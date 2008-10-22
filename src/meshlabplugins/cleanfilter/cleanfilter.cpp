@@ -183,10 +183,10 @@ const int CleanFilter::getRequirements(QAction *action)
   switch(ID(action))
   {
     case FP_REMOVE_WRT_Q:
-    case FP_REBUILD_SURFACE :	return MeshModel::MM_BORDERFLAG  | MeshModel::MM_VERTMARK;
+    case FP_REBUILD_SURFACE :	return MeshModel::MM_FACEFLAGBORDER  | MeshModel::MM_VERTMARK;
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
-        return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK;
+        return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK;
     case FP_ALIGN_WITH_PICKED_POINTS:
     	return MeshModel::MM_NONE;
     default: assert(0);
@@ -239,7 +239,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 			tri::BallPivoting<CMeshO> pivot(m.cm, Radius, Clustering, CreaseThr); 
       // the main processing
       pivot.BuildMesh(cb);
-      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			Log(GLLogStream::Info,"Reconstructed surface. Added %i faces",m.cm.fn-startingFn); 		
 	  }
     if(filter->text() == filterName(FP_REMOVE_ISOLATED_DIAMETER) )
@@ -276,7 +276,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 								deletedFN++;
 						 }
 								 
-      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			Log(GLLogStream::Info,"Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
 
 	  }

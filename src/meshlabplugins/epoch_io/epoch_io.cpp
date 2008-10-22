@@ -723,7 +723,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 			if(removeSmallCC)
 			{
 				vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
-				m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
+				m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK);
 				RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,m.cm.bbox.Diag()*maxCCDiagVal/100.0);
 			}
 
@@ -735,7 +735,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 			if (cb != NULL) (*cb)(97, "Final Processing: Closing Holes");
 			if(closeHole)
 			{
-				m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
+				m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK);
 				tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 				vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,maxHoleSize,false);
 			}

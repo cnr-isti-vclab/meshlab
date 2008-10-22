@@ -142,12 +142,12 @@ const int TriOptimizePlugin::getRequirements(QAction *action)
 	switch (ID(action)) {
 		case FP_PLANAR_EDGE_FLIP:
 		case FP_CURVATURE_EDGE_FLIP:
-			return MeshModel::MM_FACETOPO |
+			return MeshModel::MM_FACEFACETOPO |
 			       MeshModel::MM_VERTFACETOPO | 
 			       MeshModel::MM_VERTMARK | 
-			       MeshModel::MM_BORDERFLAG;
+			       MeshModel::MM_FACEFLAGBORDER;
 		case FP_NEAR_LAPLACIAN_SMOOTH:
-			return MeshModel::MM_BORDERFLAG;
+			return MeshModel::MM_FACEFLAGBORDER;
 	}
 	
 	return 0;

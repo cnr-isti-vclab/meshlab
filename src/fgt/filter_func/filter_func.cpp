@@ -199,7 +199,7 @@ const int FilterFunctionPlugin::getRequirements(QAction *action)
 	case FF_FACE_QUALITY :
     case FF_FACE_COLOR : return MeshModel::MM_FACECOLOR;
 	case FF_REFINE : 
-		return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_VERTMARK;
+		return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK;
     default: assert(0);
   }
   return 0;
@@ -794,7 +794,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				RefineE<CMeshO, MidPointCustom<CMeshO>, CustomEdge<CMeshO> >
 					(m.cm, mid, edge, false, cb);
 
-				m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_VERTMARK);
+				m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK);
 				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 
 				return true;

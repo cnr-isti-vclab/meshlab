@@ -119,7 +119,7 @@ void EditPaintPlugin::StartEdit(MeshModel &m, GLArea * parent) {
 	}
 	paint_dock->setVisible(true);
 	paint_dock->layout()->update();
-	//m.updateDataMask(MeshModel::MM_FACETOPO);
+	//m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 	m.updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK );
 
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;

@@ -105,17 +105,16 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 	Matrix44f mat_trac_rotation ; 
 	trackball_slice.track.rot.ToMatrix( mat_trac_rotation ); //rotation Matrix of the plans' trackball 
         Invert(mat_trac_rotation);
-	Point3f* dir=new Point3f(1,0,0);   //the plans' normal vector init 
-	(*dir)= mat_trac_rotation * (*dir); //rotation of the directions vector 
+	Point3f dir(1,0,0);   //the plans' normal vector init 
+	dir= mat_trac_rotation * dir; //rotation of the directions vector 
 	Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
 	bool EvportVector=false;           //variabile used after
 	vector<n_EdgeMesh*> ev;           
 	ev.clear();                        
 	
-	Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
-	pr.setPlane(0, d); 
+	pr.projDir = dir; 
 	svgpro= new SVGPro(gla->window(), point_Vector.size(), dialogsliceobj->getExportOption());
-	svgpro->Init(pr.getWidth(), pr.getHeight(), pr.getViewBox()[0], pr.getViewBox()[1], pr.getScale());
+	svgpro->Init(pr.sizeCm[0], pr.sizeCm[1],1, 1, pr.scale);
 	if ( svgpro->exec() == QDialog::Accepted ) 
 	
 	{ 
@@ -128,14 +127,13 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 		
 		mesh_grid = new TriMeshGrid();
 		mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
-		float scale =  (pr.getViewBox().V(0)/pr.numCol) /(edgeMax*(1.4142)) ;
-		pr.setScale(scale);
-		pr.setTextDetails( svgpro->showText );
+		//pr.scale =  (pr.viewBox[0]/pr.numCol) /(edgeMax*(1.4142)) ;
+		//pr.textDetails = svgpro->showText ;
 		for(int i=0; i<point_Vector.size(); i++){	
 			Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
 			Point3f po=point_Vector[i]-m.cm.bbox.Center();
 			Plane3f p;
-			p.SetDirection(*dir);
+			p.SetDirection(dir);
 				/*
 				/ Equazione del piano ax+by+cz=distance
 				/  a,b,c coordinata centro di rotazione del piano
@@ -143,7 +141,7 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 			   */   
 			
 			Point3f off= mat_trac_rotation * (translation_plans+po); //translation vector
-			p.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)));
+			p.SetOffset( rotationCenter*dir + off*dir);
 			
 			double avg_length;  
 			edge_mesh = new n_EdgeMesh();
@@ -155,11 +153,11 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 			   QString index;
 			   index.setNum(i);
 			   fileN=fileName.left( fileName.length ()- 4 )+"_"+index+".svg";
-			   pr.setPosition(Point2d(0,0));
+			  // pr.setPosition(Point2d(0,0));
 			   pr.numCol=1;
 			   pr.numRow=1;
 			   
-			   vcg::edg::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr);
+			   vcg::edg::io::ExporterSVG<n_EdgeMesh>::Save(*edge_mesh, fileN.toLatin1().data(), pr);
 		
 			}
 			else{
@@ -171,7 +169,7 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 	
 	if(EvportVector){
 		
-		vcg::edg::io::ExporterSVG<n_EdgeMesh>::Save(&ev, fileName.toLatin1().data(),pr);
+		vcg::edg::io::ExporterSVG<n_EdgeMesh>::Save(ev, fileName.toLatin1().data(),pr);
         //Free memory allocated
 		
 		vector<n_EdgeMesh*>::iterator it;
@@ -183,13 +181,10 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
  dialogsliceobj->show();
  }
 
-void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr){
-	 bool ok;
-     
-
-	 pr->setDimension(sv->getImageWidth(),sv->getImageHeight());
-	 pr->setViewBox(Point2d(sv->getViewBoxWidth(), sv->getViewBoxHeight()));
-	
+void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr)
+{
+	// pr->setDimension(sv->getImageWidth(),sv->getImageHeight());
+	// pr->viewBox= Point2f(sv->getViewBoxWidth(), sv->getViewBoxHeight());	
 } 
  void ExtraMeshSlidePlugin::Decorate(MeshModel &m, GLArea * gla)
  {   

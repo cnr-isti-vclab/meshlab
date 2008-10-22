@@ -11,7 +11,7 @@
 #include <QObject>
 
 #include <meshlab/meshmodel.h>
-
+#include <vcg/complex/trimesh/update/normal.h>
 class MorphTools : public QObject
 {
 	Q_OBJECT

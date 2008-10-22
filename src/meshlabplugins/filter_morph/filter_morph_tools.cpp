@@ -88,19 +88,6 @@ void MorphTools::calculateMorph(float percentage, MeshModel *sourceMeshModel, Me
 		}
 		
 		//qDebug() << "NOW, fix face normals for the mesh so that the lighting is correct";		
-		for(int i=0; i<sourceMeshModel->cm.face.size(); ++i)
-		{
-			//NOTE: this if/else is coppied from vcg library's import_obj.h line 559
-			if ( sourceMeshModel->ioMask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
-			{
-				// face normal is computed as an average of wedge normals
-				sourceMeshModel->cm.face[i].N().Import( sourceMeshModel->cm.face[i].WN(0) +
-						sourceMeshModel->cm.face[i].WN(1) + sourceMeshModel->cm.face[i].WN(2) );
-			} else
-			{
-				// computing face normal from position of face vertices
-				vcg::face::ComputeNormalizedNormal(sourceMeshModel->cm.face[i]);
-			}
-		}		
+		tri::UpdateNormals<CMeshO>::PerFaceNormalized(sourceMeshModel->cm);
 	}
 }

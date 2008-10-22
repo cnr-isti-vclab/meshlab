@@ -298,11 +298,12 @@ void EditSegment::StartEdit(MeshModel & m, GLArea * parent) {
 	meshcut_dock->setVisible(true);
 	meshcut_dock->layout()->update();
 
-	m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK );
+	m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK );
 
 
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
-	parent->mm()->ioMask|=MeshModel::IOM_VERTCOLOR;
+	parent->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+	//ioMask|=MeshModel::IOM_VERTCOLOR;
 
 	first = true;
 	pressed = false;

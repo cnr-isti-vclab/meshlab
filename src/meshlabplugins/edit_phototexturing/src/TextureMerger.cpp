@@ -101,7 +101,7 @@ void TextureMerger::normalizeFilterContainerList(){
 	if (ifcList.size()>0){
 		for(i=0;i<ifcList.at(0)->filterList.size();i++){
 			int j;
-			float max = FLT_MIN;
+			float max =-FLT_MAX;
 			float min = FLT_MAX;
 			qDebug()<< "calculate min max for filter: "<< i;
 			for(j=0;j<ifcList.size();j++){

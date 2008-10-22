@@ -97,7 +97,7 @@ void RgbTPlugin::StartEdit(MeshModel &m, GLArea * parent)
 
 	parent->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));
 
-	m.updateDataMask(MeshModel::MM_FACETOPO);
+	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 	m.updateDataMask(MeshModel::MM_VERTFACETOPO); // It update also the FV relation
 			m.updateDataMask(MeshModel::MM_FACECOLOR);
 
@@ -106,7 +106,7 @@ void RgbTPlugin::StartEdit(MeshModel &m, GLArea * parent)
 #endif
 			parent->getCurrentRenderMode().lighting=true;
 			parent->getCurrentRenderMode().drawMode = vcg::GLW::DMFlatWire;
-			parent->mm()->ioMask|=MeshModel::IOM_FACECOLOR;
+			//parent->mm()->ioMask|=MeshModel::IOM_FACECOLOR;
 
 			if (rgbInfo) delete rgbInfo;
 			rgbInfo = new RgbInfo(m.cm.vert.size(),m.cm.face.size());

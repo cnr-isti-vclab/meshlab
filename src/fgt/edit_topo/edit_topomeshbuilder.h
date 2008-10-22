@@ -265,7 +265,7 @@ public:
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{(*fi).ClearS(); for(int i=0; i<3; i++) (*fi).V(i)->ClearS(); }
 
-		outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+		outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 		if(tri::Clean<CMeshO>::IsTwoManifoldFace(outMesh.cm))
 			for(int i=0; i<iterations; i++)
 			{
@@ -279,7 +279,7 @@ public:
 				//	If the midSampler fails (for example if a hole is found), each 
 				//  vertex is marked with SetS() and will be smoothed later
 				//
-				outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+				outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				Refine<CMeshO, NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler, 0, false, 0);
 				outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
 				dialog->setBarVal(i+1);
@@ -337,7 +337,7 @@ public:
 		midSampler->DEBUG = false;
 
 		midSampler->distPerc = dist; 
-		outMesh.updateDataMask(MeshModel::MM_FACETOPO);
+		outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO);
 
 		// Update topology for in mesh, to be sure that the model can be refined
 		bool oriented,orientable;
@@ -345,19 +345,19 @@ public:
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
 		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
-		outMesh.clearDataMask(MeshModel::MM_FACETOPO);
+		outMesh.clearDataMask(MeshModel::MM_FACEFACETOPO);
 
 		// Clear faces and vertices selection
 		CMeshO::FaceIterator fi;
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{(*fi).ClearS(); for(int i=0; i<3; i++) (*fi).V(i)->ClearS(); }
 
-		outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+		outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 		if(tri::Clean<CMeshO>::IsTwoManifoldFace(outMesh.cm))
 		{
 			for(int i=0; i<it; i++)
 			{
-				outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+				outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 
 				// Call refine to build the retopologized mesh. Important note: "midSampler" needs to be initialized before
 				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler, 0, false, 0);
@@ -485,7 +485,7 @@ private:
 				f++;
 			}
 		}
-		outMesh.updateDataMask(MeshModel::MM_FACETOPO);
+		outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO);
 
 		// Re-orient new mesh
 		bool oriented,orientable;
@@ -493,7 +493,7 @@ private:
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
 		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
 
-		outMesh.clearDataMask(MeshModel::MM_FACETOPO);
+		outMesh.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	}
 };
 

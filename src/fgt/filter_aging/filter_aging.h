@@ -51,7 +51,7 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 		virtual const QString filterName(FilterIDType filter);
 
 		virtual const int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK | 
-				MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_CURV);}
+				MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV);}
 		virtual bool autoDialog(QAction *) {return true;}
 		virtual void initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params);
 		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb);

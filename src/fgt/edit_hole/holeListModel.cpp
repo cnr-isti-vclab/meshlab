@@ -49,9 +49,9 @@ void HoleListModel::clearModel()
 void HoleListModel::updateModel()
 {
 	clearModel();
-	mesh->clearDataMask(MeshModel::MM_BORDERFLAG);
-	mesh->updateDataMask(MeshModel::MM_FACETOPO);
-	mesh->updateDataMask(MeshModel::MM_BORDERFLAG);
+	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER);
+	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
+	mesh->updateDataMask(MeshModel::MM_FACEFLAGBORDER);
 
 	userBitHole = FgtHole<CMeshO>::GetMeshHoles(mesh->cm, holes);
 	nSelected=0;

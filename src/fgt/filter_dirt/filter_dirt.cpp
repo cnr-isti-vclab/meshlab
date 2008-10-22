@@ -103,7 +103,7 @@ const QString FilterDirt::filterInfo(FilterIDType filterId)
 const int FilterDirt::getRequirements(QAction */*action*/)
 {
 	
-	return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR | MeshModel::MM_FACEMARK;	
+	return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR | MeshModel::MM_FACEMARK;	
 }
 
 bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, FilterParameterSet & /*par*/, vcg::CallBackPos */*cb*/)

@@ -30,6 +30,7 @@
 #include <meshlab/glarea.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/math/perlin_noise.h>
@@ -67,24 +68,16 @@ void EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 
 	tri::UpdateBounding<CMeshO>::Box(m.cm);
 	
-	m.updateDataMask(MeshModel::MM_VERTFACETOPO);
-	m.updateDataMask(MeshModel::MM_FACEMARK);
-	m.updateDataMask(MeshModel::MM_VERTMARK);
+	m.updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEMARK|MeshModel::MM_VERTMARK);
 
-	if (!(m.ioMask & vcg::tri::io::Mask::IOM_VERTCOLOR))
+	if (!m.hasDataMask(MeshModel::MM_VERTCOLOR))
 	{
-		Color4b color(150, 150, 150, 255);
-		for (CMeshO::VertexIterator i = m.cm.vert.begin(); i != m.cm.vert.end(); i++) (*i).C() = color;
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
+		tri::UpdateColor<CMeshO>::VertexConstant(m.cm,Color4b(150, 150, 150, 255));
 	}
-	
 	m.cm.InitFaceIMark();
 	m.cm.InitVertexIMark();
-	
-	m.ioMask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-	m.ioMask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-	m.ioMask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
-	m.ioMask |= vcg::tri::io::Mask::IOM_FACENORMAL;
-	
+		
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	
 	QObject::connect(paintbox, SIGNAL(undo()), this, SLOT(update()));
