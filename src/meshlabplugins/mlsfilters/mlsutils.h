@@ -49,6 +49,12 @@ protected:
 namespace vcg {
 
 template <typename Scalar>
+inline Point3<Scalar> CwiseMul(Point3<Scalar> const & p1, Point3<Scalar> const & p2)
+{
+	return Point3<Scalar>(p1.X()*p2.X(), p1.Y()*p2.Y(), p1.Z()*p2.Z());
+}
+
+template <typename Scalar>
 inline Point3<Scalar> Min(Point3<Scalar> const & p1, Point3<Scalar> const & p2)
 {
 	return Point3<Scalar>(std::min(p1.X(), p2.X()), std::min(p1.Y(), p2.Y()), std::min(p1.Z(), p2.Z()));

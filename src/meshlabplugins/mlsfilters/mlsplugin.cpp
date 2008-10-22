@@ -474,19 +474,21 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 
 				if ( (!selectionOnly) || (pPoints->cm.vert[i].IsS()) )
 				{
+					Point3f p = mls->project(mesh->cm.vert[i].P());
 // 					grad = mls->gradient(mesh->cm.vert[i].P());
 // 					hess = mls->hessian(mesh->cm.vert[i].P());
 // 					curvatures[i] = mls->meanCurvature(grad,hess);
 					//float c = mesh->cm.vert[i].Q() = mls->meanCurvature(grad,hess);
 					float c = 0;
 					if (approx)
-						c = mesh->cm.vert[i].Q() = apss->approxMeanCurvature(mesh->cm.vert[i].P());
+						c = apss->approxMeanCurvature(p);
 					else
 					{
-						grad = mls->gradient(mesh->cm.vert[i].P());
-						hess = mls->hessian(mesh->cm.vert[i].P());
-						c = mesh->cm.vert[i].Q() = mls->meanCurvature(grad,hess);
+						grad = mls->gradient(p);
+						hess = mls->hessian(p);
+						c = mls->meanCurvature(grad,hess);
 					}
+					mesh->cm.vert[i].Q() = c;
 					minc = std::min(c,minc);
 					maxc = std::max(c,maxc);
 					minabsc = std::min(fabsf(c),minabsc);
@@ -495,8 +497,8 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			// pass 2: convert the curvature to color
 			cb(99, "Curvature to color...");
 			float d = maxc-minc;
-			minc += 0.1*d;
-			maxc -= 0.1*d;
+			minc += 0.05*d;
+			maxc -= 0.05*d;
 
 			vcg::Histogramf H;
       vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm,H);

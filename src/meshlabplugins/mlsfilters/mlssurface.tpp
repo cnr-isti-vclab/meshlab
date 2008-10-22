@@ -153,7 +153,10 @@ void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool comput
 	// compute spatial weights and partial derivatives
 	mCachedWeights.resize(nofSamples);
 	if (computeDerivatives)
+	{
+		mCachedWeightDerivatives.resize(nofSamples);
 		mCachedWeightGradients.resize(nofSamples);
+	}
 	else
 		mCachedWeightGradients.clear();
 
@@ -171,7 +174,10 @@ void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool comput
 		mCachedWeights[i] = w;
 
 		if (computeDerivatives)
-			mCachedWeightGradients[i] = (x - mPoints[id].cP()) * (-4. * 2. * s * aux * aux * aux);
+		{
+			mCachedWeightDerivatives[i] = (-2. * s) * (4. * aux * aux * aux);
+			mCachedWeightGradients[i]  = (x - mPoints[id].cP()) * mCachedWeightDerivatives[i];
+		}
 	}
 }
 
@@ -192,7 +198,9 @@ void MlsSurface<_MeshType>::requestSecondDerivatives() const
 				s = s*s;
 				Scalar x2 = s * mNeighborhood.squaredDistance(i);
 				x2 = 1.0 - x2;
-				mCachedWeightSecondDerivatives[i] = (4. * 3. * x2 * x2) * s*s;
+				if (x2<0)
+					x2 = 0.;
+				mCachedWeightSecondDerivatives[i] = (4.0*s*s) * (12.0 * x2 * x2);
 			}
 		}
 		//mSecondDerivativeUptodate = true;

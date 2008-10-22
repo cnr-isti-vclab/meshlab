@@ -41,6 +41,7 @@ class APSS : public MlsSurface<_MeshType>
 		using Base::mCachedQueryPoint;
 		using Base::mNeighborhood;
 		using Base::mCachedWeights;
+		using Base::mCachedWeightDerivatives;
 		using Base::mCachedWeightGradients;
 		using Base::mCachedWeightSecondDerivatives;
 		using Base::mBallTree;
@@ -103,6 +104,10 @@ class APSS : public MlsSurface<_MeshType>
 		mutable LScalar mCachedGradSumDotPN[3];
 		mutable LScalar mCachedGradSumDotPP[3];
 		mutable LScalar mCachedGradSumW[3];
+
+		mutable LScalar mCachedGradUConstant[3];
+		mutable LVector mCachedGradULinear[3];
+		mutable LScalar mCachedGradUQuad[3];
 };
 
 }

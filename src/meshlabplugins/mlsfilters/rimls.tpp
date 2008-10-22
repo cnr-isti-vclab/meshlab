@@ -26,6 +26,8 @@
 #include "mlsutils.h"
 #include <iostream>
 
+using namespace vcg;
+
 namespace GaelMls {
 
 // template<typename _Scalar>
@@ -107,6 +109,24 @@ typename RIMLS<_MeshType>::VectorType RIMLS<_MeshType>::gradient(const VectorTyp
 }
 
 template<typename _MeshType>
+typename RIMLS<_MeshType>::MatrixType RIMLS<_MeshType>::hessian(const VectorType& x, int* errorMask) const
+{
+	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
+	{
+		if (!computePotentialAndGradient(x))
+		{
+			if (errorMask)
+				*errorMask = MLS_TOO_FAR;
+			return MatrixType();
+		}
+	}
+
+	MatrixType hessian;
+	mlsHessian(x, hessian);
+	return hessian;
+}
+
+template<typename _MeshType>
 typename RIMLS<_MeshType>::VectorType RIMLS<_MeshType>::project(const VectorType& x, VectorType* pNormal, int* errorMask) const
 {
 	int iterationCount = 0;
@@ -153,6 +173,9 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 				return false;
 		}
 
+		if (mCachedRefittingWeights.size()<nofSamples)
+			mCachedRefittingWeights.resize(nofSamples+5);
+
 		VectorType source     = x;
 		VectorType grad; grad.Zero();
 		VectorType previousGrad;
@@ -162,16 +185,19 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 		Scalar invSigmaR2     = 0;
 		if (mSigmaR>0)
 			invSigmaR2 = Scalar(1) / (mSigmaR*mSigmaR);
+		VectorType sumGradWeight;
+		VectorType sumGradWeightPotential;
+		Scalar sumW;
 
 		int iterationCount = 0;
 		do
 		{
 				previousGrad = grad;
-				VectorType sumGradWeight; sumGradWeight.Zero();
-				VectorType sumGradWeightPotential; sumGradWeightPotential.Zero();
+				sumGradWeight.Zero();
+				sumGradWeightPotential.Zero();
 				sumN.Zero();
 				potential = 0.;
-				Scalar sumW = 0.;
+				sumW = 0.;
 
 				for (unsigned int i=0; i<nofSamples; i++)
 				{
@@ -190,6 +216,7 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 //                     refittingWeight *= exp(-residual*residual * invSigmaR2);
 //                 }
 						}
+						mCachedRefittingWeights.at(i) = refittingWeight;
 						Scalar w = mCachedWeights.at(i) * refittingWeight;
 						VectorType gw = mCachedWeightGradients.at(i) * refittingWeight;
 
@@ -217,11 +244,65 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 		mCachedPotential  = potential;
 		mCachedQueryPoint = x;
 		mCachedQueryPointIsOK = true;
+
+		mCachedSumGradWeight = sumGradWeight;
+		mCachedSumN = sumN;
+		mCachedSumW = sumW;
+		mCachedSumGradPotential = sumGradWeightPotential;
+		
 		return true;
 }
 
-// template class RIMLS<float>;
-// template class RIMLS<double>;
+template<typename _MeshType>
+bool RIMLS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
+{
+	this->requestSecondDerivatives();
+	// at this point we assume computePotentialAndGradient has been called first
+
+	uint nofSamples = mNeighborhood.size();
+	
+	const VectorType& sumGradWeight = mCachedSumGradWeight;
+	const VectorType& sumGradWeightPotential = mCachedSumGradPotential ;
+	const VectorType& sumN = mCachedSumN;
+	const Scalar& sumW = mCachedSumW;
+	const Scalar invW = 1.f/sumW;
+
+	for (uint k=0 ; k<3 ; ++k)
+	{
+		VectorType sumDGradWeight; sumDGradWeight.Zero();
+		VectorType sumDWeightNormal; sumDWeightNormal.Zero();
+		VectorType sumGradWeightNk; sumGradWeightNk.Zero();
+		VectorType sumDGradWeightPotential; sumDGradWeightPotential.Zero();
+		
+		for (unsigned int i=0; i<nofSamples; i++)
+		{
+			int id = mNeighborhood.index(i);
+			VectorType p = mPoints[id].cP();
+			VectorType diff = x - p;
+			Scalar f = Dot(diff, mPoints[id].cN());
+			
+			VectorType gradW = mCachedWeightGradients.at(i) * mCachedRefittingWeights.at(i);
+			VectorType dGradW = (x-p) * ( mCachedWeightSecondDerivatives.at(i) * (x[k]-p[k]) * mCachedRefittingWeights.at(i));
+			dGradW[k] += mCachedWeightDerivatives.at(i);
+
+			sumDGradWeight += dGradW;
+			sumDWeightNormal += mPoints[id].cN() * gradW[k];
+			sumGradWeightNk += gradW * mPoints[id].cN()[k];
+			sumDGradWeightPotential += dGradW * f;
+		}
+
+		VectorType dGrad = (
+						sumDWeightNormal + sumGradWeightNk + sumDGradWeightPotential
+					- (sumN*invW + mCachedGradient) * sumGradWeight[k]
+					- sumGradWeight * mCachedGradient[k]
+					- (sumDGradWeight - sumGradWeight * sumGradWeight[k] * invW ) * mCachedPotential
+					) * invW;
+
+		hessian.SetColumn(k,dGrad);
+	}
+	
+	return true;
+}
 
 }
 

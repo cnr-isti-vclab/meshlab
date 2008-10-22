@@ -191,6 +191,7 @@ class MlsSurface
 		mutable VectorType mCachedQueryPoint;
 		mutable Neighborhood<Scalar> mNeighborhood;
 		mutable std::vector<Scalar> mCachedWeights;
+		mutable std::vector<Scalar> mCachedWeightDerivatives;
 		mutable std::vector<VectorType> mCachedWeightGradients;
 		mutable std::vector<Scalar> mCachedWeightSecondDerivatives;
 };

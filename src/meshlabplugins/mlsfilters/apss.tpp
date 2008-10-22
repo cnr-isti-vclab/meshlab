@@ -375,6 +375,10 @@ bool APSS<_MeshType>::mlsGradient(const VectorType& x, VectorType& grad) const
 		dVecU0 = -invSumW*( vcg::Dot(dVecU13,sumP) + dVecU4*sumDotPP + vcg::Dot(uLinear,dSumP) + uQuad*dSumDotPP + dSumW*uConstant);
 
 		grad[k] = dVecU0 + vcg::Dot(dVecU13,vcg::Point3Cast<LScalar>(x)) + dVecU4*vcg::SquaredNorm(x) + uLinear[k] + 2.*x[k]*uQuad;
+
+		mCachedGradUConstant[k] = dVecU0;
+		mCachedGradULinear[k] = dVecU13;
+		mCachedGradUQuad[k] = dVecU4;
 	}
 
 	return true;
@@ -406,18 +410,18 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
 		const LScalar& dSumDotPP = mCachedGradSumDotPP[k];
 		const LScalar& dSumW = mCachedGradSumW[k];
 		
-		LScalar dVecU0;
-		LVector dVecU13;
-		LScalar dVecU4;
+		LScalar dVecU0 = mCachedGradUConstant[k];
+		LVector dVecU13 = mCachedGradULinear[k];
+		LScalar dVecU4 = mCachedGradUQuad[k];
 
 		LScalar nume = sumDotPN - invSumW * vcg::Dot(sumP, sumN);
 		LScalar deno = sumDotPP - invSumW * vcg::Dot(sumP, sumP);
 		LScalar dNume = dSumDotPN - invSumW*invSumW*( sumW*(vcg::Dot(dSumP,sumN) + vcg::Dot(sumP,dSumN)) - dSumW*vcg::Dot(sumP,sumN));
 		LScalar dDeno = dSumDotPP - invSumW*invSumW*( 2.*sumW*vcg::Dot(dSumP,sumP)                       - dSumW*vcg::Dot(sumP,sumP));
 
-		dVecU4 = mSphericalParameter * 0.5 * (deno * dNume - dDeno * nume)/(deno*deno);
-		dVecU13 = ((dSumN - (dSumP*uQuad + sumP*dVecU4)*2.0) - uLinear * dSumW) * invSumW;
-		dVecU0 = -invSumW*( vcg::Dot(dVecU13,sumP) + dVecU4*sumDotPP + vcg::Dot(uLinear,dSumP) + uQuad*dSumDotPP + dSumW*uConstant);
+// 		dVecU4 = mSphericalParameter * 0.5 * (deno * dNume - dDeno * nume)/(deno*deno);
+// 		dVecU13 = ((dSumN - (dSumP*uQuad + sumP*dVecU4)*2.0) - uLinear * dSumW) * invSumW;
+// 		dVecU0 = -invSumW*( vcg::Dot(dVecU13,sumP) + dVecU4*sumDotPP + vcg::Dot(uLinear,dSumP) + uQuad*dSumDotPP + dSumW*uConstant);
 		
 		// second order derivatives
 		for (uint j=0 ; j<3 ; ++j)
@@ -432,11 +436,11 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
 				int id = mNeighborhood.index(i);
 				LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
 				LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
-				LScalar dw = mCachedWeightGradients.at(i)[k];
-				LScalar d2w = (2.*(x[k]-p[k]))*(2.*(x[j]-p[j])) * mCachedWeightSecondDerivatives.at(i);
+				LScalar dw = mCachedWeightGradients.at(i)[j];
+				LScalar d2w = ((x[k]-p[k]))*((x[j]-p[j])) * mCachedWeightSecondDerivatives.at(i);
 
 				if (j==k)
-					d2w += 2.*dw;
+					d2w += mCachedWeightDerivatives.at(i);
 
 				d2SumW += d2w;
 				d2SumP += p*d2w;
@@ -479,15 +483,12 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
 			hessian[j][k] =
 							dVecU13[j] + 2.*dVecU4*x[j]
 						+ d2u0 + vcg::Dot(d2u13,vcg::Point3Cast<LScalar>(x)) + d2u4*vcg::Dot(x,x)
-						+ dVecU13[k] + (j==k ? 2.*uQuad : 0.) + 2.*x[k]*dVecU4;
+						+ mCachedGradULinear[j][k] + (j==k ? 2.*uQuad : 0.) + 2.*x[k]*dVecU4;
 
 		}
 	}
 	
 	return true;
 }
-
-// template class APSS<float>;
-// template class APSS<double>;
 
 }

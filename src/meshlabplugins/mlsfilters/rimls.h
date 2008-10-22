@@ -36,11 +36,14 @@ class RIMLS : public MlsSurface<_MeshType>
 
 		typedef typename Base::Scalar Scalar;
 		typedef typename Base::VectorType VectorType;
+		typedef typename Base::MatrixType MatrixType;
 		using Base::mCachedQueryPointIsOK;
 		using Base::mCachedQueryPoint;
 		using Base::mNeighborhood;
 		using Base::mCachedWeights;
+		using Base::mCachedWeightDerivatives;
 		using Base::mCachedWeightGradients;
+		using Base::mCachedWeightSecondDerivatives;
 		using Base::mBallTree;
 		using Base::mPoints;
 		using Base::mFilterScale;
@@ -62,6 +65,7 @@ class RIMLS : public MlsSurface<_MeshType>
 
 		virtual Scalar potential(const VectorType& x, int* errorMask = 0) const;
 		virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const;
+		virtual MatrixType hessian(const VectorType& x, int* errorMask = 0) const;
 		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const;
 
 		void setSigmaR(Scalar v);
@@ -72,6 +76,7 @@ class RIMLS : public MlsSurface<_MeshType>
 
 	protected:
 		bool computePotentialAndGradient(const VectorType& x) const;
+		bool mlsHessian(const VectorType& x, MatrixType& hessian) const;
 
 	protected:
 
@@ -84,6 +89,12 @@ class RIMLS : public MlsSurface<_MeshType>
 		// cached values:
 		mutable VectorType mCachedGradient;
 		mutable Scalar mCachedPotential;
+		
+		mutable Scalar mCachedSumW;
+		mutable std::vector<Scalar> mCachedRefittingWeights;;
+		mutable VectorType mCachedSumN;
+		mutable VectorType mCachedSumGradWeight;
+		mutable VectorType mCachedSumGradPotential;
 };
 
 }
