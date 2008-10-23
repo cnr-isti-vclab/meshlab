@@ -106,15 +106,18 @@ public:
 	 * Combines the textures calculated be each camera to one texture.
 	 * A new texture image will be created with the dimensions of (width x height).
 	 */
-	void combineTextures(MeshModel *m, int width, int height, int ets, bool enable_angle_map, int angle_weight,int angle_map_sharpness, double min_angle,bool enable_distance_map, int distance_weight);
+	void unprojectTextures(MeshModel *m, int width, int height, int ets, bool enable_angle_map, int angle_weight,int angle_map_sharpness, double min_angle,bool enable_distance_map, int distance_weight);
 
-
+	void combineTextures(MeshModel *m);
+	
 	void exportMaxScript(QString filename,MeshModel *mm);
 
 	void convertToTsaiCamera(int camIdx, bool optimize, QString filename,MeshModel *mm);
 
 	QImage mergeTextureImagesWinnerTakesAll(int imgWidth, int imgHeight, QList<QImage> imgList);
 
+	
+	void calculateZBuffer(MeshModel *mm, Camera* camera, QuadTreeNode *qtree, TextureFilterZB *zbuffer);
 private:
 
 	/*
@@ -122,7 +125,7 @@ private:
 	 * camera. The new sets of uv coordinates will be saved in the QMap, which is saved as perFaceAttribute
 	 * (key = PhotoTexturer::CAMERAUVTEXTURECOORDS ) of the MeshModel.
 	 */
-	void calculateMeshTextureForCamera(Camera* cam,MeshModel *m);
+	void calculateMeshTextureForCamera(Camera* cam,MeshModel *m,vcg::Matrix44f &matrix);
 
 	/*
 	 * Unprojects a calculated texture of a camera to the original texture of the mesh to a new
