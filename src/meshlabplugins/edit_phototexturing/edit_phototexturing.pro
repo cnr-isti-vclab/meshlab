@@ -4,7 +4,7 @@ HEADERS       = photoTexturing.h
 
 SOURCES += 	edit_phototex_factory.cpp \
 			photoTexturing.cpp \
-			PhotoTexturingDialog.cpp \
+			PhotoTexturingWidget.cpp \
 			src/PhotoTexturer.cpp \
 			src/UVFaceTexture.cpp \
 			src/Camera.cpp \
@@ -24,8 +24,8 @@ SOURCES += 	edit_phototex_factory.cpp \
 			src/Tsai/cal_util.c \
 			src/Tsai/cal_main.c \
 			src/Tsai/cal_eval.c \ 
-			#src/Kai/KaiCameraCalibration.cpp \
-			#src/Kai/Polynom3_444.cpp \
+			#src/Poly/PolyCameraCalibration.cpp \
+			#src/Poly/Polynom3_444.cpp \
 			src/QuadTree/QuadTreeNode.cpp \
 			$$VCGDIR/wrap/gui/trackball.cpp\
 			$$VCGDIR/wrap/gui/trackmode.cpp \
@@ -38,17 +38,18 @@ HEADERS += 	edit_phototex_factory.h \
 			src/PhotoTexturer.h \
 			src/Camera.h \
 			src/CameraCalibration.h\
-			PhotoTexturingDialog.h \
+			PhotoTexturingWidget.h \
 			src/Tsai/matrix/matrix.h \ 
 			src/PhotoTexturer.h \
 			src/Tsai/cal_main.h \
 			src/QuadTree/QuadTreeNode.h \
 			src/QuadTree/QuadTreeLeaf.h \
 			$$VCGDIR/wrap/gl/trimesh.h \
+			../../meshlab/meshlabeditdockwidget.h \ 
 			../../meshlab/stdpardialog.h 
 			
 			
-FORMS        += ui/photoTexturingDialog.ui
+FORMS        += ui/photoTexturingWidget.ui
 TARGET        = photo_texturing
 
 QT           += opengl

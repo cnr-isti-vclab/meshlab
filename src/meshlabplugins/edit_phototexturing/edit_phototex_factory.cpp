@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "edit_photoTex_factory.h"
+#include "edit_phototex_factory.h"
 #include "photoTexturing.h"
 
 EditPhotoTexFactory::EditPhotoTexFactory()
