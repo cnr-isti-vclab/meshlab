@@ -136,12 +136,28 @@ bool UVFaceTexture::intersectionOfTwoLines(double *p1,double *p2,double *p3, dou
 
 
 bool UVFaceTexture::isInside(double x, double y, double w, double h){
+	//qDebug()<<"isInside:" << x << y << w <<h;
 	int i;
 	for(i=0;i<3;i++){
 		if ((u[i]>=x && u[i]<=x+w)&& (v[i]>=y && v[i]<=y+h)){
 			return true;
 		}
 	}
+	
+	if(isInside(x,y)){
+		return true;
+	}
+	if(isInside(x+w,y)){
+		return true;
+	}
+	if(isInside(x+w,y+h)){
+		return true;
+	}
+	if(isInside(x,y+h)){
+		return true;
+	}
+	
+	
 	double tmp_s[2];
 	double tmp_b[2];
 
