@@ -44,10 +44,12 @@ const QString EditPickPointsPlugin::Info()
 //called
 void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla)
 {
-	//qDebug() << "Decorate " << mm.fileName.c_str() << " ...";
+	//qDebug() << "Decorate " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 	
-	if(gla != glArea){
-		qDebug() << "GLarea is different!!! ";
+	if(gla != glArea || mm.cm.fn < 1)
+	{
+		//qDebug() << "GLarea is different or no faces!!! ";
+		return;
 	}
 	
 	
@@ -107,7 +109,22 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla)
 
 void EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
 {
-	//qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ...";
+	//qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
+	
+	//if there are no faces then we cant do anything with this plugin
+	if(mm.cm.fn < 1)
+	{
+		if(NULL != pickPointsDialog)
+		{
+			pickPointsDialog->hide();
+		}
+		
+		//show message
+		QMessageBox::warning(gla->window(), "Edit Pick Points",
+				"Sorry, this mesh has no faces on which picked points can sit.",
+						QMessageBox::Ok, QMessageBox::Ok);
+		return;
+	}
 	
 	//get the cursor
 	QCursor *cursor = QApplication::overrideCursor();	
@@ -134,22 +151,31 @@ void EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
 
 void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea *gla)
 {
-	//qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ...";
+	//qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
+	
 	// some cleaning at the end.
 	
-	//now that were are ending tell the dialog to save any points it has to metadata
-	pickPointsDialog->savePointsToMetaData();
+	if(mm.cm.fn > 0)
+	{
+		assert(pickPointsDialog);
+		
+		//now that were are ending tell the dialog to save any points it has to metadata
+		pickPointsDialog->savePointsToMetaData();
 
-	//remove the dialog from the screen
-	pickPointsDialog->hide();
+		//remove the dialog from the screen
+		pickPointsDialog->hide();
 	
-	QApplication::setOverrideCursor( QCursor((Qt::CursorShape)overrideCursorShape) );
+		QApplication::setOverrideCursor( QCursor((Qt::CursorShape)overrideCursorShape) );
+	}
 }
 
 void EditPickPointsPlugin::mousePressEvent(QMouseEvent *event, MeshModel &mm, GLArea *gla )
 {
 	//qDebug() << "mouse press Pick Points: " << mm.fileName.c_str() << " ...";
 
+	//if there are no faces then we cant do anything with this plugin
+	if(mm.cm.fn < 1) return;
+	
 	if(Qt::LeftButton | event->buttons()) 
 	{
 		gla->suspendedEditor = true;
@@ -173,6 +199,9 @@ void EditPickPointsPlugin::mouseMoveEvent(QMouseEvent *event, MeshModel &mm, GLA
 {
 	//qDebug() << "mousemove pick Points: " << mm.fileName.c_str() << " ...";
 	
+	//if there are no faces then we cant do anything with this plugin
+	if(mm.cm.fn < 1) return;
+	
 	if(Qt::LeftButton | event->buttons()) 
 	{
 		gla->suspendedEditor = true;
@@ -195,6 +224,9 @@ void EditPickPointsPlugin::mouseMoveEvent(QMouseEvent *event, MeshModel &mm, GLA
 void EditPickPointsPlugin::mouseReleaseEvent(QMouseEvent *event, MeshModel &mm, GLArea * gla)
 {
 	//qDebug() << "mouseRelease Pick Points: " << mm.fileName.c_str() << " ...";
+	
+	//if there are no faces then we cant do anything with this plugin
+	if(mm.cm.fn < 1) return;
 	
 	if(Qt::LeftButton | event->buttons()) 
 	{
