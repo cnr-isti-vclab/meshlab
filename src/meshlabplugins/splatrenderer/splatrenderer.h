@@ -59,6 +59,7 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 	int mBindedPass;
 	GLuint mDummyTexId; // on ATI graphics card we need to bind a texture to get point sprite working !
 	bool mWorkaroundATI;
+	bool mBuggedAtiBlending;
 	GLuint mNormalTextureID;
 	GLuint mDepthTextureID;
 	ProgramVF mShaders[3];

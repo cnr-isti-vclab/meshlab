@@ -27,7 +27,7 @@ void Finalization(void)
 	#ifdef EXPE_OUTPUT_DEPTH
 	gl_FragDepth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
 	#endif
-	if (color.w<0.01)
+	if (color.w<0.001)
 		discard;
 	gl_FragColor = color/color.w;
 	gl_FragColor.a = 1.;
@@ -48,11 +48,11 @@ void Finalization(void)
 {
 	vec4 color = texture2DRect(ColorWeight, gl_FragCoord.st - viewport.xy + epsilon);
 
-	if (color.w<0.01)
+	if (color.w<0.001)
 		discard;
 
 
-	if(color.w>0.01)
+	if(color.w>0.001)
 		color.xyz /= color.w;
 
 	vec3 viewVec = normalize(gl_TexCoord[0].xyz);

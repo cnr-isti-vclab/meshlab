@@ -165,12 +165,6 @@ void VisibilityFP(void)
 
 #ifdef __AttributeVP__
 
-// vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)
-// {
-// 	vec3 ldir = normalize(gl_LightSource[0].position.xyz);
-// 	return color * 0.85 * clamp(dot(normal,ldir),0.0,1.0);
-// }
-
 varying vec2 scaledFragCenter2d;
 
 void AttributeVP(void)
@@ -199,7 +193,7 @@ void AttributeVP(void)
     }
     #endif
 
-    float radius = gl_MultiTexCoord2.x * expeRadiusScale;
+    float radius = gl_MultiTexCoord2.x * expeRadiusScale * 1.05;
 
     vec4 pointSize;
     pointSize.x = radius * expePreComputeRadius / ePos.z;
@@ -277,13 +271,6 @@ void AttributeFP(void)
 		vec3 fragCoord = gl_FragCoord.xyz;
 		#endif
 
-// 	gl_FragColor = abs(fragCoord.z - gl_FragCoord.z);
-
-// 		gl_FragColor = vec4(0.7,0.4,0.1,1);
-// 		gl_FragColor.xy = fragCoord.xy * 0.002;
-//  gl_FragColor.xy = gl_TexCoord[0].xy;
-//  gl_FragColor.b = 0.5;
-//  gl_FragColor.w = 1;
 #if 1
     vec3 qOne = rayCastParameter1 * fragCoord + rayCastParameter2; // MAD
     float oneOverDepth = dot(qOne,fragNoverCdotN); // DP3
@@ -303,16 +290,17 @@ void AttributeFP(void)
     float weight = clamp(1.-r2*scaleSquaredDistance,0.0,1.0);
     weight = weight*weight;
     #endif
+		weight *= 0.2;
 
     #ifdef EXPE_DEPTH_CORRECTION
     gl_FragDepth = depthParameterCast.x * oneOverDepth + depthParameterCast.y; // MAD
     #endif
 
     #ifdef EXPE_DEFERRED_SHADING
-    gl_FragData[0].rgb = gl_Color.rgb; // MOV
+    gl_FragData[0].rgb = vec3(0.6,0.2,0.1);//gl_Color.rgb; // MOV
     gl_FragData[1].xyz = fragNormal.xyz; // MOV
-    gl_FragData[1].w = weight; // MOV
-    gl_FragData[0].w = weight;
+    gl_FragData[1].w = 1;//weight; // MOV
+    gl_FragData[0].w = 1;//weight;
 
     #if EXPE_DEPTH_INTERPOLATION==2 // linear space
         gl_FragData[1].z = -depth; // MOV

@@ -49,6 +49,7 @@ SplatRendererPlugin::SplatRendererPlugin()
 	mIsSupported = false;
 	mRenderBuffer = 0;
 	mWorkaroundATI = false;
+	mBuggedAtiBlending = false;
 	mDummyTexId = 0;
 
 	mFlags = DEFERRED_SHADING_BIT | DEPTH_CORRECTION_BIT | FLOAT_BUFFER_BIT | OUTPUT_DEPTH_BIT;
@@ -138,15 +139,14 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 	gla->makeCurrent();
 	// FIXME this should be done in meshlab !!! ??
 	glewInit();
-	gla->makeCurrent();
 
 	const char* rs = (const char*)glGetString(GL_RENDERER);
 	QString rendererString("");
 	if(rs)
 		rendererString = QString(rs);
-	//std::cout << "\nRendering string = " << rendererString.toAscii().data() << "\n";
-	//std::cout << "\nRendering string = " << (const int *)glGetString(GL_RENDERER) << "\n";
-	mWorkaroundATI = true;//rendererString.startsWith("ATI") || rendererString.startsWith("AMD");
+	mWorkaroundATI = rendererString.startsWith("ATI") || rendererString.startsWith("AMD");
+	// FIXME: maybe some recent HW correctly supports floating point blending...
+	mBuggedAtiBlending = rendererString.startsWith("ATI") || rendererString.startsWith("AMD");
 
 	if (mWorkaroundATI && mDummyTexId==0)
 	{
@@ -168,9 +168,9 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 	else
 		std::cout << "Splatting: warning floating point textures are not supported.\n";
 
-// 	if (GLEW_ARB_draw_buffers)
-// 		mSupportedMask |= DEFERRED_SHADING_BIT;
-// 	else
+	if (GLEW_ARB_draw_buffers && (!mBuggedAtiBlending))
+		mSupportedMask |= DEFERRED_SHADING_BIT;
+	else
 		std::cout << "Splatting: warning deferred shading is not supported.\n";
 
 	if (GLEW_ARB_shadow)
@@ -179,8 +179,6 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 		std::cerr << "Splatting: warning copy of the depth buffer is not supported.\n";
 
 	mFlags = mFlags & mSupportedMask;
-
-
 
 	// load shader source
 	mShaderSrcs[0] = loadSource("VisibilityVP","Raycasting.glsl");
@@ -207,6 +205,11 @@ void SplatRendererPlugin::updateRenderBuffer()
 		mRenderBuffer = new QGLFramebufferObject(mCachedVP[2], mCachedVP[3],
 				(mFlags&OUTPUT_DEPTH_BIT) ? QGLFramebufferObject::NoAttachment : QGLFramebufferObject::Depth,
 				GL_TEXTURE_RECTANGLE_ARB, fmt);
+
+		if (!mRenderBuffer->isValid())
+		{
+			std::cout << "SplatRenderer: invalid FBO\n";
+		}
 
 		GL_TEST_ERR
 		if (mFlags&DEFERRED_SHADING_BIT)
@@ -440,6 +443,8 @@ void SplatRendererPlugin::enablePass(int n)
 
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE,GL_ONE);
+// 			//glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE,GL_ZERO);
+// 			glBlendFunc(GL_ONE,GL_ZERO);
 			glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
