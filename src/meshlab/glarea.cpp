@@ -109,6 +109,7 @@ GLArea::GLArea(QWidget *parent)
 	iEdit=0;
 	currentEditor=0;
 	suspendedEditor=false;
+	lastModelEdited = 0;
 	cfps=0;
 	lastTime=0;
 	hasToPick=false;
@@ -607,12 +608,17 @@ void GLArea::saveSnapshot()
 void GLArea::setCurrentlyActiveLayer(int meshId)
 {
 	//qDebug() << "setCurrent: " << meshId;
-	
-	//get the mesh that was current before this change
-	MeshModel *outgoingMeshModel = meshDoc.mm();
 		
 	//if we have an edit tool open, notify it that the current layer has changed
-	if(iEdit) iEdit->LayerChanged(meshDoc, *outgoingMeshModel, this);	
+	if(iEdit)
+	{
+		assert(lastModelEdited);  //if there is an editor last model edited should always be set when start edit is called
+		iEdit->LayerChanged(meshDoc, *lastModelEdited, this);
+		
+		//now update the last model edited
+		//TODO this is not the best design....   iEdit should maybe keep track of the model on its own
+		lastModelEdited = meshDoc.mm();
+	}
 }
 
 void GLArea::setCurrentEditAction(QAction *editAction)
@@ -622,6 +628,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 	
 	iEdit = actionToMeshEditMap.value(currentEditor); 
 	assert(iEdit); 
+	lastModelEdited = meshDoc.mm();
 	iEdit->StartEdit(meshDoc, this);
 
 	log.Logf(GLLogStream::Info,"Started Mode %s", qPrintable(currentEditor->text()));

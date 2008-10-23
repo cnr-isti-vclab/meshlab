@@ -464,6 +464,9 @@ private:
 	QAction *suspendedEditRef; // reference to last Editing Mode Used 
 	QMap<QAction*, MeshEditInterface*> actionToMeshEditMap;
 
+	//the last model that start edit was called with
+	MeshModel *lastModelEdited;
+	
 public:
 	RenderMode rm;
 	ColorSetting cs;
