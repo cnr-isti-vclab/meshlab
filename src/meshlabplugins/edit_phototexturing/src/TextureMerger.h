@@ -15,15 +15,15 @@
 class ImageFilterContainer{
 public:
 	QImage *image;
-	QList<TextureFilter*> filterList;
+	QList<TextureFilterSTD*> filterList;
 	bool merged;
-	TextureFilter *mergedFilter;
+	TextureFilterSTD *mergedFilter;
 	ImageFilterContainer();
 	~ImageFilterContainer();
 
 	void setImage(QImage* img);
 
-	void addFilter(TextureFilter *filter);
+	void addFilter(TextureFilterSTD *filter);
 	void mergeFilter();
 
 	void applyMergedFilterToImage();

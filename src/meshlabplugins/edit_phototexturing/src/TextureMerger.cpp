@@ -28,12 +28,12 @@ ImageFilterContainer::~ImageFilterContainer(){
 
 }
 
-void ImageFilterContainer::addFilter(TextureFilter *filter){
+void ImageFilterContainer::addFilter(TextureFilterSTD *filter){
 	filterList.push_back(filter);
 }
 void ImageFilterContainer::mergeFilter(){
 	if (image!=NULL){
-		mergedFilter = new TextureFilter(image->size().width(),image->size().height(),1);
+		mergedFilter = new TextureFilterSTD(image->size().width(),image->size().height(),1);
 		mergedFilter->normalized = true;
 		int size;
 		size = filterList.size();
@@ -101,7 +101,7 @@ void TextureMerger::normalizeFilterContainerList(){
 	if (ifcList.size()>0){
 		for(i=0;i<ifcList.at(0)->filterList.size();i++){
 			int j;
-			float max =-FLT_MAX;
+			float max = FLT_MIN;
 			float min = FLT_MAX;
 			qDebug()<< "calculate min max for filter: "<< i;
 			for(j=0;j<ifcList.size();j++){

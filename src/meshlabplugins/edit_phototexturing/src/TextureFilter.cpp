@@ -1,3 +1,4 @@
+/*
 #include <cfloat>
 #include "TextureFilter.h"
 
@@ -12,9 +13,9 @@ TextureFilter::TextureFilter(int width, int height, int newWeight){
 	vm_width = width;
 	weight = newWeight;
 
-	value_matrix=(float**)malloc(width*sizeof(float*));
+	value_matrix=(double**)malloc(width*sizeof(double*));
 	for(x=0;x<width;x++){
-		value_matrix[x]=(float*)malloc(height*sizeof(float));
+		value_matrix[x]=(double*)malloc(height*sizeof(double));
 		for(y=0;y<height;y++){
 			value_matrix[x][y]=FLT_MIN;
 		}
@@ -45,11 +46,7 @@ void TextureFilter::normalize(float min, float max){
 		int y;
 		for(x=0;x<vm_width;x++){
 			for(y=0;y<vm_height;y++){
-				if (value_matrix[x][y] == FLT_MIN){
-					value_matrix[x][y]=1.0;
-				}else{
-					value_matrix[x][y] = (value_matrix[x][y]-min)/(max-min);
-				}
+				value_matrix[x][y] = normalizeValue(value_matrix[x][y]);
 			}
 		}
 		normalized = true;
@@ -92,3 +89,15 @@ float TextureFilter::getValue(int x, int y){
 
 	return value_matrix[x][y];
 }
+
+
+float TextureFilter::normalizeValue(float value){
+	if (value == FLT_MIN){
+			value=1.0;
+	}else{
+		value = (value-min)/(max-min);
+	}
+	return value;
+}
+
+*/
