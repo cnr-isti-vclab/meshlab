@@ -86,12 +86,14 @@ void SplatRendererPlugin::configureShaders()
 	QString defines = "";
 	if (mFlags & DEFERRED_SHADING_BIT)
 		defines += "#define EXPE_DEFERRED_SHADING\n";
-// 	if (mFlags & DEPTH_CORRECTION_BIT)
-// 		defines += "#define EXPE_DEPTH_CORRECTION\n";
+	if (mFlags & DEPTH_CORRECTION_BIT)
+		defines += "#define EXPE_DEPTH_CORRECTION\n";
 	if (mFlags & OUTPUT_DEPTH_BIT)
 		defines += "#define EXPE_OUTPUT_DEPTH 1\n";
 	if (mFlags & BACKFACE_SHADING_BIT)
 		defines += "#define EXPE_BACKFACE_SHADING\n";
+	if (mWorkaroundATI)
+		defines += "#define EXPE_ATI_WORKAROUND\n";
 
 	QString shading =
 "vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)"
@@ -136,6 +138,23 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 	gla->makeCurrent();
 	// FIXME this should be done in meshlab !!! ??
 	glewInit();
+	gla->makeCurrent();
+
+	const char* rs = (const char*)glGetString(GL_RENDERER);
+	QString rendererString("");
+	if(rs)
+		rendererString = QString(rs);
+	//std::cout << "\nRendering string = " << rendererString.toAscii().data() << "\n";
+	//std::cout << "\nRendering string = " << (const int *)glGetString(GL_RENDERER) << "\n";
+	mWorkaroundATI = true;//rendererString.startsWith("ATI") || rendererString.startsWith("AMD");
+
+	if (mWorkaroundATI && mDummyTexId==0)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glGenTextures(1,&mDummyTexId);
+		glBindTexture(GL_TEXTURE_2D, mDummyTexId);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 4, 4, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
+	}
 
 	// let's check the GPU capabilities
 	mSupportedMask = DEPTH_CORRECTION_BIT | BACKFACE_SHADING_BIT;
@@ -161,22 +180,7 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 
 	mFlags = mFlags & mSupportedMask;
 
-	// TODO TODO TODO TODO TODO TODO
-	const char* rs = (const char*)glGetString(GL_RENDERER);
-	QString rendererString("");
-	if(rs)
-		rendererString = QString(rs);
-	std::cout << "\nRendering string = " << rendererString.toAscii().data() << "\n";
-	std::cout << "\nRendering string = " << (const int *)glGetString(GL_RENDERER) << "\n";
-	mWorkaroundATI = true;//rendererString.startsWith("ATI") || rendererString.startsWith("AMD");
 
-	if (mWorkaroundATI && mDummyTexId==0)
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glGenTextures(1,&mDummyTexId);
-		glBindTexture(GL_TEXTURE_2D, mDummyTexId);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 4, 4, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
-	}
 
 	// load shader source
 	mShaderSrcs[0] = loadSource("VisibilityVP","Raycasting.glsl");

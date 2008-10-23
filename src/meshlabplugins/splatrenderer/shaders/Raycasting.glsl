@@ -37,7 +37,6 @@ varying vec3 fragNoverCdotN;
 varying vec3 fragCenter;
 varying float scaleSquaredDistance;
 
-#define EXPE_ATI_WORKAROUND
 #ifdef EXPE_ATI_WORKAROUND
 varying vec4 fragCenterAndRadius;
 #endif
@@ -104,9 +103,9 @@ void VisibilityVP(void)
     #endif
 
 		#ifdef EXPE_ATI_WORKAROUND
-		fragCenterAndRadius.xyz = oPos.xyz/oPos.w;
-		fragCenterAndRadius.xy = (fragCenterAndRadius.xy+1.0)*halfVp;
-		//fragCenterAndRadius.z = (fragCenterAndRadius.z*0.5)+0.5;
+		fragCenterAndRadius.xyz = (oPos.xyz/oPos.w) + 1.0;
+		fragCenterAndRadius.xy = fragCenterAndRadius.xy*halfVp;
+		fragCenterAndRadius.z = fragCenterAndRadius.z*0.5;
 		fragCenterAndRadius.w = pointSize.x;
 		#endif
 
@@ -232,9 +231,9 @@ void AttributeVP(void)
     oPos = gl_ModelViewProjectionMatrix * gl_Vertex;
 
 		#ifdef EXPE_ATI_WORKAROUND
-		fragCenterAndRadius.xyz = oPos.xyz/oPos.w;
-		fragCenterAndRadius.xy = (fragCenterAndRadius.xy+1.0)*halfVp;
-		//fragCenterAndRadius.z = (fragCenterAndRadius.z*0.5)+0.5;
+		fragCenterAndRadius.xyz = (oPos.xyz/oPos.w) + 1.0;
+		fragCenterAndRadius.xy = fragCenterAndRadius.xy*halfVp;
+		fragCenterAndRadius.z = fragCenterAndRadius.z*0.5;
 		fragCenterAndRadius.w = pointSize.x;
 		#endif
 
@@ -277,6 +276,8 @@ void AttributeFP(void)
 		#else
 		vec3 fragCoord = gl_FragCoord.xyz;
 		#endif
+
+// 	gl_FragColor = abs(fragCoord.z - gl_FragCoord.z);
 
 // 		gl_FragColor = vec4(0.7,0.4,0.1,1);
 // 		gl_FragColor.xy = fragCoord.xy * 0.002;
