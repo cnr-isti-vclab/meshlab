@@ -91,7 +91,7 @@ const int FilterBorder::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-    case FP_REMOVE_BORDER_FACE :	return MeshModel::MM_BORDERFLAG;
+    case FP_REMOVE_BORDER_FACE :	return MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAGBORDER;
     default: assert(0);
   }
   return 0;
@@ -155,8 +155,8 @@ bool FilterBorder::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
 							if((*vi).IsV()) tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
 			}
 
-			m.clearDataMask(MeshModel::MM_BORDERFLAG);
-			m.updateDataMask(MeshModel::MM_BORDERFLAG);
+			m.clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAGBORDER);
+			m.updateDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAGBORDER);
 	  }
 	return true;
 }
