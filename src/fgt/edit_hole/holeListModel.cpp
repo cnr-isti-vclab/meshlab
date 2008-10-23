@@ -31,47 +31,27 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 {
 	state = HoleListModel::Selection;
 	mesh = m;
-	userBitHole = -1;
 	pickedAbutment.SetNull();
-	updateModel();
-}
-
-void HoleListModel::clearModel()
-{
-	HoleVector::iterator it;
-	for(it=holes.begin(); it!=holes.end(); it++)
-		it->ResetFlag();
-
-	holes.clear();
-	pickedAbutment.SetNull();
-}
-
-void HoleListModel::updateModel()
-{
-	clearModel();
+		
 	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER);
 	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
 	mesh->updateDataMask(MeshModel::MM_FACEFLAGBORDER);
-
-	userBitHole = FgtHole<CMeshO>::GetMeshHoles(mesh->cm, holes);
-	nSelected=0;
-	nAccepted=0;
-	emit dataChanged( index(0, 0), index(holes.size(), 2) );
+	holesManager.Init(&m->cm);
+	emit dataChanged( index(0, 0), index(holesManager.HolesCount(), 2) );
 	emit SGN_needUpdateGLA();
 }
 
+
 void HoleListModel::drawHoles() const
 {
-	// Disegno i contorni del buco
 	glLineWidth(2.0f);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_GREATER);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
-	// scorro tutti i buchi
-	HoleVector::const_iterator it = holes.begin();
-	for( ; it != holes.end(); ++it)
+	HoleVector::const_iterator it = holesManager.holes.begin();
+	for( ; it != holesManager.holes.end(); ++it)
 	{
 		if( it->IsSelected())
 		{
@@ -85,7 +65,7 @@ void HoleListModel::drawHoles() const
 		it->Draw();
 	}
 
-
+	// draw the edge selected as a bridge abutment in manual-bridging
 	if(!pickedAbutment.IsNull())
 	{
 		glDepthFunc(GL_ALWAYS);
@@ -100,7 +80,7 @@ void HoleListModel::drawHoles() const
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glLineWidth(2.0f);
-	for(it = holes.begin(); it != holes.end(); ++it)
+	for(it = holesManager.holes.begin(); it != holesManager.holes.end(); ++it)
 	{
 		if(it->IsSelected())
 		{
@@ -122,38 +102,39 @@ void HoleListModel::drawCompenetratingFaces() const
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
 	glColor3f(0.8f, 0.8f, 0.f);
+
+	// draw face border also behind other face
 	HoleVector::const_iterator it;
-	for(it = holes.begin(); it != holes.end(); ++it)
+	for(it = holesManager.holes.begin(); it != holesManager.holes.end(); ++it)
 		if(it->IsCompenetrating())
 			it->DrawCompenetratingFace(GL_LINE_LOOP);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	for(it = holes.begin(); it != holes.end(); ++it)
+	// draw compenetrating face, only the visible part
+	for(it = holesManager.holes.begin(); it != holesManager.holes.end(); ++it)
 		if(it->IsCompenetrating())
 			it->DrawCompenetratingFace(GL_TRIANGLES);
 
+	// draw face border only visible part
 	glLineWidth(4.0f);
 	glColor3f(1.0f, 1.0f, 0.f);
-	for(it = holes.begin(); it != holes.end(); ++it)
+	for(it = holesManager.holes.begin(); it != holesManager.holes.end(); ++it)
 		if(it->IsCompenetrating())
 			it->DrawCompenetratingFace(GL_LINE_LOOP);
-
 }
 
-void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
+void HoleListModel::toggleSelectionHoleFromFace(CFaceO *bface)
 {
-	assert(FgtHole<CMeshO>::IsHoleBorderFace(*bface));
+	assert(holesManager.IsHoleBorderFace(bface));
 	HoleVector::iterator h;
-	int ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes, h);
+	
+	int ind = holesManager.FindHoleFromFace(bface, h);
 	if( ind == -1)
 		return;
 	h->SetSelect( !h->IsSelected() );
-  if(h->IsSelected())
-    nSelected++;
-  else
-    nSelected--;
+  
 	emit dataChanged( index(ind, 4), index(ind, 4) );
 	emit SGN_needUpdateGLA();
 }
@@ -162,19 +143,12 @@ void HoleListModel::toggleAcceptanceHole(CFaceO *bface)
 {
 	assert(state == HoleListModel::Filled);
 	HoleVector::iterator h;
-	int ind = -1;
-	if(FgtHole<CMeshO>::IsHoleBorderFace(*bface))
-		ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes, h);
-	else if(FgtHole<CMeshO>::IsPatchFace(*bface) && !FgtHole<CMeshO>::IsBridgeFace(*bface))
-		ind = FgtHole<CMeshO>::FindHoleFromPatchFace(bface, holes, h);
-
+	int ind = holesManager.FindHoleFromFace(bface, h);
+	
 	if(ind == -1)
 		return;
 	h->SetAccepted( !h->IsAccepted() );
-  if(h->IsAccepted())
-    nAccepted++;
-  else
-    nAccepted--;
+  
 	emit dataChanged( index(ind, 6), index(ind, 6) );
 	emit SGN_needUpdateGLA();
 }
@@ -182,9 +156,10 @@ void HoleListModel::toggleAcceptanceHole(CFaceO *bface)
 void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 {
 	BridgeAbutment<CMeshO> picked;
-	if (!FgtBridge<CMeshO>::FindBridgeAbutmentFromPick(pickedFace, pickedX, pickedY, holes, picked))
+	if (!holesManager.FindBridgeAbutmentFromPick(pickedFace, pickedX, pickedY, picked))
 		return;
 
+	// reselect an already selected edge... deselect
 	if(pickedAbutment.f == picked.f && pickedAbutment.z == picked.z )
 	{
 		pickedAbutment.SetNull();
@@ -195,11 +170,12 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 		pickedAbutment = picked;
 	else
 	{
+		// 2 edge selected... bridge building
 		std::vector<CMeshO::FacePointer *> local_facePointer;
 		local_facePointer.push_back(&pickedAbutment.f);
 		local_facePointer.push_back(&picked.f);
 
-		if(FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, mesh->cm, holes, &local_facePointer))
+		if(FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, &holesManager, &local_facePointer))
 		{
 			emit SGN_ExistBridge(true);
 			emit layoutChanged();
@@ -213,64 +189,31 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 
 void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 {
-	std::vector<CMeshO::FacePointer *> local_facePointer;
-
-	HoleVector::iterator it;
-	FgtHole<CMeshO>::AddFaceReference(holes, local_facePointer);
-
-	for(it = holes.begin(); it != holes.end(); it++ )
-		if( it->IsSelected() )
-		{
-			it->Fill(mode, mesh->cm, local_facePointer);
-			state = HoleListModel::Filled;
-		}
-  nAccepted=nSelected;
-  emit layoutChanged();
+	if(holesManager.Fill(mode))
+	{
+		state = HoleListModel::Filled;
+		emit layoutChanged();
+	}
 }
 
 void HoleListModel::acceptFilling(bool accept)
 {
-  nSelected=0;
-	HoleVector::iterator it = holes.begin();
-	while( it != holes.end() )
-	{
-		if( it->IsFilled() )
-		{
-			if( (it->IsSelected() && !it->IsAccepted()) || !accept)
-			{
-				if( it->IsFilled() )
-				{
-				  	it->RestoreHole(mesh->cm);
-				  	nSelected++;
-				}
-			}
-			else if( it->IsSelected() && it->IsAccepted() )
-			{
-				it->ResetFlag();
-				it = holes.erase(it);
-				continue;
-			}
-		}
-		it++;
-	}
-
+	holesManager.ConfirmFilling(accept);
 	state = HoleListModel::Selection;
-	emit dataChanged( index(0, 0), index(holes.size(), 2) );
+	emit dataChanged( index(0, 0), index(holesManager.HolesCount(), 2) );
 	emit SGN_needUpdateGLA();
 	emit layoutChanged();
 }
 
-void HoleListModel::autoBridge(bool singleHole, double distCoeff, QLabel *infoLabel)
+void HoleListModel::autoBridge(bool singleHole, double distCoeff)
 {
-	FgtBridge<CMeshO>::RemoveBridges(mesh->cm, holes);
+	holesManager.DiscardBridges();
 	
 	int nb=0;
 	if(singleHole)
-		nb = FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, infoLabel, distCoeff, 0);
+		nb = holesManager.AutoSelfBridging(distCoeff, 0);
 	else
-		nb = FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, infoLabel, distCoeff, 0);
-
-	countSelected();
+		nb = holesManager.AutoMultiBridging(distCoeff, 0);
 
 	emit SGN_ExistBridge( nb>0 );
 	emit layoutChanged();
@@ -278,38 +221,25 @@ void HoleListModel::autoBridge(bool singleHole, double distCoeff, QLabel *infoLa
 
 void HoleListModel::removeBridges()
 {
-	FgtBridge<CMeshO>::RemoveBridges(mesh->cm, holes);
-	countSelected();
-
+	holesManager.DiscardBridges();
 	emit SGN_ExistBridge(false);
 	emit layoutChanged();
 }
 
 void HoleListModel::acceptBridges()
 {
-	FgtBridge<CMeshO>::AcceptBridges(holes);
-	state = HoleListModel::Selection;
+	holesManager.ConfirmBridges();
 	emit SGN_ExistBridge(false);
 }
 
 void HoleListModel::closeNonManifolds()
 {
-	if (FgtBridge<CMeshO>::CloseNonManifoldVertex(mesh->cm, holes) > 0 )
-	{
-		countSelected();
-    emit SGN_ExistBridge(true);
-	}
+	if (holesManager.CloseNonManifoldHoles())
+		emit SGN_ExistBridge(true);
+	
 	emit layoutChanged();
 }
 
-void HoleListModel::countSelected()
-{
-	nSelected = 0;
-  HoleVector::iterator hit = holes.begin();
-  for( ; hit!=holes.end(); hit++)
-    if(hit->IsSelected())
-      nSelected++;
-}
 
 /************* Implementazione QAbstractItemModel class *****************/
 
@@ -324,11 +254,11 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 		switch(index.column())
 		{
 		case 0:
-			return holes[index.row()].name;
+			return holesManager.holes[index.row()].name;
 		case 1:
-			return holes.at(index.row()).Size();
+			return holesManager.holes.at(index.row()).Size();
 		case 2:
-			return QString("%1").arg(holes.at(index.row()).Perimeter(), 0, 'f', 5);
+			return QString("%1").arg(holesManager.holes.at(index.row()).Perimeter(), 0, 'f', 5);
 		}
 	}
 	else if (role == Qt::TextAlignmentRole)
@@ -342,15 +272,15 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 	{
 		bool checked;
 		if(index.column() == 3)
-			checked = holes[index.row()].IsNonManifold();
+			checked = holesManager.holes[index.row()].IsNonManifold();
 		else if(index.column() == 4)
-			checked = holes[index.row()].IsSelected();
-		else if(state == HoleListModel::Filled && holes[index.row()].IsSelected())
+			checked = holesManager.holes[index.row()].IsSelected();
+		else if(state == HoleListModel::Filled && holesManager.holes[index.row()].IsSelected())
 		{
 			if(index.column() == 5)
-				checked = holes[index.row()].IsCompenetrating();
+				checked = holesManager.holes[index.row()].IsCompenetrating();
 			else if(index.column() == 6)
-				checked = holes[index.row()].IsAccepted();
+				checked = holesManager.holes[index.row()].IsAccepted();
 			else
 				return QVariant();
 		}
@@ -424,9 +354,9 @@ QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int
 }
 
 
-QModelIndex HoleListModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex HoleListModel::index(int row, int column, const QModelIndex &/*parent*/) const
 {
-	if(row >= (int)holes.size())
+	if(row >= (int)holesManager.holes.size())
 		return QModelIndex();
 	return createIndex(row,column, 0);
 }
@@ -460,7 +390,7 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 		QString newName = value.toString().trimmed();
 		if(newName != "")
 		{
-			holes[index.row()].name = newName;
+			holesManager.holes[index.row()].name = newName;
 			ret = true;
 		}
 	}
@@ -470,17 +400,13 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 		{
 			if(index.column() == 4 && state == HoleListModel::Selection)
 			{
-				holes[index.row()].SetSelect( !holes[index.row()].IsSelected() );
-				if(holes[index.row()].IsSelected() ) nSelected++;
-        else nSelected--;
+				holesManager.holes[index.row()].SetSelect( !holesManager.holes[index.row()].IsSelected() );
 				ret = true;
 			}
 		}
 		else if(index.column() == 6)
 		{	// check accept
-			holes[index.row()].SetAccepted( !holes[index.row()].IsAccepted() );
-			if(holes[index.row()].IsAccepted() ) nAccepted++;
-      else nAccepted--;
+			holesManager.holes[index.row()].SetAccepted( !holesManager.holes[index.row()].IsAccepted() );
 			ret = true;
 		}
 	}

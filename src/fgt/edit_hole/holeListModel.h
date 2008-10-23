@@ -26,14 +26,14 @@
 #include <QWidget>
 #include <QHeaderView>
 #include <QtGui>
+#include "meshlab/meshmodel.h"
 #include "fgtHole.h"
 #include "fgtBridge.h"
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-#include "vcg/simplex/face/pos.h"
-#include "vcg/complex/trimesh/base.h"
-#include "vcg/space/color4.h"
+#include "holeSetManager.h"
 
+/*  This class is the "model" of model-view architecture, so it implements methods to esposes data
+ *  informations about holes as QAbstractItemModel says.
+ */
 class HoleListModel : public QAbstractItemModel
 {
 	Q_OBJECT
@@ -44,28 +44,21 @@ public:
 		Selection, ManualBridging, Filled
 	};
 
-	typedef vcg::tri::Hole<CMeshO>            vcgHole;
-	typedef vcg::tri::Hole<CMeshO>::Info	    HoleInfo;
-	typedef FgtHole<CMeshO>						        HoleType;
-	typedef std::vector< HoleType >				    HoleVector;
-	typedef FgtBridge<CMeshO>					        BridgeType;
-	typedef std::vector< BridgeType >			    BridgeVector;
-	typedef vcg::face::Pos<CMeshO::FaceType>	PosType;
-	typedef std::vector< PosType >				    PosVector;
-	typedef PosVector::iterator					      PosIterator;
-
+	typedef FgtHole<CMeshO>					HoleType;
+	typedef std::vector< HoleType >	HoleVector;
+	
 	HoleListModel(MeshModel *m, QObject *parent = 0);
-	virtual ~HoleListModel() { clearModel(); };
+	virtual ~HoleListModel() { holesManager.Clear(); };
 
-	inline int rowCount(const QModelIndex &parent = QModelIndex()) const { return holes.size(); };
-	inline int columnCount(const QModelIndex &parent = QModelIndex()) const
+	inline int rowCount(const QModelIndex &/*parent = QModelIndex()*/) const { return holesManager.HolesCount(); };
+	inline int columnCount(const QModelIndex &/*parent = QModelIndex()*/) const
 	{
 		if(state == HoleListModel::Selection) return 5;
 		else return 7;
 	};
 
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-	QModelIndex parent(const QModelIndex &child) const { return QModelIndex(); };
+	QModelIndex parent(const QModelIndex &/*child*/) const { return QModelIndex(); };
 
   QVariant data(const QModelIndex &index, int role) const;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
@@ -74,15 +67,12 @@ public:
 	bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
 
 
-	inline int getUserBitHole() const { return userBitHole; };
-	void clearModel();
-	void updateModel();
 	void drawHoles() const;
 	void drawCompenetratingFaces() const;
 
 	inline void setState(HoleListModel::FillerState s) { state = s; emit layoutChanged(); };
 	inline FillerState getState() const { return state; };
-	void toggleSelectionHoleFromBorderFace(CFaceO *bface);
+	void toggleSelectionHoleFromFace(CFaceO *bface);
 	void toggleAcceptanceHole(CFaceO *bface);
 	void fill(FgtHole<CMeshO>::FillerMode mode);
 	void acceptFilling(bool accept=true);
@@ -91,31 +81,26 @@ public:
 	void closeNonManifolds();
 	inline MeshModel* getMesh() const { return mesh; };
 
-	void autoBridge(bool singleHole=false, double distCoeff=0, QLabel *infoLabel=0);
+	void autoBridge(bool singleHole=false, double distCoeff=0);
 
+	inline bool PickedAbutment() const {return !pickedAbutment.IsNull(); };
 	inline void setStartBridging()
 	{
 		assert(state != HoleListModel::Filled);
 		state = HoleListModel::ManualBridging ;
 	};
-	inline void setEndBridging() { state = HoleListModel::Selection; pickedAbutment.f = 0; };
+	inline void setEndBridging() { state = HoleListModel::Selection; pickedAbutment.SetNull(); };
 	void addBridgeFace(CFaceO *pickedFace, int pickX, int pickY);
 
-	void countSelected();
-  inline int SelectionCount() const { return nSelected; };
-  inline int HolesCount() const { return holes.size(); };
-  inline int AcceptedCount() const { return nAccepted; };
-	inline bool PickedAbutment() const {return !pickedAbutment.IsNull(); };
+	
 private:
 	MeshModel *mesh;
 	FillerState state;
-	int userBitHole;
 	BridgeAbutment<CMeshO> pickedAbutment;
-	int nSelected;
-	int nAccepted;
-
+	
 public:
-	HoleVector holes;
+	HoleSetManager<CMeshO> holesManager;
+	
 
 Q_SIGNALS:
 	void SGN_needUpdateGLA();

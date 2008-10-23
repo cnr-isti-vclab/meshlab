@@ -25,11 +25,29 @@
 #define EDITHOLEPLUGIN_H
 
 #include <QObject>
-#include <QList>
 #include "fillerDialog.h"
 #include "holeListModel.h"
-#include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+
+class EditHoleAutoBridgingCB : public AutoBridgingCallback
+{
+public:
+	EditHoleAutoBridgingCB(QLabel* lab, int off)
+	{
+		offset = off;
+		label = lab;
+	};
+
+	void Invoke(int val)
+	{
+		label->setText( QString("Auto-bridging: %1%").arg(val) );
+		label->repaint();			
+	};
+
+private:
+	QLabel* label;
+};
+
 
 class EditHolePlugin : public QObject, public MeshEditInterface
 {
@@ -37,12 +55,7 @@ class EditHolePlugin : public QObject, public MeshEditInterface
 	Q_INTERFACES(MeshEditInterface)
 	
 public:
-	typedef vcg::tri::Hole<CMeshO>            vcgHole;
-	typedef vcgHole::Info                     HoleInfo;
-	typedef std::vector< FgtHole<CMeshO> >    HoleVector;
-	typedef vcg::face::Pos<CMeshO::FaceType>  PosType;
-	typedef CMeshO::FaceIterator              FaceIterator;
-
+	
 	EditHolePlugin();
 	virtual ~EditHolePlugin();
 	static const QString Info();

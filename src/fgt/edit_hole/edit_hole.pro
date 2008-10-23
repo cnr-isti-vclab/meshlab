@@ -6,6 +6,7 @@ HEADERS       = edit_hole_factory.h \
 		    holeListModel.h \
 		    fgtHole.h \
 		    fgtBridge.h \
+		    holeSetManager.h \
 		    ../../meshlab/meshmodel.h
 
 SOURCES       = edit_hole_factory.cpp \

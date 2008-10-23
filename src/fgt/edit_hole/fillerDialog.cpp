@@ -38,7 +38,7 @@ FillerDialog::FillerDialog(QWidget *parent)
 FillerDialog::~FillerDialog() {}
 
 
-void FillerDialog::closeEvent ( QCloseEvent * event )
+void FillerDialog::closeEvent ( QCloseEvent * /*event*/ )
 {
 	emit SGN_Closing();
 }
