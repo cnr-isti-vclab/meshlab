@@ -21,25 +21,26 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef PHOTOTEXTURINGDIALOG_H_
-#define PHOTOTEXTURINGDIALOG_H_
+#ifndef PHOTOTEXTURINGWIDGET_H_
+#define PHOTOTEXTURINGWIDGET_H_
 
-#include <QDialog>
+#include <QDockWidget>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include <wrap/gl/trimesh.h>
+#include <meshlab/meshlabeditdockwidget.h>
 //#include <photoTexturing.h>
 #include <src/PhotoTexturer.h>
-#include "ui_photoTexturingDialog.h"
+#include "ui_photoTexturingWidget.h"
 
-class PhotoTexturingDialog: public QDialog, Ui::photoTexturingDialog{
+class PhotoTexturingWidget: public MeshlabEditDockWidget, Ui::photoTexturingWidget{
 
 Q_OBJECT
 
 private:
 	MeshModel *mesh;
 	GLArea *glarea;
-	Ui::photoTexturingDialog ui;
+	Ui::photoTexturingWidget ui;
 	MeshEditInterface *ptPlugin;
 	PhotoTexturer *photoTexturer;
 
@@ -67,14 +68,15 @@ private slots:
 	void calculateTextures();
 	void selectCurrentTexture();
 	void combineTextures();
+	void unprojectTextures();
 	void apply();
 	void close();
 	void cancel();
 
 public:
-	PhotoTexturingDialog(MeshEditInterface*, PhotoTexturer*,MeshModel &m, GLArea *gla);
-	~PhotoTexturingDialog();
+	PhotoTexturingWidget(MeshEditInterface*, PhotoTexturer*,MeshModel &m, GLArea *gla);
+	~PhotoTexturingWidget();
 
 };
 
-#endif /*PHOTOTEXTURINGDIALOG_H_*/
+#endif /*PHOTOTEXTURINGWIDGET_H_*/

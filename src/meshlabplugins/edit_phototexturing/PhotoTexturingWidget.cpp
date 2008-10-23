@@ -24,21 +24,24 @@
 #include <QList>
 #include <QListWidgetItem>
 #include <QListWidget>
-#include <PhotoTexturingDialog.h>
+#include <PhotoTexturingWidget.h>
 #include <meshlab/mainwindow.h>
 #include <wrap/gl/trimesh.h>
 #include <meshlab/stdpardialog.h>
 
-PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTexturer* texturer,MeshModel &m,GLArea *gla): QDialog() {
-
+PhotoTexturingWidget::PhotoTexturingWidget(MeshEditInterface* plugin, PhotoTexturer* texturer,MeshModel &m,GLArea *gla): MeshlabEditDockWidget(gla) {
+	
 	connect(this,SIGNAL(updateGLAreaTextures()),gla,SLOT(updateTexture()));
 	connect(this,SIGNAL(setGLAreaTextureMode(vcg::GLW::TextureMode)),gla,SLOT(setTextureMode(vcg::GLW::TextureMode)));
 	connect(this,SIGNAL(updateMainWindowMenus()),gla,SIGNAL(updateMainWindowMenus()));
 
 	ptPlugin = plugin;
 	photoTexturer = texturer;
-	PhotoTexturingDialog::ui.setupUi(this);
-
+	PhotoTexturingWidget::ui.setupUi(this);
+	this->setWidget(ui.main_frame);
+	this->setFeatures(QDockWidget::AllDockWidgetFeatures);
+	this->setAllowedAreas(Qt::LeftDockWidgetArea);
+	this->setFloating(true);
 	mesh = &m;
 	glarea = gla;
 
@@ -58,6 +61,8 @@ PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTextu
 	connect(ui.assignImagePushButton, SIGNAL(clicked()),this,SLOT(assignImage()));
 	connect(ui.calculateTexturesPushButton, SIGNAL(clicked()),this,SLOT(calculateTextures()));
 	connect(ui.combineTexturesPushButton, SIGNAL(clicked()),this,SLOT(combineTextures()));
+	connect(ui.unprojectTexturePushButton, SIGNAL(clicked()),this,SLOT(unprojectTextures()));
+
 	connect(ui.textureListWidget, SIGNAL(itemClicked(QListWidgetItem* )),this,SLOT(selectCurrentTexture()));
 
 	connect(ui.applyPushButton, SIGNAL(clicked()),this,SLOT(apply()));
@@ -71,31 +76,30 @@ PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTextu
 }
 
 
-PhotoTexturingDialog::~PhotoTexturingDialog(){
+PhotoTexturingWidget::~PhotoTexturingWidget(){
 
 }
-void PhotoTexturingDialog::loadConfigurationFile(){
+void PhotoTexturingWidget::loadConfigurationFile(){
 	QString filename = QFileDialog::getOpenFileName(this,tr("Select Configuration File"),".", "*.ptcfg");
 	ui.calibrationFileLineEdit->setText(filename);
 	photoTexturer->loadConfigurationFile(filename);
 	update();
 }
 
-void PhotoTexturingDialog::saveConfigurationFile(){
+void PhotoTexturingWidget::saveConfigurationFile(){
 	QString filename = QFileDialog::getSaveFileName(this,tr("Select Configuration File"),".", "*.ptcfg");
 	ui.calibrationFileLineEdit->setText(filename);
 	photoTexturer->saveConfigurationFile(filename);
 }
 
-void PhotoTexturingDialog::addCamera(){
-	//QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai *.kai)");
-	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai)");
+void PhotoTexturingWidget::addCamera(){
+	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.cam)");
 	photoTexturer->addCamera(filename);
 	update();
 	ui.cameraTableWidget->selectRow(ui.cameraTableWidget->rowCount()-1);
 }
 
-void PhotoTexturingDialog::removeCamera(){
+void PhotoTexturingWidget::removeCamera(){
 	//int selectedRow = ui.cameraTableWidget->sel
 	QList <QTableWidgetItem*>list = ui.cameraTableWidget->selectedItems();
 	if (list.size()>0){
@@ -108,7 +112,7 @@ void PhotoTexturingDialog::removeCamera(){
 
 }
 
-void PhotoTexturingDialog::update(){
+void PhotoTexturingWidget::update(){
 	int rowcount = photoTexturer->cameras.size();
 	ui.cameraTableWidget->setRowCount((rowcount));
 	int i;
@@ -138,13 +142,20 @@ void PhotoTexturingDialog::update(){
 
 
 	if (vcg::tri::HasPerFaceAttribute(mesh->cm,PhotoTexturer::ORIGINALUVTEXTURECOORDS) && vcg::tri::HasPerFaceAttribute(mesh->cm,PhotoTexturer::CAMERAUVTEXTURECOORDS)){
+		ui.unprojectTexturePushButton->setDisabled(false);
+	}else{
+		ui.unprojectTexturePushButton->setDisabled(true);
+	}
+	
+	if (vcg::tri::HasPerFaceAttribute(mesh->cm,PhotoTexturer::CAMERAUVTEXTURECOORDS)){
 		ui.combineTexturesPushButton->setDisabled(false);
 	}else{
 		ui.combineTexturesPushButton->setDisabled(true);
 	}
+	
 
 }
-void PhotoTexturingDialog::assignImage(){
+void PhotoTexturingWidget::assignImage(){
 	QString filename = QFileDialog::getOpenFileName(this,tr("Select Image File"),".", "Images (*.png *.jpg *.bmp)");
 	QList <QTableWidgetItem*>list = ui.cameraTableWidget->selectedItems();
 	if (list.size()>0){
@@ -156,7 +167,7 @@ void PhotoTexturingDialog::assignImage(){
 	}
 
 }
-void PhotoTexturingDialog::calculateTextures(){
+void PhotoTexturingWidget::calculateTextures(){
 	photoTexturer->calculateMeshTextureForAllCameras(mesh);
 	glarea->update();
 	update();
@@ -166,15 +177,25 @@ void PhotoTexturingDialog::calculateTextures(){
 	updateMainWindowMenus();
 }
 
-void PhotoTexturingDialog::selectCurrentTexture(){
+void PhotoTexturingWidget::selectCurrentTexture(){
 	int icam = ui.textureListWidget->currentRow();
 
 	photoTexturer->applyTextureToMesh(mesh,icam);
 	setGLAreaTextureMode(vcg::GLW::TMPerWedgeMulti);
+	updateMainWindowMenus();
 	glarea->update();
 }
 
-void PhotoTexturingDialog::combineTextures(){
+void PhotoTexturingWidget::combineTextures(){
+	photoTexturer->combineTextures(mesh);
+	setGLAreaTextureMode(vcg::GLW::TMPerWedgeMulti);
+	updateMainWindowMenus();
+	glarea->update();
+
+
+}
+
+void PhotoTexturingWidget::unprojectTextures(){
 	FilterParameterSet combineParamSet;
 	combineParamSet.addInt("width",1024,"Image width:","");
 	combineParamSet.addInt("height",1024,"Image height:","");
@@ -194,30 +215,30 @@ void PhotoTexturingDialog::combineTextures(){
 	GenericParamDialog ad(this,&combineParamSet,"Texture Baking Parameters");
 	int result=ad.exec();
 	if (result == 1){
-		photoTexturer->combineTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"),combineParamSet.getInt("edgeStretchingPasses"),combineParamSet.getBool("enable_angle_map"),combineParamSet.getInt("angle_map_weight"),combineParamSet.getInt("angle_map_sharpness"),combineParamSet.getFloat("min_angle"),combineParamSet.getBool("enable_distance_map"),combineParamSet.getInt("distance_map_weight"));
+		photoTexturer->unprojectTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"),combineParamSet.getInt("edgeStretchingPasses"),combineParamSet.getBool("enable_angle_map"),combineParamSet.getInt("angle_map_weight"),combineParamSet.getInt("angle_map_sharpness"),combineParamSet.getFloat("min_angle"),combineParamSet.getBool("enable_distance_map"),combineParamSet.getInt("distance_map_weight"));
 	}
 	update();
 }
 
-void PhotoTexturingDialog::apply(){
+void PhotoTexturingWidget::apply(){
 
 }
-void PhotoTexturingDialog::close(){
+void PhotoTexturingWidget::close(){
 	//glarea->endEdit();
 	//ptPlugin->EndEdit(NULL,NULL,NULL);
 }
-void PhotoTexturingDialog::cancel(){
+void PhotoTexturingWidget::cancel(){
 	photoTexturer->restoreOriginalTextureCoordinates(mesh);
 	glarea->update();
 }
 
-void PhotoTexturingDialog::exportCamerasToMaxScript(){
+void PhotoTexturingWidget::exportCamerasToMaxScript(){
 	QString filename = QFileDialog::getSaveFileName(this,tr("Select MaxScript File"),".", "*.ms");
 	photoTexturer->exportMaxScript(filename,mesh);
 }
 
-void PhotoTexturingDialog::convertToTsaiCamera(){
-	QString filename = QFileDialog::getSaveFileName(this,tr("Select Tsai Calibration File"),".", "*.tsai");
+void PhotoTexturingWidget::convertToTsaiCamera(){
+	QString filename = QFileDialog::getSaveFileName(this,tr("Select Tsai Calibration File"),".", "*.cam");
 	QList <QTableWidgetItem*>list = ui.cameraTableWidget->selectedItems();
 
 	bool optimize;
