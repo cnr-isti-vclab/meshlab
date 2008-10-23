@@ -1000,8 +1000,8 @@ C:\Documents and Settings\Paolo\My Documents\devel\meshlab\src\meshlab\shadersrm
   </RmRegistryBranch>
   <RmOpenGLEffect NAME="Default_OpenGL_Effect" API="OpenGL" ACTIVE_CAMERA="">
    <RmFloatVariable NAME="Ka" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.200000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
-   <RmFloatVariable NAME="Ks" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.400000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
-   <RmFloatVariable NAME="Kd" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.700000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
+   <RmFloatVariable NAME="Ks" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.400000" MIN="0.000000" MAX="1.000000" CLAMP="FALSE"/>
+   <RmFloatVariable NAME="Kd" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.700000" MIN="0.000000" MAX="1.000000" CLAMP="FALSE"/>
    <RmFloatVariable NAME="Ke" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="35.840000" MIN="1.000000" MAX="64.000000" CLAMP="FALSE"/>
    <Rm2DTextureVariable NAME="bump" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" FILE_NAME="TEXTURE0.PNG" ORIGIN="0"/>
    <RmStreamMap NAME="Stream Mapping" API="">
@@ -1043,16 +1043,13 @@ void main(void)
 
    vec3 bumpPert = normalize( -(0.5,0.5,0.5) + texture2D(bump, gl_TexCoord[0].st).rgb );
 
-   LightDirection = normalize(LightDirection);
-   ViewDirection = normalize(ViewDirection);
-   //ViewDirection =  normalize(gl_NormalMatrix * ViewDirection);
+   vec3 LightDir = normalize(LightDirection);
+   vec3 ViewDir = normalize(ViewDirection);
    vec3 nNormal =  normalize(gl_NormalMatrix * bumpPert);
    
-   float diffuse = clamp(dot(LightDirection, nNormal), 0.0, 1.0);
-   //float specular = pow(clamp(dot(reflect(ViewDirection, nNormal), LightDirection),0.0, 1.0), Ke);
-   //float specular = pow(clamp(dot(reflect(nNormal,LightDirection),-ViewDirection),0.0, 1.0), Ke);
-   float specular = pow(clamp(dot(reflect(ViewDirection, nNormal),-LightDirection),0.0, 1.0), Ke);
-   gl_FragColor = (Kd * diffuse * baseColor) + clamp(Ks * specular,0.0,1.0)*baseColor;
+   float diffuse = clamp(dot(LightDir, nNormal), 0.0, 1.0);
+   float specular = pow(clamp(dot(reflect(ViewDir, nNormal),-LightDir),0.0, 1.0), Ke);
+   gl_FragColor = (Kd * diffuse * baseColor) +  (Ks * specular)*baseColor;
 }]]></RmShaderCode></RmGLShader>
     <RmStreamMapReference NAME="Stream Mapping" API=""/>
     <RmTextureObject NAME="bump" API="OpenGL" STATE_INDEX="0" VERTEX_TEXTURE="FALSE">
