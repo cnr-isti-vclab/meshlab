@@ -297,10 +297,10 @@ void AttributeFP(void)
     #endif
 
     #ifdef EXPE_DEFERRED_SHADING
-    gl_FragData[0].rgb = vec3(0.6,0.2,0.1);//gl_Color.rgb; // MOV
+    gl_FragData[0].rgb = gl_Color.rgb; // MOV
     gl_FragData[1].xyz = fragNormal.xyz; // MOV
-    gl_FragData[1].w = 1;//weight; // MOV
-    gl_FragData[0].w = 1;//weight;
+    gl_FragData[1].w = weight; // MOV
+    gl_FragData[0].w = weight;
 
     #if EXPE_DEPTH_INTERPOLATION==2 // linear space
         gl_FragData[1].z = -depth; // MOV
