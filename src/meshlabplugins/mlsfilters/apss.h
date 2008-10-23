@@ -105,6 +105,9 @@ class APSS : public MlsSurface<_MeshType>
 		mutable LScalar mCachedGradSumDotPP[3];
 		mutable LScalar mCachedGradSumW[3];
 
+		mutable LScalar mCachedGradNume[3];
+		mutable LScalar mCachedGradDeno[3];
+
 		mutable LScalar mCachedGradUConstant[3];
 		mutable LVector mCachedGradULinear[3];
 		mutable LScalar mCachedGradUQuad[3];
