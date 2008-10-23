@@ -30,7 +30,7 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-#include <PhotoTexturingDialog.h>
+#include <PhotoTexturingWidget.h>
 #include <src/PhotoTexturer.h>
 
 class PhotoTexturingPlugin : public QObject, public MeshEditInterface {
@@ -55,7 +55,7 @@ public:
 	void drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla);
 	
 	GLArea *glArea;
-	PhotoTexturingDialog *ptDialog;
+	PhotoTexturingWidget *ptDialog;
 	PhotoTexturer *photoTexturer;
 	QFont qFont;
 private: 

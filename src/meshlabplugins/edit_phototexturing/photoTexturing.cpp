@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <meshlab/glarea.h>
 #include <wrap/qt/trackball.h>
-#include <PhotoTexturingDialog.h>
+#include <PhotoTexturingWidget.h>
 #include "photoTexturing.h"
 
 using namespace std;
@@ -58,9 +58,9 @@ void PhotoTexturingPlugin::StartEdit(MeshModel &m, GLArea *gla)
 	//Creat GUI window
 	if(ptDialog == NULL)
 	{
-		ptDialog = new PhotoTexturingDialog::PhotoTexturingDialog(this,photoTexturer,m, gla);
-		ptDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
-		qDebug()<<"new PhotoTexturingDialog";
+		ptDialog = new PhotoTexturingWidget::PhotoTexturingWidget(this,photoTexturer,m, gla);
+		//ptDialog->setWindowFlags(Qt::WindowStaysOnTopHint);
+		//qDebug()<<"new PhotoTexturingDialog";
 	}
 	glArea = gla;
 	
