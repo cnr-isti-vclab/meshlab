@@ -45,7 +45,7 @@ public:
 	
 	void getLeafs(double x, double y, QList<QuadTreeLeaf*> &list);
 	
-private: 
+//private: 
 	void buildQuadTree(QList<QuadTreeLeaf*> *list, double min_width, double min_height, int max_leafs, int max_depth);
 };
 

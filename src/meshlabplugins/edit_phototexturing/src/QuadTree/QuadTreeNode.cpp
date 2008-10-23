@@ -23,6 +23,8 @@
 #include <QtGui>
 #include "QuadTreeNode.h"
 
+#define QTN_EPSILON 1e-6
+//#define QTN_EPSILON 0.0
 QuadTreeNode::QuadTreeNode(double x, double y,double w, double h){
 	qx=x;
 	qy=y;
@@ -53,18 +55,18 @@ QuadTreeNode::~QuadTreeNode(){
 	}
 
 	if (qleafs!=NULL){
-		qleafs->clear();
-		delete qleafs;
+		//qleafs->clear();
+		//delete qleafs;
 	}
 }
 
 void QuadTreeNode::buildQuadTree(QList<QuadTreeLeaf*> *list, double min_width, double min_height){
-	qDebug()<< "min_width: "<<min_width << "min_height:" <<min_height;
+	//qDebug()<< "list->size():"<< list->size() <<"min_width: "<<min_width << "min_height:" <<min_height;
 	buildQuadTree(list,min_width, min_height,MAX_LEAFS,MAX_DEPTH);
 }
 void QuadTreeNode::buildQuadTree(QList<QuadTreeLeaf*> *list, double min_width, double min_height, int max_leafs, int max_depth){
 	qleafs = list;
-	if(list->size()> max_leafs && max_depth>=0 && qw/2.0 >= min_width && qh/2.0>=min_height){
+	if(list->size()> max_leafs && max_depth>=0 && qw/2.0 > min_width && qh/2.0>min_height){
 		//qDebug()<<"split leafs: "<< list->size() << qx << qy <<qw <<qh;
 		endOfTree = false;
 		qchildren[0] = new QuadTreeNode(qx,			qy,			qw/2.0,	qh/2.0);
@@ -124,11 +126,9 @@ void QuadTreeNode::getLeafs(double x, double y,QList <QuadTreeLeaf*> &list){
 		//qDebug()<< "qleafs" << qleafs->size() << "list" << list->size();
 	}else{
 		int i;
-		bool found = false;
 		for (i=0;i<4;i++){
-			if ((x>=qchildren[i]->qx && x<= (qchildren[i]->qx + qchildren[i]->qw)) && (y>=qchildren[i]->qy && y<= (qchildren[i]->qy + qchildren[i]->qh))){
+			if ((x>=(qchildren[i]->qx) && x<= (qchildren[i]->qx + qchildren[i]->qw) && y>=(qchildren[i]->qy) && y<= (qchildren[i]->qy + qchildren[i]->qh))){
 				qchildren[i]->getLeafs(x,y,list);
-				found =true;
 			}
 		}
 	}
