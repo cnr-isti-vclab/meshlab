@@ -4,20 +4,50 @@
 #include <string>
 #include <sstream>
 
+const QString TsaiCameraCalibration::XML_TSAICALIB_TYPE = "TSAI";
+const QString TsaiCameraCalibration::XML_TSAICALIB_OPTIMIZED = "optimized";
+	
+const QString TsaiCameraCalibration::XML_TSAICALIB_SENSOR = "Sensor";
+const QString TsaiCameraCalibration::XML_TSAICALIB_DPX = "dpx";
+const QString TsaiCameraCalibration::XML_TSAICALIB_DPY = "dpy";
+const QString TsaiCameraCalibration::XML_TSAICALIB_SX = "sx";
+const QString TsaiCameraCalibration::XML_TSAICALIB_CX = "Cx";
+const QString TsaiCameraCalibration::XML_TSAICALIB_CY = "Cy";
+const QString TsaiCameraCalibration::XML_TSAICALIB_CC = "CC";
+const QString TsaiCameraCalibration::XML_TSAICALIB_F = "f";
+const QString TsaiCameraCalibration::XML_TSAICALIB_KAPPA1 = "kappa1";
+const QString TsaiCameraCalibration::XML_TSAICALIB_P1 = "p1";
+const QString TsaiCameraCalibration::XML_TSAICALIB_P2 = "p2";
+	
+const QString TsaiCameraCalibration::XML_TSAICALIB_ROTATION = "Rotation";
+const QString TsaiCameraCalibration::XML_TSAICALIB_RX = "Rx";
+const QString TsaiCameraCalibration::XML_TSAICALIB_RY = "Ry";
+const QString TsaiCameraCalibration::XML_TSAICALIB_RZ = "Rz";
+	
+const QString TsaiCameraCalibration::XML_TSAICALIB_TRANSLATION = "Translation";
+const QString TsaiCameraCalibration::XML_TSAICALIB_TX = "Tx";
+const QString TsaiCameraCalibration::XML_TSAICALIB_TY = "Ty";
+const QString TsaiCameraCalibration::XML_TSAICALIB_TZ = "Tz";
+	
+const QString TsaiCameraCalibration::XML_TSAICALIB_MATRIX = "Matrix";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R1 = "r1";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R2 = "r2";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R3 = "r3";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R4 = "r4";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R5 = "r5";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R6 = "r6";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R7 = "r7";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R8 = "r8";
+const QString TsaiCameraCalibration::XML_TSAICALIB_R9 = "r9";
 
 TsaiCameraCalibration::TsaiCameraCalibration(){
-	type = "TSAI";
+	type = TsaiCameraCalibration::XML_TSAICALIB_TYPE;
+	optimized = false;
 }
 TsaiCameraCalibration::~TsaiCameraCalibration(){
 
 }
 
-void TsaiCameraCalibration::loadCalibration(QString calibFile){
-
-	printf("TsaiCameraCalibration::loadCalibration\n");
-
-	printf("load dona\n");
-}
 
 void TsaiCameraCalibration::getUVforPoint(double x, double y, double z, double *u, double *v){
 	world_coord_to_image_coord_cp_cc(&cam_para,&calib_const, x,y,z,u,v);
@@ -25,13 +55,21 @@ void TsaiCameraCalibration::getUVforPoint(double x, double y, double z, double *
 }
 
 void TsaiCameraCalibration::loadFromXml(QDomElement *xml_cam){
-
-	QDomElement xml_sensor = xml_cam->firstChildElement("sensor");
-	QString dpx = xml_sensor.attribute("dpx");
-	QString dpy = xml_sensor.attribute("dpy");
-	QString sx = xml_sensor.attribute("sx");
-	QString Cx = xml_sensor.attribute("Cx");
-	QString Cy = xml_sensor.attribute("Cy");
+	
+	QString soptimized = xml_cam->attribute(TsaiCameraCalibration::XML_TSAICALIB_OPTIMIZED);
+	if(soptimized.toInt()==1){
+		optimized = true;
+	}else{
+		optimized = false;
+	}
+	
+	
+	QDomElement xml_sensor = xml_cam->firstChildElement(TsaiCameraCalibration::XML_TSAICALIB_SENSOR);
+	QString dpx = xml_sensor.attribute(TsaiCameraCalibration::XML_TSAICALIB_DPX);
+	QString dpy = xml_sensor.attribute(TsaiCameraCalibration::XML_TSAICALIB_DPY);
+	QString sx = xml_sensor.attribute(TsaiCameraCalibration::XML_TSAICALIB_SX);
+	QString Cx = xml_sensor.attribute(TsaiCameraCalibration::XML_TSAICALIB_CX);
+	QString Cy = xml_sensor.attribute(TsaiCameraCalibration::XML_TSAICALIB_CY);
 
 	cam_para.dpx = dpx.toDouble();
 	cam_para.dpy = dpy.toDouble();
@@ -39,45 +77,45 @@ void TsaiCameraCalibration::loadFromXml(QDomElement *xml_cam){
 	cam_para.Cx = Cx.toDouble();
 	cam_para.Cy = Cy.toDouble();
 
-	QDomElement xml_cc = xml_cam->firstChildElement("cc");
-	QString f = xml_cc.attribute("f");
-	QString kappa1 = xml_cc.attribute("kappa1");
-	QString p1 = xml_cc.attribute("p1");
-	QString p2 = xml_cc.attribute("p2");
+	QDomElement xml_cc = xml_cam->firstChildElement(TsaiCameraCalibration::XML_TSAICALIB_CC);
+	QString f = xml_cc.attribute(TsaiCameraCalibration::XML_TSAICALIB_F);
+	QString kappa1 = xml_cc.attribute(TsaiCameraCalibration::XML_TSAICALIB_KAPPA1);
+	QString p1 = xml_cc.attribute(TsaiCameraCalibration::XML_TSAICALIB_P1);
+	QString p2 = xml_cc.attribute(TsaiCameraCalibration::XML_TSAICALIB_P2);
 
 	calib_const.f = f.toDouble();
 	calib_const.kappa1 = kappa1.toDouble();
 	//calib_const.p1 = p1.toDouble();
 	//calib_const.p2 = p2.toDouble();
 
-	QDomElement xml_rotation = xml_cam->firstChildElement("rotation");
-	QString rx = xml_rotation.attribute("x");
-	QString ry = xml_rotation.attribute("y");
-	QString rz = xml_rotation.attribute("z");
+	QDomElement xml_rotation = xml_cam->firstChildElement(TsaiCameraCalibration::XML_TSAICALIB_ROTATION);
+	QString rx = xml_rotation.attribute(TsaiCameraCalibration::XML_TSAICALIB_RX);
+	QString ry = xml_rotation.attribute(TsaiCameraCalibration::XML_TSAICALIB_RY);
+	QString rz = xml_rotation.attribute(TsaiCameraCalibration::XML_TSAICALIB_RZ);
 
 	calib_const.Rx = rx.toDouble();
 	calib_const.Ry = ry.toDouble();
 	calib_const.Rz = rz.toDouble();
 
-	QDomElement xml_translation = xml_cam->firstChildElement("translation");
-	QString tx = xml_translation.attribute("x");
-	QString ty = xml_translation.attribute("y");
-	QString tz = xml_translation.attribute("z");
+	QDomElement xml_translation = xml_cam->firstChildElement(TsaiCameraCalibration::XML_TSAICALIB_TRANSLATION);
+	QString tx = xml_translation.attribute(TsaiCameraCalibration::XML_TSAICALIB_TX);
+	QString ty = xml_translation.attribute(TsaiCameraCalibration::XML_TSAICALIB_TY);
+	QString tz = xml_translation.attribute(TsaiCameraCalibration::XML_TSAICALIB_TZ);
 
 	calib_const.Tx = tx.toDouble();
 	calib_const.Ty = ty.toDouble();
 	calib_const.Tz = tz.toDouble();
 
-	QDomElement xml_matrix = xml_cam->firstChildElement("matrix");
-	QString r1 = xml_matrix.attribute("r1");
-	QString r2 = xml_matrix.attribute("r2");
-	QString r3 = xml_matrix.attribute("r3");
-	QString r4 = xml_matrix.attribute("r4");
-	QString r5 = xml_matrix.attribute("r5");
-	QString r6 = xml_matrix.attribute("r6");
-	QString r7 = xml_matrix.attribute("r7");
-	QString r8 = xml_matrix.attribute("r8");
-	QString r9 = xml_matrix.attribute("r9");
+	QDomElement xml_matrix = xml_cam->firstChildElement(TsaiCameraCalibration::XML_TSAICALIB_MATRIX);
+	QString r1 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R1);
+	QString r2 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R2);
+	QString r3 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R3);
+	QString r4 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R4);
+	QString r5 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R5);
+	QString r6 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R6);
+	QString r7 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R7);
+	QString r8 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R8);
+	QString r9 = xml_matrix.attribute(TsaiCameraCalibration::XML_TSAICALIB_R9);
 
 	calib_const.r1 = r1.toDouble();
 	calib_const.r2 = r2.toDouble();
@@ -142,46 +180,50 @@ void TsaiCameraCalibration::loadFromXml(QDomElement *xml_cam){
 }
 
 void TsaiCameraCalibration::saveAsXml(QDomDocument* doc,QDomElement *root){
-	QDomElement xml_calib = doc->createElement("calibration");
-	xml_calib.setAttribute("type","TSAI");
-
-	QDomElement xml_sensor = doc->createElement("sensor");
-	xml_sensor.setAttribute("dpx",QString::number(cam_para.dpx));
-	xml_sensor.setAttribute("dpy",QString::number(cam_para.dpy));
-	xml_sensor.setAttribute("Cx",QString::number(cam_para.Cx));
-	xml_sensor.setAttribute("Cy",QString::number(cam_para.Cy));
-	xml_sensor.setAttribute("sx",QString::number(cam_para.sx));
+	QDomElement xml_calib = doc->createElement(CameraCalibration::XML_CALIBRATION);
+	xml_calib.setAttribute(CameraCalibration::XML_TYPE,TsaiCameraCalibration::XML_TSAICALIB_TYPE);
+	if(optimized){
+		xml_calib.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_OPTIMIZED,"1");
+	}else{
+		xml_calib.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_OPTIMIZED,"0");
+	}
+	QDomElement xml_sensor = doc->createElement(TsaiCameraCalibration::XML_TSAICALIB_SENSOR);
+	xml_sensor.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_DPX,QString::number(cam_para.dpx));
+	xml_sensor.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_DPY,QString::number(cam_para.dpy));
+	xml_sensor.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_CX,QString::number(cam_para.Cx));
+	xml_sensor.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_CY,QString::number(cam_para.Cy));
+	xml_sensor.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_SX,QString::number(cam_para.sx));
 	xml_calib.appendChild(xml_sensor);
 
-	QDomElement xml_cc = doc->createElement("cc");
-	xml_cc.setAttribute("f",QString::number(calib_const.f));
-	xml_cc.setAttribute("kappa1",QString::number(calib_const.kappa1));
-	xml_cc.setAttribute("p1",QString::number(calib_const.p1));
-	xml_cc.setAttribute("p2",QString::number(calib_const.p2));
+	QDomElement xml_cc = doc->createElement(TsaiCameraCalibration::XML_TSAICALIB_CC);
+	xml_cc.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_F,QString::number(calib_const.f));
+	xml_cc.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_KAPPA1,QString::number(calib_const.kappa1));
+	xml_cc.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_P1,QString::number(calib_const.p1));
+	xml_cc.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_P2,QString::number(calib_const.p2));
 	xml_calib.appendChild(xml_cc);
 
-	QDomElement xml_translation = doc->createElement("translation");
-	xml_translation.setAttribute("x",QString::number(calib_const.Tx));
-	xml_translation.setAttribute("y",QString::number(calib_const.Ty));
-	xml_translation.setAttribute("z",QString::number(calib_const.Tz));
+	QDomElement xml_translation = doc->createElement(TsaiCameraCalibration::XML_TSAICALIB_TRANSLATION);
+	xml_translation.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_TX,QString::number(calib_const.Tx));
+	xml_translation.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_TY,QString::number(calib_const.Ty));
+	xml_translation.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_TZ,QString::number(calib_const.Tz));
 	xml_calib.appendChild(xml_translation);
 
-	QDomElement xml_rotation = doc->createElement("rotation");
-	xml_rotation.setAttribute("x",QString::number(calib_const.Rx));
-	xml_rotation.setAttribute("y",QString::number(calib_const.Ry));
-	xml_rotation.setAttribute("z",QString::number(calib_const.Rz));
+	QDomElement xml_rotation = doc->createElement(TsaiCameraCalibration::XML_TSAICALIB_ROTATION);
+	xml_rotation.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_RX,QString::number(calib_const.Rx));
+	xml_rotation.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_RY,QString::number(calib_const.Ry));
+	xml_rotation.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_RZ,QString::number(calib_const.Rz));
 	xml_calib.appendChild(xml_rotation);
 
-	QDomElement xml_matrix = doc->createElement("matrix");
-	xml_matrix.setAttribute("r1",QString::number(calib_const.r1));
-	xml_matrix.setAttribute("r2",QString::number(calib_const.r2));
-	xml_matrix.setAttribute("r3",QString::number(calib_const.r3));
-	xml_matrix.setAttribute("r4",QString::number(calib_const.r4));
-	xml_matrix.setAttribute("r5",QString::number(calib_const.r5));
-	xml_matrix.setAttribute("r6",QString::number(calib_const.r6));
-	xml_matrix.setAttribute("r7",QString::number(calib_const.r7));
-	xml_matrix.setAttribute("r8",QString::number(calib_const.r8));
-	xml_matrix.setAttribute("r9",QString::number(calib_const.r9));
+	QDomElement xml_matrix = doc->createElement(TsaiCameraCalibration::XML_TSAICALIB_MATRIX);
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R1,QString::number(calib_const.r1));
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R2,QString::number(calib_const.r2));
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R3,QString::number(calib_const.r3));
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R4,QString::number(calib_const.r4));
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R5,QString::number(calib_const.r5));
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R6,QString::number(calib_const.r6));
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R7,QString::number(calib_const.r7));
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R8,QString::number(calib_const.r8));
+	xml_matrix.setAttribute(TsaiCameraCalibration::XML_TSAICALIB_R9,QString::number(calib_const.r9));
 
 	xml_calib.appendChild(xml_matrix);
 	root->appendChild(xml_calib);
@@ -194,6 +236,8 @@ void TsaiCameraCalibration::calibrate(QList<CameraCalibrationData*> &ccd ){
 
 void TsaiCameraCalibration::calibrate(QList<CameraCalibrationData*> &ccd, bool optimize){
 
+	optimized = optimize;
+	
 	initialize_eos400D_parms();
 
 	cd.point_count = 0;
@@ -319,7 +363,28 @@ void TsaiCameraCalibration::calibrate(QList<CameraCalibrationData*> &ccd, bool o
 }
 
 CameraCalibration* TsaiCameraCalibration::calibrateToTsai(MeshModel *mm, bool optimize){
-	return this;
+	QList<CameraCalibrationData*> ccd_list;
+
+	unsigned int i;
+	for (i=0;i<mm->cm.vert.size();i++){
+		CameraCalibrationData* ccd = new CameraCalibrationData();
+
+		double u,v;
+
+		getUVforPoint(mm->cm.vert[i].P()[0],mm->cm.vert[i].P()[1],mm->cm.vert[i].P()[0],&u,&v);
+		
+		ccd->wX = mm->cm.vert[i].P()[0];
+		ccd->wY = mm->cm.vert[i].P()[1];
+		ccd->wZ = mm->cm.vert[i].P()[2];
+		ccd->iX = u;
+		ccd->iY = v;
+		if (((int)u >=0 && (int)u<= resolution[0])&& ((int)v >=0 && (int)v<= resolution[1]))
+		ccd_list.push_back(ccd);
+	}
+
+	TsaiCameraCalibration *tsai = new TsaiCameraCalibration();
+	tsai->calibrate(ccd_list,optimize);
+	return tsai;
 }
 
 
