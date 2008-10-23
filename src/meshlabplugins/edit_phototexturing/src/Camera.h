@@ -32,12 +32,15 @@
 
 #include "CameraSensor.h"
 #include "CameraCalibration.h"
+
+#include "TextureFilter.h"
 /*
  * 
  */
 class Camera{
 public: 
 	
+	static const QString XML_CAMERADOCUMENT;
 	static const QString XML_CAMERA;
 	static const QString XML_NAME;
 	static const QString XML_IMAGE;
@@ -52,6 +55,8 @@ public:
 	CameraSensor sensor;
 	CameraCalibration *calibration;
 	int resolution[2];
+	
+	TextureFilterZB *zBuffer;
 	
 	Camera();
 	~Camera();

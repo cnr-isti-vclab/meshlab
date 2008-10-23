@@ -44,7 +44,7 @@ public:
 	int resolution[2];
 
 	//virtual CameraCalibration();
-	virtual ~CameraCalibration(){
+	CameraCalibration(){
 		cameraPosition[0]=0.0;
 		cameraPosition[1]=0.0;
 		cameraPosition[2]=0.0;
@@ -54,7 +54,7 @@ public:
 		cameraDirection[2]=-1.0;
 
 	};
-	virtual void loadCalibration(QString ){};
+	
 	virtual void loadFromXml(QDomElement *xml_cam){
 
 	};

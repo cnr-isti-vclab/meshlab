@@ -22,9 +22,10 @@
 ****************************************************************************/
 #include "Camera.h"
 #include <src/Tsai/TsaiCameraCalibration.h>
-//#include <src/Kai/KaiCameraCalibration.h>
+//#include <src/Poly/PolyCameraCalibration.h>
 
-const QString Camera::XML_CAMERA = "camera";
+const QString Camera::XML_CAMERADOCUMENT = "CameraDocument";
+const QString Camera::XML_CAMERA = "Camera";
 const QString Camera::XML_NAME = "name";
 const QString Camera::XML_IMAGE = "textureImage";
 const QString Camera::XML_RESOLUTION_X = "resolutionX";
@@ -32,7 +33,7 @@ const QString Camera::XML_RESOLUTION_Y = "resolutionY";
 
 
 Camera::Camera(){
-
+	zBuffer = 0;
 	textureImage = QString("");
 	calculatedTextures = false;
 }
@@ -81,9 +82,9 @@ void Camera::loadFromXml(QDomElement *xml_cam){
 			qDebug("TSAI\n");
 			calibration = new TsaiCameraCalibration();
 			calibration->loadFromXml(&xml_calib);
-		}/*else if (!ctype.compare("KAI")){
-			qDebug("KAI\n");
-			calibration = new KaiCameraCalibration();
+		}/*else if (!ctype.compare("POLY")){
+			qDebug("POLY\n");
+			calibration = new PolyCameraCalibration();
 			calibration->loadFromXml(&xml_calib);
 
 		}*/else{
