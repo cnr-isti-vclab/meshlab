@@ -48,6 +48,8 @@ SplatRendererPlugin::SplatRendererPlugin()
 	mDepthTextureID = 0;
 	mIsSupported = false;
 	mRenderBuffer = 0;
+	mWorkaroundATI = false;
+	mDummyTexId = 0;
 
 	mFlags = DEFERRED_SHADING_BIT | DEPTH_CORRECTION_BIT | FLOAT_BUFFER_BIT | OUTPUT_DEPTH_BIT;
 	mCachedFlags = ~mFlags;
@@ -84,8 +86,8 @@ void SplatRendererPlugin::configureShaders()
 	QString defines = "";
 	if (mFlags & DEFERRED_SHADING_BIT)
 		defines += "#define EXPE_DEFERRED_SHADING\n";
-	if (mFlags & DEPTH_CORRECTION_BIT)
-		defines += "#define EXPE_DEPTH_CORRECTION\n";
+// 	if (mFlags & DEPTH_CORRECTION_BIT)
+// 		defines += "#define EXPE_DEPTH_CORRECTION\n";
 	if (mFlags & OUTPUT_DEPTH_BIT)
 		defines += "#define EXPE_OUTPUT_DEPTH 1\n";
 	if (mFlags & BACKFACE_SHADING_BIT)
@@ -145,12 +147,12 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 	if (GLEW_ARB_texture_float)
 		mSupportedMask |= FLOAT_BUFFER_BIT;
 	else
-		std::cerr << "Splatting: warning floating point textures are not supported.\n";
+		std::cout << "Splatting: warning floating point textures are not supported.\n";
 
-	if (GLEW_ARB_draw_buffers)
-		mSupportedMask |= DEFERRED_SHADING_BIT;
-	else
-		std::cerr << "Splatting: warning deferred shading is not supported.\n";
+// 	if (GLEW_ARB_draw_buffers)
+// 		mSupportedMask |= DEFERRED_SHADING_BIT;
+// 	else
+		std::cout << "Splatting: warning deferred shading is not supported.\n";
 
 	if (GLEW_ARB_shadow)
 		mSupportedMask |= OUTPUT_DEPTH_BIT;
@@ -158,6 +160,23 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 		std::cerr << "Splatting: warning copy of the depth buffer is not supported.\n";
 
 	mFlags = mFlags & mSupportedMask;
+
+	// TODO TODO TODO TODO TODO TODO
+	const char* rs = (const char*)glGetString(GL_RENDERER);
+	QString rendererString("");
+	if(rs)
+		rendererString = QString(rs);
+	std::cout << "\nRendering string = " << rendererString.toAscii().data() << "\n";
+	std::cout << "\nRendering string = " << (const int *)glGetString(GL_RENDERER) << "\n";
+	mWorkaroundATI = true;//rendererString.startsWith("ATI") || rendererString.startsWith("AMD");
+
+	if (mWorkaroundATI && mDummyTexId==0)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glGenTextures(1,&mDummyTexId);
+		glBindTexture(GL_TEXTURE_2D, mDummyTexId);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 4, 4, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
+	}
 
 	// load shader source
 	mShaderSrcs[0] = loadSource("VisibilityVP","Raycasting.glsl");
@@ -257,7 +276,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 	}
 
 	if (mCurrentPass==2)
-	{
+	{//return;
 		// this is the last pass: normalization by the sum of weights + deferred shading
 		GL_TEST_ERR
 		mRenderBuffer->release();
@@ -373,7 +392,7 @@ void SplatRendererPlugin::Draw(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 			return;
 
 		enablePass(mCurrentPass);
-		drawSplats(m, rm);
+		/*if (mCurrentPass==1)*/ drawSplats(m, rm);
 	}
 	else if (mCurrentPass==2)
 	{
@@ -393,9 +412,8 @@ void SplatRendererPlugin::enablePass(int n)
 		// set GL states
 		if (n==0)
 		{
-			glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-			glEnable(GL_POINT_SPRITE_ARB);
-			glDisable(GL_POINT_SMOOTH);
+			glDisable(GL_LIGHTING);
+// 			glDisable(GL_POINT_SMOOTH);
 			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
 			glAlphaFunc(GL_LESS,1);
@@ -404,13 +422,17 @@ void SplatRendererPlugin::enablePass(int n)
 			glDisable(GL_BLEND);
 			glEnable(GL_ALPHA_TEST);
 			glEnable(GL_DEPTH_TEST);
+
+// 			glActiveTexture(GL_TEXTURE0);
+// 			glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+// 			glEnable(GL_POINT_SPRITE_ARB);
 		}
 		if (n==1)
 		{
-			glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-			glEnable(GL_POINT_SPRITE_ARB);
-			glDisable(GL_POINT_SMOOTH);
-			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+			glDisable(GL_LIGHTING);
+			glEnable(GL_POINT_SMOOTH);  GL_TEST_ERR;
+			glActiveTexture(GL_TEXTURE0); GL_TEST_ERR;
+			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE); GL_TEST_ERR;
 
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE,GL_ONE);
@@ -418,6 +440,23 @@ void SplatRendererPlugin::enablePass(int n)
 			glEnable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
 			glDisable(GL_ALPHA_TEST);
+
+// 			glActiveTexture(GL_TEXTURE0);
+
+		}
+		if ( (n==0) || (n==1) )
+		{
+			// enable point sprite rendering mode
+			glActiveTexture(GL_TEXTURE0);
+			if (mWorkaroundATI)
+			{
+				glBindTexture(GL_TEXTURE_2D, mDummyTexId);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 2, 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
+				glPointParameterf(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT); GL_TEST_ERR;
+				// hm... ^^^^
+			}
+			glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+			glEnable(GL_POINT_SPRITE_ARB);
 		}
 		if (n==2)
 		{

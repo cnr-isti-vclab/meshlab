@@ -37,6 +37,11 @@ varying vec3 fragNoverCdotN;
 varying vec3 fragCenter;
 varying float scaleSquaredDistance;
 
+#define EXPE_ATI_WORKAROUND
+#ifdef EXPE_ATI_WORKAROUND
+varying vec4 fragCenterAndRadius;
+#endif
+
 #ifdef EXPE_DEPTH_CORRECTION
 varying float depthOffset;
 #endif
@@ -98,6 +103,13 @@ void VisibilityVP(void)
     scaledFragCenter2d = 0.5*((oPos.xy/oPos.w)+1.0)*halfVp*oneOverEwaRadius;
     #endif
 
+		#ifdef EXPE_ATI_WORKAROUND
+		fragCenterAndRadius.xyz = oPos.xyz/oPos.w;
+		fragCenterAndRadius.xy = (fragCenterAndRadius.xy+1.0)*halfVp;
+		//fragCenterAndRadius.z = (fragCenterAndRadius.z*0.5)+0.5;
+		fragCenterAndRadius.w = pointSize.x;
+		#endif
+
     #ifndef EXPE_EARLY_BACK_FACE_CULLING
     oPos.w = oPos.w * (dotpn<0.0 ? 1.0 : 0.0);
     #else
@@ -122,8 +134,15 @@ uniform vec2 depthParameterCast;
 
 void VisibilityFP(void)
 {
+		#ifdef EXPE_ATI_WORKAROUND
+		vec3 fragCoord;
+		fragCoord.xy = fragCenterAndRadius.xy + (gl_TexCoord[0].st-0.5) * fragCenterAndRadius.w;
+		fragCoord.z = fragCenterAndRadius.z;
+		#else
+		vec3 fragCoord = gl_FragCoord.xyz;
+		#endif
     // compute q in object space
-    vec3 qOne = rayCastParameter1 * gl_FragCoord.xyz + rayCastParameter2; // MAD
+    vec3 qOne = rayCastParameter1 * fragCoord + rayCastParameter2; // MAD
     float oneOverDepth = dot(qOne,-fragNoverCdotN); // DP3
     float depth = (1.0/oneOverDepth); // RCP
     vec3 diff = fragCenter + qOne * depth; // MAD
@@ -212,6 +231,13 @@ void AttributeVP(void)
 
     oPos = gl_ModelViewProjectionMatrix * gl_Vertex;
 
+		#ifdef EXPE_ATI_WORKAROUND
+		fragCenterAndRadius.xyz = oPos.xyz/oPos.w;
+		fragCenterAndRadius.xy = (fragCenterAndRadius.xy+1.0)*halfVp;
+		//fragCenterAndRadius.z = (fragCenterAndRadius.z*0.5)+0.5;
+		fragCenterAndRadius.w = pointSize.x;
+		#endif
+
     #if (EXPE_EWA_HINT>0)
     scaledFragCenter2d = ((oPos.xy/oPos.w)+1.0)*halfVp*oneOverEwaRadius;
     #endif
@@ -244,9 +270,21 @@ uniform vec2 depthParameterCast;
 
 void AttributeFP(void)
 {
-// gl_FragColor = vec4(1,1,1,1);
+		#ifdef EXPE_ATI_WORKAROUND
+		vec3 fragCoord;
+		fragCoord.xy = fragCenterAndRadius.xy + (gl_TexCoord[0].st-0.5) * fragCenterAndRadius.w;
+		fragCoord.z = fragCenterAndRadius.z;
+		#else
+		vec3 fragCoord = gl_FragCoord.xyz;
+		#endif
+
+// 		gl_FragColor = vec4(0.7,0.4,0.1,1);
+// 		gl_FragColor.xy = fragCoord.xy * 0.002;
+//  gl_FragColor.xy = gl_TexCoord[0].xy;
+//  gl_FragColor.b = 0.5;
+//  gl_FragColor.w = 1;
 #if 1
-    vec3 qOne = rayCastParameter1 * gl_FragCoord.xyz + rayCastParameter2; // MAD
+    vec3 qOne = rayCastParameter1 * fragCoord + rayCastParameter2; // MAD
     float oneOverDepth = dot(qOne,fragNoverCdotN); // DP3
     float depth = (1.0/oneOverDepth); // RCP
     vec3 diff = fragCenter - qOne * depth; // MAD
@@ -281,7 +319,7 @@ void AttributeFP(void)
         #ifdef EXPE_DEPTH_CORRECTION
         gl_FragData[1].z = gl_FragDepth;
         #else
-        gl_FragData[1].z = gl_FragCoord.z;
+        gl_FragData[1].z = fragCoord.z;
         #endif
     #endif
 

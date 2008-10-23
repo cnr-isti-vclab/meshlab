@@ -27,7 +27,8 @@ void Finalization(void)
 	#ifdef EXPE_OUTPUT_DEPTH
 	gl_FragDepth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
 	#endif
-	discard(color.w<0.01);
+	if (color.w<0.01)
+		discard;
 	gl_FragColor = color/color.w;
 	gl_FragColor.a = 1.;
 }
