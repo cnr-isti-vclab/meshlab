@@ -138,7 +138,7 @@ void PhotoTexturer::storeOriginalTextureCoordinates(MeshModel *m){
 	//has no texture information
 
 	//checks if the MeshModel has texture coordinates
-	if(m->ioMask & MeshModel::IOM_WEDGTEXCOORD){
+	if(m->hasDataMask(MeshModel::MM_WEDGTEXCOORD) ){
 		//qDebug()<<"HasPerWedgeTexCoord";
 
 		//checks if the original texture coordinates has been saved before
@@ -220,7 +220,7 @@ void PhotoTexturer::calculateMeshTextureForAllCameras(MeshModel *m){
 	//enables texture information for the MeshModel
 	m->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 	//makes sure that the mesh model mask enabels texture coordinates (needed to save the uv coorinates later)
-	m->ioMask |= MeshModel::IOM_WEDGTEXCOORD;
+	//m->ioMask |= MeshModel::IOM_WEDGTEXCOORD;
 
 	
 	//checks if special transformation data is stored asMeshData
