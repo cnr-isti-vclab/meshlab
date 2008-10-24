@@ -115,6 +115,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   enum {
     DP_SHOW_FACE_NORMALS,
     DP_SHOW_VERT_NORMALS,
+	DP_SHOW_VERT_PRINC_CURV_DIR,
     DP_SHOW_BOX_CORNERS,
     DP_SHOW_BOX_CORNERS_ABS,
     DP_SHOW_AXIS,
@@ -142,6 +143,7 @@ public:
     typeList << 
     DP_SHOW_FACE_NORMALS <<
     DP_SHOW_VERT_NORMALS <<
+	DP_SHOW_VERT_PRINC_CURV_DIR <<
     DP_SHOW_BOX_CORNERS <<
     DP_SHOW_BOX_CORNERS_ABS <<
     DP_SHOW_AXIS <<

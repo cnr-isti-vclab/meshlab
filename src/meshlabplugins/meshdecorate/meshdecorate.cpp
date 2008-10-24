@@ -134,14 +134,15 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
  {
   switch(ID(action))
   {
-    case DP_SHOW_AXIS :      return tr("Draws XYZ axes in world coordinates");
-    case DP_SHOW_BOX_CORNERS:return tr("Draws object's bounding box corners");
-		case DP_SHOW_BOX_CORNERS_ABS  : return QString("Show Box Corners (Abs)");
-    case DP_SHOW_VERT_NORMALS:    return tr("Draws object vertex normals");
-    case DP_SHOW_FACE_NORMALS:    return tr("Draws object face normals");
-    case DP_SHOW_QUOTED_BOX: return tr("Draws quoted box");
-    case DP_SHOW_VERT_LABEL: return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
-    case DP_SHOW_FACE_LABEL: return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
+    case DP_SHOW_AXIS :					return tr("Draws XYZ axes in world coordinates");
+    case DP_SHOW_BOX_CORNERS:			return tr("Draws object's bounding box corners");
+	case DP_SHOW_BOX_CORNERS_ABS  :		return tr("Show Box Corners (Abs)");
+    case DP_SHOW_VERT_NORMALS:			return tr("Draws object vertex normals");
+    case DP_SHOW_VERT_PRINC_CURV_DIR :	return tr("Show Vertex Principal Curvature Directions");
+    case DP_SHOW_FACE_NORMALS:			return tr("Draws object face normals");
+    case DP_SHOW_QUOTED_BOX:			return tr("Draws quoted box");
+    case DP_SHOW_VERT_LABEL:			return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
+    case DP_SHOW_FACE_LABEL:			return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
 	 }
   assert(0);
   return QString();
@@ -151,14 +152,15 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
 {
   switch(filter)
   {
-    case DP_SHOW_VERT_NORMALS      : return QString("Show Vertex Normals");
-    case DP_SHOW_FACE_NORMALS      : return QString("Show Face Normals");
-    case DP_SHOW_BOX_CORNERS  : return QString("Show Box Corners");
-    case DP_SHOW_BOX_CORNERS_ABS  : return QString("Show Box Corners (Abs)");
-    case DP_SHOW_AXIS         : return QString("Show Axis");
+    case DP_SHOW_VERT_NORMALS      :	return QString("Show Vertex Normals");
+    case DP_SHOW_VERT_PRINC_CURV_DIR :	return QString("Show Vertex Principal Curvature Directions");
+    case DP_SHOW_FACE_NORMALS      :	return QString("Show Face Normals");
+    case DP_SHOW_BOX_CORNERS  :			return QString("Show Box Corners");
+    case DP_SHOW_BOX_CORNERS_ABS  :		return QString("Show Box Corners (Abs)");
+    case DP_SHOW_AXIS         :			return QString("Show Axis");
 		case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
-		case DP_SHOW_VERT_LABEL: return tr("Show Vertex Label");
-    case DP_SHOW_FACE_LABEL: return tr("Show Face Label");
+		case DP_SHOW_VERT_LABEL:		return tr("Show Vertex Label");
+    case DP_SHOW_FACE_LABEL:			return tr("Show Face Label");
 
     default: assert(0);
   }
@@ -169,7 +171,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
-	if(ID(a) == DP_SHOW_FACE_NORMALS || ID(a) == DP_SHOW_VERT_NORMALS )
+	if(ID(a) == DP_SHOW_FACE_NORMALS || ID(a) == DP_SHOW_VERT_NORMALS || ID(a) == DP_SHOW_VERT_PRINC_CURV_DIR )
 	{
     glPushAttrib(GL_ENABLE_BIT );
     float LineLen = m.cm.bbox.Diag()/20.0;
@@ -190,7 +192,21 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
 						glVertex((*vi).P()+(*vi).N()*LineLen);
 					}
 			}
-		else // ID(a) == DP_SHOW_FACE_NORMALS) 
+		else
+		if( ID(a) ==DP_SHOW_VERT_PRINC_CURV_DIR){
+			if(vcg::tri::HasPerVertexCurvatureDir(m.cm))
+				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+				{
+					glColor4f(1.0,0.0,0.0,.6f);
+					glVertex((*vi).P());
+					glVertex((*vi).P()+(*vi).PD1()*LineLen*0.25);
+					glColor4f(0.0,1.0,0.0,.6f);
+					glVertex((*vi).P());
+					glVertex((*vi).P()+(*vi).PD2()*LineLen*0.25);
+				}
+		}
+		else
+		if(ID(a) == DP_SHOW_FACE_NORMALS) 
 		{
 			glColor4f(.1f,.4f,4.f,.6f);
 			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
@@ -200,6 +216,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
 				glVertex(b+(*fi).N()*LineLen);
 			}
 		}
+
 			
 	 glEnd();
    glPopAttrib();
