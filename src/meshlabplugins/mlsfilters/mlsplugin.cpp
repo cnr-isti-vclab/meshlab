@@ -60,6 +60,14 @@ using namespace vcg;
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
+enum {
+	CT_MEAN  = 0,
+	CT_GAUSS = 1,
+	CT_K1    = 2,
+	CT_K2    = 3,
+	CT_APSS  = 4
+};
+
 MlsPlugin::MlsPlugin()
 {
 	typeList
@@ -265,12 +273,23 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 	{
 	}
 
-	if ((id & _COLORIZE_) && (id & _APSS_))
+	if ((id & _COLORIZE_))
 	{
-		parlst.addBool( "ApproxCurvature",
-										false,
-										"Approx curvature",
-										"If checked, use the radius of the fitted sphere as an approximation of the mean curvature.");
+		QStringList lst;
+		lst << "Mean" << "Gauss" << "K1" << "K2";
+		if (id & _APSS_)
+			lst << "ApproxMean";
+
+		parlst.addEnum("CurvatureType", CT_MEAN,
+			lst,
+			"Curvature type",
+			QString("The type of the curvature to plot.")
+			+ ((id & _APSS_) ? "<br>ApproxMean uses the radius of the fitted sphere as an approximation of the mean curvature." : ""));
+// 		if ((id & _APSS_))
+// 			parlst.addBool( "ApproxCurvature",
+// 										false,
+// 										"Approx mean curvature",
+// 										"If checked, use the radius of the fitted sphere as an approximation of the mean curvature.");
 	}
 
 	if (id & _MCUBE_)
@@ -461,7 +480,8 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			mesh = par.getMesh("ProxyMesh");
 
 			bool selectionOnly = par.getBool("SelectionOnly");
-			bool approx = apss && par.getBool("ApproxCurvature");
+			//bool approx = apss && par.getBool("ApproxCurvature");
+			int ct = par.getEnum("CurvatureType");
 
 			int size = mesh->cm.vert.size();
 			//std::vector<float> curvatures(size);
@@ -478,21 +498,21 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 					Point3f p = mls->project(mesh->cm.vert[i].P());
 					float c = 0;
 
-					if (approx)
-					{
+					if (ct==CT_APSS)
 						c = apss->approxMeanCurvature(p);
-					}
 					else
 					{
 						grad = mls->gradient(p);
 						hess = mls->hessian(p);
-
-// 						hess.show(stdout);
-// 						std::cout << "\n";
-
-						c = implicits::WeingartenMap<float>(grad,hess).GaussCurvature();
-// 						c = implicits::MeanCurvature(grad,hess);
-// 						c = implicits::GaussCurvature(grad,hess);
+						implicits::WeingartenMap<float> W(grad,hess);
+						switch(ct)
+						{
+							case CT_MEAN: c = W.MeanCurvature(); break;
+							case CT_GAUSS: c = W.GaussCurvature(); break;
+							case CT_K1: c = W.K1(); break;
+							case CT_K2: c = W.K2(); break;
+							default: assert(0 && "invalid curvature type");
+						}
 					}
 					mesh->cm.vert[i].Q() = c;
 					minc = std::min(c,minc);

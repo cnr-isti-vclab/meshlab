@@ -99,6 +99,6 @@ class RIMLS : public MlsSurface<_MeshType>
 
 }
 
-#include "rimls.tpp"
+//#include "rimls.tpp"
 
 #endif

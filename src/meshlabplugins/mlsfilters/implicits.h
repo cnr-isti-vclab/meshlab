@@ -94,6 +94,7 @@ public:
 		m_kgIsDirty = true;
 		m_kmIsDirty = true;
 		m_kpAreDirty = true;
+		m_kdirAreDirty = true;
 	}
 
 	/** \returns the Weingarten map matrix */
@@ -119,7 +120,7 @@ public:
 		{
 			// the third eigenvalue of W is 0, then tr(W) = k1 + k2 + 0 = 2 k mean !
 			m_km = m_w.Trace();
-			m_kmIsDirty = true;
+			m_kmIsDirty = false;
 		}
 		return m_km;
 	}
@@ -130,17 +131,44 @@ public:
 	/** \returns the second principal curvature */
 	Scalar K2() const { updateKp(); return m_k2; }
 
+	/** \returns the direction of the first principal curvature */
+	const VectorType& K1Dir() const { extractEigenvectors(); return m_k1dir; }
+
+	/** \returns the direction of the second principal curvature */
+	const VectorType& K2Dir() const { extractEigenvectors(); return m_k2dir; }
+
 protected:
 
-	// compute principal curvatures if needed
+	// direct computation of principal curvatures if needed
 	inline void updateKp() const
 	{
 		if (m_kpAreDirty)
 		{
-			Scalar delta = sqrt(MeanCurvature()*m_km - Scalar(4)*GaussCurvature());
-			m_kpAreDirty = false;
+			Scalar delta = sqrt(MeanCurvature()*m_km - 4.0*GaussCurvature());
 			m_k1 = 0.5*(m_km + delta);
 			m_k2 = 0.5*(m_km - delta);
+			if (fabs(m_k1)<fabs(m_k2))
+				std::swap(m_k1,m_k2);
+			m_kpAreDirty = false;
+		}
+	}
+
+	inline void extractEigenvectors() const
+	{
+		if (m_kdirAreDirty)
+		{
+			MatrixType copy = m_w;
+			int mrot = 0;
+			VectorType evals;
+			MatrixType evecs;
+			Jacobi(copy, evals, evecs, mrot);
+			VectorType evalsAbs(fabs(evals[0]),fabs(evals[0]),fabs(evals[0]));
+			SortEigenvaluesAndEigenvectors(evals,evecs,true);
+			m_k1 = evals[0];
+			m_k2 = evals[1];
+			m_k1dir = evecs[0];
+			m_k2dir = evecs[1];
+			m_kdirAreDirty = false;
 		}
 	}
 
@@ -148,8 +176,9 @@ protected:
 	VectorType m_normal;
 	MatrixType m_nnT;
 	MatrixType m_w;
+	mutable VectorType m_k1dir, m_k2dir;
 	mutable Scalar m_kg, m_km, m_k1, m_k2;
-	mutable bool m_kgIsDirty, m_kmIsDirty, m_kpAreDirty;
+	mutable bool m_kgIsDirty, m_kmIsDirty, m_kpAreDirty, m_kdirAreDirty;
 };
 
 } // namespace implicits

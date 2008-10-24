@@ -472,7 +472,7 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
 			LScalar deno2 = deno*deno;
 			d2u4 = mSphericalParameter * 0.5 * (deno2*(d2Nume*deno + mCachedGradDeno[j] * dNume
 																									- d2Deno*nume - dDeno * mCachedGradNume[j])
-																					- 2.*deno*dDeno*(deno * dNume - dDeno * nume))/(deno2*deno2);
+																					- 2.*deno*mCachedGradDeno[j]*(deno * dNume - dDeno * nume))/(deno2*deno2);
 
 			d2u13 = ( -dVecU13 * mCachedGradSumW[j]
 								+ (d2SumN - (dSumP*mCachedGradUQuad[j] + d2SumP*uQuad + sumP*d2u4 + mCachedGradSumP[j]*dVecU4)*2.0 )
