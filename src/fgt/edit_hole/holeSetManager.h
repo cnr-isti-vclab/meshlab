@@ -353,7 +353,7 @@ private:
 	};
 
 
-	void HoleSetManager::countSelected()
+	void countSelected()
 	{
 		nSelected = 0;
 		HoleIterator hit = holes.begin();
