@@ -516,7 +516,7 @@ void MainWindow::createMenus()
 	filterMenuColorize = filterMenu->addMenu(tr("Colorize"));
 	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing"));
 	filterMenuQuality = filterMenu->addMenu(tr("Quality"));
-	filterMenuNormal = filterMenu->addMenu(tr("Normal and Orientation"));
+	filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
 	filterMenuLayer = filterMenu->addMenu(tr("Layer"));
 	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
   filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
