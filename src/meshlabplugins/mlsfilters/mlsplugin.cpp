@@ -48,6 +48,7 @@
 #include "rimls.h"
 #include "apss.h"
 #include "mlsutils.h"
+#include "implicits.h"
 #include "../meshfilter/refine_loop.h"
 
 #include "smallcomponentselection.h"
@@ -100,7 +101,7 @@ const MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
 	{
 		return MeshFilterInterface::Selection;
 	}
-	
+
 	return MeshFilterInterface::PointSet;
 }
 
@@ -458,10 +459,10 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		else if (id & _COLORIZE_)
 		{
 			mesh = par.getMesh("ProxyMesh");
-			
+
 			bool selectionOnly = par.getBool("SelectionOnly");
 			bool approx = apss && par.getBool("ApproxCurvature");
-			
+
 			int size = mesh->cm.vert.size();
 			//std::vector<float> curvatures(size);
 			float minc=1e9, maxc=-1e9, minabsc=1e9;
@@ -475,18 +476,23 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 				if ( (!selectionOnly) || (pPoints->cm.vert[i].IsS()) )
 				{
 					Point3f p = mls->project(mesh->cm.vert[i].P());
-// 					grad = mls->gradient(mesh->cm.vert[i].P());
-// 					hess = mls->hessian(mesh->cm.vert[i].P());
-// 					curvatures[i] = mls->meanCurvature(grad,hess);
-					//float c = mesh->cm.vert[i].Q() = mls->meanCurvature(grad,hess);
 					float c = 0;
+
 					if (approx)
+					{
 						c = apss->approxMeanCurvature(p);
+					}
 					else
 					{
 						grad = mls->gradient(p);
 						hess = mls->hessian(p);
-						c = mls->meanCurvature(grad,hess);
+
+// 						hess.show(stdout);
+// 						std::cout << "\n";
+
+						c = implicits::WeingartenMap<float>(grad,hess).GaussCurvature();
+// 						c = implicits::MeanCurvature(grad,hess);
+// 						c = implicits::GaussCurvature(grad,hess);
 					}
 					mesh->cm.vert[i].Q() = c;
 					minc = std::min(c,minc);
