@@ -1,11 +1,11 @@
 include (../../shared.pri)
 
-HEADERS       = splatrenderer.h  ../../meshlab/meshmodel.h
-SOURCES       = splatrenderer.cpp $$GLEWCODE ../../meshlab/meshmodel.cpp
+HEADERS       = splatrenderer.h
+SOURCES       = splatrenderer.cpp $$GLEWCODE
 
 TARGET        = splatrenderer
 
 QT            += opengl
 RESOURCES     = splatrenderer.qrc
 
-CONFIG += debug
+# CONFIG += debug

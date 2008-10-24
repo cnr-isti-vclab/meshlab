@@ -47,13 +47,13 @@
 #include <QString>
 #include <QObject>
 
-class CEdge;   
+class CEdge;
 class CFaceO;
 class CVertexO;
 
 //Vert Mem Occupancy  --- 40b ---
 
-class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO, 
+class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO,
   vcg::vertex::InfoOcf,           /*  4b */
   vcg::vertex::Coord3f,           /* 12b */
   vcg::vertex::BitFlags,          /*  4b */
@@ -84,7 +84,7 @@ public:
 
 //Face Mem Occupancy  --- 32b ---
 
-class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,  
+class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
       vcg::face::InfoOcf,              /* 4b */
       vcg::face::VertexRef,            /*12b */
       vcg::face::BitFlags,             /* 4b */
@@ -101,7 +101,7 @@ class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, v
 public :
 	int sfn; //The number of selected faces.
   vcg::Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
-  const vcg::Box3f &trBB() { 
+  const vcg::Box3f &trBB() {
 	static vcg::Box3f bb;
 	bb.SetNull();
 	bb.Add(Tr,bbox);
@@ -112,20 +112,20 @@ public :
 /*
 MeshModel Class
 The base class for representing a single mesh.
-It contains a single vcg mesh object with some additional information for keeping track of its origin and of what info it has. 
+It contains a single vcg mesh object with some additional information for keeping track of its origin and of what info it has.
 */
 
 class MeshModel : public vcg::tri::io::Mask
 {
 public:
-/* 
+/*
  This enum specify the various simplex components
  It is used in various parts of the framework:
  - to know what elements are currently active and therefore can be saved on a file
- - to know what elements are required by a filter and therefore should be made ready before starting the filter (e.g. if a 
+ - to know what elements are required by a filter and therefore should be made ready before starting the filter (e.g. if a
  - to know what elements are changed by a filter and therefore should be saved/restored in case of dynamic filters with a preview
 	*/
- 	enum MeshElement {  
+ 	enum MeshElement {
 		MM_NONE							= 0x000000,
 		MM_VERTCOORD				= 0x000001,
 		MM_VERTNORMAL				= 0x000002,
@@ -137,7 +137,7 @@ public:
 		MM_VERTCURV					= 0x000080,
 		MM_VERTCURVDIR			= 0x000100,
 		MM_VERTRADIUS				= 0x000200,
-		
+
 		MM_FACEVERT					= 0x001000,
 		MM_FACENORMAL				= 0x002000,
 		MM_FACEFLAG					= 0x004000,
@@ -151,15 +151,15 @@ public:
 // 	SubParts of bits
 		MM_VERTFLAGSELECT	= 0x01000000,
 		MM_FACEFLAGSELECT	= 0x02000000,
-// This part should be deprecated. 		
+// This part should be deprecated.
 		MM_VERTFLAGBORDER	= 0x04000000,
 		MM_FACEFLAGBORDER	= 0x08000000,
-		
+
 // Per Mesh Stuff....
 		MM_CAMERA					= 0x10000000,
-		
+
 		MM_ALL						= 0xffffff
-		
+
 	} ;
 
 
@@ -170,52 +170,66 @@ public:
 	std::string fileName;
 
 	/*
-  
-	Bitmask denoting what fields are currently used in the mesh 
+
+	Bitmask denoting what fields are currently used in the mesh
   it is composed by MeshElement enums.
 	it should be changed by only mean the following functions:
-	 
+
 	updateDataMask(neededStuff)
 	clearDataMask(no_needed_stuff)
 	hasDataMask(stuff)
-	
-	Note that if an element is active means that is also allocated 
+
+	Note that if an element is active means that is also allocated
 	Some unactive elements (vertex color) are usually already allocated
 	other elements (FFAdj or curvature data) not necessarily.
-	 
+
 	*/
-	
+
 //private:
   int currentDataMask;
 public:
   // Bitmask denoting what fields are loaded/saved
   // it is composed by OR-ing IOM_XXXX enums (defined in tri::io::Mask)
 //  int ioMask;
-	
+
 	bool visible; // used in rendering; Needed for toggling on and off the meshes
-		
+
   //abstract pointer to fileformat's dependent additional info
   AdditionalInfo* addinfo;
 
   MeshModel(const char *meshName=0) {
-    glw.m=&cm; 
-    
+    glw.m=&cm;
+
 		// These data are always active on the mesh
 		currentDataMask = MM_NONE;
 		currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
 		currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
-		
+
     //ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS | IOM_VERTNORMAL;
-		
+
     visible=true;
 		cm.Tr.SetIdentity();
 		cm.sfn=0;
 		if(meshName) fileName=meshName;
   }
-  bool Render(vcg::GLW::DrawMode dm, vcg::GLW::ColorMode cm, vcg::GLW::TextureMode tm);
+
+  bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm)
+	{
+		// Needed to be defined here for splatrender as long there is no "MeshlabCore" library.
+		using namespace vcg;
+		glPushMatrix();
+		glMultMatrix(cm.Tr);
+		if( (_cm == GLW::CMPerFace)  && (!tri::HasPerFaceColor(cm)) ) _cm=GLW::CMNone;
+		if( (_tm == GLW::TMPerWedge )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
+		if( (_tm == GLW::TMPerWedgeMulti )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
+		glw.Draw(_dm,_cm,_tm);
+		glPopMatrix();
+		return true;
+	}
+
   bool RenderSelectedFaces();
 
-	
+
   // This function is roughly equivalent to the updateDataMask,
   // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
   void Enable(int openingFileMask)
@@ -232,7 +246,7 @@ public:
 	{
 		return ((currentDataMask & maskToBeTested)!= 0);
 	}
-	
+
   void updateDataMask(int neededDataMask)
   {
 		if( ( (neededDataMask & MM_FACEFACETOPO)!=0) && !hasDataMask(MM_FACEFACETOPO) )
@@ -255,11 +269,11 @@ public:
 		if( ( (neededDataMask & MM_VERTCURVDIR)!=0)		&& !hasDataMask(MM_VERTCURVDIR))		cm.vert.EnableCurvatureDir();
 		if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
 
-		
-		if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) || 
+
+		if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
 				 ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
 		{
-			if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO)) 
+			if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO))
 					 vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
 			else vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
 			vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
@@ -273,7 +287,7 @@ public:
 		if( ( (unneededDataMask & MM_VERTFACETOPO)!=0)	&& hasDataMask(MM_VERTFACETOPO)) {cm.face.DisableVFAdjacency();
 																																											cm.vert.DisableVFAdjacency(); }
 		if( ( (unneededDataMask & MM_FACEFACETOPO)!=0)	&& hasDataMask(MM_FACEFACETOPO))	cm.face.DisableFFAdjacency();
-		
+
 		if( ( (unneededDataMask & MM_WEDGTEXCOORD)!=0)	&& hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.DisableWedgeTex();
 		if( ( (unneededDataMask & MM_FACECOLOR)!=0)			&& hasDataMask(MM_FACECOLOR))			cm.face.DisableColor();
 		if( ( (unneededDataMask & MM_FACEQUALITY)!=0)		&& hasDataMask(MM_FACEQUALITY))		cm.face.DisableQuality();
@@ -282,7 +296,7 @@ public:
 		if( ( (unneededDataMask & MM_VERTCURV)!=0)			&& hasDataMask(MM_VERTCURV))			cm.vert.DisableCurvature();
 		if( ( (unneededDataMask & MM_VERTCURVDIR)!=0)		&& hasDataMask(MM_VERTCURVDIR))		cm.vert.DisableCurvatureDir();
 		if( ( (unneededDataMask & MM_VERTRADIUS)!=0)		&& hasDataMask(MM_VERTRADIUS))		cm.vert.DisableRadius();
-		
+
     currentDataMask = currentDataMask & (~unneededDataMask);
   }
 };
@@ -302,8 +316,8 @@ public:
     bool castShadow;
     bool selectedFaces;
     vcg::Point3f lightDir;
-		
-		
+
+
 		RenderMode()
 		{
       drawMode	= vcg::GLW::DMFlat;
@@ -324,7 +338,7 @@ class MeshDocument : public QObject
 	Q_OBJECT
 
 public:
-	
+
 	MeshDocument(): QObject()
 	{
 		currentMesh = NULL;
@@ -340,34 +354,34 @@ public:
 
 	//returns the mesh ata given position in the list
 	MeshModel *getMesh(int i)
-	{ 
+	{
 		return meshList.at(i);
 	}
-	
+
 	MeshModel *getMesh(const char *name);
-	
+
 	//set the current mesh to be the one at index i
 	void setCurrentMesh(unsigned int i);
-	
+
 	MeshModel *mm() {
 		return currentMesh;
 	}
-	
+
 	/// The very important member:
-	/// The list of MeshModels. 
-	QList<MeshModel *> meshList;	
-	
+	/// The list of MeshModels.
+	QList<MeshModel *> meshList;
+
 	int size() const {return meshList.size();}
 	bool busy;    // used in processing. To disable access to the mesh by the rendering thread
 
 	//add a new mesh with the given name
 	MeshModel *addNewMesh(const char *meshName,MeshModel *newMesh=0);
-	
+
 	//remove the mesh from the list and delete it from memory
 	bool delMesh(MeshModel *mmToDel);
-			
+
   int vn() /// Sum of all the vertices of all the meshes
-	{ 
+	{
 			int tot=0;
 			foreach(MeshModel *mmp, meshList)
 					tot+= mmp->cm.vn;
@@ -378,16 +392,16 @@ public:
 			foreach(MeshModel *mmp, meshList)
 					tot+= mmp->cm.fn;
 			return tot;
-	}		
+	}
 
  vcg::Box3f bbox()
  {
 		vcg::Box3f FullBBox;
-		foreach(MeshModel * mp, meshList) 
+		foreach(MeshModel * mp, meshList)
 			FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
 		return FullBBox;
  }
- 		
+
 	private:
 		MeshModel *currentMesh;
 
@@ -397,23 +411,23 @@ public:
 
 };
 
-/* 
+/*
 	A class designed to save partial aspects of the state of a mesh, such as vertex colors, current selections, vertex positions
-	and then be able to restore them later. 
-	This is a fundamental part for the dynamic filters framework. 
- 
-	Note: not all the MeshElements are supported!! 
+	and then be able to restore them later.
+	This is a fundamental part for the dynamic filters framework.
+
+	Note: not all the MeshElements are supported!!
 */
 class MeshModelState
 {
 	public:
-	int changeMask; // a bit mask indicating what have been changed. Composed of 
+	int changeMask; // a bit mask indicating what have been changed. Composed of
 	MeshModel *m; // the mesh which the changes refers to.
 	std::vector<vcg::Color4b> vertColor;
 	std::vector<vcg::Point3f> vertCoord;
 	std::vector<vcg::Point3f> vertNormal;
-	std::vector<bool> faceSelection;	
-	
+	std::vector<bool> faceSelection;
+
 	void create(int _mask, MeshModel* _m)
 	{
 		m=_m;
@@ -423,28 +437,28 @@ class MeshModelState
 			vertColor.resize(m->cm.vert.size());
 			std::vector<vcg::Color4b>::iterator ci;
 			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+			for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
 				if(!(*vi).IsD()) (*ci)=(*vi).C();
 		}
-		
+
 		if(changeMask & MeshModel::MM_VERTCOORD)
 		{
 			vertCoord.resize(m->cm.vert.size());
 			std::vector<vcg::Point3f>::iterator ci;
 			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+			for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
 				 if(!(*vi).IsD()) (*ci)=(*vi).P();
-		} 
-		
+		}
+
 		if(changeMask & MeshModel::MM_VERTNORMAL)
 		{
 			vertNormal.resize(m->cm.vert.size());
 			std::vector<vcg::Point3f>::iterator ci;
 			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+			for(vi = m->cm.vert.begin(), ci = vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
 				 if(!(*vi).IsD()) (*ci)=(*vi).N();
 		}
-		
+
 		if(changeMask & MeshModel::MM_FACEFLAGSELECT)
 		{
 			faceSelection.resize(m->cm.face.size());
@@ -459,44 +473,44 @@ class MeshModelState
 			}
 		}
 	}
-	
+
 	bool apply(MeshModel *_m)
 	{
-	  if(_m != m) return false;	
+	  if(_m != m) return false;
 		if(changeMask & MeshModel::MM_VERTCOLOR)
 		{
 			if(vertColor.size() != m->cm.vert.size()) return false;
 			std::vector<vcg::Color4b>::iterator ci;
 			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+			for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
 				if(!(*vi).IsD()) (*vi).C()=(*ci);
 		}
-		
+
 		if(changeMask & MeshModel::MM_VERTCOORD)
 		{
 			if(vertCoord.size() != m->cm.vert.size()) return false;
 			std::vector<vcg::Point3f>::iterator ci;
 			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+			for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
 				if(!(*vi).IsD()) (*vi).P()=(*ci);
-		} 
-		
+		}
+
 		if(changeMask & MeshModel::MM_VERTNORMAL)
 		{
 			if(vertNormal.size() != m->cm.vert.size()) return false;
 			std::vector<vcg::Point3f>::iterator ci;
 			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci=vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+			for(vi = m->cm.vert.begin(), ci=vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
 				if(!(*vi).IsD()) (*vi).N()=(*ci);
-			
+
 			//now reset the face normals
 			for(int i = 0; i < m->cm.face.size(); ++i)
 			{
 				// computing face normal from position of face vertices
 				vcg::face::ComputeNormalizedNormal(m->cm.face[i]);
 			}
-		} 
-		
+		}
+
 		if(changeMask & MeshModel::MM_FACEFLAGSELECT)
 		{
 			if(faceSelection.size() != m->cm.face.size()) return false;
@@ -512,7 +526,7 @@ class MeshModelState
 		}
 		return true;
   }
-		
+
 	bool isValid(MeshModel *m);
 };
 

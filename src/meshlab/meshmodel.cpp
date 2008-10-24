@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -31,7 +31,7 @@
 using namespace vcg;
 
 MeshModel *MeshDocument::getMesh(const char *name)
-{ 
+{
 	foreach(MeshModel *mmp, meshList)
 			{
 				QString shortName( QFileInfo(mmp->fileName.c_str()).fileName() );
@@ -51,43 +51,43 @@ void MeshDocument::setCurrentMesh(unsigned int i)
 MeshModel *MeshDocument::addNewMesh(const char *meshName,MeshModel *newMesh)
 {
 	QString newName=meshName;
-	
+
 	for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
 	{
 		QString shortName( (*mmi)->fileName.c_str() );
-		if(shortName == newName) 
+		if(shortName == newName)
 			newName = newName+"_copy";
 	}
-	
-	if(newMesh==0) 
+
+	if(newMesh==0)
 		newMesh=new MeshModel(qPrintable(newName));
-	else 
+	else
 		newMesh->fileName = qPrintable(newName);
-	
+
 	meshList.push_back(newMesh);
 	currentMesh=meshList.back();
 	emit currentMeshChanged(meshList.size()-1);
-	
+
 	return newMesh;
 }
 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
-	if(meshList.size()==1) return false; 
+	if(meshList.size()==1) return false;
 
 	QMutableListIterator<MeshModel *> i(meshList);
-	
+
 	while (i.hasNext())
 	{
 		MeshModel *md = i.next();
-		
-		if (md==mmToDel) 
+
+		if (md==mmToDel)
 		{
 			i.remove();
 			delete mmToDel;
 		}
 	}
-	
+
 	if(currentMesh == mmToDel)
 	{
 		setCurrentMesh(0);
@@ -95,18 +95,6 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 	}
 
 	return true;
-}
-
-bool MeshModel::Render(GLW::DrawMode _dm, GLW::ColorMode _cm, GLW::TextureMode _tm)
-{
-  glPushMatrix();
-	glMultMatrix(cm.Tr);
-	if( (_cm == GLW::CMPerFace)  && (!tri::HasPerFaceColor(cm)) ) _cm=GLW::CMNone;
-	if( (_tm == GLW::TMPerWedge )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
-	if( (_tm == GLW::TMPerWedgeMulti )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
-  glw.Draw(_dm,_cm,_tm);
-	glPopMatrix();
-  return true;
 }
 
 bool MeshModel::RenderSelectedFaces()
