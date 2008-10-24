@@ -4,6 +4,8 @@ GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
+DEPENDPATH  += $$VCGDIR  $$VCGDIR/vcg $$VCGDIR/wrap
+
 HEADERS        = interfaces.h \
 		 GLLogStream.h \
                  mainwindow.h \
