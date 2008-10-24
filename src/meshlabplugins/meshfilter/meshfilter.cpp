@@ -82,6 +82,7 @@ Interfaces are changing again...
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/space/normal_extrapolation.h>
 
 #include "refine_loop.h"
@@ -111,7 +112,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_INVERT_FACES<<
     FP_REMOVE_NON_MANIFOLD<<
     FP_NORMAL_EXTRAPOLATION<<
-    FP_CLOSE_HOLES<<
+	FP_COMPUTE_PRINC_CURV_DIR<<
+		FP_CLOSE_HOLES<<
 		FP_FREEZE_TRANSFORM<<
 		FP_TRANSFORM;
 
@@ -154,6 +156,7 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
 		case FP_NORMAL_EXTRAPOLATION:
 		case FP_INVERT_FACES:
 		case FP_REORIENT :
+		case FP_COMPUTE_PRINC_CURV_DIR:
 				 return MeshFilterInterface::Normal;
 
     default : return MeshFilterInterface::Generic;
@@ -181,6 +184,7 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 	case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
 	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
 	case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
+	case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions  ");
 	case FP_CLOSE_HOLES:	          return QString("Close Holes");
 
 
@@ -218,7 +222,8 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
     case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");
     case FP_FREEZE_TRANSFORM : 	        return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh");
     case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces");
-    case FP_CLOSE_HOLES :         return tr("Close holes smaller than a given threshold");
+	case FP_COMPUTE_PRINC_CURV_DIR:		return tr("Compute the principal directions of curvature with several algorithms");
+	case FP_CLOSE_HOLES :         return tr("Close holes smaller than a given threshold");
 		default : assert(0);
 	}
   return QString();
@@ -244,6 +249,10 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_FREEZE_TRANSFORM:
     case FP_NORMAL_EXTRAPOLATION:
     case FP_INVERT_FACES:         return 0;
+	case FP_COMPUTE_PRINC_CURV_DIR: return	MeshModel::MM_VERTCURVDIR	| 
+											MeshModel::MM_FACEMARK		| 
+											MeshModel::MM_VERTFACETOPO	|
+											MeshModel::MM_FACEFACETOPO;
     case FP_QUADRIC_SIMPLIFICATION:
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		return MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK ;
@@ -261,9 +270,16 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	float maxVal;
-
+	QStringList methods;
 	switch(ID(action))
 	 {
+		case FP_COMPUTE_PRINC_CURV_DIR:
+		methods.push_back("Taubin approximation");
+		methods.push_back("Principal Component Analysis");
+		methods.push_back("Normal Cycles");
+		parlst.addEnum("Method", 0, methods, tr("Method:"), tr("Choose a method"));
+		parlst.addBool("Autoclean",true,QString("Remove Unreferenced Vertices"));
+		break;
 		case FP_QUADRIC_SIMPLIFICATION:
 		  parlst.addInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces");
 		  parlst.addFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
@@ -316,6 +332,7 @@ bool ExtraMeshFilterPlugin::autoDialog(QAction *action)
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
+		case FP_COMPUTE_PRINC_CURV_DIR:
 		case FP_CLOSE_HOLES:
 		case FP_LOOP_SS :
 		case FP_BUTTERFLY_SS :
@@ -360,8 +377,8 @@ bool ExtraMeshFilterPlugin::getCustomParameters(QAction *action, QWidget * /*par
         params.addMatrix44("Transform",matrixDlg);
 				mw->executeFilter(action,params, false);
         break;
-      }
-   default :assert(0);
+	  }
+    default :assert(0);
   }
   return true;
 }
@@ -544,7 +561,37 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
     NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
 	}
 
-	if(ID(filter) == (FP_CLOSE_HOLES))
+  if (ID(filter) == (FP_COMPUTE_PRINC_CURV_DIR) ) {
+
+	  if(par.getBool("Autoclean")){
+			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+			Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
+	  }
+
+	  switch(par.getEnum("Method")){
+			 
+		  case 0: 
+			  if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
+				return false; // can't continue, mesh can't be processed
+				}
+			  vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
+		  case 1: vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,false); break;
+		  case 2:
+			  vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+			  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+			  if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
+				return false; // can't continue, mesh can't be processed
+				}
+			  vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycles(m.cm); break;
+		  default:assert(0);break;		
+
+	  }
+  }
+
+
+  if(ID(filter) == (FP_CLOSE_HOLES))
 	  {
       size_t OriginalSize= m.cm.face.size();
       int MaxHoleSize = par.getInt("MaxHoleSize");

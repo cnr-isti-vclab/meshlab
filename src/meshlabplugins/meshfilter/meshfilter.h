@@ -111,6 +111,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
           FP_QUADRIC_SIMPLIFICATION,
           FP_QUADRIC_TEXCOORD_SIMPLIFICATION,
           FP_NORMAL_EXTRAPOLATION,
+		  FP_COMPUTE_PRINC_CURV_DIR,
           FP_MIDPOINT,
           FP_REORIENT ,
           FP_INVERT_FACES,
