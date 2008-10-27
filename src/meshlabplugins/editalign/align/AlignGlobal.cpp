@@ -336,7 +336,7 @@ double AlignGlobal::Node::AlignWithActiveAdj(bool Rigid)
 				pf=(*li)->Adj(this)->M*AP[i]; // i punti fissi sono quelli sulla sup degli adiacenti messi nella loro pos corrente 
 				FixP.push_back(pf);
 				FixBox.Add(pf);
-				nf=(*li)->Adj(this)->M*(AP[i]+AN[i])-pf;
+				nf=(*li)->Adj(this)->M*Point3d(AP[i]+AN[i])-pf;
 				nf.Normalize();
 		    FixN.push_back(nf);
         

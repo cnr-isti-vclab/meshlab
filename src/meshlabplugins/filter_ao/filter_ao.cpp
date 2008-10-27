@@ -741,7 +741,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m)
 		
 		if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
 		{
-			 m.cm.vert[i].Q() += max(m.cm.vert[i].cN()*cameraDir, 0.0f);
+			 m.cm.vert[i].Q() += max(m.cm.vert[i].cN().dot(cameraDir), 0.0f);
 		}
 	}
 
@@ -774,7 +774,7 @@ void AmbientOcclusionPlugin::generateFaceOcclusionSW(MeshModel &m, vector<Point3
 		
 		if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
 		{
-			m.cm.face[i].Q() += max(m.cm.face[i].cN()*cameraDir, 0.0f);
+			m.cm.face[i].Q() += max(m.cm.face[i].cN().dot(cameraDir), 0.0f);
 		}
 	}
 

@@ -129,12 +129,12 @@ class MlsSurface
 		inline ConstDataWrapper<VectorType> positions() const
 		{
 			return ConstDataWrapper<VectorType>(&mPoints[0].cP(), mPoints.size(),
-																					size_t(&mPoints[1].cP()[0]) - size_t(&mPoints[0].cP()[0]));
+																					size_t(mPoints[1].cP().data()) - size_t(mPoints[0].cP().data()));
 		}
 		inline ConstDataWrapper<VectorType> normals() const
 		{
 			return ConstDataWrapper<VectorType>(&mPoints[0].cN(), mPoints.size(),
-																					size_t(&mPoints[1].cN()[0]) - size_t(&mPoints[0].cN()[0]));
+																					size_t(mPoints[1].cN().data()) - size_t(mPoints[0].cN().data()));
 		}
 		inline ConstDataWrapper<Scalar> radii() const
 		{

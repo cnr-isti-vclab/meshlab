@@ -222,7 +222,7 @@ bool AlignPair::InitMov(
 	A2Mesh::VertexIterator vi;
 	for(vi=mov->begin(); vi!=mov->end(); vi++) {
 		pp=in*(*vi).P();
-		nn=in*((*vi).P()+(*vi).N())-pp;
+		nn=in*Point3d((*vi).P()+(*vi).N())-pp;
 		nn.Normalize();
 		MovVert.push_back(pp);
 		MovNorm.push_back(nn);
@@ -333,7 +333,7 @@ bool AlignPair::Align(
 							++good[i];
 						}
 						else
-							if(movnorm[i]*f->N() < CosAngleThr) 
+							if(movnorm[i].dot(f->N()) < CosAngleThr)
 								ii.AngleDiscarded++;
 							else	if(	(ip[0]==0 && f->IsB(1)) || 
 												(ip[1]==0 && f->IsB(2)) || 

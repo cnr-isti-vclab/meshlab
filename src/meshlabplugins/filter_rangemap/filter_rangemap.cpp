@@ -143,7 +143,7 @@ bool RangeMapPlugin::applyFilter(QAction *filter, MeshDocument &m, FilterParamet
 					viewray = viewpoint - Barycenter(*fi);
 					viewray.Normalize();
 
-					if((viewray * (*fi).N().Normalize()) < limit)
+					if((viewray.dot((*fi).N().Normalize())) < limit)
 						fi->SetS();
 				}
 

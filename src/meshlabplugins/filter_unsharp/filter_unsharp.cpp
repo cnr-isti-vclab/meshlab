@@ -366,7 +366,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 				tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,smoothIter);
 				for(int i=0;i<m.cm.vn;++i)
 					{ 
-						Color4f colorDelta = colorOrig[i] - Color4f::Construct(m.cm.vert[i].C());		
+						Color4f colorDelta = colorOrig[i] - Color4f::Construct(m.cm.vert[i].C());
 						Color4f newCol = 	colorOrig[i]*alphaorig + colorDelta*alpha;	 // Unsharp formula 
 						Clamp(newCol); // Clamp everything in the 0..1 range
 						m.cm.vert[i].C().Import(newCol);

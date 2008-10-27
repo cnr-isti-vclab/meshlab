@@ -248,7 +248,7 @@ bool MlsSurface<_MeshType>::isInDomain(const VectorType& x) const
 			int id = mNeighborhood.index(i);
 			Scalar rs2 = mPoints[id].cR() * mDomainRadiusScale;
 			rs2 = rs2*rs2;
-			Scalar dn = vcg::Dot(mPoints[id].cN(), x-mPoints[id].cP());
+			Scalar dn = mPoints[id].cN().dot(x-mPoints[id].cP());
 			out = (mNeighborhood.squaredDistance(i) + s*dn*dn) > rs2;
 			++i;
 		}

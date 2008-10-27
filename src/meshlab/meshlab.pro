@@ -3,6 +3,10 @@ GLEWDIR = ../../../code/lib/glew
 GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
 
+# uncomment to try Eigen
+# DEFINES += VCG_USE_EIGEN
+# CONFIG += warn_off
+
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
 DEPENDPATH  += $$VCGDIR  $$VCGDIR/vcg $$VCGDIR/wrap
 
