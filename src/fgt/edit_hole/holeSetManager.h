@@ -52,14 +52,17 @@ class HoleSetManager
 	typedef FgtHole< MESH >                                   HoleType;
 	typedef typename std::vector< HoleType >    							HoleVector;
 	typedef typename HoleVector::iterator											HoleIterator;
+	typedef typename std::vector< FgtBridgeBase<MESH>* >			BridgeVector;
+	typedef typename BridgeVector::iterator										BridgeIterator;
 	typedef typename MESH::FaceType														FaceType;
 	typedef typename MESH::FacePointer												FacePointer;
 	typedef typename MESH::FaceContainer											FaceContainer;
 	typedef typename vcg::tri::Hole<MESH>											vcgHole;
 	typedef typename vcgHole::Info														HoleInfo;
 	typedef typename vcg::face::Pos<FaceType>									PosType;
+	typedef typename std::vector< PosType >										PosVector;
 	typedef typename vcg::SimpleTempData<FaceContainer, int>	SimpleData;
-	typedef typename HoleType::FillerMode								FillerMode;
+	typedef typename HoleType::FillerMode											FillerMode;
 
 public:
 
@@ -117,7 +120,7 @@ public:
 			return false;
 
 		std::vector<FacePointer *> local_facePointer;
-		HoleType::AddFaceReference(holes, local_facePointer);
+		AddFaceReference(local_facePointer);
 
 		HoleIterator it = holes.begin();
 		for( ; it != holes.end(); it++ )
@@ -157,33 +160,41 @@ public:
 	};
 
 	inline void ConfirmBridges()
-	{
-		FgtBridge<CMeshO>::AcceptBridges(this);
+	{		
+		BridgeIterator bit = bridges.begin();
+		for( ; bit != bridges.end(); bit++ )
+		{	
+			(*bit)->ResetFlag();
+			delete &*bit;
+		}
+		bridges.clear();
+
+		HoleVector::iterator hit = holes.begin();
+		for( ; hit!=holes.end(); hit++ )
+			hit->SetBridged(false);	
 	};
 
 	inline void DiscardBridges()
 	{
-		FgtBridge<CMeshO>::RemoveBridges(this);
+		removeBridges();
 		countSelected();
 	};
 
-	bool CloseNonManifoldHoles()
+	void CloseNonManifoldHoles()
 	{
-		return (FgtBridge<CMeshO>::CloseNonManifoldVertex(this) >0);
+		FgtNMBridge<CMeshO>::CloseNonManifoldVertex(this);
 	};
 
-	int AutoSelfBridging(double distCoeff, std::vector<FacePointer*> *facesRef)
+	void AutoSelfBridging(double distCoeff, std::vector<FacePointer*> *facesRef)
 	{
-		int n = FgtBridge<CMeshO>::AutoSelfBridging(this, distCoeff, facesRef);
+		FgtBridge<CMeshO>::AutoSelfBridging(this, distCoeff, facesRef);
 		countSelected();
-		return n;
 	};
 
-	int AutoMultiBridging(double distCoeff, std::vector<FacePointer*> *facesRef)
+	void AutoMultiBridging(std::vector<FacePointer*> *facesRef)
 	{
-		int n = FgtBridge<CMeshO>::AutoMultiBridging(this, distCoeff, facesRef);
+		FgtBridge<CMeshO>::AutoMultiBridging(this, facesRef);
 		countSelected();
-		return n;
 	};
 
 	/** Return index of hole adjacent to picked face into holes vector.
@@ -281,6 +292,25 @@ public:
 	};
 
 
+	/*  Starting from holes stored into a vector this function extract all reference to mesh faces 
+	 *  and adds them to vector facesReferences
+	 */
+	void AddFaceReference(std::vector<FacePointer*> &facesReferences)
+	{
+		typename HoleVector::iterator it = holes.begin();
+		for( ; it!=holes.end(); it++)
+		{
+		  facesReferences.push_back(&it->p.f);
+		  typename std::vector<FacePointer>::iterator fit;
+		  for(fit=it->patches.begin(); fit!=it->patches.end(); fit++)
+        facesReferences.push_back(&(*fit));
+		}
+
+		BridgeIterator bit = bridges.begin();
+		for( ; bit != bridges.end(); bit++ )
+			(*bit)->AddFaceReference(facesReferences);		
+  }
+
 
 private:
 
@@ -352,6 +382,95 @@ private:
 		return PosType(face, nearest, face->V(nearest) );
 	};
 
+	/* Remove all face marked as bridge. */
+	void removeBridges()
+	{
+		// contains all half-edge located over non-bridge face and over edge shared with bridge face.
+		// these half-edges will become border edge when bridge faces are removed.
+		PosVector adjBorderPos;
+
+		PosType pos;
+		BridgeIterator bit = bridges.begin();
+		for( ; bit != bridges.end(); bit++ )
+		{
+			adjBorderPos.push_back( (*bit)->GetAbutmentA() );
+			adjBorderPos.push_back( (*bit)->GetAbutmentB() );
+		}
+		
+		// remove holes adjacent to bridge
+		HoleIterator hit = holes.begin();
+		while(hit != holes.end() )
+		{
+			if( hit->IsBridged() )
+			{
+				if( hit->IsSelected() )
+				{
+					PosType p = hit->p;
+					// get adjacent border edge because start position in bridged holes
+					// is bridge face so it'll be removed
+					p.NextB();
+					p.f->SetS();
+				}
+				hit = holes.erase(hit);
+			}
+			else
+				hit++;
+		}
+
+		for( bit = bridges.begin(); bit != bridges.end(); bit++ )
+		{
+			(*bit)->DeleteFromMesh();
+			delete *bit;
+		}
+		bridges.clear();
+		
+		// update hole list inserting holes touched by bridge
+		// use adjBorderPos element as start pos to walk over the border, if walking doesn't
+		// visit some adjBorderPos element means this belongo to other hole.
+		PosType initPos, curPos;
+		typename PosVector::iterator it;
+		for( it=adjBorderPos.begin(); it!=adjBorderPos.end(); it++)
+		{
+			// bridge abutment can be placed over face of another bridge... 
+			// this abutments must be ignored
+			if(it->f->IsD())
+				continue;
+
+			assert( it->IsBorder() );
+			bool sel=it->f->IsS();
+			it->f->ClearS();
+
+			if(it->f->IsV() || it->f->IsD())
+				continue;
+			
+			curPos = initPos = *it;
+			do{
+				curPos.f->SetV();
+				sel = sel || curPos.f->IsS();
+				curPos.f->ClearS();
+				curPos.NextB();
+				assert(curPos.IsBorder());
+			}while(curPos != initPos);
+			
+			FgtHole<MESH> newHole(initPos, QString("Hole_%1").arg(HoleType::GetHoleId(),3,10,QChar('0')), this);
+			newHole.SetSelect(sel);
+			holes.push_back( newHole );
+		}
+
+		// resetto flag visited sulle facce degli hole interessati
+		for(it=adjBorderPos.begin(); it!=adjBorderPos.end(); it++)
+		{
+			if(!it->f->IsV())
+				continue;
+			curPos = initPos = *it;
+			do{
+				curPos.f->ClearV();
+				curPos.NextB();
+				assert(curPos.IsBorder());
+			}while(curPos != initPos);
+		}				
+	};
+
 
 	void countSelected()
 	{
@@ -368,6 +487,7 @@ public:
 	int nAccepted;
 	MESH* mesh;
 	HoleVector holes;
+	BridgeVector bridges;
 	SimpleData* faceAttr;
 
 	AutoBridgingCallback* autoBridgeCB;

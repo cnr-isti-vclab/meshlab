@@ -26,6 +26,7 @@
 
 #include <utility>
 #include <vector>
+#include <qstring.h>
 #include <float.h>
 #include <GL/glew.h>
 #include "vcg/simplex/face/pos.h"
@@ -488,21 +489,6 @@ private:
 	/********* Static functions **********/
 public:
 		
-	/*  Starting from holes stored into a vector this function extract all reference to mesh faces 
-	 *  and adds them to vector facesReferences
-	 */
-	static void AddFaceReference(HoleVector& holes, std::vector<FacePointer*> &facesReferences)
-	{
-		typename HoleVector::iterator it = holes.begin();
-		for( ; it!=holes.end(); it++)
-		{
-		  facesReferences.push_back(&it->p.f);
-		  typename FacePointerVector::iterator fit;
-		  for(fit=it->patches.begin(); fit!=it->patches.end(); fit++)
-        facesReferences.push_back(&(*fit));
-		}
-  }
-
 	static bool TestFaceMeshCompenetration(MESH &mesh, vcg::GridStaticPtr<FaceType, ScalarType > &gM,
 			const FacePointer f)
 	{
@@ -529,13 +515,14 @@ public:
 
 public:
 	HoleSetManager<MESH>* parentManager;
+	std::vector<FacePointer> patches;
 
 private:
 	int _state;
 	ScalarType perimeter;
 
 	std::vector<VertexType*> vertexes;
-	std::vector<FacePointer> patches;
+	
 };
 
 #endif

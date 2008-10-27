@@ -174,14 +174,14 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 		std::vector<CMeshO::FacePointer *> local_facePointer;
 		local_facePointer.push_back(&pickedAbutment.f);
 		local_facePointer.push_back(&picked.f);
-
-		if(FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, &holesManager, &local_facePointer))
+		QString errLog;
+		if(FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, &holesManager, errLog, &local_facePointer))
 		{
 			emit SGN_ExistBridge(true);
 			emit layoutChanged();
 		}
 		else
-			QMessageBox::warning(0, tr("Bridge autocompenetration"), QString("Bridge is compenetrating with mesh."));
+			QMessageBox::warning(0, tr("Bridge error"), errLog);
 
 		pickedAbutment.SetNull();
 	}
@@ -209,13 +209,12 @@ void HoleListModel::autoBridge(bool singleHole, double distCoeff)
 {
 	holesManager.DiscardBridges();
 	
-	int nb=0;
 	if(singleHole)
-		nb = holesManager.AutoSelfBridging(distCoeff, 0);
+		holesManager.AutoSelfBridging(distCoeff, 0);
 	else
-		nb = holesManager.AutoMultiBridging(distCoeff, 0);
+		holesManager.AutoMultiBridging(0);
 
-	emit SGN_ExistBridge( nb>0 );
+	emit SGN_ExistBridge( holesManager.bridges.size() > 0 );
 	emit layoutChanged();
 }
 
@@ -234,8 +233,8 @@ void HoleListModel::acceptBridges()
 
 void HoleListModel::closeNonManifolds()
 {
-	if (holesManager.CloseNonManifoldHoles())
-		emit SGN_ExistBridge(true);
+	holesManager.CloseNonManifoldHoles();
+	emit SGN_ExistBridge( holesManager.bridges.size()>0 );
 	
 	emit layoutChanged();
 }
