@@ -340,7 +340,7 @@ void UpdateFaceNormalFromVertex(MeshType& m)
 	for (FaceIterator f=m.face.begin(); f!=m.face.end(); ++f)
 	{
 		NormalType n;
-		n.Zero();
+		n.SetZero();
 		for(int j=0; j<3; ++j)
 			n += f->V(j)->cN();
 		n.Normalize();

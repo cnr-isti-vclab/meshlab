@@ -781,7 +781,7 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum,
 															CallBackPos *cb)
 {
 	math::Quadric<double> QZero;
-	QZero.Zero();
+	QZero.SetZero();
 	QuadricTemp TD3(m.vert,QZero);
 	QuadricTexHelper::TDp3()=&TD3;
 

@@ -99,7 +99,7 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,
 		bool Selected, CallBackPos *cb)
 {
   math::Quadric<double> QZero;
-  QZero.Zero();
+  QZero.SetZero();
   QuadricTemp TD(m.vert,QZero);
   QHelper::TDp()=&TD;
 

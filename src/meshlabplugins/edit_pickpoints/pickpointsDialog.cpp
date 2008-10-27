@@ -125,7 +125,7 @@ vcg::Point3f PickedPointTreeWidgetItem::getNormal(){
 }
 
 void PickedPointTreeWidgetItem::clearPoint(){
-	point.Zero();
+	point.SetZero();
 
 	//x
 	setText(1, "");

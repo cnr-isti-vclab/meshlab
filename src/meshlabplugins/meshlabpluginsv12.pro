@@ -51,7 +51,7 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_hole \
 				../fgt/edit_topo \
 				../fgt/render_rfx \
-				../fgt/filter_func \
+#				../fgt/filter_func \
 				mlsfilters \
 				io_gts \
 				io_expe \
