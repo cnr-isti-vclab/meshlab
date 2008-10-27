@@ -1,4 +1,5 @@
-#include <QGlobal.h>
+
+#include <qglobal.h>
 #include "apss.h"
 #include "apss.tpp"
 #include <meshlab/meshmodel.h>

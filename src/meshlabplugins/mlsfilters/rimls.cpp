@@ -1,4 +1,5 @@
-#include <QGlobal.h>
+
+#include <qglobal.h>
 #include "rimls.h"
 #include "rimls.tpp"
 #include <meshlab/meshmodel.h>
