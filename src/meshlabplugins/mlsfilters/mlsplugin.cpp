@@ -363,7 +363,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 
 		assert(points.size()>=2);
 		KdTree<float> knn(ConstDataWrapper<vcg::Point3f>(&points[0].cP(), points.size(),
-																										size_t(points[1].cP().data()) - size_t(points[0].cP().data())));
+																										size_t(points[1].cP().V()) - size_t(points[0].cP().V())));
 
 		knn.setMaxNofNeighbors(nbNeighbors);
 		for (size_t i = 0; i< points.size(); i++)

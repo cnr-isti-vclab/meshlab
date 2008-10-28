@@ -1405,7 +1405,7 @@ bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
 		//double dy = fabs((double)(qp.y() - mPos.y()));
 		//double dist = (dy > dx) ? 0.41*dx+0.941246*dy : 0.41*dy+0.941246*dx;
 
-		double dist = sqrt((double)(sqr(qp.x() - mPos.x()) + sqr(qp.y() - mPos.y())));
+		double dist = sqrt((double)(math::Sqr(qp.x() - mPos.x()) + math::Sqr(qp.y() - mPos.y())));
 			
 		if(dist<minDist)
 		{
@@ -1759,7 +1759,7 @@ void edit_topo::drawLine(Color4b colorFront, Color4b colorBack, Point3f p1, Poin
 		// Fill the intermed. points to draw a dotted line
 		QVector<Point3f> trattP;
 		int part = 32;
-		float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
+		float dist = (p1-p2).Norm();
 		if(dist>10) part*=2;
 		if(dist>50) part*=2;
 		if(dist>100) part*=2;
@@ -1800,7 +1800,7 @@ void edit_topo::drawLine(Color4b colorFront, Color4b colorBack, Point3f p1, Poin
 		// Fill the intermed. points to draw a dotted line
 		QVector<Point3f> trattP;
 		int part = 8;
-		float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
+		float dist = (p1-p2).Norm();
 		if(dist>10) part*=2;
 		if(dist>50) part*=2;
 		if(dist>100) part*=2;

@@ -65,10 +65,14 @@ bool EpochCamera::Open(const char *filename)
   // on the right the rotated translation -Rt and 0001 in the 
   // lower line.
 
-  R.Transpose();
+  R = R.transpose().eval();
+  #ifndef VCG_USE_EIGEN
   for(int i=0;i<3;++i)
     for(int j=0;j<3;++j)
           TR[i][j]= R[i][j];
+	#else
+	TR.corner<3,3>(Eigen::TopLeft) = R.transpose();
+	#endif
 
   Point3d rt= R*(-t);
   

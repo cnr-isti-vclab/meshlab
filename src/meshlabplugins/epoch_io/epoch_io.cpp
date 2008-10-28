@@ -480,7 +480,7 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
        n.Normalize();
        Point3f dir=CameraPos-vcg::Barycenter(*fi);
        dir.Normalize();
-       if(dir*n < minAngleCos)
+       if(dir.dot(n) < minAngleCos)
                 {
                   (*fi).SetD();
                   --m.fn;

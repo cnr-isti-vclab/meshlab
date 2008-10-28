@@ -79,23 +79,23 @@ class MlsSurface
 
 		/** \returns the value of the reconstructed scalar field at point \a x */
 		virtual Scalar potential(const VectorType& x, int* errorMask = 0) const = 0;
-		
+
 		/** \returns the gradient of the reconstructed scalar field at point \a x
 			*
 			* The method used to compute the gradient can be controlled with setGradientHint().
 			*/
 		virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const = 0;
-		
+
 		/** \returns the hessian matrix of the reconstructed scalar field at point \a x
 			*
 			* The method used to compute the hessian matrix can be controlled with setHessianHint().
 			*/
 		virtual MatrixType hessian(const VectorType& x, int* errorMask = 0) const
 		{ if (errorMask) *errorMask = MLS_NOT_SUPPORTED; return MatrixType(); }
-		
+
 		/** \returns the projection of point x onto the MLS surface, and optionnaly returns the normal in \a pNormal */
 		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const = 0;
-		
+
 		/** \returns whether \a x is inside the restricted surface definition domain */
 		virtual bool isInDomain(const VectorType& x) const;
 
@@ -109,7 +109,7 @@ class MlsSurface
 		void setMaxProjectionIters(int n);
 		/** set the threshold factor to detect convergence of the iterations */
 		void setProjectionAccuracy(Scalar v);
-		
+
 		/** set a hint on how to compute the gradient
 			*
 			* Possible values are MLS_DERIVATIVE_ACCURATE, MLS_DERIVATIVE_APPROX, MLS_DERIVATIVE_FINITEDIFF
@@ -129,12 +129,12 @@ class MlsSurface
 		inline ConstDataWrapper<VectorType> positions() const
 		{
 			return ConstDataWrapper<VectorType>(&mPoints[0].cP(), mPoints.size(),
-																					size_t(mPoints[1].cP().data()) - size_t(mPoints[0].cP().data()));
+																					size_t(mPoints[1].cP().V()) - size_t(mPoints[0].cP().V()));
 		}
 		inline ConstDataWrapper<VectorType> normals() const
 		{
 			return ConstDataWrapper<VectorType>(&mPoints[0].cN(), mPoints.size(),
-																					size_t(mPoints[1].cN().data()) - size_t(mPoints[0].cN().data()));
+																					size_t(mPoints[1].cN().V()) - size_t(mPoints[0].cN().V()));
 		}
 		inline ConstDataWrapper<Scalar> radii() const
 		{

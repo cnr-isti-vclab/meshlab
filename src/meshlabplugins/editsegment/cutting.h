@@ -79,7 +79,7 @@ namespace vcg {
 
 			while (iter != last){
 				if ((*iter).v->IMark() != U) {
-					//elemento già marchiato, si può rimuovere dalla coda
+					//elemento giï¿½ marchiato, si puï¿½ rimuovere dalla coda
 					*iter = *last;
 					--last;
 					++num_to_remove;
@@ -134,9 +134,9 @@ namespace vcg {
 
 			n_nMatrix.ExternalProduct(p->N(), p->N());
 
-			Tij = (n_nMatrix * ViVj).Normalize();
+			Tij = (n_nMatrix * ViVj).normalized();
 
-			float cos = (Tij * (*TDCurvPtr)[*p].T1.Normalize());
+			float cos = (Tij.dot((*TDCurvPtr)[*p].T1.Normalize()));
 			cos *= cos;
 
 			//k = k1 * cos^2(@) + k2 * sin^2(@); @ = angle between T1 and direction P->Q projected onto the plane N
@@ -153,7 +153,7 @@ namespace vcg {
 
 
 
-		//prende solo il più vicino
+		//prende solo il piï¿½ vicino
 		void AddNearestToQ(VertexType * v) {
 
 			float dist = 0.0f;
@@ -289,7 +289,7 @@ namespace vcg {
 					//prendo la tripletta con distanza minima
 					tempTriplet = Q.pop();
 
-					//controlla se il vertice estratto è ancora valido o se è stato già marchiato in precedenza
+					//controlla se il vertice estratto ï¿½ ancora valido o se ï¿½ stato giï¿½ marchiato in precedenza
 					if (tempTriplet.v->IMark() == U) {
 						tempTriplet.v->IMark() = tempTriplet.m;
 						--vertex_to_go; 
@@ -374,7 +374,7 @@ namespace vcg {
 					float max_prod = -std::numeric_limits<float>::max();
 					int max_faceid = -1;
 					for (int i=0; i<3; ++i) {
-						prod[i] = (tmp_face->N().Normalize()) * (tmp_face->FFp(i)->N().Normalize());
+						prod[i] = (tmp_face->N().Normalize()).dot(tmp_face->FFp(i)->N().Normalize());
 						if (prod[i] > max_prod) {
 							max_prod = prod[i];
 							max_faceid = i;
@@ -451,7 +451,7 @@ namespace vcg {
 					float max_prod = - std::numeric_limits<float>::max();
 					int max_faceid = -1;
 					for (int i=0; i<3; ++i) {
-						prod[i] = (tmp_face->N().Normalize()) * (tmp_face->FFp(i)->N().Normalize());
+						prod[i] = (tmp_face->N().Normalize()).dot(tmp_face->FFp(i)->N().Normalize());
 						if (prod[i] > max_prod) {
 							max_prod = prod[i];
 							max_faceid = i;

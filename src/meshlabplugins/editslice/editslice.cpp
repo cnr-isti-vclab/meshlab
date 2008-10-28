@@ -140,8 +140,8 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 			    /  x,y,z vettore di rotazione del pinao
 			   */   
 			
-			Point3f off= mat_trac_rotation * (translation_plans+po); //translation vector
-			p.SetOffset( rotationCenter*dir + off*dir);
+			Point3f off= mat_trac_rotation * Point3f(translation_plans+po); //translation vector
+			p.SetOffset( rotationCenter.dot(dir) + off.dot(dir));
 			
 			double avg_length;  
 			edge_mesh = new n_EdgeMesh();

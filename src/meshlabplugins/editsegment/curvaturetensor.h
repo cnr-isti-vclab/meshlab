@@ -75,7 +75,7 @@ namespace vcg {
 					VertexType* tempV;
 					float totalDoubleAreaSize = 0.0f;
 
-					if (((firstV->P()-central_vertex->P())^(pos.VFlip()->P()-central_vertex->P()))*central_vertex->N()<=0.0f)
+					if (((firstV->P()-central_vertex->P())^(pos.VFlip()->P()-central_vertex->P())).dot(central_vertex->N())<=0.0f)
 					{
 						pos.Set(central_vertex->VFp(), central_vertex);
 						pos.FlipE();
@@ -120,8 +120,8 @@ namespace vcg {
 					M.SetZero();
 					for (int i = 0; i < vertices.size(); ++i) {
 						Point3f edge = (central_vertex->P() - vertices[i].vert->P());
-						float curvature = (2.0f * (central_vertex->N() * edge) ) / edge.SquaredNorm();
-						Point3f T = (Tp*edge).Normalize();
+						float curvature = (2.0f * (central_vertex->N().dot(edge)) ) / edge.SquaredNorm();
+						Point3f T = (Tp*edge).normalized();
 						tempMatrix.ExternalProduct(T,T);
 						M += tempMatrix * weights[i] * curvature ;
 					}
@@ -139,10 +139,8 @@ namespace vcg {
 					tempMatrix.ExternalProduct(W,W);
 					Q -= tempMatrix * 2.0f;
 
-					Matrix33f Qt(Q);
-					Qt.Transpose();
 
-					Matrix33f QtMQ = (Qt * M * Q);
+					Matrix33f QtMQ = (Q.transpose() * M * Q);
 
 					Point3f T1 = Q.GetColumn(1);
 					Point3f T2 = Q.GetColumn(2);
@@ -202,10 +200,7 @@ namespace vcg {
 					S[0][1] = s;
 					S[1][0] = -1.0f * s;
 
-					vcg::ndim::MatrixMNf St (S);
-					St.Transpose();					
-
-					vcg::ndim::MatrixMNf StMS(St * minor2x2 * S);
+					vcg::ndim::MatrixMNf StMS(S.transpose() * minor2x2 * S);
 
 					float Principal_Curvature1 = (3.0f * StMS[0][0]) - StMS[1][1];
 					float Principal_Curvature2 = (3.0f * StMS[1][1]) - StMS[0][0];

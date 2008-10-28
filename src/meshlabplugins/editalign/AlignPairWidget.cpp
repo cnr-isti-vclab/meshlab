@@ -11,6 +11,8 @@
 
 #include <wrap/qt/trackball.h>
 #include <wrap/gl/picking.h>
+#include <wrap/gl/space.h>
+
 AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 {
   currentTrack=0;
@@ -78,7 +80,7 @@ void AlignPairWidget::paintGL ()
 				
 				glPushMatrix();
 						vcg::glScale(3.0f/bb.Diag());
-						glTranslate(-bb.Center());
+						vcg::glTranslate(-bb.Center());
 						if(i==0)
 						{
 							freeMesh->m->Render(vcg::GLW::DMFlat,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);

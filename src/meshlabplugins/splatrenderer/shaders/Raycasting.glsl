@@ -290,7 +290,7 @@ void AttributeFP(void)
     float weight = clamp(1.-r2*scaleSquaredDistance,0.0,1.0);
     weight = weight*weight;
     #endif
-		weight *= 0.2;
+		weight *= 0.1; // limits overflow
 
     #ifdef EXPE_DEPTH_CORRECTION
     gl_FragDepth = depthParameterCast.x * oneOverDepth + depthParameterCast.y; // MAD

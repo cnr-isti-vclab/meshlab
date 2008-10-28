@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -37,6 +37,7 @@
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/complex/trimesh/closest.h>
 
+#include <vcg/math/base.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/space/index/aabb_binary_tree/aabb_binary_tree.h>
 #include <vcg/space/index/octree.h>
@@ -77,7 +78,7 @@ class NearestMidPoint : public std::unary_function<face::Pos<typename MESH_TYPE:
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 
 public:
-	// if DEBUG value is true, the class will fill 
+	// if DEBUG value is true, the class will fill
 	// the LoutMid QList with ALL the "failed" vertices.
 	// So, LoutMid will contain all vertices that have not
 	// been found by the UnifGrid.GetClosest() function
@@ -89,16 +90,16 @@ public:
 
 	// Marker
 	typedef tri::FaceTmark<MESH_TYPE> MarkerFace;
-	MarkerFace markerFunctor;	
+	MarkerFace markerFunctor;
 
-	// All of the data structures used by the retopology algo have 
+	// All of the data structures used by the retopology algo have
 	// to be initialized *before* the function call.
 	//
 	// This is necessary in order to reduce comput time
 	void init(MESH_TYPE *_m, float dist)
 	{
 		m=_m;
-		if(m) 
+		if(m)
 		{
 			// Set up uniform grid
 			unifGrid.Set(m->face.begin(),m->face.end());
@@ -108,7 +109,7 @@ public:
 	}
 
 	// Standard operator called by Refine<>
-	// 
+	//
 	// If you want to change the way new vertices are generated
 	// you have to modify the "VertexTypr nv" output coords
 	void operator()(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType>  ep)
@@ -121,36 +122,36 @@ public:
 		// startPt is the point from where the "GetClosest" query will start
 		const typename MESH_TYPE::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
 		CMeshO::FaceType *nearestF=0;
-		
+
 		// in "dist" will be returned the closest point distance from startPt
 		dist=dist_upper_bound;
 
 		Point3f p1 = ep.f->V(ep.z)->P();
 		Point3f p2 = ep.f->V1(ep.z)->P();
-		float incDist = sqrt(sqr(p1.X()-p2.X())+sqr(p1.Y()-p2.Y())+sqr(p1.Z()-p2.Z()));
+		float incDist = sqrt(math::Sqr(p1.X()-p2.X())+math::Sqr(p1.Y()-p2.Y())+math::Sqr(p1.Z()-p2.Z()));
 
 		// distPerc is the % distance used to evaluate the maximum query distance
 		incDist = incDist * distPerc;
 
-		// dist_ upper_bound is the maximum query distance, evaluated 
+		// dist_ upper_bound is the maximum query distance, evaluated
 		// with a % factor given by the user
 		dist_upper_bound = incDist;
 
 		// Query the uniform grid and get the original mesh's point nearest to startPt
-		nearestF =  unifGrid.GetClosest(PDistFunct, 
-										markerFunctor, 
-										startPt, 
-										dist_upper_bound, 
-										dist, 
+		nearestF =  unifGrid.GetClosest(PDistFunct,
+										markerFunctor,
+										startPt,
+										dist_upper_bound,
+										dist,
 										closestPt);
 
 		// Output distance has not changed: no closest point found.
 		// The original "ideal" point will be used, and then will be
 		// smoothed with laplacian smooth algorithm
-		if(dist == dist_upper_bound) 
+		if(dist == dist_upper_bound)
 		{
 			nv.P()= startPt;
-			nv.N()= ((ep.f->V(ep.z)->N() + ep.f->V(ep.z)->N())/2).Normalize();
+			nv.N()= ((ep.f->V(ep.z)->N() + ep.f->V(ep.z)->N())/2).normalized();
 			nv.C().lerp(ep.f->V(ep.z)->C(),ep.f->V1(ep.z)->C(),.5f);
 			nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
 
@@ -165,7 +166,7 @@ public:
 		// distance has changed: got the closest point
 		else
 		{
-			nv.P()= closestPt; 
+			nv.P()= closestPt;
 
 			Point3f interp;
 			// Try to interpolate vertex colors and normals
@@ -173,13 +174,13 @@ public:
 			{
 				interp[2]=1.0-interp[1]-interp[0];
 
-				nv.P()= closestPt; 
-				nv.N()= ((nearestF->V(0)->N() + nearestF->V(1)->N() + nearestF->V(2)->N())/3).Normalize();
+				nv.P()= closestPt;
+				nv.N()= ((nearestF->V(0)->N() + nearestF->V(1)->N() + nearestF->V(2)->N())/3).normalized();
 				nv.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
 				nv.Q() = nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
 
 				nv.ClearS();
-			}		
+			}
 		}
 	}
 
@@ -196,7 +197,7 @@ public:
 	{
 		TexCoord2<FL_TYPE,1> tmp;
 		assert(t0.n()== t1.n());
-		tmp.n()=t0.n(); 
+		tmp.n()=t0.n();
 		tmp.t()=(t0.t()+t1.t())/2.0;
 		return tmp;
 	}
@@ -206,7 +207,7 @@ public:
 
 private:
 	// Internal mesh model
-	CMeshO *m; 
+	CMeshO *m;
 };
 
 
@@ -259,7 +260,7 @@ public:
 		// in faces stack "Fstack" and vertices stack "stack"
 		createBasicMesh(outMesh, Fstack, stack);
 
-		dialog->setStatusLabel("Done");	
+		dialog->setStatusLabel("Done");
 
 		CMeshO::FaceIterator fi;
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
@@ -276,7 +277,7 @@ public:
 				//		- midSampler uses an uniform grid to get the closest point
 				//		  for each given vertex, and "builds" the new mesh by adapting
 				//		  it over the existing "in" meshmodel
-				//	If the midSampler fails (for example if a hole is found), each 
+				//	If the midSampler fails (for example if a hole is found), each
 				//  vertex is marked with SetS() and will be smoothed later
 				//
 				outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
@@ -307,7 +308,7 @@ public:
 			if((*fi).IsS())
 				for(int i=0; i<3; i++)
 					(*fi).FFp(i)->SetS();
-	
+
 		dialog->setStatusLabel("Lapl smooth");
 
 		// Laplacian smooth for selected faces
@@ -336,12 +337,12 @@ public:
 		// turn off debug mode
 		midSampler->DEBUG = false;
 
-		midSampler->distPerc = dist; 
+		midSampler->distPerc = dist;
 		outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO);
 
 		// Update topology for in mesh, to be sure that the model can be refined
 		bool oriented,orientable;
-		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable); 
+		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable);
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
 		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
@@ -385,7 +386,7 @@ public:
 			if((*fi).IsS())
 				for(int i=0; i<3; i++)
 					(*fi).FFp(i)->SetS();
-	
+
 		// Laplacian smooth for not-found vertices
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
 		tri::Smooth<CMeshO>::VertexCoordLaplacian(outMesh.cm,3,true,0);
@@ -413,12 +414,12 @@ private:
 					for(int m=0; m<2; m++)
 						if(f.e[n].v[m].vName == v.vName)
 							f.e[n].v[m].vName = QString("%1").arg(i);
-			
+
 				nFstack[j]=f;
 			}
 			v.vName = QString("%1").arg(i);
 			nStack[i]=v;
-		} 
+		}
 
 		int allFce = 0;
 		for(int i=0; i<nFstack.count(); i++)
@@ -429,11 +430,11 @@ private:
 		outMesh.cm.Clear();
 		vcg::tri::Allocator<CMeshO>::AddVertices(outMesh.cm, nStack.count());
 		vcg::tri::Allocator<CMeshO>::AddFaces(outMesh.cm, allFce);
-	
+
 		QVector<CMeshO::VertexPointer> ivp(Vstack.count());
 
 		int v =0;
-		CMeshO::VertexIterator vi;	
+		CMeshO::VertexIterator vi;
 		for(vi=outMesh.cm.vert.begin(); vi!=outMesh.cm.vert.end(); vi++)
 		{
 			ivp[v] = &*vi;
@@ -444,19 +445,19 @@ private:
 
 			const CMeshO::CoordType &startPt = (*vi).P();
 			CMeshO::FaceType *nearestF=0;
-	
+
 			float d1,d2; d1 = d2 = 1000;
 
 			// Use the sampler to get original vertices normals
-			nearestF =  midSampler->unifGrid.GetClosest(PDistFunct, 
-											midSampler->markerFunctor, 
-											startPt, 
-											d1, 
-											d2, 
+			nearestF =  midSampler->unifGrid.GetClosest(PDistFunct,
+											midSampler->markerFunctor,
+											startPt,
+											d1,
+											d2,
 											closestPt);
 
 			(*vi).C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),.5f);
-			(*vi).N() = ((nearestF->V(0)->N() + nearestF->V(1)->N() + nearestF->V(2)->N())/3).Normalize();
+			(*vi).N() = ((nearestF->V(0)->N() + nearestF->V(1)->N() + nearestF->V(2)->N())/3).normalized();
 
 			++v;
 		}
@@ -466,7 +467,7 @@ private:
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{
 			Fce fce = nFstack[f];
-		
+
 			if(fce.selected)
 			{
 				QList<Vtx> allV;
@@ -489,7 +490,7 @@ private:
 
 		// Re-orient new mesh
 		bool oriented,orientable;
-		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable); 
+		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable);
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
 		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
 

@@ -1,11 +1,11 @@
 VCGDIR  = ../../../vcglib
-GLEWDIR = ../../../code/lib/glew 
+GLEWDIR = ../../../code/lib/glew
 GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
 
 # uncomment to try Eigen
-# DEFINES += VCG_USE_EIGEN
-# CONFIG += warn_off
+#DEFINES += VCG_USE_EIGEN
+#CONFIG += warn_off debug
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
 DEPENDPATH  += $$VCGDIR  $$VCGDIR/vcg $$VCGDIR/wrap
@@ -65,32 +65,32 @@ FORMS          =    ui/layerDialog.ui \
 
 RESOURCES     = meshlab.qrc
 
-# to add windows icon 
+# to add windows icon
 RC_FILE = meshlab.rc
 
 
-### the xml info list 
+### the xml info list
 ### the next time the app open a new extension
 QMAKE_INFO_PLIST = ../install/info.plist
 
 
-# to add MacOS icon 
+# to add MacOS icon
 ICON = images/meshlab.icns
-# note that to add the file icons on the mac the following line does not work. 
+# note that to add the file icons on the mac the following line does not work.
 # You have to copy the file by hand into the meshlab.app/Contents/Resources directory.
 # ICON += images/meshlab_obj.icns
 
-QT           += opengl 
+QT           += opengl
 QT           += xml
 QT           += network
 
-# the following line is needed to avoid mismatch between 
+# the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 
-# the following line is to hide the hundred of warnings about the deprecated 
+# the following line is to hide the hundred of warnings about the deprecated
 # old printf are all around the code
-win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE 
+win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 
 
 DEFINES += GLEW_STATIC
