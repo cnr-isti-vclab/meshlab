@@ -126,12 +126,12 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 		pr.numRow=1;
 		
 		mesh_grid = new TriMeshGrid();
-		mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
+		mesh_grid->Set(m->cm.face.begin() ,m->cm.face.end());
 		//pr.scale =  (pr.viewBox[0]/pr.numCol) /(edgeMax*(1.4142)) ;
 		//pr.textDetails = svgpro->showText ;
 		for(int i=0; i<point_Vector.size(); i++){	
-			Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
-			Point3f po=point_Vector[i]-m.cm.bbox.Center();
+			Point3f rotationCenter=m->cm.bbox.Center(); //the point where the plans rotate
+			Point3f po=point_Vector[i]-m->cm.bbox.Center();
 			Plane3f p;
 			p.SetDirection(dir);
 				/*
@@ -190,11 +190,11 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr)
  {   
 	 
 	 this->gla=gla;
-	 this->m=m;
+	 this->m=&m;
 	 if(!gla->isEnabled()){
 	    dialogsliceobj->close();
 	 }
-	 DrawPlane(this->gla,this->m);
+	 DrawPlane(this->gla,*(this->m));
    
  }
  void ExtraMeshSlidePlugin::EndEdit(MeshModel &m, GLArea *gla ){
@@ -211,7 +211,7 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr)
 		 dialogsliceobj=new dialogslice(gla->window());
 		 dialogsliceobj->show();
 		 dialogsliceobj->setAllowedAreas(Qt::NoDockWidgetArea);
-		 this->m=m;
+		 this->m=&m;
 		 QObject::connect(dialogsliceobj, SIGNAL(exportMesh()), this,SLOT(SlotExportButton()));
          QObject::connect(dialogsliceobj, SIGNAL(Update_glArea()), this, SLOT(upGlA()));
 	    QObject::connect(dialogsliceobj, SIGNAL(RestoreDefault()), this, SLOT(RestoreDefault()));

@@ -63,7 +63,7 @@ private:
 	QString fileName, dirName, fileN;
 	bool isDragging;
 	GLArea * gla;
-	MeshModel m;
+	MeshModel *m;
   vcg::Box3f b;
 	SVGPro *svgpro;
 	float edgeMax;
