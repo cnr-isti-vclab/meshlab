@@ -297,7 +297,7 @@ bool RIMLS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) cons
 					- sumGradWeight * mCachedGradient[k]
 					- mCachedGradient * sumGradWeight[k] ) * invW;
 
-		hessian.col(k) = dGrad;
+		hessian.SetColumn(k,dGrad);
 	}
 
 	return true;
