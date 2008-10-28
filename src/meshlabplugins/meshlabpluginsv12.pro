@@ -48,10 +48,10 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_texture\
 				../fgt/editpaint\
 				../fgt/filter_colorproc \
-#				../fgt/edit_hole \
+				../fgt/edit_hole \
 				../fgt/edit_topo \
 				../fgt/render_rfx \
-#				../fgt/filter_func \
+				../fgt/filter_func \
 				mlsfilters \
 				io_gts \
 				io_expe \
