@@ -673,7 +673,7 @@ namespace io {
 		
 		
 		//Load default value of color and texture coordinate in the vertex
-		inline static void loadDefaultValuePerVertex(typename OpenMeshType::VertexPointer vertex, const OpenMeshType m, int mask)
+		inline static void loadDefaultValuePerVertex(typename OpenMeshType::VertexPointer vertex, const OpenMeshType &m, int mask)
 		{
 			if (mask & MeshModel::IOM_VERTCOLOR && m.HasPerVertexColor())
 				vertex->C() = vcg::Color4b(vcg::Color4b::White);
@@ -687,7 +687,7 @@ namespace io {
 		
 
 		//Load default value of color and texture cooridinate per face and per wedge
-		inline static void loadDefaultValuePerFace(typename OpenMeshType::FacePointer face, const OpenMeshType m, int mask)
+		inline static void loadDefaultValuePerFace(typename OpenMeshType::FacePointer face, const OpenMeshType &m, int mask)
 		{
 			if (mask & MeshModel::IOM_FACECOLOR && HasPerFaceColor(m))
 				face->C() = vcg::Color4b(vcg::Color4b::White);
