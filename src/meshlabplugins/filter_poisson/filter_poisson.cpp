@@ -146,10 +146,10 @@ void PoissonPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParamet
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool PoissonPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool PoissonPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-//	MeshModel &m=*md->mm();
-
+	MeshModel &m=*md.mm();
+  MeshModel &pm =*md.addNewMesh("Poisson mesh");
   vector<Point3D<float> > Pts(m.cm.vn);
 	vector<Point3D<float> > Nor(m.cm.vn); 	
 	CoredVectorMeshData mesh;
@@ -179,24 +179,24 @@ bool PoissonPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	mesh.resetIterator();
 	Log(0,"Successfully created a mesh of %i vert and %i faces",mesh.outOfCorePointCount()+mesh.inCorePoints.size(),mesh.triangleCount());
 	
-	m.cm.Clear();
+	//m.cm.Clear();
 	
-	tri::Allocator<CMeshO>::AddVertices(m.cm,mesh.outOfCorePointCount()+mesh.inCorePoints.size());
-	tri::Allocator<CMeshO>::AddFaces(m.cm,mesh.triangleCount());
+	tri::Allocator<CMeshO>::AddVertices(pm.cm,mesh.outOfCorePointCount()+mesh.inCorePoints.size());
+	tri::Allocator<CMeshO>::AddFaces(pm.cm,mesh.triangleCount());
 
   Point3D<float> p;
 	int i;
 	for (i=0; i < int(mesh.inCorePoints.size()); i++){
 		p=mesh.inCorePoints[i];
-		m.cm.vert[i].P()[0] = p.coords[0]*scale+center.coords[0];
-		m.cm.vert[i].P()[1] = p.coords[1]*scale+center.coords[1];
-		m.cm.vert[i].P()[2] = p.coords[2]*scale+center.coords[2];
+		pm.cm.vert[i].P()[0] = p.coords[0]*scale+center.coords[0];
+		pm.cm.vert[i].P()[1] = p.coords[1]*scale+center.coords[1];
+		pm.cm.vert[i].P()[2] = p.coords[2]*scale+center.coords[2];
 		}
 	for (int ii=0; ii < mesh.outOfCorePointCount(); ii++){
 		mesh.nextOutOfCorePoint(p);
-		m.cm.vert[ii+i].P()[0] = p.coords[0]*scale+center.coords[0];
-		m.cm.vert[ii+i].P()[1] = p.coords[1]*scale+center.coords[1];
-		m.cm.vert[ii+i].P()[2] = p.coords[2]*scale+center.coords[2];
+		pm.cm.vert[ii+i].P()[0] = p.coords[0]*scale+center.coords[0];
+		pm.cm.vert[ii+i].P()[1] = p.coords[1]*scale+center.coords[1];
+		pm.cm.vert[ii+i].P()[2] = p.coords[2]*scale+center.coords[2];
 	}
 
 TriangleIndex tIndex;
@@ -212,7 +212,7 @@ for (i=0; i < nr_faces; i++){
 		if(!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[2])){tIndex.idx[2]+=int(mesh.inCorePoints.size());}
 		for(int j=0; j < 3; j++)
 		{
-			m.cm.face[i].V(j) = &m.cm.vert[tIndex.idx[j]];
+			pm.cm.face[i].V(j) = &pm.cm.vert[tIndex.idx[j]];
 		}
 		//ply_put_element(ply, (void *) &ply_face);
 		//delete[] ply_face.vertices;
@@ -225,12 +225,22 @@ for (i=0; i < nr_faces; i++){
 //		mesh.triangles[i].idx[2]+=mesh.inCorePoints.size();
 //		}
 //	Build(m.cm,mesh.inCorePoints,mesh.triangles);
-	Log(0,"Successfully created a mesh of %i faces",m.cm.vn);
+	Log(0,"Successfully created a mesh of %i faces",pm.cm.vn);
 	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
   
 	return true;
+}
+const PoissonPlugin::FilterClass PoissonPlugin::getClass(QAction *action)
+{
+  switch(ID(action))
+  {
+    case FP_POISSON_RECON :
+			return FilterClass (MeshFilterInterface::PointSet + MeshFilterInterface::Remeshing) ;
+    default: assert(0);
+  }
+  return FilterClass(0);
 }
 
 

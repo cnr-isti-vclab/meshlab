@@ -1,6 +1,8 @@
 include (../../shared.pri)
 
-HEADERS       = filter_poisson.h
+HEADERS       = ../../meshlab/meshmodel.h \
+                filter_poisson.h
+
 QMAKE_CXXFLAGS += -fpermissive
 
 SOURCES += src/Factor.cpp \
@@ -8,7 +10,10 @@ SOURCES += src/Factor.cpp \
            src/MarchingCubes.cpp \
            src/MultiGridOctest.cpp \
            filter_poisson.cpp \ 
-	   ../../meshlab/filterparameter.cpp
+           ../../meshlab/meshmodel.cpp \ 
+	   ../../meshlab/filterparameter.cpp\
+		$$GLEWCODE
+
 
 HEADERS += src/Allocator.h \
            src/BinaryNode.h \
@@ -34,4 +39,6 @@ HEADERS += src/Allocator.h \
 
 
 TARGET        = filter_poisson
+CONFIG       += opengl
+
 
