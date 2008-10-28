@@ -166,7 +166,7 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 
 		if (nofSamples<1)
 		{
-				mCachedGradient.Zero();
+				mCachedGradient.SetZero();
 				mCachedQueryPoint = x;
 				mCachedPotential  = 1e9;
 				mCachedQueryPointIsOK = false;
@@ -177,9 +177,9 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 			mCachedRefittingWeights.resize(nofSamples+5);
 
 		VectorType source     = x;
-		VectorType grad; grad.Zero();
+		VectorType grad; grad.SetZero();
 		VectorType previousGrad;
-		VectorType sumN; sumN.Zero();
+		VectorType sumN; sumN.SetZero();
 		Scalar potential      = 0.;
 		Scalar invSigma2      = Scalar(1) / (mSigmaN*mSigmaN);
 		Scalar invSigmaR2     = 0;
@@ -193,9 +193,9 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 		do
 		{
 				previousGrad = grad;
-				sumGradWeight.Zero();
-				sumGradWeightPotential.Zero();
-				sumN.Zero();
+				sumGradWeight.SetZero();
+				sumGradWeightPotential.SetZero();
+				sumN.SetZero();
 				potential = 0.;
 				sumW = 0.;
 
@@ -249,7 +249,7 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 		mCachedSumN = sumN;
 		mCachedSumW = sumW;
 		mCachedSumGradPotential = sumGradWeightPotential;
-		
+
 		return true;
 }
 
@@ -260,7 +260,7 @@ bool RIMLS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) cons
 	// at this point we assume computePotentialAndGradient has been called first
 
 	uint nofSamples = mNeighborhood.size();
-	
+
 	const VectorType& sumGradWeight = mCachedSumGradWeight;
 	const VectorType& sumGradWeightPotential = mCachedSumGradPotential ;
 	const VectorType& sumN = mCachedSumN;
@@ -269,18 +269,18 @@ bool RIMLS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) cons
 
 	for (uint k=0 ; k<3 ; ++k)
 	{
-		VectorType sumDGradWeight; sumDGradWeight.Zero();
-		VectorType sumDWeightNormal; sumDWeightNormal.Zero();
-		VectorType sumGradWeightNk; sumGradWeightNk.Zero();
-		VectorType sumDGradWeightPotential; sumDGradWeightPotential.Zero();
-		
+		VectorType sumDGradWeight; sumDGradWeight.SetZero();
+		VectorType sumDWeightNormal; sumDWeightNormal.SetZero();
+		VectorType sumGradWeightNk; sumGradWeightNk.SetZero();
+		VectorType sumDGradWeightPotential; sumDGradWeightPotential.SetZero();
+
 		for (unsigned int i=0; i<nofSamples; i++)
 		{
 			int id = mNeighborhood.index(i);
 			VectorType p = mPoints[id].cP();
 			VectorType diff = x - p;
 			Scalar f = Dot(diff, mPoints[id].cN());
-			
+
 			VectorType gradW = mCachedWeightGradients.at(i) * mCachedRefittingWeights.at(i);
 			VectorType dGradW = (x-p) * ( mCachedWeightSecondDerivatives.at(i) * (x[k]-p[k]) * mCachedRefittingWeights.at(i));
 			dGradW[k] += mCachedWeightDerivatives.at(i);
@@ -299,7 +299,7 @@ bool RIMLS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) cons
 
 		hessian.col(k) = dGrad;
 	}
-	
+
 	return true;
 }
 

@@ -258,8 +258,8 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
 		return true;
 	}
 
-	LVector sumP; sumP.Zero();
-	LVector sumN; sumN.Zero();
+	LVector sumP; sumP.SetZero();
+	LVector sumN; sumN.SetZero();
 	LScalar sumDotPN = 0.;
 	LScalar sumDotPP = 0.;
 	LScalar sumW = 0.;
@@ -339,8 +339,8 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
 
 	for (uint k=0 ; k<3 ; ++k)
 	{
-		LVector dSumP; dSumP.Zero();
-		LVector dSumN; dSumN.Zero();
+		LVector dSumP; dSumP.SetZero();
+		LVector dSumN; dSumN.SetZero();
 		LScalar dSumDotPN = 0.;
 		LScalar dSumDotPP = 0.;
 		LScalar dSumW = 0.;
@@ -428,8 +428,8 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
 		// second order derivatives
 		for (uint j=0 ; j<3 ; ++j)
 		{
-			LVector d2SumP; d2SumP.Zero();
-			LVector d2SumN; d2SumN.Zero();
+			LVector d2SumP; d2SumP.SetZero();
+			LVector d2SumN; d2SumN.SetZero();
 			LScalar d2SumDotPN = 0.;
 			LScalar d2SumDotPP = 0.;
 			LScalar d2SumW = 0.;
