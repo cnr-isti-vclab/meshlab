@@ -131,24 +131,46 @@ public:
 		return true;
 	};
 
+	/*	For accepted holes:
+	 *		- reset additional data for its faces
+	 *		- remove hole from list
+	 *		- accept bridge adjacent to hole
+	 *
+	 *	For not accepted holes:
+	 *		- remove hole patch and restore border
+	 */
 	void ConfirmFilling(bool accept)
 	{
-		nSelected=0;
+		std::vector<FacePointer> bridgeF;
+		std::vector<FacePointer>::iterator fpit;
+						
 		HoleIterator it = holes.begin();
 		while( it != holes.end() )
 		{
 			if( it->IsFilled() )
 			{
-				if( (it->IsSelected() && !it->IsAccepted()) || !accept)
+				
+				if( ( it->IsSelected() && !it->IsAccepted() ) || !accept)
 				{
 					if( it->IsFilled() )
-					{
 				  		it->RestoreHole();
-				  		nSelected++;
-					}
 				}
 				else if( it->IsSelected() && it->IsAccepted() )
 				{
+					if(it->IsBridged())
+					{
+						for(fpit = it->patches.begin(); fpit != it->patches.end(); fpit++)
+						{
+							if( IsBridgeFace( *fpit ) )
+								bridgeF.push_back( *fpit ); 
+
+							for(int i=0; i<3; i++)
+							{
+								if( IsBridgeFace( (*fpit)->FFp(i) ) )
+									bridgeF.push_back( (*fpit)->FFp(i) );
+							}
+						}
+					}	
 					it->ResetFlag();
 					it = holes.erase(it);
 					continue;
@@ -156,6 +178,36 @@ public:
 			}
 			it++;
 		}
+
+		for(fpit = bridgeF.begin(); fpit != bridgeF.end(); fpit++)
+		{
+			BridgeIterator bit = bridges.begin();
+			while( bit != bridges.end() )
+			{
+				PosType a = (*bit)->GetAbutmentA();
+				PosType b = (*bit)->GetAbutmentB();
+
+				if( *fpit == a.f->FFp(a.z) || *fpit == b.f->FFp(b.z) )
+				{
+					(*bit)->ResetFlag();
+					delete *bit;
+					bit = bridges.erase(bit);
+				}
+				else
+					 bit++;
+			}
+		}
+
+		// update bridging status for holes remaining.
+		// some hole marked as "bridged" can be adjacent to bridge which is accepted 
+		// because it is adjacent to hole filled and accepted, so they arent "bridged" now.
+		for( it= holes.begin(); it != holes.end(); it++)
+		{
+			assert(!it->IsFilled());
+			if( it->IsBridged() )
+				it->UpdateBridgingStatus();
+		}
+	
 		countSelected();
 	};
 
@@ -165,7 +217,7 @@ public:
 		for( ; bit != bridges.end(); bit++ )
 		{	
 			(*bit)->ResetFlag();
-			delete &*bit;
+			delete *bit;
 		}
 		bridges.clear();
 

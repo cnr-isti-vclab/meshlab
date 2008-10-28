@@ -193,9 +193,7 @@ public:
 		glEnd();
 	}
 
-	/*  Reset flags used by this plugin to unmark this hole and its patch.
-	 *  Bridges face can finded along the hole and it needs look at adjacent face because
-	 *  a bridge could be build from other bridge face.
+	/*  Reset flags used by this plugin (holeBorder and patch) to unmark this hole and its patch.
 	 */
 	void ResetFlag()
 	{
@@ -211,16 +209,10 @@ public:
 				parentManager->ClearPatchAttr(f);
 				parentManager->ClearCompAttr(f);
 
-				// si conferma il filling della faccia BridgedFace+PatchFace aggiunta
-				// dalla partizione per ottenere hole non manifold
-				parentManager->ClearBridgeAttr(f);
-				
 				for(int i=0; i<3; i++)
 				{
 					FacePointer adjF = f->FFp(i);
 					parentManager->ClearHoleBorderAttr(adjF);
-					if(parentManager->IsBridgeFace(adjF))
-						bridgesFaces.push_back(adjF);
 				}
 			}
 		}
@@ -230,23 +222,8 @@ public:
 			PosType curPos = this->p;
 			do{
 				parentManager->ClearHoleBorderAttr(curPos.f);
-				if( parentManager->IsBridgeFace(curPos.f))
-					bridgesFaces.push_back(curPos.f);
 				curPos.NextB();
 			}while( curPos != this->p );
-		}
-
-		while(bridgesFaces.size()>0)
-		{
-			FacePointer f = bridgesFaces.back();
-			bridgesFaces.pop_back();
-			parentManager->ClearBridgeAttr(f);
-			for(int i=0; i<3; i++)
-			{
-				FacePointer adjF = f->FFp(i);
-				if(parentManager->IsBridgeFace(adjF) && !parentManager->IsHoleBorderFace(adjF))
-					bridgesFaces.push_back(adjF);
-			}
 		}
 	};
 
@@ -362,6 +339,29 @@ public:
 		return false;
 	};
 
+	/*  walk over hole border, watching each adiacent faces to its vertex
+	 *  looking for bridge faces.
+	 */ 
+	void UpdateBridgingStatus()
+	{
+		assert(!IsFilled());
+		PosType curPos = this->p;
+		do{
+			do{
+				if( parentManager->IsBridgeFace(curPos.f) )
+				{
+					SetBridged(true);
+					return;
+				}
+				curPos.FlipE();
+				curPos.FlipF();
+			}while(!curPos.IsBorder());
+			curPos.FlipV();
+		}while(curPos != this->p);
+		SetBridged(false);
+	};
+
+
 private:
 
 	/*  Walking the hole computing vcgHole::Info data and other info */
@@ -445,6 +445,7 @@ private:
 		}
 	};
 
+	
 	/* First patch face is the adjacent one to initial Pos ("p" field of Hole::Info)
 	 * Other patch face are found looking adjacent face on each vertex of known patch faces.
 	 * NB: looking adjacent faces to vertexes it can find patches also for non manifold hole.

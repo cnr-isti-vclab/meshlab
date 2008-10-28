@@ -312,6 +312,9 @@ private:
 		f0->FFi(sideEdgeIndex) = sideEdgeIndex;
 		f1->FFp(sideEdgeIndex) = f1;
 		f1->FFi(sideEdgeIndex) = sideEdgeIndex;
+
+		assert( parentManager->IsBridgeFace( f0 ) );
+		assert( parentManager->IsBridgeFace( f1 ) );
 	};
 
 /*** funzioni statiche ***/

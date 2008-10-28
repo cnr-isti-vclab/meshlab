@@ -201,6 +201,7 @@ void HoleListModel::acceptFilling(bool accept)
 	holesManager.ConfirmFilling(accept);
 	state = HoleListModel::Selection;
 	emit dataChanged( index(0, 0), index(holesManager.HolesCount(), 2) );
+	emit SGN_ExistBridge( holesManager.bridges.size() > 0 );
 	emit SGN_needUpdateGLA();
 	emit layoutChanged();
 }
