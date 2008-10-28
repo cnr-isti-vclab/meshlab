@@ -30,8 +30,8 @@
 #include <vcg/container/simple_temporary_data.h>
 
 
-/*  HoleSetManager class rappresent an entity which manages the holes founded
- *  into the same MESH.
+/*  HoleSetManager class rappresent an entity which manages the holes and bridges
+ *  founded into the same MESH.
  *  It allows to invoke some functionality for each (may be the selected ones)
  *  holes as filling and bridging.
  *  His presence is necessary because it connect holes to a mesh with the
@@ -131,25 +131,26 @@ public:
 		return true;
 	};
 
-	/*	For accepted holes:
+	/*	For accepted holes: patch faces and its adjacent bridge faces become
+	 *  faces of this mesh.
 	 *		- reset additional data for its faces
 	 *		- remove hole from list
 	 *		- accept bridge adjacent to hole
 	 *
-	 *	For not accepted holes:
+	 *	For not accepted holes: patch faces are removed from mesh
 	 *		- remove hole patch and restore border
 	 */
 	void ConfirmFilling(bool accept)
 	{
-		std::vector<FacePointer> bridgeF;
-		std::vector<FacePointer>::iterator fpit;
-						
+		typename std::vector<FacePointer > bridgeF;
+		typename std::vector<FacePointer >::iterator fpit;
+
 		HoleIterator it = holes.begin();
 		while( it != holes.end() )
 		{
 			if( it->IsFilled() )
 			{
-				
+
 				if( ( it->IsSelected() && !it->IsAccepted() ) || !accept)
 				{
 					if( it->IsFilled() )
@@ -162,7 +163,7 @@ public:
 						for(fpit = it->patches.begin(); fpit != it->patches.end(); fpit++)
 						{
 							if( IsBridgeFace( *fpit ) )
-								bridgeF.push_back( *fpit ); 
+								bridgeF.push_back( *fpit );
 
 							for(int i=0; i<3; i++)
 							{
@@ -170,7 +171,7 @@ public:
 									bridgeF.push_back( (*fpit)->FFp(i) );
 							}
 						}
-					}	
+					}
 					it->ResetFlag();
 					it = holes.erase(it);
 					continue;
@@ -199,7 +200,7 @@ public:
 		}
 
 		// update bridging status for holes remaining.
-		// some hole marked as "bridged" can be adjacent to bridge which is accepted 
+		// some hole marked as "bridged" can be adjacent to bridge which is accepted
 		// because it is adjacent to hole filled and accepted, so they arent "bridged" now.
 		for( it= holes.begin(); it != holes.end(); it++)
 		{
@@ -207,25 +208,30 @@ public:
 			if( it->IsBridged() )
 				it->UpdateBridgingStatus();
 		}
-	
+
 		countSelected();
 	};
 
+	/*  Bridges became face of this mesh
+	 */
 	inline void ConfirmBridges()
-	{		
+	{
 		BridgeIterator bit = bridges.begin();
 		for( ; bit != bridges.end(); bit++ )
-		{	
+		{
 			(*bit)->ResetFlag();
 			delete *bit;
 		}
 		bridges.clear();
 
-		HoleVector::iterator hit = holes.begin();
+		typename HoleVector::iterator hit = holes.begin();
 		for( ; hit!=holes.end(); hit++ )
-			hit->SetBridged(false);	
+			hit->SetBridged(false);
 	};
 
+	/*  Bridges are removed from bridges vector and mesh is restored,
+	 *  bridge faces are removed from mesh.
+	 */
 	inline void DiscardBridges()
 	{
 		removeBridges();
@@ -252,56 +258,40 @@ public:
 	/** Return index of hole adjacent to picked face into holes vector.
 	 *  Also return the iterator on correct position in holes list.
 	 */
-	int FindHoleFromFace(FacePointer bFace, HoleIterator &it)
+	int FindHoleFromFace(FacePointer pFace, HoleIterator &it)
 	{
 		int index = 0;
+		HoleIterator hit = holes.begin();
 
 		// it know if bFace is adjacent to patchFace
 		FacePointer patchF = 0;
-		if(IsPatchFace(bFace))
-			patchF = bFace;
-		else
+		if(IsPatchFace(pFace))
 		{
-			for( int i=0; i<3; i++)
-				if(IsPatchFace(bFace->FFp(i)) && !IsBridgeFace(bFace->FFp(i)))
-					patchF = bFace->FFp(i);
-		}
-
-		HoleIterator hit = holes.begin();
-		if(patchF == 0)
-		{
-			if(IsHoleBorderFace(bFace))
-			{
-				// border face belong to an hole not filled... it can walk on border
-				for( ; hit != holes.end(); ++hit)
-				{
-					if(!hit->IsFilled())
-						if(hit->HaveBorderFace(bFace))
-						{
-							it = hit;
-							return index;
-						}
-					index++;
-				}
-			}
-		}
-		else
-		{
-			// bFace belong filled hole, adjF is its patch
-			assert(IsPatchFace(patchF));
-			HoleIterator hit = holes.begin();
 			for( ; hit != holes.end(); ++hit)
 			{
 				// for each hole check if face is its border face
-				if(hit->IsFilled())
-					if(hit->HavePatchFace(patchF))
-					{
-						it = hit;
-						return index;
-					}
+				if(hit->HavePatchFace(pFace))
+				{
+					it = hit;
+					return index;
+				}
 				index++;
 			}
 		}
+		else if(IsHoleBorderFace(pFace))
+		{
+			for( ; hit != holes.end(); ++hit)
+			{
+				// for each hole check if face is its border face
+				if(hit->HaveBorderFace(pFace))
+				{
+					it = hit;
+					return index;
+				}
+				index++;
+			}
+		}
+
 		it = holes.end();	// invalid iterator
 		return -1;
 	};
@@ -344,23 +334,18 @@ public:
 	};
 
 
-	/*  Starting from holes stored into a vector this function extract all reference to mesh faces 
-	 *  and adds them to vector facesReferences
+	/*  Appends all its face reference to a vector, all face reference of its hole type
+	 *  and its bridge.
 	 */
 	void AddFaceReference(std::vector<FacePointer*> &facesReferences)
 	{
-		typename HoleVector::iterator it = holes.begin();
-		for( ; it!=holes.end(); it++)
-		{
-		  facesReferences.push_back(&it->p.f);
-		  typename std::vector<FacePointer>::iterator fit;
-		  for(fit=it->patches.begin(); fit!=it->patches.end(); fit++)
-        facesReferences.push_back(&(*fit));
-		}
+		typename HoleVector::iterator hit = holes.begin();
+		for( ; hit!=holes.end(); hit++)
+			hit->AddFaceReference(facesReferences);
 
 		BridgeIterator bit = bridges.begin();
 		for( ; bit != bridges.end(); bit++ )
-			(*bit)->AddFaceReference(facesReferences);		
+			(*bit)->AddFaceReference(facesReferences);
   }
 
 
@@ -434,9 +419,11 @@ private:
 		return PosType(face, nearest, face->V(nearest) );
 	};
 
-	/* Remove all face marked as bridge. */
+	/*  Remove all bridges updating holes vector and its selection
+	 */
 	void removeBridges()
 	{
+		assert( holes.size()>0 );
 		// contains all half-edge located over non-bridge face and over edge shared with bridge face.
 		// these half-edges will become border edge when bridge faces are removed.
 		PosVector adjBorderPos;
@@ -448,7 +435,7 @@ private:
 			adjBorderPos.push_back( (*bit)->GetAbutmentA() );
 			adjBorderPos.push_back( (*bit)->GetAbutmentB() );
 		}
-		
+
 		// remove holes adjacent to bridge
 		HoleIterator hit = holes.begin();
 		while(hit != holes.end() )
@@ -457,11 +444,12 @@ private:
 			{
 				if( hit->IsSelected() )
 				{
-					PosType p = hit->p;
-					// get adjacent border edge because start position in bridged holes
-					// is bridge face so it'll be removed
-					p.NextB();
-					p.f->SetS();
+					PosType curPos = hit->p;
+					do
+					{
+						curPos.f->SetS();
+						curPos.NextB();
+					}while( curPos != hit->p );
 				}
 				hit = holes.erase(hit);
 			}
@@ -475,7 +463,7 @@ private:
 			delete *bit;
 		}
 		bridges.clear();
-		
+
 		// update hole list inserting holes touched by bridge
 		// use adjBorderPos element as start pos to walk over the border, if walking doesn't
 		// visit some adjBorderPos element means this belongo to other hole.
@@ -483,7 +471,7 @@ private:
 		typename PosVector::iterator it;
 		for( it=adjBorderPos.begin(); it!=adjBorderPos.end(); it++)
 		{
-			// bridge abutment can be placed over face of another bridge... 
+			// bridge abutment can be placed over face of another bridge...
 			// this abutments must be ignored
 			if(it->f->IsD())
 				continue;
@@ -494,7 +482,7 @@ private:
 
 			if(it->f->IsV() || it->f->IsD())
 				continue;
-			
+
 			curPos = initPos = *it;
 			do{
 				curPos.f->SetV();
@@ -503,7 +491,7 @@ private:
 				curPos.NextB();
 				assert(curPos.IsBorder());
 			}while(curPos != initPos);
-			
+
 			FgtHole<MESH> newHole(initPos, QString("Hole_%1").arg(HoleType::GetHoleId(),3,10,QChar('0')), this);
 			newHole.SetSelect(sel);
 			holes.push_back( newHole );
@@ -520,10 +508,10 @@ private:
 				curPos.NextB();
 				assert(curPos.IsBorder());
 			}while(curPos != initPos);
-		}				
+		}
 	};
 
-
+	// update statistical info
 	void countSelected()
 	{
 		nSelected = 0;

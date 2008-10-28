@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -58,8 +58,8 @@ public:
 	FgtHole<MESH>* h;
 };
 
-/*  Class rappresenting callback for feedback while auto bridging is running. 
- *  It's necessary because auto bridging can spent a lot of time computing 
+/*  Class rappresenting callback for feedback while auto bridging is running.
+ *  It's necessary because auto bridging can spent a lot of time computing
  *  and user must know it is working.
  */
 class AutoBridgingCallback
@@ -76,17 +76,10 @@ template <class MESH>
 class FgtBridgeBase
 {
 public:
-	typedef typename BridgeAbutment<MESH>				AbutmentType;
 	typedef typename MESH::FaceType							FaceType;
 	typedef typename MESH::FacePointer					FacePointer;
-	typedef typename MESH::FaceIterator					FaceIterator;
 	typedef typename vcg::face::Pos<FaceType>		PosType;
-	typedef typename std::vector<PosType>				PosVector;
-	typedef FgtHole<MESH>												HoleType;
-	typedef typename std::vector<HoleType>			HoleVector;
-	typedef typename MESH::VertexType						VertexType;
-	typedef typename MESH::ScalarType						ScalarType;
-	
+
 public:
 	virtual PosType GetAbutmentA() const =0;
 	virtual PosType GetAbutmentB() const =0;
@@ -97,7 +90,7 @@ public:
 
 	virtual inline bool IsNull() const = 0;
 	virtual inline bool IsDeleted() const = 0;
-	
+
 protected:
 	HoleSetManager<MESH>* parentManager;
 };
@@ -105,15 +98,15 @@ protected:
 
 /** Bridge between different FgtHoles or into the same one.
  *  Bridges rapresent connection between two border edges of different faces.
- *  Connection consists in 2 face adjcent each other over an edge and adjcent 
+ *  Connection consists in 2 face adjcent each other over an edge and adjcent
  *  with a mesh face over another edge, so both faces have a border edge.
- * 
+ *
  *  Bridge can connect 2 edge belong the same hole, result are 2 new holes.
- *  In this case bridge could be adjacent to mesh if edge are next, so this 
+ *  In this case bridge could be adjacent to mesh if edge are next, so this
  *  bridge could not been build.
  *
  *  Bridge can also connect 2 or more different holes in only one hole.
- * 
+ *
  *                   \ / B \ /                  \ / B \ /
  *             +------+-----+------+      +------+-----+------+
  *             |                   |			|      |\ f1 |      |
@@ -122,7 +115,7 @@ protected:
  *             |                   |      |      |   \ |      |
  *             |                   |      |      | f0 \|      |
  *             +------+-----+------+      +------+-----+------+
- *                   / \ A / \                  / \ A / \      
+ *                   / \ A / \                  / \ A / \
  *                                             GOOD BRIDGE
  *                             f0 and f1 are adjacent only with one mesh face
  *
@@ -148,9 +141,19 @@ protected:
 template <class MESH>
 class FgtBridge: public FgtBridgeBase<MESH>
 {
-	typedef typename vcg::GridStaticPtr<FaceType, ScalarType >	GridType;
+  typedef BridgeAbutment<MESH>        				                AbutmentType;
+  typedef typename MESH::FaceType							                FaceType;
+  typedef typename MESH::FaceType							                FaceType;
+	typedef typename MESH::ScalarType						                ScalarType;
+	typedef typename vcg::face::Pos<FaceType>               		PosType;
+	typedef FgtHole<MESH>											                	HoleType;
+	typedef typename std::vector<HoleType>			                HoleVector;
+	typedef typename MESH::FacePointer					                FacePointer;
+  typedef typename MESH::FaceIterator					                FaceIterator;
+  typedef typename vcg::GridStaticPtr<FaceType, ScalarType >	GridType;
 	typedef typename std::vector< FgtBridge<MESH> >							BridgeVector;
 	typedef typename BridgeVector::iterator											BridgeIterator;
+  typedef typename MESH::VertexType						                VertexType;
 
 public:
 	enum BridgeOption {NoOne, OptA, OptB};
@@ -158,8 +161,8 @@ public:
 	FgtBridge(HoleSetManager<MESH>* parent)
 	{
 		f0=0;
-		f0=0;		
-		parentManager = parent;		
+		f0=0;
+		this->parentManager = parent;
 	};
 
 	inline void AddFaceReference(std::vector<FacePointer*> &facesReferences)
@@ -168,11 +171,11 @@ public:
 		facesReferences.push_back(&f1);
 	};
 
-	inline PosType GetAbutmentA() const { 
-		return PosType( f0->FFp(0), f0->FFi(0) ); 
+	inline PosType GetAbutmentA() const {
+		return PosType( f0->FFp(0), f0->FFi(0) );
 	};
-	inline PosType GetAbutmentB() const { 
-		return PosType( f1->FFp(0), f1->FFi(0) ); 
+	inline PosType GetAbutmentB() const {
+		return PosType( f1->FFp(0), f1->FFi(0) );
 	};
 
 	inline PosType GetSideA() const{
@@ -183,7 +186,7 @@ public:
 	inline PosType GetSideB() const{
 		if( opt==OptA )	return PosType(f1, SIDE_EDGE_OPTA);
 		else return PosType(f1, SIDE_EDGE_OPTB);
-	};	
+	};
 
 	inline bool IsNull() const { return f0==0 && f1==0; };
 	inline bool IsDeleted() const { return f0->IsD() && f1->IsD(); };
@@ -191,41 +194,41 @@ public:
 	void ResetFlag()
 	{
 		assert( !IsNull() );
-		assert( parentManager->IsBridgeFace( f0 ) );
-		assert( parentManager->IsBridgeFace( f1 ) );
+		assert( this->parentManager->IsBridgeFace( f0 ) );
+		assert( this->parentManager->IsBridgeFace( f1 ) );
 
-		parentManager->ClearBridgeAttr( f0 );
-		parentManager->ClearBridgeAttr( f1 );
+		this->parentManager->ClearBridgeAttr( f0 );
+		this->parentManager->ClearBridgeAttr( f1 );
 	};
 
 	void DeleteFromMesh()
 	{
 		assert(!IsNull() && !IsDeleted());
 		if( !f0->IsD() )
-		vcg::tri::Allocator<MESH>::DeleteFace(*parentManager->mesh, *f0);		 
+		vcg::tri::Allocator<MESH>::DeleteFace(*this->parentManager->mesh, *f0);
 		if( !f1->IsD() )
-			vcg::tri::Allocator<MESH>::DeleteFace(*parentManager->mesh, *f1);
+			vcg::tri::Allocator<MESH>::DeleteFace(*this->parentManager->mesh, *f1);
 
 		// update mesh topology after bridge faces removal, restore border
 		for(int e=0; e<3; e++)
-		{	
+		{
 			if(!vcg::face::IsBorder<FaceType>(*f0, e))
 			{
 				FacePointer adjF = f0->FFp(e);
-				if(!parentManager->IsBridgeFace(adjF))
-				{								
+				if(!this->parentManager->IsBridgeFace(adjF))
+				{
 					int adjEI = f0->FFi(e);
 					adjF->FFp( adjEI ) = adjF;
 					adjF->FFi( adjEI ) = adjEI;
 					assert(vcg::face::IsBorder<FaceType>(*adjF, adjEI));
 				}
 			}
-			
+
 			if(!vcg::face::IsBorder<FaceType>(*f1, e))
 			{
 				FacePointer adjF = f1->FFp(e);
-				if(!parentManager->IsBridgeFace(adjF))
-				{								
+				if(!this->parentManager->IsBridgeFace(adjF))
+				{
 					int adjEI = f1->FFi(e);
 					adjF->FFp( adjEI ) = adjF;
 					adjF->FFi( adjEI ) = adjEI;
@@ -238,7 +241,7 @@ public:
 private:
 
 	void build(AbutmentType sideA, AbutmentType sideB, BridgeOption o, std::vector<FacePointer *> &app, bool test=false)
-	{	
+	{
 		opt = o;
 		if(test)
 			if(!testAbutmentDistance(sideA, sideB) &&  (opt=computeBestBridgeOpt(sideA, sideB)) == NoOne)
@@ -247,37 +250,37 @@ private:
 				opt = NoOne;
 				return;
 			}
-		
+
 		assert(testAbutmentDistance(sideA, sideB));
 		assert(opt!=NoOne);
-	
+
 		app.push_back(&sideA.f);
 		app.push_back(&sideB.f);
-		FaceIterator fit = vcg::tri::Allocator<MESH>::AddFaces(*parentManager->mesh, 2, app);
-		parentManager->faceAttr->UpdateSize();
+		FaceIterator fit = vcg::tri::Allocator<MESH>::AddFaces(*this->parentManager->mesh, 2, app);
+		this->parentManager->faceAttr->UpdateSize();
 		app.pop_back();
 		app.pop_back();
 
 		f0 = &*fit;
 		f1 = &*(fit+1);
 
-		parentManager->SetBridgeAttr(f0);
-		parentManager->SetBridgeAttr(f1);
-		parentManager->SetHoleBorderAttr(f0);
-		parentManager->SetHoleBorderAttr(f1);
+		this->parentManager->SetBridgeAttr(f0);
+		this->parentManager->SetBridgeAttr(f1);
+		this->parentManager->SetHoleBorderAttr(f0);
+		this->parentManager->SetHoleBorderAttr(f1);
 
-		parentManager->ClearHoleBorderAttr(sideA.f);
-		parentManager->ClearHoleBorderAttr(sideB.f);
-		
+		this->parentManager->ClearHoleBorderAttr(sideA.f);
+		this->parentManager->ClearHoleBorderAttr(sideB.f);
+
 		// the index of edge adjacent between new 2 face, is the same for both new faces
-		int adjEdgeIndex = -1;		
-		
+		int adjEdgeIndex = -1;
+
 		// the index of edge adjacent between new 2 face, is the same for both new faces
 		int sideEdgeIndex = -1;
 
 		setVertexByOption(sideA, sideB, opt, *f0, *f1);
 		if( opt == OptA )
-		{			
+		{
 			adjEdgeIndex = ADJ_EDGE_OPTA;
 			sideEdgeIndex = SIDE_EDGE_OPTA;
 		}
@@ -295,7 +298,7 @@ private:
 		f0->FFi(0) = sideA.z;
 		f1->FFp(0) = sideB.f;
 		f1->FFi(0) = sideB.z;
-		
+
 		sideA.f->FFp(sideA.z) = f0;
 		sideA.f->FFi(sideA.z) = 0;
 		sideB.f->FFp(sideB.z) = f1;
@@ -313,8 +316,8 @@ private:
 		f1->FFp(sideEdgeIndex) = f1;
 		f1->FFi(sideEdgeIndex) = sideEdgeIndex;
 
-		assert( parentManager->IsBridgeFace( f0 ) );
-		assert( parentManager->IsBridgeFace( f1 ) );
+		assert( this->parentManager->IsBridgeFace( f0 ) );
+		assert( this->parentManager->IsBridgeFace( f1 ) );
 	};
 
 /*** funzioni statiche ***/
@@ -322,13 +325,13 @@ private:
 public:
 
 	/*  Build a bridge between 2 border edge.
-	 *  If the bridge is inside the same hole it cannot be adjacent the hole border, 
+	 *  If the bridge is inside the same hole it cannot be adjacent the hole border,
 	 *  this means fill another sub hole.
 	 */
-	static bool CreateBridge(AbutmentType &sideA, AbutmentType &sideB, 
+	static bool CreateBridge(AbutmentType &sideA, AbutmentType &sideB,
 		HoleSetManager<MESH>* holesManager, QString &err, std::vector<FacePointer *> *app=0)
 	{
-		assert( vcg::face::IsBorder<FaceType>(*sideA.f, sideA.z) && 
+		assert( vcg::face::IsBorder<FaceType>(*sideA.f, sideA.z) &&
 						vcg::face::IsBorder<FaceType>(*sideB.f, sideB.z));
 		assert(!sideA.h->IsFilled() && !sideB.h->IsFilled());
 
@@ -361,7 +364,7 @@ public:
 	};
 
 
-	/*  Build a bridge inner to the same hole. It chooses the best bridge computing quality 
+	/*  Build a bridge inner to the same hole. It chooses the best bridge computing quality
 	 *  of 2 faces and similarity (as number of edge) of two next hole. Bridge is build follow
 	 *  bridge's rule, bridge must have 2 border edge.
 	 *  infoLabel paramter is used to show work progress.
@@ -378,7 +381,7 @@ public:
 		}
 		GridType gM;
 		gM.Set(holesManager->mesh->face.begin(),holesManager->mesh->face.end());
-		
+
 		std::vector<FacePointer *> tmpFaceRef;
 		HoleType* oldRef = 0;
 		AbutmentType sideA, sideB;
@@ -393,16 +396,16 @@ public:
 			assert(!thehole.IsFilled());
 
 			ScalarType maxQuality = -1;
-			
+
 			// initP: first bridge abutment
-			PosType initP = thehole.p;		
+			PosType initP = thehole.p;
 			for(int i=0; i<thehole.Size();i++)
 			{
 				// initP: second bridge abutment
 				PosType endP = initP;
 				endP.NextB();endP.NextB();
 				for(int j=3; j<=thehole.Size()/2; j++)
-				{	
+				{
 					endP.NextB();
 
 					// two edge used as bridge abutment are adjacent to the same face... bridge can't be build
@@ -417,7 +420,7 @@ public:
 					AbutmentType b(endP.f, endP.z, &thehole);
 					if(!testAbutmentDistance(a,b))
 						continue;
-					
+
 					ScalarType q;
 					BridgeOption opt = computeBestBridgeOpt(a, b, &q, &gM);
 					if(opt != NoOne)
@@ -429,9 +432,9 @@ public:
 							bestOpt = opt;
 							sideA.f=initP.f; sideA.z=initP.z; sideA.h=&thehole;
 							sideB.f=endP.f; sideB.z=endP.z; sideB.h=&thehole;
-						}					
+						}
 					}
-					
+
 					if(holesManager->autoBridgeCB != 0)
 					{
 						if(clock()- timer > holesManager->autoBridgeCB->GetOffset())
@@ -442,7 +445,7 @@ public:
 						}
 					}
 				}// scansione del edge di arrivo
-				
+
 				initP.NextB();
 			}// scansione dell'edge di partenza
 
@@ -451,21 +454,21 @@ public:
 
 			if( oldRef != &*holesManager->holes.begin() )
 			{
-				// si può 
+				// si può
 				tmpFaceRef.clear();
 				if(app!=0)
 					tmpFaceRef.insert(tmpFaceRef.end(), app->begin(), app->end());
 				holesManager->AddFaceReference(tmpFaceRef);
 				tmpFaceRef.push_back(&sideA.f);
 				tmpFaceRef.push_back(&sideB.f);
-				oldRef = &*holesManager->holes.begin();				
+				oldRef = &*holesManager->holes.begin();
 			}
 
 			if( maxQuality > -1)
 			{
 				subdivideHoleWithBridge(sideA, sideB, bestOpt, holesManager, tmpFaceRef);
 				gM.Set(holesManager->mesh->face.begin(), holesManager->mesh->face.end());
-				// la subdivideHole.. aggiunge un hole pertanto bisogna aggiornare anche la lista di 
+				// la subdivideHole.. aggiunge un hole pertanto bisogna aggiornare anche la lista di
 				// reference a facce
 				tmpFaceRef.push_back(&holesManager->holes.back().p.f);
 			}
@@ -477,7 +480,7 @@ public:
 	};
 
 
-	/*  It connects iteratively selected holes with the best bridge. 
+	/*  It connects iteratively selected holes with the best bridge.
 	 *  Result is unique hole instead of init holes.
 	 *  Return number of bridges builded.
 	 */
@@ -491,32 +494,32 @@ public:
 		}
 
 		GridType gM;
-		
+
 		std::vector<FacePointer *> tmpFaceRef;
 		AbutmentType sideA, sideB;
 		BridgeOption bestOpt;
 
 		std::vector<HoleType*> selectedHoles;
-		typename std::vector<HoleType*>::iterator shit1, shit2; 
+		typename std::vector<HoleType*>::iterator shit1, shit2;
 		typename HoleVector::iterator hit;
-		
+
 		int nIteration = -1;
 		int iteration = 0;
 		// iterate, unify holes, until selected hole is only one
 		do{
 			sideA.SetNull();
 			sideB.SetNull();
-			
+
 			// prendo gli hole selezionati
 			selectedHoles.clear();
 			for(hit=holesManager->holes.begin(); hit!=holesManager->holes.end(); hit++)
 				if(hit->IsSelected())
 					selectedHoles.push_back(&*hit);
-			
+
 			if(selectedHoles.size() < 2)
 				return;
 			gM.Set(holesManager->mesh->face.begin(),holesManager->mesh->face.end());
-			
+
 			float casesViewed = 0, cases2View = 0;
 			for(shit1=selectedHoles.begin(); shit1!=selectedHoles.end(); shit1++)
 				for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
@@ -526,11 +529,11 @@ public:
 				nIteration = selectedHoles.size()-1;
 
 			// cerco la miglior combinazione tra le facce di un hole con quelle di un'altro
-			ScalarType maxQuality = -1;			
+			ScalarType maxQuality = -1;
 			for(shit1=selectedHoles.begin(); shit1!=selectedHoles.end(); shit1++)
-			{				
+			{
 				for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
-				{					
+				{
 					PosType ph1((*shit1)->p.f, (*shit1)->p.z);
 					PosType ph2((*shit2)->p.f, (*shit2)->p.z);
 					do{	//scansione edge di bordo del primo buco
@@ -560,16 +563,16 @@ public:
 
 							casesViewed++;
 							ph2.NextB();
-						}while(ph2 != (*shit2)->p);				
-						
+						}while(ph2 != (*shit2)->p);
+
 						ph1.NextB();
-					}while(ph1 != (*shit1)->p);					
-				} // for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)							
+					}while(ph1 != (*shit1)->p);
+				} // for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
 			}
 
 			// adesso ho la miglior coppia di edge si deve creare il bridge
 			assert(!sideA.IsNull() && !sideB.IsNull());
-			
+
 			// la rimozione di hole dovuta alla unifyHoles.. provoca l'aggiornamento della lista di holes
 			// pertanto si deve avere sempre aggiornata la lista dei riferimenti alle facce
 			// la quale dipende anche dagli holes
@@ -579,10 +582,10 @@ public:
 			holesManager->AddFaceReference(tmpFaceRef);
 			tmpFaceRef.push_back(&sideA.f);
 			tmpFaceRef.push_back(&sideB.f);
-			
+
 			if(maxQuality > -1)
 				unifyHolesWithBridge(sideA, sideB, bestOpt, holesManager, tmpFaceRef);
-			else 
+			else
 				return;
 			iteration ++;
 		}while(true);
@@ -591,7 +594,7 @@ public:
 
 
 private:
-	/*  Compute distance between bridge side to allow no bridge adjacent to hole border. 
+	/*  Compute distance between bridge side to allow no bridge adjacent to hole border.
 	 *  A bridge must have 2 border faces.
 	 */
 	static bool testAbutmentDistance(const AbutmentType &sideA, const AbutmentType &sideB)
@@ -600,7 +603,7 @@ private:
 
 		// at least 2 edges have to be between 2 bridge side.
 		if(!sideA.h->IsNonManifold())
-		{			 
+		{
 			// so adjacent edges of a side haven't to share a vertex with other side.
 			PosType pos(sideA.f, sideA.z);
 			assert(pos.IsBorder());
@@ -619,12 +622,12 @@ private:
 			// if exist a face which share a vertex with each side then the bridge cannot be built
 			PosType initPos(sideA.f, sideA.z);
 			PosType curPos=initPos;
-			
+
 			VertexType* va0=sideA.f->V0(sideA.z);
 			VertexType* va1=sideA.f->V1(sideA.z);
 			VertexType* vb0=sideB.f->V0(sideB.z);
 			VertexType* vb1=sideB.f->V1(sideB.z);
-			
+
 			do{
 				VertexType* cv0=curPos.f->V0(curPos.z);
 				VertexType* cv1=curPos.f->V1(curPos.z);
@@ -633,14 +636,14 @@ private:
 					if( cv0 == vb0 || cv1 == vb0 ||
 					    cv0 == vb1 || cv1 == vb1 )
 						return false;
-			
+
 				curPos.NextB();
-			}while( curPos != initPos );		
+			}while( curPos != initPos );
 		}
 		return true;
 	};
 
-	static void subdivideHoleWithBridge(AbutmentType &sideA, AbutmentType &sideB, 
+	static void subdivideHoleWithBridge(AbutmentType &sideA, AbutmentType &sideB,
 		BridgeOption bo, HoleSetManager<MESH>* holesManager, std::vector<FacePointer *> &app)
 	{
 		assert(sideA.h==sideB.h);
@@ -658,7 +661,7 @@ private:
 		holesManager->holes.push_back( newHole );
 	};
 
-	static void unifyHolesWithBridge(AbutmentType &sideA, AbutmentType &sideB, 
+	static void unifyHolesWithBridge(AbutmentType &sideA, AbutmentType &sideB,
 				BridgeOption bo, HoleSetManager<MESH>* holesManager, std::vector<FacePointer *> &app)
 	{
 		assert(vcg::face::IsBorder<FaceType>(*sideA.f, sideA.z));
@@ -688,12 +691,12 @@ private:
 	static void setVertexByOption(AbutmentType &sideA, AbutmentType &sideB, BridgeOption o,
 		FaceType &bf0, FaceType &bf1)
 	{
-		VertexType* vA0 = sideA.f->V0( sideA.z ); // first vertex of pos' 1-edge 
+		VertexType* vA0 = sideA.f->V0( sideA.z ); // first vertex of pos' 1-edge
 		VertexType* vA1 = sideA.f->V1( sideA.z ); // second vertex of pos' 1-edge
-		VertexType* vB0 = sideB.f->V0( sideB.z ); // first vertex of pos' 2-edge 
-		VertexType* vB1 = sideB.f->V1( sideB.z ); // second vertex of pos' 2-edge 
+		VertexType* vB0 = sideB.f->V0( sideB.z ); // first vertex of pos' 2-edge
+		VertexType* vB1 = sideB.f->V1( sideB.z ); // second vertex of pos' 2-edge
 
-		// Quality 
+		// Quality
 		if(o==OptA)
 		{
 			bf0.V(0) = vA1; bf0.V(1) = vA0;	bf0.V(2) = vB0;
@@ -706,10 +709,10 @@ private:
 		}
 	}
 
-	/*  Find how triangolate two bridge faces. 
+	/*  Find how triangolate two bridge faces.
 	 *  If return "NoOne" means bridge is compenetrating with mesh for both option
 	 */
-	static BridgeOption computeBestBridgeOpt(AbutmentType sideA, 
+	static BridgeOption computeBestBridgeOpt(AbutmentType sideA,
 		AbutmentType sideB, ScalarType* quality=0, GridType* gM=0)
 	{
 		HoleSetManager<MESH>* hm = sideA.h->parentManager;
@@ -720,7 +723,7 @@ private:
 			gM->Set(hm->mesh->face.begin(),hm->mesh->face.end());
 			delgm = true;
 		}
-		
+
 		FaceType bf0, bf1;
 		ScalarType qA = -1;
 		// Caso A
@@ -728,7 +731,7 @@ private:
 		if( !HoleType::TestFaceMeshCompenetration(*hm->mesh, *gM, &bf0) &&
 				!HoleType::TestFaceMeshCompenetration(*hm->mesh, *gM, &bf1) )
 					qA = QualityFace(bf0)+ QualityFace(bf1);
-		
+
 		// Caso B
 		ScalarType qB = -1;
 		setVertexByOption(sideA, sideB, OptB, bf0, bf1);
@@ -752,14 +755,14 @@ private:
 			return NoOne;	// both autocompenetrant with mesh
 		else if(qA>qB)
 			return OptA;
-		else 
+		else
 			return OptB;
 	};
 
 
 private:
 	BridgeOption opt;
-	
+
 public:
 	FacePointer f0;
 	FacePointer f1;
@@ -768,23 +771,41 @@ public:
 
 
 /*  "Bridge" (face) added to close non manifold holes
+ *
+ *  
+ *	  -----+------+------      ----+------+--------
+ *		      \ A  /                  \ A  /|
+ *	         \  /                    \  / |
+ *		 holeX  \/  holeX        holeX  \/  |  holeY
+ *	          /\                      /\f0|  
+ *	         /  \                    /  \ |
+ *	        / B  \                  / B  \|
+ *	  -----+------+------      ----+------+--------
+ *   HoleX is Non-Manifold     HoleX and HoleY aren't 
+ *	                                Non-Manifold
  */
 template <class MESH>
 class FgtNMBridge: public FgtBridgeBase<MESH>
 {
+  typedef typename MESH::FaceType							FaceType;
+	typedef typename MESH::FacePointer					FacePointer;
+  typedef typename vcg::face::Pos<FaceType>		PosType;
+  typedef FgtHole<MESH>												HoleType;
+  typedef typename MESH::FaceIterator					FaceIterator;
+
 public:
 
 	FgtNMBridge(FacePointer f, HoleSetManager<MESH>* parent)
 	{
 		f0 = f;
-		parentManager = parent;
+		this->parentManager = parent;
 	};
 
-	inline PosType GetAbutmentA() const { 
-		return PosType( f0->FFp(0), f0->FFi(0)); 
+	inline PosType GetAbutmentA() const {
+		return PosType( f0->FFp(0), f0->FFi(0));
 	};
-	inline PosType GetAbutmentB() const { 
-		return PosType( f0->FFp(2), f0->FFi(2)); 
+	inline PosType GetAbutmentB() const {
+		return PosType( f0->FFp(2), f0->FFi(2));
 	};
 
 	inline bool IsNull() const { return f0==0; };
@@ -799,25 +820,25 @@ public:
 	void ResetFlag()
 	{
 		assert( !IsNull() );
-		assert(parentManager->IsBridgeFace(f0) );
-		parentManager->ClearBridgeAttr(f0);
+		assert(this->parentManager->IsBridgeFace(f0) );
+		this->parentManager->ClearBridgeAttr(f0);
 	};
 
 	void DeleteFromMesh()
 	{
 		assert( !IsNull() );
-		assert( parentManager->IsBridgeFace(f0) );
+		assert( this->parentManager->IsBridgeFace(f0) );
 		if( !f0->IsD() )
-			vcg::tri::Allocator<MESH>::DeleteFace(*parentManager->mesh, *f0);
+			vcg::tri::Allocator<MESH>::DeleteFace(*this->parentManager->mesh, *f0);
 
 		// update mesh topology after bridge faces removal, restore border
 		for(int e=0; e<3; e++)
-		{	
+		{
 			if(!vcg::face::IsBorder<FaceType>(*f0, e))
 			{
 				FacePointer adjF = f0->FFp(e);
-				if(!parentManager->IsBridgeFace(adjF))
-				{								
+				if(!this->parentManager->IsBridgeFace(adjF))
+				{
 					int adjEI = f0->FFi(e);
 					adjF->FFp( adjEI ) = adjF;
 					adjF->FFi( adjEI ) = adjEI;
@@ -833,16 +854,16 @@ public:
 	static void CloseNonManifoldVertex(HoleSetManager<MESH>* holesManager, std::vector<FacePointer *> *app=0)
 	{
 		int startNholes = holesManager->holes.size();
-		
+
 		std::vector<FacePointer *> tmpFaceRef;
-		HoleType* oldRef = 0;	
+		HoleType* oldRef = 0;
 
 		for(int i=0; i<startNholes; i++)
 		{
 			HoleType *h = &holesManager->holes.at(i);
 			if(!(h->IsNonManifold() && h->IsSelected()))
 				continue;
-			
+
 			// walk the border, mark as visit each vertex. If walk twice over the same vertex go back over the border
 			// to find other edge sharing this vertex
 			PosType curPos = h->p;
@@ -854,7 +875,7 @@ public:
 			do{
 				assert(p0.IsNull());
 				if(curPos.v->IsV())
-					p0.Set(curPos.f, curPos.z, curPos.v);				
+					p0.Set(curPos.f, curPos.z, curPos.v);
 				else
 					curPos.v->SetV();
 				curPos.NextB();
@@ -894,7 +915,7 @@ public:
 					// p2 is half-edge adjcent to connect to patch edge which usually is border
 					PosType p2 = p0;
 					p2.FlipV();
-					p2.NextB();					
+					p2.NextB();
 
 					// face is build to have as vertex 0 the non-manifold vertex, so it have adge 1 as border edge
 					fit->V(0) = p0.v;
@@ -911,13 +932,13 @@ public:
 						p0.f->FFp(p0.z) = &*fit;
 						p0.f->FFi(p0.z) = 2;
 						p1.f->FFp(p1.z) = &*fit;
-						p1.f->FFi(p1.z) = 0;						
+						p1.f->FFi(p1.z) = 0;
 					}
 					else
 					{
 						fit->V(1) = p0.f->V(p0.z);
 						fit->V(2) = p1.f->V1(p1.z);
-						
+
 						fit->FFp(0) = p0.f;
 						fit->FFi(0) = p0.z;
 						fit->FFp(2) = p1.f;
@@ -935,13 +956,13 @@ public:
 
 					if(dist==2)
 					{
-						// face used to close non-manifold holes, close entirely a "sub-hole" (sub-hole has 
+						// face used to close non-manifold holes, close entirely a "sub-hole" (sub-hole has
 						// only 3 border edge). This face become a patch face wich fill an invisible subhole.
 						holesManager->SetPatchAttr(&*fit);
 						fit->FFp(1) = p2.f;
 						fit->FFi(1) = p2.z;
 						p2.f->FFp(p2.z) = &*fit;
-						p2.f->FFi(p2.z) = 1;						
+						p2.f->FFi(p2.z) = 1;
 					}
 					else
 					{
@@ -952,9 +973,9 @@ public:
 						if(h->IsSelected())
 							newhole.SetSelect(true);
 						newhole.SetBridged(true);
-						holesManager->holes.push_back(newhole);						
+						holesManager->holes.push_back(newhole);
 						tmpFaceRef.push_back(&holesManager->holes.back().p.f);
-						
+
 						// adding hole can reallocate hole vector so h must be updated
 						if( oldRef != &*holesManager->holes.begin() )
 							h = &holesManager->holes.at(i);
@@ -973,7 +994,7 @@ public:
 			//forzo l'aggiornamento delle info dell'hole
 			h->SetStartPos(h->p);
 			h->SetBridged(true);
-		}// for(int i=0; i<startNholes...		
+		}// for(int i=0; i<startNholes...
 	};
 
 public:

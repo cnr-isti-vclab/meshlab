@@ -90,6 +90,7 @@ public:
 	typedef typename MESH::VertexType											VertexType;
 	typedef typename MESH::ScalarType											ScalarType;
 	typedef typename vcg::face::Pos<FaceType>							PosType;
+	typedef typename std::vector< PosType >								PosVector;
 	typedef typename vcg::tri::Hole<MESH>									vcgHole;
 	typedef typename vcgHole::Info												HoleInfo;
 	typedef typename std::vector< FgtHole<MESH> >					HoleVector;
@@ -168,10 +169,10 @@ public:
 
 	void Draw() const
 	{
-		typename std::vector<VertexType*>::const_iterator it = vertexes.begin();
+		typename PosVector::const_iterator it = borderPos.begin();
 		glBegin(GL_LINE_LOOP);
-		for( ; it != vertexes.end(); it++)
-			glVertex( (*it)->P() );
+		for( ; it != borderPos.end(); it++)
+			glVertex( it->v->P() );
 		glEnd();
 	};
 
@@ -297,9 +298,9 @@ public:
 		}
 
 		// hole filling leaves V flag to border vertex... resetting!
-		typename std::vector<VertexType*>::const_iterator it = vertexes.begin();
-		for( ;it!=vertexes.end(); it++)
-				(*it)->ClearV();
+		typename PosVector::const_iterator it = borderPos.begin();
+		for( ;it!=borderPos.end(); it++)
+				it->v->ClearV();
 
 		parentManager->faceAttr->UpdateSize();
 
@@ -314,14 +315,10 @@ public:
 	bool HaveBorderFace(FacePointer bFace) const
 	{
 		assert(parentManager->IsHoleBorderFace(bFace));
-		assert( !IsFilled() );
-
-		PosType curPos = this->p;
-		do{
-			if(curPos.f == bFace)
+		typename PosVector::const_iterator it;
+		for(it=borderPos.begin(); it!= borderPos.end(); it++)
+			if( bFace == it->f )
 				return true;
-			curPos.NextB();
-		}while( curPos != this->p );
 		return false;
 	}
 
@@ -329,12 +326,13 @@ public:
 	bool HavePatchFace(FacePointer pFace) const
 	{
 		assert( parentManager->IsPatchFace(pFace) );
-		assert( IsFilled() );
+		if( !IsFilled() )
+			return false;
 
 		// follow algorithm used to fill with EAR, each faces added share at least e vertex with hole
-		typename std::vector<VertexType*>::const_iterator it;
-		for(it = vertexes.begin(); it!=vertexes.end(); it++)
-			if(pFace->V(0) == *it || pFace->V(1) == *it || pFace->V(2) == *it)
+		typename std::vector<FacePointer>::const_iterator it;
+		for(it = patches.begin(); it!=patches.end(); it++)
+			if(pFace == *it)
 				return true;
 		return false;
 	};
@@ -361,6 +359,18 @@ public:
 		SetBridged(false);
 	};
 
+	// concats its face reference to a vector
+	void AddFaceReference(std::vector<FacePointer*> &facesReferences)
+	{	
+	  facesReferences.push_back(&this->p.f);
+		typename PosVector::iterator pit;
+		for(pit=borderPos.begin(); pit != borderPos.end(); pit++)
+			facesReferences.push_back( &pit->f );
+
+	  typename std::vector<FacePointer>::iterator fit;
+	  for(fit=patches.begin(); fit!=patches.end(); fit++)
+      facesReferences.push_back(&(*fit));	
+	};
 
 private:
 
@@ -368,7 +378,7 @@ private:
 	void updateInfo()
 	{
 		assert(!IsFilled());
-		vertexes.clear();
+		borderPos.clear();
 		_state &= (~NONMANIF);
 		this->bb.SetNull();
 		this->size = 0;
@@ -376,15 +386,14 @@ private:
 		PosType curPos = this->p;
 		do{
 			assert(!curPos.f->IsD());
+			borderPos.push_back(curPos);
 			parentManager->SetHoleBorderAttr(curPos.f);
 			this->bb.Add(curPos.v->cP());
 			++this->size;
-			vertexes.push_back(curPos.v);
 			if(curPos.v->IsV())
 				_state |= NONMANIF;
 			else
 				curPos.v->SetV();
-
 			curPos.NextB();
 			assert(curPos.IsBorder());
 		}while( curPos != this->p );
@@ -405,7 +414,7 @@ private:
 		_state &= (~NONMANIF);
 		PosType curPos = this->p;
 		do{
-			vertexes.push_back(curPos.v);
+			borderPos.push_back(curPos);
 			if(curPos.v->IsV())
 				_state |= NONMANIF;
 			else
@@ -522,7 +531,7 @@ private:
 	int _state;
 	ScalarType perimeter;
 
-	std::vector<VertexType*> vertexes;
+	std::vector<PosType> borderPos;
 	
 };
 

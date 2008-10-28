@@ -31,8 +31,9 @@
 #include "fgtBridge.h"
 #include "holeSetManager.h"
 
-/*  This class is the "model" of model-view architecture, so it implements methods to esposes data
+/*  This class is the "model" of model-view architecture, so it implements methods to exposes data
  *  informations about holes as QAbstractItemModel says.
+ *  It contains an istance of HoleSetManager to know and manipulate holes and bridges.
  */
 class HoleListModel : public QAbstractItemModel
 {
@@ -101,11 +102,9 @@ private:
 public:
 	HoleSetManager<CMeshO> holesManager;
 	
-
 Q_SIGNALS:
 	void SGN_needUpdateGLA();
 	void SGN_ExistBridge(bool exist);
-
 };
 
 
