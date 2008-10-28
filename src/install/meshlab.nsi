@@ -74,7 +74,7 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\shadersrm"
   File "..\meshlab\shadersrm\*.rfx"
   SetOutPath "$INSTDIR\plugins"
-  ; IO Plugins (7)
+  ; IO Plugins (9)
   File "..\meshlab\plugins\baseio.dll"
   File "..\meshlab\plugins\epoch_io.dll"
   File "..\meshlab\plugins\colladaio.dll"
@@ -82,7 +82,10 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\io_u3d.dll"
   File "..\meshlab\plugins\io_x3d.dll"
   File "..\meshlab\plugins\io_tri.dll"
-  ; filter plugins (18)
+  File "..\meshlab\plugins\io_expe.dll"
+  File "..\meshlab\plugins\io_gts.dll"
+
+  ; filter plugins (23)
   File "..\meshlab\plugins\cleanfilter.dll"
   File "..\meshlab\plugins\meshfilter.dll"
   File "..\meshlab\plugins\meshcolorize.dll"
@@ -109,8 +112,9 @@ Section "MainSection" SEC01
 
   File "..\meshlab\plugins\filter_morph.dll"
   File "..\meshlab\plugins\filter_autoalign.dll"
+  File "..\meshlab\plugins\mlsfilters.dll"
 
-  ; edit plugins (13)
+  ; edit plugins (14)
   File "..\meshlab\plugins\editalign.dll"
   File "..\meshlab\plugins\editmeasure.dll"
   File "..\meshlab\plugins\editpaint.dll"
@@ -161,6 +165,8 @@ Section "MainSection" SEC01
   File "..\sample\TextureDouble_A.png"
   File "..\sample\Laurana50k.ply"
   File "..\sample\duck_triangulate.dae"
+  File "..\sample\seashell.gts"
+  File "..\sample\chameleon4k.pts"
   SetOutPath "$INSTDIR\samples\images"
   File "..\sample\images\duckCM.jpg"
   SetOutPath "$INSTDIR\imageformats"
