@@ -65,7 +65,7 @@ bool EpochCamera::Open(const char *filename)
   // on the right the rotated translation -Rt and 0001 in the 
   // lower line.
 
-  R = R.transpose().eval();
+  R.transposeInPlace();
   #ifndef VCG_USE_EIGEN
   for(int i=0;i<3;++i)
     for(int j=0;j<3;++j)

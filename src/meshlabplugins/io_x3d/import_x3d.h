@@ -2209,7 +2209,7 @@ namespace io {
 			{
 				vcg::Point3f normal(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at( index+ 2).toFloat());
 				vcg::Matrix44f intr44 = vcg::Inverse(tMatrix);
-				intr44 = intr44.transpose().eval();
+				intr44.transposeInPlace();
 				Matrix33f intr33;
 				for(unsigned int rr = 0; rr < 2; ++rr)
 				{
