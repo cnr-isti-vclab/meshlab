@@ -143,7 +143,6 @@ class FgtBridge: public FgtBridgeBase<MESH>
 {
   typedef BridgeAbutment<MESH>        				                AbutmentType;
   typedef typename MESH::FaceType							                FaceType;
-  typedef typename MESH::FaceType							                FaceType;
 	typedef typename MESH::ScalarType						                ScalarType;
 	typedef typename vcg::face::Pos<FaceType>               		PosType;
 	typedef FgtHole<MESH>											                	HoleType;
@@ -409,7 +408,7 @@ public:
 					endP.NextB();
 
 					// two edge used as bridge abutment are adjacent to the same face... bridge can't be build
-					// i due edge di bordo sono già collegati da 2 triangoli adiacenti,
+					// i due edge di bordo sono giï¿½ collegati da 2 triangoli adiacenti,
 					// il bridge si sovrapporrebbe a questi 2 triangoli
 					if( endP.f->FFp(0) == initP.f ||
 						endP.f->FFp(1) == initP.f ||
@@ -454,7 +453,7 @@ public:
 
 			if( oldRef != &*holesManager->holes.begin() )
 			{
-				// si può
+				// si puï¿½
 				tmpFaceRef.clear();
 				if(app!=0)
 					tmpFaceRef.insert(tmpFaceRef.end(), app->begin(), app->end());
