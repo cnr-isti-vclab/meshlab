@@ -153,11 +153,11 @@ bool AlignTools::setupThenAlign(MeshModel &/*mm*/, FilterParameterSet & par)
 		}
 	}
 	
-	AlignTools::align(stuckModel, stuckPickedPoints,
+	bool result = AlignTools::align(stuckModel, stuckPickedPoints,
 			modelToMove, modelToMovePickedPoints,
 			0, par);
 	
-	return true;
+	return result;
 }
 
 
@@ -178,6 +178,9 @@ bool AlignTools::align(MeshModel *stuckModel, PickedPoints *stuckPickedPoints,
 		std::vector<vcg::Point3f> *stuckPoints = stuckPickedPoints->getPoint3fVector();
 		std::vector<vcg::Point3f> *meshToMovePoints = modelToMovePickedPoints->getPoint3fVector();
 		
+		//number of points are not the same so return false
+		if(stuckPoints->size() != meshToMovePoints->size())	return false;
+
 		//this will calculate the transform for the destination mesh model which we will be moving
 		//into alignment with the source
 		if(allowScaling)
