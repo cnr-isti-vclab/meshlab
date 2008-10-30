@@ -284,7 +284,11 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 	if(filter->text() == filterName(FP_ALIGN_WITH_PICKED_POINTS) )
 	{
 		bool result = AlignTools::setupThenAlign(m, par);
-		if(!result) return false;
+		if(!result)
+		{
+			Log(GLLogStream::Info,"Align failed, make sure you have equal numbers of points.");	
+			return false;
+		}
 	}
 
 	return true;
