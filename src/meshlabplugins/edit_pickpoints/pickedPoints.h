@@ -54,6 +54,7 @@ public:
 	
 	std::vector<PickedPoint*> * getPickedPointVector();
 	
+	//get a vector containing only active points
 	std::vector<vcg::Point3f> * getPoint3fVector();
 	
 	//translate each point using the matrix

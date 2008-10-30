@@ -192,7 +192,8 @@ std::vector<vcg::Point3f> * PickedPoints::getPoint3fVector()
 	
 	for(int i = 0; i < pointVector->size(); i++)
 	{
-		points->push_back(pointVector->at(i)->point);
+		if(pointVector->at(i)->present )
+			points->push_back(pointVector->at(i)->point);
 	}
 	
 	return points;
