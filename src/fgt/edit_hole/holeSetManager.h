@@ -122,10 +122,17 @@ public:
 		std::vector<FacePointer *> local_facePointer;
 		AddFaceReference(local_facePointer);
 
-		HoleIterator it = holes.begin();
-		for( ; it != holes.end(); it++ )
-			if( it->IsSelected() )
-				it->Fill(mode, *mesh, local_facePointer);
+		HoleIterator hit = holes.begin();
+		for( ; hit != holes.end(); hit++ )
+			if( hit->IsSelected() )
+			{
+				hit->Fill(mode, *mesh, local_facePointer);
+
+				// there are new face reference to update in next filling
+				typename std::vector<FacePointer>::iterator fit;
+				for(fit=hit->patches.begin(); fit!=hit->patches.end(); fit++)
+					local_facePointer.push_back(&*fit);	
+			}
 
 		nAccepted=nSelected;
 		return true;
@@ -153,8 +160,7 @@ public:
 
 				if( ( it->IsSelected() && !it->IsAccepted() ) || !accept)
 				{
-					if( it->IsFilled() )
-				  		it->RestoreHole();
+					it->RestoreHole();
 				}
 				else if( it->IsSelected() && it->IsAccepted() )
 				{
@@ -269,7 +275,6 @@ public:
 		{
 			for( ; hit != holes.end(); ++hit)
 			{
-				// for each hole check if face is its border face
 				if(hit->HavePatchFace(pFace))
 				{
 					it = hit;
@@ -282,7 +287,6 @@ public:
 		{
 			for( ; hit != holes.end(); ++hit)
 			{
-				// for each hole check if face is its border face
 				if(hit->HaveBorderFace(pFace))
 				{
 					it = hit;

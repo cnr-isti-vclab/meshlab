@@ -166,6 +166,8 @@ public:
 
 	inline void AddFaceReference(std::vector<FacePointer*> &facesReferences)
 	{
+		assert(!IsNull());
+		assert(!IsDeleted());
 		facesReferences.push_back(&f0);
 		facesReferences.push_back(&f1);
 	};
@@ -315,6 +317,8 @@ private:
 		f1->FFp(sideEdgeIndex) = f1;
 		f1->FFi(sideEdgeIndex) = sideEdgeIndex;
 
+		assert( vcg::face::BorderCount(*f0)==1 );
+		assert( vcg::face::BorderCount(*f1)==1 );
 		assert( this->parentManager->IsBridgeFace( f0 ) );
 		assert( this->parentManager->IsBridgeFace( f1 ) );
 	};
@@ -335,9 +339,9 @@ public:
 		assert(!sideA.h->IsFilled() && !sideB.h->IsFilled());
 
 		std::vector<FacePointer *> tmpFaceRef;
-		if(app!=0)
-			tmpFaceRef.insert(tmpFaceRef.end(), app->begin(), app->end());
-		holesManager->AddFaceReference(tmpFaceRef);
+		//if(app!=0)
+		//	tmpFaceRef.insert(tmpFaceRef.end(), app->begin(), app->end());
+		//holesManager->AddFaceReference(tmpFaceRef);
 
 		ScalarType q;
 		BridgeOption opt = computeBestBridgeOpt(sideA, sideB, &q);
@@ -408,7 +412,7 @@ public:
 					endP.NextB();
 
 					// two edge used as bridge abutment are adjacent to the same face... bridge can't be build
-					// i due edge di bordo sono gi� collegati da 2 triangoli adiacenti,
+					// i due edge di bordo sono gia' collegati da 2 triangoli adiacenti,
 					// il bridge si sovrapporrebbe a questi 2 triangoli
 					if( endP.f->FFp(0) == initP.f ||
 						endP.f->FFp(1) == initP.f ||
@@ -451,25 +455,14 @@ public:
 			assert(vcg::face::IsBorder<FaceType>(*sideA.f, sideA.z));
 			assert(vcg::face::IsBorder<FaceType>(*sideB.f, sideB.z));
 
-			if( oldRef != &*holesManager->holes.begin() )
+			if( maxQuality > -1)
 			{
-				// si pu�
 				tmpFaceRef.clear();
 				if(app!=0)
 					tmpFaceRef.insert(tmpFaceRef.end(), app->begin(), app->end());
 				holesManager->AddFaceReference(tmpFaceRef);
-				tmpFaceRef.push_back(&sideA.f);
-				tmpFaceRef.push_back(&sideB.f);
-				oldRef = &*holesManager->holes.begin();
-			}
-
-			if( maxQuality > -1)
-			{
 				subdivideHoleWithBridge(sideA, sideB, bestOpt, holesManager, tmpFaceRef);
 				gM.Set(holesManager->mesh->face.begin(), holesManager->mesh->face.end());
-				// la subdivideHole.. aggiunge un hole pertanto bisogna aggiornare anche la lista di
-				// reference a facce
-				tmpFaceRef.push_back(&holesManager->holes.back().p.f);
 			}
 			else
 				err = true;
@@ -579,9 +572,7 @@ public:
 			if(app!=0)
 				tmpFaceRef.insert(tmpFaceRef.end(), app->begin(), app->end());
 			holesManager->AddFaceReference(tmpFaceRef);
-			tmpFaceRef.push_back(&sideA.f);
-			tmpFaceRef.push_back(&sideB.f);
-
+			
 			if(maxQuality > -1)
 				unifyHolesWithBridge(sideA, sideB, bestOpt, holesManager, tmpFaceRef);
 			else
@@ -672,6 +663,7 @@ private:
 		holesManager->bridges.push_back(b);
 
 		sideA.h->SetStartPos(b->GetSideA());
+		assert( sideA.h->p.IsBorder() );
 		if(sideB.h->IsSelected())
 			sideA.h->SetSelect(true);
 		sideA.h->SetBridged(true);
@@ -812,6 +804,8 @@ public:
 
 	inline void AddFaceReference(std::vector<FacePointer*> &facesReferences)
 	{
+		assert(!IsNull());
+		assert(!IsDeleted());
 		facesReferences.push_back(&f0);
 	};
 
@@ -882,16 +876,11 @@ public:
 
 				if(!p0.IsNull())
 				{
-					if( oldRef != &*holesManager->holes.begin() )
-					{
-						// holes vector is been reallocated... tmpFaceRes must be recomputed
-						tmpFaceRef.clear();
-						if(app!=0)
-							tmpFaceRef.insert(tmpFaceRef.end(), app->begin(), app->end());
-						holesManager->AddFaceReference(tmpFaceRef);
-						oldRef = &*holesManager->holes.begin();
-					}
-
+					tmpFaceRef.clear();
+					if(app!=0)
+						tmpFaceRef.insert(tmpFaceRef.end(), app->begin(), app->end());
+					holesManager->AddFaceReference(tmpFaceRef);
+					
 					// faces allocation and local face reference management
 					tmpFaceRef.push_back(&p0.f);
 					tmpFaceRef.push_back(&curPos.f);
@@ -899,6 +888,7 @@ public:
 					holesManager->faceAttr->UpdateSize();
 					tmpFaceRef.pop_back();
 					tmpFaceRef.pop_back();
+
 
 					// non-manifold vertex found, go back over the border to find other edge share the vertex with p0
 					int dist = 0;
@@ -973,11 +963,6 @@ public:
 							newhole.SetSelect(true);
 						newhole.SetBridged(true);
 						holesManager->holes.push_back(newhole);
-						tmpFaceRef.push_back(&holesManager->holes.back().p.f);
-
-						// adding hole can reallocate hole vector so h must be updated
-						if( oldRef != &*holesManager->holes.begin() )
-							h = &holesManager->holes.at(i);
 					}
 					p0.SetNull();
 				}

@@ -103,6 +103,7 @@ public:
 	HoleSetManager<CMeshO> holesManager;
 	
 Q_SIGNALS:
+	void SGN_Closing();
 	void SGN_needUpdateGLA();
 	void SGN_ExistBridge(bool exist);
 };

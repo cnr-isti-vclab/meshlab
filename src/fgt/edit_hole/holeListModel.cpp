@@ -33,9 +33,8 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	mesh = m;
 	pickedAbutment.SetNull();
 		
-	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER);
-	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
-	mesh->updateDataMask(MeshModel::MM_FACEFLAGBORDER);
+	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEFACETOPO);
+	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	holesManager.Init(&m->cm);
 	emit dataChanged( index(0, 0), index(holesManager.HolesCount(), 2) );
 	emit SGN_needUpdateGLA();
@@ -189,6 +188,8 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 
 void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 {
+	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEFACETOPO );
+	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER );
 	if(holesManager.Fill(mode))
 	{
 		state = HoleListModel::Filled;
@@ -198,22 +199,40 @@ void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 
 void HoleListModel::acceptFilling(bool accept)
 {
+/*	if(!accept)
+	{
+		mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEFACETOPO );
+		mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER );
+	}
+*/
 	holesManager.ConfirmFilling(accept);
+	
 	state = HoleListModel::Selection;
 	emit dataChanged( index(0, 0), index(holesManager.HolesCount(), 2) );
-	emit SGN_ExistBridge( holesManager.bridges.size() > 0 );
-	emit SGN_needUpdateGLA();
-	emit layoutChanged();
+	if(holesManager.holes.size()==0)
+	{
+		QMessageBox::information(0, tr("No holes"), QString("Mesh have no hole to edit."));
+		emit SGN_Closing();	
+	}
+	else
+	{
+		emit SGN_ExistBridge( holesManager.bridges.size() > 0 );
+		emit SGN_needUpdateGLA();
+		emit layoutChanged();
+	}
 }
 
 void HoleListModel::autoBridge(bool singleHole, double distCoeff)
 {
 	holesManager.DiscardBridges();
 	
+	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEFACETOPO );
+	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER );
+
 	if(singleHole)
 		holesManager.AutoSelfBridging(distCoeff, 0);
 	else
-		holesManager.AutoMultiBridging(0);
+		holesManager.AutoMultiBridging(0);	
 
 	emit SGN_ExistBridge( holesManager.bridges.size() > 0 );
 	emit layoutChanged();

@@ -162,8 +162,8 @@ public:
 	inline void SetStartPos(PosType initP)
 	{
 		assert(!IsFilled());
-		assert(initP.IsBorder());
 		this->p = initP;
+		assert(this->p.IsBorder());
 		updateInfo();
 	};
 
@@ -234,7 +234,8 @@ public:
 	{
 		assert( IsFilled() );
 		_state &= (~FILLED);
-		typename std::vector<FaceType*>::iterator it;
+		
+		typename std::vector<FacePointer>::iterator it;
 		for(it = patches.begin(); it!=patches.end(); it++)
 		{
 			// PathcHoleFlag+BridgeFaceFlag is special case
@@ -263,6 +264,8 @@ public:
 
 	void Fill(FillerMode mode, MESH &mesh, std::vector<FacePointer * > &local_facePointer)
 	{
+		assert(!IsFilled());
+		assert(this->p.IsBorder());
 		int patchBit = FaceType::NewBitFlag();
 		switch(mode)
 		{
@@ -329,7 +332,6 @@ public:
 		if( !IsFilled() )
 			return false;
 
-		// follow algorithm used to fill with EAR, each faces added share at least e vertex with hole
 		typename std::vector<FacePointer>::const_iterator it;
 		for(it = patches.begin(); it!=patches.end(); it++)
 			if(pFace == *it)
@@ -363,13 +365,14 @@ public:
 	void AddFaceReference(std::vector<FacePointer*> &facesReferences)
 	{	
 	  facesReferences.push_back(&this->p.f);
+
 		typename PosVector::iterator pit;
 		for(pit=borderPos.begin(); pit != borderPos.end(); pit++)
 			facesReferences.push_back( &pit->f );
 
 	  typename std::vector<FacePointer>::iterator fit;
 	  for(fit=patches.begin(); fit!=patches.end(); fit++)
-      facesReferences.push_back(&(*fit));	
+      facesReferences.push_back(&*fit);	
 	};
 
 private:

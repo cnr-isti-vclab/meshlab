@@ -130,15 +130,27 @@ void EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 		delete holesModel;
 	}
 	holesModel = new HoleListModel(&m);
+
+	
 	holesModel->holesManager.autoBridgeCB = new EditHoleAutoBridgingCB(dialogFiller->ui.infoLbl, 800);
+	connect(holesModel, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
 	connect(holesModel, SIGNAL(SGN_needUpdateGLA()), this, SLOT(upGlA()) );
 	connect(holesModel, SIGNAL(SGN_ExistBridge(bool)), dialogFiller, SLOT(SLOT_ExistBridge(bool)) );
+	
 	holeSorter = new HoleSorterFilter();
 	holeSorter->setSourceModel(holesModel);
 	dialogFiller->ui.holeTree->setModel( holeSorter );
 
-	Decorate(m, gla);
-	upGlA();
+	if(holesModel->holesManager.holes.size()==0)
+	{
+		QMessageBox::information(0, tr("No holes"), QString("Mesh have no hole to edit."));
+		EndEdit(m, gla);	
+	}
+	else
+	{
+		Decorate(m, gla);
+		upGlA();
+	}
 }
 
 void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
@@ -174,7 +186,9 @@ void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
 				break;
 			case HoleListModel::ManualBridging:
 				oldAbutmentPresence = holesModel->PickedAbutment();
+				gla->meshDoc.busy=true;
 				holesModel->addBridgeFace(pickedFace, cur.x(), inverseY);
+				gla->meshDoc.busy=false;
 				if(holesModel->PickedAbutment() != oldAbutmentPresence)
 				{
 					if(oldAbutmentPresence == true)
@@ -197,7 +211,8 @@ void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
 
 	 if(holesModel->getState() == HoleListModel::Filled)
 	 	 holesModel->acceptFilling(false);
-	 holesModel->removeBridges();
+	 if(holesModel->holesManager.bridges.size()>0)
+		holesModel->removeBridges();
 
 	 if ( dialogFiller!=0) {
 		delete dialogFiller;
@@ -273,8 +288,10 @@ void EditHolePlugin::acceptFill()
 
 void EditHolePlugin::cancelFill()
 {
+	gla->meshDoc.busy=true;
 	if(holesModel->getState() == HoleListModel::Filled)
 		holesModel->acceptFilling(false);
+	gla->meshDoc.busy=false;
 }
 
 void EditHolePlugin::updateBridgeSldValue(int val)
@@ -301,14 +318,18 @@ void EditHolePlugin::manualBridge()
 
 void EditHolePlugin::autoBridge()
 {
+	gla->meshDoc.busy=true;
 	bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
 	holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
+	gla->meshDoc.busy=false;
 	upGlA();
 }
 
 void EditHolePlugin::closeNMHoles()
 {
+	gla->meshDoc.busy=true;
 	holesModel->closeNonManifolds();
+	gla->meshDoc.busy=false;
 	upGlA();
 }
 
@@ -326,7 +347,9 @@ void EditHolePlugin::acceptBridges()
 
 void EditHolePlugin::clearBridge()
 {
+	gla->meshDoc.busy=true;
 	holesModel->removeBridges();
+	gla->meshDoc.busy=false;
 	upGlA();
 }
 
