@@ -110,9 +110,10 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_MIDPOINT<<
     FP_REORIENT <<
     FP_INVERT_FACES<<
-    FP_REMOVE_NON_MANIFOLD<<
+		FP_REMOVE_NON_MANIFOLD_FACE<<
+		FP_REMOVE_NON_MANIFOLD_VERTEX<<
     FP_NORMAL_EXTRAPOLATION<<
-	FP_COMPUTE_PRINC_CURV_DIR<<
+		FP_COMPUTE_PRINC_CURV_DIR<<
 		FP_CLOSE_HOLES<<
 		FP_FREEZE_TRANSFORM<<
 		FP_TRANSFORM;
@@ -147,7 +148,8 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_REMOVE_DUPLICATED_VERTEX :
     case FP_REMOVE_FACES_BY_AREA:
     case FP_REMOVE_FACES_BY_EDGE :
-    case FP_REMOVE_NON_MANIFOLD:
+    case FP_REMOVE_NON_MANIFOLD_FACE:
+    case FP_REMOVE_NON_MANIFOLD_VERTEX:
       return MeshFilterInterface::Cleaning;
     case FP_BUTTERFLY_SS :
     case FP_LOOP_SS :
@@ -168,27 +170,28 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 {
  switch(filter)
   {
-	case FP_LOOP_SS :		                  return QString("Loop Subdivision Surfaces");
-	case FP_BUTTERFLY_SS :								return QString("Butterfly Subdivision Surfaces");
-	case FP_REMOVE_UNREFERENCED_VERTEX :	return QString("Remove Unreferenced Vertex");
-	case FP_REMOVE_DUPLICATED_VERTEX :		return QString("Remove Duplicated Vertex");
-	case FP_REMOVE_FACES_BY_AREA :     		return QString("Remove Zero Area Faces");
-	case FP_REMOVE_FACES_BY_EDGE :				return QString("Remove Faces with edges longer than...");
-	case FP_QUADRIC_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation");
-	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation (with texture)");
-	case FP_CLUSTERING :	                return QString("Clustering decimation");
-	case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
-	case FP_REORIENT :	                  return QString("Re-orient");
-	case FP_INVERT_FACES:									return QString("Invert Faces");
-	case FP_TRANSFORM:	                	return QString("Apply Transform");
-	case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
-	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
-	case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
-	case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions  ");
-	case FP_CLOSE_HOLES:	          return QString("Close Holes");
+		case FP_LOOP_SS :		                  return QString("Loop Subdivision Surfaces");
+		case FP_BUTTERFLY_SS :								return QString("Butterfly Subdivision Surfaces");
+		case FP_REMOVE_UNREFERENCED_VERTEX :	return QString("Remove Unreferenced Vertex");
+		case FP_REMOVE_DUPLICATED_VERTEX :		return QString("Remove Duplicated Vertex");
+		case FP_REMOVE_FACES_BY_AREA :     		return QString("Remove Zero Area Faces");
+		case FP_REMOVE_FACES_BY_EDGE :				return QString("Remove Faces with edges longer than...");
+		case FP_QUADRIC_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation");
+		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation (with texture)");
+		case FP_CLUSTERING :	                return QString("Clustering decimation");
+		case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
+		case FP_REORIENT :	                  return QString("Re-orient");
+		case FP_INVERT_FACES:									return QString("Invert Faces");
+		case FP_TRANSFORM:	                	return QString("Apply Transform");
+		case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
+		case FP_REMOVE_NON_MANIFOLD_FACE:	        return QString("Remove Non Manifold Faces");
+		case FP_REMOVE_NON_MANIFOLD_VERTEX:	        return QString("Remove Non Manifold Vertices");
+		case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
+		case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions  ");
+		case FP_CLOSE_HOLES:	          return QString("Close Holes");
 
 
-	default: assert(0);
+		default: assert(0);
   }
   return QString("error!");
 
@@ -213,7 +216,9 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
     case FP_REMOVE_DUPLICATED_VERTEX : 	return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
     case FP_REMOVE_FACES_BY_AREA : 			return tr("Removes null faces (the one with area equal to zero)");
     case FP_REMOVE_FACES_BY_EDGE : 			return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");
-    case FP_REMOVE_NON_MANIFOLD : 			return tr("Remove non manifold edges by removing some of the faces incident on non manifold edges");
+    case FP_REMOVE_NON_MANIFOLD_FACE : 			return tr("Remove non 2-manifold edges by removing some of the faces incident on non manifold edges");
+    case FP_REMOVE_NON_MANIFOLD_VERTEX : 		return tr("Remove non 2-manifold vertices, that vertices where the number of faces that can be reached using only face-face connectivity is different from the number of faces actually incident on that vertex.<br>"
+																											"Typical example think to two isolated triangles connected by a single vertex building a <i>hourglass</i> shape.");
     case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
     case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
@@ -233,12 +238,13 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-    case FP_REMOVE_NON_MANIFOLD:
+    case FP_REMOVE_NON_MANIFOLD_FACE:
     case FP_LOOP_SS :
     case FP_BUTTERFLY_SS :
     case FP_MIDPOINT :
     case FP_CLOSE_HOLES :
            return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
+    case FP_REMOVE_NON_MANIFOLD_VERTEX:
     case FP_REORIENT:             return MeshModel::MM_FACEFACETOPO;
     case FP_REMOVE_UNREFERENCED_VERTEX:
     case FP_REMOVE_DUPLICATED_VERTEX:
@@ -445,16 +451,26 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
-	if(ID(filter) == (FP_REMOVE_NON_MANIFOLD) )
+	if(ID(filter) == (FP_REMOVE_NON_MANIFOLD_FACE) )
 	  {
 	    int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
 
 			if(nonManif) Log(GLLogStream::Info, "Removed %d Non Manifold Faces", nonManif);
 							else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
 
-			 m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
+			 m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	  }
-
+	
+		if(ID(filter) == (FP_REMOVE_NON_MANIFOLD_VERTEX) )
+		{
+			int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldVertex(m.cm);
+			
+			if(nonManif) Log(GLLogStream::Info, "Removed %d Non Manifold Vertex", nonManif);
+			else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
+			
+			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+		}
+	
 	if(ID(filter) == (FP_REORIENT) )
 	  {
 	    bool oriented;

@@ -60,9 +60,6 @@ Filter that it colors the edge non manifold
 #include <iostream>
 #include <QtGlobal>
 
-//using std::cout;
-//using std::endl;
-
 namespace vcg{
 
 	template<class MESH_TYPE>
@@ -85,65 +82,16 @@ namespace vcg{
           }
 		  }
 	}
-
+	
   template<class MESH_TYPE>
-		void ColorManifoldVertex(MESH_TYPE &m)
+	void ColorManifoldVertex(MESH_TYPE &m)
 	{	
-		assert(m.HasFFTopology());
-
-		typename MESH_TYPE::VertexIterator vi;
-		typename MESH_TYPE::FaceIterator fi;
-   
-    tri::UpdateColor<MESH_TYPE>::VertexConstant(m, Color4b::White);
-
-    SimpleTempData<typename MESH_TYPE::VertContainer, int > TD(m.vert,0);
-
-  	// primo loop, si conta quanti facce incidono su ogni vertice...
-
-    for (fi = m.face.begin(); fi != m.face.end(); ++fi)	if (!fi->IsD())
-    {
-      TD[(*fi).V(0)]++;
-      TD[(*fi).V(1)]++;
-      TD[(*fi).V(2)]++;
-    }
-
-    for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)	if (!vi->IsD())
-      (*vi).ClearV();
-    
-    for (fi = m.face.begin(); fi != m.face.end(); ++fi)	if (!fi->IsD())
-    {
-      
-      for(int i=0;i<3;i++) if(!(*fi).V(i)->IsV()){
-        (*fi).V(i)->SetV();
-        face::Pos<typename MESH_TYPE::FaceType> sp(&(*fi),i);
-        face::Pos<typename MESH_TYPE::FaceType> ip=sp;
-        bool borderfound = false;
-        int facenumber = 0;
-        do 
-        {
-          if(!ip.IsManifold()) break;
-          if(ip.IsBorder())
-            borderfound = true;
-          ip.FlipF();
-          ip.FlipE();
-          facenumber++;
-        } while(ip!=sp);
-        
-        if(borderfound && ip.IsManifold()){
-          assert((facenumber%2)==0);
-          facenumber=facenumber/2;
-        }
-        if(TD[(*fi).V(i)]!=facenumber || !(ip.IsManifold())){
-          (*fi).V(i)->C()=Color4b::Red;
-        
-        }
-      
-      }
-    }
-
-    
-	}
-
+		assert(HasFFAdjacency(m));
+		
+		tri::UpdateColor<MESH_TYPE>::VertexConstant(m, Color4b::White);
+		tri::Clean<MESH_TYPE>::CountNonManifoldVertexFF(m,true);
+		tri::UpdateColor<MESH_TYPE>::VertexSelected(m, Color4b::Red);
+	}		
 
 } // end namespace
 #endif
