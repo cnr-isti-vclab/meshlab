@@ -319,6 +319,8 @@ private:
 
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 
+	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
+	
 public:
 	GLArea *GLA() const {
 	  if(mdiarea->currentSubWindow()==0) return 0;

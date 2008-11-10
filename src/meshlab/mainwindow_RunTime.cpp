@@ -798,10 +798,18 @@ bool MainWindow::openIn(QString /* fileName */)
 void MainWindow::saveProject()
 {
 
-	QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),"untitled.aln", tr("*.aln"));
+	QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),lastUsedDirectory.path().append("/untitled.aln"), tr("*.aln"));
+
 	qDebug("Saving aln file %s\n",qPrintable(fileName));
 	if (fileName.isEmpty()) return;
-
+	else
+	{
+		//save path away so we can use it again
+		QString path = fileName;
+		path.truncate(path.lastIndexOf("/"));
+		lastUsedDirectory.setPath(path);
+	}
+	
 	MeshDocument &meshDoc=GLA()->meshDoc;
 	vector<string> meshNameVector;
 	vector<Matrix44f> transfVector;
@@ -822,8 +830,16 @@ bool MainWindow::openProject(QString fileName)
 {
 	bool openRes=true;
 	if (fileName.isEmpty())
-	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"),".", "*.aln");
+	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "*.aln");
 	if (fileName.isEmpty()) return false;
+	else
+	{
+		//save path away so we can use it again
+		QString path = fileName;
+		path.truncate(path.lastIndexOf("/"));
+		lastUsedDirectory.setPath(path);
+	}
+		
 	vector<RangeMap> rmv;
 
 	ALNParser::ParseALN(rmv,qPrintable(fileName));
@@ -857,10 +873,18 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	filters.front().append(" *.aln)");
 	QStringList fileNameList;
 	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"),".", filters.join("\n"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"), lastUsedDirectory.path(), filters.join("\n"));
 	else fileNameList.push_back(fileName);
-	if (fileNameList.isEmpty())	return false;
 
+	if (fileNameList.isEmpty())	return false;
+	else
+	{
+		//save path away so we can use it again
+		QString path = fileNameList.first();
+		path.truncate(path.lastIndexOf("/"));
+		lastUsedDirectory.setPath(path);
+	}
+	
 	foreach(fileName,fileNameList)
 	{
 			QFileInfo fi(fileName);
@@ -1029,6 +1053,11 @@ bool MainWindow::saveAs(QString fileName)
 
 	if (!fileName.isEmpty())
 	{
+		//save path away so we can use it again
+		QString path = fileName;
+		path.truncate(path.lastIndexOf("/"));
+		lastUsedDirectory.setPath(path);
+
 		QString extension = fileName;
 		extension.remove(0, fileName.lastIndexOf('.')+1);
 
