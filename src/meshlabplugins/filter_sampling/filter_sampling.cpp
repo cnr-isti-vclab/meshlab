@@ -39,6 +39,7 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/quality.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/complex/trimesh/create/resampler.h>
 #include <vcg/simplex/face/distance.h>
@@ -275,6 +276,22 @@ void AddVert(CMeshO::VertexType &p)
 
 
 
+template <class MeshType>
+class ClusteringSampler
+	{
+	public:
+		typedef typename MeshType::VertexType			VertexType;
+		
+		ClusteringSampler(){};
+		std::vector<VertexType *> sampleVec;
+		
+		void AddVert(const VertexType &p) 
+		{
+			sampleVec.push_back((VertexType *)(&p));
+		}
+	}; // end class ClusteringSampler
+
+
 
 
 // Constructor usually performs only two simple tasks of filling the two lists 
@@ -292,6 +309,7 @@ FilterDocSampling::FilterDocSampling()
 			<< FP_TEXEL_SAMPLING
 			<< FP_VERTEX_RESAMPLING
 			<< FP_OFFSET_SURFACE
+	    << FP_VORONOI_CLUSTERING
 	;
   
   foreach(FilterIDType tt , types())
@@ -311,7 +329,8 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 		case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling"); 
 		case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer"); 
 		case FP_OFFSET_SURFACE  :  return QString("Uniform Mesh Resampling"); 
-		
+		case FP_VORONOI_CLUSTERING  :  return QString("Voronoi Vertex Clustering"); 
+			
 		default : assert(0); return QString("unknown filter!!!!");
 	}
 }
@@ -332,8 +351,10 @@ const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 																									"The algorithm assumes that the two meshes are reasonably similar and aligned."); 
 		case FP_OFFSET_SURFACE			:  return QString("Create a new mesh that is a resampled version of the current one.<br>"
 																									"The resampling is done by building a uniform volumetric representation where each voxel contains the signed distance from the original surface. "
-																									"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume. "); 
-			
+																									"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume."); 
+		case FP_VORONOI_CLUSTERING  :  return QString("Apply a clustering algorithm that builds voronoi cells over the mesh starting from random points,"
+																									"collapse each voronoi cell to a single vertex, and construct the triangulation according to the clusters adjacency relations.<br>"
+																									"Very similar to the technique described in <b>'Approximated Centroidal Voronoi Diagrams for Uniform Polygonal Mesh Coarsening'</b> - Valette Chassery - Eurographics 2004");
 		default : assert(0); return QString("unknown filter!!!!");
 
 	}
@@ -342,7 +363,9 @@ const int FilterDocSampling::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-    case FP_VERTEX_RESAMPLING :
+    case FP_VORONOI_CLUSTERING : return  MeshModel::MM_VERTFACETOPO;
+
+		case FP_VERTEX_RESAMPLING :
 		case FP_OFFSET_SURFACE:
     case FP_HAUSDORFF_DISTANCE :	return  MeshModel::MM_FACEMARK;
 		case FP_ELEMENT_SAMPLING    :   
@@ -451,7 +474,12 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			
 			
 		} break; 
-
+		 case FP_VORONOI_CLUSTERING :
+		 {
+			 parlst.addInt ("SampleNum", md.mm()->cm.vn/10, "Target vertex number",
+											"The final number of vertices.");
+			 
+		 } break; 
 		default : assert(0); 
 	}
 }
@@ -652,6 +680,84 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
 			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
 		} break;
+		case FP_VORONOI_CLUSTERING :
+		{
+			int sampleNum = par.getInt("SampleNum");
+			ClusteringSampler<CMeshO> vc;
+			tri::SurfaceSampling<CMeshO,ClusteringSampler<CMeshO> >::VertexUniform(md.mm()->cm,vc,sampleNum);
+			
+			queue<CMeshO::VertexPointer> VQ;
+			
+			tri::UpdateQuality<CMeshO>::VertexConstant(md.mm()->cm,0);
+			
+			for(int i=0;i<sampleNum;++i)
+			{
+				VQ.push(vc.sampleVec[i]);
+				vc.sampleVec[i]->Q()=i+1;
+			}
+			
+			
+			while(!VQ.empty())
+			{
+				CMeshO::VertexPointer vp = VQ.front();
+				VQ.pop();
+				
+				vector<CMeshO::VertexPointer> vertStar;
+				
+				face::VFIterator<CMeshO::FaceType> vfi(vp);
+				while(!vfi.End())
+				{
+					vertStar.push_back(vfi.F()->V1(vfi.I()));
+					vertStar.push_back(vfi.F()->V2(vfi.I()));
+					++vfi;
+				}
+				
+				sort(vertStar.begin(),vertStar.end());
+				vector<CMeshO::VertexPointer>::iterator new_end = unique(vertStar.begin(),vertStar.end());
+				for(vector<CMeshO::VertexPointer>::iterator vv = vertStar.begin();vv!=new_end;++vv)
+				{
+					if((*vv)->Q()==0) 
+					{
+						(*vv)->Q()=vp->Q();
+						VQ.push(*vv);
+					}
+				}
+				}
+				// now build the new mesh
+				
+				CMeshO *cm = &md.mm()->cm;				
+				MeshModel *clusteredMesh =md.addNewMesh("Offset mesh"); 			
+				set<Point3i> clusteredFace;
+				
+				CMeshO::FaceIterator fi;
+				for(fi=cm->face.begin();fi!=cm->face.end();++fi)
+				{
+						if( (fi->V(0)->Q() != fi->V(1)->Q() ) && 
+								(fi->V(0)->Q() != fi->V(2)->Q() ) &&
+								(fi->V(1)->Q() != fi->V(2)->Q() )  )
+							clusteredFace.insert( Point3i(int(fi->V(0)->Q()), int(fi->V(1)->Q()), int(fi->V(2)->Q())));																	 
+				}								 
+			 
+				tri::Allocator<CMeshO>::AddVertices(clusteredMesh->cm,vc.sampleVec.size());
+				for(uint i=0;i< vc.sampleVec.size();++i)
+					clusteredMesh->cm.vert[i].ImportLocal(*(vc.sampleVec[i]));																										
+					
+				tri::Allocator<CMeshO>::AddFaces(clusteredMesh->cm,clusteredFace.size());
+				set<Point3i>::iterator fsi; ;
+
+				for(fi=clusteredMesh->cm.face.begin(),fsi=clusteredFace.begin(); fsi!=clusteredFace.end();++fsi,++fi)
+				{
+					(*fi).V(0) = & clusteredMesh->cm.vert[(int)(fsi->V(0)-1)];
+					(*fi).V(1) = & clusteredMesh->cm.vert[(int)(fsi->V(1)-1)];
+					(*fi).V(2) = & clusteredMesh->cm.vert[(int)(fsi->V(2)-1)];
+				}
+					
+				tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);
+				tri::UpdateNormals<CMeshO>::PerVertexPerFace(clusteredMesh->cm);
+
+		}
+		break;
+				
 		default : assert(0);
 		}
 	return true;
@@ -667,6 +773,7 @@ const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *acti
 		case FP_SIMILAR_SAMPLING :   
 		case FP_SUBDIV_SAMPLING :   
 		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling; 
+		case FP_VORONOI_CLUSTERING: return FilterDocSampling::Remeshing;
 		case FP_OFFSET_SURFACE: return FilterDocSampling::Remeshing;
     default: assert(0);
   }
