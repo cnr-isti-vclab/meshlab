@@ -75,7 +75,7 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
 		case FP_SD_LAPLACIAN_SMOOTH :					return QString("ScaleDependent Laplacian Smooth");
 		case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
 		case FP_TAUBIN_SMOOTH :							return QString("Taubin Smooth");
-		case FP_CREASE_CUT :							return QString("Cut mesh along crease");
+		case FP_CREASE_CUT :							return QString("Cut mesh along crease edges");
   	case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normal"); 
   	case FP_FACE_NORMAL_SMOOTHING:	  return QString("Smooth Face Normals"); 
   	case FP_VERTEX_QUALITY_SMOOTHING:	return QString("Smooth vertex quality"); 
@@ -100,9 +100,9 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
     case FP_SD_LAPLACIAN_SMOOTH : 			return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, based on the Fujiwara extended umbrella operator");  
     case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals");  
     case FP_TAUBIN_SMOOTH :							return tr("The $lambda-mu$ taubin smoothing, it make two steps of smoothing, forth and back, for each iteration");  
-		case FP_CREASE_CUT:									return tr("Cut the mesh along crease edges, duplicating the vertices as necessary."); 
+		case FP_CREASE_CUT:									return tr("Cut the mesh along crease edges, duplicating the vertices as necessary. Crease edges are defined according to the variation of normal of the adjacent faces"); 
 		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
-		case FP_VERTEX_QUALITY_SMOOTHING:	  return tr("Smooth Face Normals without touching the position of the vertices."); 
+		case FP_VERTEX_QUALITY_SMOOTHING:	  return tr("Laplacian smooth of the quality values."); 
 		case FP_FACE_NORMAL_SMOOTHING:	    return tr("Smooth Face Normals without touching the position of the vertices."); 
   	case FP_UNSHARP_NORMAL:							return tr("Unsharp mask filtering of the normals, putting in more evidence normal variations"); 
   	case FP_UNSHARP_GEOMETRY:						return tr("Unsharp mask filtering of geometric shape, putting in more evidence ridges and valleys variations"); 
@@ -120,8 +120,7 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
   switch(ID(a))
   {
 			case FP_CREASE_CUT :
-					return MeshFilterInterface::Generic;     
-				
+			return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Normal | MeshFilterInterface::Remeshing);				
   		case FP_SD_LAPLACIAN_SMOOTH:
 			case FP_HC_LAPLACIAN_SMOOTH:
 			case FP_LAPLACIAN_SMOOTH:
@@ -175,7 +174,8 @@ bool FilterUnsharp::autoDialog(QAction *action)
 {
 	switch(ID(action))
 	{
-			case FP_TWO_STEP_SMOOTH:
+			case FP_CREASE_CUT :
+		  case FP_TWO_STEP_SMOOTH:
 			case FP_LAPLACIAN_SMOOTH:
 			case FP_TAUBIN_SMOOTH:
 			case FP_SD_LAPLACIAN_SMOOTH:
@@ -190,6 +190,9 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 {
 	switch(ID(action))
 	{
+		case FP_CREASE_CUT :
+			parlst.addFloat("angleDeg", 90.f, tr("Crease Angle (degree)"), tr("If the angle between the normals of two adjacent faces is <b>larger</b> that this threshold the edge is considered a creased and the mesh is cut along it."));
+			break;
 		case FP_UNSHARP_NORMAL: 
 			parlst.addBool("recalc", false, tr("Recompute Normals"), tr("Recompute normals from scratch before the unsharp masking"));
 			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
@@ -242,9 +245,11 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 {
 	switch(ID(filter))
 	{
-	case FP_CREASE_CUT :
-			 tri::CreaseCut(m.cm, math::ToRad(60.0f));
-			 m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+		case FP_CREASE_CUT :{
+				float angleDeg = par.getFloat("angleDeg");
+				tri::CreaseCut(m.cm, math::ToRad(60.0f));
+				m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+		}
 			break;
 		
   case FP_FACE_NORMAL_SMOOTHING :
