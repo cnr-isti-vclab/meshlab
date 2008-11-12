@@ -59,6 +59,7 @@ class BaseSampler
 	public:
 	BaseSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;};
 	CMeshO *m;
+	QImage* tex;
 	bool uvSpaceFlag;
 	void AddVert(const CMeshO::VertexType &p) 
 	{
@@ -80,6 +81,9 @@ class BaseSampler
 		if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0); 
 							 else m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
+		QRgb val = tex->pixel(tp[0],tex->height()-tp[1]-1);
+		m->vert.back().C().SetRGB(qRed(val),qGreen(val),qBlue(val));
+		
 	}
 }; // end class BaseSampler
 
@@ -344,8 +348,8 @@ const int FilterDocSampling::getRequirements(QAction *action)
 		case FP_ELEMENT_SAMPLING    :   
 		case FP_MONTECARLO_SAMPLING :    
 		case FP_SIMILAR_SAMPLING :   
-		case FP_SUBDIV_SAMPLING :   
-		case FP_TEXEL_SAMPLING  :  return 0;
+		case FP_SUBDIV_SAMPLING :  return 0; 
+		case FP_TEXEL_SAMPLING  :  return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTNORMAL;
 
     default: assert(0);
   }
@@ -390,7 +394,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
 			break;
 		case FP_TEXEL_SAMPLING :  
- 		  parlst.addInt (	"TextureSize", 256, "Texture Size",
+ 		  parlst.addInt (	"TextureSize", 2048, "Texture Size",
 											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)");
  		  parlst.addBool(	"TextureSpace", false, "UV Space Sampling",
 											"The generated texel samples have their UV coords as point positions. The resulting point set is has a square domain, the texels/points, even if on a flat domain retain the original vertex normal to help a better perception of the original provenience.");
@@ -474,9 +478,12 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		break;
 		case FP_TEXEL_SAMPLING :  
 				{
-					MeshModel *curMM= md.mm();				
+					MeshModel *curMM= md.mm();	
+					if(!tri::HasPerWedgeTexCoord(curMM->cm)) break;
 					MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+					
 					BaseSampler mps(&(mm->cm));
+					mps.tex= new QImage(curMM->cm.textures[0].c_str());
 					mps.uvSpaceFlag = par.getBool("TextureSpace");
 					tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,par.getInt("TextureSize"));
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
@@ -659,7 +666,7 @@ const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *acti
 		case FP_MONTECARLO_SAMPLING :    
 		case FP_SIMILAR_SAMPLING :   
 		case FP_SUBDIV_SAMPLING :   
-		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling;
+		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling; 
 		case FP_OFFSET_SURFACE: return FilterDocSampling::Remeshing;
     default: assert(0);
   }
