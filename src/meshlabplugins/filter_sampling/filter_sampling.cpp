@@ -84,9 +84,10 @@ class BaseSampler
 }; // end class BaseSampler
 
 
-/* This sampler is used to perform compute the Hausdorf measuring.
+/* This sampler is used to perform compute the Hausdorff measuring.
  * It keep internally the spatial inedexing structure used to find the closest point 
  * and the partial integration results needed to compute the average and rms error values.
+ * Averaged values assume that the samples are equidistributed (e.g. a good unbiased montecarlo sampling of the surface).
  */
 class HausdorffSampler
 {
@@ -111,10 +112,10 @@ public:
     double          volume;
     double          area_S1;
 		Histogramf hist;
-    // globals
+    // globals parameters driving the samples. 
     int             n_total_samples;
     int             n_samples;
-		float dist_upper_bound;
+		float dist_upper_bound;  // samples that have a distance beyond this threshold distance are not considered. 
 		typedef tri::FaceTmark<CMeshO> MarkerFace;
 		MarkerFace markerFunctor;
 	
@@ -201,6 +202,7 @@ void AddSample(const CMeshO::CoordType &startPt)
 class RedetailSampler
 {
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+	typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
 public:
   
 	RedetailSampler()
@@ -213,6 +215,7 @@ public:
 	int sampleNum;  // the expected number of samples. Used only for the callback
 	int sampleCnt;
 	MetroMeshGrid   unifGrid;
+	VertexMeshGrid   unifGridVert;
 
 	// Parameters
 		typedef tri::FaceTmark<CMeshO> MarkerFace;
@@ -375,7 +378,10 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 										 std::max(100000,md.mm()->cm.vn),
 											"Number of samples",
 											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-
+			 parlst.addBool("Random",
+											false,
+											"Random Sampling",
+											"if true, for each (virtual) face we draw a random point, otherwise we pick the face midpoint.");
 			break;
 		case FP_ELEMENT_SAMPLING :  
 			parlst.addEnum("Sampling", 0, 
@@ -401,12 +407,14 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 												"The mesh that is sampled for the comparison.");
 				parlst.addBool ("SaveSample", false, "Save Samples",
 												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
-				parlst.addBool ("Symmetric", target, "Symmetric",
-												"Perform the test in both ways (target to base and base to target).");
+				parlst.addBool ("SampleVert", target, "Sample Edge and Vertex",
+												"For the search of maxima it is useful to accurately sample vertices and edges of the mesh, "
+												"because it is quite probably the the farthest points falls along edges or on mesh vertexes.<br>"
+												"On the other hand this kind of sampling could make the overall sampling slightly unbiased and slightly affects the cumulative results.");
 				parlst.addInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
 												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-				parlst.addBool("Weighted", false, "Quality Weighted Sampling",
-										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
+				parlst.addAbsPerc("MaxDist", md.mm()->cm.bbox.Diag()/20.0, 0.0f, md.mm()->cm.bbox.Diag(),
+												tr("Max Distance"), tr("Sample points that are further than this specified distance are rejected and not considered neither for averaging nor for max."));
 			} break;
 		case FP_VERTEX_RESAMPLING:
 		{
@@ -476,6 +484,10 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		break;
 		case FP_MONTECARLO_SAMPLING :  
 		{
+			if (md.mm()->cm.fn==0) {
+				errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet"; 
+				return false; // can't continue, mesh can't be processed
+			}
 			
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Montecarlo Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
@@ -491,11 +503,16 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			break;
 		case FP_SUBDIV_SAMPLING :  
 		{
+			if (md.mm()->cm.fn==0) {
+				errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet"; 
+				return false; // can't continue, mesh can't be processed
+			}
+			
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 			
 			BaseSampler mps(&(mm->cm));
-			tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"));
+			tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"), par.getBool("Random"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
@@ -503,6 +520,11 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			break;
 		case FP_SIMILAR_SAMPLING :  
 		{
+			if (md.mm()->cm.fn==0) {
+				errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet"; 
+				return false; // can't continue, mesh can't be processed
+			}
+			
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Similar Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 			
@@ -520,7 +542,6 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			MeshModel* mm1 = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample. 
 			bool saveSampleFlag=par.getBool("SaveSample");
 			bool vertexSamplingFlag;
-			bool edgeSamplingFlag;
 			bool faceSamplingFlag;
 
 			
@@ -534,7 +555,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			if(saveSampleFlag)
 				{
 					closestPtMesh=md.addNewMesh("Hausdorff Closest Points"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-					samplePtMesh=md.addNewMesh("Hausdorff Sample Point"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+					samplePtMesh=md.addNewMesh("Hausdorff Sample Point");    
 					hs.init(&(mm1->cm),&(samplePtMesh->cm),&(closestPtMesh->cm));
 				}
 			else hs.init(&(mm1->cm));
@@ -545,7 +566,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			qDebug("Searched mesh has %7i vert %7i face",mm1->cm.vn,mm1->cm.fn);
 
 			tri::SurfaceSampling<CMeshO,HausdorffSampler>::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
-			//tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
+			tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 			//tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 				
 			Log(0,"Hausdorf Distance computed");						
@@ -605,6 +626,11 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		} break;
 		case FP_OFFSET_SURFACE :
 		{
+			if (md.mm()->cm.fn==0) {
+				errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet"; 
+				return false; // can't continue, mesh can't be processed
+			}
+			
 			float voxelSize = par.getAbsPerc("CellSize");
 			float offsetThr = par.getAbsPerc("Offset");
 			
