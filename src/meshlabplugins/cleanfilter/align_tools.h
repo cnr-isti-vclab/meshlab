@@ -28,7 +28,6 @@ public:
 	static const QString UseICP;
 	static const QString StuckMesh;
 	static const QString MeshToMove;
-	static const std::string TransformAppliedKey;
 	
 	//make the default parameter set for this filter
 	static void buildParameterSet(FilterParameterSet & parlst);
@@ -51,6 +50,9 @@ public:
 				FilterParameterSet &parameters,
 				QWidget *parentWidget = 0, bool confirm = false);
 
+	//returns the key applied if this transform is stored to perMeshAttribute
+	static const std::string getKey() { return "TransformAppliedKey"; }
+	
 protected:
 	AlignTools();
 

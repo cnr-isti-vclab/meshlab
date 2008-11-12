@@ -47,7 +47,6 @@ const QString AlignTools::AllowScaling = "AllowScaling";
 const QString AlignTools::UseICP = "UseICP";
 const QString AlignTools::StuckMesh = "StuckMesh";
 const QString AlignTools::MeshToMove = "MeshToMove";
-const std::string AlignTools::TransformAppliedKey = "TransformAppliedKey";
 
 AlignTools::AlignTools(){}
 
@@ -302,9 +301,9 @@ bool AlignTools::align(MeshModel *stuckModel, PickedPoints *stuckPickedPoints,
 		
 		//now save the transform as perMeshData so that we can undo it in the future
 		CMeshO::PerMeshAttributeHandle<vcg::Matrix44f> transformHandle =
-			(vcg::tri::HasPerMeshAttribute(modelToMove->cm, TransformAppliedKey) ?
-				vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vcg::Matrix44f> (modelToMove->cm, TransformAppliedKey) :
-				vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<vcg::Matrix44f> (modelToMove->cm, TransformAppliedKey) );
+			(vcg::tri::HasPerMeshAttribute(modelToMove->cm, getKey()) ?
+				vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vcg::Matrix44f> (modelToMove->cm, getKey()) :
+				vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<vcg::Matrix44f> (modelToMove->cm, getKey()) );
 		transformHandle() = modelToMove->cm.Tr;
 		
 		//now translate all the points in the mesh
