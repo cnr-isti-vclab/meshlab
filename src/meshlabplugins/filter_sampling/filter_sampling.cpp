@@ -82,7 +82,11 @@ class BaseSampler
 		if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0); 
 							 else m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
-		QRgb val = tex->pixel(tp[0],tex->height()-tp[1]-1);
+		QRgb val;
+		if (tex->width()!=tex->height())
+			val = tex->pixel(tp[0],tex->height()-(tp[1]*(double)tex->height()/(double)tex->width())-1);
+		else
+			val = tex->pixel(tp[0],tex->height()-tp[1]-1);
 		m->vert.back().C().SetRGB(qRed(val),qGreen(val),qBlue(val));
 		
 	}
@@ -515,6 +519,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 					mps.uvSpaceFlag = par.getBool("TextureSpace");
 					tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,par.getInt("TextureSize"));
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+					mm->updateDataMask(MeshModel::IOM_VERTNORMAL);
 				}
 		break;
 		case FP_MONTECARLO_SAMPLING :  
