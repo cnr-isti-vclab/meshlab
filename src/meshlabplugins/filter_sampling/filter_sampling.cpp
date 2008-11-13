@@ -519,7 +519,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 					mps.uvSpaceFlag = par.getBool("TextureSpace");
 					tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,par.getInt("TextureSize"));
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->updateDataMask(MeshModel::IOM_VERTNORMAL);
+					mm->updateDataMask(MeshModel::MM_VERTNORMAL);
 				}
 		break;
 		case FP_MONTECARLO_SAMPLING :  
