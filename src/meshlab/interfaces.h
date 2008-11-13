@@ -235,6 +235,8 @@ public:
 	// This function is called by the framework after getting the user params 
 	// NO GUI interaction should be done here. No dialog asking, no messagebox errors. 
 	// this function will also be called by the commandline framework.
+	// If you want report errors, use the errorMsg() string. It will displayed in case of filters returning false.
+	
 	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameterSet & /* par */, vcg::CallBackPos * /*cb*/) = 0;
  	virtual bool applyFilter(QAction *   filter, MeshDocument &md,   FilterParameterSet & par,       vcg::CallBackPos *cb) 
 	{ 
