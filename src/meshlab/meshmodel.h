@@ -115,7 +115,7 @@ The base class for representing a single mesh.
 It contains a single vcg mesh object with some additional information for keeping track of its origin and of what info it has.
 */
 
-class MeshModel : public vcg::tri::io::Mask
+class MeshModel 
 {
 public:
 /*
@@ -234,12 +234,12 @@ public:
   // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
   void Enable(int openingFileMask)
   {
-		if( openingFileMask & IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
-		if( openingFileMask & IOM_VERTCOLOR    ) updateDataMask(MM_VERTCOLOR);
-		if( openingFileMask & IOM_FACECOLOR    ) updateDataMask(MM_FACECOLOR);
-		if( openingFileMask & IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
-		if( openingFileMask & IOM_CAMERA				) updateDataMask(MM_CAMERA);
-		if( openingFileMask & IOM_VERTQUALITY	) updateDataMask(MM_VERTQUALITY);
+		if( openingFileMask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
+		if( openingFileMask & vcg::tri::io::Mask::IOM_VERTCOLOR    ) updateDataMask(MM_VERTCOLOR);
+		if( openingFileMask & vcg::tri::io::Mask::IOM_FACECOLOR    ) updateDataMask(MM_FACECOLOR);
+		if( openingFileMask & vcg::tri::io::Mask::IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
+		if( openingFileMask & vcg::tri::io::Mask::IOM_CAMERA				) updateDataMask(MM_CAMERA);
+		if( openingFileMask & vcg::tri::io::Mask::IOM_VERTQUALITY	) updateDataMask(MM_VERTQUALITY);
 	}
 
   bool hasDataMask(int maskToBeTested)

@@ -187,27 +187,27 @@ void SaveMaskExporterDialog::checkAndEnable(QCheckBox *qcb,int bit, int capabili
 void SaveMaskExporterDialog::SetMaskCapability()
 {
 	//vert
-	checkAndEnable(ui.check_iom_vertquality,  MeshModel::IOM_VERTQUALITY,  capability, defaultBits );
-	checkAndEnable(ui.check_iom_vertflags,    MeshModel::IOM_VERTFLAGS,    capability, defaultBits);
-	checkAndEnable(ui.check_iom_vertcolor,    MeshModel::IOM_VERTCOLOR,    capability, defaultBits);
-	checkAndEnable(ui.check_iom_verttexcoord, MeshModel::IOM_VERTTEXCOORD, capability, defaultBits);
-	checkAndEnable(ui.check_iom_vertnormal,   MeshModel::IOM_VERTNORMAL,   capability, defaultBits);
+	checkAndEnable(ui.check_iom_vertquality,  vcg::tri::io::Mask::IOM_VERTQUALITY,  capability, defaultBits );
+	checkAndEnable(ui.check_iom_vertflags,    vcg::tri::io::Mask::IOM_VERTFLAGS,    capability, defaultBits);
+	checkAndEnable(ui.check_iom_vertcolor,    vcg::tri::io::Mask::IOM_VERTCOLOR,    capability, defaultBits);
+	checkAndEnable(ui.check_iom_verttexcoord, vcg::tri::io::Mask::IOM_VERTTEXCOORD, capability, defaultBits);
+	checkAndEnable(ui.check_iom_vertnormal,   vcg::tri::io::Mask::IOM_VERTNORMAL,   capability, defaultBits);
 	
 	//face
-	checkAndEnable(ui.check_iom_facequality, MeshModel::IOM_FACEQUALITY, capability, defaultBits );
-	checkAndEnable(ui.check_iom_faceflags,   MeshModel::IOM_FACEFLAGS,   capability, defaultBits );
-	checkAndEnable(ui.check_iom_facecolor,   MeshModel::IOM_FACECOLOR,   capability, defaultBits );
-	checkAndEnable(ui.check_iom_facenormal,  MeshModel::IOM_FACENORMAL,  capability, defaultBits );
+	checkAndEnable(ui.check_iom_facequality, vcg::tri::io::Mask::IOM_FACEQUALITY, capability, defaultBits );
+	checkAndEnable(ui.check_iom_faceflags,   vcg::tri::io::Mask::IOM_FACEFLAGS,   capability, defaultBits );
+	checkAndEnable(ui.check_iom_facecolor,   vcg::tri::io::Mask::IOM_FACECOLOR,   capability, defaultBits );
+	checkAndEnable(ui.check_iom_facenormal,  vcg::tri::io::Mask::IOM_FACENORMAL,  capability, defaultBits );
 
 	//wedge
-	checkAndEnable(ui.check_iom_wedgcolor,    MeshModel::IOM_WEDGCOLOR,    capability, defaultBits );
-	checkAndEnable(ui.check_iom_wedgtexcoord, MeshModel::IOM_WEDGTEXCOORD, capability, defaultBits );
-	checkAndEnable(ui.check_iom_wedgnormal,   MeshModel::IOM_WEDGNORMAL,   capability, defaultBits );
+	checkAndEnable(ui.check_iom_wedgcolor,    vcg::tri::io::Mask::IOM_WEDGCOLOR,    capability, defaultBits );
+	checkAndEnable(ui.check_iom_wedgtexcoord, vcg::tri::io::Mask::IOM_WEDGTEXCOORD, capability, defaultBits );
+	checkAndEnable(ui.check_iom_wedgnormal,   vcg::tri::io::Mask::IOM_WEDGNORMAL,   capability, defaultBits );
 
 
 	//camera THIS ONE HAS TO BE CORRECTED !!!! 
-	//ui.check_iom_camera->setDisabled( ((capability & MeshModel::IOM_CAMERA)==0) | ((m->ioMask & MeshModel::IOM_CAMERA)==0) );
-	//ui.check_iom_camera->setChecked ( ((capability & MeshModel::IOM_CAMERA)!=0) & ((m->ioMask & MeshModel::IOM_CAMERA)!=0) );
+	//ui.check_iom_camera->setDisabled( ((capability & vcg::tri::io::Mask::IOM_CAMERA)==0) | ((m->ioMask & vcg::tri::io::Mask::IOM_CAMERA)==0) );
+	//ui.check_iom_camera->setChecked ( ((capability & vcg::tri::io::Mask::IOM_CAMERA)!=0) & ((m->ioMask & vcg::tri::io::Mask::IOM_CAMERA)!=0) );
 
 
 	if(capability == 0)
@@ -219,22 +219,22 @@ void SaveMaskExporterDialog::SlotOkButton()
 {
 	int newmask = 0;
 
-	if( ui.check_iom_vertflags->isChecked()		) { newmask |= MeshModel::IOM_VERTFLAGS;}
-	if( ui.check_iom_vertcolor->isChecked()		) { newmask |= MeshModel::IOM_VERTCOLOR;}
-	if( ui.check_iom_vertquality->isChecked()	) { newmask |= MeshModel::IOM_VERTQUALITY;}
-	if( ui.check_iom_verttexcoord->isChecked()	) { newmask |= MeshModel::IOM_VERTTEXCOORD;}
-	if( ui.check_iom_vertnormal->isChecked()	) { newmask |= MeshModel::IOM_VERTNORMAL;}
+	if( ui.check_iom_vertflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
+	if( ui.check_iom_vertcolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
+	if( ui.check_iom_vertquality->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
+	if( ui.check_iom_verttexcoord->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
+	if( ui.check_iom_vertnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
 
-	if( ui.check_iom_faceflags->isChecked()		) { newmask |= MeshModel::IOM_FACEFLAGS;}
-	if( ui.check_iom_facecolor->isChecked()		) { newmask |= MeshModel::IOM_FACECOLOR;}
-	if( ui.check_iom_facequality->isChecked()	) { newmask |= MeshModel::IOM_FACEQUALITY;}
-	if( ui.check_iom_facenormal->isChecked()	) { newmask |= MeshModel::IOM_FACENORMAL;}
+	if( ui.check_iom_faceflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
+	if( ui.check_iom_facecolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
+	if( ui.check_iom_facequality->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
+	if( ui.check_iom_facenormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_FACENORMAL;}
 
-	if( ui.check_iom_wedgcolor->isChecked()		) { newmask |= MeshModel::IOM_WEDGCOLOR;}
-	if( ui.check_iom_wedgtexcoord->isChecked()	) { newmask |= MeshModel::IOM_WEDGTEXCOORD;}
-	if( ui.check_iom_wedgnormal->isChecked()	) { newmask |= MeshModel::IOM_WEDGNORMAL;}
+	if( ui.check_iom_wedgcolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;}
+	if( ui.check_iom_wedgtexcoord->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
+	if( ui.check_iom_wedgnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;}
 
-	if( ui.check_iom_camera->isChecked()		) { newmask |= MeshModel::IOM_CAMERA;}
+	if( ui.check_iom_camera->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_CAMERA;}
 
 	for(unsigned int i=0;i<m->cm.textures.size();i++)
 		m->cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();

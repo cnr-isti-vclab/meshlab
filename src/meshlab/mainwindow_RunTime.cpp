@@ -584,16 +584,17 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
   // at the end for filters that change the color set the appropriate color mode
   if(iFilter->getClass(action)==MeshFilterInterface::FaceColoring ) {
     GLA()->setColorMode(vcg::GLW::CMPerFace);
-   // GLA()->mm()->ioMask|=MeshModel::IOM_FACECOLOR;
 		GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
   }
   if(iFilter->getClass(action)==MeshFilterInterface::VertexColoring ){
     GLA()->setColorMode(vcg::GLW::CMPerVert);
-		GLA()->mm()->updateDataMask(MeshModel::IOM_VERTCOLOR | MeshModel::IOM_VERTQUALITY);
-		//GLA()->mm()->ioMask|=MeshModel::IOM_VERTCOLOR;
-    //GLA()->mm()->ioMask|=MeshModel::IOM_VERTQUALITY;
+		GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
   }
-if(iFilter->getClass(action)==MeshFilterInterface::Selection )
+  if(iFilter->getClass(action)==MeshFilterInterface::Quality ){
+		GLA()->mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
+		GLA()->mm()->updateDataMask(MeshModel::MM_VERTQUALITY);
+  }
+	if(iFilter->getClass(action)==MeshFilterInterface::Selection )
     GLA()->setSelectionRendering(true);
 
   qb->reset();

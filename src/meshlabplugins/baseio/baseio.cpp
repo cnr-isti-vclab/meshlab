@@ -211,8 +211,8 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 		capability = vcg::tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();
 		// For the default bits of the ply format disable flags and normals that usually are not useful.
 		defaultBits=capability;
-		defaultBits &= (~MeshModel::IOM_FLAGS);
-		defaultBits &= (~MeshModel::IOM_VERTNORMAL);
+		defaultBits &= (~vcg::tri::io::Mask::IOM_FLAGS);
+		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTNORMAL);
 	}
 	if(format.toUpper() == tr("STL")){
 		capability = vcg::tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();

@@ -562,7 +562,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 {
   EpochReconstruction er;
 	
-  mask = MeshModel::IOM_VERTCOLOR | MeshModel::IOM_VERTQUALITY; 
+  mask = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTQUALITY; 
 // just to be sure...
 	
 	if (fileName.isEmpty()) return false;

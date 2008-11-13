@@ -170,14 +170,14 @@ namespace io {
 			if (!file.open(QIODevice::WriteOnly))
 				return E_CANTOPEN;
 			int nFace = 0;
-			bool bHasPerWedgeTexCoord = (mask & MeshModel::IOM_WEDGTEXCOORD) && HasPerWedgeTexCoord(m);
-			bool bHasPerWedgeNormal = (mask & MeshModel::IOM_WEDGNORMAL) && HasPerWedgeNormal(m);
-			bool bHasPerWedgeColor = (mask & MeshModel::IOM_WEDGCOLOR) && HasPerWedgeColor(m);
-			bool bHasPerVertexColor	= (mask & MeshModel::IOM_VERTCOLOR) && m.HasPerVertexColor();
-			bool bHasPerVertexNormal = (mask & MeshModel::IOM_VERTNORMAL) && m.HasPerVertexNormal();
-			bool bHasPerVertexTexCoord = (mask & MeshModel::IOM_VERTTEXCOORD) && m.HasPerVertexTexCoord();
-			bool bHasPerFaceColor = (mask & MeshModel::IOM_FACECOLOR) && HasPerFaceColor(m);
-			bool bHasPerFaceNormal = (mask & MeshModel::IOM_FACENORMAL) && HasPerFaceNormal(m);
+			bool bHasPerWedgeTexCoord = (mask & Mask::IOM_WEDGTEXCOORD) && HasPerWedgeTexCoord(m);
+			bool bHasPerWedgeNormal = (mask & Mask::IOM_WEDGNORMAL) && HasPerWedgeNormal(m);
+			bool bHasPerWedgeColor = (mask & Mask::IOM_WEDGCOLOR) && HasPerWedgeColor(m);
+			bool bHasPerVertexColor	= (mask & Mask::IOM_VERTCOLOR) && m.HasPerVertexColor();
+			bool bHasPerVertexNormal = (mask & Mask::IOM_VERTNORMAL) && m.HasPerVertexNormal();
+			bool bHasPerVertexTexCoord = (mask & Mask::IOM_VERTTEXCOORD) && m.HasPerVertexTexCoord();
+			bool bHasPerFaceColor = (mask & Mask::IOM_FACECOLOR) && HasPerFaceColor(m);
+			bool bHasPerFaceNormal = (mask & Mask::IOM_FACENORMAL) && HasPerFaceNormal(m);
 			if (bHasPerWedgeTexCoord && bHasPerVertexTexCoord)
 				return E_INVALIDSAVETEXCOORD;
 			if ((bHasPerVertexColor && (bHasPerWedgeColor || bHasPerFaceColor)) || (bHasPerWedgeColor && bHasPerFaceColor))
@@ -419,16 +419,16 @@ namespace io {
 		{
 			int capability = 0;
 			//vert
-			capability |= MeshModel::IOM_VERTNORMAL;
-			capability |= MeshModel::IOM_VERTTEXCOORD;
-			capability |= MeshModel::IOM_VERTCOLOR;
+			capability |= Mask::IOM_VERTNORMAL;
+			capability |= Mask::IOM_VERTTEXCOORD;
+			capability |= Mask::IOM_VERTCOLOR;
 			//face
-			capability |= MeshModel::IOM_FACECOLOR;
-			capability |= MeshModel::IOM_FACENORMAL;
+			capability |= Mask::IOM_FACECOLOR;
+			capability |= Mask::IOM_FACENORMAL;
 			//wedg
-			capability |= MeshModel::IOM_WEDGTEXCOORD;
-			capability |= MeshModel::IOM_WEDGNORMAL;
-			capability |= MeshModel::IOM_WEDGCOLOR;
+			capability |= Mask::IOM_WEDGTEXCOORD;
+			capability |= Mask::IOM_WEDGNORMAL;
+			capability |= Mask::IOM_WEDGCOLOR;
 			return capability;
 		}
 	};

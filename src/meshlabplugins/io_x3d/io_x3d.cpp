@@ -104,15 +104,15 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
-		if (info->mask & MeshModel::IOM_VERTTEXCOORD)
+		if (info->mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD)
 		{
-			info->mask |= MeshModel::IOM_WEDGTEXCOORD;
-			info->mask &=(~MeshModel::IOM_VERTTEXCOORD);
+			info->mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+			info->mask &=(~vcg::tri::io::Mask::IOM_VERTTEXCOORD);
 		}
-		if (info->mask & MeshModel::IOM_WEDGCOLOR)
-			info->mask &=(~MeshModel::IOM_WEDGCOLOR);
-		if (info->mask & MeshModel::IOM_WEDGNORMAL)
-			info->mask &=(~MeshModel::IOM_WEDGNORMAL);
+		if (info->mask & vcg::tri::io::Mask::IOM_WEDGCOLOR)
+			info->mask &=(~vcg::tri::io::Mask::IOM_WEDGCOLOR);
+		if (info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
+			info->mask &=(~vcg::tri::io::Mask::IOM_WEDGNORMAL);
 		m.Enable(info->mask);
 		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
 			m.cm.textures.push_back(info->textureFile[tx].toStdString());
@@ -133,7 +133,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName));
 			return false;
 		}
-		if(info->mask & MeshModel::IOM_WEDGNORMAL)
+		if(info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 		mask = info->mask;
 		delete(info);

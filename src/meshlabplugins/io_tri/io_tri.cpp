@@ -44,13 +44,13 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	bool result;
 	if(formatName.toUpper() == tr("TRI"))
 		{
-			mask |= MeshModel::IOM_WEDGTEXCOORD;
+			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 			m.Enable(mask);			
 			return parseTRI(qPrintable(fileName), m.cm);
 		}
 	if(formatName.toUpper() == tr("ASC"))
 		{
-			mask |= MeshModel::IOM_VERTQUALITY;
+			mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 			m.Enable(mask);			
 			tri::io::ImporterASC<CMeshO>::Open(m.cm, qPrintable(fileName),cb);
 			return true;

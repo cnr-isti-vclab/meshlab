@@ -146,7 +146,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
 			}
 		}
 
-		if(oi.mask & MeshModel::IOM_WEDGNORMAL)
+		if(oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 
 		mask = oi.mask;
@@ -212,7 +212,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
 			return false;
 		}
 
-		if(info.mask & MeshModel::IOM_WEDGNORMAL)
+		if(info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 
 		mask = info.mask;

@@ -139,7 +139,7 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 		}
 		else _mp.push_back(&m);
 
-		if(info->mask & MeshModel::IOM_WEDGNORMAL)
+		if(info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 		mask = info->mask;
 	}
