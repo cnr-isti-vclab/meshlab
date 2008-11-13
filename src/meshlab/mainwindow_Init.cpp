@@ -256,7 +256,7 @@ void MainWindow::createActions()
 
 	closeAct = new QAction(tr("&Close"), this);
 	closeAct->setShortcutContext(Qt::ApplicationShortcut);
-	closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
+	//closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
 	connect(closeAct, SIGNAL(triggered()),mdiarea, SLOT(closeActiveSubWindow()));
 
 	reloadAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
