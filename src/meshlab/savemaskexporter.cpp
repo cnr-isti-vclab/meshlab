@@ -147,7 +147,7 @@ int SaveMaskExporterDialog::GetNewMask()
  there are three things that are looked when setting the initial states of the checkbox of this dialog
  - this->capabilityBit
  - this->defaultBit
- - m->ioMask
+
 
 	setDisabled(true): uncheckable
 	setDisabled(false) : checkable
@@ -164,17 +164,17 @@ int SaveMaskExporterDialog::GetNewMask()
 */
 bool SaveMaskExporterDialog::shouldBeChecked(int bit, int capabilityBits, int defaultBits)
 {
-	if(!m->hasDataMask(bit)) return false;
+	if(!m->hasDataMask(MeshModel::io2mm(bit))) return false;
 	//if( (bit & meshBits) == 0 ) return false;
 	if( (bit & defaultBits) == 0 ) return false;
 	return true;
 }
 
-bool SaveMaskExporterDialog::shouldBeEnabled(int bit, int capabilityBits, int defaultBits)
+bool SaveMaskExporterDialog::shouldBeEnabled(int iobit, int capabilityBits, int defaultBits)
 {
-	if( (bit & capabilityBits) == 0 ) return false;
-//	if( (bit & meshBits) == 0 ) return false;
-	if(!m->hasDataMask(bit)) return false;
+	if( (iobit & capabilityBits) == 0 ) return false;
+	int mmbit = MeshModel::io2mm(iobit);
+	if(!m->hasDataMask(mmbit)) return false;
 	return true;
 }
 

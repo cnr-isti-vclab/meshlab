@@ -125,3 +125,32 @@ bool MeshModel::RenderSelectedFaces()
 	glPopAttrib();
   return true;
 }
+
+
+int MeshModel::io2mm(int single_iobit)
+{
+	switch(single_iobit) 
+	{
+		case tri::io::Mask::IOM_NONE					: return  MM_NONE;
+		case tri::io::Mask::IOM_VERTCOORD		: return  MM_VERTCOORD;
+		case tri::io::Mask::IOM_VERTCOLOR		: return  MM_VERTCOLOR;
+		case tri::io::Mask::IOM_VERTFLAGS		: return  MM_VERTFLAG;
+		case tri::io::Mask::IOM_VERTQUALITY	: return  MM_VERTQUALITY;
+		case tri::io::Mask::IOM_VERTNORMAL		: return  MM_VERTNORMAL;
+		case tri::io::Mask::IOM_VERTTEXCOORD : return  MM_VERTTEXCOORD;
+		case tri::io::Mask::IOM_VERTRADIUS		: return  MM_VERTRADIUS;
+		
+		case tri::io::Mask::IOM_FACEINDEX   		: return  MM_FACEVERT  ;
+		case tri::io::Mask::IOM_FACEFLAGS   		: return  MM_FACEFLAG  ;
+		case tri::io::Mask::IOM_FACECOLOR   		: return  MM_FACECOLOR  ;
+		case tri::io::Mask::IOM_FACEQUALITY 		: return  MM_FACEQUALITY;
+		case tri::io::Mask::IOM_FACENORMAL  		: return  MM_FACENORMAL ;
+		
+		case tri::io::Mask::IOM_WEDGTEXCOORD 		: return  MM_WEDGTEXCOORD;
+		case tri::io::Mask::IOM_WEDGCOLOR				: return  MM_WEDGCOLOR;
+		case tri::io::Mask::IOM_WEDGNORMAL   		: return  MM_WEDGNORMAL  ;
+	} ;
+
+	assert(0);
+}
+

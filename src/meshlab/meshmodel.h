@@ -126,39 +126,41 @@ public:
  - to know what elements are changed by a filter and therefore should be saved/restored in case of dynamic filters with a preview
 	*/
  	enum MeshElement {
-		MM_NONE							= 0x000000,
-		MM_VERTCOORD				= 0x000001,
-		MM_VERTNORMAL				= 0x000002,
-		MM_VERTFLAG					= 0x000004,
-		MM_VERTCOLOR				= 0x000008,
-		MM_VERTQUALITY			= 0x000010,
-		MM_VERTMARK					= 0x000020,
-		MM_VERTFACETOPO			= 0x000040,
-		MM_VERTCURV					= 0x000080,
-		MM_VERTCURVDIR			= 0x000100,
-		MM_VERTRADIUS				= 0x000200,
+		MM_NONE							= 0x00000000,
+		MM_VERTCOORD				= 0x00000001,
+		MM_VERTNORMAL				= 0x00000002,
+		MM_VERTFLAG					= 0x00000004,
+		MM_VERTCOLOR				= 0x00000008,
+		MM_VERTQUALITY			= 0x00000010,
+		MM_VERTMARK					= 0x00000020,
+		MM_VERTFACETOPO			= 0x00000040,
+		MM_VERTCURV					= 0x00000080,
+		MM_VERTCURVDIR			= 0x00000100,
+		MM_VERTRADIUS				= 0x00000200,
+		MM_VERTTEXCOORD			= 0x00000400,
 
-		MM_FACEVERT					= 0x001000,
-		MM_FACENORMAL				= 0x002000,
-		MM_FACEFLAG					= 0x004000,
-		MM_FACECOLOR				= 0x008000,
-		MM_FACEQUALITY			= 0x010000,
-		MM_FACEMARK					= 0x020000,
-		MM_FACEFACETOPO			= 0x040000,
-		MM_WEDGTEXCOORD			= 0x080000,
-		MM_WEDGNORMAL				= 0x100000,
+		MM_FACEVERT					= 0x00001000,
+		MM_FACENORMAL				= 0x00002000,
+		MM_FACEFLAG					= 0x00004000,
+		MM_FACECOLOR				= 0x00008000,
+		MM_FACEQUALITY			= 0x00010000,
+		MM_FACEMARK					= 0x00020000,
+		MM_FACEFACETOPO			= 0x00040000,
+		MM_WEDGTEXCOORD			= 0x00080000,
+		MM_WEDGNORMAL				= 0x00100000,
+		MM_WEDGCOLOR				= 0x00200000,
 
 // 	SubParts of bits
-		MM_VERTFLAGSELECT	= 0x01000000,
-		MM_FACEFLAGSELECT	= 0x02000000,
+		MM_VERTFLAGSELECT		= 0x01000000,
+		MM_FACEFLAGSELECT		= 0x02000000,
 // This part should be deprecated.
-		MM_VERTFLAGBORDER	= 0x04000000,
-		MM_FACEFLAGBORDER	= 0x08000000,
+		MM_VERTFLAGBORDER		= 0x04000000,
+		MM_FACEFLAGBORDER		= 0x08000000,
 
 // Per Mesh Stuff....
-		MM_CAMERA					= 0x10000000,
+		MM_CAMERA						= 0x10000000,
 
-		MM_ALL						= 0xffffff
+		MM_ALL							= 0xffffffff
 
 	} ;
 
@@ -299,7 +301,11 @@ public:
 
     currentDataMask = currentDataMask & (~unneededDataMask);
   }
-};
+	
+	static int io2mm(int single_iobit);
+
+};// end class MeshModel
+
 
 
 class RenderMode
@@ -331,7 +337,8 @@ public:
 			castShadow = false;
       selectedFaces=false;
     }
-};
+		
+}; // end class RenderMode
 
 class MeshDocument : public QObject
 {
@@ -409,7 +416,7 @@ public:
 		//when ever the current mesh changed this will send out the index of the newest mesh
 		void currentMeshChanged(int index);
 
-};
+};// end class MeshDocument
 
 /*
 	A class designed to save partial aspects of the state of a mesh, such as vertex colors, current selections, vertex positions
@@ -528,6 +535,7 @@ class MeshModelState
   }
 
 	bool isValid(MeshModel *m);
+
 };
 
 #endif

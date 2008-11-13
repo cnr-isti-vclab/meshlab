@@ -977,15 +977,23 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						renderModeTextureAct->setEnabled(true);
 						GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 					}
+					
+				
+
 					if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
 								vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
 					else
 								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
+								
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
+					
 					if(gla->mm()->cm.fn==0){
 						gla->setDrawMode(vcg::GLW::DMPoints);
-						gla->setLight(false);
+						if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)) gla->setLight(false); 
+						else mm->updateDataMask(MeshModel::MM_VERTNORMAL);
 					}
+					else mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+					
 					updateMenus();
 					int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
 					int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
