@@ -58,10 +58,13 @@ The Samplers; these classes are used to provide the callback used in the samplin
 class BaseSampler
 {
 	public:
-	BaseSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;};
+	BaseSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;tex=0;};
 	CMeshO *m;
 	QImage* tex;
+	int texSamplingWidth;
+	int texSamplingHeight;
 	bool uvSpaceFlag;
+	
 	void AddVert(const CMeshO::VertexType &p) 
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
@@ -81,13 +84,16 @@ class BaseSampler
 
 		if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0); 
 							 else m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
+							 
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
-		QRgb val;
-		if (tex->width()!=tex->height())
-			val = tex->pixel(tp[0],tex->height()-(tp[1]*(double)tex->height()/(double)tex->width())-1);
-		else
-			val = tex->pixel(tp[0],tex->height()-tp[1]-1);
-		m->vert.back().C().SetRGB(qRed(val),qGreen(val),qBlue(val));
+		if(tex)
+		{
+			QRgb val;
+			int xpos = tex->width()  * (float(tp[0])/texSamplingWidth);
+			int ypos = tex->height() * (1.0- float(tp[1])/texSamplingHeight);			
+			val = tex->pixel(xpos,ypos);
+			m->vert.back().C().SetRGB(qRed(val),qGreen(val),qBlue(val));
+		}
 		
 	}
 }; // end class BaseSampler
@@ -421,10 +427,15 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
 			break;
 		case FP_TEXEL_SAMPLING :  
- 		  parlst.addInt (	"TextureSize", 2048, "Texture Size",
+ 		  parlst.addInt (	"TextureW", 512, "Texture Width",
+											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples).<br>"
+											"If this parameter is 0 the size of the current texture is choosen.");
+ 		  parlst.addInt (	"TextureH", 512, "Texture Height",
 											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)");
  		  parlst.addBool(	"TextureSpace", false, "UV Space Sampling",
 											"The generated texel samples have their UV coords as point positions. The resulting point set is has a square domain, the texels/points, even if on a flat domain retain the original vertex normal to help a better perception of the original provenience.");
+			parlst.addBool(	"RecoverColor", md.mm()->cm.textures.size()>0, "RecoverColor",
+											"The generated point cloud has the current texture color");
 			break;
 		case FP_HAUSDORFF_DISTANCE :  
 			{
@@ -513,13 +524,21 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 					MeshModel *curMM= md.mm();	
 					if(!tri::HasPerWedgeTexCoord(curMM->cm)) break;
 					MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-					
+					bool RecoverColor = par.getBool("RecoverColor");
 					BaseSampler mps(&(mm->cm));
-					mps.tex= new QImage(curMM->cm.textures[0].c_str());
+					mps.texSamplingWidth=par.getInt("TextureW");
+					mps.texSamplingHeight=par.getInt("TextureH");
+					
+					if(RecoverColor && curMM->cm.textures.size()>0)
+					{
+							mps.tex= new QImage(curMM->cm.textures[0].c_str());
+							if(mps.texSamplingWidth==0)  mps.texSamplingWidth  = mps.tex->width();
+							if(mps.texSamplingHeight==0) mps.texSamplingHeight = mps.tex->height();
+					}
 					mps.uvSpaceFlag = par.getBool("TextureSpace");
-					tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,par.getInt("TextureSize"));
+					tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,mps.texSamplingWidth,mps.texSamplingHeight);
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-					mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+					mm->updateDataMask(MeshModel::MM_VERTNORMAL | MeshModel::MM_VERTCOLOR);
 				}
 		break;
 		case FP_MONTECARLO_SAMPLING :  
