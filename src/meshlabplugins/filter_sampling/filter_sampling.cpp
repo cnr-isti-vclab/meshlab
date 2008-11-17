@@ -152,8 +152,8 @@ public:
 		}
 		max_dist = 0;
 		mean_dist =0;
-		RMS_dist = 0;  
-		n_total_samples = 0;		
+		RMS_dist = 0;
+		n_total_samples = 0;
 	}
 
 void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType interp) 
@@ -315,11 +315,12 @@ FilterDocSampling::FilterDocSampling()
 			<< FP_MONTECARLO_SAMPLING
 			<< FP_SIMILAR_SAMPLING
 			<< FP_SUBDIV_SAMPLING
+			<< FP_POISSONDISK_SAMPLING
 			<< FP_HAUSDORFF_DISTANCE
 			<< FP_TEXEL_SAMPLING
 			<< FP_VERTEX_RESAMPLING
 			<< FP_OFFSET_SURFACE
-	    << FP_VORONOI_CLUSTERING
+			<< FP_VORONOI_CLUSTERING
 	;
   
   foreach(FilterIDType tt , types())
@@ -335,6 +336,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 		case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling"); 
 		case FP_SIMILAR_SAMPLING :  return QString("Similar Triangle Sampling"); 
 		case FP_SUBDIV_SAMPLING :  return QString("Regular Sudiv. Sampling"); 
+		case FP_POISSONDISK_SAMPLING : return QString("Poisson-disk Sampling");
 		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
 		case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling"); 
 		case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer"); 
@@ -350,19 +352,20 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_ELEMENT_SAMPLING    :  return QString("Create a new layer populated with a point sampling of the current mesh, a sample for each element of the mesh is generated"); 
-		case FP_MONTECARLO_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh."); 
-		case FP_SIMILAR_SAMPLING		:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle it is subdivided into similar triangles and the internal vertices of these triangles are considered. Distribution is biased by the shape of the triangles."); 
-		case FP_SUBDIV_SAMPLING			:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle"); 
-		case FP_HAUSDORFF_DISTANCE  :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh."); 
-		case FP_TEXEL_SAMPLING      :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated"); 
-		case FP_VERTEX_RESAMPLING		:  return QString("Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>"
+		case FP_ELEMENT_SAMPLING     :  return QString("Create a new layer populated with a point sampling of the current mesh, a sample for each element of the mesh is generated"); 
+		case FP_MONTECARLO_SAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh."); 
+		case FP_SIMILAR_SAMPLING     :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle it is subdivided into similar triangles and the internal vertices of these triangles are considered. Distribution is biased by the shape of the triangles."); 
+		case FP_SUBDIV_SAMPLING      :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle"); 
+		case FP_POISSONDISK_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated according to a Poisson-disk distribution");
+		case FP_HAUSDORFF_DISTANCE   :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh."); 
+		case FP_TEXEL_SAMPLING       :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated"); 
+		case FP_VERTEX_RESAMPLING    :  return QString("Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>"
 																									"For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>"
 																									"The algorithm assumes that the two meshes are reasonably similar and aligned."); 
-		case FP_OFFSET_SURFACE			:  return QString("Create a new mesh that is a resampled version of the current one.<br>"
+		case FP_OFFSET_SURFACE       :  return QString("Create a new mesh that is a resampled version of the current one.<br>"
 																									"The resampling is done by building a uniform volumetric representation where each voxel contains the signed distance from the original surface. "
 																									"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume."); 
-		case FP_VORONOI_CLUSTERING  :  return QString("Apply a clustering algorithm that builds voronoi cells over the mesh starting from random points,"
+		case FP_VORONOI_CLUSTERING   :  return QString("Apply a clustering algorithm that builds voronoi cells over the mesh starting from random points,"
 																									"collapse each voronoi cell to a single vertex, and construct the triangulation according to the clusters adjacency relations.<br>"
 																									"Very similar to the technique described in <b>'Approximated Centroidal Voronoi Diagrams for Uniform Polygonal Mesh Coarsening'</b> - Valette Chassery - Eurographics 2004");
 		default : assert(0); return QString("unknown filter!!!!");
@@ -380,6 +383,7 @@ const int FilterDocSampling::getRequirements(QAction *action)
     case FP_HAUSDORFF_DISTANCE :	return  MeshModel::MM_FACEMARK;
 		case FP_ELEMENT_SAMPLING    :   
 		case FP_MONTECARLO_SAMPLING :    
+		case FP_POISSONDISK_SAMPLING :
 		case FP_SIMILAR_SAMPLING :   
 		case FP_SUBDIV_SAMPLING :  return 0; 
 		case FP_TEXEL_SAMPLING  :  return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTNORMAL;
@@ -420,11 +424,14 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 											"Random Sampling",
 											"if true, for each (virtual) face we draw a random point, otherwise we pick the face midpoint.");
 			break;
-		case FP_ELEMENT_SAMPLING :  
+		case FP_ELEMENT_SAMPLING :
 			parlst.addEnum("Sampling", 0, 
 									QStringList() << "VertexSampling" << "Edge Sampling" << "Face Sampling", 
 									tr("Element to sample:"), 
 									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
+			break;
+		case FP_POISSONDISK_SAMPLING :
+			parlst.addInt("SampleNum", 100000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
 			break;
 		case FP_TEXEL_SAMPLING :  
  		  parlst.addInt (	"TextureW", 512, "Texture Width",
@@ -557,7 +564,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			else tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
+			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
 			break;
 		case FP_SUBDIV_SAMPLING :  
@@ -584,14 +591,33 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 				return false; // can't continue, mesh can't be processed
 			}
 			
-			MeshModel *curMM= md.mm();				
+			MeshModel *curMM= md.mm();
 			MeshModel *mm= md.addNewMesh("Similar Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 			
 			BaseSampler mps(&(mm->cm));
 			tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
+			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
+		}
+			break;
+
+		case FP_POISSONDISK_SAMPLING :
+		{
+			if (md.mm()->cm.fn==0)
+			{
+				errorMessage = "This filter requires a mesh. It does not work on PointSet.";
+				return false; // cannot continue
+			}
+
+			MeshModel *curMM= md.mm();
+			MeshModel *mm= md.addNewMesh("Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+			
+			BaseSampler mps(&(mm->cm));
+			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm,mps,par.getInt("SampleNum"));
+			
+			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
 			break;
 			
@@ -788,20 +814,21 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 }
 const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
 {
-  switch(ID(action))
-  {
-    case FP_VERTEX_RESAMPLING :
-    case FP_HAUSDORFF_DISTANCE :	
-		case FP_ELEMENT_SAMPLING    :   
-		case FP_MONTECARLO_SAMPLING :    
-		case FP_SIMILAR_SAMPLING :   
-		case FP_SUBDIV_SAMPLING :   
+	switch(ID(action))
+	{
+		case FP_VERTEX_RESAMPLING :
+		case FP_HAUSDORFF_DISTANCE :
+		case FP_ELEMENT_SAMPLING    :
+		case FP_MONTECARLO_SAMPLING :
+		case FP_SIMILAR_SAMPLING :
+		case FP_SUBDIV_SAMPLING :
+		case FP_POISSONDISK_SAMPLING : 
 		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling; 
 		case FP_VORONOI_CLUSTERING: return FilterDocSampling::Remeshing;
 		case FP_OFFSET_SURFACE: return FilterDocSampling::Remeshing;
-    default: assert(0);
-  }
-  return FilterClass(0);
+		default: assert(0);
+	}
+	return FilterClass(0);
 }
 
 
