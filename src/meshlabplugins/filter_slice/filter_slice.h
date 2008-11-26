@@ -38,29 +38,32 @@
 #include <vcg/math/histogram.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/simplex/vertex/vertex.h>
+#include <vcg/simplex/edgeplus/base.h>
 #include <vcg/complex/edgemesh/base.h>
-#include <vcg/simplex/edge/edge.h>
 
 #include <wrap/io_edgemesh/export_svg.h>
 
 //#include "svgpro.h"
 
 
-typedef CMeshO n_Mesh;
+class MyEdge;
+class MyFace;
+class MyVertex  : public vcg::VertexSimp2< MyVertex, MyEdge, MyFace, 
+vcg::vertex::Coord3f,     /* 12b */ 
+vcg::vertex::BitFlags,    /*  4b */
+vcg::vertex::EmptyVEAdj
+>{ 
+};
 
-class n_Edge;
-class n_Face;
-class n_Vertex  : public vcg::Vertex<float, n_Edge, n_Face> {};
-class n_Edge    : public vcg::Edge<n_Edge, n_Vertex> {};
+class MyEdge    : public vcg::EdgeSimp2<MyVertex,MyEdge,MyFace, vcg::edge::VertexRef> {};
 
 
-class n_EdgeMesh: public vcg::edge::EdgeMesh< std::vector<n_Vertex>, std::vector<n_Edge> > {};
+class MyEdgeMesh: public vcg::edg::EdgeMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 
 typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
 typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
-typedef vcg::edge::EdgeMesh<std::vector<n_Vertex>,std::vector<n_Edge> > Edge_Mesh;
-typedef vcg::edge::io::SVGProperties SVGProperties;
+typedef vcg::edg::EdgeMesh<std::vector<MyVertex>,std::vector<MyEdge> > Edge_Mesh;
+typedef vcg::edg::io::SVGProperties SVGProperties;
 
 class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 {
@@ -81,9 +84,6 @@ public:
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 private:
-	TriMeshGrid *mesh_grid;
-	n_EdgeMesh *edge_mesh;
-	n_Mesh trimesh;
 	std::vector< TriMeshGrid::Cell *> intersected_cells;
 	std::vector<vcg::Point3f> point_Vector;
 	SVGProperties pr;

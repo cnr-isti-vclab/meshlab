@@ -73,7 +73,7 @@ const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId)
 const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId)
 {
  switch(filterId) {
-		case FP_PLANE :  return QString("Export a cross section of the object and of the associated bounding box relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0)."); 
+		case FP_PLANE :  return QString("Export one or more cross sections of the current mesh relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0)."); 
 	
 		default : assert(0); 
 	}
@@ -99,12 +99,13 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 				metrics.push_back("XY Axis");
 				metrics.push_back("YZ Axis");
 				metrics.push_back("ZX Axis");
-				parlst.addEnum("plane", 0, metrics, tr("Axis:"), tr("Choose a cross section axis."));
-				parlst.addFloat("CrossplaneVal", 0.0, "Cross plane offset", "Specify an offset of the cross-plane as a float. The offset corresponds to the distance between the center of the object and the point where the plan crosses it. By default (Cross plane offset == 0), the plane crosses the center of the object, so the offset can be positive or negetive");
-				parlst.addString("filename", "Slice", "Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
-				parlst.addBool ("SelAlone",m.cm.sfn>0,"Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below");
-				parlst.addBool ("SelAll",m.cm.sfn>0,"Automatically generate a series of cross-sections along the whole length of the object and store each plane in a same SVG file. All the planes are surimposed. The distance between each plane is given by the step value below");
-				parlst.addFloat("CrossStepVal", 0.0, "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");			 		  
+				parlst.addEnum   ("planeAxis", 0, metrics, tr("Axis"), tr("The Slicing plane will be done perpendicular to the axis"));
+				parlst.addFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance between the center of the object and the point where the plan crosses it. By default (Cross plane offset == 0), the plane crosses the center of the object, so the offset can be positive or negetive");
+				parlst.addBool   ("absOffset",false,"Absolute offset", "if true the above offset is absolute is relative to the origin of the coordinate system, if false the offset is relative to the center of the bbox.");
+				parlst.addAbsPerc("planeDist", 0.0,0,m.cm.bbox.Diag(), "Distance between planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
+				parlst.addInt    ("planeNum", 0.0, "Number of Planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");	
+				parlst.addString ("filename", "Slice", "","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
+				parlst.addBool ("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below");
 		  }
 		  break;
 											
@@ -114,213 +115,46 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &parlst, vcg::CallBackPos *cb)
+bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &parlst, vcg::CallBackPos *)
 {
 	switch(ID(filter))
 	{
 		case FP_PLANE :
 		{
-			int plane = parlst.getEnum("plane");	
-			int i=0;
-			bool selAlone = parlst.getBool("SelAlone");
-			bool selAll = parlst.getBool("SelAll");
-			float StepVal = parlst.getFloat("CrossStepVal");
-			float planeVal = parlst.getFloat("CrossplaneVal");
-			Number = QString::number(planeVal);
-			number = QString::number(StepVal);
-			fileName = parlst.getString("filename");
-			folderN = fileName;
-			const char *folderName = fileName.toLatin1();
-			mkdir(folderName, 0777);
-			if (fileName==0) return false;
-    			if (!(fileName.endsWith("svg")))
-			fileName= fileName+".svg";
-			double avg_length; 
-			b=m.cm.bbox; //Boundig Box
-			Point3f mi=b.min;
-			Point3f ma=b.max;
-			Point3f center=b.Center() ;
-			edgeMax= max((ma[0]-mi[0]), (ma[1]-mi[1]));
-			edgeMax=max(edgeMax, (ma[2]-mi[2])); //edgeMax: the longest side of BBox
-			pr.numCol=1;
-			pr.numRow=1;
-			mesh_grid = new TriMeshGrid();
-			mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
-			
-			switch(plane)
-			{ 
-				case 0: 
-				{
-					Point3f* dir=new Point3f(0,0,1);   //the planes' normal vector init 
-					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
-					pr.setPlane(0, d);
-						
-					float scale = (pr.getViewBox().V(0))/(edgeMax*2);
-					pr.setScale(scale);
-					Plane3f pl;
-					pl.SetDirection(*dir);
+			Point3f planeAxis(0,0,0);
+			int axisIndex = parlst.getEnum("planeAxis");
+			assert(axisIndex >=0 && axisIndex <3);
+			planeAxis[axisIndex] = 1.0f;	
+			float planeDist = parlst.getAbsPerc("planeDist");
+			float planeOffset = parlst.getFloat("planeOffset");	
+			int	planeNum = parlst.getInt("planeNum");	
+			bool absOffset = parlst.getBool("absOffset");	
 
-				       		if(!selAll && !selAlone)
-						{
-							edge_mesh = new n_EdgeMesh();
-							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ planeVal);
-							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_XY_"+Number+".svg";
-							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[1], ma[0], ma[1], center[1], center[0]);				
-						}
+			Point3f planeCenter;
+			Plane3f slicingPlane;
+			pr.numCol=2;
+			pr.numRow=3;
+			pr.sizeCm=Point2f(4,4);
+			pr.projDir = planeAxis;
+			pr.projCenter =  m.cm.bbox.Center(); 
+			pr.scale = 2.0/m.cm.bbox.Diag();
+			vector<MyEdgeMesh*> ev;
+			for(int i=0;i<planeNum;++i)
+			{
+				if(absOffset==false) planeCenter = m.cm.bbox.Center() + planeAxis*planeOffset*(m.cm.bbox.Diag()/2.0);
+							          else planeCenter = Point3f(0,0,0) + planeAxis*planeOffset;
+				planeCenter+=planeAxis*planeDist*i;
+				slicingPlane.Init(planeCenter,planeAxis);
+				Box3f &bb=m.cm.bbox;
+				qDebug("Slicing a mesh with bb (%5.2f %5.2f %5.2f) -  (%5.2f %5.2f %5.2f)",bb.min[0],bb.min[1],bb.min[2],bb.max[0],bb.max[1],bb.max[2]);
+				qDebug("Crossing at (%5.2f %5.2f %5.2f)",planeCenter[0],planeCenter[1],planeCenter[2]);
 
-						if(selAlone && !selAll && StepVal != 0.0)
-						{							
-							while((mi[2]+i*StepVal) <= ma[2])
-							{
-								edge_mesh = new n_EdgeMesh();
-								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[2] + (i*StepVal));
-								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-								StepNumber = QString::number(mi[2] + (i*StepVal));
-								fileN="./"+folderN+"/" + fileName.left( fileName.length ()- 4 ) + "_XY_" + StepNumber + ".svg";
-								vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[1], ma[0], ma[1], center[1], center[0]);
-								i++;
-							}	
-						}
-
-						if(selAll && !selAlone && StepVal != 0.0)
-						{
-							edge_mesh = new n_EdgeMesh();
-							fileN="./"+folderN+"/" + fileName.left( fileName.length ()- 4 ) + "_XY_" + number + ".svg";
-
-							while((mi[2]+i*StepVal) <= ma[2])
-							{	
-								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[2] + (i*StepVal));
-								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-								i++;	
-							}
-							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[1], ma[0], ma[1], center[1], center[0]);		
-						}
-						
-						if( (selAll && selAlone)  || ((selAll || selAlone) && StepVal == 0.0) )
-							return false;	
-				} 
-				break;
-
-				case 1: 
-				{
-					Point3f* dir=new Point3f(1,0,0);   //the planes' normal vector init 
-					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
-					pr.setPlane(0, d);
-						
-					float scale = (pr.getViewBox().V(0))/(edgeMax*2) ;
-					pr.setScale(scale);
-					Plane3f pl;
-					pl.SetDirection(*dir);
-
-				       		if(!selAll && !selAlone)
-						{
-							edge_mesh = new n_EdgeMesh();
-							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ planeVal);
-							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_YZ_"+Number+".svg";
-							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[2], mi[1], ma[2], ma[1], center[2], center[1]);		
-						}
-
-						if(selAlone && !selAll && StepVal != 0.0)
-						{							
-							while((mi[0]+i*StepVal) <= ma[0])
-							{
-								edge_mesh = new n_EdgeMesh();
-								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[0] + (i*StepVal));
-								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-								StepNumber = QString::number(mi[2] + (i*StepVal));
-								fileN="./"+folderN+"/" + fileName.left( fileName.length ()- 4 ) + "_YZ_" + StepNumber + ".svg";
-								vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[2], mi[1], ma[2], ma[1], center[2], center[1]);
-								i++;
-							}	
-						}
-
-						if(selAll && !selAlone && StepVal != 0.0)
-						{
-							edge_mesh = new n_EdgeMesh();
-							fileN="./"+folderN+"/" + fileName.left( fileName.length ()- 4 ) + "_YZ_" + number + ".svg";
-
-							while((mi[0]+i*StepVal) <= ma[0])
-							{
-									
-								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[0] + (i*StepVal));
-								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-								i++;	
-							}
-							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[2], mi[1], ma[2], ma[1], center[2], center[1]);	
-						}
-						
-						if( (selAll && selAlone)  || ((selAll || selAlone) && StepVal == 0.0) )
-							return false;	
-				} 
-				break;
-
-				case 2: 
-				{ 	
-					Point3f* dir=new Point3f(0,1,0);   //the planes' normal vector init 
-					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
-					pr.setPlane(0, d);
-						
-					float scale = (pr.getViewBox().V(0))/(edgeMax*2);
-					pr.setScale(scale);
-					Plane3f pl;
-					pl.SetDirection(*dir);
-
-				       		if(!selAll && !selAlone)
-						{
-							edge_mesh = new n_EdgeMesh();
-							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + planeVal);
-							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_ZX_"+Number+".svg";
-							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[2], ma[0], ma[2], center[0], center[2]);		
-						}
-
-						if(selAlone && !selAll && StepVal != 0.0)
-						{							
-							while((mi[1]+i*StepVal) <= ma[1])
-							{
-								edge_mesh = new n_EdgeMesh();
-								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[1] + (i*StepVal));
-								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-								StepNumber = QString::number(mi[1] + (i*StepVal));
-								fileN="./"+folderN+"/"+fileName.left(fileName.length()-4)+"_ZX_"+StepNumber+".svg";
-								vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[2], ma[0], ma[2], center[0], center[2]);
-								i++;
-							}	
-						}
-
-						if(selAll && !selAlone && StepVal != 0.0)
-						{
-							edge_mesh = new n_EdgeMesh();
-							fileN="./"+folderN+"/"+fileName.left(fileName.length()-4)+"_ZX_"+number+".svg";
-
-							while((mi[1]+i*StepVal) <= ma[1])
-							{
-									
-								pl.SetOffset((center.X()*dir->X() )+(center.Y()*dir->Y())+(center.Z()*dir->Z())+ mi[1] + (i*StepVal));
-								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl, *edge_mesh, avg_length, mesh_grid, intersected_cells);
-								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
-								i++;	
-							}
-							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[2], ma[0], ma[2], center[0], center[2]);	
-						}
-						
-						if( (selAll && selAlone) || ((selAll || selAlone) && StepVal == 0.0) )
-							return false;	
-				}
-				break;
-					
-				default: assert(0);
-			} 
+				MyEdgeMesh *edgeMesh = new MyEdgeMesh();
+				vcg::Intersection<CMeshO, MyEdgeMesh, float>(m.cm, slicingPlane , *edgeMesh);
+				vcg::edg::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
+				ev.push_back(edgeMesh);
+			}
+			vcg::edg::io::ExporterSVG<MyEdgeMesh>::Save(ev, "test.svg", pr);
 		}
 		break;
 	}
@@ -331,15 +165,10 @@ const MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction
 {
 	switch(ID(filter))
 	{
-		case FP_PLANE :
-		{
-			return MeshFilterInterface::Generic; 
-		}
-		break;
-		
-		default: assert(0);
-              	return MeshFilterInterface::Generic;
+		case FP_PLANE : return MeshFilterInterface::Generic; 
+		default: assert(0);              	
 	}
+	return MeshFilterInterface::Generic;
 }
 
 bool ExtraFilter_SlicePlugin::autoDialog(QAction *action)
