@@ -173,7 +173,9 @@ void EditTexturePlugin::Decorate(MeshModel &m, GLArea *gla)
 void EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
 	// Set up the model
-	m.cm.face.EnableFFAdjacency();
+	//m.cm.face.EnableFFAdjacency();
+  m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+
 	if (vcg::tri::HasPerWedgeTexCoord(m.cm)) 
 	{
 		vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);

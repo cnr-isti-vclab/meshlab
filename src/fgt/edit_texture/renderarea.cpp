@@ -986,9 +986,10 @@ void RenderArea::ChangeMode(int modenumber)
 				for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 				selVertBit = CVertexO::NewBitFlag();
 				this->setCursor(Qt::CrossCursor);
-				model->cm.face.EnableVFAdjacency();
-				model->cm.vert.EnableVFAdjacency();
-				model->cm.face.EnableFFAdjacency();
+				model->updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO);
+				//model->cm.face.EnableVFAdjacency();
+				//model->cm.vert.EnableVFAdjacency();
+				//model->cm.face.EnableFFAdjacency();
 				UpdateUnifyTopology();
 			}
 			break;
