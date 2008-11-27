@@ -493,7 +493,7 @@ void MainWindow::startFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-
+    iFilter->setLog(&(GLA()->log));
 	if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
 
   // In order to avoid that a filter changes something assumed by the current editing tool,
@@ -654,11 +654,11 @@ void MainWindow::applyEditMode()
 		MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(action->parent());
 		MeshEditInterface *iEdit = iEditFactory->getMeshEditInterface(action);
 		GLA()->addMeshEditor(action, iEdit);
-	}		
+	}
 	GLA()->setCurrentEditAction(action);
 
 	//setSelectionRendering(true);
-	
+
 	updateMenus();
 }
 
@@ -810,7 +810,7 @@ void MainWindow::saveProject()
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
 	}
-	
+
 	MeshDocument &meshDoc=GLA()->meshDoc;
 	vector<string> meshNameVector;
 	vector<Matrix44f> transfVector;
@@ -840,7 +840,7 @@ bool MainWindow::openProject(QString fileName)
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
 	}
-		
+
 	vector<RangeMap> rmv;
 
 	ALNParser::ParseALN(rmv,qPrintable(fileName));
@@ -885,7 +885,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
 	}
-	
+
 	foreach(fileName,fileNameList)
 	{
 			QFileInfo fi(fileName);
@@ -977,23 +977,23 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						renderModeTextureAct->setEnabled(true);
 						GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 					}
-					
-				
+
+
 
 					if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
 								vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
 					else
 								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
-								
+
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
-					
+
 					if(gla->mm()->cm.fn==0){
 						gla->setDrawMode(vcg::GLW::DMPoints);
-						if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)) gla->setLight(false); 
+						if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)) gla->setLight(false);
 						else mm->updateDataMask(MeshModel::MM_VERTNORMAL);
 					}
 					else mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-					
+
 					updateMenus();
 					int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
 					int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
@@ -1033,7 +1033,7 @@ bool MainWindow::save()
 	fileName = QString(GLA()->mm()->fileName.c_str());
 
 	return saveAs(fileName);
-	
+
 }
 
 
