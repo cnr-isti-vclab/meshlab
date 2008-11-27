@@ -38,7 +38,7 @@ using namespace vcg;
 
 SampleEditPlugin::SampleEditPlugin() {
 	qFont.setFamily("Helvetica");
-	qFont.setPixelSize(10);    
+	qFont.setPixelSize(12);    
 }
 
 const QString SampleEditPlugin::Info() 
@@ -98,16 +98,15 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * g
 		glVertex(fp->P(2));
 	glEnd();
 	
-	QString buf=QString("f%1 (%3 %4 %5)").arg(tri::Index(m.cm,fp)).arg(tri::Index(m.cm,fp->V(0))).arg(tri::Index(m.cm,fp->V(1))).arg(tri::Index(m.cm,fp->V(2)));
+	QString buf=QString("f%1\n (%3 %4 %5)").arg(tri::Index(m.cm,fp)).arg(tri::Index(m.cm,fp->V(0))).arg(tri::Index(m.cm,fp->V(1))).arg(tri::Index(m.cm,fp->V(2)));
 	Point3f c=Barycenter(*fp);
 	gla->renderText(c[0], c[1], c[2], buf, qFont);
 	for(int i=0;i<3;++i)
 		{
 			QString buf=QString("v%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
-			//if( m.ioMask & MeshModel::IOM_VERTQUALITY)
 			if( m.hasDataMask(MeshModel::MM_VERTQUALITY) )
 				buf+=QString(" \nQ(%1)").arg(fp->V(i)->Q());
-			if(vcg::tri::HasPerWedgeTexCoord(m.cm)) 
+			if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
 					buf+=QString(" \nuv(%1 %2) id:%3").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
 			gla->renderText(fp->P(i)[0], fp->P(i)[1], fp->P(i)[2], buf, qFont);
 		}
