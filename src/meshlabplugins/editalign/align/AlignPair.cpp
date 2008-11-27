@@ -162,10 +162,10 @@ bool AlignPair::ChoosePoints( 	vector<Point3d> &Ps,		// vertici corrispondenti s
 	int sz = Ps.size();
 	int fnd=0;
 	int lastgood=sz-1;
-  math::RandomGenerator myrnd;
+  math::SubtractiveRingRNG myrnd;
 	while(fnd<N && fnd<lastgood)
 	{
-		int index = fnd+myrnd(lastgood-fnd);
+		int index = fnd+myrnd.generate(lastgood-fnd);
 		double dd=Distance(Ps[index],Pt[index]);
 		if(dd<newmaxd && dd>=newmind)
 		{
@@ -616,8 +616,8 @@ bool AlignPair::SampleMovVert(vector<A2Vertex> &vert, int SampleNum, AlignPair::
 
 int LocRnd(int n)
 {
-  static math::RandomGenerator myrnd(time(0));
-	return myrnd(n);
+  static math::SubtractiveRingRNG myrnd(time(0)); 
+	return myrnd.generate(n);
 }
 // Scelta a caso semplice
 bool AlignPair::SampleMovVertRandom(vector<A2Vertex> &vert, int SampleNum)
