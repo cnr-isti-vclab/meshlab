@@ -37,6 +37,7 @@
 
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/update/topology.h>
+#include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/flag.h>
 
 #include <wrap/gl/trimesh.h>
@@ -511,11 +512,7 @@ class MeshModelState
 				if(!(*vi).IsD()) (*vi).N()=(*ci);
 
 			//now reset the face normals
-			for(int i = 0; i < m->cm.face.size(); ++i)
-			{
-				// computing face normal from position of face vertices
-				vcg::face::ComputeNormalizedNormal(m->cm.face[i]);
-			}
+			vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
 		}
 
 		if(changeMask & MeshModel::MM_FACEFLAGSELECT)
