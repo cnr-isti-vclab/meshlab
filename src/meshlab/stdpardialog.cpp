@@ -54,7 +54,7 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		curModel = mm;
 		curMeshDoc = mdp;
 //		MainWindow * mwp = dynamic_cast<MainWindow *>(mwi);
-		MainWindow * mwp = (MainWindow *)(mwi);
+//		MainWindow * mwp = (MainWindow *)(mwi);
 		curgla=gla;
 
 		mfi->initParameterSet(action, *mdp, curParSet);
