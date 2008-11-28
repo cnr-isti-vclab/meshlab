@@ -625,11 +625,12 @@ void RfxDDSPlugin::flip_blocks_dxtc5(DXTColBlock *line, int numBlocks)
 
 ///////////////////////////////////////////////////////////////////////////////
 // swap two sections of memory
-void RfxDDSPlugin::swap(void *byte1, void *byte2, int size)
+void RfxDDSPlugin::swap(void *byte1, void *byte2, const int size)
 {
-	unsigned char tmp[size];
+	unsigned char *tmp =new unsigned char[size];
 
-	memcpy(&tmp, byte1, size);
+	memcpy(tmp, byte1, size);
 	memcpy(byte1, byte2, size);
-	memcpy(byte2, &tmp, size);
+	memcpy(byte2, tmp, size);
+	delete tmp;
 }

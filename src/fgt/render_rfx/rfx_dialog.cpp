@@ -257,7 +257,7 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 	enum controlType { INT_CTRL, FLOAT_CTRL, BOOL_CTRL };
 	float *val = u->GetValue();
 	controlType ctrl;
-	QWidget *controls[rows * columns];
+	QWidget **controls = new QWidget*[rows * columns];
 	QGridLayout *uniLayout = parent;
 	QHBoxLayout *sliderEditLayout = NULL;
 	bool multipleControls = false;
