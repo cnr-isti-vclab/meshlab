@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -48,11 +48,11 @@
 
 class MyEdge;
 class MyFace;
-class MyVertex  : public vcg::VertexSimp2< MyVertex, MyEdge, MyFace, 
-vcg::vertex::Coord3f,     /* 12b */ 
+class MyVertex  : public vcg::VertexSimp2< MyVertex, MyEdge, MyFace,
+vcg::vertex::Coord3f,     /* 12b */
 vcg::vertex::BitFlags,    /*  4b */
 vcg::vertex::EmptyVEAdj
->{ 
+>{
 };
 
 class MyEdge    : public vcg::EdgeSimp2<MyVertex,MyEdge,MyFace, vcg::edge::VertexRef> {};
@@ -61,8 +61,6 @@ class MyEdge    : public vcg::EdgeSimp2<MyVertex,MyEdge,MyFace, vcg::edge::Verte
 class MyEdgeMesh: public vcg::edg::EdgeMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 
 typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
-typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
-typedef vcg::edg::EdgeMesh<std::vector<MyVertex>,std::vector<MyEdge> > Edge_Mesh;
 typedef vcg::edg::io::SVGProperties SVGProperties;
 
 class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
@@ -72,10 +70,9 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 
 public:
 	enum { FP_PLANE };
-
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
-	
+
 	virtual const QString filterName(FilterIDType filter);
 	virtual const QString filterInfo(FilterIDType filter);
 	virtual bool autoDialog(QAction *);
@@ -84,12 +81,12 @@ public:
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 private:
-	std::vector< TriMeshGrid::Cell *> intersected_cells;
-	std::vector<vcg::Point3f> point_Vector;
+//	std::vector< TriMeshGrid::Cell *> intersected_cells;
+//	std::vector<vcg::Point3f> point_Vector;
 	SVGProperties pr;
-	QString fileName, fileN, Number, number, StepNumber, folderN;
-	vcg::Box3f b;
-	float edgeMax;
+//	QString fileName, fileN, Number, number, StepNumber, folderN;
+//	vcg::Box3f b;
+//	float edgeMax;
 };
 
 #endif
