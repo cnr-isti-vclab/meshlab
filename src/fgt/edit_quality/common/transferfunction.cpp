@@ -364,6 +364,26 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		_channels[BLUE_CHANNEL].addKey(0.0f,0.5f);
 		_channels[BLUE_CHANNEL].addKey(1.0f,0.5f);
 		break;
+	case SAW_4_TF:
+	for(int i=0;i<4;++i)
+	{
+		_channels[RED_CHANNEL].addKey(0.25f*i,           0.0f);
+		_channels[RED_CHANNEL].addKey(0.25f*(i+1)-0.0001,1.0f);
+		_channels[GREEN_CHANNEL].addKey(0.25f*i,           0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.25f*(i+1)-0.0001,1.0f);
+		_channels[BLUE_CHANNEL].addKey(0.25f*i,           0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.25f*(i+1)-0.0001,1.0f);
+	}		break;
+	case SAW_8_TF:
+	for(int i=0;i<8;++i)
+	{
+		_channels[RED_CHANNEL].addKey(0.125f*i,           0.0f);
+		_channels[RED_CHANNEL].addKey(0.125f*(i+1)-0.0001,1.0f);
+		_channels[GREEN_CHANNEL].addKey(0.125f*i,           0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.125f*(i+1)-0.0001,1.0f);
+		_channels[BLUE_CHANNEL].addKey(0.125f*i,           0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.125f*(i+1)-0.0001,1.0f);
+	}		break;
 	}
 }
 
@@ -431,6 +451,8 @@ void TransferFunction::initTF()
 	defaultTFs[RED_SCALE_TF] = "Red Scale";
 	defaultTFs[GREEN_SCALE_TF] = "Green Scale";
 	defaultTFs[BLUE_SCALE_TF] = "Blue Scale";
+	defaultTFs[SAW_4_TF] = "SawTooth Gray 4";
+	defaultTFs[SAW_8_TF] = "SawTooth Gray 8";
 	defaultTFs[FLAT_TF] = "Flat";
 }
 
