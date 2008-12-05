@@ -293,8 +293,7 @@ template<class MESH_TYPE,class ODD_VERT, class EVEN_VERT>
 bool RefineOddEven(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
                     bool RefineSelected=false, CallBackPos *cbOdd = 0, CallBackPos *cbEven = 0)
 {
-  EdgeLen <MESH_TYPE, typename MESH_TYPE::ScalarType> ep;
-  ep.thr2 = length*length;
+  EdgeLen <MESH_TYPE, typename MESH_TYPE::ScalarType> ep(length);
   return RefineOddEvenE(m, odd, even, ep, RefineSelected, cbOdd, cbEven);
 }
 

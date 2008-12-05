@@ -14,16 +14,14 @@ class QualityEdgePred
 {
 	public:
 		QualityEdgePred() {
-			lenp = EdgeLen<CMeshO, CMeshO::ScalarType>();
-			lenp.thr2 = 1.0;
+			lenp.setThr(1);
 			this->qthVal = 1.0;
 			this->selection = false;
 			selbit = -1;
 		}
 		
 		QualityEdgePred(bool sel, float lenTh, float qthVal) {
-			lenp = EdgeLen<CMeshO, CMeshO::ScalarType>();
-			lenp.thr2 = lenTh * lenTh;
+			lenp.setThr(lenTh);
 			this->qthVal = qthVal;
 			this->selection = sel;
 			selbit = -1;
