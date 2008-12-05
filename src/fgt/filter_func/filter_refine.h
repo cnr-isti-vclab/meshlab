@@ -68,13 +68,13 @@ public :
 		}
 		
 		// first and second vertex of current edge
-		x0 = ep.f->V(ep.z)->P()[0];
-		y0 = ep.f->V(ep.z)->P()[1];
-		z0 = ep.f->V(ep.z)->P()[2];
+		x0 = ep.V()->P()[0];
+		y0 = ep.V()->P()[1];
+		z0 = ep.V()->P()[2];
 
-		x1 = ep.f->V1(ep.z)->P()[0];
-		y1 = ep.f->V1(ep.z)->P()[1];
-		z1 = ep.f->V1(ep.z)->P()[2];
+		x1 = ep.VFlip()->P()[0];
+		y1 = ep.VFlip()->P()[1];
+		z1 = ep.VFlip()->P()[2];
 	
 		// new midpoint
 		nv.P() = Point3f(p1.Eval(),p2.Eval(),p3.Eval());
@@ -84,41 +84,41 @@ public :
 		{
 			// calculate new R,G,B component for midpoint based on the distance of two vertices
 			// and color distance.
-			float distance_r = math::Abs((float)ep.f->V(ep.z)->C()[0] - (float)ep.f->V1(ep.z)->C()[0]);
-			float distance_g = math::Abs((float)ep.f->V(ep.z)->C()[1] - (float)ep.f->V1(ep.z)->C()[1]);
-			float distance_b = math::Abs((float)ep.f->V(ep.z)->C()[2] - (float)ep.f->V1(ep.z)->C()[2]);
-			double clength = Distance(ep.f->V(ep.z)->P(), ep.f->V1(ep.z)->P());
+			float distance_r = math::Abs((float)ep.V()->C()[0] - (float)ep.VFlip()->C()[0]);
+			float distance_g = math::Abs((float)ep.V()->C()[1] - (float)ep.VFlip()->C()[1]);
+			float distance_b = math::Abs((float)ep.V()->C()[2] - (float)ep.VFlip()->C()[2]);
+			double clength = Distance(ep.V()->P(), ep.VFlip()->P());
 
-			double r = Distance(ep.f->V(ep.z)->P(),nv.P()) * (distance_r / clength);
-			double g = Distance(ep.f->V(ep.z)->P(),nv.P()) * (distance_g / clength);
-			double b = Distance(ep.f->V(ep.z)->P(),nv.P()) * (distance_b / clength);
+			double r = Distance(ep.V()->P(),nv.P()) * (distance_r / clength);
+			double g = Distance(ep.V()->P(),nv.P()) * (distance_g / clength);
+			double b = Distance(ep.V()->P(),nv.P()) * (distance_b / clength);
 
 			// set R component
-			if(ep.f->V(ep.z)->C()[0] < ep.f->V1(ep.z)->C()[0])
-				nv.C()[0] = ep.f->V(ep.z)->C()[0] +r;
-			else nv.C()[0] = ep.f->V(ep.z)->C()[0] -r;
+			if(ep.V()->C()[0] < ep.VFlip()->C()[0])
+				nv.C()[0] = ep.V()->C()[0] +r;
+			else nv.C()[0] = ep.V()->C()[0] -r;
 
 			// set G component
-			if(ep.f->V(ep.z)->C()[1] < ep.f->V1(ep.z)->C()[1])
-				nv.C()[1] = ep.f->V(ep.z)->C()[1] +g;
-			else nv.C()[1] = ep.f->V(ep.z)->C()[1] -g;
+			if(ep.V()->C()[1] < ep.VFlip()->C()[1])
+				nv.C()[1] = ep.V()->C()[1] +g;
+			else nv.C()[1] = ep.V()->C()[1] -g;
 
 			// set B component
-			if(ep.f->V(ep.z)->C()[2] < ep.f->V1(ep.z)->C()[2])
-				nv.C()[2] = ep.f->V(ep.z)->C()[2] +b;
-			else nv.C()[2] = ep.f->V(ep.z)->C()[2] -b;
+			if(ep.V()->C()[2] < ep.VFlip()->C()[2])
+				nv.C()[2] = ep.V()->C()[2] +b;
+			else nv.C()[2] = ep.V()->C()[2] -b;
 		}
 		
 		if( MESH_TYPE::HasPerVertexQuality()) 
 		{
 			// calculate new quality for midpoint based on the distance of two vertices
 			// and quality distance
-			double f = Distance(ep.f->V(ep.z)->P(),nv.P()) * 
-				(math::Abs(ep.f->V(ep.z)->Q() - ep.f->V1(ep.z)->Q()) / Distance(ep.f->V(ep.z)->P(), ep.f->V1(ep.z)->P()));
+			double f = Distance(ep.V()->P(),nv.P()) * 
+				(math::Abs(ep.V()->Q() - ep.VFlip()->Q()) / Distance(ep.V()->P(), ep.VFlip()->P()));
 
-			if(ep.f->V(ep.z)->Q() < ep.f->V1(ep.z)->Q())
-				nv.Q() = ep.f->V(ep.z)->Q() + f;
-			else nv.Q() = ep.f->V(ep.z)->Q() - f;
+			if(ep.V()->Q() < ep.VFlip()->Q())
+				nv.Q() = ep.V()->Q() + f;
+			else nv.Q() = ep.V()->Q() - f;
 
 		}
 	}
@@ -187,37 +187,48 @@ public:
 			this->setVars(p);
 			this->varDefined = true;
 		}
-
+		
+    setVarVal(ep);
+		
+		bool ret = p.Eval();
+		ep.FlipV();
+		setVarVal(ep);
+		ret = ret | bool(p.Eval());
+		
+		qDebug("Eval returned %i (%f %f",ret?1:0,x0,x1);
+		return ret;
+}
+		
+void setVarVal(face::Pos<typename MESH_TYPE::FaceType> &ep)
+{
 		// parser variables are related to vertex attributes
 		// set coords, normals, quality for the two edge's vertices
-		x0 = ep.f->V(ep.z)->P()[0];
-		y0 = ep.f->V(ep.z)->P()[1];
-		z0 = ep.f->V(ep.z)->P()[2];
+		x0 = ep.V()->P()[0];
+		y0 = ep.V()->P()[1];
+		z0 = ep.V()->P()[2];
 
-		x1 = ep.f->V1(ep.z)->P()[0];
-		y1 = ep.f->V1(ep.z)->P()[1];
-		z1 = ep.f->V1(ep.z)->P()[2];
+		x1 = ep.VFlip()->P()[0];
+		y1 = ep.VFlip()->P()[1];
+		z1 = ep.VFlip()->P()[2];
 
-		nx0 = ep.f->V(ep.z)->N()[0];
-		ny0 = ep.f->V(ep.z)->N()[1];
-		nz0 = ep.f->V(ep.z)->N()[2];
+		nx0 = ep.V()->N()[0];
+		ny0 = ep.V()->N()[1];
+		nz0 = ep.V()->N()[2];
 
-		nx1 = ep.f->V1(ep.z)->N()[0];
-		ny1 = ep.f->V1(ep.z)->N()[1];
-		nz1 = ep.f->V1(ep.z)->N()[2];
+		nx1 = ep.VFlip()->N()[0];
+		ny1 = ep.VFlip()->N()[1];
+		nz1 = ep.VFlip()->N()[2];
 
-		r0 = ep.f->V(ep.z)->C()[0];
-		g0 = ep.f->V(ep.z)->C()[1];
-		b0 = ep.f->V(ep.z)->C()[2];
+		r0 = ep.V()->C()[0];
+		g0 = ep.V()->C()[1];
+		b0 = ep.V()->C()[2];
 
-		r1 = ep.f->V1(ep.z)->C()[0];
-		g1 = ep.f->V1(ep.z)->C()[1];
-		b1 = ep.f->V1(ep.z)->C()[2];
+		r1 = ep.VFlip()->C()[0];
+		g1 = ep.VFlip()->C()[1];
+		b1 = ep.VFlip()->C()[2];
 
-		q0 = ep.f->V(ep.z)->Q();
-		q1 = ep.f->V1(ep.z)->Q();
-		
-		return p.Eval();
+		q0 = ep.V()->Q();
+		q1 = ep.VFlip()->Q();
 	}
 protected:
 	Parser p;
