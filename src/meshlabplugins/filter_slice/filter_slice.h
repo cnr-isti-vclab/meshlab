@@ -34,10 +34,6 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-#include <vcg/math/base.h>
-#include <vcg/math/histogram.h>
-#include <vcg/space/triangle3.h>
-#include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/simplex/edgeplus/base.h>
 #include <vcg/complex/edgemesh/base.h>
 
@@ -60,7 +56,6 @@ class MyEdge    : public vcg::EdgeSimp2<MyVertex,MyEdge,MyFace, vcg::edge::Verte
 
 class MyEdgeMesh: public vcg::edg::EdgeMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 
-typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
 typedef vcg::edg::io::SVGProperties SVGProperties;
 
 class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
@@ -78,15 +73,11 @@ public:
 	virtual bool autoDialog(QAction *);
 	virtual const FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
-	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-
+	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  virtual bool applyFilter(QAction * /* filter */, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
+  virtual const int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO;}
 private:
-//	std::vector< TriMeshGrid::Cell *> intersected_cells;
-//	std::vector<vcg::Point3f> point_Vector;
 	SVGProperties pr;
-//	QString fileName, fileN, Number, number, StepNumber, folderN;
-//	vcg::Box3f b;
-//	float edgeMax;
 };
 
 #endif

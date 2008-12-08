@@ -21,27 +21,16 @@
 *                                                                           *
 ****************************************************************************/
 
-
-#include <QtGui>
-#include <qfiledialog.h>
-#include <limits>
-#include <math.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <qstring.h>
-
 #include "filter_slice.h"
 
-#include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertexplus/component_ocf.h>
-#include <vcg/space/point3.h>
-#include <vcg/space/box3.h>
-#include <vcg/space/index/grid_closest.h>
 #include <vcg/complex/intersection.h>
 #include <vcg/complex/edgemesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/refine.h>
+#include <vcg/complex/trimesh/clean.h>
 
+#include "filter_slice_functors.h"
+//#include <wrap/gl/glu_tesselator.h>
 using namespace std;
 using namespace vcg;
 
@@ -116,8 +105,16 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &parlst, vcg::CallBackPos *)
+bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet &parlst, vcg::CallBackPos *cb)
 {
+  if (!tri::Clean<CMeshO>::IsTwoManifoldFace(m.mm()->cm) || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(m.mm()->cm,false) != 0))
+  {
+    Log(0,"Mesh is not two manifold, cannot apply filter");
+    return false;
+  }
+  else
+    Log(0,"Mesh is two manifold");
+
 	switch(ID(filter))
 	{
 		case FP_PLANE :
@@ -137,11 +134,12 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			pr.numRow=max(planeNum/pr.numCol,2);
 			pr.sizeCm=Point2f(4,4);
 			pr.projDir = planeAxis;
-			pr.projCenter =  m.cm.bbox.Center();
-			pr.scale = 2.0/m.cm.bbox.Diag();
+			pr.projCenter =  m.mm()->cm.bbox.Center();
+			pr.scale = 2.0/m.mm()->cm.bbox.Diag();
 			pr.lineWidthPt=200;
 			vector<MyEdgeMesh*> ev;
-
+			MeshModel *orig=m.mm();
+      m.mm()->visible=false;
 			for(int i=0;i<planeNum;++i)
 			{
 				//if(absOffset==false) planeCenter = m.cm.bbox.Center() + planeAxis*planeOffset*(m.cm.bbox.Diag()/2.0);
@@ -150,21 +148,31 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 				{
 				  case 0: planeCenter = planeAxis*planeOffset;  //origin
             break;
-				  case 1: planeCenter = m.cm.bbox.min+planeAxis*planeOffset*(m.cm.bbox.Diag()/2.0);  //bbox min
+				  case 1: planeCenter = m.mm()->cm.bbox.min+planeAxis*planeOffset*(m.mm()->cm.bbox.Diag()/2.0);  //bbox min
             break;
-				  case 2: planeCenter = m.cm.bbox.Center()+ planeAxis*planeOffset*(m.cm.bbox.Diag()/2.0);  //bbox min
+				  case 2: planeCenter = m.mm()->cm.bbox.Center()+ planeAxis*planeOffset*(m.mm()->cm.bbox.Diag()/2.0);  //bbox min
             break;
 				}
 
 				planeCenter+=planeAxis*planeDist*i;
 				slicingPlane.Init(planeCenter,planeAxis);
-				Box3f &bb=m.cm.bbox;
+				Box3f &bb=m.mm()->cm.bbox;
 				Log(0,"Slicing a mesh with bb (%5.2f %5.2f %5.2f) -  (%5.2f %5.2f %5.2f)",bb.min[0],bb.min[1],bb.min[2],bb.max[0],bb.max[1],bb.max[2]);
 				Log(0,"Crossing at (%5.2f %5.2f %5.2f)",planeCenter[0],planeCenter[1],planeCenter[2]);
 
+
+          SlicedEdge<CMeshO> slicededge(slicingPlane);
+          SlicingFunction<CMeshO> slicingfunc(slicingPlane);
+
+          vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
+             (m.mm()->cm, slicingfunc, slicededge, false, cb);
+
+
 				MyEdgeMesh *edgeMesh = new MyEdgeMesh();
-				vcg::Intersection<CMeshO, MyEdgeMesh, float>(m.cm, slicingPlane , *edgeMesh);
+				vcg::Intersection<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
+
 				vcg::edg::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
+
 				ev.push_back(edgeMesh);
 			}
 
@@ -174,6 +182,8 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
       if (!fname.endsWith(".svg"))
         fname+=".svg";
 			vcg::edg::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
+
+			vcg::tri::UpdateNormals<CMeshO>::PerFace(m.mm()->cm);
 		}
 		break;
 	}
