@@ -1,6 +1,6 @@
 include (../../shared.pri)
 
-HEADERS       = colladaio.h \
+HEADERS       = io_collada.h \
 		$$VCGDIR/wrap/io_trimesh/export_dae.h \
 		$$VCGDIR/wrap/io_trimesh/import_dae.h \
 		$$VCGDIR/wrap/dae/util_dae.h \
@@ -8,7 +8,7 @@ HEADERS       = colladaio.h \
 		$$VCGDIR/wrap/dae/xmldocumentmanaging.h
 
 
-SOURCES       = colladaio.cpp \
+SOURCES       = io_collada.cpp \
 		../../meshlab/filterparameter.cpp\
 		$$VCGDIR/wrap/dae/xmldocumentmanaging.cpp
 

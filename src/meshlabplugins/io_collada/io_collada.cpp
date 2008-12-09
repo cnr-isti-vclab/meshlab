@@ -90,7 +90,7 @@
 #include <Qt>
 #include <QtGui>
 
-#include "colladaio.h"
+#include "io_collada.h"
 
 //#include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
