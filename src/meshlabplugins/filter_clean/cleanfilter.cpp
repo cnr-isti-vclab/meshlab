@@ -117,7 +117,13 @@ using namespace vcg;
 
 CleanFilter::CleanFilter() 
 {
-  typeList << FP_REBUILD_SURFACE << FP_REMOVE_WRT_Q << FP_REMOVE_ISOLATED_COMPLEXITY << FP_REMOVE_ISOLATED_DIAMETER << FP_ALIGN_WITH_PICKED_POINTS;
+  typeList 
+		<< FP_REBUILD_SURFACE 
+		<< FP_REMOVE_WRT_Q 
+		<< FP_REMOVE_ISOLATED_COMPLEXITY 
+		<< FP_REMOVE_ISOLATED_DIAMETER 
+		<< FP_ALIGN_WITH_PICKED_POINTS
+		<< FP_SELECTBYANGLE;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -144,7 +150,8 @@ const QString CleanFilter::filterName(FilterIDType filter)
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
 	  case FP_ALIGN_WITH_PICKED_POINTS :	return AlignTools::FilterName;
-  	default: assert(0);
+  	case FP_SELECTBYANGLE :  return QString("Select Faces by view angle"); 
+		default: assert(0);
   }
   return QString("error!");
 }
@@ -161,7 +168,8 @@ const QString CleanFilter::filterInfo(FilterIDType filterId)
 		case FP_REMOVE_ISOLATED_DIAMETER:	 return tr("Remove isolated connected components whose diameter is smaller than the specified constant"); 
 		case FP_REMOVE_WRT_Q:	     return tr("Remove all the vertices with a quality lower smaller than the specified constant"); 
 		case FP_ALIGN_WITH_PICKED_POINTS: return tr("Align this mesh with another that has corresponding picked points.");
-  	default: assert(0);
+		case FP_SELECTBYANGLE :  return QString("Select faces according to the angle between their normal and the view direction. It is used in range map processing to select and delete steep faces parallel to viewdirection"); 
+		default: assert(0);
   }
   return QString("error!");
 }
@@ -170,6 +178,8 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
 {
   switch(ID(a))
   {
+		case FP_SELECTBYANGLE :
+				return MeshFilterInterface::FilterClass(MeshFilterInterface::RangeMap + MeshFilterInterface::Selection);     
     case FP_REMOVE_WRT_Q :
     case FP_REMOVE_ISOLATED_DIAMETER :
     case FP_REMOVE_ISOLATED_COMPLEXITY :
@@ -187,7 +197,8 @@ const int CleanFilter::getRequirements(QAction *action)
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
         return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK;
-    case FP_ALIGN_WITH_PICKED_POINTS:
+    case FP_SELECTBYANGLE:
+		case FP_ALIGN_WITH_PICKED_POINTS:
     	return MeshModel::MM_NONE;
     default: assert(0);
   }
@@ -217,13 +228,33 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
     case FP_ALIGN_WITH_PICKED_POINTS :
     	AlignTools::buildParameterSet(parlst);
     	break;
+		case FP_SELECTBYANGLE :
+			{
+				parlst.addDynamicFloat("anglelimit",
+															 75.0f, 0.0f, 180.0f, MeshModel::MM_FACEFLAGSELECT,
+												"angle threshold (deg)",
+												"faces with normal at higher angle w.r.t. the view direction are selected");
+	 		  parlst.addBool ("usecamera",
+												false,
+												"Use ViewPoint from Mesh Camera",
+												"Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs");
+				parlst.addPoint3f("viewpoint",
+												Point3f(0.0f, 0.0f, 0.0f),
+												"ViewPoint",
+												"if UseCamera is true, this value is ignored");
+			}
+			break;
+											
+
 	default: assert(0);
   }
 }
 
 bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
 {
-	if(filter->text() == filterName(FP_REBUILD_SURFACE) )
+	switch(ID(filter))
+  {
+	 case FP_REBUILD_SURFACE:
 	  {
       float Radius = par.getAbsPerc("BallRadius");		
       float Clustering = par.getFloat("Clustering");		      
@@ -241,21 +272,20 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
       pivot.BuildMesh(cb);
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			Log(GLLogStream::Info,"Reconstructed surface. Added %i faces",m.cm.fn-startingFn); 		
-	  }
-    if(filter->text() == filterName(FP_REMOVE_ISOLATED_DIAMETER) )
+	  } break;
+    case FP_REMOVE_ISOLATED_DIAMETER:
 	  {
       float minCC= par.getAbsPerc("MinComponentDiag");		
       std::pair<int,int> delInfo= RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,minCC);
 			Log(GLLogStream::Info,"Removed %2 connected components out of %1", delInfo.second, delInfo.first); 		
-    }  	
-
-    if(filter->text() == filterName(FP_REMOVE_ISOLATED_COMPLEXITY) )
+    }break;
+    case FP_REMOVE_ISOLATED_COMPLEXITY:
 	  {
       float minCC= par.getInt("MinComponentSize");		
       std::pair<int,int> delInfo=RemoveSmallConnectedComponentsSize<CMeshO>(m.cm,minCC);
 			Log(GLLogStream::Info,"Removed %i connected components out of %i", delInfo.second, delInfo.first); 		
-	  }
-	if(filter->text() == filterName(FP_REMOVE_WRT_Q) )
+	  }break;
+    case FP_REMOVE_WRT_Q:
 	  {
 			int deletedFN=0;
 			int deletedVN=0;
@@ -279,9 +309,8 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			Log(GLLogStream::Info,"Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
 
-	  }
-
-	if(filter->text() == filterName(FP_ALIGN_WITH_PICKED_POINTS) )
+	  }break;
+    case FP_ALIGN_WITH_PICKED_POINTS:
 	{
 		bool result = AlignTools::setupThenAlign(m, par);
 		if(!result)
@@ -289,8 +318,43 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 			Log(GLLogStream::Info,"Align failed, make sure you have equal numbers of points.");	
 			return false;
 		}
-	}
+	}break;
 
+		case FP_SELECTBYANGLE : 
+		{
+			CMeshO::FaceIterator   fi;
+			bool usecam = par.getBool("usecamera");
+			Point3f viewpoint = par.getPoint3f("viewpoint");	
+
+			// if usecamera but mesh does not have one
+			if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) ) 
+			{
+				errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
+				return false;
+			}
+			if(usecam)
+			{
+				viewpoint = m.cm.shot.GetViewPoint();
+			}
+
+			// angle threshold in radians
+			float limit = cos( math::ToRad(par.getDynamicFloat("anglelimit")) );
+			Point3f viewray;
+
+			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+				if(!(*fi).IsD())
+				{
+					viewray = viewpoint - Barycenter(*fi);
+					viewray.Normalize();
+
+					if((viewray.dot((*fi).N().Normalize())) < limit)
+						fi->SetS();
+				}
+
+		}
+		break;
+		default : assert(0); // unknown filter;
+	}
 	return true;
 }
 

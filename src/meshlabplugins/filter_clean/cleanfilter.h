@@ -84,7 +84,8 @@ class CleanFilter : public QObject, public MeshFilterInterface
     FP_REMOVE_ISOLATED_COMPLEXITY, 
     FP_REMOVE_ISOLATED_DIAMETER, 
     FP_REMOVE_WRT_Q,
-    FP_ALIGN_WITH_PICKED_POINTS
+    FP_ALIGN_WITH_PICKED_POINTS,
+		FP_SELECTBYANGLE
   } ;
 	
 	/* default values for standard parameters' values of the plugin actions */
