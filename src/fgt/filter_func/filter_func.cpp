@@ -887,12 +887,16 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 	r2 = (*fi).V(2)->C()[0];
 	g2 = (*fi).V(2)->C()[1];
 	b2 = (*fi).V(2)->C()[2];
-
+	
 	// set face color attributes
-	r = (*fi).C()[0];
-	g = (*fi).C()[1];
-	b = (*fi).C()[2];
-
+	if(HasPerFaceColor(m)){
+		r = (*fi).C()[0];
+		g = (*fi).C()[1];
+		b = (*fi).C()[2];
+	} else {
+		r=g=b=255;
+	}
+	
 	// zero based index of face
 	f = fi - m.face.begin();
 
