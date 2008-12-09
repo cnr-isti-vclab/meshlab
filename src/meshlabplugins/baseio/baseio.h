@@ -58,6 +58,7 @@ public:
 	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent= 0);
   virtual void initOpenParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet & par);
 	virtual void applyOpenParameter(const QString &format, MeshModel &m, const FilterParameterSet &par);
+	void initPreOpenParameter(const QString &formatName, const QString &filename, FilterParameterSet &parlst);
 
   virtual void initSaveParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet & par);
 };

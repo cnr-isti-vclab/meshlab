@@ -4,16 +4,13 @@ HEADERS		= meshio.h \
 			$$VCGDIR/wrap/ply/plylib.h \
 			$$VCGDIR/wrap/io_trimesh/export_obj.h \
 			$$VCGDIR/wrap/io_trimesh/export_3ds.h \
-			$$VCGDIR/wrap/io_trimesh/import_obj.h \
-			$$VCGDIR/wrap/io_trimesh/import_off.h \
-			$$VCGDIR/wrap/io_trimesh/export_off.h \
 			$$VCGDIR/wrap/io_trimesh/io_material.h \
 			import_3ds.h \
 			io_3ds.h 
 				
 SOURCES       = 	meshio.cpp \
-			../../meshlab/filterparameter.cpp\
-			$$VCGDIR/wrap/ply/plylib.cpp
+			../../meshlab/filterparameter.cpp
+
 
 TARGET        = io_3ds
 

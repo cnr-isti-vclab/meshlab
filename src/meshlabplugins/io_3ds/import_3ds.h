@@ -200,7 +200,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 				// Obtain current transformation matrix
 				// ------------------------------------
 				Lib3dsMatrix matrix;
-				Lib3dsMatrix translatedMatrix;
+				//Lib3dsMatrix translatedMatrix;
 				Lib3dsMatrix inverseMatrix;
 				
 				Lib3dsObjectData *d;

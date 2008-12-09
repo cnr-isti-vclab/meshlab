@@ -74,6 +74,7 @@
 #include <lib3ds/file.h>
 #include "import_3ds.h"
 #include <wrap/io_trimesh/export_3ds.h>
+
 #include <wrap/io_trimesh/export_obj.h>
 #include <wrap/io_trimesh/export_vrml.h>
 #include <wrap/io_trimesh/export_dxf.h>
@@ -93,24 +94,9 @@ using namespace std;
 using namespace vcg;
 
 
-// initialize importing parameters
-void ExtraMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &filename, FilterParameterSet &parlst)
-{
-	if (formatName.toUpper() == tr("PTX"))
-	{
-		parlst.addInt("meshindex",0,"Index of Range Map to be Imported","PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail");
-		parlst.addBool("anglecull",true,"Cull faces by angle","short");
-		parlst.addFloat("angle",85.0,"Angle limit for face culling","short");
-		parlst.addBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead");
-		parlst.addBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]");
-		parlst.addBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
-		parlst.addBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over");		
-		parlst.addBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
-	}
-}
 
 
-bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &parlst, CallBackPos *cb, QWidget *parent)
+bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, CallBackPos *cb, QWidget *parent)
 {
 	// initializing mask
   mask = 0;
@@ -126,78 +112,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
 
 	bool normalsUpdated = false;
 
-	if(formatName.toUpper() == tr("OBJ"))
-	{
-    vcg::tri::io::ImporterOBJ<CMeshO>::Info oi;	
-		oi.cb = cb;
-		if (!vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
-			return false;
-    m.Enable(oi.mask);
-		
-		int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
-		if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
-		{
-			if (result & vcg::tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
-				QMessageBox::warning(parent, tr("OBJ Opening Warning"), vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
-			else
-			{
-				QMessageBox::critical(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
-				return false;
-			}
-		}
-
-		if(oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
-			normalsUpdated = true;
-
-		mask = oi.mask;
-	}
-	else if (formatName.toUpper() == tr("PTX"))
-	{
-		vcg::tri::io::ImporterPTX<CMeshO>::Info importparams;
-
-		importparams.meshnum = parlst.getInt("meshindex");
-		importparams.anglecull =parlst.getBool("anglecull");
-		importparams.angle = parlst.getFloat("angle");
-		importparams.savecolor = parlst.getBool("usecolor");
-		importparams.pointcull = parlst.getBool("pointcull");
-		importparams.pointsonly = parlst.getBool("pointsonly");
-		importparams.switchside = parlst.getBool("switchside");
-		importparams.flipfaces = parlst.getBool("flipfaces");
-
-		// if color, add to mesh
-		if(importparams.savecolor)
-			importparams.mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-
-		// reflectance is stored in quality
-		importparams.mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-
-		m.Enable(importparams.mask);
-
-		int result = vcg::tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
-		if (result == 1)
-		{
-			QMessageBox::warning(parent, tr("PTX Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-
-		// update mask
-		mask = importparams.mask;
-	}
-	else if (formatName.toUpper() == tr("OFF"))
-	{
-		int loadMask;
-		if (!vcg::tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(),loadMask))
-			return false;
-    m.Enable(loadMask);
-		
-		int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
-		if (result != 0)  // OFFCodes enum is protected
-		{
-			QMessageBox::warning(parent, tr("OFF Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-	}
-	else if (formatName.toUpper() == tr("3DS"))
+	if (formatName.toUpper() == tr("3DS"))
 	{
 		vcg::tri::io::_3dsInfo info;	
 		info.cb = cb;
@@ -262,26 +177,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName, const QString &fileName,
 		}
 		return true;
 	}
-	else if(formatName.toUpper() == tr("WRL"))
-	{
-		int result = vcg::tri::io::ExporterWRL<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-		if(result!=0)
-		{
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterWRL<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-		return true;
-	}
-	else if( formatName.toUpper() == tr("OFF") || formatName.toUpper() == tr("DXF") || formatName.toUpper() == tr("OBJ") )
-  {
-    int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-  	if(result!=0)
-	  {
-		  QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
-		  return false;
-	  }
-	return true;
-  }
+	else 
   assert(0); // unknown format
   return false;
 }
@@ -292,10 +188,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName, const QString &fileName,
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
-	formatList << Format("Alias Wavefront Object"		,tr("OBJ"));
-	formatList << Format("Object File Format"			  ,tr("OFF"));
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));
-	formatList << Format("PTX File Format"      		,tr("PTX"));
 	return formatList;
 }
 
@@ -305,11 +198,7 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
-	formatList << Format("Alias Wavefront Object"		,tr("OBJ"));
-	formatList << Format("Object File Format"			  ,tr("OFF"));
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));
-	formatList << Format("VRML File Format"         ,tr("WRL"));
-	formatList << Format("DXF File Format"          ,tr("DXF"));
 	return formatList;
 }
 
@@ -319,10 +208,7 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 */
 void ExtraMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
-	if(format.toUpper() == tr("OBJ")){capability=defaultBits= vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("OFF")){capability=defaultBits= vcg::tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
 	if(format.toUpper() == tr("3DS")){capability=defaultBits= vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("WRL")){capability=defaultBits= vcg::tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
 	return;
 }
 
