@@ -1,0 +1,35 @@
+include (../../shared.pri)
+
+HEADERS		= meshio.h \
+			$$VCGDIR/wrap/ply/plylib.h \
+			$$VCGDIR/wrap/io_trimesh/export_obj.h \
+			$$VCGDIR/wrap/io_trimesh/export_3ds.h \
+			$$VCGDIR/wrap/io_trimesh/import_obj.h \
+			$$VCGDIR/wrap/io_trimesh/import_off.h \
+			$$VCGDIR/wrap/io_trimesh/export_off.h \
+			$$VCGDIR/wrap/io_trimesh/io_material.h \
+			import_3ds.h \
+			io_3ds.h 
+				
+SOURCES       = 	meshio.cpp \
+			../../meshlab/filterparameter.cpp\
+			$$VCGDIR/wrap/ply/plylib.cpp
+
+TARGET        = io_3ds
+
+INCLUDEPATH += ../../../../code/lib/lib3ds-1.3.0
+
+# Notes on the paths of lib3ds files.
+# Once you have compiled the library put the lib files in a dir named lib/XXX/ 
+# where XXX is the name of your system according to the QT naming style.
+# Linux users can rely on their own package managers and hope that it is installing the last version of lib3ds
+
+win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib/win32-msvc.net/lib3ds-130s.lib
+win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib/win32-msvc2005/lib3ds-130s.lib
+win32-g++:LIBS		+= ../../../../code/lib/lib3ds-1.3.0/lib/win32-g++/lib3ds.a
+
+unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/lib/unix -l3ds
+
+mac:LIBS -= -l3ds 
+mac:LIBS += ../../../../code/lib/lib3ds-1.3.0/lib/mac/lib3ds.a
+
