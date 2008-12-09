@@ -1,0 +1,528 @@
+<ui version="4.0" >
+ <class>TransformDialog</class>
+ <widget class="QDialog" name="TransformDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>672</width>
+    <height>666</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Apply Transform</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset>../../../meshlab/images/eye128.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QRadioButton" name="isRotateRB" >
+       <property name="text" >
+        <string>Rotate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="isMoveRB" >
+       <property name="text" >
+        <string>Move</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="isScaleRB" >
+       <property name="text" >
+        <string>Scale</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <layout class="QVBoxLayout" >
+       <item>
+        <widget class="QGroupBox" name="rotateBox" >
+         <property name="title" >
+          <string>Rotate</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <layout class="QHBoxLayout" >
+            <item>
+             <layout class="QVBoxLayout" >
+              <item>
+               <widget class="QRadioButton" name="xAxisRB" >
+                <property name="text" >
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="yAxisRB" >
+                <property name="text" >
+                 <string>Y</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="zAxisRB" >
+                <property name="text" >
+                 <string>Z</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QDial" name="rotateDial" >
+              <property name="maximum" >
+               <number>359</number>
+              </property>
+              <property name="sliderPosition" >
+               <number>180</number>
+              </property>
+              <property name="orientation" >
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance" >
+               <bool>true</bool>
+              </property>
+              <property name="invertedControls" >
+               <bool>true</bool>
+              </property>
+              <property name="wrapping" >
+               <bool>true</bool>
+              </property>
+              <property name="notchesVisible" >
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="rotateLE" >
+            <property name="text" >
+             <string>0.0</string>
+            </property>
+            <property name="maxLength" >
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="centerRotateBox" >
+            <property name="title" >
+             <string>Rotation Center</string>
+            </property>
+            <layout class="QGridLayout" >
+             <item row="1" column="0" >
+              <widget class="QRadioButton" name="originRotateRB" >
+               <property name="text" >
+                <string>Origin</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" >
+              <widget class="QRadioButton" name="centerRotateRB" >
+               <property name="text" >
+                <string>Mesh Center</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="rotateXUpPB" >
+            <property name="text" >
+             <string>Rotate X Up</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="rotateZUpPB" >
+            <property name="text" >
+             <string>Rotate Z Up</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>16</width>
+              <height>56</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2" >
+         <property name="title" >
+          <string>Transformation mode</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QRadioButton" name="absoluteRB" >
+            <property name="text" >
+             <string>Absolute</string>
+            </property>
+            <property name="checked" >
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="relativeRB" >
+            <property name="text" >
+             <string>Relative</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" >
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QGroupBox" name="moveBox" >
+           <property name="title" >
+            <string>Move</string>
+           </property>
+           <layout class="QVBoxLayout" >
+            <item>
+             <layout class="QGridLayout" >
+              <item row="2" column="1" >
+               <widget class="QLineEdit" name="zMoveLE" />
+              </item>
+              <item row="0" column="1" >
+               <widget class="QLineEdit" name="xMoveLE" />
+              </item>
+              <item row="2" column="0" >
+               <widget class="QLabel" name="zMoveLBL" >
+                <property name="text" >
+                 <string>Z</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>zMoveLE</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1" >
+               <widget class="QLineEdit" name="yMoveLE" />
+              </item>
+              <item row="1" column="0" >
+               <widget class="QLabel" name="yMoveLBL" >
+                <property name="text" >
+                 <string>Y</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>yMoveLE</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" >
+               <widget class="QLabel" name="xMoveLBL" >
+                <property name="text" >
+                 <string>X</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>xMoveLE</cstring>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="mvCenterOriginPB" >
+              <property name="text" >
+               <string>Move center to origin</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="scaleBox" >
+           <property name="title" >
+            <string>Scale</string>
+           </property>
+           <layout class="QGridLayout" >
+            <item row="0" column="0" >
+             <layout class="QGridLayout" >
+              <item row="2" column="0" >
+               <widget class="QLabel" name="zScaleLBL" >
+                <property name="text" >
+                 <string>Z</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>zScaleLE</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1" >
+               <widget class="QLineEdit" name="yScaleLE" />
+              </item>
+              <item row="0" column="1" >
+               <widget class="QLineEdit" name="xScaleLE" />
+              </item>
+              <item row="1" column="0" >
+               <widget class="QLabel" name="yScaleLBL" >
+                <property name="text" >
+                 <string>Y</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>yScaleLE</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" >
+               <widget class="QLabel" name="xScaleLBL" >
+                <property name="text" >
+                 <string>X</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>xScaleLE</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1" >
+               <widget class="QLineEdit" name="zScaleLE" />
+              </item>
+              <item row="3" column="0" colspan="2" >
+               <widget class="QCheckBox" name="uniformScaleCB" >
+                <property name="text" >
+                 <string>Uniform</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QPushButton" name="scaleUnitPB" >
+              <property name="text" >
+               <string>Scale to unit box</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox" >
+         <property name="toolTip" >
+          <string/>
+         </property>
+         <property name="title" >
+          <string>Current Transformation Matrix</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <property name="spacing" >
+           <number>3</number>
+          </property>
+          <property name="leftMargin" >
+           <number>4</number>
+          </property>
+          <property name="topMargin" >
+           <number>4</number>
+          </property>
+          <property name="rightMargin" >
+           <number>4</number>
+          </property>
+          <property name="bottomMargin" >
+           <number>4</number>
+          </property>
+          <item>
+           <widget class="QTableWidget" name="tableWidget" >
+            <property name="font" >
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" >
+         <item row="1" column="0" >
+          <widget class="QLabel" name="bboxMaxLBL" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text" >
+            <string>Bounding Box Max</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" >
+          <widget class="QLabel" name="bboxValueMinLBL" >
+           <property name="text" >
+            <string>bboxValueMinLBL</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" >
+          <widget class="QLabel" name="bboxMinLBL" >
+           <property name="text" >
+            <string>Bounding Box Min</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QLabel" name="bboxValueMaxLBL" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+             <horstretch>2</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text" >
+            <string>bboxValueMaxLBL</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" >
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>131</width>
+         <height>31</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="applyButton" >
+       <property name="text" >
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeAndFreezeButton" >
+       <property name="text" >
+        <string>Close and Freeze</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeButton" >
+       <property name="text" >
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTextBrowser" name="textBrowser" >
+     <property name="font" >
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="html" >
+      <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:11pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:13pt;">&lt;span style=" font-size:11pt;">MeshLab keeps for each layer/mesh a current trasformation matrix &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;">: &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;"> is used in rendering and alignment. The &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;"> matrix is usually &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">NOT&lt;/span>&lt;span style=" font-size:11pt;"> saved when you export the mesh into a generic format. With this dialog you can change &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;">  &lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">When the transformation mode is set to relative all the computations involves the &lt;span style=" font-weight:600; font-style:italic;">T&lt;/span> Matrix:&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">- &lt;span style=" font-weight:600; font-style:italic;">Relative&lt;/span>: the transformation specified in the top part is multiplied by the current matrix &lt;span style=" font-weight:600; font-style:italic;">T&lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600; font-style:italic;">- Absolute: the transformation specified in the top part is used as the  new matrix T&lt;/p>
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600; font-style:italic;">Important Note&lt;/span>:&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">To actually change the coords of the mesh and baking the matrix into the mesh itself you have to use the &lt;span style=" font-weight:600; font-style:italic;">freeze&lt;/span> filter (in that case &lt;span style=" font-weight:600; font-style:italic;">T&lt;/span> become the Identity).&lt;/p>&lt;/body>&lt;/html></string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>isMoveRB</tabstop>
+  <tabstop>isRotateRB</tabstop>
+  <tabstop>isScaleRB</tabstop>
+  <tabstop>xMoveLE</tabstop>
+  <tabstop>yMoveLE</tabstop>
+  <tabstop>zMoveLE</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TransformDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>487</x>
+     <y>498</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>526</x>
+     <y>471</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
