@@ -1,0 +1,678 @@
+<ui version="4.0" >
+ <class>v3dImportDialog</class>
+ <widget class="QDialog" name="v3dImportDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>792</width>
+    <height>606</height>
+   </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle" >
+   <string>V3D Import Settings</string>
+  </property>
+  <layout class="QHBoxLayout" >
+   <item>
+    <layout class="QVBoxLayout" >
+     <item>
+      <widget class="QLabel" name="infoLabel" >
+       <property name="text" >
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="previewLabel" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text" >
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QLabel" name="label" >
+         <property name="text" >
+          <string>SubSample</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="imgSizeLabel" >
+         <property name="text" >
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="subsampleSpinBox" >
+         <property name="toolTip" >
+          <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Set the subsample factor:&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  1 the image is not resized&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  2 image is halved &lt;span style=" font-style:italic;">(one point every 4)&lt;/span>&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  3 image is reduced to one third &lt;span style=" font-style:italic;">(one point every 9)&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QLabel" name="label_2" >
+         <property name="text" >
+          <string>Minimum Count</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>91</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="minCountSpinBox" >
+         <property name="toolTip" >
+          <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Set the minimum number of match for a sample to be accepted&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">3 means that only samples that had been found a correspondence with other 2 images or more are considered&lt;/p>&lt;/body>&lt;/html></string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QSlider" name="minCountSlider" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximum" >
+            <number>10</number>
+           </property>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="rangeLabel" >
+           <property name="text" >
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QLabel" name="label_3" >
+         <property name="text" >
+          <string>Minimum Angle</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="qualitySpinBox" >
+         <property name="decimals" >
+          <number>1</number>
+         </property>
+         <property name="maximum" >
+          <double>90.000000000000000</double>
+         </property>
+         <property name="singleStep" >
+          <double>5.000000000000000</double>
+         </property>
+         <property name="value" >
+          <double>75.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QLabel" name="label_5" >
+         <property name="text" >
+          <string>Feature Aware Smoothing</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="smoothSpinBox" >
+         <property name="decimals" >
+          <number>0</number>
+         </property>
+         <property name="maximum" >
+          <double>20.000000000000000</double>
+         </property>
+         <property name="value" >
+          <double>3.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QCheckBox" name="removeSmallCCCheckBox" >
+         <property name="layoutDirection" >
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text" >
+          <string>Remove pieces less than</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="maxCCDiagSpinBox" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip" >
+          <string>When enabled, all the floating pieces smaller than the indicated percentage are deleted. Unit is the diagonal of the bounding box of the object</string>
+         </property>
+         <property name="decimals" >
+          <number>0</number>
+         </property>
+         <property name="maximum" >
+          <double>25.000000000000000</double>
+         </property>
+         <property name="singleStep" >
+          <double>5.000000000000000</double>
+         </property>
+         <property name="value" >
+          <double>5.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="holeCheckBox" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="layoutDirection" >
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text" >
+          <string>Close Holes less than</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="holeSpinBox" >
+         <property name="singleStep" >
+          <number>5</number>
+         </property>
+         <property name="value" >
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QGridLayout" >
+       <item row="0" column="5" >
+        <widget class="QSlider" name="dilationSizeSlider" >
+         <property name="minimum" >
+          <number>1</number>
+         </property>
+         <property name="maximum" >
+          <number>6</number>
+         </property>
+         <property name="singleStep" >
+          <number>1</number>
+         </property>
+         <property name="pageStep" >
+          <number>5</number>
+         </property>
+         <property name="value" >
+          <number>2</number>
+         </property>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3" >
+        <widget class="QSpinBox" name="erosionNumPassSpinBox" >
+         <property name="minimum" >
+          <number>1</number>
+         </property>
+         <property name="maximum" >
+          <number>10</number>
+         </property>
+         <property name="value" >
+          <number>3</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4" >
+        <widget class="QLabel" name="lblDilationSize" >
+         <property name="text" >
+          <string>Size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="6" >
+        <widget class="QLabel" name="lblErosionSizeValue" >
+         <property name="text" >
+          <string>5 x 5</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3" >
+        <widget class="QSpinBox" name="dilationNumPassSpinBox" >
+         <property name="minimum" >
+          <number>1</number>
+         </property>
+         <property name="maximum" >
+          <number>5</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2" >
+        <widget class="QLabel" name="lblDilationSteps" >
+         <property name="text" >
+          <string>Num. passes:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5" >
+        <widget class="QSlider" name="erosionSizeSlider" >
+         <property name="minimum" >
+          <number>1</number>
+         </property>
+         <property name="maximum" >
+          <number>6</number>
+         </property>
+         <property name="singleStep" >
+          <number>1</number>
+         </property>
+         <property name="pageStep" >
+          <number>5</number>
+         </property>
+         <property name="value" >
+          <number>2</number>
+         </property>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6" >
+        <widget class="QLabel" name="lblDilationSizeValue" >
+         <property name="text" >
+          <string>5 x 5</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2" >
+        <widget class="QLabel" name="lblErosionSteps" >
+         <property name="text" >
+          <string>Num. passes:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" >
+        <widget class="QLabel" name="label_8" >
+         <property name="text" >
+          <string>Depth Filter</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4" >
+        <widget class="QLabel" name="lblErosionSize" >
+         <property name="text" >
+          <string>Size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" >
+        <widget class="QCheckBox" name="dilationCheckBox" >
+         <property name="text" >
+          <string>Dilation</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QCheckBox" name="erosionCheckBox" >
+         <property name="text" >
+          <string>Erosion</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="fastMergeCheckBox" >
+         <property name="toolTip" >
+          <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Perform a fast, fixed resolution merging of all the range maps. If unchecked all the rangemaps are simply put in the same space without merging them.&lt;/p>&lt;/body>&lt;/html></string>
+         </property>
+         <property name="layoutDirection" >
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text" >
+          <string>Fast merge</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_6" >
+         <property name="text" >
+          <string>Resolution: Min</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="mergeResolutionSpinBox" >
+         <property name="minimum" >
+          <number>1</number>
+         </property>
+         <property name="maximum" >
+          <number>5</number>
+         </property>
+         <property name="value" >
+          <number>3</number>
+         </property>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_7" >
+         <property name="text" >
+          <string>Max</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QPushButton" name="selectButton" >
+         <property name="text" >
+          <string>Select</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="subsampleSequenceSpinBox" >
+         <property name="value" >
+          <number>3</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QLabel" name="label_10" >
+         <property name="text" >
+          <string>Scaling Factor</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="scaleLineEdit" >
+         <property name="inputMask" >
+          <string/>
+         </property>
+         <property name="text" >
+          <string>1.0</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>131</width>
+           <height>31</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="okButton" >
+         <property name="text" >
+          <string>OK</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="plyButton" >
+         <property name="toolTip" >
+          <string>Process all selected range maps and save them as separated ply</string>
+         </property>
+         <property name="text" >
+          <string>Export as PLY</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="cancelButton" >
+         <property name="text" >
+          <string>Cancel</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="imageTableWidget" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="columnCount" >
+      <number>3</number>
+     </property>
+     <column/>
+     <column/>
+     <column/>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>okButton</sender>
+   <signal>clicked()</signal>
+   <receiver>v3dImportDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>554</x>
+     <y>682</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>342</x>
+     <y>405</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cancelButton</sender>
+   <signal>clicked()</signal>
+   <receiver>v3dImportDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>637</x>
+     <y>682</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>425</x>
+     <y>433</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>removeSmallCCCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxCCDiagSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>348</x>
+     <y>584</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>637</x>
+     <y>584</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
