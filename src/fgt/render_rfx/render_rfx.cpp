@@ -119,7 +119,7 @@ void RenderRFX::Init(QAction *action, MeshModel &mesh,
 		QFileInfo meshBaseDir(mesh.fileName.c_str());
 		theParser.setMeshTexture(meshBaseDir.absolutePath()+"/"+QString(mesh.cm.textures[0].c_str()));
 	}
-	assert(theParser.Parse());
+	theParser.Parse();
 	activeShader = theParser.GetShader();
 	assert(activeShader);
 
