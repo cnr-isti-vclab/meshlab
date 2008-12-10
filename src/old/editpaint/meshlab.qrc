@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/" >
+	<file>images/smooth_me.png</file>
+        <file>images/pinsel.png</file>
+        <file>images/pinsel_select.png</file>
+	<file>images/pinsel2.png</file>
+	<file>images/fill.png</file>
+	<file>images/bw.png</file>
+	<file>images/switch.png</file>
+	<file>images/pick.png</file>
+	<file>images/kcontrol.png</file>
+	<file>images/undo.png</file>
+	<file>images/redo.png</file>
+	<file>images/gradient.png</file>
+	<file>images/cursor_paint.png</file>
+    </qresource>
+</RCC>
