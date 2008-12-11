@@ -11,4 +11,4 @@ SOURCES       = baseio.cpp \
 		$$VCGDIR//wrap/ply/plylib.cpp\ 
 		../../meshlab/filterparameter.cpp
 
-TARGET        = baseio
+TARGET        = io_base
