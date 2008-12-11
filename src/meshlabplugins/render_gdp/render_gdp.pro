@@ -7,7 +7,7 @@ SOURCES       = meshrender.cpp \
 		$$GLEWCODE \
 		../../meshlab/meshmodel.cpp
 
-TARGET        = meshrender
+TARGET        = render_gdp
 
 FORMS		= shaderDialog.ui
 

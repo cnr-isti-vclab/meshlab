@@ -11,7 +11,7 @@ SOURCES =  balltree.cpp kdtree.cpp mlsplugin.cpp \
 	../../meshlab/meshmodel.cpp \
 	$$GLEWCODE
 
-TARGET = mlsfilters
+TARGET = filter_mls
 
 CONFIG       += opengl
 CONFIG       += warn_off

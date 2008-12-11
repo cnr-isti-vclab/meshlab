@@ -3,7 +3,7 @@ include (../../shared.pri)
 HEADERS       = splatrenderer.h
 SOURCES       = splatrenderer.cpp $$GLEWCODE
 
-TARGET        = splatrenderer
+TARGET        = render_splatting
 
 QT            += opengl
 RESOURCES     = splatrenderer.qrc

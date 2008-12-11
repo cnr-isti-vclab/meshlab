@@ -5,7 +5,7 @@ SOURCES       = meshcolorize.cpp \
 		equalizerDialog.cpp\ 
 		../../meshlab/filterparameter.cpp
 
-TARGET        = meshcolorize
+TARGET        = filter_colorize
 
 FORMS		= equalizerDialog.ui
 

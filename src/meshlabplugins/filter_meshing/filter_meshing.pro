@@ -12,7 +12,7 @@ SOURCES       = transformDialog.cpp \
 		../../meshlab/GLLogStream.cpp\ 
 		../../meshlab/filterparameter.cpp 
 
-TARGET        = meshfilter
+TARGET        = filter_meshing
 
 # all dialog are stored in meshlab/ui directory
 FORMS         = ui/transformDialog.ui 
