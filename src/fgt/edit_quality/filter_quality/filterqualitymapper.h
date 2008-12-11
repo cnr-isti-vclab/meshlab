@@ -37,12 +37,23 @@ FIRST RELEASE
 
 #include "../common/transferfunction.h"
 #include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax
-#include "../../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
 #include "../common/meshmethods.h"
+
 
 using namespace vcg;
 using namespace std;
 
+
+  class Frange
+  {
+  public:
+    Frange(){}
+    Frange(std::pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
+    Frange(float _min,float _max):minV(_min),maxV(_max){}
+
+    float minV;
+    float maxV;
+  };
 
 
 class QualityMapperFilter : public QObject, public MeshFilterInterface

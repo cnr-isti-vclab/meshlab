@@ -34,7 +34,6 @@ FIRST RELEASE
 #include <QGraphicsItem>
 #include <meshlab/meshmodel.h>
 #include <vcg/math/histogram.h>
-#include "../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
 #include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax
 #include <meshlab/glarea.h>
 #include "ui_qualitymapperdialog.h"
@@ -44,6 +43,17 @@ FIRST RELEASE
 #include "tfhandle.h"
 
 using namespace vcg;
+
+  class Frange
+  {
+  public:
+    Frange(){}
+    Frange(std::pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
+    Frange(float _min,float _max):minV(_min),maxV(_max){}
+
+    float minV;
+    float maxV;
+  };
 
 
 //struct used to store info about external TF files
