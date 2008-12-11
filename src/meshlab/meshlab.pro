@@ -4,7 +4,7 @@ GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
 
 # uncomment to try Eigen
-DEFINES += VCG_USE_EIGEN
+#DEFINES += VCG_USE_EIGEN
 #CONFIG += warn_off
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
@@ -92,6 +92,7 @@ win32:DEFINES += NOMINMAX
 # old printf are all around the code
 win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 
+mac:QMAKE_CXX=g++-4.2
 
 DEFINES += GLEW_STATIC
 
