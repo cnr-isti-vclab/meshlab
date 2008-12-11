@@ -77,6 +77,7 @@ Interfaces are changing again...
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/hole.h>
+#include <vcg/complex/trimesh/refine_loop.h>
 #include <vcg/complex/trimesh/clustering.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/position.h>
@@ -84,8 +85,6 @@ Interfaces are changing again...
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/space/normal_extrapolation.h>
-
-#include "refine_loop.h"
 
 #include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
@@ -405,8 +404,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
     switch(ID(filter)) {
       case FP_LOOP_SS :
-        RefineOddEven<CMeshO, OddPointLoop<CMeshO>, EvenPointLoop<CMeshO> >
-          (m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(), threshold, selected, cb);
+        tri::RefineOddEven<CMeshO, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO> >
+          (m.cm, tri::OddPointLoop<CMeshO>(), tri::EvenPointLoop<CMeshO>(), threshold, selected, cb);
         break;
       case FP_BUTTERFLY_SS :
         Refine<CMeshO,MidPointButterfly<CMeshO> >
