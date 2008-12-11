@@ -44,8 +44,10 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/trimesh/create/resampler.h>
 #include <vcg/simplex/face/distance.h>
 #include <vcg/complex/trimesh/update/color.h>
+#include <vcg/complex/trimesh/geodesic.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include "filter_sampling.h"
+#include "voronoi_clustering.h"
 
 using namespace vcg;
 using namespace std;
@@ -283,25 +285,6 @@ void AddVert(CMeshO::VertexType &p)
 		if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
 		}
 }; // end class RedetailSampler
-
-
-
-template <class MeshType>
-class ClusteringSampler
-	{
-	public:
-		typedef typename MeshType::VertexType			VertexType;
-		
-		ClusteringSampler(){};
-		std::vector<VertexType *> sampleVec;
-		
-		void AddVert(const VertexType &p) 
-		{
-			sampleVec.push_back((VertexType *)(&p));
-		}
-	}; // end class ClusteringSampler
-
-
 
 
 // Constructor usually performs only two simple tasks of filling the two lists 
@@ -733,75 +716,12 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		case FP_VORONOI_CLUSTERING :
 		{
 			int sampleNum = par.getInt("SampleNum");
-			ClusteringSampler<CMeshO> vc;
-			tri::SurfaceSampling<CMeshO,ClusteringSampler<CMeshO> >::VertexUniform(md.mm()->cm,vc,sampleNum);
-			
-			queue<CMeshO::VertexPointer> VQ;
-			
-			tri::UpdateQuality<CMeshO>::VertexConstant(md.mm()->cm,0);
-			
-			for(int i=0;i<sampleNum;++i)
-			{
-				VQ.push(vc.sampleVec[i]);
-				vc.sampleVec[i]->Q()=i+1;
-			}
-			
-			
-			while(!VQ.empty())
-			{
-				CMeshO::VertexPointer vp = VQ.front();
-				VQ.pop();
-				
-				vector<CMeshO::VertexPointer> vertStar;
-				
-				face::VFIterator<CMeshO::FaceType> vfi(vp);
-				while(!vfi.End())
-				{
-					vertStar.push_back(vfi.F()->V1(vfi.I()));
-					vertStar.push_back(vfi.F()->V2(vfi.I()));
-					++vfi;
-				}
-				
-				sort(vertStar.begin(),vertStar.end());
-				vector<CMeshO::VertexPointer>::iterator new_end = unique(vertStar.begin(),vertStar.end());
-				for(vector<CMeshO::VertexPointer>::iterator vv = vertStar.begin();vv!=new_end;++vv)
-				{
-					if((*vv)->Q()==0) 
-					{
-						(*vv)->Q()=vp->Q();
-						VQ.push(*vv);
-					}
-				}
-				}
-				// now build the new mesh
-				
-				CMeshO *cm = &md.mm()->cm;				
-				MeshModel *clusteredMesh =md.addNewMesh("Offset mesh"); 			
-				set<Point3i> clusteredFace;
-				
-				CMeshO::FaceIterator fi;
-				for(fi=cm->face.begin();fi!=cm->face.end();++fi)
-				{
-						if( (fi->V(0)->Q() != fi->V(1)->Q() ) && 
-								(fi->V(0)->Q() != fi->V(2)->Q() ) &&
-								(fi->V(1)->Q() != fi->V(2)->Q() )  )
-							clusteredFace.insert( Point3i(int(fi->V(0)->Q()), int(fi->V(1)->Q()), int(fi->V(2)->Q())));																	 
-				}								 
-			 
-				tri::Allocator<CMeshO>::AddVertices(clusteredMesh->cm,vc.sampleVec.size());
-				for(uint i=0;i< vc.sampleVec.size();++i)
-					clusteredMesh->cm.vert[i].ImportLocal(*(vc.sampleVec[i]));																										
-					
-				tri::Allocator<CMeshO>::AddFaces(clusteredMesh->cm,clusteredFace.size());
-				set<Point3i>::iterator fsi; ;
+			CMeshO *cm = &md.mm()->cm;				
+			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh"); 			
+			vector<CMeshO::VertexType *> seedVec;
+			VoronoiProcessing<CMeshO>::VertexColoring(*cm,sampleNum, seedVec);
+			VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
 
-				for(fi=clusteredMesh->cm.face.begin(),fsi=clusteredFace.begin(); fsi!=clusteredFace.end();++fsi,++fi)
-				{
-					(*fi).V(0) = & clusteredMesh->cm.vert[(int)(fsi->V(0)-1)];
-					(*fi).V(1) = & clusteredMesh->cm.vert[(int)(fsi->V(1)-1)];
-					(*fi).V(2) = & clusteredMesh->cm.vert[(int)(fsi->V(2)-1)];
-				}
-					
 				tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);
 				tri::UpdateNormals<CMeshO>::PerVertexPerFace(clusteredMesh->cm);
 
