@@ -1,33 +1,35 @@
 # This Project file contains all the stable plugins ready for the deployment in version 1.2 
 
 TEMPLATE      = subdirs
-SUBDIRS       = meshfilter \
-				baseio\
-				meshio \
-				colladaio \
-				epoch_io\
+SUBDIRS       = io_base\
+				io_3ds \
+				io_collada \
+				io_epoch\
 				io_u3d\
 				io_tri\
 				io_x3d \
-				meshrender \
-				cleanfilter \
+				io_gts \
+				io_expe \
+				filter_clean \
 				filter_ao \
 				filter_morph \
 				filter_poisson \
 				filter_unsharp \
 				filter_splitter \
-				filter_rangemap \
 #				filter_texture \
 				filter_sampling \
 				filter_autoalign \
-				meshcolorize \
-				meshselect \
+				filter_meshing \
+				filter_colorize \
+				filter_select \
+				filter_mls \
+				render_splatting \
+				render_gdp \
 				meshdecorate \
 				edit_select \
 				edit_pickpoints \
 #				edit_phototexturing \
 				editslice \
-#				editpaint \
 				editalign \
 				editmeasure \
 				editrgbtri \
@@ -52,8 +54,4 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_topo \
 				../fgt/render_rfx \
 				../fgt/filter_func \
-				mlsfilters \
-				io_gts \
-				io_expe \
-				splatrenderer
 
