@@ -59,7 +59,7 @@ public:
   {
     Eroded.resize(w,h);
     // erosion filter (3 x 3)
-		  int minimum;
+		  float minimum;
 		  for (int y = wsize; y < h-wsize; y++)
 			  for (int x = wsize; x < w-wsize; x++)
 			  {
@@ -77,7 +77,7 @@ public:
   {
     Dilated.resize(w,h);
     // dilation filter (3 x 3)
-		  int maximum;
+		  float maximum;
 		  for (int y = wsize; y < h-wsize; y++)
 			  for (int x = wsize; x < w-wsize; x++)
 			  {

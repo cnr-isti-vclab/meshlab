@@ -121,7 +121,7 @@
 #include <vcg/complex/trimesh/hole.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/export_ply.h>
-#include "../cleanfilter/remove_small_cc.h"
+#include "../filter_clean/remove_small_cc.h"
 #include <meshlab/alnParser.h>
 
 FILE *logFP=0; 
