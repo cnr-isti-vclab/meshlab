@@ -35,6 +35,7 @@
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/refine.h>
+#include <vcg/complex/trimesh/refine_loop.h>
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
@@ -49,7 +50,7 @@
 #include "apss.h"
 #include "mlsutils.h"
 #include "implicits.h"
-#include "../meshfilter/refine_loop.h"
+
 
 #include "smallcomponentselection.h"
 
@@ -460,8 +461,8 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 					vcg::tri::UpdateNormals<CMeshO>::PerFace(mesh->cm);
 					vcg::tri::UpdateNormals<CMeshO>::NormalizeFace(mesh->cm);
 					//vcg::RefineE<CMeshO,vcg::MidPoint<CMeshO> >(m.cm, vcg::MidPoint<CMeshO>(), edgePred, false, cb);
-					vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
-							(mesh->cm, vcg::OddPointLoop<CMeshO>(), vcg::EvenPointLoop<CMeshO>(), edgePred, selectionOnly, cb);
+					vcg::tri::RefineOddEvenE<CMeshO, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO> >
+							(mesh->cm, tri::OddPointLoop<CMeshO>(), tri::EvenPointLoop<CMeshO>(), edgePred, selectionOnly, cb);
 				}
 				// project all vertices onto the MLS surface
 				for (unsigned int i = 0; i< mesh->cm.vert.size(); i++)
