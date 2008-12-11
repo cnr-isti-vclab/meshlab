@@ -24,7 +24,7 @@ SOURCES       = epoch_io.cpp \
                 fillImage.cpp \
 		$$VCGDIR/wrap/ply/plylib.cpp
                 
-TARGET        = epoch_io
+TARGET        = io_epoch
 DESTDIR       = ../../meshlab/plugins
 QT           += xml
 

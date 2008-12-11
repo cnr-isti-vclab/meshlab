@@ -12,7 +12,7 @@ SOURCES       = io_collada.cpp \
 		../../meshlab/filterparameter.cpp\
 		$$VCGDIR/wrap/dae/xmldocumentmanaging.cpp
 
-TARGET        = colladaio
+TARGET        = io_collada
 
 QT           += xml opengl
 
