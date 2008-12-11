@@ -77,10 +77,10 @@ Section "MainSection" SEC01
   File "..\meshlab\shadersrm\ImageBasedLighting.rfx"
   SetOutPath "$INSTDIR\plugins"
   ; IO Plugins (9)
-  File "..\meshlab\plugins\baseio.dll"
-  File "..\meshlab\plugins\epoch_io.dll"
-  File "..\meshlab\plugins\colladaio.dll"
-  File "..\meshlab\plugins\meshio.dll"
+  File "..\meshlab\plugins\io_base.dll"
+  File "..\meshlab\plugins\io_epoch.dll"
+  File "..\meshlab\plugins\io_collada.dll"
+  File "..\meshlab\plugins\io_3ds.dll"
   File "..\meshlab\plugins\io_u3d.dll"
   File "..\meshlab\plugins\io_x3d.dll"
   File "..\meshlab\plugins\io_tri.dll"
@@ -88,33 +88,37 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\io_gts.dll"
 
   ; filter plugins (23)
-  File "..\meshlab\plugins\cleanfilter.dll"
-  File "..\meshlab\plugins\meshfilter.dll"
-  File "..\meshlab\plugins\meshcolorize.dll"
-  File "..\meshlab\plugins\meshselect.dll"
-  File "..\meshlab\plugins\samplefilter.dll"
-  
-  File "..\meshlab\plugins\samplefilterdoc.dll"
-  File "..\meshlab\plugins\filtergeodesic.dll"
-  File "..\meshlab\plugins\filtercreateiso.dll"
-  File "..\meshlab\plugins\filterborder.dll"
-  File "..\meshlab\plugins\filter_aging.dll"
-
   File "..\meshlab\plugins\filter_ao.dll"
+  File "..\meshlab\plugins\filter_aging.dll"
+  File "..\meshlab\plugins\filter_autoalign.dll"
+
+  File "..\meshlab\plugins\filter_clean.dll"
+  File "..\meshlab\plugins\filter_colorproc.dll"
+  File "..\meshlab\plugins\filter_colorize.dll"
+
+  File "..\meshlab\plugins\filter_func.dll"
+  
+  File "..\meshlab\plugins\filter_meshing.dll"
+  File "..\meshlab\plugins\filter_mls.dll"
+  File "..\meshlab\plugins\filter_morph.dll"
+
   File "..\meshlab\plugins\filter_poisson.dll"
   File "..\meshlab\plugins\filter_quality.dll"
   File "..\meshlab\plugins\filter_sampling.dll"
+
+  File "..\meshlab\plugins\filter_select.dll"
   File "..\meshlab\plugins\filter_splitter.dll"
 
   File "..\meshlab\plugins\filter_trioptimize.dll"
   File "..\meshlab\plugins\filter_unsharp.dll"
-  File "..\meshlab\plugins\filter_colorproc.dll"
-  File "..\meshlab\plugins\filter_func.dll"
-  File "..\meshlab\plugins\filter_rangemap.dll"
 
-  File "..\meshlab\plugins\filter_morph.dll"
-  File "..\meshlab\plugins\filter_autoalign.dll"
-  File "..\meshlab\plugins\mlsfilters.dll"
+  File "..\meshlab\plugins\samplefilter.dll"
+  File "..\meshlab\plugins\samplefilterdoc.dll"
+  File "..\meshlab\plugins\samplefilterdyn.dll"
+
+  File "..\meshlab\plugins\filtergeodesic.dll"
+  File "..\meshlab\plugins\filtercreateiso.dll"
+  File "..\meshlab\plugins\filterborder.dll"
 
   ; edit plugins (14)
   File "..\meshlab\plugins\editalign.dll"
@@ -138,7 +142,8 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\meshdecorate.dll"
   File "..\meshlab\plugins\sampledecoration.dll"
   ; render plugins (1)
-  File "..\meshlab\plugins\meshrender.dll"
+  File "..\meshlab\plugins\render_splatting.dll"
+  File "..\meshlab\plugins\render_gdp.dll"
   File "..\meshlab\plugins\render_rfx.dll"
 
   
