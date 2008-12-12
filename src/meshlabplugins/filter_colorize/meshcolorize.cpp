@@ -24,7 +24,6 @@
 #include <limits>
 #include "meshcolorize.h"
 #include "color_manifold.h"
-#include "curvature.h"
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
@@ -34,6 +33,17 @@
 #include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/complex/trimesh/update/quality.h>
 
+
+  class Frange
+  {
+  public:
+    Frange(){}
+    Frange(std::pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
+    Frange(float _min,float _max):minV(_min),maxV(_max){}
+
+    float minV;
+    float maxV;
+  };
 
 using namespace std;
 using namespace vcg;
