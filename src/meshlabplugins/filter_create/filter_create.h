@@ -35,7 +35,7 @@ class FilterCreate : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { CR_BOX, CR_SPHERE, CR_ICOSAHEDRON, CR_TETRAHEDRON, CR_OCTAHEDRON  } ;
+	enum { CR_BOX, CR_SPHERE, CR_ICOSAHEDRON, CR_TETRAHEDRON, CR_OCTAHEDRON, CR_CONE  } ;
 
 	FilterCreate();
 

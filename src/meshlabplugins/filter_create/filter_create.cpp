@@ -35,7 +35,7 @@
 
 FilterCreate::FilterCreate()
 {
-	typeList <<CR_BOX<< CR_SPHERE<< CR_ICOSAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON;
+	typeList <<CR_BOX<< CR_SPHERE<< CR_ICOSAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE;
 
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -51,6 +51,7 @@ const QString FilterCreate::filterName(FilterIDType filterId)
     case CR_ICOSAHEDRON: return QString("Icosahedron");
     case CR_OCTAHEDRON: return QString("Octahedron");
     case CR_TETRAHEDRON: return QString("Tetrahedron");
+    case CR_CONE: return QString("Cone");
 		default : assert(0);
 	}
 }
@@ -65,6 +66,7 @@ const QString FilterCreate::filterInfo(FilterIDType filterId)
     case CR_ICOSAHEDRON: return QString("Create an Icosahedron");
     case CR_OCTAHEDRON: return QString("Create an Octahedron");
     case CR_TETRAHEDRON: return QString("Create a Tetrahedron");
+    case CR_CONE: return QString("Create a Cone");
 		default : assert(0);
 	}
 }
@@ -83,6 +85,11 @@ void FilterCreate::initParameterSet(QAction *action,MeshModel &m, FilterParamete
     case CR_BOX :
       parlst.addFloat("size",1,"Scale factor","Scales the new mesh");
       break;
+    case CR_CONE:
+      parlst.addFloat("r0",1,"Radius 1","Radius of the bottom circumference");
+      parlst.addFloat("r1",2,"Radius 2","Radius of the top circumference");
+      parlst.addFloat("h",5,"Height","Height of the Cone");
+      break;
 		default : return;
 	}
 }
@@ -91,8 +98,7 @@ void FilterCreate::initParameterSet(QAction *action,MeshModel &m, FilterParamete
 // Move Vertex of a random quantity
 bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-
-   switch(ID(filter))	 {
+  switch(ID(filter))	 {
     case CR_TETRAHEDRON :
       vcg::tri::Tetrahedron<CMeshO>(m.cm);
       break;
@@ -106,9 +112,17 @@ bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
       vcg::tri::Sphere<CMeshO>(m.cm);
       break;
     case CR_BOX:
+    {
       float sz=par.getFloat("size");
       vcg::Box3f b(vcg::Point3f(1,1,1)*(sz/2),vcg::Point3f(1,1,1)*(-sz/2));
       vcg::tri::Box<CMeshO>(m.cm,b);
+      break;
+    }
+    case CR_CONE:
+      float r0=par.getFloat("r0");
+      float r1=par.getFloat("r1");
+      float h=par.getFloat("h");
+      vcg::tri::Cone<CMeshO>(m.cm,r0,r1,h);
       break;
    }
    vcg::tri::UpdateNormals<CMeshO>::PerFace(m.cm);
@@ -125,6 +139,7 @@ const MeshFilterInterface::FilterClass FilterCreate::getClass(QAction *a)
     case CR_ICOSAHEDRON:
     case CR_SPHERE:
     case CR_OCTAHEDRON:
+    case CR_CONE:
       return MeshFilterInterface::MeshCreation;
       break;
     default: assert(0);
