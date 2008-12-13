@@ -154,6 +154,13 @@ bool PoissonPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParamet
 	vector<Point3D<float> > Nor(m.cm.vn); 	
 	CoredVectorMeshData mesh;
 
+	if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
+		m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
+	}
+	if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
+		m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+	}
+	
 	int cnt=0;
 	CMeshO::VertexIterator vi;
 	for(vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi)
