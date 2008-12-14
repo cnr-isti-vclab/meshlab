@@ -2,29 +2,36 @@
 #include <vcg/math/matrix44.h>
 #include <meshlab/meshmodel.h>
 
+
 using namespace vcg;
+
+enum { VERTEX_LEFT, VERTEX_RIGHT, VERTEX_SLICE };
 
 template <class MESH_TYPE>
 class SlicedEdge
 {
 public:
-	SlicedEdge(const Plane3f &_p)
+  SlicedEdge(const Plane3f &_p)
 	{
 	  p=_p;
-	}
+  }
 
 	bool operator()(face::Pos<typename MESH_TYPE::FaceType> ep)
 	{
-    Point3f rotv1=rot*ep.f->V0(ep.z)->P();
-    Point3f rotv2=rot*ep.f->V1(ep.z)->P();
-	  Point3f pp;
+    Point3f pp;
 	  Segment3f seg(ep.f->V(ep.z)->P(),ep.f->V1(ep.z)->P());
+	  if(Distance(ep.f->V0(ep.z)->P(),p)<0)
+      ep.f->V0(ep.z)->Q()=VERTEX_LEFT;
+    else
+      ep.f->V0(ep.z)->Q()=VERTEX_RIGHT;
+    if(Distance(ep.f->V1(ep.z)->P(),p)<0)
+      ep.f->V1(ep.z)->Q()=VERTEX_LEFT;
+    else
+      ep.f->V1(ep.z)->Q()=VERTEX_RIGHT;
     return Intersection<Segment3f>(p,seg,pp);
-
   }
 protected:
   Plane3f p;
-  Matrix44f rot;
 };
 
 
@@ -43,7 +50,7 @@ public :
 	  Point3f pp;
     Intersection<Segment3f>(p,seg,pp);
     nv.P()=pp;
-    nv.Q()=3;
+    nv.Q()=VERTEX_SLICE;
 	}
 
 	// raw calculation for wedgeinterp

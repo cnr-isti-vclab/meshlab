@@ -39,6 +39,7 @@
 
 #include <wrap/io_edgemesh/export_svg.h>
 
+#include <vcg/space/plane3.h>
 //#include "svgpro.h"
 
 
@@ -78,6 +79,8 @@ public:
   virtual const int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO;}
 private:
 	SVGProperties pr;
+	void createSlice(MeshDocument& orig);
+	void capHole(MeshDocument& orig);
 };
 
 #endif

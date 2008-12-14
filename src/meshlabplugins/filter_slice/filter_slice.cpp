@@ -22,15 +22,22 @@
 ****************************************************************************/
 
 #include "filter_slice.h"
-
+//#include <stdlib.h>
 #include <vcg/complex/intersection.h>
 #include <vcg/complex/edgemesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/refine.h>
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/trimesh/update/selection.h>
+#include <algorithm>
+
 
 #include "filter_slice_functors.h"
-//#include <wrap/gl/glu_tesselator.h>
+#include <wrap/gl/glu_tesselator.h>
+#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/space/planar_polygon_tessellation.h>
 using namespace std;
 using namespace vcg;
 
@@ -91,7 +98,7 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
       parlst.addEnum   ("planeAxis", 0, metrics, tr("Axis"), tr("The Slicing plane will be done perpendicular to the axis"));
       parlst.addFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance between the center of the object and the point where the plan crosses it. By default (Cross plane offset == 0), the plane crosses the center of the object, so the offset can be positive or negetive");
       // Origin=0, BBox min=1, BBox center=2
-      parlst.addEnum   ("relativeTo",0,QStringList()<<"Origin"<<"Bounding box min"<<"Bounding box Center","plane reference","Specify the reference from which the planes are shifted");
+      parlst.addEnum   ("relativeTo",0,QStringList()<<"Bounding box Center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted");
       //parlst.addBool   ("absOffset",false,"Absolute offset", "if true the above offset is absolute is relative to the origin of the coordinate system, if false the offset is relative to the center of the bbox.");
       parlst.addAbsPerc("planeDist", 0.0,0,m.cm.bbox.Diag(), "Distance between planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
       parlst.addInt    ("planeNum", 1, "Number of Planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
@@ -138,42 +145,50 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 			pr.scale = 2.0/m.mm()->cm.bbox.Diag();
 			pr.lineWidthPt=200;
 			vector<MyEdgeMesh*> ev;
-			MeshModel *orig=m.mm();
       m.mm()->visible=false;
 			for(int i=0;i<planeNum;++i)
 			{
-				//if(absOffset==false) planeCenter = m.cm.bbox.Center() + planeAxis*planeOffset*(m.cm.bbox.Diag()/2.0);
-				//			          else planeCenter = Point3f(0,0,0) + planeAxis*planeOffset;
 				switch(reference)
 				{
-				  case 0: planeCenter = planeAxis*planeOffset;  //origin
+				  case 2: planeCenter = planeAxis*planeOffset;  //origin
             break;
 				  case 1: planeCenter = m.mm()->cm.bbox.min+planeAxis*planeOffset*(m.mm()->cm.bbox.Diag()/2.0);  //bbox min
             break;
-				  case 2: planeCenter = m.mm()->cm.bbox.Center()+ planeAxis*planeOffset*(m.mm()->cm.bbox.Diag()/2.0);  //bbox min
+				  case 0: planeCenter = m.mm()->cm.bbox.Center()+ planeAxis*planeOffset*(m.mm()->cm.bbox.Diag()/2.0);  //bbox min
             break;
 				}
 
 				planeCenter+=planeAxis*planeDist*i;
 				slicingPlane.Init(planeCenter,planeAxis);
-				Box3f &bb=m.mm()->cm.bbox;
-				Log(0,"Slicing a mesh with bb (%5.2f %5.2f %5.2f) -  (%5.2f %5.2f %5.2f)",bb.min[0],bb.min[1],bb.min[2],bb.max[0],bb.max[1],bb.max[2]);
-				Log(0,"Crossing at (%5.2f %5.2f %5.2f)",planeCenter[0],planeCenter[1],planeCenter[2]);
+				//clear the selection flags
 
-
-          SlicedEdge<CMeshO> slicededge(slicingPlane);
-          SlicingFunction<CMeshO> slicingfunc(slicingPlane);
-
-          vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
+        SlicedEdge<CMeshO> slicededge(slicingPlane);
+        SlicingFunction<CMeshO> slicingfunc(slicingPlane);
+        //after the RefineE call, the mesh will be half vertices selected
+        vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
              (m.mm()->cm, slicingfunc, slicededge, false, cb);
+        vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.mm()->cm);
 
+        vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.mm()->cm,VERTEX_LEFT,VERTEX_LEFT);
+        vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.mm()->cm);
+        createSlice(m);
+        capHole(m);
+
+        vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.mm()->cm,VERTEX_RIGHT,VERTEX_RIGHT);
+        vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.mm()->cm);
+        createSlice(m);
+        capHole(m);
+
+        /*
+        this is for generating the svd slices
 
 				MyEdgeMesh *edgeMesh = new MyEdgeMesh();
-				vcg::Intersection<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
+				vcg::Intersection<CMeshO, MyEdgeMesh, float>(m.mm()->cm, slicingPlane , *edgeMesh);
 
 				vcg::edg::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
 
 				ev.push_back(edgeMesh);
+				*/
 			}
 
 			QString fname=parlst.getString("filename");
@@ -183,7 +198,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
         fname+=".svg";
 			vcg::edg::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
 
-			vcg::tri::UpdateNormals<CMeshO>::PerFace(m.mm()->cm);
+
 		}
 		break;
 	}
@@ -207,6 +222,55 @@ bool ExtraFilter_SlicePlugin::autoDialog(QAction *action)
   case  FP_PLANE: return true;
 	default: return false;
   }
+}
+
+void ExtraFilter_SlicePlugin::createSlice(MeshDocument& m)
+{
+  MeshModel *mm= new MeshModel();
+  m.meshList.push_back(mm);
+  MeshModel *destMesh     = m.meshList.back();	// destination = last
+  MeshModel *currentMesh  = m.mm();				// source = current
+
+  tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, m.mm()->cm, true);
+  destMesh->fileName = "newmesh.ply";								// mesh name
+  tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
+  destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
+}
+
+void ExtraFilter_SlicePlugin::capHole(MeshDocument& m)
+{
+
+  std::vector<Point3f> outline;
+  for(int i=0;i<m.mm()->cm.vert.size();i++)
+    if (m.mm()->cm.vert[i].Q()==VERTEX_SLICE)
+      outline.push_back(m.mm()->cm.vert[i].P());
+
+  // tesselation input: each outline represents a polygon contour
+  std::vector< std::vector<Point3f> > outlines;
+  outlines.push_back(outline);
+  Log(0,"%d points",outline.size());
+  // tesselation output (triangles indices)
+  std::vector<int> indices;
+
+  // compute triangles indices
+  glu_tesselator::tesselate(outlines, indices);
+
+  // unroll input contours points
+  std::vector<Point3f> points;
+
+  glu_tesselator::unroll(outlines, points);
+
+  CMeshO::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(m.mm()->cm,indices.size());
+  Log(0,"%d new faces",indices.size());
+  // create triangles
+  for (size_t i=0; i<indices.size(); i+=3,++fi)
+  {
+    (*&fi)->V0(0)->P()=points[ indices[i+0] ];
+    (*&fi)->V1(0)->P()=points[ indices[i+1] ];
+    (*&fi)->V2(0)->P()=points[ indices[i+2] ];
+  }
+
+  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.mm()->cm);
 }
 
 Q_EXPORT_PLUGIN(ExtraFilter_SlicePlugin)
