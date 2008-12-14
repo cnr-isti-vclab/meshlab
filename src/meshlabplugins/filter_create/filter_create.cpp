@@ -155,4 +155,19 @@ const int FilterCreate::getRequirements(QAction *action)
   }
   return MeshModel::MM_NONE;
 }
+
+bool FilterCreate::autoDialog(QAction* action)
+{
+  switch(ID(action))
+  {
+    case CR_BOX:
+    case CR_CONE:
+      return true;
+      break;
+    default:
+      return false;
+      break;
+  }
+}
+
 Q_EXPORT_PLUGIN(FilterCreate)
