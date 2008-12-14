@@ -71,7 +71,7 @@ const QString SampleFilterDocPlugin::filterName(FilterIDType filterId)
 const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_FLATTEN :  return QString("All the visible layers are flattened to a single mesh. Transformation are preserved. Current mesh is modified and the other layers deleted"); 
+		case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformation are preserved. Existing layers can be optionally layers deleted"); 
 		default : assert(0); 
 	}
 }
@@ -82,18 +82,26 @@ const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId)
 // - the name of the parameter, 
 // - the string shown in the dialog 
 // - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
+// - a long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void SampleFilterDocPlugin::initParameterSet(QAction *action,MeshDocument & /*m*/, FilterParameterSet & parlst) 
-//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	 switch(ID(action))	 {
 		case FP_FLATTEN :  
+		  parlst.addBool ("MergeVisible",
+											true,
+											"Merge Only Visible Layers",
+											"Merge the vertices that are duplicated among different layers. \n\n"
+											"Very useful when the layers are spliced portions of a single big mesh.");
+		  parlst.addBool ("DeleteLayer",
+											true,
+											"Delete Layers ",
+											"Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter");
+											break;
  		  parlst.addBool ("MergeVertices",
 											true,
 											"Merge duplicate vertices",
 											"Merge the vertices that are duplicated among different layers. \n\n"
 											"Very useful when the layers are spliced portions of a single big mesh.");
-											break;
 											
 		default : assert(0); 
 	}
@@ -106,26 +114,46 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 	switch(ID(filter)) {
 		case FP_FLATTEN :
 		{
-			MeshModel *destMesh=md.meshList.front();
+			// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
+			bool deleteLayer = par.getBool("DeleteLayer");
+			bool mergeVisible = par.getBool("MergeVisible");
+			bool mergeVertices = par.getBool("MergeVertices");
+			
+			MeshModel *destMesh= md.addNewMesh("Merged Mesh");
+			md.meshList.front();
+			QList<MeshModel *> toBeDeletedList;
 			foreach(MeshModel *mmp, md.meshList)
 			{
-				tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
-				mmp->cm.Tr.SetIdentity();
-				if(mmp!=md.meshList.front())	
-						tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
+				if(mmp->visible || !mergeVisible)
+				{
+					if(mmp!=destMesh)	
+					{
+							tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
+//							mmp->cm.Tr.SetIdentity();
+							toBeDeletedList.push_back(mmp);
+							tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
+							tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
+					}
+				}		
 			}
 			
-			while(md.meshList.size()>1)
-				md.delMesh(md.meshList.back());
-			
-			// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
-			if(par.getBool("MergeVertices"))	
+			if( deleteLayer )
 			{
-				int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(md.mm()->cm);
-				Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
-				if (delvert != 0) 
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(md.mm()->cm);
+				foreach(MeshModel *mmp,toBeDeletedList)
+					{
+						md.delMesh(mmp); 
+					}
 			}
+			
+			if(mergeVertices)	
+			{
+				int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
+				Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+			}
+			
+			tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(destMesh->cm);
+			tri::UpdateBounding<CMeshO>::Box(destMesh->cm);
+
 
 			// Log function dump textual info in the lower part of the MeshLab screen. 
 			Log(0,"Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
