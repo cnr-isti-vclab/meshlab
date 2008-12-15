@@ -71,7 +71,7 @@ const QString SampleFilterDocPlugin::filterName(FilterIDType filterId)
 const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformation are preserved. Existing layers can be optionally layers deleted"); 
+		case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformations are preserved. Existing layers can be optionally deleted"); 
 		default : assert(0); 
 	}
 }
@@ -90,19 +90,19 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action,MeshDocument & /*m*
 		  parlst.addBool ("MergeVisible",
 											true,
 											"Merge Only Visible Layers",
-											"Merge the vertices that are duplicated among different layers. \n\n"
+											"Merge the vertices that are duplicated among different layers. <br>"
 											"Very useful when the layers are spliced portions of a single big mesh.");
 		  parlst.addBool ("DeleteLayer",
 											true,
 											"Delete Layers ",
 											"Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter");
-											break;
- 		  parlst.addBool ("MergeVertices",
+			parlst.addBool ("MergeVertices",
 											true,
 											"Merge duplicate vertices",
 											"Merge the vertices that are duplicated among different layers. \n\n"
 											"Very useful when the layers are spliced portions of a single big mesh.");
-											
+												break;
+
 		default : assert(0); 
 	}
 }
@@ -122,14 +122,16 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 			MeshModel *destMesh= md.addNewMesh("Merged Mesh");
 			md.meshList.front();
 			QList<MeshModel *> toBeDeletedList;
+			
+			int cnt=0;
 			foreach(MeshModel *mmp, md.meshList)
-			{
+			{ ++cnt;
 				if(mmp->visible || !mergeVisible)
 				{
 					if(mmp!=destMesh)	
 					{
+							cb(cnt*100/md.meshList.size(), "Merging layers...");
 							tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
-//							mmp->cm.Tr.SetIdentity();
 							toBeDeletedList.push_back(mmp);
 							tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
 							tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
@@ -137,15 +139,14 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 				}		
 			}
 			
-			if( deleteLayer )
-			{
-				foreach(MeshModel *mmp,toBeDeletedList)
-					{
+			if( deleteLayer )	{
+				Log(GLLogStream::Info, "Deleted %d merged layers", toBeDeletedList.size());
+				foreach(MeshModel *mmp,toBeDeletedList) {
 						md.delMesh(mmp); 
 					}
 			}
 			
-			if(mergeVertices)	
+			if( mergeVertices )	
 			{
 				int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
 				Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
