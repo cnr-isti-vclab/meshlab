@@ -581,21 +581,17 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
 	{
 		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(action->text())+iFilter->errorMsg()); // text
 	}
-  // at the end for filters that change the color set the appropriate color mode
-  if(iFilter->getClass(action)==MeshFilterInterface::FaceColoring ) {
+  // at the end for filters that change the color, or selection set the appropriate rendering mode
+  if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
     GLA()->setColorMode(vcg::GLW::CMPerFace);
 		GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
   }
-  if(iFilter->getClass(action)==MeshFilterInterface::VertexColoring ){
+  if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
     GLA()->setColorMode(vcg::GLW::CMPerVert);
 		GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
   }
-  if(iFilter->getClass(action)==MeshFilterInterface::Quality ){
-		GLA()->mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
-		GLA()->mm()->updateDataMask(MeshModel::MM_VERTQUALITY);
-  }
-	if(iFilter->getClass(action)==MeshFilterInterface::Selection )
-    GLA()->setSelectionRendering(true);
+	if(iFilter->getClass(action) & MeshFilterInterface::Selection )
+	    GLA()->setSelectionRendering(true);
 
   qb->reset();
   updateMenus();
