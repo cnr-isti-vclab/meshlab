@@ -90,13 +90,13 @@ const QString MlsPlugin::filterName(FilterIDType filterId)
 {
 	switch(filterId) {
 		case FP_APSS_PROJECTION         : return QString("MLS projection (APSS)");
-		case FP_RIMLS_PROJECTION        : return QString("MLS projection (#####)");
+		case FP_RIMLS_PROJECTION        : return QString("MLS projection (RIMLS)");
 		case FP_APSS_AFRONT             : return QString("MLS meshing/APSS Advancing Front");
-		case FP_RIMLS_AFRONT            : return QString("MLS meshing/##### Advancing Front");
+		case FP_RIMLS_AFRONT            : return QString("MLS meshing/RIMLS Advancing Front");
 		case FP_APSS_MCUBE              : return QString("Marching Cubes (APSS)");
-		case FP_RIMLS_MCUBE             : return QString("Marching Cubes (#####)");
+		case FP_RIMLS_MCUBE             : return QString("Marching Cubes (RIMLS)");
 		case FP_APSS_COLORIZE           : return QString("Colorize curvature (APSS)");
-		case FP_RIMLS_COLORIZE          : return QString("Colorize curvature (#####)");
+		case FP_RIMLS_COLORIZE          : return QString("Colorize curvature (RIMLS)");
 		case FP_RADIUS_FROM_DENSITY     : return QString("Estimate radius from density");
 		case FP_SELECT_SMALL_COMPONENTS : return QString("Small component selection");
 		default : assert(0);
@@ -105,13 +105,21 @@ const QString MlsPlugin::filterName(FilterIDType filterId)
 
 const MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
 {
-	int id = ID(a);
-	if (id == FP_SELECT_SMALL_COMPONENTS)
-	{
-		return MeshFilterInterface::Selection;
-	}
+	int filterId = ID(a);
 
-	return MeshFilterInterface::PointSet;
+	switch(filterId) {
+		case FP_APSS_PROJECTION         :  
+		case FP_RIMLS_PROJECTION        : return FilterClass(MeshFilterInterface::PointSet + MeshFilterInterface::Smoothing);
+		case FP_APSS_AFRONT             : 
+		case FP_RIMLS_AFRONT            :  		
+		case FP_APSS_MCUBE              :  
+		case FP_RIMLS_MCUBE             : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::Remeshing);
+		case FP_APSS_COLORIZE           : 
+		case FP_RIMLS_COLORIZE          : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::VertexColoring);
+		case FP_RADIUS_FROM_DENSITY     : return MeshFilterInterface::PointSet;
+		case FP_SELECT_SMALL_COMPONENTS : return MeshFilterInterface::Selection;
+		}
+	assert(0); 	
 }
 
 // Info() must return the longer string describing each filtering action
@@ -197,12 +205,15 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 		return;
 	}
 
-	if ((id & _PROJECTION_) || (id & _COLORIZE_))
+	if ((id & _PROJECTION_))
 	{
 		parlst.addMesh( "ControlMesh", target, "Point set",
 										"The point set (or mesh) which defines the MLS surface.");
 		parlst.addMesh( "ProxyMesh", target, "Proxy Mesh",
 										"The mesh that will be projected/resampled onto the MLS surface.");
+	}
+	if ((id & _PROJECTION_) || (id & _COLORIZE_))
+	{
 		parlst.addBool( "SelectionOnly",
 										target->cm.sfn>0,
 										"Selection only",
@@ -401,7 +412,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			else
 				pPoints = par.getMesh("ControlMesh");
 		}
-		else
+		else // for curvature
 			pPoints = md.mm();
 
 		// create the MLS surface
@@ -478,7 +489,10 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		}
 		else if (id & _COLORIZE_)
 		{
-			mesh = par.getMesh("ProxyMesh");
+			mesh = md.mm();
+			mesh->updateDataMask(MeshModel::MM_VERTCOLOR);
+			mesh->updateDataMask(MeshModel::MM_VERTQUALITY);
+			mesh->updateDataMask(MeshModel::MM_VERTCURVDIR);
 
 			bool selectionOnly = par.getBool("SelectionOnly");
 			//bool approx = apss && par.getBool("ApproxCurvature");
@@ -506,6 +520,12 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 						grad = mls->gradient(p);
 						hess = mls->hessian(p);
 						implicits::WeingartenMap<float> W(grad,hess);
+						
+						mesh->cm.vert[i].PD1() = W.K1Dir();
+						mesh->cm.vert[i].PD2() = W.K2Dir();
+						mesh->cm.vert[i].K1() =  W.K1();
+						mesh->cm.vert[i].K2() =  W.K2();
+					
 						switch(ct)
 						{
 							case CT_MEAN: c = W.MeanCurvature(); break;
@@ -530,14 +550,6 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			vcg::Histogramf H;
       vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm,H);
       vcg::tri::UpdateColor<CMeshO>::VertexQualityRamp(mesh->cm,H.Percentile(0.01f),H.Percentile(0.99f));
-// 			for (unsigned int i = 0; i< size; i++)
-// 			{
-// 				if ( (!selectionOnly) || (mesh->cm.vert[i].IsS()) )
-// 				{
-// // 					float c = curvatures[i];
-// 					mesh->cm.vert[i].C().ColorRamp(minc,maxc, mesh->cm.vert[i].Q());
-// 				}
-// 			}
 		}
 	// 	else if (id & _AFRONT_)
 	// 	{
