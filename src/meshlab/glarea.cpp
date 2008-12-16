@@ -170,7 +170,10 @@ QString GLArea::GetMeshInfoString()
 	if(mm()->hasDataMask(MeshModel::MM_VERTQUALITY) ) {info.append("VQ ");}
 	if(mm()->hasDataMask(MeshModel::MM_VERTCOLOR) ) {info.append("VC ");}
 	if(mm()->hasDataMask(MeshModel::MM_VERTRADIUS) ) {info.append("VR ");}
+	if(mm()->hasDataMask(MeshModel::MM_VERTCURV) ) {info.append("VK ");}
+	if(mm()->hasDataMask(MeshModel::MM_VERTCURVDIR) ) {info.append("VD ");}
 	if(mm()->hasDataMask(MeshModel::MM_FACECOLOR) ) {info.append("FC ");}
+	if(mm()->hasDataMask(MeshModel::MM_FACEQUALITY) ) {info.append("FQ ");}
 	if(mm()->hasDataMask(MeshModel::MM_WEDGTEXCOORD) ) {info.append("WT ");}
 	if(mm()->hasDataMask(MeshModel::MM_CAMERA) ) {info.append("MC ");}
 
