@@ -200,10 +200,9 @@ const FilterSplitterPlugin::FilterClass FilterSplitterPlugin::getClass(QAction *
   switch(ID(a))
   {
     case FP_SPLITSELECT :
-      return MeshFilterInterface::Layer;     
     case FP_DUPLICATE :
       return MeshFilterInterface::Layer; 
-		default : 
+		default :  assert(0);
 			return MeshFilterInterface::Generic;
   }
 }

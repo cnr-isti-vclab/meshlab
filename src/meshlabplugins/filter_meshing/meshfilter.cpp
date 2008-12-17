@@ -153,14 +153,20 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_BUTTERFLY_SS :
     case FP_LOOP_SS :
     case FP_MIDPOINT :
+		case FP_QUADRIC_SIMPLIFICATION :      
+		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :       
+		case FP_CLUSTERING :	               
+		case FP_CLOSE_HOLES:
          return MeshFilterInterface::Remeshing;
 		case FP_NORMAL_EXTRAPOLATION:
 		case FP_INVERT_FACES:
 		case FP_REORIENT :
 		case FP_COMPUTE_PRINC_CURV_DIR:
-				 return MeshFilterInterface::Normal;
+		case FP_TRANSFORM:	            
+		case FP_FREEZE_TRANSFORM:	       
+							 return MeshFilterInterface::Normal;
 
-    default : return MeshFilterInterface::Generic;
+    default : assert(0); return MeshFilterInterface::Generic;
   }
 }
 

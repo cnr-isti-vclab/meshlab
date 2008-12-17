@@ -152,13 +152,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	Point3f coneDir = par.getPoint3f("coneDir");
 	float coneAngle = par.getFloat("coneAngle");
 	
-	if(perFace) {
+	if(perFace) 
 	  m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-		//m.cm.face.EnableQuality();
-		//m.cm.face.EnableColor();
-	}
 	else 
-	 m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
+		m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
 
 	
 	std::vector<Point3f> unifDirVec;
