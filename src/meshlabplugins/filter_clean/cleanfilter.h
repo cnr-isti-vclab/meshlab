@@ -80,7 +80,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
 		 - name of the plugin separated by _
 	*/
 	enum { 
-    FP_REBUILD_SURFACE, 
+    FP_BALL_PIVOTING, 
     FP_REMOVE_ISOLATED_COMPLEXITY, 
     FP_REMOVE_ISOLATED_DIAMETER, 
     FP_REMOVE_WRT_Q,
@@ -100,6 +100,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
 
 	virtual const QString filterName(FilterIDType filter);
 	virtual const QString filterInfo(FilterIDType filter);
+MeshFilterInterface::Remeshing;
 
   virtual const FilterClass getClass(QAction *);
   virtual const int getRequirements(QAction *);

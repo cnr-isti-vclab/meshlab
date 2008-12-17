@@ -118,7 +118,7 @@ using namespace vcg;
 CleanFilter::CleanFilter() 
 {
   typeList 
-		<< FP_REBUILD_SURFACE 
+		<< FP_BALL_PIVOTING 
 		<< FP_REMOVE_WRT_Q 
 		<< FP_REMOVE_ISOLATED_COMPLEXITY 
 		<< FP_REMOVE_ISOLATED_DIAMETER 
@@ -145,7 +145,7 @@ const QString CleanFilter::filterName(FilterIDType filter)
 {
  switch(filter)
   {
-	  case FP_REBUILD_SURFACE :								return QString("Ball Pivoting Surface Reconstruction");
+	  case FP_BALL_PIVOTING :								return QString("Ball Pivoting Surface Reconstruction");
 	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
@@ -160,7 +160,7 @@ const QString CleanFilter::filterInfo(FilterIDType filterId)
 {
   switch(filterId)
   {
-		case FP_REBUILD_SURFACE :	return QString("Reconstruct a surface using the <b>Ball Pivoting Algorithm</b> (Bernardini et al. 1999). <br>"
+		case FP_BALL_PIVOTING :	return QString("Reconstruct a surface using the <b>Ball Pivoting Algorithm</b> (Bernardini et al. 1999). <br>"
 																						 "Starting with a seed triangle, the BPA algorithm  pivots a ball around an edge "
 																						 "(i.e. it revolves around the edge while keeping in contact with the edge endpoints) "
 																						 "until it touches another point, forming another triangle. The process continues until all reachable edges have been tried."); 
@@ -184,8 +184,10 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
     case FP_REMOVE_ISOLATED_DIAMETER :
     case FP_REMOVE_ISOLATED_COMPLEXITY :
       return MeshFilterInterface::Cleaning;     
-    default : return MeshFilterInterface::Generic;
-  }
+		case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
+		case FP_ALIGN_WITH_PICKED_POINTS: return MeshFilterInterface::RangeMap;
+    default : assert(0);  
+	}
 }
 
 const int CleanFilter::getRequirements(QAction *action)
@@ -193,7 +195,7 @@ const int CleanFilter::getRequirements(QAction *action)
   switch(ID(action))
   {
     case FP_REMOVE_WRT_Q:
-    case FP_REBUILD_SURFACE :	return MeshModel::MM_FACEFLAGBORDER  | MeshModel::MM_VERTMARK;
+    case FP_BALL_PIVOTING:	return MeshModel::MM_FACEFLAGBORDER  | MeshModel::MM_VERTMARK;
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
         return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK;
@@ -210,7 +212,7 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 	pair<float,float> qualityRange;
   switch(ID(action))
   {
-    case FP_REBUILD_SURFACE :
+    case FP_BALL_PIVOTING :
 		  parlst.addAbsPerc("BallRadius",(float)maxDiag1,0,m.cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled.");
 		  parlst.addFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it.");		  parlst.addFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling");
 		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius.");
@@ -254,7 +256,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 {
 	switch(ID(filter))
   {
-	 case FP_REBUILD_SURFACE:
+	 case FP_BALL_PIVOTING:
 	  {
       float Radius = par.getAbsPerc("BallRadius");		
       float Clustering = par.getFloat("Clustering");		      
