@@ -11,12 +11,6 @@
 
 using namespace vcg;
 
-
-MorphTools::MorphTools(QWidget *parent)
-{
-	parentWidget = parent;
-}
-
 void MorphTools::calculateMorph(float percentage, MeshModel *sourceMeshModel, MeshModel *destMeshModel)
 {
 	//if two models are not selected return
