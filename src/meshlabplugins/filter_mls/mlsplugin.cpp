@@ -108,18 +108,18 @@ const MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
 	int filterId = ID(a);
 
 	switch(filterId) {
-		case FP_APSS_PROJECTION         :  
+		case FP_APSS_PROJECTION         :
 		case FP_RIMLS_PROJECTION        : return FilterClass(MeshFilterInterface::PointSet + MeshFilterInterface::Smoothing);
-		case FP_APSS_AFRONT             : 
-		case FP_RIMLS_AFRONT            :  		
-		case FP_APSS_MCUBE              :  
+		case FP_APSS_AFRONT             :
+		case FP_RIMLS_AFRONT            :
+		case FP_APSS_MCUBE              :
 		case FP_RIMLS_MCUBE             : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::Remeshing);
-		case FP_APSS_COLORIZE           : 
+		case FP_APSS_COLORIZE           :
 		case FP_RIMLS_COLORIZE          : return FilterClass(MeshFilterInterface::PointSet | MeshFilterInterface::VertexColoring);
 		case FP_RADIUS_FROM_DENSITY     : return MeshFilterInterface::PointSet;
 		case FP_SELECT_SMALL_COMPONENTS : return MeshFilterInterface::Selection;
 		}
-	assert(0); 	
+	assert(0);
 }
 
 // Info() must return the longer string describing each filtering action
@@ -158,7 +158,10 @@ const QString MlsPlugin::filterInfo(FilterIDType filterId)
 	if (filterId & _RIMLS_)
 	{
 		str +=
-			"<br>This is the ##### MLS variant.";
+			"<br>This is the Robust Implicit MLS (RIMLS) variant which is an extension of"
+			"Implicit MLS preserving sharp features using non linear regression. See our"
+			"Eurographics 2009 paper [Ortizeli et al., Feature Preserving Point Set Surfaces"
+			"based on Non-Linear Kernel Regression] for all the details.";
 	}
 
 	if (filterId == FP_RADIUS_FROM_DENSITY)
@@ -520,12 +523,12 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 						grad = mls->gradient(p);
 						hess = mls->hessian(p);
 						implicits::WeingartenMap<float> W(grad,hess);
-						
+
 						mesh->cm.vert[i].PD1() = W.K1Dir();
 						mesh->cm.vert[i].PD2() = W.K2Dir();
 						mesh->cm.vert[i].K1() =  W.K1();
 						mesh->cm.vert[i].K2() =  W.K2();
-					
+
 						switch(ct)
 						{
 							case CT_MEAN: c = W.MeanCurvature(); break;
