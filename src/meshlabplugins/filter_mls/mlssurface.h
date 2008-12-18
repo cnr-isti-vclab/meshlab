@@ -145,9 +145,9 @@ class MlsSurface
 
 		static const Scalar InvalidValue() { return 12345679810.11121314151617; }
 
+		void computeVertexRaddi(const int nbNeighbors = 16);
 	protected:
 		void computeNeighborhood(const VectorType& x, bool computeDerivatives) const;
-		void computeVertexRaddi();
 		void requestSecondDerivatives() const;
 
 		struct PointToPointSqDist

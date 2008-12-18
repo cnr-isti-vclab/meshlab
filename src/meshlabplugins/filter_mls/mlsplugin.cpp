@@ -148,20 +148,18 @@ const QString MlsPlugin::filterInfo(FilterIDType filterId)
 	if (filterId & _APSS_)
 	{
 		str +=
-			"<br>This is the <i>algebraic point set surfaces</i> (APSS) variant which is based on"
-			"the local fitting of algebraic spheres. It requires points equipped with oriented normals.<br>"
-			"See [Guennebaud and Gross, Algebraic Point Set Surfaces, Siggraph 2007]"
-			"and [Guennebaud et al., Dynamic Sampling and Rendering of APSS, Eurographics 2008]"
-			"for all the details about APSS.";
+			"<br>This is the <i>algebraic point set surfaces</i> (APSS) variant which is based on "
+			"the local fitting of algebraic spheres. It requires points equipped with oriented normals. <br>"
+			"For all the details about APSS see: <br> Guennebaud and Gross, 'Algebraic Point Set Surfaces', Siggraph 2007, and<br>"
+			"Guennebaud et al., 'Dynamic Sampling and Rendering of APSS', Eurographics 2008";
 	}
 
 	if (filterId & _RIMLS_)
 	{
 		str +=
-			"<br>This is the Robust Implicit MLS (RIMLS) variant which is an extension of"
-			"Implicit MLS preserving sharp features using non linear regression. See our"
-			"Eurographics 2009 paper [Ortizeli et al., Feature Preserving Point Set Surfaces"
-			"based on Non-Linear Kernel Regression] for all the details.";
+			"<br>This is the Robust Implicit MLS (RIMLS) variant which is an extension of "
+			"Implicit MLS preserving sharp features using non linear regression. For more details see: <br>"
+			"Oztireli, Guennebaud and Gross, 'Feature Preserving Point Set Surfaces based on Non-Linear Kernel Regression' Eurographics 2009.";
 	}
 
 	if (filterId == FP_RADIUS_FROM_DENSITY)
@@ -369,36 +367,32 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 
 	if (id == FP_RADIUS_FROM_DENSITY)
 	{
-		CMeshO::VertContainer& points = md.mm()->cm.vert;
-		if (!points.RadiusEnabled)
-		{
-			points.EnableRadius();
-		}
-		int nbNeighbors = par.getInt("NbNeighbors");
-
-		assert(points.size()>=2);
-		KdTree<float> knn(ConstDataWrapper<vcg::Point3f>(&points[0].cP(), points.size(),
-																										size_t(points[1].cP().V()) - size_t(points[0].cP().V())));
-
-		knn.setMaxNofNeighbors(nbNeighbors);
-		for (size_t i = 0; i< points.size(); i++)
-		{
-			knn.doQueryK(points[i].cP());
-			points[i].R() = 2. * sqrt(knn.getNeighborSquaredDistance(0)/float(knn.getNofFoundNeighbors()));
-		}
+		md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
+		APSS<CMeshO> mls(md.mm()->cm);		
+		mls.computeVertexRaddi(par.getInt("NbNeighbors"));
+		return true;
 	}
-	else if (id == FP_SELECT_SMALL_COMPONENTS)
+	if (id == FP_SELECT_SMALL_COMPONENTS)
 	{
 		MeshModel* mesh = md.mm();
 		mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 		bool nonClosedOnly = par.getBool("NonClosedOnly");
 		float ratio = par.getFloat("NbFaceRatio");
 		vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, ratio, nonClosedOnly);
+		return true;
 	}
-	else
+	
+	// we are doing some MLS based stuff
 	{
-		// we are doing some MLS based stuff
-
+		// We require a per vertex radius so as a first thing check it
+		if(!md.mm()->hasDataMask(MeshModel::MM_VERTRADIUS))
+		{
+			md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
+			APSS<CMeshO> mls(md.mm()->cm);		
+			mls.computeVertexRaddi();
+			Log(GLLogStream::Info, "Mesh has no per vertex radius. Computed and added using default neighbourhood");
+		}
+		
 		MeshModel* pPoints = 0;
 		if (id & _PROJECTION_)
 		{

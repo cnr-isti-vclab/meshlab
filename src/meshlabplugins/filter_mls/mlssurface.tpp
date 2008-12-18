@@ -94,7 +94,7 @@ void MlsSurface<_MeshType>::setHessianHint(int h)
 }
 
 template<typename _MeshType>
-void MlsSurface<_MeshType>::computeVertexRaddi()
+void MlsSurface<_MeshType>::computeVertexRaddi(const int nbNeighbors)
 {
 	#if 0
 	int nbNeighbors = 16;
@@ -121,7 +121,7 @@ void MlsSurface<_MeshType>::computeVertexRaddi()
 
 	#else
 
-	int nbNeighbors = 16;
+//	int nbNeighbors = 16;
 
 	assert(mPoints.size()>=2);
 	KdTree<Scalar> knn(positions());
