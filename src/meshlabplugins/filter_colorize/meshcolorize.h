@@ -83,13 +83,11 @@ removed color_curvature.h in favour of curvature.h
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include <meshlab/glarea.h>
 
 #include <vcg/math/base.h>
 #include <vcg/math/histogram.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h>
-#include "equalizerDialog.h"
 
 class ExtraMeshColorizePlugin : public QObject, public MeshFilterInterface
 {
@@ -100,10 +98,7 @@ public:
 
     enum  {
       CP_MAP_QUALITY_INTO_COLOR,
-      CP_GAUSSIAN,
-      CP_MEAN,
-      CP_RMS,
-      CP_ABSOLUTE,
+      CP_DISCRETE_CURVATURE,
       CP_TRIANGLE_QUALITY,
       CP_SELFINTERSECT_SELECT,
       CP_SELFINTERSECT_COLOR,
@@ -114,7 +109,7 @@ public:
       CP_VERTEX_SMOOTH,
       CP_FACE_SMOOTH,
       CP_FACE_TO_VERTEX,
-	  CP_TEXTURE_TO_VERTEX,
+			CP_TEXTURE_TO_VERTEX,
       CP_VERTEX_TO_FACE,
       CP_COLOR_NON_TOPO_COHERENT,
       CP_RANDOM_FACE
@@ -130,17 +125,10 @@ public:
 
   virtual const FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *);
-	virtual bool customDialog(QAction *filter) { 
-		if(ID(filter) == CP_MAP_QUALITY_INTO_COLOR ) return true;  
-			return false;
-	}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
-	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
-protected:
-  EqualizerSettings eqSettings;
 };
 
 #endif
