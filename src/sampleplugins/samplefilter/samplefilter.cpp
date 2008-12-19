@@ -79,6 +79,20 @@ const QString ExtraSamplePlugin::filterInfo(FilterIDType filterId)
 		case FP_MOVE_VERTEX :  return QString("Move the vertices of the mesh of a random quantity."); 
 		default : assert(0); 
 	}
+	return QString("Unknown Filter");
+}
+
+// The FilterClass describes in which generic class of filters it fits. 
+// This choice affect the submenu in which each filter will be placed 
+// More than a single class can be choosen.
+const ExtraSamplePlugin::FilterClass ExtraSamplePlugin::getClass(QAction *a)
+{
+  switch(ID(a))
+	{
+		case FP_MOVE_VERTEX :  return MeshFilterInterface::Smoothing; 
+		default : assert(0); 
+	}
+	return MeshFilterInterface::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -89,7 +103,6 @@ const QString ExtraSamplePlugin::filterInfo(FilterIDType filterId)
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
-//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	 switch(ID(action))	 {
 		case FP_MOVE_VERTEX :  
