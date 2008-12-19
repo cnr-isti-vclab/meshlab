@@ -57,8 +57,8 @@ class RIMLS : public MlsSurface<_MeshType>
 			: Base(points)
 		{
 			mSigmaR = 0;
-			mSigmaN = 0.8;
-			mRefittingThreshold = 1e-3;
+			mSigmaN = Scalar(0.8);
+			mRefittingThreshold = Scalar(1e-3);
 			mMinRefittingIters = 1;
 			mMaxRefittingIters = 3;
 		}

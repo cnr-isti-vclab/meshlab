@@ -123,7 +123,7 @@ void BallTree<_Scalar>::buildNode(Node& node, std::vector<int>& indices, AxisAli
 	}
 	unsigned int dim = vcg::MaxCoeffId(diag);
 	node.dim = dim;
-	node.splitValue = 0.5*(aabb.max[dim] + aabb.min[dim]);
+	node.splitValue = Scalar(0.5*(aabb.max[dim] + aabb.min[dim]));
   node.leaf = 0;
 
 	AxisAlignedBoxType aabbLeft=aabb, aabbRight=aabb;

@@ -165,7 +165,7 @@ void KdTree<Scalar>::createTree(unsigned int nodeId, unsigned int start, unsigne
 	VectorType diag = aabb.max - aabb.min;
 	unsigned int dim = vcg::MaxCoeffId(diag);
 	node.dim = dim;
-	node.splitValue = 0.5*(aabb.max[dim] + aabb.min[dim]);
+	node.splitValue = Scalar(0.5*(aabb.max[dim] + aabb.min[dim]));
 
 	unsigned int midId = split(start, end, dim, node.splitValue);
 

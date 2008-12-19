@@ -47,7 +47,7 @@ public:
 		// the different components as a list of face pointer
 		std::vector< std::vector<FacePointer> > components;
 
-		for(int faceSeed = 0; faceSeed<m.face.size(); )
+		for(uint faceSeed = 0; faceSeed<m.face.size(); )
 		{
 			// find the first not selected face
 			bool foundSeed = false;
@@ -104,22 +104,22 @@ public:
 		// now the segmentation is done, let's compute the absolute face count threshold
 		int total_selected = 0;
 		int maxComponent = 0;
-		for (int i=0; i<components.size(); ++i)
+		for (uint i=0; i<components.size(); ++i)
 		{
 			//std::cout << "Component " << i << " -> " << components[i].size() << "\n";
 			total_selected += components[i].size();
 			maxComponent = std::max<int>(maxComponent,components[i].size());
 		}
 		int remaining = m.face.size() - total_selected;
-		int th = std::max(maxComponent,remaining) * nbFaceRatio;
+		uint th = std::max(maxComponent,remaining) * nbFaceRatio;
 
 		int selCount = 0;
-		for (int i=0; i<components.size(); ++i)
+		for (uint i=0; i<components.size(); ++i)
 		{
 			if (components[i].size()<th)
 			{
 				selCount += components[i].size();
-				for (int j=0; j<components[i].size(); ++j)
+				for (uint j=0; j<components[i].size(); ++j)
 					components[i][j]->SetS();
 			}
 		}

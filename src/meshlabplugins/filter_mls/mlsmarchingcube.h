@@ -88,8 +88,8 @@ public:
 
 		mAABB = mpSurface->boundingBox();
 		VectorType diag = mAABB.max - mAABB.min;
-		mAABB.min -= diag * 0.1;
-		mAABB.max += diag * 0.1;
+		mAABB.min -= diag * 0.1f;
+		mAABB.max += diag * 0.1f;
 		diag = mAABB.max - mAABB.min;
 
 		if (   (diag[0]<=0.)
@@ -221,7 +221,7 @@ public:
 			id1 = GetLocalCellIdFromGlobal(p1);
 			id2 = GetLocalCellIdFromGlobal(p2);
 			// interpol along the edge
-			ScalarType epsilon = 1e-5;
+			ScalarType epsilon = ScalarType(1e-5);
 			const GridElement& c1 = mCache[id1];
 			const GridElement& c2 = mCache[id2];
 			if (fabs(mIsoValue-c1.value) < epsilon)

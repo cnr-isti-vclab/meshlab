@@ -23,8 +23,6 @@
 
 #include <QtGui>
 
-#define NDEBUG
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -101,6 +99,7 @@ const QString MlsPlugin::filterName(FilterIDType filterId)
 		case FP_SELECT_SMALL_COMPONENTS : return QString("Small component selection");
 		default : assert(0);
 	}
+return QString("Filter Unknown");
 }
 
 const MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
@@ -120,6 +119,7 @@ const MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
 		case FP_SELECT_SMALL_COMPONENTS : return MeshFilterInterface::Selection;
 		}
 	assert(0);
+	return MeshFilterInterface::Generic;
 }
 
 // Info() must return the longer string describing each filtering action
@@ -187,7 +187,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 	if (id == FP_SELECT_SMALL_COMPONENTS)
 	{
 		parlst.addFloat("NbFaceRatio",
-										0.1,
+										0.1f,
 										"Small component ratio",
 										"This ratio (between 0 and 1) defines the meaning of <i>small</i> as the threshold ratio between the number of faces"
 										"of the largest component and the other ones. A larger value will select more components.");
@@ -229,7 +229,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 										"Scale of the spatial low pass filter.\n"
 										"It is relative to the radius (local point spacing) of the vertices.");
 		parlst.addFloat("ProjectionAccuracy",
-										1e-4,
+										1e-4f,
 										"Projection - Accuracy (adv)",
 										"Threshold value used to stop the projections.\n"
 										"This value is scaled by the mean point spacing to get the actual threshold.");
@@ -384,6 +384,14 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 	
 	// we are doing some MLS based stuff
 	{
+		if(md.mm()->cm.fn > 0)
+		{ // if we start from a mesh, and it has unreferenced vertices
+		  // normals are undefined on that vertices.
+			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
+			if(delvert) Log(GLLogStream::Info, "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
+		}
+		tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+
 		// We require a per vertex radius so as a first thing check it
 		if(!md.mm()->hasDataMask(MeshModel::MM_VERTRADIUS))
 		{
@@ -415,7 +423,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		// create the MLS surface
 		cb(1, "Create the MLS data structures...");
 		MlsSurface<CMeshO>* mls = 0;
-
+        
 		RIMLS<CMeshO>* rimls = 0;
 		APSS<CMeshO>* apss = 0;
 
@@ -495,11 +503,12 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			//bool approx = apss && par.getBool("ApproxCurvature");
 			int ct = par.getEnum("CurvatureType");
 
-			int size = mesh->cm.vert.size();
+			uint size = mesh->cm.vert.size();
 			//std::vector<float> curvatures(size);
 			float minc=1e9, maxc=-1e9, minabsc=1e9;
 			vcg::Point3f grad;
 			vcg::Matrix33f hess;
+
 			// pass 1: computes curvatures and statistics
 			for (unsigned int i = 0; i< size; i++)
 			{
@@ -584,7 +593,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			{
 				mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				// selection...
-				vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, 0.1);
+				vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, 0.1f);
 				// deletion...
 				vcg::tri::SmallComponent<CMeshO>::DeleteFaceVert(mesh->cm);
 				mesh->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);

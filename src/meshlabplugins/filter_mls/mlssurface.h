@@ -67,7 +67,7 @@ class MlsSurface
 
 			mFilterScale = 4.0;
 			mMaxNofProjectionIterations = 20;
-			mProjectionAccuracy = 1e-4;
+			mProjectionAccuracy = (Scalar)1e-4;
 			mBallTree = 0;
 			mGradientHint = MLS_DERIVATIVE_ACCURATE;
 			mHessianHint = MLS_DERIVATIVE_ACCURATE;
@@ -143,7 +143,7 @@ class MlsSurface
 		}
 		const vcg::Box3<Scalar>& boundingBox() const { return mAABB; }
 
-		static const Scalar InvalidValue() { return 12345679810.11121314151617; }
+		static const Scalar InvalidValue() { return Scalar(12345679810.11121314151617); }
 
 		void computeVertexRaddi(const int nbNeighbors = 16);
 	protected:

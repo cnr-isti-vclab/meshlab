@@ -39,11 +39,11 @@ public:
 		{
 			return *reinterpret_cast<const DataType*>(mpData + i*mStride);
 		}
-		inline int size() const { return mSize; }
+		inline size_t size() const { return mSize; }
 protected:
 		const unsigned char* mpData;
 		int mStride;
-		int mSize;
+		size_t mSize;
 };
 
 namespace vcg {
