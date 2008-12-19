@@ -29,7 +29,7 @@
 #include <vcg/space/color4.h>
 #include <vcg/space/point3.h>
 #include <iostream>
-#include "vcg/simplex/faceplus/component.h"
+#include "vcg/simplex/face/component.h"
 #include <meshlab/meshmodel.h>
 
 namespace rgbt

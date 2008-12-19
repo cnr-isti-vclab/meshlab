@@ -7,8 +7,8 @@
 #include <wrap/gl/pick.h>
 
 #include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertexplus/component_ocf.h>
+#include <vcg/simplex/vertex/base.h>
+#include <vcg/simplex/vertex/component_ocf.h>
 #include <vcg/space/point3.h>
 #include <vcg/space/box3.h>
 #include <vcg/space/index/grid_closest.h>

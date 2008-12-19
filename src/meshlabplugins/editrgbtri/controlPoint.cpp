@@ -1,5 +1,5 @@
 #include "controlPoint.h"
-#include "vcg/simplex/faceplus/component.h"
+#include "vcg/simplex/face/component.h"
 
 /****************************************************************************
 * Rgb Triangulations Plugin                                                 *

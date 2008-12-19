@@ -28,11 +28,11 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertexplus/component_ocf.h>
-#include <vcg/simplex/edgeplus/base.h>
-#include <vcg/simplex/faceplus/base.h>
-#include <vcg/simplex/faceplus/component_ocf.h>
+#include <vcg/simplex/vertex/base.h>
+#include <vcg/simplex/vertex/component_ocf.h>
+#include <vcg/simplex/edge/base.h>
+#include <vcg/simplex/face/base.h>
+#include <vcg/simplex/face/component_ocf.h>
 #include <vcg/simplex/face/topology.h>
 
 #include <vcg/complex/trimesh/base.h>

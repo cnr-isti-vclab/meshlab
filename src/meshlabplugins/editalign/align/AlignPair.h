@@ -42,11 +42,11 @@ Revision 1.2  2005/06/10 16:07:29  cignoni
 
 #include <vcg/math/histogram.h>
 #include <vcg/math/matrix44.h>
-#include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertexplus/component.h>
-#include <vcg/simplex/faceplus/base.h>
-#include <vcg/simplex/faceplus/component.h>
-#include <vcg/simplex/faceplus/component_rt.h>
+#include <vcg/simplex/vertex/base.h>
+#include <vcg/simplex/vertex/component.h>
+#include <vcg/simplex/face/base.h>
+#include <vcg/simplex/face/component.h>
+#include <vcg/simplex/face/component_rt.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include<vcg/complex/trimesh/base.h>
 #include<vcg/complex/trimesh/update/normal.h>

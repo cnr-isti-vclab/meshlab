@@ -1,5 +1,5 @@
 #include "modButterfly.h"
-#include "vcg/simplex/faceplus/component.h"
+#include "vcg/simplex/face/component.h"
 #include <math.h>
 
 /****************************************************************************
