@@ -25,6 +25,7 @@
 #ifndef VORONOI_PROCESSING_H
 #define VORONOI_PROCESSING_H
 
+#include <vcg//simplex/face/topology.h>
 namespace vcg
 {
 
@@ -66,18 +67,33 @@ class VoronoiProcessing
     typedef typename MeshType::FaceContainer		FaceContainer;
 	public:
 
-// Base vertex voronoi coloring algorithm.
-// it assumes VF adjacency. 
-static void VertexColoring(MeshType &m, int seedNum, std::vector<VertexType *> &seedVec)
-{
-			ClusteringSampler<MeshType> vc(&seedVec);
-			tri::SurfaceSampling<MeshType, ClusteringSampler<MeshType> >::VertexUniform(m,vc,seedNum);
+static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedVec)
+{			
+		tri::Geo<CMeshO> g;
+		float dist;
+		VertexPointer farthest;
+		g.FarthestVertex(m,seedVec,farthest,dist);
+		for(VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi) 
+			(*vi).Q()=(*vi).IMark(); 
 			
+		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
+		
+		/*
+		for(FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
+		{
+			
+		}
+		*/
+}
+// Base vertex voronoi coloring algorithm.
+// it assumes VF adjacency. No attempt of computing real geodesic distnace is done. Just a BFS visit starting from the seeds. 
+static void TopologicalVertexColoring(MeshType &m, std::vector<VertexType *> &seedVec)
+{			
 			std::queue<VertexPointer> VQ;
 			
 			tri::UpdateQuality<MeshType>::VertexConstant(m,0);
 			
-			for(int i=0;i<seedNum;++i)
+			for(uint i=0;i<seedVec.size();++i)
 			{
 				VQ.push(seedVec[i]);
 				seedVec[i]->Q()=i+1;
@@ -89,18 +105,8 @@ static void VertexColoring(MeshType &m, int seedNum, std::vector<VertexType *> &
 				VQ.pop();
 				
 				std::vector<VertexPointer> vertStar;
-				
-				face::VFIterator<FaceType> vfi(vp);
-				while(!vfi.End())
-				{
-					vertStar.push_back(vfi.F()->V1(vfi.I()));
-					vertStar.push_back(vfi.F()->V2(vfi.I()));
-					++vfi;
-				}
-				
-				std::sort(vertStar.begin(),vertStar.end());
-				typename std::vector<VertexPointer>::iterator new_end = std::unique(vertStar.begin(),vertStar.end());
-				for(typename std::vector<VertexPointer>::iterator vv = vertStar.begin();vv!=new_end;++vv)
+				vcg::face::VVStarVF<FaceType>(vp,vertStar);
+				for(typename std::vector<VertexPointer>::iterator vv = vertStar.begin();vv!=vertStar.end();++vv)
 				{
 					if((*vv)->Q()==0) 
 					{
@@ -108,7 +114,7 @@ static void VertexColoring(MeshType &m, int seedNum, std::vector<VertexType *> &
 						VQ.push(*vv);
 					}
 				}
-				}
+			} // end while(!VQ.empty())
 
 	}
 

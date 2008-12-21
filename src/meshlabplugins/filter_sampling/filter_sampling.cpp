@@ -302,7 +302,7 @@ FilterDocSampling::FilterDocSampling()
 			<< FP_HAUSDORFF_DISTANCE
 			<< FP_TEXEL_SAMPLING
 			<< FP_VERTEX_RESAMPLING
-			<< FP_OFFSET_SURFACE
+			<< FP_UNIFORM_MESH_RESAMPLING
 			<< FP_VORONOI_CLUSTERING
 	;
   
@@ -323,7 +323,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
 		case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling"); 
 		case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer"); 
-		case FP_OFFSET_SURFACE  :  return QString("Uniform Mesh Resampling"); 
+		case FP_UNIFORM_MESH_RESAMPLING  :  return QString("Uniform Mesh Resampling"); 
 		case FP_VORONOI_CLUSTERING  :  return QString("Voronoi Vertex Clustering"); 
 			
 		default : assert(0); return QString("unknown filter!!!!");
@@ -335,7 +335,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_ELEMENT_SAMPLING     :  return QString("Create a new layer populated with a point sampling of the current mesh, a sample for each element of the mesh is generated"); 
+		case FP_ELEMENT_SAMPLING     :  return QString("Create a new layer populated with a point sampling of the current mesh, a sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probabilty of being choosen."); 
 		case FP_MONTECARLO_SAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh."); 
 		case FP_SIMILAR_SAMPLING     :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle it is subdivided into similar triangles and the internal vertices of these triangles are considered. Distribution is biased by the shape of the triangles."); 
 		case FP_SUBDIV_SAMPLING      :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle"); 
@@ -345,7 +345,7 @@ const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 		case FP_VERTEX_RESAMPLING    :  return QString("Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>"
 																									"For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>"
 																									"The algorithm assumes that the two meshes are reasonably similar and aligned."); 
-		case FP_OFFSET_SURFACE       :  return QString("Create a new mesh that is a resampled version of the current one.<br>"
+		case FP_UNIFORM_MESH_RESAMPLING       :  return QString("Create a new mesh that is a resampled version of the current one.<br>"
 																									"The resampling is done by building a uniform volumetric representation where each voxel contains the signed distance from the original surface. "
 																									"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume."); 
 		case FP_VORONOI_CLUSTERING   :  return QString("Apply a clustering algorithm that builds voronoi cells over the mesh starting from random points,"
@@ -362,7 +362,7 @@ const int FilterDocSampling::getRequirements(QAction *action)
     case FP_VORONOI_CLUSTERING : return  MeshModel::MM_VERTFACETOPO;
 
 		case FP_VERTEX_RESAMPLING :
-		case FP_OFFSET_SURFACE:
+		case FP_UNIFORM_MESH_RESAMPLING:
     case FP_HAUSDORFF_DISTANCE :	return  MeshModel::MM_FACEMARK;
 		case FP_ELEMENT_SAMPLING    :   
 		case FP_MONTECARLO_SAMPLING :    
@@ -411,7 +411,8 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			parlst.addEnum("Sampling", 0, 
 									QStringList() << "VertexSampling" << "Edge Sampling" << "Face Sampling", 
 									tr("Element to sample:"), 
-									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
+									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 
+			parlst.addInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be choosen.");
 			break;
 		case FP_POISSONDISK_SAMPLING :
 			parlst.addInt("SampleNum", 100000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
@@ -465,7 +466,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 				parlst.addBool ("QualityTransfer", false, "Transfer quality",
 												"if enabled, the quality of each vertex of the target mesh will become the quality of the corresponding closest point on the source mesh");										
 		} break; 
-		case FP_OFFSET_SURFACE :
+		case FP_UNIFORM_MESH_RESAMPLING :
 		{
 				
 			parlst.addAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
@@ -501,7 +502,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			
 			switch(par.getEnum("Sampling"))
 				{
-					case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllVertex(curMM->cm,mps);	break;
+					case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::VertexUniform(curMM->cm,mps,par.getInt("SampleNum"));	break;
 					case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllEdge(curMM->cm,mps);		break;
 					case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
 				}
@@ -692,7 +693,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			if(rs.coordFlag) tri::UpdateNormals<CMeshO>::PerFaceNormalized(trgMesh->cm);
 			
 		} break;
-		case FP_OFFSET_SURFACE :
+		case FP_UNIFORM_MESH_RESAMPLING :
 		{
 			if (md.mm()->cm.fn==0) {
 				errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet"; 
@@ -719,7 +720,10 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			CMeshO *cm = &md.mm()->cm;				
 			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh"); 			
 			vector<CMeshO::VertexType *> seedVec;
-			VoronoiProcessing<CMeshO>::VertexColoring(*cm,sampleNum, seedVec);
+			
+			ClusteringSampler<CMeshO> vc(&seedVec);
+			tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
+			VoronoiProcessing<CMeshO>::GeodesicVertexColoring(*cm, seedVec);
 			VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
 
 				tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);
@@ -745,7 +749,7 @@ const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *acti
 		case FP_POISSONDISK_SAMPLING : 
 		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling; 
 		case FP_VORONOI_CLUSTERING: return FilterDocSampling::Remeshing;
-		case FP_OFFSET_SURFACE: return FilterDocSampling::Remeshing;
+		case FP_UNIFORM_MESH_RESAMPLING: return FilterDocSampling::Remeshing;
 		default: assert(0);
 	}
 	return FilterClass(0);
