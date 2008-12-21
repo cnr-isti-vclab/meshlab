@@ -34,12 +34,14 @@
 *****************************************************************************/
 #include <Qt>
 #include <QtGui>
+
 #include "filtergeodesic.h"
 
 #include <vcg/complex/trimesh/update/quality.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/clean.h>
 
+using namespace std;
 using namespace vcg;
 
 FilterGeodesic::FilterGeodesic() 
@@ -97,13 +99,19 @@ const int FilterGeodesic::getRequirements(QAction *action)
   return 0;
 }
 
-bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
+bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*par*/, vcg::CallBackPos * /*cb*/) 
 {
-				CMeshO::FaceIterator fi;
-				CMeshO::VertexIterator vi;
+	CMeshO::FaceIterator fi;
+	CMeshO::VertexIterator vi;
 	if(filter->text() == filterName(FP_QUALITY_GEODESIC) )
 	  {
-		tri::UpdateQuality<CMeshO>::VertexGeodesicFromBorder(m.cm);
+		m.updateDataMask(MeshModel::MM_VERTQUALITY);
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
+		m.updateDataMask(MeshModel::MM_VERTMARK);
+		
+		float dist;
+		tri::Geo<CMeshO> g;	
+		g.DistanceFromBorder(m.cm, dist);
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm);
 	  }
 	return true;
