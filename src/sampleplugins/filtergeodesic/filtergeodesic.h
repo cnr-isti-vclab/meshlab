@@ -41,6 +41,7 @@
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <vcg/complex/trimesh/geodesic.h>
 
 
 class FilterGeodesic : public QObject, public MeshFilterInterface
