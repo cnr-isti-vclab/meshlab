@@ -12,7 +12,6 @@ SUBDIRS       = io_base\
 				io_expe \
 				filter_clean \
 				filter_ao \
-				filter_morph \
 				filter_poisson \
 				filter_unsharp \
 				filter_splitter \
