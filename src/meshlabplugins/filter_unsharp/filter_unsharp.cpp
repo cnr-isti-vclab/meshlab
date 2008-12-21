@@ -52,7 +52,8 @@ FilterUnsharp::FilterUnsharp()
 		FP_UNSHARP_VERTEX_COLOR <<
 		FP_RECOMPUTE_VERTEX_NORMAL <<
 		FP_RECOMPUTE_FACE_NORMAL <<
-		FP_FACE_NORMAL_NORMALIZE	;
+		FP_FACE_NORMAL_NORMALIZE <<
+		FP_LINEAR_MORPH	;
 ;
  
   FilterIDType tt;
@@ -85,6 +86,8 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
   	case FP_UNSHARP_VERTEX_COLOR:	    return QString("UnSharp Mask Color"); 
 	  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Recompute Vertex Normals"); 
 	  case FP_RECOMPUTE_FACE_NORMAL:		return QString("Recompute Face Normals"); 
+		case FP_LINEAR_MORPH :	return QString("Vertex Linear Morphing");
+		
 
   	default: assert(0);
   }
@@ -110,6 +113,8 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
   	case FP_UNSHARP_VERTEX_COLOR:				return tr("Unsharp mask filtering of the color, putting in more evidence color edge variations"); 
 		case FP_RECOMPUTE_VERTEX_NORMAL:		return tr("Recompute vertex normals as an area weighted average of normal of the incident faces");
 		case FP_RECOMPUTE_FACE_NORMAL:			return tr("Recompute face normals as the normal of the plane of the face");
+		case FP_LINEAR_MORPH :							return tr("Morph current mesh towards a target with the same number of vertices. <br> The filter assumes that the two meshes have also the same vertex ordering.");
+
   	default: assert(0);
   }
   return QString("error!");
@@ -130,7 +135,8 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_NORMAL:				
 			case FP_UNSHARP_GEOMETRY:	    
-			case FP_UNSHARP_QUALITY:	    
+			case FP_UNSHARP_QUALITY:
+			case FP_LINEAR_MORPH :
 					return 	MeshFilterInterface::Smoothing;
 
 			case FP_UNSHARP_VERTEX_COLOR:	     
@@ -163,7 +169,9 @@ const int FilterUnsharp::getRequirements(QAction *action)
 		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
 		case FP_RECOMPUTE_FACE_NORMAL :
 		case FP_RECOMPUTE_VERTEX_NORMAL :
-		case FP_FACE_NORMAL_NORMALIZE:	    return 0; 
+		case FP_FACE_NORMAL_NORMALIZE:
+		case FP_LINEAR_MORPH :
+											return 0; 
 			
     default: assert(0);
   }
@@ -182,7 +190,9 @@ bool FilterUnsharp::autoDialog(QAction *action)
 			case FP_UNSHARP_GEOMETRY:		
 			case FP_UNSHARP_QUALITY:		
 			case FP_UNSHARP_VERTEX_COLOR:	
-			case FP_UNSHARP_NORMAL:		return true;
+			case FP_UNSHARP_NORMAL:
+			case FP_LINEAR_MORPH :
+					return true;
 	}
 	return false;
 }
@@ -238,6 +248,18 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
       parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		}
 		break;
+		case FP_LINEAR_MORPH :
+		{
+			parlst.addMesh ("TargetMesh", 1, "Target Mesh", "The mesh that is the morph target.");
+			
+			parlst.addDynamicFloat("PercentMorph", 0.0, -150, 250, (MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL), 
+			"% Morph", "The percent you want to morph toward (or away from) the target. <br>"
+			"0 means current mesh <br>"
+			"100 means targe mesh <br>"
+			"<0 and >100 linearly extrapolate between the two mesh <br>");
+		}
+		break;
+
 	}
 }
 
@@ -396,8 +418,39 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 					m.cm.vert[i].Q() = 	qualityOrig[i]*alphaorig + qualityDelta*alpha;	 // Unsharp formula 
 				}
 	}	break;
+	
+	case FP_LINEAR_MORPH:
+	{
+		CMeshO &targetMesh = par.getMesh("TargetMesh")->cm;
+		CMeshO &sourceMesh = m.cm;
+				
+		//if the numbers of vertices dont match up
+		if(sourceMesh.vn != targetMesh.vn)
+		{
+			errorMessage = "Number of vertices is not the same so you cant morph between these two meshes.";
+			return false;
+		}
+		
+		vcg::tri::Allocator<CMeshO>::CompactVertexVector(sourceMesh); 
+		vcg::tri::Allocator<CMeshO>::CompactFaceVector(sourceMesh); 
+		vcg::tri::Allocator<CMeshO>::CompactVertexVector(targetMesh); 
+		vcg::tri::Allocator<CMeshO>::CompactFaceVector(targetMesh);
+
+		float percentage = par.getDynamicFloat("PercentMorph")/100.f;
+		
+		int i;
+		for(i=0;i<targetMesh.vn;++i)
+		{
+			CMeshO::CoordType &srcP =sourceMesh.vert[i].P();  
+			CMeshO::CoordType &trgP =targetMesh.vert[i].P();  
+			srcP = srcP + (trgP-srcP)*percentage;
+		}
+	
+		tri::UpdateNormals<CMeshO>::PerVertexPerFace(sourceMesh);
+	} break;
 	default : assert(0);
 	}
+
 	
 				
 	return true;

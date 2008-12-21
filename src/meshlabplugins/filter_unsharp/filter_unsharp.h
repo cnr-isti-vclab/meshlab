@@ -57,7 +57,8 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 		FP_UNSHARP_VERTEX_COLOR,
 		FP_UNSHARP_FACE_COLOR,
 		FP_RECOMPUTE_VERTEX_NORMAL,
-		FP_RECOMPUTE_FACE_NORMAL
+		FP_RECOMPUTE_FACE_NORMAL,
+		FP_LINEAR_MORPH
   } ;
 	
 	/* default values for standard parameters' values of the plugin actions */
