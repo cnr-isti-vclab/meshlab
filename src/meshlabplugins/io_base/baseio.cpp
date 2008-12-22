@@ -250,7 +250,10 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
   string filename = QFile::encodeName(fileName).constData ();
   //string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
-	bool binaryFlag = par.getBool("Binary");
+	bool binaryFlag = false;
+	if(formatName.toUpper() == tr("STL") || formatName.toUpper() == tr("PLY"))
+					par.getBool("Binary");
+					
 	if(formatName.toUpper() == tr("PLY"))
 	{
 		int result = vcg::tri::io::ExporterPLY<CMeshO>::Save(m.cm,filename.c_str(),mask,binaryFlag,cb);
