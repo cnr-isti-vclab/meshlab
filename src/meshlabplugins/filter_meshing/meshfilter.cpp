@@ -396,35 +396,36 @@ bool ExtraMeshFilterPlugin::getCustomParameters(QAction *action, QWidget * /*par
 
 bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-	//MeshModel &m=*md->mm();
+	if( ID(filter) == FP_LOOP_SS ||
+			ID(filter) == FP_BUTTERFLY_SS || 
+			ID(filter) == FP_MIDPOINT )
+		{
+			if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) 
+			{
+				errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
+				return false; // can't continue, mesh can't be processed
+			}
 
-	if( getClass(filter)==Remeshing)
-  {
-    if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
-      errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
-      return false; // can't continue, mesh can't be processed
-    }
+			bool  selected  = par.getBool("Selected");
+			float threshold = par.getAbsPerc("Threshold");
 
-    bool  selected  = par.getBool("Selected");
-    float threshold = par.getAbsPerc("Threshold");
-
-    switch(ID(filter)) {
-      case FP_LOOP_SS :
+			switch(ID(filter)) {
+				case FP_LOOP_SS :
         tri::RefineOddEven<CMeshO, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO> >
           (m.cm, tri::OddPointLoop<CMeshO>(), tri::EvenPointLoop<CMeshO>(), threshold, selected, cb);
         break;
-      case FP_BUTTERFLY_SS :
-        Refine<CMeshO,MidPointButterfly<CMeshO> >
-          (m.cm, MidPointButterfly<CMeshO>(), threshold, selected, cb);
-        break;
-      case FP_MIDPOINT :
-        Refine<CMeshO,MidPoint<CMeshO> >
-          (m.cm, MidPoint<CMeshO>(), threshold, selected, cb);
-    }
+				case FP_BUTTERFLY_SS :
+					Refine<CMeshO,MidPointButterfly<CMeshO> >
+						(m.cm, MidPointButterfly<CMeshO>(), threshold, selected, cb);
+					break;
+				case FP_MIDPOINT :
+					Refine<CMeshO,MidPoint<CMeshO> >
+						(m.cm, MidPoint<CMeshO>(), threshold, selected, cb);
+			}
 
-	 m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-	 vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-  }
+		 m.clearDataMask(MeshModel::MM_VERTFACETOPO);
+		 vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		}
 	if (ID(filter) == FP_REMOVE_FACES_BY_EDGE ) {
     bool selected  = par.getBool("Selected");
     float threshold = par.getAbsPerc("Threshold");
