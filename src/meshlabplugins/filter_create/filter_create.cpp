@@ -27,6 +27,7 @@
 #include <meshlab/interfaces.h>
 #include <vcg/complex/trimesh/create/platonic.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
 #include "filter_create.h"
 
 // Constructor usually performs only two simple tasks of filling the two lists
@@ -88,7 +89,7 @@ void FilterCreate::initParameterSet(QAction *action,MeshModel &m, FilterParamete
     case CR_CONE:
       parlst.addFloat("r0",1,"Radius 1","Radius of the bottom circumference");
       parlst.addFloat("r1",2,"Radius 2","Radius of the top circumference");
-      parlst.addFloat("h",5,"Height","Height of the Cone");
+      parlst.addFloat("h",3,"Height","Height of the Cone");
       break;
 		default : return;
 	}
@@ -125,6 +126,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
       vcg::tri::Cone<CMeshO>(m.cm,r0,r1,h);
       break;
    }
+ 	 vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
    vcg::tri::UpdateNormals<CMeshO>::PerFace(m.cm);
 	return true;
 }
