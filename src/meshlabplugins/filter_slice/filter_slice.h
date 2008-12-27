@@ -34,7 +34,7 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-#include <vcg/simplex/edgeplus/base.h>
+#include <vcg/simplex/edge/base.h>
 #include <vcg/complex/edgemesh/base.h>
 
 #include <wrap/io_edgemesh/export_svg.h>
@@ -65,7 +65,7 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_PLANE };
+	enum { FP_PARALLEL_PLANES, FP_RECURSIVE_SLICE };
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
 
@@ -76,11 +76,12 @@ public:
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
   virtual bool applyFilter(QAction * /* filter */, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-  virtual const int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO;}
+  virtual const int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;}
 private:
 	SVGProperties pr;
-	void createSlice(MeshDocument& orig);
-	void capHole(MeshDocument& orig);
+	void createSlice(MeshModel* orig,MeshModel* dest);
+	void capHole(MeshModel* orig, MeshModel* dest);
+	void extrude(MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
 };
 
 #endif

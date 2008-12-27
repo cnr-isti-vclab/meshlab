@@ -15,21 +15,18 @@ public:
 	{
 	  p=_p;
   }
-
 	bool operator()(face::Pos<typename MESH_TYPE::FaceType> ep)
 	{
     Point3f pp;
-	  Segment3f seg(ep.f->V(ep.z)->P(),ep.f->V1(ep.z)->P());
-	  if(Distance(ep.f->V0(ep.z)->P(),p)<0)
-      ep.f->V0(ep.z)->Q()=VERTEX_LEFT;
-    else
-      ep.f->V0(ep.z)->Q()=VERTEX_RIGHT;
-    if(Distance(ep.f->V1(ep.z)->P(),p)<0)
-      ep.f->V1(ep.z)->Q()=VERTEX_LEFT;
-    else
-      ep.f->V1(ep.z)->Q()=VERTEX_RIGHT;
-    return Intersection<Segment3f>(p,seg,pp);
+	  if(Distance(ep.V()->P(),p)<0) ep.V()->Q()=VERTEX_LEFT;
+														else  ep.V()->Q()=VERTEX_RIGHT;
+
+    if(Distance(ep.VFlip()->P(),p)<0)  ep.VFlip()->Q()=VERTEX_LEFT;
+																 else  ep.VFlip()->Q()=VERTEX_RIGHT;
+
+    return ep.V()->Q() != ep.VFlip()->Q();
   }
+
 protected:
   Plane3f p;
 };
