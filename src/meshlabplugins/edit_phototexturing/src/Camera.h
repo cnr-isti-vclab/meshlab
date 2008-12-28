@@ -50,6 +50,7 @@ public:
 	
 	bool calculatedTextures;
 	QString name;
+	int textureId;
 	//QString type;
 	QString textureImage;
 	CameraSensor sensor;

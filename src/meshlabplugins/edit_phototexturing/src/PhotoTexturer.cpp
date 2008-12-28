@@ -44,16 +44,45 @@
 
 #include "photo_texture_tools.h"
 
+#include <src/WinnerTakesAllTextureMerger.h>
+#include <src/SmartBlendTextureMerger.h>
+
 const QString PhotoTexturer::XML_PHOTOTEXTURING = "photoTexturing";
 
-const std::string PhotoTexturer::ORIGINALUVTEXTURECOORDS = "OriginalUVTextureCoords";
-const std::string PhotoTexturer::CAMERAUVTEXTURECOORDS = "CameraUVTextureCoords";
+//const std::string PhotoTexturer::ORIGINALUVTEXTURECOORDS = "OriginalUVTextureCoords";
+const std::string PhotoTexturer::UVTEXTURECOORDS = "UVTextureCoords";
+
+const QString PhotoTexturer::TEXTURE_SIZE_WIDTH = "pt_texture_width";
+const QString PhotoTexturer::TEXTURE_SIZE_HEIGHT = "pt_texture_height";
+
+const QString PhotoTexturer::UNPROJECT_ENABLE_ANGLE = "pt_enable_angle";
+const QString PhotoTexturer::UNPROJECT_ANGLE = "pt_angle";
+const QString PhotoTexturer::UNPROJECT_ANGLE_WEIGHT = "pt_angle_weight";
+const QString PhotoTexturer::UNPROJECT_ANGLE_SHARPNESS = "pt_angle_sharpness";
+
+const QString PhotoTexturer::UNPROJECT_ENABLE_DISTANCE = "pt_enable_distance";
+const QString PhotoTexturer::UNPROJECT_DISTANCE_WEIGHT = "pt_distance_weight";
+const QString PhotoTexturer::UNPROJECT_DISTANCE_SHARPNESS = "pt_distance_shjarpness";
+
+const QString PhotoTexturer::UNPROJECT_ENABLE_EDGE_STRETCHING = "pt_enable_edge_stretching";
+const QString PhotoTexturer::UNPROJECT_EDGE_STRETCHING_PASS = "pt_edge_stretching_pass";
+
+const QString PhotoTexturer::UNPROJECT_TEXTURE_FILENAME = "pt_unproject_texture_name";
+
+
+const QString PhotoTexturer::BAKE_SAVE_UNPROJECT = "pt_save_unproject";
+
+const QString PhotoTexturer::BAKE_MERGE_TEXTURES = "pt_merge_textures";
+const QString PhotoTexturer::BAKE_MERGE_TYPE = "pt_merge_type";
+const QString PhotoTexturer::BAKE_MERGED_TEXTURE = "pt_merged_texture_file";
+const QString PhotoTexturer::BAKE_SMARTBLEND = "pt_smartblend_command";
 
 #define ZB_EPSILON 1e-2
 
 
 PhotoTexturer::PhotoTexturer(){
-
+	origTextureID = -1;
+	nextTextId = 0;
 }
 PhotoTexturer::~PhotoTexturer(){
 
@@ -76,6 +105,10 @@ void PhotoTexturer::loadConfigurationFile(QString cfgFile){
 			}
 		}
 	}
+}
+
+int PhotoTexturer::generateTextureId(){
+	return ++nextTextId;
 }
 
 void PhotoTexturer::saveConfigurationFile(QString cfgFile){
@@ -140,12 +173,19 @@ void PhotoTexturer::storeOriginalTextureCoordinates(MeshModel *m){
 	//checks if the MeshModel has texture coordinates
 	if(m->hasDataMask(MeshModel::MM_WEDGTEXCOORD) ){
 		//qDebug()<<"HasPerWedgeTexCoord";
-
+		CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> >ih;
+		if (!vcg::tri::HasPerFaceAttribute(m->cm,UVTEXTURECOORDS)){
+			//qDebug()<<"has no PhotoTexturingUVCoords";
+			ih = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<QMap<int,UVFaceTexture*> >(m->cm,UVTEXTURECOORDS);		
+		}else{
+			ih = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<QMap<int,UVFaceTexture*> >(m->cm,UVTEXTURECOORDS);
+		}
 		//checks if the original texture coordinates has been saved before
-		if (!vcg::tri::HasPerFaceAttribute(m->cm,ORIGINALUVTEXTURECOORDS)){
+	
+		if (origTextureID == -1){
 			//qDebug()<<"has no OriginalTextureCoords";
-
-			CMeshO::PerFaceAttributeHandle<UVFaceTexture*> ih = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<UVFaceTexture*> (m->cm,ORIGINALUVTEXTURECOORDS);
+			origTextureID = generateTextureId();
+			//CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> >ih = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<QMap<int,UVFaceTexture*> >(m->cm,UVTEXTURECOORDS);
 
 			//saves the texture information for each face as perFaceAttribute
 			CMeshO::FaceIterator fi; int i = 0;
@@ -163,8 +203,9 @@ void PhotoTexturer::storeOriginalTextureCoordinates(MeshModel *m){
 				uvft->textureindex = (*fi).WT(0).n();
 				uvft->faceIndex = i;
 
-				ih[i]  = uvft;   // [] operator takes a iterator
+				ih[i][origTextureID]  = uvft;   // [] operator takes a iterator
 			}
+			textureList[origTextureID]="original";
 		}else{
 			//qDebug()<<"has OriginalTextureCoords";
 		}
@@ -179,29 +220,9 @@ void PhotoTexturer::restoreOriginalTextureCoordinates(MeshModel *m){
 	// see http://vcg.sourceforge.net/index.php/Tutorial#User-defined_attributes
 
 	//checks if the original texture informationof the MeshModel were stored
-	if (vcg::tri::HasPerFaceAttribute(m->cm,ORIGINALUVTEXTURECOORDS)){
-		//qDebug()<<"has OriginalTextureCoords";
-		CMeshO::PerFaceAttributeHandle<UVFaceTexture*> ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*> (m->cm,ORIGINALUVTEXTURECOORDS);
+	if (origTextureID!= -1 && vcg::tri::HasPerFaceAttribute(m->cm,UVTEXTURECOORDS)){
+		applyTextureToMesh(m,origTextureID);
 
-		//overwrites the current texture information with the original texture information
-		// from the perFaceAttribute "ORIGINALUVTEXTURECOORDS"
-		CMeshO::FaceIterator fi; int i = 0;
-		for(fi   = m->cm.face.begin(); fi != m->cm.face.end(); ++fi,++i){
-			UVFaceTexture* uvft = ih[fi] ;
-
-			(*fi).WT(0).u() = uvft->u[0];
-			(*fi).WT(0).v() = uvft->v[0];
-			(*fi).WT(0).n() = uvft->textureindex;
-
-			(*fi).WT(1).u() = uvft->u[1];
-			(*fi).WT(1).v() = uvft->v[1];
-			(*fi).WT(1).n() = uvft->textureindex;
-
-			(*fi).WT(2).u() = uvft->u[2];
-			(*fi).WT(2).v() = uvft->v[2];
-			(*fi).WT(2).n() = uvft->textureindex;
-
-		}
 	}else{
 		//qDebug()<<"has no OriginalTextureCoords";
 	}
@@ -209,48 +230,55 @@ void PhotoTexturer::restoreOriginalTextureCoordinates(MeshModel *m){
 
 
 
-void PhotoTexturer::calculateMeshTextureForAllCameras(MeshModel *m){
+void PhotoTexturer::calculateMeshTextureForAllCameras(MeshModel *m, bool calcZBuffer){
 	//checks if the MeshModel already has the perfaceAttribute PhotoTexturer::CAMERAUVTEXTURECOORDS
 	//if not it creates one
-	if (!vcg::tri::HasPerFaceAttribute(m->cm,CAMERAUVTEXTURECOORDS)){
-		//qDebug()<<"has no PhotoTexturingUVCoords";
-		vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<QMap<QString,UVFaceTexture*> > (m->cm,CAMERAUVTEXTURECOORDS);
-	}
+
 
 	//enables texture information for the MeshModel
-	m->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+	//m->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 	//makes sure that the mesh model mask enabels texture coordinates (needed to save the uv coorinates later)
 	//m->ioMask |= MeshModel::IOM_WEDGTEXCOORD;
 
 	
 	//checks if special transformation data is stored asMeshData
-	vcg::Matrix44f transformMatrix;
-	if(vcg::tri::HasPerMeshAttribute(m->cm, PhotoTextureTools::TransformForPhoto)){
-		CMeshO::PerMeshAttributeHandle<vcg::Matrix44f> transformHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vcg::Matrix44f> (m->cm, PhotoTextureTools::TransformForPhoto);
-		transformMatrix = transformHandle();
-	}else{
-		transformMatrix = vcg::Matrix44f();
-		transformMatrix.SetIdentity();
-	}
+
 	
 	
 	//calculates the texture information (uv coordinates and texture index) for each camera
 	int i;
 	for (i=0;i<cameras.size();i++){
 		Camera *cam = cameras.at(i);
-		calculateMeshTextureForCamera(cam,m, transformMatrix);
+		calculateMeshTextureForCamera(m,cam, calcZBuffer);
 	}
 }
 
-void PhotoTexturer::calculateMeshTextureForCamera(Camera* cam,MeshModel *m,vcg::Matrix44f &matrix){
+void PhotoTexturer::calculateMeshTextureForCamera(MeshModel *m, Camera* cam,bool calcZBuffer){
 	bool found = false;
 	unsigned int size = static_cast<unsigned int>(m->cm.textures.size());
 	unsigned j = 0;
 	int tindx;
 
 	//gets the perFaceAttributeHandler for the perFaceAttribute PhotoTexturer::CAMERAUVTEXTURECOORDS
-	CMeshO::PerFaceAttributeHandle<QMap<QString,UVFaceTexture*> > ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<QString,UVFaceTexture*> > (m->cm,CAMERAUVTEXTURECOORDS);
-
+	CMeshO::PerFaceAttributeHandle<QMap<int ,UVFaceTexture*> > ih;
+	
+	if (!vcg::tri::HasPerFaceAttribute(m->cm,UVTEXTURECOORDS)){
+		//qDebug()<<"has no PhotoTexturingUVCoords";
+		ih = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
+	}else{
+		ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
+	}
+	
+	
+	vcg::Matrix44f matrix;
+	if(vcg::tri::HasPerMeshAttribute(m->cm, PhotoTextureTools::TransformForPhoto)){
+		CMeshO::PerMeshAttributeHandle<vcg::Matrix44f> transformHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vcg::Matrix44f> (m->cm, PhotoTextureTools::TransformForPhoto);
+		matrix = transformHandle();
+	}else{
+		matrix = vcg::Matrix44f();
+		matrix.SetIdentity();
+	}
+	
 	//loads the texture image and gets its dimensions
 	QImage *img = new QImage(cam->textureImage);
 	int imgw = img->width();
@@ -276,7 +304,8 @@ void PhotoTexturer::calculateMeshTextureForCamera(Camera* cam,MeshModel *m,vcg::
 
 
 	//cam->calibration->calibrateToTsai(m);
-
+	int textureId = generateTextureId();
+	cam->textureId = textureId;
 	QList<QuadTreeLeaf*> buildQuadTree;
 	//calculates the uv coordinates for each face and saves them as UVFaceTexture as
 	//perFaceAttribute of the MeshModel
@@ -285,6 +314,7 @@ void PhotoTexturer::calculateMeshTextureForCamera(Camera* cam,MeshModel *m,vcg::
 	for(fi=m->cm.face.begin(); fi!=m->cm.face.end(); ++fi, count++) {
 		int i;
 		UVFaceTexture *ft = new UVFaceTexture();
+		ft->type = 0;
 		//calculating angle between the camera direction and the face normal
 		vcg::Matrix33f rMatrix = vcg::Matrix33f(matrix,3);
 		vcg::Point3f tmpN = rMatrix*(*fi).N();
@@ -311,45 +341,57 @@ void PhotoTexturer::calculateMeshTextureForCamera(Camera* cam,MeshModel *m,vcg::
 		ft->textureindex =tindx;
 		ft->faceIndex = count;
 
-		ih[ft->faceIndex][cam->name]=ft;
+		ih[ft->faceIndex][textureId] = ft;
 		buildQuadTree.push_back(ft);
 
 	}
-
-	QuadTreeNode zBufferTree = QuadTreeNode(0.0,0.0,1.0,1.0);
-	zBufferTree.buildQuadTree(&buildQuadTree,1.0/imgw,1.0/imgh);
-	cam->zBuffer = new TextureFilterZB(imgw,imgh,1);
-	calculateZBuffer(m,cam,&zBufferTree,cam->zBuffer);
-	cam->zBuffer->SaveAsImage("zbuffer_",cam->name);
+	
+	if (cam->zBuffer!= NULL){
+		delete cam->zBuffer;
+		cam->zBuffer = NULL;
+	}
+	if(calcZBuffer){
+		QuadTreeNode zBufferTree = QuadTreeNode(0.0,0.0,1.0,1.0);
+		zBufferTree.buildQuadTree(&buildQuadTree,1.0/imgw,1.0/imgh);
+		cam->zBuffer = new TextureFilterZB(imgw,imgh,1);
+		calculateZBuffer(m,cam,&zBufferTree,cam->zBuffer);
+		cam->zBuffer->normalize();
+	}
+	//save Z-Buffer as image
+	//cam->zBuffer->SaveAsImage("zbuffer_",cam->name);
 	cam->calculatedTextures = true;
+	textureList[textureId]= cam->name;
 }
 
-void PhotoTexturer::applyTextureToMesh(MeshModel *m,int camIdx){
-
-	if (vcg::tri::HasPerFaceAttribute(m->cm,CAMERAUVTEXTURECOORDS)){
-
-		CMeshO::PerFaceAttributeHandle<QMap<QString,UVFaceTexture*> > ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<QString,UVFaceTexture*> > (m->cm,CAMERAUVTEXTURECOORDS);
-		CMeshO::FaceIterator fi;
-		int k =0;
-		for(fi=m->cm.face.begin(); fi!=m->cm.face.end(); ++fi) {
-			int i;
-			UVFaceTexture* ft = ih[fi][cameras.at(camIdx)->name];
-			//if(ft->faceAngleToCamera<=90.0){
-				for (i=0;i<3;i++){
-					(*fi).WT(i).u() = ft->u[i];
-					(*fi).WT(i).v() = ft->v[i];
-					(*fi).WT(i).n() = ft->textureindex;
+void PhotoTexturer::applyTextureToMesh(MeshModel *m,int textureIdx, bool use_different_tidx, int tidx){
+	
+	if(!m->hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
+		m->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+	}
+	QMap<int, QString>::const_iterator i = textureList.find(textureIdx);
+	 if (i != textureList.end()){
+	
+		if (vcg::tri::HasPerFaceAttribute(m->cm,UVTEXTURECOORDS)){
+	
+			CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> > ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
+			CMeshO::FaceIterator fi;
+			int k =0;
+			for(fi=m->cm.face.begin(); fi!=m->cm.face.end(); ++fi) {
+				int i;
+				UVFaceTexture* ft = ih[fi][textureIdx];
+				if(ft!=NULL){
+					for (i=0;i<3;i++){
+						(*fi).WT(i).u() = ft->u[i];
+						(*fi).WT(i).v() = ft->v[i];
+						if (use_different_tidx && tidx >-1){
+							(*fi).WT(i).n() = tidx;
+						}else{
+							(*fi).WT(i).n() = ft->textureindex;
+						}
+					}
 				}
-			/*}else{
-				for (i=0;i<3;i++){
-					(*fi).WT(i).u() = 0.0;
-					(*fi).WT(i).v() = 0.0;
-					(*fi).WT(i).n() = 0;
-				}
-
-			}*/
-
-			k++;
+				k++;
+			}
 		}
 	}
 }
@@ -359,10 +401,10 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 	qDebug() <<"unprojectToOriginalTextureMap"<< min_angle;
 
 	//checks if the MeshModel has original uv coordinates and camera projected uv coordinates.
-	if (vcg::tri::HasPerFaceAttribute(m->cm,ORIGINALUVTEXTURECOORDS) && vcg::tri::HasPerFaceAttribute(m->cm,CAMERAUVTEXTURECOORDS)){
+	if (origTextureID != -1 && vcg::tri::HasPerFaceAttribute(m->cm,UVTEXTURECOORDS)){
 
-		CMeshO::PerFaceAttributeHandle<UVFaceTexture*> oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*>(m->cm,ORIGINALUVTEXTURECOORDS);
-		CMeshO::PerFaceAttributeHandle<QMap<QString,UVFaceTexture*> > cth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<QString,UVFaceTexture*> > (m->cm,CAMERAUVTEXTURECOORDS);
+		//CMeshO::PerFaceAttributeHandle<UVFaceTexture*> oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*>(m->cm,ORIGINALUVTEXTURECOORDS);
+		CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> > cth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
 
 		QString camname = camera->name;
 
@@ -389,11 +431,11 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 		int y;
 		//CMeshO::FaceIterator fi;
 		bool found = false;
-
+		/*
 		if (camera->zBuffer!=0){
 			camera->zBuffer->normalize();
 		}
-		
+		*/
 		
 		//goes pixelwise over the whole new texture image and looks if it lies inside
 		//a texture face of the original texture coordinates. If the pixel lies inside
@@ -419,8 +461,8 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 
 						double u,v;
 						double a,b,c,d;
-						UVFaceTexture* ct = cth[tmp->faceIndex][camname];
-
+						
+						UVFaceTexture* ct = cth[tmp->faceIndex][camera->textureId];
 						tmp->getBarycentricCoordsForUV(((double)x/(double)(imgResX-1)),((double)y/(double)(imgResY-1)),a,b,c,d);
 						
 						ct->getUVatBarycentricCoords(u,v,a,b,c);
@@ -439,7 +481,7 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 							p =  f.V(0)->cP()*a+ f.V(1)->cP()*b+f.V(2)->cP()*c;
 							double distance = sqrt(pow(p[0]-camera->calibration->cameraPosition[0],2)+pow(p[1]-camera->calibration->cameraPosition[1],2)+pow(p[2]-camera->calibration->cameraPosition[2],2));
 
-							if(camera->zBuffer!= 0 && (camera->zBuffer->normalizeValue(distance)-ZB_EPSILON)<=camera->zBuffer->getValue(ix,tmp_texture.height()-(iy+1))){
+							if((camera->zBuffer!= 0 && (camera->zBuffer->normalizeValue(distance)-ZB_EPSILON)<=camera->zBuffer->getValue(ix,tmp_texture.height()-(iy+1)))|| (camera->zBuffer== 0 )){
 								
 								found = true;
 								
@@ -467,11 +509,11 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 									angle = (angle/M_PI)*180.0;
 	
 									if(angle<= min_angle){
-										angle = (angle/180.0)*M_PI;
-										angle = sin(angle);
-										angle = pow(angle,angle_map_sharpness);
+										double wangle = (angle/180.0)*M_PI;
+										wangle = sin(wangle);
+										wangle = pow(wangle,angle_map_sharpness);
 	
-										angle_filter->setValue(x,imgResY-(y+1),angle);
+										angle_filter->setValue(x,imgResY-(y+1),wangle);
 									}
 								}
 	
@@ -482,11 +524,14 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 	
 								if (angle<= min_angle){
 									cpixel = QColor(tmp_texture.pixel(ix,iy));
-									cpixel.setAlpha(255);
+									//int rgb = (int)((angle/90.0*255.0));
+									//cpixel = QColor(rgb,rgb,rgb);
+									cpixel.setAlpha((int)((angle/90.0*255.0)));
+									//cpixel.setAlpha(255);
 	
 								}else{
 									cpixel = QColor(0,0,0,0);
-									//cpixel.setAlpha(255);
+
 								}
 								container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
 							}
@@ -612,40 +657,158 @@ void PhotoTexturer::edgeTextureStretching(QImage &image, int pass){
 }
 
 
-void PhotoTexturer::unprojectTextures(MeshModel *m, int width, int height, int ets, bool enable_angle_map, int angle_weight,int angle_map_sharpness,double min_angle, bool enable_distance_map, int distance_weight){
-
+int PhotoTexturer::unprojectTextures(MeshModel *m, int textureID, FilterParameterSet *paraSet){
+	int width = paraSet->getInt(TEXTURE_SIZE_WIDTH);
+	int height = paraSet->getInt(TEXTURE_SIZE_HEIGHT);
+	int ets = paraSet->getInt(UNPROJECT_EDGE_STRETCHING_PASS);
+	//bool enable_angle_map = paraSet->getBool(UNPROJECT_ENABLE_ANGLE);
+	//int angle_weight = paraSet->getInt(UNPROJECT_ANGLE_WEIGHT);
+	//int angle_map_sharpness = paraSet->getInt(UNPROJECT_ANGLE_SHARPNESS);
+	//double min_angle = paraSet->getFloat(UNPROJECT_ANGLE);
+	//bool enable_distance_map = paraSet->getBool(UNPROJECT_ENABLE_DISTANCE);
+	//int distance_weight = paraSet->getInt(UNPROJECT_DISTANCE_WEIGHT);
+	QString smartblend = paraSet->getString(BAKE_SMARTBLEND);
+	
 	QList<QuadTreeLeaf*> *list = new QList<QuadTreeLeaf*>();
-	CMeshO::PerFaceAttributeHandle<UVFaceTexture*> oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*>(m->cm,ORIGINALUVTEXTURECOORDS);
+	CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> >oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> >(m->cm,UVTEXTURECOORDS);
 	CMeshO::FaceIterator fi;
 	for(fi = m->cm.face.begin();fi!=m->cm.face.end();fi++) {
-		list->push_back(oth[fi]);
+		list->push_back(oth[fi][origTextureID]);
 	}
 
 	QuadTreeNode qtree = QuadTreeNode(0.0,0.0,1.0,1.0);
 	//qDebug() << "list->size(): "<<list->size();
 	//qDebug()<< "buildQuadTree";
 	qtree.buildQuadTree(list, 0.50/(double)width,0.50/(double)height);
-
-	//qDebug()<< "buildQuadTree DONE";
-	int i;
-	TextureMerger texMerger = TextureMerger();
-
-	for (i=0;i<cameras.size();i++){
-		ImageFilterContainer *ifc = new ImageFilterContainer();
-		Camera *camera = cameras.at(i);
-		qDebug()<<"unprojectToOriginalTextureMap";
-		unprojectToOriginalTextureMap(m,camera,qtree,ifc, enable_distance_map, distance_weight, enable_angle_map,angle_weight,angle_map_sharpness,min_angle,width,height);
-		texMerger.ifcList.push_back(ifc);
-	}
-	texMerger.normalizeFilterContainerList();
-	QImage image = texMerger.mergeTextureImagesWinnerTakesAll(width,height);
-	edgeTextureStretching(image,ets);
-	QString filename = QString(m->fileName.c_str());
-	filename = filename + "_merged.png";
-
-	image.save(filename,"PNG");
+/*
+	ImageFilterContainer *ifc = new ImageFilterContainer();
+	unprojectToOriginalTextureMap(m,camera,qtree,ifc, enable_distance_map, distance_weight, enable_angle_map,angle_weight,angle_map_sharpness,min_angle,width,height);
+		
+	ifc->image->save(unprojectTextureName,"PNG");
+*/	
+	return 0;
 	//delete image;
 }
+
+int PhotoTexturer::bakeTextures(MeshModel *m, FilterParameterSet *paraSet){
+	int width = paraSet->getInt(TEXTURE_SIZE_WIDTH);
+	int height = paraSet->getInt(TEXTURE_SIZE_HEIGHT);
+	int ets = paraSet->getInt(UNPROJECT_EDGE_STRETCHING_PASS);
+	bool enable_angle_map = paraSet->getBool(UNPROJECT_ENABLE_ANGLE);
+	int angle_weight = paraSet->getInt(UNPROJECT_ANGLE_WEIGHT);
+	int angle_map_sharpness = paraSet->getInt(UNPROJECT_ANGLE_SHARPNESS);
+	double min_angle = paraSet->getFloat(UNPROJECT_ANGLE);
+	bool enable_distance_map = paraSet->getBool(UNPROJECT_ENABLE_DISTANCE);
+	int distance_weight = paraSet->getInt(UNPROJECT_DISTANCE_WEIGHT);
+	QString smartblend = paraSet->getString(BAKE_SMARTBLEND);
+	int merger_type = paraSet->getEnum(BAKE_MERGE_TYPE);
+	bool saveUnprojected = paraSet->getBool(BAKE_SAVE_UNPROJECT);
+	//creating a list of all UVFaceTexture
+	QList<QuadTreeLeaf*> *list = new QList<QuadTreeLeaf*>();
+	CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> >oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> >(m->cm,UVTEXTURECOORDS);
+	CMeshO::FaceIterator fi;
+	for(fi = m->cm.face.begin();fi!=m->cm.face.end();fi++) {
+		list->push_back(oth[fi][origTextureID]);
+	}
+
+	//creating a quadtree from list UVFaceTexture
+	QuadTreeNode qtree = QuadTreeNode(0.0,0.0,1.0,1.0);
+	qtree.buildQuadTree(list, 0.50/(double)width,0.50/(double)height);
+	TextureMerger *texMerger = NULL;
+	//deciedes which TextureMerger to use
+	if (merger_type == 0){
+		texMerger = new WinnerTakesAllTextureMerger();
+	}else if(merger_type == 1){
+		texMerger = new SmartBlendTextureMerger(smartblend);
+	}
+	if (texMerger != NULL){
+		for (int i=0;i<cameras.size();i++){
+			Camera *camera = cameras.at(i);
+			if(camera->textureId >-1){
+				ImageFilterContainer *ifc = new ImageFilterContainer();
+				ifc->tag = camera->name;
+				unprojectToOriginalTextureMap(m,camera,qtree,ifc, enable_distance_map, distance_weight, enable_angle_map,angle_weight,angle_map_sharpness,min_angle,width,height);
+				texMerger->ifcList.push_back(ifc);
+			}
+		}
+		texMerger->normalizeFilterContainerList();
+		
+		if (saveUnprojected){
+			ImageFilterContainer *ifc;
+			QFileInfo fi = QFileInfo(m->fileName.c_str());
+			for (int i=0;i<texMerger->ifcList.size();i++){
+				ifc = texMerger->ifcList.at(i);
+				QString upTextureName = fi.baseName()+"_unproject_"+ifc->tag+".png";
+				ifc->image->save(upTextureName,"PNG");
+			}
+		}
+		
+		QImage image = texMerger->merge(width,height);
+		
+		edgeTextureStretching(image,ets);
+		QString filename = paraSet->getString(BAKE_MERGED_TEXTURE);
+		
+		image.save(filename,"PNG");
+		
+		//create new UVTexture set
+		qDebug()<<"filename:"<<filename;
+		int textureId = generateTextureId();
+		bool found = false;
+		unsigned int size = static_cast<unsigned int>(m->cm.textures.size());
+		unsigned j = 0;
+		int tindx;
+		while (!found && (j < size)){
+			
+			if (filename.toStdString().compare(m->cm.textures[j])==0)
+			{
+				tindx = (int)j;
+				found = true;
+			}
+			++j;
+		}
+	
+		if (!found)
+		{
+			m->cm.textures.push_back(filename.toStdString());
+			tindx = (int)size;
+		}
+		
+		qDebug()<<"tindx:"<<tindx;
+		
+		if (origTextureID>-1){
+				qDebug()<<"has OriginalTextureCoords";
+				//CMeshO::PerFaceAttributeHandle<UVFaceTexture*> ihot = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*> (m->cm,ORIGINALUVTEXTURECOORDS);
+				CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> > cth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
+	
+				//overwrites the current texture information with the original texture information
+				// from the perFaceAttribute "ORIGINALUVTEXTURECOORDS"
+				CMeshO::FaceIterator fi; int i = 0;
+				for(fi   = m->cm.face.begin(); fi != m->cm.face.end(); ++fi,++i){
+					
+					UVFaceTexture* uvft = cth[fi][origTextureID] ;
+					UVFaceTexture* tmp = new UVFaceTexture(*uvft);
+					tmp->textureindex = tindx;
+					tmp->type = 1;
+					cth[fi][textureId] = tmp;
+	
+	
+				}
+			}else{
+				//qDebug()<<"has no OriginalTextureCoords";
+			}
+		qDebug()<<"textureId:"<<textureId;
+		if(merger_type==0){
+			textureList[textureId]="baked_win";
+		}else if(merger_type==1){
+			textureList[textureId]="baked_sb";
+		}
+		
+		return textureId;
+		//delete image;
+	}
+	return 0;
+}
+
 
 QImage PhotoTexturer::mergeTextureImagesWinnerTakesAll(int imgWidth, int imgHeight, QList<QImage> imgList){
 	QImage image = QImage(imgWidth,imgHeight,QImage::Format_RGB32);
@@ -727,7 +890,7 @@ void PhotoTexturer::exportMaxScript(QString filename,MeshModel *mm){
 	    	 }
 	     }
 	     out << ")\n";
-
+	     ms->close();
 	}else{
 		qDebug()<< "Could not open max script file." <<filename;
 	}
@@ -737,38 +900,47 @@ void PhotoTexturer::exportMaxScript(QString filename,MeshModel *mm){
 
 
 
-void PhotoTexturer::combineTextures(MeshModel* m){
-	if (vcg::tri::HasPerFaceAttribute(m->cm,CAMERAUVTEXTURECOORDS)){
-
-		CMeshO::PerFaceAttributeHandle<QMap<QString,UVFaceTexture*> > ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<QString,UVFaceTexture*> > (m->cm,CAMERAUVTEXTURECOORDS);
+int PhotoTexturer::combineTextures(MeshModel* m){
+	int textureId  = -1;
+	if (vcg::tri::HasPerFaceAttribute(m->cm,UVTEXTURECOORDS)){
+		
+		CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> > ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
 		CMeshO::FaceIterator fi;
+		textureId = generateTextureId();
+		
 		int k =0;
 		for(fi=m->cm.face.begin(); fi!=m->cm.face.end(); ++fi) {
-			int i;
-
 			UVFaceTexture* ft =0;
 			int j;
 			for(j=0;j<cameras.size();j++){
-				UVFaceTexture* tmp = ih[fi][cameras.at(j)->name];
-				if (ft==0 || ft->faceAngleToCamera>tmp->faceAngleToCamera){
-					if(((tmp->u[0]>=0.0 && tmp->u[0] <=1.0)&&(tmp->v[0]>=0.0 && tmp->v[0] <=1.0))&&
-						((tmp->u[1]>=0.0 && tmp->u[1] <=1.0)&&(tmp->v[1]>=0.0 && tmp->v[1] <=1.0))&&
-						((tmp->u[2]>=0.0 && tmp->u[2] <=1.0)&&(tmp->v[2]>=0.0 && tmp->v[2] <=1.0))){
-						ft = tmp;
+				UVFaceTexture* tmp = ih[fi][cameras.at(j)->textureId];
+				if (tmp!=NULL){
+					if(tmp->type == 0){
+						if (ft==0 || ft->faceAngleToCamera>tmp->faceAngleToCamera){
+							
+							if(((tmp->u[0]>=0.0 && tmp->u[0] <=1.0)&&(tmp->v[0]>=0.0 && tmp->v[0] <=1.0))&&
+								((tmp->u[1]>=0.0 && tmp->u[1] <=1.0)&&(tmp->v[1]>=0.0 && tmp->v[1] <=1.0))&&
+								((tmp->u[2]>=0.0 && tmp->u[2] <=1.0)&&(tmp->v[2]>=0.0 && tmp->v[2] <=1.0))){
+								ft = tmp;
+							}
+						}
 					}
 				}
 			}
-			//if(ft->faceAngleToCamera<=90.0){
-			if(ft!=0){
-				for (i=0;i<3;i++){
-					(*fi).WT(i).u() = ft->u[i];
-					(*fi).WT(i).v() = ft->v[i];
-					(*fi).WT(i).n() = ft->textureindex;
-				}
+			
+			UVFaceTexture* tmp2 = NULL;
+			if(ft!=NULL){
+				tmp2 = new UVFaceTexture(*ft);
+				tmp2->type = 1;
 			}
+			ih[fi][textureId]=tmp2;
+				
+			
 			k++;
 		}
 	}
+	textureList[textureId] = "combined";
+	return textureId;
 }
 
 void PhotoTexturer::calculateZBuffer(MeshModel *mm,Camera* camera,QuadTreeNode *qtree, TextureFilterZB *zbuffer){

@@ -9,7 +9,6 @@ SOURCES += 	edit_phototex_factory.cpp \
 			src/UVFaceTexture.cpp \
 			src/Camera.cpp \
 			src/CameraCalibration.cpp \
-			src/TextureFilter.cpp \
 			src/TextureMerger.cpp \
 			src/Tsai/TsaiCameraCalibration.cpp \
 			src/Tsai/matrix/matrix.c \
@@ -26,6 +25,8 @@ SOURCES += 	edit_phototex_factory.cpp \
 			src/Tsai/cal_eval.c \ 
 			#src/Poly/PolyCameraCalibration.cpp \
 			#src/Poly/Polynom3_444.cpp \
+			src/SmartBlendTextureMerger.cpp \
+			src/WinnerTakesAllTextureMerger.cpp \
 			src/QuadTree/QuadTreeNode.cpp \
 			$$VCGDIR/wrap/gui/trackball.cpp\
 			$$VCGDIR/wrap/gui/trackmode.cpp \
@@ -42,6 +43,8 @@ HEADERS += 	edit_phototex_factory.h \
 			src/Tsai/matrix/matrix.h \ 
 			src/PhotoTexturer.h \
 			src/Tsai/cal_main.h \
+			src/SmartBlendTextureMerger.h \
+			src/WinnerTakesAllTextureMerger.h \
 			src/QuadTree/QuadTreeNode.h \
 			src/QuadTree/QuadTreeLeaf.h \
 			$$VCGDIR/wrap/gl/trimesh.h \

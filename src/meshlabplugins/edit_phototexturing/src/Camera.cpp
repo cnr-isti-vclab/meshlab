@@ -33,6 +33,7 @@ const QString Camera::XML_RESOLUTION_Y = "resolutionY";
 
 
 Camera::Camera(){
+	textureId = -1;
 	zBuffer = 0;
 	textureImage = QString("");
 	calculatedTextures = false;
@@ -77,13 +78,13 @@ void Camera::loadFromXml(QDomElement *xml_cam){
 	QDomElement xml_calib = xml_cam->firstChildElement(CameraCalibration::XML_CALIBRATION);
 	if (!xml_calib.isNull()){
 		QString ctype = xml_calib.attribute(CameraCalibration::XML_TYPE);
-		//qDebug("ctype: %s\n",qPrintable(ctype));
+
 		if (!ctype.compare("TSAI")){
-			qDebug("TSAI\n");
+			//qDebug("TSAI\n");
 			calibration = new TsaiCameraCalibration();
 			calibration->loadFromXml(&xml_calib);
 		}/*else if (!ctype.compare("POLY")){
-			qDebug("POLY\n");
+			//qDebug("POLY\n");
 			calibration = new PolyCameraCalibration();
 			calibration->loadFromXml(&xml_calib);
 

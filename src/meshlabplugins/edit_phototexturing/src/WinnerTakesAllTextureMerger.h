@@ -22,42 +22,16 @@
 ****************************************************************************/
 
 
-#ifndef TEXTUREMERGER_H_
-#define TEXTUREMERGER_H_
+#ifndef WINNERTAKESALLTEXTUREMERGER_H_
+#define WINNERTAKESALLTEXTUREMERGER_H_
 
-#include <QtGui>
-#include <QImage>
-#include <src/TextureFilter.h>
+#include "TextureMerger.h"
 
-class ImageFilterContainer{
+class WinnerTakesAllTextureMerger: public TextureMerger{
 public:
-	QImage *image;
-	QList<TextureFilterSTD*> filterList;
-	QString tag;
-	bool merged;
-	TextureFilterSTD *mergedFilter;
-	ImageFilterContainer();
-	~ImageFilterContainer();
-
-	void setImage(QImage* img);
-
-	void addFilter(TextureFilterSTD *filter);
-	void mergeFilter();
-
-	void applyMergedFilterToImage();
+	WinnerTakesAllTextureMerger();
+	~WinnerTakesAllTextureMerger();
+	virtual QImage merge(int imgWidth, int imgHeight);
 };
 
-
-class TextureMerger{
-
-public:
-	bool normalized;
-	QList<ImageFilterContainer*> ifcList;
-	TextureMerger();
-	~TextureMerger();
-
-	void normalizeFilterContainerList();
-	virtual QImage merge(int imgWidth, int imgHeight)=0;
-};
-
-#endif /* TEXTUREMERGER_H_ */
+#endif /* WINNERTAKESALLTEXTUREMERGER_H_ */

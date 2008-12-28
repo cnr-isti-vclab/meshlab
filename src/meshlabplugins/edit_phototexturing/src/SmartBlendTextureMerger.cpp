@@ -22,42 +22,52 @@
 ****************************************************************************/
 
 
-#ifndef TEXTUREMERGER_H_
-#define TEXTUREMERGER_H_
+#include "SmartBlendTextureMerger.h"
 
-#include <QtGui>
-#include <QImage>
-#include <src/TextureFilter.h>
+SmartBlendTextureMerger::SmartBlendTextureMerger(QString command){
+	normalized = false;
+	cmd =command;
+}
+SmartBlendTextureMerger::~SmartBlendTextureMerger(){
+	qDebug()<<"TextureMerger::~TextureMerger()";
 
-class ImageFilterContainer{
-public:
-	QImage *image;
-	QList<TextureFilterSTD*> filterList;
-	QString tag;
-	bool merged;
-	TextureFilterSTD *mergedFilter;
-	ImageFilterContainer();
-	~ImageFilterContainer();
+	while(!ifcList.empty()){
+		delete ifcList.takeFirst();
+	}
 
-	void setImage(QImage* img);
+}
 
-	void addFilter(TextureFilterSTD *filter);
-	void mergeFilter();
+QImage SmartBlendTextureMerger::merge(int imgWidth, int imgHeight){
+	qDebug()<<"mergeTextureImagesWinnerTakesAll";
+	QImage image = QImage(imgWidth,imgHeight,QImage::Format_ARGB32);
+	QDir tmpDir = QDir::tempPath();
+	qDebug()<<"Temp Dir:"<<tmpDir.absolutePath();
+	QList<QTemporaryFile *> tmpFileNames;
+	
 
-	void applyMergedFilterToImage();
-};
-
-
-class TextureMerger{
-
-public:
-	bool normalized;
-	QList<ImageFilterContainer*> ifcList;
-	TextureMerger();
-	~TextureMerger();
-
-	void normalizeFilterContainerList();
-	virtual QImage merge(int imgWidth, int imgHeight)=0;
-};
-
-#endif /* TEXTUREMERGER_H_ */
+	
+	for(int i = 0;i<ifcList.size();i++){
+		QImage* tmpImg = ifcList.at(i)->image;
+		QTemporaryFile *file = new QTemporaryFile(tmpDir.absolutePath()+"/pt_smartblend");
+		file->setAutoRemove(false);
+		file->open();
+		qDebug()<<"file:"<<file->fileName();
+		tmpFileNames.append(file);
+		//
+		tmpImg->save(file,"PNG");
+		//file->close();
+		
+	}
+	QString sbCommand = cmd+" -o "+tmpDir.absolutePath()+"/pt_smartblend_merged.png"; 
+	for(int i= 0; i< tmpFileNames.size();i++){
+		sbCommand+=" " +tmpFileNames.at(i)->fileName();
+	}
+	
+	qDebug()<<"sbCommand: "<<sbCommand;
+	//char *c_command = sbCommand.toStdString().c_str();
+	int r= system(sbCommand.toStdString().c_str());
+	qDebug()<< "system:"<<r;
+	image = QImage(tmpDir.absolutePath()+"/pt_smartblend_merged.png");
+	
+	return image;
+}

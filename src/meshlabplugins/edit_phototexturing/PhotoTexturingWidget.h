@@ -29,7 +29,6 @@
 #include <meshlab/interfaces.h>
 #include <wrap/gl/trimesh.h>
 #include <meshlab/meshlabeditdockwidget.h>
-//#include <photoTexturing.h>
 #include <src/PhotoTexturer.h>
 #include "ui_photoTexturingWidget.h"
 
@@ -69,13 +68,22 @@ private slots:
 	void selectCurrentTexture();
 	void combineTextures();
 	void unprojectTextures();
+	void bakeTextures();
 	void apply();
 	void close();
 	void cancel();
 
+
 public:
 	PhotoTexturingWidget(MeshEditInterface*, PhotoTexturer*,MeshModel &m, GLArea *gla);
 	~PhotoTexturingWidget();
+
+private:
+	void loadDefaultSettings();
+	void saveDefaultSettings();
+	
+	FilterParameterSet loadDefaultBakeSettings();
+	void saveDefaultBakeSettings(FilterParameterSet pset);
 
 };
 

@@ -39,8 +39,9 @@ PhotoTexturingWidget::PhotoTexturingWidget(MeshEditInterface* plugin, PhotoTextu
 	photoTexturer = texturer;
 	PhotoTexturingWidget::ui.setupUi(this);
 	this->setWidget(ui.main_frame);
-	this->setFeatures(QDockWidget::AllDockWidgetFeatures);
-	this->setAllowedAreas(Qt::LeftDockWidgetArea);
+	//this->setFeatures(QDockWidget::AllDockWidgetFeatures);
+	this->setFeatures(QDockWidget::DockWidgetMovable|QDockWidget::DockWidgetClosable);
+	this->setAllowedAreas(Qt::NoDockWidgetArea);
 	this->setFloating(true);
 	mesh = &m;
 	glarea = gla;
@@ -62,6 +63,7 @@ PhotoTexturingWidget::PhotoTexturingWidget(MeshEditInterface* plugin, PhotoTextu
 	connect(ui.calculateTexturesPushButton, SIGNAL(clicked()),this,SLOT(calculateTextures()));
 	connect(ui.combineTexturesPushButton, SIGNAL(clicked()),this,SLOT(combineTextures()));
 	connect(ui.unprojectTexturePushButton, SIGNAL(clicked()),this,SLOT(unprojectTextures()));
+	connect(ui.bakeTexturePushButton, SIGNAL(clicked()),this,SLOT(bakeTextures()));
 
 	connect(ui.textureListWidget, SIGNAL(itemClicked(QListWidgetItem* )),this,SLOT(selectCurrentTexture()));
 
@@ -70,7 +72,7 @@ PhotoTexturingWidget::PhotoTexturingWidget(MeshEditInterface* plugin, PhotoTextu
 	connect(ui.cancelPushButton, SIGNAL(clicked()),this,SLOT(cancel()));
 
 	photoTexturer->storeOriginalTextureCoordinates(mesh);
-
+	loadDefaultSettings();
 	update();
 
 }
@@ -128,26 +130,43 @@ void PhotoTexturingWidget::update(){
 		ui.cameraTableWidget->setItem(i, 0, camTypeItem);
 		QTableWidgetItem *textureImageItem = new QTableWidgetItem(imagename);
 		ui.cameraTableWidget->setItem(i, 1, textureImageItem);
-		if (cam->calculatedTextures){
-			QListWidgetItem *newItem = new QListWidgetItem;
-			newItem->setText(camname);
-			//newItem->setData(QVariant(i));
-			ui.textureListWidget->addItem(newItem);
-		}
+
 	}
+	
+	QMap<int, QString>::iterator it = photoTexturer->textureList.begin();
+	while (it !=  photoTexturer->textureList.end())
+	{
+	    QMap<int, QString>::iterator prev = it;
+	    new QListWidgetItem(it.value(),ui.textureListWidget,it.key());
+
+	    ++it;
+	}
+
 	if (currentIdx < ui.textureListWidget->count()){
 		ui.textureListWidget->setCurrentRow(currentIdx);
 	}
 	ui.cameraTableWidget->resizeColumnsToContents();
 
+	if (photoTexturer->cameras.size()>0){
+		ui.calculateTexturesPushButton->setDisabled(false);
+	}else{
+		ui.calculateTexturesPushButton->setDisabled(true);
+	}
 
-	if (vcg::tri::HasPerFaceAttribute(mesh->cm,PhotoTexturer::ORIGINALUVTEXTURECOORDS) && vcg::tri::HasPerFaceAttribute(mesh->cm,PhotoTexturer::CAMERAUVTEXTURECOORDS)){
-		ui.unprojectTexturePushButton->setDisabled(false);
+	if (photoTexturer->textureList.size()>1 && photoTexturer->origTextureID>-1){
+		//ui.unprojectTexturePushButton->setDisabled(false); stay disabled until unproject function is fixed
+		ui.unprojectTexturePushButton->setDisabled(true);
 	}else{
 		ui.unprojectTexturePushButton->setDisabled(true);
 	}
 	
-	if (vcg::tri::HasPerFaceAttribute(mesh->cm,PhotoTexturer::CAMERAUVTEXTURECOORDS)){
+	if (photoTexturer->textureList.size()>1 && photoTexturer->origTextureID>-1){
+		ui.bakeTexturePushButton->setDisabled(false);
+	}else{
+		ui.bakeTexturePushButton->setDisabled(true);
+	}
+	
+	if ((photoTexturer->textureList.size()>1 && photoTexturer->origTextureID>-1)||(photoTexturer->textureList.size()>0 && photoTexturer->origTextureID==-1)){
 		ui.combineTexturesPushButton->setDisabled(false);
 	}else{
 		ui.combineTexturesPushButton->setDisabled(true);
@@ -168,7 +187,20 @@ void PhotoTexturingWidget::assignImage(){
 
 }
 void PhotoTexturingWidget::calculateTextures(){
-	photoTexturer->calculateMeshTextureForAllCameras(mesh);
+	bool calcZBuffer =ui.checkBoxzBuffer->isChecked();
+	bool selectedCamOnly = ui.selectedCameraOnlyCheckBox->isChecked();
+	if (!selectedCamOnly){
+		photoTexturer->calculateMeshTextureForAllCameras(mesh,calcZBuffer);
+	}else{
+		QList<QTableWidgetSelectionRange> ranges = ui.cameraTableWidget->selectedRanges();
+		for (int i=0;i<ranges.size();i++){
+			QTableWidgetSelectionRange range = ranges.at(i);
+			for(int j=range.topRow();j<=range.bottomRow();j++){
+				Camera *cam = photoTexturer->cameras.at(j);
+				photoTexturer->calculateMeshTextureForCamera(mesh,cam,calcZBuffer);
+			}
+		}
+	}
 	glarea->update();
 	update();
 
@@ -178,9 +210,11 @@ void PhotoTexturingWidget::calculateTextures(){
 }
 
 void PhotoTexturingWidget::selectCurrentTexture(){
-	int icam = ui.textureListWidget->currentRow();
+	//int icam = ui.textureListWidget->currentRow();
+	QListWidgetItem* lwis = ui.textureListWidget->currentItem();
 
-	photoTexturer->applyTextureToMesh(mesh,icam);
+	int textureID = lwis[0].type();
+	photoTexturer->applyTextureToMesh(mesh,textureID);
 	setGLAreaTextureMode(vcg::GLW::TMPerWedgeMulti);
 	updateMainWindowMenus();
 	glarea->update();
@@ -188,44 +222,88 @@ void PhotoTexturingWidget::selectCurrentTexture(){
 
 void PhotoTexturingWidget::combineTextures(){
 	photoTexturer->combineTextures(mesh);
+	
+	//QListWidgetItem *item = new QListWidgetItem("combined",ui.textureListWidget,textureId);
+	//item->setData(QVariant(textureId));
+
 	setGLAreaTextureMode(vcg::GLW::TMPerWedgeMulti);
 	updateMainWindowMenus();
 	glarea->update();
+	update();
 
 
 }
 
 void PhotoTexturingWidget::unprojectTextures(){
+	QSettings ptSettings;
+	QVariant setSmartBlend = ptSettings.value(PhotoTexturer::BAKE_SMARTBLEND,"smartblend.exe");
+	
 	FilterParameterSet combineParamSet;
-	combineParamSet.addInt("width",1024,"Image width:","");
-	combineParamSet.addInt("height",1024,"Image height:","");
-	combineParamSet.addInt("edgeStretchingPasses",2,"Edge Stretching Passes:","");
-	combineParamSet.addBool("enable_angle_map",true,"Enable angle map:","");
-	combineParamSet.addInt("angle_map_weight",2,"Angle map weight:","");
-	combineParamSet.addFloat("min_angle",80,"Min angle:","");
+	combineParamSet.addInt(PhotoTexturer::TEXTURE_SIZE_WIDTH,1024,"Image width:","");
+	combineParamSet.addInt(PhotoTexturer::TEXTURE_SIZE_HEIGHT,1024,"Image height:","");
+	
+	combineParamSet.addBool(PhotoTexturer::UNPROJECT_ENABLE_ANGLE,true,"Enable angle map:","");
+	combineParamSet.addInt(PhotoTexturer::UNPROJECT_ANGLE_WEIGHT,1,"Angle map weight:","");
+	combineParamSet.addFloat(PhotoTexturer::UNPROJECT_ANGLE,85,"Min angle:","");
+	combineParamSet.addInt(PhotoTexturer::UNPROJECT_ANGLE_SHARPNESS,1,"Angle map sharpness:","");
+	
+	combineParamSet.addBool(PhotoTexturer::UNPROJECT_ENABLE_DISTANCE,false,"Enable distance map:","");
+	combineParamSet.addInt(PhotoTexturer::UNPROJECT_DISTANCE_WEIGHT,1,"Distance map weight:","");
 
-	combineParamSet.addInt("angle_map_sharpness",2,"Angle map sharpness:","");
-	combineParamSet.addBool("enable_distance_map",true,"Enable distance map:","");
-	combineParamSet.addInt("distance_map_weight",1,"Distance map weight:","");
+	combineParamSet.addBool(PhotoTexturer::BAKE_SAVE_UNPROJECT,true,"Save unprojected textures:","");
+	combineParamSet.addBool(PhotoTexturer::UNPROJECT_ENABLE_EDGE_STRETCHING,false,"Enable Texture edge Stretching:","");
+	combineParamSet.addInt(PhotoTexturer::UNPROJECT_EDGE_STRETCHING_PASS,2,"Edge Stretching Passes:","");
+	
+	combineParamSet.addBool(PhotoTexturer::BAKE_MERGE_TEXTURES,true,"Merge unprojected textures:","");
+	combineParamSet.addEnum(PhotoTexturer::BAKE_MERGE_TYPE,0,QStringList() <<"Merge Faces by Angle"<<"Smartblend","Merge Mode:","");
+	combineParamSet.addString(PhotoTexturer::BAKE_MERGED_TEXTURE,"","Merged Texture Filename:","");
+	combineParamSet.addString(PhotoTexturer::BAKE_SMARTBLEND,setSmartBlend.toString(),"smartblend:","");
 
-	//combineParamSet.addBool("saveImages",true,"Save all images","");
-	//combineParamSet.addBool("sameFolder",true,"Same folder as mesh","");
-	//buildParameterSet(alignParamSet, defaultAP);
+	QListWidgetItem* lwis = ui.textureListWidget->currentItem();
+	int textureID = lwis[0].type();
 
 	GenericParamDialog ad(this,&combineParamSet,"Texture Baking Parameters");
 	int result=ad.exec();
+	ptSettings.setValue(PhotoTexturer::BAKE_SMARTBLEND,combineParamSet.getString(PhotoTexturer::BAKE_SMARTBLEND));
+	
+
 	if (result == 1){
-		photoTexturer->unprojectTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"),combineParamSet.getInt("edgeStretchingPasses"),combineParamSet.getBool("enable_angle_map"),combineParamSet.getInt("angle_map_weight"),combineParamSet.getInt("angle_map_sharpness"),combineParamSet.getFloat("min_angle"),combineParamSet.getBool("enable_distance_map"),combineParamSet.getInt("distance_map_weight"));
+		photoTexturer->unprojectTextures(mesh,textureID,&combineParamSet);
 	}
 	update();
+
+	updateGLAreaTextures();
+}
+
+void PhotoTexturingWidget::bakeTextures(){
+
+	FilterParameterSet combineParamSet = loadDefaultBakeSettings();
+	
+	//creating template name for baked texture file
+	QFileInfo fi = QFileInfo(mesh->fileName.c_str());
+	QString bTextureFile = fi.baseName()+"_baked.png";
+	
+	combineParamSet.addString(PhotoTexturer::BAKE_MERGED_TEXTURE,bTextureFile,"Merged Texture Filename:","");
+	
+	GenericParamDialog ad(this,&combineParamSet,"Texture Baking Parameters");
+	int result=ad.exec();
+	
+	int textureId =0;
+	if (result == 1){
+		saveDefaultBakeSettings(combineParamSet);
+		textureId = photoTexturer->bakeTextures(mesh,&combineParamSet);
+	}
+	update();
+
+	updateGLAreaTextures();
 }
 
 void PhotoTexturingWidget::apply(){
 
 }
 void PhotoTexturingWidget::close(){
-	//glarea->endEdit();
-	//ptPlugin->EndEdit(NULL,NULL,NULL);
+	saveDefaultSettings();
+	this->closeEvent(NULL);
 }
 void PhotoTexturingWidget::cancel(){
 	photoTexturer->restoreOriginalTextureCoordinates(mesh);
@@ -259,6 +337,94 @@ void PhotoTexturingWidget::convertToTsaiCamera(){
 		int row = item->row();
 		photoTexturer->convertToTsaiCamera(row,optimize,filename,mesh);
 	}
+	
+	
+	
+}
+
+void PhotoTexturingWidget::loadDefaultSettings(){
+	QSettings settings;
+	QVariant calcZBuffer = settings.value("pt_calczbuffer",QVariant(false));
+	QVariant onlySelectedCamera = settings.value("pt_selectedcameraonly",QVariant(false));
+	ui.checkBoxzBuffer->setChecked(calcZBuffer.toBool());
+	ui.selectedCameraOnlyCheckBox->setChecked(onlySelectedCamera.toBool());
+}
+void PhotoTexturingWidget::saveDefaultSettings(){
+	bool onlySelectedCamera;
+	bool calcZBuffer;
+	calcZBuffer = ui.checkBoxzBuffer->isChecked();
+	onlySelectedCamera = ui.selectedCameraOnlyCheckBox->isChecked();
+	QSettings settings;
+	settings.setValue("pt_calczbuffer",calcZBuffer);
+	settings.setValue("pt_selectedcameraonly",onlySelectedCamera);
+}
 
 
+FilterParameterSet PhotoTexturingWidget::loadDefaultBakeSettings(){
+	QSettings ptSettings;
+	QVariant tmpValue;
+	FilterParameterSet combineParamSet;
+	tmpValue= ptSettings.value(PhotoTexturer::TEXTURE_SIZE_WIDTH,1024);
+	combineParamSet.addInt(PhotoTexturer::TEXTURE_SIZE_WIDTH,tmpValue.toInt(),"Image width:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::TEXTURE_SIZE_HEIGHT,1024);
+	combineParamSet.addInt(PhotoTexturer::TEXTURE_SIZE_HEIGHT,tmpValue.toInt(),"Image height:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_ENABLE_ANGLE,true);
+	combineParamSet.addBool(PhotoTexturer::UNPROJECT_ENABLE_ANGLE,tmpValue.toBool(),"Enable angle map:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_ANGLE_WEIGHT,1);
+	combineParamSet.addInt(PhotoTexturer::UNPROJECT_ANGLE_WEIGHT,tmpValue.toInt(),"Angle map weight:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_ANGLE,85.0);
+	combineParamSet.addFloat(PhotoTexturer::UNPROJECT_ANGLE,tmpValue.toDouble(),"Min angle:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_ANGLE_SHARPNESS,1);
+	combineParamSet.addInt(PhotoTexturer::UNPROJECT_ANGLE_SHARPNESS,tmpValue.toInt(),"Angle map sharpness:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_ENABLE_DISTANCE,false);
+	combineParamSet.addBool(PhotoTexturer::UNPROJECT_ENABLE_DISTANCE,tmpValue.toBool(),"Enable distance map:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_DISTANCE_WEIGHT,1);
+	combineParamSet.addInt(PhotoTexturer::UNPROJECT_DISTANCE_WEIGHT,tmpValue.toInt(),"Distance map weight:","");
+
+	tmpValue = ptSettings.value(PhotoTexturer::BAKE_SAVE_UNPROJECT,true);
+	combineParamSet.addBool(PhotoTexturer::BAKE_SAVE_UNPROJECT,tmpValue.toBool(),"Save unprojected textures:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_ENABLE_EDGE_STRETCHING,false);
+	combineParamSet.addBool(PhotoTexturer::UNPROJECT_ENABLE_EDGE_STRETCHING,tmpValue.toBool(),"Enable Texture edge Stretching:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_EDGE_STRETCHING_PASS,2);
+	combineParamSet.addInt(PhotoTexturer::UNPROJECT_EDGE_STRETCHING_PASS,tmpValue.toInt(),"Edge Stretching Passes:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::BAKE_MERGE_TEXTURES,true);
+	combineParamSet.addBool(PhotoTexturer::BAKE_MERGE_TEXTURES,tmpValue.toBool(),"Merge unprojected textures:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::BAKE_MERGE_TYPE,0);
+	combineParamSet.addEnum(PhotoTexturer::BAKE_MERGE_TYPE,tmpValue.toInt(),QStringList() <<"Merge Faces by Angle"<<"Smartblend","Merge Mode:","");
+	
+	tmpValue = ptSettings.value(PhotoTexturer::BAKE_SMARTBLEND,"smartblend.exe");
+	combineParamSet.addString(PhotoTexturer::BAKE_SMARTBLEND,tmpValue.toString(),"smartblend:","");
+	
+	return combineParamSet;
+	
+}
+void PhotoTexturingWidget::saveDefaultBakeSettings(FilterParameterSet pset){
+	QSettings ptSettings;
+	
+	ptSettings.setValue(PhotoTexturer::TEXTURE_SIZE_WIDTH,pset.getInt(PhotoTexturer::TEXTURE_SIZE_WIDTH));
+	ptSettings.setValue(PhotoTexturer::TEXTURE_SIZE_HEIGHT,pset.getInt(PhotoTexturer::TEXTURE_SIZE_HEIGHT));
+	ptSettings.setValue(PhotoTexturer::UNPROJECT_ENABLE_ANGLE,pset.getBool(PhotoTexturer::UNPROJECT_ENABLE_ANGLE));
+	ptSettings.setValue(PhotoTexturer::UNPROJECT_ANGLE_WEIGHT,pset.getInt(PhotoTexturer::UNPROJECT_ANGLE_WEIGHT));
+	ptSettings.setValue(PhotoTexturer::UNPROJECT_ANGLE,pset.getFloat(PhotoTexturer::UNPROJECT_ANGLE));
+	ptSettings.setValue(PhotoTexturer::UNPROJECT_ANGLE_SHARPNESS,pset.getInt(PhotoTexturer::UNPROJECT_ANGLE_SHARPNESS));
+	ptSettings.setValue(PhotoTexturer::UNPROJECT_ENABLE_DISTANCE,pset.getBool(PhotoTexturer::UNPROJECT_ENABLE_DISTANCE));
+	ptSettings.setValue(PhotoTexturer::UNPROJECT_DISTANCE_WEIGHT,pset.getInt(PhotoTexturer::UNPROJECT_DISTANCE_WEIGHT));
+	ptSettings.setValue(PhotoTexturer::BAKE_SAVE_UNPROJECT,pset.getBool(PhotoTexturer::BAKE_SAVE_UNPROJECT));
+	ptSettings.setValue(PhotoTexturer::UNPROJECT_ENABLE_EDGE_STRETCHING,pset.getBool(PhotoTexturer::UNPROJECT_ENABLE_EDGE_STRETCHING));
+	ptSettings.setValue(PhotoTexturer::UNPROJECT_EDGE_STRETCHING_PASS,pset.getInt(PhotoTexturer::UNPROJECT_EDGE_STRETCHING_PASS));
+	ptSettings.setValue(PhotoTexturer::BAKE_MERGE_TEXTURES,pset.getBool(PhotoTexturer::BAKE_MERGE_TEXTURES));
+	ptSettings.setValue(PhotoTexturer::BAKE_MERGE_TYPE,pset.getEnum(PhotoTexturer::BAKE_MERGE_TYPE));
+	ptSettings.setValue(PhotoTexturer::BAKE_SMARTBLEND,pset.getString(PhotoTexturer::BAKE_SMARTBLEND));
+	
 }

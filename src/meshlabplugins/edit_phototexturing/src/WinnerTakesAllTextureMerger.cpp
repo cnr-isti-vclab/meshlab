@@ -22,42 +22,55 @@
 ****************************************************************************/
 
 
-#ifndef TEXTUREMERGER_H_
-#define TEXTUREMERGER_H_
+#include "WinnerTakesAllTextureMerger.h"
 
-#include <QtGui>
-#include <QImage>
-#include <src/TextureFilter.h>
+WinnerTakesAllTextureMerger::WinnerTakesAllTextureMerger(){
+	normalized = false;
+}
+WinnerTakesAllTextureMerger::~WinnerTakesAllTextureMerger(){
+	qDebug()<<"TextureMerger::~TextureMerger()";
 
-class ImageFilterContainer{
-public:
-	QImage *image;
-	QList<TextureFilterSTD*> filterList;
-	QString tag;
-	bool merged;
-	TextureFilterSTD *mergedFilter;
-	ImageFilterContainer();
-	~ImageFilterContainer();
+	while(!ifcList.empty()){
+		delete ifcList.takeFirst();
+	}
 
-	void setImage(QImage* img);
+}
 
-	void addFilter(TextureFilterSTD *filter);
-	void mergeFilter();
-
-	void applyMergedFilterToImage();
-};
+QImage WinnerTakesAllTextureMerger::merge(int imgWidth, int imgHeight){
+	qDebug()<<"mergeTextureImagesWinnerTakesAll";
+	QImage image = QImage(imgWidth,imgHeight,QImage::Format_ARGB32);
+	int k;
 
 
-class TextureMerger{
+	for(k=0;k<ifcList.size();k++){
+		ifcList.at(k)->mergeFilter();
+		ifcList.at(k)->applyMergedFilterToImage();
+		ifcList.at(k)->mergedFilter->SaveAsImage("mergedfilter",QString::number(k));
+		ifcList.at(k)->image->save("texture_"+QString::number(k)+".png","PNG");
+	}
 
-public:
-	bool normalized;
-	QList<ImageFilterContainer*> ifcList;
-	TextureMerger();
-	~TextureMerger();
+	int x;
+	int y;
+	for(x=0; x<imgWidth;x++){
+		for(y=0;y<imgHeight;y++){
+			QColor cpixel = QColor(0, 0, 0, 255);
+			double min = 1.0;
+			int i;
+			for(i=0;i<ifcList.size();i++){
+				QImage *tmpImg = ifcList.at(i)->image;
 
-	void normalizeFilterContainerList();
-	virtual QImage merge(int imgWidth, int imgHeight)=0;
-};
 
-#endif /* TEXTUREMERGER_H_ */
+				if(ifcList.at(i)->mergedFilter->getValue(x,y)<min){
+					min =ifcList.at(i)->mergedFilter->getValue(x,y);
+					cpixel= QColor::fromRgba(tmpImg->pixel(x,y));
+					//int alpha = (int)(255.0 * (1.0-min));
+					//cpixel.setAlpha(alpha);
+					cpixel.setAlpha(255);
+				}
+			}
+			image.setPixel(x,y,cpixel.rgba());
+
+		}
+	}
+	return image;
+}

@@ -22,42 +22,17 @@
 ****************************************************************************/
 
 
-#ifndef TEXTUREMERGER_H_
-#define TEXTUREMERGER_H_
+#ifndef SMARTBLENDTEXTUREMERGER_H_
+#define SMARTBLENDTEXTUREMERGER_H_
 
+#include "TextureMerger.h"
 #include <QtGui>
-#include <QImage>
-#include <src/TextureFilter.h>
-
-class ImageFilterContainer{
+class SmartBlendTextureMerger: public TextureMerger{
+	QString cmd;
 public:
-	QImage *image;
-	QList<TextureFilterSTD*> filterList;
-	QString tag;
-	bool merged;
-	TextureFilterSTD *mergedFilter;
-	ImageFilterContainer();
-	~ImageFilterContainer();
-
-	void setImage(QImage* img);
-
-	void addFilter(TextureFilterSTD *filter);
-	void mergeFilter();
-
-	void applyMergedFilterToImage();
+	SmartBlendTextureMerger(QString command);
+	~SmartBlendTextureMerger();
+	virtual QImage merge(int imgWidth, int imgHeight);
 };
 
-
-class TextureMerger{
-
-public:
-	bool normalized;
-	QList<ImageFilterContainer*> ifcList;
-	TextureMerger();
-	~TextureMerger();
-
-	void normalizeFilterContainerList();
-	virtual QImage merge(int imgWidth, int imgHeight)=0;
-};
-
-#endif /* TEXTUREMERGER_H_ */
+#endif /* SMARTBLENDTEXTUREMERGER_H_ */

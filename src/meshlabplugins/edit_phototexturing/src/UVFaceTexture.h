@@ -34,6 +34,8 @@
 class UVFaceTexture: public QuadTreeLeaf{
 public:
 
+	
+	int type;					//0 = camera; 1 = program
 	double faceAngleToCamera;	//angle of the face to the camera
 	double u[3];				
 	double v[3];
