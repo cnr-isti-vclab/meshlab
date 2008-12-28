@@ -4,7 +4,7 @@
 #
 # object default
 #
-mtllib ./lisa_textured.obj.mtl
+mtllib ./face_with_uv_coords.mtl
 
 v  316.8299 149.7578 205.8013
 v  317.0416 152.8781 203.9365
