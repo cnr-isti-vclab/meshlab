@@ -77,11 +77,14 @@ public:
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
   virtual bool applyFilter(QAction * /* filter */, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
   virtual const int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;}
+
+	static void capHole(MeshModel* orig, MeshModel* dest);
+	static void extrude(MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
 private:
 	SVGProperties pr;
 	void createSlice(MeshModel* orig,MeshModel* dest);
-	void capHole(MeshModel* orig, MeshModel* dest);
-	void extrude(MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
+	
+	
 };
 
 #endif

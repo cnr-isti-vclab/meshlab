@@ -1,3 +1,5 @@
+#ifndef SLICE_FUNCTORS
+#define SLICE_FUNCTORS
 #include <vcg/space/intersection3.h>
 #include <vcg/math/matrix44.h>
 #include <meshlab/meshmodel.h>
@@ -71,3 +73,4 @@ protected:
 };
 
 
+#endif

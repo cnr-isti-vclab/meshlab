@@ -37,7 +37,9 @@
 #include "filter_slice_functors.h"
 #include <wrap/gl/glu_tesselator.h>
 #include <vcg/complex/trimesh/allocate.h>
-#include <vcg/space/planar_polygon_tessellation.h>
+
+#include "kdtree.h"
+
 using namespace std;
 using namespace vcg;
 
@@ -47,8 +49,8 @@ using namespace vcg;
 
 ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
 {
-	typeList << FP_PARALLEL_PLANES;
-//					 <<FP_RECURSIVE_SLICE;
+	typeList << FP_PARALLEL_PLANES
+					 <<FP_RECURSIVE_SLICE;
 
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -101,8 +103,8 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
       //parlst.addAbsPerc("planeDist", 0.0,0,m.cm.bbox.Diag(), "Distance between planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
 			parlst.addEnum	 ("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured");
 			parlst.addFloat	 ("length",29,"Length","Length of the object referred to the units specified above");
-			parlst.addFloat  ("eps",0,"Medium thickness","Thickness of the medium where the pieces will be cut away");
-      parlst.addInt    ("planeNum", 1, "Number of Planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
+			parlst.addFloat  ("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away");
+      parlst.addInt    ("planeNum", 10, "Number of Planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
 
 			QStringList nn=QString(m.fileName.c_str()).split("/");
 
@@ -111,13 +113,18 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 				name="Slice";
       parlst.addString ("filename", name, "filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
       parlst.addBool   ("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below");
+			parlst.addBool   ("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter");
 			parlst.addBool   ("hideBase",true,"Hide Original Mesh","Hide the Original Mesh");
 			parlst.addBool   ("hideSlices",true,"Hide Slices","Hide the Generated Slices");
 			parlst.addBool   ("hidePlanes",false,"Hide Planes","Hide the Generated Slicing Planes");
     }
       break;
     case FP_RECURSIVE_SLICE:
-			parlst.addFloat("eps",.2,"epsilon","epsilon");
+			parlst.addBool   ("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter");
+			parlst.addEnum	 ("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured");
+			parlst.addFloat	 ("length",29,"Length","Length of the object referred to the units specified above");
+			parlst.addFloat  ("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away");
+			parlst.addInt		 ("iter",2,"iterations","iterations");
       break;
     default : assert(0);
   }
@@ -127,23 +134,33 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 // Move Vertex of a random quantity
 bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet &parlst, vcg::CallBackPos *cb)
 {
-	Point3f planeAxis(0,0,0);
-	int axisIndex = parlst.getEnum("planeAxis");
-	assert(axisIndex >=0 && axisIndex <3);
-	planeAxis[axisIndex] = 1.0f;
-
+	if(parlst.getBool("capBase"))
+	{
+		MeshModel* cap= new MeshModel();
+		capHole(m.mm(),cap);
+		tri::Append<CMeshO,CMeshO>::Mesh(m.mm()->cm, cap->cm);
+		m.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+		tri::UpdateTopology<CMeshO>::FaceFace(m.mm()->cm);
+		delete cap;
+	}
+	float length=parlst.getFloat("length");
+	float eps=parlst.getFloat("eps");
+	eps=m.mm()->cm.bbox.Diag()*(eps/length);
 	switch(ID(filter))
 	{
 		case FP_PARALLEL_PLANES :
 		{
+			Point3f planeAxis(0,0,0);
+			int axisIndex = parlst.getEnum("planeAxis");
+			assert(axisIndex >=0 && axisIndex <3);
+			planeAxis[axisIndex] = 1.0f;
 			//float planeDist = parlst.getAbsPerc("planeDist");
 			float planeDist=0;
 			float planeOffset = parlst.getFloat("planeOffset");
 			int	planeNum = parlst.getInt("planeNum");
 			int units=parlst.getEnum("units");
-			float length=parlst.getFloat("length");
-			float eps=parlst.getFloat("eps");
-			eps=m.mm()->cm.bbox.Diag()*(eps/length);
+
+
 			//bool absOffset = parlst.getBool("absOffset");
       int reference=parlst.getEnum("relativeTo");
 			Point3f planeCenter;
@@ -219,7 +236,6 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 
         createSlice(base,slice1);
 				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
-        //m.setCurrentMesh(m.meshList.size()-1);
 
 				MeshModel* cap= new MeshModel();
 				m.meshList.push_back(cap);
@@ -278,8 +294,13 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 		break;
 		case FP_RECURSIVE_SLICE:
 		{
-
-
+			KDTree<CMeshO> *kdt=new KDTree<CMeshO>(&m,&m.mm()->cm,eps);
+			int iter=parlst.getInt("iter");
+			for(int i=0;i<iter;i++)
+			{
+				kdt->Slice();
+			}
+			vcg::tri::UpdateBounding<CMeshO>::Box(m.mm()->cm);
     }
     break;
 	}
@@ -344,7 +365,7 @@ void ExtraFilter_SlicePlugin::extrude(MeshModel* orig, MeshModel* dest, float ep
 		CVertexO* v1=(&*vi); ++vi;
 		CVertexO* vs0=v0;	//we need the start point
 		CVertexO* vs1=v1; //to close the loop
-		Log(0,"%d",outlines[i].size());
+//		Log(0,"%d",outlines[i].size());
 		for(int j=1;j<outlines[i].size();++j)
 		{
 			(&*vi)->P()=outlines[i][j];
@@ -452,7 +473,7 @@ void ExtraFilter_SlicePlugin::capHole(MeshModel* currentMesh, MeshModel* destMes
 
   std::vector<int> indices;
   glu_tesselator::tesselate(outlines, indices);
-  Log(0,"%d new faces",indices.size());
+//  Log(0,"%d new faces",indices.size());
   std::vector<Point3f> points;
   glu_tesselator::unroll(outlines, points);
   CMeshO::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(destMesh->cm,nv-2);
