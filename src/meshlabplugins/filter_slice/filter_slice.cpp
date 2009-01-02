@@ -484,7 +484,7 @@ void ExtraFilter_SlicePlugin::capHole(MeshModel* currentMesh, MeshModel* destMes
     (*&fi)->V(2)=&destMesh->cm.vert[ indices[i+2] ];
   }
 	tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
-  vcg::tri::UpdateTopology<CMeshO>::FaceFace(destMesh->cm);
+  //vcg::tri::UpdateTopology<CMeshO>::FaceFace(destMesh->cm);
   vcg::tri::UpdateBounding<CMeshO>::Box(destMesh->cm);
 }
 

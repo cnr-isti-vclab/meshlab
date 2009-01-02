@@ -16,7 +16,7 @@ class KDTree
 		int axisIndex;
 		float eps;
   public:
-		static enum{YZ,XZ,XY};
+		enum{YZ,XZ,XY};
 		KDTree(MeshDocument *_m, MeshType* _mesh, float _eps, int _axisIndex=YZ)
 		{
 			m=_m;
