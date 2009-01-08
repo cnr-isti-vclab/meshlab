@@ -387,23 +387,19 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 {
 	 switch(ID(action))	 {
 		case FP_MONTECARLO_SAMPLING :  
- 		  parlst.addInt ("SampleNum",
-											md.mm()->cm.vn,
+ 		  parlst.addInt ("SampleNum", md.mm()->cm.vn,
 											"Number of samples",
 											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-			parlst.addBool("Weighted",
-										 false,
+			parlst.addBool("Weighted",  false,
 										 "Quality Weighted Sampling",
 										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
 											break;
 		case FP_SIMILAR_SAMPLING :  
 		case FP_SUBDIV_SAMPLING :  
- 		  parlst.addInt ("SampleNum",
-										 std::max(100000,md.mm()->cm.vn),
+ 		  parlst.addInt ("SampleNum",  std::max(100000,md.mm()->cm.vn),
 											"Number of samples",
 											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-			 parlst.addBool("Random",
-											false,
+			 parlst.addBool("Random", false,
 											"Random Sampling",
 											"if true, for each (virtual) face we draw a random point, otherwise we pick the face midpoint.");
 			break;
@@ -477,7 +473,11 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 																				 "If offset is zero, the created surface passes on the original mesh itself. "
 																				 "Values greater than zero mean an external surface, and lower than zero mean an internal surface.<br> "
 																				 "In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation."));
-			
+			parlst.addBool ("discretize", false, "Discretize",
+											"If true the position of the intersected edge of the marching cube grid is not computed by linear interpolation, "
+											"but it is placed in fixed middle position. As a consequence the resampled object will look severely aliased by a stairstep appearance.<br>"
+											"Useful only for simulating the output of 3D printing devices.");
+
 			
 		} break; 
 		 case FP_VORONOI_CLUSTERING :
@@ -624,7 +624,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			if(saveSampleFlag)
 				{
 					closestPtMesh=md.addNewMesh("Hausdorff Closest Points"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+					closestPtMesh->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
 					samplePtMesh=md.addNewMesh("Hausdorff Sample Point");    
+					samplePtMesh->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
 					hs.init(&(mm1->cm),&(samplePtMesh->cm),&(closestPtMesh->cm));
 				}
 			else hs.init(&(mm1->cm));
@@ -649,6 +651,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 				{
 					tri::UpdateBounding<CMeshO>::Box(samplePtMesh->cm);
 					tri::UpdateBounding<CMeshO>::Box(closestPtMesh->cm);
+					tri::UpdateColor<CMeshO>::VertexQualityRamp(samplePtMesh->cm);
+					tri::UpdateColor<CMeshO>::VertexQualityRamp(closestPtMesh->cm);
 				}
 			}
 			break;
@@ -677,12 +681,10 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			
 			if(rs.colorFlag) {
 					trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
-					//trgMesh->ioMask|=MeshModel::IOM_VERTCOLOR;
 			}
 			
 			if(rs.qualityFlag){
 					trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
-					//trgMesh->ioMask|=MeshModel::IOM_VERTQUALITY;
 			}
 
 			qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
@@ -702,6 +704,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			
 			float voxelSize = par.getAbsPerc("CellSize");
 			float offsetThr = par.getAbsPerc("Offset");
+			bool discretizeFlag = par.getBool("discretize");
 			
 			MeshModel *baseMesh= md.mm();				
 			MeshModel *offsetMesh =md.addNewMesh("Offset mesh"); 			
@@ -709,8 +712,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			
 			Point3i volumeDim;
 			BestDim( baseMesh->cm.bbox, voxelSize, volumeDim );
-
-			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeDim, voxelSize*2.5, offsetThr,cb);
+      Log(0,"Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
+			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag, cb);
 			tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
 			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
 		} break;
