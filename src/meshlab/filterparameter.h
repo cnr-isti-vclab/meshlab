@@ -196,7 +196,8 @@ public:
 	
 	FilterParameter *findParameter(QString name);
   const FilterParameter *findParameter(QString name) const;
-
+	bool hasParameter(QString name);
+	 
 	//remove a parameter from the set by name
 	void removeParameter(QString name);
 	

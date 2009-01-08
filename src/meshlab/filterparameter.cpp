@@ -34,6 +34,15 @@ $Log: filterparameter.h,v $
 
 using namespace vcg;
 
+bool FilterParameterSet::hasParameter(QString name)
+{
+	QList<FilterParameter>::iterator fpli;
+	for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
+		if((*fpli).fieldName==name)
+				return true;
+				
+	return false;
+}
 FilterParameter *FilterParameterSet::findParameter(QString name)
 {
 	QList<FilterParameter>::iterator fpli;
@@ -77,6 +86,7 @@ int FilterParameterSet::getDynamicFloatMask()
 
 void FilterParameterSet::addBool (QString name, bool defaultVal, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
   p.fieldVal=defaultVal;
 	p.fieldType=FilterParameter::PARBOOL;
@@ -101,6 +111,7 @@ bool FilterParameterSet::getBool(QString name) const
 
 void FilterParameterSet::addInt(QString name, int       defaultVal, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
   p.fieldVal=defaultVal;
 	p.fieldType=FilterParameter::PARINT;
@@ -125,6 +136,7 @@ void FilterParameterSet::setInt(QString name, int newVal)
 
 void  FilterParameterSet::addFloat(QString name, float defaultVal, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
   p.fieldVal=defaultVal;
 	p.fieldType=FilterParameter::PARFLOAT;
@@ -148,6 +160,7 @@ void  FilterParameterSet::setFloat(QString name, float newVal)
 //--------------------------------------
 void  FilterParameterSet::addColor(QString name, QColor defaultVal, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
   p.fieldVal=defaultVal.rgb(); // it is converted to an unsigned int
 	p.fieldType=FilterParameter::PARCOLOR;
@@ -180,6 +193,7 @@ void  FilterParameterSet::setColor(QString name, QColor newVal)
 
 void FilterParameterSet::addString   (QString name, QString   defaultVal, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
   p.fieldVal=defaultVal; 
 	p.fieldType=FilterParameter::PARSTRING;
@@ -220,6 +234,7 @@ Matrix44f		FilterParameterSet::getMatrix44(QString name) const
 }
 void FilterParameterSet::addMatrix44 (QString name, Matrix44f defaultVal, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
  
 	QList<QVariant> matrixVals;
@@ -255,6 +270,7 @@ Point3f		FilterParameterSet::getPoint3f(QString name) const
 }
 void FilterParameterSet::addPoint3f (QString name, Point3f defaultVal, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
 	
 	QList<QVariant> pointVals;
@@ -278,6 +294,7 @@ void  FilterParameterSet::setPoint3f(QString name, Point3f newVal)
 
 void FilterParameterSet::addAbsPerc (QString name, float defaultVal, float minVal, float maxVal, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
   p.fieldVal=defaultVal;
 	p.fieldType=FilterParameter::PARABSPERC;
@@ -301,6 +318,7 @@ void FilterParameterSet::setAbsPerc(QString name, float newVal)
 }
 
 void FilterParameterSet::addEnum (QString name, int defaultVal, QStringList values, QString desc, QString tooltip) {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
   p.fieldVal=defaultVal;
 	p.fieldType=FilterParameter::PARENUM;
@@ -325,6 +343,7 @@ void FilterParameterSet::setEnum(QString name, int newVal)
 
 void FilterParameterSet::addFloatList(QString name, QList<float> &defaultValue, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
 	
 	QList<QVariant> tempList;
@@ -372,6 +391,7 @@ void FilterParameterSet::setFloatList(QString name, QList<float> &newValue)
 /* ---- */
 
 void FilterParameterSet::addMesh (QString name, MeshModel *defaultVal, QString desc, QString tooltip) {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
   p.pointerVal= defaultVal;
 	p.fieldType=FilterParameter::PARMESH;
@@ -381,6 +401,7 @@ void FilterParameterSet::addMesh (QString name, MeshModel *defaultVal, QString d
 //make the default the mesh that is at the given position in the mesh document
 void FilterParameterSet::addMesh(QString name, int position,  QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
 	p.fieldVal = position;
 	p.pointerVal = NULL;
@@ -410,6 +431,7 @@ void FilterParameterSet::setMesh(QString name, MeshModel * newVal, int position)
 
 void FilterParameterSet::addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, int changeMask, QString desc , QString tooltip )
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
 	assert(defaultVal<=maxVal);
 	assert(defaultVal>=minVal);
@@ -441,6 +463,7 @@ void  FilterParameterSet::setDynamicFloat(QString name, float newVal)
 
 void FilterParameterSet::addOpenFileName(QString name, QString defaultVal, QString extension, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
 	p.fieldVal = defaultVal; 
 	p.fieldType = FilterParameter::PAROPENFILENAME;
@@ -471,6 +494,7 @@ void FilterParameterSet::setOpenFileName(QString name, QString newVal)
 
 void FilterParameterSet::addSaveFileName(QString name, QString defaultVal, QString extension, QString desc, QString tooltip)
 {
+	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
 	p.fieldVal = defaultVal; 
 	p.fieldType = FilterParameter::PARSAVEFILENAME;
