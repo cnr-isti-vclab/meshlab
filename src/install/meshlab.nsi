@@ -100,8 +100,7 @@ Section "MainSection" SEC01
   
   File "..\meshlab\plugins\filter_meshing.dll"
   File "..\meshlab\plugins\filter_mls.dll"
-  File "..\meshlab\plugins\filter_morph.dll"
-
+  
   File "..\meshlab\plugins\filter_poisson.dll"
   File "..\meshlab\plugins\filter_quality.dll"
   File "..\meshlab\plugins\filter_sampling.dll"
