@@ -108,6 +108,8 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, FilterParameterS
 		m.updateDataMask(MeshModel::MM_VERTQUALITY);
 		m.updateDataMask(MeshModel::MM_VERTCOLOR);
 		m.updateDataMask(MeshModel::MM_VERTMARK);
+
+		tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0);
 		
 		float dist;
 		tri::Geo<CMeshO> g;	
