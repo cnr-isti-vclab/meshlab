@@ -102,9 +102,9 @@ class BaseSampler
 
 
 /* This sampler is used to perform compute the Hausdorff measuring.
- * It keep internally the spatial inedexing structure used to find the closest point 
+ * It keep internally the spatial indexing structure used to find the closest point 
  * and the partial integration results needed to compute the average and rms error values.
- * Averaged values assume that the samples are equidistributed (e.g. a good unbiased montecarlo sampling of the surface).
+ * Averaged values assume that the samples are equi-distributed (e.g. a good unbiased montecarlo sampling of the surface).
  */
 class HausdorffSampler
 {
@@ -707,12 +707,12 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			bool discretizeFlag = par.getBool("discretize");
 			
 			MeshModel *baseMesh= md.mm();				
-			MeshModel *offsetMesh =md.addNewMesh("Offset mesh"); 			
+			MeshModel *offsetMesh =md.addNewMesh("Offset mesh");
 			baseMesh->updateDataMask(MeshModel::MM_FACEMARK);	
 			
 			Point3i volumeDim;
 			BestDim( baseMesh->cm.bbox, voxelSize, volumeDim );
-      Log(0,"Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
+			Log(0,"Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
 			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag, cb);
 			tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
 			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
@@ -721,7 +721,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		{
 			int sampleNum = par.getInt("SampleNum");
 			CMeshO *cm = &md.mm()->cm;				
-			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh"); 			
+			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh");
 			vector<CMeshO::VertexType *> seedVec;
 			
 			ClusteringSampler<CMeshO> vc(&seedVec);
