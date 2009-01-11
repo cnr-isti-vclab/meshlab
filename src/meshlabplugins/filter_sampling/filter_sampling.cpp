@@ -212,16 +212,15 @@ void AddSample(const CMeshO::CoordType &startPt)
 
 
 /* This sampler is used to transfer the detail of a mesh onto another one. 
- * the 
- * It keep internally the spatial inedexing structure used to find the closest point 
- * 
+ * It keep internally the spatial indexing structure used to find the closest point 
  */
 class RedetailSampler
 {
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 	typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
+
 public:
-  
+
 	RedetailSampler()
 	{
 		m=0;		
@@ -264,27 +263,69 @@ void AddVert(CMeshO::VertexType &p)
 {
 		assert(m);
 		// the results
-    Point3f       closestPt,      normf, bestq, ip;
+		Point3f       closestPt,      normf, bestq, ip;
 		float dist = dist_upper_bound;
 		const CMeshO::CoordType &startPt= p.cP();
-    // compute distance between startPt and the mesh S2
+		// compute distance between startPt and the mesh S2
 		CMeshO::FaceType   *nearestF=0;
 		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 		dist=dist_upper_bound;
-	  if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
+		if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
-    if(dist == dist_upper_bound) return ;																				
+		if(dist == dist_upper_bound) return ;																				
 
 		Point3f interp;
 		bool ret = InterpolationParameters(*nearestF,closestPt, interp[0], interp[1], interp[2]);
-    assert(ret);
+		assert(ret);
 		interp[2]=1.0-interp[1]-interp[0];
-																			 
+
 		if(coordFlag) p.P()=closestPt;
 		if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
 		if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
 		}
 }; // end class RedetailSampler
+
+
+/* This sampler is used by the Poisson Disk Sampling algorithm. 
+ * It keep internally the spatial indexing structure used to find the closest point
+ * to check if the disk constrain is violated.
+ */
+class PoissonDiskSampler
+{
+	typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
+
+public:
+
+	CMeshO *m;                           // output samples
+	VertexMeshGrid   unifGridVert;       // spatial index of the current samples
+	
+	// ctor
+	PoissonDiskSampler(CMeshO* mesh) :
+		m(mesh)
+	{};
+
+	// add a sample if the radius constrain is not violated (TODO...)
+	void AddVert(const CMeshO::VertexType &p) 
+	{
+		tri::Allocator<CMeshO>::AddVertices(*m,1);
+		m->vert.back().ImportLocal(p);
+	}
+
+	// add a sample on the given face, if the radius constrain is not violated (TODO...)
+	void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
+	{
+		tri::Allocator<CMeshO>::AddVertices(*m,1);
+		m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
+		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
+	}
+
+	// add a sample in the cell, project it on the mesh 
+	// and check if the radius constrain is violated (TODO...)
+	void addCell()
+	{
+		//...TODO...
+	}
+}; // end class PoissonDiskSampler
 
 
 // Constructor usually performs only two simple tasks of filling the two lists 
@@ -411,6 +452,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			parlst.addInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be choosen.");
 			break;
 		case FP_POISSONDISK_SAMPLING :
+			parlst.addEnum("AlgorithmVersion", 0, QStringList() << "Projection-based" << "Surface-based", tr("Algorithm version:"));
 			parlst.addInt("SampleNum", 100000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
 			break;
 		case FP_TEXEL_SAMPLING :  
@@ -597,8 +639,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			MeshModel *curMM= md.mm();
 			MeshModel *mm= md.addNewMesh("Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 			
-			BaseSampler mps(&(mm->cm));
-			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm,mps,par.getInt("SampleNum"));
+			PoissonDiskSampler ps(&(mm->cm));
+			tri::SurfaceSampling<CMeshO,PoissonDiskSampler>::Poissondisk(curMM->cm,ps,
+				par.getInt("SampleNum"),par.getEnum("AlgorithmVersion"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
