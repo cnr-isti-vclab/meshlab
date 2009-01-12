@@ -305,25 +305,31 @@ public:
 	{};
 
 	// add a sample if the radius constrain is not violated (TODO...)
-	void AddVert(const CMeshO::VertexType &p) 
+	// in case of success true is returned
+	bool AddVert(const CMeshO::VertexType &p) 
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 		m->vert.back().ImportLocal(p);
+		return true;
 	}
 
 	// add a sample on the given face, if the radius constrain is not violated (TODO...)
-	void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
+	// in case of success true is returned
+	bool AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 		m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
+		return true;
 	}
 
 	// add a sample in the cell, project it on the mesh 
 	// and check if the radius constrain is violated (TODO...)
-	void addCell()
+	// in case of success true si returned
+	bool addCell()
 	{
 		//...TODO...
+		return true;
 	}
 }; // end class PoissonDiskSampler
 
