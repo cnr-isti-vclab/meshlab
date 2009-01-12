@@ -53,7 +53,14 @@ using namespace vcg;
 using namespace std;
 
 /* 
-The Samplers; these classes are used to provide the callback used in the sampling process. 
+  Sampler Classes (read carefully the following note).
+
+  Sampler Classes and Sampling algorithms are independent. 
+  Sampler classes exploits the sample that are generated with various algorithms.
+  For example, you can compute Hausdorff distance (that is a sampler) using various 
+  sampling strategies (montecarlo, stratified etc).
+
+  For further details see vcg/complex/trimesh/point_sampling.h header file.
 */ 
 
 
@@ -284,54 +291,6 @@ void AddVert(CMeshO::VertexType &p)
 		if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
 		}
 }; // end class RedetailSampler
-
-
-/* This sampler is used by the Poisson Disk Sampling algorithm. 
- * It keep internally the spatial indexing structure used to find the closest point
- * to check if the disk constrain is violated.
- */
-class PoissonDiskSampler
-{
-	typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
-
-public:
-
-	CMeshO *m;                           // output samples
-	VertexMeshGrid   unifGridVert;       // spatial index of the current samples
-	
-	// ctor
-	PoissonDiskSampler(CMeshO* mesh) :
-		m(mesh)
-	{};
-
-	// add a sample if the radius constrain is not violated (TODO...)
-	// in case of success true is returned
-	bool AddVert(const CMeshO::VertexType &p) 
-	{
-		tri::Allocator<CMeshO>::AddVertices(*m,1);
-		m->vert.back().ImportLocal(p);
-		return true;
-	}
-
-	// add a sample on the given face, if the radius constrain is not violated (TODO...)
-	// in case of success true is returned
-	bool AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
-	{
-		tri::Allocator<CMeshO>::AddVertices(*m,1);
-		m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
-		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
-		return true;
-	}
-
-	// add a sample in the cell, project it on the mesh 
-	// and check if the radius constrain is violated (TODO...)
-	// in case of success true si returned
-	bool addCell()
-	{
-		//...TODO...
-		return true;
-	}
-}; // end class PoissonDiskSampler
 
 
 // Constructor usually performs only two simple tasks of filling the two lists 
@@ -645,8 +604,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			MeshModel *curMM= md.mm();
 			MeshModel *mm= md.addNewMesh("Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 			
-			PoissonDiskSampler ps(&(mm->cm));
-			tri::SurfaceSampling<CMeshO,PoissonDiskSampler>::Poissondisk(curMM->cm,ps,
+			BaseSampler mps(&(mm->cm));
+			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm,mps,
 				par.getInt("SampleNum"),par.getEnum("AlgorithmVersion"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
