@@ -53,6 +53,7 @@ FilterUnsharp::FilterUnsharp()
 		FP_RECOMPUTE_VERTEX_NORMAL <<
 		FP_RECOMPUTE_FACE_NORMAL <<
 		FP_FACE_NORMAL_NORMALIZE <<
+		FP_VERTEX_NORMAL_NORMALIZE <<
 		FP_LINEAR_MORPH	;
 ;
  
@@ -77,7 +78,8 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
 		case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
 		case FP_TAUBIN_SMOOTH :							return QString("Taubin Smooth");
 		case FP_CREASE_CUT :							return QString("Cut mesh along crease edges");
-  	case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normal"); 
+  	case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normals"); 
+  	case FP_VERTEX_NORMAL_NORMALIZE:		return QString("Normalize Vertex Normals"); 
   	case FP_FACE_NORMAL_SMOOTHING:	  return QString("Smooth Face Normals"); 
   	case FP_VERTEX_QUALITY_SMOOTHING:	return QString("Smooth vertex quality"); 
   	case FP_UNSHARP_NORMAL:						return QString("UnSharp Mask Normals"); 
@@ -105,6 +107,7 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
     case FP_TAUBIN_SMOOTH :							return tr("The $lambda-mu$ taubin smoothing, it make two steps of smoothing, forth and back, for each iteration");  
 		case FP_CREASE_CUT:									return tr("Cut the mesh along crease edges, duplicating the vertices as necessary. Crease edges are defined according to the variation of normal of the adjacent faces"); 
 		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
+		case FP_VERTEX_NORMAL_NORMALIZE:	    return tr("Normalize Vertex Normal Lenghts"); 
 		case FP_VERTEX_QUALITY_SMOOTHING:	  return tr("Laplacian smooth of the quality values."); 
 		case FP_FACE_NORMAL_SMOOTHING:	    return tr("Smooth Face Normals without touching the position of the vertices."); 
   	case FP_UNSHARP_NORMAL:							return tr("Unsharp mask filtering of the normals, putting in more evidence normal variations"); 
@@ -145,6 +148,7 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 			case FP_RECOMPUTE_FACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
 			case FP_FACE_NORMAL_NORMALIZE:	  
+			case FP_VERTEX_NORMAL_NORMALIZE:	  
 					return MeshFilterInterface::Normal;
 
     default : return MeshFilterInterface::Generic;
@@ -170,6 +174,7 @@ const int FilterUnsharp::getRequirements(QAction *action)
 		case FP_RECOMPUTE_FACE_NORMAL :
 		case FP_RECOMPUTE_VERTEX_NORMAL :
 		case FP_FACE_NORMAL_NORMALIZE:
+		case FP_VERTEX_NORMAL_NORMALIZE:
 		case FP_LINEAR_MORPH :
 											return 0; 
 			
@@ -286,7 +291,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			int stepSmoothNum = par.getInt("stepSmoothNum");
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,cnt>0,cb);
-			Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+			Log(GLLogStream::FILTER, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 		break;
@@ -296,7 +301,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			float delta = par.getAbsPerc("delta");
 			tri::Smooth<CMeshO>::VertexCoordScaleDependentLaplacian_Fujiwara(m.cm,stepSmoothNum,delta);
-			Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+			Log(GLLogStream::FILTER, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 		break;
@@ -328,7 +333,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::Smooth<CMeshO>::VertexCoordTaubin(m.cm,stepSmoothNum,lambda,mu,cnt>0,cb);
-			Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+			Log(GLLogStream::FILTER, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 			break;
@@ -339,6 +344,9 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 			break;
 	case FP_FACE_NORMAL_NORMALIZE :
+			tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
+			 break;
+	case FP_VERTEX_NORMAL_NORMALIZE :
 			tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
 			 break;
 	
