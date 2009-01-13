@@ -388,7 +388,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		{ // if we start from a mesh, and it has unreferenced vertices
 		  // normals are undefined on that vertices.
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
-			if(delvert) Log(GLLogStream::Info, "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
+			if(delvert) Log(GLLogStream::FILTER, "Pre-MLS Cleaning: Removed %d unreferenced vertices",delvert);
 		}
 		tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
 
@@ -398,7 +398,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
 			APSS<CMeshO> mls(md.mm()->cm);		
 			mls.computeVertexRaddi();
-			Log(GLLogStream::Info, "Mesh has no per vertex radius. Computed and added using default neighbourhood");
+			Log(GLLogStream::FILTER, "Mesh has no per vertex radius. Computed and added using default neighbourhood");
 		}
 		
 		MeshModel* pPoints = 0;

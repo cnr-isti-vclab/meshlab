@@ -218,12 +218,12 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			if(usePerc) 
 			{
 				tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,PercLo,PercHi);
-				Log(GLLogStream::Info, "Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",H.MinV(),H.MaxV(),PercLo,PercHi,par.getDynamicFloat("perc"),100-par.getDynamicFloat("perc"));
+				Log(GLLogStream::FILTER, "Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",H.MinV(),H.MaxV(),PercLo,PercHi,par.getDynamicFloat("perc"),100-par.getDynamicFloat("perc"));
 			}
 			else
 			{
 				tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,RangeMin,RangeMax);
-				Log(GLLogStream::Info, "Quality Range: %f %f; Used (%f %f)",H.MinV(),H.MaxV(),RangeMin,RangeMax);				
+				Log(GLLogStream::FILTER, "Quality Range: %f %f; Used (%f %f)",H.MinV(),H.MaxV(),RangeMin,RangeMax);				
 			}
       break;
     }
@@ -235,23 +235,23 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			}
 			
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			if(delvert) Log(GLLogStream::Info, "Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
+			if(delvert) Log(GLLogStream::FILTER, "Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 			tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m.cm);
       int curvType = par.getEnum("CurvatureType");
 			
 			switch(curvType){ 
-          case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m.cm);        Log(GLLogStream::Info, "Computed Mean Curvature");      break;
-			    case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvature(m.cm);    Log(GLLogStream::Info, "Computed Gaussian Curvature"); break;
-          case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m.cm);         Log(GLLogStream::Info, "Computed RMS Curvature"); break;
-          case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m.cm);    Log(GLLogStream::Info, "Computed ABS Curvature"); break;
+          case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m.cm);        Log(GLLogStream::FILTER, "Computed Mean Curvature");      break;
+			    case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvature(m.cm);    Log(GLLogStream::FILTER, "Computed Gaussian Curvature"); break;
+          case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m.cm);         Log(GLLogStream::FILTER, "Computed RMS Curvature"); break;
+          case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m.cm);    Log(GLLogStream::FILTER, "Computed ABS Curvature"); break;
 					default : assert(0);
       }      
       
       Histogramf H;
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
       tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
-      Log(GLLogStream::Info, "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
+      Log(GLLogStream::FILTER, "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
     break;
     }  
   case CP_TRIANGLE_QUALITY:

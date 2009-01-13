@@ -192,7 +192,7 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 		case FP_REMOVE_NON_MANIFOLD_FACE:	        return QString("Remove Non Manifold Faces");
 		case FP_REMOVE_NON_MANIFOLD_VERTEX:	        return QString("Remove Non Manifold Vertices");
 		case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
-		case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions  ");
+		case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions");
 		case FP_CLOSE_HOLES:	          return QString("Close Holes");
 
 
@@ -433,26 +433,26 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  if(selected) delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<true>(m.cm,0,threshold );
          else    delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<false>(m.cm,0,threshold );
     m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-		Log(GLLogStream::Info, "Removed %d faces with and edge longer than %f",delFaceNum,threshold);
+		Log(GLLogStream::FILTER, "Removed %d faces with and edge longer than %f",delFaceNum,threshold);
 	}
 
   if(ID(filter) == (FP_REMOVE_FACES_BY_AREA) )
 	  {
 	    int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
-	    Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
+	    Log(GLLogStream::FILTER, "Removed %d null faces", nullFaces);
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	  }
 
   if(ID(filter) == (FP_REMOVE_UNREFERENCED_VERTEX) )
 	  {
 	    int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-	    Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
+	    Log(GLLogStream::FILTER, "Removed %d unreferenced vertices",delvert);
 	  }
 
 	if(ID(filter) == (FP_REMOVE_DUPLICATED_VERTEX) )
 	  {
 	    int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-	    Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+	    Log(GLLogStream::FILTER, "Removed %d duplicated vertices", delvert);
 	    if (delvert != 0)
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
@@ -461,8 +461,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  {
 	    int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
 
-			if(nonManif) Log(GLLogStream::Info, "Removed %d Non Manifold Faces", nonManif);
-							else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
+			if(nonManif) Log(GLLogStream::FILTER, "Removed %d Non Manifold Faces", nonManif);
+							else Log(GLLogStream::FILTER, "Mesh is two-manifold. Nothing done.", nonManif);
 
 			 m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	  }
@@ -471,8 +471,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		{
 			int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldVertex(m.cm);
 			
-			if(nonManif) Log(GLLogStream::Info, "Removed %d Non Manifold Vertex", nonManif);
-			else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
+			if(nonManif) Log(GLLogStream::FILTER, "Removed %d Non Manifold Vertex", nonManif);
+			else Log(GLLogStream::FILTER, "Mesh is two-manifold. Nothing done.", nonManif);
 			
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 		}
@@ -521,7 +521,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	}
 	if (ID(filter) == (FP_TRANSFORM) ) {
 			Matrix44f matrixPar= par.getMatrix44("Transform");
-			Log(GLLogStream::Info, qPrintable(transformDialog->getLog()) );
+			Log(GLLogStream::FILTER, qPrintable(transformDialog->getLog()) );
 			m.cm.Tr=matrixPar;
 	}
 
@@ -541,11 +541,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		if(par.getBool("AutoClean"))
 		{
 			int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
-			if(nullFaces) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d null faces", nullFaces);
+			if(nullFaces) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d null faces", nullFaces);
 			int deldupvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-			if(deldupvert) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);
+			if(deldupvert) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			if(delvert) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
+			if(delvert) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 			tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
@@ -587,7 +587,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	  if(par.getBool("Autoclean")){
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
+			Log(GLLogStream::FILTER, "Removed %d unreferenced vertices",delvert);
 	  }
 
 	  switch(par.getEnum("Method")){
