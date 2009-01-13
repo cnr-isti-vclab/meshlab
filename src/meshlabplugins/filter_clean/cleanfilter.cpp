@@ -273,19 +273,19 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
       // the main processing
       pivot.BuildMesh(cb);
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-			Log(GLLogStream::Info,"Reconstructed surface. Added %i faces",m.cm.fn-startingFn); 		
+			Log(GLLogStream::FILTER,"Reconstructed surface. Added %i faces",m.cm.fn-startingFn); 		
 	  } break;
     case FP_REMOVE_ISOLATED_DIAMETER:
 	  {
       float minCC= par.getAbsPerc("MinComponentDiag");		
       std::pair<int,int> delInfo= RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,minCC);
-			Log(GLLogStream::Info,"Removed %2 connected components out of %1", delInfo.second, delInfo.first); 		
+			Log(GLLogStream::FILTER,"Removed %2 connected components out of %1", delInfo.second, delInfo.first); 		
     }break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
 	  {
       float minCC= par.getInt("MinComponentSize");		
       std::pair<int,int> delInfo=RemoveSmallConnectedComponentsSize<CMeshO>(m.cm,minCC);
-			Log(GLLogStream::Info,"Removed %i connected components out of %i", delInfo.second, delInfo.first); 		
+			Log(GLLogStream::FILTER,"Removed %i connected components out of %i", delInfo.second, delInfo.first); 		
 	  }break;
     case FP_REMOVE_WRT_Q:
 	  {
@@ -309,7 +309,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 						 }
 								 
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-			Log(GLLogStream::Info,"Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
+			Log(GLLogStream::FILTER,"Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
 
 	  }break;
     case FP_ALIGN_WITH_PICKED_POINTS:
@@ -317,7 +317,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 		bool result = AlignTools::setupThenAlign(m, par);
 		if(!result)
 		{
-			Log(GLLogStream::Info,"Align failed, make sure you have equal numbers of points.");	
+			Log(GLLogStream::WARNING,"Align failed, make sure you have equal numbers of points.");	
 			return false;
 		}
 	}break;

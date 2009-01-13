@@ -266,7 +266,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 		
 		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		if (delvert)
-			Log(GLLogStream::Info,
+			Log(GLLogStream::FILTER,
 			    "Pre-Curvature Cleaning: Removed %d unreferenced vertices",
 			    delvert);
 
@@ -312,7 +312,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			optimiz.DoOptimization();
 			optimiz.h.clear();
 
-			Log(GLLogStream::Info, "%d curvature edge flips performed in %.2f sec.",  optimiz.nPerfmormedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
+			Log(GLLogStream::FILTER, "%d curvature edge flips performed in %.2f sec.",  optimiz.nPerfmormedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
 		}
 	if (ID(filter) == FP_PLANAR_EDGE_FLIP) {
 		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
@@ -345,7 +345,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			optimiz.DoOptimization();
 			optimiz.h.clear();
 
-			Log(GLLogStream::Info, "%d planar edge flips performed in %.2f sec.", optimiz.nPerfmormedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
+			Log(GLLogStream::FILTER, "%d planar edge flips performed in %.2f sec.", optimiz.nPerfmormedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
 			int iternum = par.getInt("iterations");
 			
 			tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, 0.0001f, selection,cb);

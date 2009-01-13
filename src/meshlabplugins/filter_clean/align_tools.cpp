@@ -115,7 +115,7 @@ bool AlignTools::setupThenAlign(MeshModel &/*mm*/, FilterParameterSet & par)
 			} else
 			{
 				qDebug() << "stuck points file didnt exist: " << ppFileName;
-				//Log(GLLogStream::Info, "No points were found for the Stuck mesh.");
+				//Log(GLLogStream::WARNING, "No points were found for the Stuck mesh.");
 				return false;
 			}
 		}
@@ -146,7 +146,7 @@ bool AlignTools::setupThenAlign(MeshModel &/*mm*/, FilterParameterSet & par)
 			} else
 			{
 				qDebug() << "model to move points file didnt exist: " << ppFileName;
-				//Log(GLLogStream::Info, "No points were found for the mesh to move.");
+				//Log(GLLogStream::WARNING, "No points were found for the mesh to move.");
 				return false;
 			}
 		}
