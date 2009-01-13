@@ -85,7 +85,7 @@
 using namespace std;
 using namespace vcg;
 // initialize importing parameters
-void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &filename, FilterParameterSet &parlst)
+void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, FilterParameterSet &parlst)
 {
 	if (formatName.toUpper() == tr("PTX"))
 	{
@@ -252,7 +252,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
 	string ex = formatName.toUtf8().data();
 	bool binaryFlag = false;
 	if(formatName.toUpper() == tr("STL") || formatName.toUpper() == tr("PLY"))
-					par.getBool("Binary");
+					binaryFlag = par.getBool("Binary");
 					
 	if(formatName.toUpper() == tr("PLY"))
 	{
