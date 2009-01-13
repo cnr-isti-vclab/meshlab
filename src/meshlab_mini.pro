@@ -1,5 +1,5 @@
 TEMPLATE      = subdirs
 SUBDIRS       = meshlab \
-                meshlabplugins/baseio \
-                meshlabplugins/meshcolorize 
+                meshlabplugins/io_base \
+                meshlabplugins/filter_colorize 
                 
