@@ -140,7 +140,7 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 			}
 			
 			if( deleteLayer )	{
-				Log(GLLogStream::Info, "Deleted %d merged layers", toBeDeletedList.size());
+				Log(GLLogStream::FILTER, "Deleted %d merged layers", toBeDeletedList.size());
 				foreach(MeshModel *mmp,toBeDeletedList) {
 						md.delMesh(mmp); 
 					}
@@ -149,7 +149,7 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 			if( mergeVertices )	
 			{
 				int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
-				Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+				Log(GLLogStream::FILTER, "Removed %d duplicated vertices", delvert);
 			}
 			
 			tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(destMesh->cm);
