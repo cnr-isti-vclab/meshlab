@@ -34,6 +34,8 @@ $Log: stdpardialog.cpp,v $
 #include "glarea.h"
 #include "mainwindow.h"
 
+using namespace std;
+
 LayerDialog::LayerDialog(QWidget *parent )    : QDialog(parent)    
 { 
   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
@@ -74,6 +76,27 @@ void LayerDialog::showEvent ( QShowEvent * event )
 	updateTable();
 }
 
+void LayerDialog::updateLog(GLLogStream &log)
+{
+	QList< pair<int,QString> > &logStringList=log.S;
+	ui.logPlainTextEdit->clear();
+	//ui.logPlainTextEdit->setFont(QFont("Courier",10));	
+
+	pair<int,QString> logElem;
+	QString preWarn    = "<font face=\"courier\" size=3 color=\"red\"> Warning: " ;
+	QString preSystem  = "<font face=\"courier\" size=2 color=\"grey\"> System:  " ;
+	QString preFilter  = "<font face=\"courier\" size=2 color=\"black\"> Filter:  " ;
+
+	QString post   = "</font>";
+
+	foreach(logElem, logStringList){
+		QString logText = logElem.second;
+		if(logElem.first == GLLogStream::SYSTEM)  logText = preSystem + logText + post; 
+		if(logElem.first == GLLogStream::WARNING) logText = preWarn + logText + post; 
+		if(logElem.first == GLLogStream::FILTER)  logText = preFilter + logText + post; 
+		ui.logPlainTextEdit->appendHtml(logText);
+	}
+}
 
 void LayerDialog::updateTable()
 {

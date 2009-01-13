@@ -420,6 +420,8 @@ public:
 	bool  suspendedEditor;
 protected:
 
+	FilterParameterSet prefs;
+	void initPreferences();
 	void initializeGL();
 	void initTexture();
 	void displayInfo();

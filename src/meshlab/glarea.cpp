@@ -20,67 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-
-$Log: glarea.cpp,v $
-Revision 1.143  2008/04/22 16:15:45  bernabei
-By default, tablet events are treated as mouse events
-
-Revision 1.142  2008/04/22 14:54:38  bernabei
-Added support for tablet events
-
-Revision 1.141  2008/04/04 10:07:12  cignoni
-Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
-
-Revision 1.140  2008/02/05 18:06:47  benedetti
-added calls to editing plugins' keyReleaseEvent and keyPressEvent
-
-Revision 1.139  2008/01/10 17:15:16  cignoni
-unsaved dialog has a better behaviour
-
-Revision 1.138  2008/01/04 18:23:24  cignoni
-Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
-
-Revision 1.137  2008/01/04 00:46:28  cignoni
-Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
-
-Revision 1.136  2007/12/13 00:18:28  cignoni
-added meshCreation class of filter, and the corresponding menu new under file
-
-Revision 1.135  2007/12/10 10:26:18  corsini
-remove number of passes dependency in the main rendering cycle
-
-Revision 1.134  2007/11/20 12:04:09  cignoni
-shortening and refactoring
-
-Revision 1.133  2007/11/19 15:21:46  ponchio
-Temporary fix for QT glError bug causin an assert(glError()) to trigger.
-
-Revision 1.132  2007/11/17 15:40:23  cignoni
-removed QT2VCG trackball helper
-
-Revision 1.131  2007/11/09 11:23:46  cignoni
-attempts to manage 4.3 issues with fonts and opengl
-
-Revision 1.130  2007/11/05 22:38:55  cignoni
-Remove static map of cursors that caused the annoying deallocation bug under vs2005
-
-Revision 1.129  2007/10/24 16:38:08  fuscof
-paintGL draw the model only during the first rendering pass
-
-Revision 1.128  2007/10/09 13:02:09  fuscof
-Initial implementation of multipass rendering.
-Please note that MeshRenderInterface has been modified to get the number of rendering passes.
-
-Revision 1.127  2007/10/08 19:48:45  cignoni
-corrected behavior for endedit
-
-Revision 1.126  2007/09/15 09:06:20  cignoni
-Added notification of ortho projection
-
-
-****************************************************************************/
 
 #include <GL/glew.h>
 #include <QtGui>
@@ -147,8 +86,14 @@ GLArea::GLArea(QWidget *parent)
 	}else{
 		qDebug("The parent of the GLArea parent is not a pointer to the meshlab MainWindow.");
 	}
+}
 
-
+void GLArea::initPreferences()
+{
+	QSettings settings;
+	prefs.clear();
+	prefs.addColor("BackgroundTop",    settings.value("BackgroundTop").value<QColor>(), "Top Background Color", "");
+	prefs.addColor("BackgroundBottom", settings.value("BackgroundBottom").value<QColor>(), "Bottom Background Color", "");
 }
 
 GLArea::~GLArea()
@@ -239,8 +184,8 @@ void GLArea::pasteTile()
         .arg(ss.basename)
         .arg(ss.counter++,2,10,QChar('0'));
 			bool ret = snapBuffer.save(outfile,"PNG");
-			if (ret) log.Logf(GLLogStream::Info,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
-					else log.Logf(GLLogStream::Error,"Error saving %s",outfile.toLocal8Bit().constData());
+			if (ret) log.Logf(GLLogStream::SYSTEM,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
+					else log.Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
 
 			takeSnapTile=false;
 			snapBuffer=QImage();
@@ -498,7 +443,7 @@ void GLArea::paintGL()
 	glMatrixMode(GL_MODELVIEW);
   int error = glGetError();
 	if(error) {
-		log.Logf(GLLogStream::Info,"There are gl errors");
+		log.Logf(GLLogStream::WARNING,"There are gl errors");
 	}
 }
 
@@ -635,7 +580,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 	lastModelEdited = meshDoc.mm();
 	iEdit->StartEdit(meshDoc, this);
 
-	log.Logf(GLLogStream::Info,"Started Mode %s", qPrintable(currentEditor->text()));
+	log.Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
 }
 
 
@@ -810,14 +755,20 @@ void GLArea::initTexture()
 
 	if(!mm()->cm.textures.empty() && mm()->glw.TMId.empty()){
 		glEnable(GL_TEXTURE_2D);
+		GLint MaxTextureSize;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
+		
 		for(unsigned int i =0; i< mm()->cm.textures.size();++i){
 			QImage img, imgScaled, imgGL;
 			img.load(mm()->cm.textures[i].c_str());
 			// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
 			int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
 			int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
+			while(bestW>MaxTextureSize) bestW /=2;
+			while(bestH>MaxTextureSize) bestH /=2;
 
-			qDebug("texture[ %i ] =  %s ( %i x %i )",	i,mm()->cm.textures[i].c_str(), imgGL.width(), imgGL.height());
+			log.Log(0,"Loading textures");
+			log.Logf(0,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mm()->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
 			imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 			imgGL=convertToGLFormat(imgScaled);
 			mm()->glw.TMId.push_back(0);

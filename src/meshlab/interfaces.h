@@ -185,21 +185,22 @@ public:
 	
 	enum FilterClass 
 	{ 
-			Generic          =0x00000, 
-			Selection        =0x00001, // Filters that select or de-select something
+			Generic          =0x00000, // Should be avoided if possible
+			Selection        =0x00001, // select or de-select something, basic operation on selections (like deleting)
 			Cleaning         =0x00002, // Filters that can be used to clean meshes (duplicated vertices etc)
-			Remeshing        =0x00004, 
+			Remeshing        =0x00004, // Simplification, Refinement, Reconstruction and mesh optimization
 			FaceColoring     =0x00008, 
 			VertexColoring   =0x00010, 
 			MeshCreation     =0x00020, 
-			Smoothing        =0x00040, 
+			Smoothing        =0x00040, // Stuff that does not change the topology, but just the vertex positions
 			Quality          =0x00080, 
 			Layer            =0x00100, 
-			Normal           =0x00200,
+			Normal           =0x00200, // Normal, Curvature, orientation (rotations and transformations fall here)
 		  Sampling         =0x00400,
 		  Texture          =0x00800,
 		  RangeMap         =0x01000, // filters specific for range map processing
-      PointSet         =0x02000
+      PointSet         =0x02000,
+      Measure          =0x04000 // Filters that compute measures and information on meshes.
 	};
 	
 	virtual ~MeshFilterInterface() {}

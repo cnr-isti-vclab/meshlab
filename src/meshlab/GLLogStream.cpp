@@ -63,10 +63,10 @@ using namespace std;
 
 void GLLogStream::print(QStringList &l)
 {
-	list<pair <int,string> > ::iterator li;
+/*	list<pair <int,string> > ::iterator li;
 	
-	for(li=S.begin();li!=S.end();++li)
-		l << (*li).second.c_str();
+	foreach(li=S.begin();li!=S.end();++li)
+		l << (*li).second.c_str();*/
 }
 
 
@@ -84,16 +84,16 @@ void GLLogStream::Logf(int Level, const char * f, ... )
 void GLLogStream::Save(int /*Level*/, const char * filename )
 {
 	FILE *fp=fopen(filename,"wb");
-	list<pair <int,string> > ::iterator li;
+	QList<pair <int,QString> > ::iterator li;
 	for(li=S.begin();li!=S.end();++li)
-		fprintf(fp,(*li).second.c_str());
+		fprintf(fp,qPrintable((*li).second));
 }
 
 
 void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font)
 {
 	if( nlines > (int)S.size() ) nlines = S.size();
-	list<pair <int,string> > ::iterator li;
+	QList<pair <int,QString> > ::iterator li;
 	li=S.begin();
 
 	advance(li,S.size()-nlines); 
@@ -106,6 +106,6 @@ void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,Q
 	for(;li!=S.end();++li)
 	{
 		if(Level == -1 || (*li).first == Level)
-			qgl->renderText(20,StartLine+=vSpacing,(*li).second.c_str(),font);
+			qgl->renderText(20,StartLine+=vSpacing,(*li).second,font);
 	}
 }

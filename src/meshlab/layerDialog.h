@@ -32,6 +32,7 @@ $Log: stdpardialog.cpp,v $
 class GLArea;
 class MainWindow;
 class QTableWidget;
+class GLLogStream;
 
 #include "ui_layerDialog.h"
 #include <QDialog>
@@ -42,6 +43,7 @@ class LayerDialog : public QDialog
 	public:
      LayerDialog(QWidget *parent = 0);
      void updateTable();
+     void updateLog(GLLogStream &Log);
 
 	public slots:
 		void toggleStatus(int row, int column);

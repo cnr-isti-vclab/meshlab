@@ -405,6 +405,7 @@ void MainWindow::updateMenus()
 		showLayerDlgAct->setChecked(GLA()->layerDialog->isVisible());
 		//if(GLA()->layerDialog->isVisible())
 		GLA()->layerDialog->updateTable();
+		GLA()->layerDialog->updateLog(GLA()->log);
 	}
 }
 
@@ -477,7 +478,7 @@ void MainWindow::runFilterScript()
     GLA()->mm()->updateDataMask(req);
     iFilter->setLog(&(GLA()->log));
     iFilter->applyFilter( action, *(GLA()->mm()), (*ii).second, QCallBack );
-    GLA()->log.Logf(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
+    GLA()->log.Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
 }
 
@@ -571,7 +572,7 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
 
 	if(ret)
 	{
-		GLA()->log.Logf(GLLogStream::Info,"Applied filter %s",qPrintable(action->text()));
+		GLA()->log.Logf(GLLogStream::SYSTEM,"Applied filter %s",qPrintable(action->text()));
 		GLA()->setWindowModified(true);
 		GLA()->setLastAppliedFilter(action);
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
@@ -668,18 +669,18 @@ void MainWindow::applyRenderMode()
 
 	if(action->text() == tr("None"))
 	{
-		GLA()->log.Logf(GLLogStream::Info,"No Shader");
+		GLA()->log.Logf(GLLogStream::SYSTEM,"No Shader");
 		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
 	} else {
 		if(iRenderTemp->isSupported())
 		{
 			GLA()->setRenderer(iRenderTemp,action);
-			GLA()->log.Logf(GLLogStream::Info,"%s",qPrintable(action->text()));	// Prints out action name
+			GLA()->log.Logf(GLLogStream::SYSTEM,"%s",qPrintable(action->text()));	// Prints out action name
 		}
 		else
 		{
 			GLA()->setRenderer(0,0); //vertex and fragment programs not supported
-			GLA()->log.Logf(GLLogStream::Warning,"Shader not supported!");
+			GLA()->log.Logf(GLLogStream::WARNING,"Shader not supported!");
 		}
 	}
 }
@@ -712,7 +713,7 @@ void MainWindow::applyDecorateMode()
 		iDecorateTemp->StartDecorate(action,*GLA()->mm(),GLA());
 		GLA()->iDecoratorsList->push_back(make_pair(action,decoratorParams));
 
-		GLA()->log.Logf(GLLogStream::Info,"Enable Decorate mode %s",qPrintable(action->text()));
+		GLA()->log.Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
 	}
 	GLA()->update();
 }

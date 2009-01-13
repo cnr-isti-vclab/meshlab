@@ -64,15 +64,23 @@ Initial Commit
 #define GLLOGSTREAM_H
 
 #include <list>
-#include <string>
 #include <utility>
-#include "LogStream.h"
+#include <QFont>
 
+class QGLWidget;
 class GLArea;
 
-class GLLogStream : public LogStream
+class GLLogStream 
 {
 public:
+	enum Levels
+	{
+		SYSTEM = 0,
+		WARNING = 1,
+		FILTER = 2,
+		DEBUG = 3
+	};
+	
 	virtual ~GLLogStream () {}
   void print(QStringList &list);		// Fills a QStringList with the log entries 
   void glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font);
@@ -81,11 +89,11 @@ public:
 	void Logf(int Level, const char * f, ... );
   void Log(int Level, const char * buf )
 	{
-		S.push_back(std::make_pair<int,std::string>(Level,buf));
+		S.push_back(std::make_pair<int,QString>(Level,buf));
 	}
 
-private:
-  std::list<std::pair<int,std::string> > S;
+//private:
+  QList<std::pair<int,QString> > S;
 };
 
 #endif //GLLOGSTREAM_H
