@@ -143,7 +143,6 @@ pwd
 for x in $PLUGINSNAMES
 do
 cp ./$x $BUNDLE/meshlab.app/Contents/plugins/
-echo 
 done
 
 
