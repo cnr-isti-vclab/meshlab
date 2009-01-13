@@ -87,7 +87,6 @@ Interfaces are changing again...
 #include <vcg/space/normal_extrapolation.h>
 
 #include "../../meshlab/GLLogStream.h"
-#include "../../meshlab/LogStream.h"
 
 using namespace std;
 using namespace vcg;
