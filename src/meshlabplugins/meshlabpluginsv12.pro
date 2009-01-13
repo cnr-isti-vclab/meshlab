@@ -10,18 +10,19 @@ SUBDIRS       = io_base\
 				io_x3d \
 				io_gts \
 				io_expe \
-				filter_clean \
 				filter_ao \
-				filter_poisson \
-				filter_unsharp \
-				filter_splitter \
-#				filter_texture \
-				filter_sampling \
 				filter_autoalign \
-				filter_meshing \
+				filter_clean \
 				filter_colorize \
-				filter_select \
+				filter_create \
+				filter_meshing \
 				filter_mls \
+				filter_poisson \
+				filter_sampling \
+				filter_splitter \
+				filter_select \
+#				filter_texture \
+				filter_unsharp \
 				render_splatting \
 				render_gdp \
 				meshdecorate \
