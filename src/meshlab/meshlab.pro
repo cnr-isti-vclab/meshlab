@@ -2,7 +2,7 @@ VCGDIR  = ../../../vcglib
 GLEWDIR = ../../../code/lib/glew
 GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
-
+CONFIG += debug_and_release
 # uncomment to try Eigen
 #DEFINES += VCG_USE_EIGEN
 #CONFIG += warn_off
