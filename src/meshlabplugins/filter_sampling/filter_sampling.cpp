@@ -30,6 +30,7 @@ $Log: samplefilter.cpp,v $
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -130,6 +131,7 @@ public:
 	MetroMeshGrid   unifGrid;
 
 	// Parameters
+		double          min_dist;
 		double          max_dist;
     double          mean_dist;
     double          RMS_dist;   /// from the wikipedia defintion RMS DIST is sqrt(Sum(distances^2)/n), here we store Sum(distances^2)
@@ -145,6 +147,7 @@ public:
 	
 		
 		float getMeanDist() const { return mean_dist / n_total_samples; }
+		float getMinDist() const { return min_dist ; }
 		float getMaxDist() const { return max_dist ; }
 		float getRMSDist() const { return sqrt(RMS_dist / n_total_samples); }
 	
@@ -159,6 +162,7 @@ public:
 			markerFunctor.SetMesh(m);
 			hist.SetRange(0.0, m->bbox.Diag()/100.0, 100);
 		}
+		min_dist = std::numeric_limits<double>::max();
 		max_dist = 0;
 		mean_dist =0;
 		RMS_dist = 0;
@@ -171,13 +175,13 @@ void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType interp)
 	AddSample(startPt);
 }
 
-void AddVert(const CMeshO::VertexType &p) 
+void AddVert(CMeshO::VertexType &p) 
 {
-	AddSample(p.cP());
+	p.Q()=AddSample(p.cP());
 }
 
 
-void AddSample(const CMeshO::CoordType &startPt) 
+float AddSample(const CMeshO::CoordType &startPt) 
 {	
 		// the results
     Point3f       closestPt,      normf, bestq, ip;
@@ -191,10 +195,12 @@ void AddSample(const CMeshO::CoordType &startPt)
 
     // update distance measures
     if(dist == dist_upper_bound)
-        return ;
+        return dist;
 
     if(dist > max_dist)
         max_dist = dist;        // L_inf
+    if(dist < min_dist)
+        min_dist = dist;        // L_inf
 		
 		mean_dist += dist;	        // L_1
     RMS_dist  += dist*dist;     // L_2
@@ -213,7 +219,7 @@ void AddSample(const CMeshO::CoordType &startPt)
 			closestPtMesh->vert.back().P() = closestPt;
 			closestPtMesh->vert.back().Q() = dist;
 		}
-		
+		return dist;
 }
 }; // end class HausdorffSampler
 
@@ -437,20 +443,21 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 				foreach (target, md.meshList) 
 						if (target != md.mm())  break;
 		    
-				parlst.addMesh ("BaseMesh", md.mm(), "Base Mesh",
-												"The mesh that is used to be compared to.");
+				parlst.addMesh ("SampledMesh", md.mm(), "Sampled Mesh",
+												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh.");
 				parlst.addMesh ("TargetMesh", target, "Target Mesh",
 												"The mesh that is sampled for the comparison.");
 				parlst.addBool ("SaveSample", false, "Save Samples",
-												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples.");										
 				parlst.addBool ("SampleVert", target, "Sample Edge and Vertex",
-												"For the search of maxima it is useful to accurately sample vertices and edges of the mesh, "
-												"because it is quite probably the the farthest points falls along edges or on mesh vertexes.<br>"
-												"On the other hand this kind of sampling could make the overall sampling slightly unbiased and slightly affects the cumulative results.");
+												"For the search of maxima it is useful to sample vertices and edges of the mesh with a greater care. "
+												"It is quite probably the the farthest points falls along edges or on mesh vertexes, and with uniform montecarlo sampling approaches"
+												"the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
+												"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results.");
 				parlst.addInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
 												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
 				parlst.addAbsPerc("MaxDist", md.mm()->cm.bbox.Diag()/20.0, 0.0f, md.mm()->cm.bbox.Diag(),
-												tr("Max Distance"), tr("Sample points that are further than this specified distance are rejected and not considered neither for averaging nor for max."));
+												tr("Max Distance"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered neither for averaging nor for max."));
 			} break;
 		case FP_VERTEX_RESAMPLING:
 		{
@@ -514,7 +521,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 					case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
 				}
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);		
+			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);		
 		}
 		break;
 		case FP_TEXEL_SAMPLING :  
@@ -555,7 +562,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			else tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
+			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
 			break;
 		case FP_SUBDIV_SAMPLING :  
@@ -572,7 +579,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"), par.getBool("Random"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
+			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
 		}
 			break;
 		case FP_SIMILAR_SAMPLING :  
@@ -589,7 +596,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
+			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
 			break;
 
@@ -609,13 +616,13 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 				par.getInt("SampleNum"),par.getEnum("AlgorithmVersion"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
+			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
 			break;
 			
 		case FP_HAUSDORFF_DISTANCE : 
 			{
-			MeshModel* mm0 = par.getMesh("BaseMesh");  // this is sampled mesh 
+			MeshModel* mm0 = par.getMesh("SampledMesh");  // this is sampled mesh 
 			MeshModel* mm1 = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample. 
 			bool saveSampleFlag=par.getBool("SaveSample");
 			bool vertexSamplingFlag;
@@ -648,12 +655,10 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 			//tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 				
-			Log(0,"Hausdorf Distance computed");						
-			Log(0,"      max : %f   Sample %i",hs.getMaxDist(),hs.n_total_samples);						
-			Log(0,"     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
-			qDebug("Hausdorf Distance computed");						
-			qDebug("      max : %f   Sample %i",hs.getMaxDist(),hs.n_total_samples);						
-			qDebug("     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
+			Log(GLLogStream::FILTER,"Hausdorf Distance computed");						
+			Log(GLLogStream::FILTER,"     Sample %i",hs.n_total_samples);						
+			Log(GLLogStream::FILTER,"     min : %f   max %f",hs.getMinDist(),hs.getMaxDist());						
+			Log(GLLogStream::FILTER,"     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
 			
 			if(saveSampleFlag)
 				{
@@ -720,7 +725,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			
 			Point3i volumeDim;
 			BestDim( baseMesh->cm.bbox, voxelSize, volumeDim );
-			Log(0,"Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
+			Log(GLLogStream::FILTER,"Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
 			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag, cb);
 			tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
 			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
