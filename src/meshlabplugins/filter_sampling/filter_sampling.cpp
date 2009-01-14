@@ -172,16 +172,17 @@ public:
 void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType interp) 
 {
 	Point3f startPt = f.P(0)*interp[0] + f.P(1)*interp[1] +f.P(2)*interp[2]; // point to be sampled
-	AddSample(startPt);
+	Point3f startN  = f.V(0)->cN()*interp[0] + f.V(1)->cN()*interp[1] +f.V(2)->cN()*interp[2]; // Normal of the interpolated point
+	AddSample(startPt,startN); // point to be sampled);
 }
 
 void AddVert(CMeshO::VertexType &p) 
 {
-	p.Q()=AddSample(p.cP());
+	p.Q()=AddSample(p.cP(),p.cN());
 }
 
 
-float AddSample(const CMeshO::CoordType &startPt) 
+float AddSample(const CMeshO::CoordType &startPt,const CMeshO::CoordType &startN) 
 {	
 		// the results
     Point3f       closestPt,      normf, bestq, ip;
@@ -212,12 +213,14 @@ float AddSample(const CMeshO::CoordType &startPt)
 			tri::Allocator<CMeshO>::AddVertices(*samplePtMesh,1);
 			samplePtMesh->vert.back().P() = startPt;
 			samplePtMesh->vert.back().Q() = dist;
+			samplePtMesh->vert.back().N() = startN;
 		}
 		if(closestPtMesh)
 		{
 			tri::Allocator<CMeshO>::AddVertices(*closestPtMesh,1);
 			closestPtMesh->vert.back().P() = closestPt;
 			closestPtMesh->vert.back().Q() = dist;
+			closestPtMesh->vert.back().N() = startN;
 		}
 		return dist;
 }
@@ -449,11 +452,13 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 												"The mesh that is sampled for the comparison.");
 				parlst.addBool ("SaveSample", false, "Save Samples",
 												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples.");										
-				parlst.addBool ("SampleVert", target, "Sample Edge and Vertex",
+				parlst.addBool ("SampleVert", true, "Sample Vertexes",
 												"For the search of maxima it is useful to sample vertices and edges of the mesh with a greater care. "
 												"It is quite probably the the farthest points falls along edges or on mesh vertexes, and with uniform montecarlo sampling approaches"
 												"the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
 												"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results.");
+				parlst.addBool ("SampleEdge", true, "Sample Edges", "See the above comment.");
+				parlst.addBool ("SampleFace", true, "Sample Faces", "See the above comment.");
 				parlst.addInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
 												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
 				parlst.addAbsPerc("MaxDist", md.mm()->cm.bbox.Diag()/20.0, 0.0f, md.mm()->cm.bbox.Diag(),
@@ -622,13 +627,15 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			
 		case FP_HAUSDORFF_DISTANCE : 
 			{
-			MeshModel* mm0 = par.getMesh("SampledMesh");  // this is sampled mesh 
-			MeshModel* mm1 = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample. 
+			MeshModel* mm0 = par.getMesh("SampledMesh");  // surface where we choose the random samples 
+			MeshModel* mm1 = par.getMesh("TargetMesh");   // surface that is sought for the closest point to each sample. 
 			bool saveSampleFlag=par.getBool("SaveSample");
-			bool vertexSamplingFlag;
-			bool faceSamplingFlag;
+			bool sampleVert=par.getBool("SampleVert");
+			bool sampleEdge=par.getBool("SampleEdge");
+			bool sampleFace=par.getBool("SampleFace");
 
 			
+			mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
 			mm1->updateDataMask(MeshModel::MM_FACEMARK);
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm1->cm);
 			tri::UpdateFlags<CMeshO>::FaceProjection(mm1->cm);
@@ -651,9 +658,12 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			qDebug("Sampled  mesh has %7i vert %7i face",mm0->cm.vn,mm0->cm.fn);
 			qDebug("Searched mesh has %7i vert %7i face",mm1->cm.vn,mm1->cm.fn);
 
-			tri::SurfaceSampling<CMeshO,HausdorffSampler>::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
-			tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
-			//tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
+			if(sampleVert) 
+					tri::SurfaceSampling<CMeshO,HausdorffSampler>::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
+			if(sampleEdge) 
+					tri::SurfaceSampling<CMeshO,HausdorffSampler>::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"));
+			if(sampleFace)	
+					tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 				
 			Log(GLLogStream::FILTER,"Hausdorf Distance computed");						
 			Log(GLLogStream::FILTER,"     Sample %i",hs.n_total_samples);						
