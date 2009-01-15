@@ -504,7 +504,11 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 		} break; 
 		 case FP_VORONOI_CLUSTERING :
 		 {
-			 parlst.addInt ("SampleNum", md.mm()->cm.vn/10, "Target vertex number",
+			 parlst.addInt ("SampleNum", md.mm()->cm.vn/100, "Target vertex number",
+											"The final number of vertices.");
+			 parlst.addInt ("RelaxIter", 1, "Relaxing Iterations",
+											"The final number of vertices.");
+			 parlst.addInt ("RandSeed", 1, "Random Seed",
 											"The final number of vertices.");
 			 
 		 } break; 
@@ -752,17 +756,25 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		case FP_VORONOI_CLUSTERING :
 		{
 			int sampleNum = par.getInt("SampleNum");
+			int relaxIter = par.getInt("RelaxIter");
+			int randSeed = par.getInt("RandSeed");
 			CMeshO *cm = &md.mm()->cm;				
-			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh");
+//			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh");
 			vector<CMeshO::VertexType *> seedVec;
-			
-			ClusteringSampler<CMeshO> vc(&seedVec);
-			tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
-			VoronoiProcessing<CMeshO>::GeodesicVertexColoring(*cm, seedVec);
-			VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
+			md.mm()->updateDataMask(MeshModel::MM_VERTMARK);	
+			md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);	
+			md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);	
+			tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+			tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
 
-				tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);
-				tri::UpdateNormals<CMeshO>::PerVertexPerFace(clusteredMesh->cm);
+			ClusteringSampler<CMeshO> vc(&seedVec);
+			if(randSeed!=0) tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
+			tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
+			VoronoiProcessing<CMeshO>::GeodesicVertexColoring(*cm, seedVec, relaxIter);
+			//VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
+
+	//			tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);
+	//			tri::UpdateNormals<CMeshO>::PerVertexPerFace(clusteredMesh->cm);
 
 		}
 		break;

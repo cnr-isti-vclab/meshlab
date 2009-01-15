@@ -67,23 +67,75 @@ class VoronoiProcessing
     typedef typename MeshType::FaceContainer		FaceContainer;
 	public:
 
-static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedVec)
+static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter)
 {			
+	for(int iter=0;iter<relaxIter;++iter)
+	{
 		tri::Geo<CMeshO> g;
 		float dist;
 		VertexPointer farthest;
-		g.FarthestVertex(m,seedVec,farthest,dist);
-		for(VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi) 
-			(*vi).Q()=(*vi).IMark(); 
-			
-		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
+		// first run: find for each point what is the closest to one of the seeds.
+		typename MeshType::template PerVertexAttributeHandle<VertexPointer> sources;
+		sources =  tri::Allocator<CMeshO>::AddPerVertexAttribute<VertexPointer> (m,"sources");
+		g.FarthestVertex(m,seedVec,farthest,dist,&sources);
 		
-		/*
+		// find the vertexes of frontier faces
+		tri::UpdateFlags<CMeshO>::VertexClearV(m);
 		for(FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
 		{
-			
+			if(	sources[(*fi).V(0)] != sources[(*fi).V(1)]  ||
+					sources[(*fi).V(0)] != sources[(*fi).V(2)] )
+						{
+							for(int i=0;i<3;++i)
+								{
+									(*fi).V(i)->SetV();	
+									(*fi).V(i)->C() = Color4b::Black;
+								}
+						}
 		}
-		*/
+    // Collect the frontier vertexes and run the geodesic using them as sources.
+		std::vector<VertexPointer> borderVec;
+		for(VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi) 
+			if((*vi).IsV()) borderVec.push_back(&*vi);
+			
+		g.FarthestVertex(m,borderVec,farthest,dist);		
+		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
+
+		// Search the local maxima for each region and use them as new seeds	
+		std::pair<float,VertexPointer> zz(0,0);
+		std::vector< std::pair<float,VertexPointer> > seedMaxima(m.vert.size(),zz);
+		for(VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi) 
+		{
+			int seedIndex = sources[vi] - &*m.vert.begin();
+			if(seedMaxima[seedIndex].first < (*vi).Q()) 
+				{	
+					seedMaxima[seedIndex].first=(*vi).Q(); 
+					seedMaxima[seedIndex].second=&*vi; 
+				}
+		}
+		std::vector<VertexPointer> newSeeds;
+		for(int i=0;i<seedMaxima.size();++i)
+			if(seedMaxima[i].second) 
+					{
+						seedMaxima[i].second->C() = Color4b::Gray;
+						newSeeds.push_back(seedMaxima[i].second);
+					}
+		
+		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);		
+		for(int i=0;i<seedVec.size();++i)
+			seedVec[i]->C() = Color4b::Black;
+		
+		for(int i=0;i<borderVec.size();++i)
+			borderVec[i]->C() = Color4b::Gray;
+		
+		swap(newSeeds,seedVec);
+		
+		for(int i=0;i<seedVec.size();++i)
+			seedVec[i]->C() = Color4b::White;
+
+		tri::Allocator<CMeshO>::DeletePerVertexAttribute<VertexPointer> (m,"sources");			
+		
+	}
 }
 // Base vertex voronoi coloring algorithm.
 // it assumes VF adjacency. No attempt of computing real geodesic distnace is done. Just a BFS visit starting from the seeds. 
