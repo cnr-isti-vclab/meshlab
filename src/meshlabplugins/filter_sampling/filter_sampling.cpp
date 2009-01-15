@@ -755,6 +755,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		} break;
 		case FP_VORONOI_CLUSTERING :
 		{
+			tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
+			tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+			tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
 			int sampleNum = par.getInt("SampleNum");
 			int relaxIter = par.getInt("RelaxIter");
 			int randSeed = par.getInt("RandSeed");
@@ -764,13 +767,11 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			md.mm()->updateDataMask(MeshModel::MM_VERTMARK);	
 			md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);	
 			md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);	
-			tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-			tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
 
 			ClusteringSampler<CMeshO> vc(&seedVec);
 			if(randSeed!=0) tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
 			tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
-			VoronoiProcessing<CMeshO>::GeodesicVertexColoring(*cm, seedVec, relaxIter);
+			VoronoiProcessing<CMeshO>::GeodesicVertexColoring(*cm, seedVec, relaxIter,90,cb);
 			//VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
 
 	//			tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);

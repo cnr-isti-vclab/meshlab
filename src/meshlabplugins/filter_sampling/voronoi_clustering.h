@@ -67,10 +67,11 @@ class VoronoiProcessing
     typedef typename MeshType::FaceContainer		FaceContainer;
 	public:
 
-static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter)
+static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter, int percentileClamping, vcg::CallBackPos *cb=0)
 {			
 	for(int iter=0;iter<relaxIter;++iter)
 	{
+		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: First Partitioning");
 		tri::Geo<CMeshO> g;
 		float dist;
 		VertexPointer farthest;
@@ -80,6 +81,11 @@ static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedV
 		g.FarthestVertex(m,seedVec,farthest,dist,&sources);
 		
 		// find the vertexes of frontier faces
+		// and compute Area of all the regions
+
+		std::pair<float,VertexPointer> zz(0,0);
+		std::vector< std::pair<float,VertexPointer> > regionArea(m.vert.size(),zz);
+	
 		tri::UpdateFlags<CMeshO>::VertexClearV(m);
 		for(FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
 		{
@@ -92,8 +98,26 @@ static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedV
 									(*fi).V(i)->C() = Color4b::Black;
 								}
 						}
+				else // the face belongs to a single region; accumulate area;
+				{
+					int seedIndex = sources[(*fi).V(0)] - &*m.vert.begin();
+					regionArea[seedIndex].first+=DoubleArea(*fi);
+					regionArea[seedIndex].second=sources[(*fi).V(0)];
+				}
 		}
-    // Collect the frontier vertexes and run the geodesic using them as sources.
+		
+		Histogramf H;
+		H.SetRange(0,m.bbox.Diag()*m.bbox.Diag()*10,10000);
+		for(int i=0;i<regionArea.size();++i)
+			if(regionArea[i].second) H.Add(regionArea[i].first);
+			
+		float areaThreshold = H.Percentile(.1f);
+		qDebug("We have found %i regions, avg area is %f, 10perc is %f",seedVec.size(),H.Avg(),areaThreshold);
+
+						
+		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: Searching New Seeds");
+
+		// Collect the frontier vertexes and run the geodesic using them as sources.
 		std::vector<VertexPointer> borderVec;
 		for(VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi) 
 			if((*vi).IsV()) borderVec.push_back(&*vi);
@@ -102,7 +126,6 @@ static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedV
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
 
 		// Search the local maxima for each region and use them as new seeds	
-		std::pair<float,VertexPointer> zz(0,0);
 		std::vector< std::pair<float,VertexPointer> > seedMaxima(m.vert.size(),zz);
 		for(VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi) 
 		{
@@ -118,7 +141,8 @@ static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedV
 			if(seedMaxima[i].second) 
 					{
 						seedMaxima[i].second->C() = Color4b::Gray;
-						newSeeds.push_back(seedMaxima[i].second);
+						if(regionArea[i].first > areaThreshold) 
+								newSeeds.push_back(seedMaxima[i].second);
 					}
 		
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);		
