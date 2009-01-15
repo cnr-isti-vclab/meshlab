@@ -95,6 +95,7 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\filter_clean.dll"
   File "..\meshlab\plugins\filter_colorproc.dll"
   File "..\meshlab\plugins\filter_colorize.dll"
+  File "..\meshlab\plugins\filter_create.dll"
 
   File "..\meshlab\plugins\filter_func.dll"
   
