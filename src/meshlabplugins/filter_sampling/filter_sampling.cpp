@@ -497,6 +497,8 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 											"but it is placed in fixed middle position. As a consequence the resampled object will look severely aliased by a stairstep appearance.<br>"
 											"Useful only for simulating the output of 3D printing devices.");
 
+			parlst.addBool ("multisample", false, "Multisample",
+											"If true the distance field is more accurately compute by multisampling the volume (7 sample for each voxel). Much slower but less artifacts.");
 			
 		} break; 
 		 case FP_VORONOI_CLUSTERING :
@@ -728,15 +730,21 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			float voxelSize = par.getAbsPerc("CellSize");
 			float offsetThr = par.getAbsPerc("Offset");
 			bool discretizeFlag = par.getBool("discretize");
-			
+			bool multiSampleFlag = par.getBool("multisample");
 			MeshModel *baseMesh= md.mm();				
 			MeshModel *offsetMesh =md.addNewMesh("Offset mesh");
 			baseMesh->updateDataMask(MeshModel::MM_FACEMARK);	
 			
 			Point3i volumeDim;
-			BestDim( baseMesh->cm.bbox, voxelSize, volumeDim );
+			Box3f volumeBox = baseMesh->cm.bbox;
+			volumeBox.Offset(volumeBox.Diag()/10.0f);
+			BestDim(volumeBox , voxelSize, volumeDim );
+			
 			Log(GLLogStream::FILTER,"Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
-			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag, cb);
+			Log(GLLogStream::FILTER,"     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
+			Log(GLLogStream::FILTER,"     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
+			
+			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag, cb);
 			tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
 			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
 		} break;
