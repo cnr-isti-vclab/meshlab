@@ -347,7 +347,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
 			 break;
 	case FP_VERTEX_NORMAL_NORMALIZE :
-			tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
+			tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
 			 break;
 	
 	case FP_UNSHARP_NORMAL:			
