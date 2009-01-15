@@ -426,7 +426,8 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			parlst.addInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be choosen.");
 			break;
 		case FP_POISSONDISK_SAMPLING :
-			parlst.addEnum("AlgorithmVersion", 0, QStringList() << "Projection-based" << "Surface-based", tr("Algorithm version:"));
+			parlst.addEnum("AlgorithmVersion", 0, QStringList() << "Projection-based (naive)" << "Surface-based (naive)" << 
+				"Projection-based" << "Surface-based" << "Projection-based (perfect)" << "Surface-based (perfect)", tr("Algorithm version:"));
 			parlst.addInt("SampleNum", 100000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
 			break;
 		case FP_TEXEL_SAMPLING :  
