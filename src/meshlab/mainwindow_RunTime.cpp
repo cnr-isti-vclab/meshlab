@@ -563,6 +563,7 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
   // (4) Apply the Filter
 	bool ret;
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+	QTime tt; tt.start();
 	GLA()->meshDoc.busy=true;
 	ret=iFilter->applyFilter(action,   GLA()->meshDoc, params, QCallBack);
 	GLA()->meshDoc.busy=false;
@@ -572,7 +573,7 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
 
 	if(ret)
 	{
-		GLA()->log.Logf(GLLogStream::SYSTEM,"Applied filter %s",qPrintable(action->text()));
+		GLA()->log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
 		GLA()->setWindowModified(true);
 		GLA()->setLastAppliedFilter(action);
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
