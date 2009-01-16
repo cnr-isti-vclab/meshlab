@@ -426,9 +426,8 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			parlst.addInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be choosen.");
 			break;
 		case FP_POISSONDISK_SAMPLING :
-			parlst.addEnum("AlgorithmVersion", 0, QStringList() << "Projection-based (naive)" << "Surface-based (naive)" << 
-				"Projection-based" << "Surface-based" << "Projection-based (perfect)" << "Surface-based (perfect)", tr("Algorithm version:"));
-			parlst.addInt("SampleNum", 100000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
+			parlst.addInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
+			parlst.addInt("MontecarloSamples", 1000000, "Montecarlo samples", "The over-sampling samples. The generated Poisson-disk samples are a subset of such samples.");
 			break;
 		case FP_TEXEL_SAMPLING :  
  		  parlst.addInt (	"TextureW", 512, "Texture Width",
@@ -570,7 +569,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			
 			BaseSampler mps(&(mm->cm));
 			if(par.getBool("Weighted")) 
-					   tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+				tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
 			else tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
@@ -622,10 +621,18 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 
 			MeshModel *curMM= md.mm();
 			MeshModel *mm= md.addNewMesh("Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
-			
+
+			// first of all generate montecarlo samples for fast lookup
+			CMeshO presampledMesh;
+			BaseSampler sampler(&presampledMesh);
+			tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, par.getInt("MontecarloSamples"));
+			presampledMesh.bbox = curMM->cm.bbox; // we want the same bounding box
+
 			BaseSampler mps(&(mm->cm));
-			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm,mps,
-				par.getInt("SampleNum"),par.getEnum("AlgorithmVersion"));
+			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm, mps, presampledMesh, par.getInt("SampleNum"));
+
+			// clean support mesh
+			presampledMesh.Clear();
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
