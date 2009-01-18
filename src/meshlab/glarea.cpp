@@ -767,8 +767,8 @@ void GLArea::initTexture()
 			while(bestW>MaxTextureSize) bestW /=2;
 			while(bestH>MaxTextureSize) bestH /=2;
 
-			log.Log(0,"Loading textures");
-			log.Logf(0,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mm()->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
+			log.Log(GLLogStream::SYSTEM,"Loading textures");
+			log.Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mm()->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
 			imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 			imgGL=convertToGLFormat(imgScaled);
 			mm()->glw.TMId.push_back(0);
