@@ -151,11 +151,11 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 
 				currentMesh->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 
-				Log(0,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+				Log(GLLogStream::FILTER,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 			}
 			else								// keep original faces
 			{
-				Log(0,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+				Log(GLLogStream::FILTER,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 			}
 
 			// init new layer
@@ -180,7 +180,7 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 
 			tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, false);
 
-			Log(0,"Duplicated current model to layer %i", md.meshList.size());
+			Log(GLLogStream::FILTER,"Duplicated current model to layer %i", md.meshList.size());
 
 			// init new layer
 			destMesh->fileName = "newlayer.ply";								// mesh name

@@ -490,7 +490,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 				}
 			}
 
-			Log(0, "Successfully projected %i vertices", mesh->cm.vn);
+			Log(GLLogStream::FILTER, "Successfully projected %i vertices", mesh->cm.vn);
 		}
 		else if (id & _COLORIZE_)
 		{
@@ -599,7 +599,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 				mesh->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			}
 
-			Log(0, "Marching cubes MLS meshing done.");
+			Log(GLLogStream::FILTER, "Marching cubes MLS meshing done.");
 		}
 
 		delete mls;

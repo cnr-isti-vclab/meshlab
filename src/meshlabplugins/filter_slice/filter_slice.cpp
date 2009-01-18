@@ -187,7 +187,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 			{
 				if (!tri::Clean<CMeshO>::IsTwoManifoldFace(base->cm) || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
 				{
-					Log(0,"Mesh is not two manifold, cannot apply filter");
+					Log(GLLogStream::FILTER,"Mesh is not two manifold, cannot apply filter");
 					return false;
 				}
 

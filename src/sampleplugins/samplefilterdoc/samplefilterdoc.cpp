@@ -157,7 +157,7 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 
 
 			// Log function dump textual info in the lower part of the MeshLab screen. 
-			Log(0,"Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
+			Log(GLLogStream::FILTER,"Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
 				
 		} break;
 		default: assert (0);
