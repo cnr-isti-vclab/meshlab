@@ -284,6 +284,17 @@ public:
 			assert(0);
       return -1;
     }
+		
+    virtual QAction *AC(FilterIDType filterID)
+  	{
+			QString idName=this->filterName(filterID);
+      foreach( QAction *tt, actionList)
+        if( idName  == tt->text() ) return tt;
+			
+			qDebug("unable to find the action corresponding to action  '%i'",filterID);
+			assert(0);
+      return 0;
+    }
 	 
 	 virtual const QString filterInfo(QAction *a){return this->filterInfo(ID(a));};
 	 virtual const QString filterName(QAction *a){return this->filterName(ID(a));};
@@ -301,6 +312,19 @@ protected:
     
 		QList <FilterIDType> typeList;
     
+		void Log(const char * f, ... ) 
+		{
+			if(log)
+			{	
+				char buf[4096];
+				va_list marker;
+				va_start( marker, f );     
+				vsprintf(buf,f,marker);
+				va_end( marker );              
+				log->Log(GLLogStream::FILTER,buf);
+			}
+		}
+
 		void Log(int Level, const char * f, ... ) 
 		{
 		if(log)
