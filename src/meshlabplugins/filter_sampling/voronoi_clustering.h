@@ -67,7 +67,44 @@ class VoronoiProcessing
     typedef typename MeshType::FaceContainer		FaceContainer;
 	public:
 
-static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter, int percentileClamping, vcg::CallBackPos *cb=0)
+static void SeedToVertexConversion(MeshType &m,std::vector<CoordType> &seedPVec,std::vector<VertexType *> &seedVVec)
+{
+	typedef typename vcg::SpatialHashTable<VertexType, ScalarType> HashVertexGrid;
+	seedVVec.clear();
+	//unsigned int nsamples = vcg::tri::GetInSphereVertex(vmesh, sht, p ,radius,closests,distances,points);
+	HashVertexGrid HG;
+	HG.Set(m.vert.begin(),m.vert.end());
+	
+	typename std::vector<CoordType>::iterator pi;
+	for(pi=seedPVec.begin();pi!=seedPVec.end();++pi)
+		{
+			float dist_upper_bound=333;
+			float dist;
+			typename MeshType::VertexPointer vp;
+		  //f=tri::GetClosestFace<MetroMesh,MetroMeshHash>(S2, hS2, p, dist_upper_bound, dist, normf, bestq, ip);
+			vp=tri::GetClosestVertex<CMeshO,HashVertexGrid>(m, HG, *pi, dist_upper_bound, dist);
+			if(vp)
+				{
+					seedVVec.push_back(vp);
+				}
+		}
+}
+
+static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, vcg::CallBackPos *cb=0)
+{
+		tri::Geo<CMeshO> g;
+		VertexPointer farthest;
+		float dist;
+		typename MeshType::template PerVertexAttributeHandle<VertexPointer> sources;
+		sources =  tri::Allocator<CMeshO>::AddPerVertexAttribute<VertexPointer> (m,"sources");
+		assert(tri::Allocator<CMeshO>::IsValidHandle(m,sources));
+		g.FarthestVertex(m,seedVec,farthest,dist,&sources);
+		
+		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
+		tri::Allocator<CMeshO>::DeletePerVertexAttribute<VertexPointer> (m,"sources");			
+}
+
+static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter, int percentileClamping, vcg::CallBackPos *cb=0)
 {			
 	for(int iter=0;iter<relaxIter;++iter)
 	{
@@ -77,7 +114,8 @@ static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedV
 		VertexPointer farthest;
 		// first run: find for each point what is the closest to one of the seeds.
 		typename MeshType::template PerVertexAttributeHandle<VertexPointer> sources;
-		sources =  tri::Allocator<CMeshO>::AddPerVertexAttribute<VertexPointer> (m,"sources");
+		sources = tri::Allocator<CMeshO>::AddPerVertexAttribute<VertexPointer> (m,"sources");
+		
 		g.FarthestVertex(m,seedVec,farthest,dist,&sources);
 		
 		// find the vertexes of frontier faces
@@ -106,14 +144,16 @@ static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedV
 				}
 		}
 		
-		Histogramf H;
-		H.SetRange(0,m.bbox.Diag()*m.bbox.Diag()*10,10000);
+		// Smaller area region are discarded
+		Distribution<float> H;
 		for(int i=0;i<regionArea.size();++i)
 			if(regionArea[i].second) H.Add(regionArea[i].first);
 			
-		float areaThreshold = H.Percentile(.1f);
-		qDebug("We have found %i regions, avg area is %f, 10perc is %f",seedVec.size(),H.Avg(),areaThreshold);
-
+		float areaThreshold;
+		if(iter==0) areaThreshold = H.Percentile(.1f);
+		else areaThreshold = H.Percentile(.001f);
+		qDebug("We have found %i regions range (%f %f), avg area is %f, Variance is %f 10perc is %f",seedVec.size(),H.Min(),H.Max(),H.Avg(),H.StandardDeviation(),areaThreshold);
+  
 						
 		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: Searching New Seeds");
 
@@ -141,7 +181,7 @@ static void GeodesicVertexColoring(MeshType &m, std::vector<VertexType *> &seedV
 			if(seedMaxima[i].second) 
 					{
 						seedMaxima[i].second->C() = Color4b::Gray;
-						if(regionArea[i].first > areaThreshold) 
+						if(regionArea[i].first >= areaThreshold) 
 								newSeeds.push_back(seedMaxima[i].second);
 					}
 		

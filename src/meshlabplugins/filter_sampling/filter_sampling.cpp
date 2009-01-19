@@ -116,7 +116,8 @@ class BaseSampler
  */
 class HausdorffSampler
 {
-	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
+	typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MetroMeshVertexGrid;
 public:
   
 	HausdorffSampler(CMeshO* _m=0,CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 )
@@ -128,7 +129,8 @@ public:
 	CMeshO *samplePtMesh;  /// the mesh containing the sample points
 	CMeshO *closestPtMesh; /// the mesh containing the corresponding closest points that have been found
 	
-	MetroMeshGrid   unifGrid;
+	MetroMeshVertexGrid   unifVertexGrid;
+	MetroMeshFaceGrid   unifFaceGrid;
 
 	// Parameters
 		double          min_dist;
@@ -158,7 +160,7 @@ public:
 		closestPtMesh = _closestMesh;
 		if(m) 
 		{
-			unifGrid.Set(m->face.begin(),m->face.end());
+			unifFaceGrid.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
 			hist.SetRange(0.0, m->bbox.Diag()/100.0, 100);
 		}
@@ -192,16 +194,14 @@ float AddSample(const CMeshO::CoordType &startPt,const CMeshO::CoordType &startN
 		CMeshO::FaceType   *nearestF=0;
 		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 		dist=dist_upper_bound;
-		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+		nearestF =  unifFaceGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
 
     // update distance measures
     if(dist == dist_upper_bound)
-        return dist;
+return dist;
 
-    if(dist > max_dist)
-        max_dist = dist;        // L_inf
-    if(dist < min_dist)
-        min_dist = dist;        // L_inf
+    if(dist > max_dist) max_dist = dist;        // L_inf
+    if(dist < min_dist) min_dist = dist;        // L_inf
 		
 		mean_dist += dist;	        // L_1
     RMS_dist  += dist*dist;     // L_2
@@ -319,6 +319,7 @@ FilterDocSampling::FilterDocSampling()
 			<< FP_VERTEX_RESAMPLING
 			<< FP_UNIFORM_MESH_RESAMPLING
 			<< FP_VORONOI_CLUSTERING
+			<< FP_VORONOI_COLORING
 	;
   
   foreach(FilterIDType tt , types())
@@ -340,6 +341,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 		case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer"); 
 		case FP_UNIFORM_MESH_RESAMPLING  :  return QString("Uniform Mesh Resampling"); 
 		case FP_VORONOI_CLUSTERING  :  return QString("Voronoi Vertex Clustering"); 
+		case FP_VORONOI_COLORING  :  return QString("Voronoi Vertex Coloring"); 
 			
 		default : assert(0); return QString("unknown filter!!!!");
 	}
@@ -366,6 +368,7 @@ const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 		case FP_VORONOI_CLUSTERING   :  return QString("Apply a clustering algorithm that builds voronoi cells over the mesh starting from random points,"
 																									"collapse each voronoi cell to a single vertex, and construct the triangulation according to the clusters adjacency relations.<br>"
 																									"Very similar to the technique described in <b>'Approximated Centroidal Voronoi Diagrams for Uniform Polygonal Mesh Coarsening'</b> - Valette Chassery - Eurographics 2004");
+		case FP_VORONOI_COLORING   :  return QString("Color a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis."); 
 		default : assert(0); return QString("unknown filter!!!!");
 
 	}
@@ -374,7 +377,8 @@ const int FilterDocSampling::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-    case FP_VORONOI_CLUSTERING : return  MeshModel::MM_VERTFACETOPO;
+		case FP_VORONOI_COLORING :
+		case FP_VORONOI_CLUSTERING : return  MeshModel::MM_VERTFACETOPO;
 
 		case FP_VERTEX_RESAMPLING :
 		case FP_UNIFORM_MESH_RESAMPLING:
@@ -510,6 +514,17 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			 parlst.addInt ("RandSeed", 1, "Random Seed",
 											"The final number of vertices.");
 			 
+		 } break; 
+		 case FP_VORONOI_COLORING :
+		 {
+				MeshModel *target= md.mm();
+				foreach (target, md.meshList) 
+						if (target != md.mm())  break;
+		    
+				parlst.addMesh ("ColoredMesh", md.mm(), "To be Colored Mesh",
+												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh.");
+				parlst.addMesh ("VertexMesh", target, "Vertex Mesh",
+												"The mesh that is sampled for the comparison.");
 		 } break; 
 		default : assert(0); 
 	}
@@ -778,7 +793,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			ClusteringSampler<CMeshO> vc(&seedVec);
 			if(randSeed!=0) tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
 			tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
-			VoronoiProcessing<CMeshO>::GeodesicVertexColoring(*cm, seedVec, relaxIter,90,cb);
+			VoronoiProcessing<CMeshO>::VoronoiRelaxing(*cm, seedVec, relaxIter,90,cb);
+			
 			//VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
 
 	//			tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);
@@ -786,7 +802,26 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 
 		}
 		break;
-				
+		case FP_VORONOI_COLORING :
+		{
+			MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples 
+			MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample. 
+			mmM->updateDataMask(MeshModel::MM_VERTFACETOPO);	
+			tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
+			tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
+			tri::Allocator<CMeshO>::CompactFaceVector(mmM->cm);
+			vector<CMeshO::CoordType> vecP; 
+			// Fills the point vector with the position of the Point cloud
+			for(CMeshO::VertexIterator vi= mmV->cm.vert.begin(); vi!= mmV->cm.vert.end(); ++vi) if(!(*vi).IsD())
+				vecP.push_back((*vi).cP());
+			
+			vector<CMeshO::VertexPointer> vecV; // points to vertexes of ColoredMesh; 
+			VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
+			Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
+			for(int i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
+		  VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV);
+		} break;
+
 		default : assert(0);
 		}
 	return true;
@@ -805,6 +840,7 @@ const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *acti
 		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling; 
 		case FP_VORONOI_CLUSTERING: return FilterDocSampling::Remeshing;
 		case FP_UNIFORM_MESH_RESAMPLING: return FilterDocSampling::Remeshing;
+		case FP_VORONOI_COLORING: return FilterDocSampling::Sampling;
 		default: assert(0);
 	}
 	return FilterClass(0);
