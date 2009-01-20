@@ -320,6 +320,7 @@ FilterDocSampling::FilterDocSampling()
 			<< FP_UNIFORM_MESH_RESAMPLING
 			<< FP_VORONOI_CLUSTERING
 			<< FP_VORONOI_COLORING
+			<< FP_DISK_COLORING
 	;
   
   foreach(FilterIDType tt , types())
@@ -342,6 +343,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 		case FP_UNIFORM_MESH_RESAMPLING  :  return QString("Uniform Mesh Resampling"); 
 		case FP_VORONOI_CLUSTERING  :  return QString("Voronoi Vertex Clustering"); 
 		case FP_VORONOI_COLORING  :  return QString("Voronoi Vertex Coloring"); 
+		case FP_DISK_COLORING  :  return QString("Disk Vertex Coloring"); 
 			
 		default : assert(0); return QString("unknown filter!!!!");
 	}
@@ -368,7 +370,8 @@ const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 		case FP_VORONOI_CLUSTERING   :  return QString("Apply a clustering algorithm that builds voronoi cells over the mesh starting from random points,"
 																									"collapse each voronoi cell to a single vertex, and construct the triangulation according to the clusters adjacency relations.<br>"
 																									"Very similar to the technique described in <b>'Approximated Centroidal Voronoi Diagrams for Uniform Polygonal Mesh Coarsening'</b> - Valette Chassery - Eurographics 2004");
-		case FP_VORONOI_COLORING   :  return QString("Color a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis."); 
+		case FP_VORONOI_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis."); 
+		case FP_DISK_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis."); 
 		default : assert(0); return QString("unknown filter!!!!");
 
 	}
@@ -387,7 +390,9 @@ const int FilterDocSampling::getRequirements(QAction *action)
 		case FP_MONTECARLO_SAMPLING :    
 		case FP_POISSONDISK_SAMPLING :
 		case FP_SIMILAR_SAMPLING :   
+		case FP_DISK_COLORING :
 		case FP_SUBDIV_SAMPLING :  return 0; 
+		
 		case FP_TEXEL_SAMPLING  :  return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTNORMAL;
 
     default: assert(0);
@@ -525,6 +530,20 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh.");
 				parlst.addMesh ("VertexMesh", target, "Vertex Mesh",
 												"The mesh that is sampled for the comparison.");
+		 } break; 
+		 case FP_DISK_COLORING :
+		 {
+				MeshModel *target= md.mm();
+				foreach (target, md.meshList) 
+						if (target != md.mm())  break;
+		    
+				parlst.addMesh ("ColoredMesh", md.mm(), "To be Colored Mesh",
+												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh.");
+				parlst.addMesh ("VertexMesh", target, "Vertex Mesh",
+												"The mesh that is sampled for the comparison.");
+				float Diag = md.mm()->cm.bbox.Diag();
+				parlst.addDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f, MeshModel::MM_VERTCOLOR, tr("Radius"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
+
 		 } break; 
 		default : assert(0); 
 	}
@@ -818,8 +837,21 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			vector<CMeshO::VertexPointer> vecV; // points to vertexes of ColoredMesh; 
 			VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
 			Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
-			for(int i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
+			for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
 		  VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV);
+		} break;
+	case FP_DISK_COLORING :
+		{
+			MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples 
+			MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample. 
+			CMeshO::VertexIterator vim,viv;		
+			CMeshO::ScalarType r2 = par.getDynamicFloat("Radius");
+			r2=r2*r2;
+			tri::UpdateColor<CMeshO>::VertexConstant(mmM->cm, Color4b::LightGray);
+			for(vim = mmM->cm.vert.begin(); vim!= mmM->cm.vert.end(); ++vim) if(!(*vim).IsD())
+			for(viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
+				if(SquaredDistance((*viv).cP(), (*vim).cP()) < r2) 
+						vim->C()=Color4b::Red;
 		} break;
 
 		default : assert(0);
@@ -840,7 +872,8 @@ const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *acti
 		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling; 
 		case FP_VORONOI_CLUSTERING: return FilterDocSampling::Remeshing;
 		case FP_UNIFORM_MESH_RESAMPLING: return FilterDocSampling::Remeshing;
-		case FP_VORONOI_COLORING: return FilterDocSampling::Sampling;
+		case FP_DISK_COLORING: 
+		case FP_VORONOI_COLORING: return MeshFilterInterface::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::VertexColoring);
 		default: assert(0);
 	}
 	return FilterClass(0);
