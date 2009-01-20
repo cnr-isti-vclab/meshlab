@@ -5,22 +5,25 @@
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/trimesh/subset.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <lib/levmar/lm.h>
 
 #include "frame.h"
 
+namespace vcg{
 template <class MeshType>
 class CurvatureFromSliding
 {
+typedef bool CallBackPos(const int pos, const char * str );
 
 public:
-	void Compute(MeshType & _mesh, typename MeshType::ScalarType   rad ){
+	void Compute(MeshType & _mesh, typename MeshType::ScalarType   rad, CallBackPos *  cb = 0){
 
 		vcg::tri::UpdateFlags<MeshType>::FaceProjection(_mesh);
 
-		 oPos = vcg::tri::Allocator<MeshType>::AddPerVertexAttribute<typename MeshType::CoordType>(patch,"oPpos");
-		typename MeshType::VertexIterator vi;
+		oPos = vcg::tri::Allocator<MeshType>::AddPerVertexAttribute<typename MeshType::CoordType>(patch,"oPpos");
+		typename MeshType::VertexIterator vi;int i;
 		mesh = &_mesh;
 		vcg::Box3<typename MeshType::ScalarType> bbox = mesh->bbox;
 		typename MeshType::ScalarType infl = bbox.Diag()*0.1;
@@ -29,10 +32,13 @@ public:
 		bbox.max+=bb;
 
 		grid.Set((*mesh).face.begin(),(*mesh).face.end(),bbox);
-		for(vi = mesh->vert.begin(); vi!= mesh->vert.end(); ++vi){
+		for(i = 0, vi = mesh->vert.begin(); vi!= mesh->vert.end();++i, ++vi){
 			v = &(*vi);
 			Sample( rad);
 			OnVertex();
+			if(cb!=0)
+				if ( i % (mesh->vert.size()/100) == 0)
+					(*cb)(i / (mesh->vert.size()/100), "Computing Curvature Principal Direction from Sliding");
 		}
 		vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<typename MeshType::CoordType>(patch,oPos);
 	}
@@ -282,5 +288,6 @@ static void eval_only_k( double *x,double *p,  int n,int m, void *data){
 
  }
 
+};// end of class
 
-};
+}// end of subspace
