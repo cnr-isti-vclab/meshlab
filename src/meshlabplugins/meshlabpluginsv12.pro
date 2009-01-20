@@ -23,6 +23,7 @@ SUBDIRS       = io_base\
 				filter_select \
 #				filter_texture \
 				filter_unsharp \
+				filter_curvature_from_sliding \
 				render_splatting \
 				render_gdp \
 				meshdecorate \
