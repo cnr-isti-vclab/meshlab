@@ -451,13 +451,13 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			break;
 		case FP_HAUSDORFF_DISTANCE :  
 			{
-				MeshModel *target= md.mm();
-				foreach (target, md.meshList) 
-						if (target != md.mm())  break;
+				MeshModel *vertexMesh= md.mm();
+				foreach (vertexMesh, md.meshList) 
+						if (vertexMesh != md.mm())  break;
 		    
 				parlst.addMesh ("SampledMesh", md.mm(), "Sampled Mesh",
 												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh.");
-				parlst.addMesh ("TargetMesh", target, "Target Mesh",
+				parlst.addMesh ("TargetMesh", vertexMesh, "Target Mesh",
 												"The mesh that is sampled for the comparison.");
 				parlst.addBool ("SaveSample", false, "Save Samples",
 												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples.");										
@@ -475,13 +475,13 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			} break;
 		case FP_VERTEX_RESAMPLING:
 		{
-				MeshModel *target= md.mm();
-				foreach (target, md.meshList) 
-						if (target != md.mm())  break;
+				MeshModel *vertexMesh= md.mm();
+				foreach (vertexMesh, md.meshList) 
+						if (vertexMesh != md.mm())  break;
 						
 				parlst.addMesh ("SourceMesh", md.mm(), "Source Mesh",
 												"The mesh that contains the source data that we want to transfer.");
-				parlst.addMesh ("TargetMesh", target, "Target Mesh",
+				parlst.addMesh ("TargetMesh", vertexMesh, "Target Mesh",
 												"The mesh whose vertexes will receive the data from the source.");
 				parlst.addBool ("GeomTransfer", false, "Transfer Geometry",
 												"if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh");										
@@ -508,7 +508,10 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 
 			parlst.addBool ("multisample", false, "Multisample",
 											"If true the distance field is more accurately compute by multisampling the volume (7 sample for each voxel). Much slower but less artifacts.");
-			
+			parlst.addBool ("absDist", false, "Absolute Distance",
+											"If true a <b> not</b> signed distance field is computed. "
+											"In this case you have to choose a not zero Offset and a double surface is built around the original surface, inside and outside. "
+											"Is useful to convrt thin floating surfaces into <i> solid, thick meshes.</i>. t");			
 		} break; 
 		 case FP_VORONOI_CLUSTERING :
 		 {
@@ -520,30 +523,29 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 											"The final number of vertices.");
 			 
 		 } break; 
-		 case FP_VORONOI_COLORING :
+		case FP_VORONOI_COLORING :
+		case FP_DISK_COLORING :
 		 {
-				MeshModel *target= md.mm();
-				foreach (target, md.meshList) 
-						if (target != md.mm())  break;
+				MeshModel *colorMesh= md.mm();
+				foreach (colorMesh, md.meshList) // Search a mesh with some faces..
+						if (colorMesh->cm.fn>0)  break;
+						
+				MeshModel *vertexMesh;
+				foreach (vertexMesh, md.meshList) // Search another mesh
+						if (vertexMesh != colorMesh)  break;
 		    
-				parlst.addMesh ("ColoredMesh", md.mm(), "To be Colored Mesh",
-												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh.");
-				parlst.addMesh ("VertexMesh", target, "Vertex Mesh",
-												"The mesh that is sampled for the comparison.");
-		 } break; 
-		 case FP_DISK_COLORING :
-		 {
-				MeshModel *target= md.mm();
-				foreach (target, md.meshList) 
-						if (target != md.mm())  break;
-		    
-				parlst.addMesh ("ColoredMesh", md.mm(), "To be Colored Mesh",
-												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh.");
-				parlst.addMesh ("VertexMesh", target, "Vertex Mesh",
-												"The mesh that is sampled for the comparison.");
-				float Diag = md.mm()->cm.bbox.Diag();
-				parlst.addDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f, MeshModel::MM_VERTCOLOR, tr("Radius"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
-
+				parlst.addMesh ("ColoredMesh", colorMesh, "To be Colored Mesh",
+												"The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters.");
+				parlst.addMesh ("VertexMesh", vertexMesh, "Vertex Mesh",
+												"The mesh whose vertexes are used as seed points for the color computation. These seeds point are projected onto the above mesh.");
+			if(ID(action) ==	FP_DISK_COLORING) {
+					float Diag = md.mm()->cm.bbox.Diag();
+					parlst.addDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f, MeshModel::MM_VERTCOLOR, tr("Radius"), 
+																"the radius of the spheres centered in the VertexMesh seeds ");
+			} else {
+					parlst.addBool ("backward", false, "BackDistance",
+													"If true the mesh is colored according the distance from the frontier of the voonoi diagram induced by the VertexMesh seeds.");
+			}
 		 } break; 
 		default : assert(0); 
 	}
@@ -777,6 +779,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			float offsetThr = par.getAbsPerc("Offset");
 			bool discretizeFlag = par.getBool("discretize");
 			bool multiSampleFlag = par.getBool("multisample");
+			bool absDistFlag = par.getBool("absDist");
+			
 			MeshModel *baseMesh= md.mm();				
 			MeshModel *offsetMesh =md.addNewMesh("Offset mesh");
 			baseMesh->updateDataMask(MeshModel::MM_FACEMARK);	
@@ -790,7 +794,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			Log(GLLogStream::FILTER,"     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
 			Log(GLLogStream::FILTER,"     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
 			
-			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag, cb);
+			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag,absDistFlag, cb);
 			tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
 			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
 		} break;
@@ -825,6 +829,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		{
 			MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples 
 			MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample. 
+			bool backwardFlag = par.getBool("backward");
 			mmM->updateDataMask(MeshModel::MM_VERTFACETOPO);	
 			tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
 			tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
@@ -838,7 +843,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
 			Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
 			for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
-		  VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV);
+		  VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV,backwardFlag);
 		} break;
 	case FP_DISK_COLORING :
 		{
