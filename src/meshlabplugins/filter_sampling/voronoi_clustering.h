@@ -90,7 +90,7 @@ static void SeedToVertexConversion(MeshType &m,std::vector<CoordType> &seedPVec,
 		}
 }
 
-static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, vcg::CallBackPos *cb=0)
+static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, bool frontierFlag=true,vcg::CallBackPos *cb=0)
 {
 		tri::Geo<CMeshO> g;
 		VertexPointer farthest;
@@ -100,30 +100,28 @@ static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, vcg
 		assert(tri::Allocator<CMeshO>::IsValidHandle(m,sources));
 		g.FarthestVertex(m,seedVec,farthest,dist,&sources);
 		
+		if(frontierFlag)
+		{
+				std::pair<float,VertexPointer> zz(0,0);
+				std::vector< std::pair<float,VertexPointer> > regionArea(m.vert.size(),zz);
+				std::vector<VertexPointer> borderVec;
+				GetAreaAndFrontier(m, sources,  regionArea, borderVec);
+				g.FarthestVertex(m,borderVec,farthest,dist);		
+		}
+		
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
 		tri::Allocator<CMeshO>::DeletePerVertexAttribute<VertexPointer> (m,"sources");			
 }
 
-static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter, int percentileClamping, vcg::CallBackPos *cb=0)
-{			
-	for(int iter=0;iter<relaxIter;++iter)
-	{
-		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: First Partitioning");
-		tri::Geo<CMeshO> g;
-		float dist;
-		VertexPointer farthest;
-		// first run: find for each point what is the closest to one of the seeds.
-		typename MeshType::template PerVertexAttributeHandle<VertexPointer> sources;
-		sources = tri::Allocator<CMeshO>::AddPerVertexAttribute<VertexPointer> (m,"sources");
-		
-		g.FarthestVertex(m,seedVec,farthest,dist,&sources);
-		
-		// find the vertexes of frontier faces
-		// and compute Area of all the regions
+typedef typename MeshType::template PerVertexAttributeHandle<VertexPointer> PerVertexPointerHandle;
 
-		std::pair<float,VertexPointer> zz(0,0);
-		std::vector< std::pair<float,VertexPointer> > regionArea(m.vert.size(),zz);
-	
+// find the vertexes of frontier faces
+// and compute Area of all the regions
+static void GetAreaAndFrontier(MeshType &m, PerVertexPointerHandle &sources,
+		std::vector< std::pair<float,VertexPointer> > &regionArea,
+		std::vector<VertexPointer> &borderVec
+		)		
+{
 		tri::UpdateFlags<CMeshO>::VertexClearV(m);
 		for(FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
 		{
@@ -143,6 +141,32 @@ static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int
 					regionArea[seedIndex].second=sources[(*fi).V(0)];
 				}
 		}
+				
+		// Collect the frontier vertexes
+		borderVec.clear();
+		for(VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi) 
+			if((*vi).IsV()) borderVec.push_back(&*vi);
+}		
+
+static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter, int percentileClamping, vcg::CallBackPos *cb=0)
+{			
+	for(int iter=0;iter<relaxIter;++iter)
+	{
+		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: First Partitioning");
+		tri::Geo<CMeshO> g;
+		float dist;
+		VertexPointer farthest;
+		// first run: find for each point what is the closest to one of the seeds.
+		typename MeshType::template PerVertexAttributeHandle<VertexPointer> sources;
+		sources = tri::Allocator<CMeshO>::AddPerVertexAttribute<VertexPointer> (m,"sources");
+		
+		g.FarthestVertex(m,seedVec,farthest,dist,&sources);
+		
+		std::pair<float,VertexPointer> zz(0,0);
+		std::vector< std::pair<float,VertexPointer> > regionArea(m.vert.size(),zz);
+		std::vector<VertexPointer> borderVec;
+
+		GetAreaAndFrontier(m, sources,  regionArea, borderVec);
 		
 		// Smaller area region are discarded
 		Distribution<float> H;
@@ -154,13 +178,7 @@ static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int
 		else areaThreshold = H.Percentile(.001f);
 		qDebug("We have found %i regions range (%f %f), avg area is %f, Variance is %f 10perc is %f",seedVec.size(),H.Min(),H.Max(),H.Avg(),H.StandardDeviation(),areaThreshold);
   
-						
 		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: Searching New Seeds");
-
-		// Collect the frontier vertexes and run the geodesic using them as sources.
-		std::vector<VertexPointer> borderVec;
-		for(VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi) 
-			if((*vi).IsV()) borderVec.push_back(&*vi);
 			
 		g.FarthestVertex(m,borderVec,farthest,dist);		
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
