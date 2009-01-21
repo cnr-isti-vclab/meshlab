@@ -85,7 +85,10 @@ class BaseSampler
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 		m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
-		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
+		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] + f.V(2)->N()*p[2];
+
+		if (m->vert.QualityEnabled)
+			m->vert.back().Q() = f.V(0)->Q()*p[0] + f.V(1)->Q()*p[2] + f.V(2)->Q()*p[2];
 	}
 	
 	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const Point2i &tp)
@@ -100,7 +103,7 @@ class BaseSampler
 		{
 			QRgb val;
 			int xpos = tex->width()  * (float(tp[0])/texSamplingWidth);
-			int ypos = tex->height() * (1.0- float(tp[1])/texSamplingHeight);			
+			int ypos = tex->height() * (1.0- float(tp[1])/texSamplingHeight);
 			val = tex->pixel(xpos,ypos);
 			m->vert.back().C().SetRGB(qRed(val),qGreen(val),qBlue(val));
 		}
