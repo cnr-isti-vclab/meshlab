@@ -99,6 +99,9 @@ DEFINES += GLEW_STATIC
 INCLUDEPATH += . .. ../../../vcglib ../../../code/lib/glew/include
 CONFIG += stl
 
+#makes it compile under win32 and newest mingw gcc
+win32-g++:QMAKE_CXXFLAGS += -fpermissive
+
 # The following define is needed in gcc to remove the asserts
 win32-g++:DEFINES += NDEBUG
 CONFIG(debug, debug|release) {

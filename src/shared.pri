@@ -28,6 +28,8 @@ win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 
 DESTDIR       = ../../meshlab/plugins
 
+win32-g++:QMAKE_CXXFLAGS += -fpermissive
+
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {
       unix:TARGET = $$member(TARGET, 0)_debug
