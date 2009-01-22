@@ -68,12 +68,13 @@ using namespace std;
 class BaseSampler
 {
 	public:
-	BaseSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;tex=0;};
+	BaseSampler(CMeshO* _m){m=_m; uvSpaceFlag = false; qualitySampling=false; tex=0;};
 	CMeshO *m;
 	QImage* tex;
 	int texSamplingWidth;
 	int texSamplingHeight;
 	bool uvSpaceFlag;
+	bool qualitySampling;
 	
 	void AddVert(const CMeshO::VertexType &p) 
 	{
@@ -87,7 +88,7 @@ class BaseSampler
 		m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] + f.V(2)->N()*p[2];
 
-		if (m->vert.QualityEnabled)
+		if (qualitySampling)	
 			m->vert.back().Q() = f.V(0)->Q()*p[0] + f.V(1)->Q()*p[2] + f.V(2)->Q()*p[2];
 	}
 	
