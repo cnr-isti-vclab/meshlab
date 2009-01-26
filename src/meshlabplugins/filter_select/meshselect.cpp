@@ -43,9 +43,9 @@ const QString SelectionFilterPlugin::filterName(FilterIDType filter)
 	  case FP_SELECT_ERODE :		           return QString("Erode Selection");
 	  case FP_SELECT_DILATE :		           return QString("Dilate Selection");
 	  case FP_SELECT_BORDER_FACES:		     return QString("Select Border Faces");
-	  case FP_SELECT_BY_QUALITY :		       return QString("Select by Quality");
+	  case FP_SELECT_BY_QUALITY :		       return QString("Select by Vertex Quality");
 	  case FP_SELECT_BY_RANGE:						 return QString("Select by Coord range");
-	  case FP_SELECT_BY_COLOR:				return QString("Select Face by color");
+	  case FP_SELECT_BY_COLOR:						 return QString("Select Face by Vertex Color");
   }
   return QString("Unknown filter");
 }
@@ -94,8 +94,10 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 						std::pair<float,float> minmax =  tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm); 
 						float minq=minmax.first;
 						float maxq=minmax.second;
-						parlst.addAbsPerc("minQ",minq*.75+maxq*.25,minq,maxq,"Min Quality", "Minimum acceptable quality value");
-						parlst.addAbsPerc("maxQ",minq*.25+maxq*.75,minq,maxq,"Max Quality", "Maximum acceptable quality value");
+						
+						parlst.addDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq, MeshModel::MM_FACEFLAGSELECT, tr("Min Quality"), tr("Minimum acceptable quality value") );
+						parlst.addDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq, MeshModel::MM_FACEFLAGSELECT, tr("Max Quality"), tr("Maximum acceptable quality value") );
+						parlst.addBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected.");						
 					}
 					break;
 			case FP_SELECT_BY_COLOR:
@@ -167,10 +169,12 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   break;
   case FP_SELECT_BY_QUALITY: 
 		{
-			float minQ = par.getAbsPerc("minQ");	
-			float maxQ = par.getAbsPerc("maxQ");	
+			float minQ = par.getDynamicFloat("minQ");	
+			float maxQ = par.getDynamicFloat("maxQ");	
+			bool inclusiveFlag = par.getBool("Inclusive");
 			tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.cm, minQ, maxQ);  
-			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
+			if(inclusiveFlag) tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
+			else tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
 		}
 	break;
   case FP_SELECT_BY_COLOR:
