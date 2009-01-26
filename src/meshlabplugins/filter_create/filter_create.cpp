@@ -36,7 +36,7 @@
 
 FilterCreate::FilterCreate()
 {
-	typeList <<CR_BOX<< CR_SPHERE<< CR_ICOSAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE;
+	typeList <<CR_BOX<< CR_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE;
 
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -50,6 +50,7 @@ const QString FilterCreate::filterName(FilterIDType filterId)
     case CR_BOX : return QString("Box");
     case CR_SPHERE: return QString("Sphere");
     case CR_ICOSAHEDRON: return QString("Icosahedron");
+    case CR_DODECAHEDRON: return QString("Dodecahedron");
     case CR_OCTAHEDRON: return QString("Octahedron");
     case CR_TETRAHEDRON: return QString("Tetrahedron");
     case CR_CONE: return QString("Cone");
@@ -65,6 +66,7 @@ const QString FilterCreate::filterInfo(FilterIDType filterId)
     case CR_BOX : return QString("Create a Box");
     case CR_SPHERE: return QString("Create a Sphere");
     case CR_ICOSAHEDRON: return QString("Create an Icosahedron");
+    case CR_DODECAHEDRON: return QString("Create an Dodecahedron");
     case CR_OCTAHEDRON: return QString("Create an Octahedron");
     case CR_TETRAHEDRON: return QString("Create a Tetrahedron");
     case CR_CONE: return QString("Create a Cone");
@@ -106,6 +108,9 @@ bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
     case CR_ICOSAHEDRON:
       vcg::tri::Icosahedron<CMeshO>(m.cm);
       break;
+    case CR_DODECAHEDRON:
+      vcg::tri::Dodecahedron<CMeshO>(m.cm);
+      break;
     case CR_OCTAHEDRON:
       vcg::tri::Octahedron<CMeshO>(m.cm);
       break;
@@ -139,6 +144,7 @@ const MeshFilterInterface::FilterClass FilterCreate::getClass(QAction *a)
     case CR_BOX:
     case CR_TETRAHEDRON:
     case CR_ICOSAHEDRON:
+    case CR_DODECAHEDRON:
     case CR_SPHERE:
     case CR_OCTAHEDRON:
     case CR_CONE:
