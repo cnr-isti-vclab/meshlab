@@ -488,6 +488,7 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
      }
    }
 
+  tri::Clean<CMeshO>::RemoveUnreferencedVertex(m);
   int ttt6=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: Deleting skewed %i\n",ttt6-ttt5);
 
