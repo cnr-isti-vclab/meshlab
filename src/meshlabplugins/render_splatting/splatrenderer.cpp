@@ -259,13 +259,11 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glGetIntegerv(GL_VIEWPORT, mCachedVP);
 		glGetFloatv(GL_MODELVIEW_MATRIX, mCachedMV);
     glGetFloatv(GL_PROJECTION_MATRIX, mCachedProj);
-		GL_TEST_ERR
 
-		updateRenderBuffer(); GL_TEST_ERR
+		updateRenderBuffer();
 		if (mCachedFlags != mFlags)
 			configureShaders();
 
-		GL_TEST_ERR
 		mCachedFlags = mFlags;
 
 		mParams.update(mCachedMV, mCachedProj, mCachedVP);
@@ -273,7 +271,6 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		if (s>1)
 			s = pow(s,0.3f);
 		mParams.radiusScale *= s;
-		GL_TEST_ERR
 
 		// FIXME since meshlab does not set any material properties, let's define some here
 		glDisable(GL_COLOR_MATERIAL);
@@ -284,9 +281,8 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 	}
 
 	if (mCurrentPass==2)
-	{//return;
+	{
 		// this is the last pass: normalization by the sum of weights + deferred shading
-		GL_TEST_ERR
 		mRenderBuffer->release();
 		if (mFlags&DEFERRED_SHADING_BIT)
 			glDrawBuffer(GL_BACK);
@@ -300,19 +296,16 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
-		GL_TEST_ERR
 
 		mShaders[2].prog.Uniform("viewport",float(mCachedVP[0]),float(mCachedVP[1]),float(mCachedVP[2]),float(mCachedVP[3]));
-		mShaders[2].prog.Uniform("ColorWeight",0.0f); // this is a texture unit
+		mShaders[2].prog.Uniform("ColorWeight",0); // this is a texture unit
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mRenderBuffer->texture());
-		GL_TEST_ERR
 
 		if (mFlags&DEFERRED_SHADING_BIT)
 		{
-			GL_TEST_ERR
 			mShaders[2].prog.Uniform("unproj", mCachedProj[10], mCachedProj[14]);
-			mShaders[2].prog.Uniform("NormalWeight",1.0f); // this is a texture unit
+			mShaders[2].prog.Uniform("NormalWeight",1); // this is a texture unit
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mNormalTextureID);
 			GL_TEST_ERR
@@ -320,10 +313,9 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 
 		if (mFlags&OUTPUT_DEPTH_BIT)
 		{
-			GL_TEST_ERR
-			mShaders[2].prog.Uniform("Depth",2.0f); // this is a texture unit
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mDepthTextureID);
+			mShaders[2].prog.Uniform("Depth",2); // this is a texture unit
+			glActiveTexture(GL_TEXTURE2);GL_TEST_ERR
+			glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mDepthTextureID);GL_TEST_ERR
 			GL_TEST_ERR
 		}
 		else
@@ -335,7 +327,6 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		// draw a quad covering the whole screen
     vcg::Point3f viewVec(1./mCachedProj[0], 1./mCachedProj[5], -1);
 
-		GL_TEST_ERR
     glBegin(GL_QUADS);
 			glColor3f(1, 0, 0);
 			glTexCoord3f(viewVec.X(),viewVec.Y(),viewVec.Z());
@@ -357,7 +348,6 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 			glMultiTexCoord2f(GL_TEXTURE1,1.,0.);
 			glVertex3f(1,-1,0);
     glEnd();
-    GL_TEST_ERR
     if (!(mFlags&OUTPUT_DEPTH_BIT))
     {
         glEnable(GL_DEPTH_TEST);
@@ -369,11 +359,9 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
-		GL_TEST_ERR
 	}
 	else
 	{
-		GL_TEST_ERR
 		mParams.loadTo(mShaders[mCurrentPass].prog);
 		if (mCurrentPass==0)
 		{
@@ -438,9 +426,9 @@ void SplatRendererPlugin::enablePass(int n)
 		if (n==1)
 		{
 			glDisable(GL_LIGHTING);
-			glEnable(GL_POINT_SMOOTH);  GL_TEST_ERR;
-			glActiveTexture(GL_TEXTURE0); GL_TEST_ERR;
-			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE); GL_TEST_ERR;
+			glEnable(GL_POINT_SMOOTH);
+			glActiveTexture(GL_TEXTURE0);
+			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE,GL_ONE);
@@ -462,7 +450,7 @@ void SplatRendererPlugin::enablePass(int n)
 			{
 				glBindTexture(GL_TEXTURE_2D, mDummyTexId);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 2, 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
-				glPointParameterf(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT); GL_TEST_ERR;
+				glPointParameterf(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
 				// hm... ^^^^
 			}
 			glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);

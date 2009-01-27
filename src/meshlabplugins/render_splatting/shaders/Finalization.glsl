@@ -17,14 +17,14 @@ uniform vec4 viewport;
 #ifndef EXPE_DEFERRED_SHADING
 
 uniform sampler2DRect ColorWeight;
-#ifdef EXPE_OUTPUT_DEPTH
+#if (EXPE_OUTPUT_DEPTH==1)
 uniform sampler2DRect Depth;
 #endif
 
 void Finalization(void)
 {
 	vec4 color = texture2DRect(ColorWeight, gl_FragCoord.st - viewport.xy + epsilon);
-	#ifdef EXPE_OUTPUT_DEPTH
+	#if (EXPE_OUTPUT_DEPTH==1)
 	gl_FragDepth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
 	#endif
 	if (color.w<0.001)
