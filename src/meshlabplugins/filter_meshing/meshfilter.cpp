@@ -162,8 +162,9 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
 		case FP_REORIENT :
 		case FP_COMPUTE_PRINC_CURV_DIR:
 		case FP_TRANSFORM:	            
-		case FP_FREEZE_TRANSFORM:	       
 							 return MeshFilterInterface::Normal;
+		case FP_FREEZE_TRANSFORM:	       
+							 return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
 
     default : assert(0); return MeshFilterInterface::Generic;
   }
@@ -184,8 +185,8 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation (with texture)");
 		case FP_CLUSTERING :	                return QString("Clustering decimation");
 		case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
-		case FP_REORIENT :	                  return QString("Re-orient");
-		case FP_INVERT_FACES:									return QString("Invert Faces");
+		case FP_REORIENT :	                  return QString("Re-Orient all faces coherentely");
+		case FP_INVERT_FACES:									return QString("Invert Faces Orientation");
 		case FP_TRANSFORM:	                	return QString("Apply Transform");
 		case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
 		case FP_REMOVE_NON_MANIFOLD_FACE:	        return QString("Remove Non Manifold Faces");
