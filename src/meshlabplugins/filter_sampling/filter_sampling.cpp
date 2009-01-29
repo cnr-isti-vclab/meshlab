@@ -318,6 +318,7 @@ FilterDocSampling::FilterDocSampling()
 			<< FP_SIMILAR_SAMPLING
 			<< FP_SUBDIV_SAMPLING
 			<< FP_POISSONDISK_SAMPLING
+			<< FP_VARIABLEDISK_SAMPLING
 			<< FP_HAUSDORFF_DISTANCE
 			<< FP_TEXEL_SAMPLING
 			<< FP_VERTEX_RESAMPLING
@@ -341,6 +342,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 		case FP_SIMILAR_SAMPLING :  return QString("Similar Triangle Sampling"); 
 		case FP_SUBDIV_SAMPLING :  return QString("Regular Sudiv. Sampling"); 
 		case FP_POISSONDISK_SAMPLING : return QString("Poisson-disk Sampling");
+		case FP_VARIABLEDISK_SAMPLING : return QString("Variable density Disk Sampling");
 		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
 		case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling"); 
 		case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer"); 
@@ -363,6 +365,7 @@ const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 		case FP_SIMILAR_SAMPLING     :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle it is subdivided into similar triangles and the internal vertices of these triangles are considered. Distribution is biased by the shape of the triangles."); 
 		case FP_SUBDIV_SAMPLING      :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle"); 
 		case FP_POISSONDISK_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated according to a Poisson-disk distribution");
+		case FP_VARIABLEDISK_SAMPLING:  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated according to a Poisson-disk distribution");
 		case FP_HAUSDORFF_DISTANCE   :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh."); 
 		case FP_TEXEL_SAMPLING       :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated"); 
 		case FP_VERTEX_RESAMPLING    :  return QString("Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>"
@@ -392,6 +395,7 @@ const int FilterDocSampling::getRequirements(QAction *action)
     case FP_HAUSDORFF_DISTANCE :	return  MeshModel::MM_FACEMARK;
 		case FP_ELEMENT_SAMPLING    :   
 		case FP_MONTECARLO_SAMPLING :    
+		case FP_VARIABLEDISK_SAMPLING :
 		case FP_POISSONDISK_SAMPLING :
 		case FP_SIMILAR_SAMPLING :   
 		case FP_DISK_COLORING :
@@ -440,7 +444,14 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			break;
 		case FP_POISSONDISK_SAMPLING :
 			parlst.addInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
-			parlst.addInt("MontecarloSamples", 1000000, "Montecarlo samples", "The over-sampling samples. The generated Poisson-disk samples are a subset of such samples.");
+			parlst.addAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification");
+			parlst.addInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate.");
+			break;
+		case FP_VARIABLEDISK_SAMPLING :
+			parlst.addInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
+			parlst.addAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification");
+			parlst.addFloat("RadiusVariance", 2, "Radius Variance", "The radius of the disk is allowed to vary between r/var and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling");
+			parlst.addInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate.");
 			break;
 		case FP_TEXEL_SAMPLING :  
  		  parlst.addInt (	"TextureW", 512, "Texture Width",
@@ -652,6 +663,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			break;
 
 		case FP_POISSONDISK_SAMPLING :
+		case FP_VARIABLEDISK_SAMPLING :
 		{
 			if (md.mm()->cm.fn==0)
 			{
@@ -662,18 +674,33 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			MeshModel *curMM= md.mm();
 			MeshModel *mm= md.addNewMesh("Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 
+			float radius = par.getAbsPerc("Radius");
+			int sampleNum = par.getInt("SampleNum");
+			if(radius==0) radius = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonDiskRadius(curMM->cm,sampleNum);
+						else sampleNum = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonSampleNum(curMM->cm,radius);
+
+			Log("Computing %i Poisson Samples for an expected radius of %f",sampleNum,radius);
+			
 			// first of all generate montecarlo samples for fast lookup
 			CMeshO presampledMesh;
 			BaseSampler sampler(&presampledMesh);
-			tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, par.getInt("MontecarloSamples"));
+			sampler.qualitySampling =true;
+			tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
+			Log("Generated %i Montecarlo Samples",presampledMesh.vn);
 			presampledMesh.bbox = curMM->cm.bbox; // we want the same bounding box
 
 			BaseSampler mps(&(mm->cm));
-			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm, mps, presampledMesh, par.getInt("SampleNum"));
-
-			// clean support mesh
-			presampledMesh.Clear();
+				
+			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
+			if(ID(action)==FP_VARIABLEDISK_SAMPLING) 
+			{
+						pp.adaptiveRadiusFlag=true;
+						pp.radiusVariance = par.getFloat("RadiusVariance");
+						Log("Variable Density variance is %f, radius can vary from %f to %f",pp.radiusVariance,radius/pp.radiusVariance,radius*pp.radiusVariance);
+			}			
 			
+			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm, mps, presampledMesh, radius,pp);
+
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
@@ -719,10 +746,10 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			if(sampleFace)	
 					tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 				
-			Log(GLLogStream::FILTER,"Hausdorf Distance computed");						
-			Log(GLLogStream::FILTER,"     Sample %i",hs.n_total_samples);						
-			Log(GLLogStream::FILTER,"     min : %f   max %f",hs.getMinDist(),hs.getMaxDist());						
-			Log(GLLogStream::FILTER,"     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
+			Log("Hausdorf Distance computed");						
+			Log("     Sample %i",hs.n_total_samples);						
+			Log("     min : %f   max %f",hs.getMinDist(),hs.getMaxDist());						
+			Log("     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
 			
 			if(saveSampleFlag)
 				{
@@ -810,6 +837,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			int sampleNum = par.getInt("SampleNum");
 			int relaxIter = par.getInt("RelaxIter");
 			int randSeed = par.getInt("RandSeed");
+			bool saveSampleFlag=par.getBool("SaveSample");
+			bool qualityFlag = par.getBool("QualityFlag");
 			CMeshO *cm = &md.mm()->cm;				
 //			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh");
 			vector<CMeshO::VertexType *> seedVec;
@@ -853,14 +882,21 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		{
 			MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples 
 			MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample. 
-			CMeshO::VertexIterator vim,viv;		
-			CMeshO::ScalarType r2 = par.getDynamicFloat("Radius");
-			r2=r2*r2;
+			typedef vcg::SpatialHashTable<CMeshO::VertexType, float> SampleSHT;
+			SampleSHT sht;
+      sht.Set(mmV->cm.vert.begin(),mmV->cm.vert.end(),mmV->cm.bbox);
+			tri::VertTmark<CMeshO> markerFunctor;
+			typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
+			VDistFunct distFunctor;
+			Point3f closestPt;
+		
 			tri::UpdateColor<CMeshO>::VertexConstant(mmM->cm, Color4b::LightGray);
-			for(vim = mmM->cm.vert.begin(); vim!= mmM->cm.vert.end(); ++vim) if(!(*vim).IsD())
-			for(viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
-				if(SquaredDistance((*viv).cP(), (*vim).cP()) < r2) 
-						vim->C()=Color4b::Red;
+			float dist, dist_upper_bound= par.getDynamicFloat("Radius");
+			for(CMeshO::VertexIterator vim = mmM->cm.vert.begin(); vim!= mmM->cm.vert.end(); ++vim) if(!(*vim).IsD())
+			{
+				CMeshO::VertexPointer nearestV =  sht.GetClosest(distFunctor,markerFunctor,(*vim).cP(),dist_upper_bound,dist,closestPt);
+				if(nearestV) vim->C()=Color4b::Red;
+			}
 		} break;
 
 		default : assert(0);
@@ -878,6 +914,7 @@ const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *acti
 		case FP_SIMILAR_SAMPLING :
 		case FP_SUBDIV_SAMPLING :
 		case FP_POISSONDISK_SAMPLING : 
+		case FP_VARIABLEDISK_SAMPLING : 
 		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling; 
 		case FP_VORONOI_CLUSTERING: return FilterDocSampling::Remeshing;
 		case FP_UNIFORM_MESH_RESAMPLING: return FilterDocSampling::Remeshing;
