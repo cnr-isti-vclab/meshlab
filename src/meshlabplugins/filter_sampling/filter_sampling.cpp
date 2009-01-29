@@ -557,6 +557,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 					float Diag = md.mm()->cm.bbox.Diag();
 					parlst.addDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f, MeshModel::MM_VERTCOLOR, tr("Radius"), 
 																"the radius of the spheres centered in the VertexMesh seeds ");
+					parlst.addBool("SampleRadius", false, "Use sample radius", "Use the radius that is stored in each sample of the vertex mesh. Useful for displaing the variable disk sampling results");
 			} else {
 					parlst.addBool ("backward", false, "BackDistance",
 													"If true the mesh is colored according the distance from the frontier of the voonoi diagram induced by the VertexMesh seeds.");
@@ -884,18 +885,40 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample. 
 			typedef vcg::SpatialHashTable<CMeshO::VertexType, float> SampleSHT;
 			SampleSHT sht;
-      sht.Set(mmV->cm.vert.begin(),mmV->cm.vert.end(),mmV->cm.bbox);
-			tri::VertTmark<CMeshO> markerFunctor;
+      tri::VertTmark<CMeshO> markerFunctor;
 			typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
 			VDistFunct distFunctor;
 			Point3f closestPt;
-		
 			tri::UpdateColor<CMeshO>::VertexConstant(mmM->cm, Color4b::LightGray);
-			float dist, dist_upper_bound= par.getDynamicFloat("Radius");
-			for(CMeshO::VertexIterator vim = mmM->cm.vert.begin(); vim!= mmM->cm.vert.end(); ++vim) if(!(*vim).IsD())
+			if(par.getBool("SampleRadius"))
 			{
-				CMeshO::VertexPointer nearestV =  sht.GetClosest(distFunctor,markerFunctor,(*vim).cP(),dist_upper_bound,dist,closestPt);
-				if(nearestV) vim->C()=Color4b::Red;
+					sht.Set(mmM->cm.vert.begin(),mmM->cm.vert.end(),mmM->cm.bbox);
+					std::vector<CMeshO::VertexType*> closests;
+					for(CMeshO::VertexIterator viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
+					{
+						Point3f p = viv->cP();
+						float radius = viv->Q();
+						Box3f bb(p-Point3f(radius,radius,radius),p+Point3f(radius,radius,radius));
+						GridGetInBox(sht, markerFunctor, bb, closests);
+						
+						for(int i=0; i<closests.size(); ++i)
+						{
+							float dist = Distance(p,closests[i]->cP());
+							if(dist < radius)
+												closests[i]->C().lerp(Color4b::White,Color4b::Red,dist/radius);
+						}
+					}
+			}
+			else // use fixed radius
+			{
+					sht.Set(mmV->cm.vert.begin(),mmV->cm.vert.end(),mmV->cm.bbox);
+					float dist, dist_upper_bound= par.getDynamicFloat("Radius");
+
+					for(CMeshO::VertexIterator vim = mmM->cm.vert.begin(); vim!= mmM->cm.vert.end(); ++vim) if(!(*vim).IsD())
+					{
+						CMeshO::VertexPointer nearestV =  sht.GetClosest(distFunctor,markerFunctor,(*vim).cP(),dist_upper_bound,dist,closestPt);
+						if(nearestV) vim->C()=Color4b::Red;
+					}
 			}
 		} break;
 
