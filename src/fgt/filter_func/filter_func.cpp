@@ -452,6 +452,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 		case FF_VERT_QUALITY:
 			{
 				std::string func_q = par.getString("q").toStdString();
+				m.updateDataMask(MeshModel::MM_VERTQUALITY);
 				
 				// muparser initialization and define custom variables
 				Parser p;
@@ -554,6 +555,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 		case FF_FACE_QUALITY:
 			{
 				std::string func_q = par.getString("q").toStdString();
+				m.updateDataMask(MeshModel::MM_FACEQUALITY);
 
 				// muparser initialization and define custom variables
 				Parser pf;
