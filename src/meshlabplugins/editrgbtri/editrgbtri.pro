@@ -31,6 +31,8 @@ TARGET = editrgbtri
 DEFINES += NDEBUG
 
 QT += opengl
+CONFIG += STL
+
 RESOURCES = editrgbtri.qrc
 FORMS += widgetRgbT.ui subDialog.ui
 

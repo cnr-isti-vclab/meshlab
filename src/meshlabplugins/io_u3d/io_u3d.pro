@@ -8,3 +8,4 @@ SOURCES       = io_u3d.cpp \
 				u3d_gui.cpp
 TARGET        = io_u3d
 
+CONFIG += STL
