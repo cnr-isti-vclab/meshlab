@@ -452,7 +452,7 @@ bool RgbInteractiveEdit::maxEdgeLevel(RgbVertexC& v)
 	vector<RgbEdgeC> ve;
 	vector<RgbEdgeC>::iterator it;
 	v.VF(ve);
-	std::cout << ve.size() << std::endl;
+	//std::cout << ve.size() << std::endl;
 	int tmp = ve[0].t.getEdgeLevel(ve[0].index);
 	for (it = ve.begin();it != ve.end(); it++)
 	{
