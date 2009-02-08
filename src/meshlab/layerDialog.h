@@ -37,7 +37,7 @@ class GLLogStream;
 #include "ui_layerDialog.h"
 #include <QDialog>
 
-class LayerDialog : public QDialog
+class LayerDialog : public QDockWidget
 {
 	Q_OBJECT
 	public:

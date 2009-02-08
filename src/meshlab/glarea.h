@@ -157,12 +157,13 @@ Revision 1.51  2006/01/25 03:57:15  glvertex
 #include "meshmodel.h"
 #include "interfaces.h"
 #include "filterscript.h"
+#include "layerDialog.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
 
-class LayerDialog;
+
 
 class GLLightSetting
 {
@@ -291,7 +292,8 @@ public:
     {
     mm()->fileName = qPrintable(name); 
 		setWindowTitle(QFileInfo(name).fileName()+tr("[*]"));
-					
+		layerDialog->setWindowTitle("Layer Dialog for "+QFileInfo(name).fileName());			
+	  
     ss.basename=QFileInfo(getFileName()).baseName().append("Snap");
 	}
 

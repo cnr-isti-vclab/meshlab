@@ -72,7 +72,7 @@ GLArea::GLArea(QWidget *parent)
 	farPlane = 5.f;
 	pointSize = 2.0f;
 	layerDialog = new LayerDialog(this);
-
+	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	connect((const MeshDocument*)&meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(setCurrentlyActiveLayer(int)));
 
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
@@ -101,6 +101,7 @@ GLArea::~GLArea()
 	// warn any iRender plugin that we're deleting glarea
 	if (iRenderer)
 		iRenderer->Finalize(currentShader, *mm(), this);
+	delete this->layerDialog;
 }
 
 

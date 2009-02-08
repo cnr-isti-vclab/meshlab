@@ -506,6 +506,7 @@ void MainWindow::startFilter()
 	{
 		qDebug("MeshCreation");
 		GLArea *gla=new GLArea(mdiarea);
+		addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 		gla->meshDoc.addNewMesh("untitled.ply");
 		gla->setFileName("untitled.ply");
 		mdiarea->addSubWindow(gla);
@@ -948,6 +949,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					bool newGla = false;
 					if(gla==0){
 						gla=new GLArea(mdiarea);
+						addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 						newGla =true;
 					}
 					gla->meshDoc.busy=true;

@@ -36,7 +36,7 @@ $Log: stdpardialog.cpp,v $
 
 using namespace std;
 
-LayerDialog::LayerDialog(QWidget *parent )    : QDialog(parent)    
+LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)    
 { 
   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
 	setVisible(false);
