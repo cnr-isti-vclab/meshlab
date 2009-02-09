@@ -1,0 +1,96 @@
+/*
+ * The 3D Studio File Format Library
+ * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
+ * All rights reserved.
+ *
+ * This program is  free  software;  you can redistribute it and/or modify it
+ * under the terms of the  GNU Lesser General Public License  as published by 
+ * the  Free Software Foundation;  either version 2.1 of the License,  or (at 
+ * your option) any later version.
+ *
+ * This  program  is  distributed in  the  hope that it will  be useful,  but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public  
+ * License for more details.
+ *
+ * You should  have received  a copy of the GNU Lesser General Public License
+ * along with  this program;  if not, write to the  Free Software Foundation,
+ * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * $Id: types.txt,v 1.3 2007/06/20 17:04:09 jeh Exp $
+ */
+/*!
+
+\defgroup types General Types
+
+*/
+/*!
+
+\typedef Lib3dsBool
+  \ingroup types
+  Bool Typedef
+
+*/
+/*!
+
+\typedef Lib3dsByte
+  \ingroup types
+  Byte (== 8bit unsigned int) Typedef
+
+*/
+/*!
+
+\typedef Lib3dsWord
+  \ingroup types
+  Word (== 16bit unsigned int) Typedef
+
+*/
+/*!
+
+\typedef Lib3dsDword
+  \ingroup types
+  Double-Word (== 32bit unsigned int) Typedef
+
+*/
+/*!
+
+\typedef Lib3dsIntb
+  \ingroup types
+  Signed Byte (== 8bit signed int) Typedef
+
+*/
+/*!
+
+\typedef Lib3dsIntw
+  \ingroup types
+  Signed Word (== 16bit signed int) Typedef
+
+*/
+/*!
+
+\typedef Lib3dsIntd
+  \ingroup types
+  Signed Double-Word (== 32bit signed int) Typedef
+
+*/
+/*!
+
+\typedef Lib3dsRgb
+  \ingroup types
+  Red, Green, Blue color Typedef
+
+*/
+/*!
+
+\typedef Lib3dsRgba
+  \ingroup types
+  Red, Green, Blue, Alpha color Typedef
+
+*/
+/*!
+
+\typedef Lib3dsTexel
+  \ingroup types
+  UV texture coordinates
+
+*/

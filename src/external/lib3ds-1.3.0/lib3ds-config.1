@@ -1,0 +1,61 @@
+.TH lib3ds 1 "16 Jun 2001" 1.3.0
+.SH NAME
+lib3ds-config - script to get information about the installed version of lib3ds
+.SH SYNOPSIS
+.B lib3ds-config
+[\-\-prefix\fI[=DIR]\fP] [\-\-exec\-prefix\fI[=DIR]\fP] [\-\-version] [\-\-libs] [\-\-cflags]
+.SH DESCRIPTION
+.PP
+\fIlib3ds-config\fP is a tool that is used to configure to determine
+the compiler and linker flags that should be used to compile and link
+programs that use \fIlib3ds\fP. It is also used internally to the .m4
+macros for GNU autoconf that are included with \fIlib3ds\fP.
+.
+.SH OPTIONS
+.l
+\fIlib3ds-config\fP accepts the following options:
+.TP 8
+.B  \-\-version
+Print the currently installed version of \fIlib3ds\fP on the standard
+output.
+.TP 8
+.B  \-\-libs
+Print the linker flags that are necessary to link a \fIlib3ds\fP
+program.
+.TP 8
+.B  \-\-cflags
+Print the compiler flags that are necessary to compile a \fIlib3ds\fP
+program.
+.TP 8
+.B  \-\-prefix=PREFIX
+If specified, use PREFIX instead of the installation prefix that
+\fIlib3ds\fP was built with when computing the output for the
+\-\-cflags and \-\-libs options. This option is also used for the exec
+prefix if \-\-exec\-prefix was not specified. This option must be
+specified before any \-\-libs or \-\-cflags options.
+.TP 8
+.B  \-\-exec\-prefix=PREFIX
+If specified, use PREFIX instead of the installation exec prefix that
+\fIlib3ds\fP was built with when computing the output for the
+\-\-cflags and \-\-libs options.  This option must be specified before
+any \-\-libs or \-\-cflags options.
+.SH COPYRIGHT
+.PP
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+.PP
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+.PP
+You should have received a copy of the GNU Lesser General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.SH AUTHOR
+This manpage is an almost word-for-word copy of the gtk-config
+manpage, written by Owen Taylor.  It was modified by Marcelo
+E. Magallon <mmagallo@debian.org>, for the Debian GNU/Linux system
+(but may be used by others).
