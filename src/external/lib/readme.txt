@@ -1,0 +1,1 @@
+copy here the lib compiled for the system with the name specified in the directory name according to the QT system configuration names
