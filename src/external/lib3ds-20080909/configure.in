@@ -1,0 +1,27 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(Makefile.am)
+
+LIB3DS_MAJOR_VERSION=2
+LIB3DS_MINOR_VERSION=0
+LIB3DS_MICRO_VERSION=0
+LIB3DS_VERSION=$LIB3DS_MAJOR_VERSION.$LIB3DS_MINOR_VERSION.$LIB3DS_MICRO_VERSION
+AC_SUBST(LIB3DS_MAJOR_VERSION)
+AC_SUBST(LIB3DS_MINOR_VERSION)
+AC_SUBST(LIB3DS_MICRO_VERSION)
+AC_SUBST(LIB3DS_VERSION)
+
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(lib3ds, $LIB3DS_VERSION)
+
+AC_PROG_CC
+AC_PROG_LIBTOOL
+
+AC_OUTPUT([ \
+  lib3ds-config \
+  Makefile \
+  src/Makefile \
+  examples/Makefile \
+  examples/3ds2obj/Makefile \
+  examples/3dsdump/Makefile \
+  examples/cube/Makefile \
+],[chmod a+x lib3ds-config])
