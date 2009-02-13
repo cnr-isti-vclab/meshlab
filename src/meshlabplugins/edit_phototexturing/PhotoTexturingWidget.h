@@ -37,6 +37,7 @@ class PhotoTexturingWidget: public MeshlabEditDockWidget, Ui::photoTexturingWidg
 Q_OBJECT
 
 private:
+	QString lastDirectory;
 	MeshModel *mesh;
 	GLArea *glarea;
 	Ui::photoTexturingWidget ui;
@@ -69,7 +70,7 @@ private slots:
 	void combineTextures();
 	void unprojectTextures();
 	void bakeTextures();
-	void apply();
+	void reset();
 	void close();
 	void cancel();
 

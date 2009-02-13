@@ -83,6 +83,7 @@ const QString PhotoTexturer::BAKE_SMARTBLEND = "pt_smartblend_command";
 PhotoTexturer::PhotoTexturer(){
 	origTextureID = -1;
 	nextTextId = 0;
+	bakeCounter = 0;
 }
 PhotoTexturer::~PhotoTexturer(){
 
@@ -392,6 +393,7 @@ void PhotoTexturer::applyTextureToMesh(MeshModel *m,int textureIdx, bool use_dif
 				}
 				k++;
 			}
+			//m->cm
 		}
 	}
 }
@@ -424,29 +426,32 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 
 		//loading the texture corresponding to the camera
 		QImage tmp_texture(camera->textureImage);
-
+		QRgb* utimg = (QRgb*)tmp_texture.bits();
+		int twidth = tmp_texture.width();
+		int theight = tmp_texture.height();
+		
 		QColor cpixel;
 
 		int x;
 		int y;
 		//CMeshO::FaceIterator fi;
 		bool found = false;
-		/*
-		if (camera->zBuffer!=0){
-			camera->zBuffer->normalize();
-		}
-		*/
+
 		
 		//goes pixelwise over the whole new texture image and looks if it lies inside
 		//a texture face of the original texture coordinates. If the pixel lies inside
 		//a textured face it looks in the corresponding camera texture for the color value
 		//of this pixel and stores it at the current pixel position in the new texture image.
+
+		QRgb* ucimg = (QRgb*)container->image->bits();
+		
 		for (y=0;y<imgResY;y++){
 			for (x=0;x<imgResX;x++){
 
 				//sets the current pixel to black with an alpha value of 0
 				cpixel = QColor(0, 0, 0, 0);
-				container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
+				//container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
+				ucimg[(imgResY-(y+1))*imgResX+x] =  cpixel.rgba();
 				found = false;
 				//searches the QuadTree for matching faces
 				QList<QuadTreeLeaf*> list;
@@ -466,10 +471,10 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 						tmp->getBarycentricCoordsForUV(((double)x/(double)(imgResX-1)),((double)y/(double)(imgResY-1)),a,b,c,d);
 						
 						ct->getUVatBarycentricCoords(u,v,a,b,c);
-						int ix = (int)(((double)tmp_texture.width()-1)*u);
-						int iy = tmp_texture.height()-(int)((((double)tmp_texture.height()-1)*v)+1);
+						int ix = (int)(((double)twidth-1)*u);
+						int iy = theight-(int)((((double)theight-1)*v)+1);
 
-						if(ix>=0 && ix<tmp_texture.width() && iy>=0 && iy<tmp_texture.height()){
+						if(ix>=0 && ix<twidth && iy>=0 && iy<theight){
 
 
 							//calculating alpha value of the pixel by using the angle
@@ -485,10 +490,11 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 								
 								found = true;
 								
-								cpixel = QColor(tmp_texture.pixel(ix,iy));
+								//cpixel = QColor(tmp_texture.pixel(ix,iy));
+								cpixel = QColor(utimg[iy*twidth+ix]);
 								cpixel.setAlpha(255);
-								container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
-	
+								//container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
+								ucimg[(imgResY-(y+1))*imgResX+x] = cpixel.rgba();
 	
 								double angle = 0.0;
 								if(use_angle_filter){
@@ -521,9 +527,11 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 									//calculate distance for pixel
 									distance_filter->setValue(x,imgResY-(y+1),distance);
 								}
-	
+									
+								
 								if (angle<= min_angle){
-									cpixel = QColor(tmp_texture.pixel(ix,iy));
+									//cpixel = QColor(tmp_texture.pixel(ix,iy));
+									cpixel = QColor(utimg[iy*twidth+ix]);
 									//int rgb = (int)((angle/90.0*255.0));
 									//cpixel = QColor(rgb,rgb,rgb);
 									cpixel.setAlpha((int)((angle/90.0*255.0)));
@@ -533,7 +541,8 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 									cpixel = QColor(0,0,0,0);
 
 								}
-								container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
+								//container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
+								ucimg[(imgResY-(y+1))*imgResX+x] = cpixel.rgba();
 							}
 						}else{
 
@@ -556,11 +565,10 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 		}
 	}
 }
-void PhotoTexturer::getSurrundingMeanColor(QImage &image, int x, int y, QColor &surcolor){
+void PhotoTexturer::getSurrundingMeanColor(QRgb* uimg, int iwidth, int iheight, int x, int y, QColor &surcolor){
 	//qDebug()<<"getSurrundingMeanColor: "<<x<<y;
-	int width = image.width();
-	int height = image.height();
-	if((x>=0) && (x< width) && (y>=0) && (y< height)){
+	
+	if((x>=0) && (x< iwidth) && (y>=0) && (y< iheight)){
 		QColor c[8];
 		c[0] = QColor(0,0,0,0);
 		c[1] = QColor(0,0,0,0);
@@ -570,30 +578,38 @@ void PhotoTexturer::getSurrundingMeanColor(QImage &image, int x, int y, QColor &
 		c[5] = QColor(0,0,0,0);
 		c[6] = QColor(0,0,0,0);
 		c[7] = QColor(0,0,0,0);
-		if((x-1>=0) && (x-1< width) && (y-1>=0) && (y-1< height)){
-			c[0]=QColor::fromRgba(image.pixel(x-1,y-1));
+		if((x-1>=0) && (x-1< iwidth) && (y-1>=0) && (y-1< iheight)){
+			//c[0]=QColor::fromRgba(image.pixel(x-1,y-1));
+			c[0]=QColor::fromRgba(uimg[(y-1)*iwidth+(x-1)]);
 		}
 
-		if((x>=0) && (x< width) && (y-1>=0) && (y-1< height)){
-			c[1]=QColor::fromRgba(image.pixel(x,y-1));
+		if((x>=0) && (x< iwidth) && (y-1>=0) && (y-1< iheight)){
+			//c[1]=QColor::fromRgba(image.pixel(x,y-1));
+			c[1]=QColor::fromRgba(uimg[(y-1)*iwidth+(x)]);
 		}
-		if((x+1>=0) && (x+1< width) && (y-1>=0) && (y-1< height)){
-			c[2]=QColor::fromRgba(image.pixel(x+1,y-1));
+		if((x+1>=0) && (x+1< iwidth) && (y-1>=0) && (y-1< iheight)){
+			//c[2]=QColor::fromRgba(image.pixel(x+1,y-1));
+			c[2]=QColor::fromRgba(uimg[(y-1)*iwidth+(x+1)]);
 		}
-		if((x+1>=0) && (x+1< width) && (y>=0) && (y< height)){
-			c[3]=QColor::fromRgba(image.pixel(x+1,y));
+		if((x+1>=0) && (x+1< iwidth) && (y>=0) && (y< iheight)){
+			//c[3]=QColor::fromRgba(image.pixel(x+1,y));
+			c[3]=QColor::fromRgba(uimg[(y)*iwidth+(x+1)]);
 		}
-		if((x+1>=0) && (x+1< width) && (y+1>=0) && (y+1< height)){
-			c[4]=QColor::fromRgba(image.pixel(x+1,y+1));
+		if((x+1>=0) && (x+1< iwidth) && (y+1>=0) && (y+1< iheight)){
+			//c[4]=QColor::fromRgba(image.pixel(x+1,y+1));
+			c[4]=QColor::fromRgba(uimg[(y+1)*iwidth+(x+1)]);
 		}
-		if((x>=0) && (x< width) && (y+1>=0) && (y+1< height)){
-			c[5]=QColor::fromRgba(image.pixel(x,y+1));
+		if((x>=0) && (x< iwidth) && (y+1>=0) && (y+1< iheight)){
+			//c[5]=QColor::fromRgba(image.pixel(x,y+1));
+			c[5]=QColor::fromRgba(uimg[(y+1)*iwidth+(x)]);
 		}
-		if((x-1>=0) && (x-1< width) && (y+1>=0) && (y+1< height)){
-			c[6]=QColor::fromRgba(image.pixel(x-1,y+1));
+		if((x-1>=0) && (x-1< iwidth) && (y+1>=0) && (y+1< iheight)){
+			//c[6]=QColor::fromRgba(image.pixel(x-1,y+1));
+			c[6]=QColor::fromRgba(uimg[(y+1)*iwidth+(x-1)]);
 		}
-		if((x-1>=0) && (x-1< width) && (y>=0) && (y< height)){
-			c[7]=QColor::fromRgba(image.pixel(x-1,y));
+		if((x-1>=0) && (x-1< iwidth) && (y>=0) && (y< iheight)){
+			//c[7]=QColor::fromRgba(image.pixel(x-1,y));
+			c[7]=QColor::fromRgba(uimg[(y)*iwidth+(x-1)]);
 		}
 		int i;
 		int r=0;
@@ -629,23 +645,28 @@ void PhotoTexturer::getSurrundingMeanColor(QImage &image, int x, int y, QColor &
 }
 
 
-void PhotoTexturer::edgeTextureStretching(QImage &image, int pass){
+void PhotoTexturer::edgeTextureStretching(QImage *image, int pass){
+	QRgb* uimg = (QRgb*) image->bits();
+	int width = image->width();
+	int height = image->height();
 	if(pass>0){
 		int count = 0;
 		while(pass>0){
 			//qDebug()<< "edgeTextureStretching pass:" <<++count;
-			QImage tmp_image = image.copy(0,0,image.width(),image.height());
+			QImage tmp_image = image->copy(0,0,width,height);
+			QRgb* utimg = (QRgb*) tmp_image.bits();
 			int x;
 			int y;
-			for(y=0;y<image.height();y++){
-				for(x=0;x<image.width();x++){
-					QColor test = QColor::fromRgba(image.pixel(x,y));
-
+			for(y=0;y<height;y++){
+				for(x=0;x<width;x++){
+					//QColor test = QColor::fromRgba(image->pixel(x,y));
+					QColor test = QColor::fromRgba(uimg[y*width+x]);
 					if(test.alpha()==0){
 						//qDebug()<< "alpha == 0";
 						QColor surcolor;
-						getSurrundingMeanColor(tmp_image,x,y,surcolor);
-						image.setPixel(x,y,surcolor.rgba());
+						getSurrundingMeanColor(utimg,width,height,x,y,surcolor);
+						//image->setPixel(x,y,surcolor.rgba());
+						uimg[y*width+x] = surcolor.rgba();
 					}
 				}
 			}
@@ -693,6 +714,7 @@ int PhotoTexturer::unprojectTextures(MeshModel *m, int textureID, FilterParamete
 int PhotoTexturer::bakeTextures(MeshModel *m, FilterParameterSet *paraSet){
 	int width = paraSet->getInt(TEXTURE_SIZE_WIDTH);
 	int height = paraSet->getInt(TEXTURE_SIZE_HEIGHT);
+	bool enable_ets = paraSet->getBool(UNPROJECT_ENABLE_EDGE_STRETCHING);
 	int ets = paraSet->getInt(UNPROJECT_EDGE_STRETCHING_PASS);
 	bool enable_angle_map = paraSet->getBool(UNPROJECT_ENABLE_ANGLE);
 	int angle_weight = paraSet->getInt(UNPROJECT_ANGLE_WEIGHT);
@@ -704,16 +726,16 @@ int PhotoTexturer::bakeTextures(MeshModel *m, FilterParameterSet *paraSet){
 	int merger_type = paraSet->getEnum(BAKE_MERGE_TYPE);
 	bool saveUnprojected = paraSet->getBool(BAKE_SAVE_UNPROJECT);
 	//creating a list of all UVFaceTexture
-	QList<QuadTreeLeaf*> *list = new QList<QuadTreeLeaf*>();
+	QList<QuadTreeLeaf*> list;
 	CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> >oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> >(m->cm,UVTEXTURECOORDS);
 	CMeshO::FaceIterator fi;
 	for(fi = m->cm.face.begin();fi!=m->cm.face.end();fi++) {
-		list->push_back(oth[fi][origTextureID]);
+		list.push_back(oth[fi][origTextureID]);
 	}
 
 	//creating a quadtree from list UVFaceTexture
 	QuadTreeNode qtree = QuadTreeNode(0.0,0.0,1.0,1.0);
-	qtree.buildQuadTree(list, 0.50/(double)width,0.50/(double)height);
+	qtree.buildQuadTree(&list, 0.50/(double)width,0.50/(double)height);
 	TextureMerger *texMerger = NULL;
 	//deciedes which TextureMerger to use
 	if (merger_type == 0){
@@ -743,68 +765,77 @@ int PhotoTexturer::bakeTextures(MeshModel *m, FilterParameterSet *paraSet){
 			}
 		}
 		
-		QImage image = texMerger->merge(width,height);
-		
-		edgeTextureStretching(image,ets);
-		QString filename = paraSet->getString(BAKE_MERGED_TEXTURE);
-		
-		image.save(filename,"PNG");
-		
-		//create new UVTexture set
-		qDebug()<<"filename:"<<filename;
-		int textureId = generateTextureId();
-		bool found = false;
-		unsigned int size = static_cast<unsigned int>(m->cm.textures.size());
-		unsigned j = 0;
-		int tindx;
-		while (!found && (j < size)){
+		QImage *image = texMerger->merge(width,height);
+		if(image !=NULL){
+			bakeCounter++;
 			
-			if (filename.toStdString().compare(m->cm.textures[j])==0)
-			{
-				tindx = (int)j;
-				found = true;
+			if(enable_ets){
+				edgeTextureStretching(image,ets);
 			}
-			++j;
-		}
-	
-		if (!found)
-		{
-			m->cm.textures.push_back(filename.toStdString());
-			tindx = (int)size;
-		}
-		
-		qDebug()<<"tindx:"<<tindx;
-		
-		if (origTextureID>-1){
-				qDebug()<<"has OriginalTextureCoords";
-				//CMeshO::PerFaceAttributeHandle<UVFaceTexture*> ihot = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*> (m->cm,ORIGINALUVTEXTURECOORDS);
-				CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> > cth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
-	
-				//overwrites the current texture information with the original texture information
-				// from the perFaceAttribute "ORIGINALUVTEXTURECOORDS"
-				CMeshO::FaceIterator fi; int i = 0;
-				for(fi   = m->cm.face.begin(); fi != m->cm.face.end(); ++fi,++i){
-					
-					UVFaceTexture* uvft = cth[fi][origTextureID] ;
-					UVFaceTexture* tmp = new UVFaceTexture(*uvft);
-					tmp->textureindex = tindx;
-					tmp->type = 1;
-					cth[fi][textureId] = tmp;
-	
-	
+			QString filename = paraSet->getString(BAKE_MERGED_TEXTURE);
+			
+			QImage final_image = image->convertToFormat(QImage::Format_RGB32);
+
+			final_image.save(filename,"PNG");
+			
+			//create new UVTexture set
+			qDebug()<<"filename:"<<filename;
+			int textureId = generateTextureId();
+			bool found = false;
+			unsigned int size = static_cast<unsigned int>(m->cm.textures.size());
+			unsigned j = 0;
+			int tindx;
+			while (!found && (j < size)){
+				
+				if (filename.toStdString().compare(m->cm.textures[j])==0)
+				{
+					tindx = (int)j;
+					found = true;
 				}
-			}else{
-				//qDebug()<<"has no OriginalTextureCoords";
+				++j;
 			}
-		qDebug()<<"textureId:"<<textureId;
-		if(merger_type==0){
-			textureList[textureId]="baked_win";
-		}else if(merger_type==1){
-			textureList[textureId]="baked_sb";
-		}
 		
-		return textureId;
-		//delete image;
+			if (!found)
+			{
+				m->cm.textures.push_back(filename.toStdString());
+				tindx = (int)size;
+			}
+			
+			qDebug()<<"tindx:"<<tindx;
+			
+			if (origTextureID>-1){
+					qDebug()<<"has OriginalTextureCoords";
+					//CMeshO::PerFaceAttributeHandle<UVFaceTexture*> ihot = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*> (m->cm,ORIGINALUVTEXTURECOORDS);
+					CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> > cth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
+		
+					//overwrites the current texture information with the original texture information
+					// from the perFaceAttribute "ORIGINALUVTEXTURECOORDS"
+					CMeshO::FaceIterator fi; int i = 0;
+					for(fi   = m->cm.face.begin(); fi != m->cm.face.end(); ++fi,++i){
+						
+						UVFaceTexture* uvft = cth[fi][origTextureID] ;
+						UVFaceTexture* tmp = new UVFaceTexture(*uvft);
+						tmp->textureindex = tindx;
+						tmp->type = 1;
+						cth[fi][textureId] = tmp;
+		
+		
+					}
+				}else{
+					//qDebug()<<"has no OriginalTextureCoords";
+				}
+			qDebug()<<"textureId:"<<textureId;
+			if(merger_type==0){
+				textureList[textureId]="baked_win_"+QString::number(bakeCounter);
+			}else if(merger_type==1){
+				textureList[textureId]="baked_sb_"+QString::number(bakeCounter);
+			}
+			
+			delete texMerger;
+			return textureId;
+			delete image;
+			
+		}
 	}
 	return 0;
 }

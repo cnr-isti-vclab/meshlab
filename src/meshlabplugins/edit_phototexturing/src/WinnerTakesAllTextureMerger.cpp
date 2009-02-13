@@ -36,9 +36,9 @@ WinnerTakesAllTextureMerger::~WinnerTakesAllTextureMerger(){
 
 }
 
-QImage WinnerTakesAllTextureMerger::merge(int imgWidth, int imgHeight){
+QImage *WinnerTakesAllTextureMerger::merge(int imgWidth, int imgHeight){
 	qDebug()<<"mergeTextureImagesWinnerTakesAll";
-	QImage image = QImage(imgWidth,imgHeight,QImage::Format_ARGB32);
+	QImage *image = new QImage(imgWidth,imgHeight,QImage::Format_ARGB32);
 	int k;
 
 
@@ -68,7 +68,7 @@ QImage WinnerTakesAllTextureMerger::merge(int imgWidth, int imgHeight){
 					cpixel.setAlpha(255);
 				}
 			}
-			image.setPixel(x,y,cpixel.rgba());
+			image->setPixel(x,y,cpixel.rgba());
 
 		}
 	}

@@ -31,6 +31,8 @@
 
 PhotoTexturingWidget::PhotoTexturingWidget(MeshEditInterface* plugin, PhotoTexturer* texturer,MeshModel &m,GLArea *gla): MeshlabEditDockWidget(gla) {
 	
+	lastDirectory = "";
+	
 	connect(this,SIGNAL(updateGLAreaTextures()),gla,SLOT(updateTexture()));
 	connect(this,SIGNAL(setGLAreaTextureMode(vcg::GLW::TextureMode)),gla,SLOT(setTextureMode(vcg::GLW::TextureMode)));
 	connect(this,SIGNAL(updateMainWindowMenus()),gla,SIGNAL(updateMainWindowMenus()));
@@ -47,9 +49,9 @@ PhotoTexturingWidget::PhotoTexturingWidget(MeshEditInterface* plugin, PhotoTextu
 	glarea = gla;
 
 	//setting up the headers for the tblewidget
-	QStringList headers;
-	headers << "Camera" << "Image";
-	ui.cameraTableWidget->setHorizontalHeaderLabels(headers);
+	//QStringList headers;
+	//headers << "Camera" << "Image";
+	//ui.cameraTableWidget->setHorizontalHeaderLabels(headers);
 
 	connect(ui.configurationLoadPushButton, SIGNAL(clicked()),this,SLOT(loadConfigurationFile()));
 	connect(ui.configurationSavePushButton, SIGNAL(clicked()),this,SLOT(saveConfigurationFile()));
@@ -67,9 +69,9 @@ PhotoTexturingWidget::PhotoTexturingWidget(MeshEditInterface* plugin, PhotoTextu
 
 	connect(ui.textureListWidget, SIGNAL(itemClicked(QListWidgetItem* )),this,SLOT(selectCurrentTexture()));
 
-	connect(ui.applyPushButton, SIGNAL(clicked()),this,SLOT(apply()));
+	connect(ui.resetPushButton, SIGNAL(clicked()),this,SLOT(reset()));
 	connect(ui.closePushButton, SIGNAL(clicked()),this,SLOT(close()));
-	connect(ui.cancelPushButton, SIGNAL(clicked()),this,SLOT(cancel()));
+	//connect(ui.cancelPushButton, SIGNAL(clicked()),this,SLOT(cancel()));
 
 	photoTexturer->storeOriginalTextureCoordinates(mesh);
 	loadDefaultSettings();
@@ -82,23 +84,54 @@ PhotoTexturingWidget::~PhotoTexturingWidget(){
 
 }
 void PhotoTexturingWidget::loadConfigurationFile(){
-	QString filename = QFileDialog::getOpenFileName(this,tr("Select Configuration File"),".", "*.ptcfg");
-	ui.calibrationFileLineEdit->setText(filename);
-	photoTexturer->loadConfigurationFile(filename);
-	update();
+	QString dir;
+	if (lastDirectory == ""){
+		dir=".";
+	}else{
+		dir = lastDirectory;
+	}
+	QString filename = QFileDialog::getOpenFileName(this,tr("Select Configuration File"),dir, "*.ptcfg");
+	if(!filename.isNull()){
+		QFileInfo finfo(filename);
+		lastDirectory = finfo.absolutePath();
+		ui.calibrationFileLineEdit->setText(filename);
+		photoTexturer->loadConfigurationFile(filename);
+		update();
+	}
 }
 
 void PhotoTexturingWidget::saveConfigurationFile(){
-	QString filename = QFileDialog::getSaveFileName(this,tr("Select Configuration File"),".", "*.ptcfg");
-	ui.calibrationFileLineEdit->setText(filename);
-	photoTexturer->saveConfigurationFile(filename);
+	QString dir;
+	if (lastDirectory == ""){
+		dir=".";
+	}else{
+		dir = lastDirectory;
+	}
+	QString filename = QFileDialog::getSaveFileName(this,tr("Select Configuration File"),dir, "*.ptcfg");
+	if(!filename.isNull()){
+		QFileInfo finfo(filename);
+		lastDirectory = finfo.absolutePath();
+		
+		ui.calibrationFileLineEdit->setText(filename);
+		photoTexturer->saveConfigurationFile(filename);
+	}
 }
 
 void PhotoTexturingWidget::addCamera(){
-	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.cam)");
-	photoTexturer->addCamera(filename);
-	update();
-	ui.cameraTableWidget->selectRow(ui.cameraTableWidget->rowCount()-1);
+	QString dir;
+	if (lastDirectory == ""){
+		dir=".";
+	}else{
+		dir = lastDirectory;
+	}
+	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),dir, "Cameras (*.cam)");
+	if(!filename.isNull()){
+		QFileInfo finfo(filename);
+		lastDirectory = finfo.absolutePath();
+		photoTexturer->addCamera(filename);
+		update();
+		ui.cameraTableWidget->selectRow(ui.cameraTableWidget->rowCount()-1);
+	}
 }
 
 void PhotoTexturingWidget::removeCamera(){
@@ -126,10 +159,12 @@ void PhotoTexturingWidget::update(){
 		Camera *cam = photoTexturer->cameras.at(i);
 		camname =cam->name;
 		imagename = cam->textureImage;
-		QTableWidgetItem *camTypeItem = new QTableWidgetItem(camname);
-		ui.cameraTableWidget->setItem(i, 0, camTypeItem);
+		QTableWidgetItem *camNameItem = new QTableWidgetItem(camname);
+		ui.cameraTableWidget->setItem(i, 0, camNameItem);
+		QTableWidgetItem *camTypeItem = new QTableWidgetItem(cam->calibration->type);
+		ui.cameraTableWidget->setItem(i, 1, camTypeItem);
 		QTableWidgetItem *textureImageItem = new QTableWidgetItem(imagename);
-		ui.cameraTableWidget->setItem(i, 1, textureImageItem);
+		ui.cameraTableWidget->setItem(i, 2, textureImageItem);
 
 	}
 	
@@ -175,14 +210,24 @@ void PhotoTexturingWidget::update(){
 
 }
 void PhotoTexturingWidget::assignImage(){
-	QString filename = QFileDialog::getOpenFileName(this,tr("Select Image File"),".", "Images (*.png *.jpg *.bmp)");
-	QList <QTableWidgetItem*>list = ui.cameraTableWidget->selectedItems();
-	if (list.size()>0){
-		QTableWidgetItem* item = list.at(0);
-		int row = item->row();
-		Camera *cam = photoTexturer->cameras.at(row);
-		cam->textureImage = filename;
-		update();
+	QString dir;
+	if (lastDirectory == ""){
+		dir=".";
+	}else{
+		dir = lastDirectory;
+	}
+	QString filename = QFileDialog::getOpenFileName(this,tr("Select Image File"),dir, "Images (*.png *.jpg *.bmp)");
+	if(!filename.isNull()){
+		QFileInfo finfo(filename);
+		lastDirectory = finfo.absolutePath();
+		QList <QTableWidgetItem*>list = ui.cameraTableWidget->selectedItems();
+		if (list.size()>0){
+			QTableWidgetItem* item = list.at(0);
+			int row = item->row();
+			Camera *cam = photoTexturer->cameras.at(row);
+			cam->textureImage = filename;
+			update();
+		}
 	}
 
 }
@@ -215,6 +260,7 @@ void PhotoTexturingWidget::selectCurrentTexture(){
 
 	int textureID = lwis[0].type();
 	photoTexturer->applyTextureToMesh(mesh,textureID);
+	glarea->setWindowModified(true);
 	setGLAreaTextureMode(vcg::GLW::TMPerWedgeMulti);
 	updateMainWindowMenus();
 	glarea->update();
@@ -282,7 +328,20 @@ void PhotoTexturingWidget::bakeTextures(){
 	//creating template name for baked texture file
 	QFileInfo fi = QFileInfo(mesh->fileName.c_str());
 	QString bTextureFile = fi.baseName()+"_baked.png";
-	
+	if (QFile(bTextureFile).exists()){
+		int count = 1;
+		while(QFile(bTextureFile).exists()){
+			bTextureFile = fi.baseName()+"_baked_";
+			int max = 1000;
+			while(count<max){
+				bTextureFile+="0";
+				max/=10;
+			}
+			bTextureFile+=QString::number(count)+".png";
+			count++;
+		}
+		
+	}
 	combineParamSet.addString(PhotoTexturer::BAKE_MERGED_TEXTURE,bTextureFile,"Merged Texture Filename:","");
 	
 	GenericParamDialog ad(this,&combineParamSet,"Texture Baking Parameters");
@@ -298,7 +357,7 @@ void PhotoTexturingWidget::bakeTextures(){
 	updateGLAreaTextures();
 }
 
-void PhotoTexturingWidget::apply(){
+void PhotoTexturingWidget::reset(){
 
 }
 void PhotoTexturingWidget::close(){
@@ -311,33 +370,52 @@ void PhotoTexturingWidget::cancel(){
 }
 
 void PhotoTexturingWidget::exportCamerasToMaxScript(){
-	QString filename = QFileDialog::getSaveFileName(this,tr("Select MaxScript File"),".", "*.ms");
-	photoTexturer->exportMaxScript(filename,mesh);
+	QString dir;
+	if (lastDirectory == ""){
+		dir=".";
+	}else{
+		dir = lastDirectory;
+	}
+	QString filename = QFileDialog::getSaveFileName(this,tr("Select MaxScript File"),dir, "*.ms");
+	if(!filename.isNull()){
+		QFileInfo finfo(filename);
+		lastDirectory = finfo.absolutePath();
+		photoTexturer->exportMaxScript(filename,mesh);
+	}
 }
 
 void PhotoTexturingWidget::convertToTsaiCamera(){
+	QString dir;
+	if (lastDirectory == ""){
+		dir=".";
+	}else{
+		dir = lastDirectory;
+	}
 	QString filename = QFileDialog::getSaveFileName(this,tr("Select Tsai Calibration File"),".", "*.cam");
-	QList <QTableWidgetItem*>list = ui.cameraTableWidget->selectedItems();
-
-	bool optimize;
-	QMessageBox messageBox(QMessageBox::Question, "Convert to Tsai Camera", "Use optimization mode for Tsai calibration?",
-			QMessageBox::Yes|QMessageBox::No , this);
-	messageBox.setWindowModality(Qt::WindowModal);
-	int returnValue = messageBox.exec();
-
-	if(returnValue == QMessageBox::No)
-	{
-		optimize = false;
-	} else{
-		optimize = true;
-	}
-
-	if (list.size()>0){
-		QTableWidgetItem* item = list.at(0);
-		int row = item->row();
-		photoTexturer->convertToTsaiCamera(row,optimize,filename,mesh);
-	}
+	if(!filename.isNull()){
+		QFileInfo finfo(filename);
+		lastDirectory = finfo.absolutePath();
+		QList <QTableWidgetItem*>list = ui.cameraTableWidget->selectedItems();
 	
+		bool optimize;
+		QMessageBox messageBox(QMessageBox::Question, "Convert to Tsai Camera", "Use optimization mode for Tsai calibration?",
+				QMessageBox::Yes|QMessageBox::No , this);
+		messageBox.setWindowModality(Qt::WindowModal);
+		int returnValue = messageBox.exec();
+	
+		if(returnValue == QMessageBox::No)
+		{
+			optimize = false;
+		} else{
+			optimize = true;
+		}
+	
+		if (list.size()>0){
+			QTableWidgetItem* item = list.at(0);
+			int row = item->row();
+			photoTexturer->convertToTsaiCamera(row,optimize,filename,mesh);
+		}
+	}
 	
 	
 }
@@ -377,7 +455,7 @@ FilterParameterSet PhotoTexturingWidget::loadDefaultBakeSettings(){
 	combineParamSet.addInt(PhotoTexturer::UNPROJECT_ANGLE_WEIGHT,tmpValue.toInt(),"Angle map weight:","");
 	
 	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_ANGLE,85.0);
-	combineParamSet.addFloat(PhotoTexturer::UNPROJECT_ANGLE,tmpValue.toDouble(),"Min angle:","");
+	combineParamSet.addFloat(PhotoTexturer::UNPROJECT_ANGLE,tmpValue.toDouble(),"Max angle (degrees):","");
 	
 	tmpValue = ptSettings.value(PhotoTexturer::UNPROJECT_ANGLE_SHARPNESS,1);
 	combineParamSet.addInt(PhotoTexturer::UNPROJECT_ANGLE_SHARPNESS,tmpValue.toInt(),"Angle map sharpness:","");
@@ -404,8 +482,9 @@ FilterParameterSet PhotoTexturingWidget::loadDefaultBakeSettings(){
 	combineParamSet.addEnum(PhotoTexturer::BAKE_MERGE_TYPE,tmpValue.toInt(),QStringList() <<"Merge Faces by Angle"<<"Smartblend","Merge Mode:","");
 	
 	tmpValue = ptSettings.value(PhotoTexturer::BAKE_SMARTBLEND,"smartblend.exe");
-	combineParamSet.addString(PhotoTexturer::BAKE_SMARTBLEND,tmpValue.toString(),"smartblend:","");
-	
+	//combineParamSet.addOpenFileName(PhotoTexturer::BAKE_SMARTBLEND,tmpValue.toString(),".exe","Smartblend:","");
+	combineParamSet.addString(PhotoTexturer::BAKE_SMARTBLEND,tmpValue.toString(),"Smartblend:","");
+
 	return combineParamSet;
 	
 }

@@ -31,7 +31,7 @@ class WinnerTakesAllTextureMerger: public TextureMerger{
 public:
 	WinnerTakesAllTextureMerger();
 	~WinnerTakesAllTextureMerger();
-	virtual QImage merge(int imgWidth, int imgHeight);
+	virtual QImage *merge(int imgWidth, int imgHeight);
 };
 
 #endif /* WINNERTAKESALLTEXTUREMERGER_H_ */

@@ -18,7 +18,7 @@
      <x>10</x>
      <y>10</y>
      <width>491</width>
-     <height>411</height>
+     <height>451</height>
     </rect>
    </property>
    <property name="frameShape" >
@@ -64,11 +64,16 @@
                 <enum>QAbstractItemView::SelectRows</enum>
                </property>
                <property name="columnCount" >
-                <number>2</number>
+                <number>3</number>
                </property>
                <column>
                 <property name="text" >
                  <string>Camera</string>
+                </property>
+               </column>
+               <column>
+                <property name="text" >
+                 <string>Type</string>
                 </property>
                </column>
                <column>
@@ -105,6 +110,13 @@
                 <widget class="QPushButton" name="convertToTsaiCameraPushButton" >
                  <property name="text" >
                   <string>Convert to Tsai</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="exportToMaxScriptPushButton" >
+                 <property name="text" >
+                  <string>export to MaxScript</string>
                  </property>
                 </widget>
                </item>
@@ -190,7 +202,7 @@
         <item>
          <widget class="QGroupBox" name="groupBox_3" >
           <property name="title" >
-           <string>Photo texturing Configuration File:</string>
+           <string>Configuration File:</string>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3" >
            <item>
@@ -212,13 +224,6 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="exportToMaxScriptPushButton" >
-               <property name="text" >
-                <string>export to MaxScript</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
           </layout>
@@ -229,16 +234,9 @@
       <item>
        <layout class="QHBoxLayout" >
         <item>
-         <widget class="QPushButton" name="applyPushButton" >
+         <widget class="QPushButton" name="resetPushButton" >
           <property name="text" >
-           <string>Apply Texture to Mesh</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="cancelPushButton" >
-          <property name="text" >
-           <string>Restore Original Texture</string>
+           <string>Reset</string>
           </property>
          </widget>
         </item>

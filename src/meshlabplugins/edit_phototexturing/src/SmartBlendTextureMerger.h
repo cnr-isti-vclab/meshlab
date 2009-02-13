@@ -32,7 +32,7 @@ class SmartBlendTextureMerger: public TextureMerger{
 public:
 	SmartBlendTextureMerger(QString command);
 	~SmartBlendTextureMerger();
-	virtual QImage merge(int imgWidth, int imgHeight);
+	virtual QImage *merge(int imgWidth, int imgHeight);
 };
 
 #endif /* SMARTBLENDTEXTUREMERGER_H_ */

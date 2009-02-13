@@ -26,7 +26,16 @@
 
 SmartBlendTextureMerger::SmartBlendTextureMerger(QString command){
 	normalized = false;
-	cmd =command;
+	
+	command = command.replace(" ","\\ ");
+	
+#ifdef _WIN32
+	cmd = command;
+
+#else
+	cmd ="wine "+command;
+#endif
+	
 }
 SmartBlendTextureMerger::~SmartBlendTextureMerger(){
 	qDebug()<<"TextureMerger::~TextureMerger()";
@@ -37,9 +46,9 @@ SmartBlendTextureMerger::~SmartBlendTextureMerger(){
 
 }
 
-QImage SmartBlendTextureMerger::merge(int imgWidth, int imgHeight){
+QImage *SmartBlendTextureMerger::merge(int imgWidth, int imgHeight){
 	qDebug()<<"mergeTextureImagesWinnerTakesAll";
-	QImage image = QImage(imgWidth,imgHeight,QImage::Format_ARGB32);
+	QImage *image;
 	QDir tmpDir = QDir::tempPath();
 	qDebug()<<"Temp Dir:"<<tmpDir.absolutePath();
 	QList<QTemporaryFile *> tmpFileNames;
@@ -49,15 +58,14 @@ QImage SmartBlendTextureMerger::merge(int imgWidth, int imgHeight){
 	for(int i = 0;i<ifcList.size();i++){
 		QImage* tmpImg = ifcList.at(i)->image;
 		QTemporaryFile *file = new QTemporaryFile(tmpDir.absolutePath()+"/pt_smartblend");
-		file->setAutoRemove(false);
 		file->open();
 		qDebug()<<"file:"<<file->fileName();
 		tmpFileNames.append(file);
-		//
 		tmpImg->save(file,"PNG");
-		//file->close();
+
 		
 	}
+	
 	QString sbCommand = cmd+" -o "+tmpDir.absolutePath()+"/pt_smartblend_merged.png"; 
 	for(int i= 0; i< tmpFileNames.size();i++){
 		sbCommand+=" " +tmpFileNames.at(i)->fileName();
@@ -66,8 +74,21 @@ QImage SmartBlendTextureMerger::merge(int imgWidth, int imgHeight){
 	qDebug()<<"sbCommand: "<<sbCommand;
 	//char *c_command = sbCommand.toStdString().c_str();
 	int r= system(sbCommand.toStdString().c_str());
-	qDebug()<< "system:"<<r;
-	image = QImage(tmpDir.absolutePath()+"/pt_smartblend_merged.png");
 	
+	if(r !=0){
+		QErrorMessage errormsg(NULL);
+		errormsg.showMessage("An error occurred when trying to run SmartBlend. Please check the Smartblend path.");
+		errormsg.setWindowModality(Qt::ApplicationModal);
+		errormsg.exec();
+		return NULL;
+	}
+	qDebug()<< "system:"<<r;
+	
+	image = new QImage(tmpDir.absolutePath()+"/pt_smartblend_merged.png");
+	for (int i=0;i<tmpFileNames.size();i++){
+		tmpFileNames.at(i)->remove();
+	}
+	QFile tmp_sb_file(tmpDir.absolutePath()+"/pt_smartblend_merged.png");
+	tmp_sb_file.remove();
 	return image;
 }

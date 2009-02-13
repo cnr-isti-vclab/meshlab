@@ -74,6 +74,7 @@ public:
 	
 	int origTextureID;
 	
+	int bakeCounter;
 	/*
 	 * list of cameras used for the texturing of the meshes
 	 */
@@ -170,9 +171,9 @@ private:
 	 */
 	void unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, QuadTreeNode &qtree, ImageFilterContainer *container ,bool use_distance_filter, int distance_weight, bool use_angle_filter, int angle_weight , int angle_map_sharpness, double min_angle, int imgResX, int imgResY);
 
-	void getSurrundingMeanColor(QImage &image, int x, int y, QColor &surcolor);
+	void getSurrundingMeanColor(QRgb* uimg, int iwidth, int iheight, int x, int y, QColor &surcolor);
 
-	void edgeTextureStretching(QImage &image, int pass);
+	void edgeTextureStretching(QImage *image, int pass);
 	
 };
 

@@ -57,7 +57,7 @@ public:
 	~TextureMerger();
 
 	void normalizeFilterContainerList();
-	virtual QImage merge(int imgWidth, int imgHeight)=0;
+	virtual QImage *merge(int imgWidth, int imgHeight)=0;
 };
 
 #endif /* TEXTUREMERGER_H_ */
