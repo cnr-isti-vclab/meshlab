@@ -75,6 +75,7 @@ public:
 	int origTextureID;
 	
 	int bakeCounter;
+	int combineCounter;
 	/*
 	 * list of cameras used for the texturing of the meshes
 	 */

@@ -84,6 +84,7 @@ PhotoTexturer::PhotoTexturer(){
 	origTextureID = -1;
 	nextTextId = 0;
 	bakeCounter = 0;
+	combineCounter = 0;
 }
 PhotoTexturer::~PhotoTexturer(){
 
@@ -970,7 +971,8 @@ int PhotoTexturer::combineTextures(MeshModel* m){
 			k++;
 		}
 	}
-	textureList[textureId] = "combined";
+	textureList[textureId] = "combined_"+QString::number(combineCounter);
+	combineCounter++;
 	return textureId;
 }
 
