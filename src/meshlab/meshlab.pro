@@ -2,13 +2,15 @@ VCGDIR  = ../../../vcglib
 GLEWDIR = ../../../code/lib/glew
 GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
-CONFIG += debug_and_release
+CONFIG += debug_and_release precompile_header
 # uncomment to try Eigen
-#DEFINES += VCG_USE_EIGEN
-#CONFIG += warn_off
+# DEFINES += VCG_USE_EIGEN
+# CONFIG += warn_off
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
 DEPENDPATH  += $$VCGDIR  $$VCGDIR/vcg $$VCGDIR/wrap
+
+PRECOMPILED_HEADER = mainwindow.h
 
 HEADERS        = interfaces.h \
 		 GLLogStream.h \
@@ -93,6 +95,11 @@ win32:DEFINES += NOMINMAX
 win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 
 mac:QMAKE_CXX=g++-4.2
+# Uncomment these if you want to experiment with newer gcc compilers
+# (here using the one provided with macports)
+# macx-g++:QMAKE_CXX=g++-mp-4.3
+# macx-g++:QMAKE_CXXFLAGS_RELEASE -= -Os
+# macx-g++:QMAKE_CXXFLAGS_RELEASE += -O3
 
 DEFINES += GLEW_STATIC
 

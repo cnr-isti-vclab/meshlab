@@ -177,6 +177,9 @@ Added Apply Last Filter action
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+//None of this should happen if we are compiling c, not c++
+#ifdef __cplusplus
+
 #include <QDir>
 #include <QMainWindow>
 //#include <QWorkspace>
@@ -466,4 +469,5 @@ bool eventFilter(QObject *obj, QEvent *event)
      }
  };
 
+#endif
 #endif
