@@ -66,6 +66,7 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 
 public:
 	enum { FP_PARALLEL_PLANES, FP_RECURSIVE_SLICE };
+	enum { CAP_CW, CAP_CCW };
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
 
@@ -78,7 +79,7 @@ public:
   virtual bool applyFilter(QAction * /* filter */, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
   virtual const int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;}
 
-	static void capHole(MeshModel* orig, MeshModel* dest);
+	static void capHole(MeshModel* orig, MeshModel* dest, int capDir=CAP_CW);
 	static void extrude(MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
 private:
 	SVGProperties pr;

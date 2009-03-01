@@ -19,14 +19,21 @@ public:
   }
 	bool operator()(face::Pos<typename MESH_TYPE::FaceType> ep)
 	{
-    Point3f pp;
-	  if(Distance(ep.V()->P(),p)<0) ep.V()->Q()=VERTEX_LEFT;
-														else  ep.V()->Q()=VERTEX_RIGHT;
+	  if (Distance(ep.V()->P(),p)<0) 
+			ep.V()->Q()=VERTEX_LEFT;
+		else if (Distance(ep.V()->P(),p)>0)
+			ep.V()->Q()=VERTEX_RIGHT;
+		else
+			ep.V()->Q()=VERTEX_SLICE;
 
-    if(Distance(ep.VFlip()->P(),p)<0)  ep.VFlip()->Q()=VERTEX_LEFT;
-																 else  ep.VFlip()->Q()=VERTEX_RIGHT;
+    if (Distance(ep.VFlip()->P(),p)<0)  
+			ep.VFlip()->Q()=VERTEX_LEFT;
+		else if (Distance(ep.VFlip()->P(),p)>0)  
+			ep.VFlip()->Q()=VERTEX_RIGHT;
+		else
+			ep.VFlip()->Q()=VERTEX_SLICE;
 
-    return ep.V()->Q() != ep.VFlip()->Q();
+    return (ep.V()->Q() != ep.VFlip()->Q()) && (ep.V()->Q()!=VERTEX_SLICE) && (ep.VFlip()->Q()!=VERTEX_SLICE);
   }
 
 protected:
@@ -45,7 +52,7 @@ public :
 
 	void operator()(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType> ep)
 	{
-	  Segment3f seg(ep.f->V(ep.z)->P(),ep.f->V1(ep.z)->P());
+		Segment3f seg(ep.V()->P(),ep.VFlip()->P());
 	  Point3f pp;
     Intersection<Segment3f>(p,seg,pp);
     nv.P()=pp;

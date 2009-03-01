@@ -91,7 +91,12 @@ const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId)
 void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, FilterParameterSet &parlst)
 {
   vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-	parlst.addEnum   ("planeAxis", 0, QStringList()<<"YZ Axis"<<"XZ Axis"<<"XY Axis", tr("Axis"), tr("The Slicing plane will be done perpendicular to the axis"));
+	parlst.addBool   ("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter");
+	parlst.addEnum   ("planeAxis", 0, QStringList()<<"X Axis"<<"Y Axis"<<"Z Axis", tr("Axis"), tr("The Slicing plane will be done perpendicular to the axis"));
+	parlst.addEnum	 ("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured");
+	parlst.addFloat	 ("length",29,"Length","Length of the object referred to the units specified above");
+	parlst.addFloat  ("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away");
+
 	switch(ID(filter))
 	{
     case FP_PARALLEL_PLANES :
@@ -101,9 +106,6 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
       parlst.addEnum   ("relativeTo",0,QStringList()<<"Bounding box min"<<"Bounding box Center"<<"Origin","plane reference","Specify the reference from which the planes are shifted");
       //parlst.addBool   ("absOffset",false,"Absolute offset", "if true the above offset is absolute is relative to the origin of the coordinate system, if false the offset is relative to the center of the bbox.");
       //parlst.addAbsPerc("planeDist", 0.0,0,m.cm.bbox.Diag(), "Distance between planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
-			parlst.addEnum	 ("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured");
-			parlst.addFloat	 ("length",29,"Length","Length of the object referred to the units specified above");
-			parlst.addFloat  ("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away");
       parlst.addInt    ("planeNum", 10, "Number of Planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
 
 			QStringList nn=QString(m.fileName.c_str()).split("/");
@@ -113,17 +115,13 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 				name="Slice";
       parlst.addString ("filename", name, "filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
       parlst.addBool   ("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below");
-			parlst.addBool   ("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter");
 			parlst.addBool   ("hideBase",true,"Hide Original Mesh","Hide the Original Mesh");
 			parlst.addBool   ("hideSlices",true,"Hide Slices","Hide the Generated Slices");
 			parlst.addBool   ("hidePlanes",false,"Hide Planes","Hide the Generated Slicing Planes");
     }
       break;
     case FP_RECURSIVE_SLICE:
-			parlst.addBool   ("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter");
-			parlst.addEnum	 ("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured");
-			parlst.addFloat	 ("length",29,"Length","Length of the object referred to the units specified above");
-			parlst.addFloat  ("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away");
+			parlst.addBool	 ("delfather",true,"delete father", "Delete the father's mesh after slicing it");
 			parlst.addInt		 ("iter",2,"iterations","iterations");
       break;
     default : assert(0);
@@ -213,16 +211,15 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 
 				planeCenter+=planeAxis*planeDist*i;
 				slicingPlane.Init(planeCenter,planeAxis);
-				//clear the selection flags
-        vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(base->cm);
-
         SlicedEdge<CMeshO> slicededge(slicingPlane);
         SlicingFunction<CMeshO> slicingfunc(slicingPlane);
-        //after the RefineE call, the mesh will be half vertices selected
+        //after the RefineE call, the mesh will have vertices with quality 
+				//relative to the slicing plane
         vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
              (base->cm, slicingfunc, slicededge, false, cb);
-        vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
-
+				vcg::tri::UpdateTopology<CMeshO>::FaceFace(base->cm);
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
+				
 				MeshModel *slice1= new MeshModel();
 				m.meshList.push_back(slice1);
 				QString layername;
@@ -249,15 +246,17 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 					m.meshList.push_back(dup);
 					layername.sprintf("plane_%d_extruded.ply",i+1);
 					dup->fileName = layername.toStdString().c_str();								// mesh name
-					dup->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+					dup->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);					
 					extrude(cap, dup, eps, planeAxis);
 				}
 				if (hidePlanes)
 					cap->visible=false;
 				tri::Append<CMeshO,CMeshO>::Mesh(slice1->cm, cap->cm);
 				tri::Clean<CMeshO>::RemoveDuplicateVertex(slice1->cm);
+				slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);					
 				vcg::tri::UpdateTopology<CMeshO>::FaceFace(slice1->cm);
 				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(slice1->cm);
+				vcg::tri::UpdateBounding<CMeshO>::Box(slice1->cm);
 
 				MeshModel* slice2= new MeshModel();
 				m.meshList.push_back(slice2);
@@ -267,11 +266,14 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_RIGHT,VERTEX_RIGHT);
 				vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base->cm);
 				createSlice(base,slice2);
-				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice2->cm);
+				tri::Clean<CMeshO>::FlipMesh(cap->cm);
 				tri::Append<CMeshO,CMeshO>::Mesh(slice2->cm, cap->cm);
 				tri::Clean<CMeshO>::RemoveDuplicateVertex(slice2->cm);
+				slice2->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);					
 				vcg::tri::UpdateTopology<CMeshO>::FaceFace(slice2->cm);
 				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(slice2->cm);
+				vcg::tri::UpdateBounding<CMeshO>::Box(slice2->cm);
+
 				if (hideSlices)
 					slice2->visible=false;
 				if (i!=0)
@@ -294,11 +296,12 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 		break;
 		case FP_RECURSIVE_SLICE:
 		{
-			KDTree<CMeshO> *kdt=new KDTree<CMeshO>(&m,&m.mm()->cm,eps);
+			KDTree<CMeshO> *kdt=new KDTree<CMeshO>(&m,m.mm(), eps, parlst.getEnum("planeAxis"));
+			kdt->delfather=parlst.getBool("delfather");
 			int iter=parlst.getInt("iter");
 			for(int i=0;i<iter;i++)
 			{
-				kdt->Slice();
+				kdt->Slice(cb);
 			}
 			vcg::tri::UpdateBounding<CMeshO>::Box(m.mm()->cm);
     }
@@ -309,7 +312,6 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 
 void ExtraFilter_SlicePlugin::extrude(MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
 {
-
 	tri::Append<CMeshO,CMeshO>::Mesh(dest->cm, orig->cm);
 	tri::UpdateTopology<CMeshO>::FaceFace(dest->cm);
 	//create the clone, move it eps/2 on the left and invert its normals
@@ -400,11 +402,11 @@ void ExtraFilter_SlicePlugin::extrude(MeshModel* orig, MeshModel* dest, float ep
 
 	tri::Append<CMeshO,CMeshO>::Mesh(dest->cm, tempMesh->cm);
 	tri::Clean<CMeshO>::RemoveDuplicateVertex(dest->cm);
-  tri::UpdateTopology<CMeshO>::FaceFace(dest->cm);
-	tri::UpdateNormals<CMeshO>::PerVertexPerFace(dest->cm);
-
+	dest->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(dest->cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(dest->cm);
+	vcg::tri::UpdateBounding<CMeshO>::Box(dest->cm);
 	delete tempMesh;
-
 }
 const MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
 {
@@ -436,7 +438,7 @@ void ExtraFilter_SlicePlugin::createSlice(MeshModel* currentMesh, MeshModel* des
   destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
 }
 
-void ExtraFilter_SlicePlugin::capHole(MeshModel* currentMesh, MeshModel* destMesh)
+void ExtraFilter_SlicePlugin::capHole(MeshModel* currentMesh, MeshModel* destMesh, int capDir)
 {
 
   std::vector< std::vector<Point3f> > outlines;
@@ -459,6 +461,9 @@ void ExtraFilter_SlicePlugin::capHole(MeshModel* currentMesh, MeshModel* destMes
 				nv++;
       }
       while(!p.V()->IsV());
+			if (capDir==CAP_CCW)
+				std::reverse(outline.begin(),outline.end());
+
       outlines.push_back(outline);
       outline.clear();
     }
