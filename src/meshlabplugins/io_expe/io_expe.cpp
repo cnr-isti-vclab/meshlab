@@ -32,6 +32,7 @@
 #include <vcg/complex/trimesh/update/bounding.h>
 
 #include "import_expe.h"
+#include "import_xyz.h"
 // #include "export_expe.h"
 
 #include <QMessageBox>
@@ -70,7 +71,7 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 			return false;
     //std::cout << "loadMask = " << loadMask << "\n";
 		m.Enable(loadMask);
-    
+
 
 		int result = vcg::tri::io::ImporterExpePTS<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)
@@ -79,7 +80,24 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 													 errorMsgFormat.arg(fileName, vcg::tri::io::ImporterExpePTS<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
-	}
+
+  }
+  else if (formatName.toLower() == tr("xyz"))
+  {
+    int loadMask;
+    if (!vcg::tri::io::ImporterXYZ<CMeshO>::LoadMask(filename.c_str(),loadMask))
+      return false;
+    m.Enable(loadMask);
+
+
+    int result = vcg::tri::io::ImporterXYZ<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+    if (result != 0)
+    {
+      QMessageBox::warning(parent, tr("XYZ Opening Error"),
+                           errorMsgFormat.arg(fileName, vcg::tri::io::ImporterXYZ<CMeshO>::ErrorMsg(result)));
+      return false;
+    }
+  }
 
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 
