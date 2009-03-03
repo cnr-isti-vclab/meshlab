@@ -8,6 +8,7 @@
 //#include <meshlab/glarea.h>
 #include "editalign.h"
 #include "AlignPairWidget.h"
+#include "AlignPairDialog.h"
 
 #include <wrap/qt/trackball.h>
 #include <wrap/gl/picking.h>
@@ -79,15 +80,17 @@ void AlignPairWidget::paintGL ()
 				else	   bb=gluedTree->gluedBBox();
 				
 				glPushMatrix();
-						vcg::glScale(3.0f/bb.Diag());
-						vcg::glTranslate(-bb.Center());
-						if(i==0)
+					bool allowScaling = qobject_cast<AlignPairDialog *>(parent())->allowScalingCB->isChecked();
+					if(allowScaling)  vcg::glScale(3.0f/bb.Diag());
+					else vcg::glScale(3.0f/gluedTree->gluedBBox().Diag());
+					vcg::glTranslate(-bb.Center());
+					if(i==0)
 						{
 							freeMesh->m->Render(vcg::GLW::DMFlat,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
 							drawPickedPoints(freePickedPointVec,vcg::Color4b(vcg::Color4b::Red));	
 						} else				{
 							foreach(MeshNode *mn, gluedTree->nodeList) 
-								if(mn->glued && mn != freeMesh) mn->m->Render(vcg::GLW::DMFlat,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
+								if(mn->glued && mn != freeMesh && mn->m->visible) mn->m->Render(vcg::GLW::DMFlat,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
 							drawPickedPoints(gluedPickedPointVec,vcg::Color4b(vcg::Color4b::Blue));	
 						}
 								
@@ -106,7 +109,7 @@ void AlignPairWidget::paintGL ()
 								}
 							}
 				glPopMatrix();
-						tt[i]->DrawPostApply();
+				tt[i]->DrawPostApply();
 		} 
 }
 
@@ -117,11 +120,14 @@ void AlignPairWidget::drawPickedPoints(std::vector<vcg::Point3f> &pointVec, vcg:
 	glDisable(GL_TEXTURE);
 	glDepthFunc(GL_ALWAYS);
 	//glDisable(GL_DEPTH_TEST);
-	glPointSize(3.0);
-	glColor(color);
-	for(int i=0; i<pointVec.size();++i)
+	for(uint i=0; i<pointVec.size();++i)
 		{
-		vcg::Point3f &pt =pointVec[i];
+			vcg::Point3f &pt =pointVec[i];
+			glPointSize(5.0);	glColor(vcg::Color4b::Black);
+			glBegin(GL_POINTS);
+				glVertex(pt);
+			glEnd();
+			glPointSize(3.0);	glColor(color);
 			glBegin(GL_POINTS);
 				glVertex(pt);
 			glEnd();
@@ -194,8 +200,17 @@ void AlignPairWidget::mouseReleaseEvent (QMouseEvent * e)
 
 void AlignPairWidget::wheelEvent (QWheelEvent * e)
 {
-	int index = e->x () < ( width() /2) ? 0 : 1 ;
   const int WHEEL_STEP = 120;
-  tt[index]->MouseWheel (e->delta () / float (WHEEL_STEP), QTWheel2VCG (e->modifiers ()));
+  AlignPairDialog * dd= qobject_cast<AlignPairDialog *>(parent());
+	if(dd->allowScalingCB->isChecked())
+		{
+			int index = e->x () < ( width() /2) ? 0 : 1 ;
+			tt[index]->MouseWheel (e->delta () / float (WHEEL_STEP), QTWheel2VCG (e->modifiers ()));
+		}
+	else 
+	{
+		tt[0]->MouseWheel (e->delta () / float (WHEEL_STEP), QTWheel2VCG (e->modifiers ()));
+		tt[1]->MouseWheel (e->delta () / float (WHEEL_STEP), QTWheel2VCG (e->modifiers ()));
+	}
   updateGL ();
 }
