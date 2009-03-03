@@ -4,7 +4,7 @@
 # it moves plugins and frameworks into the package and runs the 
 # install_tool on them to change the linking path to the local version of qt
 # the build was issued with
-# qmake-4.3 "CONFIG += debug_and_release warn_off" meshlabv11.pro -recursive -spec macx-g++
+# qmake-4.3 "CONFIG += debug_and_release warn_off" meshlabv12.pro -recursive -spec macx-g++
 # make clean
 # make release
 # Note that sometimes you have to copy by hand the icons in the meshlab.app/Contents/Resources directory
@@ -78,7 +78,8 @@ cp shaders/*.gdp shaders/*.vert shaders/*.frag shaders/*.txt  $BUNDLE/$APPNAME/C
 
 for x in $QTCOMPONENTS
 do
-    cp -R $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks 
+#    cp -R $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks 
+rsync -avu --exclude='*debug*' $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks
 done
 
 echo "now trying to change the paths in the meshlab executable"
