@@ -44,6 +44,7 @@ public:
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
+	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, FilterParameterSet & /*par*/);
 
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb, QWidget *parent);

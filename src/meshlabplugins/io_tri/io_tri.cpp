@@ -39,7 +39,16 @@ using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);
 
-bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, CallBackPos *cb, QWidget *parent)
+void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, FilterParameterSet & parlst)
+{
+	if(format.toUpper() == tr("ASC"))
+	{
+			parlst.addInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file.");
+			parlst.addBool("triangulate", true, "Grid triangulation", "if true is assumes that the points are arranged in a complete xy grid and try to perform the naive height field triangulation of the input data.  Lenght of the lines is detected automatically by searching x jumps.");
+	}
+}
+
+bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &parlst, CallBackPos *cb, QWidget *parent)
 {
 	bool result;
 	if(formatName.toUpper() == tr("TRI"))
@@ -52,8 +61,16 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		{
 			mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 			m.Enable(mask);			
-			tri::io::ImporterASC<CMeshO>::Open(m.cm, qPrintable(fileName),cb);
-			return true;
+			bool triangulate = parlst.getBool("triangulate");
+			int rowToSkip = parlst.getInt("rowToSkip");
+			int result = tri::io::ImporterASC<CMeshO>::Open(m.cm, qPrintable(fileName),cb,triangulate,rowToSkip);
+			if (result != 0) // all the importers return 0 on success
+			{
+				errorMessage = QString("Failed to open:")+fileName;
+				return false;
+			}
+			
+		return true;
 		}
 	return result;
 }
