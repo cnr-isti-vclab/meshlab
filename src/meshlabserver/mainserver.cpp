@@ -24,9 +24,24 @@
 #include <QApplication>
 #include "../meshlab/meshmodel.h"
 #include "../meshlab/interfaces.h"
-#include "../meshlab/filterScriptDialog.h"
+#include "../meshlab/filterscript.h"
 #include "../meshlab/plugin_support.h"
 #include <vcg/complex/trimesh/update/bounding.h>
+
+class FilterData 
+{
+public:
+	FilterData();
+	QString name;
+	QString info;
+	int filterClass;
+	bool operator <(const FilterData &d) const {return name<d.name;}
+};
+
+class FilterOrganizer
+{
+
+};
 
 QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
 std::vector<MeshIOInterface*> meshIOPlugins;
@@ -50,8 +65,17 @@ void loadPlugins(FILE *fp=0)
 		pluginsDir.cdUp();
 		pluginsDir.cdUp();
 	}
+	int cnt=0;
+	while(++cnt <4 && !pluginsDir.exists("../meshlab/plugins") )
+				pluginsDir.cdUp();
 #endif
-	pluginsDir.cd("../meshlab/plugins");
+	pluginsDir.cd("../meshlab");
+	if(!pluginsDir.exists("plugins"))
+	{
+		printf(	"Error!\n We are not able to find the plugins directory\n"
+						"We searched in '%s'\n\n", qPrintable(pluginsDir.path()));
+	}
+	pluginsDir.cd("plugins");
 
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
@@ -89,11 +113,12 @@ bool Open(MeshModel &mm, QString fileName)
 	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
 
 	QFileInfo fi(fileName);
+	QDir curdir= QDir::current();
 	// this change of dir is needed for subsequent textures/materials loading
-	QDir::setCurrent(fi.absoluteDir().absolutePath());
+	//QDir::setCurrent(fi.absoluteDir().absolutePath());
 	
 	QString extension = fi.suffix();
-	
+	qDebug("Opening a file with extention %s",qPrintable(extension));
 	// retrieving corresponding IO plugin
 	int idx = allKnownFormats[extension.toLower()];
 	if (idx == 0)
@@ -112,18 +137,13 @@ bool Open(MeshModel &mm, QString fileName)
 	
 	if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
   {
-    printf("Failed loading\n");
+    printf("MeshLabServer: Failed loading of %s from dir %s\n",qPrintable(fileName),qPrintable(curdir.path()));
     return false;
   }
 	vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);
-
+	QDir::setCurrent(curdir.path());
   return true;
 }
-/*
- meshlab -i mesh -o mesh -f filtro
-
-
-*/
 
 bool Save(MeshModel *mm, int mask, QString fileName)
 {
@@ -138,7 +158,7 @@ bool Save(MeshModel *mm, int mask, QString fileName)
 
 	QFileInfo fi(fileName);
 	// this change of dir is needed for subsequent textures/materials loading
-	QDir::setCurrent(fi.absoluteDir().absolutePath());
+	// QDir::setCurrent(fi.absoluteDir().absolutePath());
 	
 	QString extension = fi.suffix();
 	
@@ -162,6 +182,7 @@ bool Save(MeshModel *mm, int mask, QString fileName)
     printf("Failed saving\n");
     return false;
   }
+
   return true;
 }
 
@@ -174,9 +195,13 @@ bool Script(MeshDocument &meshDocument, QString scriptfile){
 	
 	//Open/Load FilterScript 
 	
-	if (scriptfile.isEmpty())	return false;
+	if (scriptfile.isEmpty())
+	{
+		printf("No script specified\n");
+		return false;
+	}
 	scriptPtr.open(scriptfile);
-	
+	printf("Starting Script of %i actions",scriptPtr.actionList.size());
 	FilterScript::iterator ii;
 	for(ii = scriptPtr.actionList.begin();ii!= scriptPtr.actionList.end();++ii){
 		FilterParameterSet &par = (*ii).second;
@@ -216,7 +241,7 @@ bool Script(MeshDocument &meshDocument, QString scriptfile){
 		
 		bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, NULL);
 		//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
-		//GLA()->log.Logf(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
+		//GLA()->log.Logf(GLLogStream::WARNING,"Re-Applied filter %s",qPrintable((*ii).first));
 		
 		if(!ret)
 		{
@@ -475,7 +500,7 @@ int main(int argc, char *argv[])
 				
 	if(!scriptName.isEmpty())
 	{		
-		printf("Apply FilterScript:\n");
+		printf("Apply FilterScript: '%s'\n",qPrintable(scriptName));
 		bool returnValue = Script(meshDocument, scriptName);
 		if(!returnValue)
 		{
