@@ -139,7 +139,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int result = vcg::tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), cb);
 		if (result != 0) // all the importers return 0 on success
 		{
-			QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
+			//QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
 			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result));
 			return false;
 		}
@@ -162,7 +162,8 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 				QMessageBox::warning(parent, tr("OBJ Opening Warning"), vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
 			else
 			{
-				QMessageBox::critical(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+//				QMessageBox::critical(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+				errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterObj<CMeshO>::ErrorMsg(result));
 				return false;
 			}
 		}
