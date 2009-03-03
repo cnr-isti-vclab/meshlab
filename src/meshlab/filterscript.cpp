@@ -203,64 +203,75 @@ bool FilterScript::open(QString filename)
 {
 	QDomDocument doc;
 	actionList.clear();
-	//if(filename.endsWith(".mlx"))
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly))
 	{
-  		QFile file(filename);
-			if (file.open(QIODevice::ReadOnly) && doc.setContent(&file)) 
-        {
-					file.close();
-					QDomElement root = doc.documentElement();
-					if (root.nodeName() == "FilterScript") 
-          {
-             qDebug("FilterScript");
-              for(QDomElement nf = root.firstChildElement("filter"); !nf.isNull(); nf = nf.nextSiblingElement("filter"))
-              {
-                  FilterParameterSet par;
-                  QString name=nf.attribute("name");
-                  qDebug("Reading filter with name %s",qPrintable(name));
-                      for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
-                      {
-                        QString name=np.attribute("name");
-                        QString type=np.attribute("type");
+		qDebug("Failure in opening Script %s",qPrintable(filename));
+		qDebug("Current dir is %s",qPrintable(QDir::currentPath()));
+		return false;
+	}
+	QString errorMsg; int errorLine,errorColumn;
+	if(!doc.setContent(&file,false,&errorMsg,&errorLine,&errorColumn))
+		{
+		qDebug("Failure in setting Content line %i column %i \nError'%s'",errorLine,errorColumn,qPrintable(errorMsg));
+		return false;
+	}
+	file.close();
+	QDomElement root = doc.documentElement();
+	if(root.nodeName() != "FilterScript") 
+	{
+		qDebug("Failure in parsing script %s\nNo root node with name FilterScript\n",qPrintable(filename));
+		qDebug("Current rootname is %s",qPrintable(root.nodeName()));
+		return false;
+	}
+          
+	qDebug("FilterScript");
+	for(QDomElement nf = root.firstChildElement("filter"); !nf.isNull(); nf = nf.nextSiblingElement("filter"))
+		{
+			FilterParameterSet par;
+			QString name=nf.attribute("name");
+			qDebug("Reading filter with name %s",qPrintable(name));
+					for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
+					{
+						QString name=np.attribute("name");
+						QString type=np.attribute("type");
 
-                        qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
-                        if(type=="Bool")    par.addBool(name,np.attribute("value")!=QString("false"));
-                        if(type=="Int")     par.addInt(name,np.attribute("value").toInt());
-                        if(type=="Float")   par.addFloat(name,np.attribute("value").toDouble());
-                        if(type=="String")  par.addString(name,np.attribute("value"));
-                        if(type=="AbsPerc")  par.addAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat());
-                        if(type=="Color")	par.addColor(name,QColor::QColor(np.attribute("rgb").toUInt()));
-                        if(type=="Matrix44")par.addMatrix44(name,getMatrix(&np));                        
-                        if(type=="Enum"){
-                        	QStringList list = QStringList::QStringList();
-                        	for(QDomElement ns = np.firstChildElement("EnumString"); !ns.isNull(); ns = ns.nextSiblingElement("EnumString")){
-                        		list<<ns.attribute("value");
-                        	}
-                        	par.addEnum(name,np.attribute("value").toInt(),list);
-                        }
-                      
-                        if(type == MeshPointer)  par.addMesh(name, np.attribute(Value).toInt());
-                        if(type == FloatList)
-                        {
-                    	  QList<float> values;
-                    	  for(QDomElement listItem = np.firstChildElement(Item);
-                            !listItem.isNull();
-                            listItem = listItem.nextSiblingElement(Item))
-                    	  {
-                            values.append(listItem.attribute(Value).toFloat()); 
-                          }
-                    	  par.addFloatList(name,values);
-                        }
-                        
-                        if(type == DynamicFloat)  par.addDynamicFloat(name, np.attribute(Value).toFloat(), np.attribute(Min).toFloat(), np.attribute(Max).toFloat(), np.attribute(Mask).toInt());
-                        if(type == OpenFileName)  par.addOpenFileName(name, np.attribute(Value));
-                        if(type == SaveFileName)  par.addSaveFileName(name, np.attribute(Value));
-                   }
-                   actionList.append(qMakePair(name,par));
-             }
-          }
-        }
-    }
+						qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
+						if(type=="Bool")    par.addBool(name,np.attribute("value")!=QString("false"));
+						if(type=="Int")     par.addInt(name,np.attribute("value").toInt());
+						if(type=="Float")   par.addFloat(name,np.attribute("value").toDouble());
+						if(type=="String")  par.addString(name,np.attribute("value"));
+						if(type=="AbsPerc")  par.addAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat());
+						if(type=="Color")	par.addColor(name,QColor::QColor(np.attribute("rgb").toUInt()));
+						if(type=="Matrix44")par.addMatrix44(name,getMatrix(&np));                        
+						if(type=="Enum"){
+							QStringList list = QStringList::QStringList();
+							for(QDomElement ns = np.firstChildElement("EnumString"); !ns.isNull(); ns = ns.nextSiblingElement("EnumString")){
+								list<<ns.attribute("value");
+							}
+							par.addEnum(name,np.attribute("value").toInt(),list);
+						}
+					
+						if(type == MeshPointer)  par.addMesh(name, np.attribute(Value).toInt());
+						if(type == FloatList)
+						{
+						QList<float> values;
+						for(QDomElement listItem = np.firstChildElement(Item);
+								!listItem.isNull();
+								listItem = listItem.nextSiblingElement(Item))
+						{
+								values.append(listItem.attribute(Value).toFloat()); 
+							}
+						par.addFloatList(name,values);
+						}
+						
+						if(type == DynamicFloat)  par.addDynamicFloat(name, np.attribute(Value).toFloat(), np.attribute(Min).toFloat(), np.attribute(Max).toFloat(), np.attribute(Mask).toInt());
+						if(type == OpenFileName)  par.addOpenFileName(name, np.attribute(Value));
+						if(type == SaveFileName)  par.addSaveFileName(name, np.attribute(Value));
+			 }
+			 actionList.append(qMakePair(name,par));
+		}
+          
   return true;
 }
 
