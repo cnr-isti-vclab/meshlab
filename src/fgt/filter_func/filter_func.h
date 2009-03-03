@@ -59,6 +59,7 @@ public:
 		   FF_DEF_VERT_ATTRIB,
 		   FF_DEF_FACE_ATTRIB,
 		   FF_GRID,
+		   FF_ISOSURFACE,
 		   FF_REFINE } ;
 
 	FilterFunctionPlugin();
