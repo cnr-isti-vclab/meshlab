@@ -117,7 +117,30 @@ public:
 	virtual const QString &errorMsg() {return this->errorMessage;}
 	
 	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
+	// NEVER EVER use a msgbox to say something to the user.
 	QString errorMessage;
+	
+	
+	GLLogStream *log;	
+		
+
+	/// Standard stuff that usually should not be redefined. 
+	void setLog(GLLogStream *log) { this->log = log ; }
+	// This fucntion must be used to communicate useful information collected in the parsing/saving of the files. 
+	// NEVER EVER use a msgbox to say something to the user.
+	void Log(const char * f, ... ) 
+		{
+			if(log)
+			{	
+				char buf[4096];
+				va_list marker;
+				va_start( marker, f );     
+				vsprintf(buf,f,marker);
+				va_end( marker );              
+				log->Log(GLLogStream::FILTER,buf);
+			}
+		}
+
 
 };
 

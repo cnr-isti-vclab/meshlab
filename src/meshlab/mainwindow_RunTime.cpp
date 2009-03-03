@@ -916,7 +916,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					return false;
 				}
 				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-
+				pCurrentIOPlugin->setLog(&(GLA()->log));
 				qb->show();
 				FilterParameterSet prePar;
 				pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
@@ -1079,6 +1079,7 @@ bool MainWindow::saveAs(QString fileName)
 			return false;
 		}
 		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
+		pCurrentIOPlugin->setLog(&(GLA()->log));
 
 		int capability=0,defaultBits=0;
 		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
