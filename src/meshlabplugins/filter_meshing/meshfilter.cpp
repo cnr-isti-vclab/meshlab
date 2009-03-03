@@ -292,7 +292,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		parlst.addBool("Autoclean",true,QString("Remove Unreferenced Vertices"));
 		break;
 		case FP_QUADRIC_SIMPLIFICATION:
-		  parlst.addInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces");
+		  parlst.addInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces", "The desired final number of faces.");
+		  parlst.addFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial size.");
 		  parlst.addFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
 		  parlst.addBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries");
 		  parlst.addBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface");
@@ -303,6 +304,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  break;
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		  parlst.addInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces");
+		  parlst.addFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial mesh.");
 		  parlst.addFloat("QualityThr",lastqtex_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
 		  parlst.addFloat("Extratcoordw",lastqtex_extratw,"Texture Weight","Additional weight for each extra Texture Coordinates for every (selected) vertex");
 		  parlst.addBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries");
@@ -529,6 +531,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	if (ID(filter) == (FP_QUADRIC_SIMPLIFICATION) ) {
 
 		int TargetFaceNum = par.getInt("TargetFaceNum");
+		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
+		
 		lastq_QualityThr = par.getFloat("QualityThr");
 		lastq_PreserveBoundary = par.getBool("PreserveBoundary");
 		lastq_PreserveNormal = par.getBool("PreserveNormal");
@@ -568,6 +572,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
     }
 
 		int TargetFaceNum = par.getInt("TargetFaceNum");
+		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
 		lastqtex_QualityThr = par.getFloat("QualityThr");
 		lastqtex_extratw = par.getFloat("Extratcoordw");
 		lastq_OptimalPlacement = par.getBool("OptimalPlacement");
