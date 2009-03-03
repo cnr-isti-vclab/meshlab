@@ -100,7 +100,7 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
 	}
 }
 
-bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &parlst, CallBackPos *cb, QWidget *parent)
+bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
 	bool normalsUpdated = false;
 
@@ -117,65 +117,59 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
   
   if (formatName.toUpper() == tr("PLY"))
 	{
-		vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
+		tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
 		// small patch to allow the loading of per wedge color into faces.  
 		if(mask & tri::io::Mask::IOM_WEDGCOLOR) mask |= tri::io::Mask::IOM_FACECOLOR;
 		m.Enable(mask);
 
 		 
-		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+		int result = tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0) // all the importers return 0 on success
 		{
-			if(vcg::tri::io::ImporterPLY<CMeshO>::ErrorCritical(result) )
+			if(tri::io::ImporterPLY<CMeshO>::ErrorCritical(result) )
 			{
-				//QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
-				errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result));
+				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPLY<CMeshO>::ErrorMsg(result));
 				return false;
 			}
 		}
 	}
 	else if (formatName.toUpper() == tr("STL"))
 	{
-		int result = vcg::tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), cb);
+		int result = tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), cb);
 		if (result != 0) // all the importers return 0 on success
 		{
-			//QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(result));
 			return false;
 		}
-    //int retVal=QMessageBox::question ( parent, tr("STL File Importing"),tr("Do you want to unify duplicated vertices?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No );
-    //if(retVal==QMessageBox::Yes )
-    //  tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 	}
   else	if(formatName.toUpper() == tr("OBJ"))
 	{
-    vcg::tri::io::ImporterOBJ<CMeshO>::Info oi;	
+    tri::io::ImporterOBJ<CMeshO>::Info oi;	
 		oi.cb = cb;
-		if (!vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
+		if (!tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
 			return false;
     m.Enable(oi.mask);
 		
-		int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
-		if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
+		int result = tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
+		if (result != tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 		{
-			if (result & vcg::tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
-				QMessageBox::warning(parent, tr("OBJ Opening Warning"), vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
+			if (result & tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
+					errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
 			else
 			{
-//				QMessageBox::critical(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
-				errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterObj<CMeshO>::ErrorMsg(result));
+				errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
 				return false;
 			}
 		}
 
-		if(oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
+		if(oi.mask & tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 
 		mask = oi.mask;
 	}
 	else if (formatName.toUpper() == tr("PTX"))
 	{
-		vcg::tri::io::ImporterPTX<CMeshO>::Info importparams;
+		tri::io::ImporterPTX<CMeshO>::Info importparams;
 
 		importparams.meshnum = parlst.getInt("meshindex");
 		importparams.anglecull =parlst.getBool("anglecull");
@@ -188,17 +182,17 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 
 		// if color, add to mesh
 		if(importparams.savecolor)
-			importparams.mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+			importparams.mask |= tri::io::Mask::IOM_VERTCOLOR;
 
 		// reflectance is stored in quality
-		importparams.mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		importparams.mask |= tri::io::Mask::IOM_VERTQUALITY;
 
 		m.Enable(importparams.mask);
 
-		int result = vcg::tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
+		int result = tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
 		if (result == 1)
 		{
-			QMessageBox::warning(parent, tr("PTX Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterPTX<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 
@@ -208,14 +202,14 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	else if (formatName.toUpper() == tr("OFF"))
 	{
 		int loadMask;
-		if (!vcg::tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(),loadMask))
+		if (!tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(),loadMask))
 			return false;
     m.Enable(loadMask);
 		
-		int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+		int result = tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)  // OFFCodes enum is protected
 		{
-			QMessageBox::warning(parent, tr("OFF Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 	}
@@ -238,14 +232,14 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		}
 	}
 	if (someTextureNotFound)
-		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
+		Log("Missing texture files: %s", qPrintable(missingTextureFilesMsg));
 	
 	if (cb != NULL)	(*cb)(99, "Done");
 
 	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet & par, vcg::CallBackPos *cb, QWidget *parent)
+bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet & par, CallBackPos *cb, QWidget */*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
   string filename = QFile::encodeName(fileName).constData ();
@@ -257,40 +251,40 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
 					
 	if(formatName.toUpper() == tr("PLY"))
 	{
-		int result = vcg::tri::io::ExporterPLY<CMeshO>::Save(m.cm,filename.c_str(),mask,binaryFlag,cb);
+		int result = tri::io::ExporterPLY<CMeshO>::Save(m.cm,filename.c_str(),mask,binaryFlag,cb);
 		if(result!=0)
 		{
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterPLY<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterPLY<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		return true;
 	}
 	if(formatName.toUpper() == tr("STL"))
 	{
-		int result = vcg::tri::io::ExporterSTL<CMeshO>::Save(m.cm,filename.c_str(),binaryFlag);
+		int result = tri::io::ExporterSTL<CMeshO>::Save(m.cm,filename.c_str(),binaryFlag);
 		if(result!=0)
 		{
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterSTL<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterSTL<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		return true;
 	}
 	if(formatName.toUpper() == tr("WRL"))
 	{
-		int result = vcg::tri::io::ExporterWRL<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+		int result = tri::io::ExporterWRL<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result!=0)
 		{
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterWRL<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterWRL<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		return true;
 	}
 	if( formatName.toUpper() == tr("OFF") || formatName.toUpper() == tr("DXF") || formatName.toUpper() == tr("OBJ") )
   {
-    int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+    int result = tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
   	if(result!=0)
 	  {
-		  QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
 		  return false;
 	  }
 	return true;
@@ -336,19 +330,19 @@ QList<MeshIOInterface::Format> BaseMeshIOPlugin::exportFormats() const
 void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
 	if(format.toUpper() == tr("PLY")){
-		capability = vcg::tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();
+		capability = tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();
 		// For the default bits of the ply format disable flags and normals that usually are not useful.
 		defaultBits=capability;
-		defaultBits &= (~vcg::tri::io::Mask::IOM_FLAGS);
-		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTNORMAL);
+		defaultBits &= (~tri::io::Mask::IOM_FLAGS);
+		defaultBits &= (~tri::io::Mask::IOM_VERTNORMAL);
 	}
 	if(format.toUpper() == tr("STL")){
-		capability = vcg::tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();
+		capability = tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();
 		defaultBits=capability;
 	}
-	if(format.toUpper() == tr("OBJ")){capability=defaultBits= vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("OFF")){capability=defaultBits= vcg::tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("WRL")){capability=defaultBits= vcg::tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("OBJ")){capability=defaultBits= tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("OFF")){capability=defaultBits= tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("WRL")){capability=defaultBits= tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
 
 }
 
