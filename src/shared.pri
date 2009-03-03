@@ -10,12 +10,18 @@ GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
 
 # uncomment to try Eigen
-#DEFINES += VCG_USE_EIGEN
-#CONFIG += warn_off
+# DEFINES += VCG_USE_EIGEN
+# CONFIG += warn_off
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
 
-mac:QMAKE_CXX=g++-4.2
+# Uncomment these if you want to experiment with newer gcc compilers
+# (here using the one provided with macports)
+# macx-g++:QMAKE_CXX=g++-mp-4.3
+# macx-g++:QMAKE_CXXFLAGS_RELEASE -= -Os
+# macx-g++:QMAKE_CXXFLAGS_RELEASE += -O3
+
+macx:QMAKE_CXX=g++-4.2
 
 # the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max
