@@ -7,11 +7,11 @@ SOURCES       = filter_func.cpp\
 
 TARGET        = filter_func
 
-INCLUDEPATH += ../../../../code/lib/muparser/include
+INCLUDEPATH += ../../external/muparser_v130/include
 
 # Note: we need static libs so when building muparser lib use 
 # ./configure --enable-shared=no
 
 win32-msvc2005:LIBS += ../../../../code/lib/muparser/lib/muparser.lib
 mac:LIBS            += ../../../../code/lib/muparser/lib/libmuparser.a
-win32-g++:LIBS		 += ../../../../code/lib/muparser/lib/libmuparser.a
+win32-g++:LIBS		 += ../../external/lib/win32-gcc/libmuparser.a
