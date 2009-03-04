@@ -23,10 +23,10 @@ INCLUDEPATH += ../../../../code/lib/lib3ds-1.3.0
 
 win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib/win32-msvc.net/lib3ds-130s.lib
 win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib/win32-msvc2005/lib3ds-130s.lib
-win32-g++:LIBS		+= ../../../../code/lib/lib3ds-1.3.0/lib/win32-g++/lib3ds.a
+win32-g++:LIBS		+= ../../external/lib/win32-gcc/lib3ds.a
 
 unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/lib/unix -l3ds
 
 mac:LIBS -= -l3ds 
-mac:LIBS += ../../../../code/lib/lib3ds-1.3.0/lib/mac/lib3ds.a
+mac:LIBS += ../../external/lib/mac/lib3ds.a
 

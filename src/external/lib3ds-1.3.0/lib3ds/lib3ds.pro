@@ -10,7 +10,7 @@ INCLUDEPATH += ..
 
 
 macx:DESTDIR       = ../../lib/macx
-win32-gcc:DESTDIR       = ../../lib/win32-gcc
+win32-g++:DESTDIR       = ../../lib/win32-gcc  
 win32-msvc2005:DESTDIR       = ../../lib/win32-msvc2005
 
 
