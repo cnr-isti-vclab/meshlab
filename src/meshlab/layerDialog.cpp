@@ -62,6 +62,16 @@ void LayerDialog::toggleStatus(int row, int col)
 		{
 			//the user has clicke on one of the eyes
 			QList<MeshModel *> &meshList=gla->meshDoc.meshList;
+			// NICE TRICK.
+			// If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
+			// Very useful for comparing meshes
+			
+			if(QApplication::keyboardModifiers() == Qt::ControlModifier)
+					foreach(MeshModel *mp, meshList)
+					{
+						mp->visible=false;
+					}
+					
 			if(meshList.at(row)->visible)  meshList.at(row)->visible = false;
 			else   meshList.at(row)->visible = true;	
 		}
@@ -71,7 +81,7 @@ void LayerDialog::toggleStatus(int row, int col)
 	gla->update();
 }
 
-void LayerDialog::showEvent ( QShowEvent * event )
+void LayerDialog::showEvent ( QShowEvent * /* event*/ )
 {
 	updateTable();
 }
