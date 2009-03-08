@@ -39,7 +39,6 @@ class KDTree
 		KDTree<MeshType>* L(){return leftChild;}
 		KDTree<MeshType>* R(){return rightChild;}
 		MeshType* S(){return slice;}
-		MeshType* M(){return mesh;}
 		void Slice(vcg::CallBackPos *cb)
 		{
 			Plane3f slicingPlane;
