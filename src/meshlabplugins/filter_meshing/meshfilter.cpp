@@ -152,18 +152,18 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_BUTTERFLY_SS :
     case FP_LOOP_SS :
     case FP_MIDPOINT :
-		case FP_QUADRIC_SIMPLIFICATION :      
-		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :       
-		case FP_CLUSTERING :	               
+		case FP_QUADRIC_SIMPLIFICATION :
+		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :
+		case FP_CLUSTERING :
 		case FP_CLOSE_HOLES:
          return MeshFilterInterface::Remeshing;
 		case FP_NORMAL_EXTRAPOLATION:
 		case FP_INVERT_FACES:
 		case FP_REORIENT :
 		case FP_COMPUTE_PRINC_CURV_DIR:
-		case FP_TRANSFORM:	            
+		case FP_TRANSFORM:
 							 return MeshFilterInterface::Normal;
-		case FP_FREEZE_TRANSFORM:	       
+		case FP_FREEZE_TRANSFORM:
 							 return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
 
     default : assert(0); return MeshFilterInterface::Generic;
@@ -260,8 +260,8 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_FREEZE_TRANSFORM:
     case FP_NORMAL_EXTRAPOLATION:
     case FP_INVERT_FACES:         return 0;
-	case FP_COMPUTE_PRINC_CURV_DIR: return	MeshModel::MM_VERTCURVDIR	| 
-											MeshModel::MM_FACEMARK		| 
+	case FP_COMPUTE_PRINC_CURV_DIR: return	MeshModel::MM_VERTCURVDIR	|
+											MeshModel::MM_FACEMARK		|
 											MeshModel::MM_VERTFACETOPO	|
 											MeshModel::MM_FACEFACETOPO;
     case FP_QUADRIC_SIMPLIFICATION:
@@ -334,6 +334,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values.");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		  break;
+		case FP_NORMAL_EXTRAPOLATION:
+			parlst.addInt ("K",(int)10,"Number of neigbors","The number of neighbors used to estimate and propagate normals.");
+			break;
 			 }
 }
 
@@ -352,6 +355,7 @@ bool ExtraMeshFilterPlugin::autoDialog(QAction *action)
 		case FP_MIDPOINT :
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
+		case FP_NORMAL_EXTRAPOLATION:
 		  return true;
   	 }
   return false;
@@ -399,10 +403,10 @@ bool ExtraMeshFilterPlugin::getCustomParameters(QAction *action, QWidget * /*par
 bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
 	if( ID(filter) == FP_LOOP_SS ||
-			ID(filter) == FP_BUTTERFLY_SS || 
+			ID(filter) == FP_BUTTERFLY_SS ||
 			ID(filter) == FP_MIDPOINT )
 		{
-			if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) 
+			if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) )
 			{
 				errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
 				return false; // can't continue, mesh can't be processed
@@ -468,17 +472,17 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 			 m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	  }
-	
+
 		if(ID(filter) == (FP_REMOVE_NON_MANIFOLD_VERTEX) )
 		{
 			int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldVertex(m.cm);
-			
+
 			if(nonManif) Log(GLLogStream::FILTER, "Removed %d Non Manifold Vertex", nonManif);
 			else Log(GLLogStream::FILTER, "Mesh is two-manifold. Nothing done.", nonManif);
-			
+
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 		}
-	
+
 	if(ID(filter) == (FP_REORIENT) )
 	  {
 	    bool oriented;
@@ -532,7 +536,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
-		
+
 		lastq_QualityThr = par.getFloat("QualityThr");
 		lastq_PreserveBoundary = par.getBool("PreserveBoundary");
 		lastq_PreserveNormal = par.getBool("PreserveNormal");
@@ -585,7 +589,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	}
 
   if (ID(filter) == (FP_NORMAL_EXTRAPOLATION) ) {
-    NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
+    NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"),-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
 	}
 
   if (ID(filter) == (FP_COMPUTE_PRINC_CURV_DIR) ) {
@@ -596,8 +600,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  }
 
 	  switch(par.getEnum("Method")){
-			 
-		  case 0: 
+
+		  case 0:
 			  if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
 				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
 				return false; // can't continue, mesh can't be processed
@@ -612,7 +616,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 				return false; // can't continue, mesh can't be processed
 				}
 			  vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycles(m.cm); break;
-		  default:assert(0);break;		
+		  default:assert(0);break;
 
 	  }
   }
