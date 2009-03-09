@@ -119,7 +119,8 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 				  FP_TRANSFORM,
 				  FP_FREEZE_TRANSFORM,
           FP_CLOSE_HOLES_TRIVIAL,
-          FP_CLOSE_HOLES
+          FP_CLOSE_HOLES,
+					FP_CYLINDER_UNWRAP,
           } ;
 
 
@@ -136,7 +137,8 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual bool applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual bool applyFilter(QAction */*filter*/, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
 
 protected:
 

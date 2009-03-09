@@ -114,7 +114,9 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 		FP_COMPUTE_PRINC_CURV_DIR<<
 		FP_CLOSE_HOLES<<
 		FP_FREEZE_TRANSFORM<<
-		FP_TRANSFORM;
+		FP_TRANSFORM<<
+		FP_CYLINDER_UNWRAP;
+
 
   FilterIDType tt;
 
@@ -162,9 +164,11 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
 		case FP_REORIENT :
 		case FP_COMPUTE_PRINC_CURV_DIR:
 		case FP_TRANSFORM:
-							 return MeshFilterInterface::Normal;
+						 return MeshFilterInterface::Normal;
 		case FP_FREEZE_TRANSFORM:
 							 return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
+		case FP_CYLINDER_UNWRAP:
+						 return MeshFilterInterface::Smoothing;
 
     default : assert(0); return MeshFilterInterface::Generic;
   }
@@ -194,6 +198,8 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 		case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
 		case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions");
 		case FP_CLOSE_HOLES:	          return QString("Close Holes");
+		case FP_CYLINDER_UNWRAP:	     return QString("Geometric Cylindrical Unwrapping");
+
 
 
 		default: assert(0);
@@ -232,8 +238,10 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
     case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");
     case FP_FREEZE_TRANSFORM : 	        return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh");
     case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces");
-	case FP_COMPUTE_PRINC_CURV_DIR:		return tr("Compute the principal directions of curvature with several algorithms");
-	case FP_CLOSE_HOLES :         return tr("Close holes smaller than a given threshold");
+		case FP_COMPUTE_PRINC_CURV_DIR:			return tr("Compute the principal directions of curvature with several algorithms");
+		case FP_CLOSE_HOLES :								return tr("Close holes smaller than a given threshold");
+		case FP_CYLINDER_UNWRAP:						return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
+
 		default : assert(0);
 	}
   return QString();
@@ -259,7 +267,9 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_TRANSFORM:
     case FP_FREEZE_TRANSFORM:
     case FP_NORMAL_EXTRAPOLATION:
-    case FP_INVERT_FACES:         return 0;
+    case FP_INVERT_FACES:
+		case FP_CYLINDER_UNWRAP:						
+												return 0;
 	case FP_COMPUTE_PRINC_CURV_DIR: return	MeshModel::MM_VERTCURVDIR	|
 											MeshModel::MM_FACEMARK		|
 											MeshModel::MM_VERTFACETOPO	|
@@ -334,6 +344,12 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values.");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		  break;
+		case FP_CYLINDER_UNWRAP:	
+			parlst.addFloat("startAngle", 0,"Start angle (deg)", "The starting angle of the unrolling process.");
+		  parlst.addFloat("endAngle",360,"End angle (deg)","The ending angle of the unrolling process. Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
+			parlst.addFloat("radius", 0,"Projection Radius", "If non zero, this parameter specifies the desired radius of the reference cylinder used for the projection. Changing this parameter affect the <b>X</b> horizontal scaling of the resulting mesh. If zero (default) the average distance of the mesh from the axis is chosen.");
+			
+		break;
 		case FP_NORMAL_EXTRAPOLATION:
 			parlst.addInt ("K",(int)10,"Number of neigbors","The number of neighbors used to estimate and propagate normals.");
 			break;
@@ -355,6 +371,7 @@ bool ExtraMeshFilterPlugin::autoDialog(QAction *action)
 		case FP_MIDPOINT :
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
+		case FP_CYLINDER_UNWRAP:	
 		case FP_NORMAL_EXTRAPOLATION:
 		  return true;
   	 }
@@ -400,8 +417,10 @@ bool ExtraMeshFilterPlugin::getCustomParameters(QAction *action, QWidget * /*par
   return true;
 }
 
-bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
+	MeshModel &m=*md.mm();
+
 	if( ID(filter) == FP_LOOP_SS ||
 			ID(filter) == FP_BUTTERFLY_SS ||
 			ID(filter) == FP_MIDPOINT )
@@ -648,7 +667,99 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       }
       //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	  }
+	
+  if(ID(filter) == (FP_CYLINDER_UNWRAP))
+	  {
+		float startAngleDeg = par.getFloat("startAngle");
+		float endAngleDeg = par.getFloat("endAngle");
+		float radius = par.getFloat("radius");
+		// a 	
+		
+		// Number of unrolling. (e.g. if the user set start=-15 end=375 there are two loops)
+		int numLoop =	int(1+(endAngleDeg-startAngleDeg)/360.0);
 
+		vector< vector<int> > VertRefLoop(numLoop);
+		for(int i=0;i<numLoop;++i)
+				VertRefLoop[i].resize(m.cm.vert.size(),-1);
+				
+		Log("Computing %i loops from %f to %f",numLoop,startAngleDeg,endAngleDeg);
+		
+		MeshModel *um=md.addNewMesh("Unrolled Mesh"); 					
+		float avgZ=0;
+		CMeshO::VertexIterator vi;
+		// First loop duplicate accordingly the vertices. 
+				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+				if(!(*vi).IsD()) 
+				{
+					Point3f p = (*vi).P();
+					float ro,theta,phi;
+					p.Y()=0;
+					p.ToPolar(ro,theta,phi);
+					float thetaDeg = math::ToDeg(theta);
+					int loopIndex =0; 
+					while(thetaDeg<endAngleDeg) 
+					{
+						if(thetaDeg>=startAngleDeg)
+							{
+								CMeshO::VertexIterator nvi = tri::Allocator<CMeshO>::AddVertices(um->cm,1);
+								VertRefLoop[loopIndex][vi-m.cm.vert.begin()] = nvi - um->cm.vert.begin();
+								nvi->P().X()=math::ToRad(thetaDeg);
+								nvi->P().Y()=vi->P().Y();
+								nvi->P().Z()=ro;
+								//nvi->N()=(*vi).N();
+								nvi->C()=(*vi).C();
+								avgZ += nvi->P().Z();
+							}
+						thetaDeg+=360;
+						loopIndex++;
+					}					
+				}
+				
+				// Now correct the x width with the average radius 
+				avgZ = avgZ/um->cm.vert.size();
+				if(radius != 0) avgZ = radius; // if the user desire to override that value.
+				
+				for(vi=um->cm.vert.begin();vi!=um->cm.vert.end();++vi)
+						vi->P().X()*=avgZ;
+						
+				// Second Loop Process Faces
+				// Note the particolar care to manage the faces that jumps from one side to another.
+				CMeshO::FaceIterator fi;
+				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+				if(!(*fi).IsD()) 
+				{
+					int loopIndex=0;
+					while(loopIndex<numLoop)
+					{
+						int endIt = min(2,numLoop-loopIndex);
+						for(int ii0=0;ii0<endIt;ii0++)
+							for(int ii1=0;ii1<endIt;ii1++)
+								for(int ii2=0;ii2<endIt;ii2++)
+								{
+									int i0 = VertRefLoop[loopIndex+ii0][(*fi).V(0)-&m.cm.vert[0]];
+									int i1 = VertRefLoop[loopIndex+ii1][(*fi).V(1)-&m.cm.vert[0]];
+									int i2 = VertRefLoop[loopIndex+ii2][(*fi).V(2)-&m.cm.vert[0]];
+									if(i0>=0 && i1>=0 && i2>=0)
+									{
+										// skip faces larger than 1/10 of the radius...
+										if( (Distance(um->cm.vert[i0].P(),um->cm.vert[i1].P()) < avgZ/10.0) && 
+										    (Distance(um->cm.vert[i0].P(),um->cm.vert[i2].P()) < avgZ/10.0) ) 
+												{
+													CMeshO::FaceIterator nfi = tri::Allocator<CMeshO>::AddFaces(um->cm,1);
+													nfi->V(0) = &um->cm.vert[i0];
+													nfi->V(1) = &um->cm.vert[i1];
+													nfi->V(2) = &um->cm.vert[i2];
+												}
+									}
+								}
+						loopIndex++;
+					}
+				}
+				tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(um->cm);
+				tri::UpdateBounding<CMeshO>::Box(um->cm);
+
+			return true;
+		}
 	return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
