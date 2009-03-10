@@ -53,8 +53,9 @@ using namespace vcg;
 QhullPlugin::QhullPlugin() 
 { 
 	typeList << FP_QHULL_CONVEX_HULL  
-			 <<	FP_QHULL_DELAUNAY_TRIANGULATIONS
-			 <<	FP_QHULL_VORONOI_DIAGRAMS;
+			 <<	FP_QHULL_DELAUNAY_TRIANGULATION
+			 <<	FP_QHULL_VORONOI_DIAGRAM
+			 << FP_QHULL_ALPHA_SHAPES;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -72,8 +73,9 @@ const QString QhullPlugin::filterName(FilterIDType filterId)
 {
   switch(filterId) {
 		case FP_QHULL_CONVEX_HULL :  return QString("Convex Hull"); 
-		case FP_QHULL_DELAUNAY_TRIANGULATIONS :  return QString("Delaunay Triangulation"); 
-		case FP_QHULL_VORONOI_DIAGRAMS :  return QString("Voronoi Diagrams"); 
+		case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Delaunay Triangulation"); 
+		case FP_QHULL_VORONOI_DIAGRAM :  return QString("Voronoi Diagrams"); 
+		case FP_QHULL_ALPHA_SHAPES : return QString("Alpha Shapes");
 		default : assert(0); 
 	}
   return QString("Error: Unknown Filter"); 
@@ -85,8 +87,9 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
 		case FP_QHULL_CONVEX_HULL :  return QString("Calculate mesh Convex Hull with Qhull library. The convex hull of a set of points is the smallest convex set containing the points."); 
-		case FP_QHULL_DELAUNAY_TRIANGULATIONS :  return QString("Calculate mesh Delaunay triangulations with Qhull library"); 
-		case FP_QHULL_VORONOI_DIAGRAMS :  return QString("Calculate mesh Voronoi diagrams with Qhull library"); 
+		case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Calculate mesh Delaunay triangulations with Qhull library. The Delaunay triangulation of a set of points in d-dimensional spaces is the projection of the convex hull of the projections of the points onto a (d+1)-dimensional paraboloid."); 
+		case FP_QHULL_VORONOI_DIAGRAM :  return QString("Calculate mesh Voronoi diagrams with Qhull library. The Voronoi diagram is the nearest-neighbor map for a set of points. Each region contains those points that are nearer one input site than any other input site. "); 
+		case FP_QHULL_ALPHA_SHAPES: return QString("Calculate Alpha Shapes");
 		default : assert(0); 
 	}
 	return QString("Error: Unknown Filter");
@@ -100,8 +103,9 @@ const QhullPlugin::FilterClass QhullPlugin::getClass(QAction *a)
   switch(ID(a))
 	{
 		case FP_QHULL_CONVEX_HULL :
-		case FP_QHULL_DELAUNAY_TRIANGULATIONS :
-		case FP_QHULL_VORONOI_DIAGRAMS :
+		case FP_QHULL_DELAUNAY_TRIANGULATION :
+		case FP_QHULL_VORONOI_DIAGRAM :
+		case FP_QHULL_ALPHA_SHAPES:
 			return FilterClass (MeshFilterInterface::Remeshing) ; 
 		default : assert(0); 
 	}
@@ -121,14 +125,19 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			{
 				break;
 			}
-		case FP_QHULL_DELAUNAY_TRIANGULATIONS :
+		case FP_QHULL_DELAUNAY_TRIANGULATION :
 			{
 				break;
 			}
-		case FP_QHULL_VORONOI_DIAGRAMS :
+		case FP_QHULL_VORONOI_DIAGRAM :
 			{
 				break;
-			}									
+			}	
+		case FP_QHULL_ALPHA_SHAPES:
+			{
+			    parlst.addAbsPerc("perc",0,0,100,"Compute alpha as percentage of the bbox","Compute alpha as percentage of the bbox");
+				break;
+			}
 		default : assert(0); 
 	}
 }
@@ -141,7 +150,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 		case FP_QHULL_CONVEX_HULL :
 			{
 				MeshModel &m=*md.mm();
-			    MeshModel &pm =*md.addNewMesh("Qhull mesh");
+			    MeshModel &pm =*md.addNewMesh("Convex Hull");
 				
 				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
@@ -208,10 +217,10 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 
 				break;
 			}
-		case FP_QHULL_DELAUNAY_TRIANGULATIONS:
+		case FP_QHULL_DELAUNAY_TRIANGULATION:
 			{
 				MeshModel &m=*md.mm();
-			    MeshModel &pm =*md.addNewMesh("Qhull mesh");
+			    MeshModel &pm =*md.addNewMesh("Delaunay Triangulation");
 				
 				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
@@ -252,7 +261,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				qh visit_id++;
 				int ridgeCount=0;
 
-				//Compute each ridge (trinagle) once
+				//Compute each ridge (triangle) once
 				FORALLfacet_(facet_list)
 				if (!facet->upperdelaunay) {
 					facet->visitid= qh visit_id;
@@ -285,6 +294,113 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 
 				break;
 			}
+			case FP_QHULL_VORONOI_DIAGRAM:
+			{
+				MeshModel &m=*md.mm();
+			    MeshModel &pm =*md.addNewMesh("Voronoi Diagram");
+				
+				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
+					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
+				}
+				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
+					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+				}
+			    
+				int dim= 3;				/* dimension of points */
+				int numpoints= m.cm.vn;	/* number of mesh vertices */
+
+				//facet_list contains the delaunauy triangulation as a list of tetrahedral facets */ 	
+				facetT *facet_list = compute_delaunay(dim,numpoints,m);
+
+				//to be continued...
+				break;
+			}
+			case FP_QHULL_ALPHA_SHAPES:
+			{
+				MeshModel &m=*md.mm();
+			    MeshModel &pm =*md.addNewMesh("Alpha Shapes");
+				
+				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
+					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
+				}
+				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
+					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+				}
+			    
+				int dim= 3;				/* dimension of points */
+				int numpoints= m.cm.vn;	/* number of mesh vertices */
+
+				int perc = par.getAbsPerc("perc");
+				double alpha = m.cm.bbox.Diag()/100 *perc;
+				
+				//facet_list contains the filtered delaunauy triangulation (according to the alpha)
+				//as a list of tetrahedral facets 
+
+				//qh num_vertices is not updated, qh num_facets is.
+				facetT *facet_list = compute_alpha_shapes(dim,numpoints,m,alpha);
+
+				int convexNumFaces = qh num_facets;
+				int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
+				//assert( qh num_vertices == convexNumVert);
+
+				tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
+
+				/*ivp length is 'qh num_vertices' because each vertex is accessed through its ID whose range is 
+				  0<=qh_pointid(vertex->point)<qh num_vertices*/
+				vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
+				vertexT *vertex;
+				int     vertex_n, vertex_i;
+				FOREACHvertex_i_(qh_facetvertices (facet_list, NULL, false)){	
+					if ((*vertex).point){
+						pm.cm.vert[vertex_i].P()[0] = (*vertex).point[0];
+						pm.cm.vert[vertex_i].P()[1] = (*vertex).point[1];
+						pm.cm.vert[vertex_i].P()[2] = (*vertex).point[2];
+						ivp[qh_pointid(vertex->point)] = &pm.cm.vert[vertex_i];
+					}
+				}
+				
+				// In 3-d Delaunay triangulation each facet is a tetrahedron. If triangulated,
+				//each ridge (d-1 vertices between two neighboring facets) is a triangle
+
+				facetT *facet, **facetp,  *neighbor;
+				qh visit_id++;
+				int ridgeCount=0;
+
+				//Compute each ridge (triangle) once
+				FORALLfacet_(facet_list)
+				if (!facet->upperdelaunay) {
+					facet->visitid= qh visit_id;
+					qh_makeridges(facet);
+					ridgeT *ridge, **ridgep;
+					FOREACHridge_(facet->ridges) {
+						neighbor= otherfacet_(ridge, facet);
+						if (neighbor->visitid != qh visit_id) {
+							tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
+							ridgeCount++;
+							FOREACHvertex_i_(ridge->vertices)
+								(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
+						}
+					}
+				}
+
+				assert(pm.cm.fn == ridgeCount);
+				Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+				Log(GLLogStream::FILTER,"Alpha = %f ",alpha);
+				//m.cm.Clear();	
+
+				vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+				
+				int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
+				qh_freeqhull(!qh_ALL);  
+				qh_memfreeshort (&curlong, &totlong);
+				if (curlong || totlong)
+					fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
+								 totlong, curlong);
+
+				break;
+					break;
+				}
 	}
   
 	return true;

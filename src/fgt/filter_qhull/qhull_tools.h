@@ -46,6 +46,7 @@
 ****************************************************************************/
 
 #include <meshlab/meshmodel.h>
+#include <math.h>
 
 
 #if defined(__cplusplus)
@@ -68,4 +69,6 @@ extern "C"
 
 facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m);
 facetT *compute_delaunay(int dim, int numpoints, MeshModel &m);
+facetT *compute_voronoi(int dim, int numpoints, MeshModel &m);
+facetT *compute_alpha_shapes(int dim, int numpoints, MeshModel &m, double alpha);
 coordT *qh_readpointsFromMesh(int *numpoints, int *dimension, MeshModel &m);

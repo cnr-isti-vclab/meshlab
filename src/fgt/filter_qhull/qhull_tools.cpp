@@ -95,6 +95,9 @@ facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m)
 
 	compute_delaunay(int dim, int numpoints, MeshModel &m)
 		build Delauanay triangulation from a set of vertices of a mesh.
+			
+		The Delaunay triangulation of a set of points in d-dimensional spaces is the projection of the convex 
+		hull of the projections of the points onto a (d+1)-dimensional paraboloid.
 
 		By default, qdelaunay merges regions with cocircular or cospherical input sites. 
 		If you want a simplicial triangulation use triangulated output ('Qt') or joggled input ('QJ'). 
@@ -184,6 +187,119 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 
 	return qh facet_list;
 };
+
+/*	dim  --> dimension of points
+	numpoints --> number of points
+	m --> original mesh 
+
+	compute_voronoi(int dim, int numpoints, MeshModel &m)
+		
+
+	The Voronoi diagram is the nearest-neighbor map for a set of points. 
+	Each region contains those points that are nearer one input site than any other input site. 
+	The Voronoi diagram is the dual of the Delaunay triangulation. 
+
+	Options 'Qt' (triangulated output) and 'QJ' (joggled input) may produce unexpected results.
+
+	Option 'Qt' triangulated output. If a Voronoi vertex is defined by cospherical data, Qhull duplicates 
+	the vertex. For example, if the data contains a square, the output will contain two copies of the Voronoi vertex.
+
+	Option 'QJ' joggle the input to avoid Voronoi vertices defined by more than dim+1 points. 
+	It is less accurate than triangulated output ('Qt').
+
+	returns 
+		
+*/
+
+facetT *compute_voronoi(int dim, int numpoints, MeshModel &m)
+{  
+	coordT *points;						/* array of coordinates for each point*/
+	boolT ismalloc= True;				/* True if qhull should free points in qh_freeqhull() or reallocation */ 
+	char flags[]= "qhull v QJ Tcv";	/* option flags for qhull, see qh_opt.htm */
+	FILE *outfile= NULL;				/* output from qh_produce_output()			
+										   use NULL to skip qh_produce_output() */ 
+	FILE *errfile= stderr;				/* error messages from qhull code */ 
+	int exitcode;						/* 0 if no error from qhull */
+	facetT *facet;						/* set by FORALLfacets */
+		
+    /* initialize points[] here.
+	   points is an array of coordinates. Each triplet of coordinates rapresents a 3d vertex */
+	points= qh_readpointsFromMesh(&numpoints, &dim, m);
+
+	exitcode= qh_new_qhull (dim, numpoints, points, ismalloc,
+							flags, outfile, errfile);
+	
+	qh_setvoronoi_all();
+
+	//qh_triangulate();
+	if (!exitcode) { /* if no error */ 
+		/* 'qh facet_list' contains the convex hull */
+
+		
+
+	}
+
+	return qh facet_list;
+};
+
+/*
+	The alpha complex is a subcomplex of the Delaunay triangulation. 
+	For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay 
+	triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'. 
+	Note that at 'alpha' = 0, the alpha complex consists just of the set P, and for sufficiently large 'alpha', 
+	the alpha complex is the Delaunay triangulation D(P) of P.
+	
+*/
+
+facetT *compute_alpha_shapes(int dim, int numpoints, MeshModel &m, double alpha){
+
+	coordT *points;						/* array of coordinates for each point*/
+	boolT ismalloc= True;				/* True if qhull should free points in qh_freeqhull() or reallocation */ 
+	char flags[]= "qhull d QJ Tcv";	    /* option flags for qhull, see qh_opt.htm */
+	FILE *outfile= NULL;				/* output from qh_produce_output()			
+										   use NULL to skip qh_produce_output() */ 
+	FILE *errfile= stderr;				/* error messages from qhull code */ 
+	int exitcode;						/* 0 if no error from qhull */
+	facetT *facet;						/* set by FORALLfacets */
+		
+    /* initialize points[] here.
+	   points is an array of coordinates. Each triplet of coordinates rapresents a 3d vertex */
+	points= qh_readpointsFromMesh(&numpoints, &dim, m);
+
+	exitcode= qh_new_qhull (dim, numpoints, points, ismalloc,
+							flags, outfile, errfile);
+	
+	//set facet->center as the Voronoi center
+	qh_setvoronoi_all();
+
+	int count =0;
+	if (!exitcode) { /* if no error */ 
+		/* 'qh facet_list' contains the convex hull */
+		//For all facets computes the radius of the empy circumsphere calculating 
+		//the distance between the circumcenter and a vertex of the facet
+		FORALLfacets {
+			if (!facet->upperdelaunay) {
+				vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
+				double* center = facet->center;
+				double px = (*vertex).point[0];
+				double qx = *center;
+				double py = (*vertex).point[1];
+				double qy = *center++;
+				double pz = (*vertex).point[2];
+				double qz = *center++;
+				double radius = sqrt(pow(px-qx,2)+pow(py-qy,2)+pow(pz-qz,2));
+				if (radius>alpha){
+					qh_removefacet(facet);
+					count++;
+				}
+			}
+		}
+	}
+
+	return qh facet_list;
+}
+
+
 
 /* dim  --> dimension of points
 	numpoints --> number of points
