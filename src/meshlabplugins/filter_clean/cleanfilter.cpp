@@ -123,7 +123,9 @@ CleanFilter::CleanFilter()
 		<< FP_REMOVE_ISOLATED_COMPLEXITY 
 		<< FP_REMOVE_ISOLATED_DIAMETER 
 		<< FP_ALIGN_WITH_PICKED_POINTS
-		<< FP_SELECTBYANGLE;
+    << FP_SELECTBYANGLE
+    << FP_REMOVE_TVERTEX_FLIP
+    << FP_REMOVE_TVERTEX_COLLAPSE;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -151,6 +153,8 @@ const QString CleanFilter::filterName(FilterIDType filter)
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
 	  case FP_ALIGN_WITH_PICKED_POINTS :	return AlignTools::FilterName;
   	case FP_SELECTBYANGLE :  return QString("Select Faces by view angle"); 
+    case FP_REMOVE_TVERTEX_FLIP :  return QString("Remove T-Vertices by edge flip");
+    case FP_REMOVE_TVERTEX_COLLAPSE : return QString("Remove T-Vertices by edge collapse");
 		default: assert(0);
   }
   return QString("error!");
@@ -169,7 +173,9 @@ const QString CleanFilter::filterInfo(FilterIDType filterId)
 		case FP_REMOVE_WRT_Q:	     return tr("Remove all the vertices with a quality lower smaller than the specified constant"); 
 		case FP_ALIGN_WITH_PICKED_POINTS: return tr("Align this mesh with another that has corresponding picked points.");
 		case FP_SELECTBYANGLE :  return QString("Select faces according to the angle between their normal and the view direction. It is used in range map processing to select and delete steep faces parallel to viewdirection"); 
-		default: assert(0);
+    case FP_REMOVE_TVERTEX_COLLAPSE :  return QString("Removes t-vertices from the mesh by collapsing the shortest of the incident edges");
+    case FP_REMOVE_TVERTEX_FLIP : return QString("Removes t-vertices by flipping the opposite edge on the degenerate face if the triangulation quality improves");
+    default: assert(0);
   }
   return QString("error!");
 }
@@ -183,6 +189,8 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
     case FP_REMOVE_WRT_Q :
     case FP_REMOVE_ISOLATED_DIAMETER :
     case FP_REMOVE_ISOLATED_COMPLEXITY :
+    case FP_REMOVE_TVERTEX_COLLAPSE :
+    case FP_REMOVE_TVERTEX_FLIP :
       return MeshFilterInterface::Cleaning;     
 		case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
 		case FP_ALIGN_WITH_PICKED_POINTS: return MeshFilterInterface::RangeMap;
@@ -199,6 +207,8 @@ const int CleanFilter::getRequirements(QAction *action)
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
         return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK;
+    case FP_REMOVE_TVERTEX_COLLAPSE: return MeshModel::MM_VERTMARK;
+    case FP_REMOVE_TVERTEX_FLIP: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
     case FP_SELECTBYANGLE:
 		case FP_ALIGN_WITH_PICKED_POINTS:
     	return MeshModel::MM_NONE;
@@ -246,7 +256,13 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 												"if UseCamera is true, this value is ignored");
 			}
 			break;
-											
+    case FP_REMOVE_TVERTEX_COLLAPSE :
+    case FP_REMOVE_TVERTEX_FLIP :
+       parlst.addFloat(
+               "Threshold", 40, "Ratio", "Detects faces where the base/height ratio is lower than this value");
+       parlst.addBool(
+               "Repeat", true, "Iterate until convergence", "Iterates the algorithm until it reaches convergence");
+       break;
 
 	default: assert(0);
   }
@@ -355,7 +371,26 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 
 		}
 		break;
-		default : assert(0); // unknown filter;
+
+    case FP_REMOVE_TVERTEX_COLLAPSE :
+    {
+        float threshold = par.getFloat("Threshold");
+        bool repeat = par.getBool("Repeat");
+
+        int total = tri::Clean<CMeshO>::RemoveTVertexByCollapse(m.cm, threshold, repeat);
+        Log(GLLogStream::FILTER,"Successfully removed %d t-vertices", total);
+    }
+        break;
+    case FP_REMOVE_TVERTEX_FLIP :
+    {
+        float threshold = par.getFloat("Threshold");
+        bool repeat = par.getBool("Repeat");
+        int total = tri::Clean<CMeshO>::RemoveTVertexByFlip(m.cm, threshold, repeat);
+        Log(GLLogStream::FILTER,"Successfully removed %d t-vertices", total);
+    }
+    break;
+
+  default : assert(0); // unknown filter;
 	}
 	return true;
 }
