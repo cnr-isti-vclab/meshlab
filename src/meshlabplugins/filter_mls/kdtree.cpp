@@ -27,7 +27,7 @@
 
 template<typename Scalar>
 KdTree<Scalar>::KdTree(const ConstDataWrapper<VectorType>& points, unsigned int nofPointsPerCell, unsigned int maxDepth)
-	: mPoints(points.size())
+	: mPoints(points.size()), mIndices(points.size())
 {
 	// compute the AABB of the input
 	mPoints[0] = points[0];
@@ -35,6 +35,7 @@ KdTree<Scalar>::KdTree(const ConstDataWrapper<VectorType>& points, unsigned int 
 	for (unsigned int i=1 ; i<mPoints.size() ; ++i)
 	{
 		mPoints[i] = points[i];
+		mIndices[i] = i;
 		mAABB.Add(mPoints[i]);
 	}
 
@@ -132,6 +133,7 @@ unsigned int KdTree<Scalar>::split(int start, int end, unsigned int dim, float s
 		if (l > r)
 			break;
 		std::swap(mPoints[l],mPoints[r]);
+		std::swap(mIndices[l],mIndices[r]);
 	}
 	return (mPoints[l][dim] < splitValue ? l+1 : l);
 }

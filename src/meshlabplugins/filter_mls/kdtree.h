@@ -62,7 +62,7 @@ public:
 	void setMaxNofNeighbors(unsigned int k);
 	inline int getNofFoundNeighbors(void) { return mNeighborQueue.getNofElements(); }
 	inline const VectorType& getNeighbor(int i) { return mPoints[ mNeighborQueue.getIndex(i) ]; }
-	inline unsigned int getNeighborId(int i) { return mNeighborQueue.getIndex(i); }
+	inline unsigned int getNeighborId(int i) { return mIndices[mNeighborQueue.getIndex(i)]; }
 	inline float getNeighborSquaredDistance(int i) { return mNeighborQueue.getWeight(i); }
 
 public:
@@ -95,6 +95,7 @@ protected:
 	AxisAlignedBoxType mAABB;
 	NodeList mNodes;
 	std::vector<VectorType> mPoints;
+	std::vector<int> mIndices;
 	HeapMaxPriorityQueue<int,Scalar> mNeighborQueue;
 	QueryNode mNodeStack[64];
 };
