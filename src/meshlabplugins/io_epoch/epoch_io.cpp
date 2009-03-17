@@ -744,6 +744,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 			if (cb != NULL) (*cb)(100, "Done");
 		//  vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 			 
+				m.updateDataMask(MeshModel::MM_VERTCOLOR);
 
 			int t3=clock();
 			if(logFP) fprintf(logFP,"---------- Total Processing Time%i\n\n\n",t3-t0);
