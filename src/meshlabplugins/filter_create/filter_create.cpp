@@ -132,7 +132,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
       break;
    }
  	 vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-   vcg::tri::UpdateNormals<CMeshO>::PerFace(m.cm);
+   vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 	return true;
 }
 
@@ -169,12 +169,8 @@ bool FilterCreate::autoDialog(QAction* action)
   switch(ID(action))
   {
     case CR_BOX:
-    case CR_CONE:
-      return true;
-      break;
-    default:
-      return false;
-      break;
+    case CR_CONE:      return true;
+    default:					 return false;
   }
 }
 
