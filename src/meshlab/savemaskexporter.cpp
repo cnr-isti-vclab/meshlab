@@ -192,6 +192,7 @@ void SaveMaskExporterDialog::SetMaskCapability()
 	checkAndEnable(ui.check_iom_vertcolor,    vcg::tri::io::Mask::IOM_VERTCOLOR,    capability, defaultBits);
 	checkAndEnable(ui.check_iom_verttexcoord, vcg::tri::io::Mask::IOM_VERTTEXCOORD, capability, defaultBits);
 	checkAndEnable(ui.check_iom_vertnormal,   vcg::tri::io::Mask::IOM_VERTNORMAL,   capability, defaultBits);
+	checkAndEnable(ui.check_iom_vertradius,   vcg::tri::io::Mask::IOM_VERTRADIUS,   capability, defaultBits);
 	
 	//face
 	checkAndEnable(ui.check_iom_facequality, vcg::tri::io::Mask::IOM_FACEQUALITY, capability, defaultBits );
@@ -224,6 +225,7 @@ void SaveMaskExporterDialog::SlotOkButton()
 	if( ui.check_iom_vertquality->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
 	if( ui.check_iom_verttexcoord->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
 	if( ui.check_iom_vertnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
+	if( ui.check_iom_vertradius->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTRADIUS;}
 
 	if( ui.check_iom_faceflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
 	if( ui.check_iom_facecolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
@@ -271,6 +273,7 @@ void SaveMaskExporterDialog::SlotSelectionAllButton()
 	ui.check_iom_vertcolor->setChecked(ui.check_iom_vertcolor->isEnabled());
 	ui.check_iom_verttexcoord->setChecked(ui.check_iom_verttexcoord->isEnabled());
 	ui.check_iom_vertnormal->setChecked(ui.check_iom_vertnormal->isEnabled());
+	ui.check_iom_vertradius->setChecked(ui.check_iom_vertradius->isEnabled());
 
 	//face
 	ui.check_iom_facequality->setChecked(ui.check_iom_facequality->isEnabled());
@@ -295,6 +298,7 @@ void SaveMaskExporterDialog::SlotSelectionNoneButton()
 	ui.check_iom_vertcolor->setChecked(false);
 	ui.check_iom_verttexcoord->setChecked(false);
 	ui.check_iom_vertnormal->setChecked(false);
+	ui.check_iom_vertradius->setChecked(false);
 
 	//face
 	ui.check_iom_facequality->setChecked(false);
