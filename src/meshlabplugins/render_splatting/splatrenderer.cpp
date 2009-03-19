@@ -298,14 +298,14 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glLoadIdentity();
 
 		mShaders[2].prog.Uniform("viewport",float(mCachedVP[0]),float(mCachedVP[1]),float(mCachedVP[2]),float(mCachedVP[3]));
-		mShaders[2].prog.Uniform("ColorWeight",int(0)); // this is a texture unit
+		mShaders[2].prog.Uniform("ColorWeight",GLint(0)); // this is a texture unit
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mRenderBuffer->texture());
 
 		if (mFlags&DEFERRED_SHADING_BIT)
 		{
 			mShaders[2].prog.Uniform("unproj", mCachedProj[10], mCachedProj[14]);
-			mShaders[2].prog.Uniform("NormalWeight",int(1)); // this is a texture unit
+			mShaders[2].prog.Uniform("NormalWeight",GLint(1)); // this is a texture unit
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mNormalTextureID);
 			GL_TEST_ERR
@@ -313,7 +313,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 
 		if (mFlags&OUTPUT_DEPTH_BIT)
 		{
-			mShaders[2].prog.Uniform("Depth",int(2)); // this is a texture unit
+			mShaders[2].prog.Uniform("Depth",GLint(2)); // this is a texture unit
 			glActiveTexture(GL_TEXTURE2);GL_TEST_ERR
 			glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mDepthTextureID);GL_TEST_ERR
 			GL_TEST_ERR

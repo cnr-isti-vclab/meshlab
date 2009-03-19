@@ -110,8 +110,8 @@ void VisibilityVP(void)
 		#endif
 
     #ifndef EXPE_EARLY_BACK_FACE_CULLING
-    oPos.w = oPos.w * (dotpn<0.0 ? 1.0 : 0.0);
-    #else
+    oPos.w = oPos.w * ( (dotpn<0.0) ? 1.0 : 0.0);
+		#else
     }
     #endif
 
@@ -205,7 +205,8 @@ void AttributeVP(void)
     #endif
 
     scaleSquaredDistance = 1. / (radius * radius);
-    fragNormal = normal;
+    ///********* uncommented fragNormal....
+		//fragNormal = normal;
     fragCenter = ePos.xyz;
     fragNoverCdotN = normal/dot(ePos.xyz,normal);
 
