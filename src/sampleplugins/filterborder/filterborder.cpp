@@ -61,7 +61,7 @@ const QString FilterBorder::filterName(FilterIDType filter)
 {
  switch(filter)
   {
-	  case FP_REMOVE_BORDER_FACE :								return QString("Remove border faces");
+	  case FP_REMOVE_BORDER_FACE :						return QString("Remove border faces");
   	default: assert(0);
   }
   return QString("error!");
@@ -103,10 +103,10 @@ void FilterBorder::initParameterSet(QAction *action,MeshModel &m, FilterParamete
   switch(ID(action))
   {
     case FP_REMOVE_BORDER_FACE :
-		  parlst.addInt("IterationNum",1,"Iteration","Number of times that the removal of facexxx");
-		  parlst.addBool("DeleteVertices",true,"Delete unreferenced vertices","Longhelp");
+		  parlst.addInt("IterationNum",1,"Iteration","Number of times that the removal of face border is iterated.");
+		  parlst.addBool("DeleteVertices",true,"Delete unreferenced vertices","Remove the vertexes that remains unreferneced after the face removal.");
  		  break;
-	default: assert(0);
+		default: assert(0);
   }
 }
 
@@ -114,9 +114,11 @@ void FilterBorder::initParameterSet(QAction *action,MeshModel &m, FilterParamete
 
 bool FilterBorder::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
 {
-				CMeshO::FaceIterator fi;
-				CMeshO::VertexIterator vi;
-	if(filter->text() == filterName(FP_REMOVE_BORDER_FACE) )
+	CMeshO::FaceIterator fi;
+	CMeshO::VertexIterator vi;
+	switch(ID(filter))
+  {
+    case FP_REMOVE_BORDER_FACE: 
 	  {
 			tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
       int IterationNum = par.getInt("IterationNum");		
@@ -126,9 +128,7 @@ bool FilterBorder::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
 				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
 					if(!(*fi).IsD())
 					{
-						if((*fi).V(0)->IsB() ||
-							 (*fi).V(1)->IsB() ||
-							 (*fi).V(2)->IsB() )
+						if((*fi).V(0)->IsB() || (*fi).V(1)->IsB() || (*fi).V(2)->IsB() )
 						{
 							 (*fi).V(0)->SetV();
 							 (*fi).V(1)->SetV();
@@ -155,9 +155,10 @@ bool FilterBorder::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
 							if((*vi).IsV()) tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
 			}
 
-			m.clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAGBORDER);
-			m.updateDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAGBORDER);
+			m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
+			m.updateDataMask(MeshModel::MM_FACEFLAGBORDER);
 	  }
+	}
 	return true;
 }
 
