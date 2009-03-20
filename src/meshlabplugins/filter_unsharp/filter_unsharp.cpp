@@ -45,6 +45,7 @@ FilterUnsharp::FilterUnsharp()
     FP_TWO_STEP_SMOOTH<< 
     FP_TAUBIN_SMOOTH<< 
     FP_DEPTH_SMOOTH<< 
+    FP_DIRECTIONAL_PRESERVATION<< 
 		FP_VERTEX_QUALITY_SMOOTHING<<
 		FP_FACE_NORMAL_SMOOTHING<<
 		FP_UNSHARP_NORMAL<<
@@ -79,6 +80,7 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
 		case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
 		case FP_TAUBIN_SMOOTH :							return QString("Taubin Smooth");
 		case FP_DEPTH_SMOOTH :							return QString("Depth Smooth");
+		case FP_DIRECTIONAL_PRESERVATION :	return QString("Directional Geom. Preserv.");
 		case FP_CREASE_CUT :							return QString("Cut mesh along crease edges");
   	case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normals"); 
   	case FP_VERTEX_NORMAL_NORMALIZE:		return QString("Normalize Vertex Normals"); 
@@ -108,6 +110,7 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
     case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals");  
     case FP_TAUBIN_SMOOTH :							return tr("The $lambda-mu$ taubin smoothing, it make two steps of smoothing, forth and back, for each iteration");  
     case FP_DEPTH_SMOOTH :							return tr("A laplacian smooth that is constrained to move vertices only along the view direction.");  
+		case FP_DIRECTIONAL_PRESERVATION :	return tr("Store and Blend the current geometry with the result of another previous smoothing processing step. It is useful to limit the influence of any smoothing algorithm along the viewing direction. This is import to cope with the biased distribution of the error in many scanning devices. TOF scanner usually have very good <b>x,y</b> accuracy but suffer of great depth errors.");
 		case FP_CREASE_CUT:									return tr("Cut the mesh along crease edges, duplicating the vertices as necessary. Crease edges are defined according to the variation of normal of the adjacent faces"); 
 		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
 		case FP_VERTEX_NORMAL_NORMALIZE:	    return tr("Normalize Vertex Normal Lenghts"); 
@@ -138,6 +141,7 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 			case FP_TWO_STEP_SMOOTH:
 			case FP_TAUBIN_SMOOTH:
 			case FP_DEPTH_SMOOTH:
+			case FP_DIRECTIONAL_PRESERVATION:
 			case FP_FACE_NORMAL_SMOOTHING:	  
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_NORMAL:				
@@ -180,6 +184,7 @@ const int FilterUnsharp::getRequirements(QAction *action)
 		case FP_RECOMPUTE_VERTEX_NORMAL :
 		case FP_FACE_NORMAL_NORMALIZE:
 		case FP_VERTEX_NORMAL_NORMALIZE:
+		case FP_DIRECTIONAL_PRESERVATION:
 		case FP_LINEAR_MORPH :
 											return 0; 
 			
@@ -203,6 +208,7 @@ bool FilterUnsharp::autoDialog(QAction *action)
 			case FP_UNSHARP_VERTEX_COLOR:	
 			case FP_UNSHARP_NORMAL:
 			case FP_LINEAR_MORPH :
+			case FP_DIRECTIONAL_PRESERVATION:
 					return true;
 	}
 	return false;
@@ -247,6 +253,15 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 			break;
 		case FP_DEPTH_SMOOTH:
 			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
+			parlst.addPoint3f  ("viewPoint", Point3f(0,0,0),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
+			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+			break;
+		case FP_DIRECTIONAL_PRESERVATION:
+			parlst.addEnum("step", 0, 
+									QStringList() << "Store Vertex Position" << "Blend Vertex Position", 
+									tr("Step:"), 
+									tr("The purpose of this filter is to <b>constrain</b> any smoothing algorithm to moving vertices only along a give line of sight.<br> First you should store current vertex position, than after applying  one of the many smoothing algorithms you should re start this filter and blend the original positions with the smoothed results.<br>"
+									   "Given a view point  <i>vp</i> , the smoothed vertex position <i>vs</i> and the original position  <i>v</i>, The new vertex position is computed as the projection of  <i>vs</i> on the line  connecting  <i>v</i>  and <i>vp</i>.")); 
 			parlst.addPoint3f  ("viewPoint", Point3f(0,0,0),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
 			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 			break;
@@ -316,6 +331,50 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm,viewPoint,alpha,stepSmoothNum,true);
 			Log(GLLogStream::FILTER, "depth Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+	  }
+		break;
+	case FP_DIRECTIONAL_PRESERVATION:
+	  {
+			const std::string AttribName("SavedVertPosition");
+			int stepNum = par.getEnum("step");
+			Point3f viewpoint(0,0,0);
+			float alpha = 1;
+
+			switch (stepNum) {
+				case 0: // ***** Storing Vertex Data *****
+				{
+					if(tri::HasPerVertexAttribute(m.cm,AttribName)) 	{
+						vcg::tri::Allocator<CMeshO>::DeletePerVertexAttribute<Point3f>(m.cm,AttribName);
+					}
+					CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f> (m.cm,AttribName);
+					CMeshO::VertexIterator vi;
+					
+					for(vi =m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
+						h[vi] = vi->cP();
+					
+					Log(GLLogStream::FILTER, "Stored Position %d vertices", m.cm.vn);	 
+					break;  
+				}
+				case 1: // ***** Recovering and Projection Vertex Data *****
+				{
+					if(!tri::HasPerVertexAttribute(m.cm,AttribName)) 	{
+						errorMessage = "Failed to retrieve the stored vertex position. First Store than recover."; 
+						return false;
+					}
+					CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f> (m.cm,AttribName);
+					
+					CMeshO::VertexIterator vi;
+					for(vi= m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
+					{
+						Point3f d = h[vi] - viewpoint; d.Normalize();
+						float s = d * ( (*vi).cP() - h[vi] );
+						(*vi).P() = h[vi] + d * (s*alpha);
+					}
+					tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+					Log(GLLogStream::FILTER,  "Projected smoothed Position %d vertices", m.cm.vn);	   
+				}
+					break;
+			}
 	  }
 		break;
 	case FP_SD_LAPLACIAN_SMOOTH:
