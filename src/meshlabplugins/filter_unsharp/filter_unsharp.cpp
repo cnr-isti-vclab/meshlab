@@ -44,6 +44,7 @@ FilterUnsharp::FilterUnsharp()
 		FP_SD_LAPLACIAN_SMOOTH<< 
     FP_TWO_STEP_SMOOTH<< 
     FP_TAUBIN_SMOOTH<< 
+    FP_DEPTH_SMOOTH<< 
 		FP_VERTEX_QUALITY_SMOOTHING<<
 		FP_FACE_NORMAL_SMOOTHING<<
 		FP_UNSHARP_NORMAL<<
@@ -77,6 +78,7 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
 		case FP_SD_LAPLACIAN_SMOOTH :					return QString("ScaleDependent Laplacian Smooth");
 		case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
 		case FP_TAUBIN_SMOOTH :							return QString("Taubin Smooth");
+		case FP_DEPTH_SMOOTH :							return QString("Depth Smooth");
 		case FP_CREASE_CUT :							return QString("Cut mesh along crease edges");
   	case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normals"); 
   	case FP_VERTEX_NORMAL_NORMALIZE:		return QString("Normalize Vertex Normals"); 
@@ -105,6 +107,7 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
     case FP_SD_LAPLACIAN_SMOOTH : 			return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, based on the Fujiwara extended umbrella operator");  
     case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals");  
     case FP_TAUBIN_SMOOTH :							return tr("The $lambda-mu$ taubin smoothing, it make two steps of smoothing, forth and back, for each iteration");  
+    case FP_DEPTH_SMOOTH :							return tr("A laplacian smooth that is constrained to move vertices only along the view direction.");  
 		case FP_CREASE_CUT:									return tr("Cut the mesh along crease edges, duplicating the vertices as necessary. Crease edges are defined according to the variation of normal of the adjacent faces"); 
 		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
 		case FP_VERTEX_NORMAL_NORMALIZE:	    return tr("Normalize Vertex Normal Lenghts"); 
@@ -134,6 +137,7 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 			case FP_LAPLACIAN_SMOOTH:
 			case FP_TWO_STEP_SMOOTH:
 			case FP_TAUBIN_SMOOTH:
+			case FP_DEPTH_SMOOTH:
 			case FP_FACE_NORMAL_SMOOTHING:	  
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_NORMAL:				
@@ -162,6 +166,7 @@ const int FilterUnsharp::getRequirements(QAction *action)
 		case FP_HC_LAPLACIAN_SMOOTH:  
     case FP_SD_LAPLACIAN_SMOOTH:  
     case FP_TAUBIN_SMOOTH:  
+    case FP_DEPTH_SMOOTH:  
     case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_FACEFLAGBORDER;
     case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
 		case FP_UNSHARP_GEOMETRY:	
@@ -190,6 +195,7 @@ bool FilterUnsharp::autoDialog(QAction *action)
 			case FP_CREASE_CUT :
 		  case FP_TWO_STEP_SMOOTH:
 			case FP_LAPLACIAN_SMOOTH:
+			case FP_DEPTH_SMOOTH:
 			case FP_TAUBIN_SMOOTH:
 			case FP_SD_LAPLACIAN_SMOOTH:
 			case FP_UNSHARP_GEOMETRY:		
@@ -237,6 +243,11 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 		break;
 		case FP_LAPLACIAN_SMOOTH:
 			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
+			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+			break;
+		case FP_DEPTH_SMOOTH:
+			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
+			parlst.addPoint3f  ("viewPoint", Point3f(0,0,0),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
 			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 			break;
 		case FP_TAUBIN_SMOOTH:
@@ -292,6 +303,18 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,cnt>0,cb);
 			Log(GLLogStream::FILTER, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+	  }
+		break;
+	case FP_DEPTH_SMOOTH :
+	  {
+			int stepSmoothNum = par.getInt("stepSmoothNum");
+			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+			//float delta = par.getAbsPerc("delta");
+			Point3f viewPoint(0,0,0);
+			float alpha = 1;
+			tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm,viewPoint,alpha,stepSmoothNum,true);
+			Log(GLLogStream::FILTER, "depth Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 		break;

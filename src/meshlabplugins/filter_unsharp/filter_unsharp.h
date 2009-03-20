@@ -44,6 +44,7 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 	enum { 
     FP_CREASE_CUT, 
 		FP_LAPLACIAN_SMOOTH, 
+		FP_DEPTH_SMOOTH, 
 		FP_HC_LAPLACIAN_SMOOTH,
 		FP_SD_LAPLACIAN_SMOOTH, 
 		FP_TWO_STEP_SMOOTH,
