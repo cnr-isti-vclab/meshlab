@@ -65,7 +65,7 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_PARALLEL_PLANES, FP_RECURSIVE_SLICE };
+	enum { FP_SINGLE_PLANE, FP_PARALLEL_PLANES, FP_RECURSIVE_SLICE };
 	enum { CAP_CW, CAP_CCW };
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
