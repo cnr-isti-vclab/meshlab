@@ -30,6 +30,13 @@
 
 #include "qhull_tools.h"
 
+#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+
+using namespace std;
+using namespace vcg;
+
 /***************************************************************************/
 /*                                                                         */
 /* qhull conventions:													   */
@@ -211,7 +218,7 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 		
 */
 
-facetT *compute_voronoi(int dim, int numpoints, MeshModel &m)
+void compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 {  
 	coordT *points;						/* array of coordinates for each point*/
 	boolT ismalloc= True;				/* True if qhull should free points in qh_freeqhull() or reallocation */ 
@@ -228,19 +235,166 @@ facetT *compute_voronoi(int dim, int numpoints, MeshModel &m)
 
 	exitcode= qh_new_qhull (dim, numpoints, points, ismalloc,
 							flags, outfile, errfile);
-	
 	qh_setvoronoi_all();
 
-	//qh_triangulate();
+	//ATTENTO I VERTICI DEVONO ESSERE TUTTI!!!!
+	int convexNumVert = qh_setsize(qh_facetvertices (qh facet_list, NULL, false));
+
 	if (!exitcode) { /* if no error */ 
 		/* 'qh facet_list' contains the convex hull */
+		vertexT *vertex;
+		double *voronoi_vertex;
+		double *first_pole;
+		double *second_pole;
+		double max_dist=0;
 
+		setT* poles_set= qh_settemp(qh num_facets); //ogni facet ha un vertice di voronoi abbondiamo
 		
 
-	}
+		int poles_num =0;
+		//Voronoi vertices of the region being considered
+		vector<double*> voronoi_vertices;
+		FORALLvertices {
+			voronoi_vertices.clear();
+		    //int site_id = qh_pointid (vertex->point);
+		    if (qh hull_dim == 3)
+			   qh_order_vertexneighbors(vertex);
+		    int infinity_seen = 0;
+		    bool is_on_convexhull =false;
+		    facetT *neighbor, **neighborp;
+		    FOREACHneighbor_(vertex) {
+			   if (neighbor->upperdelaunay) {
+				 if (!infinity_seen) {
+				   infinity_seen = 1;
+				   is_on_convexhull =true;
+				   //... process a Voronoi vertex "at infinity" ...
+				 }
+			   }else {
+				   voronoi_vertex = neighbor->center;
+				   voronoi_vertices.push_back(voronoi_vertex);
+				   double dist = qh_pointdist(vertex->point, voronoi_vertex,3);
+				   if(dist>max_dist){
+					   max_dist=dist;
+					   first_pole=voronoi_vertex;
+				 }
+			   }
+		    }
 
-	return qh facet_list;
-};
+		    if(is_on_convexhull){
+			 	//Calcola media normali
+		    }
+		    else{
+				assert(first_pole!=NULL);
+				if(first_pole!=NULL)
+					qh_setunique(&poles_set, first_pole);
+
+			    //vector sp1
+			    double* sp1= new double[3];
+			    double* sp2= new double[3];
+			    for(int i=0; i<3;i++)
+				    sp1[i]= first_pole[i] - vertex->point[i];
+
+			    double max_dist2=0;
+			    for(int i=0; i<voronoi_vertices.size();i++){
+				    if(voronoi_vertices[i]!= first_pole){
+				   	    double dist = qh_pointdist(vertex->point, voronoi_vertices[i],3); 
+					    for(int j=0; j<3;j++)
+						   sp2[j]= (voronoi_vertices[i])[j] - vertex->point[j];
+					    //in realtà fa prodotto scalare
+					    double dotProd = qh_getangle(sp1,sp2);
+						//max_dist è la distanza sp1
+					    //double cos_angle = dotProd/(dist*max_dist);
+					    if(dotProd<=0 && dist>max_dist2){
+						    max_dist2=dist;
+						    second_pole = voronoi_vertices[i];
+					    }   			
+				    }
+				}
+				assert(second_pole!=NULL);
+				if(second_pole!=NULL)
+					qh_setunique(&poles_set, second_pole);
+			}
+		}
+		//S U V
+		int numpoles = qh_setsize(poles_set);
+		int tot_newpoints = numpoints + numpoles;
+		coordT * newpoints = (coordT*)malloc(tot_newpoints*3*sizeof(coordT));
+		int i=0;
+		FORALLvertices {
+			for(int j=0;j<3;j++){
+				newpoints[i]= vertex->point[j];
+				i++;
+			}
+		}
+
+		assert(i<=tot_newpoints*3);
+		double *pole, **polep;
+		FOREACHsetelement_(double,poles_set,pole){
+			for(int j=0;j<3;j++)
+				newpoints[i++]= pole[j];
+		}
+
+		//clean old triangulation
+		qh_freeqhull(!qh_ALL); 
+		
+	    char flags2[]= "qhull d QJ Tcv";	/* option flags for qhull, see qh_opt.htm */
+	    exitcode= qh_new_qhull (dim, tot_newpoints, newpoints, ismalloc,flags2, outfile, errfile);
+		
+		if (!exitcode) { /* if no error */ 
+			/* 'qh facet_list' contains the convex hull */
+
+			//convexNumVert sono i vertici iniziali
+			tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
+			
+			/*ivp length is 'qh num_vertices' because each vertex is accessed through its ID whose range is 
+			  0<=qh_pointid(vertex->point)<qh num_vertices*/
+			vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
+			int sdsss = qh num_vertices;
+			int vertex_n, vertex_i;
+			int i=0;
+			FOREACHvertex_i_(qh_facetvertices (qh facet_list, NULL, false)){	
+				if ((*vertex).point && qh_pointid(vertex->point)<numpoints){
+					pm.cm.vert[i].P()[0] = (*vertex).point[0];
+					pm.cm.vert[i].P()[1] = (*vertex).point[1];
+					pm.cm.vert[i].P()[2] = (*vertex).point[2];
+					ivp[qh_pointid(vertex->point)] = &pm.cm.vert[i];
+					i++;
+					assert(i<=convexNumVert);
+				}
+			}
+
+			//prendi solo quei triangoli coi vertici non in S
+			facetT *facet, **facetp,  *neighbor;
+			FORALLfacet_(qh facet_list) {
+				if (!facet->upperdelaunay) {
+					facet->visitid= qh visit_id;
+					qh_makeridges(facet);
+					ridgeT *ridge, **ridgep;
+					FOREACHridge_(facet->ridges) {
+						neighbor= otherfacet_(ridge, facet);
+						if (neighbor->visitid != qh visit_id) {
+							tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
+							FOREACHvertex_i_(ridge->vertices){
+								if(qh_pointid(vertex->point)<numpoints)
+									(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
+								else{
+									tri::Allocator<CMeshO>::DeleteFace(pm.cm,*fi);
+									break;
+								}
+							}
+						}
+					}	
+				}
+			}
+		}
+		int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
+		qh_freeqhull(!qh_ALL); 
+		qh_memfreeshort (&curlong, &totlong);
+		if (curlong || totlong)
+			fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
+					 totlong, curlong);
+	}
+}
 
 /*
 	The alpha complex is a subcomplex of the Delaunay triangulation. 
@@ -248,10 +402,13 @@ facetT *compute_voronoi(int dim, int numpoints, MeshModel &m)
 	triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'. 
 	Note that at 'alpha' = 0, the alpha complex consists just of the set P, and for sufficiently large 'alpha', 
 	the alpha complex is the Delaunay triangulation D(P) of P.
+
+	If "alphashape" is true, it computes the alpha shape of the points.
+	If it's false it computes the alpha complex
 	
 */
 
-facetT *compute_alpha_shapes(int dim, int numpoints, MeshModel &m, double alpha){
+void compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, double alpha, bool alphashape){
 
 	coordT *points;						/* array of coordinates for each point*/
 	boolT ismalloc= True;				/* True if qhull should free points in qh_freeqhull() or reallocation */ 
@@ -260,7 +417,6 @@ facetT *compute_alpha_shapes(int dim, int numpoints, MeshModel &m, double alpha)
 										   use NULL to skip qh_produce_output() */ 
 	FILE *errfile= stderr;				/* error messages from qhull code */ 
 	int exitcode;						/* 0 if no error from qhull */
-	facetT *facet;						/* set by FORALLfacets */
 		
     /* initialize points[] here.
 	   points is an array of coordinates. Each triplet of coordinates rapresents a 3d vertex */
@@ -272,12 +428,39 @@ facetT *compute_alpha_shapes(int dim, int numpoints, MeshModel &m, double alpha)
 	//set facet->center as the Voronoi center
 	qh_setvoronoi_all();
 
-	int count =0;
+	//ATTENTO I VERTICI DEVONO ESSERE TUTTI!!!!
+	int convexNumVert = qh_setsize(qh_facetvertices (qh facet_list, NULL, false));
+
+	tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
+	//RICORDATI DI AGGIUNGERE L'ATTRIBUTO ALPHA ANCHE CON L'ALPHA SHAPE!!!!!!!!!!!!!
+	CMeshO::PerFaceAttributeHandle<double> alphaHandle = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<double>(pm.cm,std::string("Alpha"));							
+
+	/*ivp length is 'qh num_vertices' because each vertex is accessed through its ID whose range is 
+	  0<=qh_pointid(vertex->point)<qh num_vertices*/
+	vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
+	vertexT *vertex;
+	int     vertex_n, vertex_i;
+	FOREACHvertex_i_(qh_facetvertices (qh facet_list, NULL, false)){	
+		if ((*vertex).point){
+			pm.cm.vert[vertex_i].P()[0] = (*vertex).point[0];
+			pm.cm.vert[vertex_i].P()[1] = (*vertex).point[1];
+			pm.cm.vert[vertex_i].P()[2] = (*vertex).point[2];
+			ivp[qh_pointid(vertex->point)] = &pm.cm.vert[vertex_i];
+		}
+	}
+	
+	int ridgeCount=0;
+    setT* set= qh_settemp(4* qh num_facets); //abbondiamo
 	if (!exitcode) { /* if no error */ 
-		/* 'qh facet_list' contains the convex hull */
+		/* 'qh facet_list' contains the delaunay triangulation */
 		//For all facets computes the radius of the empy circumsphere calculating 
 		//the distance between the circumcenter and a vertex of the facet
-		FORALLfacets {
+		facetT *facet, **facetp,  *neighbor;
+		qh visit_id++;
+		int numFacets=0;
+		FORALLfacet_(qh facet_list) {
+			numFacets++;
+			//Scorro tutte le facce della triangolazione di Delaunay
 			if (!facet->upperdelaunay) {
 				vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
 				double* center = facet->center;
@@ -288,17 +471,179 @@ facetT *compute_alpha_shapes(int dim, int numpoints, MeshModel &m, double alpha)
 				double pz = (*vertex).point[2];
 				double qz = *center++;
 				double radius = sqrt(pow(px-qx,2)+pow(py-qy,2)+pow(pz-qz,2));
-				if (radius>alpha){
-					qh_removefacet(facet);
-					count++;
+				int delridge=0;
+				if (radius>alpha) // if the facet is not good I consider the ridges
+				{
+					//Compute each ridge (triangle) once and test the cironference radius with alpha
+					//Marco la faccia come non visibile
+					if(alphashape){
+						facet->good=false;
+					}
+					facet->visitid= qh visit_id;
+					qh_makeridges(facet);
+					ridgeT *ridge, **ridgep;
+					int goodTriangles=0;
+					FOREACHridge_(facet->ridges) {
+						neighbor= otherfacet_(ridge, facet);
+						if (( neighbor->visitid != qh visit_id)){ //||(alphashape && neighbor->visitid != qh visit_id && (neighbor->upperdelaunay || !test(neighbor,ridge,alpha)))) {				
+							//Calcola il raggio della circosfera
+							pointT* p0 = ((vertexT*) (ridge->vertices->e[0].p))->point;
+							pointT* p1 = ((vertexT*) (ridge->vertices->e[1].p))->point;
+							pointT* p2 = ((vertexT*) (ridge->vertices->e[2].p))->point;
+
+							coordT a = qh_pointdist(p0,p1,3);
+							coordT b = qh_pointdist(p1,p2,3);
+							coordT c = qh_pointdist(p2,p0,3);
+
+							coordT sum =(a + b + c)*0.5;
+							coordT area = sum*(a+b-sum)*(a+c-sum)*(b+c-sum);
+							radius = (double) (a*b*c)/(4*sqrt(area));
+							
+							if(radius <=alpha){
+								//se è alphacomplex costruisco direttamente la nuova mesh
+								if(!alphashape){
+									goodTriangles++;
+									tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
+									ridgeCount++;
+									alphaHandle[fi] = radius;
+									FOREACHvertex_i_(ridge->vertices)
+										(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];	
+								}
+								else
+									qh_setappend (&set, ridge);
+							}
+							else if (alphashape){
+								    delridge++;
+							}
+						}
+					}
+					if(delridge>0)
+						int i=0;
+					if(alphashape && goodTriangles==4)
+						facet->good=true;
+					
+				}
+				else //the facet is good. Put all the triangles of the tetraedro in the mesh
+				{
+					//Compute each ridge (triangle) once
+					facet->visitid= qh visit_id;
+					facet->good=true;
+					qh_makeridges(facet);
+					ridgeT *ridge, **ridgep;
+					FOREACHridge_(facet->ridges) {
+						neighbor= otherfacet_(ridge, facet);
+						if ((neighbor->visitid != qh visit_id)){//||(alphashape && neighbor->visitid != qh visit_id && (neighbor->upperdelaunay || !test(neighbor,ridge, alpha)))){
+							//Se è alphacomplex la aggiungo direttamente alla mesh
+							if(!alphashape){
+								tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
+								alphaHandle[fi] = radius;
+								ridgeCount++;
+								FOREACHvertex_i_(ridge->vertices)
+									(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
+							}
+							else
+								qh_setappend (&set, ridge);
+						}	
+					}
 				}
 			}
 		}
+		assert(numFacets== qh num_facets);
+
+		//numFacets=0;
+		//if(alphashape){
+		//	//costruisci la mesh
+		//	qh visit_id++;
+		//	
+		//	FORALLfacet_(qh facet_list) {
+		//		numFacets++;
+		//		if (!facet->upperdelaunay) {
+		//			facet->visitid= qh visit_id;
+		//			qh_makeridges(facet);
+		//			ridgeT *ridge, **ridgep;
+		//			int ridgenumebr = qh_setsize(facet->ridges);
+		//			FOREACHridge_(facet->ridges) {
+		//				neighbor= otherfacet_(ridge, facet);
+		//				if ((!neighbor->good || !facet->good) /*&& ridge->seen==true*/ && neighbor->visitid != qh visit_id){//||(alphashape && neighbor->visitid != qh visit_id && (neighbor->upperdelaunay || !test(neighbor,ridge, alpha)))){
+		//					tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
+		//					ridgeCount++;
+		//					FOREACHvertex_i_(ridge->vertices)
+		//						(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
+		//				}
+		//			}
+		//		}
+		//	}
+		//	assert(numFacets== qh num_facets);
+
+		if(alphashape){
+			//costruisci la mesh
+			
+			ridgeT *ridge, **ridgep;
+			FOREACHridge_(set) {
+				if ((!ridge->top->good || !ridge->bottom->good || ridge->top->upperdelaunay || ridge->bottom->upperdelaunay)){//||(alphashape && neighbor->visitid != qh visit_id && (neighbor->upperdelaunay || !test(neighbor,ridge, alpha)))){
+					tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
+					ridgeCount++;
+					FOREACHvertex_i_(ridge->vertices)
+						(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
+				}
+			}
+
+
+
+		}		
 	}
 
-	return qh facet_list;
+	assert(pm.cm.fn == ridgeCount);
+
+	int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
+	qh_freeqhull(!qh_ALL);  
+	qh_memfreeshort (&curlong, &totlong);
+	if (curlong || totlong)
+		fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
+					 totlong, curlong);
 }
 
+bool test(facetT* facet, ridgeT* triangle ,double alpha){
+	vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
+	double* center = facet->center;
+	double px = (*vertex).point[0];
+	double qx = *center;
+	double py = (*vertex).point[1];
+	double qy = *center++;
+	double pz = (*vertex).point[2];
+	double qz = *center++;
+	double radius = sqrt(pow(px-qx,2)+pow(py-qy,2)+pow(pz-qz,2));
+	int ridgeCount=0;
+	if (radius>alpha){
+		//facet->visitid= qh visit_id;
+		//qh_makeridges(facet);
+		//ridgeT *ridge, **ridgep;
+		//FOREACHridge_(facet->ridges) {
+		//	if (ridge!=triangle) {				
+		//		//Calcola il raggio della circosfera
+		//		pointT* p0 = ((vertexT*) (ridge->vertices->e[0].p))->point;
+		//		pointT* p1 = ((vertexT*) (ridge->vertices->e[1].p))->point;
+		//		pointT* p2 = ((vertexT*) (ridge->vertices->e[2].p))->point;
+
+		//		coordT a = qh_pointdist(p0,p1,3);
+		//		coordT b = qh_pointdist(p1,p2,3);
+		//		coordT c = qh_pointdist(p2,p0,3);
+
+		//		coordT sum =(a + b + c)*0.5;
+		//		coordT area = sum*(a+b-sum)*(a+c-sum)*(b+c-sum);
+		//		radius = (double) (a*b*c)/(4*sqrt(area));
+		//		
+		//		if(radius <=alpha){
+		//			ridgeCount++;
+		//		}
+		//	}
+		//if(ridgeCount==3)
+		//	return true;
+		//else
+			return false;
+	}
+	else return true;
+}
 
 
 /* dim  --> dimension of points

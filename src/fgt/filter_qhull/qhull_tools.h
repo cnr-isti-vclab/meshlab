@@ -69,6 +69,7 @@ extern "C"
 
 facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m);
 facetT *compute_delaunay(int dim, int numpoints, MeshModel &m);
-facetT *compute_voronoi(int dim, int numpoints, MeshModel &m);
-facetT *compute_alpha_shapes(int dim, int numpoints, MeshModel &m, double alpha);
+void compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm);
+void compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm,double alpha, bool alphashape);
+bool test(facetT* facet, ridgeT* triangle,double alpha);
 coordT *qh_readpointsFromMesh(int *numpoints, int *dimension, MeshModel &m);
