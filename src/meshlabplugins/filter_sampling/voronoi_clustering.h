@@ -110,7 +110,7 @@ static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, boo
 		}
 		
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
-		tri::Allocator<CMeshO>::DeletePerVertexAttribute<VertexPointer> (m,"sources");			
+		tri::Allocator<CMeshO>::DeletePerVertexAttribute(m,"sources");			
 }
 
 typedef typename MeshType::template PerVertexAttributeHandle<VertexPointer> PerVertexPointerHandle;
@@ -215,7 +215,7 @@ static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int
 		for(int i=0;i<seedVec.size();++i)
 			seedVec[i]->C() = Color4b::White;
 
-		tri::Allocator<CMeshO>::DeletePerVertexAttribute<VertexPointer> (m,"sources");			
+		tri::Allocator<CMeshO>::DeletePerVertexAttribute (m,"sources");			
 		
 	}
 }
