@@ -680,14 +680,20 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			Log("Computing %i Poisson Samples for an expected radius of %f",sampleNum,radius);
 			
 			// first of all generate montecarlo samples for fast lookup
-			CMeshO presampledMesh;
-			BaseSampler sampler(&presampledMesh);
-			sampler.qualitySampling =true;
-			if(subsampleFlag) tri::SurfaceSampling<CMeshO,BaseSampler>::AllVertex(curMM->cm, sampler);
-			             else tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
-			Log("Generated %i Montecarlo Samples",presampledMesh.vn);
-			presampledMesh.bbox = curMM->cm.bbox; // we want the same bounding box
-
+			CMeshO *presampledMesh=&(curMM->cm);
+			
+			CMeshO MontecarloMesh; // this mesh is used only if we need real pooisson sampling (and therefore we need to choose points different from the starting mesh vertices)
+			
+			if(!subsampleFlag)
+			{
+				BaseSampler sampler(&MontecarloMesh);
+				sampler.qualitySampling =true;
+				tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
+				Log("Generated %i Montecarlo Samples",MontecarloMesh.vn);
+				MontecarloMesh.bbox = curMM->cm.bbox; // we want the same bounding box
+				CMeshO *presampledMesh=&MontecarloMesh;
+			}
+			
 			BaseSampler mps(&(mm->cm));
 				
 			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
@@ -698,7 +704,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 						Log("Variable Density variance is %f, radius can vary from %f to %f",pp.radiusVariance,radius/pp.radiusVariance,radius*pp.radiusVariance);
 			}			
 			
-			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm, mps, presampledMesh, radius,pp);
+			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm, mps, *presampledMesh, radius,pp);
 
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
