@@ -344,7 +344,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 				case 0: // ***** Storing Vertex Data *****
 				{
 					if(tri::HasPerVertexAttribute(m.cm,AttribName)) 	{
-						vcg::tri::Allocator<CMeshO>::DeletePerVertexAttribute<Point3f>(m.cm,AttribName);
+						vcg::tri::Allocator<CMeshO>::DeletePerVertexAttribute(m.cm,AttribName);
 					}
 					CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f> (m.cm,AttribName);
 					CMeshO::VertexIterator vi;
