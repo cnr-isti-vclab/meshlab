@@ -134,7 +134,7 @@ void SplatRendererPlugin::configureShaders()
 	}
 }
 
-void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla)
+void SplatRendererPlugin::Init(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla)
 {
 	mIsSupported = true;
 	gla->makeCurrent();
@@ -189,7 +189,7 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 	mShaderSrcs[4] = "";
 	mShaderSrcs[5] = loadSource("Finalization","Finalization.glsl");
 
-	mCurrentPass = 2;
+	//mCurrentPass = 2;
 	mBindedPass = -1;
 	GL_TEST_ERR
 }
@@ -246,15 +246,11 @@ void SplatRendererPlugin::updateRenderBuffer()
 	}
 }
 
-void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget * /* gla */)
+void SplatRendererPlugin::Render(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget * /* gla */)
 {
 	GL_TEST_ERR
-	mShaders[mCurrentPass].prog.Unbind();
 
-	mCurrentPass = (mCurrentPass+1) % 3;
-
-	if (mCurrentPass==0)
-	{
+		/*************** First Pass ***********/
 		// this is the first pass of the frame, so let's update the shaders, buffers, etc...
 		glGetIntegerv(GL_VIEWPORT, mCachedVP);
 		glGetFloatv(GL_MODELVIEW_MATRIX, mCachedMV);
@@ -267,7 +263,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		mCachedFlags = mFlags;
 
 		mParams.update(mCachedMV, mCachedProj, mCachedVP);
-		float s = m.glw.GetHintParamf(GLW::HNPPointSize);
+		float s = md.mm()->glw.GetHintParamf(GLW::HNPPointSize);
 		if (s>1)
 			s = pow(s,0.3f);
 		mParams.radiusScale *= s;
@@ -278,16 +274,42 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, vcg::Point4f(0.3, 0.3, 0.3, 1.).V());
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vcg::Point4f(0.6, 0.6, 0.6, 1.).V());
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, vcg::Point4f(0.5, 0.5, 0.5, 1.).V());
-	}
 
-	if (mCurrentPass==2)
-	{
+		mRenderBuffer->bind();
+		if (mFlags&DEFERRED_SHADING_BIT)
+		{
+			GLenum buf[2] = {GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};
+			glDrawBuffersARB(2, buf);
+		}
+		glViewport(mCachedVP[0],mCachedVP[1],mCachedVP[2],mCachedVP[3]);
+		glClearColor(0,0,0,0);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		
+		//* End Setup of first Pass Now a simple rendering of all the involved meshes.*/ 
+		mParams.loadTo(mShaders[0].prog);
+		enablePass(0);
+		foreach(MeshModel * mp, md.meshList)
+			{
+				if(mp->visible)  drawSplats (*mp,rm);
+			}
+
+		// begin second pass 
+		mParams.loadTo(mShaders[1].prog);
+		enablePass(1);
+
+		foreach(MeshModel * mp, md.meshList)
+			{
+				if(mp->visible)  drawSplats (*mp,rm);
+			}
+		
+		//* Start third Pass Setup */ 
+
 		// this is the last pass: normalization by the sum of weights + deferred shading
 		mRenderBuffer->release();
 		if (mFlags&DEFERRED_SHADING_BIT)
 			glDrawBuffer(GL_BACK);
 
-		enablePass(mCurrentPass);
+		enablePass(2);
 
 		// switch to normalized 2D rendering mode
 		glMatrixMode(GL_PROJECTION);
@@ -359,27 +381,11 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
-	}
-	else
-	{
-		mParams.loadTo(mShaders[mCurrentPass].prog);
-		if (mCurrentPass==0)
-		{
-			mRenderBuffer->bind();
-			if (mFlags&DEFERRED_SHADING_BIT)
-			{
-				GLenum buf[2] = {GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};
-				glDrawBuffersARB(2, buf);
-			}
-			glViewport(mCachedVP[0],mCachedVP[1],mCachedVP[2],mCachedVP[3]);
-			glClearColor(0,0,0,0);
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-		}
-		enablePass(mCurrentPass);
-		GL_TEST_ERR
-	}
-}
+		
+	  GL_TEST_ERR
 
+}
+#if 0
 void SplatRendererPlugin::Draw(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget * gla)
 {
 	if (m.cm.vert.RadiusEnabled)
@@ -395,7 +401,7 @@ void SplatRendererPlugin::Draw(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 		MeshRenderInterface::Draw(a, m, rm, gla);
 	}
 }
-
+#endif
 void SplatRendererPlugin::enablePass(int n)
 {
 	if (mBindedPass!=n)

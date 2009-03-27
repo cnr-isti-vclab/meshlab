@@ -98,11 +98,8 @@ void RenderRFX::initActionList()
 	}
 }
 
-void RenderRFX::Init(QAction *action, MeshModel &mesh,
-                     RenderMode &rmode, QGLWidget *parent)
+void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWidget *parent)
 {
-	Q_UNUSED(mesh)
-	Q_UNUSED(rmode)
 
 	assert(actionList.contains(action));
 	if (activeShader) {
@@ -114,11 +111,15 @@ void RenderRFX::Init(QAction *action, MeshModel &mesh,
 	RfxParser theParser(QDir(shaderDir).absoluteFilePath(action->text()));
 
 	// Small hack that allow to use the current mesh textures for the shaders.
-	if(mesh.cm.textures.size()>0)
-	{
-		QFileInfo meshBaseDir(mesh.fileName.c_str());
-		theParser.setMeshTexture(meshBaseDir.absolutePath()+"/"+QString(mesh.cm.textures[0].c_str()));
-	}
+	foreach(MeshModel * mp, md.meshList)
+			{
+					if(mp->cm.textures.size()>0)
+					{
+						QFileInfo meshBaseDir(mp->fileName.c_str());
+						theParser.setMeshTexture(meshBaseDir.absolutePath()+"/"+QString(mp->cm.textures[0].c_str()));
+					}			
+			}
+
 	theParser.Parse();
 	activeShader = theParser.GetShader();
 	assert(activeShader);
@@ -147,30 +148,26 @@ void RenderRFX::Init(QAction *action, MeshModel &mesh,
 	glGetError();
 }
 
-void RenderRFX::Render(QAction *action, MeshModel &mesh,
-                       RenderMode &rmode, QGLWidget *parent)
+void RenderRFX::Render(QAction *action, MeshDocument &md,  RenderMode &rm, QGLWidget *parent)
 {
-	Q_UNUSED(action)
-	Q_UNUSED(mesh)
-	Q_UNUSED(parent)
-
 	assert(activeShader);
+	rm.textureMode = vcg::GLW::TMPerWedge;
+	
+	for(shaderPass=0;shaderPass<totPass;shaderPass++)
+	{
+		activeShader->Start(shaderPass);
+		glGetError();
+		foreach(MeshModel * mp, md.meshList)
+			{
+				if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+			}
+	}
+	glUseProgramObjectARB(0);
 
-	activeShader->Start(shaderPass++);
-	rmode.textureMode = vcg::GLW::TMPerWedge;
-
-	if (shaderPass >= totPass)
-		shaderPass = 0;
-
-	glGetError();
 }
 
-void RenderRFX::Finalize(QAction *act, MeshModel &mesh, GLArea *gla)
+void RenderRFX::Finalize(QAction * /*act*/, MeshDocument &/*md*/, GLArea */*gla*/)
 {
-	Q_UNUSED(act)
-	Q_UNUSED(mesh)
-	Q_UNUSED(gla)
-
 	// close any open dialog
 	if (dialog) {
 		dialog->close();

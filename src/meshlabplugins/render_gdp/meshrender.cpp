@@ -299,7 +299,7 @@ void MeshShaderRenderPlugin::initActionList() {
 	}
 }
 
-void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla) 
+void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla) 
 {
 	if (sDialog) {
 		sDialog->close();
@@ -449,8 +449,9 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 }
 
 
-void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget * /* gla */) 
+void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget * /* gla */) 
 {
+//  MeshModel &mm
 	if (shaders.find(a->text()) != shaders.end()) {
 		ShaderInfo si = shaders[a->text()];
 
@@ -523,6 +524,11 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QG
 	}
 	// * clear the errors, if any
 	glGetError();
+	foreach(MeshModel * mp, md.meshList)
+				{
+					if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+				}
+	glUseProgramObjectARB(0);
 }
 
 Q_EXPORT_PLUGIN(MeshShaderRenderPlugin)

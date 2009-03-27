@@ -42,12 +42,11 @@ class RenderRFX : public QObject, public MeshRenderInterface
 public:
 	RenderRFX();
 	~RenderRFX();
-	void Init(QAction*, MeshModel&, RenderMode&, QGLWidget*);
-	void Render(QAction*, MeshModel&, RenderMode&, QGLWidget*);
-	void Finalize(QAction*, MeshModel&, GLArea*);
+	void Init(QAction*, MeshDocument&, RenderMode&, QGLWidget*);
+	void Render(QAction*, MeshDocument&, RenderMode&, QGLWidget*);
+	void Finalize(QAction*, MeshDocument&, GLArea*);
 	bool isSupported()         { return shadersSupported; }
 	QList<QAction*> actions();
-	int passNum()              { return totPass; }
 
 private:
 	void initActionList();

@@ -44,7 +44,6 @@ GLArea::GLArea(QWidget *parent)
 {
 	animMode=AnimNone;
 	iRenderer=0; //Shader support
-	iDecoratorsList=0;
 	iEdit=0;
 	currentEditor=0;
 	suspendedEditor=false;
@@ -63,8 +62,6 @@ GLArea::GLArea(QWidget *parent)
 	//lastEditRef = NULL;
 	currLogLevel = -1;
 	setAttribute(Qt::WA_DeleteOnClose,true);
-	// Projection Matrix starting settings
-	//objDist = 3.f;
 	fov = 60;
 	clipRatioFar = 1;
 	clipRatioNear = 1;
@@ -100,7 +97,7 @@ GLArea::~GLArea()
 {
 	// warn any iRender plugin that we're deleting glarea
 	if (iRenderer)
-		iRenderer->Finalize(currentShader, *mm(), this);
+		iRenderer->Finalize(currentShader, meshDoc, this);
 	delete this->layerDialog;
 }
 
@@ -152,10 +149,11 @@ void GLArea::initializeGL()
   }
 }
 
-
-
 void GLArea::pasteTile()
 {
+	glPushAttrib(GL_ENABLE_BIT);
+	QImage tileBuffer=grabFrameBuffer(true).mirrored(false,true);
+
 	if (snapBuffer.isNull())
 		snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
 
@@ -168,8 +166,6 @@ void GLArea::pasteTile()
 		snapPtr+=tileBuffer.bytesPerLine() * totalCols;
 		tilePtr+=tileBuffer.bytesPerLine();
 	}
-
-	tileBuffer=QImage();
 
 	tileCol++;
 
@@ -184,63 +180,21 @@ void GLArea::pasteTile()
         .arg(ss.outdir)
         .arg(ss.basename)
         .arg(ss.counter++,2,10,QChar('0'));
-			bool ret = snapBuffer.save(outfile,"PNG");
-			if (ret) log.Logf(GLLogStream::SYSTEM,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
+			bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
+			if (ret) log.Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
 					else log.Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
 
 			takeSnapTile=false;
 			snapBuffer=QImage();
 		}
 	}
+	update();
+	glPopAttrib();
 }
 
 
-void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
-{
-	GLdouble fLeft, fRight, fBottom, fTop, left, right, bottom, top, xDim, yDim, xOff, yOff, tDimX, tDimY;
 
-	fTop = zNear * tan(fovy * M_PI / 360.0);
-	fLeft = -fTop * aspect;
-	fBottom = -fTop;
-	fRight = -fLeft;
-
-	// Dimensione totale
-	xDim = fabs(fLeft * 2);
-	yDim = fabs(fTop * 2);
-
-	// Dimensione di un tile
-	tDimX = xDim / totalCols;
-	tDimY = yDim / totalRows;
-
-	// Offset del tile
-	yOff = tDimY * tileRow;
-	xOff = tDimX * tileCol;
-
-	// Nuovo frustum
-	left = fLeft + xOff;
-	right = fLeft + xOff + tDimX;
-	bottom = fTop - yOff - tDimY;
-	top = fTop - yOff;
-
-	glFrustum(left, right, bottom, top, zNear, zFar);
-}
-
-void GLArea::paintGL()
-{
-  QTime time;
-  time.start();
-	//int lastTime=time.elapsed();
-	initTexture();
-	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-	// Set Modelview and Projection matrix
-	setView();
-
-	// Enter in 2D screen Mode and
-	// draws the background
-	if(!takeSnapTile)
+void GLArea::drawGradient()
 	{
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
@@ -267,9 +221,10 @@ void GLArea::paintGL()
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 	}
-
-
-	// ============== LIGHT TRACKBALL ==============
+	
+void GLArea::drawLight()
+{
+// ============== LIGHT TRACKBALL ==============
 	// Apply the trackball for the light direction
 	glPushMatrix();
 	trackball_light.GetView();
@@ -296,31 +251,32 @@ void GLArea::paintGL()
     glPopAttrib();
 	}
 	glPopMatrix();
-  // =============================================
-	/// Compute BBox
-	Box3f FullBBox=meshDoc.bbox();
-	foreach(MeshModel * mp, meshDoc.meshList)
-	 FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
 
+}
+
+void GLArea::paintGL()
+{
+  QTime time;
+  time.start();
+	initTexture();
+	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+	setView();  // Set Modelview and Projection matrix
+	drawGradient();  // draws the background
+  drawLight();
+			
+	glPushMatrix();
+	
 	// Finally apply the Trackball for the model
 	trackball.GetView();
-  glPushMatrix();
-	trackball.Apply(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor));
-	float d=2.0f/FullBBox.Diag();
-	glScale(d);
-
-	glTranslate(-FullBBox.Center());
+  trackball.Apply(false);
+	glPushMatrix();
+	
+	//glScale(d);
+  //	glTranslate(-FullBBox.Center());
   setLightModel();
-
-	// Modify frustum...
-	if (takeSnapTile)
-	{
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		myGluPerspective(fov, (GLdouble) curSiz.width() / (GLdouble) curSiz.height(), nearPlane, farPlane);
-		glMatrixMode(GL_MODELVIEW);
-	}
 
 	// Set proper colorMode
 	if(rm.colorMode != GLW::CMNone)
@@ -330,76 +286,44 @@ void GLArea::paintGL()
 	}
 	else glColor(Color4b::LightGray);
 
-	if(rm.backFaceCull)
-		glEnable(GL_CULL_FACE);
-	else
-		glDisable(GL_CULL_FACE);
+	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
+	else glDisable(GL_CULL_FACE);
 
 	if(!meshDoc.busy)
 	{
-		int totPasses = 1;
-		if (iRenderer) {
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
-			totPasses = iRenderer->passNum();
-		}
-
-		do {
-			// render the current meshes
-			if (iRenderer && currentShader) {
-				iRenderer->Render(currentShader, *mm(), rm, this);
-			}
-
-			// handle the other meshes
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		
+		if (iRenderer) iRenderer->Render(currentShader, meshDoc, rm, this);
+		else 
+		{
+			
 			foreach(MeshModel * mp, meshDoc.meshList)
-			{
-				if(mp->visible)
-					if (iRenderer)
-						iRenderer->Draw(currentShader, *mp, rm, this);
-					else
-						mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-			}
+				{
+					if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+				}
+		}	
+		if(iEdit) iEdit->Decorate(*mm(),this);
 
-		} while (--totPasses);
-
-			if(iRenderer)
-			{
-				glPopAttrib();
-				glUseProgramObjectARB(0);
-			}
-
-			if(iEdit)
-				iEdit->Decorate(*mm(),this);
-
-			// Draw the selection
-			if(rm.selectedFaces)  mm()->RenderSelectedFaces();
-
-			if(iDecoratorsList)
-			{
-				pair<QAction *,FilterParameterSet *> p;
-				//assert(decorInterface);
-				foreach(p,*iDecoratorsList)
+		// Draw the selection
+		if(rm.selectedFaces)  mm()->RenderSelectedFaces();
+		pair<QAction *,FilterParameterSet *> p;
+		foreach(p , iDecoratorsList)
 				{
 					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p.first->parent());
-					assert(decorInterface);
 					decorInterface->Decorate(p.first,*mm(),p.second,this,qFont);
 				}
-			}
-	} ///end if busy
-
-	// ...and take a snapshot
-	if (takeSnapTile)
-	{
-		glPushAttrib(GL_ENABLE_BIT);
-		tileBuffer=grabFrameBuffer(true);
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-		pasteTile();
-		update();
+		
 		glPopAttrib();
-	}
- glPopMatrix(); // now we are back in pre-trackball space
-  if(hasToPick)
+	} ///end if busy
+	
+	glPopMatrix(); // We restore the state to immediately after the trackball (and before the bbox scaling/translating)
+	
+	if(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor)) 
+			trackball.DrawPostApply();
+	
+	glPopMatrix(); // We restore the state to immediately before the trackball
+	
+	if(hasToPick)
   { // Double click move picked point to center
     Point3f pp;
     hasToPick=false;
@@ -410,7 +334,28 @@ void GLArea::paintGL()
         }
   }
 
+	// ...and take a snapshot
+	if (takeSnapTile) pasteTile(); 
 
+	// Draw the log area background
+	// on the bottom of the glArea
+	if(infoAreaVisible)
+	{
+		displayInfo();
+		updateFps(time.elapsed());
+	}
+
+	// Finally display HELP if requested
+	if (isHelpVisible()) displayHelp();
+
+  int error = glGetError();
+	if(error) {
+		log.Logf(GLLogStream::WARNING,"There are gl errors");
+	}
+}
+
+void GLArea::displayInfo()
+{
 	// Enter in 2D screen Mode again
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -425,35 +370,10 @@ void GLArea::paintGL()
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 
-	// Draw the log area background
-	// on the bottom of the glArea
-	if(infoAreaVisible)
-	{
-		displayInfo();
-		updateFps(time.elapsed());
-	}
-
-	// Finally display HELP if requested
-	if (isHelpVisible()) displayHelp();
-
-	// Closing 2D
-	glPopAttrib();
-	glPopMatrix(); // restore modelview
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-  int error = glGetError();
-	if(error) {
-		log.Logf(GLLogStream::WARNING,"There are gl errors");
-	}
-}
-
-void GLArea::displayInfo()
-{
 	qFont.setStyleStrategy(QFont::NoAntialias);
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(12);
-//	qFont.setWeight(1);
+
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 	cs.lColor.V(3) = 128;	// set half alpha value
 	glColor(cs.lColor);
@@ -498,6 +418,14 @@ void GLArea::displayInfo()
 			renderText(rightCol,startPos+2*lineSpacing,QString("FPS: %1").arg(cfps,7,'f',1),qFont);
 	if ((clipRatioNear!=1) || (clipRatioFar!=1))
 			renderText(rightCol,startPos+3*lineSpacing,QString("Clipping: N:%1 F:%2").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1),qFont);
+
+
+	// Closing 2D
+	glPopAttrib();
+	glPopMatrix(); // restore modelview
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
 
 }
 
@@ -874,20 +802,59 @@ void GLArea::setView()
 	GLfloat fAspect = (GLfloat)curSiz.width()/ curSiz.height();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	// Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
 
-	ratio = 1.75f;
-	float objDist = ratio / tanf(vcg::math::ToRad(fov*.5f));
+	// This parameter is the one that controls:
+	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
+	float viewRatio = 1.75f;
+	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
 
-	nearPlane = objDist - 2.f*clipRatioNear;
-	farPlane =  objDist + 10.f*clipRatioFar;
-	if(nearPlane<=objDist*.1f) nearPlane=objDist*.1f;
+	nearPlane = cameraDist - 2.f*clipRatioNear;
+	farPlane =  cameraDist + 10.f*clipRatioFar;
+	if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
 
-	if(fov==5)		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,objDist - 2.f*clipRatioNear, objDist+2.f*clipRatioFar);
-	   else    		gluPerspective(fov, fAspect, nearPlane, farPlane);
+	if (!takeSnapTile)	
+	{
+		if(fov==5)	glOrtho( -viewRatio*fAspect, viewRatio*fAspect, -viewRatio, viewRatio, cameraDist - 2.f*clipRatioNear, cameraDist+2.f*clipRatioFar);
+		else    		gluPerspective(fov, fAspect, nearPlane, farPlane);
+	}	 
+	else	setTiledView(fov, viewRatio, fAspect, nearPlane, farPlane, cameraDist);
+	 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0, 0, objDist,0, 0, 0, 0, 1, 0);
+	gluLookAt(0, 0, cameraDist,0, 0, 0, 0, 1, 0);
+}
+
+void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar,  float cameraDist)
+{
+	if(fovY<=5)
+	{
+		GLdouble fLeft   = -viewRatio*fAspect;
+		GLdouble fRight  =  viewRatio*fAspect;
+		GLdouble fBottom = -viewRatio;
+		GLdouble fTop    =  viewRatio;
+		
+		GLdouble tDimX = fabs(fRight-fLeft) / totalCols;
+		GLdouble tDimY = fabs(fTop-fBottom) / totalRows;
+
+
+		glOrtho(fLeft   + tDimX * tileCol, fLeft   + tDimX * (tileCol+1),     /* left, right */
+						fBottom + tDimY * tileRow, fBottom + tDimY * (tileRow+1),     /* bottom, top */
+							 cameraDist - 2.f*clipRatioNear, cameraDist+2.f*clipRatioFar);
+	}
+	else
+	{
+		GLdouble fTop    = zNear * tan(math::ToRad(fovY/2.0));
+		GLdouble fRight  = fTop * fAspect;
+		GLdouble fBottom = -fTop;
+		GLdouble fLeft   = -fRight;
+
+		// tile Dimension
+		GLdouble tDimX = fabs(fRight-fLeft) / totalCols;
+		GLdouble tDimY = fabs(fTop-fBottom) / totalRows;
+
+		glFrustum(fLeft   + tDimX * tileCol, fLeft   + tDimX * (tileCol+1), 
+							fBottom + tDimY * tileRow, fBottom + tDimY * (tileRow+1), zNear, zFar);
+	}
 }
 
 void GLArea::updateFps(float deltaTime)
@@ -904,7 +871,14 @@ void GLArea::updateFps(float deltaTime)
   lastTime=deltaTime;
 }
 
-void GLArea::resetTrackBall(){trackball.Reset();updateGL();}
+void GLArea::resetTrackBall()
+{
+	trackball.Reset();
+	float newScale= 3.0f/meshDoc.bbox().Diag();
+	trackball.track.sca = newScale;
+	trackball.track.tra =  -meshDoc.bbox().Center();
+	updateGL();
+}
 
 void GLArea::hideEvent(QHideEvent * /*event*/)
 {

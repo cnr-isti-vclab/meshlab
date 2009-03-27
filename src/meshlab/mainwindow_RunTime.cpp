@@ -383,11 +383,8 @@ void MainWindow::updateMenus()
 
 				foreach (QAction *a,decoratorActionList){a->setChecked(false);a->setEnabled(true);}
 
-				if(GLA()->iDecoratorsList){
-					pair<QAction *,FilterParameterSet *> p;
-					foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
-				}
-
+				pair<QAction *,FilterParameterSet *> p;
+				foreach (p,GLA()->iDecoratorsList){p.first->setChecked(true);}
 	} // if active
 	else
 	{
@@ -595,7 +592,9 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
   }
 	if(iFilter->getClass(action) & MeshFilterInterface::Selection )
 	    GLA()->setSelectionRendering(true);
-
+			
+	if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
+	    GLA()->resetTrackBall();
   qb->reset();
   updateMenus();
   GLA()->update();
@@ -667,7 +666,7 @@ void MainWindow::applyRenderMode()
 
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	iRenderTemp->Init(action,*(GLA()->mm()),GLA()->getCurrentRenderMode(),GLA());
+	iRenderTemp->Init(action,GLA()->meshDoc,GLA()->getCurrentRenderMode(),GLA());
 
 	if(action->text() == tr("None"))
 	{
@@ -693,17 +692,14 @@ void MainWindow::applyDecorateMode()
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
 
 	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
-	if(GLA()->iDecoratorsList==0)
-		GLA()->iDecoratorsList= new list<pair<QAction *,FilterParameterSet *> >;
 
 	bool found=false;
 	pair<QAction *,FilterParameterSet *> p;
-	foreach(p,*GLA()->iDecoratorsList)
+	foreach(p,GLA()->iDecoratorsList)
 	{
 		if(p.first->text()==action->text()){
 			delete p.second;
-		  //p.second=0;
-			GLA()->iDecoratorsList->remove(p);
+			GLA()->iDecoratorsList.remove(p);
 			GLA()->log.Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
 			found=true;
 		}
@@ -713,7 +709,7 @@ void MainWindow::applyDecorateMode()
 	  FilterParameterSet * decoratorParams = new FilterParameterSet();
 		iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
 		iDecorateTemp->StartDecorate(action,*GLA()->mm(),GLA());
-		GLA()->iDecoratorsList->push_back(make_pair(action,decoratorParams));
+		GLA()->iDecoratorsList.push_back(make_pair(action,decoratorParams));
 
 		GLA()->log.Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
 	}
@@ -1001,6 +997,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					if(delVertNum>0 || delFaceNum>0 )
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
 					GLA()->meshDoc.busy=false;
+					if(newGla) GLA()->resetTrackBall();
 				}
 			}
 	}// end foreach file of the input list
@@ -1093,7 +1090,8 @@ bool MainWindow::saveAs(QString fileName)
 		maskDialog.exec();
 		int mask = maskDialog.GetNewMask();
 		maskDialog.close();
-
+		if(maskDialog.result() == QDialog::Rejected)
+			return false;
 		if(mask == -1)
 			return false;
 

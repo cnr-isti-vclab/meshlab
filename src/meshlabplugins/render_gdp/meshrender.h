@@ -143,9 +143,8 @@ public:
   void initActionList();
 
 	virtual bool isSupported() {return supported;}
-	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
-	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
-  virtual int passNum() { return 1; } /* single pass rendering */
+	virtual void Init(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla);
+	virtual void Render(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla);
 
 };
 

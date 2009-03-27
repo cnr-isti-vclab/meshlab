@@ -20,125 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
 
-$Log: glarea.h,v $
-Revision 1.85  2008/04/22 14:54:38  bernabei
-Added support for tablet events
-
-Revision 1.84  2008/04/04 10:07:10  cignoni
-Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
-
-Revision 1.83  2008/01/16 01:41:01  cignoni
-added endedit slot
-
-Revision 1.82  2008/01/04 18:23:24  cignoni
-Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
-
-Revision 1.81  2008/01/04 00:46:28  cignoni
-Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
-
-Revision 1.80  2007/12/13 00:18:28  cignoni
-added meshCreation class of filter, and the corresponding menu new under file
-
-Revision 1.79  2007/11/05 22:38:57  cignoni
-Remove static map of cursors that caused the annoying deallocation bug under vs2005
-
-Revision 1.78  2007/10/23 07:15:13  cignoni
-switch to selection rendering done by slot and signals
-
-Revision 1.77  2007/10/17 08:31:39  cignoni
-better label and automatic suspension after the end of the measurement using slots
-
-Revision 1.76  2007/10/06 23:29:51  cignoni
-corrected management of suspeneded editing actions. Added filter toolbar
-
-Revision 1.75  2007/07/10 07:19:12  cignoni
-** Serious Changes **
-again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
-
-Revision 1.74  2007/05/16 15:02:04  cignoni
-Better management of toggling between edit actions and camera movement
-
-Revision 1.73  2007/04/16 09:24:37  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing...
-
-Revision 1.72  2007/03/26 08:24:10  zifnab1974
-When a user minimizes the window using a shortcut that uses modifiers (alt, ctrl, shift), the state of the button remained "pressed" after the window was reraised. Added a hideevent which resets the button state.
-
-Revision 1.71  2007/03/09 11:08:09  mariolatronico
-Removed unnecessary modifier
-
-Revision 1.70  2007/03/05 11:12:55  cignoni
-correct management of release of keyboard modifiers
-
-Revision 1.69  2007/03/03 02:03:25  cignoni
-Reformatted lower bar, added number of selected faces. Updated about dialog
-
-Revision 1.68  2007/03/03 00:13:48  cignoni
-quick patch of font size
-
-Revision 1.67  2007/02/26 15:05:49  cignoni
-syntax error
-
-Revision 1.66  2007/02/26 11:57:19  cignoni
-Re enabled on screen help, moved back far plane
-
-Revision 1.65  2007/02/26 01:20:59  cignoni
-cursor added
-
-Revision 1.64  2007/02/05 19:25:05  gfrei
-added float getFov()
-
-Revision 1.63  2006/11/09 08:15:59  cignoni
-Restored classical dark background
-
-Revision 1.62  2006/11/08 15:40:10  cignoni
-Restored original checca colors
-
-Revision 1.61  2006/10/26 12:06:16  corsini
-add GLlightSettings structure
-
-Revision 1.60  2006/10/10 19:55:02  cignoni
-Corrected trackball bug, changed default background color.
-
-Revision 1.59  2006/06/13 13:50:01  cignoni
-Cleaned FPS management
-
-Revision 1.58  2006/06/12 15:18:36  cignoni
-toggle between last editing mode
-
-Revision 1.57  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.56  2006/02/16 10:09:34  cignoni
-Removed unnecessary stuff (modifiers)
-
-Revision 1.55  2006/02/13 15:37:18  cignoni
-Restructured some functions (pasteTile, wheelevent,lightmode)
-Added DoubleClick for zoom and center. Restructured all the keyboard modifier (removed currentButton)
-Removed various gl state leaking
-
-Revision 1.54  2006/02/03 15:58:21  glvertex
-Added getFont() inline method
-
-Revision 1.53  2006/01/27 12:41:21  glvertex
-Removed HUGE memory leaks. The model is now deallocated when the window is colsed.
-
-Revision 1.52  2006/01/25 15:38:10  glvertex
-- Restyling part II
-- Font resizing works better
-- Some renaming
-
-Revision 1.51  2006/01/25 03:57:15  glvertex
-- Code cleaning and restyling
-- Some bugs removed on resizing
-- A lot of changes in paintGL
-****************************************************************************/
 #ifndef GLAREA_H
 #define GLAREA_H
 #include <GL/glew.h>
@@ -322,7 +204,7 @@ public:
 	void setLightModel();
 	void setView();
 	void resetTrackBall();
-	std::list<std::pair<QAction *,FilterParameterSet *> > *iDecoratorsList;
+	std::list<std::pair<QAction *,FilterParameterSet *> > iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
@@ -396,7 +278,8 @@ public:
 	
 	void closeEvent(QCloseEvent *event);
 	float lastRenderingTime() { return lastTime;}
-
+	void drawGradient();
+	void drawLight();
 	float getFov() { return fov; }
 // the following pair of slot/signal implements a very simple message passing mechanism.
 // a widget that has a pointer to the glarea call the sendViewDir() slot and 
@@ -447,7 +330,7 @@ protected:
 private:
 	QMap<QString,QCursor> curMap;
 	void pasteTile();
-	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
+	void setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar, float cameraDist);
     
 	bool  helpVisible;				// Help on screen	
 	bool	trackBallVisible;		// Draws the trackball ?
@@ -477,8 +360,6 @@ public:
 	GLLightSetting ls;
 	// view setting variables
 	float fov;
-	float ratio;
-	//float objDist; 
 	float clipRatioFar;
 	float clipRatioNear;
 	float nearPlane;
@@ -490,7 +371,6 @@ private:
 	
 	SnapshotSetting ss;
 	QImage snapBuffer;
-	QImage tileBuffer;
 	bool takeSnapTile;
   
 	enum AnimMode { AnimNone, AnimSpin, AnimInterp};

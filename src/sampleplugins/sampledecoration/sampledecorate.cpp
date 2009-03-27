@@ -118,11 +118,11 @@ void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParamete
 	tr=tr*Scale;
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
-	glLoadIdentity();
-	GLfloat fAspect = (GLfloat)gla->width()/ gla->height();
-	float ratio= gla->ratio;
-	if(gla->fov==5)		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,0, 15);
-	   else    		gluPerspective(gla->fov, fAspect, .1, 20);
+//	glLoadIdentity();
+//	GLfloat fAspect = (GLfloat)gla->width()/ gla->height();
+//	float ratio= gla->ratio;
+//	if(gla->fov==5)		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,0, 15);
+//	   else    		gluPerspective(gla->fov, fAspect, .1, 20);
 
   glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();

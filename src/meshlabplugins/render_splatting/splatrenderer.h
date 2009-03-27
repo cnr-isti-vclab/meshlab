@@ -55,7 +55,7 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 	int mRenderBufferMask;
 	int mSupportedMask;
 
-	int mCurrentPass;
+	//int mCurrentPass;
 	int mBindedPass;
 	GLuint mDummyTexId; // on ATI graphics card we need to bind a texture to get point sprite working !
 	bool mWorkaroundATI;
@@ -105,10 +105,8 @@ public:
 	void initActionList();
 
 	virtual bool isSupported() {return mIsSupported;}
-	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
-	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
-	virtual void Draw(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
-	virtual int passNum() { return 3; }
+	virtual void Init(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
+	virtual void Render(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
 
 };
 
