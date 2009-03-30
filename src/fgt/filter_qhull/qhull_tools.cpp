@@ -548,7 +548,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 
 				if (radius>alpha) // if the facet is not good consider the ridges
 				{
-					//if calculating the alphashape, mark the facet. It could be open and some triangles visible
+					//if calculating the alphashape, mark the facet ('good' is used as 'marked'). It could be open and some triangles visible
 					if(alphashape)
 						facet->good=false;
 
@@ -585,12 +585,12 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 								}
 								else
 									//if calculating alpha shapes, save the triangle for subsequent filtering
-									qh_setappend (&set, ridge); 
+									qh_setunique (&set, ridge); 
 							}
 						}
 					}
 
-					//if calculating the alphashape, mark the facet. 
+					//if calculating the alphashape, mark the facet('good' is used as 'marked'). 
 					//This facet could hide some triangle.
 					if(alphashape && goodTriangles==4)
 						facet->good=true;
@@ -600,7 +600,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 				{
 					//Compute each ridge (triangle) once
 					facet->visitid= qh visit_id;
-					//if calculating the alphashape, mark the facet. 
+					//if calculating the alphashape, mark the facet('good' is used as 'marked') . 
 					//This facet could hide some triangle.
 					if(alphashape)
 						facet->good=true;
@@ -612,14 +612,14 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 							//if calculating alphacomplex build mesh. It needs no filtering
 							if(!alphashape){
 								tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
-								alphaHandle[fi] = radius;
+								alphaHandle[fi] = radius; //CORREGGI CON IL RAGGIO DELLA CIRCOSFERA
 								ridgesCount++;
 								FOREACHvertex_i_(ridge->vertices)
 									(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
 							}
 							else
 								//if calculating alpha shapes, save the triangle for subsequent filtering	
-								qh_setappend (&set, ridge);
+								qh_setunique(&set, ridge);
 						}	
 					}
 				}
