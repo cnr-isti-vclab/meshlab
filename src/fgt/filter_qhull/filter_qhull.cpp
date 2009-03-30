@@ -33,7 +33,6 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -86,10 +85,20 @@ const QString QhullPlugin::filterName(FilterIDType filterId)
 const QString QhullPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_QHULL_CONVEX_HULL :  return QString("Calculate mesh Convex Hull with Qhull library. The convex hull of a set of points is the smallest convex set containing the points."); 
-		case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Calculate mesh Delaunay triangulations with Qhull library. The Delaunay triangulation of a set of points in d-dimensional spaces is the projection of the convex hull of the projections of the points onto a (d+1)-dimensional paraboloid."); 
-		case FP_QHULL_VORONOI_FILTERING :  return QString("Calculate mesh Voronoi filtering with Qhull library. The Voronoi diagram is the nearest-neighbor map for a set of points. Each region contains those points that are nearer one input site than any other input site. "); 
-		case FP_QHULL_ALPHA_SHAPES: return QString("Calculate Alpha Shapes");
+		case FP_QHULL_CONVEX_HULL :  return QString("Calculate mesh convex hull with Qhull library.<br> "
+										 "The convex hull of a set of points is the smallest convex set containing the points."); 
+		case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Calculate mesh Delaunay triangulations with Qhull library.<br>"
+													"The Delaunay triangulation of a set of points in d-dimensional spaces is "
+													"the projection of the convex hull of the projections of the points onto a "
+													"(d+1)-dimensional paraboloid. <br> It could take several minutes with big input points number."); 
+		case FP_QHULL_VORONOI_FILTERING :  return QString("Compute mesh Voronoi filtering with Qhull library. <br>" 
+											   "The filter reconstructs the mesh surface starting from its vertices through a double "
+											   "Delaunay triangulation. <br> The second one takes in input some Voronoi vertices too.<br>"
+											   "It could take several minutes with big input points number."); 
+		case FP_QHULL_ALPHA_SHAPES: return QString("Calculate Alpha Shapes. <br>"
+										"The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation.<br>" 
+										"For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay "
+										"triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'");
 		default : assert(0); 
 	}
 	return QString("Error: Unknown Filter");
@@ -135,8 +144,11 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			}	
 		case FP_QHULL_ALPHA_SHAPES:
 			{
-			    parlst.addAbsPerc("perc",0,0,100,"Compute alpha as percentage of the bbox","Compute alpha as percentage of the bbox");
-				parlst.addBool("alphashape",true,"Alphashape","dddd");
+			    parlst.addAbsPerc("alpha",0,0,m.cm.bbox.Diag(),tr("Alpha value"),tr("Compute the alpha value as percentage of the diagonal of the bbox"));
+				parlst.addEnum("Filtering", 0, 
+									QStringList() << "Alpha Complex" << "Alpha Shapes" , 
+									tr("Get:"), 
+									tr("Select the output. The Alpha Shapes is the boundary of the Alpha Complex"));
 				break;
 			}
 		default : assert(0); 
@@ -169,52 +181,58 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 
 				facetT *facet_list = compute_convex_hull(dim,numpoints,m);
 
-				int convexNumFaces = qh num_facets;
-				int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
-				assert( qh num_vertices == convexNumVert);
+				if(facet_list!=NULL){
 
-				tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
-				tri::Allocator<CMeshO>::AddFaces(pm.cm,convexNumFaces);
+					int convexNumFaces = qh num_facets;
+					int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
+					assert( qh num_vertices == convexNumVert);
+
+					tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
+					tri::Allocator<CMeshO>::AddFaces(pm.cm,convexNumFaces);
 
 
-				/*ivp length is 'numpoints' because each vertex is accessed through its ID whose range is 
-				  0<=qh_pointid(vertex->point)<numpoints*/
-				vector<tri::Allocator<CMeshO>::VertexPointer> ivp(numpoints);
-				vertexT *vertex;
-				int     vertex_n, vertex_i;
-				FOREACHvertex_i_(qh_facetvertices (facet_list, NULL, false)){	
-					if ((*vertex).point){
-						pm.cm.vert[vertex_i].P()[0] = (*vertex).point[0];
-						pm.cm.vert[vertex_i].P()[1] = (*vertex).point[1];
-						pm.cm.vert[vertex_i].P()[2] = (*vertex).point[2];
-						ivp[qh_pointid(vertex->point)] = &pm.cm.vert[vertex_i];
-					}
-				}
- 
-				facetT *facet;
-				int i=0;
-				FORALLfacet_(facet_list){		
+					/*ivp length is 'numpoints' because each vertex is accessed through its ID whose range is 
+					  0<=qh_pointid(vertex->point)<numpoints. qh num_vertices is < numpoints*/
+					vector<tri::Allocator<CMeshO>::VertexPointer> ivp(numpoints);
 					vertexT *vertex;
 					int     vertex_n, vertex_i;
-					FOREACHvertex_i_((*facet).vertices){
-						pm.cm.face[i].V(vertex_i)= ivp[qh_pointid(vertex->point)];	
+					FOREACHvertex_i_(qh_facetvertices (facet_list, NULL, false)){	
+						if ((*vertex).point){
+							pm.cm.vert[vertex_i].P()[0] = (*vertex).point[0];
+							pm.cm.vert[vertex_i].P()[1] = (*vertex).point[1];
+							pm.cm.vert[vertex_i].P()[2] = (*vertex).point[2];
+							ivp[qh_pointid(vertex->point)] = &pm.cm.vert[vertex_i];
+						}
 					}
-					i++;
+	 
+					facetT *facet;
+					int i=0;
+					FORALLfacet_(facet_list){		
+						vertexT *vertex;
+						int     vertex_n, vertex_i;
+						FOREACHvertex_i_((*facet).vertices){
+							pm.cm.face[i].V(vertex_i)= ivp[qh_pointid(vertex->point)];	
+						}
+						i++;
+					}
+
+					assert( pm.cm.fn == convexNumFaces);
+					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",convexNumVert,convexNumFaces);
+					//m.cm.Clear();
+
+					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					
+					int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
+					qh_freeqhull(!qh_ALL);  
+					qh_memfreeshort (&curlong, &totlong);
+					if (curlong || totlong)
+						fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
+									 totlong, curlong);
+
 				}
-
-				assert( pm.cm.fn == convexNumFaces);
-				Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",convexNumVert,convexNumFaces);
-				//m.cm.Clear();
-
-				vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-				
-				int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
-				qh_freeqhull(!qh_ALL);  
-				qh_memfreeshort (&curlong, &totlong);
-				if (curlong || totlong)
-					fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
-								 totlong, curlong);
+				else
+					return false;
 
 				break;
 			}
@@ -236,69 +254,73 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				//facet_list contains the delaunauy triangulation as a list of tetrahedral facets */ 	
 				facetT *facet_list = compute_delaunay(dim,numpoints,m);
 
-				int convexNumFaces = qh num_facets;
-				int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
-				assert( qh num_vertices == convexNumVert);
+				if(facet_list!=NULL){
 
-				tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
+					int convexNumFaces = qh num_facets;
+					int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
+					assert( qh num_vertices == convexNumVert);
 
-				//convexNumVert is always >= numpoints
-				vector<tri::Allocator<CMeshO>::VertexPointer> ivp(convexNumVert);
-				vertexT *vertex;
-				int     vertex_n, vertex_i;
-				FOREACHvertex_i_(qh_facetvertices (facet_list, NULL, false)){	
-					if ((*vertex).point){
-						pm.cm.vert[vertex_i].P()[0] = (*vertex).point[0];
-						pm.cm.vert[vertex_i].P()[1] = (*vertex).point[1];
-						pm.cm.vert[vertex_i].P()[2] = (*vertex).point[2];
-						ivp[qh_pointid(vertex->point)] = &pm.cm.vert[vertex_i];
-					}
-				}
-				
-				// In 3-d Delaunay triangulation each facet is a tetrahedron. If triangulated,
-				//each ridge (d-1 vertices between two neighboring facets) is a triangle
+					tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
 
-				facetT *facet, **facetp,  *neighbor;
-				qh visit_id++;
-				int ridgeCount=0;
-
-				//Compute each ridge (triangle) once
-				FORALLfacet_(facet_list)
-				if (!facet->upperdelaunay) {
-					facet->visitid= qh visit_id;
-					qh_makeridges(facet);
-					ridgeT *ridge, **ridgep;
-					FOREACHridge_(facet->ridges) {
-						neighbor= otherfacet_(ridge, facet);
-						if (neighbor->visitid != qh visit_id) {
-							tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
-							ridgeCount++;
-							FOREACHvertex_i_(ridge->vertices)
-								(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
+					vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
+					vertexT *vertex;
+					int     vertex_n, vertex_i;
+					FOREACHvertex_i_(qh_facetvertices (facet_list, NULL, false)){	
+						if ((*vertex).point){
+							pm.cm.vert[vertex_i].P()[0] = (*vertex).point[0];
+							pm.cm.vert[vertex_i].P()[1] = (*vertex).point[1];
+							pm.cm.vert[vertex_i].P()[2] = (*vertex).point[2];
+							ivp[qh_pointid(vertex->point)] = &pm.cm.vert[vertex_i];
 						}
 					}
+					
+					// In 3-d Delaunay triangulation each facet is a tetrahedron. If triangulated,
+					//each ridge (d-1 vertices between two neighboring facets) is a triangle.
+
+					facetT *facet, **facetp,  *neighbor;
+					qh visit_id++;
+					int ridgeCount=0;
+
+					//Compute each ridge (triangle) once
+					FORALLfacet_(facet_list)
+					if (!facet->upperdelaunay) {
+						facet->visitid= qh visit_id;
+						qh_makeridges(facet);
+						ridgeT *ridge, **ridgep;
+						FOREACHridge_(facet->ridges) {
+							neighbor= otherfacet_(ridge, facet);
+							if (neighbor->visitid != qh visit_id) {
+								tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
+								ridgeCount++;
+								FOREACHvertex_i_(ridge->vertices)
+									(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
+							}
+						}
+					}
+
+					assert(pm.cm.fn == ridgeCount);
+					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+					//m.cm.Clear();	
+
+					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					
+					int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
+					qh_freeqhull(!qh_ALL);  
+					qh_memfreeshort (&curlong, &totlong);
+					if (curlong || totlong)
+						fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
+									 totlong, curlong);
 				}
-
-				assert(pm.cm.fn == ridgeCount);
-				Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
-				//m.cm.Clear();	
-
-				vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-				
-				int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
-				qh_freeqhull(!qh_ALL);  
-				qh_memfreeshort (&curlong, &totlong);
-				if (curlong || totlong)
-					fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
-								 totlong, curlong);
+				else 
+					return false;
 
 				break;
 			}
 			case FP_QHULL_VORONOI_FILTERING:
 			{
 				MeshModel &m=*md.mm();
-			    MeshModel &pm =*md.addNewMesh("Voronoi Diagram");
+			    MeshModel &pm =*md.addNewMesh("Voronoi Filtering");
 				
 				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
@@ -309,9 +331,13 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 			    
 				int dim= 3;				/* dimension of points */
 				int numpoints= m.cm.vn;	/* number of mesh vertices */
-
-				//facet_list contains the delaunauy triangulation as a list of tetrahedral facets */ 	
+ 	
 				compute_voronoi(dim,numpoints,m,pm);
+
+				vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+
+				Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 
 				break;
 			}
@@ -329,40 +355,42 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				int dim= 3;				/* dimension of points */
 				int numpoints= m.cm.vn;	/* number of mesh vertices */
 
-				int perc = par.getAbsPerc("perc");
-				double alpha = m.cm.bbox.Diag()/100 *perc;
+				double alpha = par.getAbsPerc("alpha");
 
-				bool alphashape = par.getBool("alphashape");
+				bool alphashape = false;
 				char* name = "";
-				if(alphashape)
-					name =("Alpha Shapes");
-				else 
-					name = ("Alpha Complex");
+				switch(par.getEnum("Filtering"))
+				{
+					case 0 :	
+						alphashape=false;	
+						name = ("Alpha Complex");
+						break;
+					case 1 :
+						alphashape=true;
+						name =("Alpha Shapes");
+						break;
+				}
 
 				MeshModel &pm =*md.addNewMesh(name);
+
 				compute_alpha_shapes(dim,numpoints,m,pm,alpha,alphashape);
+
+				vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
 
 				Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 				Log(GLLogStream::FILTER,"Alpha = %f ",alpha);
 				//m.cm.Clear();	
 
-				//Prova del 9
-
-				CMeshO::PerFaceAttributeHandle<double> alphaHandle =tri::Allocator<CMeshO>::GetPerFaceAttribute<double>(pm.cm, "Alpha");
-
-				double provaAlpha=0;
-				CMeshO::FaceIterator fi =pm.cm.face.begin();
-				if(vcg::tri::HasPerFaceAttribute(pm.cm,"Alpha"))
-					provaAlpha = alphaHandle[fi];
-				Log(GLLogStream::FILTER,"ProvaRadius = %f ",provaAlpha);
-
-
+				//Prova del 9 POI TOGLILA
+				if(vcg::tri::HasPerFaceAttribute(pm.cm,"Alpha") && pm.cm.fn>0){
+					CMeshO::PerFaceAttributeHandle<double> alphaHandle =tri::Allocator<CMeshO>::GetPerFaceAttribute<double>(pm.cm, "Alpha");
+					CMeshO::FaceIterator fi =pm.cm.face.begin();
+					//Una faccia a caso: la prima
+					double provaAlpha = alphaHandle[fi];
+					Log(GLLogStream::FILTER,"ProvaRadius = %f ",provaAlpha);
+				}
 				//Fine prova del 9
-							
-
-				vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-
 				break;
 			}
 	}
