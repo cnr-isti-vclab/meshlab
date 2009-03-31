@@ -93,11 +93,15 @@ private:
 		CoordType axis1 = (pE-pD);
 		CoordType axis2 = (pF-pD);
 		CoordType N = axis1 ^ axis2;
-		area = 0.5 * N.Norm();
+
 		axis1.Normalize();
 		axis2.Normalize();
-
 		N.Normalize();
+
+		double cosalpha = f0->V(0)->N() * N;
+		if (cosalpha > 1.57)
+			N = -N;
+
 		double a = N[0];
 		double b = N[1];
 		double c = N[2];
@@ -136,9 +140,10 @@ private:
 		a1v = factor * ((xE*yF - xF*yE)*vD + (xF*yD - xD*yF)*vE + (xD*yE - xE*yD)*vF);
 		a2v = factor * ((yE-yF)*vD + (yF-yD)*vE + (yD-yE)*vF);
 		a3v = factor * ((xF-xE)*vD + (xD-xF)*vE + (xE-xD)*vF);
+ 
+		double AAb = (yEp-yFp) * xDp + (yFp-yDp) * xEp + (yDp-yEp) * xFp;  // AA = 2A
 
-		double AAb = (yEp-yFp) * xDp + (yFp-yDp) * xEp + (yDp-yEp) * xFp;
-		area = fabs(0.5 * AAb - 0.5 * AA);
+		area = 0.5 * AA;
 	}
 
 // public methods
