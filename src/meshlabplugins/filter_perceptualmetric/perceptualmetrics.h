@@ -33,6 +33,7 @@ $Log: perceptualmetrics.h,v $
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <vcg/complex/trimesh/stat.h>
 
 template <class MeshType>
 class PerceptualMetrics
@@ -144,6 +145,9 @@ private:
 		double AAb = (yEp-yFp) * xDp + (yFp-yDp) * xEp + (yDp-yEp) * xFp;  // AA = 2A
 
 		area = 0.5 * AA;
+
+		if (area < 0.0)
+			area = -area;
 	}
 
 // public methods
@@ -226,8 +230,12 @@ public:
 			Wdistortion = G * epsilon_ij_prime_epsilon_ij_prime * Sdelta;
 			W += Warea + Wdistortion;
 		}
+
+		double area1 = vcg::tri::Stat<MeshType>::ComputeMeshArea(refmesh);
+		double area2 = vcg::tri::Stat<MeshType>::ComputeMeshArea(mesh);
 		
-		return W;
+		// Average Strain Energy (ASE)
+		return W / (area1+area2);
 	}
 
 };
