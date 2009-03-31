@@ -24,6 +24,8 @@
 #ifndef MESHLAB_FILTERPARAMETER_H
 #define MESHLAB_FILTERPARAMETER_H
 #include <QtCore>
+#include <QtXml>
+
 #include <QMap>
 #include <QPair>
 #include <QAction>
@@ -38,7 +40,7 @@ The invocation of a filter requires that these parameters have the specified val
 The Specification of the parameters can be done in two ways, either by an automatic dialog constructed by the MeshLab framework or by a user built dialog.
 
 */
-
+class FilterParameterSet;
 class FilterParameter
 {
  public:
@@ -109,6 +111,31 @@ class FilterParameter
 	{
 		return (fieldName == inputParameter.fieldName);
 	}
+	
+	bool WriteToSettings(QSettings &qs);
+	bool readFromSettings(QSettings &qs);
+	
+	QDomElement createElement(QDomDocument &doc);
+	static void addQDomElement(FilterParameterSet &par, QDomElement &np);
+
+	
+static const QString TypeName() { return QString("type");}
+static const QString ValueName() { return QString("value");}
+
+//chose "val" since it is already used and should be replaced by a constant
+static const QString ValName() { return QString("val");}
+static const QString MinName() { return QString("min");}
+static const QString MaxName() { return QString("max");}
+static const QString MaskName() { return QString("mask");}
+static const QString ItemName() { return QString("item");}
+	
+//constants for the type names
+static const QString MeshPointerName() { return QString("MeshPointer");}
+static const QString FloatListName() { return QString("FloatList");}
+static const QString DynamicFloatName() { return QString("DynamicFloat");}
+static const QString OpenFileNameName() { return QString("OpenFileName");}
+static const QString SaveFileNameName() { return QString("SaveFileName");}
+
 };
 
 /*

@@ -3,6 +3,7 @@
 CONFIG *= debug_and_release
 TEMPLATE      = lib
 CONFIG       += plugin
+QT += xml
 
 VCGDIR  = ../../../../vcglib
 GLEWDIR = ../../../../code/lib/glew

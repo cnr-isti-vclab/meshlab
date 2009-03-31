@@ -65,24 +65,6 @@ added Filter History Dialogs
 #include <QPair>
 
 using namespace vcg; 
-
-const QString FilterScript::Type = "type";
-const QString FilterScript::Value = "value";
-
-//chose "val" since it is already used and should be replaced by a constant
-const QString FilterScript::Item = "val";
-
-const QString FilterScript::Min = "min";
-const QString FilterScript::Max = "max";
-const QString FilterScript::Mask = "mask";
-	
-//constants for the type names
-const QString FilterScript::MeshPointer = "MeshPointer";
-const QString FilterScript::FloatList = "FloatList";
-const QString FilterScript::DynamicFloat = "DynamicFloat";
-const QString FilterScript::OpenFileName = "OpenFileName";
-const QString FilterScript::SaveFileName = "SaveFileName";
-
 bool FilterScript::save(QString filename)
 {
 
@@ -93,100 +75,13 @@ bool FilterScript::save(QString filename)
   FilterScript::iterator ii;
   for(ii=actionList.begin();ii!= actionList.end();++ii)
   {
-    QDomElement tag = doc.createElement("filter");
+		QDomElement tag = doc.createElement("filter");
     tag.setAttribute(QString("name"),(*ii).first);
     FilterParameterSet &par=(*ii).second;
     QList<FilterParameter>::iterator jj;
     for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
     {
-      QDomElement parElem = doc.createElement("Param");
-      parElem.setAttribute("name",(*jj).fieldName);
-
-      if((*jj).fieldType == FilterParameter::PARBOOL) { 
-        parElem.setAttribute("type","Bool");
-        parElem.setAttribute("value",(*jj).fieldVal.toString());
-      }
-      if((*jj).fieldType == FilterParameter::PARSTRING) {
-        parElem.setAttribute("type","String");
-        parElem.setAttribute("value",(*jj).fieldVal.toString());
-      }
-      if((*jj).fieldType == FilterParameter::PARINT) {
-        parElem.setAttribute("type","Int");
-        parElem.setAttribute("value",(*jj).fieldVal.toInt());
-      }
-      if((*jj).fieldType == FilterParameter::PARFLOAT) {
-        parElem.setAttribute("type","Float");
-        parElem.setAttribute("value",(*jj).fieldVal.toString());
-      }
-      if((*jj).fieldType == FilterParameter::PARABSPERC) {
-        parElem.setAttribute("type","AbsPerc");
-        parElem.setAttribute("value",(*jj).fieldVal.toString());
-        parElem.setAttribute("min",QString::number((*jj).min));
-        parElem.setAttribute("max",QString::number((*jj).max));
-      }
-      if((*jj).fieldType == FilterParameter::PARCOLOR) {
-        parElem.setAttribute("type","Color");
-        parElem.setAttribute("rgb",(*jj).fieldVal.toString());
-      }
-      if((*jj).fieldType == FilterParameter::PARENUM) {
-        parElem.setAttribute("type","Enum");
-        parElem.setAttribute("value",(*jj).fieldVal.toString());
-        QStringList::iterator kk;
-        for(kk = (*jj).enumValues.begin();kk!=(*jj).enumValues.end();++kk){
-        	QDomElement sElem = doc.createElement("EnumString");
-        	sElem.setAttribute("value",(*kk));
-        	parElem.appendChild(sElem);
-        }
-      }
-
-      if((*jj).fieldType == FilterParameter::PARMATRIX) {
-        parElem.setAttribute("type","Matrix44");
-        QList<QVariant> matrixVals = (*jj).fieldVal.toList();
-        for(int i=0;i<16;++i)
-          parElem.setAttribute(QString("val")+QString::number(i),matrixVals[i].toString());
-      }
-
-      if((*jj).fieldType == FilterParameter::PARMESH)
-      {
-    	  parElem.setAttribute(Type, MeshPointer);
-    	  //this is the mesh's position in the mesh document that was used
-    	  parElem.setAttribute(Value,((*jj).fieldVal.toString()));
-      }
-      
-      if((*jj).fieldType == FilterParameter::PARFLOATLIST)
-      {
-    	parElem.setAttribute(Type, FloatList);
-    	QList<QVariant> values = (*jj).fieldVal.toList();
-    	for(int i=0; i < values.size(); ++i)
-    	{
-    	  QDomElement listElement = doc.createElement(Item);
-    	  listElement.setAttribute(Value, values[i].toString());
-          parElem.appendChild(listElement);
-        }
-      }
-      
-      if((*jj).fieldType == FilterParameter::PARDYNFLOAT)
-      {
-    	  parElem.setAttribute(Type, DynamicFloat);
-    	  parElem.setAttribute(Value, (*jj).fieldVal.toString());
-    	  parElem.setAttribute(Min, QString::number((*jj).min));
-    	  parElem.setAttribute(Max, QString::number((*jj).max));
-    	  parElem.setAttribute(Mask,QString::number((*jj).mask));
-      }          
-    	          
-      if((*jj).fieldType == FilterParameter::PAROPENFILENAME)
-      {
-    	  parElem.setAttribute(Type, OpenFileName);
-    	  parElem.setAttribute(Value, (*jj).fieldVal.toString());
-      }
-      
-      if((*jj).fieldType == FilterParameter::PARSAVEFILENAME)
-      {
-        parElem.setAttribute(Type, SaveFileName);
-        parElem.setAttribute(Value, (*jj).fieldVal.toString());
-      }
-      
-      
+      QDomElement parElem = (*jj).createElement(doc);
       tag.appendChild(parElem);
     }
     root.appendChild(tag);
@@ -231,54 +126,12 @@ bool FilterScript::open(QString filename)
 			FilterParameterSet par;
 			QString name=nf.attribute("name");
 			qDebug("Reading filter with name %s",qPrintable(name));
-					for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
+			for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
 					{
-						QString name=np.attribute("name");
-						QString type=np.attribute("type");
-
-						qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
-						if(type=="Bool")    par.addBool(name,np.attribute("value")!=QString("false"));
-						if(type=="Int")     par.addInt(name,np.attribute("value").toInt());
-						if(type=="Float")   par.addFloat(name,np.attribute("value").toDouble());
-						if(type=="String")  par.addString(name,np.attribute("value"));
-						if(type=="AbsPerc")  par.addAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat());
-						if(type=="Color")	par.addColor(name,QColor::QColor(np.attribute("rgb").toUInt()));
-						if(type=="Matrix44")par.addMatrix44(name,getMatrix(&np));                        
-						if(type=="Enum"){
-							QStringList list = QStringList::QStringList();
-							for(QDomElement ns = np.firstChildElement("EnumString"); !ns.isNull(); ns = ns.nextSiblingElement("EnumString")){
-								list<<ns.attribute("value");
-							}
-							par.addEnum(name,np.attribute("value").toInt(),list);
-						}
-					
-						if(type == MeshPointer)  par.addMesh(name, np.attribute(Value).toInt());
-						if(type == FloatList)
-						{
-						QList<float> values;
-						for(QDomElement listItem = np.firstChildElement(Item);
-								!listItem.isNull();
-								listItem = listItem.nextSiblingElement(Item))
-						{
-								values.append(listItem.attribute(Value).toFloat()); 
-							}
-						par.addFloatList(name,values);
-						}
-						
-						if(type == DynamicFloat)  par.addDynamicFloat(name, np.attribute(Value).toFloat(), np.attribute(Min).toFloat(), np.attribute(Max).toFloat(), np.attribute(Mask).toInt());
-						if(type == OpenFileName)  par.addOpenFileName(name, np.attribute(Value));
-						if(type == SaveFileName)  par.addSaveFileName(name, np.attribute(Value));
-			 }
+						FilterParameter::addQDomElement(par,np);
+					 }
 			 actionList.append(qMakePair(name,par));
 		}
           
   return true;
-}
-
-Matrix44f FilterScript::getMatrix(QDomElement *n)
-{
-  Matrix44f mm;
-  for(int i=0;i<16;++i)
-    mm.V()[i]=n->attribute(QString("val")+QString::number(i)).toDouble();
-  return mm;
 }

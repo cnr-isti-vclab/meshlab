@@ -10,7 +10,7 @@ class QDomElement;
 /*
 The filterscipt class abstract the concept of history of processing.
 It is simply a list of all the performed actions
-Each action is a pair <filtername,parameters>
+Each action is a pair <filtername, parameters>
 */
 
 class FilterScript 
@@ -18,27 +18,9 @@ class FilterScript
 public:
   bool open(QString filename);
   bool save(QString filename);
-  vcg::Matrix44f getMatrix(QDomElement *n);
   
   QList< QPair< QString , FilterParameterSet> > actionList;
   typedef QList< QPair<QString, FilterParameterSet> >::iterator iterator;
-
-private:
-	//constant strings to make future additions to this class less error prone
-	static const QString Type;
-	static const QString Value;
-	static const QString Item;
-	static const QString Min;
-	static const QString Max;
-	static const QString Mask;
-	
-	//constants for the type names
-	static const QString MeshPointer;
-	static const QString FloatList;
-	static const QString DynamicFloat;
-	static const QString OpenFileName;
-	static const QString SaveFileName; 
-  
 };
 
 #endif
