@@ -376,6 +376,8 @@ void SplatRendererPlugin::Render(QAction *a, MeshDocument &md, RenderMode &rm, Q
         glDepthMask(GL_TRUE);
     }
 
+		glUseProgram(0);
+
 		// restore matrices
 		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
