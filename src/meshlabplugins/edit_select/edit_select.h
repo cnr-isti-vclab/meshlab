@@ -36,7 +36,7 @@ class ExtraMeshEditPlugin : public QObject, public MeshEditInterface
 	Q_INTERFACES(MeshEditInterface)
 			
 public:
-    ExtraMeshEditPlugin();
+    ExtraMeshEditPlugin(bool _ConnectedMode);
 
     virtual ~ExtraMeshEditPlugin() {}
 
@@ -52,6 +52,7 @@ public:
     QPoint cur;
     QPoint prev;
     bool isDragging;
+		bool connectedMode;
     std::vector<CMeshO::FacePointer> LastSel;
     
 signals:

@@ -51,6 +51,7 @@ private:
 	QList <QAction *> actionList;
 	
 	QAction *editSelect;
+	QAction *editSelectConnected;
 };
 
 #endif

@@ -26,9 +26,11 @@
 
 EditSelectFactory::EditSelectFactory()
 {
-	editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a region", this);
+	editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a rectagular region", this);
+	editSelectConnected = new QAction(QIcon(":/images/select_face_connected.png"),"Select Connected Components in a region", this);
 	
 	actionList << editSelect;
+	actionList << editSelectConnected;
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -44,12 +46,14 @@ QList<QAction *> EditSelectFactory::actions() const
 MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
 {
 	if(action == editSelect)
-	{
-		return new ExtraMeshEditPlugin();
-	} else assert(0); //should never be asked for an action that isnt here
+		return new ExtraMeshEditPlugin(false);
+	else if(action == editSelectConnected)
+		return new ExtraMeshEditPlugin(true);
+	 
+	assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditSelectFactory::getEditToolDescription(QAction *)
+const QString EditSelectFactory::getEditToolDescription(QAction *a)
 {
 	return ExtraMeshEditPlugin::Info();
 }

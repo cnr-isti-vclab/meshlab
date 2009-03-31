@@ -25,15 +25,17 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <limits>
 #include <meshlab/glarea.h>
 #include "edit_select.h"
 #include <wrap/gl/pick.h>
-#include<limits>
+#include <vcg/complex/trimesh/update/selection.h>
+
 
 using namespace std;
 using namespace vcg;
 
-ExtraMeshEditPlugin::ExtraMeshEditPlugin() {
+ExtraMeshEditPlugin::ExtraMeshEditPlugin(bool ConnectedMode) :connectedMode(ConnectedMode) {
   isDragging=false;      
 }
 
@@ -170,15 +172,25 @@ void ExtraMeshEditPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLA
 		glMultMatrix(m.cm.Tr);
     GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, NewSel, wid.x(), wid.y());
     qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
-    qDebug("Pickface: Got  %i on %i",NewSel.size(),m.cm.face.size());
+    qDebug("Pickface: Got  %i on %i",int(NewSel.size()),int(m.cm.face.size()));
 		glPopMatrix();
     switch(selMode)
     { 
-      case SMSub :
-      for(fpi=LastSel.begin();fpi!=LastSel.end();++fpi)
-          (*fpi)->SetS();
-      for(fpi=NewSel.begin();fpi!=NewSel.end();++fpi)
-          (*fpi)->ClearS();
+      case SMSub :  // Subtract mode 
+				if(connectedMode)
+					{
+					 	for(fpi=NewSel.begin();fpi!=NewSel.end();++fpi)
+								(*fpi)->SetS();
+						NewSel.clear();
+						tri::UpdateSelection<CMeshO>::FaceConnectedFF(m.cm);
+						for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+								if(!(*fi).IsD() && (*fi).IsS()) NewSel.push_back(&*fi);
+					}
+				// Normal case: simply deselect what has been selected. 
+				for(fpi=LastSel.begin();fpi!=LastSel.end();++fpi)
+					(*fpi)->SetS();
+				for(fpi=NewSel.begin();fpi!=NewSel.end();++fpi)
+					(*fpi)->ClearS(); 
       break;
       case SMAdd :
         for(fpi=LastSel.begin();fpi!=LastSel.end();++fpi)
@@ -186,6 +198,7 @@ void ExtraMeshEditPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLA
       case SMClear :
         for(fpi=NewSel.begin();fpi!=NewSel.end();++fpi)
           (*fpi)->SetS();
+					if(connectedMode) tri::UpdateSelection<CMeshO>::FaceConnectedFF(m.cm);
         break;
     }
      isDragging=false;
@@ -206,5 +219,5 @@ void ExtraMeshEditPlugin::StartEdit(MeshModel &m, GLArea *gla )
  connect(this, SIGNAL(setSelectionRendering(bool)),gla,SLOT(setSelectionRendering(bool)) );
 
  setSelectionRendering(true);
-
+ m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 }
