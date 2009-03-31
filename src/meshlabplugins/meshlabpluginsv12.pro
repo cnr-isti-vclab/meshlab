@@ -48,7 +48,7 @@ SUBDIRS       = io_base\
 				../fgt/filter_trioptimize \
 				../fgt/filter_aging \
 				../fgt/edit_quality \
-				../fgt/edit_quality/filter_quality \
+				../fgt/filter_quality \
 				../fgt/edit_texture\
 				../fgt/editpaint\
 				../fgt/filter_colorproc \
