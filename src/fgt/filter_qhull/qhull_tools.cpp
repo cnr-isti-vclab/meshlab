@@ -221,17 +221,16 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 		//Sets Voronoi vertex as facet center
 		qh_setvoronoi_all();
 
-		vertexT *vertex;
 		double *voronoi_vertex;
 
 		//poles_set contains the selected Voronoi vertices.
 		//Every facet has a Voronoi vertex; so poles_set size is at most qh num_facets
 		setT* poles_set= qh_settemp(qh num_facets); 	
-
-		int poles_num =0;
 		
 		vector<double*> voronoi_vertices; //Voronoi vertices of the region being considered
 		vector<double*> normals;          //vector of the outer normals of the convex hull facets
+		
+		vertexT *vertex;
 		FORALLvertices {
 			double *first_pole;
 			double *second_pole;
@@ -295,7 +294,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 						for(int i=0;i<dim;i++)
 							bbCenter[i] = pm.cm.bbox.Center()[i];
 						bbCenter[3]=0;
-						if(qh_pointdist(bbCenter,pole,dim+1)>(1000*pm.cm.bbox.Diag()))
+						if(qh_pointdist(bbCenter,pole,dim+1)>(500*pm.cm.bbox.Diag()))
 							discard=true;
 					}
 					if(!discard)
@@ -345,7 +344,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 					for(int i=0;i<dim;i++)
 						bbCenter[i] = pm.cm.bbox.Center()[i];
 					bbCenter[3]=0;
-					if(qh_pointdist(bbCenter,pole,dim+1)>(1000*pm.cm.bbox.Diag()))
+					if(qh_pointdist(bbCenter,pole,dim+1)>(500*pm.cm.bbox.Diag()))
 						discard=true;
 				}
 				if(!discard)
@@ -399,10 +398,9 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 			  0<=qh_pointid(vertex->point)<qh num_vertices*/
 			vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
 
-			int vertex_n, vertex_i;
 			vertexT* vertex;
 			int i=0;
-			FOREACHvertex_i_(qh_facetvertices (qh facet_list, NULL, false)){	
+			FORALLvertices{	
 				if ((*vertex).point && qh_pointid(vertex->point)<numpoints){
 					pm.cm.vert[i].P()[0] = (*vertex).point[0];
 					pm.cm.vert[i].P()[1] = (*vertex).point[1];
@@ -418,7 +416,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 			}
 
 			//Take only the triangles in which all three vertices are sample points
-			facetT *facet, **facetp,  *neighbor;
+			facetT *facet, *neighbor;
 			qh visit_id++;
 			FORALLfacet_(qh facet_list) {
 				if (!facet->upperdelaunay) {
@@ -453,9 +451,9 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 		fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
 				 totlong, curlong);
 	if(!exitcode)
-		return false;
-	else
 		return true;
+	else
+		return false;
 }
 
 /*
@@ -515,20 +513,21 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 		  0<=qh_pointid(vertex->point)<qh num_vertices*/
 		vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
 		vertexT *vertex;
-		int     vertex_n, vertex_i;
-		FOREACHvertex_i_(qh_facetvertices (qh facet_list, NULL, false)){	
+		int i=0;
+		FORALLvertices{	
 			if ((*vertex).point){
-				pm.cm.vert[vertex_i].P()[0] = (*vertex).point[0];
-				pm.cm.vert[vertex_i].P()[1] = (*vertex).point[1];
-				pm.cm.vert[vertex_i].P()[2] = (*vertex).point[2];
-				ivp[qh_pointid(vertex->point)] = &pm.cm.vert[vertex_i];
+				pm.cm.vert[i].P()[0] = (*vertex).point[0];
+				pm.cm.vert[i].P()[1] = (*vertex).point[1];
+				pm.cm.vert[i].P()[2] = (*vertex).point[2];
+				ivp[qh_pointid(vertex->point)] = &pm.cm.vert[i];
+				i++;
 			}
 		}
 		
 		//Set of alpha complex triangles for alphashape filtering
 		setT* set= qh_settemp(4* qh num_facets); 
 
-		facetT *facet, **facetp,  *neighbor;
+		facetT *facet, *neighbor;
 		qh visit_id++;
 		int numFacets=0;
 		FORALLfacet_(qh facet_list) {
@@ -580,12 +579,13 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 									tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
 									ridgesCount++;
 									alphaHandle[fi] = radius;
+									int vertex_n, vertex_i;
 									FOREACHvertex_i_(ridge->vertices)
 										(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];	
 								}
 								else
 									//if calculating alpha shapes, save the triangle for subsequent filtering
-									qh_setunique (&set, ridge); 
+									qh_setappend(&set, ridge); 
 							}
 						}
 					}
@@ -614,12 +614,13 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 								tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
 								alphaHandle[fi] = radius; //CORREGGI CON IL RAGGIO DELLA CIRCOSFERA
 								ridgesCount++;
+								int vertex_n, vertex_i;
 								FOREACHvertex_i_(ridge->vertices)
 									(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
 							}
 							else
 								//if calculating alpha shapes, save the triangle for subsequent filtering	
-								qh_setunique(&set, ridge);
+								qh_setappend(&set, ridge);
 						}	
 					}
 				}
@@ -635,6 +636,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 				if ((!ridge->top->good || !ridge->bottom->good || ridge->top->upperdelaunay || ridge->bottom->upperdelaunay)){
 					tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
 					ridgesCount++;
+					int vertex_n, vertex_i;
 					FOREACHvertex_i_(ridge->vertices)
 						(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
 				}
@@ -651,9 +653,9 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 					 totlong, curlong);
 
 	if(!exitcode)
-		return false;
-	else
 		return true;
+	else
+		return false;
 }
 
 /* dim  --> dimension of points
