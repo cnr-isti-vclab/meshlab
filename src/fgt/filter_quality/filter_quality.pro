@@ -1,34 +1,18 @@
-TEMPLATE      = lib
-CONFIG       += plugin
-CONFIG += stl
-INCLUDEPATH  += ../../.. ../../../../../vcglib ../../../../../code/lib/glew/include
-HEADERS       = ../common/const_types.h \
-								../common/transferfunction.h \
-								../common/util.h \
-								../common/meshmethods.h \
-								filterqualitymapper.h \
-								../../../meshlab/filterparameter.h 
+include (../../shared.pri)
 
-SOURCES       = ../common/transferfunction.cpp \
-								../common/util.cpp \
-								../common/meshmethods.cpp \
-								filterqualitymapper.cpp \
-								../../../meshlab/filterparameter.cpp
+HEADERS       = ../edit_quality/common/const_types.h \
+		../edit_quality/common/transferfunction.h \
+		../edit_quality/common/util.h \
+		../edit_quality/common/meshmethods.h \
+		filterqualitymapper.h \
+		./../../meshlab/filterparameter.h 
 
+SOURCES       = ../edit_quality/common/transferfunction.cpp \
+		../edit_quality/common/util.cpp \		
+		../edit_quality/common/meshmethods.cpp \
+		filterqualitymapper.cpp \
+		../../meshlab/filterparameter.cpp
 
 TARGET        = filter_quality
-DESTDIR       = ../../../meshlab/plugins
 
-# the following line is needed to avoid mismatch between 
-# the awful min/max macros of windows and the limits max
-win32:DEFINES += NOMINMAX
 
-CONFIG		+= debug_and_release
-
-contains(TEMPLATE,lib) {
-   CONFIG(debug, debug|release) {
-      unix:TARGET = $$member(TARGET, 0)_debug
-      else:TARGET = $$member(TARGET, 0)d
-   }
-}
-QT           += opengl

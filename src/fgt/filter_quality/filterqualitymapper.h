@@ -35,9 +35,9 @@ FIRST RELEASE
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-#include "../common/transferfunction.h"
+#include "../edit_quality/common/transferfunction.h"
 #include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax
-#include "../common/meshmethods.h"
+#include "../edit_quality/common/meshmethods.h"
 
 
 using namespace vcg;
