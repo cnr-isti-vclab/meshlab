@@ -24,6 +24,7 @@ SUBDIRS       = io_base\
 #				filter_texture \
 				filter_unsharp \
 #				filter_curvature_from_sliding \
+                                filter_perceptualmetric \
 				render_splatting \
 				render_gdp \
 				meshdecorate \
