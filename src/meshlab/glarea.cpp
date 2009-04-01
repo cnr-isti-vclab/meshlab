@@ -569,7 +569,16 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 	      else activeDefaultTrackball=true;
 
 	    if (isDefaultTrackBall())
+			{
+					if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+																															else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+					if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+																														else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+					if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+																													else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+
           trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+			}
 	    else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
   }
 	update();
