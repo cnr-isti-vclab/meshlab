@@ -47,6 +47,8 @@ public:
     virtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
     virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
     virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+		virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *);
+		virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *);
 
     QPoint start;
     QPoint cur;
@@ -61,6 +63,7 @@ signals:
 private:
   typedef enum {SMAdd, SMClear,SMSub} SelMode;
   SelMode selMode;
+	bool selectFrontFlag;
   void DrawXORRect(GLArea * gla, bool doubleDraw);
 };
 

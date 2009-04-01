@@ -43,13 +43,27 @@ const QString ExtraMeshEditPlugin::Info()
 {
 	return tr("Interactive selection of faces inside a dragged rectangle in screen space");
 }
+void ExtraMeshEditPlugin::keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *gla)
+{
+	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));	
+}
 
-void ExtraMeshEditPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea * gla)
+void ExtraMeshEditPlugin::keyPressEvent    (QKeyEvent *event, MeshModel &/*m*/, GLArea *gla)
+{
+	
+	if(QApplication::keyboardModifiers() ==  Qt::AltModifier)  gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"),1,1));	
+	if(QApplication::keyboardModifiers() ==  Qt::ControlModifier) 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"),1,1));	
+	if(QApplication::keyboardModifiers() ==  Qt::ShiftModifier) 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"),1,1));	
+	if(QApplication::keyboardModifiers() == (Qt::AltModifier+Qt::ControlModifier)) 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"),1,1));	
+	if(QApplication::keyboardModifiers() == (Qt::AltModifier+Qt::ShiftModifier)) 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"),1,1));	
+}
+
+void ExtraMeshEditPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea *)
 {
     LastSel.clear();
 		
-    if(event->modifiers() == Qt::ControlModifier || 
-       event->modifiers() == Qt::ShiftModifier )
+    if((event->modifiers() & Qt::ControlModifier) || 
+       (event->modifiers() & Qt::ShiftModifier)  )
       {
         CMeshO::FaceIterator fi;
         for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
@@ -58,8 +72,11 @@ void ExtraMeshEditPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLA
       }  
       
     selMode=SMClear;
-    if(event->modifiers()==Qt::ControlModifier) selMode=SMAdd;
-    if(event->modifiers()==Qt::ShiftModifier) selMode=SMSub;
+    if(event->modifiers() & Qt::ControlModifier) selMode=SMAdd;
+    if(event->modifiers() & Qt::ShiftModifier) selMode=SMSub;
+		
+    if(event->modifiers() & Qt::AltModifier)		selectFrontFlag=true;
+																				else	selectFrontFlag=false;
 
     start=event->pos();
     cur=start;
@@ -149,40 +166,26 @@ void ExtraMeshEditPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLA
     if(wid.x()<0)  wid.setX(-wid.x());
     if(wid.y()<0)  wid.setY(-wid.y());
 
- /*   CMeshO::FaceIterator fi;
-    for(fi=m.cm.face.begin(),fpi=NewSel.begin();fpi!=NewSel.end();++fi) 
-      if(!(*fi).IsD()) {
-          if(&(*fi)!=*fpi) (*fpi)->ClearS();
-        else {
-          (*fpi)->SetS();
-          ++fpi;
-        }
-      }
-
-    for(;fi!=m.cm.face.end();++fi)
-      if(!(*fi).IsD()) (*fi).ClearS();
-
-*/
-   
-   CMeshO::FaceIterator fi;
-    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-      if(!(*fi).IsD()) (*fi).ClearS();
-		
 		glPushMatrix();
 		glMultMatrix(m.cm.Tr);
-    GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, NewSel, wid.x(), wid.y());
+		if(selectFrontFlag)	GLPickTri<CMeshO>::PickFaceVisible(mid.x(), mid.y(), m.cm, NewSel, wid.x(), wid.y());
+									 else GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, NewSel, wid.x(), wid.y());
+
     qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
     qDebug("Pickface: Got  %i on %i",int(NewSel.size()),int(m.cm.face.size()));
 		glPopMatrix();
-    switch(selMode)
+    tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+		switch(selMode)
     { 
-      case SMSub :  // Subtract mode 
+      case SMSub :  // Subtract mode : The faces in the rect must be de-selected
 				if(connectedMode)
 					{
 					 	for(fpi=NewSel.begin();fpi!=NewSel.end();++fpi)
 								(*fpi)->SetS();
-						NewSel.clear();
 						tri::UpdateSelection<CMeshO>::FaceConnectedFF(m.cm);
+						
+						CMeshO::FaceIterator fi;
+						NewSel.clear();
 						for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
 								if(!(*fi).IsD() && (*fi).IsS()) NewSel.push_back(&*fi);
 					}
@@ -219,5 +222,7 @@ void ExtraMeshEditPlugin::StartEdit(MeshModel &m, GLArea *gla )
  connect(this, SIGNAL(setSelectionRendering(bool)),gla,SLOT(setSelectionRendering(bool)) );
 
  setSelectionRendering(true);
- m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+ 
+ if(connectedMode) 
+	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 }
