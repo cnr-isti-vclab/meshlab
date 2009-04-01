@@ -161,8 +161,7 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 	m --> original mesh 
 	pm --> new mesh
 
-	compute_voronoi(int dim, int numpoints, MeshModel &m)
-
+	compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 		Reconstructs the mesh surface starting from its vertices through a double 
 		Delaunay triangulation. The second one takes in input some Voronoi vertices too. 
 
@@ -657,6 +656,121 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 	else
 		return false;
 }
+
+/*
+	dim  --> dimension of points
+	numpoints --> number of points
+	m --> original mesh 
+	pm --> new mesh
+
+	bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm)
+		Select the visibile points from a given viewpoint. 
+
+	returns 
+		true if no errors occurred;
+		false otherwise.
+*/
+
+bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm){
+	boolT ismalloc= True;			/* True if qhull should free points in qh_freeqhull() or reallocation */ 
+	char flags[]= "qhull Tcv";		/* option flags for qhull, see qh_opt.htm */
+	FILE *outfile= NULL;			/* output from qh_produce_output()			
+									   use NULL to skip qh_produce_output() */ 
+	FILE *errfile= stderr;			/* error messages from qhull code */ 
+	int exitcode;					/* 0 if no error from qhull */
+
+
+	double *viewpoint = new double[dim];
+	vcg::Point3f viewpoint2 = m.cm.shot.GetViewPoint();
+	for(int i=0;i<3;i++)
+		viewpoint[i] = viewpoint2[i];
+	double radius = m.glw.CameraDistance() + m.cm.bbox.Diag(); //Sicuro la diag?
+
+	coordT *flipped_points = (coordT*)malloc((numpoints+1)*(dim)*sizeof(coordT));
+
+	CMeshO::VertexIterator vi;
+	double *point=new double[dim];
+	double distance = 0;
+	vector<tri::Allocator<CMeshO>::VertexPointer> ivp(numpoints);
+	int i=0; //i puntatore da 0 a numpoints
+	//Calcolo la proiezione di ciascun punto secondo la formula dell'articolo
+	for(vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi){
+		if(!(*vi).IsD()){
+			ivp[i]=&(*vi);
+			for(int ii=0;ii<dim;ii++)
+				point[ii]=(*vi).P()[ii];
+			double *c = viewpoint;
+			double *p= point;
+			distance= qh_pointdist(c,point,dim);
+			double k= 2*(radius-distance)/distance;
+			for(int ii=0;ii<dim;ii++)
+				flipped_points[3*i+ii]=point[ii] + k*point[ii];
+			i++;
+		}
+	}
+	assert(i==numpoints);
+
+	//Aggiungo il viewpoint
+	for(int ii=0;ii<dim;ii++)
+		flipped_points[3*i+ii] = viewpoint[ii];
+
+
+	exitcode= qh_new_qhull (dim, numpoints, flipped_points, ismalloc,
+							flags, outfile, errfile);
+
+	//By default, Qhull merges coplanar facets. So, it's necessary to triangulate the convex hull.
+	//If you call qh_triangulate() method , all facets will be simplicial (e.g., triangles in 2-d)
+	//In theory calling qh_triangulate() or using option 'Qt' should give the same result, but,
+	//in this case, option Qt does not triangulate the output because coplanar faces are still merged.
+	//qh_triangulate();
+
+	if (!exitcode) { /* if no error */ 
+		/* 'qh facet_list' contains the convex hull */
+		vertexT *vertex;
+		int j=0;
+		FORALLvertices{	
+			if ((*vertex).point && qh_pointid(vertex->point)!= numpoints){
+				int hgg= qh_pointid(vertex->point);
+				tri::Allocator<CMeshO>::VertexIterator vi=tri::Allocator<CMeshO>::AddVertices(pm.cm,1);
+				(*vi).P()[0] = ivp[qh_pointid(vertex->point)]->P()[0];
+				(*vi).P()[1] = ivp[qh_pointid(vertex->point)]->P()[1];
+				(*vi).P()[2] = ivp[qh_pointid(vertex->point)]->P()[2];
+				j++;
+			}
+		}
+		
+	}
+
+	int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
+	qh_freeqhull(!qh_ALL);  
+	qh_memfreeshort (&curlong, &totlong);
+	if (curlong || totlong)
+		fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
+					 totlong, curlong);
+
+	if(!exitcode)
+		return true;
+	else
+		return false;
+
+	
+	//add the viewpoint 
+	//bool usecam = par.getBool("usecamera");
+	//Point3f viewpoint = par.getPoint3f("viewpoint");	
+
+	//// if usecamera but mesh does not have one
+	//if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) ) 
+	//{
+	//	errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
+	//	return false;
+	//}
+	//if(usecam)
+	//{
+	//	viewpoint = m.cm.shot.GetViewPoint();
+	//}
+
+}
+
 
 /* dim  --> dimension of points
 	numpoints --> number of points

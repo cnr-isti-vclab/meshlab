@@ -54,7 +54,8 @@ QhullPlugin::QhullPlugin()
 	typeList << FP_QHULL_CONVEX_HULL  
 			 <<	FP_QHULL_DELAUNAY_TRIANGULATION
 			 <<	FP_QHULL_VORONOI_FILTERING
-			 << FP_QHULL_ALPHA_COMPLEX_AND_SHAPE;
+			 << FP_QHULL_ALPHA_COMPLEX_AND_SHAPE
+			 << FP_QHULL_VISIBLE_POINTS;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -75,6 +76,7 @@ const QString QhullPlugin::filterName(FilterIDType filterId)
 		case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Delaunay Triangulation"); 
 		case FP_QHULL_VORONOI_FILTERING :  return QString("Voronoi Filtering"); 
 		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE : return QString("Alpha Complex/Shape");
+		case FP_QHULL_VISIBLE_POINTS: return QString("Select Visible Points");
 		default : assert(0); 
 	}
   return QString("Error: Unknown Filter"); 
@@ -98,6 +100,7 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId)
 										"The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation.<br>" 
 										"For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay "
 										"triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'");
+		case FP_QHULL_VISIBLE_POINTS: return QString("Select points visible from camera viewpoint");
 		default : assert(0); 
 	}
 	return QString("Error: Unknown Filter");
@@ -115,6 +118,8 @@ const QhullPlugin::FilterClass QhullPlugin::getClass(QAction *a)
 		case FP_QHULL_VORONOI_FILTERING :
 		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
 			return FilterClass (MeshFilterInterface::Remeshing) ; 
+		case FP_QHULL_VISIBLE_POINTS:
+			return FilterClass (MeshFilterInterface::Selection);
 		default : assert(0); 
 	}
   return FilterClass(0);
@@ -149,6 +154,10 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 									QStringList() << "Alpha Complex" << "Alpha Shape" , 
 									tr("Get:"), 
 									tr("Select the output. The Alpha Shape is the boundary of the Alpha Complex"));
+				break;
+			}
+		case FP_QHULL_VISIBLE_POINTS:
+			{
 				break;
 			}
 		default : assert(0); 
@@ -402,6 +411,34 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				}
 				else 
 					return false;
+			}
+			case FP_QHULL_VISIBLE_POINTS:
+			{
+				MeshModel &m=*md.mm();
+			    MeshModel &pm =*md.addNewMesh("Visibile Points");
+				
+				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
+					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
+				}
+				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
+					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+				}
+			    
+				int dim= 3;				/* dimension of points */
+				int numpoints= m.cm.vn;	/* number of mesh vertices */
+
+				bool result = visible_points(dim,numpoints,m,pm);
+				
+				if(result){
+					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+
+					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+
+					return true;
+				}
+
+				else return false;
 			}
 	}
 }
