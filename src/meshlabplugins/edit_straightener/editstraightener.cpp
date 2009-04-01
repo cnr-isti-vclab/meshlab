@@ -710,13 +710,7 @@ DrawPhantom::DrawPhantom(MeshModel* mm,float refsize)
   manipulator->center = Inverse(tr) * mm->cm.trBB().Center() ;
 
   // rifaccio i modi senza le scalature
-  std::map<int, TrackMode *>::iterator it;
-  for(it = manipulator->modes.begin(); it != manipulator->modes.end(); it++)
-  {
-    if ((*it).second)
-      delete (*it).second;
-  }
-  manipulator->modes.clear();
+	manipulator->ClearModes();
   manipulator->modes[0] = NULL;    
   manipulator->modes[Trackball::BUTTON_LEFT] = new SphereMode ();
   manipulator->modes[Trackball::BUTTON_LEFT |Trackball:: KEY_CTRL] = new PanMode ();
