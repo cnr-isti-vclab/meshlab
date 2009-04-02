@@ -21,16 +21,16 @@ SUBDIRS       = io_base\
 				filter_sampling \
 				filter_splitter \
 				filter_select \
-#				filter_texture \
+#				 filter_texture \
 				filter_unsharp \
-#				filter_curvature_from_sliding \
-                                filter_perceptualmetric \
+#				 filter_curvature_from_sliding \
+#                                filter_perceptualmetric \
 				render_splatting \
 				render_gdp \
 				meshdecorate \
 				edit_select \
 				edit_pickpoints \
-#				edit_phototexturing \
+#				 edit_phototexturing \
 				editslice \
 				editalign \
 				editmeasure \
