@@ -58,7 +58,8 @@ public:
 private:
 
 	static void planeProjection(double a, double b, double c, double d, 
-		CoordType axis1, CoordType axis2, CoordType O, CoordType p, double &xcoor, double &ycoor)
+		const CoordType &axis1, const CoordType &axis2, const CoordType & O, 
+		const CoordType &p, double &xcoor, double &ycoor)
 	{
 		double u = p[0];
 		double v = p[1];
@@ -95,13 +96,12 @@ private:
 		CoordType axis2 = (pF-pD);
 		CoordType N = axis1 ^ axis2;
 
+		// axis adjustment
+		axis2 = N ^ axis1;
+
 		axis1.Normalize();
 		axis2.Normalize();
 		N.Normalize();
-
-		double cosalpha = f0->V(0)->N() * N;
-		if (cosalpha > 1.57)
-			N = -N;
 
 		double a = N[0];
 		double b = N[1];
@@ -141,8 +141,6 @@ private:
 		a1v = factor * ((xE*yF - xF*yE)*vD + (xF*yD - xD*yF)*vE + (xD*yE - xE*yD)*vF);
 		a2v = factor * ((yE-yF)*vD + (yF-yD)*vE + (yD-yE)*vF);
 		a3v = factor * ((xF-xE)*vD + (xD-xF)*vE + (xE-xD)*vF);
- 
-		double AAb = (yEp-yFp) * xDp + (yFp-yDp) * xEp + (yDp-yEp) * xFp;  // AA = 2A
 
 		area = 0.5 * AA;
 
@@ -235,7 +233,7 @@ public:
 		double area2 = vcg::tri::Stat<MeshType>::ComputeMeshArea(mesh);
 		
 		// Average Strain Energy (ASE)
-		return W / (area1+area2);
+		return W / (area1);
 	}
 
 };
