@@ -195,9 +195,9 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m,
 {
 	if (ID(action) == FP_CURVATURE_EDGE_FLIP) {
 		parlst.addBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only"));
-		parlst.addAbsPerc("pthreshold", 1.0f, 0.1f, 90.0f,
-											tr("Planar threshold"),
-											tr("angle threshold for planar faces (degrees)"));
+		parlst.addFloat("pthreshold", 1.0f,
+											tr("Angle Thr (deg)"),
+											tr("To avoid excessive flipping/swapping we consider only couple of faces with a significant diedral angle (e.g. greater than the indicated threshold). "));
 		
 		QStringList cmetrics;
 		cmetrics.push_back("mean");
@@ -218,9 +218,9 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m,
 		if (ID(action) == FP_PLANAR_EDGE_FLIP) {
 			parlst.addBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only"));
 
-			parlst.addAbsPerc("pthreshold", 1.0f, 0.1f, 90.0f,
-												tr("Planar threshold"),
-												tr("angle threshold for planar faces (degrees)"));
+		parlst.addFloat("pthreshold", 1.0f,
+											tr("Planar threshold (deg)"),
+											tr("angle threshold for planar faces (degrees)"));
 			
 		QStringList pmetrics;
 		pmetrics.push_back("area/max side");
@@ -245,7 +245,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m,
 	
 	if (ID(action) == FP_NEAR_LAPLACIAN_SMOOTH) {
 		parlst.addBool("selection", false, tr("Update selection"),	tr("Apply laplacian smooth on selected faces only"));
-		parlst.addFloat("AngleDeg", 0.0001f,	tr("Max Normal Dev (deg)"),	tr("maximum mean normal angle displacement (degrees) from old to new faces"));
+		parlst.addFloat("AngleDeg", 0.5f,	tr("Max Normal Dev (deg)"),	tr("maximum mean normal angle displacement (degrees) from old to new faces"));
 		parlst.addInt("iterations", 1, "Iterations", tr("number of laplacian smooth iterations in every run"));
 	}
 }
@@ -258,12 +258,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 {
 	float limit = -std::numeric_limits<float>::epsilon();
 	
-	if (ID(filter) == FP_CURVATURE_EDGE_FLIP) {
-		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
-			errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
-			return false; // can't continue, mesh can't be processed
-		}
-		
+	if (ID(filter) == FP_CURVATURE_EDGE_FLIP) {		
 		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		if (delvert)
 			Log(GLLogStream::FILTER,
@@ -275,8 +270,12 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		
+		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+			errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
+			return false; // can't continue, mesh can't be processed
+		}
 		vcg::LocalOptimization<CMeshO> optimiz(m.cm);
-		float pthr = par.getAbsPerc("pthreshold");
+		float pthr = par.getFloat("pthreshold");
 		time_t start = clock();
 
 		if (par.getBool("selection")) {
@@ -309,6 +308,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			
 			// stop when flips become harmful
 			optimiz.SetTargetMetric(limit);
+			//optimiz.SetTargetOperations(10);
 			optimiz.DoOptimization();
 			optimiz.h.clear();
 
@@ -328,7 +328,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		
 		vcg::LocalOptimization<CMeshO> optimiz(m.cm);
-		float pthr = par.getAbsPerc("pthreshold");
+		float pthr = par.getFloat("pthreshold");
 	  time_t	start = clock();
 		
 		
@@ -378,7 +378,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 
 		int iternum = par.getInt("iterations");
 		float dthreshold = par.getFloat("AngleDeg");
-		tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, dthreshold, selection,cb);
+		tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, math::ToRad(dthreshold), selection,cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	}
 

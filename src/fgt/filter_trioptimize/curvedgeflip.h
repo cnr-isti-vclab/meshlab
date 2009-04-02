@@ -200,9 +200,11 @@ public:
 	
 	virtual bool IsFeasible()
 	{
+		// First the flip must be topologically correct.
 		if(!vcg::face::CheckFlipEdge(*this->_pos.F(), this->_pos.E()))
 			return false;
 		
+		// then the angle between the involved normals must be greater???
 		if (math::ToDeg(Angle(this->_pos.FFlip()->cN(), this->_pos.F()->cN()) ) <= this->CoplanarAngleThresholdDeg() )
 			return false;
 		
@@ -294,7 +296,13 @@ public:
 		_cv3 = curveval(cd3);
 		float cafter = _cv0 + _cv1 + _cv2 + _cv3;
 		
+		// The priority of an edge flip is **how much we lower the overall curvature**. 
+		// If after the flip the sum of the curvature is decreased it is a good move;
+		// good flips have:    cafter < cbefore
+		// Since the local optimization is designed to make the miniumum cost move we put inside 
+		// negative values (the more negative the better).
 		this->_priority = (cafter - cbefore);
+		//qDebug("computed curvature change, %f->%f (priority = %f)", cbefore,cafter,this->_priority);
 		return this->_priority;
 	}
 	
@@ -304,8 +312,8 @@ public:
 		CURVEVAL curveval;
 		heap.clear();
 
-		// comuputing edge flip priority require non normalized vertex normals
-		vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertex(m);
+		// comuputing edge flip priority require non normalized vertex normals AND non normalized face normals.
+			vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertexPerFace(m);
 
 		VertexIterator vi;
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
