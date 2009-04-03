@@ -27,15 +27,23 @@
 SmartBlendTextureMerger::SmartBlendTextureMerger(QString command){
 	normalized = false;
 	
-	command = command.replace(" ","\\ ");
+	
 	
 #ifdef _WIN32
-	cmd = command;
+	if (command.indexOf("\"")==0 && command.lastIndexOf("\"")== command.size()){
+		cmd = command;
+	}else{
+		cmd = "\"" + command + "\"";
+	}
+	
+	
 
 #else
+	command = command.replace(" ","\\ ");
 	cmd ="wine "+command;
 #endif
 	
+	qDebug()<<"cmd: "<<cmd;
 }
 SmartBlendTextureMerger::~SmartBlendTextureMerger(){
 	qDebug()<<"TextureMerger::~TextureMerger()";

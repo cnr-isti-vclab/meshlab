@@ -157,6 +157,7 @@ public:
 
 	QImage mergeTextureImagesWinnerTakesAll(int imgWidth, int imgHeight, QList<QImage> imgList);
 
+	void reset();
 	
 	void calculateZBuffer(MeshModel *mm, Camera* camera, QuadTreeNode *qtree, TextureFilterZB *zbuffer);
 private:

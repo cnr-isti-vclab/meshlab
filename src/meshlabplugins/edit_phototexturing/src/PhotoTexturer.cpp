@@ -1015,3 +1015,8 @@ void PhotoTexturer::calculateZBuffer(MeshModel *mm,Camera* camera,QuadTreeNode *
 	}
 	
 }
+
+void PhotoTexturer::reset(){
+	
+}
+
