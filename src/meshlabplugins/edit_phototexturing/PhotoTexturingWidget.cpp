@@ -358,7 +358,9 @@ void PhotoTexturingWidget::bakeTextures(){
 }
 
 void PhotoTexturingWidget::reset(){
-
+	photoTexturer->reset(mesh);
+	update();
+	glarea->update();
 }
 void PhotoTexturingWidget::close(){
 	saveDefaultSettings();

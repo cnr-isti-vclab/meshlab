@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 #include <cfloat>
-
+#include <iostream>
 #include <QtGui>
 #include <QImage>
 #include <QMap>
@@ -276,10 +276,15 @@ void PhotoTexturer::calculateMeshTextureForCamera(MeshModel *m, Camera* cam,bool
 	if(vcg::tri::HasPerMeshAttribute(m->cm, PhotoTextureTools::TransformForPhoto)){
 		CMeshO::PerMeshAttributeHandle<vcg::Matrix44f> transformHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vcg::Matrix44f> (m->cm, PhotoTextureTools::TransformForPhoto);
 		matrix = transformHandle();
+		qDebug()<< "transformHandle";
 	}else{
+		qDebug()<<"Identity";
 		matrix = vcg::Matrix44f();
 		matrix.SetIdentity();
 	}
+	
+	//stdout << "matrix" << matrix;
+	qDebug() << "matrix2: " << matrix[0][0]<< matrix[0][1]<< matrix[0][2]<< matrix[0][3]<< matrix[1][0]<< matrix[1][1]<< matrix[1][2]<< matrix[1][3]<< matrix[2][0]<< matrix[2][1]<< matrix[2][2]<< matrix[2][3]<< matrix[3][0]<< matrix[3][1]<< matrix[3][2]<< matrix[3][3];
 	
 	//loads the texture image and gets its dimensions
 	QImage *img = new QImage(cam->textureImage);
@@ -1016,7 +1021,43 @@ void PhotoTexturer::calculateZBuffer(MeshModel *mm,Camera* camera,QuadTreeNode *
 	
 }
 
-void PhotoTexturer::reset(){
+void PhotoTexturer::reset(MeshModel *mm){
+	if (origTextureID > -1){
+		restoreOriginalTextureCoordinates(mm);
+	}else{
+		mm->clearDataMask(MeshModel::MM_WEDGTEXCOORD);
+	}
 	
+	
+	QList<int> keys = textureList.keys(); 
+	
+	
+	for(int i =0; i< keys.size();i++){
+		int key = keys[i];
+		if(key != origTextureID){
+			QMap<int, QString>::const_iterator it = textureList.find(key);
+			if (it != textureList.end()){
+				if (vcg::tri::HasPerFaceAttribute(mm->cm,UVTEXTURECOORDS)){
+				
+					CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> > ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (mm->cm,UVTEXTURECOORDS);
+					CMeshO::FaceIterator fi;
+					for(fi=mm->cm.face.begin(); fi!=mm->cm.face.end(); ++fi) {
+						int i;
+						UVFaceTexture* ft = ih[fi][key];
+						delete ft;
+						ih[fi].remove(key);
+					}
+					//m->cm
+				}
+			}
+			textureList.remove(key);
+		}
+	}
+	
+	for(int i = 0;i<cameras.size();i++){
+		Camera *c = cameras.at(i);
+		delete c;
+		cameras.clear();
+	}
 }
 
