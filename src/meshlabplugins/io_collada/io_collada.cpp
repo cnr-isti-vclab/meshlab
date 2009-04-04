@@ -171,6 +171,7 @@ void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QStr
 	
 	QDomNodeList geomList = doc->elementsByTagName("geometry");
 	QStringList idList;
+	idList.push_back("Full Scene");
 	for(int i=0;i<geomList.size();++i)
 	{
 		QString idVal = geomList.at(i).toElement().attribute("id");
