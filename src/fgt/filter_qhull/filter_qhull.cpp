@@ -158,6 +158,21 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			}
 		case FP_QHULL_VISIBLE_POINTS:
 			{
+				parlst.addDynamicFloat("radiusThreshold",
+												 0.0f, 0.0f, 7.0f,MeshModel::MM_VERTFLAGSELECT,
+												 "radius threshold ","Bounds the radius oh the sphere used to select visible points. <br>"
+												 "Use a big threshold for dense point clouds, a small one for sparse clouds");
+				
+				parlst.addBool ("usecamera",
+												false,
+												"Use ViewPoint from Mesh Camera",
+												"Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs");
+				parlst.addPoint3f("viewpoint",
+												Point3f(0.0f, 0.0f, 0.0f),
+												"ViewPoint",
+												"if UseCamera is true, this value is ignored");
+				
+				parlst.addBool("convex_hull",false,"Show Convex Hull of flipped points", "Show Convex Hull of the transformed point cloud");
 				break;
 			}
 		default : assert(0); 
@@ -415,6 +430,33 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 			case FP_QHULL_VISIBLE_POINTS:
 			{
 				MeshModel &m=*md.mm();
+				if (!m.hasDataMask(MeshModel::MM_VERTCOLOR))
+				{
+					m.updateDataMask(MeshModel::MM_VERTCOLOR);
+				}
+				if (!m.hasDataMask(MeshModel::MM_VERTFLAGSELECT))
+				{
+					m.updateDataMask(MeshModel::MM_VERTFLAGSELECT);
+				}
+				
+				int dim= 3;				/* dimension of points */
+				int numpoints= m.cm.vn;	/* number of mesh vertices */
+
+				bool usecam = par.getBool("usecamera");
+				Point3f viewpoint = par.getPoint3f("viewpoint");
+				float threshold = par.getDynamicFloat("radiusThreshold");
+
+				// if usecamera but mesh does not have one
+				if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) ) 
+				{
+					errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
+					return false;
+				}
+				if(usecam)
+				{
+					viewpoint = m.cm.shot.GetViewPoint();
+				}
+
 			    MeshModel &pm =*md.addNewMesh("Visibile Points");
 				
 				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
@@ -423,18 +465,21 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
 				}
-			    
-				int dim= 3;				/* dimension of points */
-				int numpoints= m.cm.vn;	/* number of mesh vertices */
 
-				bool result = visible_points(dim,numpoints,m,pm);
-				
-				if(result){
+
+				bool convex_hull = par.getBool("convex_hull");
+				int result = visible_points(dim,numpoints,m,pm,viewpoint,threshold,convex_hull);
+
+				if(!convex_hull)
+					md.delMesh(&pm);
+				else{
 					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
 					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-
 					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
-
+				}
+				
+				if(result>=0){
+					Log(GLLogStream::FILTER,"Selected %i visible points", result);
 					return true;
 				}
 

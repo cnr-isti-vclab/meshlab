@@ -33,6 +33,7 @@
 #include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/color.h>
 
 #include <fstream>
 #include <iostream>
@@ -660,85 +661,139 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 /*
 	dim  --> dimension of points
 	numpoints --> number of points
-	m --> original mesh 
-	pm --> new mesh
+	m --> original mesh
+	pm --> new mesh that is the convex hull of the flipped points, if convex_hull is true
+	viewpoint -> the viewpoint
+	threshold -> bounds the radius oh the sphere used to select visible points
+	convex_hull --> true if you want to show the Convex Hull of the transformed point cloud
+					false otherwise
 
 	bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 		Select the visibile points from a given viewpoint. 
 
 	returns 
-		true if no errors occurred;
-		false otherwise.
+		the number of visible points if no errors occurred;
+		-1 otherwise.
 */
 
-bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm){
+int visible_points(int dim, int numpoints, MeshModel &m,MeshModel &pm,Point3f viewpointP,float threshold, bool convex_hull){
 	boolT ismalloc= True;			/* True if qhull should free points in qh_freeqhull() or reallocation */ 
 	char flags[]= "qhull Tcv";		/* option flags for qhull, see qh_opt.htm */
 	FILE *outfile= NULL;			/* output from qh_produce_output()			
 									   use NULL to skip qh_produce_output() */ 
 	FILE *errfile= stderr;			/* error messages from qhull code */ 
 	int exitcode;					/* 0 if no error from qhull */
-
-
-	double *viewpoint = new double[dim];
-	vcg::Point3f viewpoint2 = m.cm.shot.GetViewPoint();
+		
+    double* viewpoint = new double[dim];
 	for(int i=0;i<3;i++)
-		viewpoint[i] = viewpoint2[i];
-	double radius = m.glw.CameraDistance() + m.cm.bbox.Diag(); //Sicuro la diag?
+		viewpoint[i] = viewpointP[i];
 
+	//Every point in flipped_points and points share the same index
 	coordT *flipped_points = (coordT*)malloc((numpoints+1)*(dim)*sizeof(coordT));
+	coordT *points = (coordT*)malloc((numpoints)*(dim)*sizeof(coordT));
+	//Positions in dist are the indexes of the points 
+	double *dist = (double*)malloc((numpoints)*sizeof(double));
 
+	double *point = new double[dim];
+	double radius = 0;
+	vector<tri::Allocator<CMeshO>::VertexPointer> ivp(numpoints); //Vector of pointers to the input points	
 	CMeshO::VertexIterator vi;
-	double *point=new double[dim];
-	double distance = 0;
-	vector<tri::Allocator<CMeshO>::VertexPointer> ivp(numpoints);
-	int i=0; //i puntatore da 0 a numpoints
-	//Calcolo la proiezione di ciascun punto secondo la formula dell'articolo
+	int cnt=0;
+	//Compute the radius as the distance between the viewpoint ant its farthest point 
 	for(vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi){
 		if(!(*vi).IsD()){
-			ivp[i]=&(*vi);
-			for(int ii=0;ii<dim;ii++)
-				point[ii]=(*vi).P()[ii];
-			double *c = viewpoint;
-			double *p= point;
-			distance= qh_pointdist(c,point,dim);
-			double k= 2*(radius-distance)/distance;
-			for(int ii=0;ii<dim;ii++)
-				flipped_points[3*i+ii]=point[ii] + k*point[ii];
-			i++;
+			ivp[cnt]=&(*vi);
+			for(int ii=0;ii<dim;++ii)
+				points[3*cnt + ii] = point[ii]=(*vi).P()[ii];	 
+			double *temp1= viewpoint;
+			double distance = qh_pointdist(temp1,point,dim);
+			dist[cnt] = distance;
+			if(distance>radius)
+				radius=distance;
+			cnt++;
 		}
 	}
-	assert(i==numpoints);
+	assert(cnt==numpoints);
 
-	//Aggiungo il viewpoint
-	for(int ii=0;ii<dim;ii++)
-		flipped_points[3*i+ii] = viewpoint[ii];
+	//Adjust radius according to user param.
+	radius = radius * pow(10,threshold);
+
+	//Calculate the flipped points
+	for (int j=0; j<numpoints;j++){
+		double k= 2*(radius-dist[j])/dist[j];
+		for(int ii=0;ii<dim;++ii)
+			flipped_points[3*j + ii]=points[3*j + ii]+ k*points[3*j + ii];
+	}
 
 
-	exitcode= qh_new_qhull (dim, numpoints, flipped_points, ismalloc,
+	//Attach viewpoint
+	for(int ii=0;ii<dim;++ii)
+		flipped_points[3*numpoints + ii]= viewpoint[ii];
+
+
+	//Make a convex hull from the flipped points and the viewpoint
+	exitcode= qh_new_qhull (dim, numpoints+1, flipped_points, ismalloc,
 							flags, outfile, errfile);
 
 	//By default, Qhull merges coplanar facets. So, it's necessary to triangulate the convex hull.
 	//If you call qh_triangulate() method , all facets will be simplicial (e.g., triangles in 2-d)
 	//In theory calling qh_triangulate() or using option 'Qt' should give the same result, but,
 	//in this case, option Qt does not triangulate the output because coplanar faces are still merged.
-	//qh_triangulate();
+	qh_triangulate();
 
+	int selected=0;
 	if (!exitcode) { /* if no error */ 
 		/* 'qh facet_list' contains the convex hull */
+
+
+		/*ivp length is 'numpoints' because each vertex is accessed through its ID whose range is 
+		  0<=qh_pointid(vertex->point)<numpoints. qh num_vertices is < numpoints*/
+		vector<tri::Allocator<CMeshO>::VertexPointer> ivp_flipped(numpoints); //Vector of pointers to the flipped points
+
 		vertexT *vertex;
-		int j=0;
+		selected=qh num_vertices;
+		//Eliminate the viewpoint
 		FORALLvertices{	
-			if ((*vertex).point && qh_pointid(vertex->point)!= numpoints){
-				int hgg= qh_pointid(vertex->point);
-				tri::Allocator<CMeshO>::VertexIterator vi=tri::Allocator<CMeshO>::AddVertices(pm.cm,1);
-				(*vi).P()[0] = ivp[qh_pointid(vertex->point)]->P()[0];
-				(*vi).P()[1] = ivp[qh_pointid(vertex->point)]->P()[1];
-				(*vi).P()[2] = ivp[qh_pointid(vertex->point)]->P()[2];
-				j++;
+			if ((*vertex).point && qh_pointid(vertex->point)>=numpoints)
+				selected--;
+		}
+
+		tri::Allocator<CMeshO>::AddVertices(pm.cm,selected);
+
+		int i=0;
+		FORALLvertices{	
+			if ((*vertex).point && qh_pointid(vertex->point)<numpoints){
+				//mark the vertex in the mesh that is correspondent to the flipped one (share the same index)		
+				ivp[qh_pointid(vertex->point)]->SetS();
+				
+				if(convex_hull){ //Add flipped points to the new mesh
+					pm.cm.vert[i].P()[0] = (*vertex).point[0];
+					pm.cm.vert[i].P()[1] = (*vertex).point[1];
+					pm.cm.vert[i].P()[2] = (*vertex).point[2];
+					ivp_flipped[qh_pointid(vertex->point)] = &pm.cm.vert[i];
+					i++;
+				}
 			}
 		}
-		
+		vcg::tri::UpdateColor<CMeshO>::VertexSelected(m.cm);
+
+		if(convex_hull){
+			//Add the faces of the convex_hull to the new mesh
+			facetT *facet;
+			FORALLfacet_(qh facet_list){		
+				vertexT *vertex;
+				int vertex_n, vertex_i;
+				tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);		
+				FOREACHvertex_i_((*facet).vertices){
+					if(qh_pointid(vertex->point)<numpoints)
+						(*fi).V(vertex_i)= ivp_flipped[qh_pointid(vertex->point)];	
+					else{
+						tri::Allocator<CMeshO>::DeleteFace(pm.cm,*fi);
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
@@ -748,29 +803,11 @@ bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm){
 		fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
 					 totlong, curlong);
 
-	if(!exitcode)
-		return true;
-	else
-		return false;
-
-	
-	//add the viewpoint 
-	//bool usecam = par.getBool("usecamera");
-	//Point3f viewpoint = par.getPoint3f("viewpoint");	
-
-	//// if usecamera but mesh does not have one
-	//if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) ) 
-	//{
-	//	errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
-	//	return false;
-	//}
-	//if(usecam)
-	//{
-	//	viewpoint = m.cm.shot.GetViewPoint();
-	//}
-
+	if (!exitcode)
+		return selected;
+	else 
+		return -1;
 }
-
 
 /* dim  --> dimension of points
 	numpoints --> number of points
