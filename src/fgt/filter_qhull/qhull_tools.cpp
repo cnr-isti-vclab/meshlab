@@ -706,11 +706,12 @@ int visible_points(int dim, int numpoints, MeshModel &m,MeshModel &pm,Point3f vi
 			//Move the point so that viewpoint is the origin 
 			for(int ii=0;ii<dim;++ii)
 				points[3*cnt + ii] = point[ii]=(*vi).P()[ii]- viewpoint[ii];	 
-			double *temp1= viewpoint;
-			double distance = qh_pointdist(temp1,point,dim);
-			dist[cnt] = distance;
-			if(distance>radius)
-				radius=distance;
+			double distance = 0;
+			for(int k= 0; k<dim;k++ )
+				distance += point[k] * point[k];
+			dist[cnt] = sqrt(distance);
+			if(dist[cnt]>radius)
+				radius=dist[cnt];
 			cnt++;
 		}
 	}
