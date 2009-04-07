@@ -96,7 +96,7 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId)
 		case FP_QHULL_VORONOI_FILTERING :  return QString("Compute mesh Voronoi filtering with Qhull library. <br>" 
 											   "The filter reconstructs the mesh surface starting from its vertices through a double "
 											   "Delaunay triangulation. <br> The second one takes in input some Voronoi vertices too.<br>"); 
-		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("Calculate Alpha Shapes. <br>"
+		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("Calculate Alpha Shape. <br>"
 										"The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation.<br>" 
 										"For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay "
 										"triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'");
@@ -172,7 +172,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 												"ViewPoint",
 												"if UseCamera is true, this value is ignored");
 				
-				parlst.addBool("convex_hull",false,"Show Convex Hull of flipped points", "Show Convex Hull of the transformed point cloud");
+				parlst.addBool("convex_hull",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud");
 				break;
 			}
 		default : assert(0); 
@@ -380,7 +380,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
 				}
-			    
+				
 				int dim= 3;				/* dimension of points */
 				int numpoints= m.cm.vn;	/* number of mesh vertices */
 
@@ -402,6 +402,11 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 
 				MeshModel &pm =*md.addNewMesh(name);
 
+				if (!alphashape && !pm.hasDataMask(MeshModel::MM_FACEQUALITY))
+				{
+					pm.updateDataMask(MeshModel::MM_FACEQUALITY);
+				}
+
 				bool result =compute_alpha_shapes(dim,numpoints,m,pm,alpha,alphashape);
 
 				if(result){
@@ -411,16 +416,6 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 					Log(GLLogStream::FILTER,"Alpha = %f ",alpha);
 					//m.cm.Clear();	
-
-					//Prova del 9 POI TOGLILA
-					if(vcg::tri::HasPerFaceAttribute(pm.cm,"Alpha") && pm.cm.fn>0){
-						CMeshO::PerFaceAttributeHandle<double> alphaHandle =tri::Allocator<CMeshO>::GetPerFaceAttribute<double>(pm.cm, "Alpha");
-						CMeshO::FaceIterator fi =pm.cm.face.begin();
-						//Una faccia a caso: la prima
-						double provaAlpha = alphaHandle[fi];
-						Log(GLLogStream::FILTER,"ProvaRadius = %f ",provaAlpha);
-					}
-					//Fine prova del 9
 
 					return true;
 				}
@@ -457,7 +452,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 					viewpoint = m.cm.shot.GetViewPoint();
 				}
 
-			    MeshModel &pm =*md.addNewMesh("Visibile Points");
+			    MeshModel &pm =*md.addNewMesh("CH Flipped Points");
 				
 				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);

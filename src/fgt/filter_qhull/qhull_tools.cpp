@@ -44,11 +44,9 @@ using namespace vcg;
 
 #define TestMode 0
 
-//Internal prototype ALCUNI SONO INTUTILI POI TOGLILI
+//Internal prototype 
 coordT *qh_readpointsFromMesh(int *numpoints, int *dimension, MeshModel &m);
-bool test(facetT* facet, ridgeT* triangle ,double alpha);
-void addDelaunay (coordT *points, int numpoints, int numnew, int dim);
-coordT pointdist(pointT *point1, pointT *point2, int dim);
+double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim);
 
 
 /***************************************************************************/
@@ -465,7 +463,8 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 	alphashape --> true to calculate alpha shape, false alpha complex
 
 	compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, double alpha, bool alphashape)
-		build alpha complex ora alpha shapes from a set of vertices of a mesh.
+		build alpha complex or alpha shapes from a set of vertices of a mesh.
+		Insert the minimum value of alpha (radius of the circumsphere) in attribute quality foreach face.
 
 		The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation. 
 		For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay 
@@ -507,8 +506,6 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 
 		tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
 
-		CMeshO::PerFaceAttributeHandle<double> alphaHandle = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<double>(pm.cm,std::string("Alpha"));							
-
 		/*ivp length is 'qh num_vertices' because each vertex is accessed through its ID whose range is 
 		  0<=qh_pointid(vertex->point)<qh num_vertices*/
 		vector<tri::Allocator<CMeshO>::VertexPointer> ivp(qh num_vertices);
@@ -537,13 +534,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 				//the distance between the circumcenter and a vertex of the facet
 				vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
 				double* center = facet->center;
-				double px = (*vertex).point[0];
-				double qx = *center;
-				double py = (*vertex).point[1];
-				double qy = *center++;
-				double pz = (*vertex).point[2];
-				double qz = *center++;
-				double radius = sqrt(pow(px-qx,2)+pow(py-qy,2)+pow(pz-qz,2));
+				double radius =  qh_pointdist(vertex->point,center,dim);
 
 				if (radius>alpha) // if the facet is not good consider the ridges
 				{
@@ -564,13 +555,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 							pointT* p1 = ((vertexT*) (ridge->vertices->e[1].p))->point;
 							pointT* p2 = ((vertexT*) (ridge->vertices->e[2].p))->point;
 
-							coordT a = qh_pointdist(p0,p1,3);
-							coordT b = qh_pointdist(p1,p2,3);
-							coordT c = qh_pointdist(p2,p0,3);
-
-							coordT sum =(a + b + c)*0.5;
-							coordT area = sum*(a+b-sum)*(a+c-sum)*(b+c-sum);
-							radius = (double) (a*b*c)/(4*sqrt(area));
+							radius = calculate_circumradius(p0,p1,p2, dim);
 							
 							if(radius <=alpha){
 								goodTriangles++;
@@ -578,13 +563,16 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 								if(!alphashape){
 									tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
 									ridgesCount++;
-									alphaHandle[fi] = radius;
+
+									//Store di circumradius of the face in face quality
+									(*fi).Q() = radius;
+
 									int vertex_n, vertex_i;
 									FOREACHvertex_i_(ridge->vertices)
 										(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];	
 								}
 								else
-									//if calculating alpha shapes, save the triangle for subsequent filtering
+									//if calculating alpha shape, save the triangle for subsequent filtering
 									qh_setappend(&set, ridge); 
 							}
 						}
@@ -612,7 +600,14 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 							//if calculating alphacomplex build mesh. It needs no filtering
 							if(!alphashape){
 								tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
-								alphaHandle[fi] = radius; //CORREGGI CON IL RAGGIO DELLA CIRCOSFERA
+								
+								//Store di circumradius of the face in face quality
+								pointT* p0 = ((vertexT*) (ridge->vertices->e[0].p))->point;
+								pointT* p1 = ((vertexT*) (ridge->vertices->e[1].p))->point;
+								pointT* p2 = ((vertexT*) (ridge->vertices->e[2].p))->point;
+								radius = calculate_circumradius(p0,p1,p2, dim);
+								(*fi).Q() = radius; 
+
 								ridgesCount++;
 								int vertex_n, vertex_i;
 								FOREACHvertex_i_(ridge->vertices)
@@ -665,7 +660,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 	pm --> new mesh that is the convex hull of the flipped points, if convex_hull is true
 	viewpoint -> the viewpoint
 	threshold -> bounds the radius oh the sphere used to select visible points
-	convex_hull --> true if you want to show the Convex Hull of the transformed point cloud
+	convex_hull --> true if you want to show the partial Convex Hull of the transformed points cloud
 					false otherwise
 
 	bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm)
@@ -764,6 +759,7 @@ int visible_points(int dim, int numpoints, MeshModel &m,MeshModel &pm,Point3f vi
 
 		int i=0;
 		FORALLvertices{	
+			//Do not add the viewpoint
 			if ((*vertex).point && qh_pointid(vertex->point)<numpoints){
 				//mark the vertex in the mesh that is correspondent to the flipped one (share the same index)		
 				ivp[qh_pointid(vertex->point)]->SetS();
@@ -780,7 +776,7 @@ int visible_points(int dim, int numpoints, MeshModel &m,MeshModel &pm,Point3f vi
 		vcg::tri::UpdateColor<CMeshO>::VertexSelected(m.cm);
 
 		if(convex_hull){
-			//Add the faces of the convex_hull to the new mesh
+			//Add to the new mesh only the faces of the convex hull whose vertices aren't the viewpoint 
 			facetT *facet;
 			FORALLfacet_(qh facet_list){		
 				vertexT *vertex;
@@ -842,6 +838,23 @@ coordT *qh_readpointsFromMesh(int *numpoints, int *dimension, MeshModel &m) {
 	return(points);
 }
 
+/*
+	double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim)
+		calculate the radius of the circumference passing through p0, p1, p2.
+*/
+
+
+double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim){
+	coordT a = qh_pointdist(p0,p1,dim);
+	coordT b = qh_pointdist(p1,p2,dim);
+	coordT c = qh_pointdist(p2,p0,dim);
+
+	coordT sum =(a + b + c)*0.5;
+	coordT area = sum*(a+b-sum)*(a+c-sum)*(b+c-sum);
+	return (double) (a*b*c)/(4*sqrt(area));
+}
+
+//--------------------------------------------------------------------------------
 
 bool test(facetT* facet, ridgeT* triangle ,double alpha){
 	vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
