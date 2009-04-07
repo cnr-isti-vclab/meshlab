@@ -47,6 +47,12 @@
 #include <src/WinnerTakesAllTextureMerger.h>
 #include <src/SmartBlendTextureMerger.h>
 
+
+#include <vcg/complex/trimesh/update/position.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+
+
+
 const QString PhotoTexturer::XML_PHOTOTEXTURING = "photoTexturing";
 
 //const std::string PhotoTexturer::ORIGINALUVTEXTURECOORDS = "OriginalUVTextureCoords";
@@ -271,18 +277,28 @@ void PhotoTexturer::calculateMeshTextureForCamera(MeshModel *m, Camera* cam,bool
 		ih = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
 	}
 	
-	
+	vcg::Matrix44f matrixTr = m->cm.Tr;
 	vcg::Matrix44f matrix;
+	vcg::Matrix44f matrixInv;
 	if(vcg::tri::HasPerMeshAttribute(m->cm, PhotoTextureTools::TransformForPhoto)){
 		CMeshO::PerMeshAttributeHandle<vcg::Matrix44f> transformHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vcg::Matrix44f> (m->cm, PhotoTextureTools::TransformForPhoto);
 		matrix = transformHandle();
+		matrixInv =vcg::Inverse(matrix);
+		m->cm.Tr = matrix;
+		vcg::tri::UpdatePosition<CMeshO>::Matrix(m->cm, m->cm.Tr,true);
+		//vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);
+		vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);
+		
 		qDebug()<< "transformHandle";
-	}else{
+	}/*else{
 		qDebug()<<"Identity";
 		matrix = vcg::Matrix44f();
 		matrix.SetIdentity();
 	}
 	
+	
+	m->cm.Tr = matrix;
+	*/
 	//stdout << "matrix" << matrix;
 	qDebug() << "matrix2: " << matrix[0][0]<< matrix[0][1]<< matrix[0][2]<< matrix[0][3]<< matrix[1][0]<< matrix[1][1]<< matrix[1][2]<< matrix[1][3]<< matrix[2][0]<< matrix[2][1]<< matrix[2][2]<< matrix[2][3]<< matrix[3][0]<< matrix[3][1]<< matrix[3][2]<< matrix[3][3];
 	
@@ -324,7 +340,8 @@ void PhotoTexturer::calculateMeshTextureForCamera(MeshModel *m, Camera* cam,bool
 		ft->type = 0;
 		//calculating angle between the camera direction and the face normal
 		vcg::Matrix33f rMatrix = vcg::Matrix33f(matrix,3);
-		vcg::Point3f tmpN = rMatrix*(*fi).N();
+		//vcg::Point3f tmpN = rMatrix*(*fi).N();
+		vcg::Point3f tmpN = (*fi).N();
 		tmpN.Normalize();
 		double angle = ((-1*cam->calibration->cameraDirection[0])*tmpN[0])
 						+((-1*cam->calibration->cameraDirection[1])*tmpN[1])
@@ -338,7 +355,8 @@ void PhotoTexturer::calculateMeshTextureForCamera(MeshModel *m, Camera* cam,bool
 		for (i=0;i<3;i++){
 
 			double u,v;
-			vcg::Point3f tmpVector = matrix*(*fi).V(i)->cP();
+			//vcg::Point3f tmpVector = matrix*(*fi).V(i)->cP();
+			vcg::Point3f tmpVector = (*fi).V(i)->cP();
 			cam->calibration->getUVforPoint(tmpVector[0],tmpVector[1],tmpVector[2],&u,&v);
 
 			ft->u[i] = u/cam->resolution[0];
@@ -368,6 +386,16 @@ void PhotoTexturer::calculateMeshTextureForCamera(MeshModel *m, Camera* cam,bool
 	//cam->zBuffer->SaveAsImage("zbuffer_",cam->name);
 	cam->calculatedTextures = true;
 	textureList[textureId]= cam->name;
+	
+	
+	if(vcg::tri::HasPerMeshAttribute(m->cm, PhotoTextureTools::TransformForPhoto)){
+			m->cm.Tr = matrixInv;
+			vcg::tri::UpdatePosition<CMeshO>::Matrix(m->cm, m->cm.Tr);
+			//vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);
+			vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);
+			m->cm.Tr = matrixTr;
+			qDebug()<< "transformHandle";
+	}
 }
 
 void PhotoTexturer::applyTextureToMesh(MeshModel *m,int textureIdx, bool use_different_tidx, int tidx){
@@ -413,7 +441,24 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 
 		//CMeshO::PerFaceAttributeHandle<UVFaceTexture*> oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*>(m->cm,ORIGINALUVTEXTURECOORDS);
 		CMeshO::PerFaceAttributeHandle<QMap<int,UVFaceTexture*> > cth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<QMap<int,UVFaceTexture*> > (m->cm,UVTEXTURECOORDS);
-
+		
+		
+		
+		vcg::Matrix44f matrixTr = m->cm.Tr;
+		vcg::Matrix44f matrix;
+		vcg::Matrix44f matrixInv;
+		if(vcg::tri::HasPerMeshAttribute(m->cm, PhotoTextureTools::TransformForPhoto)){
+			CMeshO::PerMeshAttributeHandle<vcg::Matrix44f> transformHandle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vcg::Matrix44f> (m->cm, PhotoTextureTools::TransformForPhoto);
+			matrix = transformHandle();
+			matrixInv =vcg::Inverse(matrix);
+			m->cm.Tr = matrix;
+			vcg::tri::UpdatePosition<CMeshO>::Matrix(m->cm, m->cm.Tr,true);
+			//vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);
+			vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);
+			
+			qDebug()<< "transformHandle";
+		}
+		
 		QString camname = camera->name;
 
 		//creates a new RGBA image for saving the new texture
@@ -568,6 +613,16 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, 
 		}
 		if(use_distance_filter){
 			container->addFilter(distance_filter);
+		}
+		
+		
+		if(vcg::tri::HasPerMeshAttribute(m->cm, PhotoTextureTools::TransformForPhoto)){
+				m->cm.Tr = matrixInv;
+				vcg::tri::UpdatePosition<CMeshO>::Matrix(m->cm, m->cm.Tr);
+				//vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);
+				vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);
+				m->cm.Tr = matrixTr;
+				qDebug()<< "transformHandle";
 		}
 	}
 }
