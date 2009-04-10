@@ -53,6 +53,8 @@ FilterUnsharp::FilterUnsharp()
 		FP_UNSHARP_QUALITY <<
 		FP_UNSHARP_VERTEX_COLOR <<
 		FP_RECOMPUTE_VERTEX_NORMAL <<
+		FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED <<
+		FP_RECOMPUTE_VERTEX_NORMAL_ANGLE <<
 		FP_RECOMPUTE_FACE_NORMAL <<
 		FP_FACE_NORMAL_NORMALIZE <<
 		FP_VERTEX_NORMAL_NORMALIZE <<
@@ -91,6 +93,8 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
   	case FP_UNSHARP_QUALITY:					return QString("UnSharp Mask Quality"); 
   	case FP_UNSHARP_VERTEX_COLOR:	    return QString("UnSharp Mask Color"); 
 	  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Recompute Vertex Normals"); 
+	  case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED:	return QString("Recompute Weighted Vertex Normals"); 
+	  case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE:	return QString("Recompute Angle Weighted Vertex Normals"); 
 	  case FP_RECOMPUTE_FACE_NORMAL:		return QString("Recompute Face Normals"); 
 		case FP_LINEAR_MORPH :	return QString("Vertex Linear Morphing");
 		
@@ -120,7 +124,9 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
   	case FP_UNSHARP_GEOMETRY:						return tr("Unsharp mask filtering of geometric shape, putting in more evidence ridges and valleys variations"); 
   	case FP_UNSHARP_QUALITY:						return tr("Unsharp mask filtering of the quality field"); 
   	case FP_UNSHARP_VERTEX_COLOR:				return tr("Unsharp mask filtering of the color, putting in more evidence color edge variations"); 
-		case FP_RECOMPUTE_VERTEX_NORMAL:		return tr("Recompute vertex normals as an area weighted average of normal of the incident faces");
+		case FP_RECOMPUTE_VERTEX_NORMAL:		return tr("Recompute vertex normals as an area weighted average of normals of the incident faces");
+		case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED:		return tr("Recompute vertex normals as a weighted sum of normals of the incident faces. Weights are defined according to the paper <i>Weights for Computing Vertex Normals from Facet Normals</i>, Nelson max, JGT 1999");
+		case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE:		return tr("Recompute vertex normals as an angle weighted sum of normals of the incident faces according to the paper <i>Computing Vertex Normals from Polygonal Facet</i>, G Thurmer, CA Wuthrich, JGT 1998");
 		case FP_RECOMPUTE_FACE_NORMAL:			return tr("Recompute face normals as the normal of the plane of the face");
 		case FP_LINEAR_MORPH :							return tr("Morph current mesh towards a target with the same number of vertices. <br> The filter assumes that the two meshes have also the same vertex ordering.");
 
@@ -155,6 +161,8 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 				
 			case FP_RECOMPUTE_FACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
+			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
+			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
 			case FP_FACE_NORMAL_NORMALIZE:	  
 			case FP_VERTEX_NORMAL_NORMALIZE:	  
 					return MeshFilterInterface::Normal;
@@ -182,6 +190,8 @@ const int FilterUnsharp::getRequirements(QAction *action)
 		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
 		case FP_RECOMPUTE_FACE_NORMAL :
 		case FP_RECOMPUTE_VERTEX_NORMAL :
+		case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
+		case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
 		case FP_FACE_NORMAL_NORMALIZE:
 		case FP_VERTEX_NORMAL_NORMALIZE:
 		case FP_DIRECTIONAL_PRESERVATION:
@@ -290,7 +300,7 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 			"<0 and >100 linearly extrapolate between the two mesh <br>");
 		}
 		break;
-
+	default : assert(0);
 	}
 }
 
@@ -424,6 +434,12 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			break;
 	case FP_RECOMPUTE_VERTEX_NORMAL : 
 			tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+			break;
+	case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED : 
+			tri::UpdateNormals<CMeshO>::PerVertexWeighted(m.cm);
+			break;
+	case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE : 
+			tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(m.cm);
 			break;
 	case FP_FACE_NORMAL_NORMALIZE :
 			tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
