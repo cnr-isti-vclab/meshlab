@@ -143,9 +143,6 @@ private:
 		a3v = factor * ((xF-xE)*vD + (xD-xF)*vE + (xE-xD)*vF);
 
 		area = 0.5 * AA;
-
-		if (area < 0.0)
-			area = -area;
 	}
 
 // public methods
@@ -229,10 +226,15 @@ public:
 			W += Warea + Wdistortion;
 		}
 
-		double area1 = vcg::tri::Stat<MeshType>::ComputeMeshArea(refmesh);
-		double area2 = vcg::tri::Stat<MeshType>::ComputeMeshArea(mesh);
-		
 		// Average Strain Energy (ASE)
+		//////////////////////////////////////////////////////////////////////////
+		
+		double area1 = vcg::tri::Stat<MeshType>::ComputeMeshArea(refmesh);
+		//double area2 = vcg::tri::Stat<MeshType>::ComputeMeshArea(mesh);
+
+		// the area if the deformed mesh is considered the same of the original one,
+		// since the deformation is assumed to be small 
+
 		return W / (area1);
 	}
 
