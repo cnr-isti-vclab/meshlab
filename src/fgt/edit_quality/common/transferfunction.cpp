@@ -331,6 +331,20 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f);
 		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f);
 		break;
+			case FRENCH_RGB_TF:
+		_channels[RED_CHANNEL].addKey(0.0f,1.0f);
+		_channels[RED_CHANNEL].addKey(0.5f,1.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f);
+
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.5f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f);
+
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.5f,1.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f);
+		break;
+
 	case RED_SCALE_TF:
 		_channels[RED_CHANNEL].addKey(0.0f,0.0f);
 		_channels[RED_CHANNEL].addKey(1.0f,1.0f);
@@ -447,6 +461,7 @@ void TransferFunction::initTF()
 	//setting default transfer functions names
 	defaultTFs[GREY_SCALE_TF] = "Grey Scale";
 	defaultTFs[MESHLAB_RGB_TF] = "Meshlab RGB";
+	defaultTFs[FRENCH_RGB_TF] = "Red-White-Blue Scale";
 	defaultTFs[RGB_TF] = "RGB";
 	defaultTFs[RED_SCALE_TF] = "Red Scale";
 	defaultTFs[GREEN_SCALE_TF] = "Green Scale";
