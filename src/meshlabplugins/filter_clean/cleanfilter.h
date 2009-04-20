@@ -87,7 +87,8 @@ class CleanFilter : public QObject, public MeshFilterInterface
     FP_ALIGN_WITH_PICKED_POINTS,
     FP_SELECTBYANGLE,
     FP_REMOVE_TVERTEX_FLIP,
-    FP_REMOVE_TVERTEX_COLLAPSE
+    FP_REMOVE_TVERTEX_COLLAPSE,
+		FP_MERGE_CLOSE_VERTEX
   } ;
 	
 	/* default values for standard parameters' values of the plugin actions */

@@ -102,7 +102,6 @@
 #include "remove_small_cc.h"
 #include "align_tools.h"
 
-//#include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/create/platonic.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
@@ -125,7 +124,8 @@ CleanFilter::CleanFilter()
 		<< FP_ALIGN_WITH_PICKED_POINTS
     << FP_SELECTBYANGLE
     << FP_REMOVE_TVERTEX_FLIP
-    << FP_REMOVE_TVERTEX_COLLAPSE;
+    << FP_REMOVE_TVERTEX_COLLAPSE
+		<< FP_MERGE_CLOSE_VERTEX;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -155,6 +155,7 @@ const QString CleanFilter::filterName(FilterIDType filter)
   	case FP_SELECTBYANGLE :  return QString("Select Faces by view angle"); 
     case FP_REMOVE_TVERTEX_FLIP :  return QString("Remove T-Vertices by edge flip");
     case FP_REMOVE_TVERTEX_COLLAPSE : return QString("Remove T-Vertices by edge collapse");
+    case FP_MERGE_CLOSE_VERTEX : return QString("Merge Close Vertices");
 		default: assert(0);
   }
   return QString("error!");
@@ -175,6 +176,7 @@ const QString CleanFilter::filterInfo(FilterIDType filterId)
 		case FP_SELECTBYANGLE :  return QString("Select faces according to the angle between their normal and the view direction. It is used in range map processing to select and delete steep faces parallel to viewdirection"); 
     case FP_REMOVE_TVERTEX_COLLAPSE :  return QString("Removes t-vertices from the mesh by collapsing the shortest of the incident edges");
     case FP_REMOVE_TVERTEX_FLIP : return QString("Removes t-vertices by flipping the opposite edge on the degenerate face if the triangulation quality improves");
+    case FP_MERGE_CLOSE_VERTEX : return QString("Merge togheter all the vertices that are nearer than the speicified threshold. Like a unify duplicated vertices but with some tolerance.");
     default: assert(0);
   }
   return QString("error!");
@@ -191,6 +193,7 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
     case FP_REMOVE_ISOLATED_COMPLEXITY :
     case FP_REMOVE_TVERTEX_COLLAPSE :
     case FP_REMOVE_TVERTEX_FLIP :
+    case FP_MERGE_CLOSE_VERTEX :
       return MeshFilterInterface::Cleaning;     
 		case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
 		case FP_ALIGN_WITH_PICKED_POINTS: return MeshFilterInterface::RangeMap;
@@ -211,6 +214,7 @@ const int CleanFilter::getRequirements(QAction *action)
     case FP_REMOVE_TVERTEX_FLIP: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
     case FP_SELECTBYANGLE:
 		case FP_ALIGN_WITH_PICKED_POINTS:
+		case FP_MERGE_CLOSE_VERTEX:
     	return MeshModel::MM_NONE;
     default: assert(0);
   }
@@ -255,7 +259,11 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 												"ViewPoint",
 												"if UseCamera is true, this value is ignored");
 			}
-			break;
+			break;    
+		case FP_MERGE_CLOSE_VERTEX :
+		 parlst.addAbsPerc("Threshold",m.cm.bbox.Diag()/10000.0,0,m.cm.bbox.Diag()/100.0,"Merging distance","All the vertices that closer than this threshold are merged toghether. Use very small values, default values is 1/10000 of bounding box diagonal. ");
+		 break;    
+
     case FP_REMOVE_TVERTEX_COLLAPSE :
     case FP_REMOVE_TVERTEX_FLIP :
        parlst.addFloat(
@@ -387,6 +395,13 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
         bool repeat = par.getBool("Repeat");
         int total = tri::Clean<CMeshO>::RemoveTVertexByFlip(m.cm, threshold, repeat);
         Log(GLLogStream::FILTER,"Successfully removed %d t-vertices", total);
+    }
+    break;
+   case FP_MERGE_CLOSE_VERTEX :
+    {
+        float threshold = par.getAbsPerc("Threshold");
+        int total = tri::Clean<CMeshO>::MergeCloseVertex(m.cm, threshold);
+        Log(GLLogStream::FILTER,"Successfully merged %d vertices", total);
     }
     break;
 
