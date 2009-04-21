@@ -69,7 +69,7 @@ double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim);
 	m --> original mesh 
 
 	compute_convex_hull(int dim, int numpoints, MeshModel &m)
-		build convex hull from a set of vertices of a mesh
+		build convex hull from a set of vertices of a mesh with Qhull library (http://www.qhull.org/html/qconvex.htm).
 
 	returns 
 		the convex hull as a list of simplicial (triangulated) facets, if there are no errors;
@@ -110,10 +110,10 @@ facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m)
 	m --> original mesh 
 
 	compute_delaunay(int dim, int numpoints, MeshModel &m)
-		build Delauanay triangulation from a set of vertices of a mesh.
+		build Delauanay triangulation from a set of vertices of a mesh with Qhull library (http://www.qhull.org/html/qdelaun.htm).
 			
-		The Delaunay triangulation of a set of points in d-dimensional spaces is the projection of the convex 
-		hull of the projections of the points onto a (d+1)-dimensional paraboloid.
+		The Delaunay triangulation of a set of points in d-dimensional spaces is a triangulation of the convex hull.
+		The result is non 2-manifold by definition.
 
 		By default, qdelaunay merges regions with cocircular or cospherical input sites. 
 		If you want a simplicial triangulation use triangulated output ('Qt') or joggled input ('QJ'). 
@@ -159,10 +159,16 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 	numpoints --> number of points
 	m --> original mesh 
 	pm --> new mesh
+	threshold --> ??????????????????????????????????????
 
 	compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
-		Reconstructs the mesh surface starting from its vertices through a double 
-		Delaunay triangulation. The second one takes in input some Voronoi vertices too. 
+		Compute a Voronoi filtering(Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). 
+	    The filter computes a piecewise-linear approximation of a smooth surface from a finite set of sample points
+	    The algorithm uses Voronoi vertices to remove triangles from the Delaunay triangulation.
+
+	    After computing the Voronoi diagram, foreach sample point it chooses the two farthest opposite Voronoi vertices.
+	    Then computes a Delaunay triangulation of the sample points and the selected Voronoi vertices, and keep
+	    only those triangles in witch all three vertices are sample points. 
 
 		Options 'Qt' (triangulated output) and 'QJ' (joggled input) may produce unexpected results.
 
@@ -177,7 +183,7 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 		false otherwise.
 		
 */
-bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
+bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float threshold)
 {  
 	coordT *points;						/* array of coordinates for each point*/
 	boolT ismalloc= True;				/* True if qhull should free points in qh_freeqhull() or reallocation */ 
@@ -292,7 +298,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 						for(int i=0;i<dim;i++)
 							bbCenter[i] = pm.cm.bbox.Center()[i];
 						bbCenter[3]=0;
-						if(qh_pointdist(bbCenter,pole,dim+1)>(500*pm.cm.bbox.Diag()))
+						if(qh_pointdist(bbCenter,pole,dim+1)>(threshold*pm.cm.bbox.Diag()))
 							discard=true;
 					}
 					if(!discard)
@@ -342,7 +348,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 					for(int i=0;i<dim;i++)
 						bbCenter[i] = pm.cm.bbox.Center()[i];
 					bbCenter[3]=0;
-					if(qh_pointdist(bbCenter,pole,dim+1)>(500*pm.cm.bbox.Diag()))
+					if(qh_pointdist(bbCenter,pole,dim+1)>(threshold*pm.cm.bbox.Diag()))
 						discard=true;
 				}
 				if(!discard)
@@ -463,7 +469,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 	alphashape --> true to calculate alpha shape, false alpha complex
 
 	compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, double alpha, bool alphashape)
-		build alpha complex or alpha shapes from a set of vertices of a mesh.
+		build alpha complex or alpha shapes (Edelsbrunner and P.Mucke 1994)from a set of vertices of a mesh with Qhull library (http://www.qhull.org/
 		Insert the minimum value of alpha (radius of the circumsphere) in attribute quality foreach face.
 
 		The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation. 
@@ -657,21 +663,27 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 	dim  --> dimension of points
 	numpoints --> number of points
 	m --> original mesh
-	pm --> new mesh that is the convex hull of the flipped points, if convex_hull is true
+	pm --> new mesh that is the convex hull of the flipped points, if convex_hullFP is true
+	pm2 --> new mesh that is the convex hull of the original points, if convex_hullNFP is true
 	viewpoint -> the viewpoint
 	threshold -> bounds the radius oh the sphere used to select visible points
-	convex_hull --> true if you want to show the partial Convex Hull of the transformed points cloud
+	convex_hullFP --> true if you want to show the partial Convex Hull of the transformed points cloud
+					false otherwise
+	convex_hullNFP --> true if you want to show the Convex Hull of the original points cloud
 					false otherwise
 
 	bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm)
-		Select the visibile points from a given viewpoint. 
+		Select the visible points in a point cloud, as viewed from a given viewpoint.
+	    It uses the Qhull library (http://www.qhull.org/.
+	    The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals.
+	    The visible points are those that corresponds to the ones that reside on the convex hull of a transformed point cloud.
 
 	returns 
 		the number of visible points if no errors occurred;
 		-1 otherwise.
 */
 
-int visible_points(int dim, int numpoints, MeshModel &m,MeshModel &pm,Point3f viewpointP,float threshold, bool convex_hull){
+int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,vcg::Point3f viewpointP,float threshold,bool convex_hullFP){
 	boolT ismalloc= True;			/* True if qhull should free points in qh_freeqhull() or reallocation */ 
 	char flags[]= "qhull Tcv";		/* option flags for qhull, see qh_opt.htm */
 	FILE *outfile= NULL;			/* output from qh_produce_output()			
@@ -764,7 +776,7 @@ int visible_points(int dim, int numpoints, MeshModel &m,MeshModel &pm,Point3f vi
 				//mark the vertex in the mesh that is correspondent to the flipped one (share the same index)		
 				ivp[qh_pointid(vertex->point)]->SetS();
 				
-				if(convex_hull){ //Add flipped points to the new mesh
+				if(convex_hullFP){ //Add flipped points to the new mesh
 					pm.cm.vert[i].P()[0] = (*vertex).point[0];
 					pm.cm.vert[i].P()[1] = (*vertex).point[1];
 					pm.cm.vert[i].P()[2] = (*vertex).point[2];
@@ -775,7 +787,7 @@ int visible_points(int dim, int numpoints, MeshModel &m,MeshModel &pm,Point3f vi
 		}
 		vcg::tri::UpdateColor<CMeshO>::VertexSelected(m.cm);
 
-		if(convex_hull){
+		if(convex_hullFP){
 			//Add to the new mesh only the faces of the convex hull whose vertices aren't the viewpoint 
 			facetT *facet;
 			FORALLfacet_(qh facet_list){		
@@ -852,90 +864,4 @@ double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim){
 	coordT sum =(a + b + c)*0.5;
 	coordT area = sum*(a+b-sum)*(a+c-sum)*(b+c-sum);
 	return (double) (a*b*c)/(4*sqrt(area));
-}
-
-//--------------------------------------------------------------------------------
-
-bool test(facetT* facet, ridgeT* triangle ,double alpha){
-	vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
-	double* center = facet->center;
-	double px = (*vertex).point[0];
-	double qx = *center;
-	double py = (*vertex).point[1];
-	double qy = *center++;
-	double pz = (*vertex).point[2];
-	double qz = *center++;
-	double radius = sqrt(pow(px-qx,2)+pow(py-qy,2)+pow(pz-qz,2));
-	int ridgesCount=0;
-	if (radius>alpha){
-		//facet->visitid= qh visit_id;
-		//qh_makeridges(facet);
-		//ridgeT *ridge, **ridgep;
-		//FOREACHridge_(facet->ridges) {
-		//	if (ridge!=triangle) {				
-		//		//Calcola il raggio della circosfera
-		//		pointT* p0 = ((vertexT*) (ridge->vertices->e[0].p))->point;
-		//		pointT* p1 = ((vertexT*) (ridge->vertices->e[1].p))->point;
-		//		pointT* p2 = ((vertexT*) (ridge->vertices->e[2].p))->point;
-
-		//		coordT a = qh_pointdist(p0,p1,3);
-		//		coordT b = qh_pointdist(p1,p2,3);
-		//		coordT c = qh_pointdist(p2,p0,3);
-
-		//		coordT sum =(a + b + c)*0.5;
-		//		coordT area = sum*(a+b-sum)*(a+c-sum)*(b+c-sum);
-		//		radius = (double) (a*b*c)/(4*sqrt(area));
-		//		
-		//		if(radius <=alpha){
-		//			ridgesCount++;
-		//		}
-		//	}
-		//if(ridgesCount==3)
-		//	return true;
-		//else
-			return false;
-	}
-	else return true;
-}
-
-void addDelaunay (coordT *points, int numpoints, int numnew, int dim) {
-  int j;
-  coordT *point;
-  facetT *facet;
-  realT bestdist;
-  boolT isoutside;
-
-  for (j= 0; j < numnew ; j++) {
-    point= points + (numpoints+j)*dim;
-    if (points == qh first_point)  /* in case of 'QRn' */
-      qh num_points= numpoints+j+1;  
-    /* qh num_points sets the size of the points array.  You may
-       allocate the point elsewhere.  If so, qh_addpoint records
-       the point's address in qh other_points 
-    */
-    
-    qh_setdelaunay (dim, 1, point);
-    facet= qh_findbestfacet (point, !qh_ALL, &bestdist, &isoutside);
-    if (isoutside) {
-      if (!qh_addpoint (point, facet, False))
-	break;  /* user requested an early exit with 'TVn' or 'TCn' */
-    }
-    
-    /* qh_produce_output(); */
-  }
-  if (qh DOcheckmax)
-    qh_check_maxout();
-  else if (qh KEEPnearinside)
-    qh_nearcoplanar();
-} /*.addDelaunay.*/
-
-coordT pointdist(pointT *point1, pointT *point2, int dim) {
-  coordT dist, diff;
-  dist= 0.0;
-
-  for (int k=0;k<dim; k++) {
-    diff= *point1++ - *point2++;
-    dist += diff * diff;
-  }
-  return(sqrt(dist));
 }
