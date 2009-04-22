@@ -325,6 +325,7 @@ FilterDocSampling::FilterDocSampling()
 			<< FP_VORONOI_CLUSTERING
 			<< FP_VORONOI_COLORING
 			<< FP_DISK_COLORING
+			<< FP_REGULAR_RECURSIVE_SAMPLING
 	;
   
   foreach(FilterIDType tt , types())
@@ -348,6 +349,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 		case FP_VORONOI_CLUSTERING  :  return QString("Voronoi Vertex Clustering"); 
 		case FP_VORONOI_COLORING  :  return QString("Voronoi Vertex Coloring"); 
 		case FP_DISK_COLORING  :  return QString("Disk Vertex Coloring"); 
+		case FP_REGULAR_RECURSIVE_SAMPLING  :  return QString("Regular Recursive Sampling"); 
 			
 		default : assert(0); return QString("unknown filter!!!!");
 	}
@@ -376,6 +378,7 @@ const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 																									"Very similar to the technique described in <b>'Approximated Centroidal Voronoi Diagrams for Uniform Polygonal Mesh Coarsening'</b> - Valette Chassery - Eurographics 2004");
 		case FP_VORONOI_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis."); 
 		case FP_DISK_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis."); 
+		case FP_REGULAR_RECURSIVE_SAMPLING   :  return QString("The bbox is recrusively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building ofsetted samples."); 
 		default : assert(0); return QString("unknown filter!!!!");
 
 	}
@@ -389,6 +392,7 @@ const int FilterDocSampling::getRequirements(QAction *action)
 
 		case FP_VERTEX_RESAMPLING :
 		case FP_UNIFORM_MESH_RESAMPLING:
+    case FP_REGULAR_RECURSIVE_SAMPLING:
     case FP_HAUSDORFF_DISTANCE :	return  MeshModel::MM_FACEMARK;
 		case FP_ELEMENT_SUBSAMPLING    :   
 		case FP_MONTECARLO_SAMPLING :    
@@ -456,6 +460,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			parlst.addAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification");
 			parlst.addFloat("RadiusVariance", 2, "Radius Variance", "The radius of the disk is allowed to vary between r/var and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling");
 			parlst.addInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate.");
+			parlst.addBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.");
 			break;
 		case FP_TEXEL_SAMPLING :  
  		  parlst.addInt (	"TextureW", 512, "Texture Width",
@@ -566,6 +571,17 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 					parlst.addBool ("backward", false, "BackDistance",
 													"If true the mesh is colored according the distance from the frontier of the voonoi diagram induced by the VertexMesh seeds.");
 			}
+		 } break; 
+		case FP_REGULAR_RECURSIVE_SAMPLING :
+			{
+				parlst.addAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+				tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger."));
+			
+				parlst.addAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
+												tr("Offset"), tr("Offset of the created surface (i.e. distance of the created surface from the original one).<br>"
+																				 "If offset is zero, the created surface passes on the original mesh itself. "
+																				 "Values greater than zero mean an external surface, and lower than zero mean an internal surface.<br> "
+																				 "In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation."));
 		 } break; 
 		default : assert(0); 
 	}
@@ -682,7 +698,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			// first of all generate montecarlo samples for fast lookup
 			CMeshO *presampledMesh=&(curMM->cm);
 			
-			CMeshO MontecarloMesh; // this mesh is used only if we need real pooisson sampling (and therefore we need to choose points different from the starting mesh vertices)
+			CMeshO MontecarloMesh; // this mesh is used only if we need real poisson sampling (and therefore we need to choose points different from the starting mesh vertices)
 			
 			if(!subsampleFlag)
 			{
@@ -691,7 +707,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 				tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
 				Log("Generated %i Montecarlo Samples",MontecarloMesh.vn);
 				MontecarloMesh.bbox = curMM->cm.bbox; // we want the same bounding box
-				CMeshO *presampledMesh=&MontecarloMesh;
+				presampledMesh=&MontecarloMesh;
 			}
 			
 			BaseSampler mps(&(mm->cm));
@@ -925,7 +941,37 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 					}
 			}
 		} break;
+	case FP_REGULAR_RECURSIVE_SAMPLING :
+		{
+			if (md.mm()->cm.fn==0) {
+				errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet"; 
+				return false; // can't continue, mesh can't be processed
+			}
+			float CellSize = par.getAbsPerc("CellSize");
+			float offset=par.getAbsPerc("Offset");
 
+			MeshModel *mmM= md.mm();				
+			MeshModel *mm= md.addNewMesh("Recur Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+
+			tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
+			tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
+			tri::Allocator<CMeshO>::CompactFaceVector(mmM->cm);
+
+			tri::UpdateNormals<CMeshO>::PerFaceNormalized(mmM->cm);
+			tri::UpdateFlags<CMeshO>::FaceProjection(mmM->cm);
+			std::vector<Point3f> pvec;
+	
+			tri::SurfaceSampling<CMeshO,RedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);
+			qDebug("Generated %i points",int(pvec.size()));
+			
+			for(uint i=0;i<pvec.size();++i)
+			{
+				tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
+				mm->cm.vert.back().P() = pvec[i];
+			}
+			
+		}
+		break;
 		default : assert(0);
 		}
 	return true;
@@ -941,6 +987,7 @@ const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *acti
 		case FP_STRATIFIED_SAMPLING :
 		case FP_POISSONDISK_SAMPLING : 
 		case FP_VARIABLEDISK_SAMPLING : 
+		case FP_REGULAR_RECURSIVE_SAMPLING : 
 		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling; 
 		case FP_VORONOI_CLUSTERING: return FilterDocSampling::Remeshing;
 		case FP_UNIFORM_MESH_RESAMPLING: return FilterDocSampling::Remeshing;
