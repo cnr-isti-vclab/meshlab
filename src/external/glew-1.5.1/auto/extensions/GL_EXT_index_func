@@ -1,0 +1,3 @@
+GL_EXT_index_func
+http://www.opengl.org/registry/specs/EXT/index_func.txt
+	void glIndexFuncEXT (GLenum func, GLfloat ref)

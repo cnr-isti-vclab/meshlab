@@ -1,0 +1,3 @@
+GL_IBM_cull_vertex
+http://www.opengl.org/registry/specs/IBM/cull_vertex.txt
+	GL_CULL_VERTEX_IBM 103050

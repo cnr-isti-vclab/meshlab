@@ -1,0 +1,4 @@
+GL_REND_screen_coordinates
+http://www.opengl.org/registry/specs/REND/screen_coordinates.txt
+	GL_SCREEN_COORDINATES_REND 0x8490
+	GL_INVERTED_SCREEN_W_REND 0x8491

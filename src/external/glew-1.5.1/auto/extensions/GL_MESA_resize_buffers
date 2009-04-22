@@ -1,0 +1,3 @@
+GL_MESA_resize_buffers
+http://www.opengl.org/registry/specs/MESA/resize_buffers.txt
+	void glResizeBuffersMESA (void)

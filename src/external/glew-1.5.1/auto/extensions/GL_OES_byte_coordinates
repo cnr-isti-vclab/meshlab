@@ -1,0 +1,3 @@
+GL_OES_byte_coordinates
+http://www.opengl.org/registry/specs/OES/byte_coordinates.txt
+	GL_BYTE 0x1400

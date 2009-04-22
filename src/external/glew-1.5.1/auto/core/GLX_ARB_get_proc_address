@@ -1,0 +1,3 @@
+GLX_ARB_get_proc_address
+http://oss.sgi.com/projects/ogl-sample/registry/ARB/get_proc_address.txt
+	extern void ( * glXGetProcAddressARB (const GLubyte *procName)) (void);

@@ -1,0 +1,3 @@
+GLX_SGIX_swap_group
+http://oss.sgi.com/projects/ogl-sample/registry/SGIX/swap_group.txt
+	void glXJoinSwapGroupSGIX (Display *dpy, GLXDrawable drawable, GLXDrawable member)

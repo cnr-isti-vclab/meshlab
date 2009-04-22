@@ -1,0 +1,3 @@
+WGL_ARB_extensions_string
+http://www.opengl.org/registry/specs/ARB/wgl_extensions_string.txt
+	const char* wglGetExtensionsStringARB (HDC hdc)

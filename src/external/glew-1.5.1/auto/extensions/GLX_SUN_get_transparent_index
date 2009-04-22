@@ -1,0 +1,3 @@
+GLX_SUN_get_transparent_index
+http://www.opengl.org/registry/specs/SUN/get_transparent_index.txt
+	Status glXGetTransparentIndexSUN (Display* dpy, Window overlay, Window underlay, unsigned long *pTransparentIndex)

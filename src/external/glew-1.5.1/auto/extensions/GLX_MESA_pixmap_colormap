@@ -1,0 +1,3 @@
+GLX_MESA_pixmap_colormap
+http://www.opengl.org/registry/specs/MESA/pixmap_colormap.txt
+	GLXPixmap glXCreateGLXPixmapMESA (Display* dpy, XVisualInfo *visual, Pixmap pixmap, Colormap cmap)

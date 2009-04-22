@@ -1,0 +1,4 @@
+GL_SGIS_generate_mipmap
+http://www.opengl.org/registry/specs/SGIS/generate_mipmap.txt
+	GL_GENERATE_MIPMAP_SGIS 0x8191
+	GL_GENERATE_MIPMAP_HINT_SGIS 0x8192

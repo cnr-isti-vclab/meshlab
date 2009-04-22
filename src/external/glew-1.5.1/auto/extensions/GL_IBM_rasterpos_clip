@@ -1,0 +1,3 @@
+GL_IBM_rasterpos_clip
+http://www.opengl.org/registry/specs/IBM/rasterpos_clip.txt
+	GL_RASTER_POSITION_UNCLIPPED_IBM 103010

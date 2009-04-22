@@ -1,0 +1,3 @@
+GLX_MESA_agp_offset
+http://www.opengl.org/registry/specs/MESA/agp_offset.txt
+	unsigned int glXGetAGPOffsetMESA (const void* pointer)

@@ -1,0 +1,3 @@
+GL_EXT_index_material
+http://www.opengl.org/registry/specs/EXT/index_material.txt
+	void glIndexMaterialEXT (GLenum face, GLenum mode)

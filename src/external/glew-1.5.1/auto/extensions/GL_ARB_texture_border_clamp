@@ -1,0 +1,3 @@
+GL_ARB_texture_border_clamp
+http://www.opengl.org/registry/specs/ARB/texture_border_clamp.txt
+	GL_CLAMP_TO_BORDER_ARB 0x812D

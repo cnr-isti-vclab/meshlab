@@ -1,0 +1,3 @@
+GL_SGIX_framezoom
+http://www.opengl.org/registry/specs/SGIX/framezoom.txt
+	void glFrameZoomSGIX (GLint factor)

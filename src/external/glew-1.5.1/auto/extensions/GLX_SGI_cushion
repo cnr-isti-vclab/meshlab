@@ -1,0 +1,3 @@
+GLX_SGI_cushion
+http://www.opengl.org/registry/specs/SGI/cushion.txt
+	void glXCushionSGI (Display* dpy, Window window, float cushion)
