@@ -6,7 +6,7 @@ CONFIG       += plugin
 QT += xml
 
 VCGDIR  = ../../../../vcglib
-GLEWDIR = ../../../../code/lib/glew
+GLEWDIR = ../../external/glew-1.5.1
 GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
 
