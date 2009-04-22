@@ -11,6 +11,7 @@ INCLUDEPATH += ../include
 macx:DESTDIR       = ../../lib/macx
 win32-g++:DESTDIR       = ../../lib/win32-gcc  
 win32-msvc2005:DESTDIR       = ../../lib/win32-msvc2005
+win32-msvc2008:DESTDIR       = ../../lib/win32-msvc2008
 
 # Input
 SOURCES += muParser.cpp \

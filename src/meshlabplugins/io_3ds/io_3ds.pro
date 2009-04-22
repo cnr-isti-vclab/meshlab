@@ -21,8 +21,8 @@ INCLUDEPATH += ../../external/lib3ds-1.3.0/
 # where XXX is the name of your system according to the QT naming style.
 # Linux users can rely on their own package managers and hope that it is installing the last version of lib3ds
 
-win32-msvc.net:LIBS	+= ../../external/lib/lib3ds-1.3.0/lib/win32-msvc.net/lib3ds-130s.lib
-win32-msvc2005:LIBS	+= ../../external/lib/lib3ds-1.3.0/lib/win32-msvc2005/lib3ds-130s.lib
+win32-msvc.net:LIBS	+= ../../external/lib/win32-msvc.net/3ds.lib
+win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/3ds.lib
 win32-g++:LIBS		+= ../../external/lib/win32-gcc/lib3ds.a
 
 # unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/lib/unix -l3ds
