@@ -89,7 +89,7 @@ void loadPlugins(FILE *fp=0)
 				foreach(filterAction, iFilter->actions())
 				{
 					filterMap[filterAction->text()]=filterAction;
-					 if(fp) fprintf(fp, "*<b><i>%s</i></b> <br>%s</br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
+					 if(fp) fprintf(fp, "*<b><i>%s</i></b> <br>%s\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
 				}
 				//printf("Loaded %i filtering actions form %s\n", filterMap.size() - oldSize, qPrintable(fileName));
 			}
