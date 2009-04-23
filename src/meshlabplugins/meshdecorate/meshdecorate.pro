@@ -4,6 +4,7 @@ QT += opengl
 
 HEADERS       = meshdecorate.h
 SOURCES       = meshdecorate.cpp \
-		$$VCGDIR/wrap/gui/coordinateframe.cpp
+				$$GLEWCODE\
+				$$VCGDIR/wrap/gui/coordinateframe.cpp
 
 TARGET        = meshdecorate

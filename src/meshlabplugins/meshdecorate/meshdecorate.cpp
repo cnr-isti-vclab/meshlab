@@ -20,103 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.49  2008/04/18 17:42:19  cignoni
-added showing of facenormals
-
-Revision 1.48  2008/04/11 10:11:55  cignoni
-added visualization of vertex and face label
-
-Revision 1.47  2008/04/04 10:03:50  cignoni
-Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
-
-Revision 1.46  2008/03/02 16:55:26  benedetti
-removed DrawAxis() in favor of VCG's CoordinateFrame class
-
-Revision 1.45  2008/01/04 18:23:34  cignoni
-Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
-
-Revision 1.44  2008/01/04 00:46:29  cignoni
-Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
-
-Revision 1.43  2007/10/23 07:16:35  cignoni
-added absolute box corner decoration
-
-Revision 1.42  2007/10/02 08:13:50  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.41  2007/04/16 09:25:29  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing again...
-
-Revision 1.40  2007/03/20 16:23:09  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.39  2007/02/25 21:23:05  cignoni
-Added casts for mac compiling
-
-Revision 1.38  2006/11/29 00:59:17  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.37  2006/11/07 09:24:10  cignoni
-Removed shorthHelp and reformatted the code
-
-Revision 1.36  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.35  2006/04/20 16:58:51  cignoni
-Disambiguated (hopefully for the last time) max(float/double) issue.
-
-Revision 1.34  2006/04/18 06:57:35  zifnab1974
-syntax errors for gcc 3.4.5 resolved
-
-Revision 1.33  2006/04/12 15:12:18  cignoni
-Added Filter classes (cleaning, meshing etc)
-
-Revision 1.32  2006/03/29 10:44:06  zifnab1974
-for gcc 3.4.5
-
-Revision 1.31  2006/03/29 10:06:14  cignoni
-disambiguated max float/double
-
-Revision 1.30  2006/03/29 07:30:21  zifnab1974
-max of float and double is not possible, remove f for gcc 3.4.5
-
-Revision 1.29  2006/02/22 12:24:41  cignoni
-Restructured Quoted Box.
-
-Revision 1.28  2006/02/19 22:17:17  glvertex
-Applied gcc patch
-
-Revision 1.27  2006/02/18 18:07:20  glvertex
-Quoted box now has extern quoted lines
-
-Revision 1.26  2006/02/17 16:09:31  glvertex
-Partial restyle in drawAxis and drawQuotedBox
-A lot of optimizations
-
-Revision 1.25  2006/02/16 17:06:54  glvertex
-Solved nasty bug on choosing axis candidate
-
-Revision 1.24  2006/02/16 12:34:35  glvertex
-Fixed quoted box
-Some optimizations
-
-Revision 1.23  2006/02/16 12:01:51  alemochi
-correct bug
-
-Revision 1.22  2006/02/15 16:27:33  glvertex
-- Added labels to the quoted box
-- Credits
-
-Revision 1.21  2006/02/06 22:44:02  davide_portelli
-Some changes in DrawAxis in order to compile under gcc
-
-****************************************************************************/
 
 #include <QtGui>
 
@@ -134,15 +37,17 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
  {
   switch(ID(action))
   {
-    case DP_SHOW_AXIS :					return tr("Draws XYZ axes in world coordinates");
-    case DP_SHOW_BOX_CORNERS:			return tr("Draws object's bounding box corners");
-	case DP_SHOW_BOX_CORNERS_ABS  :		return tr("Show Box Corners (Abs)");
-    case DP_SHOW_VERT_NORMALS:			return tr("Draws object vertex normals");
+    case DP_SHOW_AXIS :									return tr("Draws XYZ axes in world coordinates");
+    case DP_SHOW_BOX_CORNERS:						return tr("Draws object's bounding box corners");
+		case DP_SHOW_VERT:									return tr("Draw the vertices of the mesh as round dots");
+    case DP_SHOW_NON_FAUX_EDGE:								return tr("Draws the edge of the mesh that are on the boundary.");
+		case DP_SHOW_BOX_CORNERS_ABS  :			return tr("Show Box Corners (Abs)");
+    case DP_SHOW_VERT_NORMALS:					return tr("Draws object vertex normals");
     case DP_SHOW_VERT_PRINC_CURV_DIR :	return tr("Show Vertex Principal Curvature Directions");
-    case DP_SHOW_FACE_NORMALS:			return tr("Draws object face normals");
-    case DP_SHOW_QUOTED_BOX:			return tr("Draws quoted box");
-    case DP_SHOW_VERT_LABEL:			return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
-    case DP_SHOW_FACE_LABEL:			return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
+    case DP_SHOW_FACE_NORMALS:					return tr("Draws object face normals");
+    case DP_SHOW_QUOTED_BOX:						return tr("Draws quoted box");
+    case DP_SHOW_VERT_LABEL:						return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
+    case DP_SHOW_FACE_LABEL:						return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
 	 }
   assert(0);
   return QString();
@@ -152,6 +57,8 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
 {
   switch(filter)
   {
+    case DP_SHOW_VERT      :	return QString("Show Vertex Dots");
+    case DP_SHOW_NON_FAUX_EDGE :	return QString("Show Non-Faux Edges");
     case DP_SHOW_VERT_NORMALS      :	return QString("Show Vertex Normals");
     case DP_SHOW_VERT_PRINC_CURV_DIR :	return QString("Show Vertex Principal Curvature Directions");
     case DP_SHOW_FACE_NORMALS      :	return QString("Show Face Normals");
@@ -193,7 +100,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
 					}
 			}
 		else
-		if( ID(a) ==DP_SHOW_VERT_PRINC_CURV_DIR){
+		if( ID(a) == DP_SHOW_VERT_PRINC_CURV_DIR){
 			if(vcg::tri::HasPerVertexCurvatureDir(m.cm))
 				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
 				{
@@ -221,14 +128,44 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
 	 glEnd();
    glPopAttrib();
   }
-	if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
-	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m,gla,qf);
-	if(a->text() == ST(DP_SHOW_VERT_LABEL))	DrawVertLabel(m,gla,qf);
-  if(a->text() == ST(DP_SHOW_FACE_LABEL))	DrawFaceLabel(m,gla,qf);
-
+	if(ID(a) == DP_SHOW_BOX_CORNERS)	DrawBBoxCorner(m);
+	if(ID(a) == DP_SHOW_QUOTED_BOX)		DrawQuotedBox(m,gla,qf);
+	if(ID(a) == DP_SHOW_VERT_LABEL)	DrawVertLabel(m,gla,qf);
+  if(ID(a) == DP_SHOW_FACE_LABEL)	DrawFaceLabel(m,gla,qf);
+  if(ID(a) == DP_SHOW_VERT)	{
+			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+			glDisable(GL_LIGHTING);
+			glEnable(GL_POINT_SMOOTH);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor(Color4b::Black);
+			glDepthRange (0.0, 0.9999);
+			glDepthFunc(GL_LEQUAL);
+			glPointSize(4.0f);
+			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
+			glColor(Color4b::White);
+			glPointSize(3.0f);
+			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
+			
+			glPopAttrib();
+	}
+	if(ID(a) == DP_SHOW_NON_FAUX_EDGE)	{
+			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+			glDisable(GL_LIGHTING);
+			glDepthFunc(GL_LEQUAL);
+			glEnable(GL_LINE_SMOOTH);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glLineWidth(1.f);
+			glColor(Color4b::DarkGray);
+			glDepthRange (0.0, 0.999);
+			m.glw.DrawWirePolygonal<GLW::NMNone,GLW::CMNone>();
+			glPopAttrib();
+}
 	glPopMatrix();
-  if(a->text() == ST(DP_SHOW_AXIS))	CoordinateFrame(m.cm.bbox.Diag()/2.0).Render(gla);
-  if(a->text() == ST(DP_SHOW_BOX_CORNERS_ABS))	DrawBBoxCorner(m,false);
+
+  if(ID(a) == DP_SHOW_AXIS)	CoordinateFrame(m.cm.bbox.Diag()/2.0).Render(gla);
+  if(ID(a) == DP_SHOW_BOX_CORNERS_ABS)	DrawBBoxCorner(m,false);
 }
 
 void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla,QFont qf)
@@ -261,7 +198,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla,QFont qf)
 	Point3f c = b.Center();
 		
 	float s = 1.15f;
-  const float LabelSpacing = 20;
+  const float LabelSpacing = 30;
 	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
 	glPushMatrix();
 	glScalef(1,s,s);
@@ -280,7 +217,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla,QFont qf)
 	glPushMatrix();
 	glScalef(s,s,1);
 	glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
-	drawQuotedLine(p2,p1,b.min[2],b.max[2],CoordinateFrame::calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws z axis
+	drawQuotedLine(p1,p2,b.min[2],b.max[2],CoordinateFrame::calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws z axis
 	glPopMatrix();
 
 	glPopAttrib();
@@ -414,8 +351,8 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 						glVertex(Zero+v*i);
 					glEnd();
 
-					for(i=firstTick;i<bVal;i+=tickDist)
-						gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),qf);		
+					for(i=firstTick+tickDist; i<bVal-tickDist;i+=tickDist)
+						gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,4+neededZeros,'f',neededZeros),qf);		
 
 				 glPointSize(1);
 				 glBegin(GL_POINTS);
@@ -438,8 +375,8 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 
 	// bold font at beginning and at the end
 	qf.setBold(true);
-	gla->renderText(a[0],a[1],a[2],tr("%1").arg(aVal,5+neededZeros,'f',neededZeros+2 ),qf);
-	gla->renderText(b[0],b[1],b[2],tr("%1").arg(bVal,5+neededZeros,'f',neededZeros+2 ),qf);
+	gla->renderText(a[0],a[1],a[2],tr("%1").arg(aVal,6+neededZeros,'f',neededZeros+2 ),qf);
+	gla->renderText(b[0],b[1],b[2],tr("%1").arg(bVal,6+neededZeros,'f',neededZeros+2 ),qf);
 }
 
 
