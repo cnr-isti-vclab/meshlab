@@ -159,7 +159,7 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 	numpoints --> number of points
 	m --> original mesh 
 	pm --> new mesh
-	threshold --> ??????????????????????????????????????
+	threshold --> ??????????????????????????????????????PEZZA
 
 	compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
 		Compute a Voronoi filtering(Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). 
@@ -664,7 +664,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 	numpoints --> number of points
 	m --> original mesh
 	pm --> new mesh that is the convex hull of the flipped points, if convex_hullFP is true
-	pm2 --> new mesh that is the convex hull of the original points, if convex_hullNFP is true
+	pm2 --> new mesh that is the convex hull of the non flipped points, if convex_hullNFP is true
 	viewpoint -> the viewpoint
 	threshold -> bounds the radius oh the sphere used to select visible points
 	convex_hullFP --> true if you want to show the partial Convex Hull of the transformed points cloud
@@ -683,7 +683,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 		-1 otherwise.
 */
 
-int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,vcg::Point3f viewpointP,float threshold,bool convex_hullFP){
+int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, vcg::Point3f viewpointP,float threshold,bool convex_hullFP,bool convex_hullNFP){
 	boolT ismalloc= True;			/* True if qhull should free points in qh_freeqhull() or reallocation */ 
 	char flags[]= "qhull Tcv";		/* option flags for qhull, see qh_opt.htm */
 	FILE *outfile= NULL;			/* output from qh_produce_output()			
@@ -758,6 +758,7 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,vcg::Poin
 		/*ivp length is 'numpoints' because each vertex is accessed through its ID whose range is 
 		  0<=qh_pointid(vertex->point)<numpoints. qh num_vertices is < numpoints*/
 		vector<tri::Allocator<CMeshO>::VertexPointer> ivp_flipped(numpoints); //Vector of pointers to the flipped points
+		vector<tri::Allocator<CMeshO>::VertexPointer> ivp_non_flipped(numpoints); //Vector of pointers to the non flipped points BRUTTOOOOO
 
 		vertexT *vertex;
 		selected=qh num_vertices;
@@ -767,9 +768,14 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,vcg::Poin
 				selected--;
 		}
 
-		tri::Allocator<CMeshO>::AddVertices(pm.cm,selected);
+		if(convex_hullFP)
+			tri::Allocator<CMeshO>::AddVertices(pm.cm,selected);
+
+		if(convex_hullNFP)
+			tri::Allocator<CMeshO>::AddVertices(pm2.cm,selected);
 
 		int i=0;
+		int j=0;
 		FORALLvertices{	
 			//Do not add the viewpoint
 			if ((*vertex).point && qh_pointid(vertex->point)<numpoints){
@@ -782,6 +788,13 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,vcg::Poin
 					pm.cm.vert[i].P()[2] = (*vertex).point[2];
 					ivp_flipped[qh_pointid(vertex->point)] = &pm.cm.vert[i];
 					i++;
+				}
+				if(convex_hullNFP){ //Add non flipped points to the new mesh
+					pm2.cm.vert[j].P()[0] = (*ivp[qh_pointid(vertex->point)]).P()[0];
+					pm2.cm.vert[j].P()[1] = (*ivp[qh_pointid(vertex->point)]).P()[1];
+					pm2.cm.vert[j].P()[2] = (*ivp[qh_pointid(vertex->point)]).P()[2];
+					ivp_non_flipped[qh_pointid(vertex->point)] = &pm2.cm.vert[j];
+					j++;
 				}
 			}
 		}
@@ -799,6 +812,24 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,vcg::Poin
 						(*fi).V(vertex_i)= ivp_flipped[qh_pointid(vertex->point)];	
 					else{
 						tri::Allocator<CMeshO>::DeleteFace(pm.cm,*fi);
+						break;
+					}
+				}
+			}
+		}
+		if(convex_hullNFP){
+			//Add to the new mesh only the faces of the convex hull whose vertices aren't the viewpoint
+			//Aggiusta
+			facetT *facet;
+			FORALLfacet_(qh facet_list){		
+				vertexT *vertex;
+				int vertex_n, vertex_i;
+				tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm2.cm,1);		
+				FOREACHvertex_i_((*facet).vertices){
+					if(qh_pointid(vertex->point)<numpoints)
+						(*fi).V(vertex_i)= ivp_non_flipped[qh_pointid(vertex->point)];	
+					else{
+						tri::Allocator<CMeshO>::DeleteFace(pm2.cm,*fi);
 						break;
 					}
 				}

@@ -46,8 +46,6 @@
 using namespace std;
 using namespace vcg;
 
-//Internal prototype
-bool create_mesh_convex_hull(MeshDocument &md,MeshModel &m,FilterParameterSet & par);
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -110,7 +108,7 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId)
 		case FP_QHULL_VISIBLE_POINTS: return QString("Select the <b>visible points</b> in a point cloud, as viewed from a given viewpoint.<br>"
 										  "It uses the Qhull library (http://www.qhull.org/ <br><br>"
 										  "The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals."
-										  "The visible points are those that corresponds to the ones that reside on the convex hull of a transformed point cloud.");
+										  "The visible points are those that correspond to the ones that reside on the convex hull of a transformed point cloud.");
 		default : assert(0); 
 	}
 	return QString("Error: Unknown Filter");
@@ -156,7 +154,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			}
 		case FP_QHULL_VORONOI_FILTERING :
 			{
-				parlst.addDynamicFloat("threshold",100.0f, 100.0f, 2000.0f,MeshModel::MM_NONE,"threshold ","????.");
+				parlst.addDynamicFloat("threshold",0.0f, 0.0f, 2000.0f,MeshModel::MM_NONE,"threshold ","????.");
 				break;
 			}	
 		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
@@ -185,7 +183,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 												"if UseCamera is true, this value is ignored");
 				
 				parlst.addBool("convex_hullFP",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud");
-				parlst.addBool("convex_hullNFP",false,"Show the Convex Hull of the given points", "Show the Convex Hull of the given points");
+				parlst.addBool("convex_hullNFP",false,"Show the Convex Hull of the non flipped points", "Show the Convex Hull of the given points");
 				parlst.addBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
 								"If no Convex Hulls are selected , this value is ignored");
 				break;
@@ -203,13 +201,93 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 		case FP_QHULL_CONVEX_HULL :
 			{
 				MeshModel &m=*md.mm();
-				bool result= create_mesh_convex_hull(md,m,par);
-				
-				if(result){
-					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",m.cm.vn,m.cm.fn);
-					return true;
+				MeshModel &pm =*md.addNewMesh("Convex Hull");
+	
+				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
+					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
 				}
-				else return false;
+				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
+					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+				}
+			    
+				int dim= 3;				/* dimension of points */
+				int numpoints= m.cm.vn;	/* number of mesh vertices */
+				
+				//facet_list contains the convex hull  
+				//facet_list contains simplicial (triangulated) facets.
+				//The convex hull of a set of points is the smallest convex set containing the points.
+
+				facetT *facet_list = compute_convex_hull(dim,numpoints,m);
+
+				if(facet_list!=NULL){
+
+					int convexNumFaces = qh num_facets;
+					int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
+					assert( qh num_vertices == convexNumVert);
+
+					tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
+					tri::Allocator<CMeshO>::AddFaces(pm.cm,convexNumFaces);
+
+
+					/*ivp length is 'numpoints' because each vertex is accessed through its ID whose range is 
+					  0<=qh_pointid(vertex->point)<numpoints. qh num_vertices is < numpoints*/
+					vector<tri::Allocator<CMeshO>::VertexPointer> ivp(numpoints);
+					vertexT *vertex;
+					int i=0;
+					FORALLvertices{	
+						if ((*vertex).point){
+							pm.cm.vert[i].P()[0] = (*vertex).point[0];
+							pm.cm.vert[i].P()[1] = (*vertex).point[1];
+							pm.cm.vert[i].P()[2] = (*vertex).point[2];
+							ivp[qh_pointid(vertex->point)] = &pm.cm.vert[i];
+							i++;
+						}
+					}
+
+					facetT *facet;
+					i=0;
+					FORALLfacet_(facet_list){		
+						vertexT *vertex;
+						int vertex_n, vertex_i;
+						FOREACHvertex_i_((*facet).vertices){
+							pm.cm.face[i].V(vertex_i)= ivp[qh_pointid(vertex->point)];	
+						}
+						i++;
+					}
+
+					assert( pm.cm.fn == convexNumFaces);
+					//m.cm.Clear();
+
+					//Re-orient normals
+					bool reorient= par.getBool("reorient");
+					if (reorient){
+						pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
+						bool oriented, orientable;
+
+						tri::Clean<CMeshO>::IsOrientedMesh(pm.cm, oriented,orientable);
+						vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm.cm);
+						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
+						pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
+						tri::UpdateSelection<CMeshO>::ClearFace(pm.cm);
+					}
+
+					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",m.cm.vn,m.cm.fn);
+					
+					int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
+					qh_freeqhull(!qh_ALL);  
+					qh_memfreeshort (&curlong, &totlong);
+					if (curlong || totlong)
+						fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
+									 totlong, curlong);
+
+					return true;
+
+				}
+				else
+					return false;
+							
 			}
 		case FP_QHULL_DELAUNAY_TRIANGULATION:
 			{
@@ -407,7 +485,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 					viewpoint = m.cm.shot.GetViewPoint();
 				}
 
-			    MeshModel &pm =*md.addNewMesh("CH Flipped Points");
+				MeshModel &pm =*md.addNewMesh("CH Flipped Points");
 				
 				if (pm.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					pm.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
@@ -416,8 +494,19 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 					pm.clearDataMask(MeshModel::MM_VERTTEXCOORD);
 				}
 
+				MeshModel &pm2 =*md.addNewMesh("CH Non Flipped Points");
+				
+				if (pm2.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
+					pm2.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
+				}
+				if (pm2.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
+					pm2.clearDataMask(MeshModel::MM_VERTTEXCOORD);
+				}
+
 				bool convex_hullFP = par.getBool("convex_hullFP");
-				int result = visible_points(dim,numpoints,m,pm,viewpoint,threshold,convex_hullFP );
+				bool convex_hullNFP = par.getBool("convex_hullNFP");
+
+				int result = visible_points(dim,numpoints,m,pm,pm2,viewpoint,threshold,convex_hullFP,convex_hullNFP);
 
 				if(!convex_hullFP)
 					md.delMesh(&pm);
@@ -439,11 +528,31 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 				}
 
-				bool convex_hullNFP = par.getBool("convex_hullNFP");
-				if(convex_hullNFP){
-					bool result =create_mesh_convex_hull(md,m,par);
+				
+				if(!convex_hullNFP){
+					/*bool result =create_mesh_convex_hull(md,m,par);
 					if(result)
 						Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",(*md.mm()).cm.vn,(*md.mm()).cm.fn);
+				*/
+					md.delMesh(&pm2);
+				}
+				else{
+					//Re-orient normals
+					bool reorient= par.getBool("reorient");
+					if (reorient){
+						pm2.updateDataMask(MeshModel::MM_FACEFACETOPO);
+						bool oriented,orientable;
+						
+						tri::Clean<CMeshO>::IsOrientedMesh(pm2.cm, oriented,orientable);
+						vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm2.cm);
+						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm2.cm);
+						pm2.clearDataMask(MeshModel::MM_FACEFACETOPO);
+						tri::UpdateSelection<CMeshO>::ClearFace(pm2.cm);
+					}
+
+					vcg::tri::UpdateBounding<CMeshO>::Box(pm2.cm);
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm2.cm);
+					Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",pm2.cm.vn,pm2.cm.fn);
 				}
 
 				if(result>=0){
@@ -455,93 +564,4 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 			}
 	}
 }
-
-bool create_mesh_convex_hull(MeshDocument &md,MeshModel &m,FilterParameterSet & par){
-    MeshModel &pm =*md.addNewMesh("Convex Hull");
-	
-	if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
-		m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-	}
-	if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
-		m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-	}
-    
-	int dim= 3;				/* dimension of points */
-	int numpoints= m.cm.vn;	/* number of mesh vertices */
-	
-	//facet_list contains the convex hull  
-	//facet_list contains simplicial (triangulated) facets.
-	//The convex hull of a set of points is the smallest convex set containing the points.
-
-	facetT *facet_list = compute_convex_hull(dim,numpoints,m);
-
-	if(facet_list!=NULL){
-
-		int convexNumFaces = qh num_facets;
-		int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
-		assert( qh num_vertices == convexNumVert);
-
-		tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
-		tri::Allocator<CMeshO>::AddFaces(pm.cm,convexNumFaces);
-
-
-		/*ivp length is 'numpoints' because each vertex is accessed through its ID whose range is 
-		  0<=qh_pointid(vertex->point)<numpoints. qh num_vertices is < numpoints*/
-		vector<tri::Allocator<CMeshO>::VertexPointer> ivp(numpoints);
-		vertexT *vertex;
-		int i=0;
-		FORALLvertices{	
-			if ((*vertex).point){
-				pm.cm.vert[i].P()[0] = (*vertex).point[0];
-				pm.cm.vert[i].P()[1] = (*vertex).point[1];
-				pm.cm.vert[i].P()[2] = (*vertex).point[2];
-				ivp[qh_pointid(vertex->point)] = &pm.cm.vert[i];
-				i++;
-			}
-		}
-
-		facetT *facet;
-		i=0;
-		FORALLfacet_(facet_list){		
-			vertexT *vertex;
-			int vertex_n, vertex_i;
-			FOREACHvertex_i_((*facet).vertices){
-				pm.cm.face[i].V(vertex_i)= ivp[qh_pointid(vertex->point)];	
-			}
-			i++;
-		}
-
-		assert( pm.cm.fn == convexNumFaces);
-		//m.cm.Clear();
-
-		//Re-orient normals
-		bool reorient= par.getBool("reorient");
-		if (reorient){
-			pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
-			bool oriented, orientable;
-
-			tri::Clean<CMeshO>::IsOrientedMesh(pm.cm, oriented,orientable);
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm.cm);
-			vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
-			pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
-			tri::UpdateSelection<CMeshO>::ClearFace(pm.cm);
-		}
-
-		vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-		
-		int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
-		qh_freeqhull(!qh_ALL);  
-		qh_memfreeshort (&curlong, &totlong);
-		if (curlong || totlong)
-			fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n", 
-						 totlong, curlong);
-
-		return true;
-
-	}
-	else
-		return false;
-}
-
 Q_EXPORT_PLUGIN(QhullPlugin)
