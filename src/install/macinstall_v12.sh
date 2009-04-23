@@ -76,6 +76,10 @@ cp textures/cubemaps/uffizi*.jpg $BUNDLE/$APPNAME/Contents/textures/cubemaps
 mkdir $BUNDLE/$APPNAME/Contents/shaders   
 cp shaders/*.gdp shaders/*.vert shaders/*.frag shaders/*.txt  $BUNDLE/$APPNAME/Contents/shaders
 
+#added rendermonkey shaders
+mkdir $BUNDLE/$APPNAME/Contents/shadersrm   
+cp shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shadersrm
+
 for x in $QTCOMPONENTS
 do
 #    cp -R $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks 
