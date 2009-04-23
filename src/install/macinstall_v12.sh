@@ -112,7 +112,6 @@ plugins/libfilter_mls.dylib \
 plugins/libfilter_poisson.dylib \
 plugins/libfilter_sampling.dylib \
 plugins/libfilter_select.dylib \
-plugins/libfilter_slice.dylib \
 plugins/libfilter_splitter.dylib \
 plugins/libfilter_trioptimize.dylib \
 plugins/libfilter_unsharp.dylib \
@@ -123,6 +122,8 @@ plugins/libio_base.dylib \
 plugins/libio_3ds.dylib \
 plugins/libio_collada.dylib \
 plugins/libio_epoch.dylib \
+plugins/libio_expe.dylib \
+plugins/libio_gts.dylib \
 plugins/libio_u3d.dylib \
 plugins/libio_tri.dylib \
 plugins/libio_x3d.dylib \
@@ -139,6 +140,16 @@ plugins/libeditrgbtri.dylib \
 plugins/libeditsegment.dylib \
 plugins/libeditslice.dylib \
 plugins/libeditstraightener.dylib \
+plugins/libmeshdecorate.dylib \
+plugins/librender_gdp.dylib \
+plugins/librender_rfx.dylib \
+plugins/librender_splatting.dylib \
+plugins/librender_gdp.dylib \
+plugins/libsampledecoration.dylib \
+plugins/libsampleedit.dylib \
+plugins/libsamplefilter.dylib \
+plugins/libsamplefilterdoc.dylib \
+plugins/libsamplefilterdyn.dylib
 "
 pwd
 for x in $PLUGINSNAMES
