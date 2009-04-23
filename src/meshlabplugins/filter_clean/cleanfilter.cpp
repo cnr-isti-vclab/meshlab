@@ -125,6 +125,7 @@ CleanFilter::CleanFilter()
     << FP_SELECTBYANGLE
     << FP_REMOVE_TVERTEX_FLIP
     << FP_REMOVE_TVERTEX_COLLAPSE
+		<< FP_REMOVE_DUPLICATE_FACE
 		<< FP_MERGE_CLOSE_VERTEX;
 
   FilterIDType tt;
@@ -156,6 +157,7 @@ const QString CleanFilter::filterName(FilterIDType filter)
     case FP_REMOVE_TVERTEX_FLIP :  return QString("Remove T-Vertices by edge flip");
     case FP_REMOVE_TVERTEX_COLLAPSE : return QString("Remove T-Vertices by edge collapse");
     case FP_MERGE_CLOSE_VERTEX : return QString("Merge Close Vertices");
+    case FP_REMOVE_DUPLICATE_FACE: return QString("Remove Duplicate Faces");
 		default: assert(0);
   }
   return QString("error!");
@@ -177,6 +179,7 @@ const QString CleanFilter::filterInfo(FilterIDType filterId)
     case FP_REMOVE_TVERTEX_COLLAPSE :  return QString("Removes t-vertices from the mesh by collapsing the shortest of the incident edges");
     case FP_REMOVE_TVERTEX_FLIP : return QString("Removes t-vertices by flipping the opposite edge on the degenerate face if the triangulation quality improves");
     case FP_MERGE_CLOSE_VERTEX : return QString("Merge togheter all the vertices that are nearer than the speicified threshold. Like a unify duplicated vertices but with some tolerance.");
+    case FP_REMOVE_DUPLICATE_FACE : return QString("Remove all the duplicate faces. Two faces are considered equal if they are composed by the same set of verticies, regardless of the order of the vertices.");
     default: assert(0);
   }
   return QString("error!");
@@ -194,6 +197,7 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
     case FP_REMOVE_TVERTEX_COLLAPSE :
     case FP_REMOVE_TVERTEX_FLIP :
     case FP_MERGE_CLOSE_VERTEX :
+    case FP_REMOVE_DUPLICATE_FACE:
       return MeshFilterInterface::Cleaning;     
 		case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
 		case FP_ALIGN_WITH_PICKED_POINTS: return MeshFilterInterface::RangeMap;
@@ -215,11 +219,19 @@ const int CleanFilter::getRequirements(QAction *action)
     case FP_SELECTBYANGLE:
 		case FP_ALIGN_WITH_PICKED_POINTS:
 		case FP_MERGE_CLOSE_VERTEX:
+		case FP_REMOVE_DUPLICATE_FACE:
     	return MeshModel::MM_NONE;
     default: assert(0);
   }
   return 0;
 }
+
+	bool CleanFilter::autoDialog(QAction *action)
+	{
+		if(ID(action)==FP_REMOVE_DUPLICATE_FACE) return false;
+		return true;
+	}
+
 
 void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
 { 
@@ -402,6 +414,12 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
         float threshold = par.getAbsPerc("Threshold");
         int total = tri::Clean<CMeshO>::MergeCloseVertex(m.cm, threshold);
         Log(GLLogStream::FILTER,"Successfully merged %d vertices", total);
+    }
+    break;
+   case FP_REMOVE_DUPLICATE_FACE :
+    {
+        int total = tri::Clean<CMeshO>::RemoveDuplicateFace(m.cm);
+        Log(GLLogStream::FILTER,"Successfully deleted %d duplicated faces", total);
     }
     break;
 

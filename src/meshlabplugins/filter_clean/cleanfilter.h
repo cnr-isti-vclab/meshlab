@@ -88,6 +88,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
     FP_SELECTBYANGLE,
     FP_REMOVE_TVERTEX_FLIP,
     FP_REMOVE_TVERTEX_COLLAPSE,
+    FP_REMOVE_DUPLICATE_FACE,
 		FP_MERGE_CLOSE_VERTEX
   } ;
 	
@@ -108,7 +109,7 @@ MeshFilterInterface::Remeshing;
   virtual const FilterClass getClass(QAction *);
   virtual const int getRequirements(QAction *);
 
-	virtual bool autoDialog(QAction *) {return true;}
+	virtual bool autoDialog(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	
