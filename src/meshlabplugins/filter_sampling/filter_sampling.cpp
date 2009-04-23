@@ -164,6 +164,9 @@ public:
 		closestPtMesh = _closestMesh;
 		if(m) 
 		{
+			tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
+			tri::UpdateFlags<CMeshO>::FaceProjection(*m);
+
 			unifFaceGrid.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
 			hist.SetRange(0.0, m->bbox.Diag()/100.0, 100);
@@ -269,6 +272,8 @@ public:
 		m=_m;
 		if(m) 
 		{
+			tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
+			tri::UpdateFlags<CMeshO>::FaceProjection(*m);
 			unifGrid.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
 		}
