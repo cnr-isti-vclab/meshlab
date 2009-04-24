@@ -368,7 +368,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 	if (id == FP_RADIUS_FROM_DENSITY)
 	{
 		md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
-		APSS<CMeshO> mls(md.mm()->cm);		
+		APSS<CMeshO> mls(md.mm()->cm);
 		mls.computeVertexRaddi(par.getInt("NbNeighbors"));
 		return true;
 	}
@@ -381,7 +381,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, ratio, nonClosedOnly);
 		return true;
 	}
-	
+
 	// we are doing some MLS based stuff
 	{
 		if(md.mm()->cm.fn > 0)
@@ -396,11 +396,11 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		if(!md.mm()->hasDataMask(MeshModel::MM_VERTRADIUS))
 		{
 			md.mm()->updateDataMask(MeshModel::MM_VERTRADIUS);
-			APSS<CMeshO> mls(md.mm()->cm);		
+			APSS<CMeshO> mls(md.mm()->cm);
 			mls.computeVertexRaddi();
 			Log(GLLogStream::FILTER, "Mesh has no per vertex radius. Computed and added using default neighbourhood");
 		}
-		
+
 		MeshModel* pPoints = 0;
 		if (id & _PROJECTION_)
 		{
@@ -410,7 +410,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 				MeshModel* ref = par.getMesh("ControlMesh");
 				pPoints = new MeshModel();
 				pPoints->updateDataMask(ref->currentDataMask);
-				vcg::tri::Append<CMeshO,CMeshO>::Mesh(pPoints->cm, ref->cm, false);
+				vcg::tri::Append<CMeshO,CMeshO>::Mesh(pPoints->cm, ref->cm, false, true);  // the last true means "copy all vertices"
 				vcg::tri::UpdateBounding<CMeshO>::Box(pPoints->cm);
 				pPoints->cm.Tr = ref->cm.Tr;
 			}
@@ -423,7 +423,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		// create the MLS surface
 		cb(1, "Create the MLS data structures...");
 		MlsSurface<CMeshO>* mls = 0;
-        
+
 		RIMLS<CMeshO>* rimls = 0;
 		APSS<CMeshO>* apss = 0;
 

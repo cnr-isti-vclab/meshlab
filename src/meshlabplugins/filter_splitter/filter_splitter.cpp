@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -44,34 +44,34 @@
 using namespace std;
 using namespace vcg;
 
-// Constructor 
-FilterSplitterPlugin::FilterSplitterPlugin() 
-{ 
-	typeList << 
+// Constructor
+FilterSplitterPlugin::FilterSplitterPlugin()
+{
+	typeList <<
 	FP_SPLITSELECT <<
 	FP_DUPLICATE;
-  
+
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
 }
 
-// ST() return the very short string describing each filtering action 
-const QString FilterSplitterPlugin::filterName(FilterIDType filterId) 
+// ST() return the very short string describing each filtering action
+const QString FilterSplitterPlugin::filterName(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_SPLITSELECT :  return QString("Move selection on another layer"); 
-		case FP_DUPLICATE :  return QString("Duplicate current layer"); 
-		default : assert(0); 
+		case FP_SPLITSELECT :  return QString("Move selection on another layer");
+		case FP_DUPLICATE :  return QString("Duplicate current layer");
+		default : assert(0);
 	}
 }
 
-// Info() return the longer string describing each filtering action 
+// Info() return the longer string describing each filtering action
 const QString FilterSplitterPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_SPLITSELECT :  return QString("Selected faces are moved (or duplicated) in a new layer"); 
+		case FP_SPLITSELECT :  return QString("Selected faces are moved (or duplicated) in a new layer");
 		case FP_DUPLICATE :  return QString("Create a new layer containing the same model as the current one");
-		default : assert(0); 
+		default : assert(0);
 	}
 }
 
@@ -87,10 +87,10 @@ bool FilterSplitterPlugin::autoDialog(QAction *action)
   return false;
 }
 
-// This function define the needed parameters for each filter. 
-void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &m, FilterParameterSet & parlst) 
+// This function define the needed parameters for each filter.
+void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &m, FilterParameterSet & parlst)
 {
-	 switch(ID(action))	 
+	 switch(ID(action))
 	 {
 		case FP_SPLITSELECT :
 			{
@@ -101,8 +101,8 @@ void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &m, Fi
 												"if false, the selected faces are duplicated in the new layer");
 			}
 			break;
-											
-		default : assert(0); 
+
+		default : assert(0);
 	}
 }
 
@@ -114,12 +114,12 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 
 	switch(ID(filter))
   {
-		case FP_SPLITSELECT : 
+		case FP_SPLITSELECT :
 		{
 			// creating the new layer
 			// that is the back one
-			MeshModel *mm= new MeshModel();	
-			md.meshList.push_back(mm);	
+			MeshModel *mm= new MeshModel();
+			md.meshList.push_back(mm);
 
 			MeshModel *destMesh     = md.meshList.back();	// destination = last
 			MeshModel *currentMesh  = md.mm();				// source = current
@@ -138,7 +138,7 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 				CMeshO::VertexIterator vi;
 				CMeshO::FaceIterator   fi;
 				tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
-				tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(currentMesh->cm);  
+				tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(currentMesh->cm);
 				for(fi=currentMesh->cm.face.begin();fi!=currentMesh->cm.face.end();++fi)
 					if(!(*fi).IsD() && (*fi).IsS() )
 						tri::Allocator<CMeshO>::DeleteFace(currentMesh->cm,*fi);
@@ -162,23 +162,23 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 			destMesh->fileName = "newlayer.ply";								// mesh name
 			tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
 			for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
-				face::ComputeNormalizedNormal(*fi);	
+				face::ComputeNormalizedNormal(*fi);
 			tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
 			destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
 		}
 		break;
 
-		case FP_DUPLICATE : 
+		case FP_DUPLICATE :
 		{
 			// creating the new layer
 			// that is the back one
-			MeshModel *mm= new MeshModel();	
-			md.meshList.push_back(mm);	
+			MeshModel *mm= new MeshModel();
+			md.meshList.push_back(mm);
 
 			MeshModel *destMesh     = md.meshList.back();	// destination = last
 			MeshModel *currentMesh  = md.mm();				// source = current
 
-			tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, false);
+			tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, false, true); // the last true means "copy all vertices"
 
 			Log(GLLogStream::FILTER,"Duplicated current model to layer %i", md.meshList.size());
 
@@ -186,7 +186,7 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 			destMesh->fileName = "newlayer.ply";								// mesh name
 			tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
 			for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
-				face::ComputeNormalizedNormal(*fi);	
+				face::ComputeNormalizedNormal(*fi);
 			tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
 			destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
 		}
@@ -201,7 +201,7 @@ const FilterSplitterPlugin::FilterClass FilterSplitterPlugin::getClass(QAction *
   {
     case FP_SPLITSELECT :
     case FP_DUPLICATE :
-      return MeshFilterInterface::Layer; 
+      return MeshFilterInterface::Layer;
 		default :  assert(0);
 			return MeshFilterInterface::Generic;
   }
