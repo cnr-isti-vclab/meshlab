@@ -36,44 +36,51 @@ $Log: stdpardialog.cpp,v $
 
 using namespace std;
 
-LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)    
-{ 
+LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
+{
   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
 	setVisible(false);
 	LayerDialog::ui.setupUi(this);
 	gla=qobject_cast<GLArea *>(parent);
 	mw=qobject_cast<MainWindow *>(gla->parentWidget()->parentWidget());
-	
+
 	connect(ui.layerTableWidget, SIGNAL(cellClicked(int, int)), this, SLOT(toggleStatus(int,int)) );
 	connect(ui.addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
 	connect(ui.deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );
+
+	this->setContextMenuPolicy(Qt::CustomContextMenu);
+	ui.layerTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(ui.layerTableWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(showContextMenu(const QPoint&)));
+	connect(ui.menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
 
 	//connect(	ui.deleteButton, SIGNAL(cellClicked(int, int)) , this,  SLOT(openIn(int,int)) );
 }
 void LayerDialog::toggleStatus(int row, int col)
 {
 	switch(col)
-	{ 
+	{
 		case 0 :
 			//the user has chosen to switch the layer
 			gla->meshDoc.setCurrentMesh(row);
 			break;
-		case 1 : 
+		case 1 :
 		{
 			//the user has clicke on one of the eyes
 			QList<MeshModel *> &meshList=gla->meshDoc.meshList;
 			// NICE TRICK.
 			// If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
 			// Very useful for comparing meshes
-			
+
 			if(QApplication::keyboardModifiers() == Qt::ControlModifier)
 					foreach(MeshModel *mp, meshList)
 					{
 						mp->visible=false;
 					}
-					
+
 			if(meshList.at(row)->visible)  meshList.at(row)->visible = false;
-			else   meshList.at(row)->visible = true;	
+			else   meshList.at(row)->visible = true;
 		}
 	}
 	//make sure the right row is colored or that they right eye is drawn (open or closed)
@@ -86,11 +93,40 @@ void LayerDialog::showEvent ( QShowEvent * /* event*/ )
 	updateTable();
 }
 
+void LayerDialog::showLayerMenu()
+{
+	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+		MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
+		if (mainwindow)
+		{
+			mainwindow->layerMenu()->popup(ui.menuButton->mapToGlobal(QPoint(10,10)));
+			return;
+		}
+	}
+}
+
+void LayerDialog::showContextMenu(const QPoint& pos)
+{
+	// switch layer
+	int row = ui.layerTableWidget->rowAt(pos.y());
+	if (row>=0)
+		gla->meshDoc.setCurrentMesh(row);
+
+	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+		MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
+		if (mainwindow)
+		{
+			mainwindow->layerMenu()->popup(ui.layerTableWidget->mapToGlobal(pos));
+			return;
+		}
+	}
+}
+
 void LayerDialog::updateLog(GLLogStream &log)
 {
 	QList< pair<int,QString> > &logStringList=log.S;
 	ui.logPlainTextEdit->clear();
-	//ui.logPlainTextEdit->setFont(QFont("Courier",10));	
+	//ui.logPlainTextEdit->setFont(QFont("Courier",10));
 
 	pair<int,QString> logElem;
 	QString preWarn    = "<font face=\"courier\" size=3 color=\"red\"> Warning: " ;
@@ -101,9 +137,9 @@ void LayerDialog::updateLog(GLLogStream &log)
 
 	foreach(logElem, logStringList){
 		QString logText = logElem.second;
-		if(logElem.first == GLLogStream::SYSTEM)  logText = preSystem + logText + post; 
-		if(logElem.first == GLLogStream::WARNING) logText = preWarn + logText + post; 
-		if(logElem.first == GLLogStream::FILTER)  logText = preFilter + logText + post; 
+		if(logElem.first == GLLogStream::SYSTEM)  logText = preSystem + logText + post;
+		if(logElem.first == GLLogStream::WARNING) logText = preWarn + logText + post;
+		if(logElem.first == GLLogStream::FILTER)  logText = preFilter + logText + post;
 		ui.logPlainTextEdit->appendHtml(logText);
 	}
 }
@@ -124,26 +160,26 @@ void LayerDialog::updateTable()
 	 {
     QTableWidgetItem *item;
 		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
-		
+
 		item = new QTableWidgetItem(QFileInfo(meshList.at(i)->fileName.c_str()).fileName());
 		if(meshList.at(i)==gla->mm()) {
 						item->setBackground(QBrush(Qt::yellow));
-						item->setForeground(QBrush(Qt::blue));	
-						}							
+						item->setForeground(QBrush(Qt::blue));
+						}
   	ui.layerTableWidget->setItem(i,0,item );
-		
+
 		if(meshList.at(i)->visible){
 				item = new QTableWidgetItem(QIcon(":/images/layer_eye_open.png"),"");
 			}		else		{
 				item = new QTableWidgetItem(QIcon(":/images/layer_eye_close.png"),"");
-			}		
+			}
 		item->setFlags(Qt::ItemIsEnabled);
-  	ui.layerTableWidget->setItem(i,1,item ); 
+  	ui.layerTableWidget->setItem(i,1,item );
 
 		item = new QTableWidgetItem(QIcon(":/images/layer_edit_unlocked.png"),QString());
 		item->setFlags(Qt::ItemIsEnabled);
   	ui.layerTableWidget->setItem(i,2,item );
-		
+
 	}
 	ui.layerTableWidget->resizeColumnsToContents();
 	//ui.layerTableWidget->adjustSize();

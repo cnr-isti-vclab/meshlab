@@ -47,11 +47,14 @@ class LayerDialog : public QDockWidget
 
 	public slots:
 		void toggleStatus(int row, int column);
-    void showEvent ( QShowEvent * event );
+		void showEvent ( QShowEvent * event );
+		void showContextMenu(const QPoint& pos);
+		void showLayerMenu();
+
 	private:
 		Ui::layerDialog ui;
-		GLArea *gla; 
-		MainWindow *mw; 
+		GLArea *gla;
+		MainWindow *mw;
 };
 
 
