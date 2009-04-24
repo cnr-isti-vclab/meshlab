@@ -226,6 +226,26 @@ public:
       Measure          =0x04000 // Filters that compute measures and information on meshes.
 	};
 	
+	
+	// The FilterPrecondition enum is used to build the prerequisite bitmask that each filter reports. 
+	// This mask is used to explicitate what a filter really needs to be applied. 
+	// For example algorithms that compute per face quality have as precondition the existence of faces 
+	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
+	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
+	// and Face as precondition.
+	
+	enum FilterPrecondition
+	{
+			FP_Generic          =0x00000, // Should be avoided if possible
+			FP_Face             =0x00001, //  
+			FP_VertexColor      =0x00002, //  
+			FP_VertexQuality    =0x00004, //  
+			FP_VertexRadius     =0x00008, //  
+			FP_WedgeTexCoord    =0x00010, //
+			FP_IsManifold       =0x00020, //  
+			FP_IsWatertight     =0x00040, // 
+	};
+	
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action. 
@@ -254,6 +274,13 @@ public:
 	// this function making it returns MeshModel::MM_FACEFACETOPO. 
 	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
 	virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}
+	
+	// The FilterPrecondition mask is used to explicitate what a filter really needs to be applied. 
+	// For example algorithms that compute per face quality have as precondition the existence of faces 
+	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
+	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
+	// and Face as precondition.
+virtual const int getPreconditions(QAction *) {return FP_Generic;}
 
 	// The main function that applies the selected filter with the already stabilished parameters
 	// This function is called by the framework after getting the user params 
