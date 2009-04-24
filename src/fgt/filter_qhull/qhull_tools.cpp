@@ -217,6 +217,10 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 		thirdTest.open("testAfter.txt",  ios::out);
 		thirdTest << "Punti di output:\n ";
 
+		ofstream fourthTest;
+		fourthTest.open("TestVoronoi.txt",  ios::out);
+		fourthTest << "Vertici voronoi:\n ";
+
 	#endif
 
 	if (!exitcode) { /* if no error */ 
@@ -233,7 +237,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 		
 		vector<double*> voronoi_vertices; //Voronoi vertices of the region being considered
 		vector<double*> normals;          //vector of the outer normals of the convex hull facets
-		
+
 		vertexT *vertex;
 		FORALLvertices {
 			double *first_pole;
@@ -255,14 +259,15 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 		    FOREACHneighbor_(vertex) {
 				if (neighbor->upperdelaunay)
 					is_on_convexhull =true;
-				else{
+				else {
 					voronoi_vertex = neighbor->center;
 				    voronoi_vertices.push_back(neighbor->center);
+
 					if (neighbor->toporient)
 						normals.push_back(neighbor->normal);
 					double* vertex1= vertex->point;
 					double* vertex2= voronoi_vertex;
-				    double dist = qh_pointdist(vertex1, vertex2,4);
+				    double dist = qh_pointdist(vertex1, vertex2,dim);
 				    if(dist>max_dist){
 						max_dist=dist;
 					    first_pole=voronoi_vertex;
@@ -297,8 +302,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 						double* pole = first_pole;
 						for(int i=0;i<dim;i++)
 							bbCenter[i] = pm.cm.bbox.Center()[i];
-						bbCenter[3]=0;
-						if(qh_pointdist(bbCenter,pole,dim+1)>(threshold*pm.cm.bbox.Diag()))
+						if(qh_pointdist(bbCenter,pole,dim)>(threshold*pm.cm.bbox.Diag()))
 							discard=true;
 					}
 					if(!discard)
@@ -308,6 +312,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 
 		    //vector vertex-first_pole
 		    double* sp1= new double[3];
+			//vector vertex-second_pole
 		    double* sp2= new double[3];
 		    for(int i=0; i<3;i++)
 			    sp1[i]= first_pole[i] - vertex->point[i];
@@ -318,10 +323,10 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 			    if(voronoi_vertices[i]!= first_pole){
 					double* vertex1= vertex->point;
 					double* vertex2= voronoi_vertices[i];
-			   	    double dist = qh_pointdist(vertex1, vertex2,4); 
+			   	    double dist = qh_pointdist(vertex1, vertex2,dim); 
 
 					//vector vertex-second_pole
-				    for(int j=0; j<4;j++)
+				    for(int j=0; j<dim;j++)
 					   sp2[j]= (voronoi_vertices[i])[j] - vertex->point[j];
 
 					//Calculate dot-product between vector vertex-first_pole and vector vertex-second_pole
@@ -329,7 +334,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 					for(int k= 0; k<3;k++ )
 						dotProd += sp1[k] * sp2[k];
 
-					//Test is first_pole and second_pole are opposite
+					//Test if first_pole and second_pole are opposite
 				    if(dotProd<=0 && dist>max_dist2){
 					    max_dist2=dist;
 					    second_pole = voronoi_vertices[i];
@@ -343,12 +348,11 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 				bool discard=false;
 				for(int i =0;i<3;i++)
 				{
-					double* bbCenter = new double[dim+1];
+					double* bbCenter = new double[dim];
 					double* pole = second_pole;
 					for(int i=0;i<dim;i++)
 						bbCenter[i] = pm.cm.bbox.Center()[i];
-					bbCenter[3]=0;
-					if(qh_pointdist(bbCenter,pole,dim+1)>(threshold*pm.cm.bbox.Diag()))
+					if(qh_pointdist(bbCenter,pole,dim)>(threshold*pm.cm.bbox.Diag()))
 						discard=true;
 				}
 				if(!discard)
@@ -676,7 +680,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 		Select the visible points in a point cloud, as viewed from a given viewpoint.
 	    It uses the Qhull library (http://www.qhull.org/.
 	    The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals.
-	    The visible points are those that corresponds to the ones that reside on the convex hull of a transformed point cloud.
+	    A point is considered visible if its transformed point lies on the convex hull of a trasformed point cloud of the original mesh points.
 
 	returns 
 		the number of visible points if no errors occurred;

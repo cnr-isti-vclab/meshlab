@@ -92,15 +92,14 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId)
 		case FP_QHULL_CONVEX_HULL :  return QString("Calculate the <b>convex hull</b> with Qhull library (http://www.qhull.org/html/qconvex.htm).<br><br> "
 										 "The convex hull of a set of points is the boundary of the minimal convex set containing the given non-empty finite set of points."); 
 		case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Calculate the <b>Delaunay triangulation</b> with Qhull library (http://www.qhull.org/html/qdelaun.htm).<br><br>"
-													"The Delaunay triangulation of a set of points in d-dimensional spaces is a triangulation of the convex hull.<br> "
-													"The result is non 2-manifold by definition."); 
+													"The Delaunay triangulation of a set of points in d-dimensional spaces is a triangulation of the convex hull.<br> "); 
 		case FP_QHULL_VORONOI_FILTERING :  return QString("Compute a <b>Voronoi filtering</b> (Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). <br><br>" 
 											   "The filter computes a piecewise-linear approximation of a smooth surface from a finite set of sample points."
 											   "The algorithm uses Voronoi vertices to remove triangles from the Delaunay triangulation. <br>"
 											   "After computing the Voronoi diagram, foreach sample point it chooses the two farthest opposite Voronoi vertices."
 											   "Then computes a Delaunay triangulation of the sample points and the selected Voronoi vertices, and keep "
 											   "only those triangles in witch all three vertices are sample points."); 
-		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("Calculate the <b>Alpha Shape</b> (Edelsbrunner and P.Mucke 1994) with Qhull library (http://www.qhull.org/). <br><br>"
+		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE: return QString("Calculate the <b>Alpha Shape</b> of the mesh(Edelsbrunner and P.Mucke 1994) with Qhull library (http://www.qhull.org/). <br><br>"
 										"From a given finite point set in the space it computes 'the shape' of the set."
 										"The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation of the given point set.<br>" 
 										"For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay "
@@ -108,7 +107,7 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId)
 		case FP_QHULL_VISIBLE_POINTS: return QString("Select the <b>visible points</b> in a point cloud, as viewed from a given viewpoint.<br>"
 										  "It uses the Qhull library (http://www.qhull.org/ <br><br>"
 										  "The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals."
-										  "The visible points are those that correspond to the ones that reside on the convex hull of a transformed point cloud.");
+										  "A point is considered visible if its transformed point lies on the convex hull of a trasformed point cloud of the original mesh points.");
 		default : assert(0); 
 	}
 	return QString("Error: Unknown Filter");
@@ -477,7 +476,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				// if usecamera but mesh does not have one
 				if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) ) 
 				{
-					errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
+					errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; 
 					return false;
 				}
 				if(usecam)
@@ -521,6 +520,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 						vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm.cm);
 						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
 						pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
+						//Clear all face because,somewhere, they have been selected
 						tri::UpdateSelection<CMeshO>::ClearFace(pm.cm);
 					}
 					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
@@ -530,10 +530,6 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 
 				
 				if(!convex_hullNFP){
-					/*bool result =create_mesh_convex_hull(md,m,par);
-					if(result)
-						Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",(*md.mm()).cm.vn,(*md.mm()).cm.fn);
-				*/
 					md.delMesh(&pm2);
 				}
 				else{
@@ -542,11 +538,16 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 					if (reorient){
 						pm2.updateDataMask(MeshModel::MM_FACEFACETOPO);
 						bool oriented,orientable;
+						if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(pm2.cm) ) {
+								errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness"; // text
+								return false; // can't continue, mesh can't be processed
+						}
 						
 						tri::Clean<CMeshO>::IsOrientedMesh(pm2.cm, oriented,orientable);
 						vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm2.cm);
 						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm2.cm);
 						pm2.clearDataMask(MeshModel::MM_FACEFACETOPO);
+						//Clear all face because,somewhere, they have been selected
 						tri::UpdateSelection<CMeshO>::ClearFace(pm2.cm);
 					}
 
