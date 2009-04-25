@@ -92,10 +92,11 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId)
 		case FP_QHULL_CONVEX_HULL :  return QString("Calculate the <b>convex hull</b> with Qhull library (http://www.qhull.org/html/qconvex.htm).<br><br> "
 										 "The convex hull of a set of points is the boundary of the minimal convex set containing the given non-empty finite set of points."); 
 		case FP_QHULL_DELAUNAY_TRIANGULATION :  return QString("Calculate the <b>Delaunay triangulation</b> with Qhull library (http://www.qhull.org/html/qdelaun.htm).<br><br>"
-													"The Delaunay triangulation of a set of points in d-dimensional spaces is a triangulation of the convex hull.<br> "); 
+													"The Delaunay triangulation DT(P) of a set of points P in d-dimensional spaces is a triangulation of the convex hull "
+													"such that no point in P is inside the circum-sphere of any simplex in DT(P).<br> "); 
 		case FP_QHULL_VORONOI_FILTERING :  return QString("Compute a <b>Voronoi filtering</b> (Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). <br><br>" 
-											   "The filter computes a piecewise-linear approximation of a smooth surface from a finite set of sample points."
-											   "The algorithm uses Voronoi vertices to remove triangles from the Delaunay triangulation. <br>"
+											   "The algorithm calculates a piecewise-linear approximation of a smooth surface from a finite set of sample points."
+											   "It uses a subset of the Voronoi vertices to remove triangles from the Delaunay triangulation. <br>"
 											   "After computing the Voronoi diagram, foreach sample point it chooses the two farthest opposite Voronoi vertices."
 											   "Then computes a Delaunay triangulation of the sample points and the selected Voronoi vertices, and keep "
 											   "only those triangles in witch all three vertices are sample points."); 
@@ -103,11 +104,12 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId)
 										"From a given finite point set in the space it computes 'the shape' of the set."
 										"The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation of the given point set.<br>" 
 										"For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay "
-										"triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'");
+										"triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'.<br>"
+										"The filter inserts the minimum value of alpha (the circumradius of the triangle) in attribute Quality foreach face.");
 		case FP_QHULL_VISIBLE_POINTS: return QString("Select the <b>visible points</b> in a point cloud, as viewed from a given viewpoint.<br>"
 										  "It uses the Qhull library (http://www.qhull.org/ <br><br>"
 										  "The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals."
-										  "A point is considered visible if its transformed point lies on the convex hull of a trasformed point cloud of the original mesh points.");
+										  "A point is considered visible if its transformed point lies on the convex hull of a trasformed points cloud from the original mesh points.");
 		default : assert(0); 
 	}
 	return QString("Error: Unknown Filter");
@@ -153,7 +155,11 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			}
 		case FP_QHULL_VORONOI_FILTERING :
 			{
-				parlst.addDynamicFloat("threshold",0.0f, 0.0f, 2000.0f,MeshModel::MM_NONE,"threshold ","????.");
+				parlst.addDynamicFloat("threshold",0.0f, 0.0f, 2000.0f,MeshModel::MM_NONE,"threshold ","Factor that, multiplied to the bbox diagonal,"
+																						 "set a threshold used to discard the voronoi vertices too far from the origin."
+																						 "They can cause problems to the qhull library.<br>"
+																						 "Growing values of 'threshold' will add more voronoi vertices for a better surface"
+																						 "reconstruction.");
 				break;
 			}	
 		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
@@ -169,8 +175,12 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			{
 				parlst.addDynamicFloat("radiusThreshold",
 												 0.0f, 0.0f, 7.0f,MeshModel::MM_VERTFLAGSELECT,
-												 "radius threshold ","Bounds the radius of the sphere used to select visible points. <br>"
-												 "Use a big threshold for dense point clouds, a small one for sparse clouds");
+												 "radius threshold ","Bounds the radius of the sphere used to select visible points."
+												 "It is used to adjust the radius of the sphere (calculated as distance between the center and the farthest point from it) "
+												 "according to the following equation: <br>"
+												 "radius = radius * pow(10,threshold); <br>"
+												 "As the radius increases more points are marked as visible."
+												 "Use a big threshold for dense point clouds, a small one for sparse clouds.");
 				
 				parlst.addBool ("usecamera",
 												false,

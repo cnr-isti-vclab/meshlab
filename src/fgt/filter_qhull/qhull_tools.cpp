@@ -112,8 +112,8 @@ facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m)
 	compute_delaunay(int dim, int numpoints, MeshModel &m)
 		build Delauanay triangulation from a set of vertices of a mesh with Qhull library (http://www.qhull.org/html/qdelaun.htm).
 			
-		The Delaunay triangulation of a set of points in d-dimensional spaces is a triangulation of the convex hull.
-		The result is non 2-manifold by definition.
+		The Delaunay triangulation DT(P) of a set of points P in d-dimensional spaces is a triangulation of the convex hull 
+		such that no point in P is inside the circum-sphere of any simplex in DT(P).
 
 		By default, qdelaunay merges regions with cocircular or cospherical input sites. 
 		If you want a simplicial triangulation use triangulated output ('Qt') or joggled input ('QJ'). 
@@ -135,7 +135,7 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 	boolT ismalloc= True;				 /* True if qhull should free points in qh_freeqhull() or reallocation */ 
 	char flags[]= "qhull d QJ Tcv";	     /* option flags for qhull, see qh_opt.htm */
 	FILE *outfile= NULL;				 /* output from qh_produce_output()			
-											 use NULL to skip qh_produce_output() */ 
+											use NULL to skip qh_produce_output() */ 
 	FILE *errfile= stderr;				 /* error messages from qhull code */ 
 	int exitcode;						 /* 0 if no error from qhull */
 	
@@ -159,12 +159,14 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 	numpoints --> number of points
 	m --> original mesh 
 	pm --> new mesh
-	threshold --> ??????????????????????????????????????PEZZA
+	threshold --> factor that, multiplied to the bbox diagonal, set a threshold used to discard the voronoi vertices too far from the origin.
+				  They can cause problems to the qhull library.
+				  Growing values of 'threshold' will add more voronoi vertices for a better surface reconstruction.
 
 	compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm)
-		Compute a Voronoi filtering(Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). 
-	    The filter computes a piecewise-linear approximation of a smooth surface from a finite set of sample points
-	    The algorithm uses Voronoi vertices to remove triangles from the Delaunay triangulation.
+		Implements a Voronoi filtering (Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). 
+	    The algorithm computes a piecewise-linear approximation of a smooth surface from a finite set of sample points
+	    It uses a subset of the Voronoi vertices to remove triangles from the Delaunay triangulation.
 
 	    After computing the Voronoi diagram, foreach sample point it chooses the two farthest opposite Voronoi vertices.
 	    Then computes a Delaunay triangulation of the sample points and the selected Voronoi vertices, and keep
@@ -177,6 +179,8 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
 
 		Option 'QJ' joggle the input to avoid Voronoi vertices defined by more than dim+1 points. 
 		It is less accurate than triangulated output ('Qt').
+
+		Qhull returns the Delauanay triangulation as a list of tetrahedral facets.
 
 	returns 
 		true if no errors occurred;
@@ -217,10 +221,6 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 		thirdTest.open("testAfter.txt",  ios::out);
 		thirdTest << "Punti di output:\n ";
 
-		ofstream fourthTest;
-		fourthTest.open("TestVoronoi.txt",  ios::out);
-		fourthTest << "Vertici voronoi:\n ";
-
 	#endif
 
 	if (!exitcode) { /* if no error */ 
@@ -236,7 +236,8 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 		setT* poles_set= qh_settemp(qh num_facets); 	
 		
 		vector<double*> voronoi_vertices; //Voronoi vertices of the region being considered
-		vector<double*> normals;          //vector of the outer normals of the convex hull facets
+		vector<double*> normals;          //vector of the outer normals of the convex hull facets that are
+										  //neighbor to the point being considered 
 
 		vertexT *vertex;
 		FORALLvertices {
@@ -252,7 +253,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 		    bool is_on_convexhull =false;
 
 			//Considering the neighboring facets of the vertex in order to 
-			//compute the Voronoi region of vertex 
+			//compute the Voronoi region for that vertex 
 		    facetT *neighbor, **neighborp;
 
 			//Finding first_pole.
@@ -294,7 +295,8 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 				assert(first_pole!=NULL);
 				if(first_pole!=NULL){
 
-					//Test if the Voronoi vertex is too far
+					//Test if the Voronoi vertex is too far from the origin. 
+					//It can cause problems to the qhull library.
 					bool discard=false;
 					for(int i =0;i<3;i++)
 					{
@@ -334,7 +336,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 					for(int k= 0; k<3;k++ )
 						dotProd += sp1[k] * sp2[k];
 
-					//Test if first_pole and second_pole are opposite
+					//Test if first_pole and second_pole are opposite and if second pole is the farthest from vertex
 				    if(dotProd<=0 && dist>max_dist2){
 					    max_dist2=dist;
 					    second_pole = voronoi_vertices[i];
@@ -344,7 +346,8 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 			assert(second_pole!=NULL);
 
 			if(second_pole!=NULL){
-				//Test if the Voronoi vertex is too far
+				//Test if the Voronoi vertex is too far from the origin. 
+				//It can cause problems to the qhull library.
 				bool discard=false;
 				for(int i =0;i<3;i++)
 				{
@@ -438,6 +441,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 							vertexT *vertex;
 							int vertex_n, vertex_i;
 							FOREACHvertex_i_(ridge->vertices){
+								//Test if the facet has only sample points as vertices
 								if(qh_pointid(vertex->point)<numpoints)
 									(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];
 								else{
@@ -474,13 +478,15 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 
 	compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, double alpha, bool alphashape)
 		build alpha complex or alpha shapes (Edelsbrunner and P.Mucke 1994)from a set of vertices of a mesh with Qhull library (http://www.qhull.org/
-		Insert the minimum value of alpha (radius of the circumsphere) in attribute quality foreach face.
+		Insert the minimum value of alpha (the circumradius of the triangle) in attribute Quality foreach face.
 
 		The Alpha Shape is the boundary of the alpha complex, that is a subcomplex of the Delaunay triangulation. 
 		For a given value of 'alpha', the alpha complex includes all the simplices in the Delaunay 
 		triangulation which have an empty circumsphere with radius equal or smaller than 'alpha'. 
-		Note that at 'alpha' = 0, the alpha complex consists just of the set P, and for sufficiently large 'alpha', 
-		the alpha complex is the Delaunay triangulation D(P) of P.
+		Note that for 'alpha' = 0, the alpha complex consists just of the set P, and for sufficiently large 'alpha', 
+		the alpha complex is the Delaunay triangulation DT(P) of P.
+
+		Qhull returns the Delauanay triangulation as a list of tetrahedral facets.
 
 	returns 
 		true if no errors occurred;
@@ -514,6 +520,8 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 
 		int convexNumVert = qh_setsize(qh_facetvertices (qh facet_list, NULL, false));
 
+		//Insert all the sample points, because, even with alpha=0, the alpha shape/alpha complex will
+		//contain them.
 		tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
 
 		/*ivp length is 'qh num_vertices' because each vertex is accessed through its ID whose range is 
@@ -540,7 +548,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 		FORALLfacet_(qh facet_list) {
 			numFacets++;
 			if (!facet->upperdelaunay) {
-				//For all facets calculate the radius of the empty circumsphere considering 
+				//For all facets (that are tetrahedrons)calculate the radius of the empty circumsphere considering 
 				//the distance between the circumcenter and a vertex of the facet
 				vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
 				double* center = facet->center;
@@ -548,7 +556,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 
 				if (radius>alpha) // if the facet is not good consider the ridges
 				{
-					//if calculating the alphashape, mark the facet ('good' is used as 'marked'). It could be open and some triangles visible
+					//if calculating the alphashape, unmark the facet ('good' is used as 'marked'). 
 					if(alphashape)
 						facet->good=false;
 
@@ -574,7 +582,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 									tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
 									ridgesCount++;
 
-									//Store di circumradius of the face in face quality
+									//Store the circumradius of the face in face quality
 									(*fi).Q() = radius;
 
 									int vertex_n, vertex_i;
@@ -582,14 +590,14 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 										(*fi).V(vertex_i)= ivp[qh_pointid(vertex->point)];	
 								}
 								else
-									//if calculating alpha shape, save the triangle for subsequent filtering
+									//if calculating alpha shape, save the triangle (ridge) for subsequent filtering
 									qh_setappend(&set, ridge); 
 							}
 						}
 					}
 
-					//if calculating the alphashape, mark the facet('good' is used as 'marked'). 
-					//This facet could hide some triangle.
+					//If calculating the alphashape, mark the facet('good' is used as 'marked'). 
+					//This facet will have some triangles hidden by the facet's neighbor.
 					if(alphashape && goodTriangles==4)
 						facet->good=true;
 					
@@ -598,8 +606,8 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 				{
 					//Compute each ridge (triangle) once
 					facet->visitid= qh visit_id;
-					//if calculating the alphashape, mark the facet('good' is used as 'marked') . 
-					//This facet could hide some triangle.
+					//If calculating the alphashape, mark the facet('good' is used as 'marked').
+					//This facet will have some triangles hidden by the facet's neighbor.
 					if(alphashape)
 						facet->good=true;
 					qh_makeridges(facet);
@@ -611,11 +619,12 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 							if(!alphashape){
 								tri::Allocator<CMeshO>::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(pm.cm,1);
 								
-								//Store di circumradius of the face in face quality
 								pointT* p0 = ((vertexT*) (ridge->vertices->e[0].p))->point;
 								pointT* p1 = ((vertexT*) (ridge->vertices->e[1].p))->point;
 								pointT* p2 = ((vertexT*) (ridge->vertices->e[2].p))->point;
 								radius = calculate_circumradius(p0,p1,p2, dim);
+
+								//Store the circumradius of the face in face quality
 								(*fi).Q() = radius; 
 
 								ridgesCount++;
@@ -670,7 +679,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 	pm --> new mesh that is the convex hull of the flipped points, if convex_hullFP is true
 	pm2 --> new mesh that is the convex hull of the non flipped points, if convex_hullNFP is true
 	viewpoint -> the viewpoint
-	threshold -> bounds the radius oh the sphere used to select visible points
+	threshold -> bounds the radius of the sphere used to select visible points
 	convex_hullFP --> true if you want to show the partial Convex Hull of the transformed points cloud
 					false otherwise
 	convex_hullNFP --> true if you want to show the Convex Hull of the original points cloud
@@ -680,7 +689,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 		Select the visible points in a point cloud, as viewed from a given viewpoint.
 	    It uses the Qhull library (http://www.qhull.org/.
 	    The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals.
-	    A point is considered visible if its transformed point lies on the convex hull of a trasformed point cloud of the original mesh points.
+	    A point is considered visible if its transformed point lies on the convex hull of a trasformed points cloud from the original mesh points.
 
 	returns 
 		the number of visible points if no errors occurred;
@@ -700,6 +709,7 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel
 		viewpoint[i] = viewpointP[i];
 
 	//Every point in flipped_points and points share the same index
+	//Flipped points are numpoints+1 because they include the viewpoint too.
 	coordT *flipped_points = (coordT*)malloc((numpoints+1)*(dim)*sizeof(coordT));
 	coordT *points = (coordT*)malloc((numpoints)*(dim)*sizeof(coordT));
 	//Positions in dist are the indexes of the points 
@@ -762,7 +772,7 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel
 		/*ivp length is 'numpoints' because each vertex is accessed through its ID whose range is 
 		  0<=qh_pointid(vertex->point)<numpoints. qh num_vertices is < numpoints*/
 		vector<tri::Allocator<CMeshO>::VertexPointer> ivp_flipped(numpoints); //Vector of pointers to the flipped points
-		vector<tri::Allocator<CMeshO>::VertexPointer> ivp_non_flipped(numpoints); //Vector of pointers to the non flipped points BRUTTOOOOO
+		vector<tri::Allocator<CMeshO>::VertexPointer> ivp_non_flipped(numpoints); //Vector of pointers to the non flipped points 
 
 		vertexT *vertex;
 		selected=qh num_vertices;
