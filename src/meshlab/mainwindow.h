@@ -212,7 +212,7 @@ public:
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("1.2.0b"); }
+   const QString appVer() const {return tr("1.2.0"); }
 
 public slots:
 
