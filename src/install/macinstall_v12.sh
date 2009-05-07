@@ -45,9 +45,9 @@ mkdir $BUNDLE/$APPNAME/Contents/plugins/imageformats
 mkdir $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX  
 cp plugins/U3D_OSX/IDTFConverter.out  $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX
 cp plugins/U3D_OSX/IDTFConverter.sh  $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX
-cp plugins/U3D_OSX/IFXCore.dylib  $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX
+cp plugins/U3D_OSX/libIFXCore.so  $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX
 mkdir $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX/Plugins
-cp plugins/U3D_OSX/Plugins/IFXExporting.dylib  $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX/Plugins
+cp plugins/U3D_OSX/Plugins/libIFXExporting.so  $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX/Plugins
 
 cp ../../docs/gpl.txt $BUNDLE
 cp ../../docs/readme.txt $BUNDLE
