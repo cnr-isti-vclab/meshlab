@@ -153,7 +153,7 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\U3D_W32\*.dll"
   File "..\meshlab\plugins\U3D_W32\*.txt"
   SetOutPath "$INSTDIR\plugins\U3D_W32\plugins"
-  File "..\meshlab\plugins\U3D_W32\*.dll"
+  File "..\meshlab\plugins\U3D_W32\Plugins\IFXExporting.dll"
 
   SetOutPath "$INSTDIR\textures"
   File "..\meshlab\textures\chrome.png"
