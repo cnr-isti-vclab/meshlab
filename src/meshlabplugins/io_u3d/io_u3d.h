@@ -28,15 +28,12 @@ class U3DIOPlugin : public QObject, public MeshIOInterface
 	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 
 	void initSaveParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet &par);
-	void applyOpenParameter(const QString &format, MeshModel &m, const FilterParameterSet &par);
 
 	private:
 	QString computePluginsPath();
 
 
-	void saveParameters();
-	void defaultParameters();
-
+	void saveParameters(const FilterParameterSet &par);
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters _param;
 	
 };
