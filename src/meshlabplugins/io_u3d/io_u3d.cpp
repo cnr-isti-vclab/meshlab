@@ -174,13 +174,13 @@ void U3DIOPlugin::initSaveParameter(const QString &format, MeshModel &m, FilterP
 	//vcg::Point3f pos = avoidExponentialNotation(_param._campar->_obj_pos,_param._campar->_obj_bbox_diag);
 	vcg::Point3f pos = _param._campar->_obj_pos;
 	vcg::Point3f dir(0.0f,0.0f,-1.0f * _param._campar->_obj_bbox_diag);
-	par.addPoint3f("position_val",dir, "Position",
-		"Camera position.");		
+	par.addPoint3f("position_val",dir, "Camera Position",
+		"The position in which the camera is set. The default value is derived by the 3d mesh's bounding box.");		
 	//vcg::Point3f dir(0.0f,0.0f,avoidExponentialNotation(-1.0f * _param._campar->_obj_bbox_diag,_param._campar->_obj_bbox_diag));
-	par.addPoint3f("target_val",pos, "Target",
-		"Camera view direction.");
-	par.addFloat("fov_val",60.0f,"FOV Angle","Camera's FOV Angle");
-	par.addInt("compression_val",500,"U3D quality 0..1000","U3D mesh's compression ratio");
+	par.addPoint3f("target_val",pos, "Camera target point",
+		"The point towards the camera is seeing. The default value is derived by the 3d mesh's bounding box.");
+	par.addFloat("fov_val",60.0f,"Camera's FOV Angle 0..180","Camera's FOV Angle. The values' range is between 0-180 degree. The default value is 60.");
+	par.addInt("compression_val",500,"U3D quality 0..1000","U3D mesh's compression ratio. The values' range is between 0-1000 degree. The default value is 500.");
 }
 
 void U3DIOPlugin::saveParameters(const FilterParameterSet &par)
