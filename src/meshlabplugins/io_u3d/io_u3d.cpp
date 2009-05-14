@@ -11,8 +11,6 @@
 
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
-#include "u3d_gui.h"
-
 
 #include <QMessageBox>
 using namespace std;
