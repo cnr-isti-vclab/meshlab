@@ -11,14 +11,19 @@
 
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
-#include <wrap/io_trimesh/export_u3d.h>
-#include <wrap/io_trimesh/export_idtf.h>
 #include "u3d_gui.h"
 
 
 #include <QMessageBox>
 using namespace std;
 using namespace vcg;
+
+
+U3DIOPlugin::U3DIOPlugin()
+:QObject(),MeshIOInterface(),_param()
+{
+
+}
 
 bool U3DIOPlugin::open(const QString & /*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, int& /*mask*/, const FilterParameterSet &, CallBackPos */*cb*/, QWidget */*parent*/)
 {
@@ -68,12 +73,12 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 	if(formatName.toUpper() == tr("U3D"))
 	{
 		qApp->restoreOverrideCursor();	
-		vcg::tri::io::u3dparametersclasses::Movie15Parameters mp;
+		/*vcg::tri::io::u3dparametersclasses::Movie15Parameters mp;
 		mp._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
 		U3D_GUI pw(mp,parent);
 		pw.exec();
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
-		qDebug("Quality parameter %i",mp.positionQuality);
+		qDebug("Quality parameter %i",mp.positionQuality);*/
 
 		QSettings settings;
 		
@@ -98,7 +103,7 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 			return false;
 		}
 		
-		int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterCommandLine),mp,mask);
+		int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterCommandLine),_param,mask);
 		vcg::tri::io::ExporterIDTF<CMeshO>::removeConvertedTGATextures(lst);
 		if(result!=0)
 		{
@@ -150,6 +155,44 @@ void U3DIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 	}
 
 	assert(0);
+}
+
+static float avoidExponentialNotation(const float n,const float bboxdiag)
+{
+	float val_min = std::min(1000.0f,floorf(bboxdiag * 1000.0f));
+	return floorf(val_min * n ) / val_min;
+}
+
+static vcg::Point3f avoidExponentialNotation(const vcg::Point3f& p,const float bboxdiag)
+{
+	return vcg::Point3f(avoidExponentialNotation(p.X(),bboxdiag),
+		avoidExponentialNotation(p.Y(),bboxdiag),
+		avoidExponentialNotation(p.Z(),bboxdiag));
+}
+
+void U3DIOPlugin::initSaveParameter(const QString &format, MeshModel &m, FilterParameterSet &par) 
+{
+	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
+	vcg::Point3f pos = avoidExponentialNotation(_param._campar->_obj_pos,_param._campar->_obj_bbox_diag);
+	par.addPoint3f("position_val",_param._campar->_obj_pos, "Position",
+		"Camera position.");		
+	vcg::Point3f dir(0.0f,0.0f,avoidExponentialNotation(-1.0f * _param._campar->_obj_bbox_diag,_param._campar->_obj_bbox_diag));
+	par.addPoint3f("target_val",_param._campar->_obj_to_cam_dir, "Target",
+		"Camera view direction.");
+	par.addFloat("fov_val",60.0f,"FOV Angle","Camera's FOV Angle");
+	par.addInt("compression_val",500,"U3D quality 0..1000","U3D mesh's compression ratio");
+}
+
+void U3DIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const FilterParameterSet &par)
+{
+	vcg::Point3f from_target_to_camera = vcg::Point3f(- par.getPoint3f(QString("position_val")) + par.getPoint3f(QString("target_val")));
+	vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters* sw = _param._campar;
+	vcg::Point3f p = avoidExponentialNotation(sw->_obj_pos,_param._campar->_obj_bbox_diag);
+	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(
+		par.getFloat(QString("fov_val")),0.0f,from_target_to_camera,from_target_to_camera.Norm(),sw->_obj_bbox_diag,p);
+	_param.positionQuality = par.getInt(QString("compression_val"));
+
+	delete sw;
 }
 
 Q_EXPORT_PLUGIN(U3DIOPlugin)
