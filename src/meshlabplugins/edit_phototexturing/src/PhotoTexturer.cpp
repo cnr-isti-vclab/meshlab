@@ -20,6 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+
 #include <cfloat>
 #include <iostream>
 #include <QtGui>

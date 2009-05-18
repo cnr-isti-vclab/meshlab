@@ -1,13 +1,13 @@
 #ifndef TSAICAMERACALIBRATION_H_
 #define TSAICAMERACALIBRATION_H_
+extern "C" {
+
+	#include "../../../external/TSAI30B3/CAL_MAIN.h"
+	//#include "../../../external/TSAI30B3/CAL_UTIL.h"
+}
 
 #include <src/CameraCalibration.h>
 
-extern "C" {
-
-	#include <src/Tsai/cal_main.h>
-	#include <src/Tsai/cal_util.h>
-}
 
 class TsaiCameraCalibration: public CameraCalibration{
 public:
