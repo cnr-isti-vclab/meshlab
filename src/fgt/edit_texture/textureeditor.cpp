@@ -1,3 +1,26 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005, 2009                                          \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
 #include <QTabBar>
 #include "textureeditor.h"
 #include <qfiledialog.h>
@@ -180,6 +203,9 @@ void TextureEditor::on_browseButton_clicked()
 	if (s.size() > 0)
 	{
 		int i = ui.tabWidget->currentIndex();
+		unsigned int cap = model->cm.textures.capacity();
+		if (model->cm.textures.capacity() <= i)
+			model->cm.textures.resize(i + 1);
 		model->cm.textures[i] = s.toStdString();
 		ui.tabWidget->setTabText(i,s);
 		((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->setTexture(s);
