@@ -62,7 +62,8 @@
 void sincos();
 #define SINCOS(x,s,c)   sincos(x,&s,&c)
 #else
-double sin(), cos();
+// you could assume that at least sin and cos are defined at this point.
+// double sin(), cos();
 #define SINCOS(x,s,c)   s=sin(x);c=cos(x)
 #endif
 
