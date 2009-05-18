@@ -1,0 +1,170 @@
+----------------------------------------------------------------------------
+
+Version 3.0b3  28-Oct-95
+
+1) Added a check in coplanar_extrinsic_parameter_estimation () to choose
+   the correct rotation matrix solution from the two possible solutions.
+   This change affects only the coplanar extrinsic calibration routine.
+   The coplanar and non-coplanar routines have had this check since
+   release 2.0.
+
+   Bug tracked down by Pete Rander <Peter.Rander@ius4.ius.cs.cmu.edu>
+
+2) Added a check in undistorted_to_distorted_sensor_coord () for the rare
+   situation where an undistorted sensor point must be mapped to the
+   maximum barrel distortion radius.  The code will now map the point
+   properly and print a warning when this happens.
+
+3) Reworked and extended the FAQ file.
+
+4) Changed the parameter declarations in routines
+
+        cc_compute_exact_f_and_Tz_error ()
+        cc_five_parm_optimization_with_late_distortion_removal_error ()
+        cc_five_parm_optimization_with_early_distortion_removal_error ()
+        cc_nic_optimization_error ()
+        cc_full_optimization_error ()
+        ncc_compute_exact_f_and_Tz_error ()
+        ncc_nic_optimization_error ()
+        ncc_full_optimization_error ()
+
+   to match the declarations used in the MINPACK routine they're called by.
+   No functional impact.
+
+
+----------------------------------------------------------------------------
+
+Version 3.0b2  15-Jul-95
+
+1) Use the calloc () definition in the standard ANSI C stdlib.h
+   header file rather than trying to define it locally.
+   The code now works under DOS Borland C++ 4.5.
+
+   Fix found by Markus Menke <extern31@radsy1.inet.dkfz-heidelberg.de>
+
+2) Changed the variable declarations in routines
+
+        cc_compute_exact_f_and_Tz ()
+        cc_five_parm_optimization_with_late_distortion_removal ()
+        cc_five_parm_optimization_with_early_distortion_removal ()
+        cc_nic_optimization ()
+        cc_full_optimization ()
+        ncc_compute_exact_f_and_Tz ()
+        ncc_nic_optimization ()
+        ncc_full_optimization ()
+
+   to match the parameter declarations used in the MINPACK routine they call.
+   No functional impact.
+
+
+----------------------------------------------------------------------------
+
+Version 3.0b1  21-May-95
+
+1) Modified routines
+
+	cc_compute_exact_f_and_Tz_error ()
+	cc_five_parm_optimization_with_late_distortion_removal_error ()
+	cc_five_parm_optimization_with_early_distortion_removal_error ()
+	cc_nic_optimization_error ()
+	cc_full_optimization_error ()
+	ncc_compute_exact_f_and_Tz_error ()
+	ncc_nic_optimization_error ()
+	ncc_full_optimization_error ()
+
+   so that they return error values to the optimization routine rather than
+   the squared error values.  The optimization routine "lmdif" squares the
+   returned error internally during its calculations.  Before this change
+   "lmdif" was essentially optimizing the square of the squared error
+   (i.e. error^4).
+
+2) Translated the MINPACK non-linear optimization routines from FORTRAN to C.
+   The source code is now 100% C.
+
+3) Re-wrote the matrix manipulation routines to use malloc instead of calloc.
+   Malloc caused bus errors due to memory alignment problems on some platforms.
+
+4) Replaced typedef enum { FALSE, TRUE } bool; in matrix code with #defines.
+   The enumerated types didn't necessarily map correctly to the values required
+   for logical checks like if (boolean_variable) then.
+
+   Bug reported by Ron Steriti <steriti@dragon.cpe.uml.edu>
+
+5) Re-wrote the statistical calculations in routines
+
+	distorted_image_plane_error_stats ()
+	undistorted_image_plane_error_stats ()
+	object_space_error_stats ()
+
+   to improve their efficiency.
+
+6) Fixed CBRT (cubed root) routine so it handles negative arguments properly.
+  
+7) Split up source code and renamed files for PC/DOS compatibility.
+
+8) Created makefiles for Unix C and DOS Borland C++ 4.5.
+   
+9) Created a Frequently Asked Questions (FAQ) file. 
+
+
+----------------------------------------------------------------------------
+
+Version 2.1  04-Jun-94
+
+1) Added code and a compile-time switch for using *public domain* MINPACK
+   non-linear optimization routines.  Default compile uses commercial IMSL
+   optimization routines.
+
+   Code donated by Torfi Thorhallsson <torfit@verk.hi.is>
+
+2) Added a missing division by cp.sx in cc_nic_optimization_error () and
+   cc_full_optimization_error ().  Bug reduced the accuracy of full coplanar
+   calibration and increased the convergence time of full non-coplanar
+   calibration.
+
+   Bug reported by Torfi Thorhallsson <torfit@verk.hi.is>
+
+
+----------------------------------------------------------------------------
+
+Version 2.0  17-Feb-94
+
+1. Fix bug in routines ncc_compute_R and ncc_compute_better_R.
+   The r4, r5, and r6 terms should not have been divided by cp.sx.
+
+   Bug reported by Volker Rodehorst <vr@cs.tu-berlin.de>
+
+2. Modified undistorted_to_distorted_sensor_coord () to do the conversion
+   by algebraically solving the cubic polynomial
+
+	Ru = Rd * (1 + kappa1 * Rd**2)
+
+   using the Cardan method.
+
+   Code donated by Frederic Devernay <Frederic.Devernay@sophia.inria.fr>.
+
+3) Added two new routines for calculating calibration error statistics:
+   object_space_error_stats () and normalized_calibration_error ().
+
+   The first routine calculates the statistics for the magnitude of the
+   distance of closest approach (i.e. 3D error) between points in object space
+   and the line of sight formed by back projecting the measured 2D coordinates
+   out through the camera model.  The second routine is based on an error
+   measure proposed by Juyang Weng in IEEE PAMI, October 1992.
+
+4) Added checks for coordinate handedness problems in the calibration data.
+
+
+----------------------------------------------------------------------------
+
+Version 1.0  14-Jul-93
+
+   First public release of code placed in the Vision List Archive SHAREWARE
+   subdirectory on FTP.TELEOS.COM by Jon Owen <jcowen@cs.utah.edu>.
+
+
+----------------------------------------------------------------------------
+
+Version 0.X  30-Nov-92
+
+   First version of code written at CMU.

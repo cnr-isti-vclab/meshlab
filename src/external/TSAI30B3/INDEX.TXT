@@ -1,0 +1,99 @@
+This file describes the files contained in release 3.0b3.
+The files include:
+
+	index.txt	this file
+	changes.txt	listing of the version to version changes
+	faq.txt		frequently asked questions
+	notes.txt	release announcements
+
+The basic calibration software is contained in the files:
+
+	cal_main.h
+	cal_main.c	calibration routines
+	ecalmain.c	exterior orientation calibration routines
+	cal_tran.c	coordinate transformation routines
+	cal_eval.c	model evaluation routines
+	cal_util.c	utilities for reading and writing data
+
+The subdirectory matrix contains the source code for the matrix
+manipulation routines.  The files in this directory are:
+
+	matrix.h
+	matrix.c
+
+The subdirectory minpack contains the FORTRAN and C source code for the
+MINPACK nonlinear optimization routines.  The files in this directory are:
+
+	dpmpar.{f,c}	MINPACK routines
+	enorm.{f,c}
+	fdjac2.{f,c}
+	lmdif.{f,c}
+	lmpar.{f,c}
+	qrfac.{f,c}
+	qrsolv.{f,c}
+
+	f2c.h		header file for the converted C code
+
+	f2c.ps		postscript guide describing the f2c converter
+
+Five programs are included to demonstrate the use of the calibration
+routines.  The programs are:
+
+	ccal.c		basic coplanar calibration
+	ccal_fo.c	coplanar calibration with full optimization
+
+	nccal.c		basic non-coplanar calibration
+	nccal_fo.c	non-coplanar calibration with full optimization
+
+	ecal.c		extrinsic parameter calibration (i.e. pose only)
+
+Two programs are included to generate synthetic data to test the
+calibration code:
+
+	csyn.c		coplanar calibration data generation program
+	nsyn.c		non-coplanar calibration data generation program
+
+	gasdev.c	random number routine for the above programs
+
+Four test data files are also included:
+
+	cc_cd.dat	synthetic coplanar test data (100 points)
+	ncc_cd.dat	synthetic non-coplanar test data (300 points)
+
+	cc_cpcc.dat	calibrated camera model from coplanar test data
+	ncc_cpcc.dat	calibrated camera model from non-coplanar test data
+
+Three log files illustrate the output of the synthetic data generation
+programs and the results for each of the calibration programs:
+
+	ccal.log	coplanar calibration log
+	nccal.log	non-coplanar calibration log
+        ecal.log	exterior orientation calibration log
+
+A makefile is provided to build the code in Unix environments:
+
+	makefile.unx	makefile for Unix environments
+
+To build the full set of software use the command:
+	
+	make -f makefile.unx all
+
+Three other miscellaneous test programs:
+
+	xfd2xfu.c	convert from distorted to undistorted image coordinates
+	wc2ic.c		convert from 3D world to 2D image coordinates
+	ic2wc.c		convert from 2D image to 3D world coordinates
+
+All of the above files are contained in the compressed tar file
+Tsai-method-v3.0b3.tar.Z.  To extract the files use the commands:
+
+	uncompress  Tsai-method-v3.0b3.tar.Z
+	tar  -xvf   Tsai-method-v3.0b3.tar
+
+The files are also contained in the PKZIP file tsai30b3.zip.  To 
+extract the files use the command:
+
+	pkunzip -d  tsai30b3.zip
+
+Please feel free to redistribute the code.  Comments, suggestions, and bug
+reports can be directed to me at rgwillson@mmm.com.
