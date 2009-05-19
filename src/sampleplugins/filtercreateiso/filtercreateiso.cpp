@@ -35,10 +35,9 @@ Added the new sample filter plugin that removes border faces
 
 #include <vcg/math/perlin_noise.h>
 #include <vcg/complex/trimesh/create/marching_cubes.h>
+#include <vcg/complex/trimesh/create/mc_trivial_walker.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
-#include <apps/sample/trimesh_isosurface/simple_volume.h>
-#include <apps/sample/trimesh_isosurface/trivial_walker.h>
 
 using namespace std;
 using namespace vcg;
