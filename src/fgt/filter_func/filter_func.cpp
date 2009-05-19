@@ -38,8 +38,7 @@
 #include <vcg/complex/trimesh/update/color.h>
 
 #include <vcg/complex/trimesh/create/marching_cubes.h>
-#include <apps/sample/trimesh_isosurface/simple_volume.h>
-#include <apps/sample/trimesh_isosurface/trivial_walker.h>
+#include <vcg/complex/trimesh/create/mc_trivial_walker.h>
 
 #include "filter_func.h"
 #include "muParser.h"
