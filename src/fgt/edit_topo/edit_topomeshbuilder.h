@@ -51,9 +51,6 @@
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/update/selection.h>
 
-using namespace std;
-using namespace vcg;
-
 #include "edit_topodialog.h"
 
 
