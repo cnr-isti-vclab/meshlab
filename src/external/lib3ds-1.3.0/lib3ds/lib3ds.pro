@@ -12,9 +12,9 @@ INCLUDEPATH += ..
 macx:DESTDIR       = ../../lib/macx
 win32-g++:DESTDIR       = ../../lib/win32-gcc  
 win32-msvc2005:DESTDIR       = ../../lib/win32-msvc2005
-linux-g++-32:DESTDIR = ../lib/linux-g++-32
-linux-g++-64:DESTDIR = ../lib/linux-g++-64
-linux-g++:DESTDIR = ../lib/linux-g++
+linux-g++-32:DESTDIR = ../../lib/linux-g++-32
+linux-g++-64:DESTDIR = ../../lib/linux-g++-64
+linux-g++:DESTDIR = ../../lib/linux-g++
 
 
 # Input
