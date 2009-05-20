@@ -24,7 +24,7 @@ SUBDIRS       = io_base\
 #				 filter_texture \
 				filter_unsharp \
 #				 filter_curvature_from_sliding \
-#                                filter_perceptualmetric \
+#				 filter_perceptualmetric \
 				render_splatting \
 				render_gdp \
 				meshdecorate \
@@ -56,4 +56,5 @@ SUBDIRS       = io_base\
 				../fgt/edit_topo \
 				../fgt/render_rfx \
 				../fgt/filter_func \
+				../fgt/filter_qhull
 
