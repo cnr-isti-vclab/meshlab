@@ -28,13 +28,14 @@ TARGET        = io_epoch
 DESTDIR       = ../../meshlab/plugins
 QT           += xml
 
-win32-msvc.net:LIBS 	   += ../../../../code/lib/bzip2-1.0.3/libbz2.lib
-win32-msvc2005:LIBS	   += ../../../../code/lib/bzip2-1.0.4/win32/lib/bzip2.lib
+win32-msvc2005:LIBS	   += ../../external/lib/win32-msvc2005/bz2.lib
 win32-g++:LIBS	+= ../../external/lib/win32-gcc/libbz2.a
+linux-g++:LIBS	+= ../../external/lib/linux-g++/libbz2.a
 
-win32-msvc2005:INCLUDEPATH -= ../../../../code/lib/bzip2-1.0.3
-win32-msvc2005:INCLUDEPATH += ../../../../code/lib/bzip2-1.0.4/win32/include
+win32-msvc2005:INCLUDEPATH -= ../../external/bzip2-1.0.5
+win32-msvc2005:INCLUDEPATH += ../../external/bzip2-1.0.5
 win32-g++:INCLUDEPATH  += ../../external/bzip2-1.0.5
+linux-g++:INCLUDEPATH	+= ../../external/bzip2-1.0.5
 
 mac:LIBS   += -lbz2
 unix:LIBS += -lbz2
