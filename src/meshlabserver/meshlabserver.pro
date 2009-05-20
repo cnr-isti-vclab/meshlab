@@ -1,3 +1,6 @@
+GLEWDIR = ../../external/glew-1.5.1
+GLEWCODE = $$GLEWDIR/src/glew.c
+
 HEADERS        = ../meshlab/interfaces.h \
                  ../meshlab/meshmodel.h \
                  ../meshlab/filterscript.h \
@@ -8,7 +11,7 @@ SOURCES        = mainserver.cpp \
                  ../meshlab/filterscript.cpp \
                  ../meshlab/filterparameter.cpp \
                  ../meshlab/plugin_support.cpp \
-                 ../../../code/lib/glew/src/glew.c
+                 $$GLEWCODE
 
 # to add windows icon 
 RC_FILE = ../meshlab/meshlab.rc
@@ -21,7 +24,7 @@ win32:DEFINES += NOMINMAX
 
 DEFINES += GLEW_STATIC
 
-INCLUDEPATH += . .. ../../../vcglib ../../../code/lib/glew/include
+INCLUDEPATH += . .. ../../../vcglib $$GLEWDIR/include
 CONFIG += stl 
 CONFIG += console
 
