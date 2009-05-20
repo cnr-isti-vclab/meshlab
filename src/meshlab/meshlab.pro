@@ -103,7 +103,7 @@ mac:QMAKE_CXX=g++-4.2
 
 DEFINES += GLEW_STATIC
 
-INCLUDEPATH += . .. ../../../vcglib ../../../code/lib/glew/include
+INCLUDEPATH += . .. ../../../vcglib $$GLEWDIR/include
 CONFIG += stl
 
 # uncomment in your local copy only in emergency cases. 
