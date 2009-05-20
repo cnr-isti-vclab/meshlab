@@ -22,9 +22,9 @@ void main (void)
     reflexionVector.z = dot(reflexionVector,reflexionVector);
     reflexionVector.xy = (0.5*reflexionVector.xy/reflexionVector.z) + 0.5;
     reflexionVector *= 2.0;
-    color = (fract(reflexionVector.x*ScaleFactor) < 0.5 ? 1.0 : 0.1);
+    color = (fract(reflexionVector.x*ScaleFactor) < 0.5 ? vec4( 1.0) : vec4( 0.1));
 
 //     color.xyz = viewVec;
-    color.a = 1;
-    gl_FragColor = min(color, vec4(1.0));
+    color.a = 1.0;
+    gl_FragColor = min(color, vec4(1.0,1.0,1.0,1.0));
 }
