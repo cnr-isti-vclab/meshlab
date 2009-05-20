@@ -10,6 +10,6 @@ HEADERS       = samplefilterdoc.h \
 SOURCES       = samplefilterdoc.cpp \ 
 		../../meshlab/filterparameter.cpp \
 		../../meshlab/meshmodel.cpp \
-		../../../../code/lib/glew/src/glew.c
+		$$GLEWCODE
 
 TARGET        = samplefilterdoc
