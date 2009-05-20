@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<GLSLang>
+  <Metadata>
+    <Author Author="" />
+    <Email Email="" />
+    <Company Company="" />
+    <Shader Shader="" />
+    <ShaderDescription ShaderDescription="" />
+    <License License="" />
+    <Version Version="" />
+  </Metadata>
+  <VPCount numero="1">
+    <Filenames>
+      <Filename0 VertexProgram="reflexion_lines.vert" />
+    </Filenames>
+  </VPCount>
+  <FPCount numero="1">
+    <Filenames>
+      <Filename0 FragmentProgram="reflexion_lines.frag" />
+    </Filenames>
+  </FPCount>
+  <TexturesPlugins NumberOfPlugins="0" />
+  <TexturedUsed NumberUsedTU="0" />
+  <UniformVariables NumberOfVariables="1">
+    <Uniform0 Type="5" Name="ScaleFactor" ArraySize="1" Widget="2" Min="0" Max="100" Step="1">
+      <Values Value0="5" />
+    </Uniform0>
+  </UniformVariables>
+
+  <FogParameters FogColorR="0" FogColorG="0" FogColorB="0" FogColorA="1" Density="1" Start="0" End="1" />
+
+  <VertexProcessor CullFace="True" PolygonMode="DummieField" PolygonModeBack="6914" PolygonModeFront="6914" LocalValue="1" TwoSidedValue="0" ColorControlValue="33273" />
+  <FragmentProcessor Shade="7425" AlphaTest="False" AlphaFunc="516" AlphaClamp="0.5" Blending="False" BlendFuncSRC="770" BlendFuncDST="771" BlendEquation="32774" DepthTest="True" DepthFunc="515" ClampNear="0" ClampFar="1" ClearColorR="0.5019608" ClearColorG="0.5019608" ClearColorB="0.5019608" ClearColorA="1" />
+
+  <BuiltInStates>
+    <ModelAmbient AmbientR="4.730091E-11" AmbientG="4.730091E-11" AmbientB="4.730091E-11" AmbientA="2.365045E-10" />
+    <FrontMaterial AmbR="0.2" AmbG="0.2" AmbB="0.2" AmbA="1" DifR="0.2" DifG="0.2" DifB="0.2" DifA="1" SpecR="0.2" SpecG="0.2" SpecB="0.2" SpecA="1" EmiR="0.2" EmiG="0.2" EmiB="0.2" EmiA="1" Shininess="0" />
+    <BackMaterial AmbR="0.2" AmbG="0.2" AmbB="0.2" AmbA="1" DifR="0.2" DifG="0.2" DifB="0.2" DifA="1" SpecR="0.2" SpecG="0.2" SpecB="0.2" SpecA="1" EmiR="0.2" EmiG="0.2" EmiB="0.2" EmiA="1" Shininess="0" />
+    <PointParameters Size="1" MinSize="0" MaxSize="1" Threshold="1" ConstantAttenuation="1" LinearAttenuation="0" QuadraticAttenuation="0" />
+  </BuiltInStates>
+</GLSLang>
