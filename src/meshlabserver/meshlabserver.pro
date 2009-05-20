@@ -1,4 +1,4 @@
-GLEWDIR = ../../external/glew-1.5.1
+GLEWDIR = ../external/glew-1.5.1
 GLEWCODE = $$GLEWDIR/src/glew.c
 
 HEADERS        = ../meshlab/interfaces.h \
