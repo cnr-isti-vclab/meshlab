@@ -90,6 +90,7 @@ public:
 	void SetTitleDialog(const QString& filename);
 
 private slots:
+	void on_check_help_stateChanged(int);
 	void SlotOkButton();
 	void SlotCancelButton();
 	void SlotRenameTexture();

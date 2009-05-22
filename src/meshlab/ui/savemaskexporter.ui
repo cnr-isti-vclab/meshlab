@@ -12,7 +12,7 @@
   <property name="windowTitle" >
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout" >
    <item>
     <layout class="QHBoxLayout" >
      <property name="spacing" >
@@ -234,13 +234,7 @@
     <widget class="QWidget" native="1" name="layoutWidget" />
    </item>
    <item>
-    <layout class="QHBoxLayout" >
-     <property name="spacing" >
-      <number>6</number>
-     </property>
-     <property name="margin" >
-      <number>0</number>
-     </property>
+    <layout class="QHBoxLayout" name="horizontalLayout" >
      <item>
       <widget class="QRadioButton" name="AllButton" >
        <property name="sizePolicy" >
@@ -278,7 +272,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QWidget" native="1" name="layoutWidget_3" />
+      <widget class="QCheckBox" name="check_help" >
+       <property name="text" >
+        <string>Help</string>
+       </property>
+       <property name="checkable" >
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer>
@@ -287,8 +288,8 @@
        </property>
        <property name="sizeHint" stdset="0" >
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>228</width>
+         <height>19</height>
         </size>
        </property>
       </spacer>

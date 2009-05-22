@@ -320,3 +320,8 @@ void SaveMaskExporterDialog::SetTitleDialog( const QString& filename )
 {
 	this->setWindowTitle("Exporting Parameters Options for " + filename);
 }
+
+void SaveMaskExporterDialog::on_check_help_stateChanged(int)
+{
+	stdParFrame->toggleHelp();
+}
