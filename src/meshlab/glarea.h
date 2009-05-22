@@ -281,26 +281,26 @@ public:
 	void drawGradient();
 	void drawLight();
 	float getFov() { return fov; }
-// the following pair of slot/signal implements a very simple message passing mechanism.
+	
+// the following pairs of slot/signal implements a very simple message passing mechanism.
 // a widget that has a pointer to the glarea call the sendViewDir() slot and 
 // setup a connect to recive the transmitViewDir signal that actually contains the point3f.
+// This mechanism is used to get the view direction/position and picking point on surface in the filter parameter dialog.
 // See the Point3fWidget code.
 signals :
-		void transmitViewDir(vcg::Point3f dir);
+		void transmitViewDir(QString name, vcg::Point3f dir);
+		void transmitViewPos(QString name, vcg::Point3f dir);
+		void transmitSurfacePos(QString name,vcg::Point3f dir);
+		void transmitCameraPos(QString name,vcg::Point3f dir);
 public slots:
-		void sendViewDir() {
-			vcg::Point3f dir= getViewDir();
-			emit transmitViewDir(dir);
-		}
-public:
-	vcg::Point3f getViewDir() {
-		vcg::Matrix44f rotM; 
-		trackball.track.rot.ToMatrix(rotM); 
-		//vcg::Matrix44f::Invert(rotM);
-		vcg::Invert(rotM);
-		return rotM*vcg::Point3f(0,0,1);
-	}
+		void sendViewPos(QString name);
+		void sendSurfacePos(QString name);
+		void sendViewDir(QString name);
+		void sendCameraPos(QString name);
 
+
+public:
+	vcg::Point3f getViewDir(); 
 	bool	infoAreaVisible;		// Draws the lower info area ?
 	bool  suspendedEditor;
 protected:
@@ -337,6 +337,9 @@ private:
 	bool  activeDefaultTrackball; // keep track on active trackball
 	bool	hasToUpdateTexture;			// has to reload textures at the next redraw
 	bool  hasToPick;							// has to pick during the next redraw.
+	bool hasToGetPickPos;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
+	QString nameToGetPickPos;         // the name of the parameter that has asked for the point on the surface 
+	
 	vcg::Point2i pointToPick;
 
 	//shader support

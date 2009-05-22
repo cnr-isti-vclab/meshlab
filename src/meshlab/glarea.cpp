@@ -51,6 +51,7 @@ GLArea::GLArea(QWidget *parent)
 	cfps=0;
 	lastTime=0;
 	hasToPick=false;
+	hasToGetPickPos=false;
 	hasToUpdateTexture=false;
 	helpVisible=false;
 	takeSnapTile=false;
@@ -320,18 +321,33 @@ void GLArea::paintGL()
 	
 	if(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor)) 
 			trackball.DrawPostApply();
-	
+			
+	// The picking of the surface position has to be done in object space, 
+	// so after trackball transformation (and before the matrix associated to each mesh);		
+	if(hasToPick && hasToGetPickPos)
+	{
+		Point3f pp;
+    hasToPick=false;
+    if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
+		{
+					emit transmitSurfacePos(nameToGetPickPos, pp);
+					hasToGetPickPos=false;
+		}
+	}
 	glPopMatrix(); // We restore the state to immediately before the trackball
 	
-	if(hasToPick)
-  { // Double click move picked point to center
-    Point3f pp;
+	// Double click move picked point to center
+	// It has to be done in the before trackball space (we MOVE the trackball itself...)
+	if(hasToPick && !hasToGetPickPos)
+  { 
+		Point3f pp;
     hasToPick=false;
-    if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp)) {
-          trackball.Translate(-pp);
+    if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
+		{
+		      trackball.Translate(-pp);
           trackball.Scale(1.25f);
           QCursor::setPos(mapToGlobal(QPoint(width()/2+2,height()/2+2)));
-        }
+		}
   }
 
 	// ...and take a snapshot
@@ -893,4 +909,38 @@ void GLArea::hideEvent(QHideEvent * /*event*/)
 {
 	trackball.current_button=0;
 }
+
+void GLArea::sendViewPos(QString name) 
+{
+	Point3f pos=  trackball.track.InverseMatrix() *Inverse(trackball.camera.model) *Point3f(0,0,0);
+	emit transmitViewPos(name, pos);
+}
+
+void GLArea::sendSurfacePos(QString name) 
+{
+  nameToGetPickPos = name;
+	hasToGetPickPos=true;
+}
+
+void GLArea::sendViewDir(QString name) 
+{
+	Point3f dir= getViewDir();
+	emit transmitViewDir(name,dir);
+}
+
+void GLArea::sendCameraPos(QString name) 
+{
+		Point3f pos=meshDoc.mm()->cm.shot.GetViewPoint();
+	emit transmitViewDir(name, pos);
+}
+
+
+Point3f GLArea::getViewDir()
+{
+	vcg::Matrix44f rotM; 
+	trackball.track.rot.ToMatrix(rotM); 
+	vcg::Invert(rotM);
+	return rotM*vcg::Point3f(0,0,1);
+}
+
 

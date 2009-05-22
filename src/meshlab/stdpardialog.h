@@ -141,21 +141,27 @@ protected:
 /// if at the creation you provide a pointer to a GLArea (the mesh viewing window) 
 /// the widget exposes a button for getting the current view directiont 
 
-class Point3fWidget : public QGridLayout
+class Point3fWidget : public QHBoxLayout
 {
 	Q_OBJECT
 	
 public:
-  Point3fWidget(QWidget *p, vcg::Point3f defaultv, QWidget *gla);
+  Point3fWidget(QWidget *p, vcg::Point3f defaultv, QString _paramName, QWidget *gla);
   ~Point3fWidget();
-	
+	QString paramName;
 	vcg::Point3f getValue();
 	public slots:
-	void  setValue(vcg::Point3f val);	
-		
+	void  getPoint();
+	void  setValue(QString name, vcg::Point3f val);	
+	signals:
+	void askViewDir(QString);
+	void askViewPos(QString);
+	void askSurfacePos(QString);
+	void askCameraPos(QString);
 protected:
 	QLineEdit * coordSB[3];
-	QPushButton *getViewButton;
+	QComboBox *getPoint3Combo;
+	QPushButton *getPoint3Button;
 };
 
 class DynamicFloatWidget : public QGridLayout

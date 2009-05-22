@@ -413,7 +413,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				for(int ii=0;ii<3;++ii)
 				point[ii]=pointVals[ii].toDouble();
 
-				p3w = new Point3fWidget(this,point,gla);
+				p3w = new Point3fWidget(this,point,fpi.fieldDesc,gla);
 				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
 				gridLayout->addLayout(p3w,i,1,Qt::AlignTop);
 				stdfieldwidgets.push_back(p3w);
@@ -651,9 +651,9 @@ void AbsPercWidget::setValue(float val, float minV, float maxV)
 /******************************************/
 // Point3fWidget Implementation
 /******************************************/
-Point3fWidget::Point3fWidget(QWidget *p, Point3f defaultv, QWidget *gla_curr):QGridLayout(NULL)
+Point3fWidget::Point3fWidget(QWidget *p, Point3f defaultv, QString _paramName, QWidget *gla_curr):QHBoxLayout(NULL)
 {
-//	gla=gla_curr;
+	paramName = _paramName;
 	for(int i =0;i<3;++i)
 		{
 			coordSB[i]= new QLineEdit(p);
@@ -661,34 +661,72 @@ Point3fWidget::Point3fWidget(QWidget *p, Point3f defaultv, QWidget *gla_curr):QG
 			if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
 															  else baseFont.setPointSize(baseFont.pointSize()*3/4);
 			coordSB[i]->setFont(baseFont);
-			coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
-			coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/3);
+			//coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
+			coordSB[i]->setMinimumWidth(0);
+			coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
+			//coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
 			coordSB[i]->setValidator(new QDoubleValidator(p));
 			coordSB[i]->setAlignment(Qt::AlignRight);
-			this->addWidget(coordSB[i],0,i,Qt::AlignHCenter);
+			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
+			this->addWidget(coordSB[i]);
 		}
-	this->setValue(defaultv);
+	this->setValue(paramName,defaultv);
 	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 		{
-			getViewButton = new QPushButton(tr("Get View Dir"),p);
-			this->addWidget(getViewButton,0,3,Qt::AlignHCenter);
-			connect(getViewButton,SIGNAL(clicked()),gla_curr,SLOT(sendViewDir()));
-			connect(gla_curr,SIGNAL(transmitViewDir(vcg::Point3f)),this,SLOT(setValue(vcg::Point3f)));
+			getPoint3Button = new QPushButton("Get",p);
+			getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
+
+			getPoint3Button->setFlat(true);
+			//getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
+			//this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
+			this->addWidget(getPoint3Button);
+			QStringList names;
+			names << "View Dir";
+			names << "View Pos";
+			names << "Surf. Pos";
+			names << "Camera Pos";
+			
+			getPoint3Combo = new QComboBox(p);
+			getPoint3Combo->addItems(names);
+			//getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
+			//this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
+			this->addWidget(getPoint3Combo);
+
+			connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
+			connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
+			connect(gla_curr,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+			connect(gla_curr,SIGNAL(transmitViewPos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+			connect(gla_curr,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+			connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
+			connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendViewPos(QString)));
+			connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
+			connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendCameraPos(QString)));
 		}
 }
 
-Point3fWidget::~Point3fWidget()
+void Point3fWidget::getPoint()
 {
-	for(int i =0;i<3;++i)
+int index = getPoint3Combo->currentIndex();
+qDebug("Got signal %i",index);
+	switch(index)
 		{
-			delete coordSB[i];
-		}
+			case 0 : emit askViewDir(paramName);		 break;
+			case 1 : emit askViewPos(paramName);		 break;
+			case 2 : emit askSurfacePos(paramName); break;
+			case 3 : emit askCameraPos(paramName); break;
+			default : assert(0);
+		} 
 }
 
-void Point3fWidget::setValue(Point3f newVal)
+Point3fWidget::~Point3fWidget() {}
+
+void Point3fWidget::setValue(QString name,Point3f newVal)
 {
-	for(int i =0;i<3;++i)
-		coordSB[i]->setText(QString::number(newVal[i],'g',4));
+	if(name==paramName)
+	{
+		for(int i =0;i<3;++i)
+			coordSB[i]->setText(QString::number(newVal[i],'g',4));
+	}
 }
 
 vcg::Point3f Point3fWidget::getValue()
