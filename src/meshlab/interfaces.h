@@ -217,7 +217,7 @@ public:
 			MeshCreation     =0x00020, 
 			Smoothing        =0x00040, // Stuff that does not change the topology, but just the vertex positions
 			Quality          =0x00080, 
-			Layer            =0x00100, 
+			Layer            =0x00100, // Layers, attributes
 			Normal           =0x00200, // Normal, Curvature, orientation (rotations and transformations fall here)
 		  Sampling         =0x00400,
 		  Texture          =0x00800,
