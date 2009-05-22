@@ -88,7 +88,7 @@ bool FilterSplitterPlugin::autoDialog(QAction *action)
 }
 
 // This function define the needed parameters for each filter.
-void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &m, FilterParameterSet & parlst)
+void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, FilterParameterSet & parlst)
 {
 	 switch(ID(action))
 	 {
@@ -107,7 +107,7 @@ void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &m, Fi
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *)
 {
 	CMeshO::FaceIterator fi;
 	int numFacesSel,numVertSel;
