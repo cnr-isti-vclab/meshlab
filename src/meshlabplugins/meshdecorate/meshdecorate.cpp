@@ -48,6 +48,7 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
     case DP_SHOW_QUOTED_BOX:						return tr("Draws quoted box");
     case DP_SHOW_VERT_LABEL:						return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
     case DP_SHOW_FACE_LABEL:						return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
+    case DP_SHOW_CAMERA:								return tr("Draw the position of the camera, if present in the current mesh");
 	 }
   assert(0);
   return QString();
@@ -68,6 +69,7 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
 		case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
 		case DP_SHOW_VERT_LABEL:		return tr("Show Vertex Label");
     case DP_SHOW_FACE_LABEL:			return tr("Show Face Label");
+    case DP_SHOW_CAMERA:			return tr("Show Camera");
 
     default: assert(0);
   }
@@ -129,6 +131,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
    glPopAttrib();
   }
 	if(ID(a) == DP_SHOW_BOX_CORNERS)	DrawBBoxCorner(m);
+	if(ID(a) == DP_SHOW_CAMERA)	DrawCamera(m,gla,qf);
 	if(ID(a) == DP_SHOW_QUOTED_BOX)		DrawQuotedBox(m,gla,qf);
 	if(ID(a) == DP_SHOW_VERT_LABEL)	DrawVertLabel(m,gla,qf);
   if(ID(a) == DP_SHOW_FACE_LABEL)	DrawFaceLabel(m,gla,qf);
@@ -141,10 +144,13 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
 			glColor(Color4b::Black);
 			glDepthRange (0.0, 0.9999);
 			glDepthFunc(GL_LEQUAL);
-			glPointSize(4.0f);
+      //float baseSize = max(2.0f,m.glw.GetHintParamf(GLW::HNPPointSize));
+      float baseSize = 4;
+
+			glPointSize(baseSize+0.5);
 			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
 			glColor(Color4b::White);
-			glPointSize(3.0f);
+			glPointSize(baseSize-1);
 			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
 			
 			glPopAttrib();
@@ -491,6 +497,26 @@ void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QGLWidget *gla, QFont q
 											gla->renderText(m.cm.vert[i].P()[0],m.cm.vert[i].P()[1],m.cm.vert[i].P()[2],tr("%1").arg(i),qf);		
 					}
 			}	
+	glPopAttrib();			
+}
+
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m,QGLWidget *gla, QFont qf)
+{
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
+	glDepthFunc(GL_ALWAYS);
+	glDisable(GL_LIGHTING);
+	glColor3f(.8f,.8f,.8f);
+	
+	Point3f vp = m.cm.shot.GetViewPoint();
+	if(!m.cm.shot.IsValid())
+				gla->renderText(gla->width()/4,gla->height()/4,"Warning Current mesh has not a Valid Camera",qf);		
+		
+	float len = m.cm.bbox.Diag()/20.0;
+	 	glBegin(GL_LINES);
+			glVertex3f(vp[0]-len,vp[1],vp[2]); 	glVertex3f(vp[0]+len,vp[1],vp[2]); 
+			glVertex3f(vp[0],vp[1]-len,vp[2]); 	glVertex3f(vp[0],vp[1]+len,vp[2]); 
+			glVertex3f(vp[0],vp[1],vp[2]-len); 	glVertex3f(vp[0],vp[1],vp[2]+len); 
+		glEnd();
 	glPopAttrib();			
 }
 

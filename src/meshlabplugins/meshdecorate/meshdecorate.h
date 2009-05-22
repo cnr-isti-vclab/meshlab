@@ -125,6 +125,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 		DP_SHOW_QUOTED_BOX,
 		DP_SHOW_VERT_LABEL, 
 		DP_SHOW_FACE_LABEL,
+		DP_SHOW_CAMERA,
   };
 
   virtual const QString ST(FilterIDType filter) const;
@@ -154,7 +155,8 @@ public:
     DP_SHOW_AXIS <<
     DP_SHOW_QUOTED_BOX <<
 		DP_SHOW_VERT_LABEL << 
-		DP_SHOW_FACE_LABEL;
+		DP_SHOW_FACE_LABEL << 
+		DP_SHOW_CAMERA;
 
     FilterIDType tt;
     foreach(tt , types()){
@@ -172,6 +174,7 @@ public:
 	void DrawQuotedBox(MeshModel &m,GLArea *gla, QFont qf);
 	void DrawVertLabel(MeshModel &m, QGLWidget *gla, QFont qf);
 	void DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf);
+	void DrawCamera(MeshModel &m, QGLWidget *gla, QFont qf);
   
 	QHash<MeshModel *, bool> isMeshOk;
 	
