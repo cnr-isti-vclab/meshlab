@@ -117,7 +117,6 @@ void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFuncti
 void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness)
 {
 	CMeshO::VertexIterator vi;
-	float percentageQuality;
 	Color4b currentColor;
 
 	for(vi=mesh.cm.vert.begin(); vi!=mesh.cm.vert.end(); ++vi)		
