@@ -517,7 +517,7 @@ void MainWindow::createMenus()
 	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
 	filterMenuQuality = filterMenu->addMenu(tr("Quality Measure and computations"));
 	filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
-	filterMenuLayer = filterMenu->addMenu(tr("Layer Management"));
+	filterMenuLayer = filterMenu->addMenu(tr("Layer and Attribute Management"));
 	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
   filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
   filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
