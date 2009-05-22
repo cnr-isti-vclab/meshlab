@@ -314,3 +314,8 @@ void SaveMaskExporterDialog::SlotSelectionNoneButton()
 	//camera
 	ui.check_iom_camera->setChecked(false);
 }
+
+void SaveMaskExporterDialog::SetTitleDialog( const QString& filename )
+{
+	this->setWindowTitle("Exporting Parameters Options for " + filename);
+}

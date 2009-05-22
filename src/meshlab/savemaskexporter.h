@@ -87,6 +87,7 @@ public:
 	void SetTextureName();
 	int GetNewMask();
 	void SetMaskCapability();
+	void SetTitleDialog(const QString& filename);
 
 private slots:
 	void SlotOkButton();
