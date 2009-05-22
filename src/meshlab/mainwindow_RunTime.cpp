@@ -1043,10 +1043,10 @@ bool MainWindow::saveAs(QString fileName)
 	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,EXPORT);
 
 	//QString fileName;
-
+	
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->fileName.c_str(), filters.join("\n"));
-
+	
 	bool ret = false;
 
 	QStringList fs = fileName.split(".");
@@ -1087,6 +1087,8 @@ bool MainWindow::saveAs(QString fileName)
 		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
 
 		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar);
+		QFileInfo info(fileName);
+		maskDialog.SetTitleDialog(info.fileName());
 		maskDialog.exec();
 		int mask = maskDialog.GetNewMask();
 		maskDialog.close();
