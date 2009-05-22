@@ -84,6 +84,7 @@
  ****************************************************************************/
 #include <Qt>
 #include <QtGui>
+#include <QFileInfo>
 
 
 #include "savemaskexporter.h"
