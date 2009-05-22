@@ -67,6 +67,7 @@
 #include "filterparameter.h"
 #include "stdpardialog.h"
 #include "ui_savemaskexporter.h"
+#include "glarea.h"
 //
 // Each file format exposes:
 //  a capability bit vector with all the things that it can save (the bits are the one indicated in the IOM_XXX bit mask) ; 
@@ -81,7 +82,7 @@ class SaveMaskExporterDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, FilterParameterSet *par);
+	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, FilterParameterSet *par,GLArea* glar = NULL);
 	
 	void InitDialog();
 	void SetTextureName();
@@ -107,6 +108,7 @@ private:
 	int defaultBits;
 	FilterParameterSet *par;
 	StdParFrame *stdParFrame;
+	GLArea* glar;
 	
 	void checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits);
 	bool shouldBeEnabled(int bit, int capabilityBits, int defaultBits);

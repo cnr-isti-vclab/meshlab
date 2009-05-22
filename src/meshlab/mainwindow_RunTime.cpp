@@ -1086,9 +1086,7 @@ bool MainWindow::saveAs(QString fileName)
 
 		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
 
-		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar);
-		QFileInfo info(fileName);
-		maskDialog.SetTitleDialog(info.fileName());
+		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar,this->GLA());
 		maskDialog.exec();
 		int mask = maskDialog.GetNewMask();
 		maskDialog.close();

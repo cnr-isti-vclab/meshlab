@@ -90,8 +90,8 @@
 #include "savemaskexporter.h"
 #include "changetexturename.h"
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, FilterParameterSet *par): 
-QDialog(parent),m(m),capability(capability),defaultBits(defaultBits),par(par)
+SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, FilterParameterSet *par,GLArea* glar): 
+QDialog(parent),m(m),capability(capability),defaultBits(defaultBits),par(par),glar(glar)
 {
 	InitDialog();
 }
@@ -107,7 +107,7 @@ void SaveMaskExporterDialog::InitDialog()
 	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
 
-  stdParFrame = new StdParFrame(this);
+  stdParFrame = new StdParFrame(this,glar);
 	stdParFrame->loadFrameContent(*par);
   QVBoxLayout *vbox = new QVBoxLayout(this);
 	vbox->addWidget(stdParFrame);
