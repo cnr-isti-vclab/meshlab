@@ -56,13 +56,24 @@ GeometryAgingPlugin::~GeometryAgingPlugin()
 { 
 }
 
+const MeshFilterInterface::FilterClass GeometryAgingPlugin::getClass(QAction *a)
+{
+  switch(ID(a))
+  {
+    case FP_ERODE :           return MeshFilterInterface::Remeshing;
+		default :  assert(0);			return MeshFilterInterface::Generic;
+  }
+}
+
+
+
 
 /* Returns the very short string describing each filtering action */
 const QString GeometryAgingPlugin::filterName(FilterIDType filterId) 
 {
 	switch(filterId) {
 		case FP_ERODE:
-			return QString("Aging Simulation");
+			return QString("Mesh aging and chipping simulation");
 		default:
 			assert(0);
 	}

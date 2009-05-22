@@ -173,6 +173,11 @@ const FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *
 		case FF_ISOSURFACE			: return MeshFilterInterface::MeshCreation;
 		case FF_GRID						: return MeshFilterInterface::MeshCreation;
 		case FF_REFINE					: return MeshFilterInterface::Remeshing; 
+		case FF_GEOM_FUNC				: return MeshFilterInterface::Smoothing;
+		case FF_DEF_VERT_ATTRIB	: return MeshFilterInterface::Layer;
+		case FF_DEF_FACE_ATTRIB	: return MeshFilterInterface::Layer; 
+		
+		
 		default			  : return MeshFilterInterface::Generic;
   }
 }

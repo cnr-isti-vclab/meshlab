@@ -55,6 +55,8 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 		virtual bool autoDialog(QAction *) {return true;}
 		virtual void initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params);
 		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb);
+		virtual const FilterClass getClass(QAction *);
+
 		
 	protected:
 		void refineMesh(CMeshO &m, QualityEdgePred &ep, bool selection, vcg::CallBackPos *cb);

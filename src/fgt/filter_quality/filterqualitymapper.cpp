@@ -66,6 +66,16 @@ const QString QualityMapperFilter::filterInfo(FilterIDType filterId)
   return QString("");
 }
 
+const MeshFilterInterface::FilterClass QualityMapperFilter::getClass(QAction *a)
+{
+  switch(ID(a))
+  {
+    case FP_QUALITY_MAPPER :           return MeshFilterInterface::Quality;
+		default :  assert(0);			return MeshFilterInterface::Generic;
+  }
+}
+
+
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
 // For each parameter you need to define, 
