@@ -40,8 +40,8 @@ FilterColorProc::FilterColorProc()
   typeList << CP_FILLING
            << CP_INVERT
            << CP_THRESHOLDING
-           << CP_BRIGHTNESS
-           << CP_CONTRAST
+//           << CP_BRIGHTNESS
+//           << CP_CONTRAST
            << CP_CONTR_BRIGHT
            << CP_GAMMA
            << CP_LEVELS
@@ -70,7 +70,7 @@ const QString FilterColorProc::filterName(FilterIDType filter)
     case CP_THRESHOLDING : return "Vertex Color Thresholding";
     case CP_BRIGHTNESS : return "Vertex Color Brightness";
     case CP_CONTRAST : return "Vertex Color Contrast";
-    case CP_CONTR_BRIGHT : return "Vertex Color Contrast and Brightness";
+    case CP_CONTR_BRIGHT : return "Vertex Color Brightness and Contrast";
     case CP_GAMMA : return "Vertex Color Gamma Correction";
     case CP_INVERT : return "Vertex Color Invert";
     case CP_LEVELS : return "Vertex Color Levels Adjoustement";
@@ -145,9 +145,9 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
     case CP_CONTR_BRIGHT:
     {
       float brightness = 0.0f;
-      float factor = 1.0f;
+      float contrast = 0.0f;
       par.addDynamicFloat("brightness", brightness, -255.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;");
-      par.addDynamicFloat("factor", factor, 0.2f, 5.0f, MeshModel::MM_VERTCOLOR, "Contrast factor:", "Sets the amount of contrast of the mesh.");
+      par.addDynamicFloat("contrast", contrast, -255.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Contrast factor:", "Sets the amount of contrast of the mesh.");
       break;
     }
     case CP_GAMMA :
@@ -258,13 +258,13 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_CONTR_BRIGHT:
     {
-      float brightness = math::Clamp<float>(par.getDynamicFloat("brightness"), -255.0f, 255.0f);
-      float factor = math::Clamp<float>(par.getDynamicFloat("factor"), 0.2f, 5.0f);
+      float brightness =par.getDynamicFloat("brightness");
+      float contrast = par.getDynamicFloat("contrast");
 
       bool selected = false;
       if(m.cm.sfn!=0) selected = true;
 
-      vcg::tri::UpdateColor<CMeshO>::ContrastBrightness(m.cm, factor, brightness, selected);
+      vcg::tri::UpdateColor<CMeshO>::BrightnessContrast(m.cm, brightness/256.0f,contrast/256.0f , selected);
       return true;
     }
     case CP_GAMMA :
