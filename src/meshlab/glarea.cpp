@@ -523,9 +523,11 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 	iEdit = actionToMeshEditMap.value(currentEditor);
 	assert(iEdit);
 	lastModelEdited = meshDoc.mm();
-	iEdit->StartEdit(meshDoc, this);
-
-	log.Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
+	if (!iEdit->StartEdit(meshDoc, this))
+		//iEdit->EndEdit(*(meshDoc.mm()), this);
+		endEdit();
+	else
+		log.Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
 }
 
 
@@ -714,7 +716,9 @@ void GLArea::initTexture()
 		
 		for(unsigned int i =0; i< mm()->cm.textures.size();++i){
 			QImage img, imgScaled, imgGL;
-			img.load(mm()->cm.textures[i].c_str());
+
+			const char* str_TMP = mm()->cm.textures[i].c_str();
+			bool res = img.load(mm()->cm.textures[i].c_str());
 			// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
 			int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
 			int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));

@@ -232,6 +232,7 @@ public slots:
 		currentEditor=0; 
 		setCursorTrack(0); 
 		update(); 
+		emit updateMainWindowMenus();
 	} 
 
 	void setSelectionRendering(bool enabled);
