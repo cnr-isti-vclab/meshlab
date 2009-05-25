@@ -112,8 +112,9 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * g
 		}
 }
 
-void SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *gla )
+bool SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *gla )
 {
   curFacePtr=0;
 	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
+	return true;
 }
