@@ -88,7 +88,7 @@ public:
 	// it is called by the framework after the mesh is loaded to perform more or less standard processing on the mesh.
 	// typical example: ascii or binary format for ply or stl 
 	// If you do not need any additional parameter simply do nothing.
-	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, FilterParameterSet & /*par*/) {}
+	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, FilterParameterSet & /*par*/) 	{}
 
 
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
@@ -481,11 +481,11 @@ public:
 	static const QString Info();
 
 	// Called when the user press the first time the button 
-	virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
-	virtual void StartEdit(MeshDocument &md, GLArea *parent)
+	virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){return true;};
+	virtual bool StartEdit(MeshDocument &md, GLArea *parent)
 	{
 		assert(NULL != md.mm());
-		StartEdit(*(md.mm()), parent);
+		return (StartEdit(*(md.mm()), parent));	
 	}
 		
 	// Called when the user press the second time the button 
