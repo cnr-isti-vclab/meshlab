@@ -59,7 +59,7 @@ public:
 	EditHolePlugin();
 	virtual ~EditHolePlugin();
 	static const QString Info();
-	virtual void  StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual bool  StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
 	virtual void  EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
 	virtual void  Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
 	virtual void  mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );

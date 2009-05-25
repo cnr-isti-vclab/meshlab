@@ -193,11 +193,19 @@ void EditTexturePlugin::Decorate(MeshModel &m, GLArea *gla)
 	}
 }
 
-void EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
+bool EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
 	// Set up the model
 	//m.cm.face.EnableFFAdjacency();
   m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+	
+	if (m.cm.textures.size() == 0)
+	{
+		QMessageBox::warning(gla->window(), "Texture Parametrization Tool",
+			"Sorry, this mesh has no texture.",
+			QMessageBox::Ok, QMessageBox::Ok);
+		return false;
+	}
 
 	if (vcg::tri::HasPerWedgeTexCoord(m.cm)) 
 	{
@@ -241,6 +249,7 @@ void EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
 	InitTexture(m);
 
 	gla->update();
+	return true;
 }
 
 void EditTexturePlugin::EndEdit(MeshModel &m , GLArea * )

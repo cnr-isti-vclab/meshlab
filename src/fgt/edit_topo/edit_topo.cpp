@@ -1113,7 +1113,7 @@ void edit_topo::Decorate(MeshModel &m, GLArea *)
 //
 //	Plugin init
 //
-void edit_topo::StartEdit(MeshModel &m, GLArea *gla)
+bool edit_topo::StartEdit(MeshModel &m, GLArea *gla)
 {	
 	parentGla = gla;
 	gla->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
@@ -1155,6 +1155,7 @@ void edit_topo::StartEdit(MeshModel &m, GLArea *gla)
 
 	connect(edit_topodialogobj, SIGNAL( update_request() ),
           this, SLOT( on_update_request() ) );
+	return true;
 }
 
 //

@@ -46,7 +46,7 @@ const QString QualityMapperPlugin::Info()
 	return tr("Colorize mesh vertexes by Quality");
 }
 
-void QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
+bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
 {
 	if(_qualityMapperDialog==0)
 		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla);
@@ -55,8 +55,8 @@ void QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
 	//bool ret = _qualityMapperDialog->initEqualizerHistogram();
 	if ( !_qualityMapperDialog->initEqualizerHistogram() )
 	{
-		EndEdit(m, gla);
-		return;
+		//EndEdit(m, gla);
+		return false;
 	}
 
 	//drawing transferFunction

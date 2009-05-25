@@ -62,7 +62,7 @@ public:
 	virtual ~edit_topo();
 
 	static const QString Info();
-	virtual void StartEdit(MeshModel &, GLArea *);
+	virtual bool StartEdit(MeshModel &, GLArea *);
 	virtual void EndEdit(MeshModel &, GLArea *);
 	virtual void Decorate(MeshModel &, GLArea *);
 	virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );

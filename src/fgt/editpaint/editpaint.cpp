@@ -55,7 +55,7 @@ const QString EditPaintPlugin::Info() {
 	return tr("Improved Painting");
 }
 
-void EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent) 
+bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent) 
 {
 	dock = new QDockWidget(parent->window());
 	paintbox = new Paintbox(dock);
@@ -97,6 +97,7 @@ void EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 	glarea->setMouseTracking(true);
 	
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));
+	return true;
 }
 
 void EditPaintPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/) 

@@ -80,19 +80,20 @@ void EditHolePlugin::mouseMoveEvent(QMouseEvent * /*e*/, MeshModel &/*m*/, GLAre
 {
 }
 
-void EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
+bool EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
 	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 	if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) )
 	{
 		QMessageBox::critical(0, tr("Manifoldness Failure"), QString("Hole's managing requires manifoldness."));
-		return; // can't continue, mesh can't be processed
+		return false; // can't continue, mesh can't be processed
 	}
 
 	// necessario per evitare di avere 2 istanze del filtro se si cambia mesh
 	// senza chidere il filtro
 	if(dialogFiller != 0)
-		EndEdit(m, gla);
+		//EndEdit(m, gla);
+		return false;
 
 	// if plugin restart with another mesh, recomputing of hole is forced
 	if(mesh != &m)
@@ -144,7 +145,8 @@ void EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 	if(holesModel->holesManager.holes.size()==0)
 	{
 		QMessageBox::information(0, tr("No holes"), QString("Mesh have no hole to edit."));
-		EndEdit(m, gla);	
+		//EndEdit(m, gla);
+		return false;
 	}
 	else
 	{
