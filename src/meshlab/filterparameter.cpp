@@ -605,6 +605,15 @@ QDomElement FilterParameter::createElement(QDomDocument &doc)
         parElem.setAttribute(TypeName(), SaveFileNameName());
         parElem.setAttribute(ValueName(), this->fieldVal.toString());
 		break;
+		    case FilterParameter::PARPOINT3F:
+				{
+        QList<QVariant> pointVals = this->fieldVal.toList();
+				parElem.setAttribute("type","Point3f");
+        parElem.setAttribute("x",QString::number(pointVals[0].toDouble()));
+        parElem.setAttribute("y",QString::number(pointVals[1].toDouble()));
+        parElem.setAttribute("z",QString::number(pointVals[2].toDouble()));
+				}
+				break;
     default: assert(0);
     }
 	return parElem;
@@ -617,30 +626,33 @@ void FilterParameter::addQDomElement(FilterParameterSet &par, QDomElement &np)
 
 		qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
 
-		if(type=="Bool")    par.addBool(name,np.attribute("value")!=QString("false"));
-		if(type=="Int")     par.addInt(name,np.attribute("value").toInt());
-		if(type=="Float")   par.addFloat(name,np.attribute("value").toDouble());
-		if(type=="String")  par.addString(name,np.attribute("value"));
-		if(type=="AbsPerc") par.addAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat());
-		if(type=="Color")		par.addColor(name,QColor::QColor(np.attribute("rgb").toUInt()));
+		if(type=="Bool")    { par.addBool(name,np.attribute("value")!=QString("false")); return; }
+		if(type=="Int")     { par.addInt(name,np.attribute("value").toInt()); return; }
+		if(type=="Float")   { par.addFloat(name,np.attribute("value").toDouble()); return; }
+		if(type=="String")  { par.addString(name,np.attribute("value")); return; }
+		if(type=="AbsPerc") { par.addAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat()); return; }
+		if(type=="Color")		{ par.addColor(name,QColor::QColor(np.attribute("rgb").toUInt())); return; }
 		if(type=="Matrix44")
 		{
 		  Matrix44f mm;
-				for(int i=0;i<16;++i)
-				mm.V()[i]=np.attribute(QString("val")+QString::number(i)).toDouble();
-				par.addMatrix44(name,mm);                        
+			for(int i=0;i<16;++i)
+					mm.V()[i]=np.attribute(QString("val")+QString::number(i)).toDouble();
+			par.addMatrix44(name,mm);    
+			return;                    
 		}
-		if(type=="Enum"){
+		if(type=="Enum")
+		{
 			QStringList list = QStringList::QStringList();
 			for(QDomElement ns = np.firstChildElement("EnumString"); !ns.isNull(); ns = ns.nextSiblingElement("EnumString")){
 				list<<ns.attribute("value");
 			}
-				par.addEnum(name,np.attribute("value").toInt(),list);
-			}
+			par.addEnum(name,np.attribute("value").toInt(),list);
+			return;
+		}
 		
-			if(type == MeshPointerName())  par.addMesh(name, np.attribute(ValueName()).toInt());
-			if(type == FloatListName())
-			{
+		if(type == MeshPointerName())  { par.addMesh(name, np.attribute(ValueName()).toInt()); return; }
+		if(type == FloatListName())
+		{
 			QList<float> values;
 			for(QDomElement listItem = np.firstChildElement(ItemName());
 					!listItem.isNull();
@@ -649,9 +661,21 @@ void FilterParameter::addQDomElement(FilterParameterSet &par, QDomElement &np)
 					values.append(listItem.attribute(ValueName()).toFloat()); 
 				}
 			par.addFloatList(name,values);
-			}
+			return;
+		}
 			
-			if(type == DynamicFloatName())  par.addDynamicFloat(name, np.attribute(ValueName()).toFloat(), np.attribute(MinName()).toFloat(), np.attribute(MaxName()).toFloat(), np.attribute(MaskName()).toInt());
-			if(type == OpenFileNameName())  par.addOpenFileName(name, np.attribute(ValueName()));
-			if(type == SaveFileNameName())  par.addSaveFileName(name, np.attribute(ValueName()));
+		if(type == DynamicFloatName())  { par.addDynamicFloat(name, np.attribute(ValueName()).toFloat(), np.attribute(MinName()).toFloat(), np.attribute(MaxName()).toFloat(), np.attribute(MaskName()).toInt()); return; }
+		if(type == OpenFileNameName())  { par.addOpenFileName(name, np.attribute(ValueName())); return; }
+		if(type == SaveFileNameName())  { par.addSaveFileName(name, np.attribute(ValueName())); return; }
+		if(type=="Point3f") 
+		{
+			Point3f val;
+			val[0]=np.attribute("x").toFloat();
+			val[1]=np.attribute("y").toFloat();
+			val[2]=np.attribute("z").toFloat();
+			par.addPoint3f(name, val);  
+			return; 
+		}
+
+		assert(0); // we are trying to parse an unknown xml element
 }
