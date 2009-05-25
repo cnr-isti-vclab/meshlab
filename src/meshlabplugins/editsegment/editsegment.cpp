@@ -280,7 +280,7 @@ const QString EditSegment::Info()
 	return tr("Segment the mesh by selecting the foreground and background");
 }
 
-void EditSegment::StartEdit(MeshModel & m, GLArea * parent) {
+bool EditSegment::StartEdit(MeshModel & m, GLArea * parent) {
 	parent->setCursor(QCursor(
 		QPixmap(":/images/editsegment_cursor.png", "PNG"), 1, 1));
 
@@ -333,6 +333,7 @@ void EditSegment::StartEdit(MeshModel & m, GLArea * parent) {
 	dragging = false;
 
 	parent->update();
+	return true;
 }
 
 void EditSegment::EndEdit(MeshModel & m, GLArea * parent) {

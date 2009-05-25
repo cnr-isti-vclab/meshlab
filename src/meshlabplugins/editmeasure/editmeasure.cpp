@@ -75,12 +75,13 @@ void EditMeasurePlugin::Decorate(MeshModel &, GLArea * gla)
   assert(!glGetError());
 }
 
-void EditMeasurePlugin::StartEdit(MeshModel &, GLArea *gla )
+bool EditMeasurePlugin::StartEdit(MeshModel &, GLArea *gla )
 {
   gla->setCursor(QCursor(QPixmap(":/images/cur_measure.png"),15,15));	
   connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
   was_ready = false;
   rubberband.Reset();
+	return true;
 }
 
 void EditMeasurePlugin::EndEdit(MeshModel &, GLArea *)

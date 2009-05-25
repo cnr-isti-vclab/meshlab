@@ -130,7 +130,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla)
 	drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector(), mm.cm.bbox);
 }
 
-void EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
+bool EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
 {
 	//qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 	
@@ -146,7 +146,7 @@ void EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
 		QMessageBox::warning(gla->window(), "Edit Pick Points",
 				"Sorry, this mesh has no faces on which picked points can sit.",
 						QMessageBox::Ok, QMessageBox::Ok);
-		return;
+		return false;
 	}
 	
 	//get the cursor
@@ -170,6 +170,7 @@ void EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
 	
 	//show the dialog
 	pickPointsDialog->show();
+	return true;
 }
 
 void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea *gla)
@@ -187,8 +188,10 @@ void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea *gla)
 
 		//remove the dialog from the screen
 		pickPointsDialog->hide();
-	
+		
 		QApplication::setOverrideCursor( QCursor((Qt::CursorShape)overrideCursorShape) );
+		
+		this->glArea = 0;
 	}
 }
 

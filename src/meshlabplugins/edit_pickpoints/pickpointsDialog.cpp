@@ -521,7 +521,6 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, GLArea *gla)
 	assert(meshModel);
 	_glArea = gla;
 	assert(_glArea);
-	
 	//make sure undo is cleared
 	lastPointToMove = 0;
 	

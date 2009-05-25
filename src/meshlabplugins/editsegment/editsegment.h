@@ -96,7 +96,7 @@ public:
 
 	static const QString Info();
 
-	void StartEdit(MeshModel & /*m*/, GLArea * /*parent*/);
+	bool StartEdit(MeshModel & /*m*/, GLArea * /*parent*/);
 	void EndEdit(MeshModel & /*m*/, GLArea * /*parent*/);
 	void Decorate(MeshModel & /*m*/, GLArea * /*parent*/);
 	void mousePressEvent(QMouseEvent *event, MeshModel & /*m*/, GLArea * );

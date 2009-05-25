@@ -70,7 +70,7 @@ const QString EditStraightener::Info()
 	return tr("Change the coordinate frame of a mesh.");
 }
 
-void EditStraightener::StartEdit(MeshModel &m, GLArea *g )
+bool EditStraightener::StartEdit(MeshModel &m, GLArea *g )
 {
   //cleanup:
   gla=NULL;
@@ -146,6 +146,7 @@ void EditStraightener::StartEdit(MeshModel &m, GLArea *g )
 
   gla->update();
   assert(origin!=NULL);
+	return true;
 }
 
 void EditStraightener::EndEdit(MeshModel &, GLArea *)

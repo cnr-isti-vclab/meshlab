@@ -87,7 +87,7 @@ void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 	}
 }
 
-void EditAlignPlugin::StartEdit(MeshModel &_mm, GLArea *_gla )
+bool EditAlignPlugin::StartEdit(MeshModel &_mm, GLArea *_gla )
 {
 	md=&_gla->meshDoc;
 	gla=_gla;
@@ -131,6 +131,7 @@ void EditAlignPlugin::StartEdit(MeshModel &_mm, GLArea *_gla )
 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 	connect(alignDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
 	suspendEditToggle();
+	return true;
 }
 
 void EditAlignPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)

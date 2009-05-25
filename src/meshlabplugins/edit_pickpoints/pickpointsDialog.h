@@ -133,7 +133,7 @@ public:
 public slots:	
 	//redraw the points on the screen
 	void redrawPoints();
-	
+
 private:
 	//get the points from the UI
 	PickedPoints * getPickedPoints();

@@ -228,7 +228,7 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr)
 			
 	 }
  }
- void ExtraMeshSlidePlugin::StartEdit(MeshModel &m, GLArea *gla ){
+ bool ExtraMeshSlidePlugin::StartEdit(MeshModel &m, GLArea *gla ){
 	 gla->update();
 	 if(!dialogsliceobj){
 		 dialogsliceobj=new dialogslice(gla->window());
@@ -239,6 +239,7 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr)
          QObject::connect(dialogsliceobj, SIGNAL(Update_glArea()), this, SLOT(upGlA()));
 	    QObject::connect(dialogsliceobj, SIGNAL(RestoreDefault()), this, SLOT(RestoreDefault()));
 	 }
+	 return true;
 	 }
  void ExtraMeshSlidePlugin::upGlA(){
  

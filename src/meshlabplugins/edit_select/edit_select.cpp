@@ -209,7 +209,7 @@ void ExtraMeshEditPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLA
 
   }
 
-void ExtraMeshEditPlugin::StartEdit(MeshModel &m, GLArea *gla )
+bool ExtraMeshEditPlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
  LastSel.clear();
  CMeshO::FaceIterator fi;
@@ -225,4 +225,5 @@ void ExtraMeshEditPlugin::StartEdit(MeshModel &m, GLArea *gla )
  
  if(connectedMode) 
 	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+ return true;
 }

@@ -66,7 +66,7 @@ const QString RgbTPlugin::Info()
 	return tr("Selective Mesh Refinement with Rgb Triangulations");
 }
 
-void RgbTPlugin::StartEdit(MeshModel &m, GLArea * parent)
+bool RgbTPlugin::StartEdit(MeshModel &m, GLArea * parent)
 {
 	// select the type of subdivison surface
 	SubDialog sd;
@@ -155,6 +155,7 @@ void RgbTPlugin::StartEdit(MeshModel &m, GLArea * parent)
 			parent->update();
 
 			updateSelectedFaces(m);
+			return false;
 		}
 
 		// this is called only when we change editor or we want to close it.
