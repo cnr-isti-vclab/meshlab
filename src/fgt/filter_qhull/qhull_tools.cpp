@@ -281,7 +281,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 				double* avg_normal= new double[3];
 				for(int i=0;i<3;i++){
 					avg_normal[i]=0;
-					for(int j=0; j< normals.size();j++)
+					for(size_t j=0; j< normals.size();j++)
 						avg_normal[i]+= (normals[j])[i];
 				}
 				first_pole=avg_normal;
@@ -321,7 +321,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
 
 		    //Finding second_pole
 			double max_dist2=0;
-		    for(int i=0; i<voronoi_vertices.size();i++){
+		    for(size_t i=0; i<voronoi_vertices.size();i++){
 			    if(voronoi_vertices[i]!= first_pole){
 					double* vertex1= vertex->point;
 					double* vertex2= voronoi_vertices[i];
