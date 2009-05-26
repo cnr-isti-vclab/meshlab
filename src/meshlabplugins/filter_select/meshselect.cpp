@@ -288,6 +288,7 @@ const int SelectionFilterPlugin::getRequirements(QAction *action)
   {
    case FP_SELECT_BORDER_FACES:   return  MeshModel::MM_FACEFLAGBORDER;
    case FP_SELECT_BY_COLOR:		return MeshModel::MM_VERTCOLOR;
+	 default: return 0;
   }
 }
 
