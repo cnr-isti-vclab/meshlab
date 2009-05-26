@@ -203,7 +203,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos */* cb*/)
 {
 	switch(ID(filter))
 	{
@@ -212,12 +212,8 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				MeshModel &m=*md.mm();
 				MeshModel &pm =*md.addNewMesh("Convex Hull");
 	
-				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-				}
-				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-				}
 			    
 				int dim= 3;				/* dimension of points */
 				int numpoints= m.cm.vn;	/* number of mesh vertices */
@@ -303,12 +299,8 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				MeshModel &m=*md.mm();
 			    MeshModel &pm =*md.addNewMesh("Delaunay Triangulation");
 				
-				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-				}
-				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-				}
 			    
 				int dim= 3;				/* dimension of points */
 				int numpoints= m.cm.vn;	/* number of mesh vertices */
@@ -384,12 +376,8 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				MeshModel &m=*md.mm();
 			    MeshModel &pm =*md.addNewMesh("Voronoi Filtering");
 				
-				if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-				}
-				if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
 					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-				}
 			    
 				int dim= 3;				/* dimension of points */
 				int numpoints= m.cm.vn;	/* number of mesh vertices */
@@ -464,14 +452,8 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 			case FP_QHULL_VISIBLE_POINTS:
 			{
 				MeshModel &m=*md.mm();
-				if (!m.hasDataMask(MeshModel::MM_VERTCOLOR))
-				{
-					m.updateDataMask(MeshModel::MM_VERTCOLOR);
-				}
-				if (!m.hasDataMask(MeshModel::MM_VERTFLAGSELECT))
-				{
-					m.updateDataMask(MeshModel::MM_VERTFLAGSELECT);
-				}
+				m.updateDataMask(MeshModel::MM_VERTCOLOR);
+				m.updateDataMask(MeshModel::MM_VERTFLAGSELECT);
 
 				//Clear old selection
 				tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
@@ -496,21 +478,13 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 
 				MeshModel &pm =*md.addNewMesh("CH Flipped Points");
 				
-				if (pm.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					pm.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-				}
-				if (pm.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
 					pm.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-				}
 
 				MeshModel &pm2 =*md.addNewMesh("CH Non Flipped Points");
 				
-				if (pm2.hasDataMask(MeshModel::MM_WEDGTEXCOORD)){
 					pm2.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-				}
-				if (pm2.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
 					pm2.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-				}
 
 				bool convex_hullFP = par.getBool("convex_hullFP");
 				bool convex_hullNFP = par.getBool("convex_hullNFP");
