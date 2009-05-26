@@ -105,16 +105,29 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, FilterParameterS
 	CMeshO::VertexIterator vi;
 	if(filter->text() == filterName(FP_QUALITY_GEODESIC) )
 	  {
+		m.updateDataMask(MeshModel::MM_VERTFLAGBORDER);
 		m.updateDataMask(MeshModel::MM_VERTQUALITY);
 		m.updateDataMask(MeshModel::MM_VERTCOLOR);
 		m.updateDataMask(MeshModel::MM_VERTMARK);
 
-		tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0);
-		
 		float dist;
 		tri::Geo<CMeshO> g;	
-		g.DistanceFromBorder(m.cm, dist);
-		tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm);
+		bool ret = g.DistanceFromBorder(m.cm, dist);
+
+		int unreachedCnt=0;
+		float unreached  = std::numeric_limits<float>::max();
+		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+			if((*vi).Q() == unreached) {
+					unreachedCnt++;
+					(*vi).Q()=0;
+				}
+		if(unreachedCnt >0 )
+				Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+		
+		if(!ret) 
+			Log("Mesh Has no borders. No geodesic distance computed");
+		else 
+			tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm);
 	  }
 	return true;
 }
