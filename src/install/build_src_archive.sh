@@ -1,12 +1,38 @@
-#!/bin/bash
-# this is a script shell for building a tar archive of all the sources needed to build a running version of the meshlab.
-# it should be run in the directory containing the sf meshlab and code directories.
-# so your command line should be something like:     source meshlab/src/install/build_src_archive.sh
-# when the script ends you should have a tgz with all the needed sources
-#
-cp meshlab/src/install/building_meshlab.txt ./how_to_compile.txt
-find meshlab vcglib ./how_to_compile.txt | egrep -v  -e SVN -e /ui_ -e build -e /moc_ -e /php -e meshlabv11.pro -e /qrc_ -e /test/ -e MeshLabBundle -e docs/ -e /web/ -e\# | egrep -e  [.]cpp$ -e [.]c$ -e  [.]h$ -e  [.]tpp$ -e  [.]pro$ -e [.]pri$ -e [.]ui$ -e [.]png$ -e [.]rc$ -e [.]qrc$ -e [.]vert$ -e [.]frag$ -e [.]rfx$ -e [.]glsl$ -e [.]gdp$ -e [.]txt$ -e [.]icns$ -e images/100mesh.html -e images/eye.ico -e [.]inl$ > list.txt
-echo "meshlab/src/fgt/edit_topo/edit_topomeshbuilder.h" >> list.txt
-#
-gnutar -c -v -z  -T ./list.txt -f meshlab_`date +"%Y%m%d"`.tgz 
+#!/bin/sh
 
+DATE=$(date --rfc-3339=date)
+MLABURL=https://meshlab.svn.sourceforge.net/svnroot/meshlab/trunk
+VCGURL=https://vcg.svn.sourceforge.net/svnroot/vcg/trunk
+MLABREV=$(svn info ${MLABURL} | sed -n 's/^Revision:[ ]*\([0-9]*\)/\1/p')
+TMP=/tmp
+MLABARCH=meshlab-snapshot-svn${MLABREV}
+LIBARCH=meshlab-externals-svn${MLABREV}
+MLABDIR=$1
+LIBDIR=$LIBARCH
+
+CURDIR=$(pwd)
+
+mkdir -p $TMP/$MLABDIR
+svn export --force $MLABURL $TMP/$MLABDIR
+svn export --force $VCGURL $TMP/$MLABDIR
+
+cd $TMP/$MLABDIR
+
+mv meshlab/src/external $TMP/$LIBDIR/meshlab/src
+rm -rf CVSROOT meshlab/web meshlab/src/old meshlab/src/sample meshlab/src/meshlabplugins/edit_phototexturing meshlab/src/meshlab/textures meshlab/src/meshlab/plugins/U3D_OSX meshlab/src/meshlab/plugins/U3D_W32 meshlab/src/external
+mkdir -p meshlab/src/meshlab/plugins/U3D_W32
+mkdir -p meshlab/src/meshlab/plugins/U3D_OSX
+mkdir -p meshlab/src/external
+mkdir -p $TMP/$LIBDIR/meshlab/src
+
+rm -rf vcglib/docs
+rm -rf vcglib/apps/gcc_make vcglib/apps/msvc vcglib/apps/test
+mkdir -p $TMP/$LIBDIR/vcglib/vcg
+mv vcglib/vcg/Eigen $TMP/$LIBDIR/vcglib/vcg
+cd ..
+tar -zcf $CURDIR/$MLABARCH.tar.gz $MLABDIR
+tar -zcf $CURDIR/$LIBARCH.tar.gz $LIBDIR
+
+rm -rdf $TMP/$MLABDIR
+
+cd $CURDIR
