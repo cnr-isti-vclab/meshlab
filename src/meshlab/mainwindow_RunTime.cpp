@@ -509,13 +509,6 @@ void MainWindow::startFilter()
 		mdiarea->addSubWindow(gla);
 		if(mdiarea->isVisible()) gla->showMaximized();
 	}
-	// Ask for filter requirements (eg a filter can need topology, border flags etc)
-  // and statisfy them
-
-	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-  int req=iFilter->getRequirements(action);
-  GLA()->mm()->updateDataMask(req);
-  qApp->restoreOverrideCursor();
 
 	// (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
   // bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
@@ -558,6 +551,15 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
 
   qb->show();
   iFilter->setLog(&(GLA()->log));
+
+	// Ask for filter requirements (eg a filter can need topology, border flags etc)
+  // and statisfy them
+	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
+  int req=iFilter->getRequirements(action);
+  GLA()->mm()->updateDataMask(req);
+  qApp->restoreOverrideCursor();
+
   // (4) Apply the Filter
 	bool ret;
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
