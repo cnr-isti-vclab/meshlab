@@ -55,7 +55,8 @@ class FilterGeodesic : public QObject, public MeshFilterInterface
 		 - name of the plugin separated by _
 	*/
 	enum { 
-    FP_QUALITY_GEODESIC, 
+    FP_QUALITY_BORDER_GEODESIC, 
+    FP_QUALITY_POINT_GEODESIC, 
   } ;
 	
 	/* default values for standard parameters' values of the plugin actions */
@@ -68,6 +69,8 @@ class FilterGeodesic : public QObject, public MeshFilterInterface
   virtual const FilterClass getClass(QAction *);
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual bool autoDialog(QAction *) ;
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 
 	protected:
 	
