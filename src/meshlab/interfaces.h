@@ -228,11 +228,13 @@ public:
 	
 	
 	// The FilterPrecondition enum is used to build the prerequisite bitmask that each filter reports. 
-	// This mask is used to explicitate what a filter really needs to be applied. 
+	// This mask is used to explicitate what data a filter really needs in order to start. 
 	// For example algorithms that compute per face quality have as precondition the existence of faces 
 	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
 	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
 	// and Face as precondition.
+	// These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness. 
+	// They are also used to grayout menus un-appliable entries.
 	
 	enum FilterPrecondition
 	{
@@ -242,8 +244,6 @@ public:
 			FP_VertexQuality    =0x00004, //  
 			FP_VertexRadius     =0x00008, //  
 			FP_WedgeTexCoord    =0x00010, //
-			FP_IsManifold       =0x00020, //  
-			FP_IsWatertight     =0x00040, // 
 	};
 	
 	virtual ~MeshFilterInterface() {}
