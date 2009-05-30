@@ -677,15 +677,15 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 	numpoints --> number of points
 	m --> original mesh
 	pm --> new mesh that is the convex hull of the flipped points, if convex_hullFP is true
-	pm2 --> new mesh that is the convex hull of the non flipped points, if convex_hullNFP is true
+	pm2 --> new mesh that is the convex hull of the non flipped points, if triangVP is true
 	viewpoint -> the viewpoint
 	threshold -> bounds the radius of the sphere used to select visible points
 	convex_hullFP --> true if you want to show the partial Convex Hull of the transformed points cloud
 					false otherwise
-	convex_hullNFP --> true if you want to show the Convex Hull of the original points cloud
-					false otherwise
+	triangVP --> true if you want to show a triangulation of the visible points 
+				 false otherwise
 
-	bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm)
+	bool visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, vcg::Point3f viewpointP,float threshold,bool convex_hullFP,bool triangVP)
 		Select the visible points in a point cloud, as viewed from a given viewpoint.
 	    It uses the Qhull library (http://www.qhull.org/.
 	    The algorithm used (Katz, Tal and Basri 2007) determines visibility without reconstructing a surface or estimating normals.
@@ -696,7 +696,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
 		-1 otherwise.
 */
 
-int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, vcg::Point3f viewpointP,float threshold,bool convex_hullFP,bool convex_hullNFP){
+int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, vcg::Point3f viewpointP,float threshold,bool convex_hullFP,bool triangVP){
 	boolT ismalloc= True;			/* True if qhull should free points in qh_freeqhull() or reallocation */ 
 	char flags[]= "qhull Tcv";		/* option flags for qhull, see qh_opt.htm */
 	FILE *outfile= NULL;			/* output from qh_produce_output()			
@@ -785,7 +785,7 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel
 		if(convex_hullFP)
 			tri::Allocator<CMeshO>::AddVertices(pm.cm,selected);
 
-		if(convex_hullNFP)
+		if(triangVP)
 			tri::Allocator<CMeshO>::AddVertices(pm2.cm,selected);
 
 		int i=0;
@@ -803,7 +803,7 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel
 					ivp_flipped[qh_pointid(vertex->point)] = &pm.cm.vert[i];
 					i++;
 				}
-				if(convex_hullNFP){ //Add non flipped points to the new mesh
+				if(triangVP){ //Add visible points to the new mesh
 					pm2.cm.vert[j].P()[0] = (*ivp[qh_pointid(vertex->point)]).P()[0];
 					pm2.cm.vert[j].P()[1] = (*ivp[qh_pointid(vertex->point)]).P()[1];
 					pm2.cm.vert[j].P()[2] = (*ivp[qh_pointid(vertex->point)]).P()[2];
@@ -831,9 +831,8 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel
 				}
 			}
 		}
-		if(convex_hullNFP){
-			//Add to the new mesh only the faces of the convex hull whose vertices aren't the viewpoint
-			//Aggiusta
+		if(triangVP){
+			//Add to the new mesh only the faces whose vertices are visible points, discard the viewpoint
 			facetT *facet;
 			FORALLfacet_(qh facet_list){		
 				vertexT *vertex;

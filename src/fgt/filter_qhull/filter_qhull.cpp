@@ -192,7 +192,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 												"if UseCamera is true, this value is ignored");
 				
 				parlst.addBool("convex_hullFP",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud");
-				parlst.addBool("convex_hullNFP",false,"Show the Convex Hull of the non flipped points", "Show the Convex Hull of the given points");
+				parlst.addBool("triangVP",false,"Show a triangulation of the visible points", "Show a triangulation of the visible points");
 				parlst.addBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
 								"If no Convex Hulls are selected , this value is ignored");
 				break;
@@ -481,15 +481,15 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 					pm.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
 					pm.clearDataMask(MeshModel::MM_VERTTEXCOORD);
 
-				MeshModel &pm2 =*md.addNewMesh("CH Non Flipped Points");
+				MeshModel &pm2 =*md.addNewMesh("Visible Points Triangulation");
 				
 					pm2.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
 					pm2.clearDataMask(MeshModel::MM_VERTTEXCOORD);
 
 				bool convex_hullFP = par.getBool("convex_hullFP");
-				bool convex_hullNFP = par.getBool("convex_hullNFP");
+				bool triangVP = par.getBool("triangVP");
 
-				int result = visible_points(dim,numpoints,m,pm,pm2,viewpoint,threshold,convex_hullFP,convex_hullNFP);
+				int result = visible_points(dim,numpoints,m,pm,pm2,viewpoint,threshold,convex_hullFP,triangVP);
 
 				if(!convex_hullFP)
 					md.delMesh(&pm);
@@ -513,7 +513,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameter
 				}
 
 				
-				if(!convex_hullNFP){
+				if(!triangVP){
 					md.delMesh(&pm2);
 				}
 				else{

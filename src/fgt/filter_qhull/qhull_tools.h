@@ -71,4 +71,4 @@ facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m);
 facetT *compute_delaunay(int dim, int numpoints, MeshModel &m);
 bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm,float threshold);
 bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm,double alpha, bool alphashape);
-int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, vcg::Point3f viewpointP,float threshold,bool convex_hullFP,bool convex_hullNFP);
+int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel &pm2, vcg::Point3f viewpointP,float threshold,bool convex_hullFP,bool triangVP);
