@@ -63,6 +63,18 @@ public:
 	virtual QList<Format> importFormats() const = 0;
 	virtual QList<Format> exportFormats() const = 0;
 
+	
+	// The longer string describing each filtering action. 
+	// This string is printed in the top of the parameter window 
+	// so it should be at least one or two paragraphs long.
+	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
+	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
+	//virtual const QString filterInfo(FilterIDType filter) {return QString("Puppa 1");};
+
+	// The very short string (a few words) describing each filtering action 
+	// This string is used also to define the menu entry
+	//virtual const QString filterName(FilterIDType filter){return QString("Puppa 2");};
+	
 		// This function is called by the framework, for each action at the loading of the plugins.
 		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
 		// If your plugins/action has no GlobalParameter, do nothing.
@@ -236,16 +248,19 @@ public:
 	// These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness. 
 	// They are also used to grayout menus un-appliable entries.
 	
-	enum FilterPrecondition
-	{
-			FP_Generic          =0x00000, // Should be avoided if possible
-			FP_Face             =0x00001, //  
-			FP_VertexColor      =0x00002, //  
-			FP_VertexQuality    =0x00004, //  
-			FP_VertexRadius     =0x00008, //  
-			FP_WedgeTexCoord    =0x00010, //
-	};
+	//enum FilterPrecondition
+	//{
+	//		FP_Generic          =0x00000, // Should be avoided if possible
+	//		FP_Face             =0x00001, //  
+	//		FP_VertexColor      =0x00002, //  
+	//		FP_VertexQuality    =0x00004, //  
+	//		FP_VertexRadius     =0x00008, //  
+	//		FP_WedgeTexCoord    =0x00010, //
+	//};
 	
+	//TO BE REPLACED WITH = 0
+	virtual const int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
+
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action. 
@@ -280,7 +295,7 @@ public:
 	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
 	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
 	// and Face as precondition.
-virtual const int getPreconditions(QAction *) {return FP_Generic;}
+	virtual const int getPreconditions(QAction *) {return MeshModel::MM_UNKNOWN;}
 
 	// The main function that applies the selected filter with the already stabilished parameters
 	// This function is called by the framework after getting the user params 

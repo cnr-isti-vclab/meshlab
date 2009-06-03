@@ -373,6 +373,7 @@ protected:
 	MeshModelState meshState;
 	QCheckBox *previewCB;
 public:
+	int curmask;
 	MeshModel *curModel;
 	MeshDocument * curMeshDoc;
 	MeshFilterInterface *curmfi;

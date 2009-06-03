@@ -86,7 +86,7 @@ class FilterParameter
   
 	float min;  // used by the AbsPerc and DynFloat types
   float max;
-	int mask; // used by the DynFloat types
+	//int mask; // used by the DynFloat types
 	void *pointerVal;
 	QStringList enumValues;
 	
@@ -219,7 +219,7 @@ public:
 	void setOpenFileName(QString name, QString newVal);
 	void setSaveFileName(QString name, QString newVal);
 	
-	int getDynamicFloatMask();
+	//int getDynamicFloatMask();
 	
 	FilterParameter *findParameter(QString name);
   const FilterParameter *findParameter(QString name) const;

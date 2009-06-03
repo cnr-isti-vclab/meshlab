@@ -29,7 +29,7 @@
 #include "stdpardialog.h"
 using namespace vcg;
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
-:QDockWidget(QString("Plugin"), p)
+:QDockWidget(QString("Plugin"), p),curmask(MeshModel::MM_UNKNOWN)
 {
 		qf = NULL;
 		stdParFrame=NULL;
@@ -58,19 +58,20 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		curgla=gla;
 
 		mfi->initParameterSet(action, *mdp, curParSet);
+		curmask = mfi->postCondition(action);
 		createFrame();
 		loadFrameContent(mdp);
 		if(isDynamic())
 		{
-			int mask = curParSet.getDynamicFloatMask();
-			meshState.create(mask, curModel);
+			meshState.create(curmask, curModel);
 			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
 		}
   }
 
 	bool MeshlabStdDialog::isDynamic()
 	{
-		return (curParSet.getDynamicFloatMask()!= 0);
+		//return (curParSet.getDynamicFloatMask()!= 0);
+		return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE));
 	}
 
 
@@ -393,7 +394,8 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				ql = new QLabel(fpi.fieldDesc ,this);
 				ql->setToolTip(fpi.fieldToolTip);
 
-				dfw = new DynamicFloatWidget(this,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max,fpi.mask);
+				dfw = new DynamicFloatWidget(this,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max,0);
+				//dfw = new DynamicFloatWidget(this,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max,fpi.mask);
 				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
 				gridLayout->addLayout(dfw,i,1,Qt::AlignTop);
 
@@ -545,12 +547,12 @@ void MeshlabStdDialog::applyClick()
 	QAction *q = curAction;
 	stdParFrame->readValues(curParSet);
 
-	int mask = curParSet.getDynamicFloatMask();
-	if(mask)	meshState.apply(curModel);
+	//int mask = 0;//curParSet.getDynamicFloatMask();
+	if(curmask)	meshState.apply(curModel);
 
 	curmwi->executeFilter(q, curParSet, false);
 
-	if(mask)	meshState.create(mask, curModel);
+	if(curmask)	meshState.create(curmask, curModel);
 
 }
 
@@ -574,8 +576,10 @@ void MeshlabStdDialog::togglePreview()
 
 void MeshlabStdDialog::closeClick()
 {
-	int mask = curParSet.getDynamicFloatMask();
-	if(mask)	meshState.apply(curModel);
+	//int mask = 0;//curParSet.getDynamicFloatMask();
+	if(curmask)	meshState.apply(curModel);
+	curmask = MeshModel::MM_UNKNOWN;
+	this->curgla->update();
 	this->close();
 }
 

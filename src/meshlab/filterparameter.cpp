@@ -71,17 +71,6 @@ void FilterParameterSet::removeParameter(QString name){
 	paramList.removeAll(*findParameter(name));
 }
 
-int FilterParameterSet::getDynamicFloatMask()
-{
-	int maskFound=0;
-		QList<FilterParameter>::const_iterator fpli;
-	for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
-		if((*fpli).fieldType==FilterParameter::PARDYNFLOAT)
-			maskFound |= (*fpli).mask;
-	
-	return maskFound;
-}
-
 //--------------------------------------
 
 void FilterParameterSet::addBool (QString name, bool defaultVal, QString desc, QString tooltip)
@@ -439,7 +428,7 @@ void FilterParameterSet::addDynamicFloat(QString name, float defaultVal, float m
 	p.fieldType=FilterParameter::PARDYNFLOAT;
 	p.min=minVal;
 	p.max=maxVal;
-	p.mask=changeMask;
+	//p.mask=changeMask;
 	paramList.push_back(p);	
 }
 
@@ -595,7 +584,7 @@ QDomElement FilterParameter::createElement(QDomDocument &doc)
     	  parElem.setAttribute(ValueName(), this->fieldVal.toString());
     	  parElem.setAttribute(MinName(), QString::number(this->min));
     	  parElem.setAttribute(MaxName(), QString::number(this->max));
-    	  parElem.setAttribute(MaskName(),QString::number(this->mask));
+    	  //parElem.setAttribute(MaskName(),QString::number(this->mask));
     break;
     case FilterParameter::PAROPENFILENAME:
     	  parElem.setAttribute(TypeName(), OpenFileNameName());

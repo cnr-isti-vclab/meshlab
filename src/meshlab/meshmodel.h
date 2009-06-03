@@ -161,7 +161,10 @@ public:
 // Per Mesh Stuff....
 		MM_CAMERA						= 0x10000000,
 
-		MM_ALL							= 0xffffffff
+		MM_ALL							= 0xffffffff,
+		
+
+		MM_UNKNOWN = 0x80000000
 
 	} ;
 
