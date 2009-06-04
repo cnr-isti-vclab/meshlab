@@ -259,7 +259,7 @@ public:
 	//};
 	
 	//TO BE REPLACED WITH = 0
-	virtual const int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
+	virtual int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
 
 	virtual ~MeshFilterInterface() {}
 
@@ -295,7 +295,7 @@ public:
 	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
 	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
 	// and Face as precondition.
-	virtual const int getPreconditions(QAction *) {return MeshModel::MM_UNKNOWN;}
+	virtual int getPreConditions(QAction *) const {return MeshModel::MM_UNKNOWN;}
 
 	// The main function that applies the selected filter with the already stabilished parameters
 	// This function is called by the framework after getting the user params 

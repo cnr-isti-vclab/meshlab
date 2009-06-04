@@ -499,6 +499,15 @@ void MainWindow::startFilter()
 	if(GLA()) GLA()->endEdit();
 	updateMenus();
 
+	int prec = iFilter->getPreConditions(action);
+	if ((prec != MeshModel::MM_UNKNOWN) && (!GLA()->mm()->hasDataMask(prec)))
+	{
+		QStringList enlst = MeshModel::getStringListFromEnumMask(prec);
+		QString enstr = enlst.join(",");
+		QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Current mesh must have " + enstr + " to be applied to the filter " + iFilter->filterName(action) + "."));
+		return;
+	}
+
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		qDebug("MeshCreation");
@@ -531,7 +540,8 @@ void MainWindow::startFilter()
 		// invoking hte execute filter function of the mainwindow each time that the user press apply
 		iFilter->getCustomParameters(action, GLA(),*(GLA()->mm()), parList, this);
   }
-	else executeFilter(action, parList, false);
+	else 
+			executeFilter(action, parList, false);
 }
 
 /*

@@ -157,3 +157,80 @@ int MeshModel::io2mm(int single_iobit)
 	} ;
 }
 
+const QStringList MeshModel::getStringListFromEnumMask( const int mask )
+{
+	QStringList lst;
+	if (mask & MM_VERTCOORD)
+		lst.append("MM_VERTCOORD");
+	
+	if (mask & MM_VERTNORMAL)
+		lst.append("MM_VERTNORMAL");
+
+	if (mask & MM_VERTFLAG)
+		lst.append("MM_VERTFLAG");
+
+	if (mask & MM_VERTCOLOR)
+		lst.append("MM_VERTCOLOR");
+
+	if (mask & MM_VERTFLAG)
+		lst.append("MM_VERTQUALITY");
+
+	if (mask & MM_VERTMARK)
+		lst.append("MM_VERTMARK");
+	
+	if (mask & MM_VERTFLAG)
+		lst.append("MM_VERTFACETOPO");
+
+	if (mask & MM_VERTCURV)
+		lst.append("MM_VERTCURV");
+	
+	if (mask & MM_VERTCURVDIR)
+		lst.append("MM_VERTCURVDIR");
+
+	if (mask & MM_VERTRADIUS)
+		lst.append("MM_VERTRADIUS");
+		
+	if (mask & MM_VERTTEXCOORD)
+		lst.append("MM_VERTTEXCOORD");
+
+	if (mask & MM_FACEVERT)
+		lst.append("MM_FACEVERT");
+
+	if (mask & MM_FACENORMAL)
+		lst.append("MM_FACENORMAL");
+
+	if (mask & MM_FACENORMAL)
+		lst.append("MM_FACENORMAL");
+
+	if (mask & MM_FACEFLAG)
+		lst.append("MM_FACEFLAG");
+		
+	if (mask & MM_FACECOLOR)
+		lst.append("MM_FACECOLOR");
+
+	if (mask & MM_FACEQUALITY)
+		lst.append("MM_FACEQUALITY");
+
+	if (mask & MM_FACEMARK)
+		lst.append("MM_FACEMARK");
+
+	if (mask & MM_FACEFACETOPO)
+		lst.append("MM_FACEFACETOPO");
+
+	if (mask & MM_WEDGTEXCOORD)
+		lst.append("MM_WEDGTEXCOORD");
+
+	if (mask & MM_WEDGNORMAL)
+		lst.append("MM_WEDGNORMAL");
+
+	if (mask & MM_WEDGCOLOR)
+		lst.append("MM_WEDGCOLOR");
+		
+	if (mask & MM_VERTFLAGSELECT)
+		lst.append("MM_VERTFLAGSELECT");
+
+	if (mask & MM_FACEFLAGSELECT)
+		lst.append("MM_FACEFLAGSELECT");
+
+	return lst;
+}

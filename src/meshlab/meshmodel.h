@@ -46,6 +46,7 @@
 #include <wrap/io_trimesh/additionalinfo.h>
 #include <QList>
 #include <QString>
+#include <QStringList>
 #include <QObject>
 
 class CEdge;
@@ -168,6 +169,8 @@ public:
 
 	} ;
 
+
+	static const QStringList getStringListFromEnumMask(const int mask);
 
   CMeshO cm;
 

@@ -391,9 +391,14 @@ bool FilterColorProc::autoDialog(QAction *a)
   assert(0);
 }
 
-const int FilterColorProc::postCondition( QAction* filter ) const
+int FilterColorProc::postCondition( QAction* filter ) const
 {
 	return MeshModel::MM_VERTCOLOR;	
+}
+
+int FilterColorProc::getPreConditions( QAction * ) const
+{
+	return MeshModel::MM_VERTCOLOR;
 }
 
 Q_EXPORT_PLUGIN(FilterColorProc)
