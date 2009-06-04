@@ -60,7 +60,7 @@ FilterGeodesic::~FilterGeodesic() {
 		delete actionList.at(i);
 }
 
-const QString FilterGeodesic::filterName(FilterIDType filter) 
+const QString FilterGeodesic::filterName(FilterIDType filter) const
 {
  switch(filter)
   {
@@ -71,7 +71,7 @@ const QString FilterGeodesic::filterName(FilterIDType filter)
   return QString("error!");
 }
 
-const QString FilterGeodesic::filterInfo(FilterIDType filterId)
+const QString FilterGeodesic::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {

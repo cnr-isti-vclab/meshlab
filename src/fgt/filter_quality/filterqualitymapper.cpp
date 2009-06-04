@@ -46,7 +46,7 @@ QualityMapperFilter::QualityMapperFilter()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString QualityMapperFilter::filterName(FilterIDType filterId) 
+const QString QualityMapperFilter::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_QUALITY_MAPPER :  return QString("Quality Mapper applier"); 
@@ -57,7 +57,7 @@ const QString QualityMapperFilter::filterName(FilterIDType filterId)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString QualityMapperFilter::filterInfo(FilterIDType filterId)
+const QString QualityMapperFilter::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_QUALITY_MAPPER :  return QString("The filter maps quality levels into colors using a colorband built from a transfer function (may be loaded from an external file) and colorizes the mesh vertexes. The minimum, medium and maximum quality values can be set by user to obtain a custom quality range for mapping");

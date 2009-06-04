@@ -58,7 +58,7 @@ SampleFilterDocPlugin::SampleFilterDocPlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString SampleFilterDocPlugin::filterName(FilterIDType filterId) 
+const QString SampleFilterDocPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_FLATTEN :  return QString("Flatten visible layers"); 
@@ -68,7 +68,7 @@ const QString SampleFilterDocPlugin::filterName(FilterIDType filterId)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId)
+const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformations are preserved. Existing layers can be optionally deleted"); 

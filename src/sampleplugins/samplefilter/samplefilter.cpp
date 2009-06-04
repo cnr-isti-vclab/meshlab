@@ -63,7 +63,7 @@ ExtraSamplePlugin::ExtraSamplePlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString ExtraSamplePlugin::filterName(FilterIDType filterId) 
+const QString ExtraSamplePlugin::filterName(FilterIDType filterId) const 
 {
   switch(filterId) {
 		case FP_MOVE_VERTEX :  return QString("Random vertex displacement"); 
@@ -73,7 +73,7 @@ const QString ExtraSamplePlugin::filterName(FilterIDType filterId)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString ExtraSamplePlugin::filterInfo(FilterIDType filterId)
+const QString ExtraSamplePlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_MOVE_VERTEX :  return QString("Move the vertices of the mesh of a random quantity."); 

@@ -62,7 +62,7 @@ FilterColorProc::~FilterColorProc()
 		delete actionList.at(i);
 }
 
-const QString FilterColorProc::filterName(FilterIDType filter)
+const QString FilterColorProc::filterName(FilterIDType filter) const
 {
   switch(filter)
   {
@@ -83,7 +83,7 @@ const QString FilterColorProc::filterName(FilterIDType filter)
   return QString("error!");
 }
 
-const QString FilterColorProc::filterInfo(FilterIDType filterId)
+const QString FilterColorProc::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {
@@ -396,9 +396,32 @@ int FilterColorProc::postCondition( QAction* filter ) const
 	return MeshModel::MM_VERTCOLOR;	
 }
 
-int FilterColorProc::getPreConditions( QAction * ) const
+int FilterColorProc::getPreConditions( QAction * filter ) const
 {
-	return MeshModel::MM_VERTCOLOR;
+	switch(ID(filter))
+	{
+		case CP_FILLING :
+		case CP_COLOURISATION :
+		{
+			return MeshModel::MM_UNKNOWN;
+			break;
+		}
+		case CP_THRESHOLDING :
+		case CP_BRIGHTNESS :
+		case CP_CONTRAST :
+		case CP_CONTR_BRIGHT :
+		case CP_GAMMA :
+		case CP_INVERT :
+		case CP_EQUALIZE :
+		case CP_DESATURATION :
+		case CP_WHITE_BAL :
+		case CP_LEVELS : 
+		{
+			return MeshModel::MM_VERTCOLOR;	
+			break;
+		}
+		default: assert(0);
+	}
 }
 
 Q_EXPORT_PLUGIN(FilterColorProc)

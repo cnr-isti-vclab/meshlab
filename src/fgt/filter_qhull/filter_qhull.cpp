@@ -71,7 +71,7 @@ QhullPlugin::~QhullPlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString QhullPlugin::filterName(FilterIDType filterId) 
+const QString QhullPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_QHULL_CONVEX_HULL :  return QString("Convex Hull"); 
@@ -86,7 +86,7 @@ const QString QhullPlugin::filterName(FilterIDType filterId)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString QhullPlugin::filterInfo(FilterIDType filterId)
+const QString QhullPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_QHULL_CONVEX_HULL :  return QString("Calculate the <b>convex hull</b> with Qhull library (http://www.qhull.org/html/qconvex.htm).<br><br> "

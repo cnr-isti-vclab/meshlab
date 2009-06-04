@@ -47,8 +47,8 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 		GeometryAgingPlugin();
 		virtual ~GeometryAgingPlugin();
 	
-		virtual const QString filterInfo(FilterIDType filter);
-		virtual const QString filterName(FilterIDType filter);
+		virtual const QString filterInfo(FilterIDType filter) const;
+		virtual const QString filterName(FilterIDType filter) const;
 
 		virtual const int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK | 
 				MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV);}

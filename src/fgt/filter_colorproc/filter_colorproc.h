@@ -57,8 +57,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
 		~FilterColorProc();
 
     virtual const FilterClass getClass(QAction *);
-		virtual const QString filterName(FilterIDType filter);
-		virtual const QString filterInfo(FilterIDType filter);
+		virtual const QString filterName(FilterIDType filter) const;
+		virtual const QString filterInfo(FilterIDType filter) const;
 
 		virtual const int getRequirements(QAction *);
 

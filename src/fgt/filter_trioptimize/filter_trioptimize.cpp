@@ -127,7 +127,7 @@ TriOptimizePlugin::TriOptimizePlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString TriOptimizePlugin::filterName(FilterIDType filterId) 
+const QString TriOptimizePlugin::filterName(FilterIDType filterId) const 
 {
 	switch (filterId) {
 		case FP_PLANAR_EDGE_FLIP:				return tr("Planar flipping optimization");
@@ -155,7 +155,7 @@ const int TriOptimizePlugin::getRequirements(QAction *action)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString TriOptimizePlugin::filterInfo(FilterIDType filterId)
+const QString TriOptimizePlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FP_PLANAR_EDGE_FLIP:

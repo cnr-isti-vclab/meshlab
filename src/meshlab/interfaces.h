@@ -268,11 +268,11 @@ public:
 	// so it should be at least one or two paragraphs long.
 	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
 	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
-	virtual const QString filterInfo(FilterIDType filter)=0;
+	virtual const QString filterInfo(FilterIDType filter) const =0;
 	
 	// The very short string (a few words) describing each filtering action 
 	// This string is used also to define the menu entry
-	virtual const QString filterName(FilterIDType filter)=0;
+	virtual const QString filterName(FilterIDType filter) const =0;
 	
 	// This function is called by the framework, for each action at the loading of the plugins.
 	// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
@@ -339,7 +339,7 @@ public:
 	/// Failing filters should put some meaningful information inside the errorMessage string.
 	const QString &errorMsg() {return this->errorMessage;}
 
-    virtual const FilterIDType ID(QAction *a)
+    virtual const FilterIDType ID(QAction *a) const
   	{
       foreach( FilterIDType tt, types())
         if( a->text() == this->filterName(tt) ) return tt;
@@ -362,10 +362,10 @@ public:
     }
 	 
 	 virtual const QString filterInfo(QAction *a){return this->filterInfo(ID(a));};
-	 virtual const QString filterName(QAction *a){return this->filterName(ID(a));};
+	 virtual const QString filterName(QAction *a) const {return this->filterName(ID(a));};
 	 
     virtual QList<QAction *> actions() const { return actionList;}
-	  virtual QList<FilterIDType> &types() { return typeList;}
+	  virtual const QList<FilterIDType> &types() const { return typeList;}
 
 protected:
     // Each plugins exposes a set of filtering possibilities. 
