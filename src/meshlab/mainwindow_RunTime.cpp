@@ -504,7 +504,8 @@ void MainWindow::startFilter()
 	{
 		QStringList enlst = MeshModel::getStringListFromEnumMask(prec);
 		QString enstr = enlst.join(",");
-		QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Current mesh must have " + enstr + " to be applied to the filter " + iFilter->filterName(action) + "."));
+		QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> was not started.<br>"
+		"Current mesh does not have <i>" + enstr + "</i>."));
 		return;
 	}
 
