@@ -198,7 +198,7 @@ QList<MeshIOInterface::Format> IoX3DPlugin::importFormats() const
 	QList<Format> formatList;
 	formatList << Format("X3D File Format - XML encoding", tr("X3D"));
 	formatList << Format("X3D File Format - VRML encoding", tr("X3DV"));
-	formatList << Format("VRML File Format", tr("WRL"));
+	formatList << Format("VRML 2.0 File Format", tr("WRL"));
 	return formatList;
 }
 
