@@ -144,7 +144,7 @@ CleanFilter::~CleanFilter() {
 		delete actionList.at(i);
 }
 
-const QString CleanFilter::filterName(FilterIDType filter) 
+const QString CleanFilter::filterName(FilterIDType filter) const 
 {
  switch(filter)
   {
@@ -163,7 +163,7 @@ const QString CleanFilter::filterName(FilterIDType filter)
   return QString("error!");
 }
 
-const QString CleanFilter::filterInfo(FilterIDType filterId)
+const QString CleanFilter::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {

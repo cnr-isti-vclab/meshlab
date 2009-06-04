@@ -49,8 +49,8 @@ public:
 
 	FilterAutoalign();
 	
-	virtual const QString filterName(FilterIDType filter);
-	virtual const QString filterInfo(FilterIDType filter);
+	virtual const QString filterName(FilterIDType filter) const;
+	virtual const QString filterInfo(FilterIDType filter) const;
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual const FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, FilterParameterSet & /*parent*/);

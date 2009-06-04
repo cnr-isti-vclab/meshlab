@@ -175,7 +175,7 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
 }
 
 
-const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
+const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 {
  switch(filter)
   {
@@ -216,7 +216,7 @@ ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 //	}
 }
 
-const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
+const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 {
   switch(filterID)
   {

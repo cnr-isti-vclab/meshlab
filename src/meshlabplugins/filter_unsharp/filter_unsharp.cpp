@@ -72,7 +72,7 @@ FilterUnsharp::~FilterUnsharp() {
 		delete actionList.at(i);
 }
 
-const QString FilterUnsharp::filterName(FilterIDType filter) 
+const QString FilterUnsharp::filterName(FilterIDType filter) const
 {
  switch(filter)
   {
@@ -104,7 +104,7 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
   return QString("error!");
 }
 
-const QString FilterUnsharp::filterInfo(FilterIDType filterId)
+const QString FilterUnsharp::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {

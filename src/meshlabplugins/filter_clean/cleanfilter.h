@@ -102,8 +102,8 @@ class CleanFilter : public QObject, public MeshFilterInterface
 	CleanFilter();
 	~CleanFilter();
 
-	virtual const QString filterName(FilterIDType filter);
-	virtual const QString filterInfo(FilterIDType filter);
+	virtual const QString filterName(FilterIDType filter) const;
+	virtual const QString filterInfo(FilterIDType filter) const;
 MeshFilterInterface::Remeshing;
 
   virtual const FilterClass getClass(QAction *);

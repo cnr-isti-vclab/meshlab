@@ -70,8 +70,8 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 	FilterUnsharp();
 	~FilterUnsharp();
 
-	virtual const QString filterName(FilterIDType filter);
-	virtual const QString filterInfo(FilterIDType filter);
+	virtual const QString filterName(FilterIDType filter) const;
+	virtual const QString filterInfo(FilterIDType filter) const;
 
   virtual bool autoDialog(QAction *);
 	virtual const FilterClass getClass(QAction *);

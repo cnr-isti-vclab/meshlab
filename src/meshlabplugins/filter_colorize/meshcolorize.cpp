@@ -72,7 +72,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 	    actionList << new QAction(filterName(tt), this);
 }
 
-const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) {
+const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
   switch(c)
   {
     case CP_MAP_QUALITY_INTO_COLOR:   return QString("Colorize by Quality");
@@ -96,7 +96,7 @@ const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) {
   }
   return QString("error!");
 }
-const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) 
+const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const 
 {
   switch(filterId)
   {

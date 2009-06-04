@@ -87,7 +87,7 @@ AmbientOcclusionPlugin::~AmbientOcclusionPlugin()
 {
 }
 
-const QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) 
+const QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -99,7 +99,7 @@ const QString AmbientOcclusionPlugin::filterName(FilterIDType filterId)
 	return QString("");
 }
 
-const QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId)
+const QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{

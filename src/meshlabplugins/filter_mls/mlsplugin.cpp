@@ -84,7 +84,7 @@ MlsPlugin::MlsPlugin()
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-const QString MlsPlugin::filterName(FilterIDType filterId)
+const QString MlsPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FP_APSS_PROJECTION         : return QString("MLS projection (APSS)");
@@ -124,7 +124,7 @@ const MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-const QString MlsPlugin::filterInfo(FilterIDType filterId)
+const QString MlsPlugin::filterInfo(FilterIDType filterId) const
 {
 	QString str = "";
 	if (filterId & _PROJECTION_)

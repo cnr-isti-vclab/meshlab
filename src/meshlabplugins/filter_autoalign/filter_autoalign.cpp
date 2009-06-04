@@ -59,7 +59,7 @@ FilterAutoalign::FilterAutoalign()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString FilterAutoalign::filterName(FilterIDType filterId) 
+const QString FilterAutoalign::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_AUTOALIGN :  return QString("Automatic pair Alignement"); 
@@ -69,7 +69,7 @@ const QString FilterAutoalign::filterName(FilterIDType filterId)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString FilterAutoalign::filterInfo(FilterIDType filterId)
+const QString FilterAutoalign::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_AUTOALIGN :  return QString(" Automatic Rough Alignment of two meshes. Based on the paper <b> 4-Points Congruent Sets for Robust Pairwise Surface Registration</b>, by Aiger,Mitra, Cohen-Or. Siggraph 2008  "); 

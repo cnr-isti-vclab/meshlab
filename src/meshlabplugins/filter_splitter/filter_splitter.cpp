@@ -56,7 +56,7 @@ FilterSplitterPlugin::FilterSplitterPlugin()
 }
 
 // ST() return the very short string describing each filtering action
-const QString FilterSplitterPlugin::filterName(FilterIDType filterId)
+const QString FilterSplitterPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_SPLITSELECT :  return QString("Move selection on another layer");
@@ -66,7 +66,7 @@ const QString FilterSplitterPlugin::filterName(FilterIDType filterId)
 }
 
 // Info() return the longer string describing each filtering action
-const QString FilterSplitterPlugin::filterInfo(FilterIDType filterId)
+const QString FilterSplitterPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_SPLITSELECT :  return QString("Selected faces are moved (or duplicated) in a new layer");

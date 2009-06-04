@@ -44,7 +44,7 @@ FilterCreate::FilterCreate()
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-const QString FilterCreate::filterName(FilterIDType filterId)
+const QString FilterCreate::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
     case CR_BOX : return QString("Box");
@@ -60,7 +60,7 @@ const QString FilterCreate::filterName(FilterIDType filterId)
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-const QString FilterCreate::filterInfo(FilterIDType filterId)
+const QString FilterCreate::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
     case CR_BOX : return QString("Create a Box");

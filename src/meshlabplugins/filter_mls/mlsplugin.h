@@ -62,8 +62,8 @@ public:
 
 	MlsPlugin();
 
-	virtual const QString filterName(FilterIDType filter);
-	virtual const QString filterInfo(FilterIDType filter);
+	virtual const QString filterName(FilterIDType filter) const;
+	virtual const QString filterInfo(FilterIDType filter) const;
 	const FilterClass getClass(QAction *a);
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshDocument &md, FilterParameterSet &parent);

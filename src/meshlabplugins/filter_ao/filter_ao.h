@@ -72,8 +72,8 @@ public:
 	AmbientOcclusionPlugin();
 	~AmbientOcclusionPlugin();
 	
-	virtual const QString     filterName      (FilterIDType filter);
-	virtual const QString			filterInfo(FilterIDType filterId);
+	virtual const QString     filterName      (FilterIDType filter) const;
+	virtual const QString			filterInfo(FilterIDType filterId) const;
 
 	virtual const int         getRequirements (QAction *action);
 	virtual       bool        autoDialog      (QAction *) {return true;}

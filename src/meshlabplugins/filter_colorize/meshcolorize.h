@@ -120,8 +120,8 @@ public:
     ExtraMeshColorizePlugin();
     ~ExtraMeshColorizePlugin(){};
   
-  virtual const QString filterName(FilterIDType filter);
-  virtual const QString filterInfo(FilterIDType filterId);
+  virtual const QString filterName(FilterIDType filter) const;
+  virtual const QString filterInfo(FilterIDType filterId) const;
 
   virtual const FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *);
