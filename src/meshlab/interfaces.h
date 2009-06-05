@@ -248,18 +248,16 @@ public:
 	// These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness. 
 	// They are also used to grayout menus un-appliable entries.
 	
-	//enum FilterPrecondition
-	//{
-	//		FP_Generic          =0x00000, // Should be avoided if possible
-	//		FP_Face             =0x00001, //  
-	//		FP_VertexColor      =0x00002, //  
-	//		FP_VertexQuality    =0x00004, //  
-	//		FP_VertexRadius     =0x00008, //  
-	//		FP_WedgeTexCoord    =0x00010, //
-	//};
-	
-	//TO BE REPLACED WITH = 0
-	virtual int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
+	enum FilterPrecondition
+	{
+			FP_Generic          =0x00000, // Should be avoided if possible
+			FP_Face             =0x00001, //  
+			FP_VertexColor      =0x00002, //  
+			FP_VertexQuality    =0x00004, //  
+			FP_VertexRadius     =0x00008, //  
+			FP_WedgeTexCoord    =0x00010  //
+	};
+
 
 	virtual ~MeshFilterInterface() {}
 
@@ -295,7 +293,13 @@ public:
 	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
 	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
 	// and Face as precondition.
-	virtual int getPreConditions(QAction *) const {return MeshModel::MM_UNKNOWN;}
+	virtual int getPreConditions(QAction *) const {return FP_Generic;}
+
+
+	// Function used by framework to get info about the mesh properties changed by the filter.
+	// It is widely used by the meshlab's preview system.
+	//TO BE REPLACED WITH = 0
+	virtual int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
 
 	// The main function that applies the selected filter with the already stabilished parameters
 	// This function is called by the framework after getting the user params 
