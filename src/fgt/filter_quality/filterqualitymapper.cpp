@@ -173,5 +173,27 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	return true;
 }
 
+int QualityMapperFilter::getPreConditions( QAction * a) const
+{
+	switch(ID(a))
+	{
+		case FP_QUALITY_MAPPER :           
+			return MeshFilterInterface::FP_VertexColor;
+		default :  
+			assert(0);			
+			return MeshFilterInterface::FP_Generic;
+	} 
+}
 
+int QualityMapperFilter::postCondition( QAction* a) const
+{
+	switch(ID(a))
+	{
+	case FP_QUALITY_MAPPER :           
+		return MeshModel::MM_VERTCOLOR;
+	default :  
+		assert(0);			
+		return MeshModel::MM_UNKNOWN;
+	}
+}
 Q_EXPORT_PLUGIN(QualityMapperFilter)

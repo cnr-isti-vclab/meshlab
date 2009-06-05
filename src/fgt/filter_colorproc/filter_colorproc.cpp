@@ -403,7 +403,7 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
 		case CP_FILLING :
 		case CP_COLOURISATION :
 		{
-			return MeshModel::MM_UNKNOWN;
+			return MeshFilterInterface::FP_Generic;
 			break;
 		}
 		case CP_THRESHOLDING :
@@ -417,7 +417,7 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
 		case CP_WHITE_BAL :
 		case CP_LEVELS : 
 		{
-			return MeshModel::MM_VERTCOLOR;	
+			return MeshFilterInterface::FP_VertexColor;	
 			break;
 		}
 		default: assert(0);
