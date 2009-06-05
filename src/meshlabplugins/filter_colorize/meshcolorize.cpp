@@ -182,7 +182,7 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, FilterPa
 			
 			par.addFloat("minVal",minmax.first,"Min","The value that will be mapped with the lower end of the scale (blue)");
 			par.addFloat("maxVal",minmax.second,"Max","The value that will be mapped with the upper end of the scale (red)");
-			par.addDynamicFloat("perc",0,0,100, MeshModel::MM_VERTCOLOR,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers.");
+			par.addDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers.");
 			par.addBool("zeroSym",false,"Zero Simmetric","If true the min max range will be enlarged to be symmertic (so that green is always Zero)");
 			
 		} 

@@ -95,8 +95,8 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 						float minq=minmax.first;
 						float maxq=minmax.second;
 						
-						parlst.addDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq, MeshModel::MM_FACEFLAGSELECT, tr("Min Quality"), tr("Minimum acceptable quality value") );
-						parlst.addDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq, MeshModel::MM_FACEFLAGSELECT, tr("Max Quality"), tr("Maximum acceptable quality value") );
+						parlst.addDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") );
+						parlst.addDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") );
 						parlst.addBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected.");						
 					}
 					break;
@@ -113,9 +113,9 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 				parlst.addEnum("Mode", 0, mode, tr("Mode:"), tr("The mode of this filter.  Start Over clears the selection completely before selecting based on the color.  Add just adds to the current selection bases on color and subtract takes away from the selection the triangles with a vertex matching the color.") );
 
 				
-				parlst.addDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACEFLAGSELECT, tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
-				parlst.addDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACEFLAGSELECT, tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
-				parlst.addDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACEFLAGSELECT, tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
+				parlst.addDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f,  tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
+				parlst.addDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f,  tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
+				parlst.addDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f,  tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
 			}
 			break;
 		}

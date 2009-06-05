@@ -293,7 +293,7 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 		{
 			parlst.addMesh ("TargetMesh", 1, "Target Mesh", "The mesh that is the morph target.");
 			
-			parlst.addDynamicFloat("PercentMorph", 0.0, -150, 250, (MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL), 
+			parlst.addDynamicFloat("PercentMorph", 0.0, -150, 250,  
 			"% Morph", "The percent you want to morph toward (or away from) the target. <br>"
 			"0 means current mesh <br>"
 			"100 means targe mesh <br>"

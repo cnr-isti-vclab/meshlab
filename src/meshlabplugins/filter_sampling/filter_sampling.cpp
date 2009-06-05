@@ -571,7 +571,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 												"The mesh whose vertexes are used as seed points for the color computation. These seeds point are projected onto the above mesh.");
 			if(ID(action) ==	FP_DISK_COLORING) {
 					float Diag = md.mm()->cm.bbox.Diag();
-					parlst.addDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f, MeshModel::MM_VERTCOLOR, tr("Radius"), 
+					parlst.addDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f,  tr("Radius"), 
 																"the radius of the spheres centered in the VertexMesh seeds ");
 					parlst.addBool("SampleRadius", false, "Use sample radius", "Use the radius that is stored in each sample of the vertex mesh. Useful for displaing the variable disk sampling results");
 			} else {

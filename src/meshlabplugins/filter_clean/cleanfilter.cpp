@@ -259,7 +259,7 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 		case FP_SELECTBYANGLE :
 			{
 				parlst.addDynamicFloat("anglelimit",
-															 75.0f, 0.0f, 180.0f, MeshModel::MM_FACEFLAGSELECT,
+															 75.0f, 0.0f, 180.0f, 
 												"angle threshold (deg)",
 												"faces with normal at higher angle w.r.t. the view direction are selected");
 	 		  parlst.addBool ("usecamera",
