@@ -418,7 +418,7 @@ void FilterParameterSet::setMesh(QString name, MeshModel * newVal, int position)
 /* Dynamic Float Members*/
 /* ---- */
 
-void FilterParameterSet::addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, int changeMask, QString desc , QString tooltip )
+void FilterParameterSet::addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, QString desc , QString tooltip )
 {
 	assert(!hasParameter(desc));
 	FilterParameter p(name,desc,tooltip);
@@ -653,7 +653,7 @@ void FilterParameter::addQDomElement(FilterParameterSet &par, QDomElement &np)
 			return;
 		}
 			
-		if(type == DynamicFloatName())  { par.addDynamicFloat(name, np.attribute(ValueName()).toFloat(), np.attribute(MinName()).toFloat(), np.attribute(MaxName()).toFloat(), np.attribute(MaskName()).toInt()); return; }
+		if(type == DynamicFloatName())  { par.addDynamicFloat(name, np.attribute(ValueName()).toFloat(), np.attribute(MinName()).toFloat(), np.attribute(MaxName()).toFloat()); return; }
 		if(type == OpenFileNameName())  { par.addOpenFileName(name, np.attribute(ValueName())); return; }
 		if(type == SaveFileNameName())  { par.addSaveFileName(name, np.attribute(ValueName())); return; }
 		if(type=="Point3f") 

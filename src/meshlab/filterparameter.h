@@ -172,7 +172,7 @@ public:
 	
 	/*  A way to collect an arbitrary number of floats. Useful if you want the user to input an array of numbers */
 	void addFloatList(QString name, QList<float> &defaultValue, QString desc=QString(), QString tooltip=QString());
-	void addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, int changeMask, QString desc=QString(), QString tooltip=QString());
+	void addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, QString desc=QString(), QString tooltip=QString());
 	
 	/*  A way to use the built in QT file picker widget: QFileDialog::getOpenFileName
 	 *  - QString extension - the regular exprssion used to decide what files to display in QT's file picker window
