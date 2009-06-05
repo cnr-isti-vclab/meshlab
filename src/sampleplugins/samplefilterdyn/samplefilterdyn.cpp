@@ -107,13 +107,11 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 			
 			parlst.addDynamicFloat("percentage",
 												 0.5, 0, 1,
-												MeshModel::MM_VERTCOLOR,
 												"Alpha",
 												"The random color is blended with the current one with the specified alpha");
 														
 			parlst.addDynamicFloat("frequency",
 														 20, 1, 200,
-														 MeshModel::MM_VERTCOLOR,
 														 "Noisy Frequency",
 														 "The frequency of the Noise on the mesh. Higher numbers means smaller spots.");
 			break;
