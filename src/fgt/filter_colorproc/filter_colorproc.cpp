@@ -116,9 +116,9 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
     case CP_FILLING:
     {
 			float r = 255.0f, g = 255.0f, b = 255.0f;
-			par.addDynamicFloat("r", r, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR ,"Red:", "Sets the red component of the color.");
-			par.addDynamicFloat("g", g, 0, 255, MeshModel::MM_VERTCOLOR ,"Green:", "Sets the green component of the color.");
-			par.addDynamicFloat("b", b, 0, 255, MeshModel::MM_VERTCOLOR ,"Blue:", "Sets the blue component of the color.");
+			par.addDynamicFloat("r", r, 0.0f, 255.0f,"Red:", "Sets the red component of the color.");
+			par.addDynamicFloat("g", g, 0, 255,"Green:", "Sets the green component of the color.");
+			par.addDynamicFloat("b", b, 0, 255,"Blue:", "Sets the blue component of the color.");
 			break;
 		}
     case CP_THRESHOLDING:
@@ -127,43 +127,43 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
       QColor color1 = QColor(0,0,0), color2 = QColor(255,255,255);
       par.addColor("color1", color1, "Color 1:", "Sets the color to apply below the threshold.");
       par.addColor("color2", color2, "Color 2:", "Sets the color to apply above the threshold.");
-      par.addDynamicFloat("threshold", threshold, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Threshold:", "Colors above the threshold becomes Color 2, others Color 1.");
+      par.addDynamicFloat("threshold", threshold, 0.0f, 255.0f,"Threshold:", "Colors above the threshold becomes Color 2, others Color 1.");
       break;
     }
     case CP_BRIGHTNESS:
     {
       float brightness = 0.0f;
-      par.addDynamicFloat("brightness", brightness, -255.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;");
+      par.addDynamicFloat("brightness", brightness, -255.0f, 255.0f, "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;");
       break;
     }
     case CP_CONTRAST:
     {
       float factor = 1.0f;
-      par.addDynamicFloat("factor", factor, 0.2f, 5.0f, MeshModel::MM_VERTCOLOR, "Contrast factor:", "Sets the amount of contrast of the mesh.");
+      par.addDynamicFloat("factor", factor, 0.2f, 5.0f, "Contrast factor:", "Sets the amount of contrast of the mesh.");
       break;
     }
     case CP_CONTR_BRIGHT:
     {
       float brightness = 0.0f;
       float contrast = 0.0f;
-      par.addDynamicFloat("brightness", brightness, -255.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;");
-      par.addDynamicFloat("contrast", contrast, -255.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Contrast factor:", "Sets the amount of contrast of the mesh.");
+      par.addDynamicFloat("brightness", brightness, -255.0f, 255.0f, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;");
+      par.addDynamicFloat("contrast", contrast, -255.0f, 255.0f, "Contrast factor:", "Sets the amount of contrast of the mesh.");
       break;
     }
     case CP_GAMMA :
     {
       float gamma = 1.0f;
-      par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f, MeshModel::MM_VERTCOLOR, "Gamma:", "Sets the values of the exponent gamma.");
+      par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f, "Gamma:", "Sets the values of the exponent gamma.");
       break;
     }
     case CP_LEVELS:
     {
 			float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
-			par.addDynamicFloat("in_min", in_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Min input level:", "");
-			par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f, MeshModel::MM_VERTCOLOR, "Gamma:", "");
-			par.addDynamicFloat("in_max", in_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Max input level:", "");
-			par.addDynamicFloat("out_min", out_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Min output level:", "");
-			par.addDynamicFloat("out_max", out_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Max output level:", "");
+			par.addDynamicFloat("in_min", in_min, 0.0f, 255.0f,  "Min input level:", "");
+			par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f,  "Gamma:", "");
+			par.addDynamicFloat("in_max", in_max, 0.0f, 255.0f,  "Max input level:", "");
+			par.addDynamicFloat("out_min", out_min, 0.0f, 255.0f, "Min output level:", "");
+			par.addDynamicFloat("out_max", out_max, 0.0f, 255.0f,"Max output level:", "");
 			par.addBool("rCh", true, "Red Channel:", "");
 			par.addBool("gCh", true, "Green Channel:", "");
 			par.addBool("bCh", true, "Blue Channel:", "");
@@ -174,10 +174,10 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
 		  float intensity = 0.5f;
       double hue, luminance, saturation;
 			ColorSpace<unsigned char>::RGBtoHSL(1.0, 0.0, 0.0, hue, saturation, luminance);
-			par.addDynamicFloat("hue", (float)hue*360, 0.0f, 360.0f, MeshModel::MM_VERTCOLOR, "Hue:", "Changes the hue of the mesh.");
-			par.addDynamicFloat("saturation", (float)saturation*100, 0.0f, 100.0f, MeshModel::MM_VERTCOLOR, "Saturation:", "Changes the saturation of the mesh.");
-			par.addDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f, MeshModel::MM_VERTCOLOR, "Luminance:", "Changes the luminance of the mesh.");
-			par.addDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, MeshModel::MM_VERTCOLOR, "Intensity:", "Sets the intensity with which the color it's blended to the mesh.");
+			par.addDynamicFloat("hue", (float)hue*360, 0.0f, 360.0f, "Hue:", "Changes the hue of the mesh.");
+			par.addDynamicFloat("saturation", (float)saturation*100, 0.0f, 100.0f, "Saturation:", "Changes the saturation of the mesh.");
+			par.addDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f,"Luminance:", "Changes the luminance of the mesh.");
+			par.addDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, "Intensity:", "Sets the intensity with which the color it's blended to the mesh.");
 			break;
     }
     case CP_DESATURATION:

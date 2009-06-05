@@ -155,7 +155,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			}
 		case FP_QHULL_VORONOI_FILTERING :
 			{
-				parlst.addDynamicFloat("threshold",0.0f, 0.0f, 2000.0f,MeshModel::MM_NONE,"threshold ","Factor that, multiplied to the bbox diagonal,"
+				parlst.addDynamicFloat("threshold",0.0f, 0.0f, 2000.0f,"threshold ","Factor that, multiplied to the bbox diagonal,"
 																						 "set a threshold used to discard the voronoi vertices too far from the origin."
 																						 "They can cause problems to the qhull library.<br>"
 																						 "Growing values of 'threshold' will add more voronoi vertices for a better surface"
@@ -174,7 +174,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 		case FP_QHULL_VISIBLE_POINTS:
 			{
 				parlst.addDynamicFloat("radiusThreshold",
-												 0.0f, 0.0f, 7.0f,MeshModel::MM_VERTFLAGSELECT,
+												 0.0f, 0.0f, 7.0f,
 												 "radius threshold ","Bounds the radius of the sphere used to select visible points."
 												 "It is used to adjust the radius of the sphere (calculated as distance between the center and the farthest point from it) "
 												 "according to the following equation: <br>"
