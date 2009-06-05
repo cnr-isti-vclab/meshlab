@@ -122,6 +122,8 @@ public:
   
   virtual const QString filterName(FilterIDType filter) const;
   virtual const QString filterInfo(FilterIDType filterId) const;
+	int getPreConditions(QAction *) const;
+	int postCondition( QAction* ) const;
 
   virtual const FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *);

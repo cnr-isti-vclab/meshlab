@@ -408,5 +408,16 @@ bool ExtraMeshColorizePlugin::autoDialog(QAction *a) {
   }
 }
 
+int ExtraMeshColorizePlugin::getPreConditions(QAction *) const 
+{
+	return MeshFilterInterface::FP_Generic;
+}
+
+int ExtraMeshColorizePlugin::postCondition( QAction* ) const 
+{
+	return MeshModel::MM_UNKNOWN;
+}
+
+
 Q_EXPORT_PLUGIN(ExtraMeshColorizePlugin)
   
