@@ -7,7 +7,7 @@
 
 #include "pyramid_point_renderer_base.h"
 
-#include "GL/glut.h"
+//#include "GL/glut.h"
 
 #include <stdexcept>
 

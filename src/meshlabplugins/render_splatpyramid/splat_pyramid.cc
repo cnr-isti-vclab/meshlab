@@ -20,14 +20,15 @@
 
 //#include <QGLFramebufferObject>
 
-#include "GL/glut.h"
+//#include "GL/glut.h"
 
 using namespace std;
 using namespace vcg;
 
 void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &, QGLWidget *gla)
 {
-  glewInit();
+  gla->makeCurrent();
+	glewInit();
 
   canvas_width = gla->width();
   canvas_height = gla->height();
@@ -112,7 +113,7 @@ PyramidPointRendererPlugin::PyramidPointRendererPlugin() {
 
   sDialog = 0;
 
-  check_for_ogl_error("Init");
+  //check_for_ogl_error("Init");
 }
 
 void PyramidPointRendererPlugin::initActionList()

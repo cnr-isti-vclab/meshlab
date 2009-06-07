@@ -15,9 +15,7 @@
 #include <iostream>
 #include <wrap/gl/shaders.h>
 
-#include "GL/gl.h"
-#include "GL/glu.h"
-
+#include <GL/glew.h>
 #include "vcg/space/point3.h"
 #include "vcg/space/color4.h"
 

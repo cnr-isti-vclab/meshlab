@@ -10,7 +10,6 @@ SOURCES       = splat_pyramid.cc point_based_renderer.cc object.cc pyramid_point
 TARGET        = render_splatpyramid
 
 QT            += opengl
-LIBS 		  += -lglut
 
 FORMS		  = dialog.ui
 
