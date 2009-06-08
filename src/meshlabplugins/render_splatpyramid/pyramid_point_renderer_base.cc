@@ -7,7 +7,7 @@
 
 #include "pyramid_point_renderer_base.h"
 
-//#include "GL/glut.h"
+#include "GL/glut.h"
 
 #include <stdexcept>
 
@@ -41,8 +41,6 @@ void PyramidPointRendererBase::init ( void ) {
   cout << canvas_width << " " << canvas_height << endl;
 
   levels_count = min((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
-	
-	//levels_count = floor(log(max(canvas_width, canvas_height)) / log(2.0));
 
   cout << "LEVELS :  " << (int)(log(canvas_width)/log(2.0)) << " " << (int)(log(canvas_height)/log(2.0)) << " " << levels_count << endl;
 
@@ -95,8 +93,7 @@ PyramidPointRendererBase::~PyramidPointRendererBase()  {
 
   glDeleteTextures(1, &fbo_depth);
 
-  fbo_lod.clear();
-
+  delete [] fbo_lod;
   delete [] fbo_buffers;
   delete [] fbo_textures;
   delete [] shader_texture_names;
@@ -110,7 +107,6 @@ PyramidPointRendererBase::~PyramidPointRendererBase()  {
 const void PyramidPointRendererBase::rasterizePixels(void)
      
 {
-
   // Rasterize texture as quads.
   // Uses multiple tex coords in the case of reading from multiple levels
   // at the same time. (ex. synthesis phase)
@@ -153,7 +149,7 @@ void PyramidPointRendererBase::projectSurfels ( const Object* const obj )
   for (int i = 0; i < fbo_buffers_count; ++i)
 	buffers[i] = fbo_buffers[i];
 
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_lod[level]);
+  fbo_lod[level]->bind();
   glDrawBuffers(fbo_buffers_count, buffers);
 
   mShaderProjection.prog.Bind();
@@ -167,7 +163,7 @@ void PyramidPointRendererBase::projectSurfels ( const Object* const obj )
   obj->render();
 
   mShaderProjection.prog.Unbind();
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  fbo_lod[level]->release();
 }
 
 
@@ -214,7 +210,7 @@ void PyramidPointRendererBase::rasterizeAnalysisPyramid( void ) {
 	  	vertices[2][1] = lh;
 	  	vertices[3][0] = lw;
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_lod[level]);
+		fbo_lod[level]->bind();
 		glDrawBuffers(fbo_buffers_count, buffers);
 
 		ratio_w = lw;
@@ -229,9 +225,9 @@ void PyramidPointRendererBase::rasterizeAnalysisPyramid( void ) {
 
 		rasterizePixels();	  
 		mShaderAnalysis.prog.Unbind();
-}
+		fbo_lod[level]->release();
+	}
   
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
 
 /**
@@ -279,7 +275,7 @@ void PyramidPointRendererBase::rasterizeSynthesisPyramid( void )
 		vertices[2][1] = lh;
 		vertices[3][0] = lw;
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_lod[level]);
+		fbo_lod[level]->bind();
 		glDrawBuffers(fbo_buffers_count, buffers);
 
 		mShaderSynthesis.prog.Bind();
@@ -294,8 +290,8 @@ void PyramidPointRendererBase::rasterizeSynthesisPyramid( void )
 
 		rasterizePixels();
 		mShaderSynthesis.prog.Unbind();
+		fbo_lod[level]->release();
     }
-  	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
 
 /**
@@ -360,7 +356,7 @@ void PyramidPointRendererBase::clearBuffers( void ) {
 
   /// clear all buffers of all fbos
   for (int level = 0; level < levels_count; level++) {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_lod[level]);
+	fbo_lod[level]->bind();
 	for (int j = 0; j < fbo_buffers_count; j++) {
 	  glDrawBuffer(fbo_buffers[j]);
 	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -369,7 +365,7 @@ void PyramidPointRendererBase::clearBuffers( void ) {
 	checkFramebufferStatus( __func__ );
 	check_for_ogl_error("clearing");
 
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	fbo_lod[level]->release();
   }
 
   /// Clear the back buffer  
@@ -379,6 +375,7 @@ void PyramidPointRendererBase::clearBuffers( void ) {
   framebuffer_state = FBS_UNDEFINED;
 
   check_for_ogl_error("clear buffers");
+  
 }
 
 /**
@@ -446,69 +443,76 @@ void PyramidPointRendererBase::draw( void ) {
  **/
 void PyramidPointRendererBase::createFBO() {
 
-  assert(fbo_buffers_count <= 16);
+	assert(fbo_buffers_count <= 16);
 
-  fbo_buffers = new GLuint[fbo_buffers_count];
-  fbo_textures = new GLuint[fbo_buffers_count];
+	fbo_buffers = new GLuint[fbo_buffers_count];
+	fbo_textures = new GLuint[fbo_buffers_count];
 
-  check_for_ogl_error("new arrays fbo");
+	check_for_ogl_error("new arrays fbo");
 
-  /// First create one mipmap texture for each render target
-  glGenTextures(fbo_buffers_count, fbo_textures);
-  for (int i = 0; i < fbo_buffers_count; i++) {
-	fbo_buffers[i] = GL_COLOR_ATTACHMENT0_EXT + i;
-
-    glBindTexture(FBO_TYPE, fbo_textures[i]);
-	glTexImage2D(FBO_TYPE, 0, FBO_FORMAT, canvas_width, canvas_height, 0, GL_RGBA, GL_FLOAT, NULL);
-
-	glGenerateMipmapEXT(FBO_TYPE);
-
-	glTexParameteri(FBO_TYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(FBO_TYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameteri(FBO_TYPE, GL_TEXTURE_BASE_LEVEL, 0 );
-	glTexParameteri(FBO_TYPE, GL_TEXTURE_MAX_LEVEL, levels_count );
-  }
-
-  check_for_ogl_error("buffers creation");
-
-  /// create and bind a depth buffer:
-  glGenTextures(1, &fbo_depth);
-  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo_depth);
-  glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, canvas_width,
-			   canvas_height);
-  check_for_ogl_error("depth buffer creation");
-  
-  fbo_lod.resize(levels_count);
-  glGenFramebuffersEXT(levels_count, &fbo_lod[0]);
-  check_for_ogl_error("framebuffer creation");
-
-  /// now attach all textures to fbos, each fbo stores one mipmap level of all render targets
-  for (int level = 0; level < levels_count; level++) {
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_lod[level]);
-	// for each level attach all render targets to the fbo
+	/// First create one mipmap texture for each render target
+	glGenTextures(fbo_buffers_count, fbo_textures);
 	for (int i = 0; i < fbo_buffers_count; i++) {
-	  glBindTexture(FBO_TYPE, fbo_textures[i]);
-	  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,	fbo_buffers[i], FBO_TYPE, fbo_textures[i], level);
+		fbo_buffers[i] = GL_COLOR_ATTACHMENT0_EXT + i;
+
+		glBindTexture(FBO_TYPE, fbo_textures[i]);
+		glTexImage2D(FBO_TYPE, 0, FBO_FORMAT, canvas_width, canvas_height, 0, GL_RGBA, GL_FLOAT, NULL);
+
+		glGenerateMipmapEXT(FBO_TYPE);
+
+		glTexParameteri(FBO_TYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glTexParameteri(FBO_TYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(FBO_TYPE, GL_TEXTURE_BASE_LEVEL, 0 );
+		glTexParameteri(FBO_TYPE, GL_TEXTURE_MAX_LEVEL, levels_count );
 	}
-	checkFramebufferStatus( __func__ );
 
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	check_for_ogl_error("fbo attachment");
-  }
-  
-  /// And lets also attach the depth buffer to the first fbo, that is, level 0 of the pyramid
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_lod[0]);
-  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
+	check_for_ogl_error("buffers creation");
+
+	/// create and bind a depth buffer:
+	glGenTextures(1, &fbo_depth);
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo_depth);
+	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, canvas_width,
+			   canvas_height);
+	check_for_ogl_error("depth buffer creation");
+
+	//fbo_lod = new QGLFramebufferObject[levels_count];
+	
+	check_for_ogl_error("framebuffer creation");
+
+	/// now attach all textures to fbos, each fbo stores one mipmap level of all render targets
+	for (int level = 0; level < levels_count; level++) {
+
+		int dim = 1024/pow(2.0, double(level));
+		fbo_lod[level] = new QGLFramebufferObject(dim, dim, FBO_TYPE);
+		
+		if (!fbo_lod[level]->isValid()) 
+			std::cout << level << " PyramidPointRenderer: invalid FBO\n";	  
+
+		fbo_lod[level]->bind();
+		// for each level attach all render targets to the fbo
+		for (int i = 0; i < fbo_buffers_count; i++) {
+			glBindTexture(FBO_TYPE, fbo_textures[i]);
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,	fbo_buffers[i], FBO_TYPE, fbo_textures[i], level);
+		}
+		checkFramebufferStatus( __func__ );
+
+		fbo_lod[level]->release();
+		check_for_ogl_error("fbo attachment");
+	}
+
+	/// And lets also attach the depth buffer to the first fbo, that is, level 0 of the pyramid
+	fbo_lod[0]->bind();
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
 							   GL_RENDERBUFFER_EXT, fbo_depth); 
-  check_for_ogl_error("depth attachment");
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	check_for_ogl_error("depth attachment");
 
-  framebuffer_state = FBS_UNDEFINED;
+	fbo_lod[0]->release();
 
-  check_for_ogl_error("fbo_mipmap");
+	framebuffer_state = FBS_UNDEFINED;
+
+	check_for_ogl_error("fbo_mipmap");
 }
 
 QString PyramidPointRendererBase::loadShaderSource(const QString& filename) const {
