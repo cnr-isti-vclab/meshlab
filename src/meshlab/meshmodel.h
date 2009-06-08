@@ -252,7 +252,7 @@ public:
 		if( openingFileMask & vcg::tri::io::Mask::IOM_FACEQUALITY	) updateDataMask(MM_FACEQUALITY);
 	}
 
-  bool hasDataMask(int maskToBeTested)
+  bool hasDataMask(const int maskToBeTested) const
 	{
 		return ((currentDataMask & maskToBeTested)!= 0);
 	}
