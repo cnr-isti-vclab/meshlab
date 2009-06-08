@@ -27,86 +27,90 @@
 class PyramidPointRendererBase : public PointBasedRenderer
 {
  private:
-  virtual void rasterizeAnalysisPyramid( void );
-  virtual void rasterizeSynthesisPyramid( void );
-  virtual void rasterizePhongShading(void);
+	virtual void rasterizeAnalysisPyramid( void );
+	virtual void rasterizeSynthesisPyramid( void );
+	virtual void rasterizePhongShading(void);
 
  protected:
 
-  void createFBO();
+  	void createFBO();
 
-  void projectSurfels( const Object * const );
+	void projectSurfels( const Object * const );
 
-  const void activateTexture(const int text_id, const int target_id);
+	const void activateTexture(const int text_id, const int target_id);
 
-  const void rasterizePixels(void);
+	const void rasterizePixels(void);
 
-  QString loadShaderSource(const QString& file) const;
+	QString loadShaderSource(const QString& file) const;
 
-  void resetPointers ( void ) {   
-	fbo_buffers = NULL;
-	fbo_textures = NULL;
-	shader_texture_names = NULL;
-  }
+	void resetPointers ( void ) {   
+		fbo_buffers = NULL;
+		fbo_textures = NULL;
+		shader_texture_names = NULL;
+	}
 
  public:
-  PyramidPointRendererBase();
-  PyramidPointRendererBase(int w, int h);
-  PyramidPointRendererBase(int w, int h, int fbos);
-  ~PyramidPointRendererBase();
-  
-  void init ( void );
+	PyramidPointRendererBase();
+	PyramidPointRendererBase(int w, int h);
+	PyramidPointRendererBase(int w, int h, int fbos);
+	~PyramidPointRendererBase();
 
-  virtual void createShaders ( void ) = 0;
+	void init ( void );
 
-  void draw();
-  void clearBuffers (void);
-  void projectSamples (Object* const obj );
-  void interpolate ( void );
+	virtual void createShaders ( void ) = 0;
 
- protected:
-  /// Number of frame buffer object attachments.
-  int fbo_buffers_count;
+	void draw();
+	void clearBuffers (void);
+	void projectSamples (Object* const obj );
+	void interpolate ( void );
+	
+	void setShadersDir ( QDir d) { shaders_path = d; }
 
-  /// Shaders using VCG lib
-  ProgramVF mShaderProjection;
-  ProgramVF mShaderAnalysis;
-  ProgramVF mShaderSynthesis;
-  ProgramVF mShaderPhong;
+	protected:
+	/// Number of frame buffer object attachments.
+	int fbo_buffers_count;
 
-  /// Textures names to pass as uniform to shaders
-  string *shader_texture_names;
+	/// Shaders using VCG lib
+	ProgramVF mShaderProjection;
+	ProgramVF mShaderAnalysis;
+	ProgramVF mShaderSynthesis;
+	ProgramVF mShaderPhong;
 
-  /// The application-created framebuffer object.
-  vector<QGLFramebufferObject*> fbo_lod;
+	/// Textures names to pass as uniform to shaders
+	string *shader_texture_names;
 
-  /// Framebuffer for depth test.
-  GLuint fbo_depth;
+	/// The application-created framebuffer object.
+	vector<QGLFramebufferObject*> fbo_lod;
 
-  /// usually fboBuffers[i] == GL_COLOR_ATTACHMENT0_EXT + i, 
-  /// but we don't rely on this assumption
-  GLuint* fbo_buffers;
+	/// Framebuffer for depth test.
+	GLuint fbo_depth;
 
-  /** Textures bound to the framebuffer object; 
-   * the ping-pong rendering switches between pairs 0-2 and 1-3
-   * because this can be easily generalized to triples 0-2-4 and 1-3-5 etc.
-   * (pairs 0-1 and 2-3 would have to be rearranged to 0-1-2 and 3-4-5).
-   * use getTextureOfBuffer to find the texture name of a buffer
-   **/
-  GLuint *fbo_textures;
-  
-  /// Number of pyramid levels.
-  int levels_count;
+	/// usually fboBuffers[i] == GL_COLOR_ATTACHMENT0_EXT + i, 
+	/// but we don't rely on this assumption
+	GLuint* fbo_buffers;
 
-  /// Current rasterize level
-  int cur_level;
+	/** Textures bound to the framebuffer object; 
+	* the ping-pong rendering switches between pairs 0-2 and 1-3
+	* because this can be easily generalized to triples 0-2-4 and 1-3-5 etc.
+	* (pairs 0-1 and 2-3 would have to be rearranged to 0-1-2 and 3-4-5).
+	* use getTextureOfBuffer to find the texture name of a buffer
+	**/
+	GLuint *fbo_textures;
 
-  /// Type of most recently used framebuffer.
-  framebuffer_state_enum framebuffer_state; 
-  
-  
-  GLfloat vertices[4][2];
-  GLfloat texcoors0[4][2];
+	/// Number of pyramid levels.
+	int levels_count;
+
+	/// Current rasterize level
+	int cur_level;
+
+	/// Type of most recently used framebuffer.
+	framebuffer_state_enum framebuffer_state; 
+
+	GLfloat vertices[4][2];
+	GLfloat texcoors0[4][2];
+
+	/// Path to meshlab's shaders directory
+	QDir shaders_path;
   
 
 };

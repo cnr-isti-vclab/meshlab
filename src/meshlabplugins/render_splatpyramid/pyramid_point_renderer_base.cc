@@ -92,8 +92,8 @@ PyramidPointRendererBase::~PyramidPointRendererBase()  {
 	glDrawBuffer(GL_BACK);
 
 	glDeleteTextures(1, &fbo_depth);
-
-	//delete [] fbo_lod;
+	
+	fbo_lod.clear();
 	delete [] fbo_buffers;
 	delete [] fbo_textures;
 	delete [] shader_texture_names;
@@ -516,11 +516,10 @@ void PyramidPointRendererBase::createFBO() {
 }
 
 QString PyramidPointRendererBase::loadShaderSource(const QString& filename) const {
-
-  QDir dir;
+  
   QString res;
   
-  QFile f(dir.currentPath() + "/../meshlabplugins/render_splatpyramid/shaders/" + filename);
+  QFile f(shaders_path.absolutePath() + "/shaders/splatpyramid/" + filename);
   
   if (!f.open(QFile::ReadOnly))
 	{

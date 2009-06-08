@@ -27,26 +27,26 @@ using namespace vcg;
 
 void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &, QGLWidget *gla)
 {
-  gla->makeCurrent();
+	gla->makeCurrent();
 	glewInit();
 
-  canvas_width = gla->width();
-  canvas_height = gla->height();
+	canvas_width = gla->width();
+	canvas_height = gla->height();
 
-  //canvas_width = canvas_height = 1024.0;
+	//canvas_width = canvas_height = 1024.0;
 
-  objects.clear();
+	objects.clear();
 
-  bool color_per_vertex = false;
+	bool color_per_vertex = false;
 
-  foreach(MeshModel * mp, md.meshList) {
+	foreach(MeshModel * mp, md.meshList) {
 	// Create a new primitive from given file
 	objects.push_back( Object( objects.size() ) );
 
 	vector<Surfeld> *surfels = (objects.back()).getSurfels();
 
 	if (mp->hasDataMask( MeshModel::MM_VERTCOLOR ) )
-	  color_per_vertex = true;
+		color_per_vertex = true;
 	  
 	Color4b c (180, 180, 180, 255);
 	float quality = 0.0001;
@@ -54,45 +54,59 @@ void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &,
 
 	int pos = 0;
 	CMeshO::VertexIterator vi;
-  
+
 	for(vi=mp->cm.vert.begin(); vi!=mp->cm.vert.end(); ++vi)
-	  if(!(*vi).IsD())
+		if(!(*vi).IsD())
 		{
-		  Point3f p = (*vi).P();
-		  Point3f n = (*vi).N();
-		  radius = (*vi).R();
-		  if (color_per_vertex)
+			Point3f p = (*vi).P();
+			Point3f n = (*vi).N();
+			radius = (*vi).R();
+			if (color_per_vertex)
 			c = (*vi).C();
-		  
-		  surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
-		  ++pos;
+
+			surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
+			++pos;
 		}
-  }
-
-  QDir::setCurrent(qApp->applicationDirPath());
-
-  if (color_per_vertex)
-	render_mode =  PYRAMID_POINTS_COLOR;
-  else
-	render_mode =  PYRAMID_POINTS;
+	}
+  
+	if (color_per_vertex)
+		render_mode =  PYRAMID_POINTS_COLOR;
+	else
+		render_mode =  PYRAMID_POINTS;
 			
-  // Sets the default rendering algorithm and loads vertex arrays
-  for (unsigned int i = 0; i < objects.size(); ++i)
-	objects[i].setRendererType( render_mode );
+	// Sets the default rendering algorithm and loads vertex arrays
+	for (unsigned int i = 0; i < objects.size(); ++i)
+		objects[i].setRendererType( render_mode );
 
-  createPointRenderer( );  
+  
+  	QDir shadersDir = QDir(qApp->applicationDirPath());
+#if defined(Q_OS_WIN)
+	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins"  )
+		shadersDir.cdUp();
+#elif defined(Q_OS_MAC)
+	if (shadersDir.dirName() == "MacOS") {
+		for(int i=0;i<6;++i){
+			if(shadersDir.exists("shaders")) break;
+			shadersDir.cdUp();
+		}
+	}
+#endif
+	
+	QDir::setCurrent(shadersDir.absolutePath());
 
-  if (sDialog) {
-	sDialog->close();
+
+	createPointRenderer( );  
+
+	if (sDialog) {
+		sDialog->close();
 	delete sDialog;
-	sDialog=0;
-  }
+		sDialog=0;
+	}
 
-  sDialog = new Dialog(point_based_render, gla);
-  sDialog->move(10,100);
+	sDialog = new Dialog(point_based_render, gla);
+	sDialog->move(10,100);
 
-  sDialog->show();
-
+	sDialog->show();
 }
 
 /**
@@ -216,19 +230,18 @@ void PyramidPointRendererPlugin::changeRendererType( int type ) {
  **/
 void PyramidPointRendererPlugin::createPointRenderer( void ) {  
 
-  if (point_based_render)
-	delete point_based_render;
+	if (point_based_render)
+		delete point_based_render;
 
-  if (render_mode == PYRAMID_POINTS)
-	point_based_render = new PyramidPointRenderer(canvas_width, canvas_height);
-  else if (render_mode == PYRAMID_POINTS_COLOR)
-	point_based_render = new PyramidPointRendererColor(canvas_width, canvas_height);
-//   else if (render_mode == PYRAMID_TEMPLATES)
-//     point_based_render = new PyramidPointRendererER(canvas_width, canvas_height);
+	if (render_mode == PYRAMID_POINTS)
+		point_based_render = new PyramidPointRenderer(canvas_width, canvas_height);
+	else if (render_mode == PYRAMID_POINTS_COLOR)
+		point_based_render = new PyramidPointRendererColor(canvas_width, canvas_height);
 
-  assert (point_based_render);
+	assert (point_based_render);
 
-  ((PyramidPointRendererBase*)point_based_render)->createShaders();
+	((PyramidPointRendererBase*)point_based_render)->setShadersDir(QDir::currentPath());
+	((PyramidPointRendererBase*)point_based_render)->createShaders();
 }
 
 
