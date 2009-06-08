@@ -296,7 +296,7 @@ public:
 	virtual int getPreConditions(QAction *) const {return FP_Generic;}
 
 
-	// Function used by framework to get info about the mesh properties changed by the filter.
+	// Function used by the framework to get info about the mesh properties changed by the filter.
 	// It is widely used by the meshlab's preview system.
 	//TO BE REPLACED WITH = 0
 	virtual int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
@@ -313,7 +313,40 @@ public:
 		return applyFilter(filter,*(md.mm()),par,cb); 
 	}
 
- 
+	// Function used by the framework to test if a filter is applicable to a mesh.
+	// For istance a colorize by quality filter cannot be applied to a mesh without per-vertex-quality.
+
+	bool isFilterApplicable(QAction * act,const MeshModel& m) const
+	{	
+		int mask = getPreConditions(act);
+		int fp_mask = 0;
+
+		if (mask == MeshFilterInterface::FP_Generic)
+			return true;
+
+		if (m.hasDataMask(MeshModel::MM_VERTCOLOR))
+			fp_mask |= MeshFilterInterface::FP_VertexColor;
+
+		if (m.hasDataMask(MeshModel::MM_VERTQUALITY))
+			fp_mask |= MeshFilterInterface::FP_VertexQuality;
+
+		if (m.hasDataMask(MeshModel::MM_VERTRADIUS))
+			fp_mask |= MeshFilterInterface::FP_VertexRadius;
+
+		if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+			fp_mask |= MeshFilterInterface::FP_WedgeTexCoord;
+
+		bool masktest = ((mask & fp_mask) == mask);
+		if (!masktest) 
+			return false;
+
+		if (mask & MeshFilterInterface::FP_Face)
+			if (m.cm.face.empty())
+				return false;
+
+		return true;
+	}
+
 	//  this function returns true if the filter has parameters that must be filled with an automatically build dialog.
 	virtual bool autoDialog(QAction *) {return false;}
 	

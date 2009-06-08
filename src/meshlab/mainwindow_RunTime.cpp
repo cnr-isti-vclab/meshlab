@@ -480,34 +480,6 @@ void MainWindow::runFilterScript()
 }
 
 
-bool MainWindow::isFilterApplicable(const int mask) const
-{	
-	int fp_mask = 0;
-	
-	if (GLA()->mm()->hasDataMask(MeshModel::MM_VERTCOLOR))
-		fp_mask |= MeshFilterInterface::FP_VertexColor;
-
-	if (GLA()->mm()->hasDataMask(MeshModel::MM_VERTQUALITY))
-		fp_mask |= MeshFilterInterface::FP_VertexQuality;
-
-	if (GLA()->mm()->hasDataMask(MeshModel::MM_VERTRADIUS))
-		fp_mask |= MeshFilterInterface::FP_VertexRadius;
-
-	if (GLA()->mm()->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-		fp_mask |= MeshFilterInterface::FP_WedgeTexCoord;
-
-	bool masktest = ((mask & fp_mask) == mask);
-	if (!masktest) 
-		return false;
-
-	if (mask & MeshFilterInterface::FP_Face)
-		if (GLA()->mm()->cm.face.empty())
-			return false;
-
-	return true;
-}
-
-
 // /////////////////////////////////////////////////
 // The Very Important Procedure of applying a filter
 // /////////////////////////////////////////////////
@@ -528,10 +500,9 @@ void MainWindow::startFilter()
 	if(GLA()) GLA()->endEdit();
 	updateMenus();
 
-	int prec = iFilter->getPreConditions(action);
-	if ((prec != MeshFilterInterface::FP_Generic) && (!isFilterApplicable(prec)))
+	if (!iFilter->isFilterApplicable(action,(*GLA()->mm())))
 	{
-		QStringList enlst = MeshModel::getStringListFromEnumMask(prec);
+		QStringList enlst = MeshModel::getStringListFromEnumMask(iFilter->getPreConditions(action));
 		QString enstr = enlst.join(",");
 		QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
 		"Current mesh does not have <i>" + enstr + "</i>."));

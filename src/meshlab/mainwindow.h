@@ -301,7 +301,6 @@ private:
 	void updateRecentFileActions();
 	void setCurrentFile(const QString &fileName);
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
-	bool isFilterApplicable(const int mask) const ;
 	//void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type);
 
 
