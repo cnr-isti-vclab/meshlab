@@ -17,6 +17,10 @@
 #include <QFile>
 #include <QDir>
 #include <QTextStream>
+#include <QGLFramebufferObject>
+
+#define FBO_TYPE GL_TEXTURE_2D
+#define FBO_FORMAT GL_RGBA32F
 
 /**
  * Pyramid point renderer algorithm as described in: <br>
@@ -102,9 +106,6 @@ class PyramidPointRendererBase : public PointBasedRenderer
 
 	/// Current rasterize level
 	int cur_level;
-
-	/// Type of most recently used framebuffer.
-	framebuffer_state_enum framebuffer_state; 
 
 	GLfloat vertices[4][2];
 	GLfloat texcoors0[4][2];

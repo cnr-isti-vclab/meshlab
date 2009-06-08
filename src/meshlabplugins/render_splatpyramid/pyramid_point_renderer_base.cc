@@ -372,8 +372,6 @@ void PyramidPointRendererBase::clearBuffers( void ) {
   glDrawBuffer(GL_BACK);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-  framebuffer_state = FBS_UNDEFINED;
-
   check_for_ogl_error("clear buffers");
   
 }
@@ -509,8 +507,6 @@ void PyramidPointRendererBase::createFBO() {
 	check_for_ogl_error("depth attachment");
 
 	fbo_lod[0]->release();
-
-	framebuffer_state = FBS_UNDEFINED;
 
 	check_for_ogl_error("fbo_mipmap");
 }

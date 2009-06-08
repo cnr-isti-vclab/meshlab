@@ -9,13 +9,9 @@
 #ifndef __POINT_BASED_RENDERER_H__
 #define __POINT_BASED_RENDERER_H__
 
-
-
-//#include "glslKernel/glslKernel.h"
 #include <iostream>
 
 #include "surfel.hpp"
-#include "pyramid_types.h"
 #include "materials.h"
 #include "object.h"
 
