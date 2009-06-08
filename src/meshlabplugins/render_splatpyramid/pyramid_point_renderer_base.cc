@@ -86,17 +86,17 @@ PyramidPointRendererBase::PyramidPointRendererBase(int w, int h, int fbos) : Poi
 
 PyramidPointRendererBase::~PyramidPointRendererBase()  {
 
-  glDeleteTextures(fbo_buffers_count, fbo_textures);
+	glDeleteTextures(fbo_buffers_count, fbo_textures);
 
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-  glDrawBuffer(GL_BACK);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glDrawBuffer(GL_BACK);
 
-  glDeleteTextures(1, &fbo_depth);
+	glDeleteTextures(1, &fbo_depth);
 
-  delete [] fbo_lod;
-  delete [] fbo_buffers;
-  delete [] fbo_textures;
-  delete [] shader_texture_names;
+	//delete [] fbo_lod;
+	delete [] fbo_buffers;
+	delete [] fbo_textures;
+	delete [] shader_texture_names;
 }
 
 
@@ -477,7 +477,7 @@ void PyramidPointRendererBase::createFBO() {
 			   canvas_height);
 	check_for_ogl_error("depth buffer creation");
 
-	//fbo_lod = new QGLFramebufferObject[levels_count];
+	fbo_lod.resize(levels_count);
 	
 	check_for_ogl_error("framebuffer creation");
 
@@ -485,7 +485,7 @@ void PyramidPointRendererBase::createFBO() {
 	for (int level = 0; level < levels_count; level++) {
 
 		int dim = 1024/pow(2.0, double(level));
-		fbo_lod[level] = new QGLFramebufferObject(dim, dim, FBO_TYPE);
+		fbo_lod[level] = new QGLFramebufferObject(dim, dim, FBO_TYPE);		
 		
 		if (!fbo_lod[level]->isValid()) 
 			std::cout << level << " PyramidPointRenderer: invalid FBO\n";	  
