@@ -151,8 +151,10 @@ bool EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 	else
 	{
 		Decorate(m, gla);
+    //Decorate(m, gla);
 		upGlA();
 	}
+  return true;
 }
 
 void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
