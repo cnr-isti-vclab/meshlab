@@ -66,6 +66,7 @@ bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
 	_qualityMapperDialog->show();
 
 	connect(_qualityMapperDialog, SIGNAL(closingDialog()),gla,SLOT(endEdit()) );
+	return true;
 }
 
 void QualityMapperPlugin::EndEdit(MeshModel &, GLArea * )
