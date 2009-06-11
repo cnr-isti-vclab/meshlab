@@ -336,7 +336,7 @@ bool EditSegment::StartEdit(MeshModel & m, GLArea * parent) {
 	return true;
 }
 
-void EditSegment::EndEdit(MeshModel & m, GLArea * parent) {
+void EditSegment::EndEdit(MeshModel & , GLArea * ) {
 	//qDebug() << "Mesh Segmentation End Edit" << endl;
 	delete meshCutDialog;
 	meshCutDialog = 0;

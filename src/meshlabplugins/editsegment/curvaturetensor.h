@@ -170,8 +170,8 @@ namespace vcg {
 
 					float s,c;
 					// Gabriel Taubin hint and Valentino Fiorin impementation
-					float qt21 = QtMQ[2][1];
-					float qt12 = QtMQ[1][2];
+					//float qt21 = QtMQ[2][1]; // unused var
+					//float qt12 = QtMQ[1][2]; // unused var
 					float alpha = QtMQ[1][1]-QtMQ[2][2];
 					float beta  = QtMQ[2][1];
 
