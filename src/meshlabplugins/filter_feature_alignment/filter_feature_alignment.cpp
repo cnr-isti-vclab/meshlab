@@ -285,32 +285,6 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
     succOffset = 90.0f;
     consOffset = 60.0f;
     shortConsOffset = 40.0f;
-FILE* file = fopen("par.txt","w+");
-fprintf(file,"currMesh %p\n",currMesh);
-fprintf(file,"mFix %p\n",mFix);
-fprintf(file,"mMov %p\n",mMov);
-fprintf(file,"featureType %i\n",featureType);
-fprintf(file,"samplingStrategy %i\n",samplingStrategy);
-fprintf(file,"numFixFeatureSelected %i\n",numFixFeatureSelected);
-fprintf(file,"nBase %i\n",nBase);
-fprintf(file,"k %i\n",k);
-fprintf(file,"ransacIter %i\n",ransacIter);
-fprintf(file,"fullConsensusSamples %i\n",fullConsensusSamples);
-fprintf(file,"trials %i\n",trials);
-fprintf(file,"from %i\n",from);
-fprintf(file,"to %i\n",to);
-fprintf(file,"step %i\n",step);
-fprintf(file,"overlap %f\n",overlap);
-fprintf(file,"consensusDist %f\n",consensusDist);
-fprintf(file,"pickPoints %i\n",pickPoints);
-fprintf(file,"normEq %i\n",normEq);
-fprintf(file,"paint %i\n",paint);
-fprintf(file,"g %i\n",g);
-fprintf(file,"numMovFeatureSelected %i\n",numMovFeatureSelected);
-fprintf(file,"succOffset %f\n",succOffset);
-fprintf(file,"consOffset %f\n",consOffset);
-fprintf(file,"shortConsOffset %f\n",shortConsOffset);
-fclose(file);
     switch(ID(filter))
     {
         case AF_COMPUTE_FEATURE:

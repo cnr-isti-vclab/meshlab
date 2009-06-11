@@ -419,7 +419,9 @@ fprintf(file,"search done...\n");fflush(file);
 
                 vector<FeatureType*>* matches = new vector<FeatureType*>();
 fprintf(file,"coping features...\n");fflush(file);
-                for(int j=0; j<=k; j++) matches->push_back(vecF2[fnnIdx[j]]); //store all features
+                for(int j=0; j<k; j++){ matches->push_back(vecF2[fnnIdx[j]]); //store all features
+fprintf(file,"%.2f   ",(*matches)[j]->description[0]);fflush(file);
+                }
                 matchedVec->push_back(matches);
 fprintf(file,"all right...\n");fflush(file);
                 if(cb){ pBar+=offset; cb((int)pBar, "Matching..."); }
@@ -427,7 +429,7 @@ fprintf(file,"all right...\n");fflush(file);
 
             assert(int(matchedVec->size())==nBase);
 fprintf(file,"bbound\n");fflush(file);
-fclose(file);
+
             //branch and bound
             int* curSolution = new int[nBase];
             for(int i=0; i<nBase; i++) curSolution[i] = 0;              //initialization
@@ -441,7 +443,8 @@ fclose(file);
                 if(*it!=NULL){ delete *it; *it = NULL; }
             }
             delete matchedVec; matchedVec = NULL;
-
+fprintf(file,"ok\n");fflush(file);
+fclose(file);
             return true;
         }
 
