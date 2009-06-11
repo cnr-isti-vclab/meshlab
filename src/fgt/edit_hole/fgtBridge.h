@@ -86,7 +86,7 @@ public:
 
 	virtual void ResetFlag() = 0;
 	virtual void DeleteFromMesh() = 0;
-	virtual inline void AddFaceReference(std::vector<FacePointer*> &facesReferences) =0;
+	virtual inline void AddFaceReference(std::vector<FacePointer*> & /* facesReferences */) {};
 
 	virtual inline bool IsNull() const = 0;
 	virtual inline bool IsDeleted() const = 0;
@@ -331,8 +331,7 @@ public:
 	 *  If the bridge is inside the same hole it cannot be adjacent the hole border,
 	 *  this means fill another sub hole.
 	 */
-	static bool CreateBridge(AbutmentType &sideA, AbutmentType &sideB,
-		HoleSetManager<MESH>* holesManager, QString &err, std::vector<FacePointer *> *app=0)
+	static bool CreateBridge(AbutmentType &sideA, AbutmentType &sideB, HoleSetManager<MESH>* holesManager, QString &err)
 	{
 		assert( vcg::face::IsBorder<FaceType>(*sideA.f, sideA.z) &&
 						vcg::face::IsBorder<FaceType>(*sideB.f, sideB.z));
@@ -386,7 +385,6 @@ public:
 		gM.Set(holesManager->mesh->face.begin(),holesManager->mesh->face.end());
 
 		std::vector<FacePointer *> tmpFaceRef;
-		HoleType* oldRef = 0;
 		AbutmentType sideA, sideB;
 		BridgeOption bestOpt;
 
@@ -440,7 +438,7 @@ public:
 
 					if(holesManager->autoBridgeCB != 0)
 					{
-						if(clock()- timer > holesManager->autoBridgeCB->GetOffset())
+						if(int(clock()) - timer > holesManager->autoBridgeCB->GetOffset())
 						{
 							float progress = (float)(((float)( ((float)j/(thehole.Size()-3)) + i) / thehole.Size()) + h) / nh;
 							holesManager->autoBridgeCB->Invoke(progress*100);
@@ -478,7 +476,7 @@ public:
 	 */
 	static void AutoMultiBridging(HoleSetManager<MESH>* holesManager, std::vector<FacePointer *> *app=0 )
 	{
-		time_t timer;
+		int timer;
 		if(holesManager->autoBridgeCB != 0)
 		{
 			holesManager->autoBridgeCB->Invoke(0);
@@ -545,7 +543,7 @@ public:
 
 							if(holesManager->autoBridgeCB != 0)
 							{
-								if(clock() - timer > holesManager->autoBridgeCB->GetOffset())
+								if(int(clock()) - timer > holesManager->autoBridgeCB->GetOffset())
 								{
 									int progress = ( (100 * ( iteration +(casesViewed/cases2View)))/nIteration );
 									holesManager->autoBridgeCB->Invoke(progress);
@@ -849,7 +847,6 @@ public:
 		int startNholes = holesManager->holes.size();
 
 		std::vector<FacePointer *> tmpFaceRef;
-		HoleType* oldRef = 0;
 
 		for(int i=0; i<startNholes; i++)
 		{

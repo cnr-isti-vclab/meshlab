@@ -270,7 +270,6 @@ public:
 		HoleIterator hit = holes.begin();
 
 		// it know if bFace is adjacent to patchFace
-		FacePointer patchF = 0;
 		if(IsPatchFace(pFace))
 		{
 			for( ; hit != holes.end(); ++hit)

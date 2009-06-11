@@ -174,7 +174,7 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 		local_facePointer.push_back(&pickedAbutment.f);
 		local_facePointer.push_back(&picked.f);
 		QString errLog;
-		if(FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, &holesManager, errLog, &local_facePointer))
+		if(FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, &holesManager, errLog))
 		{
 			emit SGN_ExistBridge(true);
 			emit layoutChanged();
