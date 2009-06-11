@@ -354,9 +354,9 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const FilterP
 								volume.Val(i,j,k)=10000;
 								for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
 								{
-									if(! (abs(xpos-atomPos[atomIndex].X())>3) )
-										if(! (abs(ypos-atomPos[atomIndex].Y())>3) )
-											if(! (abs(zpos-atomPos[atomIndex].Z())>3) )
+									if(! (fabs(xpos-atomPos[atomIndex].X())>3.0f) )
+										if(! (fabs(ypos-atomPos[atomIndex].Y())>3.0f) )
+											if(! (fabs(zpos-atomPos[atomIndex].Z())>3.0f) )
 											{
 												float val = pow((double)(xpos-atomPos[atomIndex].X()),2.0) + 
 																		pow((double)(ypos-atomPos[atomIndex].Y()),2.0) + 
@@ -426,9 +426,9 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const FilterP
 								volume.Val(i,j,k)=0.0;
 								for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
 								{
-									if(! (abs(xpos-atomPos[atomIndex].X())>5) )
-										if(! (abs(ypos-atomPos[atomIndex].Y())>5) )
-											if(! (abs(zpos-atomPos[atomIndex].Z())>5) )
+									if(! (fabs(xpos-atomPos[atomIndex].X())>5.0f) )
+										if(! (fabs(ypos-atomPos[atomIndex].Y())>5.0f) )
+											if(! (fabs(zpos-atomPos[atomIndex].Z())>5.0f) )
 											{
 												float r2 = (pow((double)(xpos-atomPos[atomIndex].X()),2.0) + 
 																	  pow((double)(ypos-atomPos[atomIndex].Y()),2.0) + 
@@ -470,9 +470,9 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const FilterP
 			
 			for (atomIndex = 0; atomIndex < atomNumber; ++atomIndex) 
 			{
-				if(! (abs(xpos-atomPos[atomIndex].X())>5) )
-					if(! (abs(ypos-atomPos[atomIndex].Y())>5) )
-						if(! (abs(zpos-atomPos[atomIndex].Z())>5) )
+				if(! (fabs(xpos-atomPos[atomIndex].X())>5.0f) )
+					if(! (fabs(ypos-atomPos[atomIndex].Y())>5.0f) )
+						if(! (fabs(zpos-atomPos[atomIndex].Z())>5.0f) )
 						{
 							float r2 = (pow((double)(xpos-atomPos[atomIndex].X()),2.0) + 
 												  pow((double)(ypos-atomPos[atomIndex].Y()),2.0) + 

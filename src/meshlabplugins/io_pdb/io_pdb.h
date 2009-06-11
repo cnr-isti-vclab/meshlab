@@ -50,10 +50,10 @@ public:
   virtual void initSaveParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet & par);
 
 	//---------- PDB READER -----------//
-	bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const FilterParameterSet &parlst, vcg::CallBackPos *cb=0); 
-	void PDBIOPlugin::mysscanf(const char* st, const char* format, float *f);
-	float PDBIOPlugin::getAtomRadius(const char* atomicElementCharP);
-	vcg::Color4b PDBIOPlugin::getAtomColor(const char* atomicElementCharP);
+	bool parsePDB(const std::string &filename, CMeshO &m, const FilterParameterSet &parlst, vcg::CallBackPos *cb=0); 
+	void mysscanf(const char* st, const char* format, float *f);
+	float getAtomRadius(const char* atomicElementCharP);
+	vcg::Color4b getAtomColor(const char* atomicElementCharP);
 
 private:
 
