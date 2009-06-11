@@ -205,7 +205,7 @@ void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &featu
 }
 
 
-void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
+void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 {
 	QString parent;
 	QString actionName;

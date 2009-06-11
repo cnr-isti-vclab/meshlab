@@ -61,14 +61,6 @@ Fixed starting position
 
 using namespace std;
 
-void GLLogStream::print(QStringList &l)
-{
-/*	list<pair <int,string> > ::iterator li;
-	
-	foreach(li=S.begin();li!=S.end();++li)
-		l << (*li).second.c_str();*/
-}
-
 
 void GLLogStream::Logf(int Level, const char * f, ... )
 {

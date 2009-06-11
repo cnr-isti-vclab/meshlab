@@ -717,8 +717,12 @@ void GLArea::initTexture()
 		for(unsigned int i =0; i< mm()->cm.textures.size();++i){
 			QImage img, imgScaled, imgGL;
 
-			const char* str_TMP = mm()->cm.textures[i].c_str();
+			//const char* str_TMP = mm()->cm.textures[i].c_str();
 			bool res = img.load(mm()->cm.textures[i].c_str());
+			if(!res)
+				{
+				qDebug("Failure of loading texture %s",mm()->cm.textures[i].c_str());
+				}
 			// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
 			int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
 			int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
