@@ -10,6 +10,7 @@ SUBDIRS       = io_base\
 				io_x3d \
 				io_gts \
 				io_expe \
+				io_pdb \
 				filter_ao \
 				filter_autoalign \
 				filter_clean \
