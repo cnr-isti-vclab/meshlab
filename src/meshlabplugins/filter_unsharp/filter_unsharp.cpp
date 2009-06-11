@@ -170,6 +170,38 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
     default : return MeshFilterInterface::Generic;
   }
 }
+int FilterUnsharp::postCondition(QAction *a) const
+{
+  switch(ID(a))
+  {
+  		case FP_SD_LAPLACIAN_SMOOTH:
+			case FP_HC_LAPLACIAN_SMOOTH:
+			case FP_LAPLACIAN_SMOOTH:
+			case FP_TWO_STEP_SMOOTH:
+			case FP_TAUBIN_SMOOTH:
+			case FP_DEPTH_SMOOTH:
+			case FP_LINEAR_MORPH :
+			case FP_UNSHARP_NORMAL:				
+			case FP_UNSHARP_GEOMETRY:  return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL;
+			case FP_DIRECTIONAL_PRESERVATION:
+			case FP_FACE_NORMAL_SMOOTHING:	  
+			case FP_VERTEX_QUALITY_SMOOTHING:
+			case FP_UNSHARP_QUALITY:
+			case FP_RECOMPUTE_FACE_NORMAL :
+			case FP_RECOMPUTE_VERTEX_NORMAL :
+			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
+			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
+			case FP_FACE_NORMAL_NORMALIZE:	  
+			case FP_VERTEX_NORMAL_NORMALIZE:	  
+			case FP_CREASE_CUT:
+					return MeshModel::MM_UNKNOWN;
+			case FP_UNSHARP_VERTEX_COLOR:	     
+					return MeshModel::MM_VERTCOLOR;
+			
+
+    default : assert(0); return MeshModel::MM_UNKNOWN;
+  }
+}
 
 const int FilterUnsharp::getRequirements(QAction *action)
 {
@@ -253,12 +285,14 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 			break;
 		case FP_TWO_STEP_SMOOTH:
 		parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
-		parlst.addFloat("normalThr", (float) 60,"Feature Angle Threshold (deg)", "Specify a threshold angle for features that you want to be preserved.\nFeatures forming angles LARGER than the specified threshold will be preserved.");
-		parlst.addInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "Number of iteration of normal smoothing step. The larger the better and (the slower)");
+		parlst.addFloat("normalThr", (float) 60,"Feature Angle Threshold (deg)", "Specify a threshold angle (0..90) for features that you want to be preserved.<br>Features forming angles LARGER than the specified threshold will be preserved. <br> 0 -> no smoothing <br> 90 -> all faces will be smoothed");
+		parlst.addInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "Number of iterations of normal smoothing step. The larger the better and (the slower)");
+		parlst.addInt  ("stepFitNum",    (int) 20,"Vertex Fitting steps", "Number of iterations of the vertex fitting procedure. )");
 		parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		break;
 		case FP_LAPLACIAN_SMOOTH:
 			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
+			parlst.addBool ("Boundary",true,"1D Boundary Smoothing", "if true the boundary edges are smoothed only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). Can reduce the shrinking on the border but can have strange effects on very small boundaries.");
 			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 			break;
 		case FP_DEPTH_SMOOTH:
@@ -272,7 +306,7 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 									tr("Step:"), 
 									tr("The purpose of this filter is to <b>constrain</b> any smoothing algorithm to moving vertices only along a give line of sight.<br> First you should store current vertex position, than after applying  one of the many smoothing algorithms you should re start this filter and blend the original positions with the smoothed results.<br>"
 									   "Given a view point  <i>vp</i> , the smoothed vertex position <i>vs</i> and the original position  <i>v</i>, The new vertex position is computed as the projection of  <i>vs</i> on the line  connecting  <i>v</i>  and <i>vp</i>.")); 
-			parlst.addPoint3f  ("viewPoint", Point3f(0,0,0),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
+			parlst.addPoint3f  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction.");
 			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 			break;
 		case FP_TAUBIN_SMOOTH:
@@ -310,7 +344,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	{
 		case FP_CREASE_CUT :{
 				float angleDeg = par.getFloat("angleDeg");
-				tri::CreaseCut(m.cm, math::ToRad(60.0f));
+				tri::CreaseCut(m.cm, math::ToRad(angleDeg));
 				m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 		}
 			break;
@@ -326,6 +360,11 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	  {
 			int stepSmoothNum = par.getInt("stepSmoothNum");
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+			
+			bool boundarySmooth = par.getBool("Boundary");
+			if(boundarySmooth) 
+					tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
+					
       tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,cnt>0,cb);
 			Log(GLLogStream::FILTER, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
@@ -391,6 +430,8 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	  {
 			int stepSmoothNum = par.getInt("stepSmoothNum");
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+			// Small hack 
+			tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
 			float delta = par.getAbsPerc("delta");
 			tri::Smooth<CMeshO>::VertexCoordScaleDependentLaplacian_Fujiwara(m.cm,stepSmoothNum,delta);
 			Log(GLLogStream::FILTER, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
@@ -409,11 +450,19 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);			
 			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			int stepSmoothNum = par.getInt("stepSmoothNum");
-			float normalThr   = cos(math::ToRad(par.getFloat("normalThr")));
+			// sigma==0 all is smoothed
+			// sigma==1 nothing is smoothed
+			float sigma   = cos(math::ToRad(par.getFloat("normalThr")));
+			if(sigma<0) sigma=0;
+			
       int stepNormalNum = par.getInt("stepNormalNum");
+			int stepFitNum = par.getInt("stepFitNum");
       bool selectedFlag = par.getBool("Selected");
-      tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
-      tri::Smooth<CMeshO>::VertexCoordPasoDobleFast(m.cm, stepSmoothNum, normalThr, stepNormalNum,selectedFlag);
+			for(int i=0;i<stepSmoothNum;++i)
+			{
+				tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
+				tri::Smooth<CMeshO>::VertexCoordPasoDobleFast(m.cm, stepNormalNum, sigma, stepFitNum,selectedFlag);
+			}
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 		break;
