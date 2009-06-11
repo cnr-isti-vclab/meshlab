@@ -633,26 +633,27 @@ void QualityMapperDialog::drawGammaCorrection()
 	int width = ui.gammaCorrectionLabel->width();
 	int height = ui.gammaCorrectionLabel->height();
 
-	QPixmap *pixmap = new QPixmap(width, height);
-	QPainter painter(pixmap);
+	QPixmap pixmap(width, height);
+	pixmap.fill();
+	QPainter painter(&pixmap);
+	painter.setOpacity(1.0);
+	painter.setPen(Qt::black);
+	painter.drawRect(0,0,width-1,height-1);
 
 	painter.setPen(QColor(128,128,128));
 	painter.drawLine(0,height-1,width-1,0);
 
-	// Painting the border
-	painter.setPen(Qt::black);
-	painter.drawRect(0,0,width-1,height-1);
 
-	// Painting the spline representing the exponential funcion: x^exp, 0<=x<=1
+	//// Painting the spline representing the exponential funcion: x^exp, 0<=x<=1
 	int c = _equalizerMidHandlePercentilePosition*width;
 	QPainterPath path;
 	path.moveTo(0, height);
 	path.quadTo(c, c, width, 0);
+	painter.setPen(QColor(255,0,0));
 	painter.drawPath(path);
-	
-	ui.gammaCorrectionLabel->setPixmap(*pixmap);
-	painter.end();
-	delete pixmap;
+	////painter.end();
+	ui.gammaCorrectionLabel->setPixmap(pixmap);
+	/*delete pixmap;*/
 }
 
 //draws the Transfer Function in the transfer function view
@@ -734,10 +735,14 @@ void QualityMapperDialog::drawTransferFunction()
 		}
 	}
 
+
+	
 	// updating Color Band
 	this->updateColorBand();
 
+	//_transferFunctionScene.addRect(0.5,0.5,0.2,0.2);
 	ui.transferFunctionView->setScene( &_transferFunctionScene );
+	ui.transferFunctionView->update();
 }
 
 /*
