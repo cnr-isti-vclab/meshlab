@@ -71,10 +71,10 @@
   // being imported from a DLL, wheras this DLL sees symbols defined with
   // this macro as being exported.
   //----------------------------------------------------------------------
-  #ifdef DLL_EXPORTS
-	 #define DLL_API __declspec(dllexport)
+  #ifdef _ANN_WIN_MINGW	
+	#define DLL_API
   #else
-	#define DLL_API __declspec(dllimport)
+	#define DLL_API __declspec(dllexport)
   #endif
   //----------------------------------------------------------------------
   // DLL_API is ignored for all other systems
