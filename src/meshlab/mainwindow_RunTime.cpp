@@ -500,14 +500,6 @@ void MainWindow::startFilter()
 	if(GLA()) GLA()->endEdit();
 	updateMenus();
 
-	if (!iFilter->isFilterApplicable(action,(*GLA()->mm())))
-	{
-		QStringList enlst = MeshModel::getStringListFromEnumMask(iFilter->getPreConditions(action));
-		QString enstr = enlst.join(",");
-		QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
-		"Current mesh does not have <i>" + enstr + "</i>."));
-		return;
-	}
 
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
@@ -519,6 +511,15 @@ void MainWindow::startFilter()
 		mdiarea->addSubWindow(gla);
 		if(mdiarea->isVisible()) gla->showMaximized();
 	}
+	else
+		if (!iFilter->isFilterApplicable(action,(*GLA()->mm())))
+			{
+				QStringList enlst = MeshModel::getStringListFromEnumMask(iFilter->getPreConditions(action));
+				QString enstr = enlst.join(",");
+				QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
+				"Current mesh does not have <i>" + enstr + "</i>."));
+				return;
+			}
 
 	// (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
   // bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
