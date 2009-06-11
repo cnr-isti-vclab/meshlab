@@ -8,7 +8,7 @@ DESTDIR = $$ANNDIR/lib
 DLLDESTDIR = $$ANNDIR/lib
 LIBS += -L$$ANNDIR/lib -lANN
 
-#win32-g++:	DEFINES += _ANN_WIN_MINGW
+win32-g++:	DEFINES += _ANN_WIN_MINGW
 
 HEADERS       = kd_tree.h \
 				kd_split.h \
