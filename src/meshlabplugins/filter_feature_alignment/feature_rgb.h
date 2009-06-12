@@ -125,7 +125,7 @@ template<class MESH_TYPE, int dim> bool FeatureRGB<MESH_TYPE,dim>::ComputeFeatur
     float offset = 100.0f/m.VertexNumber();
     if(cb) cb(0,"Computing features...");
 
-    PVAttributeHandle fh = FeatureAlignment::GetFeatureAttribute<MeshType, FeatureType>(m, true);
+    PVAttributeHandle fh = FeatureAlignment<MeshType, FeatureType>::GetFeatureAttribute(m, true);
     if(!tri::Allocator<MeshType>::IsValidHandle(m,fh)) return false;
 
     //for each vertex, creates a feature and set its values.
@@ -153,7 +153,7 @@ template<class MESH_TYPE, int dim>
 MESH_TYPE* FeatureRGB<MESH_TYPE,dim>::CreateSamplingMesh()
 {
     MeshType* m = new MeshType();
-    PVAttributeHandle fh = FeatureAlignment::GetFeatureAttribute<MeshType, FeatureType>(*m, true);
+    PVAttributeHandle fh = FeatureAlignment<MeshType, FeatureType>::GetFeatureAttribute(*m, true);
     if(!tri::Allocator<MeshType>::IsValidHandle(*m,fh)){
         if(m) delete m;
         return NULL;
@@ -167,7 +167,7 @@ int FeatureRGB<MESH_TYPE,dim>::SetupSamplingStructures(MeshType& m, typename Mes
     int countFeatures = 0;
     PVAttributeHandle pmfh;
     if(samplingMesh){
-        pmfh = FeatureAlignment::GetFeatureAttribute<MeshType, FeatureType>(*samplingMesh);
+        pmfh = FeatureAlignment<MeshType, FeatureType>::GetFeatureAttribute(*samplingMesh);
         if(!tri::Allocator<MeshType>::IsValidHandle(*samplingMesh,pmfh)) return 0;
     }
 
@@ -196,7 +196,7 @@ bool FeatureRGB<MESH_TYPE,dim>::Subset(int k, MeshType &m, vector<FeatureType*> 
     float offset = 100.0f/(m.VertexNumber() + k);
 
     //if attribute doesn't exist, return; else we can get a handle to the attribute
-    PVAttributeHandle fh = FeatureAlignment::GetFeatureAttribute<MeshType, FeatureType>(m);
+    PVAttributeHandle fh = FeatureAlignment<MeshType, FeatureType>::GetFeatureAttribute(m);
     if(!tri::Allocator<MeshType>::IsValidHandle(m,fh)) return false;
 
     //create a vector to hold valid features that later will be sampled
@@ -213,11 +213,11 @@ bool FeatureRGB<MESH_TYPE,dim>::Subset(int k, MeshType &m, vector<FeatureType*> 
     FeatureType** sampler = NULL;
     switch(sampType){
         case 0:{ //uniform sampling: uses vecFeatures
-            sampler = FeatureAlignment::FeatureUniform<MeshType,FeatureType>(*vecFeatures, &k);
+            sampler = FeatureAlignment<MeshType, FeatureType>::FeatureUniform(*vecFeatures, &k);
             break;
         }
         case 1:{ //poisson disk sampling: uses poissonMesh
-            sampler = FeatureAlignment::FeaturePoisson<MeshType,FeatureType>(*poissonMesh, &k);
+            sampler = FeatureAlignment<MeshType, FeatureType>::FeaturePoisson(*poissonMesh, &k);
             break;
         }
         default: assert(0);

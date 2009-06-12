@@ -84,16 +84,270 @@ template<class FEATURE_TYPE, class SCALAR_TYPE> struct MData {
 template<class FEATURE_TYPE, class SCALAR_TYPE> bool MDataCompareDist(MData<FEATURE_TYPE,SCALAR_TYPE> i,MData<FEATURE_TYPE,SCALAR_TYPE> j) { return (i.summedPointDist<j.summedPointDist); }
 template<class FEATURE_TYPE, class SCALAR_TYPE> bool MDataCompareCons(MData<FEATURE_TYPE,SCALAR_TYPE> i,MData<FEATURE_TYPE,SCALAR_TYPE> j) { return (i.shortCons>j.shortCons); }
 
-class FeatureAlignment
+template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 {
     public:
 
-        enum { UNIFORM_SAMPLING=0, POISSON_SAMPLING=1 };
+        typedef MESH_TYPE MeshType;
+        typedef FEATURE_TYPE FeatureType;
+        typedef typename MeshType::ScalarType ScalarType;
+        typedef typename MeshType::VertexType VertexType;
+        typedef GridStaticPtr<VertexType, ScalarType > MeshGrid;
+        typedef tri::VertTmark<MeshType> MarkerVertex;
+        typedef Matrix44<ScalarType> Matrix44Type;
 
-        //FeatureAlignment();
-        //~FeatureAlignment();
+        enum SamplingStrategies { UNIFORM_SAMPLING=0, POISSON_SAMPLING=1 };
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
+        class Parameters{
+            public:
+
+            int samplingStrategy;        //strategy to extract features from range maps
+            int numFixFeatureSelected;                  //number of feature sampled on mFix, to choose a base
+            int numMovFeatureSelected;                  //number of feature sampled on mMov, to match base
+            int ransacIter;                             //number of ransac iterations
+            int nBase;                                  //number of features of a base
+            int k;                                      //number of feature points picked by kNN search
+            int fullConsensusSamples;                   //number of samples to perform full consensus
+            int short_cons_samples;                     //number of samples to perform short consensus
+            float consensusDist;                        //consensus distance
+            float consensusNormalsAngle;                //holds the the consensus angle for normals, in gradients.
+            float sparseBaseDist;                       //distance to pick sparse base
+            float mutualErrDist;                        //distance to choose admissible beses on mMov
+            float overlap;                              //overlap %; measure how much mMov overlaps mFix
+            float succOffset;                           //consensus %, depending on overlap, to win ransac;
+            float consOffset;                           //consensus %, depending on overlap, to win full consensus;
+            float shortConsOffset;                      //consensus %, depending on overlap, to win short consensus;
+            bool normalEqualization;                    //to use normal equalization in consensus
+            bool pickPoints;                            //to store bases/points into picked points attribute
+            bool paint;                                 //to paint mMov according to consensus
+            int maxNumFullConsensus;                    //max num of bases tested with full consensus procedure
+            int maxNumShortConsensus;                   //max num of bases tested with short consensus procedure
+            int* counterSucc;                           //used to count successes during diagram operation
+
+            void setDefault(MeshType& mFix, MeshType& mMov)
+            {
+                samplingStrategy = FeatureAlignment::UNIFORM_SAMPLING;
+                numFixFeatureSelected = 250;
+                numMovFeatureSelected = mMov.VertexNumber();
+                ransacIter = 5000;
+                nBase = 4;
+                k = 150;
+                fullConsensusSamples = 2500;
+                short_cons_samples = 200;
+                consensusDist = 2.0f;
+                consensusNormalsAngle = 0.965f;   //15 degrees.
+                sparseBaseDist = 2*consensusDist;
+                mutualErrDist = consensusDist;
+                overlap = 75.0f;
+                succOffset = 90.0f;
+                consOffset = 60.0f;
+                shortConsOffset = 40.0f;
+                normalEqualization = true;
+                pickPoints = false;
+                paint = false;
+                maxNumFullConsensus = 8;
+                maxNumShortConsensus = 50;
+                counterSucc = NULL;
+            }
+        };
+
+        vector<vector<int> >* normBuckets;          //structure to hold normals bucketing. Needed for normal equalized sampling during consensus
+        MeshGrid* gridFix;                          //variable to manage uniform grid
+        MarkerVertex markerFunctorFix;              //variable to manage uniform grid
+        ANNpointArray fdataPts;                     //ANN structure to hold descriptors from which kdTree is build
+        ANNkd_tree* fkdTree;                        //ANN kdTree structure        
+
+        void init(MeshType& mFix, MeshType& mMov, Parameters& param, vector<FEATURE_TYPE*>& vecFMov){
+            //if requested, group normals of mMov into 30 buckets. Buckets are used for Vertex Normal Equalization
+            //in consensus. Bucketing is done here once for all to speed up consensus.
+            normBuckets = NULL;
+            if(param.normalEqualization){
+                normBuckets = FeatureAlignment::BucketVertexNormal(mMov.vert, 30);
+                assert(normBuckets!=NULL);
+            }
+
+            gridFix = new MeshGrid();
+            FeatureAlignment::SetupGrid(mFix, *gridFix, markerFunctorFix); //builds the uniform grid with mFix vertices
+
+            //copy descriptors of mMov into ANN structures, then build kdtree...            
+            FeatureAlignment::SetupKDTreePoints(vecFMov, &fdataPts, FeatureType::getFeatureDimension());
+            fkdTree = new ANNkd_tree(fdataPts,vecFMov.size(),FeatureType::getFeatureDimension());
+        }
+
+        Matrix44Type align(MeshType& mFix, MeshType& mMov, vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov,Parameters& param, CallBackPos *cb=NULL)
+        {
+            //normalize normals
+            tri::UpdateNormals<MeshType>::PerVertexNormalized(mFix);
+            tri::UpdateNormals<MeshType>::PerVertexNormalized(mMov);
+
+            //variables declaration
+            Matrix44Type bestTr = Matrix44Type::Identity();     //best transformation matrix found
+            int bestConsensus = 0;                                              //best consensus score
+            float consensusDist = param.consensusDist*(mMov.bbox.Diag()/100.0f);               //consensus distance
+            float sparseBaseDist = param.sparseBaseDist*(mMov.bbox.Diag()/100.0f);//to make sure base are sparse enough
+            float mutualErrDist = param.mutualErrDist*(mMov.bbox.Diag()/100.0f);       //to make sure matched beses on mMov are similar to base on mFix
+            int short_cons_succ = int((param.shortConsOffset*param.overlap/100.0f)*(param.short_cons_samples/100.0f));      //number of vertices to win short consensus
+            int cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));                       //number of vertices to win consensus
+            int ransac_succ = int((param.succOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));                     //number of vertices to win ransac
+            int done = 0, doneShort = 0, won = 0, wonShort = 0; //just debug
+            int bestConsIdx = -1;                       //index of the best MData, needed to store picked points
+            int skipped = 0;  //just debug
+
+            //auxiliary vectors needed inside the loop
+            vector<FeatureType**>* baseVec = new vector<FeatureType**>();
+            vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
+            vector<MData<FeatureType,ScalarType> >* candidates = new vector<MData<FeatureType,ScalarType> >();
+
+            //variables needed for progress bar callback
+            float progBar = 0.0f;
+            float offset = 30.0f/param.ransacIter;
+
+            time_t start_loop, end_loop; int dif;  //timers
+
+            time(&start_loop);
+            //loop of ransac iterations to find all possible matches at once
+            for(int i = 0; i<param.ransacIter; i++)
+            {
+                //callback handling
+                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
+
+                bool ok = FeatureAlignment::Matching(vecFFix, vecFMov, fkdTree, param.nBase, *baseVec, *matchesVec, param.k, sparseBaseDist, mutualErrDist);
+                if(!ok){ skipped++; continue;} //something wrong; can't find a base, skip this...
+
+                assert(baseVec->size()>=1);
+                int currBase = baseVec->size()-1;
+
+                //scan all the new matches found and computes datas for each one
+                for(unsigned int j=candidates->size(); j<matchesVec->size(); j++)
+                {
+                    MData<FeatureType,ScalarType> data; //alloca struct
+                    data.shortCons = -param.fullConsensusSamples; //init is necessary to get structures well sorted later
+                    data.matchPtr = (*matchesVec)[j];   //set the pointer to the match
+                    data.basePtr = (*baseVec)[currBase];  //set the pointer to the relative base
+
+                    //computes the rigid transformation matrix that overlaps the two points sets
+                    Matrix44Type tr;
+                    ok = FeatureAlignment::FindRigidTransformation(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], param.nBase, tr);
+                    if(!ok) continue; //something wrong; can't find a rigid transformation, skip this...
+
+                    data.tr = tr;  //store transformation
+
+                    Matrix44Type oldTr = ApplyTransformation(mMov, tr);       //apply transformation
+                    data.summedPointDist = SummedPointDistances(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], param.nBase);  //compute and store the sum of points distances
+                    ResetTransformation(mMov, oldTr);                                 //restore old tranformation
+
+                    candidates->push_back(data);
+                }
+
+                assert(candidates->size()==matchesVec->size());
+            }
+
+            time(&end_loop);
+            dif = int(difftime(end_loop,start_loop));
+            if(param.counterSucc==NULL){
+                //mylogger("It took %i Sec to complete matches look up",dif);
+                //mylogger("%i candidates found",candidates->size());
+            }
+
+            //sort candidates by summed point distances
+            sort(candidates->begin(), candidates->end(),MDataCompareDist<FeatureType,ScalarType>);
+
+            //variable needed for progress bar callback
+            offset = (40.0f/math::Min(param.maxNumShortConsensus,int(candidates->size())));
+
+            time(&start_loop);
+            //evaluetes at most first g candidates
+            for(unsigned int j=0; j<candidates->size() && j<param.maxNumShortConsensus; j++)
+            {
+                //callback handling
+                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
+
+                doneShort++;
+                Matrix44Type currTr = (*candidates)[j].tr;             //load the right transformation
+                Matrix44Type oldTr = ApplyTransformation(mMov, currTr);  //apply transformation
+                (*candidates)[j].shortCons = Consensus(mFix, mMov, *gridFix, markerFunctorFix, normBuckets, consensusDist, param.short_cons_samples);  //compute consensus on 200 vertices
+                ResetTransformation(mMov, oldTr);                                 //restore old tranformation
+
+                if((*candidates)[j].shortCons >= short_cons_succ) wonShort++;  //count how many won, and use this as bound later
+            }
+
+            time(&end_loop);
+            dif = int(difftime(end_loop,start_loop));
+            if(param.counterSucc==NULL); //mylogger("It took %i Sec to compute all short consensus",dif);
+
+            //sort candidates by short consensus
+            sort(candidates->begin(), candidates->end(),MDataCompareCons<FeatureType,ScalarType>);
+
+            //variables needed for progress bar callback
+            offset = (40.0f/math::Min(param.maxNumFullConsensus,int(candidates->size())));
+
+            time(&start_loop);
+            //evaluetes at most maxNumFullConsensus candidates beetween those who won short consensus
+            for(int j=0; j<wonShort && j<param.maxNumFullConsensus; j++)
+            {
+                //callback handling
+                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
+
+                done++;
+                Matrix44Type currTr = (*candidates)[j].tr;             //load the right transformation
+                Matrix44Type oldTr = ApplyTransformation(mMov, currTr);  //apply transformation
+                int consensus = Consensus(mFix, mMov, *gridFix, markerFunctorFix, normBuckets, consensusDist, param.fullConsensusSamples, cons_succ, bestConsensus);  //compute consensus
+                ResetTransformation(mMov, oldTr);                                 //restore old tranformation
+
+                if(consensus >= cons_succ) won++;
+
+                //verify if transformation has the best consensus and update the result
+                if( (consensus >= cons_succ) && (consensus > bestConsensus) )
+                {
+                    bestTr = currTr;
+                    bestConsensus = consensus;
+                    bestConsIdx = j;
+                    if(consensus >= ransac_succ){
+                        if(param.counterSucc==NULL); //mylogger("Consensus of %.2f%%. Ransac terminated succesfully!", (float(consensus)/samples)*100.0f);
+                        break;
+                    }
+                }
+                if(param.counterSucc==NULL); //mylogger("Consensus of %.2f%%", (float(consensus)/samples)*100.0f);
+            }
+
+            time(&end_loop);
+            dif = int(difftime(end_loop,start_loop));
+            if(param.counterSucc==NULL){
+                //mylogger("It took %i Sec to complete all consensus computations",dif);
+                //mylogger("%i(%i short) consensus computed, %i(%i short) over succes threshold", done, doneShort, won, wonShort);
+                //mylogger("Bases %i, matches %i, %.2f%% consensus",maxRanIt-skipped, candidates->size(),(float(bestConsensus)/samples)*100.0f);
+            }
+
+            if(param.counterSucc!=NULL && won>0){ //log this just if you are running ransac diagram
+                param.counterSucc[0]++;
+                //mylogger("Found consensus of %.2f%%", (float(bestConsensus)/samples)*100.0f);
+            }
+
+            //if flag 'points' is checked, clear old picked points and save the new points
+            if(param.pickPoints){
+                if(bestConsIdx!=-1) StorePickedPoints(mFix, (*candidates)[bestConsIdx].basePtr, mFix.Tr, param.nBase, "B");
+                else ClearPickedPoints(mFix);
+                if(bestConsIdx!=-1) StorePickedPoints(mMov, (*candidates)[bestConsIdx].matchPtr, (*candidates)[bestConsIdx].tr * mMov.Tr, param.nBase, "M");
+                else ClearPickedPoints(mMov);
+            }
+
+            //Clean structures...
+            FeatureAlignment::CleanTuplesVector(baseVec, true);
+            FeatureAlignment::CleanTuplesVector(matchesVec, true);
+            candidates->clear(); if(candidates) delete candidates; candidates = NULL;
+
+            return bestTr;
+        }
+        void finalize()
+        {
+            //Cleaning ANN structures
+            FeatureAlignment::CleanKDTree(fkdTree, fdataPts, NULL, NULL, NULL, true);
+            //Cleaning bucketing structures
+            if(normBuckets!=NULL) delete normBuckets; normBuckets = NULL;
+            //Cleaning grid structures
+            if(gridFix) delete gridFix; gridFix = NULL;
+        }
+
         static FEATURE_TYPE** FeatureUniform(vector<FEATURE_TYPE*>& vecF, int* sampleNum)
         {
             typedef MESH_TYPE MeshType;
@@ -120,7 +374,6 @@ class FeatureAlignment
             return sampledF;
         }
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
         static FEATURE_TYPE** FeaturePoisson(MESH_TYPE& samplingMesh, int* sampleNum)
         {
             typedef MESH_TYPE MeshType;
@@ -130,14 +383,14 @@ class FeatureAlignment
             VertexPointerSampler<MeshType> samp = VertexPointerSampler<MeshType>();
             SampleVertPoissonDisk(samplingMesh, samp, *sampleNum);
             *sampleNum = samp.sampleVec.size();  //poisson sampling can return untill 50% more of requested samples!
-            PVAttributeHandle fh = GetFeatureAttribute<MeshType, FeatureType>(samplingMesh);
+            PVAttributeHandle fh = FeatureAlignment::GetFeatureAttribute(samplingMesh);
             if(!tri::Allocator<MeshType>::IsValidHandle(samplingMesh,fh)) return NULL;
             FeatureType** sampler = new FeatureType*[*sampleNum];
             for(int i=0; i<*sampleNum; i++) sampler[i]=fh[samp.sampleVec[i]];
             return sampler;
         }
 
-        template<class MESH_TYPE>
+        //template<class MESH_TYPE>
         static void SampleVertPoissonDisk(MESH_TYPE& m, VertexPointerSampler<MESH_TYPE>& sampler, int sampleNum)
         {
             typedef MESH_TYPE MeshType;
@@ -155,7 +408,6 @@ class FeatureAlignment
             tri::SurfaceSampling<MeshType,VertexPointerSampler<MeshType> >::Poissondisk(m, sampler, m, radius, pp);
         }
 
-        template<class MESH_TYPE>
         static bool SampleVertNormalEqualized(vector<typename MESH_TYPE::VertexPointer>& vert, vector<vector<int> >* BKT, int SampleNum)
         {
             // vettore di contatori per sapere quanti punti ho gia' preso per ogni bucket
@@ -181,7 +433,6 @@ class FeatureAlignment
             return true;
         }
 
-        template<class MESH_TYPE>
         static void SampleVertUniform(MESH_TYPE& m, vector<typename MESH_TYPE::VertexPointer>& vert, int sampleNum)
         {
             typedef MESH_TYPE MeshType;
@@ -191,7 +442,6 @@ class FeatureAlignment
             for(unsigned int i=0; i<sampler.sampleVec.size(); i++) vert.push_back(sampler.sampleVec[i]);
         }
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
         static typename MESH_TYPE::template PerVertexAttributeHandle<FEATURE_TYPE*> GetFeatureAttribute(MESH_TYPE& m, bool createAttribute = false)
         {
             typedef MESH_TYPE MeshType;
@@ -208,7 +458,6 @@ class FeatureAlignment
             return tri::Allocator<MeshType>::template GetPerVertexAttribute<FeatureType*> (m,std::string(FeatureType::getName()));
         }        
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
         static vector<FEATURE_TYPE*>* extractFeatures(int numRequested, MESH_TYPE &m, int samplingStrategy, CallBackPos *cb = NULL)
         {
             typedef MESH_TYPE MeshType;
@@ -225,8 +474,7 @@ class FeatureAlignment
         }
 
         //compute the randomized consensus beetween m1 e m2 (without taking in account any additional transformation)
-        //IMPORTANT: per vertex normals of m1 and m2 MUST BE PROVIDED JET NORMALIZED!!!
-        template<class MESH_TYPE>
+        //IMPORTANT: per vertex normals of m1 and m2 MUST BE PROVIDED JET NORMALIZED!!!       
         static int Consensus(MESH_TYPE& mFix, MESH_TYPE& mMov, GridStaticPtr<typename MESH_TYPE::VertexType, typename MESH_TYPE::ScalarType>& grid, tri::VertTmark<MESH_TYPE>& markerFunctor, vector<vector<int> >* normBuckets, float consensusDist, int fullConsensusSamples, int cons_succ = 0, int bestCons = 0, bool paint = false, CallBackPos *cb = NULL)
         {
             typedef MESH_TYPE MeshType;
@@ -250,7 +498,7 @@ class FeatureAlignment
                 //else, get a vector of vertex pointers sampled in a normal equalized manner; used as query points
                 queryVert = new vector<VertexPointer>(mMov.vert.size(),NULL);
                 for(unsigned int i=0; i<mMov.vert.size(); i++) (*queryVert)[i] = &(mMov.vert[i]);//do a copy of pointers to vertexes
-                SampleVertNormalEqualized<MeshType>(*queryVert, normBuckets, fullConsensusSamples);
+                FeatureAlignment::SampleVertNormalEqualized(*queryVert, normBuckets, fullConsensusSamples);
             }
             assert(queryVert!=NULL);
 
@@ -324,7 +572,7 @@ class FeatureAlignment
             return consensus;
         }
 
-        template<class MESH_TYPE>
+
         static vector<vector<int> >* BucketVertexNormal(typename MESH_TYPE::VertContainer& vert, int bucketDim = 30)
         {
             static vector<Point3f> NV;
@@ -343,7 +591,6 @@ class FeatureAlignment
             return BKT;
         }
 
-        template<class FEATURE_TYPE>
         static void SetupKDTreePoints(vector<FEATURE_TYPE*>& vecF, ANNpointArray* dataPts, int pointDim)
         {
             //fill dataPts with feature's descriptions in vecF
@@ -365,7 +612,6 @@ class FeatureAlignment
                 if(close) annClose();				//done with ANN; clean memory shared among all the kdTrees
         }
 
-        template<class FEATURE_TYPE>
         static void CleanTuplesVector(vector<FEATURE_TYPE**>* tuplesVec, bool deleteVec)
         {
             //clean vectors contents...
@@ -380,8 +626,7 @@ class FeatureAlignment
             }
         }
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
-        static bool Matching(vector<FEATURE_TYPE*>& vecF1, vector<FEATURE_TYPE*>& vecF2, ANNkd_tree* kdTree, int nBase, vector<FEATURE_TYPE**>& baseVec, vector<FEATURE_TYPE**>& matchesVec, int k, float sparseBaseDist, float mutualErrDist, CallBackPos *cb=NULL)
+        static bool Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, int nBase, vector<FEATURE_TYPE**>& baseVec, vector<FEATURE_TYPE**>& matchesVec, int k, float sparseBaseDist, float mutualErrDist, CallBackPos *cb=NULL)
         {
             typedef MESH_TYPE MeshType;
             typedef FEATURE_TYPE FeatureType;
@@ -390,45 +635,42 @@ class FeatureAlignment
             float pBar = 0, offset = 100.0f/nBase;  //used for progresss bar callback
             if(cb) cb(0, "Matching...");
 
-            if(nBase>int(vecF1.size())) return false; //not enough features to pick a base
-            if(k>int(vecF2.size())) return false;  //not enough features in kdtree to pick k neighboors
+            if(nBase>int(vecFFix.size())) return false; //not enough features to pick a base
+            if(k>int(vecFMov.size())) return false;  //not enough features in kdtree to pick k neighboors
 
-            FeatureType** base = FeatureUniform<MeshType, FeatureType>(vecF1, &nBase); //randomly chooses a base of features from vecF1
+            FeatureType** base = FeatureAlignment::FeatureUniform(vecFFix, &nBase); //randomly chooses a base of features from vecFFix
             if(!VerifyBaseDistances(base, nBase, sparseBaseDist)) return false; //if base point are not enough sparse, skip
             baseVec.push_back(base);
 
             assert(baseVec.size()>=1);
-            assert((int)vecF2.size()>=nBase);
+            assert((int)vecFMov.size()>=nBase);
 
             //fill fqueryPts with feature's descriptions in base
             ANNpointArray fqueryPts;
-            FeatureAlignment::SetupKDTreeQuery<FeatureType>(base, nBase, &fqueryPts, FeatureType::getFeatureDimension());
+            FeatureAlignment::SetupKDTreeQuery(base, nBase, &fqueryPts, FeatureType::getFeatureDimension());
 
             //additional variables needed
             ANNidxArray fnnIdx = new ANNidx[k];						        // allocate near neigh indices
             ANNdistArray fdists = new ANNdist[k];						    // allocate near neigh dists
             vector<vector<FeatureType*>* >* matchedVec = new vector<vector<FeatureType*>* >();            
-FILE* file=fopen("matching.txt","w+");
-fprintf(file,"before loop kNN search:\n");fflush(file);
+
             //foreach feature in the base find the best matching using fkdTree
             for(int i = 0; i < nBase; i++)
             {
                 kdTree->annkSearch(fqueryPts[i], k, fnnIdx, fdists);  //search the k best neighbor for the current point
-fprintf(file,"search done...\n");fflush(file);
+
                 assert(fdists[0]!=ANN_DIST_INF);  //if this check fails, it means that no feature have been found!
 
                 vector<FeatureType*>* matches = new vector<FeatureType*>();
-fprintf(file,"coping features...\n");fflush(file);
-                for(int j=0; j<k; j++){ matches->push_back(vecF2[fnnIdx[j]]); //store all features
-fprintf(file,"%.2f   ",(*matches)[j]->description[0]);fflush(file);
-                }
+
+                for(int j=0; j<k; j++) matches->push_back(vecFMov[fnnIdx[j]]); //store all features
+
                 matchedVec->push_back(matches);
-fprintf(file,"all right...\n");fflush(file);
+
                 if(cb){ pBar+=offset; cb((int)pBar, "Matching..."); }
             }
 
             assert(int(matchedVec->size())==nBase);
-fprintf(file,"bbound\n");fflush(file);
 
             //branch and bound
             int* curSolution = new int[nBase];
@@ -443,12 +685,9 @@ fprintf(file,"bbound\n");fflush(file);
                 if(*it!=NULL){ delete *it; *it = NULL; }
             }
             delete matchedVec; matchedVec = NULL;
-fprintf(file,"ok\n");fflush(file);
-fclose(file);
             return true;
         }
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
         static bool FindRigidTransformation(MESH_TYPE& mFix, MESH_TYPE& mMov, FEATURE_TYPE* fixF[], FEATURE_TYPE* movF[], int nBase, Matrix44<typename MESH_TYPE::ScalarType>& tr, CallBackPos *cb=NULL)
         {
             typedef MESH_TYPE MeshType;
@@ -470,247 +709,6 @@ fclose(file);
             return true;
         }
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
-        static Matrix44<typename MESH_TYPE::ScalarType> Ransac(MESH_TYPE& mFix, vector<FEATURE_TYPE*>& vecF1, MESH_TYPE& mMov, vector<FEATURE_TYPE*>& vecF2, int ransacIter, float consensusDist, int fullConsensusSamples, float overlap, float shortConsOffset, float consOffset, float succOffset, int nBase, int k, int g, bool pickPoints, bool normEq = true, CallBackPos* cb=NULL, int* counterSucc=NULL)
-        {
-            typedef MESH_TYPE MeshType;
-            typedef FEATURE_TYPE FeatureType;
-            typedef typename MeshType::ScalarType ScalarType;
-            typedef typename MeshType::VertexType VertexType;
-            typedef GridStaticPtr<VertexType, ScalarType > MeshGrid;
-            typedef tri::VertTmark<MeshType> MarkerVertex;
-
-            //normalize normals
-            tri::UpdateNormals<MeshType>::PerVertexNormalized(mFix);
-            tri::UpdateNormals<MeshType>::PerVertexNormalized(mMov);
-
-            //if requested, group normals of m2 into 30 buckets. Buckets are used for Vertex Normal Equalization
-            //in consensus. Bucketing is done here once for all to speed up consensus.
-            vector<vector<int> >* normBuckets = NULL;
-            if(normEq){
-                normBuckets = FeatureAlignment::BucketVertexNormal<MeshType>(mMov.vert, 30);
-                assert(normBuckets!=NULL);
-            }
-
-            //variable to manage uniform grid
-            MeshGrid gridFix;
-            MarkerVertex markerFunctorFix;
-            FeatureAlignment::SetupGrid(mFix, gridFix, markerFunctorFix); //builds the uniform grid with mFix vertices
-
-            //fill dataPts with feature's descriptions in vecF2, then build kdtree...
-            ANNpointArray fdataPts;
-            FeatureAlignment::SetupKDTreePoints<FeatureType>(vecF2, &fdataPts, FeatureType::getFeatureDimension());
-            ANNkd_tree* fkdTree = new ANNkd_tree(fdataPts,vecF2.size(),FeatureType::getFeatureDimension());
-
-            //variables declaration
-            Matrix44<ScalarType> bestTr = Matrix44<ScalarType>::Identity();     //best transformation matrix found
-            int bestConsensus = 0;                                              //best consensus score
-            const int short_cons_samples = 200;                                 //number of samples to compute short consensus
-            float dist = consensusDist*(mMov.bbox.Diag()/100.0f);               //consensus distance
-            float sparseBaseDist = 2*dist;                                      //to make sure base are sparse enough
-            float mutualErrDist = dist;                                         //to make sure matched beses on mMov are similar to base on mFix
-            int short_cons_succ = int((shortConsOffset*overlap/100.0f)*(short_cons_samples/100.0f));      //number of vertices to win short consensus
-            int cons_succ = int((consOffset*overlap/100.0f)*(fullConsensusSamples/100.0f));                       //number of vertices to win consensus
-            int ransac_succ = int((succOffset*overlap/100.0f)*(fullConsensusSamples/100.0f));                     //number of vertices to win ransac
-            int done = 0, doneShort = 0, won = 0, wonShort = 0; //just debug
-            int bestConsIdx = -1;                       //index of the best MData, needed to store picked points
-            int skipped = 0;  //just debug
-
-            //auxiliary vectors needed inside the loop
-            vector<FeatureType**>* baseVec = new vector<FeatureType**>();
-            vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
-            vector<MData<FeatureType,ScalarType> >* candidates = new vector<MData<FeatureType,ScalarType> >();
-
-            //variables needed for progress bar callback
-            float progBar = 0.0f;
-            float offset = 30.0f/ransacIter;
-
-            time_t start_loop, end_loop; int dif;  //timers
-
-            time(&start_loop);
-            //loop of ransac iterations to find all possible matches at once
-            for(int i = 0; i<ransacIter; i++)
-            {
-                //callback handling
-                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
-
-                bool ok = FeatureAlignment::Matching<MeshType,FeatureType>(vecF1, vecF2, fkdTree, nBase, *baseVec, *matchesVec, k, sparseBaseDist, mutualErrDist);
-                if(!ok){ skipped++; continue;} //something wrong; can't find a base, skip this...
-
-                assert(baseVec->size()>=1);
-                int currBase = baseVec->size()-1;
-
-                //scan all the new matches found and computes datas for each one
-                for(unsigned int j=candidates->size(); j<matchesVec->size(); j++)
-                {
-                    MData<FeatureType,ScalarType> data; //alloca struct
-                    data.shortCons = -fullConsensusSamples; //init is necessary to get structures well sorted later
-                    data.matchPtr = (*matchesVec)[j];   //set the pointer to the match
-                    data.basePtr = (*baseVec)[currBase];  //set the pointer to the relative base
-
-                    //computes the rigid transformation matrix that overlaps the two points sets
-                    Matrix44<ScalarType> tr;
-                    ok = FeatureAlignment::FindRigidTransformation(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], nBase, tr);
-                    if(!ok) continue; //something wrong; can't find a rigid transformation, skip this...
-
-                    data.tr = tr;  //store transformation
-
-                    Matrix44<ScalarType> oldTr = ApplyTransformation(mMov, tr);       //apply transformation
-                    data.summedPointDist = SummedPointDistances<MeshType,FeatureType>(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], nBase);  //compute and store the sum of points distances
-                    ResetTransformation(mMov, oldTr);                                 //restore old tranformation
-
-                    candidates->push_back(data);
-                }
-
-                assert(candidates->size()==matchesVec->size());
-            }
-
-            time(&end_loop);
-            dif = int(difftime(end_loop,start_loop));
-            if(counterSucc==NULL){
-                //mylogger("It took %i Sec to complete matches look up",dif);
-                //mylogger("%i candidates found",candidates->size());
-            }
-
-            //sort candidates by summed point distances
-            sort(candidates->begin(), candidates->end(),MDataCompareDist<FeatureType,ScalarType>);
-
-            //variable needed for progress bar callback
-            offset = (40.0f/math::Min(g,int(candidates->size())));
-
-            time(&start_loop);
-            //evaluetes at most first g candidates
-            for(unsigned int j=0; j<candidates->size() && j<g; j++)
-            {
-                //callback handling
-                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
-
-                doneShort++;
-                Matrix44<ScalarType> currTr = (*candidates)[j].tr;             //load the right transformation
-                Matrix44<ScalarType> oldTr = ApplyTransformation(mMov, currTr);  //apply transformation
-                (*candidates)[j].shortCons = Consensus(mFix, mMov, gridFix, markerFunctorFix, normBuckets, dist, short_cons_samples);  //compute consensus on 200 vertices
-                ResetTransformation(mMov, oldTr);                                 //restore old tranformation
-
-                if((*candidates)[j].shortCons >= short_cons_succ) wonShort++;  //count how many won, and use this as bound later
-            }
-
-            time(&end_loop);
-            dif = int(difftime(end_loop,start_loop));
-            if(counterSucc==NULL); //mylogger("It took %i Sec to compute all short consensus",dif);
-
-            //sort candidates by short consensus
-            sort(candidates->begin(), candidates->end(),MDataCompareCons<FeatureType,ScalarType>);
-
-            //variables needed for progress bar callback
-            offset = (40.0f/math::Min(8,int(candidates->size())));
-
-            time(&start_loop);
-            //evaluetes at most 8 candidates beetween those who won short consensus
-            for(int j=0; j<wonShort && j<8; j++)
-            {
-                //callback handling
-                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
-
-                done++;
-                Matrix44<ScalarType> currTr = (*candidates)[j].tr;             //load the right transformation
-                Matrix44<ScalarType> oldTr = ApplyTransformation(mMov, currTr);  //apply transformation
-                int consensus = Consensus(mFix, mMov, gridFix, markerFunctorFix, normBuckets, dist, fullConsensusSamples, cons_succ, bestConsensus);  //compute consensus
-                ResetTransformation(mMov, oldTr);                                 //restore old tranformation
-
-                if(consensus >= cons_succ) won++;
-
-                //verify if transformation has the best consensus and update the result
-                if( (consensus >= cons_succ) && (consensus > bestConsensus) )
-                {
-                    bestTr = currTr;
-                    bestConsensus = consensus;
-                    bestConsIdx = j;
-                    if(consensus >= ransac_succ){
-                        if(counterSucc==NULL); //mylogger("Consensus of %.2f%%. Ransac terminated succesfully!", (float(consensus)/samples)*100.0f);
-                        break;
-                    }
-                }
-                if(counterSucc==NULL); //mylogger("Consensus of %.2f%%", (float(consensus)/samples)*100.0f);
-            }
-
-            time(&end_loop);
-            dif = int(difftime(end_loop,start_loop));
-            if(counterSucc==NULL){
-                //mylogger("It took %i Sec to complete all consensus computations",dif);
-                //mylogger("%i(%i short) consensus computed, %i(%i short) over succes threshold", done, doneShort, won, wonShort);
-                //mylogger("Bases %i, matches %i, %.2f%% consensus",maxRanIt-skipped, candidates->size(),(float(bestConsensus)/samples)*100.0f);
-            }
-
-            if(counterSucc!=NULL && won>0){ //log this just if you are running ransac diagram
-                counterSucc[0]++;
-                //mylogger("Found consensus of %.2f%%", (float(bestConsensus)/samples)*100.0f);
-            }
-
-            //if flag 'points' is checked, clear old picked points and save the new points
-            if(pickPoints){
-                if(bestConsIdx!=-1) StorePickedPoints(mFix, (*candidates)[bestConsIdx].basePtr, mFix.Tr, nBase, "B");
-                else ClearPickedPoints(mFix);
-                if(bestConsIdx!=-1) StorePickedPoints(mMov, (*candidates)[bestConsIdx].matchPtr, (*candidates)[bestConsIdx].tr * mMov.Tr, nBase, "M");
-                else ClearPickedPoints(mMov);
-            }
-
-            //Cleaning ANN structures
-            FeatureAlignment::CleanKDTree(fkdTree, fdataPts, NULL, NULL, NULL, true);
-
-            //Clean structures...
-            FeatureAlignment::CleanTuplesVector<FeatureType>(baseVec, true);
-            FeatureAlignment::CleanTuplesVector<FeatureType>(matchesVec, true);
-            if(normBuckets!=NULL) delete normBuckets;
-            candidates->clear();
-            delete candidates;
-
-            return bestTr;
-        }
-
-        template<class MESH_TYPE>
-        static void RandomVertexColor(MESH_TYPE& m, float freq)
-        {
-            typedef MESH_TYPE MeshType;
-            typedef typename MeshType::ScalarType ScalarType;
-            typedef typename MeshType::VertexIterator VertexIterator;
-
-            Point3<ScalarType> p;
-            VertexIterator vi;
-            for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
-            {
-                if(!(*vi).IsD()){
-                    p = m.Tr * (*vi).P();           //actual vertex position
-                    //create and assign color
-                    (*vi).C() = Color4b( int(255*math::Perlin::Noise(p[0]*freq,p[1]*freq,p[2]*freq)),
-                                         int(255*math::Perlin::Noise(50+p[0]*freq,50+p[1]*freq,50+p[2]*freq)),
-                                         int(255*math::Perlin::Noise(100+p[0]*freq,100+p[1]*freq,100+p[2]*freq)), 255 );
-                }
-            }
-        }
-
-        ///adds to each vertex color a random offset beetween +/- 2^(noiseBits-1)
-        template<class MESH_TYPE>
-        static void VertexColorNoise(MESH_TYPE& m, int noiseBits)
-        {
-            typedef MESH_TYPE MeshType;
-            typedef typename MeshType::VertexIterator VertexIterator;
-
-            if(noiseBits>8) noiseBits = 8;
-            if(noiseBits<1) return;
-
-            math::SubtractiveRingRNG randomGen =  math::SubtractiveRingRNG(time(NULL));
-            VertexIterator vi;
-            for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
-            {
-                if(!(*vi).IsD()){
-                    (*vi).C()[0] = math::Clamp<int>((*vi).C()[0] + randomGen.generate(int(2*pow(2.0f,noiseBits))) - int(pow(2.0f,noiseBits)),0,255);
-                    (*vi).C()[1] = math::Clamp<int>((*vi).C()[1] + randomGen.generate(int(2*pow(2.0f,noiseBits))) - int(pow(2.0f,noiseBits)),0,255);
-                    (*vi).C()[2] = math::Clamp<int>((*vi).C()[2] + randomGen.generate(int(2*pow(2.0f,noiseBits))) - int(pow(2.0f,noiseBits)),0,255);
-                }
-            }
-        }        
-
-        template<class MESH_TYPE, class FEATURE_TYPE>
         static void AddPickedPoints(MESH_TYPE& m, vector<FEATURE_TYPE*>& vecF, char* prefix = NULL)
         {
             typedef MESH_TYPE MeshType;
@@ -739,7 +737,6 @@ fclose(file);
             }
         }
 
-        template<class MESH_TYPE>
         static void ClearPickedPoints(MESH_TYPE& m)
         {
             typedef MESH_TYPE MeshType;
@@ -756,7 +753,6 @@ fclose(file);
 
     private:
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
         static void StorePickedPoints(MESH_TYPE& m, FEATURE_TYPE* vecF[], Matrix44<typename MESH_TYPE::ScalarType> tr, int size, char* prefix = NULL)
         {
             typedef MESH_TYPE MeshType;
@@ -787,7 +783,6 @@ fclose(file);
             }
         }
 
-        template<class FEATURE_TYPE>
         static void SetupKDTreeQuery(FEATURE_TYPE* queryPointsArray[], int queryPointsSize, ANNpointArray* queryPts, int pointDim)
         {
             //fill query points with feature's description
@@ -798,14 +793,12 @@ fclose(file);
             }
         }
 
-        template<class MESH_TYPE>
         static inline void SetupGrid(MESH_TYPE& m, GridStaticPtr<typename MESH_TYPE::VertexType, typename MESH_TYPE::ScalarType>& grid, tri::VertTmark<MESH_TYPE>& markerFunctor)
         {
             grid.Set(m.vert.begin(), m.vert.end());
             markerFunctor.SetMesh(&m);
         }
 
-        template<class FEATURE_TYPE>
         static void Match(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<FEATURE_TYPE**>& solutionsVec, float mutualErrDist, CallBackPos *cb = NULL)
         {
             typedef FEATURE_TYPE FeatureType;
@@ -829,7 +822,6 @@ fclose(file);
             curSolution[level] = 0;
         }
 
-        template<class FEATURE_TYPE>
         static bool MatchSolution(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int level, int curSolution[], float mutualErrDist)
         {
             if (level==0) return true;
@@ -844,8 +836,7 @@ fclose(file);
             return true;
         }
 
-        //Verify that all points in a base are enough sparse
-        template<class FEATURE_TYPE>
+        //Verify that all points in a base are enough sparse        
         static bool VerifyBaseDistances(FEATURE_TYPE* base[], int nBase, float sparseBaseDist )
         {
             typedef FEATURE_TYPE FeatureType;
@@ -858,7 +849,6 @@ fclose(file);
             return true;
         }
 
-        template<class MESH_TYPE>
         static Matrix44<typename MESH_TYPE::ScalarType> ApplyTransformation(MESH_TYPE& m, Matrix44<typename MESH_TYPE::ScalarType>& tr)
         {
             typedef MESH_TYPE MeshType;
@@ -869,13 +859,11 @@ fclose(file);
             return oldMat;                         //return the old transformation matrix
         }
 
-        template<class MESH_TYPE>
         static void ResetTransformation(MESH_TYPE& m, Matrix44<typename MESH_TYPE::ScalarType>& tr)
         {
             m.Tr = tr;
         }
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
         static float SummedPointDistances(MESH_TYPE& m1, MESH_TYPE& m2, FEATURE_TYPE* fixF[], FEATURE_TYPE* movF[], int nBase)
         {
             typedef MESH_TYPE MeshType;

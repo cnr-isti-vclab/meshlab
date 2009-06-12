@@ -1,10 +1,12 @@
 include (../../shared.pri)
+DEFINES += _ANN_WIN_MINGW
 QT += opengl
 QT += xml
 HEADERS = filter_feature_alignment.h \
     feature_alignment.h \
     feature_rgb.h \
-    feature_msc.h
+    feature_msc.h \
+    ../../meshlab/interfaces.h
 SOURCES = filter_feature_alignment.cpp \
     ../../meshlab/filterparameter.cpp \
     ../../meshlabplugins/edit_pickpoints/pickedPoints.cpp \

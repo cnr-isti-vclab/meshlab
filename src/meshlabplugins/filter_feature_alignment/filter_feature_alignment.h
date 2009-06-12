@@ -31,6 +31,12 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
+//---solo per funzioni colore. toglile quando portate in color.h---
+#include <math.h>
+#include <vcg/math/perlin_noise.h>
+#include <vcg/math/random_generator.h>
+//------------------------------------------------------------------
+
 using namespace std;
 using namespace vcg;
 
@@ -56,8 +62,8 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         ~FilterFeatureAlignment();
 
         virtual const FilterClass getClass(QAction *);
-        virtual const QString filterName(FilterIDType filter);
-        virtual const QString filterInfo(FilterIDType filter);
+        virtual const QString filterName(FilterIDType filter) const;
+        virtual const QString filterInfo(FilterIDType filter) const;
         virtual const int getRequirements(QAction *);
         virtual bool autoDialog(QAction *);
         virtual void initParameterSet(QAction *,MeshDocument &/*m*/, FilterParameterSet & /*parent*/);
@@ -65,25 +71,70 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         virtual bool applyFilter(QAction */*filter*/, MeshModel &, FilterParameterSet & /*parent*/, CallBackPos *) { assert(0); return false;}
 
     private:
+        template<class MESH_TYPE, class ALIGNER_TYPE>
+        static void setAlignmentParameters(MESH_TYPE& mFix, MESH_TYPE& mMov, FilterParameterSet& par, typename ALIGNER_TYPE::Parameters& param);
+
         template<class MESH_TYPE, class FEATURE_TYPE>
         static bool ComputeFeatureOperation(MeshModel& m, typename FEATURE_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
-        static vector<FEATURE_TYPE*>* ExtractionOperation(int k, MeshModel& m, int samplingStrategy, bool pickPoints, CallBackPos *cb=NULL);
+        template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
+        static vector<FEATURE_TYPE*>* ExtractionOperation(MeshModel& m, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
-        static bool MatchingOperation(MeshModel& mFix, MeshModel& mMov, int numFixFeatureSelected, int numMovFeatureSelected, int nBase, int k, CallBackPos *cb=NULL);
+        template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
+        static bool MatchingOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
-        static int RigidTransformationOperation(MeshModel& mFix, MeshModel& mMov, int numFixFeatureSelected, int numMovFeatureSelected, int nBase, int k, CallBackPos *cb=NULL);
+        template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
+        static int RigidTransformationOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+
+        template<class MESH_TYPE, class ALIGNER_TYPE>
+        static int ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+
+        template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
+        static bool RansacOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+
+        template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
+        static bool RansacDiagramOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, int trials,int from, int to, int step, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE>
-        static int ConsensusOperation(MeshModel& mFix, MeshModel& mMov, float consensusDist, int fullConsensusSamples, bool normEq, bool paint, CallBackPos *cb=NULL);
+        static void PerlinColor(MESH_TYPE& m, float freq)
+        {
+            typedef MESH_TYPE MeshType;
+            typedef typename MeshType::ScalarType ScalarType;
+            typedef typename MeshType::VertexIterator VertexIterator;
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
-        static bool RansacOperation(MeshModel& mFix, MeshModel& mMov, int numFixFeatureSelected, int numMovFeatureSelected, int nBase, int ransacIter, float consensusDist, int fullConsensusSamples, float overlap, float shortConsOffset, float consOffset, float succOffset, int k, int g, int samplingStrategy, bool pickPoints, CallBackPos *cb=NULL);
+            Point3<ScalarType> p;
+            VertexIterator vi;
+            for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
+            {
+                if(!(*vi).IsD()){
+                    p = m.Tr * (*vi).P();           //actual vertex position
+                    //create and assign color
+                    (*vi).C() = Color4b( int(255*math::Perlin::Noise(p[0]*freq,p[1]*freq,p[2]*freq)),
+                                         int(255*math::Perlin::Noise(50+p[0]*freq,50+p[1]*freq,50+p[2]*freq)),
+                                         int(255*math::Perlin::Noise(100+p[0]*freq,100+p[1]*freq,100+p[2]*freq)), 255 );
+                }
+            }
+        }
 
-        template<class MESH_TYPE, class FEATURE_TYPE>
-        static bool RansacDiagramOperation(MeshModel& mFix, MeshModel& mMov, int numFixFeatureSelected, int numMovFeatureSelected, int nBase, float consensusDist, int fullConsensusSamples, float overlap, float shortConsOffset, float consOffset, float succOffset, int k, int g, int samplingStrategy, int trials,int from, int to, int step, CallBackPos *cb=NULL);
+        template<class MESH_TYPE>
+        static void ColorNoise(MESH_TYPE& m, int noiseBits)
+        {
+            typedef MESH_TYPE MeshType;
+            typedef typename MeshType::VertexIterator VertexIterator;
+
+            if(noiseBits>8) noiseBits = 8;
+            if(noiseBits<1) return;
+
+            math::SubtractiveRingRNG randomGen =  math::SubtractiveRingRNG(time(NULL));
+            VertexIterator vi;
+            for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
+            {
+                if(!(*vi).IsD()){
+                    (*vi).C()[0] = math::Clamp<int>((*vi).C()[0] + randomGen.generate(int(2*pow(2.0f,noiseBits))) - int(pow(2.0f,noiseBits)),0,255);
+                    (*vi).C()[1] = math::Clamp<int>((*vi).C()[1] + randomGen.generate(int(2*pow(2.0f,noiseBits))) - int(pow(2.0f,noiseBits)),0,255);
+                    (*vi).C()[2] = math::Clamp<int>((*vi).C()[2] + randomGen.generate(int(2*pow(2.0f,noiseBits))) - int(pow(2.0f,noiseBits)),0,255);
+                }
+            }
+        }
 };
 #endif
