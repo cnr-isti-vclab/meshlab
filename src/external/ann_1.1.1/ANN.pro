@@ -1,7 +1,7 @@
 TEMPLATE = lib
 TARGET = ANN
 CONFIG += staticlib dll
-ANNDIR = ./code/lib/ann_1.1.1
+ANNDIR = ./
 INCLUDEPATH  += $$ANNDIR/include
 DEPENDPATH += $$ANNDIR/src
 DESTDIR = $$ANNDIR/lib
@@ -16,7 +16,6 @@ HEADERS       = kd_tree.h \
 				kd_search.h \
 				kd_pr_search.h \
 				kd_fix_rad_search.h \
-				perf.h \
 				pr_queue.h \
 				pr_queue_k.h
 SOURCES       = ANN.cpp \
