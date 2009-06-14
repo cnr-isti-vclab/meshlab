@@ -71,14 +71,14 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         virtual bool applyFilter(QAction */*filter*/, MeshModel &, FilterParameterSet & /*parent*/, CallBackPos *) { assert(0); return false;}
 
     private:
-        template<class MESH_TYPE, class ALIGNER_TYPE>
-        static void setAlignmentParameters(MESH_TYPE& mFix, MESH_TYPE& mMov, FilterParameterSet& par, typename ALIGNER_TYPE::Parameters& param);
+        template<class ALIGNER_TYPE>
+        static void setAlignmentParameters(FilterParameterSet& par, typename ALIGNER_TYPE::Parameters& param);
 
         template<class MESH_TYPE, class FEATURE_TYPE>
         static bool ComputeFeatureOperation(MeshModel& m, typename FEATURE_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-        static vector<FEATURE_TYPE*>* ExtractionOperation(MeshModel& m, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+        static bool ExtractionOperation(MeshModel& m, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
         static bool MatchingOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
@@ -86,7 +86,7 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
         static int RigidTransformationOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
-        template<class MESH_TYPE, class ALIGNER_TYPE>
+        template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
         static int ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>

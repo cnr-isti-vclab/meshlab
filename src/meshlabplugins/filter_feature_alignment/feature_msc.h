@@ -30,6 +30,7 @@ class SmoothCurvatureFeature
 
         Parameters(){
             featureDesc = new vector<ScaleDescriptionType>();
+
         }
 
         ~Parameters(){

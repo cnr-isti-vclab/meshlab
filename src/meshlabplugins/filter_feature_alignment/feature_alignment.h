@@ -120,9 +120,15 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             bool normalEqualization;                    //to use normal equalization in consensus
             bool pickPoints;                            //to store bases/points into picked points attribute
             bool paint;                                 //to paint mMov according to consensus
+            bool isFullConsensus;                       //tells to consensus procedure how to compute short/full success threshold
             int maxNumFullConsensus;                    //max num of bases tested with full consensus procedure
             int maxNumShortConsensus;                   //max num of bases tested with short consensus procedure
+            float mMovBBoxDiag;                         //mMov bbox diagonal; used to compute distances...
             int* counterSucc;                           //used to count successes during diagram operation
+
+            Parameters(MeshType& mFix, MeshType& mMov){
+                setDefault(mFix, mMov);
+            }
 
             void setDefault(MeshType& mFix, MeshType& mMov)
             {
@@ -145,8 +151,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 normalEqualization = true;
                 pickPoints = false;
                 paint = false;
+                isFullConsensus = true;
                 maxNumFullConsensus = 8;
                 maxNumShortConsensus = 50;
+                mMovBBoxDiag = mMov.bbox.Diag();
                 counterSucc = NULL;
             }
         };
@@ -154,13 +162,23 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
         vector<vector<int> >* normBuckets;          //structure to hold normals bucketing. Needed for normal equalized sampling during consensus
         MeshGrid* gridFix;                          //variable to manage uniform grid
         MarkerVertex markerFunctorFix;              //variable to manage uniform grid
+        vector<FeatureType*>* vecFFix;              //vector to hold pointers to features extracted from mFix
+        vector<FeatureType*>* vecFMov;              //vector to hold pointers to features extracted from mMov
         ANNpointArray fdataPts;                     //ANN structure to hold descriptors from which kdTree is build
         ANNkd_tree* fkdTree;                        //ANN kdTree structure        
 
-        void init(MeshType& mFix, MeshType& mMov, Parameters& param, vector<FEATURE_TYPE*>& vecFMov){
-            //if requested, group normals of mMov into 30 buckets. Buckets are used for Vertex Normal Equalization
-            //in consensus. Bucketing is done here once for all to speed up consensus.
+        FeatureAlignment(){
+            //set pointers to NULL for safety
             normBuckets = NULL;
+            gridFix = NULL;
+            fkdTree = NULL;
+            vecFFix = NULL;
+            vecFMov = NULL;
+        }
+
+        bool init(MeshType& mFix, MeshType& mMov, Parameters& param){
+            //if requested, group normals of mMov into 30 buckets. Buckets are used for Vertex Normal Equalization
+            //in consensus. Bucketing is done here once for all to speed up consensus.            
             if(param.normalEqualization){
                 normBuckets = FeatureAlignment::BucketVertexNormal(mMov.vert, 30);
                 assert(normBuckets!=NULL);
@@ -169,12 +187,17 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             gridFix = new MeshGrid();
             FeatureAlignment::SetupGrid(mFix, *gridFix, markerFunctorFix); //builds the uniform grid with mFix vertices
 
+            //extract features
+            vecFFix = FeatureAlignment::extractFeatures(param.numFixFeatureSelected, mFix, param.samplingStrategy);
+            vecFMov = FeatureAlignment::extractFeatures(param.numMovFeatureSelected, mMov, FeatureAlignment::UNIFORM_SAMPLING);
+            if(vecFFix==NULL || vecFMov==NULL) return false; //can't continue; features have not been computed!
+
             //copy descriptors of mMov into ANN structures, then build kdtree...            
-            FeatureAlignment::SetupKDTreePoints(vecFMov, &fdataPts, FeatureType::getFeatureDimension());
-            fkdTree = new ANNkd_tree(fdataPts,vecFMov.size(),FeatureType::getFeatureDimension());
+            FeatureAlignment::SetupKDTreePoints(*vecFMov, &fdataPts, FeatureType::getFeatureDimension());
+            fkdTree = new ANNkd_tree(fdataPts,vecFMov->size(),FeatureType::getFeatureDimension());
         }
 
-        Matrix44Type align(MeshType& mFix, MeshType& mMov, vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov,Parameters& param, CallBackPos *cb=NULL)
+        Matrix44Type align(MeshType& mFix, MeshType& mMov, Parameters& param, CallBackPos *cb=NULL)
         {
             //normalize normals
             tri::UpdateNormals<MeshType>::PerVertexNormalized(mFix);
@@ -182,10 +205,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             //variables declaration
             Matrix44Type bestTr = Matrix44Type::Identity();     //best transformation matrix found
-            int bestConsensus = 0;                                              //best consensus score
-            float consensusDist = param.consensusDist*(mMov.bbox.Diag()/100.0f);               //consensus distance
-            float sparseBaseDist = param.sparseBaseDist*(mMov.bbox.Diag()/100.0f);//to make sure base are sparse enough
-            float mutualErrDist = param.mutualErrDist*(mMov.bbox.Diag()/100.0f);       //to make sure matched beses on mMov are similar to base on mFix
+            int bestConsensus = 0;                                              //best consensus score                        
             int short_cons_succ = int((param.shortConsOffset*param.overlap/100.0f)*(param.short_cons_samples/100.0f));      //number of vertices to win short consensus
             int cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));                       //number of vertices to win consensus
             int ransac_succ = int((param.succOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));                     //number of vertices to win ransac
@@ -211,7 +231,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 //callback handling
                 if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
 
-                bool ok = FeatureAlignment::Matching(vecFFix, vecFMov, fkdTree, param.nBase, *baseVec, *matchesVec, param.k, sparseBaseDist, mutualErrDist);
+                bool ok = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, *baseVec, *matchesVec, param);
                 if(!ok){ skipped++; continue;} //something wrong; can't find a base, skip this...
 
                 assert(baseVec->size()>=1);
@@ -263,9 +283,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
 
                 doneShort++;
-                Matrix44Type currTr = (*candidates)[j].tr;             //load the right transformation
-                Matrix44Type oldTr = ApplyTransformation(mMov, currTr);  //apply transformation
-                (*candidates)[j].shortCons = Consensus(mFix, mMov, *gridFix, markerFunctorFix, normBuckets, consensusDist, param.short_cons_samples);  //compute consensus on 200 vertices
+                Matrix44Type currTr = (*candidates)[j].tr;              //load the right transformation
+                Matrix44Type oldTr = ApplyTransformation(mMov, currTr); //apply transformation
+                param.isFullConsensus = false;                          //set parameters for short consensus
+                (*candidates)[j].shortCons = Consensus(mFix, mMov, *gridFix, markerFunctorFix, normBuckets, param);  //compute short consensus
                 ResetTransformation(mMov, oldTr);                                 //restore old tranformation
 
                 if((*candidates)[j].shortCons >= short_cons_succ) wonShort++;  //count how many won, and use this as bound later
@@ -289,9 +310,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
 
                 done++;
-                Matrix44Type currTr = (*candidates)[j].tr;             //load the right transformation
-                Matrix44Type oldTr = ApplyTransformation(mMov, currTr);  //apply transformation
-                int consensus = Consensus(mFix, mMov, *gridFix, markerFunctorFix, normBuckets, consensusDist, param.fullConsensusSamples, cons_succ, bestConsensus);  //compute consensus
+                Matrix44Type currTr = (*candidates)[j].tr;              //load the right transformation
+                Matrix44Type oldTr = ApplyTransformation(mMov, currTr); //apply transformation
+                param.isFullConsensus = true;                           //set parameters for full consensus
+                int consensus = Consensus(mFix, mMov, *gridFix, markerFunctorFix, normBuckets, param, bestConsensus);  //compute full consensus
                 ResetTransformation(mMov, oldTr);                                 //restore old tranformation
 
                 if(consensus >= cons_succ) won++;
@@ -340,6 +362,9 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
         }
         void finalize()
         {
+            //Cleaning extracted features
+            if(vecFFix) vecFFix->clear(); delete vecFFix; vecFFix = NULL;
+            if(vecFMov) vecFMov->clear(); delete vecFMov; vecFMov = NULL;
             //Cleaning ANN structures
             FeatureAlignment::CleanKDTree(fkdTree, fdataPts, NULL, NULL, NULL, true);
             //Cleaning bucketing structures
@@ -475,7 +500,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
         //compute the randomized consensus beetween m1 e m2 (without taking in account any additional transformation)
         //IMPORTANT: per vertex normals of m1 and m2 MUST BE PROVIDED JET NORMALIZED!!!       
-        static int Consensus(MESH_TYPE& mFix, MESH_TYPE& mMov, GridStaticPtr<typename MESH_TYPE::VertexType, typename MESH_TYPE::ScalarType>& grid, tri::VertTmark<MESH_TYPE>& markerFunctor, vector<vector<int> >* normBuckets, float consensusDist, int fullConsensusSamples, int cons_succ = 0, int bestCons = 0, bool paint = false, CallBackPos *cb = NULL)
+        static int Consensus(MESH_TYPE& mFix, MESH_TYPE& mMov, GridStaticPtr<typename MESH_TYPE::VertexType, typename MESH_TYPE::ScalarType>& grid, tri::VertTmark<MESH_TYPE>& markerFunctor, vector<vector<int> >* normBuckets, Parameters& param, int bestCons = 0,CallBackPos *cb = NULL)
         {
             typedef MESH_TYPE MeshType;
             typedef typename MeshType::ScalarType ScalarType;
@@ -492,18 +517,19 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //if no buckets are provided get a vector of vertex pointers sampled uniformly; used as query points
             if(normBuckets==NULL){
                 queryVert = new vector<VertexPointer>();
-                SampleVertUniform(mMov, *queryVert, fullConsensusSamples);
+                SampleVertUniform(mMov, *queryVert, param.fullConsensusSamples);
             }
             else{
                 //else, get a vector of vertex pointers sampled in a normal equalized manner; used as query points
                 queryVert = new vector<VertexPointer>(mMov.vert.size(),NULL);
                 for(unsigned int i=0; i<mMov.vert.size(); i++) (*queryVert)[i] = &(mMov.vert[i]);//do a copy of pointers to vertexes
-                FeatureAlignment::SampleVertNormalEqualized(*queryVert, normBuckets, fullConsensusSamples);
+                FeatureAlignment::SampleVertNormalEqualized(*queryVert, normBuckets, param.fullConsensusSamples);
             }
             assert(queryVert!=NULL);
 
             //init variables for consensus
-            float consensusNormalsAngle = 0.965f;   //holds the the consensus angle for normals, in gradients. default 15 degrees.
+            float consDist = param.consensusDist*(mMov.bbox.Diag()/100.0f);               //consensus distance
+            int cons_succ;                      //score needed to pass consensus
             int consensus = 0;                  //counts vertices in consensus
             float dist;                         //holds the distance of the closest vertex found
             VertexType* closestVertex = NULL;   //pointer to the closest vertex
@@ -513,12 +539,16 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             Matrix33<ScalarType> mat2(mMov.Tr,3); //3x3 matrix needed to transform normals
             Matrix33<ScalarType> inv_mat1(Inverse(mFix.Tr),3);  //3x3 matrix needed to transform normals
 
+            //compute cons_succ depending on the type of consensus, i.e short/full
+            if(param.isFullConsensus) cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));
+            else cons_succ = int((param.shortConsOffset*param.overlap/100.0f)*(param.short_cons_samples/100.0f));
+
             //Colors handling: white = not tested; blue = not in consensus; red = in consensus;
             //yellow = not in consensus becouse of normals
             //Colors are stored in a buffer vector; at the end of consensus loop they are applied
             //to the mesh ONLY IF full consensus overcome succes threshold AND the best consensus.
             vector<Color4b>* colorBuf = NULL;
-            if(paint) colorBuf = new vector<Color4b>(mMov.VertexNumber(),Color4b::White); //buffer vector for colors
+            if(param.paint) colorBuf = new vector<Color4b>(mMov.VertexNumber(),Color4b::White); //buffer vector for colors
 
             //consensus loop
             for(VertexPointerIterator vi=queryVert->begin(); vi!=queryVert->end(); vi++)
@@ -532,31 +562,31 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 queryNrm = inv_mat1 * (mat2 * (*vi)->N());
 
                 //if query point is bbox, the look for a vertex in cDist from the query point
-                if(mFix.bbox.IsIn(queryPnt)) closestVertex = grid.GetClosest(PDistFunct,markerFunctor,queryPnt,consensusDist,dist,closestPnt);
+                if(mFix.bbox.IsIn(queryPnt)) closestVertex = grid.GetClosest(PDistFunct,markerFunctor,queryPnt,consDist,dist,closestPnt);
                 else closestVertex=NULL;  //out of bbox, we consider the point not in consensus...
 
-                if(closestVertex!=NULL && dist < consensusDist){
+                if(closestVertex!=NULL && dist < consDist){
                     assert(closestVertex->P()==closestPnt); //coord and vertex pointer returned by getClosest must be the same
 
                     //point is in consensus distance, now we check if normals are near
-                    if(queryNrm.dot(closestVertex->N())>consensusNormalsAngle)  //15 degrees
+                    if(queryNrm.dot(closestVertex->N())>param.consensusNormalsAngle)  //15 degrees
                     {
                         consensus++;  //got consensus
-                        if(paint){ (*colorBuf)[i] = Color4b::Red; }  //paint of red if needed
+                        if(param.paint){ (*colorBuf)[i] = Color4b::Red; }  //paint of red if needed
                     }
                     else{
-                        if(paint){ (*colorBuf)[i] = Color4b::Yellow; }  //paint of yellow if needed
+                        if(param.paint){ (*colorBuf)[i] = Color4b::Yellow; }  //paint of yellow if needed
                     }
                 }
                 else{
-                    if(paint){ (*colorBuf)[i] = Color4b::Blue; } //not in consensus due to distance, paint of blue
+                    if(param.paint){ (*colorBuf)[i] = Color4b::Blue; } //not in consensus due to distance, paint of blue
                 }
             }
 
             //apply colors if consensus is the best ever found.
             //NOTE: we got to do this here becouse we need a handle to sampler. This is becouse vertex have been shuffled
             //and so colors have been stored not in order in the buffer!
-            if(paint){
+            if(param.paint){
                 if(consensus>=bestCons && consensus>=cons_succ){
                     for(VertexPointerIterator vi=queryVert->begin(); vi!=queryVert->end(); vi++)
                         if(!(*vi)->IsD()) (*vi)->C() = (*colorBuf)[vi-queryVert->begin()];
@@ -564,7 +594,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             }
 
             //clear and delete buffer for colors, if needed
-            if(paint){ colorBuf->clear(); delete colorBuf; }
+            if(param.paint){ colorBuf->clear(); delete colorBuf; }
 
             //delete vector of query vertexes; do it as last thing, 'couse it is used for coloring too.
             if(queryVert!=NULL) delete queryVert;
@@ -626,56 +656,60 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             }
         }
 
-        static bool Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, int nBase, vector<FEATURE_TYPE**>& baseVec, vector<FEATURE_TYPE**>& matchesVec, int k, float sparseBaseDist, float mutualErrDist, CallBackPos *cb=NULL)
+        static bool Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, vector<FEATURE_TYPE**>& baseVec, vector<FEATURE_TYPE**>& matchesVec, Parameters& param, CallBackPos *cb=NULL)
         {
             typedef MESH_TYPE MeshType;
             typedef FEATURE_TYPE FeatureType;
             typedef typename vector<FeatureType*>::iterator FeatureIterator;
 
-            float pBar = 0, offset = 100.0f/nBase;  //used for progresss bar callback
+            float pBar = 0, offset = 100.0f/param.nBase;  //used for progresss bar callback
             if(cb) cb(0, "Matching...");
 
-            if(nBase>int(vecFFix.size())) return false; //not enough features to pick a base
-            if(k>int(vecFMov.size())) return false;  //not enough features in kdtree to pick k neighboors
+            if(param.nBase>int(vecFFix.size())) return false; //not enough features to pick a base
+            if(param.k>int(vecFMov.size())) return false;  //not enough features in kdtree to pick k neighboors
 
-            FeatureType** base = FeatureAlignment::FeatureUniform(vecFFix, &nBase); //randomly chooses a base of features from vecFFix
-            if(!VerifyBaseDistances(base, nBase, sparseBaseDist)) return false; //if base point are not enough sparse, skip
+            //compute needed params
+            float baseDist = param.sparseBaseDist*(param.mMovBBoxDiag/100.0f);
+            float errDist = param.mutualErrDist*(param.mMovBBoxDiag/100.0f);
+
+            FeatureType** base = FeatureAlignment::FeatureUniform(vecFFix, &(param.nBase)); //randomly chooses a base of features from vecFFix
+            if(!VerifyBaseDistances(base, param.nBase, baseDist)) return false; //if base point are not enough sparse, skip
             baseVec.push_back(base);
 
             assert(baseVec.size()>=1);
-            assert((int)vecFMov.size()>=nBase);
+            assert((int)vecFMov.size()>=param.nBase);
 
             //fill fqueryPts with feature's descriptions in base
             ANNpointArray fqueryPts;
-            FeatureAlignment::SetupKDTreeQuery(base, nBase, &fqueryPts, FeatureType::getFeatureDimension());
+            FeatureAlignment::SetupKDTreeQuery(base, param.nBase, &fqueryPts, FeatureType::getFeatureDimension());
 
             //additional variables needed
-            ANNidxArray fnnIdx = new ANNidx[k];						        // allocate near neigh indices
-            ANNdistArray fdists = new ANNdist[k];						    // allocate near neigh dists
+            ANNidxArray fnnIdx = new ANNidx[param.k];						        // allocate near neigh indices
+            ANNdistArray fdists = new ANNdist[param.k];						    // allocate near neigh dists
             vector<vector<FeatureType*>* >* matchedVec = new vector<vector<FeatureType*>* >();            
 
             //foreach feature in the base find the best matching using fkdTree
-            for(int i = 0; i < nBase; i++)
+            for(int i = 0; i < param.nBase; i++)
             {
-                kdTree->annkSearch(fqueryPts[i], k, fnnIdx, fdists);  //search the k best neighbor for the current point
+                kdTree->annkSearch(fqueryPts[i], param.k, fnnIdx, fdists);  //search the k best neighbor for the current point
 
                 assert(fdists[0]!=ANN_DIST_INF);  //if this check fails, it means that no feature have been found!
 
                 vector<FeatureType*>* matches = new vector<FeatureType*>();
 
-                for(int j=0; j<k; j++) matches->push_back(vecFMov[fnnIdx[j]]); //store all features
+                for(int j=0; j<param.k; j++) matches->push_back(vecFMov[fnnIdx[j]]); //store all features
 
                 matchedVec->push_back(matches);
 
                 if(cb){ pBar+=offset; cb((int)pBar, "Matching..."); }
             }
 
-            assert(int(matchedVec->size())==nBase);
+            assert(int(matchedVec->size())==param.nBase);
 
             //branch and bound
-            int* curSolution = new int[nBase];
-            for(int i=0; i<nBase; i++) curSolution[i] = 0;              //initialization
-            FeatureAlignment::Match(baseVec, *matchedVec, nBase, 0, curSolution, matchesVec, mutualErrDist);
+            int* curSolution = new int[param.nBase];
+            for(int i=0; i<param.nBase; i++) curSolution[i] = 0;              //initialization
+            FeatureAlignment::Match(baseVec, *matchedVec, param.nBase, 0, curSolution, matchesVec, errDist);
 
             //Cleaning ANN structures
             FeatureAlignment::CleanKDTree(NULL, NULL, fqueryPts, fnnIdx, fdists, false);
@@ -799,7 +833,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             markerFunctor.SetMesh(&m);
         }
 
-        static void Match(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<FEATURE_TYPE**>& solutionsVec, float mutualErrDist, CallBackPos *cb = NULL)
+        static void Match(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<FEATURE_TYPE**>& solutionsVec, float errDist, CallBackPos *cb = NULL)
         {
             typedef FEATURE_TYPE FeatureType;
 
@@ -807,7 +841,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             for(unsigned int j=0; j<matchedVec[level]->size(); j++){
                 curSolution[level] = j;
-                if(MatchSolution(baseVec, matchedVec, level, curSolution, mutualErrDist)){
+                if(MatchSolution(baseVec, matchedVec, level, curSolution, errDist)){
                     if(level==nBase-1){
                         FeatureType** solution = new FeatureType*[nBase];
                         for(int h=0; h<nBase; h++){
@@ -816,13 +850,13 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                         solutionsVec.push_back(solution);
                     }
                     else
-                        Match(baseVec, matchedVec, nBase, level+1, curSolution, solutionsVec, mutualErrDist);
+                        Match(baseVec, matchedVec, nBase, level+1, curSolution, solutionsVec, errDist);
                 }
             }
             curSolution[level] = 0;
         }
 
-        static bool MatchSolution(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int level, int curSolution[], float mutualErrDist)
+        static bool MatchSolution(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int level, int curSolution[], float errDist)
         {
             if (level==0) return true;
 
@@ -831,19 +865,19 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             for(int j=0; j<level; j++){
                 float distF = vcg::Distance(baseVec[currBase][level]->pos, baseVec[currBase][j]->pos);
                 float distM = vcg::Distance((*(matchedVec[level]))[curSolution[level]]->pos, (*(matchedVec[j]))[curSolution[j]]->pos);
-                if( math::Abs(distF-distM)>mutualErrDist) return false;
+                if( math::Abs(distF-distM)>errDist) return false;
             }
             return true;
         }
 
         //Verify that all points in a base are enough sparse        
-        static bool VerifyBaseDistances(FEATURE_TYPE* base[], int nBase, float sparseBaseDist )
+        static bool VerifyBaseDistances(FEATURE_TYPE* base[], int nBase, float baseDist )
         {
             typedef FEATURE_TYPE FeatureType;
 
             for(int i=0; i<nBase-1; i++){
                 for(int j=i+1; j<nBase; j++){
-                    if(Distance(base[i]->pos, base[j]->pos)<=sparseBaseDist) return false;
+                    if(Distance(base[i]->pos, base[j]->pos)<=baseDist) return false;
                 }
             }
             return true;

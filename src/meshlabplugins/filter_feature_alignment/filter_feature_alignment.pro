@@ -1,5 +1,7 @@
 include (../../shared.pri)
-DEFINES += _ANN_WIN_MINGW
+ANNDIR = ../../external/ann_1.1.1
+INCLUDEPATH  += $$ANNDIR/include
+LIBS += -L$$ANNDIR/lib -lANN
 QT += opengl
 QT += xml
 HEADERS = filter_feature_alignment.h \
