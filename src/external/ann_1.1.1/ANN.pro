@@ -1,12 +1,10 @@
 TEMPLATE = lib
 TARGET = ANN
-CONFIG += staticlib dll
-ANNDIR = ./
+CONFIG += staticlib
+ANNDIR = .
 INCLUDEPATH  += $$ANNDIR/include
 DEPENDPATH += $$ANNDIR/src
 DESTDIR = $$ANNDIR/lib
-DLLDESTDIR = $$ANNDIR/lib
-LIBS += -L$$ANNDIR/lib -lANN
 
 win32-g++:	DEFINES += _ANN_WIN_MINGW
 
