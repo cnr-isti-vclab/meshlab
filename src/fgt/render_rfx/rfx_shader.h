@@ -70,6 +70,13 @@ public:
 	void Stop() { glUseProgram(0); }
 	QStringList GetCompilationLog();
 
+	/*
+		Checks whether the actual mesh document contains the value needed to set up the value of the special attributes.
+		@param md the mesh document to test.
+		@return true if the mesh document contains all the value per vertex needed to set up the special attribute values, false otherwise.
+	*/
+	bool checkSpecialAttributeDataMask(MeshDocument*);
+
 private:
 	void UpdateSemanticUniforms(int);
 

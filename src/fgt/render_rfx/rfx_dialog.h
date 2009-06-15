@@ -58,6 +58,7 @@ private:
 #include <climits>
 #include <cfloat>
 #include <QMap>
+#include <typeinfo>
 #include <QLabel>
 #include <QPicture>
 #include <QSpinBox>
@@ -67,9 +68,12 @@ private:
 #include <QHeaderView>
 #include <QSignalMapper>
 #include <QFileDialog>
+#include <QColor>
 #include <QtGui>
 #include "ui_rfx_dialog.h"
 #include "rfx_shader.h"
+#include "rfx_specialuniform.h"
+#include "rfx_colorbox.h"
 
 class RfxDialog : public QDockWidget
 {
@@ -78,6 +82,10 @@ class RfxDialog : public QDockWidget
 public:
 	RfxDialog(RfxShader*, QAction*, QGLWidget *parent = 0);
 	virtual ~RfxDialog();
+
+     
+     static const float DECTOINT;
+     static const float INTTODEC;
 
 	enum DialogTabs { UNIFORM_TAB, TEXTURE_TAB, ALL_TABS };
 
@@ -89,14 +97,14 @@ public slots:
 	void extendRange(double);
 	void extendRange(int);
 	void mapSliderLineEdit(QWidget*);
-
+     
 private:
 	void setupTabs();
 	void AddUniformBox(RfxUniform*, int);
 	void DrawIFace(QGridLayout*, RfxUniform*, int idx, int rows, int columns);
 	void CleanTab(int);
 
-	Ui::RfxDock ui;
+     Ui::RfxDock ui;
 	QGLWidget *mGLWin;
 	QMultiMap<int, QWidget*> widgetsByTab;
 	int selPass;

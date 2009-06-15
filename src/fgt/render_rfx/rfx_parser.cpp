@@ -61,9 +61,14 @@ RfxParser::~RfxParser()
  *
  * TODO: use DTD in rfx header to validate contents
  */
-bool RfxParser::Parse()
+
+/*
+	Verifies if the document is valid.
+	@return true if the document is valid, false otherwise.
+*/
+bool RfxParser::isValidDoc()
 {
-	if (!document.setContent(rmShader))
+     if (!document.setContent(rmShader))
 		return false;
 
 	root = document.documentElement();
@@ -73,6 +78,15 @@ bool RfxParser::Parse()
 	// no <RmOpenGLEffect> found, parsing failed
 	if (OGLEffect.isNull())
 		return false;
+     return true;
+}
+
+bool RfxParser::Parse(MeshDocument &md)
+{
+     document.setContent(rmShader);
+	root = document.documentElement();
+	QDomElement OGLEffect =
+		root.elementsByTagName("RmOpenGLEffect").at(0).toElement();
 
 	// before looping between passes, check for renderable textures
 	QDomNodeList rtex = root.elementsByTagName("RmRenderableTexture");
@@ -149,6 +163,8 @@ bool RfxParser::Parse()
 
 			// also check for uniforms declaration, will save some time later
 			ParseUniforms(source.text());
+
+			ParseAttributes(source.text(), theGLPass);
 		}
 
 		// shader uniforms
@@ -160,14 +176,20 @@ bool RfxParser::Parse()
 			if (!uniformType.contains(varName))
 				continue;
 
-			RfxUniform *unif = new RfxUniform(varName, uniformType[varName]);
-			float *parsedValue = ValueFromRfx(varName, unif->GetType());
-			unif->SetValue(parsedValue);
+               RfxUniform *unif;
+               if(RfxSpecialUniform::getSpecialType(varName) == RfxSpecialUniform::NONE){
+                    unif = new RfxUniform(varName, uniformType[varName]);
+                    float *parsedValue = ValueFromRfx(varName, unif);
+			     unif->SetValue(parsedValue);
 
-			if (parsedValue[16] != 0.0 || parsedValue[17] != 0.0)
-				unif->SetValRange(parsedValue[16], parsedValue[17]);
+			     if (parsedValue[16] != 0.0 || parsedValue[17] != 0.0)
+				     unif->SetValRange(parsedValue[16], parsedValue[17]);
 
-			delete parsedValue;
+			     delete parsedValue;
+               }
+               else
+                    unif = new RfxSpecialUniform(varName, uniformType[varName], &md);
+			
 
 			QString sem = GetSemantic(varName, unif->GetType());
 			if (!sem.isNull()) {
@@ -301,7 +323,7 @@ QString RfxParser::GetSemantic(const QString& VarName, RfxUniform::UniformType V
 	return QString();
 }
 
-float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType VarType)
+float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform* unif)
 {
 	// read a bool, int or float vector (max 4 elements)
 	// or a float matrix (max 16 elements).
@@ -312,6 +334,7 @@ float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType V
 	for (int i = 0; i < 18; ++i)
 		result[i] = 0.0f;
 
+	RfxUniform::UniformType VarType = unif->GetType();
 	// use lookup table to init data
 	int elementNum = UniformToElements[VarType];
 	QString elementName = UniformToRfx[VarType];
@@ -332,6 +355,7 @@ float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType V
 		for (int i = 0; i < candidates.size(); ++i)
 			if (candidates.at(i).toElement().attribute("NAME") == VarName) {
 				varNode = candidates.at(i).toElement();
+				unif->setIsRmColorVariable(true);
 				result[16] = 0.0;
 				result[17] = 1.0;
 			}
@@ -458,5 +482,31 @@ void RfxParser::ParseUniforms(const QString &source)
 		// (eg: uniformType["MyTexture"] = "sampler2D")
 		enum declContent {UNIFORM, TYPE, IDENTIFIER};
 		uniformType[decl[IDENTIFIER]] = decl[TYPE];
+	}
+}
+
+/*
+	Verifies if the shader sources contains some special attributes.
+	For each special attribute declared creates a new instance of SpecialAttribute and appends it in the GLPass.
+	@param source the source of the shader.
+	@param pass the GLPass.
+*/
+void RfxParser::ParseAttributes(const QString &source, RfxGLPass *pass)
+{
+	QString txtSource = source;
+	int position = 0;
+	int attrib;
+	while ((attrib = txtSource.indexOf("attribute", position)) != -1) {
+		int semicol = txtSource.indexOf(";", attrib);
+		int declLen = semicol - attrib;
+		QStringList decl = txtSource.mid(attrib, declLen).split(QRegExp("\\s+|\\,"));
+		position = semicol;
+		QString temp;
+		for (int i =2; i < decl.size(); ++i){
+			temp = decl.at(i);
+                        //qDebug("temp : ",temp);
+			if(RfxSpecialAttribute::getSpecialType(temp) != RfxSpecialAttribute::NONE)
+				pass->AddSpecialAttribute(new RfxSpecialAttribute(temp));
+		}
 	}
 }

@@ -23,8 +23,8 @@
 
 #include "rfx_dialog.h"
 
-const float DECTOINT = 10000.0f;
-const float INTTODEC = 0.0001f;
+const float RfxDialog::DECTOINT = 10000.0f;
+const float RfxDialog::INTTODEC = 0.0001f;
 
 RfxDialog::RfxDialog(RfxShader *s, QAction *a, QGLWidget *parent)
 	: QDockWidget(parent)
@@ -82,7 +82,19 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QGLWidget *parent)
 			if (uni->isTexture())
 				continue;
 
-			AddUniformBox(uni, unifCount);
+               /* Verifies if the type of the uniform is special or not */
+               using namespace std;
+               const type_info& ti  = typeid(*uni);
+               
+               if(ti != typeid(RfxSpecialUniform))
+			     AddUniformBox(uni, unifCount);
+               else{
+				   /* If the uniform is a special one, casts it to special uniform */
+                    RfxSpecialUniform* sp = dynamic_cast<RfxSpecialUniform*>(uni);
+					/* and initializes its value */
+                    sp->initialize();
+                    sp->PassToShader();
+			   }
 		}
 
 		++selPass;
@@ -224,6 +236,10 @@ void RfxDialog::AddUniformBox(RfxUniform *uni, int uniIndex)
 		break;
 
 	case RfxUniform::VEC4:
+		if(uni->isRmColorVariable()){
+			DrawIFace(gridUni, uni, uniIndex, 1, 1);
+			break;
+		}
 	case RfxUniform::IVEC4:
 	case RfxUniform::BVEC4:
 		DrawIFace(gridUni, uni, uniIndex, 1, 4);
@@ -254,9 +270,11 @@ void RfxDialog::AddUniformBox(RfxUniform *uni, int uniIndex)
 
 void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows, int columns)
 {
-	enum controlType { INT_CTRL, FLOAT_CTRL, BOOL_CTRL };
+	enum controlType { INT_CTRL, FLOAT_CTRL, BOOL_CTRL, COLOR_CTRL };
+	enum ColorComponentsType { R, G, B, A };
 	float *val = u->GetValue();
 	controlType ctrl;
+	ColorComponentsType rgba = R;
 	QWidget **controls = new QWidget*[rows * columns];
 	QGridLayout *uniLayout = parent;
 	QHBoxLayout *sliderEditLayout = NULL;
@@ -275,6 +293,10 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 	case RfxUniform::VEC2:
 	case RfxUniform::VEC3:
 	case RfxUniform::VEC4:
+		if(u->isRmColorVariable()){
+			ctrl = COLOR_CTRL;
+			break;
+		}
 	case RfxUniform::MAT2:
 	case RfxUniform::MAT3:
 	case RfxUniform::MAT4:
@@ -291,7 +313,17 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 	default:
 		return;
 	}
-
+	if(ctrl == COLOR_CTRL)
+	{
+		RfxColorBox* mycolorBox = new RfxColorBox(100, 25, QColor(val[0] * 255, val[1] * 255, val[2] * 255, val[3] * 255));
+		uniLayout->addWidget(mycolorBox, 0,0);
+		connect(mycolorBox, SIGNAL(colorChanged()), valMapper, SLOT(map()));
+		valMapper->setMapping(mycolorBox,
+			                      QString().setNum(uidx) + '-' +
+			                      QString().setNum(1)  + '-' +
+			                      QString().setNum(selPass));
+	}
+	else{
 	// controls in a grid layout
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < columns; ++j) {
@@ -371,6 +403,8 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 				connect(controls[arrayIdx], SIGNAL(currentIndexChanged(int)),
 						valMapper, SLOT(map()));
 				break;
+
+				
 			}
 
 			valMapper->setMapping(controls[arrayIdx],
@@ -388,7 +422,7 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 			multipleControls = false;
 		}
 	}
-
+}
 	connect(valMapper, SIGNAL(mapped(const QString&)), this,
 	        SLOT(ChangeValue(const QString&)));
 }
@@ -516,7 +550,19 @@ void RfxDialog::ChangeValue(const QString& val)
 					newVal = qslide->value() * INTTODEC;
 					qslide->setToolTip(QString().setNum(newVal));
 				} else {
-					return;
+					RfxColorBox *cBox = dynamic_cast<RfxColorBox*>(sender);
+					if (cBox != NULL) {
+						float* newVal = cBox->getColorf();
+						oldVal[0] = newVal[0];
+						oldVal[1] = newVal[1];
+						oldVal[2] = newVal[2];
+						oldVal[3] = newVal[3];
+						uni->PassToShader();
+						mGLWin->updateGL();
+						return;
+					} else {
+						return;
+					}
 				}
 			}
 		}
@@ -526,7 +572,6 @@ void RfxDialog::ChangeValue(const QString& val)
 	uni->PassToShader();
 	mGLWin->updateGL();
 }
-
 void RfxDialog::TextureSelected(int idx)
 {
 	disconnect(ui.btnChangeTexture, 0, 0, 0);

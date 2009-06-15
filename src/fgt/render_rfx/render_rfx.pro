@@ -3,6 +3,9 @@ include (../../shared.pri)
 QT           += opengl xml
 
 HEADERS       = render_rfx.h             \
+		    rfx_colorbox.h           \
+		    rfx_specialuniform.h     \
+		    rfx_specialattribute.h   \
                 rfx_shader.h             \
                 rfx_glpass.h             \
                 rfx_uniform.h            \
@@ -17,6 +20,9 @@ HEADERS       = render_rfx.h             \
                 ../../meshlab/meshmodel.h
 
 SOURCES       = render_rfx.cpp           \
+	  	    rfx_colorbox.cpp	     \
+		    rfx_specialuniform.cpp   \
+		    rfx_specialattribute.cpp \
                 rfx_shader.cpp           \
                 rfx_glpass.cpp           \
                 rfx_uniform.cpp          \
@@ -32,5 +38,5 @@ SOURCES       = render_rfx.cpp           \
                 ../../meshlab/meshmodel.cpp
 
 FORMS         = rfx_dialog.ui
-
+RESOURCES 	  = render_rfx.qrc
 TARGET        = render_rfx

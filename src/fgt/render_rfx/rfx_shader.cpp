@@ -233,3 +233,22 @@ bool RfxShader::AddSemanticUniform(RfxUniform *u, const QString &sem)
 		}
 	return false;
 }
+
+/*
+	Checks whether the actual mesh document contains the value needed to set up the value of the special attributes.
+	@param md the mesh document to test.
+	@return true if the mesh document contains all the value per vertex needed to set up the special attribute values, false otherwise.
+*/
+bool RfxShader::checkSpecialAttributeDataMask(MeshDocument *md)
+{
+	QListIterator<RfxGLPass*> it = QListIterator<RfxGLPass*>(shaderPasses);
+	RfxGLPass *tmp;
+	while(it.hasNext())
+	{
+		tmp = it.next();
+		if(!tmp->checkSpecialAttributeDataMask(md))
+			return false;
+
+	}
+	return true;
+}

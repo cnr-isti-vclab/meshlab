@@ -29,7 +29,11 @@
 #include <QList>
 #include <GL/glew.h>
 #include <QGLWidget>
+#include <QMessageBox>
 #include "rfx_uniform.h"
+
+#include "rfx_specialattribute.h"
+
 #include "rfx_state.h"
 
 class RfxGLPass
@@ -38,7 +42,7 @@ public:
 	RfxGLPass() : passIndex(-1) { useRenderTarget = false; shaderLinked = false; }
 	RfxGLPass(int passidx) : passIndex(passidx) { useRenderTarget = false; shaderLinked = false; }
 	virtual ~RfxGLPass();
-
+	bool checkSpecialAttributeDataMask(MeshDocument*);
 	void SetShaderSource(const QString &source, bool isFragment);
 	const QString& GetVertexSource() { return vert; }
 	const QString& GetFragmentSource() { return frag; }
@@ -48,10 +52,18 @@ public:
 	void SetPassName(const QString &n) { passName = n; }
 	void AddGLState(RfxState *s) { rfxStates.append(s); }
 	void AddUniform(RfxUniform *u) { shaderUniforms.append(u); }
+
+	/*
+		Appends a new Special Attribute to the pass.
+		@param s the attribute to be appended.
+	*/
+	void AddSpecialAttribute(RfxSpecialAttribute *s){ shaderSpecialAttributes.append(s); }
+
 	void SetRenderToTexture(bool t) { useRenderTarget = t; }
 	bool wantsRenderTarget() { return useRenderTarget; }
 	void LinkRenderTarget(RfxRenderTarget *_rt) { rt = _rt; }
 	RfxRenderTarget* GetRenderTarget() { assert(useRenderTarget); return rt; }
+
 	QListIterator<RfxUniform*> UniformsIterator()
 	{
 		return QListIterator<RfxUniform*>(shaderUniforms);
@@ -60,8 +72,35 @@ public:
 	{
 		return QListIterator<RfxState*>(rfxStates);
 	}
+	
+	/*
+		Returns the list of special attribute contained in the pass.
+		@return the list of special attribute
+	*/
+	QList<RfxSpecialAttribute*>* AttributesList()
+	{
+		return &shaderSpecialAttributes;
+	}
+
+	/*
+		Returns true if the pass has at least a specialAttribute, false otherwise.
+		@return true if the pass contains at least a special attribute, false otherwise.
+	*/
+	bool hasSpecialAttribute(){
+		return !this->shaderSpecialAttributes.isEmpty();
+	}
+
 	RfxUniform* getUniform(int uniIdx) { return shaderUniforms.at(uniIdx); }
 	RfxUniform* getUniform(const QString& uniIdx);
+	
+	/*
+		Returns the shader program.
+		@return the shader program.
+	*/
+	GLuint* getProgram() { 
+		return &shaderProgram; 
+	}
+
 	void CompileAndLink();
 	void Start();
 	const QString GetCompilationLog() { return compileLog; }
@@ -81,6 +120,9 @@ private:
 
 	QList<RfxState*> rfxStates;
 	QList<RfxUniform*> shaderUniforms;
+
+	/* The list of special attribute the pass contains */
+	QList<RfxSpecialAttribute*> shaderSpecialAttributes;
 
 	void FillInfoLog(GLhandleARB);
 };

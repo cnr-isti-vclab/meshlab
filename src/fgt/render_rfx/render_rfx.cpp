@@ -88,7 +88,7 @@ void RenderRFX::initActionList()
 	foreach (QString fileName, shadersDir.entryList(QDir::Files)) {
 		if (fileName.endsWith(".rfx")) {
 			RfxParser theParser(shadersDir.absoluteFilePath(fileName));
-			if (theParser.Parse()) {
+			if (theParser.isValidDoc()) {
 				QAction *action = new QAction(fileName, this);
 				action->setCheckable(false);
 				actionList.append(action);
@@ -120,7 +120,7 @@ void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWi
 					}			
 			}
 
-	theParser.Parse();
+	theParser.Parse(md);
 	activeShader = theParser.GetShader();
 	assert(activeShader);
 
@@ -128,6 +128,11 @@ void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWi
 		dialog->close();
 		delete dialog;
 	}
+
+	//verifies if there's some special attributes in the shader.
+	if(!activeShader->checkSpecialAttributeDataMask(&md))
+		return;
+	
 
 	parent->makeCurrent();
 	GLenum err = glewInit();
@@ -156,10 +161,18 @@ void RenderRFX::Render(QAction *action, MeshDocument &md,  RenderMode &rm, QGLWi
 	for(shaderPass=0;shaderPass<totPass;shaderPass++)
 	{
 		activeShader->Start(shaderPass);
-		glGetError();
-		foreach(MeshModel * mp, md.meshList)
+			glGetError();
+			foreach(MeshModel * mp, md.meshList)
 			{
-				if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+				if(mp->visible && activeShader->GetPass(shaderPass)->hasSpecialAttribute()){
+					GLuint *program = activeShader->GetPass(shaderPass)->getProgram();
+					Draw(&md, program, activeShader->GetPass(shaderPass)->AttributesList());
+				}
+				else{
+					if(mp->visible) 
+						mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+				}
+				
 			}
 	}
 	glUseProgramObjectARB(0);

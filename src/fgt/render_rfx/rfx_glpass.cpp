@@ -35,6 +35,10 @@ RfxGLPass::~RfxGLPass()
 	foreach (RfxUniform *uniform, shaderUniforms)
 		delete uniform;
 	shaderUniforms.clear();
+
+	foreach (RfxSpecialAttribute *attribute, shaderSpecialAttributes)
+		delete attribute;
+	shaderSpecialAttributes.clear();
 }
 
 void RfxGLPass::SetShaderSource(const QString &source, bool isFragment)
@@ -145,4 +149,30 @@ RfxUniform* RfxGLPass::getUniform(const QString& uniIdx)
 	}
 
 	return NULL;
+}
+
+/*
+	Checks whether the actual mesh document contains the value needed to set up the value of the special attributes.
+	If not an alert message is shown and it returns false.
+	@param md the mesh document to test.
+	@return true if the mesh document contains all the value per vertex needed to set up the special attribute values, false otherwise.
+*/
+bool RfxGLPass::checkSpecialAttributeDataMask(MeshDocument* md){
+	QListIterator<RfxSpecialAttribute*> iterator = QListIterator<RfxSpecialAttribute*>(this->shaderSpecialAttributes);
+
+	RfxSpecialAttribute* spa;
+	
+	while(iterator.hasNext()){
+		spa = iterator.next();
+		if(!md->mm()->hasDataMask(spa->getDataMask()))
+		{
+			 QMessageBox msgBox;
+			 msgBox.setIcon(QMessageBox::Warning);
+			 msgBox.setWindowTitle("Attribute missed");
+			 msgBox.setText(QString("The requested shader needs the model contains per %1 value").arg(spa->getDescription()));
+			 int ret = msgBox.exec();
+			return false;
+		}
+	}
+	return true;
 }

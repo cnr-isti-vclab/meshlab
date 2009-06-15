@@ -32,23 +32,42 @@
 #include "rfx_shader.h"
 #include "rfx_glpass.h"
 #include "rfx_rendertarget.h"
+#include "rfx_specialuniform.h"
+#include "rfx_specialattribute.h"
 
 class RfxParser
 {
 public:
 	RfxParser(const QString&);
 	virtual ~RfxParser();
-	bool Parse();
+	bool Parse(MeshDocument &md);
+
+	/*
+		Verifies if the document is valid.
+		@return true if the document is valid, false otherwise.
+	*/
+    bool isValidDoc();
+
 	RfxShader* GetShader() { return rfxShader; }
 	void setMeshTexture(QString tn){meshTextureName = tn;}
 private:
 	QList<RfxState*> ParseGLStates(QDomNodeList, RfxState::StateType);
 	void ParseUniforms(const QString&);
-	float* ValueFromRfx(const QString&, RfxUniform::UniformType);
+
+	/*
+		Verifies if the shader sources contains some special attributes.
+		For each special attribute declared creates a new instance of SpecialAttribute and appends it in the GLPass.
+		@param source the source of the shader.
+		@param pass the GLPass.
+	*/
+	void ParseAttributes(const QString&, RfxGLPass*);
+
+	float* ValueFromRfx(const QString&, RfxUniform* unif);
 	QString TextureFromRfx(const QString&, RfxUniform::UniformType);
 	QString GetSemantic(const QString& VarName, RfxUniform::UniformType VarType);
 
 	QMap<QString, QString> uniformType;
+	
 	QFile *rmShader;
 	QDomDocument document;
 	QDomElement root;

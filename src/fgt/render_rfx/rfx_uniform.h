@@ -86,6 +86,17 @@ public:
 	float GetMaxRange() { return maxVal; }
 	void SetValRange(float _min, float _max) { minVal = _min; maxVal = _max; }
 
+	/*
+	Sets the value of _isRmColorVariable variable.
+	true if the uniform is a "RmColorVariable", false otherwise
+	*/
+	void setIsRmColorVariable(bool val){ _isRmColorVariable = val; }
+
+	/*
+	Returns the value of _isRmColorVariable. True if the uniform is a RmColorVariable, false otherwise.
+	*/
+	bool isRmColorVariable(){ return _isRmColorVariable; }
+
 private:
 	QString identifier;
 	UniformType type;
@@ -94,6 +105,12 @@ private:
 	bool textureLoaded;
 	bool textureNotFound;
 	bool textureRendered;
+
+	/*
+	True if the uniform is a RenderMonkey Color Variable. False otherwise.
+	*/
+	bool _isRmColorVariable;
+
 	RfxRenderTarget *rTarget;
 	QList<RfxState*> textureStates;
 	QString textureFile;

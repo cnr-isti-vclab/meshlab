@@ -32,6 +32,8 @@ RfxUniform::RfxUniform(const QString &_name, const QString &_type)
 	textureNotFound = false;
 	textureRendered = false;
 
+	_isRmColorVariable = false;
+
 	minVal = 0.0;
 	maxVal = 0.0;
 }
