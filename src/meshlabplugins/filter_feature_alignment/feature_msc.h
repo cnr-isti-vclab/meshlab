@@ -74,6 +74,7 @@ class SmoothCurvatureFeature
     static pair<float,float> FindMinMax(vector<FeatureType*>& vec, int scale);
     static void SortByBinCount(vector<FeatureType*>& vecFeatures, float min, float max, int histSize, vector<FeatureType*>& sorted);
     static int SpatialSelection(vector<FeatureType*>& container, vector<FeatureType*>& vec, int k, float radius);
+    static void PreCleaning(MeshType& m);
 };
 
 template<class MESH_TYPE, int dim>
@@ -89,9 +90,18 @@ template<class MESH_TYPE, int dim> inline char* SmoothCurvatureFeature<MESH_TYPE
     return "SmoothCurvatureFeature";
 }
 
+/* Provides needed attribute to compute feature. A detailed list follows:
+    MM_FACEFACETOPO required by RemoveNonManifoldVertex and RemoveNonManifoldFace
+    MM_FACEFLAGBORDER required by RemoveNonManifoldFace
+    MM_VERTCURV required by curvature computation
+    MM_VERTQUALITY required by curvature and histogram computation
+*/
 template<class MESH_TYPE, int dim> inline int SmoothCurvatureFeature<MESH_TYPE,dim>::getRequirements()
-{
-    return (MeshModel::MM_VERTFLAGBORDER|MeshModel::MM_VERTCURV|MeshModel::MM_VERTQUALITY|MeshModel::MM_VERTFACETOPO|MeshModel::MM_FACEFACETOPO);
+{       
+    return (MeshModel::MM_VERTCURV |
+            MeshModel::MM_VERTQUALITY |
+            MeshModel::MM_FACEFACETOPO |
+            MeshModel::MM_FACEFLAGBORDER);
 }
 
 template<class MESH_TYPE, int dim> inline bool SmoothCurvatureFeature<MESH_TYPE,dim>::isNullValue(float val)
@@ -131,6 +141,17 @@ template<class MESH_TYPE, int dim> void SmoothCurvatureFeature<MESH_TYPE,dim>::S
     assert(param.featureDesc->size()==getFeatureDimension());
 }
 
+template<class MESH_TYPE, int dim> void SmoothCurvatureFeature<MESH_TYPE,dim>::PreCleaning(MeshType& m)
+{
+    tri::Clean<MeshType>::RemoveZeroAreaFace(m);
+    tri::Clean<MeshType>::RemoveDuplicateFace(m);
+    tri::Clean<MeshType>::RemoveDuplicateVertex(m);
+    tri::Clean<MeshType>::RemoveNonManifoldFace(m);
+    //tri::Clean<MeshType>::RemoveNonManifoldVertex(m);
+    tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
+    tri::Allocator<MeshType>::CompactVertexVector(m);
+}
+
 template<class MESH_TYPE, int dim> bool SmoothCurvatureFeature<MESH_TYPE,dim>::ComputeFeature(MeshType &m, ParamType& param, CallBackPos *cb)
 {
     //variables needed for progress bar callback
@@ -148,8 +169,7 @@ template<class MESH_TYPE, int dim> bool SmoothCurvatureFeature<MESH_TYPE,dim>::C
     }
 
     //clear the mesh to avoid wrong values during curvature computations
-    tri::Clean<MeshType>::RemoveNonManifoldFace(m);
-    tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
+    PreCleaning(m);
 
     //copy vertex coords of the mesh before smoothing
     vector<Point3<ScalarType> > oldVertCoords(m.VertexNumber());

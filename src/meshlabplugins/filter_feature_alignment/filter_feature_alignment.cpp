@@ -239,7 +239,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
         }                 
         case AF_PERLIN_COLOR:
         {
-            par.addDynamicFloat("freq", 0.025f, 0.001f, 1.0f,"Frequency","");
+            par.addDynamicFloat("freq", 10.0f, 0.1f, 50.0f,"Frequency","");
             break;
         }
         case AF_COLOR_NOISE:
@@ -251,17 +251,18 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
     }
 }
 
-template<class ALIGNER_TYPE>
-void FilterFeatureAlignment::setAlignmentParameters(FilterParameterSet& par, typename ALIGNER_TYPE::Parameters& param)
+template<class MESH_TYPE, class ALIGNER_TYPE>
+void FilterFeatureAlignment::setAlignmentParameters(MESH_TYPE& mFix, MESH_TYPE& mMov, FilterParameterSet& par, typename ALIGNER_TYPE::Parameters& param)
 {
+    typedef MESH_TYPE MeshType;
     typedef ALIGNER_TYPE AlignerType;    
 
     if(par.hasParameter("samplingStrategy")) param.samplingStrategy = par.getEnum("samplingStrategy");
     if(par.hasParameter("numFixFeatureSelected")) param.numFixFeatureSelected = par.getInt("numFixFeatureSelected");
     if(par.hasParameter("nBase")) param.nBase = par.getInt("nBase");
     if(par.hasParameter("k")) param.k = par.getInt("k");
-    if(par.hasParameter("ransacIter")) param.ransacIter = par.getInt("ransacIter");
-    if(par.hasParameter("fullConsensusSamples")) param.fullConsensusSamples = par.getInt("fullConsensusSamples");
+    if(par.hasParameter("ransacIter")){ param.ransacIter = par.getInt("ransacIter"); if(param.ransacIter<0) param.ransacIter = 0;}
+    if(par.hasParameter("fullConsensusSamples")) math::Clamp(param.fullConsensusSamples = par.getInt("fullConsensusSamples"),1,mMov.VertexNumber());
     if(par.hasParameter("overlap")) param.overlap = math::Clamp<float>(par.getFloat("overlap"),0.0f,100.0f);
     if(par.hasParameter("consensusDist")) param.consensusDist = math::Clamp<float>(par.getFloat("consensusDist"),0.0f,100.0f);
     if(par.hasParameter("pickPoints")) param.pickPoints = par.getBool("pickPoints");
@@ -279,7 +280,6 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
     //declare variables for parameters
     int featureType, from, to, step, trials;
     MeshModel *mFix, *mMov, *currMesh;
-
     //read parameters
     currMesh = md.mm(); //get current mesh from document
     if(par.hasParameter("mFix")) mFix = par.getMesh("mFix"); else mFix = currMesh;
@@ -321,7 +321,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType                    
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     bool ok = ExtractionOperation<MeshType, FeatureType, AlignerType>(*currMesh, alignerParam, cb);
                     return ok;
                 }
@@ -329,7 +329,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType                    
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     bool ok = ExtractionOperation<MeshType, FeatureType, AlignerType>(*currMesh, alignerParam, cb);
                     return ok;
                 }                
@@ -353,14 +353,14 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType                    
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     return MatchingOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
                 }
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     return MatchingOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
                 }                
                 default: assert(0);
@@ -378,7 +378,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     int exitCode = RigidTransformationOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
                     if(exitCode){ errorMessage = errMessages[exitCode]; return false; }
                     return true;
@@ -387,7 +387,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     int exitCode = RigidTransformationOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
                     if(exitCode){ errorMessage = errMessages[exitCode]; return false; }
                     return true;
@@ -404,7 +404,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     int consensus = ConsensusOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
                     //Log results
                     Log(GLLogStream::FILTER,"Consensus of %.2f%% (%i/%i vertices).",(float(consensus)/alignerParam.fullConsensusSamples)*100.0f, consensus, alignerParam.fullConsensusSamples);
@@ -414,7 +414,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     int consensus = ConsensusOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
                     //Log results
                     Log(GLLogStream::FILTER,"Consensus of %.2f%% (%i/%i vertices).",(float(consensus)/alignerParam.fullConsensusSamples)*100.0f, consensus, alignerParam.fullConsensusSamples);
@@ -435,14 +435,14 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     return RansacOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
                 }               
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     return RansacOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
                 }                
                 default: assert(0);
@@ -461,14 +461,14 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     return RansacDiagramOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, trials, from, to, step, cb);
                 }
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(par, alignerParam);
+                    setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     return RansacDiagramOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, trials, from, to, step, cb);
                 }                
                 default: assert(0);
@@ -483,7 +483,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
             float freq = par.getDynamicFloat("freq");//default frequency; grant to be the same for all mesh in the document            
             m->updateDataMask(MeshModel::MM_VERTCOLOR);  //make sure color per vertex is enabled
 
-            FilterFeatureAlignment::PerlinColor<MeshType>(m->cm, freq);
+            FilterFeatureAlignment::PerlinColor<MeshType>(m->cm, md.bbox(), freq);
             return true;
         }
         case AF_COLOR_NOISE:

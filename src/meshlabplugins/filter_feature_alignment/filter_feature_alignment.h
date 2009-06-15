@@ -71,8 +71,8 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         virtual bool applyFilter(QAction */*filter*/, MeshModel &, FilterParameterSet & /*parent*/, CallBackPos *) { assert(0); return false;}
 
     private:
-        template<class ALIGNER_TYPE>
-        static void setAlignmentParameters(FilterParameterSet& par, typename ALIGNER_TYPE::Parameters& param);
+        template<class MESH_TYPE, class ALIGNER_TYPE>
+        static void setAlignmentParameters(MESH_TYPE& mFix, MESH_TYPE& mMov, FilterParameterSet& par, typename ALIGNER_TYPE::Parameters& param);
 
         template<class MESH_TYPE, class FEATURE_TYPE>
         static bool ComputeFeatureOperation(MeshModel& m, typename FEATURE_TYPE::Parameters& param, CallBackPos *cb=NULL);
@@ -96,22 +96,22 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         static bool RansacDiagramOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, int trials,int from, int to, int step, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE>
-        static void PerlinColor(MESH_TYPE& m, float freq)
+        static void PerlinColor(MESH_TYPE& m, Box3f bbox, float freq)
         {
             typedef MESH_TYPE MeshType;
             typedef typename MeshType::ScalarType ScalarType;
             typedef typename MeshType::VertexIterator VertexIterator;
 
-            Point3<ScalarType> p;
+            Point3<ScalarType> p;                                    
             VertexIterator vi;
             for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
             {
                 if(!(*vi).IsD()){
-                    p = m.Tr * (*vi).P();           //actual vertex position
+                    p = bbox.GlobalToLocal(m.Tr * (*vi).P());           //actual vertex position
                     //create and assign color
                     (*vi).C() = Color4b( int(255*math::Perlin::Noise(p[0]*freq,p[1]*freq,p[2]*freq)),
-                                         int(255*math::Perlin::Noise(50+p[0]*freq,50+p[1]*freq,50+p[2]*freq)),
-                                         int(255*math::Perlin::Noise(100+p[0]*freq,100+p[1]*freq,100+p[2]*freq)), 255 );
+                                         int(255*math::Perlin::Noise(64+p[0]*freq,64+p[1]*freq,64+p[2]*freq)),
+                                         int(255*math::Perlin::Noise(128+p[0]*freq,128+p[1]*freq,128+p[2]*freq)), 255 );
                 }
             }
         }
