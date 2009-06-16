@@ -32,9 +32,9 @@
 #include <meshlab/interfaces.h>
 
 //---solo per funzioni colore. toglile quando portate in color.h---
-#include <math.h>
-#include <vcg/math/perlin_noise.h>
-#include <vcg/math/random_generator.h>
+//#include <math.h>
+//#include <vcg/math/perlin_noise.h>
+//#include <vcg/math/random_generator.h>
 //------------------------------------------------------------------
 
 using namespace std;
@@ -94,9 +94,9 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
         static bool RansacDiagramOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, int trials,int from, int to, int step, CallBackPos *cb=NULL);
-
+/*
         template<class MESH_TYPE>
-        static void PerlinColor(MESH_TYPE& m, Box3f bbox, float freq)
+        static void PerlinColor(MESH_TYPE& m, Box3f bbox, float freq, Point3i channelOffsets)
         {
             typedef MESH_TYPE MeshType;
             typedef typename MeshType::ScalarType ScalarType;
@@ -107,11 +107,10 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
             for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
             {
                 if(!(*vi).IsD()){
-                    p = bbox.GlobalToLocal(m.Tr * (*vi).P());           //actual vertex position
-                    //create and assign color
-                    (*vi).C() = Color4b( int(255*math::Perlin::Noise(p[0]*freq,p[1]*freq,p[2]*freq)),
-                                         int(255*math::Perlin::Noise(64+p[0]*freq,64+p[1]*freq,64+p[2]*freq)),
-                                         int(255*math::Perlin::Noise(128+p[0]*freq,128+p[1]*freq,128+p[2]*freq)), 255 );
+                    p = bbox.GlobalToLocal(m.Tr * (*vi).P());           //actual vertex position scaled to bbox
+                    (*vi).C() = Color4b( int(255*math::Perlin::Noise(channelOffsets[0]+p[0]*freq,channelOffsets[0]+p[1]*freq,channelOffsets[0]+p[2]*freq)),
+                                         int(255*math::Perlin::Noise(channelOffsets[1]+p[0]*freq,channelOffsets[1]+p[1]*freq,channelOffsets[1]+p[2]*freq)),
+                                         int(255*math::Perlin::Noise(channelOffsets[2]+p[0]*freq,channelOffsets[2]+p[1]*freq,channelOffsets[2]+p[2]*freq)), 255 );
                 }
             }
         }
@@ -136,5 +135,6 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
                 }
             }
         }
+        */
 };
 #endif

@@ -483,7 +483,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
             float freq = par.getDynamicFloat("freq");//default frequency; grant to be the same for all mesh in the document            
             m->updateDataMask(MeshModel::MM_VERTCOLOR);  //make sure color per vertex is enabled
 
-            FilterFeatureAlignment::PerlinColor<MeshType>(m->cm, md.bbox(), freq);
+            tri::UpdateColor<MeshType>::PerlinColor(m->cm, md.bbox(), freq, Point3i(0,64,128));
             return true;
         }
         case AF_COLOR_NOISE:
@@ -495,7 +495,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
 
             m->updateDataMask(MeshModel::MM_VERTCOLOR);  //make sure color per vertex is enabled
 
-            FilterFeatureAlignment::ColorNoise<MeshType>(m->cm, noiseBits);
+            tri::UpdateColor<MeshType>::ColorNoise(m->cm, noiseBits);
             return true;
         }                        
         default: assert(0);
