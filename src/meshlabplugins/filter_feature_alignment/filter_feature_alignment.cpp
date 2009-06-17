@@ -159,7 +159,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
               << "FeatureRGB";
             st << "Uniform" << "Poisson";
             par.addEnum("featureType", 0, l,"Feature type", "");
-            par.addInt("numFixFeatureSelected", 250, "Number of feature to select", "");
+            par.addInt("numMovFeatureSelected", 250, "Number of feature to select", "");
             par.addEnum("samplingStrategy", 0, st,"Sampling", "");
             par.addBool("pickPoints", false, "Store features as picked points", "");
             break;
@@ -172,7 +172,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             par.addEnum("featureType", 0, l,"Feature type: ", "");
             par.addMesh("mFix", 0, "Fix mesh");
             par.addMesh("mMov", 1, "Move mesh");
-            par.addInt("numFixFeatureSelected", 250, "Number of feature extracted from fix mesh: ", "");
+            par.addInt("numMovFeatureSelected", 250, "Number of feature extracted from Mov mesh: ", "");
             par.addInt("nBase", 4, "Number of base features: ", "");            
             par.addInt("k", 150, "Number of neighboor picked: ", "");            
             break;
@@ -185,7 +185,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             par.addEnum("featureType", 0, l,"Feature type: ", "");
             par.addMesh("mFix", 0, "Fix mesh");
             par.addMesh("mMov", 1, "Move mesh");
-            par.addInt("numFixFeatureSelected", 250, "Number of feature extracted from fix mesh: ", "");
+            par.addInt("numMovFeatureSelected", 250, "Number of feature extracted from Mov mesh: ", "");
             par.addInt("nBase", 4, "Number of base features: ", "");           
             par.addInt("k", 150, "Number of neighboor picked: ", "");            
             break;
@@ -258,11 +258,11 @@ void FilterFeatureAlignment::setAlignmentParameters(MESH_TYPE& mFix, MESH_TYPE& 
     typedef ALIGNER_TYPE AlignerType;    
 
     if(par.hasParameter("samplingStrategy")) param.samplingStrategy = par.getEnum("samplingStrategy");
-    if(par.hasParameter("numFixFeatureSelected")) param.numFixFeatureSelected = par.getInt("numFixFeatureSelected");
+    if(par.hasParameter("numMovFeatureSelected")) param.numMovFeatureSelected = math::Clamp(par.getInt("numMovFeatureSelected"),0,mMov.VertexNumber());
     if(par.hasParameter("nBase")) param.nBase = par.getInt("nBase");
     if(par.hasParameter("k")) param.k = par.getInt("k");
     if(par.hasParameter("ransacIter")){ param.ransacIter = par.getInt("ransacIter"); if(param.ransacIter<0) param.ransacIter = 0;}
-    if(par.hasParameter("fullConsensusSamples")) math::Clamp(param.fullConsensusSamples = par.getInt("fullConsensusSamples"),1,mMov.VertexNumber());
+    if(par.hasParameter("fullConsensusSamples")) param.fullConsensusSamples = math::Clamp(par.getInt("fullConsensusSamples"),1,mMov.VertexNumber());
     if(par.hasParameter("overlap")) param.overlap = math::Clamp<float>(par.getFloat("overlap"),0.0f,100.0f);
     if(par.hasParameter("consensusDist")) param.consensusDist = math::Clamp<float>(par.getFloat("consensusDist"),0.0f,100.0f);
     if(par.hasParameter("pickPoints")) param.pickPoints = par.getBool("pickPoints");

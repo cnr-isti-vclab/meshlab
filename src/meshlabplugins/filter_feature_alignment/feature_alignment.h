@@ -133,8 +133,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             void setDefault(MeshType& mFix, MeshType& mMov)
             {
                 samplingStrategy = FeatureAlignment::UNIFORM_SAMPLING;
-                numFixFeatureSelected = 250;
-                numMovFeatureSelected = mMov.VertexNumber();
+                numFixFeatureSelected = mFix.VertexNumber();
+                numMovFeatureSelected = 250;
                 ransacIter = 5000;
                 nBase = 4;
                 k = 150;
@@ -188,13 +188,13 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             FeatureAlignment::SetupGrid(mFix, *gridFix, markerFunctorFix); //builds the uniform grid with mFix vertices
 
             //extract features
-            vecFFix = FeatureAlignment::extractFeatures(param.numFixFeatureSelected, mFix, param.samplingStrategy);
-            vecFMov = FeatureAlignment::extractFeatures(param.numMovFeatureSelected, mMov, FeatureAlignment::UNIFORM_SAMPLING);
+            vecFFix = FeatureAlignment::extractFeatures(param.numFixFeatureSelected, mFix, FeatureAlignment::UNIFORM_SAMPLING);
+            vecFMov = FeatureAlignment::extractFeatures(param.numMovFeatureSelected, mMov, param.samplingStrategy);
             if(vecFFix==NULL || vecFMov==NULL) return false; //can't continue; features have not been computed!
 
             //copy descriptors of mMov into ANN structures, then build kdtree...            
-            FeatureAlignment::SetupKDTreePoints(*vecFMov, &fdataPts, FeatureType::getFeatureDimension());
-            fkdTree = new ANNkd_tree(fdataPts,vecFMov->size(),FeatureType::getFeatureDimension());
+            FeatureAlignment::SetupKDTreePoints(*vecFFix, &fdataPts, FeatureType::getFeatureDimension());
+            fkdTree = new ANNkd_tree(fdataPts,vecFFix->size(),FeatureType::getFeatureDimension());
         }
 
         Matrix44Type align(MeshType& mFix, MeshType& mMov, Parameters& param, CallBackPos *cb=NULL)
@@ -254,11 +254,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
                     Matrix44Type oldTr = ApplyTransformation(mMov, tr);       //apply transformation
                     data.summedPointDist = SummedPointDistances(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], param.nBase);  //compute and store the sum of points distances
-                    ResetTransformation(mMov, oldTr);                                 //restore old tranformation
+                    ResetTransformation(mMov, oldTr);                                 //restore old tranformation                    
 
                     candidates->push_back(data);
                 }
-
                 assert(candidates->size()==matchesVec->size());
             }
 
@@ -331,7 +330,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 }
                 if(param.counterSucc==NULL); //mylogger("Consensus of %.2f%%", (float(consensus)/samples)*100.0f);
             }
-
             time(&end_loop);
             dif = int(difftime(end_loop,start_loop));
             if(param.counterSucc==NULL){
@@ -513,22 +511,24 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //pointer to a function to compute distance beetween points
             vertex::PointDistanceFunctor<ScalarType> PDistFunct;
 
+            int samples = param.fullConsensusSamples;
+            if(!param.isFullConsensus) samples = param.short_cons_samples;
             vector<VertexPointer>* queryVert = NULL;
             //if no buckets are provided get a vector of vertex pointers sampled uniformly; used as query points
             if(normBuckets==NULL){
-                queryVert = new vector<VertexPointer>();
-                SampleVertUniform(mMov, *queryVert, param.fullConsensusSamples);
+                queryVert = new vector<VertexPointer>();                
+                SampleVertUniform(mMov, *queryVert, samples);
             }
             else{
                 //else, get a vector of vertex pointers sampled in a normal equalized manner; used as query points
                 queryVert = new vector<VertexPointer>(mMov.vert.size(),NULL);
                 for(unsigned int i=0; i<mMov.vert.size(); i++) (*queryVert)[i] = &(mMov.vert[i]);//do a copy of pointers to vertexes
-                FeatureAlignment::SampleVertNormalEqualized(*queryVert, normBuckets, param.fullConsensusSamples);
+                FeatureAlignment::SampleVertNormalEqualized(*queryVert, normBuckets, samples);
             }
             assert(queryVert!=NULL);
 
             //init variables for consensus
-            float consDist = param.consensusDist*(mMov.bbox.Diag()/100.0f);               //consensus distance
+            float consDist = param.consensusDist*(param.mMovBBoxDiag/100.0f);               //consensus distance
             int cons_succ;                      //score needed to pass consensus
             int consensus = 0;                  //counts vertices in consensus
             float dist;                         //holds the distance of the closest vertex found
@@ -665,19 +665,19 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             float pBar = 0, offset = 100.0f/param.nBase;  //used for progresss bar callback
             if(cb) cb(0, "Matching...");
 
-            if(param.nBase>int(vecFFix.size())) return false; //not enough features to pick a base
-            if(param.k>int(vecFMov.size())) return false;  //not enough features in kdtree to pick k neighboors
+            if(param.nBase>int(vecFMov.size())) return false; //not enough features to pick a base
+            if(param.k>int(vecFFix.size())) return false;  //not enough features in kdtree to pick k neighboors
 
             //compute needed params
             float baseDist = param.sparseBaseDist*(param.mMovBBoxDiag/100.0f);
             float errDist = param.mutualErrDist*(param.mMovBBoxDiag/100.0f);
 
-            FeatureType** base = FeatureAlignment::FeatureUniform(vecFFix, &(param.nBase)); //randomly chooses a base of features from vecFFix
+            FeatureType** base = FeatureAlignment::FeatureUniform(vecFMov, &(param.nBase)); //randomly chooses a base of features from vecFFix
             if(!VerifyBaseDistances(base, param.nBase, baseDist)) return false; //if base point are not enough sparse, skip
             baseVec.push_back(base);
 
             assert(baseVec.size()>=1);
-            assert((int)vecFMov.size()>=param.nBase);
+            assert((int)vecFFix.size()>=param.nBase);
 
             //fill fqueryPts with feature's descriptions in base
             ANNpointArray fqueryPts;
@@ -697,7 +697,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
                 vector<FeatureType*>* matches = new vector<FeatureType*>();
 
-                for(int j=0; j<param.k; j++) matches->push_back(vecFMov[fnnIdx[j]]); //store all features
+                for(int j=0; j<param.k; j++) matches->push_back(vecFFix[fnnIdx[j]]); //store all features
 
                 matchedVec->push_back(matches);
 
@@ -736,10 +736,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             for(int i = 0; i<nBase; i++)
             {
-                fixPoints.push_back(mFix.Tr * fixF[i]->pos);
-                movPoints.push_back(mMov.Tr * movF[i]->pos);
+                fixPoints.push_back(mMov.Tr * fixF[i]->pos);
+                movPoints.push_back(mFix.Tr * movF[i]->pos);
             }
-            PointMatching<ScalarType>::ComputeRigidMatchMatrix(tr, fixPoints, movPoints);
+            PointMatching<ScalarType>::ComputeRigidMatchMatrix(tr, movPoints, fixPoints);
             return true;
         }
 
@@ -898,23 +898,23 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             m.Tr = tr;
         }
 
-        static float SummedPointDistances(MESH_TYPE& m1, MESH_TYPE& m2, FEATURE_TYPE* fixF[], FEATURE_TYPE* movF[], int nBase)
+        static float SummedPointDistances(MESH_TYPE& mFix, MESH_TYPE& mMov, FEATURE_TYPE* baseF[], FEATURE_TYPE* matchF[], int nBase)
         {
             typedef MESH_TYPE MeshType;
             typedef typename MeshType::ScalarType ScalarType;
 
-            Matrix33<ScalarType> matMov(m2.Tr,3); //3x3 matrix needed totransform normals
-            Matrix33<ScalarType> matFix(m1.Tr,3); //3x3 matrix needed totransform normals
+            Matrix33<ScalarType> matMov(mMov.Tr,3); //3x3 matrix needed totransform normals
+            Matrix33<ScalarType> matFix(mFix.Tr,3); //3x3 matrix needed totransform normals
             Point3<ScalarType> fixNrm, movNrm;    //normals
             float spd, snd, result = 0.0f;
 
             for(int i=0; i<nBase;i++){
                 //transform normals properly; normals inside features are jet normalized
-                fixNrm = matFix * fixF[i]->normal;
-                movNrm = matMov * movF[i]->normal;
+                fixNrm = matFix * matchF[i]->normal;
+                movNrm = matMov * baseF[i]->normal;
 
                 //compute distance beetween points and then beetween normals
-                spd = Distance( m1.Tr * fixF[i]->pos, m2.Tr * movF[i]->pos );
+                spd = Distance( mFix.Tr * matchF[i]->pos, mMov.Tr * baseF[i]->pos );
                 snd = math::Clamp(1-fixNrm.dot(movNrm),0.0f,1.0f);
 
                 //weight distances with normals and update result
