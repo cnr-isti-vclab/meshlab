@@ -30,6 +30,7 @@ varying vec3 EyePos;
 varying vec3 Normal;
 
 uniform float ScaleFactor;
+uniform float Smoothing;
 
 void main (void)
 {
@@ -40,12 +41,11 @@ void main (void)
     vec3 viewVec = normalize(EyePos);
     reflexionVector = viewVec.xyz - 2.0*n*dot(n,viewVec.xyz);
     reflexionVector.z += 1.0;
-    reflexionVector.z = dot(reflexionVector,reflexionVector);
-    reflexionVector.xy = (0.5*reflexionVector.xy/reflexionVector.z) + 0.5;
+    reflexionVector.z = 0.5/sqrt(dot(reflexionVector,reflexionVector));
+    reflexionVector.xy = (reflexionVector.xy*reflexionVector.z) + 0.5;
     reflexionVector *= 2.0;
-    color = (fract(reflexionVector.x*ScaleFactor) < 0.5 ? vec4( 1.0) : vec4( 0.1));
+    color = clamp(0.5 + Smoothing * sin(2.0 * 3.1428 * reflexionVector.x*ScaleFactor), 0.0, 1.0);
 
-//     color.xyz = viewVec;
     color.a = 1.0;
     gl_FragColor = min(color, vec4(1.0,1.0,1.0,1.0));
 }

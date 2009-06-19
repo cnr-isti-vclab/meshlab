@@ -46,6 +46,11 @@
     <Uniform0 Type="5" Name="ScaleFactor" ArraySize="1" Widget="2" Min="0" Max="100" Step="1">
       <Values Value0="5" />
     </Uniform0>
+    
+    <Uniform0 Type="5" Name="Smoothing" ArraySize="1" Widget="2" Min="0.5" Max="10" Step="1">
+      <Values Value0="1" />
+    </Uniform0>
+    
   </UniformVariables>
 
   <FogParameters FogColorR="0" FogColorG="0" FogColorB="0" FogColorA="1" Density="1" Start="0" End="1" />
