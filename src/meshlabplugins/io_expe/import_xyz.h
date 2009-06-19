@@ -149,20 +149,35 @@ class ImporterXYZ
 
 			loadmask = 0;
 
-      loadmask |= Mask::IOM_VERTCOORD;
-      loadmask |= Mask::IOM_VERTNORMAL;
+      QString buf;
+      QStringList line;
 
 			if (options.onlyMaskFlag)
+      {
+        // check the first line
+        line = (buf = stream.readLine(1024)).split(QRegExp("[ |\t]"));
+
+        if (line.size()==6)
+        {
+          loadmask |= Mask::IOM_VERTCOORD;
+          loadmask |= Mask::IOM_VERTNORMAL;
+        }
+        else if (line.size()==3)
+        {
+          loadmask |= Mask::IOM_VERTCOORD;
+        }
 				return 0;
+      }
 
       std::vector<CoordType> pos,normals;
       CoordType p,n;
-      QStringList line;
       while(!stream.atEnd())
       {
-        line = stream.readLine(1024).split(" ");
+        line = (buf = stream.readLine(1024)).split(QRegExp("[ |\t]"));
         if (line.size()==6)
         {
+          loadmask |= Mask::IOM_VERTCOORD;
+          loadmask |= Mask::IOM_VERTNORMAL;
           for (int k=0; k<3; ++k)
           {
             p[k] = line[k].toDouble();
@@ -170,6 +185,25 @@ class ImporterXYZ
           }
           pos.push_back(p);
           normals.push_back(n);
+        }
+        else if (line.size()==3)
+        {
+          loadmask |= Mask::IOM_VERTCOORD;
+          // there is no normal information
+          for (int k=0; k<3; ++k)
+          {
+            p[k] = line[k].toDouble();
+            n[k] = 0;
+          }
+          pos.push_back(p);
+          normals.push_back(n);
+        }
+        else
+        {
+          std::cerr << "error: skip line " << buf.toAscii().data() << "\n";
+          for (int i=0; i<line.size(); ++i)
+            std::cerr << line[i].toAscii().data() << " $ ";
+          std::cerr << "\n";
         }
       }
       VertexIterator v_iter = Allocator<MESH_TYPE>::AddVertices(mesh,pos.size());
