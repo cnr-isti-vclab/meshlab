@@ -646,8 +646,8 @@ bool FilterFeatureAlignment::RansacOperation(MeshModel& mFix, MeshModel& mMov, t
     mMov.updateDataMask(MeshModel::MM_VERTMARK);
 
     AlignerType aligner;
-    aligner.init(mFix.cm, mMov.cm, param);
-
+    bool ret =aligner.init(mFix.cm, mMov.cm, param);
+		if(ret==false) assert(0);
     //perform RANSAC and get best transformation matrix
     Matrix44Type tr = aligner.align(mFix.cm, mMov.cm, param, cb);
 
