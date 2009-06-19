@@ -26,27 +26,33 @@ void main (void)
     // Compute reflection vector   
     vec3 reflectDir = reflect(EyeDir, Normal);
 
-    // Compute altitude and azimuth angles
+//---- this is the original code (buggy):
+//     // Compute altitude and azimuth angles
+// 
+//     index.y = dot(normalize(reflectDir), Yunitvec);
+//     reflectDir.y = 0.0;
+//     index.x = dot(normalize(reflectDir), Xunitvec) * 0.5;
+// 
+//     // Translate index values into proper range
+// 
+//     if (reflectDir.z >= 0.0)
+//         index = (index + 1.0) * 0.5;
+//     else
+//     {
+//         index.t = (index.t + 1.0) * 0.5;
+//         index.s = (-index.s) * 0.5 + 1.0;
+//     }
+//     
+//     // if reflectDir.z >= 0.0, s will go from 0.25 to 0.75
+//     // if reflectDir.z <  0.0, s will go from 0.75 to 1.25, and
+//     // that's OK, because we've set the texture to wrap.
+//---- end of the original code
 
-    vec2 index;
-
-    index.y = dot(normalize(reflectDir), Yunitvec);
-    reflectDir.y = 0.0;
-    index.x = dot(normalize(reflectDir), Xunitvec) * 0.5;
-
-    // Translate index values into proper range
-
-    if (reflectDir.z >= 0.0)
-        index = (index + 1.0) * 0.5;
-    else
-    {
-        index.t = (index.t + 1.0) * 0.5;
-        index.s = (-index.s) * 0.5 + 1.0;
-    }
-    
-    // if reflectDir.z >= 0.0, s will go from 0.25 to 0.75
-    // if reflectDir.z <  0.0, s will go from 0.75 to 1.25, and
-    // that's OK, because we've set the texture to wrap.
+    // this is the version implemented from the OpenGL-1.2 programming guide:
+    reflectDir.z += 1.0;
+    float inv_m = 0.5/sqrt(dot(reflectDir,reflectDir));
+    vec2 index = reflectDir.xy * inv_m + 0.5;
+  
   
     // Do a lookup into the environment map.
 
