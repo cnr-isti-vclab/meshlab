@@ -397,7 +397,10 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
             return false;
         }  //end case AF_RIGID_TRANSFORMATION
         case AF_CONSENSUS :
-        {            
+        {
+            //set error message just once to avoid code grow long...
+            errorMessage = QString("Probably features have not been computed for this mesh.\n");
+
             switch(featureType)
             {
                 case 0:{
@@ -406,6 +409,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     int consensus = ConsensusOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    if(consensus<0) return false;
                     //Log results
                     Log(GLLogStream::FILTER,"Consensus of %.2f%% (%i/%i vertices).",(float(consensus)/alignerParam.fullConsensusSamples)*100.0f, consensus, alignerParam.fullConsensusSamples);
                     return true;
@@ -416,6 +420,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     int consensus = ConsensusOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    if(consensus<0) return false;
                     //Log results
                     Log(GLLogStream::FILTER,"Consensus of %.2f%% (%i/%i vertices).",(float(consensus)/alignerParam.fullConsensusSamples)*100.0f, consensus, alignerParam.fullConsensusSamples);
                     return true;
@@ -553,10 +558,11 @@ bool FilterFeatureAlignment::MatchingOperation(MeshModel& mFix, MeshModel& mMov,
     vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
 
     AlignerType aligner;
-    aligner.init(mFix.cm, mMov.cm, param);
+    bool ok = aligner.init(mFix.cm, mMov.cm, param);
+    if(!ok) return false;
 
     //execute matching procedure with requested parameters;    
-    bool ok = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
+    ok = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
 
     aligner.finalize();
 
@@ -584,10 +590,11 @@ int FilterFeatureAlignment::RigidTransformationOperation(MeshModel& mFix, MeshMo
     vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
 
     AlignerType aligner;
-    aligner.init(mFix.cm, mMov.cm, param);
+    bool ok = aligner.init(mFix.cm, mMov.cm, param);
+    if(!ok) return 1; //exit code 1: features not computed
 
     //execute matching procedure with requested parameters;    
-    bool ok = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
+    ok = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
     if(!ok) return 2;   //exit code 2
 
     assert(baseVec->size()==1);  //now baseVec must hold exactly one base of features
@@ -622,7 +629,9 @@ int FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov,
     mMov.updateDataMask(MeshModel::MM_VERTMARK);    
 
     AlignerType aligner;
-    aligner.init(mFix.cm, mMov.cm, param);
+    bool ok = aligner.init(mFix.cm, mMov.cm, param);
+    if(!ok) return -1;  //return <0 to dected that features have not been computed
+
     param.consOffset = 0.0f;
     int consensus = FeatureAlignment<MeshType,FeatureType>::Consensus(mFix.cm, mMov.cm, *(aligner.gridFix), aligner.markerFunctorFix, aligner.normBuckets, param, 0, cb);
     aligner.finalize();
@@ -646,8 +655,9 @@ bool FilterFeatureAlignment::RansacOperation(MeshModel& mFix, MeshModel& mMov, t
     mMov.updateDataMask(MeshModel::MM_VERTMARK);
 
     AlignerType aligner;
-    bool ret =aligner.init(mFix.cm, mMov.cm, param);
-		if(ret==false) assert(0);
+    bool ok =aligner.init(mFix.cm, mMov.cm, param);
+    if(!ok) return false;
+
     //perform RANSAC and get best transformation matrix
     Matrix44Type tr = aligner.align(mFix.cm, mMov.cm, param, cb);
 
@@ -694,7 +704,9 @@ bool FilterFeatureAlignment::RansacDiagramOperation(MeshModel& mFix, MeshModel& 
 
             time(&start);  //start timer
 
-            aligner.init(mFix.cm, mMov.cm, param);
+            bool ok =aligner.init(mFix.cm, mMov.cm, param);
+            if(!ok) return false;
+
             aligner.align(mFix.cm, mMov.cm, param);
 
             time(&end);  //stop timer

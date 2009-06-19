@@ -190,12 +190,12 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //extract features
             vecFFix = FeatureAlignment::extractFeatures(param.numFixFeatureSelected, mFix, FeatureAlignment::UNIFORM_SAMPLING);
             vecFMov = FeatureAlignment::extractFeatures(param.numMovFeatureSelected, mMov, param.samplingStrategy);
-            if( (vecFFix==NULL) || (vecFMov==NULL) ) 
-								return false; //can't continue; features have not been computed!
+            if( (vecFFix==NULL) | (vecFMov==NULL) ) return false; //can't continue; features have not been computed!
 
             //copy descriptors of mMov into ANN structures, then build kdtree...            
             FeatureAlignment::SetupKDTreePoints(*vecFFix, &fdataPts, FeatureType::getFeatureDimension());
             fkdTree = new ANNkd_tree(fdataPts,vecFFix->size(),FeatureType::getFeatureDimension());
+            assert(fkdTree);
         }
 
         Matrix44Type align(MeshType& mFix, MeshType& mMov, Parameters& param, CallBackPos *cb=NULL)
@@ -231,8 +231,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             {
                 //callback handling
                 if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
-								assert(vecFMov);
-								assert(vecFFix);
+                assert(vecFMov);
+                assert(vecFFix);
 								
                 bool ok = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, *baseVec, *matchesVec, param);
                 if(!ok){ skipped++; continue;} //something wrong; can't find a base, skip this...
