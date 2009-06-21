@@ -132,12 +132,12 @@ template<class MESH_TYPE, int dim> bool SmoothCurvatureFeature<MESH_TYPE,dim>::C
 //parameters must be ordered according to smooth iterations
 template<class MESH_TYPE, int dim> void SmoothCurvatureFeature<MESH_TYPE,dim>::SetupParameters(ParamType& param)
 {
-    //param.add(Parameters::GAUSSIAN, 5);
-    param.add(Parameters::MEAN, 6);
-    //param.add(Parameters::GAUSSIAN, 10);
-    param.add(Parameters::MEAN, 12);
-    //param.add(Parameters::GAUSSIAN, 15);
-    param.add(Parameters::MEAN, 18);
+    param.add(Parameters::GAUSSIAN, 5);
+    param.add(Parameters::MEAN, 5);
+    param.add(Parameters::GAUSSIAN, 10);
+    param.add(Parameters::MEAN, 10);
+    param.add(Parameters::GAUSSIAN, 15);
+    param.add(Parameters::MEAN, 15);
     assert(param.featureDesc->size()==getFeatureDimension());
 }
 

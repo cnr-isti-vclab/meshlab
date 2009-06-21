@@ -196,6 +196,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             FeatureAlignment::SetupKDTreePoints(*vecFFix, &fdataPts, FeatureType::getFeatureDimension());
             fkdTree = new ANNkd_tree(fdataPts,vecFFix->size(),FeatureType::getFeatureDimension());
             assert(fkdTree);
+
+            return true;
         }
 
         Matrix44Type align(MeshType& mFix, MeshType& mMov, Parameters& param, CallBackPos *cb=NULL)

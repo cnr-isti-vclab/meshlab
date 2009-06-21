@@ -53,9 +53,7 @@ void mylogger(const char * f, ... )
 FilterFeatureAlignment::FilterFeatureAlignment()
 {
     typeList << AF_COMPUTE_FEATURE
-             << AF_EXTRACTION
-             << AF_MATCHING
-             << AF_RIGID_TRANSFORMATION             
+             << AF_EXTRACTION                    
              << AF_CONSENSUS
              << AF_RANSAC
              << AF_RANSAC_DIAGRAM                                   
@@ -129,7 +127,7 @@ const QString FilterFeatureAlignment::filterInfo(FilterIDType filterId) const
         case AF_RANSAC : return "Performs the complete alignment process. Automatic alignment procedure is feature based and uses the iterative non deterministic RANSAC algorithm to look for a good coarse alignment. It is very important to provide a precise esteem of overlap percentage between the meshes in order to get a good success probability and avoid too rough results. Pre-semplification of meshes speed up the process. NOTICE: this plugin requires that features have been computed previously.";
         case AF_RANSAC_DIAGRAM : return "Useful to perform tests and to evaluate performances. It repeats the alignment process several times with different settings and outputs stats in the file .\\Diagram.txt. The file is in a format suitable for OpenOffice, to easily create diagrams. NOTICE: this plugin requires that features have been computed previously.";
         case AF_PERLIN_COLOR : return "Paints the mesh using PerlinColor function. The color assigned to verteces depends on their position in the space; it means that near verteces will be painted with similar colors.";
-        case AF_COLOR_NOISE : return "Adds to the color the requested amount of bits of noise. Bits of noise are added independently for each RGB channel. Example: 4 bits => R+-8, G+-8, B+-8.";
+        case AF_COLOR_NOISE : return "Adds to the color the requested amount of bits of noise. Bits of noise are added independently for each RGB channel.";
         default: assert(0);
     }
     return QString("error!");
@@ -161,7 +159,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             par.addEnum("featureType", 0, l,"Feature type:", "The feature that you want to compute for the current mesh.");
             par.addInt("numMovFeatureSelected", 250, "Number of features:", "The number of feature points you want to extract from the current mesh.");
             par.addEnum("samplingStrategy", 0, st,"Sampling strategy:", "The sampling strategy used to select feature points:<br>Uniform -> random selection<br>Poisson disk -> Poisson disk sampling.");
-            par.addBool("pickPoints", false, "Store feature points:", "Turns on and off storing of feature points into PickedPoints attribute. Check this if you plan of showing feature points. NOTICE: rendering more of two hundred feature points can be very slow.");
+            par.addBool("pickPoints", false, "Store feature points", "Turns on and off storing of feature points into PickedPoints attribute. Check this if you plan of showing feature points. NOTICE: rendering more of two hundred feature points can be very slow.");
             break;
         }
         case AF_MATCHING:
@@ -200,8 +198,8 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             par.addMesh("mMov", 1, "Move mesh:", "The mesh that moves to fit Fix Mesh.");
             par.addFloat("consensusDist", 2, "Consensus distance:","Consensus distance expressed in percentage of Move Mesh bounding box diagonal. It states how close two verteces must be to be in consensus.");
             par.addInt("fullConsensusSamples", 2500, "Number of samples:", "Number of samples used to perform consensus procedure. Greater values get a more actual esteem but takes more time to be computed.");
-            par.addBool("normEq", true, "Normal equalization:","If checked samples are selected according a normal equilezed strategy, elsewhere a random selection is performed. Normal equalization is computationally more expensive but provides a better esteem, specially with few samples.");
-            par.addBool("paint", true, "Paint Move Mesh:","If checked Move Mesh is painted according to consensus as follows:<br>white -> not tested<br>blue -> too far<br>yellow -> close but badly oriented<br>red -> in consensus.");
+            par.addBool("normEq", true, "Normal equalization","If checked samples are selected according a normal equilezed strategy, elsewhere a random selection is performed. Normal equalization is computationally more expensive but provides a better esteem, specially with few samples.");
+            par.addBool("paint", true, "Paint Move Mesh","If checked Move Mesh is painted according to consensus as follows:<br>white -> not tested<br>blue -> too far<br>yellow -> close but badly oriented<br>red -> in consensus.");
             break;
         }
         case AF_RANSAC:
@@ -209,42 +207,41 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             QStringList l;
             l << "GMSmooth curvature"
               << "RGB";
-            par.addEnum("featureType", 0, l,"Feature type", "");
-            par.addMesh("mFix", 0, "Fix mesh");
-            par.addMesh("mMov", 1, "Move mesh");
-            par.addInt("ransacIter", 5000, "Max number of RANSAC iterations", "");
-            par.addFloat("overlap", 75.0, "Overlap in \%", "");
-            par.addFloat("consensusDist", 2, "Consensus distance in \% of BBox diagonal of move mesh", "");
-            par.addInt("k", 150, "Number of neighboor picked: ", "");                      
-            par.addBool("pickPoints", true, "Store base and match as picked points","");
+            par.addEnum("featureType", 0, l,"Feature type:", "The feature that you want to compute for the current mesh.");
+            par.addMesh("mFix", 0, "Fix mesh:", "The mesh that stays still and grow large after alignment.");
+            par.addMesh("mMov", 1, "Move mesh:", "The mesh that moves to fit Fix Mesh.");
+            par.addInt("ransacIter", 5000, "Iterations:", "Number of iterations of the RANSAC algorithm. Greater values provides a greater success probability but requires more time.");
+            par.addFloat("overlap", 75.0, "Overlap:", "A measure, expressed in percentage, of how much Move Mesh overlaps with Fix Mesh. It is very important to provide an actual esteem: lower values can produce false positive results or too rough alignments; higher values produce a small success probability and no alignements at all.");
+            par.addFloat("consensusDist", 2, "Consensus distance:","Consensus distance expressed in percentage of Move Mesh bounding box diagonal. It states how close two verteces must be to be in consensus.");
+            par.addInt("k", 75, "Number of neighboors:", "Number of neighboor feature points picked by kNN search during matching. Greater values produce a greater success probability but make the alignment process slower.");
+            par.addBool("pickPoints", false, "Store best match", "If checked, feature points of the base picked on Move Mesh and feature points of the best matching base on Fix Mesh are stored into PickedPoints attribute. Bases are stored only if alignment process ends successfully, i.e at least one base have to exceed full consensus.");
             break;
         }
         case AF_RANSAC_DIAGRAM:
         {
             QStringList l;
-            l << "GMSmooth Curvature"
-              << "FeatureRGB";
-            par.addEnum("featureType", 0, l,"Feature type", "");
-            par.addMesh("mFix", 0, "Fix mesh");
-            par.addMesh("mMov", 1, "Move mesh");
-            par.addInt("ransacIter", 5000, "Max number of RANSAC iterations", "");
-            par.addFloat("overlap", 75.0, "Overlap in \%", "");
-            par.addFloat("consensusDist", 2, "Consensus distance in \% of BBox diagonal of move mesh", "");
-            par.addInt("k", 150, "Number of neighboor picked: ", "");
-            par.addInt("trials", 100, "Number of try", "");
-            par.addInt("from", 1000, "From iteration", "");
-            par.addInt("to", 5000, "To iteration", "");
-            par.addInt("step", 1000, "Step", "");
+            l << "GMSmooth curvature"
+              << "RGB";
+            par.addEnum("featureType", 0, l,"Feature type:", "The feature that you want to compute for the current mesh.");
+            par.addMesh("mFix", 0, "Fix mesh:", "The mesh that stays still and grow large after alignment.");
+            par.addMesh("mMov", 1, "Move mesh:", "The mesh that moves to fit Fix Mesh.");
+            par.addFloat("overlap", 75.0, "Overlap:", "A measure, expressed in percentage, of how much Move Mesh overlaps with Fix Mesh. It is very important to provide an actual esteem: lower values can produce false positive results or too rough alignments; higher values produce a small success probability and no alignements at all.");
+            par.addFloat("consensusDist", 2, "Consensus distance:","Consensus distance expressed in percentage of Move Mesh bounding box diagonal. It states how close two verteces must be to be in consensus.");
+            par.addInt("k", 75, "Number of neighboors:", "Number of neighboor feature points picked by kNN search during matching. Greater values produce a greater success probability but make the alignment process slower.");
+            par.addInt("trials", 100, "Trials:", "How many times the alignment process is repeated with the same amount of RANSAC iterations.");
+            par.addInt("from", 1000, "From iteration:", "Number of RANSAC iteration used to perform the first battery of alignments.");
+            par.addInt("to", 5000, "To iteration:", "Number of RANSAC iteration over which no more alignments are performed.");
+            par.addInt("step", 1000, "Step:", "Step used to increment RANSAC iterations after that the specified number of attempts has been done.");
             break;
         }                 
         case AF_PERLIN_COLOR:
         {
-            par.addDynamicFloat("freq", 10.0f, 0.1f, 50.0f,"Frequency","");
+            par.addDynamicFloat("freq", 10.0f, 0.1f, 50.0f,"Frequency:","Frequency of the Perlin Noise function. High frequencies produces many small splashes of colours, while low frequencies produces few big splashes.");
             break;
         }
         case AF_COLOR_NOISE:
         {            
-            par.addInt("noiseBits", 1, "Bits of noise","");
+            par.addInt("noiseBits", 1, "Noise bits:","Bits of noise added to each RGB channel. Example: 3 noise bits adds three random offsets in the [-4,+4] interval to each RGB channels.");
             break;
         }        
         default: assert(0);
@@ -296,7 +293,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
         {            
             switch(featureType){
                 case 0:{
-                    typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
+                    typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     FeatureType::Parameters param;
                     FeatureType::SetupParameters(param);
                     return ComputeFeatureOperation<MeshType,FeatureType>(*currMesh, param, cb);
@@ -318,7 +315,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
 
             switch(featureType){
                 case 0:{
-                    typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType                    
+                    typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
@@ -350,7 +347,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
             switch(featureType)
             {                
                 case 0:{
-                    typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType                    
+                    typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
@@ -375,7 +372,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
             switch(featureType)
             {                
                 case 0:{
-                    typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
+                    typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
@@ -404,7 +401,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
             switch(featureType)
             {
                 case 0:{
-                    typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
+                    typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
@@ -437,7 +434,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
 
             switch(featureType){
                 case 0:{
-                    typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
+                    typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
@@ -463,7 +460,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
 
             switch(featureType){
                 case 0:{
-                    typedef SmoothCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
+                    typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
@@ -561,7 +558,7 @@ bool FilterFeatureAlignment::MatchingOperation(MeshModel& mFix, MeshModel& mMov,
     bool ok = aligner.init(mFix.cm, mMov.cm, param);
     if(!ok) return false;
 
-    //execute matching procedure with requested parameters;    
+    //execute matching procedure with requested parameters;
     ok = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
 
     aligner.finalize();
@@ -593,7 +590,7 @@ int FilterFeatureAlignment::RigidTransformationOperation(MeshModel& mFix, MeshMo
     bool ok = aligner.init(mFix.cm, mMov.cm, param);
     if(!ok) return 1; //exit code 1: features not computed
 
-    //execute matching procedure with requested parameters;    
+    //execute matching procedure with requested parameters;
     ok = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
     if(!ok) return 2;   //exit code 2
 
@@ -686,9 +683,9 @@ bool FilterFeatureAlignment::RansacDiagramOperation(MeshModel& mFix, MeshModel& 
     mFix.updateDataMask(MeshModel::MM_VERTMARK);
     mMov.updateDataMask(MeshModel::MM_VERTMARK);
 
-    FILE* file = fopen("RansacDiagram.txt","w+");
-    fprintf(file,"FixMesh#%s\nMoveMesh#%s\nFeature#%s\nVertices#%i\nOverlap#%.2f%%\nShort threshold#%.2f%%#%.2f%% total#\nAcceptance#%.2f%%#%.2f%% total#\nTrials#%i\n",mFix.fileName.c_str(),mMov.fileName.c_str(),FeatureType::getName(),mFix.cm.VertexNumber(),param.overlap,param.shortConsOffset,(param.shortConsOffset*param.overlap/100.0f),param.consOffset,(param.consOffset*param.overlap/100.0f),trials); fflush(file);
-    fprintf(file,"Iterations#Mean Time in Sec#Succ. Rate#FailRate/Sec\n0#0#0#0\n"); fflush(file);
+    FILE* file = fopen("Diagram.txt","w+");
+    fprintf(file,"Fix Mesh#%s\nMove Mesh#%s\nFeature#%s\nNum. of vertices of Fix Mesh#%i\nNum. of vertices of Move Mesh#%i\nOverlap#%.2f%%\nShort consensus threshold#%.2f%% overlap#%.2f%% of Move Mesh#\nFull consensus threshold#%.2f%% overlap#%.2f%% of Move Mesh#\nTrials#%i\n",mFix.fileName.c_str(),mMov.fileName.c_str(),FeatureType::getName(),mFix.cm.VertexNumber(),mMov.cm.VertexNumber(),param.overlap,param.shortConsOffset,(param.shortConsOffset*param.overlap/100.0f),param.consOffset,(param.consOffset*param.overlap/100.0f),trials); fflush(file);
+    fprintf(file,"Iterazioni#Tempo di esecuzione#Prob. Succ.#Prob. Fall. per Sec\n0#0#0#0\n"); fflush(file);
 
     AlignerType aligner;
     float probSucc = 0.0f, meanTime = 0.0f, failPerSec = -1.0f;
@@ -716,7 +713,7 @@ bool FilterFeatureAlignment::RansacDiagramOperation(MeshModel& mFix, MeshModel& 
         probSucc = counterSucc/float(trials);               //k = prob succ in 1 iteration
         meanTime = dif/float(trials);                       //t=sec elapsed to perform N ransac iterations
         failPerSec = std::pow(1-probSucc,float(trials)/dif);    //fail rate per sec is: (1-k)^(1/t)
-        fprintf(file,"%i#%.2f#=100*%.2f#=100*%.2f\n", param.ransacIter, meanTime, probSucc, failPerSec); fflush(file);
+        fprintf(file,"%i#%.2f#%.2f#%.2f\n", param.ransacIter, meanTime, probSucc, failPerSec); fflush(file);
         counterSucc = 0; dif = 0; progBar=0.0f;        
         param.ransacIter+=step;
     }
