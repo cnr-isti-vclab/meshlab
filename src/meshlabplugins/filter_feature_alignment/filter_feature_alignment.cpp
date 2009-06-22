@@ -56,9 +56,7 @@ FilterFeatureAlignment::FilterFeatureAlignment()
              << AF_EXTRACTION                    
              << AF_CONSENSUS
              << AF_RANSAC
-             << AF_RANSAC_DIAGRAM                                   
-             << AF_PERLIN_COLOR
-             << AF_COLOR_NOISE;
+             << AF_RANSAC_DIAGRAM;
 
     FilterIDType tt;
     foreach(tt , types())
@@ -79,9 +77,7 @@ const MeshFilterInterface::FilterClass FilterFeatureAlignment::getClass(QAction 
         case AF_EXTRACTION :
         case AF_MATCHING :
         case AF_RIGID_TRANSFORMATION :        
-        case AF_CONSENSUS:        
-        case AF_PERLIN_COLOR:
-        case AF_COLOR_NOISE:                
+        case AF_CONSENSUS:                            
         case AF_RANSAC_DIAGRAM:        
         case AF_RANSAC : return MeshFilterInterface::RangeMap;
         default: assert(0);
@@ -107,9 +103,7 @@ const QString FilterFeatureAlignment::filterName(FilterIDType filter) const
         case AF_RIGID_TRANSFORMATION : return "Rigid transformation";
         case AF_CONSENSUS : return "Consensus";
         case AF_RANSAC : return "Feature based alignment";
-        case AF_RANSAC_DIAGRAM : return "Alignment diagram";
-        case AF_PERLIN_COLOR : return "Perlin color";
-        case AF_COLOR_NOISE : return "Color noise";
+        case AF_RANSAC_DIAGRAM : return "Alignment diagram";       
         default: assert(0);
     }
     return QString("error!");
@@ -125,9 +119,7 @@ const QString FilterFeatureAlignment::filterInfo(FilterIDType filterId) const
         case AF_RIGID_TRANSFORMATION : return "Extracts feature points, performs matching and computes the rigid transformation for all matched bases found. NOTICE: this plugin requires that features have been computed previously.";
         case AF_CONSENSUS : return "Performs consensus procedure and returns the percentage of consensus. In addiction, Move Mesh can be painted accordingly to consensus. NOTICE: this plugin requires that features have been computed previously.";
         case AF_RANSAC : return "Performs the complete alignment process. Automatic alignment procedure is feature based and uses the iterative non deterministic RANSAC algorithm to look for a good coarse alignment. It is very important to provide a precise esteem of overlap percentage between the meshes in order to get a good success probability and avoid too rough results. Pre-semplification of meshes speed up the process. NOTICE: this plugin requires that features have been computed previously.";
-        case AF_RANSAC_DIAGRAM : return "Useful to perform tests and to evaluate performances. It repeats the alignment process several times with different settings and outputs stats in the file .\\Diagram.txt. The file is in a format suitable for OpenOffice, to easily create diagrams. NOTICE: this plugin requires that features have been computed previously.";
-        case AF_PERLIN_COLOR : return "Paints the mesh using PerlinColor function. The color assigned to verteces depends on their position in the space; it means that near verteces will be painted with similar colors.";
-        case AF_COLOR_NOISE : return "Adds to the color the requested amount of bits of noise. Bits of noise are added independently for each RGB channel.";
+        case AF_RANSAC_DIAGRAM : return "Useful to perform tests and to evaluate performances. It repeats the alignment process several times with different settings and outputs stats in the file .\\Diagram.txt. The file is in a format suitable for OpenOffice, to easily create diagrams. NOTICE: this plugin requires that features have been computed previously.";        
         default: assert(0);
     }
     return QString("error!");
@@ -233,17 +225,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             par.addInt("to", 5000, "To iteration:", "Number of RANSAC iteration over which no more alignments are performed.");
             par.addInt("step", 1000, "Step:", "Step used to increment RANSAC iterations after that the specified number of attempts has been done.");
             break;
-        }                 
-        case AF_PERLIN_COLOR:
-        {
-            par.addDynamicFloat("freq", 10.0f, 0.1f, 50.0f,"Frequency:","Frequency of the Perlin Noise function. High frequencies produces many small splashes of colours, while low frequencies produces few big splashes.");
-            break;
-        }
-        case AF_COLOR_NOISE:
-        {            
-            par.addInt("noiseBits", 1, "Noise bits:","Bits of noise added to each RGB channel. Example: 3 noise bits adds three random offsets in the [-4,+4] interval to each RGB channels.");
-            break;
-        }        
+        }                                 
         default: assert(0);
     }
 }
@@ -476,30 +458,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                 default: assert(0);
             }  // end switch(ftype)
             return true;
-        }  //end case AF_RANSAC_DIAGRAM              
-        case AF_PERLIN_COLOR:
-        {
-            //get current mesh from document
-            MeshModel* m = md.mm();
-            //read parameters
-            float freq = par.getDynamicFloat("freq");//default frequency; grant to be the same for all mesh in the document            
-            m->updateDataMask(MeshModel::MM_VERTCOLOR);  //make sure color per vertex is enabled
-
-            tri::UpdateColor<MeshType>::PerlinColor(m->cm, md.bbox(), freq, Point3i(0,64,128));
-            return true;
-        }
-        case AF_COLOR_NOISE:
-        {
-            //get current mesh from document
-            MeshModel* m = md.mm();
-            //read parameters
-            int noiseBits = par.getInt("noiseBits");
-
-            m->updateDataMask(MeshModel::MM_VERTCOLOR);  //make sure color per vertex is enabled
-
-            tri::UpdateColor<MeshType>::ColorNoise(m->cm, noiseBits);
-            return true;
-        }                        
+        }  //end case AF_RANSAC_DIAGRAM                                         
         default: assert(0);
     } // end switch(ID(filter))
     return false;

@@ -46,9 +46,7 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
                AF_RIGID_TRANSFORMATION,
                AF_CONSENSUS,
                AF_RANSAC,
-               AF_RANSAC_DIAGRAM,
-               AF_PERLIN_COLOR,
-               AF_COLOR_NOISE
+               AF_RANSAC_DIAGRAM
             };
 
         FilterFeatureAlignment();
