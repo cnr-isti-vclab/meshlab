@@ -51,7 +51,11 @@ class FilterColorProc : public QObject, public MeshFilterInterface
            CP_COLOURISATION,
            CP_DESATURATION,
            CP_WHITE_BAL,
-           CP_EQUALIZE };
+           CP_EQUALIZE,
+           CP_PERLIN_COLOR,
+           CP_COLOR_NOISE,
+           CP_SCATTER_PER_MESH
+       };
 
 		FilterColorProc();
 		~FilterColorProc();
@@ -63,8 +67,9 @@ class FilterColorProc : public QObject, public MeshFilterInterface
 		virtual const int getRequirements(QAction *);
 
 		virtual bool autoDialog(QAction *);
-		virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
-		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb);
+                virtual void initParameterSet(QAction *,MeshDocument&, FilterParameterSet & /*parent*/);
+                virtual bool applyFilter(QAction *filter, MeshDocument&, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb);
+                virtual bool applyFilter(QAction */*filter*/, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;}
 	  int postCondition(QAction* filter) const;
 		int getPreConditions(QAction *) const;
 };
