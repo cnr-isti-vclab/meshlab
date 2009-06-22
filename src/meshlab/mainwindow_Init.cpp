@@ -546,6 +546,9 @@ void MainWindow::createMenus()
 	colorModeNoneAct->setCheckable(true);
 	colorModeNoneAct->setChecked(true);
 
+        colorModePerMeshAct = new QAction(QString("Per &Mesh"),colorModeGroupAct);
+        colorModePerMeshAct->setCheckable(true);
+
 	colorModePerVertexAct = new QAction(QString("Per &Vertex"),colorModeGroupAct);
 	colorModePerVertexAct->setCheckable(true);
 
@@ -554,6 +557,7 @@ void MainWindow::createMenus()
 
 
 	colorModeMenu->addAction(colorModeNoneAct);
+        colorModeMenu->addAction(colorModePerMeshAct);
 	colorModeMenu->addAction(colorModePerVertexAct);
 	colorModeMenu->addAction(colorModePerFaceAct);
 

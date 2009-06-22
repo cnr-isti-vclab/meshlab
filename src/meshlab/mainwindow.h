@@ -418,6 +418,7 @@ private:
 
 	QActionGroup *colorModeGroupAct;
 	QAction *colorModeNoneAct;
+        QAction *colorModePerMeshAct;
 	QAction *colorModePerVertexAct;
 	QAction *colorModePerFaceAct;
 	///////////Actions Menu View ////////////////////////

@@ -140,7 +140,7 @@ public:
 		MM_VERTCURVDIR			= 0x00000100,
 		MM_VERTRADIUS				= 0x00000200,
 		MM_VERTTEXCOORD			= 0x00000400,
-
+                MM_COLOR                        = 0x00000800,
 		MM_FACEVERT					= 0x00001000,
 		MM_FACENORMAL				= 0x00002000,
 		MM_FACEFLAG					= 0x00004000,
@@ -262,7 +262,7 @@ public:
 		if( ( (neededDataMask & MM_FACEFACETOPO)!=0) && !hasDataMask(MM_FACEFACETOPO) )
 		{
 			cm.face.EnableFFAdjacency();
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(cm);
+                        vcg::tri::UpdateTopology<CMeshO>::FaceFace(cm);
 		}
 		if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && !hasDataMask(MM_VERTFACETOPO) )
 		{
@@ -271,7 +271,7 @@ public:
 			vcg::tri::UpdateTopology<CMeshO>::VertexFace(cm);
 		}
 		if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0)	&& !hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.EnableWedgeTex();
-		if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
+                if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
 		if( ( (neededDataMask & MM_FACEQUALITY)!=0)		&& !hasDataMask(MM_FACEQUALITY))		cm.face.EnableQuality();
 		if( ( (neededDataMask & MM_FACEMARK)!=0)			&& !hasDataMask(MM_FACEMARK))				cm.face.EnableMark();
 		if( ( (neededDataMask & MM_VERTMARK)!=0)			&& !hasDataMask(MM_VERTMARK))				cm.vert.EnableMark();

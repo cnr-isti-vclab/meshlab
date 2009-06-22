@@ -288,6 +288,7 @@ void MainWindow::updateWindowMenu()
 void MainWindow::setColorMode(QAction *qa)
 {
 	if(qa->text() == tr("&None"))					GLA()->setColorMode(GLW::CMNone);
+        if(qa->text() == tr("Per &Mesh"))               GLA()->setColorMode(GLW::CMPerMesh);
 	if(qa->text() == tr("Per &Vertex"))		GLA()->setColorMode(GLW::CMPerVert);
 	if(qa->text() == tr("Per &Face"))			GLA()->setColorMode(GLW::CMPerFace);
 }
@@ -329,7 +330,8 @@ void MainWindow::updateMenus()
 				colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm()->cm));
 				switch (rm.colorMode)
 				{
-					case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
+                                        case GLW::CMNone:	colorModeNoneAct->setChecked(true);	      break;
+                                        case GLW::CMPerMesh:	colorModePerMeshAct->setChecked(true);	      break;
 					case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
 					case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
 					default: break;
