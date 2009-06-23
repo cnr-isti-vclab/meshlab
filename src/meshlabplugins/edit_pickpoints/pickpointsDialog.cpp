@@ -365,7 +365,7 @@ void PickPointsDialog::selectOrMoveThisPoint(Point3f point){
 
 void PickPointsDialog::redrawPoints()
 {
-	parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
+	//parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
 	assert(_glArea);
 	_glArea->update();
 }
@@ -521,6 +521,7 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, GLArea *gla)
 	assert(meshModel);
 	_glArea = gla;
 	assert(_glArea);
+	
 	//make sure undo is cleared
 	lastPointToMove = 0;
 	
