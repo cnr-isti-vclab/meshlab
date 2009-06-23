@@ -64,6 +64,7 @@ class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO,
   vcg::vertex::Color4b,           /*  4b */
   vcg::vertex::VFAdjOcf,          /*  0b */
   vcg::vertex::MarkOcf,           /*  0b */
+  vcg::vertex::TexCoordfOcf,      /*  0b */
   vcg::vertex::CurvaturefOcf,     /*  0b */
   vcg::vertex::CurvatureDirfOcf,  /*  0b */
   vcg::vertex::RadiusfOcf         /*  0b */
@@ -80,9 +81,6 @@ public:
    else return CEdge(v1,v0);
 	}
 };
-
-  //inline CEdge( Edge<CEdge,CVertexO> &e):Edge<CEdge,CVertexO>(e){};
-
 
 //Face Mem Occupancy  --- 32b ---
 
@@ -271,13 +269,14 @@ public:
 			vcg::tri::UpdateTopology<CMeshO>::VertexFace(cm);
 		}
 		if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0)	&& !hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.EnableWedgeTex();
-                if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
+		if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
 		if( ( (neededDataMask & MM_FACEQUALITY)!=0)		&& !hasDataMask(MM_FACEQUALITY))		cm.face.EnableQuality();
 		if( ( (neededDataMask & MM_FACEMARK)!=0)			&& !hasDataMask(MM_FACEMARK))				cm.face.EnableMark();
 		if( ( (neededDataMask & MM_VERTMARK)!=0)			&& !hasDataMask(MM_VERTMARK))				cm.vert.EnableMark();
 		if( ( (neededDataMask & MM_VERTCURV)!=0)			&& !hasDataMask(MM_VERTCURV))				cm.vert.EnableCurvature();
 		if( ( (neededDataMask & MM_VERTCURVDIR)!=0)		&& !hasDataMask(MM_VERTCURVDIR))		cm.vert.EnableCurvatureDir();
 		if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
+		if( ( (neededDataMask & MM_VERTTEXCOORD)!=0)  && !hasDataMask(MM_VERTTEXCOORD))		cm.vert.EnableTexCoord();
 
 
 		if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
@@ -306,6 +305,7 @@ public:
 		if( ( (unneededDataMask & MM_VERTCURV)!=0)			&& hasDataMask(MM_VERTCURV))			cm.vert.DisableCurvature();
 		if( ( (unneededDataMask & MM_VERTCURVDIR)!=0)		&& hasDataMask(MM_VERTCURVDIR))		cm.vert.DisableCurvatureDir();
 		if( ( (unneededDataMask & MM_VERTRADIUS)!=0)		&& hasDataMask(MM_VERTRADIUS))		cm.vert.DisableRadius();
+		if( ( (unneededDataMask & MM_VERTTEXCOORD)!=0)	&& hasDataMask(MM_VERTTEXCOORD))	cm.vert.DisableTexCoord();
 
     currentDataMask = currentDataMask & (~unneededDataMask);
   }
@@ -435,14 +435,15 @@ public:
 */
 class MeshModelState
 {
-	public:
+private:
 	int changeMask; // a bit mask indicating what have been changed. Composed of
 	MeshModel *m; // the mesh which the changes refers to.
 	std::vector<vcg::Color4b> vertColor;
 	std::vector<vcg::Point3f> vertCoord;
 	std::vector<vcg::Point3f> vertNormal;
 	std::vector<bool> faceSelection;
-
+public:
+  // This function save the <mask> portion of a mesh into the private members of the MeshModelState class;
 	void create(int _mask, MeshModel* _m)
 	{
 		m=_m;
