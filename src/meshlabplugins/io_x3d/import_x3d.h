@@ -1666,7 +1666,7 @@ namespace io {
 							{
 								if (texCoordIndex.isEmpty() && !m.HasPerVertexTexCoord())
 									getTextureCoord(texture, index*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix);
-								else if (!texCoordIndex.isEmpty() && index < texCoordIndex.size())
+								else if (!texCoordIndex.isEmpty() && (indexVect.at(tt + ff*3) + initPolygon) < texCoordIndex.size())
 									getTextureCoord(texture, texCoordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt()*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix); 
 								else
 								{

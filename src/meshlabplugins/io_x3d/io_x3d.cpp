@@ -89,11 +89,10 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nFile: %2\nError details: %3";
 	string filename = QFile::encodeName(fileName).constData ();
-  bool normalsUpdated = false;
+	bool normalsUpdated = false;
+	vcg::tri::io::AdditionalInfoX3D* info = NULL;
 	if(formatName.toUpper() == tr("X3D") || formatName.toUpper() == tr("X3DV") || formatName.toUpper() == tr("WRL"))
 	{
-		m.addinfo = NULL;
-		vcg::tri::io::AdditionalInfoX3D* info = NULL;
 		int result;
 		if (formatName.toUpper() == tr("X3D"))
 			result = vcg::tri::io::ImporterX3D<CMeshO>::LoadMask(filename.c_str(), info); 
@@ -114,9 +113,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		if (info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			info->mask &=(~vcg::tri::io::Mask::IOM_WEDGNORMAL);
 		m.Enable(info->mask);
-		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
-			m.cm.textures.push_back(info->textureFile[tx].toStdString());
-		
+				
 		errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nFile: %2\nLine number: %3\nError details: %4";
 		result = vcg::tri::io::ImporterX3D<CMeshO>::Open(m.cm, filename.c_str(), info, cb);
 		if (result != vcg::tri::io::ImporterX3D<CMeshO>::E_NOERROR)
@@ -136,37 +133,39 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		if(info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 		mask = info->mask;
-		delete(info);
-		m.addinfo = new vcg::tri::io::AdditionalInfoX3D();
-		m.addinfo->mask = mask; 
 	}
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;
-	for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
+	for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
 	{
-		FILE* pFile = fopen (m.cm.textures[textureIdx].c_str(), "r");
+		FILE* pFile = fopen (info->textureFile[tx].toStdString().c_str(), "r");
 		if (pFile == NULL)
 		{
 			missingTextureFilesMsg.append("\n");
-			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
+			missingTextureFilesMsg.append(info->textureFile[tx].toStdString().c_str());
 			someTextureNotFound = true;
 		}
 		else
+		{
+			m.cm.textures.push_back(info->textureFile[tx].toStdString());
 			fclose (pFile);
-	}
+		}
+	}	
+		
+		
 	if (someTextureNotFound)
+	{
 		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
+	}
 	
-	m.addinfo->numvert = m.cm.vert.size();
-	m.addinfo->numface = m.cm.face.size();
-
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	if (!normalsUpdated) 
 		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
 	if (cb != NULL)	(*cb)(99, "Done");
 	
+	delete(info);
 	return true;
 }
 
