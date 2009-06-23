@@ -120,7 +120,7 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 
 	if(formatName.toUpper() == tr("DAE"))
 	{
-		m.addinfo = NULL;
+		//m.addinfo = NULL;
 		tri::io::InfoDAE* info = NULL;
 		if (!tri::io::ImporterDAE<CMeshO>::LoadMask(filename.c_str(), info))
 			return false;
