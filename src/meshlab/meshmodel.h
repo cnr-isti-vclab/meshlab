@@ -204,7 +204,7 @@ public:
 	bool visible; // used in rendering; Needed for toggling on and off the meshes
 
   //abstract pointer to fileformat's dependent additional info
-  AdditionalInfo* addinfo;
+  //AdditionalInfo* addinfo;
 
   MeshModel(const char *meshName=0) {
     glw.m=&cm;
