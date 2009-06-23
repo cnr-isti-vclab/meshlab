@@ -365,4 +365,14 @@ void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, c
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 }
 
+/*
+const QString BaseMeshIOPlugin::filterInfo( FilterIDType filter )
+{
+	return QString("");
+}
+
+const QString BaseMeshIOPlugin::filterName( FilterIDType filter )
+{
+	return QString("");
+}*/
 Q_EXPORT_PLUGIN(BaseMeshIOPlugin)

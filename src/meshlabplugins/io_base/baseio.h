@@ -61,6 +61,8 @@ public:
 	void initPreOpenParameter(const QString &formatName, const QString &filename, FilterParameterSet &parlst);
 
   virtual void initSaveParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet & par);
+	//const QString filterInfo(FilterIDType filter);
+	//const QString filterName(FilterIDType filter);
 };
 
 #endif
