@@ -104,6 +104,8 @@ class QColorButton : public QHBoxLayout
 		QColor getColor();
 		void  setColor(QColor newColor);
 							 
+	signals:
+		void dialogParamChanged();
 	private slots:
 		void pickColor(); 
 };
@@ -181,7 +183,8 @@ public:
 		void setValue(float newValue);
 
 	signals:
-		void valueChanged(int mask);
+		//void valueChanged(int mask);
+		void dialogParamChanged();
 	
 protected:
 	QLineEdit *valueLE;
@@ -218,7 +221,9 @@ private:
 	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
 	
 signals:
+
 		void dynamicFloatChanged(int mask);
+		void parameterChanged();
 };
 
 /// Widget to select an entry from a list
@@ -237,6 +242,9 @@ protected:
 		
 		//returns the number of items in the list 
 		int getSize();
+
+	signals:
+		void dialogParamChanged();
 };
 
 
@@ -358,6 +366,7 @@ public:
 
 	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic();
+
 private slots:
 	void applyClick();
 	void closeClick();
@@ -372,6 +381,8 @@ protected:
 	QAction *curAction;
 	MeshModelState meshState;
 	QCheckBox *previewCB;
+
+	void closeEvent ( QCloseEvent * event ); 
 public:
 	int curmask;
 	MeshModel *curModel;

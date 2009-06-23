@@ -65,6 +65,7 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		{
 			meshState.create(curmask, curModel);
 			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
+			connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 		}
   }
 
@@ -277,6 +278,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				if(fpi.fieldVal.toBool()) qcb->setCheckState(Qt::Checked);
 				gridLayout->addWidget(qcb,i,0,1,2,Qt::AlignTop);
 				stdfieldwidgets.push_back(qcb);
+				connect(qcb,SIGNAL(stateChanged(int)),this,SIGNAL(parameterChanged()));
 				break;
 
 			case FilterParameter::PARFLOAT:
@@ -286,6 +288,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
 				gridLayout->addWidget(qle,i,1,Qt::AlignTop);
 				stdfieldwidgets.push_back(qle);
+				connect(qle,SIGNAL(editingFinished()),this,SIGNAL(parameterChanged()));
 				break;
 			case FilterParameter::PARINT:
 			case FilterParameter::PARSTRING:
@@ -298,7 +301,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				gridLayout->addWidget(qle,i,1,Qt::AlignTop);
 
 				stdfieldwidgets.push_back(qle);
-
+				connect(qle,SIGNAL(editingFinished()),this,SIGNAL(parameterChanged()));
 				break;
 			case FilterParameter::PARABSPERC:
 				descr = fpi.fieldDesc + " (abs and %)";
@@ -321,6 +324,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				gridLayout->addLayout(qcbt,i,1,Qt::AlignTop);
 
 				stdfieldwidgets.push_back(qcbt);
+				connect(qcbt,SIGNAL(dialogParamChanged()),this,SIGNAL(parameterChanged()));
 
 				break;
 			case FilterParameter::PARENUM:
@@ -332,6 +336,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				gridLayout->addLayout(layout,i,1,Qt::AlignTop);
 
 				stdfieldwidgets.push_back(layout);
+				connect(layout,SIGNAL(dialogParamChanged()),this,SIGNAL(parameterChanged()));
 
 				break;
 
@@ -400,7 +405,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				gridLayout->addLayout(dfw,i,1,Qt::AlignTop);
 
 				stdfieldwidgets.push_back(dfw);
-				connect(dfw,SIGNAL(valueChanged(int)),this,SIGNAL( dynamicFloatChanged(int) ));
+				connect(dfw,SIGNAL(dialogParamChanged()),this,SIGNAL( parameterChanged()));
 				break;
 
 
@@ -570,6 +575,7 @@ void MeshlabStdDialog::togglePreview()
 {
 	if(previewCB->isChecked()) applyDynamic();
 	else meshState.apply(curModel);
+	curgla->update();
 }
 
 /* click event for the close button of the standard plugin window */
@@ -580,9 +586,15 @@ void MeshlabStdDialog::closeClick()
 	if(curmask)	meshState.apply(curModel);
 	curmask = MeshModel::MM_UNKNOWN;
 	this->curgla->update();
-	this->close();
+	close();
 }
 
+
+// click event for the standard red crossed close button in the upper right widget's corner
+void MeshlabStdDialog::closeEvent(QCloseEvent * event)
+{
+	closeClick();
+}
 /******************************************/
 // AbsPercWidget Implementation
 /******************************************/
@@ -770,6 +782,7 @@ void QColorButton::pickColor()
 {
 	 QColor newColor=QColorDialog::getColor(QColor(255,255,255,255));
 	 if(newColor.isValid()) setColor(newColor);
+	 emit dialogParamChanged();
 }
 
 /******************************************/
@@ -777,6 +790,7 @@ void QColorButton::pickColor()
 /******************************************/
 EnumWidget::EnumWidget(QWidget *p, int defaultEnum, QStringList values) {
 	Init(p,defaultEnum,values);
+	connect(enumCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
 }
 
 void EnumWidget::Init(QWidget *p, int defaultEnum, QStringList values)
@@ -803,6 +817,7 @@ int EnumWidget::getSize()
 {
 	return enumCombo->count();
 }
+
 
 /******************************************/
 //MeshEnumWidget Implementation
@@ -1080,7 +1095,7 @@ void DynamicFloatWidget::setValue()
 {
 	float newValLE=float(valueLE->text().toDouble());
 	valueSlider->setValue(floatToInt(newValLE));
-	emit valueChanged(mask);
+	emit dialogParamChanged();
 }
 
 float DynamicFloatWidget::intToFloat(int val)
