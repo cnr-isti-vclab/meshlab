@@ -608,6 +608,11 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
     GLA()->setColorMode(vcg::GLW::CMPerVert);
 		GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
   }
+  if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
+  {
+    GLA()->setColorMode(vcg::GLW::CMPerMesh);
+    GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
+  }
 	if(iFilter->getClass(action) & MeshFilterInterface::Selection )
 	    GLA()->setSelectionRendering(true);
 			
