@@ -307,7 +307,7 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, QualityEdgePred &ep, bool select
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
 		}
 		
-		ref = RefineE<CMeshO, MidPoint<CMeshO>, QualityEdgePred>(m, MidPoint<CMeshO>(), ep, selection, cb);
+		ref = RefineE<CMeshO, MidPoint<CMeshO>, QualityEdgePred>(m, MidPoint<CMeshO>(&m), ep, selection, cb);
 		if(ref) vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m);
 		
 		if(selection) {

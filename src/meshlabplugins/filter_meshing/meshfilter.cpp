@@ -445,7 +445,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 					break;
 				case FP_MIDPOINT :
 					Refine<CMeshO,MidPoint<CMeshO> >
-						(m.cm, MidPoint<CMeshO>(), threshold, selected, cb);
+						(m.cm, MidPoint<CMeshO>(&m.cm), threshold, selected, cb);
 			}
 
 		 m.clearDataMask(MeshModel::MM_VERTFACETOPO);
