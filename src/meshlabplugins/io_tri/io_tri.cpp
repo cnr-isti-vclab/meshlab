@@ -44,7 +44,7 @@ void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*f
 	if(format.toUpper() == tr("ASC"))
 	{
 			parlst.addInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file.");
-			parlst.addBool("triangulate", true, "Grid triangulation", "if true is assumes that the points are arranged in a complete xy grid and try to perform the naive height field triangulation of the input data.  Lenght of the lines is detected automatically by searching x jumps.");
+			parlst.addBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Lenght of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created.");
 	}
 }
 
