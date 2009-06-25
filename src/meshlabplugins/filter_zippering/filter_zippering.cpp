@@ -46,7 +46,6 @@
 #include <wrap/gl/glu_tesselator.h>
 
 #include "filter_zippering.h"
-#include "remove_small_cc.h"
 
 //#define DEB 1
 //#define REDUNDANCY_ONLY 1
@@ -221,7 +220,7 @@ bool FilterZippering::isOnBorder( CMeshO::CoordType point, CMeshO::FacePointer f
     return false;
 }
 
-/* Scoprire perchè non funziona
+/* Scoprire perchÃ‹ non funziona
 bool FilterZippering::isOnBorder2( CMeshO::CoordType point, CMeshO::FacePointer f )  {
 
     vcg::Triangle3<CMeshO::ScalarType> t( f->P(0), f->P(1), f->P(2) );
@@ -415,7 +414,7 @@ int FilterZippering::searchComponent( aux_info &info,                           
                              vcg::Segment3<CMeshO::ScalarType> s,       //query segment
                              bool &conn ) {
     float min_dist = 10*eps; conn = true; int index = -1;
-    // Verifica le componenti connesse; se ce ne è una in cui la distanza segmento-bordo è
+    // Verifica le componenti connesse; se ce ne Ã‹ una in cui la distanza segmento-bordo Ã‹
     // inferiore a min_dist, diventa la nuova candidata
     for ( int i = 0; i < info.nCComponent(); i ++ ) {
         polyline current = info.conn[i];
@@ -483,7 +482,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, FilterParam
     vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);   vcg::tri::UpdateFlags<CMeshO>::FaceProjection(a->cm);  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
     vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(b->cm);   vcg::tri::UpdateFlags<CMeshO>::FaceProjection(b->cm);  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(b->cm);
 
-    CMeshO::FacePointer patch_border;   //patch border
+    CMeshO::FacePointer patch_border=0;   //patch border
     CMeshO::ScalarType epsilon  = a->cm.bbox.Diag() / 30.0; //Su homer non trova niente, capire perche'
                                                             //Rivedere l'epsilon
     //Cerca una faccia di bordo e ne salva l'indice
@@ -554,7 +553,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, FilterParam
         vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
     } while (changed);
 
-    vcg::RemoveSmallConnectedComponentsSize<CMeshO>( a->cm, a->cm.fn / 500.00 );      //Remove spurious component
+    vcg::tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize( a->cm, a->cm.fn / 500.00 );      //Remove spurious component
     /* End Step 1 */
 #ifdef REDUNDANCY_ONLY
     Log(GLLogStream::DEBUG, "Rimosse %d facce ridondanti", c_faces);
@@ -597,7 +596,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, FilterParam
         while ( modified ) {
             modified = false;
             /* PRIMO CASO DEGENERE */
-            // Uno dei due closest point giace su un vertice già esistente della mesh A
+            // Uno dei due closest point giace su un vertice giâ€¡ esistente della mesh A
             // operiamo spostando il closest in modo da  evitare questa sovrapposizione.
             // - Check sul vertice p.P(p.E())
             for ( int k = 0; k < 3; k ++ ) {
@@ -954,7 +953,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, FilterParam
     }
 
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
-    vcg::RemoveSmallConnectedComponentsSize<CMeshO>( a->cm, a->cm.fn / 100 );
+    vcg::tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize( a->cm, a->cm.fn / 100 );
     vcg::tri::UpdateBounding<CMeshO>::Box( a->cm );
     a->cm.face.DisableColor();
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);

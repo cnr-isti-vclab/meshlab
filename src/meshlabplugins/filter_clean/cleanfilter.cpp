@@ -99,7 +99,6 @@
 #include <vcg/math/matrix33.h>
 
 #include "cleanfilter.h"
-#include "remove_small_cc.h"
 #include "align_tools.h"
 
 #include <vcg/complex/trimesh/create/platonic.h>
@@ -314,13 +313,13 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
     case FP_REMOVE_ISOLATED_DIAMETER:
 	  {
       float minCC= par.getAbsPerc("MinComponentDiag");		
-      std::pair<int,int> delInfo= RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,minCC);
+      std::pair<int,int> delInfo= tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,minCC);
 			Log(GLLogStream::FILTER,"Removed %2 connected components out of %1", delInfo.second, delInfo.first); 		
     }break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
 	  {
       float minCC= par.getInt("MinComponentSize");		
-      std::pair<int,int> delInfo=RemoveSmallConnectedComponentsSize<CMeshO>(m.cm,minCC);
+      std::pair<int,int> delInfo=tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize(m.cm,minCC);
 			Log(GLLogStream::FILTER,"Removed %i connected components out of %i", delInfo.second, delInfo.first); 		
 	  }break;
     case FP_REMOVE_WRT_Q:
