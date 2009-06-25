@@ -65,6 +65,9 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         template<class MESH_TYPE, class ALIGNER_TYPE>
         static void setAlignmentParameters(MESH_TYPE& mFix, MESH_TYPE& mMov, FilterParameterSet& par, typename ALIGNER_TYPE::Parameters& param);
 
+        template<class ALIGNER_TYPE>
+        static bool logResult(FilterIDType filter, typename ALIGNER_TYPE::Result& res, QString& errorMsg);
+
         template<class MESH_TYPE, class FEATURE_TYPE>
         static bool ComputeFeatureOperation(MeshModel& m, typename FEATURE_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
@@ -72,19 +75,19 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         static bool ExtractionOperation(MeshModel& m, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-        static bool MatchingOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+        static typename ALIGNER_TYPE::Result MatchingOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-        static int RigidTransformationOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+        static typename ALIGNER_TYPE::Result RigidTransformationOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-        static int ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+        static typename ALIGNER_TYPE::Result ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-        static bool RansacOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+        static typename ALIGNER_TYPE::Result RansacOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-        static bool RansacDiagramOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, int trials,int from, int to, int step, CallBackPos *cb=NULL);
+        static typename ALIGNER_TYPE::Result RansacDiagramOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, int trials,int from, int to, int step, CallBackPos *cb=NULL);
 
 };
 #endif

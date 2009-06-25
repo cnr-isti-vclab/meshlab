@@ -55,7 +55,7 @@ FilterFeatureAlignment::FilterFeatureAlignment()
     typeList << AF_COMPUTE_FEATURE
              << AF_EXTRACTION                    
              << AF_CONSENSUS
-             << AF_RANSAC
+             << AF_RANSAC             
              << AF_RANSAC_DIAGRAM;
 
     FilterIDType tt;
@@ -249,6 +249,59 @@ void FilterFeatureAlignment::setAlignmentParameters(MESH_TYPE& mFix, MESH_TYPE& 
     if(par.hasParameter("paint")) param.paint = par.getBool("paint");
 }
 
+template<class ALIGNER_TYPE>
+bool FilterFeatureAlignment::logResult(FilterIDType filter, typename ALIGNER_TYPE::Result& res, QString& errorMsg)
+{
+    typedef ALIGNER_TYPE AlignerType;
+    typedef typename AlignerType::Result ResultType;
+
+    switch(filter)
+    {
+        case AF_MATCHING:{
+            switch(res.exitCode){
+                case ResultType::ALIGNED :
+                case ResultType::NOT_ALIGNED : {mylogger("Matching done: %i matches, %i sec.", res.numMatches, res.time); return true;}
+                case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
+                default : assert(0);
+            }
+        }
+        case AF_RIGID_TRANSFORMATION:{
+                switch(res.exitCode){
+                    case ResultType::ALIGNED : {mylogger("Transformations computed: %i computed, %i matches, %i sec.", res.numWonFullCons, res.numMatches, res.time); return true;}
+                    case ResultType::NOT_ALIGNED : {mylogger("No trasformations computed: %i matches, %i sec.", res.numMatches, res.time); return true;}
+                    case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
+                    default : assert(0);
+            }
+        }
+        case AF_CONSENSUS:{
+            switch(res.exitCode){
+                case ResultType::ALIGNED :
+                case ResultType::NOT_ALIGNED : {mylogger("Consensus computed: %.2f%% consensus, %i sec.", res.bestConsensus, res.time); return true;}
+                case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
+                default : assert(0);
+            }
+        }
+        case AF_RANSAC:{
+            switch(res.exitCode){
+                case ResultType::ALIGNED : {mylogger("Alignemnt found: %.2f%% consensus, %i matches, %i iter. skipped, %i sec.", res.bestConsensus, res.numMatches, res.numSkippedIter, res.time); return true;}
+                case ResultType::NOT_ALIGNED : {mylogger("Alignemnt not found: %i matches, %i iter. skipped, %i sec.", res.numMatches, res.numSkippedIter, res.time); return true;}
+                case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
+                default : assert(0);
+            }
+        }
+        case AF_RANSAC_DIAGRAM:{
+            switch(res.exitCode){
+                case ResultType::ALIGNED :
+                case ResultType::NOT_ALIGNED : return true;
+                case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
+                default : assert(0);
+            }
+        }
+        default: return true;
+    }
+    assert(0);
+}
+
 bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos * cb)
 {
     glLog=log;  //assign log to a global variable. needed to write the log from everywhere in the code
@@ -288,7 +341,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                 }                
                 default: assert(0);
             }   //end switch(ftype)
-            return true;
+            assert(0);
         }   //end case AF_COMPUTE_FEATURE
         case AF_EXTRACTION:
         {                      
@@ -307,14 +360,14 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType                    
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
-                    AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
+                    AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);                    
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
                     bool ok = ExtractionOperation<MeshType, FeatureType, AlignerType>(*currMesh, alignerParam, cb);
                     return ok;
                 }                
                 default: assert(0);
             }   //end switch(ftype)
-            return true;
+            assert(0);
         }   //end case AF_EXTRACTION
         case AF_MATCHING :
         {
@@ -331,20 +384,24 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                 case 0:{
                     typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    return MatchingOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    ResultType res = MatchingOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    return MatchingOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    ResultType res = MatchingOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }                
                 default: assert(0);
             }  //end switch(ftype)
-            return false;
+            assert(0);
         }  //end case AF_MATCHING
         case AF_RIGID_TRANSFORMATION :
         {          
@@ -356,24 +413,24 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                 case 0:{
                     typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    int exitCode = RigidTransformationOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
-                    if(exitCode){ errorMessage = errMessages[exitCode]; return false; }
-                    return true;
+                    ResultType res = RigidTransformationOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    int exitCode = RigidTransformationOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
-                    if(exitCode){ errorMessage = errMessages[exitCode]; return false; }
-                    return true;
+                    ResultType res = RigidTransformationOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }               
                 default: assert(0);
             }  //end switch(ftype)
-            return false;
+            assert(0);
         }  //end case AF_RIGID_TRANSFORMATION
         case AF_CONSENSUS :
         {
@@ -385,53 +442,53 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                 case 0:{
                     typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    int consensus = ConsensusOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
-                    if(consensus<0) return false;
-                    //Log results
-                    Log(GLLogStream::FILTER,"Consensus of %.2f%% (%i/%i vertices).",(float(consensus)/alignerParam.fullConsensusSamples)*100.0f, consensus, alignerParam.fullConsensusSamples);
-                    return true;
+                    ResultType res = ConsensusOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    int consensus = ConsensusOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
-                    if(consensus<0) return false;
-                    //Log results
-                    Log(GLLogStream::FILTER,"Consensus of %.2f%% (%i/%i vertices).",(float(consensus)/alignerParam.fullConsensusSamples)*100.0f, consensus, alignerParam.fullConsensusSamples);
-                    return true;
+                    ResultType res = ConsensusOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }
                 default: assert(0);
             }
+            assert(0);
         }
         case AF_RANSAC:
         {
             //set error message just once to avoid code grow long...
             errorMessage = QString("One or more parameters are wrong.\n") +
                            QString("1 - Features have not been computed for these meshes.\n") +\
-                           QString("2 - 'Number of neighboor picked' must be > 1.\n");           
-
+                           QString("2 - 'Number of neighboor picked' must be > 1.\n");                       
             switch(featureType){
                 case 0:{
                     typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    return RansacOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    ResultType res = RansacOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);                    
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }               
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    return RansacOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    ResultType res = RansacOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }                
                 default: assert(0);
-            }  // end switch(ftype)
-            return true;
+            }  // end switch(ftype)            
+            assert(0);
         }  //end case AF_RANSAC
         case AF_RANSAC_DIAGRAM:
         {                                    
@@ -444,20 +501,24 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                 case 0:{
                     typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    return RansacDiagramOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, trials, from, to, step, cb);
+                    ResultType res = RansacDiagramOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, trials, from, to, step, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }
                 case 1:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
                     AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
                     setAlignmentParameters<MeshType, AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    return RansacDiagramOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, trials, from, to, step, cb);
+                    ResultType res = RansacDiagramOperation<MeshType, FeatureType, AlignerType>(*mFix, *mMov, alignerParam, trials, from, to, step, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }                
                 default: assert(0);
             }  // end switch(ftype)
-            return true;
+            assert(0);
         }  //end case AF_RANSAC_DIAGRAM                                         
         default: assert(0);
     } // end switch(ID(filter))
@@ -503,74 +564,90 @@ bool FilterFeatureAlignment::ExtractionOperation(MeshModel& m, typename ALIGNER_
 }
 
 template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-bool FilterFeatureAlignment::MatchingOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
+typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
 {
     typedef MESH_TYPE MeshType;
     typedef FEATURE_TYPE FeatureType;
     typedef ALIGNER_TYPE AlignerType;
+    typedef typename AlignerType::Result ResultType;
+
+    time_t start, end;
+    time(&start); //start timer
 
     //create vectors to hold tuples of bases and matches
     vector<FeatureType**>* baseVec = new vector<FeatureType**>();
     vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
 
     AlignerType aligner;
-    bool ok = aligner.init(mFix.cm, mMov.cm, param);
-    if(!ok) return false;
+    ResultType res = aligner.init(mFix.cm, mMov.cm, param);
+    if(res.exitCode==ResultType::FAILED) return res;
 
     //execute matching procedure with requested parameters;
-    ok = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
+    int errCode = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
 
-    aligner.finalize();
+    res.numMatches = matchesVec->size(); //store the numeber of matches found
 
-    //write result in the log
-    if(ok) mylogger("%i matches found.",matchesVec->size());
+    aligner.finalize();   
 
     //cleaning baseVec and matchesVec...
     FeatureAlignment<MeshType,FeatureType>::CleanTuplesVector(baseVec, true);
     FeatureAlignment<MeshType,FeatureType>::CleanTuplesVector(matchesVec, true);
 
-    return ok;
+    time(&end); //stop timer
+    res.time = (int)difftime(end,start);
+
+    return res;
 }
 
 template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-int FilterFeatureAlignment::RigidTransformationOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
+typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
 {
     typedef MESH_TYPE MeshType;
     typedef FEATURE_TYPE FeatureType;
     typedef ALIGNER_TYPE AlignerType;
     typedef typename MeshType::ScalarType ScalarType;
+    typedef typename AlignerType::Result ResultType;
     typedef Matrix44<ScalarType> Matrix44Type;
+
+    time_t start, end;
+    time(&start); //start timer
 
     //create vectors to hold tuples of bases and matches
     vector<FeatureType**>* baseVec = new vector<FeatureType**>();
     vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
 
     AlignerType aligner;
-    bool ok = aligner.init(mFix.cm, mMov.cm, param);
-    if(!ok) return 1; //exit code 1: features not computed
+    ResultType res = aligner.init(mFix.cm, mMov.cm, param);
+    if(res.exitCode==ResultType::FAILED) return res;
 
     //execute matching procedure with requested parameters;
-    ok = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
-    if(!ok) return 2;   //exit code 2
+    int errCode = FeatureAlignment<MeshType,FeatureType>::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
+    if(!errCode) return res;
 
+    res.numMatches = matchesVec->size(); //store the numeber of matches found
     assert(baseVec->size()==1);  //now baseVec must hold exactly one base of features
 
     for(unsigned int j=0; j<matchesVec->size(); j++)
     {
         Matrix44Type tr;
-        ok = FeatureAlignment<MeshType,FeatureType>::FindRigidTransformation(mFix.cm, mMov.cm, (*baseVec)[0], (*matchesVec)[j], param.nBase, tr, cb);
-        if(!ok) return 3;  //exit code 3
+        bool ok = FeatureAlignment<MeshType,FeatureType>::FindRigidTransformation(mFix.cm, mMov.cm, (*baseVec)[0], (*matchesVec)[j], param.nBase, tr, cb);
+        if(!ok) return res;
+        res.numWonFullCons++;  //use this variable to increase num of found transform
+        res.exitCode = ResultType::ALIGNED;  //this means at least one matrix found
     }
 
     //cleaning baseVec and matchesVec...
     FeatureAlignment<MeshType,FeatureType>::CleanTuplesVector(baseVec, true);
     FeatureAlignment<MeshType,FeatureType>::CleanTuplesVector(matchesVec, true);
 
-    return 0; //all right
+    time(&end); //stop timer
+    res.time = (int)difftime(end,start);
+
+    return res; //all right
 }
 
 template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-int FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
+typename ALIGNER_TYPE::Result FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
 {
     typedef MESH_TYPE MeshType;
     typedef FEATURE_TYPE FeatureType;
@@ -578,61 +655,66 @@ int FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov,
     typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
     typedef GridStaticPtr<VertexType,ScalarType> MeshGrid;
-    typedef tri::VertTmark<MeshType> MarkerVertex;    
+    typedef tri::VertTmark<MeshType> MarkerVertex;
+    typedef typename AlignerType::Result ResultType;
+
+    time_t start, end;
+    time(&start); //start timer
 
     //enables needed attributes. These are used by the getClosest functor.
     mFix.updateDataMask(MeshModel::MM_VERTMARK);
     mMov.updateDataMask(MeshModel::MM_VERTMARK);    
 
     AlignerType aligner;
-    bool ok = aligner.init(mFix.cm, mMov.cm, param);
-    if(!ok) return -1;  //return <0 to dected that features have not been computed
+    ResultType res = aligner.init(mFix.cm, mMov.cm, param);
+    if(res.exitCode==ResultType::FAILED) return res;
 
     param.consOffset = 0.0f;
-    int consensus = FeatureAlignment<MeshType,FeatureType>::Consensus(mFix.cm, mMov.cm, *(aligner.gridFix), aligner.markerFunctorFix, aligner.normBuckets, param, 0, cb);
+    res.bestConsensus = 100.0f*(FeatureAlignment<MeshType,FeatureType>::Consensus(mFix.cm, mMov.cm, *(aligner.gridFix), aligner.markerFunctorFix, aligner.normBuckets, param, 0, cb)/float(param.fullConsensusSamples));
     aligner.finalize();
 
-    //return the consensus score
-    return consensus;
+    time(&end); //stop timer
+    res.time = (int)difftime(end,start);
+
+    return res;
 }
 
 template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-bool FilterFeatureAlignment::RansacOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
+typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
 {
     typedef MESH_TYPE MeshType;
     typedef FEATURE_TYPE FeatureType;
     typedef ALIGNER_TYPE AlignerType;
     typedef typename MeshType::ScalarType ScalarType;
-    typedef Matrix44<ScalarType> Matrix44Type;
-
+    typedef typename AlignerType::Result ResultType;
 
     //enables needed attributes. MM_VERTMARK is used by the getClosest functor.
     mFix.updateDataMask(MeshModel::MM_VERTMARK);
     mMov.updateDataMask(MeshModel::MM_VERTMARK);
 
     AlignerType aligner;
-    bool ok =aligner.init(mFix.cm, mMov.cm, param);
-    if(!ok) return false;
+    ResultType res = aligner.init(mFix.cm, mMov.cm, param);
+    if(res.exitCode==ResultType::FAILED) return res;
 
     //perform RANSAC and get best transformation matrix
-    Matrix44Type tr = aligner.align(mFix.cm, mMov.cm, param, cb);
+    res = aligner.align(mFix.cm, mMov.cm, param, cb);
 
     aligner.finalize();
 
     //apply transformation. If ransac don't find a good matrix, identity is returned; so nothing is wrong here...
-    mMov.cm.Tr = tr * mMov.cm.Tr;
+    mMov.cm.Tr = res.tr * mMov.cm.Tr;
 
-    return true;  //all right
+    return res;
 }
 
 template<class MESH_TYPE, class FEATURE_TYPE, class ALIGNER_TYPE>
-bool FilterFeatureAlignment::RansacDiagramOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, int trials, int from, int to, int step, CallBackPos *cb)
+typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacDiagramOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, int trials, int from, int to, int step, CallBackPos *cb)
 {
     typedef MESH_TYPE MeshType;
     typedef FEATURE_TYPE FeatureType;
     typedef ALIGNER_TYPE AlignerType;
-    typedef typename MeshType::ScalarType ScalarType;
-    typedef Matrix44<ScalarType> Matrix44Type;
+    typedef typename MeshType::ScalarType ScalarType;    
+    typedef typename AlignerType::Result ResultType;
 
     //variables needed for progress bar callback
     float progBar = 0.0f;
@@ -647,38 +729,36 @@ bool FilterFeatureAlignment::RansacDiagramOperation(MeshModel& mFix, MeshModel& 
     fprintf(file,"Iterazioni#Tempo di esecuzione#Prob. Succ.#Prob. Fall. per Sec\n0#0#0#0\n"); fflush(file);
 
     AlignerType aligner;
-    float probSucc = 0.0f, meanTime = 0.0f, failPerSec = -1.0f;
-    int counterSucc = 0, dif = 0; time_t start, end;
-    param.counterSucc = &counterSucc;
+    float probSucc = 0.0f, meanTime = 0.0f, failPerSec = -1.0f;      
+    int numWon = 0, trialsTotTime = 0;
     param.ransacIter = from;
+    //param.log = &mylogger; //this is the way to assign a pointer to log function
+    ResultType res;
 
     while(param.ransacIter<=to)
     {
         for(int i=0; i<trials; i++){
             //callback handling
-            if(cb){ progBar+=offset; cb(int(progBar),"Computing diagram..."); }
+            if(cb){ progBar+=offset; cb(int(progBar),"Computing diagram..."); }            
 
-            time(&start);  //start timer
+            res = aligner.init(mFix.cm, mMov.cm, param);
+            if(res.exitCode==ResultType::FAILED) return res;
 
-            bool ok =aligner.init(mFix.cm, mMov.cm, param);
-            if(!ok) return false;
-
-            aligner.align(mFix.cm, mMov.cm, param);
-
-            time(&end);  //stop timer
-            dif += int(difftime(end,start));            
+            res = aligner.align(mFix.cm, mMov.cm, param);
+            if(res.exitCode==ResultType::ALIGNED){ numWon++; trialsTotTime+=res.time; }
+            if(res.exitCode==ResultType::FAILED) return res;  //failure: stop everything and return error            
         }
 
-        probSucc = counterSucc/float(trials);               //k = prob succ in 1 iteration
-        meanTime = dif/float(trials);                       //t=sec elapsed to perform N ransac iterations
-        failPerSec = std::pow(1-probSucc,float(trials)/dif);    //fail rate per sec is: (1-k)^(1/t)
+        probSucc = numWon/float(trials);                    //k = prob succ in 1 iteration
+        meanTime = trialsTotTime/float(trials);             //t=sec elapsed to perform N ransac iterations
+        failPerSec = std::pow(1-probSucc,1.0f/meanTime);    //fail rate per sec is: (1-k)^(1/t)
         fprintf(file,"%i#%.2f#%.2f#%.2f\n", param.ransacIter, meanTime, probSucc, failPerSec); fflush(file);
-        counterSucc = 0; dif = 0; progBar=0.0f;        
+        numWon = 0; trialsTotTime = 0; progBar=0.0f;
         param.ransacIter+=step;
     }
 
     fclose(file);
-    return true;  //all right
+    return res;  //all right
 }
 
 Q_EXPORT_PLUGIN(FilterFeatureAlignment)
