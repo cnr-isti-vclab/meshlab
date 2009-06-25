@@ -253,7 +253,7 @@ public slots:
   
 signals:
 	void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
-
+	void glareaClosed();					//someone has closed the glarea
   
 public slots:
 

@@ -548,7 +548,8 @@ void GLArea::closeEvent(QCloseEvent *event)
 			return;
 		}
 	}
-  if(getCurrentEditAction()) endEdit();
+	if(getCurrentEditAction()) endEdit();
+  emit glareaClosed();
 	event->accept();
 }
 

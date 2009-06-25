@@ -585,7 +585,8 @@ void MeshlabStdDialog::closeClick()
 	//int mask = 0;//curParSet.getDynamicFloatMask();
 	if(curmask)	meshState.apply(curModel);
 	curmask = MeshModel::MM_UNKNOWN;
-	this->curgla->update();
+	// Perform the update only if there is Valid GLarea. 
+	if(this->curgla) this->curgla->update();
 	close();
 }
 

@@ -240,6 +240,7 @@ void MainWindow::createStdPluginWnd()
 	//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
 	stddialog->setFloating(true);
 	stddialog->hide();
+	connect(GLA(),SIGNAL(glareaClosed()),stddialog,SLOT(close()));
 }
 
 // When we switch the current model (and we change the active window)
@@ -250,6 +251,7 @@ void MainWindow::updateStdDialog()
 	if(stddialog!=0){
 		if(GLA()!=0){
 			if(stddialog->curModel != GLA()->mm()){
+				stddialog->curgla=0; // invalidate the curgla member that is no more valid.
 				stddialog->close();
 			}
 		}
