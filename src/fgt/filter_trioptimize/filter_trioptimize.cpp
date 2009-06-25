@@ -181,6 +181,19 @@ const TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(QAction *action
 	}
  return MeshFilterInterface::Generic;
 }
+int TriOptimizePlugin::postCondition(QAction *a) const
+{
+  switch(ID(a))
+  {
+			case FP_PLANAR_EDGE_FLIP:
+			case FP_CURVATURE_EDGE_FLIP:
+					return MeshModel::MM_UNKNOWN;
+			case FP_NEAR_LAPLACIAN_SMOOTH:	     
+					return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL;
+					
+			default: assert(0);
+	}
+}
 
 // This function define the needed parameters for each filter.
 // Return true if the filter has some parameters
@@ -384,5 +397,6 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 
 	return true;
 }
+
 
 Q_EXPORT_PLUGIN(TriOptimizePlugin)

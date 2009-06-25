@@ -52,6 +52,8 @@ public:
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &/*parent*/, vcg::CallBackPos * cb) ;
 	virtual const int getRequirements(QAction *);
 	virtual const FilterClass getClass(QAction *);
+	virtual int postCondition( QAction* ) const;
+
 };
 
 #endif
