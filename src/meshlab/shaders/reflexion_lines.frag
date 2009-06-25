@@ -44,7 +44,7 @@ void main (void)
     reflexionVector.z = 0.5/sqrt(dot(reflexionVector,reflexionVector));
     reflexionVector.xy = (reflexionVector.xy*reflexionVector.z) + 0.5;
     reflexionVector *= 2.0;
-    color = clamp(0.5 + Smoothing * sin(2.0 * 3.1428 * reflexionVector.x*ScaleFactor), 0.0, 1.0);
+    color = vec4(clamp(0.5 + Smoothing * sin(2.0 * 3.1428 * reflexionVector.x*ScaleFactor), 0.0, 1.0));
 
     color.a = 1.0;
     gl_FragColor = min(color, vec4(1.0,1.0,1.0,1.0));
