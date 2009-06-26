@@ -168,8 +168,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             int errorCode;
             Matrix44Type tr;
             float bestConsensus;
-            int numSkippedIter;
-            int numNotSparse;
+            int numSkippedIter;                       
             int numWonShortCons;
             int numWonFullCons;
             int numMatches;
@@ -177,6 +176,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             time_t matchingTime;
             time_t shortConsTime;
             time_t fullConsTime;
+            time_t initTime;
             QString errorMsg;
 
             Result(){
@@ -184,12 +184,12 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 errorCode = -1;
                 tr = Matrix44Type::Identity();
                 bestConsensus = 0.0f;
-                numSkippedIter = 0;                
-                numNotSparse = 0;
+                numSkippedIter = 0;
                 numWonShortCons = 0;
                 numWonFullCons = 0;
                 numMatches = 0;                
                 time = 0;
+                initTime = 0;
                 matchingTime = 0;
                 shortConsTime = 0;
                 fullConsTime = 0;
@@ -219,6 +219,9 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
         Result& init(MeshType& mFix, MeshType& mMov, Parameters& param)
         {
+            time_t start, end;  //timers
+            time(&start);
+
             //extract features
             vecFFix = FeatureAlignment::extractFeatures(param.numFixFeatureSelected, mFix, FeatureAlignment::UNIFORM_SAMPLING);
             vecFMov = FeatureAlignment::extractFeatures(param.numMovFeatureSelected, mMov, param.samplingStrategy);
@@ -226,7 +229,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 //can't continue; features have not been computed! set error stuff and return
                 FeatureAlignment::setError(1,res);
                 return res;
-            }
+            }                        
 
             //copy descriptors of mMov into ANN structures, then build kdtree...
             FeatureAlignment::SetupKDTreePoints(*vecFFix, &fdataPts, FeatureType::getFeatureDimension());
@@ -244,6 +247,9 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 assert(normBuckets!=NULL);
             }                                  
 
+            time(&end);
+            res.initTime = int(difftime(end,start));
+
             return res;
         }
 
@@ -252,11 +258,15 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             time_t start, end, start_loop, end_loop;  //timers
             time(&start);
 
+            if(param.nBase>int(vecFMov->size())){ setError(2,res); return res; }  //not enough features to pick a base
+            if(param.k>int(vecFFix->size())){ setError(3, res); return res; }     //not enough features to pick k neighboors
+
             //normalize normals
             tri::UpdateNormals<MeshType>::PerVertexNormalized(mFix);
             tri::UpdateNormals<MeshType>::PerVertexNormalized(mMov);
 
-            //variables declaration            
+            //variables declaration
+            res.exitCode = Result::NOT_ALIGNED;
             int bestConsensus = 0;                                              //best consensus score                        
             int short_cons_succ = int((param.shortConsOffset*param.overlap/100.0f)*(param.short_cons_samples/100.0f));      //number of vertices to win short consensus
             int cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));                       //number of vertices to win consensus
@@ -282,11 +292,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 assert(vecFFix);
 								
                 int errCode = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, *baseVec, *matchesVec, param);
-                if(!errCode){
-                    FeatureAlignment::setError(errCode,res);
-                    if(errCode==4) res.numNotSparse++;
-                    res.numSkippedIter++; continue;
-                } //something wrong; can't find a base, skip this...
+                if(errCode){ res.numSkippedIter++; continue; } //can't find a base, skip this iteration
 
                 assert(baseVec->size()>=1);
                 int currBase = baseVec->size()-1;
@@ -301,8 +307,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
                     //computes the rigid transformation matrix that overlaps the two points sets
                     Matrix44Type tr;
-                    bool ok = FeatureAlignment::FindRigidTransformation(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], param.nBase, tr);
-                    if(!ok) continue; //something wrong; can't find a rigid transformation, skip this...
+                    errCode = FeatureAlignment::FindRigidTransformation(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], param.nBase, tr);
+                    if(errCode) { res.numSkippedIter++; continue; } //can't find a rigid transformation, skip this iteration
 
                     data.tr = tr;  //store transformation
 
@@ -416,6 +422,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
         error code 2 : Features extracted are not enough to pick a base - Matching
         error code 3 : Features extracted are not enough to pick k neighboors - Matching
         error code 4 : Base isn't enough sparse - Matching
+        error code 5 : Error while computing rigid transformation - FindRigidTransform
         *******************************************************************************************/
         static QString getErrorMsg(int code)
         {
@@ -424,6 +431,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 case 2: return QString("Features extracted are not enough to pick a base.");
                 case 3: return QString("Features extracted are not enough to pick k neighboors.");
                 case 4: return QString("Base isn't enough sparse.");
+                case 5: return QString("Error while computing rigid transformation.");
                 default: return QString("An unkown error occurred.");
             }
         }
@@ -728,9 +736,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             float pBar = 0, offset = 100.0f/param.nBase;  //used for progresss bar callback
             if(cb) cb(0, "Matching...");
-
-            if(param.nBase>int(vecFMov.size())) return 2; //not enough features to pick a base
-            if(param.k>int(vecFFix.size())) return 3;  //not enough features in kdtree to pick k neighboors
+            assert(param.nBase<=int(vecFMov.size()));  //not enough features to pick a base
+            assert(param.k<=int(vecFFix.size()));      //not enough features in kdtree to pick k neighboors
 
             //compute needed params
             float baseDist = param.sparseBaseDist*(param.mMovBBoxDiag/100.0f);
@@ -786,7 +793,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             return 0;
         }
 
-        static bool FindRigidTransformation(MESH_TYPE& mFix, MESH_TYPE& mMov, FEATURE_TYPE* fixF[], FEATURE_TYPE* movF[], int nBase, Matrix44<typename MESH_TYPE::ScalarType>& tr, CallBackPos *cb=NULL)
+        static int FindRigidTransformation(MESH_TYPE& mFix, MESH_TYPE& mMov, FEATURE_TYPE* fixF[], FEATURE_TYPE* movF[], int nBase, Matrix44<typename MESH_TYPE::ScalarType>& tr, CallBackPos *cb=NULL)
         {
             typedef MESH_TYPE MeshType;
             typedef FEATURE_TYPE FeatureType;
@@ -800,11 +807,15 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             for(int i = 0; i<nBase; i++)
             {
-                fixPoints.push_back(mMov.Tr * fixF[i]->pos);
-                movPoints.push_back(mFix.Tr * movF[i]->pos);
+                movPoints.push_back(mMov.Tr * fixF[i]->pos); //points on mFix
+                fixPoints.push_back(mFix.Tr * movF[i]->pos); //points on mMov
             }
-            PointMatching<ScalarType>::ComputeRigidMatchMatrix(tr, movPoints, fixPoints);
-            return true;
+
+            //this compute transformation that brings movPoints over fixPoints
+            bool ok = PointMatching<ScalarType>::ComputeRigidMatchMatrix(tr, fixPoints, movPoints);
+            if(!ok) return 5; //Error while computing rigid transformation
+
+            return 0;
         }
 
         static void AddPickedPoints(MESH_TYPE& m, vector<FEATURE_TYPE*>& vecF, char* prefix = NULL)
