@@ -206,6 +206,8 @@ void SaveMaskExporterDialog::SetMaskCapability()
 	checkAndEnable(ui.check_iom_wedgtexcoord, vcg::tri::io::Mask::IOM_WEDGTEXCOORD, capability, defaultBits );
 	checkAndEnable(ui.check_iom_wedgnormal,   vcg::tri::io::Mask::IOM_WEDGNORMAL,   capability, defaultBits );
 
+	checkAndEnable(ui.check_iom_polygonal,   vcg::tri::io::Mask::IOM_BITPOLYGONAL,   capability, defaultBits );
+
 
 	//camera THIS ONE HAS TO BE CORRECTED !!!! 
 	//bool camval = m->cm.shot.IsValid();
@@ -240,6 +242,7 @@ void SaveMaskExporterDialog::SlotOkButton()
 	if( ui.check_iom_wedgnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;}
 
 	if( ui.check_iom_camera->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_CAMERA;}
+	if( ui.check_iom_polygonal->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_BITPOLYGONAL;}
 
 	for(unsigned int i=0;i<m->cm.textures.size();i++)
 		m->cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();

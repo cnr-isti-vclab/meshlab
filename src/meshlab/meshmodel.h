@@ -138,7 +138,7 @@ public:
 		MM_VERTCURVDIR			= 0x00000100,
 		MM_VERTRADIUS				= 0x00000200,
 		MM_VERTTEXCOORD			= 0x00000400,
-                MM_COLOR                        = 0x00000800,
+
 		MM_FACEVERT					= 0x00001000,
 		MM_FACENORMAL				= 0x00002000,
 		MM_FACEFLAG					= 0x00004000,
@@ -160,6 +160,8 @@ public:
 // Per Mesh Stuff....
 		MM_CAMERA						= 0x10000000,
 		MM_TRANSFMATRIX     = 0x20000000,
+    MM_COLOR            = 0x40000000,
+    MM_POLYGONAL        = 0x80000000,
 		MM_ALL							= 0xffffffff,
 		
 

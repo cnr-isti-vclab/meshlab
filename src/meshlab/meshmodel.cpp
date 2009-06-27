@@ -150,6 +150,8 @@ int MeshModel::io2mm(int single_iobit)
 		case tri::io::Mask::IOM_WEDGCOLOR				: return  MM_WEDGCOLOR;
 		case tri::io::Mask::IOM_WEDGNORMAL   		: return  MM_WEDGNORMAL  ;
 
+		case tri::io::Mask::IOM_BITPOLYGONAL   	: return  MM_POLYGONAL  ;
+
 		default:
 			assert(0);
 			return MM_NONE;  // FIXME: Returning this is not the best solution (!)
