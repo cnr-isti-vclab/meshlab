@@ -463,7 +463,9 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
 	{
 		case CP_FILLING :
 		case CP_COLOURISATION :
-                case CP_SCATTER_PER_MESH :
+		case CP_SCATTER_PER_MESH :
+		case CP_PERLIN_COLOR :
+		case CP_COLOR_NOISE :
 		{
 			return MeshFilterInterface::FP_Generic;
 			break;
@@ -477,9 +479,7 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
 		case CP_EQUALIZE :
 		case CP_DESATURATION :
 		case CP_WHITE_BAL :
-                case CP_LEVELS :
-                case CP_PERLIN_COLOR :
-                case CP_COLOR_NOISE :
+		case CP_LEVELS :
 		{
 			return MeshFilterInterface::FP_VertexColor;	
 			break;
