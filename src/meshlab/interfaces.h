@@ -315,36 +315,31 @@ public:
 
 	// Function used by the framework to test if a filter is applicable to a mesh.
 	// For istance a colorize by quality filter cannot be applied to a mesh without per-vertex-quality.
-
-	bool isFilterApplicable(QAction * act,const MeshModel& m) const
+    // if return false it fills a list of strings describing the missing items.
+	bool isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const
 	{	
-		int mask = getPreConditions(act);
-		int fp_mask = 0;
-
-		if (mask == MeshFilterInterface::FP_Generic)
+		int preMask = getPreConditions(act);
+		MissingItems.clear();
+		
+		if (preMask == MeshFilterInterface::FP_Generic) // no precondition specified. 
 			return true;
+		
+		if (preMask & MeshFilterInterface::FP_VertexColor && !m.hasDataMask(MeshModel::MM_VERTCOLOR))
+				MissingItems.push_back("Vertex Color");
+				
+		if (preMask & MeshFilterInterface::FP_VertexQuality && !m.hasDataMask(MeshModel::MM_VERTQUALITY))
+				MissingItems.push_back("Vertex Quality");
 
-		if (m.hasDataMask(MeshModel::MM_VERTCOLOR))
-			fp_mask |= MeshFilterInterface::FP_VertexColor;
+		if (preMask & MeshFilterInterface::FP_WedgeTexCoord && !m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+				MissingItems.push_back("Per Wedge Texture Coords");
 
-		if (m.hasDataMask(MeshModel::MM_VERTQUALITY))
-			fp_mask |= MeshFilterInterface::FP_VertexQuality;
+		if (preMask & MeshFilterInterface::FP_VertexRadius && !m.hasDataMask(MeshModel::MM_VERTRADIUS))
+				MissingItems.push_back("Vertex Radius");
 
-		if (m.hasDataMask(MeshModel::MM_VERTRADIUS))
-			fp_mask |= MeshFilterInterface::FP_VertexRadius;
+		if (preMask & MeshFilterInterface::FP_Face)
+				MissingItems.push_back("Non empty Face Set");
 
-		if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-			fp_mask |= MeshFilterInterface::FP_WedgeTexCoord;
-
-		bool masktest = ((mask & fp_mask) == mask);
-		if (!masktest) 
-			return false;
-
-		if (mask & MeshFilterInterface::FP_Face)
-			if (m.cm.face.empty())
-				return false;
-
-		return true;
+		return MissingItems.isEmpty();
 	}
 
 	//  this function returns true if the filter has parameters that must be filled with an automatically build dialog.

@@ -159,32 +159,3 @@ int MeshModel::io2mm(int single_iobit)
 	} ;
 }
 
-const QStringList MeshModel::getStringListFromEnumMask( const int mask )
-{
-	QStringList lst;
-	if (mask & MM_VERTCOORD)			lst.append("Vertex Coordinate");
-	if (mask & MM_VERTNORMAL)			lst.append("Vertex Normal");
-	if (mask & MM_VERTFLAG)				lst.append("Vertex Flag");
-	if (mask & MM_VERTCOLOR)			lst.append("Vertex Color");
-	if (mask & MM_VERTQUALITY)		lst.append("Vertex Quality");
-	if (mask & MM_VERTMARK)				lst.append("Vertex");
-	if (mask & MM_VERTFLAG)				lst.append("Vertex");
-	if (mask & MM_VERTCURV)				lst.append("Vertex");
-	if (mask & MM_VERTCURVDIR)		lst.append("Vertex");
-	if (mask & MM_VERTRADIUS)			lst.append("Vertex Radius");
-	if (mask & MM_VERTTEXCOORD)		lst.append("Vertex Texture Coordinate");
-	if (mask & MM_FACEVERT)				lst.append("MM_FACEVERT");
-	if (mask & MM_FACENORMAL)			lst.append("MM_FACENORMAL");
-	if (mask & MM_FACENORMAL)			lst.append("MM_FACENORMAL");
-	if (mask & MM_FACEFLAG)				lst.append("MM_FACEFLAG");
-	if (mask & MM_FACECOLOR)			lst.append("MM_FACECOLOR");
-	if (mask & MM_FACEQUALITY)		lst.append("MM_FACEQUALITY");
-	if (mask & MM_FACEMARK)				lst.append("MM_FACEMARK");
-	if (mask & MM_FACEFACETOPO)		lst.append("MM_FACEFACETOPO");
-	if (mask & MM_WEDGTEXCOORD)		lst.append("MM_WEDGTEXCOORD");
-	if (mask & MM_WEDGNORMAL)			lst.append("MM_WEDGNORMAL");
-	if (mask & MM_WEDGCOLOR)			lst.append("MM_WEDGCOLOR");
-	if (mask & MM_VERTFLAGSELECT)	lst.append("MM_VERTFLAGSELECT");
-	if (mask & MM_FACEFLAGSELECT)	lst.append("MM_FACEFLAGSELECT");
-	return lst;
-}

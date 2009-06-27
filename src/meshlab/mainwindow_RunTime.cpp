@@ -504,7 +504,7 @@ void MainWindow::startFilter()
 	if(GLA()) GLA()->endEdit();
 	updateMenus();
 
-
+	QStringList missingStuff;
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		qDebug("MeshCreation");
@@ -516,10 +516,9 @@ void MainWindow::startFilter()
 		if(mdiarea->isVisible()) gla->showMaximized();
 	}
 	else
-		if (!iFilter->isFilterApplicable(action,(*GLA()->mm())))
+		if (!iFilter->isFilterApplicable(action,(*GLA()->mm()),missingStuff))
 			{
-				QStringList enlst = MeshModel::getStringListFromEnumMask(iFilter->getPreConditions(action));
-				QString enstr = enlst.join(",");
+				QString enstr = missingStuff.join(",");
 				QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
 				"Current mesh does not have <i>" + enstr + "</i>."));
 				return;

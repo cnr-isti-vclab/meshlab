@@ -170,8 +170,6 @@ public:
 	} ;
 
 
-	static const QStringList getStringListFromEnumMask(const int mask);
-
   CMeshO cm;
 
 public:
