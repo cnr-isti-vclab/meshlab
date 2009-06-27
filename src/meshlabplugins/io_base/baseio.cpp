@@ -279,8 +279,10 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
 		}
 		return true;
 	}
-	if( formatName.toUpper() == tr("OFF") || formatName.toUpper() == tr("DXF") || formatName.toUpper() == tr("OBJ") )
+	if( formatName.toUpper() == tr("OFF"))
   {
+		if(mask && tri::io::Mask::IOM_BITPOLYGONAL)
+			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
     int result = tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
   	if(result!=0)
 	  {
@@ -289,6 +291,17 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
 	  }
 	return true;
   }
+	if( formatName.toUpper() == tr("DXF") || formatName.toUpper() == tr("OBJ") )
+  {
+		int result = tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+  	if(result!=0)
+	  {
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
+		  return false;
+	  }
+	return true;
+  }
+
   assert(0); // unknown format
 	return false;
 }

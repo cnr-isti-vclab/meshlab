@@ -110,6 +110,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
       break;
     case CR_DODECAHEDRON:
       vcg::tri::Dodecahedron<CMeshO>(m.cm);
+			m.updateDataMask(MeshModel::MM_POLYGONAL);
       break;
     case CR_OCTAHEDRON:
       vcg::tri::Octahedron<CMeshO>(m.cm);
@@ -122,6 +123,8 @@ bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet
       float sz=par.getFloat("size");
       vcg::Box3f b(vcg::Point3f(1,1,1)*(sz/2),vcg::Point3f(1,1,1)*(-sz/2));
       vcg::tri::Box<CMeshO>(m.cm,b);
+			m.updateDataMask(MeshModel::MM_POLYGONAL);
+
       break;
     }
     case CR_CONE:
