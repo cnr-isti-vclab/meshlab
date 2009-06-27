@@ -121,7 +121,6 @@
 #include <vcg/complex/trimesh/hole.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/export_ply.h>
-#include "../filter_clean/remove_small_cc.h"
 #include <meshlab/alnParser.h>
 
 FILE *logFP=0; 
@@ -725,7 +724,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 			{
 				vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 				m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK);
-				RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,m.cm.bbox.Diag()*maxCCDiagVal/100.0);
+				tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,m.cm.bbox.Diag()*maxCCDiagVal/100.0);
 			}
 
 			int t2=clock();
