@@ -124,7 +124,7 @@ const int FilterColorProc::getRequirements(QAction *action)
     assert(0);
 }
 
-void FilterColorProc::initParameterSet(QAction *a, MeshDocument& md, FilterParameterSet & par)
+void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, FilterParameterSet & par)
 {
     switch(ID(a))
   {
@@ -228,7 +228,7 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& md, FilterParam
 	}
 }
 
-bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, FilterParameterSet & par, vcg::CallBackPos * cb)
+bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, FilterParameterSet & par, vcg::CallBackPos * /* cb */)
 {
   MeshModel* m = md.mm();  //get current mesh from document
 
@@ -454,7 +454,6 @@ int FilterColorProc::postCondition( QAction* filter ) const
         case CP_SCATTER_PER_MESH : return MeshModel::MM_COLOR;
         default : return MeshModel::MM_VERTCOLOR;
     }
-    assert(0);
 }
 
 int FilterColorProc::getPreConditions( QAction * filter ) const
@@ -484,7 +483,7 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
 			return MeshFilterInterface::FP_VertexColor;	
 			break;
 		}
-		default: assert(0);
+		default: assert(0); return MeshFilterInterface::FP_Generic;
 	}
 }
 
