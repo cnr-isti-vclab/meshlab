@@ -170,6 +170,41 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
     default : return MeshFilterInterface::Generic;
   }
 }
+int FilterUnsharp::getPreConditions(QAction *a) const
+{
+  switch(ID(a))
+  {
+			case FP_VERTEX_QUALITY_SMOOTHING:
+			case FP_UNSHARP_QUALITY:
+					return MeshFilterInterface::FP_Face | MeshFilterInterface::FP_VertexQuality;
+  		case FP_SD_LAPLACIAN_SMOOTH:
+			case FP_HC_LAPLACIAN_SMOOTH:
+			case FP_LAPLACIAN_SMOOTH:
+			case FP_TWO_STEP_SMOOTH:
+			case FP_TAUBIN_SMOOTH:
+			case FP_DEPTH_SMOOTH:
+			case FP_LINEAR_MORPH :
+			case FP_UNSHARP_NORMAL:				
+			case FP_UNSHARP_GEOMETRY:  
+			case FP_DIRECTIONAL_PRESERVATION:
+			case FP_FACE_NORMAL_SMOOTHING:	  
+			case FP_RECOMPUTE_FACE_NORMAL :
+			case FP_RECOMPUTE_VERTEX_NORMAL :
+			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
+			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
+			case FP_FACE_NORMAL_NORMALIZE:	  
+			case FP_CREASE_CUT:
+					return MeshFilterInterface::FP_Face;
+			case FP_UNSHARP_VERTEX_COLOR:	     
+					return MeshFilterInterface::FP_Face | MeshFilterInterface::FP_VertexColor;
+
+			case FP_VERTEX_NORMAL_NORMALIZE:	  return MeshFilterInterface::FP_Generic;
+					
+    default : assert(0); return MeshFilterInterface::FP_Generic;
+  }
+}
+
+
 int FilterUnsharp::postCondition(QAction *a) const
 {
   switch(ID(a))

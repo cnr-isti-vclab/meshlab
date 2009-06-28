@@ -79,6 +79,8 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
   virtual void initParameterSet(QAction *action, MeshModel &/*m*/, FilterParameterSet & parlst);
 	virtual int postCondition( QAction* ) const;
+	virtual int getPreConditions(QAction *) const;
+
 	protected:
 	
 };
