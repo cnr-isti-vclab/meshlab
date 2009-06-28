@@ -84,8 +84,10 @@ public:
 	WeingartenMap(const VectorType& grad, const MatrixType& hess)
 	{
 		Scalar invL = 1.0/grad.Norm();
+		assert(grad.Norm()>1e-8);
 		m_normal = grad * invL;
-
+    assert(!math::IsNAN(invL) && "gradient should not be zero!");
+					
 		Matrix33<Scalar> I; I.SetIdentity();
 		m_nnT.ExternalProduct(m_normal,m_normal);
 

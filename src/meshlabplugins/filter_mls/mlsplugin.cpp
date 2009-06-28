@@ -540,6 +540,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 							case CT_K2: c = W.K2(); break;
 							default: assert(0 && "invalid curvature type");
 						}
+					assert(!math::IsNAN(c) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
 					}
 					mesh->cm.vert[i].Q() = c;
 					minc = std::min(c,minc);

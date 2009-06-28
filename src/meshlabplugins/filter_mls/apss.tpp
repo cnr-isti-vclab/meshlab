@@ -297,6 +297,7 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
 	{
 		mStatus = ASS_PLANE;
 		LScalar s = LScalar(1)/vcg::Norm(uLinear);
+		assert(!vcg::math::IsNAN(s) && "normal should not have zero len!");
 		uLinear *= s;
 		uConstant *= s;
 	}
