@@ -118,7 +118,7 @@ template<class MESH_TYPE, int dim> void FeatureRGB<MESH_TYPE,dim>::SetupParamete
 template<class MESH_TYPE, int dim> bool FeatureRGB<MESH_TYPE,dim>::ComputeFeature(MeshType &m, ParamType& param, CallBackPos *cb)
 {
     //clear the mesh to avoid wrong values during computations
-    tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
+    //tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
 
     //variables needed for progress bar callback
     float progBar = 0.0f;

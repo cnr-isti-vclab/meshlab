@@ -20,16 +20,30 @@ class SmoothCurvatureFeature
 
     class Parameters
     {
-        public:
+        public:       
 
         enum CurvatureType {GAUSSIAN, MEAN, ABSOLUTE};
 
-        typedef pair<CurvatureType,int> ScaleDescriptionType;
+        class Item
+        {
+            public:
+            CurvatureType type;
+            int scale;
+            float lower_bound;
+            float upper_bound;
 
-        vector<ScaleDescriptionType>* featureDesc;
+            Item(CurvatureType _type, int _scale, float _lower_bound = 0.0f, float _upper_bound = 1.0f){
+                type = _type;
+                scale = _scale;
+                lower_bound = _lower_bound;
+                upper_bound = _upper_bound;
+            }
+        };
+
+        vector<Item>* featureDesc;
 
         Parameters(){
-            featureDesc = new vector<ScaleDescriptionType>();
+            featureDesc = new vector<Item>();
 
         }
 
@@ -37,9 +51,10 @@ class SmoothCurvatureFeature
             delete featureDesc;
         }
 
-        bool add(CurvatureType cType, int smoothStep){
-            if(smoothStep<0 | featureDesc->size()>=dim) return false;
-            featureDesc->push_back(make_pair<CurvatureType,int>(cType,smoothStep));
+        bool add(CurvatureType cType, int smoothStep, float lower_bound = 0.0f, float upper_bound = 1.0f){
+
+            assert(smoothStep>=0 & featureDesc->size()<dim & lower_bound>=0.0f & upper_bound<=1.0f & lower_bound<upper_bound);
+            featureDesc->push_back(Item(cType, smoothStep, lower_bound, upper_bound));
             return true;
         }
     };
@@ -132,12 +147,12 @@ template<class MESH_TYPE, int dim> bool SmoothCurvatureFeature<MESH_TYPE,dim>::C
 //parameters must be ordered according to smooth iterations
 template<class MESH_TYPE, int dim> void SmoothCurvatureFeature<MESH_TYPE,dim>::SetupParameters(ParamType& param)
 {
-    param.add(Parameters::GAUSSIAN, 5);
-    param.add(Parameters::MEAN, 5);
-    param.add(Parameters::GAUSSIAN, 10);
-    param.add(Parameters::MEAN, 10);
-    param.add(Parameters::GAUSSIAN, 15);
-    param.add(Parameters::MEAN, 15);
+    param.add(Parameters::GAUSSIAN, 5, 0.4f, 0.9f);
+    param.add(Parameters::MEAN, 5, 0.4f, 0.9f);
+    param.add(Parameters::GAUSSIAN, 10, 0.4f, 0.9f);
+    param.add(Parameters::MEAN, 10, 0.4f, 0.9f);
+    param.add(Parameters::GAUSSIAN, 15, 0.4f, 0.9f);
+    param.add(Parameters::MEAN, 15, 0.4f, 0.9f);
     assert(param.featureDesc->size()==getFeatureDimension());
 }
 
@@ -185,15 +200,15 @@ template<class MESH_TYPE, int dim> bool SmoothCurvatureFeature<MESH_TYPE,dim>::C
     for(VertexIterator vi = m.vert.begin(); vi!=m.vert.end(); ++vi) fh[vi] = new FeatureType(*vi);
 
     //loop trough scale levels
-    int smooth_step = 0, smooth_accum = 0; float hmin = 0.4f, hmax = 0.9f;
+    int smooth_step = 0, smooth_accum = 0;
     for (unsigned int i = 0; i<FeatureType::getFeatureDimension(); i++, smooth_accum+=smooth_step)
     {
-        smooth_step = (*param.featureDesc)[i].second - smooth_accum;
+        smooth_step = (*param.featureDesc)[i].scale - smooth_accum;
 
         tri::Smooth<MeshType>::VertexCoordLaplacian(m, smooth_step);//smooth mesh
         tri::UpdateCurvature<MeshType>::MeanAndGaussian(m);  //compute curvature
         //copy curvature values in the quality attributes; then build the histogram and take lower and upper bounds.
-        switch((*param.featureDesc)[i].first){
+        switch((*param.featureDesc)[i].type){
             case Parameters::GAUSSIAN:{
                 tri::UpdateQuality<MeshType>::VertexFromGaussianCurvature(m);
                 break;
@@ -210,7 +225,7 @@ template<class MESH_TYPE, int dim> bool SmoothCurvatureFeature<MESH_TYPE,dim>::C
         }
         Histogram<ScalarType> hist = Histogram<ScalarType>();
         tri::Stat<MeshType>::ComputePerVertexQualityHistogram(m, hist);
-        float vmin = hist.Percentile(hmin); float vmax = hist.Percentile(hmax);
+        float vmin = hist.Percentile((*param.featureDesc)[i].lower_bound); float vmax = hist.Percentile((*param.featureDesc)[i].upper_bound);
 
         //for each vertex, creates a feature, assign it to the attribute, and set its common values. If curvature is beetween bounds
         //and vertex is not a boundary, curvature is stored in the feature, otherwise the feature is set to an empty value.
