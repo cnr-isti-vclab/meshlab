@@ -80,8 +80,8 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         template<class ALIGNER_TYPE>
         static typename ALIGNER_TYPE::Result RigidTransformationOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
-        template<class ALIGNER_TYPE>
-        static typename ALIGNER_TYPE::Result ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);
+        template<class CONSENSUS_TYPE>
+        static int ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename CONSENSUS_TYPE::Parameters& param, CallBackPos *cb=NULL);
 
         template<class ALIGNER_TYPE>
         static typename ALIGNER_TYPE::Result RansacOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb=NULL);

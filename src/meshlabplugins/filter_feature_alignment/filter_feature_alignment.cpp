@@ -272,15 +272,7 @@ bool FilterFeatureAlignment::logResult(FilterIDType filter, typename ALIGNER_TYP
                     case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
                     default : assert(0);
             }
-        }
-        case AF_CONSENSUS:{
-            switch(res.exitCode){
-                case ResultType::ALIGNED :
-                case ResultType::NOT_ALIGNED : {mylogger("Consensus computed: %.2f%% consensus, %i sec.", res.bestConsensus, res.time); return true;}
-                case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
-                default : assert(0);
-            }
-        }
+        }                
         case AF_RANSAC:{
             switch(res.exitCode){
                 case ResultType::ALIGNED : {mylogger("Alignemnt found: %.2f%% consensus, %i matches, %i iter. skipped, %i sec.", res.bestConsensus, res.numMatches, res.numSkippedIter, res.time); return true;}
@@ -419,30 +411,23 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
             assert(0);
         }  //end case AF_RIGID_TRANSFORMATION
         case AF_CONSENSUS :
-        {            
-            switch(featureType)
-            {
-                case 0:{
-                    typedef SmoothCurvatureFeature<MeshType, 6> FeatureType; //define needed typedef FeatureType
-                    typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
-                    typedef AlignerType::Result ResultType;
-                    AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    ResultType res = ConsensusOperation<AlignerType>(*mFix, *mMov, alignerParam, cb);
-                    return logResult<AlignerType>(ID(filter), res, errorMessage);
-                }
-                case 1:{
-                    typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
-                    typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
-                    typedef AlignerType::Result ResultType;
-                    AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
-                    setAlignmentParameters<AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
-                    ResultType res = ConsensusOperation<AlignerType>(*mFix, *mMov, alignerParam, cb);
-                    return logResult<AlignerType>(ID(filter), res, errorMessage);
-                }
-                default: assert(0);
-            }
-            assert(0);
+        {                        
+            typedef Consensus<CMeshO> ConsensusType;
+            ConsensusType::Parameters consParam;
+            //set up params for consensus
+            consParam.samples = math::Clamp(par.getInt("fullConsensusSamples"),1,mMov->cm.VertexNumber());
+            consParam.consensusDist=math::Clamp<float>(par.getFloat("consensusDist"),0.0f,100.0f);
+            consParam.paint = par.getBool("paint");
+            consParam.normalEqualization = par.getBool("normEq");
+            consParam.threshold = 0.0f;
+            consParam.bestScore = 0;
+            int result = ConsensusOperation<ConsensusType>(*mFix, *mMov, consParam, cb);
+            if(result<0){
+                errorMessage = "Consensus Initialization fails.";
+                return false; }
+
+            Log("Consensus of %.2f%%", 100.0f*float(result)/consParam.samples);
+            return true;
         }
         case AF_RANSAC:
         {                                
@@ -625,37 +610,28 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
     return res; //all right
 }
 
-template<class ALIGNER_TYPE>
-typename ALIGNER_TYPE::Result FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
+template<class CONSENSUS_TYPE>
+int FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename CONSENSUS_TYPE::Parameters& param, CallBackPos *cb)
 {
-    typedef ALIGNER_TYPE AlignerType;
-    typedef typename AlignerType::MeshType MeshType;
-    typedef typename AlignerType::FeatureType FeatureType;
+    typedef CONSENSUS_TYPE ConsensusType;
+    typedef typename ConsensusType::MeshType MeshType;
     typedef typename MeshType::ScalarType ScalarType;
-    typedef typename MeshType::VertexType VertexType;
-    typedef GridStaticPtr<VertexType,ScalarType> MeshGrid;
-    typedef tri::VertTmark<MeshType> MarkerVertex;
-    typedef typename AlignerType::Result ResultType;
-
-    time_t start, end;
-    time(&start); //start timer
+    typedef typename MeshType::VertexType VertexType;    
+    typedef typename ConsensusType::Parameters ParamType;
 
     //enables needed attributes. These are used by the getClosest functor.
     mFix.updateDataMask(MeshModel::MM_VERTMARK);
     mMov.updateDataMask(MeshModel::MM_VERTMARK);    
 
-    AlignerType aligner;
-    ResultType res = aligner.init(mFix.cm, mMov.cm, param);
-    if(res.exitCode==ResultType::FAILED) return res;
+    ConsensusType cons;    
+    cons.AddFix(mFix.cm);
+    cons.SetMove(mMov.cm);
 
-    param.consOffset = 0.0f;
-    res.bestConsensus = 100.0f*(AlignerType::Consensus(mFix.cm, mMov.cm, *(aligner.gridFix), aligner.markerFunctorFix, aligner.normBuckets, param, 0, cb)/float(param.fullConsensusSamples));
-    aligner.finalize();
+    if(!cons.Init(param)) return -1;
 
-    time(&end); //stop timer
-    res.time = (int)difftime(end,start);
+    int result = cons.Check(param);
 
-    return res;
+    return result;
 }
 
 template<class ALIGNER_TYPE>

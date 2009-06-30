@@ -42,12 +42,6 @@
 using namespace std;
 using namespace vcg;
 
-inline int LocRnd(int n)
-{
-    static math::SubtractiveRingRNG myrnd(time(NULL));
-    return myrnd.generate(n);
-}
-
 template <class MeshType>
 class VertexPointerSampler
 {
@@ -70,6 +64,16 @@ class VertexPointerSampler
         void AddTextureSample(const FaceType &, const CoordType &, const Point2i &){}
 };
 
+//puo darsi che serva solo al consenso. in quel caso mettila privata della classe
+template<class MESH_TYPE> void SampleVertUniform(MESH_TYPE& m, vector<typename MESH_TYPE::VertexPointer>& vert, int sampleNum)
+{
+    typedef MESH_TYPE MeshType;
+
+    VertexPointerSampler<MeshType> sampler;
+    tri::SurfaceSampling<MeshType, VertexPointerSampler<MeshType> >::VertexUniform(m, sampler, sampleNum);
+    for(unsigned int i=0; i<sampler.sampleVec.size(); i++) vert.push_back(sampler.sampleVec[i]);
+}
+
 template<class FEATURE_TYPE, class SCALAR_TYPE> struct MData {
     typedef FEATURE_TYPE FeatureType;
     typedef SCALAR_TYPE ScalarType;
@@ -84,6 +88,233 @@ template<class FEATURE_TYPE, class SCALAR_TYPE> struct MData {
 template<class FEATURE_TYPE, class SCALAR_TYPE> bool MDataCompareDist(MData<FEATURE_TYPE,SCALAR_TYPE> i,MData<FEATURE_TYPE,SCALAR_TYPE> j) { return (i.summedPointDist<j.summedPointDist); }
 template<class FEATURE_TYPE, class SCALAR_TYPE> bool MDataCompareCons(MData<FEATURE_TYPE,SCALAR_TYPE> i,MData<FEATURE_TYPE,SCALAR_TYPE> j) { return (i.shortCons>j.shortCons); }
 
+template<class MESH_TYPE> class Consensus
+{
+    public:
+
+    typedef MESH_TYPE MeshType;
+    typedef typename MeshType::ScalarType ScalarType;
+    typedef typename MeshType::VertexType VertexType;
+    typedef typename MeshType::VertexPointer VertexPointer;
+    typedef typename MeshType::CoordType CoordType;
+    typedef typename MeshType::VertexIterator VertexIterator;
+    typedef typename VertexPointerSampler<MeshType>::VertexPointerIterator VertexPointerIterator;
+    typedef GridStaticPtr<VertexType, ScalarType > MeshGrid;
+    typedef tri::VertTmark<MeshType> MarkerVertex;
+
+    class Parameters
+    {
+        public:
+        int samples;                                //number of samples
+        int bestScore;                              //used to paint mMove: paint only if is a best score
+        float consensusDist;                        //consensus distance
+        float consensusNormalsAngle;                //holds the the consensus angle for normals, in gradients.
+        float threshold;                            //consensus % to win consensus;
+        bool normalEqualization;                    //to use normal equalization in consensus
+        bool paint;                                 //to paint mMov according to consensus
+        void (*log)(const char * f, ... );          //pointer to log function
+
+        Parameters()
+        {
+            samples = 2500;
+            bestScore = 0;
+            consensusDist = 2.0f;
+            consensusNormalsAngle = 0.965f;   //15 degrees.
+            threshold = 45.0f;
+            normalEqualization = true;
+            paint = false;
+            log = NULL;
+        }
+    };
+
+    vector<MeshType*> fixList;
+    MeshType* mMov;
+    vector<vector<int> >* normBuckets;          //structure to hold normals bucketing. Needed for normal equalized sampling during consensus
+    MeshGrid* gridFix;                          //variable to manage uniform grid
+    MarkerVertex markerFunctorFix;              //variable to manage uniform grid
+
+    Consensus(){
+        normBuckets = NULL;
+        gridFix = NULL;
+    }
+
+    void AddFix(MeshType& mFix){ fixList.push_back(&mFix); }
+
+    void ClearFix(MeshType& mFix){}
+
+    void SetMove(MeshType& mMove){ mMov = &mMove; }
+
+    bool Init(Parameters& param){
+        //builds the uniform grid with mFix vertices
+        gridFix = new MeshGrid();
+        assert(fixList.size()>0);
+        SetupGrid();
+
+        //if requested, group normals of mMov into 30 buckets. Buckets are used for Vertex Normal Equalization
+        //in consensus. Bucketing is done here once for all to speed up consensus.
+        if(param.normalEqualization){
+            normBuckets = BucketVertexNormal(mMov->vert, 30);
+            assert(normBuckets!=NULL);
+        }
+    }
+
+    //compute the randomized consensus beetween m1 e m2 (without taking in account any additional transformation)
+    //IMPORTANT: per vertex normals of m1 and m2 MUST BE PROVIDED JET NORMALIZED!!!
+    int Check(Parameters& param)
+    {
+        //pointer to a function to compute distance beetween points
+        vertex::PointDistanceFunctor<ScalarType> PDistFunct;
+
+ //       int samples = param.samples;
+//        if(!param.isFullConsensus) samples = param.short_cons_samples;
+
+        vector<VertexPointer>* queryVert = NULL;
+        //if no buckets are provided get a vector of vertex pointers sampled uniformly
+        //else, get a vector of vertex pointers sampled in a normal equalized manner; used as query points
+        if(normBuckets==NULL){
+            queryVert = new vector<VertexPointer>();
+            SampleVertUniform<MeshType>(*mMov, *queryVert, param.samples);
+        }
+        else{
+            queryVert = new vector<VertexPointer>(mMov->vert.size(),NULL);
+            for(unsigned int i=0; i<mMov->vert.size(); i++) (*queryVert)[i] = &(mMov->vert[i]);//do a copy of pointers to vertexes
+            SampleVertNormalEqualized(*queryVert, param.samples);
+        }
+        assert(queryVert!=NULL);
+
+        assert(fixList.size()>0);
+        //init variables for consensus
+        float consDist = param.consensusDist*(mMov->bbox.Diag()/100.0f);        //consensus distance
+        int cons_succ = int(param.threshold*(param.samples/100.0f));      //score needed to pass consensus
+        int consensus = 0;                  //counts vertices in consensus
+        float dist;                         //holds the distance of the closest vertex found
+        VertexType* closestVertex = NULL;   //pointer to the closest vertex
+        Point3<ScalarType> queryNrm;        //the query point normal for consensus
+        CoordType queryPnt;                 //the query point for consensus
+        CoordType closestPnt;               //the closest point found in consensus
+        Matrix33<ScalarType> inv33_matMov(mMov->Tr,3); //3x3 matrix needed to transform normals
+        Matrix33<ScalarType> inv33_matFix(Inverse(fixList[0]->Tr),3);  //3x3 matrix needed to transform normals
+
+        //compute cons_succ depending on the type of consensus, i.e short/full
+//        if(param.isFullConsensus) cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));
+
+
+        //Colors handling: white = not tested; blue = not in consensus; red = in consensus;
+        //yellow = not in consensus becouse of normals
+        //Colors are stored in a buffer vector; at the end of consensus loop they are applied
+        //to the mesh ONLY IF full consensus overcome succes threshold AND the best consensus.
+        vector<Color4b>* colorBuf = NULL;
+        if(param.paint) colorBuf = new vector<Color4b>(mMov->VertexNumber(),Color4b::White); //buffer vector for colors
+
+        //consensus loop
+        for(VertexPointerIterator vi=queryVert->begin(); vi!=queryVert->end(); vi++)
+        {
+            int i = (vi - queryVert->begin());  //iteration counter
+            assert(i>=0 && i<mMov->VertexNumber());
+
+            dist = -1.0f;
+            //set query point; vertex coord is transformed properly in fix mesh coordinates space; the same for normals
+            queryPnt = Inverse(fixList[0]->Tr) * (mMov->Tr * (*vi)->P());
+            queryNrm = inv33_matFix * (inv33_matMov * (*vi)->N());
+
+            //if query point is bbox, the look for a vertex in cDist from the query point
+            if(fixList[0]->bbox.IsIn(queryPnt)) closestVertex = gridFix->GetClosest(PDistFunct,markerFunctorFix,queryPnt,consDist,dist,closestPnt);
+            else closestVertex=NULL;  //out of bbox, we consider the point not in consensus...
+
+            if(closestVertex!=NULL && dist < consDist){
+                assert(closestVertex->P()==closestPnt); //coord and vertex pointer returned by getClosest must be the same
+
+                //point is in consensus distance, now we check if normals are near
+                if(queryNrm.dot(closestVertex->N())>param.consensusNormalsAngle)  //15 degrees
+                {
+                    consensus++;  //got consensus
+                    if(colorBuf){ (*colorBuf)[i] = Color4b::Red; }  //paint of red if needed
+                }
+                else{
+                    if(colorBuf){ (*colorBuf)[i] = Color4b::Yellow; }  //paint of yellow if needed
+                }
+            }
+            else{
+                if(colorBuf){ (*colorBuf)[i] = Color4b::Blue; } //not in consensus due to distance, paint of blue
+            }
+        }
+
+        //apply colors if consensus is the best ever found.
+        //NOTE: we got to do this here becouse we need a handle to sampler. This is becouse vertex have been shuffled
+        //and so colors have been stored not in order in the buffer!
+        if(colorBuf){
+            if(consensus>=param.bestScore && consensus>=cons_succ){
+                for(VertexPointerIterator vi=queryVert->begin(); vi!=queryVert->end(); vi++)
+                    if(!(*vi)->IsD()) (*vi)->C() = (*colorBuf)[vi-queryVert->begin()];
+            }
+        }
+
+        //clear and delete buffer for colors, if needed
+        if(colorBuf){ colorBuf->clear(); delete colorBuf; }
+
+        //delete vector of query vertexes; do it as last thing, 'couse it is used for coloring too.
+        if(queryVert!=NULL) delete queryVert;
+
+        return consensus;
+    }
+
+    private:
+    vector<vector<int> >* BucketVertexNormal(typename MESH_TYPE::VertContainer& vert, int bucketDim = 30)
+    {
+        static vector<Point3f> NV;
+        if(NV.size()==0) GenNormal<float>::Uniform(bucketDim,NV);
+
+        // Bucket vector dove, per ogni normale metto gli indici
+        // dei vertici ad essa corrispondenti
+        vector<vector<int> >* BKT = new vector<vector<int> >(NV.size()); //NV size is greater then bucketDim, so don't change this!
+
+        int ind;
+        for(int i=0;i<vert.size();++i){
+            ind=GenNormal<float>::BestMatchingNormal(vert[i].N(),NV);
+            (*BKT)[ind].push_back(i);
+        }
+
+        return BKT;
+    }
+
+    bool SampleVertNormalEqualized(vector<typename MESH_TYPE::VertexPointer>& vert, int SampleNum)
+    {
+        // vettore di contatori per sapere quanti punti ho gia' preso per ogni bucket
+        vector<int> BKTpos(normBuckets->size(),0);
+
+        if(SampleNum >= int(vert.size())) SampleNum= int(vert.size()-1);
+
+        int ind;
+        for(int i=0;i<SampleNum;){
+            ind=LocRnd(normBuckets->size()); // Scelgo un Bucket
+            int &CURpos = BKTpos[ind];
+            vector<int> &CUR = (*normBuckets)[ind];
+
+            if(CURpos<int(CUR.size())){
+                swap(CUR[CURpos], CUR[ CURpos + LocRnd((*normBuckets)[ind].size()-CURpos)]);
+                swap(vert[i],vert[CUR[CURpos]]);
+                ++BKTpos[ind];
+                ++i;
+            }
+        }
+
+        vert.resize(SampleNum);
+        return true;
+    }
+
+    int LocRnd(int n){
+        static math::SubtractiveRingRNG myrnd(time(NULL));
+        return myrnd.generate(n);
+    }
+
+    inline void SetupGrid()
+    {
+        gridFix->Set(fixList[0]->vert.begin(),fixList[0]->vert.end());
+        markerFunctorFix.SetMesh(fixList[0]);
+    }
+};
+
+
 template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 {
     public:
@@ -91,10 +322,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
         typedef MESH_TYPE MeshType;
         typedef FEATURE_TYPE FeatureType;
         typedef typename MeshType::ScalarType ScalarType;
-        typedef typename MeshType::VertexType VertexType;
-        typedef GridStaticPtr<VertexType, ScalarType > MeshGrid;
-        typedef tri::VertTmark<MeshType> MarkerVertex;
+        typedef typename MeshType::VertexType VertexType;        
         typedef Matrix44<ScalarType> Matrix44Type;
+        typedef Consensus<MeshType> ConsensusType;
+        typedef typename ConsensusType::Parameters ConsensusParam;
 
         enum SamplingStrategies { UNIFORM_SAMPLING=0, POISSON_SAMPLING=1 };
 
@@ -119,8 +350,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             float shortConsOffset;                      //consensus %, depending on overlap, to win short consensus;
             bool normalEqualization;                    //to use normal equalization in consensus
             bool pickPoints;                            //to store bases/points into picked points attribute
-            bool paint;                                 //to paint mMov according to consensus
-            bool isFullConsensus;                       //tells to consensus procedure how to compute short/full success threshold
+            bool paint;                                 //to paint mMov according to consensus           
             int maxNumFullConsensus;                    //max num of bases tested with full consensus procedure
             int maxNumShortConsensus;                   //max num of bases tested with short consensus procedure
             float mMovBBoxDiag;                         //mMov bbox diagonal; used to compute distances...            
@@ -150,8 +380,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 shortConsOffset = 40.0f;
                 normalEqualization = true;
                 pickPoints = false;
-                paint = false;
-                isFullConsensus = true;
+                paint = false;                
                 maxNumFullConsensus = 8;
                 maxNumShortConsensus = 50;
                 mMovBBoxDiag = mMov.bbox.Diag();                
@@ -197,19 +426,16 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             }
         };
 
-        Result res;                                 //structure to hold result and stats
-        vector<vector<int> >* normBuckets;          //structure to hold normals bucketing. Needed for normal equalized sampling during consensus
-        MeshGrid* gridFix;                          //variable to manage uniform grid
-        MarkerVertex markerFunctorFix;              //variable to manage uniform grid
+        Result res;                                 //structure to hold result and stats        
         vector<FeatureType*>* vecFFix;              //vector to hold pointers to features extracted from mFix
         vector<FeatureType*>* vecFMov;              //vector to hold pointers to features extracted from mMov
         ANNpointArray fdataPts;                     //ANN structure to hold descriptors from which kdTree is build
-        ANNkd_tree* fkdTree;                        //ANN kdTree structure        
+        ANNkd_tree* fkdTree;                        //ANN kdTree structure
+        ConsensusType cons;
+        ConsensusParam consParam;
 
         FeatureAlignment(){
-            //set pointers to NULL for safety
-            normBuckets = NULL;
-            gridFix = NULL;
+            //set pointers to NULL for safety            
             fkdTree = NULL;
             vecFFix = NULL;
             vecFMov = NULL;
@@ -234,18 +460,13 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //copy descriptors of mMov into ANN structures, then build kdtree...
             FeatureAlignment::SetupKDTreePoints(*vecFFix, &fdataPts, FeatureType::getFeatureDimension());
             fkdTree = new ANNkd_tree(fdataPts,vecFFix->size(),FeatureType::getFeatureDimension());
-            assert(fkdTree);
+            assert(fkdTree);                                                        
 
-            //builds the uniform grid with mFix vertices
-            gridFix = new MeshGrid();
-            FeatureAlignment::SetupGrid(mFix, *gridFix, markerFunctorFix);
-
-            //if requested, group normals of mMov into 30 buckets. Buckets are used for Vertex Normal Equalization
-            //in consensus. Bucketing is done here once for all to speed up consensus.            
-            if(param.normalEqualization){
-                normBuckets = FeatureAlignment::BucketVertexNormal(mMov.vert, 30);
-                assert(normBuckets!=NULL);
-            }                                  
+            //consensus structure initialization
+            cons.AddFix(mFix);
+            cons.SetMove(mMov);
+            consParam.normalEqualization = param.normalEqualization;
+            cons.Init(consParam);
 
             time(&end);
             res.initTime = int(difftime(end,start));
@@ -272,6 +493,11 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             int cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));                       //number of vertices to win consensus
             int ransac_succ = int((param.succOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));                     //number of vertices to win ransac
             int bestConsIdx = -1;                       //index of the best MData, needed to store picked points            
+
+            //set up params for consensus
+            consParam.consensusDist=param.consensusDist;
+            consParam.consensusNormalsAngle=param.consensusNormalsAngle;
+            consParam.paint = param.paint;
 
             //auxiliary vectors needed inside the loop
             vector<FeatureType**>* baseVec = new vector<FeatureType**>();
@@ -340,8 +566,9 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
                 Matrix44Type currTr = (*candidates)[j].tr;              //load the right transformation
                 Matrix44Type oldTr = ApplyTransformation(mMov, currTr); //apply transformation
-                param.isFullConsensus = false;                          //set parameters for short consensus
-                (*candidates)[j].shortCons = Consensus(mFix, mMov, *gridFix, markerFunctorFix, normBuckets, param);  //compute short consensus
+                consParam.samples=param.short_cons_samples;                
+                consParam.threshold = param.shortConsOffset*param.overlap/100.0f;
+                (*candidates)[j].shortCons = cons.Check(consParam);  //compute short consensus
                 ResetTransformation(mMov, oldTr);                                 //restore old tranformation
 
                 if((*candidates)[j].shortCons >= short_cons_succ) res.numWonShortCons++;  //count how many won, and use this as bound later
@@ -365,8 +592,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
                 Matrix44Type currTr = (*candidates)[j].tr;              //load the right transformation
                 Matrix44Type oldTr = ApplyTransformation(mMov, currTr); //apply transformation
-                param.isFullConsensus = true;                           //set parameters for full consensus
-                int consensus = Consensus(mFix, mMov, *gridFix, markerFunctorFix, normBuckets, param, bestConsensus);  //compute full consensus
+                consParam.samples=param.fullConsensusSamples;                                
+                consParam.threshold = param.consOffset*param.overlap/100.0f;
+                consParam.bestScore = bestConsensus;
+                int consensus = cons.Check(consParam);  //compute full consensus
                 ResetTransformation(mMov, oldTr);                                 //restore old tranformation
 
                 if(consensus >= cons_succ) res.numWonFullCons++;
@@ -409,11 +638,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             if(vecFFix) vecFFix->clear(); delete vecFFix; vecFFix = NULL;
             if(vecFMov) vecFMov->clear(); delete vecFMov; vecFMov = NULL;
             //Cleaning ANN structures
-            FeatureAlignment::CleanKDTree(fkdTree, fdataPts, NULL, NULL, NULL, true);
-            //Cleaning bucketing structures
-            if(normBuckets!=NULL) delete normBuckets; normBuckets = NULL;
-            //Cleaning grid structures
-            if(gridFix) delete gridFix; gridFix = NULL;
+            FeatureAlignment::CleanKDTree(fkdTree, fdataPts, NULL, NULL, NULL, true);            
         }        
 
         /*******************************************************************************************
@@ -501,41 +726,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //as support mesh, so we are sure that pointer to vertex of input mesh are returned
             //perform sampling: number of samples returned can be 50% greater of the requested amount
             tri::SurfaceSampling<MeshType,VertexPointerSampler<MeshType> >::Poissondisk(m, sampler, m, radius, pp);
-        }
-
-        static bool SampleVertNormalEqualized(vector<typename MESH_TYPE::VertexPointer>& vert, vector<vector<int> >* BKT, int SampleNum)
-        {
-            // vettore di contatori per sapere quanti punti ho gia' preso per ogni bucket
-            vector<int> BKTpos(BKT->size(),0);
-
-            if(SampleNum >= int(vert.size())) SampleNum= int(vert.size()-1);
-
-            int ind;
-            for(int i=0;i<SampleNum;){
-                ind=LocRnd(BKT->size()); // Scelgo un Bucket
-                int &CURpos = BKTpos[ind];
-                vector<int> &CUR = (*BKT)[ind];
-
-                if(CURpos<int(CUR.size())){
-                    swap(CUR[CURpos], CUR[ CURpos + LocRnd((*BKT)[ind].size()-CURpos)]);
-                    swap(vert[i],vert[CUR[CURpos]]);
-                    ++BKTpos[ind];
-                    ++i;
-                }
-            }
-
-            vert.resize(SampleNum);
-            return true;
-        }
-
-        static void SampleVertUniform(MESH_TYPE& m, vector<typename MESH_TYPE::VertexPointer>& vert, int sampleNum)
-        {
-            typedef MESH_TYPE MeshType;
-
-            VertexPointerSampler<MeshType> sampler;
-            tri::SurfaceSampling<MeshType, VertexPointerSampler<MeshType> >::VertexUniform(m, sampler, sampleNum);
-            for(unsigned int i=0; i<sampler.sampleVec.size(); i++) vert.push_back(sampler.sampleVec[i]);
-        }
+        }                
 
         static typename MESH_TYPE::template PerVertexAttributeHandle<FEATURE_TYPE*> GetFeatureAttribute(MESH_TYPE& m, bool createAttribute = false)
         {
@@ -568,130 +759,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             return featureSubset;
         }
 
-        //compute the randomized consensus beetween m1 e m2 (without taking in account any additional transformation)
-        //IMPORTANT: per vertex normals of m1 and m2 MUST BE PROVIDED JET NORMALIZED!!!       
-        static int Consensus(MESH_TYPE& mFix, MESH_TYPE& mMov, GridStaticPtr<typename MESH_TYPE::VertexType, typename MESH_TYPE::ScalarType>& grid, tri::VertTmark<MESH_TYPE>& markerFunctor, vector<vector<int> >* normBuckets, Parameters& param, int bestCons = 0,CallBackPos *cb = NULL)
-        {
-            typedef MESH_TYPE MeshType;
-            typedef typename MeshType::ScalarType ScalarType;
-            typedef typename MeshType::VertexType VertexType;
-            typedef typename MeshType::VertexPointer VertexPointer;
-            typedef typename MeshType::CoordType CoordType;
-            typedef typename MeshType::VertexIterator VertexIterator;
-            typedef typename VertexPointerSampler<MeshType>::VertexPointerIterator VertexPointerIterator;
-
-            //pointer to a function to compute distance beetween points
-            vertex::PointDistanceFunctor<ScalarType> PDistFunct;
-
-            int samples = param.fullConsensusSamples;
-            if(!param.isFullConsensus) samples = param.short_cons_samples;
-            vector<VertexPointer>* queryVert = NULL;
-            //if no buckets are provided get a vector of vertex pointers sampled uniformly; used as query points
-            if(normBuckets==NULL){
-                queryVert = new vector<VertexPointer>();                
-                SampleVertUniform(mMov, *queryVert, samples);
-            }
-            else{
-                //else, get a vector of vertex pointers sampled in a normal equalized manner; used as query points
-                queryVert = new vector<VertexPointer>(mMov.vert.size(),NULL);
-                for(unsigned int i=0; i<mMov.vert.size(); i++) (*queryVert)[i] = &(mMov.vert[i]);//do a copy of pointers to vertexes
-                FeatureAlignment::SampleVertNormalEqualized(*queryVert, normBuckets, samples);
-            }
-            assert(queryVert!=NULL);
-
-            //init variables for consensus
-            float consDist = param.consensusDist*(param.mMovBBoxDiag/100.0f);               //consensus distance
-            int cons_succ;                      //score needed to pass consensus
-            int consensus = 0;                  //counts vertices in consensus
-            float dist;                         //holds the distance of the closest vertex found
-            VertexType* closestVertex = NULL;   //pointer to the closest vertex
-            Point3<ScalarType> queryNrm;        //the query point normal for consensus
-            CoordType queryPnt;                 //the query point for consensus
-            CoordType closestPnt;               //the closest point found in consensus
-            Matrix33<ScalarType> mat2(mMov.Tr,3); //3x3 matrix needed to transform normals
-            Matrix33<ScalarType> inv_mat1(Inverse(mFix.Tr),3);  //3x3 matrix needed to transform normals
-
-            //compute cons_succ depending on the type of consensus, i.e short/full
-            if(param.isFullConsensus) cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));
-            else cons_succ = int((param.shortConsOffset*param.overlap/100.0f)*(param.short_cons_samples/100.0f));
-
-            //Colors handling: white = not tested; blue = not in consensus; red = in consensus;
-            //yellow = not in consensus becouse of normals
-            //Colors are stored in a buffer vector; at the end of consensus loop they are applied
-            //to the mesh ONLY IF full consensus overcome succes threshold AND the best consensus.
-            vector<Color4b>* colorBuf = NULL;
-            if(param.paint) colorBuf = new vector<Color4b>(mMov.VertexNumber(),Color4b::White); //buffer vector for colors
-
-            //consensus loop
-            for(VertexPointerIterator vi=queryVert->begin(); vi!=queryVert->end(); vi++)
-            {
-                int i = (vi - queryVert->begin());  //iteration counter
-                assert(i>=0 && i<mMov.VertexNumber());
-
-                dist = -1.0f;
-                //set query point; vertex coord is transformed properly in fix mesh coordinates space; the same for normals
-                queryPnt = Inverse(mFix.Tr) * (mMov.Tr * (*vi)->P());
-                queryNrm = inv_mat1 * (mat2 * (*vi)->N());
-
-                //if query point is bbox, the look for a vertex in cDist from the query point
-                if(mFix.bbox.IsIn(queryPnt)) closestVertex = grid.GetClosest(PDistFunct,markerFunctor,queryPnt,consDist,dist,closestPnt);
-                else closestVertex=NULL;  //out of bbox, we consider the point not in consensus...
-
-                if(closestVertex!=NULL && dist < consDist){
-                    assert(closestVertex->P()==closestPnt); //coord and vertex pointer returned by getClosest must be the same
-
-                    //point is in consensus distance, now we check if normals are near
-                    if(queryNrm.dot(closestVertex->N())>param.consensusNormalsAngle)  //15 degrees
-                    {
-                        consensus++;  //got consensus
-                        if(param.paint){ (*colorBuf)[i] = Color4b::Red; }  //paint of red if needed
-                    }
-                    else{
-                        if(param.paint){ (*colorBuf)[i] = Color4b::Yellow; }  //paint of yellow if needed
-                    }
-                }
-                else{
-                    if(param.paint){ (*colorBuf)[i] = Color4b::Blue; } //not in consensus due to distance, paint of blue
-                }
-            }
-
-            //apply colors if consensus is the best ever found.
-            //NOTE: we got to do this here becouse we need a handle to sampler. This is becouse vertex have been shuffled
-            //and so colors have been stored not in order in the buffer!
-            if(param.paint){
-                if(consensus>=bestCons && consensus>=cons_succ){
-                    for(VertexPointerIterator vi=queryVert->begin(); vi!=queryVert->end(); vi++)
-                        if(!(*vi)->IsD()) (*vi)->C() = (*colorBuf)[vi-queryVert->begin()];
-                }
-            }
-
-            //clear and delete buffer for colors, if needed
-            if(param.paint){ colorBuf->clear(); delete colorBuf; }
-
-            //delete vector of query vertexes; do it as last thing, 'couse it is used for coloring too.
-            if(queryVert!=NULL) delete queryVert;
-
-            return consensus;
-        }
-
-
-        static vector<vector<int> >* BucketVertexNormal(typename MESH_TYPE::VertContainer& vert, int bucketDim = 30)
-        {
-            static vector<Point3f> NV;
-            if(NV.size()==0) GenNormal<float>::Uniform(bucketDim,NV);
-
-            // Bucket vector dove, per ogni normale metto gli indici
-            // dei vertici ad essa corrispondenti
-            vector<vector<int> >* BKT = new vector<vector<int> >(NV.size()); //NV size is greater then bucketDim, so don't change this!
-
-            int ind;
-            for(int i=0;i<vert.size();++i){
-                ind=GenNormal<float>::BestMatchingNormal(vert[i].N(),NV);
-                (*BKT)[ind].push_back(i);
-            }
-
-            return BKT;
-        }
 
         static void SetupKDTreePoints(vector<FEATURE_TYPE*>& vecF, ANNpointArray* dataPts, int pointDim)
         {
@@ -900,13 +967,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 for (int j = 0; j < pointDim; j++)
                     (*queryPts)[i][j] = (ANNcoord)(queryPointsArray[i]->description[j]);
             }
-        }
-
-        static inline void SetupGrid(MESH_TYPE& m, GridStaticPtr<typename MESH_TYPE::VertexType, typename MESH_TYPE::ScalarType>& grid, tri::VertTmark<MESH_TYPE>& markerFunctor)
-        {
-            grid.Set(m.vert.begin(), m.vert.end());
-            markerFunctor.SetMesh(&m);
-        }
+        }       
 
         static void Match(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<FEATURE_TYPE**>& solutionsVec, float errDist, CallBackPos *cb = NULL)
         {
