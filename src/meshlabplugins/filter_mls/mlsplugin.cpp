@@ -523,24 +523,28 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 						c = apss->approxMeanCurvature(p);
 					else
 					{
-						grad = mls->gradient(p);
-						hess = mls->hessian(p);
-						implicits::WeingartenMap<float> W(grad,hess);
-
-						mesh->cm.vert[i].PD1() = W.K1Dir();
-						mesh->cm.vert[i].PD2() = W.K2Dir();
-						mesh->cm.vert[i].K1() =  W.K1();
-						mesh->cm.vert[i].K2() =  W.K2();
-
-						switch(ct)
+						int errorMask;
+						grad = mls->gradient(p, &errorMask);
+						if (errorMask == MLS_OK && grad.Norm() > 1e-8)
 						{
-							case CT_MEAN: c = W.MeanCurvature(); break;
-							case CT_GAUSS: c = W.GaussCurvature(); break;
-							case CT_K1: c = W.K1(); break;
-							case CT_K2: c = W.K2(); break;
-							default: assert(0 && "invalid curvature type");
+						  hess = mls->hessian(p);
+						  implicits::WeingartenMap<float> W(grad,hess);
+
+						  mesh->cm.vert[i].PD1() = W.K1Dir();
+						  mesh->cm.vert[i].PD2() = W.K2Dir();
+						  mesh->cm.vert[i].K1() =  W.K1();
+						  mesh->cm.vert[i].K2() =  W.K2();
+
+						  switch(ct)
+						  {
+							  case CT_MEAN: c = W.MeanCurvature(); break;
+							  case CT_GAUSS: c = W.GaussCurvature(); break;
+							  case CT_K1: c = W.K1(); break;
+							  case CT_K2: c = W.K2(); break;
+							  default: assert(0 && "invalid curvature type");
+						  }
 						}
-					assert(!math::IsNAN(c) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
+						assert(!math::IsNAN(c) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
 					}
 					mesh->cm.vert[i].Q() = c;
 					minc = std::min(c,minc);

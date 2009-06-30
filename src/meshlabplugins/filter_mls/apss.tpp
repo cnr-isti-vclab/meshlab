@@ -87,6 +87,8 @@ typename APSS<_MeshType>::Scalar APSS<_MeshType>::approxMeanCurvature(const Vect
 template<typename _MeshType>
 typename APSS<_MeshType>::VectorType APSS<_MeshType>::gradient(const VectorType& x, int* errorMask) const
 {
+	if (errorMask)
+	   *errorMask = MLS_OK;
 	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
 	{
 		if (!fit(x))

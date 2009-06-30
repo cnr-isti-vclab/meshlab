@@ -64,7 +64,7 @@ Scalar MeanCurvature(const Point3<Scalar>& gradient, const Matrix33<Scalar>& hes
 /** This class computes the Weingarten map of a scalar field and provides
 	* methods to extract curvatures from it.
 	*
-	* The Weingarten map is equal to gradient of the normal vector:
+	* The Weingarten map is equal to the gradient of the normal vector:
 	* \f$ W = \nabla \mathbf(n)
 	*       = \nabla \frac{\mathbf{g}}{\Vert \mathbf{g} \Vert}
 	*       = \frac{(I - n n^T) H}{\Vert \mathbf{g} \Vert} \f$
