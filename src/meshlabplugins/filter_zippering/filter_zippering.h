@@ -35,12 +35,12 @@
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 
-#define SAMPLES_PER_EDGE 150
+#define SAMPLES_PER_EDGE 100
 
 // Polyline (set of consecutive segments)
 struct polyline {
     std::vector< vcg::Segment3<CMeshO::ScalarType> > edges;                         //polyline edges
-    std::vector< std::pair<CMeshO::VertexPointer, CMeshO::VertexPointer> > verts;   //Vertex pointers
+    std::vector< std::pair<int, int> > verts;
 };
 
 //Auxiliar info for triangulation
@@ -50,11 +50,11 @@ struct aux_info {
     std::vector< polyline > border; //Segment intersecting components
 
     //Add segment c to border
-    virtual void AddToBorder( std::pair<CMeshO::VertexPointer, CMeshO::VertexPointer> v  ) {
+    virtual void AddToBorder( vcg::Segment3<CMeshO::ScalarType> c, std::pair<int, int> v  ) {
         /****Insert new segment****/
         //Search for segment S having S.P0() == c.P1 or S.P1 == c.P0()
         if ( v.first == v.second ) return;
-        bool found = false; vcg::Segment3<CMeshO::ScalarType> c ( v.first->P(), v.second->P() );
+        bool found = false;
         for ( int j = 0; j < border.size(); j ++ ) {
             for ( int i = 0; i < border[j].verts.size() && !found; i ++ ) {
                 if ( border[j].verts[i].first == v.second ) { found = true; border[j].edges.insert( border[j].edges.begin() + i, c ); border[j].verts.insert( border[j].verts.begin() + i, v ); }           //insert before i-th element
@@ -91,14 +91,14 @@ struct aux_info {
     }
 
     // Set initial t.component
-    virtual void Init( CMeshO::FaceType f ) {
+    virtual void Init( CMeshO::FaceType f, int a, int b, int c ) {
         if (!trash.empty()) return;
         polyline tri;   tri.edges.push_back( vcg::Segment3<CMeshO::ScalarType>(f.P(0), f.P(1)) );
                         tri.edges.push_back( vcg::Segment3<CMeshO::ScalarType>(f.P(1), f.P(2)) );
                         tri.edges.push_back( vcg::Segment3<CMeshO::ScalarType>(f.P(2), f.P(0)) );
-                        tri.verts.push_back( std::pair<CMeshO::VertexPointer,CMeshO::VertexPointer>( f.V(0), f.V(1) ) );
-                        tri.verts.push_back( std::pair<CMeshO::VertexPointer,CMeshO::VertexPointer>( f.V(1), f.V(2) ) );
-                        tri.verts.push_back( std::pair<CMeshO::VertexPointer,CMeshO::VertexPointer>( f.V(2), f.V(0) ) );
+                        tri.verts.push_back( std::make_pair(a, b) );
+                        tri.verts.push_back( std::make_pair(b, c) );
+                        tri.verts.push_back( std::make_pair(c, a) );
         AddTComponent( tri );
     }
 
@@ -162,18 +162,14 @@ private:
         void handleBorder( aux_info &info,                                            //Auxiliar information for triangulatio
                            vcg::Point3<CMeshO::ScalarType> N,                        //face normal (useful for proiection)
                            std::vector<CMeshO::CoordType> &coords,          //output coords
-                           std::vector< CMeshO::VertexPointer > &output ); //output v. pointers
+                           std::vector<int> &output ); //output v. pointers
         polyline cutComponent(  polyline comp,                                   //Component to be cut
                                 polyline border,                                 //border
                                 vcg::Matrix44<CMeshO::ScalarType> rot_mat );     //Rotation matrix
-        bool isInside( polyline &comp,                                   //component
-                       vcg::Segment3<CMeshO::ScalarType> s,               //query segment
-                       vcg::Matrix44<CMeshO::ScalarType> rot_mat );     //rotation matrix
         bool isRight (vcg::Point2< float > p1,       //ext.1
                       vcg::Point2< float > p2,       //ext.2
                       vcg::Point2< float > pn);      //query point
         bool debug_v;
-        /*returns index */
         int searchComponent( aux_info &info,                            //Auxiliar info
                              vcg::Segment3<CMeshO::ScalarType> s,       //query segment
                              bool &conn );
