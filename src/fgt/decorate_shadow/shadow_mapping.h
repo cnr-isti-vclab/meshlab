@@ -45,23 +45,22 @@ public:
 	ShadowMapping();
 	~ShadowMapping();
 
-        bool Init(int, int);
+        bool Init();
         void RunShader(MeshModel&, GLArea*);
 
 private:
         bool compileLinkSM();
         //bool ClearBuffers();
         bool Setup();
-        void Bind();
+        void Bind(MeshModel&);
         void Unbind();
         void GetQImage();
         void printShaderInfoLog(GLuint);
         void printProgramInfoLog(GLuint);
 
         bool initOk;
-        int _width;
-	int _height;
-        GLuint _shadowMap , _depth;
+        int _texSize;
+        GLuint _shadowMap;// , _depth;
         GLuint fbo;
 	GLuint _depthShaderProgram, _objectShaderProgram;
 	GLuint _depthVert, _depthFrag, _objectVert, _objectFrag ;

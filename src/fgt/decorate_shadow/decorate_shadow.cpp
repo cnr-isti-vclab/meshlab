@@ -50,7 +50,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *, FilterParameterSet 
                 glGetFloatv(GL_VIEWPORT, dims);
                 int width = (int)dims[2];
                 int height = (int)dims[3];
-    this->_sm->Init(width, width);
+    this->_sm->Init();//(width, width);
 }		
 		
 const QString DecorateShadowPlugin::ST(FilterIDType filter) const

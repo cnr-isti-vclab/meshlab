@@ -26,8 +26,7 @@
 
 ShadowMapping::ShadowMapping()
 {
-    this->_height = 0;
-    this->_width = 0;
+    this->_texSize = 0;
     this->_depthFrag = 0;
     this->_depthVert = 0;
     this->_depthShaderProgram = 0;
@@ -35,22 +34,54 @@ ShadowMapping::ShadowMapping()
     this->_objectFrag = 0;
     this->_objectShaderProgram = 0;
     this->_shadowMap = 0;
-    this->_depth=0;
+    //this->_depth=0;
     this->initOk=false;
     this->fbo = 0;
 }
 
 ShadowMapping::~ShadowMapping(){}
 
-bool ShadowMapping::Init(int w, int h)
+bool ShadowMapping::Init()//(int w, int h)
 {
-this->_width = 640;
-this->_height = 640;
+//this->_width = 640;
+//this->_height = 640;
 compileLinkSM();
 return true;
 }
 
 void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
+        vcg::Box3f bb = m.cm.bbox;
+        vcg::Point3f max, min;
+        max = bb.max;
+        min = bb.min;
+
+/*        GLfloat maxf[4];
+        GLfloat minf[4];
+        maxf[0] = max.X();
+        maxf[1] = max.Y();
+        maxf[2] = max.Z();
+        maxf[3] = 1.0;
+        maxf[0] = min.X();
+        maxf[1] = min.Y();
+        maxf[2] = min.Z();
+        maxf[3] = 1.0;
+
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glMultMatrixf(minf);
+        glMultMatrixf(maxf);
+        glPopMatrix();
+*/
+        int index = bb.MaxDim();
+        if(index == 0) this->_texSize = bb.DimX();
+        else if(index == 1) this->_texSize = bb.DimY();
+            else this->_texSize = bb.DimZ();
+        (this->_texSize % 2) == 0 ? this->_texSize = this->_texSize + 2 : this->_texSize++;
+       /* GLfloat oldV[4];
+        glGetFloatv(GL_VIEWPORT, oldV);
+        glViewport(0,0,this->_texSize, this->_texSize);*/
+
 
         glUseProgram(this->_depthShaderProgram);
 
@@ -62,29 +93,20 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
 
         glUniform1f(uLocNearP, 200);
         glUniform1f(uLocFarP, 200);
-        glUniform1f(uLocWidth, gla->size().width());
+        glUniform1f(uLocWidth, this->_texSize);
        // glUniform1f(uLocHeight, gla->size().height());*/
         this->Unbind();
         this->Setup();
-        this->Bind();
+        this->Bind(m);
         m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerVert);
         this->GetQImage();
-        /*glDetachShader(this->_depthShaderProgram, this->_depthVert);
-        glDeleteShader(this->_depthVert);
-
-        glDetachShader(this->_depthShaderProgram, this->_depthFrag);
-        glDeleteShader(this->_depthFrag);
-
-        glDeleteProgram(this->_depthShaderProgram);
-
-        err = glGetError();*/
         this->Unbind();
 
         glUseProgram(0);
 
 
 
-        glUseProgram(this->_objectShaderProgram);
+         glUseProgram(this->_objectShaderProgram);
         //PASS UNIFORMS
         uLocNearP = glGetUniformLocation(this->_objectShaderProgram, "near");
         uLocFarP = glGetUniformLocation(this->_objectShaderProgram, "far");
@@ -95,27 +117,127 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         glUniform1f(uLocFarP, gla->farPlane);
         glUniform1f(uLocWidth, gla->size().width());
         //glUniform1f(uLocHeight, gla->size().height());*/
-glEnable (GL_BLEND);
+        glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_TEXTURE_2D);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-
+        // select modulate to mix texture with color for shading
+        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
         glUniform1i(loc, 1);
 
         m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerVert);
-glDisable(GL_TEXTURE_2D);
-glDisable(GL_BLEND);
-        /*glDetachShader(this->_objectShaderProgram, this->_objectVert);
-        glDeleteShader(this->_objectVert);
-        glDetachShader(this->_objectShaderProgram, this->_objectVert);
-        glDeleteShader(this->_objectFrag);
-        glDeleteProgram(this->_objectShaderProgram);*/
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
         glUseProgram(0);
-
 }
 
+bool ShadowMapping::Setup()
+{
+        if (!GLEW_EXT_framebuffer_object) {
+                qWarning("FBO not supported!");
+                return false;
+        }
+
+        if (initOk)
+                return true;
+
+        glGenFramebuffersEXT(1, &fbo);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
+        // depth buffer
+        /*glGenRenderbuffersEXT(1, &(this->_depth));
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
+*/
+        // color buffer
+        glGenTextures(1, &this->_shadowMap);
+        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        glGenerateMipmapEXT(GL_TEXTURE_2D);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
+
+        int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+        initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        return initOk;
+}
+
+void ShadowMapping::Bind(MeshModel &m)
+{
+        assert(initOk);
+
+        glClearDepth(1.0);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+        glPushAttrib(GL_VIEWPORT_BIT);
+
+        GLdouble mv[16];
+        GLdouble prj[16];
+        GLint view[4];
+
+        glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+        glGetDoublev(GL_PROJECTION_MATRIX, prj);
+        glGetIntegerv(GL_VIEWPORT, view);
+
+        GLdouble *fx,*fy,*fz;
+
+        vcg::Point3f p = m.cm.bbox.min;
+
+        GLdouble x,y,z;
+        x = p[0];
+        y = p[1];
+        z = p[2];
+
+        gluProject(x, y, z, mv, prj, view, fx, fy, fz);
+
+        glViewport(0, 0, this->_texSize, this->_texSize);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+}
+
+void ShadowMapping::Unbind()
+{
+        if (!initOk)
+                return;
+
+        glPopAttrib();
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        //glDeleteFramebuffersEXT(1, &fbo);
+}
+
+void ShadowMapping::GetQImage()
+{
+        if (!initOk)
+                return;// QImage();
+
+        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+
+        unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
+        unsigned char *tempBufPtr = tempBuf;
+        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
+        for (int i = 0; i < this->_texSize; ++i) {
+                QRgb *scanLine = (QRgb*)img.scanLine(i);
+                for (int j = 0; j < this->_texSize; ++j) {
+                        scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
+                        tempBufPtr += 3;
+                }
+        }
+        delete[] tempBuf;
+
+        img.save("./texture.png", "PNG");
+        img.mirrored().save("./textureMirrored.png", "PNG");
+        //return img.mirrored();
+}
 
 bool ShadowMapping::compileLinkSM(){
     GLenum err = glewInit();
@@ -198,130 +320,6 @@ bool ShadowMapping::compileLinkSM(){
     return true;
 }
 
-bool ShadowMapping::Setup()
-{
-        if (!GLEW_EXT_framebuffer_object) {
-                qWarning("FBO not supported!");
-                return false;
-        }
-
-        if (initOk)
-                return true;
-
-        glGenFramebuffersEXT(1, &fbo);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-
-        // depth buffer
-        glGenRenderbuffersEXT(1, &(this->_depth));
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_width, this->_height);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
-
-        // color buffer
-        glGenTextures(1, &this->_shadowMap);
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_width, this->_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
-
-
-        // set texture state based on the first uniform that will use RT
-
-        /*QList<int> k = passStates.keys();
-        for (int i = 0; i < k.size(); ++i) {
-                if (k.at(i) > pass) {
-                        foreach (RfxState *s, passStates.value(i))
-                                s->SetEnvironment(GL_TEXTURE_2D);
-                }
-        }*/
-
-        //case GL_TextureWrapS:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        //	break;
-        //case GL_TextureWrapT:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        //	break;
-        //case GL_TextureWrapR:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-        //	break;
-
-        //case GL_TextureMinify:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        //	break;
-        //case GL_TextureMagnify:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        //	break;
-
-        int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        return initOk;
-}
-
-void ShadowMapping::Bind()
-{
-        assert(initOk);
-
-        //bool colClear = passOptions.value(pass).colorClear;
-        //bool depClear = passOptions.value(pass).depthClear;
-
-        /*if (colClear) {
-                const float *cols = passOptions.value(pass).colorClearVal;
-                glClearColor(cols[0], cols[1], cols[2], cols[3]);
-        }
-*/
-        //if (depClear)
-        glClearDepth(1.0);
-
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-
-        glPushAttrib(GL_VIEWPORT_BIT);
-        glViewport(0, 0, this->_width, this->_height);
-
-        //if (colClear || depClear)
-        //        glClear(passOptions.value(pass).clearMask);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-}
-
-void ShadowMapping::Unbind()
-{
-        if (!initOk)
-                return;
-
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        glPopAttrib();
-}
-
-
-//bool ShadowMapping::ClearBuffers(){return false;}
-
-void ShadowMapping::GetQImage()
-{
-        if (!initOk)
-                return;// QImage();
-
-        QImage img(this->_width, this->_height, QImage::Format_RGB32);
-
-        unsigned char *tempBuf = new unsigned char[this->_width * this->_height * 3];
-        unsigned char *tempBufPtr = tempBuf;
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
-        for (int i = 0; i < this->_height; ++i) {
-                QRgb *scanLine = (QRgb*)img.scanLine(i);
-                for (int j = 0; j < this->_width; ++j) {
-                        scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
-                        tempBufPtr += 3;
-                }
-        }
-        delete[] tempBuf;
-
-        img.save("./texture.png", "PNG");
-        img.mirrored().save("./textureMirrored.png", "PNG");
-        //return img.mirrored();
-}
 
 void ShadowMapping::printShaderInfoLog(GLuint obj)
         {
