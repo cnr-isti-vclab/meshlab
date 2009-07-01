@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -20,62 +20,52 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef SAMPLE_DECORATE_PLUGIN_H
-#define SAMPLE_DECORATE_PLUGIN_H
 
-#include <QObject>
-#include <QAction>
-#include <QList>
-#include <math.h>
-#include <limits>
-#include <stdlib.h>
-//#include <QGLWidget>
+#ifndef SHADOW_MAPPING_H_
+#define SHADOW_MAPPING_H_
+
+
+#include <cassert>
+#include <QString>
+#include <QImage>
+#include <QFile>
+#include <GL/glew.h>
 #include <meshlab/interfaces.h>
-#include <QtGui>
 #include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
-//#include <wrap/gl/addons.h>
-#include "shadow_mapping.h"
 
-class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
+
+
+
+class ShadowMapping 
 {
-  Q_OBJECT
-  Q_INTERFACES(MeshDecorateInterface)
-  virtual const QString Info(QAction *);
-  
-  enum {
-    DP_SHOW_SIMPLE_SHADOW,
-    DP_SHOW_VSM_SHADOW,
-		DP_SHOW_AO_DEPTH_TRICK,
-		DP_SHOW_SSAO
-		};
-
-  virtual const QString ST(FilterIDType filter) const;
 
 public:
-     
-	DecorateShadowPlugin()
-	{
-    typeList << 
-    DP_SHOW_SIMPLE_SHADOW ;
 
-    FilterIDType tt;
-    foreach(tt , types()){
-	      actionList << new QAction(ST(tt), this);
-    }
-    QAction *ap;
-    foreach(ap,actionList){
-        ap->setCheckable(true);
-    }
-    this->_sm = new ShadowMapping();
-  }
+	ShadowMapping();
+	~ShadowMapping();
 
-	QList<QAction *> actions () const {return actionList;}
+        bool Init(int, int);
+        void RunShader(MeshModel&, GLArea*);
 
-    virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet * /*parent*/ par, GLArea *gla,QFont qf);
-    virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/);
 private:
-    ShadowMapping* _sm;
+        bool compileLinkSM();
+        //bool ClearBuffers();
+        bool Setup();
+        void Bind();
+        void Unbind();
+        void GetQImage();
+        void printShaderInfoLog(GLuint);
+        void printProgramInfoLog(GLuint);
+
+        bool initOk;
+        int _width;
+	int _height;
+        GLuint _shadowMap , _depth;
+        GLuint fbo;
+	GLuint _depthShaderProgram, _objectShaderProgram;
+	GLuint _depthVert, _depthFrag, _objectVert, _objectFrag ;
+
 };
 
-#endif
+#endif /* SHADOW_MAPPING_H_ */

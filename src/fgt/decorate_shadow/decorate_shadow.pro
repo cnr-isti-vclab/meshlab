@@ -3,8 +3,11 @@ include (../../shared.pri)
 
 QT           += opengl
 
-HEADERS       = decorate_shadow.h
-SOURCES       = decorate_shadow.cpp\ 
+HEADERS       = decorate_shadow.h \
+                shadow_mapping.h
+
+SOURCES       = decorate_shadow.cpp \
+                shadow_mapping.cpp \
 		../../meshlab/filterparameter.cpp \
 		$$GLEWCODE
 

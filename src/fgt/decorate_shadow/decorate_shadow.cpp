@@ -20,26 +20,8 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-sampledecorate.cpp,v
-Revision 1.1  2007/12/13 00:33:55  cignoni
-New small samples
 
-****************************************************************************/
-
-#include <QtGui>
-
-#include <math.h>
-#include <limits>
-#include <stdlib.h>
-#include "sampledecorate.h"
-#include <QGLWidget>
-#include <wrap/gl/addons.h>
-
-#include <meshlab/glarea.h>
-
-
+#include "decorate_shadow.h"
 
 using namespace vcg;
 
@@ -47,7 +29,10 @@ const QString DecorateShadowPlugin::Info(QAction *action)
  {
   switch(ID(action))
   {
-    case DP_SHOW_CUBEMAPPED_ENV :      return tr("Draws a cube mapped background");
+    case DP_SHOW_AO_DEPTH_TRICK :      return tr("Enable ambient occlusion trick");
+    case DP_SHOW_SIMPLE_SHADOW:      return tr("Enable simple shadow");
+    case DP_SHOW_SSAO:      return tr("Enable SSAO");
+    case DP_SHOW_VSM_SHADOW :      return tr("Enable variance shadow mapping");
  	 }
   assert(0);
   return QString();
@@ -55,24 +40,27 @@ const QString DecorateShadowPlugin::Info(QAction *action)
  
 void DecorateShadowPlugin::initGlobalParameterSet(QAction *, FilterParameterSet *parset) 
 {
- /* sample of the behaviour of the global parameter 
- could be changed in the near future...
- 
-	if(parset->findParameter("CubeMapPath")!= NULL) 
-	{
-		qDebug("CubeMapPath already setted. Doing nothing");
-		return;
-	}
-	QString cubemapDirPath = MainWindowInterface::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");	
-	parset->addString("CubeMapPath", cubemapDirPath);
-	*/
+    if(parset->findParameter(tr("NoisePath")) != NULL){
+        qDebug("noise path already setted..doing nothing");
+        return;
+    }
+    QString noiseDirPath = MainWindowInterface::getBaseDirPath() + tr("/textures/noise.png");
+    parset->addString("NoisePath", noiseDirPath);
+    GLfloat dims[4];
+                glGetFloatv(GL_VIEWPORT, dims);
+                int width = (int)dims[2];
+                int height = (int)dims[3];
+    this->_sm->Init(width, width);
 }		
 		
 const QString DecorateShadowPlugin::ST(FilterIDType filter) const
 {
   switch(filter)
   {
-    case DP_SHOW_CUBEMAPPED_ENV      : return QString("Cubemapped Environment");
+    case DP_SHOW_AO_DEPTH_TRICK     : return QString("AO depth trick");
+    case DP_SHOW_SIMPLE_SHADOW      : return QString("simple shadow");
+    case DP_SHOW_SSAO               : return QString("SSAO");
+    case DP_SHOW_VSM_SHADOW         : return QString("VSM");
     default: assert(0);
   }
   return QString("error!");
@@ -80,59 +68,11 @@ const QString DecorateShadowPlugin::ST(FilterIDType filter) const
 
 void DecorateShadowPlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet *par, GLArea *gla, QFont /*qf*/)
 {
- assert(par);
-	static QString lastname("unitialized");
-  if(a->text() != ST(DP_SHOW_CUBEMAPPED_ENV))	assert(0);
-	
-	QString basename;
-	if(!cm.IsValid())
-	{
-		assert(par->findParameter("CubeMapPath")); 
-		basename=par->getString("CubeMapPath");
-		if(lastname != basename ) 
-		{
-			qDebug( "Current CubeMapPath Dir: %s ",qPrintable(basename)); 
-
-			glewInit();
-			bool ret = cm.Load(qPrintable(basename));
-			lastname=basename;
-			if(! ret ) 
-				QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + basename );
-		//	cm.radius= m.cm.bbox.Diag()/2;
-			cm.radius=10;
-		}
-	}
-	if(!cm.IsValid()) return;
-	Matrix44f tr;
-	glGetv(GL_MODELVIEW_MATRIX,tr);
-	
-	// Remove the translation from the current matrix by simply padding the last column of the matrix
- 	tr[0][3]=0;
-	tr[1][3]=0;
-	tr[2][3]=0;
-	tr[3][3]=1;
-	
-	//Remove the scaling from the the current matrix by adding an inverse scaling matrix
-	float scale = 1.0/pow(tr.Determinant(),1.0f/3.0f);
-	Matrix44f Scale; 
-	Scale.SetDiagonal(scale);
-	tr=tr*Scale;
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-//	glLoadIdentity();
-//	GLfloat fAspect = (GLfloat)gla->width()/ gla->height();
-//	float ratio= gla->ratio;
-//	if(gla->fov==5)		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,0, 15);
-//	   else    		gluPerspective(gla->fov, fAspect, .1, 20);
-
-  glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-		cm.DrawEnvCube(tr);
-	glPopMatrix();
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
+    if(m.visible){
+        if(a->text() == ST(DP_SHOW_SIMPLE_SHADOW)){
+            this->_sm->RunShader(m, gla);
+        }
+    }
 }
 
 Q_EXPORT_PLUGIN(DecorateShadowPlugin)
