@@ -181,11 +181,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             break;
         }        
         case AF_CONSENSUS :
-        {
-            QStringList l;
-            l << "GMSmooth curvature"
-              << "RGB";
-            par.addEnum("featureType", 0, l,"Feature type:", "The feature that you want to compute for the current mesh.");
+        {            
             par.addMesh("mFix", 0, "Fix mesh:", "The mesh that stays still and grow large after alignment.");
             par.addMesh("mMov", 1, "Move mesh:", "The mesh that moves to fit Fix Mesh.");
             par.addFloat("consensusDist", 2, "Consensus distance:","Consensus distance expressed in percentage of Move Mesh bounding box diagonal. It states how close two verteces must be to be in consensus.");
@@ -624,7 +620,7 @@ int FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov,
     mMov.updateDataMask(MeshModel::MM_VERTMARK);    
 
     ConsensusType cons;    
-    cons.AddFix(mFix.cm);
+    cons.SetFix(mFix.cm);
     cons.SetMove(mMov.cm);
 
     if(!cons.Init(param)) return -1;

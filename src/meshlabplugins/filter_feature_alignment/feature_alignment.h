@@ -127,35 +127,36 @@ template<class MESH_TYPE> class Consensus
         }
     };
 
-    vector<MeshType*> fixList;
-    MeshType* mMov;
+    MeshType* mFix, *mMov;
     vector<vector<int> >* normBuckets;          //structure to hold normals bucketing. Needed for normal equalized sampling during consensus
     MeshGrid* gridFix;                          //variable to manage uniform grid
     MarkerVertex markerFunctorFix;              //variable to manage uniform grid
 
-    Consensus(){
-        normBuckets = NULL;
-        gridFix = NULL;
+    Consensus() : normBuckets(NULL), gridFix(NULL){}
+    ~Consensus(){
+        if(normBuckets) delete normBuckets;
+        if(gridFix) delete gridFix;
     }
 
-    void AddFix(MeshType& mFix){ fixList.push_back(&mFix); }
+    void SetFix(MeshType& m){ mFix = &m; }
 
-    void ClearFix(MeshType& mFix){}
+    //void ClearFix(MeshType& mFix){}
 
-    void SetMove(MeshType& mMove){ mMov = &mMove; }
+    void SetMove(MeshType& m){ mMov = &m; }
 
     bool Init(Parameters& param){
         //builds the uniform grid with mFix vertices
-        gridFix = new MeshGrid();
-        assert(fixList.size()>0);
+        gridFix = new MeshGrid();        
         SetupGrid();
 
         //if requested, group normals of mMov into 30 buckets. Buckets are used for Vertex Normal Equalization
         //in consensus. Bucketing is done here once for all to speed up consensus.
         if(param.normalEqualization){
-            normBuckets = BucketVertexNormal(mMov->vert, 30);
-            assert(normBuckets!=NULL);
+            if(normBuckets) {normBuckets->clear(); delete normBuckets; }
+            normBuckets = BucketVertexNormal(mMov->vert, 30);            
+            assert(normBuckets);
         }
+        return true;
     }
 
     //compute the randomized consensus beetween m1 e m2 (without taking in account any additional transformation)
@@ -165,24 +166,21 @@ template<class MESH_TYPE> class Consensus
         //pointer to a function to compute distance beetween points
         vertex::PointDistanceFunctor<ScalarType> PDistFunct;
 
- //       int samples = param.samples;
-//        if(!param.isFullConsensus) samples = param.short_cons_samples;
-
-        vector<VertexPointer>* queryVert = NULL;
         //if no buckets are provided get a vector of vertex pointers sampled uniformly
         //else, get a vector of vertex pointers sampled in a normal equalized manner; used as query points
-        if(normBuckets==NULL){
+        vector<VertexPointer>* queryVert = NULL;        
+        if(param.normalEqualization){
+            assert(normBuckets);
+            queryVert = new vector<VertexPointer>(mMov->vert.size(),NULL);
+            for(unsigned int i=0; i<mMov->vert.size(); i++) (*queryVert)[i] = &(mMov->vert[i]);//do a copy of pointers to vertexes            
+            SampleVertNormalEqualized(*queryVert, param.samples);
+        }
+        else{
             queryVert = new vector<VertexPointer>();
             SampleVertUniform<MeshType>(*mMov, *queryVert, param.samples);
         }
-        else{
-            queryVert = new vector<VertexPointer>(mMov->vert.size(),NULL);
-            for(unsigned int i=0; i<mMov->vert.size(); i++) (*queryVert)[i] = &(mMov->vert[i]);//do a copy of pointers to vertexes
-            SampleVertNormalEqualized(*queryVert, param.samples);
-        }
-        assert(queryVert!=NULL);
+        assert(queryVert);
 
-        assert(fixList.size()>0);
         //init variables for consensus
         float consDist = param.consensusDist*(mMov->bbox.Diag()/100.0f);        //consensus distance
         int cons_succ = int(param.threshold*(param.samples/100.0f));      //score needed to pass consensus
@@ -193,11 +191,7 @@ template<class MESH_TYPE> class Consensus
         CoordType queryPnt;                 //the query point for consensus
         CoordType closestPnt;               //the closest point found in consensus
         Matrix33<ScalarType> inv33_matMov(mMov->Tr,3); //3x3 matrix needed to transform normals
-        Matrix33<ScalarType> inv33_matFix(Inverse(fixList[0]->Tr),3);  //3x3 matrix needed to transform normals
-
-        //compute cons_succ depending on the type of consensus, i.e short/full
-//        if(param.isFullConsensus) cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));
-
+        Matrix33<ScalarType> inv33_matFix(Inverse(mFix->Tr),3);  //3x3 matrix needed to transform normals
 
         //Colors handling: white = not tested; blue = not in consensus; red = in consensus;
         //yellow = not in consensus becouse of normals
@@ -214,11 +208,11 @@ template<class MESH_TYPE> class Consensus
 
             dist = -1.0f;
             //set query point; vertex coord is transformed properly in fix mesh coordinates space; the same for normals
-            queryPnt = Inverse(fixList[0]->Tr) * (mMov->Tr * (*vi)->P());
+            queryPnt = Inverse(mFix->Tr) * (mMov->Tr * (*vi)->P());
             queryNrm = inv33_matFix * (inv33_matMov * (*vi)->N());
 
             //if query point is bbox, the look for a vertex in cDist from the query point
-            if(fixList[0]->bbox.IsIn(queryPnt)) closestVertex = gridFix->GetClosest(PDistFunct,markerFunctorFix,queryPnt,consDist,dist,closestPnt);
+            if(mFix->bbox.IsIn(queryPnt)) closestVertex = gridFix->GetClosest(PDistFunct,markerFunctorFix,queryPnt,consDist,dist,closestPnt);
             else closestVertex=NULL;  //out of bbox, we consider the point not in consensus...
 
             if(closestVertex!=NULL && dist < consDist){
@@ -253,7 +247,7 @@ template<class MESH_TYPE> class Consensus
         if(colorBuf){ colorBuf->clear(); delete colorBuf; }
 
         //delete vector of query vertexes; do it as last thing, 'couse it is used for coloring too.
-        if(queryVert!=NULL) delete queryVert;
+        if(queryVert) delete queryVert;
 
         return consensus;
     }
@@ -279,6 +273,7 @@ template<class MESH_TYPE> class Consensus
 
     bool SampleVertNormalEqualized(vector<typename MESH_TYPE::VertexPointer>& vert, int SampleNum)
     {
+        assert(normBuckets);
         // vettore di contatori per sapere quanti punti ho gia' preso per ogni bucket
         vector<int> BKTpos(normBuckets->size(),0);
 
@@ -309,8 +304,8 @@ template<class MESH_TYPE> class Consensus
 
     inline void SetupGrid()
     {
-        gridFix->Set(fixList[0]->vert.begin(),fixList[0]->vert.end());
-        markerFunctorFix.SetMesh(fixList[0]);
+        gridFix->Set(mFix->vert.begin(),mFix->vert.end());
+        markerFunctorFix.SetMesh(mFix);
     }
 };
 
@@ -463,7 +458,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             assert(fkdTree);                                                        
 
             //consensus structure initialization
-            cons.AddFix(mFix);
+            cons.SetFix(mFix);
             cons.SetMove(mMov);
             consParam.normalEqualization = param.normalEqualization;
             cons.Init(consParam);
