@@ -55,33 +55,11 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         max = bb.max;
         min = bb.min;
 
-/*        GLfloat maxf[4];
-        GLfloat minf[4];
-        maxf[0] = max.X();
-        maxf[1] = max.Y();
-        maxf[2] = max.Z();
-        maxf[3] = 1.0;
-        maxf[0] = min.X();
-        maxf[1] = min.Y();
-        maxf[2] = min.Z();
-        maxf[3] = 1.0;
-
-
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glMultMatrixf(minf);
-        glMultMatrixf(maxf);
-        glPopMatrix();
-*/
         int index = bb.MaxDim();
         if(index == 0) this->_texSize = bb.DimX();
         else if(index == 1) this->_texSize = bb.DimY();
             else this->_texSize = bb.DimZ();
         (this->_texSize % 2) == 0 ? this->_texSize = this->_texSize + 2 : this->_texSize++;
-       /* GLfloat oldV[4];
-        glGetFloatv(GL_VIEWPORT, oldV);
-        glViewport(0,0,this->_texSize, this->_texSize);*/
-
 
         glUseProgram(this->_depthShaderProgram);
 
@@ -91,8 +69,8 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         GLint uLocWidth = glGetUniformLocation(this->_depthShaderProgram, "width");
      //   GLint uLocHeight = glGetUniformLocation(this->_depthShaderProgram, "fViewportHeight");
 
-        glUniform1f(uLocNearP, 200);
-        glUniform1f(uLocFarP, 200);
+        glUniform1f(uLocNearP, gla->nearPlane);
+        glUniform1f(uLocFarP, gla->farPlane);
         glUniform1f(uLocWidth, this->_texSize);
        // glUniform1f(uLocHeight, gla->size().height());*/
         this->Unbind();
@@ -120,7 +98,7 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_TEXTURE_2D);
-        glActiveTexture(GL_TEXTURE1);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
         // select modulate to mix texture with color for shading
         glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -180,8 +158,13 @@ void ShadowMapping::Bind(MeshModel &m)
         glClearDepth(1.0);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
-
-        GLdouble mv[16];
+/*
+  cercavo di muovere la mesh nel suo centro
+        vcg::Point3f bbc =  m.cm.bbox.Center();
+        glMatrixMode(GL_MODELVIEW);
+        glTranslatef(-bbc.X(), -bbc.Y(), -bbc.Z());
+*/
+        /*GLdouble mv[16];
         GLdouble prj[16];
         GLint view[4];
 
@@ -189,7 +172,9 @@ void ShadowMapping::Bind(MeshModel &m)
         glGetDoublev(GL_PROJECTION_MATRIX, prj);
         glGetIntegerv(GL_VIEWPORT, view);
 
-        GLdouble *fx,*fy,*fz;
+        GLdouble fx;
+        GLdouble fy;
+        GLdouble fz;
 
         vcg::Point3f p = m.cm.bbox.min;
 
@@ -198,7 +183,7 @@ void ShadowMapping::Bind(MeshModel &m)
         y = p[1];
         z = p[2];
 
-        gluProject(x, y, z, mv, prj, view, fx, fy, fz);
+        gluProject(x, y, z, mv, prj, view, &fx, &fy, &fz);*/
 
         glViewport(0, 0, this->_texSize, this->_texSize);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);

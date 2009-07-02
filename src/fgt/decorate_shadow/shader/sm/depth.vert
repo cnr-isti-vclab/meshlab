@@ -25,7 +25,7 @@ void main(void)
      
                
 //Perform parallel Ortographic projection
-   float F = -near; //distance of Front clipping plane from VRP measured along VPN (a.k.a. lightDir) 
+   float F = near; //distance of Front clipping plane from VRP measured along VPN (a.k.a. lightDir) 
    float B = far;//distance of Back clipping plane from VRP measured along VPN (a.k.a. lightDir) 
    float umin = -width/2.0;
    float umax = width/2.0;

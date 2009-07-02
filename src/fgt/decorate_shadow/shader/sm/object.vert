@@ -12,8 +12,8 @@ void main(void)
    vec4 pPos = gl_Vertex;
   
    gl_Position = gl_ModelViewProjectionMatrix * pPos;
-   gl_TexCoord[0] = gl_MultiTexCoord0;
-   vec4 lightPosition = gl_ModelViewMatrix * gl_LightSource[0].position;
+   //gl_TexCoord[0] = gl_MultiTexCoord0;
+   vec4 lightPosition = gl_ModelViewMatrix * gl_LightSource[0].position * 2.0;
    // lighting is performed in eye space
    vec4 ePos = gl_ModelViewMatrix * gl_Vertex;
    vec4 eLight = gl_ModelViewMatrix * lightPosition; //lightPosition;
@@ -43,7 +43,7 @@ void main(void)
      
                
    //Perform parallel Ortographic projection
-   float F = -near; //distance of Front clipping plane from VRP measured along VPN (a.k.a. lightDir) 
+   float F = near; //distance of Front clipping plane from VRP measured along VPN (a.k.a. lightDir) 
    float B = far;//distance of Back clipping plane from VRP measured along VPN (a.k.a. lightDir) 
    float umin = -width/2.0;
    float umax = width/2.0;
@@ -77,7 +77,7 @@ void main(void)
                           0.5, 0.5, 0.5, 1.0
                          );
 
-   gl_TexCoord[1] = texAdjTrSc * lightPos;
+   gl_TexCoord[0] = texAdjTrSc * lightPos;
    
    // we also need world space light vector
    //lightVecDist = (lightDirection.xyz - gl_Vertex.xyz) * (1.0 / zFar);
