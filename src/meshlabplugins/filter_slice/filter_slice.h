@@ -70,8 +70,8 @@ public:
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
 
-	virtual const QString filterName(FilterIDType filter);
-	virtual const QString filterInfo(FilterIDType filter);
+	virtual const QString filterName(FilterIDType filter) const;
+	virtual const QString filterInfo(FilterIDType filter) const;
 	virtual bool autoDialog(QAction *);
 	virtual const FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);

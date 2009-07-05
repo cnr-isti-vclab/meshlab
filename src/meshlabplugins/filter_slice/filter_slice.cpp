@@ -59,7 +59,7 @@ ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId)
+const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_PARALLEL_PLANES :  return QString("Cross section parallel planes");
@@ -72,7 +72,8 @@ const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId)
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId)
+
+const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId) const
 {
  switch(filterId) {
 		case FP_PARALLEL_PLANES :  return QString("Export one or more cross sections of the current mesh relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0).");
@@ -93,6 +94,7 @@ const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId)
 //void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
 void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, FilterParameterSet &parlst)
 {
+	//vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
   vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 	
 
@@ -114,7 +116,7 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 			QString name=nn.last().left(nn.last().lastIndexOf("."));
 			if (name=="")
 				name="Slice";
-      parlst.addString ("filename", name, "filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
+      parlst.addSaveFileName ("filename", name, "svg","filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
       parlst.addBool   ("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below");
 			parlst.addBool   ("hideBase",true,"Hide Original Mesh","Hide the Original Mesh");
 			parlst.addBool   ("hideSlices",true,"Hide Slices","Hide the Generated Slices");
@@ -142,11 +144,12 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
       parlst.addEnum   ("relativeTo",0,QStringList()<<"Bounding box min"<<"Bounding box Center"<<"Origin","plane reference","Specify the reference from which the planes are shifted");
       //parlst.addBool   ("absOffset",false,"Absolute offset", "if true the above offset is absolute is relative to the origin of the coordinate system, if false the offset is relative to the center of the bbox.");
       //parlst.addAbsPerc("planeDist", 0.0,0,m.cm.bbox.Diag(), "Distance between planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
-      QStringList nn=QString(m.fileName.c_str()).split("/");
+			parlst.addFloat("maxdim",m.cm.bbox.MaxDim(),"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg");
+			QStringList nn=QString(m.fileName.c_str()).split("/");
 			QString name=nn.last().left(nn.last().lastIndexOf("."));
 			if (name=="")
 				name="Slice";
-      parlst.addString ("filename", name, "filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
+      parlst.addSaveFileName ("filename", name, "svg","filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
 			}
 			break;
 		default : assert(0);
@@ -179,11 +182,13 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 			Plane3f slicingPlane;
 			pr.numCol=1;
 			pr.numRow=1;
-			//da rivedere per le misure
-			pr.sizeCm=Point2f(4,4);
+			float ratio=parlst.getFloat("maxdim")/m.mm()->cm.bbox.MaxDim();
+			
+			pr.sizeCm=Point2f(parlst.getFloat("maxdim"),parlst.getFloat("maxdim"));
 			pr.projDir = planeAxis;
 			pr.projCenter =  m.mm()->cm.bbox.Center();
-			pr.scale = 2.0/m.mm()->cm.bbox.Diag();
+			pr.scale = 1;
+			pr.crossHairs=true;
 			pr.lineWidthPt=200;
 
 			vector<MyEdgeMesh*> ev;
@@ -247,7 +252,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 				ev.push_back(edgeMesh);
 			
 
-			QString fname=parlst.getString("filename");
+			QString fname=parlst.getSaveFileName("filename");
 			if(fname=="")
         fname="Slice.svg";
       if (!fname.endsWith(".svg"))
@@ -407,7 +412,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 				ev.push_back(edgeMesh);
 			}
 
-			QString fname=parlst.getString("filename");
+			QString fname=parlst.getSaveFileName("filename");
 			if(fname=="")
         fname="Slice.svg";
       if (!fname.endsWith(".svg"))
