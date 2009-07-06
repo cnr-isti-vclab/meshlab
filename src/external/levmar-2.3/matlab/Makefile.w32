@@ -1,0 +1,26 @@
+#
+# Windows Makefile for MATLAB interface to levmar
+#
+
+MEX=mex
+MEXCFLAGS=-I.. -O #-g
+# WHEN USING LAPACK, CHANGE THE NEXT TWO LINES TO WHERE YOUR COMPILED LAPACK/BLAS & F2C LIBS ARE!
+LAPACKBLASLIBS_PATH=C:\src\lib
+F2CLIBS_PATH=$(LAPACKBLASLIBS_PATH) # define appropriately if not identical to LAPACKBLASLIBS_PATH
+
+
+INTFACESRCS=levmar.c
+LAPACKLIBS=$(LAPACKBLASLIBS_PATH)/clapack.lib $(LAPACKBLASLIBS_PATH)/blas.lib $(F2CLIBS_PATH)/libF77.lib $(F2CLIBS_PATH)/libI77.lib
+LIBS=$(LAPACKLIBS)
+
+dummy: $(INTFACESRCS)
+	$(MEX) $(MEXCFLAGS) $(INTFACESRCS) ../levmar.lib $(LIBS)
+
+clean:
+	-del levmar.mexw32
+
+depend:
+	makedepend -f Makefile $(INTFACESRCS)
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
