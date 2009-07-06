@@ -21,5 +21,6 @@ FORMS 	  += fittoolbox.ui
 INCLUDEPATH += ../../../../code/lib/cminpack-1.0.1
 
 win32-msvc2005:LIBS	+= ../../../../code/lib/cminpack-1.0.1/lib/cminpack.lib
+win32-msvc2008:LIBS	+= ../../../../code/lib/cminpack-1.0.1/lib/cminpack.lib
 
 QT           += opengl

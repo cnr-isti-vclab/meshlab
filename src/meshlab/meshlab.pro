@@ -93,6 +93,7 @@ win32:DEFINES += NOMINMAX
 # the following line is to hide the hundred of warnings about the deprecated
 # old printf are all around the code
 win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
+win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 
 mac:QMAKE_CXX=g++-4.2
 # Uncomment these if you want to experiment with newer gcc compilers
