@@ -336,7 +336,7 @@ public:
 		if (preMask & MeshFilterInterface::FP_VertexRadius && !m.hasDataMask(MeshModel::MM_VERTRADIUS))
 				MissingItems.push_back("Vertex Radius");
 
-		if (preMask & MeshFilterInterface::FP_Face)
+		if (preMask & MeshFilterInterface::FP_Face && (m.cm.fn==0))
 				MissingItems.push_back("Non empty Face Set");
 
 		return MissingItems.isEmpty();
