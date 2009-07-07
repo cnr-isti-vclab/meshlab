@@ -34,81 +34,66 @@ ShadowMapping::ShadowMapping()
     this->_objectFrag = 0;
     this->_objectShaderProgram = 0;
     this->_shadowMap = 0;
-    //this->_depth=0;
-    this->initOk=false;
-    this->fbo = 0;
+    this->_initOk=false;
+    this->_fbo = 0;
 }
 
 ShadowMapping::~ShadowMapping(){}
 
-bool ShadowMapping::Init()//(int w, int h)
+bool ShadowMapping::Init()
 {
-//this->_width = 640;
-//this->_height = 640;
-compileLinkSM();
-return true;
+    compileLinkSM();
+    return true;
 }
 
 void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         vcg::Box3f bb = m.cm.bbox;
-        vcg::Point3f max, min;
-        max = bb.max;
-        min = bb.min;
+        vcg::Point3f center;
+        center = bb.Center();
 
-        int index = bb.MaxDim();
-        if(index == 0) this->_texSize = bb.DimX();
-        else if(index == 1) this->_texSize = bb.DimY();
-            else this->_texSize = bb.DimZ();
+        GLfloat g_mModelView[16];
+        GLfloat g_mProjection[16];
+
+        this->_texSize = bb.Diag();
         (this->_texSize % 2) == 0 ? this->_texSize = this->_texSize + 2 : this->_texSize++;
 
         glUseProgram(this->_depthShaderProgram);
-
-        //PASS UNIFORMS
-        GLint uLocNearP = glGetUniformLocation(this->_depthShaderProgram, "near");
-        GLint uLocFarP = glGetUniformLocation(this->_depthShaderProgram, "far");
         GLint uLocWidth = glGetUniformLocation(this->_depthShaderProgram, "width");
-     //   GLint uLocHeight = glGetUniformLocation(this->_depthShaderProgram, "fViewportHeight");
+        GLint uLocMeshCenter = glGetUniformLocation(this->_depthShaderProgram, "meshCenter");
 
-        glUniform1f(uLocNearP, gla->nearPlane);
-        glUniform1f(uLocFarP, gla->farPlane);
         glUniform1f(uLocWidth, this->_texSize);
-       // glUniform1f(uLocHeight, gla->size().height());*/
-        this->Unbind();
+        glUniform3f(uLocMeshCenter, center[0], center[1], center[2]);
+
         this->Setup();
         this->Bind(m);
-        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerVert);
+        m.Render(vcg::GLW::DMFlat, vcg::GLW::CMPerFace, vcg::GLW::TMPerWedge);
         this->GetQImage();
         this->Unbind();
 
         glUseProgram(0);
 
-
-
-         glUseProgram(this->_objectShaderProgram);
-        //PASS UNIFORMS
-        uLocNearP = glGetUniformLocation(this->_objectShaderProgram, "near");
-        uLocFarP = glGetUniformLocation(this->_objectShaderProgram, "far");
+        glUseProgram(this->_objectShaderProgram);
         uLocWidth = glGetUniformLocation(this->_objectShaderProgram, "width");
-        //uLocHeight = glGetUniformLocation(this->_objectShaderProgram, "fViewportHeight");
+        uLocMeshCenter = glGetUniformLocation(this->_objectShaderProgram, "meshCenter");
 
-        glUniform1f(uLocNearP, gla->nearPlane);
-        glUniform1f(uLocFarP, gla->farPlane);
         glUniform1f(uLocWidth, gla->size().width());
-        //glUniform1f(uLocHeight, gla->size().height());*/
+        glUniform3f(uLocMeshCenter, center[0], center[1], center[2]);
+
         glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_TEXTURE_2D);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-        // select modulate to mix texture with color for shading
         glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
         glUniform1i(loc, 1);
-
-        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerVert);
+        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerWedge);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
         glUseProgram(0);
+        //glEnable (GL_BLEND);
+        //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        int error = glGetError();
 }
 
 bool ShadowMapping::Setup()
@@ -118,18 +103,18 @@ bool ShadowMapping::Setup()
                 return false;
         }
 
-        if (initOk)
+        if (_initOk)
                 return true;
 
-        glGenFramebuffersEXT(1, &fbo);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+        glGenFramebuffersEXT(1, &_fbo);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
         // depth buffer
-        /*glGenRenderbuffersEXT(1, &(this->_depth));
+        glGenRenderbuffersEXT(1, &(this->_depth));
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
         glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
-*/
+        
         // color buffer
         glGenTextures(1, &this->_shadowMap);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
@@ -140,69 +125,42 @@ bool ShadowMapping::Setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-        glGenerateMipmapEXT(GL_TEXTURE_2D);
+        //glGenerateMipmapEXT(GL_TEXTURE_2D);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
 
         int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
+        _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        return initOk;
+        return _initOk;
 }
 
 void ShadowMapping::Bind(MeshModel &m)
 {
-        assert(initOk);
+        assert(_initOk);
 
         glClearDepth(1.0);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
-/*
-  cercavo di muovere la mesh nel suo centro
-        vcg::Point3f bbc =  m.cm.bbox.Center();
-        glMatrixMode(GL_MODELVIEW);
-        glTranslatef(-bbc.X(), -bbc.Y(), -bbc.Z());
-*/
-        /*GLdouble mv[16];
-        GLdouble prj[16];
-        GLint view[4];
-
-        glGetDoublev(GL_MODELVIEW_MATRIX, mv);
-        glGetDoublev(GL_PROJECTION_MATRIX, prj);
-        glGetIntegerv(GL_VIEWPORT, view);
-
-        GLdouble fx;
-        GLdouble fy;
-        GLdouble fz;
-
-        vcg::Point3f p = m.cm.bbox.min;
-
-        GLdouble x,y,z;
-        x = p[0];
-        y = p[1];
-        z = p[2];
-
-        gluProject(x, y, z, mv, prj, view, &fx, &fy, &fz);*/
-
         glViewport(0, 0, this->_texSize, this->_texSize);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
 void ShadowMapping::Unbind()
 {
-        if (!initOk)
+        if (!_initOk)
                 return;
 
         glPopAttrib();
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        //glDeleteFramebuffersEXT(1, &fbo);
+        //glDeleteFramebuffersEXT(1, &_fbo);
 }
 
 void ShadowMapping::GetQImage()
 {
-        if (!initOk)
-                return;// QImage();
+        if (!_initOk)
+                return;
 
         QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
 
@@ -218,10 +176,7 @@ void ShadowMapping::GetQImage()
                 }
         }
         delete[] tempBuf;
-
-        img.save("./texture.png", "PNG");
-        img.mirrored().save("./textureMirrored.png", "PNG");
-        //return img.mirrored();
+        img.mirrored().save("./_shadowMapTXT.png", "PNG");
 }
 
 bool ShadowMapping::compileLinkSM(){
@@ -296,47 +251,41 @@ bool ShadowMapping::compileLinkSM(){
                 glAttachShader(this->_objectShaderProgram, this->_objectFrag);
         glLinkProgram(this->_objectShaderProgram);
         this->printProgramInfoLog(this->_objectShaderProgram);
-
-        /*aggiungere controllo compilaz e linking*/
-
-
     }
-
     return true;
 }
 
 
 void ShadowMapping::printShaderInfoLog(GLuint obj)
-        {
-            int infologLength = 0;
-            int charsWritten  = 0;
-            char *infoLog;
+{
+    int infologLength = 0;
+    int charsWritten  = 0;
+    char *infoLog;
 
-                glGetShaderiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
+        glGetShaderiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
 
-            if (infologLength > 0)
-            {
-                infoLog = (char *)malloc(infologLength);
-                glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
-                        printf("%s\n",infoLog);
-                free(infoLog);
-            }
-        }
+    if (infologLength > 0)
+    {
+        infoLog = (char *)malloc(infologLength);
+        glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
+                printf("%s\n",infoLog);
+        free(infoLog);
+    }
+}
 
-        void ShadowMapping::printProgramInfoLog(GLuint obj)
-        {
-            int infologLength = 0;
-            int charsWritten  = 0;
-            char *infoLog;
+void ShadowMapping::printProgramInfoLog(GLuint obj)
+{
+    int infologLength = 0;
+    int charsWritten  = 0;
+    char *infoLog;
 
-                glGetProgramiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
+        glGetProgramiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
 
-            if (infologLength > 0)
-            {
-                infoLog = (char *)malloc(infologLength);
-                glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
-                        printf("%s\n",infoLog);
-                free(infoLog);
-            }
-        }
-
+    if (infologLength > 0)
+    {
+        infoLog = (char *)malloc(infologLength);
+        glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
+                printf("%s\n",infoLog);
+        free(infoLog);
+    }
+}

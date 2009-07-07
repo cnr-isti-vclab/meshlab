@@ -34,9 +34,6 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
 
-
-
-
 class ShadowMapping 
 {
 
@@ -58,10 +55,10 @@ private:
         void printShaderInfoLog(GLuint);
         void printProgramInfoLog(GLuint);
 
-        bool initOk;
+        bool _initOk;
         int _texSize;
-        GLuint _shadowMap;// , _depth;
-        GLuint fbo;
+        GLuint _shadowMap, _depth;
+        GLuint _fbo;
 	GLuint _depthShaderProgram, _objectShaderProgram;
 	GLuint _depthVert, _depthFrag, _objectVert, _objectFrag ;
 

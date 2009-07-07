@@ -1,8 +1,11 @@
-uniform float far;
-uniform float near;
+//uniform float far;
+//uniform float near;
 uniform float width;
+uniform vec3 meshCenter;
 
-
+/*uniform mat4 modelViewMX;
+uniform mat4 prjMX;
+*/
 void main(void)
 {
 
@@ -23,26 +26,30 @@ void main(void)
                        );
    
      
-               
+              
 //Perform parallel Ortographic projection
-   float F = near; //distance of Front clipping plane from VRP measured along VPN (a.k.a. lightDir) 
-   float B = far;//distance of Back clipping plane from VRP measured along VPN (a.k.a. lightDir) 
-   float umin = -width/2.0;
-   float umax = width/2.0;
-   float vmin = -width/2.0;
-   float vmax = width/2.0;
+   float nearP = - (width / 2.0);//meshCenter.z - (width / 2.0); //distance of Front clipping plane from VRP measured along VPN (a.k.a. lightDir) 
+   float farP = (width / 2.0);//meshCenter.z + (width / 2.0);//distance of Back clipping plane from VRP measured along VPN (a.k.a. lightDir) 
+   float leftP = meshCenter.x - width/2.0;
+   float rightP = meshCenter.x + width/2.0;
+   float bottomP = meshCenter.y - width/2.0;
+   float topP = meshCenter.y + width/2.0;
       
                   
    mat4 parallelViewProject = mat4(
-                        2.0/(umax-umin), 0.0, 0.0, 0.0,
-                        0.0, 2.0/(vmax-vmin), 0.0, 0.0,
-                        0.0, 0.0, 2.0/(B - F), 0.0,
-                       -(umax+ umin)/2.0, -(vmax+vmin)/2.0, -(F+B)/2.0, 1.0
+                        2.0/(rightP-leftP), 0.0, 0.0, 0.0,
+                        0.0, 2.0/(topP-bottomP), 0.0, 0.0,
+                        0.0, 0.0, 2.0/(farP - nearP), 0.0,
+                       -(rightP + leftP)/(rightP - leftP), -(topP + bottomP)/(topP-bottomP), -(farP + nearP)/(farP - nearP), 1.0
                        );
                      
-  
-   gl_Position =  parallelViewProject
-                  * toLightSpaceRot  
+
+ gl_Position =  parallelViewProject
+                  * toLightSpaceRot 
                   * gl_Vertex;
                     
 }
+
+/*void main(){
+  gl_Position = ftransform();
+}*/
