@@ -31,6 +31,7 @@ win32:DEFINES += NOMINMAX
 # the following line is to hide the hundred of warnings about the deprecated
 # old printf are all around the code
 win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
+win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 CONFIG(release){
 # Uncomment the following line to disable assert in mingw
 #DEFINES += NDEBUG
