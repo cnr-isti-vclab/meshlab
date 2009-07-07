@@ -19,7 +19,6 @@ HEADERS += compiler.h \
 SOURCES += lmdemo.c\
 		   Axb.c \
            Axb_core.c \
-           expfit.c \
            lm.c \
            lm_core.c \
            lmbc.c \
