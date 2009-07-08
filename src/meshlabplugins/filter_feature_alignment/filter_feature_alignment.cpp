@@ -23,10 +23,10 @@
 
 #include <Qt>
 #include <QtGui>
-#include <feature_alignment.h>
-#include <filter_feature_alignment.h>
-#include <feature_msc.h>
-#include <feature_rgb.h>
+#include "feature_alignment.h"
+#include "filter_feature_alignment.h"
+#include "feature_msc.h"
+#include "feature_rgb.h"
 #include <meshlabplugins/edit_pickpoints/pickedPoints.h>
 
 #include <stdlib.h>
@@ -544,9 +544,7 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshMode
     int errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
 
-    res.numMatches = matchesVec->size(); //store the numeber of matches found
-
-    aligner.finalize();   
+    res.numMatches = matchesVec->size(); //store the numeber of matches found   
 
     //cleaning baseVec and matchesVec...
     AlignerType::CleanTuplesVector(baseVec, true);
@@ -650,8 +648,6 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacOperation(MeshModel&
     //perform RANSAC and get best transformation matrix
     res = aligner.align(mFix.cm, mMov.cm, param, cb);
 
-    aligner.finalize();
-
     //apply transformation. If ransac don't find a good matrix, identity is returned; so nothing is wrong here...
     mMov.cm.Tr = res.tr * mMov.cm.Tr;
 
@@ -701,7 +697,8 @@ for(int h=0; h<4; h++)
             trialsInitTotTime+=res.initTime;
 
             res = aligner.align(mFix.cm, mMov.cm, param);
-            if(res.exitCode==ResultType::ALIGNED){ numWon++; trialsTotTime+=res.time; }
+            trialsTotTime+=res.time;
+            if(res.exitCode==ResultType::ALIGNED)numWon++;
             if(res.exitCode==ResultType::FAILED) return res;  //failure: stop everything and return error            
         }
 

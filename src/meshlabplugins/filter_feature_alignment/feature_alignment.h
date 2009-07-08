@@ -120,7 +120,7 @@ template<class MESH_TYPE> class Consensus
             bestScore = 0;
             consensusDist = 2.0f;
             consensusNormalsAngle = 0.965f;   //15 degrees.
-            threshold = 45.0f;
+            threshold = 0.0f;
             normalEqualization = true;
             paint = false;
             log = NULL;
@@ -436,7 +436,15 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             vecFMov = NULL;
             //create struct for result and stats
             res = Result();
-        }               
+        }
+
+        ~FeatureAlignment(){
+            //Cleaning extracted features
+            if(vecFFix) vecFFix->clear(); delete vecFFix; vecFFix = NULL;
+            if(vecFMov) vecFMov->clear(); delete vecFMov; vecFMov = NULL;
+            //Cleaning ANN structures
+            FeatureAlignment::CleanKDTree(fkdTree, fdataPts, NULL, NULL, NULL, true);
+        }
 
         Result& init(MeshType& mFix, MeshType& mMov, Parameters& param)
         {
@@ -625,16 +633,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             candidates->clear(); if(candidates) delete candidates; candidates = NULL;
 
             return res;
-        }
-
-        void finalize()
-        {
-            //Cleaning extracted features
-            if(vecFFix) vecFFix->clear(); delete vecFFix; vecFFix = NULL;
-            if(vecFMov) vecFMov->clear(); delete vecFMov; vecFMov = NULL;
-            //Cleaning ANN structures
-            FeatureAlignment::CleanKDTree(fkdTree, fdataPts, NULL, NULL, NULL, true);            
-        }        
+        }     
 
         /*******************************************************************************************
         ERROR TABLE:

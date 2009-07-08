@@ -5,11 +5,11 @@ LIBS += -L$$ANNDIR/lib \
     -lANN
 QT += opengl
 QT += xml
-HEADERS = filter_feature_alignment.h \
+HEADERS = ../../meshlab/interfaces.h \
+    filter_feature_alignment.h \
     feature_alignment.h \
     feature_rgb.h \
-    feature_msc.h \
-    ../../meshlab/interfaces.h
+    feature_msc.h
 SOURCES = filter_feature_alignment.cpp \
     ../../meshlab/filterparameter.cpp \
     ../../meshlabplugins/edit_pickpoints/pickedPoints.cpp \
