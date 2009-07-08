@@ -873,6 +873,7 @@ bool MainWindow::openProject(QString fileName)
 
 		GLA()->mm()->cm.Tr=(*ir).trasformation;
 	}
+	this->GLA()->resetTrackBall();
 	return true;
 }
 
