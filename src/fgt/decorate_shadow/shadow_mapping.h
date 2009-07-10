@@ -49,14 +49,14 @@ private:
         bool compileLinkSM();
         //bool ClearBuffers();
         bool Setup();
-        void Bind(MeshModel&);
+        void Bind();
         void Unbind();
         void GetQImage();
         void printShaderInfoLog(GLuint);
         void printProgramInfoLog(GLuint);
 
         bool _initOk;
-        int _texSize;
+        int _texSize, _diag;
         GLuint _shadowMap, _depth;
         GLuint _fbo;
 	GLuint _depthShaderProgram, _objectShaderProgram;

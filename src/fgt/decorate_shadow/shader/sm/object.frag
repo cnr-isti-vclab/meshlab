@@ -1,10 +1,23 @@
-uniform sampler2D shadowMap;
-uniform float width;
-varying vec3 normalVec;
-varying float lightDepth; //current frag distance from light
-varying vec3 viewVec;
-varying vec3 lightVec;
+uniform mat4 mvpl;
+uniform sampler2DShadow shadowMap;
+varying vec4 pPos;
 
+void main(){
+    vec4 shadowCoord = mvpl * pPos;
+    //shadow2DProj fa automaticamente la divisione prospettica..al momento siamo in ortografica e nn serve
+    shadowCoord.xyz = shadowCoord.xyz * 0.5 + 0.5;
+    float sh = shadow2D(shadowMap, shadowCoord.xyz).x;
+    if (sh > 0.95)
+      discard;
+    //else
+    gl_FragColor = vec4(vec3(0.0), 1.0);
+}
+
+
+
+#if 0 
+
+uniform mat4 mvpl;
 
 
 const float w = 0.5;
@@ -62,3 +75,4 @@ void main(void)
  
  
 }
+#endif

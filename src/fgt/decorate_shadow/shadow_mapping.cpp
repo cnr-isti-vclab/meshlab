@@ -42,6 +42,7 @@ ShadowMapping::~ShadowMapping(){}
 
 bool ShadowMapping::Init()
 {
+    this->_texSize = 512;
     compileLinkSM();
     return true;
 }
@@ -54,43 +55,85 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         GLfloat g_mModelView[16];
         GLfloat g_mProjection[16];
 
-        this->_texSize = bb.Diag();
-        (this->_texSize % 2) == 0 ? this->_texSize = this->_texSize + 2 : this->_texSize++;
-
-        glUseProgram(this->_depthShaderProgram);
+        this->_diag = bb.Diag();
+        /*glUseProgram(this->_depthShaderProgram);
         GLint uLocWidth = glGetUniformLocation(this->_depthShaderProgram, "width");
         GLint uLocMeshCenter = glGetUniformLocation(this->_depthShaderProgram, "meshCenter");
 
         glUniform1f(uLocWidth, this->_texSize);
         glUniform3f(uLocMeshCenter, center[0], center[1], center[2]);
+*/
 
-        this->Setup();
-        this->Bind(m);
-        m.Render(vcg::GLW::DMFlat, vcg::GLW::CMPerFace, vcg::GLW::TMPerWedge);
-        this->GetQImage();
-        this->Unbind();
+        //vcg::Matrix44f mv, pr;
 
-        glUseProgram(0);
+        GLfloat lP[4];
+        glGetLightfv(GL_LIGHT0, GL_POSITION, lP);
+        vcg::Point3f light = -vcg::Point3f(lP[0],lP[1],lP[2]);
 
+        vcg::Matrix44f tm = gla->trackball.Matrix();
+
+        glMatrixMode(GL_PROJECTION);
+
+        glPushMatrix();
+
+            glLoadIdentity();
+            glOrtho(-(this->_diag/2),
+                     this->_diag/2,
+                     -(this->_diag/2),
+                     this->_diag/2,
+                     -(this->_diag/2),
+                     this->_diag/2);
+
+            glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
+    glMatrixMode(GL_MODELVIEW);
+
+    glPushMatrix();
+            vcg::Point3f u, v;
+            //mi seleziona automaticamente un upvector che mi eviti casi degeneri...nel caso vada bene 010 sceglie quello
+            vcg::GetUV(light, u, v, vcg::Point3f(0,-1,0));
+            glLoadIdentity();
+            gluLookAt(0, 0, 0, light[0], light[1], light[2], v[0], v[1], v[2]);
+
+            //glMultMatrixf(tm.transpose().V());
+            //glMultMatrixf(m.cm.Tr.transpose().V());
+
+            glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
+
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(4.0, 4.0);
+            this->Setup();
+            this->Bind();
+            m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
+            glDisable(GL_POLYGON_OFFSET_FILL);
+            this->GetQImage();
+            this->Unbind();
+
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+
+  //      glUseProgram(0);
+
+
+        GLint depthFuncOld;
+        glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
+        glDepthFunc(GL_LEQUAL);
+        vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
         glUseProgram(this->_objectShaderProgram);
-        uLocWidth = glGetUniformLocation(this->_objectShaderProgram, "width");
-        uLocMeshCenter = glGetUniformLocation(this->_objectShaderProgram, "meshCenter");
 
-        glUniform1f(uLocWidth, gla->size().width());
-        glUniform3f(uLocMeshCenter, center[0], center[1], center[2]);
+        GLuint matrixLoc = glGetUniformLocation(this->_objectShaderProgram, "mvpl");
+        glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
 
-        glEnable (GL_BLEND);
-        glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_TEXTURE_2D);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
-        glUniform1i(loc, 1);
+        glUniform1i(loc, 0);
+
         m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerWedge);
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_BLEND);
+        glDepthFunc((GLenum)depthFuncOld);
         glUseProgram(0);
+
         //glEnable (GL_BLEND);
         //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         int error = glGetError();
@@ -106,15 +149,12 @@ bool ShadowMapping::Setup()
         if (_initOk)
                 return true;
 
-        glGenFramebuffersEXT(1, &_fbo);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
-
         // depth buffer
-        glGenRenderbuffersEXT(1, &(this->_depth));
+        /*glGenRenderbuffersEXT(1, &(this->_depth));
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
         glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
-        
+        */
         // color buffer
         glGenTextures(1, &this->_shadowMap);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
@@ -124,11 +164,19 @@ bool ShadowMapping::Setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_LUMINANCE);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
         //glGenerateMipmapEXT(GL_TEXTURE_2D);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glGenFramebuffersEXT(1, &_fbo);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
+        //cosi specifichi che il colore non importa, che il fbo non ha niente sull'attachment colore
+        GLenum drawBuffers[] = {GL_NONE};
+        glDrawBuffersARB(1, drawBuffers);
 
         int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
@@ -136,7 +184,7 @@ bool ShadowMapping::Setup()
         return _initOk;
 }
 
-void ShadowMapping::Bind(MeshModel &m)
+void ShadowMapping::Bind()
 {
         assert(_initOk);
 
@@ -144,7 +192,7 @@ void ShadowMapping::Bind(MeshModel &m)
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
         glViewport(0, 0, this->_texSize, this->_texSize);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void ShadowMapping::Unbind()
@@ -158,6 +206,29 @@ void ShadowMapping::Unbind()
 }
 
 void ShadowMapping::GetQImage()
+{
+        if (!_initOk)
+                return;
+
+        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+
+        float *tempFBuf = new float[this->_texSize * this->_texSize *1 ];
+        float *tempFBufPtr = tempFBuf;
+        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, tempFBufPtr);
+        for (int i = 0; i < this->_texSize; ++i) {
+                QRgb *scanLine = (QRgb*)img.scanLine(i);
+                for (int j = 0; j < this->_texSize; ++j) {
+                    const unsigned char val = (unsigned char) (tempFBufPtr[0] * 255.0f);
+                        scanLine[j] = qRgb(val, val, val);
+                        tempFBufPtr ++;
+                }
+        }
+        delete[] tempFBuf;
+        img.mirrored().save("./_shadowMapTXT.png", "PNG");
+}
+
+/* void ShadowMapping::GetQImage()
 {
         if (!_initOk)
                 return;
@@ -178,6 +249,7 @@ void ShadowMapping::GetQImage()
         delete[] tempBuf;
         img.mirrored().save("./_shadowMapTXT.png", "PNG");
 }
+*/
 
 bool ShadowMapping::compileLinkSM(){
     GLenum err = glewInit();
