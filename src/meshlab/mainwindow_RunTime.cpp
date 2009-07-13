@@ -730,10 +730,13 @@ void MainWindow::applyDecorateMode()
 	if(!found){
 	  FilterParameterSet * decoratorParams = new FilterParameterSet();
 		iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
-		iDecorateTemp->StartDecorate(action,*GLA()->mm(),GLA());
-		GLA()->iDecoratorsList.push_back(make_pair(action,decoratorParams));
-
-		GLA()->log.Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
+		bool ret = iDecorateTemp->StartDecorate(action,*GLA()->mm(),GLA());
+		if(ret) {
+				GLA()->iDecoratorsList.push_back(make_pair(action,decoratorParams));
+				GLA()->log.Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
+				}
+				else GLA()->log.Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+		
 	}
 	GLA()->update();
 }

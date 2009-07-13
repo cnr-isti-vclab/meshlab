@@ -103,7 +103,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
 			}
 		else
 		if( ID(a) == DP_SHOW_VERT_PRINC_CURV_DIR){
-			if(vcg::tri::HasPerVertexCurvatureDir(m.cm))
+			if(m.hasDataMask(MeshModel::MM_VERTCURVDIR))
 				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
 				{
 					glColor4f(1.0,0.0,0.0,.6f);
@@ -450,18 +450,24 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 
 
 
-void ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, GLArea *)
+bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, GLArea *)
 {	
 	if( ID(action) == DP_SHOW_VERT_LABEL || ID(action) == DP_SHOW_FACE_LABEL)
 				{
 					if(m.cm.vn <1000 && m.cm.fn<2000) {
 									isMeshOk[&m] = true;
-									return;
+									return true;
 						}					
 					QMessageBox::StandardButton ret=QMessageBox::question(0,"","Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW <br> Do you REALLY want this? ",QMessageBox::Yes|QMessageBox::No);
 					if(ret==QMessageBox::Yes) isMeshOk[&m] = true; 
-					else isMeshOk[&m] = false;
+					else isMeshOk[&m] = false; 
+					return isMeshOk[&m];
 				}
+	if( ID(action) == DP_SHOW_VERT_PRINC_CURV_DIR )
+	{
+		if(m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
+	}
+	return true;
 }
 void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf)
 {

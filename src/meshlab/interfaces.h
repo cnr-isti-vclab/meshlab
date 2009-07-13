@@ -491,7 +491,7 @@ public:
 	
 		virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/) {}		
 		
-    virtual void StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){assert(0); return false;};
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, FilterParameterSet * /*param*/, GLArea * /*parent*/,QFont qf) = 0;
 		virtual void EndDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
         
