@@ -40,7 +40,7 @@ const QString DecorateShadowPlugin::Info(QAction *action)
  
 void DecorateShadowPlugin::initGlobalParameterSet(QAction *, FilterParameterSet *parset) 
 {
-    if(parset->findParameter(tr("NoisePath")) != NULL){
+    /*if(parset->findParameter(tr("NoisePath")) != NULL){
         qDebug("noise path already setted..doing nothing");
         return;
     }
@@ -50,7 +50,9 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *, FilterParameterSet 
                 glGetFloatv(GL_VIEWPORT, dims);
                 int width = (int)dims[2];
                 int height = (int)dims[3];
-    this->_sm->Init();//(width, width);
+*/
+    //this->_decorator = new ShadowMapping();
+    //this->_decorator->init();
 }		
 		
 const QString DecorateShadowPlugin::ST(FilterIDType filter) const
@@ -66,12 +68,20 @@ const QString DecorateShadowPlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
+bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, GLArea* gla){
+    bool result;
+    if(action->text() == ST(DP_SHOW_SIMPLE_SHADOW)){
+        result = this->_decorator = new ShadowMapping();
+    }
+
+    result = this->_decorator->init();
+    return result;
+}
+
 void DecorateShadowPlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet *par, GLArea *gla, QFont /*qf*/)
 {
     if(m.visible){
-        if(a->text() == ST(DP_SHOW_SIMPLE_SHADOW)){
-            this->_sm->RunShader(m, gla);
-        }
+            this->_decorator->runShader(m, gla);
     }
 }
 

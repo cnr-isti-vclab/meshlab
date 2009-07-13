@@ -24,30 +24,48 @@
 
 #include "shadow_mapping.h"
 
-ShadowMapping::ShadowMapping()
+ShadowMapping::ShadowMapping():DecorateShader()
 {
-    this->_texSize = 0;
-    this->_depthFrag = 0;
-    this->_depthVert = 0;
-    this->_depthShaderProgram = 0;
     this->_objectVert = 0;
     this->_objectFrag = 0;
     this->_objectShaderProgram = 0;
-    this->_shadowMap = 0;
-    this->_initOk=false;
     this->_fbo = 0;
 }
 
-ShadowMapping::~ShadowMapping(){}
+ShadowMapping::~ShadowMapping(){
+    glDetachShader(this->_objectShaderProgram, this->_objectVert);
+    glDetachShader(this->_objectShaderProgram, this->_objectFrag);
 
-bool ShadowMapping::Init()
-{
-    this->_texSize = 512;
-    compileLinkSM();
-    return true;
+    glDeleteShader(this->_objectVert);
+    glDeleteShader(this->_objectFrag);
+    glDeleteProgram(this->_objectShaderProgram);
+
+    glDeleteFramebuffersEXT(1, &_fbo);
 }
 
-void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
+bool ShadowMapping::init()
+{
+    GLenum err = glewInit();
+    if (!GLEW_OK == err){
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setWindowTitle("GLEW init failure");
+        msgBox.setText(QString("Init GLEW failed."));
+        int ret = msgBox.exec();
+        return false;
+    }
+    if(!this->setup()){
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setWindowTitle("FBO Setup failure");
+        msgBox.setText(QString("Failed in creating a Frame Buffer Object."));
+        int ret = msgBox.exec();
+        return false;
+    }
+    return compileAndLink();
+}
+
+void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
         vcg::Box3f bb = m.cm.bbox;
         vcg::Point3f center;
         center = bb.Center();
@@ -55,16 +73,7 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         GLfloat g_mModelView[16];
         GLfloat g_mProjection[16];
 
-        this->_diag = bb.Diag();
-        /*glUseProgram(this->_depthShaderProgram);
-        GLint uLocWidth = glGetUniformLocation(this->_depthShaderProgram, "width");
-        GLint uLocMeshCenter = glGetUniformLocation(this->_depthShaderProgram, "meshCenter");
-
-        glUniform1f(uLocWidth, this->_texSize);
-        glUniform3f(uLocMeshCenter, center[0], center[1], center[2]);
-*/
-
-        //vcg::Matrix44f mv, pr;
+        int diag = bb.Diag();
 
         GLfloat lP[4];
         glGetLightfv(GL_LIGHT0, GL_POSITION, lP);
@@ -77,44 +86,48 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         glPushMatrix();
 
             glLoadIdentity();
-            glOrtho(-(this->_diag/2),
-                     this->_diag/2,
-                     -(this->_diag/2),
-                     this->_diag/2,
-                     -(this->_diag/2),
-                     this->_diag/2);
+            glOrtho(-(diag/2),
+                     diag/2,
+                     -(diag/2),
+                     diag/2,
+                     -(diag/2),
+                     diag/2);
 
             glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
-    glMatrixMode(GL_MODELVIEW);
+        glMatrixMode(GL_MODELVIEW);
 
-    glPushMatrix();
+        glPushMatrix();
             vcg::Point3f u, v;
             //mi seleziona automaticamente un upvector che mi eviti casi degeneri...nel caso vada bene 010 sceglie quello
             vcg::GetUV(light, u, v, vcg::Point3f(0,-1,0));
             glLoadIdentity();
             gluLookAt(0, 0, 0, light[0], light[1], light[2], v[0], v[1], v[2]);
 
-            //glMultMatrixf(tm.transpose().V());
-            //glMultMatrixf(m.cm.Tr.transpose().V());
+            //get the rotation matrix from the trackball
+            vcg::Matrix44f rotation;
+            vcg::Similarityf track = gla->trackball.track;
+            track.rot.ToMatrix(rotation);
+            glMultMatrixf(rotation.transpose().V());
 
+            //traslate the model in the center
+            glTranslatef(-center[0],-center[1],-center[2]);
             glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
 
             glEnable(GL_POLYGON_OFFSET_FILL);
             glPolygonOffset(4.0, 4.0);
-            this->Setup();
-            this->Bind();
-            m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
+
+
+            this->bind();
+            RenderMode rm = gla->getCurrentRenderMode();
+            m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
             glDisable(GL_POLYGON_OFFSET_FILL);
-            this->GetQImage();
-            this->Unbind();
+            this->getShadowMap();
+            this->unbind();
 
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
-
-  //      glUseProgram(0);
-
 
         GLint depthFuncOld;
         glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
@@ -130,16 +143,14 @@ void ShadowMapping::RunShader(MeshModel& m, GLArea* gla){
         GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
         glUniform1i(loc, 0);
 
-        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerWedge);
+        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+        //m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerWedge);
         glDepthFunc((GLenum)depthFuncOld);
         glUseProgram(0);
-
-        //glEnable (GL_BLEND);
-        //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         int error = glGetError();
 }
 
-bool ShadowMapping::Setup()
+bool ShadowMapping::setup()
 {
         if (!GLEW_EXT_framebuffer_object) {
                 qWarning("FBO not supported!");
@@ -149,13 +160,6 @@ bool ShadowMapping::Setup()
         if (_initOk)
                 return true;
 
-        // depth buffer
-        /*glGenRenderbuffersEXT(1, &(this->_depth));
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
-        */
-        // color buffer
         glGenTextures(1, &this->_shadowMap);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
 
@@ -164,10 +168,9 @@ bool ShadowMapping::Setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_LUMINANCE);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
-        //glGenerateMipmapEXT(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_LUMINANCE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glGenFramebuffersEXT(1, &_fbo);
@@ -184,7 +187,7 @@ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
         return _initOk;
 }
 
-void ShadowMapping::Bind()
+void ShadowMapping::bind()
 {
         assert(_initOk);
 
@@ -195,7 +198,7 @@ void ShadowMapping::Bind()
         glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void ShadowMapping::Unbind()
+void ShadowMapping::unbind()
 {
         if (!_initOk)
                 return;
@@ -205,159 +208,39 @@ void ShadowMapping::Unbind()
         //glDeleteFramebuffersEXT(1, &_fbo);
 }
 
-void ShadowMapping::GetQImage()
-{
-        if (!_initOk)
-                return;
+bool ShadowMapping::compileAndLink(){
+    QFile* objVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/object.vert"));
+    QFile* objFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/object.frag"));
 
-        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+    objVert->open(QIODevice::ReadOnly | QIODevice::Text);
+    objFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
-        float *tempFBuf = new float[this->_texSize * this->_texSize *1 ];
-        float *tempFBufPtr = tempFBuf;
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, tempFBufPtr);
-        for (int i = 0; i < this->_texSize; ++i) {
-                QRgb *scanLine = (QRgb*)img.scanLine(i);
-                for (int j = 0; j < this->_texSize; ++j) {
-                    const unsigned char val = (unsigned char) (tempFBufPtr[0] * 255.0f);
-                        scanLine[j] = qRgb(val, val, val);
-                        tempFBufPtr ++;
-                }
-        }
-        delete[] tempFBuf;
-        img.mirrored().save("./_shadowMapTXT.png", "PNG");
-}
+    QByteArray bArray = objVert->readAll();
+    GLint ShaderLen = (GLint) bArray.length();
+    GLubyte* ShaderSource = (GLubyte *)bArray.data();
 
-/* void ShadowMapping::GetQImage()
-{
-        if (!_initOk)
-                return;
+    this->_objectVert= glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(this->_objectVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(this->_objectVert);
+    if(!this->printShaderInfoLog(this->_objectVert))
+        return false;
 
-        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+    bArray = objFrag->readAll();
+    ShaderLen = (GLint) bArray.length();
+    ShaderSource = (GLubyte *)bArray.data();
 
-        unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
-        unsigned char *tempBufPtr = tempBuf;
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
-        for (int i = 0; i < this->_texSize; ++i) {
-                QRgb *scanLine = (QRgb*)img.scanLine(i);
-                for (int j = 0; j < this->_texSize; ++j) {
-                        scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
-                        tempBufPtr += 3;
-                }
-        }
-        delete[] tempBuf;
-        img.mirrored().save("./_shadowMapTXT.png", "PNG");
-}
-*/
+    this->_objectFrag= glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(this->_objectFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(this->_objectFrag);
+    if(!this->printShaderInfoLog(this->_objectFrag))
+        return false;
 
-bool ShadowMapping::compileLinkSM(){
-    GLenum err = glewInit();
-    if (GLEW_OK == err) {
-        QFile* depthVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/depth.vert"));
-        QFile* depthFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/depth.frag"));
-        QFile* objVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/object.vert"));
-        QFile* objFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/object.frag"));
+    this->_objectShaderProgram = glCreateProgram();
+    glAttachShader(this->_objectShaderProgram, this->_objectVert);
+    glAttachShader(this->_objectShaderProgram, this->_objectFrag);
+    glLinkProgram(this->_objectShaderProgram);
+    if(!this->printProgramInfoLog(this->_objectShaderProgram))
+        return false;
 
-        depthVert->open(QIODevice::ReadOnly | QIODevice::Text);
-        depthFrag->open(QIODevice::ReadOnly | QIODevice::Text);
-        objVert->open(QIODevice::ReadOnly | QIODevice::Text);
-        objFrag->open(QIODevice::ReadOnly | QIODevice::Text);
-
-
-
-                //DEPTH PASS
-                QByteArray bArray = depthVert->readAll();
-        GLubyte *ShaderSource;
-        GLint ShaderLen = (GLint) bArray.length();
-        ShaderSource = (GLubyte *)bArray.data();
-
-
-                this->_depthVert= glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(this->_depthVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-        glCompileShader(this->_depthVert);
-        this->printShaderInfoLog(this->_depthVert);
-        //delete ShaderSource;
-
-        bArray = depthFrag->readAll();
-        ShaderLen = (GLint) bArray.length();
-        ShaderSource = (GLubyte *)bArray.data();
-
-                this->_depthFrag = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(this->_depthFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-        glCompileShader(this->_depthFrag);
-        this->printShaderInfoLog(this->_depthFrag);
-        //delete[] ShaderSource;
-
-                this->_depthShaderProgram = glCreateProgram();
-                glAttachShader(this->_depthShaderProgram, this->_depthVert);
-                glAttachShader(this->_depthShaderProgram, this->_depthFrag);
-        glLinkProgram(this->_depthShaderProgram);
-        this->printProgramInfoLog(this->_depthShaderProgram);
-
-
-
-                //OBJ PASS
-                bArray = objVert->readAll();
-        ShaderLen = (GLint) bArray.length();
-        ShaderSource = (GLubyte *)bArray.data();
-
-                this->_objectVert= glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(this->_objectVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-        glCompileShader(this->_objectVert);
-        this->printShaderInfoLog(this->_objectVert);
-
-
-                bArray = objFrag->readAll();
-        ShaderLen = (GLint) bArray.length();
-        ShaderSource = (GLubyte *)bArray.data();
-
-                this->_objectFrag= glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(this->_objectFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-        glCompileShader(this->_objectFrag);
-        this->printShaderInfoLog(this->_objectFrag);
-
-
-                this->_objectShaderProgram = glCreateProgram();
-                glAttachShader(this->_objectShaderProgram, this->_objectVert);
-                glAttachShader(this->_objectShaderProgram, this->_objectFrag);
-        glLinkProgram(this->_objectShaderProgram);
-        this->printProgramInfoLog(this->_objectShaderProgram);
-    }
     return true;
-}
-
-
-void ShadowMapping::printShaderInfoLog(GLuint obj)
-{
-    int infologLength = 0;
-    int charsWritten  = 0;
-    char *infoLog;
-
-        glGetShaderiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
-
-    if (infologLength > 0)
-    {
-        infoLog = (char *)malloc(infologLength);
-        glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
-                printf("%s\n",infoLog);
-        free(infoLog);
-    }
-}
-
-void ShadowMapping::printProgramInfoLog(GLuint obj)
-{
-    int infologLength = 0;
-    int charsWritten  = 0;
-    char *infoLog;
-
-        glGetProgramiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
-
-    if (infologLength > 0)
-    {
-        infoLog = (char *)malloc(infologLength);
-        glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
-                printf("%s\n",infoLog);
-        free(infoLog);
-    }
 }

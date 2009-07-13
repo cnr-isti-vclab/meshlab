@@ -33,35 +33,27 @@
 #include <meshlab/interfaces.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
+#include <decorate_shader.h>
 
-class ShadowMapping 
+class ShadowMapping : public DecorateShader
 {
 
 public:
-
-	ShadowMapping();
+        ShadowMapping();
 	~ShadowMapping();
 
-        bool Init();
-        void RunShader(MeshModel&, GLArea*);
+        bool init();
+        void runShader(MeshModel&, GLArea*);
 
 private:
-        bool compileLinkSM();
-        //bool ClearBuffers();
-        bool Setup();
-        void Bind();
-        void Unbind();
-        void GetQImage();
-        void printShaderInfoLog(GLuint);
-        void printProgramInfoLog(GLuint);
+        bool compileAndLink();
+        bool setup();
+        void bind();
+        void unbind();
 
-        bool _initOk;
-        int _texSize, _diag;
-        GLuint _shadowMap, _depth;
         GLuint _fbo;
-	GLuint _depthShaderProgram, _objectShaderProgram;
-	GLuint _depthVert, _depthFrag, _objectVert, _objectFrag ;
-
+        GLuint _objectShaderProgram;
+        GLuint _objectVert, _objectFrag ;
 };
 
 #endif /* SHADOW_MAPPING_H_ */

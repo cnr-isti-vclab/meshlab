@@ -35,6 +35,7 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
 //#include <wrap/gl/addons.h>
+#include "decorate_shader.h"
 #include "shadow_mapping.h"
 
 class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
@@ -67,14 +68,15 @@ public:
     foreach(ap,actionList){
         ap->setCheckable(true);
     }
-    this->_sm = new ShadowMapping();
+    //this->_sm = new ShadowMapping();
   }
 
 	QList<QAction *> actions () const {return actionList;}
-
+    virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
     virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet * /*parent*/ par, GLArea *gla,QFont qf);
     virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/);
 private:
+    DecorateShader* _decorator;
     ShadowMapping* _sm;
 };
 

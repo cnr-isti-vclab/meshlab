@@ -1,7 +1,9 @@
 include (../../shared.pri)
 QT += opengl
 HEADERS = decorate_shadow.h \
-    shadow_mapping.h
+    shadow_mapping.h \
+    ../../../../vcglib/wrap/gui/trackball.h \
+    decorate_shader.h
 SOURCES = decorate_shadow.cpp \
     shadow_mapping.cpp \
     ../../meshlab/filterparameter.cpp \
