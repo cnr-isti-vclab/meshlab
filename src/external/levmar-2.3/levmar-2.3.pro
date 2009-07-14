@@ -16,18 +16,11 @@ linux-g++:DESTDIR = ../lib/linux-g++
 HEADERS += compiler.h \
 		   lm.h\
 		   misc.h
-SOURCES += lmdemo.c\
-		   Axb.c \
-           Axb_core.c \
+SOURCES += Axb.c \
            lm.c \
-           lm_core.c \
            lmbc.c \
-           lmbc_core.c \
            lmblec.c \
-           lmblec_core.c \
            lmlec.c \
-           lmlec_core.c \
            misc.c\
-           misc_core.c
  
 
