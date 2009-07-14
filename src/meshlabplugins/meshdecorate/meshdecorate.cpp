@@ -465,7 +465,7 @@ bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, GLAr
 				}
 	if( ID(action) == DP_SHOW_VERT_PRINC_CURV_DIR )
 	{
-		if(m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
+		if(!m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
 	}
 	return true;
 }
