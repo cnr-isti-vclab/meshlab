@@ -43,6 +43,7 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/trimesh/update/quality.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/complex/trimesh/create/resampler.h>
+#include <vcg/complex/trimesh/clustering.h>
 #include <vcg/simplex/face/distance.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/geodesic.h>
@@ -321,6 +322,7 @@ FilterDocSampling::FilterDocSampling()
 			<< FP_ELEMENT_SUBSAMPLING 
 			<< FP_MONTECARLO_SAMPLING
 			<< FP_STRATIFIED_SAMPLING
+			<< FP_CLUSTERED_SAMPLING
 			<< FP_POISSONDISK_SAMPLING
 			<< FP_VARIABLEDISK_SAMPLING
 			<< FP_HAUSDORFF_DISTANCE
@@ -345,6 +347,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId) const
 		case FP_ELEMENT_SUBSAMPLING    :  return QString("Mesh Element Subsampling"); 
 		case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling"); 
 		case FP_STRATIFIED_SAMPLING :  return QString("Stratified Triangle Sampling"); 
+		case FP_CLUSTERED_SAMPLING :  return QString("Clustered vertex Subsampling"); 
 		case FP_POISSONDISK_SAMPLING : return QString("Poisson-disk Sampling");
 		case FP_VARIABLEDISK_SAMPLING : return QString("Variable density Disk Sampling");
 		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
@@ -365,9 +368,10 @@ const QString FilterDocSampling::filterName(FilterIDType filterId) const
 const QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_ELEMENT_SUBSAMPLING     :  return QString("Create a new layer populated with a point sampling of the current mesh, At most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probabilty of being choosen."); 
+		case FP_ELEMENT_SUBSAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh, At most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probabilty of being choosen."); 
 		case FP_MONTECARLO_SAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh."); 
-		case FP_STRATIFIED_SAMPLING     :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i> stratified</i> strategies. Distribution is often biased by triangle shape."); 
+		case FP_STRATIFIED_SAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i> stratified</i> strategies. Distribution is often biased by triangle shape."); 
+		case FP_CLUSTERED_SAMPLING   :  return QString("Create a new layer populated with a  subsampling of the vertexes of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy."); 
 		case FP_POISSONDISK_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated according to a Poisson-disk distribution");
 		case FP_VARIABLEDISK_SAMPLING:  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated according to a Poisson-disk distribution");
 		case FP_HAUSDORFF_DISTANCE   :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh."); 
@@ -404,6 +408,7 @@ const int FilterDocSampling::getRequirements(QAction *action)
 		case FP_VARIABLEDISK_SAMPLING :
 		case FP_POISSONDISK_SAMPLING :
 		case FP_STRATIFIED_SAMPLING :   
+		case FP_CLUSTERED_SAMPLING :   
 		case FP_DISK_COLORING :  return 0; 
 		
 		case FP_TEXEL_SAMPLING  :  return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTNORMAL;
@@ -446,6 +451,21 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 			 parlst.addBool("Random", false,
 											"Random Sampling",
 											"if true, for each (virtual) face we draw a random point, otherwise we pick the face midpoint.");
+			break;
+		case FP_CLUSTERED_SAMPLING :{  
+			float maxVal = md.mm()->cm.bbox.Diag();
+		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values.");
+
+			parlst.addEnum("Sampling", 1, 
+									QStringList() << "Average" << "Closest to center", 
+									tr("Representative Strataegy:"), 
+									tr(	"<b>Average</b>: for each cell we take the average of the sample falling into. The resulting point is a new point.<br>"
+											"<b>Closes to center</b>: for each cell we take the sample that is closest to the center of the cell. Choosen vertices are a subset of the original ones.  <br>"
+									)); 
+			parlst.addBool ("Selected", false, "Selected",
+											"If true only for the filter is applied only on the selected subset of the mesh.");
+											
+			}
 			break;
 		case FP_ELEMENT_SUBSAMPLING :
 			parlst.addEnum("Sampling", 0, 
@@ -682,7 +702,46 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 		}
 			break;
-
+case FP_CLUSTERED_SAMPLING :  
+		{			
+			MeshModel *curMM= md.mm();				
+			MeshModel *mm= md.addNewMesh("Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+			int samplingMethod = par.getEnum("Sampling");
+			float threshold = par.getAbsPerc("Threshold");
+			bool selected = par.getBool("Selected");
+			if(selected)
+			{
+					int cnt =tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(curMM->cm);
+					Log("Using only %i selected vertexes for choosing",cnt);
+			}				
+			switch(samplingMethod)
+			{
+				case 0 :	
+						{
+							tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
+							ClusteringGrid.Init(curMM->cm.bbox,100000,threshold);
+							ClusteringGrid.AddPointSet(curMM->cm,selected);
+							ClusteringGrid.ExtractPointSet(mm->cm);
+							ClusteringGrid.SelectPointSet(curMM->cm);
+							tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
+							Log(GLLogStream::FILTER,"Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
+						}						
+						break;			
+				case 1 :	
+						{
+							vcg::tri::Clustering<CMeshO, vcg::tri::NearestToCenter<CMeshO> > ClusteringGrid;
+							ClusteringGrid.Init(curMM->cm.bbox,100000,threshold);
+							ClusteringGrid.AddPointSet(curMM->cm,selected);
+							ClusteringGrid.SelectPointSet(curMM->cm);
+							tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
+							ClusteringGrid.ExtractPointSet(mm->cm);
+							Log(GLLogStream::FILTER,"Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
+						}						
+						break;			
+			}
+			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+		}
+    break;
 		case FP_POISSONDISK_SAMPLING :
 		case FP_VARIABLEDISK_SAMPLING :
 		{
@@ -999,6 +1058,7 @@ const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *acti
 		case FP_ELEMENT_SUBSAMPLING    :
 		case FP_MONTECARLO_SAMPLING :
 		case FP_STRATIFIED_SAMPLING :
+		case FP_CLUSTERED_SAMPLING :
 		case FP_POISSONDISK_SAMPLING : 
 		case FP_VARIABLEDISK_SAMPLING : 
 		case FP_REGULAR_RECURSIVE_SAMPLING : 
