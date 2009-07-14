@@ -523,10 +523,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 	  {
       bool selected  = par.getBool("Selected");
       float threshold = par.getAbsPerc("Threshold");
-				vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > Grid;
-				Grid.Init(m.cm.bbox,100000,threshold);
-				Grid.Add(m.cm);
-				Grid.Extract(m.cm);
+				vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
+				ClusteringGrid.Init(m.cm.bbox,100000,threshold);
+				ClusteringGrid.AddMesh(m.cm);
+				ClusteringGrid.ExtractMesh(m.cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	  }
