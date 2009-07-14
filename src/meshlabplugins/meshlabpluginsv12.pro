@@ -38,6 +38,7 @@ SUBDIRS       = io_base\
 				editrgbtri \
 				editsegment \
 				edit_straightener \
+				filter_isoparametrization \
 				../sampleplugins/sampleedit \
 				../sampleplugins/samplefilter \
 				../sampleplugins/samplefilterdyn \
