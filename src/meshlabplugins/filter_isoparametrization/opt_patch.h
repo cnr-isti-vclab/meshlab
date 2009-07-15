@@ -237,7 +237,7 @@ public:
 		ScalarType &varianceA
 		)
 	{
-		MeshType::FaceIterator Fi;
+                typename MeshType::FaceIterator Fi;
 		varianceA=0;
 		varianceL=0;
 		int num_edge=0;
@@ -267,7 +267,7 @@ public:
 	}
 
 	///optimize UV of central vertex
-	static void OptimizeUV(typename VertexType *center)
+        static void OptimizeUV(VertexType *center)
 	{
 		///parametrize base domain star and subvertices
 		ParametrizeStarEquilateral<MeshType>(center,true);
@@ -281,7 +281,7 @@ public:
 
 		///get Hres Vertices
 		std::vector<VertexType*> Hres_vert;
-		getHresVertex<MeshType::FaceType>(faces,Hres_vert);
+                getHresVertex<typename MeshType::FaceType>(faces,Hres_vert);
 		///make a copy of base mesh
 		std::vector<FaceType*> ordFaces;
 		CreateMeshVertexStar<MeshType>(vertices,ordFaces,domain);
@@ -377,7 +377,7 @@ public:
 	std::vector<Elem> Operations;
 
 
-	void Execute(typename VertexType *center)
+        void Execute(VertexType *center)
 	{
 		OptimizeUV(center);
 		std::vector<typename MeshType::VertexType*> neigh;

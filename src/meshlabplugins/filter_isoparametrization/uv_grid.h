@@ -237,7 +237,7 @@ public:
 			vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
 			ScalarType area=(tex1-tex0)^(tex2-tex0);
 			///then find if the point 2d falls inside
-			MeshType::CoordType bary;
+                        typename MeshType::CoordType bary;
 			if (area>_EPSILON)
 			{
 				AbsCoord=InterpolateRPos(f,baryVal[i]);

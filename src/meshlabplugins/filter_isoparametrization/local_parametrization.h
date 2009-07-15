@@ -19,11 +19,11 @@ void ParametrizeExternal(MeshType &to_parametrize)
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename MeshType::VertexType VertexType;
 
-	std::vector<MeshType::VertexType*> vertices;
+        std::vector<VertexType*> vertices;
 	
 	///find first border vertex
-	MeshType::VertexType* Start=NULL;
-	MeshType::VertexIterator Vi=to_parametrize.vert.begin();
+        VertexType* Start=NULL;
+        typename MeshType::VertexIterator Vi=to_parametrize.vert.begin();
 	
 	while ((Start==NULL)&&(Vi<to_parametrize.vert.end()))
 	{
@@ -62,7 +62,7 @@ void ParametrizeExternal(MeshType &to_parametrize)
 	}
 
 	///set border vertices
-	std::vector<MeshType::VertexType*>::iterator iteV;
+        typename std::vector<VertexType*>::iterator iteV;
 	/*ScalarType curr_perim=0;*/
 	ScalarType curr_angle=0;
 	vertices[0]->T().U()=cos(curr_angle);
@@ -95,13 +95,13 @@ void ParametrizeInternal(MeshType &to_parametrize)
 	typedef typename MeshType::ScalarType ScalarType;
 	const ScalarType Eps=(ScalarType)0.0001;
 	///set internal vertices
-	for (MeshType::VertexIterator Vi=to_parametrize.vert.begin();Vi!=to_parametrize.vert.end();Vi++)
+        for (typename MeshType::VertexIterator Vi=to_parametrize.vert.begin();Vi!=to_parametrize.vert.end();Vi++)
 	{
 		//assert(!Vi->IsD());
 		if ((!Vi->IsB())&&(!Vi->IsD()))
 		{
 			///find kernel
-			std::vector<MeshType::VertexType*> star;
+                        std::vector<typename MeshType::VertexType*> star;
 			getVertexStar<MeshType>(&(*Vi),star);
 			ScalarType kernel=0;
 			for (unsigned int k=0;k<star.size();k++)
@@ -152,11 +152,11 @@ void ParametrizeInternal(MeshType &to_parametrize)
 	}
 	///smoothing of txcoords
 	InitDampRestUV(to_parametrize);
-	for (MeshType::VertexIterator Vi=to_parametrize.vert.begin();Vi!=to_parametrize.vert.end();Vi++)
+        for (typename MeshType::VertexIterator Vi=to_parametrize.vert.begin();Vi!=to_parametrize.vert.end();Vi++)
 	{
 		if ((!Vi->IsB())&&(!Vi->IsD()))
 		{
-			std::vector<MeshType::VertexType*> star;
+                        std::vector<typename MeshType::VertexType*> star;
 			getVertexStar<MeshType>(&(*Vi),star);
 			vcg::Point2<ScalarType> UV=vcg::Point2<ScalarType>(0,0);
 			for (unsigned int k=0;k<star.size();k++)
@@ -184,6 +184,7 @@ template <class FaceType>
 typename FaceType::CoordType InterpolateNorm
 (FaceType* f, const typename FaceType::CoordType &bary)
 {	
+        typedef typename FaceType::CoordType CoordType;
 	CoordType n0=f->V(0)->N();
 	CoordType n1=f->V(1)->N();
 	CoordType n2=f->V(2)->N();
@@ -205,6 +206,7 @@ template <class FaceType>
 vcg::Point3i InterpolateColor
 (FaceType* f,const typename FaceType::CoordType &bary)
 {	
+        typedef typename FaceType::ScalarType ScalarType;
 	vcg::Color4b c0=f->V(0)->C();
 	vcg::Color4b c1=f->V(1)->C();
 	vcg::Color4b c2=f->V(2)->C();
@@ -235,16 +237,16 @@ typename VertexType::CoordType ProjectPos(const VertexType &v)
 template <class VertexType>
 typename VertexType::CoordType Warp(const VertexType* v)
 {
-	VertexType::FaceType * father=v->father;
-	VertexType::CoordType proj=father->P(0)*v->Bary.X()+father->P(1)*v->Bary.Y()+father->P(2)*v->Bary.Z();
+        typename VertexType::FaceType * father=v->father;
+        typename VertexType::CoordType proj=father->P(0)*v->Bary.X()+father->P(1)*v->Bary.Y()+father->P(2)*v->Bary.Z();
 	return proj;
 }
 
 template <class VertexType>
 typename VertexType::CoordType WarpRpos(const VertexType* v)
 {
-	VertexType::FaceType * father=v->father;
-	VertexType::CoordType proj=father->V(0)->RPos*v->Bary.X()+father->V(1)->RPos*v->Bary.Y()+father->V(2)->RPos*v->Bary.Z();
+        typename VertexType::FaceType * father=v->father;
+        typename VertexType::CoordType proj=father->V(0)->RPos*v->Bary.X()+father->V(1)->RPos*v->Bary.Y()+father->V(2)->RPos*v->Bary.Z();
 	return proj;
 }
 
@@ -379,6 +381,7 @@ void MeanVal(const std::vector<vcg::Point2<typename MeshType::ScalarType> > &Poi
 	typedef typename MeshType::FaceType FaceType;
 	typedef typename MeshType::VertexType VertexType;
 	typedef typename MeshType::ScalarType ScalarType;
+        typedef typename MeshType::CoordType CoordType;
 
 	int size=Points.size();
 	Lamda.resize(size);
@@ -402,13 +405,13 @@ void MeanVal(const std::vector<vcg::Point2<typename MeshType::ScalarType> > &Poi
 		ScalarType Alpha0=acos(v0*v1);
 		ScalarType Alpha1=acos(v1*v2);
 
-		Lamda[i]=(tan(Alpha0/2.0)+tan(alpha1/2.0))/l;
-		Sum+=Lamda[i];
+                Lamda[i]=(tan(Alpha0/2.0)+tan(Alpha1/2.0))/l;
+                sum+=Lamda[i];
 	}
 
 	///normalization
 	for (int i=0;i<size;i++)
-		Lamda[i]/=Sum;
+                Lamda[i]/=sum;
 }
 
 template <class FaceType>
@@ -507,22 +510,22 @@ public:
 
 ///sample 3d vertex possible's position
 ///using area criterion
-template <class MeshType>
-void SamplingPoints(MeshType &mesh,
-					std::vector<typename MeshType::CoordType> &pos)
-{
-	typedef typename MeshType::CoordType CoordType;
-	typedef VertexSampler<MeshType::FaceType> Sampler;
-	pos.reserve(samples_area);
-	Sampler ps;
-	ps.points.reserve(samples_area);
-	
-	vcg::tri::SurfaceSampling<MeshType,Sampler>::Montecarlo(mesh,ps,samples_area);
-	pos=std::vector<CoordType>(ps.points.begin(),ps.points.end());
-}
+//template <class MeshType>
+//void SamplingPoints(MeshType &mesh,
+//					std::vector<typename MeshType::CoordType> &pos)
+//{
+//	typedef typename MeshType::CoordType CoordType;
+//	typedef VertexSampler<MeshType::FaceType> Sampler;
+//	pos.reserve(samples_area);
+//	Sampler ps;
+//	ps.points.reserve(samples_area);
+//
+//	vcg::tri::SurfaceSampling<MeshType,Sampler>::Montecarlo(mesh,ps,samples_area);
+//	pos=std::vector<CoordType>(ps.points.begin(),ps.points.end());
+//}
 
 template <class MeshType> 
-void InitDampRestUV(typename MeshType &m)
+void InitDampRestUV(MeshType &m)
 {
 	for (unsigned int i=0;i<m.vert.size();i++)
 		m.vert[i].RestUV=m.vert[i].T().P();
@@ -530,7 +533,7 @@ void InitDampRestUV(typename MeshType &m)
 
 
 template <class MeshType> 
-void RestoreRestUV(typename MeshType &m)
+void RestoreRestUV(MeshType &m)
 {
 	for (unsigned int i=0;i<m.vert.size();i++)
 		m.vert[i].T().P()=m.vert[i].RestUV;
@@ -539,7 +542,7 @@ void RestoreRestUV(typename MeshType &m)
 
 ///parametrize a submesh from trinagles that are incident on vertices 
 template <class MeshType>
-void ParametrizeLocally(typename MeshType &parametrized,
+void ParametrizeLocally(MeshType &parametrized,
 						bool fix_boundary=true,
 						bool init_border=true)
 {
@@ -684,8 +687,8 @@ bool testParamCoords(MeshType &domain)
 {
 	for (unsigned int i=0;i<domain.vert.size();i++)
 	{
-		MeshType::VertexType *v=&domain.vert[i];
-		bool b=testParamCoords<MeshType::VertexType>(v);
+                typename MeshType::VertexType *v=&domain.vert[i];
+                bool b=testParamCoords<typename MeshType::VertexType>(v);
 		if (!b)
 		{
 			#ifndef _MESHLAB
@@ -846,12 +849,12 @@ void ParametrizeStarEquilateral(MeshType &parametrized,
 	assert(non_border.size()>0);
 
 	///get sorted border vertices
-	std::vector<MeshType::VertexType*> vertices;
+        std::vector<VertexType*> vertices;
 	FindSortedBorderVertices<MeshType>(parametrized,Start,vertices);
 	
 	///set border vertices
 	int num=vertices.size();
-	std::vector<MeshType::VertexType*>::iterator iteV;
+        typename std::vector<VertexType*>::iterator iteV;
 	ScalarType curr_angle=0;
 	vertices[0]->T().U()=cos(curr_angle)*radius;
 	vertices[0]->T().V()=sin(curr_angle)*radius;
@@ -1011,7 +1014,7 @@ void ParametrizeFaceEquilateral(MeshType &parametrized,
 ///parametrize and create a submesh from trinagles that are incident on
 /// vertices .... seturn a vetor of original faces
 template <class MeshType>
-void ParametrizeLocally(typename MeshType &parametrized,
+void ParametrizeLocally(MeshType &parametrized,
 						const std::vector<typename MeshType::VertexType*> &subset,
 						std::vector<typename MeshType::FaceType*> &orderedFaces,
 						std::vector<typename MeshType::VertexType*> &orderedVertex)
@@ -1022,7 +1025,7 @@ void ParametrizeLocally(typename MeshType &parametrized,
 	typedef typename FaceType::VertexType VertexType;
 
 	orderedFaces.clear();
-	std::vector<FaceType::VertexType*> vertices;
+        std::vector<VertexType*> vertices;
 	
 	
 	///get faces referenced by vertices
@@ -1071,7 +1074,7 @@ bool GetBaryFaceFromUV(const MeshType &m,
 	assert ((V>=-1)&&(V<=1));*/
 	for (unsigned int i=0;i<m.face.size();i++)
 	{
-		const MeshType::FaceType *f=&m.face[i];
+                const typename  MeshType::FaceType *f=&m.face[i];
 		vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
 		vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
 		vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
@@ -1187,7 +1190,7 @@ bool GetCoordFromUV(const MeshType &m,
 	const ScalarType _EPSILON = (ScalarType)0.00001;
 	for (unsigned int i=0;i<m.face.size();i++)
 	{
-		const MeshType::FaceType *f=&m.face[i];
+                const typename MeshType::FaceType *f=&m.face[i];
 		vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
 		vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
 		vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
@@ -1196,7 +1199,7 @@ bool GetCoordFromUV(const MeshType &m,
 		vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
 		ScalarType area=(tex1-tex0)^(tex2-tex0);
 		///then find if the point 2d falls inside
-		MeshType::CoordType bary;
+                typename MeshType::CoordType bary;
 		if ((area>_EPSILON)&&(t2d.InterpolationParameters(test,bary.X(),bary.Y(),bary.Z())))
 		{
 			///approximation errors
@@ -1254,7 +1257,7 @@ typename MeshType::ScalarType GetSmallestUVHeight(const MeshType &m)
 	assert(m.fn>0);
 	for (unsigned int i=0;i<m.face.size();i++)
 	{
-		const MeshType::FaceType *f=&m.face[i];
+                const typename MeshType::FaceType *f=&m.face[i];
 		///approximation errors
 		for (int j=0;j<3;j++)
 		{

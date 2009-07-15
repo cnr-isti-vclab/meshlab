@@ -75,7 +75,7 @@ void CopyMeshFromFacesAbs(const std::vector<typename MeshType::FaceType*> &faces
 
 	///get set of faces
 	std::map<VertexType*,VertexType*> vertexmap;
-	std::vector<FaceType::VertexType*> vertices;
+        std::vector<VertexType*> vertices;
 	FindVertices(faces,vertices);
 
 	///initialization of new mesh
@@ -88,7 +88,7 @@ void CopyMeshFromFacesAbs(const std::vector<typename MeshType::FaceType*> &faces
 	new_mesh.fn=faces.size();
 
 	///add new vertices
-	std::vector<VertexType*>::const_iterator iteV;
+        typename std::vector<VertexType*>::const_iterator iteV;
 	int i=0;
 	for (iteV=vertices.begin();iteV!=vertices.end();iteV++)
 	{
@@ -110,8 +110,8 @@ void CopyMeshFromFacesAbs(const std::vector<typename MeshType::FaceType*> &faces
 	}
 
 	///setting of new faces
-	std::vector<FaceType*>::const_iterator iteF;
-	std::vector<FaceType>::iterator iteF1;
+        typename std::vector<FaceType*>::const_iterator iteF;
+        typename std::vector<FaceType>::iterator iteF1;
 	for (iteF=faces.begin(),iteF1=new_mesh.face.begin()
 		;iteF!=faces.end();iteF++,iteF1++)
 	{
@@ -123,7 +123,7 @@ void CopyMeshFromFacesAbs(const std::vector<typename MeshType::FaceType*> &faces
 		for (int j=0;j<3;j++)
 		{
 			VertexType* v=(*iteF)->V(j);
-			std::map<VertexType*,VertexType*>::iterator iteMap=vertexmap.find(v);
+                        typename std::map<VertexType*,VertexType*>::iterator iteMap=vertexmap.find(v);
 			assert(iteMap!=vertexmap.end());
 			(*iteF1).V(j)=(*iteMap).second;
 		}
@@ -132,19 +132,21 @@ void CopyMeshFromFacesAbs(const std::vector<typename MeshType::FaceType*> &faces
 
 ///create a mesh considering just the faces that share all three vertex
 template <class MeshType>
-void CopyMeshFromVerticesAbs(const std::vector<typename MeshType::VertexType*> &vertices,
+void CopyMeshFromVerticesAbs(std::vector<typename MeshType::VertexType*> &vertices,
 						  std::vector<typename MeshType::VertexType*> &OrderedVertices,
 						  std::vector<typename MeshType::FaceType*> &OrderedFaces,
 					      MeshType & new_mesh)
 {
-	std::vector<MeshType::VertexType*>::const_iterator iteV;
+        typedef typename MeshType::CoordType CoordType;
+        typedef typename MeshType::ScalarType ScalarType;
+        typedef typename MeshType::VertexType VertexType;
+        typedef typename MeshType::FaceType FaceType;
+
+        typename std::vector<VertexType*>::const_iterator iteV;
 	for (iteV=vertices.begin();iteV!=vertices.end();iteV++)
 		(*iteV)->ClearV();
 
-	typedef typename MeshType::CoordType CoordType;
-	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::VertexType VertexType;
-	typedef typename MeshType::FaceType FaceType;
+
 
 	OrderedVertices.clear();
 
@@ -167,7 +169,7 @@ void CopyMeshFromVerticesAbs(const std::vector<typename MeshType::VertexType*> &
 		(*iteV)->SetV();
 
 	///getting inside faces
-	std::vector<FaceType*>::const_iterator iteF;
+        typename std::vector<FaceType*>::const_iterator iteF;
 	for (iteF=faces.begin();iteF!=faces.end();iteF++)
 	{
 		///for each vertex get new reference
@@ -191,7 +193,7 @@ void CopyMeshFromVerticesAbs(const std::vector<typename MeshType::VertexType*> &
 
 	///setting of internal vertices
 	int i=0;
-	std::vector<typename MeshType::VertexType*>::iterator iteVI;
+        typename std::vector<typename MeshType::VertexType*>::iterator iteVI;
 	for (iteVI=OrderedVertices.begin();iteVI!=OrderedVertices.end();iteVI++)
 	{
 		///copy position
@@ -214,7 +216,7 @@ void CopyMeshFromVerticesAbs(const std::vector<typename MeshType::VertexType*> &
 	}
 
 	///setting of new faces
-	std::vector<FaceType>::iterator iteF1;
+        typename std::vector<FaceType>::iterator iteF1;
 	for (iteF=OrderedFaces.begin(),iteF1=new_mesh.face.begin()
 		;iteF!=OrderedFaces.end();iteF++,iteF1++)
 	{
@@ -223,7 +225,7 @@ void CopyMeshFromVerticesAbs(const std::vector<typename MeshType::VertexType*> &
 		for (int j=0;j<3;j++)
 		{
 			VertexType* v=(*iteF)->V(j);
-			std::map<VertexType*,VertexType*>::iterator iteMap=vertexmap.find(v);
+                        typename std::map<VertexType*,VertexType*>::iterator iteMap=vertexmap.find(v);
 			assert(iteMap!=vertexmap.end());
 			(*iteF1).V(j)=(*iteMap).second;
 		}

@@ -1,14 +1,20 @@
 #ifndef PARAM_FLIP
 #define PARAM_FLIP
 
+#include <vcg/complex/local_optimization/tri_edge_flip.h>
+
 ///Flip function
 template <class BaseMesh>
 class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<BaseMesh> >
 {
 	typedef typename BaseMesh::VertexType::EdgeType EdgeType;
 	typedef typename BaseMesh::VertexType BaseVertex;
+        typedef typename BaseMesh::VertexType VertexType;
 	typedef typename BaseMesh::FaceType   BaseFace;
-
+        typedef typename BaseMesh::FaceType   FaceType;
+        typedef typename BaseMesh::CoordType   CoordType;
+        typedef typename BaseMesh::ScalarType   ScalarType;
+        typedef vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<BaseMesh> > Super;
 	ScalarType diff;
 	
 	public:
@@ -21,7 +27,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 			return false;
 		///ScalarType diff=EdgeDiff();
 		/*return true;*/
-		return (_priority>0);
+                return (this->_priority>0);
 	}
 
 	inline ParamEdgeFlip() {}
@@ -29,7 +35,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 	/*!
 	 *	Constructor with <I>pos</I> type
 	 */
-	inline ParamEdgeFlip(const PosType pos, int mark)
+        inline ParamEdgeFlip(const typename Super::PosType pos, int mark)
 	{
 		this->_pos = pos;
 		this->_localMark = mark;
@@ -38,8 +44,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 	}
 
 	///do the effective flip 
-	void ExecuteFlip(FaceType &f,
-					 const int &edge)
+	void ExecuteFlip(FaceType &f, const int &edge)
 	{
 		std::vector<FaceType*> faces;
 		faces.push_back(&f);
@@ -259,7 +264,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 
 	ScalarType ComputePriority()
 	{
-		_priority=EdgeDiff();
+                this->_priority=EdgeDiff();
 		return this->_priority;
 	}
 

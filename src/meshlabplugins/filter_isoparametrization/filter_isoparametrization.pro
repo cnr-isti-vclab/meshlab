@@ -32,6 +32,8 @@ INCLUDEPATH  += ../../external/levmar-2.3/
 
 win32-msvc2005:QMAKE_CXXFLAGS   +=  /openmp
 win32-msvc2008:QMAKE_CXXFLAGS   +=  /openmp
+win32-g++:QMAKE_CXXFLAGS   +=  -fopenmp
+linux-g++:QMAKE_CXXFLAGS   +=  -fopenmp
 
 win32-msvc.net:LIBS	+= ../../external/lib/win32-msvc.net/levmar.lib
 win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/levmar.lib

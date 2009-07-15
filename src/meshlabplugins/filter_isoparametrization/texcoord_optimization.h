@@ -4,8 +4,9 @@
 #define __VCGLIB__TEXTCOOORD_OPTIMIZATION
 
 #include <vcg/container/simple_temporary_data.h>
+#ifdef _USE_OMP
 #include <omp.h>
-
+#endif
 /*
 
 SINGLE PATCH TEXTURE OPTIMIZATIONS
@@ -27,10 +28,10 @@ namespace tri
 template<class MESH_TYPE> 
 class TexCoordOptimization{
 protected:
-  MESH_TYPE &m;
   SimpleTempData<typename MESH_TYPE::VertContainer, int > isFixed;
+  MESH_TYPE &m;
 public:
-  
+
   /* Tpyes */
   typedef MESH_TYPE MeshType;
   typedef typename MESH_TYPE::VertexIterator VertexIterator;
@@ -229,189 +230,10 @@ public:
     /* todo: do as iterate, but without */ 
     Iterate();
   }
-  
-//  ScalarType Iterate(){
-//    
-//    
-//    #define v0 (f->V0(i)->T().P())
-//    #define v1 (f->V1(i)->T().P())
-//    #define v2 (f->V2(i)->T().P())
-//	omp_set_num_threads(4);
-//
-///*	#define vp0 (f->V0(i)->P())
-//    #define vp1 (f->V1(i)->P())
-//    #define vp2 (f->V2(i)->P())*/
-//	/*#pragma omp parallel for schedule(static,5)*/
-//	 for (VertexIterator v=Super::m.vert.begin(); v!=Super::m.vert.end(); v++) {
-//	 //for (int i=0; i<=Super::m.vert.size(); i++) {
-//		  //sum[v].Zero();
-//		// VertexType *v=&Super::m.vert[i];
-//		  sum[v]=Point2<ScalarType>(0,0);
-//	  }
-//	 
-//		
-//	  ScalarType tot_proj_area=0;
-//	 // ScalarType tot_area=0;num_threads(4)
-//	  //int i;
-//	  #pragma omp parallel for reduction (+:tot_proj_area)
-//	  for (int i=0;i<m.face.size(); i++) {
-//		  FaceType *f=&m.face[i];
-//		  if (!(Super::isFixed[f->V(0)]&& Super::isFixed[f->V(1)] && Super::isFixed[f->V(2)]))
-//		  {
-//		  int i=0;
-//		  double area2 = fabs((v1-v0) ^ (v2-v0));
-//		  /*#pragma omp atomic*/
-//	      tot_proj_area+=area2;
-//		  }
-//	  }
-////*/
-//	  #pragma omp barrier
-//
-//	  double scale= tot_proj_area / totArea ;
-//	//  printf("scale factor: %f/%f = %f\n",tot_proj_area , tot_area ,scale);
-//
-//	  #pragma omp parallel for schedule(static,60)
-//	  for (int k=0;k<m.face.size(); k++) {
-//		  FaceType *f=&m.face[k];
-//		   int i=0;
-//		   ScalarType area2 = fabs((v1-v0) ^ (v2-v0));
-//		  /*if (!Fixed(&(*f)))
-//		  {
-//			if (area2==0)
-//			  printf(".");
-//			else
-//			if (area2<0)
-//				  printf("/");
-//		  }*/
-//		/* if (area2<=0){
-//			  FixVertex(f->V(0));
-//			  FixVertex(f->V(1));
-//			  FixVertex(f->V(2));
-//		  }*/
-//		  //ScalarType epsilon=0.000001;
-//		  for (i=0; i<3; i++){
-//			  
-//			  ScalarType 
-//				  a = (v1-v0).Norm(),
-//				  b =  ((v1-v0) * (v2-v0))/a,
-//			      c = area2 / a,
-//			    
-//				  m0= data[f][i] / area2,
-//				  m1= data[f][(i+1)%3] / area2,
-//				  m2= data[f][(i+2)%3] / area2,
-//				  
-//				  mx= (b-a)/area2,
-//				  my= c/area2, // 1.0/a
-//				  mA= data[f][3]/area2* scale,
-//				  e = m0*((b-a)*(b-a)+c*c) + m1*(b*b+c*c) + m2*a*a, // as obvious
-//				  M1= mA + 1.0/mA,
-//				  M2= mA - 1.0/mA,
-//				  px= e*my,
-//				  py=-e*mx,
-//				  qx= m1*b+ m2*a,
-//				  qy= m1*c,
-//
-//				 
-//				  /* linear weightings
-//
-//				  dx= (OMEGA) * (my * M2) + 
-//				      (1-OMEGA) * ( px - 2.0*qx),
-//				  dy= (OMEGA) * (-mx * M2) + 
-//				      (1-OMEGA) * ( py - 2.0*qy),*/
-//				
-//				  // exponential weighting
-//				  // 2d gradient
-//				  		dx=// M1
-//				  	 //*M1 // ^ theta-1 
-//				  	 pow(M1,theta-1)
-//				  	 *(px*(M1+ theta*M2) - 2.0*qx*M1), 
-//				  dy=// M1
-//					   //*M1 // ^ theta-1 
-//					   pow(M1,theta-1)
-//					   *(py*(M1+ theta*M2) - 2.0*qy*M1), 
-//
-//				  gy= dy/c,
-//				  gx= (dx - gy*b) / a;
-//				 /* dx=// M1
-//				  	 //*M1 // ^ theta-1 
-//				  	 pow(M1,theta-1)
-//				  	 *(px*(M1+ theta*M2) - 2.0*qx*M1), 
-//				  dy=// M1
-//					   //*M1 // ^ theta-1 
-//					   pow(M1,theta-1)
-//					   *(py*(M1+ theta*M2) - 2.0*qy*M1), 
-//
-//				  gy= dy/c,
-//				  gx= (dx - gy*b) / a;*/
-//
-//				  // 3d gradient
-//				Point2<ScalarType> val=( (v1-v0) * gx + (v2-v0) * gy ) * data[f][3]; 
-//				//
-//				//omp_set_lock(&lck[f->V(i)]);
-//				#pragma omp atomic
-//				sum[f->V(i)].X()+=val.X();
-//				//omp_unset_lock(&lck[f->V(i)]);
-//				
-//				//omp_set_lock(&lck[f->V(i)]);
-//				#pragma omp atomic
-//				sum[f->V(i)].Y()+=val.Y();
-//				//omp_unset_lock(&lck[f->V(i)]);
-//				//printf("sum norm %e \n",sum[f->V(i)].Norm());
-//		  }
-//	  }
-//	#pragma omp barrier
-//
-//    ScalarType max=0; // max displacement
-//	// #pragma omp parallel for num_threads(4)
-// 	 // for (VertexIterator v=Super::m.vert.begin(); v!=Super::m.vert.end(); v++) 
-//	/*omp_lock_t lck0;
-//	omp_init_lock(&lck0);*/
-//	#pragma omp parallel for schedule(static,60)
-//	for (int j=0; j<Super::m.vert.size(); j++) 
-//	{
-//		VertexType *v=&Super::m.vert[j];
-//
-//    if (  !Super::isFixed[v] ) //if (!v->IsB()) 
-//    {
-//		  ScalarType n=sum[v].Norm();
-//		  //printf("N %f \n",n);
-//		  if ( n > 1 ) { sum[v]/=n; n=1.0;}
-//		  
-//		  if (lastDir[v]*sum[v]<0) vSpeed[v]*=0.85; else vSpeed[v]/=0.92;
-//		  lastDir[v]= sum[v];
-//		  
-//		  if ( n*speed<=0.1 );{
-//		   // Point2<ScalarType> test=(sum[v] * (speed * vSpeed[v]) );// * scale;
-//			//printf("DEJHHHH");
-//			/*printf("N %f %f \n",test.X(),test.Y());*/
-//		    
-//		    v->T().P()-=(sum[v] * (speed * vSpeed[v]) );
-//
-//
-//			n=n*speed * vSpeed[v];
-//			#pragma omp critical 
-//			max=std::max(max,n);
-//
-//			
-//		   /* if (max<n)
-//				max=n;*/
-//			/*omp_unset_lock(&lck0);*/
-//      }
-//	 	  //else rejected++;
-//  	}
-//	}
-//	#pragma omp barrier
-//	
-//  	return max;
-//  	#undef v0
-//    #undef v1 
-//    #undef v2 
-//  	//printf("rejected %d\n",rejected);
-//  }
 
   ScalarType Area(int i)
   {
-	 FaceType *f=&m.face[i];
+         FaceType *f=&(Super::m.face[i]);
 	 double val=0;
 	 if (!(Super::isFixed[f->V(0)]&& Super::isFixed[f->V(1)] && Super::isFixed[f->V(2)]))
 		val=(f->V(1)->T().P()-f->V(0)->T().P())^(f->V(2)->T().P()-f->V(0)->T().P());
@@ -435,8 +257,8 @@ public:
  void InitSum()
  {
 	 int k;
-	 int n=m.vert.size();
-	 int n1=m.face.size();
+         int n=Super::m.vert.size();
+         int n1=Super::m.face.size();
 #ifdef _USE_OMP
 	 #pragma omp parallel for default (none) shared(n) private(k)
 #endif
@@ -464,7 +286,7 @@ public:
 ScalarType getProjArea()
 {
 	  int k;
-	  int n=m.face.size();
+          int n=Super::m.face.size();
 	  ScalarType tot_proj_area=0;
 	 //# pragma omp parallel for 
 #ifdef _USE_OMP
@@ -481,7 +303,7 @@ ScalarType getProjArea()
 
 vcg::Point2<ScalarType> VertValue(const int &face,const int &vert,const double &scale)
 {
-	 FaceType *f=&m.face[face];
+         FaceType *f=&Super::m.face[face];
 	 /*int i=0;*/
 	 vcg::Point2<ScalarType> t0=(f->V0(vert)->T().P());
      vcg::Point2<ScalarType> t1=(f->V1(vert)->T().P());
@@ -524,7 +346,7 @@ vcg::Point2<ScalarType> VertValue(const int &face,const int &vert,const double &
 
 void UpdateSum(const double &scale)
 {
-	 int n=m.face.size();
+         int n=Super::m.face.size();
 	 int k;
 	 FaceType *f;
 	 ScalarType myscale=scale;
@@ -533,7 +355,7 @@ void UpdateSum(const double &scale)
 	  #pragma omp parallel for default (none) shared(n,myscale) private(k,f,val0,val1,val2) 
 #endif
 	  for (k=0;k<n; k++) {
-			  f=&m.face[k];
+                          f=&Super::m.face[k];
 			  val0=VertValue(k,0,myscale);
 			  val1=VertValue(k,1,myscale);
 			  val2=VertValue(k,2,myscale);
@@ -556,7 +378,7 @@ void SumVertex()
 	{
 		for (int i=0;i<3;i++)
 		{
-			VertexType *v=m.face[j].V(i);
+                        VertexType *v=Super::m.face[j].V(i);
 			sum[v].X()+=sumX[j].V(i);
 			sum[v].Y()+=sumY[j].V(i);
 		}
@@ -622,8 +444,8 @@ void SumVertex()
    /* Super::isFixed.Start();
     data.Start();
     sum.Start();*/
-      sumX.resize(m.face.size());
-	  sumY.resize(m.face.size());
+      sumX.resize(Super::m.face.size());
+          sumY.resize(Super::m.face.size());
 	  totArea=0;
 	  for (FaceIterator f=Super::m.face.begin(); f!=Super::m.face.end(); f++) {
 		  double area2 = 	((f->V(1)->P() - f->V(0)->P() )^(f->V(2)->P() - f->V(0)->P() )).Norm();

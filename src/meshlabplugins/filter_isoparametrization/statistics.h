@@ -277,7 +277,7 @@ typename MeshType::ScalarType ApproxL2Error(MeshType &mesh)
 		vcg::Point2f p0(-0.5,0.0);
 		vcg::Point2f p1(0.5,0.0);
 		vcg::Point2f p2(0,0.866025f);
-		MeshType::FaceIterator Fi;
+                typename MeshType::FaceIterator Fi;
 
 		ScalarType sum=0;
 		ScalarType A3dtot=0;

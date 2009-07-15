@@ -1,10 +1,11 @@
 #ifndef _LOCAL_OPTIMIZATION
 #define _LOCAL_OPTIMIZATION
 
+#include "statistics.h"
+
 template <class MeshType>
 bool UnFold(MeshType &mesh,int /*num_faces*/,bool fix_selected=false)
 {
-  typedef typename MeshType::ScalarType ScalarType;
   typedef typename MeshType::ScalarType ScalarType;
   static int folds=0;
   std::vector<typename MeshType::FaceType*> folded_faces;
@@ -41,6 +42,7 @@ bool UnFold(MeshType &mesh,int /*num_faces*/,bool fix_selected=false)
 template <class MeshType>
 bool testCoords(MeshType &m)
 {
+        typedef typename MeshType::ScalarType ScalarType;
 	for (int i=0;i<m.vert.size();i++)
 	{
 		ScalarType u=m.vert[i].T().U();
@@ -96,8 +98,8 @@ typename MeshType::ScalarType StarDistorsion(typename MeshType::VertexType *v)
 	std::vector<typename MeshType::VertexType*> ordered_vertex;
 	CopyHlevMesh(ordered_faces,hlev_mesh,ordered_vertex);
 	UpdateTopologies<MeshType>(&hlev_mesh);
-	ScalarType val0=ApproxAreaDistortion<BaseMesh>(hlev_mesh,star_domain.fn);
-	ScalarType val1=ApproxAngleDistortion<BaseMesh>(hlev_mesh);
+        ScalarType val0=ApproxAreaDistortion<MeshType>(hlev_mesh,star_domain.fn);
+        ScalarType val1=ApproxAngleDistortion<MeshType>(hlev_mesh);
 	ScalarType val2=geomAverage<ScalarType>(val0+(ScalarType)1.0,val1+(ScalarType)1.0,3,1)-(ScalarType)1;
 	return val2;
 }
@@ -223,7 +225,7 @@ void OptimizeStar(typename MeshType::VertexType *v,int accuracy=1)
 		ScalarType V=parametrized->T().V();
 		///then get face falling into and estimate (alpha,beta,gamma)
 		CoordType bary;
-		BaseFace* chosen;
+                FaceType* chosen;
 		inside=GetBaryFaceFromUV(star_domain,U,V,ordered_faces,bary,chosen);
 		if ((!inside)||(!testBaryCoords(bary)))
 		{
@@ -251,8 +253,8 @@ void OptimizeStar(typename MeshType::VertexType *v,int accuracy=1)
 	///set face-vertex link
 	for (unsigned int i=0;i<HresVert.size();i++)
 	{
-		BaseVertex *v=HresVert[i];
-		BaseFace *f=v->father;
+                VertexType *v=HresVert[i];
+                FaceType *f=v->father;
 		CoordType bary=v->Bary;
 		/*if(!testBaryCoords(bary))
 		{

@@ -23,6 +23,7 @@
 
 #include <Qt>
 #include <QtGui>
+#include "defines.h"
 #include <filter_isoparametrization.h>
 
 

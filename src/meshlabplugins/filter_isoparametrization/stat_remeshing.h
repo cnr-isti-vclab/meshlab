@@ -21,7 +21,7 @@ typename MeshType::ScalarType MinimumAspectRatio(const MeshType &mesh)
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=1.f;
-	MeshType::ConstFaceIterator Fi;
+        typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		if ((!(*Fi).IsD()))
 		{
@@ -40,7 +40,7 @@ typename MeshType::ScalarType MinimumArea(const MeshType &mesh)
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=10000.f;
-	MeshType::ConstFaceIterator Fi;
+        typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		if ((!(*Fi).IsD()))
 		{
@@ -59,7 +59,7 @@ typename MeshType::ScalarType MaximumArea(const MeshType &mesh)
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=0.f;
-	MeshType::ConstFaceIterator Fi;
+        typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		if ((!(*Fi).IsD()))
 		{
@@ -80,8 +80,8 @@ typename FaceType::ScalarType MinAngleFace(const FaceType &f)
 	ScalarType res=360.0;
 	for (int i=0;i<3;i++)
 	{
-		FaceType::CoordType v0=f.P((i+1)%3)-f.P(i);
-		FaceType::CoordType v1=f.P((i+2)%3)-f.P(i);
+                CoordType v0=f.P((i+1)%3)-f.P(i);
+                CoordType v1=f.P((i+2)%3)-f.P(i);
 		v0.Normalize();
 		v1.Normalize();
 		ScalarType angle=acos(v0*v1)* 180.0 / PI;
@@ -102,8 +102,8 @@ typename FaceType::ScalarType MaxAngleFace(const FaceType &f)
 	ScalarType res=0;
 	for (int i=0;i<3;i++)
 	{
-		FaceType::CoordType v0=f.P((i+1)%3)-f.P(i);
-		FaceType::CoordType v1=f.P((i+2)%3)-f.P(i);
+                CoordType v0=f.P((i+1)%3)-f.P(i);
+                CoordType v1=f.P((i+2)%3)-f.P(i);
 		v0.Normalize();
 		v1.Normalize();
 		ScalarType angle=acos(v0*v1)* 180.0 / PI;
@@ -119,7 +119,7 @@ typename MeshType::ScalarType MinAngle(const MeshType &mesh)
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=360.0;
-	MeshType::ConstFaceIterator Fi;
+        typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		if ((!(*Fi).IsD()))
 		{
@@ -136,7 +136,7 @@ typename MeshType::ScalarType MaxAngle(const MeshType &mesh)
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=0;
-	MeshType::ConstFaceIterator Fi;
+        typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		if ((!(*Fi).IsD()))
 		{
@@ -155,15 +155,15 @@ void MaxMinEdge(const MeshType &mesh,typename MeshType::ScalarType &min,
 	typedef typename MeshType::CoordType CoordType;
 	min=10000.0;
 	max=0.0;
-	MeshType::ConstFaceIterator Fi;
+        typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		if ((!(*Fi).IsD()))
 		{
 
 			for (int i=0;i<3;i++)
 			{
-				MeshType::VertexType* v0=(*Fi).V(i);
-				MeshType::VertexType* v1=(*Fi).V((i+1)%3);
+                                typename MeshType::VertexType* v0=(*Fi).V(i);
+                                typename MeshType::VertexType* v1=(*Fi).V((i+1)%3);
 				if (v0>v1)
 				{
 					ScalarType dist=(v0->P()-v1->P()).Norm();
@@ -206,7 +206,7 @@ void StatAspectRatio(MeshType &mesh,
 	HAspectRatio.SetRange(minRatio,maxRatio,500);
 
 	
-	MeshType::FaceIterator Fi;
+        typename MeshType::FaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 			HAspectRatio.Add(vcg::QualityRadii((*Fi).P(0),(*Fi).P(1),(*Fi).P(2)));
 			
@@ -232,7 +232,7 @@ void StatArea(MeshType &mesh,
 	HArea.SetRange(minArea,maxArea,500);
 
 	
-	MeshType::FaceIterator Fi;
+        typename MeshType::FaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 	{
 		CoordType p0=(*Fi).P0(0);
@@ -266,7 +266,7 @@ void StatAngle(MeshType &mesh,
 	HAngle.SetRange(minAngle,maxAngle,500);
 
 	
-	MeshType::FaceIterator Fi;
+        typename MeshType::FaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		HAngle.Add(MinAngleFace((*Fi)));
 			
@@ -294,13 +294,13 @@ void StatEdge(MeshType &mesh,
 	HEdge.SetRange(minEdge,maxEdge,500);
 
 	typedef typename MeshType::ScalarType ScalarType;
-	MeshType::FaceIterator Fi;
+        typename MeshType::FaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 	{
 		for (int i=0;i<3;i++)
 		{
-				MeshType::VertexType* v0=(*Fi).V(i);
-				MeshType::VertexType* v1=(*Fi).V((i+1)%3);
+                                VertexType* v0=(*Fi).V(i);
+                                VertexType* v1=(*Fi).V((i+1)%3);
 				if ((v0>v1)||((*Fi).FFp(i)==&(*Fi)))
 				{
 					ScalarType dist=(v0->P()-v1->P()).Norm();
@@ -321,7 +321,7 @@ int NumRegular(MeshType &mesh)
 	typedef typename MeshType::FaceType FaceType;
 	///update topology
 	vcg::tri::UpdateTopology<MeshType>::VertexFace(mesh);
-	MeshType::VertexIterator Vi;
+        typename MeshType::VertexIterator Vi;
 	int irregular=0;
 	for (Vi=mesh.vert.begin();Vi!=mesh.vert.end();Vi++)
 	{

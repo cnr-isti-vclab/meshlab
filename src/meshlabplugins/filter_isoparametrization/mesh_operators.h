@@ -1,6 +1,13 @@
 #ifndef MESH_OPERATORS
 #define MESH_OPERATORS
 #include <vcg/simplex/face/pos.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/topology.h>
+#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/edges.h>
+#include <vector>
+#include <map>
 
 template <class MeshType>
 void UpdateStructures(MeshType *mesh)
@@ -28,7 +35,7 @@ template <class MeshType>
 void FindNotBorderVertices(MeshType &mesh, 
 						   std::vector<typename MeshType::VertexType*> &vertices)
 {
-	MeshType::VertexIterator Vi;
+        typename MeshType::VertexIterator Vi;
 	for (Vi=mesh.vert.begin();Vi!=mesh.vert.end();Vi++)
 		if ((!(*Vi).IsD())&&(!(*Vi).IsB()))
 			vertices.push_back(&(*Vi));
@@ -41,7 +48,7 @@ typename MeshType::ScalarType AspectRatio(const MeshType &mesh)
 {
 	typedef typename MeshType::ScalarType ScalarType;
 	ScalarType res=0;
-	MeshType::ConstFaceIterator Fi;
+        typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		if ((!(*Fi).IsD()))
 			res+=vcg::QualityRadii((*Fi).P(0),(*Fi).P(1),(*Fi).P(2));
@@ -72,7 +79,7 @@ typename MeshType::ScalarType Area(MeshType &mesh)
 	ScalarType res=0.0;
 	for (unsigned int i=0;i<mesh.face.size();i++)
 		{
-			MeshType::FaceType *f=&mesh.face[i];
+                        typename MeshType::FaceType *f=&mesh.face[i];
 			if (!f->IsD())
 			{
 				ScalarType area=((f->P(1)-f->P(0))^(f->P(2)-f->P(0))).Norm();
@@ -132,7 +139,7 @@ typename MeshType::ScalarType AreaDispersion(MeshType &mesh)
 	ScalarType res=0;
 	for (unsigned int i=0;i<mesh.face.size();i++)
 	{
-		MeshType::FaceType *f=&mesh.face[i];
+                typename MeshType::FaceType *f=&mesh.face[i];
 		if ((!f->IsD()))
 		{
 			ScalarType area=((f->P(1)-f->P(0))^(f->P(2)-f->P(0))).Norm();
@@ -150,7 +157,7 @@ void FindVertices(const std::vector<FaceType*> &faces,
 {
 	typedef typename FaceType::VertexType VertexType;
 	
-	std::vector<FaceType*>::const_iterator iteF;
+        typename std::vector<FaceType*>::const_iterator iteF;
 	for (iteF=faces.begin();iteF!=faces.end();iteF++)
 	{
 		assert(!(*iteF)->IsD());
@@ -161,7 +168,7 @@ void FindVertices(const std::vector<FaceType*> &faces,
 		}
 	}
 	std::sort(vertices.begin(),vertices.end());
-	std::vector<VertexType*>::iterator new_end=std::unique(vertices.begin(),vertices.end());
+        typename std::vector<VertexType*>::iterator new_end=std::unique(vertices.begin(),vertices.end());
 	int dist=distance(vertices.begin(),new_end);
 	vertices.resize(dist);
 }
@@ -197,6 +204,84 @@ void FindSortedBorderVertices(const MeshType &/*mesh*/,
 	while (pos.V()!=Start);
 }
 
+template <class MeshType>
+void CopyMeshFromFaces(const std::vector<typename MeshType::FaceType*> &faces,
+                                           std::vector<typename MeshType::VertexType*> &orderedVertex,
+                                           MeshType & new_mesh)
+{
+        typedef typename MeshType::CoordType CoordType;
+        typedef typename MeshType::ScalarType ScalarType;
+        typedef typename MeshType::VertexType VertexType;
+        typedef typename MeshType::FaceType FaceType;
+
+        ///get set of faces
+        std::map<VertexType*,VertexType*> vertexmap;
+        std::vector<typename FaceType::VertexType*> vertices;
+        FindVertices(faces,vertices);
+
+        ///initialization of new mesh
+        new_mesh.Clear();
+        new_mesh.vn=0;
+        new_mesh.fn=0;
+        new_mesh.face.resize(faces.size());
+        new_mesh.vert.resize(vertices.size());
+        new_mesh.vn=vertices.size();
+        new_mesh.fn=faces.size();
+
+        ///add new vertices
+        typename std::vector<VertexType*>::const_iterator iteV;
+        int i=0;
+        for (iteV=vertices.begin();iteV!=vertices.end();iteV++)
+        {
+                ///copy position
+                assert(!(*iteV)->IsD());
+                new_mesh.vert[i].P()=(*iteV)->P();
+                new_mesh.vert[i].RPos=(*iteV)->RPos;
+                new_mesh.vert[i].T().P()=(*iteV)->T().P();
+                new_mesh.vert[i].N()=(*iteV)->N();
+                /*assert(new_mesh.vert[i].brother!=NULL);*/
+                //if (MeshType::Has_Auxiliary())
+                new_mesh.vert[i].brother=(*iteV)->brother;
+                new_mesh.vert[i].ClearFlags();
+
+                orderedVertex.push_back((*iteV));
+                vertexmap.insert(std::pair<VertexType*,VertexType*>((*iteV),&new_mesh.vert[i]));
+                i++;
+        }
+
+        ///setting of new faces
+        typename std::vector<FaceType*>::const_iterator iteF;
+        typename std::vector<FaceType>::iterator iteF1;
+        for (iteF=faces.begin(),iteF1=new_mesh.face.begin()
+                ;iteF!=faces.end();iteF++,iteF1++)
+        {
+                (*iteF1).areadelta=(*iteF)->areadelta;
+        /*	if ((*iteF1).areadelta>1)
+                        assert(0);*/
+                ///for each vertex get new reference
+                ///and associate face-vertex
+                for (int j=0;j<3;j++)
+                {
+                        VertexType* v=(*iteF)->V(j);
+                        typename std::map<VertexType*,VertexType*>::iterator iteMap=vertexmap.find(v);
+                        assert(iteMap!=vertexmap.end());
+                        (*iteF1).V(j)=(*iteMap).second;
+                }
+        }
+}
+        template <class FaceType>
+        inline void getHresVertex(std::vector<FaceType*> &domain,
+                                                          std::vector<typename FaceType::VertexType*> &Hres)
+        {
+                for (unsigned int i=0;i<domain.size();i++)
+                {
+                        FaceType* f=domain[i];
+                        for (unsigned int j=0;j<f->vertices_bary.size();j++)
+                                if (f->vertices_bary[j].first->father==f)
+                                        Hres.push_back(f->vertices_bary[j].first);
+                }
+        }
+
 ///copy mesh low level & high level
 ///putting the link between them toghether
 template <class MeshType>
@@ -229,7 +314,7 @@ void CopySubMeshLevels(std::vector<typename MeshType::FaceType*> &faces,
 	{
 		FaceType *father=hlevMesh.vert[i].father;
 		///find position of father to map on the new domain
-		std::vector<FaceType*>::iterator iteFath;
+                typename std::vector<FaceType*>::iterator iteFath;
 		iteFath=std::find(faces.begin(),faces.end(),father);
 		if (iteFath!=faces.end())
 		{
@@ -248,91 +333,93 @@ void CopySubMeshLevels(std::vector<typename MeshType::FaceType*> &faces,
 		VertexType *son=&hlevMesh.vert[i];
 		FaceType *father=son->father;
 		CoordType bary=son->Bary;
-		father->vertices_bary.push_back(std::pair<BaseVertex*,vcg::Point3f>(son,bary));
+                father->vertices_bary.push_back(std::pair<VertexType *,vcg::Point3f>(son,bary));
 	}
 }
 
 template <class MeshType>
-void CopyMeshFromFaces(const std::vector<typename MeshType::FaceType*> &faces,
-					   std::vector<typename MeshType::VertexType*> &orderedVertex,
-					   MeshType & new_mesh)
-{
-	typedef typename MeshType::CoordType CoordType;
-	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::VertexType VertexType;
-	typedef typename MeshType::FaceType FaceType;
+inline void getSharedFace(typename MeshType::VertexType *v0,
+                                                  typename MeshType::VertexType *v1,
+                std::vector<typename MeshType::FaceType*> &result,
+                std::vector<typename MeshType::FaceType*> &in_v0,
+                std::vector<typename MeshType::FaceType*> &in_v1)
+        {
+                typedef typename MeshType::VertexType VertexType;
+                typedef typename MeshType::FaceType FaceType;
+                typedef typename MeshType::CoordType CoordType;
 
-	///get set of faces
-	std::map<VertexType*,VertexType*> vertexmap;
-	std::vector<FaceType::VertexType*> vertices;
-	FindVertices(faces,vertices);
+                result.clear();
+                result.reserve(2);
+                vcg::face::VFIterator<FaceType> vfi0(v0); //initialize the iterator to the first vertex
+                vcg::face::VFIterator<FaceType> vfi1(v1); //initialize the iterator to the first vertex
+                vcg::face::VFIterator<FaceType> vfi2(v0); //initialize the iterator to the first vertex
 
-	///initialization of new mesh
-	new_mesh.Clear();
-	new_mesh.vn=0;
-	new_mesh.fn=0;
-	new_mesh.face.resize(faces.size());
-	new_mesh.vert.resize(vertices.size());
-	new_mesh.vn=vertices.size();
-	new_mesh.fn=faces.size();
+                std::set<FaceType*> faces0;
 
-	///add new vertices
-	std::vector<VertexType*>::const_iterator iteV;
-	int i=0;
-	for (iteV=vertices.begin();iteV!=vertices.end();iteV++)
-	{
-		///copy position
-		assert(!(*iteV)->IsD());
-		new_mesh.vert[i].P()=(*iteV)->P();
-		new_mesh.vert[i].RPos=(*iteV)->RPos;
-		new_mesh.vert[i].T().P()=(*iteV)->T().P();
-		new_mesh.vert[i].N()=(*iteV)->N();
-		/*assert(new_mesh.vert[i].brother!=NULL);*/
-		//if (MeshType::Has_Auxiliary())
-		new_mesh.vert[i].brother=(*iteV)->brother;
-		new_mesh.vert[i].ClearFlags();
-		
-		orderedVertex.push_back((*iteV));
-		vertexmap.insert(std::pair<VertexType*,VertexType*>((*iteV),&new_mesh.vert[i]));
-		i++;
-	}
+                ///faces in v0
+                for(;!vfi0.End();++vfi0)
+                        faces0.insert(vfi0.F());
 
-	///setting of new faces
-	std::vector<FaceType*>::const_iterator iteF;
-	std::vector<FaceType>::iterator iteF1;
-	for (iteF=faces.begin(),iteF1=new_mesh.face.begin()
-		;iteF!=faces.end();iteF++,iteF1++)
-	{
-		(*iteF1).areadelta=(*iteF)->areadelta;
-	/*	if ((*iteF1).areadelta>1)
-			assert(0);*/
-		///for each vertex get new reference
-		///and associate face-vertex
-		for (int j=0;j<3;j++)
-		{
-			VertexType* v=(*iteF)->V(j);
-			std::map<VertexType*,VertexType*>::iterator iteMap=vertexmap.find(v);
-			assert(iteMap!=vertexmap.end());
-			(*iteF1).V(j)=(*iteMap).second;
-		}
-	}
-}
+                ///faces in v1 + intersection between both
+                for(;!vfi1.End();++vfi1)
+                        if (faces0.count(vfi1.F())!=0)
+                                result.push_back(vfi1.F());
+                        else
+                                in_v1.push_back(vfi1.F());
+
+                ///faces in v0
+                bool border=(result.size()==1);
+                for(;!vfi2.End();++vfi2)
+                        if ((!border)&&((result[0]!=vfi2.F())&&(result[1]!=vfi2.F())))
+                                in_v0.push_back(vfi2.F());
+                        else
+                        if ((border)&&((result[0]!=vfi2.F())))
+                                in_v0.push_back(vfi2.F());
+        }
+
+template  <class MeshType>
+inline void getSharedFace(std::vector<typename MeshType::VertexType*> &vertices,
+                                                  std::vector<typename MeshType::FaceType*> &faces)
+        {
+                typedef typename MeshType::VertexType VertexType;
+                typedef typename MeshType::FaceType FaceType;
+                typedef typename MeshType::CoordType CoordType;
+
+                typename std::vector<VertexType*>::const_iterator vi;
+                for (vi=vertices.begin();vi!=vertices.end();vi++)
+                {
+                        assert(!(*vi)->IsD());
+                    vcg::face::VFIterator<FaceType> vfi(*vi);
+                        while (!vfi.End()){
+                                if (!vfi.F()->IsD())
+                                faces.push_back(vfi.F());
+                                ++vfi;
+                        }
+                }
+
+                ///sort and unique
+                std::sort(faces.begin(),faces.end());
+                typename std::vector<FaceType*>::iterator new_end=std::unique(faces.begin(),faces.end());
+                int dist=distance(faces.begin(),new_end);
+                faces.resize(dist);
+        }
+
 
 ///create a mesh considering just the faces that share all three vertex
 template <class MeshType>
-void CopyMeshFromVertices(const std::vector<typename MeshType::VertexType*> &vertices,
+void CopyMeshFromVertices(std::vector<typename MeshType::VertexType*> &vertices,
 						  std::vector<typename MeshType::VertexType*> &OrderedVertices,
 						  std::vector<typename MeshType::FaceType*> &OrderedFaces,
 					      MeshType & new_mesh)
 {
-	std::vector<MeshType::VertexType*>::const_iterator iteV;
+        typedef typename MeshType::CoordType CoordType;
+        typedef typename MeshType::ScalarType ScalarType;
+        typedef typename MeshType::VertexType VertexType;
+        typedef typename MeshType::FaceType FaceType;
+
+        typename std::vector<VertexType*>::const_iterator iteV;
 	for (iteV=vertices.begin();iteV!=vertices.end();iteV++)
 		(*iteV)->ClearV();
-
-	typedef typename MeshType::CoordType CoordType;
-	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::VertexType VertexType;
-	typedef typename MeshType::FaceType FaceType;
 
 	OrderedVertices.clear();
 
@@ -340,7 +427,7 @@ void CopyMeshFromVertices(const std::vector<typename MeshType::VertexType*> &ver
 	std::map<VertexType*,VertexType*> vertexmap;
 
 	///get set of faces
-	std::vector<typename MeshType::FaceType*> faces;
+        std::vector<FaceType*> faces;
 
 	getSharedFace<MeshType>(vertices,faces);
 	
@@ -355,7 +442,7 @@ void CopyMeshFromVertices(const std::vector<typename MeshType::VertexType*> &ver
 		(*iteV)->SetV();
 
 	///getting inside faces
-	std::vector<FaceType*>::const_iterator iteF;
+        typename std::vector<FaceType*>::const_iterator iteF;
 	for (iteF=faces.begin();iteF!=faces.end();iteF++)
 	{
 		///for each vertex get new reference
@@ -379,7 +466,7 @@ void CopyMeshFromVertices(const std::vector<typename MeshType::VertexType*> &ver
 
 	///setting of internal vertices
 	int i=0;
-	std::vector<typename MeshType::VertexType*>::iterator iteVI;
+        typename std::vector<typename MeshType::VertexType*>::iterator iteVI;
 	for (iteVI=OrderedVertices.begin();iteVI!=OrderedVertices.end();iteVI++)
 	{
 		///copy position
@@ -401,7 +488,7 @@ void CopyMeshFromVertices(const std::vector<typename MeshType::VertexType*> &ver
 	}
 
 	///setting of new faces
-	std::vector<FaceType>::iterator iteF1;
+        typename std::vector<FaceType>::iterator iteF1;
 	for (iteF=OrderedFaces.begin(),iteF1=new_mesh.face.begin()
 		;iteF!=OrderedFaces.end();iteF++,iteF1++)
 	{
@@ -410,7 +497,7 @@ void CopyMeshFromVertices(const std::vector<typename MeshType::VertexType*> &ver
 		for (int j=0;j<3;j++)
 		{
 			VertexType* v=(*iteF)->V(j);
-			std::map<VertexType*,VertexType*>::iterator iteMap=vertexmap.find(v);
+                        typename std::map<VertexType*,VertexType*>::iterator iteMap=vertexmap.find(v);
 			assert(iteMap!=vertexmap.end());
 			(*iteF1).V(j)=(*iteMap).second;
 		}
@@ -434,45 +521,7 @@ void CopyMeshFromVertices(const std::vector<typename MeshType::VertexType*> &ver
 //}
 
 
-template <class MeshType>
-inline void getSharedFace(typename MeshType::VertexType *v0,
-						  typename MeshType::VertexType *v1,
-		std::vector<typename MeshType::FaceType*> &result,
-		std::vector<typename MeshType::FaceType*> &in_v0,
-		std::vector<typename MeshType::FaceType*> &in_v1)
-	{
-		typedef typename MeshType::VertexType VertexType;
-		typedef typename MeshType::FaceType FaceType;
-		typedef typename MeshType::CoordType CoordType;
 
-		result.clear();
-		result.reserve(2);
-		vcg::face::VFIterator<FaceType> vfi0(v0); //initialize the iterator to the first vertex
-		vcg::face::VFIterator<FaceType> vfi1(v1); //initialize the iterator to the first vertex
-		vcg::face::VFIterator<FaceType> vfi2(v0); //initialize the iterator to the first vertex
-
-		std::set<FaceType*> faces0;
-
-		///faces in v0
-		for(;!vfi0.End();++vfi0)
-			faces0.insert(vfi0.F());
-
-		///faces in v1 + intersection between both
-		for(;!vfi1.End();++vfi1)
-			if (faces0.count(vfi1.F())!=0)
-				result.push_back(vfi1.F());
-			else
-				in_v1.push_back(vfi1.F());
-		
-		///faces in v0
-		bool border=(result.size()==1);
-		for(;!vfi2.End();++vfi2)
-			if ((!border)&&((result[0]!=vfi2.F())&&(result[1]!=vfi2.F())))
-				in_v0.push_back(vfi2.F());
-			else
-			if ((border)&&((result[0]!=vfi2.F())))
-				in_v0.push_back(vfi2.F());
-	}
 
 template  <class MeshType>
 inline void getSharedVertex(const std::vector<typename MeshType::FaceType*> &faces,
@@ -482,7 +531,7 @@ inline void getSharedVertex(const std::vector<typename MeshType::FaceType*> &fac
 		typedef typename MeshType::FaceType FaceType;
 		typedef typename MeshType::CoordType CoordType;
 
-		std::vector<FaceType*>::const_iterator fi;
+                typename std::vector<FaceType*>::const_iterator fi;
 		for (fi=faces.begin();fi!=faces.end();fi++)
 		{
 			assert(!(*fi)->IsD());
@@ -492,7 +541,7 @@ inline void getSharedVertex(const std::vector<typename MeshType::FaceType*> &fac
 
 		///sort and unique
 		std::sort(vertices.begin(),vertices.end());
-		std::vector<VertexType*>::iterator new_end=std::unique(vertices.begin(),vertices.end());
+                typename std::vector<VertexType*>::iterator new_end=std::unique(vertices.begin(),vertices.end());
 		int dist=distance(vertices.begin(),new_end);
 		vertices.resize(dist);
 	}
@@ -523,33 +572,6 @@ inline int EdgeIndex(const FaceType* test_face,
 	return edge_index;
 }
 
-template  <class MeshType>
-inline void getSharedFace(const std::vector<typename MeshType::VertexType*> &vertices,
-						  std::vector<typename MeshType::FaceType*> &faces)
-	{
-		typedef typename MeshType::VertexType VertexType;
-		typedef typename MeshType::FaceType FaceType;
-		typedef typename MeshType::CoordType CoordType;
-
-		std::vector<VertexType*>::const_iterator vi;
-		for (vi=vertices.begin();vi!=vertices.end();vi++)
-		{
-			assert(!(*vi)->IsD());
-		    vcg::face::VFIterator<FaceType> vfi(*vi);
-			while (!vfi.End()){
-				if (!vfi.F()->IsD())
-				faces.push_back(vfi.F());
-				++vfi;
-			}
-		}
-
-		///sort and unique
-		std::sort(faces.begin(),faces.end());
-		std::vector<FaceType*>::iterator new_end=std::unique(faces.begin(),faces.end());
-		int dist=distance(faces.begin(),new_end);
-		faces.resize(dist);
-	}
-
 	 ////ATTENTIOn to change if v0 is border
 	template <class MeshType>
 	inline void getVertexStar(typename MeshType::VertexType *v,
@@ -562,7 +584,7 @@ inline void getSharedFace(const std::vector<typename MeshType::VertexType*> &ver
 		assert(!v->IsB());
 		vcg::face::VFIterator<FaceType> vfi(v);
 		///get a face and an edge
-		MeshType::FaceType *f=vfi.F();
+                FaceType *f=vfi.F();
 		int edge=vfi.I();
 		vcg::face::Pos<FaceType> pos=vcg::face::Pos<FaceType>(f,edge,v);
 		do
@@ -598,19 +620,6 @@ inline void getSharedFace(const std::vector<typename MeshType::VertexType*> &ver
 		int dist=distance(shared.begin(),intersEnd);
 		shared.resize(dist);
 	}
-	
-	template <class FaceType>
-	inline void getHresVertex(std::vector<FaceType*> &domain,
-							  std::vector<typename FaceType::VertexType*> &Hres)
-	{
-		for (unsigned int i=0;i<domain.size();i++)
-		{
-			FaceType* f=domain[i];
-			for (unsigned int j=0;j<f->vertices_bary.size();j++)
-				if (f->vertices_bary[j].first->father==f)
-					Hres.push_back(f->vertices_bary[j].first);
-		}
-	}
 
 	template <class MeshType>
 	inline typename MeshType::ScalarType StarAspectRatio(const std::vector<typename MeshType::VertexType*> &starCenters)
@@ -618,13 +627,14 @@ inline void getSharedFace(const std::vector<typename MeshType::VertexType*> &ver
 		typedef typename MeshType::VertexType VertexType;
 		typedef typename MeshType::FaceType FaceType;
 		typedef typename MeshType::CoordType CoordType;
+                typedef typename MeshType::ScalarType ScalarType;
 
 		std::vector<typename MeshType::FaceType*> orderedFaces;
 		getSharedFace<MeshType>(starCenters,orderedFaces);
 
 		ScalarType res=0.0;
 
-		std::vector<typename MeshType::FaceType*>::iterator Fi;
+                typename std::vector<FaceType*>::iterator Fi;
 		for (Fi=orderedFaces.begin();Fi!=orderedFaces.end();Fi++)
 			res+=vcg::QualityRadii((*Fi)->P(0),(*Fi)->P(1),(*Fi)->P(2));
 
@@ -644,7 +654,7 @@ inline void getSharedFace(const std::vector<typename MeshType::VertexType*> &ver
 		
 		ScalarType average_area=0.0;
 
-		std::vector<typename MeshType::FaceType*>::iterator Fi;
+                typename std::vector<FaceType*>::iterator Fi;
 		for (Fi=orderedFaces.begin();Fi!=orderedFaces.end();Fi++)
 			average_area+=(((*Fi)->P(1)-(*Fi)->P(0))^((*Fi)->P(2)-(*Fi)->P(0))).Norm();
 		
@@ -660,7 +670,7 @@ inline void getSharedFace(const std::vector<typename MeshType::VertexType*> &ver
 	}
 
 	template <class MeshType>
-	inline void CreateMeshVertexStar(const std::vector<typename MeshType::VertexType*> &starCenters,
+        inline void CreateMeshVertexStar(std::vector<typename MeshType::VertexType*> &starCenters,
 									 std::vector<typename MeshType::FaceType*> &orderedFaces,
 									 MeshType &created)
 	{
@@ -671,7 +681,7 @@ inline void getSharedFace(const std::vector<typename MeshType::VertexType*> &ver
 	}
 	
 	template <class MeshType>
-	inline void CreateMeshVertexStar(const std::vector<typename MeshType::VertexType*> &starCenters,
+        inline void CreateMeshVertexStar(std::vector<typename MeshType::VertexType*> &starCenters,
 									 std::vector<typename MeshType::FaceType*> &orderedFaces,
 									 std::vector<typename MeshType::VertexType*> &orderedVertex,
 									 MeshType &created)
