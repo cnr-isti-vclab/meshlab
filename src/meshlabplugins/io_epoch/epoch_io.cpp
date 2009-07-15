@@ -693,7 +693,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 												Grid.Init(mm.bbox,100000.0*pow(10.0,mergeResolution));
 												firstTime=false;
 											}
-										Grid.Add(mm);
+                                                                                Grid.AddMesh(mm);
 									}
 								else  
 									tri::Append<CMeshO,CMeshO>::Mesh(m.cm,mm); // append mesh mr to ml
@@ -708,7 +708,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 			if (cb != NULL) (*cb)(90, "Final Processing: clustering");
 			if(clustering)  
 			{
-				Grid.Extract(m.cm);
+                                Grid.ExtractPointSet(m.cm);
 			}
 			
 			if(epochDialog->exportToPLY) 
