@@ -821,9 +821,9 @@ void MinimizeStep(const int &phaseNum)
 			   (!(v<=1.001)&&(v>=-1.001)))
 			{
 				IsOK=false;
-#ifndef _MESHLAB
-				printf("error in minimization... recovering...\n");
-#endif
+//#ifndef _MESHLAB
+//				printf("error in minimization... recovering...\n");
+//#endif
 				for (unsigned int k=0;k<currMesh->vert.size();k++)
 					currMesh->vert[k].T().P()=currMesh->vert[k].RestUV;
 				break;
@@ -851,9 +851,9 @@ void MinimizeStep(const int &phaseNum)
 			bool inside=GetBaryFaceFromUV(*currDom->domain,u,v,currDom->ordered_faces,bary,chosen);
 			if (!inside)
 			{
-				#ifndef _MESHLAB
+				/*#ifndef _MESHLAB*/
 				printf("\n OUTSIDE %f,%f \n",u,v);
-				#endif
+				/*#endif*/
 				vcg::Point2<ScalarType> UV=vcg::Point2<ScalarType>(u,v);
 				ForceInParam<MeshType>(UV,*currDom->domain);
 				u=UV.X();
@@ -872,15 +872,18 @@ void MinimizeStep(const int &phaseNum)
 
 	///clear father and bary
 	for (unsigned int i=0;i<domain->face.size();i++)
-		domain->face[i].vertices_bary.resize(0);
+		domain->face[i].vertices_bary.clear();
 
 	///set face-vertex link
 	for (unsigned int i=0;i<h_res_mesh->vert.size();i++)
 	{
 		BaseVertex *v=&h_res_mesh->vert[i];
-		BaseFace *f=v->father;
-		CoordType bary=v->Bary;
-		f->vertices_bary.push_back(std::pair<VertexType*,CoordType>(v,bary));
+		if (!v->IsD())
+		{
+			BaseFace *f=v->father;
+			CoordType bary=v->Bary;
+			f->vertices_bary.push_back(std::pair<VertexType*,CoordType>(v,bary));
+		}
 	}	
 }
 
@@ -997,7 +1000,11 @@ public:
 		PatchesOptimizer<BaseMesh> DomOpt(*domain,*h_res_mesh);
 		step++;
 		PrintAttributes();
+
 		DomOpt.OptimizePatches();
+
+	
+
 		while (ContinueOpt)
 		{
 			///domain Optimization	
