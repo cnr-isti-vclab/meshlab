@@ -122,6 +122,7 @@ plugins/libfilter_unsharp.dylib \
 plugins/libfilterborder.dylib \
 plugins/libfiltercreateiso.dylib \
 plugins/libfiltergeodesic.dylib \
+plugins/libfilter_qhull.dylib \
 plugins/libio_base.dylib \
 plugins/libio_3ds.dylib \
 plugins/libio_collada.dylib \
@@ -131,6 +132,7 @@ plugins/libio_gts.dylib \
 plugins/libio_u3d.dylib \
 plugins/libio_tri.dylib \
 plugins/libio_x3d.dylib \
+plugins/libio_pdb.dylib \
 plugins/libedit_hole.dylib \
 plugins/libedit_pickpoints.dylib \
 plugins/libedit_quality.dylib \
