@@ -40,7 +40,7 @@ win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/levmar.lib
 win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/levmar.lib
 win32-g++:LIBS		+= ../../external/lib/win32-gcc/levmar.a
 linux-g++:LIBS += ../../external/lib/linux-g++/levmar.a
-macx:LIBS += ../../external/lib/macx/levmar.a
+macx:LIBS += ../../external/lib/macx/liblevmar.a
 
 QMAKE_CXXFLAGS += -fpermissive
 
