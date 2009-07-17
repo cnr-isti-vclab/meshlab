@@ -178,7 +178,7 @@ int QualityMapperFilter::getPreConditions( QAction * a) const
 	switch(ID(a))
 	{
 		case FP_QUALITY_MAPPER :           
-			return MeshFilterInterface::FP_VertexColor;
+			return MeshFilterInterface::FP_VertexQuality;
 		default :  
 			assert(0);			
 			return MeshFilterInterface::FP_Generic;
