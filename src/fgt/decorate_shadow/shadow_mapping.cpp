@@ -40,6 +40,9 @@ ShadowMapping::~ShadowMapping(){
     glDeleteShader(this->_objectFrag);
     glDeleteProgram(this->_objectShaderProgram);
 
+	//glDeleteTextures(1, &(this->_color_tex));
+	glDeleteTextures(1, &(this->_shadowMap));
+
     glDeleteFramebuffersEXT(1, &_fbo);
 }
 
@@ -116,13 +119,14 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
             glEnable(GL_POLYGON_OFFSET_FILL);
             glPolygonOffset(4.0, 4.0);
 
-
+	//		glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
             this->bind();
             RenderMode rm = gla->getCurrentRenderMode();
-            m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+			m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
             glDisable(GL_POLYGON_OFFSET_FILL);
             this->getShadowMap();
             this->unbind();
+	//		glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
@@ -140,7 +144,10 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-        GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
+        //glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D, this->_color_tex);
+        
+		GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
         glUniform1i(loc, 0);
 
         m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
@@ -160,7 +167,20 @@ bool ShadowMapping::setup()
         if (_initOk)
                 return true;
 
-        glGenTextures(1, &this->_shadowMap);
+		
+		 //COLOR
+		/*glGenTextures(1, &(this->_color_tex));
+		glBindTexture(GL_TEXTURE_2D, this->_color_tex);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, this->_texSize, this->_texSize, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+		*/
+	 
+	 
+		/*DEPTH*/
+		glGenTextures(1, &this->_shadowMap);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -172,16 +192,24 @@ bool ShadowMapping::setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glGenFramebuffersEXT(1, &_fbo);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        
+		glGenFramebuffersEXT(1, &_fbo);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
+		//depth
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
-        //cosi specifichi che il colore non importa, che il fbo non ha niente sull'attachment colore
+        
+		//color
+		//glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_color_tex, 0/*mipmap level*/);
+ 
+		//cosi specifichi che il colore non importa, che il fbo non ha niente sull'attachment colore
         GLenum drawBuffers[] = {GL_NONE};
         glDrawBuffersARB(1, drawBuffers);
-
-        int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		
+		glReadBuffer(GL_NONE);
+        
+		int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         return _initOk;
@@ -195,7 +223,7 @@ void ShadowMapping::bind()
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
         glViewport(0, 0, this->_texSize, this->_texSize);
-        glClear(GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
 void ShadowMapping::unbind()

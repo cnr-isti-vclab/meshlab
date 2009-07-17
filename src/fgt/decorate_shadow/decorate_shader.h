@@ -37,9 +37,10 @@ public:
         this->_initOk = false;
         this->_texSize = 512;
         this->_shadowMap = 0;
+	//	this->_color_tex = 0;
     }
 
-    virtual ~DecorateShader() =0;
+    //virtual ~DecorateShader();
 
     virtual bool init() = 0;
     virtual void runShader(MeshModel&, GLArea*) = 0;
@@ -48,6 +49,7 @@ protected:
     bool _initOk;
     int _texSize;
     GLuint _shadowMap;
+	// GLuint _color_tex;
 
     virtual bool compileAndLink() = 0;
     virtual bool setup() = 0;

@@ -40,7 +40,7 @@ class ShadowMapping : public DecorateShader
 
 public:
         ShadowMapping();
-	~ShadowMapping();
+		~ShadowMapping();
 
         bool init();
         void runShader(MeshModel&, GLArea*);
