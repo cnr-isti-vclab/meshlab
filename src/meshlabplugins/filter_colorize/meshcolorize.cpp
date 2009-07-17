@@ -408,13 +408,66 @@ bool ExtraMeshColorizePlugin::autoDialog(QAction *a) {
   }
 }
 
-int ExtraMeshColorizePlugin::getPreConditions(QAction *) const 
+int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const 
 {
+	switch(ID(a)) 
+	{
+    case   CP_BORDER:
+    case   CP_COLOR_NON_MANIFOLD_VERTEX:
+    case   CP_COLOR_NON_MANIFOLD_FACE:
+	  case   CP_SELFINTERSECT_SELECT: 
+		case   CP_SELFINTERSECT_COLOR:
+    case   CP_TRIANGLE_QUALITY:
+		case   CP_RANDOM_FACE:	
+    case   CP_DISCRETE_CURVATURE:
+    case   CP_COLOR_NON_TOPO_COHERENT:
+				return MeshFilterInterface::FP_Face;
+
+    case   CP_MAP_QUALITY_INTO_COLOR:
+				return MeshFilterInterface::FP_VertexQuality;
+
+    case   CP_FACE_TO_VERTEX:
+    case   CP_FACE_SMOOTH:
+				return MeshFilterInterface::FP_FaceColor;
+
+    case   CP_VERTEX_SMOOTH:
+    case   CP_VERTEX_TO_FACE:
+				return MeshFilterInterface::FP_VertexColor;
+
+	  case   CP_TEXTURE_TO_VERTEX:
+    case   CP_TEXBORDER: 
+				return MeshFilterInterface::FP_WedgeTexCoord;
+
+    default: assert(0);
+	}
 	return MeshFilterInterface::FP_Generic;
 }
 
 int ExtraMeshColorizePlugin::postCondition( QAction* ) const 
 {
+	switch(ID(a)) 
+	{
+	  case   CP_SELFINTERSECT_SELECT: 
+		case   CP_SELFINTERSECT_COLOR:
+    case   CP_TRIANGLE_QUALITY:
+		case   CP_RANDOM_FACE:	
+    case   CP_COLOR_NON_TOPO_COHERENT:
+    case   CP_FACE_SMOOTH:
+    case   CP_VERTEX_TO_FACE:
+				return MeshModel::MM_FACECOLOR;
+    case   CP_BORDER:
+    case   CP_COLOR_NON_MANIFOLD_VERTEX:
+    case   CP_COLOR_NON_MANIFOLD_FACE:
+    case   CP_DISCRETE_CURVATURE:
+    case   CP_MAP_QUALITY_INTO_COLOR:
+    case   CP_FACE_TO_VERTEX:
+    case   CP_VERTEX_SMOOTH:
+	  case   CP_TEXTURE_TO_VERTEX:
+    case   CP_TEXBORDER: 
+				return MeshModel::MM_VERTCOLOR;
+
+    default: assert(0);
+	}
 	return MeshModel::MM_UNKNOWN;
 }
 
