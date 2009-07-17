@@ -28,7 +28,8 @@ SOURCES       = ./filter_isoparametrization.cpp \
 				$$GLEWCODE
 				
 TARGET        = filter_isoparametrization
-INCLUDEPATH  += ../../external/levmar-2.3/
+INCLUDEPATH  += ./  \
+                ../../external/levmar-2.3/
 
 win32-msvc2005:QMAKE_CXXFLAGS   +=  /openmp
 win32-msvc2008:QMAKE_CXXFLAGS   +=  /openmp
@@ -38,8 +39,8 @@ linux-g++:QMAKE_CXXFLAGS   +=  -fopenmp
 win32-msvc.net:LIBS	+= ../../external/lib/win32-msvc.net/levmar.lib
 win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/levmar.lib
 win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/levmar.lib
-win32-g++:LIBS		+= ../../external/lib/win32-gcc/levmar.a
-linux-g++:LIBS += ../../external/lib/linux-g++/levmar.a
+win32-g++:LIBS		+= -L../../external/lib/win32-gcc -llevmar
+linux-g++:LIBS		+= -L../../external/lib/win32-gcc -llevmar
 macx:LIBS += ../../external/lib/macx/liblevmar.a
 
 QMAKE_CXXFLAGS += -fpermissive
