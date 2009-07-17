@@ -443,7 +443,7 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const
 	return MeshFilterInterface::FP_Generic;
 }
 
-int ExtraMeshColorizePlugin::postCondition( QAction* ) const 
+int ExtraMeshColorizePlugin::postCondition( QAction* a ) const 
 {
 	switch(ID(a)) 
 	{
