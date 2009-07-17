@@ -255,7 +255,8 @@ public:
 			FP_VertexColor      =0x00002, //  
 			FP_VertexQuality    =0x00004, //  
 			FP_VertexRadius     =0x00008, //  
-			FP_WedgeTexCoord    =0x00010  //
+			FP_WedgeTexCoord    =0x00010, //
+			FP_FaceColor        =0x00020 //  
 	};
 
 
@@ -326,6 +327,9 @@ public:
 		
 		if (preMask & MeshFilterInterface::FP_VertexColor && !m.hasDataMask(MeshModel::MM_VERTCOLOR))
 				MissingItems.push_back("Vertex Color");
+
+		if (preMask & MeshFilterInterface::FP_FaceColor && !m.hasDataMask(MeshModel::MM_FACECOLOR))
+				MissingItems.push_back("Face Color");
 				
 		if (preMask & MeshFilterInterface::FP_VertexQuality && !m.hasDataMask(MeshModel::MM_VERTQUALITY))
 				MissingItems.push_back("Vertex Quality");
