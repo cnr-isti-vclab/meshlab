@@ -18,19 +18,11 @@ class FeatureRGB
 
         enum RGBAType {RED, GREEN, BLUE, ALPHA};
 
-        vector<RGBAType>* featureDesc;
-
-        Parameters(){
-            featureDesc = new vector<RGBAType>();
-        }
-
-        ~Parameters(){
-            delete featureDesc;
-        }
+        vector<RGBAType> featureDesc;
 
         bool add(RGBAType cType){
-            if(featureDesc->size()>=dim) return false;
-            featureDesc->push_back(cType);
+            if(featureDesc.size()>=dim) return false;
+            featureDesc.push_back(cType);
             return true;
         }
     };
@@ -40,36 +32,37 @@ class FeatureRGB
     typedef typename FeatureType::Parameters ParamType;
     typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
-    typedef typename MeshType::VertexPointer VertexPointer;
     typedef typename MeshType::VertexIterator VertexIterator;
-    typedef typename MeshType::template PerVertexAttributeHandle<FeatureType*> PVAttributeHandle;
-    typedef typename vector<FeatureType*>::iterator VecFeatureIterator;
+    typedef typename MeshType::template PerVertexAttributeHandle<FeatureType> PVAttributeHandle;
 
     Point3<ScalarType> pos;
     Point3<ScalarType> normal;
     float description[dim];
 
+    FeatureRGB();
     FeatureRGB(VertexType& v);
     static char* getName();
     static int getRequirements();
     static float getNullValue();
     static bool isNullValue(float);
     static int getFeatureDimension();
-    static bool CheckPersistency(FeatureType* f);
+    static bool CheckPersistency(FeatureType f);
     static void SetupParameters(ParamType& param);
     static bool ComputeFeature( MeshType&, ParamType& param, CallBackPos *cb=NULL);
     static bool Subset(int, MeshType&, vector<FeatureType*>&, int, CallBackPos *cb=NULL);
 
     private:
     static MESH_TYPE* CreateSamplingMesh();
-    static int SetupSamplingStructures(MeshType& m, typename MeshType::template PerVertexAttributeHandle<FeatureType*>& fh, MeshType* samplingMesh, vector<FeatureType*>* vecFeatures);
+    static int SetupSamplingStructures(MeshType& m, typename MeshType::template PerVertexAttributeHandle<FeatureType>& fh, MeshType* samplingMesh, vector<FeatureType*>* vecFeatures);
 };
 
-template<class MESH_TYPE, int dim> inline FeatureRGB<MESH_TYPE,dim>::FeatureRGB(VertexType& v)
+template<class MESH_TYPE, int dim> inline FeatureRGB<MESH_TYPE,dim>::FeatureRGB(){}
+
+template<class MESH_TYPE, int dim>
+inline FeatureRGB<MESH_TYPE,dim>::FeatureRGB(VertexType& v):pos(v.P()),normal(v.N())
 {
-    pos = v.P();
-    normal = v.N();
     normal.Normalize();
+    for(int i=0; i<dim; i++) FeatureRGB::getNullValue();
 }
 
 template<class MESH_TYPE, int dim> inline char* FeatureRGB<MESH_TYPE,dim>::getName()
@@ -98,11 +91,11 @@ template<class MESH_TYPE, int dim> inline int FeatureRGB<MESH_TYPE,dim>::getFeat
 }
 
 //check persistence beetween scales: return true if description is valid for all scales, false otherwise
-template<class MESH_TYPE, int dim> bool FeatureRGB<MESH_TYPE,dim>::CheckPersistency(FeatureType* f)
+template<class MESH_TYPE, int dim> bool FeatureRGB<MESH_TYPE,dim>::CheckPersistency(FeatureType f)
 {
     for(int i = 0; i<FeatureType::getFeatureDimension(); i++)
     {
-        if( FeatureType::isNullValue(f->description[i]) ) return false;
+        if( FeatureType::isNullValue(f.description[i]) ) return false;
     }
     return true;
 }
@@ -112,7 +105,7 @@ template<class MESH_TYPE, int dim> void FeatureRGB<MESH_TYPE,dim>::SetupParamete
     param.add(FeatureType::Parameters::RED);
     param.add(FeatureType::Parameters::GREEN);
     param.add(FeatureType::Parameters::BLUE);
-    assert(param.featureDesc->size()==getFeatureDimension());
+    assert(param.featureDesc.size()==getFeatureDimension());
 }
 
 template<class MESH_TYPE, int dim> bool FeatureRGB<MESH_TYPE,dim>::ComputeFeature(MeshType &m, ParamType& param, CallBackPos *cb)
@@ -132,14 +125,11 @@ template<class MESH_TYPE, int dim> bool FeatureRGB<MESH_TYPE,dim>::ComputeFeatur
     VertexIterator vi;
     for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
     {
-        //if custom attributes holds an old pointer, first delete it to avoid memory leak, then add a fresh pointer to f
-        if(fh[vi] != NULL){ delete fh[vi]; fh[vi] = NULL; }
-
-        fh[vi] = new FeatureType(*vi);  //Create feature object in the heap
+        fh[vi] = FeatureType(*vi);
 
         //copy vertex color into feature values
         for(unsigned int i=0; i<FeatureType::getFeatureDimension(); i++)
-            fh[vi]->description[i] = float((*vi).C()[(*param.featureDesc)[i]]);
+            fh[vi].description[i] = float((*vi).C()[param.featureDesc[i]]);
 
         //advance progress bar
         progBar+=offset;
@@ -162,7 +152,7 @@ MESH_TYPE* FeatureRGB<MESH_TYPE,dim>::CreateSamplingMesh()
 }
 
 template<class MESH_TYPE, int dim>
-int FeatureRGB<MESH_TYPE,dim>::SetupSamplingStructures(MeshType& m, typename MeshType::template PerVertexAttributeHandle<FeatureType*>& fh, MeshType* samplingMesh, vector<FeatureType*>* vecFeatures)
+int FeatureRGB<MESH_TYPE,dim>::SetupSamplingStructures(MeshType& m, typename MeshType::template PerVertexAttributeHandle<FeatureType>& fh, MeshType* samplingMesh, vector<FeatureType*>* vecFeatures)
 {
     int countFeatures = 0;
     PVAttributeHandle pmfh;
@@ -176,7 +166,7 @@ int FeatureRGB<MESH_TYPE,dim>::SetupSamplingStructures(MeshType& m, typename Mes
         //check persistence beetween scales: if feature is persistent, add a pointer in vecFeatures
         if( FeatureType::CheckPersistency(fh[vi]) ){
             countFeatures++;  //increment counter of valid features
-            if(vecFeatures) vecFeatures->push_back(fh[vi]);
+            if(vecFeatures) vecFeatures->push_back(&(fh[vi]));
             if(samplingMesh){
                 tri::Allocator<MeshType>::AddVertices(*samplingMesh, 1);
                 samplingMesh->vert.back().ImportLocal(*vi);

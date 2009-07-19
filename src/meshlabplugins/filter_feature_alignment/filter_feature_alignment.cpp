@@ -138,6 +138,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
         {
             QStringList l;
             l << "GMSmooth curvature"
+              << "APSS curvature"
               << "RGB";
             par.addEnum("featureType", 0, l,"Feature type:", "The feature that you want to compute for the current mesh.");
             break;
@@ -194,6 +195,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
         {
             QStringList l;
             l << "GMSmooth curvature"
+              << "APSS curvature"
               << "RGB";
             par.addEnum("featureType", 0, l,"Feature type:", "The feature that you want to compute for the current mesh.");
             par.addMesh("mFix", 0, "Fix mesh:", "The mesh that stays still and grow large after alignment.");
@@ -322,6 +324,12 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     return ComputeFeatureOperation<MeshType,FeatureType>(*currMesh, param, cb);
                 }
                 case 1:{
+                    typedef APSSCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
+                    FeatureType::Parameters param;
+                    FeatureType::SetupParameters(param);
+                    return ComputeFeatureOperation<MeshType,FeatureType>(*currMesh, param, cb);
+                }
+                case 2:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     FeatureType::Parameters param;
                     FeatureType::SetupParameters(param);
@@ -436,8 +444,17 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     setAlignmentParameters<AlignerType>(mFix->cm, mMov->cm, par, alignerParam);                    
                     ResultType res = RansacOperation<AlignerType>(*mFix, *mMov, alignerParam, cb);
                     return logResult<AlignerType>(ID(filter), res, errorMessage);
-                }               
+                }
                 case 1:{
+                    typedef APSSCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
+                    typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
+                    AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
+                    setAlignmentParameters<AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
+                    ResultType res = RansacOperation<AlignerType>(*mFix, *mMov, alignerParam, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
+                }
+                case 2:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     typedef AlignerType::Result ResultType;
