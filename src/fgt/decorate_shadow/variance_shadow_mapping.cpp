@@ -63,7 +63,7 @@ void VarianceShadowMapping::runShader(MeshModel& m, GLArea* gla){
         GLfloat g_mModelView[16];
         GLfloat g_mProjection[16];
 
-        int diag = bb.Diag();
+        float diag = bb.Diag();
 
         GLfloat lP[4];
         glGetLightfv(GL_LIGHT0, GL_POSITION, lP);
@@ -141,7 +141,12 @@ void VarianceShadowMapping::runShader(MeshModel& m, GLArea* gla){
 
         GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
         glUniform1i(loc, 0);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
+
+        glDisable(GL_BLEND);
         glDepthFunc((GLenum)depthFuncOld);
         glUseProgram(0);
 
