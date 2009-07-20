@@ -122,9 +122,9 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
 	//		glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
             this->bind();
             RenderMode rm = gla->getCurrentRenderMode();
-			m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
+			m.Render(rm.drawMode, rm.colorMode,rm.textureMode);
             glDisable(GL_POLYGON_OFFSET_FILL);
-            //this->getShadowMap();
+            this->getShadowMap();
             this->unbind();
 	//		glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
@@ -151,7 +151,7 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
         glUniform1i(loc, 0);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
+        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
         glDisable(GL_BLEND);
         //m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerWedge);
         glDepthFunc((GLenum)depthFuncOld);

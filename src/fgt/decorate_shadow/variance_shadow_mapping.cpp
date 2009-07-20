@@ -144,7 +144,7 @@ void VarianceShadowMapping::runShader(MeshModel& m, GLArea* gla){
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
+        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
 
         glDisable(GL_BLEND);
         glDepthFunc((GLenum)depthFuncOld);
