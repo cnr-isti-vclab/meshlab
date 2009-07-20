@@ -37,6 +37,8 @@
 //#include <wrap/gl/addons.h>
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
+#include "variance_shadow_mapping.h"
+#include "variance_shadow_mapping_blur.h"
 
 class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
 {
@@ -47,6 +49,7 @@ class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
   enum {
     DP_SHOW_SIMPLE_SHADOW,
     DP_SHOW_VSM_SHADOW,
+    DP_SHOW_VSM_SHADOW_BLUR,
 		DP_SHOW_AO_DEPTH_TRICK,
 		DP_SHOW_SSAO
 		};
@@ -57,8 +60,10 @@ public:
      
 	DecorateShadowPlugin()
 	{
-    typeList << 
-    DP_SHOW_SIMPLE_SHADOW ;
+    typeList <<
+            DP_SHOW_SIMPLE_SHADOW <<
+            DP_SHOW_VSM_SHADOW <<
+            DP_SHOW_VSM_SHADOW_BLUR;
 
     FilterIDType tt;
     foreach(tt , types()){
@@ -68,7 +73,6 @@ public:
     foreach(ap,actionList){
         ap->setCheckable(true);
     }
-    //this->_sm = new ShadowMapping();
   }
 
 	QList<QAction *> actions () const {return actionList;}
@@ -77,7 +81,6 @@ public:
     virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/);
 private:
     DecorateShader* _decorator;
-    ShadowMapping* _sm;
 };
 
 #endif

@@ -35,9 +35,8 @@ class DecorateShader
 public:
     DecorateShader(){
         this->_initOk = false;
-        this->_texSize = 512;
+        this->_texSize = 1024;
         this->_shadowMap = 0;
-	//	this->_color_tex = 0;
     }
 
     //virtual ~DecorateShader();
@@ -49,7 +48,6 @@ protected:
     bool _initOk;
     int _texSize;
     GLuint _shadowMap;
-	// GLuint _color_tex;
 
     virtual bool compileAndLink() = 0;
     virtual bool setup() = 0;

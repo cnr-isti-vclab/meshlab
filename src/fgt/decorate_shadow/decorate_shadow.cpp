@@ -29,10 +29,11 @@ const QString DecorateShadowPlugin::Info(QAction *action)
  {
   switch(ID(action))
   {
-    case DP_SHOW_AO_DEPTH_TRICK :      return tr("Enable ambient occlusion trick");
-    case DP_SHOW_SIMPLE_SHADOW:      return tr("Enable simple shadow");
-    case DP_SHOW_SSAO:      return tr("Enable SSAO");
-    case DP_SHOW_VSM_SHADOW :      return tr("Enable variance shadow mapping");
+    case DP_SHOW_AO_DEPTH_TRICK :   return tr("Enable ambient occlusion trick");
+    case DP_SHOW_SIMPLE_SHADOW:     return tr("Enable simple shadow");
+    case DP_SHOW_SSAO:              return tr("Enable SSAO");
+    case DP_SHOW_VSM_SHADOW :       return tr("Enable variance shadow mapping");
+    case DP_SHOW_VSM_SHADOW_BLUR :  return tr("Enable variance shadow mapping with blur");
  	 }
   assert(0);
   return QString();
@@ -60,9 +61,10 @@ const QString DecorateShadowPlugin::ST(FilterIDType filter) const
   switch(filter)
   {
     case DP_SHOW_AO_DEPTH_TRICK     : return QString("AO depth trick");
-    case DP_SHOW_SIMPLE_SHADOW      : return QString("simple shadow");
+    case DP_SHOW_SIMPLE_SHADOW      : return QString("Simple shadow");
     case DP_SHOW_SSAO               : return QString("SSAO");
-    case DP_SHOW_VSM_SHADOW         : return QString("VSM");
+    case DP_SHOW_VSM_SHADOW         : return QString("Variance shadow mapping");
+    case DP_SHOW_VSM_SHADOW_BLUR    : return QString("Variance shadow mapping blur");
     default: assert(0);
   }
   return QString("error!");
@@ -73,6 +75,15 @@ bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, GLArea* 
     if(action->text() == ST(DP_SHOW_SIMPLE_SHADOW)){
         result = this->_decorator = new ShadowMapping();
     }
+
+    if(action->text() == ST(DP_SHOW_VSM_SHADOW)){
+        result = this->_decorator = new VarianceShadowMapping();
+    }
+
+    if(action->text() == ST(DP_SHOW_VSM_SHADOW_BLUR)){
+        result = this->_decorator = new VarianceShadowMappingBlur();
+    }
+
 
     result = this->_decorator->init();
     return result;

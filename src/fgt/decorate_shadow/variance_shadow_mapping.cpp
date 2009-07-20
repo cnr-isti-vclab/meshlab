@@ -1,38 +1,26 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+#include "variance_shadow_mapping.h"
 
-
-#include "shadow_mapping.h"
-
-ShadowMapping::ShadowMapping():DecorateShader()
+VarianceShadowMapping::VarianceShadowMapping():DecorateShader()
 {
+    this->_depth = 0;
+
+    this->_depthVert = 0;
+    this->_depthFrag = 0;
+    this->_depthShaderProgram = 0;
     this->_objectVert = 0;
     this->_objectFrag = 0;
     this->_objectShaderProgram = 0;
     this->_fbo = 0;
 }
 
-ShadowMapping::~ShadowMapping(){
+VarianceShadowMapping::~VarianceShadowMapping(){
+    glDetachShader(this->_depthShaderProgram, this->_depthVert);
+    glDetachShader(this->_depthShaderProgram, this->_depthFrag);
+
+    glDeleteShader(this->_depthVert);
+    glDeleteShader(this->_depthFrag);
+    glDeleteProgram(this->_depthShaderProgram);
+
     glDetachShader(this->_objectShaderProgram, this->_objectVert);
     glDetachShader(this->_objectShaderProgram, this->_objectFrag);
 
@@ -40,13 +28,12 @@ ShadowMapping::~ShadowMapping(){
     glDeleteShader(this->_objectFrag);
     glDeleteProgram(this->_objectShaderProgram);
 
-	//glDeleteTextures(1, &(this->_color_tex));
-	glDeleteTextures(1, &(this->_shadowMap));
-
+    glDeleteFramebuffersEXT(1, &(this->_depth));
+    glDeleteTexturesEXT(1, &(this->_shadowMap));
     glDeleteFramebuffersEXT(1, &_fbo);
 }
 
-bool ShadowMapping::init()
+bool VarianceShadowMapping::init()
 {
     GLenum err = glewInit();
     if (!GLEW_OK == err){
@@ -68,7 +55,7 @@ bool ShadowMapping::init()
     return compileAndLink();
 }
 
-void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
+void VarianceShadowMapping::runShader(MeshModel& m, GLArea* gla){
         vcg::Box3f bb = m.cm.bbox;
         vcg::Point3f center;
         center = bb.Center();
@@ -101,7 +88,8 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
 
         glPushMatrix();
             vcg::Point3f u, v;
-            //mi seleziona automaticamente un upvector che mi eviti casi degeneri...nel caso vada bene 010 sceglie quello
+            //mi seleziona automaticamente un upvector che mi eviti casi degeneri...
+            //nel caso vada bene 010 sceglie quello
             vcg::GetUV(light, u, v, vcg::Point3f(0,-1,0));
             glLoadIdentity();
             gluLookAt(0, 0, 0, light[0], light[1], light[2], v[0], v[1], v[2]);
@@ -116,23 +104,29 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
             glTranslatef(-center[0],-center[1],-center[2]);
             glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
 
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(4.0, 4.0);
 
-	//		glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+            /***********************************************************/
+            //GENERAZIONE SHADOW MAP
+            /***********************************************************/
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(1.0, 1.0);
+
+
             this->bind();
+            glUseProgram(this->_depthShaderProgram);
             RenderMode rm = gla->getCurrentRenderMode();
-			m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
+            m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
             glDisable(GL_POLYGON_OFFSET_FILL);
-            //this->getShadowMap();
             this->unbind();
-	//		glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
 
+        /***********************************************************/
+        //OBJECT PASS
+        /***********************************************************/
         GLint depthFuncOld;
         glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
         glDepthFunc(GL_LEQUAL);
@@ -144,20 +138,17 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-        //glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, this->_color_tex);
-        
-		GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
-        glUniform1i(loc, 0);
 
-        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
-        //m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerWedge);
+        GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
+        glUniform1i(loc, 0);
+        m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
         glDepthFunc((GLenum)depthFuncOld);
         glUseProgram(0);
+
         int error = glGetError();
 }
 
-bool ShadowMapping::setup()
+bool VarianceShadowMapping::setup()
 {
         if (!GLEW_EXT_framebuffer_object) {
                 qWarning("FBO not supported!");
@@ -167,35 +158,31 @@ bool ShadowMapping::setup()
         if (_initOk)
                 return true;
 
-        /*DEPTH*/
+        //genero il frame buffer object
+        glGenFramebuffersEXT(1, &_fbo);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+
+        //genero la texture di colore che sara la mia variance shadow map.
         glGenTextures(1, &this->_shadowMap);
         glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_LUMINANCE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        
-        glGenFramebuffersEXT(1, &_fbo);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        //attacco al FBO la texture di colore
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
 
-        //depth
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
-        
-        //color
-        //glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_color_tex, 0/*mipmap level*/);
+        //genero il render buffer per il depth buffer
+        glGenRenderbuffersEXT(1, &(this->_depth));
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
 
-        //cosi specifichi che il colore non importa, che il fbo non ha niente sull'attachment colore
-        GLenum drawBuffers[] = {GL_NONE};
-        glDrawBuffersARB(1, drawBuffers);
-		
-        glReadBuffer(GL_NONE);
+        //e il depth buffer
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
+
 
         int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
@@ -203,7 +190,7 @@ bool ShadowMapping::setup()
         return _initOk;
 }
 
-void ShadowMapping::bind()
+void VarianceShadowMapping::bind()
 {
         assert(_initOk);
 
@@ -214,7 +201,7 @@ void ShadowMapping::bind()
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
-void ShadowMapping::unbind()
+void VarianceShadowMapping::unbind()
 {
         if (!_initOk)
                 return;
@@ -224,16 +211,53 @@ void ShadowMapping::unbind()
         //glDeleteFramebuffersEXT(1, &_fbo);
 }
 
-bool ShadowMapping::compileAndLink(){
-    QFile* objVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/object.vert"));
-    QFile* objFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/object.frag"));
+bool VarianceShadowMapping::compileAndLink(){
+    QFile* depthVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsm/depthVSM.vert"));
+    QFile* depthFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsm/depthVSM.frag"));
+    QFile* objVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsm/objectVSM.vert"));
+    QFile* objFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsm/objectVSM.frag"));
+
+    depthVert->open(QIODevice::ReadOnly | QIODevice::Text);
+    depthFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
     objVert->open(QIODevice::ReadOnly | QIODevice::Text);
     objFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
-    QByteArray bArray = objVert->readAll();
+    QByteArray bArray = depthVert->readAll();
     GLint ShaderLen = (GLint) bArray.length();
     GLubyte* ShaderSource = (GLubyte *)bArray.data();
+
+    this->_depthVert= glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(this->_depthVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(this->_depthVert);
+    if(!this->printShaderInfoLog(this->_depthVert))
+        return false;
+
+    depthVert->close();
+
+    bArray = depthFrag->readAll();
+    ShaderLen = (GLint) bArray.length();
+    ShaderSource = (GLubyte *)bArray.data();
+
+    this->_depthFrag = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(this->_depthFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(this->_depthFrag);
+    if(!this->printShaderInfoLog(this->_depthFrag))
+        return false;
+
+    depthFrag->close();
+
+    this->_depthShaderProgram = glCreateProgram();
+    glAttachShader(this->_depthShaderProgram, this->_depthVert);
+    glAttachShader(this->_depthShaderProgram, this->_depthFrag);
+    glLinkProgram(this->_depthShaderProgram);
+    if(!this->printProgramInfoLog(this->_depthShaderProgram))
+        return false;
+
+
+    bArray = objVert->readAll();
+    ShaderLen = (GLint) bArray.length();
+    ShaderSource = (GLubyte *)bArray.data();
 
     this->_objectVert= glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(this->_objectVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
@@ -264,3 +288,4 @@ bool ShadowMapping::compileAndLink(){
 
     return true;
 }
+
