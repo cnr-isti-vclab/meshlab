@@ -114,7 +114,7 @@ void ParametrizeInternal(MeshType &to_parametrize)
 					ScalarType peso=(dist)/star.size();
 					kernel+=(peso);//*dist);
 				}
-			
+			assert(kernel>0);
 			///then find factor
 			kernel=1.0/kernel;       
 
@@ -1175,8 +1175,12 @@ bool GetBaryFaceFromUV(const MeshType &m,
 {
 	int index;
 	bool found=GetBaryFaceFromUV(m,U,V,bary,index);
+	if(!found) {
+			chosen=0;
+			return false;
+		}
 	chosen=orderedFaces[index];
-	return found;
+	return true;
 }
 
 template <class MeshType>
