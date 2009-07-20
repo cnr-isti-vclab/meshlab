@@ -26,8 +26,8 @@ void main() {
   float shadow = chebyshevUpperBound(shadowCoordPostW.z);
 
   vec4 kd = gl_LightSource[0].diffuse;
-  if (shadow > 0.4)
+  if (shadow > 0.94)
     discard;
 
-  gl_FragColor = vec4(vec3(shadow), 1.0);
+  gl_FragColor = vec4(vec3(shadow), 0.5 - shadow);
 } 
