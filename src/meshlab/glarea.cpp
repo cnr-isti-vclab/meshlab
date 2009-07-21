@@ -223,7 +223,7 @@ void GLArea::drawGradient()
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 	}
-	
+
 void GLArea::drawLight()
 {
 // ============== LIGHT TRACKBALL ==============
@@ -268,14 +268,14 @@ void GLArea::paintGL()
 	setView();  // Set Modelview and Projection matrix
 	drawGradient();  // draws the background
   drawLight();
-			
+
 	glPushMatrix();
-	
+
 	// Finally apply the Trackball for the model
 	trackball.GetView();
   trackball.Apply(false);
 	glPushMatrix();
-	
+
 	//glScale(d);
   //	glTranslate(-FullBBox.Center());
   setLightModel();
@@ -294,16 +294,16 @@ void GLArea::paintGL()
 	if(!meshDoc.busy)
 	{
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		
+
 		if (iRenderer) iRenderer->Render(currentShader, meshDoc, rm, this);
-		else 
+		else
 		{
-			
+
 			foreach(MeshModel * mp, meshDoc.meshList)
 				{
 					if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
-		}	
+		}
 		if(iEdit) iEdit->Decorate(*mm(),this);
 
 		// Draw the selection
@@ -314,17 +314,17 @@ void GLArea::paintGL()
 					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p.first->parent());
 					decorInterface->Decorate(p.first,*mm(),p.second,this,qFont);
 				}
-		
+
 		glPopAttrib();
 	} ///end if busy
-	
+
 	glPopMatrix(); // We restore the state to immediately after the trackball (and before the bbox scaling/translating)
-	
-	if(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor)) 
+
+	if(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor))
 			trackball.DrawPostApply();
-			
-	// The picking of the surface position has to be done in object space, 
-	// so after trackball transformation (and before the matrix associated to each mesh);		
+
+	// The picking of the surface position has to be done in object space,
+	// so after trackball transformation (and before the matrix associated to each mesh);
 	if(hasToPick && hasToGetPickPos)
 	{
 		Point3f pp;
@@ -336,11 +336,11 @@ void GLArea::paintGL()
 		}
 	}
 	glPopMatrix(); // We restore the state to immediately before the trackball
-	
+
 	// Double click move picked point to center
 	// It has to be done in the before trackball space (we MOVE the trackball itself...)
 	if(hasToPick && !hasToGetPickPos)
-  { 
+  {
 		Point3f pp;
     hasToPick=false;
     if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
@@ -352,7 +352,7 @@ void GLArea::paintGL()
   }
 
 	// ...and take a snapshot
-	if (takeSnapTile) pasteTile(); 
+	if (takeSnapTile) pasteTile();
 
 	// Draw the log area background
 	// on the bottom of the glArea
@@ -715,7 +715,7 @@ void GLArea::initTexture()
 		glEnable(GL_TEXTURE_2D);
 		GLint MaxTextureSize;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
-		
+
 		for(unsigned int i =0; i< mm()->cm.textures.size();++i){
 			QImage img, imgScaled, imgGL;
 
@@ -847,13 +847,13 @@ void GLArea::setView()
 	farPlane =  cameraDist + 10.f*clipRatioFar;
 	if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
 
-	if (!takeSnapTile)	
+	if (!takeSnapTile)
 	{
 		if(fov==5)	glOrtho( -viewRatio*fAspect, viewRatio*fAspect, -viewRatio, viewRatio, cameraDist - 2.f*clipRatioNear, cameraDist+2.f*clipRatioFar);
 		else    		gluPerspective(fov, fAspect, nearPlane, farPlane);
-	}	 
+	}
 	else	setTiledView(fov, viewRatio, fAspect, nearPlane, farPlane, cameraDist);
-	 
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(0, 0, cameraDist,0, 0, 0, 0, 1, 0);
@@ -867,7 +867,7 @@ void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdoubl
 		GLdouble fRight  =  viewRatio*fAspect;
 		GLdouble fBottom = -viewRatio;
 		GLdouble fTop    =  viewRatio;
-		
+
 		GLdouble tDimX = fabs(fRight-fLeft) / totalCols;
 		GLdouble tDimY = fabs(fTop-fBottom) / totalRows;
 
@@ -887,7 +887,7 @@ void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdoubl
 		GLdouble tDimX = fabs(fRight-fLeft) / totalCols;
 		GLdouble tDimY = fabs(fTop-fBottom) / totalRows;
 
-		glFrustum(fLeft   + tDimX * tileCol, fLeft   + tDimX * (tileCol+1), 
+		glFrustum(fLeft   + tDimX * tileCol, fLeft   + tDimX * (tileCol+1),
 							fBottom + tDimY * tileRow, fBottom + tDimY * (tileRow+1), zNear, zFar);
 	}
 }
@@ -920,25 +920,29 @@ void GLArea::hideEvent(QHideEvent * /*event*/)
 	trackball.current_button=0;
 }
 
-void GLArea::sendViewPos(QString name) 
+void GLArea::sendViewPos(QString name)
 {
+  #ifndef VCG_USE_EIGEN
 	Point3f pos=  trackball.track.InverseMatrix() *Inverse(trackball.camera.model) *Point3f(0,0,0);
+  #else
+  Point3f pos=  Eigen::Transform3f(trackball.track.InverseMatrix()) * Eigen::Transform3f(Inverse(trackball.camera.model)).translation();
+  #endif
 	emit transmitViewPos(name, pos);
 }
 
-void GLArea::sendSurfacePos(QString name) 
+void GLArea::sendSurfacePos(QString name)
 {
   nameToGetPickPos = name;
 	hasToGetPickPos=true;
 }
 
-void GLArea::sendViewDir(QString name) 
+void GLArea::sendViewDir(QString name)
 {
 	Point3f dir= getViewDir();
 	emit transmitViewDir(name,dir);
 }
 
-void GLArea::sendCameraPos(QString name) 
+void GLArea::sendCameraPos(QString name)
 {
 		Point3f pos=meshDoc.mm()->cm.shot.GetViewPoint();
 	emit transmitViewDir(name, pos);
@@ -947,8 +951,8 @@ void GLArea::sendCameraPos(QString name)
 
 Point3f GLArea::getViewDir()
 {
-	vcg::Matrix44f rotM; 
-	trackball.track.rot.ToMatrix(rotM); 
+	vcg::Matrix44f rotM;
+	trackball.track.rot.ToMatrix(rotM);
 	vcg::Invert(rotM);
 	return rotM*vcg::Point3f(0,0,1);
 }
