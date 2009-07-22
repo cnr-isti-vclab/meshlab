@@ -39,6 +39,8 @@
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <meshlabplugins/edit_pickpoints/pickedPoints.h>
 
+#include <qdatetime.h>
+
 using namespace std;
 using namespace vcg;
 
@@ -97,7 +99,7 @@ template<class MESH_TYPE> class Consensus
         float threshold;                            //consensus % to win consensus;
         bool normalEqualization;                    //to use normal equalization in consensus
         bool paint;                                 //to paint mMov according to consensus
-        void (*log)(const char * f, ... );          //pointer to log function
+        void (*log)(int level, const char * f, ... );          //pointer to log function
 
         Parameters()
         {
@@ -377,11 +379,12 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             int numWonShortCons;
             int numWonFullCons;
             int numMatches;
-            time_t time;
-            time_t matchingTime;
-            time_t shortConsTime;
-            time_t fullConsTime;
-            time_t initTime;
+            int totalTime;
+            int baseSelectionTime;
+            int matchingTime;
+            int shortConsTime;
+            int fullConsTime;
+            int initTime;
             QString errorMsg;
 
             Result(){
@@ -393,11 +396,12 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 numWonShortCons = 0;
                 numWonFullCons = 0;
                 numMatches = 0;                
-                time = 0;
+                totalTime = 0;
                 initTime = 0;
                 matchingTime = 0;
                 shortConsTime = 0;
                 fullConsTime = 0;
+                baseSelectionTime = 0;
                 errorMsg = "An unkown error occurred.";
             }
         };
@@ -438,8 +442,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
         Result& init(MeshType& mFix, MeshType& mMov, Parameters& param)
         {
-            time_t start, end;  //timers
-            time(&start);
+            QTime timer;  //timers
+            timer.start();
 
             //extract features
             vecFFix = FeatureAlignment::extractFeatures(param.numFixFeatureSelected, mFix, FeatureAlignment::UNIFORM_SAMPLING);
@@ -461,16 +465,15 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             consParam.normalEqualization = param.normalEqualization;
             cons.Init(consParam);
 
-            time(&end);
-            res.initTime = int(difftime(end,start));
+            res.initTime = timer.elapsed();
 
             return res;
         }
 
         Result& align(MeshType& mFix, MeshType& mMov, Parameters& param, CallBackPos *cb=NULL)
         {
-            time_t start, end, start_loop, end_loop;  //timers
-            time(&start);
+            QTime tot_timer, timer;  //timers
+            tot_timer.start();
 
             if(param.nBase>int(vecFMov->size())){ setError(2,res); return res; }  //not enough features to pick a base
             if(param.k>int(vecFFix->size())){ setError(3, res); return res; }     //not enough features to pick k neighboors
@@ -503,7 +506,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             float progBar = 0.0f;
             float offset = 30.0f/param.ransacIter;            
 
-            time(&start_loop);
             //loop of ransac iterations to find all possible matches at once
             for(int i = 0; i<param.ransacIter; i++)
             {
@@ -542,8 +544,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 assert(candidates->size()==matchesVec->size());
             }
 
-            time(&end_loop);
-            res.matchingTime = int(difftime(end_loop,start_loop));
+
+            //res.matchingTime = int(difftime(end_loop,start_loop));
             res.numMatches = candidates->size();
 
             //sort candidates by summed point distances
@@ -552,7 +554,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //variable needed for progress bar callback
             offset = (40.0f/math::Min(param.maxNumShortConsensus,int(candidates->size())));
 
-            time(&start_loop);
+            //time(&start_loop);
             //evaluetes at most first g candidates
             for(unsigned int j=0; j<candidates->size() && j<param.maxNumShortConsensus; j++)
             {
@@ -569,8 +571,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 if((*candidates)[j].shortCons >= short_cons_succ) res.numWonShortCons++;  //count how many won, and use this as bound later
             }
 
-            time(&end_loop);
-            res.shortConsTime = int(difftime(end_loop,start_loop));
+            //res.shortConsTime = int(difftime(end_loop,start_loop));
 
             //sort candidates by short consensus
             sort(candidates->begin(), candidates->end(), CandidateType::SortByScore);
@@ -578,7 +579,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //variables needed for progress bar callback
             offset = (40.0f/math::Min(param.maxNumFullConsensus,int(candidates->size())));
 
-            time(&start_loop);
+            //time(&start_loop);
             //evaluetes at most maxNumFullConsensus candidates beetween those who won short consensus
             for(int j=0; j<res.numWonShortCons && j<param.maxNumFullConsensus; j++)
             {
@@ -607,10 +608,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 }                
             }
 
-            time(&end_loop);
-            time(&end);
-            res.fullConsTime = int(difftime(end_loop,start_loop));
-            res.time = (difftime(end,start));
+            //res.fullConsTime = int(difftime(end_loop,start_loop));
+            res.totalTime = tot_timer.elapsed();
 
             //if flag 'points' is checked, clear old picked points and save the new points
             if(param.pickPoints){

@@ -39,7 +39,7 @@ using namespace std;
 using namespace vcg;
 
 GLLogStream *glLog;
-void mylogger(const char * f, ... )
+void mylogger(int level, const char * f, ... )
 {
     char buf[4096];
     va_list marker;
@@ -47,7 +47,7 @@ void mylogger(const char * f, ... )
 
     vsprintf(buf,f,marker);
     va_end( marker );
-    glLog->Log(GLLogStream::DEBUG,buf);
+    glLog->Log(level,buf);
 }
 
 FilterFeatureAlignment::FilterFeatureAlignment()
@@ -258,23 +258,23 @@ bool FilterFeatureAlignment::logResult(FilterIDType filter, typename ALIGNER_TYP
         case AF_MATCHING:{
             switch(res.exitCode){
                 case ResultType::ALIGNED :
-                case ResultType::NOT_ALIGNED : {mylogger("Matching done: %i matches, %i sec.", res.numMatches, res.time); return true;}
+                case ResultType::NOT_ALIGNED : {mylogger(GLLogStream::FILTER,"Matching done: %i matches, %i msec.", res.numMatches, res.totalTime); return true;}
                 case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
                 default : assert(0);
             }
         }
         case AF_RIGID_TRANSFORMATION:{
                 switch(res.exitCode){
-                    case ResultType::ALIGNED : {mylogger("Transformations computed: %i computed, %i matches, %i sec.", res.numWonFullCons, res.numMatches, res.time); return true;}
-                    case ResultType::NOT_ALIGNED : {mylogger("No trasformations computed: %i matches, %i sec.", res.numMatches, res.time); return true;}
+                    case ResultType::ALIGNED : {mylogger(GLLogStream::FILTER,"Transformations computed: %i computed, %i matches, %i msec.", res.numWonFullCons, res.numMatches, res.totalTime); return true;}
+                    case ResultType::NOT_ALIGNED : {mylogger(GLLogStream::FILTER,"No trasformations computed: %i matches, %i msec.", res.numMatches, res.totalTime); return true;}
                     case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
                     default : assert(0);
             }
         }                
         case AF_RANSAC:{
             switch(res.exitCode){
-                case ResultType::ALIGNED : {mylogger("Alignemnt found: %.2f%% consensus, %i matches, %i iter. skipped, %i sec.", res.bestConsensus, res.numMatches, res.numSkippedIter, res.time); return true;}
-                case ResultType::NOT_ALIGNED : {mylogger("Alignemnt not found: %i matches, %i iter. skipped, %i sec.", res.numMatches, res.numSkippedIter, res.time); return true;}
+                case ResultType::ALIGNED : {mylogger(GLLogStream::FILTER,"Alignemnt found: %.2f%% consensus.", res.bestConsensus); return true;}
+                case ResultType::NOT_ALIGNED : {mylogger(GLLogStream::FILTER,"Alignemnt not found."); return true;}
                 case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
                 default : assert(0);
             }
@@ -516,8 +516,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> bool FilterFeatureAlignment::Compu
 template<class ALIGNER_TYPE>
 bool FilterFeatureAlignment::ExtractionOperation(MeshModel& m, typename ALIGNER_TYPE::Parameters& param, CallBackPos *cb)
 {
-    //typedef MESH_TYPE MeshType;
-    //typedef FEATURE_TYPE FeatureType;
     typedef ALIGNER_TYPE AlignerType;
     typedef typename AlignerType::MeshType MeshType;
     typedef typename AlignerType::FeatureType FeatureType;
@@ -546,8 +544,8 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshMode
     typedef typename AlignerType::FeatureType FeatureType;
     typedef typename AlignerType::Result ResultType;
 
-    time_t start, end;
-    time(&start); //start timer
+    QTime timer;
+    timer.start(); //start timer
 
     //create vectors to hold tuples of bases and matches
     vector<FeatureType**>* baseVec = new vector<FeatureType**>();
@@ -567,8 +565,7 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshMode
     AlignerType::CleanTuplesVector(baseVec, true);
     AlignerType::CleanTuplesVector(matchesVec, true);
 
-    time(&end); //stop timer
-    res.time = (int)difftime(end,start);
+    res.totalTime = timer.elapsed();
 
     return res;
 }
@@ -583,8 +580,8 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
     typedef typename AlignerType::Result ResultType;
     typedef Matrix44<ScalarType> Matrix44Type;
 
-    time_t start, end;
-    time(&start); //start timer
+    QTime timer;
+    timer.start(); //start timer
 
     //create vectors to hold tuples of bases and matches
     vector<FeatureType**>* baseVec = new vector<FeatureType**>();
@@ -615,8 +612,7 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
     AlignerType::CleanTuplesVector(baseVec, true);
     AlignerType::CleanTuplesVector(matchesVec, true);
 
-    time(&end); //stop timer
-    res.time = (int)difftime(end,start);
+    res.totalTime = timer.elapsed();
 
     return res; //all right
 }
@@ -714,7 +710,7 @@ for(int h=0; h<4; h++)
             trialsInitTotTime+=res.initTime;
 
             res = aligner.align(mFix.cm, mMov.cm, param);
-            trialsTotTime+=res.time;
+            trialsTotTime+=res.totalTime;
             if(res.exitCode==ResultType::ALIGNED)numWon++;
             if(res.exitCode==ResultType::FAILED) return res;  //failure: stop everything and return error            
         }
@@ -722,8 +718,8 @@ for(int h=0; h<4; h++)
         probSucc = numWon/float(trials);                    //k = prob succ in 1 iteration
         meanTime = trialsTotTime/float(trials);             //t=sec elapsed to perform N ransac iterations
         meanInitTime = trialsInitTotTime/float(trials);
-        failPerSec = std::pow(1-probSucc,1.0f/meanTime);    //fail rate per sec is: (1-k)^(1/t)
-        fprintf(file,"%i#%.2f#%.2f#%.2f#%.2f\n", param.ransacIter, meanInitTime, meanTime, probSucc, failPerSec); fflush(file);
+        failPerSec = std::pow(1-probSucc,1.0f/(meanTime/1000));    //fail rate per sec is: (1-k)^(1/t)
+        fprintf(file,"%i#%.2f#%.2f#%.2f#%.2f\n", param.ransacIter, meanInitTime/1000, meanTime/1000, probSucc, failPerSec); fflush(file);
         numWon = 0; trialsTotTime = 0; trialsInitTotTime=0; progBar=0.0f;
         param.ransacIter+=step;
     }
