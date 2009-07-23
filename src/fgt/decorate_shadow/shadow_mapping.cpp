@@ -124,7 +124,7 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
             RenderMode rm = gla->getCurrentRenderMode();
 			m.Render(rm.drawMode, rm.colorMode,rm.textureMode);
             glDisable(GL_POLYGON_OFFSET_FILL);
-            this->getShadowMap();
+            //this->getShadowMap();
             this->unbind();
 	//		glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 

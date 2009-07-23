@@ -39,7 +39,7 @@
 #include "shadow_mapping.h"
 #include "variance_shadow_mapping.h"
 #include "variance_shadow_mapping_blur.h"
-#include "ssao.h"
+//#include "ssao.h"
 
 class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
 {
@@ -48,9 +48,9 @@ class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
   virtual const QString Info(QAction *);
   
   enum {
-    DP_SHOW_SIMPLE_SHADOW,
-    DP_SHOW_VSM_SHADOW,
-    DP_SHOW_VSM_SHADOW_BLUR,
+		DP_SHOW_SIMPLE_SHADOW,
+		DP_SHOW_VSM_SHADOW,
+		DP_SHOW_VSM_SHADOW_BLUR,
 		DP_SHOW_AO_DEPTH_TRICK,
 		DP_SHOW_SSAO
 		};
@@ -64,8 +64,8 @@ public:
     typeList <<
             DP_SHOW_SIMPLE_SHADOW <<
             DP_SHOW_VSM_SHADOW <<
-            DP_SHOW_VSM_SHADOW_BLUR <<
-            DP_SHOW_SSAO;
+            DP_SHOW_VSM_SHADOW_BLUR; /*<<
+            DP_SHOW_SSAO;*/
 
     FilterIDType tt;
     foreach(tt , types()){
