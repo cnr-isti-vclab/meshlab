@@ -31,10 +31,10 @@ void main() {
   //vec4 color = ka + kd + ks;
   //vec4 color = vec4(vec3(0.5), 1.0);
   //gl_FragColor = vec4(shadow ) * color;
-  if (shadow > 0.4){
+  if (shadow > 0.4)//{
     //discard;
-      gl_FragColor = vec4(vec3(kd), 0.0);
-  }
-    else
-      gl_FragColor = vec4(vec3(shadow), 1.0);
+      gl_FragColor = vec4(vec3(1.0), 0.0);
+ // }
+  else
+      gl_FragColor = vec4(vec3(shadow), 0.5 - shadow);
 } 
