@@ -76,6 +76,52 @@ protected:
         img.mirrored().save("./_shadowMapTXT.png", "PNG");
     }
 
+    void printDepthMap(GLuint map){
+        if (!this->_initOk)
+                return;
+
+        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+
+        float *tempFBuf = new float[this->_texSize * this->_texSize *1 ];
+        float *tempFBufPtr = tempFBuf;
+        glBindTexture(GL_TEXTURE_2D, map);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, tempFBufPtr);
+        for (int i = 0; i < this->_texSize; ++i) {
+                QRgb *scanLine = (QRgb*)img.scanLine(i);
+                for (int j = 0; j < this->_texSize; ++j) {
+                    const unsigned char val = (unsigned char) (tempFBufPtr[0] * 255.0f);
+                        scanLine[j] = qRgb(val, val, val);
+                        tempFBufPtr ++;
+                }
+        }
+        delete[] tempFBuf;
+        img.mirrored().save("./_depthMapTXT.png", "PNG");
+    }
+
+    void printColorMap(GLuint map){
+        if (!this->_initOk)
+                return;
+
+        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+
+     unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
+        unsigned char *tempBufPtr = tempBuf;
+        glBindTexture(GL_TEXTURE_2D, map);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
+        for (int i = 0; i < this->_texSize; ++i) {
+                QRgb *scanLine = (QRgb*)img.scanLine(i);
+                for (int j = 0; j < this->_texSize; ++j) {
+                        scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
+                        tempBufPtr += 3;
+                }
+        }
+
+        delete[] tempBuf;
+
+        img.mirrored().save("./_depthMapTXT.png", "PNG");
+    }
+
+
     bool printShaderInfoLog(GLuint obj){
         int infologLength = 0;
         int charsWritten  = 0;

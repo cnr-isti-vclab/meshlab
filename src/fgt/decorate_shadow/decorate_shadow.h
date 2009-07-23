@@ -39,6 +39,7 @@
 #include "shadow_mapping.h"
 #include "variance_shadow_mapping.h"
 #include "variance_shadow_mapping_blur.h"
+#include "ssao.h"
 
 class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
 {
@@ -63,7 +64,8 @@ public:
     typeList <<
             DP_SHOW_SIMPLE_SHADOW <<
             DP_SHOW_VSM_SHADOW <<
-            DP_SHOW_VSM_SHADOW_BLUR;
+            DP_SHOW_VSM_SHADOW_BLUR <<
+            DP_SHOW_SSAO;
 
     FilterIDType tt;
     foreach(tt , types()){

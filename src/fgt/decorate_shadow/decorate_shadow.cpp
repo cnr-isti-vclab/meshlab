@@ -85,6 +85,10 @@ bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, GLArea* 
     }
 
 
+    if(action->text() == ST(DP_SHOW_SSAO)){
+        result = this->_decorator = new SSAO();
+    }
+
     result = this->_decorator->init();
     return result;
 }

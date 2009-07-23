@@ -3,8 +3,8 @@
 VarianceShadowMappingBlur::VarianceShadowMappingBlur():DecorateShader()
 {
     this->_depth = 0;
-    this->_blur = 0;
-
+    this->_blurH = 0;
+    this->_blurV = 0;
     this->_depthVert = 0;
     this->_depthFrag = 0;
     this->_depthShaderProgram = 0;
@@ -41,7 +41,8 @@ VarianceShadowMappingBlur::~VarianceShadowMappingBlur(){
 
     glDeleteFramebuffersEXT(1, &(this->_depth));
     glDeleteTexturesEXT(1, &(this->_shadowMap));
-    glDeleteTexturesEXT(1, &(this->_blur));
+    glDeleteTexturesEXT(1, &(this->_blurH));
+    glDeleteTexturesEXT(1, &(this->_blurV));
     glDeleteFramebuffersEXT(1, &_fbo);
 }
 
@@ -75,7 +76,7 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
         GLfloat g_mModelView[16];
         GLfloat g_mProjection[16];
 
-        int diag = bb.Diag();
+        float diag = bb.Diag();
 
         GLfloat lP[4];
         glGetLightfv(GL_LIGHT0, GL_POSITION, lP);
@@ -159,43 +160,18 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
         glUniform1i(loc, 0);
         glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
+        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
 
-        //this->getBlur();
-        this->unbind();
-        glDepthFunc((GLenum)depthFuncOld);
+        //this->getBlurH();
         glUseProgram(0);
 
-        /***********************************************************/
-        //BLURRING
-        /***********************************************************/
-        glUseProgram(this->_blurShaderProgram);
-
-        //GLfloat scale = 1/(diag * BLUR_COEF * SHADOW_COEF);
-        GLfloat scale = (1/(this->_texSize)) * BLUR_COEF * SHADOW_COEF;
-
-        GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
-        //glUniform2f(scaleLoc, 0.0, 0.0);
-        glUniform2f(scaleLoc, scale, scale);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, this->_blur);
-        loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
-        glUniform1i(loc, 0);
-
-        //Preparing to draw quad
+/****************************************************************************************/
+//                                      BLURRING
+/****************************************************************************************/
+     //Preparing to draw quad
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
             glLoadIdentity();
-            /*glOrtho(-(diag/2),
-                     diag/2,
-                     -(diag/2),
-                     diag/2,
-                     -(diag/2),
-                     diag/2);*/
             glOrtho(-(this->_texSize/2),
                      this->_texSize/2,
                      -(this->_texSize/2),
@@ -206,25 +182,79 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
             glLoadIdentity();
-            //glTranslated(0,0,-(diag/2));
-            glTranslated(0,0,-5);
+            //vcg::Point3f t = track.tra;
+            //glTranslated(0,0,t[2]);
+            glTranslated(0,0,-1);
+        /***********************************************************/
+        //BLURRING horizontal
+        /***********************************************************/
+        glUseProgram(this->_blurShaderProgram);
 
+        GLfloat scale = 1/(diag * BLUR_COEF);// * SHADOW_COEF);
+        //GLfloat scale = (1/(this->_texSize)) * BLUR_COEF * SHADOW_COEF;
+        GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
+        glUniform2f(scaleLoc, scale, 0.0);
+
+        glBindTexture(GL_TEXTURE_2D, this->_blurH);
+        loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
+        glUniform1i(loc, 0);
+
+        glDrawBuffer(GL_COLOR_ATTACHMENT2_EXT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glBegin(GL_QUADS);
-                    glTexCoord2d(0,0);glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,0);glVertex3f(this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,1);glVertex3f(this->_texSize/2,this->_texSize/2,0);
-                    glTexCoord2d(0,1);glVertex3f(-this->_texSize/2,this->_texSize/2,0);
+                    glTexCoord2d(0,0);
+                    glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
+                    glTexCoord2d(1,0);
+                    glVertex3f(this->_texSize/2,-this->_texSize/2,0);
+                    glTexCoord2d(1,1);
+                    glVertex3f(this->_texSize/2,this->_texSize/2,0);
+                    glTexCoord2d(0,1);
+                    glVertex3f(-this->_texSize/2,this->_texSize/2,0);
             glEnd();
+
+        //this->getBlurV();
+        this->unbind();
+
+
+        /***********************************************************/
+        //BLURRING vertical
+        /***********************************************************/
+        glUniform2f(scaleLoc, 0.0, scale);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glDisable(GL_DEPTH_TEST);
+
+        glBindTexture(GL_TEXTURE_2D, this->_blurV);
+        loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
+        glUniform1i(loc, 0);
+
+            glBegin(GL_QUADS);
+                    glTexCoord2d(0,0);
+                    glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
+                    glTexCoord2d(1,0);
+                    glVertex3f(this->_texSize/2,-this->_texSize/2,0);
+                    glTexCoord2d(1,1);
+                    glVertex3f(this->_texSize/2,this->_texSize/2,0);
+                    glTexCoord2d(0,1);
+                    glVertex3f(-this->_texSize/2,this->_texSize/2,0);
+            glEnd();
+
+
+        glDepthFunc((GLenum)depthFuncOld);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+        glUseProgram(0);
+
 
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
 
-        //m.Render(rm.drawMode, rm.colorMode, rm.textureMode);
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_BLEND);
-        glUseProgram(0);
+/****************************************************************************************/
+//                                      BLURRING END
+/****************************************************************************************/
 
         int error = glGetError();
 }
@@ -257,9 +287,9 @@ bool VarianceShadowMappingBlur::setup()
         //attacco al FBO la texture di colore
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
 
-        //genero la texture di blur.
-        glGenTextures(1, &this->_blur);
-        glBindTexture(GL_TEXTURE_2D, this->_blur);
+        //genero la texture di blur orizzontale.
+        glGenTextures(1, &this->_blurH);
+        glBindTexture(GL_TEXTURE_2D, this->_blurH);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
@@ -268,8 +298,22 @@ bool VarianceShadowMappingBlur::setup()
 
         //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        //e la texture per il blur
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_blur, 0);
+        //e la texture per il blur orizzontale
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_blurH, 0);
+
+        //genero la texture di blur verticale.
+        glGenTextures(1, &this->_blurV);
+        glBindTexture(GL_TEXTURE_2D, this->_blurV);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
+        //e la texture per il blur verticale
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2_EXT, GL_TEXTURE_2D, this->_blurV, 0);
 
         //genero il render buffer per il depth buffer
         glGenRenderbuffersEXT(1, &(this->_depth));
@@ -278,8 +322,9 @@ bool VarianceShadowMappingBlur::setup()
 
         //e il depth buffer
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
-        GLenum drawBuffers[] = {this->_shadowMap, this->_blur};
-        glDrawBuffersARB(2, drawBuffers);
+
+        GLenum drawBuffers[] = {this->_shadowMap, this->_blurH, this->_blurV};
+        glDrawBuffersARB(3, drawBuffers);
 
         int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
@@ -422,7 +467,7 @@ bool VarianceShadowMappingBlur::compileAndLink(){
     return true;
 }
 
-void VarianceShadowMappingBlur::getBlur()
+void VarianceShadowMappingBlur::getBlurH()
 {
         if (!this->_initOk)
                 return;
@@ -431,7 +476,7 @@ void VarianceShadowMappingBlur::getBlur()
 
      unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
         unsigned char *tempBufPtr = tempBuf;
-        glBindTexture(GL_TEXTURE_2D, this->_blur);
+        glBindTexture(GL_TEXTURE_2D, this->_blurH);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
         for (int i = 0; i < this->_texSize; ++i) {
                 QRgb *scanLine = (QRgb*)img.scanLine(i);
@@ -443,7 +488,31 @@ void VarianceShadowMappingBlur::getBlur()
 
         delete[] tempBuf;
 
-        img.mirrored().save("./_vsm_blurTXT.png", "PNG");
+        img.mirrored().save("./_vsm_blurHTXT.png", "PNG");
+}
+
+void VarianceShadowMappingBlur::getBlurV()
+{
+        if (!this->_initOk)
+                return;
+
+        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+
+     unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
+        unsigned char *tempBufPtr = tempBuf;
+        glBindTexture(GL_TEXTURE_2D, this->_blurV);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
+        for (int i = 0; i < this->_texSize; ++i) {
+                QRgb *scanLine = (QRgb*)img.scanLine(i);
+                for (int j = 0; j < this->_texSize; ++j) {
+                        scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
+                        tempBufPtr += 3;
+                }
+        }
+
+        delete[] tempBuf;
+
+        img.mirrored().save("./_vsm_blurVTXT.png", "PNG");
 }
 
 void VarianceShadowMappingBlur::getShadowMap(){
