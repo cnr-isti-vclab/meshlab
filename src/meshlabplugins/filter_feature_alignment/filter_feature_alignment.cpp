@@ -556,7 +556,9 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshMode
     if(res.exitCode==ResultType::FAILED) return res;
 
     //execute matching procedure with requested parameters;
-    int errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
+    int errCode = AlignerType::SelectBase(*(aligner.vecFMov),*baseVec,param);
+    if(errCode){ AlignerType::setError(errCode, res); return res; }
+    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], *matchesVec, param, cb);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
 
     res.numMatches = matchesVec->size(); //store the numeber of matches found   
@@ -592,7 +594,9 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
     if(res.exitCode==ResultType::FAILED) return res;
 
     //execute matching procedure with requested parameters;
-    int errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, *baseVec, *matchesVec, param, cb);
+    int errCode = AlignerType::SelectBase(*(aligner.vecFMov),*baseVec,param);
+    if(errCode){ AlignerType::setError(errCode, res); return res; }
+    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], *matchesVec, param, cb);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
 
     res.numMatches = matchesVec->size(); //store the numeber of matches found
@@ -655,6 +659,7 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacOperation(MeshModel&
     mMov.updateDataMask(MeshModel::MM_VERTMARK);
 
     AlignerType aligner;
+    param.log = &mylogger; //set the callback used to print infos inside the procedure
     ResultType res = aligner.init(mFix.cm, mMov.cm, param);
     if(res.exitCode==ResultType::FAILED) return res;
 
@@ -696,8 +701,6 @@ for(int h=0; h<4; h++)
     float probSucc = 0.0f, meanTime = 0.0f, meanInitTime = 0.0f, failPerSec = -1.0f;
     int numWon = 0, trialsTotTime = 0, trialsInitTotTime = 0;
     param.ransacIter = from;
-    //param.log = &mylogger; //this is the way to assign a pointer to log function
-    //move res here
 
     while(param.ransacIter<=to)
     {

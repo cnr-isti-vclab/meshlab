@@ -332,7 +332,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             int maxNumFullConsensus;                    //max num of bases tested with full consensus procedure
             int maxNumShortConsensus;                   //max num of bases tested with short consensus procedure
             float mMovBBoxDiag;                         //mMov bbox diagonal; used to compute distances...            
-            void (*log)(const char * f, ... );          //pointer to log function
+            void (*log)(int level,const char * f, ... );          //pointer to log function
 
             Parameters(MeshType& mFix, MeshType& mMov){
                 setDefault(mFix, mMov);
@@ -408,9 +408,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
         struct CandidateType
         {
-            //typedef FEATURE_TYPE FeatureType;
-            //typedef SCALAR_TYPE ScalarType;
-
             int shortCons;
             float summedPointDist;
             Matrix44<ScalarType> tr;
@@ -513,9 +510,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
                 assert(vecFMov);
                 assert(vecFFix);
-								
-                int errCode = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, *baseVec, *matchesVec, param);
+
+                int errCode = FeatureAlignment::SelectBase(*vecFMov,*baseVec, param);
                 if(errCode){ res.numSkippedIter++; continue; } //can't find a base, skip this iteration
+                errCode = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, (*baseVec)[baseVec->size()-1], *matchesVec, param);
 
                 assert(baseVec->size()>=1);
                 int currBase = baseVec->size()-1;
@@ -543,6 +541,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 }
                 assert(candidates->size()==matchesVec->size());
             }
+            if(param.log) param.log(3,"%i bases found.", param.ransacIter-res.numSkippedIter);
 
 
             //res.matchingTime = int(difftime(end_loop,start_loop));
@@ -780,26 +779,27 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             }
         }
 
-        static int Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, vector<FEATURE_TYPE**>& baseVec, vector<FEATURE_TYPE**>& matchesVec, Parameters& param, CallBackPos *cb=NULL)
+        static int SelectBase(vector<FEATURE_TYPE*>& vecFMov, vector<FEATURE_TYPE**>& baseVec, Parameters& param)
         {
-            typedef MESH_TYPE MeshType;
-            typedef FEATURE_TYPE FeatureType;
-            typedef typename vector<FeatureType*>::iterator FeatureIterator;
-
-            float pBar = 0, offset = 100.0f/param.nBase;  //used for progresss bar callback
-            if(cb) cb(0, "Matching...");
             assert(param.nBase<=int(vecFMov.size()));  //not enough features to pick a base
-            assert(param.k<=int(vecFFix.size()));      //not enough features in kdtree to pick k neighboors
-
-            //compute needed params
-            float baseDist = param.sparseBaseDist*(param.mMovBBoxDiag/100.0f);
-            float errDist = param.mutualErrDist*(param.mMovBBoxDiag/100.0f);
+            float baseDist = param.sparseBaseDist*(param.mMovBBoxDiag/100.0f); //compute needed params
 
             FeatureType** base = FeatureAlignment::FeatureUniform(vecFMov, &(param.nBase)); //randomly chooses a base of features from vecFFix
             if(!VerifyBaseDistances(base, param.nBase, baseDist)) return 4; //if base point are not enough sparse, skip
             baseVec.push_back(base);
+            return 0;
+        }
 
-            assert(baseVec.size()>=1);
+        static int Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, FEATURE_TYPE** base, vector<FEATURE_TYPE**>& matchesVec, Parameters& param, CallBackPos *cb=NULL)
+        {
+            float pBar = 0, offset = 100.0f/param.nBase;  //used for progresss bar callback
+            if(cb) cb(0, "Matching...");
+
+            assert(param.k<=int(vecFFix.size()));      //not enough features in kdtree to pick k neighboors
+
+            //compute needed params
+            float errDist = param.mutualErrDist*(param.mMovBBoxDiag/100.0f);
+
             assert((int)vecFFix.size()>=param.nBase);
 
             //fill fqueryPts with feature's descriptions in base
@@ -832,7 +832,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //branch and bound
             int* curSolution = new int[param.nBase];
             for(int i=0; i<param.nBase; i++) curSolution[i] = 0;              //initialization
-            FeatureAlignment::Match(baseVec, *matchedVec, param.nBase, 0, curSolution, matchesVec, errDist);
+            FeatureAlignment::Match(base, *matchedVec, param.nBase, 0, curSolution, matchesVec, errDist);
 
             //Cleaning ANN structures
             FeatureAlignment::CleanKDTree(NULL, NULL, fqueryPts, fnnIdx, fdists, false);
@@ -954,15 +954,13 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             }
         }       
 
-        static void Match(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<FEATURE_TYPE**>& solutionsVec, float errDist, CallBackPos *cb = NULL)
+        static void Match(FEATURE_TYPE** base, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<FEATURE_TYPE**>& solutionsVec, float errDist, CallBackPos *cb = NULL)
         {
-            typedef FEATURE_TYPE FeatureType;
-
             assert(level<nBase);
 
             for(unsigned int j=0; j<matchedVec[level]->size(); j++){
                 curSolution[level] = j;
-                if(MatchSolution(baseVec, matchedVec, level, curSolution, errDist)){
+                if(MatchSolution(base, matchedVec, level, curSolution, errDist)){
                     if(level==nBase-1){
                         FeatureType** solution = new FeatureType*[nBase];
                         for(int h=0; h<nBase; h++){
@@ -971,20 +969,18 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                         solutionsVec.push_back(solution);
                     }
                     else
-                        Match(baseVec, matchedVec, nBase, level+1, curSolution, solutionsVec, errDist);
+                        Match(base, matchedVec, nBase, level+1, curSolution, solutionsVec, errDist);
                 }
             }
             curSolution[level] = 0;
         }
 
-        static bool MatchSolution(vector<FEATURE_TYPE**>& baseVec, vector<vector<FEATURE_TYPE*>* >& matchedVec, int level, int curSolution[], float errDist)
+        static bool MatchSolution(FEATURE_TYPE** base, vector<vector<FEATURE_TYPE*>* >& matchedVec, int level, int curSolution[], float errDist)
         {
             if (level==0) return true;
 
-            int currBase = baseVec.size()-1;
-
             for(int j=0; j<level; j++){
-                float distF = vcg::Distance(baseVec[currBase][level]->pos, baseVec[currBase][j]->pos);
+                float distF = vcg::Distance(base[level]->pos, base[j]->pos);
                 float distM = vcg::Distance((*(matchedVec[level]))[curSolution[level]]->pos, (*(matchedVec[j]))[curSolution[j]]->pos);
                 if( math::Abs(distF-distM)>errDist) return false;
             }
