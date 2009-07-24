@@ -245,8 +245,10 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
         glUniform1i(loc, 0);
 //        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glPushAttrib(GL_COLOR_BUFFER_BIT);
+				glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_FALSE); // to avoid the fact that when saving a snapshot we get semitransparent shadowed areas.
         m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
-
+			  glPopAttrib();
         //this->getBlurH();
         glUseProgram(0);
 
