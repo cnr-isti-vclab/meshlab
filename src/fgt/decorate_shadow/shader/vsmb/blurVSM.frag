@@ -13,9 +13,9 @@ void main() {
 
     
     //gl_FragColor = color;//vec4(color.xyz, (0.5 - color.x));
-    if(scale.y == 0.0)
+    //if(scale.y == 0.0)
       gl_FragColor = color;//vec4(color.xyz, 0.5);
-    else
-      gl_FragColor = vec4(color.xyz, (0.5 - color.x));
+    //else
+	  //gl_FragColor = vec4(color.xyz, (0.5 - color.x));
 
 }

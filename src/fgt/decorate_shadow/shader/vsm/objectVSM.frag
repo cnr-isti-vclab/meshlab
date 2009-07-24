@@ -29,5 +29,5 @@ void main() {
   if (shadow > 0.4)
     discard;
 
-  gl_FragColor = vec4(vec3(shadow), 0.5 - shadow);
+  gl_FragColor = vec4(vec3(0.0), 0.5 - shadow);
 } 

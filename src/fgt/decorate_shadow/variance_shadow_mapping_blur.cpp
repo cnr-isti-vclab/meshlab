@@ -139,32 +139,6 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
 
-        /***********************************************************/
-        //OBJECT PASS
-        /***********************************************************/
-        GLint depthFuncOld;
-        glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
-        glDepthFunc(GL_LEQUAL);
-        vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
-        glUseProgram(this->_objectShaderProgram);
-
-        GLuint matrixLoc = glGetUniformLocation(this->_objectShaderProgram, "mvpl");
-        glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
-
-        glEnable(GL_TEXTURE_2D);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-
-
-        GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
-        glUniform1i(loc, 0);
-        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
-
-        //this->getBlurH();
-        glUseProgram(0);
-
 /****************************************************************************************/
 //                                      BLURRING
 /****************************************************************************************/
@@ -195,6 +169,37 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
         GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
         glUniform2f(scaleLoc, scale, 0.0);
 
+        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
+        GLuint loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
+        glUniform1i(loc, 0);
+
+        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glBegin(GL_QUADS);
+                    glTexCoord2d(0,0);
+                    glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
+                    glTexCoord2d(1,0);
+                    glVertex3f(this->_texSize/2,-this->_texSize/2,0);
+                    glTexCoord2d(1,1);
+                    glVertex3f(this->_texSize/2,this->_texSize/2,0);
+                    glTexCoord2d(0,1);
+                    glVertex3f(-this->_texSize/2,this->_texSize/2,0);
+            glEnd();
+
+        //this->getBlurH();
+        //this->unbind();
+
+
+        /***********************************************************/
+        //BLURRING vertical
+        /***********************************************************/
+        glUniform2f(scaleLoc, 0.0, scale);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+//        glDisable(GL_DEPTH_TEST);
+
         glBindTexture(GL_TEXTURE_2D, this->_blurH);
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
@@ -213,45 +218,44 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
                     glVertex3f(-this->_texSize/2,this->_texSize/2,0);
             glEnd();
 
-        //this->getBlurV();
+			//this->getBlurV();
         this->unbind();
-
-
-        /***********************************************************/
-        //BLURRING vertical
-        /***********************************************************/
-        glUniform2f(scaleLoc, 0.0, scale);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glDisable(GL_DEPTH_TEST);
-
-        glBindTexture(GL_TEXTURE_2D, this->_blurV);
-        loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
-        glUniform1i(loc, 0);
-
-            glBegin(GL_QUADS);
-                    glTexCoord2d(0,0);
-                    glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,0);
-                    glVertex3f(this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,1);
-                    glVertex3f(this->_texSize/2,this->_texSize/2,0);
-                    glTexCoord2d(0,1);
-                    glVertex3f(-this->_texSize/2,this->_texSize/2,0);
-            glEnd();
-
-
-        glDepthFunc((GLenum)depthFuncOld);
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_BLEND);
-        glUseProgram(0);
-
-
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
 
+        /***********************************************************/
+        //OBJECT PASS
+        /***********************************************************/
+        GLint depthFuncOld;
+        glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
+        glDepthFunc(GL_LEQUAL);
+        vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
+        glUseProgram(this->_objectShaderProgram);
+
+        GLuint matrixLoc = glGetUniformLocation(this->_objectShaderProgram, "mvpl");
+        glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
+
+        glEnable(GL_TEXTURE_2D);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, this->_blurV);
+
+
+        loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
+        glUniform1i(loc, 0);
+//        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+
+        //this->getBlurH();
+        glUseProgram(0);
+
+				glDepthFunc((GLenum)depthFuncOld);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+				
+				
+   
 /****************************************************************************************/
 //                                      BLURRING END
 /****************************************************************************************/
