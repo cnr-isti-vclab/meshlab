@@ -543,13 +543,14 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshMode
     typedef typename AlignerType::MeshType MeshType;
     typedef typename AlignerType::FeatureType FeatureType;
     typedef typename AlignerType::Result ResultType;
+    typedef typename AlignerType::CandidateType CandidateType;
 
     QTime timer;
     timer.start(); //start timer
 
     //create vectors to hold tuples of bases and matches
     vector<FeatureType**>* baseVec = new vector<FeatureType**>();
-    vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
+    vector<CandidateType>* candidates = new vector<CandidateType>();
 
     AlignerType aligner;
     ResultType res = aligner.init(mFix.cm, mMov.cm, param);
@@ -558,14 +559,15 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshMode
     //execute matching procedure with requested parameters;
     int errCode = AlignerType::SelectBase(*(aligner.vecFMov),*baseVec,param);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
-    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], *matchesVec, param, cb);
+    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], *candidates, param, cb);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
 
-    res.numMatches = matchesVec->size(); //store the numeber of matches found   
+    res.numMatches = candidates->size(); //store the numeber of matches found
 
-    //cleaning baseVec and matchesVec...
-    AlignerType::CleanTuplesVector(baseVec, true);
-    AlignerType::CleanTuplesVector(matchesVec, true);
+    //Clean structures...
+    for(int i=0; i<baseVec->size();i++){ delete[] (*baseVec)[i];}
+    for(int i=0; i<candidates->size();i++){ delete[] (*candidates)[i].basePtr; delete[] (*candidates)[i].matchPtr;}
+    delete baseVec; delete candidates;
 
     res.totalTime = timer.elapsed();
 
@@ -581,13 +583,14 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
     typedef typename MeshType::ScalarType ScalarType;
     typedef typename AlignerType::Result ResultType;
     typedef Matrix44<ScalarType> Matrix44Type;
+    typedef typename AlignerType::CandidateType CandidateType;
 
     QTime timer;
     timer.start(); //start timer
 
     //create vectors to hold tuples of bases and matches
     vector<FeatureType**>* baseVec = new vector<FeatureType**>();
-    vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
+    vector<CandidateType>* candidates = new vector<CandidateType>();
 
     AlignerType aligner;
     ResultType res = aligner.init(mFix.cm, mMov.cm, param);
@@ -596,25 +599,27 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
     //execute matching procedure with requested parameters;
     int errCode = AlignerType::SelectBase(*(aligner.vecFMov),*baseVec,param);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
-    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], *matchesVec, param, cb);
+    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], *candidates, param, cb);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
 
-    res.numMatches = matchesVec->size(); //store the numeber of matches found
+    res.numMatches = candidates->size(); //store the numeber of matches found
     assert(baseVec->size()==1);  //now baseVec must hold exactly one base of features
 
-    for(unsigned int j=0; j<matchesVec->size(); j++)
+    for(unsigned int j=0; j<candidates->size(); j++)
     {
+        CandidateType currCandidate = (*candidates)[j];
         Matrix44Type tr;
-        errCode = AlignerType::FindRigidTransformation(mFix.cm, mMov.cm, (*baseVec)[0], (*matchesVec)[j], param.nBase, tr, cb);
+        errCode = AlignerType::FindRigidTransformation(mFix.cm, mMov.cm, currCandidate.basePtr, currCandidate.matchPtr, param.nBase, tr, cb);
         if(errCode) { AlignerType::setError(errCode,res); return res; }
 
         res.numWonFullCons++;  //use this variable to increase num of found transform
         res.exitCode = ResultType::ALIGNED;  //this means at least one matrix found
     }
 
-    //cleaning baseVec and matchesVec...
-    AlignerType::CleanTuplesVector(baseVec, true);
-    AlignerType::CleanTuplesVector(matchesVec, true);
+    //Clean structures...
+    for(int i=0; i<baseVec->size();i++){ delete[] (*baseVec)[i];}
+    for(int i=0; i<candidates->size();i++){ delete[] (*candidates)[i].basePtr; delete[] (*candidates)[i].matchPtr;}
+    delete baseVec; delete candidates;
 
     res.totalTime = timer.elapsed();
 
@@ -695,12 +700,14 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacDiagramOperation(Mes
     fprintf(file,"Fix Mesh#%s\nMove Mesh#%s\nFeature#%s\nNum. of vertices of Fix Mesh#%i\nNum. of vertices of Move Mesh#%i\nOverlap#%.2f%%\nShort consensus threshold#%.2f%% overlap#%.2f%% of Move Mesh#\nFull consensus threshold#%.2f%% overlap#%.2f%% of Move Mesh#\nTrials#%i\n",mFix.fileName.c_str(),mMov.fileName.c_str(),FeatureType::getName(),mFix.cm.VertexNumber(),mMov.cm.VertexNumber(),param.overlap,param.shortConsOffset,(param.shortConsOffset*param.overlap/100.0f),param.consOffset,(param.consOffset*param.overlap/100.0f),trials); fflush(file);
 for(int h=0; h<4; h++)
 {
-    fprintf(file,"Iterazioni#Tempo di inizializzazione#Tempo di esecuzione#Prob. Succ.#Prob. Fall. per Sec\n0#0#0#0\n"); fflush(file);
+    fprintf(file,"Iterazioni#Tempo di inizializzazione#Tempo di esecuzione#Prob. Succ.#Prob. Fall. per Sec#Num. medio basi\n0#0#0#0#0\n"); fflush(file);
 
     AlignerType aligner;
     float probSucc = 0.0f, meanTime = 0.0f, meanInitTime = 0.0f, failPerSec = -1.0f;
-    int numWon = 0, trialsTotTime = 0, trialsInitTotTime = 0;
+    int numWon = 0, trialsTotTime = 0, trialsInitTotTime = 0, numBases = 0;
     param.ransacIter = from;
+    //param.log = &mylogger; //this is the way to assign a pointer to log function
+    //move res here
 
     while(param.ransacIter<=to)
     {
@@ -714,7 +721,8 @@ for(int h=0; h<4; h++)
 
             res = aligner.align(mFix.cm, mMov.cm, param);
             trialsTotTime+=res.totalTime;
-            if(res.exitCode==ResultType::ALIGNED)numWon++;
+            numBases+=res.numBasesFound;
+            if(res.exitCode==ResultType::ALIGNED) numWon++;
             if(res.exitCode==ResultType::FAILED) return res;  //failure: stop everything and return error            
         }
 
@@ -722,8 +730,8 @@ for(int h=0; h<4; h++)
         meanTime = trialsTotTime/float(trials);             //t=sec elapsed to perform N ransac iterations
         meanInitTime = trialsInitTotTime/float(trials);
         failPerSec = std::pow(1-probSucc,1.0f/(meanTime/1000));    //fail rate per sec is: (1-k)^(1/t)
-        fprintf(file,"%i#%.2f#%.2f#%.2f#%.2f\n", param.ransacIter, meanInitTime/1000, meanTime/1000, probSucc, failPerSec); fflush(file);
-        numWon = 0; trialsTotTime = 0; trialsInitTotTime=0; progBar=0.0f;
+        fprintf(file,"%i#%.2f#%.2f#%.2f#%.2f#%i\n", param.ransacIter, meanInitTime/1000, meanTime/1000, probSucc, failPerSec,numBases/trials); fflush(file);
+        numWon = 0; trialsTotTime = 0; trialsInitTotTime=0; progBar=0.0f; numBases=0;
         param.ransacIter+=step;
     }
 }

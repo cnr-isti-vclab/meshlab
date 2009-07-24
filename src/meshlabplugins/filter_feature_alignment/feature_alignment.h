@@ -375,13 +375,14 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             int errorCode;
             Matrix44Type tr;
             float bestConsensus;
-            int numSkippedIter;                       
+            int numBasesFound;
             int numWonShortCons;
             int numWonFullCons;
             int numMatches;
             int totalTime;
             int baseSelectionTime;
             int matchingTime;
+            int rankTime;
             int shortConsTime;
             int fullConsTime;
             int initTime;
@@ -392,7 +393,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 errorCode = -1;
                 tr = Matrix44Type::Identity();
                 bestConsensus = 0.0f;
-                numSkippedIter = 0;
+                numBasesFound = 0;
                 numWonShortCons = 0;
                 numWonFullCons = 0;
                 numMatches = 0;                
@@ -402,6 +403,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 shortConsTime = 0;
                 fullConsTime = 0;
                 baseSelectionTime = 0;
+                rankTime = 0;
                 errorMsg = "An unkown error occurred.";
             }
         };
@@ -414,6 +416,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             FeatureType** matchPtr;
             FeatureType** basePtr;
 
+            CandidateType(FeatureType** base, FeatureType** match, int cons = -1, float spd = numeric_limits<float>::max()):basePtr(base),matchPtr(match),shortCons(cons),summedPointDist(spd){}
             static bool SortByDistance(CandidateType i,CandidateType j) { return (i.summedPointDist<j.summedPointDist); }
             static bool SortByScore(CandidateType i,CandidateType j) { return (i.shortCons>j.shortCons); }
         };
@@ -472,6 +475,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             QTime tot_timer, timer;  //timers
             tot_timer.start();
 
+            assert(vecFMov); assert(vecFFix);
+
             if(param.nBase>int(vecFMov->size())){ setError(2,res); return res; }  //not enough features to pick a base
             if(param.k>int(vecFFix->size())){ setError(3, res); return res; }     //not enough features to pick k neighboors
 
@@ -496,102 +501,99 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             //auxiliary vectors needed inside the loop
             vector<FeatureType**>* baseVec = new vector<FeatureType**>();
-            vector<FeatureType**>* matchesVec = new vector<FeatureType**>();
             vector<CandidateType>* candidates = new vector<CandidateType>();
 
             //variables needed for progress bar callback
-            float progBar = 0.0f;
-            float offset = 30.0f/param.ransacIter;            
+            float progBar = 1.0f;
+            if(cb) cb(int(progBar),"Selecting bases...");
 
             //loop of ransac iterations to find all possible matches at once
+            timer.start();
             for(int i = 0; i<param.ransacIter; i++)
             {
-                //callback handling
-                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
-                assert(vecFMov);
-                assert(vecFFix);
-
-                int errCode = FeatureAlignment::SelectBase(*vecFMov,*baseVec, param);
-                if(errCode){ res.numSkippedIter++; continue; } //can't find a base, skip this iteration
-                errCode = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, (*baseVec)[baseVec->size()-1], *matchesVec, param);
-
-                assert(baseVec->size()>=1);
-                int currBase = baseVec->size()-1;
-
-                //scan all the new matches found and computes datas for each one
-                for(unsigned int j=candidates->size(); j<matchesVec->size(); j++)
-                {
-                    CandidateType data;
-                    data.shortCons = -1;                  //this is needed to get structures well sorted later
-                    data.matchPtr = (*matchesVec)[j];     //set the pointer to the match
-                    data.basePtr = (*baseVec)[currBase];  //set the pointer to the relative base
-
-                    //computes the rigid transformation matrix that overlaps the two points sets
-                    Matrix44Type tr;
-                    errCode = FeatureAlignment::FindRigidTransformation(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], param.nBase, tr);
-                    if(errCode) { res.numSkippedIter++; continue; } //can't find a rigid transformation, skip this iteration
-
-                    data.tr = tr;  //store transformation
-
-                    Matrix44Type oldTr = ApplyTransformation(mMov, tr);       //apply transformation
-                    data.summedPointDist = SummedPointDistances(mFix, mMov, (*baseVec)[currBase], (*matchesVec)[j], param.nBase);  //compute and store the sum of points distances
-                    ResetTransformation(mMov, oldTr);                         //restore old tranformation
-
-                    candidates->push_back(data);
-                }
-                assert(candidates->size()==matchesVec->size());
+                int errCode = FeatureAlignment::SelectBase(*vecFMov,*baseVec, param,i);
+                if(errCode) continue; //can't find a base, skip this iteration
             }
-            if(param.log) param.log(3,"%i bases found.", param.ransacIter-res.numSkippedIter);
+            res.numBasesFound=baseVec->size();
+            res.baseSelectionTime = timer.elapsed();
+            if(param.log) param.log(3,"%i bases found in %i msec.", baseVec->size(), res.baseSelectionTime);
 
-
-            //res.matchingTime = int(difftime(end_loop,start_loop));
+            timer.start();
+            for(int i = 0; i<baseVec->size(); i++)
+            {
+                int errCode = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, (*baseVec)[i], *candidates, param);
+                if(cb){ progBar+=(20.0f/baseVec->size()); cb(int(progBar),"Matching..."); }
+            }
+            res.matchingTime = timer.elapsed();
             res.numMatches = candidates->size();
+            if(param.log) param.log(3,"%i candidates found in %i msec.", candidates->size(), res.matchingTime);
+
+            timer.start();
+            for(unsigned int j=0; j<candidates->size(); j++)
+            {
+                CandidateType& currCandidate = (*candidates)[j];
+
+                //computes the rigid transformation matrix that overlaps the two points sets
+                Matrix44Type tr;
+                int errCode = FeatureAlignment::FindRigidTransformation(mFix, mMov, currCandidate.basePtr, currCandidate.matchPtr, param.nBase, tr);
+                if(errCode) continue; //can't find a rigid transformation, skip this iteration
+
+                currCandidate.tr = tr;  //store transformation
+
+                Matrix44Type oldTr = ApplyTransformation(mMov, tr);       //apply transformation
+                currCandidate.summedPointDist = SummedPointDistances(mFix, mMov, currCandidate.basePtr, currCandidate.matchPtr, param.nBase);  //compute and store the sum of points distance
+                ResetTransformation(mMov, oldTr);                         //restore old tranformation
+
+                if(cb){ progBar+=(20.0f/candidates->size()); cb(int(progBar),"Ranking candidates..."); }
+            }
+            res.rankTime = timer.elapsed();
+            if(param.log) param.log(3,"Ranking performed in %i msec.", res.rankTime);
 
             //sort candidates by summed point distances
             sort(candidates->begin(), candidates->end(), CandidateType::SortByDistance);
-
+for(int i=0; i<50;i++)if(param.log) param.log(3,"%i spd %.2f.", i,(*candidates)[i].summedPointDist);
             //variable needed for progress bar callback
-            offset = (40.0f/math::Min(param.maxNumShortConsensus,int(candidates->size())));
+            float offset = (20.0f/math::Min(param.maxNumShortConsensus,int(candidates->size())));
 
-            //time(&start_loop);
             //evaluetes at most first g candidates
+            timer.start();
             for(unsigned int j=0; j<candidates->size() && j<param.maxNumShortConsensus; j++)
             {
-                //callback handling
-                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
-
-                Matrix44Type currTr = (*candidates)[j].tr;              //load the right transformation
+                CandidateType& currCandidate = (*candidates)[j];
+                Matrix44Type currTr = currCandidate.tr;              //load the right transformation
                 Matrix44Type oldTr = ApplyTransformation(mMov, currTr); //apply transformation
                 consParam.samples=param.short_cons_samples;                
                 consParam.threshold = param.shortConsOffset*param.overlap/100.0f;
-                (*candidates)[j].shortCons = cons.Check(consParam);     //compute short consensus
+                currCandidate.shortCons = cons.Check(consParam);     //compute short consensus
+                if(param.log) param.log(3,"%i short cons %i.", j,currCandidate.shortCons);
                 ResetTransformation(mMov, oldTr);                       //restore old tranformation
 
-                if((*candidates)[j].shortCons >= short_cons_succ) res.numWonShortCons++;  //count how many won, and use this as bound later
-            }
+                if(currCandidate.shortCons >= short_cons_succ) res.numWonShortCons++;  //count how many won, and use this as bound later
 
-            //res.shortConsTime = int(difftime(end_loop,start_loop));
+                if(cb){ progBar+=offset; cb(int(progBar),"Short consensus..."); }
+            }
+            res.shortConsTime = timer.elapsed();
+            if(param.log) param.log(3,"Short consensus performed in %i msec.", res.shortConsTime);
 
             //sort candidates by short consensus
             sort(candidates->begin(), candidates->end(), CandidateType::SortByScore);
 
             //variables needed for progress bar callback
-            offset = (40.0f/math::Min(param.maxNumFullConsensus,int(candidates->size())));
+            offset = (20.0f/math::Min(param.maxNumFullConsensus,res.numWonShortCons));
 
-            //time(&start_loop);
             //evaluetes at most maxNumFullConsensus candidates beetween those who won short consensus
+            timer.start();
             for(int j=0; j<res.numWonShortCons && j<param.maxNumFullConsensus; j++)
             {
-                //callback handling
-                if(cb){ progBar+=offset; cb(int(progBar),"Computing ransac..."); }
-
-                Matrix44Type currTr = (*candidates)[j].tr;              //load the right transformation
+                CandidateType& currCandidate = (*candidates)[j];
+                Matrix44Type currTr = currCandidate.tr;              //load the right transformation
                 Matrix44Type oldTr = ApplyTransformation(mMov, currTr); //apply transformation
                 consParam.samples=param.fullConsensusSamples;                                
                 consParam.threshold = param.consOffset*param.overlap/100.0f;
                 consParam.bestScore = bestConsensus;
                 int consensus = cons.Check(consParam);                  //compute full consensus
-                ResetTransformation(mMov, oldTr);                       //restore old tranformation
+                if(param.log) param.log(3,"%i short cons %i.", j,consensus);
+                ResetTransformation(mMov, oldTr);                   //restore old tranformation
 
                 if(consensus >= cons_succ) res.numWonFullCons++;
 
@@ -604,11 +606,13 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                     res.bestConsensus = 100.0f*(float(bestConsensus)/param.fullConsensusSamples);                    
                     bestConsIdx = j;
                     if(consensus >= ransac_succ) break;    //very good alignment, no more iterations are done
-                }                
-            }
+                }
 
-            //res.fullConsTime = int(difftime(end_loop,start_loop));
+                if(cb){ progBar+=offset; cb(int(progBar),"Full consensus..."); }
+            }
+            res.fullConsTime = timer.elapsed();
             res.totalTime = tot_timer.elapsed();
+            if(param.log) param.log(3,"Full consensus performed in %i msec.", res.fullConsTime);
 
             //if flag 'points' is checked, clear old picked points and save the new points
             if(param.pickPoints){
@@ -619,9 +623,9 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             }
 
             //Clean structures...
-            FeatureAlignment::CleanTuplesVector(baseVec, true);
-            FeatureAlignment::CleanTuplesVector(matchesVec, true);
-            candidates->clear(); if(candidates) delete candidates; candidates = NULL;
+            for(int i=0; i<baseVec->size();i++){ delete[] (*baseVec)[i];}
+            for(int i=0; i<candidates->size();i++){ delete[] (*candidates)[i].basePtr; delete[] (*candidates)[i].matchPtr;}
+            delete baseVec; delete candidates;
 
             return res;
         }     
@@ -653,7 +657,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             res.errorMsg = FeatureAlignment::getErrorMsg(errorCode);
         }
 
-        static FEATURE_TYPE** FeatureUniform(vector<FEATURE_TYPE*>& vecF, int* sampleNum)
+        static FEATURE_TYPE** FeatureUniform(vector<FEATURE_TYPE*>& vecF, int* sampleNum, int seed = clock())
         {
             typedef MESH_TYPE MeshType;
             typedef FEATURE_TYPE FeatureType;
@@ -666,7 +670,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             assert(vec->size()==vecF.size());
 
-            tri::SurfaceSampling<MeshType, VertexPointerSampler<MeshType> >::SamplingRandomGenerator().initialize(clock());
+            tri::SurfaceSampling<MeshType, VertexPointerSampler<MeshType> >::SamplingRandomGenerator().initialize(seed);
             unsigned int (*p_myrandom)(unsigned int) = tri::SurfaceSampling<MeshType, VertexPointerSampler<MeshType> >::RandomInt;
             std::random_shuffle(vec->begin(),vec->end(), p_myrandom);
 
@@ -765,32 +769,18 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 if(close) annClose();				//done with ANN; clean memory shared among all the kdTrees
         }
 
-        static void CleanTuplesVector(vector<FEATURE_TYPE**>* tuplesVec, bool deleteVec)
-        {
-            //clean vectors contents...
-            for(unsigned int j=0; j<tuplesVec->size(); j++){
-                delete [] (*tuplesVec)[j]; (*tuplesVec)[j] = NULL;
-            }
-            tuplesVec->clear();
-
-            //if deleteVec is set to true, deallocates the vector too...
-            if(deleteVec){
-                delete tuplesVec; tuplesVec = NULL;
-            }
-        }
-
-        static int SelectBase(vector<FEATURE_TYPE*>& vecFMov, vector<FEATURE_TYPE**>& baseVec, Parameters& param)
+        static int SelectBase(vector<FEATURE_TYPE*>& vecFMov, vector<FEATURE_TYPE**>& baseVec, Parameters& param,int seed = clock())
         {
             assert(param.nBase<=int(vecFMov.size()));  //not enough features to pick a base
             float baseDist = param.sparseBaseDist*(param.mMovBBoxDiag/100.0f); //compute needed params
 
-            FeatureType** base = FeatureAlignment::FeatureUniform(vecFMov, &(param.nBase)); //randomly chooses a base of features from vecFFix
+            FeatureType** base = FeatureAlignment::FeatureUniform(vecFMov, &(param.nBase), seed); //randomly chooses a base of features from vecFFix
             if(!VerifyBaseDistances(base, param.nBase, baseDist)) return 4; //if base point are not enough sparse, skip
             baseVec.push_back(base);
             return 0;
         }
 
-        static int Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, FEATURE_TYPE** base, vector<FEATURE_TYPE**>& matchesVec, Parameters& param, CallBackPos *cb=NULL)
+        static int Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, FEATURE_TYPE** base, vector<CandidateType>& candidates, Parameters& param, CallBackPos *cb=NULL)
         {
             float pBar = 0, offset = 100.0f/param.nBase;  //used for progresss bar callback
             if(cb) cb(0, "Matching...");
@@ -832,7 +822,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //branch and bound
             int* curSolution = new int[param.nBase];
             for(int i=0; i<param.nBase; i++) curSolution[i] = 0;              //initialization
-            FeatureAlignment::Match(base, *matchedVec, param.nBase, 0, curSolution, matchesVec, errDist);
+            FeatureAlignment::Match(base, *matchedVec, param.nBase, 0, curSolution, candidates, errDist);
 
             //Cleaning ANN structures
             FeatureAlignment::CleanKDTree(NULL, NULL, fqueryPts, fnnIdx, fdists, false);
@@ -847,10 +837,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
         static int FindRigidTransformation(MESH_TYPE& mFix, MESH_TYPE& mMov, FEATURE_TYPE* fixF[], FEATURE_TYPE* movF[], int nBase, Matrix44<typename MESH_TYPE::ScalarType>& tr, CallBackPos *cb=NULL)
         {
-            typedef MESH_TYPE MeshType;
-            typedef FEATURE_TYPE FeatureType;
-            typedef typename MESH_TYPE::ScalarType ScalarType;
-
             if(cb) cb(0,"Computing rigid transformation...");
 
             //computes the rigid transformation matrix that overlaps the two points sets
@@ -954,7 +940,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             }
         }       
 
-        static void Match(FEATURE_TYPE** base, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<FEATURE_TYPE**>& solutionsVec, float errDist, CallBackPos *cb = NULL)
+        static void Match(FEATURE_TYPE** base, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<CandidateType>& candidates, float errDist, CallBackPos *cb = NULL)
         {
             assert(level<nBase);
 
@@ -966,10 +952,10 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                         for(int h=0; h<nBase; h++){
                             solution[h] = (*(matchedVec[h]))[curSolution[h]];
                         }
-                        solutionsVec.push_back(solution);
+                        candidates.push_back(CandidateType(base,solution));
                     }
                     else
-                        Match(base, matchedVec, nBase, level+1, curSolution, solutionsVec, errDist);
+                        Match(base, matchedVec, nBase, level+1, curSolution, candidates, errDist);
                 }
             }
             curSolution[level] = 0;
