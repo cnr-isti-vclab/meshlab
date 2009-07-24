@@ -11,7 +11,7 @@
 #include <meshlab/glarea.h>
 #include <decorate_shader.h>
 
-#define BLUR_COEF 0.4
+
 #define SHADOW_COEF 0.95
 
 class VarianceShadowMappingBlur : public DecorateShader

@@ -1,36 +1,41 @@
-#include "variance_shadow_mapping_blur.h"
+#include "ssao.h"
 
-VarianceShadowMappingBlur::VarianceShadowMappingBlur():DecorateShader()
+SSAO::SSAO():DecorateShader()
 {
     this->_depth = 0;
+
+    this->_normalMap = 0;
+    this->_normalMapFrag = 0;
+    this->_normalMapVert = 0;
+    this->_normalMapShaderProgram = 0;
+
+    this->_ssao= 0;
+    this->_ssaoVert = 0;
+    this->_ssaoFrag = 0;
+    this->_ssaoShaderProgram = 0;
+
     this->_blurH = 0;
-    this->_blurV = 0;
-    this->_depthVert = 0;
-    this->_depthFrag = 0;
-    this->_depthShaderProgram = 0;
-    this->_objectVert = 0;
-    this->_objectFrag = 0;
-    this->_objectShaderProgram = 0;
+//    this->_blurV = 0;
     this->_blurVert = 0;
     this->_blurFrag = 0;
     this->_blurShaderProgram = 0;
     this->_fbo = 0;
 }
 
-VarianceShadowMappingBlur::~VarianceShadowMappingBlur(){
-    glDetachShader(this->_depthShaderProgram, this->_depthVert);
-    glDetachShader(this->_depthShaderProgram, this->_depthFrag);
+SSAO::~SSAO(){
+    glDetachShader(this->_normalMapShaderProgram, this->_normalMapVert);
+    glDetachShader(this->_normalMapShaderProgram, this->_normalMapFrag);
 
-    glDeleteShader(this->_depthVert);
-    glDeleteShader(this->_depthFrag);
-    glDeleteProgram(this->_depthShaderProgram);
+    glDeleteShader(this->_normalMapVert);
+    glDeleteShader(this->_normalMapFrag);
+    glDeleteProgram(this->_normalMapShaderProgram);
 
-    glDetachShader(this->_objectShaderProgram, this->_objectVert);
-    glDetachShader(this->_objectShaderProgram, this->_objectFrag);
+    glDetachShader(this->_ssaoShaderProgram, this->_ssaoVert);
+    glDetachShader(this->_ssaoShaderProgram, this->_ssaoFrag);
 
-    glDeleteShader(this->_objectVert);
-    glDeleteShader(this->_objectFrag);
-    glDeleteProgram(this->_objectShaderProgram);
+    glDeleteShader(this->_ssaoVert);
+    glDeleteShader(this->_ssaoFrag);
+    glDeleteProgram(this->_ssaoShaderProgram);
 
     glDetachShader(this->_blurShaderProgram, this->_blurVert);
     glDetachShader(this->_blurShaderProgram, this->_blurFrag);
@@ -40,13 +45,15 @@ VarianceShadowMappingBlur::~VarianceShadowMappingBlur(){
     glDeleteProgram(this->_blurShaderProgram);
 
     glDeleteFramebuffersEXT(1, &(this->_depth));
-    glDeleteTexturesEXT(1, &(this->_shadowMap));
+    glDeleteTexturesEXT(1, &(this->_normalMap));
+    glDeleteTexturesEXT(1, &(this->_ssao));
+
     glDeleteTexturesEXT(1, &(this->_blurH));
-    glDeleteTexturesEXT(1, &(this->_blurV));
+  //  glDeleteTexturesEXT(1, &(this->_blurV));
     glDeleteFramebuffersEXT(1, &_fbo);
 }
 
-bool VarianceShadowMappingBlur::init()
+bool SSAO::init()
 {
     GLenum err = glewInit();
     if (!GLEW_OK == err){
@@ -68,101 +75,105 @@ bool VarianceShadowMappingBlur::init()
     return compileAndLink();
 }
 
-void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
-        vcg::Box3f bb = m.cm.bbox;
-        vcg::Point3f center;
-        center = bb.Center();
-
-        GLfloat g_mModelView[16];
-        GLfloat g_mProjection[16];
-
-        float diag = bb.Diag();
-
-        GLfloat lP[4];
-        glGetLightfv(GL_LIGHT0, GL_POSITION, lP);
-        vcg::Point3f light = -vcg::Point3f(lP[0],lP[1],lP[2]);
-
-        vcg::Matrix44f tm = gla->trackball.Matrix();
-
-        glMatrixMode(GL_PROJECTION);
-
-        glPushMatrix();
-
-            glLoadIdentity();
-            glOrtho(-(diag/2),
-                     diag/2,
-                     -(diag/2),
-                     diag/2,
-                     -(diag/2),
-                     diag/2);
-
-            glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
-        glMatrixMode(GL_MODELVIEW);
-
-        glPushMatrix();
-            vcg::Point3f u, v;
-            //mi seleziona automaticamente un upvector che mi eviti casi degeneri...nel caso vada bene 010 sceglie quello
-            vcg::GetUV(light, u, v, vcg::Point3f(0,-1,0));
-            glLoadIdentity();
-            gluLookAt(0, 0, 0, light[0], light[1], light[2], v[0], v[1], v[2]);
-
-            //get the rotation matrix from the trackball
-            vcg::Matrix44f rotation;
-            vcg::Similarityf track = gla->trackball.track;
-            track.rot.ToMatrix(rotation);
-            glMultMatrixf(rotation.transpose().V());
-
-            //traslate the model in the center
-            glTranslatef(-center[0],-center[1],-center[2]);
-            glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
-
-
+void SSAO::runShader(MeshModel& m, GLArea* gla){
             /***********************************************************/
             //GENERAZIONE SHADOW MAP
             /***********************************************************/
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(1.0, 1.0);
+//            glEnable(GL_POLYGON_OFFSET_FILL);
+//            glPolygonOffset(1.0, 1.0);
+GLfloat g_mModelView[16];
+        GLfloat g_mProjection[16];
+            vcg::Box3f bb = m.cm.bbox;
+                vcg::Point3f center;
+                center = bb.Center();
 
+                float diag = bb.Diag();
+
+                vcg::Matrix44f tm = gla->trackball.Matrix();
+
+                glMatrixMode(GL_PROJECTION);
+
+                glPushMatrix();
+
+                    glLoadIdentity();
+                    glOrtho(-(diag/2),
+                             diag/2,
+                             -(diag/2),
+                             diag/2,
+                             -(diag/2),
+                             diag/2);
+
+                    glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
+                glMatrixMode(GL_MODELVIEW);
+
+                glPushMatrix();
+                    glLoadIdentity();
+
+                    vcg::Matrix44f rotation;
+                    vcg::Similarityf track = gla->trackball.track;
+                    track.rot.ToMatrix(rotation);
+                    glMultMatrixf(rotation.transpose().V());
+
+                    //traslate the model in the center
+                    glTranslatef(-center[0],-center[1],-center[2]);
+                    glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
 
             this->bind();
-            glUseProgram(this->_depthShaderProgram);
+            glUseProgram(this->_normalMapShaderProgram);
+
+            /*GLuint farLoc = glGetUniformLocation(this->_normalMapShaderProgram, "farPlane");
+            glUniform1f(farLoc, gla->farPlane);
+
+            GLuint nearLoc = glGetUniformLocation(this->_normalMapShaderProgram, "nearPlane");
+            glUniform1f(nearLoc, gla->nearPlane);
+
+            GLuint diagLoc = glGetUniformLocation(this->_normalMapShaderProgram, "diag");
+            glUniform1f(diagLoc, m.cm.bbox.Diag());
+*/
+
             RenderMode rm = gla->getCurrentRenderMode();
             glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
-            glDisable(GL_POLYGON_OFFSET_FILL);
-            //this->getShadowMap();
-            //glUseProgram(0);
-
+           // glDisable(GL_POLYGON_OFFSET_FILL);
+            this->printColorMap(this->_normalMap, "_normalMap.png");
+            //this->unbind();
+            glUseProgram(0);
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
 
         /***********************************************************/
-        //OBJECT PASS
+        //SSAO PASS
         /***********************************************************/
-        GLint depthFuncOld;
+        /*GLint depthFuncOld;
         glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
-        glDepthFunc(GL_LEQUAL);
+        glDepthFunc(GL_LEQUAL);*/
         vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
-        glUseProgram(this->_objectShaderProgram);
+        glUseProgram(this->_ssaoShaderProgram);
 
-        GLuint matrixLoc = glGetUniformLocation(this->_objectShaderProgram, "mvpl");
+        GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "mvpl");
         glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
 
         glEnable(GL_TEXTURE_2D);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
+        glBindTexture(GL_TEXTURE_2D, this->_noise);
+        GLuint noiseloc = glGetUniformLocation(this->_ssaoShaderProgram, "rnm");
+        glUniform1i(noiseloc, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, this->_normalMap);
+        GLuint loc = glGetUniformLocation(this->_ssaoShaderProgram, "normalMap");
+        glUniform1i(loc, 1);
 
 
-        GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
-        glUniform1i(loc, 0);
         glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+        m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
 
-        //this->getBlurH();
+        this->printColorMap(this->_ssao, "_ssao1.png");
+        //this->unbind();
         glUseProgram(0);
 
 /****************************************************************************************/
@@ -195,7 +206,8 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
         GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
         glUniform2f(scaleLoc, scale, 0.0);
 
-        glBindTexture(GL_TEXTURE_2D, this->_blurH);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, this->_ssao);
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
 
@@ -213,7 +225,7 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
                     glVertex3f(-this->_texSize/2,this->_texSize/2,0);
             glEnd();
 
-        //this->getBlurV();
+        this->printColorMap(this->_blurH, "./_blurOrizzontale.png");
         this->unbind();
 
 
@@ -226,7 +238,7 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
 
         glDisable(GL_DEPTH_TEST);
 
-        glBindTexture(GL_TEXTURE_2D, this->_blurV);
+        glBindTexture(GL_TEXTURE_2D, this->_blurH);
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
 
@@ -242,7 +254,7 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
             glEnd();
 
 
-        glDepthFunc((GLenum)depthFuncOld);
+        //glDepthFunc((GLenum)depthFuncOld);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
         glUseProgram(0);
@@ -259,7 +271,7 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
         int error = glGetError();
 }
 
-bool VarianceShadowMappingBlur::setup()
+bool SSAO::setup()
 {
         if (!GLEW_EXT_framebuffer_object) {
                 qWarning("FBO not supported!");
@@ -273,9 +285,8 @@ bool VarianceShadowMappingBlur::setup()
         glGenFramebuffersEXT(1, &_fbo);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
-        //genero la texture di colore che sara la mia variance shadow map.
-        glGenTextures(1, &this->_shadowMap);
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
+        glGenTextures(1, &this->_normalMap);
+        glBindTexture(GL_TEXTURE_2D, this->_normalMap);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
@@ -285,7 +296,21 @@ bool VarianceShadowMappingBlur::setup()
         //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
         //attacco al FBO la texture di colore
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_normalMap, 0);
+
+        glGenTextures(1, &this->_ssao);
+        glBindTexture(GL_TEXTURE_2D, this->_ssao);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
+        //attacco al FBO la texture di colore
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_ssao, 0);
+
 
         //genero la texture di blur orizzontale.
         glGenTextures(1, &this->_blurH);
@@ -299,21 +324,7 @@ bool VarianceShadowMappingBlur::setup()
         //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
         //e la texture per il blur orizzontale
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_blurH, 0);
-
-        //genero la texture di blur verticale.
-        glGenTextures(1, &this->_blurV);
-        glBindTexture(GL_TEXTURE_2D, this->_blurV);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        //e la texture per il blur verticale
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2_EXT, GL_TEXTURE_2D, this->_blurV, 0);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2_EXT, GL_TEXTURE_2D, this->_blurH, 0);
 
         //genero il render buffer per il depth buffer
         glGenRenderbuffersEXT(1, &(this->_depth));
@@ -323,8 +334,11 @@ bool VarianceShadowMappingBlur::setup()
         //e il depth buffer
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
 
-        GLenum drawBuffers[] = {this->_shadowMap, this->_blurH, this->_blurV};
+        //GLenum drawBuffers[] = {this->_normalMap, this->_ssao, this->_blurH};
+        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
         glDrawBuffersARB(3, drawBuffers);
+
+        this->loadNoiseTxt();
 
         int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
@@ -332,7 +346,7 @@ bool VarianceShadowMappingBlur::setup()
         return _initOk;
 }
 
-void VarianceShadowMappingBlur::bind()
+void SSAO::bind()
 {
         assert(_initOk);
 
@@ -343,7 +357,7 @@ void VarianceShadowMappingBlur::bind()
         //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
-void VarianceShadowMappingBlur::unbind()
+void SSAO::unbind()
 {
         if (!_initOk)
                 return;
@@ -353,84 +367,86 @@ void VarianceShadowMappingBlur::unbind()
         //glDeleteFramebuffersEXT(1, &_fbo);
 }
 
-bool VarianceShadowMappingBlur::compileAndLink(){
-    QFile* depthVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsmb/depthVSM.vert"));
-    QFile* depthFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsmb/depthVSM.frag"));
-    QFile* objVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsmb/objectVSM.vert"));
-    QFile* objFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsmb/objectVSM.frag"));
-    QFile* blurVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsmb/blurVSM.vert"));
-    QFile* blurFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/vsmb/blurVSM.frag"));
+bool SSAO::compileAndLink(){
+    QFile* normalVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/normalMap.vert"));
+    QFile* normalFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/normalMap.frag"));
 
-    depthVert->open(QIODevice::ReadOnly | QIODevice::Text);
-    depthFrag->open(QIODevice::ReadOnly | QIODevice::Text);
+    QFile* ssaoVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/ssao.vert"));
+    QFile* ssaoFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/ssao.frag"));
 
-    objVert->open(QIODevice::ReadOnly | QIODevice::Text);
-    objFrag->open(QIODevice::ReadOnly | QIODevice::Text);
+    QFile* blurVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/blur.vert"));
+    QFile* blurFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/blur.frag"));
+
+    normalVert->open(QIODevice::ReadOnly | QIODevice::Text);
+    normalFrag->open(QIODevice::ReadOnly | QIODevice::Text);
+
+    ssaoVert->open(QIODevice::ReadOnly | QIODevice::Text);
+    ssaoFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
     blurVert->open(QIODevice::ReadOnly | QIODevice::Text);
     blurFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
-    QByteArray bArray = depthVert->readAll();
+    QByteArray bArray = normalVert->readAll();
     GLint ShaderLen = (GLint) bArray.length();
     GLubyte* ShaderSource = (GLubyte *)bArray.data();
 
-    depthVert->close();
+    normalVert->close();
 
-    this->_depthVert= glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(this->_depthVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_depthVert);
-    if(!this->printShaderInfoLog(this->_depthVert))
+    this->_normalMapVert= glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(this->_normalMapVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(this->_normalMapVert);
+    if(!this->printShaderInfoLog(this->_normalMapVert))
         return false;
 
-    bArray = depthFrag->readAll();
+    bArray = normalFrag->readAll();
     ShaderLen = (GLint) bArray.length();
     ShaderSource = (GLubyte *)bArray.data();
 
-    depthFrag->close();
+    normalFrag->close();
 
-    this->_depthFrag = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(this->_depthFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_depthFrag);
-    if(!this->printShaderInfoLog(this->_depthFrag))
+    this->_normalMapFrag = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(this->_normalMapFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(_normalMapFrag);
+    if(!this->printShaderInfoLog(this->_normalMapFrag))
         return false;
 
-    this->_depthShaderProgram = glCreateProgram();
-    glAttachShader(this->_depthShaderProgram, this->_depthVert);
-    glAttachShader(this->_depthShaderProgram, this->_depthFrag);
-    glLinkProgram(this->_depthShaderProgram);
-    if(!this->printProgramInfoLog(this->_depthShaderProgram))
+    this->_normalMapShaderProgram = glCreateProgram();
+    glAttachShader(this->_normalMapShaderProgram, this->_normalMapVert);
+    glAttachShader(this->_normalMapShaderProgram, this->_normalMapFrag);
+    glLinkProgram(this->_normalMapShaderProgram);
+    if(!this->printProgramInfoLog(this->_normalMapShaderProgram))
         return false;
 
 
-    bArray = objVert->readAll();
+    bArray = ssaoVert->readAll();
     ShaderLen = (GLint) bArray.length();
     ShaderSource = (GLubyte *)bArray.data();
 
-    objVert->close();
+    ssaoVert->close();
 
-    this->_objectVert= glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(this->_objectVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_objectVert);
-    if(!this->printShaderInfoLog(this->_objectVert))
+    this->_ssaoVert= glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(this->_ssaoVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(this->_ssaoVert);
+    if(!this->printShaderInfoLog(this->_ssaoVert))
         return false;
 
-    bArray = objFrag->readAll();
+    bArray = ssaoFrag->readAll();
     ShaderLen = (GLint) bArray.length();
     ShaderSource = (GLubyte *)bArray.data();
 
-    objFrag->close();
+    ssaoFrag->close();
 
-    this->_objectFrag= glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(this->_objectFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_objectFrag);
-    if(!this->printShaderInfoLog(this->_objectFrag))
+    this->_ssaoFrag= glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(this->_ssaoFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(this->_ssaoFrag);
+    if(!this->printShaderInfoLog(this->_ssaoFrag))
         return false;
 
-    this->_objectShaderProgram = glCreateProgram();
-    glAttachShader(this->_objectShaderProgram, this->_objectVert);
-    glAttachShader(this->_objectShaderProgram, this->_objectFrag);
-    glLinkProgram(this->_objectShaderProgram);
-    if(!this->printProgramInfoLog(this->_objectShaderProgram))
+    this->_ssaoShaderProgram = glCreateProgram();
+    glAttachShader(this->_ssaoShaderProgram, this->_ssaoVert);
+    glAttachShader(this->_ssaoShaderProgram, this->_ssaoFrag);
+    glLinkProgram(this->_ssaoShaderProgram);
+    if(!this->printProgramInfoLog(this->_ssaoShaderProgram))
         return false;
 
     bArray = blurVert->readAll();
@@ -467,73 +483,26 @@ bool VarianceShadowMappingBlur::compileAndLink(){
     return true;
 }
 
-void VarianceShadowMappingBlur::getBlurH()
-{
-        if (!this->_initOk)
-                return;
+bool SSAO::loadNoiseTxt(){
 
-        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
-
-     unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
-        unsigned char *tempBufPtr = tempBuf;
-        glBindTexture(GL_TEXTURE_2D, this->_blurH);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
-        for (int i = 0; i < this->_texSize; ++i) {
-                QRgb *scanLine = (QRgb*)img.scanLine(i);
-                for (int j = 0; j < this->_texSize; ++j) {
-                        scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
-                        tempBufPtr += 3;
-                }
-        }
-
-        delete[] tempBuf;
-
-        img.mirrored().save("./_vsm_blurHTXT.png", "PNG");
-}
-
-void VarianceShadowMappingBlur::getBlurV()
-{
-        if (!this->_initOk)
-                return;
-
-        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
-
-     unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
-        unsigned char *tempBufPtr = tempBuf;
-        glBindTexture(GL_TEXTURE_2D, this->_blurV);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
-        for (int i = 0; i < this->_texSize; ++i) {
-                QRgb *scanLine = (QRgb*)img.scanLine(i);
-                for (int j = 0; j < this->_texSize; ++j) {
-                        scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
-                        tempBufPtr += 3;
-                }
-        }
-
-        delete[] tempBuf;
-
-        img.mirrored().save("./_vsm_blurVTXT.png", "PNG");
-}
-
-void VarianceShadowMappingBlur::getShadowMap(){
-        if (!this->_initOk)
-                return;
-
-        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
-
-        unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
-        unsigned char *tempBufPtr = tempBuf;
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
-        for (int i = 0; i < this->_texSize; ++i) {
-                QRgb *scanLine = (QRgb*)img.scanLine(i);
-                for (int j = 0; j < this->_texSize; ++j) {
-                        scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
-                        tempBufPtr += 3;
-                }
-        }
-
-        delete[] tempBuf;
-        img.mirrored().save("./_shadowMapTXT.png", "PNG");
+    QImage image = QImage();
+    QString textureName = QString("./noise.png");
+    //fileName = textureName;
+    if (QFile(textureName).exists())
+    {
+            image = QImage(textureName);
+            //int bestW = pow(2.0,floor(::log(double(image.width()))/::log(2.0)));
+            //int bestH = pow(2.0,floor(::log(double(image.height()))/::log(2.0)));
+            //QImage imgGL = image.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+            QImage tmpGL = QGLWidget::convertToGLFormat(image);
+            image = QImage(tmpGL);
     }
+    // Creates The Texture
+    glGenTextures(1, &(this->_noise));
+    glBindTexture(GL_TEXTURE_2D, this->_noise);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NOISE_WIDTH , NOISE_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
 
+    return true;
+}

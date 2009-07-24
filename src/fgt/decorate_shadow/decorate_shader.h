@@ -29,6 +29,7 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
 
+#define BLUR_COEF 0.4
 
 class DecorateShader
 {
@@ -98,7 +99,7 @@ protected:
         img.mirrored().save("./_depthMapTXT.png", "PNG");
     }
 
-    void printColorMap(GLuint map){
+    void printColorMap(GLuint map, const QString &fname){
         if (!this->_initOk)
                 return;
 
@@ -118,7 +119,8 @@ protected:
 
         delete[] tempBuf;
 
-        img.mirrored().save("./_depthMapTXT.png", "PNG");
+        img.mirrored().save(fname, "PNG");
+        //img.save(fname, "PNG");
     }
 
 
