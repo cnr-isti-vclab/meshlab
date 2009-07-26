@@ -200,7 +200,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             par.addEnum("featureType", 0, l,"Feature type:", "The feature that you want to compute for the current mesh.");
             par.addMesh("mFix", 0, "Fix mesh:", "The mesh that stays still and grow large after alignment.");
             par.addMesh("mMov", 1, "Move mesh:", "The mesh that moves to fit Fix Mesh.");
-            par.addInt("ransacIter", 5000, "Iterations:", "Number of iterations of the RANSAC algorithm. Greater values provides a greater success probability but requires more time.");
+            par.addInt("ransacIter", 500, "Iterations:", "Number of iterations of the RANSAC algorithm. Greater values provides a greater success probability but requires more time.");
             par.addFloat("overlap", 75.0, "Overlap:", "A measure, expressed in percentage, of how much Move Mesh overlaps with Fix Mesh. It is very important to provide an actual esteem: lower values can produce false positive results or too rough alignments; higher values produce a small success probability and no alignements at all.");
             par.addFloat("consensusDist", 2, "Consensus distance:","Consensus distance expressed in percentage of Move Mesh bounding box diagonal. It states how close two verteces must be to be in consensus.");
             par.addInt("k", 75, "Number of neighboors:", "Number of neighboor feature points picked by kNN search during matching. Greater values produce a greater success probability but make the alignment process slower.");
@@ -211,6 +211,7 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
         {
             QStringList l;
             l << "GMSmooth curvature"
+              << "APSS curvature"
               << "RGB";
             par.addEnum("featureType", 0, l,"Feature type:", "The feature that you want to compute for the current mesh.");
             par.addMesh("mFix", 0, "Fix mesh:", "The mesh that stays still and grow large after alignment.");
@@ -219,9 +220,9 @@ void FilterFeatureAlignment::initParameterSet(QAction *a, MeshDocument& md, Filt
             par.addFloat("consensusDist", 2, "Consensus distance:","Consensus distance expressed in percentage of Move Mesh bounding box diagonal. It states how close two verteces must be to be in consensus.");
             par.addInt("k", 75, "Number of neighboors:", "Number of neighboor feature points picked by kNN search during matching. Greater values produce a greater success probability but make the alignment process slower.");
             par.addInt("trials", 100, "Trials:", "How many times the alignment process is repeated with the same amount of RANSAC iterations.");
-            par.addInt("from", 1000, "From iteration:", "Number of RANSAC iteration used to perform the first battery of alignments.");
-            par.addInt("to", 5000, "To iteration:", "Number of RANSAC iteration over which no more alignments are performed.");
-            par.addInt("step", 1000, "Step:", "Step used to increment RANSAC iterations after that the specified number of attempts has been done.");
+            par.addInt("from", 100, "From iteration:", "Number of RANSAC iteration used to perform the first battery of alignments.");
+            par.addInt("to", 1000, "To iteration:", "Number of RANSAC iteration over which no more alignments are performed.");
+            par.addInt("step", 100, "Step:", "Step used to increment RANSAC iterations after that the specified number of attempts has been done.");
             break;
         }                                 
         default: assert(0);
@@ -480,6 +481,15 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
                     return logResult<AlignerType>(ID(filter), res, errorMessage);
                 }
                 case 1:{
+                    typedef APSSCurvatureFeature<MeshType, 3> FeatureType; //define needed typedef FeatureType
+                    typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
+                    typedef AlignerType::Result ResultType;
+                    AlignerType::Parameters alignerParam(mFix->cm, mMov->cm);
+                    setAlignmentParameters<AlignerType>(mFix->cm, mMov->cm, par, alignerParam);
+                    ResultType res = RansacDiagramOperation<AlignerType>(*mFix, *mMov, alignerParam, trials, from, to, step, cb);
+                    return logResult<AlignerType>(ID(filter), res, errorMessage);
+                }
+                case 2:{
                     typedef FeatureRGB<MeshType, 3> FeatureType; //define needed typedef FeatureType
                     typedef FeatureAlignment<MeshType, FeatureType> AlignerType;  //define the Aligner class
                     typedef AlignerType::Result ResultType;
@@ -550,6 +560,7 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshMode
 
     //create vectors to hold tuples of bases and matches
     vector<FeatureType**>* baseVec = new vector<FeatureType**>();
+    vector<vector<FeatureType*> > matches;
     vector<CandidateType>* candidates = new vector<CandidateType>();
 
     AlignerType aligner;
@@ -559,8 +570,8 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::MatchingOperation(MeshMode
     //execute matching procedure with requested parameters;
     int errCode = AlignerType::SelectBase(*(aligner.vecFMov),*baseVec,param);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
-    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], *candidates, param, cb);
-    if(errCode){ AlignerType::setError(errCode, res); return res; }
+    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], matches, param, cb);
+    errCode = AlignerType::BranchAndBound((*baseVec)[baseVec->size()-1], matches, *candidates, param);
 
     res.numMatches = candidates->size(); //store the numeber of matches found
 
@@ -590,6 +601,7 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
 
     //create vectors to hold tuples of bases and matches
     vector<FeatureType**>* baseVec = new vector<FeatureType**>();
+    vector<vector<FeatureType*> > matches;
     vector<CandidateType>* candidates = new vector<CandidateType>();
 
     AlignerType aligner;
@@ -599,8 +611,8 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
     //execute matching procedure with requested parameters;
     int errCode = AlignerType::SelectBase(*(aligner.vecFMov),*baseVec,param);
     if(errCode){ AlignerType::setError(errCode, res); return res; }
-    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], *candidates, param, cb);
-    if(errCode){ AlignerType::setError(errCode, res); return res; }
+    errCode = AlignerType::Matching(*(aligner.vecFFix), *(aligner.vecFMov), aligner.fkdTree, (*baseVec)[baseVec->size()-1], matches, param, cb);
+    errCode = AlignerType::BranchAndBound((*baseVec)[baseVec->size()-1], matches, *candidates, param);
 
     res.numMatches = candidates->size(); //store the numeber of matches found
     assert(baseVec->size()==1);  //now baseVec must hold exactly one base of features

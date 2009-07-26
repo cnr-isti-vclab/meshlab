@@ -382,6 +382,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             int totalTime;
             int baseSelectionTime;
             int matchingTime;
+            int branchBoundTime;
             int rankTime;
             int shortConsTime;
             int fullConsTime;
@@ -403,6 +404,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 shortConsTime = 0;
                 fullConsTime = 0;
                 baseSelectionTime = 0;
+                branchBoundTime = 0;
                 rankTime = 0;
                 errorMsg = "An unkown error occurred.";
             }
@@ -501,6 +503,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             //auxiliary vectors needed inside the loop
             vector<FeatureType**>* baseVec = new vector<FeatureType**>();
+            vector<vector<FeatureType*> > matches;
             vector<CandidateType>* candidates = new vector<CandidateType>();
 
             //variables needed for progress bar callback
@@ -518,15 +521,23 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             res.baseSelectionTime = timer.elapsed();
             if(param.log) param.log(3,"%i bases found in %i msec.", baseVec->size(), res.baseSelectionTime);
 
-            timer.start();
             for(int i = 0; i<baseVec->size(); i++)
             {
-                int errCode = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, (*baseVec)[i], *candidates, param);
+                timer.start();
+                int errCode = FeatureAlignment::Matching(*vecFFix, *vecFMov, fkdTree, (*baseVec)[i], matches, param);
+                res.matchingTime+= timer.elapsed();
+
+                timer.start();
+                errCode = FeatureAlignment::BranchAndBound((*baseVec)[i], matches, *candidates, param);
+                matches.clear(); //make matches vec ready for another iteration
+                res.branchBoundTime+= timer.elapsed();
+
                 if(cb){ progBar+=(20.0f/baseVec->size()); cb(int(progBar),"Matching..."); }
             }
-            res.matchingTime = timer.elapsed();
             res.numMatches = candidates->size();
-            if(param.log) param.log(3,"%i candidates found in %i msec.", candidates->size(), res.matchingTime);
+            if(param.log) param.log(3,"%matching performed in %i msec.", res.matchingTime);
+            if(param.log) param.log(3,"%Branch&Bound performed in %i msec.", res.branchBoundTime);
+            if(param.log) param.log(3,"%i candidates found in %i msec.", candidates->size(), res.matchingTime+res.branchBoundTime);
 
             timer.start();
             for(unsigned int j=0; j<candidates->size(); j++)
@@ -546,12 +557,12 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
                 if(cb){ progBar+=(20.0f/candidates->size()); cb(int(progBar),"Ranking candidates..."); }
             }
+            //sort candidates by summed point distances
+            sort(candidates->begin(), candidates->end(), CandidateType::SortByDistance);
+
             res.rankTime = timer.elapsed();
             if(param.log) param.log(3,"Ranking performed in %i msec.", res.rankTime);
 
-            //sort candidates by summed point distances
-            sort(candidates->begin(), candidates->end(), CandidateType::SortByDistance);
-for(int i=0; i<50;i++)if(param.log) param.log(3,"%i spd %.2f.", i,(*candidates)[i].summedPointDist);
             //variable needed for progress bar callback
             float offset = (20.0f/math::Min(param.maxNumShortConsensus,int(candidates->size())));
 
@@ -565,15 +576,14 @@ for(int i=0; i<50;i++)if(param.log) param.log(3,"%i spd %.2f.", i,(*candidates)[
                 consParam.samples=param.short_cons_samples;                
                 consParam.threshold = param.shortConsOffset*param.overlap/100.0f;
                 currCandidate.shortCons = cons.Check(consParam);     //compute short consensus
-                if(param.log) param.log(3,"%i short cons %i.", j,currCandidate.shortCons);
-                ResetTransformation(mMov, oldTr);                       //restore old tranformation
+                ResetTransformation(mMov, oldTr);                    //restore old tranformation
 
                 if(currCandidate.shortCons >= short_cons_succ) res.numWonShortCons++;  //count how many won, and use this as bound later
 
                 if(cb){ progBar+=offset; cb(int(progBar),"Short consensus..."); }
             }
             res.shortConsTime = timer.elapsed();
-            if(param.log) param.log(3,"Short consensus performed in %i msec.", res.shortConsTime);
+            if(param.log) param.log(3,"%i short consensus performed in %i msec.",(param.maxNumShortConsensus<int(candidates->size()))? param.maxNumShortConsensus : candidates->size(), res.shortConsTime);
 
             //sort candidates by short consensus
             sort(candidates->begin(), candidates->end(), CandidateType::SortByScore);
@@ -591,8 +601,7 @@ for(int i=0; i<50;i++)if(param.log) param.log(3,"%i spd %.2f.", i,(*candidates)[
                 consParam.samples=param.fullConsensusSamples;                                
                 consParam.threshold = param.consOffset*param.overlap/100.0f;
                 consParam.bestScore = bestConsensus;
-                int consensus = cons.Check(consParam);                  //compute full consensus
-                if(param.log) param.log(3,"%i short cons %i.", j,consensus);
+                int consensus = cons.Check(consParam);              //compute full consensus
                 ResetTransformation(mMov, oldTr);                   //restore old tranformation
 
                 if(consensus >= cons_succ) res.numWonFullCons++;
@@ -612,7 +621,7 @@ for(int i=0; i<50;i++)if(param.log) param.log(3,"%i spd %.2f.", i,(*candidates)[
             }
             res.fullConsTime = timer.elapsed();
             res.totalTime = tot_timer.elapsed();
-            if(param.log) param.log(3,"Full consensus performed in %i msec.", res.fullConsTime);
+            if(param.log) param.log(3,"%i full consensus performed in %i msec.", (param.maxNumFullConsensus<res.numWonShortCons)? param.maxNumFullConsensus : res.numWonShortCons, res.fullConsTime);
 
             //if flag 'points' is checked, clear old picked points and save the new points
             if(param.pickPoints){
@@ -780,27 +789,23 @@ for(int i=0; i<50;i++)if(param.log) param.log(3,"%i spd %.2f.", i,(*candidates)[
             return 0;
         }
 
-        static int Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, FEATURE_TYPE** base, vector<CandidateType>& candidates, Parameters& param, CallBackPos *cb=NULL)
+        static int Matching(vector<FEATURE_TYPE*>& vecFFix, vector<FEATURE_TYPE*>& vecFMov, ANNkd_tree* kdTree, FEATURE_TYPE** base, vector<vector<FeatureType*> >& matches, Parameters& param, CallBackPos *cb=NULL)
         {
             float pBar = 0, offset = 100.0f/param.nBase;  //used for progresss bar callback
             if(cb) cb(0, "Matching...");
 
-            assert(param.k<=int(vecFFix.size()));      //not enough features in kdtree to pick k neighboors
-
-            //compute needed params
-            float errDist = param.mutualErrDist*(param.mMovBBoxDiag/100.0f);
-
+            assert(param.k<=int(vecFFix.size()));       //not enough features in kdtree to pick k neighbors
             assert((int)vecFFix.size()>=param.nBase);
+            assert(matches.size()==0);                  //matches vectors have to be provided empty
 
             //fill fqueryPts with feature's descriptions in base
             ANNpointArray fqueryPts;
             FeatureAlignment::SetupKDTreeQuery(base, param.nBase, &fqueryPts, FeatureType::getFeatureDimension());
 
             //additional variables needed
-            ANNidxArray fnnIdx = new ANNidx[param.k];						        // allocate near neigh indices
+            ANNidxArray fnnIdx = new ANNidx[param.k];						    // allocate near neigh indices
             ANNdistArray fdists = new ANNdist[param.k];						    // allocate near neigh dists
-            vector<vector<FeatureType*>* >* matchedVec = new vector<vector<FeatureType*>* >();            
-
+            vector<FeatureType*> neighbors;
             //foreach feature in the base find the best matching using fkdTree
             for(int i = 0; i < param.nBase; i++)
             {
@@ -808,30 +813,30 @@ for(int i=0; i<50;i++)if(param.log) param.log(3,"%i spd %.2f.", i,(*candidates)[
 
                 assert(fdists[0]!=ANN_DIST_INF);  //if this check fails, it means that no feature have been found!
 
-                vector<FeatureType*>* matches = new vector<FeatureType*>();
-
-                for(int j=0; j<param.k; j++) matches->push_back(vecFFix[fnnIdx[j]]); //store all features
-
-                matchedVec->push_back(matches);
+                for(int j=0; j<param.k; j++) neighbors.push_back(vecFFix[fnnIdx[j]]); //store all features
+                matches.push_back(neighbors);           //copy neighbors vec into matches vec
+                neighbors.clear();                      //make neighbors vec ready for another iteration
 
                 if(cb){ pBar+=offset; cb((int)pBar, "Matching..."); }
             }
 
-            assert(int(matchedVec->size())==param.nBase);
-
-            //branch and bound
-            int* curSolution = new int[param.nBase];
-            for(int i=0; i<param.nBase; i++) curSolution[i] = 0;              //initialization
-            FeatureAlignment::Match(base, *matchedVec, param.nBase, 0, curSolution, candidates, errDist);
+            assert(int(matches.size())==param.nBase);
 
             //Cleaning ANN structures
             FeatureAlignment::CleanKDTree(NULL, NULL, fqueryPts, fnnIdx, fdists, false);
 
-            //Cleaning matching structures
-            for(typename vector<vector<FeatureType*>* >::iterator it=matchedVec->begin(); it!=matchedVec->end(); it++){
-                if(*it!=NULL){ delete *it; *it = NULL; }
-            }
-            delete matchedVec; matchedVec = NULL;
+            return 0;
+        }
+
+        static int BranchAndBound(FEATURE_TYPE** base, vector<vector<FeatureType*> >& matches, vector<CandidateType>& candidates, Parameters& param)
+        {
+            //compute needed params
+            float errDist = param.mutualErrDist*(param.mMovBBoxDiag/100.0f);
+
+            //branch and bound
+            int curSolution[param.nBase];
+            for(int i=0; i<param.nBase; i++) curSolution[i] = 0;              //initialization
+            FeatureAlignment::Match(base, matches, param.nBase, 0, curSolution, candidates, errDist);
             return 0;
         }
 
@@ -940,34 +945,34 @@ for(int i=0; i<50;i++)if(param.log) param.log(3,"%i spd %.2f.", i,(*candidates)[
             }
         }       
 
-        static void Match(FEATURE_TYPE** base, vector<vector<FEATURE_TYPE*>* >& matchedVec, int nBase, int level, int curSolution[], vector<CandidateType>& candidates, float errDist, CallBackPos *cb = NULL)
+        static void Match(FEATURE_TYPE** base, vector<vector<FEATURE_TYPE*> >& matches, int nBase, int level, int curSolution[], vector<CandidateType>& candidates, float errDist, CallBackPos *cb = NULL)
         {
             assert(level<nBase);
 
-            for(unsigned int j=0; j<matchedVec[level]->size(); j++){
+            for(unsigned int j=0; j<matches[level].size(); j++){
                 curSolution[level] = j;
-                if(MatchSolution(base, matchedVec, level, curSolution, errDist)){
+                if(MatchSolution(base, matches, level, curSolution, errDist)){
                     if(level==nBase-1){
                         FeatureType** solution = new FeatureType*[nBase];
                         for(int h=0; h<nBase; h++){
-                            solution[h] = (*(matchedVec[h]))[curSolution[h]];
+                            solution[h] = matches[h][curSolution[h]];
                         }
                         candidates.push_back(CandidateType(base,solution));
                     }
                     else
-                        Match(base, matchedVec, nBase, level+1, curSolution, candidates, errDist);
+                        Match(base, matches, nBase, level+1, curSolution, candidates, errDist);
                 }
             }
             curSolution[level] = 0;
         }
 
-        static bool MatchSolution(FEATURE_TYPE** base, vector<vector<FEATURE_TYPE*>* >& matchedVec, int level, int curSolution[], float errDist)
+        static bool MatchSolution(FEATURE_TYPE** base, vector<vector<FEATURE_TYPE*> >& matches, int level, int curSolution[], float errDist)
         {
             if (level==0) return true;
 
             for(int j=0; j<level; j++){
-                float distF = vcg::Distance(base[level]->pos, base[j]->pos);
-                float distM = vcg::Distance((*(matchedVec[level]))[curSolution[level]]->pos, (*(matchedVec[j]))[curSolution[j]]->pos);
+                float distF = Distance(base[level]->pos, base[j]->pos);
+                float distM = Distance(matches[level][curSolution[level]]->pos, matches[j][curSolution[j]]->pos);
                 if( math::Abs(distF-distM)>errDist) return false;
             }
             return true;
