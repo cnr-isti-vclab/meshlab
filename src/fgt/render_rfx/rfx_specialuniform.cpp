@@ -25,7 +25,7 @@
 
 // static member initialization
 const char *RfxSpecialUniform::SpecialUniformTypeString[] = {
-	"MSHLB_BBOX_MIN","MSHLB_BBOX_MAX"
+	"MSHLB_BBOX_MIN","MSHLB_BBOX_MAX","MSHLB_QUALITY_MAX","MSHLB_QUALITY_MIN"
 };
 
 RfxSpecialUniform::RfxSpecialUniform(const QString &_name, const QString &_type, MeshDocument* mDoc) : RfxUniform(_name, _type)
@@ -72,7 +72,18 @@ void RfxSpecialUniform::initialize(){
 
                this->SetValue(val);
                break;
-               
+
+		  case MSHLB_QUALITY_MIN:
+			   val[0] = 0.0;	
+			   this->SetValue(val);
+			   break;
+           
+		  case MSHLB_QUALITY_MAX:
+			   val[0] = 128.0;
+			   this->SetValue(val);
+			   break;
+           
+
           default:
 	          break;
           }

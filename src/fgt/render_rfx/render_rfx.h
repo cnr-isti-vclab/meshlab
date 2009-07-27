@@ -83,9 +83,10 @@ void Draw(MeshDocument *md, GLuint *program, QList<RfxSpecialAttribute*> *sal)
 			loc[i]=glGetAttribLocation(*program, temp->getTypeName());
 			i++;
 		}
+		//glEnable (GL_BLEND); 
 		
-		glBegin(GL_TRIANGLES);
 		cm->sfn=0;
+		glBegin(GL_TRIANGLES);
 		for(fi=cm->face.begin();fi!=cm->face.end();++fi)
 			{
 			sai.toFront();
@@ -113,6 +114,7 @@ void Draw(MeshDocument *md, GLuint *program, QList<RfxSpecialAttribute*> *sal)
 
 
 		glEnd();
+		
 		glPopMatrix();
 	}
 	

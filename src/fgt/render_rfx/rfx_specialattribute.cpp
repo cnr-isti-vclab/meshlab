@@ -57,14 +57,15 @@ RfxSpecialAttribute::SpecialAttributeType RfxSpecialAttribute::getSpecialType(co
 
 void RfxSpecialAttribute::setValueByType(GLint loc, CVertexO *vert)
 {
-
+float qual;
 	switch(this->_specialType){
 		case RfxSpecialAttribute::MSHLB_CURVATURE :
 			glVertexAttrib1f(loc, 2.0);
 			break;
 
-			case RfxSpecialAttribute::MSHLB_QUALITY :
-			glVertexAttrib1f(loc, 1.0);
+		case RfxSpecialAttribute::MSHLB_QUALITY :
+			qual=vert->Q();
+			glVertexAttrib1f(loc, qual);
 			break;
 	}
 }

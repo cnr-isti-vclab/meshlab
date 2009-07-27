@@ -158,15 +158,20 @@ void RenderRFX::Render(QAction *action, MeshDocument &md,  RenderMode &rm, QGLWi
 	assert(activeShader);
 	rm.textureMode = vcg::GLW::TMPerWedge;
 	
+	
 	for(shaderPass=0;shaderPass<totPass;shaderPass++)
 	{
 		activeShader->Start(shaderPass);
 			glGetError();
 			foreach(MeshModel * mp, md.meshList)
 			{
+				
 				if(mp->visible && activeShader->GetPass(shaderPass)->hasSpecialAttribute()){
 					GLuint *program = activeShader->GetPass(shaderPass)->getProgram();
+								
 					Draw(&md, program, activeShader->GetPass(shaderPass)->AttributesList());
+				
+
 				}
 				else{
 					if(mp->visible) 

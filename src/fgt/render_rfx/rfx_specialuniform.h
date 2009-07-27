@@ -34,7 +34,7 @@ class RfxSpecialUniform : public RfxUniform
 public:
      //Special uniform types used to pass particular values taken from meshlab to the shader.
      enum SpecialUniformType {
-          MSHLB_BBOX_MIN,MSHLB_BBOX_MAX,
+          MSHLB_BBOX_MIN,MSHLB_BBOX_MAX,MSHLB_QUALITY_MAX,MSHLB_QUALITY_MIN,
           TOTAL_SPECIAL_TYPES,
           NONE
 	};

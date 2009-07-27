@@ -67,7 +67,7 @@ void RfxGLPass::CompileAndLink()
 	GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertShader, 1, (const GLchar **)&ShaderSource, &ShaderLen);
 	glCompileShader(vertShader);
-
+	
 	delete[] ShaderSource;
 	ShaderSource = (GLubyte *)new char[frag.length() + 1];
 	memcpy(ShaderSource, frag.toLocal8Bit().data(), frag.length());
