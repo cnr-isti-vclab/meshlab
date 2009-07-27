@@ -283,8 +283,18 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
 	}
 
-	if(perFace) tri::UpdateColor<CMeshO>::FaceQualityGray(m.cm);
-	else tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
+	if(perFace) 
+		{
+			tri::UpdateColor<CMeshO>::FaceQualityGray(m.cm);
+			CMeshO::FaceIterator fi;
+			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD()) 
+					(*fi).Q()=(*fi).Q()/numViews;
+		} else {
+			tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
+			CMeshO::VertexIterator vi;
+			for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD()) 
+					(*vi).Q()=(*vi).Q()/numViews;
+		}
 	
 	Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
