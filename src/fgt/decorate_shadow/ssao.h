@@ -58,7 +58,7 @@ private:
         GLuint _ssao;
         GLuint _noise;
         GLuint _blurH;
-        //GLuint _blurV;
+        GLuint _blurV;
 
         GLuint _depth;
 

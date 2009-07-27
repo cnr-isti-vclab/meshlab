@@ -15,7 +15,7 @@ SSAO::SSAO():DecorateShader()
     this->_ssaoShaderProgram = 0;
 
     this->_blurH = 0;
-//    this->_blurV = 0;
+    this->_blurV = 0;
     this->_blurVert = 0;
     this->_blurFrag = 0;
     this->_blurShaderProgram = 0;
@@ -49,7 +49,7 @@ SSAO::~SSAO(){
     glDeleteTexturesEXT(1, &(this->_ssao));
 
     glDeleteTexturesEXT(1, &(this->_blurH));
-  //  glDeleteTexturesEXT(1, &(this->_blurV));
+    glDeleteTexturesEXT(1, &(this->_blurV));
     glDeleteFramebuffersEXT(1, &_fbo);
 }
 
@@ -79,83 +79,26 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
             /***********************************************************/
             //GENERAZIONE SHADOW MAP
             /***********************************************************/
-//            glEnable(GL_POLYGON_OFFSET_FILL);
-//            glPolygonOffset(1.0, 1.0);
-GLfloat g_mModelView[16];
-        GLfloat g_mProjection[16];
-            vcg::Box3f bb = m.cm.bbox;
-                vcg::Point3f center;
-                center = bb.Center();
-
-                float diag = bb.Diag();
-
-                vcg::Matrix44f tm = gla->trackball.Matrix();
-
-                glMatrixMode(GL_PROJECTION);
-
-                glPushMatrix();
-
-                    glLoadIdentity();
-                    glOrtho(-(diag/2),
-                             diag/2,
-                             -(diag/2),
-                             diag/2,
-                             -(diag/2),
-                             diag/2);
-
-                    glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
-                glMatrixMode(GL_MODELVIEW);
-
-                glPushMatrix();
-                    glLoadIdentity();
-
-                    vcg::Matrix44f rotation;
-                    vcg::Similarityf track = gla->trackball.track;
-                    track.rot.ToMatrix(rotation);
-                    glMultMatrixf(rotation.transpose().V());
-
-                    //traslate the model in the center
-                    glTranslatef(-center[0],-center[1],-center[2]);
-                    glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
-
             this->bind();
             glUseProgram(this->_normalMapShaderProgram);
-
-            /*GLuint farLoc = glGetUniformLocation(this->_normalMapShaderProgram, "farPlane");
-            glUniform1f(farLoc, gla->farPlane);
-
-            GLuint nearLoc = glGetUniformLocation(this->_normalMapShaderProgram, "nearPlane");
-            glUniform1f(nearLoc, gla->nearPlane);
-
-            GLuint diagLoc = glGetUniformLocation(this->_normalMapShaderProgram, "diag");
-            glUniform1f(diagLoc, m.cm.bbox.Diag());
-*/
-
             RenderMode rm = gla->getCurrentRenderMode();
             glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
-           // glDisable(GL_POLYGON_OFFSET_FILL);
-            this->printColorMap(this->_normalMap, "_normalMap.png");
+            //this->printColorMap(this->_normalMap, "_normalMap.png");
             //this->unbind();
             glUseProgram(0);
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
+
 
         /***********************************************************/
         //SSAO PASS
         /***********************************************************/
-        /*GLint depthFuncOld;
-        glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
-        glDepthFunc(GL_LEQUAL);*/
-        vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
+                //this->unbind();
         glUseProgram(this->_ssaoShaderProgram);
 
-        GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "mvpl");
-        glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
-
+        /*glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_DEPTH_TEST);*/
         glEnable(GL_TEXTURE_2D);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->_noise);
@@ -163,6 +106,7 @@ GLfloat g_mModelView[16];
         glUniform1i(noiseloc, 0);
 
         glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D, this->_blurV);
         glBindTexture(GL_TEXTURE_2D, this->_normalMap);
         GLuint loc = glGetUniformLocation(this->_ssaoShaderProgram, "normalMap");
         glUniform1i(loc, 1);
@@ -170,11 +114,18 @@ GLfloat g_mModelView[16];
 
         glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
 
-        this->printColorMap(this->_ssao, "_ssao1.png");
+
+        //this->printColorMap(this->_ssao, "_ssao.png");
         //this->unbind();
+        /*glEnable(GL_DEPTH_TEST);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+*/
         glUseProgram(0);
+
+
 
 /****************************************************************************************/
 //                                      BLURRING
@@ -193,15 +144,15 @@ GLfloat g_mModelView[16];
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
             glLoadIdentity();
-            //vcg::Point3f t = track.tra;
-            //glTranslated(0,0,t[2]);
             glTranslated(0,0,-1);
+
         /***********************************************************/
         //BLURRING horizontal
         /***********************************************************/
         glUseProgram(this->_blurShaderProgram);
 
-        GLfloat scale = 1/(this->_texSize * BLUR_COEF);// * SHADOW_COEF);
+        float blur_coef = 0.8;
+        GLfloat scale = 1/(this->_texSize * blur_coef);// * SHADOW_COEF);
         //GLfloat scale = (1/(this->_texSize)) * BLUR_COEF * SHADOW_COEF;
         GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
         glUniform2f(scaleLoc, scale, 0.0);
@@ -225,23 +176,23 @@ GLfloat g_mModelView[16];
                     glVertex3f(-this->_texSize/2,this->_texSize/2,0);
             glEnd();
 
-        this->printColorMap(this->_blurH, "./_blurOrizzontale.png");
-        this->unbind();
+        //this->printColorMap(this->_blurH, "./_blurOrizzontale.png");
+        //this->unbind();
 
 
         /***********************************************************/
         //BLURRING vertical
         /***********************************************************/
+        this->unbind();
         glUniform2f(scaleLoc, 0.0, scale);
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glDisable(GL_DEPTH_TEST);
-
         glBindTexture(GL_TEXTURE_2D, this->_blurH);
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
-
+        /*glDrawBuffer(GL_COLOR_ATTACHMENT3_EXT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);*/
             glBegin(GL_QUADS);
                     glTexCoord2d(0,0);
                     glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
@@ -253,12 +204,12 @@ GLfloat g_mModelView[16];
                     glVertex3f(-this->_texSize/2,this->_texSize/2,0);
             glEnd();
 
-
-        //glDepthFunc((GLenum)depthFuncOld);
+        glUseProgram(0);
+        //this->printColorMap(this->_blurV, "_blurVericale.png");
+        //this->unbind();
+        glEnable(GL_DEPTH_TEST);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
-        glUseProgram(0);
-
 
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
@@ -267,6 +218,8 @@ GLfloat g_mModelView[16];
 /****************************************************************************************/
 //                                      BLURRING END
 /****************************************************************************************/
+
+
 
         int error = glGetError();
 }
@@ -311,7 +264,6 @@ bool SSAO::setup()
         //attacco al FBO la texture di colore
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_ssao, 0);
 
-
         //genero la texture di blur orizzontale.
         glGenTextures(1, &this->_blurH);
         glBindTexture(GL_TEXTURE_2D, this->_blurH);
@@ -326,6 +278,22 @@ bool SSAO::setup()
         //e la texture per il blur orizzontale
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2_EXT, GL_TEXTURE_2D, this->_blurH, 0);
 
+        //genero la texture di blur verticale.
+        glGenTextures(1, &this->_blurV);
+        glBindTexture(GL_TEXTURE_2D, this->_blurV);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
+        //e la texture per il blur orizzontale
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT3_EXT, GL_TEXTURE_2D, this->_blurV, 0);
+
+
+
         //genero il render buffer per il depth buffer
         glGenRenderbuffersEXT(1, &(this->_depth));
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
@@ -335,7 +303,7 @@ bool SSAO::setup()
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
 
         //GLenum drawBuffers[] = {this->_normalMap, this->_ssao, this->_blurH};
-        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
         glDrawBuffersARB(3, drawBuffers);
 
         this->loadNoiseTxt();
