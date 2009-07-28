@@ -85,34 +85,25 @@ void Draw(MeshDocument *md, GLuint *program, QList<RfxSpecialAttribute*> *sal)
 		}
 		//glEnable (GL_BLEND); 
 		
-		cm->sfn=0;
+		const int attribNum= sal->size();
 		glBegin(GL_TRIANGLES);
-		for(fi=cm->face.begin();fi!=cm->face.end();++fi)
+		for(fi=cm->face.begin();fi!=cm->face.end();++fi) if(!(*fi).IsD())
 			{
-			sai.toFront();
-			i=0;
-			while(sai.hasNext())
-			{
-				temp = sai.next();
-				temp->setValueByType(loc[i], (*fi).V(0));
-				temp->setValueByType(loc[i], (*fi).V(1));
-				temp->setValueByType(loc[i], (*fi).V(2));
-				i++;
-			}
-		
+			for(int i=0;i<attribNum;++i)
+				temp->setValueByType(loc[i], (*fi).V(0));					
 			glNormal((*fi).V(0)->N());
 			glVertex((*fi).cP(0));
 			
+			for(int i=0;i<attribNum;++i)
+				temp->setValueByType(loc[i], (*fi).V(1));					
 			glNormal((*fi).V(1)->N());
 			glVertex((*fi).cP(1));
 			
+			for(int i=0;i<attribNum;++i)
+				temp->setValueByType(loc[i], (*fi).V(2));					
 			glNormal((*fi).V(2)->N());
 			glVertex((*fi).cP(2));
-			++cm->sfn;
-
 			}		
-
-
 		glEnd();
 		
 		glPopMatrix();
