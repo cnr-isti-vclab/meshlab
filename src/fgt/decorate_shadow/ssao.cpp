@@ -84,7 +84,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
             RenderMode rm = gla->getCurrentRenderMode();
             glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+            m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
             //this->printColorMap(this->_normalMap, "_normalMap.png");
             //this->unbind();
             glUseProgram(0);
@@ -117,7 +117,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
 
 
-        //this->printColorMap(this->_ssao, "_ssao.png");
+        this->printColorMap(this->_ssao, "_ssao.png");
         //this->unbind();
         /*glEnable(GL_DEPTH_TEST);
         glDisable(GL_TEXTURE_2D);
@@ -247,7 +247,7 @@ bool SSAO::setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
         //attacco al FBO la texture di colore
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_normalMap, 0);
 

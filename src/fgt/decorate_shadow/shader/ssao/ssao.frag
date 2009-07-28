@@ -3,7 +3,7 @@ uniform sampler2D normalMap;
 
 varying vec4 texCoord;
 
-const float totStrength = 5.38;
+const float totStrength = 5.0;
 const float strength = 0.7;
 const float offset = 18.0;
 const float falloff = 0.000002;
