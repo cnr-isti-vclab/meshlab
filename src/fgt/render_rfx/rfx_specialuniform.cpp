@@ -25,7 +25,7 @@
 
 // static member initialization
 const char *RfxSpecialUniform::SpecialUniformTypeString[] = {
-	"MSHLB_BBOX_MIN","MSHLB_BBOX_MAX","MSHLB_QUALITY_MAX","MSHLB_QUALITY_MIN"
+	"MSHLB_BBOX_MIN","MSHLB_BBOX_MAX","MSHLB_QUALITY_MAX", "MSHLB_QUALITY_MAX"
 };
 
 RfxSpecialUniform::RfxSpecialUniform(const QString &_name, const QString &_type, MeshDocument* mDoc) : RfxUniform(_name, _type)
@@ -52,6 +52,8 @@ void RfxSpecialUniform::initialize(){
      vcg::Box3f bb;
      vcg::Point3f pMax;
      vcg::Point3f pMin;
+	 std::pair<float, float> qMinMax;
+	 float qmin = 0, qmax = 0;
 
      switch(this->_specialType){
           case MSHLB_BBOX_MIN:
@@ -73,16 +75,17 @@ void RfxSpecialUniform::initialize(){
                this->SetValue(val);
                break;
 
-		  case MSHLB_QUALITY_MIN:
-			   val[0] = 0.0;	
-			   this->SetValue(val);
-			   break;
-           
-		  case MSHLB_QUALITY_MAX:
-			   val[0] = 128.0;
-			   this->SetValue(val);
-			   break;
-           
+		case MSHLB_QUALITY_MIN:
+			qMinMax = vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(this->_mDoc->mm()->cm);
+			val[0] = qMinMax.first;
+			this->SetValue(val);
+			break;
+
+		case MSHLB_QUALITY_MAX:
+			qMinMax = vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(this->_mDoc->mm()->cm);
+			val[0] = qMinMax.second;
+			this->SetValue(val);
+			break;
 
           default:
 	          break;

@@ -74,7 +74,7 @@ void Draw(MeshDocument *md, GLuint *program, QList<RfxSpecialAttribute*> *sal)
 		glMultMatrix(cm->Tr);
 		
 		QListIterator<RfxSpecialAttribute*> sai = QListIterator<RfxSpecialAttribute*>(*sal);
-		GLint *loc;
+		GLint loc[RfxSpecialAttribute::TOTAL_SPECIAL_TYPES];
 		int i=0;
 		RfxSpecialAttribute* temp;
 		while(sai.hasNext())
