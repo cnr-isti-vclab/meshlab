@@ -75,6 +75,9 @@ namespace io {
 
 		int lineNumberError;
 		std::vector<QString> filenameStack;
+
+		bool meshColor;
+		vcg::Color4b color;
 		
 		AdditionalInfoX3D()
 		:AdditionalInfo()

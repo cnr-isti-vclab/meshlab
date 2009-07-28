@@ -128,7 +128,7 @@ QDomDocument *doc;
 	  x3dNode.insert("Layer"); x3dNode.insert("LayerSet"); x3dNode.insert("Layout");
 	  x3dNode.insert("LayoutGroup"); x3dNode.insert("LayoutLayer"); x3dNode.insert("LinePicker");
 	  x3dNode.insert("LineProperties"); x3dNode.insert("LineSet"); x3dNode.insert("LoadSensor");
-	  x3dNode.insert("LocalFog"); x3dNode.insert("Matrix3VertexAttribute"); 
+	  x3dNode.insert("LocalFog"); x3dNode.insert("Material"); x3dNode.insert("Matrix3VertexAttribute"); 
 	  x3dNode.insert("Matrix4VertexAttribute"); x3dNode.insert("MetadataDouble");
 	  x3dNode.insert("MetadataFloat"); x3dNode.insert("MetadataInteger"); x3dNode.insert("MetadataSet");
 	  x3dNode.insert("MetadataString"); x3dNode.insert("MotorJoint"); x3dNode.insert("MultiTexture");
@@ -225,7 +225,7 @@ QDomDocument *doc;
 
 }; // end Parser
 
-}; // namespace
+} // namespace
 
 
 #endif // !defined(VRML_PARSER_H__)

@@ -299,7 +299,7 @@ public:
 
 }; // end Scanner
 
-}; // namespace
+} // namespace
 
 
 #endif // !defined(VRML_SCANNER_H__)
