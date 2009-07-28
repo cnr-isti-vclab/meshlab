@@ -26,24 +26,22 @@
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
-#ifndef ANN_H
+//#ifndef ANN_H
     #include <ANN/ANN.h>
-#endif
+//#endif
 
-#include <vcg/math/perlin_noise.h>
-#include <vcg/math/gen_normal.h>
-#include <vcg/math/random_generator.h>
 #include <vcg/math/point_matching.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/trimesh/overlap_estimation.h>
 #include <meshlabplugins/edit_pickpoints/pickedPoints.h>
 
 #include <qdatetime.h>
 
 using namespace std;
 using namespace vcg;
-
+/*
 template <class MeshType>
 class VertexPointerSampler
 {
@@ -65,248 +63,41 @@ class VertexPointerSampler
 
         void AddTextureSample(const FaceType &, const CoordType &, const Point2i &){}
 };
-
-template<class MESH_TYPE> void SampleVertUniform(MESH_TYPE& m, vector<typename MESH_TYPE::VertexPointer>& vert, int sampleNum)
-{
-    typedef MESH_TYPE MeshType;
-
-    VertexPointerSampler<MeshType> sampler;
-    tri::SurfaceSampling<MeshType, VertexPointerSampler<MeshType> >::VertexUniform(m, sampler, sampleNum);
-    for(unsigned int i=0; i<sampler.sampleVec.size(); i++) vert.push_back(sampler.sampleVec[i]);
-}
-
-template<class MESH_TYPE> class Consensus
-{
-    public:
-
-    typedef MESH_TYPE MeshType;
-    typedef typename MeshType::ScalarType ScalarType;
-    typedef typename MeshType::VertexType VertexType;
-    typedef typename MeshType::VertexPointer VertexPointer;
-    typedef typename MeshType::CoordType CoordType;
-    typedef typename MeshType::VertexIterator VertexIterator;
-    typedef typename VertexPointerSampler<MeshType>::VertexPointerIterator VertexPointerIterator;
-    typedef GridStaticPtr<VertexType, ScalarType > MeshGrid;
-    typedef tri::VertTmark<MeshType> MarkerVertex;
-
-    class Parameters
-    {
-        public:
-        int samples;                                //number of samples
-        int bestScore;                              //used to paint mMove: paint only if is a best score
-        float consensusDist;                        //consensus distance
-        float consensusNormalsAngle;                //holds the the consensus angle for normals, in gradients.
-        float threshold;                            //consensus % to win consensus;
-        bool normalEqualization;                    //to use normal equalization in consensus
-        bool paint;                                 //to paint mMov according to consensus
-        void (*log)(int level, const char * f, ... );          //pointer to log function
-
-        Parameters()
-        {
-            samples = 2500;
-            bestScore = 0;
-            consensusDist = 2.0f;
-            consensusNormalsAngle = 0.965f;   //15 degrees.
-            threshold = 0.0f;
-            normalEqualization = true;
-            paint = false;
-            log = NULL;
-        }
-    };
-
-    MeshType* mFix, *mMov;
-    vector<vector<int> >* normBuckets;          //structure to hold normals bucketing. Needed for normal equalized sampling during consensus
-    MeshGrid* gridFix;                          //variable to manage uniform grid
-    MarkerVertex markerFunctorFix;              //variable to manage uniform grid
-
-    Consensus() : normBuckets(NULL), gridFix(NULL){}
-    ~Consensus(){
-        if(normBuckets) delete normBuckets;
-        if(gridFix) delete gridFix;
-    }
-
-    void SetFix(MeshType& m){ mFix = &m; }
-
-    void SetMove(MeshType& m){ mMov = &m; }
-
-    bool Init(Parameters& param){
-        //builds the uniform grid with mFix vertices
-        gridFix = new MeshGrid();        
-        SetupGrid();
-
-        //if requested, group normals of mMov into 30 buckets. Buckets are used for Vertex Normal Equalization
-        //in consensus. Bucketing is done here once for all to speed up consensus.
-        if(param.normalEqualization){
-            if(normBuckets) {normBuckets->clear(); delete normBuckets; }
-            normBuckets = BucketVertexNormal(mMov->vert, 30);            
-            assert(normBuckets);
-        }
-        return true;
-    }
-
-    //compute the randomized consensus beetween m1 e m2 (without taking in account any additional transformation)
-    //IMPORTANT: per vertex normals of m1 and m2 MUST BE PROVIDED JET NORMALIZED!!!
-    int Check(Parameters& param)
-    {
-        //pointer to a function to compute distance beetween points
-        vertex::PointDistanceFunctor<ScalarType> PDistFunct;
-
-        //if no buckets are provided get a vector of vertex pointers sampled uniformly
-        //else, get a vector of vertex pointers sampled in a normal equalized manner; used as query points
-        vector<VertexPointer>* queryVert = NULL;        
-        if(param.normalEqualization){
-            assert(normBuckets);
-            queryVert = new vector<VertexPointer>(mMov->vert.size(),NULL);
-            for(unsigned int i=0; i<mMov->vert.size(); i++) (*queryVert)[i] = &(mMov->vert[i]);//do a copy of pointers to vertexes            
-            SampleVertNormalEqualized(*queryVert, param.samples);
-        }
-        else{
-            queryVert = new vector<VertexPointer>();
-            SampleVertUniform<MeshType>(*mMov, *queryVert, param.samples);
-        }
-        assert(queryVert);
-
-        //init variables for consensus
-        float consDist = param.consensusDist*(mMov->bbox.Diag()/100.0f);  //consensus distance
-        int cons_succ = int(param.threshold*(param.samples/100.0f));      //score needed to pass consensus
-        int consensus = 0;                  //counts vertices in consensus
-        float dist;                         //holds the distance of the closest vertex found
-        VertexType* closestVertex = NULL;   //pointer to the closest vertex
-        Point3<ScalarType> queryNrm;        //the query point normal for consensus
-        CoordType queryPnt;                 //the query point for consensus
-        CoordType closestPnt;               //the closest point found in consensus
-        Matrix33<ScalarType> inv33_matMov(mMov->Tr,3);          //3x3 matrix needed to transform normals
-        Matrix33<ScalarType> inv33_matFix(Inverse(mFix->Tr),3); //3x3 matrix needed to transform normals
-
-        //Colors handling: white = not tested; blue = not in consensus; red = in consensus; yellow = not in consensus becouse of normals
-        //Colors are stored in a buffer vector; at the end of consensus loop they are applied
-        //to the mesh ONLY IF full consensus overcome succes threshold AND the best consensus.
-        vector<Color4b>* colorBuf = NULL;
-        if(param.paint) colorBuf = new vector<Color4b>(mMov->VertexNumber(),Color4b::White); //buffer vector for colors
-
-        //consensus loop
-        for(VertexPointerIterator vi=queryVert->begin(); vi!=queryVert->end(); vi++)
-        {
-            int i = (vi - queryVert->begin());  //iteration counter
-            assert(i>=0 && i<mMov->VertexNumber());
-
-            dist = -1.0f;
-            //set query point; vertex coord is transformed properly in fix mesh coordinates space; the same for normals
-            queryPnt = Inverse(mFix->Tr) * (mMov->Tr * (*vi)->P());
-            queryNrm = inv33_matFix * (inv33_matMov * (*vi)->N());
-            //if query point is bbox, the look for a vertex in cDist from the query point
-            if(mFix->bbox.IsIn(queryPnt)) closestVertex = gridFix->GetClosest(PDistFunct,markerFunctorFix,queryPnt,consDist,dist,closestPnt);
-            else closestVertex=NULL;  //out of bbox, we consider the point not in consensus...
-
-            if(closestVertex!=NULL && dist < consDist){
-                assert(closestVertex->P()==closestPnt); //coord and vertex pointer returned by getClosest must be the same
-
-                //point is in consensus distance, now we check if normals are near
-                if(queryNrm.dot(closestVertex->N())>param.consensusNormalsAngle)  //15 degrees
-                {
-                    consensus++;  //got consensus
-                    if(colorBuf){ (*colorBuf)[i] = Color4b::Red; }  //paint of red if needed
-                }
-                else{
-                    if(colorBuf){ (*colorBuf)[i] = Color4b::Yellow; }  //paint of yellow if needed
-                }
-            }
-            else{
-                if(colorBuf){ (*colorBuf)[i] = Color4b::Blue; } //not in consensus due to distance, paint of blue
-            }
-        }
-
-        //apply colors if consensus is the best ever found.
-        //NOTE: we got to do this here becouse we need a handle to sampler. This is becouse vertex have been shuffled
-        //and so colors have been stored not in order in the buffer!
-        if(colorBuf){
-            if(consensus>=param.bestScore && consensus>=cons_succ){
-                for(VertexPointerIterator vi=queryVert->begin(); vi!=queryVert->end(); vi++)
-                    if(!(*vi)->IsD()) (*vi)->C() = (*colorBuf)[vi-queryVert->begin()];
-            }
-        }
-
-        //clear and delete buffer for colors, if needed
-        if(colorBuf){ colorBuf->clear(); delete colorBuf; }
-
-        //delete vector of query vertexes; do it as last thing, 'couse it is used for coloring too.
-        if(queryVert) delete queryVert;
-
-        return consensus;
-    }
-
-    private:
-    vector<vector<int> >* BucketVertexNormal(typename MESH_TYPE::VertContainer& vert, int bucketDim = 30)
-    {
-        static vector<Point3f> NV;
-        if(NV.size()==0) GenNormal<float>::Uniform(bucketDim,NV);
-
-        // Bucket vector dove, per ogni normale metto gli indici
-        // dei vertici ad essa corrispondenti
-        vector<vector<int> >* BKT = new vector<vector<int> >(NV.size()); //NV size is greater then bucketDim, so don't change this!
-
-        int ind;
-        for(int i=0;i<vert.size();++i){
-            ind=GenNormal<float>::BestMatchingNormal(vert[i].N(),NV);
-            (*BKT)[ind].push_back(i);
-        }
-
-        return BKT;
-    }
-
-    bool SampleVertNormalEqualized(vector<typename MESH_TYPE::VertexPointer>& vert, int SampleNum)
-    {
-        assert(normBuckets);
-        // vettore di contatori per sapere quanti punti ho gia' preso per ogni bucket
-        vector<int> BKTpos(normBuckets->size(),0);
-
-        if(SampleNum >= int(vert.size())) SampleNum= int(vert.size()-1);
-
-        int ind;
-        for(int i=0;i<SampleNum;){
-            ind=LocRnd(normBuckets->size()); // Scelgo un Bucket
-            int &CURpos = BKTpos[ind];
-            vector<int> &CUR = (*normBuckets)[ind];
-
-            if(CURpos<int(CUR.size())){
-                swap(CUR[CURpos], CUR[ CURpos + LocRnd((*normBuckets)[ind].size()-CURpos)]);
-                swap(vert[i],vert[CUR[CURpos]]);
-                ++BKTpos[ind];
-                ++i;
-            }
-        }
-
-        vert.resize(SampleNum);
-        return true;
-    }
-
-    int LocRnd(int n){
-        static math::SubtractiveRingRNG myrnd(time(NULL));
-        return myrnd.generate(n);
-    }
-
-    inline void SetupGrid()
-    {
-        gridFix->Set(mFix->vert.begin(),mFix->vert.end());
-        markerFunctorFix.SetMesh(mFix);
-    }
-};
-
-
+*/
 template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 {
     public:
-
         typedef MESH_TYPE MeshType;
         typedef FEATURE_TYPE FeatureType;
         typedef typename MeshType::ScalarType ScalarType;
-        typedef typename MeshType::VertexType VertexType;        
+        typedef typename MeshType::CoordType	CoordType;
+        typedef typename MeshType::VertexType	VertexType;
+        typedef typename MeshType::FaceType	FaceType;
         typedef Matrix44<ScalarType> Matrix44Type;
-        typedef Consensus<MeshType> ConsensusType;
+        typedef OverlapEstimation<MeshType> ConsensusType;
         typedef typename ConsensusType::Parameters ConsensusParam;
 
         enum SamplingStrategies { UNIFORM_SAMPLING=0, POISSON_SAMPLING=1 };
 
+        private:
+        class VertexPointerSampler
+        {
+            public:
+
+            MeshType* m;  //this is needed for advanced sampling (i.e poisson sampling)
+
+            VertexPointerSampler(){ m = new MeshType(); m->Tr.SetIdentity(); m->sfn=0; }
+            ~VertexPointerSampler(){ if(m) delete m; }
+            vector<VertexType*> sampleVec;
+
+            void AddVert(VertexType &p){ sampleVec.push_back(&p); }
+
+            void AddFace(const FaceType &f, const CoordType &p){}
+
+            void AddTextureSample(const FaceType &, const CoordType &, const Point2i &){}
+        };
+
+        public:
         class Parameters{
             public:
 
@@ -668,37 +459,30 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
         static FEATURE_TYPE** FeatureUniform(vector<FEATURE_TYPE*>& vecF, int* sampleNum, int seed = clock())
         {
-            typedef MESH_TYPE MeshType;
-            typedef FEATURE_TYPE FeatureType;
             typedef typename vector<FeatureType*>::iterator FeatureIterator;
 
             if(*sampleNum>=int(vecF.size())) *sampleNum = vecF.size();
 
-            vector<FeatureType*>* vec = new vector<FeatureType*>();
-            for(FeatureIterator fi=vecF.begin();fi!=vecF.end();++fi) vec->push_back(*fi);
+            vector<FeatureType*> vec;
+            for(FeatureIterator fi=vecF.begin();fi!=vecF.end();++fi) vec.push_back(*fi);
 
-            assert(vec->size()==vecF.size());
+            assert(vec.size()==vecF.size());
 
-            tri::SurfaceSampling<MeshType, VertexPointerSampler<MeshType> >::SamplingRandomGenerator().initialize(seed);
-            unsigned int (*p_myrandom)(unsigned int) = tri::SurfaceSampling<MeshType, VertexPointerSampler<MeshType> >::RandomInt;
-            std::random_shuffle(vec->begin(),vec->end(), p_myrandom);
+            tri::SurfaceSampling<MeshType, VertexPointerSampler>::SamplingRandomGenerator().initialize(seed);
+            unsigned int (*p_myrandom)(unsigned int) = tri::SurfaceSampling<MeshType, VertexPointerSampler>::RandomInt;
+            std::random_shuffle(vec.begin(),vec.end(), p_myrandom);
 
             FeatureType** sampledF = new FeatureType*[*sampleNum];
-            for(int i =0; i<*sampleNum; ++i) sampledF[i] = (*vec)[i];
-
-            //cleaning...
-            vec->clear(); delete vec;
+            for(int i =0; i<*sampleNum; ++i) sampledF[i] = vec[i];
 
             return sampledF;
         }
 
         static FEATURE_TYPE** FeaturePoisson(MESH_TYPE& samplingMesh, int* sampleNum)
         {
-            typedef MESH_TYPE MeshType;
-            typedef FEATURE_TYPE FeatureType;
             typedef typename MeshType::template PerVertexAttributeHandle<FeatureType> PVAttributeHandle;
 
-            VertexPointerSampler<MeshType> samp = VertexPointerSampler<MeshType>();
+            VertexPointerSampler samp = VertexPointerSampler();
             SampleVertPoissonDisk(samplingMesh, samp, *sampleNum);
             *sampleNum = samp.sampleVec.size();  //poisson sampling can return untill 50% more of requested samples!
             PVAttributeHandle fh = FeatureAlignment::GetFeatureAttribute(samplingMesh);
@@ -708,8 +492,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             return sampler;
         }
 
-        //template<class MESH_TYPE>
-        static void SampleVertPoissonDisk(MESH_TYPE& m, VertexPointerSampler<MESH_TYPE>& sampler, int sampleNum)
+        static void SampleVertPoissonDisk(MESH_TYPE& m, VertexPointerSampler& sampler, int sampleNum)
         {
             typedef MESH_TYPE MeshType;
 
@@ -717,13 +500,13 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             tri::UpdateBounding<MeshType>::Box(m);
 
             //setup parameters
-            float radius = tri::SurfaceSampling<MeshType,VertexPointerSampler<MeshType> >::ComputePoissonDiskRadius(m,sampleNum);
-            typename tri::SurfaceSampling<MeshType,VertexPointerSampler<MeshType> >::PoissonDiskParam pp;
+            float radius = tri::SurfaceSampling<MeshType,VertexPointerSampler>::ComputePoissonDiskRadius(m,sampleNum);
+            typename tri::SurfaceSampling<MeshType,VertexPointerSampler>::PoissonDiskParam pp;
 
             //poisson samplig need a support mesh from which it takes vertexes; we use the same input mesh
             //as support mesh, so we are sure that pointer to vertex of input mesh are returned
             //perform sampling: number of samples returned can be 50% greater of the requested amount
-            tri::SurfaceSampling<MeshType,VertexPointerSampler<MeshType> >::Poissondisk(m, sampler, m, radius, pp);
+            tri::SurfaceSampling<MeshType,VertexPointerSampler>::Poissondisk(m, sampler, m, radius, pp);
         }                
 
         static typename MESH_TYPE::template PerVertexAttributeHandle<FEATURE_TYPE> GetFeatureAttribute(MESH_TYPE& m, bool createAttribute = false)
@@ -1017,7 +800,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             float spd, snd, result = 0.0f;
 
             for(int i=0; i<nBase;i++){
-                //transform normals properly; normals inside features are jet normalized
+                //transform normals properly; normals inside features are yet normalized
                 fixNrm = matFix * matchF[i]->normal;
                 movNrm = matMov * baseF[i]->normal;
 

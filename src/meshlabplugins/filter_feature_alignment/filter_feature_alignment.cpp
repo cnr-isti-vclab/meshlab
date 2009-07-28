@@ -417,7 +417,7 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
         }  //end case AF_RIGID_TRANSFORMATION
         case AF_CONSENSUS :
         {                        
-            typedef Consensus<CMeshO> ConsensusType;
+            typedef OverlapEstimation<CMeshO> ConsensusType;
             ConsensusType::Parameters consParam;
             //set up params for consensus
             consParam.samples = math::Clamp(par.getInt("fullConsensusSamples"),1,mMov->cm.VertexNumber());
@@ -426,12 +426,12 @@ bool FilterFeatureAlignment::applyFilter(QAction *filter, MeshDocument &md, Filt
             consParam.normalEqualization = par.getBool("normEq");
             consParam.threshold = 0.0f;
             consParam.bestScore = 0;
-            int result = ConsensusOperation<ConsensusType>(*mFix, *mMov, consParam, cb);
+            float result = ConsensusOperation<ConsensusType>(*mFix, *mMov, consParam, cb);
             if(result<0){
                 errorMessage = "Consensus Initialization fails.";
                 return false; }
 
-            Log("Consensus of %.2f%%", 100.0f*float(result)/consParam.samples);
+            Log("Consensus of %.2f%%", 100*result);
             return true;
         }
         case AF_RANSAC:
@@ -639,7 +639,7 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RigidTransformationOperati
 }
 
 template<class CONSENSUS_TYPE>
-int FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename CONSENSUS_TYPE::Parameters& param, CallBackPos *cb)
+float FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov, typename CONSENSUS_TYPE::Parameters& param, CallBackPos *cb)
 {
     typedef CONSENSUS_TYPE ConsensusType;
     typedef typename ConsensusType::MeshType MeshType;
@@ -655,11 +655,9 @@ int FilterFeatureAlignment::ConsensusOperation(MeshModel& mFix, MeshModel& mMov,
     cons.SetFix(mFix.cm);
     cons.SetMove(mMov.cm);
 
-    if(!cons.Init(param)) return -1;
+    if(!cons.Init(param)) return -1.0f;
 
-    int result = cons.Check(param);
-
-    return result;
+    return cons.Compute(param);
 }
 
 template<class ALIGNER_TYPE>
