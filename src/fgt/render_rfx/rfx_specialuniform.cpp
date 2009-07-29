@@ -43,23 +43,17 @@ RfxSpecialUniform::~RfxSpecialUniform()
 	Initializes the value of the uniform according to its special type.
 */
 void RfxSpecialUniform::initialize(){
-     float *val = new float[16];
+     float val[16];
 
-	// initialization (unnecessary?)
-	for (int i = 0; i < 16; ++i)
-		val[i] = 0.0f;
-
-     vcg::Box3f bb;
-     vcg::Point3f pMax;
-     vcg::Point3f pMin;
+	vcg::Box3f bb;
 	 std::pair<float, float> qMinMax;
-	 float qmin = 0, qmax = 0;
 
      switch(this->_specialType){
           case MSHLB_BBOX_MIN:
                bb = this->_mDoc->mm()->cm.bbox;
-
-               val = &(bb.min[0]);
+               val[0] = bb.min[0];
+               val[1] = bb.min[1];
+               val[2] = bb.min[2];
                val[3] = 1.0;
 
                this->SetValue(val);
@@ -68,7 +62,9 @@ void RfxSpecialUniform::initialize(){
 
           case MSHLB_BBOX_MAX:
                bb = this->_mDoc->mm()->cm.bbox;
-               val = &(bb.max[0]);
+               val[0] = bb.max[0];
+               val[1] = bb.max[1];
+               val[2] = bb.max[2];
                val[3] = 1.0;
 
 
