@@ -48,6 +48,7 @@ class FeatureRGB
     static int getFeatureDimension();
     static bool CheckPersistency(FeatureType f);
     static void SetupParameters(ParamType& param);
+    static bool HasBeenComputed(MeshType& m);
     static bool ComputeFeature( MeshType&, ParamType& param, CallBackPos *cb=NULL);
     static bool Subset(int, MeshType&, vector<FeatureType*>&, int, CallBackPos *cb=NULL);
 
@@ -106,6 +107,12 @@ template<class MESH_TYPE, int dim> void FeatureRGB<MESH_TYPE,dim>::SetupParamete
     param.add(FeatureType::Parameters::GREEN);
     param.add(FeatureType::Parameters::BLUE);
     assert(param.featureDesc.size()==getFeatureDimension());
+}
+
+template<class MESH_TYPE, int dim> bool FeatureRGB<MESH_TYPE,dim>::HasBeenComputed(MeshType &m)
+{
+    //checks if the attribute exist
+    return tri::HasPerVertexAttribute(m,std::string(FeatureType::getName()));
 }
 
 template<class MESH_TYPE, int dim> bool FeatureRGB<MESH_TYPE,dim>::ComputeFeature(MeshType &m, ParamType& param, CallBackPos *cb)

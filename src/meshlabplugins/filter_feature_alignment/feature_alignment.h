@@ -20,16 +20,16 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#ifndef FEATURE_ALIGNMENT_H
+#define FEATURE_ALIGNMENT_H
+
 #include <meshlab/meshmodel.h>
 
 #include <math.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
-//#ifndef ANN_H
-    #include <ANN/ANN.h>
-//#endif
-
+#include <ANN/ANN.h>
 #include <vcg/math/point_matching.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/complex/trimesh/closest.h>
@@ -41,29 +41,7 @@
 
 using namespace std;
 using namespace vcg;
-/*
-template <class MeshType>
-class VertexPointerSampler
-{
-        public:
-        typedef typename MeshType::CoordType	CoordType;
-        typedef typename MeshType::VertexType	VertexType;
-        typedef typename MeshType::FaceType	FaceType;
-        typedef typename vector<VertexType*>::iterator VertexPointerIterator;
 
-        MeshType* m;  //this is needed for advanced sampling (i.e poisson sampling)
-
-        VertexPointerSampler(){ m = new MeshType(); (*m).Tr.SetIdentity(); (*m).sfn=0; }
-        ~VertexPointerSampler(){ if(m) delete m; }
-        vector<VertexType*> sampleVec;
-
-        void AddVert(VertexType &p){ sampleVec.push_back(&p); }
-
-        void AddFace(const FaceType &f, const CoordType &p){}
-
-        void AddTextureSample(const FaceType &, const CoordType &, const Point2i &){}
-};
-*/
 template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 {
     public:
@@ -79,7 +57,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
         enum SamplingStrategies { UNIFORM_SAMPLING=0, POISSON_SAMPLING=1 };
 
-        private:
+    private:
         class VertexPointerSampler
         {
             public:
@@ -97,7 +75,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             void AddTextureSample(const FaceType &, const CoordType &, const Point2i &){}
         };
 
-        public:
+    public:
         class Parameters{
             public:
 
@@ -116,13 +94,12 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             float overlap;                              //overlap %; measure how much mMov overlaps mFix
             float succOffset;                           //consensus %, depending on overlap, to win ransac;
             float consOffset;                           //consensus %, depending on overlap, to win full consensus;
-            float shortConsOffset;                      //consensus %, depending on overlap, to win short consensus;
             bool normalEqualization;                    //to use normal equalization in consensus
             bool pickPoints;                            //to store bases/points into picked points attribute
-            bool paint;                                 //to paint mMov according to consensus           
+            bool paint;                                 //to paint mMov according to consensus
             int maxNumFullConsensus;                    //max num of bases tested with full consensus procedure
             int maxNumShortConsensus;                   //max num of bases tested with short consensus procedure
-            float mMovBBoxDiag;                         //mMov bbox diagonal; used to compute distances...            
+            float mMovBBoxDiag;                         //mMov bbox diagonal; used to compute distances...
             void (*log)(int level,const char * f, ... );          //pointer to log function
 
             Parameters(MeshType& mFix, MeshType& mMov){
@@ -146,13 +123,12 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 overlap = 75.0f;
                 succOffset = 90.0f;
                 consOffset = 60.0f;
-                shortConsOffset = 40.0f;
                 normalEqualization = true;
                 pickPoints = false;
-                paint = false;                
-                maxNumFullConsensus = 8;
+                paint = false;
+                maxNumFullConsensus = 15;
                 maxNumShortConsensus = 50;
-                mMovBBoxDiag = mMov.bbox.Diag();                
+                mMovBBoxDiag = mMov.bbox.Diag();
                 log = NULL;
             }
         };
@@ -167,7 +143,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             Matrix44Type tr;
             float bestConsensus;
             int numBasesFound;
-            int numWonShortCons;
             int numWonFullCons;
             int numMatches;
             int totalTime;
@@ -186,9 +161,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 tr = Matrix44Type::Identity();
                 bestConsensus = 0.0f;
                 numBasesFound = 0;
-                numWonShortCons = 0;
                 numWonFullCons = 0;
-                numMatches = 0;                
+                numMatches = 0;
                 totalTime = 0;
                 initTime = 0;
                 matchingTime = 0;
@@ -214,9 +188,9 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             static bool SortByScore(CandidateType i,CandidateType j) { return (i.shortCons>j.shortCons); }
         };
 
-        Result res;                                 //structure to hold result and stats        
         vector<FeatureType*>* vecFFix;              //vector to hold pointers to features extracted from mFix
         vector<FeatureType*>* vecFMov;              //vector to hold pointers to features extracted from mMov
+        Result res;                                 //structure to hold result and stats
         ANNpointArray fdataPts;                     //ANN structure to hold descriptors from which kdTree is build
         ANNkd_tree* fkdTree;                        //ANN kdTree structure
         ConsensusType cons;
@@ -233,10 +207,34 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             FeatureAlignment::CleanKDTree(fkdTree, fdataPts, NULL, NULL, NULL, true);
         }
 
-        Result& init(MeshType& mFix, MeshType& mMov, Parameters& param)
+        Result& init(MeshType& mFix, MeshType& mMov, Parameters& param, CallBackPos* cb=NULL)
         {
-            QTime timer;  //timers
+            QTime timer, t;  //timers
             timer.start();
+
+            //compute feature for mFix and mMov if they are not computed yet
+            if(cb) cb(0,"Computing features...");
+            typename FeatureType::Parameters p;
+            FeatureType::SetupParameters(p);
+            if(!FeatureType::HasBeenComputed(mFix)){
+                t.start();
+                if(!FeatureType::ComputeFeature(mFix, p)){
+                    FeatureAlignment::setError(6,res);
+                    return res;
+                }
+                if(param.log) param.log(3,"Features on mFix computed in %i msec.",t.elapsed());
+            }
+            if(!FeatureType::HasBeenComputed(mMov)){
+                t.start();
+                if(!FeatureType::ComputeFeature(mMov, p)){
+                    FeatureAlignment::setError(6,res);
+                    return res;
+                }
+                if(param.log) param.log(3,"Features on mMov computed in %i msec.",t.elapsed());
+            }
+
+            //initialize a static random generator used later on to select bases
+            tri::SurfaceSampling<MeshType, VertexPointerSampler>::SamplingRandomGenerator().initialize(time(NULL));
 
             //extract features
             vecFFix = FeatureAlignment::extractFeatures(param.numFixFeatureSelected, mFix, FeatureAlignment::UNIFORM_SAMPLING);
@@ -282,7 +280,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             //variables declaration
             res.exitCode = Result::NOT_ALIGNED;
             int bestConsensus = 0;                                              //best consensus score                        
-            int short_cons_succ = int((param.shortConsOffset*param.overlap/100.0f)*(param.short_cons_samples/100.0f));      //number of vertices to win short consensus
             int cons_succ = int((param.consOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));               //number of vertices to win consensus
             int ransac_succ = int((param.succOffset*param.overlap/100.0f)*(param.fullConsensusSamples/100.0f));             //number of vertices to win ransac
             int bestConsIdx = -1;                       //index of the best candidate, needed to store picked points
@@ -305,7 +302,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             timer.start();
             for(int i = 0; i<param.ransacIter; i++)
             {
-                int errCode = FeatureAlignment::SelectBase(*vecFMov,*baseVec, param,i);
+                int errCode = FeatureAlignment::SelectBase(*vecFMov,*baseVec, param);
                 if(errCode) continue; //can't find a base, skip this iteration
             }
             res.numBasesFound=baseVec->size();
@@ -365,11 +362,8 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 Matrix44Type currTr = currCandidate.tr;              //load the right transformation
                 Matrix44Type oldTr = ApplyTransformation(mMov, currTr); //apply transformation
                 consParam.samples=param.short_cons_samples;                
-                consParam.threshold = param.shortConsOffset*param.overlap/100.0f;
                 currCandidate.shortCons = cons.Check(consParam);     //compute short consensus
                 ResetTransformation(mMov, oldTr);                    //restore old tranformation
-
-                if(currCandidate.shortCons >= short_cons_succ) res.numWonShortCons++;  //count how many won, and use this as bound later
 
                 if(cb){ progBar+=offset; cb(int(progBar),"Short consensus..."); }
             }
@@ -380,11 +374,11 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             sort(candidates->begin(), candidates->end(), CandidateType::SortByScore);
 
             //variables needed for progress bar callback
-            offset = (20.0f/math::Min(param.maxNumFullConsensus,res.numWonShortCons));
+            offset = (20.0f/param.maxNumFullConsensus);
 
             //evaluetes at most maxNumFullConsensus candidates beetween those who won short consensus
             timer.start();
-            for(int j=0; j<res.numWonShortCons && j<param.maxNumFullConsensus; j++)
+            for(int j=0; j<param.maxNumFullConsensus; j++)
             {
                 CandidateType& currCandidate = (*candidates)[j];
                 Matrix44Type currTr = currCandidate.tr;              //load the right transformation
@@ -395,24 +389,29 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 int consensus = cons.Check(consParam);              //compute full consensus
                 ResetTransformation(mMov, oldTr);                   //restore old tranformation
 
-                if(consensus >= cons_succ) res.numWonFullCons++;
-
                 //verify if transformation has the best consensus and update the result
-                if( (consensus >= cons_succ) && (consensus > bestConsensus) )
+                if( (consensus >= cons_succ))
                 {
-                    res.exitCode = Result::ALIGNED;
-                    res.tr = currTr;
-                    bestConsensus = consensus;
-                    res.bestConsensus = 100.0f*(float(bestConsensus)/param.fullConsensusSamples);                    
-                    bestConsIdx = j;
-                    if(consensus >= ransac_succ) break;    //very good alignment, no more iterations are done
+                    res.numWonFullCons++;
+                    if(consensus > bestConsensus)
+                    {
+                        res.exitCode = Result::ALIGNED;
+                        res.tr = currTr;
+                        bestConsensus = consensus;
+                        res.bestConsensus = 100.0f*(float(bestConsensus)/param.fullConsensusSamples);
+                        bestConsIdx = j;
+                        if(consensus >= ransac_succ) break;    //very good alignment, no more iterations are done
+                    }
+                }//else we store the consensus score anyway, so even if we fail we can provide an estimation
+                else{
+                    if(100*(float(consensus)/param.fullConsensusSamples)>res.bestConsensus)
+                        res.bestConsensus = 100.0f*(float(consensus)/param.fullConsensusSamples);
                 }
-
                 if(cb){ progBar+=offset; cb(int(progBar),"Full consensus..."); }
             }
             res.fullConsTime = timer.elapsed();
             res.totalTime = tot_timer.elapsed();
-            if(param.log) param.log(3,"%i full consensus performed in %i msec.", (param.maxNumFullConsensus<res.numWonShortCons)? param.maxNumFullConsensus : res.numWonShortCons, res.fullConsTime);
+            if(param.log) param.log(3,"%i full consensus performed in %i msec.", param.maxNumFullConsensus, res.fullConsTime);
 
             //if flag 'points' is checked, clear old picked points and save the new points
             if(param.pickPoints){
@@ -437,6 +436,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
         error code 3 : Features extracted are not enough to pick k neighboors - Matching
         error code 4 : Base isn't enough sparse - Matching
         error code 5 : Error while computing rigid transformation - FindRigidTransform
+        error code 6 : Error while computing features - Init
         *******************************************************************************************/
         static QString getErrorMsg(int code)
         {
@@ -446,6 +446,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 case 3: return QString("Features extracted are not enough to pick k neighboors.");
                 case 4: return QString("Base isn't enough sparse.");
                 case 5: return QString("Error while computing rigid transformation.");
+                case 6: return QString("Error while computing features.");
                 default: return QString("An unkown error occurred.");
             }
         }
@@ -457,7 +458,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             res.errorMsg = FeatureAlignment::getErrorMsg(errorCode);
         }
 
-        static FEATURE_TYPE** FeatureUniform(vector<FEATURE_TYPE*>& vecF, int* sampleNum, int seed = clock())
+        static FEATURE_TYPE** FeatureUniform(vector<FEATURE_TYPE*>& vecF, int* sampleNum)
         {
             typedef typename vector<FeatureType*>::iterator FeatureIterator;
 
@@ -468,7 +469,6 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
 
             assert(vec.size()==vecF.size());
 
-            tri::SurfaceSampling<MeshType, VertexPointerSampler>::SamplingRandomGenerator().initialize(seed);
             unsigned int (*p_myrandom)(unsigned int) = tri::SurfaceSampling<MeshType, VertexPointerSampler>::RandomInt;
             std::random_shuffle(vec.begin(),vec.end(), p_myrandom);
 
@@ -558,15 +558,15 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             if(queryPts) annDeallocPts(queryPts);
             if(idx){ delete [] idx; idx = NULL; }
             if(dists){ delete [] dists; dists = NULL; }
-                if(close) annClose();				//done with ANN; clean memory shared among all the kdTrees
+            if(close) annClose();				//done with ANN; clean memory shared among all the kdTrees
         }
 
-        static int SelectBase(vector<FEATURE_TYPE*>& vecFMov, vector<FEATURE_TYPE**>& baseVec, Parameters& param,int seed = clock())
+        static int SelectBase(vector<FEATURE_TYPE*>& vecFMov, vector<FEATURE_TYPE**>& baseVec, Parameters& param)
         {
             assert(param.nBase<=int(vecFMov.size()));  //not enough features to pick a base
             float baseDist = param.sparseBaseDist*(param.mMovBBoxDiag/100.0f); //compute needed params
 
-            FeatureType** base = FeatureAlignment::FeatureUniform(vecFMov, &(param.nBase), seed); //randomly chooses a base of features from vecFFix
+            FeatureType** base = FeatureAlignment::FeatureUniform(vecFMov, &(param.nBase)); //randomly chooses a base of features from vecFFix
             if(!VerifyBaseDistances(base, param.nBase, baseDist)) return 4; //if base point are not enough sparse, skip
             baseVec.push_back(base);
             return 0;
@@ -813,5 +813,5 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             }
             return result;
         }
-
 };
+#endif //FEATURE_ALIGNMENT_H

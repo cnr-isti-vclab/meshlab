@@ -68,8 +68,9 @@ class SmoothCurvatureFeature
     static float getNullValue();
     static bool isNullValue(float);
     static int getFeatureDimension();
-    static void SetupParameters( ParamType& param );
-    static bool ComputeFeature( MeshType&, ParamType& param, CallBackPos *cb=NULL);
+    static void SetupParameters(ParamType& param );
+    static bool HasBeenComputed(MeshType& m);
+    static bool ComputeFeature(MeshType&, ParamType& param, CallBackPos *cb=NULL);
     static bool Subset(int, MeshType&, vector<FeatureType*>&, int, CallBackPos *cb=NULL);
     static bool CheckPersistency(FeatureType f);
 
@@ -157,6 +158,12 @@ template<class MESH_TYPE, int dim> void SmoothCurvatureFeature<MESH_TYPE,dim>::P
     //tri::Clean<MeshType>::RemoveNonManifoldVertex(m);
     tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
     tri::Allocator<MeshType>::CompactVertexVector(m);
+}
+
+template<class MESH_TYPE, int dim> bool SmoothCurvatureFeature<MESH_TYPE,dim>::HasBeenComputed(MeshType &m)
+{
+    //checks if the attribute exist
+    return tri::HasPerVertexAttribute(m,std::string(FeatureType::getName()));
 }
 
 template<class MESH_TYPE, int dim> bool SmoothCurvatureFeature<MESH_TYPE,dim>::ComputeFeature(MeshType &m, ParamType& param, CallBackPos *cb)
@@ -559,8 +566,9 @@ class APSSCurvatureFeature
     static float getNullValue();
     static bool isNullValue(float);
     static int getFeatureDimension();
-    static void SetupParameters( ParamType& param );
-    static bool ComputeFeature( MeshType&, ParamType& param, CallBackPos *cb=NULL);
+    static void SetupParameters(ParamType& param );
+    static bool HasBeenComputed(MeshType& m);
+    static bool ComputeFeature(MeshType&, ParamType& param, CallBackPos *cb=NULL);
     static bool Subset(int, MeshType&, vector<FeatureType*>&, int, CallBackPos *cb=NULL);
     static bool CheckPersistency(FeatureType f);
 
@@ -705,6 +713,12 @@ template<class MESH_TYPE, int dim> bool APSSCurvatureFeature<MESH_TYPE,dim>::Com
     delete mls;
 
     return true;
+}
+
+template<class MESH_TYPE, int dim> bool APSSCurvatureFeature<MESH_TYPE,dim>::HasBeenComputed(MeshType &m)
+{
+    //checks if the attribute exist
+    return tri::HasPerVertexAttribute(m,std::string(FeatureType::getName()));
 }
 
 template<class MESH_TYPE, int dim> bool APSSCurvatureFeature<MESH_TYPE,dim>::ComputeFeature(MeshType &m, ParamType& param, CallBackPos *cb)

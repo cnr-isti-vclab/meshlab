@@ -275,7 +275,7 @@ bool FilterFeatureAlignment::logResult(FilterIDType filter, typename ALIGNER_TYP
         case AF_RANSAC:{
             switch(res.exitCode){
                 case ResultType::ALIGNED : {mylogger(GLLogStream::FILTER,"Alignemnt found: %.2f%% consensus.", res.bestConsensus); return true;}
-                case ResultType::NOT_ALIGNED : {mylogger(GLLogStream::FILTER,"Alignemnt not found."); return true;}
+                case ResultType::NOT_ALIGNED : {mylogger(GLLogStream::FILTER,"Alignemnt not found: best consensus found %.2f%%.", res.bestConsensus); return true;}
                 case ResultType::FAILED : {errorMsg = res.errorMsg; return false; }
                 default : assert(0);
             }
@@ -670,12 +670,12 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacOperation(MeshModel&
     typedef typename AlignerType::Result ResultType;
 
     //enables needed attributes. MM_VERTMARK is used by the getClosest functor.
-    mFix.updateDataMask(MeshModel::MM_VERTMARK);
-    mMov.updateDataMask(MeshModel::MM_VERTMARK);
+    mFix.updateDataMask(MeshModel::MM_VERTMARK|FeatureType::getRequirements());
+    mMov.updateDataMask(MeshModel::MM_VERTMARK|FeatureType::getRequirements());
 
     AlignerType aligner;
     param.log = &mylogger; //set the callback used to print infos inside the procedure
-    ResultType res = aligner.init(mFix.cm, mMov.cm, param);
+    ResultType res = aligner.init(mFix.cm, mMov.cm, param, cb);
     if(res.exitCode==ResultType::FAILED) return res;
 
     //perform RANSAC and get best transformation matrix
@@ -707,7 +707,7 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacDiagramOperation(Mes
     ResultType res;
 
     FILE* file = fopen("Diagram.txt","w+");
-    fprintf(file,"Fix Mesh#%s\nMove Mesh#%s\nFeature#%s\nNum. of vertices of Fix Mesh#%i\nNum. of vertices of Move Mesh#%i\nOverlap#%.2f%%\nShort consensus threshold#%.2f%% overlap#%.2f%% of Move Mesh#\nFull consensus threshold#%.2f%% overlap#%.2f%% of Move Mesh#\nTrials#%i\n",mFix.fileName.c_str(),mMov.fileName.c_str(),FeatureType::getName(),mFix.cm.VertexNumber(),mMov.cm.VertexNumber(),param.overlap,param.shortConsOffset,(param.shortConsOffset*param.overlap/100.0f),param.consOffset,(param.consOffset*param.overlap/100.0f),trials); fflush(file);
+    fprintf(file,"Fix Mesh#%s\nMove Mesh#%s\nFeature#%s\nNum. of vertices of Fix Mesh#%i\nNum. of vertices of Move Mesh#%i\nOverlap#%.2f%%\nFull consensus threshold#%.2f%% overlap#%.2f%% of Move Mesh#\nTrials#%i\n",mFix.fileName.c_str(),mMov.fileName.c_str(),FeatureType::getName(),mFix.cm.VertexNumber(),mMov.cm.VertexNumber(),param.overlap,param.consOffset,(param.consOffset*param.overlap/100.0f),trials); fflush(file);
 for(int h=0; h<4; h++)
 {
     fprintf(file,"Iterazioni#Tempo di inizializzazione#Tempo di esecuzione#Prob. Succ.#Prob. Fall. per Sec#Num. medio basi\n0#0#0#0#0\n"); fflush(file);
