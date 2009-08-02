@@ -614,10 +614,14 @@ bool AlignPair::SampleMovVert(vector<A2Vertex> &vert, int SampleNum, AlignPair::
 }
 
 
-int LocRnd(int n)
-{
-  static math::SubtractiveRingRNG myrnd(time(0)); 
-	return myrnd.generate(n);
+// Function to retrieve a static random number generator object.
+static math::SubtractiveRingRNG &LocRnd(){
+    static math::SubtractiveRingRNG myrnd(time(NULL));
+    return myrnd;
+}
+// Gets a random number in the interval [0..n].
+static int LocRnd(int n){
+    return LocRnd().generate(n);
 }
 // Scelta a caso semplice
 bool AlignPair::SampleMovVertRandom(vector<A2Vertex> &vert, int SampleNum)
