@@ -2262,7 +2262,7 @@ namespace io {
 		
 
 		//If the index is valid, return the color of index 'index'
-		inline static void getColor(const QStringList& list, int component, int index, vcg::Color4b& dest, vcg::Color4b& defValue)
+		inline static void getColor(const QStringList& list, int component, int index, vcg::Color4b& dest, const vcg::Color4b& defValue)
 		{
 			if(!list.isEmpty() && (index + component - 1) < list.size())
 			{
