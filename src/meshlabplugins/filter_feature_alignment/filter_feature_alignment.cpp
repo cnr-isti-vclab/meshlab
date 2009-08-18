@@ -53,7 +53,7 @@ void mylogger(int level, const char * f, ... )
 FilterFeatureAlignment::FilterFeatureAlignment()
 {
     typeList << AF_COMPUTE_FEATURE
-             << AF_EXTRACTION                    
+             << AF_EXTRACTION
              << AF_CONSENSUS
              << AF_RANSAC             
              << AF_RANSAC_DIAGRAM;
@@ -701,18 +701,16 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacDiagramOperation(Mes
     float offset = 100.0f/(trials);
 
     //enables needed attributes. MM_VERTMARK is used by the getClosest functor.
-    mFix.updateDataMask(MeshModel::MM_VERTMARK);
-    mMov.updateDataMask(MeshModel::MM_VERTMARK);
+    mFix.updateDataMask(MeshModel::MM_VERTMARK|FeatureType::getRequirements());
+    mMov.updateDataMask(MeshModel::MM_VERTMARK|FeatureType::getRequirements());
 
     ResultType res;
 
     FILE* file = fopen("Diagram.txt","w+");
     fprintf(file,"Fix Mesh#%s\nMove Mesh#%s\nFeature#%s\nNum. of vertices of Fix Mesh#%i\nNum. of vertices of Move Mesh#%i\nOverlap#%.2f%%\nFull consensus threshold#%.2f%% overlap#%.2f%% of Move Mesh#\nTrials#%i\n",mFix.fileName.c_str(),mMov.fileName.c_str(),FeatureType::getName(),mFix.cm.VertexNumber(),mMov.cm.VertexNumber(),param.overlap,param.consOffset,(param.consOffset*param.overlap/100.0f),trials); fflush(file);
-for(int h=0; h<4; h++)
-{
+
     fprintf(file,"Iterazioni#Tempo di inizializzazione#Tempo di esecuzione#Prob. Succ.#Prob. Fall. per Sec#Num. medio basi\n0#0#0#0#0\n"); fflush(file);
 
-    AlignerType aligner;
     float probSucc = 0.0f, meanTime = 0.0f, meanInitTime = 0.0f, failPerSec = -1.0f;
     int numWon = 0, trialsTotTime = 0, trialsInitTotTime = 0, numBases = 0;
     param.ransacIter = from;
@@ -725,11 +723,13 @@ for(int h=0; h<4; h++)
             //callback handling
             if(cb){ progBar+=offset; cb(int(progBar),"Computing diagram..."); }            
 
+            AlignerType aligner;
             res = aligner.init(mFix.cm, mMov.cm, param);
             if(res.exitCode==ResultType::FAILED) return res;
             trialsInitTotTime+=res.initTime;
 
             res = aligner.align(mFix.cm, mMov.cm, param);
+
             trialsTotTime+=res.totalTime;
             numBases+=res.numBasesFound;
             if(res.exitCode==ResultType::ALIGNED) numWon++;
@@ -740,11 +740,11 @@ for(int h=0; h<4; h++)
         meanTime = trialsTotTime/float(trials);             //t=sec elapsed to perform N ransac iterations
         meanInitTime = trialsInitTotTime/float(trials);
         failPerSec = std::pow(1-probSucc,1.0f/(meanTime/1000));    //fail rate per sec is: (1-k)^(1/t)
-        fprintf(file,"%i#%.2f#%.2f#%.2f#%.2f#%i\n", param.ransacIter, meanInitTime/1000, meanTime/1000, probSucc, failPerSec,numBases/trials); fflush(file);
+        fprintf(file,"%i#=%.0f/1000#=%.0f/1000#=%.0f/100#=%.0f/100#%i\n", param.ransacIter, meanInitTime, meanTime, 100*probSucc, 100*failPerSec,numBases/trials); fflush(file);
         numWon = 0; trialsTotTime = 0; trialsInitTotTime=0; progBar=0.0f; numBases=0;
         param.ransacIter+=step;
     }
-}
+
     fclose(file);
     return res;  //all right
 }
