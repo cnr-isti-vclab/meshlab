@@ -507,6 +507,7 @@ public:
 	bool Preconditions(MeshType &mesh)
 	{
 		bool b;
+		vcg::tri::UpdateTopology<MeshType>::FaceFace(mesh);
 
 		b=vcg::tri::Clean<MeshType>::IsTwoManifoldFace(mesh);
 		if (!b)
@@ -522,12 +523,12 @@ public:
 
 		for (unsigned int i=0;i<mesh.face.size();i++)
 			for (unsigned int j=0;j<3;j++)
-				if (mesh.face[i].FFi(j)==-1)
+				if (mesh.face[i].FFp(j)==(&mesh.face[i]))
 					return false;
 
 		return true;
 	}
-	
+
 	///perform a global optimization step
 	void GlobalOptimizeStep()
 	{
@@ -549,19 +550,11 @@ public:
 	bool Parametrize(MeshType *mesh)
 	{
 		bool done;
-		/*time_opt=0;
-		int time0=clock();*/
-		//vcg::tri::UpdateTopology<MeshType>::VertexFace(*mesh);
 		
 		done=InitBaseMesh<MeshType>(mesh,lower_limit,interval);
 		if (!done)
 			return false;
-		/*int time1=clock();
-#ifndef _MESHLAB
-		printf("ELAPSED TIME:%d secs",(int)(time1-time0)/1000);
-		printf("OPTIMIZATION TIME:%d percent of total",(int)(time_opt*100/(time1-time0)));
-#endif*/
-
+		
 		GlobalOptimizeStep();
 		return true;
 	}
