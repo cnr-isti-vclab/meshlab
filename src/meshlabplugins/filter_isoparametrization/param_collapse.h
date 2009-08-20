@@ -33,10 +33,9 @@ public:
 
 	inline ParamEdgeCollapse(const EdgeType &p, int mark)
 	{    
-                Super::localMark = mark;
-                Super::pos=p;
-                Super::_priority = ComputePriority();
-		//savedomain=false;
+        Super::localMark = mark;
+        Super::pos=p;
+        Super::_priority = ComputePriority();
 	}
 
 	inline ScalarType Cost()
@@ -44,15 +43,12 @@ public:
 	std::vector<typename BaseMesh::FaceType*> on_edge,faces1,faces2;
         getSharedFace<BaseMesh>(Super::pos.V(0),Super::pos.V(1),on_edge,faces1,faces2);
 
-	/*const ScalarType sqr3=sqrt(3.0);*/
 	FaceType* edgeF[2];
 	edgeF[0]=on_edge[0];
 	edgeF[1]=on_edge[1];
         ScalarType costArea=EstimateAreaByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
         ScalarType lenght=EstimateLenghtByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
 
-	//ScalarType lenght=(Distance(pos.V(0)->cP(),pos.V(1)->cP()));
-	//return (pow(lenght,2)+costArea*4);
 	return (pow(lenght,2)+costArea);
   }
 	
