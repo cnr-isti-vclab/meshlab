@@ -701,6 +701,36 @@ private:
 
 		return num;
 	}
+	
+	int getSharedVertices(AbstractFace *f0,AbstractFace *f1,AbstractVertex *shared[3])
+	{
+		AbstractVertex *vert0[3],*vert1[3];
+		
+		vert0[0]=f0->V(0);
+		vert0[1]=f0->V(1);
+		vert0[2]=f0->V(2);
+
+		vert1[0]=f1->V(0);
+		vert1[1]=f1->V(1);
+		vert1[2]=f1->V(2);
+
+		
+		int num=0;
+		for (int i=0;i<3;i++)
+		{
+			AbstractVertex * test=vert0[i];
+			bool found0=false;
+			if ((vert1[0]==test)||(vert1[1]==test)||(vert1[2]==test))
+					found0=true;
+			if (found0)
+			{
+				shared[num]=test;
+				num++;
+			}
+		}
+
+		return num;
+	}
 
 	void Clamp(vcg::Point2f &UV)
 	{
@@ -794,6 +824,54 @@ public:
 		assert((uvI2.X()>=-1)&&(uvI2.Y()>=-1)&&(uvI2.X()<=1)&&(uvI2.Y()<=1)); 
 
 		
+
+		return 2;
+
+	}
+	
+	///return the minimum interpolation space shared by two faces of abstarct domain
+	///return 0 if is a face 1 is a diamaond and 2 is a star
+	int InterpolationSpace(const int &I0,const int &I1,int &IndexDomain)
+	{
+		///that case is the face itself
+		if (I0==I1)
+		{
+			IndexDomain=I0;
+			return 0;
+		}
+		AbstractFace* f0=&AbsMesh()->face[I0];
+		AbstractFace* f1=&AbsMesh()->face[I1];
+		AbstractVertex *v0=f0->V(0);
+		AbstractVertex *v1=f0->V(1);
+		AbstractVertex *v2=f0->V(2);
+		AbstractVertex *v3=f1->V(0);
+		AbstractVertex *v4=f1->V(1);
+		AbstractVertex *v5=f1->V(2);
+
+		
+		AbstractVertex *shared[3];
+
+		int num=getSharedVertices(f0,f1,shared);
+		if (!((num==1)||(num==2)))
+			return -1;
+		if (num==2)///ude diamond
+		{
+			AbstractVertex* v0=shared[0];
+			AbstractVertex* v1=shared[1];
+			int EdgeIndex;
+
+			getDiamondFromPointer(v0,v1,EdgeIndex);
+
+			IndexDomain=EdgeIndex;
+			return 1;
+		}
+
+		///use the star domain
+
+		AbstractVertex* center=shared[0];
+		int StarIndex;
+		getStarFromPointer(center,StarIndex);
+		IndexDomain=StarIndex;
 
 		return 2;
 
@@ -990,7 +1068,27 @@ public:
 		return 2;
 	}
 
-	
+	///given the I and UV coordinates return the face and barycentric coords
+	///return the domain used for interpolation 0=face 1=half diam 2=half star
+	///and 3D Coordinates
+	int Theta(const int &I,
+		const vcg::Point2<ScalarType> &UV,
+		CoordType &pos3D)
+	{
+		std::vector<ParamFace*> face;
+		std::vector<CoordType> baryVal;
+		int ret=Theta(I,UV,face,baryVal);
+		pos3D=CoordType(0,0,0);
+		for (int i=0;i<face.size();i++)
+		{
+			CoordType pos=face[i]->V(0)->P()*baryVal[i].X()+
+						  face[i]->V(1)->P()*baryVal[i].Y()+
+						  face[i]->V(2)->P()*baryVal[i].Z();
+			pos3D+=pos;
+		}
+		pos3D/=(ScalarType)face.size();
+		return ret;
+	}
 
 	///return the coordinate on the half star domain
 	bool GE0(const int &I,
@@ -1131,6 +1229,48 @@ public:
 		
 	}
 	
+	///given the diamond coordinates return the coordinates in the parametrization space
+	///in this case I is fixed and should falls also outside the face I
+	void inv_GE1_fixedI(const int &DiamIndex,
+		const vcg::Point2<ScalarType> &UVDiam,
+		const int &I,
+		vcg::Point2<ScalarType> &bary)
+	{
+		AbstractMesh* diam_domain=diamond_meshes[DiamIndex].domain;
+		int index;
+		CoordType bary3d;
+		///then find barycentryc coordinates with respect to such face
+		int local_face=diamond_meshes[DiamIndex].Global2Local(I);
+		AbstractFace* f=&diamond_meshes[DiamIndex].domain->face[local_face];
+		vcg::Point2<ScalarType> p0=f->V(0)->T().P();
+		vcg::Point2<ScalarType> p1=f->V(1)->T().P();
+		vcg::Point2<ScalarType> p2=f->V(2)->T().P();
+		InterpParam(p0,p1,p2,UVDiam,bary3d.X(),bary3d.Y(),bary3d.Z());
+		bary.X()=bary3d.X();
+		bary.Y()=bary3d.Y();
+	}
+	
+	///given the star return the coordinates in the parametrization space
+	///in this case I is fixed and should falls also outside the face I
+	void inv_GE0_fixedI(const int &StarIndex,
+		const vcg::Point2<ScalarType> &UVStar,
+		const int &I,
+		vcg::Point2<ScalarType> &bary)
+	{
+		AbstractMesh* star_domain=star_meshes[StarIndex].domain;
+		int index;
+		CoordType bary3d;
+		///then find barycentryc coordinates with respect to such face
+		int local_face=star_meshes[StarIndex].Global2Local(I);
+		AbstractFace* f=&star_meshes[StarIndex].domain->face[local_face];
+		vcg::Point2<ScalarType> p0=f->V(0)->T().P();
+		vcg::Point2<ScalarType> p1=f->V(1)->T().P();
+		vcg::Point2<ScalarType> p2=f->V(2)->T().P();
+		InterpParam(p0,p1,p2,UVStar,bary3d.X(),bary3d.Y(),bary3d.Z());
+		bary.X()=bary3d.X();
+		bary.Y()=bary3d.Y();
+	}
+
 	///given the diamond coordinates AS A QUAD return the coordinates in the parametrization space
 	void inv_GE1Quad(const int &DiamIndex,
 					const vcg::Point2<ScalarType> &UVQuad,
@@ -1329,154 +1469,234 @@ public:
 		
 		Update();
 	}
-
 	
-
-	//void AreaDistorsion(ParamFace *f,ScalarType &distorsion,ScalarType &area_3d)
-	//{
-	//	const float epsilon=0.000001f;
-	//	const float maxRatio=10.f;
-	//	int indexDomain;
-	//	vcg::Point2f UV0,UV1,UV2;
-	//	int domainType=InterpolationSpace(f,UV0,UV1,UV2,indexDomain);
-
-	//	
-	//	area_3d=((f->P(1)-f->P(0))^(f->P(2)-f->P(0))).Norm()/2.0;
-	//	ScalarType area_2d=((UV1-UV0)^(UV2-UV0))/2.0;
-	//	area_3d/=Area3d;
-	//	area_2d/=AbstractArea;
-
-	//	if (fabs(area_2d)<epsilon)area_2d=epsilon;
-	//	if (fabs(area_3d)<epsilon)area_3d=epsilon;
-
-	//	ScalarType r0=area_3d/area_2d;
-	//	ScalarType r1=area_2d/area_3d;
-	//	if (r0>maxRatio)r0=maxRatio;
-	//	if (r1>maxRatio)r1=maxRatio;
-
-	//	distorsion=((r0+r1)/2.0)-1.0;
-	//}
-	//
-	//void AngleDistorsion(ParamFace *f,ScalarType &distortion)
-	//{
-	//	const float epsilon=0.000001f;
-	//	ScalarType area_3d=((f->P(1)-f->P(0))^(f->P(2)-f->P(0))).Norm();
-	//	int indexDomain;
-	//	vcg::Point2f UV0,UV1,UV2;
-	//	int domainType=InterpolationSpace(f,UV0,UV1,UV2,indexDomain);
-	//	ScalarType area_2d=fabs((UV1-UV0)^(UV2-UV0));
-	//	ScalarType a2=(f->P(1)-f->P(0)).SquaredNorm();
-	//	ScalarType b2=(f->P(2)-f->P(1)).SquaredNorm();
-	//	ScalarType c2=(f->P(0)-f->P(2)).SquaredNorm();
-	//	ScalarType cot_a=((UV2-UV1)*(UV0-UV2));
-	//	ScalarType cot_b=((UV0-UV2)*(UV1-UV0));
-	//	ScalarType cot_c=((UV1-UV0)*(UV2-UV1));
-
-	//	ScalarType num;
-	//	if ((fabs(area_2d)<epsilon)||(fabs(area_3d)<epsilon))
-	//		num=0;
-	//	else
-	//		num=(cot_a*a2+cot_b*b2+cot_c*c2)/area_2d;
-
-	//	distortion=fabs(num/(Area3d*4.0));
-	//}
-
-	//ScalarType AreaDistorsion()
-	//{
-	//	ScalarType sum=0;
-	//	for (int i=0;i<param_mesh->face.size();i++)
-	//	{
-	//		float area3d=0;
-	//		ScalarType distorsion=0;
-	//		AreaDistorsion(&param_mesh->face[i],distorsion,area3d);
-	//		sum+=distorsion*area3d;
-	//	}
-	//	return(fabs(sum));
-	//}
-	//
-	//ScalarType AngleDistorsion()
-	//{
-	//	ScalarType sum=0;
-	//	for (int i=0;i<param_mesh->face.size();i++)
-	//	{
-	//		ScalarType distorsion=0;
-	//		AngleDistorsion(&param_mesh->face[i],distorsion);
-	//		sum+=distorsion;
-	//	}
-	//	return (sum)-1.0;
-	//}
-
-	//ScalarType AggregateDistorsion()
-	//{
-	//	ScalarType d0=AreaDistorsion();
-	//	ScalarType d1=AngleDistorsion();
-	//	ScalarType ret=geomAverage<double>(d0+1.0,d1+1.0,3,1)-1;
-	//	return ret;
-	//}
-
-	//ScalarType  L2Error()
-	//{
-	//	///equilateral triagle
-	//	vcg::Point2f p0(-0.5,0.0);
-	//	vcg::Point2f p1(0.5,0.0);
-	//	vcg::Point2f p2(0,0.866025f);
-	//	ParamMesh::FaceIterator Fi;
-
-	//	float sum=0;
-	//	float A3dtot=0;
-	//	float A2dtot=0;
-	//	for (Fi=param_mesh->face.begin();Fi!=param_mesh->face.end();Fi++)
-	//	{
-	//		if (!(*Fi).IsD())
-	//		{
-	//			ParamFace *f=&(*Fi);
-	//			CoordType q1=(*Fi).V(0)->P();
-	//			CoordType q2=(*Fi).V(1)->P();
-	//			CoordType q3=(*Fi).V(2)->P();
-	//			///map to equilateral triangle
-	//			/*vcg::Point2f UV1=p0*(*Fi).V(0)->Bary.X()+p1*(*Fi).V(0)->Bary.Y()+p2*(*Fi).V(0)->Bary.Z();
-	//			vcg::Point2f UV2=p0*(*Fi).V(1)->Bary.X()+p1*(*Fi).V(1)->Bary.Y()+p2*(*Fi).V(1)->Bary.Z();
-	//			vcg::Point2f UV3=p0*(*Fi).V(2)->Bary.X()+p1*(*Fi).V(2)->Bary.Y()+p2*(*Fi).V(2)->Bary.Z();*/
-	//			vcg::Point2f UV1,UV2,UV3;
-	//			int indexDomain;
-	//			int domainType=InterpolationSpace(f,UV1,UV2,UV3,indexDomain);
-	//			ScalarType s1=UV1.X();
-	//			ScalarType t1=UV1.Y();
-	//			ScalarType s2=UV2.X();
-	//			ScalarType t2=UV2.Y();
-	//			ScalarType s3=UV3.X();
-	//			ScalarType t3=UV3.Y();
-	//			ScalarType A=fabs(((s2-s1)*(t3-t1)-(s3-s1)*(t2-t1))/2.0);
-	//			if (A<0.00001)
-	//				A=0.00001;
-	//			ScalarType A3d=((q2 - q1) ^ (q3 - q1)).Norm()/2.0;
-	//			A3dtot+=A3d;
-	//			A2dtot+=A;
-	//			CoordType Ss=(q1*(t2-t3)+q2*(t3-t1)+q3*(t1-t2))/(2.0*A);
-	//			CoordType St=(q1*(s3-s2)+q2*(s1-s3)+q3*(s2-s1))/(2.0*A);
-	//			ScalarType a=Ss*Ss;
-	//			ScalarType b=Ss*St;
-	//			ScalarType c=St*St;
-	//			ScalarType L2=sqrt((a+c)/2.0);
-	//			sum+=L2*L2*A3d;
-	//		}
-	//}
-	//sum=sqrt(sum/A3dtot)*sqrt(A2dtot/A3dtot);
-	//return sum;
-	//}
-
-	/*void PrintAttributes()
-	{
-		printf("\n STATISTICS \n"),
-		printf("AREA	   distorsion:%lf ;\n",AreaDistorsion());
-		printf("ANGLE	   distorsion:%lf ;\n",AngleDistorsion());
-		printf("AGGREGATE  distorsion:%lf ;\n",AggregateDistorsion());
-		printf("L2 STRETCH efficiency:%lf ;\n",L2Error());
-	}*/
-
 	AbstractMesh *&AbsMesh(){return abstract_mesh;} 
 	ParamMesh	 *&ParaMesh(){return param_mesh;} 
 
+	///given the index of face and the index of the edge return the 
+	///index of diamond
+	int GetDiamond(const int &I,const int & edge)
+	{
+		AbstractVertex *v0=AbsMesh()->face[I].V0(edge);
+		AbstractVertex *v1=AbsMesh()->face[I].V1(edge);
+		int index;
+		getDiamondFromPointer(v0,v1,index);
+		return index;
+	}
+
+	int GetStarIndex(const int &I,const int & indexV)
+	{
+		AbstractVertex *v=AbsMesh()->face[I].V(indexV);
+		int index;
+		getStarFromPointer(v,index);
+		return index;
+	}
+
+	///// I/O FUNCTIONS
+	//void SaveMCP(char* filename)
+	//{
+	//	/*Warp(0);*/
+	//	FILE *f;
+	//	f=fopen(filename,"w+");
+	//	std::map<BaseFace*,int> facemap;
+	//	std::map<BaseVertex*,int> vertexmap;
+	//	typedef std::map<BaseVertex*,int>::iterator iteMapVert;
+	//	typedef std::map<BaseFace*,int>::iterator iteMapFace;
+
+	//	///add vertices
+	//	fprintf(f,"%d,%d \n",base_mesh.fn,base_mesh.vn);
+	//	int index=0;
+	//	for (unsigned int i=0;i<base_mesh.vert.size();i++)
+	//	{
+	//		BaseVertex* vert=&base_mesh.vert[i];
+	//		if (!vert->IsD())
+	//		{
+	//			vertexmap.insert(std::pair<BaseVertex*,int>(vert,index));
+	//			CoordType pos=vert->P();
+	//			CoordType RPos=vert->RPos;
+	//			fprintf(f,"%f,%f,%f;%f,%f,%f \n",pos.X(),pos.Y(),pos.Z(),RPos.X(),RPos.Y(),RPos.Z());
+	//			index++;
+	//		}
+	//	}
+
+	//	///add faces
+	//	index=0;
+	//	for (unsigned int i=0;i<base_mesh.face.size();i++)
+	//	{
+	//		BaseFace* face=&base_mesh.face[i];
+	//		if (!face->IsD())
+	//		{
+	//			BaseVertex* v0=face->V(0);
+	//			BaseVertex* v1=face->V(1);
+	//			BaseVertex* v2=face->V(2);
+	//			iteMapVert vertIte;
+	//			vertIte=vertexmap.find(v0);
+	//			assert(vertIte!=vertexmap.end());
+	//			int index0=(*vertIte).second;
+	//			vertIte=vertexmap.find(v1);
+	//			assert(vertIte!=vertexmap.end());
+	//			int index1=(*vertIte).second;
+	//			vertIte=vertexmap.find(v2);
+	//			assert(vertIte!=vertexmap.end());
+	//			int index2=(*vertIte).second;
+	//			assert((index0!=index1)&&(index1!=index2));
+	//			fprintf(f,"%d,%d,%d \n",index0,index1,index2);
+	//			facemap.insert(std::pair<BaseFace*,int>(face,index));
+	//			index++;
+	//		}
+	//	}
+
+	//	///high resolution mesh
+	//	fprintf(f,"%d,%d \n",final_mesh.fn,final_mesh.vn);
+
+	//	///add vertices
+	//	vertexmap.clear();
+	//	index=0;
+	//	for (unsigned int i=0;i<final_mesh.vert.size();i++)
+	//	{
+	//		BaseVertex* vert=&final_mesh.vert[i];
+	//		if (!vert->IsD())
+	//		{
+	//			vertexmap.insert(std::pair<BaseVertex*,int>(vert,index));
+	//			CoordType pos=vert->P();
+	//			CoordType bary=vert->Bary;
+	//			BaseFace* father=vert->father;
+	//			iteMapFace IteF=facemap.find(father);
+	//			assert (IteF!=facemap.end());
+	//			int indexface=(*IteF).second;
+	//			fprintf(f,"%f,%f,%f;%f,%f,%f;%d,%d,%d;%d \n",
+	//			pos.X(),pos.Y(),pos.Z(),bary.X(),bary.Y(),bary.Z(),
+	//			vert->OriginalCol.X(),vert->OriginalCol.Y(),vert->OriginalCol.Z(),
+	//			indexface);
+	//			index++;
+	//		}
+	//	}
+
+	//	///add faces
+	//	for (unsigned int i=0;i<final_mesh.face.size();i++)
+	//	{
+	//		BaseFace* face=&final_mesh.face[i];
+	//		if (!face->IsD())
+	//		{
+	//			BaseVertex* v0=face->V(0);
+	//			BaseVertex* v1=face->V(1);
+	//			BaseVertex* v2=face->V(2);
+	//			iteMapVert vertIte;
+	//			vertIte=vertexmap.find(v0);
+	//			assert(vertIte!=vertexmap.end());
+	//			int index0=(*vertIte).second;
+	//			vertIte=vertexmap.find(v1);
+	//			assert(vertIte!=vertexmap.end());
+	//			int index1=(*vertIte).second;
+	//			vertIte=vertexmap.find(v2);
+	//			assert(vertIte!=vertexmap.end());
+	//			int index2=(*vertIte).second;
+	//			assert((index0!=index1)&&(index1!=index2));
+	//			fprintf(f,"%d,%d,%d \n",index0,index1,index2);
+	//		}
+	//	}
+	//	fclose(f);
+	//}
+
+	int LoadMCP(AbstractMesh * _abstract_mesh,
+			  ParamMesh	 * _param_mesh,
+				char* filename)
+	{
+		abstract_mesh=_abstract_mesh;
+		param_mesh=_param_mesh;
+
+		FILE *f=NULL;              
+		f=fopen(filename,"r");
+		if (f==NULL)
+			return -1;
+		
+
+		///add vertices
+		abstract_mesh->Clear();
+		fscanf(f,"%d,%d \n",&abstract_mesh->fn,&abstract_mesh->vn);
+		abstract_mesh->vert.resize(abstract_mesh->vn);
+		abstract_mesh->face.resize(abstract_mesh->fn);
+
+		for (unsigned int i=0;i<abstract_mesh->vert.size();i++)
+		{
+			AbstractVertex* vert=&abstract_mesh->vert[i];
+			CoordType pos;
+			CoordType RPos;
+			fscanf(f,"%f,%f,%f;%f,%f,%f \n",&pos.X(),&pos.Y(),&pos.Z(),&RPos.X(),&RPos.Y(),&RPos.Z());
+			vert->P()=pos;
+			//vert->RPos=RPos;
+		}
+
+		
+
+		///add faces
+		for (unsigned int i=0;i<abstract_mesh->face.size();i++)
+		{
+			AbstractFace* face=&abstract_mesh->face[i];
+			if (!face->IsD())
+			{
+				int index0,index1,index2;
+				fscanf(f,"%d,%d,%d \n",&index0,&index1,&index2);
+				abstract_mesh->face[i].V(0)=&abstract_mesh->vert[index0];
+				abstract_mesh->face[i].V(1)=&abstract_mesh->vert[index1];
+				abstract_mesh->face[i].V(2)=&abstract_mesh->vert[index2];
+			}
+		}
+		
+		///high resolution mesh
+		fscanf(f,"%d,%d \n",&param_mesh->fn,&param_mesh->vn);
+		param_mesh->vert.resize(param_mesh->vn);
+		param_mesh->face.resize(param_mesh->fn);
+
+		///add vertices
+		for (unsigned int i=0;i<param_mesh->vert.size();i++)
+		{
+			ParamVertex* vert=&param_mesh->vert[i];
+			CoordType pos;
+			CoordType bary;
+			vcg::Color4b col;
+			int index_face;
+			int col0,col1,col2;
+			fscanf(f,"%f,%f,%f;%f,%f,%f;%d,%d,%d;%d \n",
+				  &pos.X(),&pos.Y(),&pos.Z(),
+				  &bary.X(),&bary.Y(),&bary.Z(),
+				  &col0,&col1,&col2,
+				  &index_face);
+			vert->P()=pos;
+			//vert->RPos=pos;
+			vert->T().P()=vcg::Point2<ScalarType>(bary.X(),bary.Y());
+			vert->T().N()=index_face;
+			
+		}
+
+		///add faces
+		for (unsigned int i=0;i<param_mesh->face.size();i++)
+		{
+			//BaseFace* face=&final_mesh.face[i];
+			
+			int index0,index1,index2;
+			fscanf(f,"%d,%d,%d \n",&index0,&index1,&index2);
+			param_mesh->face[i].V(0)=&param_mesh->vert[index0];
+			param_mesh->face[i].V(1)=&param_mesh->vert[index1];
+			param_mesh->face[i].V(2)=&param_mesh->vert[index2];
+			
+		}
+		fclose(f);
+		
+		///update structures
+		vcg::tri::UpdateBounding<AbstractMesh>::Box(*abstract_mesh);
+		vcg::tri::UpdateTopology<AbstractMesh>::FaceFace(*abstract_mesh);
+		vcg::tri::UpdateTopology<AbstractMesh>::VertexFace(*abstract_mesh);
+
+		vcg::tri::UpdateBounding<ParamMesh>::Box(*param_mesh);
+		vcg::tri::UpdateTopology<ParamMesh>::FaceFace(*param_mesh);
+		vcg::tri::UpdateTopology<ParamMesh>::VertexFace(*param_mesh);
+
+		
+		Update();
+
+		return 0;
+	}
 };
 
 
