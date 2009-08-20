@@ -1,5 +1,7 @@
 #ifndef _DIAMSAMPLER
 #define _DIAMSAMPLER
+#include <stat_remeshing.h>
+#include <vcg/complex/trimesh/clean.h>
 
 class DiamSampler{
 	typedef IsoParametrization::CoordType CoordType;
