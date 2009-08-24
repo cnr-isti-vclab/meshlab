@@ -723,7 +723,11 @@ void GLArea::initTexture()
 			bool res = img.load(mm()->cm.textures[i].c_str());
 			if(!res)
 				{
-				qDebug("Failure of loading texture %s",mm()->cm.textures[i].c_str());
+				 // Note that sometimes (in collada) the texture names could have been encoded with a url-like style (e.g. replacing spaces with '%20') so making some other attempt could be harmless
+				 QString ConvertedName = QString(mm()->cm.textures[i].c_str()).replace(QString("%20"), QString(" "));
+				 res = img.load(ConvertedName);
+				 if(!res) qDebug("Failure of loading texture %s",mm()->cm.textures[i].c_str());
+						 else qDebug("Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mm()->cm.textures[i].c_str());
 				}
 			// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
 			int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
