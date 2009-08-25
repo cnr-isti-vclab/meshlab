@@ -192,6 +192,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	typedef typename TriMeshType::VertexType VertexType;
 	typedef typename TriMeshType::CoordType CoordType;
 	typedef typename TriMeshType::CoordType::ScalarType ScalarType;
+	typedef typename TriMeshType::VertexPointer VertexPointer;
   
 
 	public:
@@ -205,8 +206,8 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	}
 
 // puntatori ai vertici che sono stati messi non-w per preservare il boundary
-	static std::vector<typename TriMeshType::VertexPointer>  & WV(){
-      static std::vector<typename TriMeshType::VertexPointer> _WV; return _WV;
+	static std::vector<VertexPointer>  & WV(){
+      static std::vector<VertexPointer> _WV; return _WV;
     }; 
 
 
@@ -214,14 +215,14 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	static TriEdgeCollapseQuadricTexParameter & Params(){static TriEdgeCollapseQuadricTexParameter p; return p;}
 
 	    // Final Clean up after the end of the simplification process
-    static void Finalize(TriMeshType &m,HeapType&h_ret)
+    static void Finalize(TriMeshType &m,HeapType &h_ret)
     {
 			vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromVF(m);
 
       // If we had the boundary preservation we should clean up the writable flags
      	if(Params().PreserveBoundary)
       {
-        typename 	std::vector<typename TriMeshType::VertexPointer>::iterator wvi;
+        typename 	std::vector<VertexPointer>::iterator wvi;
         for(wvi=WV().begin();wvi!=WV().end();++wvi)
           if(!(*wvi)->IsD()) (*wvi)->SetW();
       }
@@ -310,7 +311,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 		ScalarType ComputePriority(double vv[5],Quadric5<double> &qsum)
 		{
-			typename TriMeshType::VertexType * v[2];
+			VertexType * v[2];
 			v[0] = this->pos.V(0);
 			v[1] = this->pos.V(1);
 
@@ -523,7 +524,6 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	static void InitQuadric(TriMeshType &m)
 	{
 		typename TriMeshType::FaceIterator pf;
-		int j;
 		HelperType::Init(); 
 			
 		for(pf=m.face.begin();pf!=m.face.end();++pf)
@@ -531,9 +531,9 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 				if((*pf).V(0)->IsR() &&(*pf).V(1)->IsR() &&(*pf).V(2)->IsR())
 						{
 							Quadric5<double> q;
-							q.byFace(*pf,QH::Qd3((*pf).V(0)),QH::Qd3((*pf).V(1)),QH::Qd3((*pf).V(2)));
+							q.byFace(*pf, QH::Qd3((*pf).V(0)), QH::Qd3((*pf).V(1)), QH::Qd3((*pf).V(2)));
 
-							for(j=0;j<3;++j)
+							for(int j=0;j<3;++j)
 							  if( (*pf).V(j)->IsW())
 							  {
 								  if(!HelperType::Contains((*pf).V(j),(*pf).WT(j)))
@@ -657,7 +657,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	vcg::TexCoord2<float> newtcoord2;
 	QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > qv;
 	int ncoords;
-	typename TriMeshType::VertexType * v[2];
+	VertexType * v[2];
 	v[0] = this->pos.V(0);
 	v[1] = this->pos.V(1);
 

@@ -196,7 +196,7 @@ public:
 		ScalarType pe1;
 		ScalarType pe2;
 		ScalarType tmpmat[5][5];  
-		ScalarType tmpsymmat[15];  
+		ScalarType tmpsymmat[15];  // a compactly stored 5x5 symmetric matrix. 
 		ScalarType tmpvec[5];  
 		ScalarType p[5]; 
 		ScalarType q[5];
@@ -206,59 +206,30 @@ public:
 		ScalarType e2[5];
 		ScalarType diffe[5];
 
-		CVertexO &v1 = (*fi.V(0));
-		CVertexO &v2 = (*fi.V(1));
-		CVertexO &v3 = (*fi.V(2));
-
 		// computes p
-		p[0] = v1.P().X();
-		p[1] = v1.P().Y();
-		p[2] = v1.P().Z();
-
-		if(!onlygeo)
-		{
-			vcg::TexCoord2<float>& t = fi.WT(0);
-			p[3] = t.u();
-			p[4] = t.v();
-		}
-		else
-		{
-			p[3] = 0;
-			p[4] = 0;
-		}
+		p[0] = fi.P(0).X();
+		p[1] = fi.P(0).Y();
+		p[2] = fi.P(0).Z();
+		p[3] = fi.WT(0).u();
+		p[4] = fi.WT(0).v();
 
 		//  computes q
-		q[0] = v2.P().X();
-		q[1] = v2.P().Y();
-		q[2] = v2.P().Z();
-
-		if(!onlygeo)
-		{
-			vcg::TexCoord2<float>& t = fi.WT(1);
-			q[3] = t.u();
-			q[4] = t.v();
-		}
-		else
-		{
-			q[3] = 0;
-			q[4] = 0;
-		}
-
+		q[0] = fi.P(1).X();
+		q[1] = fi.P(1).Y();
+		q[2] = fi.P(1).Z();
+		q[3] = fi.WT(1).u();
+		q[4] = fi.WT(1).v();
 
 		//  computes r
-		r[0] = v3.P().X();
-		r[1] = v3.P().Y();
-		r[2] = v3.P().Z();
-		if(!onlygeo)
-		{
-			vcg::TexCoord2<float>& t = fi.WT(2);
-			r[3] = t.u();
-			r[4] = t.v();
-		}
-		else
-		{
-			r[3] = 0;
-			r[4] = 0;
+		r[0] = fi.P(2).X();
+		r[1] = fi.P(2).Y();
+		r[2] = fi.P(2).Z();
+		r[3] = fi.WT(2).u();
+		r[4] = fi.WT(2).v();
+
+		if(onlygeo)		{
+			p[3] = 0; q[3] = 0;	r[3] = 0;
+			p[4] = 0; q[4] = 0;	r[4] = 0;
 		}
 
 		/*
