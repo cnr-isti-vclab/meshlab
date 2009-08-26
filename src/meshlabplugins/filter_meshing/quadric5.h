@@ -125,8 +125,9 @@ public:
 		if(q)
 		{
 			// computes the geometrical quadric
-			byFace(f,true);
-
+			//byFaceGeo(f,q1,q2,q3);
+		
+				byFace(f,true);
 			q1.a[0] += a[0];
 			q1.a[1] += a[1];
 			q1.a[2] += a[2];
@@ -187,17 +188,37 @@ public:
 			c=0;
 		}
 	}
+	// failed attempt to use the classic way of computing geometric quadrics.
+	void byFaceGeo(FaceType &fi, math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
+	{
+		Plane3<double,false> p;
+			// Calcolo piano
+			Point3d e1 = Point3d::Construct( fi.V(1)->cP() ) - Point3d::Construct( fi.V(0)->cP() );
+			Point3d e2 = Point3d::Construct( fi.V(2)->cP() ) - Point3d::Construct( fi.V(0)->cP() );
+			e1.Normalize();
+			e2.Normalize();
+			
+		p.SetDirection( e1 ^ e2 );
+			// Se normalizzo non dipende dall'area
+
+		//if(!Params().UseArea)	
+		p.Normalize();
+
+		p.SetOffset( p.Direction().dot(Point3d::Construct(fi.V(0)->cP())));
+		math::Quadric<double> q;	// Calcolo quadrica	delle facce
+		q.ByPlane(p);
+		q1+=q;
+		q2+=q;
+		q3+=q;						
+	}
 	
 	// Computes the geometrical quadric if onlygeo == true and the real quadric if onlygeo == false
 	void byFace(FaceType &fi, bool onlygeo)
 	{
+	  //assert(onlygeo==false);
 		double minerror = std::numeric_limits<double>::max();
 		int minerror_index = 0;
-		ScalarType pe1;
-		ScalarType pe2;
 		ScalarType tmpmat[5][5];  
-		ScalarType tmpsymmat[15];  // a compactly stored 5x5 symmetric matrix. 
-		ScalarType tmpvec[5];  
 		ScalarType p[5]; 
 		ScalarType q[5];
 		ScalarType r[5];
@@ -284,52 +305,15 @@ public:
 			math::normalize_vec5(e1);
 			
 			//  computes e2
+			ScalarType tmpvec[5];  
 			math::sub_vec5(r,p,diffe);
 			math::outproduct5(e1,diffe,tmpmat);
 			math::prod_matvec5(tmpmat,e1,tmpvec);
 			math::sub_vec5(diffe,tmpvec,e2);
 			math::normalize_vec5(e2);
-
-
-			// computes A
-			a[0] = 1;
-			a[1] = 0;
-			a[2] = 0;
-			a[3] = 0;
-			a[4] = 0;
-			a[5] = 1;
-			a[6] = 0;
-			a[7] = 0;
-			a[8] = 0;
-			a[9] = 1;
-			a[10] = 0;
-			a[11] = 0;
-			a[12] = 1;
-			a[13] = 0;
-			a[14] = 1;
-
-			math::symprod_vvt5(tmpsymmat,e1);
-			math::sub_symmat5(a,tmpsymmat);
-			math::symprod_vvt5(tmpsymmat,e2);
-			math::sub_symmat5(a,tmpsymmat);
-
-
-			pe1 = math::inproduct5(p,e1);
-			pe2 = math::inproduct5(p,e2);
 			
-			//  computes b
-
-			tmpvec[0] = pe1*e1[0] + pe2*e2[0]; 
-			tmpvec[1] = pe1*e1[1] + pe2*e2[1]; 
-			tmpvec[2] = pe1*e1[2] + pe2*e2[2]; 
-			tmpvec[3] = pe1*e1[3] + pe2*e2[3]; 
-			tmpvec[4] = pe1*e1[4] + pe2*e2[4];
-
-			math::sub_vec5(tmpvec,p,b);
-
-			//  computes c
-			c = math::inproduct5(p,p)-pe1*pe1-pe2*pe2;
-
+			ComputeFromE1E2(e1,e2,p);
+			
 			if(IsValid())
 				return;
 			else if (minerror_index == -1) // the one with the smallest error has been computed
@@ -347,6 +331,54 @@ public:
 		c = 0; // rounds up to zero
 	}
 
+// Given two orthonormal vectors on the plane and one of the three points compute the quadric.
+// Note it uses the same notation of the original garland 98 paper. 
+void ComputeFromE1E2(ScalarType e1[5], ScalarType e2[5], ScalarType p[5] )
+{
+	// computes A
+	a[0] = 1;
+	a[1] = 0;
+	a[2] = 0;
+	a[3] = 0;
+	a[4] = 0;
+	a[5] = 1;
+	a[6] = 0;
+	a[7] = 0;
+	a[8] = 0;
+	a[9] = 1;
+	a[10] = 0;
+	a[11] = 0;
+	a[12] = 1;
+	a[13] = 0;
+	a[14] = 1;
+
+		ScalarType tmpsymmat[15];  // a compactly stored 5x5 symmetric matrix. 
+	math::symprod_vvt5(tmpsymmat,e1);
+	math::sub_symmat5(a,tmpsymmat);
+	math::symprod_vvt5(tmpsymmat,e2);
+	math::sub_symmat5(a,tmpsymmat);
+
+		ScalarType pe1;
+		ScalarType pe2;
+
+	pe1 = math::inproduct5(p,e1);
+	pe2 = math::inproduct5(p,e2);
+	
+	//  computes b
+		ScalarType tmpvec[5];  
+
+	tmpvec[0] = pe1*e1[0] + pe2*e2[0]; 
+	tmpvec[1] = pe1*e1[1] + pe2*e2[1]; 
+	tmpvec[2] = pe1*e1[2] + pe2*e2[2]; 
+	tmpvec[3] = pe1*e1[3] + pe2*e2[3]; 
+	tmpvec[4] = pe1*e1[4] + pe2*e2[4];
+
+	math::sub_vec5(tmpvec,p,b);
+
+	//  computes c
+	c = math::inproduct5(p,p)-pe1*pe1-pe2*pe2;
+}
+			
 	bool Gauss55( ScalarType x[], ScalarType C[5][5+1] )
 	{
 		const ScalarType keps = (ScalarType)1e-6;
