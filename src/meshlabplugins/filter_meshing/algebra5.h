@@ -39,7 +39,7 @@ namespace vcg {
 		typedef double ScalarType;
 
 		// r = a-b
-		void inline sub_vec5(ScalarType a[5], ScalarType b[5], ScalarType r[5])
+		void inline sub_vec5(const ScalarType a[5], const ScalarType b[5], ScalarType r[5])
 		{
 			r[0] = a[0] - b[0];
 			r[1] = a[1] - b[1];
@@ -49,13 +49,13 @@ namespace vcg {
 		}
 
 		// returns the in-product a*b
-		ScalarType inline inproduct5(ScalarType a[5], ScalarType b[5])
+		ScalarType inline inproduct5(const ScalarType a[5], const ScalarType b[5])
 		{
 			return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3]+a[4]*b[4];
 		}
 
 		// r = out-product of a*b
-		void inline outproduct5(ScalarType a[5], ScalarType b[5], ScalarType r[5][5])
+		void inline outproduct5(const ScalarType a[5], const ScalarType b[5], ScalarType r[5][5])
 		{
 			for(int i = 0; i < 5; i++)
 				for(int j = 0; j < 5; j++)

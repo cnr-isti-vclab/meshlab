@@ -114,67 +114,43 @@ public:
 			ww[i] = tmp;
 		}
 	}
+	
+	// Add the right subset of the current 5D quadric to a given 3D quadric.
+  void AddtoQ3(math::Quadric<double> &q3) const
+	{
+		q3.a[0] += a[0];
+		q3.a[1] += a[1];
+		q3.a[2] += a[2];
+		q3.a[3] += a[5];
+		q3.a[4] += a[6];
 
+		q3.a[5] += a[9];
+
+		q3.b[0] += b[0];
+		q3.b[1] += b[1];
+		q3.b[2] += b[2];
+
+		q3.c += c;
+		
+		assert(q3.IsValid());
+	}
+	
+	
 	// computes the real quadric and the geometric quadric using the face
 	// The geometric quadric is added to the parameter qgeo
-	void byFace(FaceType &f, vcg::math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
+	void byFace(FaceType &f, math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
 	{
 		double q = QualityFace(f);
 		
 		// if quality==0 then the geometrical quadric has just zeroes
 		if(q)
 		{
-			// computes the geometrical quadric
-			//byFaceGeo(f,q1,q2,q3);
-		
-				byFace(f,true);
-			q1.a[0] += a[0];
-			q1.a[1] += a[1];
-			q1.a[2] += a[2];
-			q1.a[3] += a[5];
-			q1.a[4] += a[6];
+			byFace(f,true);			// computes the geometrical quadric
+			AddtoQ3(q1);
+			AddtoQ3(q2);
+			AddtoQ3(q3);			
 
-			q1.a[5] += a[9];
-
-			q1.b[0] += b[0];
-			q1.b[1] += b[1];
-			q1.b[2] += b[2];
-
-			q1.c += c;
-
-			q2.a[0] += a[0];
-			q2.a[1] += a[1];
-			q2.a[2] += a[2];
-			q2.a[3] += a[5];
-			q2.a[4] += a[6];
-
-			q2.a[5] += a[9];
-
-			q2.b[0] += b[0];
-			q2.b[1] += b[1];
-			q2.b[2] += b[2];
-
-			q2.c += c;
-
-			q3.a[0] += a[0];
-			q3.a[1] += a[1];
-			q3.a[2] += a[2];
-			q3.a[3] += a[5];
-			q3.a[4] += a[6];
-
-			q3.a[5] += a[9];
-
-			q3.b[0] += b[0];
-			q3.b[1] += b[1];
-			q3.b[2] += b[2];
-
-			q3.c += c;
-
-			assert(q1.IsValid());
-			assert(q2.IsValid());
-			assert(q3.IsValid());
-
-			byFace(f,false); // computes the real quadric
+			byFace(f,false);		// computes the real quadric
 		}
 		else if(
 			(f.WT(1).u()-f.WT(0).u()) * (f.WT(2).v()-f.WT(0).v()) -
@@ -188,7 +164,9 @@ public:
 			c=0;
 		}
 	}
+	
 	// failed attempt to use the classic way of computing geometric quadrics.
+	// DO NOT USE IT!!
 	void byFaceGeo(FaceType &fi, math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
 	{
 		Plane3<double,false> p;
@@ -216,16 +194,12 @@ public:
 	void byFace(FaceType &fi, bool onlygeo)
 	{
 	  //assert(onlygeo==false);
-		double minerror = std::numeric_limits<double>::max();
-		int minerror_index = 0;
-		ScalarType tmpmat[5][5];  
 		ScalarType p[5]; 
 		ScalarType q[5];
 		ScalarType r[5];
 		ScalarType A[5][5];  
 		ScalarType e1[5];
 		ScalarType e2[5];
-		ScalarType diffe[5];
 
 		// computes p
 		p[0] = fi.P(0).X();
@@ -253,11 +227,19 @@ public:
 			p[4] = 0; q[4] = 0;	r[4] = 0;
 		}
 
+		ComputeE1E2(p,q,r,e1,e2);
+		ComputeQuadricFromE1E2(e1,e2,p);
+		
+		if(IsValid())	return;
+		qDebug("Warning: failed to find a good 5D quadric try to permute stuff.");
+		
 		/*
 		When c is very close to 0, loss of precision causes it to be computed as a negative number,
 		which is invalid for a quadric. Vertex switches are performed in order to try to obtain a smaller
 		loss of precision. The one with the smallest error is chosen.
 		*/
+		double minerror = std::numeric_limits<double>::max();
+		int minerror_index = 0;
 		for(int i = 0; i < 7; i++) // tries the 6! configurations and chooses the one with the smallest error
 		{
 			switch(i)
@@ -299,20 +281,9 @@ public:
 			default:
 				assert(0);
 			}
-
-			//  computes e1
-			math::sub_vec5(q,p,e1);
-			math::normalize_vec5(e1);
 			
-			//  computes e2
-			ScalarType tmpvec[5];  
-			math::sub_vec5(r,p,diffe);
-			math::outproduct5(e1,diffe,tmpmat);
-			math::prod_matvec5(tmpmat,e1,tmpvec);
-			math::sub_vec5(diffe,tmpvec,e2);
-			math::normalize_vec5(e2);
-			
-			ComputeFromE1E2(e1,e2,p);
+      ComputeE1E2(p,q,r,e1,e2);
+			ComputeQuadricFromE1E2(e1,e2,p);
 			
 			if(IsValid())
 				return;
@@ -331,9 +302,27 @@ public:
 		c = 0; // rounds up to zero
 	}
 
-// Given two orthonormal vectors on the plane and one of the three points compute the quadric.
+// Given three 5D points it compute an orthonormal basis e1 e2
+void ComputeE1E2 (const ScalarType p[5],	const	ScalarType q[5],	const	ScalarType r[5], ScalarType e1[5], ScalarType e2[5]) const
+{
+		ScalarType diffe[5];
+		ScalarType tmpmat[5][5];  
+		ScalarType tmpvec[5];  
+//  computes e1
+		math::sub_vec5(q,p,e1);
+		math::normalize_vec5(e1);
+		
+		//  computes e2
+		math::sub_vec5(r,p,diffe);
+		math::outproduct5(e1,diffe,tmpmat);
+		math::prod_matvec5(tmpmat,e1,tmpvec);
+		math::sub_vec5(diffe,tmpvec,e2);
+		math::normalize_vec5(e2);
+}
+
+// Given two orthonormal 5D vectors lying on the plane and one of the three points of the triangle compute the quadric.
 // Note it uses the same notation of the original garland 98 paper. 
-void ComputeFromE1E2(ScalarType e1[5], ScalarType e2[5], ScalarType p[5] )
+void ComputeQuadricFromE1E2(ScalarType e1[5], ScalarType e2[5], ScalarType p[5] )
 {
 	// computes A
 	a[0] = 1;
