@@ -191,13 +191,14 @@ bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, M
   //std::string filename = fileName.toUtf8().data();
 	std::string ex = formatName.toUtf8().data();
 	int result;
-    
+  tri::Allocator<CMeshO>::CompactVertexVector(m.cm);  
+  tri::Allocator<CMeshO>::CompactFaceVector(m.cm);  
 	// Collada exporting function do not manage very correctly the case
     // of null texture index faces (e.g. faces that have no texture and have a default -1 tex index.
     // so we convert it to a more standard mesh adding a fake notexture.png texture.
 	if(tri::HasPerWedgeTexCoord(m.cm))
 			tri::UpdateTexture<CMeshO>::WedgeTexRemoveNull(m.cm,"notexture.png");
-
+	
 	//if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end())
 		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
 	//else 
