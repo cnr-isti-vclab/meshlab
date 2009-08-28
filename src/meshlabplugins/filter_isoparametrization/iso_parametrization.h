@@ -8,8 +8,8 @@
 #include <vcg/simplex/face/component_rt.h>
 #include <vcg/simplex/edge/base.h>
 #include <vcg/complex/trimesh/base.h>
-#include <local_parametrization.h>
-#include <uv_grid.h>
+#include "local_parametrization.h"
+#include "uv_grid.h"
 #include <vcg/complex/trimesh/stat.h>
 
 ///ABSTRACT MESH THAT MAINTAINS THE WHOLE PARAMETERIZATION
@@ -46,7 +46,10 @@ class ParamEdge;
 class ParamFace;
 
 class ParamVertex: public vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, 
-	vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b,vcg::vertex::TexCoord2f,vcg::vertex::BitFlags>
+											vcg::vertex::Normal3f, vcg::vertex::VFAdj, 
+											vcg::vertex::Coord3f,vcg::vertex::Color4b,
+											vcg::vertex::TexCoord2f,vcg::vertex::BitFlags,
+											vcg::vertex::CurvatureDirf >
 {
 public:
 	CoordType RPos;
@@ -54,8 +57,11 @@ public:
 };
 
 class ParamFace: public vcg::FaceSimp2  <  ParamVertex, ParamEdge, ParamFace, 
-	vcg::face::VFAdj,vcg::face::FFAdj,vcg::face::VertexRef,vcg::face::Color4b,vcg::face::BitFlags,
-	vcg::face::WedgeTexCoord2f>
+	vcg::face::VFAdj,vcg::face::FFAdj,vcg::face::VertexRef,
+  vcg::face::Color4b,vcg::face::BitFlags,
+  vcg::face::WedgeTexCoord2f,vcg::face::Normal3f,
+  vcg::face::Qualityf // not really needed
+  >
 {};
 class ParamMesh: public vcg::tri::TriMesh<std::vector<ParamVertex>, std::vector<ParamFace> > 
 {
@@ -731,6 +737,57 @@ private:
 
 		return num;
 	}
+	
+	int getSharedVertices(const std::vector<int> &I,AbstractVertex *shared[3])
+	{	
+		///else test the number of vertices shared 
+		AbstractVertex * shared_vert[3];
+		bool sharedB[3];
+
+		///quick test for 2 or 3 cases
+		if (I.size()==2)
+			return getSharedVertices(&AbsMesh()->face[I[0]],&AbsMesh()->face[I[1]],shared);
+		else
+		if (I.size()==3)
+			return getSharedVertices(&AbsMesh()->face[I[0]],&AbsMesh()->face[I[1]],&AbsMesh()->face[I[2]],shared);
+
+		AbstractFace* f0=&AbsMesh()->face[I[0]];
+		AbstractVertex *v0=f0->V(0);
+		AbstractVertex *v1=f0->V(1);
+		AbstractVertex *v2=f0->V(2);
+		shared_vert[0]=v0;
+		shared_vert[1]=v1;
+		shared_vert[2]=v2;
+		sharedB[0]=true;
+		sharedB[1]=true;
+		sharedB[2]=true;
+		//for each face
+		for (int i=1;i<I.size();i++)
+		{
+			AbstractFace* f=&AbsMesh()->face[I[i]];
+			//for each vertex
+			for (int j=0;j<3;j++)
+			{
+				if (sharedB[j])
+				{
+					AbstractVertex *v_test=shared_vert[j];
+					if (!((v_test==f->V(0))||(v_test==f->V(1))||(v_test==f->V(2))))
+						sharedB[j]=false;
+				}	
+			}
+		}
+
+		///return vertices correctly
+		int num=0;
+		for (int i=0;i<3;i++)
+			if (sharedB[i])
+			{
+				shared[num]=shared_vert[i];
+				num++;
+			}
+		return num;
+	}
+
 
 	void Clamp(vcg::Point2f &UV)
 	{
@@ -854,6 +911,67 @@ public:
 		int num=getSharedVertices(f0,f1,shared);
 		if (!((num==1)||(num==2)))
 			return -1;
+		if (num==2)///use diamond
+		{
+			AbstractVertex* v0=shared[0];
+			AbstractVertex* v1=shared[1];
+			int EdgeIndex;
+
+			getDiamondFromPointer(v0,v1,EdgeIndex);
+
+			IndexDomain=EdgeIndex;
+			return 1;
+		}
+
+		///use the star domain
+
+		AbstractVertex* center=shared[0];
+		int StarIndex;
+		getStarFromPointer(center,StarIndex);
+		IndexDomain=StarIndex;
+
+		return 2;
+
+	}
+	
+	///return 0 if is a face 1 is a diamaond and 2 is a star
+	int InterpolationSpace(const std::vector<int> &I,int &IndexDomain)
+	{
+		///simple cases
+		assert(I.size()>0);
+		///1 element
+		if (I.size()==1)
+		{
+			IndexDomain=I[0];
+			return 0;
+		}
+		///2 elements
+		if (I.size()==2)
+			return InterpolationSpace(I[0],I[1],IndexDomain);
+
+		///test if they all are the same
+		///that case is the face itself
+		bool sameface=true;
+		int i=1;
+		int I0=I[0];
+		while ((i<I.size())&&(sameface))
+		{
+			sameface&=(I[i]==I0);
+			i++;
+		}
+		if (sameface)
+		{
+			IndexDomain=I0;
+			return 0;
+		}
+
+		///else test the number of vertices shared 
+		AbstractVertex *shared[3];
+		int num=getSharedVertices(I,shared);
+		assert(num!=3); ///no same yet face possible
+		if (num==0)
+			return -1;  ///no interpolation space exists
+
 		if (num==2)///ude diamond
 		{
 			AbstractVertex* v0=shared[0];
@@ -1012,7 +1130,7 @@ public:
 	///given the I and UV coordinates return the face and barycentric coords
 	///return the domain used for interpolation 0=face 1=half diam 2=half star
 	int Theta(const int &I,
-		const vcg::Point2<ScalarType> &UV,
+		const vcg::Point2<ScalarType> &UV, // alphaBeta
 		std::vector<ParamFace*> &face,
 		std::vector<CoordType> &baryVal)
 	{
@@ -1066,6 +1184,24 @@ public:
 #endif
 		}
 		return 2;
+	}
+	
+	///given the I and UV coordinates return the face and barycentric coords
+	///return the domain used for interpolation 0=face 1=half diam 2=half star
+	int Theta(const int &I,
+		const vcg::Point2<ScalarType> &UV, // alphaBeta
+		ParamFace* &face,
+		CoordType &baryVal)
+	{
+		std::vector<ParamFace*> faces;
+		std::vector<CoordType>  baryVals;
+		int ret=Theta(I,UV,faces,baryVals);
+		if (ret!=-1)
+		{
+			face=faces[0];
+			baryVal=baryVals[0];
+		}
+		return ret;
 	}
 
 	///given the I and UV coordinates return the face and barycentric coords
