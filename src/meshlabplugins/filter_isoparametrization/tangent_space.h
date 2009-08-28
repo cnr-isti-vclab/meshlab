@@ -1,19 +1,47 @@
 #ifndef _ISO_TANGENTSPACE
 #define _ISO_TANGENTSPACE
-#include <iso_parametrization.h>
+#include "iso_parametrization.h"
+#include <vcg/complex/trimesh/update/curvature.h>
+#include <vcg/complex/trimesh/update/normal.h>
 
 class TangentSpace{
 	typedef IsoParametrization::CoordType CoordType;
 	typedef IsoParametrization::ScalarType ScalarType;
 	IsoParametrization *isoParam;
+
+	vcg::SimpleTempData<typename ParamMesh::VertContainer,vcg::Matrix33<ScalarType> > *ProjMatrix;
+	
 public:
 
 	
 
+  bool isoParamTheta(int i, vcg::Point2<ScalarType> p, vcg::Point3<ScalarType> &res) const{
+    return isoParam->Theta(i,p,res);
+
+    vcg::Point3<ScalarType>  c(0,0,10);//(0.5,sqrt(3.0)/2.0,0);
+    vcg::Point3<ScalarType> b(1,0,0);
+    vcg::Point3<ScalarType> a(0,0,0);
+    res  = a*p[0]+b*p[1]+c*(1-p[0]-p[1]) 
+    +vcg::Point3<ScalarType>(4,4,4);
+    return true;
+  }
+
+	//
+  void Theta(int i,
+		const vcg::Point2<ScalarType> &UV,
+		CoordType &pos3D){
+      isoParamTheta(i,UV,pos3D);
+  }
+
 	///initialize the sampler 
-	void Init(IsoParametrization *_isoParam)
+	void Init(IsoParametrization *_isoParam,ScalarType radius=(ScalarType)0.1)
 	{
 		isoParam=_isoParam;
+		ProjMatrix   = new vcg::SimpleTempData<typename ParamMesh::VertContainer,vcg::Matrix33<ScalarType> > (isoParam->ParaMesh()->vert);
+		
+		InitProjectionMatrix(radius);
+		vcg::tri::UpdateNormals<ParamMesh>::PerFaceNormalized(*isoParam->ParaMesh());
+		vcg::tri::UpdateCurvature<ParamMesh>::PrincipalDirectionsNormalCycles(*isoParam->ParaMesh());
 	}
 	
 	///given an initial position in parametric space (I0,bary0)
@@ -21,9 +49,12 @@ public:
 	///position (I1,bary1) abd return true if everithing was ok, false otherwise
 	bool Sum(const int &I0,const vcg::Point2<ScalarType> &bary0,
 			 const vcg::Point2<ScalarType> &vect,
-			 int &I1,vcg::Point2<ScalarType> &bary1,int &domain)
+			 int &I1,vcg::Point2<ScalarType> &bary1,int &domain) const
 	{
+    
+		
 		vcg::Point2<ScalarType> dest=bary0+vect;
+      //vect[0]*Xaxis + vect[1]*Yaxis;
 		ScalarType alpha=dest.X();
 		ScalarType beta=dest.Y();
 		///point inside the face
@@ -34,7 +65,6 @@ public:
 			domain=0;
 			return true;
 		}
-		
 		
 		///control edges
 		int edge=-1;
@@ -92,7 +122,7 @@ public:
 	///modify the 2D vector (vect) and return true if everithing was ok, false otherwise
 	bool Sub(const int &I0,const vcg::Point2<ScalarType> &bary0,
 			 const int &I1,const vcg::Point2<ScalarType> &bary1,
-			 vcg::Point2<ScalarType> &vect,int &num)
+			 vcg::Point2<ScalarType> &vect,int &num) const
 	{
 		int IndexDomain;
 		num=isoParam->InterpolationSpace(I0,I1,IndexDomain);
@@ -138,51 +168,55 @@ public:
 	}
 	
 	bool TangentDir(const int &I,const vcg::Point2<ScalarType> &bary,
-			   CoordType &XAxis,CoordType &YAxis,ScalarType radius=(ScalarType)0.5)
+			   CoordType &XAxis,CoordType &YAxis,ScalarType radius=(ScalarType)0.5) const
 	{
 		///3d position of origin
-		CoordType origin;
-		isoParam->Theta(I,bary,origin);
+		//CoordType origin;
+		//isoParam->Theta(I,bary,origin);
 
+    // two axis in alpha-beta space that will be orthogonal in UV-Space
 		const ScalarType h=(ScalarType)2.0/sqrt((ScalarType)3.0);
-		vcg::Point2<ScalarType> Xaxis=vcg::Point2<ScalarType>(1,0);
-		vcg::Point2<ScalarType> Yaxis=vcg::Point2<ScalarType>(-(ScalarType)0.5,h);
-		Yaxis.Normalize();
-		Xaxis*=radius;
-		Yaxis*=radius;
+		vcg::Point2<ScalarType> XP=vcg::Point2<ScalarType>(1,0);
+		vcg::Point2<ScalarType> YP=vcg::Point2<ScalarType>(-0.5,h);
+		
+		XP*=radius;
+		YP*=radius;
+		vcg::Point2<ScalarType> XM=-XP;
+		vcg::Point2<ScalarType> YM=-YP;
+		//Yaxis.Normalize();
+		
 		vcg::Point2<ScalarType> bary0,bary1,bary2,bary3;
 		int I0,I1,I2,I3;
 		CoordType X0,X1,Y0,Y1;
 		///find paraCoords of four neighbors
 		int domain;
-		bool done=Sum(I,bary,Xaxis,I0,bary0,domain);
-		Xaxis=-Xaxis;
-		done&=Sum(I,bary,Xaxis,I1,bary1,domain);
-		done&=Sum(I,bary,Yaxis,I2,bary2,domain);
-		Yaxis=-Yaxis;
-		done&=Sum(I,bary,Yaxis,I3,bary3,domain);
+		bool done=true;
+    done&=Sum(I,bary,XP,I0,bary0,domain);
+		done&=Sum(I,bary,XM,I1,bary1,domain);
+		done&=Sum(I,bary,YP,I2,bary2,domain);
+		done&=Sum(I,bary,YM,I3,bary3,domain);
 		if (!done)
 			return false;
+
+		//if (I0!=I1 || I1!=I2 || I2!=I3) return false;
+
 		///get 3d position
-		isoParam->Theta(I0,bary0,X0);
-		isoParam->Theta(I1,bary1,X1);
-		isoParam->Theta(I2,bary2,Y0);
-		isoParam->Theta(I3,bary3,Y1);
-		///wich respect to origin .. considering one is opposite respect to the other
-		X0=X0-origin;
-		X1=origin-X1;
-		Y0=Y0-origin;
-		Y1=origin-Y1;
+		isoParamTheta(I0,bary0,X0);
+		isoParamTheta(I1,bary1,X1);
+		isoParamTheta(I2,bary2,Y0);
+		isoParamTheta(I3,bary3,Y1);
+		
+		
 		///average .. considering one is opposite respect to the other
-		XAxis=(X0+X1)/(ScalarType)2.0;
-		YAxis=(Y0+Y1)/(ScalarType)2.0;
+		XAxis=(X0-X1)/(ScalarType)2.0;
+		YAxis=(Y0-Y1)/(ScalarType)2.0;
 		///final scaling 
 		XAxis/=radius;
 		YAxis/=radius;
 		return true;
 	}
 
-	void Test(int Sample=100,int Ite=100)
+	void Test(int Sample=100,int Ite=100) 
 	{
 		int max=isoParam->AbsMesh()->face.size();
 		for (int I=0;I<max;I++)
@@ -250,23 +284,193 @@ public:
 			}
 		}
 	}
-
-	bool Project(const int &I,const vcg::Point2<ScalarType> &bary,
-				 CoordType &vect3d,
-				 vcg::Point2<ScalarType> &vect2d,
-				 ScalarType radius=(ScalarType)0.5)
+	
+	void InitProjectionMatrix(ScalarType radius=(ScalarType)0.1)
 	{
-		CoordType origin;
-		isoParam->Theta(I,bary,origin);
-		CoordType XAxis,YAxis;
-		///get tangent directions
-		bool done=TangentDir(I,bary,XAxis,YAxis,radius);
-		if (!done)
+		for (int i=0;i<isoParam->ParaMesh()->vert.size();i++)
+		{
+			int I=isoParam->ParaMesh()->vert[i].T().N();
+			vcg::Point2<ScalarType> bary=isoParam->ParaMesh()->vert[i].T().P();
+			
+			CoordType origin;
+			isoParamTheta(I,bary,origin);
+			CoordType XAxis,YAxis; // tangent axis in 3D Object space
+			///get tangent directions
+			
+			bool done=TangentDir(I,bary,XAxis,YAxis,0.1);
+			if (!done)
+			{
+				(*ProjMatrix)[i].SetIdentity();
+				continue;
+			}
+		
+			// must compute res2d such that:  res2d.X() * XAxis + res2d.Y() * YAxis + dontCare * ZAxis = vect3d
+			CoordType ZAxis = -(XAxis^YAxis).Normalize()*XAxis.Norm();
+			
+			(*ProjMatrix)[i].SetColumn(0,XAxis);
+			(*ProjMatrix)[i].SetColumn(1,YAxis);
+			(*ProjMatrix)[i].SetColumn(2,ZAxis);
+			vcg::Invert((*ProjMatrix)[i]);
+		}
+	}
+
+	void GetCurvature(const int &I,const vcg::Point2<ScalarType> &alpha_beta,
+					  CoordType &d1,CoordType &d2,ScalarType &k1,ScalarType &k2)
+	{
+		ParamFace* face=NULL;
+		CoordType baryVal;
+		isoParam->Theta(I,alpha_beta,face,baryVal);
+		ParamVertex *v0=face->V(0);
+		ParamVertex *v1=face->V(1);
+		ParamVertex *v2=face->V(2);
+		d1=v0->PD1()*baryVal.X()+v1->PD1()*baryVal.Y()+v2->PD1()*baryVal.Z();
+		d2=v0->PD2()*baryVal.X()+v1->PD2()*baryVal.Y()+v2->PD2()*baryVal.Z();
+		k1=v0->K1()*baryVal.X()+v1->K1()*baryVal.Y()+v2->K1()*baryVal.Z();
+		k2=v0->K2()*baryVal.X()+v1->K2()*baryVal.Y()+v2->K2()*baryVal.Z();
+	}
+
+	void GetProjectionMatrix(const int &I,const vcg::Point2<ScalarType> &alpha_beta,
+						     vcg::Matrix33<ScalarType> &projMatr) const
+	{
+		ParamFace* face=NULL;
+		CoordType baryVal;
+		isoParam->Theta(I,alpha_beta,face,baryVal);
+		ParamVertex *v0=face->V(0);
+		ParamVertex *v1=face->V(1);
+		ParamVertex *v2=face->V(2);
+
+		projMatr=(*ProjMatrix)[v0]*baryVal.X();
+		projMatr+=(*ProjMatrix)[v1]*baryVal.Y();
+		projMatr+=(*ProjMatrix)[v2]*baryVal.Z();
+	}
+
+	
+	bool Project(const int &I,const vcg::Point2<ScalarType> &bary,
+				 const CoordType &vect3d, // in object space
+				 vcg::Point2<ScalarType> &res2d) const
+	{
+		vcg::Matrix33f m;
+		GetProjectionMatrix(I,bary,m);
+
+		ScalarType deltaX=vect3d*m.GetRow(0);
+		ScalarType deltaY=vect3d*m.GetRow(1);
+		
+		// two axis in alpha-beta space that will be orthogonal in UV-Space
+		const ScalarType h=(ScalarType)2.0/sqrt((ScalarType)3.0);
+		vcg::Point2<ScalarType> XP=vcg::Point2<ScalarType>(1,0);
+		vcg::Point2<ScalarType> YP=vcg::Point2<ScalarType>(-0.5,h);
+		res2d = XP*deltaX + YP*deltaY;
+		//res2d=vcg::Point2<ScalarType>(deltaX,deltaY);
+
+		return true;
+	}
+
+	 // WEIGHTED INTERPOLATION OF POINTS IN TANGENT SPACE 
+	///	weights MUST be normalized
+	bool Interpolate(const int &I0,const vcg::Point2<ScalarType> &alpha_beta0,
+					 const int &I1,const vcg::Point2<ScalarType> &alpha_beta1,
+					 ScalarType weight,
+					 int &I_res,
+					 vcg::Point2<ScalarType> &alpha_beta_res)
+	{
+		int IndexDomain;
+		int kind=isoParam->InterpolationSpace(I0,I1,IndexDomain);
+		if (kind==-1)
 			return false;
-		///then find dot products
-		ScalarType deltaX=vect3d*XAxis;
-		ScalarType deltaY=vect3d*YAxis;
-		vect2d=vcg::Point2<ScalarType>(deltaX,deltaY);
+
+		vcg::Point2<ScalarType> transformed0,transformed1;
+		
+		///interpolate in a face
+		if (kind==0)
+		{
+			isoParam->GE2(IndexDomain,alpha_beta0,transformed0);
+			isoParam->GE2(IndexDomain,alpha_beta1,transformed1);
+		}
+		else
+		///interpolate in a diamond
+		if (kind==1)
+		{				
+			isoParam->GE1(I0,alpha_beta0,IndexDomain,transformed0);		
+			isoParam->GE1(I1,alpha_beta1,IndexDomain,transformed1);		
+		}
+		else
+		{
+			isoParam->GE0(I0,alpha_beta0,IndexDomain,transformed0);
+			isoParam->GE0(I1,alpha_beta1,IndexDomain,transformed1);
+		}
+
+		vcg::Point2<ScalarType> UV_interp=transformed0*weight+transformed1*(1.0-weight);
+		///FINALLY......
+		///transform back to alpha,beta,I
+		if (kind==0)
+		{
+			isoParam->inv_GE2(IndexDomain,UV_interp,alpha_beta_res);
+			I_res=IndexDomain;
+		}
+		else
+		if (kind==1)
+		{
+			isoParam->inv_GE1(IndexDomain,UV_interp,I_res,alpha_beta_res);
+		}
+		else
+			isoParam->inv_GE0(IndexDomain,UV_interp,I_res,alpha_beta_res);
+		return true;
+	}
+
+    // WEIGHTED INTERPOLATION OF POINTS IN TANGENT SPACE 
+	///	weights MUST be normalized
+	bool Interpolate(const std::vector<int> &I,
+					 const std::vector<vcg::Point2<ScalarType> > &alpha_beta,
+					 const std::vector<ScalarType> &weights,
+					 int &I_res,
+					 vcg::Point2<ScalarType> &alpha_beta_res)
+	{
+		int IndexDomain;
+		int kind=isoParam->InterpolationSpace(I,IndexDomain);
+		if (kind==-1)
+			return false;
+
+		std::vector<vcg::Point2<ScalarType> > transformed;
+		transformed.resize(alpha_beta.size());
+		
+		///interpolate in a face
+		if (kind==0)
+		{
+			for (int i=0;i<alpha_beta.size();i++)
+				isoParam->GE2(IndexDomain,alpha_beta[i],transformed[i]);
+		}
+		else
+		///interpolate in a diamond
+		if (kind==1)
+		{				
+			for (int i=0;i<alpha_beta.size();i++)
+				isoParam->GE1(I[i],alpha_beta[i],IndexDomain,transformed[i]);		
+		}
+		else
+		{
+			for (int i=0;i<alpha_beta.size();i++)
+				bool b0=isoParam->GE0(I[i],alpha_beta[i],IndexDomain,transformed[i]);
+		}
+
+		/// do the interpolation
+		vcg::Point2<ScalarType> UV_interp=vcg::Point2<ScalarType>(0,0);
+		for (int i=0;i<weights.size();i++)
+			UV_interp+=(transformed[i]*weights[i]);
+		
+		///FINALLY......
+		///transform back to alpha,beta,I
+		if (kind==0)
+		{
+			isoParam->inv_GE2(IndexDomain,UV_interp,alpha_beta_res);
+			I_res=IndexDomain;
+		}
+		else
+		if (kind==1)
+		{
+			isoParam->inv_GE1(IndexDomain,UV_interp,I_res,alpha_beta_res);
+		}
+		else
+			isoParam->inv_GE0(IndexDomain,UV_interp,I_res,alpha_beta_res);
 		return true;
 	}
 
