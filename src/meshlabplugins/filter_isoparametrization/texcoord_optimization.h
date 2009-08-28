@@ -3,6 +3,7 @@
 #ifndef __VCGLIB__TEXTCOOORD_OPTIMIZATION
 #define __VCGLIB__TEXTCOOORD_OPTIMIZATION
 
+
 #include <vcg/container/simple_temporary_data.h>
 #ifdef _USE_OMP
 #include <omp.h>
@@ -23,6 +24,16 @@ namespace vcg
 namespace tri
 {
 
+// helper function (checks that coords are inside -1..+1)
+template <class ScalarType>
+bool testParamCoordsPoint(const vcg::Point2<ScalarType> &p)
+{
+	ScalarType eps=(ScalarType)0.00001;
+	if (!((p.X()>=-1-eps)&&(p.X()<=1+eps)&&
+		   (p.Y()>=-1-eps)&&(p.Y()<=1+eps)))
+			return (false);
+	return true;
+}
 
 /* Base class for all Texture Optimizers*/
 template<class MESH_TYPE> 
@@ -424,7 +435,7 @@ void SumVertex()
 		  {*/
 			
 			vcg::Point2f goal=v->T().P()-(sum[v] * (speed * vSpeed[v]) );
-			bool isOK=testParamCoordsPoint(goal);
+			bool isOK=testParamCoordsPoint<ScalarType>(goal);
 			if (isOK)
 				v->T().P()-=(sum[v] * (speed * vSpeed[v]) );
 
