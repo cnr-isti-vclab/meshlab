@@ -1,12 +1,16 @@
-#ifndef LOCAL_PARAMETRIZATION
-#define LOCAL_PARAMETRIZATION
 
+
+#include "defines.h"
 ///fitting
 #include <vcg/space/fitting3.h>
 #include <vcg/math/matrix33.h>
 #include <vcg/space/triangle2.h>
-#include <mesh_operators.h>
-#include <texcoord_optimization.h>
+#include "texcoord_optimization.h"
+#include "mesh_operators.h"
+
+#ifndef LOCAL_PARAMETRIZATION
+#define LOCAL_PARAMETRIZATION
+
 //#include <vcg/complex/trimesh/point_sampling.h>
 
 //#define samples_area 80
@@ -33,10 +37,6 @@ void ParametrizeExternal(MeshType &to_parametrize)
 	}
 	if (Vi==to_parametrize.vert.end())
 	{
-		#ifndef _MESHLAB
-		vcg::tri::io::ExporterPLY<BaseMesh>::Save(to_parametrize,"case2.ply");
-		printf("OUT\n");
-		#endif
 		assert(0);
 	}
 	///get sorted border vertices
@@ -602,7 +602,7 @@ void ParametrizeLocally(MeshType &parametrized,
 		vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
 		vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
 		vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
-		vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
+		vcg::Triangle2<typename MeshType::ScalarType> t2d=vcg::Triangle2<typename MeshType::ScalarType>(tex0,tex1,tex2);
 #ifndef NDEBUG
 		ScalarType area=(tex1-tex0)^(tex2-tex0);
 		assert(area>0);
@@ -647,7 +647,7 @@ void ForceInParam(vcg::Point2<typename MeshType::ScalarType> &UV,MeshType &domai
 		center+=tex0;
 		center+=tex1;
 		center+=tex2;
-		vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
+		vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
 		ScalarType dist;
 		vcg::Point2<ScalarType> temp;
 		t2d.PointDistance(UV,dist,temp);
@@ -660,15 +660,7 @@ void ForceInParam(vcg::Point2<typename MeshType::ScalarType> &UV,MeshType &domai
 	center/=(ScalarType)(domain.face.size()*3);
 	UV=closest*(ScalarType)0.95+center*(ScalarType)0.05;
 }
-template <class ScalarType>
-bool testParamCoordsPoint(const vcg::Point2<ScalarType> &p)
-{
-	ScalarType eps=(ScalarType)0.00001;
-	if (!((p.X()>=-1-eps)&&(p.X()<=1+eps)&&
-		   (p.Y()>=-1-eps)&&(p.Y()<=1+eps)))
-			return (false);
-	return true;
-}
+
 
 template <class VertexType>
 bool testParamCoords(VertexType *v)
@@ -781,7 +773,7 @@ bool NonFolded(MeshType &parametrized)
 			vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
 			vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
 			vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
-			vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
+			vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
 			ScalarType area=(tex1-tex0)^(tex2-tex0);
 			if (area<=0)
 				return false;
@@ -811,7 +803,7 @@ bool NonFolded(MeshType &parametrized,std::vector<typename MeshType::FaceType*> 
 			vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
 			vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
 			vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
-			vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
+			vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
 			ScalarType area=(tex1-tex0)^(tex2-tex0);
 			if (area<=epsilon)
 				folded.push_back(f);
@@ -1080,7 +1072,7 @@ bool GetBaryFaceFromUV(const MeshType &m,
 		vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
 
 		vcg::Point2<ScalarType> test=vcg::Point2<ScalarType>(U,V);
-		vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
+		vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
 		ScalarType area=(tex1-tex0)^(tex2-tex0);
 		//assert(area>-_EPSILON);
 		///then find if the point 2d falls inside
@@ -1200,7 +1192,7 @@ bool GetCoordFromUV(const MeshType &m,
 		vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
 
 		vcg::Point2<ScalarType> test=vcg::Point2<ScalarType>(U,V);
-		vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
+		vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
 		ScalarType area=(tex1-tex0)^(tex2-tex0);
 		///then find if the point 2d falls inside
                 typename MeshType::CoordType bary;
