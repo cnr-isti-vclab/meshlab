@@ -19,55 +19,6 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-/****************************************************************************
-  History
-$Log: meshfilter.cpp,v $
-Revision 1.107  2008/04/04 13:22:30  cignoni
-Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h, and added a manifoldness check on the reorient tool.
-
-Revision 1.106  2008/03/18 10:33:53  cignoni
-added Post-Simplification cleaning filter, improved help
-
-Revision 1.105  2008/03/06 08:25:04  cignoni
-updated to the error message reporting style for filters
-
-Revision 1.104  2008/02/12 14:21:39  cignoni
-changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
-
-Revision 1.103  2008/02/10 09:32:39  cignoni
-added a missing clear border flag in remove non manifold
-
-Revision 1.102  2007/11/21 09:48:03  cignoni
-better help and color clustering
-
-Revision 1.101  2007/11/05 23:44:23  cignoni
-Added tex simplification check, selection to paso doble and better comments
-
-Revision 1.100  2007/10/16 12:19:25  cignoni
-mismatch between float and absperc parameters
-
-Revision 1.99  2007/10/06 23:39:01  cignoni
-Updated used defined dialog to the new filter interface.
-
-Revision 1.98  2007/10/02 08:13:44  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.97  2007/07/24 07:20:20  cignoni
-Added Freeze transform and improved transformation dialog
-
-Revision 1.96  2007/04/20 10:09:56  cignoni
-issue on vertex selection from face selection
-
-Revision 1.95  2007/04/16 10:16:25  cignoni
-Added missing info on filtering actions
-
-Revision 1.94  2007/04/16 09:25:29  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing again...
-
-
-****************************************************************************/
 #include <QtGui>
 
 #include <math.h>
@@ -85,14 +36,14 @@ Interfaces are changing again...
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/space/normal_extrapolation.h>
-
+#include "quadricstexsimp.h"
 #include "../../meshlab/GLLogStream.h"
 
 using namespace std;
 using namespace vcg;
 
 void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool PreserveNormal, bool OptimalPlacement, bool PlanarQuadric, bool Selected, CallBackPos *cb);
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,float c, bool PreserveBoundary, bool optimalPlacement, bool Selected,CallBackPos *cb);
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, tri::TriEdgeCollapseQuadricTexParameter & params, bool Selected, CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 {
@@ -319,6 +270,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addFloat("Extratcoordw",lastqtex_extratw,"Texture Weight","Additional weight for each extra Texture Coordinates for every (selected) vertex");
 		  parlst.addBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries");
 		  parlst.addBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. ");
+		  parlst.addBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh.");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
 		  break;
 		case FP_CLOSE_HOLES:
@@ -596,13 +548,21 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
-		lastqtex_QualityThr = par.getFloat("QualityThr");
-		lastqtex_extratw = par.getFloat("Extratcoordw");
-		lastq_OptimalPlacement = par.getBool("OptimalPlacement");
-		lastq_PreserveBoundary = par.getBool("PreserveBoundary");
+		
+		
+		//MyTriEdgeCollapseQTex::SetDefaultParams();
+		tri::TriEdgeCollapseQuadricTexParameter pp;
+		  
+	
+		lastqtex_QualityThr = pp.QualityThr = par.getFloat("QualityThr");
+		lastqtex_extratw = pp.ExtraTCoordWeight = par.getFloat("Extratcoordw");
+		lastq_OptimalPlacement = pp.OptimalPlacement = par.getBool("OptimalPlacement");
+		lastq_PreserveBoundary = pp.PreserveBoundary = par.getBool("PreserveBoundary");
+		lastq_PlanarQuadric  = pp.QualityQuadric = par.getBool("PlanarQuadric");
+
 		lastq_Selected = par.getBool("Selected");
 
-		QuadricTexSimplification(m.cm,TargetFaceNum,lastqtex_QualityThr,lastqtex_extratw,lastq_PreserveBoundary,lastq_OptimalPlacement,lastq_Selected, cb);
+		QuadricTexSimplification(m.cm,TargetFaceNum,pp,lastq_Selected, cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
