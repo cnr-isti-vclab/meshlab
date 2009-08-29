@@ -8,8 +8,8 @@ HEADERS       = transformDialog.h \
 
 SOURCES       = transformDialog.cpp \
 		meshfilter.cpp \ 
-		quadricsimp.cpp \ 
-		quadricsteximp.cpp \ 
+		quadric_simp.cpp \ 
+		quadric_tex_simp.cpp \ 
 		../../meshlab/GLLogStream.cpp\ 
 		../../meshlab/filterparameter.cpp \
 		../../meshlab/meshmodel.cpp \
