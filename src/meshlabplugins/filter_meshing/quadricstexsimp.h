@@ -301,18 +301,33 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 			double qt,   MinQual = 1e100;
 			vcg::face::VFIterator<FaceType> x(this->pos.V(0));
+			
+			double ndiff,MinCos  = 1e100; // minimo coseno di variazione di una normale della faccia 
+																	// (e.g. max angle) Mincos varia da 1 (normali coincidenti) a
+																	// -1 (normali opposte);
 
 			for(x.F() = v[0]->VFp(), x.I() = v[0]->VFi(),i=0; x.F()!=0; ++x )	// for all faces in v0		
 				if(x.F()->V(0)!=v[1] && x.F()->V(1)!=v[1] && x.F()->V(2)!=v[1] )		// skip faces with v1
 				{
 					qt= QualityFace(*x.F());
 					if(qt<MinQual) MinQual=qt;
+					if(Params().NormalCheck){
+							Point3f nn=NormalizedNormal(*x.F());
+							ndiff=nn.dot(x.F()->N()) / x.F()->N().Norm();
+							if(ndiff<MinCos) MinCos=ndiff;
+							}
 				}
 			for(x.F() = v[1]->VFp(), x.I() = v[1]->VFi(),i=0; x.F()!=0; ++x )		// for all faces in v1	
 				if(x.F()->V(0)!=v[0] && x.F()->V(1)!=v[0] && x.F()->V(2)!=v[0] )			// skip faces with v0
 				{
 					qt= QualityFace(*x.F());
 					if(qt<MinQual) MinQual=qt;
+					if(Params().NormalCheck){
+							Point3f nn=NormalizedNormal(*x.F());
+							ndiff=nn.dot(x.F()->N() / x.F()->N().Norm());
+							if(ndiff<MinCos) MinCos=ndiff;
+					}
+
 				}
 
 
@@ -323,7 +338,12 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 			if(QuadErr<1e-15) QuadErr=1e-15;
 			
 			this->_priority = (ScalarType)(QuadErr / MinQual);
-																								           
+			if(Params().NormalCheck){
+			if(minCos< Params().CosineThr) this->_priority *=1000;
+			}
+			
+																																																					
+																													
 			//Rrestore old position of v0 and v1
 			v[0]->P()=OldPos0;
 			v[1]->P()=OldPos1;

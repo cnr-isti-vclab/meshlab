@@ -270,6 +270,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addFloat("Extratcoordw",lastqtex_extratw,"Texture Weight","Additional weight for each extra Texture Coordinates for every (selected) vertex");
 		  parlst.addBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries");
 		  parlst.addBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. ");
+			parlst.addBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface");
 		  parlst.addBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh.");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
 		  break;
@@ -559,6 +560,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 		lastq_OptimalPlacement = pp.OptimalPlacement = par.getBool("OptimalPlacement");
 		lastq_PreserveBoundary = pp.PreserveBoundary = par.getBool("PreserveBoundary");
 		lastq_PlanarQuadric  = pp.QualityQuadric = par.getBool("PlanarQuadric");
+		lastq_PreserveNormal = pp.NormalCheck = par.getBool("PreserveNormal");
 
 		lastq_Selected = par.getBool("Selected");
 
