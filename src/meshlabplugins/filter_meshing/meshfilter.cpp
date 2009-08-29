@@ -36,14 +36,14 @@
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/space/normal_extrapolation.h>
-#include "quadricstexsimp.h"
+#include "quadric_tex_simp.h"
+#include "quadric_simp.h"
 #include "../../meshlab/GLLogStream.h"
 
 using namespace std;
 using namespace vcg;
 
-void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool PreserveNormal, bool OptimalPlacement, bool PlanarQuadric, bool Selected, CallBackPos *cb);
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, tri::TriEdgeCollapseQuadricTexParameter & params, bool Selected, CallBackPos *cb);
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 {
@@ -86,6 +86,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 	lastq_OptimalPlacement = true;
 	lastq_Selected = false;
 	lastq_PlanarQuadric = false;
+	lastq_QualityWeight =false;
 
 	lastqtex_QualityThr = 0.3f;
 	lastqtex_extratw = 0.0;
@@ -260,6 +261,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface");
 		  parlst.addBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. ");
 		  parlst.addBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh.");
+		  parlst.addBool ("QualityWeight",lastq_QualityWeight,"Weighted Simplification","Use the Per-Vertex quality as a weighting factor for the simplification. The weight is used as a error amplification value, so a vertex with a high quality value will not be simplified and a portion of the mesh with low quality values will be aggressively simplified.");
 		  parlst.addBool ("AutoClean",true,"Post-simplification cleaning","After the simplification an additional set of steps is performed to clean the mesh (unreferenced vertices, bad faces, etc)");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
 		  break;
@@ -508,15 +510,18 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
-
-		lastq_QualityThr = par.getFloat("QualityThr");
-		lastq_PreserveBoundary = par.getBool("PreserveBoundary");
-		lastq_PreserveNormal = par.getBool("PreserveNormal");
-		lastq_OptimalPlacement = par.getBool("OptimalPlacement");
-		lastq_PlanarQuadric = par.getBool("PlanarQuadric");
+		
+		tri::MyTriEdgeCollapse::SetDefaultParams();
+		tri::TriEdgeCollapseQuadricParameter &pp = tri::MyTriEdgeCollapse::Params();
+		pp.QualityThr=lastq_QualityThr =par.getFloat("QualityThr");
+		pp.PreserveBoundary=lastq_PreserveBoundary = par.getBool("PreserveBoundary");
+		pp.QualityWeight=lastq_QualityWeight = par.getBool("QualityWeight");
+		pp.NormalCheck=lastq_PreserveNormal = par.getBool("PreserveNormal");
+		pp.OptimalPlacement=lastq_OptimalPlacement = par.getBool("OptimalPlacement");
+		pp.QualityQuadric=lastq_PlanarQuadric = par.getBool("PlanarQuadric");
 		lastq_Selected = par.getBool("Selected");
 
-		QuadricSimplification(m.cm,TargetFaceNum,lastq_QualityThr, lastq_PreserveBoundary,lastq_PreserveNormal, lastq_OptimalPlacement,lastq_OptimalPlacement,lastq_Selected,  cb);
+		QuadricSimplification(m.cm,TargetFaceNum,lastq_Selected,  cb);
 
 		if(par.getBool("AutoClean"))
 		{
@@ -551,8 +556,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
 		
 		
-		//MyTriEdgeCollapseQTex::SetDefaultParams();
-		tri::TriEdgeCollapseQuadricTexParameter pp;
+		tri::MyTriEdgeCollapseQTex::SetDefaultParams();
+		tri::TriEdgeCollapseQuadricTexParameter & pp=tri::MyTriEdgeCollapseQTex::Params();
 		  
 	
 		lastqtex_QualityThr = pp.QualityThr = par.getFloat("QualityThr");
@@ -564,7 +569,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 
 		lastq_Selected = par.getBool("Selected");
 
-		QuadricTexSimplification(m.cm,TargetFaceNum,pp,lastq_Selected, cb);
+		QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}

@@ -61,64 +61,34 @@ Added remove non manifold and quadric simplification filter.
 #include <vcg/complex/local_optimization.h>
 #include <vcg/complex/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/container/simple_temporary_data.h>
-#include "quadric_simp.h"
+namespace vcg {
+namespace tri {
 
-using namespace vcg;
-using namespace std;
+typedef	SimpleTempData<CMeshO::VertContainer, math::Quadric<double> > QuadricTemp;
 
-void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBackPos *cb)
-{
-  math::Quadric<double> QZero;
-  QZero.SetZero();
-  tri::QuadricTemp TD(m.vert,QZero);
-  tri::QHelper::TDp()=&TD;
 
-	// we assume that the caller has already set up the tri::MyTriEdgeCollapse::Params() class
-	tri::TriEdgeCollapseQuadricParameter & pp = tri::MyTriEdgeCollapse::Params();
-  
-  if(Selected) // simplify only inside selected faces
-  {
-    // select only the vertices having ALL incident faces selected
-    tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m);
+class QHelper
+		{
+		public:
+			QHelper(){};
+      static void Init(){};
+      static math::Quadric<double> &Qd(CVertexO &v) {return TD()[v];}
+      static math::Quadric<double> &Qd(CVertexO *v) {return TD()[*v];}
+      static CVertexO::ScalarType W(CVertexO * /*v*/) {return 1.0;};
+      static CVertexO::ScalarType W(CVertexO & /*v*/) {return 1.0;};
+      static void Merge(CVertexO & /*v_dest*/, CVertexO const & /*v_del*/){};
+      static QuadricTemp* &TDp() {static QuadricTemp *td; return td;}
+      static QuadricTemp &TD() {return *TDp();}
+		};
 
-    // Mark not writable un-selected vertices
-    CMeshO::VertexIterator  vi;
-    for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
-          if(!(*vi).IsS()) (*vi).ClearW();
-                      else (*vi).SetW();
-  }
 
-  if(pp.PreserveBoundary && !Selected) 
-	{
-    pp.FastPreserveBoundary=true;
-		pp.PreserveBoundary = false;
-	}
-		
-  if(pp.NormalCheck) pp.NormalThrRad = M_PI/4.0;
-	
-	
-  vcg::LocalOptimization<CMeshO> DeciSession(m);
-	cb(1,"Initializing simplification");
-	DeciSession.Init<tri::MyTriEdgeCollapse >();
+class MyTriEdgeCollapse: public vcg::tri::TriEdgeCollapseQuadric< CMeshO, MyTriEdgeCollapse, QHelper > {
+						public:
+						typedef  vcg::tri::TriEdgeCollapseQuadric< CMeshO,  MyTriEdgeCollapse, QHelper> TECQ;
+            typedef  CMeshO::VertexType::EdgeType EdgeType;
+            inline MyTriEdgeCollapse(  const EdgeType &p, int i) :TECQ(p,i){}
+};
+} // end namespace tri
+} // end namepsace vcg
+void QuadricSimplification(CMeshO &m,int  TargetFaceNum,    bool Selected, vcg::CallBackPos *cb);
 
-	if(Selected)
-		TargetFaceNum= m.fn - (m.sfn-TargetFaceNum);
-	DeciSession.SetTargetSimplices(TargetFaceNum);
-	DeciSession.SetTimeBudget(0.1f); // this allow to update the progress bar 10 time for sec...
-//  if(TargetError< numeric_limits<double>::max() ) DeciSession.SetTargetMetric(TargetError);
-  int startFn=m.fn;
-  int faceToDel=m.fn-TargetFaceNum;
- while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
- {
-   cb(100-100*(m.fn-TargetFaceNum)/(faceToDel), "Simplifying...");
- };
-
-	DeciSession.Finalize<tri::MyTriEdgeCollapse >();
-  
-  if(Selected) // Clear Writable flags 
-  {
-    CMeshO::VertexIterator  vi;
-    for(vi=m.vert.begin();vi!=m.vert.end();++vi) 
-      if(!(*vi).IsD()) (*vi).SetW();
-  }
-}

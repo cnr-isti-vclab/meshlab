@@ -148,6 +148,7 @@ protected:
 
 
 	float lastq_QualityThr;
+	bool lastq_QualityWeight;
 	bool lastq_PreserveBoundary;
 	bool lastq_Selected;
 	bool lastq_PreserveNormal;

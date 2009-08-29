@@ -22,38 +22,24 @@
 ****************************************************************************/
 
 #include "meshfilter.h"   
-#include "quadricstexsimp.h"
+#include "quadric_tex_simp.h"
 
 using namespace vcg;
 using namespace std;
 using namespace vcg::tri;
 
-
-
-
-
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, 
-															TriEdgeCollapseQuadricTexParameter & params,
-															/*float QualityThr, 
-															float extratexw,  
-															bool PreserveBoundary, 
-															bool optimalPlacement,*/
-															bool Selected,
-															CallBackPos *cb)
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBackPos *cb)
 {
 	math::Quadric<double> QZero;
 	QZero.SetZero();
 	QuadricTemp TD3(m.vert,QZero);
 	QuadricTexHelper::TDp3()=&TD3;
 
-	
 	QVector <QPair<vcg::TexCoord2<float>,Quadric5<double> > > qv;
 
 	Quadric5Temp TD(m.vert,qv);
 	QuadricTexHelper::TDp()=&TD;
 
-
-	MyTriEdgeCollapseQTex::Params() = params;
 	if(Selected) // simplify only inside selected faces
   {
     // select only the vertices having ALL incident faces selected
