@@ -64,7 +64,7 @@ double	QualityThr; // all
 };
 
 
-typedef	SimpleTempData<CMeshO::VertContainer, QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > > Quadric5Temp;
+typedef	SimpleTempData<CMeshO::VertContainer, QVector<QPair<vcg::TexCoord2f ,Quadric5<double> > > > Quadric5Temp;
 typedef	SimpleTempData<CMeshO::VertContainer, math::Quadric<double> > QuadricTemp;
 
 
@@ -81,27 +81,27 @@ class QuadricTexHelper
 	      static void Init(){};
 
 	  // it allocs the QPair for the vertex relativly to the texture coord parameter
-	  static void Alloc(CVertexO *v,vcg::TexCoord2<float> &coord)
+	  static void Alloc(CVertexO *v,vcg::TexCoord2f &coord)
 	  {
-		   QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > &qv = Vd(v);
+		   QVector<QPair<vcg::TexCoord2f ,Quadric5<double> > > &qv = Vd(v);
 		   Quadric5<double> newq5;
 		   newq5.Zero();
-		   vcg::TexCoord2<float> newcoord;
+		   vcg::TexCoord2f newcoord;
 		   newcoord.u() = coord.u();
 		   newcoord.v() = coord.v();
 
 		   newq5.Sum3(Qd3(v),coord.u(),coord.v());
 
-		   qv.push_back(QPair<vcg::TexCoord2<float>,Quadric5<double> >(newcoord,newq5));
+		   qv.push_back(QPair<vcg::TexCoord2f ,Quadric5<double> >(newcoord,newq5));
 	  }
 
-	  static void SumAll(CVertexO *v,vcg::TexCoord2<float> &coord, Quadric5<double>& q)
+	  static void SumAll(CVertexO *v,vcg::TexCoord2f &coord, Quadric5<double>& q)
 	  {
-		   QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > &qv = Vd(v);
+		   QVector<QPair<vcg::TexCoord2f ,Quadric5<double> > > &qv = Vd(v);
 
 		   for(int i = 0; i < qv.size(); i++)
 		   {
-			   vcg::TexCoord2<float> &f = qv[i].first;
+			   vcg::TexCoord2f &f = qv[i].first;
 			   if((f.u() == coord.u()) && (f.v() == coord.v()))
 				   qv[i].second += q;
 			   else
@@ -109,13 +109,13 @@ class QuadricTexHelper
 		   }
 	  }
 
-	  static bool Contains(CVertexO *v,vcg::TexCoord2<float> &coord)
+	  static bool Contains(CVertexO *v,vcg::TexCoord2f &coord)
 	  {
-		   QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > &qv = Vd(v);
+		   QVector<QPair<vcg::TexCoord2f ,Quadric5<double> > > &qv = Vd(v);
 
 		   for(int i = 0; i < qv.size(); i++)
 		   {
-			   vcg::TexCoord2<float> &f = qv[i].first;
+			   vcg::TexCoord2f &f = qv[i].first;
 			   if((f.u() == coord.u()) && (f.v() == coord.v()))
 				   return true;
 		   }
@@ -123,13 +123,13 @@ class QuadricTexHelper
 		   return false;
 	  }
 
-	  static Quadric5<double> &Qd(CVertexO *v,vcg::TexCoord2<float> &coord)
+	  static Quadric5<double> &Qd(CVertexO *v,vcg::TexCoord2f &coord)
 	  {
-		   QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > &qv = Vd(v);
+		   QVector<QPair<vcg::TexCoord2f ,Quadric5<double> > > &qv = Vd(v);
 
 		   for(int i = 0; i < qv.size(); i++)
 		   {
-			   vcg::TexCoord2<float> &f = qv[i].first;
+			   vcg::TexCoord2f &f = qv[i].first;
 			   if((f.u() == coord.u()) && (f.v() == coord.v()))
 				   return qv[i].second;
 		   }
@@ -139,7 +139,7 @@ class QuadricTexHelper
       static math::Quadric<double> &Qd3(CVertexO *v) {return TD3()[*v];}
 	  static math::Quadric<double> &Qd3(CVertexO &v) {return TD3()[v];}
 	 
-	  static QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > &Vd(CVertexO *v){return (TD()[*v]);}
+	  static QVector<QPair<vcg::TexCoord2f ,Quadric5<double> > > &Vd(CVertexO *v){return (TD()[*v]);}
       static CVertexO::ScalarType W(CVertexO * /*v*/) {return 1.0;};
       static CVertexO::ScalarType W(CVertexO & /*v*/) {return 1.0;};
       static void Merge(CVertexO & /*v_dest*/, CVertexO const & /*v_del*/){};
@@ -227,7 +227,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 		assert(0); return -1;
 	}
 
-	inline int GetTexCoords(vcg::TexCoord2<float> &tcoord0_1,vcg::TexCoord2<float> &tcoord1_1,vcg::TexCoord2<float> &tcoord0_2,vcg::TexCoord2<float> &tcoord1_2)
+	inline int GetTexCoords(vcg::TexCoord2f &tcoord0_1,vcg::TexCoord2f &tcoord1_1,vcg::TexCoord2f &tcoord0_2,vcg::TexCoord2f &tcoord1_2)
 	{
 		int ncoords = 0;
 
@@ -269,10 +269,10 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 			Quadric5<double> qsum2;
 			double min1[5];
 			double min2[5];
-			vcg::TexCoord2<float> tcoord0_1;
-			vcg::TexCoord2<float> tcoord1_1;
-			vcg::TexCoord2<float> tcoord0_2;
-			vcg::TexCoord2<float> tcoord1_2;
+			vcg::TexCoord2f tcoord0_1;
+			vcg::TexCoord2f tcoord1_1;
+			vcg::TexCoord2f tcoord0_2;
+			vcg::TexCoord2f tcoord1_2;
 			int ncoords;
 
 			ncoords = GetTexCoords(tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2);
@@ -280,6 +280,14 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 			return (ScalarType)ComputeMinimalsAndPriority(min1,min2,qsum1,qsum2,tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2,ncoords);			
 		}
 
+
+		/* 
+		* the very important function that says how good is a collapse. 
+		Originally is should be just the quadric error (e.g. you should choose the collapse that make the minimal quadric error)
+		but important correcting factors has to be applyed
+		- quality of the involved triangles
+		- normal checking
+		*/
 		ScalarType ComputePriority(double vv[5],Quadric5<double> &qsum)
 		{
 			VertexType * v[2];
@@ -331,20 +339,20 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 				}
 
 
-			// All collapses involving triangles with quality larger than <QualityThr> has no penalty;
+			// All collapses involving triangles with quality larger than <QualityThr> have no penalty;
 			if(MinQual>Params().QualityThr) MinQual=Params().QualityThr;  
-					
+			if(QuadErr<1e-15) QuadErr=1e-15; // Do not use zero quality penalties
 			
-			if(QuadErr<1e-15) QuadErr=1e-15;
+			this->_priority = (ScalarType)(QuadErr / MinQual);  // the priority of collapses that create low quality triangles has a penalty (it is increased)
 			
-			this->_priority = (ScalarType)(QuadErr / MinQual);
+			
 			if(Params().NormalCheck){
-			if(minCos< Params().CosineThr) this->_priority *=1000;
+					if(MinCos<Params().CosineThr) this->_priority *=1000;  // gross penalty to collapses that move too much the original normals.
 			}
 			
 																																																					
 																													
-			//Rrestore old position of v0 and v1
+			//Restore old position of v0 and v1
 			v[0]->P()=OldPos0;
 			v[1]->P()=OldPos1;
 			return this->_priority;
@@ -354,10 +362,10 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 									double dest_2[5],
 									Quadric5<double> &qsum_1,
 									Quadric5<double> &qsum_2,
-									vcg::TexCoord2<float> &tcoord0_1,
-									vcg::TexCoord2<float> &tcoord1_1,
-									vcg::TexCoord2<float> &tcoord0_2,
-									vcg::TexCoord2<float> &tcoord1_2,
+									vcg::TexCoord2f &tcoord0_1,
+									vcg::TexCoord2f &tcoord1_1,
+									vcg::TexCoord2f &tcoord0_2,
+									vcg::TexCoord2f &tcoord1_2,
 									int ncoords
 									)
 		{
@@ -640,13 +648,13 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	Quadric5<double> qsum2;
 	double min1[5];
 	double min2[5];
-	vcg::TexCoord2<float> tcoord0_1;
-	vcg::TexCoord2<float> tcoord1_1;
-	vcg::TexCoord2<float> tcoord0_2;
-	vcg::TexCoord2<float> tcoord1_2;
-	vcg::TexCoord2<float> newtcoord1;
-	vcg::TexCoord2<float> newtcoord2;
-	QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > qv;
+	vcg::TexCoord2f tcoord0_1;
+	vcg::TexCoord2f tcoord1_1;
+	vcg::TexCoord2f tcoord0_2;
+	vcg::TexCoord2f tcoord1_2;
+	vcg::TexCoord2f newtcoord1;
+	vcg::TexCoord2f newtcoord2;
+	QVector<QPair<vcg::TexCoord2f ,Quadric5<double> > > qv;
 	int ncoords;
 	VertexType * v[2];
 	v[0] = this->pos.V(0);
@@ -665,7 +673,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 		
 	 DoCollapse(m, this->pos, newPos ); // v0 is deleted and v1 take the new position	 
 
-	vcg::TexCoord2<float> newtcoord;
+	vcg::TexCoord2f newtcoord;
 	Quadric5<double> newq;
 	
 	
@@ -675,7 +683,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	newtcoord1 = newtcoord;
 	newq = qsum1;
 
-	qv.push_back(QPair<vcg::TexCoord2<float>,Quadric5<double> >(newtcoord,newq));
+	qv.push_back(QPair<vcg::TexCoord2f ,Quadric5<double> >(newtcoord,newq));
 
 	if(ncoords > 1)
 	{
@@ -684,14 +692,14 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 		newtcoord2 = newtcoord;
 		newq = qsum2;
 
-		qv.push_back(QPair<vcg::TexCoord2<float>,Quadric5<double> >(newtcoord2,newq));
+		qv.push_back(QPair<vcg::TexCoord2f ,Quadric5<double> >(newtcoord2,newq));
 	}
 
 
 	vcg::face::VFIterator<FaceType> vfi(v[1]);	
 	while (!vfi.End())
 	{
-		vcg::TexCoord2<float>& tcoords = vfi.F()->WT(matchVertexID(vfi.F(),v[1]));
+		vcg::TexCoord2f & tcoords = vfi.F()->WT(matchVertexID(vfi.F(),v[1]));
 
 		if(
 			((tcoords.u() == tcoord0_1.u()) && (tcoords.v() == tcoord0_1.v())) ||
@@ -729,7 +737,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 			else
 				assert(0);
 			
-			qv.push_back(QPair<vcg::TexCoord2<float>,Quadric5<double> >(newtcoord,newq));
+			qv.push_back(QPair<vcg::TexCoord2f ,Quadric5<double> >(newtcoord,newq));
 		}
 
 		++vfi; 
