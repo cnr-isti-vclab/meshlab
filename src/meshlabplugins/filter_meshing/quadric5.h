@@ -138,7 +138,7 @@ public:
 	
 	// computes the real quadric and the geometric quadric using the face
 	// The geometric quadric is added to the parameter qgeo
-	void byFace(FaceType &f, math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
+	void byFace(FaceType &f, math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3,bool QualityQuadric)
 	{
 		double q = QualityFace(f);
 		
@@ -149,8 +149,33 @@ public:
 			AddtoQ3(q1);
 			AddtoQ3(q2);
 			AddtoQ3(q3);			
-
 			byFace(f,false);		// computes the real quadric
+			for(int j=0;j<3;++j)
+			{
+				if( f.IsB(j) || QualityQuadric )
+				{
+					Quadric5<double> temp;
+					TexCoord2f newtex;
+					Point3f newpoint = (f.P0(j)+f.P1(j))/2.0 + (f.N()/f.N().Norm())*Distance(f.P0(j),f.P1(j));
+					newtex.u() = (f.WT( (j+0)%3 ).u()+f.WT( (j+1)%3 ).u())/2.0;
+					newtex.v() = (f.WT( (j+0)%3 ).v()+f.WT( (j+1)%3 ).v())/2.0;
+					Point3f oldpoint = f.P2(j);
+					TexCoord2f oldtex = f.WT((j+2)%3); 
+					
+					f.P2(j)=newpoint;
+					f.WT((j+2)%3).u()=newtex.u();
+					f.WT((j+2)%3).v()=newtex.v();
+					
+					temp.byFace(f,false);			// computes the full quadric
+					if(! f.IsB(j) ) temp.Scale(0.05);
+					*this+=temp;
+					
+					f.P2(j)=oldpoint;
+					f.WT((j+2)%3).u()=oldtex.u();
+					f.WT((j+2)%3).v()=oldtex.v();
+				}	
+			}
+
 		}
 		else if(
 			(f.WT(1).u()-f.WT(0).u()) * (f.WT(2).v()-f.WT(0).v()) -
@@ -165,31 +190,7 @@ public:
 		}
 	}
 	
-	// failed attempt to use the classic way of computing geometric quadrics.
-	// DO NOT USE IT!!
-	void byFaceGeo(FaceType &fi, math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
-	{
-		Plane3<double,false> p;
-			// Calcolo piano
-			Point3d e1 = Point3d::Construct( fi.V(1)->cP() ) - Point3d::Construct( fi.V(0)->cP() );
-			Point3d e2 = Point3d::Construct( fi.V(2)->cP() ) - Point3d::Construct( fi.V(0)->cP() );
-			e1.Normalize();
-			e2.Normalize();
-			
-		p.SetDirection( e1 ^ e2 );
-			// Se normalizzo non dipende dall'area
-
-		//if(!Params().UseArea)	
-		p.Normalize();
-
-		p.SetOffset( p.Direction().dot(Point3d::Construct(fi.V(0)->cP())));
-		math::Quadric<double> q;	// Calcolo quadrica	delle facce
-		q.ByPlane(p);
-		q1+=q;
-		q2+=q;
-		q3+=q;						
-	}
-	
+		
 	// Computes the geometrical quadric if onlygeo == true and the real quadric if onlygeo == false
 	void byFace(FaceType &fi, bool onlygeo)
 	{
@@ -600,6 +601,15 @@ computes bad the priority......this should be adjusted with the extra weight use
 
 		c    += q3.c + u*u + v*v;
 
+	}
+	
+	void Scale(ScalarType val)	
+	{
+	 for(int i=0;i<15;++i)
+		 a[i]*=val;
+	 for(int i=0;i<5;++i)
+		 b[i]*=val;
+	 c*=val;
 	}
 
   // returns the quadric value in v
