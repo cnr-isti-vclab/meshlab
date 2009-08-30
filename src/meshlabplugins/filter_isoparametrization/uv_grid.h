@@ -128,6 +128,7 @@ public:
 					std::vector<FaceType*> &face,
 					std::vector<CoordType> &baryVal)
 	{
+    typedef typename MeshType::ScalarType ScalarType;
 		if (!bbox2.IsIn(UV))
 			return false;
 
@@ -139,7 +140,7 @@ public:
 			vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
 			vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
 			vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
-			vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
+			vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
 			//ScalarType area=(tex1-tex0)^(tex2-tex0);
 			CoordType bary;
 			///then find if the point 2d falls inside
@@ -158,6 +159,7 @@ public:
 		FaceType* &face,
 		CoordType &baryVal)
 	{
+
 		ScalarType dist=100.0;
 
 		if (!bbox2.IsIn(UV))
@@ -175,7 +177,7 @@ public:
 					vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
 					vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
 					vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
-					vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
+					vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
 					vcg::Point2<ScalarType> closest;
 					ScalarType dist_test;
 					t2d.PointDistance(UV,dist_test,closest);
