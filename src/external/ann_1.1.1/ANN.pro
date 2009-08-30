@@ -7,6 +7,7 @@ DEPENDPATH += $$ANNDIR/src
 DESTDIR = $$ANNDIR/lib
 
 win32-g++:	DEFINES += _ANN_WIN_MINGW
+linux-g++:  QMAKE_CXXFLAGS += -include stdlib.h -include string.h
 
 HEADERS       = kd_tree.h \
 				kd_split.h \
