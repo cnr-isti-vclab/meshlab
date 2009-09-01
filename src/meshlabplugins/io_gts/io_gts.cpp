@@ -41,14 +41,14 @@ using namespace vcg;
 
 
 // initialize importing parameters
-// void GtsIOPlugin::initPreOpenParameter(const QString &formatName, const QString &filename, FilterParameterSet &parlst)
+// void GtsIOPlugin::initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst)
 // {
 // 	parlst.addBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
 // 	parlst.addBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
 // }
 
 
-bool GtsIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &parlst, CallBackPos *cb, QWidget *parent)
+bool GtsIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *parent)
 {
 	// initializing mask
 	mask = 0;
@@ -96,7 +96,7 @@ bool GtsIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return true;
 }
 
-bool GtsIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
+bool GtsIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();

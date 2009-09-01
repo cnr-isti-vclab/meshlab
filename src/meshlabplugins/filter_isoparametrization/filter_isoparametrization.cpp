@@ -97,40 +97,40 @@ const int FilterIsoParametrization::getRequirements(QAction *action)
 	return MeshModel::MM_UNKNOWN;
 }
 
-void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& /*md*/, FilterParameterSet & par)
+void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& /*md*/, RichParameterSet & par)
 {
   
   switch(ID(a))
   {
     case ISOP_PARAM:
     {
-		par.addInt("targetAbstractMinFaceNum",100,"Abstract Min Mesh Size",
+		par.addParam(new RichInt("targetAbstractMinFaceNum",100,"Abstract Min Mesh Size",
 			"This number and the following one indicate the range face number of the abstract mesh that is used for the parametrization process.<br>"
 			"The algorithm will choose the abstract mesh with the best number of triangles within the specified interval.<br>"
 			"If the mesh has a very simple structure this range can be very low and strict;"
 			"for a roughly spherical object if you specify a range of [8,8] faces you get a octahedral abstract mesh, e.g. a geometry image.<br>"
-			"Large numbers (greater than 400) are usually not of practical use.");
-		par.addInt("targetAbstractMaxFaceNum",200,"Abstract Max Mesh Size", "See above.");
+			"Large numbers (greater than 400) are usually not of practical use."));
+		par.addParam(new RichInt("targetAbstractMaxFaceNum",200,"Abstract Max Mesh Size", "See above."));
 		QStringList stopCriteriaList;
 		stopCriteriaList.push_back("Best Heuristic");
 		stopCriteriaList.push_back("Area + Angle");
 		stopCriteriaList.push_back("Regularity");
 		stopCriteriaList.push_back("L2");
 		
-		par.addEnum("stopCriteria", 0, stopCriteriaList, tr("Optimization Criteria"),
+		par.addParam(new RichEnum("stopCriteria", 0, stopCriteriaList, tr("Optimization Criteria"),
 		        tr("<p style=\'white-space:pre\'>"
 			        "Choose a metric to stop the parametrization within the interval<br>"
 					"1: Best Heuristic : stop considering both isometry and number of faces of base domain<br>"
 					"2: Area + Angle : stop at minimum area and angle distorsion<br>"
 			        "3: Regularity : stop at minimum number of irregular vertices<br>"
-			        "4: L2 : stop at minimum OneWay L2 Stretch Eff"));
+			        "4: L2 : stop at minimum OneWay L2 Stretch Eff")));
 
-		//par.addDynamicFloat("convergenceSpeed", 1, 1,4, "Convergence Speed", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results");
-		par.addInt("convergenceSpeed",2, "Convergence Speed", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results");
+		//par.addParam(new RichDynamicFloat("convergenceSpeed", 1, 1,4, "Convergence Speed", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results");
+		par.addParam(new RichInt("convergenceSpeed",2, "Convergence Speed", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results"));
 			break;
 	}
 	 case ISOP_REMESHING :
-		 par.addInt("SamplingRate",10,"Sampling Rate", "This specify the sampling rate for remeshing.");
+		 par.addParam(new RichInt("SamplingRate",10,"Sampling Rate", "This specify the sampling rate for remeshing."));
 		 break;
   }
 
@@ -191,7 +191,7 @@ void FilterIsoParametrization::PrintStats(CMeshO *mesh)
 	Log("stdDev Edge:%d",stdEi);
 }
 
-bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, FilterParameterSet & par, vcg::CallBackPos  *cb)
+bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, RichParameterSet & par, vcg::CallBackPos  *cb)
 {
   (void) par;
   MeshModel* m = md.mm();  //get current mesh from document

@@ -425,78 +425,78 @@ const int FilterDocSampling::getRequirements(QAction *action)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, FilterParameterSet & parlst) 
+void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, RichParameterSet & parlst) 
 {
 	 switch(ID(action))	 {
 		case FP_MONTECARLO_SAMPLING :  
- 		  parlst.addInt ("SampleNum", md.mm()->cm.vn,
+ 		  parlst.addParam(new RichInt ("SampleNum", md.mm()->cm.vn,
 											"Number of samples",
-											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-			parlst.addBool("Weighted",  false,
+											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
+			parlst.addParam(new RichBool("Weighted",  false,
 										 "Quality Weighted Sampling",
-										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
+										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices."));
 											break;
 		case FP_STRATIFIED_SAMPLING :  
- 		   parlst.addInt ("SampleNum",  std::max(100000,md.mm()->cm.vn),
+ 		   parlst.addParam(new RichInt ("SampleNum",  std::max(100000,md.mm()->cm.vn),
 											"Number of samples",
-											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-			parlst.addEnum("Sampling", 0, 
+											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
+			parlst.addParam(new RichEnum("Sampling", 0, 
 									QStringList() << "Similar Triangle" << "Dual Similar Triangle" << "Long Edge Subdiv" , 
 									tr("Element to sample:"), 
 									tr(	"<b>Similar Triangle</b>: each triangle is subdivided into similar triangles and the internal vertices of these triangles are considered. This sampling leave space around edges and vertices for separate sampling of these entities.<br>"
 											"<b>Dual Similar Triangle</b>: each triangle is subdivided into similar triangles and the internal vertices of these triangles are considered.  <br>"
 											"<b>Long Edge Subdiv</b> each triangle is recursively subdivided along the longest edge. <br>"
-									)); 
+									))); 
 											
-			 parlst.addBool("Random", false,
+			 parlst.addParam(new RichBool("Random", false,
 											"Random Sampling",
-											"if true, for each (virtual) face we draw a random point, otherwise we pick the face midpoint.");
+											"if true, for each (virtual) face we draw a random point, otherwise we pick the face midpoint."));
 			break;
 		case FP_CLUSTERED_SAMPLING :{  
 			float maxVal = md.mm()->cm.bbox.Diag();
-		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values.");
+		  parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
 
-			parlst.addEnum("Sampling", 1, 
+			parlst.addParam(new RichEnum("Sampling", 1, 
 									QStringList() << "Average" << "Closest to center", 
 									tr("Representative Strataegy:"), 
 									tr(	"<b>Average</b>: for each cell we take the average of the sample falling into. The resulting point is a new point.<br>"
 											"<b>Closes to center</b>: for each cell we take the sample that is closest to the center of the cell. Choosen vertices are a subset of the original ones.  <br>"
-									)); 
-			parlst.addBool ("Selected", false, "Selected",
-											"If true only for the filter is applied only on the selected subset of the mesh.");
+									))); 
+			parlst.addParam(new RichBool ("Selected", false, "Selected",
+											"If true only for the filter is applied only on the selected subset of the mesh."));
 											
 			}
 			break;
 		case FP_ELEMENT_SUBSAMPLING :
-			parlst.addEnum("Sampling", 0, 
+			parlst.addParam(new RichEnum("Sampling", 0, 
 									QStringList() << "Vertex" << "Edge" << "Face", 
 									tr("Element to sample:"), 
-									tr("Choose what mesh element has to be used for the subsampling. At most one point sample will be added for each one of the chosen elements")); 
-			parlst.addInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be chosen. Being a subsampling of the original elements if this number should not be larger than the number of elements of the original mesh.");
+									tr("Choose what mesh element has to be used for the subsampling. At most one point sample will be added for each one of the chosen elements"))); 
+			parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be chosen. Being a subsampling of the original elements if this number should not be larger than the number of elements of the original mesh."));
 			break;
 		case FP_POISSONDISK_SAMPLING :
-			parlst.addInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
-			parlst.addAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification");
-			parlst.addInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate.");
-			parlst.addBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.");
+			parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
+			parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
+			parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
+			parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number."));
 			break;
 		case FP_VARIABLEDISK_SAMPLING :
-			parlst.addInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density.");
-			parlst.addAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification");
-			parlst.addFloat("RadiusVariance", 2, "Radius Variance", "The radius of the disk is allowed to vary between r/var and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling");
-			parlst.addInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate.");
-			parlst.addBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.");
+			parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
+			parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
+			parlst.addParam(new RichFloat("RadiusVariance", 2, "Radius Variance", "The radius of the disk is allowed to vary between r/var and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling"));
+			parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
+			parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number."));
 			break;
 		case FP_TEXEL_SAMPLING :  
- 		  parlst.addInt (	"TextureW", 512, "Texture Width",
+ 		  parlst.addParam(new RichInt (	"TextureW", 512, "Texture Width",
 											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples).<br>"
-											"If this parameter is 0 the size of the current texture is choosen.");
- 		  parlst.addInt (	"TextureH", 512, "Texture Height",
-											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)");
- 		  parlst.addBool(	"TextureSpace", false, "UV Space Sampling",
-											"The generated texel samples have their UV coords as point positions. The resulting point set is has a square domain, the texels/points, even if on a flat domain retain the original vertex normal to help a better perception of the original provenience.");
-			parlst.addBool(	"RecoverColor", md.mm()->cm.textures.size()>0, "RecoverColor",
-											"The generated point cloud has the current texture color");
+											"If this parameter is 0 the size of the current texture is choosen."));
+ 		  parlst.addParam(new RichInt (	"TextureH", 512, "Texture Height",
+											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)"));
+ 		  parlst.addParam(new RichBool(	"TextureSpace", false, "UV Space Sampling",
+											"The generated texel samples have their UV coords as point positions. The resulting point set is has a square domain, the texels/points, even if on a flat domain retain the original vertex normal to help a better perception of the original provenience."));
+			parlst.addParam(new RichBool(	"RecoverColor", md.mm()->cm.textures.size()>0, "RecoverColor",
+											"The generated point cloud has the current texture color"));
 			break;
 		case FP_HAUSDORFF_DISTANCE :  
 			{
@@ -504,23 +504,23 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 				foreach (vertexMesh, md.meshList) 
 						if (vertexMesh != md.mm())  break;
 		    
-				parlst.addMesh ("SampledMesh", md.mm(), "Sampled Mesh",
-												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh.");
-				parlst.addMesh ("TargetMesh", vertexMesh, "Target Mesh",
-												"The mesh that is sampled for the comparison.");
-				parlst.addBool ("SaveSample", false, "Save Samples",
-												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples.");										
-				parlst.addBool ("SampleVert", true, "Sample Vertexes",
+				parlst.addParam(new RichMesh ("SampledMesh", md.mm(),&md, "Sampled Mesh",
+												"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh."));
+				parlst.addParam(new RichMesh ("TargetMesh", vertexMesh,&md, "Target Mesh",
+												"The mesh that is sampled for the comparison."));
+				parlst.addParam(new RichBool ("SaveSample", false, "Save Samples",
+												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples."));										
+				parlst.addParam(new RichBool ("SampleVert", true, "Sample Vertexes",
 												"For the search of maxima it is useful to sample vertices and edges of the mesh with a greater care. "
 												"It is quite probably the the farthest points falls along edges or on mesh vertexes, and with uniform montecarlo sampling approaches"
 												"the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
-												"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results.");
-				parlst.addBool ("SampleEdge", true, "Sample Edges", "See the above comment.");
-				parlst.addBool ("SampleFace", true, "Sample Faces", "See the above comment.");
-				parlst.addInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
-												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-				parlst.addAbsPerc("MaxDist", md.mm()->cm.bbox.Diag()/20.0, 0.0f, md.mm()->cm.bbox.Diag(),
-												tr("Max Distance"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered neither for averaging nor for max."));
+												"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results."));
+				parlst.addParam(new RichBool ("SampleEdge", true, "Sample Edges", "See the above comment."));
+				parlst.addParam(new RichBool ("SampleFace", true, "Sample Faces", "See the above comment."));
+				parlst.addParam(new RichInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
+												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
+				parlst.addParam(new RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag()/20.0, 0.0f, md.mm()->cm.bbox.Diag(),
+												tr("Max Distance"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered neither for averaging nor for max.")));
 			} break;
 		case FP_VERTEX_RESAMPLING:
 		{
@@ -528,50 +528,50 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 				foreach (vertexMesh, md.meshList) 
 						if (vertexMesh != md.mm())  break;
 						
-				parlst.addMesh ("SourceMesh", md.mm(), "Source Mesh",
-												"The mesh that contains the source data that we want to transfer.");
-				parlst.addMesh ("TargetMesh", vertexMesh, "Target Mesh",
-												"The mesh whose vertexes will receive the data from the source.");
-				parlst.addBool ("GeomTransfer", false, "Transfer Geometry",
-												"if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh");										
-				parlst.addBool ("ColorTransfer", true, "Transfer Color",
-												"if enabled, the color of each vertex of the target mesh will become the color of the corresponding closest point on the source mesh");										
-				parlst.addBool ("QualityTransfer", false, "Transfer quality",
-												"if enabled, the quality of each vertex of the target mesh will become the quality of the corresponding closest point on the source mesh");										
+				parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
+												"The mesh that contains the source data that we want to transfer."));
+				parlst.addParam(new RichMesh ("TargetMesh", vertexMesh,&md, "Target Mesh",
+												"The mesh whose vertexes will receive the data from the source."));
+				parlst.addParam(new RichBool ("GeomTransfer", false, "Transfer Geometry",
+												"if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh"));										
+				parlst.addParam(new RichBool ("ColorTransfer", true, "Transfer Color",
+												"if enabled, the color of each vertex of the target mesh will become the color of the corresponding closest point on the source mesh"));										
+				parlst.addParam(new RichBool ("QualityTransfer", false, "Transfer quality",
+												"if enabled, the quality of each vertex of the target mesh will become the quality of the corresponding closest point on the source mesh"));										
 		} break; 
 		case FP_UNIFORM_MESH_RESAMPLING :
 		{
 				
-			parlst.addAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
-				tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger."));
+			parlst.addParam(new RichAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+				tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger.")));
 			
-			parlst.addAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
+			parlst.addParam(new RichAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
 												tr("Offset"), tr("Offset of the created surface (i.e. distance of the created surface from the original one).<br>"
 																				 "If offset is zero, the created surface passes on the original mesh itself. "
 																				 "Values greater than zero mean an external surface, and lower than zero mean an internal surface.<br> "
-																				 "In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation."));
-			parlst.addBool ("mergeCloseVert", false, "Clean Vertices",
-											"If true the mesh generated by MC will be cleaned by unifying vertices that are almost coincident");
-			parlst.addBool ("discretize", false, "Discretize",
+																				 "In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation.")));
+			parlst.addParam(new RichBool ("mergeCloseVert", false, "Clean Vertices",
+											"If true the mesh generated by MC will be cleaned by unifying vertices that are almost coincident"));
+			parlst.addParam(new RichBool ("discretize", false, "Discretize",
 											"If true the position of the intersected edge of the marching cube grid is not computed by linear interpolation, "
 											"but it is placed in fixed middle position. As a consequence the resampled object will look severely aliased by a stairstep appearance.<br>"
-											"Useful only for simulating the output of 3D printing devices.");
+											"Useful only for simulating the output of 3D printing devices."));
 
-			parlst.addBool ("multisample", false, "Multisample",
-											"If true the distance field is more accurately compute by multisampling the volume (7 sample for each voxel). Much slower but less artifacts.");
-			parlst.addBool ("absDist", false, "Absolute Distance",
+			parlst.addParam(new RichBool ("multisample", false, "Multisample",
+											"If true the distance field is more accurately compute by multisampling the volume (7 sample for each voxel). Much slower but less artifacts."));
+			parlst.addParam(new RichBool ("absDist", false, "Absolute Distance",
 											"If true a <b> not</b> signed distance field is computed. "
 											"In this case you have to choose a not zero Offset and a double surface is built around the original surface, inside and outside. "
-											"Is useful to convrt thin floating surfaces into <i> solid, thick meshes.</i>. t");			
+											"Is useful to convrt thin floating surfaces into <i> solid, thick meshes.</i>. t"));			
 		} break; 
 		 case FP_VORONOI_CLUSTERING :
 		 {
-			 parlst.addInt ("SampleNum", md.mm()->cm.vn/100, "Target vertex number",
-											"The final number of vertices.");
-			 parlst.addInt ("RelaxIter", 1, "Relaxing Iterations",
-											"The final number of vertices.");
-			 parlst.addInt ("RandSeed", 1, "Random Seed",
-											"The final number of vertices.");
+			 parlst.addParam(new RichInt ("SampleNum", md.mm()->cm.vn/100, "Target vertex number",
+											"The final number of vertices."));
+			 parlst.addParam(new RichInt ("RelaxIter", 1, "Relaxing Iterations",
+											"The final number of vertices."));
+			 parlst.addParam(new RichInt ("RandSeed", 1, "Random Seed",
+											"The final number of vertices."));
 			 
 		 } break; 
 		case FP_VORONOI_COLORING :
@@ -585,36 +585,36 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 				foreach (vertexMesh, md.meshList) // Search another mesh
 						if (vertexMesh != colorMesh)  break;
 		    
-				parlst.addMesh ("ColoredMesh", colorMesh, "To be Colored Mesh",
-												"The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters.");
-				parlst.addMesh ("VertexMesh", vertexMesh, "Vertex Mesh",
-												"The mesh whose vertexes are used as seed points for the color computation. These seeds point are projected onto the above mesh.");
+				parlst.addParam(new RichMesh ("ColoredMesh", colorMesh,&md, "To be Colored Mesh",
+												"The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters."));
+				parlst.addParam(new RichMesh ("VertexMesh", vertexMesh,&md, "Vertex Mesh",
+												"The mesh whose vertexes are used as seed points for the color computation. These seeds point are projected onto the above mesh."));
 			if(ID(action) ==	FP_DISK_COLORING) {
 					float Diag = md.mm()->cm.bbox.Diag();
-					parlst.addDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f,  tr("Radius"), 
-																"the radius of the spheres centered in the VertexMesh seeds ");
-					parlst.addBool("SampleRadius", false, "Use sample radius", "Use the radius that is stored in each sample of the vertex mesh. Useful for displaing the variable disk sampling results");
+					parlst.addParam(new RichDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f,  tr("Radius"), 
+																"the radius of the spheres centered in the VertexMesh seeds "));
+					parlst.addParam(new RichBool("SampleRadius", false, "Use sample radius", "Use the radius that is stored in each sample of the vertex mesh. Useful for displaing the variable disk sampling results"));
 			} else {
-					parlst.addBool ("backward", false, "BackDistance",
-													"If true the mesh is colored according the distance from the frontier of the voonoi diagram induced by the VertexMesh seeds.");
+					parlst.addParam(new RichBool ("backward", false, "BackDistance",
+													"If true the mesh is colored according the distance from the frontier of the voonoi diagram induced by the VertexMesh seeds."));
 			}
 		 } break; 
 		case FP_REGULAR_RECURSIVE_SAMPLING :
 			{
-				parlst.addAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
-				tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger."));
+				parlst.addParam(new RichAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+				tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger.")));
 			
-				parlst.addAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
+				parlst.addParam(new RichAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
 												tr("Offset"), tr("Offset of the created surface (i.e. distance of the created surface from the original one).<br>"
 																				 "If offset is zero, the created surface passes on the original mesh itself. "
 																				 "Values greater than zero mean an external surface, and lower than zero mean an internal surface.<br> "
-																				 "In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation."));
+																				 "In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation.")));
 		 } break; 
 		default : assert(0); 
 	}
 }
 
-bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action))
 		{

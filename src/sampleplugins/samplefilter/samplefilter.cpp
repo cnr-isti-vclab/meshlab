@@ -102,19 +102,19 @@ const ExtraSamplePlugin::FilterClass ExtraSamplePlugin::getClass(QAction *a)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
+void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
 {
 	 switch(ID(action))	 {
 		case FP_MOVE_VERTEX :  
- 		  parlst.addBool ("UpdateNormals",
+ 		  parlst.addParam(new RichBool ("UpdateNormals",
 											true,
 											"Recompute normals",
 											"Toggle the recomputation of the normals after the random displacement.\n\n"
-											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect.");
-			parlst.addAbsPerc("Displacement",
+											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
+			parlst.addParam(new RichAbsPerc("Displacement",
 												m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),
 												"Max displacement",
-												"The vertex are displaced of a vector whose norm is bounded by this value");
+												"The vertex are displaced of a vector whose norm is bounded by this value"));
 											break;
 											
 		default : assert(0); 
@@ -123,7 +123,7 @@ void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, FilterPar
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	//MeshModel &m=*md->mm();
 	srand(time(NULL)); 

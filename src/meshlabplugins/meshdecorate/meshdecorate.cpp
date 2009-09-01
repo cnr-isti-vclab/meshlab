@@ -76,7 +76,7 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet */*rm*/, GLArea *gla, QFont qf)
+void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RichParameterSet */*rm*/, GLArea *gla, QFont qf)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);

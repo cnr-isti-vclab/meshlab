@@ -230,9 +230,9 @@ void EditAlignPlugin:: alignParamCurrent()
 {
   assert(currentArc());
 	
-	FilterParameterSet alignParamSet;
+	RichParameterSet alignParamSet;
 	QString titleString=QString("Current Arc (%1 -> %2) Alignment Parameters").arg(currentArc()->MovName).arg(currentArc()->FixName);
-	AlignParameter::buildFilterParameterSet(currentArc()->ap, alignParamSet);
+	AlignParameter::buildRichParameterSet(currentArc()->ap, alignParamSet);
 
 	GenericParamDialog ad(alignDialog,&alignParamSet,titleString);
 	int result=ad.exec();
@@ -244,8 +244,8 @@ void EditAlignPlugin:: alignParamCurrent()
 
 void EditAlignPlugin:: alignParam()
 {
-	FilterParameterSet alignParamSet;
-	AlignParameter::buildFilterParameterSet(defaultAP, alignParamSet);
+	RichParameterSet alignParamSet;
+	AlignParameter::buildRichParameterSet(defaultAP, alignParamSet);
 
 	GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
 	int result=ad.exec();

@@ -53,7 +53,7 @@ const QString SampleMeshDecoratePlugin::Info(QAction *action)
   return QString();
  }
  
-void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, FilterParameterSet *parset) 
+void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, RichParameterSet *parset) 
 {
 	if(parset->findParameter("CubeMapPath")!= NULL) 
 	{
@@ -63,7 +63,7 @@ void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, FilterParameter
 	QString cubemapDirPath = MainWindowInterface::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
 	
 	//parset->addString("CubeMapPath", "/Users/cignoni/devel/meshlab/src/meshlab/textures/cubemaps/uffizi.jpg");
-	parset->addString("CubeMapPath", cubemapDirPath);
+	parset->addParam(new RichString("CubeMapPath", cubemapDirPath));
 	
 }		
 		
@@ -77,7 +77,7 @@ const QString SampleMeshDecoratePlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet *par, GLArea *gla, QFont /*qf*/)
+void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RichParameterSet *par, GLArea *gla, QFont /*qf*/)
 {
  assert(par);
 	static QString lastname("unitialized");

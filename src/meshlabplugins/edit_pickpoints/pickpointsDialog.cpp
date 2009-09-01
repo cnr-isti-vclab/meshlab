@@ -643,8 +643,8 @@ void PickPointsDialog::renameHighlightedPoint(){
 
 		const QString newName = "newName";
 		
-		FilterParameterSet parameterSet;
-		parameterSet.addString(newName, name, "New Name", "Enter the new name");
+		RichParameterSet parameterSet;
+		parameterSet.addParam(new RichString(newName, name, "New Name", "Enter the new name"));
 	
 		GenericParamDialog getNameDialog(this,&parameterSet);
 		getNameDialog.setWindowModality(Qt::WindowModal);

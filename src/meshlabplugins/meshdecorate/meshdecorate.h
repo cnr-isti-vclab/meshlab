@@ -178,7 +178,7 @@ public:
   
 	QHash<MeshModel *, bool> isMeshOk;
 	
-  virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet *, GLArea *gla,QFont qf);
+  virtual void Decorate(QAction *a, MeshModel &m, RichParameterSet *, GLArea *gla,QFont qf);
 	 virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
 		
 };

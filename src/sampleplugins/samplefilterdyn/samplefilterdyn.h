@@ -42,9 +42,9 @@ public:
 	virtual const QString filterName(FilterIDType filter) const;
 	virtual const QString filterInfo(FilterIDType filter) const;
 	virtual bool autoDialog(QAction *) {return true;}
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual int postCondition( QAction* ) const {return MeshModel::MM_VERTCOLOR;};
-	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	virtual const FilterClass getClass(QAction *);	
 };
 

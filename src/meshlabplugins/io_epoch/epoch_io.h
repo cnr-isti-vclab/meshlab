@@ -66,8 +66,8 @@ public:
   QString lastFileName;
   void GetExportMaskCapability(QString &, int &, int &) const {assert(0); return ;} 
 
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const FilterParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 };
 
 

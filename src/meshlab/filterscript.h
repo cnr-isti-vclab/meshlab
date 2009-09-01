@@ -42,8 +42,8 @@ public:
   bool open(QString filename);
   bool save(QString filename);
   
-  QList< QPair< QString , FilterParameterSet> > actionList;
-  typedef QList< QPair<QString, FilterParameterSet> >::iterator iterator;
+  QList< QPair< QString , RichParameterSet> > actionList;
+  typedef QList< QPair<QString, RichParameterSet> >::iterator iterator;
 };
 
 #endif

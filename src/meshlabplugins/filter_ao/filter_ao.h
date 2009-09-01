@@ -86,10 +86,10 @@ public:
 	
 	virtual       void        initParameterSet(QAction *,
 	                                           MeshModel &/*m*/,
-	                                           FilterParameterSet & /*parent*/);
+	                                           RichParameterSet & /*parent*/);
 	virtual       bool        applyFilter     (QAction *filter,
 	                                           MeshModel &m,
-	                                           FilterParameterSet & /*parent*/,
+	                                           RichParameterSet & /*parent*/,
 	                                           vcg::CallBackPos * cb) ;
 	void  initTextures          (void);
 	void  initGL                (vcg::CallBackPos *cb,

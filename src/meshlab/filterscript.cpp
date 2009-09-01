@@ -77,12 +77,12 @@ bool FilterScript::save(QString filename)
   {
 		QDomElement tag = doc.createElement("filter");
     tag.setAttribute(QString("name"),(*ii).first);
-    FilterParameterSet &par=(*ii).second;
-    QList<FilterParameter>::iterator jj;
+    RichParameterSet &par=(*ii).second;
+    QList<RichParameter*>::iterator jj;
     for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
     {
-      QDomElement parElem = (*jj).createElement(doc);
-      tag.appendChild(parElem);
+      //// QDomElement parElem = (*jj).createElement(doc);
+      //// tag.appendChild(parElem);
     }
     root.appendChild(tag);
   }
@@ -123,12 +123,12 @@ bool FilterScript::open(QString filename)
 	qDebug("FilterScript");
 	for(QDomElement nf = root.firstChildElement("filter"); !nf.isNull(); nf = nf.nextSiblingElement("filter"))
 		{
-			FilterParameterSet par;
+			RichParameterSet par;
 			QString name=nf.attribute("name");
 			qDebug("Reading filter with name %s",qPrintable(name));
 			for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
 					{
-						FilterParameter::addQDomElement(par,np);
+						//Guido// FilterParameter::addQDomElement(par,np);
 					 }
 			 actionList.append(qMakePair(name,par));
 		}

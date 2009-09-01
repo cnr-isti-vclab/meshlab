@@ -67,7 +67,7 @@ const QString FilterTopoPlugin::filterInfo(FilterIDType filterId)
 //
 // Filter interface start up
 //
-void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, FilterParameterSet & parlst) 
+void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, RichParameterSet & parlst) 
 {
 	MeshModel *target= md.mm();
 	foreach (target, md.meshList) 
@@ -78,22 +78,22 @@ void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, Filt
 	 switch(ID(action))	 {
 		case FP_RE_TOPO :  
 			// Iterations editbox
-			parlst.addInt(	"it", 
+			parlst.addParam(new RichInt(	"it", 
 							4,
 							"Number of refinement iterations used to build the new mesh", 
-							"As higher is this value, as well defined will be the new mesh. Consider that more than 5 iterations may slow down your system");
+							"As higher is this value, as well defined will be the new mesh. Consider that more than 5 iterations may slow down your system"));
 			// Distance editbox
-			parlst.addAbsPerc(	"dist", 0.3f, 0.01f, 0.99f, 
+			parlst.addParam(new RichAbsPerc(	"dist", 0.3f, 0.01f, 0.99f, 
 								"Incremental distance %", 
-								"This param represents the % distance for the local search algorithm used for new vertices allocation. Generally, 0.25-0.30 is a good value");
+								"This param represents the % distance for the local search algorithm used for new vertices allocation. Generally, 0.25-0.30 is a good value"));
 			// Topology mesh list
-			parlst.addMesh(	"userMesh", md.mm(), 
+			parlst.addParam(new RichMesh(	"userMesh", md.mm(), 
 							"Topology mesh",
-							"This mesh will be used as the new base topology, and will be replaced by the new mesh");
+							"This mesh will be used as the new base topology, and will be replaced by the new mesh"));
 			// Original mesh list
-			parlst.addMesh( "inMesh", target,
+			parlst.addParam(new RichMesh( "inMesh", target,
 							"Original mesh",
-							"The new mesh will be elaborated using this model");
+							"The new mesh will be elaborated using this model"));
 		break;
 											
 		default : assert(0); 
@@ -103,7 +103,7 @@ void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, Filt
 //
 // Apply filter
 //
-bool FilterTopoPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool FilterTopoPlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	// To run the retopology algorithm an istance of RetopoMeshBuilder is needed
 	RetopMeshBuilder rm;

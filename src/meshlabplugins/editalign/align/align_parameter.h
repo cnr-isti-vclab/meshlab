@@ -29,10 +29,10 @@ class AlignParameter {
 
 public:
 	//translates the filter parameters into align parameters
-	static void buildAlignParameters(FilterParameterSet &fps, vcg::AlignPair::Param &app);
+	static void buildAlignParameters(RichParameterSet &fps, vcg::AlignPair::Param &app);
 
 	//translates the align parameters into filter parameters
-	static void buildFilterParameterSet(vcg::AlignPair::Param &app, FilterParameterSet &fps);
+	static void buildRichParameterSet(vcg::AlignPair::Param &app, RichParameterSet &fps);
 
 private:
 	//no need to have an instance of this class

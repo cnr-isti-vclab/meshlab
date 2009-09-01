@@ -50,23 +50,23 @@ const QString AlignTools::MeshToMove = "MeshToMove";
 
 AlignTools::AlignTools(){}
 
-void AlignTools::buildParameterSet(FilterParameterSet & parlst)
+void AlignTools::buildParameterSet(MeshDocument &md,RichParameterSet & parlst)
 {
 	vcg::AlignPair::Param ICPParameters;
-	AlignParameter::buildFilterParameterSet(ICPParameters, parlst);
+	AlignParameter::buildRichParameterSet(ICPParameters, parlst);
 
-	parlst.addBool(UseMarkers, true, "Use Markers for Alignment","if true (default), then use the user picked markers to do an alignment (or pre alignment if you also use ICP).");
-	parlst.addBool(AllowScaling, false, "Scale the mesh","if true (false by default), in addition to the alignment, scale the mesh based on the points picked");
+	parlst.addParam(new RichBool(UseMarkers, true, "Use Markers for Alignment","if true (default), then use the user picked markers to do an alignment (or pre alignment if you also use ICP)."));
+	parlst.addParam(new RichBool(AllowScaling, false, "Scale the mesh","if true (false by default), in addition to the alignment, scale the mesh based on the points picked"));
 	
-	parlst.addBool(UseICP, true, "Use ICP for Alignment","if true (default), then use the ICP to align the two meshes.");
+	parlst.addParam(new RichBool(UseICP, true, "Use ICP for Alignment","if true (default), then use the ICP to align the two meshes."));
 	
-	parlst.addMesh (StuckMesh, 0, "Stuck Mesh",
-			"The mesh that will not move.");
-	parlst.addMesh (MeshToMove, 1, "Mesh to Move",
-			"The mesh that will move to fit close to the Stuck Mesh.");
+	parlst.addParam(new RichMesh (StuckMesh, md.mm(), &md,"Stuck Mesh",
+			"The mesh that will not move."));
+	parlst.addParam(new RichMesh (MeshToMove, md.mm(), &md, "Mesh to Move",
+			"The mesh that will move to fit close to the Stuck Mesh."));
 }
 
-bool AlignTools::setupThenAlign(MeshModel &/*mm*/, FilterParameterSet & par)
+bool AlignTools::setupThenAlign(MeshModel &/*mm*/, RichParameterSet & par)
 {
 	//mesh that wont move
 	MeshModel *stuckModel = par.getMesh(StuckMesh);
@@ -163,7 +163,7 @@ bool AlignTools::setupThenAlign(MeshModel &/*mm*/, FilterParameterSet & par)
 bool AlignTools::align(MeshModel *stuckModel, PickedPoints *stuckPickedPoints,
 		MeshModel *modelToMove, PickedPoints *modelToMovePickedPoints,
 		GLArea *modelToMoveGLArea,
-		FilterParameterSet &filterParameters,
+		RichParameterSet &filterParameters,
 		QWidget *parentWidget, bool confirm)
 {
 	vcg::Matrix44f result;

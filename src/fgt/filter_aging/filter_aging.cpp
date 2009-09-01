@@ -92,7 +92,7 @@ const QString GeometryAgingPlugin::filterInfo(FilterIDType filterId) const
 }
 
 /* Initializes the list of parameters (called by the auto dialog framework) */
-void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params)
+void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &params)
 {
 	if( ID(action) != FP_ERODE)
 	{
@@ -108,51 +108,51 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 		if(qRange.second <= qRange.first) hasQ=false;
 	}
 		
-		params.addBool("ComputeCurvature", !hasQ, "ReCompute quality from curvature", 
+		params.addParam(new RichBool("ComputeCurvature", !hasQ, "ReCompute quality from curvature", 
 				"Compute per vertex quality values using mesh mean curvature <br>"
 				"algorithm. In this way only the areas with higher curvature <br>"
 				"will be eroded. If not checked, the quality values already <br>"
-				"present over the mesh will be used.");
-		params.addBool("SmoothQuality", false, "Smooth vertex quality", 
+				"present over the mesh will be used."));
+		params.addParam(new RichBool("SmoothQuality", false, "Smooth vertex quality", 
 				"Smooth per vertex quality values. This allows to extend the <br>"
-				"area affected by the erosion process.");
-		params.addAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*0.66,
+				"area affected by the erosion process."));
+		params.addParam(new RichAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*0.66,
 				qRange.first, qRange.second, "Min quality threshold",
 				"Represents the minimum quality value two vertexes must have <br>"
-				"to consider the edge they are sharing.");
-		params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0,m.cm.bbox.Diag()*0.5,
+				"to consider the edge they are sharing."));
+		params.addParam(new RichAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0,m.cm.bbox.Diag()*0.5,
 				"Edge len threshold", 
-				"The minimum length of an edge. Useful to avoid the creation of too many small faces.");
-		params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.05, 0, m.cm.bbox.Diag(),
-				"Max chip depth", "The maximum depth of a chip.");
-		params.addInt("Octaves", 3, "Fractal Octaves", 
+				"The minimum length of an edge. Useful to avoid the creation of too many small faces."));
+		params.addParam(new RichAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.05, 0, m.cm.bbox.Diag(),
+				"Max chip depth", "The maximum depth of a chip."));
+		params.addParam(new RichInt("Octaves", 3, "Fractal Octaves", 
 				"The number of octaves that are used in the generation of the <br>"
 				"fractal noise using Perlin noise; reasonalble values are in the <br>"
-				"1..8 range. Setting it to 1 means using a simple Perlin Noise.");
-		params.addAbsPerc("NoiseFreqScale", m.cm.bbox.Diag()/10, 0, m.cm.bbox.Diag(), "Noise frequency scale",
+				"1..8 range. Setting it to 1 means using a simple Perlin Noise."));
+		params.addParam(new RichAbsPerc("NoiseFreqScale", m.cm.bbox.Diag()/10, 0, m.cm.bbox.Diag(), "Noise frequency scale",
 				"Changes the noise frequency scale: this affects chip dimensions and <br>"
 				"the distance between chips. The value denotes the average values <br>"
-				"between two dents. Smaller number means small and frequent chips.");
-		params.addFloat("NoiseClamp", 0.5, "Noise clamp threshold [0..1]",
+				"between two dents. Smaller number means small and frequent chips."));
+		params.addParam(new RichFloat("NoiseClamp", 0.5, "Noise clamp threshold [0..1]",
 				"All the noise values smaller than this parameter will be <br> "
-				"considered as 0.");
-		params.addFloat("DisplacementSteps", 10, "Displacement steps",
+				"considered as 0."));
+		params.addParam(new RichFloat("DisplacementSteps", 10, "Displacement steps",
 				"The whole displacement process is performed as a sequence of small <br>"
 				"offsets applyed on each vertex. This parameter represents the number <br>"
 				"of steps into which the displacement process will be splitted. <br>"
 				"Useful to avoid the introduction of self intersections. <br>"
-				"Bigger number means better accuracy.");
-		params.addBool("Selected", m.cm.sfn>0, "Affect only selected faces", 
-				"The aging procedure will be applied to the selected faces only.");
-		params.addBool("StoreDisplacement", false, "Store erosion informations",
+				"Bigger number means better accuracy."));
+		params.addParam(new RichBool("Selected", m.cm.sfn>0, "Affect only selected faces", 
+				"The aging procedure will be applied to the selected faces only."));
+		params.addParam(new RichBool("StoreDisplacement", false, "Store erosion informations",
 				"Select this option if you want to store the erosion informations <br>"
 				"over the mesh. A new attribute will be added to each vertex <br>"
-				"to contain the displacement offset applied to that vertex.");
+				"to contain the displacement offset applied to that vertex."));
 }
 
 
 /* The Real Core Function doing the actual mesh processing */
-bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb)
+bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet &params, vcg::CallBackPos *cb)
 {	
 	if( ID(filter) != FP_ERODE)
 	{

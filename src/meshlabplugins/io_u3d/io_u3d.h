@@ -47,16 +47,16 @@ class U3DIOPlugin : public QObject, public MeshIOInterface
 
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 
-	void initSaveParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet &par);
+	void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par);
 
 	private:
 	QString computePluginsPath();
 
 
-	void saveParameters(const FilterParameterSet &par);
+	void saveParameters(const RichParameterSet &par);
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters _param;
 	
 };

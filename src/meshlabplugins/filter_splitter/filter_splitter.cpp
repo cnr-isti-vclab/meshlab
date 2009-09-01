@@ -88,17 +88,17 @@ bool FilterSplitterPlugin::autoDialog(QAction *action)
 }
 
 // This function define the needed parameters for each filter.
-void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, FilterParameterSet & parlst)
+void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst)
 {
 	 switch(ID(action))
 	 {
 		case FP_SPLITSELECT :
 			{
-	 		  parlst.addBool ("DeleteOriginal",
+	 		  parlst.addParam(new RichBool ("DeleteOriginal",
 												true,
 												"Delete original selection",
 												"Deletes the original selected faces, thus splitting the mesh among layers. \n\n"
-												"if false, the selected faces are duplicated in the new layer");
+												"if false, the selected faces are duplicated in the new layer"));
 			}
 			break;
 
@@ -107,7 +107,7 @@ void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *)
+bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *)
 {
 	CMeshO::FaceIterator fi;
 	int numFacesSel,numVertSel;

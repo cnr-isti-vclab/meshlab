@@ -46,7 +46,7 @@ U3DIOPlugin::U3DIOPlugin()
 
 }
 
-bool U3DIOPlugin::open(const QString & /*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, int& /*mask*/, const FilterParameterSet &, CallBackPos */*cb*/, QWidget */*parent*/)
+bool U3DIOPlugin::open(const QString & /*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, int& /*mask*/, const RichParameterSet &, CallBackPos */*cb*/, QWidget */*parent*/)
 {
 	return false;
 }
@@ -66,7 +66,7 @@ QString U3DIOPlugin::computePluginsPath()
 }
 
 
-bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet & par, vcg::CallBackPos */*cb*/, QWidget *parent)
+bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, vcg::CallBackPos */*cb*/, QWidget *parent)
 {
   vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
@@ -191,22 +191,22 @@ void U3DIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 //		avoidExponentialNotation(p.Z(),bboxdiag));
 //}
 
-void U3DIOPlugin::initSaveParameter(const QString &format, MeshModel &m, FilterParameterSet &par) 
+void U3DIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichParameterSet &par) 
 {
 	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
 	//vcg::Point3f pos = avoidExponentialNotation(_param._campar->_obj_pos,_param._campar->_obj_bbox_diag);
 	vcg::Point3f pos = _param._campar->_obj_pos;
 	vcg::Point3f dir(0.0f,0.0f,-1.0f * _param._campar->_obj_bbox_diag);
-	par.addPoint3f("position_val",dir, "Camera Position",
-		"The position in which the camera is set. The default value is derived by the 3d mesh's bounding box.");		
+	par.addParam(new RichPoint3f("position_val",dir, "Camera Position",
+		"The position in which the camera is set. The default value is derived by the 3d mesh's bounding box."));		
 	//vcg::Point3f dir(0.0f,0.0f,avoidExponentialNotation(-1.0f * _param._campar->_obj_bbox_diag,_param._campar->_obj_bbox_diag));
-	par.addPoint3f("target_val",pos, "Camera target point",
-		"The point towards the camera is seeing. The default value is derived by the 3d mesh's bounding box.");
-	par.addFloat("fov_val",60.0f,"Camera's FOV Angle 0..180","Camera's FOV Angle. The values' range is between 0-180 degree. The default value is 60.");
-	par.addInt("compression_val",500,"U3D quality 0..1000","U3D mesh's compression ratio. The values' range is between 0-1000 degree. The default value is 500.");
+	par.addParam(new RichPoint3f("target_val",pos, "Camera target point",
+		"The point towards the camera is seeing. The default value is derived by the 3d mesh's bounding box."));
+	par.addParam(new RichFloat("fov_val",60.0f,"Camera's FOV Angle 0..180","Camera's FOV Angle. The values' range is between 0-180 degree. The default value is 60."));
+	par.addParam(new RichInt("compression_val",500,"U3D quality 0..1000","U3D mesh's compression ratio. The values' range is between 0-1000 degree. The default value is 500."));
 }
 
-void U3DIOPlugin::saveParameters(const FilterParameterSet &par)
+void U3DIOPlugin::saveParameters(const RichParameterSet &par)
 {
 	vcg::Point3f from_target_to_camera = vcg::Point3f(- par.getPoint3f(QString("position_val")) + par.getPoint3f(QString("target_val")));
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters* sw = _param._campar;

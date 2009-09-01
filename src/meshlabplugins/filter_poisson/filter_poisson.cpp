@@ -99,44 +99,44 @@ const QString PoissonPlugin::filterInfo(FilterIDType filterId) const
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void PoissonPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
-//void PoissonPlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
+void PoissonPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+//void PoissonPlugin::initParList(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
 	 switch(ID(action))	 {
 		case FP_POISSON_RECON :  
- 		  //parlst.addBool ("RecomputeNormals",
+ 		  //parlst.addParam(new RichBool ("RecomputeNormals",
 			//								false,
 			//								"Recompute normals",
 			//								"Do not use the current normals, but recompute them from scratch considering the vertices of the mesh as an unstructured point cloud.");
- 		  //parlst.addBool ("UseConfidence",
+ 		  //parlst.addParam(new RichBool ("UseConfidence",
 			//								true,
 			//								"Use Quality",
 			//								"Use the per vertex quality as a confidence value\n");
-			parlst.addInt ("OctDepth",
+			parlst.addParam(new RichInt ("OctDepth",
 											6,
 											"Octree Depth",
-											"Set the depth of the Octree used for extracting the final surface. Suggested range 5..10. Higher numbers mean higher precision in the reconstruction but also higher processing times. Be patient.\n");
-			parlst.addInt ("SolverDivide",
+											"Set the depth of the Octree used for extracting the final surface. Suggested range 5..10. Higher numbers mean higher precision in the reconstruction but also higher processing times. Be patient.\n"));
+			parlst.addParam(new RichInt ("SolverDivide",
 											6,
 											"Solver Divide",
 											"This integer argument specifies the depth at which a block Gauss-Seidel solver is used to solve the Laplacian equation.\n"
 											"Using this parameter helps reduce the memory overhead at the cost of a small increase in reconstruction time. \n"
 											"In practice, the authors have found that for reconstructions of depth 9 or higher a subdivide depth of 7 or 8 can reduce the memory usage.\n"
-											"The default value is 8.\n");
-			parlst.addFloat ("SamplesPerNode",
+											"The default value is 8.\n"));
+			parlst.addParam(new RichFloat ("SamplesPerNode",
 											1.0,
 											"Samples per Node",
 											"This floating point value specifies the minimum number of sample points that should fall within an octree node as the octree\n"
 											"construction is adapted to sampling density. For noise-free samples, small values in the range [1.0 - 5.0] can be used.\n"
 											"For more noisy samples, larger values in the range [15.0 - 20.0] may be needed to provide a smoother, noise-reduced, reconstruction.\n"
-											"The default value is 1.0.");
-			parlst.addFloat ("Offset",
+											"The default value is 1.0."));
+			parlst.addParam(new RichFloat ("Offset",
 											 1.0,
 											 "Surface offsetting",
 											 "This floating point value specifies a correction value for the isosurface threshold that is chosen.\n"
 											 "Values < 1 means internal offsetting, >1 external offsetting."
 											 "Good values are in the range 0.5 .. 2.\n"
-											 "The default value is 1.0 (no offsetting).");
+											 "The default value is 1.0 (no offsetting)."));
 			
 			break;
 											
@@ -146,7 +146,7 @@ void PoissonPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParamet
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool PoissonPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool PoissonPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	MeshModel &m=*md.mm();
   MeshModel &pm =*md.addNewMesh("Poisson mesh");

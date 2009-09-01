@@ -39,16 +39,16 @@ using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);
 
-void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, FilterParameterSet & parlst)
+void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterSet & parlst)
 {
 	if(format.toUpper() == tr("ASC"))
 	{
-			parlst.addInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file.");
-			parlst.addBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Lenght of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created.");
+			parlst.addParam(new RichInt("rowToSkip",0,"Header Row to be skipped","The number of lines that must be skipped at the beginning of the file."));
+			parlst.addParam(new RichBool("triangulate", true, "Grid triangulation", "if true it assumes that the points are arranged in a complete xy grid and it tries to perform a naive height field triangulation of the input data.  Lenght of the lines is detected automatically by searching x jumps. If the input point cloud data is not arranged as a xy regular height field, no triangles are created."));
 	}
 }
 
-bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &parlst, CallBackPos *cb, QWidget *parent)
+bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *parent)
 {
 	bool result;
 	if(formatName.toUpper() == tr("TRI"))
@@ -75,7 +75,7 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return result;
 }
 
-bool TriIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
+bool TriIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
 {
 	assert(0);
 	return false;

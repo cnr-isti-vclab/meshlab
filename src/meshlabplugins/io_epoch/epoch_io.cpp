@@ -558,7 +558,7 @@ EpochIO::EpochIO()
     delete epochDialog;
   }
 
-bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const FilterParameterSet & /*par*/, CallBackPos *cb, QWidget *parent)
+bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & /*par*/, CallBackPos *cb, QWidget *parent)
 {
   EpochReconstruction er;
 	
@@ -755,7 +755,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 }
 
 
-bool EpochIO::save(const QString &/*formatName*/,const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const FilterParameterSet &, vcg::CallBackPos * /*cb*/, QWidget *parent)
+bool EpochIO::save(const QString &/*formatName*/,const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const RichParameterSet &, vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
 	QMessageBox::warning(parent, "Unknown type", "file's extension not supported!!!");
 	return false;

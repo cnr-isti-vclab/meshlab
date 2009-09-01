@@ -83,26 +83,29 @@ const MeshFilterInterface::FilterClass QualityMapperFilter::getClass(QAction *a)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
-//void QualityMapperFilter::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
+void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+//void QualityMapperFilter::initParList(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
 	 switch(ID(action))	 {
 		case FP_QUALITY_MAPPER :
 			{
 				_meshMinMaxQuality = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 
-				parlst.addFloat("minQualityVal", _meshMinMaxQuality.minV, "Minimum mesh quality","The specified quality value is mapped in the <b>lower</b> end of the choosen color scale. Default value: the minumum quality value found on the mesh."  );
-				parlst.addFloat("maxQualityVal", _meshMinMaxQuality.maxV, "Maximum mesh quality","The specified quality value is mapped in the <b>upper</b> end of the choosen color scale. Default value: the maximum quality value found on the mesh." );
-				parlst.addFloat("midHandlePos", 50, "Gamma biasing (0..100)", "Defines a gamma compression of the quality values, by setting the position of the middle of the color scale. Value is defined as a percentage (0..100). Default value is 50, that corresponds to a linear mapping." );
-				parlst.addFloat("brightness", 1.0f, "Mesh brightness", "must be between 0 and 2. 0 represents a completely dark mesh, 1 represents a mesh colorized with original colors, 2 represents a completely bright mesh");
+				parlst.addParam(new RichFloat("minQualityVal", _meshMinMaxQuality.minV, "Minimum mesh quality","The specified quality value is mapped in the <b>lower</b> end of the choosen color scale. Default value: the minumum quality value found on the mesh."  ));
+				parlst.addParam(new RichFloat("maxQualityVal", _meshMinMaxQuality.maxV, "Maximum mesh quality","The specified quality value is mapped in the <b>upper</b> end of the choosen color scale. Default value: the maximum quality value found on the mesh." ));
+				parlst.addParam(new RichFloat("midHandlePos", 50, "Gamma biasing (0..100)", "Defines a gamma compression of the quality values, by setting the position of the middle of the color scale. Value is defined as a percentage (0..100). Default value is 50, that corresponds to a linear mapping." ));
+				parlst.addParam(new RichFloat("brightness", 1.0f, "Mesh brightness", "must be between 0 and 2. 0 represents a completely dark mesh, 1 represents a mesh colorized with original colors, 2 represents a completely bright mesh"));
 				//setting default transfer functions names
 				TransferFunction::defaultTFs[GREY_SCALE_TF] = "Grey Scale";
 				TransferFunction::defaultTFs[MESHLAB_RGB_TF] = "Meshlab RGB";
 				TransferFunction::defaultTFs[RGB_TF] = "RGB";
+				TransferFunction::defaultTFs[FRENCH_RGB_TF] = "French RGB";
 				TransferFunction::defaultTFs[RED_SCALE_TF] = "Red Scale";
 				TransferFunction::defaultTFs[GREEN_SCALE_TF] = "Green Scale";
 				TransferFunction::defaultTFs[BLUE_SCALE_TF] = "Blue Scale";
 				TransferFunction::defaultTFs[FLAT_TF] = "Flat";
+				TransferFunction::defaultTFs[SAW_4_TF] = "Saw 4";
+				TransferFunction::defaultTFs[SAW_8_TF] = "Saw 8";
 
 				QStringList tfList;
 				tfList << "Custom Transfer Function File";
@@ -110,8 +113,8 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 					//fetching and adding default TFs to TFList
 					tfList << TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF];
 				
-				parlst.addEnum( "TFsList", 1, tfList, "Transfer Function type to apply to filter", "Choose the Transfer Function to apply to the filter" );
-				parlst.addString("csvFileName", "", "Custom TF Filename", "Filename of the transfer function to be loaded, used only if you have chosen the Custom Transfer Function." );
+				parlst.addParam(new RichEnum( "TFsList", 1, tfList, "Transfer Function type to apply to filter", "Choose the Transfer Function to apply to the filter" ));
+				parlst.addParam(new RichString("csvFileName", "", "Custom TF Filename", "Filename of the transfer function to be loaded, used only if you have chosen the Custom Transfer Function." ));
 			}
 			break;
 											
@@ -121,7 +124,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 
 // The Real Core Function doing the actual mesh processing.
 // Apply color to mesh vertexes
-bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	Q_UNUSED(filter);
 	Q_UNUSED(cb);
@@ -145,11 +148,11 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 		//text TF
 		QString csvFileName = par.getString("csvFileName");
 		if ( csvFileName != "" &&  loadEqualizerInfo(csvFileName, &eqData) > 0 )
-			{
-				par.setFloat("minQualityVal", eqData.minQualityVal );
-				par.setFloat("maxQualityVal", eqData.maxQualityVal );
-				par.setFloat("midHandlePos", _meshMinMaxQuality.minV + ((_meshMinMaxQuality.maxV-_meshMinMaxQuality.minV)/eqData.midQualityPercentage));
-				par.setFloat("brightness", eqData.brightness);
+		{
+				par.setValue("minQualityVal", FloatValue(eqData.minQualityVal) );
+				par.setValue("maxQualityVal", FloatValue(eqData.maxQualityVal) );
+				par.setValue("midHandlePos", FloatValue(_meshMinMaxQuality.minV + ((_meshMinMaxQuality.maxV-_meshMinMaxQuality.minV)/eqData.midQualityPercentage)));
+				par.setValue("brightness", FloatValue(eqData.brightness));
 
 				//building new TF object from external file
 				transferFunction = new TransferFunction( par.getString("csvFileName") );

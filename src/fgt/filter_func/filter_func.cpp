@@ -211,90 +211,90 @@ const int FilterFunctionPlugin::getRequirements(QAction *action)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
+void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
 {
 	Q_UNUSED(m);
 	switch(ID(action))	 {
 
 		case FF_VERT_SELECTION :
-			parlst.addString("condSelect","(q < 0)", "boolean function",
+			parlst.addParam(new RichString("condSelect","(q < 0)", "boolean function",
 							 "type a boolean function that will be evaluated in order to select a subset of vertices<br>"
-							 "example: (y > 0) and (ny > 0)");
+							 "example: (y > 0) and (ny > 0)"));
 
-			parlst.addBool("strictSelect",true,"Strict face selection", "If checked a face is selected if <b>ALL</b> its vertices are selected. <br>"
-										 "If unchecked a face is selected if <b>at least one</b> of its vertices is selected");
+			parlst.addParam(new RichBool("strictSelect",true,"Strict face selection", "If checked a face is selected if <b>ALL</b> its vertices are selected. <br>"
+										 "If unchecked a face is selected if <b>at least one</b> of its vertices is selected"));
 			break;
 
 		case FF_FACE_SELECTION :
-			parlst.addString("condSelect","(fi == 0)", "boolean function",
-							 "type a boolean function that will be evaluated in order to select a subset of faces<br>");
+			parlst.addParam(new RichString("condSelect","(fi == 0)", "boolean function",
+							 "type a boolean function that will be evaluated in order to select a subset of faces<br>"));
 			break;
 
 		case FF_GEOM_FUNC :
-			parlst.addString("x","x", "func x = ", "insert function to generate new coord for x");
-			parlst.addString("y","y", "func y = ", "insert function to generate new coord for y");
-			parlst.addString("z","sin(x+y)", "func z = ", "insert function to generate new coord for z");
+			parlst.addParam(new RichString("x","x", "func x = ", "insert function to generate new coord for x"));
+			parlst.addParam(new RichString("y","y", "func y = ", "insert function to generate new coord for y"));
+			parlst.addParam(new RichString("z","sin(x+y)", "func z = ", "insert function to generate new coord for z"));
 			break;
 
 		case FF_FACE_COLOR:
-			parlst.addString("r","255", "func r = ", "function to generate Red component. Expected Range 0-255");
-			parlst.addString("g","0", "func g = ", "function to generate Green component. Expected Range 0-255");
-			parlst.addString("b","255", "func b = ", "function to generate Blue component. Expected Range 0-255");
+			parlst.addParam(new RichString("r","255", "func r = ", "function to generate Red component. Expected Range 0-255"));
+			parlst.addParam(new RichString("g","0", "func g = ", "function to generate Green component. Expected Range 0-255"));
+			parlst.addParam(new RichString("b","255", "func b = ", "function to generate Blue component. Expected Range 0-255"));
 			break;
 
 		case FF_FACE_QUALITY:
-			parlst.addString("q","x0+y0+z0", "func q0 = ", "function to generate new Quality foreach face");
-			parlst.addBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]");
-			parlst.addBool("map",false,"map into color", "if checked map quality generated values into per-vertex color");
+			parlst.addParam(new RichString("q","x0+y0+z0", "func q0 = ", "function to generate new Quality foreach face"));
+			parlst.addParam(new RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
+			parlst.addParam(new RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
 			break;
 
 		case FF_VERT_COLOR:
-			parlst.addString("x","255", "func r = ", "function to generate Red component. Expected Range 0-255");
-			parlst.addString("y","255", "func g = ", "function to generate Green component. Expected Range 0-255");
-			parlst.addString("z","0", "func b = ", "function to generate Blue component. Expected Range 0-255");
+			parlst.addParam(new RichString("x","255", "func r = ", "function to generate Red component. Expected Range 0-255"));
+			parlst.addParam(new RichString("y","255", "func g = ", "function to generate Green component. Expected Range 0-255"));
+			parlst.addParam(new RichString("z","0", "func b = ", "function to generate Blue component. Expected Range 0-255"));
 			break;
 
 		case FF_VERT_QUALITY:
-			parlst.addString("q","vi", "func q = ", "function to generate new Quality for every vertex");
-			parlst.addBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]");
-			parlst.addBool("map",false,"map into color", "if checked map quality generated values into per-vertex color");
+			parlst.addParam(new RichString("q","vi", "func q = ", "function to generate new Quality for every vertex"));
+			parlst.addParam(new RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
+			parlst.addParam(new RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
 			break;
 
 		case FF_DEF_VERT_ATTRIB:
-			parlst.addString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name");
-			parlst.addString("expr","x","Function =", "function to calculate custom attribute value for each vertex");
+			parlst.addParam(new RichString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name"));
+			parlst.addParam(new RichString("expr","x","Function =", "function to calculate custom attribute value for each vertex"));
 			break;
 
 		case FF_DEF_FACE_ATTRIB:
-			parlst.addString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name");
-			parlst.addString("expr","fi","Function =", "function to calculate custom attribute value for each vertex");
+			parlst.addParam(new RichString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name"));
+			parlst.addParam(new RichString("expr","fi","Function =", "function to calculate custom attribute value for each vertex"));
 			break;
 
 		case FF_GRID :
-			parlst.addInt("numVertX", 10, "num vertices on x", "number of vertices on x. it must be positive");
-			parlst.addInt("numVertY", 10, "num vertices on y", "number of vertices on y. it must be positive");
-			parlst.addFloat("absScaleX", 0.3f, "x scale", "absolute scale on x (float)");
-			parlst.addFloat("absScaleY", 0.3f, "y scale", "absolute scale on y (float)");
-			parlst.addBool("center",false,"centered on origin", "center grid generated by filter on origin.<br>"
-						   "Grid is first generated and than moved into origin (using muparser lib to perform fast calc on every vertex)");
+			parlst.addParam(new RichInt("numVertX", 10, "num vertices on x", "number of vertices on x. it must be positive"));
+			parlst.addParam(new RichInt("numVertY", 10, "num vertices on y", "number of vertices on y. it must be positive"));
+			parlst.addParam(new RichFloat("absScaleX", 0.3f, "x scale", "absolute scale on x (float)"));
+			parlst.addParam(new RichFloat("absScaleY", 0.3f, "y scale", "absolute scale on y (float)"));
+			parlst.addParam(new RichBool("center",false,"centered on origin", "center grid generated by filter on origin.<br>"
+						   "Grid is first generated and than moved into origin (using muparser lib to perform fast calc on every vertex)"));
 			break;
 		case FF_ISOSURFACE :
-			parlst.addFloat("voxelSize", 0.05, "Size of Voxel", "Size of the voxel that is used by for the grid where the field is sampled. Smaller this value, higher precision, but higher processing times.");
-			parlst.addFloat("minX", -1, "Min X", "Range where the field is sampled");
-			parlst.addFloat("minY", -1, "Min Y", "Range where the field is sampled");
-			parlst.addFloat("minZ", -1, "Min Z", "Range where the field is sampled");
-			parlst.addFloat("maxX",  1, "Max X", "Range where the field is sampled");
-			parlst.addFloat("maxY",  1, "Max Y", "Range where the field is sampled");
-			parlst.addFloat("maxZ",  1, "Max Z", "Range where the field is sampled");
-			parlst.addString("expr","x*x+y*y+z*z-0.5","Function =", "This expression is evaluated for each voxel of the grid. The surface passing through the zero valued points of this field is then extracted using marching cube.");
+			parlst.addParam(new RichFloat("voxelSize", 0.05, "Size of Voxel", "Size of the voxel that is used by for the grid where the field is sampled. Smaller this value, higher precision, but higher processing times."));
+			parlst.addParam(new RichFloat("minX", -1, "Min X", "Range where the field is sampled"));
+			parlst.addParam(new RichFloat("minY", -1, "Min Y", "Range where the field is sampled"));
+			parlst.addParam(new RichFloat("minZ", -1, "Min Z", "Range where the field is sampled"));
+			parlst.addParam(new RichFloat("maxX",  1, "Max X", "Range where the field is sampled"));
+			parlst.addParam(new RichFloat("maxY",  1, "Max Y", "Range where the field is sampled"));
+			parlst.addParam(new RichFloat("maxZ",  1, "Max Z", "Range where the field is sampled"));
+			parlst.addParam(new RichString("expr","x*x+y*y+z*z-0.5","Function =", "This expression is evaluated for each voxel of the grid. The surface passing through the zero valued points of this field is then extracted using marching cube."));
 
 			break;
 
 		case FF_REFINE :
-			parlst.addString("condSelect","(q0 >= 0 and q1 >= 0)","boolean function","type a boolean function that will be evaluated on every edge");
-			parlst.addString("x","(x0+x1)/2","x =","function to generate x coord of new vertex in [x0,x1].<br>For example (x0+x1)/2");
-			parlst.addString("y","(y0+y1)/2","y =","function to generate x coord of new vertex in [y0,y1].<br>For example (y0+y1)/2");
-			parlst.addString("z","(z0+z1)/2","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2");
+			parlst.addParam(new RichString("condSelect","(q0 >= 0 and q1 >= 0)","boolean function","type a boolean function that will be evaluated on every edge"));
+			parlst.addParam(new RichString("x","(x0+x1)/2","x =","function to generate x coord of new vertex in [x0,x1].<br>For example (x0+x1)/2"));
+			parlst.addParam(new RichString("y","(y0+y1)/2","y =","function to generate x coord of new vertex in [y0,y1].<br>For example (y0+y1)/2"));
+			parlst.addParam(new RichString("z","(z0+z1)/2","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2"));
 			break;
 
 		default : assert(0); 
@@ -302,7 +302,7 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	Q_UNUSED(cb);
 	switch(ID(filter)) {

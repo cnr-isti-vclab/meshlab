@@ -290,90 +290,92 @@ bool FilterUnsharp::autoDialog(QAction *action)
 	}
 	return false;
 }
-void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet & parlst)
+
+void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
+//void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, RichParameterSet & parlst)
 {
 	switch(ID(action))
 	{
 		case FP_CREASE_CUT :
-			parlst.addFloat("angleDeg", 90.f, tr("Crease Angle (degree)"), tr("If the angle between the normals of two adjacent faces is <b>larger</b> that this threshold the edge is considered a creased and the mesh is cut along it."));
+			parlst.addParam(new RichFloat("angleDeg", 90.f, tr("Crease Angle (degree)"), tr("If the angle between the normals of two adjacent faces is <b>larger</b> that this threshold the edge is considered a creased and the mesh is cut along it.")));
 			break;
 		case FP_UNSHARP_NORMAL: 
-			parlst.addBool("recalc", false, tr("Recompute Normals"), tr("Recompute normals from scratch before the unsharp masking"));
-			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
-			parlst.addFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation.<br> Usually you should not need to change the default 1.0 value."));
-			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of laplacian face smooth iterations in every run"));
+			parlst.addParam(new RichBool("recalc", false, tr("Recompute Normals"), tr("Recompute normals from scratch before the unsharp masking")));
+			parlst.addParam(new RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
+			parlst.addParam(new RichFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation.<br> Usually you should not need to change the default 1.0 value.")));
+			parlst.addParam(new RichInt("iterations", 5, "Smooth Iterations", 	tr("number of laplacian face smooth iterations in every run")));
 		break;
 		case FP_UNSHARP_GEOMETRY:
-			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
-			parlst.addFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value."));
-			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number ofiterations of laplacian smooth in every run"));
+			parlst.addParam(new RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
+			parlst.addParam(new RichFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value.")));
+			parlst.addParam(new RichInt("iterations", 5, "Smooth Iterations", 	tr("number ofiterations of laplacian smooth in every run")));
 			break;
 		case FP_UNSHARP_VERTEX_COLOR:
-			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
-			parlst.addFloat("weightOrig", 1.f, tr("Original Color Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value."));
-			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run"));
+			parlst.addParam(new RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
+			parlst.addParam(new RichFloat("weightOrig", 1.f, tr("Original Color Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value.")));
+			parlst.addParam(new RichInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run")));
 			break;
 		case FP_UNSHARP_QUALITY:
-			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
-			parlst.addFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value."));
-			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run"));
+			parlst.addParam(new RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
+			parlst.addParam(new RichFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value.")));
+			parlst.addParam(new RichInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run")));
 			break;
 		case FP_TWO_STEP_SMOOTH:
-		parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
-		parlst.addFloat("normalThr", (float) 60,"Feature Angle Threshold (deg)", "Specify a threshold angle (0..90) for features that you want to be preserved.<br>Features forming angles LARGER than the specified threshold will be preserved. <br> 0 -> no smoothing <br> 90 -> all faces will be smoothed");
-		parlst.addInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "Number of iterations of normal smoothing step. The larger the better and (the slower)");
-		parlst.addInt  ("stepFitNum",    (int) 20,"Vertex Fitting steps", "Number of iterations of the vertex fitting procedure. )");
-		parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+		parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+		parlst.addParam(new RichFloat("normalThr", (float) 60,"Feature Angle Threshold (deg)", "Specify a threshold angle (0..90) for features that you want to be preserved.<br>Features forming angles LARGER than the specified threshold will be preserved. <br> 0 -> no smoothing <br> 90 -> all faces will be smoothed"));
+		parlst.addParam(new RichInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "Number of iterations of normal smoothing step. The larger the better and (the slower)"));
+		parlst.addParam(new RichInt  ("stepFitNum",    (int) 20,"Vertex Fitting steps", "Number of iterations of the vertex fitting procedure. )"));
+		parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
 		break;
 		case FP_LAPLACIAN_SMOOTH:
-			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
-			parlst.addBool ("Boundary",true,"1D Boundary Smoothing", "if true the boundary edges are smoothed only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). Can reduce the shrinking on the border but can have strange effects on very small boundaries.");
-			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+			parlst.addParam(new RichBool ("Boundary",true,"1D Boundary Smoothing", "if true the boundary edges are smoothed only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). Can reduce the shrinking on the border but can have strange effects on very small boundaries."));
+			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
 			break;
 		case FP_DEPTH_SMOOTH:
-			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
-			parlst.addPoint3f  ("viewPoint", Point3f(0,0,0),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
-			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+			parlst.addParam(new RichPoint3f  ("viewPoint", Point3f(0,0,0),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
 			break;
 		case FP_DIRECTIONAL_PRESERVATION:
-			parlst.addEnum("step", 0, 
+			parlst.addParam(new RichEnum("step", 0, 
 									QStringList() << "Store Vertex Position" << "Blend Vertex Position", 
 									tr("Step:"), 
 									tr("The purpose of this filter is to <b>constrain</b> any smoothing algorithm to moving vertices only along a give line of sight.<br> First you should store current vertex position, than after applying  one of the many smoothing algorithms you should re start this filter and blend the original positions with the smoothed results.<br>"
-									   "Given a view point  <i>vp</i> , the smoothed vertex position <i>vs</i> and the original position  <i>v</i>, The new vertex position is computed as the projection of  <i>vs</i> on the line  connecting  <i>v</i>  and <i>vp</i>.")); 
-			parlst.addPoint3f  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction.");
-			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+									   "Given a view point  <i>vp</i> , the smoothed vertex position <i>vs</i> and the original position  <i>v</i>, The new vertex position is computed as the projection of  <i>vs</i> on the line  connecting  <i>v</i>  and <i>vp</i>."))); 
+			parlst.addParam(new RichPoint3f  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
+			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
 			break;
 		case FP_TAUBIN_SMOOTH:
-			parlst.addFloat("lambda", (float) 0.5,"Lambda", "The lambda parameter of the Taubin Smoothing algorithm");
-			parlst.addFloat("mu", (float) -0.53,"mu", "The mu parameter of the Taubin Smoothing algorithm");
-			parlst.addInt  ("stepSmoothNum", (int) 10,"Smoothing steps", "The number of times that the taubin smoothing is iterated. Usually it requires a larger number of iteration than the classical laplacian");
-			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+			parlst.addParam(new RichFloat("lambda", (float) 0.5,"Lambda", "The lambda parameter of the Taubin Smoothing algorithm"));
+			parlst.addParam(new RichFloat("mu", (float) -0.53,"mu", "The mu parameter of the Taubin Smoothing algorithm"));
+			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 10,"Smoothing steps", "The number of times that the taubin smoothing is iterated. Usually it requires a larger number of iteration than the classical laplacian"));
+			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
 			break;
 		case FP_SD_LAPLACIAN_SMOOTH:
 		{
-			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
-			float maxVal = m.cm.bbox.Diag()/10;
-		  parlst.addAbsPerc("delta",maxVal*0.01,0,maxVal,"delta", "");
-      parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+			float maxVal = md.mm()->cm.bbox.Diag()/10;
+		  parlst.addParam(new RichAbsPerc("delta",maxVal*0.01,0,maxVal,"delta", ""));
+      parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
 		}
 		break;
 		case FP_LINEAR_MORPH :
 		{
-			parlst.addMesh ("TargetMesh", 1, "Target Mesh", "The mesh that is the morph target.");
+			parlst.addParam(new RichMesh ("TargetMesh", md.mm(), &md,"Target Mesh", "The mesh that is the morph target."));
 			
-			parlst.addDynamicFloat("PercentMorph", 0.0, -150, 250,  
+			parlst.addParam(new RichDynamicFloat("PercentMorph", 0.0, -150, 250,  
 			"% Morph", "The percent you want to morph toward (or away from) the target. <br>"
 			"0 means current mesh <br>"
 			"100 means targe mesh <br>"
-			"<0 and >100 linearly extrapolate between the two mesh <br>");
+			"<0 and >100 linearly extrapolate between the two mesh <br>"));
 		}
 		break;
 	default : assert(0);
 	}
 }
 
-bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
+bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
 {
 	switch(ID(filter))
 	{

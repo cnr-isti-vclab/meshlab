@@ -81,17 +81,17 @@ const QString FilterCreate::filterInfo(FilterIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterCreate::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
+void FilterCreate::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
 	 switch(ID(action))	 {
 
     case CR_BOX :
-      parlst.addFloat("size",1,"Scale factor","Scales the new mesh");
+      parlst.addParam(new RichFloat("size",1,"Scale factor","Scales the new mesh"));
       break;
     case CR_CONE:
-      parlst.addFloat("r0",1,"Radius 1","Radius of the bottom circumference");
-      parlst.addFloat("r1",2,"Radius 2","Radius of the top circumference");
-      parlst.addFloat("h",3,"Height","Height of the Cone");
+      parlst.addParam(new RichFloat("r0",1,"Radius 1","Radius of the bottom circumference"));
+      parlst.addParam(new RichFloat("r1",2,"Radius 2","Radius of the top circumference"));
+      parlst.addParam(new RichFloat("h",3,"Height","Height of the Cone"));
       break;
 		default : return;
 	}
@@ -99,7 +99,7 @@ void FilterCreate::initParameterSet(QAction *action,MeshModel &m, FilterParamete
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
   switch(ID(filter))	 {
     case CR_TETRAHEDRON :

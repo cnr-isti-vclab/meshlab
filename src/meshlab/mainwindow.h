@@ -207,7 +207,7 @@ class MainWindow : public QMainWindow, MainWindowInterface
 
 public:
 	// callback function to execute a filter
-	void executeFilter(QAction *action, FilterParameterSet &srcpar, bool isPreview);
+	void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview);
 
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
@@ -301,6 +301,7 @@ private:
 	void updateRecentFileActions();
 	void setCurrentFile(const QString &fileName);
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
+	//void saveHistory(QAction *action,const RichParameterSet &params);
 	//void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type);
 
 

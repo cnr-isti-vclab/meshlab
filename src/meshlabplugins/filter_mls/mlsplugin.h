@@ -66,10 +66,10 @@ public:
 	virtual const QString filterInfo(FilterIDType filter) const;
 	const FilterClass getClass(QAction *a);
 	virtual bool autoDialog(QAction *) {return true;}
-	virtual void initParameterSet(QAction *,MeshDocument &md, FilterParameterSet &parent);
+	virtual void initParameterSet(QAction *,MeshDocument &md, RichParameterSet &parent);
 	virtual const int getRequirements(QAction *action);
-	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet &parent, vcg::CallBackPos *cb) ;
-	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &parent, vcg::CallBackPos *cb)
+	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet &parent, vcg::CallBackPos *cb) ;
+	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet &parent, vcg::CallBackPos *cb)
 	{assert(0); return false;}
 };
 

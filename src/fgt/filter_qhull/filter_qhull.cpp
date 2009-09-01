@@ -141,12 +141,12 @@ const QhullPlugin::FilterClass QhullPlugin::getClass(QAction *a)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
+void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
 {
 	 switch(ID(action))	 {
 		case FP_QHULL_CONVEX_HULL :
 			{
-				parlst.addBool("reorient", false,"Re-orient all faces coherentely","Re-orient all faces coherentely");
+				parlst.addParam(new RichBool("reorient", false,"Re-orient all faces coherentely","Re-orient all faces coherentely"));
 				break;
 			}
 		case FP_QHULL_DELAUNAY_TRIANGULATION :
@@ -155,46 +155,46 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			}
 		case FP_QHULL_VORONOI_FILTERING :
 			{
-				parlst.addDynamicFloat("threshold",0.0f, 0.0f, 2000.0f,"threshold ","Factor that, multiplied to the bbox diagonal,"
+				parlst.addParam(new RichDynamicFloat("threshold",0.0f, 0.0f, 2000.0f,"threshold ","Factor that, multiplied to the bbox diagonal,"
 																						 "set a threshold used to discard the voronoi vertices too far from the origin."
 																						 "They can cause problems to the qhull library.<br>"
 																						 "Growing values of 'threshold' will add more voronoi vertices for a better surface"
-																						 "reconstruction.");
+																						 "reconstruction."));
 				break;
 			}	
 		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
 			{
-			    parlst.addAbsPerc("alpha",0,0,m.cm.bbox.Diag(),tr("Alpha value"),tr("Compute the alpha value as percentage of the diagonal of the bbox"));
-				parlst.addEnum("Filtering", 0, 
+			    parlst.addParam(new RichAbsPerc("alpha",0,0,m.cm.bbox.Diag(),tr("Alpha value"),tr("Compute the alpha value as percentage of the diagonal of the bbox")));
+				parlst.addParam(new RichEnum("Filtering", 0, 
 									QStringList() << "Alpha Complex" << "Alpha Shape" , 
 									tr("Get:"), 
-									tr("Select the output. The Alpha Shape is the boundary of the Alpha Complex"));
+									tr("Select the output. The Alpha Shape is the boundary of the Alpha Complex")));
 				break;
 			}
 		case FP_QHULL_VISIBLE_POINTS:
 			{
-				parlst.addDynamicFloat("radiusThreshold",
+				parlst.addParam(new RichDynamicFloat("radiusThreshold",
 												 0.0f, 0.0f, 7.0f,
 												 "radius threshold ","Bounds the radius of the sphere used to select visible points."
 												 "It is used to adjust the radius of the sphere (calculated as distance between the center and the farthest point from it) "
 												 "according to the following equation: <br>"
 												 "radius = radius * pow(10,threshold); <br>"
 												 "As the radius increases more points are marked as visible."
-												 "Use a big threshold for dense point clouds, a small one for sparse clouds.");
+												 "Use a big threshold for dense point clouds, a small one for sparse clouds."));
 				
-				parlst.addBool ("usecamera",
+				parlst.addParam(new RichBool ("usecamera",
 												false,
 												"Use ViewPoint from Mesh Camera",
-												"Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs");
-				parlst.addPoint3f("viewpoint",
+												"Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs"));
+				parlst.addParam(new RichPoint3f("viewpoint",
 												Point3f(0.0f, 0.0f, 0.0f),
 												"ViewPoint",
-												"if UseCamera is true, this value is ignored");
+												"if UseCamera is true, this value is ignored"));
 				
-				parlst.addBool("convex_hullFP",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud");
-				parlst.addBool("triangVP",false,"Show a triangulation of the visible points", "Show a triangulation of the visible points");
-				parlst.addBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
-								"If no Convex Hulls are selected , this value is ignored");
+				parlst.addParam(new RichBool("convex_hullFP",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud"));
+				parlst.addParam(new RichBool("triangVP",false,"Show a triangulation of the visible points", "Show a triangulation of the visible points"));
+				parlst.addParam(new RichBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
+								"If no Convex Hulls are selected , this value is ignored"));
 				break;
 				break;
 			}
@@ -203,7 +203,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos */* cb*/)
+bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */* cb*/)
 {
 	switch(ID(filter))
 	{

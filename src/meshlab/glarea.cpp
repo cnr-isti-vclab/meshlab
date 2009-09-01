@@ -90,8 +90,8 @@ void GLArea::initPreferences()
 {
 	QSettings settings;
 	prefs.clear();
-	prefs.addColor("BackgroundTop",    settings.value("BackgroundTop").value<QColor>(), "Top Background Color", "");
-	prefs.addColor("BackgroundBottom", settings.value("BackgroundBottom").value<QColor>(), "Bottom Background Color", "");
+	//GUIDO// prefs.addColor("BackgroundTop",    settings.value("BackgroundTop").value<QColor>(), "Top Background Color", "");
+	//GUIDO// prefs.addColor("BackgroundBottom", settings.value("BackgroundBottom").value<QColor>(), "Bottom Background Color", "");
 }
 
 GLArea::~GLArea()
@@ -308,7 +308,7 @@ void GLArea::paintGL()
 
 		// Draw the selection
 		if(rm.selectedFaces)  mm()->RenderSelectedFaces();
-		pair<QAction *,FilterParameterSet *> p;
+		pair<QAction *,RichParameterSet *> p;
 		foreach(p , iDecoratorsList)
 				{
 					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p.first->parent());

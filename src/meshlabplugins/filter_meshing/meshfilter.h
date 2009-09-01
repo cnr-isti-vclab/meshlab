@@ -134,11 +134,11 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	virtual bool autoDialog(QAction *) ;
 	virtual bool customDialog(QAction *filter);
 
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
-	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, RichParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual bool applyFilter(QAction */*filter*/, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
+	virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual bool applyFilter(QAction */*filter*/, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
 
 protected:
 

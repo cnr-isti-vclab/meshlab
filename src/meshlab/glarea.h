@@ -204,7 +204,7 @@ public:
 	void setLightModel();
 	void setView();
 	void resetTrackBall();
-	std::list<std::pair<QAction *,FilterParameterSet *> > iDecoratorsList;
+	std::list<std::pair<QAction *,RichParameterSet *> > iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
@@ -306,7 +306,7 @@ public:
 	bool  suspendedEditor;
 protected:
 
-	FilterParameterSet prefs;
+	RichParameterSet prefs;
 	void initPreferences();
 	void initializeGL();
 	void initTexture();

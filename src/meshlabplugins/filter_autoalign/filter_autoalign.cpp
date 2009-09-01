@@ -84,8 +84,8 @@ const QString FilterAutoalign::filterInfo(FilterIDType filterId) const
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, FilterParameterSet & parlst) 
-//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
+void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, RichParameterSet & parlst) 
+//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
 	 MeshModel *target;
 	 switch(ID(action))	 {
@@ -94,19 +94,19 @@ void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, F
 				foreach (target, md.meshList) 
 						if (target != md.mm())  break;
 		    
-				parlst.addMesh ("FirstMesh", md.mm(), "First Mesh",
-												"The mesh were the coplanar bases are sampled (it will contain the trasformation)");
-				parlst.addMesh ("SecondMesh", target, "Second Mesh",
-												"The mesh were similar coplanar based are searched.");
-				parlst.addFloat("overlapping",0.5f,"Estimated fraction of the\n first mesh overlapped by the second");
-				parlst.addFloat("tolerance [0.0,1.0]",0.3f,"Error tolerance");
+				parlst.addParam(new RichMesh ("FirstMesh", md.mm(),&md, "First Mesh",
+												"The mesh were the coplanar bases are sampled (it will contain the trasformation)"));
+				parlst.addParam(new RichMesh ("SecondMesh", target,&md, "Second Mesh",
+												"The mesh were similar coplanar based are searched."));
+				parlst.addParam(new RichFloat("overlapping",0.5f,"Estimated fraction of the\n first mesh overlapped by the second"));
+				parlst.addParam(new RichFloat("tolerance [0.0,1.0]",0.3f,"Error tolerance"));
 		 break;		
 		default : assert(0); 
 	}
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	vcg::tri::FourPCS<CMeshO> *fpcs ;
 	bool res;

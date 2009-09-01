@@ -387,7 +387,7 @@ void MainWindow::updateMenus()
 
 				foreach (QAction *a,decoratorActionList){a->setChecked(false);a->setEnabled(true);}
 
-				pair<QAction *,FilterParameterSet *> p;
+				pair<QAction *,RichParameterSet *> p;
 				foreach (p,GLA()->iDecoratorsList){p.first->setChecked(true);}
 	} // if active
 	else
@@ -526,7 +526,7 @@ void MainWindow::startFilter()
 
 	// (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
   // bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
-	FilterParameterSet parList;
+	RichParameterSet parList;
 
 	//Hide the std dialog just in case to avoid that two different filters runs mixed
 	//stddialog->hide();
@@ -556,13 +556,10 @@ void MainWindow::startFilter()
 	from the automatic dialog
 	from the user defined dialog
 */
-void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool isPreview)
+void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool isPreview)
 {
 
 	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
-
-  // (3) save the current filter and its parameters in the history
-	if(!isPreview) GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
 
   qb->show();
   iFilter->setLog(&(GLA()->log));
@@ -574,6 +571,10 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool
   int req=iFilter->getRequirements(action);
   GLA()->mm()->updateDataMask(req);
   qApp->restoreOverrideCursor();
+
+	// (3) save the current filter and its parameters in the history
+	if(!isPreview) 
+		GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
 
   // (4) Apply the Filter
 	bool ret;
@@ -716,7 +717,7 @@ void MainWindow::applyDecorateMode()
 	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
 
 	bool found=false;
-	pair<QAction *,FilterParameterSet *> p;
+	pair<QAction *,RichParameterSet *> p;
 	foreach(p,GLA()->iDecoratorsList)
 	{
 		if(p.first->text()==action->text()){
@@ -728,7 +729,7 @@ void MainWindow::applyDecorateMode()
 	}
 
 	if(!found){
-	  FilterParameterSet * decoratorParams = new FilterParameterSet();
+	  RichParameterSet * decoratorParams = new RichParameterSet();
 		iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
 		bool ret = iDecorateTemp->StartDecorate(action,*GLA()->mm(),GLA());
 		if(ret) {
@@ -940,7 +941,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 				pCurrentIOPlugin->setLog(&(GLA()->log));
 				qb->show();
-				FilterParameterSet prePar;
+				RichParameterSet prePar;
 				pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
 				if(!prePar.isEmpty())
 				{
@@ -960,7 +961,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					// requires some optional, or userdriven post-opening processing.
 					// and in that case ask for the required parameters and then
 					// ask to the plugin to perform that processing
-					FilterParameterSet par;
+					RichParameterSet par;
 					pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 					if(!par.isEmpty())
 						{
@@ -1108,7 +1109,7 @@ bool MainWindow::saveAs(QString fileName)
 		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
 
 		// optional saving parameters (like ascii/binary encoding)
-		FilterParameterSet savePar;
+		RichParameterSet savePar;
 
 		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
 

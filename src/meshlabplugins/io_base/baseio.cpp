@@ -85,22 +85,23 @@
 using namespace std;
 using namespace vcg;
 // initialize importing parameters
-void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, FilterParameterSet &parlst)
+void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
 {
 	if (formatName.toUpper() == tr("PTX"))
 	{
-		parlst.addInt("meshindex",0,"Index of Range Map to be Imported","PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail");
-		parlst.addBool("anglecull",true,"Cull faces by angle","short");
-		parlst.addFloat("angle",85.0,"Angle limit for face culling","short");
-		parlst.addBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead");
-		parlst.addBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]");
-		parlst.addBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
-		parlst.addBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over");		
-		parlst.addBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
+		parlst.addParam(new RichInt("meshindex",0,"Index of Range Map to be Imported",
+						"PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail"));
+		parlst.addParam(new RichBool("anglecull",true,"Cull faces by angle","short"));
+		parlst.addParam(new RichFloat("angle",85.0,"Angle limit for face culling","short"));
+		parlst.addParam(new RichBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead"));
+		parlst.addParam(new RichBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]"));
+		parlst.addParam(new RichBool("pointsonly",false,"Keep only points","Just import points, without triangulation"));
+		parlst.addParam(new RichBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over"));
+		parlst.addParam(new RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles"));
 	}
 }
 
-bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
 	bool normalsUpdated = false;
 
@@ -171,14 +172,14 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		tri::io::ImporterPTX<CMeshO>::Info importparams;
 
-		importparams.meshnum = parlst.getInt("meshindex");
-		importparams.anglecull =parlst.getBool("anglecull");
-		importparams.angle = parlst.getFloat("angle");
-		importparams.savecolor = parlst.getBool("usecolor");
-		importparams.pointcull = parlst.getBool("pointcull");
-		importparams.pointsonly = parlst.getBool("pointsonly");
-		importparams.switchside = parlst.getBool("switchside");
-		importparams.flipfaces = parlst.getBool("flipfaces");
+		importparams.meshnum = parlst.findParameter("meshindex")->val->getInt();
+		importparams.anglecull =parlst.findParameter("anglecull")->val->getBool(); 
+		importparams.angle = parlst.findParameter("angle")->val->getFloat();
+		importparams.savecolor = parlst.findParameter("usecolor")->val->getBool(); 
+		importparams.pointcull = parlst.findParameter("pointcull")->val->getBool();  
+		importparams.pointsonly = parlst.findParameter("pointsonly")->val->getBool();  
+		importparams.switchside = parlst.findParameter("switchside")->val->getBool();  
+		importparams.flipfaces = parlst.findParameter("flipfaces")->val->getBool();  
 
 		// if color, add to mesh
 		if(importparams.savecolor)
@@ -239,7 +240,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet & par, CallBackPos *cb, QWidget */*parent*/)
+bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget */*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
   string filename = QFile::encodeName(fileName).constData ();
@@ -247,7 +248,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
 	string ex = formatName.toUtf8().data();
 	bool binaryFlag = false;
 	if(formatName.toUpper() == tr("STL") || formatName.toUpper() == tr("PLY"))
-					binaryFlag = par.getBool("Binary");
+					binaryFlag = par.findParameter("Binary")->val->getBool();
 					
 	if(formatName.toUpper() == tr("PLY"))
 	{
@@ -359,22 +360,22 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 
 }
 
-void BaseMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet &par) 
+void BaseMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
 {
 	if(format.toUpper() == tr("STL"))
-		par.addBool("Unify",true, "Unify Duplicated Vertices",
-								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
+		par.addParam(new RichBool("Unify",true, "Unify Duplicated Vertices",
+								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));		
 }
-void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet &par) 
+void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
 {
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
-		par.addBool("Binary",true, "Binary encoding",
-								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
+		par.addParam(new RichBool("Binary",true, "Binary encoding",
+								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format"));		
 }
-void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const FilterParameterSet &par) 
+void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par) 
 {
 	if(format.toUpper() == tr("STL"))
-		if(par.getBool("Unify"))
+		if(par.findParameter("Unify")->val->getBool())
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 }
 

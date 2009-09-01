@@ -178,108 +178,108 @@ const QString MlsPlugin::filterInfo(FilterIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParameterSet& parlst)
-//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
+void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParameterSet& parlst)
+//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
 	int id = ID(action);
 	MeshModel *target = md.mm();
 
 	if (id == FP_SELECT_SMALL_COMPONENTS)
 	{
-		parlst.addFloat("NbFaceRatio",
+		parlst.addParam(new RichFloat("NbFaceRatio",
 										0.1f,
 										"Small component ratio",
 										"This ratio (between 0 and 1) defines the meaning of <i>small</i> as the threshold ratio between the number of faces"
-										"of the largest component and the other ones. A larger value will select more components.");
-		parlst.addBool( "NonClosedOnly",
+										"of the largest component and the other ones. A larger value will select more components."));
+		parlst.addParam(new RichBool( "NonClosedOnly",
 										false,
 										"Select only non closed components",
-										"");
+										""));
 		return;
 	}
 	else if (id == FP_RADIUS_FROM_DENSITY)
 	{
-		parlst.addInt("NbNeighbors",
+		parlst.addParam(new RichInt("NbNeighbors",
 									16,
 									"Number of neighbors",
-									"Number of neighbors used to estimate the local density. Larger values lead to smoother variations.");
+									"Number of neighbors used to estimate the local density. Larger values lead to smoother variations."));
 		return;
 	}
 
 	if ((id & _PROJECTION_))
 	{
-		parlst.addMesh( "ControlMesh", target, "Point set",
-										"The point set (or mesh) which defines the MLS surface.");
-		parlst.addMesh( "ProxyMesh", target, "Proxy Mesh",
-										"The mesh that will be projected/resampled onto the MLS surface.");
+		parlst.addParam(new RichMesh( "ControlMesh", target,&md, "Point set",
+										"The point set (or mesh) which defines the MLS surface."));
+		parlst.addParam(new RichMesh( "ProxyMesh", target, &md, "Proxy Mesh",
+										"The mesh that will be projected/resampled onto the MLS surface."));
 	}
 	if ((id & _PROJECTION_) || (id & _COLORIZE_))
 	{
-		parlst.addBool( "SelectionOnly",
+		parlst.addParam(new RichBool( "SelectionOnly",
 										target->cm.sfn>0,
 										"Selection only",
-										"If checked, only selected vertices will be projected.");
+										"If checked, only selected vertices will be projected."));
 	}
 
 	if ( (id & _APSS_) || (id & _RIMLS_) )
 	{
-		parlst.addFloat("FilterScale",
+		parlst.addParam(new RichFloat("FilterScale",
 										2.0,
 										"MLS - Filter scale",
 										"Scale of the spatial low pass filter.\n"
-										"It is relative to the radius (local point spacing) of the vertices.");
-		parlst.addFloat("ProjectionAccuracy",
+										"It is relative to the radius (local point spacing) of the vertices."));
+		parlst.addParam(new RichFloat("ProjectionAccuracy",
 										1e-4f,
 										"Projection - Accuracy (adv)",
 										"Threshold value used to stop the projections.\n"
-										"This value is scaled by the mean point spacing to get the actual threshold.");
-		parlst.addInt(  "MaxProjectionIters",
+										"This value is scaled by the mean point spacing to get the actual threshold."));
+		parlst.addParam(new RichInt(  "MaxProjectionIters",
 										15,
 										"Projection - Max iterations (adv)",
-										"Max number of iterations for the projection.");
+										"Max number of iterations for the projection."));
 	}
 
 	if (id & _APSS_)
 	{
-		parlst.addFloat("SphericalParameter",
+		parlst.addParam(new RichFloat("SphericalParameter",
 										1,
 										"MLS - Spherical parameter",
 										"Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,"
 										"1 to a pure spherical fit, values between 0 and 1 gives intermediate results,"
 										"while others real values might give interresting results, but take care with extreme"
-										"settings !");
+										"settings !"));
 		if (!(id & _COLORIZE_))
-			parlst.addBool( "AccurateNormal",
+			parlst.addParam(new RichBool( "AccurateNormal",
 										true,
 										"Accurate normals",
 										"If checked, use the accurate MLS gradient instead of the local approximation"
-										"to compute the normals.");
+										"to compute the normals."));
 	}
 
 	if (id & _RIMLS_)
 	{
-		parlst.addFloat("SigmaN",
+		parlst.addParam(new RichFloat("SigmaN",
 										0.75,
 										"MLS - Sharpness",
 										"Width of the filter used by the normal refitting weight."
 										"This weight function is a Gaussian on the distance between two unit vectors:"
-										"the current gradient and the input normal. Therefore, typical value range between 0.5 (sharp) to 2 (smooth).");
-		parlst.addInt(  "MaxRefittingIters",
+										"the current gradient and the input normal. Therefore, typical value range between 0.5 (sharp) to 2 (smooth)."));
+		parlst.addParam(new RichInt(  "MaxRefittingIters",
 										3,
 										"MLS - Max fitting iterations",
-										"Max number of fitting iterations. (0 or 1 is equivalent to the standard IMLS)");
+										"Max number of fitting iterations. (0 or 1 is equivalent to the standard IMLS)"));
 	}
 
 	if (id & _PROJECTION_)
 	{
-		parlst.addInt(  "MaxSubdivisions",
+		parlst.addParam(new RichInt(  "MaxSubdivisions",
 										0,
 										"Refinement - Max subdivisions",
-										"Max number of subdivisions.");
-		parlst.addFloat("ThAngleInDegree",
+										"Max number of subdivisions."));
+		parlst.addParam(new RichFloat("ThAngleInDegree",
 										2,
 										"Refinement - Crease angle (degree)",
-										"Threshold angle between two faces controlling the refinement.");
+										"Threshold angle between two faces controlling the refinement."));
 	}
 
 	if (id & _AFRONT_)
@@ -293,13 +293,13 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 		if (id & _APSS_)
 			lst << "ApproxMean";
 
-		parlst.addEnum("CurvatureType", CT_MEAN,
+		parlst.addParam(new RichEnum("CurvatureType", CT_MEAN,
 			lst,
 			"Curvature type",
 			QString("The type of the curvature to plot.")
-			+ ((id & _APSS_) ? "<br>ApproxMean uses the radius of the fitted sphere as an approximation of the mean curvature." : ""));
+			+ ((id & _APSS_) ? "<br>ApproxMean uses the radius of the fitted sphere as an approximation of the mean curvature." : "")));
 // 		if ((id & _APSS_))
-// 			parlst.addBool( "ApproxCurvature",
+// 			parlst.addParam(new RichBool( "ApproxCurvature",
 // 										false,
 // 										"Approx mean curvature",
 // 										"If checked, use the radius of the fitted sphere as an approximation of the mean curvature.");
@@ -307,11 +307,11 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 
 	if (id & _MCUBE_)
 	{
-		parlst.addInt(  "Resolution",
+		parlst.addParam(new RichInt(  "Resolution",
 										200,
 										"Grid Resolution",
 										"The resolution of the grid on which we run the marching cubes."
-										"This marching cube is memory friendly, so you can safely set large values up to 1000 or even more.");
+										"This marching cube is memory friendly, so you can safely set large values up to 1000 or even more."));
 	}
 }
 
@@ -361,7 +361,7 @@ void UpdateFaceNormalFromVertex(MeshType& m)
 	}
 }
 
-bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSet& par, vcg::CallBackPos* cb)
+bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb)
 {
 	int id = ID(filter);
 

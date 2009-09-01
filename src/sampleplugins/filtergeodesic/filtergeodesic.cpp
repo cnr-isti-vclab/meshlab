@@ -105,7 +105,7 @@ const int FilterGeodesic::getRequirements(QAction *action)
   return 0;
 }
 
-bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * /*cb*/) 
+bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * /*cb*/) 
 {
 	CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
@@ -189,12 +189,12 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, FilterParameterS
 return true;		
 }
 
-void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
+void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
 	switch(ID(action))	 
 		{
 			case FP_QUALITY_POINT_GEODESIC :
-					parlst.addPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point.");
+					parlst.addParam(new RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
 					break;
 			default: assert(0);
 		}

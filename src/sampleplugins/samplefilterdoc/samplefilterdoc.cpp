@@ -83,24 +83,24 @@ const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId) const
 // - the string shown in the dialog 
 // - the default value
 // - a long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void SampleFilterDocPlugin::initParameterSet(QAction *action,MeshDocument & /*m*/, FilterParameterSet & parlst) 
+void SampleFilterDocPlugin::initParameterSet(QAction *action,MeshDocument & /*m*/, RichParameterSet & parlst) 
 {
 	 switch(ID(action))	 {
 		case FP_FLATTEN :  
-		  parlst.addBool ("MergeVisible",
+		  parlst.addParam(new RichBool ("MergeVisible",
 											true,
 											"Merge Only Visible Layers",
 											"Merge the vertices that are duplicated among different layers. <br>"
-											"Very useful when the layers are spliced portions of a single big mesh.");
-		  parlst.addBool ("DeleteLayer",
+											"Very useful when the layers are spliced portions of a single big mesh."));
+		  parlst.addParam(new RichBool ("DeleteLayer",
 											true,
 											"Delete Layers ",
-											"Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter");
-			parlst.addBool ("MergeVertices",
+											"Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
+			parlst.addParam(new RichBool ("MergeVertices",
 											true,
 											"Merge duplicate vertices",
 											"Merge the vertices that are duplicated among different layers. \n\n"
-											"Very useful when the layers are spliced portions of a single big mesh.");
+											"Very useful when the layers are spliced portions of a single big mesh."));
 												break;
 
 		default : assert(0); 
@@ -108,7 +108,7 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action,MeshDocument & /*m*
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	
 	switch(ID(filter)) {

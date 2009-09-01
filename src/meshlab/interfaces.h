@@ -78,29 +78,29 @@ public:
 		// This function is called by the framework, for each action at the loading of the plugins.
 		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
 		// If your plugins/action has no GlobalParameter, do nothing.
-	virtual void initGlobalParameterSet(QString /*format*/, FilterParameterSet & /*globalparam*/) {}
+	virtual void initGlobalParameterSet(QString /*format*/, RichParameterSet & /*globalparam*/) {}
 	
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
 	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
 	// The instanced parameters are then passed to the open at the loading time.
 	// Typical example of use to decide what subportion of a mesh you have to load.
 	// If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
-	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, FilterParameterSet & /*par*/) {}
+	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterSet & /*par*/) {}
 	
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
 	// it is called by the framework AFTER the mesh is already loaded to perform more or less standard processing on the mesh.
 	// typical example: unifying vertices in stl models. 
 	// If you do not need any additional processing do nothing.
-	virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, FilterParameterSet & /*par*/) {}
+	virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) {}
 
   // This is the corresponding function that is called after the mesh is loaded with the initialized parameters 
-	virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const FilterParameterSet &/*par*/){}
+	virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const RichParameterSet &/*par*/){}
 
 	// This function is called to initialize the list of additional parameters that a SAVING filter could require 
 	// it is called by the framework after the mesh is loaded to perform more or less standard processing on the mesh.
 	// typical example: ascii or binary format for ply or stl 
 	// If you do not need any additional parameter simply do nothing.
-	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, FilterParameterSet & /*par*/) 	{}
+	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 	{}
 
 
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
@@ -110,7 +110,7 @@ public:
 			const QString &fileName,				// The name of the file to be opened
       MeshModel &m,										// The mesh that is filled with the file content 
       int &mask,											// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
-			const FilterParameterSet & par,	// The parameters that have been set up in the initPreOpenParameter()
+			const RichParameterSet & par,	// The parameters that have been set up in the initPreOpenParameter()
       vcg::CallBackPos *cb=0,					// standard callback for reporting progress in the loading
       QWidget *parent=0)=0;						// you should not use this...
     
@@ -119,7 +119,7 @@ public:
 			const QString &fileName,
       MeshModel &m, 
       const int mask,       // a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
-      const FilterParameterSet & par,
+      const RichParameterSet & par,
 			vcg::CallBackPos *cb=0,
       QWidget *parent= 0)=0 ; 
 
@@ -164,7 +164,7 @@ class MainWindowInterface
 {
 public:
 	//isPreview tells whether this execution is being used to produce or preview a result
-	virtual void executeFilter(QAction *, FilterParameterSet &, bool /* isPreview */){};
+	virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){};
 	virtual ~MainWindowInterface(){};
 	
 	// This function is to find the dir where all the deployed stuff reside. 
@@ -276,7 +276,7 @@ public:
 	// This function is called by the framework, for each action at the loading of the plugins.
 	// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
 	// If your plugins/action has no GlobalParameter, do nothing.
-	virtual void initGlobalParameterSet(QAction *, FilterParameterSet & /*globalparam*/) {}
+	virtual void initGlobalParameterSet(QAction *, RichParameterSet & /*globalparam*/) {}
 
 	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
@@ -308,8 +308,8 @@ public:
 	// this function will also be called by the commandline framework.
 	// If you want report errors, use the errorMsg() string. It will displayed in case of filters returning false.
 	
-	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameterSet & /* par */, vcg::CallBackPos * /*cb*/) = 0;
- 	virtual bool applyFilter(QAction *   filter, MeshDocument &md,   FilterParameterSet & par,       vcg::CallBackPos *cb) 
+	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, RichParameterSet & /* par */, vcg::CallBackPos * /*cb*/) = 0;
+ 	virtual bool applyFilter(QAction *   filter, MeshDocument &md,   RichParameterSet & par,       vcg::CallBackPos *cb) 
 	{ 
 		return applyFilter(filter,*(md.mm()),par,cb); 
 	}
@@ -351,8 +351,8 @@ public:
 	
 	// This function is called to initialized the list of parameters. 
 	// it is called by the auto dialog framework to know the list of parameters.
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*par*/) {}
-	virtual void initParameterSet(QAction *filter,MeshDocument &md, FilterParameterSet &par) 
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*par*/) {}
+	virtual void initParameterSet(QAction *filter,MeshDocument &md, RichParameterSet &par) 
 	{initParameterSet(filter,*(md.mm()),par);}
 
 	//  this function returns true if the filter has a personally customized dialog..
@@ -360,7 +360,7 @@ public:
 	
 	// This function is invoked for filters with a custom dialog of a filter and when has the params 
 	// it notify it to the mainwindow with the collected parameters
-	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw) 
+	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, RichParameterSet & params, MainWindowInterface *mw) 
 	{
 		assert(mw);
 		mw->executeFilter(action, params, false);
@@ -490,13 +490,13 @@ public:
 		// This function is called by the framework, for each action at the loading of the plugins.
 		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
 		// If your plugins/action has no GlobalParameter, do nothing.
-		// The FilterParameterSet comes here already intialized with the values stored on the permanent storage.
+		// The RichParameterSet comes here already intialized with the values stored on the permanent storage.
 		// If a filter wants to save some permanent stuff should check its esistence here.
 	
-		virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/) {}		
+		virtual void initGlobalParameterSet(QAction *, RichParameterSet * /*globalparam*/) {}		
 		
     virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){assert(0); return false;};
-		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, FilterParameterSet * /*param*/, GLArea * /*parent*/,QFont qf) = 0;
+		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/,QFont qf) = 0;
 		virtual void EndDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
         
     virtual const QString ST(FilterIDType filter) const=0;

@@ -96,7 +96,7 @@ const int FilterCreateIso::getRequirements(QAction *action)
   return 0;
 }
 
-bool FilterCreateIso::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
+bool FilterCreateIso::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
 {
 	CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
@@ -127,13 +127,13 @@ bool FilterCreateIso::applyFilter(QAction *filter, MeshModel &m, FilterParameter
 	}
 	return true;
 }
-void FilterCreateIso::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
+void FilterCreateIso::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 { 
 	pair<float,float> qualityRange;
   switch(ID(action))
   {
     case FP_CREATEISO :
-		  parlst.addInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation");
+		  parlst.addParam(new RichInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation"));
  		  break;
 		default: assert(0);
   }

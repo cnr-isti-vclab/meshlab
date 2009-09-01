@@ -151,19 +151,20 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
 }
 
 
-void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, FilterParameterSet & par) {
+void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, RichParameterSet & par) {
 	switch(ID(a))
   {
 		case CP_FACE_SMOOTH: 
 		case CP_VERTEX_SMOOTH: 
-			par.addInt("iteration",1,tr("Iteration"),tr("the number ofiteration of the smoothing algorithm"));
+			//par.addInt("iteration",1,tr("Iteration"),tr("the number ofiteration of the smoothing algorithm"));
+			par.addParam(new RichInt("iteration",1,tr("Iteration"),tr("the number ofiteration of the smoothing algorithm")));
 								 break;
 	case CP_TRIANGLE_QUALITY: {
 			QStringList metrics;
 			metrics.push_back("area/max side");
 			metrics.push_back("inradius/circumradius");
 			metrics.push_back("mean ratio");
-			par.addEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality."));
+			par.addParam(new RichEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality.")));
 			break;
 		}
 	case CP_DISCRETE_CURVATURE: {
@@ -172,19 +173,18 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, FilterPa
 			curvNameList.push_back("Gaussian Curvature");
 			curvNameList.push_back("RMS Curvature");
 			curvNameList.push_back("ABS Curvature");
-			par.addEnum("CurvatureType", 0, curvNameList, tr("Type:"), tr("Choose the curvatures. Mean and Gaussian curvature are computed according the technique described in the Desbrun et al. paper.<br>"
-			"Absolute curvature is defined as |H|+|K| and RMS curvature as sqrt(4* H^2 - 2K) as explained in <br><i>Improved curvature estimation for watershed segmentation of 3-dimensional meshes </i> by S. Pulla, A. Razdan, G. Farin. "));
+			par.addParam(new RichEnum("CurvatureType", 0, curvNameList, tr("Type:"), tr("Choose the curvatures. Mean and Gaussian curvature are computed according the technique described in the Desbrun et al. paper.<br>"
+			"Absolute curvature is defined as |H|+|K| and RMS curvature as sqrt(4* H^2 - 2K) as explained in <br><i>Improved curvature estimation for watershed segmentation of 3-dimensional meshes </i> by S. Pulla, A. Razdan, G. Farin. ")));
 		break;
 		}
 	case CP_MAP_QUALITY_INTO_COLOR :
 		{
 			pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 			
-			par.addFloat("minVal",minmax.first,"Min","The value that will be mapped with the lower end of the scale (blue)");
-			par.addFloat("maxVal",minmax.second,"Max","The value that will be mapped with the upper end of the scale (red)");
-			par.addDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers.");
-			par.addBool("zeroSym",false,"Zero Simmetric","If true the min max range will be enlarged to be symmertic (so that green is always Zero)");
-			
+			par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that will be mapped with the lower end of the scale (blue)"));
+			par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that will be mapped with the upper end of the scale (red)"));
+			par.addParam(new RichDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
+			par.addParam(new RichBool("zeroSym",false,"Zero Simmetric","If true the min max range will be enlarged to be symmertic (so that green is always Zero)"));
 		} 
 		break;
 	
@@ -192,7 +192,7 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, FilterPa
 	}
 }
 
-bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
  switch(ID(filter)) {
   case CP_MAP_QUALITY_INTO_COLOR :

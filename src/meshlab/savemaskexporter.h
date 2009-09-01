@@ -82,7 +82,7 @@ class SaveMaskExporterDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, FilterParameterSet *par,GLArea* glar = NULL);
+	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, RichParameterSet *par,GLArea* glar = NULL);
 	
 	void InitDialog();
 	void SetTextureName();
@@ -106,7 +106,7 @@ private:
 	int type;
 	int capability;
 	int defaultBits;
-	FilterParameterSet *par;
+	RichParameterSet *par;
 	StdParFrame *stdParFrame;
 	GLArea* glar;
 	

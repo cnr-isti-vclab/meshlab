@@ -90,49 +90,188 @@ Added standard plugin window support
 #include "meshmodel.h"
 #include "filterparameter.h"
 #include "interfaces.h"
+#include <cassert>
 
-/// Widget to enter a color. 
-class QColorButton : public QHBoxLayout
+class MeshLabWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	MeshLabWidget(QWidget* p,RichParameter* rpar);
+	
+	virtual void resetWidgetValue() = 0;
+	virtual void collectWidgetValue() = 0;
+	virtual ~MeshLabWidget();
+	void resetValue();
+	Value& getWidgetValue();
+
+	RichParameter* rp;
+	QLabel* helpLab;
+signals:
+	void parameterChanged();
+protected:
+	QGridLayout* gridLay;
+	void InitRichParameter(RichParameter* rpar);
+};
+
+class BoolWidget : public MeshLabWidget 
+{
+	QCheckBox* cb;
+public:
+	BoolWidget(QWidget* p,RichBool* rb);
+	~BoolWidget();
+	void collectWidgetValue();
+	void resetWidgetValue();
+};
+
+
+class LineEditWidget : public MeshLabWidget
+{
+protected:
+	QLabel* lab;
+	QLineEdit* lned;
+public:
+
+	LineEditWidget(QWidget* p,RichParameter* rpar);
+	~LineEditWidget();
+	virtual void collectWidgetValue() = 0;
+	virtual void resetWidgetValue() = 0;
+};
+
+
+
+class IntWidget : public LineEditWidget
+{
+public:
+	IntWidget(QWidget* p,RichInt* rpar);
+	~IntWidget(){}
+	void collectWidgetValue();
+	void resetWidgetValue();
+};
+
+
+
+class FloatWidget : public  LineEditWidget
+{
+public:
+	FloatWidget(QWidget* p,RichFloat* rpar);
+	~FloatWidget(){}
+	void collectWidgetValue();
+	void resetWidgetValue();
+};
+
+
+
+class StringWidget  : public  LineEditWidget
+{
+public:
+	StringWidget(QWidget* p,RichString* rpar);
+	~StringWidget(){}
+	void collectWidgetValue();
+	void resetWidgetValue();
+};
+
+//class Matrix44fWidget : public  MeshLabWidget
+//{
+//public:
+//	Matrix44fWidget(QWidget* p,RichMatrix44f* rpar);
+//
+//	void collectWidgetValue();
+//	void resetWidgetValue();
+//};
+
+/*
+class FloatListWidget : public MeshLabWidget
+{
+public:
+	FloatListWidget(QWidget* p,RichFloatList* rpar);
+
+	void collectWidgetValue();
+	void resetWidgetValue();
+};
+*/
+
+/*
+class OpenFileWidget : public MeshLabWidget
+{
+public:
+	OpenFileWidget(QWidget* p,RichOpenFile* rpar);
+
+	void collectWidgetValue();
+	void resetWidgetValue();
+};
+*/
+
+
+class SaveFileWidget : public MeshLabWidget
+{
+public:
+	SaveFileWidget(QWidget* p,RichSaveFile* rpar);
+
+	void collectWidgetValue();
+	void resetWidgetValue();
+};
+
+
+/// Widget to enter a color.
+// public QHBoxLayout,
+class ColorWidget : public MeshLabWidget
 {
 	  Q_OBJECT
 		
-		QPushButton *colorButton;
-		QLabel *colorLabel;
-		QColor currentColor;
+		QPushButton* colorButton;
+		QLabel* colorLabel;
+		QLabel* descLabel;
+		QColor pickcol;
+
 	public:
-		QColorButton(QWidget *p, QColor newColor);
-		QColor getColor();
-		void  setColor(QColor newColor);
-							 
+	ColorWidget(QWidget *p, RichColor* newColor);
+	~ColorWidget();
+
+		void collectWidgetValue();
+		void resetWidgetValue();
+
+private:
+	void  updateColorInfo(const ColorValue& newColor);
+
 	signals:
 		void dialogParamChanged();
 	private slots:
 		void pickColor(); 
 };
 
+
+
 /// Widget to enter a value as a percentage or as an absolute value. 
 /// You have to specify the default value and the range of the possible values.
 /// The default value is expressed in ABSolute units (e.g. it should be in the min..max range.
 
-class AbsPercWidget : public QGridLayout
+
+//public QGridLayout
+class AbsPercWidget : public MeshLabWidget
 {
 	  Q_OBJECT
 
 public:
-  AbsPercWidget(QWidget *p, double defaultv, double minVal, double maxVal);
+  AbsPercWidget(QWidget *p,RichAbsPerc* rabs);
   ~AbsPercWidget();
+	
+	void collectWidgetValue();
+	void resetWidgetValue();
 
-  float getValue();
+private:
 	void  setValue(float val, float minV, float maxV);
 
 public slots:
 
 	void on_absSB_valueChanged(double newv); 
 	void on_percSB_valueChanged(double newv);
+signals:
+	void dialogParamChanged();
 
 protected:
   QDoubleSpinBox *absSB;
   QDoubleSpinBox *percSB;
+	QLabel* fieldDesc;
   float m_min;
   float m_max;
 };
@@ -143,15 +282,20 @@ protected:
 /// if at the creation you provide a pointer to a GLArea (the mesh viewing window) 
 /// the widget exposes a button for getting the current view directiont 
 
-class Point3fWidget : public QHBoxLayout
+//public QHBoxLayout,
+class Point3fWidget : public MeshLabWidget
 {
 	Q_OBJECT
 	
 public:
-  Point3fWidget(QWidget *p, vcg::Point3f defaultv, QString _paramName, QWidget *gla);
+  Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla);
   ~Point3fWidget();
 	QString paramName;
 	vcg::Point3f getValue();
+
+	void collectWidgetValue();
+	void resetWidgetValue();
+
 	public slots:
 	void  getPoint();
 	void  setValue(QString name, vcg::Point3f val);	
@@ -160,22 +304,30 @@ public:
 	void askViewPos(QString);
 	void askSurfacePos(QString);
 	void askCameraPos(QString);
+
 protected:
 	QLineEdit * coordSB[3];
 	QComboBox *getPoint3Combo;
 	QPushButton *getPoint3Button;
+	QLabel* descLab;
 };
 
-class DynamicFloatWidget : public QGridLayout
+
+
+//public QGridLayout,
+class DynamicFloatWidget : public MeshLabWidget
 {
 	Q_OBJECT
 	
 public:
-  DynamicFloatWidget(QWidget *p, double defaultv, double minVal, double maxVal, int mask);
+  DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf);
   ~DynamicFloatWidget();
 	
   float getValue();
 	void  setValue(float val, float minV, float maxV);
+
+	void collectWidgetValue();
+	void resetWidgetValue();
 	
 	public slots:
 		void setValue(int newv);
@@ -189,6 +341,7 @@ public:
 protected:
 	QLineEdit *valueLE;
 	QSlider   *valueSlider;
+	QLabel* fieldDesc; 
   float minVal;
   float maxVal;
 	int mask;
@@ -196,6 +349,138 @@ private :
 	float intToFloat(int val);  
 	int floatToInt(float val);
 };
+
+
+
+class ComboWidget : public MeshLabWidget
+{
+	Q_OBJECT
+protected:	
+	QComboBox *enumCombo;
+	QLabel *enumLabel;
+public:
+	ComboWidget(QWidget *p, RichParameter* rpar);
+	~ComboWidget();
+	void Init(QWidget *p,int newEnum, QStringList values);
+	virtual void collectWidgetValue() = 0;
+	virtual void resetWidgetValue() = 0;
+
+	int getIndex();
+	void  setIndex(int newEnum);	
+
+signals:
+	void dialogParamChanged();
+};
+
+/// Widget to select an entry from a list
+
+//public QHBoxLayout
+class EnumWidget : public ComboWidget
+{
+	Q_OBJECT
+
+public:	
+	EnumWidget(QWidget *p, RichEnum* rpar);
+	~EnumWidget(){};
+
+	void collectWidgetValue();
+	void resetWidgetValue();
+
+	//returns the number of items in the list 
+	int getSize();
+};
+
+
+/// Widget to select a Layer the current one
+class MeshWidget : public ComboWidget
+{
+private:
+	MeshDocument *md;
+	int defaultMeshIndex;
+public:
+	MeshWidget(QWidget *p, RichMesh* defaultMesh);
+	~MeshWidget(){};
+	void collectWidgetValue();
+	void resetWidgetValue();
+
+	MeshModel * getMesh();
+	void setMesh(MeshModel * newMesh);
+};
+
+
+/*
+class QVariantListWidget : public MeshLabWidget
+{
+	Q_OBJECT
+public:
+	QVariantListWidget(QWidget *parent, QList<QVariant> &values);
+
+	//get the values listed in this widget
+	QList<QVariant> getList();
+
+	//set the values this widget lists
+	void setList(QList<QVariant> &values);
+
+	public slots:
+		//add a new row for input at the end
+		void addRow();
+
+		//remove the last row of the table widget
+		void removeRow();
+
+		void collectWidgetValue();
+		void resetWidgetValue();
+
+private:
+	QTableWidget *tableWidget;
+
+};
+*/
+
+
+/*
+//public QVBoxLayout
+class GetFileNameWidget : public MeshLabWidget
+{
+	Q_OBJECT
+public:
+	GetFileNameWidget(QWidget *parent, QString &defaultString, bool getOpenFileName, QString fileExtension = QString("*.*"));
+
+	~GetFileNameWidget();
+
+	//set the values this widget lists
+	QString getFileName();
+
+	//set the name to be something else
+	void setFileName(QString newName);
+
+	public slots:
+		//add a new row for input at the end
+		void launchGetFileNameDialog();
+
+		void collectWidgetValue();
+		void resetWidgetValue();
+private:
+
+	//open or save filename
+	bool _getOpenFileName;
+
+	//label to display the current value of _filename
+	QLabel *fileNameLabel;
+
+	//button to launch the get filename dialog
+	QPushButton *launchFileNameDialogButton;
+
+	//the filename colected by the fileName dialog 
+	QString _fileName;
+
+	//the extension of the files to look for
+	QString _fileExtension;
+
+};
+*/
+
+/*---------------------------------*/
 
 /* 
 This class is used to automatically create a frame from a set of parameters. 
@@ -209,119 +494,24 @@ class StdParFrame : public QFrame
 public:
 	StdParFrame(QWidget *p, QWidget *gla=0);
 
-	void loadFrameContent(FilterParameterSet &curParSet,MeshDocument *mdPt = 0);
-	void readValues(FilterParameterSet &curParSet);
-	void resetValues(FilterParameterSet &curParSet);
+	void loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdPt = 0);
+	void readValues(RichParameterSet &curParSet);
+	void resetValues(RichParameterSet &curParSet);
 
 	void toggleHelp();	
 	
-	QVector<void *> stdfieldwidgets;
+	QVector<MeshLabWidget *> stdfieldwidgets;
 	QVector<QLabel *> helpList;
-private: 
+
 	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
-	
+	~StdParFrame();
 signals:
 
 		void dynamicFloatChanged(int mask);
 		void parameterChanged();
 };
 
-/// Widget to select an entry from a list
-class EnumWidget : public QHBoxLayout
-{
-	  Q_OBJECT
-protected:	
-		QComboBox *enumCombo;
-		QLabel *enumLabel;
-	public:
-		EnumWidget(){};		
-		EnumWidget(QWidget *p, int newEnum, QStringList values);
-		void Init(QWidget *p, int newEnum, QStringList values);
-		int getEnum();
-		void  setEnum(int newEnum);	
-		
-		//returns the number of items in the list 
-		int getSize();
 
-	signals:
-		void dialogParamChanged();
-};
-
-
-
-/// Widget to select a Layer the current one
-class MeshEnumWidget : public EnumWidget
-{
-private:
-	MeshDocument *md;
-public:
-	MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument &md);
-		
-	MeshModel * getMesh();
-	void setMesh(MeshModel * newMesh);
-};
-
-
-class QVariantListWidget : public QHBoxLayout
-{
-	Q_OBJECT
-public:
-	QVariantListWidget(QWidget *parent, QList<QVariant> &values);
-	
-	//get the values listed in this widget
-	QList<QVariant> getList();
-	
-	//set the values this widget lists
-	void setList(QList<QVariant> &values);
-	
-public slots:
-	//add a new row for input at the end
-	void addRow();
-	
-	//remove the last row of the table widget
-	void removeRow();
-	
-private:
-	QTableWidget *tableWidget;
-	
-};
-
-class GetFileNameWidget : public QVBoxLayout
-{
-	Q_OBJECT
-public:
-	GetFileNameWidget(QWidget *parent, QString &defaultString, bool getOpenFileName, QString fileExtension = QString("*.*"));
-	
-	~GetFileNameWidget();
-	
-	//set the values this widget lists
-	QString getFileName();
-	
-	//set the name to be something else
-	void setFileName(QString newName);
-	
-public slots:
-	//add a new row for input at the end
-	void launchGetFileNameDialog();
-	
-private:
-	
-	//open or save filename
-	bool _getOpenFileName;
-	
-	//label to display the current value of _filename
-	QLabel *fileNameLabel;
-	
-	//button to launch the get filename dialog
-	QPushButton *launchFileNameDialogButton;
-	
-	//the filename colected by the fileName dialog 
-	QString _fileName;
-	
-	//the extension of the files to look for
-	QString _fileExtension;
-	
-};
 
 // This class provide a modal dialog box for asking a generic parameter set
 // It can be used by anyone needing for some values in a structred form and having some integrated help
@@ -329,9 +519,10 @@ class GenericParamDialog: public QDialog
 {
 	Q_OBJECT 
 public:
-  GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
-	
-	FilterParameterSet *curParSet;
+  GenericParamDialog(QWidget *p, RichParameterSet *_curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
+	~GenericParamDialog();
+
+	RichParameterSet *curParSet;
 	StdParFrame *stdParFrame;
 	
 	void createFrame();
@@ -359,6 +550,7 @@ class MeshlabStdDialog : public QDockWidget
 
 public:
   MeshlabStdDialog(QWidget *p);
+	~MeshlabStdDialog();
 
 	void clearValues();
 	void createFrame();
@@ -375,24 +567,63 @@ private slots:
 	void togglePreview();
 	void applyDynamic();
 
-protected:
+public:
 	QFrame *qf;
 	StdParFrame *stdParFrame;
 	QAction *curAction;
 	MeshModelState meshState;
+	MeshModelState meshCacheState;
 	QCheckBox *previewCB;
 
 	void closeEvent ( QCloseEvent * event ); 
-public:
+
 	int curmask;
 	MeshModel *curModel;
 	MeshDocument * curMeshDoc;
 	MeshFilterInterface *curmfi;
 	MainWindowInterface *curmwi;
 	QWidget * curgla;
-	FilterParameterSet curParSet;
-	
+	RichParameterSet curParSet;
+	RichParameterSet prevParSet;
+	bool validcache;
 };
+
+
+
+//QWidget* parent parameter says to the class who will destroy the MeshLabWidget object that it had created
+//RichWidgetConstructor shouldn't destroy anything
+
+class RichWidgetInterfaceConstructor : public Visitor
+{
+public:
+	RichWidgetInterfaceConstructor(QWidget* parent):par(parent),lastCreated(NULL){}
+
+	void visit(RichBool& pd) {lastCreated = new BoolWidget(par,&pd);};
+	void visit(RichInt& pd) {lastCreated = new IntWidget(par,&pd);};
+	void visit(RichFloat& pd){lastCreated = new FloatWidget(par,&pd);};
+	void visit(RichString& pd){lastCreated = new StringWidget(par,&pd);};
+	void visit(RichMatrix44f& pd){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new Matrix44fWidget(par,&pd);*/};
+	void visit(RichPoint3f& pd){lastCreated = new Point3fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
+	void visit(RichColor& pd){lastCreated = new ColorWidget(par,&pd);};
+	void visit(RichColor4b& pd){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new Color4bWidget(par,&pd);*/};
+	void visit(RichAbsPerc& pd){lastCreated = new AbsPercWidget(par,&pd);};
+	void visit(RichEnum& pd){lastCreated = new EnumWidget(par,&pd);};
+	void visit(RichFloatList& pd){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new FloatListWidget(par,&pd);*/};
+	void visit(RichDynamicFloat& pd){lastCreated = new DynamicFloatWidget(par,&pd);};
+	void visit(RichOpenFile& pd){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new OpenFileWidget(par,&pd);*/};
+	void visit(RichSaveFile& pd){lastCreated = new SaveFileWidget(par,&pd);};
+	void visit(RichMesh& pd){lastCreated = new MeshWidget(par,&pd);};
+
+	~RichWidgetInterfaceConstructor() {}
+
+	void setParentWidget(QWidget* parent) {par = parent;}
+	MeshLabWidget* lastCreated;
+private:
+	QWidget* par;
+
+};
+
+
 
 #endif
 

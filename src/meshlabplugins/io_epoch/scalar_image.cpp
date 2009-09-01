@@ -44,10 +44,11 @@
 //#include "epoch.h"
 //#include "radial_distortion.h"
 //#include "epoch_camera.h"
+#include <bzlib.h>
 #include <vector>
 #include "scalar_image.h"
 
-#include <bzlib.h>
+
 
 using namespace std;
 /*

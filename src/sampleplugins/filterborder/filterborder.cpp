@@ -97,14 +97,14 @@ const int FilterBorder::getRequirements(QAction *action)
   return 0;
 }
 
-void FilterBorder::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
+void FilterBorder::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 { 
 	pair<float,float> qualityRange;
   switch(ID(action))
   {
     case FP_REMOVE_BORDER_FACE :
-		  parlst.addInt("IterationNum",1,"Iteration","Number of times that the removal of face border is iterated.");
-		  parlst.addBool("DeleteVertices",true,"Delete unreferenced vertices","Remove the vertexes that remains unreferneced after the face removal.");
+		  parlst.addParam(new RichInt("IterationNum",1,"Iteration","Number of times that the removal of face border is iterated."));
+		  parlst.addParam(new RichBool("DeleteVertices",true,"Delete unreferenced vertices","Remove the vertexes that remains unreferneced after the face removal."));
  		  break;
 		default: assert(0);
   }
@@ -112,7 +112,7 @@ void FilterBorder::initParameterSet(QAction *action,MeshModel &m, FilterParamete
 
 
 
-bool FilterBorder::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
+bool FilterBorder::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
 {
 	CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;

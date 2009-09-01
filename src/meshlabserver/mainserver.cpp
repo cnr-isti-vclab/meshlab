@@ -132,7 +132,7 @@ bool Open(MeshModel &mm, QString fileName)
 	
 	int mask = 0;
 	
-	FilterParameterSet prePar;
+	RichParameterSet prePar;
 	pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
 	
 	if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
@@ -174,7 +174,7 @@ bool Save(MeshModel *mm, int mask, QString fileName)
 	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 	
 	// optional saving parameters (like ascii/binary encoding)
-	FilterParameterSet savePar;
+	RichParameterSet savePar;
 	pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
 	
 	if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask, savePar))
@@ -203,8 +203,9 @@ bool Script(MeshDocument &meshDocument, QString scriptfile){
 	scriptPtr.open(scriptfile);
 	printf("Starting Script of %i actions",scriptPtr.actionList.size());
 	FilterScript::iterator ii;
-	for(ii = scriptPtr.actionList.begin();ii!= scriptPtr.actionList.end();++ii){
-		FilterParameterSet &par = (*ii).second;
+	for(ii = scriptPtr.actionList.begin();ii!= scriptPtr.actionList.end();++ii)
+	{
+		RichParameterSet &par = (*ii).second;
 		QString &name = (*ii).first;
 		printf("filter: %s\n",qPrintable((*ii).first));
 		
@@ -213,31 +214,6 @@ bool Script(MeshDocument &meshDocument, QString scriptfile){
 		iFilter->setLog(NULL);
 		int req = iFilter->getRequirements(action);
 		mm.updateDataMask(req);
-
-		
-		
-		//make sure the PARMESH parameters are initialized
-		FilterParameterSet &parameterSet = (*ii).second;
-		for(int i = 0; i < parameterSet.paramList.size(); i++)
-		{	
-			//get a modifieable reference
-			FilterParameter &parameter = parameterSet.paramList[i];
-				
-			//if this is a mesh paramter and the index is valid
-			if(parameter.fieldType == FilterParameter::PARMESH)
-			{  
-				if(	parameter.fieldVal.toInt() < meshDocument.size() && 
-					parameter.fieldVal.toInt() >= 0  )
-				{
-					parameter.pointerVal = meshDocument.getMesh(parameter.fieldVal.toInt());					
-				} else
-				{
-					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), parameter.fieldVal.toInt() );
-					printf("One of the filters in the script needs more meshes than you have loaded.\n");
-					exit(-1);
-				}
-			}
-		}
 		
 		bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, NULL);
 		//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );

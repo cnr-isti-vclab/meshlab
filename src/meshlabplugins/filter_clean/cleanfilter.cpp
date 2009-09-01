@@ -232,62 +232,63 @@ const int CleanFilter::getRequirements(QAction *action)
 	}
 
 
-void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
+void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParameterSet & parlst)
 { 
 	pair<float,float> qualityRange;
   switch(ID(action))
   {
     case FP_BALL_PIVOTING :
-		  parlst.addAbsPerc("BallRadius",(float)maxDiag1,0,m.cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled.");
-		  parlst.addFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it.");		  parlst.addFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling");
-		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius.");
+		  parlst.addParam(new RichAbsPerc("BallRadius",(float)maxDiag1,0,md.mm()->cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled."));
+		  parlst.addParam(new RichFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it."));		  
+			parlst.addParam(new RichFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling"));
+		  parlst.addParam(new RichBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius."));
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
-		  parlst.addAbsPerc("MinComponentDiag",m.cm.bbox.Diag()/10.0,0,m.cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one");
+		  parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0,0,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
 		  break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-		  parlst.addInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one");
+		  parlst.addParam(new RichInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
 		  break;
     case FP_REMOVE_WRT_Q:
-			qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
-		  parlst.addAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:");
+			qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
+		  parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
 		  break;
     case FP_ALIGN_WITH_PICKED_POINTS :
-    	AlignTools::buildParameterSet(parlst);
+    	AlignTools::buildParameterSet(md,parlst);
     	break;
 		case FP_SELECTBYANGLE :
 			{
-				parlst.addDynamicFloat("anglelimit",
+				parlst.addParam(new RichDynamicFloat("anglelimit",
 															 75.0f, 0.0f, 180.0f, 
 												"angle threshold (deg)",
-												"faces with normal at higher angle w.r.t. the view direction are selected");
-	 		  parlst.addBool ("usecamera",
+												"faces with normal at higher angle w.r.t. the view direction are selected"));
+	 		  parlst.addParam(new RichBool ("usecamera",
 												false,
 												"Use ViewPoint from Mesh Camera",
-												"Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs");
-				parlst.addPoint3f("viewpoint",
+												"Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs"));
+				parlst.addParam(new RichPoint3f("viewpoint",
 												Point3f(0.0f, 0.0f, 0.0f),
 												"ViewPoint",
-												"if UseCamera is true, this value is ignored");
+												"if UseCamera is true, this value is ignored"));
 			}
 			break;    
 		case FP_MERGE_CLOSE_VERTEX :
-		 parlst.addAbsPerc("Threshold",m.cm.bbox.Diag()/10000.0,0,m.cm.bbox.Diag()/100.0,"Merging distance","All the vertices that closer than this threshold are merged toghether. Use very small values, default values is 1/10000 of bounding box diagonal. ");
+			parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0,0,md.mm()->cm.bbox.Diag()/100.0,"Merging distance","All the vertices that closer than this threshold are merged toghether. Use very small values, default values is 1/10000 of bounding box diagonal. "));
 		 break;    
 
     case FP_REMOVE_TVERTEX_COLLAPSE :
     case FP_REMOVE_TVERTEX_FLIP :
-       parlst.addFloat(
-               "Threshold", 40, "Ratio", "Detects faces where the base/height ratio is lower than this value");
-       parlst.addBool(
-               "Repeat", true, "Iterate until convergence", "Iterates the algorithm until it reaches convergence");
+       parlst.addParam(new RichFloat(
+               "Threshold", 40, "Ratio", "Detects faces where the base/height ratio is lower than this value"));
+       parlst.addParam(new RichBool(
+               "Repeat", true, "Iterate until convergence", "Iterates the algorithm until it reaches convergence"));
        break;
 
 	default: assert(0);
   }
 }
 
-bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
+bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
 {
 	switch(ID(filter))
   {

@@ -85,7 +85,7 @@ SelectionFilterPlugin::~SelectionFilterPlugin()
 		delete actionList.at(i);
 	}
 }
-void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &parlst)
+void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
 		switch(ID(action))
 		{
@@ -95,27 +95,27 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 						float minq=minmax.first;
 						float maxq=minmax.second;
 						
-						parlst.addDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") );
-						parlst.addDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") );
-						parlst.addBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected.");						
+						parlst.addParam(new RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
+						parlst.addParam(new RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
+						parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));						
 					}
 					break;
 			case FP_SELECT_BY_COLOR:
 			{
-				parlst.addColor("Color",Color4b::Black, tr("Color To Select"), tr("Color that you want to be selected.") );
+				parlst.addParam(new RichColor("Color",Color4b::Black, tr("Color To Select"), tr("Color that you want to be selected.") ));
 				
 				QStringList colorspace;
 				colorspace << "HSV" << "RGB";
-				parlst.addEnum("ColorSpace", 0, colorspace, tr("Pick Color Space"), tr("The color space that the sliders will manipulate.") );
+				parlst.addParam(new RichEnum("ColorSpace", 0, colorspace, tr("Pick Color Space"), tr("The color space that the sliders will manipulate.") ));
 
 				QStringList mode;
 				mode << "Start Over" << "Add" << "Subtract";
-				parlst.addEnum("Mode", 0, mode, tr("Mode:"), tr("The mode of this filter.  Start Over clears the selection completely before selecting based on the color.  Add just adds to the current selection bases on color and subtract takes away from the selection the triangles with a vertex matching the color.") );
+				parlst.addParam(new RichEnum("Mode", 0, mode, tr("Mode:"), tr("The mode of this filter.  Start Over clears the selection completely before selecting based on the color.  Add just adds to the current selection bases on color and subtract takes away from the selection the triangles with a vertex matching the color.") ));
 
 				
-				parlst.addDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f,  tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
-				parlst.addDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f,  tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
-				parlst.addDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f,  tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
+				parlst.addParam(new RichDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f,  tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
+				parlst.addParam(new RichDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f,  tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
+				parlst.addParam(new RichDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f,  tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
 			}
 			break;
 		}
@@ -134,7 +134,7 @@ bool SelectionFilterPlugin::autoDialog(QAction *action)
 }
 
 
-bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
+bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
 {
 	CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
