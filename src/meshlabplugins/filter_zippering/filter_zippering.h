@@ -225,11 +225,13 @@ public:
         virtual const QString filterName(FilterIDType filter) const;
         virtual const QString filterInfo(FilterIDType filter) const;
 	virtual bool autoDialog(QAction *) {return true;}
-        virtual void initParameterSet(QAction *,MeshDocument &/*m*/, FilterParameterSet & /*parent*/);
+        virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
         const int getRequirements(QAction *action);
-        virtual bool applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-        virtual bool applyFilter(QAction *filter, MeshModel &md, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) {return true; }
+        virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+        virtual bool applyFilter(QAction *filter, MeshModel &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) {return true;}
 	const FilterClass getClass(QAction *a);
+	virtual int postCondition( QAction *a ) const { return MeshModel::MM_FACEFACETOPO|MeshModel::MM_VERTNORMAL; }
+
 
 
 private:

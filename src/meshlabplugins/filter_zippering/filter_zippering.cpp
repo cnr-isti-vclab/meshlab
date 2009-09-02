@@ -117,19 +117,20 @@ const FilterZippering::FilterClass FilterZippering::getClass(QAction *a)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterZippering::initParameterSet(QAction *action, MeshDocument &md, FilterParameterSet & parlst)
+void FilterZippering::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
 {
          MeshModel *target;
          float maxVal = 0.0;
          switch(ID(action))	 {
                 case FP_ZIPPERING :
+								//Improvements needed
                                 foreach (target, md.meshList) {
                                     if ( target->cm.bbox.Diag() > maxVal ) maxVal = target->cm.bbox.Diag();
                                     if (target != md.mm())  break;
                                 }
-                                parlst.addMesh ("FirstMesh", md.mm(), "Mesh (with holes)", "The mesh with holes.");
-                                parlst.addMesh ("SecondMesh", target, "Patch", "The mesh that will be used as patch.");
-                                parlst.addAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path");
+                                parlst.addParam( new RichMesh("FirstMesh", md.mm(), &md, "Mesh (with holes)", "The mesh with holes.") );
+                                parlst.addParam( new RichMesh("SecondMesh", target, &md, "Patch", "The mesh that will be used as patch.") );
+                                parlst.addParam( new RichAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path") );
                 break;
                 default : assert(0);
         }
@@ -473,7 +474,7 @@ int  FilterZippering::sharesVertex( CMeshO::FacePointer f1, CMeshO::FacePointer 
  * - MeshRefinement: faces where patch vertices lie are re-triangulated
  * Based on Zippered Polygon Meshes from Range Images, by G.Turk, M.Levoy, Siggraph 1994
  */
-bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
      if ( md.size() == 1 )   {
         Log(GLLogStream::FILTER,"Please add a second mesh");
