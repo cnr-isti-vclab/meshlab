@@ -259,7 +259,6 @@ public:
 			FP_FaceColor        =0x00020 //  
 	};
 
-
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action. 
