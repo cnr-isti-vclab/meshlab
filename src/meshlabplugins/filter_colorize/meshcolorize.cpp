@@ -458,13 +458,15 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const
     case   CP_BORDER:
     case   CP_COLOR_NON_MANIFOLD_VERTEX:
     case   CP_COLOR_NON_MANIFOLD_FACE:
-    case   CP_DISCRETE_CURVATURE:
     case   CP_MAP_QUALITY_INTO_COLOR:
     case   CP_FACE_TO_VERTEX:
     case   CP_VERTEX_SMOOTH:
 	  case   CP_TEXTURE_TO_VERTEX:
     case   CP_TEXBORDER: 
 				return MeshModel::MM_VERTCOLOR;
+
+		case   CP_DISCRETE_CURVATURE:
+			return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTNUMBER;
 
     default: assert(0);
 	}
