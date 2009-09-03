@@ -74,7 +74,7 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 	bool MeshlabStdDialog::isDynamic()
 	{
 		//return (curParSet.getDynamicFloatMask()!= 0);
-		return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE));
+		return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 	}
 
 
@@ -287,9 +287,9 @@ void MeshlabStdDialog::applyDynamic()
 	// Restore the
 	meshState.apply(curModel);
 	curmwi->executeFilter(q, curParSet, true);
-
-	validcache = true;
 	meshCacheState.create(curmask,curModel);
+	validcache = true;
+	
 
 	if(this->curgla) this->curgla->update();
 }
@@ -1171,8 +1171,8 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 	colorButton = new QPushButton(p);
 	colorButton->setAutoFillBackground(true);
 	colorButton->setFlat(true);
-	const QColor cl = rp->pd->defVal->getColor();
-	updateColorInfo(cl);
+	//const QColor cl = rp->pd->defVal->getColor();
+	resetWidgetValue();
 	int row = gridLay->rowCount() - 1;
 	gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
@@ -1196,9 +1196,12 @@ void ColorWidget::updateColorInfo(const ColorValue& newColor)
 
 void ColorWidget::pickColor()
 {
-	pickcol =QColorDialog::getColor(rp->pd->defVal->getColor());
+	pickcol =QColorDialog::getColor(pickcol);
 	if(pickcol.isValid()) 
+	{
+		collectWidgetValue();
 		updateColorInfo(ColorValue(pickcol));
+	}
 	emit dialogParamChanged();
 }
 
