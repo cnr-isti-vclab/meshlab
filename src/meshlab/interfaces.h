@@ -58,6 +58,7 @@ public:
 		QStringList extensions;
 	};
 
+	MeshIOInterface() { log=0; }
   virtual ~MeshIOInterface() {}
 	
 	virtual QList<Format> importFormats() const = 0;
@@ -486,8 +487,22 @@ public:
 
     virtual const QString Info(QAction *)=0;
 
-		// This function is called by the framework, for each action at the loading of the plugins.
+		// This function is called by the framework, for each decoration at the start of the plugins.
 		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
+		// For the global parameters the following rules apply:
+		// * there is a *hardwired* default value, that is directly coded into the plugin
+		// * there is a *saved* value that is stored into persistent location into the user space (registry/home/library)
+		// * there is a *current* value that is currently used, different for each decoration instance and that is not stored permanently.
+		//
+		// The plugin use the current value to draw its decoration.
+		// at startup the current value is always silently initialized to the saved value.
+		// User can revert current value to the saved values and to the hardwired values. 
+		// In the dialog for each parameter some buttons should be present:
+		// 
+		// * load (from the registry), 
+		// * save (to the registry), 
+		// * reset (from the hardwired).
+		
 		// If your plugins/action has no GlobalParameter, do nothing.
 		// The RichParameterSet comes here already intialized with the values stored on the permanent storage.
 		// If a filter wants to save some permanent stuff should check its esistence here.
