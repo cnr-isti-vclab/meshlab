@@ -939,7 +939,16 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					return false;
 				}
 				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-				pCurrentIOPlugin->setLog(&(GLA()->log));
+				bool newGla = false;
+				if(gla==0){
+						gla=new GLArea(mdiarea);
+						addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
+						newGla =true;
+						pCurrentIOPlugin->setLog(&(gla->log));
+					}
+				else
+					pCurrentIOPlugin->setLog(&(GLA()->log));
+				
 				qb->show();
 				RichParameterSet prePar;
 				pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
@@ -969,12 +978,6 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 							postOpenDialog.exec();
 							pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 						}
-					bool newGla = false;
-					if(gla==0){
-						gla=new GLArea(mdiarea);
-						addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
-						newGla =true;
-					}
 					gla->meshDoc.busy=true;
 					gla->meshDoc.addNewMesh(qPrintable(fileName),mm);
 
