@@ -195,7 +195,7 @@ public:
 
 	*/
 
-//private:
+private:
   int currentDataMask;
 public:
   // Bitmask denoting what fields are loaded/saved
@@ -256,6 +256,10 @@ public:
   bool hasDataMask(const int maskToBeTested) const
 	{
 		return ((currentDataMask & maskToBeTested)!= 0);
+	}
+	void updateDataMask(MeshModel *m)
+  {
+		updateDataMask(m->currentDataMask);
 	}
 
   void updateDataMask(int neededDataMask)
