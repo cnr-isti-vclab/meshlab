@@ -354,7 +354,8 @@ MeshlabStdDialog::~MeshlabStdDialog()
 	  absSB->setMinimum(m_min-(m_max-m_min));
 	  absSB->setMaximum(m_max*2);
 	  absSB->setAlignment(Qt::AlignRight);
-		int decimals= 6-ceil(log10(fabs(m_max-m_min)) ) ;
+		
+		int decimals= 7-ceil(log10(fabs(m_max-m_min)) ) ;
 	//qDebug("range is (%f %f) %f ",m_max,m_min,fabs(m_max-m_min));
 	//qDebug("log range is %f ",log10(fabs(m_max-m_min)));
 	  absSB->setDecimals(decimals);
@@ -367,6 +368,7 @@ MeshlabStdDialog::~MeshlabStdDialog()
 	  percSB->setAlignment(Qt::AlignRight);
 		percSB->setSingleStep(0.5);
 	  percSB->setValue((100*(defaultv - m_min))/(m_max - m_min));
+		percSB->setDecimals(3);
 		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
 		QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
 
