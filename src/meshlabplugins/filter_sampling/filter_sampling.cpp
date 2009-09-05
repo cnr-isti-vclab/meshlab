@@ -254,8 +254,9 @@ public:
 	CallBackPos *cb;
 	int sampleNum;  // the expected number of samples. Used only for the callback
 	int sampleCnt;
-	MetroMeshGrid   unifGrid;
+	MetroMeshGrid   unifGridFace;
 	VertexMeshGrid   unifGridVert;
+	bool useVertexSampling;
 
 	// Parameters
 		typedef tri::FaceTmark<CMeshO> MarkerFace;
@@ -264,18 +265,24 @@ public:
 	bool coordFlag;
 	bool colorFlag;
 	bool qualityFlag;
+	bool storeDistanceAsQualityFlag;
 	float dist_upper_bound;
  	void init(CMeshO *_m, CallBackPos *_cb=0, int targetSz=0)
 	{
 		coordFlag=false;
 		colorFlag=false;
 		qualityFlag=false;
+		storeDistanceAsQualityFlag=false;
 		m=_m;
 		if(m) 
 		{
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
 			tri::UpdateFlags<CMeshO>::FaceProjection(*m);
-			unifGrid.Set(m->face.begin(),m->face.end());
+			if(m->fn==0) useVertexSampling = true;
+							else useVertexSampling = false;
+							
+			if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
+											else  unifGridFace.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
 		}
 		// sampleNum and sampleCnt are used only for the progress callback.
@@ -293,22 +300,37 @@ void AddVert(CMeshO::VertexType &p)
 		float dist = dist_upper_bound;
 		const CMeshO::CoordType &startPt= p.cP();
 		// compute distance between startPt and the mesh S2
-		CMeshO::FaceType   *nearestF=0;
-		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
-		dist=dist_upper_bound;
-		if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
-		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
-		if(dist == dist_upper_bound) return ;																				
+		if(useVertexSampling)
+			{
+				CMeshO::VertexType   *nearestV=0;
+				nearestV =  tri::GetClosestVertex<CMeshO,VertexMeshGrid>(*m,unifGridVert,startPt,dist_upper_bound,dist); //(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+			if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
+				if(storeDistanceAsQualityFlag)  p.Q() = dist;
+				if(dist == dist_upper_bound) return ;		
+				
+				if(coordFlag) p.P()=nearestV->P();
+				if(colorFlag) p.C() = nearestV->C();
+				if(qualityFlag) p.Q()= nearestV->Q();
+			}
+		else
+			{
+				CMeshO::FaceType   *nearestF=0;
+				vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
+				dist=dist_upper_bound;
+				if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
+				nearestF =  unifGridFace.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+				if(dist == dist_upper_bound) return ;																				
 
-		Point3f interp;
-		bool ret = InterpolationParameters(*nearestF,closestPt, interp[0], interp[1], interp[2]);
-		assert(ret);
-		interp[2]=1.0-interp[1]-interp[0];
+				Point3f interp;
+				bool ret = InterpolationParameters(*nearestF,closestPt, interp[0], interp[1], interp[2]);
+				assert(ret);
+				interp[2]=1.0-interp[1]-interp[0];
 
-		if(coordFlag) p.P()=closestPt;
-		if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
-		if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
-		}
+				if(coordFlag) p.P()=closestPt;
+				if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
+				if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
+			}
+	}
 }; // end class RedetailSampler
 
 
@@ -478,7 +500,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 			parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
 			parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
 			parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
-			parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number."));
+			parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud."));
 			break;
 		case FP_VARIABLEDISK_SAMPLING :
 			parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
@@ -538,6 +560,10 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 												"if enabled, the color of each vertex of the target mesh will become the color of the corresponding closest point on the source mesh"));										
 				parlst.addParam(new RichBool ("QualityTransfer", false, "Transfer quality",
 												"if enabled, the quality of each vertex of the target mesh will become the quality of the corresponding closest point on the source mesh"));										
+				parlst.addParam(new RichBool ("QualityDistance", false, "Store dist. as quality",
+												"if enabled, we store the distance of the transferred value as in the vertex quality"));										
+				parlst.addParam(new RichAbsPerc("UpperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+												tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering attributes.")));
 		} break; 
 		case FP_UNIFORM_MESH_RESAMPLING :
 		{
@@ -622,6 +648,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 		{
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+			mm->updateDataMask(curMM);
+			
 			BaseSampler mps(&(mm->cm));
 			
 			switch(par.getEnum("Sampling"))
@@ -665,7 +693,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 			
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Montecarlo Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-			
+			mm->updateDataMask(curMM);
+
 			BaseSampler mps(&(mm->cm));
 			if(par.getBool("Weighted")) 
 				tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
@@ -684,6 +713,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 			
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+			mm->updateDataMask(curMM);
 			int samplingMethod = par.getEnum("Sampling");
 			BaseSampler mps(&(mm->cm));
 			switch(samplingMethod)
@@ -705,7 +735,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 case FP_CLUSTERED_SAMPLING :  
 		{			
 			MeshModel *curMM= md.mm();				
-			MeshModel *mm= md.addNewMesh("Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+			MeshModel *mm= md.addNewMesh("Cluster Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 			int samplingMethod = par.getEnum("Sampling");
 			float threshold = par.getAbsPerc("Threshold");
 			bool selected = par.getBool("Selected");
@@ -754,6 +784,8 @@ case FP_CLUSTERED_SAMPLING :
 
 			MeshModel *curMM= md.mm();
 			MeshModel *mm= md.addNewMesh("Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+			mm->updateDataMask(curMM);
+
 			float radius = par.getAbsPerc("Radius");
 			int sampleNum = par.getInt("SampleNum");
 			if(radius==0) radius = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonDiskRadius(curMM->cm,sampleNum);
@@ -851,7 +883,7 @@ case FP_CLUSTERED_SAMPLING :
 		{
 			MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
 			MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample. 
-			
+			float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
 			srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
 			tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
@@ -859,10 +891,11 @@ case FP_CLUSTERED_SAMPLING :
 		  RedetailSampler rs;
 			rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
 				
-			rs.dist_upper_bound = trgMesh->cm.bbox.Diag()/50;
+			rs.dist_upper_bound = upperbound;
 			rs.colorFlag=par.getBool("ColorTransfer");
 			rs.coordFlag=par.getBool("GeomTransfer");
 			rs.qualityFlag=par.getBool("QualityTransfer");
+			rs.storeDistanceAsQualityFlag=par.getBool("QualityDistance");
 
 			if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag)
 			{
