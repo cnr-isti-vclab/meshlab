@@ -95,7 +95,7 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId) const
 													"The Delaunay triangulation DT(P) of a set of points P in d-dimensional spaces is a triangulation of the convex hull "
 													"such that no point in P is inside the circum-sphere of any simplex in DT(P).<br> "); 
 		case FP_QHULL_VORONOI_FILTERING :  return QString("Compute a <b>Voronoi filtering</b> (Amenta and Bern 1998) with Qhull library (http://www.qhull.org/). <br><br>" 
-											   "The algorithm calculates a piecewise-linear approximation of a smooth surface from a finite set of sample points."
+											   "The algorithm calculates a triangulation of the input point cloud without requiring vertex normals."
 											   "It uses a subset of the Voronoi vertices to remove triangles from the Delaunay triangulation. <br>"
 											   "After computing the Voronoi diagram, foreach sample point it chooses the two farthest opposite Voronoi vertices."
 											   "Then computes a Delaunay triangulation of the sample points and the selected Voronoi vertices, and keep "
@@ -155,11 +155,12 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 			}
 		case FP_QHULL_VORONOI_FILTERING :
 			{
-				parlst.addParam(new RichDynamicFloat("threshold",0.0f, 0.0f, 2000.0f,"threshold ","Factor that, multiplied to the bbox diagonal,"
-																						 "set a threshold used to discard the voronoi vertices too far from the origin."
-																						 "They can cause problems to the qhull library.<br>"
-																						 "Growing values of 'threshold' will add more voronoi vertices for a better surface"
-																						 "reconstruction."));
+				parlst.addParam(new RichDynamicFloat("threshold",10.0f, 0.0f, 2000.0f,"Pole Discard Thr",
+				"Threshold used to discard the Voronoi vertices too far from the origin."
+				"We discard vertices are further than this factor times the bbox diagonal <br>"
+				"Growing values of this value will add more Voronoi vertices for a better tightier surface reconstruction."
+				"On the other hand they will increase processing time and could cause numerical problems to the qhull library.<br>"
+																						 ));
 				break;
 			}	
 		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
