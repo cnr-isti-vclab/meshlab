@@ -264,6 +264,7 @@ public:
 	
 	bool coordFlag;
 	bool colorFlag;
+	bool normalFlag;
 	bool qualityFlag;
 	bool storeDistanceAsQualityFlag;
 	float dist_upper_bound;
@@ -310,6 +311,7 @@ void AddVert(CMeshO::VertexType &p)
 				
 				if(coordFlag) p.P()=nearestV->P();
 				if(colorFlag) p.C() = nearestV->C();
+				if(normalFlag) p.N() = nearestV->N();
 				if(qualityFlag) p.Q()= nearestV->Q();
 			}
 		else
@@ -328,6 +330,7 @@ void AddVert(CMeshO::VertexType &p)
 
 				if(coordFlag) p.P()=closestPt;
 				if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
+				if(normalFlag) p.N() = nearestF->V(0)->N()*interp[0] + nearestF->V(1)->N()*interp[1] + nearestF->V(2)->N()*interp[2];
 				if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
 			}
 	}
@@ -556,6 +559,8 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 												"The mesh whose vertexes will receive the data from the source."));
 				parlst.addParam(new RichBool ("GeomTransfer", false, "Transfer Geometry",
 												"if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh"));										
+				parlst.addParam(new RichBool ("NormalTransfer", false, "Transfer Normal",
+												"if enabled, the normal of each vertex of the target mesh will get the (interpolated) normal of the corresponding closest point on the source mesh"));										
 				parlst.addParam(new RichBool ("ColorTransfer", true, "Transfer Color",
 												"if enabled, the color of each vertex of the target mesh will become the color of the corresponding closest point on the source mesh"));										
 				parlst.addParam(new RichBool ("QualityTransfer", false, "Transfer quality",
@@ -894,10 +899,12 @@ case FP_CLUSTERED_SAMPLING :
 			rs.dist_upper_bound = upperbound;
 			rs.colorFlag=par.getBool("ColorTransfer");
 			rs.coordFlag=par.getBool("GeomTransfer");
+			rs.normalFlag=par.getBool("NormalTransfer");
 			rs.qualityFlag=par.getBool("QualityTransfer");
+			
 			rs.storeDistanceAsQualityFlag=par.getBool("QualityDistance");
 
-			if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag)
+			if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag  && !rs.normalFlag)
 			{
 				errorMessage = QString("You have to choose at least one attribute to be sampled");
 				return false;
