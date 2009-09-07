@@ -119,10 +119,12 @@ plugins/libfilter_select.dylib \
 plugins/libfilter_splitter.dylib \
 plugins/libfilter_trioptimize.dylib \
 plugins/libfilter_unsharp.dylib \
+plugins/libfilter_qhull.dylib \
 plugins/libfilterborder.dylib \
 plugins/libfiltercreateiso.dylib \
 plugins/libfiltergeodesic.dylib \
 plugins/libfilter_qhull.dylib \
+plugins/libfilter_isoparametrization.dylib \
 plugins/libio_base.dylib \
 plugins/libio_3ds.dylib \
 plugins/libio_collada.dylib \
@@ -146,6 +148,7 @@ plugins/libeditrgbtri.dylib \
 plugins/libeditsegment.dylib \
 plugins/libeditslice.dylib \
 plugins/libeditstraightener.dylib \
+plugins/libfilter_qhull.dylib \
 plugins/libmeshdecorate.dylib \
 plugins/librender_gdp.dylib \
 plugins/librender_rfx.dylib \
