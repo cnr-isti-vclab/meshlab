@@ -353,5 +353,233 @@ void RichParameterCopyConstructor::visit( RichSaveFile& pd )
 void RichParameterCopyConstructor::visit( RichMesh& pd )
 {
 	MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(pd.pd); 
-	lastCreated = new RichMesh(pd.name,dec->defVal->getMesh(),dec->meshdoc,dec->fieldDesc,dec->tooltip);
+	if (dec->defVal != NULL)
+		lastCreated = new RichMesh(pd.name,dec->defVal->getMesh(),dec->meshdoc,dec->fieldDesc,dec->tooltip);
+	else
+		lastCreated = new RichMesh(pd.name,dec->meshindex);
+}
+
+void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name)
+{
+	parElem = docdom.createElement("Param");
+	parElem.setAttribute("type",type);
+	parElem.setAttribute("name",name);
+}
+
+void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name,const QString& val)
+{
+	fillRichParameterAttribute(type,name);
+	parElem.setAttribute("value",val);
+}
+
+void RichParameterXMLVisitor::visit( RichBool& pd )
+{
+	QString v;
+	if (pd.val->getBool()) 
+		v = "true";
+	else	
+		v = "false";
+	fillRichParameterAttribute("RichBool",pd.name,v);
+}
+
+void RichParameterXMLVisitor::visit( RichInt& pd )
+{
+	fillRichParameterAttribute("RichInt",pd.name,QString::number(pd.val->getInt()));
+}
+
+void RichParameterXMLVisitor::visit( RichFloat& pd )
+{
+	fillRichParameterAttribute("RichFloat",pd.name,QString::number(pd.val->getFloat()));
+}
+
+void RichParameterXMLVisitor::visit( RichString& pd )
+{
+	fillRichParameterAttribute("RichString",pd.name,pd.val->getString());
+}
+
+void RichParameterXMLVisitor::visit( RichMatrix44f& pd )
+{
+	fillRichParameterAttribute("RichMatrix44f",pd.name);
+	vcg::Matrix44f mat = pd.val->getMatrix44f();
+	for(unsigned int ii = 0;ii < 16;++ii)
+		parElem.setAttribute(QString("val")+QString::number(ii),QString::number(mat.V()[ii]));
+}
+
+void RichParameterXMLVisitor::visit( RichPoint3f& pd )
+{
+	fillRichParameterAttribute("RichPoint3f",pd.name);
+	vcg::Point3f p = pd.val->getPoint3f();
+	parElem.setAttribute("x",QString::number(p.X()));
+	parElem.setAttribute("y",QString::number(p.Y()));
+	parElem.setAttribute("z",QString::number(p.Z()));
+}
+
+void RichParameterXMLVisitor::visit( RichColor& pd )
+{
+	fillRichParameterAttribute("RichColor",pd.name);
+	QColor p = pd.val->getColor();
+	parElem.setAttribute("r",QString::number(p.red()));
+	parElem.setAttribute("g",QString::number(p.green()));
+	parElem.setAttribute("b",QString::number(p.blue()));
+	parElem.setAttribute("a",QString::number(p.alpha()));
+}
+
+void RichParameterXMLVisitor::visit( RichColor4b& pd )
+{
+	assert(0);	
+}
+
+void RichParameterXMLVisitor::visit( RichAbsPerc& pd )
+{
+	fillRichParameterAttribute("RichAbsPerc",pd.name,QString::number(pd.val->getAbsPerc()));
+	AbsPercDecoration* dec = reinterpret_cast<AbsPercDecoration*>(pd.pd);
+	parElem.setAttribute("min",QString::number(dec->min));
+	parElem.setAttribute("max",QString::number(dec->max));
+}
+
+void RichParameterXMLVisitor::visit( RichEnum& pd )
+{
+	fillRichParameterAttribute("RichEnum",pd.name,QString::number(pd.val->getEnum()));
+	EnumDecoration* dec = reinterpret_cast<EnumDecoration*>(pd.pd);
+	parElem.setAttribute("enum_cardinality",dec->enumvalues.size());
+	for(unsigned int ii = 0; ii < dec->enumvalues.size();++ii)
+		parElem.setAttribute(QString("enum_val")+QString::number(ii),dec->enumvalues.at(ii));
+
+}
+
+void RichParameterXMLVisitor::visit( RichFloatList& pd )
+{
+	assert(0);
+}
+
+void RichParameterXMLVisitor::visit(RichDynamicFloat& pd)
+{
+	fillRichParameterAttribute("RichDynamicFloat",pd.name,QString::number(pd.val->getDynamicFloat()));
+	DynamicFloatDecoration* dec = reinterpret_cast<DynamicFloatDecoration*>(pd.pd);
+	parElem.setAttribute("min",QString::number(dec->min));
+	parElem.setAttribute("max",QString::number(dec->max));
+}
+
+void RichParameterXMLVisitor::visit( RichOpenFile& pd )
+{
+	assert(0);
+}
+
+void RichParameterXMLVisitor::visit( RichSaveFile& pd )
+{
+	assert(0);
+}
+
+void RichParameterXMLVisitor::visit( RichMesh& pd )
+{
+	MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(pd.pd);
+	fillRichParameterAttribute("RichMesh",pd.name,QString::number(dec->meshindex));
+}
+
+void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
+{
+	QString name=np.attribute("name");
+	QString type=np.attribute("type");
+
+	qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
+
+	if(type=="RichBool")    
+	{ 
+		*par = new RichBool(name,np.attribute("value")!=QString("false")); 
+		return; 
+	}
+
+	if(type=="RichInt")     
+	{ 
+		*par = new RichInt(name,np.attribute("value").toInt()); 
+		return; 
+	}
+
+	if(type=="RichFloat")   
+	{ 
+		*par = new RichFloat(name,np.attribute("value").toFloat());
+		return;
+	}
+
+	if(type=="RichString")  
+	{ 
+		*par = new RichString(name,np.attribute("value")); 
+		return; 
+	}
+	
+	if(type=="RichAbsPerc") 
+	{ 
+		*par = new RichAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat()); 
+		return; 
+	}
+
+	if(type=="RichColor")		
+	{ 
+		unsigned int r = np.attribute("r").toUInt(); 
+		unsigned int g = np.attribute("g").toUInt(); 
+		unsigned int b = np.attribute("b").toUInt(); 
+		unsigned int a = np.attribute("a").toUInt(); 
+		QColor col(r,g,b,a);
+		*par= new RichColor(name,col); 
+		return; 
+	}
+
+	if(type=="RichMatrix44f")
+	{
+		Matrix44f mm;
+		for(int i=0;i<16;++i)
+			mm.V()[i]=np.attribute(QString("val")+QString::number(i)).toFloat();
+		*par = new RichMatrix44f(name,mm);    
+		return;                    
+	}
+
+	if(type=="RichEnum")
+	{
+		QStringList list = QStringList::QStringList();
+		unsigned int enum_card = np.attribute(QString("enum_cardinality")).toUInt();
+
+		for(int i=0;i<enum_card;++i)
+			list<<np.attribute(QString("enum_val")+QString::number(i));
+
+		*par = new RichEnum(name,np.attribute("value").toInt(),list);
+		return;
+	}
+
+	if(type == "RichMesh")  
+	{ 
+		*par = new RichMesh(name, np.attribute("value").toInt()); 
+		return; 
+	}
+
+	if(type == "RichFloatList")
+	{
+		//to be implemented
+		assert(0);
+	}
+
+	if(type == "RichOpenFile")  
+	{ 
+		//to be implemented
+		assert(0);
+	}
+
+	if(type == "RichSaveFile")  
+	{ 
+		//par.addOpenFileName(name, np.attribute(ValueName())); return; 
+		
+		//to be implemented
+		assert(0);
+	}
+
+	if(type=="Point3f") 
+	{
+		Point3f val;
+		val[0]=np.attribute("x").toFloat();
+		val[1]=np.attribute("y").toFloat();
+		val[2]=np.attribute("z").toFloat();
+		*par = new RichPoint3f(name, val);  
+		return; 
+	}
+
+	assert(0); // we are trying to parse an unknown xml element
 }

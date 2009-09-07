@@ -79,10 +79,11 @@ bool FilterScript::save(QString filename)
     tag.setAttribute(QString("name"),(*ii).first);
     RichParameterSet &par=(*ii).second;
     QList<RichParameter*>::iterator jj;
+		RichParameterXMLVisitor v(doc);
     for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
     {
-      //// QDomElement parElem = (*jj).createElement(doc);
-      //// tag.appendChild(parElem);
+			(*jj)->accept(v);
+      tag.appendChild(v.parElem);
     }
     root.appendChild(tag);
   }
@@ -128,7 +129,10 @@ bool FilterScript::open(QString filename)
 			qDebug("Reading filter with name %s",qPrintable(name));
 			for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
 					{
-						//Guido// FilterParameter::addQDomElement(par,np);
+						RichParameter* rp = NULL;
+						RichParameterFactory::create(np,&rp);
+						//FilterParameter::addQDomElement(par,np);
+						par.paramList.push_back(rp);
 					 }
 			 actionList.append(qMakePair(name,par));
 		}

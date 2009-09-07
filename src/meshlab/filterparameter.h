@@ -27,10 +27,12 @@
 #include <QtXml>
 
 #include <QMap>
+#include<QString>
 #include <QPair>
 #include <QAction>
 #include <vcg/math/matrix44.h>
 #include <meshlab/meshmodel.h>
+
 
 
 class Value
@@ -364,14 +366,27 @@ class MeshDecoration : public ParameterDecoration
 {
 public:
 	MeshDecoration(MeshValue* defvalue,MeshDocument* doc,const QString desc=QString(), const QString tltip=QString())
-		:ParameterDecoration(defvalue,desc,tltip),meshdoc(doc) { meshindex = doc->meshList.indexOf(defvalue->getMesh()); assert(meshindex != -1);}
+		:ParameterDecoration(defvalue,desc,tltip),meshdoc(doc) 
+	{ 
+		meshindex = -1;
+		if (doc != NULL) meshindex = doc->meshList.indexOf(defvalue->getMesh()); 
+		assert((meshindex != -1) || (doc == NULL));
+	}
 
-	MeshDecoration(int meshindex,MeshDocument* doc,const QString desc=QString(), const QString tltip=QString())
+	MeshDecoration(int meshind,MeshDocument* doc,const QString desc=QString(), const QString tltip=QString())
 		:ParameterDecoration(NULL,desc,tltip),meshdoc(doc) 
 		{ 
-			assert(meshindex < doc->size() && meshindex >= 0); 
-			defVal = new MeshValue(doc->meshList.at(meshindex));
+			assert(meshind < doc->size() && meshind >= 0); 
+			meshindex = meshind;
+			if (doc != NULL)
+				defVal = new MeshValue(doc->meshList.at(meshind));
 		}
+
+	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
+	MeshDecoration(int meshind)
+		:ParameterDecoration(NULL,QString(),QString()),meshdoc(NULL),meshindex(meshind)
+	{
+	}
 
 	~MeshDecoration(){}
 
@@ -428,8 +443,6 @@ public:
 	Value* val;
 
 	ParameterDecoration* pd;
-
-	
 
 	RichParameter(const QString nm,Value* v,ParameterDecoration* prdec)
 		:name(nm),pd(prdec),val(v) {}
@@ -554,6 +567,10 @@ public:
 		val = new MeshValue(doc->meshList.at(meshindex));
 	}
 
+	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
+	RichMesh(const QString nm,int meshindex)
+		:RichParameter(nm,new MeshValue(NULL),new MeshDecoration(meshindex)) {}
+	
 	void accept(Visitor& v) {v.visit(*this);}
 	bool operator==(const RichParameter& rb) {return (rb.val->isMesh() &&(name == rb.name) && (val->getMesh() == rb.val->getMesh()));}
 	~RichMesh(){}
@@ -633,10 +650,16 @@ public:
 	RichParameter* lastCreated;
 };
 
-class RichWidgetXML : public Visitor
+class RichParameterFactory
 {
 public:
-	RichWidgetXML(QDomDocument& doc){}
+	static void create(const QDomElement& np,RichParameter** par);
+};
+
+class RichParameterXMLVisitor : public Visitor
+{
+public:
+	RichParameterXMLVisitor(QDomDocument& doc) : docdom(doc){}
 
 	void visit(RichBool& pd);
 	void visit(RichInt& pd);
@@ -656,10 +679,14 @@ public:
 	void visit(RichOpenFile& pd);
 	void visit(RichSaveFile& pd);
 	void visit(RichMesh& pd);
-
-	~RichWidgetXML() {}
+	
+	~RichParameterXMLVisitor(){}
 
 	QDomDocument docdom;
+	QDomElement parElem;
+private:
+	void fillRichParameterAttribute(const QString& type,const QString& name);
+	void fillRichParameterAttribute(const QString& type,const QString& name,const QString& val);
 };
 
 class RichParameterSet

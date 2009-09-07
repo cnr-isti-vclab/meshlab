@@ -478,7 +478,59 @@ void MainWindow::runFilterScript()
     int req=iFilter->getRequirements(action);
     GLA()->mm()->updateDataMask(req);
     iFilter->setLog(&(GLA()->log));
-    iFilter->applyFilter( action, *(GLA()->mm()), (*ii).second, QCallBack );
+		
+		MeshDocument &meshDocument=GLA()->meshDoc;
+		RichParameterSet &parameterSet = (*ii).second;
+		
+		for(int i = 0; i < parameterSet.paramList.size(); i++)
+		{	
+			//get a modifieable reference
+			RichParameter* parameter = parameterSet.paramList[i];
+
+			//if this is a mesh paramter and the index is valid
+			if(parameter->val->isMesh())
+			{  
+				MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
+				if(	md->meshindex < meshDocument.size() && 
+					md->meshindex >= 0  )
+				{
+					RichMesh* rmesh = new RichMesh(parameter->name,meshDocument.getMesh(md->meshindex),&meshDocument);
+					parameterSet.paramList.replace(i,rmesh);
+				} else
+				{
+					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
+					printf("One of the filters in the script needs more meshes than you have loaded.\n");
+					exit(-1);
+				}
+				delete parameter;
+			}
+		}
+    //iFilter->applyFilter( action, *(GLA()->mm()), (*ii).second, QCallBack );
+
+		//WARNING!!!!!!!!!!!!
+		/* to be changed */
+		iFilter->applyFilter( action, meshDocument, (*ii).second, QCallBack );
+		
+		if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
+			GLA()->setColorMode(vcg::GLW::CMPerFace);
+			GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+		}
+		if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
+			GLA()->setColorMode(vcg::GLW::CMPerVert);
+			GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+		}
+		if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
+		{
+			GLA()->setColorMode(vcg::GLW::CMPerMesh);
+			GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
+		}
+		if(iFilter->getClass(action) & MeshFilterInterface::Selection )
+			GLA()->setSelectionRendering(true);
+
+		if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
+			GLA()->resetTrackBall();
+		/* to be changed */
+
     GLA()->log.Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
 }

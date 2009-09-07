@@ -214,6 +214,31 @@ bool Script(MeshDocument &meshDocument, QString scriptfile){
 		iFilter->setLog(NULL);
 		int req = iFilter->getRequirements(action);
 		mm.updateDataMask(req);
+				//make sure the PARMESH parameters are initialized
+		RichParameterSet &parameterSet = (*ii).second;
+		for(int i = 0; i < parameterSet.paramList.size(); i++)
+		{	
+			//get a modifieable reference
+			RichParameter* parameter = parameterSet.paramList[i];
+				
+			//if this is a mesh paramter and the index is valid
+			if(parameter->val->isMesh())
+			{  
+				MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
+				if(	md->meshindex < meshDocument.size() && 
+					md->meshindex >= 0  )
+				{
+					RichMesh* rmesh = new RichMesh(parameter->name,meshDocument.getMesh(md->meshindex),&meshDocument);
+					parameterSet.paramList.replace(i,rmesh);
+				} else
+				{
+					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
+					printf("One of the filters in the script needs more meshes than you have loaded.\n");
+					exit(-1);
+				}
+				delete parameter;
+			}
+		}
 		
 		bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, NULL);
 		//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
