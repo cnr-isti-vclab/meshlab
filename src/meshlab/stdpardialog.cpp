@@ -291,7 +291,8 @@ void MeshlabStdDialog::applyDynamic()
 	validcache = true;
 	
 
-	if(this->curgla) this->curgla->update();
+	if(this->curgla) 
+		this->curgla->update();
 }
 
 void MeshlabStdDialog::togglePreview()
@@ -1001,7 +1002,7 @@ BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
 
 	int row = gridLay->rowCount() -1 ;
 	gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
-	connect(cb,SIGNAL(stateChanged(int)),this,SIGNAL(parameterChanged()));
+	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
 
 }
 
@@ -1031,7 +1032,7 @@ LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 	lab->setToolTip(rp->pd->tooltip);
 	gridLay->addWidget(lab,row,0,Qt::AlignTop);
 	gridLay->addWidget(lned,row,1,Qt::AlignTop);
-	connect(lned,SIGNAL(editingFinished()),this,SIGNAL(parameterChanged()));
+	connect(lned,SIGNAL(editingFinished()),p,SIGNAL(parameterChanged()));
 }
 
 LineEditWidget::~LineEditWidget()
