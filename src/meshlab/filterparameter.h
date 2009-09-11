@@ -76,7 +76,7 @@ public:
 class BoolValue : public Value
 {
 public:
-	BoolValue(const bool val): pval(val){};
+	BoolValue(const bool val);
 	inline bool getBool() const {return pval;}
 	inline bool isBool() const {return true;}
 	inline void	set(const Value& p) {pval  = p.getBool();}
@@ -243,66 +243,58 @@ public:
         QString tooltip;
         Value* defVal;
 
-	ParameterDecoration(Value* defvalue,const QString desc = QString(),const QString tltip = QString())
-		:fieldDesc(desc),tooltip(tltip),defVal(defvalue) {}
+	ParameterDecoration(Value* defvalue,const QString desc = QString(),const QString tltip = QString());
 
-	virtual ~ParameterDecoration(){delete defVal;}
+	virtual ~ParameterDecoration();
 
 };
 
 class BoolDecoration : public ParameterDecoration
 {
 public:
-	BoolDecoration(BoolValue* defvalue,const QString desc=QString(),const QString tltip=QString())
-		:ParameterDecoration(defvalue,desc,tltip) {}
+	BoolDecoration(BoolValue* defvalue,const QString desc=QString(),const QString tltip=QString());
 	~BoolDecoration(){}
 };
 
 class IntDecoration : public ParameterDecoration
 {
 public:
-	IntDecoration(IntValue* defvalue,const QString desc = QString(),const QString tltip = QString())
-	:ParameterDecoration(defvalue,desc,tltip) {}
+	IntDecoration(IntValue* defvalue,const QString desc = QString(),const QString tltip = QString());
 	~IntDecoration(){}
 };
 
 class FloatDecoration : public ParameterDecoration
 {
 public:
-	FloatDecoration(FloatValue* defvalue,const QString desc = QString(),const QString tltip = QString())
-	:ParameterDecoration(defvalue,desc,tltip) {}
+	FloatDecoration(FloatValue* defvalue,const QString desc = QString(),const QString tltip = QString());
 	~FloatDecoration(){}
 };
 
 class StringDecoration : public ParameterDecoration
 {
 public:
-	StringDecoration(StringValue* defvalue,const QString desc = QString(),const QString tltip = QString())
-		:ParameterDecoration(defvalue,desc,tltip) {}
+	StringDecoration(StringValue* defvalue,const QString desc = QString(),const QString tltip = QString());
 	~StringDecoration(){}
 };
 
 class Matrix44fDecoration : public ParameterDecoration
 {
 public:
-	Matrix44fDecoration(Matrix44fValue* defvalue,const QString desc = QString(),const QString tltip = QString())
-		:ParameterDecoration(defvalue,desc,tltip) {}
+	Matrix44fDecoration(Matrix44fValue* defvalue,const QString desc = QString(),const QString tltip = QString());
 	~Matrix44fDecoration(){}
 };
 
 class Point3fDecoration : public ParameterDecoration
 {
 public:
-	Point3fDecoration(Point3fValue* defvalue,const QString desc = QString(),const QString tltip = QString())
-		:ParameterDecoration(defvalue,desc,tltip) {}
+	Point3fDecoration(Point3fValue* defvalue,const QString desc = QString(),const QString tltip = QString());
 	~Point3fDecoration(){}
 };
 
 class ColorDecoration : public ParameterDecoration
 {
 public:
-	ColorDecoration(ColorValue* defvalue,const QString desc = QString(),const QString tltip= QString())
-		:ParameterDecoration(defvalue,desc,tltip) {}
+	ColorDecoration(ColorValue* defvalue,const QString desc = QString(),const QString tltip= QString());
 	~ColorDecoration(){}
 };
 
@@ -317,8 +309,7 @@ public:
 class AbsPercDecoration : public ParameterDecoration
 {
 public:
-	AbsPercDecoration(AbsPercValue* defvalue,const float minVal,const float maxVal,const QString desc = QString(),const QString tltip = QString())
-		:ParameterDecoration(defvalue,desc,tltip),min(minVal),max(maxVal) {}
+	AbsPercDecoration(AbsPercValue* defvalue,const float minVal,const float maxVal,const QString desc = QString(),const QString tltip = QString());
 	float min;
 	float max;
 	~AbsPercDecoration(){}
@@ -327,8 +318,7 @@ public:
 class EnumDecoration : public ParameterDecoration
 {
 public:
-	EnumDecoration(EnumValue* defvalue, QStringList values,const QString desc = QString(),const QString tltip = QString())
-	:ParameterDecoration(defvalue,desc,tltip),enumvalues(values) {}
+	EnumDecoration(EnumValue* defvalue, QStringList values,const QString desc = QString(),const QString tltip = QString());
 	QStringList enumvalues;
 	~EnumDecoration(){}
 };
@@ -344,8 +334,7 @@ public:
 class DynamicFloatDecoration : public ParameterDecoration
 {
 public:
-	DynamicFloatDecoration(DynamicFloatValue* defvalue, const float minVal,const float maxVal,const QString desc = QString(),const QString tltip = QString())
-	:ParameterDecoration(defvalue,desc,tltip),min(minVal),max(maxVal) {}
+	DynamicFloatDecoration(DynamicFloatValue* defvalue, const float minVal,const float maxVal,const QString desc = QString(),const QString tltip = QString());
 	~DynamicFloatDecoration(){};
 	float min;
 	float max;
@@ -354,8 +343,7 @@ public:
 class FileDecoration : public ParameterDecoration
 {
 public:
-	FileDecoration(FileValue* defvalue,const QString extension=QString(".*"),const QString desc = QString(),const QString tltip = QString())
-		:ParameterDecoration(defvalue,desc,tltip),ext(extension) {}
+	FileDecoration(FileValue* defvalue,const QString extension=QString(".*"),const QString desc = QString(),const QString tltip = QString());
 	~FileDecoration(){}
 	
 	QString ext;
@@ -365,28 +353,12 @@ public:
 class MeshDecoration : public ParameterDecoration
 {
 public:
-	MeshDecoration(MeshValue* defvalue,MeshDocument* doc,const QString desc=QString(), const QString tltip=QString())
-		:ParameterDecoration(defvalue,desc,tltip),meshdoc(doc) 
-	{ 
-		meshindex = -1;
-		if (doc != NULL) meshindex = doc->meshList.indexOf(defvalue->getMesh()); 
-		assert((meshindex != -1) || (doc == NULL));
-	}
+	MeshDecoration(MeshValue* defvalue,MeshDocument* doc,const QString desc=QString(), const QString tltip=QString());
 
-	MeshDecoration(int meshind,MeshDocument* doc,const QString desc=QString(), const QString tltip=QString())
-		:ParameterDecoration(NULL,desc,tltip),meshdoc(doc) 
-		{ 
-			assert(meshind < doc->size() && meshind >= 0); 
-			meshindex = meshind;
-			if (doc != NULL)
-				defVal = new MeshValue(doc->meshList.at(meshind));
-		}
+	MeshDecoration(int meshind,MeshDocument* doc,const QString desc=QString(), const QString tltip=QString());
 
 	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	MeshDecoration(int meshind)
-		:ParameterDecoration(NULL,QString(),QString()),meshdoc(NULL),meshindex(meshind)
-	{
-	}
+	MeshDecoration(int meshind);
 
 	~MeshDecoration(){}
 
@@ -444,177 +416,155 @@ public:
 
 	ParameterDecoration* pd;
 
-	RichParameter(const QString nm,Value* v,ParameterDecoration* prdec)
-		:name(nm),pd(prdec),val(v) {}
+	RichParameter(const QString nm,Value* v,ParameterDecoration* prdec);
 	virtual void accept(Visitor& v) = 0;
 	virtual bool operator==(const RichParameter& rp) = 0;
-	virtual ~RichParameter() {delete val;delete pd;}
+	virtual ~RichParameter();
 };
 
 
 class RichBool : public RichParameter
 {
 public:
-	RichBool(const QString nm,const bool defval,const QString desc=QString(),const QString tltip=QString()) 
-		: RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isBool() && (name == rb.name) && (val->getBool() == rb.val->getBool()));}
+	RichBool(const QString nm,const bool defval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
 
-	~RichBool(){}
+	~RichBool();
 };
 
 class RichInt : public RichParameter
 {
 public:
-	RichInt(const QString nm,const int defval,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new IntValue(defval),new IntDecoration(new IntValue(defval),desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isInt() &&(name == rb.name) && (val->getInt() == rb.val->getInt()));}
-	~RichInt(){}
+	RichInt(const QString nm,const int defval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichInt();
 };
 
 class RichFloat : public RichParameter
 {
 public:
-	RichFloat(const QString nm,const float defval,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new FloatValue(defval),new FloatDecoration(new FloatValue(defval),desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isFloat() &&(name == rb.name) && (val->getFloat() == rb.val->getFloat()));}
-	~RichFloat(){}
+	RichFloat(const QString nm,const float defval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichFloat();
 };
 
 class RichString : public RichParameter
 {
 public:
-	RichString(const QString nm,const QString defval,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isString() &&(name == rb.name) && (val->getString() == rb.val->getString()));}
-	~RichString(){}
+	RichString(const QString nm,const QString defval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichString();
 };
 
 class RichMatrix44f : public RichParameter
 {
 public:
-	RichMatrix44f(const QString nm,const vcg::Matrix44f& defval,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isMatrix44f() &&(name == rb.name) && (val->getMatrix44f() == rb.val->getMatrix44f()));}
-	~RichMatrix44f() {}
+	RichMatrix44f(const QString nm,const vcg::Matrix44f& defval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichMatrix44f();
 };
 
 class RichPoint3f : public RichParameter
 {
 public:
-	RichPoint3f(const QString nm,const vcg::Point3f defval,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isPoint3f() &&(name == rb.name) && (val->getPoint3f() == rb.val->getPoint3f()));}
-	~RichPoint3f(){}
+	RichPoint3f(const QString nm,const vcg::Point3f defval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichPoint3f();
 };
 
 class RichColor : public RichParameter
 {
 public:
-	RichColor(const QString nm,const QColor defval,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isColor() &&(name == rb.name) && (val->getColor() == rb.val->getColor()));}
-	~RichColor(){}
+	RichColor(const QString nm,const QColor defval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichColor();
 
 };
 
 class RichColor4b : public RichParameter
 {
 public:
-	RichColor4b(const QString nm,Color4bValue* v,Color4bDecoration* prdec)
-		:RichParameter(nm,v,prdec){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isColor4b() &&(name == rb.name) && (val->getColor4b() == rb.val->getColor4b()));}
-	~RichColor4b() {}
+	RichColor4b(const QString nm,Color4bValue* v,Color4bDecoration* prdec);
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichColor4b();
 };
 
 class RichAbsPerc : public RichParameter
 {
 public:
-	RichAbsPerc(const QString nm,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new AbsPercValue(defval),new AbsPercDecoration(new AbsPercValue(defval),minval,maxval,desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isAbsPerc() &&(name == rb.name) && (val->getAbsPerc() == rb.val->getAbsPerc()));}
-	~RichAbsPerc() {}
+	RichAbsPerc(const QString nm,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichAbsPerc();
 };
 
 class RichEnum : public RichParameter
 {
 public:
-	RichEnum(const QString nm,const int defval,const QStringList values,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new EnumValue(defval),new EnumDecoration(new EnumValue(defval),values,desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isEnum() &&(name == rb.name) && (val->getEnum() == rb.val->getEnum()));}
-	~RichEnum(){}
+	RichEnum(const QString nm,const int defval,const QStringList values,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichEnum();
 };
 
 class RichMesh : public RichParameter
 {
 public:
-	RichMesh(const QString nm,MeshModel* defval,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new MeshValue(defval),new MeshDecoration(new MeshValue(defval),doc,desc,tltip)){}
+	RichMesh(const QString nm,MeshModel* defval,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString());
 
-	RichMesh(const QString nm,int meshindex,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,NULL,new MeshDecoration(meshindex,doc,desc,tltip))
-	{ 
-		assert(meshindex < doc->size() && meshindex >= 0); 
-		val = new MeshValue(doc->meshList.at(meshindex));
-	}
+	RichMesh(const QString nm,int meshindex,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString());
 
 	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	RichMesh(const QString nm,int meshindex)
-		:RichParameter(nm,new MeshValue(NULL),new MeshDecoration(meshindex)) {}
+	RichMesh(const QString nm,int meshindex);
 	
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isMesh() &&(name == rb.name) && (val->getMesh() == rb.val->getMesh()));}
-	~RichMesh(){}
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichMesh();
 };
 
 class RichFloatList : public RichParameter
 {
 public:
-	RichFloatList(const QString nm,FloatListValue* v,FloatListDecoration* prdec)
-		:RichParameter(nm,v,prdec){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isFloatList() &&(name == rb.name) && (val->getFloatList() == rb.val->getFloatList()));}
-	~RichFloatList(){}
+	RichFloatList(const QString nm,FloatListValue* v,FloatListDecoration* prdec);
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichFloatList();
 };
 
 class RichDynamicFloat : public RichParameter
 {
 public:
-	RichDynamicFloat(const QString nm,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new DynamicFloatValue(defval),new DynamicFloatDecoration(new DynamicFloatValue(defval),minval,maxval,desc,tltip)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isDynamicFloat() &&(name == rb.name) && (val->getDynamicFloat() == rb.val->getDynamicFloat()));}
-	~RichDynamicFloat(){}
+	RichDynamicFloat(const QString nm,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichDynamicFloat();
 
 };
 
 class RichOpenFile : public RichParameter
 {
 public:
-	RichOpenFile(const QString nm,const QString defval,const QString ext = QString("*.*"),const QString desc=QString(),const QString tltip=QString())
-		:RichParameter(nm,new FileValue(defval),new FileDecoration(new FileValue(defval),tltip,desc)){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isFileName() &&(name == rb.name) && (val->getFileName() == rb.val->getFileName()));}
-	~RichOpenFile(){}
+	RichOpenFile(const QString nm,const QString defval,const QString ext = QString("*.*"),const QString desc=QString(),const QString tltip=QString());
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichOpenFile();
 };
 
 class RichSaveFile : public RichParameter
 {
 public:
-	RichSaveFile(const QString nm,FileValue* v,FileDecoration* prdec)
-		:RichParameter(nm,v,prdec){}
-	void accept(Visitor& v) {v.visit(*this);}
-	bool operator==(const RichParameter& rb) {return (rb.val->isFileName() &&(name == rb.name) && (val->getFileName() == rb.val->getFileName()));}
-	~RichSaveFile(){}
+	RichSaveFile(const QString nm,FileValue* v,FileDecoration* prdec);
+	void accept(Visitor& v);
+	bool operator==(const RichParameter& rb);
+	~RichSaveFile();
 };
 
 
@@ -693,12 +643,12 @@ class RichParameterSet
 {
 
 public:
-	RichParameterSet():paramList(){}	
+	RichParameterSet();	
 	RichParameterSet(const RichParameterSet& rps);
 	// The data is just a list of Parameters
 	//QMap<QString, FilterParameter *> paramMap;  
 	QList<RichParameter*> paramList;  
-	bool isEmpty() const {return paramList.isEmpty();} 
+	bool isEmpty() const; 
 	RichParameter* findParameter(QString name);
 	const RichParameter* findParameter(QString name) const;
 	bool hasParameter(QString name);
@@ -713,7 +663,7 @@ public:
 	//remove a parameter from the set by name
 	RichParameterSet& removeParameter(QString name);
 
-	void clear() { paramList.clear(); }
+	void clear();
 
 	void setValue(const QString name,const Value& val);
 

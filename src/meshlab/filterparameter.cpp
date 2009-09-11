@@ -275,6 +275,20 @@ RichParameterSet::RichParameterSet( const RichParameterSet& rps )
 	}
 }
 
+RichParameterSet::RichParameterSet() :paramList()
+{
+
+}
+
+bool RichParameterSet::isEmpty() const
+{
+	return paramList.isEmpty();
+}
+
+void RichParameterSet::clear()
+{
+	paramList.clear();
+}
 /****************************************/
 
 void RichParameterCopyConstructor::visit( RichBool& pd )
@@ -582,4 +596,415 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 	}
 
 	assert(0); // we are trying to parse an unknown xml element
+}
+
+BoolValue::BoolValue( const bool val ) : pval(val)
+{
+
+}
+
+ParameterDecoration::ParameterDecoration( Value* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :fieldDesc(desc),tooltip(tltip),defVal(defvalue)
+{
+
+}
+
+ParameterDecoration::~ParameterDecoration()
+{
+	delete defVal;
+}
+
+BoolDecoration::BoolDecoration( BoolValue* defvalue,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+{
+
+}
+
+IntDecoration::IntDecoration( IntValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+{
+
+}
+
+FloatDecoration::FloatDecoration( FloatValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+{
+
+}
+
+StringDecoration::StringDecoration( StringValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+{
+
+}
+
+Matrix44fDecoration::Matrix44fDecoration( Matrix44fValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+{
+
+}
+
+Point3fDecoration::Point3fDecoration( Point3fValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+{
+
+}
+
+ColorDecoration::ColorDecoration( ColorValue* defvalue,const QString desc /*= QString()*/,const QString tltip/*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+{
+
+}
+
+AbsPercDecoration::AbsPercDecoration( AbsPercValue* defvalue,const float minVal,const float maxVal,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),min(minVal),max(maxVal)
+{
+
+}
+
+EnumDecoration::EnumDecoration( EnumValue* defvalue, QStringList values,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),enumvalues(values)
+{
+
+}
+
+DynamicFloatDecoration::DynamicFloatDecoration( DynamicFloatValue* defvalue, const float minVal,const float maxVal,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),min(minVal),max(maxVal)
+{
+
+}
+
+FileDecoration::FileDecoration( FileValue* defvalue,const QString extension/*=QString(".*")*/,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),ext(extension)
+{
+
+}
+
+MeshDecoration::MeshDecoration( MeshValue* defvalue,MeshDocument* doc,const QString desc/*=QString()*/, const QString tltip/*=QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),meshdoc(doc)
+{
+	meshindex = -1;
+	if (doc != NULL) meshindex = doc->meshList.indexOf(defvalue->getMesh()); 
+	assert((meshindex != -1) || (doc == NULL));
+}
+
+MeshDecoration::MeshDecoration( int meshind,MeshDocument* doc,const QString desc/*=QString()*/, const QString tltip/*=QString()*/ ) :ParameterDecoration(NULL,desc,tltip),meshdoc(doc)
+{
+	assert(meshind < doc->size() && meshind >= 0); 
+	meshindex = meshind;
+	if (doc != NULL)
+		defVal = new MeshValue(doc->meshList.at(meshind));
+}
+
+MeshDecoration::MeshDecoration( int meshind ) :ParameterDecoration(NULL,QString(),QString()),meshdoc(NULL),meshindex(meshind)
+{
+
+}
+
+RichParameter::RichParameter( const QString nm,Value* v,ParameterDecoration* prdec ) :name(nm),pd(prdec),val(v)
+{
+
+}
+
+RichParameter::~RichParameter()
+{
+	delete val;delete pd;
+}
+
+RichBool::RichBool( const QString nm,const bool defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,tltip))
+{
+
+}
+
+void RichBool::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichBool::operator==( const RichParameter& rb )
+{
+	return (rb.val->isBool() && (name == rb.name) && (val->getBool() == rb.val->getBool()));
+}
+
+RichBool::~RichBool()
+{
+
+}
+
+RichInt::RichInt( const QString nm,const int defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new IntValue(defval),new IntDecoration(new IntValue(defval),desc,tltip))
+{
+
+}
+
+void RichInt::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichInt::operator==( const RichParameter& rb )
+{
+	return (rb.val->isInt() &&(name == rb.name) && (val->getInt() == rb.val->getInt()));
+}
+
+RichInt::~RichInt()
+{
+
+}
+
+RichFloat::RichFloat( const QString nm,const float defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new FloatValue(defval),new FloatDecoration(new FloatValue(defval),desc,tltip))
+{
+
+}
+
+void RichFloat::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichFloat::operator==( const RichParameter& rb )
+{
+	return (rb.val->isFloat() &&(name == rb.name) && (val->getFloat() == rb.val->getFloat()));
+}
+
+RichFloat::~RichFloat()
+{
+
+}
+
+RichString::RichString( const QString nm,const QString defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),desc,tltip))
+{
+
+}
+
+void RichString::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichString::operator==( const RichParameter& rb )
+{
+	return (rb.val->isString() &&(name == rb.name) && (val->getString() == rb.val->getString()));
+}
+
+RichString::~RichString()
+{
+
+}
+
+RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip))
+{
+
+}
+
+void RichMatrix44f::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichMatrix44f::operator==( const RichParameter& rb )
+{
+	return (rb.val->isMatrix44f() &&(name == rb.name) && (val->getMatrix44f() == rb.val->getMatrix44f()));
+}
+
+RichMatrix44f::~RichMatrix44f()
+{
+
+}
+
+RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3f defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip))
+{
+
+}
+
+void RichPoint3f::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichPoint3f::operator==( const RichParameter& rb )
+{
+	return (rb.val->isPoint3f() &&(name == rb.name) && (val->getPoint3f() == rb.val->getPoint3f()));
+}
+
+RichPoint3f::~RichPoint3f()
+{
+
+}
+
+RichColor::RichColor( const QString nm,const QColor defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,tltip))
+{
+
+}
+
+void RichColor::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichColor::operator==( const RichParameter& rb )
+{
+	return (rb.val->isColor() &&(name == rb.name) && (val->getColor() == rb.val->getColor()));
+}
+
+RichColor::~RichColor()
+{
+
+}
+
+RichColor4b::RichColor4b( const QString nm,Color4bValue* v,Color4bDecoration* prdec ) :RichParameter(nm,v,prdec)
+{
+
+}
+
+void RichColor4b::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichColor4b::operator==( const RichParameter& rb )
+{
+	return (rb.val->isColor4b() &&(name == rb.name) && (val->getColor4b() == rb.val->getColor4b()));
+}
+
+RichColor4b::~RichColor4b()
+{
+
+}
+
+RichAbsPerc::RichAbsPerc( const QString nm,const float defval,const float minval,const float maxval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm, new AbsPercValue(defval), new AbsPercDecoration(new AbsPercValue(defval),minval,maxval,desc,tltip))
+{
+
+}
+
+void RichAbsPerc::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichAbsPerc::operator==( const RichParameter& rb )
+{
+	return (rb.val->isAbsPerc() &&(name == rb.name) && (val->getAbsPerc() == rb.val->getAbsPerc()));
+}
+
+RichAbsPerc::~RichAbsPerc()
+{
+
+}
+
+RichEnum::RichEnum( const QString nm,const int defval,const QStringList values,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new EnumValue(defval),new EnumDecoration(new EnumValue(defval),values,desc,tltip))
+{
+
+}
+
+void RichEnum::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichEnum::operator==( const RichParameter& rb )
+{
+	return (rb.val->isEnum() &&(name == rb.name) && (val->getEnum() == rb.val->getEnum()));
+}
+
+RichEnum::~RichEnum()
+{
+
+}
+
+RichMesh::RichMesh( const QString nm,MeshModel* defval,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm, new MeshValue(defval),new MeshDecoration( new MeshValue(defval),doc,desc,tltip))
+{
+
+}
+
+RichMesh::RichMesh( const QString nm,int meshindex,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,NULL, new MeshDecoration(meshindex,doc,desc,tltip))
+{
+	assert(meshindex < doc->size() && meshindex >= 0); 
+	val = new MeshValue(doc->meshList.at(meshindex));
+}
+
+RichMesh::RichMesh( const QString nm,int meshindex ) :RichParameter(nm,new MeshValue(NULL),new MeshDecoration(meshindex))
+{
+
+}
+
+void RichMesh::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichMesh::operator==( const RichParameter& rb )
+{
+	return (rb.val->isMesh() &&(name == rb.name) && (val->getMesh() == rb.val->getMesh()));
+}
+
+RichMesh::~RichMesh()
+{
+
+}
+
+RichFloatList::RichFloatList( const QString nm,FloatListValue* v,FloatListDecoration* prdec ) :RichParameter(nm,v,prdec)
+{
+
+}
+
+void RichFloatList::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichFloatList::operator==( const RichParameter& rb )
+{
+	return (rb.val->isFloatList() &&(name == rb.name) && (val->getFloatList() == rb.val->getFloatList()));
+}
+
+RichFloatList::~RichFloatList()
+{
+
+}
+
+RichDynamicFloat::RichDynamicFloat( const QString nm,const float defval,const float minval,const float maxval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new DynamicFloatValue(defval),new DynamicFloatDecoration(new DynamicFloatValue(defval),minval,maxval,desc,tltip))
+{
+
+}
+
+void RichDynamicFloat::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichDynamicFloat::operator==( const RichParameter& rb )
+{
+	return (rb.val->isDynamicFloat() &&(name == rb.name) && (val->getDynamicFloat() == rb.val->getDynamicFloat()));
+}
+
+RichDynamicFloat::~RichDynamicFloat()
+{
+
+}
+
+RichOpenFile::RichOpenFile( const QString nm,const QString defval,const QString ext /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new FileValue(defval),new FileDecoration(new FileValue(defval),tltip,desc))
+{
+
+}
+
+void RichOpenFile::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichOpenFile::operator==( const RichParameter& rb )
+{
+	return (rb.val->isFileName() &&(name == rb.name) && (val->getFileName() == rb.val->getFileName()));
+}
+
+RichOpenFile::~RichOpenFile()
+{
+
+}
+
+RichSaveFile::RichSaveFile( const QString nm,FileValue* v,FileDecoration* prdec ) :RichParameter(nm,v,prdec)
+{
+
+}
+
+void RichSaveFile::accept( Visitor& v )
+{
+	v.visit(*this);
+}
+
+bool RichSaveFile::operator==( const RichParameter& rb )
+{
+	return (rb.val->isFileName() &&(name == rb.name) && (val->getFileName() == rb.val->getFileName()));
+}
+
+RichSaveFile::~RichSaveFile()
+{
+
 }
