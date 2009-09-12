@@ -616,12 +616,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 	    bool SelectedFlag = par.getBool("Selected");
       bool SelfIntersectionFlag = par.getBool("SelfIntersection");
       bool NewFaceSelectedFlag = par.getBool("NewFaceSelected");
-
+			int holeCnt;
       if( SelfIntersectionFlag )
-          tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag);
+          holeCnt = tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
       else
-          tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
-
+          holeCnt = tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
+			Log("Closed %i holes and added %i new faces",holeCnt,m.cm.fn-OriginalSize);
       assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
       tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 
