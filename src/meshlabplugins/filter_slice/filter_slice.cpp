@@ -92,64 +92,66 @@ const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId) const
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 //void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
-void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, FilterParameterSet &parlst)
+void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, RichParameterSet &parlst)
 {
 	//vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
   vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 	
-
+	//common params
+	QStringList axis;
+	axis<<"X Axis"<<"Y Axis"<<"Z Axis";
+	if (ID(filter)!=FP_RECURSIVE_SLICE)
+		axis<<"Custom Axis";
+	parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
+	parlst.addParam(new RichEnum("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured"));
+  parlst.addParam(new RichFloat("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
+	parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
+	
+	QStringList nn=QString(m.fileName.c_str()).split("/");
+	QString name=nn.last().left(nn.last().lastIndexOf("."));
+	if (name=="")
+		name="Slice.svg";		
+	else if (!name.endsWith(".svg"))
+		name+=".svg";
+  //parlst.addParam(new RichSaveFile ("filename", name, "svg","filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree"));
+	parlst.addParam(new RichSaveFile (
+		"filename",
+		new FileValue(name),
+		new FileDecoration(new FileValue(name),"svg")
+	));
+	/* OLD UNUSED */
+	//parlst.addBool   ("absOffset",false,"Absolute offset", "if true the above offset is absolute is relative to the origin of the coordinate system, if false the offset is relative to the center of the bbox.");
+  //parlst.addAbsPerc("planeDist", 0.0,0,m.cm.bbox.Diag(), "Distance between planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
+		
+	//filter specific params
 	switch(ID(filter))
 	{
     case FP_PARALLEL_PLANES :
-    {
-			parlst.addEnum   ("planeAxis", 0, QStringList()<<"X Axis"<<"Y Axis"<<"Z Axis", tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis"));
-			parlst.addEnum	 ("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured");
-			parlst.addFloat	 ("length",29,"Length","Length of the object referred to the units specified above");
-			parlst.addFloat  ("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away");
-      parlst.addFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)");
-      // BBox min=0, BBox center=1, Origin=2
-      parlst.addEnum   ("relativeTo",0,QStringList()<<"Bounding box min"<<"Bounding box Center"<<"Origin","plane reference","Specify the reference from which the planes are shifted");
-      //parlst.addBool   ("absOffset",false,"Absolute offset", "if true the above offset is absolute is relative to the origin of the coordinate system, if false the offset is relative to the center of the bbox.");
-      //parlst.addAbsPerc("planeDist", 0.0,0,m.cm.bbox.Diag(), "Distance between planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
-      parlst.addInt    ("planeNum", 10, "Number of Planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
-			QStringList nn=QString(m.fileName.c_str()).split("/");
-			QString name=nn.last().left(nn.last().lastIndexOf("."));
-			if (name=="")
-				name="Slice";
-      parlst.addSaveFileName ("filename", name, "svg","filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
-      parlst.addBool   ("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below");
-			parlst.addBool   ("hideBase",true,"Hide Original Mesh","Hide the Original Mesh");
-			parlst.addBool   ("hideSlices",true,"Hide Slices","Hide the Generated Slices");
-			parlst.addBool   ("hidePlanes",false,"Hide Planes","Hide the Generated Slicing Planes");
-			parlst.addBool   ("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter");
-	
-    }
-      break;
+			{
+				parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
+				parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
+				// BBox min=0, BBox center=1, Origin=2
+				parlst.addParam(new RichEnum   ("relativeTo",0,QStringList()<<"Bounding box min"<<"Bounding box Center"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));				
+				parlst.addParam(new RichInt("planeNum",10,"Number of Planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above."));
+				parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
+				parlst.addParam(new RichBool("hideBase",true,"Hide Original Mesh","Hide the Original Mesh"));
+				parlst.addParam(new RichBool("hideSlices",true,"Hide Slices","Hide the Generated Slices"));
+				parlst.addParam(new RichBool("hidePlanes",false,"Hide Planes","Hide the Generated Slicing Planes"));
+				parlst.addParam(new RichBool("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter"));
+			}
+    break;
     case FP_RECURSIVE_SLICE:
 			{
-			parlst.addEnum   ("planeAxis", 0, QStringList()<<"X Axis"<<"Y Axis"<<"Z Axis", tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis"));
-			parlst.addEnum	 ("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured");
-			parlst.addFloat	 ("length",29,"Length","Length of the object referred to the units specified above");
-			parlst.addFloat  ("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away");
-			parlst.addBool	 ("delfather",true,"delete father", "Delete the father's mesh after slicing it");
-			parlst.addInt		 ("iter",2,"iterations","iterations");
+				parlst.addParam(new RichBool	 ("delfather",true,"delete father", "Delete the father's mesh after slicing it"));
+				parlst.addParam(new RichInt		 ("iter",2,"iterations","iterations"));
 			}
 			break;
 		case FP_SINGLE_PLANE:
 			{
-			parlst.addEnum   ("planeAxis", 0, QStringList()<<"X Axis"<<"Y Axis"<<"Z Axis"<<"Custom", tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis. If custom, it will be specified by the custom axis parameter"));
-			parlst.addPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom");
-			parlst.addFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)");
-      // BBox min=0, BBox center=1, Origin=2
-      parlst.addEnum   ("relativeTo",0,QStringList()<<"Bounding box min"<<"Bounding box Center"<<"Origin","plane reference","Specify the reference from which the planes are shifted");
-      //parlst.addBool   ("absOffset",false,"Absolute offset", "if true the above offset is absolute is relative to the origin of the coordinate system, if false the offset is relative to the center of the bbox.");
-      //parlst.addAbsPerc("planeDist", 0.0,0,m.cm.bbox.Diag(), "Distance between planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");
-			parlst.addFloat("maxdim",m.cm.bbox.MaxDim(),"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg");
-			QStringList nn=QString(m.fileName.c_str()).split("/");
-			QString name=nn.last().left(nn.last().lastIndexOf("."));
-			if (name=="")
-				name="Slice";
-      parlst.addSaveFileName ("filename", name, "svg","filename","Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
+				parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
+				parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
+				// BBox min=0, BBox center=1, Origin=2
+				parlst.addParam(new RichEnum   ("relativeTo",0,QStringList()<<"Bounding box min"<<"Bounding box Center"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
 			}
 			break;
 		default : assert(0);
@@ -158,21 +160,45 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet &parlst, vcg::CallBackPos *cb)
+bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, RichParameterSet &parlst, vcg::CallBackPos *cb)
 {
+	vcg::tri::UpdateBounding<CMeshO>::Box(m.mm()->cm);
 	
+	// Get common params
+	Point3f planeAxis(0,0,0);
+	int axisIndex = parlst.getEnum("planeAxis");
+	if (axisIndex >=0 && axisIndex <3)
+	{
+		planeAxis[axisIndex] = 1.0f;
+	}
+	else
+	{
+		planeAxis=parlst.getPoint3f("customAxis")*(1/parlst.getPoint3f("customAxis").Norm());
+	}
+	float length=parlst.getFloat("length");
+	float eps=parlst.getFloat("eps");
+	
+	// set common SVG Properties
+	float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
+	Point3f sizeCm=m.mm()->cm.bbox.Dim()*(length/maxdim);
+	// to check for dimensions with custom axis
+	if (planeAxis[0]==1)
+		pr.sizeCm=Point2f(sizeCm[1],sizeCm[2]);
+	else if (planeAxis[1]==1)
+		pr.sizeCm=Point2f(sizeCm[0],sizeCm[2]);
+	else
+		pr.sizeCm=Point2f(sizeCm[0],sizeCm[1]);
+	Log(GLLogStream::FILTER,"sizecm %fx%f",pr.sizeCm[0],pr.sizeCm[1]);
+
+	pr.lineWidthPt=200;
+	pr.scale=2/maxdim;
+	pr.crossHairs=true;
+
+	// get filter specific params and execute filter
 	switch(ID(filter))
 	{
 		case FP_SINGLE_PLANE:
-			{
-			Point3f planeAxis(0,0,0);
-			int axisIndex = parlst.getEnum("planeAxis");
-			if (axisIndex >=0 && axisIndex <3)
-			{
-				planeAxis[axisIndex] = 1.0f;
-			}
-			else
-				planeAxis=parlst.getPoint3f("customAxis")*(1/parlst.getPoint3f("customAxis").Norm());
+			{			
 			//float planeDist = parlst.getAbsPerc("planeDist");
 			float planeDist=0;
 			float planeOffset = parlst.getFloat("planeOffset");
@@ -180,77 +206,47 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
       int reference=parlst.getEnum("relativeTo");
 			Point3f planeCenter;
 			Plane3f slicingPlane;
+
 			pr.numCol=1;
 			pr.numRow=1;
-			float ratio=parlst.getFloat("maxdim")/m.mm()->cm.bbox.MaxDim();
-			
-			pr.sizeCm=Point2f(parlst.getFloat("maxdim"),parlst.getFloat("maxdim"));
 			pr.projDir = planeAxis;
 			pr.projCenter =  m.mm()->cm.bbox.Center();
-			pr.scale = 1;
-			pr.crossHairs=true;
-			pr.lineWidthPt=200;
 
 			vector<MyEdgeMesh*> ev;
 			Box3f bbox=m.mm()->cm.bbox;
 			MeshModel* base=m.mm();
 			MeshModel* orig=m.mm();
 			
-				if (!tri::Clean<CMeshO>::IsTwoManifoldFace(base->cm) || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
-				{
-					Log(GLLogStream::FILTER,"Mesh is not two manifold, cannot apply filter");
-					return false;
-				}
-
-				switch(reference)
-				{
-				  case 2:
-						planeCenter = planeAxis*planeOffset;  //origin
-            break;
-				  case 0:
-						planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox min
-						break;
-				  case 1:
-						planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox center
-						break;
-				}
-
-				//planeCenter+=planeAxis*planeDist;
-				slicingPlane.Init(planeCenter,planeAxis);
-        SlicedEdge<CMeshO> slicededge(slicingPlane);
-        SlicingFunction<CMeshO> slicingfunc(slicingPlane);
-        //after the RefineE call, the mesh will have vertices with quality 
-				//relative to the slicing plane
-        vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
-             (base->cm, slicingfunc, slicededge, false, cb);
-				vcg::tri::UpdateTopology<CMeshO>::FaceFace(base->cm);
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
-				
-				MeshModel *slice1= new MeshModel();
-				//m.meshList.push_back(slice1);
-				QString layername;
-				slice1->fileName = "slice";								// mesh name
-				slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_LEFT,VERTEX_LEFT);
-        vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base->cm);
-        createSlice(base,slice1);
-				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
-
-				MeshModel* cap= new MeshModel();
-				m.meshList.push_back(cap);
-				cap->fileName = "plane";								// mesh name
-				cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-				capHole(slice1,cap);
-				delete slice1;
-				vcg::tri::UpdateTopology<CMeshO>::FaceFace(cap->cm);
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(cap->cm);
-				vcg::tri::UpdateBounding<CMeshO>::Box(cap->cm);
-		    //this is used to generate svd slices
-				MyEdgeMesh *edgeMesh = new MyEdgeMesh();
-				vcg::Intersection<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
-				vcg::edg::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
-				ev.push_back(edgeMesh);
 			
+			//actual cut of the mesh
+
+			if (!tri::Clean<CMeshO>::IsTwoManifoldFace(base->cm) || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
+			{
+				Log(GLLogStream::FILTER,"Mesh is not two manifold, cannot apply filter");
+				return false;
+			}
+
+			switch(reference)
+			{
+			  case 2:
+					planeCenter = planeAxis*planeOffset;  //origin
+          break;
+			  case 0:
+					planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox min
+					break;
+			  case 1:
+					planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox center
+					break;
+			}
+
+			//planeCenter+=planeAxis*planeDist;
+			slicingPlane.Init(planeCenter,planeAxis);
+
+			//this is used to generate svg slices
+			MyEdgeMesh *edgeMesh = new MyEdgeMesh();
+			vcg::Intersection<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
+			vcg::edg::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
+			ev.push_back(edgeMesh);
 
 			QString fname=parlst.getSaveFileName("filename");
 			if(fname=="")
@@ -258,49 +254,78 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
       if (!fname.endsWith(".svg"))
         fname+=".svg";
 			vcg::edg::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
+
+
+      SlicedEdge<CMeshO> slicededge(slicingPlane);
+      SlicingFunction<CMeshO> slicingfunc(slicingPlane);
+      //after the RefineE call, the mesh will have vertices with quality 
+			//relative to the slicing plane
+      vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
+           (base->cm, slicingfunc, slicededge, false, cb);
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(base->cm);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
+			
+			MeshModel *slice1= new MeshModel();
+			//m.meshList.push_back(slice1);
+			QString layername;
+			slice1->fileName = "slice";								// mesh name
+			slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+			vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_LEFT,VERTEX_LEFT);
+      vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base->cm);
+      createSlice(base,slice1);
+			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
+
+			MeshModel* cap= new MeshModel();
+			m.meshList.push_back(cap);
+			cap->fileName = "plane";								// mesh name
+			cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+			capHole(slice1,cap);
+			delete slice1;
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(cap->cm);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(cap->cm);
+			vcg::tri::UpdateBounding<CMeshO>::Box(cap->cm);
+	    
+			
 		}
 		break;
 		case FP_PARALLEL_PLANES :
 		{
+			bool hideBase=parlst.getBool("hideBase");
+			bool hideSlices=parlst.getBool("hideSlices");
+			bool hidePlanes=parlst.getBool("hidePlanes");
+			
 			if(parlst.getBool("capBase"))
-	{
-		MeshModel* cap= new MeshModel();
-		capHole(m.mm(),cap);
-		tri::Append<CMeshO,CMeshO>::Mesh(m.mm()->cm, cap->cm);
-		m.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-		tri::UpdateTopology<CMeshO>::FaceFace(m.mm()->cm);
-		delete cap;
-	}
-	float length=parlst.getFloat("length");
-	float eps=parlst.getFloat("eps");
-	eps=m.mm()->cm.bbox.Diag()*(eps/length);
-			Point3f planeAxis(0,0,0);
-			int axisIndex = parlst.getEnum("planeAxis");
-			assert(axisIndex >=0 && axisIndex <3);
-			planeAxis[axisIndex] = 1.0f;
+			{
+				MeshModel* cap= new MeshModel();
+				capHole(m.mm(),cap);
+				tri::Append<CMeshO,CMeshO>::Mesh(m.mm()->cm, cap->cm);
+				m.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+				tri::UpdateTopology<CMeshO>::FaceFace(m.mm()->cm);
+				delete cap;
+			}
+
+			float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
+			// eps to use in extrusion, is relative to maxdim
+			// eps : length = eps_xtr : maxdim  -> eps_xtr = (eps*maxdim)/length
+			// NOTE: change eps with eps_xtr everywhere below
+			eps=maxdim*(eps/length);
+			
 			//float planeDist = parlst.getAbsPerc("planeDist");
 			float planeDist=0;
 			float planeOffset = parlst.getFloat("planeOffset");
 			int	planeNum = parlst.getInt("planeNum");
 			int units=parlst.getEnum("units");
-
-
+	
 			//bool absOffset = parlst.getBool("absOffset");
       int reference=parlst.getEnum("relativeTo");
 			Point3f planeCenter;
 			Plane3f slicingPlane;
-			pr.numCol=max((int)sqrt(planeNum*1.0f),2);
-			pr.numRow=max(planeNum/pr.numCol,2);
-			//da rivedere per le misure
-			pr.sizeCm=Point2f(4,4);
+			pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
+			pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
+			
 			pr.projDir = planeAxis;
 			pr.projCenter =  m.mm()->cm.bbox.Center();
-			pr.scale = 2.0/m.mm()->cm.bbox.Diag();
-			pr.lineWidthPt=200;
 
-			bool hideBase=parlst.getBool("hideBase");
-			bool hideSlices=parlst.getBool("hideSlices");
-			bool hidePlanes=parlst.getBool("hidePlanes");
 			vector<MyEdgeMesh*> ev;
 			if (hideBase)
 				m.mm()->visible=false;
@@ -422,18 +447,16 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Filt
 		break;
 		case FP_RECURSIVE_SLICE:
 		{
-			if(parlst.getBool("capBase"))
-	{
-		MeshModel* cap= new MeshModel();
-		capHole(m.mm(),cap);
-		tri::Append<CMeshO,CMeshO>::Mesh(m.mm()->cm, cap->cm);
-		m.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-		tri::UpdateTopology<CMeshO>::FaceFace(m.mm()->cm);
-		delete cap;
-	}
-	float length=parlst.getFloat("length");
-	float eps=parlst.getFloat("eps");
-	eps=m.mm()->cm.bbox.Diag()*(eps/length);
+			if (axisIndex <0 || axisIndex >3)
+			{
+				Log(GLLogStream::FILTER,"Custom Axis not implemented yet");
+				return false;
+			}
+			float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
+			// eps to use in extrusion, is relative to maxdim
+			// eps : length = eps_xtr : maxdim  -> eps_xtr = (eps*maxdim)/length
+			// NOTE: change eps with eps_xtr everywhere below
+			eps=maxdim*(eps/length);
 			KDTree<CMeshO> *kdt=new KDTree<CMeshO>(&m,m.mm(), eps, parlst.getEnum("planeAxis"));
 			kdt->delfather=parlst.getBool("delfather");
 			int iter=parlst.getInt("iter");
