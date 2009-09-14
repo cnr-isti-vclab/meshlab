@@ -83,11 +83,13 @@ removed color_curvature.h in favour of curvature.h
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <meshlab/filterparameter.h>
 
 #include <vcg/math/base.h>
 #include <vcg/math/histogram.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h>
+
 
 class ExtraMeshColorizePlugin : public QObject, public MeshFilterInterface
 {
