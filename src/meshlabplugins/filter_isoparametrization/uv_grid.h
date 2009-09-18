@@ -131,9 +131,18 @@ public:
     typedef typename MeshType::ScalarType ScalarType;
 		if (!bbox2.IsIn(UV))
 			return false;
-
+		
 		//const ScalarType _EPSILON = ScalarType(0.000000001);
 		vcg::Point2i cell=Cell(UV);
+		if (cell.X()>=data.size())
+			cell.X()-=1;
+		if (cell.Y()>=data.size())
+			cell.Y()-=1;
+		if (cell.X()<0)
+			cell.X()=0;
+		if (cell.Y()<0)
+			cell.Y()=0;
+
 		for (unsigned int i=0;i<data[cell.X()][cell.Y()].size();i++)
 		{
 			FaceType *f=data[cell.X()][cell.Y()][i];
