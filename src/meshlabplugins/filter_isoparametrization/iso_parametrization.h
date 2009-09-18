@@ -208,6 +208,7 @@ void CopyMeshFromVerticesAbs(std::vector<typename MeshType::VertexType*> &vertic
 		new_mesh.vert[i].RPos=(*iteVI)->RPos;
 		new_mesh.vert[i].T().P()=(*iteVI)->T().P();
 		new_mesh.vert[i].T().N()=(*iteVI)->T().N();
+		new_mesh.vert[i].C()=(*iteVI)->C();
 		/*new_mesh.vert[i].father=(*iteVI)->father;
 		new_mesh.vert[i].Bary=(*iteVI)->Bary;*/
 		//new_mesh.vert[i].Damp=(*iteVI)->Damp;
@@ -334,6 +335,9 @@ private:
 			face.resize(1);
 			baryVal.resize(1);
 			bool found=grid.getClosest(UV,face[0],baryVal[0]);
+			int index=face[0]-&(*HresDomain->face.begin());
+			assert(index<HresDomain->fn);
+			face[0]=ordered_faces[index];
 			return found;
 		}
 	};
@@ -738,17 +742,22 @@ private:
 		return num;
 	}
 	
-	int getSharedVertices(const std::vector<int> &I,AbstractVertex *shared[3])
+	int getSharedVertices(const std::vector<int> &I,AbstractVertex *shared[3],int *_num=NULL)
 	{	
 		///else test the number of vertices shared 
 		AbstractVertex * shared_vert[3];
 		bool sharedB[3];
+		int size;
+		if (_num==NULL)
+			size=I.size();
+		else
+			size=*_num;
 
 		///quick test for 2 or 3 cases
-		if (I.size()==2)
+		if (size==2)
 			return getSharedVertices(&AbsMesh()->face[I[0]],&AbsMesh()->face[I[1]],shared);
 		else
-		if (I.size()==3)
+		if (size==3)
 			return getSharedVertices(&AbsMesh()->face[I[0]],&AbsMesh()->face[I[1]],&AbsMesh()->face[I[2]],shared);
 
 		AbstractFace* f0=&AbsMesh()->face[I[0]];
@@ -762,7 +771,7 @@ private:
 		sharedB[1]=true;
 		sharedB[2]=true;
 		//for each face
-		for (int i=1;i<I.size();i++)
+		for (int i=1;i<size;i++)
 		{
 			AbstractFace* f=&AbsMesh()->face[I[i]];
 			//for each vertex
@@ -935,18 +944,24 @@ public:
 	}
 	
 	///return 0 if is a face 1 is a diamaond and 2 is a star
-	int InterpolationSpace(const std::vector<int> &I,int &IndexDomain)
+	int InterpolationSpace(const std::vector<int> &I,int &IndexDomain,int *_num=NULL)
 	{
+		int size;
+		if (_num==NULL)
+			size=I.size();
+		else
+			size=*_num;
+
 		///simple cases
 		assert(I.size()>0);
 		///1 element
-		if (I.size()==1)
+		if (size==1)
 		{
 			IndexDomain=I[0];
 			return 0;
 		}
 		///2 elements
-		if (I.size()==2)
+		if (size==2)
 			return InterpolationSpace(I[0],I[1],IndexDomain);
 
 		///test if they all are the same
@@ -954,7 +969,7 @@ public:
 		bool sameface=true;
 		int i=1;
 		int I0=I[0];
-		while ((i<I.size())&&(sameface))
+		while ((i<size)&&(sameface))
 		{
 			sameface&=(I[i]==I0);
 			i++;
@@ -967,7 +982,7 @@ public:
 
 		///else test the number of vertices shared 
 		AbstractVertex *shared[3];
-		int num=getSharedVertices(I,shared);
+		int num=getSharedVertices(I,shared,_num);
 		assert(num!=3); ///no same yet face possible
 		if (num==0)
 			return -1;  ///no interpolation space exists
@@ -1143,12 +1158,16 @@ public:
 		assert(UV.Y()>=0);
 		//printf("%f,%f \n",UV.X(),UV.Y());
 		assert((UV.X()+UV.Y())<=(1+eps));
+		
 		//printf("%f,%f \n",UV.X(),UV.Y());
 		///FACE SEARCH
 		///first test if is in the face domain 
 		//printf("face\n");
 		bool found=false;
 		int indexFace=I;
+		/*if (indexFace>=face_meshes.size())
+			printf("B");*/
+
 		vcg::Point2<ScalarType> UVFace;
 		GE2(indexFace,UV,UVFace);
 		found=face_meshes[indexFace].Project(UVFace,face,baryVal);
@@ -1162,6 +1181,8 @@ public:
 		vcg::Point2<ScalarType> UVDiam;
 		///transform UV coordids in diamond
 		GE1(I,UV,indexDiam,UVDiam);
+		/*if (indexDiam>=diamond_meshes.size())*/
+			/*printf("C");*/
 		found=diamond_meshes[indexDiam].Project(UVDiam,face,baryVal);
 		if (found)
 			return 1;
@@ -1181,6 +1202,7 @@ public:
 			assert(found);
 #else
 			star_meshes[indexStar].getClosest(UVStar,face,baryVal);
+			/*printf("D");*/
 #endif
 		}
 		return 2;
@@ -1213,7 +1235,9 @@ public:
 	{
 		std::vector<ParamFace*> face;
 		std::vector<CoordType> baryVal;
+			
 		int ret=Theta(I,UV,face,baryVal);
+			
 		pos3D=CoordType(0,0,0);
 		for (int i=0;i<face.size();i++)
 		{
@@ -1222,6 +1246,7 @@ public:
 						  face[i]->V(2)->P()*baryVal[i].Z();
 			pos3D+=pos;
 		}
+		
 		pos3D/=(ScalarType)face.size();
 		return ret;
 	}
@@ -1257,6 +1282,8 @@ public:
 		CoordType bary;
 		int index;
 		bool done=GetBaryFaceFromUV(*star_domain,UVHstar.X(),UVHstar.Y(),bary,index);
+		if (!done)
+			return false;
 		UV.X()=bary.X();
 		UV.Y()=bary.Y();
 		I=star_meshes[StarIndex].Local2Global(index);
@@ -1733,10 +1760,10 @@ public:
 	//	}
 	//	fclose(f);
 	//}
-
+	template <class MeshType>
 	int LoadMCP(AbstractMesh * _abstract_mesh,
 			  ParamMesh	 * _param_mesh,
-				char* filename)
+				char* filename,MeshType *coloredMesh=NULL)
 	{
 		abstract_mesh=_abstract_mesh;
 		param_mesh=_param_mesh;
@@ -1802,7 +1829,11 @@ public:
 			//vert->RPos=pos;
 			vert->T().P()=vcg::Point2<ScalarType>(bary.X(),bary.Y());
 			vert->T().N()=index_face;
-			
+			if (coloredMesh!=NULL)
+			{
+				vcg::Color4b col=coloredMesh->vert[i].C();
+				vert->C()=col;
+			}
 		}
 
 		///add faces
