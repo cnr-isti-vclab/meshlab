@@ -986,7 +986,7 @@ public:
 		(*cb)(percent,ret);
 	}
 
-	void Optimize(ScalarType gap=0.5)
+	void Optimize(ScalarType gap=0.05)
 	{
 		/*int t0=clock();*/
 		int k=0;
@@ -1033,10 +1033,6 @@ public:
 			distAngle=ApproxAngleDistortion<BaseMesh>(*h_res_mesh);
 			ScalarType distAggregate1=geomAverage<ScalarType>(distArea+1.0,distAngle+1.0,3,1)-1;
 			ScalarType NewGap=((distAggregate0-distAggregate1)*100.0)/distAggregate0;
-			/*#ifndef _MESHLAB
-			PrintAttributes();
-			printf("\n Step %d Gap %lf \n",k,NewGap);
-			#endif*/
 			if (NewGap<gap)
 				ContinueOpt=false;
 			distAggregate0=distAggregate1;
