@@ -7,23 +7,16 @@
 class TangentSpace{
 	typedef IsoParametrization::CoordType CoordType;
 	typedef IsoParametrization::ScalarType ScalarType;
-	IsoParametrization *isoParam;
+	
 
 	vcg::SimpleTempData<typename ParamMesh::VertContainer,vcg::Matrix33<ScalarType> > *ProjMatrix;
 	
 public:
-
+	IsoParametrization *isoParam;
 	
 
   bool isoParamTheta(int i, vcg::Point2<ScalarType> p, vcg::Point3<ScalarType> &res) const{
     return isoParam->Theta(i,p,res);
-
-    vcg::Point3<ScalarType>  c(0,0,10);//(0.5,sqrt(3.0)/2.0,0);
-    vcg::Point3<ScalarType> b(1,0,0);
-    vcg::Point3<ScalarType> a(0,0,0);
-    res  = a*p[0]+b*p[1]+c*(1-p[0]-p[1]) 
-    +vcg::Point3<ScalarType>(4,4,4);
-    return true;
   }
 
 	//
@@ -31,6 +24,15 @@ public:
 		const vcg::Point2<ScalarType> &UV,
 		CoordType &pos3D){
       isoParamTheta(i,UV,pos3D);
+  }
+	
+	bool Theta(const int &I,
+		const vcg::Point2<ScalarType> &alpha_beta, // alphaBeta
+		std::vector<ParamFace*> &face,
+		std::vector<CoordType> &baryVal)
+	{
+      int ret=isoParam->Theta(I,alpha_beta,face,baryVal);
+			return (ret!=-1);
   }
 
 	///initialize the sampler 
@@ -334,7 +336,12 @@ public:
 	{
 		ParamFace* face=NULL;
 		CoordType baryVal;
-		isoParam->Theta(I,alpha_beta,face,baryVal);
+		int dom=isoParam->Theta(I,alpha_beta,face,baryVal);
+		if (dom==-1)
+		{
+			projMatr.SetIdentity();
+			return;
+		}
 		ParamVertex *v0=face->V(0);
 		ParamVertex *v1=face->V(1);
 		ParamVertex *v2=face->V(2);
@@ -417,44 +424,57 @@ public:
 		return true;
 	}
 
+	ScalarType AbstractArea()
+	{
+		ScalarType Cnum=sqrt(3.0)/4.0;
+		return(isoParam->AbsMesh()->fn*Cnum);
+	}
+
     // WEIGHTED INTERPOLATION OF POINTS IN TANGENT SPACE 
 	///	weights MUST be normalized
 	bool Interpolate(const std::vector<int> &I,
 					 const std::vector<vcg::Point2<ScalarType> > &alpha_beta,
 					 const std::vector<ScalarType> &weights,
 					 int &I_res,
-					 vcg::Point2<ScalarType> &alpha_beta_res)
+					 vcg::Point2<ScalarType> &alpha_beta_res,
+					 int *num=NULL)
 	{
+		int size;
+		if (num==NULL)
+			size=alpha_beta.size();
+		else
+			size=*num;
+
 		int IndexDomain;
-		int kind=isoParam->InterpolationSpace(I,IndexDomain);
+		int kind=isoParam->InterpolationSpace(I,IndexDomain,num);
 		if (kind==-1)
 			return false;
 
 		std::vector<vcg::Point2<ScalarType> > transformed;
-		transformed.resize(alpha_beta.size());
+		transformed.resize(size);
 		
 		///interpolate in a face
 		if (kind==0)
 		{
-			for (int i=0;i<alpha_beta.size();i++)
+			for (int i=0;i<size;i++)
 				isoParam->GE2(IndexDomain,alpha_beta[i],transformed[i]);
 		}
 		else
 		///interpolate in a diamond
 		if (kind==1)
 		{				
-			for (int i=0;i<alpha_beta.size();i++)
+			for (int i=0;i<size;i++)
 				isoParam->GE1(I[i],alpha_beta[i],IndexDomain,transformed[i]);		
 		}
 		else
 		{
-			for (int i=0;i<alpha_beta.size();i++)
+			for (int i=0;i<size;i++)
 				bool b0=isoParam->GE0(I[i],alpha_beta[i],IndexDomain,transformed[i]);
 		}
 
 		/// do the interpolation
 		vcg::Point2<ScalarType> UV_interp=vcg::Point2<ScalarType>(0,0);
-		for (int i=0;i<weights.size();i++)
+		for (int i=0;i<size;i++)
 			UV_interp+=(transformed[i]*weights[i]);
 		
 		///FINALLY......
