@@ -62,8 +62,9 @@ public:
 		if (!found0)
 			found1=GetCoordFromUV<MeshType>(*inf.parametrized_domain,inf.to_optimize->T().U(),inf.to_optimize->T().V(),val,true);
 
-		assert ((found0)||(found1));
-		inf.to_optimize->RPos=val;
+		//assert ((found0)||(found1));
+		if ((found0)||(found1))
+			inf.to_optimize->RPos=val;
 
 		///clear assigned vertices
 		for (unsigned int i=0;i<inf.parametrized_domain->face.size();i++)
