@@ -326,10 +326,6 @@ void RichParameterCopyConstructor::visit( RichColor& pd )
 	lastCreated = new RichColor(pd.name,pd.pd->defVal->getColor(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
-void RichParameterCopyConstructor::visit( RichColor4b& pd )
-{
-	/*lastCreated = new Color4bWidget(par,&pd);*/
-}
 
 void RichParameterCopyConstructor::visit( RichAbsPerc& pd )
 {
@@ -436,11 +432,6 @@ void RichParameterXMLVisitor::visit( RichColor& pd )
 	parElem.setAttribute("g",QString::number(p.green()));
 	parElem.setAttribute("b",QString::number(p.blue()));
 	parElem.setAttribute("a",QString::number(p.alpha()));
-}
-
-void RichParameterXMLVisitor::visit( RichColor4b& pd )
-{
-	assert(0);	
 }
 
 void RichParameterXMLVisitor::visit( RichAbsPerc& pd )
@@ -834,26 +825,6 @@ bool RichColor::operator==( const RichParameter& rb )
 }
 
 RichColor::~RichColor()
-{
-
-}
-
-RichColor4b::RichColor4b( const QString nm,Color4bValue* v,Color4bDecoration* prdec ) :RichParameter(nm,v,prdec)
-{
-
-}
-
-void RichColor4b::accept( Visitor& v )
-{
-	v.visit(*this);
-}
-
-bool RichColor4b::operator==( const RichParameter& rb )
-{
-	return (rb.val->isColor4b() &&(name == rb.name) && (val->getColor4b() == rb.val->getColor4b()));
-}
-
-RichColor4b::~RichColor4b()
 {
 
 }

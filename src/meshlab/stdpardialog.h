@@ -605,7 +605,6 @@ public:
 	void visit(RichMatrix44f& pd){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new Matrix44fWidget(par,&pd);*/};
 	void visit(RichPoint3f& pd){lastCreated = new Point3fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
 	void visit(RichColor& pd){lastCreated = new ColorWidget(par,&pd);};
-	void visit(RichColor4b& pd){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new Color4bWidget(par,&pd);*/};
 	void visit(RichAbsPerc& pd){lastCreated = new AbsPercWidget(par,&pd);};
 	void visit(RichEnum& pd){lastCreated = new EnumWidget(par,&pd);};
 	void visit(RichFloatList& pd){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new FloatListWidget(par,&pd);*/};

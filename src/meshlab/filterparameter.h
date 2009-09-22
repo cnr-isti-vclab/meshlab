@@ -374,7 +374,6 @@ class RichString;
 class RichMatrix44f;
 class RichPoint3f;
 class RichColor;
-class RichColor4b;
 class RichAbsPerc;
 class RichEnum;
 class RichFloatList;
@@ -395,7 +394,6 @@ public:
 	virtual void visit( RichMatrix44f& pd) = 0;
 	virtual void visit( RichPoint3f& pd) = 0;
 	virtual void visit( RichColor& pd) = 0;
-	virtual void visit( RichColor4b& pd) = 0;
 	virtual void visit( RichAbsPerc& pd) = 0;
 	virtual void visit( RichEnum& pd) = 0;
 	virtual void visit( RichFloatList& pd) = 0;
@@ -488,15 +486,6 @@ public:
 
 };
 
-class RichColor4b : public RichParameter
-{
-public:
-	RichColor4b(const QString nm,Color4bValue* v,Color4bDecoration* prdec);
-	void accept(Visitor& v);
-	bool operator==(const RichParameter& rb);
-	~RichColor4b();
-};
-
 class RichAbsPerc : public RichParameter
 {
 public:
@@ -583,7 +572,6 @@ public:
 	void visit(RichMatrix44f& pd);
 	void visit(RichPoint3f& pd);
 	void visit(RichColor& pd);
-	void visit(RichColor4b& pd);
 	void visit(RichAbsPerc& pd);
 
 	void visit(RichEnum& pd);
@@ -618,7 +606,6 @@ public:
 	void visit(RichMatrix44f& pd);
 	void visit(RichPoint3f& pd);
 	void visit(RichColor& pd);
-	void visit(RichColor4b& pd);
 	void visit(RichAbsPerc& pd);
 
 	void visit(RichEnum& pd);
