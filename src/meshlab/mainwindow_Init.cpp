@@ -643,7 +643,8 @@ void MainWindow::loadPlugins()
               		filterMenuSmoothing->addAction(filterAction);
 					if(filterClass &  MeshFilterInterface::Normal )
               		filterMenuNormal->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Quality )
+					if( (filterClass &  MeshFilterInterface::Quality ) ||
+              (filterClass & MeshFilterInterface::Measure  )	)				
               		filterMenuQuality->addAction(filterAction);
 					if(filterClass &  MeshFilterInterface::Layer )
               		filterMenuLayer->addAction(filterAction);
