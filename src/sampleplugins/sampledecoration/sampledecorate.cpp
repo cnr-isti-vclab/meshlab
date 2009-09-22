@@ -134,4 +134,8 @@ void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RichParameterS
   glMatrixMode(GL_MODELVIEW);
 }
 
+bool SampleMeshDecoratePlugin::StartDecorate( QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/ )
+{
+	return true;
+}
 Q_EXPORT_PLUGIN(SampleMeshDecoratePlugin)
