@@ -724,6 +724,35 @@ void MainWindow::loadPlugins()
 
 }
 
+void MainWindow::loadMeshLabSettings()
+{
+	QDomDocument doc("MeshLabSettings");
+	QFile file("meshlabsettings.xml");
+	if (!file.open(QIODevice::ReadOnly))
+		return;
+	if (!doc.setContent(&file)) 
+	{
+		file.close();
+		return;
+	}
+	file.close();
+
+	QDomElement docElem = doc.documentElement();
+
+	QDomNode n = docElem.firstChild();
+	while(!n.isNull()) 
+	{
+		QDomElement e = n.toElement(); 
+		RichParameter* rpar = NULL;
+		if(!e.isNull()) 
+		{
+			RichParameterFactory::create(e,&par);
+			globalParams.addParam(par);
+		}
+		n = n.nextSibling();
+	}
+}
+
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
 {
 	foreach (QAction *a, actionList)

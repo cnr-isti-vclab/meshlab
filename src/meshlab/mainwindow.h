@@ -296,6 +296,7 @@ private:
 	void createActions();
 	void createMenus();
 	void createToolBars();
+	void loadMeshLabSettings();
 	void loadPlugins();
 	void keyPressEvent(QKeyEvent *);
 	void updateRecentFileActions();
@@ -321,6 +322,10 @@ private:
 	QList<QAction *> editActionList;
 	QList<QAction *> decoratorActionList;
 
+	//*********WARNING*******
+	//it should be moved away from here! MeshLabServer needs it too
+	RichParameterSet globalParams;
+  
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
