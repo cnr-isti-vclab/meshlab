@@ -56,6 +56,7 @@ FilterUnsharp::FilterUnsharp()
 		FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED <<
 		FP_RECOMPUTE_VERTEX_NORMAL_ANGLE <<
 		FP_RECOMPUTE_FACE_NORMAL <<
+		FP_RECOMPUTE_QUADFACE_NORMAL <<
 		FP_FACE_NORMAL_NORMALIZE <<
 		FP_VERTEX_NORMAL_NORMALIZE <<
 		FP_LINEAR_MORPH	;
@@ -96,6 +97,7 @@ const QString FilterUnsharp::filterName(FilterIDType filter) const
 	  case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED:	return QString("Recompute Weighted Vertex Normals"); 
 	  case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE:	return QString("Recompute Angle Weighted Vertex Normals"); 
 	  case FP_RECOMPUTE_FACE_NORMAL:		return QString("Recompute Face Normals"); 
+	  case FP_RECOMPUTE_QUADFACE_NORMAL:		return QString("Recompute Per-Quad Face Normals"); 
 		case FP_LINEAR_MORPH :	return QString("Vertex Linear Morphing");
 		
 
@@ -128,6 +130,7 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId) const
 		case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED:		return tr("Recompute vertex normals as a weighted sum of normals of the incident faces. Weights are defined according to the paper <i>Weights for Computing Vertex Normals from Facet Normals</i>, Nelson max, JGT 1999");
 		case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE:		return tr("Recompute vertex normals as an angle weighted sum of normals of the incident faces according to the paper <i>Computing Vertex Normals from Polygonal Facet</i>, G Thurmer, CA Wuthrich, JGT 1998");
 		case FP_RECOMPUTE_FACE_NORMAL:			return tr("Recompute face normals as the normal of the plane of the face");
+		case FP_RECOMPUTE_QUADFACE_NORMAL:			return tr("Recompute face normals as the normal of the average of the normals of the triangles that builds a quad. Useful for showing shaded quad meshes.");
 		case FP_LINEAR_MORPH :							return tr("Morph current mesh towards a target with the same number of vertices. <br> The filter assumes that the two meshes have also the same vertex ordering.");
 
   	default: assert(0);
@@ -160,6 +163,7 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 					return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Smoothing | MeshFilterInterface::VertexColoring);
 				
 			case FP_RECOMPUTE_FACE_NORMAL :
+			case FP_RECOMPUTE_QUADFACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
 			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
@@ -189,6 +193,7 @@ int FilterUnsharp::getPreConditions(QAction *a) const
 			case FP_DIRECTIONAL_PRESERVATION:
 			case FP_FACE_NORMAL_SMOOTHING:	  
 			case FP_RECOMPUTE_FACE_NORMAL :
+			case FP_RECOMPUTE_QUADFACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
 			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
@@ -223,6 +228,7 @@ int FilterUnsharp::postCondition(QAction *a) const
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_QUALITY:
 			case FP_RECOMPUTE_FACE_NORMAL :
+			case FP_RECOMPUTE_QUADFACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
 			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
@@ -254,6 +260,7 @@ const int FilterUnsharp::getRequirements(QAction *action)
 		case FP_UNSHARP_VERTEX_COLOR:	return MeshModel::MM_FACEFLAGBORDER;
     case FP_CREASE_CUT :	return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
 		case FP_UNSHARP_NORMAL:		return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
+		case FP_RECOMPUTE_QUADFACE_NORMAL :
 		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
 		case FP_RECOMPUTE_FACE_NORMAL :
 		case FP_RECOMPUTE_VERTEX_NORMAL :
@@ -517,6 +524,9 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, RichParameterSet 
 			break;
 	case FP_RECOMPUTE_FACE_NORMAL : 
 			tri::UpdateNormals<CMeshO>::PerFace(m.cm);
+			break;
+	case FP_RECOMPUTE_QUADFACE_NORMAL : 
+			tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
 			break;
 	case FP_RECOMPUTE_VERTEX_NORMAL : 
 			tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
