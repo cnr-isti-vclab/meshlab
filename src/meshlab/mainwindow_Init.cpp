@@ -187,7 +187,8 @@ Added short key lastFilter
 #include <QProgressBar>
 #include <QHttp>
 #include <QFileOpenEvent>
-
+#include <QFile>
+ #include <QtXml>
 
 #include "meshmodel.h"
 #include "interfaces.h"
@@ -196,6 +197,7 @@ Added short key lastFilter
 #include "plugindialog.h"
 #include "customDialog.h"
 #include "saveSnapshotDialog.h"
+#include "filterparameter.h"
 #include "ui_congratsDialog.h"
 
 QProgressBar *MainWindow::qb;
@@ -746,8 +748,8 @@ void MainWindow::loadMeshLabSettings()
 		RichParameter* rpar = NULL;
 		if(!e.isNull()) 
 		{
-			RichParameterFactory::create(e,&par);
-			globalParams.addParam(par);
+			RichParameterFactory::create(e,&rpar);
+			globalParams.addParam(rpar);
 		}
 		n = n.nextSibling();
 	}
