@@ -143,7 +143,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 			return false;
 		}
 	}
-  else	if(formatName.toUpper() == tr("OBJ"))
+  else	if( (formatName.toUpper() == tr("OBJ")) || (formatName.toUpper() == tr("QOBJ")) )
 	{
     tri::io::ImporterOBJ<CMeshO>::Info oi;	
 		oi.cb = cb;
@@ -316,6 +316,7 @@ QList<MeshIOInterface::Format> BaseMeshIOPlugin::importFormats() const
 	formatList << Format("Stanford Polygon File Format"	, tr("PLY"));
 	formatList << Format("STL File Format"				      , tr("STL"));
 	formatList << Format("Alias Wavefront Object"				, tr("OBJ"));
+	formatList << Format("Quad Object"				,						tr("QOBJ"));
 	formatList << Format("Object File Format"						, tr("OFF"));
 	formatList << Format("PTX File Format"							, tr("PTX"));
 

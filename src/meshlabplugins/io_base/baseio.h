@@ -49,6 +49,9 @@ class BaseMeshIOPlugin : public QObject, public MeshIOInterface
 
   
 public:
+	
+	BaseMeshIOPlugin() : MeshIOInterface() {}
+	
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
 
