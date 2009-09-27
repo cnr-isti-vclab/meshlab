@@ -1055,14 +1055,21 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						renderModeTextureAct->setEnabled(true);
 						GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 					}
-
-
-
-					if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-								vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
-					else
-								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
-
+					
+					 // In case of polygonal meshes the normal should be updated accordingly
+					if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) 
+					{
+									mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
+									mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
+									vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
+									vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
+					} // standard case
+					else {
+							if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+										vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
+							else
+										vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
+					}
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 
 					if(gla->mm()->cm.fn==0){

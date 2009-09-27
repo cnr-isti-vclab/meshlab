@@ -251,6 +251,7 @@ public:
 		if( openingFileMask & vcg::tri::io::Mask::IOM_CAMERA				) updateDataMask(MM_CAMERA);
 		if( openingFileMask & vcg::tri::io::Mask::IOM_VERTQUALITY	) updateDataMask(MM_VERTQUALITY);
 		if( openingFileMask & vcg::tri::io::Mask::IOM_FACEQUALITY	) updateDataMask(MM_FACEQUALITY);
+		if( openingFileMask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) updateDataMask(MM_POLYGONAL);
 	}
 
   bool hasDataMask(const int maskToBeTested) const
