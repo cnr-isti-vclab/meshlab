@@ -1,0 +1,33 @@
+imager
+AQSIS_V 1.4.2
+
+
+segment Data
+
+USES 8781824
+
+param uniform  color bgcolor
+
+
+segment Init
+	pushif 1
+	pushif 1
+	pushif 1
+	settc
+	pop bgcolor
+
+
+segment Code
+	pushv bgcolor
+	pushv alpha
+	pushif 1
+	subff
+	mulfc
+	pushv Ci
+	addcc
+	pop Ci
+	pushif 1
+	setfc
+	pop Oi
+	pushif 1
+	pop alpha
