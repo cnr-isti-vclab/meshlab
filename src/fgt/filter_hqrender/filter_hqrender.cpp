@@ -30,7 +30,7 @@ FilterHighQualityRender::FilterHighQualityRender()
   if (templateDir.dirName() == "MacOS") {
     for (int i = 0; i < 6; ++i) {
 	  templateDir.cdUp();
-	  if (shadersDir.exists("template"))
+	  if (templateDir.exists("template"))
 	    break;
 	}
   }
