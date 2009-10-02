@@ -30,10 +30,14 @@ void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &,
 	gla->makeCurrent();
 	glewInit();
 
+	const char* rs = (const char*)glGetString(GL_RENDERER);
+	
+	cout << "GL_RENDERER : " << rs << endl;	
+	if (!GLEW_ARB_texture_float)
+		std::cout << "SplatPyramid: warning floating point textures are not supported.\n";
+
 	canvas_width = gla->width();
 	canvas_height = gla->height();
-
-	//canvas_width = canvas_height = 1024.0;
 
 	objects.clear();
 
@@ -46,7 +50,7 @@ void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &,
 	vector<Surfeld> *surfels = (objects.back()).getSurfels();
 
 	if (mp->hasDataMask( MeshModel::MM_VERTCOLOR ) )
-		color_per_vertex = true;
+		color_per_vertex = true;	
 	  
 	Color4b c (180, 180, 180, 255);
 	float quality = 0.0001;
@@ -74,11 +78,11 @@ void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &,
 	else
 		render_mode =  PYRAMID_POINTS;
 			
-	// Sets the default rendering algorithm and loads vertex arrays
+	/// Sets the default rendering algorithm and loads display lists
 	for (unsigned int i = 0; i < objects.size(); ++i)
 		objects[i].setRendererType( render_mode );
 
-  
+  	/// Sets the path to the meshlab's shaders directory
   	QDir shadersDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
 	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins"  )
@@ -93,7 +97,6 @@ void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &,
 #endif
 	
 	QDir::setCurrent(shadersDir.absolutePath());
-
 
 	createPointRenderer( );  
 

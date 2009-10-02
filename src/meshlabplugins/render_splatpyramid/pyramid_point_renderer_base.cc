@@ -468,11 +468,10 @@ void PyramidPointRendererBase::createFBO() {
 
 	check_for_ogl_error("buffers creation");
 
-	/// create and bind a depth buffer:
+	/// create a depth buffer:
 	glGenTextures(1, &fbo_depth);
 	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo_depth);
-	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, canvas_width,
-			   canvas_height);
+	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, canvas_width, canvas_height);
 	check_for_ogl_error("depth buffer creation");
 
 	fbo_lod.resize(levels_count);
@@ -485,14 +484,13 @@ void PyramidPointRendererBase::createFBO() {
 		int dim = 1024/pow(2.0, double(level));
 		fbo_lod[level] = new QGLFramebufferObject(dim, dim, FBO_TYPE);		
 		
-		if (!fbo_lod[level]->isValid()) 
+		if (!fbo_lod[level]->isValid())
 			std::cout << level << " PyramidPointRenderer: invalid FBO\n";	  
 
 		fbo_lod[level]->bind();
-		// for each level attach all render targets to the fbo
+		// for each level: attach all render targets to the fbo
 		for (int i = 0; i < fbo_buffers_count; i++) {
-			glBindTexture(FBO_TYPE, fbo_textures[i]);
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,	fbo_buffers[i], FBO_TYPE, fbo_textures[i], level);
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, fbo_buffers[i], FBO_TYPE, fbo_textures[i], level);
 		}
 		checkFramebufferStatus( __func__ );
 
@@ -503,7 +501,7 @@ void PyramidPointRendererBase::createFBO() {
 	/// And lets also attach the depth buffer to the first fbo, that is, level 0 of the pyramid
 	fbo_lod[0]->bind();
 	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-							   GL_RENDERBUFFER_EXT, fbo_depth); 
+							   GL_RENDERBUFFER_EXT, fbo_depth);
 	check_for_ogl_error("depth attachment");
 
 	fbo_lod[0]->release();

@@ -50,18 +50,18 @@ class PointBasedRenderer
    /**
     * Render point based model using deferred shading (per pixel shading).
     **/
-  virtual void draw( void ) {}
+	virtual void draw( void ) {}
 
-   /**
-    * Intepolate samples in screen space using pyramid method.
-    **/
-   virtual void interpolate( void ) {}
+	/**
+ 	 * Interpolate samples in screen space using pyramid method.
+	**/
+	virtual void interpolate( void ) {}
 
-   /**
-    * Projects samples to screen space.
-    * @param p Point to primitives instance containing samples.
-    **/
-   virtual void projectSamples(Object* ) {}
+	/**
+	 * Projects samples to screen space.
+	 * @param p Point to primitives instance containing samples.
+	**/
+	virtual void projectSamples(Object* ) {}
 
    /**
     * Clears all buffers, including those of the framebuffer object.
