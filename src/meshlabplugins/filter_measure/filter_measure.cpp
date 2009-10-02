@@ -40,7 +40,9 @@
 
 #include <vcg/complex/trimesh/update/selection.h>
 #include<vcg/complex/trimesh/append.h>
-
+#include<vcg/simplex/face/pos.h>
+#include<vcg/complex/trimesh/bitquad_support.h>
+#include<vcg/complex/trimesh/bitquad_optimization.h>
 #include "filter_measure.h"
 
 using namespace std;
@@ -51,6 +53,7 @@ FilterMeasurePlugin::FilterMeasurePlugin()
 { 
 	typeList << 
 	FP_MEASURE_TOPO <<
+	FP_MEASURE_TOPO_QUAD <<
 	FP_MEASURE_GAUSSCURV <<
 	FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION <<
 	FP_MEASURE_GEOM;
@@ -64,6 +67,7 @@ const QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_MEASURE_TOPO :  return QString("Compute Topological Measures"); 
+		case FP_MEASURE_TOPO_QUAD :  return QString("Compute Topological Measures for Quad Meshes"); 
 		case FP_MEASURE_GEOM :  return QString("Compute Geometric Measures"); 
 		case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature"); 
 		case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION :  return QString("Measure Quality Per Vertex"); 
@@ -76,6 +80,7 @@ const QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_MEASURE_TOPO :  return QString("Selected faces are moved (or duplicated) in a new layer"); 
+		case FP_MEASURE_TOPO_QUAD :  return QString("Selected faces are moved (or duplicated) in a new layer"); 
 		case FP_MEASURE_GEOM :  return QString("Create a new layer containing the same model as the current one");
 		case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature");
 		case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION : return QString("Compute some measures (min, max, med, stdev, variance, about the distribution of per vertex quality values");
@@ -91,6 +96,7 @@ bool FilterMeasurePlugin::autoDialog(QAction *action)
 	 {
 			case FP_MEASURE_GEOM :
 			case FP_MEASURE_TOPO:
+			case FP_MEASURE_TOPO_QUAD:
 			case FP_MEASURE_GAUSSCURV:
 			case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION:
 			 return false;
@@ -149,10 +155,49 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 					int genus = tri::Clean<CMeshO>::MeshGenus(m, holeNum, connectedComponentsNum, edgeNum);
 					Log("Genus is %i",genus);
 				}
-				
-				
 			}
 		break;
+		/************************************************************/ 
+		case FP_MEASURE_TOPO_QUAD : 
+			{
+					CMeshO &m=md.mm()->cm;	
+					md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);				
+					md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);				
+
+					if (! tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m)){
+											Log("Error: mesh has a not consistent FF adjacency");
+											return false;
+										}
+					if (! tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
+											Log("Warning: mesh has a not consistent FauxEdge tagging");
+											return false;
+										}
+					if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
+											Log("Warning: IsBitTriQuadOnly");
+											//return false;
+										}
+					//										if (! tri::Clean<CMeshO>::HasConsistentEdges(m)) lastErrorDetected |= NOT_EDGES_CONST;
+					int nsinglets= tri::BitQuadOptimization< tri::BitQuad<CMeshO> >::MarkSinglets(m);
+					if ( nsinglets  )  {
+											Log("Warning: MarkSinglets");
+											//return false;
+										}
+					
+					if (! tri::BitQuad<CMeshO>::HasConsistentValencyFlag(m))
+					 {
+											Log("Warning: HasConsistentValencyFlag");
+											//return false;
+										}
+				
+			int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
+			int nTris = tri::Clean<CMeshO>::CountBitTris(m);
+			int nPolys = tri::Clean<CMeshO>::CountBitPolygons(m);
+			
+			Log("Mesh has %i tri %i quad and %i polig",nTris,nQuads,nPolys);
+
+			}
+			break;
+		/************************************************************/ 
 		case FP_MEASURE_GEOM : 
 			{
 				CMeshO &m=md.mm()->cm;
@@ -162,7 +207,8 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 				tri::UpdateBounding<CMeshO>::Box(m); 
 				float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
 				float Volume = I.Mass(); 
-				Log("Mesh Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());			
+				Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());			
+				Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());			
 				Log("Mesh Volume  is %f", Volume);			
 				Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);		
 				
@@ -235,6 +281,7 @@ const FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *a)
     case FP_MEASURE_GAUSSCURV :
     case FP_MEASURE_GEOM :
     case FP_MEASURE_TOPO :
+    case FP_MEASURE_TOPO_QUAD :
 		 case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION:
       return MeshFilterInterface::Measure; 
 		default :  assert(0);
