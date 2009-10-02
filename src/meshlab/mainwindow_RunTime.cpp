@@ -1186,8 +1186,11 @@ bool MainWindow::saveAs(QString fileName)
 
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 		qb->show();
+		QTime tt; tt.start();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
 		qb->reset();
+		GLA()->log.Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
+
 		qApp->restoreOverrideCursor();
 		GLA()->mm()->fileName = fileName.toStdString();
 		GLA()->setFileName(fileName);
