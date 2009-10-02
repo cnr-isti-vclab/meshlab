@@ -33,7 +33,7 @@ private:
   QStringList templates;
   bool delRibFiles;
 
-  int convertGeometry(RibFileStack* files, QTextStream &out, MeshModel &m, RichParameterSet &, QStringList* textureList);
+  int convertGeometry(RibFileStack* files, FILE* fout /*QTextStream &out*/, MeshModel &m, RichParameterSet &, QStringList* textureList);
   QString getDirFromPath(QString* path);
   QString getFileNameFromPath(QString* path, bool type = true);
 };

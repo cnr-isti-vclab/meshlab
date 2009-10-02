@@ -107,7 +107,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 			}
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));			
 
-			// ******Ë il nome dell'immagine, ma poi va copiata nella cartella della mesh...******
+			// ******� il nome dell'immagine, ma poi va copiata nella cartella della mesh...******
 			parlst.addParam(new RichString("ImageName", "default.tiff", "Name of output image"));
 			
 			//DON'T WORK!!
@@ -179,6 +179,12 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		return false;
 	}
 	QTextStream out(&outFile);
+	FILE* fout;
+	//fout = fopen(dest.data.data(),"wb");
+	fout = fopen(qPrintable(dest),"wb");
+	if(fout==NULL)	{
+	
+	}
 
 	/////controlli di coordinate, ecc.... per ora non servono... credo
 	//if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord())
@@ -224,7 +230,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		if(token[0].trimmed() == "FrameBegin" && token[1].trimmed() == "1") {
 			foreach(QString textureName, textureList) {
 				QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName) + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 2 2");
-				out<<makeTexture<<endl;
+				//out<<makeTexture<<endl;
+				fprintf(fout,"%s\n",qPrintable(makeTexture));
 			}
 		}
 
@@ -262,8 +269,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 							str.remove('\"');
 							str = str.simplified();
 							if(str.toLower() == "dummy") {
-								(out)<<line<<endl<<"## HO TROVATO UN OGGETTO DUMMY"<<endl;
-								convertGeometry(&files, out, m, par, &textureList);
+								//(out)<<line<<endl<<"## HO TROVATO UN OGGETTO DUMMY"<<endl;
+								fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY\n",qPrintable(line));
+								convertGeometry(&files, fout/*out*/, m, par, &textureList);
 								writeLine = false; //line is already writed...jump the next statement
 							}
 						} else {
@@ -277,20 +285,22 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		}
 		if(writeLine) {
 			//copy the same line of in file
-			(out)<<line<<endl;
+			//(out)<<line<<endl;
+			fprintf(fout,"%s\n",qPrintable(line));
 		}
 	}
-
+	fclose(fout);
 	//va copiata una quantita indefinita di file dal template e organizzata in directory ;)
-	//va copiata l'immagine alla fine È_Ë
+	//va copiata l'immagine alla fine
 	return true;
 }
 
 //write on a opened file the geometry of the mesh (faces topology, index of vertex per face, coordinates, normal and color per vertex
-int FilterHighQualityRender::convertGeometry(RibFileStack* files, QTextStream &out, MeshModel &m, RichParameterSet &par, QStringList* textureList) {
-		
+int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*QTextStream &out*/, MeshModel &m, RichParameterSet &par, QStringList* textureList)
+{	
 	float scale = 1.0;
-	
+	vcg::Matrix44f transfMatrix = vcg::Matrix44f::Identity();
+
 	int c = 1; //the number of AttributeBegin statement readed
 	bool exit = false;
 	while(!files->isEmpty() && !exit) {
@@ -302,12 +312,38 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, QTextStream &o
 		if(token[0].trimmed() == "AttributeEnd")
 			--c;
 
+		//take the transformation matrix of dummy
+		if(token[0].trimmed() == "Transform") {
+			float t[16];
+			//an array in renderman can contains the char '\n' :(
+			QString matrixString = line;
+			while(!line.contains(']')) {
+				line = files->topNextLine();
+				matrixString += line;
+			}
+			int k=0;
+			QStringList list = matrixString.split(' ');
+			for(int i=0; i<list.size(); i++) {
+				if(list[i].trimmed().contains('[') || list[i].trimmed().contains(']')) {
+					list[i] = list[i].remove('[');
+					list[i] = list[i].remove(']');
+				}
+				bool isNumber;
+				float number = list[i].toFloat(&isNumber);
+				if(isNumber)
+					t[k++]=number;
+			}
+			transfMatrix = vcg::Matrix44f(t);
+			
+		}
+
 		//autoscale
 		if(token[0].trimmed() == "Bound") {
 			if(par.getBool("Autoscale")) {
 				float meshX = m.cm.trBB().DimX();
 				float meshY = m.cm.trBB().DimY();
 				float meshZ = m.cm.trBB().DimZ();
+
 				float dummyX = token[2].toFloat() - token[1].toFloat();
 				float dummyY = token[4].toFloat() - token[3].toFloat();
 				float dummyZ = token[6].toFloat() - token[5].toFloat();
@@ -316,30 +352,50 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, QTextStream &o
 				float ratioZ = dummyZ / meshY;
 				scale = std::min<float>(ratioX, ratioY);
 				scale = std::min<float>(scale, ratioZ);
+				
+				vcg::Point3f c = m.cm.trBB().Center();
+				vcg::Matrix44f m1,m2,m3,m4,result;
+				m1.SetTranslate(c[0],c[1],c[2]);
+				m2.SetScale(scale,scale,scale);
+				m3.SetTranslate(-c[0],-c[1],-c[2]);
+				m4 = vcg::Inverse(transfMatrix);
+				result = m3 * m2 * m1 * transfMatrix;
+				//out<<"Transform [ ";
+				fprintf(fout,"Transform [ ");
+				for(int i = 0; i<4; i++)
+					for(int j = 0; j<4; j++)
+						//out<<result.ElementAt(i,j)<<" ";
+						fprintf(fout,"%f ",result.ElementAt(i,j));
+				//out<<"]"<<endl;
+				//out<<line<<endl; //will the bound be modify?
+				fprintf(fout,"]\n%s\n",qPrintable(line));
 			}
-			out<<line<<endl; //will the bound be modify?
-		}
-
-		//BAD CODE!!!!
-		if(token[0].trimmed() == "Transform" || token[0].trimmed() == "ShadingInterpolation") {
-			out<<line<<endl;
-			if(line.contains('[') && !line.contains(']')) { //an array maybe contains '\n'
-				while(!line.contains(']')) { //se trovo la fine del file? O_O
-					line = files->topNextLine();
-					out<<line<<endl;
-				}
+			else {				
+				//out<<line<<endl; //will the bound be modify?
+				fprintf(fout,"%s\n",qPrintable(line));
 			}
 		}
 		
+		if(token[0].trimmed() == "ShadingInterpolation") {
+			//out<<line<<endl;		//forzare smooth???
+			fprintf(fout,"%s\n",qPrintable(line));
+		}
+		
 		//some like switch???
-		if(token[0].trimmed() == "Attribute") {
+		if(token[0].trimmed() == "Attribute")
+		{
 //			if(token[1].trimmed() == "\"identifier\"" || token[1].trimmed() == "\"user\"" || token[1].trimmed() == "\"displacementbound\"")
-			if(token[1].trimmed() == "\"user\"" || token[1].trimmed() == "\"displacementbound\"") {
-				out<<line<<endl;
-				if(line.contains('[') && !line.contains(']')) { //array maybe contains '\n'
-					while(!line.contains(']')) {
+			if(token[1].trimmed() == "\"user\"" || token[1].trimmed() == "\"displacementbound\"")
+			{
+				//out<<line<<endl;
+				fprintf(fout,"%s\n",line.data());
+				if(line.contains('[') && !line.contains(']')) //array maybe contains '\n'
+				{
+					while(!line.contains(']'))
+					{
 						line = files->topNextLine();
-						out<<line<<endl;
+						//out<<line<<endl;
+						fprintf(fout,"%s\n",qPrintable(line));
 					}
 				}
 			}
@@ -349,7 +405,8 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, QTextStream &o
 		if(token[0].trimmed() == "Surface") {
 			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
 				foreach(QString textureName, *textureList) {
-					out<<"Surface \"paintedplastic\" \"texturename\" [\"" + getFileNameFromPath(&textureName,false) + ".tx\"]"<<endl;
+					//out<<"Surface \"paintedplastic\" \"texturename\" [\"" + getFileNameFromPath(&textureName,false) + ".tx\"]"<<endl;
+					fprintf(fout,"Surface \"paintedplastic\" \"texturename\" [\"%s.tx\"]\n", getFileNameFromPath(&textureName,false).data());
 				}
 			}
 		}
@@ -362,35 +419,46 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, QTextStream &o
 			QTime tt; tt.start();
 		
 			//replace with opened mesh
-			out<<"Declare \"Cs\" \"facevarying color\""<<endl;
-			out<<"Declare \"st\" \"facevarying float[2]\""<<endl;
-			out<<"Declare \"N\" \"facevarying normal\""<<endl;
+			//out<<"Declare \"Cs\" \"facevarying color\""<<endl;
+			//out<<"Declare \"st\" \"facevarying float[2]\""<<endl;
+			//out<<"Declare \"N\" \"facevarying normal\""<<endl;
+			fprintf(fout,"Declare \"Cs\" \"facevarying color\"\n"
+				"Declare \"st\" \"facevarying float[2]\"\n"
+				"Declare \"N\" \"facevarying normal\"\n");
 			//first: faces topology
-			out<<"PointsPolygons"<<endl<<"["<<endl;
+			//out<<"PointsPolygons"<<endl<<"["<<endl;
+			fprintf(fout,"PointsPolygons\n[\n");
 			for(int i=0; i<m.cm.fn; i++) {
-					out<<"3 ";//<<endl;
+					//out<<"3 "<<endl;
+					fprintf(fout,"3\n");
 			}
-			out<<"]"<<endl<<"["<<endl;
+			//out<<"]"<<endl<<"["<<endl;
+			fprintf(fout,"]\n[\n");
 			qDebug("PointsPolygons %i",tt.elapsed());
 			vcg::tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
 			
 			//second: index of vertex for face
 			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
-					for(int j=0; j<3; ++j) {						
-						int indexOfVertex = (*fi).V(j) - &(m.cm.vert[0]);
-						out<<indexOfVertex<<" ";
-						//if it's the first visit, set visited bit
-						if(!(*fi).V(j)->IsV()) {
-							(*fi).V(j)->SetV();
-						}
-//					out<<endl;
+				for(int j=0; j<3; ++j) {						
+					int indexOfVertex = (*fi).V(j) - &(m.cm.vert[0]);
+					//out<<indexOfVertex<<" ";
+					fprintf(fout,"%i ",indexOfVertex);
+					//if it's the first visit, set visited bit
+					if(!(*fi).V(j)->IsV()) {
+						(*fi).V(j)->SetV();
+					}
+					//out<<endl;
+					fprintf(fout,"\n");
+					
 				}
 			}
-			out<<"]"<<endl;
+			//out<<"]"<<endl;
+			fprintf(fout,"]\n");
 			qDebug("coords %i",tt.elapsed());
 
 			//third: vertex coordinates
-			out<<"\"P\""<<endl<<"["<<endl;			
+			//out<<"\"P\""<<endl<<"["<<endl;
+			fprintf(fout,"\"P\"\n[\n");
 			vcg::Point3f c = m.cm.trBB().Center();
 			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi) {
 				if(vi->IsV()) {
@@ -398,60 +466,81 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, QTextStream &o
 					//p.Import(vi->P());
 					p = vi->P();
 					if(scale!= 1.0) {
-						p[0] = (p[0] + c[0])*scale - c[0];
-						p[1] = (p[1] + c[1])*scale - c[1];
-						p[2] = (p[2] + c[2])*scale - c[2];
+						/*vcg::Point3f c = m.cm.trBB().Center();						
+						vcg::Matrix44f m1,m2,m3;						
+						m1.SetTranslate(c[0],c[1],c[2]);						
+						m2.SetScale(scale,scale,scale);						
+						m3.SetTranslate(-c[0],-c[1],-c[2]);						
+						p = m1 * m2 * m3 * p;*/						
+						//p[0] = (p[0] + c[0])*scale - c[0];						
+						//p[1] = (p[1] + c[1])*scale - c[1];						
+						//p[2] = (p[2] + c[2])*scale - c[2];						
+						//p[0] = (p[0] + x)*scale - x;						
+						//p[1] = (p[1] + y)*scale - y;						
+						//p[2] = (p[2] + z)*scale - z;					
 					}
-					out<<p[0]<<" "<<p[2]<<" "<<p[1];//<<endl;
+					//out<<p[0]<<" "<<p[2]<<" "<<p[1]<<endl;
+					fprintf(fout,"%f %f %f\n",p[0],p[2],p[1]);
 				}
 			}
-			out<<"]"<<endl;
-						qDebug("coords %i",tt.elapsed());
+			//out<<"]"<<endl;
+			fprintf(fout,"]\n");
+			qDebug("coords %i",tt.elapsed());
 
 			//fourth: vertex normal
-			out<<"\"N\""<<endl<<"["<<endl;
+			//out<<"\"N\""<<endl<<"["<<endl;
+			fprintf(fout,"\"N\"\n[\n");
 			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
 				//for each face, foreach vertex write normal
-					for(int j=0; j<3; ++j) {						
-						vcg::Point3f &n=(*fi).V(j)->N();
-						out<<float(n[0])<<" "<<float(n[1])<<" "<<float(n[2]);// << endl;						
+				for(int j=0; j<3; ++j) {						
+					vcg::Point3f &n=(*fi).V(j)->N();						
+					//out<<float(n[0])<<" "<<float(n[1])<<" "<<float(n[2])<< endl;
+					fprintf(fout,"%f %f %f\n",n[0],n[1],n[2]);
 				}
 			}
-			out<<"]"<<endl;
-						qDebug("normal %i",tt.elapsed());
+			//out<<"]"<<endl;
+			fprintf(fout,"]\n");
+			qDebug("normal %i",tt.elapsed());
 
 			//fifth: vertex color	
-			out<<"\"Cs\""<<endl<<"["<<endl;
+			//out<<"\"Cs\""<<endl<<"["<<endl;
+			fprintf(fout,"\"Cs\"\n[\n");
 			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
 				//for each face, foreach vertex write color
-					for(int j=0; j<3; ++j) {						
-						vcg::Color4b &c=(*fi).V(j)->C();
-						out<<float(c[0])/255<<" "<<float(c[1])/255<<" "<<float(c[2])/255<< " ";//<<endl;						
-					}
+				for(int j=0; j<3; ++j) {						
+					vcg::Color4b &c=(*fi).V(j)->C();
+					//out<<float(c[0])/255<<" "<<float(c[1])/255<<" "<<float(c[2])/255<< " "<<endl;
+					fprintf(fout,"%f %f %f\n",float(c[0])/255,float(c[1])/255,float(c[2])/255);
+				}
 			}
-			out<<"]"<<endl;
-						qDebug("color %i",tt.elapsed());
+			//out<<"]"<<endl;
+			fprintf(fout,"]\n");
+			qDebug("color %i",tt.elapsed());
 
 			//sixth: texture coordinates (for edge)
-			out<<"\"st\""<<endl<<"["<<endl;
+			//out<<"\"st\""<<endl<<"["<<endl;
+			fprintf(fout,"\"st\"\n[\n");
 			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
 				//for each face, foreach vertex write uv coord
-					for(int j=0; j<3; ++j) {
-						//CVertexO* vertex = ((*fi).V(j));
-						//vcg::TexCoord2<float,1> tc(((*fi).V(j))->T().U(),((*fi).V(j))->T().V()); ;
-						//out<<tc.U()<<" "<<tc.V()<<endl;
-						out<< (*fi).WT(j).U() <<" "<< (*fi).WT(j).V() << " ";// <<endl;
-					}
+				for(int j=0; j<3; ++j) {
+					//CVertexO* vertex = ((*fi).V(j));
+					//vcg::TexCoord2<float,1> tc(((*fi).V(j))->T().U(),((*fi).V(j))->T().V()); ;
+					//out<<tc.U()<<" "<<tc.V()<<endl;
+					//out<< (*fi).WT(j).U() <<" "<< (*fi).WT(j).V() << " "<<endl;
+					fprintf(fout,"%f %f\n",(*fi).WT(j).U(),(*fi).WT(j).V());
+				}
 			}
-			out<<"]"<<endl;
-						qDebug("texcoords %i",tt.elapsed());
+			//out<<"]"<<endl;
+			fprintf(fout,"]\n");
+			qDebug("texcoords %i",tt.elapsed());
 
 		} 
 
 		
 		if(c == 0) {
 			exit = true;
-			out<<line<<endl; //AttributeEnd
+			//out<<line<<endl; //AttributeEnd
+			fprintf(fout,"%s\n",qPrintable(line));
 		}
 	}
 	//ignore the geometry of dummy object defined in the template
