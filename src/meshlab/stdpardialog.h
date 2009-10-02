@@ -495,6 +495,7 @@ public:
 	StdParFrame(QWidget *p, QWidget *gla=0);
 
 	void loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdPt = 0);
+	void loadFrameContent(RichParameter* par,MeshDocument *mdPt = 0);
 	void readValues(RichParameterSet &curParSet);
 	void resetValues(RichParameterSet &curParSet);
 

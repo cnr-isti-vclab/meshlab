@@ -212,6 +212,25 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdP
 	adjustSize();
 }
 
+void StdParFrame::loadFrameContent( RichParameter* par,MeshDocument *mdPt /*= 0*/ )
+{
+	if(layout()) delete layout();
+	QGridLayout * vLayout = new QGridLayout(this);
+	//vLayout->setAlignment(Qt::AlignLeading);
+	vLayout->setAlignment(Qt::AlignLeading);
+	setLayout(vLayout);
+
+	QString descr;
+	RichWidgetInterfaceConstructor rwc(this);
+
+		par->accept(rwc);
+		//vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
+		stdfieldwidgets.push_back(rwc.lastCreated);
+		helpList.push_back(rwc.lastCreated->helpLab);
+
+	showNormal();
+	adjustSize();
+}
 void StdParFrame::toggleHelp()
 {
 	for(int i = 0; i < helpList.count(); i++)

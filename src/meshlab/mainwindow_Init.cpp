@@ -228,6 +228,7 @@ MainWindow::MainWindow()
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(appName());
 	loadPlugins();
+	loadMeshLabSettings();
 	setStatusBar(new QStatusBar(this));
 	globalStatusBar()=statusBar();
 	qb=new QProgressBar(this);
@@ -622,11 +623,14 @@ void MainWindow::loadPlugins()
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
       {
+
         QAction *filterAction;
-        foreach(filterAction, iFilter->actions())
+        
+				foreach(filterAction, iFilter->actions())
         {
 					//qDebug("Processing action %s",qPrintable(filterAction->text()) );
 					//qDebug("          (%s)", qPrintable(iFilter->filterInfo(filterAction)) );
+					iFilter->initGlobalParameterSet(filterAction,neededGlobalParams);
 					filterMap[filterAction->text()]=filterAction;
           filterAction->setToolTip(iFilter->filterInfo(filterAction));
           connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
@@ -666,7 +670,8 @@ void MainWindow::loadPlugins()
         }
        }
 		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			if (iIO) meshIOPlugins.push_back(iIO);
+			if (iIO) 
+				meshIOPlugins.push_back(iIO);
 
 			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
 			if (iDecorator){
@@ -674,6 +679,7 @@ void MainWindow::loadPlugins()
 				decoratorActionList+=iDecorator->actions();
 				foreach(decoratorAction, iDecorator->actions())
 						{
+							iDecorator->initGlobalParameterSet(decoratorAction,&neededGlobalParams);
 								connect(decoratorAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
 								decoratorAction->setToolTip(iDecorator->Info(decoratorAction));
 								renderMenu->addAction(decoratorAction);
@@ -726,33 +732,61 @@ void MainWindow::loadPlugins()
 
 }
 
+void MainWindow::initGlobalParameters()
+{
+	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundBotCol",QColor(35,0.0,210),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
+	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundTopCol",QColor(225,225,225),"MeshLab GLarea's BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
+	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::GLLogAreaCol",QColor(202,0.0,40),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
+	neededGlobalParams.addParam(new RichInt("MeshLab::Info::Log",0,"Type of info to be shown in the MeshLab's Log Area","Type of info to be shown in the MeshLab's Log Area"));
+}
+
 void MainWindow::loadMeshLabSettings()
 {
-	QDomDocument doc("MeshLabSettings");
-	QFile file("meshlabsettings.xml");
-	if (!file.open(QIODevice::ReadOnly))
-		return;
-	if (!doc.setContent(&file)) 
-	{
-		file.close();
-		return;
-	}
-	file.close();
+	initGlobalParameters();
+	QSettings settings;
+	QStringList klist = settings.allKeys();
 
-	QDomElement docElem = doc.documentElement();
-
-	QDomNode n = docElem.firstChild();
-	while(!n.isNull()) 
+	for(int ii = 0;ii < klist.size();++ii)
 	{
-		QDomElement e = n.toElement(); 
-		RichParameter* rpar = NULL;
-		if(!e.isNull()) 
+		QDomDocument doc;
+		QDomElement docElem = doc.createElement(klist.at(ii));
+
+		QDomNode n = docElem.firstChild();
+		while(!n.isNull()) 
 		{
-			RichParameterFactory::create(e,&rpar);
-			globalParams.addParam(rpar);
+			QDomElement e = n.toElement(); 
+			RichParameter* rpar = NULL;
+			if(!e.isNull()) 
+			{
+				RichParameterFactory::create(e,&rpar);
+				globalParams.addParam(rpar);
+			}
+			n = n.nextSibling();
 		}
-		n = n.nextSibling();
 	}
+
+	for(int ii = 0;ii < neededGlobalParams.paramList.size();++ii)
+	{
+		RichParameter* rpar = globalParams.findParameter(neededGlobalParams.paramList.at(ii)->name);
+		if (!rpar)
+		{
+			RichParameterCopyConstructor v;
+			neededGlobalParams.paramList.at(ii)->accept(v);
+			globalParams.paramList.push_back(v.lastCreated);
+			
+			QDomDocument doc("MeshLabSettings");
+			RichParameterXMLVisitor vxml(doc);
+			v.lastCreated->accept(vxml);
+			doc.appendChild(vxml.parElem);
+			QString docstring =  doc.toString();
+			QSettings setting;
+			setting.value(v.lastCreated->name,QVariant(docstring));
+		}	
+		//delete neededGlobalParams.paramList.at(ii);
+	}
+	for(int ii = 0;ii < neededGlobalParams.paramList.size();++ii)
+		delete neededGlobalParams.paramList.at(ii);
+	neededGlobalParams.clear();
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)

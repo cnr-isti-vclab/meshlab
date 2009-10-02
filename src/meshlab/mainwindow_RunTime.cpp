@@ -207,6 +207,7 @@ Added Drag n drog opening of files (thanks to Valentino Fiorin)
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/clean.h>
+#include <wrap/qt/col_qt_convert.h>
 
 using namespace std;
 using namespace vcg;
@@ -1265,17 +1266,17 @@ void MainWindow::showLayerDlg() {if(GLA() != 0) 	GLA()->layerDialog->setVisible(
 
 void MainWindow::setCustomize()
 {
-	CustomDialog dialog(this);
+	CustomDialog dialog(globalParams,this);
 	ColorSetting cs=GLA()->getCustomSetting();
-	dialog.loadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor,GLA()->getLogLevel());
+	//dialog.loadCurrentSetting(globalParams);
 	if (dialog.exec()==QDialog::Accepted)
 	{
 		// If press Ok set the selected colors in glArea
-		cs.bColorBottom=dialog.getBkgBottomColor();
-		cs.bColorTop=dialog.getBkgTopColor();
-		cs.lColor=dialog.getLogAreaColor();
+		cs.bColorBottom=vcg::ColorConverter::convertQColorToColor4<unsigned char>(globalParams.findParameter("MeshLab::Appearance::BackGroundBotCol")->val->getColor());
+		cs.bColorTop=   vcg::ColorConverter::convertQColorToColor4<unsigned char>(globalParams.findParameter("MeshLab::Appearance::BackGroundTopCol")->val->getColor());
+		cs.lColor=      vcg::ColorConverter::convertQColorToColor4<unsigned char>(globalParams.findParameter("MeshLab::Appearance::GLLogAreaCol")->val->getColor());
     GLA()->setCustomSetting(cs);
-		GLA()->setLogLevel(dialog.getLogLevel());
+		GLA()->setLogLevel(globalParams.findParameter("MeshLab::Info::Log")->val->getInt());
 	}
 }
 

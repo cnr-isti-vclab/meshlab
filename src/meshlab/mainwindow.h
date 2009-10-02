@@ -292,6 +292,7 @@ private slots:
 	void wrapSetActiveSubWindow(QWidget* window);
 
 private:
+	void initGlobalParameters();
 	void createStdPluginWnd();
 	void createActions();
 	void createMenus();
@@ -325,6 +326,7 @@ private:
 	//*********WARNING*******
 	//it should be moved away from here! MeshLabServer needs it too
 	RichParameterSet globalParams;
+	RichParameterSet neededGlobalParams;
   
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 

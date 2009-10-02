@@ -49,34 +49,46 @@ Added copyright info
 ****************************************************************************/
 
 #include "ui_customDialog.h"
-#include <QColor>
 #include <QDialog>
+#include <QDockWidget>
 #include <QColorDialog>
-//#include <wrap/gl/trimesh.h>
-#include <vcg/space/color4.h>
+#include "filterparameter.h"
+#include "stdpardialog.h"
+
+
+class SettingDialog : public QDialog
+{
+Q_OBJECT
+public:
+	SettingDialog(RichParameter* rpar,QWidget* parent = 0);
+	~SettingDialog();
+public slots:
+	void save();
+	void reset();
+	void apply();
+
+private:
+	StdParFrame frame;
+	RichParameter* richpar;
+	QPushButton* savebut;
+	QPushButton* applybut;
+	QPushButton* resetbut;
+};
 
 class CustomDialog : public QDialog
 {
 Q_OBJECT
 public:
-	CustomDialog(QWidget *parent = 0);
+	CustomDialog(RichParameterSet& parset,QWidget *parent = 0);
+	~CustomDialog();
+	//void loadCurrentSetting(RichParameterSet& parset);
 
-	void loadCurrentSetting(const vcg::Color4b& bkgBottom,const vcg::Color4b& bkgTop,const vcg::Color4b& logArea,short logLevel);
-  
-	vcg::Color4b getBkgBottomColor()	{ return bkgBottomColor;}
-	vcg::Color4b getBkgTopColor()			{ return bkgTopColor;		}
-	vcg::Color4b getLogAreaColor()		{ return logAreaColor;	}
-	short getLogLevel()								{ return ui.comboBoxInfoType->currentIndex()-1;		}
-
-private slots:
-	void setBkgBottomColor();
-	void setBkgTopColor();
-	void setLogAreaColor();
+public slots:
+	void openSubDialog(QListWidgetItem* itm);
 		
 private:
-	Ui::customDialog ui;
-
-	vcg::Color4b bkgBottomColor;
-	vcg::Color4b bkgTopColor;
-	vcg::Color4b logAreaColor;
+	RichParameterSet& richparset;
+	QListWidget* listwid;
+	QMap<QListWidgetItem*,RichParameter*> mp; 
+	void dispatch(const RichParameter& par);
 };

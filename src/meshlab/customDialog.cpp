@@ -50,86 +50,92 @@ Added copyright info
 
 #include "customDialog.h"
 #include <QPalette>
+#include "stdpardialog.h"
 
 using namespace vcg;
 
-CustomDialog::CustomDialog(QWidget * parent)
-		:QDialog(parent)
+CustomDialog::CustomDialog(RichParameterSet& parset,QWidget * parent)
+		:QDialog(parent),richparset(parset)
 {
-	ui.setupUi(this);
-	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(accept()));
-	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-	connect(ui.pushButtonBottomBg,SIGNAL(clicked()),this,SLOT(setBkgBottomColor()));
-	connect(ui.pushButtonTopBg,SIGNAL(clicked()),this,SLOT(setBkgTopColor()));
-	connect(ui.pushButtonLogArea,SIGNAL(clicked()),this,SLOT(setLogAreaColor()));
-	connect(ui.comboBoxInfoType,SIGNAL(editTextChanged()),this,SLOT(setLogLevel()));
-	setFixedSize(260,155);
-
-	// Added for Qt 4.1
-#if (QT_VERSION >= 0x040100)
-  ui.labelBottmBg->setAutoFillBackground(true);
-	ui.labelTopBg->setAutoFillBackground(true);
-	ui.labelLogArea->setAutoFillBackground(true);
-#endif
-
-	//Error=0, Warning=1, Info=2, Debug=3, Direct=4, OnlyFileLog=5, OnlyConsole=6
-	ui.comboBoxInfoType->addItem("Any");
-	ui.comboBoxInfoType->addItem("Errors");
-	ui.comboBoxInfoType->addItem("Warnigs");
-	ui.comboBoxInfoType->addItem("Info");
-	ui.comboBoxInfoType->addItem("Debug");
-	//ui.comboBoxInfoType->addItem("Direct");
-	//ui.comboBoxInfoType->addItem("Only file");
-	//ui.comboBoxInfoType->addItem("Only Console");
-
+	setModal(false);
+	QVBoxLayout* layout = new QVBoxLayout(parent);
+	setLayout(layout);
+	listwid = new QListWidget(this); 
+	for(int ii = 0;ii < richparset.paramList.size();++ii)
+	{
+		//butt = new QPushButton(richparset.paramList.at(ii)->name,this);
+		QListWidgetItem* item = new QListWidgetItem(parset.paramList.at(ii)->name,listwid);
+		mp.insert(item,parset.paramList.at(ii));
+		//connect(butt,SIGNAL(clicked()),this,SLOT(openSubDialog()));
+	}
+	layout->addWidget(listwid);
+	connect(listwid,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(openSubDialog(QListWidgetItem*)));
 }
 
-
-void CustomDialog::loadCurrentSetting(const Color4b& bb,const Color4b& bt,const Color4b& l,short logLevel)
+void CustomDialog::openSubDialog( QListWidgetItem* itm )
 {
-	bkgBottomColor=bb;
-	bkgTopColor=bt;
- 	logAreaColor=l;
+	QMap<QListWidgetItem*,RichParameter*>::iterator it = mp.find(itm);
+	if (it != mp.end())
+	{
+		SettingDialog* setdial = new SettingDialog(it.value(),this);
+		setdial->exec();
+		delete setdial;
+	}
+}
 
-	// Changes the palette in the labels
-	QPalette pbb(QColor(bb.V(0),bb.V(1),bb.V(2)));
-	QPalette pbt(QColor(bt.V(0),bt.V(1),bt.V(2)));
-	QPalette pl(QColor(l.V(0),l.V(1),l.V(2)));
+CustomDialog::~CustomDialog()
+{
+	delete listwid;
+	//RichParameter will be destroyed elsewhere
+	//for(QMap<QListWidgetItem*,RichParameter*>::iterator it = mp.begin();it != mp.end();it++)
+	//	delete it.key();
+}
+//Maybe a MeshDocument parameter is needed. See loadFrameContent definition
+SettingDialog::SettingDialog( RichParameter* rpar,QWidget* parent /*= 0*/ )
+:QDialog(parent),frame(this),richpar(rpar)
+{
+	setModal(true);
+	savebut = new QPushButton("Save",this);
+	resetbut = new QPushButton("Reset",this);
+	applybut = new QPushButton("Apply",this);
+	QGridLayout* dialoglayout = new QGridLayout(parent);
 	
-	ui.comboBoxInfoType->setCurrentIndex(logLevel+1);
-	
-	
-	ui.labelBottmBg->setPalette(pbb);
-	ui.labelTopBg->setPalette(pbt);
-	ui.labelLogArea->setPalette(pl);
+	dialoglayout->addWidget(savebut,1,0);
+	dialoglayout->addWidget(resetbut,1,1);
+	dialoglayout->addWidget(applybut,1,2);
+
+	frame.loadFrameContent(rpar);
+	dialoglayout->addWidget(&frame,0,0);
+	setLayout(dialoglayout);
+	connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
+	connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
+	connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
 }
 
-void CustomDialog::setBkgBottomColor()
+void SettingDialog::save()
 {
-	QColor bb=QColorDialog::getColor(QColor(255,255,255,255),this);
-	QPalette palette(bb);
-	ui.labelBottmBg->setPalette(palette);
-	bkgBottomColor.V(0)=bb.red();
-	bkgBottomColor.V(1)=bb.green();
-	bkgBottomColor.V(2)=bb.blue();
+	QDomDocument doc("MeshLabSettings");
+	RichParameterXMLVisitor v(doc);
+	richpar->accept(v);
+	QString docstring =  doc.toString();
+	QSettings setting;
+	setting.value(richpar->name,QVariant(docstring));
 }
 
-void CustomDialog::setBkgTopColor()
+void SettingDialog::apply()
 {
-	QColor bt=QColorDialog::getColor(QColor(255,255,255,255),this);
-	QPalette palette(bt);
-	ui.labelTopBg->setPalette(palette);
-	bkgTopColor.V(0)=bt.red();
-	bkgTopColor.V(1)=bt.green();
-	bkgTopColor.V(2)=bt.blue();
+
 }
 
-void CustomDialog::setLogAreaColor()
+void SettingDialog::reset()
 {
-	QColor l=QColorDialog::getColor(QColor(255,255,255,255),this);
-	QPalette palette(l);
-	ui.labelLogArea->setPalette(palette);
-	logAreaColor.V(0)=l.red();
-	logAreaColor.V(1)=l.green();
-	logAreaColor.V(2)=l.blue();
+
+}
+
+SettingDialog::~SettingDialog()
+{
+	delete savebut;
+	delete resetbut;
+	delete applybut;
+	//RichParameter Value will be destroyed elsewhere
 }
