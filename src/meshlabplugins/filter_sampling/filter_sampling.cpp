@@ -541,6 +541,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 												"the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
 												"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results."));
 				parlst.addParam(new RichBool ("SampleEdge", true, "Sample Edges", "See the above comment."));
+				parlst.addParam(new RichBool ("SampleFauxEdge", false, "Sample FauxEdge", "See the above comment."));
 				parlst.addParam(new RichBool ("SampleFace", true, "Sample Faces", "See the above comment."));
 				parlst.addParam(new RichInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
 												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
@@ -837,6 +838,7 @@ case FP_CLUSTERED_SAMPLING :
 			bool saveSampleFlag=par.getBool("SaveSample");
 			bool sampleVert=par.getBool("SampleVert");
 			bool sampleEdge=par.getBool("SampleEdge");
+			bool sampleFauxEdge=par.getBool("SampleFauxEdge");
 			bool sampleFace=par.getBool("SampleFace");
 
 			
@@ -866,7 +868,7 @@ case FP_CLUSTERED_SAMPLING :
 			if(sampleVert) 
 					tri::SurfaceSampling<CMeshO,HausdorffSampler>::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
 			if(sampleEdge) 
-					tri::SurfaceSampling<CMeshO,HausdorffSampler>::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"));
+					tri::SurfaceSampling<CMeshO,HausdorffSampler>::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"),sampleFauxEdge);
 			if(sampleFace)	
 					tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 				
