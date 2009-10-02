@@ -870,10 +870,15 @@ case FP_CLUSTERED_SAMPLING :
 			if(sampleFace)	
 					tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 				
-			Log("Hausdorf Distance computed");						
+			Log("Hausdorff Distance computed");						
 			Log("     Sample %i",hs.n_total_samples);						
 			Log("     min : %f   max %f",hs.getMinDist(),hs.getMaxDist());						
 			Log("     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
+			float d = mm0->cm.bbox.Diag();
+			Log("\nValues w.r.t. BBox Diag (%f)",d);						
+			Log("     min : %f   max %f",hs.getMinDist()/d,hs.getMaxDist()/d);						
+			Log("     mean : %f   RMS : %f",hs.getMeanDist()/d,hs.getRMSDist()/d);						
+			
 			
 			if(saveSampleFlag)
 				{
