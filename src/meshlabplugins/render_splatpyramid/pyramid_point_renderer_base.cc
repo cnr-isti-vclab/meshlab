@@ -7,8 +7,6 @@
 
 #include "pyramid_point_renderer_base.h"
 
-#include "GL/glut.h"
-
 #include <stdexcept>
 
 using std::runtime_error;
@@ -492,6 +490,7 @@ void PyramidPointRendererBase::createFBO() {
 		for (int i = 0; i < fbo_buffers_count; i++) {
 			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, fbo_buffers[i], FBO_TYPE, fbo_textures[i], level);
 		}
+		check_for_ogl_error("fbo attachment");
 		checkFramebufferStatus( __func__ );
 
 		fbo_lod[level]->release();
