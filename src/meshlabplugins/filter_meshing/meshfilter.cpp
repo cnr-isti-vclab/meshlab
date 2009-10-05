@@ -29,6 +29,8 @@
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/hole.h>
 #include <vcg/complex/trimesh/refine_loop.h>
+#include <vcg/complex/trimesh/bitquad_support.h>
+#include <vcg/complex/trimesh/bitquad_creation.h>
 #include <vcg/complex/trimesh/clustering.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/position.h>
@@ -66,7 +68,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 		FP_CLOSE_HOLES<<
 		FP_FREEZE_TRANSFORM<<
 		FP_TRANSFORM<<
-		FP_CYLINDER_UNWRAP;
+		FP_CYLINDER_UNWRAP<<
+		FP_REFINE_CATMULL;
 
 
   FilterIDType tt;
@@ -110,6 +113,7 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :
 		case FP_CLUSTERING :
 		case FP_CLOSE_HOLES:
+		case FP_REFINE_CATMULL:
          return MeshFilterInterface::Remeshing;
 		case FP_NORMAL_EXTRAPOLATION:
 		case FP_INVERT_FACES:
@@ -151,6 +155,7 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 		case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions");
 		case FP_CLOSE_HOLES:	          return QString("Close Holes");
 		case FP_CYLINDER_UNWRAP:	     return QString("Geometric Cylindrical Unwrapping");
+		case FP_REFINE_CATMULL:				return QString("Catmull-Clark Subdivision Surfaces");
 
 
 
@@ -193,6 +198,7 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_COMPUTE_PRINC_CURV_DIR:			return tr("Compute the principal directions of curvature with several algorithms");
 		case FP_CLOSE_HOLES :								return tr("Close holes smaller than a given threshold");
 		case FP_CYLINDER_UNWRAP:						return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
+		case FP_REFINE_CATMULL:				return QString("Apply the Catmull-Clark Subdivision Surfaces. Note Position of the new vertces is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generate a quad mesh otherwise it honores it the faux-edge bits");
 
 		default : assert(0);
 	}
@@ -203,6 +209,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
+		case FP_REFINE_CATMULL : return MeshModel::MM_FACEFACETOPO;
     case FP_REMOVE_NON_MANIFOLD_FACE:
     case FP_LOOP_SS :
     case FP_BUTTERFLY_SS :
@@ -728,6 +735,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 
 			return true;
 		}
+		if(ID(filter) == (FP_REFINE_CATMULL))
+		{
+			tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
+			tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);			
+			return true;
+		}
+	 		
 	return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)

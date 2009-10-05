@@ -121,6 +121,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
           FP_CLOSE_HOLES_TRIVIAL,
           FP_CLOSE_HOLES,
 					FP_CYLINDER_UNWRAP,
+					FP_REFINE_CATMULL,
           } ;
 
 
