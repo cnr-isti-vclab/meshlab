@@ -197,10 +197,14 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 	QDir tmp(destDir);
 	if(!(tmp.entryList(QDir::Dirs | QDir::NoDotAndDotDot)).contains("Maps"))
+	{
 		if(!tmp.mkdir("Maps"))
 			return false;
 		else
 			tmp.cd("Maps");
+	}
+	else
+		tmp.cd("Maps");
 
 	//2. Copy all texture in outDir (magari in una cartella a parte)	
 	foreach(QString textureName, textureList) {
@@ -208,9 +212,14 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		str = getDirFromPath(&str);
 		QFile srcFile(str + QDir::separator() + textureName);
 		
-		QString newTex = tmp.absolutePath() + QDir::separator() + getFileNameFromPath(&textureName);
+		QString newTex = tmp.absolutePath() + QDir::separator() + getFileNameFromPath(&textureName,false);
 		if(srcFile.exists())
-			srcFile.copy(newTex);
+		{
+			//srcFile.copy(newTex);
+			QImage image;
+			image.load(srcFile.fileName());
+			image.save(newTex+".tiff","Tiff");
+		}
 		else
 			return false;
 	}
@@ -229,7 +238,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		// ********* forse pixie ha un exe che crea le texture..... **********
 		if(token[0].trimmed() == "FrameBegin" && token[1].trimmed() == "1") {
 			foreach(QString textureName, textureList) {
-				QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName) + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 2 2");
+				QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName,false) + ".tiff" + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 1 1");
 				//out<<makeTexture<<endl;
 				fprintf(fout,"%s\n",qPrintable(makeTexture));
 			}
@@ -353,13 +362,12 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 				scale = std::min<float>(ratioX, ratioY);
 				scale = std::min<float>(scale, ratioZ);
 				
-				vcg::Point3f c = m.cm.trBB().Center();
-				vcg::Matrix44f m1,m2,m3,m4,result;
-				m1.SetTranslate(c[0],c[1],c[2]);
-				m2.SetScale(scale,scale,scale);
-				m3.SetTranslate(-c[0],-c[1],-c[2]);
-				m4 = vcg::Inverse(transfMatrix);
-				result = m3 * m2 * m1 * transfMatrix;
+				//vcg::Point3f c = m.cm.trBB().Center();
+				//vcg::Matrix44f scaleMatrix,translateMatrix,result;
+				//scaleMatrix.SetScale(scale,scale,scale);
+				//translateMatrix.SetTranslate(-c[0],-c[1],-c[2]);
+				//result = transfMatrix * scaleMatrix * translateMatrix;
+				vcg::Matrix44f result = transfMatrix;
 				//out<<"Transform [ ";
 				fprintf(fout,"Transform [ ");
 				for(int i = 0; i<4; i++)
@@ -372,7 +380,14 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 			}
 			else {				
 				//out<<line<<endl; //will the bound be modify?
-				fprintf(fout,"%s\n",qPrintable(line));
+				fprintf(fout,"Transform [ ");
+				for(int i = 0; i<4; i++)
+					for(int j = 0; j<4; j++)
+						//out<<result.ElementAt(i,j)<<" ";
+						fprintf(fout,"%f ",transfMatrix.ElementAt(i,j));
+				//out<<"]"<<endl;
+				//out<<line<<endl; //will the bound be modify?
+				fprintf(fout,"]\n%s\n",qPrintable(line));
 			}
 		}
 		
@@ -388,7 +403,7 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 			if(token[1].trimmed() == "\"user\"" || token[1].trimmed() == "\"displacementbound\"")
 			{
 				//out<<line<<endl;
-				fprintf(fout,"%s\n",line.data());
+				fprintf(fout,"%s\n",qPrintable(line));
 				if(line.contains('[') && !line.contains(']')) //array maybe contains '\n'
 				{
 					while(!line.contains(']'))
@@ -406,7 +421,7 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
 				foreach(QString textureName, *textureList) {
 					//out<<"Surface \"paintedplastic\" \"texturename\" [\"" + getFileNameFromPath(&textureName,false) + ".tx\"]"<<endl;
-					fprintf(fout,"Surface \"paintedplastic\" \"texturename\" [\"%s.tx\"]\n", getFileNameFromPath(&textureName,false).data());
+					fprintf(fout,"Surface \"paintedplastic\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 				}
 			}
 		}
@@ -447,10 +462,9 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 					if(!(*fi).V(j)->IsV()) {
 						(*fi).V(j)->SetV();
 					}
-					//out<<endl;
-					fprintf(fout,"\n");
-					
 				}
+				//out<<endl;
+				fprintf(fout,"\n");
 			}
 			//out<<"]"<<endl;
 			fprintf(fout,"]\n");
@@ -459,28 +473,17 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 			//third: vertex coordinates
 			//out<<"\"P\""<<endl<<"["<<endl;
 			fprintf(fout,"\"P\"\n[\n");
-			vcg::Point3f c = m.cm.trBB().Center();
+			vcg::Point3f centerBB = m.cm.trBB().Center();
+			vcg::Matrix44f scaleMatrix,translateMatrix;						
+			scaleMatrix.SetScale(scale,scale,scale);
+			translateMatrix.SetTranslate(-centerBB[0],-centerBB[1],-centerBB[2]);
 			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi) {
 				if(vi->IsV()) {
 					vcg::Point3f p;
-					//p.Import(vi->P());
 					p = vi->P();
-					if(scale!= 1.0) {
-						/*vcg::Point3f c = m.cm.trBB().Center();						
-						vcg::Matrix44f m1,m2,m3;						
-						m1.SetTranslate(c[0],c[1],c[2]);						
-						m2.SetScale(scale,scale,scale);						
-						m3.SetTranslate(-c[0],-c[1],-c[2]);						
-						p = m1 * m2 * m3 * p;*/						
-						//p[0] = (p[0] + c[0])*scale - c[0];						
-						//p[1] = (p[1] + c[1])*scale - c[1];						
-						//p[2] = (p[2] + c[2])*scale - c[2];						
-						//p[0] = (p[0] + x)*scale - x;						
-						//p[1] = (p[1] + y)*scale - y;						
-						//p[2] = (p[2] + z)*scale - z;					
-					}
+					p = scaleMatrix * translateMatrix * p;
 					//out<<p[0]<<" "<<p[2]<<" "<<p[1]<<endl;
-					fprintf(fout,"%f %f %f\n",p[0],p[2],p[1]);
+					fprintf(fout,"%f %f %f\n",p[0],p[1],p[2]);
 				}
 			}
 			//out<<"]"<<endl;
