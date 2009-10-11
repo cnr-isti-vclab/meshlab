@@ -1,6 +1,7 @@
 #include <filter_hqrender.h>
 #include <QtGui>
 #include <QDir>
+#include <QProcess>
 //#include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -208,10 +209,10 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 	//2. Copy all texture in outDir (magari in una cartella a parte)	
 	foreach(QString textureName, textureList) {
-		QString str(m.fileName.c_str());
+		QString str(m.fileName.c_str()); //mesh directory
 		str = getDirFromPath(&str);
 		QFile srcFile(str + QDir::separator() + textureName);
-		
+
 		QString newTex = tmp.absolutePath() + QDir::separator() + getFileNameFromPath(&textureName,false);
 		if(srcFile.exists())
 		{
@@ -259,6 +260,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			line = token[0] + " " + QString::number(par.getInt("FormatX")) + " " + QString::number(par.getInt("FormatY")) + " " + QString::number(par.getFloat("PixelAspectRatio"));
 		}
 
+		
+
 		//looking for a dummy object...
 		if(token[0].trimmed() == "Attribute") {
 			if(token[1].trimmed() == "\"identifier\"") {
@@ -299,8 +302,54 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		}
 	}
 	fclose(fout);
+	
 	//va copiata una quantita indefinita di file dal template e organizzata in directory ;)
-	//va copiata l'immagine alla fine
+	
+	//run the aqsis rendering
+	QStringList env = QProcess::systemEnvironment();
+	QString aqsisDir;
+	foreach(QString envElem, env) {
+		if(envElem.contains("AQSISHOME")) {
+			aqsisDir = envElem.remove("AQSISHOME=");
+			break;
+		}
+	}
+#if defined(Q_OS_WIN)
+	//if os is win and a dir contains a space, it must be wrapped in quotes (..\"Program files"\..)
+	QStringList dirs = aqsisDir.split(QDir::separator());
+	aqsisDir.clear();
+	for(int i = 0; i < dirs.size(); i++) {
+		if(!dirs[i].contains(" "))
+			aqsisDir += dirs[i];
+		else
+			aqsisDir = aqsisDir + "\"" + dirs[i] + "\"";
+		aqsisDir += QDir::separator();
+	}
+	dirs.clear();
+	dirs = dest.split(QDir::separator());
+	dest.clear();
+	for(int i = 0; i < dirs.size(); i++) {
+		if(!dirs[i].contains(" "))
+			dest += dirs[i];
+		else
+			dest = dest + "\"" + dirs[i] + "\"";
+		
+		if(!dirs[i].contains("."))
+			dest += QDir::separator();
+	}
+#endif
+	QProcess renderProcess;
+	renderProcess.setWorkingDirectory(destDir); //for the shaders/maps reference
+	QString toRun = aqsisDir+"bin"+QDir::separator()+"aqsis.exe " + destFile;
+	renderProcess.start(toRun);
+	if (!renderProcess.waitForFinished(-1))
+         return false; //devo?
+
+	//the image is copied in mesh folder
+	QString meshDir(m.fileName.c_str());
+	meshDir = getDirFromPath(&meshDir);
+	QFile::copy(destDir + QDir::separator() + par.getString("ImageName"), meshDir + QDir::separator() + par.getString("ImageName"));
+    
 	return true;
 }
 
@@ -421,7 +470,9 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
 				foreach(QString textureName, *textureList) {
 					//out<<"Surface \"paintedplastic\" \"texturename\" [\"" + getFileNameFromPath(&textureName,false) + ".tx\"]"<<endl;
-					fprintf(fout,"Surface \"paintedplastic\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					//fprintf(fout,"Surface \"paintedplastic\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					fprintf(fout,"Surface \"sticky_texture\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+
 				}
 			}
 		}
@@ -483,7 +534,7 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 					p = vi->P();
 					p = scaleMatrix * translateMatrix * p;
 					//out<<p[0]<<" "<<p[2]<<" "<<p[1]<<endl;
-					fprintf(fout,"%f %f %f\n",p[0],p[1],p[2]);
+					fprintf(fout,"%f %f %f\n",p[0],p[2],p[1]);
 				}
 			}
 			//out<<"]"<<endl;
@@ -514,6 +565,7 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 					vcg::Color4b &c=(*fi).V(j)->C();
 					//out<<float(c[0])/255<<" "<<float(c[1])/255<<" "<<float(c[2])/255<< " "<<endl;
 					fprintf(fout,"%f %f %f\n",float(c[0])/255,float(c[1])/255,float(c[2])/255);
+					//resto in modulo?
 				}
 			}
 			//out<<"]"<<endl;
@@ -530,7 +582,8 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout /*Q
 					//vcg::TexCoord2<float,1> tc(((*fi).V(j))->T().U(),((*fi).V(j))->T().V()); ;
 					//out<<tc.U()<<" "<<tc.V()<<endl;
 					//out<< (*fi).WT(j).U() <<" "<< (*fi).WT(j).V() << " "<<endl;
-					fprintf(fout,"%f %f\n",(*fi).WT(j).U(),(*fi).WT(j).V());
+					//fprintf(fout,"%f %f\n",(*fi).WT(j).U(),(*fi).WT(j).V());
+					fprintf(fout,"%f %f\n",(*fi).WT(j).V(),(*fi).WT(j).U());
 				}
 			}
 			//out<<"]"<<endl;
