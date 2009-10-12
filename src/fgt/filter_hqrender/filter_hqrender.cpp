@@ -348,7 +348,12 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//the image is copied in mesh folder
 	QString meshDir(m.fileName.c_str());
 	meshDir = getDirFromPath(&meshDir);
-	QFile::copy(destDir + QDir::separator() + par.getString("ImageName"), meshDir + QDir::separator() + par.getString("ImageName"));
+	QString finalImage = meshDir + QDir::separator() + par.getString("ImageName");
+	if(QFile::exists(finalImage)) {
+		//delete without control?
+		QFile::remove(finalImage);
+	}
+	QFile::copy(destDir + QDir::separator() + par.getString("ImageName"), finalImage);
     
 	return true;
 }
