@@ -34,14 +34,19 @@ class MainWindow;
 class QTableWidget;
 class GLLogStream;
 
-#include "ui_layerDialog.h"
 #include <QDialog>
+
+namespace Ui 
+{
+	class layerDialog;
+} 
 
 class LayerDialog : public QDockWidget
 {
 	Q_OBJECT
 	public:
      LayerDialog(QWidget *parent = 0);
+	 ~LayerDialog();
      void updateTable();
      void updateLog(GLLogStream &Log);
 
@@ -52,7 +57,7 @@ class LayerDialog : public QDockWidget
 		void showLayerMenu();
 
 	private:
-		Ui::layerDialog ui;
+		Ui::layerDialog* ui;
 		GLArea *gla;
 		MainWindow *mw;
 };

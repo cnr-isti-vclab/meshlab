@@ -48,33 +48,35 @@
 
  ****************************************************************************/
 
+#include "ui_renametexture.h"
 #include "changetexturename.h"
 #include <QtGui>
 
 ChangeTextureNameDialog::ChangeTextureNameDialog(QWidget *parent) : QDialog(parent)
 {
+	ui = new Ui::RenameTextureDialog();
 	InitDialog();
 }
 
 ChangeTextureNameDialog::ChangeTextureNameDialog(QWidget *parent,std::string oldtexture) : QDialog(parent), texture(oldtexture)
 {
 	InitDialog();
-	ui.newtexturename->setText(QString(texture.c_str()));
+	ui->newtexturename->setText(QString(texture.c_str()));
 }
 
 void ChangeTextureNameDialog::InitDialog()
 {
-	ChangeTextureNameDialog::ui.setupUi(this);
-	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
-	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
-	connect(ui.searchButton,SIGNAL(clicked()),this,SLOT(SlotSearchTextureName()));
-	ui.newtexturename->setWindowTitle("Rename Texture");
+	ChangeTextureNameDialog::ui->setupUi(this);
+	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
+	connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
+	connect(ui->searchButton,SIGNAL(clicked()),this,SLOT(SlotSearchTextureName()));
+	ui->newtexturename->setWindowTitle("Rename Texture");
 }
 
 void ChangeTextureNameDialog::SlotOkButton()
 {
-	this->texture = ui.newtexturename->text().toStdString();
-	ui.newtexturename->setText(QString(texture.c_str()));
+	this->texture = ui->newtexturename->text().toStdString();
+	ui->newtexturename->setText(QString(texture.c_str()));
 }
 
 void ChangeTextureNameDialog::SlotCancelButton()
@@ -88,6 +90,11 @@ void ChangeTextureNameDialog::SlotSearchTextureName()
 	if(this->texture.size() > 0)
 	{
 		QStringList lists = QString(texture.c_str()).split('/');
-		ui.newtexturename->setText(lists[lists.size()-1]);
+		ui->newtexturename->setText(lists[lists.size()-1]);
 	}
+}
+
+ChangeTextureNameDialog::~ChangeTextureNameDialog()
+{
+	delete ui;
 }

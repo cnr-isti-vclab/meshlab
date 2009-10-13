@@ -38,10 +38,14 @@ Added snapshot save dialog (not used yet)
 
 ****************************************************************************/
 
-#include "ui_savesnapshotDialog.h"
 #include "glarea.h"
 #include <QDialog>
 #include <QFileDialog>
+
+namespace Ui 
+{
+	class SSDialog;
+} 
 
 class SaveSnapshotDialog: public QDialog
 {
@@ -49,6 +53,7 @@ Q_OBJECT
 
 public:
 	SaveSnapshotDialog(QWidget *parent = 0);
+	~SaveSnapshotDialog();
 	void setValues(const SnapshotSetting &ss);
 	SnapshotSetting getValues();
 	
@@ -56,6 +61,6 @@ private slots:
 	void browseDir();
 
 private:
-	Ui::SSDialog ui;
+	Ui::SSDialog* ui;
 	SnapshotSetting settings;
 };

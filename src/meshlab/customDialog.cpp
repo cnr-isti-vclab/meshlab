@@ -48,6 +48,7 @@ Added copyright info
 
 ****************************************************************************/
 
+#include "ui_customDialog.h"
 #include "customDialog.h"
 #include <QPalette>
 #include "stdpardialog.h"

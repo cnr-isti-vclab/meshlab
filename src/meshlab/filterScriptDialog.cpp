@@ -35,6 +35,7 @@ added Filter History Dialogs
 ****************************************************************************/
 #include <QFileDialog>
 
+#include "ui_filterScriptDialog.h"
 #include "filterScriptDialog.h"
 #include "mainwindow.h"
 #include "stdpardialog.h"
@@ -45,26 +46,27 @@ added Filter History Dialogs
 FilterScriptDialog::FilterScriptDialog(QWidget * parent)
 		:QDialog(parent)
 {
-  FilterScriptDialog::ui.setupUi(this);
+	ui = new Ui::scriptDialog();
+  FilterScriptDialog::ui->setupUi(this);
   scriptPtr=0;
-  connect(ui.okButton, SIGNAL(clicked()), this, SLOT(applyScript()));
-  connect(ui.clearScriptButton,SIGNAL(clicked()), this, SLOT(clearScript()));
-  connect(ui.saveScriptButton, SIGNAL(clicked()), this, SLOT(saveScript()));
-  connect(ui.openScriptButton, SIGNAL(clicked()), this, SLOT(openScript()));
-  connect(ui.moveUpButton,SIGNAL(clicked()), this, SLOT(moveSelectedFilterUp()));
-  connect(ui.moveDownButton, SIGNAL(clicked()), this, SLOT(moveSelectedFilterDown()));
-  connect(ui.removeFilterButton, SIGNAL(clicked()), this, SLOT(removeSelectedFilter()));
-  connect(ui.editParameterButton, SIGNAL(clicked()), this, SLOT(editSelectedFilterParameters()));
+  connect(ui->okButton, SIGNAL(clicked()), this, SLOT(applyScript()));
+  connect(ui->clearScriptButton,SIGNAL(clicked()), this, SLOT(clearScript()));
+  connect(ui->saveScriptButton, SIGNAL(clicked()), this, SLOT(saveScript()));
+  connect(ui->openScriptButton, SIGNAL(clicked()), this, SLOT(openScript()));
+  connect(ui->moveUpButton,SIGNAL(clicked()), this, SLOT(moveSelectedFilterUp()));
+  connect(ui->moveDownButton, SIGNAL(clicked()), this, SLOT(moveSelectedFilterDown()));
+  connect(ui->removeFilterButton, SIGNAL(clicked()), this, SLOT(removeSelectedFilter()));
+  connect(ui->editParameterButton, SIGNAL(clicked()), this, SLOT(editSelectedFilterParameters()));
 }
 
 void FilterScriptDialog::setScript(FilterScript *scr)
 {
 	scriptPtr=scr;
   FilterScript::iterator li;
-  ui.scriptListWidget->clear();
+  ui->scriptListWidget->clear();
   
   for(li=scr->actionList.begin();li!=scr->actionList.end() ;++li)
-     ui.scriptListWidget->addItem((*li).first);
+     ui->scriptListWidget->addItem((*li).first);
 }
 
 void FilterScriptDialog::applyScript()
@@ -118,7 +120,7 @@ void FilterScriptDialog::clearScript()
 {
   assert(scriptPtr);
   scriptPtr->actionList.clear();
-  ui.scriptListWidget->clear();
+  ui->scriptListWidget->clear();
 }
 
 void FilterScriptDialog::saveScript()
@@ -144,49 +146,49 @@ void FilterScriptDialog::moveSelectedFilterUp()
 	//NOTE if this class gets to complex using the QT model/view may be a good idea
 	//however, i found it to be over complicated and not too helpful for reording
 	
-	int currentRow = ui.scriptListWidget->currentRow();
+	int currentRow = ui->scriptListWidget->currentRow();
 
 	//move item up in list
 	QPair<QString, RichParameterSet> pair = scriptPtr->actionList.takeAt(currentRow);
 	scriptPtr->actionList.insert(currentRow-1, pair);
 	
 	//move item up on ui
-	QListWidgetItem * item = ui.scriptListWidget->takeItem(currentRow);
-	ui.scriptListWidget->insertItem(currentRow-1, item);
+	QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
+	ui->scriptListWidget->insertItem(currentRow-1, item);
 	
 	//set selected 
-	ui.scriptListWidget->setCurrentItem(item);
+	ui->scriptListWidget->setCurrentItem(item);
 }
 
 void FilterScriptDialog::moveSelectedFilterDown()
 {
-	int currentRow = ui.scriptListWidget->currentRow();
+	int currentRow = ui->scriptListWidget->currentRow();
 
 	//move item down in list
 	QPair<QString, RichParameterSet> pair = scriptPtr->actionList.takeAt(currentRow);
 	scriptPtr->actionList.insert(currentRow+1, pair);
 	
 	//move item down on ui
-	QListWidgetItem * item = ui.scriptListWidget->takeItem(currentRow);
-	ui.scriptListWidget->insertItem(currentRow+1, item);
+	QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
+	ui->scriptListWidget->insertItem(currentRow+1, item);
 	
 	//set selected 
-	ui.scriptListWidget->setCurrentItem(item);
+	ui->scriptListWidget->setCurrentItem(item);
 }
 
 void FilterScriptDialog::removeSelectedFilter()
 {
-	int currentRow = ui.scriptListWidget->currentRow();
+	int currentRow = ui->scriptListWidget->currentRow();
 	
 	//remove from list and ui
 	scriptPtr->actionList.removeAt(currentRow);
-	ui.scriptListWidget->takeItem(currentRow);
+	ui->scriptListWidget->takeItem(currentRow);
 }
 
 void FilterScriptDialog::editSelectedFilterParameters()
 {
 	//get the selected item
-	int currentRow = ui.scriptListWidget->currentRow();	
+	int currentRow = ui->scriptListWidget->currentRow();	
 	
 	//return if no row was selected
 	if(currentRow == -1)
@@ -236,5 +238,9 @@ void FilterScriptDialog::editSelectedFilterParameters()
 	
 }
 
+FilterScriptDialog::~FilterScriptDialog()
+{
+	delete ui;
+}
 
 

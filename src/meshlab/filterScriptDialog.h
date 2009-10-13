@@ -34,15 +34,20 @@ added Filter History Dialogs
 
 ****************************************************************************/
 
-#include "ui_filterScriptDialog.h"
 #include <QDialog>
 #include "filterscript.h"
+
+namespace Ui 
+{
+	class scriptDialog;
+} 
 
 class FilterScriptDialog : public QDialog
 {
 Q_OBJECT
 public:
 	FilterScriptDialog(QWidget *parent = 0);
+	~FilterScriptDialog();
   void setScript(FilterScript *scr);
 
 private slots:
@@ -67,7 +72,7 @@ private slots:
 	void editSelectedFilterParameters();
 	
 private:
-	Ui::scriptDialog ui;
+	Ui::scriptDialog* ui;
   FilterScript *scriptPtr;
 
 };

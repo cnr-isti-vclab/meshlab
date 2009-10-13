@@ -30,6 +30,7 @@ $Log: stdpardialog.cpp,v $
 #include <GL/glew.h>
 #include <QtGui>
 
+#include "ui_layerDialog.h"
 #include "layerDialog.h"
 #include "glarea.h"
 #include "mainwindow.h"
@@ -38,24 +39,25 @@ using namespace std;
 
 LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 {
+	ui = new Ui::layerDialog();
   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
 	setVisible(false);
-	LayerDialog::ui.setupUi(this);
+	LayerDialog::ui->setupUi(this);
 	gla=qobject_cast<GLArea *>(parent);
 	mw=qobject_cast<MainWindow *>(gla->parentWidget()->parentWidget());
 
-	connect(ui.layerTableWidget, SIGNAL(cellClicked(int, int)), this, SLOT(toggleStatus(int,int)) );
-	connect(ui.addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
-	connect(ui.deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );
+	connect(ui->layerTableWidget, SIGNAL(cellClicked(int, int)), this, SLOT(toggleStatus(int,int)) );
+	connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
+	connect(ui->deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );
 
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
-	ui.layerTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	ui->layerTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-	connect(ui.layerTableWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
+	connect(ui->layerTableWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(showContextMenu(const QPoint&)));
-	connect(ui.menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
+	connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
 
-	//connect(	ui.deleteButton, SIGNAL(cellClicked(int, int)) , this,  SLOT(openIn(int,int)) );
+	//connect(	ui->deleteButton, SIGNAL(cellClicked(int, int)) , this,  SLOT(openIn(int,int)) );
 }
 void LayerDialog::toggleStatus(int row, int col)
 {
@@ -99,7 +101,7 @@ void LayerDialog::showLayerMenu()
 		MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
 		if (mainwindow)
 		{
-			mainwindow->layerMenu()->popup(ui.menuButton->mapToGlobal(QPoint(10,10)));
+			mainwindow->layerMenu()->popup(ui->menuButton->mapToGlobal(QPoint(10,10)));
 			return;
 		}
 	}
@@ -108,7 +110,7 @@ void LayerDialog::showLayerMenu()
 void LayerDialog::showContextMenu(const QPoint& pos)
 {
 	// switch layer
-	int row = ui.layerTableWidget->rowAt(pos.y());
+	int row = ui->layerTableWidget->rowAt(pos.y());
 	if (row>=0)
 		gla->meshDoc.setCurrentMesh(row);
 
@@ -116,7 +118,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 		MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
 		if (mainwindow)
 		{
-			mainwindow->layerMenu()->popup(ui.layerTableWidget->mapToGlobal(pos));
+			mainwindow->layerMenu()->popup(ui->layerTableWidget->mapToGlobal(pos));
 			return;
 		}
 	}
@@ -125,8 +127,8 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 void LayerDialog::updateLog(GLLogStream &log)
 {
 	QList< pair<int,QString> > &logStringList=log.S;
-	ui.logPlainTextEdit->clear();
-	//ui.logPlainTextEdit->setFont(QFont("Courier",10));
+	ui->logPlainTextEdit->clear();
+	//ui->logPlainTextEdit->setFont(QFont("Courier",10));
 
 	pair<int,QString> logElem;
 	QString preWarn    = "<font face=\"courier\" size=3 color=\"red\"> Warning: " ;
@@ -140,7 +142,7 @@ void LayerDialog::updateLog(GLLogStream &log)
 		if(logElem.first == GLLogStream::SYSTEM)  logText = preSystem + logText + post;
 		if(logElem.first == GLLogStream::WARNING) logText = preWarn + logText + post;
 		if(logElem.first == GLLogStream::FILTER)  logText = preFilter + logText + post;
-		ui.logPlainTextEdit->appendHtml(logText);
+		ui->logPlainTextEdit->appendHtml(logText);
 	}
 }
 
@@ -149,13 +151,13 @@ void LayerDialog::updateTable()
 	if(!isVisible()) return;
 	QList<MeshModel *> &meshList=gla->meshDoc.meshList;
 	//qDebug("Items in list: %d", meshList.size());
-	ui.layerTableWidget->clear();
-	ui.layerTableWidget->setColumnCount(3);
-	ui.layerTableWidget->setRowCount(meshList.size());
-	ui.layerTableWidget->horizontalHeader()->hide();
-	ui.layerTableWidget->setColumnWidth(1,32);
-	ui.layerTableWidget->setColumnWidth(2,32);
-	ui.layerTableWidget->setShowGrid(false);
+	ui->layerTableWidget->clear();
+	ui->layerTableWidget->setColumnCount(3);
+	ui->layerTableWidget->setRowCount(meshList.size());
+	ui->layerTableWidget->horizontalHeader()->hide();
+	ui->layerTableWidget->setColumnWidth(1,32);
+	ui->layerTableWidget->setColumnWidth(2,32);
+	ui->layerTableWidget->setShowGrid(false);
 	for(int i=0;i<meshList.size();++i)
 	 {
     QTableWidgetItem *item;
@@ -166,7 +168,7 @@ void LayerDialog::updateTable()
 						item->setBackground(QBrush(Qt::yellow));
 						item->setForeground(QBrush(Qt::blue));
 						}
-  	ui.layerTableWidget->setItem(i,0,item );
+  	ui->layerTableWidget->setItem(i,0,item );
 
 		if(meshList.at(i)->visible){
 				item = new QTableWidgetItem(QIcon(":/images/layer_eye_open.png"),"");
@@ -174,17 +176,21 @@ void LayerDialog::updateTable()
 				item = new QTableWidgetItem(QIcon(":/images/layer_eye_close.png"),"");
 			}
 		item->setFlags(Qt::ItemIsEnabled);
-  	ui.layerTableWidget->setItem(i,1,item );
+  	ui->layerTableWidget->setItem(i,1,item );
 
 		item = new QTableWidgetItem(QIcon(":/images/layer_edit_unlocked.png"),QString());
 		item->setFlags(Qt::ItemIsEnabled);
-  	ui.layerTableWidget->setItem(i,2,item );
+  	ui->layerTableWidget->setItem(i,2,item );
 
 	}
-	ui.layerTableWidget->resizeColumnsToContents();
-	//ui.layerTableWidget->adjustSize();
+	ui->layerTableWidget->resizeColumnsToContents();
+	//ui->layerTableWidget->adjustSize();
 
 	//this->adjustSize();
 
 }
 
+LayerDialog::~LayerDialog()
+{
+	delete ui;
+}

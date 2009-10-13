@@ -45,7 +45,10 @@
 #ifndef __VCGLIB_TEXTURE_RENAME
 #define __VCGLIB_TEXTURE_RENAME
 
-#include "ui_renametexture.h"
+namespace Ui
+{
+	class RenameTextureDialog;
+}
 
 class ChangeTextureNameDialog : public QDialog
 {
@@ -53,6 +56,7 @@ class ChangeTextureNameDialog : public QDialog
 public:
 	ChangeTextureNameDialog(QWidget *parent);
 	ChangeTextureNameDialog(QWidget *parent,std::string oldtexture);
+	~ChangeTextureNameDialog();
 
 	void InitDialog();
 	std::string GetTextureName(){return texture;}
@@ -63,7 +67,7 @@ private slots:
 	void SlotSearchTextureName();
 
 private:
-	Ui::RenameTextureDialog ui;
+	Ui::RenameTextureDialog* ui;
 	std::string texture;
 };//end class
 

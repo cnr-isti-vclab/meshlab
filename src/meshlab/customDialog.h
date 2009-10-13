@@ -48,7 +48,6 @@ Added copyright info
 
 ****************************************************************************/
 
-#include "ui_customDialog.h"
 #include <QDialog>
 #include <QDockWidget>
 #include <QColorDialog>

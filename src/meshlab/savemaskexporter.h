@@ -66,7 +66,6 @@
 #include "meshmodel.h"
 #include "filterparameter.h"
 #include "stdpardialog.h"
-#include "ui_savemaskexporter.h"
 #include "glarea.h"
 //
 // Each file format exposes:
@@ -78,11 +77,17 @@
 // 
 // 
 
+namespace Ui 
+{
+	class MaskExporterDialog;
+} 
+
 class SaveMaskExporterDialog : public QDialog
 {
 	Q_OBJECT
 public:
 	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, RichParameterSet *par,GLArea* glar = NULL);
+	~SaveMaskExporterDialog();
 	
 	void InitDialog();
 	void SetTextureName();
@@ -100,7 +105,7 @@ private slots:
 	void SlotSelectionNoneButton();
 
 private:
-	Ui::MaskExporterDialog ui;
+	Ui::MaskExporterDialog* ui;
 	MeshModel *m;
 	int mask;
 	int type;
