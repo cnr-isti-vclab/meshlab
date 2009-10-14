@@ -8,9 +8,11 @@
 
 
 #include <param_mesh.h>
+#include <iso_parametrization.h>
 
 ///auxiliary structures
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/bounding.h>
@@ -63,16 +65,40 @@ private:
 	/*vcg::GlTrimesh<BaseMesh> glWrap;
 	vcg::GlTrimesh<BaseMesh> glWrapAbstract;*/
 
+	void InitVoronoiArea()
+	{
+		///area deviation respect to original
+		for (unsigned int i=0;i<base_mesh.face.size();i++)
+			base_mesh.face[i].areadelta=0;
+
+		for (unsigned int i=0;i<final_mesh.vert.size();i++)
+			final_mesh.vert[i].area=0;
+
+		for (unsigned int i=0;i<final_mesh.face.size();i++)
+		{
+			BaseFace *f=&final_mesh.face[i];
+			ScalarType areaf=vcg::DoubleArea(*f)/2.0;//(((f->V(1)->P()-f->V(0)->P())^(f->V(2)->P()-f->V(0)->P())).Norm())/2.0;
+			f->V(0)->area+=areaf/(ScalarType)3.0;
+			f->V(1)->area+=areaf/(ScalarType)3.0;
+			f->V(2)->area+=areaf/(ScalarType)3.0;
+		}
+	}
+
 	template <class MeshType>
 	void InitializeStructures(MeshType *mesh)
 	{
 		///cleaning of initial mesh
 		/*int dup = */vcg::tri::Clean<MeshType>::RemoveDuplicateVertex(*mesh);
 		/*int unref =  */vcg::tri::Clean<MeshType>::RemoveUnreferencedVertex(*mesh);
-		
+
+		vcg::tri::Allocator<MeshType>::CompactFaceVector(*mesh);
+		vcg::tri::Allocator<MeshType>::CompactVertexVector(*mesh);
+
 		///copy
-		vcg::tri::Append<BaseMesh,MeshType>::Mesh(base_mesh,*mesh);
-		vcg::tri::Append<BaseMesh,MeshType>::Mesh(final_mesh,*mesh);
+		base_mesh.Clear();
+		final_mesh.Clear();
+		vcg::tri::Append<BaseMesh,MeshType>::Mesh(base_mesh,*mesh,false,true);
+		vcg::tri::Append<BaseMesh,MeshType>::Mesh(final_mesh,*mesh,false,true);
 
 		///update auxiliary structures
 		UpdateStructures(&base_mesh);
@@ -88,21 +114,21 @@ private:
 			final_mesh.vert[i].OriginalCol=final_mesh.vert[i].C();
 		
 		///set brother vertices and default father
-		unsigned int i=0;
-		for (i=0;i<base_mesh.vert.size();i++)
+		/*unsigned int i=0;*/
+		for (unsigned int i=0;i<base_mesh.vert.size();i++)
 		{
 			base_mesh.vert[i].brother=&final_mesh.vert[i];
 			base_mesh.vert[i].RPos=base_mesh.vert[i].P();
 		}
 
-		///area deviation respect to original
-		for (i=0;i<base_mesh.face.size();i++)
+		/*///area deviation respect to original
+		for (unsigned int i=0;i<base_mesh.face.size();i++)
 			base_mesh.face[i].areadelta=0;
 
-		for (i=0;i<final_mesh.vert.size();i++)
-			final_mesh.vert[i].area=0;
+		for (unsigned int i=0;i<final_mesh.vert.size();i++)
+			final_mesh.vert[i].area=0;*/
 		
-		for (i=0;i<base_mesh.vert.size();i++){
+		for (unsigned int i=0;i<base_mesh.vert.size();i++){
 			base_mesh.vert[i].brother=&final_mesh.vert[i];
 			final_mesh.vert[i].father=base_mesh.vert[i].VFp();
 			CoordType bary=CoordType(0,0,0);
@@ -111,47 +137,71 @@ private:
 		}
 
 		///initialize area per vertex
-		for (i=0;i<final_mesh.face.size();i++)
-		{
-			BaseFace *f=&final_mesh.face[i];
-			ScalarType areaf=(((f->V(1)->P()-f->V(0)->P())^(f->V(2)->P()-f->V(0)->P())).Norm())/2.0;
-			f->V(0)->area+=areaf/(ScalarType)3.0;
-			f->V(1)->area+=areaf/(ScalarType)3.0;
-			f->V(2)->area+=areaf/(ScalarType)3.0;
+	
+		for (unsigned int i=0;i<final_mesh.vert.size();i++){
+			BaseFace* father=final_mesh.vert[i].father;
+			CoordType bary=final_mesh.vert[i].Bary;
+			father->vertices_bary.push_back(std::pair<BaseVertex*,vcg::Point3f>(&final_mesh.vert[i],bary));
 		}
 
 		///testing everithing is ok
-		for (i=0;i<final_mesh.vert.size();i++)
+		for (unsigned int i=0;i<final_mesh.vert.size();i++)
 		{
 			final_mesh.vert[i].RPos=final_mesh.vert[i].P();
 			CoordType test=ProjectPos(final_mesh.vert[i]);
 			assert((test-final_mesh.vert[i].P()).Norm()<0.000001);
 		}	
+
+		////initialization for decimation
+		//base_mesh.en=0;
+		InitIMark();
+		for (unsigned int i=0;i<base_mesh.vert.size();i++)
+			base_mesh.vert[i].ClearFlags();
+		for (unsigned int i=0;i<base_mesh.face.size();i++)
+			base_mesh.face[i].ClearFlags();
 	}
 
+	void InitIMark()
+	{
+		base_mesh.IMark()=0;
+		base_mesh.InitFaceIMark();
+		base_mesh.InitVertexIMark();
+	}
 	
 
 	void ParaDecimate(const int &targetFaces,
-					  const int &interval)
+										const int &interval,
+										bool execute_flip=false)
 	{
 		vcg::LocalOptimization<BaseMesh> DeciSession(base_mesh);
 		DeciSession.Init<MyTriEdgeCollapse >();
 		MyTriEdgeCollapse::Accuracy()=accuracy;
 
+		
 		int flip_todo=4;
 		int next_flip_num=targetFaces;
 		std::vector<int> stop_points;
-		stop_points.resize(flip_todo+2);///number of flips + save stack point + final stop
 
-		for (int i=0;i<flip_todo;i++)
+		if (execute_flip)
 		{
-			next_flip_num=(int)((ScalarType)next_flip_num*flip_factor);
-			stop_points[i]=next_flip_num;
-		}	
-		stop_points[flip_todo]=targetFaces+interval;
-		stop_points[flip_todo+1]=targetFaces;
+			stop_points.resize(flip_todo+2);///number of flips + save stack point + final stop
 
-		std::sort(stop_points.begin(),stop_points.end());
+			for (int i=0;i<flip_todo;i++)
+			{
+				next_flip_num=(int)((ScalarType)next_flip_num*flip_factor);
+				stop_points[i]=next_flip_num;
+			}	
+			stop_points[flip_todo]=targetFaces+interval;
+			stop_points[flip_todo+1]=targetFaces;
+			std::sort(stop_points.begin(),stop_points.end());
+		}
+		else
+		{
+			stop_points.resize(2);
+			stop_points[0]=targetFaces;
+			stop_points[1]=targetFaces+interval;
+		}
+
 		///find the point where save stack is defined 
 		int pos_stack=-1;
 		for (unsigned int i=0;i<stop_points.size();i++)
@@ -159,13 +209,16 @@ private:
 			if (stop_points[i]==(targetFaces+interval))
 				pos_stack=i;
 		}
+		
+
 		assert(pos_stack!=-1);
 
 		bool do_flip=false;
 		bool save_status=false;
 		int curr_limit=stop_points.size()-1;
+		bool not_heap_empty=true;
 		//bool check_status=false;
-		while (base_mesh.fn>targetFaces)
+		while ((base_mesh.fn>targetFaces)&&(not_heap_empty))
 		{
 			do_flip=false;
 
@@ -184,22 +237,22 @@ private:
 				if (curr_limit==pos_stack)
 					save_status=true;
 				else
-				if (curr_limit!=0)
+				if ((curr_limit!=0)&&(execute_flip))
 					do_flip=true;
 
 				curr_limit--;
 			}
 			
-
+			
 			DeciSession.SetTargetSimplices(next_num);
-			DeciSession.DoOptimization();
-
+			not_heap_empty=DeciSession.DoOptimization();
 			
 			if (do_flip)
 			{
 				FlipStep();
 				vcg::tri::UpdateTopology<BaseMesh>::FaceFace(base_mesh);
 				vcg::tri::UpdateTopology<BaseMesh>::VertexFace(base_mesh);
+				InitIMark();
 				DeciSession.h.clear();
 				DeciSession.Init<MyTriEdgeCollapse >();
 				if (flip_todo>0)
@@ -218,6 +271,9 @@ private:
 				printf("SAVING CURRENT STATUS....face_num: %d\n",curr_num);
 				#endif
 				SaveCurrentStatus();
+				InitIMark();
+				DeciSession.h.clear();
+				DeciSession.Init<MyTriEdgeCollapse >();
 			}
 		}
 	
@@ -281,18 +337,24 @@ private:
 	template <class MeshType>
 	bool InitBaseMesh(MeshType *mesh,
 		const int &targetFaces,
-		const int &interval)
+		const int &interval,bool execute_flip=true)
 	{
+			
+			for (unsigned int i=0;i<mesh->vert.size();i++)
+				mesh->vert[i].ClearFlags();
+			for (unsigned int i=0;i<mesh->face.size();i++)
+				mesh->face[i].ClearFlags();
+
 		///INITIALIZATION
 		InitializeStructures<MeshType>(mesh);
-
+		
 		///TEST PRECONDITIONS
 		bool isOK=Preconditions(base_mesh);
 		if (!isOK)
 			return false;
 
 		///DECIMATION & PARAMETRIZATION
-		ParaDecimate(targetFaces,interval);
+		ParaDecimate(targetFaces,interval,execute_flip);
 
 		///SET BEST FIND STOP POINT
 		SetBestStatus();
@@ -301,26 +363,56 @@ private:
 		ClearStack();
 
 		///LAST FLIP STEP
-		FlipStep();
+		if (execute_flip)
+			FlipStep();
 
 		vcg::tri::UpdateTopology<BaseMesh>::FaceFace(base_mesh);
 		vcg::tri::UpdateTopology<BaseMesh>::VertexFace(base_mesh);
+		vcg::tri::UpdateTopology<BaseMesh>::TestVertexFace(base_mesh); ///TEST
+
 		UpdateStructures(&base_mesh);
 		#ifndef _MESHLAB
-		printf("\n POST LAST FLIP: \n");
-		
-		PrintAttributes();
+		if (execute_flip)
+		{
+			printf("\n POST LAST FLIP: \n");
+			PrintAttributes();
+		}
 		#endif
+		
 		///ASSOCIATE REMAINING VERTICES TO ONE FACE
 		AssociateRemaining();
 		
 		///LAST OPTIMIZATION STEP ON STARS
-		FinalOptimization();
+		if (execute_flip)
+			FinalOptimization();
+
 		#ifndef _MESHLAB	
-		printf("\n POST STAR OPT: \n");
-		PrintAttributes();
+		if (execute_flip)
+		{
+			printf("\n POST STAR OPT: \n");
+			PrintAttributes();
+		}
 		#endif
 		return true;
+	}
+
+	void CompactBaseDomain()
+	{
+		vcg::tri::Allocator<BaseMesh>::CompactVertexVector(base_mesh);
+		vcg::tri::Allocator<BaseMesh>::CompactFaceVector(base_mesh);
+		///reassing
+		for (int i=0;i<base_mesh.face.size();i++)
+		{
+			int size=base_mesh.face[i].vertices_bary.size();
+			for (int j=0;j<size;j++)
+			{
+				BaseVertex* son=base_mesh.face[i].vertices_bary[j].first;
+				CoordType bary=base_mesh.face[i].vertices_bary[j].second;
+				son->father=&base_mesh.face[i];
+				son->Bary=bary;
+			}
+		}
+	  testParametrization(base_mesh,final_mesh);
 	}
 
 	///save the current status of the parameterization
@@ -330,19 +422,16 @@ private:
 		ParaStack.push_back(ParaInfo());
 		ParaStack.back().AbsMesh=new BaseMesh();
 		BaseMesh *mesh=ParaStack.back().AbsMesh;
-		vcg::tri::Append<BaseMesh,BaseMesh>::Mesh(*mesh,base_mesh);
+		CompactBaseDomain();
 
-		///copy rest pos
-		int k=0;
-		for (unsigned int i=0;i<mesh->vert.size();i++)
-			if (!base_mesh.vert[i].IsD())
-			{
-				mesh->vert[k].RPos=base_mesh.vert[i].RPos;
-				k++;
-			}
+		vcg::tri::Append<BaseMesh,BaseMesh>::Mesh(*mesh,base_mesh,false,true);
 
+	
+		for (unsigned int i=0;i<base_mesh.vert.size();i++)
+				mesh->vert[i].RPos=base_mesh.vert[i].RPos;
+		
 		///copy linking for parameterization informations
-		k=0;
+		int k=0;
 		for (unsigned int i=0;i<base_mesh.face.size();i++)
 		{
 			if (!base_mesh.face[i].IsD())
@@ -378,9 +467,9 @@ private:
 		///delete current base mesh
 		base_mesh.Clear();
 		BaseMesh *to_restore=ParaStack[index_status].AbsMesh;
-
+	
 		///restore saved abstract mesh and link
-		vcg::tri::Append<BaseMesh,BaseMesh>::Mesh(base_mesh,*to_restore);
+		vcg::tri::Append<BaseMesh,BaseMesh>::Mesh(base_mesh,*to_restore,false,true);
 		for (unsigned int i=0;i<to_restore->face.size();i++)
 		{
 			int size=to_restore->face[i].vertices_bary.size();
@@ -399,8 +488,12 @@ private:
 
 		///copy rest pos
 		for (unsigned int i=0;i<to_restore->vert.size();i++)
+		{
 			base_mesh.vert[i].RPos=to_restore->vert[i].RPos;
-			
+			base_mesh.vert[i].P()=to_restore->vert[i].P();
+		}
+		///clear stack of meshes
+		ClearStack();
 	}
 
 	///clear the durrent stack
@@ -547,14 +640,99 @@ public:
 	///PARAMETRIZATION FUNCTIONS 
 	///initialize the mesh 
 	template <class MeshType>
-	bool Parametrize(MeshType *mesh)
+	bool Parametrize(MeshType *mesh,bool Two_steps=true)
 	{
 		bool done;
+		const int limit0=15000;//00;
+		const int limit1=30000;
+		if ((!Two_steps)||(lower_limit>limit0)||(mesh->fn<limit1))
+		{
+			done=InitBaseMesh<MeshType>(mesh,lower_limit,interval);
+			if (!done)
+				return false;
+		}
+		else
+		{
+			///do a first parametrization step
+			printf("\n STEP 1 \n");
+			done=InitBaseMesh<MeshType>(mesh,limit0,1,false);
+			if (!done)
+				return false;
+
+			ParamMesh para_mesh0;
+			AbstractMesh abs_mesh0;
+			//AbstractMesh abs_mesh_test;
+			ExportMeshes(para_mesh0,abs_mesh0);
+
+			printf("\n STEP 2 \n");
+			done=InitBaseMesh<AbstractMesh>(&abs_mesh0,lower_limit,interval);
+			if (!done)
+				return false;
+
+			ParamMesh para_mesh1;
+			AbstractMesh abs_mesh1;
+			ExportMeshes(para_mesh1,abs_mesh1);
 		
-		done=InitBaseMesh<MeshType>(mesh,lower_limit,interval);
-		if (!done)
-			return false;
+			///constrauct an ISOPARAM
+			IsoParametrization IsoParam1;
+			done=IsoParam1.Init(&abs_mesh1,&para_mesh1);
+			if (!done)
+				return false;
+			printf("\n merging \n");
+			///copy initial mesh 
+			final_mesh.Clear();
+			base_mesh.Clear();
+			vcg::tri::Append<BaseMesh,ParamMesh>::Mesh(final_mesh,para_mesh0,false,true);
+			vcg::tri::Append<BaseMesh,AbstractMesh>::Mesh(base_mesh,abs_mesh1,false,true);
+			UpdateTopologies<BaseMesh>(&final_mesh);
+			UpdateTopologies<BaseMesh>(&base_mesh);
+
+			for (int i=0;i<base_mesh.vert.size();i++)
+				base_mesh.vert[i].RPos=abs_mesh1.vert[i].P();
+			for (int i=0;i<final_mesh.vert.size();i++)
+				final_mesh.vert[i].RPos=para_mesh0.vert[i].P();
+
+			///finally merge in between
+			for (int i=0;i<para_mesh0.vert.size();i++)
+			{
+				///get the index of the first parametrization process
+				int Index0=para_mesh0.vert[i].T().N();
+				///find the parametrization coordinates
+				vcg::Point2<ScalarType> p2bary=para_mesh0.vert[i].T().P();
+				CoordType bary0=CoordType (p2bary.X(),p2bary.Y(),1-p2bary.X()-p2bary.Y());
+				bool isOK=NormalizeBaryCoords(bary0);
+				assert(isOK);
+				assert(Index0<para_mesh1.face.size());
+
+				///get the correspondent face
+				ParamFace *f1=&para_mesh1.face[Index0];
+				int I_final=-1;
+				vcg::Point2<ScalarType> UV_final;
+				IsoParam1.Phi(f1,bary0,I_final,UV_final);
+				assert(I_final<abs_mesh1.face.size());
 		
+				CoordType bary2=CoordType(UV_final.X(),UV_final.Y(),1-UV_final.X()-UV_final.Y());
+				isOK=NormalizeBaryCoords(bary2);
+				assert(isOK);
+				final_mesh.vert[i].father=&base_mesh.face[I_final];
+				final_mesh.vert[i].Bary=bary2;
+			}
+
+			///set father to son link
+			for (int i=0;i<final_mesh.vert.size();i++)
+			{
+				BaseFace* base_f=final_mesh.vert[i].father;
+				CoordType bary=final_mesh.vert[i].Bary;
+				assert((bary.X()>=0)&&(bary.Y()>=0));
+				assert((bary.X()<=1)&&(bary.Y()<=1));
+				assert(bary.X()+bary.Y()<=1.0001);
+				base_f->vertices_bary.push_back(std::pair<BaseVertex *,CoordType>(&final_mesh.vert[i],bary));
+			}
+		}
+		///finally perform the final optimization step
+		printf("STEP 3 \n");
+		InitVoronoiArea();
+		FinalOptimization();
 		GlobalOptimizeStep();
 		return true;
 	}
@@ -565,6 +743,7 @@ public:
 #ifndef _MESHLAB
 		printf("\n STARTING FLIP SESSION \n");
 #endif
+		InitIMark();
 		FlipSession=new vcg::LocalOptimization<BaseMesh>(base_mesh);
 		FlipSession->Init<MyTriEdgeFlip>();	
 		/*bool b=*/FlipSession->DoOptimization();
@@ -833,8 +1012,8 @@ public:
 		abs_mesh.Clear();
 
 		///copy meshes
-		vcg::tri::Append<AbstractMesh,BaseMesh>::Mesh(abs_mesh,base_mesh);
-		vcg::tri::Append<ParamMesh,BaseMesh>::Mesh(para_mesh,final_mesh);
+		vcg::tri::Append<AbstractMesh,BaseMesh>::Mesh(abs_mesh,base_mesh,false,true);
+		vcg::tri::Append<ParamMesh,BaseMesh>::Mesh(para_mesh,final_mesh,false,true);
 
 		///copy additional values
 		for (unsigned int i=0;i<base_mesh.vert.size();i++)
