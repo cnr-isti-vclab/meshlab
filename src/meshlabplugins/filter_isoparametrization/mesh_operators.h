@@ -35,7 +35,7 @@ template <class MeshType>
 void FindNotBorderVertices(MeshType &mesh, 
 						   std::vector<typename MeshType::VertexType*> &vertices)
 {
-        typename MeshType::VertexIterator Vi;
+  typename MeshType::VertexIterator Vi;
 	for (Vi=mesh.vert.begin();Vi!=mesh.vert.end();Vi++)
 		if ((!(*Vi).IsD())&&(!(*Vi).IsB()))
 			vertices.push_back(&(*Vi));
@@ -336,9 +336,10 @@ void CopySubMeshLevels(std::vector<typename MeshType::FaceType*> &faces,
                 father->vertices_bary.push_back(std::pair<VertexType *,vcg::Point3f>(son,bary));
 	}
 }
-
+///return in result the intersection, while in_v0 and in_v1 return 
+///faces shareb by each vertex
 template <class MeshType>
-inline void getSharedFace(typename MeshType::VertexType *v0,
+inline bool getSharedFace(typename MeshType::VertexType *v0,
                                                   typename MeshType::VertexType *v1,
                 std::vector<typename MeshType::FaceType*> &result,
                 std::vector<typename MeshType::FaceType*> &in_v0,
@@ -368,14 +369,25 @@ inline void getSharedFace(typename MeshType::VertexType *v0,
                                 in_v1.push_back(vfi1.F());
 
                 ///faces in v0
+								bool non_shared=(result.size()==0);
+								if (non_shared)
+									return false;
                 bool border=(result.size()==1);
                 for(;!vfi2.End();++vfi2)
-                        if ((!border)&&((result[0]!=vfi2.F())&&(result[1]!=vfi2.F())))
+								{
+									if  (non_shared)
+										in_v0.push_back(vfi2.F());
+									else
+									{
+										if ((!border)&&((result[0]!=vfi2.F())&&(result[1]!=vfi2.F())))
                                 in_v0.push_back(vfi2.F());
-                        else
-                        if ((border)&&((result[0]!=vfi2.F())))
+										else
+                    if ((border)&&((result[0]!=vfi2.F())))
                                 in_v0.push_back(vfi2.F());
+									}
+								}
         }
+
 
 template  <class MeshType>
 inline void getSharedFace(std::vector<typename MeshType::VertexType*> &vertices,
@@ -386,15 +398,19 @@ inline void getSharedFace(std::vector<typename MeshType::VertexType*> &vertices,
                 typedef typename MeshType::CoordType CoordType;
 
                 typename std::vector<VertexType*>::const_iterator vi;
+
                 for (vi=vertices.begin();vi!=vertices.end();vi++)
                 {
-                        assert(!(*vi)->IsD());
+                    assert(!(*vi)->IsD());
+										int num=0;
                     vcg::face::VFIterator<FaceType> vfi(*vi);
-                        while (!vfi.End()){
-                                if (!vfi.F()->IsD())
-                                faces.push_back(vfi.F());
-                                ++vfi;
-                        }
+                    while (!vfi.End())
+										{
+                      assert(!vfi.F()->IsD());
+											faces.push_back(vfi.F());
+											num++;
+                      ++vfi;
+                    }
                 }
 
                 ///sort and unique
