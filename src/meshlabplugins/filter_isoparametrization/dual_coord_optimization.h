@@ -28,16 +28,7 @@ public:
 	///structures for the optimization
 	std::vector<MeshType*> HRES_meshes;
 	std::vector<std::vector<VertexType*> > Ord_HVert;
-	/*std::vector<std::vector<VertexType*> > HVert;*/
-
-	/*///subdomain in witch a vertex falls into
-	std::vector<param_domain*> subdomain;*/
-
-	///map fo correspondences between domain & entities
-	//std::map<VertexType*,param_domain*> starMap;
-	//std::map<std::pair<FaceType*,FaceType*>,param_domain*> diamondMap;
-	//std::map<FaceType*,param_domain*> faceMap;
-
+	
 	///hight resolution mesh and domain mesh
 	MeshType *domain;
 	MeshType *h_res_mesh;
@@ -62,9 +53,6 @@ public:
 				///and parametrize it
 				ParametrizeStarEquilateral<MeshType>(*star_meshes[index].domain,1.0);
 
-				/*///insert in search structure
-				starMap.insert(std::pair<VertexType*,param_domain*>(&domain->vert[i],&star_meshes[index]));*/
-
 				index++;
 			}
 		}		
@@ -88,7 +76,6 @@ public:
 					{
 						///add to domain map
 						std::pair<FaceType*,FaceType*> entry=std::pair<FaceType*,FaceType*>(f0,f1);
-						/*diamondMap.insert(std::pair<std::pair<FaceType*,FaceType*> ,param_domain*>(entry,&diamond_meshes[index]));*/
 						///end domain mapping
 
 						int num0=j;
@@ -280,74 +267,6 @@ void InitStarSubdivision()
 	}
 }
 
-/////subdivide the mesh into Star subdomain
-//void InitStarSubdivision()
-//{
-//	
-//	vcg::SimpleTempData<typename MeshType::VertContainer, param_domain* > domainVert(h_res_mesh->vert);
-//
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//	{
-//		assert(!h_res_mesh->vert[i].IsD());
-//		///get father and bary coordinate
-//		FaceType *father=h_res_mesh->vert[i].father;
-//		CoordType bary=h_res_mesh->vert[i].Bary;
-//
-//		///then get the substar falling into
-//
-//		///get nearest vertex
-//		VertexType* chosen;
-//		CoordType proj=Warp(&h_res_mesh->vert[i]);		
-//		int index=getVertexStar(proj,father);
-//		///chosen is the half-star center
-//		chosen=father->V(index);
-//
-//		///then get corresponding half-star reference parametrized mesh
-//		std::map<VertexType*,param_domain*>::iterator iteStar=starMap.find(chosen);
-//		assert(iteStar!=starMap.end());
-//		///end parametrize it using that star
-//
-//		///get corresponding parametrizad face
-//		param_domain* pdomain=(*iteStar).second;
-//		FaceType *param_face=NULL;
-//		int f=0;
-//		while ((f<pdomain->ordered_faces.size())&&(param_face==NULL))
-//		{
-//			if (pdomain->ordered_faces[f]==father)
-//				param_face=&pdomain->domain.face[f];
-//			f++;
-//		}
-//		assert(param_face!=NULL);
-//		///then translate barycentric into UV over the star
-//		ScalarType u,v;
-//		GetUV<MeshType>(param_face,bary,u,v);
-//
-//		///set UV values
-//		h_res_mesh->vert[i].T().U()=u;
-//		h_res_mesh->vert[i].T().V()=v;
-//		h_res_mesh->vert[i].ClearS();
-//
-//		///set corresponding domain
-//		domainVert[i]=pdomain;
-//		subdomain[i]=pdomain;
-//	}
-//
-//	///then set as selected border vertices
-//	for (int i=0;i<h_res_mesh->face.size();i++)
-//	{
-//		VertexType *v0=h_res_mesh->face[i].V(0);
-//		VertexType *v1=h_res_mesh->face[i].V(1);
-//		VertexType *v2=h_res_mesh->face[i].V(2);
-//		if (!((domainVert[v0]==domainVert[v1])&&(domainVert[v1]==domainVert[v2])))
-//		{
-//			v0->SetS();
-//			v1->SetS();
-//			v2->SetS();
-//		}
-//	}
-//}
-
-
 ///initialize Star Submeshes
 void InitDiamondSubdivision()
 {
@@ -415,75 +334,6 @@ void InitDiamondSubdivision()
 	}
 }
 
-/////subdivide the mesh into subdomains
-//void InitDiamondSubdivision()
-//{
-//	
-//	vcg::SimpleTempData<typename MeshType::VertContainer, param_domain* > domainVert(h_res_mesh->vert);
-//
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//	{
-//		/*h_res_mesh->vert[i].C()=vcg::Color4b(255,255,255,255);*/
-//
-//		assert(!h_res_mesh->vert[i].IsD());
-//		///get father and bary coordinate
-//		FaceType *father=h_res_mesh->vert[i].father;
-//		CoordType bary=h_res_mesh->vert[i].Bary;
-//
-//		///get nearest edge
-//		int chosen;
-//		CoordType proj=Warp(&h_res_mesh->vert[i]);
-//		
-//		chosen=getEdgeDiamond(proj,father);
-//		///then get corresponding star
-//		FaceType *fadj=father->FFp(chosen);
-//		FaceType *f0=(father>fadj)? father:fadj;
-//		FaceType *f1=(father<fadj)? father:fadj;
-//
-//		std::pair<FaceType*,FaceType*> keyF=std::pair<FaceType*,FaceType*>(f0,f1);
-//		std::map<std::pair<FaceType*,FaceType*> ,param_domain*>::iterator iteDiam=diamondMap.find(keyF);
-//		assert(iteDiam!=diamondMap.end());
-//
-//		///end parametrize it using that star
-//		param_domain* pdomain=(*iteDiam).second;
-//		FaceType *param_face=NULL;
-//		int f=0;
-//		while ((f<pdomain->ordered_faces.size())&&(param_face==NULL))
-//		{
-//			if (pdomain->ordered_faces[f]==father)
-//				param_face=&pdomain->domain.face[f];
-//			f++;
-//		}
-//		assert(param_face!=NULL);
-//		///then translate barycentric into UV over the star
-//		ScalarType u,v;
-//		GetUV<MeshType>(param_face,bary,u,v);
-//
-//		///set UV values
-//		h_res_mesh->vert[i].T().U()=u;
-//		h_res_mesh->vert[i].T().V()=v;
-//		h_res_mesh->vert[i].ClearS();
-//
-//		///set corresponding domain
-//		domainVert[i]=pdomain;
-//		subdomain[i]=pdomain;
-//	}
-//
-//	///then set as selected border vertices
-//	for (int i=0;i<h_res_mesh->face.size();i++)
-//	{
-//		VertexType *v0=h_res_mesh->face[i].V(0);
-//		VertexType *v1=h_res_mesh->face[i].V(1);
-//		VertexType *v2=h_res_mesh->face[i].V(2);
-//		if (!((domainVert[v0]==domainVert[v1])&&(domainVert[v1]==domainVert[v2])))
-//		{
-//			v0->SetS();
-//			v1->SetS();
-//			v2->SetS();
-//		}
-//	}
-//}
-
 ///initialize Star Submeshes
 void InitFaceSubdivision()
 {
@@ -536,226 +386,6 @@ void InitFaceSubdivision()
 	}
  }
 
-/////subdivide the mesh into subdomains
-//void InitFaceSubdivision()
-//{
-//	
-//	vcg::SimpleTempData<typename MeshType::VertContainer, param_domain* > domainVert(h_res_mesh->vert);
-//
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//	{
-//	
-//		assert(!h_res_mesh->vert[i].IsD());
-//		///get father and bary coordinate
-//		FaceType *father=h_res_mesh->vert[i].father;
-//		CoordType bary=h_res_mesh->vert[i].Bary;
-//
-//		std::map<FaceType*,param_domain*>::iterator iteFace=faceMap.find(father);
-//		assert(iteFace!=faceMap.end());
-//
-//		///end parametrize it using that star
-//		param_domain* pdomain=(*iteFace).second;
-//		FaceType *param_face=&pdomain->domain.face[0];
-//		assert(father==pdomain->ordered_faces[0]);
-//
-//		///then translate barycentric into UV over the star
-//		ScalarType u,v;
-//		GetUV<MeshType>(param_face,bary,u,v);
-//
-//		///set UV values
-//		h_res_mesh->vert[i].T().U()=u;
-//		h_res_mesh->vert[i].T().V()=v;
-//		h_res_mesh->vert[i].ClearS();
-//
-//		///set corresponding domain
-//		domainVert[i]=pdomain;
-//		subdomain[i]=pdomain;
-//	}
-//
-//	///then set as selected border vertices
-//	for (int i=0;i<h_res_mesh->face.size();i++)
-//	{
-//		VertexType *v0=h_res_mesh->face[i].V(0);
-//		VertexType *v1=h_res_mesh->face[i].V(1);
-//		VertexType *v2=h_res_mesh->face[i].V(2);
-//		if (!((domainVert[v0]==domainVert[v1])&&(domainVert[v1]==domainVert[v2])))
-//		{
-//			v0->SetS();
-//			v1->SetS();
-//			v2->SetS();
-//		}
-//	}
-//}
-
-//void GetDomainHVert(param_domain*  domain,std::vector<VertexType*> &HresVert)
-//{
-//	HresVert.clear();
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//		if (subdomain[i]==domain)
-//			HresVert.push_back(&h_res_mesh->vert[i]);
-//}
-
-////test current domains and unfold when is necessary and needed
-//bool UnfoldDomain()
-//{
-//	std::set<param_domain*> folded_domains;
-//
-//	///set all vertices as non-visited
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//		h_res_mesh->vert[i].ClearV();
-//
-//	///collect folded vertices
-//	bool folded=false;
-//	for (int i=0;i<h_res_mesh->face.size();i++)
-//	{
-//		if (!(h_res_mesh->face[i].V(0)->IsS()&&
-//			h_res_mesh->face[i].V(1)->IsS()&&
-//			h_res_mesh->face[i].V(2)->IsS()))
-//		{
-//			FaceType *f=&h_res_mesh->face[i];
-//			vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
-//			vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
-//			vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
-//			vcg::Triangle2<MeshType::ScalarType> t2d=vcg::Triangle2<MeshType::ScalarType>(tex0,tex1,tex2);
-//			ScalarType area=(tex1-tex0)^(tex2-tex0);
-//			if (area<0)
-//			{
-//				h_res_mesh->face[i].V(0)->SetV();
-//				h_res_mesh->face[i].V(1)->SetV();
-//				h_res_mesh->face[i].V(2)->SetV();
-//				folded=true;
-//			}
-//		}
-//	}
-//
-//	if (!folded)
-//	{
-//		//printf("nothing to unfold\n");
-//		return true;
-//	}
-//
-//	///collect all domains in wich needed optimization
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//		if (h_res_mesh->vert[i].IsV())
-//			folded_domains.insert(subdomain[i]);
-//
-//	///clear flags
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//		h_res_mesh->vert[i].ClearV();
-//
-//	///for each one try to unfold
-//	std::set<param_domain*>::iterator iteParam;
-//	for (iteParam=folded_domains.begin();iteParam!=folded_domains.end();iteParam++)
-//	{
-//		std::vector<VertexType*> HresVert;
-//		std::vector<VertexType*> ordVert;
-//		//HresVert.clear();
-//		///get h resolution vertex
-//		MeshType folded;
-//		//getHresVertex<FaceType>((*iteParam)->ordered_faces,HresVert);*/
-//		/*for (int i=0;i<h_res_mesh->vert.size();i++)
-//			if (subdomain[i]==(*iteParam))
-//				HresVert.push_back(&h_res_mesh->vert[i]);*/
-//
-//		GetDomainHVert((*iteParam),HresVert);
-//
-//		CopyMeshFromVertices<MeshType>(HresVert,ordVert,folded);
-//		//bool done=true;
-//		bool done=UnFold<MeshType>(folded,(*iteParam)->ordered_faces.size());
-//		///copy back values
-//		
-//		if (done)
-//		{
-//			for (int i=0;i<folded.vert.size();i++)
-//				ordVert[i]->T().P()=folded.vert[i].T().P();
-//		}
-//	}
-//	return true;
-//}
-
-//void MinimizeStep(char *phasename,
-//				  const ScalarType &conv_interval=0.00001,
-//				  const int &max_step=500)
-//{
-//	//////statistics
-//	UnfoldDomain();
-//	int opt_type=0;
-//	std::vector<CoordType> oldPos;
-//	std::vector<FaceType*> oldFather;
-//	oldPos.resize(h_res_mesh->vert.size());
-//	oldFather.resize(h_res_mesh->vert.size());
-//
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//	{
-//		oldPos[i]=h_res_mesh->vert[i].Bary;
-//		oldFather[i]=h_res_mesh->vert[i].father;
-//	}
-//	
-//
-//	///fix selected vertices 
-//	optimizer[0]->SetNothingAsFixed();
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//		if (h_res_mesh->vert[i].IsS())
-//			optimizer[opt_type]->FixVertex(&h_res_mesh->vert[i]);
-//
-//	
-//
-//	//ScalarType speed=2.0/(sqrt((ScalarType)h_res_mesh->vn/(ScalarType)domain->vn))*optimize_speed_fact;
-//	//optimizer[opt_type]->SetSpeed(speed);
-//
-//	/////then iterate until convergence
-//	//for (int i=0;i<max_step;i++)
-//	//	optimizer[opt_type]->IterateBlind();
-//	ScalarType speed0=sqrt((ScalarType)domain->fn/(ScalarType)h_res_mesh->vn) * optimize_speed_fact;
-//	//ScalarType speed0=optimize_speed_fact;
-//	optimizer[opt_type]->SetSpeed(speed0);
-//	///END SETTINS SPEED
-//	//if ((!bi)&&(b))
-//	//	opt.IterateUntilConvergence(0.001);//,itenum);    
-//	//else
-//	int ite=optimizer[opt_type]->IterateUntilConvergence(speed0/10.0);//,itenum);
-//
-//	/*optimizer[opt_type]->IterateUntilConvergence(conv_interval,max_step);*/
-//	bool inside=true;
-//	
-//	//reassing fathers and bary coordinates
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//	{
-//		VertexType *vert=&h_res_mesh->vert[i];
-//		param_domain* pdomain=subdomain[i];
-//		ScalarType u=vert->T().U();
-//		ScalarType v=vert->T().V();
-//		///then get face falling into and estimate (alpha,beta,gamma)
-//		CoordType bary;
-//		BaseFace* chosen;
-//		inside &=GetBaryFaceFromUV(pdomain->domain,u,v,pdomain->ordered_faces,bary,chosen);
-//		vert->father=chosen;
-//		vert->Bary=bary;
-//	}
-//	//assert(inside);
-//	////statistics
-//	int changed=0;
-//	ScalarType max_diff=0;
-//	for (int i=0;i<h_res_mesh->vert.size();i++)
-//	{
-//		//ScalarType displ=(oldPos[i]-ProjectPos(h_res_mesh->vert[i])).Norm();
-//		if (oldFather[i]!=h_res_mesh->vert[i].father)
-//			changed++;
-//
-//		else {
-//			ScalarType displ = (oldPos[i]-h_res_mesh->vert[i].Bary).SquaredNorm();
-//			if (displ>max_diff) max_diff=displ;
-//		}
-//	}
-//	printf("%s : \n",phasename);
-//	printf(" diff:%6.5f \n",sqrt(max_diff) );
-//	printf("migr:%i \n",changed);
-//	printf("AREA distorsion:%lf \n",ApproxAreaDistortion<MeshType>(*h_res_mesh,domain->fn));
-//	printf("ANGLE distorsion:%lf \n",ApproxAngleDistortion<MeshType>(*h_res_mesh));
-//	/*if (!inside)
-//		printf("Point out of parametrization during optimization \n");*/
-//
-//}
 
 void MinimizeStep(const int &phaseNum)
 {
@@ -821,9 +451,7 @@ void MinimizeStep(const int &phaseNum)
 			   (!(v<=1.001)&&(v>=-1.001)))
 			{
 				IsOK=false;
-//#ifndef _MESHLAB
-//				printf("error in minimization... recovering...\n");
-//#endif
+
 				for (unsigned int k=0;k<currMesh->vert.size();k++)
 					currMesh->vert[k].T().P()=currMesh->vert[k].RestUV;
 				break;
@@ -887,22 +515,6 @@ void MinimizeStep(const int &phaseNum)
 	}	
 }
 
-//void EndOptimization()
-//{
-//	///clear father and bary
-//	for (unsigned int i=0;i<domain->face.size();i++)
-//		domain->face[i].vertices_bary.resize(0);
-//		
-//	///set face-vertex link
-//	for (unsigned int i=0;i<h_res_mesh->vert.size();i++)
-//	{
-//		BaseVertex *v=&h_res_mesh->vert[i];
-//		BaseFace *f=v->father;
-//		CoordType bary=v->Bary;
-//		f->vertices_bary.push_back(std::pair<VertexType*,CoordType>(v,bary));
-//	}	
-//
-//}
 
 int accuracy;
 vcg::CallBackPos *cb;
@@ -925,14 +537,6 @@ public:
 		domain=&_domain;
 		h_res_mesh=&_h_res_mesh;
 		
-		/*subdomain.resize(h_res_mesh->vert.size());*/
-
-		///get the average area per triangle
-		/*ScalarType area=Area<MeshType>(_h_res_mesh);*/
-
-		///get esteemation of average area per triangle
-		//ScalarType average_area=area/(ScalarType)_h_res_mesh.vn;
-
 		///initialize STARS
 		star_meshes.resize(domain->vn);
 		InitStarEquilateral();
@@ -971,10 +575,7 @@ public:
 	
 	void PrintAttributes()
 	{
-		/*ScalarType distArea=ApproxAreaDistortion<BaseMesh>(*h_res_mesh,domain->fn);
-		ScalarType distAngle=ApproxAngleDistortion<BaseMesh>(*h_res_mesh);
-		ScalarType distAggregate=geomAverage<ScalarType>(distArea+1.0,distAngle+1.0,3,1)-1;
-		printf("\n AREA  distorsion:%lf;\n ANGLE distorsion:%lf;\n AGGREGATE distorsion:%lf \n\n",distArea,distAngle,distAggregate);*/
+		
 		int done=step;
 		int total=6;
 		ScalarType ratio=(ScalarType)done/total;
@@ -986,44 +587,31 @@ public:
 		(*cb)(percent,ret);
 	}
 
-	void Optimize(ScalarType gap=0.05)
+	void Optimize(ScalarType gap=0.5,int max_step=10)
 	{
-		/*int t0=clock();*/
 		int k=0;
-		/*int opt_type=0;*/
 		ScalarType distArea=ApproxAreaDistortion<BaseMesh>(*h_res_mesh,domain->fn);
 		ScalarType distAngle=ApproxAngleDistortion<BaseMesh>(*h_res_mesh);
 		ScalarType distAggregate0=geomAverage<ScalarType>(distArea+1.0,distAngle+1.0,3,1)-1;
-		PrintAttributes();
 		bool ContinueOpt=true;
-		PrintAttributes();
 		PatchesOptimizer<BaseMesh> DomOpt(*domain,*h_res_mesh);
 		step++;
-		PrintAttributes();
+		
 
 		DomOpt.OptimizePatches();
-
-	
+		PrintAttributes();
 
 		while (ContinueOpt)
 		{
 			///domain Optimization	
 			k++;
-			/*#ifndef _MESHLAB
-			printf("\n DOING STAR\n");
-			#endif*/
+			
 			InitStarSubdivision();
 			MinimizeStep(0);
-			//PrintAttributes();
-		/*	#ifndef _MESHLAB
-			printf("\n DOING DIAMOND\n");
-			#endif*/
+
 			InitDiamondSubdivision();
 			MinimizeStep(1);
-			//PrintAttributes();
-			/*#ifndef _MESHLAB
-			printf("\n DOING FACES\n");
-			#endif*/
+
 			InitFaceSubdivision();
 			MinimizeStep(2);
 			step++;
@@ -1033,17 +621,10 @@ public:
 			distAngle=ApproxAngleDistortion<BaseMesh>(*h_res_mesh);
 			ScalarType distAggregate1=geomAverage<ScalarType>(distArea+1.0,distAngle+1.0,3,1)-1;
 			ScalarType NewGap=((distAggregate0-distAggregate1)*100.0)/distAggregate0;
-			if (NewGap<gap)
+			if ((NewGap<gap)||(k>max_step))
 				ContinueOpt=false;
 			distAggregate0=distAggregate1;
 		}
-		///*EndOptimization();*/
-		//int t1=clock();
-		//#ifndef _MESHLAB
-		//printf("TIME OPTIMIZATION:%d \n",(t1-t0)/1000);
-		//#endif
 	}
-	
-	
 };
 #endif
