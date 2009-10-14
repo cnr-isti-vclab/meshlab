@@ -235,8 +235,7 @@ public:
 		const ScalarType &averageLenght,
 		const ScalarType &averageArea,
 		ScalarType &varianceL,
-		ScalarType &varianceA
-		)
+		ScalarType &varianceA)
 	{
                 typename MeshType::FaceIterator Fi;
 		varianceA=0;
@@ -399,75 +398,6 @@ public:
 	}
 
 
-//	void OptimizePatches()
-//	{
-//		global_mark=0;
-//		markers.Init(global_mark);
-//
-//		Operations.clear();
-//
-//		const ScalarType sqrtsrt3=(ScalarType)1.31607401;
-//
-//		averageArea=Area(final_mesh)/((ScalarType)base_mesh.fn*(ScalarType)2.0);
-//		averageLenght=2*sqrt(averageArea)/sqrtsrt3;
-//
-//		ScalarType varianceL,varianceA;
-//		FindVarianceLenghtArea(base_mesh,averageLenght,averageArea,varianceL,varianceA);
-//
-//#ifndef _MESHLAB
-//		printf("Variance lenght:%f\n",varianceL*100.f/averageLenght);
-//		printf("Variance area:%f\n",varianceA*100.f/averageArea);
-//#endif
-//		//Initialize heap
-//		for (unsigned int i=0;i<base_mesh.vert.size();i++)
-//		{
-//			VertexType *v=&base_mesh.vert[i];
-//			Operations.push_back(Elem(v,Priority(v),global_mark));
-//		}
-//		std::make_heap(Operations.begin(),Operations.end());
-//		float gap=(ScalarType)0.05;
-//		int n_oper=0;
-//		///start Optimization
-//		ScalarType varianceL0=varianceL;
-//		ScalarType varianceA0=varianceA;
-//		ScalarType varianceL1;
-//		ScalarType varianceA1;
-//		bool continue_opt=true;
-//		while (continue_opt)
-//		{
-//			int temp_oper=0;
-//			while (temp_oper<20)
-//			{
-//				std::pop_heap(Operations.begin(),Operations.end());
-//				if (markers[Operations.back().center]<=Operations.back().t_mark)
-//				{
-//					VertexType* oper=Operations.back().center;
-//					Execute(oper);
-//					n_oper++;
-//					temp_oper++;
-//				}
-//				Operations.pop_back();
-//			}
-//			FindVarianceLenghtArea(base_mesh,averageLenght,averageArea,varianceL1,varianceA1);
-//			ScalarType percL=(varianceL0-varianceL1)*100/averageLenght;
-//			ScalarType percA=(varianceA0-varianceA1)*100/averageArea;
-//			ScalarType curr_gap=percL+percA;
-//#ifndef _MESHLAB
-//			printf("gap:%f\n",curr_gap);
-//#endif
-//			varianceL0=varianceL1;
-//			varianceA0=varianceA1;
-//			continue_opt=curr_gap>gap;
-//		}
-//		FindVarianceLenghtArea(base_mesh,averageLenght,averageArea,varianceL,varianceA);
-//
-//#ifndef _MESHLAB
-//		printf("Num Oper:%i\n",n_oper);
-//		printf("Variance lenght:%f\n",varianceL*100.f/averageLenght);
-//		printf("Variance area:%f\n",varianceA*100.f/averageArea);
-//#endif
-//
-//	}
 
 void OptimizePatches()
 	{
