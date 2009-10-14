@@ -21,6 +21,7 @@ class AbstractVertex  : public vcg::VertexSimp2< AbstractVertex, AbstractEdge, A
 	vcg::vertex::Coord3f,
 	vcg::vertex::TexCoord2f,
 	vcg::vertex::BitFlags>
+  //vcg::face::Normal3f>
 {
 public:
 	CoordType RPos;
@@ -33,6 +34,7 @@ class AbstractFace    : public vcg::FaceSimp2  < AbstractVertex, AbstractEdge, A
 	vcg::face::VertexRef,
 	vcg::face::Color4b,
 	vcg::face::BitFlags>
+//vcg::face::Normal3f>
 {};
 
 class AbstractMesh: public vcg::tri::TriMesh<std::vector<AbstractVertex>, std::vector<AbstractFace> > {
@@ -613,7 +615,7 @@ private:
 	}
 	
 	
-	void Test()
+	bool Test()
 	{
 		/*int index=0;*/
 		for (unsigned int i=0;i<abstract_mesh->face.size();i++)
@@ -627,10 +629,6 @@ private:
 					AbstractFace * f1=f0->FFp(j);
 					if (f1>f0)
 					{
-						
-						/*int num0=j;
-						int num1=f0->FFi(j);*/
-
 						///add to domain map
 						AbstractVertex *v0,*v1;
 						v0=f0->V(j);
@@ -656,21 +654,17 @@ private:
 				}
 			}
 		}
-
 		///test if for each face there is a right domain
 		for (unsigned int i=0;i<param_mesh->face.size();i++)
 		{
 			ParamFace * f=&param_mesh->face[i];	
 			vcg::Point2f uvI0,uvI1,uvI2;
 			int IndexDomain=-1;
-#ifndef NDEBUG
 			int ret=InterpolationSpace(f,uvI0,uvI1,uvI2,IndexDomain);
-			assert(ret!=-1);
-#else
-			InterpolationSpace(f,uvI0,uvI1,uvI2,IndexDomain);
-#endif
+			if (ret==-1)
+				return false;
 		}
-
+	return true;
 	}
 
 	int getSharedVertices(AbstractFace *f0,AbstractFace *f1,AbstractFace *f2,
@@ -856,7 +850,9 @@ public:
 		AbstractVertex *shared[3];
 
 		int num=getSharedVertices(f0,f1,f2,shared);
-		assert((num==1)||(num==2));
+		if (num<1)
+			return -1;
+		//assert((num==1)||(num==2));
 		if (num==2)///ude diamond
 		{
 			AbstractVertex* v0=shared[0];
@@ -1580,7 +1576,7 @@ public:
 
 	}
 
-	void Update()
+	bool Update(bool test=true)
 	{
 		UpdateTopologies(abstract_mesh);
 		UpdateTopologies(param_mesh);
@@ -1617,20 +1613,22 @@ public:
 		InitFace();
 		InitDiamond();
 		InitStar();
-		Test();
+		if (test)
+			return (Test());
+		return true;
 	}
 
-	void Init(AbstractMesh * _abstract_mesh,
-			  ParamMesh	 * _param_mesh)
+	bool Init(AbstractMesh * _abstract_mesh,
+			  ParamMesh	 * _param_mesh,bool test=true)
 	{
 		
 		abstract_mesh=_abstract_mesh;
 		param_mesh=_param_mesh;
 
-		//UpdateTopologies(abstract_mesh);
-		//UpdateTopologies(param_mesh);
+		UpdateTopologies(abstract_mesh);
+		UpdateTopologies(param_mesh);
 		
-		Update();
+		return (Update(test));
 	}
 	
 	AbstractMesh *&AbsMesh(){return abstract_mesh;} 
@@ -1655,111 +1653,7 @@ public:
 		return index;
 	}
 
-	///// I/O FUNCTIONS
-	//void SaveMCP(char* filename)
-	//{
-	//	/*Warp(0);*/
-	//	FILE *f;
-	//	f=fopen(filename,"w+");
-	//	std::map<BaseFace*,int> facemap;
-	//	std::map<BaseVertex*,int> vertexmap;
-	//	typedef std::map<BaseVertex*,int>::iterator iteMapVert;
-	//	typedef std::map<BaseFace*,int>::iterator iteMapFace;
-
-	//	///add vertices
-	//	fprintf(f,"%d,%d \n",base_mesh.fn,base_mesh.vn);
-	//	int index=0;
-	//	for (unsigned int i=0;i<base_mesh.vert.size();i++)
-	//	{
-	//		BaseVertex* vert=&base_mesh.vert[i];
-	//		if (!vert->IsD())
-	//		{
-	//			vertexmap.insert(std::pair<BaseVertex*,int>(vert,index));
-	//			CoordType pos=vert->P();
-	//			CoordType RPos=vert->RPos;
-	//			fprintf(f,"%f,%f,%f;%f,%f,%f \n",pos.X(),pos.Y(),pos.Z(),RPos.X(),RPos.Y(),RPos.Z());
-	//			index++;
-	//		}
-	//	}
-
-	//	///add faces
-	//	index=0;
-	//	for (unsigned int i=0;i<base_mesh.face.size();i++)
-	//	{
-	//		BaseFace* face=&base_mesh.face[i];
-	//		if (!face->IsD())
-	//		{
-	//			BaseVertex* v0=face->V(0);
-	//			BaseVertex* v1=face->V(1);
-	//			BaseVertex* v2=face->V(2);
-	//			iteMapVert vertIte;
-	//			vertIte=vertexmap.find(v0);
-	//			assert(vertIte!=vertexmap.end());
-	//			int index0=(*vertIte).second;
-	//			vertIte=vertexmap.find(v1);
-	//			assert(vertIte!=vertexmap.end());
-	//			int index1=(*vertIte).second;
-	//			vertIte=vertexmap.find(v2);
-	//			assert(vertIte!=vertexmap.end());
-	//			int index2=(*vertIte).second;
-	//			assert((index0!=index1)&&(index1!=index2));
-	//			fprintf(f,"%d,%d,%d \n",index0,index1,index2);
-	//			facemap.insert(std::pair<BaseFace*,int>(face,index));
-	//			index++;
-	//		}
-	//	}
-
-	//	///high resolution mesh
-	//	fprintf(f,"%d,%d \n",final_mesh.fn,final_mesh.vn);
-
-	//	///add vertices
-	//	vertexmap.clear();
-	//	index=0;
-	//	for (unsigned int i=0;i<final_mesh.vert.size();i++)
-	//	{
-	//		BaseVertex* vert=&final_mesh.vert[i];
-	//		if (!vert->IsD())
-	//		{
-	//			vertexmap.insert(std::pair<BaseVertex*,int>(vert,index));
-	//			CoordType pos=vert->P();
-	//			CoordType bary=vert->Bary;
-	//			BaseFace* father=vert->father;
-	//			iteMapFace IteF=facemap.find(father);
-	//			assert (IteF!=facemap.end());
-	//			int indexface=(*IteF).second;
-	//			fprintf(f,"%f,%f,%f;%f,%f,%f;%d,%d,%d;%d \n",
-	//			pos.X(),pos.Y(),pos.Z(),bary.X(),bary.Y(),bary.Z(),
-	//			vert->OriginalCol.X(),vert->OriginalCol.Y(),vert->OriginalCol.Z(),
-	//			indexface);
-	//			index++;
-	//		}
-	//	}
-
-	//	///add faces
-	//	for (unsigned int i=0;i<final_mesh.face.size();i++)
-	//	{
-	//		BaseFace* face=&final_mesh.face[i];
-	//		if (!face->IsD())
-	//		{
-	//			BaseVertex* v0=face->V(0);
-	//			BaseVertex* v1=face->V(1);
-	//			BaseVertex* v2=face->V(2);
-	//			iteMapVert vertIte;
-	//			vertIte=vertexmap.find(v0);
-	//			assert(vertIte!=vertexmap.end());
-	//			int index0=(*vertIte).second;
-	//			vertIte=vertexmap.find(v1);
-	//			assert(vertIte!=vertexmap.end());
-	//			int index1=(*vertIte).second;
-	//			vertIte=vertexmap.find(v2);
-	//			assert(vertIte!=vertexmap.end());
-	//			int index2=(*vertIte).second;
-	//			assert((index0!=index1)&&(index1!=index2));
-	//			fprintf(f,"%d,%d,%d \n",index0,index1,index2);
-	//		}
-	//	}
-	//	fclose(f);
-	//}
+	
 	template <class MeshType>
 	int LoadMCP(AbstractMesh * _abstract_mesh,
 			  ParamMesh	 * _param_mesh,
