@@ -20,14 +20,13 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 	public:
 
 	bool savedomain;
-
+	
 	bool IsFeasible()
 	{
 		if(!vcg::face::CheckFlipEdge(*this->_pos.F(), this->_pos.E()))
 			return false;
-		///ScalarType diff=EdgeDiff();
-		/*return true;*/
-                return (this->_priority>0);
+
+		return (this->_priority>0);
 	}
 
 	inline ParamEdgeFlip() {}
@@ -35,7 +34,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 	/*!
 	 *	Constructor with <I>pos</I> type
 	 */
-        inline ParamEdgeFlip(const typename Super::PosType pos, int mark)
+  inline ParamEdgeFlip(const typename Super::PosType pos, int mark)
 	{
 		this->_pos = pos;
 		this->_localMark = mark;
@@ -72,8 +71,30 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 
 			GetUV<BaseMesh>(father,bary,v->T().U(),v->T().V());
 		}
+
+		///update VF topology
+		FaceType *f1=f.FFp(edge);
+		FaceType *f0=&f;
+		vcg::face::VFDetach(*f1,0);
+		vcg::face::VFDetach(*f1,1);
+		vcg::face::VFDetach(*f1,2);
+		vcg::face::VFDetach(*f0,0);
+		vcg::face::VFDetach(*f0,1);
+		vcg::face::VFDetach(*f0,2);
 		///then do the effective flip
+
 		vcg::face::FlipEdge(f,edge);
+
+		
+		
+		vcg::face::VFAppend(f1,0);
+		vcg::face::VFAppend(f1,1);
+		vcg::face::VFAppend(f1,2);
+		vcg::face::VFAppend(f0,0);
+		vcg::face::VFAppend(f0,1);
+		vcg::face::VFAppend(f0,2);
+		///edh updating topology
+
 
 		///set son->father new link
 		for (unsigned int i=0;i<HresVert.size();i++)
@@ -264,7 +285,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 
 	ScalarType ComputePriority()
 	{
-                this->_priority=EdgeDiff();
+    this->_priority=EdgeDiff();
 		return this->_priority;
 	}
 
