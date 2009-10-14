@@ -364,7 +364,9 @@ template <class FaceType>
 		eP.isoParam=isoParam;
 		eP.alphaMap=&alphaMap;
 
-		/*int f0=to_param->fn;*/
+		#ifndef _MESHLAB
+		int f0=to_param->fn;
+		#endif
 		bool done=vcg::RefineE<ParamMesh,SplitMidPoint<ParamMesh>,EdgePredicate<ParamMesh> >(*to_param,splMd,eP);
 		#ifndef _MESHLAB
 		printf("FACE ADDED  %d \n",to_param->fn-f0);
