@@ -178,15 +178,12 @@ void OptimizeStar(typename MeshType::VertexType *v,int accuracy=1)
 
 	////SETTING SPEED
 	ScalarType edge_esteem=GetSmallestUVHeight(hlev_mesh);
-	
-	//ScalarType speed0=(2.0/(sqrt((ScalarType)mesh.vn/num_faces)))*optimize_speed_fact;
-	//ScalarType edge_esteem=GetSmallestUVHeight(hlev_mesh);
 
 	ScalarType speed0=edge_esteem*0.5;//0.05;
 	ScalarType conv=edge_esteem*0.2;//edge_esteem*0.05;
 	if (accuracy>1)
 		conv*=1.0/(ScalarType)((accuracy-1)*10.0);
-	
+
 	opt.SetSpeed(speed0);
 
 	/*int ite=*/opt.IterateUntilConvergence(conv);
@@ -275,7 +272,7 @@ void OptimizeStar(typename MeshType::VertexType *v,int accuracy=1)
 
 
 template <class MeshType>
-void SmartOptimizeStar(typename MeshType::VertexType *center,int accuracy=1)
+bool SmartOptimizeStar(typename MeshType::VertexType *center,int accuracy=1)
 {
 	typedef typename MeshType::VertexType VertexType;
 	typedef typename MeshType::FaceType FaceType;
@@ -294,8 +291,9 @@ void SmartOptimizeStar(typename MeshType::VertexType *center,int accuracy=1)
 	ScalarType ratio=(ScalarType)sizeH/(ScalarType)faces.size();
 
 	if (ratio<=1)
-		return;
+		return false;
 	else
 		OptimizeStar<MeshType>(center,accuracy);
+	return true;
 }
 #endif
