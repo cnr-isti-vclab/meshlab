@@ -700,11 +700,44 @@ bool testBaryCoords(CoordType &bary)
 	float eps=(ScalarType)0.0001;
 	if(!(fabs(bary.X()+bary.Y()+bary.Z()-1.0)<eps))
 		return false;
-	if(!((bary.X()<=1.0)&&(bary.X()>=0)&&(bary.Y()<=1.0)&&(bary.Y()>=0)&&(bary.Z()<=1.0)&&(bary.Z()>=0)))
+	if(!((bary.X()<=1.0)&&(bary.X()>=-eps)&&(bary.Y()<=1.0)&&(bary.Y()>=-eps)&&(bary.Z()<=1.0)&&(bary.Z()>=-eps)))
 		return false;
 	return true;
 }
 
+template <class CoordType>
+bool NormalizeBaryCoords(CoordType &bary)
+{
+	bool isOK=testBaryCoords(bary);
+	if (!isOK)
+		return false;
+
+	typedef typename CoordType::ScalarType ScalarType;
+
+	///test <0
+	if (bary.X()<0)
+		bary.X()=0;
+	if (bary.Y()<0)
+		bary.Y()=0;
+	if (bary.Z()<0)
+		bary.Z()=0;
+
+	///test >1
+	if (bary.X()>1.0)
+		bary.X()=1.0;
+	if (bary.Y()>1.0)
+		bary.Y()=1.0;
+	if (bary.Z()>1.0)
+		bary.Z()=1.0;
+	
+	///test sum
+	ScalarType diff=bary.X()+bary.Y()+bary.Z()-1.0;
+	bary.X()-=diff;
+
+	if (bary.X()<0)
+		bary.X()=0;
+	return true;
+}
 
 template <class MeshType>
 bool testParametrization(MeshType &domain,
@@ -715,17 +748,23 @@ bool testParametrization(MeshType &domain,
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename MeshType::VertexType VertexType;
 	bool is_good=true;
+	int num_del=0;
+	int num_null=0;
+	int fath_son=0;
 	for (unsigned int i=0;i<Hlev.vert.size();i++)
 	{
 		VertexType *v=&Hlev.vert[i];
+		
 		if (v->father==NULL)
 		{
-			printf("\n PAR ERROR : father NULL\n");
+			//printf("\n PAR ERROR : father NULL\n");
+			num_null++;
 			is_good=false;
 		}
 		if (v->father->IsD())
 		{
-			printf("\n PAR ERROR : father DELETED \n");
+			//printf("\n PAR ERROR : father DELETED \n");
+			num_del++;
 			is_good=false;
 		}
 		if (!(((v->Bary.X()>=0)&&(v->Bary.X()<=1))&&
@@ -746,12 +785,19 @@ bool testParametrization(MeshType &domain,
 				VertexType *v=face->vertices_bary[j].first;
 				if (v->father!=face)
 				{
-					printf("\n PAR ERROR : Father<->son \n");
+					//printf("\n PAR ERROR : Father<->son \n");
+					fath_son++;
 					is_good=false;
 				}
 			}
 		}
 	}
+	if (num_del>0)
+		printf("\n PAR ERROR %d Father isDel  \n",num_del);
+	if (num_null>0)
+		printf("\n PAR ERROR %d Father isNull \n",num_null);
+	if (fath_son>0)
+		printf("\n PAR ERROR %d Father<->son  \n",fath_son);
 	return (is_good);
 }
 
@@ -838,10 +884,10 @@ void ParametrizeStarEquilateral(MeshType &parametrized,
 		if (!vert->IsB())
 			non_border.push_back(vert);
 	}
-	assert(non_border.size()>0);
-
+	assert(non_border.size()!=0);
+	
 	///get sorted border vertices
-        std::vector<VertexType*> vertices;
+  std::vector<VertexType*> vertices;
 	FindSortedBorderVertices<MeshType>(parametrized,Start,vertices);
 	
 	///set border vertices
@@ -913,23 +959,10 @@ void ParametrizeStarEquilateral(MeshType &parametrized,
 			}
 		}
 	}
-#ifndef _MESHLAB
-	///final assert parametrization
-	if (!NonFolded(parametrized))
-	{
-		printf("ERROR FOLDED PARAMETRIZATION\n");
-		vcg::tri::io::ExporterPLY<MeshType>::Save(parametrized,"case0.ply");
 
-		for (int j=0;j<parametrized.vert.size();j++)
-		{
-			parametrized.vert[j].P().V(0)=parametrized.vert[j].T().U();
-			parametrized.vert[j].P().V(1)=parametrized.vert[j].T().V();
-			parametrized.vert[j].P().V(2)=0;
-		}
-		vcg::tri::io::ExporterPLY<MeshType>::Save(parametrized,"case1.ply");
-		assert(0);
-	}
-#endif
+	///final assert parametrization
+	assert(!NonFolded(parametrized));
+
 }
 
 ///given the mesh and the two edges (same) seen from face[0] and face[1] of the mesh construct
@@ -1269,8 +1302,8 @@ typename MeshType::ScalarType GetSmallestUVHeight(const MeshType &m)
 	}
 	if (smallest<eps)
 		smallest=(ScalarType)eps;
-	if (smallest>(ScalarType)0.2)
-		smallest=(ScalarType)0.2;
+	if (smallest>(ScalarType)0.05)
+		smallest=(ScalarType)0.05;
 	return smallest;
 }
 
