@@ -200,6 +200,7 @@ public:
 	EdgeType posEdge;
 	std::vector<typename FaceType::VertexType*> vertEdge;
 	FindNotBorderVertices<BaseMesh>(created,vertEdge);
+
 	posEdge.V(0)=std::max<typename FaceType::VertexType*>(vertEdge[1],vertEdge[0]);
 	posEdge.V(1)=std::min<typename FaceType::VertexType*>(vertEdge[1],vertEdge[0]);
 
@@ -212,6 +213,7 @@ public:
 		domain.face[i].areadelta=created.face[i].areadelta;
 
 	DoCollapse(created,posEdge, newPos); // v0 is deleted and v1 take the new position
+	
 	UpdateTopologies<BaseMesh>(&created);
 
 	/////parametrize domain
@@ -509,6 +511,7 @@ void UVToAlphaBeta(std::vector<VertexType*> &HresVert,
 		//}
 		///set father-son relation
 		chosen->vertices_bary.push_back(std::pair<BaseVertex*,vcg::Point3f>(brother,bary1));
+		
 		brother->father=chosen;
 		brother->Bary=bary1;
 
@@ -554,15 +557,31 @@ void AssignRPos(VertexType* &to_assign,
 
 void Execute(BaseMesh &m)
 	{	
-                typedef typename BaseMesh::FaceType FaceType;
-                typedef typename BaseMesh::VertexType VertexType;
-                typedef typename BaseMesh::ScalarType ScalarType;
-                typedef typename BaseMesh::CoordType CoordType;
+    typedef typename BaseMesh::FaceType FaceType;
+    typedef typename BaseMesh::VertexType VertexType;
+    typedef typename BaseMesh::ScalarType ScalarType;
+    typedef typename BaseMesh::CoordType CoordType;
 		
+		assert(pos.V(0)!=pos.V(1));
+		assert(!pos.V(0)->IsD());
+		assert(!pos.V(1)->IsD());
+		assert((pos.V(0)-&(*m.vert.begin()))<m.vert.size());
+		assert((pos.V(1)-&(*m.vert.begin()))<m.vert.size());
+				
+    std::vector<FaceType*> result;
+    std::vector<FaceType*> in_v0;
+    std::vector<FaceType*> in_v1;
+
+#ifndef NDEBUG
+		getSharedFace<BaseMesh>(pos.V(0),pos.V(1),result,in_v0,in_v1);
+		assert(result.size()==2);
+#endif
+
 		///compute new position
+		CoordType oldRPos=(pos.V(0)->RPos+pos.V(1)->RPos)/2.0;
 		CoordType newPos;
-		newPos=ComputeMinimal();//(pos.V(0)->RPos+pos.V(1)->RPos)/2.0;//
-		
+		newPos=ComputeMinimal();//
+		//vcg::tri::UpdateTopology<BaseMesh>::TestVertexFace(m); ///TEST
 
 		BaseMesh param0,param1;
 		//std::vector<VertexType*> vert_star0,vert_star1;
@@ -570,7 +589,7 @@ void Execute(BaseMesh &m)
 		std::vector<VertexType*> orderedVertex0,orderedVertex1;
 	
 		///create a parametrized submesh pre-collapse
-                CreatePreCollapseSubmesh(Super::pos,param0,orderedVertex0,orderedFaces0);
+    CreatePreCollapseSubmesh(Super::pos,param0,orderedVertex0,orderedFaces0);
 
 //---------------------------///
 		///update FF topology post-collapse
@@ -581,10 +600,10 @@ void Execute(BaseMesh &m)
 		
 		///do the collapse
 		DoCollapse(m, this->pos, newPos); // v0 is deleted and v1 take the new position
-		
+		//vcg::tri::UpdateTopology<BaseMesh>::TestVertexFace(m); ///TEST
 		//---------------------------///
 		///create a parametrized submesh post-collapse #1
-                CreatePostCollapseSubmesh(this->pos,param1,orderedVertex1,orderedFaces1);
+    CreatePostCollapseSubmesh(this->pos,param1,orderedVertex1,orderedFaces1);
 
 		//---------------------------///
 		///FINAL AREA
@@ -601,7 +620,7 @@ void Execute(BaseMesh &m)
 		std::vector<VertexType*> HresVert;
 	
 		//TRANSFORM TO UV
-                AphaBetaToUV(this->pos,orderedFaces0,param0,HresVert);
+    AphaBetaToUV(this->pos,orderedFaces0,param0,HresVert);
 
 		//DELETE SONS
 		ClearVert_Bary(orderedFaces0);
@@ -615,7 +634,7 @@ void Execute(BaseMesh &m)
 		UVToAlphaBeta(HresVert,param1,orderedFaces1);
 
 		///UPTIMIZE UV
-                PatchesOptimizer<BaseMesh>::OptimizeUV(this->pos.V(1));
+    PatchesOptimizer<BaseMesh>::OptimizeUV(this->pos.V(1));
 
 //---------------------------///
 		///get the non border one that is the one survived
@@ -632,7 +651,9 @@ void Execute(BaseMesh &m)
 
 		///FINAL OPTIMIZATION
 		/*int t0=clock();*/
-                SmartOptimizeStar<BaseMesh>(this->pos.V(1),Accuracy());
+		this->pos.V(1)->RPos=oldRPos;
+    bool b=SmartOptimizeStar<BaseMesh>(this->pos.V(1),Accuracy());
+			
 		/*int t1=clock();
 		time_opt+=(t1-t0);*/
 	}
