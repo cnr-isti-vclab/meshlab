@@ -106,7 +106,8 @@ SettingDialog::SettingDialog( RichParameter* rpar,QWidget* parent /*= 0*/ )
 	dialoglayout->addWidget(applybut,1,2);
 
 	frame.loadFrameContent(rpar);
-	dialoglayout->addWidget(&frame,0,0);
+	dialoglayout->addWidget(&frame,0,0,1,3);
+	dialoglayout->setSizeConstraint(QLayout::SetFixedSize);
 	setLayout(dialoglayout);
 	connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
 	connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
