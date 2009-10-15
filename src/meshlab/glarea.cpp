@@ -457,7 +457,7 @@ void GLArea::resizeGL(int _width, int _height)
 
 void GLArea::displayHelp()
 {
-	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT );
+	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT );
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_BLEND);
