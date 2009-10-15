@@ -482,7 +482,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
     }
     MeshModel *a = par.getMesh("FirstMesh");
     MeshModel *b = par.getMesh("SecondMesh");
-
+	
     a->cm.face.EnableFFAdjacency();   vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
     a->cm.face.EnableMark(); a->cm.UnMarkAll();
     b->cm.face.EnableFFAdjacency();      vcg::tri::UpdateTopology<CMeshO>::FaceFace(b->cm);
@@ -490,11 +490,12 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
     vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);   vcg::tri::UpdateFlags<CMeshO>::FaceProjection(a->cm);  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
     vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(b->cm);   vcg::tri::UpdateFlags<CMeshO>::FaceProjection(b->cm);  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(b->cm);
     CMeshO::ScalarType epsilon  = par.getAbsPerc("distance");
-
-    //Search for face on patch border
+ 
+	//Search for face on patch border
     int limit = a->cm.fn;
-    std::vector< vcg::tri::Hole<CMeshO>::Info > ccons; vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons ); ccons.clear();
-    vcg::tri::Append<CMeshO, CMeshO>::Mesh( a->cm, b->cm );
+    std::vector< vcg::tri::Hole<CMeshO>::Info > ccons, holes; vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, holes ); //ccons.clear();
+	std::vector<int> face_ind; for (int i = 0; i < holes.size(); i ++) face_ind.push_back( vcg::tri::Index(a->cm, holes[i].p.F()) );
+	vcg::tri::Append<CMeshO, CMeshO>::Mesh( a->cm, b->cm );
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
     a->cm.face.EnableColor();
     b->cm.face.EnableColor();//Useful for debug
@@ -504,29 +505,26 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
     debug_v = false;
 
     vcg::tri::UpdateBounding<CMeshO>::Box( a->cm ); eps = a->cm.bbox.Diag() / 1000000;
-    Log(GLLogStream::DEBUG, "eps value %f", eps);
+	Log(GLLogStream::DEBUG, "eps value %f", eps);
 
-    /* STEP 1 - Removing Redundant Surfaces
+	/* STEP 1 - Removing Redundant Surfaces
      * Repeat until mesh surface remain unchanged:
      *   - Remove redundant triangles on the boundary of patch
      */
     MeshFaceGrid grid_a; grid_a.Set( a->cm.face.begin(), a->cm.face.begin()+limit );  //Grid on A
-    bool changed; vcg::face::Pos<CMeshO::FaceType> p; int c_faces = 0;
+	bool changed; vcg::face::Pos<CMeshO::FaceType> p; int c_faces = 0;
     std::vector< CMeshO::FacePointer > split_faces;  std::vector< CMeshO::VertexPointer > new_faces; std::vector< CMeshO::FacePointer > remove_faces;
-    vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons );
-    for ( int i = 0; i < ccons.size(); i ++ ) {
+	vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons ); 
+    for ( int i = 0; i < ccons.size(); i ++ ) { 
         int start = remove_faces.size();
         vcg::face::Pos<CMeshO::FaceType> p = ccons[i].p;
-        do {
+		do {
             if ( !p.F()->IsD() && checkRedundancy( p.F(), a, grid_a, epsilon ) )  {
-            vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *(p.F()) ); remove_faces.push_back( p.F() );
-            } else
-                if ( !p.F()->IsD() ) split_faces.push_back( p.F() );
-            p.NextB();
+				vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *(p.F()) ); remove_faces.push_back( p.F() );
+			} else if ( !p.F()->IsD() ) split_faces.push_back( p.F() );
+			p.NextB();
         } while ( p.F() != ccons[i].p.F() );
-
-        int num_iter = remove_faces.size() - start;  int count = 0;
-
+		int num_iter = remove_faces.size() - start;  int count = 0; 
         do {
             changed = false; count = 0;
             for ( int i = start; i < start + num_iter; i ++ ) {
@@ -534,7 +532,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                     if ( !remove_faces[i]->FFp(j)->IsD() && checkRedundancy( remove_faces[i]->FFp(j), a, grid_a, epsilon ) ) {
                         changed = true; count++; c_faces++; remove_faces.push_back( remove_faces[i]->FFp(j) );
                         vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *(remove_faces[i]->FFp(j)) );
-                    } else {
+					} else {
                         if ( !remove_faces[i]->FFp(j)->IsD() ) split_faces.push_back( remove_faces[i]->FFp(j) );
                     }
                 }
@@ -544,18 +542,18 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
     }
     //remove redundant faces
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
-
     //split faces with two border edges
     for ( int i = 0; i < split_faces.size(); i ++ ) {
         if ( vcg::face::BorderCount( *split_faces[i] ) == 3 ) {
             if (!split_faces[i]->IsD())  vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *split_faces[i] );
             if (split_faces[i]->IsD()) { split_faces.erase( split_faces.begin() + i ); --i; }
-        }
+			continue;
+        } 
         if ( vcg::face::BorderCount( *split_faces[i] ) <= 1 ) {
             split_faces.erase( split_faces.begin() + i ); --i;
         }
     }
-    CMeshO::VertexIterator v = vcg::tri::Allocator<CMeshO>::AddVertices( a->cm, split_faces.size() );
+	CMeshO::VertexIterator v = vcg::tri::Allocator<CMeshO>::AddVertices( a->cm, split_faces.size() );
     for ( int i = 0; i < split_faces.size(); i ++ ) {
         if ( split_faces[i]->IsD() ) continue;
         int j; for (j=0; j<3 && vcg::face::IsBorder(*split_faces[i], j); j++); assert( j < 3 ); //split non border edge
@@ -563,11 +561,12 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
         new_faces.push_back( split_faces[i]->V(j) ); new_faces.push_back( &*v );  new_faces.push_back( split_faces[i]->V2(j) );
         new_faces.push_back( &*v ); new_faces.push_back( split_faces[i]->V1(j) ); new_faces.push_back( split_faces[i]->V2(j) );
         CMeshO::FacePointer opp_face = split_faces[i]->FFp(j);  int opp_edge = split_faces[i]->FFi(j);
-        new_faces.push_back( opp_face->V1(opp_edge) ); new_faces.push_back(opp_face->V2(opp_edge));  new_faces.push_back( &*v );
-        new_faces.push_back( &*v ); new_faces.push_back( opp_face->V2(opp_edge) ); new_faces.push_back( opp_face->V(opp_edge) );
-        vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *split_faces[i] );
-        if ( !opp_face->IsD() )vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *opp_face ); ++v;
-        //TODO Manual update
+		if ( !opp_face->IsD() ) {
+			new_faces.push_back( opp_face->V1(opp_edge) ); new_faces.push_back(opp_face->V2(opp_edge));  new_faces.push_back( &*v );
+			new_faces.push_back( &*v ); new_faces.push_back( opp_face->V2(opp_edge) ); new_faces.push_back( opp_face->V(opp_edge) );
+		}
+		vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *split_faces[i] );
+        if ( !opp_face->IsD() ) vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *opp_face ); ++v;
     }
     // Add new faces
     for ( int k = 0; k < new_faces.size(); k += 3 ) {
@@ -576,7 +575,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
         (*f).N() = ( (*f).P(0) - (*f).P(2) )^( (*f).P(1)-(*f).P(2) );
     }
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
-	vcg::tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize( a->cm, b->cm.fn/20 );
+	vcg::tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize( a->cm, b->cm.fn/100 );
     /* End Step 1 */
 #ifdef REDUNDANCY_ONLY
     Log(GLLogStream::DEBUG, "Removed %d redundant faces", c_faces);
@@ -586,23 +585,26 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
     grid_a.Set( a->cm.face.begin(), a->cm.face.begin()+limit );  //reset grid on A
     vcg::tri::UpdateSelection<CMeshO>::ClearFace(a->cm);
+	vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons );
+	
     /* STEP 2 - Project patch points on mesh surface
      * and ricorsively subdivide face in smaller triangles until each patch's face has border vertices
      * lying in adiacent or coincident faces. Also collect informations for triangulation of mesh faces.
      */
     //Add optional attribute
     CMeshO::PerFaceAttributeHandle<aux_info> info = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<aux_info>  (a->cm, std::string("aux_info"));
+	CMeshO::PerFaceAttributeHandle<bool> visited = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<bool> (a->cm); //check for already visited face
+	for ( int i = 0; i < a->cm.fn; i ++) visited[i] = false;	//no face previously visited
     vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons );
     std::vector< CMeshO::FacePointer > tbt_faces;   //To Be Triangulated
     std::vector< CMeshO::FacePointer > tbr_faces;   //To Be Removed
-    std::vector< int > verts; debug_v = true; 
+    std::vector< int > verts; debug_v = true;
 	for ( int c = 0; c < ccons.size(); c ++ ) {
-        if (ccons[c].p.F()->IsS() || ccons[c].p.F()->IsD() ) continue;
-        vcg::face::Pos<CMeshO::FaceType> p = ccons[c].p; debug_v = false; p.FlipV();//CCW order
-		do {
-            p.F()->SetS();
-            if (p.F()->IsD()) { p.NextB(); continue; }  //Already deleted, step over
-			p.F()->C() = vcg::Color4b::LightGray; 
+        if ( visited[ccons[c].p.F()] || ccons[c].p.F()->IsD() ) continue; 
+		vcg::face::Pos<CMeshO::FaceType> p = ccons[c].p; debug_v = false; p.FlipV();//CCW order
+		do { 
+			if ( visited[p.F()] || p.F()->IsD()) { p.NextB(); continue; }  //Already deleted or visited, step over
+			visited[p.F()] = true;
 			CMeshO::FacePointer nearestF = 0, nearestF1 = 0;
 			assert( vcg::face::BorderCount( *p.F() ) > 0 ); assert( vcg::face::IsBorder( *p.F(), p.E() ) );  //Check border correctness
             vcg::tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&a->cm);
@@ -625,7 +627,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                 int last_split = -1; vcg::Point2f pt; bool stop = false;
                 //search for splitting edge
                 do {
-                    int tosplit = -1;
+					int tosplit = -1;
                     vcg::Plane3<CMeshO::ScalarType> plane; plane.Init( currentF->P(0), currentF->N() );
                     vcg::Matrix44<CMeshO::ScalarType> rot_m;
                     rot_m.SetRotateRad( vcg::Angle<CMeshO::ScalarType>( currentF->N(), vcg::Point3<CMeshO::ScalarType>(0.0, 0.0, 1.0) ), currentF->N() ^ vcg::Point3<CMeshO::ScalarType>(0.0, 0.0, 1.0) );
@@ -649,7 +651,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                             closest = currentP; min_dist = vcg::SquaredDistance( edge, closest );
                         }
                     }
-
                     assert( vcg::SquaredDistance( edge, closest ) < edge.Length() );    //point found
                     closest = vcg::ClosestPoint(edge, closest); //projection on edge
                     vcg::tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
@@ -742,7 +743,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                 }
 				p.NextB(); continue;
             }
-            tbr_faces.push_back( p.F() ); //remove face, it will be overwritten by new faces
+			tbr_faces.push_back( p.F() ); //remove face, it will be overwritten by new faces
             int cnt = 0;    //counter (inf. loop)
             // Not-adjacent; recursive split using mid-point of edge border
             stack.push_back( std::make_pair( vcg::tri::Index( a->cm, p.F()->V(p.E()) ),
@@ -750,9 +751,10 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
             assert( vcg::face::IsBorder( *p.F(), p.E() ) );
             stack_faces.push_back( std::make_pair(nearestF, nearestF1) );   //Nearest Faces
             CMeshO::FacePointer actualF = p.F(); int actualE = p.E(); p.NextB();
+			
             while ( !stack.empty() ) {
-                assert( ++cnt < MAX_LOOP );  //stop in case of inf. loop
-                std::pair< int, int > border_edge = stack.back(); stack.pop_back();   //vertex indices
+				assert( cnt < MAX_LOOP ); cnt++; //stop in case of inf. loop
+				std::pair< int, int > border_edge = stack.back(); stack.pop_back();   //vertex indices
                 CMeshO::FacePointer start = stack_faces.back().first; CMeshO::FacePointer end = stack_faces.back().second; //facce di A, non richiedono update
                 stack_faces.pop_back();
                 if ( start == end ) {
@@ -763,8 +765,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                     }
                     continue;
                 }
-
-                if ( isAdjacent( start, end ) ) {
+				
+				if ( isAdjacent( start, end ) ) {
                     //calc. intersection point (approximate) and split edge
                     int shared; for ( int k = 0; k < 3; k ++ ) if ( start->FFp(k) == end ) shared = k;
                     vcg::Segment3<CMeshO::ScalarType> shared_edge( start->P(shared), start->P1(shared) );
@@ -802,7 +804,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                     vcg::tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
                     CMeshO::VertexIterator v = vcg::tri::Allocator<CMeshO>::AddVertices( a->cm, 1, vpu ); (*v).P() = closest;
                     if ( vpu.NeedUpdate() )  vpu.Update( p.V() );
-                    info[start].SetEps( eps );  info[start].Init( *start, vcg::tri::Index( a->cm, start->V(0) ), vcg::tri::Index( a->cm, start->V(1) ), vcg::tri::Index( a->cm, start->V(2) ) );
+					info[start].SetEps( eps );  info[start].Init( *start, vcg::tri::Index( a->cm, start->V(0) ), vcg::tri::Index( a->cm, start->V(1) ), vcg::tri::Index( a->cm, start->V(2) ) );
                     info[end].SetEps( eps );    info[end].Init( *end, vcg::tri::Index( a->cm, end->V(0) ), vcg::tri::Index( a->cm, end->V(1) ), vcg::tri::Index( a->cm, end->V(2) ) );
                     if ( info[start].AddToBorder( vcg::Segment3<CMeshO::ScalarType> ( a->cm.vert[border_edge.first].P(), (*v).P() ),
                                                   std::make_pair( border_edge.first, v - a->cm.vert.begin() ) ) ) {
@@ -814,10 +816,10 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                     }
                     continue;
                 }
-                //check if start and end share a vertex
+				//check if start and end share a vertex
                 int w = sharesVertex( start, end ); vcg::Segment3<CMeshO::ScalarType> s( a->cm.vert[border_edge.first].P(), a->cm.vert[border_edge.second].P() );
                 if ( w != -1 && vcg::SquaredDistance<float>( s, start->P(w) ) <= eps ) {
-                    vcg::tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
+					vcg::tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
                     CMeshO::VertexIterator v = vcg::tri::Allocator<CMeshO>::AddVertices( a->cm, 1, vpu ); (*v).P() = start->P(w);
 					if ( vpu.NeedUpdate() ) vpu.Update( p.V() );
                     info[start].SetEps( eps ); info[start].Init( *start, vcg::tri::Index( a->cm, start->V(0) ), vcg::tri::Index( a->cm, start->V(1) ), vcg::tri::Index( a->cm, start->V(2) )  );
@@ -832,28 +834,36 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                     }
                     continue;
                 }
-                vcg::tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
+				vcg::tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
                 CMeshO::VertexIterator v = vcg::tri::Allocator<CMeshO>::AddVertices( a->cm, 1, vpu );
                 (*v).P() = (a->cm.vert[border_edge.first].P() + a->cm.vert[border_edge.second].P())/2.00;
                 if ( vpu.NeedUpdate() ) vpu.Update( p.V() );
                 CMeshO::FacePointer currentF = 0; CMeshO::CoordType closest;
                 currentF =  grid_a.GetClosest(PDistFunct, markerFunctor, (*v).P(), 2*epsilon, dist, closest); //proj. midpoin on A
                 assert( currentF != 0 ); (*v).P() = closest;
-                stack.push_back( std::make_pair( border_edge.first, v - a->cm.vert.begin() ) );
-                stack.push_back( std::make_pair( v - a->cm.vert.begin(), border_edge.second ) );
-                stack_faces.push_back( std::pair<CMeshO::FacePointer, CMeshO::FacePointer> ( start, currentF ) );
-                stack_faces.push_back( std::pair<CMeshO::FacePointer, CMeshO::FacePointer> ( currentF, end ) );
+				//Avoid cycles, but holes may be generated
+				if ( !isOnBorder( a->cm.vert[border_edge.first].P(), start ) || !isOnBorder( closest, currentF ) ) {
+					stack.push_back( std::make_pair( border_edge.first, v - a->cm.vert.begin() ) );
+					stack_faces.push_back( std::pair<CMeshO::FacePointer, CMeshO::FacePointer> ( start, currentF ) );
+                }	
+				else {
+					verts.push_back( border_edge.first ); verts.push_back( v - a->cm.vert.begin() ); verts.push_back( end_v );					
+				}
+				if ( !isOnBorder( a->cm.vert[border_edge.second].P(), end ) || !isOnBorder( closest, currentF ) ) {
+					stack.push_back( std::make_pair( v - a->cm.vert.begin(), border_edge.second ) );
+					stack_faces.push_back( std::pair<CMeshO::FacePointer, CMeshO::FacePointer> ( currentF, end ) );
+				} else {
+					verts.push_back( border_edge.second ); verts.push_back( v - a->cm.vert.begin() ); verts.push_back( end_v );
+				}
                 assert( stack.size() == stack_faces.size() );
-            }
+			}
         } while ( p.F() != ccons[c].p.F() );
     }//end for
 
     for ( int i = 0; i < tbr_faces.size(); i++) {
         if (!tbr_faces[i]->IsD()) vcg::tri::Allocator<CMeshO>::DeleteFace(a->cm, *tbr_faces[i]);
     }
-
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
-    
     /* End of Step 2 */
 #ifdef REFINE_PATCH_ONLY
     for ( int k = 0; k < verts.size(); k += 3 ) {
@@ -868,19 +878,27 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
      * vertices and edges
      */
     std::sort( tbt_faces.begin(), tbt_faces.end() ); std::vector<CMeshO::FacePointer>::iterator itr = std::unique( tbt_faces.begin(), tbt_faces.end() ); tbt_faces.resize(itr - tbt_faces.begin() );
-    std::vector< CMeshO::CoordType > coords; int patch_verts = verts.size(); debug_v = false; int d=-1;
-    for ( int i = 0; i < tbt_faces.size(); i ++ ) {
-        if ( !tbt_faces[i]->IsD() ) {
+    std::vector< CMeshO::CoordType > coords; int patch_verts = verts.size(); debug_v = false; int d=-1; int faces_a = 0;
+	for ( int i = 0; i < tbt_faces.size(); i ++ ) {
+		if ( !tbt_faces[i]->IsD() ) {
+			faces_a++;
             handleBorder( info[tbt_faces[i]], tbt_faces[i]->N(), coords, verts );
             vcg::tri::Allocator<CMeshO>::DeleteFace(a->cm, *tbt_faces[i]);
         }
     }
+	//delete additional attributes
     vcg::tri::Allocator<CMeshO>::DeletePerFaceAttribute<aux_info>(a->cm, info); //no more useful
+	vcg::tri::Allocator<CMeshO>::DeletePerFaceAttribute<bool>(a->cm, visited); //no more useful
     // Add new faces
     int n_faces = 0;
-    for ( int k = 0; k < verts.size(); k += 3 ) { n_faces++;
+    for ( int k = 0; k < verts.size(); k += 3 ) { 
+		//avoid null faces; could originate holes
+		if ( vcg::Angle<float>( a->cm.vert[verts[k+1]].P() - a->cm.vert[verts[k]].P(), a->cm.vert[verts[k+2]].P() - a->cm.vert[verts[k]].P() ) == 0.0f ) continue;
+		if ( vcg::Angle<float>( a->cm.vert[verts[k]].P() - a->cm.vert[verts[k+1]].P(), a->cm.vert[verts[k+2]].P() - a->cm.vert[verts[k+1]].P() ) == 0.0f ) continue;
+		if ( vcg::Angle<float>( a->cm.vert[verts[k]].P() - a->cm.vert[verts[k+2]].P(), a->cm.vert[verts[k+1]].P() - a->cm.vert[verts[k+2]].P() ) == 0.0f ) continue;
+		n_faces++;
         CMeshO::FaceIterator  f = vcg::tri::Allocator<CMeshO>::AddFaces( a->cm, 1 );
-        if ( k < patch_verts ) {
+		if ( k < patch_verts ) {
             (*f).V(0) = &(a->cm.vert[verts[k]]); (*f).V(1) = &(a->cm.vert[verts[k+1]]); (*f).V(2) = &(a->cm.vert[verts[k+2]]); (*f).N() = ( (*f).P(0) - (*f).P(2) )^( (*f).P(1)-(*f).P(2) );
         }
         else {
@@ -889,17 +907,17 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
     }
     //post-processing refinement
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
-	vcg::tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize( a->cm, a->cm.fn / 100 );
+	vcg::tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize( a->cm, a->cm.fn / 20 );
     vcg::tri::UpdateBounding<CMeshO>::Box( a->cm );
     vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex( a->cm );
     //vcg::tri::Clean<CMeshO>::MergeCloseVertex( a->cm, eps ); //tooooooo slow
     vcg::tri::Clean<CMeshO>::RemoveDuplicateVertex( a->cm );
-    vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
     a->cm.face.DisableColor();
     //garbage collector
     vcg::tri::Allocator<CMeshO>::CompactVertexVector(a->cm);
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(a->cm);
-    Log(GLLogStream::DEBUG, "**********************" );
+	Log(GLLogStream::DEBUG, "**********************" );
     Log(GLLogStream::DEBUG, "End - Remove %d faces from patch - Created %d new faces", c_faces, n_faces);
 
     return true;

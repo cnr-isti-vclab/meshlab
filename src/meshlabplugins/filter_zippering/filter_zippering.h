@@ -119,7 +119,8 @@ struct aux_info {
         for ( unsigned int j = 0; j < border.size(); j ++ ) {
             for ( int i = 0; i < border[j].verts.size() && !found; i ++ ) {
                 if ( border[j].verts[i].first == v.second ) { found = true; border[j].edges.insert( border[j].edges.begin() + i, c ); border[j].verts.insert( border[j].verts.begin() + i, v ); }           //insert before i-th element
-                if ( border[j].verts[i].second == v.first ) { found = true; border[j].edges.insert( border[j].edges.begin() + i + 1, c ); border[j].verts.insert( border[j].verts.begin() + i + 1, v ); }   //insert after i-th element
+				else 
+				if ( border[j].verts[i].second == v.first ) { found = true; border[j].edges.insert( border[j].edges.begin() + i + 1, c ); border[j].verts.insert( border[j].verts.begin() + i + 1, v ); }   //insert after i-th element
             }
         }
         if (!found) {   //Create a new polyline ad add it to the border list
@@ -147,7 +148,7 @@ struct aux_info {
                     if ( trash[i].verts[j].first == border[k].verts.back().second ) {
                         trash[i].edges[j].P0() = border[k].edges.back().P1();
                         //trash[i].edges.erase( trash[i].edges.begin() + j ); trash[i].verts.erase( trash[i].verts.begin() + j )
-                    }
+                    } else 
                     if ( trash[i].verts[j].first == border[k].verts.front().first ) {
                         trash[i].edges[j].P0() = border[k].edges.front().P0();
                         //trash[i].edges.erase( trash[i].edges.begin() + j ); trash[i].verts.erase( trash[i].verts.begin() + j )
