@@ -45,6 +45,8 @@
 #ifndef __VCGLIB_TEXTURE_RENAME
 #define __VCGLIB_TEXTURE_RENAME
 
+#include <QDialog>
+
 namespace Ui
 {
 	class RenameTextureDialog;
