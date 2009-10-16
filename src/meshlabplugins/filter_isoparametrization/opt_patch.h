@@ -20,7 +20,7 @@ public:
 		VertexType* to_optimize;
 		std::vector<VertexType*> Hres_vert;
 		MeshType *parametrized_domain;
-		//MeshType *base_domain;
+		MeshType *base_domain;
 		MeshType hres_mesh;
 	};
 
@@ -80,27 +80,28 @@ public:
 			CoordType bary;
 			int index;
 			inside &=GetBaryFaceFromUV(*inf.parametrized_domain,u,v,bary,index);
+			FaceType* chosen;
 			if (!inside)///ack
 			{
-				x[0]=std::numeric_limits<float>::max();
-				x[1]=std::numeric_limits<float>::max();
-				return;
+				chosen=test->father;
+				bary=test->Bary;
 			}
-			FaceType* chosen=&inf.parametrized_domain->face[index];
+			else
+			{
+				chosen=&inf.parametrized_domain->face[index];
+			}
 			chosen->vertices_bary.push_back(std::pair<VertexType*,vcg::Point3f>(test,bary));
 			test->father=chosen;
+			assert(!chosen->IsD());
 			test->Bary=bary;
 		}
 
-
-		/*///ack
-		if (!inside)
+		if (!inside)///ack
 		{
-		x[0]=std::numeric_limits<float>::max();
-		x[1]=std::numeric_limits<float>::max();
-		return;
-		}*/
-		//assert(inside);
+			x[0]=std::numeric_limits<float>::max();
+			x[1]=std::numeric_limits<float>::max();
+			return;
+		}
 
 		ScalarType maxEdge=0;
 		ScalarType minEdge=std::numeric_limits<float>::max();
@@ -148,12 +149,6 @@ public:
 		x[0]=((maxArea/minArea)*(ScalarType)2.0);
 		x[1]=pow(maxEdge/minEdge,(ScalarType)2.0);
 
-		/*if (x[0]>MaxVal)
-		x[0]=MaxVal;
-		if (x[1]>MaxVal)
-		x[1]=MaxVal;*/
-		/*x[0]=(maxArea-minArea);
-		x[1]=pow(maxEdge-minEdge,2);*/
 	}
 
 	static ScalarType LengthPath(VertexType *v0,VertexType *v1)
@@ -267,7 +262,7 @@ public:
 	}
 
 	///optimize UV of central vertex
-        static void OptimizeUV(VertexType *center)
+   static void OptimizeUV(VertexType *center,MeshType &base_domain)
 	{
 		///parametrize base domain star and subvertices
 		ParametrizeStarEquilateral<MeshType>(center,true);
@@ -281,10 +276,18 @@ public:
 
 		///get Hres Vertices
 		std::vector<VertexType*> Hres_vert;
-                getHresVertex<typename MeshType::FaceType>(faces,Hres_vert);
+    getHresVertex<typename MeshType::FaceType>(faces,Hres_vert);
+
 		///make a copy of base mesh
 		std::vector<FaceType*> ordFaces;
 		CreateMeshVertexStar<MeshType>(vertices,ordFaces,domain);
+		assert(ordFaces.size()==domain.face.size());
+		assert(ordFaces.size()==faces.size());
+	/*	assert(Test(ordFaces,faces));
+		assert(Test1(ordFaces,domain.face));
+		assert(Test1(faces,domain.face));*/
+		/*assert(Test2(domain,Hres_vert.size()));*/
+
 		UpdateTopologies<MeshType>(&domain);
 
 		///minimization
@@ -292,6 +295,7 @@ public:
 		///setting parameters for minimization
 		//Minf.base_domain=base_domain;
 		Minf.parametrized_domain=&domain;
+		//Minf.base_domain=&base_mesh;
 		Minf.Hres_vert=std::vector<VertexType*>(Hres_vert.begin(),Hres_vert.end());
 
 		///create a copy of hres mesh
@@ -322,19 +326,18 @@ public:
 		opts[3]=(float)1E-20;
 		opts[4]=(float)LM_DIFF_DELTA;
 
-		/*energy1(p,x,2,2,&Minf);*/
-
-
 		/*int num=*/slevmar_dif(Equi_energy,p,x,2,2,1000,opts,info,NULL,NULL,&Minf);
-
-
+		
+		
 		///copy back values
 
 		//clear old values 
 		for (unsigned int i=0;i<ordFaces.size();i++)
 			ordFaces[i]->vertices_bary.resize(0);
 
+		
 		//reassing
+		int num=0;
 		for (unsigned int i=0;i<domain.face.size();i++)
 		{
 			for (unsigned int j=0;j<domain.face[i].vertices_bary.size();j++)
@@ -342,12 +345,20 @@ public:
 				VertexType *vert=domain.face[i].vertices_bary[j].first;
 				CoordType bary=domain.face[i].vertices_bary[j].second;
 				ordFaces[i]->vertices_bary.push_back(std::pair<VertexType*,vcg::Point3f>(vert,bary));
-				vert->father=ordFaces[i];
-				vert->Bary=bary;
+				/*vert->father=ordFaces[i];
+				assert(!ordFaces[i]->IsD());
+				vert->Bary=bary;*/
+				AssingFather(*vert,ordFaces[i],bary,base_domain);
+				num++;
 			}
 		}
-		/*Minf.to_optimize->T().U()=p[0];
-		Minf.to_optimize->T().V()=p[1];*/
+		//assert(num==Minf.Hres_vert.size());
+		if (num!=Minf.Hres_vert.size())
+		{	
+			printf("num0 %d \n",num);
+			printf("num1 %d \n",Minf.Hres_vert.size());
+		}
+
 		center->RPos=Minf.to_optimize->RPos;
 		delete(x);
 		delete(p);
@@ -377,9 +388,9 @@ public:
 	std::vector<Elem> Operations;
 
 
-        void Execute(VertexType *center)
+  void Execute(VertexType *center)
 	{
-		OptimizeUV(center);
+		OptimizeUV(center,base_mesh);
 		std::vector<typename MeshType::VertexType*> neigh;
 		getVertexStar<MeshType>(center,neigh);
 
@@ -469,7 +480,20 @@ void OptimizePatches()
 #endif
 
 	}
+
 	PatchesOptimizer(MeshType &_base_mesh,MeshType &_final_mesh):base_mesh(_base_mesh),final_mesh(_final_mesh),markers(_base_mesh.vert){}
+	
+	static MeshType* &HresMesh()
+	{
+		static MeshType* mesh;
+		return mesh;
+	}
+	
+	static MeshType* &BaseMesh()
+	{
+		static MeshType* mesh;
+		return mesh;
+	}
 
 };
 #endif

@@ -16,7 +16,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
         typedef typename BaseMesh::ScalarType   ScalarType;
         typedef vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<BaseMesh> > Super;
 	ScalarType diff;
-	
+
 	public:
 
 	bool savedomain;
@@ -43,7 +43,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 	}
 
 	///do the effective flip 
-	void ExecuteFlip(FaceType &f, const int &edge)
+	void ExecuteFlip(FaceType &f, const int &edge, BaseMesh *base_domain=NULL)
 	{
 		std::vector<FaceType*> faces;
 		faces.push_back(&f);
@@ -112,8 +112,14 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 			}
 			//assert(found);
 			assert(testBaryCoords(bary));
-			v->father=faces[index];
-			v->Bary=bary;
+			if (base_domain!=NULL)
+				AssingFather(*v,faces[index],bary,*base_domain);
+			else
+			{
+				v->father=faces[index];
+				assert(!faces[index]->IsD());
+				v->Bary=bary;
+			}
 		}
 		
 		
@@ -264,7 +270,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 		}
 #endif
 
-		ExecuteFlip(*this->_pos.F(),this->_pos.E());
+		ExecuteFlip(*this->_pos.F(),this->_pos.E(),&m);
 		
 		UpdateTopologies(&m);
 		
@@ -275,10 +281,10 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 		OptimizeStar<BaseMesh>(v2);
 		OptimizeStar<BaseMesh>(v3);*/
 		
-		SmartOptimizeStar<BaseMesh>(v0);
-		SmartOptimizeStar<BaseMesh>(v1);
-		SmartOptimizeStar<BaseMesh>(v2);
-		SmartOptimizeStar<BaseMesh>(v3);	
+		SmartOptimizeStar<BaseMesh>(v0,m,Accuracy());
+		SmartOptimizeStar<BaseMesh>(v1,m,Accuracy());
+		SmartOptimizeStar<BaseMesh>(v2,m,Accuracy());
+		SmartOptimizeStar<BaseMesh>(v3,m,Accuracy());	
 		/*int t1=clock();
 		time_opt+=(t1-t0);*/
 	}
@@ -294,6 +300,14 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 
 	int getE()
 	{return this->_pos.E();}
+
+	public:
+	static int &Accuracy()
+	{
+		static int _acc;
+		return _acc;
+	}
+
 };
 
 #endif

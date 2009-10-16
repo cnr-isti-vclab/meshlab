@@ -130,10 +130,12 @@ private:
 		
 		for (unsigned int i=0;i<base_mesh.vert.size();i++){
 			base_mesh.vert[i].brother=&final_mesh.vert[i];
-			final_mesh.vert[i].father=base_mesh.vert[i].VFp();
+			//final_mesh.vert[i].father=base_mesh.vert[i].VFp();
+			//assert(!base_mesh.vert[i].VFp()->IsD());
 			CoordType bary=CoordType(0,0,0);
 			bary.V(base_mesh.vert[i].VFi())=1;
-			final_mesh.vert[i].Bary=bary;
+			//final_mesh.vert[i].Bary=bary;
+			AssingFather(final_mesh.vert[i],base_mesh.vert[i].VFp(),bary,base_mesh);
 		}
 
 		///initialize area per vertex
@@ -176,7 +178,11 @@ private:
 		vcg::LocalOptimization<BaseMesh> DeciSession(base_mesh);
 		DeciSession.Init<MyTriEdgeCollapse >();
 		MyTriEdgeCollapse::Accuracy()=accuracy;
+		MyTriEdgeCollapse::HresMesh()=&final_mesh;
+		PatchesOptimizer<BaseMesh>::HresMesh()=&final_mesh;
+		PatchesOptimizer<BaseMesh>::BaseMesh()=&base_mesh;
 
+		MyTriEdgeFlip::Accuracy()=accuracy;
 		
 		int flip_todo=4;
 		int next_flip_num=targetFaces;
@@ -243,10 +249,13 @@ private:
 				curr_limit--;
 			}
 			
-			
+		
+
 			DeciSession.SetTargetSimplices(next_num);
 			not_heap_empty=DeciSession.DoOptimization();
-			
+
+		
+
 			if (do_flip)
 			{
 				FlipStep();
@@ -275,6 +284,8 @@ private:
 				DeciSession.h.clear();
 				DeciSession.Init<MyTriEdgeCollapse >();
 			}
+			
+			testParametrization<BaseMesh>(base_mesh,final_mesh);
 		}
 	
 	}
@@ -293,11 +304,12 @@ private:
 				CoordType bary=CoordType(0,0,0);
 				bary[index]=1.f;
 				f->vertices_bary.push_back(std::pair<BaseVertex*,vcg::Point3f>(vb,bary));
-				vb->father=f;
-				vb->Bary=bary;
+				AssingFather(*vb,f,bary,base_mesh);
+				/*vb->father=f;
+				assert(!f->IsD());
+				vb->Bary=bary;*/
 				v->brother=NULL;
 			}
-		testParametrization(base_mesh,final_mesh);
 	}
 
 	typedef struct vert_para
@@ -329,7 +341,7 @@ private:
 		
 		std::sort(ord_vertex.begin(),ord_vertex.end());
 		for (unsigned int i=0;i<ord_vertex.size();i++)
-				SmartOptimizeStar<BaseMesh>(ord_vertex[i].v);
+				SmartOptimizeStar<BaseMesh>(ord_vertex[i].v,base_mesh,MyTriEdgeCollapse::Accuracy());
 			
 	}
 
@@ -408,11 +420,12 @@ private:
 			{
 				BaseVertex* son=base_mesh.face[i].vertices_bary[j].first;
 				CoordType bary=base_mesh.face[i].vertices_bary[j].second;
-				son->father=&base_mesh.face[i];
-				son->Bary=bary;
+				/*son->father=&base_mesh.face[i];
+				assert(!base_mesh.face[i].IsD());
+				son->Bary=bary;*/
+				AssingFather(*son,&base_mesh.face[i],bary,base_mesh);
 			}
 		}
-	  testParametrization(base_mesh,final_mesh);
 	}
 
 	///save the current status of the parameterization
@@ -480,8 +493,11 @@ private:
 				CoordType bary=to_restore->face[i].vertices_bary[j].second;
 				base_mesh.face[i].vertices_bary[j].first=vert;
 				base_mesh.face[i].vertices_bary[j].second=bary;
-				vert->father=&base_mesh.face[i];
-				vert->Bary=bary;
+				AssingFather(*vert,&base_mesh.face[i],bary,base_mesh);
+
+				//vert->father=&base_mesh.face[i];
+				//assert(!base_mesh.face[i].IsD());
+				//vert->Bary=bary;
 			}
 		}
 		UpdateTopologies<BaseMesh>(&base_mesh);
@@ -714,8 +730,10 @@ public:
 				CoordType bary2=CoordType(UV_final.X(),UV_final.Y(),1-UV_final.X()-UV_final.Y());
 				isOK=NormalizeBaryCoords(bary2);
 				assert(isOK);
-				final_mesh.vert[i].father=&base_mesh.face[I_final];
-				final_mesh.vert[i].Bary=bary2;
+				//final_mesh.vert[i].father=&base_mesh.face[I_final];
+				//assert(!base_mesh.face[I_final].IsD());
+				//final_mesh.vert[i].Bary=bary2;
+				AssingFather(final_mesh.vert[i],&base_mesh.face[I_final],bary2,base_mesh);
 			}
 
 			///set father to son link
@@ -936,6 +954,7 @@ public:
 			vert->RPos=pos;
 			vert->Bary=bary;
 			vert->father=&base_mesh.face[index_face];
+			assert(!base_mesh.face[index_face].IsD());
 			col=vcg::Color4b(col0,col1,col2,255);
 			vert->OriginalCol=col;
 			/*if (i==final_mesh.vert.size()-1)
@@ -1034,6 +1053,7 @@ public:
 		for (unsigned int i=0;i<final_mesh.vert.size();i++)
 		{
 			std::map<BaseFace*,int>::iterator cur  = faceMap.find(final_mesh.vert[i].father);
+			assert(cur!= faceMap.end());
 			CoordType bary=final_mesh.vert[i].Bary;
 			int index=(*cur).second;
 			para_mesh.vert[i].T().N()=index;

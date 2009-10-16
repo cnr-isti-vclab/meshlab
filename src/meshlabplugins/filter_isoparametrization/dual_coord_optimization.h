@@ -490,8 +490,9 @@ void MinimizeStep(const int &phaseNum)
 				//assert(0);
 			}
 			assert(inside);
-			OrigVert->father=chosen;
-			OrigVert->Bary=bary;
+			//OrigVert->father=chosen;
+			//OrigVert->Bary=bary;
+			AssingFather(*OrigVert,chosen,bary,*domain);
 		}
 		}
 			///delete current mesh

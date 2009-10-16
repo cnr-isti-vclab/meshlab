@@ -93,7 +93,7 @@ public:
   }
 
   static void  SetBaryFromUV(BaseMesh &domain,
-                                         std::vector<BaseVertex*> &vertices)
+														 std::vector<BaseVertex*> &vertices)
   {
     ///set a vector of pointer to face
         std::vector<BaseFace*> OrdFace;
@@ -107,10 +107,12 @@ public:
 			FaceType *chosen;
 			ScalarType u=vertices[i]->T().U();
 			ScalarType v=vertices[i]->T().V();
-                        GetBaryFaceFromUV<BaseMesh>(domain,u,v,OrdFace,bary1,chosen);
+      GetBaryFaceFromUV<BaseMesh>(domain,u,v,OrdFace,bary1,chosen);
 			assert(fabs(bary1.X()+bary1.Y()+bary1.Z()-1.0)<=0.0001);
-			vertices[i]->father=chosen;
-			vertices[i]->Bary=bary1;
+			/*vertices[i]->father=chosen;
+			assert(!chosen->IsD());
+			vertices[i]->Bary=bary1;*/
+			AssingFather(vertices[i],chosen,bary1,domain);
 		}
   }
 
@@ -154,7 +156,7 @@ public:
   }
 
    ///find best position
-  inline CoordType FindBestPos()
+  inline CoordType FindBestPos(BaseMesh &m)
   {
     minInfo0 Minf;
     ///create the submesh
@@ -256,9 +258,11 @@ public:
 
 
 	for (unsigned int i=0;i<Minf.HiVertex.size();i++)
-	{
+	{/*
 		Minf.HiVertex[i]->father=swap[i].first;
-		Minf.HiVertex[i]->Bary=swap[i].second;
+		assert(!swap[i].first->IsD());
+		Minf.HiVertex[i]->Bary=swap[i].second;*/
+		AssingFather(*Minf.HiVertex[i],swap[i].first,swap[i].second,m);
 	}
 
 	return (bestPos);
@@ -270,9 +274,9 @@ public:
 	//return( Distance(pos.V(0)->cP(),pos.V(1)->cP()));
   }
 
-  CoordType ComputeMinimal()
+  CoordType ComputeMinimal(BaseMesh &m)
   {
-	CoordType bestPos=FindBestPos();
+	CoordType bestPos=FindBestPos(m);
 	return bestPos;
   }
 
@@ -465,7 +469,8 @@ void AphaBetaToUV(EdgeType &pos,
 }
 
 void UVToAlphaBeta(std::vector<VertexType*> &HresVert,
-				   BaseMesh &param,std::vector<FaceType*> &orderedFaces)
+									  BaseMesh &param,std::vector<FaceType*> &orderedFaces,
+										BaseMesh &base_mesh)
 {
 	///for each parametrized vertex
 	for (unsigned int i=0;i<HresVert.size();i++)
@@ -512,8 +517,10 @@ void UVToAlphaBeta(std::vector<VertexType*> &HresVert,
 		///set father-son relation
 		chosen->vertices_bary.push_back(std::pair<BaseVertex*,vcg::Point3f>(brother,bary1));
 		
-		brother->father=chosen;
-		brother->Bary=bary1;
+		AssingFather(*brother,chosen,bary1,base_mesh);
+		/*brother->father=chosen;
+		assert(!chosen->IsD());
+		brother->Bary=bary1;*/
 
 		///set new parametrization value
 		GetUV<BaseMesh>(&param.face[index],bary1,u,v);
@@ -580,7 +587,7 @@ void Execute(BaseMesh &m)
 		///compute new position
 		CoordType oldRPos=(pos.V(0)->RPos+pos.V(1)->RPos)/2.0;
 		CoordType newPos;
-		newPos=ComputeMinimal();//
+		newPos=ComputeMinimal(m);//
 		//vcg::tri::UpdateTopology<BaseMesh>::TestVertexFace(m); ///TEST
 
 		BaseMesh param0,param1;
@@ -597,7 +604,7 @@ void Execute(BaseMesh &m)
 		
 		///INITIAL AREA
 		ScalarType area0=Area<BaseFace>(orderedFaces0);
-		
+
 		///do the collapse
 		DoCollapse(m, this->pos, newPos); // v0 is deleted and v1 take the new position
 		//vcg::tri::UpdateTopology<BaseMesh>::TestVertexFace(m); ///TEST
@@ -621,7 +628,7 @@ void Execute(BaseMesh &m)
 	
 		//TRANSFORM TO UV
     AphaBetaToUV(this->pos,orderedFaces0,param0,HresVert);
-
+		
 		//DELETE SONS
 		ClearVert_Bary(orderedFaces0);
 //---------------------------///
@@ -631,11 +638,12 @@ void Execute(BaseMesh &m)
 		
 //---------------------------///
 		///REPROJECT BACK TO ORIGINAL FATHER #3
-		UVToAlphaBeta(HresVert,param1,orderedFaces1);
+		
+		UVToAlphaBeta(HresVert,param1,orderedFaces1,m);
 
-		///UPTIMIZE UV
-    PatchesOptimizer<BaseMesh>::OptimizeUV(this->pos.V(1));
-
+		
+    PatchesOptimizer<BaseMesh>::OptimizeUV(this->pos.V(1),m);
+	
 //---------------------------///
 		///get the non border one that is the one survived
 		unsigned int k=0;
@@ -648,12 +656,14 @@ void Execute(BaseMesh &m)
 		///ASSIGN REST POSITION CENTRAL VERTEX
 		//AssignRPos(pos.V(1),param1.vert[k].T().U(),param1.vert[k].T().V(),orderedFaces1,param0);
 //---------------------------///
-
+	
 		///FINAL OPTIMIZATION
 		/*int t0=clock();*/
+		
 		this->pos.V(1)->RPos=oldRPos;
-    bool b=SmartOptimizeStar<BaseMesh>(this->pos.V(1),Accuracy());
-			
+		
+    bool b=SmartOptimizeStar<BaseMesh>(this->pos.V(1),m,Accuracy());
+		
 		/*int t1=clock();
 		time_opt+=(t1-t0);*/
 	}
@@ -663,6 +673,12 @@ public:
 	{
 		static int _acc;
 		return _acc;
+	}
+	
+	static BaseMesh* &HresMesh()
+	{
+		static BaseMesh* mesh;
+		return mesh;
 	}
 
 	BaseVertex *getV(int num)

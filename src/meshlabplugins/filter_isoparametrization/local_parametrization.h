@@ -740,6 +740,26 @@ bool NormalizeBaryCoords(CoordType &bary)
 }
 
 template <class MeshType>
+void AssingFather(typename MeshType::VertexType &v,
+									typename MeshType::FaceType *father,
+									typename MeshType::CoordType &bary,
+									MeshType &domain)
+{
+	const MeshType::ScalarType eps=0.00001;
+	assert((father-&(*domain.face.begin()))<domain.face.size());
+	assert(!(father->IsD()));
+	assert(!(father==NULL));
+	assert((bary.X()>=0)&&(bary.X()<=1)&&
+				 (bary.Y()>=0)&&(bary.Y()<=1)&&
+				 (bary.Z()>=0)&&(bary.Z()<=1)&&
+				 ((bary.X()+bary.Y()+bary.Z())<=1+eps)&&
+				 ((bary.X()+bary.Y()+bary.Z())>=1-eps));
+
+	v.father=father;
+	v.Bary=bary;
+}
+
+template <class MeshType>
 bool testParametrization(MeshType &domain,
 						 MeshType &Hlev)
 {
@@ -751,25 +771,33 @@ bool testParametrization(MeshType &domain,
 	int num_del=0;
 	int num_null=0;
 	int fath_son=0;
+	int wrong_address=0;
 	for (unsigned int i=0;i<Hlev.vert.size();i++)
 	{
 		VertexType *v=&Hlev.vert[i];
-		
-		if (v->father==NULL)
+		bool isGoodAddr=true;
+		if ((v->father-&(*domain.face.begin()))>=domain.face.size())
+		{
+			printf("\n ADDRESS EXCEEDS OF %d \n",v->father-&(*domain.face.begin()));
+			wrong_address++;
+			is_good=false;
+			isGoodAddr=false;
+		}
+		if ((isGoodAddr)&&(v->father==NULL))
 		{
 			//printf("\n PAR ERROR : father NULL\n");
 			num_null++;
 			is_good=false;
 		}
-		if (v->father->IsD())
+		if ((isGoodAddr)&&(v->father->IsD()))
 		{
 			//printf("\n PAR ERROR : father DELETED \n");
 			num_del++;
 			is_good=false;
 		}
-		if (!(((v->Bary.X()>=0)&&(v->Bary.X()<=1))&&
+		if ((isGoodAddr)&&(!(((v->Bary.X()>=0)&&(v->Bary.X()<=1))&&
 		((v->Bary.Y()>=0)&&(v->Bary.Y()<=1))&&
-		((v->Bary.Z()>=0)&&(v->Bary.Z()<=1))))
+		((v->Bary.Z()>=0)&&(v->Bary.Z()<=1)))))
 		{
 			printf("\n PAR ERROR : bary coords exceeds: %f,%f,%f \n",v->Bary.X(),v->Bary.Y(),v->Bary.Z());
 			is_good=false;
@@ -798,6 +826,11 @@ bool testParametrization(MeshType &domain,
 		printf("\n PAR ERROR %d Father isNull \n",num_null);
 	if (fath_son>0)
 		printf("\n PAR ERROR %d Father<->son  \n",fath_son);
+	if (wrong_address>0)
+	{
+		printf("\n PAR ERROR %d Wrong Address Num Faces %d\n",wrong_address,domain.fn);
+		system("pause");
+	}
 	return (is_good);
 }
 
@@ -961,7 +994,7 @@ void ParametrizeStarEquilateral(MeshType &parametrized,
 	}
 
 	///final assert parametrization
-	assert(!NonFolded(parametrized));
+	assert(NonFolded(parametrized));
 
 }
 

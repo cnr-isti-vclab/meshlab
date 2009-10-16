@@ -106,7 +106,7 @@ typename MeshType::ScalarType StarDistorsion(typename MeshType::VertexType *v)
 
 ///optimize a single star
 template <class MeshType>
-void OptimizeStar(typename MeshType::VertexType *v,int accuracy=1)
+void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy=1)
 {
 	typedef typename MeshType::VertexType VertexType;
 	typedef typename MeshType::FaceType FaceType;
@@ -229,8 +229,10 @@ void OptimizeStar(typename MeshType::VertexType *v,int accuracy=1)
 			///restore old coordinates and return
 			for (unsigned int k=0;k<oldFath.size();k++)
 			{
-				hlev_mesh.vert[k].father=oldFath[k];
-				hlev_mesh.vert[k].Bary=oldBary[k];
+				/*hlev_mesh.vert[k].father=oldFath[k];
+				assert(!oldFath[k]->IsD());
+				hlev_mesh.vert[k].Bary=oldBary[k];*/
+				AssingFather(hlev_mesh.vert[k],oldFath[k],oldBary[k],domain);
 			}
 			CoordType val;
 			bool found1=GetCoordFromUV(hlev_mesh,0,0,val,true);   
@@ -239,8 +241,10 @@ void OptimizeStar(typename MeshType::VertexType *v,int accuracy=1)
 			return;
 		}
 
-		to_reassing->father=chosen;
-		to_reassing->Bary=bary;
+		//to_reassing->father=chosen;
+		//assert(!chosen->IsD());
+		//to_reassing->Bary=bary;
+		AssingFather(*to_reassing,chosen,bary,domain);
 	}
 
 	///clear father and bary
@@ -272,7 +276,7 @@ void OptimizeStar(typename MeshType::VertexType *v,int accuracy=1)
 
 
 template <class MeshType>
-bool SmartOptimizeStar(typename MeshType::VertexType *center,int accuracy=1)
+bool SmartOptimizeStar(typename MeshType::VertexType *center,MeshType &base_domain,int accuracy=1)
 {
 	typedef typename MeshType::VertexType VertexType;
 	typedef typename MeshType::FaceType FaceType;
@@ -293,7 +297,7 @@ bool SmartOptimizeStar(typename MeshType::VertexType *center,int accuracy=1)
 	if (ratio<=1)
 		return false;
 	else
-		OptimizeStar<MeshType>(center,accuracy);
+		OptimizeStar<MeshType>(center,base_domain,accuracy);
 	return true;
 }
 #endif

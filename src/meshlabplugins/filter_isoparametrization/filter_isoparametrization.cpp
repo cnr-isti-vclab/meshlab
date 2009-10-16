@@ -124,9 +124,10 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& /*md*/
 					"2: Area + Angle : stop at minimum area and angle distorsion<br>"
 			        "3: Regularity : stop at minimum number of irregular vertices<br>"
 			        "4: L2 : stop at minimum OneWay L2 Stretch Eff")));
-
+		
 		//par.addParam(new RichDynamicFloat("convergenceSpeed", 1, 1,4, "Convergence Speed", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results");
 		par.addParam(new RichInt("convergenceSpeed",2, "Convergence Speed", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results"));
+		par.addParam(new RichBool("DoubleStep",true,"Double Step","Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust, but it may increase the distorsion"));
 			break;
 	}
 	 case ISOP_REMESHING :
@@ -211,6 +212,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		int targetAbstractMaxFaceNum = par.getInt("targetAbstractMaxFaceNum");
 		int convergenceSpeed = par.getInt("convergenceSpeed");
 		int stopCriteria=par.getEnum("stopCriteria");
+		bool doublestep=par.getBool("DoubleStep");
 		IsoParametrizator Parametrizator;
 		
 		bool isTXTenabled=m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
@@ -241,7 +243,8 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			case 3:Parametrizator.SetParameters(cb,targetAbstractMinFaceNum,tolerance,IsoParametrizator::SM_L2,convergenceSpeed);break;
 			default:Parametrizator.SetParameters(cb,targetAbstractMinFaceNum,tolerance,IsoParametrizator::SM_Euristic,convergenceSpeed);break;
 		}
-		bool done=Parametrizator.Parametrize<CMeshO>(mesh);
+		bool done=Parametrizator.Parametrize<CMeshO>(mesh,doublestep);
+		
 		float aggregate,L2;
 		int n_faces;
 		Parametrizator.getValues(aggregate,L2,n_faces);
@@ -263,7 +266,12 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		}
 		Parametrizator.ExportMeshes(para_mesh,abs_mesh);
 		isoPHandle=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
-		isoPHandle().Init(&abs_mesh,&para_mesh);
+		bool isOK=isoPHandle().Init(&abs_mesh,&para_mesh);
+		if (!isOK)
+		{
+			Log("Problems gathering parameterization \n");
+			return false;
+		}
 		if (!isTXTenabled)
 				m->clearDataMask(MeshModel::MM_VERTTEXCOORD);
 		if (!isVMarkenabled)
