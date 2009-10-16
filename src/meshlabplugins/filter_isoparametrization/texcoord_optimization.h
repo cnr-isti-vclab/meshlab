@@ -259,7 +259,7 @@ public:
 		 printf("v1 %lf,%lf \n",f->V(1)->T().U(),f->V(1)->T().V());
 		 printf("v2 %lf,%lf \n",f->V(2)->T().U(),f->V(2)->T().V());
 		 printf("Area Value %lf \n",val);
-		 system("pause");
+		 //system("pause");
 	 }
 
 	 return fabs(val);

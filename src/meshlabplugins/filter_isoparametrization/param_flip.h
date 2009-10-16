@@ -66,7 +66,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 			if(!testBaryCoords(bary))
 		{
 			printf("BAry0 :%lf,%lf,%lf",bary.X(),bary.Y(),bary.Z());
-			system("pause");
+			//system("pause");
 		}
 
 			GetUV<BaseMesh>(father,bary,v->T().U(),v->T().V());
@@ -108,7 +108,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 			if (!found)
 			{
 				printf("\n U : %lf; V : %lf \n",U,V);
-				system("pause");
+				//system("pause");
 			}
 			//assert(found);
 			assert(testBaryCoords(bary));

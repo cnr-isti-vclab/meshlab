@@ -745,7 +745,7 @@ void AssingFather(typename MeshType::VertexType &v,
 									typename MeshType::CoordType &bary,
 									MeshType &domain)
 {
-	const MeshType::ScalarType eps=0.00001;
+	const MeshType::ScalarType eps=(MeshType::ScalarType)0.00001;
 	assert((father-&(*domain.face.begin()))<domain.face.size());
 	assert(!(father->IsD()));
 	assert(!(father==NULL));
@@ -829,7 +829,7 @@ bool testParametrization(MeshType &domain,
 	if (wrong_address>0)
 	{
 		printf("\n PAR ERROR %d Wrong Address Num Faces %d\n",wrong_address,domain.fn);
-		system("pause");
+		/*system("pause");*/
 	}
 	return (is_good);
 }

@@ -244,7 +244,7 @@ public:
 							ScalarType d1=((ScalarType)(rand()%1000));
 							vcg::Point2<ScalarType> vect=vcg::Point2<ScalarType>(d0,d1);
 							vect.Normalize();
-							ScalarType norm=0.05;//((ScalarType)(rand()%1000))/(ScalarType)2000;
+							ScalarType norm=(ScalarType)0.05;//((ScalarType)(rand()%1000))/(ScalarType)2000;
 							assert(norm<1);
 							vect*=norm;
 							int I1;
@@ -299,7 +299,7 @@ public:
 			CoordType XAxis,YAxis; // tangent axis in 3D Object space
 			///get tangent directions
 			
-			bool done=TangentDir(I,bary,XAxis,YAxis,0.1);
+			bool done=TangentDir(I,bary,XAxis,YAxis,(ScalarType)0.1);
 			if (!done)
 			{
 				(*ProjMatrix)[i].SetIdentity();
