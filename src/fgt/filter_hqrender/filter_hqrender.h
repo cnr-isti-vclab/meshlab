@@ -6,6 +6,7 @@
 #include <QString>
 #include <QStringList>
 #include <RibFileStack.h>
+#include <export_rib.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
@@ -33,7 +34,7 @@ private:
   QStringList templates;
   bool delRibFiles;
 
-  int convertGeometry(RibFileStack* files, FILE* fout /*QTextStream &out*/, MeshModel &m, RichParameterSet &, QStringList* textureList);
+  int convertGeometry(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList);
   QString getDirFromPath(QString* path);
   QString getFileNameFromPath(QString* path, bool type = true);
 };
