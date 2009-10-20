@@ -472,7 +472,7 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QS
 			QString filename = "geometry.rib";
 			fprintf(fout,"ReadArchive \"%s\"", qPrintable(filename));
 			QString geometryDest = destDir + QDir::separator() + filename;
-			vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), 1, scale, false);
+			vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, scale, false);
 
 			
 			/*m.updateDataMask(m.MM_ALL); //VA TOLTO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
