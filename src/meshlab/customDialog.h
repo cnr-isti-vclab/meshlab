@@ -66,6 +66,9 @@ public slots:
 	void reset();
 	void apply();
 
+signals:
+	void applySettingSignal();
+
 private:
 	StdParFrame frame;
 	RichParameter* richpar;
@@ -84,7 +87,10 @@ public:
 
 public slots:
 	void openSubDialog(QListWidgetItem* itm);
-		
+
+signals:
+	void applyCustomSetting();
+
 private:
 	RichParameterSet& richparset;
 	QListWidget* listwid;

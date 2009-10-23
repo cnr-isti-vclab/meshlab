@@ -229,6 +229,7 @@ class ColorWidget : public MeshLabWidget
 
 		void collectWidgetValue();
 		void resetWidgetValue();
+		void initWidgetValue();
 
 private:
 	void  updateColorInfo(const ColorValue& newColor);

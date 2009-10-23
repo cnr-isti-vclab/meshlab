@@ -214,6 +214,9 @@ public:
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
    const QString appVer() const {return tr("1.2.3b"); }
 
+signals:
+   void dispatchCustomSettings(RichParameterSet& rps);
+
 public slots:
 
 	bool open(QString fileName=QString(), GLArea *gla=0);
@@ -223,6 +226,7 @@ public slots:
 	void delCurrentMesh();
 	void updateGL();
 	void endEdit();
+	void updateCustomSettings();
 
 private slots:
 

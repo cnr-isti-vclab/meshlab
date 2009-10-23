@@ -35,6 +35,7 @@
 
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
+#include <wrap/qt/col_qt_convert.h>
 
 using namespace std;
 using namespace vcg;
@@ -72,7 +73,6 @@ GLArea::GLArea(QWidget *parent)
 	layerDialog = new LayerDialog(this);
 	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	connect((const MeshDocument*)&meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(setCurrentlyActiveLayer(int)));
-
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -81,6 +81,7 @@ GLArea::GLArea(QWidget *parent)
 	//connecting the MainWindow Slots to GLArea signal (simple passthrough)
 	if(mainwindow != NULL){
 		connect(this,SIGNAL(updateMainWindowMenus()),mainwindow,SLOT(updateMenus()));
+		connect(mainwindow,SIGNAL(dispatchCustomSettings(RichParameterSet&)),this,SLOT(updateCustomSettingValues(RichParameterSet&)));
 	}else{
 		qDebug("The parent of the GLArea parent is not a pointer to the meshlab MainWindow.");
 	}
@@ -88,8 +89,8 @@ GLArea::GLArea(QWidget *parent)
 
 void GLArea::initPreferences()
 {
-	QSettings settings;
-	prefs.clear();
+	//QSettings settings;
+	//prefs.clear();
 	//GUIDO// prefs.addColor("BackgroundTop",    settings.value("BackgroundTop").value<QColor>(), "Top Background Color", "");
 	//GUIDO// prefs.addColor("BackgroundBottom", settings.value("BackgroundBottom").value<QColor>(), "Bottom Background Color", "");
 }
@@ -823,14 +824,6 @@ void GLArea::setLightModel()
 	}
 }
 
-
-void GLArea::setCustomSetting(const ColorSetting & s)
-{
-	cs.bColorBottom = s.bColorBottom;
-	cs.bColorTop = s.bColorTop;
-	cs.lColor = s.lColor;
-}
-
 void GLArea::setSnapshotSetting(const SnapshotSetting & s)
 {
 	ss=s;
@@ -961,4 +954,22 @@ Point3f GLArea::getViewDir()
 	return rotM*vcg::Point3f(0,0,1);
 }
 
+void GLArea::setCustomSetting(RichParameterSet& rps)
+{
+	RichParameter* res = NULL;
+	if ( (res = rps.findParameter("MeshLab::Appearance::BackGroundBotCol")) != NULL)
+		cs.bColorBottom = vcg::ColorConverter::convertQColorToColor4<unsigned char>(res->val->getColor());
+	if ( (res = rps.findParameter("MeshLab::Appearance::BackGroundTopCol")) != NULL)
+		cs.bColorTop = vcg::ColorConverter::convertQColorToColor4<unsigned char>(res->val->getColor());
+	if ( (res = rps.findParameter("MeshLab::Appearance::GLLogAreaCol")) != NULL)
+		cs.lColor = vcg::ColorConverter::convertQColorToColor4<unsigned char>(res->val->getColor());
+	if ( (res = rps.findParameter("MeshLab::Info::Log")) != NULL)
+		setLogLevel(res->val->getInt());
+}
+
+void GLArea::updateCustomSettingValues( RichParameterSet& rps )
+{
+	setCustomSetting(rps);
+	updateGL();
+}
 

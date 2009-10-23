@@ -79,6 +79,7 @@ void CustomDialog::openSubDialog( QListWidgetItem* itm )
 	if (it != mp.end())
 	{
 		SettingDialog* setdial = new SettingDialog(it.value(),this);
+		connect(setdial,SIGNAL(applySettingSignal()),this,SIGNAL(applyCustomSetting()));
 		setdial->exec();
 		delete setdial;
 	}
@@ -119,6 +120,7 @@ void SettingDialog::save()
 	QDomDocument doc("MeshLabSettings");
 	RichParameterXMLVisitor v(doc);
 	richpar->accept(v);
+	doc.appendChild(v.parElem);
 	QString docstring =  doc.toString();
 	QSettings setting;
 	setting.value(richpar->name,QVariant(docstring));
@@ -126,12 +128,15 @@ void SettingDialog::save()
 
 void SettingDialog::apply()
 {
-
+	assert(frame.stdfieldwidgets.size() == 1);
+	frame.stdfieldwidgets.at(0)->collectWidgetValue();
+	emit applySettingSignal();
 }
 
 void SettingDialog::reset()
 {
-
+	assert(frame.stdfieldwidgets.size() == 1);
+	frame.stdfieldwidgets.at(0)->resetValue();
 }
 
 SettingDialog::~SettingDialog()

@@ -1194,7 +1194,8 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 	colorButton->setAutoFillBackground(true);
 	colorButton->setFlat(true);
 	//const QColor cl = rp->pd->defVal->getColor();
-	resetWidgetValue();
+	//resetWidgetValue();
+	initWidgetValue();
 	int row = gridLay->rowCount() - 1;
 	gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
@@ -1203,7 +1204,7 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 	lay->addWidget(colorButton);
 
 	gridLay->addLayout(lay,row,1,Qt::AlignTop);
-	pickcol = rp->pd->defVal->getColor();
+	pickcol = rp->val->getColor();
 	connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 }
@@ -1225,6 +1226,13 @@ void ColorWidget::pickColor()
 		updateColorInfo(ColorValue(pickcol));
 	}
 	emit dialogParamChanged();
+}
+
+void ColorWidget::initWidgetValue()
+{
+	QColor cl = rp->val->getColor();
+	pickcol = cl;
+	updateColorInfo(cl);
 }
 
 void ColorWidget::resetWidgetValue()

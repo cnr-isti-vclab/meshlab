@@ -196,13 +196,13 @@ public:
 
 	void toggleHelpVisible()      {helpVisible = !helpVisible; update();}  
 	void setBackFaceCulling(bool enabled);
-	void setCustomSetting(const ColorSetting & s);
 	void setSnapshotSetting(const SnapshotSetting & s);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
 	void saveSnapshot();
 	void setLightModel();
 	void setView();
+	void setCustomSetting(RichParameterSet& rps);
 	void resetTrackBall();
 	std::list<std::pair<QAction *,RichParameterSet *> > iDecoratorsList;
 
@@ -222,7 +222,8 @@ public slots:
 	void setDrawMode(vcg::GLW::DrawMode mode); 
 	void setColorMode(vcg::GLW::ColorMode mode);
 	void setTextureMode(vcg::GLW::TextureMode mode);
-	
+	void updateCustomSettingValues(RichParameterSet& rps);
+
 	void endEdit(){	
 		if(iEdit && currentEditor) 
 		{
