@@ -745,7 +745,7 @@ void AssingFather(typename MeshType::VertexType &v,
 									typename MeshType::CoordType &bary,
 									MeshType &domain)
 {
-	const MeshType::ScalarType eps=(MeshType::ScalarType)0.00001;
+	const typename MeshType::ScalarType eps=(typename MeshType::ScalarType)0.00001;
 	assert((father-&(*domain.face.begin()))<domain.face.size());
 	assert(!(father->IsD()));
 	assert(!(father==NULL));

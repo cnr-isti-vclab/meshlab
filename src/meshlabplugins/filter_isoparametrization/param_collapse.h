@@ -569,23 +569,23 @@ void Execute(BaseMesh &m)
     typedef typename BaseMesh::ScalarType ScalarType;
     typedef typename BaseMesh::CoordType CoordType;
 		
-		assert(pos.V(0)!=pos.V(1));
-		assert(!pos.V(0)->IsD());
-		assert(!pos.V(1)->IsD());
-		assert((pos.V(0)-&(*m.vert.begin()))<m.vert.size());
-		assert((pos.V(1)-&(*m.vert.begin()))<m.vert.size());
+		assert(this->pos.V(0)!=this->pos.V(1));
+		assert(!this->pos.V(0)->IsD());
+		assert(!this->pos.V(1)->IsD());
+		assert((this->pos.V(0)-&(*m.vert.begin()))<m.vert.size());
+		assert((this->pos.V(1)-&(*m.vert.begin()))<m.vert.size());
 				
     std::vector<FaceType*> result;
     std::vector<FaceType*> in_v0;
     std::vector<FaceType*> in_v1;
 
 #ifndef NDEBUG
-		getSharedFace<BaseMesh>(pos.V(0),pos.V(1),result,in_v0,in_v1);
+		getSharedFace<BaseMesh>(this->pos.V(0),this->pos.V(1),result,in_v0,in_v1);
 		assert(result.size()==2);
 #endif
 
 		///compute new position
-		CoordType oldRPos=(pos.V(0)->RPos+pos.V(1)->RPos)/2.0;
+		CoordType oldRPos=(this->pos.V(0)->RPos+this->pos.V(1)->RPos)/2.0;
 		CoordType newPos;
 		newPos=ComputeMinimal(m);//
 		//vcg::tri::UpdateTopology<BaseMesh>::TestVertexFace(m); ///TEST
