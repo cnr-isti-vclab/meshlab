@@ -162,12 +162,10 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			for (uint i=0; i < size; ++i)
 			{
 				vi = &m.cm.vert[i];
-				if (!m.cm.IsMarked(vi))
-				{
-					wtc = vertcoord[vi];
+				if (m.cm.IsMarked(vi))
+					vi->C() = vcg::Color4b(0, 0, 255, 0);
+				else if ((wtc = vertcoord[vi]))
 					vi->C() = vcg::Color4b(wtc->U()*255, wtc->V()*255, 0, 0);
-				}
-				else vi->C() = vcg::Color4b(0, 0, 255, 0);
 				cb(i*30/size+70, "Colorizing mesh...");
 			}
 			m.cm.UnMarkAll();
