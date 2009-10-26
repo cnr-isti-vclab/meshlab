@@ -63,7 +63,7 @@ void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, RichParameterSe
 	QString cubemapDirPath = MainWindowInterface::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
 	
 	//parset->addString("CubeMapPath", "/Users/cignoni/devel/meshlab/src/meshlab/textures/cubemaps/uffizi.jpg");
-	parset->addParam(new RichString("CubeMapPath", cubemapDirPath));
+	parset->addParam(new RichString("CubeMapPath", cubemapDirPath,"",""));
 	
 }		
 		

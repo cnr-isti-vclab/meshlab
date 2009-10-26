@@ -293,50 +293,50 @@ void RichParameterSet::clear()
 
 void RichParameterCopyConstructor::visit( RichBool& pd )
 {
-	lastCreated = new RichBool(pd.name,pd.pd->defVal->getBool(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichBool(pd.name,pd.val->getBool(),pd.pd->defVal->getBool(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichInt& pd )
 {
-	lastCreated = new RichInt(pd.name,pd.pd->defVal->getInt(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichInt(pd.name,pd.val->getInt(),pd.pd->defVal->getInt(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichFloat& pd )
 {
-	lastCreated = new RichFloat(pd.name,pd.pd->defVal->getFloat(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichFloat(pd.name,pd.val->getFloat(),pd.pd->defVal->getFloat(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichString& pd )
 {
-	lastCreated = new RichString(pd.name,pd.pd->defVal->getString(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichString(pd.name,pd.val->getString(),pd.pd->defVal->getString(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichMatrix44f& pd )
 {
-	lastCreated = new RichMatrix44f(pd.name,pd.pd->defVal->getMatrix44f(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichMatrix44f(pd.name,pd.val->getMatrix44f(),pd.pd->defVal->getMatrix44f(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichPoint3f& pd )
 {
-	lastCreated = new RichPoint3f(pd.name,pd.pd->defVal->getPoint3f(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichPoint3f(pd.name,pd.val->getPoint3f(),pd.pd->defVal->getPoint3f(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichColor& pd )
 {
-	lastCreated = new RichColor(pd.name,pd.pd->defVal->getColor(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichColor(pd.name,pd.val->getColor(),pd.pd->defVal->getColor(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 
 void RichParameterCopyConstructor::visit( RichAbsPerc& pd )
 {
 	AbsPercDecoration* dec = reinterpret_cast<AbsPercDecoration*>(pd.pd); 
-	lastCreated = new RichAbsPerc(pd.name,pd.pd->defVal->getAbsPerc(),dec->min,dec->max,pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichAbsPerc(pd.name,pd.val->getAbsPerc(),pd.pd->defVal->getAbsPerc(),dec->min,dec->max,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichEnum& pd )
 {
 	EnumDecoration* dec = reinterpret_cast<EnumDecoration*>(pd.pd);
-	lastCreated = new RichEnum(pd.name,pd.pd->defVal->getEnum(),dec->enumvalues,pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichEnum(pd.name,pd.val->getEnum(),pd.pd->defVal->getEnum(),dec->enumvalues,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichFloatList& pd )
@@ -347,7 +347,7 @@ void RichParameterCopyConstructor::visit( RichFloatList& pd )
 void RichParameterCopyConstructor::visit( RichDynamicFloat& pd )
 {
 	DynamicFloatDecoration* dec = reinterpret_cast<DynamicFloatDecoration*>(pd.pd); 
-	lastCreated = new RichDynamicFloat(pd.name,pd.pd->defVal->getDynamicFloat(),dec->min,dec->max,pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichDynamicFloat(pd.name,pd.val->getDynamicFloat(),pd.pd->defVal->getDynamicFloat(),dec->min,dec->max,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichOpenFile& pd )
@@ -364,7 +364,7 @@ void RichParameterCopyConstructor::visit( RichMesh& pd )
 {
 	MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(pd.pd); 
 	if (dec->defVal != NULL)
-		lastCreated = new RichMesh(pd.name,dec->defVal->getMesh(),dec->meshdoc,dec->fieldDesc,dec->tooltip);
+		lastCreated = new RichMesh(pd.name,pd.val->getMesh(),dec->defVal->getMesh(),dec->meshdoc,dec->fieldDesc,dec->tooltip);
 	else
 		lastCreated = new RichMesh(pd.name,dec->meshindex);
 }
@@ -508,7 +508,7 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 
 	if(type=="RichString")  
 	{ 
-		*par = new RichString(name,np.attribute("value")); 
+		*par = new RichString(name,np.attribute("value"),"",""); 
 		return; 
 	}
 	
@@ -525,7 +525,7 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		unsigned int b = np.attribute("b").toUInt(); 
 		unsigned int a = np.attribute("a").toUInt(); 
 		QColor col(r,g,b,a);
-		*par= new RichColor(name,col); 
+		*par= new RichColor(name,col,"",""); 
 		return; 
 	}
 
@@ -694,6 +694,10 @@ RichBool::RichBool( const QString nm,const bool defval,const QString desc/*=QStr
 
 }
 
+RichBool::RichBool( const QString nm,const bool val,const bool defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(val),new BoolDecoration(new BoolValue(defval),desc,tltip))
+{
+
+}
 void RichBool::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -714,6 +718,10 @@ RichInt::RichInt( const QString nm,const int defval,const QString desc/*=QString
 
 }
 
+RichInt::RichInt( const QString nm,const int val,const int defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new IntValue(val),new IntDecoration(new IntValue(defval),desc,tltip))
+{
+
+}
 void RichInt::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -734,6 +742,10 @@ RichFloat::RichFloat( const QString nm,const float defval,const QString desc/*=Q
 
 }
 
+RichFloat::RichFloat( const QString nm,const float val,const float defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new FloatValue(val),new FloatDecoration(new FloatValue(defval),desc,tltip))
+{
+
+}
 void RichFloat::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -754,6 +766,10 @@ RichString::RichString( const QString nm,const QString defval,const QString desc
 
 }
 
+RichString::RichString( const QString nm,const QString val,const QString defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new StringValue(val),new StringDecoration(new StringValue(defval),desc,tltip))
+{
+
+}
 void RichString::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -774,6 +790,10 @@ RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& defval,cons
 
 }
 
+RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& val,const vcg::Matrix44f& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new Matrix44fValue(val),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip))
+{
+
+}
 void RichMatrix44f::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -794,6 +814,10 @@ RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3f defval,const QStri
 
 }
 
+RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3f val,const vcg::Point3f defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new Point3fValue(val),new Point3fDecoration(new Point3fValue(defval),desc,tltip))
+{
+
+}
 void RichPoint3f::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -814,6 +838,10 @@ RichColor::RichColor( const QString nm,const QColor defval,const QString desc/*=
 
 }
 
+RichColor::RichColor( const QString nm,const QColor val,const QColor defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new ColorValue(val),new ColorDecoration(new ColorValue(defval),desc,tltip))
+{
+
+}
 void RichColor::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -834,6 +862,10 @@ RichAbsPerc::RichAbsPerc( const QString nm,const float defval,const float minval
 
 }
 
+RichAbsPerc::RichAbsPerc( const QString nm,const float val,const float defval,const float minval,const float maxval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm, new AbsPercValue(val), new AbsPercDecoration(new AbsPercValue(defval),minval,maxval,desc,tltip))
+{
+
+}
 void RichAbsPerc::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -854,6 +886,10 @@ RichEnum::RichEnum( const QString nm,const int defval,const QStringList values,c
 
 }
 
+RichEnum::RichEnum( const QString nm,const int val,const int defval,const QStringList values,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new EnumValue(val),new EnumDecoration(new EnumValue(defval),values,desc,tltip))
+{
+
+}
 void RichEnum::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -885,6 +921,10 @@ RichMesh::RichMesh( const QString nm,int meshindex ) :RichParameter(nm,new MeshV
 
 }
 
+RichMesh::RichMesh( const QString nm,MeshModel* val,MeshModel* defval,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm, new MeshValue(defval),new MeshDecoration( new MeshValue(defval),doc,desc,tltip))
+{
+
+}
 void RichMesh::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -901,6 +941,11 @@ RichMesh::~RichMesh()
 }
 
 RichFloatList::RichFloatList( const QString nm,FloatListValue* v,FloatListDecoration* prdec ) :RichParameter(nm,v,prdec)
+{
+
+}
+
+RichFloatList::RichFloatList( const QString nm,FloatListValue* val,FloatListValue* v,FloatListDecoration* prdec ) :RichParameter(nm,v,prdec)
 {
 
 }
@@ -925,6 +970,11 @@ RichDynamicFloat::RichDynamicFloat( const QString nm,const float defval,const fl
 
 }
 
+RichDynamicFloat::RichDynamicFloat( const QString nm,const float val,const float defval,const float minval,const float maxval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new DynamicFloatValue(val),new DynamicFloatDecoration(new DynamicFloatValue(defval),minval,maxval,desc,tltip))
+{
+
+}
+
 void RichDynamicFloat::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -945,6 +995,10 @@ RichOpenFile::RichOpenFile( const QString nm,const QString defval,const QString 
 
 }
 
+RichOpenFile::RichOpenFile( const QString nm,const QString val,const QString defval,const QString ext /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new FileValue(val),new FileDecoration(new FileValue(defval),tltip,desc))
+{
+
+}
 void RichOpenFile::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -965,6 +1019,10 @@ RichSaveFile::RichSaveFile( const QString nm,FileValue* v,FileDecoration* prdec 
 
 }
 
+RichSaveFile::RichSaveFile( const QString nm,FileValue* val,FileValue* v,FileDecoration* prdec ):RichParameter(nm,v,prdec)
+{
+
+}
 void RichSaveFile::accept( Visitor& v )
 {
 	v.visit(*this);

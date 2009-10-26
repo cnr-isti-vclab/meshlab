@@ -94,7 +94,7 @@ CustomDialog::~CustomDialog()
 }
 //Maybe a MeshDocument parameter is needed. See loadFrameContent definition
 SettingDialog::SettingDialog( RichParameter* rpar,QWidget* parent /*= 0*/ )
-:QDialog(parent),frame(this),richpar(rpar)
+:QDialog(parent),frame(this),tmppar(NULL),richpar(rpar)
 {
 	setModal(true);
 	savebut = new QPushButton("Save",this);
@@ -106,7 +106,10 @@ SettingDialog::SettingDialog( RichParameter* rpar,QWidget* parent /*= 0*/ )
 	dialoglayout->addWidget(resetbut,1,1);
 	dialoglayout->addWidget(applybut,1,2);
 
-	frame.loadFrameContent(rpar);
+	RichParameterCopyConstructor cp;
+	richpar->accept(cp);
+	tmppar = cp.lastCreated;
+	frame.loadFrameContent(tmppar);
 	dialoglayout->addWidget(&frame,0,0,1,3);
 	dialoglayout->setSizeConstraint(QLayout::SetFixedSize);
 	setLayout(dialoglayout);
@@ -119,17 +122,18 @@ void SettingDialog::save()
 {
 	QDomDocument doc("MeshLabSettings");
 	RichParameterXMLVisitor v(doc);
-	richpar->accept(v);
+	tmppar->accept(v);
 	doc.appendChild(v.parElem);
 	QString docstring =  doc.toString();
 	QSettings setting;
-	setting.value(richpar->name,QVariant(docstring));
+	setting.value(tmppar->name,QVariant(docstring));
 }
 
 void SettingDialog::apply()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
 	frame.stdfieldwidgets.at(0)->collectWidgetValue();
+	richpar->val->set(*tmppar->val);
 	emit applySettingSignal();
 }
 
@@ -141,6 +145,7 @@ void SettingDialog::reset()
 
 SettingDialog::~SettingDialog()
 {
+	delete tmppar;
 	delete savebut;
 	delete resetbut;
 	delete applybut;

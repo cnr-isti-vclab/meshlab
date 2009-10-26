@@ -72,6 +72,7 @@ signals:
 private:
 	StdParFrame frame;
 	RichParameter* richpar;
+	RichParameter* tmppar;
 	QPushButton* savebut;
 	QPushButton* applybut;
 	QPushButton* resetbut;

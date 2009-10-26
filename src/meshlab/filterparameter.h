@@ -425,6 +425,7 @@ class RichBool : public RichParameter
 {
 public:
 	RichBool(const QString nm,const bool defval,const QString desc=QString(),const QString tltip=QString());
+	RichBool(const QString nm,const bool val,const bool defval,const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 
@@ -435,6 +436,7 @@ class RichInt : public RichParameter
 {
 public:
 	RichInt(const QString nm,const int defval,const QString desc=QString(),const QString tltip=QString());
+	RichInt(const QString nm,const int val,const int defval,const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichInt();
@@ -444,6 +446,7 @@ class RichFloat : public RichParameter
 {
 public:
 	RichFloat(const QString nm,const float defval,const QString desc=QString(),const QString tltip=QString());
+	RichFloat(const QString nm,const float val,const float defval,const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichFloat();
@@ -452,7 +455,8 @@ public:
 class RichString : public RichParameter
 {
 public:
-	RichString(const QString nm,const QString defval,const QString desc=QString(),const QString tltip=QString());
+	RichString(const QString nm,const QString defval,const QString desc,const QString tltip);
+	RichString(const QString nm,const QString val,const QString defval,const QString desc,const QString tltip);
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichString();
@@ -462,6 +466,7 @@ class RichMatrix44f : public RichParameter
 {
 public:
 	RichMatrix44f(const QString nm,const vcg::Matrix44f& defval,const QString desc=QString(),const QString tltip=QString());
+	RichMatrix44f(const QString nm,const vcg::Matrix44f& val,const vcg::Matrix44f& defval,const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichMatrix44f();
@@ -471,6 +476,7 @@ class RichPoint3f : public RichParameter
 {
 public:
 	RichPoint3f(const QString nm,const vcg::Point3f defval,const QString desc=QString(),const QString tltip=QString());
+	RichPoint3f(const QString nm,const vcg::Point3f val,const vcg::Point3f defval,const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichPoint3f();
@@ -479,7 +485,8 @@ public:
 class RichColor : public RichParameter
 {
 public:
-	RichColor(const QString nm,const QColor defval,const QString desc=QString(),const QString tltip=QString());
+	RichColor(const QString nm,const QColor defval,const QString desc,const QString tltip);
+	RichColor(const QString nm,const QColor val,const QColor defval,const QString desc,const QString tltip);
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichColor();
@@ -490,6 +497,7 @@ class RichAbsPerc : public RichParameter
 {
 public:
 	RichAbsPerc(const QString nm,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString());
+	RichAbsPerc(const QString nm,const float val,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichAbsPerc();
@@ -499,6 +507,7 @@ class RichEnum : public RichParameter
 {
 public:
 	RichEnum(const QString nm,const int defval,const QStringList values,const QString desc=QString(),const QString tltip=QString());
+	RichEnum(const QString nm,const int val,const int defval,const QStringList values,const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichEnum();
@@ -508,6 +517,7 @@ class RichMesh : public RichParameter
 {
 public:
 	RichMesh(const QString nm,MeshModel* defval,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString());
+	RichMesh(const QString nm,MeshModel* val,MeshModel* defval,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString());
 
 	RichMesh(const QString nm,int meshindex,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString());
 
@@ -523,6 +533,7 @@ class RichFloatList : public RichParameter
 {
 public:
 	RichFloatList(const QString nm,FloatListValue* v,FloatListDecoration* prdec);
+	RichFloatList(const QString nm,FloatListValue* val,FloatListValue* v,FloatListDecoration* prdec);
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichFloatList();
@@ -532,6 +543,7 @@ class RichDynamicFloat : public RichParameter
 {
 public:
 	RichDynamicFloat(const QString nm,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString());
+	RichDynamicFloat(const QString nm,const float val,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichDynamicFloat();
@@ -542,6 +554,7 @@ class RichOpenFile : public RichParameter
 {
 public:
 	RichOpenFile(const QString nm,const QString defval,const QString ext = QString("*.*"),const QString desc=QString(),const QString tltip=QString());
+	RichOpenFile(const QString nm,const QString val,const QString defval,const QString ext = QString("*.*"),const QString desc=QString(),const QString tltip=QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichOpenFile();
@@ -551,6 +564,7 @@ class RichSaveFile : public RichParameter
 {
 public:
 	RichSaveFile(const QString nm,FileValue* v,FileDecoration* prdec);
+	RichSaveFile(const QString nm,FileValue* val,FileValue* v,FileDecoration* prdec);
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichSaveFile();
