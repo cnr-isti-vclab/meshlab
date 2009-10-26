@@ -375,6 +375,7 @@ private:
   QMenu *filterMenuRangeMap;
   QMenu *filterMenuPointSet;
   QMenu *filterMenuSampling;
+	QMenu *filterMenuTexture;
 
 	QMenu *editMenu;
 

@@ -524,6 +524,7 @@ void MainWindow::createMenus()
 	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
   filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
   filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
+	filterMenuTexture = filterMenu->addMenu(tr("Texture"));
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
@@ -662,6 +663,8 @@ void MainWindow::loadPlugins()
                   filterMenuPointSet->addAction(filterAction);
           if(filterClass & MeshFilterInterface::Sampling )
 									filterMenuSampling->addAction(filterAction);
+			if (filterClass & MeshFilterInterface::Texture)
+				filterMenuTexture->addAction(filterAction);
 					if(filterClass == 0) //  MeshFilterInterface::Generic :
 									filterMenu->addAction(filterAction);
 
