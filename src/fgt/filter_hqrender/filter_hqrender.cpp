@@ -10,7 +10,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
-
+#define NO_RENDERING
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -37,9 +37,13 @@ FilterHighQualityRender::FilterHighQualityRender()
   }
 #endif
   if(!templateDir.cd("render_template")) {
-		qDebug("Error. I was expecting to find the render_template dir. Now i am in dir %s",qPrintable(templateDir.absolutePath()));
+	qDebug("Error. I was expecting to find the render_template dir. Now i am in dir %s",qPrintable(templateDir.absolutePath()));
     ;//this->errorMessage = "\"render_template\" folder not found";
   }
+
+  alignValue = QStringList();
+  alignValue << "center" << "bottom" << "top";
+
 }
 
 // ST() must return the very short string describing each filtering action 
@@ -92,8 +96,11 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 			parlst.addParam(new RichInt("FormatX", 800, "Format X"));
 			parlst.addParam(new RichInt("FormatY", 600, "Format Y"));
 			parlst.addParam(new RichFloat("PixelAspectRatio", 1.0, "Pixel aspect ratio"));
-			parlst.addParam(new RichBool("Autoscale",true,"Auto-scale mesh","Check if the object will be scaled on render scene"));
-			
+			parlst.addParam(new RichBool("Autoscale",true,"Auto-scale mesh","Check if the object will be scaled on render scene"));			
+			parlst.addParam(new RichEnum("AlignX",0,alignValue,"Align X"));
+			parlst.addParam(new RichEnum("AlignY",0,alignValue,"Align Y"));
+			parlst.addParam(new RichEnum("AlignZ",0,alignValue,"Align Z"));
+
 			//update the template list
 			templates = QStringList();
 			foreach(QString subDir, templateDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
@@ -178,15 +185,14 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	QFile outFile(dest);
 	if(!outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		return false;
-	}
-	//QTextStream out(&outFile);
+	}	
 	FILE* fout;
 	fout = fopen(qPrintable(dest),"wb");
 	if(fout==NULL)	{
 	
 	}
 	
-	/////controlli di coordinate, ecc.... per ora non servono... credo
+	/////controlli di coordinate, ecc.... per ora ignoro
 	//if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord())
 
 	//TEXTURE:
@@ -337,10 +343,11 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	QProcess renderProcess;
 	renderProcess.setWorkingDirectory(destDir); //for the shaders/maps reference
 	QString toRun = aqsisDir+"bin"+QDir::separator()+"aqsis.exe " + destFile;
+#if !defined(NO_RENDERING)
 	renderProcess.start(toRun);
 	if (!renderProcess.waitForFinished(-1))
          return false; //devo?
-
+#endif
 	//the image is copied in mesh folder
 	QString meshDir(m.fileName.c_str());
 	meshDir = getDirFromPath(&meshDir);
@@ -360,8 +367,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList)
 {	
 	float scale = 1.0;
-	vcg::Matrix44f transfMatrix = vcg::Matrix44f::Identity();
-
+	vcg::Matrix44f templateMatrix = vcg::Matrix44f::Identity();
+	
 	int c = 1; //the number of AttributeBegin statement readed
 	bool exit = false;
 	while(!files->isEmpty() && !exit) {
@@ -394,45 +401,71 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QS
 				if(isNumber)
 					t[k++]=number;
 			}
-			transfMatrix = vcg::Matrix44f(t);
+			templateMatrix = vcg::Matrix44f(t);
+			templateMatrix = templateMatrix.transpose();
 			
 		}
 
-		//autoscale
+		//modify the transformation matrix
 		if(token[0].trimmed() == "Bound") {
+			vcg::Matrix44f scaleMatrix = vcg::Matrix44f::Identity();
+			float dummyX = token[2].toFloat() - token[1].toFloat();
+			float dummyY = token[4].toFloat() - token[3].toFloat();
+			float dummyZ = token[6].toFloat() - token[5].toFloat();
+				///////////////////////////////////////
+				//CONTROLLARE Y e Z (se vanno scambiate
+				///////////////////////////////////////
+			//autoscale
 			if(par.getBool("Autoscale")) {
 				float meshX = m.cm.trBB().DimX();
 				float meshY = m.cm.trBB().DimY();
 				float meshZ = m.cm.trBB().DimZ();
 
-				float dummyX = token[2].toFloat() - token[1].toFloat();
-				float dummyY = token[4].toFloat() - token[3].toFloat();
-				float dummyZ = token[6].toFloat() - token[5].toFloat();
 				float ratioX = dummyX / meshX;
 				float ratioY = dummyY / meshZ;
 				float ratioZ = dummyZ / meshY;
 				scale = std::min<float>(ratioX, ratioY);
 				scale = std::min<float>(scale, ratioZ);
-				
-				//vcg::Point3f c = m.cm.trBB().Center();
-				//vcg::Matrix44f scaleMatrix,translateMatrix,result;
-				//scaleMatrix.SetScale(scale,scale,scale);
-				//translateMatrix.SetTranslate(-c[0],-c[1],-c[2]);
-				//result = transfMatrix * scaleMatrix * translateMatrix;
-				vcg::Matrix44f result = transfMatrix;
-				fprintf(fout,"Transform [ ");
-				for(int i = 0; i<4; i++)
-					for(int j = 0; j<4; j++)
-						fprintf(fout,"%f ",result.ElementAt(i,j));
-				fprintf(fout,"]\n%s\n",qPrintable(line)); //will the bound be modify?
+				scaleMatrix.SetScale(scale,scale,scale);
 			}
-			else {				
-				fprintf(fout,"Transform [ ");
-				for(int i = 0; i<4; i++)
-					for(int j = 0; j<4; j++)
-						fprintf(fout,"%f ",transfMatrix.ElementAt(i,j));
-				fprintf(fout,"]\n%s\n",qPrintable(line)); //will the bound be modify?
+			
+			//center mesh
+			vcg::Point3f c = m.cm.trBB().Center();
+			vcg::Matrix44f translateBBMatrix;
+			translateBBMatrix.SetTranslate(-c[0],-c[2],-c[1]);
+			
+			//align
+			float dx = 0.0, dy = 0.0, dz = 0.0;
+			QString x = alignValue.at(par.getEnum("AlignX"));
+			if(x != "center") {
+				dx = (dummyX - m.cm.trBB().DimX() * scale) / 2;
+				if(x == "bottom")
+					dx = -dx;
 			}
+			QString y = alignValue.at(par.getEnum("AlignY"));
+			if(y != "center") {
+				dy = (dummyY - m.cm.trBB().DimY() * scale) / 2;
+				if(y == "bottom")
+					dy = -dy;
+			}
+			QString z = alignValue.at(par.getEnum("AlignZ"));
+			if(z != "center") {
+				dz = (dummyZ - m.cm.trBB().DimZ() * scale) / 2;
+				if(z == "bottom")
+					dz = -dz;
+			}
+			vcg::Matrix44f alignMatrix;
+			alignMatrix = alignMatrix.SetTranslate(dx,dz,dy);
+
+			vcg::Matrix44f result = templateMatrix * alignMatrix * scaleMatrix * translateBBMatrix;			
+			//write transformation matrix
+			fprintf(fout,"Transform [ ");
+			for(int i = 0; i<4; i++)
+				for(int j = 0; j<4; j++)
+					fprintf(fout,"%f ",result.ElementAt(j,i)); //traspose
+			//write bounding box (not modified)
+			fprintf(fout,"]\n%s\n",qPrintable(line));
+			
 		}
 		
 		if(token[0].trimmed() == "ShadingInterpolation") {
@@ -461,9 +494,10 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QS
 		if(token[0].trimmed() == "Surface") {
 			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
 				foreach(QString textureName, *textureList) {
-					fprintf(fout,"Surface \"paintedplastic\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					//fprintf(fout,"Surface \"paintedplastic\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"sticky_texture\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
-
+					fprintf(fout,"Surface \"mytexmap\" \"name\" \"%s.tx\"\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					
 				}
 			}
 		}
@@ -472,97 +506,8 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QS
 			QString filename = "geometry.rib";
 			fprintf(fout,"ReadArchive \"%s\"", qPrintable(filename));
 			QString geometryDest = destDir + QDir::separator() + filename;
-			vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, scale, false);
-
 			
-			/*m.updateDataMask(m.MM_ALL); //VA TOLTO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-			vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
-		
-			QTime tt; tt.start();
-		
-			//replace with opened mesh
-			fprintf(fout,"Declare \"Cs\" \"facevarying color\"\n"
-				"Declare \"st\" \"facevarying float[2]\"\n"
-				"Declare \"N\" \"facevarying normal\"\n");
-			//first: faces topology
-			fprintf(fout,"PointsPolygons\n[\n");
-			for(int i=0; i<m.cm.fn; i++) {
-				fprintf(fout,"3\n");
-			}
-			fprintf(fout,"]\n[\n");
-			qDebug("PointsPolygons %i",tt.elapsed());
-						
-			//second: index of vertex for face
-			vcg::tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
-			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
-				for(int j=0; j<3; ++j) {						
-					int indexOfVertex = (*fi).V(j) - &(m.cm.vert[0]);
-					fprintf(fout,"%i ",indexOfVertex);
-					//if it's the first visit, set visited bit
-					if(!(*fi).V(j)->IsV()) {
-						(*fi).V(j)->SetV();
-					}
-				}
-				fprintf(fout,"\n");
-			}
-			fprintf(fout,"]\n");
-			qDebug("coords %i",tt.elapsed());
-
-			//third: vertex coordinates
-			fprintf(fout,"\"P\"\n[\n");
-			vcg::Point3f centerBB = m.cm.trBB().Center();
-			vcg::Matrix44f scaleMatrix,translateMatrix;						
-			scaleMatrix.SetScale(scale,scale,scale);
-			translateMatrix.SetTranslate(-centerBB[0],-centerBB[1],-centerBB[2]);
-			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi) {
-				if(vi->IsV()) {
-					vcg::Point3f p;
-					p = vi->P();
-					p = scaleMatrix * translateMatrix * p;
-					fprintf(fout,"%g %g %g\n",p[0],p[2],p[1]);
-				}
-			}
-			fprintf(fout,"]\n");
-			qDebug("coords %i",tt.elapsed());
-
-			//fourth: vertex normal
-			fprintf(fout,"\"N\"\n[\n");
-			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
-				//for each face, foreach vertex write normal
-				for(int j=0; j<3; ++j) {						
-					vcg::Point3f &n=(*fi).V(j)->N();						
-					fprintf(fout,"%g %g %g\n",n[0],n[1],n[2]);
-				}
-			}
-			fprintf(fout,"]\n");
-			qDebug("normal %i",tt.elapsed());
-
-			//fifth: vertex color	
-			fprintf(fout,"\"Cs\"\n[\n");
-			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
-				//for each face, foreach vertex write color
-				for(int j=0; j<3; ++j) {						
-					vcg::Color4b &c=(*fi).V(j)->C();
-					fprintf(fout,"%g %g %g\n",float(c[0])/255,float(c[1])/255,float(c[2])/255);
-					//resto in modulo?
-				}
-			}
-			fprintf(fout,"]\n");
-			qDebug("color %i",tt.elapsed());
-
-			//sixth: texture coordinates (for edge)
-			fprintf(fout,"\"st\"\n[\n");
-			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
-				//for each face, foreach vertex write uv coord
-				for(int j=0; j<3; ++j) {
-					//fprintf(fout,"%f %f\n",(*fi).WT(j).U(),(*fi).WT(j).V());
-					fprintf(fout,"%g %g\n",(*fi).WT(j).V(),(*fi).WT(j).U());
-				}
-			}
-			fprintf(fout,"]\n");
-			qDebug("texcoords %i",tt.elapsed());
-			*/
+			vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, scale, false);
 		} 
 
 		

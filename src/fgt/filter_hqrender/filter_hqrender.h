@@ -33,6 +33,7 @@ private:
   QDir templateDir;
   QStringList templates;
   bool delRibFiles;
+  QStringList alignValue;
 
   int convertGeometry(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList);
   QString getDirFromPath(QString* path);
