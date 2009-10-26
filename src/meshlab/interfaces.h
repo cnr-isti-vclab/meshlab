@@ -257,7 +257,8 @@ public:
 			FP_VertexQuality    =0x00004, //  
 			FP_VertexRadius     =0x00008, //  
 			FP_WedgeTexCoord    =0x00010, //
-			FP_FaceColor        =0x00020 //  
+			FP_FaceColor        =0x00020, //  
+			FP_VertexTexCoord   =0x00040 //
 	};
 
 	virtual ~MeshFilterInterface() {}
@@ -336,6 +337,9 @@ public:
 
 		if (preMask & MeshFilterInterface::FP_WedgeTexCoord && !m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 				MissingItems.push_back("Per Wedge Texture Coords");
+
+		if (preMask & MeshFilterInterface::FP_VertexTexCoord && !m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
+				MissingItems.push_back("Per Vertex Texture Coords");
 
 		if (preMask & MeshFilterInterface::FP_VertexRadius && !m.hasDataMask(MeshModel::MM_VERTRADIUS))
 				MissingItems.push_back("Vertex Radius");
