@@ -999,6 +999,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				bool newGla = false;
 				if(gla==0){
 						gla=new GLArea(mdiarea);
+						gla->setCustomSetting(globalParams);
 						addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 						newGla =true;
 						pCurrentIOPlugin->setLog(&(gla->log));

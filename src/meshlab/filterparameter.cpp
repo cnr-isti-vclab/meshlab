@@ -369,16 +369,18 @@ void RichParameterCopyConstructor::visit( RichMesh& pd )
 		lastCreated = new RichMesh(pd.name,dec->meshindex);
 }
 
-void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name)
+void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name,const QString& desc,const QString& tooltip)
 {
 	parElem = docdom.createElement("Param");
 	parElem.setAttribute("type",type);
 	parElem.setAttribute("name",name);
+	parElem.setAttribute("description",desc);
+	parElem.setAttribute("tooltip",tooltip);
 }
 
-void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name,const QString& val)
+void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name,const QString& val,const QString& desc,const QString& tooltip)
 {
-	fillRichParameterAttribute(type,name);
+	fillRichParameterAttribute(type,name,desc,tooltip);
 	parElem.setAttribute("value",val);
 }
 
@@ -389,27 +391,27 @@ void RichParameterXMLVisitor::visit( RichBool& pd )
 		v = "true";
 	else	
 		v = "false";
-	fillRichParameterAttribute("RichBool",pd.name,v);
+	fillRichParameterAttribute("RichBool",pd.name,v,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterXMLVisitor::visit( RichInt& pd )
 {
-	fillRichParameterAttribute("RichInt",pd.name,QString::number(pd.val->getInt()));
+	fillRichParameterAttribute("RichInt",pd.name,QString::number(pd.val->getInt()),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterXMLVisitor::visit( RichFloat& pd )
 {
-	fillRichParameterAttribute("RichFloat",pd.name,QString::number(pd.val->getFloat()));
+	fillRichParameterAttribute("RichFloat",pd.name,QString::number(pd.val->getFloat()),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterXMLVisitor::visit( RichString& pd )
 {
-	fillRichParameterAttribute("RichString",pd.name,pd.val->getString());
+	fillRichParameterAttribute("RichString",pd.name,pd.val->getString(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterXMLVisitor::visit( RichMatrix44f& pd )
 {
-	fillRichParameterAttribute("RichMatrix44f",pd.name);
+	fillRichParameterAttribute("RichMatrix44f",pd.name,pd.pd->fieldDesc,pd.pd->tooltip);
 	vcg::Matrix44f mat = pd.val->getMatrix44f();
 	for(unsigned int ii = 0;ii < 16;++ii)
 		parElem.setAttribute(QString("val")+QString::number(ii),QString::number(mat.V()[ii]));
@@ -417,7 +419,7 @@ void RichParameterXMLVisitor::visit( RichMatrix44f& pd )
 
 void RichParameterXMLVisitor::visit( RichPoint3f& pd )
 {
-	fillRichParameterAttribute("RichPoint3f",pd.name);
+	fillRichParameterAttribute("RichPoint3f",pd.name,pd.pd->fieldDesc,pd.pd->tooltip);
 	vcg::Point3f p = pd.val->getPoint3f();
 	parElem.setAttribute("x",QString::number(p.X()));
 	parElem.setAttribute("y",QString::number(p.Y()));
@@ -426,7 +428,7 @@ void RichParameterXMLVisitor::visit( RichPoint3f& pd )
 
 void RichParameterXMLVisitor::visit( RichColor& pd )
 {
-	fillRichParameterAttribute("RichColor",pd.name);
+	fillRichParameterAttribute("RichColor",pd.name,pd.pd->fieldDesc,pd.pd->tooltip);
 	QColor p = pd.val->getColor();
 	parElem.setAttribute("r",QString::number(p.red()));
 	parElem.setAttribute("g",QString::number(p.green()));
@@ -436,7 +438,7 @@ void RichParameterXMLVisitor::visit( RichColor& pd )
 
 void RichParameterXMLVisitor::visit( RichAbsPerc& pd )
 {
-	fillRichParameterAttribute("RichAbsPerc",pd.name,QString::number(pd.val->getAbsPerc()));
+	fillRichParameterAttribute("RichAbsPerc",pd.name,QString::number(pd.val->getAbsPerc()),pd.pd->fieldDesc,pd.pd->tooltip);
 	AbsPercDecoration* dec = reinterpret_cast<AbsPercDecoration*>(pd.pd);
 	parElem.setAttribute("min",QString::number(dec->min));
 	parElem.setAttribute("max",QString::number(dec->max));
@@ -444,7 +446,7 @@ void RichParameterXMLVisitor::visit( RichAbsPerc& pd )
 
 void RichParameterXMLVisitor::visit( RichEnum& pd )
 {
-	fillRichParameterAttribute("RichEnum",pd.name,QString::number(pd.val->getEnum()));
+	fillRichParameterAttribute("RichEnum",pd.name,QString::number(pd.val->getEnum()),pd.pd->fieldDesc,pd.pd->tooltip);
 	EnumDecoration* dec = reinterpret_cast<EnumDecoration*>(pd.pd);
 	parElem.setAttribute("enum_cardinality",dec->enumvalues.size());
 	for(unsigned int ii = 0; ii < dec->enumvalues.size();++ii)
@@ -459,7 +461,7 @@ void RichParameterXMLVisitor::visit( RichFloatList& pd )
 
 void RichParameterXMLVisitor::visit(RichDynamicFloat& pd)
 {
-	fillRichParameterAttribute("RichDynamicFloat",pd.name,QString::number(pd.val->getDynamicFloat()));
+	fillRichParameterAttribute("RichDynamicFloat",pd.name,QString::number(pd.val->getDynamicFloat()),pd.pd->fieldDesc,pd.pd->tooltip);
 	DynamicFloatDecoration* dec = reinterpret_cast<DynamicFloatDecoration*>(pd.pd);
 	parElem.setAttribute("min",QString::number(dec->min));
 	parElem.setAttribute("max",QString::number(dec->max));
@@ -478,43 +480,46 @@ void RichParameterXMLVisitor::visit( RichSaveFile& pd )
 void RichParameterXMLVisitor::visit( RichMesh& pd )
 {
 	MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(pd.pd);
-	fillRichParameterAttribute("RichMesh",pd.name,QString::number(dec->meshindex));
+	fillRichParameterAttribute("RichMesh",pd.name,QString::number(dec->meshindex),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 {
 	QString name=np.attribute("name");
 	QString type=np.attribute("type");
+	QString desc=np.attribute("description");
+	QString tooltip=np.attribute("tooltip");
+
 
 	qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
 
 	if(type=="RichBool")    
 	{ 
-		*par = new RichBool(name,np.attribute("value")!=QString("false")); 
+		*par = new RichBool(name,np.attribute("value")!=QString("false"),desc,tooltip); 
 		return; 
 	}
 
 	if(type=="RichInt")     
 	{ 
-		*par = new RichInt(name,np.attribute("value").toInt()); 
+		*par = new RichInt(name,np.attribute("value").toInt(),desc,tooltip); 
 		return; 
 	}
 
 	if(type=="RichFloat")   
 	{ 
-		*par = new RichFloat(name,np.attribute("value").toFloat());
+		*par = new RichFloat(name,np.attribute("value").toFloat(),desc,tooltip);
 		return;
 	}
 
 	if(type=="RichString")  
 	{ 
-		*par = new RichString(name,np.attribute("value"),"",""); 
+		*par = new RichString(name,np.attribute("value"),desc,tooltip); 
 		return; 
 	}
 	
 	if(type=="RichAbsPerc") 
 	{ 
-		*par = new RichAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat()); 
+		*par = new RichAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat(),desc,tooltip); 
 		return; 
 	}
 
@@ -525,7 +530,7 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		unsigned int b = np.attribute("b").toUInt(); 
 		unsigned int a = np.attribute("a").toUInt(); 
 		QColor col(r,g,b,a);
-		*par= new RichColor(name,col,"",""); 
+		*par= new RichColor(name,col,desc,tooltip); 
 		return; 
 	}
 
@@ -534,7 +539,7 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		Matrix44f mm;
 		for(int i=0;i<16;++i)
 			mm.V()[i]=np.attribute(QString("val")+QString::number(i)).toFloat();
-		*par = new RichMatrix44f(name,mm);    
+		*par = new RichMatrix44f(name,mm,desc,tooltip);    
 		return;                    
 	}
 
@@ -546,13 +551,13 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		for(int i=0;i<enum_card;++i)
 			list<<np.attribute(QString("enum_val")+QString::number(i));
 
-		*par = new RichEnum(name,np.attribute("value").toInt(),list);
+		*par = new RichEnum(name,np.attribute("value").toInt(),list,desc,tooltip);
 		return;
 	}
 
 	if(type == "RichMesh")  
 	{ 
-		*par = new RichMesh(name, np.attribute("value").toInt()); 
+		*par = new RichMesh(name, np.attribute("value").toInt(),desc,tooltip); 
 		return; 
 	}
 
@@ -582,7 +587,7 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		val[0]=np.attribute("x").toFloat();
 		val[1]=np.attribute("y").toFloat();
 		val[2]=np.attribute("z").toFloat();
-		*par = new RichPoint3f(name, val);  
+		*par = new RichPoint3f(name, val,desc,tooltip);  
 		return; 
 	}
 
@@ -674,7 +679,7 @@ MeshDecoration::MeshDecoration( int meshind,MeshDocument* doc,const QString desc
 		defVal = new MeshValue(doc->meshList.at(meshind));
 }
 
-MeshDecoration::MeshDecoration( int meshind ) :ParameterDecoration(NULL,QString(),QString()),meshdoc(NULL),meshindex(meshind)
+MeshDecoration::MeshDecoration( int meshind,const QString desc/*=QString()*/,const QString tltip/*=QString()*/) :ParameterDecoration(NULL,desc,tooltip),meshdoc(NULL),meshindex(meshind)
 {
 
 }
@@ -770,6 +775,17 @@ RichString::RichString( const QString nm,const QString val,const QString defval,
 {
 
 }
+
+RichString::RichString( const QString nm,const QString defval ) : RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),"",""))
+{
+
+}
+
+RichString::RichString( const QString nm,const QString defval,const QString desc ) : RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),desc,""))
+{
+
+}
+
 void RichString::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -833,15 +849,27 @@ RichPoint3f::~RichPoint3f()
 
 }
 
-RichColor::RichColor( const QString nm,const QColor defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,tltip))
+RichColor::RichColor( const QString nm,const QColor defval,const QString desc,const QString tltip ) :RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,tltip))
 {
 
 }
 
-RichColor::RichColor( const QString nm,const QColor val,const QColor defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new ColorValue(val),new ColorDecoration(new ColorValue(defval),desc,tltip))
+RichColor::RichColor( const QString nm,const QColor val,const QColor defval,const QString desc,const QString tltip ) :RichParameter(nm,new ColorValue(val),new ColorDecoration(new ColorValue(defval),desc,tltip))
 {
 
 }
+
+RichColor::RichColor( const QString nm,const QColor defval )
+:RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),"",""))
+{
+	
+}
+
+RichColor::RichColor( const QString nm,const QColor defval,const QString desc )
+:RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,""))
+{
+}
+
 void RichColor::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -916,7 +944,7 @@ RichMesh::RichMesh( const QString nm,int meshindex,MeshDocument* doc,const QStri
 	val = new MeshValue(doc->meshList.at(meshindex));
 }
 
-RichMesh::RichMesh( const QString nm,int meshindex ) :RichParameter(nm,new MeshValue(NULL),new MeshDecoration(meshindex))
+RichMesh::RichMesh( const QString nm,int meshindex,const QString desc/*=QString()*/,const QString tltip/*=QString()*/  ) :RichParameter(nm,new MeshValue(NULL),new MeshDecoration(meshindex))
 {
 
 }

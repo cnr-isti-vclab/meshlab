@@ -126,7 +126,8 @@ void SettingDialog::save()
 	doc.appendChild(v.parElem);
 	QString docstring =  doc.toString();
 	QSettings setting;
-	setting.value(tmppar->name,QVariant(docstring));
+	setting.setValue(tmppar->name,QVariant(docstring));
+	apply();
 }
 
 void SettingDialog::apply()

@@ -358,7 +358,7 @@ public:
 	MeshDecoration(int meshind,MeshDocument* doc,const QString desc=QString(), const QString tltip=QString());
 
 	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	MeshDecoration(int meshind);
+	MeshDecoration(int meshind,const QString desc=QString(), const QString tltip=QString());
 
 	~MeshDecoration(){}
 
@@ -456,6 +456,8 @@ class RichString : public RichParameter
 {
 public:
 	RichString(const QString nm,const QString defval,const QString desc,const QString tltip);
+	RichString(const QString nm,const QString defval);
+	RichString(const QString nm,const QString defval,const QString desc);
 	RichString(const QString nm,const QString val,const QString defval,const QString desc,const QString tltip);
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
@@ -485,6 +487,8 @@ public:
 class RichColor : public RichParameter
 {
 public:
+	RichColor(const QString nm,const QColor defval);
+	RichColor(const QString nm,const QColor defval,const QString desc);
 	RichColor(const QString nm,const QColor defval,const QString desc,const QString tltip);
 	RichColor(const QString nm,const QColor val,const QColor defval,const QString desc,const QString tltip);
 	void accept(Visitor& v);
@@ -522,7 +526,7 @@ public:
 	RichMesh(const QString nm,int meshindex,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString());
 
 	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	RichMesh(const QString nm,int meshindex);
+	RichMesh(const QString nm,int meshindex,const QString desc=QString(),const QString tltip=QString());
 	
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
@@ -636,8 +640,8 @@ public:
 	QDomDocument docdom;
 	QDomElement parElem;
 private:
-	void fillRichParameterAttribute(const QString& type,const QString& name);
-	void fillRichParameterAttribute(const QString& type,const QString& name,const QString& val);
+	void fillRichParameterAttribute(const QString& type,const QString& name,const QString& desc,const QString& tooltip);
+	void fillRichParameterAttribute(const QString& type,const QString& name,const QString& val,const QString& desc,const QString& tooltip);
 };
 
 class RichParameterSet

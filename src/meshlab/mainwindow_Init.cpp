@@ -205,7 +205,7 @@ QProgressBar *MainWindow::qb;
 MainWindow::MainWindow()
 {
 	//workspace = new QWorkspace(this);
-	mdiarea = new QMdiArea(this),
+	mdiarea = new QMdiArea(this);
 	//setCentralWidget(workspace);
 	setCentralWidget(mdiarea);
 	windowMapper = new QSignalMapper(this);
@@ -737,9 +737,9 @@ void MainWindow::loadPlugins()
 
 void MainWindow::initGlobalParameters()
 {
-	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundBotCol",QColor(35,0.0,210),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
-	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundTopCol",QColor(225,225,225),"MeshLab GLarea's BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
-	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::GLLogAreaCol",QColor(202,0.0,40),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
+	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundBotCol",QColor(128,128,255),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
+	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundTopCol",QColor(255,255,255),"MeshLab GLarea's BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
+	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::GLLogAreaCol",QColor(255,32,32),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
 	neededGlobalParams.addParam(new RichInt("MeshLab::Info::Log",0,"Type of info to be shown in the MeshLab's Log Area","Type of info to be shown in the MeshLab's Log Area"));
 }
 
@@ -752,19 +752,16 @@ void MainWindow::loadMeshLabSettings()
 	for(int ii = 0;ii < klist.size();++ii)
 	{
 		QDomDocument doc;
-		QDomElement docElem = doc.createElement(klist.at(ii));
+        doc.setContent(settings.value(klist.at(ii)).toString());
 
-		QDomNode n = docElem.firstChild();
-		while(!n.isNull()) 
+		QString st = settings.value(klist.at(ii)).toString();
+        QDomElement docElem = doc.firstChild().toElement();
+
+		RichParameter* rpar = NULL;
+        if(!docElem.isNull())
 		{
-			QDomElement e = n.toElement(); 
-			RichParameter* rpar = NULL;
-			if(!e.isNull()) 
-			{
-				RichParameterFactory::create(e,&rpar);
-				globalParams.addParam(rpar);
-			}
-			n = n.nextSibling();
+			RichParameterFactory::create(docElem,&rpar);
+			globalParams.addParam(rpar);
 		}
 	}
 
@@ -790,6 +787,7 @@ void MainWindow::loadMeshLabSettings()
 	for(int ii = 0;ii < neededGlobalParams.paramList.size();++ii)
 		delete neededGlobalParams.paramList.at(ii);
 	neededGlobalParams.clear();
+	emit dispatchCustomSettings(globalParams);
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)

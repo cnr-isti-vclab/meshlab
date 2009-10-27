@@ -112,9 +112,9 @@ public:
 
 	ColorSetting()
 	{
-		bColorBottom=vcg::Color4b(64,64,128,1);	
-		bColorTop=vcg::Color4b(0,0,0,1);
-		lColor=vcg::Color4b(128,16,16,1);
+		//bColorBottom=vcg::Color4b(64,64,128,1);	
+		//bColorTop=vcg::Color4b(0,0,0,1);
+		//lColor=vcg::Color4b(128,16,16,1);
 
     //bColorBottom=Color4b(192,192,192,1);	
 		//bColorTop=Color4b(255,255,255,1);
