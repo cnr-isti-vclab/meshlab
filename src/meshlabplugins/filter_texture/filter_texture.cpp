@@ -31,12 +31,14 @@
 #include <meshlab/interfaces.h>
 
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/attribute_seam.h>
 
 #include "filter_texture.h"
 
 FilterTexturePlugin::FilterTexturePlugin() 
 { 
-	typeList << FP_UVTOCOLOR;
+	typeList << FP_UVTOCOLOR
+			<< FP_UV_WEDGE_TO_VERTEX;
   
 	foreach(FilterIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
@@ -46,6 +48,8 @@ const QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FP_UVTOCOLOR : return QString("UV to Color"); 
+		// TODO Change name
+		case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
 		default : assert(0); 
 	}
 }
@@ -56,7 +60,8 @@ const QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
-		case FP_UVTOCOLOR :  return QString("Maps the UV Space into a color space (Red Green), thus colorizing mesh vertices according to UV coords."); 
+		case FP_UVTOCOLOR :  return QString("Maps the UV Space into a color space (Red Green), thus colorizing mesh vertices according to UV coords.");
+		case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with Wedge coordinates not coherent.");
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -66,7 +71,8 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
 {
 	switch (ID(a))
 	{
-		case FP_UVTOCOLOR: return MeshFilterInterface::FP_WedgeTexCoord;
+		case FP_UVTOCOLOR : return MeshFilterInterface::FP_VertexTexCoord;
+		case FP_UV_WEDGE_TO_VERTEX : return MeshFilterInterface::FP_WedgeTexCoord;
 		default: assert(0);
 	}
 	return MeshFilterInterface::FP_Generic;
@@ -76,7 +82,9 @@ const int FilterTexturePlugin::getRequirements(QAction *a)
 {
 	switch (ID(a))
 	{
-		case FP_UVTOCOLOR: return MeshModel::MM_VERTMARK;
+		case FP_UVTOCOLOR :
+		case FP_UV_WEDGE_TO_VERTEX :
+			return MeshModel::MM_NONE;
 		default: assert(0);	
 	}
 	return MeshModel::MM_NONE;
@@ -86,7 +94,8 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 {
 	switch (ID(a))
 	{
-		case FP_UVTOCOLOR: return MeshModel::MM_VERTCOLOR;
+		case FP_UVTOCOLOR : return MeshModel::MM_VERTCOLOR;
+		case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
 		default: assert(0);	
 	}
 	return MeshModel::MM_NONE;
@@ -99,7 +108,8 @@ const FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{
-		case FP_UVTOCOLOR :  return MeshFilterInterface::VertexColoring; 
+		case FP_UVTOCOLOR : return MeshFilterInterface::VertexColoring;
+		case FP_UV_WEDGE_TO_VERTEX : return MeshFilterInterface::Texture;
 		default : assert(0); 
 	}
 	return MeshFilterInterface::Generic;
@@ -114,63 +124,87 @@ const FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet & parlst) 
 {
-	 switch(ID(action))	 {
-		 case FP_UVTOCOLOR : break; 
-		 default : assert(0); 
+	switch(ID(action))	{
+		case FP_UVTOCOLOR :
+			parlst.addParam(new RichEnum("colorspace", 0, QStringList() << "Red-Green" << "Hue-Saturation", "Color Space", "The color space used to mapping UV to."));
+		case FP_UV_WEDGE_TO_VERTEX : 
+			break;
+		default : assert(0); 
 	}
 }
+
+
+/////// FUNCTIONS NEEDED BY "UV WEDGE TO VERTEX" FILTER
+inline void ExtractVertex(const CMeshO & srcMesh, const CMeshO::FaceType & f, int whichWedge, const CMeshO & dstMesh, CMeshO::VertexType & v)
+{
+	(void)srcMesh;
+	(void)dstMesh;
+	// This is done to preserve every single perVertex property
+	// perVextex Texture Coordinate is instead obtained from perWedge one.
+	v.ImportLocal(*f.cV(whichWedge));
+	v.T() = f.cWT(whichWedge);
+}
+
+inline bool CompareVertex(const CMeshO & m, const CMeshO::VertexType & vA, const CMeshO::VertexType & vB)
+{
+	(void)m;
+	return (vA.cT() == vB.cT());
+}
+/////////////////////////////////////////////////////
+
 
 // The Real Core Function doing the actual mesh processing.
 bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet &par, vcg::CallBackPos *cb)
 {
 	switch(ID(filter))	 {
 		case FP_UVTOCOLOR : {
-			assert(m.hasDataMask(MeshModel::MM_WEDGTEXCOORD));
-			assert(m.hasDataMask(MeshModel::MM_VERTMARK));
-			m.cm.UnMarkAll();
-			
-			//Holds per vertex texture coordinates
-			std::map<CVertexO*, CFaceO::TexCoordType*> vertcoord;
-			
-			CVertexO *v;
-			CFaceO::TexCoordType *wtc;
-			
-			//Iterates through faces updating vertex coords map (vertcoord) using per wedge texture coords
-			//If for a vertex two different Wedge texture coordinates are found then the vertex is marked (as seam).
-			CFaceO *fi;
-			uint size = m.cm.face.size();
-			for (uint i=0; i < size; ++i)
+			int vcount = m.cm.vert.size();
+			int colsp = par.getEnum("colorspace");
+			if (!m.hasDataMask(MeshModel::MM_VERTCOLOR))
+				m.updateDataMask(MeshModel::MM_VERTCOLOR);
+			for (int i=0; i<vcount; ++i)
 			{
-				fi = &m.cm.face[i];
-				if (!fi->IsD())
-					for (int i=0; i<3; ++i)
-					{
-						v = fi->V(i);
-						wtc = vertcoord[v]; 
-						if (!wtc)
-							vertcoord[v] = &fi->WT(i);
-						else if (!m.cm.IsMarked(v) && *wtc != fi->WT(i))
-							m.cm.Mark(v);
-					}
-				cb(i*70/size, "Finding seams...");
+				CMeshO::VertexType &v = m.cm.vert[i];
+				if (!v.IsD())
+				{
+					//Normalized 0..1 
+					float normU, normV;
+					normU = v.T().U() - (int)v.T().U();
+					if (normU < 0.) normU += 1.;
+					normV = v.T().V() - (int)v.T().V();
+					if (normV < 0.) normV += 1.;
+					
+					switch(colsp) {
+						// Red-Green color space
+						case 0 : v.C() = vcg::Color4b((int)round(normU*255), (int)round(normV*255), 0, 255); break;
+						// Hue-Saturation color space
+						case 1 : {
+							vcg::Color4f c;
+							c.SetHSVColor(normU, normV, 1.0);
+							v.C().Import(c);
+						}
+							break;
+						default : assert(0);
+					};
+				}
+				cb(i*100/vcount, "Colorizing vertices from UV coordinates ...");
 			}
-			//Iterates trough vertices coloring them with:
-			// blue for seams (marked ones)
-			// Red-Green space corresponding color otherwise
-			CVertexO *vi;
-			size = m.cm.vert.size();
-			for (uint i=0; i < size; ++i)
-			{
-				vi = &m.cm.vert[i];
-				if (m.cm.IsMarked(vi))
-					vi->C() = vcg::Color4b(0, 0, 255, 0);
-				else if ((wtc = vertcoord[vi]))
-					vi->C() = vcg::Color4b(wtc->U()*255, wtc->V()*255, 0, 0);
-				cb(i*30/size+70, "Colorizing mesh...");
-			}
-			m.cm.UnMarkAll();
-			break;
 		}
+		break;
+		case FP_UV_WEDGE_TO_VERTEX : {
+			int vn = m.cm.vn;
+			if (!m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
+				m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
+			vcg::tri::AttributeSeam::SplitVertex(m.cm, ExtractVertex, CompareVertex);
+			if (m.cm.vn != vn)
+			{
+				if (m.hasDataMask(MeshModel::MM_FACEFACETOPO))
+					m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+				if (m.hasDataMask(MeshModel::MM_VERTFACETOPO))
+					m.clearDataMask(MeshModel::MM_VERTFACETOPO);
+			}
+		}
+		break;
 		default: assert(0);
 	}
 	

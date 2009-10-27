@@ -35,7 +35,10 @@ class FilterTexturePlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_UVTOCOLOR  } ;
+	enum {
+		FP_UVTOCOLOR,
+		FP_UV_WEDGE_TO_VERTEX
+	};
 
 	FilterTexturePlugin();
 	
