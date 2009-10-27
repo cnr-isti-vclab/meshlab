@@ -738,7 +738,7 @@ void MainWindow::loadPlugins()
 void MainWindow::initGlobalParameters()
 {
 	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundBotCol",QColor(128,128,255),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
-	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundTopCol",QColor(255,255,255),"MeshLab GLarea's BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
+	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundTopCol",QColor(0,0,0),"MeshLab GLarea's BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
 	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::GLLogAreaCol",QColor(255,32,32),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
 	neededGlobalParams.addParam(new RichInt("MeshLab::Info::Log",0,"Type of info to be shown in the MeshLab's Log Area","Type of info to be shown in the MeshLab's Log Area"));
 }
