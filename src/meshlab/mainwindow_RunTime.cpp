@@ -566,6 +566,7 @@ void MainWindow::startFilter()
 	{
 		qDebug("MeshCreation");
 		GLArea *gla=new GLArea(mdiarea);
+		gla->setCustomSetting(globalParams);
 		addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 		gla->meshDoc.addNewMesh("untitled.ply");
 		gla->setFileName("untitled.ply");
