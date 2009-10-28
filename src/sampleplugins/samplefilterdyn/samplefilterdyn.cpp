@@ -35,6 +35,8 @@
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <wrap/qt/col_qt_convert.h>
+
 
 #include "samplefilterdyn.h"
 
@@ -124,7 +126,8 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 // It changes the color of the mesh according to a perlin noise function
 bool ExtraSampleDynPlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-	const Color4b baseColor = par.getColor4b("baseColor");
+	//const Color4b baseColor = par.getColor4b("baseColor");
+	const Color4b baseColor = vcg::ColorConverter::convertQColorToColor4<unsigned char>(par.getColor("baseColor"));
 	const float percentage  = par.getDynamicFloat("percentage");
 	const float frequency   = math::Clamp(par.getDynamicFloat("frequency"),1.f,1000.f);
 
