@@ -48,7 +48,7 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
 	public:
 		enum { ISOP_PARAM,
            ISOP_REMESHING,
-		   ISOP_DIAMPARAM
+					 ISOP_DIAMPARAM
        };
 
 		FilterIsoParametrization();

@@ -41,8 +41,8 @@ using namespace vcg;
 FilterIsoParametrization::FilterIsoParametrization()
 {
   typeList << ISOP_PARAM
-           << ISOP_REMESHING;
-		   /*<< ISOP_DIAMPARAM;*/
+           << ISOP_REMESHING
+					 << ISOP_DIAMPARAM;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -62,7 +62,7 @@ const QString FilterIsoParametrization::filterName(FilterIDType filter) const
   {
     case ISOP_PARAM : return "Iso Parametrization";
     case ISOP_REMESHING : return "Iso Parametrization Remeshing";
-    case ISOP_DIAMPARAM : return "Iso Parametrization Diamond";
+    case ISOP_DIAMPARAM : return "Iso Parametrization transfer to Original mesh";
     default: assert(0);
   }
   return QString("error!");
@@ -80,7 +80,10 @@ const QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
 			"For more details see: <br>"
 			"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
 			"IEEE Transaction of Visualization and Computer Graphics 2009";
-    case ISOP_DIAMPARAM : return "bla bla";
+    case ISOP_DIAMPARAM : return "<br>	 Transfer the Isoparametrinzation to a Diamond-parametrization over the original mesh  <br>"
+			"For more details see: <br>"
+			"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
+			"IEEE Transaction of Visualization and Computer Graphics 2009";
    default: assert(0);
   }
   return QString("error!");
@@ -131,10 +134,17 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& /*md*/
 			break;
 	}
 	 case ISOP_REMESHING :
+	{
 		 par.addParam(new RichInt("SamplingRate",10,"Sampling Rate", "This specify the sampling rate for remeshing."));
 		 break;
   }
-
+	case ISOP_DIAMPARAM :
+	{
+		 par.addParam(new RichDynamicFloat("BorderSize",0.01,0.05,0.5,"BorderSize ratio", "This specify the border for each diamond.<br>"
+																				"The bigger is the less triangles are splitted, but the more UV space is used."));								 
+		break;										
+	}
+}
 }
 
 void FilterIsoParametrization::PrintStats(CMeshO *mesh)
@@ -286,8 +296,6 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 	}
 	case ISOP_REMESHING :
 	{
-		
-
 		bool b=vcg::tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
 		if (!b)
 		{
@@ -322,7 +330,12 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
 			return false;
 		}
-
+		float border_size=par.getDynamicFloat("BorderSize");
+		MeshModel* mm=md.addNewMesh("Diam-Parameterized");
+		CMeshO *rem=&mm->cm;
+		DiamondParametrizator DiaPara;
+		DiaPara.Init(&isoPHandle());
+		DiaPara.SetCoordinates<CMeshO>(*rem,border_size);
 		return true;
 	}
   }
