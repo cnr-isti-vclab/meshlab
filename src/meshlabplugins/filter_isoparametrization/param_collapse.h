@@ -642,7 +642,7 @@ void Execute(BaseMesh &m)
 		UVToAlphaBeta(HresVert,param1,orderedFaces1,m);
 
 		
-    PatchesOptimizer<BaseMesh>::OptimizeUV(this->pos.V(1),m);
+    //PatchesOptimizer<BaseMesh>::OptimizeUV(this->pos.V(1),m);
 	
 //---------------------------///
 		///get the non border one that is the one survived
