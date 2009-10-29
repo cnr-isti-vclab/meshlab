@@ -105,9 +105,9 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * g
 		{
 			QString buf=QString("v%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
 			if( m.hasDataMask(MeshModel::MM_VERTQUALITY) )
-				buf+=QString(" \nQ(%1)").arg(fp->V(i)->Q());
+				buf+=QString(" - Q(%1)").arg(fp->V(i)->Q());
 			if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
-					buf+=QString(" \nuv(%1 %2) id:%3").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
+					buf+=QString("- uv(%1 %2) id:%3").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
 			gla->renderText(fp->P(i)[0], fp->P(i)[1], fp->P(i)[2], buf, qFont);
 		}
 }
