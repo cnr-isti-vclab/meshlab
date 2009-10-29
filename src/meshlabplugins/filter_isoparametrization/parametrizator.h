@@ -349,7 +349,9 @@ private:
 	template <class MeshType>
 	bool InitBaseMesh(MeshType *mesh,
 		const int &targetFaces,
-		const int &interval,bool execute_flip=true)
+		const int &interval,
+		bool execute_flip=true,
+		bool test_interpolation=true)
 	{
 			
 			for (unsigned int i=0;i<mesh->vert.size();i++)
@@ -369,7 +371,7 @@ private:
 		ParaDecimate(targetFaces,interval,execute_flip);
 
 		///SET BEST FIND STOP POINT
-		SetBestStatus();
+		SetBestStatus(test_interpolation);
 
 		///THEN CLEAR STACK
 		ClearStack();
@@ -508,8 +510,8 @@ private:
 			base_mesh.vert[i].RPos=to_restore->vert[i].RPos;
 			base_mesh.vert[i].P()=to_restore->vert[i].P();
 		}
-		///clear stack of meshes
-		ClearStack();
+		/*///clear stack of meshes
+		ClearStack();*/
 	}
 
 	///clear the durrent stack
@@ -540,21 +542,48 @@ private:
 			break;
 		}
 	}
+	
+	///return true if possible to construct an Isoparametrization
+	bool TestInterpolation()
+	{
+			ParamMesh para_mesh1;
+			AbstractMesh abs_mesh1;
+			ExportMeshes(para_mesh1,abs_mesh1);
+		
+			///constrauct an ISOPARAM
+			IsoParametrization IsoParam1;
+			return(IsoParam1.Init(&abs_mesh1,&para_mesh1));
+	}
 
 	///set the best value considering the ratio value
-	void SetBestStatus()
+	bool SetBestStatus(bool test_interpolation)
 	{
+		std::sort(ParaStack.begin(),ParaStack.end());
 		int indexmin=0;
-		
-		double valMin=GetStatusVal(0);
-		for (unsigned int i=1;i<ParaStack.size();i++)
+		bool isOK_interp=false;
+		RestoreStatus(indexmin);
+		if (test_interpolation)
 		{
-			if (ParaStack[i].ratio<valMin)
+			while ((!isOK_interp)&&(indexmin<ParaStack.size()))
 			{
-				valMin=GetStatusVal(i);
-				indexmin=i;
-			}
+				isOK_interp=TestInterpolation();
+				if (!isOK_interp)
+				{
+					indexmin++;
+					if (indexmin<ParaStack.size())
+						RestoreStatus(indexmin);
+				}
+			}	
+		} 
+
+		///clear stack of meshes
+	
+
+		
 #ifndef _MESHLAB
+		for (unsigned int i=0;i<ParaStack.size();i++)
+		{
+
 			printf("faces %d, Area %.4f, Angle %.4f, Corr %.4f, non Reg %d,L2 %.4f,Heuristic %.4f\n",
 				ParaStack[i].num_faces,
 				ParaStack[i].AreaDist,
@@ -563,12 +592,15 @@ private:
 				ParaStack[i].Regular,
 				ParaStack[i].L2,
 				ParaStack[i].ratio);
-#endif
 		}
-#ifndef _MESHLAB
-		printf("Choosen to stop at %d faces \n",ParaStack[indexmin].num_faces);
+		if ((isOK_interp)||(!test_interpolation))
+			printf("Choosen to stop at %d faces \n",ParaStack[indexmin].num_faces);
+		else
+			printf("Not a right Interpolation Domain is found");
 #endif
-		RestoreStatus(indexmin);
+		
+		ClearStack();
+		return (isOK_interp);
 	}
 
 public:
@@ -607,6 +639,33 @@ public:
 		ScalarType ratio;
 		ScalarType L2;
 		BaseMesh * AbsMesh;
+
+		static StopMode& SM()
+		{
+			static StopMode S;
+			return S;
+		}
+
+		inline bool operator < (ParaInfo &P_info){
+			switch (SM())
+			{
+			case (SM_Area): return AreaDist<P_info.AreaDist;
+				break;
+			case (SM_Angle):return AngleDist<P_info.AngleDist;
+				break;
+			case (SM_Corr):return AggrDist<P_info.AggrDist;
+				break;
+			case (SM_Reg):return Regular<P_info.Regular;
+				break;
+			case (SM_Smallest):return num_faces<P_info.num_faces;
+				break;
+			case (SM_L2):return L2<P_info.L2;
+				break;
+			default:return ratio<P_info.ratio;
+				break;
+			}
+		}
+
 	};
 
 	std::vector<ParaInfo> ParaStack;
@@ -663,7 +722,7 @@ public:
 		const int limit1=30000;
 		if ((!Two_steps)||(lower_limit>limit0)||(mesh->fn<limit1))
 		{
-			done=InitBaseMesh<MeshType>(mesh,lower_limit,interval);
+			done=InitBaseMesh<MeshType>(mesh,lower_limit,interval,true,true);
 			if (!done)
 				return false;
 		}
@@ -671,7 +730,7 @@ public:
 		{
 			///do a first parametrization step
 			printf("\n STEP 1 \n");
-			done=InitBaseMesh<MeshType>(mesh,limit0,1,false);
+			done=InitBaseMesh<MeshType>(mesh,limit0,1,false,false);
 			if (!done)
 				return false;
 
@@ -681,7 +740,7 @@ public:
 			ExportMeshes(para_mesh0,abs_mesh0);
 
 			printf("\n STEP 2 \n");
-			done=InitBaseMesh<AbstractMesh>(&abs_mesh0,lower_limit,interval);
+			done=InitBaseMesh<AbstractMesh>(&abs_mesh0,lower_limit,interval,true,true);
 			if (!done)
 				return false;
 
@@ -1088,6 +1147,7 @@ public:
 		interval=_interval;
 		accuracy=_accuracy;
 		SMode=_SMode;
+		ParaInfo::SM()=_SMode;
 		cb=_cb;
 	}
 	
