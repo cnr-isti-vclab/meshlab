@@ -338,6 +338,10 @@ template <class FaceType>
 		alphaMap.clear();
 
 		ParamMesh *to_param=isoParam->ParaMesh();
+		///copy paramesh
+		
+
+		
 
 		typedef ParamMesh::VertexType VertexType;
 		typedef ParamMesh::FaceType FaceType;
@@ -497,7 +501,8 @@ public:
 	
 
 	///set the vertex coordinates
-	void SetCoordinates(const ScalarType &border=0.01)
+	template <class MeshType>
+	void SetCoordinates(MeshType &mesh,const ScalarType &border=0.01)
 	{
 		std::vector<vcg::Color4b > colorDiam;
 		
@@ -517,6 +522,11 @@ public:
 
 		AssociateDiamond();
 		SetWedgeCoords(border);
+
+		///copy parametrization to the new mesh
+		mesh.Clear();
+		vcg::tri::Append<MeshType,ParamMesh>::Mesh(mesh,*isoParam->ParaMesh(),false,true);
+		
 	}
 
 };
