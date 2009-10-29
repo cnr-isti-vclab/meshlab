@@ -35,7 +35,9 @@
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 
-#define SAMPLES_PER_EDGE 100
+#define SAMPLES_PER_EDGE 15 //modificare, length/epsilon
+//Sistemare la gestione buco
+//rimozione componente connessa?
 
 // Polyline (set of consecutive segments)
 struct polyline {
@@ -207,6 +209,15 @@ struct aux_info {
 
 };//end struct
 
+class compareFaceQuality {
+	public:
+		compareFaceQuality() { };
+
+		bool operator () (const std::pair<CMeshO::FacePointer,char> f1, const std::pair<CMeshO::FacePointer,char> f2) {
+			//quality f1 < quality f2 return true
+			return ( f1.first->Q() < f2.first->Q() );
+		}
+};
 
 class FilterZippering : public QObject, public MeshFilterInterface
 {
@@ -251,10 +262,14 @@ private:
         polyline cutComponent(  polyline comp,                                   //Component to be cut
                                 polyline border,                                 //border
                                 vcg::Matrix44<CMeshO::ScalarType> rot_mat );     //Rotation matrix
-        bool debug_v;
         int searchComponent( aux_info &info,                            //Auxiliar info
                              vcg::Segment3<CMeshO::ScalarType> s,       //query segment
                              bool &conn );
+		bool findIntersection(  CMeshO::FacePointer currentF,				//face
+								vcg::Segment3<float> edge,				//edge
+								int last_split,							//last splitted edge
+								int &splitted_edge,						//currently splitted edge
+								vcg::Point3<CMeshO::ScalarType> &hit );	//approximate intersection point
         float eps;
 };
 
