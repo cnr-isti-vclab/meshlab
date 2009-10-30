@@ -458,6 +458,19 @@ void GLArea::resizeGL(int _width, int _height)
 
 void GLArea::displayHelp()
 {
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(-1,1,-1,1,-1,1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+
 	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT );
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
@@ -487,9 +500,15 @@ void GLArea::displayHelp()
 	renderText(2,13.5*fontSpacingV,QString("Ctrl-Wheel:"),qFont);				renderText(hPosition,13.5*fontSpacingV,QString("Move far clipping plane"),qFont);
 	renderText(2,15*fontSpacingV,QString("Ctrl-Shift-Wheel:"),qFont);		renderText(hPosition,15*fontSpacingV,QString("Move near clipping plane"),qFont);
 	renderText(2,16.5*fontSpacingV,QString("Double Click:"),qFont);			renderText(hPosition,16.5*fontSpacingV,QString("Center on mouse"),qFont);
-	renderText(2,18*fontSpacingV,QString("F1:"),qFont);									renderText(hPosition,18*fontSpacingV,QString("Toggle this help"),qFont);
-	renderText(2,19.5*fontSpacingV,QString("Alt+enter:"),qFont);						renderText(hPosition,19.5*fontSpacingV,QString("Enter/Exit fullscreen mode"),qFont);
+	renderText(2,18*fontSpacingV,QString("Alt+enter:"),qFont);						renderText(hPosition,18*fontSpacingV,QString("Enter/Exit fullscreen mode"),qFont);
 	glPopAttrib();
+	// Closing 2D
+	glPopAttrib();
+	glPopMatrix(); // restore modelview
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+
 }
 
 void GLArea::saveSnapshot()
