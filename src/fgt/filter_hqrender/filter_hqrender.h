@@ -34,8 +34,10 @@ private:
   QStringList templates;
   bool delRibFiles;
   QStringList alignValue;
+  bool convertedGeometry;
 
-  int convertGeometry(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList);
+  int convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList);
+  int ignoreObject(RibFileStack* files);
   QString getDirFromPath(QString* path);
   QString getFileNameFromPath(QString* path, bool type = true);
 };

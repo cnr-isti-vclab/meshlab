@@ -113,7 +113,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 				this->errorMessage = "No template scene has been found in \"render_template\" directory";
 				qDebug(qPrintable(this->errorMessage));
 			}
-			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));			
+			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));
 
 			// ******Ë il nome dell'immagine, ma poi va copiata nella cartella della mesh...******
 			parlst.addParam(new RichString("ImageName", "default.tiff", "Name of output image"));
@@ -230,7 +230,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 	//3. se attive, prima di "world begin" va messo il MAKETEXTURE ;)
 
-	
+	convertedGeometry = false; //if the mesh is already converted
+	int currentFrame = 0;
 
 	//reading cycle
 	while(!files.isEmpty()) {
@@ -239,20 +240,33 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		//the ReadArchive and Option SearchPath "String Archive" statement are already handled
 		QStringList token = line.split(' ');
 
-		//add "MakeTexture" statement to create the texure
+
+
+		//add "MakeTexture" statement to create the texure, but only before frame one
 		// ********* forse aqsis ha un exe che crea le texture..... ********** (pixie sì)
-		if(token[0].trimmed() == "FrameBegin" && token[1].trimmed() == "1") {
-			foreach(QString textureName, textureList) {
-				QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName,false) + ".tiff" + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 1 1");
-				fprintf(fout,"%s\n",qPrintable(makeTexture));
+		if(token[0].trimmed() == "FrameBegin") {
+			currentFrame = token[1].trimmed().toInt(); //no check on cast
+			if(currentFrame == 1) {
+				foreach(QString textureName, textureList) {
+					QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName,false) + ".tiff" + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 1 1");
+					fprintf(fout,"%s\n",qPrintable(makeTexture));
+				}
 			}
 		}
 
 		//change the output image file name
 		if(token[0].trimmed() == "Display") {
-			//if is there more frame?
-			//////il + viene messo soltanto su framebuffer e non su file (o viceversa :D)
-			line = token[0] + " \"+" + par.getString("ImageName") + "\" " + token[2] + " " + token[3];
+			line = token[0] + " \"";
+			if(token[2].trimmed() == "\"file\"")
+				line += "+";			
+			if(currentFrame == 1)
+				line += par.getString("ImageName");
+			else {
+				QString imageName = par.getString("ImageName");
+				imageName = getFileNameFromPath(&imageName,false);
+				line += imageName + QString::number(currentFrame) + ".tiff";
+			}
+			line += "\" " + token[2] + " " + token[3];
 			for(int i = 4; i<token.size(); i++) {
 				line += token[i];
 			}
@@ -284,8 +298,22 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 							str.remove('\"');
 							str = str.simplified();
 							if(str.toLower() == "dummy") {
-								fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY\n",qPrintable(line));
-								convertGeometry(&files, fout, destDir, m, par, &textureList);
+								QString filename = "mesh" + QString::number(currentFrame) + ".rib";
+								if(true) {
+									QString meshDest = destDir + QDir::separator() + filename;
+									FILE *fmesh = fopen(qPrintable(meshDest),"wb");
+									if(fmesh==NULL) {							
+									}
+
+									fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY..SOSTITUISCO\n",qPrintable(line));
+									fprintf(fout,"ReadArchive \"%s\"", qPrintable(filename));									
+									convertObject(&files, fmesh, destDir, m, par, &textureList);
+									fclose(fmesh);
+								} else { //animation of plugin
+									fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY\n",qPrintable(line));									
+									fprintf(fout,"ReadArchive \"%s\"", qPrintable(filename));
+									ignoreObject(&files);
+								}
 								writeLine = false; //line is already writed...jump the next statement
 							}
 						} else {
@@ -363,8 +391,24 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	return true;
 }
 
-//write on a opened file the geometry of the mesh (faces topology, index of vertex per face, coordinates, normal and color per vertex
-int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList)
+int FilterHighQualityRender::ignoreObject(RibFileStack* files) {
+	int c = 1; //the number of AttributeBegin statement readed
+	bool exit = false;
+	while(!files->isEmpty() && c!=0) {
+		QString line = files->topNextLine();
+		QStringList token = line.split(' ');
+		
+		if(token[0].trimmed() == "AttributeBegin")
+			++c;
+		if(token[0].trimmed() == "AttributeEnd")
+			--c;		
+	}
+	return 0; //errors...
+}
+
+
+//write on a opened file the attribute of object entity
+int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList)
 {	
 	float scale = 1.0;
 	vcg::Matrix44f templateMatrix = vcg::Matrix44f::Identity();
@@ -463,7 +507,7 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QS
 			for(int i = 0; i<4; i++)
 				for(int j = 0; j<4; j++)
 					fprintf(fout,"%f ",result.ElementAt(j,i)); //traspose
-			//write bounding box (not modified)
+			//write bounding box (not modified) /////VA MODIFICATO IL BB SE NON SCALO?????
 			fprintf(fout,"]\n%s\n",qPrintable(line));
 			
 		}
@@ -505,9 +549,11 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QS
 		if(token[0].trimmed() == "PointsPolygons") {
 			QString filename = "geometry.rib";
 			fprintf(fout,"ReadArchive \"%s\"", qPrintable(filename));
-			QString geometryDest = destDir + QDir::separator() + filename;
-			
-			vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, scale, false);
+			if(!convertedGeometry) {
+				convertedGeometry = true;
+				QString geometryDest = destDir + QDir::separator() + filename;			
+				vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, scale, false);
+			}
 		} 
 
 		
@@ -517,8 +563,8 @@ int FilterHighQualityRender::convertGeometry(RibFileStack* files, FILE* fout, QS
 		}
 	}
 	//ignore the geometry of dummy object defined in the template
-	//until end of file or number of statement "AttributeEnd" is equal to c (?)
-	return 0;
+	//until end of file or number of statement "AttributeEnd" is equal to c
+	return 0;  //errors...
 }
 
 QString FilterHighQualityRender::getDirFromPath(QString* path) {
