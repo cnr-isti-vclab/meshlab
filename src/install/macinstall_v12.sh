@@ -120,10 +120,10 @@ plugins/libfilter_splitter.dylib \
 plugins/libfilter_trioptimize.dylib \
 plugins/libfilter_unsharp.dylib \
 plugins/libfilter_qhull.dylib \
+plugins/libfilter_quality.dylib \
 plugins/libfilterborder.dylib \
 plugins/libfiltercreateiso.dylib \
 plugins/libfiltergeodesic.dylib \
-plugins/libfilter_qhull.dylib \
 plugins/libfilter_isoparametrization.dylib \
 plugins/libio_base.dylib \
 plugins/libio_3ds.dylib \
@@ -153,7 +153,6 @@ plugins/libmeshdecorate.dylib \
 plugins/librender_gdp.dylib \
 plugins/librender_rfx.dylib \
 plugins/librender_splatting.dylib \
-plugins/librender_gdp.dylib \
 plugins/libsampledecoration.dylib \
 plugins/libsampleedit.dylib \
 plugins/libsamplefilter.dylib \
