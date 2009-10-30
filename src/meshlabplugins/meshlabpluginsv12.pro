@@ -16,16 +16,19 @@ SUBDIRS       = io_base\
 				filter_clean \
 				filter_colorize \
 				filter_create \
+				filter_measure \
 				filter_meshing \
 				filter_mls \
 				filter_poisson \
 				filter_sampling \
 				filter_splitter \
 				filter_select \
-#				 filter_texture \
+				 filter_texture \
 				filter_unsharp \
+				filter_zippering \
 #				 filter_curvature_from_sliding \
 #				 filter_perceptualmetric \
+#				render_splat_pyramid \
 				render_splatting \
 				render_gdp \
 				meshdecorate \
@@ -44,6 +47,7 @@ SUBDIRS       = io_base\
 				../sampleplugins/samplefilterdyn \
 				../sampleplugins/samplefilterdoc \
 				../sampleplugins/sampledecoration \
+				../sampleplugins/io_m\
 				../sampleplugins/filterborder \
 				../sampleplugins/filtergeodesic \
 				../sampleplugins/filtercreateiso \
