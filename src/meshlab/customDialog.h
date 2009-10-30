@@ -76,6 +76,7 @@ private:
 	QPushButton* savebut;
 	QPushButton* applybut;
 	QPushButton* resetbut;
+	QPushButton* closebut;
 };
 
 class CustomDialog : public QDialog
@@ -97,4 +98,5 @@ private:
 	QListWidget* listwid;
 	QMap<QListWidgetItem*,RichParameter*> mp; 
 	void dispatch(const RichParameter& par);
+	QPushButton* closebut;
 };

@@ -59,7 +59,9 @@ CustomDialog::CustomDialog(RichParameterSet& parset,QWidget * parent)
 		:QDialog(parent),richparset(parset)
 {
 	setModal(false);
-	QVBoxLayout* layout = new QVBoxLayout(parent);
+	closebut = new QPushButton("Close",this);
+	//QVBoxLayout* layout = new QVBoxLayout(parent);
+	QGridLayout* layout = new QGridLayout(parent);
 	setLayout(layout);
 	listwid = new QListWidget(this); 
 	for(int ii = 0;ii < richparset.paramList.size();++ii)
@@ -69,8 +71,10 @@ CustomDialog::CustomDialog(RichParameterSet& parset,QWidget * parent)
 		mp.insert(item,parset.paramList.at(ii));
 		//connect(butt,SIGNAL(clicked()),this,SLOT(openSubDialog()));
 	}
-	layout->addWidget(listwid);
+	layout->addWidget(listwid,0,0,1,4);
+	layout->addWidget(closebut,1,3);
 	connect(listwid,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(openSubDialog(QListWidgetItem*)));
+	connect(closebut,SIGNAL(clicked()),this,SLOT(close()));
 }
 
 void CustomDialog::openSubDialog( QListWidgetItem* itm )
@@ -88,6 +92,7 @@ void CustomDialog::openSubDialog( QListWidgetItem* itm )
 CustomDialog::~CustomDialog()
 {
 	delete listwid;
+	delete closebut;
 	//RichParameter will be destroyed elsewhere
 	//for(QMap<QListWidgetItem*,RichParameter*>::iterator it = mp.begin();it != mp.end();it++)
 	//	delete it.key();
@@ -100,22 +105,26 @@ SettingDialog::SettingDialog( RichParameter* rpar,QWidget* parent /*= 0*/ )
 	savebut = new QPushButton("Save",this);
 	resetbut = new QPushButton("Reset",this);
 	applybut = new QPushButton("Apply",this);
+	closebut = new QPushButton("Close",this);
+
 	QGridLayout* dialoglayout = new QGridLayout(parent);
 	
 	dialoglayout->addWidget(savebut,1,0);
 	dialoglayout->addWidget(resetbut,1,1);
 	dialoglayout->addWidget(applybut,1,2);
+	dialoglayout->addWidget(closebut,1,3);
 
 	RichParameterCopyConstructor cp;
 	richpar->accept(cp);
 	tmppar = cp.lastCreated;
 	frame.loadFrameContent(tmppar);
-	dialoglayout->addWidget(&frame,0,0,1,3);
+	dialoglayout->addWidget(&frame,0,0,1,4);
 	dialoglayout->setSizeConstraint(QLayout::SetFixedSize);
 	setLayout(dialoglayout);
 	connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
 	connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
 	connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
+	connect(closebut,SIGNAL(clicked()),this,SLOT(close()));
 }
 
 void SettingDialog::save()
@@ -150,5 +159,6 @@ SettingDialog::~SettingDialog()
 	delete savebut;
 	delete resetbut;
 	delete applybut;
+	delete closebut;
 	//RichParameter Value will be destroyed elsewhere
 }
