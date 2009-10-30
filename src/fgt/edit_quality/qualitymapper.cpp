@@ -48,6 +48,11 @@ const QString QualityMapperPlugin::Info()
 
 bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
 {
+	if(!m.hasDataMask(MeshModel::MM_VERTQUALITY))
+	{
+			QMessageBox::warning(gla, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 
+			return false;
+	}
 	if(_qualityMapperDialog==0)
 		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla);
 
