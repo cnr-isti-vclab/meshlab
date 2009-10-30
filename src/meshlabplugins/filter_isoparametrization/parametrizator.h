@@ -646,7 +646,7 @@ public:
 			return S;
 		}
 
-		inline bool operator < (ParaInfo &P_info){
+		inline bool operator < (const ParaInfo &P_info){
 			switch (SM())
 			{
 			case (SM_Area): return AreaDist<P_info.AreaDist;
