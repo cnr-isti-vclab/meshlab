@@ -252,6 +252,8 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, RichPar
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
       tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
       Log(GLLogStream::FILTER, "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
+			m.updateDataMask(MeshModel::MM_VERTQUALITY);
+			m.updateDataMask(MeshModel::MM_VERTCOLOR);
     break;
     }  
   case CP_TRIANGLE_QUALITY:
@@ -466,7 +468,7 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const
 				return MeshModel::MM_VERTCOLOR;
 
 		case   CP_DISCRETE_CURVATURE:
-			return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTNUMBER;
+			return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTNUMBER;
 
     default: assert(0);
 	}
