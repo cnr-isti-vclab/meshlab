@@ -114,7 +114,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 				qDebug(qPrintable(this->errorMessage));
 			}
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));
-
+			parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));
 			// ******Ë il nome dell'immagine, ma poi va copiata nella cartella della mesh...******
 			parlst.addParam(new RichString("ImageName", "default.tiff", "Name of output image"));
 			
@@ -228,18 +228,23 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		else
 			return false;
 	}
-	//3. se attive, prima di "world begin" va messo il MAKETEXTURE ;)
+	//3. se attive, prima del primo "frame begin" va messo il MAKETEXTURE ;)
 
 	convertedGeometry = false; //if the mesh is already converted
 	int currentFrame = 0;
+	int numOfFrames = par.getInt("frames");
+	vcg::Matrix44f transfCamera = vcg::Matrix44f::Identity();
+	bool stop = false;
+	FILE* fmain = fout;
+	QStringList frameDeclaration = QStringList();
+	bool isFrameDeclaration = false;
 
 	//reading cycle
-	while(!files.isEmpty()) {
+	while(!files.isEmpty() && !stop) {
 		bool writeLine = true;
 		QString line = files.topNextLine();
 		//the ReadArchive and Option SearchPath "String Archive" statement are already handled
 		QStringList token = line.split(' ');
-
 
 
 		//add "MakeTexture" statement to create the texure, but only before frame one
@@ -251,8 +256,19 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 					QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName,false) + ".tiff" + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 1 1");
 					fprintf(fout,"%s\n",qPrintable(makeTexture));
 				}
+				if(numOfFrames > 0)
+					isFrameDeclaration = true;
 			}
 		}
+
+		//if there's an animation, stop the processing of other possible frame
+		if(numOfFrames > 0 && currentFrame == 1 && token[0].trimmed() == "FrameEnd") {
+			fprintf(fout,"%s\n",qPrintable(line));
+			writeLine = false;
+			makeAnimation(fout,numOfFrames,transfCamera,frameDeclaration,par.getString("ImageName"));
+			stop = true;
+		}
+
 
 		//change the output image file name
 		if(token[0].trimmed() == "Display") {
@@ -277,7 +293,27 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			line = token[0] + " " + QString::number(par.getInt("FormatX")) + " " + QString::number(par.getInt("FormatY")) + " " + QString::number(par.getFloat("PixelAspectRatio"));
 		}
 
-		
+		//transformation camera
+		if(numOfFrames > 0 && token[0].trimmed() == "Transformation") {
+			transfCamera = readMatrix(&files, line);
+		}
+
+		//make another file if there is an animation
+		if(numOfFrames > 0 && token[0].trimmed() == "WorldBegin") {
+			isFrameDeclaration = false;
+			//it's certainly the first WorldBegin
+			QString filename = destDir + QDir::separator() + "world.rib";
+			fprintf(fout,"ReadArchive \"world.rib\"\n");
+			fout = fopen(qPrintable(filename),"wb");
+			if(fout==NULL)	{
+			}			
+		}
+		if(numOfFrames > 0 && token[0].trimmed() == "WorldEnd") {
+			//it's certainly the first WorldEnd
+			fprintf(fout,"%s\n",qPrintable(line));
+			fclose(fout);
+			fout = fmain;
+		}
 
 		//looking for a dummy object...
 		if(token[0].trimmed() == "Attribute") {
@@ -299,21 +335,17 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 							str = str.simplified();
 							if(str.toLower() == "dummy") {
 								QString filename = "mesh" + QString::number(currentFrame) + ".rib";
-								if(true) {
-									QString meshDest = destDir + QDir::separator() + filename;
-									FILE *fmesh = fopen(qPrintable(meshDest),"wb");
-									if(fmesh==NULL) {							
-									}
 
-									fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY..SOSTITUISCO\n",qPrintable(line));
-									fprintf(fout,"ReadArchive \"%s\"", qPrintable(filename));									
-									convertObject(&files, fmesh, destDir, m, par, &textureList);
-									fclose(fmesh);
-								} else { //animation of plugin
-									fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY\n",qPrintable(line));									
-									fprintf(fout,"ReadArchive \"%s\"", qPrintable(filename));
-									ignoreObject(&files);
+								QString meshDest = destDir + QDir::separator() + filename;
+								FILE *fmesh = fopen(qPrintable(meshDest),"wb");
+								if(fmesh==NULL) {							
 								}
+
+								fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY\n",qPrintable(line));
+								fprintf(fout,"ReadArchive \"%s\"\n", qPrintable(filename));									
+								convertObject(&files, fmesh, destDir, m, par, &textureList);
+								fclose(fmesh);
+								fprintf(fout,"AttributeEnd\n");
 								writeLine = false; //line is already writed...jump the next statement
 							}
 						} else {
@@ -330,6 +362,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			//(out)<<line<<endl;
 			fprintf(fout,"%s\n",qPrintable(line));
 		}
+		if(isFrameDeclaration && token[0].trimmed() != "FrameBegin" && token[0].trimmed() != "Transform")
+			frameDeclaration << line;
 	}
 	fclose(fout);
 	
@@ -390,7 +424,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 	return true;
 }
-
+/*
 int FilterHighQualityRender::ignoreObject(RibFileStack* files) {
 	int c = 1; //the number of AttributeBegin statement readed
 	bool exit = false;
@@ -404,8 +438,43 @@ int FilterHighQualityRender::ignoreObject(RibFileStack* files) {
 			--c;		
 	}
 	return 0; //errors...
-}
+}*/
 
+
+int FilterHighQualityRender::makeAnimation(FILE* fout, int numOfFrame,vcg::Matrix44f transfCamera, QStringList frameDeclaration, QString imageName) {
+	for(int frame=2; frame<numOfFrame+2; frame++) {
+		fprintf(fout,"FrameBegin %i\n",frame);
+		foreach(QString statement, frameDeclaration) {
+			QStringList token = statement.split(' ');
+			if(token[0].trimmed() == "Display") {
+				statement = token[0] + " \"";
+				if(token[2].trimmed() == "\"file\"")
+					statement += "+";			
+					if(frame == 1)
+						statement += imageName;
+					else {
+						imageName = getFileNameFromPath(&imageName,false);
+						statement += imageName + QString::number(frame) + ".tiff";
+				}
+				statement += "\" " + token[2] + " " + token[3];
+				for(int i = 4; i<token.size(); i++) {
+					statement += token[i];
+				}
+			}
+			fprintf(fout,"%s\n",qPrintable(statement));
+		}
+		vcg::Matrix44f result;
+		float rot = float(360*frame/numOfFrame);
+		result.SetRotateDeg(rot,vcg::Point3f(0.0,0.0,1.0));
+		result = transfCamera * result;
+		fprintf(fout,"Transform [ ");
+		for(int i = 0; i<4; i++)
+			for(int j = 0; j<4; j++)
+				fprintf(fout,"%f ",result.ElementAt(j,i)); //traspose		
+		fprintf(fout,"]\nReadArchive \"world.rib\"\nFrameEnd\n");
+	}
+	return 0; //errors
+}
 
 //write on a opened file the attribute of object entity
 int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList)
@@ -425,29 +494,8 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 			--c;
 
 		//take the transformation matrix of dummy
-		if(token[0].trimmed() == "Transform") {
-			float t[16];
-			//an array in renderman can contains the char '\n' :(
-			QString matrixString = line;
-			while(!line.contains(']')) {
-				line = files->topNextLine();
-				matrixString += line;
-			}
-			int k=0;
-			QStringList list = matrixString.split(' ');
-			for(int i=0; i<list.size(); i++) {
-				if(list[i].trimmed().contains('[') || list[i].trimmed().contains(']')) {
-					list[i] = list[i].remove('[');
-					list[i] = list[i].remove(']');
-				}
-				bool isNumber;
-				float number = list[i].toFloat(&isNumber);
-				if(isNumber)
-					t[k++]=number;
-			}
-			templateMatrix = vcg::Matrix44f(t);
-			templateMatrix = templateMatrix.transpose();
-			
+		if(token[0].trimmed() == "Transform") {			
+			templateMatrix = readMatrix(files,line);
 		}
 
 		//modify the transformation matrix
@@ -559,12 +607,39 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 		
 		if(c == 0) {
 			exit = true;
-			fprintf(fout,"%s\n",qPrintable(line));
+			//fprintf(fout,"%s\n",qPrintable(line));
 		}
 	}
 	//ignore the geometry of dummy object defined in the template
 	//until end of file or number of statement "AttributeEnd" is equal to c
 	return 0;  //errors...
+}
+
+//read array???
+
+//read a matrix from the rib stack and transpose it
+vcg::Matrix44f FilterHighQualityRender::readMatrix(RibFileStack* files, QString line){
+	float t[16];
+	//an array in renderman can contains the char '\n' :(
+	QString matrixString = line;
+	while(!line.contains(']')) {
+		line = files->topNextLine();
+		matrixString += line;
+	}
+	int k=0;
+	QStringList list = matrixString.split(' ');
+	for(int i=0; i<list.size(); i++) {
+		if(list[i].trimmed().contains('[') || list[i].trimmed().contains(']')) {
+			list[i] = list[i].remove('[');
+			list[i] = list[i].remove(']');
+		}
+		bool isNumber;
+		float number = list[i].toFloat(&isNumber);
+		if(isNumber)
+			t[k++]=number;
+	}
+	vcg::Matrix44f tempMatrix(t);
+	return tempMatrix.transpose();
 }
 
 QString FilterHighQualityRender::getDirFromPath(QString* path) {
