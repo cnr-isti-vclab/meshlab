@@ -675,7 +675,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	vcg::tri::Append<CMeshO, CMeshO>::Mesh( a->cm, b->cm );
 	vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
 	vcg::tri::UpdateFlags<CMeshO>::FaceClear(a->cm); 
-	ccons.clear(); vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons );  std::vector<std::pair<int,int>> b_pos;
+	ccons.clear(); vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons );  std::vector<std::pair<int,int> > b_pos;
 	for ( int i = 0; i < ccons.size(); i ++ ) {
 		if ( vcg::tri::Index(a->cm, ccons[i].p.F()) >= limit ) b_pos.push_back( std::make_pair( vcg::tri::Index(a->cm, ccons[i].p.F()), ccons[i].p.E() ) );
 	}
