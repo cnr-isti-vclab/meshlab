@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.2.2b"
+!define PRODUCT_VERSION "1.2.3b"
 !define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -45,7 +45,7 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v122BETA_${NOW}.exe"
+OutFile "MeshLabDevel_v123BETA_${NOW}.exe"
 InstallDir "$PROGRAMFILES\VCG\MeshLab"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -87,6 +87,7 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\io_expe.dll"
   File "..\meshlab\plugins\io_gts.dll"
   File "..\meshlab\plugins\io_pdb.dll"
+  File "..\meshlab\plugins\io_m.dll"
 
   ; filter plugins (23)
   File "..\meshlab\plugins\filter_ao.dll"
@@ -99,10 +100,12 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\filter_create.dll"
 
   File "..\meshlab\plugins\filter_func.dll"
-  
+  File "..\meshlab\plugins\filter_isoparametrization.dll"
+    File "..\meshlab\plugins\filter_measure.dll"
   File "..\meshlab\plugins\filter_meshing.dll"
   File "..\meshlab\plugins\filter_mls.dll"
   
+  File "..\meshlab\plugins\filter_plymc.dll"
   File "..\meshlab\plugins\filter_poisson.dll"
   File "..\meshlab\plugins\filter_qhull.dll"
   File "..\meshlab\plugins\filter_quality.dll"
@@ -111,8 +114,11 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\filter_select.dll"
   File "..\meshlab\plugins\filter_splitter.dll"
   
+  File "..\meshlab\plugins\filter_texture.dll"
   File "..\meshlab\plugins\filter_trioptimize.dll"
   File "..\meshlab\plugins\filter_unsharp.dll"
+  File "..\meshlab\plugins\filter_zippering.dll"
+  
 
   File "..\meshlab\plugins\samplefilter.dll"
   File "..\meshlab\plugins\samplefilterdoc.dll"
@@ -121,8 +127,7 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\filtergeodesic.dll"
   File "..\meshlab\plugins\filtercreateiso.dll"
   File "..\meshlab\plugins\filterborder.dll"
-  File "..\meshlab\plugins\filter_qhull.dll"
-  File "..\meshlab\plugins\filter_isoparametrization.dll"
+ 
 
   ; edit plugins (14)
   File "..\meshlab\plugins\editalign.dll"
