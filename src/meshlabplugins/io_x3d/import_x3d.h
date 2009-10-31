@@ -82,8 +82,8 @@
 #include <vcg/complex/trimesh/create/platonic.h>
 #include <wrap/gl/glu_tesselator.h>
 
-#include <util_x3d.h>
-#include <vrml/Parser.h>
+#include "util_x3d.h"
+#include "vrml/Parser.h"
 
 #include <set>
 
