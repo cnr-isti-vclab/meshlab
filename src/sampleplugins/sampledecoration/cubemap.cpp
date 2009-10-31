@@ -36,7 +36,7 @@
 using namespace vcg;
 using namespace std;
 
-#include<cubemap.h>
+#include "cubemap.h"
 
 static Point3f cube_vertices[8] = {
 
