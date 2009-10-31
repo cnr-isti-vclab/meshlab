@@ -19,6 +19,7 @@ SUBDIRS       = io_base\
 				filter_measure \
 				filter_meshing \
 				filter_mls \
+				filter_plymc \
 				filter_poisson \
 				filter_sampling \
 				filter_splitter \
