@@ -153,8 +153,8 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
                                         CMeshO::ScalarType max_dist )
 {
     // Step1: check if border edge can be projected on m
-    int i; for (i=0; i<3 && !vcg::face::IsBorder(*face, i); i++);   //i-edge on patch border
-    if (i == 3)  for (i = 0; i < 3 && !(face->FFp(i)->IsD()); i++);
+    int i; for (i=0; i<3 && !vcg::face::IsBorder(*face, i); i++) {}   //i-edge on patch border
+    if (i == 3)  for (i = 0; i < 3 && !(face->FFp(i)->IsD()); i++) {}
     assert( i<3 );
 	int samplePerEdge = SAMPLES_PER_EDGE;
 
