@@ -63,8 +63,8 @@ cp ../sample/TextureDouble_A.png $BUNDLE/sample
 cp ../sample/Laurana50k.ply $BUNDLE/sample
 cp ../sample/duck_triangulate.dae $BUNDLE/sample
 cp ../sample/images/duckCM.jpg $BUNDLE/sample/images
-cp ../sample/seashell.gts $BUNDLE/sample/images
-cp ../sample/chameleon4k.pts $BUNDLE/sample/images
+cp ../sample/seashell.gts $BUNDLE/sample
+cp ../sample/chameleon4k.pts $BUNDLE/sample
 cp ../sample/normalmap/laurana500.* $BUNDLE/sample/normalmap
 cp ../sample/normalmap/matteonormb.* $BUNDLE/sample/normalmap
 
@@ -112,7 +112,7 @@ plugins/libfilter_colorproc.dylib \
 plugins/libfilter_create.dylib \
 plugins/libfilter_func.dylib \
 plugins/libfilter_isoparametrization.dylib \
-plugins/libfilter_mesure.dylib \
+plugins/libfilter_measure.dylib \
 plugins/libfilter_meshing.dylib \
 plugins/libfilter_mls.dylib \
 plugins/libfilter_plymc.dylib \
