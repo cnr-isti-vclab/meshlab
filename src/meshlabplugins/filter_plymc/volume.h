@@ -20,6 +20,10 @@
 #ifndef __VOLUME_H__
 #define __VOLUME_H__
 
+#ifdef __MINGW32__
+#define _int64 __int64
+#endif
+
 #include "Voxel.h"
 #include "SVoxel.h"
 #include <vector>
@@ -74,7 +78,7 @@ public:
     std::vector<  std::vector<VOX_TYPE>  > rv;
     Box3x   bbox;
 
- 	_int64 AskedCells;
+        _int64 AskedCells;
 	Point3x dim;  /// Dimensione spaziale (lunghezza lati) del bbox
   
 	Point3i sz;   /// Dimensioni griglia come numero di celle per lato
@@ -131,7 +135,7 @@ bool Verbose; // se true stampa un sacco di info in piu su logfp;
     Init(VV.AskedCells,VV.bbox,VV.div,VV.pos);
 	}
 
-	void Init(_int64 cells, Box3x bb, Point3i _div=Point3i(1,1,1), Point3i _pos=Point3i(0,0,0))
+        void Init(_int64 cells, Box3x bb, Point3i _div=Point3i(1,1,1), Point3i _pos=Point3i(0,0,0))
 	{
 		Point3d voxdim;voxdim.Import(bb.max-bb.min);
 		AskedCells=cells;
@@ -240,7 +244,7 @@ void SetSubPart(Point3i _div, Point3i _pos)
 /*
 		printf("  Computing only subvolume: (%d x %d x %d)= %dk cells  \n"
 			     "                             %d,%d,%d -> %d,%d,%d\n"
-			,SubPart.DimX(),SubPart.DimY(),SubPart.DimZ(),(int)(((__int64)SubPart.DimX()*(__int64)SubPart.DimY()*(__int64)SubPart.DimZ())/1000)
+                        ,SubPart.DimX(),SubPart.DimY(),SubPart.DimZ(),(int)(((__int64)SubPart.DimX()*(__int64)SubPart.DimY()*(__int64)SubPart.DimZ())/1000)
 			,SubPart.min[0]			,SubPart.min[1]			,SubPart.min[2]
 			,SubPart.max[0]			,SubPart.max[1]			,SubPart.max[2]		);
 */
@@ -796,7 +800,7 @@ void AddXZInt( const int x, const int z, const double y, const double sgn, const
 	 
 	 fprintf(fp,"  Size in MacroCell %7i %7i %7i (tot: %7.3f M):\n",rsz[0],rsz[1],rsz[2],double(rsz[0]*rsz[1]*rsz[2])/1000000.0);
 	 fprintf(fp," Memory Info: \n   Voxel Size %8i b Virtually needed mem %8i Mb\n",
-					sizeof(VOX_TYPE),int(sizeof(VOX_TYPE)*(_int64)(sz[0])*(_int64)(sz[1])*(_int64)(sz[2])/(1024*1024)));
+                                        sizeof(VOX_TYPE),int(sizeof(VOX_TYPE)*(_int64)(sz[0])*(_int64)(sz[1])*(_int64)(sz[2])/(1024*1024)));
    if(div!=Point3i(1,1,1))
 		 {	 
 			fprintf(fp,"  Subdivided in      %6i %6i %6i  (tot: %12i block):\n",div[0],div[1],div[2],div[0]*div[1]*div[2]);
