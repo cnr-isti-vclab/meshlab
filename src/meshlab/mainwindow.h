@@ -179,6 +179,7 @@ Added Apply Last Filter action
 
 //None of this should happen if we are compiling c, not c++
 #ifdef __cplusplus
+#include <GL/glew.h>
 
 #include <QDir>
 #include <QMainWindow>
