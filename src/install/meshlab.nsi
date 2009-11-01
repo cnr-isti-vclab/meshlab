@@ -9,7 +9,7 @@
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\2009.02\qt"
+!define QT_BASE "C:\Qt\2009.04\qt"
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -101,7 +101,7 @@ Section "MainSection" SEC01
 
   File "..\meshlab\plugins\filter_func.dll"
   File "..\meshlab\plugins\filter_isoparametrization.dll"
-    File "..\meshlab\plugins\filter_measure.dll"
+  File "..\meshlab\plugins\filter_measure.dll"
   File "..\meshlab\plugins\filter_meshing.dll"
   File "..\meshlab\plugins\filter_mls.dll"
   
@@ -109,8 +109,8 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\filter_poisson.dll"
   File "..\meshlab\plugins\filter_qhull.dll"
   File "..\meshlab\plugins\filter_quality.dll"
+  
   File "..\meshlab\plugins\filter_sampling.dll"
-
   File "..\meshlab\plugins\filter_select.dll"
   File "..\meshlab\plugins\filter_splitter.dll"
   
@@ -197,9 +197,10 @@ Section "MainSection" SEC01
   File "${QT_BASE}\bin\QtOpenGL4.dll"
   File "${QT_BASE}\bin\QtXml4.dll"
   File "${QT_BASE}\bin\QtNetwork4.dll"
-  File "C:\MinGW\bin\mingwm10.dll"
+  ;File "C:\MinGW\bin\mingwm10.dll"
+  File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
   File "..\..\docs\readme.txt"
-  File "..\..\docs\history.txt"
+  ;File "..\..\docs\history.txt"
   File "..\..\docs\gpl.txt"
 SectionEnd
 
