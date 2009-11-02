@@ -25,7 +25,7 @@
 #include <QtGui>
 #include "defines.h"
 #include <filter_isoparametrization.h>
-
+#include <vcg/complex/trimesh/update/normal.h>
 
 //#include <vcg/complex/trimesh/update/flag.h>
 //#include <vcg/complex/trimesh/update/color.h>
@@ -140,7 +140,7 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& /*md*/
   }
 	case ISOP_DIAMPARAM :
 	{
-		 par.addParam(new RichDynamicFloat("BorderSize",0.01,0.05,0.5,"BorderSize ratio", "This specify the border for each diamond.<br>"
+		 par.addParam(new RichDynamicFloat("BorderSize",0.05,0.01,0.5,"BorderSize ratio", "This specify the border for each diamond.<br>"
 																				"The bigger is the less triangles are splitted, but the more UV space is used."));								 
 		break;										
 	}
@@ -302,9 +302,13 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
 			return false;
 		}
+		
+
 		int SamplingRate=par.getInt("SamplingRate");
 		MeshModel* mm=md.addNewMesh("Re-meshed");
+		
 		CMeshO *rem=&mm->cm;
+		
 		DiamSampl.Init(&isoPHandle());
 		DiamSampl.SamplePos(SamplingRate);
 		DiamSampl.GetMesh<CMeshO>(*rem);
@@ -320,6 +324,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
 		mm->updateDataMask(MeshModel::MM_VERTFACETOPO);
 		PrintStats(rem);
+		vcg::tri::UpdateNormals<CMeshO>::PerFace(*rem);
 		return true;
 	}
 	case ISOP_DIAMPARAM :
@@ -330,12 +335,15 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
 			return false;
 		}
+		
 		float border_size=par.getDynamicFloat("BorderSize");
 		MeshModel* mm=md.addNewMesh("Diam-Parameterized");
+		mm->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 		CMeshO *rem=&mm->cm;
 		DiamondParametrizator DiaPara;
 		DiaPara.Init(&isoPHandle());
 		DiaPara.SetCoordinates<CMeshO>(*rem,border_size);
+		vcg::tri::UpdateNormals<CMeshO>::PerFace(*rem);
 		return true;
 	}
   }
