@@ -903,12 +903,12 @@ public:
 		}
 		AbstractFace* f0=&AbsMesh()->face[I0];
 		AbstractFace* f1=&AbsMesh()->face[I1];
-		AbstractVertex *v0=f0->V(0);
+	/*	AbstractVertex *v0=f0->V(0);
 		AbstractVertex *v1=f0->V(1);
 		AbstractVertex *v2=f0->V(2);
 		AbstractVertex *v3=f1->V(0);
 		AbstractVertex *v4=f1->V(1);
-		AbstractVertex *v5=f1->V(2);
+		AbstractVertex *v5=f1->V(2);*/
 
 		
 		AbstractVertex *shared[3];
