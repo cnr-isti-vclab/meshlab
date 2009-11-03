@@ -39,7 +39,7 @@ const QString DecorateShadowPlugin::Info(QAction *action)
   return QString();
  }
  
-void DecorateShadowPlugin::initGlobalParameterSet(QAction *, FilterParameterSet *parset) 
+void DecorateShadowPlugin::initGlobalParameterSet(QAction *, RichParameterSet *parset) 
 {
     /*if(parset->findParameter(tr("NoisePath")) != NULL){
         qDebug("noise path already setted..doing nothing");
@@ -93,7 +93,7 @@ bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, GLArea* 
     return result;
 }
 
-void DecorateShadowPlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet *par, GLArea *gla, QFont /*qf*/)
+void DecorateShadowPlugin::Decorate(QAction *a, MeshModel &m, RichParameterSet  *par, GLArea *gla, QFont /*qf*/)
 {
     if(m.visible){
             this->_decorator->runShader(m, gla);
