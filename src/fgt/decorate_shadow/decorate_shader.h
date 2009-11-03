@@ -77,7 +77,7 @@ protected:
         img.mirrored().save("./_shadowMapTXT.png", "PNG");
     }
 
-    void printDepthMap(GLuint map){
+    void printDepthMap(GLuint map, const QString &fname){
         if (!this->_initOk)
                 return;
 
@@ -96,7 +96,7 @@ protected:
                 }
         }
         delete[] tempFBuf;
-        img.mirrored().save("./_depthMapTXT.png", "PNG");
+        img.mirrored().save(fname, "PNG");
     }
 
     void printColorMap(GLuint map, const QString &fname){

@@ -9,6 +9,12 @@ SSAO::SSAO():DecorateShader()
     this->_normalMapVert = 0;
     this->_normalMapShaderProgram = 0;
 
+    /*this->_depthMap = 0;
+    this->_depthMapFrag = 0;
+    this->_depthMapVert = 0;
+    this->_depthMapShaderProgram = 0;
+*/
+
     this->_ssao= 0;
     this->_ssaoVert = 0;
     this->_ssaoFrag = 0;
@@ -30,6 +36,13 @@ SSAO::~SSAO(){
     glDeleteShader(this->_normalMapFrag);
     glDeleteProgram(this->_normalMapShaderProgram);
 
+    /*glDetachShader(this->_depthMapShaderProgram, this->_depthMapVert);
+    glDetachShader(this->_depthMapShaderProgram, this->_depthMapFrag);
+
+    glDeleteShader(this->_depthMapVert);
+    glDeleteShader(this->_depthMapFrag);
+    glDeleteProgram(this->_depthMapShaderProgram);
+*/
     glDetachShader(this->_ssaoShaderProgram, this->_ssaoVert);
     glDetachShader(this->_ssaoShaderProgram, this->_ssaoFrag);
 
@@ -46,6 +59,7 @@ SSAO::~SSAO(){
 
     glDeleteFramebuffersEXT(1, &(this->_depth));
     glDeleteTexturesEXT(1, &(this->_normalMap));
+    glDeleteTexturesEXT(1, &(this->_depthMap));
     glDeleteTexturesEXT(1, &(this->_ssao));
 
     glDeleteTexturesEXT(1, &(this->_blurH));
@@ -76,19 +90,31 @@ bool SSAO::init()
 }
 
 void SSAO::runShader(MeshModel& m, GLArea* gla){
-            /***********************************************************/
-            //GENERAZIONE SHADOW MAP
-            /***********************************************************/
-            this->bind();
-            glUseProgram(this->_normalMapShaderProgram);
-            RenderMode rm = gla->getCurrentRenderMode();
-            glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
-            //this->printColorMap(this->_normalMap, "_normalMap.png");
-            //this->unbind();
-            glUseProgram(0);
+        /***********************************************************/
+        //GENERAZIONE SHADOW MAP
+        /***********************************************************/
+        this->bind();
+        glUseProgram(this->_normalMapShaderProgram);
+        RenderMode rm = gla->getCurrentRenderMode();
 
+        glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(4.0, 4.0);
+
+        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        this->printColorMap(this->_normalMap, "_normalMap.png");
+        this->printDepthMap(this->_depthMap, "_depthMap.png");
+        //this->unbind();
+        glUseProgram(0);
+
+        /***********************************************************/
+        //GENERAZIONE SHADOW MAP
+        /***********************************************************/
+        /*glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);*/
+        /*glClear(GL_COLOR_BUFFER_BIT);// | GL_DEPTH_BUFFER_BIT);
+        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);*/
 
         /***********************************************************/
         //SSAO PASS
@@ -111,6 +137,11 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         GLuint loc = glGetUniformLocation(this->_ssaoShaderProgram, "normalMap");
         glUniform1i(loc, 1);
 
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, this->_depthMap);
+        loc = glGetUniformLocation(this->_ssaoShaderProgram, "depthMap");
+        glUniform1i(loc, 2);
 
         glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -218,10 +249,6 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
 /****************************************************************************************/
 //                                      BLURRING END
 /****************************************************************************************/
-
-
-
-        int error = glGetError();
 }
 
 bool SSAO::setup()
@@ -250,6 +277,22 @@ bool SSAO::setup()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
         //attacco al FBO la texture di colore
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_normalMap, 0);
+
+        glGenTextures(1, &this->_depthMap);
+        glBindTexture(GL_TEXTURE_2D, this->_depthMap);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+        glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_LUMINANCE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, this->_depthMap, 0);
 
         glGenTextures(1, &this->_ssao);
         glBindTexture(GL_TEXTURE_2D, this->_ssao);
@@ -295,15 +338,19 @@ bool SSAO::setup()
 
 
         //genero il render buffer per il depth buffer
-        glGenRenderbuffersEXT(1, &(this->_depth));
+/*        glGenRenderbuffersEXT(1, &(this->_depth));
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
         glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
 
         //e il depth buffer
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
+*/
+        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0
+                                , GL_COLOR_ATTACHMENT1
+                                , GL_COLOR_ATTACHMENT2
+                                , GL_COLOR_ATTACHMENT3};
+                                //, GL_COLOR_ATTACHMENT4};
 
-        //GLenum drawBuffers[] = {this->_normalMap, this->_ssao, this->_blurH};
-        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
         glDrawBuffersARB(3, drawBuffers);
 
         this->loadNoiseTxt();
@@ -339,6 +386,9 @@ bool SSAO::compileAndLink(){
     QFile* normalVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/normalMap.vert"));
     QFile* normalFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/normalMap.frag"));
 
+    /*QFile* depthVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/depthMap.vert"));
+    QFile* depthFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/depthMap.frag"));
+*/
     QFile* ssaoVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/ssao.vert"));
     QFile* ssaoFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/ssao.frag"));
 
@@ -348,6 +398,9 @@ bool SSAO::compileAndLink(){
     normalVert->open(QIODevice::ReadOnly | QIODevice::Text);
     normalFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
+ /*   depthVert->open(QIODevice::ReadOnly | QIODevice::Text);
+    depthFrag->open(QIODevice::ReadOnly | QIODevice::Text);
+*/
     ssaoVert->open(QIODevice::ReadOnly | QIODevice::Text);
     ssaoFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
@@ -385,7 +438,37 @@ bool SSAO::compileAndLink(){
     if(!this->printProgramInfoLog(this->_normalMapShaderProgram))
         return false;
 
+  /*  bArray = depthVert->readAll();
+    ShaderLen = (GLint) bArray.length();
+    ShaderSource = (GLubyte *)bArray.data();
 
+    depthVert->close();
+
+    this->_depthMapVert= glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(this->_depthMapVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(this->_depthMapVert);
+    if(!this->printShaderInfoLog(this->_depthMapVert))
+        return false;
+
+    bArray = depthFrag->readAll();
+    ShaderLen = (GLint) bArray.length();
+    ShaderSource = (GLubyte *)bArray.data();
+
+    depthFrag->close();
+
+    this->_depthMapFrag = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(this->_depthMapFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
+    glCompileShader(_depthMapFrag);
+    if(!this->printShaderInfoLog(this->_depthMapFrag))
+        return false;
+
+    this->_depthMapShaderProgram = glCreateProgram();
+    glAttachShader(this->_depthMapShaderProgram, this->_depthMapVert);
+    glAttachShader(this->_depthMapShaderProgram, this->_depthMapFrag);
+    glLinkProgram(this->_depthMapShaderProgram);
+    if(!this->printProgramInfoLog(this->_depthMapShaderProgram))
+        return false;
+*/
     bArray = ssaoVert->readAll();
     ShaderLen = (GLint) bArray.length();
     ShaderSource = (GLubyte *)bArray.data();

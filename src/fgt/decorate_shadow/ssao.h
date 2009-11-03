@@ -59,12 +59,15 @@ private:
         GLuint _noise;
         GLuint _blurH;
         GLuint _blurV;
+        GLuint _depthMap;
 
         GLuint _depth;
 
         GLuint _fbo;
         GLuint _normalMapShaderProgram;
         GLuint _normalMapVert, _normalMapFrag;
+        GLuint _depthMapShaderProgram;
+        GLuint _depthMapVert, _depthMapFrag;
         GLuint _ssaoShaderProgram;
         GLuint _ssaoVert, _ssaoFrag;
         GLuint _blurShaderProgram;
