@@ -1,7 +1,10 @@
 uniform sampler2D rnm;
 uniform sampler2D normalMap;
+uniform sampler2D depthMap;
+//uniform sampler2DShadow depthMap;
 
 varying vec4 texCoord;
+//varying vec2  uv;
 
 const float totStrength = 5.0;
 const float strength = 0.7;
@@ -13,11 +16,8 @@ const float invSamples = -1.38/2.0;
 
 void main(void)
 {
-  vec4 texCoordPostW = texCoord / texCoord.w;
-  texCoordPostW = texCoordPostW * 0.5 + 0.5;
-  vec2 uv = texCoordPostW.xy;
   // these are the random vectors inside a unit sphere
-  vec3 pSphere[16] = vec3[](
+  vec3 pSphere[SAMPLES] = vec3[](
 			vec3(-0.010735935, 0.01647018, 0.0062425877),
 			vec3(-0.06533369, 0.3647007, -0.13746321),
 			vec3(-0.6539235, -0.016726388, -0.53000957),
@@ -27,7 +27,7 @@ void main(void)
 			vec3(0.03755566, -0.10961345, -0.33040273),
 			vec3(0.019100213, 0.29652783, 0.066237666),
 			vec3(0.8765323, 0.011236004, 0.28265962),
-			vec3(0.29264435, -0.40794238, 0.15964167),
+			vec3(0.29264435, -0.40794238, 0.15964167),	
 			vec3(0.50958289, 0.2424578036, -0.777556324),
 			vec3(-0.5476366, 0.09554684, 0.157546479),
 			vec3(0.445354129, -0.54557427, -0.02452532),
@@ -36,15 +36,21 @@ void main(void)
 			vec3(0.8325432003, -0.011354804, 0.9564872)
 			);
 
+  vec4 texCoordPostW = texCoord / texCoord.w;
+  texCoordPostW = texCoordPostW * 0.5 + 0.5;
+  texCoordPostW = texCoord;
+
+/*
   // grab a normal for reflecting the sample rays later on
-  vec3 fres = normalize((texture2D(rnm , uv * offset).xyz * 2.0) - vec3(1.0));
+  vec3 fres = normalize((texture2D(rnm , gl_TexCoord[0].st * offset).xyz * 2.0) - vec3(1.0));
 
-  vec4 currentPixelSample = texture2D(normalMap,uv);
+  vec4 currentPixelSample = texture2D(normalMap,gl_TexCoord[0].st);
 
-  float currentPixelDepth = currentPixelSample.a;
+  //float currentPixelDepth = currentPixelSample.a;
+  float currentPixelDepth = texture2D(depthMap, texCoordPostW).x;
 
   // current fragment coords in screen space
-  vec3 ep = vec3(uv.xy,currentPixelDepth);
+  vec3 ep = vec3(gl_TexCoord[0].st,currentPixelDepth);
   // get the normal of current fragment
   vec3 norm = currentPixelSample.xyz;
 
@@ -54,7 +60,7 @@ void main(void)
 
   //vec3 ray, se, occNorm;
   float occluderDepth, depthDifference;
-  vec4 occluderFragment;
+  vec4 occluderFragment, occluderFragmentDepth;
   vec3 ray;
   for(int i=0; i < SAMPLES; ++i)
   {
@@ -62,7 +68,9 @@ void main(void)
     ray = radD*reflect(pSphere[i],fres);
 
     // get the depth of the occluder fragment
+    occluderFragmentDepth = texture2D(depthMap,ep.xy + sign(dot(ray,norm) )*ray.xy);
     occluderFragment = texture2D(normalMap,ep.xy + sign(dot(ray,norm) )*ray.xy);
+    occluderFragment.a = occluderFragmentDepth.x;
     // if depthDifference is negative = occluder is behind current fragment
     depthDifference = currentPixelDepth-occluderFragment.a;
 
@@ -72,14 +80,17 @@ void main(void)
   }
 
   float ao = 1.0 + totStrength * bl * invSamples;
-  /*if(ao > 0.7)
-    discard;
-    gl_FragColor = vec4(vec3(0.0), 0.7 - ao);*/
 
   float alpha = 1.0;
   if((norm.x + norm.y + norm.z) == 0.0)
     alpha = 0.0;
     
-  gl_FragColor = vec4(vec3(ao), alpha);
+  //gl_FragColor = vec4(vec3(ao), alpha);
+  //gl_FragColor = texture2D(normalMap, texCoordPostW);
+  */
+  //float sh = shadow2D(depthMap, texCoordPostW.xyz).x;
+  float sh = texture2D(depthMap, texCoordPostW).x;
 
+  //gl_FragColor = vec4(vec3(sh), 1.0);
+  gl_FragColor = texture2D(depthMap, texCoordPostW);
 }
