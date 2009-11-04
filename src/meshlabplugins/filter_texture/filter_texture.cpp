@@ -206,7 +206,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 					
 					switch(colsp) {
 						// Red-Green color space
-						case 0 : v.C() = vcg::Color4b((int)round(normU*255), (int)round(normV*255), 0, 255); break;
+						case 0 : v.C() = vcg::Color4b((int)floor((normU*255)+0.5), (int)floor((normV*255)+0.5), 0, 255); break;
 						// Hue-Saturation color space
 						case 1 : {
 							vcg::Color4f c;
