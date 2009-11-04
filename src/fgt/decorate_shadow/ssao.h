@@ -64,6 +64,7 @@ private:
         GLuint _depth;
 
         GLuint _fbo;
+        GLuint _fbo2;
         GLuint _normalMapShaderProgram;
         GLuint _normalMapVert, _normalMapFrag;
         GLuint _depthMapShaderProgram;

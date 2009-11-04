@@ -1,18 +1,50 @@
-uniform sampler2D rnm;
-uniform sampler2D normalMap;
-uniform sampler2D depthMap;
+/*uniform sampler2D depthMap;
 //uniform sampler2DShadow depthMap;
 
 varying vec4 texCoord;
-//varying vec2  uv;
 
-const float totStrength = 5.0;
+void main(void)
+{
+  
+  vec4 texCoordPostW = texCoord / texCoord.w;
+  texCoordPostW = texCoordPostW * 0.5 + 0.5;
+
+  //gl_FragColor = shadow2D(depthMap, texCoordPostW);
+  gl_FragColor = texture2D(depthMap, texCoordPostW);
+}
+*/
+
+uniform sampler2D rnm;
+uniform sampler2D normalMap;
+uniform sampler2D depthMap;
+
+varying vec4 texCoord;
+
+/*const float totStrength = 5.0;
 const float strength = 0.7;
 const float offset = 18.0;
 const float falloff = 0.000002;
 const float rad = 0.005;
 #define SAMPLES 16 // 10 is good
-const float invSamples = -1.38/2.0;
+const float invSamples = -1.38/2.0;*/
+
+/*
+const float totStrength = 1.38;
+const float strength = 0.07;
+const float offset = 18.0;
+const float falloff = 0.000002;
+const float rad = 0.006;
+#define SAMPLES 10 // 10 is good
+const float invSamples = -1.38/10.0;
+*/
+
+const float totStrength = 5.5;
+const float strength = 0.05;
+const float offset = 18.0;
+const float falloff = 0.000002;
+const float rad = 0.009;
+#define SAMPLES 16 // 10 is good
+const float invSamples = -1.5/10.0;
 
 void main(void)
 {
@@ -38,19 +70,17 @@ void main(void)
 
   vec4 texCoordPostW = texCoord / texCoord.w;
   texCoordPostW = texCoordPostW * 0.5 + 0.5;
-  texCoordPostW = texCoord;
 
-/*
   // grab a normal for reflecting the sample rays later on
   vec3 fres = normalize((texture2D(rnm , gl_TexCoord[0].st * offset).xyz * 2.0) - vec3(1.0));
 
-  vec4 currentPixelSample = texture2D(normalMap,gl_TexCoord[0].st);
+  vec4 currentPixelSample = texture2D(normalMap,texCoordPostW);
 
   //float currentPixelDepth = currentPixelSample.a;
   float currentPixelDepth = texture2D(depthMap, texCoordPostW).x;
 
   // current fragment coords in screen space
-  vec3 ep = vec3(gl_TexCoord[0].st,currentPixelDepth);
+  vec3 ep = vec3(texCoordPostW.st,currentPixelDepth);
   // get the normal of current fragment
   vec3 norm = currentPixelSample.xyz;
 
@@ -85,12 +115,5 @@ void main(void)
   if((norm.x + norm.y + norm.z) == 0.0)
     alpha = 0.0;
     
-  //gl_FragColor = vec4(vec3(ao), alpha);
-  //gl_FragColor = texture2D(normalMap, texCoordPostW);
-  */
-  //float sh = shadow2D(depthMap, texCoordPostW.xyz).x;
-  float sh = texture2D(depthMap, texCoordPostW).x;
-
-  //gl_FragColor = vec4(vec3(sh), 1.0);
-  gl_FragColor = texture2D(depthMap, texCoordPostW);
+  gl_FragColor = vec4(vec3(ao), alpha);
 }

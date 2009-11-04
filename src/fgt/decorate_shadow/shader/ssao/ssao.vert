@@ -6,9 +6,10 @@ void main(void)
   //gl_TexCoord[1] = gl_MultiTexCoord1;
   //gl_TexCoord[2].xy = gl_MultiTexCoord2.xy;
   //texCoord = gl_ModelViewProjectionMatrix * gl_Vertex;
+  texCoord = gl_ModelViewProjectionMatrix * gl_Vertex;
   gl_Position = ftransform();
-  texCoord = gl_Position;
-  texCoord = (texCoord / texCoord.w)* 0.5 + 0.5;
+ // texCoord = gl_Position;
+  //texCoord = (texCoord / texCoord.w)* 0.5 + 0.5;
   
 
   

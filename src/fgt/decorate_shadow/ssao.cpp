@@ -9,11 +9,8 @@ SSAO::SSAO():DecorateShader()
     this->_normalMapVert = 0;
     this->_normalMapShaderProgram = 0;
 
-    /*this->_depthMap = 0;
-    this->_depthMapFrag = 0;
-    this->_depthMapVert = 0;
-    this->_depthMapShaderProgram = 0;
-*/
+    this->_depthMap = 0;
+    this->_depth = 0;
 
     this->_ssao= 0;
     this->_ssaoVert = 0;
@@ -26,6 +23,7 @@ SSAO::SSAO():DecorateShader()
     this->_blurFrag = 0;
     this->_blurShaderProgram = 0;
     this->_fbo = 0;
+    this->_fbo2 = 0;
 }
 
 SSAO::~SSAO(){
@@ -36,13 +34,6 @@ SSAO::~SSAO(){
     glDeleteShader(this->_normalMapFrag);
     glDeleteProgram(this->_normalMapShaderProgram);
 
-    /*glDetachShader(this->_depthMapShaderProgram, this->_depthMapVert);
-    glDetachShader(this->_depthMapShaderProgram, this->_depthMapFrag);
-
-    glDeleteShader(this->_depthMapVert);
-    glDeleteShader(this->_depthMapFrag);
-    glDeleteProgram(this->_depthMapShaderProgram);
-*/
     glDetachShader(this->_ssaoShaderProgram, this->_ssaoVert);
     glDetachShader(this->_ssaoShaderProgram, this->_ssaoFrag);
 
@@ -57,14 +48,16 @@ SSAO::~SSAO(){
     glDeleteShader(this->_blurFrag);
     glDeleteProgram(this->_blurShaderProgram);
 
-    glDeleteFramebuffersEXT(1, &(this->_depth));
     glDeleteTexturesEXT(1, &(this->_normalMap));
     glDeleteTexturesEXT(1, &(this->_depthMap));
-    glDeleteTexturesEXT(1, &(this->_ssao));
 
+    glDeleteFramebuffersEXT(1, &(this->_depth));
+    glDeleteTexturesEXT(1, &(this->_ssao));
     glDeleteTexturesEXT(1, &(this->_blurH));
     glDeleteTexturesEXT(1, &(this->_blurV));
+
     glDeleteFramebuffersEXT(1, &_fbo);
+    glDeleteFramebuffersEXT(1, &_fbo2);
 }
 
 bool SSAO::init()
@@ -90,6 +83,7 @@ bool SSAO::init()
 }
 
 void SSAO::runShader(MeshModel& m, GLArea* gla){
+
         /***********************************************************/
         //GENERAZIONE SHADOW MAP
         /***********************************************************/
@@ -104,27 +98,15 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
         glDisable(GL_POLYGON_OFFSET_FILL);
-        this->printColorMap(this->_normalMap, "_normalMap.png");
-        this->printDepthMap(this->_depthMap, "_depthMap.png");
-        //this->unbind();
+        this->printColorMap(this->_normalMap, "_normals.png");
         glUseProgram(0);
-
-        /***********************************************************/
-        //GENERAZIONE SHADOW MAP
-        /***********************************************************/
-        /*glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);*/
-        /*glClear(GL_COLOR_BUFFER_BIT);// | GL_DEPTH_BUFFER_BIT);
-        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);*/
 
         /***********************************************************/
         //SSAO PASS
         /***********************************************************/
-                //this->unbind();
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo2);
         glUseProgram(this->_ssaoShaderProgram);
 
-        /*glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDisable(GL_DEPTH_TEST);*/
         glEnable(GL_TEXTURE_2D);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->_noise);
@@ -132,7 +114,6 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glUniform1i(noiseloc, 0);
 
         glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, this->_blurV);
         glBindTexture(GL_TEXTURE_2D, this->_normalMap);
         GLuint loc = glGetUniformLocation(this->_ssaoShaderProgram, "normalMap");
         glUniform1i(loc, 1);
@@ -143,12 +124,13 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         loc = glGetUniformLocation(this->_ssaoShaderProgram, "depthMap");
         glUniform1i(loc, 2);
 
-        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
 
 
-        this->printColorMap(this->_ssao, "_ssao.png");
+        //this->printColorMap(this->_ssao, "_ssao.png");
+        //this->printDepthMap(this->_depthMap, "_depthMap2.png");
         //this->unbind();
         /*glEnable(GL_DEPTH_TEST);
         glDisable(GL_TEXTURE_2D);
@@ -193,7 +175,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
 
-        glDrawBuffer(GL_COLOR_ATTACHMENT2_EXT);
+        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glBegin(GL_QUADS);
@@ -261,8 +243,11 @@ bool SSAO::setup()
         if (_initOk)
                 return true;
 
-        //genero il frame buffer object
+        //genero i 2 framebuffer object che mi servono.
         glGenFramebuffersEXT(1, &_fbo);
+        glGenFramebuffersEXT(1, &_fbo2);
+
+        //attacco il primo...adesso le modifiche andranno a modificare solo _fbo
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
         glGenTextures(1, &this->_normalMap);
@@ -286,14 +271,26 @@ bool SSAO::setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-        glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_LUMINANCE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, this->_depthMap, 0);
 
+
+        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
+                                //, GL_COLOR_ATTACHMENT4};
+
+        glDrawBuffersARB(0, drawBuffers);
+
+        int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+        _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
+
+        if(!this->_initOk)
+            return this->_initOk;
+
+        //attacco il secondo fbo...adesso le modifiche andranno a modificare solo _fbo2
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo2);
+
+        //texture per ssao
         glGenTextures(1, &this->_ssao);
         glBindTexture(GL_TEXTURE_2D, this->_ssao);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -302,10 +299,8 @@ bool SSAO::setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        //attacco al FBO la texture di colore
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_ssao, 0);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_ssao, 0);
 
         //genero la texture di blur orizzontale.
         glGenTextures(1, &this->_blurH);
@@ -316,13 +311,11 @@ bool SSAO::setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        //e la texture per il blur orizzontale
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2_EXT, GL_TEXTURE_2D, this->_blurH, 0);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_blurH, 0);
 
         //genero la texture di blur verticale.
-        glGenTextures(1, &this->_blurV);
+        /*glGenTextures(1, &this->_blurV);
         glBindTexture(GL_TEXTURE_2D, this->_blurV);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -330,33 +323,32 @@ bool SSAO::setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        //e la texture per il blur orizzontale
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT3_EXT, GL_TEXTURE_2D, this->_blurV, 0);
-
-
-
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2_EXT, GL_TEXTURE_2D, this->_blurV, 0);
+*/
         //genero il render buffer per il depth buffer
-/*        glGenRenderbuffersEXT(1, &(this->_depth));
+        glGenRenderbuffersEXT(1, &(this->_depth));
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
         glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
 
         //e il depth buffer
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
-*/
-        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0
-                                , GL_COLOR_ATTACHMENT1
-                                , GL_COLOR_ATTACHMENT2
-                                , GL_COLOR_ATTACHMENT3};
-                                //, GL_COLOR_ATTACHMENT4};
 
-        glDrawBuffersARB(3, drawBuffers);
+
+
+        GLenum drawBuffers2[] = {GL_COLOR_ATTACHMENT0
+                                , GL_COLOR_ATTACHMENT1
+                                /*, GL_COLOR_ATTACHMENT2*/};
+
+        glDrawBuffersARB(1, drawBuffers2);
 
         this->loadNoiseTxt();
 
-        int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+        err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
+
+
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         return _initOk;
 }
@@ -369,7 +361,6 @@ void SSAO::bind()
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
         glViewport(0, 0, this->_texSize, this->_texSize);
-        //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
 void SSAO::unbind()
