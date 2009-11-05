@@ -131,7 +131,7 @@ void FilterZippering::initParameterSet(QAction *action, MeshDocument &md, RichPa
                                 parlst.addParam( new RichMesh("FirstMesh", md.mm(), &md, "Mesh (with holes)", "The mesh with holes.") );
                                 parlst.addParam( new RichMesh("SecondMesh", target, &md, "Patch", "The mesh that will be used as patch.") );
                                 parlst.addParam( new RichAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path") );
-								parlst.addParam( new RichBool("FaceQuality", false, false, "Use face quality to select redundant face", "If selected, previously computed face quality will be used in order to select redundant faces.") );
+								parlst.addParam( new RichBool("FaceQuality", false, "Use face quality to select redundant face", "If selected, previously computed face quality will be used in order to select redundant faces.") );
                 break;
                 default : assert(0);
         }
