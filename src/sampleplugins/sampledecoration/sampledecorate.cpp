@@ -55,18 +55,21 @@ const QString SampleMeshDecoratePlugin::Info(QAction *action)
  
 void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, RichParameterSet *parset) 
 {
-	if(parset->findParameter("CubeMapPath")!= NULL) 
-	{
-		qDebug("CubeMapPath already setted. Doing nothing");
-		return;
-	}
+	assert(!parset->hasParameter(CubeMapPathParam()));
 	QString cubemapDirPath = MainWindowInterface::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
-	
-	//parset->addString("CubeMapPath", "/Users/cignoni/devel/meshlab/src/meshlab/textures/cubemaps/uffizi.jpg");
-	parset->addParam(new RichString("CubeMapPath", cubemapDirPath,"",""));
-	
+	parset->addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
 }		
 		
+bool SampleMeshDecoratePlugin::StartDecorate( QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * parset, GLArea * /*parent*/ )
+{
+	assert(parset->hasParameter(CubeMapPathParam()));
+	basename = parset->getString(CubeMapPathParam());
+	if(parset->findParameter(CubeMapPathParam())== NULL) 	
+		qDebug("CubeMapPath was not setted!!!");
+
+	return true;
+}
+
 const QString SampleMeshDecoratePlugin::ST(FilterIDType filter) const
 {
   switch(filter)
@@ -77,17 +80,13 @@ const QString SampleMeshDecoratePlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RichParameterSet *par, GLArea *gla, QFont /*qf*/)
+void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QFont /*qf*/)
 {
- assert(par);
 	static QString lastname("unitialized");
   if(a->text() != ST(DP_SHOW_CUBEMAPPED_ENV))	assert(0);
 	
-	QString basename;
 	if(!cm.IsValid())
 	{
-		assert(par->findParameter("CubeMapPath")); 
-		basename=par->getString("CubeMapPath");
 		if(lastname != basename ) 
 		{
 			qDebug( "Current CubeMapPath Dir: %s ",qPrintable(basename)); 
@@ -134,8 +133,4 @@ void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RichParameterS
   glMatrixMode(GL_MODELVIEW);
 }
 
-bool SampleMeshDecoratePlugin::StartDecorate( QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/ )
-{
-	return true;
-}
 Q_EXPORT_PLUGIN(SampleMeshDecoratePlugin)

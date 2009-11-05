@@ -76,7 +76,7 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RichParameterSet */*rm*/, GLArea *gla, QFont qf)
+void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QFont qf)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
@@ -106,11 +106,13 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RichParameterSe
 			if(m.hasDataMask(MeshModel::MM_VERTCURVDIR))
 				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
 				{
-					glColor4f(1.0,0.0,0.0,.6f);
+					glColor4f(1.0,0.0,0.0,.8f);
 					glVertex((*vi).P());
+					glColor4f(0.0,1.0,0.0,.1f);
 					glVertex((*vi).P()+(*vi).PD1()*LineLen*0.25);
-					glColor4f(0.0,1.0,0.0,.6f);
+					glColor4f(0.0,1.0,0.0,.8f);
 					glVertex((*vi).P());
+					glColor4f(0.0,1.0,0.0,.1f);
 					glVertex((*vi).P()+(*vi).PD2()*LineLen*0.25);
 				}
 		}
@@ -450,7 +452,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 
 
 
-bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, GLArea *)
+bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, RichParameterSet */*rm*/, GLArea *)
 {	
 	if( ID(action) == DP_SHOW_VERT_LABEL || ID(action) == DP_SHOW_FACE_LABEL)
 				{
