@@ -495,7 +495,7 @@ public:
 		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
 		// For the global parameters the following rules apply:
 		// * there is a *hardwired* default value, that is directly coded into the plugin
-		// * there is a *saved* value that is stored into persistent location into the user space (registry/home/library)
+		// * there is a *saved* value that is stored into persistent location into the user space (registry/home/library) and it is stored in the classical default value of the parameter
 		// * there is a *current* value that is currently used, different for each decoration instance and that is not stored permanently.
 		//
 		// The plugin use the current value to draw its decoration.
@@ -508,13 +508,15 @@ public:
 		// * reset (from the hardwired).
 		
 		// If your plugins/action has no GlobalParameter, do nothing.
-		// The RichParameterSet comes here already intialized with the values stored on the permanent storage.
-		// If a filter wants to save some permanent stuff should check its esistence here.
-	
+		// The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
+		// At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values) 
+		// If a filter wants to save some permanent stuff should set the permanent default values.
+		
+
 		virtual void initGlobalParameterSet(QAction *, RichParameterSet * /*globalparam*/) {}		
 		
-    virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){assert(0); return false;};
-		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/,QFont qf) = 0;
+    virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/){assert(0); return false;};
+		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/,QFont qf) = 0;
 		virtual void EndDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
         
     virtual const QString ST(FilterIDType filter) const=0;
