@@ -127,7 +127,7 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 bool ExtraSampleDynPlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	//const Color4b baseColor = par.getColor4b("baseColor");
-	const Color4b baseColor = vcg::ColorConverter::convertQColorToColor4<unsigned char>(par.getColor("baseColor"));
+	const Color4b baseColor = par.getColor4b("baseColor");
 	const float percentage  = par.getDynamicFloat("percentage");
 	const float frequency   = math::Clamp(par.getDynamicFloat("frequency"),1.f,1000.f);
 
