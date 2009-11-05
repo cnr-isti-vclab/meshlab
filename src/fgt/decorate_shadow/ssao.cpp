@@ -96,9 +96,9 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
 
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
         glDisable(GL_POLYGON_OFFSET_FILL);
-        this->printColorMap(this->_normalMap, "_normals.png");
+        //this->printColorMap(this->_normalMap, "_normals.png");
         glUseProgram(0);
 
         /***********************************************************/
