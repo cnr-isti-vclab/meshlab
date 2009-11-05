@@ -62,7 +62,6 @@ GLArea::GLArea(QWidget *parent)
 	currentShader = NULL;
 	lastFilterRef = NULL;
 	//lastEditRef = NULL;
-	currLogLevel = -1;
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	fov = 60;
 	clipRatioFar = 1;
@@ -309,11 +308,11 @@ void GLArea::paintGL()
 
 		// Draw the selection
 		if(rm.selectedFaces)  mm()->RenderSelectedFaces();
-		pair<QAction *,RichParameterSet *> p;
+		QAction * p;
 		foreach(p , iDecoratorsList)
 				{
-					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p.first->parent());
-					decorInterface->Decorate(p.first,*mm(),p.second,this,qFont);
+					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+					decorInterface->Decorate(p,*mm(),this,qFont);
 				}
 
 		glPopAttrib();
@@ -413,7 +412,7 @@ void GLArea::displayInfo()
  	float startPos = curSiz.height()-(5+lineSpacing*(lineNum));
 
 	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
-	log.glDraw(this,currLogLevel,3,lineSpacing,qFont);
+	log.glDraw(this,-1,3,lineSpacing,qFont);
 
 	if(meshDoc.size()==1)
 	{
@@ -975,15 +974,9 @@ Point3f GLArea::getViewDir()
 
 void GLArea::setCustomSetting(RichParameterSet& rps)
 {
-	RichParameter* res = NULL;
-	if ( (res = rps.findParameter("MeshLab::Appearance::BackGroundBotCol")) != NULL)
-		cs.bColorBottom = vcg::ColorConverter::convertQColorToColor4<unsigned char>(res->val->getColor());
-	if ( (res = rps.findParameter("MeshLab::Appearance::BackGroundTopCol")) != NULL)
-		cs.bColorTop = vcg::ColorConverter::convertQColorToColor4<unsigned char>(res->val->getColor());
-	if ( (res = rps.findParameter("MeshLab::Appearance::GLLogAreaCol")) != NULL)
-		cs.lColor = vcg::ColorConverter::convertQColorToColor4<unsigned char>(res->val->getColor());
-	if ( (res = rps.findParameter("MeshLab::Info::Log")) != NULL)
-		setLogLevel(res->val->getInt());
+		cs.bColorBottom = rps.getColor4b(GLArea::BackGroundBotParam());
+		cs.bColorTop = rps.getColor4b(GLArea::BackGroundTopParam());
+		cs.lColor = rps.getColor4b(GLArea::LogAreaColParam());
 }
 
 void GLArea::updateCustomSettingValues( RichParameterSet& rps )
@@ -992,3 +985,9 @@ void GLArea::updateCustomSettingValues( RichParameterSet& rps )
 	updateGL();
 }
 
+void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
+{
+	defaultGlobalParamSet->addParam(new RichColor(GLArea::BackGroundBotParam(),QColor(128,128,255),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
+	defaultGlobalParamSet->addParam(new RichColor(GLArea::BackGroundTopParam(),QColor(0,0,0),"MeshLab GLarea's BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
+	defaultGlobalParamSet->addParam(new RichColor(GLArea::LogAreaColParam(),QColor(255,32,32),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
+}

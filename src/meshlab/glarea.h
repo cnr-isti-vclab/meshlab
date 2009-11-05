@@ -147,8 +147,13 @@ class GLArea : public QGLWidget
 public:
 	GLArea(QWidget *parent = 0);
 	~GLArea();
-
+	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 private:
+
+inline static QString BackGroundBotParam()		{return "MeshLab::Appearance::BackGroundBotCol";}
+inline static QString BackGroundTopParam()		{return "MeshLab::Appearance::BackGroundTopCol";}
+inline static QString LogAreaColParam() {return "MeshLab::Appearance::LogAreaCol";}
+
 public:
 	LayerDialog *layerDialog;
   // Layer Management stuff. 
@@ -158,8 +163,7 @@ public:
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
 	GLLogStream log;
-	short currLogLevel;
-    FilterScript filterHistory;
+	FilterScript filterHistory;
 
 	QSize curSiz;
 	QSize minimumSizeHint() const;
@@ -178,9 +182,6 @@ public:
 	  
     ss.basename=QFileInfo(getFileName()).baseName().append("Snap");
 	}
-
-	short		getLogLevel()												{return currLogLevel;}
-	void		setLogLevel(short lvl)	{currLogLevel = lvl;}
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 	const ColorSetting& getCustomSetting()		const {return cs;}
@@ -204,7 +205,7 @@ public:
 	void setView();
 	void setCustomSetting(RichParameterSet& rps);
 	void resetTrackBall();
-	std::list<std::pair<QAction *,RichParameterSet *> > iDecoratorsList;
+	std::list<QAction *> iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
