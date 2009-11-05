@@ -37,6 +37,7 @@
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/curvature.h>
+#include <vcg/complex/trimesh/update/curvature_fitting.h>
 #include <vcg/space/normal_extrapolation.h>
 #include "quadric_tex_simp.h"
 #include "quadric_simp.h"
@@ -258,8 +259,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 		methods.push_back("Taubin approximation");
 		methods.push_back("Principal Component Analysis");
 		methods.push_back("Normal Cycles");
-		parlst.addParam(new RichEnum("Method", 0, methods, tr("Method:"), tr("Choose a method")));
-		parlst.addParam(new RichBool("Autoclean",true,QString("Remove Unreferenced Vertices")));
+		methods.push_back("Pseudoinverse Quadric Fitting");
+		parlst.addParam(new RichEnum("Method", 3, methods, tr("Method:"), tr("Choose a method")));
+		parlst.addParam(new RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
 		break;
 		case FP_QUADRIC_SIMPLIFICATION:
 		  parlst.addParam(new RichInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces", "The desired final number of faces."));
@@ -295,17 +297,17 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 		case FP_MIDPOINT:
 		  maxVal = m.cm.bbox.Diag();
 		  parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the edges <b>longer</b> than this threshold will be refined.<br>Setting this value to zero will force an uniform refinement."));
-		  parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces"));
+		  parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 			break;
 		case FP_REMOVE_FACES_BY_EDGE:
 		  maxVal = m.cm.bbox.Diag();
 		  parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the faces with an edge <b>longer</b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps."));
-		  parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces"));
+		  parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 			break;
 		case FP_CLUSTERING:
 		  maxVal = m.cm.bbox.Diag();
 		  parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
-		  parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces"));
+		  parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 		  break;
 		case FP_CYLINDER_UNWRAP:	
 			parlst.addParam(new RichFloat("startAngle", 0,"Start angle (deg)", "The starting angle of the unrolling process."));
@@ -610,6 +612,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 				return false; // can't continue, mesh can't be processed
 				}
 			  vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycles(m.cm); break;
+		  case 3:
+			  vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+			  if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
+				return false; // can't continue, mesh can't be processed
+				}
+				tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm);
+				break;
 		  default:assert(0);break;
 
 	  }

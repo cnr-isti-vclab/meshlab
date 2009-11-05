@@ -86,7 +86,6 @@ missing std and and all the other gcc detected syntax errors
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-//#include "decimatorDialog.h"
 #include "transformDialog.h"
 #include "../../meshlab/GLLogStream.h"
 
@@ -98,7 +97,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 		public:
 	/* naming convention :
 		 - FP -> Filter Plugin
-		 - name of the plugin separated by _
+		 - name of the filter separated by _
 	*/
 	enum {  FP_LOOP_SS,
           FP_BUTTERFLY_SS,
@@ -145,8 +144,6 @@ protected:
 
 
 	TransformDialog *transformDialog;
-//	GenericELDialog *genericELD;
-
 
 	float lastq_QualityThr;
 	bool lastq_QualityWeight;
