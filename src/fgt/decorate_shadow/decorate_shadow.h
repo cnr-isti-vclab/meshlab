@@ -78,8 +78,8 @@ public:
   }
 
 	QList<QAction *> actions () const {return actionList;}
-    virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void Decorate(QAction *a, MeshModel &m, RichParameterSet  * /*parent*/ par, GLArea *gla,QFont qf);
+    virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet  * /*parent*/ par, GLArea * /*parent*/);
+    virtual void Decorate(QAction *a, MeshModel &m,  GLArea *gla,QFont qf);
     virtual void initGlobalParameterSet(QAction *, RichParameterSet  * /*globalparam*/);
 private:
     DecorateShader* _decorator;

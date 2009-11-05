@@ -70,7 +70,7 @@ const QString DecorateShadowPlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, GLArea* gla){
+bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, RichParameterSet  * par, GLArea* gla){
     bool result;
     if(action->text() == ST(DP_SHOW_SIMPLE_SHADOW)){
         result = this->_decorator = new ShadowMapping();
@@ -93,7 +93,7 @@ bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, GLArea* 
     return result;
 }
 
-void DecorateShadowPlugin::Decorate(QAction *a, MeshModel &m, RichParameterSet  *par, GLArea *gla, QFont /*qf*/)
+void DecorateShadowPlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QFont /*qf*/)
 {
     if(m.visible){
             this->_decorator->runShader(m, gla);
