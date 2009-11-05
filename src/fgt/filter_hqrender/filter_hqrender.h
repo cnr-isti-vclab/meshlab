@@ -38,7 +38,7 @@ private:
 
   int convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList);
   int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);
-  int ignoreObject(RibFileStack* files);
+  int writeMatrix(FILE* fout, vcg::Matrix44f matrix, bool transposed = true);
   vcg::Matrix44f readMatrix(RibFileStack* files,QString line);
   QString getDirFromPath(QString* path);
   QString getFileNameFromPath(QString* path, bool type = true);
