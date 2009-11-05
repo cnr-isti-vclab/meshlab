@@ -331,18 +331,18 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 		parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 		parlst.addParam(new RichFloat("normalThr", (float) 60,"Feature Angle Threshold (deg)", "Specify a threshold angle (0..90) for features that you want to be preserved.<br>Features forming angles LARGER than the specified threshold will be preserved. <br> 0 -> no smoothing <br> 90 -> all faces will be smoothed"));
 		parlst.addParam(new RichInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "Number of iterations of normal smoothing step. The larger the better and (the slower)"));
-		parlst.addParam(new RichInt  ("stepFitNum",    (int) 20,"Vertex Fitting steps", "Number of iterations of the vertex fitting procedure. )"));
-		parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
+		parlst.addParam(new RichInt  ("stepFitNum",    (int) 20,"Vertex Fitting steps", "Number of iterations of the vertex fitting procedure."));
+		parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 		break;
 		case FP_LAPLACIAN_SMOOTH:
 			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 			parlst.addParam(new RichBool ("Boundary",true,"1D Boundary Smoothing", "if true the boundary edges are smoothed only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). Can reduce the shrinking on the border but can have strange effects on very small boundaries."));
-			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
+			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 			break;
 		case FP_DEPTH_SMOOTH:
 			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 			parlst.addParam(new RichPoint3f  ("viewPoint", Point3f(0,0,0),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
-			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
+			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 			break;
 		case FP_DIRECTIONAL_PRESERVATION:
 			parlst.addParam(new RichEnum("step", 0, 
@@ -351,20 +351,20 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 									tr("The purpose of this filter is to <b>constrain</b> any smoothing algorithm to moving vertices only along a give line of sight.<br> First you should store current vertex position, than after applying  one of the many smoothing algorithms you should re start this filter and blend the original positions with the smoothed results.<br>"
 									   "Given a view point  <i>vp</i> , the smoothed vertex position <i>vs</i> and the original position  <i>v</i>, The new vertex position is computed as the projection of  <i>vs</i> on the line  connecting  <i>v</i>  and <i>vp</i>."))); 
 			parlst.addParam(new RichPoint3f  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
-			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
+			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 			break;
 		case FP_TAUBIN_SMOOTH:
 			parlst.addParam(new RichFloat("lambda", (float) 0.5,"Lambda", "The lambda parameter of the Taubin Smoothing algorithm"));
 			parlst.addParam(new RichFloat("mu", (float) -0.53,"mu", "The mu parameter of the Taubin Smoothing algorithm"));
 			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 10,"Smoothing steps", "The number of times that the taubin smoothing is iterated. Usually it requires a larger number of iteration than the classical laplacian"));
-			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
+			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 			break;
 		case FP_SD_LAPLACIAN_SMOOTH:
 		{
 			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 			float maxVal = md.mm()->cm.bbox.Diag()/10;
 		  parlst.addParam(new RichAbsPerc("delta",maxVal*0.01,0,maxVal,"delta", ""));
-      parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces"));
+      parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 		}
 		break;
 		case FP_LINEAR_MORPH :
