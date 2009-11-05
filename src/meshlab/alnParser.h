@@ -94,12 +94,13 @@ public:
 			rm.filename = buffer;
 
 			fgets(buffer, 1024, stream);
-			*strchr(buffer,'\n')=0;
-			if(strchr(buffer,'\r')) 	*strchr(buffer,'\r')=0;
-
 			if(buffer[0]!='#') 
 				return ExpectingComment;
 
+			*strchr(buffer,'\n')=0;
+			if(strchr(buffer,'\r')) 	*strchr(buffer,'\r')=0;
+
+			
 			char *occurrence = strchr(buffer, 'W');
 			if(occurrence!=NULL && occurrence[1]==':') 
 				rm.quality = (float) atof(occurrence+2);
