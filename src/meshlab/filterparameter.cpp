@@ -20,43 +20,32 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log: filterparameter.h,v $
-****************************************************************************/
 
 #include <QtCore>
 #include <QMap>
 #include <QPair>
 #include <QAction>
 #include <vcg/math/matrix44.h>
+#include <wrap/qt/col_qt_convert.h>
+
 #include "filterparameter.h"
 
 
 using namespace vcg;
 
-bool RichParameterSet::hasParameter(QString name)
+// Very similar to the findParameter but this one does not print out debugstuff. 
+bool RichParameterSet::hasParameter(QString name) const 
 {
-	QList<RichParameter*>::iterator fpli;
+	QList<RichParameter*>::const_iterator fpli;
 	for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
-		if((*fpli)->name ==name)
+	{
+		if((*fpli != NULL) && (*fpli)->name==name)
 			return true;
-
-	return false;
+	}	
+	return false; 
 }
-RichParameter* RichParameterSet::findParameter(QString name)
-{
-	QList<RichParameter*>::iterator fpli;
-	for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
-		if((*fpli)->name ==name)
-			return *fpli;
-
-	qDebug("FilterParameter Warning: Unable to find a parameter with name '%s',\n"
-		"      Please check types and names of the parameter in the calling filter",qPrintable(name));
-	return 0;
-}
-
-const RichParameter* RichParameterSet::findParameter(QString name) const
+// You should never use this one to know if a given parameter is present. 
+RichParameter* RichParameterSet::findParameter(QString name) const
 {
 	QList<RichParameter*>::const_iterator fpli;
 	for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
@@ -66,6 +55,7 @@ const RichParameter* RichParameterSet::findParameter(QString name) const
 	}
 	qDebug("FilterParameter Warning: Unable to find a parameter with name '%s',\n"
 		"      Please check types and names of the parameter in the calling filter",qPrintable(name));
+	assert(0);
 	return 0;
 }
 
@@ -76,6 +66,7 @@ RichParameterSet& RichParameterSet::removeParameter(QString name){
 
 RichParameterSet& RichParameterSet::addParam(RichParameter* pd )
 {
+	assert(!hasParameter(pd->name));
 	paramList.push_back(pd);
 	return (*this);
 }
@@ -83,140 +74,25 @@ RichParameterSet& RichParameterSet::addParam(RichParameter* pd )
 //--------------------------------------
 
 
-void RichParameterSet::setValue(QString name,const Value& newval)
-{
-	RichParameter *p=findParameter(name);
-	assert(p);
-	p->val->set(newval);
-}
+void RichParameterSet::setValue(QString name,const Value& newval){ findParameter(name)->val->set(newval); }
 
-//--------------------------------------
+//- All the get<TYPE> are very similar. Nothing interesting here. 
 
-bool RichParameterSet::getBool(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return p->val->getBool();
-}
-
-//--------------------------------------
-
-int	 RichParameterSet::getInt(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return p->val->getInt();
-}
-
-//--------------------------------------
-
-float RichParameterSet::getFloat(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return p->val->getFloat();
-}
-
-//--------------------------------------
-
-QColor RichParameterSet::getColor(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return p->val->getColor();
-}
-
-Color4b RichParameterSet::getColor4b(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return p->val->getColor4b();
-}
-
-//--------------------------------------
-
-
-QString RichParameterSet::getString(QString name) const
-{
-	const RichParameter*p=findParameter(name);
-	assert(p);
-	return p->val->getString();
-}
-
-//--------------------------------------
-
-
-Matrix44f		RichParameterSet::getMatrix44(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return p->val->getMatrix44f();
-}
-
-//--------------------------------------
-
-Point3f		RichParameterSet::getPoint3f(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return p->val->getPoint3f();
-}
-
-//--------------------------------------
-
-float		RichParameterSet::getAbsPerc(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return float(p->val->getAbsPerc());
-}
-
-int RichParameterSet::getEnum(QString name) const {
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return float(p->val->getEnum());
-}
-
-QList<float> RichParameterSet::getFloatList(QString name) const
-{
-	const RichParameter *p = findParameter(name);
-	assert(p);
-	return p->val->getFloatList();
-}
-
-/* ---- */
-
-MeshModel * RichParameterSet::getMesh(QString name) const {
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return p->val->getMesh();
-}
-
-/* ---- */
-/* Dynamic Float Members*/
-/* ---- */
-
-float RichParameterSet::getDynamicFloat(QString name) const
-{
-	const RichParameter *p=findParameter(name);
-	assert(p);
-	return float(p->val->getDynamicFloat());
-}
-
-QString RichParameterSet::getOpenFileName(QString name) const
-{
-	const RichParameter *p = findParameter(name);
-	assert(p);
-	return p->val->getFileName();
-}
-
-
-QString RichParameterSet::getSaveFileName(QString name) const
-{
-	const RichParameter *p = findParameter(name);
-	assert(p);
-	return p->val->getFileName();
-}
+        bool RichParameterSet::getBool(QString name)     const { return findParameter(name)->val->getBool(); }
+         int RichParameterSet::getInt(QString name)      const { return findParameter(name)->val->getInt();}
+       float RichParameterSet::getFloat(QString name)    const { return findParameter(name)->val->getFloat();}
+      QColor RichParameterSet::getColor(QString name)    const { return findParameter(name)->val->getColor();}
+     Color4b RichParameterSet::getColor4b(QString name)  const { return ColorConverter::ToColor4b(findParameter(name)->val->getColor());}
+     QString RichParameterSet::getString(QString name)   const { return findParameter(name)->val->getString();}
+   Matrix44f RichParameterSet::getMatrix44(QString name) const { return findParameter(name)->val->getMatrix44f();}
+     Point3f RichParameterSet::getPoint3f(QString name)  const { return findParameter(name)->val->getPoint3f();}  
+       float RichParameterSet::getAbsPerc(QString name)  const { return findParameter(name)->val->getAbsPerc();}
+				 int RichParameterSet::getEnum(QString name)     const { return findParameter(name)->val->getEnum();}
+QList<float> RichParameterSet::getFloatList(QString name)    const { return findParameter(name)->val->getFloatList();}
+ MeshModel * RichParameterSet::getMesh(QString name)         const { return findParameter(name)->val->getMesh();}
+       float RichParameterSet::getDynamicFloat(QString name) const { return findParameter(name)->val->getDynamicFloat();}
+     QString RichParameterSet::getOpenFileName(QString name) const { return findParameter(name)->val->getFileName();}
+     QString RichParameterSet::getSaveFileName(QString name) const { return findParameter(name)->val->getFileName(); }
 
 RichParameterSet& RichParameterSet::operator=( const RichParameterSet& rps )
 {
@@ -229,7 +105,7 @@ bool RichParameterSet::operator==( const RichParameterSet& rps )
 		return false;
 
 	bool iseq = true;
-	unsigned int ii = 0;
+	int ii = 0;
 	while((ii < rps.paramList.size()) && iseq)
 	{
 		if (!(*rps.paramList.at(ii) == *paramList.at(ii)))
@@ -243,7 +119,7 @@ bool RichParameterSet::operator==( const RichParameterSet& rps )
 RichParameterSet::~RichParameterSet()
 {
 	//int val = _CrtCheckMemory( );
-	for(unsigned int ii = 0;ii < paramList.size();++ii)
+	for(int ii = 0;ii < paramList.size();++ii)
 		delete paramList.at(ii);
 	paramList.clear();
 
@@ -254,7 +130,7 @@ RichParameterSet& RichParameterSet::copy( const RichParameterSet& rps )
 	clear();
 
 	RichParameterCopyConstructor copyvisitor;
-	for(unsigned int ii = 0;ii < rps.paramList.size();++ii)
+	for(int ii = 0;ii < rps.paramList.size();++ii)
 	{
 		rps.paramList.at(ii)->accept(copyvisitor);
 		paramList.push_back(copyvisitor.lastCreated);
@@ -268,7 +144,7 @@ RichParameterSet::RichParameterSet( const RichParameterSet& rps )
 	clear();
 
 	RichParameterCopyConstructor copyvisitor;
-	for(unsigned int ii = 0;ii < rps.paramList.size();++ii)
+	for(int ii = 0;ii < rps.paramList.size();++ii)
 	{
 		rps.paramList.at(ii)->accept(copyvisitor);
 		paramList.push_back(copyvisitor.lastCreated);
@@ -293,7 +169,7 @@ void RichParameterSet::clear()
 
 void RichParameterCopyConstructor::visit( RichBool& pd )
 {
-	lastCreated = new RichBool(pd.name,pd.val->getBool(),pd.pd->defVal->getBool(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichBool(pd.name,pd.val->getBool(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichInt& pd )
@@ -449,7 +325,7 @@ void RichParameterXMLVisitor::visit( RichEnum& pd )
 	fillRichParameterAttribute("RichEnum",pd.name,QString::number(pd.val->getEnum()),pd.pd->fieldDesc,pd.pd->tooltip);
 	EnumDecoration* dec = reinterpret_cast<EnumDecoration*>(pd.pd);
 	parElem.setAttribute("enum_cardinality",dec->enumvalues.size());
-	for(unsigned int ii = 0; ii < dec->enumvalues.size();++ii)
+	for(int ii = 0; ii < dec->enumvalues.size();++ii)
 		parElem.setAttribute(QString("enum_val")+QString::number(ii),dec->enumvalues.at(ii));
 
 }
@@ -546,7 +422,7 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 	if(type=="RichEnum")
 	{
 		QStringList list = QStringList::QStringList();
-		unsigned int enum_card = np.attribute(QString("enum_cardinality")).toUInt();
+		int enum_card = np.attribute(QString("enum_cardinality")).toUInt();
 
 		for(int i=0;i<enum_card;++i)
 			list<<np.attribute(QString("enum_val")+QString::number(i));
@@ -693,26 +569,22 @@ RichParameter::~RichParameter()
 {
 	delete val;delete pd;
 }
-
+/*
 RichBool::RichBool( const QString nm,const bool defval) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),"",""))
 {
 
 }
-
 RichBool::RichBool( const QString nm,const bool defval,const QString desc) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,""))
 {
 
 }
-
+*/
 RichBool::RichBool( const QString nm,const bool defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,tltip))
-{
+{}
 
-}
 
-RichBool::RichBool( const QString nm,const bool val,const bool defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(val),new BoolDecoration(new BoolValue(defval),desc,tltip))
-{
-
-}
+//RichBool::RichBool( const QString nm,const bool val,const bool defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(val),new BoolDecoration(new BoolValue(defval),desc,tltip))
+//{}
 void RichBool::accept( Visitor& v )
 {
 	v.visit(*this);

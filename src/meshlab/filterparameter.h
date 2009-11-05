@@ -45,7 +45,6 @@ public:
 	virtual vcg::Matrix44f		getMatrix44f() const {assert(0);return vcg::Matrix44f();}
 	virtual vcg::Point3f getPoint3f() const {assert(0);return vcg::Point3f();}
 	virtual QColor		   getColor() const {assert(0);return QColor();}
-	virtual vcg::Color4b getColor4b() const {assert(0);return vcg::Color4b();}
 	virtual float		     getAbsPerc() const {assert(0);return float();}
 	virtual int					 getEnum() const {assert(0);return int();}
 	virtual MeshModel*   getMesh() const {assert(0);return NULL;}
@@ -60,7 +59,6 @@ public:
 	virtual bool isMatrix44f() const {return false;}
 	virtual bool isPoint3f() const {return false;}
 	virtual bool isColor() const {return false;}
-	virtual bool isColor4b() const {return false;}
 	virtual bool isAbsPerc() const {return false;}
 	virtual bool isEnum() const {return false;}
 	virtual bool isMesh() const {return false;}
@@ -155,19 +153,6 @@ public:
 	~ColorValue(){}
 private:
 	QColor pval;
-};
-
-class Color4bValue : public Value
-{
-public:
-	Color4bValue(QString name,const vcg::Color4b val) :pval(val){};
-	inline vcg::Color4b getColor4b() const {return pval;}
-	inline bool isColor4b() const {return true;}
-	inline void	set(const Value& p) {pval = p.getColor4b();}
-	~Color4bValue(){}
-
-private:
-	vcg::Color4b pval;
 };
 
 class AbsPercValue : public FloatValue
@@ -296,14 +281,6 @@ class ColorDecoration : public ParameterDecoration
 public:
 	ColorDecoration(ColorValue* defvalue,const QString desc = QString(),const QString tltip= QString());
 	~ColorDecoration(){}
-};
-
-class Color4bDecoration : public ParameterDecoration
-{
-public:
-	Color4bDecoration(Color4bValue* defvalue,const QString desc = QString(),const QString tltip = QString())
-		:ParameterDecoration(defvalue,desc,tltip) {}
-	~Color4bDecoration(){}
 };
 
 class AbsPercDecoration : public ParameterDecoration
@@ -656,9 +633,9 @@ public:
 	//QMap<QString, FilterParameter *> paramMap;  
 	QList<RichParameter*> paramList;  
 	bool isEmpty() const; 
-	RichParameter* findParameter(QString name);
-	const RichParameter* findParameter(QString name) const;
-	bool hasParameter(QString name);
+	//RichParameter* findParameter(QString name);
+	RichParameter* findParameter(QString name) const;
+	bool hasParameter(QString name) const;
 
 
 	RichParameterSet& operator=(const RichParameterSet& rps);
