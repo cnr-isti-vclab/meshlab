@@ -328,10 +328,11 @@ private:
 	QList<QAction *> editActionList;
 	QList<QAction *> decoratorActionList;
 
-	//*********WARNING*******
-	//it should be moved away from here! MeshLabServer needs it too
-	RichParameterSet globalParams;
-	RichParameterSet neededGlobalParams;
+	/* 
+		For each running instance of meshlab, for the global params we have default (hardwired) values and current(saved,modified) values. 
+	*/
+	RichParameterSet currentGlobalParams;
+	RichParameterSet defaultGlobalParams;
   
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 

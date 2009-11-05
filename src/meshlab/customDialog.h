@@ -59,7 +59,7 @@ class SettingDialog : public QDialog
 {
 Q_OBJECT
 public:
-	SettingDialog(RichParameter* rpar,QWidget* parent = 0);
+	SettingDialog(RichParameter* curPar,RichParameter* defPar,QWidget* parent = 0);
 	~SettingDialog();
 public slots:
 	void save();
@@ -71,7 +71,8 @@ signals:
 
 private:
 	StdParFrame frame;
-	RichParameter* richpar;
+	RichParameter* curPar;
+	RichParameter* defPar;
 	RichParameter* tmppar;
 	QPushButton* savebut;
 	QPushButton* applybut;
@@ -83,7 +84,7 @@ class CustomDialog : public QDialog
 {
 Q_OBJECT
 public:
-	CustomDialog(RichParameterSet& parset,QWidget *parent = 0);
+	CustomDialog(RichParameterSet& parset,RichParameterSet& defparset,QWidget *parent = 0);
 	~CustomDialog();
 	//void loadCurrentSetting(RichParameterSet& parset);
 
@@ -94,7 +95,8 @@ signals:
 	void applyCustomSetting();
 
 private:
-	RichParameterSet& richparset;
+	RichParameterSet& curParSet;
+	RichParameterSet& defParSet;
 	QListWidget* listwid;
 	QMap<QListWidgetItem*,RichParameter*> mp; 
 	void dispatch(const RichParameter& par);

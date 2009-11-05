@@ -20,33 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.8  2007/03/26 08:25:09  zifnab1974
-added eol at the end of the files
-
-Revision 1.7  2006/01/16 05:34:16  cignoni
-Added backward qt4.0 compatibility for setAutoFillBackground
-
-Revision 1.6  2006/01/15 15:27:59  glvertex
-Added few lines to set background even in qt 4.1
-
-Revision 1.5  2006/01/02 18:54:52  glvertex
-added multilevel logging support
-
-Revision 1.4  2006/01/02 17:39:18  glvertex
-Added info types in a combobox
-
-Revision 1.3  2005/12/04 16:50:15  glvertex
-Removed [using namespace] directive form .h
-Renaming in QT style
-Adapted method behavior to the new ui interface
-
-Revision 1.2  2005/12/03 22:49:46  cignoni
-Added copyright info
-
-****************************************************************************/
 
 #include "ui_customDialog.h"
 #include "customDialog.h"
@@ -55,8 +28,8 @@ Added copyright info
 
 using namespace vcg;
 
-CustomDialog::CustomDialog(RichParameterSet& parset,QWidget * parent)
-		:QDialog(parent),richparset(parset)
+CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defparset, QWidget * parent)
+		:QDialog(parent),curParSet(curparset),defParSet(defparset)
 {
 	setModal(false);
 	closebut = new QPushButton("Close",this);
@@ -64,11 +37,11 @@ CustomDialog::CustomDialog(RichParameterSet& parset,QWidget * parent)
 	QGridLayout* layout = new QGridLayout(parent);
 	setLayout(layout);
 	listwid = new QListWidget(this); 
-	for(int ii = 0;ii < richparset.paramList.size();++ii)
+	for(int ii = 0;ii < curParSet.paramList.size();++ii)
 	{
 		//butt = new QPushButton(richparset.paramList.at(ii)->name,this);
-		QListWidgetItem* item = new QListWidgetItem(parset.paramList.at(ii)->name,listwid);
-		mp.insert(item,parset.paramList.at(ii));
+		QListWidgetItem* item = new QListWidgetItem(curParSet.paramList.at(ii)->name,listwid);
+		mp.insert(item,curParSet.paramList.at(ii));
 		//connect(butt,SIGNAL(clicked()),this,SLOT(openSubDialog()));
 	}
 	layout->addWidget(listwid,0,0,1,4);
@@ -82,7 +55,8 @@ void CustomDialog::openSubDialog( QListWidgetItem* itm )
 	QMap<QListWidgetItem*,RichParameter*>::iterator it = mp.find(itm);
 	if (it != mp.end())
 	{
-		SettingDialog* setdial = new SettingDialog(it.value(),this);
+	  RichParameter *defPar = defParSet.findParameter(it.value()->name);
+		SettingDialog* setdial = new SettingDialog(it.value(),defPar,this);
 		connect(setdial,SIGNAL(applySettingSignal()),this,SIGNAL(applyCustomSetting()));
 		setdial->exec();
 		delete setdial;
@@ -98,8 +72,8 @@ CustomDialog::~CustomDialog()
 	//	delete it.key();
 }
 //Maybe a MeshDocument parameter is needed. See loadFrameContent definition
-SettingDialog::SettingDialog( RichParameter* rpar,QWidget* parent /*= 0*/ )
-:QDialog(parent),frame(this),tmppar(NULL),richpar(rpar)
+SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultPar, QWidget* parent /*= 0*/ )
+:QDialog(parent),frame(this),tmppar(NULL),curPar(currentPar),defPar(defaultPar)
 {
 	setModal(true);
 	savebut = new QPushButton("Save",this);
@@ -115,7 +89,7 @@ SettingDialog::SettingDialog( RichParameter* rpar,QWidget* parent /*= 0*/ )
 	dialoglayout->addWidget(closebut,1,3);
 
 	RichParameterCopyConstructor cp;
-	richpar->accept(cp);
+	curPar->accept(cp);
 	tmppar = cp.lastCreated;
 	frame.loadFrameContent(tmppar);
 	dialoglayout->addWidget(&frame,0,0,1,4);
@@ -129,27 +103,31 @@ SettingDialog::SettingDialog( RichParameter* rpar,QWidget* parent /*= 0*/ )
 
 void SettingDialog::save()
 {
+	apply();
 	QDomDocument doc("MeshLabSettings");
 	RichParameterXMLVisitor v(doc);
 	tmppar->accept(v);
 	doc.appendChild(v.parElem);
 	QString docstring =  doc.toString();
+	qDebug("Writing into Settings param with name %s and content ****%s****",qPrintable(tmppar->name),qPrintable(docstring));
 	QSettings setting;
 	setting.setValue(tmppar->name,QVariant(docstring));
-	apply();
 }
 
 void SettingDialog::apply()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
 	frame.stdfieldwidgets.at(0)->collectWidgetValue();
-	richpar->val->set(*tmppar->val);
+	curPar->val->set(*tmppar->val);
 	emit applySettingSignal();
 }
 
 void SettingDialog::reset()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
+	qDebug("resetting the value of param %s to the hardwired default",qPrintable(curPar->name));
+
+	curPar->val->set(*defPar->val);
 	frame.stdfieldwidgets.at(0)->resetValue();
 }
 

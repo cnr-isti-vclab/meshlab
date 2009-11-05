@@ -260,7 +260,7 @@ void MainWindow::updateStdDialog()
 
 void MainWindow::updateCustomSettings()
 {
-	emit dispatchCustomSettings(globalParams);
+	emit dispatchCustomSettings(currentGlobalParams);
 }
 
 void MainWindow::updateWindowMenu()
@@ -392,8 +392,8 @@ void MainWindow::updateMenus()
 
 				foreach (QAction *a,decoratorActionList){a->setChecked(false);a->setEnabled(true);}
 
-				pair<QAction *,RichParameterSet *> p;
-				foreach (p,GLA()->iDecoratorsList){p.first->setChecked(true);}
+				 QAction * p;
+				foreach (p,GLA()->iDecoratorsList){p->setChecked(true);}
 	} // if active
 	else
 	{
@@ -566,7 +566,7 @@ void MainWindow::startFilter()
 	{
 		qDebug("MeshCreation");
 		GLArea *gla=new GLArea(mdiarea);
-		gla->setCustomSetting(globalParams);
+		gla->setCustomSetting(currentGlobalParams);
 		addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 		gla->meshDoc.addNewMesh("untitled.ply");
 		gla->setFileName("untitled.ply");
@@ -775,11 +775,10 @@ void MainWindow::applyDecorateMode()
 	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
 
 	bool found=false;
-	pair<QAction *,RichParameterSet *> p;
+	 QAction * p;
 	foreach(p,GLA()->iDecoratorsList)
 	{
-		if(p.first->text()==action->text()){
-			delete p.second;
+		if(p->text()==action->text()){
 			GLA()->iDecoratorsList.remove(p);
 			GLA()->log.Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
 			found=true;
@@ -787,11 +786,11 @@ void MainWindow::applyDecorateMode()
 	}
 
 	if(!found){
-	  RichParameterSet * decoratorParams = new RichParameterSet();
-		iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
-		bool ret = iDecorateTemp->StartDecorate(action,*GLA()->mm(),GLA());
+	  //RichParameterSet * decoratorParams = new RichParameterSet();
+		//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
+		bool ret = iDecorateTemp->StartDecorate(action,*GLA()->mm(), &currentGlobalParams, GLA());
 		if(ret) {
-				GLA()->iDecoratorsList.push_back(make_pair(action,decoratorParams));
+				GLA()->iDecoratorsList.push_back(action);
 				GLA()->log.Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
 				}
 				else GLA()->log.Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
@@ -1000,7 +999,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				bool newGla = false;
 				if(gla==0){
 						gla=new GLArea(mdiarea);
-						gla->setCustomSetting(globalParams);
+						gla->setCustomSetting(currentGlobalParams);
 						addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 						newGla =true;
 						pCurrentIOPlugin->setLog(&(gla->log));
@@ -1272,7 +1271,7 @@ void MainWindow::showLayerDlg() {if(GLA() != 0) 	GLA()->layerDialog->setVisible(
 
 void MainWindow::setCustomize()
 {
-	CustomDialog dialog(globalParams,this);
+	CustomDialog dialog(currentGlobalParams,defaultGlobalParams, this);
 	connect(&dialog,SIGNAL(applyCustomSetting()),this,SLOT(updateCustomSettings()));
 	dialog.exec();
 }

@@ -614,6 +614,15 @@ void MainWindow::loadPlugins()
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
 	qApp->addLibraryPath(getPluginDirPath());
 	qApp->addLibraryPath(getBaseDirPath());
+	
+	QStringList pluginfilters;
+#if defined(Q_OS_WIN)
+	pluginfilters << "*.dll";		
+#elif defined(Q_OS_MAC)
+	pluginfilters << "*.dylib";		
+#else
+#endif
+	pluginsDir.setNameFilters(pluginfilters);
 
 	qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
@@ -631,7 +640,7 @@ void MainWindow::loadPlugins()
         {
 					//qDebug("Processing action %s",qPrintable(filterAction->text()) );
 					//qDebug("          (%s)", qPrintable(iFilter->filterInfo(filterAction)) );
-					iFilter->initGlobalParameterSet(filterAction,neededGlobalParams);
+					iFilter->initGlobalParameterSet(filterAction,defaultGlobalParams);
 					filterMap[filterAction->text()]=filterAction;
           filterAction->setToolTip(iFilter->filterInfo(filterAction));
           connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
@@ -682,7 +691,7 @@ void MainWindow::loadPlugins()
 				decoratorActionList+=iDecorator->actions();
 				foreach(decoratorAction, iDecorator->actions())
 						{
-							iDecorator->initGlobalParameterSet(decoratorAction,&neededGlobalParams);
+							iDecorator->initGlobalParameterSet(decoratorAction,&defaultGlobalParams);
 								connect(decoratorAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
 								decoratorAction->setToolTip(iDecorator->Info(decoratorAction));
 								renderMenu->addAction(decoratorAction);
@@ -735,17 +744,11 @@ void MainWindow::loadPlugins()
 
 }
 
-void MainWindow::initGlobalParameters()
-{
-	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundBotCol",QColor(128,128,255),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
-	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::BackGroundTopCol",QColor(0,0,0),"MeshLab GLarea's BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
-	neededGlobalParams.addParam(new RichColor("MeshLab::Appearance::GLLogAreaCol",QColor(255,32,32),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
-	neededGlobalParams.addParam(new RichInt("MeshLab::Info::Log",0,"Type of info to be shown in the MeshLab's Log Area","Type of info to be shown in the MeshLab's Log Area"));
-}
 
 void MainWindow::loadMeshLabSettings()
 {
-	initGlobalParameters();
+	GLArea::initGlobalParameterSet(& defaultGlobalParams);
+	
 	QSettings settings;
 	QStringList klist = settings.allKeys();
 
@@ -761,18 +764,20 @@ void MainWindow::loadMeshLabSettings()
         if(!docElem.isNull())
 		{
 			RichParameterFactory::create(docElem,&rpar);
-			globalParams.addParam(rpar);
+			qDebug("param %i,%s loaded from settings",ii,qPrintable(rpar->name));
+			currentGlobalParams.addParam(rpar);
 		}
 	}
 
-	for(int ii = 0;ii < neededGlobalParams.paramList.size();++ii)
+	for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
 	{
-		RichParameter* rpar = globalParams.findParameter(neededGlobalParams.paramList.at(ii)->name);
-		if (!rpar)
+		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
+		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
 		{
+			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
 			RichParameterCopyConstructor v;
-			neededGlobalParams.paramList.at(ii)->accept(v);
-			globalParams.paramList.push_back(v.lastCreated);
+			defaultGlobalParams.paramList.at(ii)->accept(v);
+			currentGlobalParams.paramList.push_back(v.lastCreated);
 			
 			QDomDocument doc("MeshLabSettings");
 			RichParameterXMLVisitor vxml(doc);
@@ -780,14 +785,19 @@ void MainWindow::loadMeshLabSettings()
 			doc.appendChild(vxml.parElem);
 			QString docstring =  doc.toString();
 			QSettings setting;
-			setting.value(v.lastCreated->name,QVariant(docstring));
+			setting.setValue(v.lastCreated->name,QVariant(docstring));
 		}	
 		//delete neededGlobalParams.paramList.at(ii);
 	}
-	for(int ii = 0;ii < neededGlobalParams.paramList.size();++ii)
-		delete neededGlobalParams.paramList.at(ii);
-	neededGlobalParams.clear();
-	emit dispatchCustomSettings(globalParams);
+	
+	/* Non cancello i default perche' mi potrebbero riservire.
+	
+	for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
+		delete defaultGlobalParams.paramList.at(ii);
+	defaultGlobalParams.clear();
+	*/
+	
+	emit dispatchCustomSettings(currentGlobalParams);
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
