@@ -4,13 +4,22 @@ uniform sampler2D depthMap;
 
 varying vec4 texCoord;
 
-const float totStrength = 5.5;
+/*const float totStrength = 5.5;
 const float strength = 0.05;
 const float offset = 18.0;
 const float falloff = 0.000002;
 const float rad = 0.009;
 #define SAMPLES 16 // 10 is good
 const float invSamples = -1.5/10.0;
+*/
+
+const float totStrength = 2.38;
+const float strength = 0.5;
+const float offset = 18.0;
+const float falloff = 0.000002;
+const float rad = 0.009;
+#define SAMPLES 16 // 10 is good
+const float invSamples = -1.38/10.0;
 
 void main(void)
 {
@@ -83,4 +92,5 @@ void main(void)
     alpha = 0.0;
     
   gl_FragColor = vec4(vec3(ao), alpha);
+  //gl_FragColor = texture2D(depthMap, texCoordPostW.st);
 }
