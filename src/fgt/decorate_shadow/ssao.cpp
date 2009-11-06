@@ -126,16 +126,11 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
 
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+        //m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+        m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
 
-
-        //this->printColorMap(this->_ssao, "_ssao.png");
+        this->printColorMap(this->_ssao, "_ssao.png");
         //this->printDepthMap(this->_depthMap, "_depthMap2.png");
-        //this->unbind();
-        /*glEnable(GL_DEPTH_TEST);
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_BLEND);
-*/
         glUseProgram(0);
 
 
@@ -189,9 +184,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
                     glVertex3f(-this->_texSize/2,this->_texSize/2,0);
             glEnd();
 
-        //this->printColorMap(this->_blurH, "./_blurOrizzontale.png");
-        //this->unbind();
-
+        this->printColorMap(this->_blurH, "./_blurOrizzontale.png");
 
         /***********************************************************/
         //BLURRING vertical
@@ -204,8 +197,8 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glBindTexture(GL_TEXTURE_2D, this->_blurH);
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
-        /*glDrawBuffer(GL_COLOR_ATTACHMENT3_EXT);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);*/
+
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glBegin(GL_QUADS);
                     glTexCoord2d(0,0);
                     glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
@@ -218,8 +211,6 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
             glEnd();
 
         glUseProgram(0);
-        //this->printColorMap(this->_blurV, "_blurVericale.png");
-        //this->unbind();
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
@@ -314,32 +305,17 @@ bool SSAO::setup()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_blurH, 0);
 
-        //genero la texture di blur verticale.
-        /*glGenTextures(1, &this->_blurV);
-        glBindTexture(GL_TEXTURE_2D, this->_blurV);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT2_EXT, GL_TEXTURE_2D, this->_blurV, 0);
-*/
         //genero il render buffer per il depth buffer
         glGenRenderbuffersEXT(1, &(this->_depth));
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
         glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
 
-        //e il depth buffer
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
 
 
 
         GLenum drawBuffers2[] = {GL_COLOR_ATTACHMENT0
-                                , GL_COLOR_ATTACHMENT1
-                                /*, GL_COLOR_ATTACHMENT2*/};
+                                , GL_COLOR_ATTACHMENT1};
 
         glDrawBuffersARB(1, drawBuffers2);
 
@@ -370,7 +346,6 @@ void SSAO::unbind()
 
         glPopAttrib();
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        //glDeleteFramebuffersEXT(1, &_fbo);
 }
 
 bool SSAO::compileAndLink(){
