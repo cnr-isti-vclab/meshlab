@@ -40,7 +40,8 @@ FilterTexturePlugin::FilterTexturePlugin()
 { 
 	typeList << FP_UVTOCOLOR
 			<< FP_UV_WEDGE_TO_VERTEX
-			<< FP_BASIC_TRIANGLE_MAPPING;
+			<< FP_BASIC_TRIANGLE_MAPPING
+			<< FP_SET_TEXTURE;
   
 	foreach(FilterIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
@@ -52,6 +53,7 @@ const QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 		case FP_UVTOCOLOR : return QString("UV to Color"); 
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
 		case FP_BASIC_TRIANGLE_MAPPING : return QString("Basic Triangle Mapping");
+		case FP_SET_TEXTURE : return QString("Set Texture");
 		default : assert(0); 
 	}
 }
@@ -65,6 +67,8 @@ const QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 		case FP_UVTOCOLOR :  return QString("Maps the UV Space into a color space, thus colorizing mesh vertices according to UV coords.");
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
 		case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a basic parametrization");
+		case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>"
+											 "If the texture provided exits it will be simply set else a dummy one will be created in the same directory");
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -77,6 +81,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
 		case FP_UVTOCOLOR : return MeshFilterInterface::FP_VertexTexCoord;
 		case FP_UV_WEDGE_TO_VERTEX : return MeshFilterInterface::FP_WedgeTexCoord;
 		case FP_BASIC_TRIANGLE_MAPPING : return MeshFilterInterface::FP_Face;
+		case FP_SET_TEXTURE : return MeshFilterInterface::FP_WedgeTexCoord;
 		default: assert(0);
 	}
 	return MeshFilterInterface::FP_Generic;
@@ -89,6 +94,7 @@ const int FilterTexturePlugin::getRequirements(QAction *a)
 		case FP_UVTOCOLOR :
 		case FP_UV_WEDGE_TO_VERTEX :
 		case FP_BASIC_TRIANGLE_MAPPING :
+		case FP_SET_TEXTURE :
 			return MeshModel::MM_NONE;
 		default: assert(0);	
 	}
@@ -102,6 +108,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 		case FP_UVTOCOLOR : return MeshModel::MM_VERTCOLOR;
 		case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
 		case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
+		case FP_SET_TEXTURE : return MeshModel::MM_UNKNOWN;
 		default: assert(0);	
 	}
 	return MeshModel::MM_NONE;
@@ -116,7 +123,8 @@ const FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 	{
 		case FP_UVTOCOLOR : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
 		case FP_UV_WEDGE_TO_VERTEX : 
-		case FP_BASIC_TRIANGLE_MAPPING : return MeshFilterInterface::Texture;
+		case FP_BASIC_TRIANGLE_MAPPING :
+		case FP_SET_TEXTURE : return MeshFilterInterface::Texture;
 		default : assert(0); 
 	}
 	return MeshFilterInterface::Generic;
@@ -142,6 +150,10 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 			parlst.addParam(new RichInt("textdim", 1024, "Texture Dimension (px)", "Gives an indication on how big the texture is"));
 			parlst.addParam(new RichInt("border", 1, "Inter-Triangle border (px)", "Specifies how many pixels to be left between triangles in parametrization domain"));
 			parlst.addParam(new RichEnum("method", 0, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
+			break;
+		case FP_SET_TEXTURE :
+			parlst.addParam(new RichString("textName", m.fileName.c_str(), "Texture file", "If the file exists it will be associated to the mesh else a dummy one will be created"));
+			parlst.addParam(new RichInt("textDim", 1024, "Texture Dimension (px)", "If the named texture doesn't exists the dummy one will be squared with this side"));
 			break;
 		default : assert(0); 
 	}
@@ -486,6 +498,11 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			}
 			Log(GLLogStream::FILTER, "Triangles catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
 			}
+		}
+		break;
+		
+		case FP_SET_TEXTURE : {
+			
 		}
 		break;
 			

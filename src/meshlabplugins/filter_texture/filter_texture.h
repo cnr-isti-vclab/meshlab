@@ -38,7 +38,8 @@ public:
 	enum {
 		FP_UVTOCOLOR,
 		FP_UV_WEDGE_TO_VERTEX,
-		FP_BASIC_TRIANGLE_MAPPING
+		FP_BASIC_TRIANGLE_MAPPING,
+		FP_SET_TEXTURE
 	};
 
 	FilterTexturePlugin();
