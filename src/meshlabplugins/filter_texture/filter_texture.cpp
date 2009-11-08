@@ -396,10 +396,13 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 						Tri2 &t = cache[pos];
 						tmp = t.P0(lEdge) + origin;
 						m.cm.face[idx].WT(0) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						m.cm.face[idx].WT(0).N() = 0;
 						tmp = t.P1(lEdge) + origin;
 						m.cm.face[idx].WT(1) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						m.cm.face[idx].WT(1).N() = 0;
 						tmp = t.P2(lEdge) + origin;
 						m.cm.face[idx].WT(2) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						m.cm.face[idx].WT(2).N() = 0;
 						--k[kidx];
 						cb(idx*100/faceNo, "Generating parametrization...");
 					}
@@ -460,15 +463,21 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 							topr.U() = 1.0/sideDim*(j/2+1);
 							CFaceO::TexCoordType bl(botl.U()+halfborder, botl.V()+halfborder+bordersq2);
 							CFaceO::TexCoordType tr(topr.U()-(halfborder+bordersq2), topr.V()-halfborder);
+							bl.N() = 0;
+							tr.N() = 0;
 							m.cm.face[idx].WT(lEdge) = bl;
 							m.cm.face[idx].WT((++lEdge)%3) = tr;
 							m.cm.face[idx].WT((++lEdge)%3) = CFaceO::TexCoordType(bl.U(), tr.V());
+							m.cm.face[idx].WT(lEdge%3).N() = 0;
 						} else {
 							CFaceO::TexCoordType bl(botl.U()+(halfborder+bordersq2), botl.V()+halfborder);
 							CFaceO::TexCoordType tr(topr.U()-halfborder, topr.V()-(halfborder+bordersq2));
+							bl.N() = 0;
+							tr.N() = 0;
 							m.cm.face[idx].WT(lEdge) = tr;
 							m.cm.face[idx].WT((++lEdge)%3) = bl;
 							m.cm.face[idx].WT((++lEdge)%3) = CFaceO::TexCoordType(tr.U(), bl.V());
+							m.cm.face[idx].WT(lEdge%3).N() = 0;
 						}
 						cb(idx*100/faceNo, "Generating parametrization...");
 						odd=!odd; ++j;
