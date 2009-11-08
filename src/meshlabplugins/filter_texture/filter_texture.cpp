@@ -25,14 +25,14 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <map>
+#include <pair.h>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/attribute_seam.h>
-#include <vcg/space/triangle3.h>
+#include <vcg/space/triangle2.h>
 
 #include "filter_texture.h"
 
@@ -51,7 +51,7 @@ const QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 	switch(filterId) {
 		case FP_UVTOCOLOR : return QString("UV to Color"); 
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
-		case FP_BASIC_TRIANGLE_MAPPING : return QString("Basic Tringle Mapping");
+		case FP_BASIC_TRIANGLE_MAPPING : return QString("Basic Triangle Mapping");
 		default : assert(0); 
 	}
 }
@@ -62,7 +62,7 @@ const QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
-		case FP_UVTOCOLOR :  return QString("Maps the UV Space into a color space (Red Green), thus colorizing mesh vertices according to UV coords.");
+		case FP_UVTOCOLOR :  return QString("Maps the UV Space into a color space, thus colorizing mesh vertices according to UV coords.");
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
 		case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a basic parametrization");
 		default : assert(0); 
@@ -138,9 +138,10 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 		case FP_UV_WEDGE_TO_VERTEX : 
 			break;
 		case FP_BASIC_TRIANGLE_MAPPING :
-			parlst.addParam(new RichInt("sidedim", 0, "Quads per line", "Indicates how many triangles have to be put on each line (every quad contains two triangles)"));
+			parlst.addParam(new RichInt("sidedim", 0, "Quads per line", "Indicates how many triangles have to be put on each line (every quad contains two triangles)\nLeave 0 for automatic calculation"));
 			parlst.addParam(new RichInt("textdim", 1024, "Texture Dimension (px)", "Gives an indication on how big the texture is"));
 			parlst.addParam(new RichInt("border", 1, "Inter-Triangle border (px)", "Specifies how many pixels to be left between triangles in parametrization domain"));
+			parlst.addParam(new RichEnum("method", 0, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
 			break;
 		default : assert(0); 
 	}
@@ -180,6 +181,56 @@ inline int getLongestEdge(const CMeshO::FaceType & f)
 			else                    res = 2;
 	return res;
 }
+
+inline bool cmp( pair<uint,double> a, pair<uint,double> b ) {
+	return a.second > b.second;
+}
+
+typedef vcg::Triangle2<CMeshO::FaceType::TexCoordType::ScalarType> Tri2;
+
+inline void buildTrianglesCache(std::vector<Tri2> &arr, int idx, int maxLevels, float border, float quadSize)
+{
+	static const float sqrt2 = sqrt(2.0);
+	
+	assert(idx >= -1);
+	Tri2 &t0 = arr[2*idx+2];
+	Tri2 &t1 = arr[2*idx+3];
+	if (idx == -1)
+	{
+		// build triangle 0
+		t0.P(0).X() = quadSize - (0.5 + 1.0/sqrt2)*border;
+		t0.P(1).X() = 0.5 * border;
+		t0.P(0).Y() = 1.0 - t0.P(1).X();
+		t0.P(1).Y() = 1.0 - t0.P(0).X();
+		t0.P(2).X() = t0.P(1).X();
+		t0.P(2).Y() = t0.P(0).Y();
+		// build triangle 1
+		t1.P(0).X() = (0.5 + 1.0/sqrt2)*border;
+		t1.P(1).X() = quadSize - 0.5 * border;
+		t1.P(0).Y() = 1.0 - t1.P(1).X();
+		t1.P(1).Y() = 1.0 - t1.P(0).X();
+		t1.P(2).X() = t1.P(1).X();
+		t1.P(2).Y() = t1.P(0).Y();
+	}
+	else {
+		// split triangle idx in t0 t1
+		Tri2 &t = arr[idx];
+		Tri2::CoordType midPoint = (t.P(0) + t.P(1)) / 2;
+		Tri2::CoordType vec01 = (t.P(1) - t.P(0)).Normalize() * (border/2.0);
+		t0.P(0) = t.P(1);
+		t1.P(1) = t.P(0);
+		t0.P(2) = midPoint + vec01;
+		t1.P(2) = midPoint - vec01;
+		t0.P(1) = t.P(2) + ( (t.P(1)-t.P(2)).Normalize() * border / sqrt2 );
+		t1.P(0) = t.P(2) + ( (t.P(0)-t.P(2)).Normalize() * border / sqrt2 );
+	}
+	if (--maxLevels <= 0) return;
+	buildTrianglesCache (arr, 2*idx+2, maxLevels, border, quadSize);
+	buildTrianglesCache (arr, 2*idx+3, maxLevels, border, quadSize);
+	
+}
+
+#define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
 ///////////////////////////////////////////////////////
 
 
@@ -241,7 +292,124 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			if (!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 				m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 			
+			bool adv;
+			switch(par.getEnum("method")) {
+				case 0 : adv = false; break; // Basic
+				case 1 : adv = true; break;  // Advanced
+				default : assert(0);
+			};
+			
 			static const float sqrt2 = sqrt(2.0);
+			
+			if (adv)
+			{ //ADVANCED
+			
+			// Get Parameters
+			int sideDim = par.getInt("sidedim");
+			int textDim = par.getInt("textdim");
+			int pxBorder = par.getInt("border");
+			
+			float border = ((float)pxBorder) / textDim;
+			
+			// Pre checks
+			CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
+			CheckError(border < 0,   "Inter-Triangle border has an incorrect value");
+			CheckError(sideDim < 0,  "Quads per line border has an incorrect value");
+			
+			// Creates a vector of pair <face index, double area> area ordered (not increasingly) O(n logn)
+			std::vector<pair<uint,double> > faces;
+			for (uint i=0; i<m.cm.face.size(); ++i)
+				if (!m.cm.face[i].IsD()) faces.push_back( pair<uint,double>(i, DoubleArea(m.cm.face[i])) );
+			sort(faces.begin(), faces.end(), cmp);
+			
+			int faceNo = faces.size();
+			
+			// Counts faces for each halfening level O(n)
+			std::vector<int> k;
+			double baseArea = faces.front().second / 2.0;
+			int idx=0, maxHalfening=0;
+			while (idx < faceNo) {
+				int no=0;
+				while (idx<faceNo && faces[idx].second>baseArea) { ++no; ++idx; }
+				k.push_back(no);
+				baseArea /= 2.0;
+				++maxHalfening;
+			}
+			
+			// Calculating optimal dimension (considering faces areas and border dimension)
+			int dim = 0;
+			int halfeningLevels = 0;
+			
+			double qn = 0., divisor = 2.0;
+			int rest = faceNo, oneFact = 1, sqrt2Fact = 1;
+			while (halfeningLevels < maxHalfening)
+			{
+				int tmp;
+				if (sideDim == 0) tmp = (int)ceil(sqrt(qn + rest/divisor));
+				else tmp = sideDim;
+
+				if (1.0/tmp < (sqrt2Fact/sqrt2 + oneFact)*border) break;
+				
+				rest -= k[halfeningLevels];
+				qn += k[halfeningLevels] / divisor;
+				divisor *= 2.0;
+				
+				if (halfeningLevels%2)
+					oneFact *= 2;
+				else
+					sqrt2Fact *= 2;
+				
+				dim = tmp;
+				halfeningLevels++;
+			}
+			
+			// Post checks
+			CheckError(halfeningLevels==0 && sideDim!=0, "Quads per line aren't enough to obtain a correct parametrization");
+			CheckError(halfeningLevels==0 && sideDim==0, "Inter-Triangle border is too much");
+			
+			//Create cache of possible triangles (need only translation in correct position)
+			std::vector<Tri2> cache((1 << (halfeningLevels+1))-2);
+			buildTrianglesCache(cache, -1, halfeningLevels, border, 1.0/dim);
+			
+			// Setting texture coordinates (finally)
+			Tri2::CoordType origin(0., 0.);
+			Tri2::CoordType tmp;
+			idx = 0;
+			int currLevel = 1, kidx = 0;
+			for (int i=0; i<dim && idx<faceNo; ++i)
+			{
+				origin.Y() = -((float)i)/dim;
+				for (int j=0; j<dim && idx<faceNo; j++)
+				{
+					origin.X() = ((float)j)/dim;
+					for (int pos=(1<<currLevel)-2; pos<(1<<(currLevel+1))-2 && idx<faceNo; ++pos, ++idx)
+					{
+						while (k[kidx] == 0) {
+							if (++kidx < halfeningLevels)
+							{
+								++currLevel;
+								pos = 2*pos+2;
+							}
+						}
+						int fidx = faces[idx].first;
+						int lEdge = getLongestEdge(m.cm.face[fidx]);
+						Tri2 &t = cache[pos];
+						tmp = t.P0(lEdge) + origin;
+						m.cm.face[idx].WT(0) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						tmp = t.P1(lEdge) + origin;
+						m.cm.face[idx].WT(1) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						tmp = t.P2(lEdge) + origin;
+						m.cm.face[idx].WT(2) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						--k[kidx];
+						cb(idx*100/faceNo, "Generating parametrization...");
+					}
+				}
+			}
+			assert(idx == faceNo);
+			
+			}
+			else
+			{ //BASIC
 			
 			// Get Parameters
 			int sideDim = par.getInt("sidedim");
@@ -257,23 +425,17 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			// Minimum side dimension to get correct halfsquared triangles
 			int optimalDim = ceilf(sqrtf(faceNotD/2.));
 			if (sideDim == 0) sideDim = optimalDim;
-			else if (optimalDim > sideDim)
-			{
-				this->errorMessage = "Triangles per lines aren't enough to obtain a correct parametrization";
-				return false;
+			else {
+				CheckError(optimalDim > sideDim, "Quads per line aren't enough to obtain a correct parametrization");
 			}
+			CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
+			
 			
 			//Calculating border size in UV space
 			float border = ((float)pxBorder) / textDim;
-			if (border < 0)
-			{
-				this->errorMessage = "Inter-Triangle border has an incorrect value";
-				return false;
-			} else if (border*(1.0+sqrt2)*sideDim > 1.0)
-			{
-				this->errorMessage = "Inter-Triangle border is too much";
-				return false;
-			}
+			CheckError(border < 0, "Inter-Triangle border has an incorrect value");
+			CheckError(border*(1.0+sqrt2)*sideDim > 1.0, "Inter-Triangle border is too much");
+			
 			float bordersq2 = border / sqrt2;
 			float halfborder = border / 2;
 			
@@ -310,6 +472,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 						odd=!odd; ++j;
 					}
 				}
+			}
 			}
 		}
 		break;
