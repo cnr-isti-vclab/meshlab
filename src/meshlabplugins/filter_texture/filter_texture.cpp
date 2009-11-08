@@ -316,7 +316,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			CheckError(border < 0,   "Inter-Triangle border has an incorrect value");
 			CheckError(sideDim < 0,  "Quads per line border has an incorrect value");
 			
-			// Creates a vector of pair <face index, double area> area ordered (not increasingly) O(n logn)
+			// Creates a vector of pair <face index, double area> area ordered (not increasingly) O(n logn) UNACCEPTABLE
 			std::vector<pair<uint,double> > faces;
 			for (uint i=0; i<m.cm.face.size(); ++i)
 				if (!m.cm.face[i].IsD()) faces.push_back( pair<uint,double>(i, DoubleArea(m.cm.face[i])) );
@@ -395,14 +395,14 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 						int lEdge = getLongestEdge(m.cm.face[fidx]);
 						Tri2 &t = cache[pos];
 						tmp = t.P0(lEdge) + origin;
-						m.cm.face[idx].WT(0) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
-						m.cm.face[idx].WT(0).N() = 0;
+						m.cm.face[fidx].WT(0) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						m.cm.face[fidx].WT(0).N() = 0;
 						tmp = t.P1(lEdge) + origin;
-						m.cm.face[idx].WT(1) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
-						m.cm.face[idx].WT(1).N() = 0;
+						m.cm.face[fidx].WT(1) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						m.cm.face[fidx].WT(1).N() = 0;
 						tmp = t.P2(lEdge) + origin;
-						m.cm.face[idx].WT(2) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
-						m.cm.face[idx].WT(2).N() = 0;
+						m.cm.face[fidx].WT(2) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
+						m.cm.face[fidx].WT(2).N() = 0;
 						--k[kidx];
 						cb(idx*100/faceNo, "Generating parametrization...");
 					}
