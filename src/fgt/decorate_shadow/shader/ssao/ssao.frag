@@ -17,7 +17,7 @@ const float totStrength = 2.38;
 const float strength = 0.5;
 const float offset = 18.0;
 const float falloff = 0.000002;
-const float rad = 0.009;
+const float rad = 0.002;
 #define SAMPLES 16 // 10 is good
 const float invSamples = -1.38/10.0;
 
