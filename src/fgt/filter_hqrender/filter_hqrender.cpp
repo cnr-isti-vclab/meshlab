@@ -444,6 +444,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	QFile::copy(destDir + QDir::separator() + par.getString("ImageName"), finalImage);
     
 	//delete all files (if it's required)
+	
 
 	return true;
 }
@@ -535,8 +536,8 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 				float meshZ = m.cm.trBB().DimZ();
 
 				float ratioX = dummyX / meshX;
-				float ratioY = dummyY / meshZ;
-				float ratioZ = dummyZ / meshY;
+				float ratioY = dummyY / meshY;
+				float ratioZ = dummyZ / meshZ;
 				scale = std::min<float>(ratioX, ratioY);
 				scale = std::min<float>(scale, ratioZ);
 				scaleMatrix.SetScale(scale,scale,scale);
@@ -545,7 +546,7 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 			//center mesh
 			vcg::Point3f c = m.cm.trBB().Center();
 			vcg::Matrix44f translateBBMatrix;
-			translateBBMatrix.SetTranslate(-c[0],-c[2],-c[1]);
+			translateBBMatrix.SetTranslate(-c[0],-c[1],-c[2]);
 			
 			//align
 			float dx = 0.0, dy = 0.0, dz = 0.0;
@@ -568,7 +569,7 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 					dz = -dz;
 			}
 			vcg::Matrix44f alignMatrix;
-			alignMatrix = alignMatrix.SetTranslate(dx,dz,dy);
+			alignMatrix = alignMatrix.SetTranslate(dx,dy,dz);
 
 			vcg::Matrix44f result = templateMatrix * alignMatrix * scaleMatrix * translateBBMatrix;			
 			//write transformation matrix (after transpose it)
@@ -604,9 +605,9 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 		if(token[0].trimmed() == "Surface") {
 			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
 				foreach(QString textureName, *textureList) {
-					//fprintf(fout,"Surface \"paintedplastic\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 1.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"sticky_texture\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
-					fprintf(fout,"Surface \"mytexmap\" \"name\" \"%s.tx\"\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					//fprintf(fout,"Surface \"mytexmap\" \"name\" \"%s.tx\"\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					
 				}
 			}
