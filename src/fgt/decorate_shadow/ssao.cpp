@@ -98,7 +98,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
         glDisable(GL_POLYGON_OFFSET_FILL);
-        //this->printColorMap(this->_normalMap, "_normals.png");
+        this->printColorMap(this->_normalMap, "_normals.png");
         glUseProgram(0);
 
         /***********************************************************/
@@ -184,7 +184,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
                     glVertex3f(-this->_texSize/2,this->_texSize/2,0);
             glEnd();
 
-        this->printColorMap(this->_blurH, "./_blurOrizzontale.png");
+        //this->printColorMap(this->_blurH, "./_blurOrizzontale.png");
 
         /***********************************************************/
         //BLURRING vertical
@@ -503,7 +503,7 @@ bool SSAO::compileAndLink(){
 bool SSAO::loadNoiseTxt(){
 
     QImage image = QImage();
-    QString textureName = QString("./noise.png");
+    QString textureName = QString(":/noise.png");
     //fileName = textureName;
     if (QFile(textureName).exists())
     {
@@ -513,6 +513,10 @@ bool SSAO::loadNoiseTxt(){
             //QImage imgGL = image.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
             QImage tmpGL = QGLWidget::convertToGLFormat(image);
             image = QImage(tmpGL);
+    }
+    else {
+        qDebug("Warning failed to load noise texture!");
+        assert(0);
     }
     // Creates The Texture
     glGenTextures(1, &(this->_noise));
