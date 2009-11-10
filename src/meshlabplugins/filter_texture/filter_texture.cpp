@@ -24,6 +24,7 @@
 #include <QtGui>
 
 #include <math.h>
+#include <float.h>
 #include <stdlib.h>
 #include <pair.h>
 
@@ -314,7 +315,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			static const float sqrt2 = sqrt(2.0);
 			
 			if (adv)
-			{ //ADVANCED
+			{ //ADVANCED SPACE-OPTIMIZING
 			
 			// Get Parameters
 			int sideDim = par.getInt("sidedim");
@@ -329,41 +330,47 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			CheckError(sideDim < 0,  "Quads per line border has an incorrect value");
 			
 			// Creates a vector of pair <face index, double area> area ordered (not increasingly) O(n logn) UNACCEPTABLE
+			double maxArea = -1, minArea=DBL_MAX;
 			std::vector<pair<uint,double> > faces;
 			for (uint i=0; i<m.cm.face.size(); ++i)
-				if (!m.cm.face[i].IsD()) faces.push_back( pair<uint,double>(i, DoubleArea(m.cm.face[i])) );
-			sort(faces.begin(), faces.end(), cmp);
+			{
+				if (!m.cm.face[i].IsD())
+				{
+					double area = DoubleArea(m.cm.face[i]);
+					if (area == 0) area = DBL_MIN;
+					if (area > maxArea) maxArea = area;
+					if (area < minArea) minArea = area;
+					faces.push_back(pair<uint,double>(i, area));
+				}
+			}
+			//sort(faces.begin(), faces.end(), cmp);
 			
 			int faceNo = faces.size();
-			
-			// Counts faces for each halfening level O(n)
-			std::vector<int> k;
-			double baseArea = faces.front().second / 2.0;
-			int idx=0, maxHalfening=0;
-			while (idx < faceNo) {
-				int no=0;
-				while (idx<faceNo && faces[idx].second>baseArea) { ++no; ++idx; }
-				k.push_back(no);
-				baseArea /= 2.0;
-				++maxHalfening;
+			int	buckSize = (int)ceil(log2(maxArea/minArea) + DBL_EPSILON);
+			std::vector<std::vector<uint> > buckets(buckSize);
+			for (std::vector<pair<uint,double> >::iterator it=faces.begin(); it != faces.end(); ++it)
+			{
+				int slot = (int)ceil(log2(maxArea/it->second) + DBL_EPSILON) - 1;
+				assert(slot < buckSize);
+				assert(slot >= 0);
+				buckets[slot].push_back(it->first);
 			}
 			
-			// Calculating optimal dimension (considering faces areas and border dimension)
 			int dim = 0;
 			int halfeningLevels = 0;
-			
+				
 			double qn = 0., divisor = 2.0;
 			int rest = faceNo, oneFact = 1, sqrt2Fact = 1;
-			while (halfeningLevels < maxHalfening)
+			while (halfeningLevels < buckSize)
 			{
 				int tmp;
 				if (sideDim == 0) tmp = (int)ceil(sqrt(qn + rest/divisor));
 				else tmp = sideDim;
-
+				
 				if (1.0/tmp < (sqrt2Fact/sqrt2 + oneFact)*border) break;
 				
-				rest -= k[halfeningLevels];
-				qn += k[halfeningLevels] / divisor;
+				rest -= buckets[halfeningLevels].size();
+				qn += buckets[halfeningLevels].size() / divisor;
 				divisor *= 2.0;
 				
 				if (halfeningLevels%2)
@@ -379,6 +386,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			CheckError(halfeningLevels==0 && sideDim!=0, "Quads per line aren't enough to obtain a correct parametrization");
 			CheckError(halfeningLevels==0 && sideDim==0, "Inter-Triangle border is too much");
 			
+			// Buckets recompacting
+			std::vector<uint> &last = buckets[halfeningLevels-1];
+			for (int i=halfeningLevels; i<buckSize; ++i)
+				last.insert(last.end(), buckets[i].begin(), buckets[i].end());
+			buckets.resize(halfeningLevels);
+				
 			//Create cache of possible triangles (need only translation in correct position)
 			std::vector<Tri2> cache((1 << (halfeningLevels+1))-2);
 			buildTrianglesCache(cache, -1, halfeningLevels, border, 1.0/dim);
@@ -386,24 +399,26 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			// Setting texture coordinates (finally)
 			Tri2::CoordType origin(0., 0.);
 			Tri2::CoordType tmp;
-			idx = 0;
-			int currLevel = 1, kidx = 0;
-			for (int i=0; i<dim && idx<faceNo; ++i)
+			int buckIdx=0, face=0;
+			std::vector<uint>::iterator it = buckets[buckIdx].begin();
+			int currLevel = 1; //, kidx = 0;
+			for (int i=0; i<dim && face<faceNo; ++i)
 			{
 				origin.Y() = -((float)i)/dim;
-				for (int j=0; j<dim && idx<faceNo; j++)
+				for (int j=0; j<dim && face<faceNo; j++)
 				{
 					origin.X() = ((float)j)/dim;
-					for (int pos=(1<<currLevel)-2; pos<(1<<(currLevel+1))-2 && idx<faceNo; ++pos, ++idx)
+					for (int pos=(1<<currLevel)-2; pos<(1<<(currLevel+1))-2 && face<faceNo; ++pos, ++face)
 					{
-						while (k[kidx] == 0) {
-							if (++kidx < halfeningLevels)
+						while (it == buckets[buckIdx].end()) {
+							if (++buckIdx < buckSize)
 							{
 								++currLevel;
 								pos = 2*pos+2;
+								it = buckets[buckIdx].begin();
 							}
 						}
-						int fidx = faces[idx].first;
+						int fidx = *it;
 						int lEdge = getLongestEdge(m.cm.face[fidx]);
 						Tri2 &t = cache[pos];
 						tmp = t.P0(lEdge) + origin;
@@ -415,12 +430,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 						tmp = t.P2(lEdge) + origin;
 						m.cm.face[fidx].WT(2) = CFaceO::TexCoordType(tmp.X(), tmp.Y());
 						m.cm.face[fidx].WT(2).N() = 0;
-						--k[kidx];
-						cb(idx*100/faceNo, "Generating parametrization...");
+						++it;
+						cb(face*100/faceNo, "Generating parametrization...");
 					}
 				}
 			}
-			assert(idx == faceNo);
+			assert(face == faceNo);
 			Log(GLLogStream::FILTER, "Biggest triangle's catheti are %.2f px long", (cache[0].P(0)-cache[0].P(2)).Norm() * textDim);
 			Log(GLLogStream::FILTER, "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
 			
@@ -458,18 +473,18 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			
 			bool odd = true;
 			CFaceO::TexCoordType botl, topr;
-			int idx=0;
+			int face=0;
 			botl.V() = 1.;
-			for (int i=0; i<sideDim && idx<faceNo; ++i)
+			for (int i=0; i<sideDim && face<faceNo; ++i)
 			{
 				topr.V() = botl.V();
 				topr.U() = 0.;
 				botl.V() = 1.0 - 1.0/sideDim*(i+1);
-				for (int j=0; j<2*sideDim && idx<faceNo; ++idx)
+				for (int j=0; j<2*sideDim && face<faceNo; ++face)
 				{
-					if (!m.cm.face[idx].IsD())
+					if (!m.cm.face[face].IsD())
 					{
-						int lEdge = getLongestEdge(m.cm.face[idx]);
+						int lEdge = getLongestEdge(m.cm.face[face]);
 						if (odd) {
 							botl.U() = topr.U();
 							topr.U() = 1.0/sideDim*(j/2+1);
@@ -477,21 +492,21 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 							CFaceO::TexCoordType tr(topr.U()-(halfborder+bordersq2), topr.V()-halfborder);
 							bl.N() = 0;
 							tr.N() = 0;
-							m.cm.face[idx].WT(lEdge) = bl;
-							m.cm.face[idx].WT((++lEdge)%3) = tr;
-							m.cm.face[idx].WT((++lEdge)%3) = CFaceO::TexCoordType(bl.U(), tr.V());
-							m.cm.face[idx].WT(lEdge%3).N() = 0;
+							m.cm.face[face].WT(lEdge) = bl;
+							m.cm.face[face].WT((++lEdge)%3) = tr;
+							m.cm.face[face].WT((++lEdge)%3) = CFaceO::TexCoordType(bl.U(), tr.V());
+							m.cm.face[face].WT(lEdge%3).N() = 0;
 						} else {
 							CFaceO::TexCoordType bl(botl.U()+(halfborder+bordersq2), botl.V()+halfborder);
 							CFaceO::TexCoordType tr(topr.U()-halfborder, topr.V()-(halfborder+bordersq2));
 							bl.N() = 0;
 							tr.N() = 0;
-							m.cm.face[idx].WT(lEdge) = tr;
-							m.cm.face[idx].WT((++lEdge)%3) = bl;
-							m.cm.face[idx].WT((++lEdge)%3) = CFaceO::TexCoordType(tr.U(), bl.V());
-							m.cm.face[idx].WT(lEdge%3).N() = 0;
+							m.cm.face[face].WT(lEdge) = tr;
+							m.cm.face[face].WT((++lEdge)%3) = bl;
+							m.cm.face[face].WT((++lEdge)%3) = CFaceO::TexCoordType(tr.U(), bl.V());
+							m.cm.face[face].WT(lEdge%3).N() = 0;
 						}
-						cb(idx*100/faceNo, "Generating parametrization...");
+						cb(face*100/faceNo, "Generating parametrization...");
 						odd=!odd; ++j;
 					}
 				}
