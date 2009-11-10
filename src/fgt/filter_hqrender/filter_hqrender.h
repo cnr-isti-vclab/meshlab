@@ -6,9 +6,9 @@
 #include <QString>
 #include <QStringList>
 #include <RibFileStack.h>
-#include <export_rib.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <export_rib.h>
 
 
 class FilterHighQualityRender : public QObject, public MeshFilterInterface

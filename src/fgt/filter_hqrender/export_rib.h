@@ -4,6 +4,7 @@
 //#include<wrap/ply/io_mask.h>
 #include<wrap/io_trimesh/io_mask.h>
 #include<wrap/callback.h>
+#include<vcg/complex/trimesh/clean.h>
 //#include<vcg/container/simple_temporary_data.h>
 
 
@@ -58,7 +59,7 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
     fprintf(fout,"Declare \"N\" \"facevarying normal\"\n");
 
 
-  Clean<SaveMeshType>::RemoveUnreferencedVertex(m);
+  tri::Clean<SaveMeshType>::RemoveUnreferencedVertex(m);
   Allocator<SaveMeshType>::CompactVertexVector(m);
   Allocator<SaveMeshType>::CompactFaceVector(m);
   
@@ -73,7 +74,7 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
 
   //second step: index of vertex for face
   UpdateFlags<SaveMeshType>::VertexClearV(m);
-  for(SaveMeshType::FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+  for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
     for(int j=0; j<3; ++j) {						
       int indexOfVertex = (*fi).V(j) - &(m.vert[0]);
 	  fprintf(fout,"%i ",indexOfVertex);
@@ -93,7 +94,7 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   Matrix44f mat = Matrix44f::Identity();
   //mat = mat.SetRotateDeg(180.0,vcg::Point3f(0.0,1.0,0.0));
   mat = mat.SetScale(1.0,1.0,-1.0);
-  for(SaveMeshType::VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi) {
+  for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi) {
     if(vi->IsV()) {
 	  Point3f p = mat * vi->P();
 	  fprintf(fout,"%g %g %g\n",p[0],p[1],p[2]);
@@ -106,7 +107,7 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   //fourth step: vertex normal
   if(HasPerVertexNormal(m) && (savemask & Mask::IOM_VERTNORMAL)) {
     fprintf(fout,"\"N\"\n[\n");
-    for(SaveMeshType::FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+    for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
 	  //for each face, foreach vertex write normal
 	  for(int j=0; j<3; ++j) {			
 	    Point3f &n=(*fi).V(j)->N();
@@ -120,7 +121,7 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   //fifth step: vertex color (ignore face color?)
   if(m.HasPerVertexColor() && (savemask & Mask::IOM_VERTCOLOR)) {
     fprintf(fout,"\"Cs\"\n[\n");
-	for(SaveMeshType::FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
 	  //for each face, foreach vertex write color
 	  for(int j=0; j<3; ++j) {
 	    Color4b &c=(*fi).V(j)->C();
@@ -136,7 +137,7 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   if((HasPerVertexTexCoord(m) && (savemask & Mask::IOM_VERTTEXCOORD)) || 
 	  (HasPerWedgeTexCoord(m) && (savemask & Mask::IOM_WEDGTEXCOORD))) {
 	fprintf(fout,"\"st\"\n[\n");
-	for(SaveMeshType::FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
 	  //for each face, foreach vertex write uv coord
 	  for(int j=0; j<3; ++j) {
 	    fprintf(fout,"%g %g ",(*fi).WT(j).U(),1.0 - (*fi).WT(j).V());
