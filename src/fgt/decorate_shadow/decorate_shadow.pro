@@ -17,3 +17,4 @@ SOURCES = decorate_shadow.cpp \
     variance_shadow_mapping_blur.cpp \
     ssao.cpp
 TARGET = decorate_shadow
+RESOURCES    += noise.qrc
