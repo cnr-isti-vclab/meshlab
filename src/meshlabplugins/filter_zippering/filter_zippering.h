@@ -207,6 +207,44 @@ struct aux_info {
         return trash.size();
     }
 
+	// Add vertex in original triangle
+	virtual bool addVertex( CMeshO::VertexPointer v, int v_index ) {
+		int cnt = 0; int split = -1;
+		for ( int i = 0; i < trash.size(); i ++ ) {	//one component only
+			for ( int j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
+				if ( vcg::SquaredDistance<float>( trash[i].edges[j], v->P() ) <= eps ) { 
+					 cnt++; split = j;
+				}	
+			}
+		}
+		if (!cnt) return false;
+
+		if ( cnt == 1 ) {		//one edge only -> split the edge
+			vcg::Segment3<CMeshO::ScalarType> splitting_edge = trash[0].edges[split];
+			std::pair<int, int>  splitting_edge_v = trash[0].verts[split];
+
+			trash[0].edges.erase(trash[0].edges.begin()+split);		//remove edge
+			trash[0].verts.erase(trash[0].verts.begin()+split);
+			//replace edge using two new edges
+			trash[0].edges.insert(trash[0].edges.begin()+split, vcg::Segment3<CMeshO::ScalarType>( splitting_edge.P0(), v->P() ) );
+			trash[0].edges.insert(trash[0].edges.begin()+split+1, vcg::Segment3<CMeshO::ScalarType>( v->P(), splitting_edge.P1() ) );
+			trash[0].verts.insert(trash[0].verts.begin()+split, std::make_pair( splitting_edge_v.first, v_index ) );
+			trash[0].verts.insert(trash[0].verts.begin()+split+1, std::make_pair( v_index, splitting_edge_v.second ) );
+		}
+
+		if ( cnt == 2 ) {	// search for closest vertex and copy vertex coords
+			for ( int i = 0; i < trash.size(); i ++ ) {	//one component only
+				for ( int j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
+					if ( vcg::Distance<float>( trash[i].edges[j].P0(), v->P() ) <= eps ) { 
+						 v->P() = trash[i].edges[j].P0();
+					}	
+				}
+			}
+		}
+
+		return true;
+	}
+
 };//end struct
 
 class compareFaceQuality {
