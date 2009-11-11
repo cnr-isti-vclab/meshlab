@@ -10,7 +10,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
-#define NO_RENDERING
+//#define NO_RENDERING
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -403,7 +403,10 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 #if defined(Q_OS_WIN)
 	//if os is win and a dir contains a space, it must be wrapped in quotes (..\"Program files"\..)
-	QStringList dirs = aqsisDir.split(QDir::separator());
+	aqsisDir = quotesPath(&aqsisDir);
+	dest = getDirFromPath(&dest);
+	dest = quotesPath(&dest);
+	/*QStringList dirs = aqsisDir.split(QDir::separator());
 	aqsisDir.clear();
 	for(int i = 0; i < dirs.size(); i++) {
 		if(!dirs[i].contains(" "))
@@ -423,7 +426,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		
 		if(!dirs[i].contains("."))
 			dest += QDir::separator();
-	}
+	}*/
 #endif
 	QProcess renderProcess;
 	renderProcess.setWorkingDirectory(destDir); //for the shaders/maps reference
@@ -448,22 +451,6 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 	return true;
 }
-/*
-int FilterHighQualityRender::ignoreObject(RibFileStack* files) {
-	int c = 1; //the number of AttributeBegin statement readed
-	bool exit = false;
-	while(!files->isEmpty() && c!=0) {
-		QString line = files->topNextLine();
-		QStringList token = line.split(' ');
-		
-		if(token[0].trimmed() == "AttributeBegin")
-			++c;
-		if(token[0].trimmed() == "AttributeEnd")
-			--c;		
-	}
-	return 0; //errors...
-}*/
-
 
 int FilterHighQualityRender::makeAnimation(FILE* fout, int numOfFrame,vcg::Matrix44f transfCamera, QStringList frameDeclaration, QString imageName) {
 	//with numOfFrame+2 the last image is the same of first
@@ -605,10 +592,11 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 		if(token[0].trimmed() == "Surface") {
 			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
 				foreach(QString textureName, *textureList) {
-					fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 1.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"sticky_texture\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"mytexmap\" \"name\" \"%s.tx\"\n", qPrintable(getFileNameFromPath(&textureName,false)));
-					
+					//fprintf(fout,"Surface \"MOSAICsurface\" \"uniform float ColMix\" [ 1.0 ] \"uniform string ColMap\" [ \"%s.tx\" ] \"uniform float Amb\" [ 0.5 ] \"uniform color AmbCol\" [ 0.0 0.0 0.0 ]", qPrintable(getFileNameFromPath(&textureName,false)));
+					//fprintf(fout,"Surface \"texmap\" \"texname\" [\"%s.tx\"]\n",qPrintable(getFileNameFromPath(&textureName,false)));
 				}
 			}
 		}
@@ -682,6 +670,22 @@ QString FilterHighQualityRender::getFileNameFromPath(QString* path, bool type) {
 		return temp;
 	else
 		return temp.left(temp.lastIndexOf('.'));
+}
+
+
+QString FilterHighQualityRender::quotesPath(QString* path) {
+	//if path contains a space, is wrapped in quotes (e.g. ..\"Program files"\..)
+	QStringList dirs = path->split(QDir::separator());
+	QString temp("");
+	for(int i = 0; i < dirs.size(); i++) {
+		if(!dirs[i].contains(" "))
+			temp += dirs[i];
+		else
+			temp = temp + "\"" + dirs[i] + "\"";
+		temp += QDir::separator();
+	}
+	//the final of path is separator!!!
+	return temp;
 }
 
 Q_EXPORT_PLUGIN(FilterHighQualityRender)

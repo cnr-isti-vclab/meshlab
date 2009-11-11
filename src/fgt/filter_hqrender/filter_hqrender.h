@@ -42,6 +42,7 @@ private:
   vcg::Matrix44f readMatrix(RibFileStack* files,QString line);
   QString getDirFromPath(QString* path);
   QString getFileNameFromPath(QString* path, bool type = true);
+  QString quotesPath(QString* path);
 };
 
 #endif
