@@ -126,7 +126,7 @@ template<class TriMeshType>
     std::string MeshName(int i) const {return meshnames[i];}
     float W(int i) const {return WV[i];}
 
-    void Clear();
+    void Clear()
     {
       meshnames.clear();
       TrV.clear();
