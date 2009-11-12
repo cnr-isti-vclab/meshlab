@@ -2,9 +2,13 @@
 #define SIMPLEMESHPROVIDER_H
 #include "../../meshlab/alnParser.h"
 #include <list>
+#include <vector>
 #include <vcg/space/box3.h>
 #include <wrap/ply/plystuff.h>
 #include <wrap/io_trimesh/import.h>
+
+using namespace std;
+using namespace vcg;
 
 template<class TriMeshType>
         class MeshCache
@@ -82,15 +86,27 @@ template<class TriMeshType>
 {
     std::vector< std::string > meshnames;
     std::vector<vcg::Matrix44f> TrV;
-    std::vector<float> WV;					// vettore con i pesi da applicare alla mesh.
-    std::vector<vcg::Box3f> BBV;        // vettore con i bbox trasformati delle mesh da scannare.
+    std::vector<float> WV;		    // vettore con i pesi da applicare alla mesh.
+    std::vector<vcg::Box3f> BBV;	    // vettore con i bbox trasformati delle mesh da scannare.
     vcg::Box3f fullBBox;
     MeshCache<TriMeshType> MC;
+
     public:
+
     int size() {return meshnames.size();}
+
     bool openALN (const char* alnName)
     {
-//        AlnParser::
+      vector<RangeMap> rmaps;
+      ALNParser::ParseALN(rmaps, alnName);
+
+      for(int i=0; i<rmaps.size(); i++)
+      {
+	TrV.push_back(rmaps[i].trasformation);
+	meshnames.push_back(rmaps[i].filename);
+	WV.push_back(rmaps[i].quality);
+	BBV.push_back(Box3f());
+      }
       return true;
     }
 
@@ -103,12 +119,23 @@ template<class TriMeshType>
         WV.push_back(1);
         BBV.push_back(Box3f());
     }
+
     vcg::Box3f bb(int i) {return BBV[i];}
     vcg::Box3f fullBB(){ return fullBBox;}
     vcg::Matrix44f Tr(int i) const  {return TrV[i];}
     std::string MeshName(int i) const {return meshnames[i];}
     float W(int i) const {return WV[i];}
+
     void Clear();
+    {
+      meshnames.clear();
+      TrV.clear();
+      WV.clear();
+      BBV.clear();
+      fullBBox.SetNull();
+      MC.clear();
+    }
+
     bool Find(int i, TriMeshType * &sm)
     {
         return MC.Find(meshnames[i],sm);
@@ -116,33 +143,36 @@ template<class TriMeshType>
 
     bool InitBBox()
     {
+	fullBBox.SetNull();
+
         for(int i=0;i<int(meshnames.size());++i)
         {
             Box3d b;
-            fullBBox.SetNull();
             bool ret;
             Matrix44f mt;
             Matrix44f Id; Id.SetIdentity();
             mt.Import(TrV[i]);
-            printf("bbox scanning %i/%i '%16s'      \r",i,(int)meshnames.size(), meshnames[i].c_str());
+	    printf("bbox scanning %4i/%i [%16s]      \r",i+1,(int)meshnames.size(), meshnames[i].c_str());
             if(tri::io::Importer<TriMeshType>::FileExtension(meshnames[i],"PLY"))
             {
-            if(!(TrV[i]==Id))
-                ret=ply::ScanBBox(meshnames[i].c_str(),BBV[i],mt,true,0);
-            else
-                ret=vcg::ply::ScanBBox(meshnames[i].c_str(),BBV[i]);
-            if( ! ret) {
-                printf("\n\nwarning:\n file '%s' not found\n",meshnames[i].c_str());
-                continue;
-            }
-        }else
+	      if(!(TrV[i]==Id))
+		  ret=ply::ScanBBox(meshnames[i].c_str(),BBV[i],mt,true,0);
+	      else
+		  ret=vcg::ply::ScanBBox(meshnames[i].c_str(),BBV[i]);
+	      if( ! ret)
+	      {
+		  printf("\n\nwarning:\n file '%s' not found\n",meshnames[i].c_str());
+		  continue;
+	      }
+	    }
+	    else
             {
                 TriMeshType m;
                 tri::io::Importer<TriMeshType>::Open(m,meshnames[i].c_str());
                 tri::UpdateBounding<TriMeshType>::Box(m);
                 BBV[i].Import(m.bbox);
             }
-            fullBBox.Add(BBV[i]);
+	    fullBBox.Add(BBV[i]);
         }
         return true;
     }

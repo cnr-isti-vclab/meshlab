@@ -172,7 +172,7 @@ void InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
     tri::io::Importer<SMesh>::Open(m,filename);
     tri::UpdatePosition<SMesh>::Matrix(m,Tr,false);
     tri::UpdateBounding<SMesh>::Box(m);
-    printf("Init Mesh %s (%ivn,%ifn)",filename,m.vn,m.fn);
+    printf("Init Mesh %s (%ivn,%ifn)\n",filename,m.vn,m.fn);
 
 
     tri::UpdateNormals<SMesh>::PerVertexNormalizedPerFaceNormalized(m);
@@ -309,7 +309,7 @@ void Process()
     // Calcolo gridsize
     Point3i gridsize;
     Point3f voxdim;
-    fullb.Offset(fullb.Diag() * 0.2 );
+    fullb.Offset(fullb.Diag() * 0.1 );
     int saveMask;
    if(!p.MergeColor) saveMask &= tri::io::Mask::IOM_VERTCOLOR ;
 

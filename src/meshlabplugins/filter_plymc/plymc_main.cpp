@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
     int t1=clock();
     pmc.Process();
     int t2=clock();
-		// Scansione bbox
+
 
 	return 0;
 }

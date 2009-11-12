@@ -18,4 +18,5 @@ HEADERS = plymc.h \
     volume.h \
     trivial_walker.h \
     tri_edge_collapse_mc.h \
-    simplemeshprovider.h
+    simplemeshprovider.h \
+    ../../meshlab/alnParser.h
