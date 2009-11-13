@@ -130,6 +130,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
 
         this->printColorMap(this->_ssao, "_ssao.png");
+        this->printNoiseTxt();
         //this->printDepthMap(this->_depthMap, "_depthMap2.png");
         glUseProgram(0);
 
@@ -508,9 +509,6 @@ bool SSAO::loadNoiseTxt(){
     if (QFile(textureName).exists())
     {
             image = QImage(textureName);
-            //int bestW = pow(2.0,floor(::log(double(image.width()))/::log(2.0)));
-            //int bestH = pow(2.0,floor(::log(double(image.height()))/::log(2.0)));
-            //QImage imgGL = image.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
             QImage tmpGL = QGLWidget::convertToGLFormat(image);
             image = QImage(tmpGL);
     }
@@ -521,9 +519,31 @@ bool SSAO::loadNoiseTxt(){
     // Creates The Texture
     glGenTextures(1, &(this->_noise));
     glBindTexture(GL_TEXTURE_2D, this->_noise);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NOISE_WIDTH , NOISE_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
 
     return true;
+}
+
+void SSAO::printNoiseTxt(){
+    QImage img(NOISE_WIDTH , NOISE_HEIGHT, QImage::Format_RGB32);
+
+    unsigned char *tempBuf = new unsigned char[NOISE_WIDTH * NOISE_HEIGHT * 3];
+    unsigned char *tempBufPtr = tempBuf;
+    glBindTexture(GL_TEXTURE_2D, this->_noise);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
+    for (int i = 0; i < NOISE_WIDTH; ++i) {
+            QRgb *scanLine = (QRgb*)img.scanLine(i);
+            for (int j = 0; j < NOISE_HEIGHT; ++j) {
+                    scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
+                    tempBufPtr += 3;
+            }
+    }
+
+    delete[] tempBuf;
+
+    img.mirrored().save("_noise.png", "PNG");
 }

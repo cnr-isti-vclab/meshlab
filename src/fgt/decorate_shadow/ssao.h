@@ -34,8 +34,8 @@
 #include <meshlab/glarea.h>
 #include <decorate_shader.h>
 
-#define NOISE_WIDTH 64
-#define NOISE_HEIGHT 64
+#define NOISE_WIDTH 512
+#define NOISE_HEIGHT 512
 
 class SSAO : public DecorateShader
 {
@@ -53,6 +53,7 @@ private:
         void bind();
         void unbind();
         bool loadNoiseTxt();
+        void printNoiseTxt();
 
         GLuint _normalMap;
         GLuint _ssao;

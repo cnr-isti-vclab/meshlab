@@ -4,10 +4,10 @@ uniform sampler2D depthMap;
 
 varying vec4 texCoord;
 
-const float rad = 0.01;
+const float rad = 0.005;
 const float strength = 200.0;
-#define SAMPLES 16 // 10 is good
 
+#define SAMPLES 16 // Cambiare sempre anche come color viene calcolato
 
 void main(void)
 {
@@ -34,8 +34,8 @@ void main(void)
   texCoordPostW = texCoordPostW * 0.5 + 0.5;
 
   // grab a normal for reflecting the sample rays later on
-  vec3 fres = normalize((texture2D(rnm , gl_TexCoord[0].st).xyz * 2.0) - vec3(1.0));
-
+  vec3 fres = normalize((texture2D(rnm , (texCoordPostW).st).xyz * 2.0) - vec3(1.0));
+  //vec3 fres = texture2D(rnm , texCoordPostW.st).xyz;
   //Depth del pixel corrente recuperata dalla texture di depth
   float currentPixelDepth = texture2D(depthMap, texCoordPostW.st).x;
 
@@ -54,6 +54,7 @@ void main(void)
   float sampleDepth;
   vec3 sampleNormal, ray;
   vec2 sample;
+  float depthDifference;
 
   for(int i=0; i < SAMPLES; ++i)
   {
@@ -70,13 +71,16 @@ void main(void)
     sampleDepth = texture2D(depthMap, sample).x;
     //normale del campione
     sampleNormal = texture2D(normalMap,sample).xyz;
+    depthDifference = currentPixelDepth - sampleDepth;
     
     float zd = strength * (1.0 - dot(normal, sampleNormal)) * max((ep.z + ray.z) - sampleDepth, 0.0);
     bl += 1.0/(1.0+zd*zd);
   }
   
-  float color = bl/SAMPLES;
+  //float color = bl/SAMPLES;
+  float color = bl/16.0;
   /*if(color > 0.8)
     discard;*/
   gl_FragColor = vec4(vec3(color), 1.0);
+  //gl_FragColor = vec4(fres, 1.0);
 }
