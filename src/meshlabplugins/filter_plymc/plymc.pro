@@ -7,6 +7,10 @@ CONFIG += console \
     stl \
     debug_and_release
 
+release{
+win32-g++:DEFINES += NDEBUG
+}
+
 # Mac specific Config required to avoid to make application bundles
 CONFIG -= app_bundle
 TEMPLATE = app
