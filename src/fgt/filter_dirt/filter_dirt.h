@@ -43,20 +43,17 @@ class FilterDirt : public QObject, public MeshFilterInterface
 		FilterDirt();
 		~FilterDirt(){};
 
-		virtual const QString filterName(FilterIDType filter);
-		virtual const QString filterInfo(FilterIDType filter);
+        virtual const QString filterName(FilterIDType filter) const;
+        virtual const QString filterInfo(FilterIDType filter) const;
 
 		virtual const int getRequirements(QAction *);
 
 		virtual bool autoDialog(QAction *) {return false;}
-		virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/){};
-		virtual bool applyFilter(QAction*  filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb);
-		virtual bool applyFilter(QAction * /*filter */, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
+		virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/){};
+		virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+		virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
 		virtual const FilterClass getClass(QAction *);
 
-
-	protected:
-		const int defaultGammaTon;
 };
 
 

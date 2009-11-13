@@ -1,5 +1,3 @@
-
-
 include (../../shared.pri)
 
 HEADERS       = filter_dirt.h
