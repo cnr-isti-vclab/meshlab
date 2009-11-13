@@ -329,8 +329,13 @@ private:
 	QList<QAction *> decoratorActionList;
 
 	/* 
+		Note this part should be detached from MainWindow just like the loading plugin part.
+		
 		For each running instance of meshlab, for the global params we have default (hardwired) values and current(saved,modified) values. 
+		At the start up the initGlobalParameterSet function (of decorations and of glarea and of ... ) is called with the empty RichParameterSet defaultGlobalParams (to collect the default values) 
+		At the start up the currentGlobalParams is filled with the values saved in the registry.
 	*/
+	
 	RichParameterSet currentGlobalParams;
 	RichParameterSet defaultGlobalParams;
   

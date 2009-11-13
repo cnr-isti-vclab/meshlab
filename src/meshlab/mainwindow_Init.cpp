@@ -747,11 +747,14 @@ void MainWindow::loadPlugins()
 
 void MainWindow::loadMeshLabSettings()
 {
+  // I have already loaded the plugins so the default for the plugins are already in.
+	// we just miss the globals default of meshlab itself
 	GLArea::initGlobalParameterSet(& defaultGlobalParams);
 	
 	QSettings settings;
 	QStringList klist = settings.allKeys();
 
+  // 1) load saved values
 	for(int ii = 0;ii < klist.size();++ii)
 	{
 		QDomDocument doc;
@@ -769,6 +772,7 @@ void MainWindow::loadMeshLabSettings()
 		}
 	}
 
+	// 2) eventually fill missing values with the hardwired defaults 
 	for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
 	{
 		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
@@ -787,15 +791,7 @@ void MainWindow::loadMeshLabSettings()
 			QSettings setting;
 			setting.setValue(v.lastCreated->name,QVariant(docstring));
 		}	
-		//delete neededGlobalParams.paramList.at(ii);
 	}
-	
-	/* Non cancello i default perche' mi potrebbero riservire.
-	
-	for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
-		delete defaultGlobalParams.paramList.at(ii);
-	defaultGlobalParams.clear();
-	*/
 	
 	emit dispatchCustomSettings(currentGlobalParams);
 }
