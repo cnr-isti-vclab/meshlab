@@ -23,21 +23,21 @@ FilterHighQualityRender::FilterHighQualityRender()
   foreach(FilterIDType tt , types())
     actionList << new QAction(filterName(tt), this);
 
-  templateDir = qApp->applicationDirPath();
+  templatesDir = qApp->applicationDirPath();
 #if defined(Q_OS_WIN)
-  if (templateDir.dirName() == "debug" || templateDir.dirName() == "release" || templateDir.dirName() == "plugins")
-	templateDir.cdUp();
+  if (templatesDir.dirName() == "debug" || templatesDir.dirName() == "release" || templatesDir.dirName() == "plugins")
+	templatesDir.cdUp();
 #elif defined(Q_OS_MAC)
-  if (templateDir.dirName() == "MacOS") {
+  if (templatesDir.dirName() == "MacOS") {
     for (int i = 0; i < 6; ++i) {
-	  templateDir.cdUp();
-	  if (templateDir.exists("render_template"))
+	  templatesDir.cdUp();
+	  if (templatesDir.exists("render_template"))
 	    break;
 	}
   }
 #endif
-  if(!templateDir.cd("render_template")) {
-	qDebug("Error. I was expecting to find the render_template dir. Now i am in dir %s",qPrintable(templateDir.absolutePath()));
+  if(!templatesDir.cd("render_template")) {
+	qDebug("Error. I was expecting to find the render_template dir. Now i am in dir %s",qPrintable(templatesDir.absolutePath()));
     ;//this->errorMessage = "\"render_template\" folder not found";
   }
 
@@ -105,8 +105,8 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 
 			//update the template list
 			templates = QStringList();
-			foreach(QString subDir, templateDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-				QString temp(templateDir.absolutePath() + QDir::separator() + subDir + QDir::separator() + subDir + ".rib");
+			foreach(QString subDir, templatesDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+				QString temp(templatesDir.absolutePath() + QDir::separator() + subDir + QDir::separator() + subDir + ".rib");
 				if(QFile::exists(temp))
 					templates << subDir;
 			}
@@ -146,20 +146,19 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			
 	//QString templatePath = par.getOpenFileName("TemplateName");
 	QString templateName = templates.at(par.getEnum("scene"));
-	QString templatePath = templateDir.absolutePath() + QDir::separator() + templateName + QDir::separator() + templateName + ".rib";
-	//QString templatePath("e:\\fgt\\meshlab\\src\\meshlab\\render_template\\default\\default.rib");
+	QString templatePath = templatesDir.absolutePath() + QDir::separator() + templateName + QDir::separator() + templateName + ".rib";
+    QDir templateDir(templatesDir);
+	templateDir.cd(templateName);
+	QString templateDirString = getDirFromPath(&templatePath);
 
-
-	QString templateDir = getDirFromPath(&templatePath);
-
- 	RibFileStack files(&templateName, &templateDir); //constructor
+ 	RibFileStack files(&templateName, &templateDirString); //constructor
 	//open file and stream
 	if(!files.pushFile(&templatePath)) {
 		this->errorMessage = "Template path is wrong: " + templatePath;
 		return false;
 	}
 
-	//destination diretory
+	//destination diretory + main file
 	QString dest("");
 	//QString dest = par.getSaveFileName("SceneName");
 	if(dest == "") { //default value: temporany directory
@@ -180,14 +179,14 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		delRibFiles = false;
 	}
 
-	QString destDir = getDirFromPath(&dest);
+	QString destDirString = getDirFromPath(&dest);
 	QString destFile = getFileNameFromPath(&dest);
 	qDebug("Starting to write rib file into %s",qPrintable(dest));
 	//output file
-	QFile outFile(dest);
+	/*QFile outFile(dest);
 	if(!outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		return false;
-	}	
+	}*/	
 	FILE* fout;
 	fout = fopen(qPrintable(dest),"wb");
 	if(fout==NULL)	{
@@ -197,41 +196,13 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	/////controlli di coordinate, ecc.... per ora ignoro
 	//if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord())
 
-	//TEXTURE:
-	//1. Take the list of texture mesh
+	//TEXTURE: take the list of texture mesh
+	//if there are textures, will be add the MAKETEXTURE statement before the first "frame begin"
 	QStringList textureList;
 	for(int i=0; i<m.cm.textures.size(); i++) {
 		textureList << QString(m.cm.textures[i].c_str());
 	}
-	QDir tmp(destDir);
-	if(!(tmp.entryList(QDir::Dirs | QDir::NoDotAndDotDot)).contains("Maps"))
-	{
-		if(!tmp.mkdir("Maps"))
-			return false;
-		else
-			tmp.cd("Maps");
-	}
-	else
-		tmp.cd("Maps");
-
-	//2. Copy all texture in outDir (magari in una cartella a parte)	
-	foreach(QString textureName, textureList) {
-		QString str(m.fileName.c_str()); //mesh directory
-		str = getDirFromPath(&str);
-		QFile srcFile(str + QDir::separator() + textureName);
-
-		QString newTex = tmp.absolutePath() + QDir::separator() + getFileNameFromPath(&textureName,false);
-		if(srcFile.exists())
-		{
-			QImage image;
-			image.load(srcFile.fileName());
-			image.save(newTex+".tiff","Tiff");
-		}
-		else
-			return false;
-	}
-	//3. se attive, prima del primo "frame begin" va messo il MAKETEXTURE ;)
-
+	
 	convertedGeometry = false; //if the mesh is already converted
 	int currentFrame = 0;
 	int numOfFrames = par.getInt("frames");
@@ -240,14 +211,34 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	FILE* fmain = fout;
 	QStringList frameDeclaration = QStringList();
 	bool isFrameDeclaration = false;
+	QStringList shaderDirs, textureDirs;
 
 	//reading cycle
 	while(!files.isEmpty() && !stop) {
 		bool writeLine = true;
 		QString line = files.topNextLine();
-		//the ReadArchive and Option SearchPath "String Archive" statement are already handled
+		//the ReadArchive statement is already handled
 		QStringList token = line.split(' ');
 
+		//statement to declare other directory for the template
+		if(token[0].trimmed() == "Option" && token[1].trimmed() == "\"searchpath\"") {			
+			int type = 0;
+			QStringList dirList = readSearchPath(&files,line,&type);
+			switch(type) {
+				case searchType::ARCHIVE:
+					files.addSubDirs(dirList);
+					break;
+				case searchType::SHADER:
+					shaderDirs = dirList;
+					break;
+				case searchType::TEXTURE:
+					textureDirs = dirList;
+					break;
+				case searchType::ERR:
+					//????????????????COSA FACCIO??????
+					break;
+			}
+		}
 
 		//add "MakeTexture" statement to create the texure, but only before frame one
 		// ********* forse aqsis ha un exe che crea le texture..... ********** (pixie sì)
@@ -306,7 +297,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		if(numOfFrames > 0 && token[0].trimmed() == "WorldBegin") {
 			isFrameDeclaration = false;
 			//it's certainly the first WorldBegin
-			QString filename = destDir + QDir::separator() + "world.rib";
+			QString filename = destDirString + QDir::separator() + "world.rib";
 			fprintf(fout,"ReadArchive \"world.rib\"\n");
 			fout = fopen(qPrintable(filename),"wb");
 			if(fout==NULL)	{
@@ -355,14 +346,14 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 								if(str.toLower() == "dummy") {
 									QString filename = "mesh" + QString::number(currentFrame) + ".rib";
 
-									QString meshDest = destDir + QDir::separator() + filename;
+									QString meshDest = destDirString + QDir::separator() + filename;
 									FILE *fmesh = fopen(qPrintable(meshDest),"wb");
 									if(fmesh==NULL) {							
 									}
 
 									fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY\n",qPrintable(line));
 									fprintf(fout,"ReadArchive \"%s\"\n", qPrintable(filename));									
-									convertObject(&files, fmesh, destDir, m, par, &textureList);
+									convertObject(&files, fmesh, destDirString, m, par, &textureList);
 									fclose(fmesh);
 									fprintf(fout,"AttributeEnd\n");
 									--c;
@@ -390,8 +381,33 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 	fclose(fout);
 	
-	//va copiata una quantita indefinita di file dal template e organizzata in directory ;)
-	
+	//copy the rest of template (shaders, textures..)
+	QDir destDir(destDirString);
+	copyFiles(templateDir, destDir, shaderDirs);
+	copyFiles(templateDir, destDir, textureDirs);
+
+	//Copy all mesh textures in dest dir
+	foreach(QString textureName, textureList) {
+		QString str(m.fileName.c_str()); //mesh directory
+		str = getDirFromPath(&str);
+		QFile srcFile(str + QDir::separator() + textureName);
+
+		//position in the first readable/writable between textures directories
+		foreach(QString dir, textureDirs)
+			if(dir!="." && destDir.cd(dir))
+				break;
+
+		QString newTex = destDir.absolutePath() + QDir::separator() + getFileNameFromPath(&textureName,false);
+		if(srcFile.exists())
+		{
+			QImage image;
+			image.load(srcFile.fileName());
+			image.save(newTex+".tiff","Tiff");
+		}
+		else
+			return false; //the mesh has a texture not existing
+	}
+
 	//run the aqsis rendering
 	QStringList env = QProcess::systemEnvironment();
 	QString aqsisDir;
@@ -405,37 +421,19 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//if os is win and a dir contains a space, it must be wrapped in quotes (..\"Program files"\..)
 	aqsisDir = quotesPath(&aqsisDir);
 	dest = getDirFromPath(&dest);
-	dest = quotesPath(&dest);
-	/*QStringList dirs = aqsisDir.split(QDir::separator());
-	aqsisDir.clear();
-	for(int i = 0; i < dirs.size(); i++) {
-		if(!dirs[i].contains(" "))
-			aqsisDir += dirs[i];
-		else
-			aqsisDir = aqsisDir + "\"" + dirs[i] + "\"";
-		aqsisDir += QDir::separator();
-	}
-	dirs.clear();
-	dirs = dest.split(QDir::separator());
-	dest.clear();
-	for(int i = 0; i < dirs.size(); i++) {
-		if(!dirs[i].contains(" "))
-			dest += dirs[i];
-		else
-			dest = dest + "\"" + dirs[i] + "\"";
-		
-		if(!dirs[i].contains("."))
-			dest += QDir::separator();
-	}*/
+	dest = quotesPath(&dest);	
 #endif
+
 	QProcess renderProcess;
-	renderProcess.setWorkingDirectory(destDir); //for the shaders/maps reference
+	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
 	QString toRun = aqsisDir+"bin"+QDir::separator()+"aqsis.exe " + destFile;
 #if !defined(NO_RENDERING)
 	renderProcess.start(toRun);
 	if (!renderProcess.waitForFinished(-1))
          return false; //devo?
 #endif
+
+
 	//the image is copied in mesh folder
 	QString meshDir(m.fileName.c_str());
 	meshDir = getDirFromPath(&meshDir);
@@ -444,7 +442,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		//delete without control?
 		QFile::remove(finalImage);
 	}
-	QFile::copy(destDir + QDir::separator() + par.getString("ImageName"), finalImage);
+	QFile::copy(destDirString + QDir::separator() + par.getString("ImageName"), finalImage);
     
 	//delete all files (if it's required)
 	
@@ -592,7 +590,7 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 		if(token[0].trimmed() == "Surface") {
 			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
 				foreach(QString textureName, *textureList) {
-					fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					fprintf(fout,"Surface \"paintedplastic\" \"Ka\" 0.0 \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"sticky_texture\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"mytexmap\" \"name\" \"%s.tx\"\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"MOSAICsurface\" \"uniform float ColMix\" [ 1.0 ] \"uniform string ColMap\" [ \"%s.tx\" ] \"uniform float Amb\" [ 0.5 ] \"uniform color AmbCol\" [ 0.0 0.0 0.0 ]", qPrintable(getFileNameFromPath(&textureName,false)));
@@ -622,17 +620,24 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 	return 0;  //errors...
 }
 
-//read array???
+//read array from the rib stack (an array can be contain \n character
+QString FilterHighQualityRender::readArray(RibFileStack* files, QString arrayString) {
+	QString str = arrayString;
+	while(!(str.contains('[') && str.contains(']')))
+		str += files->topNextLine();
+	return str;
+}
 
 //read a matrix from the rib stack and transpose it
 vcg::Matrix44f FilterHighQualityRender::readMatrix(RibFileStack* files, QString line){
 	float t[16];
 	//an array in renderman can contains the char '\n' :(
-	QString matrixString = line;
+	QString matrixString = readArray(files, line);
+	/*QString matrixString = line;
 	while(!line.contains(']')) {
 		line = files->topNextLine();
 		matrixString += line;
-	}
+	}*/
 	int k=0;
 	QStringList list = matrixString.split(' ');
 	for(int i=0; i<list.size(); i++) {
@@ -656,6 +661,52 @@ int FilterHighQualityRender::writeMatrix(FILE* fout, vcg::Matrix44f matrix, bool
 			fprintf(fout,"%f ",(transposed)? matrix.ElementAt(j,i) : matrix.ElementAt(i,j));
 	fprintf(fout,"]\n");
 	return 0;
+}
+
+//return an a list of directory (separated by ':' character)
+QStringList FilterHighQualityRender::readSearchPath(RibFileStack* files,QString line, int* type) {
+	QStringList dirs;
+	QStringList token = line.split(" ");
+	if(!(token[0].trimmed() == "Option" && token[1].trimmed() == "\"searchpath\"")) {
+		*type = FilterHighQualityRender::searchType::ERR;
+		return dirs;
+	}
+	//the line maybe: Option "searchpath" "string type" [ ..values..]
+	//            or: Option "searchpath" "type"        [ ..values..]
+	int index = 2;
+	if(token[2].trimmed() == "\"string")
+		index++; //is "string type"..
+	if(token[index].trimmed() == "\"archive\"" || token[index].trimmed() == "archive\"")
+		*type = FilterHighQualityRender::searchType::ARCHIVE;
+	if(token[index].trimmed() == "\"shader\"" || token[index].trimmed() == "shader\"")
+		*type = FilterHighQualityRender::searchType::SHADER;
+	if(token[index].trimmed() == "\"texture\"" || token[index].trimmed() == "texture\"")
+		*type = FilterHighQualityRender::searchType::TEXTURE;
+
+	QString str = token[++index];
+	if(token.size()>(index+1)) {
+		for(int i = index + 1; i < token.size(); i++) {
+			str += " " + token[i]; //the remainig token are joined together
+		}
+	}
+	//maybe that the array is defined over more line
+	str = readArray(files,str);
+	str = str.simplified();
+	if(str.startsWith('[') && str.endsWith(']')) {
+		//remove the character [ ] "
+		str.remove('[');
+		str.remove(']');
+		str.remove('\"');
+		str = str.simplified();
+		dirs = str.split(':');				
+		/*for(int i=0; i<dirs.size(); i++) {
+			//subDir.append(templateName + QDir::separator() + dirs[i]); //why did I add templateName???
+			subDir.append(dirs[i]);
+		}*/
+	} else {
+		*type = FilterHighQualityRender::searchType::ERR;		
+	}
+	return dirs;		
 }
 
 QString FilterHighQualityRender::getDirFromPath(QString* path) {
@@ -688,4 +739,25 @@ QString FilterHighQualityRender::quotesPath(QString* path) {
 	return temp;
 }
 
+//take all files in templateDir/[dirs] directories and copy them in dest/[dirs]
+bool FilterHighQualityRender::copyFiles(QDir templateDir,QDir destDir,QStringList dirs) {
+	QDir src = templateDir, dest = destDir;
+	foreach(QString dir, dirs) {
+		if(dir != "." && src.cd(dir)) {
+			bool a;
+			if(!dest.mkdir(dir)) {
+				if(!dest.cd(dir))
+					return false;
+			}
+			else
+				a = dest.cd(dir);
+
+			QStringList filesList = src.entryList(QDir::Files);
+			foreach(QString file, filesList) {
+				QFile::copy(src.absolutePath() + QDir::separator() + file,dest.absolutePath() + QDir::separator() + file);
+			}
+		}
+	}
+	return true;
+}
 Q_EXPORT_PLUGIN(FilterHighQualityRender)

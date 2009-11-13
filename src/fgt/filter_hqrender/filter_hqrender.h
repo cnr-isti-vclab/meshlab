@@ -30,7 +30,7 @@ public:
   virtual const FilterClass getClass(QAction *a);
 
 private:
-  QDir templateDir;
+  QDir templatesDir; //directory of templates ("render_template")
   QStringList templates;
   bool delRibFiles;
   QStringList alignValue;
@@ -39,10 +39,14 @@ private:
   int convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList);
   int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);
   int writeMatrix(FILE* fout, vcg::Matrix44f matrix, bool transposed = true);
+  QString readArray(RibFileStack* files,QString arrayString = "");
   vcg::Matrix44f readMatrix(RibFileStack* files,QString line);
+  enum searchType{ ERR, ARCHIVE, SHADER, TEXTURE };
+  QStringList readSearchPath(RibFileStack* files,QString line, int* type);
   QString getDirFromPath(QString* path);
   QString getFileNameFromPath(QString* path, bool type = true);
   QString quotesPath(QString* path);
+  bool copyFiles(QDir templateDir,QDir destDir,QStringList dirs);
 };
 
 #endif

@@ -1,13 +1,10 @@
 #include <RibFileStack.h>
 
-/*RibFileStack::QFileStack() {
-	stack = new QStack< QPair<QFile*, QTextStream*> >();
-};*/
-
 RibFileStack::RibFileStack(QString* templateName, QString* dir) {
 	stack = new QStack< QPair<QFile*, QTextStream*>* >();
 	this->templateName = *templateName;
 	this->templateDir = *dir;
+	subDir.append("."); //to search in the same dir
 };
 
 RibFileStack::~RibFileStack() {
@@ -67,13 +64,11 @@ QString RibFileStack::topNextLine() {
 		//test if it's a statement to open a new file
 		if(token[0].trimmed() == "ReadArchive") {
 			//if it's a ReadArchive statement search the next file to parse
-			//QString path = QDir::currentPath();
 			//search in subdir list
 			bool found = false;
 			//token[1] is the file name
 			for(int i=0; i<subDir.size() && !found; i++) {
 				token[1] = token[1].trimmed();
-				//QString str(path + QDir::separator() + (subDir)[i] + QDir::separator() + token[1].remove('\"'));
 				QString str(templateDir + QDir::separator() + (subDir)[i] + QDir::separator() + token[1].remove('\"'));
 				if(pushFile(&str)) {
 					found = true;
@@ -84,41 +79,7 @@ QString RibFileStack::topNextLine() {
 				return topNextLine();
 			//else
 				//return the line "ReadArchive ..."
-		}
-		//test if it's a statement to add a new sub-directory
-		if(token[0].trimmed() == "Option") {
-			if(token[1].trimmed() == "\"searchpath\"") {
-				if(token[2].trimmed() == "\"string" && token[3].trimmed() == "archive\"") { //"string archive"
-					//it's the subdir location of rib archives
-					//assume that the format is [".:dir1:dir2"]
-					QString str = token[4];
-					if(token.size()>5) {
-						for(int i= 5; i<token.size(); i++)
-							str += " " + token[i]; //the remainig token are joined together
-					}
-					str = str.simplified();
-					if(str.startsWith('[')) {
-						if(str.endsWith(']')) {
-							//remove the character [ ] "
-							str.remove('[');
-							str.remove(']');
-							str.remove('\"');
-							str = str.simplified();
-							QStringList dirs = str.split(':');
-							//add the found dir to the list of subdirectory
-							for(int i=0; i<dirs.size(); i++) {
-								//subDir.append(templateName + QDir::separator() + dirs[i]); //why did I add templateName???
-								subDir.append(dirs[i]);
-							}
-						} else {
-							//an array can be contains the \n character.... :/
-						}
-					} else {
-						//the statement is: 'Option "string archive"' without an array =>do nothing
-					}
-				}
-			}
-		}
+		}		
 		return line;
 	} else {
 		//close and remove from stack the file
@@ -130,4 +91,10 @@ QString RibFileStack::topNextLine() {
 
 bool RibFileStack::isEmpty() {
 	return stack->isEmpty();
+};
+
+bool RibFileStack::addSubDirs(QStringList dirs) {
+	foreach(QString dir,dirs)
+		subDir.append(dir);
+	return true;
 };

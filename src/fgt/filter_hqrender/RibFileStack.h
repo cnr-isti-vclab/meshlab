@@ -9,17 +9,17 @@
 class RibFileStack {
 	
 public:
-	//RibFileStack() : this(QString("")) {};
 	RibFileStack(QString* name, QString* dir);
 	~RibFileStack();
 	bool pushFile(QString* path);
 	bool pushFile(QFile* file);
 	QString topNextLine();
 	bool isEmpty();
+	bool addSubDirs(QStringList dirs);	
 private:
 	QStack< QPair<QFile*, QTextStream*>* >* stack;
 	QString templateName;
 	QString templateDir;
-	QStringList subDir;
 	bool popFile();
+	QStringList subDir;
 };
