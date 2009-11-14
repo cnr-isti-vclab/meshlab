@@ -371,16 +371,22 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				
 				double qn = 0., divisor = 2.0;
 				int rest = faceNo, oneFact = 1, sqrt2Fact = 1;
+				bool enough = false;
 				while (halfeningLevels < buckSize)
 				{
-					int tmp;
-					if (sideDim == 0) tmp = (int)ceil(sqrt(qn + rest/divisor));
-					else tmp = sideDim;
-					
-					// this check limits triangles dimension too
-					if (1.0/tmp < (sqrt2Fact/M_SQRT2 + oneFact)*border +
+					int tmp =(int)ceil(sqrt(qn + rest/divisor));
+					bool newenough = true;
+					if (sideDim != 0)
+					{
+						newenough = sideDim>=tmp;
+						tmp = sideDim;
+					}
+						
+					// this check triangles dimension limit too
+					if (newenough && 1.0/tmp < (sqrt2Fact/M_SQRT2 + oneFact)*border +
 						(oneFact != sqrt2Fact ? oneFact*M_SQRT2*2.0/textDim : oneFact*2.0/textDim)) break;
 					
+					enough = newenough;
 					rest -= buckets[halfeningLevels].size();
 					qn += buckets[halfeningLevels].size() / divisor;
 					divisor *= 2.0;
@@ -395,8 +401,9 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				}
 				
 				// Post checks
-				CheckError(halfeningLevels==0 && sideDim!=0, "Quads per line aren't enough to obtain a correct parametrization");
-				CheckError(halfeningLevels==0 && sideDim==0, "Inter-Triangle border is too much");
+				CheckError(!enough && halfeningLevels==buckSize, QString("Quads per line aren't enough to obtain a correct parametrization\nTry setting at least ") + QString::number((int)ceil(sqrt(qn))));
+				CheckError(halfeningLevels==0  || !enough, "Inter-Triangle border is too much");
+				//CheckError(!enough && halfeningLevels>0 && halfeningLevels<buckSize, "Quads per line aren't enough to obtain a correct parametrization");
 				
 				// Buckets recompacting
 				std::vector<uint> &last = buckets[halfeningLevels-1];
@@ -462,13 +469,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 					if (!fi->IsD()) ++faceNotD;
 				
 				// Minimum side dimension to get correct halfsquared triangles
+				CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
 				int optimalDim = ceilf(sqrtf(faceNotD/2.));
 				if (sideDim == 0) sideDim = optimalDim;
 				else {
-					CheckError(optimalDim > sideDim, "Quads per line aren't enough to obtain a correct parametrization");
+					CheckError(optimalDim > sideDim, QString("Quads per line aren't enough to obtain a correct parametrization\nTry setting at least ") + QString::number(optimalDim));
 				}
-				CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
-				
 				
 				//Calculating border size in UV space
 				float border = ((float)pxBorder) / textDim;
