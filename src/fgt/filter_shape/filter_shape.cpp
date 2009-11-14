@@ -23,7 +23,7 @@
 
 #include <Qt>
 #include <QtGui>
-#include "filter_text.h"
+#include "filter_shape.h"
 
 #include <vcg/math/base.h>
 #include <vcg/complex/trimesh/clean.h>
@@ -42,7 +42,7 @@
 using namespace std;
 using namespace vcg;
 
-FilterSolidShape::FilterSolidShape()
+FilterSolidShapes::FilterSolidShapes()
 {
 	
     typeList << 
@@ -53,22 +53,22 @@ FilterSolidShape::FilterSolidShape()
 	actionList << new QAction(filterName(tt), this);
 }
 
-const QString FilterSolidShape::filterName(FilterIDType filterId) const
+const QString FilterSolidShapes::filterName(FilterIDType filterId) const
 {
 	switch (filterId) {
         case FP_TEXT:
-            return QString("String of Text");
+            return QString("Platonic solids");
 			break;
 		default:
             assert(0); return QString("error");
 			break;
 	}
 }
-const QString FilterSolidShape::filterInfo(FilterIDType filterId) const
+const QString FilterSolidShapes::filterInfo(FilterIDType filterId) const
 {
 	switch (filterId) {
         case FP_TEXT:
-            return QString("Create a 3D model of a text string");
+            return QString("Create platonic solids according to user parameters");
 			break;
 		default:
             assert(0); return QString("error");
@@ -76,27 +76,29 @@ const QString FilterSolidShape::filterInfo(FilterIDType filterId) const
 	}
 }
 
-const int FilterSolidShape::getRequirements(QAction */*action*/)
+const int FilterSolidShapes::getRequirements(QAction */*action*/)
 {	
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
 }
 
-void FilterSolidShape::initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & par)
+void FilterSolidShapes::initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & par)
 {
-    par.addParam(new RichString("text3d","MeshLab","Text string","The string entered here will be transformed into a 3D model according to the choosen options"));
+    par.addParam(new RichString("Param1","Default1","Param1","Explanation of Param1"));
+    par.addParam(new RichString("Param2","Default2","Param2","Explanation of Param2"));
 }
 
-bool FilterSolidShape::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
+bool FilterSolidShapes::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
 {
-    QString text3d = par.getString("text3d");
-    Log("Transforming text '%s'",qPrintable(text3d));
+	Log("Creating platonic solid...");
+    Log("Param1 = '%s'", qPrintable(par.getString("Param1")));
+    Log("Param2 = '%s'", qPrintable(par.getString("Param2")));
 	return true;
 }
 
-const MeshFilterInterface::FilterClass FilterSolidShape::getClass(QAction *)
+const MeshFilterInterface::FilterClass FilterSolidShapes::getClass(QAction *)
 {
     return MeshFilterInterface::MeshCreation;
 }
 
 
-Q_EXPORT_PLUGIN(FilterSolidShape)
+Q_EXPORT_PLUGIN(FilterSolidShapes)
