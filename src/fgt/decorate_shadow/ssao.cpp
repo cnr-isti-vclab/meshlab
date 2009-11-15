@@ -509,6 +509,8 @@ bool SSAO::loadNoiseTxt(){
     if (QFile(textureName).exists())
     {
             image = QImage(textureName);
+						noiseWidth=image.width();
+						noiseHeight=image.height();
             QImage tmpGL = QGLWidget::convertToGLFormat(image);
             image = QImage(tmpGL);
     }
@@ -523,21 +525,21 @@ bool SSAO::loadNoiseTxt(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NOISE_WIDTH , NOISE_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, noiseWidth , noiseHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
 
     return true;
 }
 
 void SSAO::printNoiseTxt(){
-    QImage img(NOISE_WIDTH , NOISE_HEIGHT, QImage::Format_RGB32);
+    QImage img(noiseWidth , noiseHeight, QImage::Format_RGB32);
 
-    unsigned char *tempBuf = new unsigned char[NOISE_WIDTH * NOISE_HEIGHT * 3];
+    unsigned char *tempBuf = new unsigned char[noiseWidth * noiseHeight * 3];
     unsigned char *tempBufPtr = tempBuf;
     glBindTexture(GL_TEXTURE_2D, this->_noise);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
-    for (int i = 0; i < NOISE_WIDTH; ++i) {
+    for (int i = 0; i < noiseWidth; ++i) {
             QRgb *scanLine = (QRgb*)img.scanLine(i);
-            for (int j = 0; j < NOISE_HEIGHT; ++j) {
+            for (int j = 0; j < noiseHeight; ++j) {
                     scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
                     tempBufPtr += 3;
             }
