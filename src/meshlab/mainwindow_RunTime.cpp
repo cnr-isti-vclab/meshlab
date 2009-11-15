@@ -676,6 +676,10 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 			
 	if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
 	    GLA()->resetTrackBall();
+
+	if(iFilter->getClass(action) & MeshFilterInterface::Texture )
+	    GLA()->updateTexture();
+
   qb->reset();
   updateMenus();
   GLA()->update();
