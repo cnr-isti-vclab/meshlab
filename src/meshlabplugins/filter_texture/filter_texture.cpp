@@ -20,13 +20,11 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-
 #include <QtGui>
 
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
-#include <pair.h>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -39,7 +37,7 @@
 
 FilterTexturePlugin::FilterTexturePlugin() 
 { 
-	typeList << FP_UVTOCOLOR
+	typeList << FP_UV_TO_COLOR
 			<< FP_UV_WEDGE_TO_VERTEX
 			<< FP_BASIC_TRIANGLE_MAPPING
 			<< FP_SET_TEXTURE;
@@ -51,7 +49,7 @@ FilterTexturePlugin::FilterTexturePlugin()
 const QString FilterTexturePlugin::filterName(FilterIDType filterId) const 
 {
 	switch(filterId) {
-		case FP_UVTOCOLOR : return QString("UV to Color"); 
+		case FP_UV_TO_COLOR : return QString("UV to Color"); 
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
 		case FP_BASIC_TRIANGLE_MAPPING : return QString("Basic Triangle Mapping");
 		case FP_SET_TEXTURE : return QString("Set Texture");
@@ -65,11 +63,11 @@ const QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
-		case FP_UVTOCOLOR :  return QString("Maps the UV Space into a color space, thus colorizing mesh vertices according to UV coords.");
+		case FP_UV_TO_COLOR :  return QString("Maps the UV Space into a color space, thus colorizing mesh vertices according to UV coords.");
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
 		case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a basic parametrization");
 		case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>"
-											 "If the texture provided exits it will be simply set else a dummy one will be created in the same directory");
+											 "If the texture provided exists it will be simply set else a dummy one will be created in the same directory");
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -79,7 +77,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
 {
 	switch (ID(a))
 	{
-		case FP_UVTOCOLOR : return MeshFilterInterface::FP_VertexTexCoord;
+		case FP_UV_TO_COLOR : return MeshFilterInterface::FP_VertexTexCoord;
 		case FP_UV_WEDGE_TO_VERTEX : return MeshFilterInterface::FP_WedgeTexCoord;
 		case FP_BASIC_TRIANGLE_MAPPING : return MeshFilterInterface::FP_Face;
 		case FP_SET_TEXTURE : return MeshFilterInterface::FP_WedgeTexCoord;
@@ -92,7 +90,7 @@ const int FilterTexturePlugin::getRequirements(QAction *a)
 {
 	switch (ID(a))
 	{
-		case FP_UVTOCOLOR :
+		case FP_UV_TO_COLOR :
 		case FP_UV_WEDGE_TO_VERTEX :
 		case FP_BASIC_TRIANGLE_MAPPING :
 		case FP_SET_TEXTURE :
@@ -106,7 +104,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 {
 	switch (ID(a))
 	{
-		case FP_UVTOCOLOR : return MeshModel::MM_VERTCOLOR;
+		case FP_UV_TO_COLOR : return MeshModel::MM_VERTCOLOR;
 		case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
 		case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
 		case FP_SET_TEXTURE : return MeshModel::MM_UNKNOWN;
@@ -122,7 +120,7 @@ const FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{
-		case FP_UVTOCOLOR : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
+		case FP_UV_TO_COLOR : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
 		case FP_UV_WEDGE_TO_VERTEX : 
 		case FP_BASIC_TRIANGLE_MAPPING :
 		case FP_SET_TEXTURE : return MeshFilterInterface::Texture;
@@ -141,7 +139,7 @@ const FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet & parlst) 
 {
 	switch(ID(action))	{
-		case FP_UVTOCOLOR :
+		case FP_UV_TO_COLOR :
 			parlst.addParam(new RichEnum("colorspace", 0, QStringList("Red-Green") << "Hue-Saturation", "Color Space", "The color space used to mapping UV to"));
 			break;
 		case FP_UV_WEDGE_TO_VERTEX : 
@@ -160,9 +158,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 			else {
 				fileName = fileName.left(lastPoint);
 				lastPoint = std::max<int>(fileName.lastIndexOf('\\'),fileName.lastIndexOf('/'));
-				if (lastPoint <= 0)
-					fileName = QString("");
-				else
+				if (lastPoint > 0)
 					fileName = fileName.right(fileName.size() - 1 - lastPoint);
 			}
 			fileName = fileName.append(".png");
@@ -207,10 +203,6 @@ inline int getLongestEdge(const CMeshO::FaceType & f)
 			if(maxd12 > maxd20)     res = 1;
 			else                    res = 2;
 	return res;
-}
-
-inline bool cmp( pair<uint,double> a, pair<uint,double> b ) {
-	return a.second > b.second;
 }
 
 typedef vcg::Triangle2<CMeshO::FaceType::TexCoordType::ScalarType> Tri2;
@@ -263,7 +255,7 @@ inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float bor
 bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet &par, vcg::CallBackPos *cb)
 {
 	switch(ID(filter))	 {
-		case FP_UVTOCOLOR : {
+		case FP_UV_TO_COLOR : {
 			int vcount = m.cm.vert.size();
 			int colsp = par.getEnum("colorspace");
 			if (!m.hasDataMask(MeshModel::MM_VERTCOLOR))
@@ -328,19 +320,20 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				default : assert(0);
 			};
 			
+			// Pre checks
+			CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
+			CheckError(pxBorder < 0,   "Inter-Triangle border has an incorrect value");
+			CheckError(sideDim < 0,  "Quads per line border has an incorrect value");
+			
 			if (adv)
 			{ //ADVANCED SPACE-OPTIMIZING
 				
 				float border = ((float)pxBorder) / textDim;
 				
-				// Pre checks
-				CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
-				CheckError(border < 0,   "Inter-Triangle border has an incorrect value");
-				CheckError(sideDim < 0,  "Quads per line border has an incorrect value");
-				
 				// Creates a vector of pair <face index, double area>
 				double maxArea = -1, minArea=DBL_MAX;
-				std::vector<pair<uint,double> > faces;
+				std::vector<double> areas;
+				int faceNo = 0;
 				for (uint i=0; i<m.cm.face.size(); ++i)
 				{
 					if (!m.cm.face[i].IsD())
@@ -349,21 +342,23 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 						if (area == 0) area = DBL_MIN;
 						if (area > maxArea) maxArea = area;
 						if (area < minArea) minArea = area;
-						faces.push_back(pair<uint,double>(i, area));
+						areas.push_back(area);
+						++faceNo;
+					} else {
+						areas.push_back(-1.0);
 					}
 				}
 				
 				// Creates buckets containing each halfening level triangles (a histogram)
-				int faceNo = faces.size();
 				int	buckSize = (int)ceil(log2(maxArea/minArea) + DBL_EPSILON);
 				std::vector<std::vector<uint> > buckets(buckSize);
-				for (std::vector<pair<uint,double> >::iterator it=faces.begin(); it != faces.end(); ++it)
-				{
-					int slot = (int)ceil(log2(maxArea/it->second) + DBL_EPSILON) - 1;
-					assert(slot < buckSize);
-					assert(slot >= 0);
-					buckets[slot].push_back(it->first);
-				}
+				for (uint i=0; i<areas.size(); ++i)
+					if (areas[i]>=0)
+					{
+						int slot = (int)ceil(log2(maxArea/areas[i]) + DBL_EPSILON) - 1;
+						assert(slot < buckSize && slot >= 0);
+						buckets[slot].push_back(i);
+					}
 				
 				// Determinates correct dimension and accordingly max halfening levels
 				int dim = 0;
@@ -403,14 +398,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				// Post checks
 				CheckError(!enough && halfeningLevels==buckSize, QString("Quads per line aren't enough to obtain a correct parametrization\nTry setting at least ") + QString::number((int)ceil(sqrt(qn))));
 				CheckError(halfeningLevels==0  || !enough, "Inter-Triangle border is too much");
-				//CheckError(!enough && halfeningLevels>0 && halfeningLevels<buckSize, "Quads per line aren't enough to obtain a correct parametrization");
-				
-				// Buckets recompacting
-				std::vector<uint> &last = buckets[halfeningLevels-1];
-				for (int i=halfeningLevels; i<buckSize; ++i)
-					last.insert(last.end(), buckets[i].begin(), buckets[i].end());
-				buckets.resize(halfeningLevels);
-				
+								
 				//Create cache of possible triangles (need only translation in correct position)
 				std::vector<Tri2> cache((1 << (halfeningLevels+1))-2);
 				buildTrianglesCache(cache, halfeningLevels, border, 1.0/dim);
@@ -430,12 +418,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 						for (int pos=(1<<currLevel)-2; pos<(1<<(currLevel+1))-2 && face<faceNo; ++pos, ++face)
 						{
 							while (it == buckets[buckIdx].end()) {
-								if (++buckIdx < buckets.size())
+								if (++buckIdx < halfeningLevels)
 								{
 									++currLevel;
 									pos = 2*pos+2;
-									it = buckets[buckIdx].begin();
 								}
+								it = buckets[buckIdx].begin();
 							}
 							int fidx = *it;
 							int lEdge = getLongestEdge(m.cm.face[fidx]);
@@ -455,6 +443,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 					}
 				}
 				assert(face == faceNo);
+				assert(it == buckets[buckSize-1].end());
 				Log(GLLogStream::FILTER, "Biggest triangle's catheti are %.2f px long", (cache[0].P(0)-cache[0].P(2)).Norm() * textDim);
 				Log(GLLogStream::FILTER, "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
 				
@@ -469,7 +458,6 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 					if (!fi->IsD()) ++faceNotD;
 				
 				// Minimum side dimension to get correct halfsquared triangles
-				CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
 				int optimalDim = ceilf(sqrtf(faceNotD/2.));
 				if (sideDim == 0) sideDim = optimalDim;
 				else {
@@ -478,7 +466,6 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				
 				//Calculating border size in UV space
 				float border = ((float)pxBorder) / textDim;
-				CheckError(border < 0, "Inter-Triangle border has an incorrect value");
 				CheckError(border*(1.0+M_SQRT2)+2.0/textDim > 1.0/sideDim, "Inter-Triangle border is too much");
 				
 				float bordersq2 = border / M_SQRT2;
@@ -537,6 +524,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			QString textName = par.getString("textName");
 			int textDim = par.getInt("textDim");
 			
+			CheckError(!QFile(m.fileName.c_str()).exists(), "Save the file before setting a texture");
 			CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
 			CheckError(textName.length() == 0, "Texture file not specified");
 			
@@ -544,11 +532,15 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			CheckError(std::max<int>(textName.lastIndexOf("\\"),textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
 			if (!textName.endsWith(".png", Qt::CaseInsensitive))
 				textName.append(".png");
+			
 			// Creates path to texture file;
 			QString fileName(m.fileName.c_str());
-			fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'),fileName.lastIndexOf('/')))
-						.append(QDir::separator())
-						.append(textName);
+			int lastPoint = std::max<int>(fileName.lastIndexOf('\\'),fileName.lastIndexOf('/'));
+			if (lastPoint < 0)
+				fileName = textName;
+			else
+				fileName = fileName.left(lastPoint).append(QDir::separator()).append(textName);
+			
 			QFile textFile(fileName);
 			if (!textFile.exists())
 			{
@@ -576,8 +568,6 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			//set
 			m.cm.textures.clear();
 			m.cm.textures.push_back(textName.toStdString());
-			
-			//qDebug("set texture: %s", m.cm.textures[0].c_str());
 		}
 		break;
 			
