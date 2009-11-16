@@ -118,6 +118,7 @@ template<class TriMeshType>
         meshnames.push_back(meshName);
         WV.push_back(1);
         BBV.push_back(Box3f());
+		return true;
     }
 
     vcg::Box3f bb(int i) {return BBV[i];}
