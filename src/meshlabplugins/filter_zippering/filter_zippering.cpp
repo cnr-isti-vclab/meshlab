@@ -291,7 +291,7 @@ void FilterZippering::handleBorder( aux_info &info,                             
         if ( conn ) info.RemoveCComponent( c ); else info.RemoveTComponent( c );
     }
 	//No border; triangulation of the whole face
-    if ( info.border.size() == 0 ) {
+	if ( info.border.size() == 0 ) {
         info.conn = info.trash;
         for ( int  i = 0; i < info.conn.size(); i ++ ) {
             reverse( info.conn[i].edges.begin(), info.conn[i].edges.end() );
@@ -672,20 +672,20 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
 	vcg::tri::UpdateTopology<CMeshO>::FaceFace(b->cm);
-	vcg::tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize( a->cm, b->cm.fn/50 ); //remove this ASAP
-	vcg::tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize( b->cm, b->cm.fn/50 ); //remove this ASAP
 	vcg::tri::Append<CMeshO, CMeshO>::Mesh( a->cm, b->cm );
 	vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
 	vcg::tri::UpdateFlags<CMeshO>::FaceClear(a->cm); 
-	
+
 	ccons.clear(); vcg::tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons );  std::vector<std::pair<int,int> > b_pos;
 	for ( int i = 0; i < ccons.size(); i ++ ) {
 		if ( vcg::tri::Index(a->cm, ccons[i].p.F()) >= limit ) b_pos.push_back( std::make_pair( vcg::tri::Index(a->cm, ccons[i].p.F()), ccons[i].p.E() ) );
 	}
-	
+
 	for ( int i = 0; i < b_pos.size(); i ++ ) {
 		vcg::face::Pos<CMeshO::FaceType> p; p.Set( &(a->cm.face[b_pos[i].first]), b_pos[i].second, a->cm.face[b_pos[i].first].V(b_pos[i].second) );
 		CMeshO::FacePointer start = p.F(); 
+		if ( vcg::face::BorderCount(*start) == 3 ) { vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *p.F() ); continue; }
+		
 		while ( vcg::face::BorderCount(*start) >= 2			 || vcg::face::BorderCount(*(start->FFp(0))) >= 2 ||
 				vcg::face::BorderCount(*(start->FFp(1))) >=2 || vcg::face::BorderCount(*(start->FFp(2))) >=2) { p.NextB(); start = p.F(); }
 		do {
@@ -729,18 +729,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);   vcg::tri::UpdateFlags<CMeshO>::FaceProjection(a->cm);  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
     vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(b->cm);   vcg::tri::UpdateFlags<CMeshO>::FaceProjection(b->cm);  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(b->cm);
     grid_a.Set( a->cm.face.begin(), a->cm.face.begin()+limit );  //reset grid on A
-
-	/*for ( int c = 0; c < ccons.size(); c ++ ) {
-		vcg::face::Pos<CMeshO::FaceType> p = ccons[c].p; p.FlipV();//CCW order
-		if ( p.F() -> IsD() ) continue;
-		if ( vcg::tri::Index( a->cm, ccons[c].p.F() ) < limit ) continue;
-		Log(GLLogStream::DEBUG, "One Border %d", c);
-		do {
-			p.F()->C() = vcg::Color4b::LightBlue; p.NextB();
-		}
-		while ( p.F() != ccons[c].p.F() );
-	}*/
-	//return true;
 	
     /* STEP 2 - Project patch points on mesh surface
      * and ricorsively subdivide face in smaller triangles until each patch's face has border vertices
@@ -797,15 +785,33 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 				grid_a.GetClosest(PDistFunct, markerFunctor, a->cm.vert[border_edge.first].P(), 2*epsilon, distStart, closestStart); //closest point on mesh
 				grid_a.GetClosest(PDistFunct, markerFunctor, a->cm.vert[border_edge.second].P(), 2*epsilon, distEnd, closestEnd); //closest point on mesh
 				
+				if (start != 0) { info[start].SetEps( eps ); info[start].Init( *start, vcg::tri::Index( a->cm, start->V(0) ), vcg::tri::Index( a->cm, start->V(1) ), vcg::tri::Index( a->cm, start->V(2) )  ); } //init
+				if (end != 0)	{info[end].SetEps( eps ); info[end].Init( *end, vcg::tri::Index( a->cm, end->V(0) ), vcg::tri::Index( a->cm, end->V(1) ), vcg::tri::Index( a->cm, end->V(2) ) ); }
+                        
 				//if closest point is really closest to the border, split border face
-				if ( start != 0 && isOnBorder( closestStart, start ) && distStart <= eps )	info[start].addVertex( &(a->cm.vert[border_edge.first]), border_edge.first ); 
-				if ( end != 0 && isOnBorder( closestEnd, end ) && distEnd <= eps )			info[end].addVertex( &(a->cm.vert[border_edge.second]), border_edge.second );
+				//if ( start != 0 && isOnBorder( closestStart, start ) && distStart <= eps )	info[start].addVertex( &(a->cm.vert[border_edge.first]), border_edge.first ); 
+				//if ( end != 0 && isOnBorder( closestEnd, end ) && distEnd <= eps )			info[end].addVertex( &(a->cm.vert[border_edge.second]), border_edge.second );
 
-				if ( isOnBorder( closestStart, start ) && isOnBorder( closestEnd, end ) ) continue;
-				if ( isOnBorder( closestStart, start ) && end == 0 ) continue;
-				if ( isOnBorder( closestEnd, end ) && start == 0 ) continue;
+				if ( isOnBorder( closestStart, start ) && isOnBorder( closestEnd, end ) ) {
+					//if closest point is really closest to the border, split border face
+					if ( distStart <= eps ) info[start].addVertex( &(a->cm.vert[border_edge.first]), border_edge.first ); 
+					if ( distEnd <= eps )   info[end].addVertex( &(a->cm.vert[border_edge.second]), border_edge.second );
+					continue;
+				}
+				if ( isOnBorder( closestStart, start ) && end == 0 ) {
+					//if closest point is really closest to the border, split border face
+					if ( distStart <= eps ) info[start].addVertex( &(a->cm.vert[border_edge.first]), border_edge.first ); 
+					continue;
+				}
+				if ( isOnBorder( closestEnd, end ) && start == 0 ) {
+					//if closest point is really closest to the border, split border face
+					if ( distEnd <= eps )   info[end].addVertex( &(a->cm.vert[border_edge.second]), border_edge.second );
+					continue;
+				}
 				
 				if ( start == 0 || isOnBorder( closestStart, start ) ) {
+					//if closest point is really closest to the border, split border face
+					if ( distStart <= eps ) info[start].addVertex( &(a->cm.vert[border_edge.first]), border_edge.first ); 
 					a->cm.vert[border_edge.second].P() = closestEnd;
 					tbr_faces.push_back( actualF );
 					int last_split = -1; CMeshO::FacePointer currentF = end; bool stop = false; 
@@ -815,7 +821,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 					do {
 						int tosplit; vcg::Point3<CMeshO::ScalarType> closest; 
 						if (!findIntersection( currentF, vcg::Segment3<CMeshO::ScalarType>(a->cm.vert[border_edge.first].P(),a->cm.vert[border_edge.second].P()), last_split, tosplit, closest )) {
-							Log(GLLogStream::DEBUG,"Intersection Not Found 00"); 
 							stop = true; //no op
 						}
 						else {
@@ -840,6 +845,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 				}
 
 				if ( end == 0 || isOnBorder( closestEnd, end ) ) {
+					//if closest point is really closest to the border, split border face
+					if ( distEnd <= eps )   info[end].addVertex( &(a->cm.vert[border_edge.second]), border_edge.second );
 					a->cm.vert[border_edge.first].P() = closestStart;
 					tbr_faces.push_back( actualF );
 					int last_split = -1; CMeshO::FacePointer currentF = start; bool stop = false; 
@@ -849,7 +856,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 					do {
 						int tosplit; vcg::Point3<CMeshO::ScalarType> closest; 
 						if (!findIntersection( currentF, vcg::Segment3<CMeshO::ScalarType>(a->cm.vert[border_edge.first].P(),a->cm.vert[border_edge.second].P()), last_split, tosplit, closest )) {
-							Log(GLLogStream::DEBUG,"Intersection Not Found 01"); //return false;
 							break;
 						}
 						last_split = currentF->FFi( tosplit );
