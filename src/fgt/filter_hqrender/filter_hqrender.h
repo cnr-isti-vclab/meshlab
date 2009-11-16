@@ -35,6 +35,40 @@ private:
   bool delRibFiles;
   QStringList alignValue;
   bool convertedGeometry;
+	
+	inline const QString aqsisName() 
+	{ 
+	#if defined(Q_OS_WIN)
+		return QString("aqsis.exe");
+	#elif defined(Q_OS_MAC)
+		return QString("aqsis");
+	#endif
+	}
+	inline const QString aqslName() 
+	{ 
+	#if defined(Q_OS_WIN)
+		return QString("aqsl.exe");
+	#elif defined(Q_OS_MAC)
+		return QString("aqsl");
+	#endif
+	}
+	inline const QString teqserName() 
+	{ 
+	#if defined(Q_OS_WIN)
+		return QString("teqser.exe");
+	#elif defined(Q_OS_MAC)
+		return QString("teqser");
+	#endif
+	}
+	inline const QString aqsisBinPath() 
+	{ 
+	#if defined(Q_OS_WIN)
+		return QString("/bin/");
+	#elif defined(Q_OS_MAC)
+		return QString("/Contents/Resources/bin/");
+	#endif
+	}
+	
 
   int convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList);
   int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);

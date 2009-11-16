@@ -117,7 +117,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 			}
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));
 			parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));
-			// ******Ë il nome dell'immagine, ma poi va copiata nella cartella della mesh...******
+			// ******il nome dell'immagine, ma poi va copiata nella cartella della mesh...******
 			parlst.addParam(new RichString("ImageName", "default.tiff", "Name of output image"));
 			
 			//DON'T WORK!!
@@ -217,16 +217,16 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			int type = 0;
 			QStringList dirList = readSearchPath(&files,line,&type);
 			switch(type) {
-				case searchType::ARCHIVE:
+				case FilterHighQualityRender::ARCHIVE:
 					files.addSubDirs(dirList);
 					break;
-				case searchType::SHADER:
+				case FilterHighQualityRender::SHADER:
 					shaderDirs = dirList;
 					break;
-				case searchType::TEXTURE:
+				case FilterHighQualityRender::TEXTURE:
 					textureDirs = dirList;
 					break;
-				case searchType::ERR:
+				case FilterHighQualityRender::ERR:
 					//????????????????COSA FACCIO??????
 					break;
 			}
@@ -377,12 +377,24 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	copyFiles(templateDir, destDir, textureDirs);
 	copyFiles(templateDir, destDir, shaderDirs);
 	
+	QStringList aqsisEnv = QProcess::systemEnvironment();
+
 	//looking for aqsis installation directory:
 	//take the system environment variables
-	QStringList env = QProcess::systemEnvironment();
+	#if defined(Q_OS_MAC)
+ 		 QDir macPath("/Applications/Aqsis.app");
+		 if(macPath.exists())
+		 {
+			qDebug("a bit of hope");
+			QProcess process;
+			aqsisEnv << "AQSISHOME=/Applications/Aqsis.app"; // Add an environment variable
+			aqsisEnv.replaceInStrings(QRegExp("^PATH=(.*)", Qt::CaseInsensitive), "PATH=\\1:/Applications/Aqsis.app/Contents/Resources/bin");
+		 }
+	#endif
+	
 	QString aqsisDir;
 	bool found = false;
-	foreach(QString envElem, env) { //looking for AQSISHOME variable
+	foreach(QString envElem, aqsisEnv) { //looking for AQSISHOME variable
 		if(envElem.contains("AQSISHOME")) {
 			qDebug("founded environment variable value: %s", qPrintable(envElem));
 			aqsisDir = envElem.remove("AQSISHOME="); //the string is "AQSISHOME='path'"
@@ -406,8 +418,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			QProcess compileProcess; //compile all shaders together foreach folder
 			//set working directory the location of shaders
 			compileProcess.setWorkingDirectory(destDirString + QDir::separator() + dirStr);
+			compileProcess.setEnvironment(aqsisEnv);
 			qDebug("compiling shader working directory: %s",qPrintable(destDirString + QDir::separator() + dirStr));
-			QString toRun = aqsisDir + "bin" + QDir::separator() + "aqsl.exe *.sl";
+			QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqslName()+" *.sl";
 			qDebug("compiling command: %s",qPrintable(toRun));
 			compileProcess.start(toRun);				
 			if (!compileProcess.waitForFinished(-1)) { //wait the finish of process
@@ -447,10 +460,11 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 			//convert the texture to renderman format
 			QProcess convertTextureProcess;
+			convertTextureProcess.setEnvironment(aqsisEnv);
 			//set working directory the location of texture
 			convertTextureProcess.setWorkingDirectory(destDirString + QDir::separator() + newImageDir);
 			qDebug("convert texture working directory: %s",qPrintable(destDirString + QDir::separator() + newImageDir));
-			QString toRun = aqsisDir + "bin" + QDir::separator() + "teqser.exe " + getFileNameFromPath(&textureName,false) +".tiff " + getFileNameFromPath(&textureName,false) + ".tx";
+			QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + teqserName()+ getFileNameFromPath(&textureName,false) +".tiff " + getFileNameFromPath(&textureName,false) + ".tx";
 			qDebug("convert command: %s",qPrintable(toRun));
 			convertTextureProcess.start(toRun);				
 			if (!convertTextureProcess.waitForFinished(-1)) { //wait the finish of process
@@ -469,7 +483,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//run the aqsis rendering	
 	QProcess renderProcess;
 	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
-	QString toRun = aqsisDir + "bin" + QDir::separator() + "aqsis.exe " + destFile;
+	renderProcess.setEnvironment(aqsisEnv);
+	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " "+ destFile;
 	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
 #if !defined(NO_RENDERING)
 	renderProcess.start(toRun);
@@ -715,7 +730,7 @@ QStringList FilterHighQualityRender::readSearchPath(RibFileStack* files,QString 
 	QStringList dirs;
 	QStringList token = line.split(" ");
 	if(!(token[0].trimmed() == "Option" && token[1].trimmed() == "\"searchpath\"")) {
-		*type = FilterHighQualityRender::searchType::ERR;
+		*type = FilterHighQualityRender::ERR;
 		return dirs;
 	}
 	//the line maybe: Option "searchpath" "string type" [ ..values..]
@@ -724,11 +739,11 @@ QStringList FilterHighQualityRender::readSearchPath(RibFileStack* files,QString 
 	if(token[2].trimmed() == "\"string")
 		index++; //is "string type"..
 	if(token[index].trimmed() == "\"archive\"" || token[index].trimmed() == "archive\"")
-		*type = FilterHighQualityRender::searchType::ARCHIVE;
+		*type = FilterHighQualityRender::ARCHIVE;
 	if(token[index].trimmed() == "\"shader\"" || token[index].trimmed() == "shader\"")
-		*type = FilterHighQualityRender::searchType::SHADER;
+		*type = FilterHighQualityRender::SHADER;
 	if(token[index].trimmed() == "\"texture\"" || token[index].trimmed() == "texture\"")
-		*type = FilterHighQualityRender::searchType::TEXTURE;
+		*type = FilterHighQualityRender::TEXTURE;
 
 	QString str = token[++index];
 	if(token.size()>(index+1)) {
@@ -751,7 +766,7 @@ QStringList FilterHighQualityRender::readSearchPath(RibFileStack* files,QString 
 			subDir.append(dirs[i]);
 		}*/
 	} else {
-		*type = FilterHighQualityRender::searchType::ERR;		
+		*type = FilterHighQualityRender::ERR;		
 	}
 	return dirs;		
 }
