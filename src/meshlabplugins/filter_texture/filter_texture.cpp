@@ -250,6 +250,11 @@ inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float bor
 #define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
 ///////////////////////////////////////////////////////
 
+template<typename T>
+T log_2(const T num)
+{
+	return T(log(num) / log(T(2)));
+}
 
 // The Real Core Function doing the actual mesh processing.
 bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet &par, vcg::CallBackPos *cb)
@@ -350,12 +355,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				}
 				
 				// Creates buckets containing each halfening level triangles (a histogram)
-				int	buckSize = (int)ceil(log2(maxArea/minArea) + DBL_EPSILON);
+				int	buckSize = (int)ceil(log_2(maxArea/minArea) + DBL_EPSILON);
 				std::vector<std::vector<uint> > buckets(buckSize);
 				for (uint i=0; i<areas.size(); ++i)
 					if (areas[i]>=0)
 					{
-						int slot = (int)ceil(log2(maxArea/areas[i]) + DBL_EPSILON) - 1;
+						int slot = (int)ceil(log_2(maxArea/areas[i]) + DBL_EPSILON) - 1;
 						assert(slot < buckSize && slot >= 0);
 						buckets[slot].push_back(i);
 					}
