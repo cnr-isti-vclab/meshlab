@@ -108,9 +108,9 @@ private :
 	Point3i div;
 	Point3i pos;
 public:
-	Box3i			SubPart;                 // Sottoparte del volume da considerare ufficialmente 
+	Box3i	  SubPart;                 // Sottoparte del volume da considerare ufficialmente
 	Box3x     SubBox;                  // BBox della sottoparte del volume da considerare in coord assolute
- 	Box3i			SubPartSafe;             // come sopra ma aumentati per sicurezza.
+	Box3i	  SubPartSafe;             // come sopra ma aumentati per sicurezza.
 	Box3x     SubBoxSafe;
 
  FILE *LogFP;

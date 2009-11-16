@@ -341,132 +341,137 @@ void Process()
 	for(p.IPos[2]=p.IPosS[2];p.IPos[2]<=p.IPosE[2];++p.IPos[2])
 	  if((p.IPos[2]+(p.IPos[1]*p.IDiv[2])+(p.IPos[0]*p.IDiv[2]*p.IDiv[1])) >=
 	     (p.IPosB[2]+(p.IPosB[1]*p.IDiv[2])+(p.IPosB[0]*p.IDiv[2]*p.IDiv[1]))) // skip until IPos >= IPosB
-	  {
-	    printf("----------- SubBlock %2i %2i %2i ----------\n",p.IPos[0],p.IPos[1],p.IPos[2]);
-	    //Volume<Voxelf> B;
-	    int t0=clock();
-
-	    Box3f fullbf; fullbf.Import(fullb);
-
-	    VV.Init(cells,fullbf,p.IDiv,p.IPos);
-	    printf("\n\n --------------- Allocated subcells. %i\n",VV.Allocated());
-
-	    std::string filename=p.basename;
-	    if(p.IDiv!=Point3i(1,1,1))
-	    {
-	      std::string subvoltag;
-	      VV.GetSubVolumeTag(subvoltag);
-	      filename+=subvoltag;
-	    }
-	    /********** Grande loop di scansione di tutte le mesh *********/
-	    bool res=false;
-	    for(int i=0;i<MP.size();++i)
-	    {
-	      Box3f bbb= MP.bb(i);
-	      SMesh *sm;
-	      if(!MP.Find(i,sm) )
 	      {
-		  InitMesh(*sm,MP.MeshName(i).c_str(),MP.Tr(i));
-	      }
-	      res |= AddMeshToVolumeM(*sm, MP.MeshName(i),MP.W(i));
-	    }
+		printf("----------- SubBlock %2i %2i %2i ----------\n",p.IPos[0],p.IPos[1],p.IPos[2]);
+		//Volume<Voxelf> B;
+		int t0=clock();
 
-	    //B.Normalize(1);
-	    printf("End Scanning\n");
-	    if(p.OffsetFlag)
-	    {
-		VV.Offset(p.OffsetThr);
+		Box3f fullbf; fullbf.Import(fullb);
+
+		VV.Init(cells,fullbf,p.IDiv,p.IPos);
+		printf("\n\n --------------- Allocated subcells. %i\n",VV.Allocated());
+
+		std::string filename=p.basename;
+		if(p.IDiv!=Point3i(1,1,1))
+		{
+		  std::string subvoltag;
+		  VV.GetSubVolumeTag(subvoltag);
+		  filename+=subvoltag;
+		}
+		/********** Grande loop di scansione di tutte le mesh *********/
+		bool res=false;
+		for(int i=0;i<MP.size();++i)
+		{
+		  Box3f bbb= MP.bb(i);
+
+		  // if bbox of mesh #i is part of the subblock, then process it
+		  if(bbb.Collide(VV.SubBoxSafe))
+		  {
+		    SMesh *sm;
+		    if(!MP.Find(i,sm) )
+		    {
+			InitMesh(*sm,MP.MeshName(i).c_str(),MP.Tr(i));
+		    }
+		    res |= AddMeshToVolumeM(*sm, MP.MeshName(i),MP.W(i));
+		  }
+		}
+
+		//B.Normalize(1);
+		printf("End Scanning\n");
+		if(p.OffsetFlag)
+		{
+		    VV.Offset(p.OffsetThr);
+		    if (p.VerboseLevel>0)
+		    {
+			VV.SlicedPPM("finaloff","__",p.SliceNum);
+			VV.SlicedPPMQ("finaloff","__",p.SliceNum);
+		    }
+		}
+		//if(p.VerboseLevel>1) VV.SlicedPPM(filename.c_str(),SFormat("_%02im",i),p.SliceNum	);
+
+		for(int i=0;i<p.RefillNum;++i)
+		{
+		  VV.Refill(3,6);
+		  if(p.VerboseLevel>1) VV.SlicedPPM(filename.c_str(),SFormat("_%02imsr",i),p.SliceNum	);
+		  //if(VerboseLevel>1) VV.SlicedPPMQ(filename,SFormat("_%02ips",i++),SliceNum	);
+		}
+
+		for(int i=0;i<p.SmoothNum;++i)
+		{
+		  Volume <Voxelf> SM;
+		  SM.Init(VV);
+		  printf("%2i/%2i: ",i,p.SmoothNum);
+		  SM.CopySmooth(VV,1,p.QualitySmoothAbs);
+		  VV=SM;
+		  VV.Refill(3,6);
+		  if(p.VerboseLevel>1) VV.SlicedPPM(filename.c_str(),SFormat("_%02ims",i),p.SliceNum	);
+		}
+
+		int t1=clock();  //--------
+		TotAdd+=t1-t0;
+		printf("Extracting surface...\r");
 		if (p.VerboseLevel>0)
 		{
-		    VV.SlicedPPM("finaloff","__",p.SliceNum);
-		    VV.SlicedPPMQ("finaloff","__",p.SliceNum);
+		    VV.SlicedPPM("final","__",p.SliceNum);
+		    VV.SlicedPPMQ("final","__",p.SliceNum);
 		}
-	    }
-	    //if(p.VerboseLevel>1) VV.SlicedPPM(filename.c_str(),SFormat("_%02im",i),p.SliceNum	);
+		//MCMesh me;
+		//
+		MCMesh me;
+		if(res)
+		{
+		  typedef vcg::tri::TrivialWalker<MCMesh, Volume <Voxelf> >	Walker;
+		  typedef vcg::tri::MarchingCubes<MCMesh, Walker>             MarchingCubes;
+		  //typedef vcg::tri::ExtendedMarchingCubes<MCMesh, Walker> ExtendedMarchingCubes;
 
-	    for(int i=0;i<p.RefillNum;++i)
-	    {
-	      VV.Refill(3,6);
-	      if(p.VerboseLevel>1) VV.SlicedPPM(filename.c_str(),SFormat("_%02imsr",i),p.SliceNum	);
-	      //if(VerboseLevel>1) VV.SlicedPPMQ(filename,SFormat("_%02ips",i++),SliceNum	);
-	    }
-
-	    for(int i=0;i<p.SmoothNum;++i)
-	    {
-	      Volume <Voxelf> SM;
-	      SM.Init(VV);
-	      printf("%2i/%2i: ",i,p.SmoothNum);
-	      SM.CopySmooth(VV,1,p.QualitySmoothAbs);
-	      VV=SM;
-	      VV.Refill(3,6);
-	      if(p.VerboseLevel>1) VV.SlicedPPM(filename.c_str(),SFormat("_%02ims",i),p.SliceNum	);
-	    }
-
-	    int t1=clock();  //--------
-	    TotAdd+=t1-t0;
-	    printf("Extracting surface...\r");
-	    if (p.VerboseLevel>0)
-	    {
-		VV.SlicedPPM("final","__",p.SliceNum);
-		VV.SlicedPPMQ("final","__",p.SliceNum);
-	    }
-	    //MCMesh me;
-	    //
-	    MCMesh me;
-	    if(res)
-	    {
-	      typedef vcg::tri::TrivialWalker<MCMesh, Volume <Voxelf> >	Walker;
-	      typedef vcg::tri::MarchingCubes<MCMesh, Walker>             MarchingCubes;
-	      //typedef vcg::tri::ExtendedMarchingCubes<MCMesh, Walker> ExtendedMarchingCubes;
-
-	      Walker walker;
-	      MarchingCubes	mc(me, walker);
-	      Box3i currentSubBox=VV.SubPartSafe;
-	      Point3i currentSubBoxRes=VV.ssz;
-	      walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
-	      typename MCMesh::VertexIterator vi;
-	      Box3f bbb; bbb.Import(VV.SubPart);
-	      for(vi=me.vert.begin();vi!=me.vert.end();++vi)
-	      {
-		  if(!bbb.IsIn((*vi).P()))
-		      vcg::tri::Allocator< MCMesh >::DeleteVertex(me,*vi);
-		  VV.DeInterize((*vi).P());
-	      }
-	      typename MCMesh::FaceIterator fi;
-	      for (fi = me.face.begin(); fi != me.face.end(); ++fi)
-	      {
-		  if((*fi).V(0)->IsD() || (*fi).V(1)->IsD() || (*fi).V(2)->IsD() )
-		      vcg::tri::Allocator< MCMesh >::DeleteFace(me,*fi);
-		  else std::swap((*fi).V1(0), (*fi).V2(0));
-	      }
-
-	      int t2=clock();  //--------
-	      TotMC+=t2-t1;
-	      if(me.vn >0 || me.fn >0)
-	      {
-								  p.OutNameVec.push_back(filename+std::string(".ply"));
-		  tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameVec.back().c_str(),saveMask);
-		  if(p.SimplificationFlag)
+		  Walker walker;
+		  MarchingCubes	mc(me, walker);
+		  Box3i currentSubBox=VV.SubPartSafe;
+		  Point3i currentSubBoxRes=VV.ssz;
+		  walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
+		  typename MCMesh::VertexIterator vi;
+		  Box3f bbb; bbb.Import(VV.SubPart);
+		  for(vi=me.vert.begin();vi!=me.vert.end();++vi)
 		  {
-		      Simplify(me, VV.voxel[0]/2);
-		      tri::io::ExporterPLY<MCMesh>::Save(me,(filename+std::string(".d.ply")).c_str(),saveMask);
+		      if(!bbb.IsIn((*vi).P()))
+			  vcg::tri::Allocator< MCMesh >::DeleteVertex(me,*vi);
+		      VV.DeInterize((*vi).P());
 		  }
+		  typename MCMesh::FaceIterator fi;
+		  for (fi = me.face.begin(); fi != me.face.end(); ++fi)
+		  {
+		      if((*fi).V(0)->IsD() || (*fi).V(1)->IsD() || (*fi).V(2)->IsD() )
+			  vcg::tri::Allocator< MCMesh >::DeleteFace(me,*fi);
+		      else std::swap((*fi).V1(0), (*fi).V2(0));
+		  }
+
+		  int t2=clock();  //--------
+		  TotMC+=t2-t1;
+		  if(me.vn >0 || me.fn >0)
+		  {
+								      p.OutNameVec.push_back(filename+std::string(".ply"));
+		      tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameVec.back().c_str(),saveMask);
+		      if(p.SimplificationFlag)
+		      {
+			  Simplify(me, VV.voxel[0]/2);
+			  tri::io::ExporterPLY<MCMesh>::Save(me,(filename+std::string(".d.ply")).c_str(),saveMask);
+		      }
+		  }
+		  int t3=clock();  //--------
+		  TotSav+=t3-t2;
+
+		}
+
+		printf("Mesh Saved '%s':  %8d vertices, %8d faces                   \n",(filename+std::string(".ply")).c_str(),me.vn,me.fn);
+		printf("Adding Meshes %8i\n",TotAdd);
+		printf("MC            %8i\n",TotMC);
+		printf("Saving        %8i\n",TotSav);
+		printf("Total         %8i\n",TotAdd+TotMC+TotSav);
 	      }
-	      int t3=clock();  //--------
-	      TotSav+=t3-t2;
-
-	    }
-
-	    printf("Mesh Saved '%s':  %8d vertices, %8d faces                   \n",(filename+std::string(".ply")).c_str(),me.vn,me.fn);
-	    printf("Adding Meshes %8i\n",TotAdd);
-	    printf("MC            %8i\n",TotMC);
-	    printf("Saving        %8i\n",TotSav);
-	    printf("Total         %8i\n",TotAdd+TotMC+TotSav);
-	  }
-	else
-	  {
-	     printf("----------- skipping SubBlock %2i %2i %2i ----------\n",p.IPos[0],p.IPos[1],p.IPos[2]);
-	  }
+	    else
+	      {
+		 printf("----------- skipping SubBlock %2i %2i %2i ----------\n",p.IPos[0],p.IPos[1],p.IPos[2]);
+	      }
 }
 
 
