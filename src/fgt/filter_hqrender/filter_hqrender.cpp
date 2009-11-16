@@ -159,9 +159,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 
 	//destination diretory + main file
-	QString dest("");
-	//QString dest = par.getSaveFileName("SceneName");
-	if(dest == "") { //default value: temporany directory
+	QString destPathFileString("");
+	//QString destPathFileString = par.getSaveFileName("SceneName");
+	if(destPathFileString == "") { //default value: temporany directory
 		QDir temp = QDir::temp();
 		if(!temp.cd("scene")) {
 			if(temp.mkdir("scene")) {
@@ -172,33 +172,25 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 				return false;
 			}
 		}
-		dest = temp.absolutePath() + QDir::separator() + "scene.rib";
+		destPathFileString = temp.absolutePath() + QDir::separator() + "scene.rib";
 		delRibFiles = true;
 	}
 	else {
 		delRibFiles = false;
 	}
 
-	QString destDirString = getDirFromPath(&dest);
-	QString destFile = getFileNameFromPath(&dest);
-	qDebug("Starting to write rib file into %s",qPrintable(dest));
-	//output file
-	/*QFile outFile(dest);
-	if(!outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		return false;
-	}*/	
+	QString destDirString = getDirFromPath(&destPathFileString);
+	QString destFile = getFileNameFromPath(&destPathFileString);
+	qDebug("Starting to write rib file into %s",qPrintable(destPathFileString));
+	//output file		
 	FILE* fout;
-	fout = fopen(qPrintable(dest),"wb");
+	fout = fopen(qPrintable(destPathFileString),"wb");
 	if(fout==NULL)	{
 	
 	}
-	
-	/////controlli di coordinate, ecc.... per ora ignoro
-	//if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord())
 
 	//TEXTURE: take the list of texture mesh
-	//if there are textures, will be add the MAKETEXTURE statement before the first "frame begin"
-	QStringList textureList;
+	QStringList textureList;	
 	for(int i=0; i<m.cm.textures.size(); i++) {
 		textureList << QString(m.cm.textures[i].c_str());
 	}
@@ -208,7 +200,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	int numOfFrames = par.getInt("frames");
 	vcg::Matrix44f transfCamera = vcg::Matrix44f::Identity();
 	bool stop = false;
-	FILE* fmain = fout;
+	FILE* fmain = fout; //if change the output file
 	QStringList frameDeclaration = QStringList();
 	bool isFrameDeclaration = false;
 	QStringList shaderDirs, textureDirs;
@@ -240,15 +232,14 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			}
 		}
 
-		//add "MakeTexture" statement to create the texure, but only before frame one
-		// ********* forse aqsis ha un exe che crea le texture..... ********** (pixie sì)
+		//add "MakeTexture" statement to create the texure, but only before frame one =>not necessary
 		if(token[0].trimmed() == "FrameBegin") {
 			currentFrame = token[1].trimmed().toInt(); //no check on cast
 			if(currentFrame == 1) {
-				foreach(QString textureName, textureList) {
-					QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName,false) + ".tiff" + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 1 1");
-					fprintf(fout,"%s\n",qPrintable(makeTexture));
-				}
+				//foreach(QString textureName, textureList) {
+					//QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName,false) + ".tiff" + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 1 1");
+					//fprintf(fout,"%s\n",qPrintable(makeTexture));
+				//}
 				if(numOfFrames > 0)
 					isFrameDeclaration = true;
 			}
@@ -312,7 +303,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		}
 
 		//is an object
-		if(token[0].trimmed() == "AttributeBegin") {
+		if(token[0].trimmed() == "AttributeBegin") {//rewrite this part
 			fprintf(fout,"%s\n",qPrintable(line));
 			//looking for an object called dummy...
 			int c = 1;
@@ -328,7 +319,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 				if(token[0].trimmed() == "Attribute") {
 					if(token[1].trimmed() == "\"identifier\"" &&
 						token[2].trimmed() == "\"string" &&
-						token[3].trimmed() == "name\"") { //"identifier" "string name"
+						token[3].trimmed() == "name\"") { //"identifier" "string name" !!!"identifier" "name" TOO!!!
 						QString str = token[4];
 						if(token.size()>5) {
 							for(int i= 5; i<token.size(); i++)
@@ -383,68 +374,123 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	
 	//copy the rest of template (shaders, textures..)
 	QDir destDir(destDirString);
-	copyFiles(templateDir, destDir, shaderDirs);
 	copyFiles(templateDir, destDir, textureDirs);
+	copyFiles(templateDir, destDir, shaderDirs);
+	
+	//looking for aqsis installation directory:
+	//take the system environment variables
+	QStringList env = QProcess::systemEnvironment();
+	QString aqsisDir;
+	bool found = false;
+	foreach(QString envElem, env) { //looking for AQSISHOME variable
+		if(envElem.contains("AQSISHOME")) {
+			qDebug("founded environment variable value: %s", qPrintable(envElem));
+			aqsisDir = envElem.remove("AQSISHOME="); //the string is "AQSISHOME='path'"
+			qDebug("aqsis directory: %s", qPrintable(aqsisDir));
+			found = true;
+			break;
+		}
+	}
+	if(!found) {
+		this->errorMessage = "Aqsis is not installed correctly";
+		return false;
+	}
+#if defined(Q_OS_WIN)
+	//if os is win and a dir contains a space, it must be wrapped in quotes (..\"Program files"\..)
+	aqsisDir = quotesPath(&aqsisDir);
+#endif
 
-	//Copy all mesh textures in dest dir
+	//compile the shaders with current aqsis shader compiler version
+	foreach(QString dirStr, shaderDirs) {
+		if(destDir.exists(dirStr)) {
+			QProcess compileProcess; //compile all shaders together foreach folder
+			//set working directory the location of shaders
+			compileProcess.setWorkingDirectory(destDirString + QDir::separator() + dirStr);
+			qDebug("compiling shader working directory: %s",qPrintable(destDirString + QDir::separator() + dirStr));
+			QString toRun = aqsisDir + "bin" + QDir::separator() + "aqsl.exe *.sl";
+			qDebug("compiling command: %s",qPrintable(toRun));
+			compileProcess.start(toRun);				
+			if (!compileProcess.waitForFinished(-1)) { //wait the finish of process
+				//if there's an arror of compiling the process exits normally!!
+				QByteArray err = compileProcess.readAllStandardError();
+				this->errorMessage = "Is impossible compile the shaders of template" + err;
+				qDebug("compiling msg err: %s",err.data());
+				qDebug("compiling msg out: %s",compileProcess.readAllStandardOutput().data());
+				return false;
+			}
+		}
+	}
+
+	//Copy and convert to tiff format, all mesh textures, in dest dir and convert the to renderman format
 	foreach(QString textureName, textureList) {
 		QString str(m.fileName.c_str()); //mesh directory
 		str = getDirFromPath(&str);
 		QFile srcFile(str + QDir::separator() + textureName);
 
 		//position in the first readable/writable between textures directories
-		foreach(QString dir, textureDirs)
-			if(dir!="." && destDir.cd(dir))
+		QString newImageDir = ".";
+		foreach(QString dir, textureDirs) {
+			if(dir!="." && destDir.cd(dir)) {
+				newImageDir = dir;
 				break;
-
-		QString newTex = destDir.absolutePath() + QDir::separator() + getFileNameFromPath(&textureName,false);
+			}
+		}
+		qDebug("source texture directory: %s", qPrintable(srcFile.fileName()));
+		QString newTex = destDirString + QDir::separator() + newImageDir + QDir::separator() + getFileNameFromPath(&textureName,false);
+		qDebug("destination texture directory: %s", qPrintable(newTex + ".tiff"));
 		if(srcFile.exists())
 		{
+			//convert image to tiff format (the one readable in aqsis)
 			QImage image;
 			image.load(srcFile.fileName());
-			image.save(newTex+".tiff","Tiff");
+			image.save(newTex + ".tiff", "Tiff");
+
+			//convert the texture to renderman format
+			QProcess convertTextureProcess;
+			//set working directory the location of texture
+			convertTextureProcess.setWorkingDirectory(destDirString + QDir::separator() + newImageDir);
+			qDebug("convert texture working directory: %s",qPrintable(destDirString + QDir::separator() + newImageDir));
+			QString toRun = aqsisDir + "bin" + QDir::separator() + "teqser.exe " + getFileNameFromPath(&textureName,false) +".tiff " + getFileNameFromPath(&textureName,false) + ".tx";
+			qDebug("convert command: %s",qPrintable(toRun));
+			convertTextureProcess.start(toRun);				
+			if (!convertTextureProcess.waitForFinished(-1)) { //wait the finish of process
+				QByteArray err = convertTextureProcess.readAllStandardError();
+				this->errorMessage = "Is impossible convert the texture " + textureName + "\n" + err;				
+				return false;
+			}
 		}
-		else
+		else {
+			this->errorMessage = "Not founded the texture file: " + srcFile.fileName();
 			return false; //the mesh has a texture not existing
-	}
-
-	//run the aqsis rendering
-	QStringList env = QProcess::systemEnvironment();
-	QString aqsisDir;
-	foreach(QString envElem, env) {
-		if(envElem.contains("AQSISHOME")) {
-			aqsisDir = envElem.remove("AQSISHOME=");
-			break;
 		}
 	}
-#if defined(Q_OS_WIN)
-	//if os is win and a dir contains a space, it must be wrapped in quotes (..\"Program files"\..)
-	aqsisDir = quotesPath(&aqsisDir);
-	dest = getDirFromPath(&dest);
-	dest = quotesPath(&dest);	
-#endif
 
+
+	//run the aqsis rendering	
 	QProcess renderProcess;
 	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
-	QString toRun = aqsisDir+"bin"+QDir::separator()+"aqsis.exe " + destFile;
+	QString toRun = aqsisDir + "bin" + QDir::separator() + "aqsis.exe " + destFile;
+	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
 #if !defined(NO_RENDERING)
 	renderProcess.start(toRun);
-	if (!renderProcess.waitForFinished(-1))
-         return false; //devo?
+	if (!renderProcess.waitForFinished(-1)) //wait the finish of process
+         return false; //devo?quando si verifica?se la finestra viene chiusa?
 #endif
 
-
-	//the image is copied in mesh folder
+	//the rendering result image is copied in mesh folder
 	QString meshDir(m.fileName.c_str());
 	meshDir = getDirFromPath(&meshDir);
 	QString finalImage = meshDir + QDir::separator() + par.getString("ImageName");
+	qDebug("final image position: %s", qPrintable(finalImage));
 	if(QFile::exists(finalImage)) {
 		//delete without control?
 		QFile::remove(finalImage);
 	}
+	qDebug("rendering result image position: %s", qPrintable(destDirString + QDir::separator() + par.getString("ImageName")));
 	QFile::copy(destDirString + QDir::separator() + par.getString("ImageName"), finalImage);
+
     
-	//delete all files (if it's required)
+	//delete all created files (if it's required)
 	
 
 	return true;
@@ -590,12 +636,13 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 		if(token[0].trimmed() == "Surface") {
 			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
 				foreach(QString textureName, *textureList) {
-					fprintf(fout,"Surface \"paintedplastic\" \"Ka\" 0.0 \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+					fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"sticky_texture\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"mytexmap\" \"name\" \"%s.tx\"\n", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"MOSAICsurface\" \"uniform float ColMix\" [ 1.0 ] \"uniform string ColMap\" [ \"%s.tx\" ] \"uniform float Amb\" [ 0.5 ] \"uniform color AmbCol\" [ 0.0 0.0 0.0 ]", qPrintable(getFileNameFromPath(&textureName,false)));
 					//fprintf(fout,"Surface \"texmap\" \"texname\" [\"%s.tx\"]\n",qPrintable(getFileNameFromPath(&textureName,false)));
 				}
+				fprintf(fout,"Color [ 1.0 0.0 0.0 ]\n");				
 			}
 		}
 
@@ -754,6 +801,9 @@ bool FilterHighQualityRender::copyFiles(QDir templateDir,QDir destDir,QStringLis
 
 			QStringList filesList = src.entryList(QDir::Files);
 			foreach(QString file, filesList) {
+				qDebug("copy file from %s to %s", 
+					qPrintable(src.absolutePath() + QDir::separator() + file),
+					qPrintable(dest.absolutePath() + QDir::separator() + file));	
 				QFile::copy(src.absolutePath() + QDir::separator() + file,dest.absolutePath() + QDir::separator() + file);
 			}
 		}
