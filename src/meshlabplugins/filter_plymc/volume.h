@@ -336,7 +336,7 @@ public:
 		int rx=x/BLOCKSIDE();		int ry=y/BLOCKSIDE();		int rz=z/BLOCKSIDE();
 		assert(rx>=0 && rx<asz[0] && ry>=0 && ry<asz[1] && rz>=0 && rz<asz[2]);
 		rpos = rz*asz[0]*asz[1]+ry*asz[0]+rx;
-		assert(rpos < rv.size());
+        assert(rpos < int(rv.size()));
 		int lx = x%BLOCKSIDE();		int ly = y%BLOCKSIDE();		int lz = z % BLOCKSIDE();
 		lpos = lz*BLOCKSIDE()*BLOCKSIDE()+ly*BLOCKSIDE()+lx;		
 		if(rv[rpos].empty()) return false;
@@ -900,7 +900,7 @@ void AddXZInt( const int x, const int z, const double y, const double sgn, const
 	 fprintf(fp,"  Voxel dimension   %7.4f %7.4f %7.4f \n",voxel[0],voxel[1],voxel[2]);
 	 
 	 fprintf(fp,"  Size in MacroCell %7i %7i %7i (tot: %7.3f M):\n",rsz[0],rsz[1],rsz[2],double(rsz[0]*rsz[1]*rsz[2])/1000000.0);
-	 fprintf(fp," Memory Info: \n   Voxel Size %8i b Virtually needed mem %8i Mb\n",
+     fprintf(fp," Memory Info: \n   Voxel Size %8li b Virtually needed mem %8i Mb\n",
                                         sizeof(VOX_TYPE),int(sizeof(VOX_TYPE)*(_int64)(sz[0])*(_int64)(sz[1])*(_int64)(sz[2])/(1024*1024)));
    if(div!=Point3i(1,1,1))
 		 {	 
@@ -1024,7 +1024,7 @@ void Refill(const int thr,float maxdistance = std::numeric_limits<float>::max() 
 
 	}
  printf("ReFill  %8i ",lcnt);
-int ncnt=Normalize(thr,maxdistance);
+Normalize(thr,maxdistance);
 }
 
 /*
@@ -1284,7 +1284,6 @@ class VolumeIterator
 	{
 		
 		//Dump();
-		bool fnd=false;
         typename std::vector<std::vector<typename VOL::voxel_type> >::iterator rvi=V.rv.begin()+rpos;
 		do
 		{
@@ -1334,7 +1333,7 @@ class VolumeIterator
 			//V.IPos(p[0],p[1],p[2],rpos,lpos);
 			return true;
 		}
-		if(rpos < V.rv.size()-1)
+        if(rpos < int(V.rv.size()-1))
 		{
 			lpos=0;
 			++rpos;

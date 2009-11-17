@@ -255,7 +255,7 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w )
                     if(quality)
                             res |= B.ScanFace((*fi).V(0)->P(),(*fi).V(1)->P(),(*fi).V(2)->P(),quality,(*fi).N());
                 }
-            printf(" : %i\n",clock()-tt0);
+            printf(" : %li\n",clock()-tt0);
 
     } else
     {	// Splat approach add only the vertices to the volume

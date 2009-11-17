@@ -111,7 +111,7 @@ break;
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
     MeshModel &m=*(md.mm());
 		srand(time(NULL)); 
@@ -135,7 +135,7 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 		pmc.Process();
 		if(par.getBool("openResult"))
 		{
-		for(int i=0;i<p.OutNameVec.size();++i)
+        for(size_t i=0;i<p.OutNameVec.size();++i)
 			{
 				MeshModel *mp=md.addNewMesh(p.OutNameVec[i].c_str());
 				tri::io::ImporterPLY<CMeshO>::Open(mp->cm,p.OutNameVec[i].c_str());

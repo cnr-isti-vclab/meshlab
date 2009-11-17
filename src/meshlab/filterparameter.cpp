@@ -215,7 +215,7 @@ void RichParameterCopyConstructor::visit( RichEnum& pd )
 	lastCreated = new RichEnum(pd.name,pd.val->getEnum(),pd.pd->defVal->getEnum(),dec->enumvalues,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
-void RichParameterCopyConstructor::visit( RichFloatList& pd )
+void RichParameterCopyConstructor::visit( RichFloatList& /*pd*/ )
 {
 	/*lastCreated = new FloatListWidget(par,&pd);*/
 }
@@ -226,12 +226,12 @@ void RichParameterCopyConstructor::visit( RichDynamicFloat& pd )
 	lastCreated = new RichDynamicFloat(pd.name,pd.val->getDynamicFloat(),pd.pd->defVal->getDynamicFloat(),dec->min,dec->max,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
-void RichParameterCopyConstructor::visit( RichOpenFile& pd )
+void RichParameterCopyConstructor::visit( RichOpenFile& /*pd*/ )
 {
 	/*lastCreated = new OpenFileWidget(par,&pd);*/
 }
 
-void RichParameterCopyConstructor::visit( RichSaveFile& pd )
+void RichParameterCopyConstructor::visit( RichSaveFile& /*pd*/ )
 {
 	/*lastCreated = new SaveFileWidget(par,&pd);*/
 }
@@ -330,7 +330,7 @@ void RichParameterXMLVisitor::visit( RichEnum& pd )
 
 }
 
-void RichParameterXMLVisitor::visit( RichFloatList& pd )
+void RichParameterXMLVisitor::visit( RichFloatList& /*pd*/ )
 {
 	assert(0);
 }
@@ -343,12 +343,12 @@ void RichParameterXMLVisitor::visit(RichDynamicFloat& pd)
 	parElem.setAttribute("max",QString::number(dec->max));
 }
 
-void RichParameterXMLVisitor::visit( RichOpenFile& pd )
+void RichParameterXMLVisitor::visit( RichOpenFile& /*pd*/ )
 {
 	assert(0);
 }
 
-void RichParameterXMLVisitor::visit( RichSaveFile& pd )
+void RichParameterXMLVisitor::visit( RichSaveFile& /*pd*/ )
 {
 	assert(0);
 }
@@ -555,12 +555,12 @@ MeshDecoration::MeshDecoration( int meshind,MeshDocument* doc,const QString desc
 		defVal = new MeshValue(doc->meshList.at(meshind));
 }
 
-MeshDecoration::MeshDecoration( int meshind,const QString desc/*=QString()*/,const QString tltip/*=QString()*/) :ParameterDecoration(NULL,desc,tooltip),meshdoc(NULL),meshindex(meshind)
+MeshDecoration::MeshDecoration( int meshind,const QString desc/*=QString()*/,const QString tooltip/*=QString()*/) :ParameterDecoration(NULL,desc,tooltip),meshdoc(NULL),meshindex(meshind)
 {
 
 }
 
-RichParameter::RichParameter( const QString nm,Value* v,ParameterDecoration* prdec ) :name(nm),pd(prdec),val(v)
+RichParameter::RichParameter( const QString nm,Value* v,ParameterDecoration* prdec ) :name(nm),val(v),pd(prdec)
 {
 
 }
@@ -826,12 +826,12 @@ RichMesh::RichMesh( const QString nm,int meshindex,MeshDocument* doc,const QStri
 	val = new MeshValue(doc->meshList.at(meshindex));
 }
 
-RichMesh::RichMesh( const QString nm,int meshindex,const QString desc/*=QString()*/,const QString tltip/*=QString()*/  ) :RichParameter(nm,new MeshValue(NULL),new MeshDecoration(meshindex))
+RichMesh::RichMesh( const QString nm,int meshindex,const QString /*desc*//*=QString()*/,const QString /*tltip*//*=QString()*/  ) :RichParameter(nm,new MeshValue(NULL),new MeshDecoration(meshindex))
 {
 
 }
 
-RichMesh::RichMesh( const QString nm,MeshModel* val,MeshModel* defval,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm, new MeshValue(defval),new MeshDecoration( new MeshValue(defval),doc,desc,tltip))
+RichMesh::RichMesh( const QString nm,MeshModel* /*val*/,MeshModel* defval,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm, new MeshValue(defval),new MeshDecoration( new MeshValue(defval),doc,desc,tltip))
 {
 
 }
@@ -855,7 +855,7 @@ RichFloatList::RichFloatList( const QString nm,FloatListValue* v,FloatListDecora
 
 }
 
-RichFloatList::RichFloatList( const QString nm,FloatListValue* val,FloatListValue* v,FloatListDecoration* prdec ) :RichParameter(nm,v,prdec)
+RichFloatList::RichFloatList( const QString nm,FloatListValue* /*val*/,FloatListValue* v,FloatListDecoration* prdec ) :RichParameter(nm,v,prdec)
 {
 
 }
@@ -900,12 +900,12 @@ RichDynamicFloat::~RichDynamicFloat()
 
 }
 
-RichOpenFile::RichOpenFile( const QString nm,const QString defval,const QString ext /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new FileValue(defval),new FileDecoration(new FileValue(defval),tltip,desc))
+RichOpenFile::RichOpenFile( const QString nm,const QString defval,const QString /*ext*/ /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new FileValue(defval),new FileDecoration(new FileValue(defval),tltip,desc))
 {
 
 }
 
-RichOpenFile::RichOpenFile( const QString nm,const QString val,const QString defval,const QString ext /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new FileValue(val),new FileDecoration(new FileValue(defval),tltip,desc))
+RichOpenFile::RichOpenFile( const QString nm,const QString val,const QString defval,const QString /*ext*/ /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new FileValue(val),new FileDecoration(new FileValue(defval),tltip,desc))
 {
 
 }
@@ -929,7 +929,7 @@ RichSaveFile::RichSaveFile( const QString nm,FileValue* v,FileDecoration* prdec 
 
 }
 
-RichSaveFile::RichSaveFile( const QString nm,FileValue* val,FileValue* v,FileDecoration* prdec ):RichParameter(nm,v,prdec)
+RichSaveFile::RichSaveFile( const QString nm,FileValue* /*val*/,FileValue* v,FileDecoration* prdec ):RichParameter(nm,v,prdec)
 {
 
 }
