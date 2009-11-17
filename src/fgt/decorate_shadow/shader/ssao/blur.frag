@@ -11,16 +11,12 @@ void main() {
     color += texture2D( scene, gl_TexCoord[0].st + vec2( 2.0 * scale.x,  2.0 * scale.y ) )*0.09375;
     color += texture2D( scene, gl_TexCoord[0].st + vec2( 3.0 * scale.x, 3.0 * scale.y ) ) * 0.015625;
 
-    if(color.a < 0.5)
+    /*if(color.a < 0.5)
       discard;
-    //gl_FragColor = color;//vec4(color.xyz, (0.5 - color.x));
     if(scale.y == 0.0)
       gl_FragColor = color;//vec4(color.xyz, 0.5);
     else
-      /*if (color.x > 0.8)//{
-	discard;
-      else*/
-	gl_FragColor = gl_FragColor = vec4(vec3(0.0), (1.0 - color.x));
-      //gl_FragColor = vec4(color.xyz, 0.0);//(0.5 - color.x));
+	gl_FragColor = gl_FragColor = vec4(vec3(0.0), (1.0 - color.x));*/
+      gl_FragColor = texture2D( scene, gl_TexCoord[0].st);
 
 }
