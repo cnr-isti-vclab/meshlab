@@ -24,3 +24,6 @@ HEADERS = plymc.h \
     tri_edge_collapse_mc.h \
     simplemeshprovider.h \
     ../../meshlab/alnParser.h
+
+#macx-g++:DEFINES += NDEBUG
+

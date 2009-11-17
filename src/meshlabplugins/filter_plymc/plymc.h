@@ -170,6 +170,13 @@ class PlyMC
 void InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
 {
     tri::io::Importer<SMesh>::Open(m,filename);
+
+    if(p.CleaningFlag){
+        int dup = tri::Clean<SMesh>::RemoveDuplicateVertex(m);
+        int unref =  tri::Clean<SMesh>::RemoveUnreferencedVertex(m);
+        printf("Removed %i duplicates and %i unref",dup,unref);
+    }
+
     tri::UpdatePosition<SMesh>::Matrix(m,Tr,false);
     tri::UpdateBounding<SMesh>::Box(m);
     printf("Init Mesh %s (%ivn,%ifn)\n",filename,m.vn,m.fn);
@@ -182,10 +189,6 @@ void InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
         tri::UpdateQuality<SMesh>::VertexGeodesicFromBorder(m);
     }
 
-    if(p.CleaningFlag){
-        int dup = tri::Clean<SMesh>::RemoveDuplicateVertex(m);
-        int unref =  tri::Clean<SMesh>::RemoveUnreferencedVertex(m);
-    }
     typename SMesh::VertexIterator vi;
 
     for(vi=m.vert.begin(); vi!=m.vert.end();++vi)
@@ -243,7 +246,8 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w )
             bool closed=false;
             if(minq==maxq) closed=true;  // se la mesh e' chiusa la  ComputeGeodesicQuality mette la qualita a zero ovunque
             // Classical approach: scan each face
-            printf("Face Rasterization\n");
+            int tt0=clock();
+            printf("---- Face Rasterization");
             for(fi=m.face.begin(); fi!=m.face.end();++fi)
                 {
                     if(closed || (p.PLYFileQualityFlag==false && p.GeodesicQualityFlag==false)) quality=1.0;
@@ -251,6 +255,8 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w )
                     if(quality)
                             res |= B.ScanFace((*fi).V(0)->P(),(*fi).V(1)->P(),(*fi).V(2)->P(),quality,(*fi).N());
                 }
+            printf(" : %i\n",clock()-tt0);
+
     } else
     {	// Splat approach add only the vertices to the volume
         printf("Vertex Splatting\n");
@@ -306,6 +312,7 @@ void Process()
     printf("Completed BBox Scanning                   \n");
     Box3f fullb = MP.fullBB();
     assert (!fullb.IsNull());
+    assert (!fullb.IsEmpty());
     // Calcolo gridsize
     Point3i gridsize;
     Point3f voxdim;

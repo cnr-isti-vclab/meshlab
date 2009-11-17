@@ -165,7 +165,7 @@ bool Verbose; // se true stampa un sacco di info in piu su logfp;
 		asz=ssz/BLOCKSIDE() + Point3i(1,1,1);
         rv.clear();
         rv.resize(asz[0]*asz[1]*asz[2]);
-        for(int i=0;i<rv.size();++i)
+        for(size_t i=0;i<rv.size();++i)
             rv[i].resize(0,VOX_TYPE::Zero());
         SetDim(bb);
 	};
@@ -448,8 +448,7 @@ void CopySmooth( Volume<VOX_TYPE> &S, scalar SafeZone=1, scalar SafeQuality=0)
  VolumeIterator< Volume > vi(S);
  vi.Restart();
  vi.FirstNotEmpty();
- int tt0 = clock();
-// const Voxelf *VC;
+ // const Voxelf *VC;
  while(vi.IsValid()) 
 	 // scandisci il volume in ingresso, per ogni voxel non vuoto del volume 
 	 // in ingresso calcola la media con gli adiacenti
@@ -489,7 +488,6 @@ void CopySmooth( Volume<VOX_TYPE> &S, scalar SafeZone=1, scalar SafeQuality=0)
 	}
  // Step 2, 
  // dopo aver calcolato la media, 
-int tt1 = clock();
  
  VolumeIterator< Volume > svi(*this);
  svi.Restart();
@@ -534,8 +532,7 @@ int tt1 = clock();
 		svi.Next();
 		if(svi.IsValid()) svi.FirstNotEmpty();
 	}
- int tt2 = clock();
- //printf("step 1 %i step2 %i\n",tt1-tt0,tt2-tt1);
+
  if(Verbose) fprintf(LogFP,"CopySmooth %i voxels, %i preserved, %i blended\n",smoothcnt,preservedcnt,blendedcnt);
 }
 
@@ -621,6 +618,110 @@ bool SplatVert( const Point3x & v0, double quality, const Point3x & nn, Color4b 
 		return true;	
 }
 
+template <const int CoordZ>
+        void RasterFace(const int sx, const int ex, const int sy, const int ey,
+                        scalar dist, const Point3x &norm, scalar quality,
+                        const Point3x &v0,  const Point3x &v1,  const Point3x &v2,
+                        const Point3x &d10, const Point3x &d21, const Point3x &d02)
+{
+  const scalar EPS     = scalar(1e-12);
+  const int crd0 = CoordZ;
+  const int crd1 = (CoordZ+1)%3;
+  const int crd2 = (CoordZ+2)%3;
+  assert(fabs(norm[crd0])+0.001 > fabs(norm[crd1]));
+  assert(fabs(norm[crd0])+0.001 > fabs(norm[crd2]));
+  scalar x,y;
+	for(x=sx;x<=ex;++x)
+		for(y=sy;y<=ey;++y)
+		{
+            scalar n0 = (x-v0[crd1])*d10[crd2] - (y-v0[crd2])*d10[crd1];
+            scalar n1 = (x-v1[crd1])*d21[crd2] - (y-v1[crd2])*d21[crd1];
+            scalar n2 = (x-v2[crd1])*d02[crd2] - (y-v2[crd2])*d02[crd1];
+
+            if( (n0>-EPS && n1>-EPS && n2>-EPS) ||
+                   n0< EPS && n1< EPS && n2< EPS )
+			{
+                scalar iz = ( dist - x*norm[crd1] - y*norm[crd2] ) / norm[crd0];
+				//assert(iz>=fbox.min[2] && iz<=fbox.max[2]);
+                AddIntercept<CoordZ>(x,y,iz, quality, norm );
+			}
+		}
+}
+
+// Si sa che la faccia ha una intercetta sull'asse z-dir di coord xy alla posizione z;
+// quindi si setta nei 2 vertici prima e 2 dopo la distanza corrispondente.
+template<int CoordZ>
+        void AddIntercept( const int x, const int y, const scalar z, const scalar q, const Point3f &n )
+{
+    scalar esgn = (n[CoordZ] > 0 ? -1 : 1);
+    int  zint = floor(z);
+    scalar dist=z-zint;  // sempre positivo e compreso tra zero e uno
+
+    for(int k=WN;k<=WP;k++)
+    {
+        if(zint+k >= SubPartSafe.min[CoordZ] && zint+k < SubPartSafe.max[CoordZ])
+        {
+            VOX_TYPE *VV;
+            if(CoordZ==2) VV=&V(x,y,zint+k);
+            if(CoordZ==1) VV=&V(y,zint+k,x);
+            if(CoordZ==0) VV=&V(zint+k,x,y);
+            scalar nvv= esgn*( k-dist);
+            if(!VV->B() || fabs(VV->V()) > fabs(nvv))		{
+                *VV=VOX_TYPE(nvv,n,q);
+            }
+        }
+    }
+}
+
+// assume che i punti della faccia in ingresso siano stati interized 
+bool ScanFace2( const Point3x & v0, const Point3x & v1, const Point3x & v2,
+                       scalar quality, const Point3x & norm)//, const int name )	// OK
+{
+
+	Box3x fbox;		// Bounding Box della faccia (double)
+	Box3i ibox;		// Bounding Box della faccia (int)
+	int sx,sy,sz;	// Bounding Box intero
+	int ex,ey,ez;
+
+		// Calcolo bbox della faccia
+	fbox.Set(v0);
+	fbox.Add(v1);
+	fbox.Add(v2);
+
+	// BBox intero (nota che il cast a int fa truncation (funge solo perche' v0,v1,v2 sono positivi)
+
+	ibox.min[0] =sx = floor(fbox.min[0]); if( ((scalar)sx)!=fbox.min[0] ) ++sx; // necessario se il punto e'approx a .9999 
+	ibox.min[1] =sy = floor(fbox.min[1]); if( ((scalar)sy)!=fbox.min[1] ) ++sy;
+	ibox.min[2] =sz = floor(fbox.min[2]); if( ((scalar)sz)!=fbox.min[2] ) ++sz;
+	ibox.max[0] =ex = floor(fbox.max[0]);
+	ibox.max[1] =ey = floor(fbox.max[1]);
+	ibox.max[2] =ez = floor(fbox.max[2]);
+	 // Skip faces not colliding current subvolume.
+	if(!ibox.Collide(SubPartSafe)) return false;
+	
+	Point3x d10 = v1 - v0;
+	Point3x d21 = v2 - v1;
+	Point3x d02 = v0 - v2;
+
+    assert(norm.Norm() >0.999f && norm.Norm()<1.001f);
+//    assert(0);
+    scalar  dist = norm * v0;
+
+
+		/**** Rasterizzazione bbox ****/
+
+	// Clamping dei valori di rasterizzazione al subbox corrente
+	sx = std::max(SubPartSafe.min[0],sx); ex = std::min(SubPartSafe.max[0]-1,ex);
+	sy = std::max(SubPartSafe.min[1],sy); ey = std::min(SubPartSafe.max[1]-1,ey);
+	sz = std::max(SubPartSafe.min[2],sz); ez = std::min(SubPartSafe.max[2]-1,ez);
+
+    if(fabs(norm[0]) > fabs(norm[1]) && fabs(norm[0])>fabs(norm[2])) RasterFace<0>(sy,ey,sz,ez,dist,norm,quality,v0,v1,v2,d10,d21,d02);
+    else if(fabs(norm[1]) > fabs(norm[0]) && fabs(norm[1])>fabs(norm[2])) RasterFace<1>(sz,ez,sx,ex,dist,norm,quality,v0,v1,v2,d10,d21,d02);
+    else RasterFace<2>(sx,ex,sy,ey,dist,norm,quality,v0,v1,v2,d10,d21,d02);
+
+
+return true;
+}
 
 // assume che i punti della faccia in ingresso siano stati interized 
 bool ScanFace( const Point3x & v0, const Point3x & v1, const Point3x & v2,
@@ -814,7 +915,7 @@ void AddXZInt( const int x, const int z, const double y, const double sgn, const
 
 	int Allocated()
 	{int cnt=0;
-		for(int i=0;i<rv.size();++i)
+        for(size_t i=0;i<rv.size();++i)
 			if(!rv[i].empty()) cnt++;
 			return cnt;
 	}
