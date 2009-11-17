@@ -95,6 +95,18 @@ template<class TriMeshType>
 
     int size() {return meshnames.size();}
 
+    int getCacheSize() {return MC.MaxSize;}
+    int setCacheSize(int newsize)
+    {
+      if(newsize == MC.MaxSize)
+	return MC.MaxSize;
+      if(newsize <= 0)
+	return MC.MaxSize;
+
+      MC.MaxSize = newsize;
+      return newsize;
+    }
+
     bool openALN (const char* alnName)
     {
       vector<RangeMap> rmaps;

@@ -129,19 +129,19 @@ int main(int argc, char *argv[])
     switch(argv[i][1])
     {
 	case 'o' :  p.basename=argv[i]+2;printf("Setting Basename  to %s\n",MYbasename.c_str());break;
-	  //    case 'C' :	CM.MaxSize =atoi(argv[i]+2);printf("Setting MaxSize of MeshCache to %i\n",CM.MaxSize); break;
-	case 'c' :	p.NCell   =atoi(argv[i]+2);printf("Setting NCell  to %i\n",p.NCell); break;
+	case 'C' :  pmc.MP.setCacheSize(atoi(argv[i]+2));printf("Setting MaxSize of MeshCache to %i\n",atoi(argv[i]+2)); break;
+	case 'c' :  p.NCell   =atoi(argv[i]+2);printf("Setting NCell  to %i\n",p.NCell); break;
 	case 'v' :  p.SaveVolumeFlag=true; VolumeBaseName=argv[i]+2; printf("Saving Volume enabled: volume Basename  to %s\n",VolumeBaseName.c_str());break;
-	case 'V' :	p.VoxSize =atof(argv[i]+2);printf("Setting VoxSize  to %f; overridden NCell\n",p.VoxSize);p.NCell=0;break;
-	case 'w' :	p.WideNum =atoi(argv[i]+2);printf("Setting WideNum  to %i\n",p.WideNum);break;
-	case 'W' :	p.WideSize=atof(argv[i]+2);printf("Setting WideSize to %f;overridden WideNum\n",p.WideSize);break;
-	case 'L' :	p.SmoothNum =atoi(argv[i]+2);printf("Setting Laplacian SmoothNum to %i\n",p.SmoothNum);break;
-	case 'R' :	p.RefillNum =atoi(argv[i]+2);printf("Setting Refilling Num to %i\n",p.RefillNum);break;
+	case 'V' :  p.VoxSize =atof(argv[i]+2);printf("Setting VoxSize  to %f; overridden NCell\n",p.VoxSize);p.NCell=0;break;
+	case 'w' :  p.WideNum =atoi(argv[i]+2);printf("Setting WideNum  to %i\n",p.WideNum);break;
+	case 'W' :  p.WideSize=atof(argv[i]+2);printf("Setting WideSize to %f;overridden WideNum\n",p.WideSize);break;
+	case 'L' :  p.SmoothNum =atoi(argv[i]+2);printf("Setting Laplacian SmoothNum to %i\n",p.SmoothNum);break;
+	case 'R' :  p.RefillNum =atoi(argv[i]+2);printf("Setting Refilling Num to %i\n",p.RefillNum);break;
 	case 'q' :  p.QualitySmoothVox=atof(argv[i]+2);printf("Setting QualitySmoothThr  to %f; \n",p.QualitySmoothVox);break;
 	case 'Q' :  p.QualitySmoothAbs=atof(argv[i]+2);printf("Setting QualitySmoothAbsolute to %f; it will override the default %i voxel value\n",p.QualitySmoothAbs,p.QualitySmoothVox);break;
-	case 'l' :	p.IntraSmoothFlag=true; printf("Setting Laplacian Smooth after expansion \n");break;
-	case 'G' :	p.GeodesicQualityFlag=false; printf("Disabling Geodesic Quality\n");break;
-	case 'F' :	p.PLYFileQualityFlag=true; p.GeodesicQualityFlag=false; printf("Enabling PlyFile (and disabling Geodesic) Quality\n");break;
+	case 'l' :  p.IntraSmoothFlag=true; printf("Setting Laplacian Smooth after expansion \n");break;
+	case 'G' :  p.GeodesicQualityFlag=false; printf("Disabling Geodesic Quality\n");break;
+	case 'F' :  p.PLYFileQualityFlag=true; p.GeodesicQualityFlag=false; printf("Enabling PlyFile (and disabling Geodesic) Quality\n");break;
 	case 'f' :  p.FillThr=atoi(argv[i]+2);printf("Setting Fill Threshold to %i\n",p.FillThr);break;
 	case 'a' :  p.ExpAngleDeg=atoi(argv[i]+2);printf("Setting Expanding Angle Threshold to %f Degree\n",p.ExpAngleDeg);break;
 	case 'O' :  p.OffsetThr=atof(argv[i]+2);printf("Setting Offset Threshold to %f \n",p.OffsetThr);p.OffsetFlag=true;break;
