@@ -41,9 +41,9 @@ FilterHighQualityRender::FilterHighQualityRender()
     ;//this->errorMessage = "\"render_template\" folder not found";
   }
 
-  alignValue = QStringList();
+  /*alignValue = QStringList();
   alignValue << "center" << "bottom" << "top";
-
+*/
 }
 
 // ST() must return the very short string describing each filtering action 
@@ -99,10 +99,13 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 			parlst.addParam(new RichInt("FormatY", 200, "Format Y"));
 			parlst.addParam(new RichFloat("PixelAspectRatio", 1.0, "Pixel aspect ratio"));
 			parlst.addParam(new RichBool("Autoscale",true,"Auto-scale mesh","Check if the object will be scaled on render scene"));			
-			parlst.addParam(new RichEnum("AlignX",0,alignValue,"Align X"));
+			QStringList alignValueList = (QStringList() << "Center" << "Top" << "Bottom");
+			parlst.addParam(new RichEnum("AlignX",0,alignValueList,"Align X"));
+			parlst.addParam(new RichEnum("AlignY",0,alignValueList,"Align Y"));
+			parlst.addParam(new RichEnum("AlignZ",0,alignValueList,"Align Z"));
+			/*parlst.addParam(new RichEnum("AlignX",0,alignValue,"Align X"));
 			parlst.addParam(new RichEnum("AlignY",0,alignValue,"Align Y"));
-			parlst.addParam(new RichEnum("AlignZ",0,alignValue,"Align Z"));
-
+			parlst.addParam(new RichEnum("AlignZ",0,alignValue,"Align Z"));*/
 			//update the template list
 			templates = QStringList();
 			foreach(QString subDir, templatesDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
@@ -314,7 +317,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 				if(token[0].trimmed() == "AttributeBegin")
 					++c;
 				if(token[0].trimmed() == "AttributeEnd")
-					--c;				
+					--c;
 				
 				if(token[0].trimmed() == "Attribute") {
 					if(token[1].trimmed() == "\"identifier\"" &&
@@ -426,7 +429,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			if (!compileProcess.waitForFinished(-1)) { //wait the finish of process
 				//if there's an arror of compiling the process exits normally!!
 				QByteArray err = compileProcess.readAllStandardError();
-				this->errorMessage = "Is impossible compile the shaders of template" + err;
+				this->errorMessage = "Is impossible to compile the shaders of template" + err;
 				qDebug("compiling msg err: %s",err.data());
 				qDebug("compiling msg out: %s",compileProcess.readAllStandardOutput().data());
 				return false;
@@ -435,7 +438,10 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 
 	//Copy and convert to tiff format, all mesh textures, in dest dir and convert the to renderman format
-	foreach(QString textureName, textureList) {
+	//multi-texture not supported!Copy and convert only the first texture
+	if(textureList.count() > 0) {
+	//foreach(QString textureName, textureList) {
+		QString textureName = textureList.first();
 		QString str(m.fileName.c_str()); //mesh directory
 		str = getDirFromPath(&str);
 		QFile srcFile(str + QDir::separator() + textureName);
@@ -445,6 +451,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		foreach(QString dir, textureDirs) {
 			if(dir!="." && destDir.cd(dir)) {
 				newImageDir = dir;
+				destDir.cdUp();
 				break;
 			}
 		}
@@ -464,12 +471,12 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			//set working directory the location of texture
 			convertTextureProcess.setWorkingDirectory(destDirString + QDir::separator() + newImageDir);
 			qDebug("convert texture working directory: %s",qPrintable(destDirString + QDir::separator() + newImageDir));
-			QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + teqserName()+ getFileNameFromPath(&textureName,false) +".tiff " + getFileNameFromPath(&textureName,false) + ".tx";
+			QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + teqserName() + " " + getFileNameFromPath(&textureName,false) +".tiff " + getFileNameFromPath(&textureName,false) + ".tx";
 			qDebug("convert command: %s",qPrintable(toRun));
 			convertTextureProcess.start(toRun);				
 			if (!convertTextureProcess.waitForFinished(-1)) { //wait the finish of process
 				QByteArray err = convertTextureProcess.readAllStandardError();
-				this->errorMessage = "Is impossible convert the texture " + textureName + "\n" + err;				
+				this->errorMessage = "Is impossible convert the texture " + textureName + "\n" + QString(err);				
 				return false;
 			}
 		}
@@ -478,7 +485,6 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			return false; //the mesh has a texture not existing
 		}
 	}
-
 
 	//run the aqsis rendering	
 	QProcess renderProcess;
@@ -572,20 +578,13 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 			float dummyX = token[2].toFloat() - token[1].toFloat();
 			float dummyY = token[4].toFloat() - token[3].toFloat();
 			float dummyZ = token[6].toFloat() - token[5].toFloat();
-				///////////////////////////////////////
-				//CONTROLLARE Y e Z (se vanno scambiate
-				///////////////////////////////////////
+				
 			//autoscale
-			if(par.getBool("Autoscale")) {
-				float meshX = m.cm.trBB().DimX();
-				float meshY = m.cm.trBB().DimY();
-				float meshZ = m.cm.trBB().DimZ();
-
-				float ratioX = dummyX / meshX;
-				float ratioY = dummyY / meshY;
-				float ratioZ = dummyZ / meshZ;
-				scale = std::min<float>(ratioX, ratioY);
-				scale = std::min<float>(scale, ratioZ);
+			if(par.getBool("Autoscale")) {				
+				float ratioX = dummyX / m.cm.trBB().DimX();
+				float ratioY = dummyY / m.cm.trBB().DimY();
+				float ratioZ = dummyZ / m.cm.trBB().DimZ();
+				scale = std::min<float>(ratioX, std::min<float>(ratioY, ratioZ)); //scale factor is min ratio
 				scaleMatrix.SetScale(scale,scale,scale);
 			}
 			
@@ -595,29 +594,38 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 			translateBBMatrix.SetTranslate(-c[0],-c[1],-c[2]);
 			
 			//align
-			float dx = 0.0, dy = 0.0, dz = 0.0;
-			QString x = alignValue.at(par.getEnum("AlignX"));
-			if(x != "center") {
-				dx = (dummyX - m.cm.trBB().DimX() * scale) / 2;
-				if(x == "bottom")
-					dx = -dx;
+			float dx = 0.0, dy = 0.0, dz = 0.0;				
+			switch(par.getEnum("AlignX")) {
+				case alignValue::TOP:
+					dx = (dummyX - m.cm.trBB().DimX() * scale) / 2;
+					break;
+				case alignValue::BOTTOM:
+					dx = -(dummyX - m.cm.trBB().DimX() * scale) / 2;
+					break;
+				case alignValue::CENTER: break; //is already center
 			}
-			QString y = alignValue.at(par.getEnum("AlignY"));
-			if(y != "center") {
-				dy = (dummyY - m.cm.trBB().DimY() * scale) / 2;
-				if(y == "bottom")
-					dy = -dy;
-			}
-			QString z = alignValue.at(par.getEnum("AlignZ"));
-			if(z != "center") {
-				dz = (dummyZ - m.cm.trBB().DimZ() * scale) / 2;
-				if(z == "bottom")
-					dz = -dz;
+			switch(par.getEnum("AlignY")) {
+				case alignValue::TOP:
+					dy = (dummyY - m.cm.trBB().DimY() * scale) / 2;
+					break;
+				case alignValue::BOTTOM:
+					dy = -(dummyY - m.cm.trBB().DimY() * scale) / 2;
+					break;
+				case alignValue::CENTER: break; //is already center
+			}			
+			switch(par.getEnum("AlignZ")) {
+				case alignValue::TOP:
+					dz = (dummyZ - m.cm.trBB().DimZ() * scale) / 2;
+					break;
+				case alignValue::BOTTOM:
+					dz = -(dummyX - m.cm.trBB().DimZ() * scale) / 2;
+					break;
+				case alignValue::CENTER: break; //is already center
 			}
 			vcg::Matrix44f alignMatrix;
 			alignMatrix = alignMatrix.SetTranslate(dx,dy,dz);
 
-			vcg::Matrix44f result = templateMatrix * alignMatrix * scaleMatrix * translateBBMatrix;			
+			vcg::Matrix44f result = templateMatrix * alignMatrix * scaleMatrix * translateBBMatrix;
 			//write transformation matrix (after transpose it)
 			writeMatrix(fout,result);
 			//write bounding box (not modified) /////VA MODIFICATO IL BB SE NON SCALO?????
@@ -649,15 +657,16 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 
 		//texture mapping
 		if(token[0].trimmed() == "Surface") {
-			if(m.cm.textures.size()>1 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
-				foreach(QString textureName, *textureList) {
-					fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
-					//fprintf(fout,"Surface \"sticky_texture\" \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
-					//fprintf(fout,"Surface \"mytexmap\" \"name\" \"%s.tx\"\n", qPrintable(getFileNameFromPath(&textureName,false)));
-					//fprintf(fout,"Surface \"MOSAICsurface\" \"uniform float ColMix\" [ 1.0 ] \"uniform string ColMap\" [ \"%s.tx\" ] \"uniform float Amb\" [ 0.5 ] \"uniform color AmbCol\" [ 0.0 0.0 0.0 ]", qPrintable(getFileNameFromPath(&textureName,false)));
-					//fprintf(fout,"Surface \"texmap\" \"texname\" [\"%s.tx\"]\n",qPrintable(getFileNameFromPath(&textureName,false)));
-				}
-				fprintf(fout,"Color [ 1.0 0.0 0.0 ]\n");				
+			//are TexCoord needed for texture mapping?
+			if(textureList->count() > 0 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
+				//multi-texture don't work!I need ad-hoc shader and to read the texture index for vertex..
+				//foreach(QString textureName, *textureList) {
+					
+				//read only the one texture
+				QString textureName = textureList->first();
+				fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
+
+				//fprintf(fout,"Color [ 1.0 0.0 0.0 ]\n");				
 			}
 		}
 
@@ -669,8 +678,7 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 				QString geometryDest = destDir + QDir::separator() + filename;			
 				vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, scale, false);
 			}
-		} 
-
+		}
 		
 		if(c == 0) {
 			exit = true; //sposta questo nel while!!

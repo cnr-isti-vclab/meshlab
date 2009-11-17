@@ -92,13 +92,11 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   //third step: vertex coordinates
   fprintf(fout,"\"P\"\n[\n");
   Matrix44f mat = Matrix44f::Identity();
-  //mat = mat.SetRotateDeg(180.0,vcg::Point3f(0.0,1.0,0.0));
   mat = mat.SetScale(1.0,1.0,-1.0);
   for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi) {
     if(vi->IsV()) {
 	  Point3f p = mat * vi->P();
-	  fprintf(fout,"%g %g %g\n",p[0],p[1],p[2]);
-	  //fprintf(fout,"%g %g %g ",p[0],-p[2],p[1]);
+	  fprintf(fout,"%g %g %g ",p[0],p[1],p[2]);
 	}
   }
   fprintf(fout,"\n]\n");
@@ -110,7 +108,7 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
     for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
 	  //for each face, foreach vertex write normal
 	  for(int j=0; j<3; ++j) {			
-	    Point3f &n=(*fi).V(j)->N();
+	    Point3f &n = mat * (*fi).V(j)->N(); //transform normal too
 		fprintf(fout,"%g %g %g ",n[0],n[1],n[2]);
 	  }
 	}
@@ -125,7 +123,6 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
 	  //for each face, foreach vertex write color
 	  for(int j=0; j<3; ++j) {
 	    Color4b &c=(*fi).V(j)->C();
-		//fprintf(fout,"%g %g %g\n",float(c[0])/255,float(c[1])/255,float(c[2])/255);
 		fprintf(fout,"%g %g %g ",float(c[0])/255,float(c[1])/255,float(c[2])/255);
 	  }
 	}
@@ -140,7 +137,7 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
 	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
 	  //for each face, foreach vertex write uv coord
 	  for(int j=0; j<3; ++j) {
-	    fprintf(fout,"%g %g ",(*fi).WT(j).U(),1.0 - (*fi).WT(j).V());
+	    fprintf(fout,"%g %g ",(*fi).WT(j).U() , 1.0 - (*fi).WT(j).V()); //v origin axis is up
 	  }
 	}
 	fprintf(fout,"\n]\n");

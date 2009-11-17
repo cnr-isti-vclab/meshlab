@@ -33,7 +33,8 @@ private:
   QDir templatesDir; //directory of templates ("render_template")
   QStringList templates;
   bool delRibFiles;
-  QStringList alignValue;
+  //QStringList alignValue;
+  enum alignValue { CENTER, TOP, BOTTOM };
   bool convertedGeometry;
 	
 	inline const QString aqsisName() 
@@ -63,7 +64,7 @@ private:
 	inline const QString aqsisBinPath() 
 	{ 
 	#if defined(Q_OS_WIN)
-		return QString("/bin/");
+		return QString("bin");
 	#elif defined(Q_OS_MAC)
 		return QString("/Contents/Resources/bin/");
 	#endif
