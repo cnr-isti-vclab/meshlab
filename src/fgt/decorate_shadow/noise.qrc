@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/" >
         <file>noise.png</file>
+        <file>rand.png</file>
     </qresource>
 </RCC>

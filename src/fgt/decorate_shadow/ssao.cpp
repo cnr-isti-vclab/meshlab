@@ -68,7 +68,7 @@ bool SSAO::init()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setWindowTitle("GLEW init failure");
         msgBox.setText(QString("Init GLEW failed."));
-        int ret = msgBox.exec();
+        msgBox.exec();
         return false;
     }
     if(!this->setup()){
@@ -76,7 +76,7 @@ bool SSAO::init()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setWindowTitle("FBO Setup failure");
         msgBox.setText(QString("Failed in creating a Frame Buffer Object."));
-        int ret = msgBox.exec();
+        msgBox.exec();
         return false;
     }
     return compileAndLink();
@@ -91,16 +91,41 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glUseProgram(this->_normalMapShaderProgram);
         RenderMode rm = gla->getCurrentRenderMode();
 
-        glEnable(GL_POLYGON_OFFSET_FILL);
+        /*glEnable(GL_POLYGON_OFFSET_FILL);
             glPolygonOffset(4.0, 4.0);
-
+*/
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
-        glDisable(GL_POLYGON_OFFSET_FILL);
-        this->printColorMap(this->_normalMap, "_normals.png");
+        //glDisable(GL_POLYGON_OFFSET_FILL);
+        //this->printColorMap(this->_normalMap, "_normals.png");
         glUseProgram(0);
+/****************************************************************************************/
+//                                      BLURRING
+/****************************************************************************************/
+        GLfloat mProj[16];
 
+     //Preparing to draw quad
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+            glLoadIdentity();
+            glOrtho(-(this->_texSize/2),
+                     this->_texSize/2,
+                     -(this->_texSize/2),
+                     this->_texSize/2,
+                     -(this->_texSize/2),
+                     this->_texSize/2);
+        glGetFloatv(GL_PROJECTION_MATRIX, mProj);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+            glTranslated(0,0,-1);
+
+
+        GLfloat mInverseProj[16] = {this->_texSize/2, 0, 0, 0,
+                                    0, this->_texSize/2, 0, 0,
+                                    0, 0, -this->_texSize/2, 0,
+                                    0, 0, 0, 1};
         /***********************************************************/
         //SSAO PASS
         /***********************************************************/
@@ -124,36 +149,33 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         loc = glGetUniformLocation(this->_ssaoShaderProgram, "depthMap");
         glUniform1i(loc, 2);
 
+        GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "proj");
+        glUniformMatrix4fv(matrixLoc, 1, 0, mProj);
+
+        GLuint invMatrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "invProj");
+        glUniformMatrix4fv(invMatrixLoc, 1, 0, mInverseProj);
+
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
-        m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
-
+        //m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
+glBegin(GL_QUADS);
+                    glTexCoord2d(0,0);
+                    glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
+                    glTexCoord2d(1,0);
+                    glVertex3f(this->_texSize/2,-this->_texSize/2,0);
+                    glTexCoord2d(1,1);
+                    glVertex3f(this->_texSize/2,this->_texSize/2,0);
+                    glTexCoord2d(0,1);
+                    glVertex3f(-this->_texSize/2,this->_texSize/2,0);
+            glEnd();
         this->printColorMap(this->_ssao, "_ssao.png");
-        this->printNoiseTxt();
+        //this->printNoiseTxt();
         //this->printDepthMap(this->_depthMap, "_depthMap2.png");
         glUseProgram(0);
 
 
 
-/****************************************************************************************/
-//                                      BLURRING
-/****************************************************************************************/
-     //Preparing to draw quad
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-            glLoadIdentity();
-            glOrtho(-(this->_texSize/2),
-                     this->_texSize/2,
-                     -(this->_texSize/2),
-                     this->_texSize/2,
-                     -(this->_texSize/2),
-                     this->_texSize/2);
-
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-            glLoadIdentity();
-            glTranslated(0,0,-1);
 
         /***********************************************************/
         //BLURRING horizontal
@@ -269,7 +291,6 @@ bool SSAO::setup()
 
 
         GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-                                //, GL_COLOR_ATTACHMENT4};
 
         glDrawBuffersARB(0, drawBuffers);
 
@@ -504,13 +525,15 @@ bool SSAO::compileAndLink(){
 bool SSAO::loadNoiseTxt(){
 
     QImage image = QImage();
-    QString textureName = QString(":/noise.png");
+    //QString textureName = QString(":/noise.png");
+    QString textureName = QString(":/rand.png");
     //fileName = textureName;
     if (QFile(textureName).exists())
     {
             image = QImage(textureName);
 						noiseWidth=image.width();
 						noiseHeight=image.height();
+
             QImage tmpGL = QGLWidget::convertToGLFormat(image);
             image = QImage(tmpGL);
     }
