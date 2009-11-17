@@ -618,6 +618,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	} 
 	else {	//do not use face quality
 		Log(GLLogStream::FILTER, "Using Standard predicate...");	
+		Log(GLLogStream::FILTER, "epsilon %f", epsilon);
 		for ( int i = 0; i < ccons_a.size(); i ++ ) { 
 			vcg::face::Pos<CMeshO::FaceType> p = ccons_a[i].p;
 			do {
@@ -681,13 +682,12 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		if ( vcg::tri::Index(a->cm, ccons[i].p.F()) >= limit ) b_pos.push_back( std::make_pair( vcg::tri::Index(a->cm, ccons[i].p.F()), ccons[i].p.E() ) );
 	}
 
+	Log(GLLogStream::DEBUG, "B_pos %d", b_pos.size() );
+	
 	for ( int i = 0; i < b_pos.size(); i ++ ) {
 		vcg::face::Pos<CMeshO::FaceType> p; p.Set( &(a->cm.face[b_pos[i].first]), b_pos[i].second, a->cm.face[b_pos[i].first].V(b_pos[i].second) );
 		CMeshO::FacePointer start = p.F(); 
-		if ( vcg::face::BorderCount(*start) == 3 ) { vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *p.F() ); continue; }
-		
-		while ( vcg::face::BorderCount(*start) >= 2			 || vcg::face::BorderCount(*(start->FFp(0))) >= 2 ||
-				vcg::face::BorderCount(*(start->FFp(1))) >=2 || vcg::face::BorderCount(*(start->FFp(2))) >=2) { p.NextB(); start = p.F(); }
+		if ( vcg::face::BorderCount(*start) == 3 ) { vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *start ); continue; }	
 		do {
 			if ( !p.F()->IsD() && vcg::face::BorderCount(*p.F()) >= 2 ) {
 				
@@ -711,6 +711,9 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 				if( !vcg::face::IsBorder(*f4, 0) ) { f4->FFp(0)->FFp(f4->FFi(0)) = f4; f4->FFp(0)->FFi(f4->FFi(0)) = 0; }	//border
 				vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *(p.F()->FFp(j)) );
 				vcg::tri::Allocator<CMeshO>::DeleteFace( a->cm, *p.F() );
+				if ( p.F() == start ) start = f1;
+				if ( (p.F()->FFp(j)) == start && vcg::face::IsBorder(*f3,0) ) start = f3;
+				if ( (p.F()->FFp(j)) == start && vcg::face::IsBorder(*f4,0) ) start = f4;
 			}
 			p.NextB();
 		} 
