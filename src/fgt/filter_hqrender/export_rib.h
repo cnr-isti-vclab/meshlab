@@ -58,6 +58,8 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   if(HasPerVertexNormal(m) && (savemask & Mask::IOM_VERTNORMAL))
     fprintf(fout,"Declare \"N\" \"facevarying normal\"\n");
 
+  if(HasPerVertexQuality(m) && (savemask & Mask::IOM_VERTQUALITY))
+    fprintf(fout,"Declare \"Q\" \"facevarying float\"\n");
 
   tri::Clean<SaveMeshType>::RemoveUnreferencedVertex(m);
   Allocator<SaveMeshType>::CompactVertexVector(m);
@@ -144,6 +146,20 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
 	qDebug("texcoords %i",tt.elapsed());
   }
 
+  //seventh step: vertex quality
+  if(HasPerVertexQuality(m) && (savemask & Mask::IOM_VERTQUALITY)) {
+	fprintf(fout,"\"Q\"\n[\n");
+	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+	  //for each face, foreach vertex write its quality
+	  for(int j=0; j<3; ++j) {
+	    float &q = (*fi).V(j)->Q();
+	    fprintf(fout,"%g ",q);
+	  }
+	}
+	fprintf(fout,"\n]\n");
+	qDebug("quality %i",tt.elapsed());
+  }
+
   fclose(fout);
 
   return 0;
@@ -195,7 +211,7 @@ static const char *ErrorMsg(int error)
 	  capability |= vcg::tri::io::Mask::IOM_VERTCOORD    ;
 	  //capability |= vcg::tri::io::Mask::IOM_VERTFLAGS    ;
 	  capability |= vcg::tri::io::Mask::IOM_VERTCOLOR    ;
-	  //capability |= vcg::tri::io::Mask::IOM_VERTQUALITY  ;
+	  capability |= vcg::tri::io::Mask::IOM_VERTQUALITY  ;
 	  capability |= vcg::tri::io::Mask::IOM_VERTNORMAL   ;
 	  //capability |= vcg::tri::io::Mask::IOM_VERTRADIUS   ;
 	  capability |= vcg::tri::io::Mask::IOM_VERTTEXCOORD ;

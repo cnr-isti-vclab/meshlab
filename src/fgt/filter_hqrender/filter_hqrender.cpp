@@ -193,7 +193,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 
 	//TEXTURE: take the list of texture mesh
-	QStringList textureList;	
+	QStringList textureList = QStringList();
 	for(int i=0; i<m.cm.textures.size(); i++) {
 		textureList << QString(m.cm.textures[i].c_str());
 	}
@@ -658,7 +658,7 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 		//texture mapping
 		if(token[0].trimmed() == "Surface") {
 			//are TexCoord needed for texture mapping?
-			if(textureList->count() > 0 && m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord()) {
+			if(!textureList->empty() > 0 && (m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord())) {
 				//multi-texture don't work!I need ad-hoc shader and to read the texture index for vertex..
 				//foreach(QString textureName, *textureList) {
 					
