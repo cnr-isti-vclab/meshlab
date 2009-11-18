@@ -34,25 +34,27 @@
 
 class FilterSolidShapes : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    Q_INTERFACES(MeshFilterInterface)
 
-	public:
-        enum {FP_TEXT} ;
-		
-		FilterSolidShapes();
-		~FilterSolidShapes(){};
+public:
+    enum { FSS_TEXT };
+    enum { CR_TETRAHEDRON, CR_HEXAHEDRON, CR_OCTAHEDRON, CR_DODECAHEDRON, CR_ICOSAHEDRON, CR_BOX };
 
-        virtual const QString filterName(FilterIDType filter) const;
-        virtual const QString filterInfo(FilterIDType filter) const;
+    FilterSolidShapes();
+    ~FilterSolidShapes(){};
 
-		virtual const int getRequirements(QAction *);
+    virtual const QString filterName(FilterIDType filter) const;
+    virtual const QString filterInfo(FilterIDType filter) const;
 
-        virtual bool autoDialog(QAction *) {return true;}
-        virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-		virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-		virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-		virtual const FilterClass getClass(QAction *);
+    virtual const int getRequirements(QAction *);
+
+    virtual bool autoDialog(QAction *) {return true;}
+    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+//  virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+    virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *);
+
+    virtual const FilterClass getClass(QAction *);
 
 };
 

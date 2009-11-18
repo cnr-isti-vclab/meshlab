@@ -37,6 +37,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/space/triangle3.h>
+#include "platonic.h"
 
 
 using namespace std;
@@ -44,36 +45,37 @@ using namespace vcg;
 
 FilterSolidShapes::FilterSolidShapes()
 {
-	
-    typeList << 
-    FP_TEXT;
+    typeList << FSS_TEXT;
     
-	FilterIDType tt;
-	foreach(tt , types())
-	actionList << new QAction(filterName(tt), this);
+    FilterIDType tt;
+    foreach(tt , types())
+        actionList << new QAction(filterName(tt), this);
 }
 
 const QString FilterSolidShapes::filterName(FilterIDType filterId) const
 {
-	switch (filterId) {
-        case FP_TEXT:
-            return QString("Platonic solids");
-			break;
-		default:
-            assert(0); return QString("error");
-			break;
-	}
+    switch (filterId) {
+    case FSS_TEXT:
+        return QString("Platonic");
+        break;
+    default:
+        assert(0);
+        return QString("error");
+        break;
+    }
 }
+
 const QString FilterSolidShapes::filterInfo(FilterIDType filterId) const
 {
-	switch (filterId) {
-        case FP_TEXT:
-            return QString("Create platonic solids according to user parameters");
-			break;
-		default:
-            assert(0); return QString("error");
-			break;
-	}
+    switch (filterId) {
+    case FSS_TEXT:
+        return QString("Create platonic solids according to user parameters");
+        break;
+    default:
+        assert(0);
+        return QString("error");
+        break;
+    }
 }
 
 const int FilterSolidShapes::getRequirements(QAction */*action*/)
@@ -83,16 +85,47 @@ const int FilterSolidShapes::getRequirements(QAction */*action*/)
 
 void FilterSolidShapes::initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & par)
 {
-    par.addParam(new RichString("Param1","Default1","Param1","Explanation of Param1"));
-    par.addParam(new RichString("Param2","Default2","Param2","Explanation of Param2"));
+    QStringList list;
+    list << "Tetrahedron" << "Hexahedron" << "Octahedron" << "Dodecahedron" << "Icosahedron";
+
+    par.addParam(new RichEnum("Figure", 0, list, "Figure", "Choose a figure"));
+    par.addParam(new RichBool("Star", FALSE, "Star?", "Star or minimal triangulation instead"));
 }
 
-bool FilterSolidShapes::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
+bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-	Log("Creating platonic solid...");
-    Log("Param1 = '%s'", qPrintable(par.getString("Param1")));
-    Log("Param2 = '%s'", qPrintable(par.getString("Param2")));
-	return true;
+    Log("Creating platonic number %d. STAR=%d", par.getEnum("Figure"), par.getBool("Star"));
+
+    switch(par.getEnum("Figure")) {
+    case CR_TETRAHEDRON:
+        vcg::tri::Tetrahedron<CMeshO>(m.cm);
+        break;
+    case CR_ICOSAHEDRON:
+        vcg::tri::Icosahedron<CMeshO>(m.cm);
+        break;
+    case CR_DODECAHEDRON:
+        vcg::tri::Dodecahedron<CMeshO>(m.cm);
+        m.updateDataMask(MeshModel::MM_POLYGONAL);
+        break;
+    case CR_OCTAHEDRON:
+        vcg::tri::Octahedron<CMeshO>(m.cm);
+        break;
+    case CR_HEXAHEDRON:
+        break;
+    case CR_BOX:
+        /* CRASSSHHHH
+        float sz=par.getFloat("size");
+        vcg::Box3f b(vcg::Point3f(1,1,1)*(sz/2),vcg::Point3f(1,1,1)*(-sz/2));
+        vcg::tri::Box<CMeshO>(m.cm,b);
+        m.updateDataMask(MeshModel::MM_POLYGONAL);
+        */
+        break;
+    }
+
+    //Camera...
+    vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
+    return true;
 }
 
 const MeshFilterInterface::FilterClass FilterSolidShapes::getClass(QAction *)
