@@ -23,24 +23,27 @@
 
 #include <Qt>
 #include <QtGui>
-#include "filter_fractal.h"
 
-#include <vcg/math/base.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/smooth.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/selection.h> 
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <meshlab/meshmodel.h>
+#include <meshlab/interfaces.h>
+#include <vcg/complex/trimesh/create/platonic.h>
 #include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/point_sampling.h>
-#include <vcg/space/triangle3.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/math/base.h>
+#include "filter_fractal.h"
+#include <vcg/math/perlin_noise.h>
 
 using namespace std;
 using namespace vcg;
 
+enum {
+    FBM = 0,
+    STANDARD_MF = 1,
+    HETERO_MF = 2
+};
+
+// --------- constructor and destructor ------------------------------
 FilterFractal::FilterFractal()
 {
     typeList << CR_FRACTAL_TERRAIN;
@@ -49,6 +52,10 @@ FilterFractal::FilterFractal()
 	actionList << new QAction(filterName(tt), this);
 }
 
+FilterFractal::~FilterFractal(){}
+// -------------------------------------------------------------------
+
+// ------- MeshFilterInterface implementation ------------------------
 const QString FilterFractal::filterName(FilterIDType filterId) const
 {
     switch (filterId) {
@@ -78,24 +85,46 @@ const int FilterFractal::getRequirements(QAction*/*action*/)
     return MeshModel::MM_NONE;
 }
 
-void FilterFractal::initParameterSet(QAction* filter,MeshModel &/*m*/, RichParameterSet & /*parent*/)
-{
-    return;
-}
-
-bool FilterFractal::applyFilter(QAction* filter, MeshModel &/*m*/, RichParameterSet & /* par */, vcg::CallBackPos * /*cb*/)
+void FilterFractal::initParameterSet(QAction* filter,MeshModel &/*m*/, RichParameterSet &par)
 {
     switch(ID(filter)) {
         case CR_FRACTAL_TERRAIN:
-            return true;
+            par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable result."));
+            par.addParam(new RichFloat("seed", 1, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
+
+            QStringList algList;
+            algList << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal";
+            par.addParam(new RichEnum("algorithm", 0, algList, "Algorithm", "Todo..."));
+
+            par.addParam(new RichInt("octaves", 10, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the resulting terrain. Reasonable values are in range [2,9]."));
+            par.addParam(new RichFloat("lacunarity", 2.0, "Lacunarity:", "The gap between Perlin noise frequencies. This parameter is used in different ways by applying different algorithms, but you can always choose values between 2 and 7 to make the generated terrain appear different."));
+            par.addParam(new RichFloat("fractalIncrement", 1.2, "Fractal increment:", "This parameter defines how rough the generated terrain will be. Use values in range [1,2] to obtain reasonable results.\nIf the value is near 1, then the terrain will be very rough."));
+            par.addParam(new RichFloat("offset", 0.7, "Offset:", "Todo..."));
             break;
     }
+    return;
+}
+
+bool FilterFractal::applyFilter(QAction* filter, MeshModel &m, RichParameterSet &par, vcg::CallBackPos * /*cb*/)
+{
     return false;
 }
 
-bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet & /*par*/, vcg::CallBackPos */*cb*/)
+bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterSet &par, vcg::CallBackPos */*cb*/)
 {
-    return true;
+    switch(ID(filter)) {
+        case CR_FRACTAL_TERRAIN:
+            return generateTerrain(m.mm()->cm,
+                                   par.getInt("steps"),
+                                   par.getEnum("algorithm"),
+                                   par.getFloat("seed"),
+                                   par.getInt("octaves"),
+                                   par.getFloat("lacunarity"),
+                                   par.getFloat("fractalIncrement"),
+                                   par.getFloat("offset"));
+            break;
+    }
+    return false;
 }
 
 const MeshFilterInterface::FilterClass FilterFractal::getClass(QAction* filter)
@@ -113,5 +142,106 @@ bool FilterFractal::autoDialog(QAction *)
 {
     return true;
 }
+// ----------------------------------------------------------------------
+
+// -------------------- Private functions -------------------------------
+bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm,
+    float seed, int octaves, float lacunarity, float fractalIncrement, float offset)
+{
+    m.Clear();
+    int k = pow(2, subSteps), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
+
+    // grid generation
+    vcg::tri::Allocator<CMeshO>::AddVertices(m, vertexCount);
+    vcg::tri::Allocator<CMeshO>::AddFaces(m, faceCount);
+
+    VertexIterator vi;
+    VertexPointer ivp[vertexCount];
+    for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
+    {
+        (*vi).P() = CoordType((i%k2)/(double)k2, i/((double)vertexCount), .0);
+        ivp[i++] = &*vi;
+    }
+
+    FaceIterator fi = m.face.begin();
+    int evenFace[3] = {0, 1, k2}, oddFace[3] = {1, k2+1, k2};
+    for(i=0; i<k; i++)
+    {
+        for(j=0; j<k; j++)
+        {
+            (*fi).V(0) = ivp[evenFace[0]++];
+            (*fi).V(1) = ivp[evenFace[1]++];
+            (*fi).V(2) = ivp[evenFace[2]++];
+            ++fi;
+            (*fi).V(0) = ivp[oddFace[0]++];
+            (*fi).V(1) = ivp[oddFace[1]++];
+            (*fi).V(2) = ivp[oddFace[2]++];
+            if(fi != m.face.end())++fi;
+        }
+        evenFace[0]++; evenFace[1]++; evenFace[2]++;
+        oddFace[0]++;  oddFace[1]++;  oddFace[2]++;
+    }
+
+    // terrain generation
+    double seedFactor = (seed*vertexCount)/100;
+    switch(algorithm)
+    {
+        case FBM:
+            addFBMNoise(m, octaves, seedFactor, lacunarity, fractalIncrement);
+            break;
+        case STANDARD_MF:
+            addMultifractalNoise(m, octaves, seedFactor, lacunarity, fractalIncrement, offset);
+            break;
+        case HETERO_MF:
+            Log("Not implemented yet");
+            break;
+        default:
+            assert(0); Log("FilterFractal error: algoithm type not recognized");
+            break;
+    }
+
+    // updating bounding box and normals
+    vcg::tri::UpdateBounding<CMeshO>::Box(m);
+    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m);
+    return true;
+}
+
+void FilterFractal::addFBMNoise(CMeshO &m, int octaves, float seedFactor,
+    float lacunarity, float fractalIncrement)
+{
+    double noise = .0, tmpNoise = .0, scaler = .0; CoordType* p;
+    for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi) {
+        p = &((*vi).P());
+        noise = .0;
+        for(int i=0; i<octaves-1; i++) {
+            scaler = pow(lacunarity, i);
+            tmpNoise = math::Perlin::Noise((*p)[0]*scaler + seedFactor,(*p)[1]*scaler+seedFactor,(*p)[2]*scaler+seedFactor);
+            tmpNoise *= pow(lacunarity, -i*fractalIncrement);
+            noise += tmpNoise;
+        }
+        (*p)[2] = noise;
+    }
+}
+
+void FilterFractal::addMultifractalNoise(CMeshO &m, int octaves, float seed,
+                float lacunarity, float fractalIncrement, float offset)
+{
+    double tmpNoise = .0, noise = .0, scaler = .0;
+    CoordType* p;
+    for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi) {
+        p = &((*vi).P());
+        noise = 1.0;
+        for(int i=0; i<octaves-1; i++) {
+            scaler = pow(lacunarity, i);
+            tmpNoise = math::Perlin::Noise((*p)[0]*scaler + seed, (*p)[1]*scaler + seed, (*p)[2]*scaler + seed);
+            tmpNoise += offset;
+            tmpNoise *= pow(lacunarity, -i * fractalIncrement);
+            noise *= tmpNoise;
+        }
+        (*p)[2] = noise;
+    }
+}
+// ---------------------------------------------------------------------
 
 Q_EXPORT_PLUGIN(FilterFractal)
+

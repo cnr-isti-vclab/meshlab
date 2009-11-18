@@ -36,18 +36,33 @@ class FilterFractal : public QObject, public MeshFilterInterface
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
 
+        typedef CMeshO::CoordType       CoordType;
+        typedef CMeshO::VertexPointer   VertexPointer;
+        typedef CMeshO::VertexIterator  VertexIterator;
+        typedef CMeshO::FacePointer     FacePointer;
+        typedef CMeshO::FaceIterator    FaceIterator;
+
+        private:
+            bool generateTerrain(CMeshO &m, int subSteps, int algorithm,
+                float seed, int octaves, float lacunarity, float fractalIncrement,
+                float offset);
+            void addFBMNoise(CMeshO &m, int octaves, float seedFactor,
+                float lacunarity, float fractalIncrement);
+            void addMultifractalNoise(CMeshO &m, int octaves, float seedFactor,
+                float lacunarity, float fractalIncrement, float offset);
+
 	public:
             enum {CR_FRACTAL_TERRAIN} ;
 		
             FilterFractal();
-            ~FilterFractal(){};
+            ~FilterFractal();
 
             virtual const QString filterName(FilterIDType filter) const;
             virtual const QString filterInfo(FilterIDType filter) const;
 
             virtual const int getRequirements(QAction *);
             virtual bool autoDialog(QAction *);
-            virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+            virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*par*/);
             virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, RichParameterSet & /* par */, vcg::CallBackPos * /*cb*/);
             virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
             virtual const FilterClass getClass(QAction *);
