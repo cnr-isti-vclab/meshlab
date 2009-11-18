@@ -40,7 +40,8 @@ FilterTexturePlugin::FilterTexturePlugin()
 	typeList << FP_UV_TO_COLOR
 			<< FP_UV_WEDGE_TO_VERTEX
 			<< FP_BASIC_TRIANGLE_MAPPING
-			<< FP_SET_TEXTURE;
+			<< FP_SET_TEXTURE
+			<< FP_COLOR_TO_TEXTURE;
   
 	foreach(FilterIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
@@ -53,6 +54,7 @@ const QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
 		case FP_BASIC_TRIANGLE_MAPPING : return QString("Basic Triangle Mapping");
 		case FP_SET_TEXTURE : return QString("Set Texture");
+		case FP_COLOR_TO_TEXTURE : return QString("Color To Texture");
 		default : assert(0); 
 	}
 }
@@ -68,6 +70,7 @@ const QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 		case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a basic parametrization");
 		case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>"
 											 "If the texture provided exists it will be simply set else a dummy one will be created in the same directory");
+		case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture accordingly to per vertex color");
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -81,6 +84,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
 		case FP_UV_WEDGE_TO_VERTEX : return MeshFilterInterface::FP_WedgeTexCoord;
 		case FP_BASIC_TRIANGLE_MAPPING : return MeshFilterInterface::FP_Face;
 		case FP_SET_TEXTURE : return MeshFilterInterface::FP_WedgeTexCoord;
+		case FP_COLOR_TO_TEXTURE : return MeshFilterInterface::FP_WedgeTexCoord + MeshFilterInterface::FP_VertexColor;
 		default: assert(0);
 	}
 	return MeshFilterInterface::FP_Generic;
@@ -94,6 +98,7 @@ const int FilterTexturePlugin::getRequirements(QAction *a)
 		case FP_UV_WEDGE_TO_VERTEX :
 		case FP_BASIC_TRIANGLE_MAPPING :
 		case FP_SET_TEXTURE :
+		case FP_COLOR_TO_TEXTURE :
 			return MeshModel::MM_NONE;
 		default: assert(0);	
 	}
@@ -108,6 +113,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 		case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
 		case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
 		case FP_SET_TEXTURE : return MeshModel::MM_UNKNOWN;
+		case FP_COLOR_TO_TEXTURE : return MeshModel::MM_UNKNOWN;
 		default: assert(0);	
 	}
 	return MeshModel::MM_NONE;
@@ -123,7 +129,9 @@ const FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 		case FP_UV_TO_COLOR : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
 		case FP_UV_WEDGE_TO_VERTEX : 
 		case FP_BASIC_TRIANGLE_MAPPING :
-		case FP_SET_TEXTURE : return MeshFilterInterface::Texture;
+		case FP_SET_TEXTURE :
+		case FP_COLOR_TO_TEXTURE :
+			return MeshFilterInterface::Texture;
 		default : assert(0); 
 	}
 	return MeshFilterInterface::Generic;
@@ -164,6 +172,22 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 			fileName = fileName.append(".png");
 			parlst.addParam(new RichString("textName", fileName, "Texture file", "If the file exists it will be associated to the mesh else a dummy one will be created"));
 			parlst.addParam(new RichInt("textDim", 1024, "Texture Dimension (px)", "If the named texture doesn't exists the dummy one will be squared with this side"));
+			}
+			break;
+		case FP_COLOR_TO_TEXTURE : {
+			QString fileName(m.fileName.c_str());
+			int lastPoint = fileName.lastIndexOf(".");
+			if (lastPoint <= 0)
+				fileName = QString("");
+			else {
+				fileName = fileName.left(lastPoint);
+				lastPoint = std::max<int>(fileName.lastIndexOf('\\'),fileName.lastIndexOf('/'));
+				if (lastPoint > 0)
+					fileName = fileName.right(fileName.size() - 1 - lastPoint);
+			}
+			fileName = fileName.append("_color.png");
+			parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
+			parlst.addParam(new RichInt("textDim", 1024, "Texture Dimension (px)", "The dimension for the texture"));
 			}
 			break;
 		default : assert(0); 
@@ -335,7 +359,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				
 				float border = ((float)pxBorder) / textDim;
 				
-				// Creates a vector of pair <face index, double area>
+				// Creates a vector of double areas
 				double maxArea = -1, minArea=DBL_MAX;
 				std::vector<double> areas;
 				int faceNo = 0;
@@ -365,7 +389,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 						buckets[slot].push_back(i);
 					}
 				
-				// Determinates correct dimension and accordingly max halfening levels
+				// Determines correct dimension and accordingly max halfening levels
 				int dim = 0;
 				int halfeningLevels = 0;
 				
@@ -519,7 +543,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				Log(GLLogStream::FILTER, "Triangles catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
 			}
 		}
-			break;
+		break;
 		
 		case FP_SET_TEXTURE : {
 			
@@ -575,10 +599,14 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			m.cm.textures.push_back(textName.toStdString());
 		}
 		break;
-			
+		
+		case FP_COLOR_TO_TEXTURE : {
+			this->errorMessage = "not implemented yet!";
+			return false;
+		}
+		break;
 		default: assert(0);
 	}
-	
 	return true;
 }
 
