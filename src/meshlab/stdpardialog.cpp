@@ -453,6 +453,11 @@ void AbsPercWidget::resetWidgetValue()
 	setValue(rp->pd->defVal->getAbsPerc(),absd->min,absd->max);	
 }
 
+void AbsPercWidget::setWidgetValue( const Value& nv )
+{
+	const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
+	setValue(nv.getAbsPerc(),absd->min,absd->max);	
+}
 
 /******************************************/
 // Point3fWidget Implementation
@@ -564,9 +569,11 @@ void Point3fWidget::resetWidgetValue()
 		coordSB[ii]->setText(QString::number(rp->pd->defVal->getPoint3f()[ii],'g',3));
 }
 
-
-
-
+void Point3fWidget::setWidgetValue( const Value& nv )
+{
+	for(unsigned int ii = 0; ii < 3;++ii)
+		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
+}
 
 ComboWidget::ComboWidget(QWidget *p, RichParameter* rpar) :MeshLabWidget(p,rpar) {
 }
@@ -630,6 +637,10 @@ void EnumWidget::resetWidgetValue()
 	enumCombo->setCurrentIndex(rp->pd->defVal->getEnum());
 }
 
+void EnumWidget::setWidgetValue( const Value& nv )
+{
+	enumCombo->setCurrentIndex(nv.getEnum());
+}
 
 /******************************************/
 //MeshEnumWidget Implementation
@@ -689,6 +700,12 @@ void MeshWidget::resetWidgetValue()
 	enumCombo->setCurrentIndex(defaultMeshIndex);
 }
 
+void MeshWidget::setWidgetValue( const Value& nv )
+{
+	//WARNING!!!!! I HAVE TO THINK CAREFULLY ABOUT THIS FUNCTION!!!
+	assert(0);
+	//enumCombo->setCurrentIndex(md->meshList(nv.getMesh());
+}
 
 /******************************************
  QVariantListWidget Implementation
@@ -965,6 +982,10 @@ void DynamicFloatWidget::resetWidgetValue()
 	valueLE->setText(QString::number(rp->pd->defVal->getFloat()));
 }
 
+void DynamicFloatWidget::setWidgetValue( const Value& nv )
+{
+	valueLE->setText(QString::number(nv.getFloat()));
+}
 /****************************/
 Value& MeshLabWidget::getWidgetValue()
 {
@@ -1040,6 +1061,11 @@ BoolWidget::~BoolWidget()
 	delete cb;
 }
 
+void BoolWidget::setWidgetValue( const Value& nv )
+{
+	cb->setChecked(nv.getBool());
+}
+
 //connect(qle,SIGNAL(editingFinished()),this,SIGNAL(parameterChanged()));
 LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 :MeshLabWidget(p,rpar)
@@ -1075,6 +1101,10 @@ void IntWidget::resetWidgetValue()
 	lned->setText(QString::number(rp->val->getInt()));
 }
 
+void IntWidget::setWidgetValue( const Value& nv )
+{
+	lned->setText(QString::number(nv.getInt()));
+}
 //
 FloatWidget::FloatWidget( QWidget* p,RichFloat* rpar )
 :LineEditWidget(p,rpar)
@@ -1092,6 +1122,10 @@ void FloatWidget::resetWidgetValue()
 	lned->setText(QString::number(rp->val->getFloat(),'g',3));
 }
 
+void FloatWidget::setWidgetValue( const Value& nv )
+{
+	lned->setText(QString::number(nv.getFloat(),'g',3));
+}
 
 StringWidget::StringWidget( QWidget* p,RichString* rpar )
 :LineEditWidget(p,rpar)
@@ -1109,6 +1143,10 @@ void StringWidget::resetWidgetValue()
 	lned->setText(rp->val->getString());
 }
 
+void StringWidget::setWidgetValue( const Value& nv )
+{
+	lned->setText(nv.getString());
+}
 
 //Matrix44fWidget::Matrix44fWidget( QWidget* p,RichMatrix44f* rpar )
 //:MeshLabWidget(p,rb)
@@ -1167,6 +1205,10 @@ void SaveFileWidget::resetWidgetValue()
 {
 }
 
+void SaveFileWidget::setWidgetValue( const Value& nv )
+{
+
+}
 /*
 ql = new QLabel(fpi.fieldDesc,this);
 ql->setToolTip(fpi.fieldToolTip);
@@ -1254,8 +1296,70 @@ ColorWidget::~ColorWidget()
 	delete descLabel;
 }
 
+void ColorWidget::setWidgetValue( const Value& nv )
+{
+	QColor cl = nv.getColor();
+	pickcol = cl;
+	updateColorInfo(cl);
+}
 /*
 void GetFileNameWidget::launchGetFileNameDialog()
 {
 
 }*/
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichBool& pd )
+{
+	if (pd.val->getBool())
+		lastCreated = new QTableWidgetItem("true"/*,lst*/);
+	else
+		lastCreated = new QTableWidgetItem("false"/*,lst*/);
+
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichInt& pd )
+{
+	lastCreated = new QTableWidgetItem(QString::number(pd.val->getInt())/*,lst*/);
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichFloat& pd )
+{
+	lastCreated = new QTableWidgetItem(QString::number(pd.val->getFloat())/*,lst*/);
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichString& pd )
+{
+	lastCreated = new QTableWidgetItem(pd.val->getString()/*,lst*/);
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichPoint3f& pd )
+{
+	vcg::Point3f pp = pd.val->getPoint3f(); 
+	QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")"; 
+	lastCreated = new QTableWidgetItem(pst/*,lst*/);
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichColor& pd )
+{
+	QPixmap pix(10,10);
+	pix.fill(pd.val->getColor());
+	QIcon ic(pix);
+	lastCreated = new QTableWidgetItem(ic,""/*,lst*/);
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichAbsPerc& pd )
+{
+	lastCreated = new QTableWidgetItem(QString::number(pd.val->getAbsPerc())/*,lst*/);
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichEnum& pd )
+{
+	lastCreated = new QTableWidgetItem(QString::number(pd.val->getEnum())/*,lst*/);
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
+{
+	lastCreated = new QTableWidgetItem(QString::number(pd.val->getDynamicFloat())/*,lst*/);
+}
+
+

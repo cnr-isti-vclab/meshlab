@@ -65,6 +65,7 @@ public slots:
 	void save();
 	void reset();
 	void apply();
+	void load();
 
 signals:
 	void applySettingSignal();
@@ -78,6 +79,7 @@ private:
 	QPushButton* applybut;
 	QPushButton* resetbut;
 	QPushButton* closebut;
+	QPushButton* loadbut;
 };
 
 class CustomDialog : public QDialog
@@ -89,16 +91,19 @@ public:
 	//void loadCurrentSetting(RichParameterSet& parset);
 
 public slots:
-	void openSubDialog(QListWidgetItem* itm);
-
+	void openSubDialog(QTableWidgetItem* itm);
+	void updateSettings();
 signals:
 	void applyCustomSetting();
 
 private:
+	void fillTable();
+
 	RichParameterSet& curParSet;
 	RichParameterSet& defParSet;
-	QListWidget* listwid;
-	QMap<QListWidgetItem*,RichParameter*> mp; 
+	QTableWidget* tw;
+	QVector<RichParameter*> vrp; 
 	void dispatch(const RichParameter& par);
 	QPushButton* closebut;
+	int maxlen[2];
 };

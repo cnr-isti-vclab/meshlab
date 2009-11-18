@@ -31,45 +31,86 @@ using namespace vcg;
 CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defparset, QWidget * parent)
 		:QDialog(parent),curParSet(curparset),defParSet(defparset)
 {
+	maxlen[0] = 0;
+	maxlen[1] = 0;
 	setModal(false);
 	closebut = new QPushButton("Close",this);
 	//QVBoxLayout* layout = new QVBoxLayout(parent);
 	QGridLayout* layout = new QGridLayout(parent);
 	setLayout(layout);
-	listwid = new QListWidget(this); 
-	for(int ii = 0;ii < curParSet.paramList.size();++ii)
+	tw = new QTableWidget(curParSet.paramList.size(),2,this);
+	fillTable();
+	int totlen = 0;
+	for (unsigned int jj =0; jj < 2;++jj)
 	{
-		//butt = new QPushButton(richparset.paramList.at(ii)->name,this);
-		QListWidgetItem* item = new QListWidgetItem(curParSet.paramList.at(ii)->name,listwid);
-		mp.insert(item,curParSet.paramList.at(ii));
-		//connect(butt,SIGNAL(clicked()),this,SLOT(openSubDialog()));
+		tw->setColumnWidth(jj,maxlen[jj]);
+		totlen += maxlen[jj];
 	}
-	layout->addWidget(listwid,0,0,1,4);
-	layout->addWidget(closebut,1,3);
-	connect(listwid,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(openSubDialog(QListWidgetItem*)));
+
+	setMinimumWidth(totlen);
+	layout->addWidget(tw,0,0,1,5);
+	layout->addWidget(closebut,1,4,1,1);
+	connect(tw,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),this,SLOT(openSubDialog(QTableWidgetItem*)));
 	connect(closebut,SIGNAL(clicked()),this,SLOT(close()));
 }
 
-void CustomDialog::openSubDialog( QListWidgetItem* itm )
+void CustomDialog::openSubDialog( QTableWidgetItem* itm )
 {
-	QMap<QListWidgetItem*,RichParameter*>::iterator it = mp.find(itm);
-	if (it != mp.end())
-	{
-	  RichParameter *defPar = defParSet.findParameter(it.value()->name);
-		SettingDialog* setdial = new SettingDialog(it.value(),defPar,this);
-		connect(setdial,SIGNAL(applySettingSignal()),this,SIGNAL(applyCustomSetting()));
-		setdial->exec();
-		delete setdial;
-	}
+	int rprow = tw->row(itm);
+	RichParameter *defPar = defParSet.findParameter(vrp[rprow]->name);
+	SettingDialog* setdial = new SettingDialog(vrp[rprow],defPar,this);
+	connect(setdial,SIGNAL(applySettingSignal()),this,SIGNAL(applyCustomSetting()));
+	connect(setdial,SIGNAL(applySettingSignal()),this,SLOT(updateSettings()));
+	setdial->exec();
+	delete setdial;
+}
+
+void CustomDialog::updateSettings()
+{
+	fillTable();
 }
 
 CustomDialog::~CustomDialog()
 {
-	delete listwid;
+	delete tw;
 	delete closebut;
 	//RichParameter will be destroyed elsewhere
 	//for(QMap<QListWidgetItem*,RichParameter*>::iterator it = mp.begin();it != mp.end();it++)
 	//	delete it.key();
+}
+
+void CustomDialog::fillTable()
+{
+	RichParameterToQTableWidgetItemConstructor v;
+	QStringList slst;
+	slst.push_back("Variable Name");
+	slst.push_back("Variable Value");
+	tw->setHorizontalHeaderLabels(slst);
+	tw->setWordWrap(false);
+	tw->verticalHeader()->hide();
+
+	tw->horizontalHeader()->setResizeMode(tw->columnCount() - 1, QHeaderView::Stretch);
+	
+	int sz = tw->font().pointSize();
+	for(int ii = 0;ii < curParSet.paramList.size();++ii)
+	{
+		QTableWidgetItem* item = new QTableWidgetItem(curParSet.paramList.at(ii)->name);
+		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
+
+		if (maxlen[0] < item->text().size() * sz)
+			maxlen[0] = item->text().size() * sz;
+		//item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+
+		tw->setItem(ii,0,item);
+		//butt = new QPushButton(richparset.paramList.at(ii)->name,this);
+
+		curParSet.paramList[ii]->accept(v);
+		v.lastCreated->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
+		tw->setItem(ii,1,v.lastCreated);
+		if (maxlen[1] < v.lastCreated->text().size() * sz)
+			maxlen[1] = v.lastCreated->text().size() * sz;
+		vrp.push_back(curParSet.paramList.at(ii));
+	}
 }
 //Maybe a MeshDocument parameter is needed. See loadFrameContent definition
 SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultPar, QWidget* parent /*= 0*/ )
@@ -79,25 +120,28 @@ SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultP
 	savebut = new QPushButton("Save",this);
 	resetbut = new QPushButton("Reset",this);
 	applybut = new QPushButton("Apply",this);
+	loadbut = new QPushButton("Load",this);
 	closebut = new QPushButton("Close",this);
 
 	QGridLayout* dialoglayout = new QGridLayout(parent);
 	
 	dialoglayout->addWidget(savebut,1,0);
 	dialoglayout->addWidget(resetbut,1,1);
-	dialoglayout->addWidget(applybut,1,2);
-	dialoglayout->addWidget(closebut,1,3);
+	dialoglayout->addWidget(loadbut,1,2);
+	dialoglayout->addWidget(applybut,1,3);
+	dialoglayout->addWidget(closebut,1,4);
 
 	RichParameterCopyConstructor cp;
 	curPar->accept(cp);
 	tmppar = cp.lastCreated;
 	frame.loadFrameContent(tmppar);
-	dialoglayout->addWidget(&frame,0,0,1,4);
+	dialoglayout->addWidget(&frame,0,0,1,5);
 	dialoglayout->setSizeConstraint(QLayout::SetFixedSize);
 	setLayout(dialoglayout);
 	connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
 	connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
 	connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
+	connect(loadbut,SIGNAL(clicked()),this,SLOT(load()));
 	connect(closebut,SIGNAL(clicked()),this,SLOT(close()));
 }
 
@@ -112,6 +156,7 @@ void SettingDialog::save()
 	qDebug("Writing into Settings param with name %s and content ****%s****",qPrintable(tmppar->name),qPrintable(docstring));
 	QSettings setting;
 	setting.setValue(tmppar->name,QVariant(docstring));
+	tmppar->pd->defVal->set(*tmppar->val);
 }
 
 void SettingDialog::apply()
@@ -124,10 +169,16 @@ void SettingDialog::apply()
 
 void SettingDialog::reset()
 {
-	assert(frame.stdfieldwidgets.size() == 1);
 	qDebug("resetting the value of param %s to the hardwired default",qPrintable(curPar->name));
+	tmppar->val->set(*defPar->val);
+	assert(frame.stdfieldwidgets.size() == 1);
+	frame.stdfieldwidgets.at(0)->setWidgetValue(*tmppar->val);
+	apply();
+}
 
-	curPar->val->set(*defPar->val);
+void SettingDialog::load()
+{
+	assert(frame.stdfieldwidgets.size() == 1);
 	frame.stdfieldwidgets.at(0)->resetValue();
 }
 
@@ -138,5 +189,6 @@ SettingDialog::~SettingDialog()
 	delete resetbut;
 	delete applybut;
 	delete closebut;
+	delete loadbut;
 	//RichParameter Value will be destroyed elsewhere
 }

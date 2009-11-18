@@ -92,6 +92,7 @@ Added standard plugin window support
 #include "interfaces.h"
 #include <cassert>
 
+
 class MeshLabWidget : public QWidget
 {
 	Q_OBJECT
@@ -100,6 +101,7 @@ public:
 	
 	virtual void resetWidgetValue() = 0;
 	virtual void collectWidgetValue() = 0;
+	virtual void setWidgetValue(const Value& nv) = 0;
 	virtual ~MeshLabWidget();
 	void resetValue();
 	Value& getWidgetValue();
@@ -121,6 +123,7 @@ public:
 	~BoolWidget();
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 };
 
 
@@ -135,6 +138,7 @@ public:
 	~LineEditWidget();
 	virtual void collectWidgetValue() = 0;
 	virtual void resetWidgetValue() = 0;
+	virtual void setWidgetValue(const Value& nv) = 0;
 };
 
 
@@ -146,6 +150,7 @@ public:
 	~IntWidget(){}
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 };
 
 
@@ -157,6 +162,7 @@ public:
 	~FloatWidget(){}
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 };
 
 
@@ -168,6 +174,7 @@ public:
 	~StringWidget(){}
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 };
 
 //class Matrix44fWidget : public  MeshLabWidget
@@ -209,6 +216,7 @@ public:
 
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 };
 
 
@@ -229,6 +237,7 @@ class ColorWidget : public MeshLabWidget
 
 		void collectWidgetValue();
 		void resetWidgetValue();
+		void setWidgetValue(const Value& nv);
 		void initWidgetValue();
 
 private:
@@ -258,6 +267,7 @@ public:
 	
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 
 private:
 	void  setValue(float val, float minV, float maxV);
@@ -296,6 +306,7 @@ public:
 
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 
 	public slots:
 	void  getPoint();
@@ -329,6 +340,7 @@ public:
 
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 	
 	public slots:
 		void setValue(int newv);
@@ -365,6 +377,7 @@ public:
 	void Init(QWidget *p,int newEnum, QStringList values);
 	virtual void collectWidgetValue() = 0;
 	virtual void resetWidgetValue() = 0;
+	virtual void setWidgetValue(const Value& nv) = 0;
 
 	int getIndex();
 	void  setIndex(int newEnum);	
@@ -386,6 +399,7 @@ public:
 
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 
 	//returns the number of items in the list 
 	int getSize();
@@ -403,6 +417,7 @@ public:
 	~MeshWidget(){};
 	void collectWidgetValue();
 	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
 
 	MeshModel * getMesh();
 	void setMesh(MeshModel * newMesh);
@@ -624,6 +639,29 @@ private:
 
 };
 
+class RichParameterToQTableWidgetItemConstructor : public Visitor
+{
+public:
+	RichParameterToQTableWidgetItemConstructor(/*QListWidget* widlst*/):/*lst(widlst),*/lastCreated(NULL){}
+
+	void visit(RichBool& pd);
+	void visit(RichInt& pd);
+	void visit(RichFloat& pd);
+	void visit(RichString& pd);
+	void visit(RichMatrix44f& pd){assert(0);};
+	void visit(RichPoint3f& pd);
+	void visit(RichColor& pd);
+	void visit(RichAbsPerc& pd);
+	void visit(RichEnum& pd);
+	void visit(RichFloatList& pd){assert(0);};
+	void visit(RichDynamicFloat& pd);
+	void visit(RichOpenFile& pd){assert(0);};
+	void visit(RichSaveFile& pd){assert(0);};
+	void visit(RichMesh& pd){assert(0);};
+
+	/*QListWidget* lst;*/
+	QTableWidgetItem* lastCreated;
+};
 
 
 
