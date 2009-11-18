@@ -1,0 +1,39 @@
+<template defaultExtension="X3D file format (*.x3d)" name="x3d" >
+<description>
+	Custom x3d export template
+</description>
+<primitive name="begin">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.1//EN" "http://www.web3d.org/specifications/x3d-3.1.dtd">
+<X3D profile="Immersive" version="3.1" xsd:noNamespaceSchemaLocation="http://www.web3d.org/specifications/x3d-3.1.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance" >
+ <head></head>
+ <Scene>
+]]>
+</primitive>
+<primitive name="end">
+<![CDATA[
+</Scene>
+</X3D>
+]]>
+</primitive>
+<primitive name="sphere">
+<![CDATA[<Transform translation="{matrix}">
+<Shape> 
+   <IndexedFaceSet coordIndex="0 1 2 -1 0 2 4 -1 4 2 6 -1 4 7 5 -1 4 6 7 -1 1 3 2 -1 1 0 4 -1 1 4 5 -1 3 7 2 -1 2 7 6 -1 3 1 7 -1 7 1 5 -1" solid="false">
+    <Coordinate point="0 0 0 0 0 1 0 1 0 0 1 1 1 0 0 1 0 1 1 1 0 1 1 1" />
+   </IndexedFaceSet>
+  </Shape>
+</Transform>
+]]>
+</primitive>
+<primitive name="box">
+<![CDATA[<Transform translation="{matrix}">
+<Shape> 
+   <IndexedFaceSet coordIndex="0 1 2 -1 0 2 4 -1 4 2 6 -1 4 7 5 -1 4 6 7 -1 1 3 2 -1 1 0 4 -1 1 4 5 -1 3 7 2 -1 2 7 6 -1 3 1 7 -1 7 1 5 -1" solid="false">
+    <Coordinate point="0 0 0 0 0 1 0 1 0 0 1 1 1 0 0 1 0 1 1 1 0 1 1 1" />
+   </IndexedFaceSet>
+  </Shape>
+</Transform>
+]]>
+</primitive>
+</template>
