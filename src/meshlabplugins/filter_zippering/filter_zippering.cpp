@@ -52,7 +52,7 @@
 
 //#define REDUNDANCY_ONLY 1
 //#define REFINE_PATCH_ONLY 1
-#define MAX_LOOP 50
+#define MAX_LOOP 150
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -618,7 +618,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	} 
 	else {	//do not use face quality
 		Log(GLLogStream::FILTER, "Using Standard predicate...");	
-		Log(GLLogStream::FILTER, "epsilon %f", epsilon);
 		for ( int i = 0; i < ccons_a.size(); i ++ ) { 
 			vcg::face::Pos<CMeshO::FaceType> p = ccons_a[i].p;
 			do {
@@ -714,6 +713,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 				if ( p.F() == start ) start = f1;
 				if ( (p.F()->FFp(j)) == start && vcg::face::IsBorder(*f3,0) ) start = f3;
 				if ( (p.F()->FFp(j)) == start && vcg::face::IsBorder(*f4,0) ) start = f4;
+				if ( vcg::face::BorderCount(*(p.F())) == 2 && vcg::face::BorderCount(*(p.F()->FFp(j))) == 2 ) break;	//square
 			}
 			p.NextB();
 		} 
@@ -775,7 +775,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 			
             while ( !stack.empty() ) {
 				if ( cnt++ > MAX_LOOP ) {
-					Log(GLLogStream::DEBUG, "Loop"); actualF->C() = vcg::Color4b::Red; return false;
+					Log(GLLogStream::DEBUG, "Loop"); actualF->C() = vcg::Color4b::Red;  stack_faces.back().first->C()=vcg::Color4b::Blue; stack_faces.back().second->C()=vcg::Color4b::Gray; //return false;
 				} //stop in case of inf. loop
 				
 				std::pair< int, int > border_edge = stack.back(); stack.pop_back();   //vertex indices
@@ -791,16 +791,45 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 				if (start != 0) { info[start].SetEps( eps ); info[start].Init( *start, vcg::tri::Index( a->cm, start->V(0) ), vcg::tri::Index( a->cm, start->V(1) ), vcg::tri::Index( a->cm, start->V(2) )  ); } //init
 				if (end != 0)	{info[end].SetEps( eps ); info[end].Init( *end, vcg::tri::Index( a->cm, end->V(0) ), vcg::tri::Index( a->cm, end->V(1) ), vcg::tri::Index( a->cm, end->V(2) ) ); }
                         
-				//if closest point is really closest to the border, split border face
-				//if ( start != 0 && isOnBorder( closestStart, start ) && distStart <= eps )	info[start].addVertex( &(a->cm.vert[border_edge.first]), border_edge.first ); 
-				//if ( end != 0 && isOnBorder( closestEnd, end ) && distEnd <= eps )			info[end].addVertex( &(a->cm.vert[border_edge.second]), border_edge.second );
-
 				if ( isOnBorder( closestStart, start ) && isOnBorder( closestEnd, end ) ) {
 					//if closest point is really closest to the border, split border face
 					if ( distStart <= eps ) info[start].addVertex( &(a->cm.vert[border_edge.first]), border_edge.first ); 
 					if ( distEnd <= eps )   info[end].addVertex( &(a->cm.vert[border_edge.second]), border_edge.second );
+
+					//Verify if the whole segment is on border
+					vcg::Segment3<CMeshO::ScalarType> border_seg( a->cm.vert[border_edge.first].P(), a->cm.vert[border_edge.second].P() );
+					int sampleNum = SAMPLES_PER_EDGE; float step = 1.0/(sampleNum+1); bool border = true;
+                    vcg::Point3<CMeshO::ScalarType> closestP;   float dist = 2*epsilon;
+                    for ( int k = 0; k <= sampleNum; k ++ ) {
+                        vcg::Point3<CMeshO::ScalarType> currentP = border_seg.P0() + ( border_seg.P1() - border_seg.P0() ) * (k*step);
+						CMeshO::FacePointer closestFace = grid_a.GetClosest(PDistFunct, markerFunctor, currentP, 2*epsilon, dist, closestP); //closest point on mesh
+						if ( !isOnBorder( closestP, closestFace ) ) {	//not completely on border: split it!
+							border = false;
+							vcg::tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
+							CMeshO::VertexIterator v = vcg::tri::Allocator<CMeshO>::AddVertices( a->cm, 1, vpu );
+							(*v).P() = (a->cm.vert[border_edge.first].P() + a->cm.vert[border_edge.second].P())/2.00;
+							if ( vpu.NeedUpdate() ) vpu.Update( p.V() );
+							CMeshO::FacePointer currentF = 0; CMeshO::CoordType closest;
+							currentF =  grid_a.GetClosest(PDistFunct, markerFunctor, (*v).P(), 2*epsilon, dist, closest); //proj. midpoint on A
+							stack.push_back( std::make_pair( border_edge.first, v - a->cm.vert.begin() ) );
+							stack_faces.push_back( std::pair<CMeshO::FacePointer, CMeshO::FacePointer> ( start, currentF ) );
+							stack.push_back( std::make_pair( v - a->cm.vert.begin(), border_edge.second ) );
+							stack_faces.push_back( std::pair<CMeshO::FacePointer, CMeshO::FacePointer> ( currentF, end ) );
+							break;
+						}
+					}
+
+					if ( border ) {
+						//actualFace: no operation needed
+						if ( a->cm.vert[border_edge.first].P() == actualF->P(actualE) &&
+							 a->cm.vert[border_edge.second].P() == actualF->P1(actualE) ) ;
+						else {//create new triangle to file small hole
+							verts.push_back(border_edge.second); verts.push_back( end_v ); verts.push_back( border_edge.first );   //new triangle
+						}
+					}
 					continue;
 				}
+
 				if ( isOnBorder( closestStart, start ) && end == 0 ) {
 					//if closest point is really closest to the border, split border face
 					if ( distStart <= eps ) info[start].addVertex( &(a->cm.vert[border_edge.first]), border_edge.first ); 
@@ -821,6 +850,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 					CMeshO::VertexPointer startV = &a->cm.vert[border_edge.second];
 					CMeshO::VertexPointer endV = &a->cm.vert[border_edge.first];
 					CMeshO::VertexPointer thirdV = actualF->V2(actualE);
+					currentF->C()=vcg::Color4b::Gray; start->C()=vcg::Color4b::Blue;
 					do {
 						int tosplit; vcg::Point3<CMeshO::ScalarType> closest; 
 						if (!findIntersection( currentF, vcg::Segment3<CMeshO::ScalarType>(a->cm.vert[border_edge.first].P(),a->cm.vert[border_edge.second].P()), last_split, tosplit, closest )) {
@@ -837,8 +867,10 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 									tbt_faces.push_back( currentF ); verts.push_back( vcg::tri::Index(a->cm, startV) ); verts.push_back( vcg::tri::Index(a->cm, thirdV) ); verts.push_back( v - a->cm.vert.begin() );
 								}
 							startV = &(*v);
-							if ( vcg::face::IsBorder( *currentF, tosplit ) )  { //last triangle
-								verts.push_back( vcg::tri::Index( a->cm, thirdV ) ); verts.push_back( vcg::tri::Index( a->cm, endV ) ); verts.push_back( v - a->cm.vert.begin() );
+							if ( vcg::face::IsBorder( *currentF, tosplit ) )  { //border reached
+								//verts.push_back( vcg::tri::Index( a->cm, thirdV ) ); verts.push_back( vcg::tri::Index( a->cm, endV ) ); verts.push_back( v - a->cm.vert.begin() );
+								stack.push_back( std::make_pair( vcg::tri::Index(a->cm, endV), v - a->cm.vert.begin() ) );
+								stack_faces.push_back( std::make_pair(start, currentF) );
 								stop = true;
 							}
 							else currentF = currentF->FFp(tosplit);
@@ -872,7 +904,9 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 							}
 						startV = &(*v);
 						if ( vcg::face::IsBorder( *currentF, tosplit ) )  { //last triangle
-							verts.push_back( vcg::tri::Index( a->cm, endV ) ); verts.push_back( vcg::tri::Index( a->cm, thirdV ) ); verts.push_back( v - a->cm.vert.begin() );
+							//verts.push_back( vcg::tri::Index( a->cm, endV ) ); verts.push_back( vcg::tri::Index( a->cm, thirdV ) ); verts.push_back( v - a->cm.vert.begin() );
+							stack.push_back( std::make_pair( v - a->cm.vert.begin(), vcg::tri::Index(a->cm, endV) ) );
+							stack_faces.push_back( std::make_pair(currentF, end) );
 							stop = true;
 						}
 						else currentF = currentF->FFp(tosplit);
@@ -945,7 +979,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
                 }
 				//check if start and end share a vertex
                 int w = sharesVertex( start, end ); vcg::Segment3<CMeshO::ScalarType> s( a->cm.vert[border_edge.first].P(), a->cm.vert[border_edge.second].P() );
-                if ( w != -1 && vcg::SquaredDistance<float>( s, start->P(w) ) <= eps ) {
+                if ( w != -1 && (cnt == MAX_LOOP || vcg::SquaredDistance<float>( s, start->P(w) ) <= eps) ) {
 					vcg::tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
                     CMeshO::VertexIterator v = vcg::tri::Allocator<CMeshO>::AddVertices( a->cm, 1, vpu ); (*v).P() = start->P(w);
 					if ( vpu.NeedUpdate() ) vpu.Update( p.V() );
