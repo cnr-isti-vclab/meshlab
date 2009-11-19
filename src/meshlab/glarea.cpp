@@ -40,9 +40,10 @@
 using namespace std;
 using namespace vcg;
 
-GLArea::GLArea(QWidget *parent)
+GLArea::GLArea(QWidget *parent, RichParameterSet *current)
 : QGLWidget(parent)
 {
+    this->updateCustomSettingValues(*current);
 	animMode=AnimNone;
 	iRenderer=0; //Shader support
 	iEdit=0;
@@ -84,6 +85,7 @@ GLArea::GLArea(QWidget *parent)
 	}else{
 		qDebug("The parent of the GLArea parent is not a pointer to the meshlab MainWindow.");
 	}
+
 }
 
 void GLArea::initPreferences()
@@ -972,17 +974,12 @@ Point3f GLArea::getViewDir()
 	return rotM*vcg::Point3f(0,0,1);
 }
 
-void GLArea::setCustomSetting(RichParameterSet& rps)
-{
-		cs.bColorBottom = rps.getColor4b(GLArea::BackGroundBotParam());
-		cs.bColorTop = rps.getColor4b(GLArea::BackGroundTopParam());
-		cs.lColor = rps.getColor4b(GLArea::LogAreaColParam());
-}
-
 void GLArea::updateCustomSettingValues( RichParameterSet& rps )
 {
-	setCustomSetting(rps);
-	updateGL();
+    cs.bColorBottom = rps.getColor4b(GLArea::BackGroundBotParam());
+    cs.bColorTop = rps.getColor4b(GLArea::BackGroundTopParam());
+    cs.lColor = rps.getColor4b(GLArea::LogAreaColParam());
+    updateGL();
 }
 
 void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)

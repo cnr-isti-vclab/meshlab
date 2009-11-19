@@ -145,7 +145,7 @@ class GLArea : public QGLWidget
 	Q_OBJECT
 
 public:
-	GLArea(QWidget *parent = 0);
+    GLArea(QWidget *parent, RichParameterSet *current);
 	~GLArea();
 	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 private:
@@ -203,8 +203,7 @@ public:
 	void saveSnapshot();
 	void setLightModel();
 	void setView();
-	void setCustomSetting(RichParameterSet& rps);
-	void resetTrackBall();
+    void resetTrackBall();
 	std::list<QAction *> iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}

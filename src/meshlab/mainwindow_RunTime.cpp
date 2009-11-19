@@ -565,9 +565,8 @@ void MainWindow::startFilter()
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		qDebug("MeshCreation");
-		GLArea *gla=new GLArea(mdiarea);
-		gla->setCustomSetting(currentGlobalParams);
-		addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
+        GLArea *gla=new GLArea(mdiarea,&currentGlobalParams);
+        addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 		gla->meshDoc.addNewMesh("untitled.ply");
 		gla->setFileName("untitled.ply");
 		mdiarea->addSubWindow(gla);
@@ -1002,9 +1001,8 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 				bool newGla = false;
 				if(gla==0){
-						gla=new GLArea(mdiarea);
-						gla->setCustomSetting(currentGlobalParams);
-						addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
+                        gla=new GLArea(mdiarea,&currentGlobalParams);
+                        addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 						newGla =true;
 						pCurrentIOPlugin->setLog(&(gla->log));
 					}
