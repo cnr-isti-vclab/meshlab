@@ -91,19 +91,29 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glUseProgram(this->_normalMapShaderProgram);
         RenderMode rm = gla->getCurrentRenderMode();
 
+        vcg::Matrix44f mProj, mInverseProj;
+
+        glMatrixMode(GL_PROJECTION);
+
+        glGetFloatv(GL_PROJECTION_MATRIX, mProj.V());
+
+        glMatrixMode(GL_MODELVIEW);
+
+        mProj.transposeInPlace();
+        mInverseProj = vcg::Inverse(mProj);
+
         /*glEnable(GL_POLYGON_OFFSET_FILL);
             glPolygonOffset(4.0, 4.0);
 */
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
         //glDisable(GL_POLYGON_OFFSET_FILL);
         //this->printColorMap(this->_normalMap, "_normals.png");
         glUseProgram(0);
 /****************************************************************************************/
 //                                      BLURRING
 /****************************************************************************************/
-        GLfloat mProj[16];
 
      //Preparing to draw quad
         glMatrixMode(GL_PROJECTION);
@@ -115,17 +125,12 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
                      this->_texSize/2,
                      -(this->_texSize/2),
                      this->_texSize/2);
-        glGetFloatv(GL_PROJECTION_MATRIX, mProj);
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
             glLoadIdentity();
             glTranslated(0,0,-1);
 
 
-        GLfloat mInverseProj[16] = {this->_texSize/2, 0, 0, 0,
-                                    0, this->_texSize/2, 0, 0,
-                                    0, 0, -this->_texSize/2, 0,
-                                    0, 0, 0, 1};
         /***********************************************************/
         //SSAO PASS
         /***********************************************************/
@@ -150,11 +155,20 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glUniform1i(loc, 2);
 
         GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "proj");
+
+        glUniformMatrix4fv(matrixLoc, 1, 0, mProj.transpose().V());
+
+        GLuint invMatrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "invProj");
+
+        glUniformMatrix4fv(invMatrixLoc, 1, 0, mInverseProj.transpose().V());
+
+
+/*        GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "proj");
         glUniformMatrix4fv(matrixLoc, 1, 0, mProj);
 
         GLuint invMatrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "invProj");
         glUniformMatrix4fv(invMatrixLoc, 1, 0, mInverseProj);
-
+*/
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
@@ -183,8 +197,8 @@ glBegin(GL_QUADS);
         glUseProgram(this->_blurShaderProgram);
 
         float blur_coef = 0.8;
-        GLfloat scale = 1/(this->_texSize * blur_coef);// * SHADOW_COEF);
-        //GLfloat scale = (1/(this->_texSize)) * BLUR_COEF * SHADOW_COEF;
+        GLfloat scale = 1/(this->_texSize * blur_coef);
+
         GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
         glUniform2f(scaleLoc, scale, 0.0);
 
@@ -207,8 +221,6 @@ glBegin(GL_QUADS);
                     glVertex3f(-this->_texSize/2,this->_texSize/2,0);
             glEnd();
 
-        //this->printColorMap(this->_blurH, "./_blurOrizzontale.png");
-
         /***********************************************************/
         //BLURRING vertical
         /***********************************************************/
@@ -221,7 +233,7 @@ glBegin(GL_QUADS);
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
 
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glBegin(GL_QUADS);
                     glTexCoord2d(0,0);
                     glVertex3f(-this->_texSize/2,-this->_texSize/2,0);

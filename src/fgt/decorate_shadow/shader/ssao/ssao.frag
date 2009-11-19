@@ -11,7 +11,7 @@ const float totStrength = 4.0;
 const float strength = 0.0005;
 const float offset = 18.0;
 const float falloff = 0.000000002;
-const float rad = 0.007;
+const float rad = 0.07;
 
 
 #define SAMPLES 16 
@@ -99,10 +99,10 @@ void main(void)
     sampleDepth = getDepth(sampleView.st);
     //normale del campione
     sampleNormal = normalize(texture2D(normalMap,sampleView.st).xyz);
-    depthDifference =  abs(currentPixelDepth - sampleDepth);
+    depthDifference =  currentPixelDepth - sampleDepth;
   
-    float zd = (1.0 - dot(normal, sampleNormal))*(1.0-smoothstep(strength,falloff,depthDifference))*(currentPixelDepth/sampleDepth);
-    bl += zd * zd;
+    float zd = (1.0 - dot(normal, sampleNormal))*(1.0-smoothstep(strength,falloff,depthDifference));//*(currentPixelDepth/sampleDepth);
+    bl += zd;// * zd;
   }
   
   float ao = 1.0-totStrength*bl/float(SAMPLES);
