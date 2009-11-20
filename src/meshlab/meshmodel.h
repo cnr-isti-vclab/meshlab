@@ -366,7 +366,7 @@ public:
 	MeshDocument(): QObject()
 	{
 		currentMesh = NULL;
-		busy=false;
+        busy=true;
 	}
 
 	//deletes each meshModel
