@@ -8,8 +8,8 @@ uniform mat4 invProj;
 const float totStrength = 4.0;
 const float strength = 0.0005;
 const float offset = 18.0;
-const float falloff = 0.000000002;
-const float rad = 0.07;
+const float falloff = 0.002;
+const float rad = 0.25;
 
 
 #define SAMPLES 16 
@@ -23,8 +23,9 @@ float getDepth(in vec2 texCoord)
 vec3 getViewPosition(in vec2 texCoord)
 {
     vec4 pos = vec4(texCoord.x, texCoord.y, getDepth(texCoord), 1.0);
+    pos.xyz=(pos.xyz*2.0)-1.0;
     pos = invProj * pos;
-    return pos.xyz;// pos.w;
+    return pos.xyz/pos.w;
 }
 
 void main(void)
@@ -57,13 +58,14 @@ void main(void)
 
   
   // grab a normal for reflecting the sample rays later on
-  vec3 fres = normalize((texture2D(rnm , (texCoord.st * offset)).xyz));
+  vec3 fres = (normalize(texture2D(rnm , (texCoord.st * offset)).xyz)-vec3(0.5,0.5,0.5) )*2.0;
+  //vec3 fres = vec3(1.0,0.0,0.0);
   
   //view space position del corrente frammento
   vec3 viewPos = getViewPosition(texCoord);
 
   // normale del frammento corrente
-  vec3 normal = normalize(texture2D(normalMap,texCoord.st).xyz);
+  vec3 normal = normalize(texture2D(normalMap,texCoord.st).xyz*2.0-1.0);
 
   float bl = 0.0;
 
@@ -82,13 +84,15 @@ void main(void)
     //se normale e raggio formano un angolo maggiore di 90 gradi il raggio viene flippato.
     ray = sign(dot(ray,normal)) * ray;
 
-    viewRayPos = invProj * vec4(ray, 1.0);
+    //viewRayPos = invProj * vec4(ray, 1.0);
+	viewRayPos = vec4(ray, 1.0);
 
     //coordinate del campione
-    sample = vec4(vec3(viewPos.xyz + viewRayPos.xyz), 1.0);
+    sample = vec4(vec3(viewPos.xyz + viewRayPos.xyz), 0.0);
     
     //riproietto il campione
-    sampleView = proj * sample;
+    sampleView = ( proj * sample );
+    sampleView.xyz = (sampleView.xyz / sampleView.w)*0.5 + 0.5;
 
     //recupero una nuova normale dalla texture di noise
     fres = normalize((texture2D(rnm, (ray.st * offset)).xyz));
@@ -96,13 +100,24 @@ void main(void)
     //depth del campione
     sampleDepth = getDepth(sampleView.st);
     //normale del campione
-    sampleNormal = normalize(texture2D(normalMap,sampleView.st).xyz);
+    sampleNormal = normalize(texture2D(normalMap,sampleView.st).xyz*2.0-1.0);
+  
     depthDifference =  currentPixelDepth - sampleDepth;
   
-    float zd = (1.0 - dot(normal, sampleNormal))*(1.0-smoothstep(strength,falloff,depthDifference));
-    bl += zd;
+    // depthDifference  > 0 -> sono sotto (e.g. il sample ha una z minore quindi e' piu' vicino) 
+    // depthDifference  < 0 -> sono sopra (e.g. il sample ha una z maggiore quindi e' piu' lontano) 
+    // depthDifference << 0 -> sono molto sopra (e.g. il sample ha una z molto maggiore quindi e' molto piu' lontano) 
+    
+    float lightContrib = float(depthDifference<0.001); // se non e' proprio molto sotto  lo considero in piena luce
+    
+    // se era un po' sotto ma (non tanto), non sarebbe illuminato e allora ci metto un po' di luce con un test delle normali.
+    if(lightContrib<0.5 && depthDifference>-0.1) lightContrib = dot(normal, sampleNormal);
+
+    bl += lightContrib;
   }
-  
-  float ao = 1.0-totStrength*bl/float(SAMPLES);
+  // remember: ao is skylight
+  float ao = bl/float(SAMPLES);
+  ao = ao*ao;
+
   gl_FragColor = vec4(vec3(ao), 1.0);
 }
