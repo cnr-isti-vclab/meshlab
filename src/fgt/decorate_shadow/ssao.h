@@ -52,11 +52,9 @@ private:
         bool loadNoiseTxt();
         void printNoiseTxt();
 
-        GLuint _normalMap;
-        GLuint _ssao;
+        GLuint _color1;
+        GLuint _color2;
         GLuint _noise;
-        GLuint _blurH;
-        GLuint _blurV;
         GLuint _depthMap;
 				int noiseWidth;
 				int noiseHeight;
@@ -66,8 +64,6 @@ private:
         GLuint _fbo2;
         GLuint _normalMapShaderProgram;
         GLuint _normalMapVert, _normalMapFrag;
-        GLuint _depthMapShaderProgram;
-        GLuint _depthMapVert, _depthMapFrag;
         GLuint _ssaoShaderProgram;
         GLuint _ssaoVert, _ssaoFrag;
         GLuint _blurShaderProgram;

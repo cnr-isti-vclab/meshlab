@@ -4,7 +4,7 @@ SSAO::SSAO():DecorateShader()
 {
     this->_depth = 0;
 
-    this->_normalMap = 0;
+    this->_color1 = 0;
     this->_normalMapFrag = 0;
     this->_normalMapVert = 0;
     this->_normalMapShaderProgram = 0;
@@ -12,13 +12,11 @@ SSAO::SSAO():DecorateShader()
     this->_depthMap = 0;
     this->_depth = 0;
 
-    this->_ssao= 0;
+    this->_color2= 0;
     this->_ssaoVert = 0;
     this->_ssaoFrag = 0;
     this->_ssaoShaderProgram = 0;
 
-    this->_blurH = 0;
-    this->_blurV = 0;
     this->_blurVert = 0;
     this->_blurFrag = 0;
     this->_blurShaderProgram = 0;
@@ -48,13 +46,12 @@ SSAO::~SSAO(){
     glDeleteShader(this->_blurFrag);
     glDeleteProgram(this->_blurShaderProgram);
 
-    glDeleteTexturesEXT(1, &(this->_normalMap));
+    glDeleteTexturesEXT(1, &(this->_color1));
     glDeleteTexturesEXT(1, &(this->_depthMap));
 
     glDeleteFramebuffersEXT(1, &(this->_depth));
-    glDeleteTexturesEXT(1, &(this->_ssao));
-    glDeleteTexturesEXT(1, &(this->_blurH));
-    glDeleteTexturesEXT(1, &(this->_blurV));
+    glDeleteTexturesEXT(1, &(this->_color2));
+    glDeleteTexturesEXT(1, &(this->_color2));
 
     glDeleteFramebuffersEXT(1, &_fbo);
     glDeleteFramebuffersEXT(1, &_fbo2);
@@ -85,51 +82,25 @@ bool SSAO::init()
 void SSAO::runShader(MeshModel& m, GLArea* gla){
 
         /***********************************************************/
-        //GENERAZIONE SHADOW MAP
+        //GENERAZIONE NORMAL MAP E DEPTH MAP
         /***********************************************************/
         this->bind();
         glUseProgram(this->_normalMapShaderProgram);
         RenderMode rm = gla->getCurrentRenderMode();
 
         vcg::Matrix44f mProj, mInverseProj;
-
         glMatrixMode(GL_PROJECTION);
-
         glGetFloatv(GL_PROJECTION_MATRIX, mProj.V());
-
         glMatrixMode(GL_MODELVIEW);
 
         mProj.transposeInPlace();
         mInverseProj = vcg::Inverse(mProj);
 
-        /*glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(4.0, 4.0);
-*/
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone);
-        //glDisable(GL_POLYGON_OFFSET_FILL);
-        //this->printColorMap(this->_normalMap, "_normals.png");
+        m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        //this->printColorMap(this->_color1, "_normals.png");
         glUseProgram(0);
-/****************************************************************************************/
-//                                      BLURRING
-/****************************************************************************************/
-
-     //Preparing to draw quad
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-            glLoadIdentity();
-            glOrtho(-(this->_texSize/2),
-                     this->_texSize/2,
-                     -(this->_texSize/2),
-                     this->_texSize/2,
-                     -(this->_texSize/2),
-                     this->_texSize/2);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-            glLoadIdentity();
-            glTranslated(0,0,-1);
-
 
         /***********************************************************/
         //SSAO PASS
@@ -144,7 +115,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glUniform1i(noiseloc, 0);
 
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, this->_normalMap);
+        glBindTexture(GL_TEXTURE_2D, this->_color1);
         GLuint loc = glGetUniformLocation(this->_ssaoShaderProgram, "normalMap");
         glUniform1i(loc, 1);
 
@@ -155,45 +126,32 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glUniform1i(loc, 2);
 
         GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "proj");
-
         glUniformMatrix4fv(matrixLoc, 1, 0, mProj.transpose().V());
 
         GLuint invMatrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "invProj");
-
         glUniformMatrix4fv(invMatrixLoc, 1, 0, mInverseProj.transpose().V());
 
-
-/*        GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "proj");
-        glUniformMatrix4fv(matrixLoc, 1, 0, mProj);
-
-        GLuint invMatrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "invProj");
-        glUniformMatrix4fv(invMatrixLoc, 1, 0, mInverseProj);
-*/
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
-        //m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
-glBegin(GL_QUADS);
-                    glTexCoord2d(0,0);
-                    glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,0);
-                    glVertex3f(this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,1);
-                    glVertex3f(this->_texSize/2,this->_texSize/2,0);
-                    glTexCoord2d(0,1);
-                    glVertex3f(-this->_texSize/2,this->_texSize/2,0);
+            glBegin(GL_TRIANGLE_STRIP);
+                glVertex3f(-1.0f, -1.0f, 0.0f);
+                glVertex3f( 1.0f, -1.0f, 0.0f);
+                glVertex3f(-1.0f,  1.0f, 0.0f);
+                glVertex3f( 1.0f,  1.0f, 0.0f);
             glEnd();
-        this->printColorMap(this->_ssao, "_ssao.png");
-        //this->printNoiseTxt();
-        //this->printDepthMap(this->_depthMap, "_depthMap2.png");
+        //this->printColorMap(this->_color2, "_ssao.png");
         glUseProgram(0);
 
 
+/****************************************************************************************/
+//                                      BLURRING
+/****************************************************************************************/
 
 
         /***********************************************************/
         //BLURRING horizontal
         /***********************************************************/
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
         glUseProgram(this->_blurShaderProgram);
 
         float blur_coef = 0.8;
@@ -203,22 +161,17 @@ glBegin(GL_QUADS);
         glUniform2f(scaleLoc, scale, 0.0);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, this->_ssao);
+        glBindTexture(GL_TEXTURE_2D, this->_color2);
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
 
-        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glBegin(GL_QUADS);
-                    glTexCoord2d(0,0);
-                    glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,0);
-                    glVertex3f(this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,1);
-                    glVertex3f(this->_texSize/2,this->_texSize/2,0);
-                    glTexCoord2d(0,1);
-                    glVertex3f(-this->_texSize/2,this->_texSize/2,0);
+            glBegin(GL_TRIANGLE_STRIP);
+                glVertex3f(-1.0f, -1.0f, 0.0f);
+                glVertex3f( 1.0f, -1.0f, 0.0f);
+                glVertex3f(-1.0f,  1.0f, 0.0f);
+                glVertex3f( 1.0f,  1.0f, 0.0f);
             glEnd();
 
         /***********************************************************/
@@ -229,30 +182,21 @@ glBegin(GL_QUADS);
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glBindTexture(GL_TEXTURE_2D, this->_blurH);
+        glBindTexture(GL_TEXTURE_2D, this->_color1);
         loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
         glUniform1i(loc, 0);
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glBegin(GL_QUADS);
-                    glTexCoord2d(0,0);
-                    glVertex3f(-this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,0);
-                    glVertex3f(this->_texSize/2,-this->_texSize/2,0);
-                    glTexCoord2d(1,1);
-                    glVertex3f(this->_texSize/2,this->_texSize/2,0);
-                    glTexCoord2d(0,1);
-                    glVertex3f(-this->_texSize/2,this->_texSize/2,0);
+            glBegin(GL_TRIANGLE_STRIP);
+                glVertex3f(-1.0f, -1.0f, 0.0f);
+                glVertex3f( 1.0f, -1.0f, 0.0f);
+                glVertex3f(-1.0f,  1.0f, 0.0f);
+                glVertex3f( 1.0f,  1.0f, 0.0f);
             glEnd();
 
         glUseProgram(0);
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
-
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
 
 /****************************************************************************************/
 //                                      BLURRING END
@@ -276,18 +220,16 @@ bool SSAO::setup()
         //attacco il primo...adesso le modifiche andranno a modificare solo _fbo
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
-        glGenTextures(1, &this->_normalMap);
-        glBindTexture(GL_TEXTURE_2D, this->_normalMap);
+        glGenTextures(1, &this->_color1);
+        glBindTexture(GL_TEXTURE_2D, this->_color1);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB,  this->_texSize, this->_texSize, 0, GL_RGB, GL_FLOAT, NULL);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        //attacco al FBO la texture di colore
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_normalMap, 0);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_color1, 0);
 
         glGenTextures(1, &this->_depthMap);
         glBindTexture(GL_TEXTURE_2D, this->_depthMap);
@@ -316,8 +258,8 @@ bool SSAO::setup()
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo2);
 
         //texture per ssao
-        glGenTextures(1, &this->_ssao);
-        glBindTexture(GL_TEXTURE_2D, this->_ssao);
+        glGenTextures(1, &this->_color2);
+        glBindTexture(GL_TEXTURE_2D, this->_color2);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
@@ -325,19 +267,7 @@ bool SSAO::setup()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_ssao, 0);
-
-        //genero la texture di blur orizzontale.
-        glGenTextures(1, &this->_blurH);
-        glBindTexture(GL_TEXTURE_2D, this->_blurH);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_FLOAT, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, this->_blurH, 0);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_color2, 0);
 
         //genero il render buffer per il depth buffer
         glGenRenderbuffersEXT(1, &(this->_depth));
@@ -346,18 +276,14 @@ bool SSAO::setup()
 
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
 
+        GLenum drawBuffers2[] = {GL_COLOR_ATTACHMENT0};
 
-
-        GLenum drawBuffers2[] = {GL_COLOR_ATTACHMENT0
-                                , GL_COLOR_ATTACHMENT1};
-
-        glDrawBuffersARB(1, drawBuffers2);
+        glDrawBuffersARB(0, drawBuffers2);
 
         this->loadNoiseTxt();
 
         err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
-
 
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         return _initOk;
@@ -386,9 +312,6 @@ bool SSAO::compileAndLink(){
     QFile* normalVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/normalMap.vert"));
     QFile* normalFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/normalMap.frag"));
 
-    /*QFile* depthVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/depthMap.vert"));
-    QFile* depthFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/depthMap.frag"));
-*/
     QFile* ssaoVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/ssao.vert"));
     QFile* ssaoFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/ssao.frag"));
 
@@ -398,9 +321,6 @@ bool SSAO::compileAndLink(){
     normalVert->open(QIODevice::ReadOnly | QIODevice::Text);
     normalFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
- /*   depthVert->open(QIODevice::ReadOnly | QIODevice::Text);
-    depthFrag->open(QIODevice::ReadOnly | QIODevice::Text);
-*/
     ssaoVert->open(QIODevice::ReadOnly | QIODevice::Text);
     ssaoFrag->open(QIODevice::ReadOnly | QIODevice::Text);
 
@@ -438,37 +358,6 @@ bool SSAO::compileAndLink(){
     if(!this->printProgramInfoLog(this->_normalMapShaderProgram))
         return false;
 
-  /*  bArray = depthVert->readAll();
-    ShaderLen = (GLint) bArray.length();
-    ShaderSource = (GLubyte *)bArray.data();
-
-    depthVert->close();
-
-    this->_depthMapVert= glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(this->_depthMapVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_depthMapVert);
-    if(!this->printShaderInfoLog(this->_depthMapVert))
-        return false;
-
-    bArray = depthFrag->readAll();
-    ShaderLen = (GLint) bArray.length();
-    ShaderSource = (GLubyte *)bArray.data();
-
-    depthFrag->close();
-
-    this->_depthMapFrag = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(this->_depthMapFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(_depthMapFrag);
-    if(!this->printShaderInfoLog(this->_depthMapFrag))
-        return false;
-
-    this->_depthMapShaderProgram = glCreateProgram();
-    glAttachShader(this->_depthMapShaderProgram, this->_depthMapVert);
-    glAttachShader(this->_depthMapShaderProgram, this->_depthMapFrag);
-    glLinkProgram(this->_depthMapShaderProgram);
-    if(!this->printProgramInfoLog(this->_depthMapShaderProgram))
-        return false;
-*/
     bArray = ssaoVert->readAll();
     ShaderLen = (GLint) bArray.length();
     ShaderSource = (GLubyte *)bArray.data();

@@ -5,8 +5,6 @@ uniform sampler2D depthMap;
 uniform mat4 proj;
 uniform mat4 invProj;
 
-varying vec4 texCoord;
-
 const float totStrength = 4.0;
 const float strength = 0.0005;
 const float offset = 18.0;
@@ -101,10 +99,10 @@ void main(void)
     sampleNormal = normalize(texture2D(normalMap,sampleView.st).xyz);
     depthDifference =  currentPixelDepth - sampleDepth;
   
-    float zd = (1.0 - dot(normal, sampleNormal))*(1.0-smoothstep(strength,falloff,depthDifference));//*(currentPixelDepth/sampleDepth);
-    bl += zd;// * zd;
+    float zd = (1.0 - dot(normal, sampleNormal))*(1.0-smoothstep(strength,falloff,depthDifference));
+    bl += zd;
   }
   
   float ao = 1.0-totStrength*bl/float(SAMPLES);
-  gl_FragColor = vec4(vec3(ao), 0.5);
+  gl_FragColor = vec4(vec3(ao), 1.0);
 }
