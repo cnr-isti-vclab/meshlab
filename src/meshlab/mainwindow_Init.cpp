@@ -20,166 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-
-$Log$
-Revision 1.93  2008/04/18 17:39:34  cignoni
-added menus for the new filter classes (smoothing, normal, quality)
-
-Revision 1.92  2008/04/10 11:07:42  cignoni
-added tooltip to decorations
-
-Revision 1.91  2008/03/10 09:39:51  cignoni
-better disabling of functionalities when no mesh is loaded
-
-Revision 1.90  2008/03/08 17:25:10  cignoni
-added define for disabling auto test of updated versions
-
-Revision 1.89  2008/02/06 09:56:37  cignoni
-Corrected bug in the display of plugins info
-
-Revision 1.88  2008/01/06 20:44:19  cignoni
-added correct paths for QT dynlib loading
-
-Revision 1.87  2008/01/04 00:46:28  cignoni
-Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
-
-Revision 1.86  2007/12/27 09:43:08  cignoni
-moved colorize filters to a submenu of the filter menu
-
-Revision 1.85  2007/12/13 00:18:28  cignoni
-added meshCreation class of filter, and the corresponding menu new under file
-
-Revision 1.84  2007/11/20 11:51:28  cignoni
-added layer icon
-
-Revision 1.83  2007/11/09 11:26:44  cignoni
-hide the stddialog at the beginning please.
-
-Revision 1.82  2007/11/05 13:49:52  cignoni
-better managment of the filter parameter dialog (stddialog)
-
-Revision 1.81  2007/10/23 08:23:10  cignoni
-removed reserved shortcut ctrl+s from selection drawing.
-
-Revision 1.80  2007/10/06 23:29:51  cignoni
-corrected management of suspeneded editing actions. Added filter toolbar
-
-Revision 1.79  2007/10/02 07:59:33  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.78  2007/07/10 07:19:22  cignoni
-** Serious Changes **
-again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
-
-Revision 1.77  2007/05/16 15:02:05  cignoni
-Better management of toggling between edit actions and camera movement
-
-Revision 1.76  2007/05/14 10:46:04  cignoni
-Added cngrt dialog
-
-Revision 1.75  2007/04/16 09:24:37  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing...
-
-Revision 1.74  2007/03/27 12:20:16  cignoni
-Revamped logging iterface, changed function names in automatic parameters, better selection handling
-
-Revision 1.73  2007/03/20 16:22:34  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.72  2007/03/12 15:23:59  cignoni
-Safer dir search for plugins for mac
-
-Revision 1.71  2007/03/03 02:03:25  cignoni
-Reformatted lower bar, added number of selected faces. Updated about dialog
-
-Revision 1.70  2007/02/28 00:05:12  cignoni
-Added Bug submitting menu
-
-Revision 1.69  2007/02/26 12:03:43  cignoni
-Added Help online and check for updates
-
-Revision 1.68  2007/02/26 01:21:46  cignoni
-no more snapping dialog, better search for plugins
-
-Revision 1.67  2007/02/08 16:04:18  cignoni
-Corrected behaviour of edit actions
-
-Revision 1.66  2006/12/13 17:37:02  pirosu
-Added standard plugin window support
-
-Revision 1.65  2006/12/06 00:48:17  cignoni
-Improved managment of http answer
-
-Revision 1.64  2006/11/29 00:53:43  cignoni
-Improved logging and added web based version checking
-
-Revision 1.63  2006/11/09 08:16:23  cignoni
-Bug in the http communication
-
-Revision 1.62  2006/11/08 15:51:56  cignoni
-Added kvert to the saved vars
-
-Revision 1.61  2006/11/08 01:35:59  cignoni
-still on the web logging
-
-Revision 1.60  2006/11/08 01:04:48  cignoni
-First version with http communications
-
-Revision 1.59  2006/10/26 12:07:30  corsini
-add lighting properties option
-
-Revision 1.58  2006/07/08 06:37:47  cignoni
-Many small bugs correction (esc crash, info in about, obj loading progress,fullscreen es)
-
-Revision 1.57  2006/06/18 21:27:49  cignoni
-Progress bar redesigned, now integrated in the workspace window
-
-Revision 1.56  2006/06/15 13:05:57  cignoni
-added Filter History Dialogs
-
-Revision 1.55  2006/06/12 15:20:44  cignoni
-Initial Dragdrop support (still not working,,,)
-
-Revision 1.54  2006/05/26 04:09:52  cignoni
-Still debugging 0.7
-
-Revision 1.53  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.52  2006/04/18 06:57:34  zifnab1974
-syntax errors for gcc 3.4.5 resolved
-
-Revision 1.51  2006/04/12 15:12:18  cignoni
-Added Filter classes (cleaning, meshing etc)
-
-Revision 1.50  2006/02/25 13:43:39  ggangemi
-Action "None" is now exported from MeshRenderPlugin
-
-Revision 1.49  2006/02/24 08:21:00  cignoni
-yet another attempt to solve the QProgressDialog issue. Now trying with qt->reset.
-
-Revision 1.48  2006/02/22 10:20:09  cignoni
-Changed progressbar->hide  into close to avoid 100% cpu use.
-
-Revision 1.47  2006/02/17 11:17:23  glvertex
-- Moved closeAction in FileMenu
-- Minor changes
-
-Revision 1.46  2006/02/13 16:18:04  cignoni
-Minor edits.
-
-Revision 1.45  2006/02/01 12:44:42  glvertex
-- Disabled EDIT menu when no editing tools loaded
-- Solved openig bug when running by command line
-
-Revision 1.44  2006/01/31 15:25:13  davide_portelli
-Added short key lastFilter
-****************************************************************************/
 
 
 #include <QtGui>
@@ -345,11 +185,6 @@ void MainWindow::createActions()
 	setFancyLightingAct->setShortcutContext(Qt::ApplicationShortcut);
 	setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_F);
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(setFancyLighting()));
-
-	setLightingPropertiesAct  = new QAction(tr("Lighting &Properties"), this);
-	setLightingPropertiesAct->setShortcutContext(Qt::ApplicationShortcut);
-	setLightingPropertiesAct->setShortcut(Qt::CTRL+Qt::Key_P);
-	connect(setLightingPropertiesAct, SIGNAL(triggered()), this, SLOT(setLightingProperties()));
 
 	backFaceCullAct 	  = new QAction(tr("BackFace &Culling"),this);
 	backFaceCullAct->setCheckable(true);
@@ -539,7 +374,6 @@ void MainWindow::createMenus()
 	lightingModeMenu->addAction(setLightAct);
 	lightingModeMenu->addAction(setDoubleLightingAct);
 	lightingModeMenu->addAction(setFancyLightingAct);
-	lightingModeMenu->addAction(setLightingPropertiesAct);
 
 	// Color SUBmenu
 	colorModeMenu = renderMenu->addMenu(tr("&Color"));
@@ -768,7 +602,12 @@ void MainWindow::loadMeshLabSettings()
 		{
 			RichParameterFactory::create(docElem,&rpar);
 			qDebug("param %i,%s loaded from settings",ii,qPrintable(rpar->name));
-			currentGlobalParams.addParam(rpar);
+            if (!defaultGlobalParams.hasParameter(rpar->name))
+            {
+                qDebug("Warning in the saved parameters there were parameters that are not in the HardWired ones.\n"
+                       "This should not happen. Ignored parameter %s",qPrintable(rpar->name));
+            }
+            else currentGlobalParams.addParam(rpar);
 		}
 	}
 

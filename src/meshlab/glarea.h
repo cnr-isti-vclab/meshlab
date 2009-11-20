@@ -40,87 +40,12 @@
 #include "interfaces.h"
 #include "filterscript.h"
 #include "layerDialog.h"
+#include "glarea_setting.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
 
-
-
-class GLLightSetting
-{
-public:
-
-	GLfloat ambient[4];
-	GLfloat diffuse[4];
-	GLfloat specular[4];
-
-	GLfloat ambientFancyBack[4];
-	GLfloat diffuseFancyBack[4];
-	GLfloat specularFancyBack[4];
-
-	GLfloat ambientFancyFront[4];
-	GLfloat diffuseFancyFront[4];
-	GLfloat specularFancyFront[4];
-
-	GLLightSetting()
-	{
-		// defaults
-		ambient[0] = 0.2f; ambient[1] = 0.2f; ambient[2] = 0.2f; ambient[3] = 1.0f;
-		diffuse[0] = 0.8f; diffuse[1] = 0.8f; diffuse[2] = 0.8f; diffuse[3] = 1.0f;
-		specular[0] = 1.0f; specular[1] = 1.0f; specular[2] = 1.0f; specular[3] = 1.0f;
-
-		ambientFancyBack[0] = 0.0f;
-		ambientFancyBack[1] = 0.0f;
-		ambientFancyBack[2] = 0.0f;
-		ambientFancyBack[3] = 1.0f;
-
-		diffuseFancyBack[0] = 1.0f;
-		diffuseFancyBack[1] = 0.7f;
-		diffuseFancyBack[2] = 0.7f;
-		diffuseFancyBack[3] = 1.0f;
-
-		specularFancyBack[0] = 1.0f;
-		specularFancyBack[1] = 1.0f;
-		specularFancyBack[2] = 1.0f;
-		specularFancyBack[3] = 1.0f;
-
-		ambientFancyFront[0] = 0.0f;
-		ambientFancyFront[1] = 0.0f;
-		ambientFancyFront[2] = 0.0f;
-		ambientFancyFront[3] = 1.0f;
-
-		diffuseFancyFront[0] = 0.7f;
-		diffuseFancyFront[1] = 0.7f;
-		diffuseFancyFront[2] = 1.0f;
-		diffuseFancyFront[3] = 1.0f;
-
-		specularFancyFront[0] = 1.0f;
-		specularFancyFront[1] = 1.0f;
-		specularFancyFront[2] = 1.0f;
-		specularFancyFront[3] = 1.0f;
-	}
-};
-
-class ColorSetting
-{
-public:
-	
-	vcg::Color4b bColorBottom;
-	vcg::Color4b bColorTop;
-	vcg::Color4b lColor;
-
-	ColorSetting()
-	{
-		//bColorBottom=vcg::Color4b(64,64,128,1);	
-		//bColorTop=vcg::Color4b(0,0,0,1);
-		//lColor=vcg::Color4b(128,16,16,1);
-
-    //bColorBottom=Color4b(192,192,192,1);	
-		//bColorTop=Color4b(255,255,255,1);
-		//lColor=Color4b(128,16,16,1);
-	};
-};
 
 class SnapshotSetting
 {
@@ -150,9 +75,6 @@ public:
 	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 private:
 
-inline static QString BackGroundBotParam()		{return "MeshLab::Appearance::BackGroundBotCol";}
-inline static QString BackGroundTopParam()		{return "MeshLab::Appearance::BackGroundTopCol";}
-inline static QString LogAreaColParam() {return "MeshLab::Appearance::LogAreaCol";}
 
 public:
 	LayerDialog *layerDialog;
@@ -164,11 +86,10 @@ public:
 	vcg::Trackball trackball_light;
 	GLLogStream log;
 	FilterScript filterHistory;
-
+    GLAreaSetting glas;
 	QSize curSiz;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
-	//QFont getFont() {return qFont;}
 
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
@@ -184,10 +105,8 @@ public:
 	}
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
-	const ColorSetting& getCustomSetting()		const {return cs;}
-	GLLightSetting getLightSettings(){return ls;}
-	void setLightSettings(GLLightSetting glls){ls = glls;}
-	const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
+
+    const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
 	void updateFps(float deltaTime);
 	
 	void showTrackBall(bool b)		{trackBallVisible = b; updateGL();}
@@ -361,9 +280,7 @@ private:
 	
 public:
 	RenderMode rm;
-	ColorSetting cs;
-	GLLightSetting ls;
-	// view setting variables
+    // view setting variables
 	float fov;
 	float clipRatioFar;
 	float clipRatioNear;

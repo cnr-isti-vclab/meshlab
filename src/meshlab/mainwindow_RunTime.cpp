@@ -20,165 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-
-$Log: mainwindow_RunTime.cpp,v $
-Revision 1.156  2008/04/11 10:09:13  cignoni
-added start decorate call
-
-Revision 1.155  2008/04/04 10:07:08  cignoni
-Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
-
-Revision 1.154  2008/03/22 07:38:55  cignoni
-To avoid that a filter changes something assumed by the current editing tool, before actually starting the filter we close the current editing tool (if any).
-
-Revision 1.153  2008/03/14 15:22:28  corsini
-fix decoration menu
-
-Revision 1.152  2008/03/10 09:39:51  cignoni
-better disabling of functionalities when no mesh is loaded
-
-Revision 1.151  2008/02/28 10:33:21  cignoni
-Added errorMsg  exchange mechaninsm to the interface of filter plugins to allow the passage of error reports between the filter and the framework.
-
-Revision 1.150  2008/02/12 14:20:33  cignoni
-changed the function getParameter into the more meaningful getCustomParameter
-
-Revision 1.149  2008/02/06 09:56:37  cignoni
-Corrected bug in the display of plugins info
-
-Revision 1.148  2008/02/04 09:34:02  cignoni
-better managment of state changes when layer switching and adding files to the current layer set
-
-Revision 1.147  2008/01/30 11:24:43  sherholz
-Fixed Bug in runFilterScript: the log was not set before applying a filter (caused crashes by some filter)
-
-Revision 1.146  2008/01/28 13:02:00  cignoni
-added support for filters on collection of meshes (layer filters)
-
-Revision 1.145  2008/01/16 01:39:55  cignoni
-added two slot for better managing the exit from editing tools
-
-Revision 1.144  2008/01/06 20:45:11  cignoni
-busy cursor when saving
-
-Revision 1.143  2008/01/04 00:46:28  cignoni
-Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
-
-Revision 1.142  2007/12/23 10:50:23  cignoni
-disable lighting for point based mesh (with no faces)
-
-Revision 1.141  2007/12/13 00:18:28  cignoni
-added meshCreation class of filter, and the corresponding menu new under file
-
-Revision 1.140  2007/11/25 09:48:38  cignoni
-Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
-
-Revision 1.139  2007/11/20 12:00:24  cignoni
-added setcurrent slot
-
-Revision 1.138  2007/11/05 23:45:34  cignoni
-automatic closure of stdialog on other filters
-
-Revision 1.137  2007/11/05 13:49:52  cignoni
-better managment of the filter parameter dialog (stddialog)
-
-Revision 1.136  2007/10/19 21:39:37  cignoni
-Avoid recreation of normals for loaded mesh with explicit per vertex normal
-
-Revision 1.135  2007/10/08 08:55:09  cignoni
-moved out code for saving of aln
-
-Revision 1.134  2007/10/06 23:29:51  cignoni
-corrected management of suspeneded editing actions. Added filter toolbar
-
-Revision 1.133  2007/10/02 07:59:40  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.132  2007/09/15 09:07:33  cignoni
-Added missing return
-
-Revision 1.131  2007/07/24 07:19:01  cignoni
-managed failure in loading of project. Added safe cleaning of meshes with nan coords
-
-Revision 1.130  2007/07/13 15:18:22  cignoni
-Save and load of beloved aln files
-
-Revision 1.129  2007/07/10 07:19:27  cignoni
-** Serious Changes **
-again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
-
-Revision 1.128  2007/05/16 15:02:06  cignoni
-Better management of toggling between edit actions and camera movement
-
-Revision 1.127  2007/04/20 09:57:00  cignoni
-Smarter Callback that does not slow down the system when called too frequently
-
-Revision 1.126  2007/04/16 09:24:37  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing...
-
-Revision 1.125  2007/03/27 12:20:17  cignoni
-Revamped logging iterface, changed function names in automatic parameters, better selection handling
-
-Revision 1.124  2007/03/26 08:25:09  zifnab1974
-added eol at the end of the files
-
-Revision 1.123  2007/03/20 16:22:34  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.122  2007/03/05 22:31:33  cignoni
-V100 Final patch of version checking
-
-Revision 1.121  2007/03/03 02:03:25  cignoni
-Reformatted lower bar, added number of selected faces. Updated about dialog
-
-Revision 1.120  2007/03/02 15:58:32  cignoni
-Progress bar bug removed
-
-Revision 1.119  2007/03/01 04:56:28  cignoni
-Added checks on the existence and readability of input files
-
-Revision 1.118  2007/02/26 12:03:44  cignoni
-Added Help online and check for updates
-
-Revision 1.117  2007/02/08 23:45:27  pirosu
-merged srcpar and par in the GetStdParameters() function
-
-Revision 1.116  2007/02/08 16:04:18  cignoni
-Corrected behaviour of edit actions
-
-Revision 1.115  2007/01/18 13:35:02  gfrei
-Resolved crash when a edit-plugin is selected without a mesh.
-Resolves multiple-pushed edit-buttons problem.
-
-Revision 1.114  2006/12/27 21:41:41  pirosu
-Added improvements for the standard plugin window:
-split of the apply button in two buttons:ok and apply
-added support for parameters with absolute and percentage values
-
-Revision 1.113  2006/12/13 17:37:02  pirosu
-Added standard plugin window support
-
-
-Revision 1.112  2006/11/30 23:23:13  cignoni
-Open take care also of updating the bbox
-
-Revision 1.111  2006/11/29 00:53:43  cignoni
-Improved logging and added web based version checking
-
-Revision 1.110  2006/11/08 15:51:00  cignoni
-Corrected bug apply last filter on empty workspace
-
-Revision 1.109  2006/11/08 01:04:48  cignoni
-First version with http communications
-
-Revision 1.108  2006/11/07 09:15:27  cignoni
-Added Drag n drog opening of files (thanks to Valentino Fiorin)
-
-****************************************************************************/
 
 
 #include <QtGui>
@@ -194,7 +35,6 @@ Added Drag n drog opening of files (thanks to Valentino Fiorin)
 #include "plugindialog.h"
 #include "filterScriptDialog.h"
 #include "customDialog.h"
-#include "lightingDialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
@@ -836,24 +676,6 @@ void MainWindow::setFancyLighting()
 {
 	const RenderMode &rm = GLA()->getCurrentRenderMode();
 	GLA()->setLightMode(!rm.fancyLighting,LFANCY);
-}
-
-void MainWindow::setLightingProperties()
-{
-	// retrieve current lighting settings
-	GLLightSetting GLlightsetting = GLA()->getLightSettings();
-
-	// customize them
-	LightingDialog dlg(GLlightsetting, this);
-	if (dlg.exec() == QDialog::Accepted)
-	{
-		// update light settings
-		dlg.lightSettingsToGL(GLlightsetting);
-		GLA()->setLightSettings(GLlightsetting);
-
-		// update lighting model
-		GLA()->setLightModel();
-	}
 }
 
 void MainWindow::toggleBackFaceCulling()

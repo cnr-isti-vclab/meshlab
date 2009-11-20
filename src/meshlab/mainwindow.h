@@ -257,8 +257,7 @@ private slots:
 	void setLight();
 	void setDoubleLighting();
 	void setFancyLighting();
-	void setLightingProperties();
-	void setColorMode(QAction *qa);
+    void setColorMode(QAction *qa);
 	void applyRenderMode();
 	//void applyColorMode();
 	void toggleBackFaceCulling();
@@ -431,8 +430,7 @@ private:
 	QAction *renderModeTextureAct;
 	QAction *setDoubleLightingAct;
 	QAction *setFancyLightingAct;
-	QAction *setLightingPropertiesAct;
-	QAction *setLightAct;
+    QAction *setLightAct;
 	QAction *backFaceCullAct;
   QAction *setSelectionRenderingAct;
 

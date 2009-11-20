@@ -213,10 +213,10 @@ void GLArea::drawGradient()
 		glDisable(GL_TEXTURE_2D);
 
 		glBegin(GL_TRIANGLE_STRIP);
-			glColor(cs.bColorTop);  	glVertex2f(-1, 1);
-			glColor(cs.bColorBottom);	glVertex2f(-1,-1);
-			glColor(cs.bColorTop);		glVertex2f( 1, 1);
-			glColor(cs.bColorBottom);	glVertex2f( 1,-1);
+            glColor(glas.backgroundTopColor);  	glVertex2f(-1, 1);
+            glColor(glas.backgroundBotColor);	glVertex2f(-1,-1);
+            glColor(glas.backgroundTopColor);		glVertex2f( 1, 1);
+            glColor(glas.backgroundBotColor);	glVertex2f( 1,-1);
 		glEnd();
 
 		glPopAttrib();
@@ -394,8 +394,7 @@ void GLArea::displayInfo()
 	qFont.setPixelSize(12);
 
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
-	cs.lColor.V(3) = 128;	// set half alpha value
-	glColor(cs.lColor);
+    glColor(glas.logAreaColor);
 	int lineNum =4;
 	float lineSpacing = qFont.pixelSize()*1.5f;
 	float barHeight = -1 + 2.0*(lineSpacing*(lineNum+.25))/float(curSiz.height());
@@ -811,8 +810,7 @@ void GLArea::setSelectionRendering(bool enabled)
 
 void GLArea::setLightModel()
 {
-	glDisable(GL_LIGHTING);
-	if (rm.lighting)
+    if (rm.lighting)
 	{
 		glEnable(GL_LIGHTING);
 
@@ -821,27 +819,20 @@ void GLArea::setLightModel()
 		else
 			glDisable(GL_LIGHT1);
 
-		if(rm.fancyLighting)
-		{
-			glLightfv(GL_LIGHT0, GL_AMBIENT, ls.ambientFancyFront);
-			glLightfv(GL_LIGHT0, GL_DIFFUSE, ls.diffuseFancyFront);
-			glLightfv(GL_LIGHT0, GL_SPECULAR, ls.specularFancyFront);
+        glLightfv(GL_LIGHT0, GL_AMBIENT, Color4f::Construct(glas.baseLightAmbientColor).V());
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.baseLightDiffuseColor).V());
+        glLightfv(GL_LIGHT0, GL_SPECULAR,Color4f::Construct(glas.baseLightSpecularColor).V());
 
-			glLightfv(GL_LIGHT1, GL_AMBIENT, ls.ambientFancyBack);
-			glLightfv(GL_LIGHT1, GL_DIFFUSE, ls.diffuseFancyBack);
-			glLightfv(GL_LIGHT1, GL_SPECULAR, ls.specularFancyBack);
-		}
-		else
-		{
-			glLightfv(GL_LIGHT0, GL_AMBIENT, ls.ambient);
-			glLightfv(GL_LIGHT0, GL_DIFFUSE, ls.diffuse);
-			glLightfv(GL_LIGHT0, GL_SPECULAR, ls.specular);
-
-			glLightfv(GL_LIGHT1, GL_AMBIENT, ls.ambient);
-			glLightfv(GL_LIGHT1, GL_DIFFUSE, ls.diffuse);
-			glLightfv(GL_LIGHT1, GL_SPECULAR, ls.specular);
+        glLightfv(GL_LIGHT1, GL_AMBIENT, Color4f::Construct(glas.baseLightAmbientColor).V());
+        glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.baseLightDiffuseColor).V());
+        glLightfv(GL_LIGHT1, GL_SPECULAR,Color4f::Construct(glas.baseLightSpecularColor).V());
+        if(rm.fancyLighting)
+        {
+            glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.fancyFLightDiffuseColor).V());
+            glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.fancyBLightDiffuseColor).V());
 		}
 	}
+    else glDisable(GL_LIGHTING);
 }
 
 void GLArea::setSnapshotSetting(const SnapshotSetting & s)
@@ -976,15 +967,11 @@ Point3f GLArea::getViewDir()
 
 void GLArea::updateCustomSettingValues( RichParameterSet& rps )
 {
-    cs.bColorBottom = rps.getColor4b(GLArea::BackGroundBotParam());
-    cs.bColorTop = rps.getColor4b(GLArea::BackGroundTopParam());
-    cs.lColor = rps.getColor4b(GLArea::LogAreaColParam());
-    updateGL();
+    glas.updateGlobalParameterSet(rps);
+    this->update();
 }
 
 void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
 {
-	defaultGlobalParamSet->addParam(new RichColor(GLArea::BackGroundBotParam(),QColor(128,128,255),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
-	defaultGlobalParamSet->addParam(new RichColor(GLArea::BackGroundTopParam(),QColor(0,0,0),"MeshLab GLarea's BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
-	defaultGlobalParamSet->addParam(new RichColor(GLArea::LogAreaColParam(),QColor(255,32,32),"MeshLab GLarea's BackGround Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
+    GLAreaSetting::initGlobalParameterSet(defaultGlobalParamSet);
 }
