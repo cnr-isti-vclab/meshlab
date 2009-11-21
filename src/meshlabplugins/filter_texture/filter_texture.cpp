@@ -32,8 +32,11 @@
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/attribute_seam.h>
 #include <vcg/space/triangle2.h>
+#include <vcg/complex/trimesh/point_sampling.h>
 
 #include "filter_texture.h"
+#include "pushpull.h"
+
 
 FilterTexturePlugin::FilterTexturePlugin() 
 { 
@@ -187,7 +190,10 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 			}
 			fileName = fileName.append("_color.png");
 			parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
-			parlst.addParam(new RichInt("textDim", 1024, "Texture Dimension (px)", "The dimension for the texture"));
+			parlst.addParam(new RichInt("textW", 1024, "Texture width (px)", "The texture width"));
+			parlst.addParam(new RichInt("textH", 1024, "Texture height (px)", "The texture height"));
+			parlst.addParam(new RichBool("overwrite", false, "Overwrite texture", "if current has a texture will be overwritten"));
+			parlst.addParam(new RichBool("assign", false, "Assign texture", "assign the newly created texture"));
 			}
 			break;
 		default : assert(0); 
@@ -270,6 +276,30 @@ inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float bor
 	buildTrianglesCache (arr, maxLevels, border, quadSize, 2*idx+3);
 	
 }
+
+/////// "COLOR TO TEXTURE" FILTER NEEDED STUFF
+class RasterSampler
+{
+public:
+	RasterSampler(QImage &_img, int _tw, int _th) : img(_img)
+	{
+		assert(_tw >=1);
+		assert(_th >=1);
+		texWidth = _tw;
+		texHeight = _th;
+	};
+	
+	QImage &img;
+	int texWidth;
+	int texHeight;
+	
+	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp)
+	{
+		CMeshO::VertexType::ColorType c;
+		c.lerp(f.V(0)->cC(), f.V(1)->cC(), f.V(2)->cC(), p);
+		img.setPixel(tp.X(), (texHeight-1)-tp.Y(), qRgba(c[0], c[1], c[2], 255));
+	}
+};
 
 #define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
 ///////////////////////////////////////////////////////
@@ -562,7 +592,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			if (!textName.endsWith(".png", Qt::CaseInsensitive))
 				textName.append(".png");
 			
-			// Creates path to texture file;
+			// Creates path to texture file
 			QString fileName(m.fileName.c_str());
 			int lastPoint = std::max<int>(fileName.lastIndexOf('\\'),fileName.lastIndexOf('/'));
 			if (lastPoint < 0)
@@ -601,8 +631,54 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 		break;
 		
 		case FP_COLOR_TO_TEXTURE : {
-			this->errorMessage = "not implemented yet!";
-			return false;
+			
+			QString textName = par.getString("textName");
+			int textW = par.getInt("textW");
+			int textH = par.getInt("textH");
+			bool overwrite = par.getBool("overwrite");
+			bool assign = par.getBool("assign");
+			
+			CheckError(!QFile(m.fileName.c_str()).exists(), "Save the file before creting a texture");
+			
+			QString filePath(m.fileName.c_str());
+			filePath = filePath.left(std::max<int>(filePath.lastIndexOf('\\'),filePath.lastIndexOf('/'))+1);
+	
+			if (!overwrite)
+			{
+				// Check textName and eventually add .png ext
+				CheckError(textName.length() == 0, "Texture file not specified");
+				CheckError(std::max<int>(textName.lastIndexOf("\\"),textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
+				if (!textName.endsWith(".png", Qt::CaseInsensitive))
+					textName.append(".png");
+				filePath.append(textName);
+			} else {
+				CheckError(m.cm.textures.empty(), "Mesh has no associated texture to overwrite");
+				filePath.append(m.cm.textures[0].c_str());
+			}
+			
+			CheckError(textW <= 0, "Texture Width has an incorrect value");
+			CheckError(textH <= 0, "Texture Height has an incorrect value");
+			
+			// Image creation
+			QImage img(QSize(textW,textH), QImage::Format_ARGB32);
+			img.fill(Qt::transparent);
+			
+			// Rasterizing
+			RasterSampler rs(img, textW, textH);
+			vcg::tri::SurfaceSampling<CMeshO,RasterSampler>::Texture(m.cm,rs,textW,textH);
+			
+			// PullPush
+			vcg::PullPush(img, Qt::transparent);
+			
+			// Save
+			CheckError(!img.save(filePath), "Texture file cannot be saved");
+			Log(GLLogStream::FILTER, "Texture \"%s\" Created", filePath.toStdString().c_str());
+			
+			// Assign
+			if (assign && !overwrite) {
+				m.cm.textures.clear();
+				m.cm.textures.push_back(textName.toStdString());
+			}
 		}
 		break;
 		default: assert(0);
