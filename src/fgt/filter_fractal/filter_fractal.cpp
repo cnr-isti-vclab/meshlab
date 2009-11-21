@@ -40,7 +40,9 @@ using namespace vcg;
 enum {
     FBM = 0,
     STANDARD_MF = 1,
-    HETERO_MF = 2
+    HETERO_MF = 2,
+    HYBRID_MF = 3,
+    RIDGED_MF = 4
 };
 
 // --------- constructor and destructor ------------------------------
@@ -93,13 +95,14 @@ void FilterFractal::initParameterSet(QAction* filter,MeshModel &/*m*/, RichParam
             par.addParam(new RichFloat("seed", 1, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
 
             QStringList algList;
-            algList << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal";
+            algList << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal" << "Hybrid multifractal terrain" << "Ridged multifractal terrain";
             par.addParam(new RichEnum("algorithm", 0, algList, "Algorithm", "Todo..."));
 
             par.addParam(new RichFloat("octaves", 10.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the resulting terrain. Reasonable values are in range [2,9]."));
             par.addParam(new RichFloat("lacunarity", 2.0, "Lacunarity:", "The gap between Perlin noise frequencies. This parameter is used in different ways by applying different algorithms, but you can always choose values between 2 and 7 to make the generated terrain appear different."));
             par.addParam(new RichFloat("fractalIncrement", 1.2, "Fractal increment:", "This parameter defines how rough the generated terrain will be. Use values in range [1,2] to obtain reasonable results.\nIf the value is near 1, then the terrain will be very rough."));
             par.addParam(new RichFloat("offset", 0.7, "Offset:", "Todo..."));
+            par.addParam(new RichFloat("gain", 2.0, "Gain:", "Todo..."));
             break;
     }
     return;
@@ -121,7 +124,8 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterS
                                    par.getFloat("octaves"),
                                    par.getFloat("lacunarity"),
                                    par.getFloat("fractalIncrement"),
-                                   par.getFloat("offset"));
+                                   par.getFloat("offset"),
+                                   par.getFloat("gain"));
             break;
     }
     return false;
@@ -146,7 +150,8 @@ bool FilterFractal::autoDialog(QAction *)
 
 // -------------------- Private functions -------------------------------
 bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm,
-    float seed, float octaves, float lacunarity, float fractalIncrement, float offset)
+    float seed, float octaves, float lacunarity, float fractalIncrement,
+    float offset, float gain)
 {
     m.Clear();
     int k = pow(2, subSteps), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
@@ -194,6 +199,12 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm,
             break;
         case HETERO_MF:
             createHeterogeneousMFTerrain(m, octaves, seedFactor, lacunarity, fractalIncrement, offset);
+            break;
+        case HYBRID_MF:
+            createHybridMFTerrain(m, octaves, seedFactor, lacunarity, fractalIncrement, offset);
+            break;
+        case RIDGED_MF:
+            createRidgedMFTerrain(m, octaves, seedFactor, lacunarity, fractalIncrement, offset, gain);
             break;
         default:
             assert(0); Log("FilterFractal error: algoithm type not recognized");
@@ -260,7 +271,7 @@ void FilterFractal::createMFTerrain(CMeshO &m, float octaves, float seedFactor,
         }
 
         if(remainder != .0)
-            noise *= (remainder * math::Perlin::Noise(x, y, z) * spectralWeight[(int)octaves] + offset);
+            noise *= (remainder * (math::Perlin::Noise(x, y, z) * spectralWeight[(int)octaves] + offset));
 
         (*point)[2] += noise;
     }
@@ -269,7 +280,124 @@ void FilterFractal::createMFTerrain(CMeshO &m, float octaves, float seedFactor,
 void FilterFractal::createHeterogeneousMFTerrain(CMeshO &m, float octaves,
     float seedFactor, float lacunarity, float fractalIncrement, float offset)
 {
-    return;
+    double x=.0, y=.0, z=.0, spectralWeight[(int)octaves+1], frequency=1.0;
+    double noise=.0, remainder = octaves - (int)octaves, increment = .0;
+    CoordType* point;
+
+    for(int i=0; i<=octaves; i++)
+    {
+        spectralWeight[i] = pow(frequency, -fractalIncrement);
+        frequency *= lacunarity;
+    }
+
+    for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
+    {
+        point = &((*vi).P());
+        x=(*point)[0]+seedFactor; y=(*point)[1]+seedFactor; z=(*point)[2]+seedFactor;
+        noise = (offset + math::Perlin::Noise(x, y, z)) * spectralWeight[0];
+        x *= lacunarity; y *= lacunarity; z *= lacunarity;
+
+        for(int i=1; i<octaves; i++)
+        {
+            increment = (offset + math::Perlin::Noise(x, y, z)) * spectralWeight[i] * noise;
+            noise += increment;
+            x *= lacunarity; y *= lacunarity; z *= lacunarity;
+        }
+
+        if(remainder != .0)
+        {
+            increment = (math::Perlin::Noise(x, y, z) + offset) * spectralWeight[(int)octaves] * noise;
+            increment *= remainder;
+            noise += increment;
+        }
+
+        (*point)[2] += noise;
+    }
+}
+
+void FilterFractal::createHybridMFTerrain(CMeshO &m, float octaves, float seedFactor,
+                float lacunarity, float fractalIncrement, float offset)
+{
+    double x=.0, y=.0, z=.0, spectralWeight[(int)octaves+1], frequency=1.0;
+    double noise=.0, remainder = octaves - (int)octaves, weight = .0, signal = .0;
+    CoordType* point;
+
+    for(int i=0; i<=octaves; i++)
+    {
+        spectralWeight[i] = pow(frequency, -fractalIncrement);
+        frequency *= lacunarity;
+    }
+
+    for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
+    {
+        point = &((*vi).P());
+        x=(*point)[0]+seedFactor; y=(*point)[1]+seedFactor; z=(*point)[2]+seedFactor;
+        noise = (offset + math::Perlin::Noise(x, y, z));
+        weight = noise;
+        x *= lacunarity; y *= lacunarity; z *= lacunarity;
+
+        for(int i=1; i<octaves; i++)
+        {
+            if (weight > 1.0) weight = 1.0;
+            signal = (offset + math::Perlin::Noise(x, y, z)) * spectralWeight[i];
+            noise += (weight * signal);
+            weight *= signal;
+            x *= lacunarity; y *= lacunarity; z *= lacunarity;
+        }
+
+        if(remainder != .0)
+        {
+            signal = (offset + math::Perlin::Noise(x, y, z)) * spectralWeight[(int)octaves];
+            noise += (weight * signal * remainder);
+        }
+
+        (*point)[2] += noise;
+    }
+}
+
+void FilterFractal::createRidgedMFTerrain(CMeshO &m, float octaves, float seedFactor,
+    float lacunarity, float fractalIncrement, float offset, float gain)
+{
+    double x=.0, y=.0, z=.0, spectralWeight[(int)octaves+1], frequency=1.0;
+    double noise=.0, remainder = octaves - (int)octaves, weight = .0, signal = .0;
+    CoordType* point;
+
+    for(int i=0; i<=octaves; i++)
+    {
+        spectralWeight[i] = pow(frequency, -fractalIncrement);
+        frequency *= lacunarity;
+    }
+
+    for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
+    {
+        point = &((*vi).P());
+        x=(*point)[0]+seedFactor; y=(*point)[1]+seedFactor; z=(*point)[2]+seedFactor;
+        signal = pow(offset - fabs(math::Perlin::Noise(x, y, z)), 2);
+        noise = signal;
+        x *= lacunarity; y *= lacunarity; z *= lacunarity;
+
+        for(int i=1; i<octaves; i++)
+        {
+            weight = signal * gain;
+            if (weight > 1.0) weight = 1.0;
+            if (weight < 0.0) weight = 0.0;
+            signal = pow(offset - fabs(math::Perlin::Noise(x, y, z)), 2) * weight * spectralWeight[i];
+            noise += signal;
+            x *= lacunarity; y *= lacunarity; z *= lacunarity;
+        }
+
+        if(remainder != .0)
+        {
+            weight = signal * gain;
+            if (weight > 1.0) weight = 1.0;
+            if (weight < 0.0) weight = 0.0;
+            signal = pow(offset - fabs(math::Perlin::Noise(x, y, z)), 2) * weight * spectralWeight[(int)octaves];
+            signal *= remainder;
+            noise += signal;
+        }
+
+        (*point)[2] += noise;
+    }
 }
 // ---------------------------------------------------------------------
 

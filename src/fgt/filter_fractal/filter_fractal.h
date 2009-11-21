@@ -45,13 +45,17 @@ class FilterFractal : public QObject, public MeshFilterInterface
         private:
             bool generateTerrain(CMeshO &m, int subSteps, int algorithm,
                 float seed, float octaves, float lacunarity, float fractalIncrement,
-                float offset);
+                float offset, float gain);
             void createFBMTerrain(CMeshO &m, float octaves, float seedFactor,
                 float lacunarity, float fractalIncrement);
             void createMFTerrain(CMeshO &m, float octaves, float seedFactor,
                 float lacunarity, float fractalIncrement, float offset);
             void createHeterogeneousMFTerrain(CMeshO &m, float octaves, float seedFactor,
                 float lacunarity, float fractalIncrement, float offset);
+            void createHybridMFTerrain(CMeshO &m, float octaves, float seedFactor,
+                float lacunarity, float fractalIncrement, float offset);
+            void createRidgedMFTerrain(CMeshO &m, float octaves, float seedFactor,
+                float lacunarity, float fractalIncrement, float offset, float gain);
 
 	public:
             enum {CR_FRACTAL_TERRAIN} ;
