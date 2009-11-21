@@ -111,14 +111,7 @@ bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameter
         vcg::tri::Octahedron<CMeshO>(m.cm);
         break;
     case CR_HEXAHEDRON:
-        break;
-    case CR_BOX:
-        /* CRASSSHHHH
-        float sz=par.getFloat("size");
-        vcg::Box3f b(vcg::Point3f(1,1,1)*(sz/2),vcg::Point3f(1,1,1)*(-sz/2));
-        vcg::tri::Box<CMeshO>(m.cm,b);
-        m.updateDataMask(MeshModel::MM_POLYGONAL);
-        */
+        vcg::tri::Hexahedron<CMeshO>(m.cm);
         break;
     }
 
