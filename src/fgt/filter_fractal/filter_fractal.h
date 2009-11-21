@@ -44,11 +44,13 @@ class FilterFractal : public QObject, public MeshFilterInterface
 
         private:
             bool generateTerrain(CMeshO &m, int subSteps, int algorithm,
-                float seed, int octaves, float lacunarity, float fractalIncrement,
+                float seed, float octaves, float lacunarity, float fractalIncrement,
                 float offset);
-            void addFBMNoise(CMeshO &m, int octaves, float seedFactor,
+            void createFBMTerrain(CMeshO &m, float octaves, float seedFactor,
                 float lacunarity, float fractalIncrement);
-            void addMultifractalNoise(CMeshO &m, int octaves, float seedFactor,
+            void createMFTerrain(CMeshO &m, float octaves, float seedFactor,
+                float lacunarity, float fractalIncrement, float offset);
+            void createHeterogeneousMFTerrain(CMeshO &m, float octaves, float seedFactor,
                 float lacunarity, float fractalIncrement, float offset);
 
 	public:
