@@ -74,8 +74,27 @@ const QString FilterFractal::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
         case CR_FRACTAL_TERRAIN:
-            return QString("Generates a fractal terrain");
-            break;
+        {
+            /*
+            QString desc = "Generates a fractal terrain with five different algorithms. ";
+            desc += "Detailed descriptions can be found in:<br /><br />";
+            desc += "<span style=\"font-variant: small-caps;\">Ebert, D.S., Musgrave, F.K., Peachey, D., Perlin, K., and Worley, S.</span><br />";
+            desc += "Texturing and Modeling: A Procedural Approach.<br />";
+            desc += "<i>Morgan Kaufmann Publishers Inc., San Francisco, CA, USA, 2002.</i><br /> <br />";
+            desc += "Some good parameter values to start with:<br />";
+            */
+            QString desc;
+            QFile f(":/ff_description.txt");
+            if (f.open(QFile::ReadOnly))
+            {
+                QTextStream stream(&f);
+                desc = stream.readAll();
+                f.close();
+            }
+
+            return desc;
+        }
+        break;
         default:
             assert(0); return QString("error");
             break;
@@ -91,18 +110,18 @@ void FilterFractal::initParameterSet(QAction* filter,MeshModel &/*m*/, RichParam
 {
     switch(ID(filter)) {
         case CR_FRACTAL_TERRAIN:
-            par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable result."));
-            par.addParam(new RichFloat("seed", 1, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
+            par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable results."));
+            par.addParam(new RichFloat("seed", 2, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
 
             QStringList algList;
             algList << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal" << "Hybrid multifractal terrain" << "Ridged multifractal terrain";
-            par.addParam(new RichEnum("algorithm", 0, algList, "Algorithm", "Todo..."));
+            par.addParam(new RichEnum("algorithm", 4, algList, "Algorithm", "The algorithm with which the fractal terrain will be generated."));
 
-            par.addParam(new RichFloat("octaves", 10.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the resulting terrain. Reasonable values are in range [2,9]."));
-            par.addParam(new RichFloat("lacunarity", 2.0, "Lacunarity:", "The gap between Perlin noise frequencies. This parameter is used in different ways by applying different algorithms, but you can always choose values between 2 and 7 to make the generated terrain appear different."));
-            par.addParam(new RichFloat("fractalIncrement", 1.2, "Fractal increment:", "This parameter defines how rough the generated terrain will be. Use values in range [1,2] to obtain reasonable results.\nIf the value is near 1, then the terrain will be very rough."));
-            par.addParam(new RichFloat("offset", 0.7, "Offset:", "Todo..."));
-            par.addParam(new RichFloat("gain", 2.0, "Gain:", "Todo..."));
+            par.addParam(new RichFloat("octaves", 8.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the terrain. Reasonable values are in range [2,9]. Float values are allowed."));
+            par.addParam(new RichFloat("lacunarity", 4.0, "Lacunarity:", "The gap between noise frequencies. This parameter is used in conjunction with fractal increment to compute the spectral weights that contribute to the noise in each octave."));
+            par.addParam(new RichFloat("fractalIncrement", 0.23, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
+            par.addParam(new RichFloat("offset", 0.6, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
+            par.addParam(new RichFloat("gain", 2.0, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
             break;
     }
     return;
@@ -154,7 +173,7 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm,
     float offset, float gain)
 {
     m.Clear();
-    int k = pow(2, subSteps), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
+    int k = (int)(pow(2, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
 
     // grid generation
     vcg::tri::Allocator<CMeshO>::AddVertices(m, vertexCount);
