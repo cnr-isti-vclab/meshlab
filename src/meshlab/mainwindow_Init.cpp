@@ -60,6 +60,10 @@ MainWindow::MainWindow()
 	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
 	connect(httpReq, SIGNAL(done(bool)), this, SLOT(connectionDone(bool)));
 
+        QIcon icon;
+        icon.addPixmap(QPixmap(":images/eye48.png"));
+        setWindowIcon(icon);
+
 	createActions();
 	createMenus();
 	createToolBars();
