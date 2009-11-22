@@ -1,6 +1,7 @@
 include (../../shared.pri)
 HEADERS = filter_shape.h \
-    platonic.h
+    platonic.h \
+    archimedean.h
 SOURCES = filter_shape.cpp \
     ../../meshlab/filterparameter.cpp \
     $$GLEWCODE
