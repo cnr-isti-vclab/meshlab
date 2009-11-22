@@ -1,10 +1,13 @@
 include (../../shared.pri)
-
-HEADERS       = filter_dirt.h
-SOURCES       = filter_dirt.cpp \
-                ../../meshlab/filterparameter.cpp\
-		$$GLEWCODE
-TARGET        = filter_dirt
-TEMPLATE      = lib
-QT           += opengl
-CONFIG       += plugin
+DEFINES += dSINGLE
+HEADERS = filter_physics.h \
+    PhysicsEngineFacade.h \
+    ODEFacade.h
+SOURCES = ../../meshlab/filterparameter.cpp \
+    filter_physics.cpp \
+    ODEFacade.cpp
+TARGET = filter_physics
+TEMPLATE = lib
+QT += opengl
+CONFIG += plugin x86
+LIBS += -L/usr/local/lib -lode
