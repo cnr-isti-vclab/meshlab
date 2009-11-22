@@ -103,9 +103,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 			parlst.addParam(new RichEnum("AlignX",0,alignValueList,"Align X"));
 			parlst.addParam(new RichEnum("AlignY",0,alignValueList,"Align Y"));
 			parlst.addParam(new RichEnum("AlignZ",0,alignValueList,"Align Z"));
-			/*parlst.addParam(new RichEnum("AlignX",0,alignValue,"Align X"));
-			parlst.addParam(new RichEnum("AlignY",0,alignValue,"Align Y"));
-			parlst.addParam(new RichEnum("AlignZ",0,alignValue,"Align Z"));*/
+			
 			//update the template list
 			templates = QStringList();
 			foreach(QString subDir, templatesDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
@@ -120,8 +118,8 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 			}
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));
 			parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));
-			// ******il nome dell'immagine, ma poi va copiata nella cartella della mesh...******
-			parlst.addParam(new RichString("ImageName", "default.tiff", "Name of output image"));
+			//format is output is only tiff for now
+			parlst.addParam(new RichString("ImageName", "default", "Name of output image"));
 			
 			//DON'T WORK!!
 			//delRibFiles = true;
@@ -175,12 +173,19 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 				return false;
 			}
 		}
+		if(!temp.cd("Cache")) {
+			if(!temp.mkdir("Cache"))
+				return false;
+		}
+		else
+			temp.cdUp();
 		destPathFileString = temp.absolutePath() + QDir::separator() + "scene.rib";
 		delRibFiles = true;
 	}
 	else {
 		delRibFiles = false;
 	}
+
 
 	QString destDirString = getDirFromPath(&destPathFileString);
 	QString destFile = getFileNameFromPath(&destPathFileString);
@@ -207,6 +212,13 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	QStringList frameDeclaration = QStringList();
 	bool isFrameDeclaration = false;
 	QStringList shaderDirs, textureDirs;
+	bool currentDisplayTypeIsFile = false;
+	bool anyOtherDisplayType = false;
+	QString newFormat = "Format " + 
+						QString::number(par.getInt("FormatX")) + " " +
+						QString::number(par.getInt("FormatY")) + " " +
+						QString::number(par.getFloat("PixelAspectRatio"));
+	QStringList renderedImage = QStringList();
 
 	//reading cycle
 	while(!files.isEmpty() && !stop) {
@@ -234,15 +246,10 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 					break;
 			}
 		}
-
-		//add "MakeTexture" statement to create the texure, but only before frame one =>not necessary
+		
 		if(token[0].trimmed() == "FrameBegin") {
 			currentFrame = token[1].trimmed().toInt(); //no check on cast
-			if(currentFrame == 1) {
-				//foreach(QString textureName, textureList) {
-					//QString makeTexture("MakeTexture \"" + getFileNameFromPath(&textureName,false) + ".tiff" + "\" \"" + getFileNameFromPath(&textureName, false) + ".tx\" \"periodic\" \"periodic\" \"gaussian\" 1 1");
-					//fprintf(fout,"%s\n",qPrintable(makeTexture));
-				//}
+			if(currentFrame == 1) {				
 				if(numOfFrames > 0)
 					isFrameDeclaration = true;
 			}
@@ -255,10 +262,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			makeAnimation(fout,numOfFrames,transfCamera,frameDeclaration,par.getString("ImageName"));
 			stop = true;
 		}
-
-
-		//change the output image file name
-		if(token[0].trimmed() == "Display") {
+		
+		//change the output image file name (it's more simple change the final image name..in animation too)
+		/*if(token[0].trimmed() == "Display") {
 			line = token[0] + " \"";
 			if(token[2].trimmed() == "\"file\"")
 				line += "+";			
@@ -271,14 +277,25 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			}
 			line += "\" " + token[2] + " " + token[3];
 			for(int i = 4; i<token.size(); i++) {
-				line += token[i];
+				line += token[i] + " ";
 			}
-		}
-
+		}*/
 		//change the output image format
-		if(token[0].trimmed() == "Format") {
-			line = token[0] + " " + QString::number(par.getInt("FormatX")) + " " + QString::number(par.getInt("FormatY")) + " " + QString::number(par.getFloat("PixelAspectRatio"));
-		}
+		/*if(token[0].trimmed() == "Format" ) {
+			originalFormat = line;
+			//line = token[0] + " " + QString::number(par.getInt("FormatX")) + " " + QString::number(par.getInt("FormatY")) + " " + QString::number(par.getFloat("PixelAspectRatio"));
+		}*/
+
+		//if output is not a file the format must be the same!!framebuffer is ignored
+		if(token[0].trimmed() == "Display") {
+			if(token[2].trimmed() != "\"framebuffer\"")
+				if (!anyOtherDisplayType && token[2].trimmed() == "\"file\"") {
+					currentDisplayTypeIsFile = true;
+					renderedImage << token[1].trimmed();
+				}
+				else
+					anyOtherDisplayType = true;
+		}		
 
 		//transformation camera
 		if(numOfFrames > 0 && token[0].trimmed() == "Transform") {
@@ -288,14 +305,25 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		}
 
 		//make another file if there is an animation
-		if(numOfFrames > 0 && token[0].trimmed() == "WorldBegin") {
-			isFrameDeclaration = false;
-			//it's certainly the first WorldBegin
-			QString filename = destDirString + QDir::separator() + "world.rib";
-			fprintf(fout,"ReadArchive \"world.rib\"\n");
-			fout = fopen(qPrintable(filename),"wb");
-			if(fout==NULL)	{
-			}			
+		if(token[0].trimmed() == "WorldBegin") {
+			//if there's another type of display the format is not change
+			if(!anyOtherDisplayType && currentDisplayTypeIsFile) {
+				fprintf(fout,"Format %s\n", newFormat);
+				frameDeclaration << newFormat;
+			}
+			currentDisplayTypeIsFile = false;
+			anyOtherDisplayType = false;
+			//is right?yes,because before the next WorldBegin will there be a new Display statement
+				
+			if(numOfFrames > 0) {
+				isFrameDeclaration = false;
+				//it's certainly the first WorldBegin
+				QString filename = destDirString + QDir::separator() + "world.rib";
+				fprintf(fout,"ReadArchive \"world.rib\"\n");
+				fout = fopen(qPrintable(filename),"wb");
+				if(fout==NULL)	{
+				}
+			}
 		}
 		if(numOfFrames > 0 && token[0].trimmed() == "WorldEnd") {
 			//it's certainly the first WorldEnd
@@ -501,14 +529,16 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//the rendering result image is copied in mesh folder
 	QString meshDir(m.fileName.c_str());
 	meshDir = getDirFromPath(&meshDir);
-	QString finalImage = meshDir + QDir::separator() + par.getString("ImageName");
+	QString finalImage = meshDir + QDir::separator() + par.getString("ImageName") + ".tiff";
 	qDebug("final image position: %s", qPrintable(finalImage));
 	if(QFile::exists(finalImage)) {
 		//delete without control?
 		QFile::remove(finalImage);
 	}
-	qDebug("rendering result image position: %s", qPrintable(destDirString + QDir::separator() + par.getString("ImageName")));
-	QFile::copy(destDirString + QDir::separator() + par.getString("ImageName"), finalImage);
+	for(int i = 0; i < renderedImage.size(); i++)
+		qDebug("rendering result image position: %s", qPrintable(destDirString + QDir::separator() + renderedImage.at(i)));
+	//maybe a set of file
+	//QFile::copy(destDirString + QDir::separator() + par.getString("ImageName"), finalImage);
 
     
 	//delete all created files (if it's required)
@@ -517,6 +547,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	return true;
 }
 
+//rivedere....nome file
 int FilterHighQualityRender::makeAnimation(FILE* fout, int numOfFrame,vcg::Matrix44f transfCamera, QStringList frameDeclaration, QString imageName) {
 	//with numOfFrame+2 the last image is the same of first
 	for(int frame=2; frame<numOfFrame+1; frame++) {
@@ -702,12 +733,7 @@ QString FilterHighQualityRender::readArray(RibFileStack* files, QString arrayStr
 vcg::Matrix44f FilterHighQualityRender::readMatrix(RibFileStack* files, QString line){
 	float t[16];
 	//an array in renderman can contains the char '\n' :(
-	QString matrixString = readArray(files, line);
-	/*QString matrixString = line;
-	while(!line.contains(']')) {
-		line = files->topNextLine();
-		matrixString += line;
-	}*/
+	QString matrixString = readArray(files, line);	
 	int k=0;
 	QStringList list = matrixString.split(' ');
 	for(int i=0; i<list.size(); i++) {
