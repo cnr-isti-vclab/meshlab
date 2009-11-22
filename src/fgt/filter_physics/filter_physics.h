@@ -1,0 +1,35 @@
+#ifndef FILTERPHYSICS_PLUGIN_H
+#define FILTERPHYSICS_PLUGIN_H
+
+#include <QObject>
+#include <QStringList>
+#include <QString>
+
+#include <meshlab/meshmodel.h>
+#include <meshlab/interfaces.h>
+
+class FilterPhysics : public QObject, public MeshFilterInterface
+{
+    Q_OBJECT
+    Q_INTERFACES(MeshFilterInterface)
+
+    public:
+    enum {FP_PHYSICS} ;
+
+    FilterPhysics();
+    ~FilterPhysics(){}
+
+    virtual const QString filterName(FilterIDType filter) const;
+    virtual const QString filterInfo(FilterIDType filter) const;
+
+    virtual const int getRequirements(QAction*);
+
+    virtual bool autoDialog(QAction *) {return true;}
+    virtual void initParameterSet(QAction *,MeshModel&, RichParameterSet&);
+    virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
+    virtual bool applyFilter(QAction*, MeshModel&, RichParameterSet&, vcg::CallBackPos*) { assert(0); return false;}
+    virtual const FilterClass getClass(QAction *);
+
+};
+
+#endif
