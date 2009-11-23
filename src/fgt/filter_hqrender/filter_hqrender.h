@@ -81,6 +81,7 @@ private:
   QString getDirFromPath(QString* path);
   QString getFileNameFromPath(QString* path, bool type = true);
   QString quotesPath(QString* path);
+  bool checkDir(QString destDirString, QString path);
   bool copyFiles(QDir templateDir,QDir destDir,QStringList dirs);
 };
 

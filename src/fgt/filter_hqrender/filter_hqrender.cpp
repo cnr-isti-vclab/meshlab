@@ -10,7 +10,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
-//#define NO_RENDERING
+#define NO_RENDERING
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -172,13 +172,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			else {
 				return false;
 			}
-		}
-		if(!temp.cd("Cache")) {
-			if(!temp.mkdir("Cache"))
-				return false;
-		}
-		else
-			temp.cdUp();
+		}		
 		destPathFileString = temp.absolutePath() + QDir::separator() + "scene.rib";
 		delRibFiles = true;
 	}
@@ -247,9 +241,21 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			}
 		}
 		
+		//there are some statement that make an output. It's need to create the path
+		if(token[0].trimmed().startsWith("Make")) {
+			QString path = token[2]; //for MakeTexture, MakeShadow, MakeLatLongEnvironment
+			if(token[0].trimmed() == "MakeCubeFaceEnvironment")
+				path = token[7];
+			path = getDirFromPath(&path);
+			qDebug("dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
+			checkDir(destDirString,path);
+		}
+
+		
+
 		if(token[0].trimmed() == "FrameBegin") {
 			currentFrame = token[1].trimmed().toInt(); //no check on cast
-			if(currentFrame == 1) {				
+			if(currentFrame == 1) {		//questo è casino con animazioni		
 				if(numOfFrames > 0)
 					isFrameDeclaration = true;
 			}
@@ -288,6 +294,12 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 		//if output is not a file the format must be the same!!framebuffer is ignored
 		if(token[0].trimmed() == "Display") {
+			//create the path if needed
+			QString path = token[1].trimmed();
+			path = getDirFromPath(&path);
+			qDebug("dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
+			checkDir(destDirString,path);
+
 			if(token[2].trimmed() != "\"framebuffer\"")
 				if (!anyOtherDisplayType && token[2].trimmed() == "\"file\"") {
 					currentDisplayTypeIsFile = true;
@@ -308,7 +320,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		if(token[0].trimmed() == "WorldBegin") {
 			//if there's another type of display the format is not change
 			if(!anyOtherDisplayType && currentDisplayTypeIsFile) {
-				fprintf(fout,"Format %s\n", newFormat);
+				fprintf(fout,"%s\n", qPrintable(newFormat));
 				frameDeclaration << newFormat;
 			}
 			currentDisplayTypeIsFile = false;
@@ -698,7 +710,9 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 				fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
 
 				//fprintf(fout,"Color [ 1.0 0.0 0.0 ]\n");				
-			}
+			}/* else {
+				fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \n");
+			}*/
 		}
 
 		if(token[0].trimmed() == "PointsPolygons") {
@@ -805,8 +819,11 @@ QStringList FilterHighQualityRender::readSearchPath(RibFileStack* files,QString 
 	return dirs;		
 }
 
+//path must have the filename
 QString FilterHighQualityRender::getDirFromPath(QString* path) {
 	//return path->left(path->lastIndexOf(QDir::separator())); //don't work :/
+	if(path->lastIndexOf('\\') == -1 && path->lastIndexOf('/') == -1)
+		return ".";
 	return path->left(std::max<int>(path->lastIndexOf('\\'),path->lastIndexOf('/')));
 }
 
@@ -833,6 +850,19 @@ QString FilterHighQualityRender::quotesPath(QString* path) {
 	}
 	//the final of path is separator!!!
 	return temp;
+}
+
+bool FilterHighQualityRender::checkDir(QString destDirString, QString path) {
+	QDir destDir(destDirString);
+	QStringList pathDirs = path.split('/');
+	foreach(QString dir, pathDirs) {
+		if(!destDir.cd(dir)) {
+			destDir.mkdir(dir);
+			destDir.cd(dir);
+		}
+	}
+	qDebug(qPrintable(destDir.absolutePath()));
+	return true;
 }
 
 //take all files in templateDir/[dirs] directories and copy them in dest/[dirs]
