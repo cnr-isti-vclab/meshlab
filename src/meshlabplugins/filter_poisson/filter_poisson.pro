@@ -1,6 +1,6 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = ../../meshlab/meshmodel.h \
+HEADERS       += ../../meshlab/meshmodel.h \
                 filter_poisson.h
 
 QMAKE_CXXFLAGS += -fpermissive

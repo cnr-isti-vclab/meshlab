@@ -1,9 +1,9 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = io_expe.h \
+HEADERS       += io_expe.h \
 				../../meshlab/meshmodel.h
 
-SOURCES       = io_expe.cpp \
+SOURCES       += io_expe.cpp \
 				../../meshlab/meshmodel.cpp \
 				$$GLEWCODE
 

@@ -1,8 +1,8 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filter_curvature_from_sliding.h
+HEADERS       += filter_curvature_from_sliding.h
 
-SOURCES       = filter_curvature_from_sliding.cpp 
+SOURCES       += filter_curvature_from_sliding.cpp 
 		
 TARGET        = filter_curvature_from_sliding
 

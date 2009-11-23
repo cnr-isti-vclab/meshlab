@@ -4,7 +4,7 @@ TEMPLATE      = lib
 CONFIG       += plugin 
 
 FORMS         = ui/v3dImportDialog.ui
-HEADERS       = epoch_io.h \
+HEADERS       += epoch_io.h \
 				epoch_reconstruction.h \
 				epoch_camera.h \		
 				radial_distortion.h\
@@ -14,7 +14,7 @@ HEADERS       = epoch_io.h \
                 maskImageWidget.h \
                 fillImage.h
 				
-SOURCES       = epoch_io.cpp \
+SOURCES       += epoch_io.cpp \
                 epoch_camera.cpp \
                 radial_distortion.cpp \
                 scalar_image.cpp \

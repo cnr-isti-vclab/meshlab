@@ -1,8 +1,8 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filter_func.h
+HEADERS       += filter_func.h
 
-SOURCES       = filter_func.cpp
+SOURCES       += filter_func.cpp
 
 TARGET        = filter_func
 

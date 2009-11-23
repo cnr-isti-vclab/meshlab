@@ -1,6 +1,6 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = transformDialog.h \
+HEADERS       += transformDialog.h \
                 $$VCGDIR/vcg/complex/trimesh/clean.h \
                 ../../meshlab/interfaces.h \
                 ../../meshlab/meshmodel.h \
@@ -8,7 +8,7 @@ HEADERS       = transformDialog.h \
 		quadric_tex_simp.h \ 
 		meshfilter.h 
 
-SOURCES       = transformDialog.cpp \
+SOURCES       += transformDialog.cpp \
 		meshfilter.cpp \ 
 		quadric_simp.cpp \ 
 		quadric_tex_simp.cpp \ 

@@ -1,6 +1,6 @@
 include (../../sharedfilter.pri)
-HEADERS = io_m.h \
+HEADERS += io_m.h \
     export_m.h
-SOURCES = io_m.cpp 
+SOURCES += io_m.cpp
 
 TARGET = io_m

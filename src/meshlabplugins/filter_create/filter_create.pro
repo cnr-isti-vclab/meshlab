@@ -1,7 +1,7 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filter_create.h
+HEADERS       += filter_create.h
 
-SOURCES       = filter_create.cpp 
+SOURCES       += filter_create.cpp 
 		
 TARGET        = filter_create

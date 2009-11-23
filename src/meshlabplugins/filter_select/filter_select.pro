@@ -1,7 +1,7 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = meshselect.h 
-SOURCES       = meshselect.cpp
+HEADERS       += meshselect.h
+SOURCES       += meshselect.cpp
 
 TARGET        = filter_select
 

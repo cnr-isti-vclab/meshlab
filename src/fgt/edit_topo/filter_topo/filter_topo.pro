@@ -1,9 +1,9 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filter_topo.h \
+HEADERS       += filter_topo.h \
 				../edit_topomeshbuilder.h
 
-SOURCES       = filter_topo.cpp  
+SOURCES       += filter_topo.cpp  
 				
 				
 TARGET        = filter_topo

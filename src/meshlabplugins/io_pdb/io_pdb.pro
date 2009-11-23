@@ -1,9 +1,9 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = io_pdb.h \
+HEADERS       += io_pdb.h \
 		$$VCGDIR/wrap/ply/plylib.h 
 				
-SOURCES       = io_pdb.cpp \
+SOURCES       += io_pdb.cpp \
 		$$VCGDIR//wrap/ply/plylib.cpp\ 
 		
 

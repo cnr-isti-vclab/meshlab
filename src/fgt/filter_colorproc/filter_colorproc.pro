@@ -2,9 +2,9 @@ include (../../sharedfilter.pri)
 
 QT           += opengl
 
-HEADERS       = filter_colorproc.h 
+HEADERS       += filter_colorproc.h 
 
-SOURCES       = filter_colorproc.cpp 
+SOURCES       += filter_colorproc.cpp 
 				
 
 TARGET        = filter_colorproc

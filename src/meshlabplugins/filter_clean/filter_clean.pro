@@ -1,9 +1,9 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = cleanfilter.h \
+HEADERS       += cleanfilter.h \
 		../../common/filterparameter.h
 
-SOURCES       = cleanfilter.cpp	
+SOURCES       += cleanfilter.cpp	
 
 #align stuff
 

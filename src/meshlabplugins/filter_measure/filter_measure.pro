@@ -1,8 +1,8 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filter_measure.h
+HEADERS       += filter_measure.h
 
-SOURCES       = filter_measure.cpp \ 
+SOURCES       += filter_measure.cpp \ 
 		 		$$GLEWCODE
 
 TARGET        = filter_measure

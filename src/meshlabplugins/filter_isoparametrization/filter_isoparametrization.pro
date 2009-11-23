@@ -1,6 +1,6 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = ./diamond_sampler.h \
+HEADERS       += ./diamond_sampler.h \
 				./diam_parametrization.h \
 				./diam_topology.h \
 				./dual_coord_optimization.h \
@@ -22,7 +22,7 @@ HEADERS       = ./diamond_sampler.h \
 				../../meshlab/meshmodel.h
 				 
 
-SOURCES       = ./filter_isoparametrization.cpp \
+SOURCES       += ./filter_isoparametrization.cpp \
 				../../meshlab/meshmodel.cpp \
 				$$GLEWCODE
 				

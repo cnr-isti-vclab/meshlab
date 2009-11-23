@@ -3,11 +3,11 @@ include (../../sharedfilter.pri)
 
 QT           += opengl
 
-HEADERS       = samplefilterdoc.h \
+HEADERS       += samplefilterdoc.h \
 		../../common/filterparameter.h \
 		../../meshlab/meshmodel.h
 
-SOURCES       = samplefilterdoc.cpp \ 
+SOURCES       += samplefilterdoc.cpp \ 
 		 \
 		../../meshlab/meshmodel.cpp \
 		$$GLEWCODE

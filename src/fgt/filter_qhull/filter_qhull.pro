@@ -2,11 +2,11 @@ include (../../sharedfilter.pri)
 
 QT           += opengl
 
-HEADERS       = ../../meshlab/meshmodel.h \
+HEADERS       += ../../meshlab/meshmodel.h \
 		filter_qhull.h \
 		qhull_tools.h 
 
-SOURCES       = filter_qhull.cpp \ 
+SOURCES       += filter_qhull.cpp \ 
 		qhull_tools.cpp \
 		 ../../meshlab/meshmodel.cpp 
 		

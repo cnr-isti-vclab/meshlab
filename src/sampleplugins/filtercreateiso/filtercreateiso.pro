@@ -1,8 +1,8 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filtercreateiso.h 
+HEADERS       += filtercreateiso.h 
 				
-SOURCES       = filtercreateiso.cpp 
+SOURCES       += filtercreateiso.cpp 
 		
 
 TARGET        = filtercreateiso

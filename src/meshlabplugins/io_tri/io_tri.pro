@@ -1,8 +1,8 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = io_tri.h 
+HEADERS       += io_tri.h 
 				
-SOURCES       = io_tri.cpp\
+SOURCES       += io_tri.cpp\
 		
  
 				

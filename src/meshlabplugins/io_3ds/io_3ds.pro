@@ -8,7 +8,7 @@ HEADERS		= meshio.h \
 			import_3ds.h \
 			io_3ds.h 
 				
-SOURCES       = 	meshio.cpp \
+SOURCES       += 	meshio.cpp \
 			
 
 

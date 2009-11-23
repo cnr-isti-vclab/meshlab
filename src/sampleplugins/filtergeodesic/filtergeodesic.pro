@@ -1,8 +1,8 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filtergeodesic.h 
+HEADERS       += filtergeodesic.h 
 				
-SOURCES       = filtergeodesic.cpp 
+SOURCES       += filtergeodesic.cpp 
 		
 TARGET        = filtergeodesic
 

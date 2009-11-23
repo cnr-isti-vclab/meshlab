@@ -1,7 +1,7 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = sampleio.h 
+HEADERS       += sampleio.h 
 				
-SOURCES       = sampleio.cpp 
+SOURCES       += sampleio.cpp 
 				
 TARGET        = sampleio

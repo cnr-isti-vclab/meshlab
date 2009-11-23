@@ -1,7 +1,7 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filter_aging.h \
+HEADERS       += filter_aging.h \
 		edgepred.h
-SOURCES       = filter_aging.cpp   
+SOURCES       += filter_aging.cpp   
 TARGET        = filter_aging
 

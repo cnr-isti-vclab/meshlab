@@ -1,9 +1,9 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = filter_texture.h \
+HEADERS       += filter_texture.h \
 		pushpull.h
 
-SOURCES       = filter_texture.cpp  
+SOURCES       += filter_texture.cpp  
 		
 TARGET        = filter_texture
 

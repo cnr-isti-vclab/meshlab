@@ -1,7 +1,7 @@
 include (../../sharedfilter.pri)
 
-HEADERS       = io_custom.h
-SOURCES       = io_custom.cpp \
+HEADERS       += io_custom.h
+SOURCES       += io_custom.cpp \
                 \
 		$$GLEWCODE
 TARGET        = io_custom
