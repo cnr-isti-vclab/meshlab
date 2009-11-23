@@ -49,6 +49,7 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
     case DP_SHOW_VERT_LABEL:						return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
     case DP_SHOW_FACE_LABEL:						return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
     case DP_SHOW_CAMERA:								return tr("Draw the position of the camera, if present in the current mesh");
+    case DP_SHOW_TEXPARAM: return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
 	 }
   assert(0);
   return QString();
@@ -56,8 +57,8 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
 
 const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
 {
-  switch(filter)
-  {
+    switch(filter)
+    {
     case DP_SHOW_VERT      :	return QString("Show Vertex Dots");
     case DP_SHOW_NON_FAUX_EDGE :	return QString("Show Non-Faux Edges");
     case DP_SHOW_VERT_NORMALS      :	return QString("Show Vertex Normals");
@@ -66,46 +67,50 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
     case DP_SHOW_BOX_CORNERS  :			return QString("Show Box Corners");
     case DP_SHOW_BOX_CORNERS_ABS  :		return QString("Show Box Corners (Abs)");
     case DP_SHOW_AXIS         :			return QString("Show Axis");
-		case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
-		case DP_SHOW_VERT_LABEL:		return tr("Show Vertex Label");
+    case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
+    case DP_SHOW_VERT_LABEL:		return tr("Show Vertex Label");
     case DP_SHOW_FACE_LABEL:			return tr("Show Face Label");
     case DP_SHOW_CAMERA:			return tr("Show Camera");
+    case DP_SHOW_TEXPARAM:			return tr("Show UV Tex Param");
 
     default: assert(0);
-  }
-  return QString("error!");
+    }
+    return QString("error!");
 }
 
 void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QFont qf)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
-	if(ID(a) == DP_SHOW_FACE_NORMALS || ID(a) == DP_SHOW_VERT_NORMALS || ID(a) == DP_SHOW_VERT_PRINC_CURV_DIR )
-	{
-    glPushAttrib(GL_ENABLE_BIT );
-    float LineLen = m.cm.bbox.Diag()/20.0;
-    CMeshO::VertexIterator vi;
-    CMeshO::FaceIterator fi;
-    glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glBegin(GL_LINES);
-
-		if(ID(a) == DP_SHOW_VERT_NORMALS) 
+    switch (ID(a))
+    {
+    case DP_SHOW_FACE_NORMALS:
+    case DP_SHOW_VERT_NORMALS:
+    case DP_SHOW_VERT_PRINC_CURV_DIR:
+        {
+            glPushAttrib(GL_ENABLE_BIT );
+            float LineLen = m.cm.bbox.Diag()/20.0;
+            CMeshO::VertexIterator vi;
+            CMeshO::FaceIterator fi;
+            glDisable(GL_LIGHTING);
+            glDisable(GL_TEXTURE_2D);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            glBegin(GL_LINES);
+            if(ID(a) == DP_SHOW_VERT_NORMALS)
 			{
 				glColor4f(.4f,.4f,1.f,.6f);
-					for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
-					{
-						glVertex((*vi).P());
-						glVertex((*vi).P()+(*vi).N()*LineLen);
-					}
+                for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+                {
+                    glVertex((*vi).P());
+                    glVertex((*vi).P()+(*vi).N()*LineLen);
+                }
 			}
-		else
-		if( ID(a) == DP_SHOW_VERT_PRINC_CURV_DIR){
-			if(m.hasDataMask(MeshModel::MM_VERTCURVDIR))
-				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
-				{
+            else
+                if( ID(a) == DP_SHOW_VERT_PRINC_CURV_DIR){
+                if(m.hasDataMask(MeshModel::MM_VERTCURVDIR))
+                    for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+                    {
 					glColor4f(1.0,0.0,0.0,.8f);
 					glVertex((*vi).P());
 					glColor4f(0.0,1.0,0.0,.1f);
@@ -115,29 +120,28 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QF
 					glColor4f(0.0,1.0,0.0,.1f);
 					glVertex((*vi).P()+(*vi).PD2()*LineLen*0.25);
 				}
-		}
-		else
-		if(ID(a) == DP_SHOW_FACE_NORMALS) 
-		{
-			glColor4f(.1f,.4f,4.f,.6f);
-			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
-			{
-				Point3f b=Barycenter(*fi);
-				glVertex(b);
-				glVertex(b+(*fi).N()*LineLen);
-			}
-		}
-
+            }
+            else
+                if(ID(a) == DP_SHOW_FACE_NORMALS)
+                {
+                glColor4f(.1f,.4f,4.f,.6f);
+                for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+                {
+                    Point3f b=Barycenter(*fi);
+                    glVertex(b);
+                    glVertex(b+(*fi).N()*LineLen);
+                }
+            }
 			
-	 glEnd();
-   glPopAttrib();
-  }
-	if(ID(a) == DP_SHOW_BOX_CORNERS)	DrawBBoxCorner(m);
-	if(ID(a) == DP_SHOW_CAMERA)	DrawCamera(m,gla,qf);
-	if(ID(a) == DP_SHOW_QUOTED_BOX)		DrawQuotedBox(m,gla,qf);
-	if(ID(a) == DP_SHOW_VERT_LABEL)	DrawVertLabel(m,gla,qf);
-  if(ID(a) == DP_SHOW_FACE_LABEL)	DrawFaceLabel(m,gla,qf);
-  if(ID(a) == DP_SHOW_VERT)	{
+            glEnd();
+            glPopAttrib();
+        } break;
+    case DP_SHOW_BOX_CORNERS:	DrawBBoxCorner(m); break;
+    case DP_SHOW_CAMERA:	DrawCamera(m,gla,qf);break;
+    case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,gla,qf);break;
+    case DP_SHOW_VERT_LABEL:	DrawVertLabel(m,gla,qf);break;
+    case DP_SHOW_FACE_LABEL:	DrawFaceLabel(m,gla,qf);break;
+    case DP_SHOW_VERT:	{
 			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_LIGHTING);
 			glEnable(GL_POINT_SMOOTH);
@@ -146,18 +150,16 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QF
 			glColor(Color4b::Black);
 			glDepthRange (0.0, 0.9999);
 			glDepthFunc(GL_LEQUAL);
-      //float baseSize = max(2.0f,m.glw.GetHintParamf(GLW::HNPPointSize));
-      float baseSize = 4;
+            float baseSize = 4;
 
 			glPointSize(baseSize+0.5);
 			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
 			glColor(Color4b::White);
 			glPointSize(baseSize-1);
-			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
-			
+			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();			
 			glPopAttrib();
-	}
-	if(ID(a) == DP_SHOW_NON_FAUX_EDGE)	{
+        } break;
+    case DP_SHOW_NON_FAUX_EDGE :	{
 			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_LIGHTING);
 			glDepthFunc(GL_LEQUAL);
@@ -169,7 +171,9 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QF
 			glDepthRange (0.0, 0.999);
 			m.glw.DrawWirePolygonal<GLW::NMNone,GLW::CMNone>();
 			glPopAttrib();
-}
+        } break;
+    case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,qf); break;
+    } // end switch;
 	glPopMatrix();
 
   if(ID(a) == DP_SHOW_AXIS)	CoordinateFrame(m.cm.bbox.Diag()/2.0).Render(gla);
@@ -469,6 +473,10 @@ bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, Rich
 	{
 		if(!m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
 	}
+    if( ID(action) == DP_SHOW_TEXPARAM )
+    {
+        if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return false;
+    }
 	return true;
 }
 void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf)
@@ -527,5 +535,49 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m,QGLWidget *gla, QFont qf)
 		glEnd();
 	glPopAttrib();			
 }
+
+void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf)
+{
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(-1,1,-1,1,-1,1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT | GL_POLYGON_BIT);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glPolygonMode(GL_FRONT_AND_BACK ,GL_LINE);
+
+    glBegin(GL_TRIANGLES);
+    for(size_t i=0;i<m.cm.face.size();++i)
+        if(!m.cm.face[i].IsD())
+                {
+        glVertex(m.cm.face[i].WT(0).P());
+        glVertex(m.cm.face[i].WT(1).P());
+        glVertex(m.cm.face[i].WT(2).P());
+    }
+    glEnd();
+
+    glPopAttrib();
+    // Closing 2D
+    glPopAttrib();
+    glPopMatrix(); // restore modelview
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+
+}
+
+
 
 Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)
