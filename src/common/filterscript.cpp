@@ -55,8 +55,8 @@ added Filter History Dialogs
 // widget capace di fare rendering di un Modello
 #include <vcg/space/box3.h>
 #include <wrap/gl/space.h>
-#include "meshmodel.h"
-#include "interfaces.h"
+#include "../meshlab/meshmodel.h"
+#include "../meshlab/interfaces.h"
 #include "filterscript.h"
 //#include "glarea.h"
 #include <QtXml/QDomDocument>

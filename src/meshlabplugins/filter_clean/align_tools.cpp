@@ -25,8 +25,6 @@
 
 #include "align_tools.h"
 
-#include <meshlab/filterparameter.h>
-
 #include <meshlabplugins/edit_pickpoints/pickedPoints.h>
 
 #include <meshlabplugins/editalign/align/align_parameter.h>

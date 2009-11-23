@@ -24,7 +24,7 @@
 #include <QApplication>
 #include "../meshlab/meshmodel.h"
 #include "../meshlab/interfaces.h"
-#include "../meshlab/filterscript.h"
+#include "../common/filterscript.h"
 #include "../meshlab/plugin_support.h"
 #include <vcg/complex/trimesh/update/bounding.h>
 

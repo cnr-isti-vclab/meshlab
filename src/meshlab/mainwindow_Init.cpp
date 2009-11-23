@@ -37,7 +37,7 @@
 #include "plugindialog.h"
 #include "customDialog.h"
 #include "saveSnapshotDialog.h"
-#include "filterparameter.h"
+#include "../common/filterparameter.h"
 #include "ui_congratsDialog.h"
 
 QProgressBar *MainWindow::qb;
