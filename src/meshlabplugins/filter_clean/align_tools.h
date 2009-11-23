@@ -33,7 +33,6 @@
 
 #include <QObject>
 
-#include <meshlab/filterparameter.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
 
