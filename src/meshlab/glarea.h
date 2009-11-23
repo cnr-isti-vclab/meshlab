@@ -38,7 +38,7 @@
 #include "GLLogStream.h"
 #include "meshmodel.h"
 #include "interfaces.h"
-#include "filterscript.h"
+#include "../common/filterscript.h"
 #include "layerDialog.h"
 #include "glarea_setting.h"
 

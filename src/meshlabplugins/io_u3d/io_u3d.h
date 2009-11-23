@@ -30,7 +30,6 @@
 
 #include "../../meshlab/meshmodel.h"
 #include "../../meshlab/interfaces.h"
-#include "../../meshlab/filterparameter.h"
 #include <wrap/io_trimesh/export_u3d.h>
 #include <wrap/io_trimesh/export_idtf.h>
 

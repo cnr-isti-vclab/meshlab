@@ -35,7 +35,7 @@ added Filter History Dialogs
 ****************************************************************************/
 
 #include <QDialog>
-#include "filterscript.h"
+#include "../common/filterscript.h"
 
 namespace Ui 
 {
