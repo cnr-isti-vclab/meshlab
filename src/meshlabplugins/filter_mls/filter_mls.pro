@@ -2,7 +2,7 @@ include(../../sharedfilter.pri)
 
 # CONFIG += debug
 
-HEADERS =	apss.h\ 
+HEADERS +=	apss.h\
 		mlsmarchingcube.h \		
 		priorityqueue.h \
 		balltree.h \			
@@ -15,7 +15,7 @@ HEADERS =	apss.h\
 		mlsutils.h \	
 		../../meshlab/meshmodel.h
 
-SOURCES =	apss.cpp \	
+SOURCES +=	apss.cpp \
 		balltree.cpp \	
 		mlsplugin.cpp \		
 		rimls.cpp \
