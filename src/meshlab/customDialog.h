@@ -51,7 +51,7 @@ Added copyright info
 #include <QDialog>
 #include <QDockWidget>
 #include <QColorDialog>
-#include "filterparameter.h"
+#include "common/filterparameter.h"
 #include "stdpardialog.h"
 
 
