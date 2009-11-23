@@ -20,8 +20,8 @@ HEADERS = interfaces.h \
     mainwindow.h \
     meshmodel.h \
     glarea.h \
-    filterscript.h \
-    filterparameter.h \
+    ../common/filterscript.h \
+    ../common/filterparameter.h \
     plugindialog.h \
     customDialog.h \
     filterScriptDialog.h \
@@ -34,7 +34,8 @@ HEADERS = interfaces.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
     $$VCGDIR/wrap/gl/trimesh.h \
-    glarea_setting.h
+    glarea_setting.h \
+    ../common/pluginmanager.h
 SOURCES = main.cpp \
     mainwindow_Init.cpp \
     mainwindow_RunTime.cpp \
@@ -43,8 +44,8 @@ SOURCES = main.cpp \
     glarea.cpp \
     plugin_support.cpp \
     plugindialog.cpp \
-    filterscript.cpp \
-    filterparameter.cpp \
+    ../common/filterscript.cpp \
+    ../common/filterparameter.cpp \
     customDialog.cpp \
     filterScriptDialog.cpp \
     saveSnapshotDialog.cpp \
@@ -55,7 +56,8 @@ SOURCES = main.cpp \
     $$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
     $$GLEWCODE \
-    glarea_setting.cpp
+    glarea_setting.cpp \
+    ../common/pluginmanager.cpp
 FORMS = ui/layerDialog.ui \
     ui/filterScriptDialog.ui \
     ui/customDialog.ui \

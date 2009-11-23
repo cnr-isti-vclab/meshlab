@@ -1,9 +1,8 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_func.h
 
-SOURCES       = filter_func.cpp\ 
-		../../meshlab/filterparameter.cpp
+SOURCES       = filter_func.cpp
 
 TARGET        = filter_func
 

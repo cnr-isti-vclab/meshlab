@@ -1,10 +1,9 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_measure.h
 
 SOURCES       = filter_measure.cpp \ 
-		../../meshlab/filterparameter.cpp \
-		$$GLEWCODE
+		 		$$GLEWCODE
 
 TARGET        = filter_measure
 

@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = transformDialog.h \
                 $$VCGDIR/vcg/complex/trimesh/clean.h \
@@ -13,7 +13,6 @@ SOURCES       = transformDialog.cpp \
 		quadric_simp.cpp \ 
 		quadric_tex_simp.cpp \ 
 		../../meshlab/GLLogStream.cpp\ 
-		../../meshlab/filterparameter.cpp \
 		../../meshlab/meshmodel.cpp \
 		$$GLEWCODE
 TARGET        = filter_meshing

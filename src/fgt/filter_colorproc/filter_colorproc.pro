@@ -1,11 +1,10 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 QT           += opengl
 
 HEADERS       = filter_colorproc.h 
 
-SOURCES       = filter_colorproc.cpp \ 
-				../../meshlab/filterparameter.cpp 
+SOURCES       = filter_colorproc.cpp 
 				
 
 TARGET        = filter_colorproc

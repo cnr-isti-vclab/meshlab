@@ -1,8 +1,8 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filtergeodesic.h 
 				
-SOURCES       = filtergeodesic.cpp\ 
-		../../meshlab/filterparameter.cpp
+SOURCES       = filtergeodesic.cpp 
+		
 TARGET        = filtergeodesic
 

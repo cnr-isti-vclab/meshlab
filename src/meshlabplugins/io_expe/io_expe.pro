@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = io_expe.h \
 				../../meshlab/meshmodel.h

@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = io_collada.h \
 		$$VCGDIR/wrap/io_trimesh/export_dae.h \
@@ -9,7 +9,7 @@ HEADERS       = io_collada.h \
 
 
 SOURCES       = io_collada.cpp \
-		../../meshlab/filterparameter.cpp\
+		\
 		$$VCGDIR/wrap/dae/xmldocumentmanaging.cpp
 
 TARGET        = io_collada

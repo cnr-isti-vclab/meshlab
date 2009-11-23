@@ -1,7 +1,6 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = meshcolorize.h 
-SOURCES       = meshcolorize.cpp \
-		../../meshlab/filterparameter.cpp
+SOURCES       = meshcolorize.cpp 
 
 TARGET        = filter_colorize

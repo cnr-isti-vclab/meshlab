@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = ./diamond_sampler.h \
 				./diam_parametrization.h \
@@ -24,7 +24,6 @@ HEADERS       = ./diamond_sampler.h \
 
 SOURCES       = ./filter_isoparametrization.cpp \
 				../../meshlab/meshmodel.cpp \
-				../../meshlab/filterparameter.cpp \
 				$$GLEWCODE
 				
 TARGET        = filter_isoparametrization

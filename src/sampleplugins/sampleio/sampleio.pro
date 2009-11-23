@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = sampleio.h 
 				

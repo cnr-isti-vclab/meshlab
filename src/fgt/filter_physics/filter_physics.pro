@@ -1,10 +1,9 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 DEFINES += dSINGLE
 HEADERS = filter_physics.h \
     PhysicsEngineFacade.h \
     ODEFacade.h
-SOURCES = ../../meshlab/filterparameter.cpp \
-    filter_physics.cpp \
+SOURCES =  filter_physics.cpp \
     ODEFacade.cpp
 TARGET = filter_physics
 TEMPLATE = lib

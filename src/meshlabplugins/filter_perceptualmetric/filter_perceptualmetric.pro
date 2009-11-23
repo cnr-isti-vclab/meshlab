@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_perceptualmetric.h \
                 ../../meshlab/meshmodel.h \
@@ -6,7 +6,6 @@ HEADERS       = filter_perceptualmetric.h \
 				
 SOURCES       = filter_perceptualmetric.cpp \
                 ../../meshlab/meshmodel.cpp \ 
-                ../../meshlab/filterparameter.cpp \
                 $$GLEWCODE
 
 TARGET        = filter_perceptualmetric

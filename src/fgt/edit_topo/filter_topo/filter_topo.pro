@@ -1,9 +1,9 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_topo.h \
 				../edit_topomeshbuilder.h
 
-SOURCES       = filter_topo.cpp \ 
-				../../meshlab/filterparameter.cpp
+SOURCES       = filter_topo.cpp  
+				
 				
 TARGET        = filter_topo

@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_slice.h \
                 filter_slice_functors.h \
@@ -8,8 +8,6 @@ HEADERS       = filter_slice.h \
  
 SOURCES       = filter_slice.cpp \
                 $$GLEWCODE \
-                #	svgpro.cpp \
-                ../../meshlab/filterparameter.cpp  \
                 ../../meshlab/meshmodel.cpp
 
 TARGET        = filter_slice

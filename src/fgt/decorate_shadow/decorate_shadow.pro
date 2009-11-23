@@ -9,7 +9,7 @@ HEADERS = decorate_shadow.h \
     ssao.h
 SOURCES = decorate_shadow.cpp \
     shadow_mapping.cpp \
-    ../../meshlab/filterparameter.cpp \
+    ../../common/filterparameter.cpp \
     $$GLEWCODE \
     ../../../../vcglib/wrap/gui/trackball.cpp \
     ../../../../vcglib/wrap/gui/trackmode.cpp \

@@ -12,7 +12,7 @@ HEADERS       = edit_align_factory.h \
                 align/align_parameter.h \
 		../../meshlab/meshmodel.h \
 		../../meshlab/stdpardialog.h \
-		../../meshlab/filterparameter.h \
+		../../common/filterparameter.h \
 		 $$VCGDIR/wrap/gui/trackball.h\
                  $$VCGDIR/wrap/gui/trackmode.h\
                  $$VCGDIR/wrap/gl/trimesh.h
@@ -28,7 +28,7 @@ SOURCES       = edit_align_factory.cpp \
                 align/align_parameter.cpp \
 		../../meshlab/meshmodel.cpp \
 		../../meshlab/stdpardialog.cpp \
-		../../meshlab/filterparameter.cpp \
+		../../common/filterparameter.cpp \
 		$$VCGDIR/wrap/ply/plylib.cpp\
                 $$VCGDIR/wrap/gui/trackball.cpp\
                 $$VCGDIR/wrap/gui/trackmode.cpp \

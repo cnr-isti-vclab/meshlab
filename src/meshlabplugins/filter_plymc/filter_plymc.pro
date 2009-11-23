@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_plymc.h \ 
                 ../../meshlab/interfaces.h \
@@ -8,7 +8,6 @@ voxel.h
 
 SOURCES       = filter_plymc.cpp \
 ../../../../vcglib/wrap/ply/plylib.cpp \
-        ../../meshlab/filterparameter.cpp \
         ../../meshlab/meshmodel.cpp \
         $$GLEWCODE
 

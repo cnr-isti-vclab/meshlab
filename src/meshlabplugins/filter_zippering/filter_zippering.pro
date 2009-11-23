@@ -1,6 +1,6 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 HEADERS = filter_zippering.h 
-SOURCES = filter_zippering.cpp \
-    ../../meshlab/filterparameter.cpp
+SOURCES = filter_zippering.cpp 
+    
 TARGET = filter_zippering
 QT += opengl

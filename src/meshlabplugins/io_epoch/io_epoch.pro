@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 TEMPLATE      = lib
 CONFIG       += plugin 

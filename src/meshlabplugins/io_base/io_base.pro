@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = baseio.h \
 		$$VCGDIR/wrap/io_trimesh/import_obj.h \
@@ -9,6 +9,6 @@ HEADERS       = baseio.h \
 				
 SOURCES       = baseio.cpp \
 		$$VCGDIR//wrap/ply/plylib.cpp\ 
-		../../meshlab/filterparameter.cpp
+		
 
 TARGET        = io_base

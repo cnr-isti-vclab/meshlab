@@ -1,8 +1,8 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filterborder.h 
 				
-SOURCES       = filterborder.cpp\ 
-		../../meshlab/filterparameter.cpp
+SOURCES       = filterborder.cpp 
+		
 
 TARGET        = filterborder

@@ -1,9 +1,8 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_splitter.h
 
-SOURCES       = filter_splitter.cpp \ 
-		../../meshlab/filterparameter.cpp \
+SOURCES       = filter_splitter.cpp \
 		$$GLEWCODE
 
 TARGET        = filter_splitter

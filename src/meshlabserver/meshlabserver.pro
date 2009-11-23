@@ -3,13 +3,13 @@ GLEWCODE = $$GLEWDIR/src/glew.c
 
 HEADERS        = ../meshlab/interfaces.h \
                  ../meshlab/meshmodel.h \
-                 ../meshlab/filterscript.h \
-                 ../meshlab/filterparameter.h 
+                 ../common/filterscript.h \
+                 ../common/filterparameter.h
 
 SOURCES        = mainserver.cpp \
                  ../meshlab/meshmodel.cpp \
-                 ../meshlab/filterscript.cpp \
-                 ../meshlab/filterparameter.cpp \
+                 ../common/filterscript.cpp \
+                 ../common/filterparameter.cpp \
                  ../meshlab/plugin_support.cpp \
                  $$GLEWCODE
 

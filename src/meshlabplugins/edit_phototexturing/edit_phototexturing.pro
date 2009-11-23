@@ -31,7 +31,7 @@ SOURCES += 	edit_phototex_factory.cpp \
 			$$VCGDIR/wrap/gui/trackball.cpp\
 			$$VCGDIR/wrap/gui/trackmode.cpp \
 			$$GLEWDIR/src/glew.c \
-			../../meshlab/filterparameter.cpp \
+			../../common/filterparameter.cpp \
 			../../meshlab/stdpardialog.cpp 
 
 

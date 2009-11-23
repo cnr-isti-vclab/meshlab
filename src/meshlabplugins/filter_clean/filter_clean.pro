@@ -1,10 +1,9 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = cleanfilter.h \
-		../../meshlab/filterparameter.h
+		../../common/filterparameter.h
 
-SOURCES       = cleanfilter.cpp\ 
-		../../meshlab/filterparameter.cpp
+SOURCES       = cleanfilter.cpp	
 
 #align stuff
 

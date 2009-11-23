@@ -1,8 +1,7 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 HEADERS = filter_fractal.h
 SOURCES = filter_fractal.cpp \
-    ../../meshlab/filterparameter.cpp \
-    $$GLEWCODE
+      $$GLEWCODE
 TARGET = filter_fractal
 TEMPLATE = lib
 QT += opengl

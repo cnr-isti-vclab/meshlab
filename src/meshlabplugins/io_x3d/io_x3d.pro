@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = io_x3d.h import_x3d.h\
 		export_x3d.h util_x3d.h \

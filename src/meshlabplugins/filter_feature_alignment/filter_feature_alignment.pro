@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 ANNDIR = ../../external/ann_1.1.1
 INCLUDEPATH += $$ANNDIR/include
 LIBS += -L$$ANNDIR/lib \
@@ -24,7 +24,6 @@ SOURCES = filter_feature_alignment.cpp \
     ../filter_mls/apss.tpp \
     ../filter_mls/kdtree.cpp \
     ../filter_mls/mlssurface.tpp \
-    ../../meshlab/filterparameter.cpp \
     ../../meshlab/meshmodel.cpp \
     ../edit_pickpoints/pickedPoints.cpp \
     $$GLEWCODE

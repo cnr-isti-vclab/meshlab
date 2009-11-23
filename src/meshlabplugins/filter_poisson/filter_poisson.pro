@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = ../../meshlab/meshmodel.h \
                 filter_poisson.h
@@ -10,9 +10,8 @@ SOURCES += src/Factor.cpp \
            src/MarchingCubes.cpp \
            src/MultiGridOctest.cpp \
            filter_poisson.cpp \ 
-           ../../meshlab/meshmodel.cpp \ 
-	   ../../meshlab/filterparameter.cpp\
-		$$GLEWCODE
+           ../../meshlab/meshmodel.cpp \
+           $$GLEWCODE
 
 
 HEADERS += src/Allocator.h \

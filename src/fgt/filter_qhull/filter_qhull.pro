@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 QT           += opengl
 
@@ -8,8 +8,7 @@ HEADERS       = ../../meshlab/meshmodel.h \
 
 SOURCES       = filter_qhull.cpp \ 
 		qhull_tools.cpp \
-		 ../../meshlab/meshmodel.cpp \ 
-	   	../../meshlab/filterparameter.cpp
+		 ../../meshlab/meshmodel.cpp 
 		
 
 HEADERS += 	../../external/qhull-2003.1/src/geom.h \

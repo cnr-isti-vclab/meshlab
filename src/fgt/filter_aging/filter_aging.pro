@@ -1,8 +1,7 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_aging.h \
 		edgepred.h
-SOURCES       = filter_aging.cpp \
-                ../../meshlab/filterparameter.cpp
+SOURCES       = filter_aging.cpp   
 TARGET        = filter_aging
 

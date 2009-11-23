@@ -1,7 +1,7 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = samplefilterdyn.h
 
 SOURCES       = samplefilterdyn.cpp \ 
-		../../meshlab/filterparameter.cpp
+		
 TARGET        = samplefilterdyn

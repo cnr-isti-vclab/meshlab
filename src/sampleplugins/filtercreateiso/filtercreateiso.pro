@@ -1,9 +1,9 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filtercreateiso.h 
 				
-SOURCES       = filtercreateiso.cpp\ 
-		../../meshlab/filterparameter.cpp
+SOURCES       = filtercreateiso.cpp 
+		
 
 TARGET        = filtercreateiso
 

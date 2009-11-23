@@ -1,4 +1,4 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS		= meshio.h \
 			$$VCGDIR/wrap/ply/plylib.h \
@@ -9,7 +9,7 @@ HEADERS		= meshio.h \
 			io_3ds.h 
 				
 SOURCES       = 	meshio.cpp \
-			../../meshlab/filterparameter.cpp
+			
 
 
 TARGET        = io_3ds

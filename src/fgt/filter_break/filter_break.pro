@@ -1,9 +1,8 @@
-include (../../shared.pri)
+include (../../sharedfilter.pri)
 
 HEADERS       = filter_dirt.h
 SOURCES       = filter_dirt.cpp \
-                ../../meshlab/filterparameter.cpp\
-		$$GLEWCODE
+                $$GLEWCODE
 TARGET        = filter_dirt
 TEMPLATE      = lib
 QT           += opengl

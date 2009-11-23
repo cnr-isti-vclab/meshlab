@@ -1,4 +1,4 @@
-include(../../shared.pri)
+include(../../sharedfilter.pri)
 
 # CONFIG += debug
 
@@ -23,7 +23,6 @@ SOURCES =	apss.cpp \
 		kdtree.cpp \	
 		mlssurface.tpp \
 		rimls.tpp \	
-		../../meshlab/filterparameter.cpp \
 		../../meshlab/meshmodel.cpp \
 	$$GLEWCODE
 
