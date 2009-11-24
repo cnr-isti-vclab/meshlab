@@ -1,6 +1,8 @@
 #ifndef FILTERPHYSICS_PLUGIN_H
 #define FILTERPHYSICS_PLUGIN_H
 
+#include "ODEFacade.h"
+
 #include <QObject>
 #include <QStringList>
 #include <QString>
@@ -22,14 +24,14 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     virtual const QString filterName(FilterIDType filter) const;
     virtual const QString filterInfo(FilterIDType filter) const;
 
-    virtual const int getRequirements(QAction*);
+    virtual const int getRequirements(QAction*){return MeshModel::MM_FACEVERT;}
+    virtual int postCondition( QAction* ) const{return MeshModel::MM_TRANSFMATRIX;}
 
     virtual bool autoDialog(QAction *) {return true;}
     virtual void initParameterSet(QAction *,MeshModel&, RichParameterSet&);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
     virtual bool applyFilter(QAction*, MeshModel&, RichParameterSet&, vcg::CallBackPos*) { assert(0); return false;}
     virtual const FilterClass getClass(QAction *);
-
 };
 
 #endif

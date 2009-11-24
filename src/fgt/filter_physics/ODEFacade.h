@@ -4,38 +4,42 @@
 
 #include <map>
 
-struct ODETriMesh{
-	ODETriMesh(){
-		vertices = 0;
-		indices = 0;
-	}
-	
-	~ODETriMesh(){
-		delete[] vertices;
-		delete[] indices;
-	}
-	
-	dReal (*vertices)[3];
-	dTriIndex (*indices)[3];
-	dTriMeshDataID data;
-	dGeomID geom;
-};
-
 class ODEFacade : public PhysicsEngineFacade{
 public:
 	ODEFacade();
-	~ODEFacade();
 	
-	virtual void setGlobalForce(int force[3]);
-        virtual void registerTriMesh(const MeshModel& mesh);
+        virtual void setGlobalForce(float force[3]);
+        virtual void registerTriMesh(MeshModel& mesh);
+        virtual void integrate(float step);
+        virtual void clear();
 	
 protected:
 	virtual void initialize();
-	virtual void finalize();
-	
-private:
-	dWorldID m_world;
-	dSpaceID m_space;
-	
-        std::map<const MeshModel*, ODETriMesh> m_triMeshMap;
+
+    private:
+        struct ODEMesh{
+            ODEMesh(){
+                vertices = 0;
+                indices = 0;
+            }
+
+            ~ODEMesh(){
+                delete[] vertices;
+                delete[] indices;
+            }
+
+            dBodyID body;
+            dGeomID geom;
+            dTriMeshDataID data;
+            dReal (*vertices)[3];
+            dTriIndex (*indices)[3];
+        };
+
+        typedef std::map<MeshModel*, ODEMesh*> MeshMap;
+
+        //This class is a monostate
+        static bool m_initialized;
+        static dWorldID m_world;
+        static dSpaceID m_space;
+        static MeshMap m_registeredMeshes;
 };

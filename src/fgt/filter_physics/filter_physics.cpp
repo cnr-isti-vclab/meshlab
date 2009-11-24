@@ -1,5 +1,4 @@
 #include "filter_physics.h"
-#include "ODEFacade.h"
 
 #include <Qt>
 #include <QtGui>
@@ -7,8 +6,7 @@
 using namespace std;
 using namespace vcg;
 
-FilterPhysics::FilterPhysics()
-{
+FilterPhysics::FilterPhysics(){
     typeList << FP_PHYSICS;
     
     FilterIDType tt;
@@ -16,8 +14,7 @@ FilterPhysics::FilterPhysics()
         actionList << new QAction(filterName(tt), this);
 }
 
-const QString FilterPhysics::filterName(FilterIDType filterId) const
-{
+const QString FilterPhysics::filterName(FilterIDType filterId) const{
     switch (filterId) {
     case FP_PHYSICS:
         return QString("Physics stuff");
@@ -26,35 +23,39 @@ const QString FilterPhysics::filterName(FilterIDType filterId) const
         break;
     }
 }
-const QString FilterPhysics::filterInfo(FilterIDType filterId) const
-{
+const QString FilterPhysics::filterInfo(FilterIDType filterId) const{
     switch (filterId) {
     case FP_PHYSICS:
-        return QString("Apply physics to a set of meshes");
+        return QString("Runs a physics simulation on a set of meshes");
     default:
         assert(0);
         break;
     }
 }
 
-const int FilterPhysics::getRequirements(QAction*)
-{	
-    return MeshModel::MM_FACEVERT | MeshModel::MM_VERTNORMAL;
+void FilterPhysics::initParameterSet(QAction *,MeshModel& m, RichParameterSet & par){
+    par.addParam(new RichDynamicFloat("timeline",
+                                         0, 0, 100,
+                                         "Timeline",
+                                         "Physics simulation is run"));
 }
 
-void FilterPhysics::initParameterSet(QAction *,MeshModel& m, RichParameterSet & par)
-{
-    //par.addParam(new RichString("text3d","MeshLab","Text string","The string entered here will be transformed into a 3D model according to the choosen options"));
-}
+bool FilterPhysics::applyFilter(QAction*, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos*){
+    /*float timeline  = par.getDynamicFloat("timeline") / 1000.0f;
+    if(timeline <= 0)
+        return true;*/
 
-bool FilterPhysics::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
-{
+    float gravity[3] = {0.0f, -9.8f, 0.0f};
+
     ODEFacade engine;
+    engine.setGlobalForce(gravity);
     engine.registerTriMesh(*md.mm());
+    engine.integrate(0.01f);
+
+    return true;
 }
 
-const MeshFilterInterface::FilterClass FilterPhysics::getClass(QAction *)
-{
+const MeshFilterInterface::FilterClass FilterPhysics::getClass(QAction *){
     return MeshFilterInterface::Generic;
 }
 
