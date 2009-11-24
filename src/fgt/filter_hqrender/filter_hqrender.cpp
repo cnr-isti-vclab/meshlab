@@ -10,7 +10,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
-#define NO_RENDERING
+//#define NO_RENDERING
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -142,7 +142,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	// Log function dump textual info in the lower part of the MeshLab screen. 
 	//Log(GLLogStream::FILTER,"Successfully displaced %i vertices",m.cm.vn);
 
-	
+	QTime tt; tt.start(); //debug
+	qDebug("Starting apply filter");
  	//read a template file e make a new file rib
 			
 	//QString templatePath = par.getOpenFileName("TemplateName");
@@ -213,11 +214,17 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 						QString::number(par.getInt("FormatY")) + " " +
 						QString::number(par.getFloat("PixelAspectRatio"));
 	QStringList renderedImage = QStringList();
-
+	int numberOfDummies = 0; //the dummy object could be than one (e.g. for ambient occlusion passes)
+	
+	qDebug("Starting reading cycle %i",tt.elapsed());
 	//reading cycle
+	int debugCount = 0;
 	while(!files.isEmpty() && !stop) {
+		if((++debugCount)%200 == 0)	qDebug("Time after %i statement: %i",debugCount,tt.elapsed());
+
 		bool writeLine = true;
 		QString line = files.topNextLine();
+		
 		//the ReadArchive statement is already handled
 		QStringList token = line.split(' ');
 
@@ -268,29 +275,6 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			makeAnimation(fout,numOfFrames,transfCamera,frameDeclaration,par.getString("ImageName"));
 			stop = true;
 		}
-		
-		//change the output image file name (it's more simple change the final image name..in animation too)
-		/*if(token[0].trimmed() == "Display") {
-			line = token[0] + " \"";
-			if(token[2].trimmed() == "\"file\"")
-				line += "+";			
-			if(currentFrame == 1)
-				line += par.getString("ImageName");
-			else {
-				QString imageName = par.getString("ImageName");
-				imageName = getFileNameFromPath(&imageName,false);
-				line += imageName + QString::number(currentFrame) + ".tiff";
-			}
-			line += "\" " + token[2] + " " + token[3];
-			for(int i = 4; i<token.size(); i++) {
-				line += token[i] + " ";
-			}
-		}*/
-		//change the output image format
-		/*if(token[0].trimmed() == "Format" ) {
-			originalFormat = line;
-			//line = token[0] + " " + QString::number(par.getInt("FormatX")) + " " + QString::number(par.getInt("FormatY")) + " " + QString::number(par.getFloat("PixelAspectRatio"));
-		}*/
 
 		//if output is not a file the format must be the same!!framebuffer is ignored
 		if(token[0].trimmed() == "Display") {
@@ -377,9 +361,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 								str.remove(']');
 								str.remove('\"');
 								str = str.simplified();
-								if(str.toLower() == "dummy") {
-									QString filename = "mesh" + QString::number(currentFrame) + ".rib";
-
+								if(str.toLower() == "dummy") {									
+									QString filename = "meshF" + QString::number(currentFrame) + "O" + QString::number(numberOfDummies) + ".rib";
+									numberOfDummies++;
 									QString meshDest = destDirString + QDir::separator() + filename;
 									FILE *fmesh = fopen(qPrintable(meshDest),"wb");
 									if(fmesh==NULL) {							
@@ -414,12 +398,12 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			frameDeclaration << line;
 	}
 	fclose(fout);
-	
+	qDebug("Cycle ending at %i",tt.elapsed());
 	//copy the rest of template (shaders, textures..)
 	QDir destDir(destDirString);
 	copyFiles(templateDir, destDir, textureDirs);
 	copyFiles(templateDir, destDir, shaderDirs);
-	
+	qDebug("Copied needed file at %i",tt.elapsed());
 	QStringList aqsisEnv = QProcess::systemEnvironment();
 
 	//looking for aqsis installation directory:
@@ -476,7 +460,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			}
 		}
 	}
-
+	qDebug("Compiled shaders at %i",tt.elapsed());
 	//Copy and convert to tiff format, all mesh textures, in dest dir and convert the to renderman format
 	//multi-texture not supported!Copy and convert only the first texture
 	if(textureList.count() > 0) {
@@ -525,19 +509,21 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			return false; //the mesh has a texture not existing
 		}
 	}
-
+	qDebug("Converted image at %i",tt.elapsed());
 	//run the aqsis rendering	
 	QProcess renderProcess;
 	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
 	renderProcess.setEnvironment(aqsisEnv);
-	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " "+ destFile;
+	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -Progress "+ destFile;
 	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
 #if !defined(NO_RENDERING)
 	renderProcess.start(toRun);
 	if (!renderProcess.waitForFinished(-1)) //wait the finish of process
          return false; //devo?quando si verifica?se la finestra viene chiusa?
+	QByteArray out = renderProcess.readAllStandardOutput();
+	qDebug("aqsis.exe output:\n%s",out.data());
 #endif
-
+	qDebug("end rendering at %i",tt.elapsed());
 	//the rendering result image is copied in mesh folder
 	QString meshDir(m.fileName.c_str());
 	meshDir = getDirFromPath(&meshDir);
@@ -554,8 +540,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
     
 	//delete all created files (if it's required)
+	qDebug("end: %i",tt.elapsed());
 	
-
 	return true;
 }
 
@@ -605,6 +591,17 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 		QString line = files->topNextLine();
 		QStringList token = line.split(' ');
 		
+		//the surface shader remain the same of template (maybe many line)
+		if(token[0].trimmed() == "Surface") {
+			fprintf(fout,"%s\n",qPrintable(line));
+			line = files->topNextLine();
+			while(line.trimmed().startsWith('\"'))
+			{				
+				fprintf(fout,"%s\n",qPrintable(line));
+				line = files->topNextLine();
+			}
+		}
+
 		if(token[0].trimmed() == "AttributeBegin")
 			++c;
 		if(token[0].trimmed() == "AttributeEnd")
@@ -698,27 +695,21 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 			}
 		}
 
-		//texture mapping
-		if(token[0].trimmed() == "Surface") {
-			//are TexCoord needed for texture mapping?
+		if(token[0].trimmed() == "PointsPolygons") {
+			//texture mapping (are TexCoord needed for texture mapping?)
 			if(!textureList->empty() > 0 && (m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord())) {
 				//multi-texture don't work!I need ad-hoc shader and to read the texture index for vertex..
 				//foreach(QString textureName, *textureList) {
-					
+
 				//read only the one texture
 				QString textureName = textureList->first();
-				fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));
-
-				//fprintf(fout,"Color [ 1.0 0.0 0.0 ]\n");				
-			}/* else {
-				fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \n");
-			}*/
-		}
-
-		if(token[0].trimmed() == "PointsPolygons") {
+				fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));								
+			}
+			
 			QString filename = "geometry.rib";
 			fprintf(fout,"ReadArchive \"%s\"", qPrintable(filename));
 			if(!convertedGeometry) {
+				//make the conversion only once
 				convertedGeometry = true;
 				QString geometryDest = destDir + QDir::separator() + filename;			
 				vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, scale, false);
