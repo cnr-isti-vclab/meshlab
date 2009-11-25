@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QString>
 #include <QStringList>
+#include <QProcess>
 #include <RibFileStack.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -29,11 +30,15 @@ public:
   virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & param, vcg::CallBackPos * cb) ;
   virtual const FilterClass getClass(QAction *a);
 
+private slots:
+  void updateOutputProcess();
+
 private:
+  vcg::CallBackPos * cb;
+  QProcess renderProcess;
   QDir templatesDir; //directory of templates ("render_template")
   QStringList templates;
   bool delRibFiles;
-  //QStringList alignValue;
   enum alignValue { CENTER, TOP, BOTTOM };
   bool convertedGeometry;
 	
@@ -71,7 +76,7 @@ private:
 	}
 	
 
-  int convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList);
+  int convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &, QStringList* textureList, vcg::CallBackPos * cb);
   int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);
   int writeMatrix(FILE* fout, vcg::Matrix44f matrix, bool transposed = true);
   QString readArray(RibFileStack* files,QString arrayString = "");

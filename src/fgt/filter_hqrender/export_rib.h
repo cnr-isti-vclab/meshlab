@@ -1,12 +1,14 @@
 #ifndef __VCGLIB_EXPORT_RIB
 #define __VCGLIB_EXPORT_RIB
 
+#define RIB_EXPORT_STEPS 7
+
 //#include<wrap/ply/io_mask.h>
 #include<wrap/io_trimesh/io_mask.h>
 #include<wrap/callback.h>
 #include<vcg/complex/trimesh/clean.h>
 //#include<vcg/container/simple_temporary_data.h>
-
+#include <QThread>
 
 #include <stdio.h>
 
@@ -35,7 +37,9 @@ static int Save(SaveMeshType &m,  const char * filename, bool binary, CallBackPo
 
 static int Save(SaveMeshType &m,  const char * filename, int savemask, bool binary, CallBackPos *cb=0)
 {
-	//ignore binary for now!
+  //ignore binary for now!
+  int cbStep = 100/RIB_EXPORT_STEPS, cbValue = 0, step = 0;
+  cb(cbValue, "Start exporting");
   
   FILE *fout = fopen(filename,"wb");
   if(fout==NULL) {
@@ -67,17 +71,23 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   
   //first step: faces topology
   fprintf(fout,"PointsPolygons\n[\n");
-  for(int i=0; i<m.fn; i++) {
+  int incr = m.fn/cbStep, i=0;
+  for(i=0; i<m.fn; i++) {
     fprintf(fout,"3 ");//\n");
+	if(i%incr == 0)
+		cb(++cbValue, "Exporting face topology");
   }
   fprintf(fout,"\n");
   fprintf(fout,"]\n[\n");
   qDebug("PointsPolygons %i",tt.elapsed());
-
+  cbValue = (++step)*cbStep; i=0;
+ 
   //second step: index of vertex for face
   UpdateFlags<SaveMeshType>::VertexClearV(m);
-  for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
-    for(int j=0; j<3; ++j) {						
+  for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
+	if(i%incr == 0)
+		cb(++cbValue, "Exporting index of verteces");
+    for(int j=0; j<3; ++j) {
       int indexOfVertex = (*fi).V(j) - &(m.vert[0]);
 	  fprintf(fout,"%i ",indexOfVertex);
 	  //if it's the first visit, set visited bit
@@ -90,12 +100,15 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   }
   fprintf(fout,"\n]\n");
   qDebug("coords %i",tt.elapsed());
+  cbValue = (++step)*cbStep; i=0;
 
   //third step: vertex coordinates
   fprintf(fout,"\"P\"\n[\n");
   Matrix44f mat = Matrix44f::Identity();
   mat = mat.SetScale(1.0,1.0,-1.0);
-  for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi) {
+  incr = m.vn/cbStep;
+  for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi, ++i) {
+    if(i%incr == 0) cb(++cbValue, "Exporting vertex coordinates");
     if(vi->IsV()) {
 	  Point3f p = mat * vi->P();
 	  fprintf(fout,"%g %g %g ",p[0],p[1],p[2]);
@@ -104,10 +117,12 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
   fprintf(fout,"\n]\n");
   qDebug("coords %i",tt.elapsed());
 
+  incr = m.fn/cbStep; cbValue = (++step)*cbStep; i=0;
   //fourth step: vertex normal
   if(HasPerVertexNormal(m) && (savemask & Mask::IOM_VERTNORMAL)) {
     fprintf(fout,"\"N\"\n[\n");
-    for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+    for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
+	  if(i%incr == 0) cb(++cbValue, "Exporting vertex normals");
 	  //for each face, foreach vertex write normal
 	  for(int j=0; j<3; ++j) {			
 	    Point3f &n = mat * (*fi).V(j)->N(); //transform normal too
@@ -115,13 +130,15 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
 	  }
 	}
 	fprintf(fout,"\n]\n");
-	qDebug("normal %i",tt.elapsed());
+	qDebug("normal %i",tt.elapsed());	
   }
+  cbValue = (++step)*cbStep; i=0;
 
   //fifth step: vertex color (ignore face color?)
   if(m.HasPerVertexColor() && (savemask & Mask::IOM_VERTCOLOR)) {
     fprintf(fout,"\"Cs\"\n[\n");
-	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
+	  if(i%incr == 0) cb(++cbValue, "Exporting vertex colors");
 	  //for each face, foreach vertex write color
 	  for(int j=0; j<3; ++j) {
 	    Color4b &c=(*fi).V(j)->C();
@@ -131,12 +148,14 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
 	fprintf(fout,"\n]\n");
 	qDebug("color %i",tt.elapsed());
   }
+  cbValue = (++step)*cbStep; i=0;
 
   //sixth step: texture coordinates (for edge)
   if((HasPerVertexTexCoord(m) && (savemask & Mask::IOM_VERTTEXCOORD)) || 
 	  (HasPerWedgeTexCoord(m) && (savemask & Mask::IOM_WEDGTEXCOORD))) {
-	fprintf(fout,"\"st\"\n[\n");
-	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+	fprintf(fout,"\"st\"\n[\n"); i=0;
+	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
+      if(i%incr == 0) cb(++cbValue, "Exporting vertex/edge texture coordinates");
 	  //for each face, foreach vertex write uv coord
 	  for(int j=0; j<3; ++j) {
 	    fprintf(fout,"%g %g ",(*fi).WT(j).U() , 1.0 - (*fi).WT(j).V()); //v origin axis is up
@@ -145,21 +164,22 @@ static int Save(SaveMeshType &m,  const char * filename, int savemask, bool bina
 	fprintf(fout,"\n]\n");
 	qDebug("texcoords %i",tt.elapsed());
   }
+  cbValue = (++step)*cbStep; i=0;
 
   //seventh step: vertex quality
   if(HasPerVertexQuality(m) && (savemask & Mask::IOM_VERTQUALITY)) {
-	fprintf(fout,"\"Q\"\n[\n");
-	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi) {
+	fprintf(fout,"\"Q\"\n[\n"); i=0;
+	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
+	  if(i%incr == 0) cb(++cbValue, "Exporting vertex quality");
 	  //for each face, foreach vertex write its quality
 	  for(int j=0; j<3; ++j) {
-	    float &q = (*fi).V(j)->Q();
-	    fprintf(fout,"%g ",q);
+	    fprintf(fout,"%g ",(*fi).V(j)->Q());
 	  }
 	}
 	fprintf(fout,"\n]\n");
 	qDebug("quality %i",tt.elapsed());
   }
-
+  cb(100, "Exporting completed");
   fclose(fout);
 
   return 0;

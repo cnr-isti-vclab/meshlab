@@ -141,7 +141,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//cb(100*i/m.cm.vert.size(), "Randomly Displacing...");
 	// Log function dump textual info in the lower part of the MeshLab screen. 
 	//Log(GLLogStream::FILTER,"Successfully displaced %i vertices",m.cm.vn);
-
+	this->cb = cb;
 	QTime tt; tt.start(); //debug
 	qDebug("Starting apply filter");
  	//read a template file e make a new file rib
@@ -371,7 +371,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 									fprintf(fout,"%s\n## HO TROVATO UN OGGETTO DUMMY\n",qPrintable(line));
 									fprintf(fout,"ReadArchive \"%s\"\n", qPrintable(filename));									
-									convertObject(&files, fmesh, destDirString, m, par, &textureList);
+									convertObject(&files, fmesh, destDirString, m, par, &textureList, cb);
 									fclose(fmesh);
 									fprintf(fout,"AttributeEnd\n");
 									--c;
@@ -398,6 +398,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			frameDeclaration << line;
 	}
 	fclose(fout);
+	Log(GLLogStream::FILTER,"Successfully created scene");
 	qDebug("Cycle ending at %i",tt.elapsed());
 	//copy the rest of template (shaders, textures..)
 	QDir destDir(destDirString);
@@ -458,9 +459,11 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 				qDebug("compiling msg out: %s",compileProcess.readAllStandardOutput().data());
 				return false;
 			}
+
 		}
 	}
 	qDebug("Compiled shaders at %i",tt.elapsed());
+	Log(GLLogStream::FILTER,"Successfully compiled scene shaders");
 	//Copy and convert to tiff format, all mesh textures, in dest dir and convert the to renderman format
 	//multi-texture not supported!Copy and convert only the first texture
 	if(textureList.count() > 0) {
@@ -508,22 +511,28 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			this->errorMessage = "Not founded the texture file: " + srcFile.fileName();
 			return false; //the mesh has a texture not existing
 		}
+		Log(GLLogStream::FILTER,"Successfully converted mesh texture");
 	}
 	qDebug("Converted image at %i",tt.elapsed());
-	//run the aqsis rendering	
-	QProcess renderProcess;
+	
+	//run the aqsis rendering
+	//QProcess renderProcess;
 	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
 	renderProcess.setEnvironment(aqsisEnv);
-	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -Progress "+ destFile;
+	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -progress -progressformat=%p "+ destFile;
 	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
+	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
+	connect(this, SIGNAL(newCb(int)),this,SLOT(updateCallback(int)));
+	cb(0, "Rendering image with Aqsis");
 #if !defined(NO_RENDERING)
-	renderProcess.start(toRun);
+	renderProcess.start(toRun); //segnale destroyed
 	if (!renderProcess.waitForFinished(-1)) //wait the finish of process
          return false; //devo?quando si verifica?se la finestra viene chiusa?
 	QByteArray out = renderProcess.readAllStandardOutput();
 	qDebug("aqsis.exe output:\n%s",out.data());
 #endif
 	qDebug("end rendering at %i",tt.elapsed());
+	
 	//the rendering result image is copied in mesh folder
 	QString meshDir(m.fileName.c_str());
 	meshDir = getDirFromPath(&meshDir);
@@ -541,8 +550,16 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
     
 	//delete all created files (if it's required)
 	qDebug("end: %i",tt.elapsed());
-	
+	Log(GLLogStream::FILTER,"Successfully created high quality image");
+
 	return true;
+}
+
+void FilterHighQualityRender::updateOutputProcess() {
+	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
+	out = QStringList(out.trimmed().split(' ')).last();
+	//qDebug("aqsis.exe output: %s",qPrintable(out));
+	cb(int(out.toFloat()), "Rendering image with Aqsis");
 }
 
 //rivedere....nome file
@@ -580,7 +597,7 @@ int FilterHighQualityRender::makeAnimation(FILE* fout, int numOfFrame,vcg::Matri
 }
 
 //write on a opened file the attribute of object entity
-int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList)
+int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, vcg::CallBackPos * cb)
 {	
 	float scale = 1.0;
 	vcg::Matrix44f templateMatrix = vcg::Matrix44f::Identity();
@@ -712,7 +729,8 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 				//make the conversion only once
 				convertedGeometry = true;
 				QString geometryDest = destDir + QDir::separator() + filename;			
-				vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, scale, false);
+				vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, false, cb);
+				Log(GLLogStream::FILTER,"Successfully converted mesh");
 			}
 		}
 		
@@ -799,11 +817,7 @@ QStringList FilterHighQualityRender::readSearchPath(RibFileStack* files,QString 
 		str.remove(']');
 		str.remove('\"');
 		str = str.simplified();
-		dirs = str.split(':');				
-		/*for(int i=0; i<dirs.size(); i++) {
-			//subDir.append(templateName + QDir::separator() + dirs[i]); //why did I add templateName???
-			subDir.append(dirs[i]);
-		}*/
+		dirs = str.split(':');
 	} else {
 		*type = FilterHighQualityRender::ERR;		
 	}
