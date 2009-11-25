@@ -42,36 +42,39 @@ class FilterFractal : public QObject, public MeshFilterInterface
         typedef CMeshO::FacePointer     FacePointer;
         typedef CMeshO::FaceIterator    FaceIterator;
 
-        private:
-            bool generateTerrain(CMeshO &m, int subSteps, int algorithm,
-                float seed, float octaves, float lacunarity, float fractalIncrement,
-                float offset, float gain);
-            void createFBMTerrain(CMeshO &m, float octaves, float seedFactor,
-                float lacunarity, float fractalIncrement);
-            void createMFTerrain(CMeshO &m, float octaves, float seedFactor,
-                float lacunarity, float fractalIncrement, float offset);
-            void createHeterogeneousMFTerrain(CMeshO &m, float octaves, float seedFactor,
-                float lacunarity, float fractalIncrement, float offset);
-            void createHybridMFTerrain(CMeshO &m, float octaves, float seedFactor,
-                float lacunarity, float fractalIncrement, float offset);
-            void createRidgedMFTerrain(CMeshO &m, float octaves, float seedFactor,
-                float lacunarity, float fractalIncrement, float offset, float gain);
-
-	public:
-            enum {CR_FRACTAL_TERRAIN} ;
-		
+        public:
             FilterFractal();
-            ~FilterFractal();
+            ~FilterFractal(){}
 
             virtual const QString filterName(FilterIDType filter) const;
             virtual const QString filterInfo(FilterIDType filter) const;
 
-            virtual const int getRequirements(QAction *);
-            virtual bool autoDialog(QAction *);
-            virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*par*/);
-            virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, RichParameterSet & /* par */, vcg::CallBackPos * /*cb*/);
+            virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}
+            virtual bool autoDialog(QAction *){return true;}
+
+            virtual void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
+            virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
+
+            virtual bool applyFilter(QAction *, MeshModel&, RichParameterSet &, vcg::CallBackPos *){assert(0); return false;}
             virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+
             virtual const FilterClass getClass(QAction *);
+
+       private:
+            void computeSpectralWeights();
+            bool generateTerrain(CMeshO &m, int subSteps, int algorithm, float seed);
+
+            double fBM(void);
+            double StandardMF(void);
+            double HeteroMF(void);
+            double HybridMF(void);
+            double RidgedMF(void);
+
+            float spectralWeight[20];
+            float fArgs[9];
+            enum {X=0, Y=1, Z=2, OCTAVES=3, REMAINDER=4, L=5, H=6, OFFSET=7, GAIN=8};
+            enum {CR_FRACTAL_TERRAIN};
+            double (FilterFractal::*vertexDisp[5]) (void);
 };
 
 #endif
