@@ -42,6 +42,84 @@ void Truncated_Tetrahedron(MeshType &in)
     (+3,−1,−1), (+1,−3,−1), (+1,−1,−3)
     */
 
+ typedef typename MeshType::CoordType CoordType;
+ typedef typename MeshType::VertexPointer  VertexPointer;
+ typedef typename MeshType::VertexIterator VertexIterator;
+ typedef typename MeshType::FaceIterator   FaceIterator;
+
+ in.Clear();
+ Allocator<MeshType>::AddVertices(in, 12);
+ Allocator<MeshType>::AddFaces(in, 4*4+4); //20 triangles
+
+ VertexPointer ivp[12];
+
+ VertexIterator vi=in.vert.begin();
+
+ /*
+ ivp[11]=&*vi;(*vi).P()=CoordType ( 3, 1, 1); ++vi;
+ ivp[10]=&*vi;(*vi).P()=CoordType ( 1, 3, 1); ++vi;
+ ivp[9] =&*vi;(*vi).P()=CoordType ( 1, 1, 3); ++vi;
+ ivp[8] =&*vi;(*vi).P()=CoordType (-3,-1, 1); ++vi;
+ ivp[7] =&*vi;(*vi).P()=CoordType (-1,-3, 1); ++vi;
+ ivp[6] =&*vi;(*vi).P()=CoordType (-1,-1, 3); ++vi;
+ ivp[5] =&*vi;(*vi).P()=CoordType (-3, 1,-1); ++vi;
+ ivp[4] =&*vi;(*vi).P()=CoordType (-1, 3,-1); ++vi;
+ ivp[3] =&*vi;(*vi).P()=CoordType (-1, 1,-3); ++vi;
+ ivp[2] =&*vi;(*vi).P()=CoordType ( 3,-1,-1); ++vi;
+ ivp[1] =&*vi;(*vi).P()=CoordType ( 1,-3,-1); ++vi;
+ ivp[0] =&*vi;(*vi).P()=CoordType ( 1,-1,-3);
+
+ (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[1]; ++fi;
+ (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[4]; ++fi;
+ (*fi).V(0)=ivp[6];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[2]; ++fi;
+ (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[1]; ++fi;
+ (*fi).V(0)=ivp[5];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[4]; ++fi;
+ (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[6]; ++fi;
+ (*fi).V(0)=ivp[4];  (*fi).V(1)=ivp[6]; (*fi).V(2)=ivp[5];
+ */
+
+ ivp[0]=&*vi;(*vi).P()=CoordType ( 3, 1, 1); ++vi;
+ ivp[1]=&*vi;(*vi).P()=CoordType ( 1, 3, 1); ++vi;
+ ivp[2] =&*vi;(*vi).P()=CoordType ( 1, 1, 3); ++vi;
+ ivp[3] =&*vi;(*vi).P()=CoordType (-3,-1, 1); ++vi;
+ ivp[4] =&*vi;(*vi).P()=CoordType (-1,-3, 1); ++vi;
+ ivp[5] =&*vi;(*vi).P()=CoordType (-1,-1, 3); ++vi;
+ ivp[6] =&*vi;(*vi).P()=CoordType (-3, 1,-1); ++vi;
+ ivp[7] =&*vi;(*vi).P()=CoordType (-1, 3,-1); ++vi;
+ ivp[8] =&*vi;(*vi).P()=CoordType (-1, 1,-3); ++vi;
+ ivp[9] =&*vi;(*vi).P()=CoordType ( 3,-1,-1); ++vi;
+ ivp[10] =&*vi;(*vi).P()=CoordType ( 1,-3,-1); ++vi;
+ ivp[11] =&*vi;(*vi).P()=CoordType ( 1,-1,-3);
+
+ FaceIterator fi=in.face.begin();
+ (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[7];  (*fi).V(2)=ivp[1];  ++fi;
+ (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[7];  (*fi).V(2)=ivp[8];  ++fi;
+ (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[8];  (*fi).V(2)=ivp[9];  ++fi;
+ (*fi).V(0)=ivp[11]; (*fi).V(1)=ivp[8];  (*fi).V(2)=ivp[9];  ++fi;
+ (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[4];  (*fi).V(2)=ivp[5];  ++fi;    //triangle1
+ (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[1];  (*fi).V(2)=ivp[2];  ++fi;    //triangle2
+ (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[6];  (*fi).V(2)=ivp[7];  ++fi;    //triangle3
+ (*fi).V(0)=ivp[9];  (*fi).V(1)=ivp[10]; (*fi).V(2)=ivp[11]; ++fi;    //triangle4
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[4];  (*fi).V(2)=ivp[5];  ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[4];  (*fi).V(2)=ivp[10]; ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[9];  (*fi).V(2)=ivp[0];  ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[9];  (*fi).V(2)=ivp[10]; ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[3];  (*fi).V(2)=ivp[5];  ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[3];  (*fi).V(2)=ivp[1];  ++fi;
+ (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[7];  (*fi).V(2)=ivp[6];  ++fi;
+ (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[7];  (*fi).V(2)=ivp[1];  ++fi;
+ (*fi).V(0)=ivp[10]; (*fi).V(1)=ivp[8];  (*fi).V(2)=ivp[11]; ++fi;
+ (*fi).V(0)=ivp[10]; (*fi).V(1)=ivp[8];  (*fi).V(2)=ivp[6];  ++fi;
+ (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[10]; (*fi).V(2)=ivp[6];  ++fi;
+ (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[10]; (*fi).V(2)=ivp[4];
+
+  if (in.HasPerFaceFlags()) {
+    FaceIterator fi=in.face.begin();
+    for (int k=0; k<20; k++) {
+      (*fi).SetF(1); fi++;
+    }
+  }
+
 }
 
 template <class MeshType>

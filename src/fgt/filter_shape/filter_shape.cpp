@@ -37,8 +37,10 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/space/triangle3.h>
-#include "platonic.h"
 
+//VCGLib
+#include "platonic.h"
+#include "archimedean.h"
 
 using namespace std;
 using namespace vcg;
@@ -86,7 +88,7 @@ const int FilterSolidShapes::getRequirements(QAction */*action*/)
 void FilterSolidShapes::initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & par)
 {
     QStringList list;
-    list << "Tetrahedron" << "Hexahedron" << "Octahedron" << "Dodecahedron" << "Icosahedron";
+    list << "Tetrahedron" << "Hexahedron" << "Octahedron" << "Dodecahedron" << "Icosahedron" << "Truncated Tetrahedron (AR)";
 
     par.addParam(new RichEnum("Figure", 0, list, "Figure", "Choose a figure"));
     par.addParam(new RichBool("Star", FALSE, "Star?", "Star or minimal triangulation instead"));
@@ -112,6 +114,13 @@ bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameter
         break;
     case CR_HEXAHEDRON:
         vcg::tri::Hexahedron<CMeshO>(m.cm);
+        break;
+    /********* Archimedeans... *********/
+    /* This is temporal, archimedeans should be moved to somewhere else.
+    * But at the moment it remains here for debugging purposes.
+    */
+    case CR_TT:
+        vcg::tri::Truncated_Tetrahedron<CMeshO>(m.cm);
         break;
     }
 
