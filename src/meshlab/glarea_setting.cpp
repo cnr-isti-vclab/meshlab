@@ -14,6 +14,11 @@ void GLAreaSetting::initGlobalParameterSet( RichParameterSet * defaultGlobalPara
 
     defaultGlobalParamSet->addParam(new RichColor(fancyBLightDiffuseColorParam()	,QColor(255,204,204),"MeshLab Base Light Diffuse Color","MeshLab GLarea's BackGround Color(top corner)"));
     defaultGlobalParamSet->addParam(new RichColor(fancyFLightDiffuseColorParam()	,QColor(204,204,255),"MeshLab Base Light Diffuse Color","MeshLab GLarea's BackGround Color(top corner)"));
+
+    QStringList textureMinFilterModes =  (QStringList() << "Nearest" << "MipMap");
+    QStringList textureMagFilterModes =  (QStringList() << "Nearest" << "Linear");
+    defaultGlobalParamSet->addParam(new RichEnum(textureMinFilterParam()	, 1,textureMinFilterModes,"MeshLab Texture Minification Filtering","MeshLab GLarea's BackGround Color(top corner)"));
+    defaultGlobalParamSet->addParam(new RichEnum(textureMagFilterParam()	, 1,textureMagFilterModes,"MeshLab Texture Magnification Filtering","MeshLab GLarea's BackGround Color(top corner)"));
 }
 
 
@@ -29,5 +34,8 @@ void GLAreaSetting::updateGlobalParameterSet( RichParameterSet& rps )
 
     fancyBLightDiffuseColor =  rps.getColor4b(fancyBLightDiffuseColorParam());
     fancyFLightDiffuseColor =  rps.getColor4b(fancyFLightDiffuseColorParam());
+
+    textureMinFilter = rps.getEnum(this->textureMinFilterParam());
+    textureMagFilter = rps.getEnum(this->textureMagFilterParam());
 
 }

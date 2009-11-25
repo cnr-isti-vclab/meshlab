@@ -26,9 +26,13 @@ public:
     inline static QString backgroundTopColorParam()		{return "MeshLab::Appearance::backgroundTopColor";}
     inline static QString logAreaColorParam()           {return "MeshLab::Appearance::logAreaColor";}
 
+    int textureMagFilter;
+    int textureMinFilter;
+    inline static QString textureMinFilterParam()           {return "MeshLab::Appearance::textureMinFilter";}
+    inline static QString textureMagFilterParam()           {return "MeshLab::Appearance::textureMagFilter";}
+
     void updateGlobalParameterSet( RichParameterSet& rps );
     static void initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet);
-
 };
 
 
