@@ -88,7 +88,8 @@ const int FilterSolidShapes::getRequirements(QAction */*action*/)
 void FilterSolidShapes::initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & par)
 {
     QStringList list;
-    list << "Tetrahedron" << "Hexahedron" << "Octahedron" << "Dodecahedron" << "Icosahedron" << "Truncated Tetrahedron (AR)";
+    list << "Tetrahedron" << "Hexahedron" << "Octahedron" << "Dodecahedron" << "Icosahedron"
+            << "Truncated Tetrahedron (AR)" << "Cuboctahedron (AR)";
 
     par.addParam(new RichEnum("Figure", 0, list, "Figure", "Choose a figure"));
     par.addParam(new RichBool("Star", FALSE, "Star?", "Star or minimal triangulation instead"));
@@ -121,6 +122,9 @@ bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameter
     */
     case CR_TT:
         vcg::tri::Truncated_Tetrahedron<CMeshO>(m.cm);
+        break;
+    case CR_COH:
+        vcg::tri::Cuboctahedron<CMeshO>(m.cm);
         break;
     }
 
