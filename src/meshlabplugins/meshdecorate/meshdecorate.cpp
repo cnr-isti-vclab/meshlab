@@ -541,10 +541,14 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(-1,1,-1,1,-1,1);
+    float ratio = float(gla->width())/gla->height();
+    glOrtho(-ratio,ratio,-1,1,-1,1);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
+    glTranslatef(ratio-1.0,0.0f,0.0f);
+    glScalef(0.9f,0.9f,0.9f);
+
     glPushAttrib(GL_ENABLE_BIT);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
@@ -567,7 +571,8 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf
         glVertex(m.cm.face[i].WT(2).P());
     }
     glEnd();
-
+    drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.5,gla,qf);
+    drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.5,gla,qf);
     glPopAttrib();
     // Closing 2D
     glPopAttrib();
