@@ -27,8 +27,10 @@
 #include "filter_fractal.h"
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/trimesh/refine.h>
 #include <vcg/math/base.h>
 #include <vcg/math/perlin_noise.h>
 
@@ -44,7 +46,7 @@ FilterFractal::FilterFractal()
     vertexDisp[3] = &FilterFractal::HybridMF;
     vertexDisp[4] = &FilterFractal::RidgedMF;
 
-    typeList << CR_FRACTAL_TERRAIN;
+    typeList << CR_FRACTAL_TERRAIN << FP_FRACTAL_MESH;
     FilterIDType tt;
     foreach(tt , types())
 	actionList << new QAction(filterName(tt), this);
@@ -58,6 +60,9 @@ const QString FilterFractal::filterName(FilterIDType filterId) const
         case CR_FRACTAL_TERRAIN:
             return QString("Fractal terrain");
             break;
+        case FP_FRACTAL_MESH:
+            return QString("Fractal displacement");
+            break;
         default:
             assert(0); return QString("error");
             break;
@@ -68,16 +73,18 @@ const QString FilterFractal::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
         case CR_FRACTAL_TERRAIN:
+        case FP_FRACTAL_MESH:
         {
             QString desc;
             QFile f(":/ff_description.txt");
-            if (f.open(QFile::ReadOnly))
+            bool opened = f.open(QFile::ReadOnly);
+            if (opened)
             {
                 QTextStream stream(&f);
                 desc = stream.readAll();
                 f.close();
             } else {
-                desc = "Generates a fractal terrain.";
+                desc = "Generates a fractal terrain perturbation";
             }
             return desc;
         }
@@ -91,42 +98,52 @@ const QString FilterFractal::filterInfo(FilterIDType filterId) const
 void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par)
 {
     switch(ID(filter)) {
-        case CR_FRACTAL_TERRAIN:
+    case CR_FRACTAL_TERRAIN:
+        par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable results."));
+        break;
+    case FP_FRACTAL_MESH:
         {
-            par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable results."));
-            par.addParam(new RichFloat("seed", 2, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
-
-            QStringList algList;
-            algList << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal" << "Hybrid multifractal terrain" << "Ridged multifractal terrain";
-            par.addParam(new RichEnum("algorithm", 4, algList, "Algorithm", "The algorithm with which the fractal terrain will be generated."));
-
-            par.addParam(new RichFloat("octaves", 8.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the terrain. Reasonable values are in range [2,9]. Float values are allowed."));
-            par.addParam(new RichFloat("lacunarity", 4.0, "Lacunarity:", "The gap between noise frequencies. This parameter is used in conjunction with fractal increment to compute the spectral weights that contribute to the noise in each octave."));
-            par.addParam(new RichFloat("fractalIncrement", 0.23, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
-            par.addParam(new RichFloat("offset", 0.6, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
-            par.addParam(new RichFloat("gain", 2.0, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
+            float diag = md.mm()->cm.bbox.Diag();
+            par.addParam(new RichAbsPerc("eThreshold", diag*0.01, 0, diag, "Edge threshold:", "Todo..."));
         }
         break;
-        default: assert(0);
+    default: assert(0);
     }
+
+    par.addParam(new RichFloat("seed", 2, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
+
+    QStringList algList;
+    algList << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal" << "Hybrid multifractal terrain" << "Ridged multifractal terrain";
+    par.addParam(new RichEnum("algorithm", 4, algList, "Algorithm", "The algorithm with which the fractal terrain will be generated."));
+
+    par.addParam(new RichFloat("octaves", 8.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the terrain. Reasonable values are in range [2,9]. Float values are allowed."));
+    par.addParam(new RichFloat("lacunarity", 4.0, "Lacunarity:", "The gap between noise frequencies. This parameter is used in conjunction with fractal increment to compute the spectral weights that contribute to the noise in each octave."));
+    par.addParam(new RichFloat("fractalIncrement", 0.23, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
+    par.addParam(new RichFloat("offset", 0.6, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
+    par.addParam(new RichFloat("gain", 2.0, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
+
     return;
 }
 
 bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterSet &par, vcg::CallBackPos */*cb*/)
 {
+    fArgs[SEED] = par.getFloat("seed");         // read parameters
+    fArgs[OCTAVES] = par.getFloat("octaves");
+    fArgs[REMAINDER] = fArgs[OCTAVES] - (int)fArgs[OCTAVES];
+    fArgs[L] = par.getFloat("lacunarity");
+    fArgs[H] = par.getFloat("fractalIncrement");
+    fArgs[OFFSET] = par.getFloat("offset");
+    fArgs[GAIN] = par.getFloat("gain");
+    int algorithmId = par.getEnum("algorithm");
+
     switch(ID(filter)) {
         case CR_FRACTAL_TERRAIN:
-        {
-            fArgs[OCTAVES] = par.getFloat("octaves");
-            fArgs[REMAINDER] = fArgs[OCTAVES] - (int)fArgs[OCTAVES];
-            fArgs[L] = par.getFloat("lacunarity");
-            fArgs[H] = par.getFloat("fractalIncrement");
-            fArgs[OFFSET] = par.getFloat("offset");
-            fArgs[GAIN] = par.getFloat("gain");
-            return generateTerrain(m.mm()->cm, par.getInt("steps"),
-                par.getEnum("algorithm"), par.getFloat("seed"));
-        }
+            return generateTerrain(m.mm()->cm, par.getInt("steps"), algorithmId);
         break;
+        case FP_FRACTAL_MESH:
+            return generateFractalMesh(m.mm()->cm, par.getAbsPerc("eThreshold"), algorithmId);
+        break;
+        default: assert(0);
     }
     return false;
 }
@@ -137,14 +154,30 @@ const MeshFilterInterface::FilterClass FilterFractal::getClass(QAction* filter)
         case CR_FRACTAL_TERRAIN:
             return MeshFilterInterface::MeshCreation;
         break;
+        case FP_FRACTAL_MESH:
+            return MeshFilterInterface::Smoothing;
+        break;
         default: assert(0);
             return MeshFilterInterface::Generic;
+    }
+}
+
+const int FilterFractal::getRequirements(QAction *filter)
+{
+    switch(ID(filter)) {
+        case CR_FRACTAL_TERRAIN:
+            return MeshModel::MM_NONE;
+        break;
+        case FP_FRACTAL_MESH:
+            return MeshModel::MM_FACEFACETOPO;
+        break;
+        default: assert(0);
     }
 }
 // ----------------------------------------------------------------------
 
 // -------------------- Private functions -------------------------------
-bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm, float seed)
+bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm)
 {
     m.Clear();
     int k = (int)(pow(2, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
@@ -181,7 +214,7 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm, floa
     }
 
     // terrain generation
-    double seedFactor = (seed*vertexCount)/100;
+    double seedFactor = (fArgs[SEED]*vertexCount)/100;
     CoordType* point;
     double (FilterFractal::*f)() = vertexDisp[algorithm];
 
@@ -198,6 +231,20 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm, floa
     // updating bounding box and normals
     vcg::tri::UpdateBounding<CMeshO>::Box(m);
     vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m);
+    return true;
+}
+
+bool FilterFractal::generateFractalMesh(CMeshO &m, float edgeThreshold, int algorithm)
+{
+    if (!tri::Clean<CMeshO>::IsTwoManifoldFace(m))
+    {
+        errorMessage = "There are some not 2-manifold faces. Manifoldness is required in order to apply the filter.";
+        return false;
+    }
+
+
+
+
     return true;
 }
 

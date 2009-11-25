@@ -1,4 +1,4 @@
-Generates a fractal terrain with five different algorithms.<br />
+Generates a fractal terrain perturbation with five different algorithms.<br />
 Some good parameter values to start with are:<br />
 <table align="center">
     <tr style="border:1px solid black">
