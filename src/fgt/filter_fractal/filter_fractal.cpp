@@ -31,6 +31,7 @@
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/refine.h>
+#include <vcg/complex/trimesh/smooth.h>
 #include <vcg/math/base.h>
 #include <vcg/math/perlin_noise.h>
 
@@ -58,10 +59,10 @@ const QString FilterFractal::filterName(FilterIDType filterId) const
 {
     switch (filterId) {
         case CR_FRACTAL_TERRAIN:
-            return QString("Fractal terrain");
+            return QString("Fractal Terrain");
             break;
         case FP_FRACTAL_MESH:
-            return QString("Fractal displacement");
+            return QString("Fractal Displacement");
             break;
         default:
             assert(0); return QString("error");
@@ -97,6 +98,8 @@ const QString FilterFractal::filterInfo(FilterIDType filterId) const
 
 void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par)
 {
+    par.addParam(new RichDynamicFloat("scaleFactor", 0.4, 0, 1.0, "Scale factor:", "Scales down the resulting perturbation of the given value."));
+
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
         par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable results."));
@@ -104,30 +107,32 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
     case FP_FRACTAL_MESH:
         {
             float diag = md.mm()->cm.bbox.Diag();
-            par.addParam(new RichAbsPerc("eThreshold", diag*0.01, 0, diag, "Edge threshold:", "Todo..."));
+            par.addParam(new RichAbsPerc("eThreshold", diag*0.005, 0, diag, "Edge threshold:", "Current mesh will be refined until the length of all edges is below the given threshold."));
+            par.addParam(new RichInt("smoothingSteps", 3, "Normals smoothing steps:", "After the subdivision step, face normals will be smoothed to make the perturbation more homogeneous. This parameter represents the number of smoothing steps." ));
         }
         break;
     default: assert(0);
     }
 
-    par.addParam(new RichFloat("seed", 2, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
+    par.addParam(new RichFloat("seed", 1, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
 
     QStringList algList;
     algList << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal" << "Hybrid multifractal terrain" << "Ridged multifractal terrain";
     par.addParam(new RichEnum("algorithm", 4, algList, "Algorithm", "The algorithm with which the fractal terrain will be generated."));
 
-    par.addParam(new RichFloat("octaves", 8.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the terrain. Reasonable values are in range [2,9]. Float values are allowed."));
+    par.addParam(new RichDynamicFloat("octaves", 8.0, 1.0, 20.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the terrain. Reasonable values are in range [2,9]."));
     par.addParam(new RichFloat("lacunarity", 4.0, "Lacunarity:", "The gap between noise frequencies. This parameter is used in conjunction with fractal increment to compute the spectral weights that contribute to the noise in each octave."));
-    par.addParam(new RichFloat("fractalIncrement", 0.23, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
+    par.addParam(new RichFloat("fractalIncrement", 0.2, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
     par.addParam(new RichFloat("offset", 0.6, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
-    par.addParam(new RichFloat("gain", 2.0, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
+    par.addParam(new RichFloat("gain", 2.5, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
 
     return;
 }
 
-bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterSet &par, vcg::CallBackPos */*cb*/)
+bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterSet &par, vcg::CallBackPos* cb)
 {
     fArgs[SEED] = par.getFloat("seed");         // read parameters
+    fArgs[SCALER] = par.getDynamicFloat("scaleFactor");
     fArgs[OCTAVES] = par.getFloat("octaves");
     fArgs[REMAINDER] = fArgs[OCTAVES] - (int)fArgs[OCTAVES];
     fArgs[L] = par.getFloat("lacunarity");
@@ -138,10 +143,16 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterS
 
     switch(ID(filter)) {
         case CR_FRACTAL_TERRAIN:
-            return generateTerrain(m.mm()->cm, par.getInt("steps"), algorithmId);
+        {
+            int steps = par.getInt("steps");
+            if (steps > 9) steps = 9;
+            if (steps < 2) steps = 2;
+            return generateTerrain(m.mm()->cm, steps, algorithmId, cb);
+        }
         break;
         case FP_FRACTAL_MESH:
-            return generateFractalMesh(m.mm()->cm, par.getAbsPerc("eThreshold"), algorithmId);
+            fArgs[THRESHOLD] = par.getAbsPerc("eThreshold");
+            return generateFractalMesh(*(m.mm()), par.getInt("smoothingSteps"), algorithmId, cb);
         break;
         default: assert(0);
     }
@@ -169,7 +180,7 @@ const int FilterFractal::getRequirements(QAction *filter)
             return MeshModel::MM_NONE;
         break;
         case FP_FRACTAL_MESH:
-            return MeshModel::MM_FACEFACETOPO;
+            return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
         break;
         default: assert(0);
     }
@@ -177,7 +188,7 @@ const int FilterFractal::getRequirements(QAction *filter)
 // ----------------------------------------------------------------------
 
 // -------------------- Private functions -------------------------------
-bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm)
+bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm, vcg::CallBackPos* cb)
 {
     m.Clear();
     int k = (int)(pow(2, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
@@ -214,10 +225,9 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm)
     }
 
     // terrain generation
-    double seedFactor = (fArgs[SEED]*vertexCount)/100;
-    CoordType* point;
+    double seedFactor = (fArgs[SEED] * vertexCount)/100;
     double (FilterFractal::*f)() = vertexDisp[algorithm];
-
+    CoordType* point;
     computeSpectralWeights();
     for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
     {
@@ -225,7 +235,7 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm)
         fArgs[X] = (*point)[0] + seedFactor;
         fArgs[Y] = (*point)[1] + seedFactor;
         fArgs[Z] = (*point)[2] + seedFactor;
-        (*point)[2] += (this->*f)();
+        (*point)[2] += ((this->*f)() * fArgs[SCALER]);
     }
 
     // updating bounding box and normals
@@ -234,17 +244,50 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm)
     return true;
 }
 
-bool FilterFractal::generateFractalMesh(CMeshO &m, float edgeThreshold, int algorithm)
+bool FilterFractal::generateFractalMesh(MeshModel &mm, int smoothingSteps, int algorithm, vcg::CallBackPos* cb)
 {
-    if (!tri::Clean<CMeshO>::IsTwoManifoldFace(m))
+    CMeshO* m = &mm.cm;
+
+    // checks 2-manifoldness
+    if (!tri::Clean<CMeshO>::IsTwoManifoldFace(*m))
     {
         errorMessage = "There are some not 2-manifold faces. Manifoldness is required in order to apply the filter.";
         return false;
     }
 
+    // refines mesh until a given threshold
+    while (Refine<CMeshO, MidPoint<CMeshO> >(*m, MidPoint<CMeshO>(m), fArgs[THRESHOLD], false, cb)){};
+    mm.clearDataMask(MeshModel::MM_VERTFACETOPO);
+    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(*m);
 
+    // smoothes face normals
+    tri::Smooth<CMeshO>::FaceNormalLaplacianFF(*m, smoothingSteps, false);
 
+    // recomputes vertex normals from face normals
+    tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(*m);
 
+    // normalizes vertex normals
+    tri::UpdateNormals<CMeshO>::NormalizeVertex(*m);
+
+    double seedFactor = (fArgs[SEED]*((*m).vn))/100;
+    double (FilterFractal::*f)() = vertexDisp[algorithm];
+
+    computeSpectralWeights();
+    double perturbation = .0;
+    for(VertexIterator vi=(*m).vert.begin(); vi!=(*m).vert.end(); ++vi)
+    {
+        fArgs[X] = (*vi).P()[0] + seedFactor;
+        fArgs[Y] = (*vi).P()[1] + seedFactor;
+        fArgs[Z] = (*vi).P()[2] + seedFactor;
+        perturbation = (this->*f)();
+        (*vi).P()[0] += ((*vi).N()[0] * perturbation);
+        (*vi).P()[1] += ((*vi).N()[1] * perturbation);
+        (*vi).P()[2] += ((*vi).N()[2] * perturbation);
+    }
+
+    // updating bounding box and normals
+    vcg::tri::UpdateBounding<CMeshO>::Box(*m);
+    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(*m);
     return true;
 }
 

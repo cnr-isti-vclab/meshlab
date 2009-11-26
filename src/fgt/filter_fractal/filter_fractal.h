@@ -62,8 +62,8 @@ class FilterFractal : public QObject, public MeshFilterInterface
 
        private:
             void computeSpectralWeights();
-            bool generateTerrain(CMeshO &m, int subSteps, int algorithm);
-            bool generateFractalMesh(CMeshO &m, float edgeThreshold, int algorithm);
+            bool generateTerrain(CMeshO &m, int subSteps, int algorithm, vcg::CallBackPos* cb);
+            bool generateFractalMesh(MeshModel &mm, int smoothingSteps, int algorithm, vcg::CallBackPos* cb);
 
             double fBM(void);
             double StandardMF(void);
@@ -71,9 +71,10 @@ class FilterFractal : public QObject, public MeshFilterInterface
             double HybridMF(void);
             double RidgedMF(void);
 
-            float spectralWeight[20];
-            float fArgs[10];
-            enum {X=0, Y=1, Z=2, OCTAVES=3, REMAINDER=4, L=5, H=6, OFFSET=7, GAIN=8, SEED=9};
+            float spectralWeight[21];
+            float fArgs[12];
+            enum {X=0, Y=1, Z=2, OCTAVES=3, REMAINDER=4, L=5, H=6, OFFSET=7, GAIN=8, SEED=9, THRESHOLD=10, SCALER=11};
+
             enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH};
             double (FilterFractal::*vertexDisp[5]) (void);
 };
