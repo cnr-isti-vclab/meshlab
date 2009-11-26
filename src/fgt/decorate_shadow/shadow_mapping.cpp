@@ -26,138 +26,145 @@
 
 ShadowMapping::ShadowMapping():DecorateShader()
 {
-    this->_objectVert = 0;
-    this->_objectFrag = 0;
-    this->_objectShaderProgram = 0;
+    this->_shadowMappingVert = 0;
+    this->_shadowMappingFrag = 0;
+    this->_shadowMappingProgram = 0;
     this->_fbo = 0;
 }
 
 ShadowMapping::~ShadowMapping(){
-    glDetachShader(this->_objectShaderProgram, this->_objectVert);
-    glDetachShader(this->_objectShaderProgram, this->_objectFrag);
+    glDetachShader(this->_shadowMappingProgram, this->_shadowMappingVert);
+    glDetachShader(this->_shadowMappingProgram, this->_shadowMappingFrag);
 
-    glDeleteShader(this->_objectVert);
-    glDeleteShader(this->_objectFrag);
-    glDeleteProgram(this->_objectShaderProgram);
+    glDeleteShader(this->_shadowMappingVert);
+    glDeleteShader(this->_shadowMappingFrag);
+    glDeleteProgram(this->_shadowMappingProgram);
 
-	//glDeleteTextures(1, &(this->_color_tex));
-	glDeleteTextures(1, &(this->_shadowMap));
+    glDeleteTextures(1, &(this->_shadowMap));
 
     glDeleteFramebuffersEXT(1, &_fbo);
 }
 
 bool ShadowMapping::init()
 {
-    GLenum err = glewInit();
-    if (!GLEW_OK == err){
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setWindowTitle("GLEW init failure");
-        msgBox.setText(QString("Init GLEW failed."));
-        int ret = msgBox.exec();
+    if(!this->initGlew() || !this->initSetup())
         return false;
-    }
-    if(!this->setup()){
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setWindowTitle("FBO Setup failure");
-        msgBox.setText(QString("Failed in creating a Frame Buffer Object."));
-        int ret = msgBox.exec();
-        return false;
-    }
-    return compileAndLink();
+
+    return compileAndLink(
+            this->_shadowMappingProgram,
+            this->_shadowMappingVert,
+            this->_shadowMappingFrag,
+            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/sm/object")));
+}
+
+void ShadowMapping::renderingFromLightSetup(MeshModel& m, GLArea* gla){
+    vcg::Box3f bb = m.cm.bbox;
+    vcg::Point3f center;
+    center = bb.Center();
+
+    float diag = bb.Diag();
+
+    GLfloat lP[4];
+    glGetLightfv(GL_LIGHT0, GL_POSITION, lP);
+    vcg::Point3f light = -vcg::Point3f(lP[0],lP[1],lP[2]);
+
+    vcg::Matrix44f tm = gla->trackball.Matrix();
+
+    glMatrixMode(GL_PROJECTION);
+
+    glPushMatrix();
+
+        glLoadIdentity();
+        glOrtho(-(diag/2),
+                 diag/2,
+                 -(diag/2),
+                 diag/2,
+                 -(diag/2),
+                 diag/2);
+
+    glMatrixMode(GL_MODELVIEW);
+
+    glPushMatrix();
+        vcg::Point3f u, v;
+        //mi seleziona automaticamente un upvector che mi eviti casi degeneri...nel caso vada bene 010 sceglie quello
+        vcg::GetUV(light, u, v, vcg::Point3f(0,-1,0));
+        glLoadIdentity();
+        gluLookAt(0, 0, 0, light[0], light[1], light[2], v[0], v[1], v[2]);
+
+        //get the rotation matrix from the trackball
+        vcg::Matrix44f rotation;
+        vcg::Similarityf track = gla->trackball.track;
+        track.rot.ToMatrix(rotation);
+        glMultMatrixf(rotation.transpose().V());
+
+        //traslate the model in the center
+        glTranslatef(-center[0],-center[1],-center[2]);
+}
+
+
+void ShadowMapping::renderingFromLightUnsetup(){
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
 }
 
 void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
-        vcg::Box3f bb = m.cm.bbox;
-        vcg::Point3f center;
-        center = bb.Center();
+    GLfloat g_mModelView[16];
+    GLfloat g_mProjection[16];
 
-        GLfloat g_mModelView[16];
-        GLfloat g_mProjection[16];
+    this->renderingFromLightSetup(m, gla);
 
-        float diag = bb.Diag();
+    glMatrixMode(GL_PROJECTION);
+        glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
+    glMatrixMode(GL_MODELVIEW);
+        glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
 
-        GLfloat lP[4];
-        glGetLightfv(GL_LIGHT0, GL_POSITION, lP);
-        vcg::Point3f light = -vcg::Point3f(lP[0],lP[1],lP[2]);
+    /***********************************************************/
+    //SHADOW MAP Generation
+    /***********************************************************/
 
-        vcg::Matrix44f tm = gla->trackball.Matrix();
+    //first rendering to get shadowMap from the light point of view
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(4.0, 4.0);
 
-        glMatrixMode(GL_PROJECTION);
+    //binding the FBO
+    this->bind();
 
-        glPushMatrix();
+    RenderMode rm = gla->getCurrentRenderMode();
+    m.Render(rm.drawMode, rm.colorMode,rm.textureMode);
+    glDisable(GL_POLYGON_OFFSET_FILL);
 
-            glLoadIdentity();
-            glOrtho(-(diag/2),
-                     diag/2,
-                     -(diag/2),
-                     diag/2,
-                     -(diag/2),
-                     diag/2);
+    //unbinding the FBO
+    this->unbind();
 
-            glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
-        glMatrixMode(GL_MODELVIEW);
+    this->renderingFromLightUnsetup();
 
-        glPushMatrix();
-            vcg::Point3f u, v;
-            //mi seleziona automaticamente un upvector che mi eviti casi degeneri...nel caso vada bene 010 sceglie quello
-            vcg::GetUV(light, u, v, vcg::Point3f(0,-1,0));
-            glLoadIdentity();
-            gluLookAt(0, 0, 0, light[0], light[1], light[2], v[0], v[1], v[2]);
+    /***********************************************************/
+    //SHADOW MAP Generation finished
+    /***********************************************************/
 
-            //get the rotation matrix from the trackball
-            vcg::Matrix44f rotation;
-            vcg::Similarityf track = gla->trackball.track;
-            track.rot.ToMatrix(rotation);
-            glMultMatrixf(rotation.transpose().V());
+    GLint depthFuncOld;
+    glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
+    glDepthFunc(GL_LEQUAL);
 
-            //traslate the model in the center
-            glTranslatef(-center[0],-center[1],-center[2]);
-            glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
+    vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
+    glUseProgram(this->_shadowMappingProgram);
 
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(4.0, 4.0);
+    GLuint matrixLoc = glGetUniformLocation(this->_shadowMappingProgram, "mvpl");
+    glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
 
-	//		glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
-            this->bind();
-            RenderMode rm = gla->getCurrentRenderMode();
-			m.Render(rm.drawMode, rm.colorMode,rm.textureMode);
-            glDisable(GL_POLYGON_OFFSET_FILL);
-            //this->getShadowMap();
-            this->unbind();
-	//		glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
 
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-
-        GLint depthFuncOld;
-        glGetIntegerv(GL_DEPTH_FUNC, &depthFuncOld);
-        glDepthFunc(GL_LEQUAL);
-        vcg::Matrix44f mvpl = (vcg::Matrix44f(g_mProjection).transpose() * vcg::Matrix44f(g_mModelView).transpose()).transpose();
-        glUseProgram(this->_objectShaderProgram);
-
-        GLuint matrixLoc = glGetUniformLocation(this->_objectShaderProgram, "mvpl");
-        glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-
-        //glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, this->_color_tex);
-        
-		GLuint loc = glGetUniformLocation(this->_objectShaderProgram, "shadowMap");
-        glUniform1i(loc, 0);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
-        glDisable(GL_BLEND);
-        //m.Render(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMPerWedge);
-        glDepthFunc((GLenum)depthFuncOld);
-        glUseProgram(0);
-        int error = glGetError();
+    GLuint loc = glGetUniformLocation(this->_shadowMappingProgram, "shadowMap");
+    glUniform1i(loc, 0);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+    glDisable(GL_BLEND);
+    glDepthFunc((GLenum)depthFuncOld);
+    glUseProgram(0);
 }
 
 bool ShadowMapping::setup()
@@ -169,104 +176,21 @@ bool ShadowMapping::setup()
 
         if (_initOk)
                 return true;
-
-        /*DEPTH*/
-        glGenTextures(1, &this->_shadowMap);
-        glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-        glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_LUMINANCE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
-        //glGenerateMipmapEXT(GL_TEXTURE_2D);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         
         glGenFramebuffersEXT(1, &_fbo);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
-        //depth
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, this->_shadowMap, 0);
-        
-        //color
-        //glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_color_tex, 0/*mipmap level*/);
+        this->genDepthMapTexture24(this->_shadowMap, true);
 
-        //cosi specifichi che il colore non importa, che il fbo non ha niente sull'attachment colore
+        //we don't need a color attachment
         GLenum drawBuffers[] = {GL_NONE};
         glDrawBuffersARB(1, drawBuffers);
 		
         glReadBuffer(GL_NONE);
 
+        //checks for fbo creation errors
         int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         return _initOk;
-}
-
-void ShadowMapping::bind()
-{
-        assert(_initOk);
-
-        glClearDepth(1.0);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
-        glPushAttrib(GL_VIEWPORT_BIT);
-        glViewport(0, 0, this->_texSize, this->_texSize);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-}
-
-void ShadowMapping::unbind()
-{
-        if (!_initOk)
-                return;
-
-        glPopAttrib();
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        //glDeleteFramebuffersEXT(1, &_fbo);
-}
-
-bool ShadowMapping::compileAndLink(){
-    QFile* objVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/object.vert"));
-    QFile* objFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/sm/object.frag"));
-
-    objVert->open(QIODevice::ReadOnly | QIODevice::Text);
-    objFrag->open(QIODevice::ReadOnly | QIODevice::Text);
-
-    QByteArray bArray = objVert->readAll();
-    GLint ShaderLen = (GLint) bArray.length();
-    GLubyte* ShaderSource = (GLubyte *)bArray.data();
-
-    this->_objectVert= glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(this->_objectVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_objectVert);
-    if(!this->printShaderInfoLog(this->_objectVert))
-        return false;
-
-    objVert->close();
-
-    bArray = objFrag->readAll();
-    ShaderLen = (GLint) bArray.length();
-    ShaderSource = (GLubyte *)bArray.data();
-
-    this->_objectFrag= glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(this->_objectFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_objectFrag);
-    if(!this->printShaderInfoLog(this->_objectFrag))
-        return false;
-
-    objFrag->close();
-
-    this->_objectShaderProgram = glCreateProgram();
-    glAttachShader(this->_objectShaderProgram, this->_objectVert);
-    glAttachShader(this->_objectShaderProgram, this->_objectFrag);
-    glLinkProgram(this->_objectShaderProgram);
-    if(!this->printProgramInfoLog(this->_objectShaderProgram))
-        return false;
-
-    return true;
 }

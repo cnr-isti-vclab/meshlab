@@ -26,15 +26,10 @@
 #include <QObject>
 #include <QAction>
 #include <QList>
-#include <math.h>
-#include <limits>
-#include <stdlib.h>
-//#include <QGLWidget>
+
 #include <meshlab/interfaces.h>
-#include <QtGui>
 #include <meshlab/meshmodel.h>
-#include <meshlab/glarea.h>
-//#include <wrap/gl/addons.h>
+
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
 #include "variance_shadow_mapping.h"
@@ -45,37 +40,45 @@ class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
-  virtual const QString Info(QAction *);
-  
-  enum {
-		DP_SHOW_SIMPLE_SHADOW,
-		DP_SHOW_VSM_SHADOW,
-		DP_SHOW_VSM_SHADOW_BLUR,
-		DP_SHOW_AO_DEPTH_TRICK,
-		DP_SHOW_SSAO
-		};
 
-  virtual const QString ST(FilterIDType filter) const;
+    enum {
+        DP_SHOW_SHADOW,
+        DP_SHOW_SSAO
+    };
+
+  //3 different implementations of shadow mapping
+    enum{
+        SH_MAP,             //simple shadow mapping
+        SH_MAP_VSM,         //variance shadow mapping
+        SH_MAP_VSM_BLUR     //variance shadow mapping with blur
+    };
+
+    static QStringList getSHMethods(){
+        return QStringList()
+                <<"Shadow mapping"
+                <<"Variance shadow mapping"
+                <<"Variance shadow mapping with blur";
+    }
+
+    virtual const QString Info(QAction *);
+    virtual const QString ST(FilterIDType filter) const;
 
 public:
      
-	DecorateShadowPlugin()
-	{
-    typeList <<
-            DP_SHOW_SIMPLE_SHADOW <<
-            DP_SHOW_VSM_SHADOW <<
-            DP_SHOW_VSM_SHADOW_BLUR <<
-            DP_SHOW_SSAO;
+    DecorateShadowPlugin(){
+        typeList <<
+        DP_SHOW_SHADOW <<
+        DP_SHOW_SSAO;
 
-    FilterIDType tt;
-    foreach(tt , types()){
-	      actionList << new QAction(ST(tt), this);
+        FilterIDType tt;
+        foreach(tt , types()){
+          actionList << new QAction(ST(tt), this);
+        }
+        QAction *ap;
+        foreach(ap,actionList){
+            ap->setCheckable(true);
+        }
     }
-    QAction *ap;
-    foreach(ap,actionList){
-        ap->setCheckable(true);
-    }
-  }
 
 	QList<QAction *> actions () const {return actionList;}
     virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet  * /*parent*/ par, GLArea * /*parent*/);
@@ -83,6 +86,8 @@ public:
     virtual void initGlobalParameterSet(QAction *, RichParameterSet  * /*globalparam*/);
 private:
     DecorateShader* _decorator;
+    inline const QString DecorateShadowSSAORadius() { return  "MeshLab::Decoration::SSAORadius" ; }
+    inline const QString DecorateShadowMethod() { return  "MeshLab::Decoration::ShadowMethod" ; }
 };
 
 #endif

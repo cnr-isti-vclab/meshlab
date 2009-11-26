@@ -1,7 +1,32 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005, 2006                                          \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
 #include "ssao.h"
 
-SSAO::SSAO():DecorateShader()
+SSAO::SSAO(float radius):DecorateShader()
 {
+    this->_radius = radius;
+
     this->_depth = 0;
 
     this->_color1 = 0;
@@ -10,7 +35,6 @@ SSAO::SSAO():DecorateShader()
     this->_normalMapShaderProgram = 0;
 
     this->_depthMap = 0;
-    this->_depth = 0;
 
     this->_color2= 0;
     this->_ssaoVert = 0;
@@ -59,30 +83,32 @@ SSAO::~SSAO(){
 
 bool SSAO::init()
 {
-    GLenum err = glewInit();
-    if (!GLEW_OK == err){
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setWindowTitle("GLEW init failure");
-        msgBox.setText(QString("Init GLEW failed."));
-        msgBox.exec();
+    if(!this->initGlew() || !this->initSetup())
         return false;
-    }
-    if(!this->setup()){
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setWindowTitle("FBO Setup failure");
-        msgBox.setText(QString("Failed in creating a Frame Buffer Object."));
-        msgBox.exec();
+
+    if(!compileAndLink(
+            this->_ssaoShaderProgram,
+            this->_ssaoVert,
+            this->_ssaoFrag,
+            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/ssao"))) ||
+       !compileAndLink(
+            this->_normalMapShaderProgram,
+            this->_normalMapVert,
+            this->_normalMapFrag,
+            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/normalMap"))) ||
+       !compileAndLink(
+            this->_blurShaderProgram,
+            this->_blurVert,
+            this->_blurFrag,
+            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/blur"))))
         return false;
-    }
-    return compileAndLink();
+    return true;
 }
 
 void SSAO::runShader(MeshModel& m, GLArea* gla){
 
         /***********************************************************/
-        //GENERAZIONE NORMAL MAP E DEPTH MAP
+        //NORMAL MAP and DEPTH MAP generation
         /***********************************************************/
         this->bind();
         glUseProgram(this->_normalMapShaderProgram);
@@ -99,7 +125,6 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
-        //this->printColorMap(this->_color1, "_normals.png");
         glUseProgram(0);
 
         /***********************************************************/
@@ -125,6 +150,9 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         loc = glGetUniformLocation(this->_ssaoShaderProgram, "depthMap");
         glUniform1i(loc, 2);
 
+        GLuint radiusLoc = glGetUniformLocation(this->_ssaoShaderProgram, "rad");
+        glUniform1f(radiusLoc, this->_radius);
+
         GLuint matrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "proj");
         glUniformMatrix4fv(matrixLoc, 1, 0, mProj.transpose().V());
 
@@ -139,14 +167,7 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
                 glVertex3f(-1.0f,  1.0f, 0.0f);
                 glVertex3f( 1.0f,  1.0f, 0.0f);
             glEnd();
-        //this->printColorMap(this->_color2, "_ssao.png");
         glUseProgram(0);
-
-
-/****************************************************************************************/
-//                                      BLURRING
-/****************************************************************************************/
-
 
         /***********************************************************/
         //BLURRING horizontal
@@ -197,251 +218,81 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
-
-/****************************************************************************************/
-//                                      BLURRING END
-/****************************************************************************************/
 }
 
 bool SSAO::setup()
 {
-        if (!GLEW_EXT_framebuffer_object) {
-                qWarning("FBO not supported!");
-                return false;
-        }
+    if (!GLEW_EXT_framebuffer_object) {
+            qWarning("FBO not supported!");
+            return false;
+    }
 
-        if (_initOk)
-                return true;
+    if (_initOk)
+            return true;
 
-        //genero i 2 framebuffer object che mi servono.
-        glGenFramebuffersEXT(1, &_fbo);
-        glGenFramebuffersEXT(1, &_fbo2);
+    //genero i 2 framebuffer object che mi servono.
+    glGenFramebuffersEXT(1, &_fbo);
+    glGenFramebuffersEXT(1, &_fbo2);
 
-        //attacco il primo...adesso le modifiche andranno a modificare solo _fbo
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+    //attacco il primo...adesso le modifiche andranno a modificare solo _fbo
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
-        glGenTextures(1, &this->_color1);
-        glBindTexture(GL_TEXTURE_2D, this->_color1);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //Generates first color texture
+    this->genColorTextureEXT(this->_color1, GL_COLOR_ATTACHMENT0_EXT);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_color1, 0);
+    this->genDepthMapTexture24(this->_depthMap, false);
 
-        glGenTextures(1, &this->_depthMap);
-        glBindTexture(GL_TEXTURE_2D, this->_depthMap);
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glDrawBuffersARB(0, drawBuffers);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, this->_depthMap, 0);
+    int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
 
+    if(!this->_initOk)
+        return this->_initOk;
 
-        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
+    //attacco il secondo fbo...adesso le modifiche andranno a modificare solo _fbo2
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo2);
 
-        glDrawBuffersARB(0, drawBuffers);
+    //Generates first color texture
+    this->genColorTextureEXT(this->_color2, GL_COLOR_ATTACHMENT0_EXT);
 
-        int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
+    //Generates render buffer for depth attachment
+    this->genDepthRenderBufferEXT(this->_depth);
 
-        if(!this->_initOk)
-            return this->_initOk;
+    GLenum drawBuffers2[] = {GL_COLOR_ATTACHMENT0};
 
-        //attacco il secondo fbo...adesso le modifiche andranno a modificare solo _fbo2
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo2);
+    glDrawBuffersARB(0, drawBuffers2);
 
-        //texture per ssao
-        glGenTextures(1, &this->_color2);
-        glBindTexture(GL_TEXTURE_2D, this->_color2);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    this->loadNoiseTxt();
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, this->_color2, 0);
+    err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
 
-        //genero il render buffer per il depth buffer
-        glGenRenderbuffersEXT(1, &(this->_depth));
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_depth);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
-
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->_depth);
-
-        GLenum drawBuffers2[] = {GL_COLOR_ATTACHMENT0};
-
-        glDrawBuffersARB(0, drawBuffers2);
-
-        this->loadNoiseTxt();
-
-        err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
-
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        return _initOk;
-}
-
-void SSAO::bind()
-{
-        assert(_initOk);
-
-        glClearDepth(1.0);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
-        glPushAttrib(GL_VIEWPORT_BIT);
-        glViewport(0, 0, this->_texSize, this->_texSize);
-}
-
-void SSAO::unbind()
-{
-        if (!_initOk)
-                return;
-
-        glPopAttrib();
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-}
-
-bool SSAO::compileAndLink(){
-    QFile* normalVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/normalMap.vert"));
-    QFile* normalFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/normalMap.frag"));
-
-    QFile* ssaoVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/ssao.vert"));
-    QFile* ssaoFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/ssao.frag"));
-
-    QFile* blurVert = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/blur.vert"));
-    QFile* blurFrag = new QFile(MainWindowInterface::getBaseDirPath() + QString("/../fgt/decorate_shadow/shader/ssao/blur.frag"));
-
-    normalVert->open(QIODevice::ReadOnly | QIODevice::Text);
-    normalFrag->open(QIODevice::ReadOnly | QIODevice::Text);
-
-    ssaoVert->open(QIODevice::ReadOnly | QIODevice::Text);
-    ssaoFrag->open(QIODevice::ReadOnly | QIODevice::Text);
-
-    blurVert->open(QIODevice::ReadOnly | QIODevice::Text);
-    blurFrag->open(QIODevice::ReadOnly | QIODevice::Text);
-
-    QByteArray bArray = normalVert->readAll();
-    GLint ShaderLen = (GLint) bArray.length();
-    GLubyte* ShaderSource = (GLubyte *)bArray.data();
-
-    normalVert->close();
-
-    this->_normalMapVert= glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(this->_normalMapVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_normalMapVert);
-    if(!this->printShaderInfoLog(this->_normalMapVert))
-        return false;
-
-    bArray = normalFrag->readAll();
-    ShaderLen = (GLint) bArray.length();
-    ShaderSource = (GLubyte *)bArray.data();
-
-    normalFrag->close();
-
-    this->_normalMapFrag = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(this->_normalMapFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(_normalMapFrag);
-    if(!this->printShaderInfoLog(this->_normalMapFrag))
-        return false;
-
-    this->_normalMapShaderProgram = glCreateProgram();
-    glAttachShader(this->_normalMapShaderProgram, this->_normalMapVert);
-    glAttachShader(this->_normalMapShaderProgram, this->_normalMapFrag);
-    glLinkProgram(this->_normalMapShaderProgram);
-    if(!this->printProgramInfoLog(this->_normalMapShaderProgram))
-        return false;
-
-    bArray = ssaoVert->readAll();
-    ShaderLen = (GLint) bArray.length();
-    ShaderSource = (GLubyte *)bArray.data();
-
-    ssaoVert->close();
-
-    this->_ssaoVert= glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(this->_ssaoVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_ssaoVert);
-    if(!this->printShaderInfoLog(this->_ssaoVert))
-        return false;
-
-    bArray = ssaoFrag->readAll();
-    ShaderLen = (GLint) bArray.length();
-    ShaderSource = (GLubyte *)bArray.data();
-
-    ssaoFrag->close();
-
-    this->_ssaoFrag= glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(this->_ssaoFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_ssaoFrag);
-    if(!this->printShaderInfoLog(this->_ssaoFrag))
-        return false;
-
-    this->_ssaoShaderProgram = glCreateProgram();
-    glAttachShader(this->_ssaoShaderProgram, this->_ssaoVert);
-    glAttachShader(this->_ssaoShaderProgram, this->_ssaoFrag);
-    glLinkProgram(this->_ssaoShaderProgram);
-    if(!this->printProgramInfoLog(this->_ssaoShaderProgram))
-        return false;
-
-    bArray = blurVert->readAll();
-    ShaderLen = (GLint) bArray.length();
-    ShaderSource = (GLubyte *)bArray.data();
-
-    blurVert->close();
-
-    this->_blurVert = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(this->_blurVert, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_blurVert);
-    if(!this->printShaderInfoLog(this->_blurVert))
-        return false;
-
-    bArray = blurFrag->readAll();
-    ShaderLen = (GLint) bArray.length();
-    ShaderSource = (GLubyte *)bArray.data();
-
-    blurFrag->close();
-
-    this->_blurFrag= glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(this->_blurFrag, 1, (const GLchar **)&ShaderSource, &ShaderLen);
-    glCompileShader(this->_blurFrag);
-    if(!this->printShaderInfoLog(this->_blurFrag))
-        return false;
-
-    this->_blurShaderProgram = glCreateProgram();
-    glAttachShader(this->_blurShaderProgram, this->_blurVert);
-    glAttachShader(this->_blurShaderProgram, this->_blurFrag);
-    glLinkProgram(this->_blurShaderProgram);
-    if(!this->printProgramInfoLog(this->_blurShaderProgram))
-        return false;
-
-    return true;
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    return _initOk;
 }
 
 bool SSAO::loadNoiseTxt(){
 
     QImage image = QImage();
-    //QString textureName = QString(":/noise.png");
     QString textureName = QString(":/rand.png");
-    //fileName = textureName;
     if (QFile(textureName).exists())
     {
-            image = QImage(textureName);
-						noiseWidth=image.width();
-						noiseHeight=image.height();
+        image = QImage(textureName);
+        noiseWidth=image.width();
+        noiseHeight=image.height();
 
-            QImage tmpGL = QGLWidget::convertToGLFormat(image);
-            image = QImage(tmpGL);
+        QImage tmpGL = QGLWidget::convertToGLFormat(image);
+        image = QImage(tmpGL);
     }
     else {
         qDebug("Warning failed to load noise texture!");
         assert(0);
+        return false;
     }
+
     // Creates The Texture
     glGenTextures(1, &(this->_noise));
     glBindTexture(GL_TEXTURE_2D, this->_noise);

@@ -5,12 +5,12 @@ uniform sampler2D depthMap;
 uniform mat4 proj;
 uniform mat4 invProj;
 
+uniform float rad;
+
 const float totStrength = 4.0;
 const float strength = 0.0005;
 const float offset = 18.0;
 const float falloff = 0.002;
-const float rad = 0.25;
-
 
 #define SAMPLES 16 
 

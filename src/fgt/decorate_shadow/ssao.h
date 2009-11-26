@@ -38,36 +38,64 @@ class SSAO : public DecorateShader
 {
 
 public:
-        SSAO();
-        ~SSAO();
+    SSAO(float);
+    ~SSAO();
 
-        bool init();
-        void runShader(MeshModel&, GLArea*);
+    /**
+      * Performs init commands.
+      * Initializes GLEW and performs setup, thes compiles and links the shaders.
+      * If something went wrong return false, otherwise true.
+      * @return false if something went wrong, true otherwise.
+      */
+    bool init();
+
+
+    /**
+      * Applies the decoration running the shaders.
+      * @param m the mesh model.
+      * @param gla GLArea reference.
+      */
+    void runShader(MeshModel&, GLArea*);
 
 private:
-        bool compileAndLink();
-        bool setup();
-        void bind();
-        void unbind();
-        bool loadNoiseTxt();
-        void printNoiseTxt();
 
-        GLuint _color1;
-        GLuint _color2;
-        GLuint _noise;
-        GLuint _depthMap;
-				int noiseWidth;
-				int noiseHeight;
-        GLuint _depth;
+    /**
+      * Sets up the needed resources(FBO and textures) to apply the shader.
+      * @return false if something went wrong, true otherwise.
+      */
+    bool setup();
 
-        GLuint _fbo;
-        GLuint _fbo2;
-        GLuint _normalMapShaderProgram;
-        GLuint _normalMapVert, _normalMapFrag;
-        GLuint _ssaoShaderProgram;
-        GLuint _ssaoVert, _ssaoFrag;
-        GLuint _blurShaderProgram;
-        GLuint _blurVert, _blurFrag;
+    /**
+      * Loads the noise texture used in the SSAO pass.
+      * @return false if something went wrong, true otherwise.
+      */
+    bool loadNoiseTxt();
+
+    /**
+      * Prints the noise texture.
+      * $$$$$$ FOR DEBUGGING PURPOSES $$$$$$
+      */
+    void printNoiseTxt();
+
+    float _radius;
+
+    int noiseWidth;
+    int noiseHeight;
+
+    GLuint _color1;
+    GLuint _color2;
+    GLuint _noise;
+    GLuint _depthMap;
+
+    GLuint _depth;
+
+    GLuint _fbo2;
+    GLuint _normalMapShaderProgram;
+    GLuint _normalMapVert, _normalMapFrag;
+    GLuint _ssaoShaderProgram;
+    GLuint _ssaoVert, _ssaoFrag;
+    GLuint _blurShaderProgram;
+    GLuint _blurVert, _blurFrag;
 };
 
 #endif // SSAO_H

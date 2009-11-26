@@ -24,36 +24,56 @@
 #ifndef SHADOW_MAPPING_H_
 #define SHADOW_MAPPING_H_
 
-
-#include <cassert>
-#include <QString>
-#include <QImage>
-#include <QFile>
-#include <GL/glew.h>
-#include <meshlab/interfaces.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/glarea.h>
 #include <decorate_shader.h>
 
 class ShadowMapping : public DecorateShader
 {
 
 public:
-        ShadowMapping();
-		~ShadowMapping();
 
-        bool init();
-        void runShader(MeshModel&, GLArea*);
+    ShadowMapping();
+    ~ShadowMapping();
 
-private:
-        bool compileAndLink();
-        bool setup();
-        void bind();
-        void unbind();
+    /**
+      * Performs init commands.
+      * Initializes GLEW and performs setup, thes compiles and links the shader.
+      * If something went wrong return false, otherwise true.
+      * @return false if something went wrong, true otherwise.
+      */
+    bool init();
 
-        GLuint _fbo;
-        GLuint _objectShaderProgram;
-        GLuint _objectVert, _objectFrag ;
+
+    /**
+      * Applies the decoration running the shader.
+      * @param m the mesh model.
+      * @param gla GLArea reference.
+      */
+    void runShader(MeshModel&, GLArea*);
+
+protected:
+
+    /**
+      * Sets up the needed resources(FBO and textures) to apply the shader.
+      * @return false if something went wrong, true otherwise.
+      */
+    bool setup();
+
+    /**
+      * Prepares the scene to be rendered from the light point of view.
+      * @param m the MeshModel.
+      * @param gla GlArea
+      */
+    void renderingFromLightSetup(MeshModel&, GLArea*);
+
+    /**
+      * Restores the previous settings
+      */
+    void renderingFromLightUnsetup();
+
+    GLuint _shadowMap;
+
+    GLuint _shadowMappingProgram;
+    GLuint _shadowMappingVert, _shadowMappingFrag;
 };
 
 #endif /* SHADOW_MAPPING_H_ */
