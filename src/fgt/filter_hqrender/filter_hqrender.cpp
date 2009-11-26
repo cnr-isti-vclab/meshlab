@@ -503,7 +503,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			convertTextureProcess.start(toRun);				
 			if (!convertTextureProcess.waitForFinished(-1)) { //wait the finish of process
 				QByteArray err = convertTextureProcess.readAllStandardError();
-				this->errorMessage = "Is impossible convert the texture " + textureName + "\n" + QString(err);				
+				this->errorMessage = "Is impossible to convert the texture " + textureName + "\n" + QString(err);				
 				return false;
 			}
 		}
@@ -521,18 +521,18 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	renderProcess.setEnvironment(aqsisEnv);
 	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -progress -progressformat=%p "+ destFile;
 	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
+	//every time the render process write a message, receive a signal
 	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
-	connect(this, SIGNAL(newCb(int)),this,SLOT(updateCallback(int)));
+	connect(&renderProcess, SIGNAL(readyReadStandardError()),this, SLOT(errSgn()));
+	connect(&renderProcess, SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(finish(int,QProcess::ExitStatus)));
 	cb(0, "Rendering image with Aqsis");
 #if !defined(NO_RENDERING)
-	renderProcess.start(toRun); //segnale destroyed
-	if (!renderProcess.waitForFinished(-1)) //wait the finish of process
-         return false; //devo?quando si verifica?se la finestra viene chiusa?
-	QByteArray out = renderProcess.readAllStandardOutput();
-	qDebug("aqsis.exe output:\n%s",out.data());
+	renderProcess.start(toRun);	
+	//if (!renderProcess.waitForFinished(-1)) //wait the finish of process
+         //return false; //devo?quando si verifica?se la finestra viene chiusa?	
 #endif
-	qDebug("end rendering at %i",tt.elapsed());
-	
+	//qDebug("end rendering at %i",tt.elapsed());
+/*	
 	//the rendering result image is copied in mesh folder
 	QString meshDir(m.fileName.c_str());
 	meshDir = getDirFromPath(&meshDir);
@@ -551,15 +551,29 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//delete all created files (if it's required)
 	qDebug("end: %i",tt.elapsed());
 	Log(GLLogStream::FILTER,"Successfully created high quality image");
-
+*/
 	return true;
 }
 
 void FilterHighQualityRender::updateOutputProcess() {
 	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
-	out = QStringList(out.trimmed().split(' ')).last();
+	//the format is a number which say the percentage (maybe more that one)
+	out = QStringList(out.trimmed().split(' ')).last(); //take only last
 	//qDebug("aqsis.exe output: %s",qPrintable(out));
-	cb(int(out.toFloat()), "Rendering image with Aqsis");
+	cb(int(out.toFloat()), "Rendering image with Aqsis"); //update progress bar
+}
+void FilterHighQualityRender::finish(int a,QProcess::ExitStatus b){
+	qDebug("aqsis.exe finished");
+	Log(GLLogStream::FILTER,"Aqsis has rendered image successfully");
+	cb(0, "");
+	//ho bisogno di alcune info per questi:
+	//copia l'immagine creata
+	//cancella file temporanei
+}
+
+void FilterHighQualityRender::errSgn() {
+	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardError().data());
+	qDebug("aqsis.exe error: %s",qPrintable(out));
 }
 
 //rivedere....nome file

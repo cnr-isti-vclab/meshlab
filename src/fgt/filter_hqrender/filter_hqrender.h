@@ -32,6 +32,8 @@ public:
 
 private slots:
   void updateOutputProcess();
+  void finish(int a,QProcess::ExitStatus b);
+  void errSgn();
 
 private:
   vcg::CallBackPos * cb;
