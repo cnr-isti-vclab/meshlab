@@ -85,7 +85,7 @@ public:
     virtual void Decorate(QAction *a, MeshModel &m,  GLArea *gla,QFont qf);
     virtual void initGlobalParameterSet(QAction *, RichParameterSet  * /*globalparam*/);
 private:
-    DecorateShader* _decorator;
+    DecorateShader* _decoratorSH, *_decoratorSSAO;
     inline const QString DecorateShadowSSAORadius() { return  "MeshLab::Decoration::SSAORadius" ; }
     inline const QString DecorateShadowMethod() { return  "MeshLab::Decoration::ShadowMethod" ; }
 };

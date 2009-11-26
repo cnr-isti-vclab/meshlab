@@ -40,7 +40,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
     switch(ID(action)){
         case DP_SHOW_SHADOW : {
             assert(!(parset->hasParameter(this->DecorateShadowMethod())));
-            int method = SH_MAP;//SH_MAP_VSM_BLUR;
+            int method = SH_MAP_VSM_BLUR;
             parset->addParam(
                     new RichEnum(
                         this->DecorateShadowMethod(),
@@ -88,41 +88,49 @@ bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, RichPara
             }
             switch (parset->getEnum(DecorateShadowMethod())){
                 case SH_MAP:
-                    this->_decorator = new ShadowMapping();
+                    this->_decoratorSH = new ShadowMapping();
                     break;
 
                 case SH_MAP_VSM:
-                    this->_decorator = new VarianceShadowMapping();
+                    this->_decoratorSH = new VarianceShadowMapping();
                     break;
 
                 case SH_MAP_VSM_BLUR:
-                    this->_decorator = new VarianceShadowMappingBlur();
+                    this->_decoratorSH = new VarianceShadowMappingBlur();
                     break;
 
                 default: assert(0);
             }
-            result = true;
-            break;
+            result = this->_decoratorSH->init();
+            return result;
+
         case DP_SHOW_SSAO:
             if(!parset->hasParameter(DecorateShadowMethod())){
                 qDebug("Unable to find uniform variable radius for SSAO shader");
                 assert(0);
             }
-            this->_decorator = new SSAO(parset->getFloat(DecorateShadowSSAORadius()));
-            result = true;
-            break;
+            this->_decoratorSSAO = new SSAO(parset->getFloat(DecorateShadowSSAORadius()));
+            result = this->_decoratorSSAO->init();
+            return result;
 
         default: assert(0);
     }
-
-    result = this->_decorator->init();
-    return result;
 }
 
-void DecorateShadowPlugin::Decorate(QAction *, MeshModel &m, GLArea *gla, QFont /*qf*/)
+void DecorateShadowPlugin::Decorate(QAction *action, MeshModel &m, GLArea *gla, QFont /*qf*/)
 {
     if(m.visible){
-            this->_decorator->runShader(m, gla);
+        switch(ID(action)){
+            case DP_SHOW_SHADOW :
+                this->_decoratorSH->runShader(m, gla);
+                break;
+
+            case DP_SHOW_SSAO:
+                this->_decoratorSSAO->runShader(m, gla);
+                break;
+
+            default: assert(0);
+        }
     }
 }
 
