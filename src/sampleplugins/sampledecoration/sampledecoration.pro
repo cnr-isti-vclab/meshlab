@@ -1,13 +1,12 @@
-include (../../shared.pri)
-
+include (../../sharedfilter.pri)
 
 QT           += opengl
 
-HEADERS       = sampledecorate.h cubemap.h
+HEADERS       += sampledecorate.h cubemap.h
 
-SOURCES       = sampledecorate.cpp\ 
+SOURCES      += sampledecorate.cpp\ 
 		cubemap.cpp \
-		../../common/filterparameter.cpp \
+		../../common/pluginmanager.cpp \
 		$$GLEWCODE
 
 TARGET        = sampledecoration

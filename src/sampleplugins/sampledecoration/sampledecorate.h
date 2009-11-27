@@ -43,18 +43,17 @@ class SampleMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
-  virtual const QString Info(QAction *);
-  
+  QString filterName(FilterIDType filter) const;
+  QString filterInfo(QAction *) const;
+
   enum {
     DP_SHOW_CUBEMAPPED_ENV,
 		};
 
-  virtual const QString ST(FilterIDType filter) const;
-
 private:
 vcg::CICubeMap cm;
 
-inline const QString CubeMapPathParam() { return  "MeshLab::Decoration::CubeMapPath" ; }
+inline QString CubeMapPathParam() const { return  "MeshLab::Decoration::CubeMapPath" ; }
 
 public:
      
@@ -65,7 +64,7 @@ public:
 
     FilterIDType tt;
     foreach(tt , types()){
-	      actionList << new QAction(ST(tt), this);
+	      actionList << new QAction(filterName(tt), this);
     }
     QAction *ap;
     foreach(ap,actionList){
@@ -78,7 +77,7 @@ public:
 	
 	bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*parent*/ par, GLArea * /*parent*/);
   void Decorate(QAction *a, MeshModel &m, GLArea *gla,QFont qf);
-	void initGlobalParameterSet(QAction *, RichParameterSet * /*globalparam*/);	
+	void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);	
 		
 };
 

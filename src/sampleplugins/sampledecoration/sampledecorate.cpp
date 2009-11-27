@@ -38,26 +38,36 @@ New small samples
 #include <wrap/gl/addons.h>
 
 #include <meshlab/glarea.h>
+#include <common/pluginmanager.h>
 
 
 
 using namespace vcg;
 
-const QString SampleMeshDecoratePlugin::Info(QAction *action)
- {
-  switch(ID(action))
-  {
-    case DP_SHOW_CUBEMAPPED_ENV :      return tr("Draws a cube mapped background");
- 	 }
-  assert(0);
-  return QString();
- }
- 
-void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, RichParameterSet *parset) 
+QString SampleMeshDecoratePlugin::filterInfo(QAction *action) const
 {
-	assert(!parset->hasParameter(CubeMapPathParam()));
-	QString cubemapDirPath = MainWindowInterface::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
-	parset->addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
+	switch(ID(action))
+	{
+	case DP_SHOW_CUBEMAPPED_ENV :      return tr("Draws a customizable cube mapped background that is sync with trackball rotation");
+	}
+	assert(0);
+	return QString();
+}
+QString SampleMeshDecoratePlugin::filterName(FilterIDType id) const
+{
+	switch(id)
+	{
+	case DP_SHOW_CUBEMAPPED_ENV :      return tr("Cube mapped background");
+	}
+	assert(0);
+	return QString();
+}
+
+void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, RichParameterSet &parset) 
+{
+	assert(!parset.hasParameter(CubeMapPathParam()));
+	QString cubemapDirPath = PluginManager::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
+	parset.addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
 }		
 		
 bool SampleMeshDecoratePlugin::StartDecorate( QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * parset, GLArea * /*parent*/ )
@@ -70,67 +80,53 @@ bool SampleMeshDecoratePlugin::StartDecorate( QAction * /*mode*/, MeshModel &/*m
 	return true;
 }
 
-const QString SampleMeshDecoratePlugin::ST(FilterIDType filter) const
-{
-  switch(filter)
-  {
-    case DP_SHOW_CUBEMAPPED_ENV      : return QString("Cubemapped Environment");
-    default: assert(0);
-  }
-  return QString("error!");
-}
-
 void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QFont /*qf*/)
 {
 	static QString lastname("unitialized");
-  if(a->text() != ST(DP_SHOW_CUBEMAPPED_ENV))	assert(0);
-	
-	if(!cm.IsValid())
+	switch(ID(a))
 	{
-		if(lastname != basename ) 
+	  case DP_SHOW_CUBEMAPPED_ENV :
 		{
-			qDebug( "Current CubeMapPath Dir: %s ",qPrintable(basename)); 
+			if(a->text() != filterName(DP_SHOW_CUBEMAPPED_ENV))	assert(0);
+			if(!cm.IsValid())
+			{
+				if(lastname != basename ) 
+				{
+					qDebug( "Current CubeMapPath Dir: %s ",qPrintable(basename)); 
+					glewInit();
+					bool ret = cm.Load(qPrintable(basename));
+					lastname=basename;
+					if(! ret ) QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + basename );
+					cm.radius=10;
+				}
+			}
+			if(!cm.IsValid()) return;
+			Matrix44f tr;
+			glGetv(GL_MODELVIEW_MATRIX,tr);
+			
+			// Remove the translation from the current matrix by simply padding the last column of the matrix
+			tr[0][3]=0;
+			tr[1][3]=0;
+			tr[2][3]=0;
+			tr[3][3]=1;
+			
+			//Remove the scaling from the the current matrix by adding an inverse scaling matrix
+			float scale = 1.0/pow(tr.Determinant(),1.0f/3.0f);
+			Matrix44f Scale; 
+			Scale.SetDiagonal(scale);
+			tr=tr*Scale;
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+				cm.DrawEnvCube(tr);
+			glPopMatrix();
 
-			glewInit();
-			bool ret = cm.Load(qPrintable(basename));
-			lastname=basename;
-			if(! ret ) 
-				QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + basename );
-		//	cm.radius= m.cm.bbox.Diag()/2;
-			cm.radius=10;
-		}
+			glMatrixMode(GL_PROJECTION);
+			glPopMatrix();
+			glMatrixMode(GL_MODELVIEW);
+			}
 	}
-	if(!cm.IsValid()) return;
-	Matrix44f tr;
-	glGetv(GL_MODELVIEW_MATRIX,tr);
-	
-	// Remove the translation from the current matrix by simply padding the last column of the matrix
- 	tr[0][3]=0;
-	tr[1][3]=0;
-	tr[2][3]=0;
-	tr[3][3]=1;
-	
-	//Remove the scaling from the the current matrix by adding an inverse scaling matrix
-	float scale = 1.0/pow(tr.Determinant(),1.0f/3.0f);
-	Matrix44f Scale; 
-	Scale.SetDiagonal(scale);
-	tr=tr*Scale;
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-//	glLoadIdentity();
-//	GLfloat fAspect = (GLfloat)gla->width()/ gla->height();
-//	float ratio= gla->ratio;
-//	if(gla->fov==5)		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,0, 15);
-//	   else    		gluPerspective(gla->fov, fAspect, .1, 20);
-
-  glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-		cm.DrawEnvCube(tr);
-	glPopMatrix();
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
 }
 
 Q_EXPORT_PLUGIN(SampleMeshDecoratePlugin)
