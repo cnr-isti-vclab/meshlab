@@ -16,7 +16,7 @@ enum TypeIO{IMPORT,EXPORT};
 	inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
 	void LoadFormats(QStringList &filters, QHash<QString, MeshIOInterface*> &allKnownFormats, int type);
 	static QString getPluginDirPath();
-	static QString PluginManager::getBaseDirPath();
+    static QString getBaseDirPath();
 
 	QDir pluginsDir;
 	QMap<QString,QAction*> actionFilterMap;
