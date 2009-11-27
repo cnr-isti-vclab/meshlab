@@ -315,50 +315,50 @@ void Truncated_Octahedron(MeshType &in)
  ivp[23]=&*vi;(*vi).P()=CoordType  (-2,-1, 0);
 
  FaceIterator fi=in.face.begin();
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];  ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[1];
+ (*fi).V(0)=ivp[4];  (*fi).V(1)=ivp[10];  (*fi).V(2)=ivp[5];  ++fi;
+ (*fi).V(0)=ivp[4];  (*fi).V(1)=ivp[5];  (*fi).V(2)=ivp[14];  ++fi;
+ (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[13];  (*fi).V(2)=ivp[1];  ++fi;
+ (*fi).V(0)=ivp[1];  (*fi).V(1)=ivp[9];  (*fi).V(2)=ivp[3];  ++fi;
+ (*fi).V(0)=ivp[21];  (*fi).V(1)=ivp[17];  (*fi).V(2)=ivp[20];  ++fi;
+ (*fi).V(0)=ivp[20];  (*fi).V(1)=ivp[16];  (*fi).V(2)=ivp[21];  ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[8];  (*fi).V(2)=ivp[0];  ++fi;
+ (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[12];  (*fi).V(2)=ivp[2];  ++fi;
+ (*fi).V(0)=ivp[23];  (*fi).V(1)=ivp[18];  (*fi).V(2)=ivp[22];  ++fi;
+ (*fi).V(0)=ivp[22];  (*fi).V(1)=ivp[19];  (*fi).V(2)=ivp[23];  ++fi;
+ (*fi).V(0)=ivp[11];  (*fi).V(1)=ivp[6];  (*fi).V(2)=ivp[15];  ++fi;
+ (*fi).V(0)=ivp[15];  (*fi).V(1)=ivp[7];  (*fi).V(2)=ivp[11];  ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[12];  (*fi).V(2)=ivp[18];  ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[18];  (*fi).V(2)=ivp[23];  ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[23];  (*fi).V(2)=ivp[15];  ++fi;
+ (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[15];  (*fi).V(2)=ivp[6];  ++fi;
+ (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[15];  (*fi).V(2)=ivp[23];  ++fi;
+ (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[23];  (*fi).V(2)=ivp[19];  ++fi;
+ (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[19];  (*fi).V(2)=ivp[13];  ++fi;
+ (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[13];  (*fi).V(2)=ivp[3];  ++fi;
+ (*fi).V(0)=ivp[21];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[7];  ++fi;
+ (*fi).V(0)=ivp[21];  (*fi).V(1)=ivp[7];  (*fi).V(2)=ivp[3];  ++fi;
+ (*fi).V(0)=ivp[21];  (*fi).V(1)=ivp[3];  (*fi).V(2)=ivp[9];  ++fi;
+ (*fi).V(0)=ivp[21];  (*fi).V(1)=ivp[9];  (*fi).V(2)=ivp[17];  ++fi;
+ (*fi).V(0)=ivp[12];  (*fi).V(1)=ivp[0];  (*fi).V(2)=ivp[4];  ++fi;
+ (*fi).V(0)=ivp[12];  (*fi).V(1)=ivp[4];  (*fi).V(2)=ivp[14];  ++fi;
+ (*fi).V(0)=ivp[12];  (*fi).V(1)=ivp[14];  (*fi).V(2)=ivp[22];  ++fi;
+ (*fi).V(0)=ivp[12];  (*fi).V(1)=ivp[22];  (*fi).V(2)=ivp[18];  ++fi;
+ (*fi).V(0)=ivp[16];  (*fi).V(1)=ivp[20];  (*fi).V(2)=ivp[10];  ++fi;
+ (*fi).V(0)=ivp[16];  (*fi).V(1)=ivp[10];  (*fi).V(2)=ivp[4];  ++fi;
+ (*fi).V(0)=ivp[16];  (*fi).V(1)=ivp[4];  (*fi).V(2)=ivp[0];  ++fi;
+ (*fi).V(0)=ivp[16];  (*fi).V(1)=ivp[0];  (*fi).V(2)=ivp[8];  ++fi;
+ (*fi).V(0)=ivp[10];  (*fi).V(1)=ivp[20];  (*fi).V(2)=ivp[17];  ++fi;
+ (*fi).V(0)=ivp[10];  (*fi).V(1)=ivp[17];  (*fi).V(2)=ivp[9];  ++fi;
+ (*fi).V(0)=ivp[10];  (*fi).V(1)=ivp[9];  (*fi).V(2)=ivp[1];  ++fi;
+ (*fi).V(0)=ivp[10];  (*fi).V(1)=ivp[1];  (*fi).V(2)=ivp[5];  ++fi;
+ (*fi).V(0)=ivp[14];  (*fi).V(1)=ivp[5];  (*fi).V(2)=ivp[1];  ++fi;
+ (*fi).V(0)=ivp[14];  (*fi).V(1)=ivp[1];  (*fi).V(2)=ivp[13];  ++fi;
+ (*fi).V(0)=ivp[14];  (*fi).V(1)=ivp[13];  (*fi).V(2)=ivp[19];  ++fi;
+ (*fi).V(0)=ivp[14];  (*fi).V(1)=ivp[19];  (*fi).V(2)=ivp[22];  ++fi;
+ (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[2];  (*fi).V(2)=ivp[6];  ++fi;
+ (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[6];  (*fi).V(2)=ivp[11];  ++fi;
+ (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[11];  (*fi).V(2)=ivp[21];  ++fi;
+ (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[21];  (*fi).V(2)=ivp[16];
 
   if (in.HasPerFaceFlags()) {
     FaceIterator fi=in.face.begin();
@@ -473,21 +473,69 @@ void Rhombicuboctahedron(MeshType &in)
 template <class MeshType>
 void Truncated_cuboctahedron(MeshType &in)
 {
-    /* F = 26, V = 48
-       Perm(±1, ±(1+√2), ±(1+√8))
+    /*
     */
 }
 
-/****************************************
-TODO:
-    snub cube
-    icosidodecahedron
-    truncated dodecahedron
-    truncated icosahedron (soccer ball)
-    rhombicosidodecahedron
-    truncated icosidodecahedron
-    snub dodecahedron
-**************************************************/
+
+template <class MeshType>
+void Snub_Cube(MeshType &in)
+{
+    /*
+    */
+
+}
+
+
+template <class MeshType>
+void Icosidodecahedron(MeshType &in)
+{
+    /*
+    */
+
+}
+
+
+template <class MeshType>
+void Truncated_Dodecahedron(MeshType &in)
+{
+    /*
+    */
+
+}
+
+// (soccer ball)
+template <class MeshType>
+void Truncated_Icosahedron(MeshType &in)
+{
+    /*
+    */
+
+}
+
+template <class MeshType>
+void Rhombicosidodecahedron(MeshType &in)
+{
+    /*
+    */
+
+}
+
+template <class MeshType>
+void Truncated_Icosidodecahedron(MeshType &in)
+{
+    /*
+    */
+
+}
+
+template <class MeshType>
+void Snub_Dodecahedron(MeshType &in)
+{
+    /*
+    */
+
+}
 
 } // End Namespace TriMesh
 } // End Namespace vcg
