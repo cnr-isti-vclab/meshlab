@@ -25,6 +25,8 @@
 #include "../meshlab/meshmodel.h"
 #include "../meshlab/interfaces.h"
 #include "../common/filterscript.h"
+#include "../common/pluginmanager.h"
+
 #include "../meshlab/plugin_support.h"
 #include <vcg/complex/trimesh/update/bounding.h>
 
@@ -38,10 +40,8 @@ public:
 	bool operator <(const FilterData &d) const {return name<d.name;}
 };
 
-class FilterOrganizer
-{
-
-};
+PluginManager PM;
+RichParameterSet defaultGlobal;
 
 QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
 std::vector<MeshIOInterface*> meshIOPlugins;
@@ -55,48 +55,15 @@ std::vector<MeshIOInterface*> meshIOPlugins;
 
 void loadPlugins(FILE *fp=0)
 {
-	QDir pluginsDir = QDir(qApp->applicationDirPath());
-#if defined(Q_OS_WIN)
-	if (pluginsDir.dirName() == "debug" || pluginsDir.dirName() == "release")
-		pluginsDir.cdUp();
-#elif defined(Q_OS_MAC)
-	if (pluginsDir.dirName() == "MacOS") {
-		pluginsDir.cdUp();
-		pluginsDir.cdUp();
-		pluginsDir.cdUp();
-	}
-	int cnt=0;
-	while(++cnt <4 && !pluginsDir.exists("../meshlab/plugins") )
-				pluginsDir.cdUp();
-#endif
-	pluginsDir.cd("../meshlab");
-	if(!pluginsDir.exists("plugins"))
-	{
-		printf(	"Error!\n We are not able to find the plugins directory\n"
-						"We searched in '%s'\n\n", qPrintable(pluginsDir.path()));
-	}
-	pluginsDir.cd("plugins");
+    PM.loadPlugins(defaultGlobal);
 
-	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
-		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
-		QObject *plugin = loader.instance();
-		
-		if (plugin) {		
-			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-			if (iFilter){ 
-				QAction *filterAction;
-				int oldSize = filterMap.size();
-				foreach(filterAction, iFilter->actions())
-				{
-					filterMap[filterAction->text()]=filterAction;
-					 if(fp) fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
-				}
-				//printf("Loaded %i filtering actions form %s\n", filterMap.size() - oldSize, qPrintable(fileName));
-			}
-			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			if (iIO)	meshIOPlugins.push_back(iIO);
-		}
-	}
+    if(fp) 
+    {
+        foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins()) 
+            foreach(QAction *filterAction, iFilter->actions())
+                fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
+    }
+
 	printf("Total %i filtering actions\n", filterMap.size());
 	printf("Total %i io plugins\n", meshIOPlugins.size());
 }
@@ -108,9 +75,9 @@ bool Open(MeshModel &mm, QString fileName)
 	
 	// HashTable storing all supported formats togheter with
 	// the (1-based) index  of first plugin which is able to open it
-	QHash<QString, int> allKnownFormats;
+    QHash<QString, MeshIOInterface*> allKnownFormats;
 	
-	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
+    PM.LoadFormats(filters, allKnownFormats,IMPORT);
 
 	QFileInfo fi(fileName);
 	QDir curdir= QDir::current();
@@ -120,16 +87,12 @@ bool Open(MeshModel &mm, QString fileName)
 	QString extension = fi.suffix();
 	qDebug("Opening a file with extention %s",qPrintable(extension));
 	// retrieving corresponding IO plugin
-	int idx = allKnownFormats[extension.toLower()];
-	if (idx == 0)
+    MeshIOInterface* pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+    if (pCurrentIOPlugin == 0)
 	{	
-    printf("Error encountered while opening file: ");
-		//QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
-		//QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
-		return false;
+        printf("Error encountered while opening file: ");
+        return false;
 	}
-	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-	
 	int mask = 0;
 	
 	RichParameterSet prePar;
@@ -152,9 +115,9 @@ bool Save(MeshModel *mm, int mask, QString fileName)
 	
 	// HashTable storing all supported formats togheter with
 	// the (1-based) index  of first plugin which is able to open it
-	QHash<QString, int> allKnownFormats;
+    QHash<QString, MeshIOInterface*> allKnownFormats;
 	
-	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
+    PM.LoadFormats( filters, allKnownFormats,EXPORT);
 
 	QFileInfo fi(fileName);
 	// this change of dir is needed for subsequent textures/materials loading
@@ -163,27 +126,26 @@ bool Save(MeshModel *mm, int mask, QString fileName)
 	QString extension = fi.suffix();
 	
 	// retrieving corresponding IO plugin
-	int idx = allKnownFormats[extension.toLower()];
-	if (idx == 0)
+    MeshIOInterface* pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+    if (pCurrentIOPlugin == 0)
 	{	
     printf("Error encountered while opening file: ");
 		//QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
 		//QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
 		return false;
 	}
-	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-	
+
 	// optional saving parameters (like ascii/binary encoding)
 	RichParameterSet savePar;
 	pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
 	
 	if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask, savePar))
-  {
-    printf("Failed saving\n");
-    return false;
-  }
+    {
+        printf("Failed saving\n");
+        return false;
+    }
 
-  return true;
+    return true;
 }
 
 
