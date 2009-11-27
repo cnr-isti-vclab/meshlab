@@ -64,15 +64,16 @@ MainWindow::MainWindow()
         icon.addPixmap(QPixmap(":images/eye48.png"));
         setWindowIcon(icon);
 
+	PM.loadPlugins(defaultGlobalParams);
+	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
+	loadMeshLabSettings();
 	createActions();
-	createMenus();
 	createToolBars();
+	createMenus();
 	stddialog = 0;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(appName());
-	loadPlugins();
-	loadMeshLabSettings();
 	setStatusBar(new QStatusBar(this));
 	globalStatusBar()=statusBar();
 	qb=new QProgressBar(this);
@@ -316,6 +317,17 @@ void MainWindow::createToolBars()
 	editToolBar->addSeparator();
 
 	filterToolBar = addToolBar(tr("Action"));
+
+	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
+	{		
+		foreach(QAction* editAction, iEditFactory->actions())
+		{
+			if(!editAction->icon().isNull())
+			{
+				editToolBar->addAction(editAction);
+			} else qDebug() << "action was null";
+		}
+	}
 }
 
 
@@ -361,9 +373,10 @@ void MainWindow::createMenus()
 	filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
 	filterMenuLayer = filterMenu->addMenu(tr("Layer and Attribute Management"));
 	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
-  filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
-  filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
+	filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
+	filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
 	filterMenuTexture = filterMenu->addMenu(tr("Texture"));
+	
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
@@ -444,142 +457,216 @@ void MainWindow::createMenus()
 	helpMenu->addAction(onscreenHelpAct);
 	helpMenu->addAction(submitBugAct);
 	helpMenu->addAction(checkUpdatesAct);
+
+	fillFilterMenu();
+	fillEditMenu();
+	fillRenderMenu();
+	fillDecorateMenu();
 }
+
+void MainWindow::fillFilterMenu()
+{
+	foreach(MeshFilterInterface *iFilter,PM.meshFilterPlugins())
+	{
+		foreach(QAction *filterAction, iFilter->actions())
+		{
+			filterAction->setToolTip(iFilter->filterInfo(filterAction));
+			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
+			int filterClass = iFilter->getClass(filterAction);
+
+			if( (filterClass & MeshFilterInterface::FaceColoring) || (filterClass & MeshFilterInterface::VertexColoring) ) filterMenuColorize->addAction(filterAction);
+			if(filterClass & MeshFilterInterface::Selection) filterMenuSelect->addAction(filterAction);
+			if(filterClass &  MeshFilterInterface::Cleaning ) filterMenuClean->addAction(filterAction);
+			if(filterClass &  MeshFilterInterface::Remeshing ) filterMenuRemeshing->addAction(filterAction);
+			if(filterClass &  MeshFilterInterface::Smoothing ) filterMenuSmoothing->addAction(filterAction);
+			if(filterClass &  MeshFilterInterface::Normal ) filterMenuNormal->addAction(filterAction);
+			if( (filterClass &  MeshFilterInterface::Quality ) || (filterClass & MeshFilterInterface::Measure  )	)	 filterMenuQuality->addAction(filterAction);
+			if(filterClass &  MeshFilterInterface::Layer ) filterMenuLayer->addAction(filterAction);
+			if(filterClass & MeshFilterInterface::MeshCreation ) fileMenuNew->addAction(filterAction);
+			if(filterClass & MeshFilterInterface::RangeMap )	filterMenuRangeMap->addAction(filterAction);
+			if(filterClass & MeshFilterInterface::PointSet )	filterMenuPointSet->addAction(filterAction);
+			if(filterClass & MeshFilterInterface::Sampling )	filterMenuSampling->addAction(filterAction);
+			if(filterClass & MeshFilterInterface::Texture)		filterMenuTexture->addAction(filterAction);
+			 //  MeshFilterInterface::Generic :
+			if(filterClass == 0) filterMenu->addAction(filterAction);
+
+			if(!filterAction->icon().isNull())
+				filterToolBar->addAction(filterAction);
+		}
+	}	
+}
+
+void MainWindow::fillDecorateMenu()
+{
+	foreach(MeshDecorateInterface *iDecorate,PM.meshDecoratePlugins())
+	{
+		foreach(QAction *decorateAction, iDecorate->actions())
+		{
+			connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
+			decorateAction->setToolTip(iDecorate->filterInfo(decorateAction));
+			renderMenu->addAction(decorateAction);
+		}
+	}
+}
+
+void MainWindow::fillRenderMenu()
+{
+	foreach(MeshRenderInterface *iRender,PM.meshRenderPlugins())
+	{
+		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
+	}
+}
+
+void MainWindow::fillEditMenu()
+{
+	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
+	{		
+		foreach(QAction* editAction, iEditFactory->actions())
+		{
+			editMenu->addAction(editAction);
+
+			connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
+			editActionList.push_back(editAction);
+		}
+	}
+}
+
 
 void MainWindow::loadPlugins()
 {
-	pluginsDir=QDir(getPluginDirPath());
-	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-	qApp->addLibraryPath(getPluginDirPath());
-	qApp->addLibraryPath(getBaseDirPath());
-	
-	QStringList pluginfilters;
-#if defined(Q_OS_WIN)
-	pluginfilters << "*.dll";		
-#elif defined(Q_OS_MAC)
-	pluginfilters << "*.dylib";		
-#else
-#endif
-	pluginsDir.setNameFilters(pluginfilters);
-
-	qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
-	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
-		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
-		QObject *plugin = loader.instance();
-
-		if (plugin) {
-		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-			if (iFilter)
-      {
-
-        QAction *filterAction;
-        
-				foreach(filterAction, iFilter->actions())
-        {
-					//qDebug("Processing action %s",qPrintable(filterAction->text()) );
-					//qDebug("          (%s)", qPrintable(iFilter->filterInfo(filterAction)) );
-					iFilter->initGlobalParameterSet(filterAction,defaultGlobalParams);
-					filterMap[filterAction->text()]=filterAction;
-          filterAction->setToolTip(iFilter->filterInfo(filterAction));
-          connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
-          int filterClass = iFilter->getClass(filterAction);
-
-          if( (filterClass & MeshFilterInterface::FaceColoring) ||
-              (filterClass & MeshFilterInterface::VertexColoring) )
-              		filterMenuColorize->addAction(filterAction);
-					if(filterClass & MeshFilterInterface::Selection)
-              		filterMenuSelect->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Cleaning )
-              		filterMenuClean->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Remeshing )
-              		filterMenuRemeshing->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Smoothing )
-              		filterMenuSmoothing->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Normal )
-              		filterMenuNormal->addAction(filterAction);
-					if( (filterClass &  MeshFilterInterface::Quality ) ||
-              (filterClass & MeshFilterInterface::Measure  )	)				
-              		filterMenuQuality->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Layer )
-              		filterMenuLayer->addAction(filterAction);
-					if(filterClass & MeshFilterInterface::MeshCreation )
-              		fileMenuNew->addAction(filterAction);
-					if(filterClass & MeshFilterInterface::RangeMap )
-              		filterMenuRangeMap->addAction(filterAction);
-          if(filterClass & MeshFilterInterface::PointSet )
-                  filterMenuPointSet->addAction(filterAction);
-          if(filterClass & MeshFilterInterface::Sampling )
-									filterMenuSampling->addAction(filterAction);
-			if (filterClass & MeshFilterInterface::Texture)
-				filterMenuTexture->addAction(filterAction);
-					if(filterClass == 0) //  MeshFilterInterface::Generic :
-									filterMenu->addAction(filterAction);
-
-					if(!filterAction->icon().isNull())
-										filterToolBar->addAction(filterAction);
-        }
-       }
-		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			if (iIO) 
-				meshIOPlugins.push_back(iIO);
-
-			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
-			if (iDecorator){
-				QAction *decoratorAction;
-				decoratorActionList+=iDecorator->actions();
-				foreach(decoratorAction, iDecorator->actions())
-						{
-							iDecorator->initGlobalParameterSet(decoratorAction,&defaultGlobalParams);
-								connect(decoratorAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
-								decoratorAction->setToolTip(iDecorator->Info(decoratorAction));
-								renderMenu->addAction(decoratorAction);
-						}
-			}
-
-			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
-			if (iRender)
-			  addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
-/*
-			MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
-			QAction *editAction;
-			if (iEdit)
-        foreach(editAction, iEdit->actions())
-        {
-			    editMenu->addAction(editAction);
-          if(!editAction->icon().isNull())
-              editToolBar->addAction(editAction);
-          connect(editAction,SIGNAL(triggered()),this,SLOT(applyEditMode()));
-          editActionList.push_back(editAction);
-        }
-*/		
-			MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
-			QAction *editAction = 0;
-			if(iEditFactory)
-			{
-				//qDebug() << "Here with filename:" << fileName;
-				
-				foreach(editAction, iEditFactory->actions())
-				{
-					editMenu->addAction(editAction);
-					if(!editAction->icon().isNull())
-					{
-						editToolBar->addAction(editAction);
-					} else qDebug() << "action was null";
-					
-					connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
-					editActionList.push_back(editAction);
-				}
-			}
-			
-			pluginFileNames += fileName;
-		} else
-		{
-			qDebug() << "error loading plugin with filename:" << fileName;
-			qDebug() << loader.errorString();
-        }
-	}
-	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && mdiarea->activeSubWindow());
-
+	//PM.loadPlugins();
+//	pluginsDir=QDir(getPluginDirPath());
+//	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
+//	qApp->addLibraryPath(getPluginDirPath());
+//	qApp->addLibraryPath(getBaseDirPath());
+//	
+//	QStringList pluginfilters;
+//#if defined(Q_OS_WIN)
+//	pluginfilters << "*.dll";		
+//#elif defined(Q_OS_MAC)
+//	pluginfilters << "*.dylib";		
+//#else
+//#endif
+//	pluginsDir.setNameFilters(pluginfilters);
+//
+//	qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
+//	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+//		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
+//		QObject *plugin = loader.instance();
+//
+//		if (plugin) {
+//		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+//			if (iFilter)
+//      {
+//
+//        QAction *filterAction;
+//        
+//				foreach(filterAction, iFilter->actions())
+//        {
+//					//qDebug("Processing action %s",qPrintable(filterAction->text()) );
+//					//qDebug("          (%s)", qPrintable(iFilter->filterInfo(filterAction)) );
+//					iFilter->initGlobalParameterSet(filterAction,defaultGlobalParams);
+//					filterMap[filterAction->text()]=filterAction;
+//          filterAction->setToolTip(iFilter->filterInfo(filterAction));
+//          connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
+//          int filterClass = iFilter->getClass(filterAction);
+//
+//          if( (filterClass & MeshFilterInterface::FaceColoring) ||
+//              (filterClass & MeshFilterInterface::VertexColoring) )
+//              		filterMenuColorize->addAction(filterAction);
+//					if(filterClass & MeshFilterInterface::Selection)
+//              		filterMenuSelect->addAction(filterAction);
+//					if(filterClass &  MeshFilterInterface::Cleaning )
+//              		filterMenuClean->addAction(filterAction);
+//					if(filterClass &  MeshFilterInterface::Remeshing )
+//              		filterMenuRemeshing->addAction(filterAction);
+//					if(filterClass &  MeshFilterInterface::Smoothing )
+//              		filterMenuSmoothing->addAction(filterAction);
+//					if(filterClass &  MeshFilterInterface::Normal )
+//              		filterMenuNormal->addAction(filterAction);
+//					if( (filterClass &  MeshFilterInterface::Quality ) ||
+//              (filterClass & MeshFilterInterface::Measure  )	)				
+//              		filterMenuQuality->addAction(filterAction);
+//					if(filterClass &  MeshFilterInterface::Layer )
+//              		filterMenuLayer->addAction(filterAction);
+//					if(filterClass & MeshFilterInterface::MeshCreation )
+//              		fileMenuNew->addAction(filterAction);
+//					if(filterClass & MeshFilterInterface::RangeMap )
+//              		filterMenuRangeMap->addAction(filterAction);
+//          if(filterClass & MeshFilterInterface::PointSet )
+//                  filterMenuPointSet->addAction(filterAction);
+//          if(filterClass & MeshFilterInterface::Sampling )
+//									filterMenuSampling->addAction(filterAction);
+//			if (filterClass & MeshFilterInterface::Texture)
+//				filterMenuTexture->addAction(filterAction);
+//					if(filterClass == 0) //  MeshFilterInterface::Generic :
+//									filterMenu->addAction(filterAction);
+//
+//					if(!filterAction->icon().isNull())
+//										filterToolBar->addAction(filterAction);
+//        }
+//       }
+//		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+//			if (iIO) 
+//				meshIOPlugins.push_back(iIO);
+//
+//			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
+//			if (iDecorator){
+//				QAction *decoratorAction;
+//				decoratorActionList+=iDecorator->actions();
+//				foreach(decoratorAction, iDecorator->actions())
+//						{
+//							iDecorator->initGlobalParameterSet(decoratorAction,&defaultGlobalParams);
+//								connect(decoratorAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
+//								decoratorAction->setToolTip(iDecorator->Info(decoratorAction));
+//								renderMenu->addAction(decoratorAction);
+//						}
+//			}
+//
+//			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+//			if (iRender)
+//			  addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
+///*
+//			MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
+//			QAction *editAction;
+//			if (iEdit)
+//        foreach(editAction, iEdit->actions())
+//        {
+//			    editMenu->addAction(editAction);
+//          if(!editAction->icon().isNull())
+//              editToolBar->addAction(editAction);
+//          connect(editAction,SIGNAL(triggered()),this,SLOT(applyEditMode()));
+//          editActionList.push_back(editAction);
+//        }
+//*/		
+//			MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+//			QAction *editAction = 0;
+//			if(iEditFactory)
+//			{
+//				//qDebug() << "Here with filename:" << fileName;
+//				
+//				foreach(editAction, iEditFactory->actions())
+//				{
+//					editMenu->addAction(editAction);
+//					if(!editAction->icon().isNull())
+//					{
+//						editToolBar->addAction(editAction);
+//					} else qDebug() << "action was null";
+//					
+//					connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
+//					editActionList.push_back(editAction);
+//				}
+//			}
+//			
+//			pluginFileNames += fileName;
+//		} else
+//		{
+//			qDebug() << "error loading plugin with filename:" << fileName;
+//			qDebug() << loader.errorString();
+//        }
+//	}
+//	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && mdiarea->activeSubWindow());
+//
 }
 
 
@@ -784,5 +871,4 @@ void MainWindow::wrapSetActiveSubWindow(QWidget* window){
 		qDebug("Type of window is not a QMdiSubWindow*");
 	}
 }
-
 

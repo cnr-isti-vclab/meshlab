@@ -43,11 +43,88 @@ class RenderMode;
 class GLArea;
 
 
+
+
 // The basic interface for opening and saving a mesh.
 // The plugins for opening and saving different mesh types must be derived from this class.
 //
 
-class MeshIOInterface
+class MeshLabInterface
+{
+public:
+	typedef int FilterIDType;
+	MeshLabInterface() :log(0) {}; 
+
+	GLLogStream *log;	
+	
+	
+	/// Standard stuff that usually should not be redefined. 
+	void setLog(GLLogStream *log) { this->log = log ; }
+	// This fucntion must be used to communicate useful information collected in the parsing/saving of the files. 
+	// NEVER EVER use a msgbox to say something to the user.
+	void Log(const char * f, ... ) 
+	{
+		if(log)
+		{	
+			char buf[4096];
+			va_list marker;
+			va_start( marker, f );     
+			vsprintf(buf,f,marker);
+			va_end( marker );              
+			log->Log(GLLogStream::FILTER,buf);
+		}
+	}
+
+	void Log(int Level, const char * f, ... ) 
+	{
+		if(log)
+		{	
+			char buf[4096];
+			va_list marker;
+			va_start( marker, f );     
+			vsprintf(buf,f,marker);
+			va_end( marker );              
+			log->Log(Level,buf);
+		}
+	}
+
+	// This function is called by the framework, for each decoration at the start of the plugins.
+	// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
+	// For the global parameters the following rules apply:
+	// * there is a *hardwired* default value, that is directly coded into the plugin
+	// * there is a *saved* value that is stored into persistent location into the user space (registry/home/library) and it is stored in the classical default value of the parameter
+	// * there is a *current* value that is currently used, different for each decoration instance and that is not stored permanently.
+	//
+	// The plugin use the current value to draw its decoration.
+	// at startup the current value is always silently initialized to the saved value.
+	// User can revert current value to the saved values and to the hardwired values. 
+	// In the dialog for each parameter some buttons should be present:
+	// 
+	// * load (from the registry), 
+	// * save (to the registry), 
+	// * reset (from the hardwired).
+
+	// If your plugins/action has no GlobalParameter, do nothing.
+	// The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
+	// At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values) 
+	// If a filter wants to save some permanent stuff should set the permanent default values.
+
+	virtual void initGlobalParameterSet(QAction * /*format*/, RichParameterSet & /*globalparam*/) {}
+
+	// The longer string describing each filtering action. 
+	// This string is printed in the top of the parameter window 
+	// so it should be at least one or two paragraphs long.
+	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
+	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
+	virtual QString filterInfo(QAction* action) const =0;
+
+	// The very short string (a few words) describing each filtering action 
+	// This string is used also to define the menu entry
+	virtual QString filterName(FilterIDType ) const =0;
+
+};
+
+class MeshIOInterface : public MeshLabInterface
 {
 public:
 	class Format
@@ -58,7 +135,7 @@ public:
 		QStringList extensions;
 	};
 
-	MeshIOInterface() { log=0; }
+	MeshIOInterface(): MeshLabInterface() {  }
   virtual ~MeshIOInterface() {}
 	
 	virtual QList<Format> importFormats() const = 0;
@@ -70,16 +147,12 @@ public:
 	// so it should be at least one or two paragraphs long.
 	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
 	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
-	//virtual const QString filterInfo(FilterIDType filter) {return QString("Puppa 1");};
+	QString filterInfo(QAction* /*action*/) const {return QString();};
 
 	// The very short string (a few words) describing each filtering action 
 	// This string is used also to define the menu entry
-	//virtual const QString filterName(FilterIDType filter){return QString("Puppa 2");};
-	
-		// This function is called by the framework, for each action at the loading of the plugins.
-		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
-		// If your plugins/action has no GlobalParameter, do nothing.
-	virtual void initGlobalParameterSet(QString /*format*/, RichParameterSet & /*globalparam*/) {}
+	QString filterName(FilterIDType ) const {return QString();};
+
 	
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
 	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
@@ -127,33 +200,11 @@ public:
 	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
 	/// io plugins should avoid using QMessageBox for reporting errors. 
 	/// Failure should put some meaningful information inside the errorMessage string.
-	virtual const QString &errorMsg() {return this->errorMessage;}
+	virtual QString &errorMsg() {return this->errorMessage;}
 	
 	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
 	// NEVER EVER use a msgbox to say something to the user.
 	QString errorMessage;
-	
-	
-	GLLogStream *log;	
-		
-
-	/// Standard stuff that usually should not be redefined. 
-	void setLog(GLLogStream *log) { this->log = log ; }
-	// This fucntion must be used to communicate useful information collected in the parsing/saving of the files. 
-	// NEVER EVER use a msgbox to say something to the user.
-	void Log(const char * f, ... ) 
-		{
-			if(log)
-			{	
-				char buf[4096];
-				va_list marker;
-				va_start( marker, f );     
-				vsprintf(buf,f,marker);
-				va_end( marker );              
-				log->Log(GLLogStream::FILTER,buf);
-			}
-		}
-
 
 };
 
@@ -176,44 +227,44 @@ public:
 	// - on windows is in the installation dir
 	// - on macs it is in inside the application bundle (to allow easy application moving)
 	
-	static QString getBaseDirPath()
-	{
-		QDir baseDir(qApp->applicationDirPath());
-		
-		#if defined(Q_OS_WIN)
-		// Windows: 
-		// during development with visual studio binary could be in the debug/release subdir.
-		// once deployed plugins dir is in the application directory, so 
-				if (baseDir.dirName() == "debug" || baseDir.dirName() == "release")		baseDir.cdUp();
-		#endif 
+	//static QString getBaseDirPath()
+	//{
+	//	QDir baseDir(qApp->applicationDirPath());
+	//	
+	//	#if defined(Q_OS_WIN)
+	//	// Windows: 
+	//	// during development with visual studio binary could be in the debug/release subdir.
+	//	// once deployed plugins dir is in the application directory, so 
+	//			if (baseDir.dirName() == "debug" || baseDir.dirName() == "release")		baseDir.cdUp();
+	//	#endif 
 
-		#if defined(Q_OS_MAC)
-		// Mac: during developmentwith xcode  and well deployed the binary is well buried.
-				for(int i=0;i<6;++i){
-						if(baseDir.exists("plugins")) break;
-						baseDir.cdUp();
-					}
-		#endif
-		return baseDir.absolutePath();
-	}
-	
-	static QString getPluginDirPath()
-	{
-		QDir pluginsDir(getBaseDirPath());
-		if(!pluginsDir.exists("plugins"))
-				QMessageBox::warning(0,"Meshlab Initialization","Serious error. Unable to find the plugins directory.");
-		
-		pluginsDir.cd("plugins");
-		return pluginsDir.absolutePath();
-	}
+	//	#if defined(Q_OS_MAC)
+	//	// Mac: during developmentwith xcode  and well deployed the binary is well buried.
+	//			for(int i=0;i<6;++i){
+	//					if(baseDir.exists("plugins")) break;
+	//					baseDir.cdUp();
+	//				}
+	//	#endif
+	//	return baseDir.absolutePath();
+	//}
+	//
+	//static QString getPluginDirPath()
+	//{
+	//	QDir pluginsDir(getBaseDirPath());
+	//	if(!pluginsDir.exists("plugins"))
+	//			QMessageBox::warning(0,"Meshlab Initialization","Serious error. Unable to find the plugins directory.");
+	//	
+	//	pluginsDir.cd("plugins");
+	//	return pluginsDir.absolutePath();
+	//}
 };
 
 
 
-class MeshFilterInterface
+class MeshFilterInterface : public MeshLabInterface
 {
 public:
-  typedef int FilterIDType;
+ 
 	
 	// The FilterClass enum represents the set of keywords that must be used to categorize a filter.
 	// Each filter can belong to one or more filtering class, or-ed togheter. 
@@ -260,7 +311,8 @@ public:
 			FP_FaceColor        =0x00020, //  
 			FP_VertexTexCoord   =0x00040 //
 	};
-
+	
+	MeshFilterInterface() : MeshLabInterface() {}
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action. 
@@ -268,27 +320,22 @@ public:
 	// so it should be at least one or two paragraphs long.
 	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
 	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
-	virtual const QString filterInfo(FilterIDType filter) const =0;
+	virtual QString filterInfo(FilterIDType filter) const =0;
 	
 	// The very short string (a few words) describing each filtering action 
 	// This string is used also to define the menu entry
-	virtual const QString filterName(FilterIDType filter) const =0;
-	
-	// This function is called by the framework, for each action at the loading of the plugins.
-	// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
-	// If your plugins/action has no GlobalParameter, do nothing.
-	virtual void initGlobalParameterSet(QAction *, RichParameterSet & /*globalparam*/) {}
+	//virtual QString filterName(FilterIDType filter) const =0;
 
 	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
 	// For example filters that perform an action only on the selection will be placed in the Selection Class
-	virtual const FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
+	virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
 	
 	// The filters can have some additional requirements on the mesh capabiliteis. 
 	// For example if a filters requires Face-Face Adjacency you shoud re-implement 
 	// this function making it returns MeshModel::MM_FACEFACETOPO. 
 	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
-	virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}
+	virtual int getRequirements(QAction *){return MeshModel::MM_NONE;}
 	
 	// The FilterPrecondition mask is used to explicitate what a filter really needs to be applied. 
 	// For example algorithms that compute per face quality have as precondition the existence of faces 
@@ -378,8 +425,11 @@ public:
 	/// Filters should avoid using QMessageBox for reporting errors. 
 	/// Failing filters should put some meaningful information inside the errorMessage string.
 	const QString &errorMsg() {return this->errorMessage;}
+	virtual QString filterInfo(QAction *a) const {return this->filterInfo(ID(a));};
+	virtual QString filterName(QAction *a) const {return this->filterName(ID(a));};
+	virtual QString filterName(FilterIDType filterID) const =0;// const {return MeshLabInterface::filterName(filterID);};
 
-    virtual const FilterIDType ID(QAction *a) const
+    virtual FilterIDType ID(QAction *a) const
   	{
       foreach( FilterIDType tt, types())
         if( a->text() == this->filterName(tt) ) return tt;
@@ -401,11 +451,9 @@ public:
       return 0;
     }
 	 
-	 virtual const QString filterInfo(QAction *a){return this->filterInfo(ID(a));};
-	 virtual const QString filterName(QAction *a) const {return this->filterName(ID(a));};
 	 
     virtual QList<QAction *> actions() const { return actionList;}
-	  virtual const QList<FilterIDType> &types() const { return typeList;}
+	  virtual QList<FilterIDType> types() const { return typeList;}
 
 protected:
     // Each plugins exposes a set of filtering possibilities. 
@@ -417,34 +465,6 @@ protected:
     
 		QList <FilterIDType> typeList;
     
-		void Log(const char * f, ... ) 
-		{
-			if(log)
-			{	
-				char buf[4096];
-				va_list marker;
-				va_start( marker, f );     
-				vsprintf(buf,f,marker);
-				va_end( marker );              
-				log->Log(GLLogStream::FILTER,buf);
-			}
-		}
-
-		void Log(int Level, const char * f, ... ) 
-		{
-		if(log)
-			{	
-				char buf[4096];
-				va_list marker;
-				va_start( marker, f );     
-				vsprintf(buf,f,marker);
-				va_end( marker );              
-				log->Log(Level,buf);
-			}
-		}
-
-    GLLogStream *log;	
-		
 		// this string is used to pass back to the framework error messages in case of failure of a filter apply.
 		QString errorMessage;
 };
@@ -469,71 +489,60 @@ The typical rendering loop of a Render plugin is something like, :
 
 */
 
-class MeshRenderInterface
+class MeshRenderInterface : public MeshLabInterface
 {
 public:
+	MeshRenderInterface() :MeshLabInterface() {}
     virtual ~MeshRenderInterface() {}
 		
     virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){};
-		virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
-		virtual void Finalize(QAction * /*mode*/, MeshDocument &/*m*/, GLArea * /*parent*/){};
-		virtual bool isSupported() = 0;
-		virtual QList<QAction *> actions() = 0;
+	virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
+	virtual void Finalize(QAction * /*mode*/, MeshDocument &/*m*/, GLArea * /*parent*/){};
+	virtual bool isSupported() = 0;
+	virtual QList<QAction *> actions() = 0;
+
+	// The longer string describing each filtering action. 
+	// This string is printed in the top of the parameter window 
+	// so it should be at least one or two paragraphs long.
+	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
+	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
+	QString filterInfo(QAction* /*action*/) const {return QString();};
+
+	// The very short string (a few words) describing each filtering action 
+	// This string is used also to define the menu entry
+	QString filterName(FilterIDType /*action*/) const {return QString();};
+
+
 };
 
 
-class MeshDecorateInterface
+class MeshDecorateInterface : public MeshLabInterface
 {
 public:
   typedef int FilterIDType;
 
-    virtual ~MeshDecorateInterface() {}
+  MeshDecorateInterface(): MeshLabInterface() {}
+  virtual ~MeshDecorateInterface() {}
 
-    virtual const QString Info(QAction *)=0;
-
-		// This function is called by the framework, for each decoration at the start of the plugins.
-		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
-		// For the global parameters the following rules apply:
-		// * there is a *hardwired* default value, that is directly coded into the plugin
-		// * there is a *saved* value that is stored into persistent location into the user space (registry/home/library) and it is stored in the classical default value of the parameter
-		// * there is a *current* value that is currently used, different for each decoration instance and that is not stored permanently.
-		//
-		// The plugin use the current value to draw its decoration.
-		// at startup the current value is always silently initialized to the saved value.
-		// User can revert current value to the saved values and to the hardwired values. 
-		// In the dialog for each parameter some buttons should be present:
-		// 
-		// * load (from the registry), 
-		// * save (to the registry), 
-		// * reset (from the hardwired).
-		
-		// If your plugins/action has no GlobalParameter, do nothing.
-		// The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
-		// At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values) 
-		// If a filter wants to save some permanent stuff should set the permanent default values.
-		
-
-		virtual void initGlobalParameterSet(QAction *, RichParameterSet * /*globalparam*/) {}		
-		
     virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/){assert(0); return false;};
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/,QFont qf) = 0;
 		virtual void EndDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
         
-    virtual const QString ST(FilterIDType filter) const=0;
-    virtual const FilterIDType ID(QAction *a)
-  	{
-      foreach( FilterIDType tt, types())
-        if( a->text() == this->ST(tt) ) return tt;
-          assert(0);
-      return 0;
-    }
-
     virtual QList<QAction *> actions() const { return actionList;}
-    virtual QList<FilterIDType> &types() { return typeList;}
+    virtual QList<FilterIDType> types() const { return typeList;}
 protected:
     QList <QAction *> actionList;
-    QList <FilterIDType> typeList;
-    GLLogStream *log;	
+    QList <FilterIDType> typeList;	
+	virtual FilterIDType ID(QAction *a) const
+	{
+		foreach( FilterIDType tt, types())
+			if( a->text() == this->filterName(tt) ) return tt;
+
+
+		qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
+		assert(0);
+		return -1;
+	}
 };
 
 
@@ -543,13 +552,25 @@ Used to provide tools that needs some kind of interaction with the mesh.
 Editing tools are exclusive (only one at a time) and can grab the mouse events and customize the rendering process.
 */
 
-class MeshEditInterface
+class MeshEditInterface : public MeshLabInterface
 {
 public:
+	MeshEditInterface() : MeshLabInterface() {}
 	virtual ~MeshEditInterface() {}
 	
 	//should return a sentence describing what the editing tool does
 	static const QString Info();
+
+	// The longer string describing each filtering action. 
+	// This string is printed in the top of the parameter window 
+	// so it should be at least one or two paragraphs long.
+	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
+	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
+	QString filterInfo(QAction* /*action*/) const {return QString();};
+
+	// The very short string (a few words) describing each filtering action 
+	// This string is used also to define the menu entry
+	QString filterName(FilterIDType ) const {return QString();};
 
 	// Called when the user press the first time the button 
 	virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){return true;};
@@ -598,7 +619,7 @@ public:
 	virtual MeshEditInterface* getMeshEditInterface(QAction *) = 0;
 	
 	//get the description for the given action
-	virtual const QString getEditToolDescription(QAction *)=0;
+	virtual QString getEditToolDescription(QAction *)=0;
 
 };
 

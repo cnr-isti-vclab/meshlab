@@ -230,10 +230,10 @@ void MainWindow::updateMenus()
 				setDoubleLightingAct->setChecked(rm.doubleSideLighting);
 				setSelectionRenderingAct->setChecked(rm.selectedFaces);
 
-				foreach (QAction *a,decoratorActionList){a->setChecked(false);a->setEnabled(true);}
+				// Check only the active decorations
+				foreach (QAction *a,      decoratorActionList){a->setChecked(false);a->setEnabled(true);}
+				foreach (QAction *a,   GLA()->iDecoratorsList){a->setChecked(true);}
 
-				 QAction * p;
-				foreach (p,GLA()->iDecoratorsList){p->setChecked(true);}
 	} // if active
 	else
 	{
@@ -770,9 +770,9 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 	// HashTable storing all supported formats togheter with
 	// the (1-based) index  of first plugin which is able to open it
-	QHash<QString, int> allKnownFormats;
+	QHash<QString, MeshIOInterface*> allKnownFormats;
 
-	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
+	PM.LoadFormats(filters, allKnownFormats,IMPORT);
 	filters.push_back("ALN project ( *.aln)");
 	filters.front().chop(1);
 	filters.front().append(" *.aln)");
@@ -813,14 +813,14 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				QString extension = fi.suffix();
 
 				// retrieving corresponding IO plugin
-				int idx = allKnownFormats[extension.toLower()];
-				if (idx == 0)
+				MeshIOInterface *pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+				if (pCurrentIOPlugin == 0)
 				{
 					QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
 					QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
 					return false;
 				}
-				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
+				//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 				bool newGla = false;
 				if(gla==0){
                         gla=new GLArea(mdiarea,&currentGlobalParams);
@@ -957,9 +957,9 @@ bool MainWindow::saveAs(QString fileName)
 {
 	QStringList filters;
 
-	QHash<QString, int> allKnownFormats;
+	QHash<QString, MeshIOInterface*> allKnownFormats;
 
-	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,EXPORT);
+	PM.LoadFormats( filters, allKnownFormats,EXPORT);
 
 	//QString fileName;
 	
@@ -988,13 +988,13 @@ bool MainWindow::saveAs(QString fileName)
 
 		QStringListIterator itFilter(filters);
 
-		int idx = allKnownFormats[extension.toLower()];
-		if (idx == 0)
+		MeshIOInterface *pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+		if (pCurrentIOPlugin == 0)
 		{
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
 			return false;
 		}
-		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
+		//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 		pCurrentIOPlugin->setLog(&(GLA()->log));
 
 		int capability=0,defaultBits=0;
