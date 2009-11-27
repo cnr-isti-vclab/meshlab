@@ -33,7 +33,7 @@
 using namespace vcg;
 using namespace std;
 
-const QString ExtraMeshDecoratePlugin::Info(QAction *action)
+QString ExtraMeshDecoratePlugin::filterInfo(QAction *action) const
  {
   switch(ID(action))
   {

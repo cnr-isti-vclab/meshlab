@@ -521,6 +521,7 @@ void SplatRendererPlugin::drawSplats(MeshModel &m, RenderMode &rm)
 	glClientActiveTexture(GL_TEXTURE0);
 }
 
+
 void SplatRendererPlugin::UniformParameters::update(float* mv, float* proj, GLint* vp)
 {
 	// extract the uniform scale

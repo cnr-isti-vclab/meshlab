@@ -37,7 +37,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
-  virtual const QString Info(QAction *);
+  virtual QString filterInfo(QAction *) const;
   
   enum {
     DP_SHOW_FACE_NORMALS,
@@ -108,8 +108,8 @@ public:
 
 	QHash<MeshModel *, bool> isMeshOk;
 	
-  virtual void Decorate(QAction *a, MeshModel &m,  GLArea *gla,QFont qf);
-	 virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
+	virtual void Decorate(QAction *a, MeshModel &m,  GLArea *gla,QFont qf);
+	virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
 		
 };
 

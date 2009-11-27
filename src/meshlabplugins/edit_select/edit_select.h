@@ -40,7 +40,7 @@ public:
 
     virtual ~ExtraMeshEditPlugin() {}
 
-    static const QString Info();
+    static QString Info();
     virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
     virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
     virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);

@@ -91,6 +91,7 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 	void updateRenderBuffer();
 	void enablePass(int n);
 	void drawSplats(MeshModel &m, RenderMode &rm);
+	//QString filterName(MeshLabInterface::FilterIDType) const;
 
 public:
 

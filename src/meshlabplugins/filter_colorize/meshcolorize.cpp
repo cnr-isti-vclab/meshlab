@@ -72,7 +72,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 	    actionList << new QAction(filterName(tt), this);
 }
 
-const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
+QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
   switch(c)
   {
     case CP_MAP_QUALITY_INTO_COLOR:   return QString("Colorize by Quality");
@@ -96,7 +96,7 @@ const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
   }
   return QString("error!");
 }
-const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const 
+QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const 
 {
   switch(filterId)
   {
@@ -124,7 +124,7 @@ const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const
   return QString();
 }
 
-const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
+int ExtraMeshColorizePlugin::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
@@ -218,12 +218,12 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, RichPar
 			if(usePerc) 
 			{
 				tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,PercLo,PercHi);
-				Log(GLLogStream::FILTER, "Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",H.MinV(),H.MaxV(),PercLo,PercHi,par.getDynamicFloat("perc"),100-par.getDynamicFloat("perc"));
+				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",H.MinV(),H.MaxV(),PercLo,PercHi,par.getDynamicFloat("perc"),100-par.getDynamicFloat("perc"));
 			}
 			else
 			{
 				tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,RangeMin,RangeMax);
-				Log(GLLogStream::FILTER, "Quality Range: %f %f; Used (%f %f)",H.MinV(),H.MaxV(),RangeMin,RangeMax);				
+				Log("Quality Range: %f %f; Used (%f %f)",H.MinV(),H.MaxV(),RangeMin,RangeMax);				
 			}
       break;
     }
@@ -235,7 +235,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, RichPar
 			}
 			
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			if(delvert) Log(GLLogStream::FILTER, "Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
+			if(delvert) Log("Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 			tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m.cm);
       int curvType = par.getEnum("CurvatureType");
@@ -368,7 +368,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, RichPar
 	return true;
 }
 
-const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a)
+MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {

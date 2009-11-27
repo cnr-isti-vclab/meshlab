@@ -39,7 +39,7 @@ ExtraMeshEditPlugin::ExtraMeshEditPlugin(bool ConnectedMode) :connectedMode(Conn
   isDragging=false;      
 }
 
-const QString ExtraMeshEditPlugin::Info() 
+QString ExtraMeshEditPlugin::Info() 
 {
 	return tr("Interactive selection of faces inside a dragged rectangle in screen space");
 }

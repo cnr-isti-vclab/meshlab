@@ -121,15 +121,15 @@ public:
     ExtraMeshColorizePlugin();
     ~ExtraMeshColorizePlugin(){};
   
-  virtual const QString filterName(FilterIDType filter) const;
-  virtual const QString filterInfo(FilterIDType filterId) const;
+  virtual QString filterName(FilterIDType filter) const;
+  virtual QString filterInfo(FilterIDType filterId) const;
 	int getPreConditions(QAction *) const;
 	int postCondition( QAction* ) const;
 
-  virtual const FilterClass getClass(QAction *);
+  virtual FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-  virtual const int getRequirements(QAction *);
+  virtual int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 };
