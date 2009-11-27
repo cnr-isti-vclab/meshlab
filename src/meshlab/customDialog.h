@@ -97,8 +97,6 @@ signals:
 	void applyCustomSetting();
 
 private:
-	void fillTable();
-
 	RichParameterSet& curParSet;
 	RichParameterSet& defParSet;
 	QTableWidget* tw;

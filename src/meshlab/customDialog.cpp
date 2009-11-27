@@ -39,7 +39,7 @@ CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defpar
 	QGridLayout* layout = new QGridLayout(parent);
 	setLayout(layout);
 	tw = new QTableWidget(curParSet.paramList.size(),2,this);
-	fillTable();
+	updateSettings();
 	int totlen = 0;
 	for (unsigned int jj =0; jj < 2;++jj)
 	{
@@ -65,21 +65,11 @@ void CustomDialog::openSubDialog( QTableWidgetItem* itm )
 	delete setdial;
 }
 
-void CustomDialog::updateSettings()
-{
-	fillTable();
-}
-
 CustomDialog::~CustomDialog()
 {
-	delete tw;
-	delete closebut;
-	//RichParameter will be destroyed elsewhere
-	//for(QMap<QListWidgetItem*,RichParameter*>::iterator it = mp.begin();it != mp.end();it++)
-	//	delete it.key();
 }
 
-void CustomDialog::fillTable()
+void CustomDialog::updateSettings()
 {
 	RichParameterToQTableWidgetItemConstructor v;
 	QStringList slst;
