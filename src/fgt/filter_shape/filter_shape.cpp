@@ -90,13 +90,14 @@ void FilterSolidShapes::initParameterSet(QAction *,MeshModel &/*m*/, RichParamet
     QStringList list;
     list << "Tetrahedron" << "Hexahedron" << "Octahedron" << "Dodecahedron" << "Icosahedron"
             << "Truncated Tetrahedron (AR)" << "Cuboctahedron (AR)" << "Truncated Cube (AR)"
-            << "Truncated Octahedron (AR)" << "Rhombicuboctahedron (AR)";
+            << "Truncated Octahedron (AR)" << "Rhombicuboctahedron (AR)"
+            << "Truncated Icosahedron (AR)";
 
     par.addParam(new RichEnum("Figure", 0, list, "Figure", "Choose a figure"));
     par.addParam(new RichBool("Star", FALSE, "Star?", "Star or minimal triangulation instead"));
 }
 
-bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterSolidShapes::applyFilter(QAction * /*filter*/, MeshModel &m, RichParameterSet & par, vcg::CallBackPos */*cb*/)
 {
     Log("Creating platonic number %d. STAR=%d", par.getEnum("Figure"), par.getBool("Star"));
 
@@ -135,6 +136,9 @@ bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameter
         break;
     case CR_RCOH:
         vcg::tri::Rhombicuboctahedron<CMeshO>(m.cm);
+        break;
+    case CR_TIS:
+        vcg::tri::Truncated_Icosahedron<CMeshO>(m.cm);
         break;
     }
 
