@@ -1,3 +1,7 @@
+/**
+ * @author Vitillo Roberto Agostino <vitillo@cli.di.unipi.it>
+ */
+
 #ifndef FILTERPHYSICS_PLUGIN_H
 #define FILTERPHYSICS_PLUGIN_H
 

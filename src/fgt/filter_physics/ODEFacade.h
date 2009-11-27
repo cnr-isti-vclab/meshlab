@@ -1,3 +1,7 @@
+/**
+ * @author Vitillo Roberto Agostino <vitillo@cli.di.unipi.it>
+ */
+
 #ifndef ODE_FACADE_H
 #define ODE_FACADE_H
 
@@ -15,7 +19,7 @@ public:
 	
         virtual void registerTriMesh(MeshModel& mesh, bool scenery = false);
         virtual void setAsRigidBody(MeshModel& mesh, bool isRigidBody = true);
-        virtual void updateTransform(MeshModel& mesh);
+        virtual void updateTransform();
 
         virtual void setGlobalForce(float force[3]);
         virtual void integrate(float step);
@@ -43,11 +47,12 @@ protected:
             dTriIndex (*indices)[3];
         };
 
-        typedef std::vector<std::pair<CMeshO*, ODEMesh*> > MeshContainer;
+        typedef std::vector<std::pair<MeshModel*, ODEMesh*> > MeshContainer;
         typedef CMeshO::PerMeshAttributeHandle<unsigned int> MeshIndex;
 
         static void collisionCallback(void* data, dGeomID o1, dGeomID o2);
         void collisionCallback(dGeomID o1, dGeomID o2);
+        void updateEngineTransform(MeshModel& mesh);
 
         //This class is a monostate
         static bool m_initialized;

@@ -1,3 +1,7 @@
+/**
+ * @author Vitillo Roberto Agostino <vitillo@cli.di.unipi.it>
+ */
+
 #ifndef MESHSUBFILTER_H
 #define MESHSUBFILTER_H
 

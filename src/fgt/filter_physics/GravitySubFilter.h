@@ -1,3 +1,7 @@
+/**
+ * @author Vitillo Roberto Agostino <vitillo@cli.di.unipi.it>
+ */
+
 #ifndef GRAVITYSUBFILTER_H
 #define GRAVITYSUBFILTER_H
 
@@ -16,8 +20,10 @@ protected:
 
 private:
     bool m_initialized;
-    unsigned int m_prevTimeSlice;
+    const float m_stepSize;
+    unsigned int m_steps;
     unsigned int m_currentSceneryLayer;
+    int m_prevStep;
     ODEFacade m_engine;
 };
 
