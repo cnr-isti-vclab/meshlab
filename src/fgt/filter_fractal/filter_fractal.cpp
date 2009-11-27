@@ -125,7 +125,6 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
     par.addParam(new RichFloat("fractalIncrement", 0.2, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
     par.addParam(new RichFloat("offset", 0.6, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
     par.addParam(new RichFloat("gain", 2.5, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
-
     return;
 }
 
@@ -199,6 +198,7 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm, vcg:
 
     VertexIterator vi;
     VertexPointer ivp[vertexCount];
+    cb(0, "Grid construction..");
     for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
     {
         (*vi).P() = CoordType((i%k2)/(double)k2, i/((double)vertexCount), .0);
@@ -229,8 +229,12 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm, vcg:
     double (FilterFractal::*f)() = vertexDisp[algorithm];
     CoordType* point;
     computeSpectralWeights();
+    i=0;
+    char buffer[50];
     for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
     {
+        sprintf(buffer, "Computing perturbation on vertex %d..", i++);
+        cb(100*i/vertexCount, buffer);
         point = &((*vi).P());
         fArgs[X] = (*point)[0] + seedFactor;
         fArgs[Y] = (*point)[1] + seedFactor;
