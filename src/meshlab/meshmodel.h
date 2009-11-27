@@ -451,6 +451,7 @@ private:
 	std::vector<vcg::Point3f> vertCoord;
 	std::vector<vcg::Point3f> vertNormal;
 	std::vector<bool> faceSelection;
+	vcg::Matrix44f Tr;
 public:
   // This function save the <mask> portion of a mesh into the private members of the MeshModelState class;
 	void create(int _mask, MeshModel* _m)
@@ -490,13 +491,10 @@ public:
 			std::vector<bool>::iterator ci;
 			CMeshO::FaceIterator fi;
 			for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
-			{
-				if((*fi).IsS())
-					(*ci) = true;
-				else
-					(*ci) = false;
-			}
+			 if(!(*fi).IsD()) (*ci) = (*fi).IsS();
 		}
+		if(changeMask & MeshModel::MM_TRANSFMATRIX)
+			Tr = m->cm.Tr;
 	}
 
 	bool apply(MeshModel *_m)
@@ -545,6 +543,10 @@ public:
 					(*fi).ClearS();
 			}
 		}
+		
+		if(changeMask & MeshModel::MM_TRANSFMATRIX)
+			m->cm.Tr=Tr;
+
 		return true;
   }
 
