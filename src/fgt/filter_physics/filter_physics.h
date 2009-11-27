@@ -2,6 +2,7 @@
 #define FILTERPHYSICS_PLUGIN_H
 
 #include "ODEFacade.h"
+#include "GravitySubFilter.h"
 
 #include <QObject>
 #include <QStringList>
@@ -16,10 +17,10 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     Q_INTERFACES(MeshFilterInterface)
 
     public:
-    enum {FP_PHYSICS} ;
+    enum {FP_PHYSICS_GRAVITY} ;
 
     FilterPhysics();
-    ~FilterPhysics(){}
+    ~FilterPhysics();
 
     virtual const QString filterName(FilterIDType filter) const;
     virtual const QString filterInfo(FilterIDType filter) const;
@@ -27,11 +28,14 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     virtual const int getRequirements(QAction*){return MeshModel::MM_FACEVERT;}
     virtual int postCondition( QAction* ) const{return MeshModel::MM_TRANSFMATRIX;}
 
-    virtual bool autoDialog(QAction *) {return true;}
-    virtual void initParameterSet(QAction *,MeshModel&, RichParameterSet&);
+    virtual bool autoDialog(QAction*) {return true;}
+    virtual void initParameterSet(QAction*, MeshDocument&, RichParameterSet&);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
     virtual bool applyFilter(QAction*, MeshModel&, RichParameterSet&, vcg::CallBackPos*) { assert(0); return false;}
     virtual const FilterClass getClass(QAction *);
+
+    private:
+    GravitySubFilter m_gravityFilter;
 };
 
 #endif

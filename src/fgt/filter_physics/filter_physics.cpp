@@ -7,17 +7,20 @@ using namespace std;
 using namespace vcg;
 
 FilterPhysics::FilterPhysics(){
-    typeList << FP_PHYSICS;
+    typeList << FP_PHYSICS_GRAVITY;
     
     FilterIDType tt;
     foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
 }
 
+FilterPhysics::~FilterPhysics(){
+}
+
 const QString FilterPhysics::filterName(FilterIDType filterId) const{
     switch (filterId) {
-    case FP_PHYSICS:
-        return QString("Physics stuff");
+    case FP_PHYSICS_GRAVITY:
+        return QString("Physics gravity demo");
     default:
         assert(0);
         break;
@@ -25,32 +28,32 @@ const QString FilterPhysics::filterName(FilterIDType filterId) const{
 }
 const QString FilterPhysics::filterInfo(FilterIDType filterId) const{
     switch (filterId) {
-    case FP_PHYSICS:
-        return QString("Runs a physics simulation on a set of meshes");
+    case FP_PHYSICS_GRAVITY:
+        return QString("Runs a physics gravity simulation on a set of meshes");
     default:
         assert(0);
         break;
     }
 }
 
-void FilterPhysics::initParameterSet(QAction *,MeshModel& m, RichParameterSet & par){
-    par.addParam(new RichDynamicFloat("timeline",
-                                         0, 0, 100,
-                                         "Timeline",
-                                         "Physics simulation is run"));
+void FilterPhysics::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
+    switch(ID(action)){
+    case FP_PHYSICS_GRAVITY:
+        m_gravityFilter.initParameterSet(action, md, par);
+        break;
+    default:
+        break;
+    }
 }
 
-bool FilterPhysics::applyFilter(QAction*, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos*){
-    /*float timeline  = par.getDynamicFloat("timeline") / 1000.0f;
-    if(timeline <= 0)
-        return true;*/
-
-    float gravity[3] = {0.0f, -9.8f, 0.0f};
-
-    ODEFacade engine;
-    engine.setGlobalForce(gravity);
-    engine.registerTriMesh(*md.mm());
-    engine.integrate(0.01f);
+bool FilterPhysics::applyFilter(QAction* action, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
+    switch(ID(action)){
+    case FP_PHYSICS_GRAVITY:
+        return m_gravityFilter.applyFilter(action, md, par, cb);
+        break;
+    default:
+        break;
+    }
 
     return true;
 }
