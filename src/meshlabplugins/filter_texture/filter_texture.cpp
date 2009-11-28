@@ -49,7 +49,7 @@ FilterTexturePlugin::FilterTexturePlugin()
 		actionList << new QAction(filterName(tt), this);
 }
 
-const QString FilterTexturePlugin::filterName(FilterIDType filterId) const 
+ QString FilterTexturePlugin::filterName(FilterIDType filterId) const 
 {
 	switch(filterId) {
 		case FP_UV_TO_COLOR : return QString("UV to Color"); 
@@ -63,7 +63,7 @@ const QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
+ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -92,7 +92,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
 	return MeshFilterInterface::FP_Generic;
 }
 
-const int FilterTexturePlugin::getRequirements(QAction *a)
+ int FilterTexturePlugin::getRequirements(QAction *a)
 {
 	switch (ID(a))
 	{
@@ -123,7 +123,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
-const FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
+ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{

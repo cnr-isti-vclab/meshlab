@@ -56,7 +56,7 @@ ExtraSampleDynPlugin::ExtraSampleDynPlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const 
+QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_VERTEX_COLOR_NOISE :  return QString("Vertex Color Noise"); 
@@ -66,7 +66,7 @@ const QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString ExtraSampleDynPlugin::filterInfo(FilterIDType filterId) const
+ QString ExtraSampleDynPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_VERTEX_COLOR_NOISE :  return QString("Randomly add a small amount of a random base color to the mesh"); 
@@ -77,7 +77,7 @@ const QString ExtraSampleDynPlugin::filterInfo(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // In this case this sample belong to the class of filters that change the vertex colors
-const MeshFilterInterface::FilterClass ExtraSampleDynPlugin::getClass(QAction *) { return MeshFilterInterface::VertexColoring; }
+ MeshFilterInterface::FilterClass ExtraSampleDynPlugin::getClass(QAction *) { return MeshFilterInterface::VertexColoring; }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh

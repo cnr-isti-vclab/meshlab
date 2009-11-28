@@ -70,14 +70,14 @@ public:
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
 
-	virtual const QString filterName(FilterIDType filter) const;
-	virtual const QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
 	virtual bool autoDialog(QAction *);
-	virtual const FilterClass getClass(QAction *);
+	virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
   virtual bool applyFilter(QAction * /* filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-	virtual const int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
+	virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
 
 	static void capHole(MeshModel* orig, MeshModel* dest, int capDir=CAP_CW);
 	static void extrude(MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);

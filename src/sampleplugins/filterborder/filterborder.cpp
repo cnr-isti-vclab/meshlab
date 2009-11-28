@@ -57,7 +57,7 @@ FilterBorder::~FilterBorder() {
 		delete actionList.at(i);
 }
 
-const QString FilterBorder::filterName(FilterIDType filter) const
+ QString FilterBorder::filterName(FilterIDType filter) const
 {
  switch(filter)
   {
@@ -67,7 +67,7 @@ const QString FilterBorder::filterName(FilterIDType filter) const
   return QString("error!");
 }
 
-const QString FilterBorder::filterInfo(FilterIDType filterId) const
+ QString FilterBorder::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {
@@ -77,7 +77,7 @@ const QString FilterBorder::filterInfo(FilterIDType filterId) const
   return QString("error!");
 }
 
-const FilterBorder::FilterClass FilterBorder::getClass(QAction *a)
+ FilterBorder::FilterClass FilterBorder::getClass(QAction *a)
 {
   switch(ID(a))
   {
@@ -87,7 +87,7 @@ const FilterBorder::FilterClass FilterBorder::getClass(QAction *a)
   }
 }
 
-const int FilterBorder::getRequirements(QAction *action)
+ int FilterBorder::getRequirements(QAction *action)
 {
   switch(ID(action))
   {

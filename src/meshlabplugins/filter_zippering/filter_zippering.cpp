@@ -68,7 +68,7 @@ FilterZippering::FilterZippering()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString FilterZippering::filterName(FilterIDType filterId) const
+ QString FilterZippering::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
                 case FP_ZIPPERING :  return QString("Zippering");
@@ -78,7 +78,7 @@ const QString FilterZippering::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString FilterZippering::filterInfo(FilterIDType filterId) const
+ QString FilterZippering::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
                 case FP_ZIPPERING :  return QString("Merge two meshes, a mesh with holes and a mesh-patch, into a single one; hole is filled using patch's triangles. Based on <b>Zippered Polygon Meshes from Range Images,</b> by G.Turk, M.Levoy, Siggraph 1994");
@@ -87,7 +87,7 @@ const QString FilterZippering::filterInfo(FilterIDType filterId) const
 	return QString("Unknown Filter");
 }
 
-const int FilterZippering::getRequirements(QAction *action)
+ int FilterZippering::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
@@ -100,7 +100,7 @@ const int FilterZippering::getRequirements(QAction *action)
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
-const FilterZippering::FilterClass FilterZippering::getClass(QAction *a)
+ FilterZippering::FilterClass FilterZippering::getClass(QAction *a)
 {
   switch(ID(a))
 	{

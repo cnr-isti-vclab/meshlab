@@ -60,7 +60,7 @@ FilterGeodesic::~FilterGeodesic() {
 		delete actionList.at(i);
 }
 
-const QString FilterGeodesic::filterName(FilterIDType filter) const
+QString FilterGeodesic::filterName(FilterIDType filter) const
 {
  switch(filter)
   {
@@ -71,7 +71,7 @@ const QString FilterGeodesic::filterName(FilterIDType filter) const
   return QString("error!");
 }
 
-const QString FilterGeodesic::filterInfo(FilterIDType filterId) const
+ QString FilterGeodesic::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {
@@ -82,7 +82,7 @@ const QString FilterGeodesic::filterInfo(FilterIDType filterId) const
   return QString("error!");
 }
 
-const FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
+ FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
 {
   switch(ID(a))
   {
@@ -94,7 +94,7 @@ const FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
   }
 }
 
-const int FilterGeodesic::getRequirements(QAction *action)
+ int FilterGeodesic::getRequirements(QAction *action)
 {
   switch(ID(action))
   {

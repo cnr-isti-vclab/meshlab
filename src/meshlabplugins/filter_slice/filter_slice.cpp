@@ -59,7 +59,7 @@ ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) const
+ QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_PARALLEL_PLANES :  return QString("Cross section parallel planes");
@@ -73,7 +73,7 @@ const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) const
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
 
-const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId) const
+ QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId) const
 {
  switch(filterId) {
 		case FP_PARALLEL_PLANES :  return QString("Export one or more cross sections of the current mesh relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0).");
@@ -569,7 +569,7 @@ void ExtraFilter_SlicePlugin::extrude(MeshModel* orig, MeshModel* dest, float ep
 	vcg::tri::UpdateBounding<CMeshO>::Box(dest->cm);
 	delete tempMesh;
 }
-const MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
+ MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
 {
 	switch(ID(filter))
 	{

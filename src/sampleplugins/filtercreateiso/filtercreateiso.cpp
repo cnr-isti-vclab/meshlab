@@ -57,7 +57,7 @@ FilterCreateIso::~FilterCreateIso() {
 		delete actionList.at(i);
 }
 
-const QString FilterCreateIso::filterName(FilterIDType filter) const
+ QString FilterCreateIso::filterName(FilterIDType filter) const
 {
 	switch(filter)
   {
@@ -67,7 +67,7 @@ const QString FilterCreateIso::filterName(FilterIDType filter) const
   return QString("error!");
 }
 
-const QString FilterCreateIso::filterInfo(FilterIDType filterId) const
+ QString FilterCreateIso::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {
@@ -77,7 +77,7 @@ const QString FilterCreateIso::filterInfo(FilterIDType filterId) const
   return QString("error!");
 }
 
-const FilterCreateIso::FilterClass FilterCreateIso::getClass(QAction *a)
+ FilterCreateIso::FilterClass FilterCreateIso::getClass(QAction *a)
 {
   switch(ID(a))
   {
@@ -86,7 +86,7 @@ const FilterCreateIso::FilterClass FilterCreateIso::getClass(QAction *a)
   }
 }
 
-const int FilterCreateIso::getRequirements(QAction *action)
+ int FilterCreateIso::getRequirements(QAction *action)
 {
   switch(ID(action))
   {

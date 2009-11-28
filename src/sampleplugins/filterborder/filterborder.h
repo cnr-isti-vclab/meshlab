@@ -58,11 +58,11 @@ class FilterBorder : public QObject, public MeshFilterInterface
 	FilterBorder();
 	~FilterBorder();
 
-	virtual const QString filterName(FilterIDType filter) const;
-	virtual const QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
 
-  virtual const FilterClass getClass(QAction *);
-  virtual const int getRequirements(QAction *);
+  virtual FilterClass getClass(QAction *);
+  virtual int getRequirements(QAction *);
 
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
