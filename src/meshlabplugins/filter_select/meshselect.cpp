@@ -31,7 +31,7 @@
 
 using namespace vcg;
 
-const QString SelectionFilterPlugin::filterName(FilterIDType filter) const
+ QString SelectionFilterPlugin::filterName(FilterIDType filter) const
 {
  switch(filter)
   {
@@ -263,7 +263,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, RichParam
   return true;
 }
 
- const QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const 
+QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const 
  {
   switch(filterId)
   {
@@ -282,7 +282,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, RichParam
   return QString();
  }
 
-const int SelectionFilterPlugin::getRequirements(QAction *action)
+ int SelectionFilterPlugin::getRequirements(QAction *action)
 {
  switch(ID(action))
   {

@@ -58,14 +58,14 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 
 	SelectionFilterPlugin();
 	~SelectionFilterPlugin();
-	virtual const QString filterInfo(FilterIDType filter) const;
-  virtual const QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
+  virtual QString filterName(FilterIDType filter) const;
   
-  virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
+  virtual FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
   void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst);
 	bool autoDialog(QAction *action);
 
-	virtual const int getRequirements(QAction *);
+	virtual int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 };
 

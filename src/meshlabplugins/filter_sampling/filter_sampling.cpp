@@ -366,7 +366,7 @@ FilterDocSampling::FilterDocSampling()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString FilterDocSampling::filterName(FilterIDType filterId) const 
+ QString FilterDocSampling::filterName(FilterIDType filterId) const 
 {
   switch(filterId) {
 		case FP_ELEMENT_SUBSAMPLING    :  return QString("Mesh Element Subsampling"); 
@@ -390,7 +390,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString FilterDocSampling::filterInfo(FilterIDType filterId) const
+ QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_ELEMENT_SUBSAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh, At most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probabilty of being choosen."); 
@@ -417,7 +417,7 @@ const QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 
 	}
 }
-const int FilterDocSampling::getRequirements(QAction *action)
+ int FilterDocSampling::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
@@ -806,13 +806,14 @@ case FP_CLUSTERED_SAMPLING :
 			
 			if(!subsampleFlag)
 			{
+        QTime tt;tt.start();
 				BaseSampler sampler(&MontecarloMesh);
 				sampler.qualitySampling =true;
 				tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
-				Log("Generated %i Montecarlo Samples",MontecarloMesh.vn);
 				MontecarloMesh.bbox = curMM->cm.bbox; // we want the same bounding box
 				presampledMesh=&MontecarloMesh;
-			}
+				Log("Generated %i Montecarlo Samples (%i msec)",MontecarloMesh.vn,tt.elapsed());
+				}
 			
 			BaseSampler mps(&(mm->cm));
 				
@@ -1096,7 +1097,7 @@ case FP_CLUSTERED_SAMPLING :
 		}
 	return true;
 }
-const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
+ MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
 {
 	switch(ID(action))
 	{
