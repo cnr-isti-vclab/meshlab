@@ -49,7 +49,7 @@ FilterTexturePlugin::FilterTexturePlugin()
 		actionList << new QAction(filterName(tt), this);
 }
 
- QString FilterTexturePlugin::filterName(FilterIDType filterId) const 
+QString FilterTexturePlugin::filterName(FilterIDType filterId) const 
 {
 	switch(filterId) {
 		case FP_UV_TO_COLOR : return QString("UV to Color"); 
@@ -63,7 +63,7 @@ FilterTexturePlugin::FilterTexturePlugin()
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
- QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
+QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -92,7 +92,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
 	return MeshFilterInterface::FP_Generic;
 }
 
- int FilterTexturePlugin::getRequirements(QAction *a)
+int FilterTexturePlugin::getRequirements(QAction *a)
 {
 	switch (ID(a))
 	{
@@ -123,7 +123,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
- FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
+FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{
@@ -243,31 +243,31 @@ inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float bor
 	if (idx == -1)
 	{
 		// build triangle 0
-		t0.P(0).X() = quadSize - (0.5 + M_SQRT1_2)*border;
-		t0.P(1).X() = 0.5 * border;
-		t0.P(0).Y() = 1.0 - t0.P(1).X();
+		t0.P(1).X() = quadSize - (0.5 + M_SQRT1_2)*border;
+		t0.P(0).X() = 0.5 * border;
 		t0.P(1).Y() = 1.0 - t0.P(0).X();
-		t0.P(2).X() = t0.P(1).X();
-		t0.P(2).Y() = t0.P(0).Y();
+		t0.P(0).Y() = 1.0 - t0.P(1).X();
+		t0.P(2).X() = t0.P(0).X();
+		t0.P(2).Y() = t0.P(1).Y();
 		// build triangle 1
-		t1.P(0).X() = (0.5 + M_SQRT1_2)*border;
-		t1.P(1).X() = quadSize - 0.5 * border;
-		t1.P(0).Y() = 1.0 - t1.P(1).X();
+		t1.P(1).X() = (0.5 + M_SQRT1_2)*border;
+		t1.P(0).X() = quadSize - 0.5 * border;
 		t1.P(1).Y() = 1.0 - t1.P(0).X();
-		t1.P(2).X() = t1.P(1).X();
-		t1.P(2).Y() = t1.P(0).Y();
+		t1.P(0).Y() = 1.0 - t1.P(1).X();
+		t1.P(2).X() = t1.P(0).X();
+		t1.P(2).Y() = t1.P(1).Y();
 	}
 	else {
 		// split triangle idx in t0 t1
 		Tri2 &t = arr[idx];
 		Tri2::CoordType midPoint = (t.P(0) + t.P(1)) / 2;
-		Tri2::CoordType vec01 = (t.P(1) - t.P(0)).Normalize() * (border/2.0);
-		t0.P(0) = t.P(1);
-		t1.P(1) = t.P(0);
-		t0.P(2) = midPoint + vec01;
-		t1.P(2) = midPoint - vec01;
-		t0.P(1) = t.P(2) + ( (t.P(1)-t.P(2)).Normalize() * border / M_SQRT2 );
-		t1.P(0) = t.P(2) + ( (t.P(0)-t.P(2)).Normalize() * border / M_SQRT2 );
+		Tri2::CoordType vec10 = (t.P(0) - t.P(1)).Normalize() * (border/2.0);
+		t0.P(1) = t.P(0);
+		t1.P(0) = t.P(1);
+		t0.P(2) = midPoint + vec10;
+		t1.P(2) = midPoint - vec10;
+		t0.P(0) = t.P(2) + ( (t.P(0)-t.P(2)).Normalize() * border / M_SQRT2 );
+		t1.P(1) = t.P(2) + ( (t.P(1)-t.P(2)).Normalize() * border / M_SQRT2 );
 	}
 	if (--maxLevels <= 0) return;
 	buildTrianglesCache (arr, maxLevels, border, quadSize, 2*idx+2);
