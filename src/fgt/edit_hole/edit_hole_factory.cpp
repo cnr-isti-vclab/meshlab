@@ -49,7 +49,7 @@ MeshEditInterface* EditHoleFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditHoleFactory::getEditToolDescription(QAction *)
+QString EditHoleFactory::getEditToolDescription(QAction *)
 {
 	return EditHolePlugin::Info();
 }

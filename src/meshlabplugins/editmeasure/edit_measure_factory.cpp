@@ -49,7 +49,7 @@ MeshEditInterface* EditMeasureFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditMeasureFactory::getEditToolDescription(QAction *)
+QString EditMeasureFactory::getEditToolDescription(QAction *)
 {
 	return EditMeasurePlugin::Info();
 }

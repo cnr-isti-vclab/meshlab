@@ -49,7 +49,7 @@ MeshEditInterface* SampleEditFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString SampleEditFactory::getEditToolDescription(QAction *)
+QString SampleEditFactory::getEditToolDescription(QAction *)
 {
 	return SampleEditPlugin::Info();
 }

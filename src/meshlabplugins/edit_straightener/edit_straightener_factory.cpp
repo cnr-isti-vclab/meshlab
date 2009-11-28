@@ -49,7 +49,7 @@ MeshEditInterface* EditStraightenerFactory::getMeshEditInterface(QAction *action
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditStraightenerFactory::getEditToolDescription(QAction *)
+QString EditStraightenerFactory::getEditToolDescription(QAction *)
 {
 	return EditStraightener::Info();
 }

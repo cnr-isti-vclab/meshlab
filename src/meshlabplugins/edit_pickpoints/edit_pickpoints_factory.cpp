@@ -49,7 +49,7 @@ MeshEditInterface* EditPickPointsFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditPickPointsFactory::getEditToolDescription(QAction *)
+QString EditPickPointsFactory::getEditToolDescription(QAction *)
 {
 	return EditPickPointsPlugin::Info();
 }

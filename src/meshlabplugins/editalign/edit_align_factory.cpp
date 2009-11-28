@@ -49,7 +49,7 @@ MeshEditInterface* EditAlignFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditAlignFactory::getEditToolDescription(QAction *)
+QString EditAlignFactory::getEditToolDescription(QAction *)
 {
 	return EditAlignPlugin::Info();
 }

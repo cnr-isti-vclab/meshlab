@@ -50,7 +50,7 @@ MeshEditInterface* QualityMapperFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString QualityMapperFactory::getEditToolDescription(QAction *)
+QString QualityMapperFactory::getEditToolDescription(QAction *)
 {
 	return QualityMapperPlugin::Info();
 }

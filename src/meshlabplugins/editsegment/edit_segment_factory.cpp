@@ -49,7 +49,7 @@ MeshEditInterface* EditSegmentFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditSegmentFactory::getEditToolDescription(QAction *)
+QString EditSegmentFactory::getEditToolDescription(QAction *)
 {
 	return EditSegment::Info();
 }

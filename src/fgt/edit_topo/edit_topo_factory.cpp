@@ -49,7 +49,7 @@ MeshEditInterface* EditTopoFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditTopoFactory::getEditToolDescription(QAction *)
+QString EditTopoFactory::getEditToolDescription(QAction *)
 {
 	return edit_topo::Info();
 }

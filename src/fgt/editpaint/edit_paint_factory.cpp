@@ -49,7 +49,7 @@ MeshEditInterface* EditPaintFactory::getMeshEditInterface(QAction *action)
 	} else assert(0); //should never be asked for an action that isnt here
 }
 
-const QString EditPaintFactory::getEditToolDescription(QAction *)
+QString EditPaintFactory::getEditToolDescription(QAction *)
 {
 	return EditPaintPlugin::Info();
 }

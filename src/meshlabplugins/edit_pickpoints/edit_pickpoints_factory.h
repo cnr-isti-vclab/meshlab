@@ -45,7 +45,7 @@ public:
 	virtual MeshEditInterface* getMeshEditInterface(QAction *);
     
 	//get the description for the given action
-	virtual const QString getEditToolDescription(QAction *);
+    QString getEditToolDescription(QAction *);
 	
 private:
 	QList <QAction *> actionList;
