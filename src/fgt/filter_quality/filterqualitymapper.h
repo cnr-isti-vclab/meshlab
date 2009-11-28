@@ -69,14 +69,14 @@ public:
 
 	QualityMapperFilter();
 	
-	virtual const QString filterName(FilterIDType filter) const;
-	virtual const QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
 	int getPreConditions(QAction *) const;
 	int postCondition( QAction* ) const;
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual const FilterClass getClass(QAction *);
+	virtual FilterClass getClass(QAction *);
 };
 
 #endif

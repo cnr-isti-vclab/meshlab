@@ -53,7 +53,7 @@ FilterCreateText::FilterCreateText()
 	actionList << new QAction(filterName(tt), this);
 }
 
-const QString FilterCreateText::filterName(FilterIDType filterId) const
+ QString FilterCreateText::filterName(FilterIDType filterId) const
 {
 	switch (filterId) {
         case FP_TEXT:
@@ -64,7 +64,7 @@ const QString FilterCreateText::filterName(FilterIDType filterId) const
 			break;
 	}
 }
-const QString FilterCreateText::filterInfo(FilterIDType filterId) const
+ QString FilterCreateText::filterInfo(FilterIDType filterId) const
 {
 	switch (filterId) {
         case FP_TEXT:
@@ -76,7 +76,7 @@ const QString FilterCreateText::filterInfo(FilterIDType filterId) const
 	}
 }
 
-const int FilterCreateText::getRequirements(QAction */*action*/)
+ int FilterCreateText::getRequirements(QAction */*action*/)
 {	
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
 }
@@ -93,7 +93,7 @@ bool FilterCreateText::applyFilter(QAction * /*filter*/, MeshDocument &md, RichP
 	return true;
 }
 
-const MeshFilterInterface::FilterClass FilterCreateText::getClass(QAction *)
+ MeshFilterInterface::FilterClass FilterCreateText::getClass(QAction *)
 {
     return MeshFilterInterface::MeshCreation;
 }

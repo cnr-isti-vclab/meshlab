@@ -56,7 +56,7 @@ GeometryAgingPlugin::~GeometryAgingPlugin()
 { 
 }
 
-const MeshFilterInterface::FilterClass GeometryAgingPlugin::getClass(QAction *a)
+ MeshFilterInterface::FilterClass GeometryAgingPlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {
@@ -69,7 +69,7 @@ const MeshFilterInterface::FilterClass GeometryAgingPlugin::getClass(QAction *a)
 
 
 /* Returns the very short string describing each filtering action */
-const QString GeometryAgingPlugin::filterName(FilterIDType filterId) const
+ QString GeometryAgingPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FP_ERODE:
@@ -81,7 +81,7 @@ const QString GeometryAgingPlugin::filterName(FilterIDType filterId) const
 
 
 /* Returns the longer string describing each filtering action */
-const QString GeometryAgingPlugin::filterInfo(FilterIDType filterId) const
+ QString GeometryAgingPlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FP_ERODE: 

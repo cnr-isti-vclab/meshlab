@@ -64,7 +64,7 @@ const QString FilterDirt::filterName(FilterIDType filterId) const
 			break;
 	}
 }
-const QString FilterDirt::filterInfo(FilterIDType filterId) const
+ QString FilterDirt::filterInfo(FilterIDType filterId) const
 {
 	switch (filterId) {
 		case FP_DIRT:
@@ -76,7 +76,7 @@ const QString FilterDirt::filterInfo(FilterIDType filterId) const
 	}
 }
 
-const int FilterDirt::getRequirements(QAction */*action*/)
+ int FilterDirt::getRequirements(QAction */*action*/)
 {	
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
 }
@@ -86,7 +86,7 @@ bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParamet
 	return true;
 }
 
-const MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *)
+ MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *)
 {
 	return MeshFilterInterface::VertexColoring;
 }

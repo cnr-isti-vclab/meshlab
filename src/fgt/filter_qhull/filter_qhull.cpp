@@ -71,7 +71,7 @@ QhullPlugin::~QhullPlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString QhullPlugin::filterName(FilterIDType filterId) const
+ QString QhullPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_QHULL_CONVEX_HULL :  return QString("Convex Hull"); 
@@ -86,7 +86,7 @@ const QString QhullPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString QhullPlugin::filterInfo(FilterIDType filterId) const
+ QString QhullPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_QHULL_CONVEX_HULL :  return QString("Calculate the <b>convex hull</b> with Qhull library (http://www.qhull.org/html/qconvex.htm).<br><br> "
@@ -118,7 +118,7 @@ const QString QhullPlugin::filterInfo(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
-const QhullPlugin::FilterClass QhullPlugin::getClass(QAction *a)
+ QhullPlugin::FilterClass QhullPlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{

@@ -66,7 +66,7 @@ FilterColorProc::~FilterColorProc()
 		delete actionList.at(i);
 }
 
-const QString FilterColorProc::filterName(FilterIDType filter) const
+ QString FilterColorProc::filterName(FilterIDType filter) const
 {
   switch(filter)
   {
@@ -90,7 +90,7 @@ const QString FilterColorProc::filterName(FilterIDType filter) const
   return QString("error!");
 }
 
-const QString FilterColorProc::filterInfo(FilterIDType filterId) const
+ QString FilterColorProc::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {
@@ -114,7 +114,7 @@ const QString FilterColorProc::filterInfo(FilterIDType filterId) const
   return QString("error!");
 }
 
-const int FilterColorProc::getRequirements(QAction *action)
+ int FilterColorProc::getRequirements(QAction *action)
 {
     switch(ID(action))
     {
@@ -413,7 +413,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
 	return false;
 }
 
-const MeshFilterInterface::FilterClass FilterColorProc::getClass(QAction *a)
+ MeshFilterInterface::FilterClass FilterColorProc::getClass(QAction *a)
 {
   switch(ID(a))
   {

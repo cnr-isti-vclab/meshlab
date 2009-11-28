@@ -38,7 +38,7 @@ FilterCSG::FilterCSG()
         actionList << new QAction(filterName(tt), this);
 }
 
-const QString FilterCSG::filterName(FilterIDType filterId) const
+ QString FilterCSG::filterName(FilterIDType filterId) const
 {
     switch (filterId) {
     case FP_CSG:
@@ -50,7 +50,7 @@ const QString FilterCSG::filterName(FilterIDType filterId) const
     }
 }
 
-const QString FilterCSG::filterInfo(FilterIDType filterId) const
+ QString FilterCSG::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
     case FP_CSG:

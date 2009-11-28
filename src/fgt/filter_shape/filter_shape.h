@@ -40,22 +40,22 @@ class FilterSolidShapes : public QObject, public MeshFilterInterface
 public:
     enum { FSS_TEXT };
     enum { CR_TETRAHEDRON, CR_HEXAHEDRON, CR_OCTAHEDRON, CR_DODECAHEDRON, CR_ICOSAHEDRON,
-           CR_TT, CR_COH, CR_TC, CR_TO, CR_RCOH, CR_TIS};
+           CR_TT, CR_COH, CR_TC, CR_TO, CR_RCOH};
 
     FilterSolidShapes();
     ~FilterSolidShapes(){};
 
-    virtual const QString filterName(FilterIDType filter) const;
-    virtual const QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
 
-    virtual const int getRequirements(QAction *);
+    virtual int getRequirements(QAction *);
 
     virtual bool autoDialog(QAction *) {return true;}
     virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 //  virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
     virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *);
 
-    virtual const FilterClass getClass(QAction *);
+    virtual FilterClass getClass(QAction *);
 
 };
 

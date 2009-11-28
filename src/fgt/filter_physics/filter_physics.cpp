@@ -17,7 +17,7 @@ FilterPhysics::FilterPhysics(){
 FilterPhysics::~FilterPhysics(){
 }
 
-const QString FilterPhysics::filterName(FilterIDType filterId) const{
+ QString FilterPhysics::filterName(FilterIDType filterId) const{
     switch (filterId) {
     case FP_PHYSICS_GRAVITY:
         return QString("Physics gravity demo");
@@ -26,7 +26,7 @@ const QString FilterPhysics::filterName(FilterIDType filterId) const{
         break;
     }
 }
-const QString FilterPhysics::filterInfo(FilterIDType filterId) const{
+ QString FilterPhysics::filterInfo(FilterIDType filterId) const{
     switch (filterId) {
     case FP_PHYSICS_GRAVITY:
         return QString("Runs a physics gravity simulation on a set of meshes");
@@ -58,7 +58,7 @@ bool FilterPhysics::applyFilter(QAction* action, MeshDocument &md, RichParameter
     return true;
 }
 
-const MeshFilterInterface::FilterClass FilterPhysics::getClass(QAction *){
+ MeshFilterInterface::FilterClass FilterPhysics::getClass(QAction *){
     return MeshFilterInterface::Generic;
 }
 

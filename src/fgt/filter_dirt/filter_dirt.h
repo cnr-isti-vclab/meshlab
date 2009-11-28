@@ -43,16 +43,16 @@ class FilterDirt : public QObject, public MeshFilterInterface
 		FilterDirt();
 		~FilterDirt(){};
 
-        virtual const QString filterName(FilterIDType filter) const;
-        virtual const QString filterInfo(FilterIDType filter) const;
+        virtual QString filterName(FilterIDType filter) const;
+        virtual QString filterInfo(FilterIDType filter) const;
 
-		virtual const int getRequirements(QAction *);
+		virtual int getRequirements(QAction *);
 
 		virtual bool autoDialog(QAction *) {return false;}
 		virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/){};
 		virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 		virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-		virtual const FilterClass getClass(QAction *);
+		virtual FilterClass getClass(QAction *);
 
 };
 

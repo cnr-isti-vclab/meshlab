@@ -74,7 +74,7 @@ FilterFunctionPlugin::~FilterFunctionPlugin()
 }
 
 // short string describing each filtering action 
-const QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
+ QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FF_VERT_SELECTION :  return QString("Conditional Vertex Selection");
@@ -103,7 +103,7 @@ const QString PerFaceAttributeString("It's possibile to use per-face variables l
 																		"<b>q0,q1,q2</b> for <b>quality</b>.<br>");
 
 // long string describing each filtering action 
-const QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
+ QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FF_VERT_SELECTION : return tr("Boolean function using muparser lib to perform vertex selection over current mesh.<br>"
@@ -160,7 +160,7 @@ const QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
 	return QString("filter not found!");
 }
 
-const FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *a)
+ FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {
@@ -182,7 +182,7 @@ const FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *
   }
 }
 
-const int FilterFunctionPlugin::getRequirements(QAction *action)
+ int FilterFunctionPlugin::getRequirements(QAction *action)
 {
   switch(ID(action))
   {

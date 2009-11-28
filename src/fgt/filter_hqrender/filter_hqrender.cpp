@@ -48,7 +48,7 @@ FilterHighQualityRender::FilterHighQualityRender()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString FilterHighQualityRender::filterName(FilterIDType filterId) const
+ QString FilterHighQualityRender::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
     case FP_HIGHQUALITY_RENDER :  return QString("Render high quality image");
@@ -59,7 +59,7 @@ const QString FilterHighQualityRender::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-const QString FilterHighQualityRender::filterInfo(FilterIDType filterId) const
+ QString FilterHighQualityRender::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
     case FP_HIGHQUALITY_RENDER :  return QString("Make an high quality image of current mesh on a choosen template scene.");
@@ -71,7 +71,7 @@ const QString FilterHighQualityRender::filterInfo(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
-const FilterHighQualityRender::FilterClass FilterHighQualityRender::getClass(QAction *a)
+ FilterHighQualityRender::FilterClass FilterHighQualityRender::getClass(QAction *a)
 {
   switch(ID(a))
 	{

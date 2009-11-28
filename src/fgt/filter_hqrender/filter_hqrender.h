@@ -23,12 +23,12 @@ public:
 
   FilterHighQualityRender();
 
-  virtual const QString filterName(FilterIDType filter) const;
-  virtual const QString filterInfo(FilterIDType filter) const;
+  virtual QString filterName(FilterIDType filter) const;
+  virtual QString filterInfo(FilterIDType filter) const;
   virtual bool autoDialog(QAction *) {return true;}
   virtual void initParameterSet(QAction *,MeshModel &m, RichParameterSet & param);
   virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & param, vcg::CallBackPos * cb) ;
-  virtual const FilterClass getClass(QAction *a);
+  virtual FilterClass getClass(QAction *a);
 
 private slots:
   void updateOutputProcess();

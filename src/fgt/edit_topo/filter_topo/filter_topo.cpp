@@ -48,7 +48,7 @@ FilterTopoPlugin::FilterTopoPlugin()
 	  actionList << new QAction(filterName(tt), this);
 }
 
-const QString FilterTopoPlugin::filterName(FilterIDType filterId) 
+ QString FilterTopoPlugin::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
 		case FP_RE_TOPO :  return QString("Create mesh from basic topology"); 
@@ -56,7 +56,7 @@ const QString FilterTopoPlugin::filterName(FilterIDType filterId)
 	}
 }
 
-const QString FilterTopoPlugin::filterInfo(FilterIDType filterId)
+ QString FilterTopoPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
 		case FP_RE_TOPO :  return QString("Creates a new mesh from a basic topology model applied to an high resolution model"); 

@@ -54,7 +54,7 @@ FilterSolidShapes::FilterSolidShapes()
         actionList << new QAction(filterName(tt), this);
 }
 
-const QString FilterSolidShapes::filterName(FilterIDType filterId) const
+ QString FilterSolidShapes::filterName(FilterIDType filterId) const
 {
     switch (filterId) {
     case FSS_TEXT:
@@ -67,7 +67,7 @@ const QString FilterSolidShapes::filterName(FilterIDType filterId) const
     }
 }
 
-const QString FilterSolidShapes::filterInfo(FilterIDType filterId) const
+ QString FilterSolidShapes::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
     case FSS_TEXT:
@@ -80,7 +80,7 @@ const QString FilterSolidShapes::filterInfo(FilterIDType filterId) const
     }
 }
 
-const int FilterSolidShapes::getRequirements(QAction */*action*/)
+ int FilterSolidShapes::getRequirements(QAction */*action*/)
 {	
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
 }
@@ -148,7 +148,7 @@ bool FilterSolidShapes::applyFilter(QAction * /*filter*/, MeshModel &m, RichPara
     return true;
 }
 
-const MeshFilterInterface::FilterClass FilterSolidShapes::getClass(QAction *)
+ MeshFilterInterface::FilterClass FilterSolidShapes::getClass(QAction *)
 {
     return MeshFilterInterface::MeshCreation;
 }

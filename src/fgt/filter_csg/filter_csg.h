@@ -49,8 +49,8 @@ public:
     FilterCSG();
     ~FilterCSG() {};
 
-    virtual const QString filterName(FilterIDType filter) const;
-    virtual const QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
 
     virtual bool autoDialog(QAction *) { return true; }
 
@@ -60,7 +60,7 @@ public:
     virtual bool applyFilter(QAction *, MeshDocument &, RichParameterSet &, vcg::CallBackPos *);
     virtual bool applyFilter(QAction *, MeshModel &, RichParameterSet &, vcg::CallBackPos *) { assert(0); return false; }
 
-    virtual const FilterClass getClass(QAction *) { return MeshFilterInterface::Layer; }
+    virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Layer; }
 };
 
 

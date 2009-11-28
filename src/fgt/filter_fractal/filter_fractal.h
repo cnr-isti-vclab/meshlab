@@ -46,10 +46,10 @@ class FilterFractal : public QObject, public MeshFilterInterface
             FilterFractal();
             ~FilterFractal(){}
 
-            virtual const QString filterName(FilterIDType filter) const;
-            virtual const QString filterInfo(FilterIDType filter) const;
+            virtual QString filterName(FilterIDType filter) const;
+            virtual QString filterInfo(FilterIDType filter) const;
 
-            virtual const int getRequirements(QAction *);
+            virtual int getRequirements(QAction *);
             virtual bool autoDialog(QAction *){return true;}
 
             virtual void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
@@ -58,7 +58,7 @@ class FilterFractal : public QObject, public MeshFilterInterface
             virtual bool applyFilter(QAction *, MeshModel&, RichParameterSet &, vcg::CallBackPos *){assert(0); return false;}
             virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 
-            virtual const FilterClass getClass(QAction *);
+            virtual FilterClass getClass(QAction *);
 
        private:
             void computeSpectralWeights();

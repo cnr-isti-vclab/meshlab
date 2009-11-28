@@ -26,8 +26,8 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     FilterPhysics();
     ~FilterPhysics();
 
-    virtual const QString filterName(FilterIDType filter) const;
-    virtual const QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
 
     virtual const int getRequirements(QAction*){return MeshModel::MM_FACEVERT;}
     virtual int postCondition( QAction* ) const{return MeshModel::MM_TRANSFMATRIX;}

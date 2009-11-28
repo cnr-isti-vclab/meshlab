@@ -65,12 +65,12 @@ public:
 	FilterFunctionPlugin();
 	~FilterFunctionPlugin();
 	
-	virtual const QString filterName(FilterIDType filter) const;
-	virtual const QString filterInfo(FilterIDType filter) const;
-	virtual const FilterClass getClass(QAction *);
+	virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
+	virtual FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	virtual const int getRequirements(QAction *);
+	virtual int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	void showParserError(const QString &s, mu::Parser::exception_type &e);
 	void normalizeVertexQuality(MeshModel &m);

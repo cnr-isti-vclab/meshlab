@@ -55,7 +55,7 @@ FilterFractal::FilterFractal()
 // -------------------------------------------------------------------
 
 // ------- MeshFilterInterface implementation ------------------------
-const QString FilterFractal::filterName(FilterIDType filterId) const
+ QString FilterFractal::filterName(FilterIDType filterId) const
 {
     switch (filterId) {
         case CR_FRACTAL_TERRAIN:
@@ -70,7 +70,7 @@ const QString FilterFractal::filterName(FilterIDType filterId) const
     }
 }
 
-const QString FilterFractal::filterInfo(FilterIDType filterId) const
+ QString FilterFractal::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
         case CR_FRACTAL_TERRAIN:
@@ -158,7 +158,7 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterS
     return false;
 }
 
-const MeshFilterInterface::FilterClass FilterFractal::getClass(QAction* filter)
+ MeshFilterInterface::FilterClass FilterFractal::getClass(QAction* filter)
 {
     switch(ID(filter)) {
         case CR_FRACTAL_TERRAIN:
@@ -172,7 +172,7 @@ const MeshFilterInterface::FilterClass FilterFractal::getClass(QAction* filter)
     }
 }
 
-const int FilterFractal::getRequirements(QAction *filter)
+ int FilterFractal::getRequirements(QAction *filter)
 {
     switch(ID(filter)) {
         case CR_FRACTAL_TERRAIN:
