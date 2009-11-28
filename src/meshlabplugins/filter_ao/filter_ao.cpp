@@ -87,7 +87,7 @@ AmbientOcclusionPlugin::~AmbientOcclusionPlugin()
 {
 }
 
-const QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
+QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -99,7 +99,7 @@ const QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
 	return QString("");
 }
 
-const QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
+QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
@@ -111,7 +111,7 @@ const QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
 	return QString("");
 }
 
-const int AmbientOcclusionPlugin::getRequirements(QAction *action)
+int AmbientOcclusionPlugin::getRequirements(QAction *action)
 {
 	//no requirements needed
 	return 0;

@@ -44,7 +44,7 @@ FilterCreate::FilterCreate()
 
 // ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
-const QString FilterCreate::filterName(FilterIDType filterId) const
+ QString FilterCreate::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
     case CR_BOX : return QString("Box");
@@ -60,7 +60,7 @@ const QString FilterCreate::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
-const QString FilterCreate::filterInfo(FilterIDType filterId) const
+ QString FilterCreate::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
     case CR_BOX : return QString("Create a Box");
@@ -139,7 +139,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, RichParameterSet &
 	return true;
 }
 
-const MeshFilterInterface::FilterClass FilterCreate::getClass(QAction *a)
+ MeshFilterInterface::FilterClass FilterCreate::getClass(QAction *a)
 {
   switch(ID(a))
   {
@@ -157,7 +157,7 @@ const MeshFilterInterface::FilterClass FilterCreate::getClass(QAction *a)
               return MeshFilterInterface::Generic;
   }
 }
-const int FilterCreate::getRequirements(QAction *action)
+ int FilterCreate::getRequirements(QAction *action)
 {
   switch(ID(action))
   {

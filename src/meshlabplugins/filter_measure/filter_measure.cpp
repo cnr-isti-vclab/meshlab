@@ -63,7 +63,7 @@ FilterMeasurePlugin::FilterMeasurePlugin()
 }
 
 // ST() return the very short string describing each filtering action 
-const QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
+ QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_MEASURE_TOPO :  return QString("Compute Topological Measures"); 
@@ -76,7 +76,7 @@ const QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 }
 
 // Info() return the longer string describing each filtering action 
-const QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
+ QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_MEASURE_TOPO :  return QString("Selected faces are moved (or duplicated) in a new layer"); 
@@ -274,7 +274,7 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 	return true;
 }
 
-const FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *a)
+ FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {

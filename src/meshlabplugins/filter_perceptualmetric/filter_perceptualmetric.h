@@ -48,14 +48,14 @@ public:
 
 	FilterPerceptualMetric();
 	
-	virtual const QString filterName(FilterIDType filter);
-	virtual const QString filterInfo(FilterIDType filter);
+	virtual QString filterName(FilterIDType filter);
+	virtual QString filterInfo(FilterIDType filter);
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual const int getRequirements(QAction *action);
+	virtual int getRequirements(QAction *action);
 	virtual bool applyFilter(QAction * /* filter */, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-	virtual const FilterClass getClass(QAction *);	
+	virtual FilterClass getClass(QAction *);	
 };
 
 #endif

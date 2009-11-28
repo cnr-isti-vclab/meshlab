@@ -62,12 +62,12 @@ public:
 
 	MlsPlugin();
 
-	virtual const QString filterName(FilterIDType filter) const;
-	virtual const QString filterInfo(FilterIDType filter) const;
-	const FilterClass getClass(QAction *a);
+	virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
+    FilterClass getClass(QAction *a);
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshDocument &md, RichParameterSet &parent);
-	virtual const int getRequirements(QAction *action);
+	virtual int getRequirements(QAction *action);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet &parent, vcg::CallBackPos *cb) ;
 	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet &parent, vcg::CallBackPos *cb)
 	{assert(0); return false;}

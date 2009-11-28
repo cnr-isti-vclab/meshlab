@@ -66,7 +66,7 @@ SlidingCurvaturePlugin::SlidingCurvaturePlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString SlidingCurvaturePlugin::filterName(FilterIDType filterId) 
+ QString SlidingCurvaturePlugin::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
 		case FP_COMPUTE_PRINC_CURV_DIR_FROM_SLIDING :  return QString("Compute Curvature from Sliding"); 
@@ -74,7 +74,7 @@ const QString SlidingCurvaturePlugin::filterName(FilterIDType filterId)
 	}
 }
 
-const int SlidingCurvaturePlugin::getRequirements(QAction *action)
+ int SlidingCurvaturePlugin::getRequirements(QAction *action)
 {
  return	MeshModel::MM_VERTCURVDIR | MeshModel::MM_FACEMARK;
 }
@@ -82,7 +82,7 @@ const int SlidingCurvaturePlugin::getRequirements(QAction *action)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString SlidingCurvaturePlugin::filterInfo(FilterIDType filterId)
+ QString SlidingCurvaturePlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
 		case FP_COMPUTE_PRINC_CURV_DIR_FROM_SLIDING :  return QString("Compute Curvature from Sliding"); 
@@ -94,7 +94,7 @@ const QString SlidingCurvaturePlugin::filterInfo(FilterIDType filterId)
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
-const SlidingCurvaturePlugin::FilterClass SlidingCurvaturePlugin::getClass(QAction *a)
+ SlidingCurvaturePlugin::FilterClass SlidingCurvaturePlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{

@@ -75,7 +75,7 @@ FilterPerceptualMetric::FilterPerceptualMetric()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString FilterPerceptualMetric::filterName(FilterIDType filterId) 
+ QString FilterPerceptualMetric::filterName(FilterIDType filterId) 
 {
 	switch(filterId) 
 	{
@@ -89,7 +89,7 @@ const QString FilterPerceptualMetric::filterName(FilterIDType filterId)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString FilterPerceptualMetric::filterInfo(FilterIDType filterId)
+ QString FilterPerceptualMetric::filterInfo(FilterIDType filterId)
 {
 	switch(filterId) 
 	{
@@ -100,7 +100,7 @@ const QString FilterPerceptualMetric::filterInfo(FilterIDType filterId)
 		default : assert(0); return QString("unknown filter!!!!");
 	}
 }
-const int FilterPerceptualMetric::getRequirements(QAction *action)
+ int FilterPerceptualMetric::getRequirements(QAction *action)
 {
 	switch(ID(action))
 	{
@@ -208,7 +208,7 @@ bool FilterPerceptualMetric::applyFilter(QAction *action, MeshDocument &md, Filt
 	return true;
 }
 
-const MeshFilterInterface::FilterClass FilterPerceptualMetric::getClass(QAction *action)
+ MeshFilterInterface::FilterClass FilterPerceptualMetric::getClass(QAction *action)
 {
 	switch(ID(action))
 	{

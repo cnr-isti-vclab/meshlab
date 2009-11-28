@@ -69,7 +69,7 @@ FilterFeatureAlignment::~FilterFeatureAlignment()
         delete actionList.at(i);
 }
 
-const MeshFilterInterface::FilterClass FilterFeatureAlignment::getClass(QAction *a)
+ MeshFilterInterface::FilterClass FilterFeatureAlignment::getClass(QAction *a)
 {
     switch(ID(a))
     {
@@ -93,7 +93,7 @@ bool FilterFeatureAlignment::autoDialog(QAction *a)
   assert(0);
 }
 
-const QString FilterFeatureAlignment::filterName(FilterIDType filter) const
+ QString FilterFeatureAlignment::filterName(FilterIDType filter) const
 {
     switch(filter)
     {
@@ -109,7 +109,7 @@ const QString FilterFeatureAlignment::filterName(FilterIDType filter) const
     return QString("error!");
 }
 
-const QString FilterFeatureAlignment::filterInfo(FilterIDType filterId) const
+ QString FilterFeatureAlignment::filterInfo(FilterIDType filterId) const
 {
     switch(filterId)
     {
@@ -125,7 +125,7 @@ const QString FilterFeatureAlignment::filterInfo(FilterIDType filterId) const
     return QString("error!");
 }
 
-const int FilterFeatureAlignment::getRequirements(QAction *action)
+ int FilterFeatureAlignment::getRequirements(QAction *action)
 {
     return 0;
 }

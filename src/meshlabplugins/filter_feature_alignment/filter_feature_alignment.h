@@ -52,10 +52,10 @@ class FilterFeatureAlignment : public QObject, public MeshFilterInterface
         FilterFeatureAlignment();
         ~FilterFeatureAlignment();
 
-        virtual const FilterClass getClass(QAction *);
-        virtual const QString filterName(FilterIDType filter) const;
-        virtual const QString filterInfo(FilterIDType filter) const;
-        virtual const int getRequirements(QAction *);
+        virtual FilterClass getClass(QAction *);
+        virtual QString filterName(FilterIDType filter) const;
+        virtual QString filterInfo(FilterIDType filter) const;
+        virtual int getRequirements(QAction *);
         virtual bool autoDialog(QAction *);
         virtual void initParameterSet(QAction *,MeshDocument &/*m*/, FilterParameterSet & /*parent*/);
         virtual bool applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & /*parent*/, CallBackPos * cb) ;

@@ -57,7 +57,7 @@ PlyMCPlugin::PlyMCPlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString PlyMCPlugin::filterName(FilterIDType filterId) const 
+ QString PlyMCPlugin::filterName(FilterIDType filterId) const 
 {
   switch(filterId) {
         case FP_PLYMC :  return QString("VCG Reconstruction");
@@ -67,7 +67,7 @@ const QString PlyMCPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString PlyMCPlugin::filterInfo(FilterIDType filterId) const
+ QString PlyMCPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
         case FP_PLYMC :  return QString("The surface reconstrction algorithm that have been used for a long time inside the ISTI-Visual Computer Lab. It is mostly a variant of the Curless et al.  approach with some original weighting schemes, a different expansion rule, a new aprroach to hole filling through voluem filling.");
@@ -79,7 +79,7 @@ const QString PlyMCPlugin::filterInfo(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
-const PlyMCPlugin::FilterClass PlyMCPlugin::getClass(QAction *a)
+ PlyMCPlugin::FilterClass PlyMCPlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{

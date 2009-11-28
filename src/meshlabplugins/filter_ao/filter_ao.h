@@ -72,13 +72,13 @@ public:
 	AmbientOcclusionPlugin();
 	~AmbientOcclusionPlugin();
 	
-	virtual const QString     filterName      (FilterIDType filter) const;
-	virtual const QString			filterInfo(FilterIDType filterId) const;
+    virtual QString     filterName      (FilterIDType filter) const;
+    virtual QString			filterInfo(FilterIDType filterId) const;
 
-	virtual const int         getRequirements (QAction *action);
+    virtual int         getRequirements (QAction *action);
 	virtual       bool        autoDialog      (QAction *) {return true;}
 	
-	virtual const FilterClass getClass(QAction *filter) 
+    virtual FilterClass getClass(QAction *filter)
 	{
 		if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION) return MeshFilterInterface::FaceColoring;
 	   	else return MeshFilterInterface::VertexColoring; 

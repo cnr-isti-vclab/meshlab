@@ -39,13 +39,13 @@ public:
 
 	FilterCreate();
 
-	virtual const QString filterName(FilterIDType filter) const;
-	virtual const QString filterInfo(FilterIDType filter) const;
-  virtual const FilterClass getClass(QAction *);
+	virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
+  virtual FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual const int getRequirements(QAction *action);
+	virtual int getRequirements(QAction *action);
 };
 
 #endif

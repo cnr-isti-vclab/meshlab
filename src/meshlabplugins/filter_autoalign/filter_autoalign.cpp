@@ -20,10 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log: samplefilter.cpp,v $
-****************************************************************************/
 
 #include <QtGui>
 
@@ -42,6 +38,7 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/trimesh/autoalign_4pcs.h>
 
 #include "filter_autoalign.h"
+#include "../../meshlabplugins/editalign/align/Guess.h"
 
 using namespace vcg;
 using namespace std;
@@ -51,7 +48,9 @@ using namespace std;
 
 FilterAutoalign::FilterAutoalign() 
 { 
-	typeList << FP_AUTOALIGN;
+	typeList << FP_AUTOALIGN 
+					 //<< FP_BEST_ROTATION
+					 ;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -59,20 +58,22 @@ FilterAutoalign::FilterAutoalign()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString FilterAutoalign::filterName(FilterIDType filterId) const
+QString FilterAutoalign::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_AUTOALIGN :  return QString("Automatic pair Alignement"); 
+		case FP_BEST_ROTATION :  return QString("Automatic Alignement (Brute)"); 
 		default : assert(0); 
 	}
 }
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString FilterAutoalign::filterInfo(FilterIDType filterId) const
+QString FilterAutoalign::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_AUTOALIGN :  return QString(" Automatic Rough Alignment of two meshes. Based on the paper <b> 4-Points Congruent Sets for Robust Pairwise Surface Registration</b>, by Aiger,Mitra, Cohen-Or. Siggraph 2008  "); 
+		case FP_AUTOALIGN     :  return QString("Automatic Rough Alignment of two meshes. Based on the paper <b> 4-Points Congruent Sets for Robust Pairwise Surface Registration</b>, by Aiger,Mitra, Cohen-Or. Siggraph 2008  "); 
+		case FP_BEST_ROTATION :  return QString("Automatic Rough Alignment of two meshes. Brute Force Approach"); 
 		default : assert(0); 
 	}
 }
@@ -101,6 +102,19 @@ void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, R
 				parlst.addParam(new RichFloat("overlapping",0.5f,"Estimated fraction of the\n first mesh overlapped by the second"));
 				parlst.addParam(new RichFloat("tolerance [0.0,1.0]",0.3f,"Error tolerance"));
 		 break;		
+			 case FP_BEST_ROTATION :  
+			 target= md.mm();
+			 foreach (target, md.meshList) 
+			 if (target != md.mm())  break;
+			 
+			 parlst.addParam(new RichMesh ("FirstMesh", md.mm(),&md, "First Mesh",
+											 "The mesh that will be moved"));
+			 parlst.addParam(new RichMesh ("SecondMesh", target,&md, "Second Mesh",
+											 "The mesh that will be kept fixed."));
+			 parlst.addParam(new RichInt("GridSize",10,"Grid Size", "The size of the uniform grid that is used for searching the best translation for a given rotation"));
+			 parlst.addParam(new RichInt("Rotation Num",64,"RotationNumber", "sss"));
+			 break;		
+			 
 		default : assert(0); 
 	}
 }
@@ -109,37 +123,66 @@ void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, R
 bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	vcg::tri::FourPCS<CMeshO> *fpcs ;
-	bool res;
 	switch(ID(filter)) {
 		case FP_AUTOALIGN :
 		{
+			
 			MeshModel *firstMesh= par.getMesh("FirstMesh");
 			MeshModel *secondMesh= par.getMesh("SecondMesh");
 			fpcs = new vcg::tri::FourPCS<CMeshO>();
 			fpcs->prs.Default();
 			fpcs->prs.f =  par.getFloat("overlapping");
-			firstMesh->cm.vert.EnableMark();
-			secondMesh->cm.vert.EnableMark();
+			firstMesh->updateDataMask(MeshModel::MM_VERTMARK);
+			secondMesh->updateDataMask(MeshModel::MM_VERTMARK);
 			fpcs->Init(firstMesh->cm,secondMesh->cm);
-			res = fpcs->Align(0,firstMesh->cm.Tr,cb);
-			firstMesh->cm.vert.DisableMark();
-			secondMesh->cm.vert.DisableMark();
+			bool res = fpcs->Align(0,firstMesh->cm.Tr,cb);
+			firstMesh->clearDataMask(MeshModel::MM_VERTMARK);
+			secondMesh->clearDataMask(MeshModel::MM_VERTMARK);
 
 			// Log function dump textual info in the lower part of the MeshLab screen. 
-			Log(0,(res)?" Automatic Rough Alignment Done":"Automatic Rough Alignment Failed");
+			Log(GLLogStream::FILTER,(res)?" Automatic Rough Alignment Done":"Automatic Rough Alignment Failed");
 				delete fpcs;
+		} break;
+		case FP_BEST_ROTATION :
+		{	
+			MeshModel *firstMesh= par.getMesh("FirstMesh");
+			MeshModel *secondMesh= par.getMesh("SecondMesh");
+			tri::Guess GG;
+			GG.pp.MatrixNum = 100;
+			GG.GenRotMatrix();
+			GG.Init<CMeshO>(firstMesh->cm, secondMesh->cm);
+		  static int counterMV=0;
+			static int step=0;
+			//for(int i=0;i<GG.MV.size();++i)
+			int i=counterMV;
+			step = (step +1)%4;
+//			if(step==0) counterMV++;
+			
+			qDebug("Counter %i step %i",counterMV,step);
+				{
+						Point3f baseTran =  GG.InitBaseTranslation(GG.MV[i]);		
+						Point3f bestTran;
+																
+						int res = GG.SearchBestTranslation(GG.u[0],GG.MV[i],4,1,baseTran,bestTran);
+						if(step==0) firstMesh->cm.Tr.SetIdentity();
+						if(step==1) firstMesh->cm.Tr = GG.MV[i];
+						if(step==2) firstMesh->cm.Tr = GG.BuildTransformation(GG.MV[i],baseTran);												
+						if(step==3) firstMesh->cm.Tr = GG.BuildTransformation(GG.MV[i],bestTran);																									
+				}			
+			//Log(0,(res)?" Automatic Rough Alignment Done":"Automatic Rough Alignment Failed");			
 		} break;
 		default: assert (0);
 	}
 	return true;
 }
 
-const FilterAutoalign::FilterClass FilterAutoalign::getClass(QAction *a)
+FilterAutoalign::FilterClass FilterAutoalign::getClass(QAction *a)
 {
   switch(ID(a))
   {
     case FP_AUTOALIGN :
-      return MeshFilterInterface::Layer;     
+		case FP_BEST_ROTATION :	
+      return FilterClass(MeshFilterInterface::Layer+MeshFilterInterface::RangeMap);     
     default : 
 			return MeshFilterInterface::Generic;
   }

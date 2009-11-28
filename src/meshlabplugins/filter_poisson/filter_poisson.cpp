@@ -72,7 +72,7 @@ PoissonPlugin::PoissonPlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString PoissonPlugin::filterName(FilterIDType filterId) const
+ QString PoissonPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_POISSON_RECON :  return QString("Poisson Reconstruction"); 
@@ -83,7 +83,7 @@ const QString PoissonPlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString PoissonPlugin::filterInfo(FilterIDType filterId) const
+ QString PoissonPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_POISSON_RECON :  return QString("Use the points and normal to build a surface using the Poisson Surface reconstruction approach."); 
@@ -239,7 +239,7 @@ for (i=0; i < nr_faces; i++){
   
 	return true;
 }
-const PoissonPlugin::FilterClass PoissonPlugin::getClass(QAction *action)
+ PoissonPlugin::FilterClass PoissonPlugin::getClass(QAction *action)
 {
   switch(ID(action))
   {

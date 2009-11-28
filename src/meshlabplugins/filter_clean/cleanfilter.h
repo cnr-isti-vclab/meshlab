@@ -102,12 +102,12 @@ class CleanFilter : public QObject, public MeshFilterInterface
 	CleanFilter();
 	~CleanFilter();
 
-	virtual const QString filterName(FilterIDType filter) const;
-	virtual const QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
 MeshFilterInterface::Remeshing;
 
-  virtual const FilterClass getClass(QAction *);
-  virtual const int getRequirements(QAction *);
+  virtual FilterClass getClass(QAction *);
+  virtual int getRequirements(QAction *);
 
 	virtual bool autoDialog(QAction *);
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);

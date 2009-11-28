@@ -45,10 +45,10 @@ public:
 
 	FilterMeasurePlugin();
 	
-	virtual const QString filterName(FilterIDType filter) const;
-	virtual const QString filterInfo(FilterIDType filter) const;
+	virtual QString filterName(FilterIDType filter) const;
+	virtual QString filterInfo(FilterIDType filter) const;
 	virtual bool autoDialog(QAction *);
-	virtual const FilterClass getClass(QAction *);
+	virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	virtual bool applyFilter(QAction *filter, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) { assert(0); return false;} ;

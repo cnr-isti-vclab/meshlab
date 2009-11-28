@@ -56,7 +56,7 @@ FilterIsoParametrization::~FilterIsoParametrization()
 		delete actionList.at(i);
 }
 
-const QString FilterIsoParametrization::filterName(FilterIDType filter) const
+ QString FilterIsoParametrization::filterName(FilterIDType filter) const
 {
   switch(filter)
   {
@@ -68,7 +68,7 @@ const QString FilterIsoParametrization::filterName(FilterIDType filter) const
   return QString("error!");
 }
 
-const QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
+ QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {
@@ -89,7 +89,7 @@ const QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
   return QString("error!");
 }
 
-const int FilterIsoParametrization::getRequirements(QAction *action)
+ int FilterIsoParametrization::getRequirements(QAction *action)
 {
 	(void) action;
     /*switch(ID(action))
@@ -350,7 +350,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
   return false;
 }
 
-const MeshFilterInterface::FilterClass FilterIsoParametrization::getClass(QAction *a)
+ MeshFilterInterface::FilterClass FilterIsoParametrization::getClass(QAction *a)
 {
   switch(ID(a))
   {
