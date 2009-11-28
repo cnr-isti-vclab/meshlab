@@ -60,8 +60,8 @@ class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
                 <<"Variance shadow mapping with blur";
     }
 
-    virtual const QString Info(QAction *);
-    virtual const QString ST(FilterIDType filter) const;
+    virtual QString Info(QAction *);
+    virtual QString ST(FilterIDType filter) const;
 
 public:
      

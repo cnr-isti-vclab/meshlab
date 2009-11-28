@@ -55,7 +55,7 @@ QString ExtraMeshDecoratePlugin::filterInfo(QAction *action) const
   return QString();
  }
 
-const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
+QString ExtraMeshDecoratePlugin::filterName(FilterIDType filter) const
 {
     switch(filter)
     {

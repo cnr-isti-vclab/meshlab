@@ -56,7 +56,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
         DP_SHOW_TEXPARAM,
   };
 
-  virtual const QString ST(FilterIDType filter) const;
+  QString filterName(FilterIDType filter) const;
 
 private:
 	float niceRound2(float value,float base);
@@ -89,7 +89,7 @@ public:
 
     FilterIDType tt;
     foreach(tt , types()){
-	      actionList << new QAction(ST(tt), this);
+          actionList << new QAction(filterName(tt), this);
     }
     QAction *ap;
     foreach(ap,actionList){
