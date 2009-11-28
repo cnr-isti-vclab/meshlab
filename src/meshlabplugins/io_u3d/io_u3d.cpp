@@ -28,7 +28,7 @@
 #include <QtGui>
 
 #include "io_u3d.h"
-
+#include <common/pluginmanager.h>
 //#include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
@@ -53,7 +53,7 @@ bool U3DIOPlugin::open(const QString & /*formatName*/, const QString &/*fileName
 
 QString U3DIOPlugin::computePluginsPath()
 {
-		QDir pluginsDir(MainWindowInterface::getPluginDirPath());
+    QDir pluginsDir(PluginManager::getPluginDirPath());
 		#if defined(Q_OS_WIN)
 			pluginsDir.cd("U3D_W32");
 		#elif defined(Q_OS_MAC)
