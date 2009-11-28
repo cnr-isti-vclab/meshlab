@@ -72,7 +72,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 
 			
 			MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
-			QAction *editAction = 0;
+            //QAction *editAction = 0;
 			if(iEditFactory)
 			{
 				//qDebug() << "Here with filename:" << fileName;
