@@ -39,8 +39,15 @@ private:
   vcg::CallBackPos * cb;
   QProcess renderProcess;
   QDir templatesDir; //directory of templates ("render_template")
-  QStringList templates;
-  bool delRibFiles;
+  QStringList templates; //list of templates found
+  QStringList imageFormatsSupported; //list of image formats supported by qt for conversion of final image
+  bool delRibFiles; //if the rib files produced are to remove
+  QStringList fileToRemove; //list of file created
+  QString imageName; //final image name
+  int imageFormat; //format of final image
+  QString meshDirString; //string of mesh dir
+  QDir destDir; //destination dir
+  QStringList imagesRendered; //list of image to rendered (readed from file)
   enum alignValue { CENTER, TOP, BOTTOM };
   bool convertedGeometry;
 	
@@ -90,6 +97,7 @@ private:
   QString quotesPath(QString* path);
   bool checkDir(QString destDirString, QString path);
   bool copyFiles(QDir templateDir,QDir destDir,QStringList dirs);
+  bool delDir(QDir dir, QString toDel);
 };
 
 #endif

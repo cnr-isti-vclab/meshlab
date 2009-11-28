@@ -2,7 +2,7 @@
 #include <QtGui>
 #include <QDir>
 #include <QProcess>
-//#include <math.h>
+#include <math.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -41,15 +41,15 @@ FilterHighQualityRender::FilterHighQualityRender()
     ;//this->errorMessage = "\"render_template\" folder not found";
   }
 
-  /*alignValue = QStringList();
-  alignValue << "center" << "bottom" << "top";
-*/
+  QList<QByteArray> imageFormats = QImageWriter::supportedImageFormats();
+  for(int i=0; i<imageFormats.count(); i++) {
+	  imageFormatsSupported << imageFormats.at(i).data();
+  }
 }
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
- QString FilterHighQualityRender::filterName(FilterIDType filterId) const
-{
+QString FilterHighQualityRender::filterName(FilterIDType filterId) const{
   switch(filterId) {
     case FP_HIGHQUALITY_RENDER :  return QString("Render high quality image");
     default : assert(0); 
@@ -59,8 +59,7 @@ FilterHighQualityRender::FilterHighQualityRender()
 
 // Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
- QString FilterHighQualityRender::filterInfo(FilterIDType filterId) const
-{
+QString FilterHighQualityRender::filterInfo(FilterIDType filterId) const{
   switch(filterId) {
     case FP_HIGHQUALITY_RENDER :  return QString("Make an high quality image of current mesh on a choosen template scene.");
     default : assert(0); 
@@ -71,8 +70,7 @@ FilterHighQualityRender::FilterHighQualityRender()
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
- FilterHighQualityRender::FilterClass FilterHighQualityRender::getClass(QAction *a)
-{
+FilterHighQualityRender::FilterClass FilterHighQualityRender::getClass(QAction *a){
   switch(ID(a))
 	{
 		case FP_HIGHQUALITY_RENDER :  return MeshFilterInterface::Generic;
@@ -118,15 +116,15 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 			}
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));
 			parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));
-			//format is output is only tiff for now
 			parlst.addParam(new RichString("ImageName", "default", "Name of output image"));
-			
-			//DON'T WORK!!
+			parlst.addParam(new RichEnum("ImageFormat", 0, imageFormatsSupported, "Output image format"));
+
+			//DON'T WORK!!not implemented
 			//delRibFiles = true;
 			//FileValue fv("");
 			//parlst.addParam(new RichSaveFile("SceneName",&fv,&FileDecoration(&fv,".rib","Name of file rib to save","If not specified, the files will be removed")));
-			
-			
+			parlst.addParam(new RichBool("SaveScene",false,"Save the files created for rendering?",
+				"If checked the scene will be created in the same directory of mesh, else in the temporary system folder and then removed"));
 			break;
 			}
 		default : assert(0); 
@@ -144,9 +142,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	this->cb = cb;
 	QTime tt; tt.start(); //debug
 	qDebug("Starting apply filter");
- 	//read a template file e make a new file rib
-			
-	//QString templatePath = par.getOpenFileName("TemplateName");
+
 	QString templateName = templates.at(par.getEnum("scene"));
 	QString templatePath = templatesDir.absolutePath() + QDir::separator() + templateName + QDir::separator() + templateName + ".rib";
     QDir templateDir(templatesDir);
@@ -160,34 +156,57 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		return false;
 	}
 
-	//destination diretory + main file
-	QString destPathFileString("");
-	//QString destPathFileString = par.getSaveFileName("SceneName");
-	if(destPathFileString == "") { //default value: temporany directory
-		QDir temp = QDir::temp();
-		if(!temp.cd("scene")) {
-			if(temp.mkdir("scene")) {
-				if(!temp.cd("scene"))
-					return false;
-			}
-			else {
+	//directory of current mesh
+	meshDirString = QString(m.fileName.c_str());
+	meshDirString = getDirFromPath(&meshDirString);
+
+	//name and format of final image
+	imageName = par.getString("ImageName");
+	imageFormat = par.getEnum("ImageFormat");
+
+	//creating of destination directory
+	delRibFiles = !par.getBool("SaveScene");
+	destDir = QDir::temp(); //system temporary directry
+	if(!delRibFiles) {
+		//destDir = QDir(par.getSaveFileName("SceneName"));
+		destDir = QDir(meshDirString);
+	}
+	//create scene directory
+	if(!destDir.cd("scene")) {
+		if(destDir.mkdir("scene")) {
+			if(!destDir.cd("scene")) {
+				this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
 				return false;
 			}
-		}		
-		destPathFileString = temp.absolutePath() + QDir::separator() + "scene.rib";
-		delRibFiles = true;
+		}
+		else {
+			this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
+			return false;
+		}
 	}
-	else {
-		delRibFiles = false;
+	//create a new directory
+	QString newDir = templateName;
+	int k = 0;
+	while(destDir.cd(newDir)) {
+		destDir.cdUp();
+		newDir = templateName + QString::number(++k);
+	}
+	if(!destDir.mkdir(newDir)) {
+		this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
+		return false;
+	}
+	if(!destDir.cd(newDir)) {
+		this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
+		return false;
 	}
 
-
-	QString destDirString = getDirFromPath(&destPathFileString);
-	QString destFile = getFileNameFromPath(&destPathFileString);
-	qDebug("Starting to write rib file into %s",qPrintable(destPathFileString));
-	//output file		
+	//destination diretory + main file	
+	QString destDirString = destDir.absolutePath();
+	QString destFileString = "scene.rib";
+	qDebug("Starting to write rib file into %s",qPrintable(destDir.absolutePath() + QDir::separator() + destFileString));
+	//output file
 	FILE* fout;
-	fout = fopen(qPrintable(destPathFileString),"wb");
+	fout = fopen(qPrintable(destDir.absolutePath() + QDir::separator() + destFileString),"wb");
 	if(fout==NULL)	{
 	
 	}
@@ -212,8 +231,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	QString newFormat = "Format " + 
 						QString::number(par.getInt("FormatX")) + " " +
 						QString::number(par.getInt("FormatY")) + " " +
-						QString::number(par.getFloat("PixelAspectRatio"));
-	QStringList renderedImage = QStringList();
+						QString::number(par.getFloat("PixelAspectRatio"));	
+	imagesRendered = QStringList();
 	int numberOfDummies = 0; //the dummy object could be than one (e.g. for ambient occlusion passes)
 	
 	qDebug("Starting reading cycle %i",tt.elapsed());
@@ -254,11 +273,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			if(token[0].trimmed() == "MakeCubeFaceEnvironment")
 				path = token[7];
 			path = getDirFromPath(&path);
-			qDebug("dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
+			//qDebug("check dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
 			checkDir(destDirString,path);
 		}
-
-		
 
 		if(token[0].trimmed() == "FrameBegin") {
 			currentFrame = token[1].trimmed().toInt(); //no check on cast
@@ -281,13 +298,17 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			//create the path if needed
 			QString path = token[1].trimmed();
 			path = getDirFromPath(&path);
-			qDebug("dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
+			//qDebug("check dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
 			checkDir(destDirString,path);
 
+			//if there's more "Display" statement with one that's "file" is not considered a final image
 			if(token[2].trimmed() != "\"framebuffer\"")
 				if (!anyOtherDisplayType && token[2].trimmed() == "\"file\"") {
 					currentDisplayTypeIsFile = true;
-					renderedImage << token[1].trimmed();
+					QString img = token[1].trimmed().remove('\"');
+					if(img.startsWith('+'))
+						img = img.mid(1,img.size());
+					imagesRendered << img;
 				}
 				else
 					anyOtherDisplayType = true;
@@ -401,7 +422,6 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	Log(GLLogStream::FILTER,"Successfully created scene");
 	qDebug("Cycle ending at %i",tt.elapsed());
 	//copy the rest of template (shaders, textures..)
-	QDir destDir(destDirString);
 	copyFiles(templateDir, destDir, textureDirs);
 	copyFiles(templateDir, destDir, shaderDirs);
 	qDebug("Copied needed file at %i",tt.elapsed());
@@ -469,9 +489,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	if(textureList.count() > 0) {
 	//foreach(QString textureName, textureList) {
 		QString textureName = textureList.first();
-		QString str(m.fileName.c_str()); //mesh directory
-		str = getDirFromPath(&str);
-		QFile srcFile(str + QDir::separator() + textureName);
+
+		QFile srcFile(meshDirString + QDir::separator() + textureName);
 
 		//position in the first readable/writable between textures directories
 		QString newImageDir = ".";
@@ -519,7 +538,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//QProcess renderProcess;
 	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
 	renderProcess.setEnvironment(aqsisEnv);
-	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -progress -progressformat=%p "+ destFile;
+	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -progress -progressformat=%p "+ destFileString;
 	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
 	//every time the render process write a message, receive a signal
 	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
@@ -533,24 +552,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 #endif
 	//qDebug("end rendering at %i",tt.elapsed());
 /*	
-	//the rendering result image is copied in mesh folder
-	QString meshDir(m.fileName.c_str());
-	meshDir = getDirFromPath(&meshDir);
-	QString finalImage = meshDir + QDir::separator() + par.getString("ImageName") + ".tiff";
-	qDebug("final image position: %s", qPrintable(finalImage));
-	if(QFile::exists(finalImage)) {
-		//delete without control?
-		QFile::remove(finalImage);
-	}
-	for(int i = 0; i < renderedImage.size(); i++)
-		qDebug("rendering result image position: %s", qPrintable(destDirString + QDir::separator() + renderedImage.at(i)));
-	//maybe a set of file
-	//QFile::copy(destDirString + QDir::separator() + par.getString("ImageName"), finalImage);
-
-    
-	//delete all created files (if it's required)
-	qDebug("end: %i",tt.elapsed());
-	Log(GLLogStream::FILTER,"Successfully created high quality image");
+	
 */
 	return true;
 }
@@ -558,7 +560,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 void FilterHighQualityRender::updateOutputProcess() {
 	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
 	//the format is a number which say the percentage (maybe more that one)
-	out = QStringList(out.trimmed().split(' ')).last(); //take only last
+	out = QStringList(out.trimmed().split(' ')).last(); //take only the last
 	//qDebug("aqsis.exe output: %s",qPrintable(out));
 	cb(int(out.toFloat()), "Rendering image with Aqsis"); //update progress bar
 }
@@ -566,10 +568,50 @@ void FilterHighQualityRender::finish(int a,QProcess::ExitStatus b){
 	qDebug("aqsis.exe finished");
 	Log(GLLogStream::FILTER,"Aqsis has rendered image successfully");
 	cb(0, "");
-	//ho bisogno di alcune info per questi:
-	//copia l'immagine creata
-	//cancella file temporanei
+	
+	//the rendering result image is copied in mesh folder (maybe a set of file)
+	QString finalImage = meshDirString + QDir::separator() + imageName;
+	qDebug("final image position: %s", qPrintable(finalImage));
+	QString imageFormatString = imageFormatsSupported.at(imageFormat);
+	float n = 0;
+	while( (imagesRendered.size() / pow(float(10),++n)) > 1);
+	n--; //n is the ciphers number of imagesRendered.size()
+	for(int i = 0; i < imagesRendered.size(); i++) {
+		QString currentImage = destDir.absolutePath() + QDir::separator() + imagesRendered.at(i);
+		qDebug("rendering result image position: %s", qPrintable(currentImage));
+		QImage image;
+		image.load(currentImage);
+		
+		if(imagesRendered.size() == 1) {
+			image.save(finalImage + "." + imageFormatString, qPrintable(imageFormatString));
+			qDebug("saved image in: %s", qPrintable(finalImage + "." + imageFormatString));
+		}
+		else {
+			//add zero for correct image name
+			QString num = QString::number(i);
+			float j = 0; //j is the ciphers number of i
+			while((i / pow(float(10),++j)) > 1); 
+			for(;j <= n; j++)
+				num = "0" + num;
+			image.save(finalImage + num + "." + imageFormatString, qPrintable(imageFormatString));
+			qDebug("saved image in: %s", qPrintable(finalImage + num + "." + imageFormatString));
+			//unique file gif?
+		}		
+	}
+	
+	//delete recursively all created files (if it's required)
+	if(delRibFiles) {
+		QString dirName = destDir.dirName();
+		destDir.cdUp();
+		//warning: unresolved bug (signal finish arrivied two times...more dangerous)
+		//delDir(destDir, dirName);
+	}
+
+	/*qDebug("end: %i",tt.elapsed());
+	Log(GLLogStream::FILTER,"Successfully created high quality image");*/
 }
+
+
 
 void FilterHighQualityRender::errSgn() {
 	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardError().data());
@@ -689,7 +731,7 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 					dz = (dummyZ - m.cm.trBB().DimZ() * scale) / 2;
 					break;
 				case alignValue::BOTTOM:
-					dz = -(dummyX - m.cm.trBB().DimZ() * scale) / 2;
+					dz = -(dummyZ - m.cm.trBB().DimZ() * scale) / 2;
 					break;
 				case alignValue::CENTER: break; //is already center
 			}
@@ -878,9 +920,9 @@ bool FilterHighQualityRender::checkDir(QString destDirString, QString path) {
 		if(!destDir.cd(dir)) {
 			destDir.mkdir(dir);
 			destDir.cd(dir);
+			qDebug("created: %s", qPrintable(destDir.absolutePath()));	
 		}
 	}
-	qDebug(qPrintable(destDir.absolutePath()));
 	return true;
 }
 
@@ -908,4 +950,31 @@ bool FilterHighQualityRender::copyFiles(QDir templateDir,QDir destDir,QStringLis
 	}
 	return true;
 }
+
+bool FilterHighQualityRender::delDir(QDir dir, QString toDel) {
+	qDebug("Deleting: %s in %s", qPrintable(toDel), qPrintable(dir.absolutePath()));
+	if(!dir.rmdir(toDel)) {
+		dir.cd(toDel);
+		qDebug("Sono in %s", qPrintable(dir.absolutePath()));
+		QStringList dirs = dir.entryList(QDir::Files|QDir::NoDotAndDotDot);
+		foreach(QString entry, dirs) {
+			qDebug("Cycle1 Deleting: %s in %s", qPrintable(entry), qPrintable(dir.absolutePath()));	
+			dir.remove(entry);
+		}
+		dirs = dir.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
+		foreach(QString entry, dirs) {
+			qDebug("Cycle2 Deleting: %s in %s", qPrintable(entry), qPrintable(dir.absolutePath()));	
+			if(!dir.rmdir(entry)) {
+				QDir temp = dir;
+				delDir(temp, entry);
+			}
+		}
+		dir.cdUp();
+		qDebug("Ora sono in %s", qPrintable(dir.absolutePath()));		
+		if(!dir.rmdir(toDel))
+			return false;
+	}
+	return true;
+}
+
 Q_EXPORT_PLUGIN(FilterHighQualityRender)
