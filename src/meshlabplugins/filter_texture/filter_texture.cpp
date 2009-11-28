@@ -25,14 +25,13 @@
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
-
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/attribute_seam.h>
-#include <vcg/space/triangle2.h>
 #include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/space/triangle2.h>
 
 #include "filter_texture.h"
 #include "pushpull.h"
@@ -57,7 +56,7 @@ const QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
 		case FP_BASIC_TRIANGLE_MAPPING : return QString("Basic Triangle Mapping");
 		case FP_SET_TEXTURE : return QString("Set Texture");
-		case FP_COLOR_TO_TEXTURE : return QString("Color To Texture");
+		case FP_COLOR_TO_TEXTURE : return QString("Vertex Color to Texture transfer");
 		default : assert(0); 
 	}
 }
@@ -100,9 +99,8 @@ const int FilterTexturePlugin::getRequirements(QAction *a)
 		case FP_UV_TO_COLOR :
 		case FP_UV_WEDGE_TO_VERTEX :
 		case FP_BASIC_TRIANGLE_MAPPING :
-		case FP_SET_TEXTURE :
-		case FP_COLOR_TO_TEXTURE :
-			return MeshModel::MM_NONE;
+		case FP_SET_TEXTURE : return MeshModel::MM_NONE;
+		case FP_COLOR_TO_TEXTURE : return MeshModel::MM_FACEFACETOPO;
 		default: assert(0);	
 	}
 	return MeshModel::MM_NONE;
@@ -174,7 +172,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 			}
 			fileName = fileName.append(".png");
 			parlst.addParam(new RichString("textName", fileName, "Texture file", "If the file exists it will be associated to the mesh else a dummy one will be created"));
-			parlst.addParam(new RichInt("textDim", 1024, "Texture Dimension (px)", "If the named texture doesn't exists the dummy one will be squared with this side"));
+			parlst.addParam(new RichInt("textDim", 1024, "Texture Dimension (px)", "If the named texture doesn't exists the dummy one will be squared with this size"));
 			}
 			break;
 		case FP_COLOR_TO_TEXTURE : {
@@ -192,7 +190,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 			parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
 			parlst.addParam(new RichInt("textW", 1024, "Texture width (px)", "The texture width"));
 			parlst.addParam(new RichInt("textH", 1024, "Texture height (px)", "The texture height"));
-			parlst.addParam(new RichBool("overwrite", false, "Overwrite texture", "if current has a texture will be overwritten"));
+			parlst.addParam(new RichBool("overwrite", false, "Overwrite texture", "if current mesh has a texture will be overwritten (with provided texture dimension)"));
 			parlst.addParam(new RichBool("assign", false, "Assign texture", "assign the newly created texture"));
 			}
 			break;
@@ -281,26 +279,36 @@ inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float bor
 class RasterSampler
 {
 public:
-	RasterSampler(QImage &_img, int _tw, int _th) : img(_img)
-	{
-		assert(_tw >=1);
-		assert(_th >=1);
-		texWidth = _tw;
-		texHeight = _th;
-	};
+	RasterSampler(QImage &_img, int _th) : img(_img), texH(_th) {assert(texH>0);};
 	
 	QImage &img;
-	int texWidth;
-	int texHeight;
+	int texH;
 	
 	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp)
 	{
 		CMeshO::VertexType::ColorType c;
 		c.lerp(f.V(0)->cC(), f.V(1)->cC(), f.V(2)->cC(), p);
-		img.setPixel(tp.X(), (texHeight-1)-tp.Y(), qRgba(c[0], c[1], c[2], 255));
+		img.setPixel(tp.X(), texH - tp.Y(), qRgba(c[0], c[1], c[2], 255));
 	}
 };
 
+template <class MetroMesh, class VertexSampler>	
+static void TextureCorrected(MetroMesh & m, VertexSampler &ps, int textureWidth, int textureHeight)
+{
+	typedef typename MetroMesh::FaceIterator FaceIterator;
+	FaceIterator fi;
+	
+	printf("Similar Triangles face sampling\n");
+	for(fi=m.face.begin(); fi != m.face.end(); fi++)
+	{
+		vcg::Point2f ti[3];
+		for(int i=0;i<3;++i)
+			ti[i]=vcg::Point2f((*fi).WT(i).U() * textureWidth - 0.5, (*fi).WT(i).V() * textureHeight + 0.5);
+		vcg::tri::SurfaceSampling<MetroMesh,VertexSampler>::SingleFaceRaster(*fi,  ps, ti[0],ti[1],ti[2]);
+	}
+}
+
+// ERROR CHECKING UTILITY
 #define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
 ///////////////////////////////////////////////////////
 
@@ -384,9 +392,8 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			CheckError(pxBorder < 0,   "Inter-Triangle border has an incorrect value");
 			CheckError(sideDim < 0,  "Quads per line border has an incorrect value");
 			
-			if (adv)
-			{ //ADVANCED SPACE-OPTIMIZING
-				
+			if (adv) //ADVANCED SPACE-OPTIMIZING
+			{
 				float border = ((float)pxBorder) / textDim;
 				
 				// Creates a vector of double areas
@@ -507,9 +514,8 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 				Log(GLLogStream::FILTER, "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
 				
 			}
-			else
-			{ //BASIC
-				
+			else //BASIC
+			{
 				//Get total faces and total undeleted face
 				int faceNo = m.cm.face.size();
 				int faceNotD = 0;
@@ -570,7 +576,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 						}
 					}
 				}
-				Log(GLLogStream::FILTER, "Triangles catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
+				Log(GLLogStream::FILTER, "Triangles' catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
 			}
 		}
 		break;
@@ -605,7 +611,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			{
 				//create dummy checkers texture image
 				QImage img(textDim, textDim, QImage::Format_RGB32);
-				img.fill(0xffffffff);
+				img.fill(Qt::white);
 				QPainter p(&img);
 				QBrush gray(Qt::gray);
 				QRect rect(0,0,CHECKERDIM,CHECKERDIM);
@@ -663,12 +669,51 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			QImage img(QSize(textW,textH), QImage::Format_ARGB32);
 			img.fill(Qt::transparent);
 			
-			// Rasterizing
-			RasterSampler rs(img, textW, textH);
-			vcg::tri::SurfaceSampling<CMeshO,RasterSampler>::Texture(m.cm,rs,textW,textH);
+			// Compute (texture-space) border edges
+			vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
+			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+			
+			// Rasterizing safety buffer area along border edges
+			QPainter p(&img);
+			QGradientStops gs;
+			QLinearGradient grad;
+			QPen pen(Qt::SolidLine);
+			grad.setCoordinateMode(QGradient::LogicalMode);
+			pen.setCapStyle(Qt::RoundCap);
+			pen.setWidthF(2.0);
+			gs << QGradientStop(0.0,Qt::transparent) << QGradientStop(1.0,Qt::transparent);
+			
+			CMeshO::FaceIterator fi;
+			for (fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi)
+				for(int i=0;i<3;++i)
+					if (fi->IsB(i))
+					{
+						QPointF t[2];
+						CMeshO::VertexType::ColorType c[2];
+						t[0] = QPointF(fi->cWT(i).U() * textW - 0.5, (1.0 - fi->cWT(i).V()) * textH - 0.5);
+						t[1] = QPointF(fi->cWT((i+1)%3).U() * textW - 0.5, (1.0 - fi->cWT((i+1)%3).V()) * textH - 0.5);
+						c[0] = fi->V(i)->cC();
+						c[1] = fi->V((i+1)%3)->cC();
+						grad.setStart(t[0].x()+0.5, t[0].y()+0.5);
+						grad.setFinalStop(t[1].x()+0.5, t[1].y()+0.5);
+						gs[0].second = QColor(c[0][0],c[0][1], c[0][2]);
+						gs[1].second = QColor(c[1][0],c[1][1], c[1][2]);
+						grad.setStops(gs);
+						pen.setBrush(QBrush(grad));
+						p.setPen(pen);
+						p.drawLine(t[0], t[1]);
+					}
+			
+			// Rasterizing triangles
+			RasterSampler rs(img, textH);
+			TextureCorrected<CMeshO,RasterSampler>(m.cm,rs,textW,textH);
 			
 			// PullPush
 			vcg::PullPush(img, Qt::transparent);
+			
+			// Undo topology changes
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 			
 			// Save
 			CheckError(!img.save(filePath), "Texture file cannot be saved");
@@ -681,6 +726,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			}
 		}
 		break;
+		
 		default: assert(0);
 	}
 	return true;
