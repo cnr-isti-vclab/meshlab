@@ -157,16 +157,16 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 
 	//directory of current mesh
-	meshDirString = QString(m.fileName.c_str());
+	QString meshDirString = QString(m.fileName.c_str());
 	meshDirString = getDirFromPath(&meshDirString);
 
 	//name and format of final image
-	imageName = par.getString("ImageName");
-	imageFormat = par.getEnum("ImageFormat");
+	QString imageName = par.getString("ImageName");
+	int imageFormat = par.getEnum("ImageFormat");
 
 	//creating of destination directory
-	delRibFiles = !par.getBool("SaveScene");
-	destDir = QDir::temp(); //system temporary directry
+	bool delRibFiles = !par.getBool("SaveScene");
+	QDir destDir = QDir::temp(); //system temporary directry
 	if(!delRibFiles) {
 		//destDir = QDir(par.getSaveFileName("SceneName"));
 		destDir = QDir(meshDirString);
@@ -232,7 +232,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 						QString::number(par.getInt("FormatX")) + " " +
 						QString::number(par.getInt("FormatY")) + " " +
 						QString::number(par.getFloat("PixelAspectRatio"));	
-	imagesRendered = QStringList();
+	QStringList imagesRendered = QStringList();
 	int numberOfDummies = 0; //the dummy object could be than one (e.g. for ambient occlusion passes)
 	
 	qDebug("Starting reading cycle %i",tt.elapsed());
@@ -312,6 +312,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 				}
 				else
 					anyOtherDisplayType = true;
+			else
+				line = "#" + line; //if there's a framebuffer will be open pqsl automatically
 		}		
 
 		//transformation camera
@@ -421,6 +423,13 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	fclose(fout);
 	Log(GLLogStream::FILTER,"Successfully created scene");
 	qDebug("Cycle ending at %i",tt.elapsed());
+
+	//check if the final rib file will render any image
+	if(imagesRendered.size() == 0) {
+		this->errorMessage = "The template hasn't statement to render any image";
+		return false;
+	}
+
 	//copy the rest of template (shaders, textures..)
 	copyFiles(templateDir, destDir, textureDirs);
 	copyFiles(templateDir, destDir, shaderDirs);
@@ -473,10 +482,11 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			compileProcess.start(toRun);				
 			if (!compileProcess.waitForFinished(-1)) { //wait the finish of process
 				//if there's an arror of compiling the process exits normally!!
-				QByteArray err = compileProcess.readAllStandardError();
-				this->errorMessage = "Is impossible to compile the shaders of template" + err;
-				qDebug("compiling msg err: %s",err.data());
-				qDebug("compiling msg out: %s",compileProcess.readAllStandardOutput().data());
+				QString out = QString::fromLocal8Bit(compileProcess.readAllStandardError().data());
+				this->errorMessage = "Unable to compile the shaders of template" + out;
+				qDebug("compiling msg err: %s",qPrintable(out));
+				out = QString::fromLocal8Bit(compileProcess.readAllStandardOutput().data());
+				qDebug("compiling msg out: %s",qPrintable(out));
 				return false;
 			}
 
@@ -535,7 +545,6 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	qDebug("Converted image at %i",tt.elapsed());
 	
 	//run the aqsis rendering
-	//QProcess renderProcess;
 	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
 	renderProcess.setEnvironment(aqsisEnv);
 	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -progress -progressformat=%p "+ destFileString;
@@ -543,31 +552,16 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//every time the render process write a message, receive a signal
 	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
 	connect(&renderProcess, SIGNAL(readyReadStandardError()),this, SLOT(errSgn()));
-	connect(&renderProcess, SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(finish(int,QProcess::ExitStatus)));
 	cb(0, "Rendering image with Aqsis");
 #if !defined(NO_RENDERING)
 	renderProcess.start(toRun);	
-	//if (!renderProcess.waitForFinished(-1)) //wait the finish of process
-         //return false; //devo?quando si verifica?se la finestra viene chiusa?	
+	if (!renderProcess.waitForFinished(-1)) {
+		this->errorMessage = "An error occured in Aqsis";
+        return false;
+	}
 #endif
-	//qDebug("end rendering at %i",tt.elapsed());
-/*	
-	
-*/
-	return true;
-}
-
-void FilterHighQualityRender::updateOutputProcess() {
-	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
-	//the format is a number which say the percentage (maybe more that one)
-	out = QStringList(out.trimmed().split(' ')).last(); //take only the last
-	//qDebug("aqsis.exe output: %s",qPrintable(out));
-	cb(int(out.toFloat()), "Rendering image with Aqsis"); //update progress bar
-}
-void FilterHighQualityRender::finish(int a,QProcess::ExitStatus b){
-	qDebug("aqsis.exe finished");
-	Log(GLLogStream::FILTER,"Aqsis has rendered image successfully");
-	cb(0, "");
+	//if process Aqsis is stopped, no image are created
+	qDebug("aqsis process finished");
 	
 	//the rendering result image is copied in mesh folder (maybe a set of file)
 	QString finalImage = meshDirString + QDir::separator() + imageName;
@@ -580,7 +574,10 @@ void FilterHighQualityRender::finish(int a,QProcess::ExitStatus b){
 		QString currentImage = destDir.absolutePath() + QDir::separator() + imagesRendered.at(i);
 		qDebug("rendering result image position: %s", qPrintable(currentImage));
 		QImage image;
-		image.load(currentImage);
+		if(!image.load(currentImage)) {
+			this->errorMessage = "An error occured with Aqsis or rendered image are be removing";
+			return false;
+		}
 		
 		if(imagesRendered.size() == 1) {
 			image.save(finalImage + "." + imageFormatString, qPrintable(imageFormatString));
@@ -598,24 +595,52 @@ void FilterHighQualityRender::finish(int a,QProcess::ExitStatus b){
 			//unique file gif?
 		}		
 	}
+
+	qDebug("end: %i",tt.elapsed());
+	Log(GLLogStream::FILTER,"Successfully created high quality image");
+	//Log(GLLogStream::FILTER,"Aqsis has rendered image successfully");
+	cb(100, "");
+
+	//run piqls with rendered image
+	QProcess piqslProcess;
+	piqslProcess.setWorkingDirectory(destDirString);
+	piqslProcess.setEnvironment(aqsisEnv);
+	toRun = aqsisDir + aqsisBinPath() + QDir::separator() + "piqsl ";
+	//if there'isnt image, it stops before...
+	foreach(QString img, imagesRendered) {
+		toRun += img + " ";
+	}
 	
+	qDebug("Runnig piqsl command: %s", qPrintable(toRun));
+	piqslProcess.start(toRun);
+	
+	piqslProcess.waitForFinished(5000); //no check error...
+	piqslProcess.terminate();
+
 	//delete recursively all created files (if it's required)
 	if(delRibFiles) {
 		QString dirName = destDir.dirName();
-		destDir.cdUp();
-		//warning: unresolved bug (signal finish arrivied two times...more dangerous)
-		//delDir(destDir, dirName);
+		QDir temp = destDir;
+		temp.cdUp();
+		delDir(temp, dirName);
+		delRibFiles = false;
 	}
+	qDebug("finsish to apply filter at %i",tt.elapsed());
 
-	/*qDebug("end: %i",tt.elapsed());
-	Log(GLLogStream::FILTER,"Successfully created high quality image");*/
+	return true;
 }
 
-
+void FilterHighQualityRender::updateOutputProcess() {
+	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
+	//the format is a number which say the percentage (maybe more that one)
+	out = QStringList(out.trimmed().split(' ')).last(); //take only the last
+	//qDebug("aqsis.exe output: %s",qPrintable(out));
+	cb(int(out.toFloat()), "Rendering image with Aqsis"); //update progress bar
+}
 
 void FilterHighQualityRender::errSgn() {
 	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardError().data());
-	qDebug("aqsis.exe error: %s",qPrintable(out));
+	qDebug("aqsis error: %s",qPrintable(out));
 }
 
 //rivedere....nome file
@@ -970,7 +995,6 @@ bool FilterHighQualityRender::delDir(QDir dir, QString toDel) {
 			}
 		}
 		dir.cdUp();
-		qDebug("Ora sono in %s", qPrintable(dir.absolutePath()));		
 		if(!dir.rmdir(toDel))
 			return false;
 	}
