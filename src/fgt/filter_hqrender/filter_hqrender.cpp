@@ -234,7 +234,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 						QString::number(par.getFloat("PixelAspectRatio"));	
 	QStringList imagesRendered = QStringList();
 	int numberOfDummies = 0; //the dummy object could be than one (e.g. for ambient occlusion passes)
-	
+	numOfWorldBegin = 0; //the number of world begin statement found (for progress bar)
+
 	qDebug("Starting reading cycle %i",tt.elapsed());
 	//reading cycle
 	int debugCount = 0;
@@ -325,6 +326,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 		//make another file if there is an animation
 		if(token[0].trimmed() == "WorldBegin") {
+			numOfWorldBegin++;
 			//if there's another type of display the format is not change
 			if(!anyOtherDisplayType && currentDisplayTypeIsFile) {
 				fprintf(fout,"%s\n", qPrintable(newFormat));
@@ -384,7 +386,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 								str.remove(']');
 								str.remove('\"');
 								str = str.simplified();
-								if(str.toLower() == "dummy") {									
+								if(str.toLower() == "dummy") {
 									QString filename = "meshF" + QString::number(currentFrame) + "O" + QString::number(numberOfDummies) + ".rib";
 									numberOfDummies++;
 									QString meshDest = destDirString + QDir::separator() + filename;
@@ -550,6 +552,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -progress -progressformat=%p "+ destFileString;
 	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
 	//every time the render process write a message, receive a signal
+	worldBeginRendered = 1; lastCb = 0;
+	qDebug("number of world begin found: %i",numOfWorldBegin);
 	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
 	connect(&renderProcess, SIGNAL(readyReadStandardError()),this, SLOT(errSgn()));
 	cb(0, "Rendering image with Aqsis");
@@ -566,10 +570,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//the rendering result image is copied in mesh folder (maybe a set of file)
 	QString finalImage = meshDirString + QDir::separator() + imageName;
 	qDebug("final image position: %s", qPrintable(finalImage));
-	QString imageFormatString = imageFormatsSupported.at(imageFormat);
-	float n = 0;
-	while( (imagesRendered.size() / pow(float(10),++n)) > 1);
-	n--; //n is the ciphers number of imagesRendered.size()
+	QString imageFormatString = imageFormatsSupported.at(imageFormat);	
+	int n = numberOfCiphers(imagesRendered.size());//n is the ciphers number of imagesRendered.size()
 	for(int i = 0; i < imagesRendered.size(); i++) {
 		QString currentImage = destDir.absolutePath() + QDir::separator() + imagesRendered.at(i);
 		qDebug("rendering result image position: %s", qPrintable(currentImage));
@@ -586,8 +588,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		else {
 			//add zero for correct image name
 			QString num = QString::number(i);
-			float j = 0; //j is the ciphers number of i
-			while((i / pow(float(10),++j)) > 1); 
+			int j = numberOfCiphers(i) + 1;
 			for(;j <= n; j++)
 				num = "0" + num;
 			image.save(finalImage + num + "." + imageFormatString, qPrintable(imageFormatString));
@@ -631,16 +632,29 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 }
 
 void FilterHighQualityRender::updateOutputProcess() {
-	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
+	//a thread for each signal => working with signal disabled
+	disconnect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
 	//the format is a number which say the percentage (maybe more that one)
-	out = QStringList(out.trimmed().split(' ')).last(); //take only the last
+	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
 	//qDebug("aqsis.exe output: %s",qPrintable(out));
-	cb(int(out.toFloat()), "Rendering image with Aqsis"); //update progress bar
+	out = QStringList(out.trimmed().split(' ')).last(); //take only the last
+	qDebug("aqsis output taken: %s",qPrintable(out));
+	int currentCb = int(out.toFloat());
+	if(currentCb < lastCb)
+		worldBeginRendered++;
+	QString msg = "Rendering image with Aqsis (pass: " +
+		QString::number(worldBeginRendered) + "/" + QString::number(numOfWorldBegin) + ")";
+	int value = int( (100 * (worldBeginRendered - 1) + currentCb ) / numOfWorldBegin );
+	cb(value, qPrintable(msg)); //update progress bar
+	qDebug("cb value: worldBeginRendered %i last %i current %i effective %i" ,worldBeginRendered,lastCb,currentCb,value);
+	lastCb = currentCb;
+	//restore the signal handling
+	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
 }
 
 void FilterHighQualityRender::errSgn() {
 	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardError().data());
-	qDebug("aqsis error: %s",qPrintable(out));
+	qDebug("aqsis error signal: %s",qPrintable(out));
 }
 
 //rivedere....nome file
@@ -999,6 +1013,12 @@ bool FilterHighQualityRender::delDir(QDir dir, QString toDel) {
 			return false;
 	}
 	return true;
+}
+
+int FilterHighQualityRender::numberOfCiphers(int number) {
+	float n = 0;
+	while( (number / pow(float(10),++n)) > 1);
+	return int(n - 1);
 }
 
 Q_EXPORT_PLUGIN(FilterHighQualityRender)

@@ -36,16 +36,12 @@ private slots:
 
 private:
   vcg::CallBackPos * cb;
+  int worldBeginRendered, numOfWorldBegin, lastCb; //for progress bar update
   QProcess renderProcess;
   QDir templatesDir; //directory of templates ("render_template")
   QStringList templates; //list of templates found
   QStringList imageFormatsSupported; //list of image formats supported by qt for conversion of final image
-  //bool delRibFiles; //if the rib files produced are to remove
-  //QString imageName; //final image name
-  //int imageFormat; //format of final image
-  //QString meshDirString; //string of mesh dir
-  //QDir destDir; //destination dir
-  //QStringList imagesRendered; //list of image to rendered (readed from file)
+
   enum alignValue { CENTER, TOP, BOTTOM };
   bool convertedGeometry;
 	
@@ -96,6 +92,7 @@ private:
   bool checkDir(QString destDirString, QString path);
   bool copyFiles(QDir templateDir,QDir destDir,QStringList dirs);
   bool delDir(QDir dir, QString toDel);
+  int numberOfCiphers(int number);
 };
 
 #endif
