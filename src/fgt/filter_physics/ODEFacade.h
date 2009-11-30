@@ -30,11 +30,12 @@ protected:
 
     private:
         struct ODEMesh{
-            ODEMesh() : body(0), vertices(0), indices(0){
+            ODEMesh() : body(0), vertices(0), normals(0), indices(0){
             }
 
             ~ODEMesh(){
                 delete[] vertices;
+                delete[] normals;
                 delete[] indices;
             }
 
@@ -44,6 +45,7 @@ protected:
 
             dTriMeshDataID data;
             dReal (*vertices)[3];
+            dReal (*normals)[3];
             dTriIndex (*indices)[3];
         };
 

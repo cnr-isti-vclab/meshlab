@@ -29,14 +29,14 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
 
-    virtual const int getRequirements(QAction*){return MeshModel::MM_FACEVERT;}
+    virtual int getRequirements(QAction*){return MeshModel::MM_FACEVERT | MeshModel::MM_FACENORMAL;}
     virtual int postCondition( QAction* ) const{return MeshModel::MM_TRANSFMATRIX;}
 
     virtual bool autoDialog(QAction*) {return true;}
     virtual void initParameterSet(QAction*, MeshDocument&, RichParameterSet&);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
     virtual bool applyFilter(QAction*, MeshModel&, RichParameterSet&, vcg::CallBackPos*) { assert(0); return false;}
-    virtual const FilterClass getClass(QAction *);
+    virtual FilterClass getClass(QAction *);
 
     private:
     GravitySubFilter m_gravityFilter;

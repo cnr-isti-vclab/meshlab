@@ -48,6 +48,7 @@ void ODEFacade::registerTriMesh(MeshModel& mesh, bool scenery){
 
     ODEMesh* odeMesh = new ODEMesh();
     odeMesh->vertices = new dReal[mesh.cm.vert.size()][3];
+    odeMesh->normals = new dReal[mesh.cm.face.size()][3];
     odeMesh->indices = new dTriIndex[mesh.cm.face.size()][3];
 
     int i = 0;
@@ -58,14 +59,15 @@ void ODEFacade::registerTriMesh(MeshModel& mesh, bool scenery){
     }
 
     i = 0;
-    for(CMeshO::ConstFaceIterator fi = mesh.cm.face.begin(); fi != mesh.cm.face.end(); fi++, i++){
+    for(CMeshO::FaceIterator fi = mesh.cm.face.begin(); fi != mesh.cm.face.end(); fi++, i++){
         for(int j = 0; j < 3; j++){
             odeMesh->indices[i][j] = fi->V(j) - &mesh.cm.vert[0];
+            odeMesh->normals[i][j] = fi->N()[j];
         }
     }
 
     odeMesh->data = dGeomTriMeshDataCreate();
-    dGeomTriMeshDataBuildSingle(odeMesh->data, odeMesh->vertices, 3*sizeof(dReal), mesh.cm.vert.size(), odeMesh->indices, 3*mesh.cm.face.size(), 3*sizeof(dTriIndex));
+    dGeomTriMeshDataBuildSingle1(odeMesh->data, odeMesh->vertices, 3*sizeof(dReal), mesh.cm.vert.size(), odeMesh->indices, 3*mesh.cm.face.size(), 3*sizeof(dTriIndex), odeMesh->normals);
 
     odeMesh->geom = dCreateTriMesh(m_space, odeMesh->data, 0, 0, 0);
 
@@ -167,7 +169,7 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
 
     for(int i = 0; i < m_maxContacts; i++){
         contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
-        contacts[i].surface.mu = dInfinity;
+        contacts[i].surface.mu = 0.5;
         contacts[i].surface.bounce = 0.1;
         contacts[i].surface.bounce_vel = 0.1;
         contacts[i].surface.soft_cfm = 0.01;
