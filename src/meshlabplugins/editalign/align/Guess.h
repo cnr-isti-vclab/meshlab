@@ -128,7 +128,7 @@ public:
 			// u[1] has 1/8 of the cells of u[0] etc etc...
 			for(int kk=0;kk<pp.UGLevels;++kk)
 			{
-				u[kk].Create(tbb,pp.GridSize/pow(8,kk),false);
+				u[kk].Create(tbb,pp.GridSize/std::pow(8.0f,kk),false);
 				printf("Created grid of %i (%i %i %i)\n",u[kk].size(),u[kk].siz[0],u[kk].siz[1],u[kk].siz[2]);
 			}
 			
