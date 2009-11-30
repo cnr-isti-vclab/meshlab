@@ -38,7 +38,7 @@ FilterCSG::FilterCSG()
         actionList << new QAction(filterName(tt), this);
 }
 
- QString FilterCSG::filterName(FilterIDType filterId) const
+QString FilterCSG::filterName(FilterIDType filterId) const
 {
     switch (filterId) {
     case FP_CSG:
@@ -50,7 +50,7 @@ FilterCSG::FilterCSG()
     }
 }
 
- QString FilterCSG::filterInfo(FilterIDType filterId) const
+QString FilterCSG::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
     case FP_CSG:
@@ -94,7 +94,7 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
     }
 }
 
-bool FilterCSG::applyFilter(QAction *filter, MeshDocument &, RichParameterSet & par, vcg::CallBackPos *)
+bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *)
 {
     switch(ID(filter)) {
     case FP_CSG:
@@ -105,27 +105,37 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &, RichParameterSet & 
                 firstMesh->cm.bbox.min.X(), firstMesh->cm.bbox.min.Y(), firstMesh->cm.bbox.min.Z(),
                 firstMesh->cm.bbox.max.X(), firstMesh->cm.bbox.max.Y(), firstMesh->cm.bbox.max.Z());
             Log(0, "Operation: %d", par.getEnum("Operator") );
-            //vcg::tri::UpdateNormals::PerFace(firstMesh->cm);
-            const Point3<CMeshO::ScalarType> delta(par.getFloat("Delta"), par.getFloat("Delta"), par.getFloat("Delta"));
-            InterceptVolume<CMeshO::ScalarType> v(InterceptSet3<CMeshO::ScalarType>(firstMesh->cm, delta)),
-            tmp(InterceptSet3<CMeshO::ScalarType>(secondMesh->cm, delta));
+            firstMesh->updateDataMask(MeshModel::MM_FACENORMAL);
+            secondMesh->updateDataMask(MeshModel::MM_FACENORMAL);
+
+            typedef CMeshO::ScalarType scalar;
+            typedef Intercept<scalar> intercept;
+            const Point3<scalar> delta(par.getFloat("Delta"), par.getFloat("Delta"), par.getFloat("Delta"));
+            InterceptVolume<intercept> v(InterceptSet3<intercept>(firstMesh->cm, delta)),
+            tmp(InterceptSet3<intercept>(secondMesh->cm, delta));
+
+            MeshModel *mesh;
             switch(par.getEnum("Operator")){
             case CSG_OPERATION_INTERSECTION:
                 v &= tmp;
+                mesh = md.addNewMesh("intersection");
                 break;
 
             case CSG_OPERATION_UNION:
                 v |= tmp;
+                mesh = md.addNewMesh("union");
                 break;
 
             case CSG_OPERATION_DIFFERENCE:
-                v ^= tmp;
+                v -= tmp;
+                mesh = md.addNewMesh("difference");
                 break;
 
             default:
                 assert(0);
                 return true;
             }
+
         }
         return true;
 

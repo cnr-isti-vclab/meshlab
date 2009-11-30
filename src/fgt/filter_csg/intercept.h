@@ -6,77 +6,142 @@
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/space/box2.h>
 
-template <typename scalar>
+template <typename _scalar>
         class Intercept
 {
-    typedef vcg::Point3<scalar> Point3x;
+    typedef vcg::Point3<_scalar> Point3x;
+
+private:
+    Point3x norm;
+    _scalar quality;
 
 public:
-    inline Intercept (scalar dist, const Point3x &norm, scalar quality) : norm(norm), dist(dist), quality(quality) {};
+    typedef _scalar scalar;
+
+    scalar dist;
+
+    inline Intercept () {};
+
+    inline Intercept (scalar dist, const Point3x &norm, scalar quality) : norm(norm), quality(quality), dist(dist) {};
 
     inline Intercept operator -() const { return Intercept(dist, -norm, quality); }
 
     inline bool operator <(const Intercept &other) const { return dist < other.dist; }
-
-private:
-    Point3x norm;
-    scalar dist, quality;
 };
 
-template <typename scalar>
+template <typename InterceptType>
         class InterceptRay
 {
-    typedef Intercept<scalar> InterceptType;
+    typedef typename InterceptType::scalar scalar;
     typedef std::vector<InterceptType> ContainerType;
 
 public:
+    inline InterceptRay() {};
+
     inline InterceptRay(const ContainerType &set) : v(set) {
+        const scalar EPS = scalar(1e-6);
         std::sort(v.begin(), v.end());
-        //TODO: cleanup
+        ContainerType tmp;
+        for(typename ContainerType::const_iterator i = v.begin(); i != v.end(); ++i) {
+            while(i+1 != v.end() && i->dist + EPS > (i+1)->dist)
+                i++;
+            tmp.push_back(*i);
+        }
+        assert(tmp.size() % 2 == 0);
+        v = tmp;
     }
 
-    inline InterceptRay & operator &=(const InterceptRay & other) {
+    inline InterceptRay operator &(const InterceptRay & other) const {
         ContainerType newv(v.size() + other.v.size());
         typename ContainerType::const_iterator i = v.begin(), j = other.v.begin(), endi = v.end(), endj = v.end();
         while (i != endi && j != endj) {
-            if (*i < *j) {
-                if (*j < *(i+1)) {
-                    while (j != endj && *(j+1) < *(i+1)) {
-                        newv.push_back(*j);
-                        newv.push_back(*(j+1));
-                        j += 2;
-                    }
-                    if (j != endj && *j < *(i+1)) {
-                        newv.push_back(*j);
-                        newv.push_back(*(i+1));
-                    }
+            if (*j < *i) {
+                std::swap(i, j);
+                std::swap(endi, endj);
+            }
+            // i <= j < J
+            if (*j < *(i+1)) { // i <= j < I & i <= j < J
+                while (j != endj && *(j+1) < *(i+1)) { // i <= j < J < I
+                    newv.push_back(*j);
+                    newv.push_back(*(j+1));
+                    j += 2;
                 }
-                i += 2;
-            } else {
-                if (*i < *(j+1)) {
-                    while (i != endi && *(i+1) < *(j+1)) {
-                        newv.push_back(*i);
-                        newv.push_back(*(i+1));
-                        i += 2;
-                    }
-                    if (i != endi && *i < *(j+1)) {
-                        newv.push_back(*i);
-                        newv.push_back(*(j+1));
-                    }
+                // i < I <= J & i <= j < J
+                if (j != endj && *j < *(i+1)) {  // i <= j < I <= J
+                    newv.push_back(*j);
+                    newv.push_back(*(i+1));
                 }
-                j += 2;
+            }
+            i += 2;
+        }
+        newv.resize(newv.size());
+        return InterceptRay(newv);
+    }
+
+    inline InterceptRay operator |(const InterceptRay & other) const {
+        ContainerType newv(v.size() + other.v.size());
+        typename ContainerType::const_iterator i = v.begin(), j = other.v.begin(), endi = v.end(), endj = v.end();
+        while (i != endi && j != endj) {
+            if (*j < *i) {
+                std::swap(i, j);
+                std::swap(endi, endj);
+            }
+            // i <= j < J
+            newv.push_back(*i);
+            while (i != endi && j != endj) {
+                while (j != endj && *(j+1) < *(i+1)) // j < J < I
+                    j += 2;
+                // i < I <= J & i <= j < J
+                if (j == endj || *(i+1) < *j) { // i < I < j < J
+                    newv.push_back(*(i+1));
+                    i += 2;
+                } else { // i < j <= I < J
+                    std::swap(i, j);
+                    std::swap(endi, endj);
+                }
             }
         }
-        this->v = newv;
-        return *this;
+        newv.insert(newv.end(), i, endi);
+        newv.insert(newv.end(), j, endj);
+        newv.resize(newv.size());
+        return InterceptRay(newv);
     }
 
-    inline InterceptRay & operator |=(const InterceptRay & other) {
-        return *this;
-    }
+    inline InterceptRay operator -(const InterceptRay & other) const {
+        ContainerType newv(v.size() + other.v.size());
+        typename ContainerType::const_iterator i = v.begin(), j = other.v.begin(), endi = v.end(), endj = v.end();
+        while (i != endi && j != endj) {
+            while (j != endj && !(*i < *(j+1))) // j < J <= i
+                j += 2;
+            if (j == endj)
+                break;
+            else if (*i < *j) // i < j < J
+                newv.push_back(*i);
+            else { // j <= i < J
+                while (i != endi && !(*(j+1) < *(i+1))) // j <= i < I <= J
+                    i += 2;
+                if (i != endi && *i < *(j+1)) { // j <= i < J < I
+                    newv.push_back(-*(j+1));
+                    j += 2;
+                } else  // j <= J <= i < I
+                    continue;
+            }
 
-    inline InterceptRay & operator ^=(const InterceptRay & other) {
-        return *this;
+            while (j != endj && *(j+1) < *(i+1)) { // i < j < J < I
+                newv.push_back(-*j);
+                newv.push_back(-*(j+1));
+                j += 2;
+            }
+
+            if (j != endj && *j < *(i+1)) // i < j < I <= J
+                newv.push_back(-*j);
+            else  // i < I <= j < J
+                newv.push_back(*(i+1));
+            i += 2;
+        }
+        newv.insert(newv.end(), i, endi);
+        newv.resize(newv.size());
+        return InterceptRay(newv);
     }
 
 private:
@@ -84,25 +149,67 @@ private:
 };
 
 
-template <typename scalar>
+template <typename InterceptType>
         class InterceptBeam
 {
-    typedef Intercept<scalar> InterceptType;
+    typedef typename InterceptType::scalar scalar;
+    typedef InterceptRay<InterceptType> IRayType;
 
 public:
-    typedef std::vector<std::vector<InterceptRay<scalar> > > ContainerType;
+    typedef std::vector<std::vector<IRayType > > ContainerType;
 
     inline InterceptBeam(const vcg::Box2i &box, const ContainerType &rays) : bbox(box), ray(rays) {};
 
-    inline InterceptBeam & operator &=(const InterceptBeam & other) {
+    inline const IRayType& GetIntercept (const vcg::Point2i &p) const {
+        assert(bbox.IsIn(p));
+        vcg::Point2i c = p - bbox.min;
+        return ray[c.X()][c.Y()];
+    }
+
+    inline InterceptBeam &operator &=(const InterceptBeam & other) {
+        vcg::Box2i newbbox(bbox);
+        newbbox.Intersect(other.bbox);
+
+        for(int i = 0; i < newbbox.DimX(); ++i) {
+            for(int j = 0; j < newbbox.DimY(); ++j) {
+                vcg::Point2i p = newbbox.min + vcg::Point2i(i,j);
+                ray[i][j] = GetIntercept(p) & other.GetIntercept(p);
+            }
+            ray[i].resize(newbbox.DimY());
+        }
+        ray.resize(newbbox.DimX());
+        bbox = newbbox;
         return *this;
     }
 
     inline InterceptBeam & operator |=(const InterceptBeam & other) {
+        vcg::Box2i newbbox(bbox);
+        newbbox.Add(other.bbox);
+
+        ray.resize(newbbox.DimX());
+        for(int i = newbbox.DimX() - 1; i >= 0; --i) {
+            ray[i].resize(newbbox.DimY());
+            for(int j = newbbox.DimY() - 1; j >= 0; --j) {
+                vcg::Point2i p = newbbox.min + vcg::Point2i(i,j);
+                ray[i][j] = (bbox.IsIn(p) ? GetIntercept(p) : IRayType()) &
+                            (other.bbox.IsIn(p) ? other.GetIntercept(p) : IRayType());
+            }
+        }
+        bbox = newbbox;
         return *this;
     }
 
-    inline InterceptBeam & operator ^=(const InterceptBeam & other) {
+    inline InterceptBeam & operator -=(const InterceptBeam & other) {
+        vcg::Box2i damage(bbox);
+        damage.Intersect(other.bbox);
+
+        for(int i = 0; i < damage.DimX(); ++i) {
+            for(int j = 0; j < damage.DimY(); ++j) {
+                vcg::Point2i p = damage.min + vcg::Point2i(i,j);
+                vcg::Point2i p2 = p - bbox.min;
+                ray[p2.X()][p2.Y()]= GetIntercept(p) - other.GetIntercept(p);
+            }
+        }
         return *this;
     }
 
@@ -111,10 +218,10 @@ private:
     ContainerType ray;
 };
 
-template <typename scalar>
+template <typename InterceptType>
         class InterceptVolume
 {
-    typedef Intercept<scalar> InterceptType;
+    typedef typename InterceptType::scalar scalar;
     typedef vcg::Point3<scalar> Point3x;
 
     inline bool checkConsistency (const InterceptVolume & other) const {
@@ -122,7 +229,7 @@ template <typename scalar>
     }
 
 public:
-    typedef typename std::vector<InterceptBeam<scalar> > ContainerType;
+    typedef typename std::vector<InterceptBeam<InterceptType> > ContainerType;
 
     inline InterceptVolume(const Point3x &d, const ContainerType &beams) : delta(d), beam(beams) { assert(beams.size() == 3); };
 
@@ -140,10 +247,10 @@ public:
         return *this;
     }
 
-    inline InterceptVolume & operator ^=(const InterceptVolume & other) {
+    inline InterceptVolume & operator -=(const InterceptVolume & other) {
         assert(checkConsistency(other));
         for (int i = 0; i < 3; ++i)
-            beam[i] ^= other.beam[i];
+            beam[i] -= other.beam[i];
         return *this;
     }
 
@@ -153,26 +260,23 @@ private:
 };
 
 
-template <typename scalar>
+template <typename InterceptType>
         class InterceptSet
 {
-    typedef Intercept<scalar> InterceptType;
-    typedef std::vector<InterceptType> ContainerType;
-    typedef InterceptRay<scalar> SortedType;
+    typedef InterceptRay<InterceptType> SortedType;
 
 public:
     inline void AddIntercept (const InterceptType &x) { v.push_back(x); }
     inline operator SortedType() const { return SortedType(v); }
 
 private:
-    ContainerType v;
+    std::vector<InterceptType> v;
 };
 
-template <typename scalar>
+template <typename InterceptType>
         class InterceptSet1
 {
-    typedef Intercept<scalar> InterceptType;
-    typedef std::vector<InterceptRay<scalar> > SortedType;
+    typedef std::vector<InterceptRay<InterceptType> > SortedType;
 
 public:
     inline InterceptSet1() {};
@@ -184,17 +288,16 @@ public:
     }
 
 private:
-    std::vector<InterceptSet<scalar> > set;
+    std::vector<InterceptSet<InterceptType> > set;
 };
 
-template <typename scalar>
+template <typename InterceptType>
         class InterceptSet2
 {
-    typedef Intercept<scalar> InterceptType;
-    typedef InterceptBeam<scalar> SortedType;
+    typedef InterceptBeam<InterceptType> SortedType;
 
 public:
-    inline InterceptSet2(const vcg::Box2i box) : bbox(box) { set.reserve(bbox.DimX()); };
+    inline InterceptSet2(const vcg::Box2i &box) : bbox(box) { set.reserve(bbox.DimX()); };
 
     inline operator SortedType() const { return SortedType(bbox, typename SortedType::ContainerType(set.begin(), set.end())); }
 
@@ -204,17 +307,18 @@ public:
         set[c.X()].AddIntercept(c.Y(), x);
     }
 
-    const vcg::Box2i bbox;
 private:
-    std::vector<InterceptSet1<scalar> > set;
+    vcg::Box2i bbox;
+    std::vector<InterceptSet1<InterceptType> > set;
 };
 
-template <typename scalar>
+template <typename InterceptType>
         class InterceptSet3
 {
-    typedef Intercept<scalar> InterceptType;
+    typedef typename InterceptType::scalar scalar;
     typedef vcg::Point3<scalar> Point3x;
-    typedef InterceptVolume<scalar> SortedType;
+    typedef InterceptSet2<InterceptType> ISet2Type;
+    typedef InterceptVolume<InterceptType> SortedType;
 
     template <const int CoordZ>
             void RasterFace(const vcg::Box3i &ibox,
@@ -264,8 +368,14 @@ template <typename scalar>
 public:
     template <class MeshType>
             inline InterceptSet3(const MeshType &m, const Point3x &delta) : delta(delta) {
-        //TODO: init bbox
-        const Point3x invDelta(scalar(1) / delta.X(), scalar(1) / delta.Y(), scalar(1) / delta.Z());
+        const Point3x invDelta(scalar(1) / delta.X(),
+                               scalar(1) / delta.Y(),
+                               scalar(1) / delta.Z());
+
+        set.push_back(ISet2Type(vcg::Box2i(/*TODO*/)));
+        set.push_back(ISet2Type(vcg::Box2i(/*TODO*/)));
+        set.push_back(ISet2Type(vcg::Box2i(/*TODO*/)));
+
         typename MeshType::ConstFaceIterator i, end = m.face.end();
         for (i = m.face.begin(); i != end; ++i)
             ScanFace (Point3x(i->V(0)->P()).Scale(invDelta),
@@ -279,6 +389,35 @@ public:
 
     const Point3x delta;
 private:
-    std::vector<InterceptSet2<scalar> > set;
+    std::vector<ISet2Type> set;
+};
+
+template <typename MeshType, typename scalar>
+        class Walker
+{
+    typedef typename MeshType::VertexPointer VertexPointer;
+
+public:
+    inline Walker(const InterceptVolume<Intercept<scalar> > &volume) : v(volume) {}
+    const float V(int i, int j, int k) const {
+        //TODO
+        return 0;
+    }
+
+    template <const int coord>
+            void GetIntercept(vcg::Point3i p1, vcg::Point3i p2, VertexPointer v) {
+    }
+    void GetXIntercept(vcg::Point3i p1, vcg::Point3i p2, VertexPointer v) {
+        GetIntercept<0>(p1, p2, v);
+    }
+    void GetYIntercept(vcg::Point3i p1, vcg::Point3i p2, VertexPointer v) {
+        GetIntercept<1>(p1, p2, v);
+    }
+    void GetZIntercept(vcg::Point3i p1, vcg::Point3i p2, VertexPointer v) {
+        GetIntercept<2>(p1, p2, v);
+    }
+
+private:
+    InterceptVolume<Intercept<scalar> > v;
 };
 #endif // INTERCEPT_H
