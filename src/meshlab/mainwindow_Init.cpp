@@ -526,7 +526,7 @@ void MainWindow::fillEditMenu()
 			editMenu->addAction(editAction);
 
 			connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
-			editActionList.push_back(editAction);
+			//editActionList.push_back(editAction);
 		}
 	}
 }

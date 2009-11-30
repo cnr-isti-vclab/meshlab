@@ -58,6 +58,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				foreach(decoratorAction, iDecorator->actions())
 				{
 					//actionMap.insert(decoratorAction->name(),decoratorAction);
+					editActionList.push_back(decoratorAction);
 					iDecorator->initGlobalParameterSet(decoratorAction,defaultGlobal);
 					//connect(decoratorAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
 					//decoratorAction->setToolTip(iDecorator->Info(decoratorAction));
@@ -77,17 +78,8 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 			{
 				//qDebug() << "Here with filename:" << fileName;
 				meshEditInterfacePlug.push_back(iEditFactory);
-				/*foreach(editAction, iEditFactory->actions())
-				{
-					editMenu->addAction(editAction);
-					if(!editAction->icon().isNull())
-					{
-						editToolBar->addAction(editAction);
-					} else qDebug() << "action was null";
-
-					connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
+				foreach(QAction* editAction, iEditFactory->actions())
 					editActionList.push_back(editAction);
-				}*/
 			}
 		}
 	}

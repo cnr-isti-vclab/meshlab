@@ -202,7 +202,7 @@ void MainWindow::updateMenus()
 				// you exit from editing mode by pressing again the editing button
 				// When you are in a editing mode all the other editing are disabled.
 
-				foreach (QAction *a,editActionList)
+				foreach (QAction *a,PM.editActionList)
 						 {
 								a->setChecked(false);
 								a->setEnabled( GLA()->getCurrentEditAction() == NULL );
@@ -231,17 +231,17 @@ void MainWindow::updateMenus()
 				setSelectionRenderingAct->setChecked(rm.selectedFaces);
 
 				// Check only the active decorations
-				foreach (QAction *a,      decoratorActionList){a->setChecked(false);a->setEnabled(true);}
+				foreach (QAction *a,      PM.decoratorActionList){a->setChecked(false);a->setEnabled(true);}
 				foreach (QAction *a,   GLA()->iDecoratorsList){a->setChecked(true);}
 
 	} // if active
 	else
 	{
-		foreach (QAction *a,editActionList)
+		foreach (QAction *a,PM.editActionList)
 		{
 				a->setEnabled(false);
 		}
-		foreach (QAction *a,decoratorActionList)
+		foreach (QAction *a,PM.decoratorActionList)
 				a->setEnabled(false);
 
 	}

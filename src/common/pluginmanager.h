@@ -25,6 +25,8 @@ enum TypeIO{IMPORT,EXPORT};
 	QVector<MeshRenderInterface*> meshRenderPlug;
 	QVector<MeshDecorateInterface*> meshDecoratePlug;
 	QVector<MeshEditInterfaceFactory*> meshEditInterfacePlug;
+	QVector<QAction *> editActionList;
+	QVector<QAction *> decoratorActionList;
 };
 
 #endif // PLUGINMANAGER_H

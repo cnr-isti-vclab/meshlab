@@ -176,8 +176,8 @@ private:
 	QDir pluginsDir;
 	QStringList pluginFileNames;
 	//std::vector<MeshIOInterface*> meshIOPlugins;
-	QList<QAction *> editActionList;
-	QList<QAction *> decoratorActionList;
+	//QList<QAction *> editActionList;
+	//QList<QAction *> decoratorActionList;
     
 	PluginManager PM;
 
