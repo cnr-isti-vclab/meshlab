@@ -1,4 +1,4 @@
-#include <RibFileStack.h>
+#include "RibFileStack.h"
 
 RibFileStack::RibFileStack(QString dir) {
 	stack = new QStack< QPair<QFile*, QTextStream*>* >();

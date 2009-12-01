@@ -1,4 +1,4 @@
-#include <utilities_hqrender.h>
+#include "utilities_hqrender.h"
 
 //path must have the filename
 QString UtilitiesHQR::getDirFromPath(QString* path) {

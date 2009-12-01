@@ -9,6 +9,7 @@
 
 
 #include <stdio.h>
+#include <QTime>
 
 namespace vcg {
 namespace tri {
@@ -127,8 +128,8 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
 	  if(i%incr == 0) cb(++cbValue, "Exporting vertex normals");
 	  //for each face, foreach vertex write normal
 	  for(int j=0; j<3; ++j) {			
-	    Point3f &n = mat * (*fi).V(j)->N(); //transform normal too
-		fprintf(fout,"%g %g %g ",n[0],n[1],n[2]);
+            Point3f n = mat * (*fi).V(j)->N(); //transform normal too
+            fprintf(fout,"%g %g %g ",n[0],n[1],n[2]);
 	  }
 	}
 	fprintf(fout,"\n]\n");

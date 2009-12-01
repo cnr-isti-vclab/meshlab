@@ -1,10 +1,10 @@
-#include <filter_hqrender.h>
 #include <QtGui>
 #include <QDir>
 #include <QProcess>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include "filter_hqrender.h"
 
 //#define NO_RENDERING
 

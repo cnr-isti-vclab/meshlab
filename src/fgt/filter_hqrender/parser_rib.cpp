@@ -1,4 +1,4 @@
-#include <filter_hqrender.h>
+#include "filter_hqrender.h"
 
 using namespace UtilitiesHQR;
 
@@ -289,31 +289,31 @@ int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QStr
 			//align
 			float dx = 0.0, dy = 0.0, dz = 0.0;				
 			switch(par.getEnum("AlignX")) {
-				case alignValue::TOP:
+                                case FilterHighQualityRender::TOP:
 					dx = (dummyX - m.cm.trBB().DimX() * scale) / 2;
 					break;
-				case alignValue::BOTTOM:
+                                case FilterHighQualityRender::BOTTOM:
 					dx = -(dummyX - m.cm.trBB().DimX() * scale) / 2;
 					break;
-				case alignValue::CENTER: break; //is already center
+                                case FilterHighQualityRender::CENTER: break; //is already center
 			}
 			switch(par.getEnum("AlignY")) {
-				case alignValue::TOP:
+                                case FilterHighQualityRender::TOP:
 					dy = (dummyY - m.cm.trBB().DimY() * scale) / 2;
 					break;
-				case alignValue::BOTTOM:
+                                case FilterHighQualityRender::BOTTOM:
 					dy = -(dummyY - m.cm.trBB().DimY() * scale) / 2;
 					break;
-				case alignValue::CENTER: break; //is already center
+                                case FilterHighQualityRender::CENTER: break; //is already center
 			}			
 			switch(par.getEnum("AlignZ")) {
-				case alignValue::TOP:
+                                case FilterHighQualityRender::TOP:
 					dz = (dummyZ - m.cm.trBB().DimZ() * scale) / 2;
 					break;
-				case alignValue::BOTTOM:
+                                case FilterHighQualityRender::BOTTOM:
 					dz = -(dummyZ - m.cm.trBB().DimZ() * scale) / 2;
 					break;
-				case alignValue::CENTER: break; //is already center
+                                case FilterHighQualityRender::CENTER: break; //is already center
 			}
 			vcg::Matrix44f alignMatrix;
 			alignMatrix = alignMatrix.SetTranslate(dx,dy,dz);
