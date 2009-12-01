@@ -1,6 +1,14 @@
 include (../../sharedfilter.pri)
 
-HEADERS       += filter_hqrender.h
+HEADERS       += filter_hqrender.h \
+		export_rib.h \
+		RibFileStack.h \
+		utilities_hqrender.h
+			
 
-SOURCES       += filter_hqrender.cpp RibFileStack.cpp		
+SOURCES       += filter_hqrender.cpp \
+		RibFileStack.cpp \
+		parser_rib.cpp \
+		utilities_hqrender.cpp
+
 TARGET        = filter_hqrender

@@ -3,12 +3,10 @@
 
 #define RIB_EXPORT_STEPS 7
 
-//#include<wrap/ply/io_mask.h>
 #include<wrap/io_trimesh/io_mask.h>
 #include<wrap/callback.h>
 #include<vcg/complex/trimesh/clean.h>
-//#include<vcg/container/simple_temporary_data.h>
-#include <QThread>
+
 
 #include <stdio.h>
 

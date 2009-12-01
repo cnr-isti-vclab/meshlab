@@ -1,9 +1,8 @@
 #include <RibFileStack.h>
 
-RibFileStack::RibFileStack(QString* templateName, QString* dir) {
+RibFileStack::RibFileStack(QString dir) {
 	stack = new QStack< QPair<QFile*, QTextStream*>* >();
-	this->templateName = *templateName;
-	this->templateDir = *dir;
+	this->templateDir = dir;
 	subDir.append("."); //to search in the same dir
 };
 
@@ -11,7 +10,7 @@ RibFileStack::~RibFileStack() {
 	//close all file
 	while(!stack->isEmpty())
 		popFile();
-	delete stack; //basta?
+	delete stack; //it's enough?
 	/*
 	while(popFile()); delete stack;
 	*/
