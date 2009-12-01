@@ -40,7 +40,8 @@ public:
 		FP_UV_WEDGE_TO_VERTEX,
 		FP_BASIC_TRIANGLE_MAPPING,
 		FP_SET_TEXTURE,
-		FP_COLOR_TO_TEXTURE
+		FP_COLOR_TO_TEXTURE,
+		FP_MESH_TEXCOLOR_TRANSFER
 	};
 
 	FilterTexturePlugin();
@@ -48,7 +49,7 @@ public:
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
 	virtual bool autoDialog(QAction *) {return true;}
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
 	virtual int getRequirements(QAction *);
 	virtual int getPreConditions(QAction *) const;

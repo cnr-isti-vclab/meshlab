@@ -1,7 +1,8 @@
 include (../../sharedfilter.pri)
 
 HEADERS       += filter_texture.h \
-		pushpull.h
+		pushpull.h \
+		rastering.h
 
 SOURCES       += filter_texture.cpp  
 		
