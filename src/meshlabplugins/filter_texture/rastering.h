@@ -95,6 +95,36 @@ class TransferColorSampler
 	typedef vcg::tri::FaceTmark<CMeshO> MarkerFace;
 	MarkerFace markerFunctor;
 	
+	/*QRgb GetBilinearPixelColor(float _u, float _v, int alpha)
+	{
+		int w = srcImg->width();
+		int h = srcImg->height();
+		QRgb p00, p01, p10, p11;
+		float u = _u * w -0.5;
+		float v = _v * h -0.5;
+		int x = floor(u);
+		int y = floor(v);
+		float u_ratio = u - x;
+		float v_ratio = v - y;
+		x = (x%w + w)%w;
+		y = (y%h + h)%h;
+		float u_opposite = 1 - u_ratio;
+		float v_opposite = 1 - v_ratio;
+		
+		p00 = srcImg->pixel(x,y);
+		p01 = srcImg->pixel(x, (y+1)%h);
+		p10 = srcImg->pixel((x+1)%w, y);
+		p11 = srcImg->pixel((x+1)%w, (y+1)%h);
+		int r,g,b;
+		r = (qRed(p00)*u_opposite+qRed(p01)*u_ratio)*v_opposite + 
+			(qRed(p01)*u_opposite+qRed(p11)*u_ratio)*v_ratio;
+		g = (qGreen(p00)*u_opposite+qGreen(p01)*u_ratio)*v_opposite + 
+			(qGreen(p01)*u_opposite+qGreen(p11)*u_ratio)*v_ratio;
+		b = (qBlue(p00)*u_opposite+qBlue(p01)*u_ratio)*v_opposite + 
+		    (qBlue(p01)*u_opposite+qBlue(p11)*u_ratio)*v_ratio;
+		return qRgba(r,g,b, alpha);	
+	}*/
+	
 public:
 	TransferColorSampler(CMeshO &_srcMesh, QImage &_trgImg, float upperBound)
 	: trgImg(_trgImg), dist_upper_bound(upperBound)
@@ -161,20 +191,30 @@ public:
 		assert(ret);
 		interp[2]=1.0-interp[1]-interp[0];
 		
-		if (fromTexture)
-		{
-			// NOT IMPLEMENTED YET
-		}
-		else
-		{	
-			// Calculate and set color 
-			if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - tp.Y())) < alpha)
+		if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - tp.Y())) < alpha)
+			if (fromTexture)
 			{
+				int w=srcImg->width(), h=srcImg->height();
+				int x, y;
+				x = w * (interp[0]*nearestF->cWT(0).U()+interp[1]*nearestF->cWT(1).U()+interp[2]*nearestF->cWT(2).U());
+				y = h * (1.0 - (interp[0]*nearestF->cWT(0).V()+interp[1]*nearestF->cWT(1).V()+interp[2]*nearestF->cWT(2).V()));
+				// repeat mode
+				x = (x%w + w)%w;
+				y = (y%h + h)%h;
+				QRgb px = srcImg->pixel(x, y);
+				trgImg.setPixel(tp.X(), trgImg.height() - tp.Y(), qRgba(qRed(px), qGreen(px), qBlue(px), alpha));
+				
+				/*float u = interp[0]*nearestF->cWT(0).U()+interp[1]*nearestF->cWT(1).U()+interp[2]*nearestF->cWT(2).U();
+				float v = 1.0 - (interp[0]*nearestF->cWT(0).V()+interp[1]*nearestF->cWT(1).V()+interp[2]*nearestF->cWT(2).V());
+				trgImg.setPixel(tp.X(), trgImg.height() - tp.Y(), GetBilinearPixelColor(u, v, alpha));*/
+			}
+			else
+			{	
+				// Calculate and set color 
 				CMeshO::VertexType::ColorType c;
 				c.lerp(nearestF->V(0)->cC(), nearestF->V(1)->cC(), nearestF->V(2)->cC(), interp);
 				trgImg.setPixel(tp.X(), trgImg.height() - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
 			}
-		}
 		
 		if (cb)
 		{

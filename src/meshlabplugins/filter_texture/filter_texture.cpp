@@ -722,6 +722,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParamet
 			CheckError(trgMesh->cm.fn == 0 || trgMesh->cm.fn == 0, "Both meshes require to have faces");
 			CheckError(!trgMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Target mesh doesn't have Per Wedge Texture Coordinates");
 			
+			// Source image (for texture to texture transfer)
 			QImage srcImg;
 			
 			if (colorSampling) {
