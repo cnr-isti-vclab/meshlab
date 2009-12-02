@@ -4,7 +4,6 @@ Some good parameter values to start with are:<br />
     <tr style="border:1px solid black">
         <td></td>
         <td align="center"> Seed </td>
-        <td align="center"> Subdivision steps </td>
         <td align="center"> Octaves </td>
         <td align="center"> Lacunarity </td>
         <td align="center"> Fractal increment </td>
@@ -14,7 +13,6 @@ Some good parameter values to start with are:<br />
     <tr>
         <td>fBM</td>
         <td align="center">1</td>
-        <td align="center">8</td>
         <td align="center">10</td>
         <td align="center">2</td>
         <td align="center">1.2</td>
@@ -25,7 +23,6 @@ Some good parameter values to start with are:<br />
         <td>Standard multifractal</td>
         <td align="center">1</td>
         <td align="center">8</td>
-        <td align="center">8</td>
         <td align="center">2</td>
         <td align="center">0.9</td>
         <td align="center">0.9</td>
@@ -34,7 +31,6 @@ Some good parameter values to start with are:<br />
     <tr>
         <td>Heterogeneous multifractal</td>
         <td align="center">1</td>
-        <td align="center">8</td>
         <td align="center">8</td>
         <td align="center">3</td>
         <td align="center">0.9</td>
@@ -45,7 +41,6 @@ Some good parameter values to start with are:<br />
         <td>Hybrid multifractal</td>
         <td align="center">1</td>
         <td align="center">8</td>
-        <td align="center">8</td>
         <td align="center">4</td>
         <td align="center">0.1</td>
         <td align="center">0.3</td>
@@ -54,7 +49,6 @@ Some good parameter values to start with are:<br />
     <tr>
         <td>Ridged multifractal</td>
         <td align="center">2</td>
-        <td align="center">8</td>
         <td align="center">8</td>
         <td align="center">4</td>
         <td align="center">0.23</td>

@@ -78,14 +78,11 @@ FilterFractal::FilterFractal()
         {
             QString desc;
             QFile f(":/ff_description.txt");
-            bool opened = f.open(QFile::ReadOnly);
-            if (opened)
+            if(f.open(QFile::ReadOnly))
             {
                 QTextStream stream(&f);
                 desc = stream.readAll();
                 f.close();
-            } else {
-                desc = "Generates a fractal terrain perturbation";
             }
             return desc;
         }
@@ -105,11 +102,7 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
         par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable results."));
         break;
     case FP_FRACTAL_MESH:
-        {
-            float diag = md.mm()->cm.bbox.Diag();
-            par.addParam(new RichAbsPerc("eThreshold", diag*0.005, 0, diag, "Edge threshold:", "Current mesh will be refined until the length of all edges is below the given threshold."));
-            par.addParam(new RichInt("smoothingSteps", 3, "Normals smoothing steps:", "After the subdivision step, face normals will be smoothed to make the perturbation more homogeneous. This parameter represents the number of smoothing steps." ));
-        }
+        par.addParam(new RichInt("smoothingSteps", 10, "Normals smoothing steps:", "After the subdivision step, face normals will be smoothed to make the perturbation more homogeneous. This parameter represents the number of smoothing steps." ));
         break;
     default: assert(0);
     }
@@ -125,33 +118,36 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
     par.addParam(new RichFloat("fractalIncrement", 0.2, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
     par.addParam(new RichFloat("offset", 0.6, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
     par.addParam(new RichFloat("gain", 2.5, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
+
+    switch(ID(filter))
+    {
+        case FP_FRACTAL_MESH:
+            par.addParam(new RichBool("saveAsQuality", false, "Save as vertex quality", "Saves the perturbation value as vertex quality."));
+        break;
+        case CR_FRACTAL_TERRAIN: break;
+        default: assert(0);
+    }
     return;
 }
 
 bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterSet &par, vcg::CallBackPos* cb)
 {
-    fArgs[SEED] = par.getFloat("seed");         // read parameters
-    fArgs[SCALER] = par.getDynamicFloat("scaleFactor");
-    fArgs[OCTAVES] = par.getFloat("octaves");
-    fArgs[REMAINDER] = fArgs[OCTAVES] - (int)fArgs[OCTAVES];
-    fArgs[L] = par.getFloat("lacunarity");
-    fArgs[H] = par.getFloat("fractalIncrement");
-    fArgs[OFFSET] = par.getFloat("offset");
-    fArgs[GAIN] = par.getFloat("gain");
-    int algorithmId = par.getEnum("algorithm");
+    FractalArgs args(par.getEnum("algorithm"),par.getFloat("seed"), par.getFloat("octaves"),
+                par.getFloat("lacunarity"), par.getFloat("fractalIncrement"), par.getFloat("offset"),
+                par.getFloat("gain"), par.getDynamicFloat("scaleFactor"));
 
     switch(ID(filter)) {
         case CR_FRACTAL_TERRAIN:
         {
             int steps = par.getInt("steps");
-            if (steps > 9) steps = 9;
-            if (steps < 2) steps = 2;
-            return generateTerrain(m.mm()->cm, steps, algorithmId, cb);
+            args.subdivisionSteps = (steps>2)? steps : 2;
+            return generateTerrain(*(m.mm()), args, cb);
         }
         break;
         case FP_FRACTAL_MESH:
-            fArgs[THRESHOLD] = par.getAbsPerc("eThreshold");
-            return generateFractalMesh(*(m.mm()), par.getInt("smoothingSteps"), algorithmId, cb);
+            args.smoothingSteps =  par.getInt("smoothingSteps");
+            args.saveAsQuality = par.getBool("saveAsQuality");
+            return generateFractalMesh(*(m.mm()), args, cb);
         break;
         default: assert(0);
     }
@@ -165,7 +161,7 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterS
             return MeshFilterInterface::MeshCreation;
         break;
         case FP_FRACTAL_MESH:
-            return MeshFilterInterface::Smoothing;
+            return MeshFilterInterface::Remeshing;
         break;
         default: assert(0);
             return MeshFilterInterface::Generic;
@@ -184,28 +180,44 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterS
         default: assert(0);
     }
 }
+
+int FilterFractal::postCondition(QAction *filter) const
+{
+    switch(ID(filter))
+    {
+        case CR_FRACTAL_TERRAIN:
+            return MeshModel::MM_UNKNOWN;
+            break;
+        case FP_FRACTAL_MESH:
+            return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL | MeshModel::MM_VERTQUALITY;
+            break;
+        default: assert(0);
+    }
+}
 // ----------------------------------------------------------------------
 
 // -------------------- Private functions -------------------------------
-bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm, vcg::CallBackPos* cb)
+bool FilterFractal::generateTerrain(MeshModel &mm, FractalArgs &args, vcg::CallBackPos* cb)
 {
-    m.Clear();
+    CMeshO* m = &mm.cm;
+    m->Clear();
+    int subSteps = args.subdivisionSteps;
     int k = (int)(pow(2, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
 
     // grid generation
-    vcg::tri::Allocator<CMeshO>::AddVertices(m, vertexCount);
-    vcg::tri::Allocator<CMeshO>::AddFaces(m, faceCount);
+    vcg::tri::Allocator<CMeshO>::AddVertices(*m, vertexCount);
+    vcg::tri::Allocator<CMeshO>::AddFaces(*m, faceCount);
 
     VertexIterator vi;
     VertexPointer ivp[vertexCount];
     cb(0, "Grid construction..");
-    for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
+    for(vi = m->vert.begin(); vi!=m->vert.end(); ++vi)
     {
         (*vi).P() = CoordType((i%k2)/(double)k2, i/((double)vertexCount), .0);
         ivp[i++] = &*vi;
     }
 
-    FaceIterator fi = m.face.begin();
+    FaceIterator fi = m->face.begin();
     int evenFace[3] = {0, 1, k2}, oddFace[3] = {1, k2+1, k2};
     for(i=0; i<k; i++)
     {
@@ -218,37 +230,32 @@ bool FilterFractal::generateTerrain(CMeshO &m, int subSteps, int algorithm, vcg:
             (*fi).V(0) = ivp[oddFace[0]++];
             (*fi).V(1) = ivp[oddFace[1]++];
             (*fi).V(2) = ivp[oddFace[2]++];
-            if(fi != m.face.end())++fi;
+            if(fi != m->face.end())++fi;
         }
         evenFace[0]++; evenFace[1]++; evenFace[2]++;
         oddFace[0]++;  oddFace[1]++;  oddFace[2]++;
     }
 
     // terrain generation
-    double seedFactor = (fArgs[SEED] * vertexCount)/100;
-    double (FilterFractal::*f)() = vertexDisp[algorithm];
-    CoordType* point;
-    computeSpectralWeights();
+    args.seed = args.seed * vertexCount / 100;
+    double (FilterFractal::*f)(CoordType &, FractalArgs&) = vertexDisp[args.algorithmId];
+    computeSpectralWeights(args);
     i=0;
     char buffer[50];
-    for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
+    for(VertexIterator vi=m->vert.begin(); vi!=m->vert.end(); ++vi)
     {
         sprintf(buffer, "Computing perturbation on vertex %d..", i++);
         cb(100*i/vertexCount, buffer);
-        point = &((*vi).P());
-        fArgs[X] = (*point)[0] + seedFactor;
-        fArgs[Y] = (*point)[1] + seedFactor;
-        fArgs[Z] = (*point)[2] + seedFactor;
-        (*point)[2] += ((this->*f)() * fArgs[SCALER]);
+        (*vi).P()[2] += (this->*f)((*vi).P(), args) * args.scale;
     }
 
     // updating bounding box and normals
-    vcg::tri::UpdateBounding<CMeshO>::Box(m);
-    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m);
+    vcg::tri::UpdateBounding<CMeshO>::Box(*m);
+    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(*m);
     return true;
 }
 
-bool FilterFractal::generateFractalMesh(MeshModel &mm, int smoothingSteps, int algorithm, vcg::CallBackPos* cb)
+bool FilterFractal::generateFractalMesh(MeshModel &mm, FractalArgs &args, vcg::CallBackPos* cb)
 {
     CMeshO* m = &mm.cm;
 
@@ -258,157 +265,162 @@ bool FilterFractal::generateFractalMesh(MeshModel &mm, int smoothingSteps, int a
         errorMessage = "There are some not 2-manifold faces. Manifoldness is required in order to apply the filter.";
         return false;
     }
+    tri::UpdateNormals<CMeshO>::PerVertexNormalized(*m);
 
-    // refines mesh until a given threshold
-    while (Refine<CMeshO, MidPoint<CMeshO> >(*m, MidPoint<CMeshO>(m), fArgs[THRESHOLD], false, cb)){};
-    mm.clearDataMask(MeshModel::MM_VERTFACETOPO);
-    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(*m);
+    // smoothes vertex normals
+    tri::Smooth<CMeshO>::VertexNormalLaplacian(*m, args.smoothingSteps, false);
 
-    // smoothes face normals
-    tri::Smooth<CMeshO>::FaceNormalLaplacianFF(*m, smoothingSteps, false);
-
-    // recomputes vertex normals from face normals
-    tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(*m);
-
-    // normalizes vertex normals
-    tri::UpdateNormals<CMeshO>::NormalizeVertex(*m);
-
-    double seedFactor = (fArgs[SEED]*((*m).vn))/100;
-    double (FilterFractal::*f)() = vertexDisp[algorithm];
-
-    computeSpectralWeights();
+    double (FilterFractal::*f)(CoordType&, FractalArgs&) = vertexDisp[args.algorithmId];
     double perturbation = .0;
+    char buffer[50];
+    int i=0, vertexCount = m->vn;
+
+    // calculates seed factor and spectral weights
+    args.seed = args.seed * (*m).vn / 100;
+    computeSpectralWeights(args);
+
+    // adds per-vertex quality if needed
+    if(args.saveAsQuality)
+        mm.updateDataMask(MeshModel::MM_VERTQUALITY);
+
+    // computes perturbation
     for(VertexIterator vi=(*m).vert.begin(); vi!=(*m).vert.end(); ++vi)
     {
-        fArgs[X] = (*vi).P()[0] + seedFactor;
-        fArgs[Y] = (*vi).P()[1] + seedFactor;
-        fArgs[Z] = (*vi).P()[2] + seedFactor;
-        perturbation = (this->*f)();
-        (*vi).P()[0] += ((*vi).N()[0] * perturbation);
-        (*vi).P()[1] += ((*vi).N()[1] * perturbation);
-        (*vi).P()[2] += ((*vi).N()[2] * perturbation);
+        sprintf(buffer, "Computing perturbation on vertex %d..", i++);
+        cb(100*i/vertexCount, buffer);
+        if ((*vi).IsD()) continue;
+        perturbation = (this->*f)((*vi).P(), args);
+        if(args.saveAsQuality)
+        {
+            (*vi).Q() = perturbation * args.scale;
+        }else {
+            (*vi).P() += ((*vi).N() * perturbation * args.scale);
+        }
     }
 
-    // updating bounding box and normals
+    // updates bounding box and normals
     vcg::tri::UpdateBounding<CMeshO>::Box(*m);
     vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(*m);
     return true;
 }
 
-double FilterFractal::fBM()
+double FilterFractal::fBM(CoordType &point, FractalArgs &args)
 {
-    double noise = .0, x = fArgs[X], y = fArgs[Y], z = fArgs[Z];
-    for(int i=0; i<(int)fArgs[OCTAVES]; i++)
+    double noise = .0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
+
+    for(int i=0; i<(int)args.octaves; i++)
     {
         noise += (math::Perlin::Noise(x, y, z) * spectralWeight[i]);
-        x *= fArgs[L]; y *= fArgs[L]; z *= fArgs[L];
+        x *= args.l; y *= args.l; z *= args.l;
     }
 
-    if(fArgs[REMAINDER] != .0)
-        noise += (fArgs[REMAINDER] * math::Perlin::Noise(x, y, z) * spectralWeight[(int)fArgs[OCTAVES]]);
+    if(args.remainder != .0)
+        noise += (args.remainder * math::Perlin::Noise(x, y, z) * spectralWeight[(int)args.octaves]);
 
     return noise;
 }
 
-double FilterFractal::StandardMF()
+double FilterFractal::StandardMF(CoordType &point, FractalArgs &args)
 {
-    double noise = 1.0, x = fArgs[X], y = fArgs[Y], z = fArgs[Z];
+    double noise = 1.0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
 
-    for(int i=0; i<(int)fArgs[OCTAVES]; i++)
+    for(int i=0; i<(int)args.octaves; i++)
     {
-        noise *= (fArgs[OFFSET] + math::Perlin::Noise(x, y, z) * spectralWeight[i]);
-        x *= fArgs[L]; y *= fArgs[L]; z *= fArgs[L];
+        noise *= (args.offset + math::Perlin::Noise(x, y, z) * spectralWeight[i]);
+        x *= args.l; y *= args.l; z *= args.l;
     }
 
-    if(fArgs[REMAINDER] != .0)
-        noise *= (fArgs[REMAINDER] * (math::Perlin::Noise(x, y, z) *
-                  spectralWeight[(int)fArgs[OCTAVES]] + fArgs[OFFSET]));
+    if(args.remainder != .0)
+        noise *= (args.remainder * (math::Perlin::Noise(x, y, z) *
+                  spectralWeight[(int)args.octaves] + args.offset));
 
     return noise;
 }
 
-double FilterFractal::HeteroMF()
+double FilterFractal::HeteroMF(CoordType &point, FractalArgs &args)
 {
-    double noise = .0, x = fArgs[X], y = fArgs[Y], z = fArgs[Z], increment = .0;
-    noise = (fArgs[OFFSET] + math::Perlin::Noise(x, y, z)) * spectralWeight[0];
-    x *= fArgs[L]; y *= fArgs[L]; z *= fArgs[L];
+    double noise = .0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
+    double increment = .0;
+    noise = (args.offset + math::Perlin::Noise(x, y, z)) * spectralWeight[0];
+    x *= args.l; y *= args.l; z *= args.l;
 
-    for(int i=1; i<(int)fArgs[OCTAVES]; i++)
+    for(int i=1; i<(int)args.octaves; i++)
     {
-        increment = (fArgs[OFFSET] + math::Perlin::Noise(x, y, z)) * spectralWeight[i] * noise;
+        increment = (args.offset + math::Perlin::Noise(x, y, z)) * spectralWeight[i] * noise;
         noise += increment;
-        x *= fArgs[L]; y *= fArgs[L]; z *= fArgs[L];
+        x *= args.l; y *= args.l; z *= args.l;
     }
 
-    if(fArgs[REMAINDER] != .0)
+    if(args.remainder != .0)
     {
-        increment = (math::Perlin::Noise(x, y, z) + fArgs[OFFSET]) * spectralWeight[(int)fArgs[OCTAVES]] * noise;
-        increment *= fArgs[REMAINDER];
+        increment = (math::Perlin::Noise(x, y, z) + args.offset) * spectralWeight[(int)args.octaves] * noise;
+        increment *= args.remainder;
         noise += increment;
     }
     return noise;
 }
 
-double FilterFractal::HybridMF()
+double FilterFractal::HybridMF(CoordType &point, FractalArgs &args)
 {
-    double x = fArgs[X], y = fArgs[Y], z = fArgs[Z];
-    double noise = (fArgs[OFFSET] + math::Perlin::Noise(x, y, z));
+    double x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
+    double noise = (args.offset + math::Perlin::Noise(x, y, z));
     double weight = noise, signal = .0;
-    x *= fArgs[L]; y *= fArgs[L]; z *= fArgs[L];
+    x *= args.l; y *= args.l; z *= args.l;
 
-    for(int i=1; i<(int)fArgs[OCTAVES]; i++)
+    for(int i=1; i<(int)args.octaves; i++)
     {
         if (weight > 1.0) weight = 1.0;
-        signal = (fArgs[OFFSET] + math::Perlin::Noise(x, y, z)) * spectralWeight[i];
+        signal = (args.offset + math::Perlin::Noise(x, y, z)) * spectralWeight[i];
         noise += (weight * signal);
         weight *= signal;
-        x *= fArgs[L]; y *= fArgs[L]; z *= fArgs[L];
+        x *= args.l; y *= args.l; z *= args.l;
     }
 
-    if(fArgs[REMAINDER] != .0)
+    if(args.remainder != .0)
     {
-        signal = (fArgs[OFFSET] + math::Perlin::Noise(x, y, z)) * spectralWeight[(int)fArgs[OCTAVES]];
-        noise += (weight * signal * fArgs[REMAINDER]);
+        signal = (args.offset + math::Perlin::Noise(x, y, z)) * spectralWeight[(int)args.octaves];
+        noise += (weight * signal * args.remainder);
     }
     return noise;
 }
 
-double FilterFractal::RidgedMF()
+double FilterFractal::RidgedMF(CoordType &point, FractalArgs &args)
 {
-    double x = fArgs[X], y = fArgs[Y], z = fArgs[Z];
-    double signal = pow(fArgs[OFFSET] - fabs(math::Perlin::Noise(x, y, z)), 2);
+    double x = point[0], y = point[1], z = point[2];
+    double signal = pow(args.offset - fabs(math::Perlin::Noise(x, y, z)), 2);
     double noise = signal, weight = .0;
-    x *= fArgs[L]; y *= fArgs[L]; z *= fArgs[L];
+    x *= args.l; y *= args.l; z *= args.l;
 
-    for(int i=1; i<(int)fArgs[OCTAVES]; i++)
+    for(int i=1; i<(int)args.octaves; i++)
     {
-        weight = signal * fArgs[GAIN];
+        weight = signal * args.gain;
         if (weight > 1.0) weight = 1.0;
         if (weight < 0.0) weight = 0.0;
-        signal = pow(fArgs[OFFSET] - fabs(math::Perlin::Noise(x, y, z)), 2) * weight * spectralWeight[i];
+        signal = pow(args.offset - fabs(math::Perlin::Noise(x, y, z)), 2) * weight * spectralWeight[i];
         noise += signal;
-        x *= fArgs[L]; y *= fArgs[L]; z *= fArgs[L];
+        x *= args.l; y *= args.l; z *= args.l;
     }
 
-    if(fArgs[REMAINDER] != .0)
+    if(args.remainder != .0)
     {
-        weight = signal * fArgs[GAIN];
+        weight = signal * args.gain;
         if (weight > 1.0) weight = 1.0;
         if (weight < 0.0) weight = 0.0;
-        signal = pow(fArgs[OFFSET] - fabs(math::Perlin::Noise(x, y, z)), 2) * weight * spectralWeight[(int)fArgs[OCTAVES]];
-        signal *= fArgs[REMAINDER];
+        signal = pow(args.offset - fabs(math::Perlin::Noise(x, y, z)), 2) * weight * spectralWeight[(int)args.octaves];
+        signal *= args.remainder;
         noise += signal;
     }
     return noise;
 }
 
-void FilterFractal::computeSpectralWeights()
+void FilterFractal::computeSpectralWeights(FractalArgs &args)
 {
     float frequency = 1.0;
-    for(int i=0; i<=(int)fArgs[OCTAVES]; i++)
+    int oct = (int)args.octaves;
+    for(int i=0; i<=oct; i++)
     {
-        spectralWeight[i] = pow(frequency, -fArgs[H]);
-        frequency *= fArgs[L];
+        spectralWeight[i] = pow(frequency, -args.h);
+        frequency *= args.l;
     }
 }
 // ---------------------------------------------------------------------
