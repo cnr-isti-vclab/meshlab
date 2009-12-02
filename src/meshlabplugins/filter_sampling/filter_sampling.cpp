@@ -825,7 +825,8 @@ case FP_CLUSTERED_SAMPLING :
 						Log("Variable Density variance is %f, radius can vary from %f to %f",pp.radiusVariance,radius/pp.radiusVariance,radius*pp.radiusVariance);
 			}			
 			
-			tri::SurfaceSampling<CMeshO,BaseSampler>::Poissondisk(curMM->cm, mps, *presampledMesh, radius,pp);
+            //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(curMM->cm, mps, *presampledMesh, radius,pp);
+            tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
 
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
