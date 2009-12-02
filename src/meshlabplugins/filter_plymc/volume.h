@@ -24,8 +24,8 @@
 #define _int64 __int64
 #endif
 
-#include "Voxel.h"
-#include "SVoxel.h"
+#include "voxel.h"
+#include "svoxel.h"
 #include <vector>
 #include <vcg/space/index/grid_static_ptr.h>
 
