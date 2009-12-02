@@ -24,7 +24,16 @@
 #include <Qt>
 #include <QtGui>
 #include "filter_dirt.h"
+#include "dustparticle.h"
+#include "dustsampler.h"
 
+
+#include <vcg/math/random_generator.h>
+#include <vcg/complex/trimesh/closest.h>
+#include <vcg/space/index/spatial_hashing.h>
+#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/trimesh/update/topology.h>
+#include <vcg/space/box2.h>
 #include <vcg/math/base.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
@@ -37,10 +46,13 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/space/triangle3.h>
-
+#include <vcg/complex/trimesh/allocate.h>
+#include <vector>
 
 using namespace std;
 using namespace vcg;
+
+
 
 FilterDirt::FilterDirt()
 {
@@ -53,7 +65,7 @@ FilterDirt::FilterDirt()
 	actionList << new QAction(filterName(tt), this);
 }
 
-const QString FilterDirt::filterName(FilterIDType filterId) const
+QString FilterDirt::filterName(FilterIDType filterId) const
 {
 	switch (filterId) {
 		case FP_DIRT:
@@ -76,14 +88,46 @@ const QString FilterDirt::filterName(FilterIDType filterId) const
 	}
 }
 
+ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par){
+    par.addParam(new RichInt("nparticles",1000,"Number of Dust Particles",""));
+    return;
+ }
+
  int FilterDirt::getRequirements(QAction */*action*/)
 {	
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
 }
 
-bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & /*par*/, vcg::CallBackPos */*cb*/)
+bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
-	return true;
+
+    vector<Point3f> dustVertexVec;
+    vector<DustParticle<CMeshO>> dustParticleVec;
+    DustSampler<CMeshO> ts(dustVertexVec,dustParticleVec);
+    MeshModel *currMM=md.mm();
+    tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::Montecarlo(currMM->cm,ts,par.getInt("nparticles"));
+
+    //tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::WeightedMontecarlo(currMM->cm,ts,par.getInt("nparticles"));
+
+
+    MeshModel* dmm=md.addNewMesh("Dust Mesh");
+    dmm->cm.Clear();
+    tri::Allocator<CMeshO>::AddVertices(dmm->cm,dustVertexVec.size());
+    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO>> ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<DustParticle<CMeshO>> (dmm->cm,std::string("ParticleInfo"));
+
+
+    CMeshO::VertexIterator vIter=dmm->cm.vert.begin();
+    vector<Point3f>::iterator dvIter;
+    std::vector< DustParticle<CMeshO> >::iterator dpIter=dustParticleVec.begin();
+
+    for(dvIter=dustVertexVec.begin();dvIter!=dustVertexVec.end();++dvIter){
+        (*vIter).P()=CMeshO::CoordType ((*dvIter)[0],(*dvIter)[1],(*dvIter)[2]);
+        ph[vIter]=(*dpIter);
+        ++dpIter;
+        ++vIter;
+    }
+
+    return true;
 }
 
  MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *)

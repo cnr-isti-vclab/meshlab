@@ -30,6 +30,22 @@
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include<vector>
+#include<vcg/simplex/vertex/base.h>
+#include<vcg/simplex/face/base.h>
+#include<vcg/complex/trimesh/base.h>
+
+
+using namespace vcg;
+
+class DustEdge;//Never used
+class DustVertex;//Never used
+class DustFace;
+
+class DustVertex : public VertexSimp2<DustVertex, DustEdge, DustFace> {};
+class DustFace:public FaceSimp2< DustVertex, DustEdge, DustFace,face::Normal3f>{};
+class DustMesh:public tri::TriMesh< std::vector<DustVertex>,std::vector<DustFace> >{};
+
 
 
 class FilterDirt : public QObject, public MeshFilterInterface
@@ -40,19 +56,18 @@ class FilterDirt : public QObject, public MeshFilterInterface
 	public:
 		enum {FP_DIRT} ;
 		
-		FilterDirt();
-		~FilterDirt(){};
+        FilterDirt();
+        ~FilterDirt(){};
 
         virtual QString filterName(FilterIDType filter) const;
         virtual QString filterInfo(FilterIDType filter) const;
-
-		virtual int getRequirements(QAction *);
-
-		virtual bool autoDialog(QAction *) {return false;}
-		virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/){};
-		virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-		virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-		virtual FilterClass getClass(QAction *);
+        virtual int getRequirements(QAction *);
+        virtual bool autoDialog(QAction *) {return true;}
+        virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};
+        virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+        virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+        virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
+        virtual FilterClass getClass(QAction *);
 
 };
 
