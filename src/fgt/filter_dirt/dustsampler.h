@@ -20,36 +20,60 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#ifndef _DUSTSAMPLER_H_
+#define _DUSTSAMPLER_H_
 
-#include "dustsampler.h"
+#include <vcg/math/random_generator.h>
+#include <vcg/complex/trimesh/closest.h>
+#include <vcg/space/index/spatial_hashing.h>
+#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/trimesh/update/topology.h>
+#include <vcg/space/box2.h>
+#include "dustparticle.h"
 
-using namespace vcg;
-using namespace tri;
-
-template <class MeshType> DustSampler<MeshType>::DustSampler(){
-    sampleVec= new std::vector<Coordtype>;
-    vectorOwner=true;
-}
+template <class MeshType>
+        class DustSampler
+{
 
 
-template <class MeshType> DustSampler<MeshType>::DustSampler(std::vector<CoordType> &Vec){
-    sampleVec = &Vec;
-    sampleVec->clear();
-    vectorOwner=false;
-}
+public:
+    typedef typename MeshType::CoordType    CoordType;
+    typedef typename MeshType::VertexType   VertexType;
+    typedef typename MeshType::FaceType     FaceType;
 
-template <class MeshType> DustSampler<MeshType>::~DustSampler(){
-    if(vectorOwner)delete sampleVec;
-}
+    DustSampler(){
+        sampleVec= new std::vector<Coordtype>;
+        dpVec=new std::vector<DustParticle <MeshType> >;
+        vectorOwner=true;
+    };
+    DustSampler(std::vector<CoordType> &pointVec,std::vector<DustParticle <MeshType> > &infoVec){
+        sampleVec = &pointVec;
+        dpVec = &infoVec;
+        dpVec->clear();
+        sampleVec->clear();
+        vectorOwner=false;
+    };
+    ~DustSampler(){
+        if(vectorOwner)delete sampleVec;
+    };
 
-template <class MeshType> void DustSampler<MeshType>::AddVert(const VertexType &p){
-    sampleVec->push_back(p.cP());
-}
+    void AddVert(const VertexType &p){
+        sampleVec->push_back(p.cP());
+    };
 
-template <class MeshType> void DustSampler<MeshType>::AddFace(const FaceType &f, const CoordType &p){
-    sampleVec->push_back(f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2] );
-}
+    void AddFace(FaceType &f, CoordType &p){
+        sampleVec->push_back(f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2] );
+        DustParticle<MeshType> part;
+        part.setFace(f);
+        part.setBarCoord(p);
+        dpVec->push_back(part);
 
-/*void DustSampler::AddTextureSample(const FaceType &, const CoordType &, const Point2i &){
+    };
+    //void AddTextureSample(const FaceType &, const CoordType &, const Point2i &){};
+private:
+    std::vector<CoordType> *sampleVec;
+    std::vector< DustParticle<MeshType> > *dpVec;
+    bool vectorOwner;
+};
 
-}*/
+#endif
