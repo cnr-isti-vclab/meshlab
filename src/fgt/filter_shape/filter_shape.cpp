@@ -47,98 +47,101 @@ using namespace vcg;
 
 FilterSolidShapes::FilterSolidShapes()
 {
-    typeList << FSS_TEXT;
+    typeList << FSS_PLATONIC << FSS_ARCHIMEDEAN;
     
-    FilterIDType tt;
-    foreach(tt , types())
+    foreach(FilterIDType tt , types())
         actionList << new QAction(filterName(tt), this);
 }
 
  QString FilterSolidShapes::filterName(FilterIDType filterId) const
 {
     switch (filterId) {
-    case FSS_TEXT:
-        return QString("Platonic");
-        break;
-    default:
-        assert(0);
-        return QString("error");
-        break;
+        case FSS_PLATONIC: return tr("Platonic solids");
+        case FSS_ARCHIMEDEAN: return tr("Archimedean solids");
     }
 }
 
  QString FilterSolidShapes::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
-    case FSS_TEXT:
-        return QString("Create platonic solids according to user parameters");
-        break;
-    default:
-        assert(0);
-        return QString("error");
-        break;
+        case FSS_PLATONIC:
+            return tr("Create platonic solids according to user parameters");
+        case FSS_ARCHIMEDEAN:
+            return tr("Create archimedean solids according to user parameters");
     }
 }
 
+ // What is it??
  int FilterSolidShapes::getRequirements(QAction */*action*/)
 {	
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
 }
 
-void FilterSolidShapes::initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & par)
+void FilterSolidShapes::initParameterSet(QAction *action,MeshModel &/*m*/, RichParameterSet & par)
 {
     QStringList list;
-    list << "Tetrahedron" << "Hexahedron" << "Octahedron" << "Dodecahedron" << "Icosahedron"
-            << "Truncated Tetrahedron (AR)" << "Cuboctahedron (AR)" << "Truncated Cube (AR)"
-            << "Truncated Octahedron (AR)" << "Rhombicuboctahedron (AR)"
-            << "Truncated Icosahedron (AR)";
+
+    switch(ID(action))	 {
+        case FSS_PLATONIC:
+            list << "Tetrahedron" << "Hexahedron" << "Octahedron" << "Dodecahedron" << "Icosahedron";
+            break;
+        case FSS_ARCHIMEDEAN:
+            list  << "Truncated Tetrahedron" << "Cuboctahedron" << "Truncated Cube"
+            << "Truncated Octahedron" << "Rhombicuboctahedron" << "Truncated Icosahedron";
+            break;
+    }
 
     par.addParam(new RichEnum("Figure", 0, list, "Figure", "Choose a figure"));
     par.addParam(new RichBool("Star", FALSE, "Star?", "Star or minimal triangulation instead"));
+
 }
 
-bool FilterSolidShapes::applyFilter(QAction * /*filter*/, MeshModel &m, RichParameterSet & par, vcg::CallBackPos */*cb*/)
+bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos */*cb*/)
 {
-    Log("Creating platonic number %d. STAR=%d", par.getEnum("Figure"), par.getBool("Star"));
-
-    switch(par.getEnum("Figure")) {
-    case CR_TETRAHEDRON:
-        vcg::tri::Tetrahedron<CMeshO>(m.cm);
+    switch(ID(filter)) {
+        case FSS_PLATONIC:
+            Log("Creating platonic number %d. STAR=%d", par.getEnum("Figure"), par.getBool("Star"));
+            switch(par.getEnum("Figure")) {
+                case CR_TETRAHEDRON:
+                    vcg::tri::Tetrahedron<CMeshO>(m.cm);
+                    break;
+                case CR_ICOSAHEDRON:
+                    vcg::tri::Icosahedron<CMeshO>(m.cm);
+                    break;
+                case CR_DODECAHEDRON:
+                    vcg::tri::Dodecahedron<CMeshO>(m.cm);
+                    m.updateDataMask(MeshModel::MM_POLYGONAL);
+                    break;
+                case CR_OCTAHEDRON:
+                    vcg::tri::Octahedron<CMeshO>(m.cm);
+                    break;
+                case CR_HEXAHEDRON:
+                    vcg::tri::Hexahedron<CMeshO>(m.cm);
+                    break;
+            }
         break;
-    case CR_ICOSAHEDRON:
-        vcg::tri::Icosahedron<CMeshO>(m.cm);
-        break;
-    case CR_DODECAHEDRON:
-        vcg::tri::Dodecahedron<CMeshO>(m.cm);
-        m.updateDataMask(MeshModel::MM_POLYGONAL);
-        break;
-    case CR_OCTAHEDRON:
-        vcg::tri::Octahedron<CMeshO>(m.cm);
-        break;
-    case CR_HEXAHEDRON:
-        vcg::tri::Hexahedron<CMeshO>(m.cm);
-        break;
-    /********* Archimedeans... *********/
-    /* This is temporal, archimedeans should be moved to somewhere else.
-    * But at the moment it remains here for debugging purposes.
-    */
-    case CR_TT:
-        vcg::tri::Truncated_Tetrahedron<CMeshO>(m.cm);
-        break;
-    case CR_COH:
-        vcg::tri::Cuboctahedron<CMeshO>(m.cm);
-        break;
-    case CR_TC:
-        vcg::tri::Truncated_Cube<CMeshO>(m.cm);
-        break;
-    case CR_TO:
-        vcg::tri::Truncated_Octahedron<CMeshO>(m.cm);
-        break;
-    case CR_RCOH:
-        vcg::tri::Rhombicuboctahedron<CMeshO>(m.cm);
-        break;
-    case CR_TIS:
-        vcg::tri::Truncated_Icosahedron<CMeshO>(m.cm);
+        case FSS_ARCHIMEDEAN:
+                Log("Creating archimedean number %d. STAR=%d", par.getEnum("Figure"), par.getBool("Star"));
+                switch(par.getEnum("Figure")) {
+                    case CR_TT:
+                        vcg::tri::Truncated_Tetrahedron<CMeshO>(m.cm);
+                        break;
+                    case CR_COH:
+                        vcg::tri::Cuboctahedron<CMeshO>(m.cm);
+                        break;
+                    case CR_TC:
+                        vcg::tri::Truncated_Cube<CMeshO>(m.cm);
+                        break;
+                    case CR_TO:
+                        vcg::tri::Truncated_Octahedron<CMeshO>(m.cm);
+                        break;
+                    case CR_RCOH:
+                        vcg::tri::Rhombicuboctahedron<CMeshO>(m.cm);
+                        break;
+                    case CR_TIS:
+                        vcg::tri::Truncated_Icosahedron<CMeshO>(m.cm);
+                        break;
+                }
         break;
     }
 
