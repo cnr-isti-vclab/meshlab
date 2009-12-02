@@ -42,7 +42,7 @@ public:
     typedef typename MeshType::FaceType     FaceType;
 
     DustSampler(){
-        sampleVec= new std::vector<Coordtype>;
+        sampleVec= new std::vector<CoordType>;
         dpVec=new std::vector<DustParticle <MeshType> >;
         vectorOwner=true;
     };
@@ -61,7 +61,7 @@ public:
         sampleVec->push_back(p.cP());
     };
 
-    void AddFace(FaceType &f, CoordType &p){
+    void AddFace(FaceType &f, CoordType p){
         sampleVec->push_back(f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2] );
         DustParticle<MeshType> part;
         part.setFace(f);
