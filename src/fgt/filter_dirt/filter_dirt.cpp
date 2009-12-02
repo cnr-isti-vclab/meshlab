@@ -102,7 +102,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 {
 
     vector<Point3f> dustVertexVec;
-    vector<DustParticle<CMeshO>> dustParticleVec;
+    vector<DustParticle<CMeshO> > dustParticleVec;
     DustSampler<CMeshO> ts(dustVertexVec,dustParticleVec);
     MeshModel *currMM=md.mm();
     tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::Montecarlo(currMM->cm,ts,par.getInt("nparticles"));
@@ -113,7 +113,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
     MeshModel* dmm=md.addNewMesh("Dust Mesh");
     dmm->cm.Clear();
     tri::Allocator<CMeshO>::AddVertices(dmm->cm,dustVertexVec.size());
-    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO>> ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<DustParticle<CMeshO>> (dmm->cm,std::string("ParticleInfo"));
+    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<DustParticle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
 
 
     CMeshO::VertexIterator vIter=dmm->cm.vert.begin();
