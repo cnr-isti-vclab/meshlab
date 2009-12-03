@@ -29,6 +29,74 @@
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/space/triangle2.h>
 
+class VertexSampler
+{
+	typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+	typedef vcg::tri::FaceTmark<CMeshO> MarkerFace;
+	
+	CMeshO &srcMesh;
+	QImage &srcImg;
+	float dist_upper_bound;
+	
+	MetroMeshGrid unifGridFace;
+	MarkerFace markerFunctor;
+	vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
+	
+	// Callback stuff
+	vcg::CallBackPos *cb;
+	int vertexNo, vertexCnt, start, offset;
+	
+public:
+	VertexSampler(CMeshO &_srcMesh, QImage &_srcImg, float upperBound) : 
+	srcMesh(_srcMesh), srcImg(_srcImg), dist_upper_bound(upperBound) 
+	{
+		unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
+		markerFunctor.SetMesh(&_srcMesh);
+	}
+	
+	void InitCallback(vcg::CallBackPos *_cb, int _vertexNo, int _start=0, int _offset=100)
+	{
+		assert(_vertexNo > 0);
+		assert(_start>=0);
+		assert(_offset>=0 && _offset <= 100-_start);
+		cb = _cb;
+		vertexNo = _vertexNo;
+		vertexCnt = 0;
+		start = _start;
+		offset = _offset;
+	}
+	
+	void AddVert(CMeshO::VertexType &v)
+	{
+		// Get Closest point
+		CMeshO::CoordType closestPt;
+		float dist=dist_upper_bound;
+		CMeshO::FaceType *nearestF;
+		nearestF =  unifGridFace.GetClosest(PDistFunct, markerFunctor, v.cP(), dist_upper_bound, dist, closestPt);
+		if (dist == dist_upper_bound) return;
+		
+		// Convert point to barycentric coords
+		vcg::Point3f interp;
+		int axis = 0;
+		float tmp = -1;
+		for (int i=0; i<3; ++i)
+			if (fabs(nearestF->cN()[i]) > tmp) {tmp = fabs(nearestF->cN()[i]); axis = i;}
+		bool ret = InterpolationParameters(*nearestF, axis, closestPt, interp);
+		assert(ret);
+		interp[2]=1.0-interp[1]-interp[0];
+		
+		int w=srcImg.width(), h=srcImg.height();
+		int x, y;
+		x = w * (interp[0]*nearestF->cWT(0).U()+interp[1]*nearestF->cWT(1).U()+interp[2]*nearestF->cWT(2).U());
+		y = h * (1.0 - (interp[0]*nearestF->cWT(0).V()+interp[1]*nearestF->cWT(1).V()+interp[2]*nearestF->cWT(2).V()));
+		// repeat mode
+		x = (x%w + w)%w;
+		y = (y%h + h)%h;
+		QRgb px = srcImg.pixel(x, y);
+		v.C() = CMeshO::VertexType::ColorType(qRed(px), qGreen(px), qBlue(px), 255);
+	}
+};
+
 class RasterSampler
 {
 	QImage &trgImg;
@@ -55,18 +123,21 @@ public:
 	}
 	
 	// expects points outside face (face affecting) with baycentric coords = (bX, bY, -<distance from closest edge>)
-	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp)
+	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp, float edgeDist= 0.0)
 	{
 		CMeshO::VertexType::ColorType c;
-		CMeshO::CoordType bary = p;
-		int alpha = 255;
+		/*int alpha = 255;
 		if (fabs(p[0]+p[1]+p[2]-1)>=0.00001)
 			if (p[0] <.0) {alpha = 254+p[0]*128; bary[0] = 0.;} else
 				if (p[1] <.0) {alpha = 254+p[1]*128; bary[1] = 0.;} else
-					if (p[2] <.0) {alpha = 254+p[2]*128; bary[2] = 0.;}
+					if (p[2] <.0) {alpha = 254+p[2]*128; bary[2] = 0.;}*/
+		int alpha = 255;
+		if (edgeDist != 0.0)
+			alpha=254-edgeDist*128;
+		
 		if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - tp.Y())) < alpha)
 		{
-			c.lerp(f.V(0)->cC(), f.V(1)->cC(), f.V(2)->cC(), bary);
+			c.lerp(f.V(0)->cC(), f.V(1)->cC(), f.V(2)->cC(), p);
 			trgImg.setPixel(tp.X(), trgImg.height() - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
 		}
 		if (cb)
@@ -156,16 +227,21 @@ public:
 		offset = _offset;
 		currFace = NULL;
 	}
-	// expects points outside face (face affecting) with baycentric coords = (bX, bY, -<distance from closest edge instead of 0>) 
-	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp)
+	
+	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp, float edgeDist=0.0)
 	{
-		// Calculate correct brycentric coords
-		CMeshO::CoordType bary = p;
+		// Calculate correct barycentric coords
+		/*CMeshO::CoordType bary = p;
 		int alpha = 255;
 		if (fabs(p[0]+p[1]+p[2]-1)>=0.00001)
 			if (p[0] <.0) {alpha = 254+p[0]*128; bary[0] = 0.;} else
 				if (p[1] <.0) {alpha = 254+p[1]*128; bary[1] = 0.;} else
-					if (p[2] <.0) {alpha = 254+p[2]*128; bary[2] = 0.;}
+					if (p[2] <.0) {alpha = 254+p[2]*128; bary[2] = 0.;}*/
+		
+		CMeshO::CoordType bary = p;
+		int alpha = 255;
+		if (edgeDist != 0.0)
+			alpha=254-edgeDist*128;
 		
 		// Get point on face
 		CMeshO::CoordType startPt;
@@ -224,7 +300,7 @@ public:
 	}
 };
 
-template <class MetroMesh, class VertexSampler>
+template <class MetroMesh, class VertexSampler, bool EDGEBARYCENTRIC>
 static void SingleFaceRasterWEdge(typename MetroMesh::FaceType &f,  VertexSampler &ps, 
 								  const vcg::Point2<typename MetroMesh::ScalarType> & v0, 
 								  const vcg::Point2<typename MetroMesh::ScalarType> & v1, 
@@ -304,7 +380,7 @@ static void SingleFaceRasterWEdge(typename MetroMesh::FaceType &f,  VertexSample
 				ps.AddTextureSample(f, baryCoord, vcg::Point2i(x,y));
 				in = true;
 			} else {
-				// Check wheter a pixel outside (on a border edge side) triangle affects color inside it
+				// Check whether a pixel outside (on a border edge side) triangle affects color inside it
 				vcg::Point2<S> px(x, y);
 				vcg::Point2<S> closePoint;
 				int closeEdge = -1;
@@ -328,12 +404,20 @@ static void SingleFaceRasterWEdge(typename MetroMesh::FaceType &f,  VertexSample
 				
 				if (closeEdge >= 0)
 				{
-					// Add x,y sample with closePoint barycentric coords and -min
 					typename MetroMesh::CoordType baryCoord;
-					baryCoord[closeEdge] = (closePoint - borderEdges[closeEdge].P(1)).Norm()/edgeLength[closeEdge];
-					baryCoord[(closeEdge+1)%3] = 1 - baryCoord[closeEdge];
-					baryCoord[(closeEdge+2)%3] = -minDst;
-					ps.AddTextureSample(f, baryCoord, vcg::Point2i(x,y));
+					if (EDGEBARYCENTRIC)
+					{
+						// Add x,y sample with closePoint barycentric coords (on edge)
+						baryCoord[closeEdge] = (closePoint - borderEdges[closeEdge].P(1)).Norm()/edgeLength[closeEdge];
+						baryCoord[(closeEdge+1)%3] = 1 - baryCoord[closeEdge];
+						baryCoord[(closeEdge+2)%3] = 0;
+					} else {
+						// Add x,y sample with his own barycentric coords (off edge)
+						baryCoord[0] =  double(-y*v1[0]+v2[0]*y+v1[1]*x-v2[0]*v1[1]+v1[0]*v2[1]-x*v2[1])/de;
+						baryCoord[1] = -double( x*v0[1]-x*v2[1]-v0[0]*y+v0[0]*v2[1]-v2[0]*v0[1]+v2[0]*y)/de;
+						baryCoord[2] = 1-baryCoord[0]-baryCoord[1];
+					}
+					ps.AddTextureSample(f, baryCoord, vcg::Point2i(x,y), minDst);
 					in = true;
 				} else if (in) break;
 			}
@@ -347,8 +431,8 @@ static void SingleFaceRasterWEdge(typename MetroMesh::FaceType &f,  VertexSample
 	}
 }
 
-template <class MetroMesh, class VertexSampler>	
-static void TextureCorrected(MetroMesh & m, VertexSampler &ps, int textureWidth, int textureHeight)
+template <class MetroMesh, class VertexSampler, bool EDGEBARYCENTRIC>	
+static void TextureCorrectedWEdge(MetroMesh & m, VertexSampler &ps, int textureWidth, int textureHeight)
 {
 	typedef typename MetroMesh::FaceIterator FaceIterator;
 	FaceIterator fi;
@@ -361,7 +445,7 @@ static void TextureCorrected(MetroMesh & m, VertexSampler &ps, int textureWidth,
 			for(int i=0;i<3;++i)
 				ti[i]=vcg::Point2f((*fi).WT(i).U() * textureWidth - 0.5, (*fi).WT(i).V() * textureHeight + 0.5);
 			//vcg::tri::SurfaceSampling<MetroMesh,VertexSampler>::SingleFaceRaster(*fi,  ps, ti[0],ti[1],ti[2]);
-			SingleFaceRasterWEdge<MetroMesh,VertexSampler>(*fi,  ps, ti[0],ti[1],ti[2]);
+			SingleFaceRasterWEdge<MetroMesh,VertexSampler, EDGEBARYCENTRIC>(*fi,  ps, ti[0],ti[1],ti[2]);
 		}
 }
 
