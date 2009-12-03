@@ -613,7 +613,7 @@ public:
 class RichWidgetInterfaceConstructor : public Visitor
 {
 public:
-	RichWidgetInterfaceConstructor(QWidget* parent):par(parent),lastCreated(NULL){}
+        RichWidgetInterfaceConstructor(QWidget* parent):lastCreated(NULL),par(parent){}
 
 	void visit(RichBool& pd) {lastCreated = new BoolWidget(par,&pd);};
 	void visit(RichInt& pd) {lastCreated = new IntWidget(par,&pd);};
