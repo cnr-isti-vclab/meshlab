@@ -110,7 +110,10 @@ public:
 	
 	virtual void Decorate(QAction *a, MeshModel &m,  GLArea *gla,QFont qf);
 	virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
-		
+
+    void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
+    inline QString TextureStyleParam() const { return  "MeshLab::Decoration::TextureStyle" ; }
+    bool textureWireParam;
 };
 
 #endif

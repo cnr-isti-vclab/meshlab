@@ -456,7 +456,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 
 
 
-bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, RichParameterSet */*rm*/, GLArea *)
+bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, RichParameterSet *rm, GLArea *)
 {	
 	if( ID(action) == DP_SHOW_VERT_LABEL || ID(action) == DP_SHOW_FACE_LABEL)
 				{
@@ -475,6 +475,7 @@ bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, Rich
 	}
     if( ID(action) == DP_SHOW_TEXPARAM )
     {
+        textureWireParam = rm->getBool(this->TextureStyleParam());
         if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return false;
     }
 	return true;
@@ -560,19 +561,26 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf
     glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPolygonMode(GL_FRONT_AND_BACK ,GL_LINE);
-
+    if(textureWireParam==true)  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                          else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture( GL_TEXTURE_2D, m.glw.TMId.back() );
     glBegin(GL_TRIANGLES);
     for(size_t i=0;i<m.cm.face.size();++i)
         if(!m.cm.face[i].IsD())
-                {
+        {
+        glTexCoord(m.cm.face[i].WT(0).P());
         glVertex(m.cm.face[i].WT(0).P());
+        glTexCoord(m.cm.face[i].WT(1).P());
         glVertex(m.cm.face[i].WT(1).P());
+        glTexCoord(m.cm.face[i].WT(2).P());
         glVertex(m.cm.face[i].WT(2).P());
     }
     glEnd();
     drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.5,gla,qf);
     drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.5,gla,qf);
+    gla->renderText(0,-0.10,0,tr("%1").arg(m.cm.textures[0].c_str()),qf);
+
     glPopAttrib();
     // Closing 2D
     glPopAttrib();
@@ -583,6 +591,13 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf
 
 }
 
-
-
+void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
+{
+    switch(ID(action)){
+    case DP_SHOW_TEXPARAM : {
+            assert(!parset.hasParameter(TextureStyleParam()));
+            parset.addParam(new RichBool(TextureStyleParam(), true,"Texture Param Wire","if true the parametrization is drawn in a textured wireframe style"));
+        }
+    }
+}
 Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)
