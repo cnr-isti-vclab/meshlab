@@ -27,8 +27,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include "filter_splitter.h"
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/position.h>
@@ -39,7 +38,7 @@
 #include <vcg/complex/trimesh/update/selection.h>
 #include<vcg/complex/trimesh/append.h>
 
-#include "filter_splitter.h"
+
 
 using namespace std;
 using namespace vcg;

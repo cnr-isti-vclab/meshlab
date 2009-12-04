@@ -34,8 +34,7 @@ New small samples
 #include <QAction>
 #include <QList>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include "cubemap.h"
 //#include "../../meshlab/mainwindow.h"
 

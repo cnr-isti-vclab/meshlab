@@ -25,7 +25,7 @@
 #define _RASTERING_H
 
 #include <QtGui>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/space/triangle2.h>
 

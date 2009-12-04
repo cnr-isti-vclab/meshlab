@@ -25,9 +25,12 @@
 #define _FILTER_TEXTURE_H
 
 #include <QObject>
+#include <QTime>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <vcg/complex/trimesh/attribute_seam.h>
+#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/space/triangle2.h>
+#include <common/interfaces.h>
 
 class FilterTexturePlugin : public QObject, public MeshFilterInterface
 {

@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += baseio.h \
 		$$VCGDIR/wrap/io_trimesh/import_obj.h \

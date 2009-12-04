@@ -23,12 +23,7 @@
 #ifndef EDITPLUGIN_H
 #define EDITPLUGIN_H
 
-#include <QObject>
-#include <QStringList>
-#include <QList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class ExtraMeshEditPlugin : public QObject, public MeshEditInterface
 {

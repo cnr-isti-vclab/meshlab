@@ -39,8 +39,7 @@
 
 #include <QString>
 
-#include "../../meshlab/meshmodel.h"
-#include "../../meshlab/interfaces.h"
+#include <common/interfaces.h>
 
 class BaseMeshIOPlugin : public QObject, public MeshIOInterface
 {

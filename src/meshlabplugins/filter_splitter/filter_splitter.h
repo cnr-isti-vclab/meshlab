@@ -26,8 +26,7 @@
 
 #include <QObject>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class FilterSplitterPlugin : public QObject, public MeshFilterInterface
 {

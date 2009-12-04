@@ -20,62 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/* History
-$Log: meshfilter.h,v $
-Revision 1.46  2008/02/12 14:21:39  cignoni
-changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
-
-Revision 1.45  2007/10/02 08:13:45  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.44  2007/07/24 07:20:18  cignoni
-Added Freeze transform and improved transformation dialog
-
-Revision 1.43  2007/04/16 09:25:29  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing again...
-
-Revision 1.42  2007/02/25 21:31:49  cignoni
-new parameters for quadric simplification
-
-Revision 1.41  2007/02/08 23:46:17  pirosu
-merged srcpar and par in the GetStdParameters() function
-
-Revision 1.40  2007/02/08 16:10:15  cignoni
-Added more parameters to holefilling and quadric simplification
-
-Revision 1.39  2007/02/08 13:39:58  pirosu
-Added Quadric Simplification(with textures) Filter
-
-Revision 1.38  2007/01/11 19:52:26  pirosu
-fixed bug for QT 4.1.0/dotnet2003
-removed the request of the window title to the plugin. The action description is used instead.
-
-Revision 1.37  2006/12/27 21:41:58  pirosu
-Added improvements for the standard plugin window:
-split of the apply button in two buttons:ok and apply
-added support for parameters with absolute and percentage values
-
-Revision 1.36  2006/12/13 17:37:27  pirosu
-Added standard plugin window support
-
-Revision 1.35  2006/11/29 00:59:18  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.34  2006/10/22 21:09:35  cignoni
-Added Close Hole
-
-Revision 1.33  2006/10/19 08:57:45  cignoni
-Added working ball pivoting and normal creation
-
-Revision 1.32  2006/10/10 21:13:08  cignoni
-Added remove non manifold and quadric simplification filter.
-
-Revision 1.31  2006/05/25 09:46:38  cignoni
-missing std and and all the other gcc detected syntax errors
-
-****************************************************************************/
 
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
@@ -84,10 +28,8 @@ missing std and and all the other gcc detected syntax errors
 #include <QStringList>
 #include <QList>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include "transformDialog.h"
-#include "../../meshlab/GLLogStream.h"
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {

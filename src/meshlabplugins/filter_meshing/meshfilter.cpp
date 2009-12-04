@@ -41,7 +41,6 @@
 #include <vcg/space/normal_extrapolation.h>
 #include "quadric_tex_simp.h"
 #include "quadric_simp.h"
-#include "../../meshlab/GLLogStream.h"
 
 using namespace std;
 using namespace vcg;

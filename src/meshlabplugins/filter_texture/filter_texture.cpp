@@ -25,13 +25,6 @@
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-#include <vcg/complex/trimesh/attribute_seam.h>
-#include <vcg/complex/trimesh/point_sampling.h>
-#include <vcg/space/triangle2.h>
-
 #include "filter_texture.h"
 #include "pushpull.h"
 #include "rastering.h"

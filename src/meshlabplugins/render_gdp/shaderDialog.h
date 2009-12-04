@@ -26,7 +26,7 @@
 
 #include <map>
 #include <GL/glew.h>
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include <QtGui>
 #include <QGLWidget>
 #include "shaderStructs.h"

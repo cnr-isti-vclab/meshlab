@@ -81,8 +81,7 @@ removed color_curvature.h in favour of curvature.h
 #include <QActionGroup>
 #include <QList>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 #include <vcg/math/base.h>
 #include <vcg/math/histogram.h>

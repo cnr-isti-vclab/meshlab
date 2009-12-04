@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += meshcolorize.h 
 SOURCES       += meshcolorize.cpp 
