@@ -21,11 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
-#include <limits>
-#include <stdlib.h>
 #include "meshdecorate.h"
 #include <QGLWidget>
 #include <wrap/gl/addons.h>

@@ -24,21 +24,13 @@
 #ifndef EDITPAINT_H
 #define EDITPAINT_H
 
-#include <QObject>
-#include <QStringList>
-#include <QList>
-#include <QDockWidget>
-#include <QHash>
-#include <QDialog>
 #include <GL/glew.h>
-#include <QtOpenGL>
-
+#include <QObject>
+#include <QDockWidget>
 
 #include <wrap/gl/pick.h>
 #include <meshlab/glarea.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-#include <vcg/math/matrix44.h>
+#include <common/interfaces.h>
 
 #include "paintbox.h"
 

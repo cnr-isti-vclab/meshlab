@@ -24,10 +24,9 @@
 
 #ifndef EditPaintFactoryPLUGIN_H
 #define EditPaintFactoryPLUGIN_H
-
-#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QList>
+
+#include <common/interfaces.h>
 
 class EditPaintFactory : public QObject, public MeshEditInterfaceFactory
 {

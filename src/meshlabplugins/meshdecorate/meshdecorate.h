@@ -25,13 +25,9 @@
 #define EXTRADECORATEPLUGIN_H
 
 #include <QObject>
-#include <QAction>
-#include <QList>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include <wrap/gui/coordinateframe.h>
-//#include "../../meshlab/mainwindow.h"
 
 class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {

@@ -10,8 +10,7 @@ HEADERS = edit_paint_factory.h \
 
 SOURCES = edit_paint_factory.cpp \
 	paintbox.cpp \
-    editpaint.cpp \
-    $$GLEWCODE
+    editpaint.cpp
 
 TARGET = editpaint
 RESOURCES = meshlab.qrc

@@ -76,8 +76,7 @@ Revision 1.4  2006/01/17 14:18:03  mariolatronico
 #include <QDoubleValidator>
 #include "ui_transformDialog.h"
 #include <vcg/math/matrix44.h>
-#include <meshlab/meshmodel.h> // for CMeshO
-#include <meshlab/interfaces.h> // for CMeshO
+#include <common/interfaces.h> // for CMeshO
 
 using vcg::Matrix44f;
 //#define PI 3.14159265
