@@ -27,7 +27,6 @@
 #include <QAction>
 #include <QList>
 
-#include "../meshlab/meshmodel.h"
 #include "filterparameter.h"
 class QDomElement;
 /*

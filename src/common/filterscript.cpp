@@ -49,20 +49,14 @@ added Filter History Dialogs
 ****************************************************************************/
 
 #include <GL/glew.h>
-#include <QtGui>
 #include <algorithm>
-
-// widget capace di fare rendering di un Modello
-#include <vcg/space/box3.h>
-#include <wrap/gl/space.h>
-#include "../meshlab/meshmodel.h"
-#include "../meshlab/interfaces.h"
-#include "filterscript.h"
-//#include "glarea.h"
+#include <QtGui>
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
 #include <QPair>
+
+#include "filterscript.h"
 
 using namespace vcg; 
 bool FilterScript::save(QString filename)

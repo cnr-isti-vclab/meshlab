@@ -30,9 +30,7 @@
 #include<QString>
 #include <QPair>
 #include <QAction>
-#include <vcg/math/matrix44.h>
-#include <meshlab/meshmodel.h>
-
+#include "meshmodel.h"
 
 
 class Value

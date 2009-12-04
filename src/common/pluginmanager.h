@@ -1,7 +1,8 @@
 #ifndef PLUGINMANAGER_H
 #define PLUGINMANAGER_H
-#include "filterparameter.h"
-#include "../meshlab/interfaces.h"
+
+#include "interfaces.h"
+
 class PluginManager
 {
 public:
