@@ -27,8 +27,7 @@
 // widget capace di fare rendering di un Modello
 #include <vcg/space/box3.h>
 #include <wrap/gl/space.h>
-#include "meshmodel.h"
-#include "interfaces.h"
+#include "../common/interfaces.h"
 #include "glarea.h"
 #include "layerDialog.h"
 #include "mainwindow.h"

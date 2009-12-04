@@ -20,61 +20,10 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.16  2008/02/06 09:56:37  cignoni
-Corrected bug in the display of plugins info
-
-Revision 1.15  2007/12/12 15:33:00  cignoni
-Use info() instead of name() for a better description
-
-Revision 1.14  2007/10/02 07:59:44  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.13  2006/11/29 00:55:36  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.12  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.11  2006/02/15 23:09:06  fmazzant
-added the part of MeshIO credits
-
-Revision 1.10  2006/01/17 13:47:45  fmazzant
-update interface meshio : formats -> importFormats() & exportFormts
-
-Revision 1.9  2006/01/17 10:03:29  cignoni
-Removed bug: crash on white space click
-
-Revision 1.8  2006/01/04 15:35:52  alemochi
-Renamed string about general information on plugin
-
-Revision 1.7  2006/01/04 15:27:30  alemochi
-Renamed property of Format struct, and changed plugin dialog
-
-Revision 1.6  2006/01/04 13:27:52  alemochi
-Added help in plugin dialog
-
-Revision 1.5  2005/12/20 03:33:16  davide_portelli
-Modified PluginDialog.
-
-Revision 1.4  2005/12/04 02:44:39  davide_portelli
-Added texture icon in toolbar
-
-Revision 1.3  2005/11/24 01:38:36  cignoni
-Added new plugins intefaces, tested with shownormal render mode
-
-Revision 1.2  2005/11/21 12:12:54  cignoni
-Added copyright info
-
-****************************************************************************/
 
 #include <QtGui>
 #include <QStringList>
-#include "meshmodel.h"
-#include "interfaces.h"
+#include <common/interfaces.h>
 #include "plugindialog.h"
 
 PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWidget *parent): QDialog(parent)

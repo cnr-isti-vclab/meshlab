@@ -104,7 +104,7 @@ void CustomDialog::updateSettings()
 }
 //Maybe a MeshDocument parameter is needed. See loadFrameContent definition
 SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultPar, QWidget* parent /*= 0*/ )
-:QDialog(parent),frame(this),tmppar(NULL),curPar(currentPar),defPar(defaultPar)
+:QDialog(parent),frame(this),curPar(currentPar),defPar(defaultPar),tmppar(NULL)
 {
 	setModal(true);
 	savebut = new QPushButton("Save",this);

@@ -22,10 +22,7 @@
 ****************************************************************************/
 
 #include<QObject>
-#include "meshmodel.h"
-#include "interfaces.h"
 #include "mainwindow.h"
-//#include "plugindialog.h"
 #include "stdpardialog.h"
 using namespace vcg;
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)

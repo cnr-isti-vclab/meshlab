@@ -7,8 +7,10 @@ QT += xml
 
 VCGDIR  = ../../../../vcglib
 GLEWDIR = ../../external/glew-1.5.1
-GLEWCODE = $$GLEWDIR/src/glew.c
-DEFINES *= GLEW_STATIC
+mac:LIBS += ../../meshlab/meshlab.app/Contents/MacOS/libcommon.dylib
+win32-msvc2005:LIBS += XXXXXXX
+win32-msvc2008:LIBS += XXXXXXX
+win32-g++:LIBS += XXXXXXX
 
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN

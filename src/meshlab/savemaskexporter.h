@@ -63,7 +63,6 @@
 
 #include <wrap/io_trimesh/io_mask.h>
 
-#include "meshmodel.h"
 #include "../common/filterparameter.h"
 #include "stdpardialog.h"
 #include "glarea.h"

@@ -28,7 +28,7 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QTabletEvent>
-#include "../common/filterparameter.h"
+#include "filterparameter.h"
 #include "GLLogStream.h"
 
 

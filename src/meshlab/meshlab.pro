@@ -1,7 +1,6 @@
 VCGDIR = ../../../vcglib
 GLEWDIR = ../external/glew-1.5.1
 GLEWCODE = $$GLEWDIR/src/glew.c
-DEFINES *= GLEW_STATIC
 CONFIG += debug_and_release 
 
 # uncomment to try Eigen
@@ -13,18 +12,13 @@ INCLUDEPATH *= ../.. \
 DEPENDPATH += $$VCGDIR \
     $$VCGDIR/vcg \
     $$VCGDIR/wrap
-PRECOMPILED_HEADER = mainwindow.h
-HEADERS = interfaces.h \
-    GLLogStream.h \
+HEADERS = ../common/interfaces.h \
     mainwindow.h \
-    meshmodel.h \
     glarea.h \
-    ../common/filterscript.h \
-    ../common/filterparameter.h \
+    glarea_setting.h \
     plugindialog.h \
     customDialog.h \
     filterScriptDialog.h \
-    plugin_support.h \
     saveSnapshotDialog.h \
     savemaskexporter.h \
     changetexturename.h \
@@ -32,19 +26,12 @@ HEADERS = interfaces.h \
     stdpardialog.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
-    $$VCGDIR/wrap/gl/trimesh.h \
-    glarea_setting.h \
-    ../common/pluginmanager.h
+    $$VCGDIR/wrap/gl/trimesh.h
 SOURCES = main.cpp \
     mainwindow_Init.cpp \
     mainwindow_RunTime.cpp \
-    meshmodel.cpp \
-    GLLogStream.cpp \
     glarea.cpp \
-    plugin_support.cpp \
     plugindialog.cpp \
-    ../common/filterscript.cpp \
-    ../common/filterparameter.cpp \
     customDialog.cpp \
     filterScriptDialog.cpp \
     saveSnapshotDialog.cpp \
@@ -54,13 +41,11 @@ SOURCES = main.cpp \
     stdpardialog.cpp \
     $$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
-    $$GLEWCODE \
-    glarea_setting.cpp \
-    ../common/pluginmanager.cpp
+    glarea_setting.cpp
+
 FORMS = ui/layerDialog.ui \
     ui/filterScriptDialog.ui \
     ui/customDialog.ui \
-    ui/lightingProperties.ui \
     ui/savesnapshotDialog.ui \
     ui/aboutDialog.ui \
     ui/renametexture.ui \
@@ -100,12 +85,17 @@ mac:QMAKE_CXX = g++-4.2
 # macx-g++:QMAKE_CXX=g++-mp-4.3
 # macx-g++:QMAKE_CXXFLAGS_RELEASE -= -Os
 # macx-g++:QMAKE_CXXFLAGS_RELEASE += -O3
-DEFINES += GLEW_STATIC
+
 INCLUDEPATH += . \
     .. \
     ../../../vcglib \
     $$GLEWDIR/include
 CONFIG += stl
+
+mac:LIBS += meshlab.app/Contents/MacOS/libcommon.dylib
+win32-msvc2005:LIBS += XXXXXXX
+win32-msvc2008:LIBS += XXXXXXX
+win32-g++:LIBS += XXXXXXX
 
 # uncomment in your local copy only in emergency cases.
 # We should never be too permissive

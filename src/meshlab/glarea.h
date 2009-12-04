@@ -35,9 +35,7 @@
 #include <wrap/gl/trimesh.h>
 #include <wrap/gui/trackball.h>
 
-#include "GLLogStream.h"
-#include "meshmodel.h"
-#include "interfaces.h"
+#include "../common/interfaces.h"
 #include "../common/filterscript.h"
 #include "layerDialog.h"
 #include "glarea_setting.h"

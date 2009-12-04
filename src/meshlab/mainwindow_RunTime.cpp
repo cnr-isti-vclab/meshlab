@@ -28,8 +28,6 @@
 #include <QHttp>
 #include <QDesktopServices>
 
-#include "meshmodel.h"
-#include "interfaces.h"
 #include "mainwindow.h"
 #include "glarea.h"
 #include "plugindialog.h"
@@ -38,7 +36,6 @@
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
-#include "plugin_support.h"
 #include "stdpardialog.h"
 #include "layerDialog.h"
 #include "alnParser.h"
@@ -772,7 +769,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	// the (1-based) index  of first plugin which is able to open it
 	QHash<QString, MeshIOInterface*> allKnownFormats;
 
-	PM.LoadFormats(filters, allKnownFormats,IMPORT);
+    PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 	filters.push_back("ALN project ( *.aln)");
 	filters.front().chop(1);
 	filters.front().append(" *.aln)");
@@ -959,7 +956,7 @@ bool MainWindow::saveAs(QString fileName)
 
 	QHash<QString, MeshIOInterface*> allKnownFormats;
 
-	PM.LoadFormats( filters, allKnownFormats,EXPORT);
+    PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
 
 	//QString fileName;
 	

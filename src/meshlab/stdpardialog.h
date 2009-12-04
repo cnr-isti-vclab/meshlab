@@ -87,9 +87,7 @@ Added standard plugin window support
 #include <QObject>
 //#include <QDoubleSpinBox>
 
-#include "meshmodel.h"
-#include "../common/filterparameter.h"
-#include "interfaces.h"
+#include "../common/interfaces.h"
 #include <cassert>
 
 

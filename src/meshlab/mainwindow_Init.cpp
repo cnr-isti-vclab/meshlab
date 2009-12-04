@@ -30,14 +30,12 @@
 #include <QFile>
  #include <QtXml>
 
-#include "meshmodel.h"
-#include "interfaces.h"
+#include "../common/interfaces.h"
 #include "mainwindow.h"
 #include "glarea.h"
 #include "plugindialog.h"
 #include "customDialog.h"
 #include "saveSnapshotDialog.h"
-#include "../common/filterparameter.h"
 #include "ui_congratsDialog.h"
 
 QProgressBar *MainWindow::qb;

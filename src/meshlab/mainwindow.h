@@ -30,14 +30,12 @@
 
 #include <QDir>
 #include <QMainWindow>
-//#include <QWorkspace>
 #include <QMdiArea>
 #include <QStringList>
 #include <QColorDialog>
-#include "meshmodel.h"
+#include "../common/pluginmanager.h"
 #include "glarea.h"
 #include "stdpardialog.h"
-#include "../common/pluginmanager.h"
 
 #define MAXRECENTFILES 4
 
