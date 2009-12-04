@@ -25,19 +25,9 @@
 #define EDITSEGMENT_H
 
 #include <QObject>
-#include <QStringList>
-#include <QList>
-#include <QDockWidget>
-#include <QDialog>
-#include <QDebug>
-#include <QMap>
-
+#include <common/interfaces.h>
 #include <meshlab/glarea.h>
-#include <vcg/math/matrix44.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
 #include <meshcutdialog.h>
-#include <wrap/gui/trackball.h>
 
 #include <cutting.h>
 

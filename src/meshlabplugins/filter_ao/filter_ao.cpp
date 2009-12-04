@@ -21,37 +21,15 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <algorithm>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-#include <vcg/space/box3.h>
-#include <vcg/math/gen_normal.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/quality.h>
-
-#include <wrap/gl/trimesh.h>
-
-#include <QtGui>
-#include <QGLContext>
-#include <QGLFormat>
-#include <QTextStream>
-#include <QDataStream>
-#include <QString>
-#include <QFile>
-#include <QTime>
 #include <GL/glew.h>
+#include "AOGLWidget.h"
+#include "filter_ao.h"
+
+#include <vcg/math/gen_normal.h>
+
 #include <wrap/qt/checkGLError.h>
 
-#include "filter_ao.h"
-#include "AOGLWidget.h"
+
 #include <iostream>
 
 #define AMBOCC_MAX_TEXTURE_SIZE 2048

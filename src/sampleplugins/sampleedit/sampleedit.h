@@ -25,11 +25,7 @@
 #define SAMPLEEDITPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
-#include <QList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class SampleEditPlugin : public QObject, public MeshEditInterface
 {

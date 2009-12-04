@@ -26,11 +26,8 @@
 
 #include <GL/glew.h>
 #include <QObject>
-#include <QDialog>
-#include <QGLWidget>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class AmbientOcclusionPlugin;
 
