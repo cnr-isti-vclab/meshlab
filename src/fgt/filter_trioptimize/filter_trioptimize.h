@@ -25,9 +25,7 @@
 #define TRIOPTIMIZEFILTERSPLUGIN_H
 
 #include <QObject>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class TriOptimizePlugin : public QObject, public MeshFilterInterface
 {

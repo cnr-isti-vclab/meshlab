@@ -1,15 +1,12 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 QT           += opengl
 
-HEADERS       += ../../meshlab/meshmodel.h \
-		filter_qhull.h \
+HEADERS       += filter_qhull.h \
 		qhull_tools.h 
 
 SOURCES       += filter_qhull.cpp \ 
-		qhull_tools.cpp \
-		 ../../meshlab/meshmodel.cpp 
-		
+		qhull_tools.cpp 
 
 HEADERS += 	../../external/qhull-2003.1/src/geom.h \
 		../../external/qhull-2003.1/src/io.h \
@@ -23,7 +20,6 @@ HEADERS += 	../../external/qhull-2003.1/src/geom.h \
 
 SOURCES +=	../../external/qhull-2003.1/src/geom.c \
 		../../external/qhull-2003.1/src/geom2.c \
-		$$GLEWCODE \
 		../../external/qhull-2003.1/src/global.c \
 		../../external/qhull-2003.1/src/io.c \
 		../../external/qhull-2003.1/src/mem.c \

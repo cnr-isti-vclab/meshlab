@@ -1,9 +1,8 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
-HEADERS      += filter_fractal.h \
+HEADERS      += filter_fractal.h 
 
-SOURCES      += filter_fractal.cpp \
-                $$GLEWCODE
+SOURCES      += filter_fractal.cpp 
 
 TARGET        = filter_fractal
 TEMPLATE      = lib

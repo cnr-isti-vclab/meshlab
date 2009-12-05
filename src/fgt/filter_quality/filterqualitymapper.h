@@ -32,8 +32,7 @@ FIRST RELEASE
 
 #include <QObject>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 #include "../edit_quality/common/transferfunction.h"
 #include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax

@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += ../edit_quality/common/const_types.h \
 		../edit_quality/common/transferfunction.h \

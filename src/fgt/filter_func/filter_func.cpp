@@ -25,22 +25,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include "filter_func.h"
 
 #include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/selection.h>
-#include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/update/color.h>
 
 #include <vcg/complex/trimesh/create/marching_cubes.h>
 #include <vcg/complex/trimesh/create/mc_trivial_walker.h>
 
-#include "filter_func.h"
 #include "muParser.h"
 
 using namespace mu;

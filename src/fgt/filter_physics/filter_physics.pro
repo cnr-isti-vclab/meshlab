@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 DEFINES += dSINGLE
 INCLUDEPATH += ../../meshlab
 HEADERS = filter_physics.h \

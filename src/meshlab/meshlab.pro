@@ -1,6 +1,5 @@
 VCGDIR = ../../../vcglib
 GLEWDIR = ../external/glew-1.5.1
-GLEWCODE = $$GLEWDIR/src/glew.c
 CONFIG += debug_and_release 
 
 # uncomment to try Eigen

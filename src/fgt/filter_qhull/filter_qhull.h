@@ -29,11 +29,7 @@
 #define QHULLFILTERSPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
-#include <QString>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class QhullPlugin : public QObject, public MeshFilterInterface
 {

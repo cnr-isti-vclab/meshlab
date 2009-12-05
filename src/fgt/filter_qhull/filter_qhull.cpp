@@ -33,13 +33,7 @@
 
 #include <math.h>
 #include <stdlib.h>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-#include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 
 #include "qhull_tools.h"
 

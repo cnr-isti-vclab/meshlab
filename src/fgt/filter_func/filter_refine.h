@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 
 using namespace vcg;
 using namespace mu;

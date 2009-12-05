@@ -26,7 +26,7 @@
 
 #include <cassert>
 #include <QString>
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 
 class RfxSpecialAttribute
 {

@@ -1,12 +1,9 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS      += filter_csg.h \
-                intercept.h \
-                ../../meshlab/meshmodel.h
+                intercept.h 
 
-SOURCES      += filter_csg.cpp \
-                ../../meshlab/meshmodel.cpp \
-                $$GLEWCODE
+SOURCES      += filter_csg.cpp 
 
 TARGET        = filter_csg
 TEMPLATE      = lib

@@ -25,14 +25,8 @@
 #define FILTERCOLORPROCPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
-#include <QString>
+#include <common/interfaces.h>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-#include <math.h>
-#include <vcg/complex/trimesh/update/color.h>
 
 class FilterColorProc : public QObject, public MeshFilterInterface
 {

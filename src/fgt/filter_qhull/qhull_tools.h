@@ -45,7 +45,7 @@
 
 ****************************************************************************/
 
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include <math.h>
 
 

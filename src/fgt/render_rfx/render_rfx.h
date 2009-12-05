@@ -25,11 +25,7 @@
 #define RENDERRFX_H
 
 #include <GL/glew.h>
-#include <QGLWidget>
-#include <QMapIterator>
-#include <QtGui>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include "rfx_uniform.h"
 #include "rfx_shader.h"
 #include "rfx_parser.h"
