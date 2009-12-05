@@ -25,13 +25,7 @@
 #define SPLATRENDERER_H
 
 #include <QObject>
-#include <QAction>
-#include <QString>
-#include <map>
-
-#include <GL/glew.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common//interfaces.h>
 #include <wrap/gl/shaders.h>
 class QGLFramebufferObject;
 

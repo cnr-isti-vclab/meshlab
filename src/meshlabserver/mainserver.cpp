@@ -22,15 +22,10 @@
 ****************************************************************************/
 
 #include <QApplication>
-#include "../meshlab/meshmodel.h"
-#include "../meshlab/interfaces.h"
-#include "../common/filterscript.h"
-#include "../common/pluginmanager.h"
-
-#include "../meshlab/plugin_support.h"
-#include <vcg/complex/trimesh/update/bounding.h>
-
-class FilterData 
+#include <common/interfaces.h>
+#include <common/pluginmanager.h>
+#include <common/filterscript.h>
+class FilterData
 {
 public:
 	FilterData();
@@ -77,7 +72,7 @@ bool Open(MeshModel &mm, QString fileName)
 	// the (1-based) index  of first plugin which is able to open it
     QHash<QString, MeshIOInterface*> allKnownFormats;
 	
-    PM.LoadFormats(filters, allKnownFormats,IMPORT);
+    PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 
 	QFileInfo fi(fileName);
 	QDir curdir= QDir::current();
@@ -117,7 +112,7 @@ bool Save(MeshModel *mm, int mask, QString fileName)
 	// the (1-based) index  of first plugin which is able to open it
     QHash<QString, MeshIOInterface*> allKnownFormats;
 	
-    PM.LoadFormats( filters, allKnownFormats,EXPORT);
+    PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
 
 	QFileInfo fi(fileName);
 	// this change of dir is needed for subsequent textures/materials loading

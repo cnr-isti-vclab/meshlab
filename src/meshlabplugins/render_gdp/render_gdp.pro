@@ -3,14 +3,11 @@ include (../../shared.pri)
 HEADERS       = meshrender.h \
                 textfile.h \
                 shaderStructs.h \
-                shaderDialog.h \
-                ../../common/meshmodel.h
+                shaderDialog.h 
 
 SOURCES       = meshrender.cpp \
 		textfile.cpp \  
-        shaderDialog.cpp #\
-#		$$GLEWCODE \
-#        ../../common/meshmodel.cpp
+        shaderDialog.cpp 
 
 TARGET        = render_gdp
 

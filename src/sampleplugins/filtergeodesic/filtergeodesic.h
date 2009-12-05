@@ -36,11 +36,7 @@
 #define FILTERGEODESIC_PLUGIN_H
 
 #include <QObject>
-#include <QStringList>
-#include <QString>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include <vcg/complex/trimesh/geodesic.h>
 
 

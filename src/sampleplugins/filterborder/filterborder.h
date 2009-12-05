@@ -33,11 +33,7 @@
 #define FILTERBORDERPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
-#include <QString>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 
 class FilterBorder : public QObject, public MeshFilterInterface

@@ -31,8 +31,7 @@ $Log: samplefilter.cpp,v $
 #include <stdlib.h>
 #include <time.h>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include "samplefilterdoc.h"
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/position.h>
@@ -40,7 +39,6 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/trimesh/update/bounding.h>
 #include<vcg/complex/trimesh/append.h>
 
-#include "samplefilterdoc.h"
 
 using namespace vcg;
 using namespace std;

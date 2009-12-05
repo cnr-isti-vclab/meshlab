@@ -20,32 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log: samplefilter.cpp,v $
-Revision 1.3  2006/11/29 00:59:20  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.2  2006/11/27 06:57:21  cignoni
-Wrong way of using the __DATE__ preprocessor symbol
-
-Revision 1.1  2006/09/25 09:24:39  e_cerisoli
-add samplefilter
-
-****************************************************************************/
-
-#include <QtGui>
-
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 
 #include "samplefilter.h"
 

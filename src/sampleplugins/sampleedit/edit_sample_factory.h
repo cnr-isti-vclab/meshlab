@@ -25,9 +25,8 @@
 #ifndef SampleEditFactoryPLUGIN_H
 #define SampleEditFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class SampleEditFactory : public QObject, public MeshEditInterfaceFactory
 {

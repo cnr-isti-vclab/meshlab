@@ -1,19 +1,8 @@
 GLEWDIR = ../external/glew-1.5.1
-GLEWCODE = $$GLEWDIR/src/glew.c
 
-HEADERS        = ../meshlab/interfaces.h \
-                 ../meshlab/meshmodel.h \
-                 ../common/pluginmanager.h \
-                 ../common/filterscript.h \
-                 ../common/filterparameter.h
+HEADERS        = 
 
-SOURCES        = mainserver.cpp \
-                 ../meshlab/meshmodel.cpp \
-                 ../common/pluginmanager.cpp \
-                 ../common/filterscript.cpp \
-                 ../common/filterparameter.cpp \
-                 ../meshlab/plugin_support.cpp \
-                 $$GLEWCODE
+SOURCES        = mainserver.cpp
 
 # to add windows icon 
 RC_FILE = ../meshlab/meshlab.rc
@@ -24,7 +13,9 @@ QT           += xml opengl
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 
-DEFINES += GLEW_STATIC
+mac:LIBS += ../meshlab/meshlab.app/Contents/MacOS/libcommon.dylib
+
+#DEFINES += GLEW_STATIC
 
 INCLUDEPATH += . .. ../../../vcglib $$GLEWDIR/include
 CONFIG += stl 

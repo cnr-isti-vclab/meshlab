@@ -22,19 +22,9 @@
 ****************************************************************************/
 
 #include <QtGui>
-
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
+#include <common/interfaces.h>
 #include <vcg/math/perlin_noise.h>
-
 #include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 #include <wrap/qt/col_qt_convert.h>
 
 
@@ -98,7 +88,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 // when the user press apply the current stored state is updated. 
 // when the user press close the mesh state is restored to the one before the startup of the filter.
 
-void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, RichParameterSet & parlst)
 {
 	 switch(ID(action))	 {
 		case FP_VERTEX_COLOR_NOISE :  
@@ -124,10 +114,9 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 
 // The Real Core Function doing the actual mesh processing.
 // It changes the color of the mesh according to a perlin noise function
-bool ExtraSampleDynPlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
+bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *)
 {
-	//const Color4b baseColor = par.getColor4b("baseColor");
-	const Color4b baseColor = par.getColor4b("baseColor");
+    const Color4b baseColor = par.getColor4b("baseColor");
 	const float percentage  = par.getDynamicFloat("percentage");
 	const float frequency   = math::Clamp(par.getDynamicFloat("frequency"),1.f,1000.f);
 

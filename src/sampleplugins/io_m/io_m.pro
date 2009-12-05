@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 HEADERS += io_m.h \
     export_m.h
 SOURCES += io_m.cpp
