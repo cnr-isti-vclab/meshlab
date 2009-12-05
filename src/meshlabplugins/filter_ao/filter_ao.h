@@ -26,10 +26,7 @@
 
 #include <QObject>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-#include <vcg/space/box3.h>
-#include <wrap/gl/shot.h>
+#include <common/interfaces.h>
 #include <wrap/gl/gl_surface.h>
 class AOGLWidget;
 class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface

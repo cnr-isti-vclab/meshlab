@@ -33,7 +33,7 @@
 
 #include <QObject>
 
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include <meshlab/glarea.h>
 
 #include <meshlabplugins/edit_pickpoints/pickedPoints.h>

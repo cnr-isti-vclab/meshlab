@@ -23,14 +23,8 @@
 * for more details.                                                         *
 ****************************************************************************/
 
-#include <vector>
-#include <list>
-#include <assert.h>
-#include <vcg/space/color4.h>
-#include <vcg/space/point3.h>
+#include <common/meshmodel.h>
 #include <iostream>
-#include "vcg/simplex/face/component.h"
-#include <meshlab/meshmodel.h>
 
 namespace rgbt
 {

@@ -25,9 +25,8 @@
 #ifndef EditSegmentFactoryPLUGIN_H
 #define EditSegmentFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditSegmentFactory : public QObject, public MeshEditInterfaceFactory
 {

@@ -25,9 +25,7 @@
 #ifndef EditSliceFactoryPLUGIN_H
 #define EditSliceFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
-#include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditSliceFactory : public QObject, public MeshEditInterfaceFactory
 {

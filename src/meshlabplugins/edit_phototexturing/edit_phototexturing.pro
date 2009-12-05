@@ -23,15 +23,11 @@ SOURCES += 	edit_phototex_factory.cpp \
 			../../external/TSAI30B3//cal_util.c \
 			../../external/TSAI30B3//cal_main.c \
 			../../external/TSAI30B3//cal_eval.c \ 
-			#src/Poly/PolyCameraCalibration.cpp \
-			#src/Poly/Polynom3_444.cpp \
 			src/SmartBlendTextureMerger.cpp \
 			src/WinnerTakesAllTextureMerger.cpp \
 			src/QuadTree/QuadTreeNode.cpp \
 			$$VCGDIR/wrap/gui/trackball.cpp\
 			$$VCGDIR/wrap/gui/trackmode.cpp \
-			$$GLEWDIR/src/glew.c \
-			../../common/filterparameter.cpp \
 			../../meshlab/stdpardialog.cpp 
 
 

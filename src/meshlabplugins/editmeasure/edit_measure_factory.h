@@ -25,9 +25,8 @@
 #ifndef EditMeasureFactoryPLUGIN_H
 #define EditMeasureFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditMeasureFactory : public QObject, public MeshEditInterfaceFactory
 {

@@ -25,17 +25,12 @@
 #define FILTERISOPARAMPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
-#include <QString>
-#include <assert.h>
 #include <parametrizator.h>
 #include <iso_parametrization.h>
 #include <diamond_sampler.h>
 #include <diam_parametrization.h>
 #include <stat_remeshing.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-#include <vcg/complex/trimesh/allocate.h>
+#include <common/interfaces.h>
 
 //#include <math.h>
 //#include <vcg/complex/trimesh/update/color.h>

@@ -31,7 +31,7 @@
 
 #include <QtGui>
 
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include <meshlab/glarea.h>
 
 #include "pickedPoints.h"

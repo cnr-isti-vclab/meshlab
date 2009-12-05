@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += ./diamond_sampler.h \
 				./diam_parametrization.h \
@@ -18,13 +18,9 @@ HEADERS       += ./diamond_sampler.h \
 				./uv_grid.h \
 				./defines.h \
 				./filter_isoparametrization.h\
-				./stat_remeshing.h\
-				../../meshlab/meshmodel.h
-				 
+				./stat_remeshing.h				 
 
-SOURCES       += ./filter_isoparametrization.cpp \
-				../../meshlab/meshmodel.cpp \
-				$$GLEWCODE
+SOURCES       += ./filter_isoparametrization.cpp 
 				
 TARGET        = filter_isoparametrization
 INCLUDEPATH  += ./  \

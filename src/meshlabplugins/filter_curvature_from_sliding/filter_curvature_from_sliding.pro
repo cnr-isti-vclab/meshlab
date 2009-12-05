@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += filter_curvature_from_sliding.h
 

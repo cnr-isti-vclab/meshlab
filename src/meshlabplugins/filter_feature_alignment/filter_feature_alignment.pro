@@ -1,13 +1,12 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 ANNDIR = ../../external/ann_1.1.1
 INCLUDEPATH += $$ANNDIR/include
 LIBS += -L$$ANNDIR/lib \
     -lANN
 QT += opengl
 QT += xml
-HEADERS = ../../meshlab/interfaces.h \
-    ../../meshlab/meshmodel.h \
-    ../filter_mls/apss.h \
+HEADERS =
+		../filter_mls/apss.h \
     ../filter_mls/priorityqueue.h \
     ../filter_mls/balltree.h \
     ../filter_mls/implicits.h \
@@ -24,8 +23,7 @@ SOURCES = filter_feature_alignment.cpp \
     ../filter_mls/apss.tpp \
     ../filter_mls/kdtree.cpp \
     ../filter_mls/mlssurface.tpp \
-    ../../meshlab/meshmodel.cpp \
-    ../edit_pickpoints/pickedPoints.cpp \
-    $$GLEWCODE
-TARGET = filter_feature_alignment
+    ../edit_pickpoints/pickedPoints.cpp 
+		
+		TARGET = filter_feature_alignment
 CONFIG += opengl

@@ -5,7 +5,6 @@ HEADERS       = edit_measure_factory.h \
 
 SOURCES       = edit_measure_factory.cpp \
 				editmeasure.cpp \
-				$$GLEWCODE \
 				$$VCGDIR/wrap/gui/rubberband.cpp
 				
 TARGET        = editmeasure

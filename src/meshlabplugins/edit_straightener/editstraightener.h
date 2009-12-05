@@ -45,14 +45,12 @@ first version
 #define EDITSTRAIGHTENER_H
 
 #include <GL/glew.h>
-#include <QList>
-#include <QDockWidget>
+#include <QTGui>
+#include <common/interfaces.h>
 
 #include <wrap/gui/activecoordinateframe.h>
 #include <wrap/gui/rubberband.h>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
 
 #include "editstraightenerdialog.h"
 

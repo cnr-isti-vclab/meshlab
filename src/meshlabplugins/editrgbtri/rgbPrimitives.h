@@ -24,9 +24,8 @@
 ****************************************************************************/
 
 #include "rgbInfo.h"
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include "topologicalOp.h"
-#include <vcg/space/point3.h>
 #include "controlPoint.h"
 #include "modButterfly.h"
 

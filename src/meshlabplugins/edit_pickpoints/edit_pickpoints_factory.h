@@ -25,9 +25,8 @@
 #ifndef EditPickPointsFactoryPLUGIN_H
 #define EditPickPointsFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditPickPointsFactory : public QObject, public MeshEditInterfaceFactory
 {

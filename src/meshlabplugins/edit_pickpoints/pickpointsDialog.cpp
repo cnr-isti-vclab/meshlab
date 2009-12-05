@@ -30,11 +30,9 @@
 
 #include <math.h>
 
+#include <common/meshmodel.h>
 #include <meshlab/stdpardialog.h>
-#include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
-
-#include <vcg/complex/trimesh/allocate.h>
 
 #include "editpickpoints.h"
 #include "pickpointsDialog.h"

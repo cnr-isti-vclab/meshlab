@@ -25,9 +25,7 @@
 #ifndef EditRGBtriFactoryPLUGIN_H
 #define EditRGBtriFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
-#include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditRGBtriFactory : public QObject, public MeshEditInterfaceFactory
 {

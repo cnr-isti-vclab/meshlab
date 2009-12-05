@@ -24,19 +24,12 @@
 #ifndef SLIDEPLUGIN_H
 #define SLIDEPLUGIN_H
 
-#include <QObject>
-#include <QStringList>
-#include <QList>
 #include "svgpro.h"
 #include "slicedialog.h"
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include <wrap/gui/trackball.h>
 
 #include <vcg/space/index/grid_static_ptr.h>
-
-#include <vcg/simplex/vertex/base.h>
-#include <vcg/simplex/vertex/component.h>
 #include <vcg/complex/edgemesh/base.h>
 #include <vcg/simplex/edge/base.h>
 #include <vcg/simplex/edge/component.h>

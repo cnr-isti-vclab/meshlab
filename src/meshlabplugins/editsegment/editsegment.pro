@@ -9,7 +9,6 @@ HEADERS = edit_segment_factory.h \
 		
 SOURCES = edit_segment_factory.cpp \
 		editsegment.cpp \
-		$$GLEWCODE \
 		meshcutdialog.cpp \
 		colorpiker.cpp
 

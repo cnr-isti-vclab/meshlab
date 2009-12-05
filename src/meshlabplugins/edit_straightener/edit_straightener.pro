@@ -8,8 +8,7 @@ SOURCES += $$VCGDIR/wrap/gui/trackball.cpp \
 			$$VCGDIR/wrap/gui/trackmode.cpp \
 			$$VCGDIR/wrap/gui/coordinateframe.cpp \
 			$$VCGDIR/wrap/gui/activecoordinateframe.cpp \
-			$$VCGDIR/wrap/gui/rubberband.cpp \ 
-			$$GLEWCODE
+			$$VCGDIR/wrap/gui/rubberband.cpp
 
 # Input
 HEADERS  += edit_straightener_factory.h \

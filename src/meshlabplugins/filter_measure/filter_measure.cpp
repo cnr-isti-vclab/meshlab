@@ -26,17 +26,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/inertia.h>
 #include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/quality.h>
 
 #include <vcg/complex/trimesh/update/selection.h>
 #include<vcg/complex/trimesh/append.h>

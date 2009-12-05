@@ -24,17 +24,7 @@
 #define RGBT_H
 
 #include <QObject>
-#include <QStringList>
-#include <QList>
-#include <QDockWidget>
-#include <QHash>
-#include <QDialog>
-#include <vector>
-#include <list>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-#include <vcg/math/matrix44.h>
+#include <common/interfaces.h>
 
 #include "widgetRgbT.h"
 #include "rgbInfo.h"

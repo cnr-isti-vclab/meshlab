@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += cleanfilter.h \
 		../../common/filterparameter.h

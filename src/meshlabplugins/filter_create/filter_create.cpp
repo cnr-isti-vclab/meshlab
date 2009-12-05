@@ -23,11 +23,7 @@
 
 #include <QtGui>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
 #include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 #include "filter_create.h"
 
 // Constructor usually performs only two simple tasks of filling the two lists

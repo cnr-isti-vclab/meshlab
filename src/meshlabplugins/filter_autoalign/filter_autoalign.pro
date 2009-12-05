@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += ../../meshlabplugins/editalign/align/AlignPair.h \
 		../../meshlabplugins/editalign/align/OccupancyGrid.h \

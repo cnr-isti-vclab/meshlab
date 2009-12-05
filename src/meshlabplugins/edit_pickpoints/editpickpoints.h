@@ -30,13 +30,7 @@
 #ifndef EDIT_PickPoints_PLUGIN_H
 #define EDIT_PickPoints_PLUGIN_H
 
-#include <QObject>
-#include <QString>
-#include <QList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
+#include <common/interfaces.h>
 #include "pickpointsDialog.h"
 
 class EditPickPointsPlugin : public QObject, public MeshEditInterface

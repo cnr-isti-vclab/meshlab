@@ -25,9 +25,7 @@
 #define FILTER_CREATE_H
 
 #include <QObject>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class FilterCreate : public QObject, public MeshFilterInterface
 {

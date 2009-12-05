@@ -26,7 +26,7 @@
 
 #include <vcg/space/point3.h>
 #include "rgbInfo.h"
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include "rgbPrimitives.h"
 #include "topologicalOp.h"
 

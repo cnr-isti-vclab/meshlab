@@ -32,8 +32,7 @@ $Log: editmeasure.h,v $
 #include <QStringList>
 #include <QList>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include <wrap/gui/rubberband.h>
 
 class EditMeasurePlugin : public QObject, public MeshEditInterface

@@ -25,7 +25,7 @@
 #define __VCG_AOGLWIDGET
 
 #include <GL/glew.h>
-#include <QObject>
+#include <QGLWidget>
 
 #include <common/interfaces.h>
 

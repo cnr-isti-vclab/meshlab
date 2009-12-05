@@ -25,9 +25,7 @@
 #ifndef EditStraightenerFactoryPLUGIN_H
 #define EditStraightenerFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
-#include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditStraightenerFactory : public QObject, public MeshEditInterfaceFactory
 {

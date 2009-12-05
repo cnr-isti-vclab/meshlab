@@ -12,9 +12,7 @@ SOURCES      += edit_pickpoints_factory.cpp \
 				pickpointsDialog.cpp \
 				pickedPoints.cpp \
 				pickPointsTemplate.cpp \
-				../../meshlab/stdpardialog.cpp \
-				../../common/filterparameter.cpp \
-				$$GLEWCODE
+                ../../meshlab/stdpardialog.cpp
 
 RESOURCES    += editpickpoints.qrc
 

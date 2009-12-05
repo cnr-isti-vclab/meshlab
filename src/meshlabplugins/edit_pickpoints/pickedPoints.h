@@ -32,10 +32,7 @@
 #ifndef PICKED_POINTS_H
 #define PICKED_POINTS_H
 
-#include <QString>
-#include <QMap>
-
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 
 //our points
 class PickedPoint
