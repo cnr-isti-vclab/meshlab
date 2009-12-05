@@ -36,8 +36,7 @@ add sampleplugins
 
 #include <QObject>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class PoissonPlugin : public QObject, public MeshFilterInterface
 {

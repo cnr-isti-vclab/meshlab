@@ -26,10 +26,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/normal.h>

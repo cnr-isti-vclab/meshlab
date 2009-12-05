@@ -28,19 +28,14 @@
 #include <time.h>
 #include <iostream>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/refine.h>
 #include <vcg/complex/trimesh/refine_loop.h>
-#include <vcg/complex/trimesh/update/selection.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/create/advancing_front.h>
 #include <vcg/complex/trimesh/create/marching_cubes.h>
-#include <vcg/complex/trimesh/update/quality.h>
 #include "mlsmarchingcube.h"
 
 #include "mlsplugin.h"

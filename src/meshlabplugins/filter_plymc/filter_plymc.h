@@ -25,9 +25,7 @@
 #define _FILTER_PLYMC_H_
 
 #include <QObject>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class PlyMCPlugin : public QObject, public MeshFilterInterface
 {

@@ -1,4 +1,4 @@
-include(../../sharedfilter.pri)
+include(../../shared.pri)
 
 # CONFIG += debug
 
@@ -12,8 +12,7 @@ HEADERS +=	apss.h\
 		mlssurface.h \			
 		smallcomponentselection.h \
 		kdtree.h \			
-		mlsutils.h \	
-		../../meshlab/meshmodel.h
+		mlsutils.h 
 
 SOURCES +=	apss.cpp \
 		balltree.cpp \	
@@ -22,9 +21,7 @@ SOURCES +=	apss.cpp \
 		apss.tpp \		
 		kdtree.cpp \	
 		mlssurface.tpp \
-		rimls.tpp \	
-		../../meshlab/meshmodel.cpp \
-	$$GLEWCODE
+		rimls.tpp 
 
 TARGET = filter_mls
 

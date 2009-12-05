@@ -1,15 +1,10 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
-HEADERS       += filter_plymc.h \ 
-                ../../meshlab/interfaces.h \
-                ../../meshlab/meshmodel.h \
-volume.h\
-voxel.h
+HEADERS       += filter_plymc.h 							volume.h\
+		voxel.h
 
 SOURCES       += filter_plymc.cpp \
-../../../../vcglib/wrap/ply/plylib.cpp \
-        ../../meshlab/meshmodel.cpp \
-        $$GLEWCODE
+../../../../vcglib/wrap/ply/plylib.cpp 
 
 TARGET        = filter_plymc
 QT += opengl
