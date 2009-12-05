@@ -166,7 +166,7 @@ public:
 			PassLoFilter = 0.05;
 			PassHiFilter = 0.75;
 			ReduceFactor = 0.90;
-			MinMinDistAbs = 1;
+			MinMinDistPerc = 0.01;
 			EndStepNum   = 5;
 			MatchMode    = MMRigid;
 			SampleMode   = SMNormalEqualized;
@@ -200,8 +200,8 @@ public:
 	
 	double PassLoFilter; // Filtraggio utilizzato per decidere quali punti scegliere tra quello trovati abbastanza
 	double PassHiFilter; // vicini. Espresso in percentili. Di solito si scarta il quelli sopra il 75 e quelli sotto il 5
-	double ReduceFactor; // Ad ogni passo si riduce la distanza entro la quale andare a cercare i punti piu' vicini. Di solito si sceglie il .9 percentile.
-	double MinMinDistAbs;	// distanza minima fino a cui si puo' ridurre la MinDist secondo il reduce factor 
+	double ReduceFactor; // At each step we reduce the range of search of the nearest points. We keep 5 times the <ReduceFactor> percentile.
+	double MinMinDistPerc;	// Ratio between initial starting distance (MinDistAbs) and what can reach by the application of the ReduceFactor. 
 
 	int UGExpansionFactor; // Grandezza della UG per la mesh fix come rapporto del numero di facce della mesh fix 
 

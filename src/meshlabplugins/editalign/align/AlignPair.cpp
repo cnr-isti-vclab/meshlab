@@ -413,7 +413,9 @@ bool AlignPair::Align(
 		ii.Time=clock();
 		as.I.push_back(ii);
 		nc++;
-		if(ap.ReduceFactor<1) StartMinDist=max(ap.MinMinDistAbs, min(StartMinDist,5.0*H.Percentile(ap.ReduceFactor)));
+		// The distance of the next points to be considered is lowered according to the <ReduceFactor> parameter. 
+		// We use 5 times the <ReduceFactor> percentile of the found points. 
+		if(ap.ReduceFactor<1) StartMinDist=max(ap.MinDistAbs*ap.MinMinDistPerc, min(StartMinDist,5.0*H.Percentile(ap.ReduceFactor)));
 	} 
 	while ( 
 		nc<=ap.MaxIterNum && 
