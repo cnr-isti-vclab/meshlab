@@ -20,12 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-Revision 1.0 2008/02/20 Alessandro Maione, Federico Bellucci
-FIRST RELEASE
-
-****************************************************************************/
 
 #ifndef _MESHMETHODS_H_
 #define _MESHMETHODS_H_
@@ -33,7 +27,7 @@ FIRST RELEASE
 #include "const_types.h"
 #include "transferfunction.h"
 #include <vcg/math/histogram.h>
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include <cassert>
 #include <utility> // for pair<T,T>
 

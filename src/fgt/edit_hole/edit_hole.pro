@@ -6,15 +6,12 @@ HEADERS       = edit_hole_factory.h \
 		    holeListModel.h \
 		    fgtHole.h \
 		    fgtBridge.h \
-		    holeSetManager.h \
-		    ../../meshlab/meshmodel.h
+		    holeSetManager.h 
 
 SOURCES       = edit_hole_factory.cpp \
 		    edit_hole.cpp \
 		    fillerDialog.cpp\
-		    holeListModel.cpp \
-		    ../../meshlab/meshmodel.cpp \
-		    $$GLEWCODE
+		    holeListModel.cpp
 
 TARGET        = edit_hole
 

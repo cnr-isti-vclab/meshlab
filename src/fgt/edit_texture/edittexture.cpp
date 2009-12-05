@@ -21,21 +21,13 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-#include <QString>
-
-#include <math.h>
-#include <stdlib.h>
+#include <common/interfaces.h>
 #include <meshlab/glarea.h>
 #include "edittexture.h"
 #include "renderarea.h"
 #include <wrap/gl/pick.h>
 #include <wrap/gl/picking.h>
-#include<limits>
-#include <meshlab/interfaces.h>
 
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/clean.h>
 
 using namespace vcg;

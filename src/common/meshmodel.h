@@ -36,9 +36,14 @@
 #include <vcg/simplex/face/topology.h>
 
 #include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/position.h>
+#include <vcg/complex/trimesh/update/quality.h>
+#include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/trimesh/update/topology.h>
 
 #include <wrap/gl/trimesh.h>
 #include <wrap/callback.h>

@@ -4,17 +4,14 @@ HEADERS       = edit_texture_factory.h \
 		edittexture.h \
 		textureeditor.h \
 		renderarea.h \
-		../../meshlab/GLLogStream.h \
 		$$VCGDIR/wrap/gui/trackball.h
 		
 SOURCES       = edit_texture_factory.cpp \
 		edittexture.cpp \
 		textureeditor.cpp \
 		renderarea.cpp \
-		../../meshlab/GLLogStream.cpp \
 		$$VCGDIR/wrap/gui/trackball.cpp \
-		$$VCGDIR/wrap/gui/trackmode.cpp \
-		$$GLEWCODE
+		$$VCGDIR/wrap/gui/trackmode.cpp 
 
 TARGET        = edit_texture
 

@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += filter_aging.h \
 		edgepred.h

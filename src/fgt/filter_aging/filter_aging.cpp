@@ -28,13 +28,9 @@
 
 /* Local includes */
 #include "filter_aging.h"
-
+using namespace vcg;
 /* VCG includes */
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/selection.h>
-#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/curvature.h>
-#include <vcg/complex/trimesh/update/quality.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/smooth.h>

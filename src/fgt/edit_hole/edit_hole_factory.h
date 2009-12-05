@@ -25,9 +25,8 @@
 #ifndef EditHoleFactoryPLUGIN_H
 #define EditHoleFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditHoleFactory : public QObject, public MeshEditInterfaceFactory
 {

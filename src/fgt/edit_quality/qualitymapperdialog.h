@@ -32,7 +32,7 @@ FIRST RELEASE
 
 #include <QDockWidget>
 #include <QGraphicsItem>
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include <vcg/math/histogram.h>
 #include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax
 #include <meshlab/glarea.h>

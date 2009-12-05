@@ -27,7 +27,7 @@
 #include <QBrush>
 #include <QPen>
 #include <QPixmap>
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 #include <wrap/gui/trackball.h>
 #include <stdio.h>
 #include <QGLWidget>

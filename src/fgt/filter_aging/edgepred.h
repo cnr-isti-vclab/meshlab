@@ -24,15 +24,8 @@
 #ifndef EDGEPRED_H_
 #define EDGEPRED_H_
 
-
-#include <vector>
-
-#include <meshlab/meshmodel.h>
-
-
-using namespace vcg;
-
-
+namespace vcg
+{
 class QualityEdgePred
 {
 	public:
@@ -143,5 +136,5 @@ class AngleEdgePred
 		float athVal;			// edge angle threshold value
 };
 
-
+}
 #endif /*EDGEPRED_H_*/

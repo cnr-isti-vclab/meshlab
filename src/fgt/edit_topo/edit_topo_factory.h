@@ -25,9 +25,8 @@
 #ifndef EditTopoFactoryPLUGIN_H
 #define EditTopoFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditTopoFactory : public QObject, public MeshEditInterfaceFactory
 {

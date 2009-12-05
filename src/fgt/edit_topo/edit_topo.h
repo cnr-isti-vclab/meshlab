@@ -28,21 +28,13 @@ $Log: edit_topo.h,v $
 #ifndef edit_topo_H
 #define edit_topo_H
 
-#include <QList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include <meshlab/glarea.h>
 
 #include <stdlib.h>
 
 #include <wrap/gl/pick.h>
 #include <wrap/gl/picking.h>
-
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/color.h>
 
 #include "edit_topodialog.h"
 #include "edit_topomeshbuilder.h"

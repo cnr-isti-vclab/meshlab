@@ -24,12 +24,7 @@
 #ifndef EDITTEXTUREPLUGIN_H
 #define EDITTEXTUREPLUGIN_H
 
-#include <QObject>
-#include <QList>
-#include <QDockWidget>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include "textureeditor.h"
 #include "ui_textureeditor.h"
 

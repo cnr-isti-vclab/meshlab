@@ -29,7 +29,7 @@
 #include <QWidget>
 
 #include <QtGui/QApplication>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 #include "ui_edit_topodialog.h"
 

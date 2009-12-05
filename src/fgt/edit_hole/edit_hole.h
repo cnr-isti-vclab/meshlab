@@ -27,7 +27,7 @@
 #include <QObject>
 #include "fillerDialog.h"
 #include "holeListModel.h"
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class EditHoleAutoBridgingCB : public AutoBridgingCallback
 {

@@ -8,9 +8,7 @@ HEADERS = decorate_shadow.h \
     variance_shadow_mapping_blur.h \
     ssao.h
 SOURCES = decorate_shadow.cpp \
-    shadow_mapping.cpp \
-    ../../common/filterparameter.cpp \
-    $$GLEWCODE \
+    shadow_mapping.cpp 
     ../../../../vcglib/wrap/gui/trackball.cpp \
     ../../../../vcglib/wrap/gui/trackmode.cpp \
     variance_shadow_mapping.cpp \

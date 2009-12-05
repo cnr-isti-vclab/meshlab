@@ -28,8 +28,7 @@
 
 #include <QObject>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include <vcg/complex/trimesh/refine.h>
 #include <vcg/space/index/grid_static_ptr.h>
 
@@ -59,9 +58,9 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 
 		
 	protected:
-		void refineMesh(CMeshO &m, QualityEdgePred &ep, bool selection, vcg::CallBackPos *cb);
+        void refineMesh(CMeshO &m, vcg::QualityEdgePred &ep, bool selection, vcg::CallBackPos *cb);
 		double generateNoiseValue(int Octaves, const CVertexO::CoordType &p);
-		bool faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceType> p, GridStaticPtr<CFaceO, CMeshO::ScalarType> &gM);
+        bool faceIntersections(CMeshO &m, vcg::face::Pos<CMeshO::FaceType> p, vcg::GridStaticPtr<CFaceO, CMeshO::ScalarType> &gM);
 		void smoothPeaks(CMeshO &m, bool selected, bool updateErosionAttr);
 		void computeMeanCurvature(CMeshO &m);
 };

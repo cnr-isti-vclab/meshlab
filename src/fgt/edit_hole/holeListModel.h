@@ -26,7 +26,7 @@
 #include <QWidget>
 #include <QHeaderView>
 #include <QtGui>
-#include "meshlab/meshmodel.h"
+#include <common/meshmodel.h>
 #include "fgtHole.h"
 #include "fgtBridge.h"
 #include "holeSetManager.h"

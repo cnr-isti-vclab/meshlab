@@ -25,9 +25,8 @@
 #ifndef EditTextureFactoryPLUGIN_H
 #define EditTextureFactoryPLUGIN_H
 
-#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QList>
+#include <common/interfaces.h>
 
 class EditTextureFactory : public QObject, public MeshEditInterfaceFactory
 {
