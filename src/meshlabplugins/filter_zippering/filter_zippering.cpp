@@ -27,28 +27,16 @@
 ****************************************************************************/
 
 #include <QtGui>
-#include <cmath>
-#include <time.h>
+#include "filter_zippering.h"
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/simplex/face/topology.h>
 #include <vcg/simplex/face/pos.h>
-#include <vcg/simplex/vertex/component_ocf.h>
-#include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/hole.h>
-#include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/space/intersection2.h>
-#include <vcg/math/matrix44.h>
 #include <wrap/gl/glu_tesselator.h>
 
-#include "filter_zippering.h"
 
 //#define REDUNDANCY_ONLY 1
 //#define REFINE_PATCH_ONLY 1

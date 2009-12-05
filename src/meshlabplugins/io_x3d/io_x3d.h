@@ -34,8 +34,7 @@
 
 #include <QObject>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class IoX3DPlugin : public QObject, public MeshIOInterface
 {

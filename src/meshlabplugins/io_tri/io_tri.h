@@ -31,8 +31,7 @@
 
 #include <QObject>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class TriIOPlugin : public QObject, public MeshIOInterface
 {

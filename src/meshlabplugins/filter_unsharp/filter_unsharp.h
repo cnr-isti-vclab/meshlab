@@ -24,11 +24,7 @@
 #define FilterUnsharp_PLUGIN_H
 
 #include <QObject>
-#include <QStringList>
-#include <QString>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 
 class FilterUnsharp : public QObject, public MeshFilterInterface

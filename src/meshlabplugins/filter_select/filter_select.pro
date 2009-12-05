@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += meshselect.h
 SOURCES       += meshselect.cpp

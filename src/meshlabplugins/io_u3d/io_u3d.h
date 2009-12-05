@@ -28,8 +28,7 @@
 #include <QList>
 #include <QString>
 
-#include "../../meshlab/meshmodel.h"
-#include "../../meshlab/interfaces.h"
+#include <common/interfaces.h>
 #include <wrap/io_trimesh/export_u3d.h>
 #include <wrap/io_trimesh/export_idtf.h>
 

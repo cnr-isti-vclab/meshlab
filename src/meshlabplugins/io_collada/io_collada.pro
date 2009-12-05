@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += io_collada.h \
 		$$VCGDIR/wrap/io_trimesh/export_dae.h \

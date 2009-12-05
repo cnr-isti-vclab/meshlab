@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS       += io_pdb.h \
 		$$VCGDIR/wrap/ply/plylib.h 

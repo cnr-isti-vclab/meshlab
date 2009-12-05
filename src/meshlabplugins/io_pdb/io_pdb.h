@@ -24,10 +24,8 @@
 #ifndef PDBIOPLUGIN_H
 #define PDBIOPLUGIN_H
 
-#include <QString>
 
-#include "../../meshlab/meshmodel.h"
-#include "../../meshlab/interfaces.h"
+#include <common/interfaces.h>
 
 class PDBIOPlugin : public QObject, public MeshIOInterface
 {

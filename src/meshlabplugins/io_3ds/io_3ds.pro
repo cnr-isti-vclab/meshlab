@@ -1,4 +1,4 @@
-include (../../sharedfilter.pri)
+include (../../shared.pri)
 
 HEADERS		= meshio.h \
 			$$VCGDIR/wrap/ply/plylib.h \

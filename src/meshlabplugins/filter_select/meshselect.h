@@ -25,11 +25,7 @@
 #define FILTER_SELECT_H
 
 #include <QObject>
-#include <QStringList>
-#include <QList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 
 class SelectionFilterPlugin : public QObject, public MeshFilterInterface

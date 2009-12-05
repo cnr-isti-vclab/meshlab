@@ -32,23 +32,15 @@ $Log: samplefilter.cpp,v $
 #include <time.h>
 #include <limits>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include "filter_sampling.h"
 
 #include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/quality.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/complex/trimesh/create/resampler.h>
 #include <vcg/complex/trimesh/clustering.h>
 #include <vcg/simplex/face/distance.h>
-#include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/geodesic.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include "filter_sampling.h"
 #include "voronoi_clustering.h"
 
 using namespace vcg;

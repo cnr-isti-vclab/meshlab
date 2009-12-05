@@ -24,11 +24,9 @@
 #ifndef _EPOCH_RECONSTRUCTION_H
 #define _EPOCH_RECONSTRUCTION_H
 
-#include <QtXml/QDomDocument>
-#include <QtXml/QDomElement>
-#include <QtXml/QDomNode>
+#include <QtXml>
 
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 
 #include "radial_distortion.h"
 #include "epoch_camera.h"
