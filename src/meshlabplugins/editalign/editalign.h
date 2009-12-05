@@ -25,11 +25,7 @@
 #define EditAlignPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
-#include <QList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include "align/AlignPair.h" 
 #include "align/OccupancyGrid.h" 
 #include "meshtree.h"

@@ -23,11 +23,11 @@
 
 #include <GL/glew.h>
 #include <QObject>
-#include <QDialog>
 #include <QtGui>
+#include <QDialog>
+#include <QLayout>
 #include <wrap/gui/trackball.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include "AlignPairWidget.h"
 
 #ifndef __VCG_ALIGNPAIRDIALOG

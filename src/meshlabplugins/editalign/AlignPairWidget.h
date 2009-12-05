@@ -28,9 +28,8 @@
 #include <QObject>
 #include <QDialog>
 #include <QGLWidget>
+#include <vcg/space/point2.h>
 #include <wrap/gui/trackball.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
 class MeshTree;
 class MeshNode;
 

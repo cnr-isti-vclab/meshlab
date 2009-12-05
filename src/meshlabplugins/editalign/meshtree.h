@@ -32,8 +32,7 @@ $Log: meshedit.cpp,v $
 #include <QStringList>
 #include <QList>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include "align/AlignPair.h" 
 #include "align/OccupancyGrid.h" 
 #include <wrap/gui/trackball.h>
