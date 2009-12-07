@@ -58,6 +58,7 @@ FilterSolidShapes::FilterSolidShapes()
     switch (filterId) {
         case FSS_PLATONIC: return tr("Platonic solids");
         case FSS_ARCHIMEDEAN: return tr("Archimedean solids");
+        default: assert(0); return QString("error");
     }
 }
 
@@ -68,6 +69,7 @@ FilterSolidShapes::FilterSolidShapes()
             return tr("Create platonic solids according to user parameters");
         case FSS_ARCHIMEDEAN:
             return tr("Create archimedean solids according to user parameters");
+        default: assert(0); return QString("error");
     }
 }
 
