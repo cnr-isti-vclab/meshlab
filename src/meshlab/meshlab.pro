@@ -95,6 +95,7 @@ mac:LIBS += meshlab.app/Contents/MacOS/libcommon.dylib
 win32-msvc2005:LIBS += XXXXXXX
 win32-msvc2008:LIBS += XXXXXXX
 win32-g++:LIBS += XXXXXXX
+unix:LIBS += -L../common -lcommon
 
 # uncomment in your local copy only in emergency cases.
 # We should never be too permissive
