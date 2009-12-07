@@ -17,13 +17,10 @@ public:
 
 protected:
     virtual void initialize(MeshDocument&, RichParameterSet&);
+    virtual bool configurationHasChanged(RichParameterSet& par);
 
 private:
-    bool m_initialized;
-    const float m_stepSize;
-    unsigned int m_steps;
-    unsigned int m_currentSceneryLayer;
-    int m_prevStep;
+    int m_currentSceneryLayer;
     ODEFacade m_engine;
 };
 

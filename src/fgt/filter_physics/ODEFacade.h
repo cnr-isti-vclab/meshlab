@@ -21,6 +21,7 @@ public:
         virtual void setAsRigidBody(MeshModel& mesh, bool isRigidBody = true);
         virtual void updateTransform();
 
+        virtual vcg::Matrix44f getTransformationMatrix(MeshModel& mesh);
         virtual void setGlobalForce(float force[3]);
         virtual void integrate(float step);
         virtual void clear();

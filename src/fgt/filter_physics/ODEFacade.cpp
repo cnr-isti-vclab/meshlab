@@ -181,3 +181,33 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
         dJointAttach(joint, body1, body2);
     }
 }
+
+vcg::Matrix44f ODEFacade::getTransformationMatrix(MeshModel& mesh){
+    if(!tri::HasPerMeshAttribute(mesh.cm, "physicsID"))
+        return vcg::Matrix44f();
+
+    MeshIndex index = tri::Allocator<CMeshO>::GetPerMeshAttribute<unsigned int>(mesh.cm, "physicsID");
+
+    vcg::Matrix44f matrix;
+    const dReal* position = dGeomGetPosition(m_registeredMeshes[index()].second->geom);
+    const dReal* rotation = dGeomGetRotation(m_registeredMeshes[index()].second->geom);
+
+    matrix[0][0] = rotation[0];
+    matrix[0][1] = rotation[1];
+    matrix[0][2] = rotation[2];
+    matrix[0][3] = position[0];
+    matrix[1][0] = rotation[4];
+    matrix[1][1] = rotation[5];
+    matrix[1][2] = rotation[6];
+    matrix[1][3] = position[1];
+    matrix[2][0] = rotation[8];
+    matrix[2][1] = rotation[9];
+    matrix[2][2] = rotation[10];
+    matrix[2][3] = position[2];
+    matrix[3][0] = 0.f;
+    matrix[3][1] = 0.f;
+    matrix[3][2] = 0.f;
+    matrix[3][3] = 1.f;
+
+    return matrix;
+}

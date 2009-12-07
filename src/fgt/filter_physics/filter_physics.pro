@@ -6,10 +6,11 @@ HEADERS = filter_physics.h \
     PhysicsEngineFacade.h \
     MeshSubFilter.h \
     GravitySubFilter.h
-SOURCES =  filter_physics.cpp \
+SOURCES = filter_physics.cpp \
     ODEFacade.cpp \
     GravitySubFilter.cpp \
-    ../../common/filterparameter.cpp
+    ../../common/filterparameter.cpp \
+    MeshSubFilter.cpp
 TARGET = filter_physics
 TEMPLATE = lib
 QT += opengl
