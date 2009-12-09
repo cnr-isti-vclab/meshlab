@@ -79,18 +79,22 @@ void Truncated_Tetrahedron(MeshType &in)
  }
 
  for(int i=0; i<4; i++) {
-     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+1]];  (*fi).V(2)=ivp[hexagons[i*6+2]]; ++fi;
-     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+2]];  (*fi).V(2)=ivp[hexagons[i*6+3]]; ++fi;
-     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+3]];  (*fi).V(2)=ivp[hexagons[i*6+4]]; ++fi;
-     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+4]];  (*fi).V(2)=ivp[hexagons[i*6+5]]; ++fi;
+     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+1]];  (*fi).V(2)=ivp[hexagons[i*6+2]];
+     (*fi).SetF(0); (*fi).SetF(2); ++fi;
+     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+2]];  (*fi).V(2)=ivp[hexagons[i*6+3]];
+     (*fi).SetF(0); (*fi).SetF(2); ++fi;
+     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+3]];  (*fi).V(2)=ivp[hexagons[i*6+4]];
+     (*fi).SetF(0); (*fi).SetF(2); ++fi;
+     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+4]];  (*fi).V(2)=ivp[hexagons[i*6+5]];
+     (*fi).SetF(0); (*fi).SetF(2); ++fi;
  }
-
-  if (in.HasPerFaceFlags()) {
-    FaceIterator fi=in.face.begin();
-    for (int k=0; k<20; k++) {
-      (*fi).SetF(1); fi++;
-    }
-  }
+//
+//  if (in.HasPerFaceFlags()) {
+//    FaceIterator fi=in.face.begin();
+//    for (int k=0; k<20; k++) {
+//      (*fi).SetF(1); fi++;
+//    }
+//  }
 
 }
 
@@ -355,12 +359,87 @@ void Rhombicuboctahedron(MeshType &in)
 }
 
 template <class MeshType>
-void Truncated_cuboctahedron(MeshType &in)
+void Truncated_Cuboctahedron(MeshType &in)
 {
     // 12 squares, 8 hexagons and 6 octagons
     /* F = 26, V = 48
        Perm(±1, ±(1+√2), ±(1+√8))
     */
+
+ typedef typename MeshType::CoordType CoordType;
+ typedef typename MeshType::VertexPointer  VertexPointer;
+ typedef typename MeshType::VertexIterator VertexIterator;
+ typedef typename MeshType::FaceIterator   FaceIterator;
+
+ double E = 1 + sqrt(2);
+ double F = 1 + sqrt(8);
+
+ in.Clear();
+ Allocator<MeshType>::AddVertices(in, 48);
+ Allocator<MeshType>::AddFaces(in, 12*2+8*4+6*6); //92 faces
+
+ VertexPointer ivp[48];
+ VertexIterator vi;
+
+ double vertexes[144] = {
+     1, E, F,       1, E,-F,        1,-E, F,        1,-E,-F,
+    -1, E, F,      -1, E,-F,       -1,-E, F,       -1,-E,-F,
+     1, F, E,       1, F,-E,        1,-F, E,        1,-F,-E,
+    -1, F, E,      -1, F,-E,       -1,-F, E,       -1,-F,-E,
+     E, 1, F,       E, 1,-F,        E,-1, F,        E,-1,-F,
+    -E, 1, F,      -E, 1,-F,       -E,-1, F,       -E,-1,-F,
+     E, F, 1,       E, F,-1,        E,-F, 1,        E,-F,-1,
+    -E, F, 1,      -E, F,-1,       -E,-F, 1,       -E,-F,-1,
+     F, 1, E,       F, 1,-E,        F,-1, E,        F,-1,-E,
+    -F, 1, E,      -F, 1,-E,       -F,-1, E,       -F,-1,-E,
+     F, E, 1,       F, E,-1,        F,-E, 1,        F,-E,-1,
+    -F, E, 1,      -F, E,-1,       -F,-E, 1,       -F,-E,-1 };
+
+ int i;
+ for(i=0, vi=in.vert.begin(); vi!=in.vert.end(); i++, vi++) {
+    ivp[i]=&*vi; (*vi).P()=CoordType  ( vertexes[3*i], vertexes[3*i+1], vertexes[3*i+2]);
+ }
+
+ int squares[48] = {
+    0, 8,12, 4,     10, 2, 6,14,        3,11,15, 7,     9, 1, 5,13,
+   28,29,45,44,     46,47,31,30,       26,27,43,42,    40,41,25,24,
+   22,20,36,38,     39,37,21,23,       19,17,33,35,    34,32,16,18 };
+
+ int hexagons[48] = {
+   25,41,33,17, 1, 9,       2,10,26,42,34,18,       27,11, 3,19,35,43,
+   16,32,40,24, 8, 0,      20, 4,12,28,44,36,       37,45,29,13, 5,21,
+    7,15,31,47,39,23,      14, 6,22,38,46,30};
+
+ int octagons[48] = {
+   12, 8,24,25, 9,13,29,28,     27,26,10,14,30,31,15,11,
+   23,21, 5, 1,17,19, 3, 7,      2,18,16, 0, 4,20,22, 6,
+   39,47,46,38,36,44,45,37,     34,42,43,35,33,41,40,32 };
+
+ FaceIterator fi=in.face.begin();
+
+ for(int i=0; i<12; i++) {
+     (*fi).V(0)=ivp[squares[i*4]];  (*fi).V(1)=ivp[squares[i*4+1]];  (*fi).V(2)=ivp[squares[i*4+2]];
+     (*fi).SetF(0); (*fi).SetF(2); ++fi;
+     (*fi).V(0)=ivp[squares[i*4]];  (*fi).V(1)=ivp[squares[i*4+2]];  (*fi).V(2)=ivp[squares[i*4+3]];
+     (*fi).SetF(0); (*fi).SetF(2); ++fi;
+ }
+
+ for(int i=0; i<8; i++) {
+     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+1]];  (*fi).V(2)=ivp[hexagons[i*6+2]]; ++fi;
+     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+2]];  (*fi).V(2)=ivp[hexagons[i*6+3]]; ++fi;
+     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+3]];  (*fi).V(2)=ivp[hexagons[i*6+4]]; ++fi;
+     (*fi).V(0)=ivp[hexagons[i*6]];  (*fi).V(1)=ivp[hexagons[i*6+4]];  (*fi).V(2)=ivp[hexagons[i*6+5]]; ++fi;
+ }
+
+ for(int i=0; i<6; i++) {
+     (*fi).V(0)=ivp[octagons[i*8]];  (*fi).V(1)=ivp[octagons[i*8+1]];  (*fi).V(2)=ivp[octagons[i*8+2]]; ++fi;
+     (*fi).V(0)=ivp[octagons[i*8]];  (*fi).V(1)=ivp[octagons[i*8+2]];  (*fi).V(2)=ivp[octagons[i*8+3]]; ++fi;
+     (*fi).V(0)=ivp[octagons[i*8]];  (*fi).V(1)=ivp[octagons[i*8+3]];  (*fi).V(2)=ivp[octagons[i*8+4]]; ++fi;
+     (*fi).V(0)=ivp[octagons[i*8]];  (*fi).V(1)=ivp[octagons[i*8+4]];  (*fi).V(2)=ivp[octagons[i*8+5]]; ++fi;
+     (*fi).V(0)=ivp[octagons[i*8]];  (*fi).V(1)=ivp[octagons[i*8+5]];  (*fi).V(2)=ivp[octagons[i*8+6]]; ++fi;
+     (*fi).V(0)=ivp[octagons[i*8]];  (*fi).V(1)=ivp[octagons[i*8+6]];  (*fi).V(2)=ivp[octagons[i*8+7]]; ++fi;
+ }
+
 }
 
 
