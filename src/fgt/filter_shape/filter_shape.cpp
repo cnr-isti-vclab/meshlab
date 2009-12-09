@@ -41,13 +41,14 @@
 //VCGLib
 #include "platonic.h"
 #include "archimedean.h"
+#include "knot.h"
 
 using namespace std;
 using namespace vcg;
 
 FilterSolidShapes::FilterSolidShapes()
 {
-    typeList << FSS_PLATONIC << FSS_ARCHIMEDEAN;
+    typeList << FSS_PLATONIC << FSS_ARCHIMEDEAN << FSS_MISC;
     
     foreach(FilterIDType tt , types())
         actionList << new QAction(filterName(tt), this);
@@ -58,6 +59,7 @@ FilterSolidShapes::FilterSolidShapes()
     switch (filterId) {
         case FSS_PLATONIC: return tr("Platonic solids");
         case FSS_ARCHIMEDEAN: return tr("Archimedean solids");
+        case FSS_MISC: return tr("Misc solids");
         default: assert(0); return QString("error");
     }
 }
@@ -69,6 +71,8 @@ FilterSolidShapes::FilterSolidShapes()
             return tr("Create platonic solids according to user parameters");
         case FSS_ARCHIMEDEAN:
             return tr("Create archimedean solids according to user parameters");
+        case FSS_MISC:
+            return tr("Create misc solids according to user parameters");
         default: assert(0); return QString("error");
     }
 }
@@ -90,6 +94,9 @@ void FilterSolidShapes::initParameterSet(QAction *action,MeshModel &/*m*/, RichP
         case FSS_ARCHIMEDEAN:
             list  << "Truncated Tetrahedron" << "Cuboctahedron" << "Truncated Cube"
             << "Truncated Octahedron" << "Rhombicuboctahedron" << "Truncated Icosahedron";
+            break;
+        case FSS_MISC:
+            list << "Torus 2-3 (test)" << "Torus 3-8";
             break;
     }
 
@@ -145,6 +152,19 @@ bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameter
                         break;
                 }
         break;
+        case FSS_MISC:
+            Log("Creating misc number %d. STAR=%d", par.getEnum("Figure"), par.getBool("Star"));
+            switch(par.getEnum("Figure")) {
+                case CR_TORUS23:
+                    //torus 2-3
+                    vcg::tri::Torus_knot<CMeshO>(m.cm, 2, 3, 0.05);
+                    break;
+                case CR_TORUS38:
+                    //torus 2-3
+                    vcg::tri::Torus_knot<CMeshO>(m.cm, 3, 8, 0.05);
+                    break;
+
+            }
     }
 
     //Camera...

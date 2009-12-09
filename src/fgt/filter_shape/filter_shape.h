@@ -36,9 +36,10 @@ class FilterSolidShapes : public QObject, public MeshFilterInterface
     Q_INTERFACES(MeshFilterInterface)
 
 public:
-    enum { FSS_PLATONIC, FSS_ARCHIMEDEAN };
+    enum { FSS_PLATONIC, FSS_ARCHIMEDEAN, FSS_MISC};
     enum { CR_TETRAHEDRON, CR_HEXAHEDRON, CR_OCTAHEDRON, CR_DODECAHEDRON, CR_ICOSAHEDRON };
     enum { CR_TT, CR_COH, CR_TC, CR_TO, CR_RCOH, CR_TIS };
+    enum { CR_TORUS23, CR_TORUS38 };
 
     FilterSolidShapes();
     ~FilterSolidShapes(){};
