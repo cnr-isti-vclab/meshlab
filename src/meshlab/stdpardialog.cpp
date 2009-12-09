@@ -279,8 +279,8 @@ void MeshlabStdDialog::applyClick()
 
 	//PreView Caching: if the apply parameters are the same to those used in the preview mode
 	//we don't need to reapply the filter to the mesh
-	bool equal = (curParSet == prevParSet);
-	if ((curParSet == prevParSet) && (validcache))
+	bool isEqual = (curParSet == prevParSet);
+        if ((isEqual) && (validcache))
 		meshCacheState.apply(curModel);
 	else
 		curmwi->executeFilter(q, curParSet, false);

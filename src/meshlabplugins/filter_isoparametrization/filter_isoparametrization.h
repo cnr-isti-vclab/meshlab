@@ -25,6 +25,7 @@
 #define FILTERISOPARAMPLUGIN_H
 
 #include <QObject>
+#include <cassert>
 #include <parametrizator.h>
 #include <iso_parametrization.h>
 #include <diamond_sampler.h>
