@@ -14,6 +14,8 @@ QT           += xml opengl
 win32:DEFINES += NOMINMAX
 
 mac:LIBS += ../meshlab/meshlab.app/Contents/MacOS/libcommon.dylib
+win32-g++:debug:  LIBS += -L../common/debug -lcommon
+win32-g++:release:LIBS += -L../common/release -lcommon
 
 #DEFINES += GLEW_STATIC
 
