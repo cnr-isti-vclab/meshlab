@@ -443,14 +443,58 @@ void Truncated_Cuboctahedron(MeshType &in)
 }
 
 
+// Are vertexes ok? Something goes wrong..
 template <class MeshType>
 void Snub_Cube(MeshType &in)
 {
     // 32 triangles and 6 squares
     /* F = 38, V = 24
-       Perm(±1, ±ξ, ±1/ξ)
+       Only Even Perm(±1, ±ξ, ±1/ξ)
        where ξ3+ξ2+ξ=1
     */
+
+ typedef typename MeshType::CoordType CoordType;
+ typedef typename MeshType::VertexPointer  VertexPointer;
+ typedef typename MeshType::VertexIterator VertexIterator;
+ typedef typename MeshType::FaceIterator   FaceIterator;
+
+ //double E = (pow(17+3*sqrt(33), 1/3.0) - pow(-17+3*sqrt(33), 1/3.0) -1) / 3.0; //en
+ //double E = (pow(19+3*sqrt(33), 1/3.0) + pow(19-3*sqrt(33), 1/3.0) +1) / 3.0; //cat
+ double E = (pow(19+3*sqrt(33), 1/3.0) + pow(19-3*sqrt(33), 1/3.0) -2) / 6.0; //de
+
+ in.Clear();
+ Allocator<MeshType>::AddVertices(in, 24);
+ // Allocator<MeshType>::AddFaces(in, 32+6*2); //44 faces
+ Allocator<MeshType>::AddFaces(in, 9);
+
+ VertexPointer ivp[24];
+ VertexIterator vi;
+
+ double vertexes[72] = {
+    1, E, 1/E,       1, E,-1/E,     1,-E, 1/E,      1,-E,-1/E,
+   -1, E, 1/E,      -1, E,-1/E,    -1,-E, 1/E,     -1,-E,-1/E,
+    E, 1/E, 1,       E, 1/E,-1,     E,-1/E, 1,      E,-1/E,-1,
+   -E, 1/E, 1,      -E, 1/E,-1,    -E,-1/E, 1,     -E,-1/E,-1,
+    1/E, 1, E,       1/E, 1,-E,     1/E,-1, E,      1/E,-1,-E,
+   -1/E, 1, E,      -1/E, 1,-E,    -1/E,-1, E,     -1/E,-1,-E };
+
+ int i;
+ for(i=0, vi=in.vert.begin(); vi!=in.vert.end(); i++, vi++) {
+    ivp[i]=&*vi; (*vi).P()=CoordType  ( vertexes[3*i], vertexes[3*i+1], vertexes[3*i+2]);
+ }
+
+ int triangles[48] = {
+    16, 8, 0,       18, 2,10,       14, 6,22,       20, 4,12,
+     1, 9,17,        7,15,23,       21,13, 5,       11, 3,19,
+     5,21,13,
+ };
+
+ FaceIterator fi=in.face.begin();
+
+ for(int i=0; i<9; i++) {
+     (*fi).V(0)=ivp[triangles[i*3]];  (*fi).V(1)=ivp[triangles[i*3+1]];  (*fi).V(2)=ivp[triangles[i*3+2]]; ++fi;
+ }
+
 
 }
 
@@ -460,9 +504,64 @@ void Icosidodecahedron(MeshType &in)
 {
     // 20 triangles and 12 pentagons
     /* F = 32, V = 30
-       (0,0,±τ), (±1/2, ±τ/2, ±(1+τ)/2)
+       Cyclic permutations of (0,0,±τ) and (±1/2, ±τ/2, ±(1+τ)/2)
        where τ is the golden ratio, (1+√5)/2
     */
+
+ typedef typename MeshType::CoordType CoordType;
+ typedef typename MeshType::VertexPointer  VertexPointer;
+ typedef typename MeshType::VertexIterator VertexIterator;
+ typedef typename MeshType::FaceIterator   FaceIterator;
+
+ in.Clear();
+ Allocator<MeshType>::AddVertices(in, 30);
+ Allocator<MeshType>::AddFaces(in, 20+12*3); //56 faces
+
+ VertexPointer ivp[30];
+ VertexIterator vi;
+
+ double G = (1 + sqrt(5))/2;
+
+ double vertexes[90] = {
+     0,0,G,     0,0,-G,       G,0,0,        -G,0,0,       0,G,0,      0,-G,0,
+     0.5, G/2, (1+G)/2,     0.5, G/2,-(1+G)/2,      0.5,-G/2, (1+G)/2,      0.5,-G/2,-(1+G)/2,
+    -0.5, G/2, (1+G)/2,    -0.5, G/2,-(1+G)/2,     -0.5,-G/2, (1+G)/2,     -0.5,-G/2,-(1+G)/2,
+     (1+G)/2, 0.5, G/2,     (1+G)/2, 0.5,-G/2,      (1+G)/2,-0.5, G/2,      (1+G)/2,-0.5,-G/2,
+    -(1+G)/2, 0.5, G/2,    -(1+G)/2, 0.5,-G/2,     -(1+G)/2,-0.5, G/2,     -(1+G)/2,-0.5,-G/2,
+     G/2, (1+G)/2, 0.5,     G/2, (1+G)/2,-0.5,      G/2,-(1+G)/2, 0.5,      G/2,-(1+G)/2,-0.5,
+    -G/2, (1+G)/2, 0.5,    -G/2, (1+G)/2,-0.5,     -G/2,-(1+G)/2, 0.5,     -G/2,-(1+G)/2,-0.5,
+     };
+
+ int i;
+ for(i=0, vi=in.vert.begin(); vi!=in.vert.end(); i++, vi++) {
+    ivp[i]=&*vi; (*vi).P()=CoordType  ( vertexes[3*i], vertexes[3*i+1], vertexes[3*i+2]);
+ }
+
+ int triangles[60] = {
+    26,18,10,       22, 6,14,       16, 8,24,       5,28,29,        13,29,21,
+    11,19,27,       18, 3,20,       24, 5,25,      17,25, 9,         4,27,26,
+    22,23, 4,        6,10, 0,        2,14,16,       1, 9,13,         3,19,21,
+    17,15, 2,        8, 0,12,       28,12,20,      11, 7, 1,        23,15, 7 };
+
+ int pentagons[60] = {
+    8,16,14, 6, 0,      14, 2,15,23,22,     23, 7,11,27, 4,      1,13,21,19,11,
+   27,19, 3,18,26,      13, 9,25, 5,29,      3,21,29,28,20,     18,20,12, 0,10,
+    4,26,10, 6,22,      24, 8,12,28, 5,     17, 2,16,24,25,      7,15,17, 9, 1 };
+
+ FaceIterator fi=in.face.begin();
+
+ for(int i=0; i<20; i++) {
+     (*fi).V(0)=ivp[triangles[i*3]];  (*fi).V(1)=ivp[triangles[i*3+1]];  (*fi).V(2)=ivp[triangles[i*3+2]]; ++fi;
+ }
+
+ for(int i=0; i<12; i++) {
+     (*fi).V(0)=ivp[pentagons[i*5]];  (*fi).V(1)=ivp[pentagons[i*5+1]];  (*fi).V(2)=ivp[pentagons[i*5+2]]; ++fi;
+     (*fi).V(0)=ivp[pentagons[i*5]];  (*fi).V(1)=ivp[pentagons[i*5+2]];  (*fi).V(2)=ivp[pentagons[i*5+3]]; ++fi;
+     (*fi).V(0)=ivp[pentagons[i*5]];  (*fi).V(1)=ivp[pentagons[i*5+3]];  (*fi).V(2)=ivp[pentagons[i*5+4]]; ++fi;
+ }
+
+
+
 
 }
 

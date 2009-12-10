@@ -94,7 +94,7 @@ void FilterSolidShapes::initParameterSet(QAction *action,MeshModel &/*m*/, RichP
         case FSS_ARCHIMEDEAN:
             list  << "Truncated Tetrahedron" << "Cuboctahedron" << "Truncated Cube"
             << "Truncated Octahedron" << "Rhombicuboctahedron" << "Truncated Cuboctahedron"
-            << "Truncated Icosahedron";
+            << "Snub Cube" << "Icosidodecahedron" << "Truncated Icosahedron";
             break;
         case FSS_MISC:
             list << "Torus 2-3 (test)" << "Torus 3-8";
@@ -150,6 +150,12 @@ bool FilterSolidShapes::applyFilter(QAction *filter, MeshModel &m, RichParameter
                         break;
                     case CR_TCOH:
                         vcg::tri::Truncated_Cuboctahedron<CMeshO>(m.cm);
+                        break;
+                    case CR_SC:
+                        vcg::tri::Snub_Cube<CMeshO>(m.cm);
+                        break;
+                    case CR_ISDH:
+                        vcg::tri::Icosidodecahedron<CMeshO>(m.cm);
                         break;
                     case CR_TIS:
                         vcg::tri::Truncated_Icosahedron<CMeshO>(m.cm);
