@@ -2,7 +2,7 @@ VCGDIR  = ../../../vcglib
 GLEWDIR = ../external/glew-1.5.1
 GLEWCODE = $$GLEWDIR/src/glew.c
 
-mac:DESTDIR       = ../meshlab/meshlab.app/Contents/MacOS
+
 win32-g++:debug:DESTDIR       = ../meshlab/debug
 win32-g++:release:DESTDIR       = ../meshlab/release
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
