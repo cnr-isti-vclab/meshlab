@@ -558,9 +558,13 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     if(textureWireParam==true)  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                          else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture( GL_TEXTURE_2D, m.glw.TMId.back() );
+                           else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    if(!m.glw.TMId.empty())
+    {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture( GL_TEXTURE_2D, m.glw.TMId.back() );
+        gla->renderText(0,-0.10,0,tr("%1").arg(m.cm.textures[0].c_str()),qf);
+    }
     glBegin(GL_TRIANGLES);
     for(size_t i=0;i<m.cm.face.size();++i)
         if(!m.cm.face[i].IsD())
@@ -573,9 +577,10 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf
         glVertex(m.cm.face[i].WT(2).P());
     }
     glEnd();
+    glDisable(GL_TEXTURE_2D);
+
     drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.5,gla,qf);
     drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.5,gla,qf);
-    gla->renderText(0,-0.10,0,tr("%1").arg(m.cm.textures[0].c_str()),qf);
 
     glPopAttrib();
     // Closing 2D
