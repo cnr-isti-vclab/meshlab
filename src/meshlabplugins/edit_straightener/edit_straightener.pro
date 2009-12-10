@@ -1,7 +1,7 @@
 include (../../shared.pri)
 
 # Lib name
-TARGET = editstraightener
+TARGET = edit_straightener
 
 # Lib sources
 SOURCES += $$VCGDIR/wrap/gui/trackball.cpp \
