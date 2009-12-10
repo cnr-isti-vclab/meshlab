@@ -122,16 +122,16 @@ void Tetrahedron(TetraMeshType &in)
 
  VertexPointer ivp[4];
  VertexIterator vi=in.vert.begin();
- ivp[0]=&*vi;(*vi).P()=CoordType ( 1.0, 1.0, 1.0); ++vi;
- ivp[1]=&*vi;(*vi).P()=CoordType (-1.0, 1.0,-1.0); ++vi;
- ivp[2]=&*vi;(*vi).P()=CoordType (-1.0,-1.0, 1.0); ++vi;
- ivp[3]=&*vi;(*vi).P()=CoordType ( 1.0,-1.0,-1.0); 
+ ivp[0]=&*vi;vi->P()=CoordType ( 1.0, 1.0, 1.0); ++vi;
+ ivp[1]=&*vi;vi->P()=CoordType (-1.0, 1.0,-1.0); ++vi;
+ ivp[2]=&*vi;vi->P()=CoordType (-1.0,-1.0, 1.0); ++vi;
+ ivp[3]=&*vi;vi->P()=CoordType ( 1.0,-1.0,-1.0);
 
  FaceIterator fi=in.face.begin();
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[3]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[1]; ++fi;
- (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[1]; 
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[1]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[2]; fi->V(2)=ivp[3]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[3]; fi->V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[3];  fi->V(1)=ivp[2]; fi->V(2)=ivp[1];
 }
 
 
@@ -214,12 +214,12 @@ void Dodecahedron(DodMeshType & in)
 			h= penta[ i*9 + order[j]  ]-1;
 		  xx=vv[h*3];yy=vv[h*3+1];zz=vv[h*3+2]; sx+=xx; sy+=yy; sz+=zz;
 			if (!used[h]) {
-				(*vi).P()=CoordType( xx, yy, zz ); vi++;
+                                vi->P()=CoordType( xx, yy, zz ); vi++;
 				used[h]=true;
 				reindex[ h ] = m++;
 			}
 		}
-		(*vi).P()=CoordType( sx/5.0, sy/5.0, sz/5.0 ); 	vi++;
+                vi->P()=CoordType( sx/5.0, sy/5.0, sz/5.0 ); 	vi++;
 		added[ i ] = m++;
 	}
 
@@ -231,13 +231,13 @@ void Dodecahedron(DodMeshType & in)
 
 	for (i=0; i<12; i++) {
 		for (j=0; j<5; j++){
-		  (*fi).V(0)=index[added[i] ];
-	    (*fi).V(1)=index[reindex[penta[i*9 + order[j      ] ] -1 ] ]; 
-	    (*fi).V(2)=index[reindex[penta[i*9 + order[(j+1)%5] ] -1 ] ];  
+                  fi->V(0)=index[added[i] ];
+            fi->V(1)=index[reindex[penta[i*9 + order[j      ] ] -1 ] ];
+            fi->V(2)=index[reindex[penta[i*9 + order[(j+1)%5] ] -1 ] ];
 	    if (in.HasPerFaceFlags()) {
   	    // tag faux edges
-        (*fi).SetF(0);
-        (*fi).SetF(2);
+        fi->SetF(0);
+        fi->SetF(2);
       }
 		  fi++;
 		}
@@ -260,22 +260,22 @@ void Octahedron(OctMeshType &in)
  VertexPointer ivp[6];
 
  VertexIterator vi=in.vert.begin();
- ivp[0]=&*vi;(*vi).P()=CoordType ( 1, 0, 0); ++vi;
- ivp[1]=&*vi;(*vi).P()=CoordType ( 0, 1, 0); ++vi;
- ivp[2]=&*vi;(*vi).P()=CoordType ( 0, 0, 1); ++vi;
- ivp[3]=&*vi;(*vi).P()=CoordType (-1, 0, 0); ++vi;
- ivp[4]=&*vi;(*vi).P()=CoordType ( 0,-1, 0); ++vi;
- ivp[5]=&*vi;(*vi).P()=CoordType ( 0, 0,-1); 
+ ivp[0]=&*vi;vi->P()=CoordType ( 1, 0, 0); ++vi;
+ ivp[1]=&*vi;vi->P()=CoordType ( 0, 1, 0); ++vi;
+ ivp[2]=&*vi;vi->P()=CoordType ( 0, 0, 1); ++vi;
+ ivp[3]=&*vi;vi->P()=CoordType (-1, 0, 0); ++vi;
+ ivp[4]=&*vi;vi->P()=CoordType ( 0,-1, 0); ++vi;
+ ivp[5]=&*vi;vi->P()=CoordType ( 0, 0,-1);
 
  FaceIterator fi=in.face.begin();
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[4]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[1]; ++fi;
- (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[4]; ++fi;
- (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[1]; 
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[1]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[2]; fi->V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[4]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[5]; fi->V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[3];  fi->V(1)=ivp[1]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[3];  fi->V(1)=ivp[5]; fi->V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[3];  fi->V(1)=ivp[4]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[3];  fi->V(1)=ivp[2]; fi->V(2)=ivp[1];
 }
 
 template <class IcoMeshType>
@@ -323,15 +323,15 @@ void Icosahedron(IcoMeshType &in)
   VertexIterator vi;
   int i;
   for(i=0,vi=in.vert.begin();vi!=in.vert.end();++i,++vi){
-    (*vi).P()=vv[i];
+    vi->P()=vv[i];
 	  ivp[i]=&*vi;
   }
 
  FaceIterator fi;
  for(i=0,fi=in.face.begin();fi!=in.face.end();++i,++fi){	
-		(*fi).V(0)=ivp[ff[i][0]];
-		(*fi).V(1)=ivp[ff[i][1]];
-		(*fi).V(2)=ivp[ff[i][2]];
+                fi->V(0)=ivp[ff[i][0]];
+                fi->V(1)=ivp[ff[i][1]];
+                fi->V(2)=ivp[ff[i][2]];
 	}
 }
 
@@ -352,33 +352,33 @@ void Hexahedron(MeshType &in)
 
  VertexIterator vi=in.vert.begin();
 
- ivp[7]=&*vi;(*vi).P()=CoordType (-1,-1,-1); ++vi;
- ivp[6]=&*vi;(*vi).P()=CoordType ( 1,-1,-1); ++vi;
- ivp[5]=&*vi;(*vi).P()=CoordType (-1, 1,-1); ++vi;
- ivp[4]=&*vi;(*vi).P()=CoordType ( 1, 1,-1); ++vi;
- ivp[3]=&*vi;(*vi).P()=CoordType (-1,-1, 1); ++vi;
- ivp[2]=&*vi;(*vi).P()=CoordType ( 1,-1, 1); ++vi;
- ivp[1]=&*vi;(*vi).P()=CoordType (-1, 1, 1); ++vi;
- ivp[0]=&*vi;(*vi).P()=CoordType ( 1, 1, 1); 
+ ivp[7]=&*vi;vi->P()=CoordType (-1,-1,-1); ++vi;
+ ivp[6]=&*vi;vi->P()=CoordType ( 1,-1,-1); ++vi;
+ ivp[5]=&*vi;vi->P()=CoordType (-1, 1,-1); ++vi;
+ ivp[4]=&*vi;vi->P()=CoordType ( 1, 1,-1); ++vi;
+ ivp[3]=&*vi;vi->P()=CoordType (-1,-1, 1); ++vi;
+ ivp[2]=&*vi;vi->P()=CoordType ( 1,-1, 1); ++vi;
+ ivp[1]=&*vi;vi->P()=CoordType (-1, 1, 1); ++vi;
+ ivp[0]=&*vi;vi->P()=CoordType ( 1, 1, 1);
 
  FaceIterator fi=in.face.begin();
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[1]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[4]; ++fi;
- (*fi).V(0)=ivp[6];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[1]; ++fi;
- (*fi).V(0)=ivp[5];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[4]; ++fi;
- (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[6]; ++fi;
- (*fi).V(0)=ivp[4];  (*fi).V(1)=ivp[6]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[6]; (*fi).V(2)=ivp[3]; ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[6]; ++fi;
- (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[1];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[3]; 
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[1]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[3];  fi->V(1)=ivp[2]; fi->V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[2]; fi->V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[6];  fi->V(1)=ivp[4]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[4]; fi->V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[5];  fi->V(1)=ivp[1]; fi->V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[7];  fi->V(1)=ivp[5]; fi->V(2)=ivp[6]; ++fi;
+ fi->V(0)=ivp[4];  fi->V(1)=ivp[6]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[7];  fi->V(1)=ivp[6]; fi->V(2)=ivp[3]; ++fi;
+ fi->V(0)=ivp[2];  fi->V(1)=ivp[3]; fi->V(2)=ivp[6]; ++fi;
+ fi->V(0)=ivp[7];  fi->V(1)=ivp[3]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[1];  fi->V(1)=ivp[5]; fi->V(2)=ivp[3];
  
   if (in.HasPerFaceFlags()) {
     FaceIterator fi=in.face.begin();
     for (int k=0; k<12; k++) {
-      (*fi).SetF(1); fi++;
+      fi->SetF(1); fi++;
     }
   }
 
@@ -402,56 +402,56 @@ void HexahedronStar(MeshType &in)
 
  VertexIterator vi=in.vert.begin();
 
- ivp[13]=&*vi;(*vi).P()=CoordType ( 0, 0,-1); ++vi;
- ivp[12]=&*vi;(*vi).P()=CoordType ( 0, 0, 1); ++vi;
- ivp[11]=&*vi;(*vi).P()=CoordType (-1, 0, 0); ++vi;
- ivp[10]=&*vi;(*vi).P()=CoordType ( 1, 0, 0); ++vi;
- ivp[9] =&*vi;(*vi).P()=CoordType ( 0,-1, 0); ++vi;
- ivp[8] =&*vi;(*vi).P()=CoordType ( 0, 1, 0); ++vi;
- ivp[7] =&*vi;(*vi).P()=CoordType (-1,-1,-1); ++vi;
- ivp[6] =&*vi;(*vi).P()=CoordType ( 1,-1,-1); ++vi;
- ivp[5] =&*vi;(*vi).P()=CoordType (-1, 1,-1); ++vi;
- ivp[4] =&*vi;(*vi).P()=CoordType ( 1, 1,-1); ++vi;
- ivp[3] =&*vi;(*vi).P()=CoordType (-1,-1, 1); ++vi;
- ivp[2] =&*vi;(*vi).P()=CoordType ( 1,-1, 1); ++vi;
- ivp[1] =&*vi;(*vi).P()=CoordType (-1, 1, 1); ++vi;
- ivp[0] =&*vi;(*vi).P()=CoordType ( 1, 1, 1);
+ ivp[13]=&*vi;vi->P()=CoordType ( 0, 0,-1); ++vi;
+ ivp[12]=&*vi;vi->P()=CoordType ( 0, 0, 1); ++vi;
+ ivp[11]=&*vi;vi->P()=CoordType (-1, 0, 0); ++vi;
+ ivp[10]=&*vi;vi->P()=CoordType ( 1, 0, 0); ++vi;
+ ivp[9] =&*vi;vi->P()=CoordType ( 0,-1, 0); ++vi;
+ ivp[8] =&*vi;vi->P()=CoordType ( 0, 1, 0); ++vi;
+ ivp[7] =&*vi;vi->P()=CoordType (-1,-1,-1); ++vi;
+ ivp[6] =&*vi;vi->P()=CoordType ( 1,-1,-1); ++vi;
+ ivp[5] =&*vi;vi->P()=CoordType (-1, 1,-1); ++vi;
+ ivp[4] =&*vi;vi->P()=CoordType ( 1, 1,-1); ++vi;
+ ivp[3] =&*vi;vi->P()=CoordType (-1,-1, 1); ++vi;
+ ivp[2] =&*vi;vi->P()=CoordType ( 1,-1, 1); ++vi;
+ ivp[1] =&*vi;vi->P()=CoordType (-1, 1, 1); ++vi;
+ ivp[0] =&*vi;vi->P()=CoordType ( 1, 1, 1);
 
  FaceIterator fi=in.face.begin();
- (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[0]; (*fi).V(2)=ivp[4]; ++fi;
- (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[1]; ++fi;
- (*fi).V(0)=ivp[8];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[0]; ++fi;
+ fi->V(0)=ivp[8];  fi->V(1)=ivp[0]; fi->V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[8];  fi->V(1)=ivp[4]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[8];  fi->V(1)=ivp[5]; fi->V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[8];  fi->V(1)=ivp[1]; fi->V(2)=ivp[0]; ++fi;
 
- (*fi).V(0)=ivp[10];  (*fi).V(1)=ivp[0]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[10];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[6]; ++fi;
- (*fi).V(0)=ivp[10];  (*fi).V(1)=ivp[6]; (*fi).V(2)=ivp[4]; ++fi;
- (*fi).V(0)=ivp[10];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[0]; ++fi;
+ fi->V(0)=ivp[10];  fi->V(1)=ivp[0]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[10];  fi->V(1)=ivp[2]; fi->V(2)=ivp[6]; ++fi;
+ fi->V(0)=ivp[10];  fi->V(1)=ivp[6]; fi->V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[10];  fi->V(1)=ivp[4]; fi->V(2)=ivp[0]; ++fi;
 
- (*fi).V(0)=ivp[12];  (*fi).V(1)=ivp[0]; (*fi).V(2)=ivp[1]; ++fi;
- (*fi).V(0)=ivp[12];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[3]; ++fi;
- (*fi).V(0)=ivp[12];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[12];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[0]; ++fi;
+ fi->V(0)=ivp[12];  fi->V(1)=ivp[0]; fi->V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[12];  fi->V(1)=ivp[1]; fi->V(2)=ivp[3]; ++fi;
+ fi->V(0)=ivp[12];  fi->V(1)=ivp[3]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[12];  fi->V(1)=ivp[2]; fi->V(2)=ivp[0]; ++fi;
 
- (*fi).V(0)=ivp[11];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[3]; ++fi;
- (*fi).V(0)=ivp[11];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[7]; ++fi;
- (*fi).V(0)=ivp[11];  (*fi).V(1)=ivp[7]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[11];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[11];  fi->V(1)=ivp[1]; fi->V(2)=ivp[3]; ++fi;
+ fi->V(0)=ivp[11];  fi->V(1)=ivp[3]; fi->V(2)=ivp[7]; ++fi;
+ fi->V(0)=ivp[11];  fi->V(1)=ivp[7]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[11];  fi->V(1)=ivp[5]; fi->V(2)=ivp[1]; ++fi;
 
- (*fi).V(0)=ivp[13];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[13];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[7]; ++fi;
- (*fi).V(0)=ivp[13];  (*fi).V(1)=ivp[7]; (*fi).V(2)=ivp[6]; ++fi;
- (*fi).V(0)=ivp[13];  (*fi).V(1)=ivp[6]; (*fi).V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[13];  fi->V(1)=ivp[4]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[13];  fi->V(1)=ivp[5]; fi->V(2)=ivp[7]; ++fi;
+ fi->V(0)=ivp[13];  fi->V(1)=ivp[7]; fi->V(2)=ivp[6]; ++fi;
+ fi->V(0)=ivp[13];  fi->V(1)=ivp[6]; fi->V(2)=ivp[4]; ++fi;
 
- (*fi).V(0)=ivp[9];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[3]; ++fi;
- (*fi).V(0)=ivp[9];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[7]; ++fi;
- (*fi).V(0)=ivp[9];  (*fi).V(1)=ivp[7]; (*fi).V(2)=ivp[6]; ++fi;
- (*fi).V(0)=ivp[9];  (*fi).V(1)=ivp[6]; (*fi).V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[9];  fi->V(1)=ivp[2]; fi->V(2)=ivp[3]; ++fi;
+ fi->V(0)=ivp[9];  fi->V(1)=ivp[3]; fi->V(2)=ivp[7]; ++fi;
+ fi->V(0)=ivp[9];  fi->V(1)=ivp[7]; fi->V(2)=ivp[6]; ++fi;
+ fi->V(0)=ivp[9];  fi->V(1)=ivp[6]; fi->V(2)=ivp[2]; ++fi;
 
   if (in.HasPerFaceFlags()) {
     FaceIterator fi=in.face.begin();
     for (int k=0; k<24; k++) {
-      (*fi).SetF(1); fi++;
+      fi->SetF(1); fi++;
     }
   }
 
@@ -473,19 +473,19 @@ void Square(MeshType &in)
   VertexPointer ivp[4];
 
   VertexIterator vi=in.vert.begin();
-  ivp[0]=&*vi;(*vi).P()=CoordType ( 1, 0, 0); ++vi;
-  ivp[1]=&*vi;(*vi).P()=CoordType ( 0, 1, 0); ++vi;
-  ivp[2]=&*vi;(*vi).P()=CoordType (-1, 0, 0); ++vi;
-  ivp[3]=&*vi;(*vi).P()=CoordType ( 0,-1, 0); 
+  ivp[0]=&*vi;vi->P()=CoordType ( 1, 0, 0); ++vi;
+  ivp[1]=&*vi;vi->P()=CoordType ( 0, 1, 0); ++vi;
+  ivp[2]=&*vi;vi->P()=CoordType (-1, 0, 0); ++vi;
+  ivp[3]=&*vi;vi->P()=CoordType ( 0,-1, 0);
 
   FaceIterator fi=in.face.begin();
-  (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[2]; ++fi;
-  (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[0]; 
+  fi->V(0)=ivp[0];  fi->V(1)=ivp[1]; fi->V(2)=ivp[2]; ++fi;
+  fi->V(0)=ivp[2];  fi->V(1)=ivp[3]; fi->V(2)=ivp[0];
 
   if (in.HasPerFaceFlags()) {
     FaceIterator fi=in.face.begin();
     for (int k=0; k<2; k++) {
-      (*fi).SetF(2); fi++;
+      fi->SetF(2); fi++;
     }
   }
 }
@@ -553,8 +553,8 @@ void Cone( MeshType& in,
 	VertexPointer  *ivp = new VertexPointer[VN];
 
   VertexIterator vi=in.vert.begin();
-  ivp[0]=&*vi;(*vi).P()=CoordType ( 0,-h/2,0 ); ++vi;
-  ivp[1]=&*vi;(*vi).P()=CoordType ( 0, h/2,0 ); ++vi;
+  ivp[0]=&*vi;vi->P()=CoordType ( 0,-h/2,0 ); ++vi;
+  ivp[1]=&*vi;vi->P()=CoordType ( 0, h/2,0 ); ++vi;
  
 	b1 = b2 = 2;
  int cnt=2;
@@ -570,7 +570,7 @@ void Cone( MeshType& in,
 			z = r1*s;
 			y = -h/2;
 			
-      ivp[cnt]=&*vi; (*vi).P()= CoordType( x,y,z ); ++vi;++cnt;
+      ivp[cnt]=&*vi; vi->P()= CoordType( x,y,z ); ++vi;++cnt;
 		}
 		b2 += D;
 	}
@@ -587,46 +587,46 @@ void Cone( MeshType& in,
 			z = r2*s;
 			y =  h/2;
 			
-      ivp[cnt]=&*vi; (*vi).P()= CoordType( x,y,z ); ++vi;++cnt;
+      ivp[cnt]=&*vi; vi->P()= CoordType( x,y,z ); ++vi;++cnt;
   		}
 	}
 	
   FaceIterator fi=in.face.begin();
  
   if(r1!=0) for(i=0;i<D;++i,++fi)	{
-      (*fi).V(0)=ivp[0];
-      (*fi).V(1)=ivp[b1+i]; 
-      (*fi).V(2)=ivp[b1+(i+1)%D]; 
+      fi->V(0)=ivp[0];
+      fi->V(1)=ivp[b1+i];
+      fi->V(2)=ivp[b1+(i+1)%D];
 		}
 
 	if(r2!=0) for(i=0;i<D;++i,++fi) {
-      (*fi).V(0)=ivp[1];
-      (*fi).V(2)=ivp[b2+i]; 
-      (*fi).V(1)=ivp[b2+(i+1)%D]; 
+      fi->V(0)=ivp[1];
+      fi->V(2)=ivp[b2+i];
+      fi->V(1)=ivp[b2+(i+1)%D];
 		}
 
 	if(r1==0) for(i=0;i<D;++i,++fi)
 		{
-      (*fi).V(0)=ivp[0];
-      (*fi).V(1)=ivp[b2+i]; 
-      (*fi).V(2)=ivp[b2+(i+1)%D]; 
+      fi->V(0)=ivp[0];
+      fi->V(1)=ivp[b2+i];
+      fi->V(2)=ivp[b2+(i+1)%D];
 			//in.face.push_back(*fi);
 		}
   if(r2==0)	for(i=0;i<D;++i,++fi){
-      (*fi).V(0)=ivp[1];
-      (*fi).V(2)=ivp[b1+i]; 
-      (*fi).V(1)=ivp[b1+(i+1)%D];
+      fi->V(0)=ivp[1];
+      fi->V(2)=ivp[b1+i];
+      fi->V(1)=ivp[b1+(i+1)%D];
 		}
 	
 	if(r1!=0 && r2!=0)for(i=0;i<D;++i)
 		{
-      (*fi).V(0)=ivp[b1+i];
-      (*fi).V(1)=ivp[b2+i]; 
-      (*fi).V(2)=ivp[b2+(i+1)%D]; 
+      fi->V(0)=ivp[b1+i];
+      fi->V(1)=ivp[b2+i];
+      fi->V(2)=ivp[b2+(i+1)%D];
       ++fi;
-      (*fi).V(0)=ivp[b1+i]; 
-      (*fi).V(1)=ivp[b2+(i+1)%D]; 
-      (*fi).V(2)=ivp[b1+(i+1)%D]; 
+      fi->V(0)=ivp[b1+i];
+      fi->V(1)=ivp[b2+(i+1)%D];
+      fi->V(2)=ivp[b1+(i+1)%D];
       ++fi;
 		}		
 }
@@ -648,33 +648,33 @@ void Box(MeshType &in, const typename MeshType::BoxType & bb )
  VertexPointer ivp[8];
 
  VertexIterator vi=in.vert.begin();
- ivp[0]=&*vi;(*vi).P()=CoordType (bb.min[0],bb.min[1],bb.min[2]); ++vi;
- ivp[1]=&*vi;(*vi).P()=CoordType (bb.max[0],bb.min[1],bb.min[2]); ++vi;
- ivp[2]=&*vi;(*vi).P()=CoordType (bb.min[0],bb.max[1],bb.min[2]); ++vi;
- ivp[3]=&*vi;(*vi).P()=CoordType (bb.max[0],bb.max[1],bb.min[2]); ++vi;
- ivp[4]=&*vi;(*vi).P()=CoordType (bb.min[0],bb.min[1],bb.max[2]); ++vi;
- ivp[5]=&*vi;(*vi).P()=CoordType (bb.max[0],bb.min[1],bb.max[2]); ++vi;
- ivp[6]=&*vi;(*vi).P()=CoordType (bb.min[0],bb.max[1],bb.max[2]); ++vi;
- ivp[7]=&*vi;(*vi).P()=CoordType (bb.max[0],bb.max[1],bb.max[2]); 
+ ivp[0]=&*vi;vi->P()=CoordType (bb.min[0],bb.min[1],bb.min[2]); ++vi;
+ ivp[1]=&*vi;vi->P()=CoordType (bb.max[0],bb.min[1],bb.min[2]); ++vi;
+ ivp[2]=&*vi;vi->P()=CoordType (bb.min[0],bb.max[1],bb.min[2]); ++vi;
+ ivp[3]=&*vi;vi->P()=CoordType (bb.max[0],bb.max[1],bb.min[2]); ++vi;
+ ivp[4]=&*vi;vi->P()=CoordType (bb.min[0],bb.min[1],bb.max[2]); ++vi;
+ ivp[5]=&*vi;vi->P()=CoordType (bb.max[0],bb.min[1],bb.max[2]); ++vi;
+ ivp[6]=&*vi;vi->P()=CoordType (bb.min[0],bb.max[1],bb.max[2]); ++vi;
+ ivp[7]=&*vi;vi->P()=CoordType (bb.max[0],bb.max[1],bb.max[2]);
 
  FaceIterator fi=in.face.begin();
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[3];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[1]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[2]; (*fi).V(2)=ivp[4]; ++fi;
- (*fi).V(0)=ivp[6];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[2]; ++fi;
- (*fi).V(0)=ivp[0];  (*fi).V(1)=ivp[4]; (*fi).V(2)=ivp[1]; ++fi;
- (*fi).V(0)=ivp[5];  (*fi).V(1)=ivp[1]; (*fi).V(2)=ivp[4]; ++fi;
- (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[6]; ++fi;
- (*fi).V(0)=ivp[4];  (*fi).V(1)=ivp[6]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[6]; (*fi).V(2)=ivp[3]; ++fi;
- (*fi).V(0)=ivp[2];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[6]; ++fi;
- (*fi).V(0)=ivp[7];  (*fi).V(1)=ivp[3]; (*fi).V(2)=ivp[5]; ++fi;
- (*fi).V(0)=ivp[1];  (*fi).V(1)=ivp[5]; (*fi).V(2)=ivp[3]; 
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[1]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[3];  fi->V(1)=ivp[2]; fi->V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[2]; fi->V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[6];  fi->V(1)=ivp[4]; fi->V(2)=ivp[2]; ++fi;
+ fi->V(0)=ivp[0];  fi->V(1)=ivp[4]; fi->V(2)=ivp[1]; ++fi;
+ fi->V(0)=ivp[5];  fi->V(1)=ivp[1]; fi->V(2)=ivp[4]; ++fi;
+ fi->V(0)=ivp[7];  fi->V(1)=ivp[5]; fi->V(2)=ivp[6]; ++fi;
+ fi->V(0)=ivp[4];  fi->V(1)=ivp[6]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[7];  fi->V(1)=ivp[6]; fi->V(2)=ivp[3]; ++fi;
+ fi->V(0)=ivp[2];  fi->V(1)=ivp[3]; fi->V(2)=ivp[6]; ++fi;
+ fi->V(0)=ivp[7];  fi->V(1)=ivp[3]; fi->V(2)=ivp[5]; ++fi;
+ fi->V(0)=ivp[1];  fi->V(1)=ivp[5]; fi->V(2)=ivp[3];
  
  if (in.HasPerFaceFlags()) {
     FaceIterator fi=in.face.begin();
     for (int k=0; k<12; k++) {
-      (*fi).SetF(1); fi++;
+      fi->SetF(1); fi++;
     }
   }
 
@@ -884,7 +884,7 @@ void Cylinder(int slices, int stacks, MeshType & m){
 				y = sin(	2.0 * M_PI / slices * j);
 				h = 2 * i / (float)(stacks) - 1;
 
-				(*vi).P() = typename MeshType::CoordType(x,h,y);
+                                vi->P() = typename MeshType::CoordType(x,h,y);
 				++vi;
 		}
 
@@ -899,32 +899,32 @@ void Cylinder(int slices, int stacks, MeshType & m){
        d =  (j+0)*slices + (i+1)%slices;
 			 if(((i+j)%2) == 0){
 				fi = vcg::tri::Allocator<MeshType>::AddFaces(m,1);
-				(*fi).V(0) = &m.vert[ a ];
-				(*fi).V(1) = &m.vert[ b ];
-				(*fi).V(2) = &m.vert[ c ];
+                                fi->V(0) = &m.vert[ a ];
+                                fi->V(1) = &m.vert[ b ];
+                                fi->V(2) = &m.vert[ c ];
 
 			 	fi = vcg::tri::Allocator<MeshType>::AddFaces(m,1);
-			 	(*fi).V(0) = &m.vert[ c ];
-			 	(*fi).V(1) = &m.vert[ d ];
-			 	(*fi).V(2) = &m.vert[ a ];
+                                fi->V(0) = &m.vert[ c ];
+                                fi->V(1) = &m.vert[ d ];
+                                fi->V(2) = &m.vert[ a ];
 			 }
 			 else{
 				fi = vcg::tri::Allocator<MeshType>::AddFaces(m,1);
-				(*fi).V(0) = &m.vert[ b ];
-				(*fi).V(1) = &m.vert[ c ];
-				(*fi).V(2) = &m.vert[ d ];
+                                fi->V(0) = &m.vert[ b ];
+                                fi->V(1) = &m.vert[ c ];
+                                fi->V(2) = &m.vert[ d ];
 
 			 	fi = vcg::tri::Allocator<MeshType>::AddFaces(m,1);
-				(*fi).V(0) = &m.vert[ d ];
-				(*fi).V(1) = &m.vert[ a ];
-				(*fi).V(2) = &m.vert[ b ];
+                                fi->V(0) = &m.vert[ d ];
+                                fi->V(1) = &m.vert[ a ];
+                                fi->V(2) = &m.vert[ b ];
 
 			 }
     }
     
    if (m.HasPerFaceFlags()) {
      for (typename MeshType::FaceIterator fi=m.face.begin(); fi!=m.face.end(); fi++) {
-       (*fi).SetF(2);
+       fi->SetF(2);
      }
    }
 

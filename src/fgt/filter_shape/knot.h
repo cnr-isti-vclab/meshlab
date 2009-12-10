@@ -58,7 +58,7 @@ void Torus_knot(MeshType &in, int p, int q, float prec)
 	 x = (2 + cos(q*i/p))*cos(i);
          y = (2 + cos(q*i/p))*sin(i);
 	 z = sin(q*i/p);
-	 ivp[j]=&*vi; (*vi).P()=CoordType(x, y, z);
+	 ivp[j]=&*vi; vi->P()=CoordType(x, y, z);
 	 vi++; j++;
  }
 
