@@ -91,7 +91,9 @@ INCLUDEPATH += . \
     $$GLEWDIR/include
 CONFIG += stl
 
-mac:LIBS += meshlab.app/Contents/MacOS/libcommon.dylib
+macx:LIBS += ../common/libcommon.dylib
+macx:QMAKE_POST_LINK ="cp ../common/libcommon* meshlab.app/Contents/MacOS; install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib meshlab.app/Contents/MacOS/meshlab"
+
 win32-msvc2005:LIBS += XXXXXXX
 win32-msvc2008:LIBS += XXXXXXX
 CONFIG(debug) {
@@ -106,6 +108,7 @@ unix:LIBS += -L../common -lcommon
 # uncomment in your local copy only in emergency cases.
 # We should never be too permissive
 # win32-g++:QMAKE_CXXFLAGS += -fpermissive
+
 # The following define is needed in gcc to remove the asserts
 win32-g++:DEFINES += NDEBUG
 CONFIG(debug, debug|release):win32-g++:release:DEFINES -= NDEBUG
