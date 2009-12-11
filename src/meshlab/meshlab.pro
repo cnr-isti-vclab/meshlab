@@ -94,13 +94,18 @@ CONFIG += stl
 macx:LIBS += ../common/libcommon.dylib
 macx:QMAKE_POST_LINK ="cp ../common/libcommon* meshlab.app/Contents/MacOS; install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib meshlab.app/Contents/MacOS/meshlab"
 
-win32-msvc2005:LIBS += XXXXXXX
-win32-msvc2008:LIBS += XXXXXXX
+
+
 CONFIG(debug) {
-win32-g++:LIBS += -L../common/debug -lcommon
+	win32-msvc2005:debug:LIBS		+= -L../common/debug -lcommon
+	win32-msvc2008:debug:LIBS		+= -L../common/debug -lcommon
+	win32-g++:debug:LIBS        	+= -L../common/debug -lcommon
 }
+
 CONFIG(release) {
-win32-g++:LIBS += -L../common/release -lcommon
+	win32-msvc2005:release:LIBS     += -L../common/release -lcommon
+	win32-msvc2008:release:LIBS     += -L../common/release -lcommon
+	win32-g++:release:LIBS 			+= -L../common/release -lcommon
 }
 
 unix:LIBS += -L../common -lcommon
