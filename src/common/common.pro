@@ -3,19 +3,43 @@ GLEWDIR = ../external/glew-1.5.1
 GLEWCODE = $$GLEWDIR/src/glew.c
 
 
-win32-g++:debug:DESTDIR       = ../meshlab/debug
-win32-g++:release:DESTDIR       = ../meshlab/release
+CONFIG(debug) {
+	win32-msvc2005:DESTDIR     = ./debug
+	win32-msvc2008:DESTDIR     = ./debug
+	win32-g++:DESTDIR     = ./debug
+}
+
+CONFIG(release) {
+	win32-msvc2005:DESTDIR     = ./release
+	win32-msvc2008:DESTDIR     = ./release
+	win32-g++:DESTDIR     = ./release
+}
+
+
+mac:DESTDIR       = ../meshlab/meshlab.app/Contents/MacOS
+
+
+
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
 
 TEMPLATE = lib
-CONFIG += dll
+win32-g++:CONFIG       += dll
+macx-g++:CONFIG        += dll
+unix:CONFIG            += dll
+win32-msvc2005:CONFIG  += staticlib
+win32-msvc2008:CONFIG  += staticlib
+
 QT += opengl
 QT += xml
 
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .
-win32-g++:DEFINES += GLEW_STATIC
+DEFINES += GLEW_STATIC
+win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_WARNINGS
+win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_WARNINGS
+
+
 # Input
 HEADERS += filterparameter.h \
            filterscript.h \
