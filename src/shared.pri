@@ -8,11 +8,18 @@ QT += xml
 VCGDIR  = ../../../../vcglib
 GLEWDIR = ../../external/glew-1.5.1
 mac:LIBS += ../../meshlab/meshlab.app/Contents/MacOS/libcommon.dylib
-win32-msvc2005:LIBS += XXXXXXX
-win32-msvc2008:LIBS += XXXXXXX
 
+
+win32-msvc2005:debug:  LIBS += -L../../common/debug -lcommon
+win32-msvc2008:debug:  LIBS += -L../../common/debug -lcommon
 win32-g++:debug:  LIBS += -L../../common/debug -lcommon
+
+win32-msvc2005:release:  LIBS += -L../../common/release -lcommon
+win32-msvc2008:release:  LIBS += -L../../common/release -lcommon
 win32-g++:release:LIBS += -L../../common/release -lcommon
+
+win32-msvc2005:DEFINES += GLEW_STATIC
+win32-msvc2008:DEFINES += GLEW_STATIC 
 
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN
