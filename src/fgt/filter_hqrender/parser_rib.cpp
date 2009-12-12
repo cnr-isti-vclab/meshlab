@@ -1,4 +1,5 @@
 #include "filter_hqrender.h"
+#include <limits>
 
 using namespace UtilitiesHQR;
 
@@ -30,7 +31,8 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 	FILE* fmain = fout; //if change the output file, save the main	
 	convertedGeometry = false; //if the mesh is already converted
 	int currentFrame = 0;
-	int numOfFrames = par.getInt("frames");
+	int numOfFrames = 0;
+	//int numOfFrames = par.getInt("frames");
 	vcg::Matrix44f transfCamera = vcg::Matrix44f::Identity();
 	bool stop = false;
 	bool isFrameDeclaration = false;
@@ -168,14 +170,11 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 
 		//is an object
 		if(token[0].trimmed() == "AttributeBegin") {
-			//QString* filename;// = new QString("a");
-			//qDebug(qPrintable(*filename));
 			//write it (o convert it if it's named dummy) to another file
-			QString filename = parseObject(&files, destDirString/*, &filename*/, currentFrame, m, par, textureList);
+			QString filename = parseObject(&files, destDirString, currentFrame, m, par, textureList);
 			qDebug("fuori: %s",qPrintable(filename));
 			writeLine = false;
 			fprintf(fout,"ReadArchive \"%s\"\n",qPrintable(filename));
-			//delete(filename);
 		}
 		
 		if(writeLine) {
@@ -190,9 +189,7 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 }
 
 //object is a sequence beetwen the statement AttributeBegin and AttributeEnd
-QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDirString/*, QString** objName*/, int currentFrame, MeshModel &m, RichParameterSet &par, QStringList* textureList) {
-	/**objName = new QString("object" + QString::number(numOfObject) + ".rib");
-	QString name = **objName;	*/
+QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDirString, int currentFrame, MeshModel &m, RichParameterSet &par, QStringList* textureList) {
 	QString name = "object" + QString::number(numOfObject) + ".rib";
 	FILE* fout = fopen(qPrintable(destDirString + QDir::separator() + name),"wb");
 	if(fout == NULL) {
@@ -200,15 +197,13 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 	
 	//if it's a dummy object, i need the the follow value:
 	ObjValues* current = new ObjValues();
-	//current->objectId = "";
-	/*current->objectMatrix = vcg::Matrix44f::Identity();
-	//current->objectBound = float[6] {0, 0, 0, 0, 0, 0};
-	current->objectDisplacementbound = "";
-	
-	/*QStringList a;
-	current->objectShader = a;*/
+	current->objectMatrix = vcg::Matrix44f::Identity();
+	//default RIS bound is infinite
+	for(int i=0; i< 6; i=i+2)
+		current->objectBound[i] = std::numeric_limits<int>::min();
+	for(int i=1; i<6; i=i+2)
+		current->objectBound[i] = std::numeric_limits<int>::max();
 
-	
 	//write AttributeBegin statement
 	fprintf(fout,"AttributeBegin\n");
 
@@ -223,13 +218,11 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 		if(token[0].trimmed() == "Surface") {
 			current->objectShader << line;
 			fprintf(fout,"%s\n",qPrintable(line));
-			//qDebug("%s\n",qPrintable(line));
 			line = files->topNextLine();
 			while(line.trimmed().startsWith('\"'))
 			{				
 				current->objectShader << line;
 				fprintf(fout,"%s\n",qPrintable(line));
-				//qDebug("%s\n",qPrintable(line));
 				line = files->topNextLine();
 			}
 			token = line.split(' ');
@@ -301,38 +294,33 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 		}
 
 		if(!isDummy) {
-			fprintf(fout,"%s\n",qPrintable(line));
-			//qDebug("%s\n",qPrintable(line));				
+			fprintf(fout,"%s\n",qPrintable(line));		
 		}
 	}
 	fclose(fout);
 
 	if(isDummy) {
-		//delete the previous
-		//destDirString + QDir::separator() + *objName
-		//and create another file
-		//delete(*objName);
-		/**objName = new QString("meshF" + QString::number(currentFrame) + "O" + QString::number(numberOfDummies) + ".rib");
-		name = **objName; */
+		//delete the previous file
+		QDir tmp = QDir(destDirString);
+		tmp.remove(name);
+		//and create another one
 		name = "meshF" + QString::number(currentFrame) + "O" + QString::number(numberOfDummies) + ".rib";
 		numberOfDummies++;
 		FILE *fmesh = fopen(qPrintable(destDirString + QDir::separator() + name),"wb");
 		if(fmesh==NULL) {
 		}
-		convertObject(files, fmesh, destDirString, m, par, textureList, current);
+		convertObject(fmesh, destDirString, m, par, textureList, current);
 		fclose(fmesh);		
 	} 
 	else
 		numOfObject++;
-	//qDebug("dentro: %s",qPrintable(**objName));
 	delete current;
 	return name;
 }
 
 //write on a opened file the attribute of object entity
-int FilterHighQualityRender::convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues)
+int FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues)
 {	
-	//ObjValues* dummyValues = *values;
 	fprintf(fout,"AttributeBegin\n");
 	//name
 	fprintf(fout,"Attribute \"identifier\" \"string name\" [ \"dummy\" ]\n");
@@ -542,8 +530,7 @@ vcg::Matrix44f FilterHighQualityRender::getMatrix(QString matrixString) {
 //read array from the rib stack (an array can be contain '\n' character)
 QString FilterHighQualityRender::readArray(RibFileStack* files, QString arrayString) {
 	QString str = arrayString;
-	//while(!(str.contains('[') && str.contains(']')) && !files->isEmpty())
-	while( (srt.count('[') - str.count(']')) > 0 && !files->isEmpty())
+	while( (str.count('[') - str.count(']')) > 0 && !files->isEmpty())
 		str += " " + files->topNextLine();
 	return str; //a string with array
 }

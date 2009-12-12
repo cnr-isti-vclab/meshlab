@@ -1,6 +1,4 @@
 #include <QtGui>
-#include <QDir>
-#include <QProcess>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -112,7 +110,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 				qDebug(qPrintable(this->errorMessage));
 			}
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));
-			parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));
+			//parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));
 			parlst.addParam(new RichString("ImageName", "default", "Name of output image"));
 			parlst.addParam(new RichEnum("ImageFormat", 0, imageFormatsSupported, "Output image format"));
 
