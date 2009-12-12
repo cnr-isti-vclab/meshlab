@@ -88,7 +88,7 @@ QString RibFileStack::topNextLine() {
 	}
 };
 
-bool RibFileStack::isEmpty() {
+bool RibFileStack::isEmpty() const {
 	return stack->isEmpty();
 };
 

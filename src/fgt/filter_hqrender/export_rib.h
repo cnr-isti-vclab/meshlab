@@ -40,7 +40,7 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
 
   //working with a copy of mesh
   SaveMeshType &m = mm;
-  
+
   int cbStep = 100/RIB_EXPORT_STEPS, cbValue = 0, step = 0;
   cb(cbValue, "Start exporting");
   

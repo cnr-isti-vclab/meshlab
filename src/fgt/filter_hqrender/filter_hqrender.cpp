@@ -199,11 +199,11 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		textureList << QString(m.cm.textures[i].c_str());
 	}
 	
-	QStringList shaderDirs, textureDirs, imagesRendered = QStringList();
+	QStringList shaderDirs, textureDirs, proceduralDirs, imagesRendered;
 	
 	//read the template files and create the new scenes files
 	qDebug("Starting reading cycle %i",tt.elapsed());
-	if(!makeScene(m, &textureList, par, templatePath, destDirString, &shaderDirs, &textureDirs, &imagesRendered))
+	if(!makeScene(m, &textureList, par, templatePath, destDirString, &shaderDirs, &textureDirs, &proceduralDirs, &imagesRendered))
 		return false; //message already set
 	qDebug("Cycle ending at %i",tt.elapsed());
 	Log(GLLogStream::FILTER,"Successfully created scene");
@@ -214,9 +214,10 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		return false;
 	}
 
-	//copy the rest of template (shaders, textures..)
+	//copy the rest of template (shaders, textures, procedural..)
 	copyFiles(templateDir, destDir, textureDirs);
 	copyFiles(templateDir, destDir, shaderDirs);
+	copyFiles(templateDir, destDir, proceduralDirs);
 	qDebug("Copied needed file at %i",tt.elapsed());
 	QStringList aqsisEnv = QProcess::systemEnvironment();
 
@@ -263,7 +264,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			qDebug("compiling shader working directory: %s",qPrintable(destDirString + QDir::separator() + dirStr));
 			QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqslName()+" *.sl";
 			qDebug("compiling command: %s",qPrintable(toRun));
-			compileProcess.start(toRun);				
+			compileProcess.start(toRun);
 			if (!compileProcess.waitForFinished(-1)) { //wait the finish of process
 				//if there's an arror of compiling the process exits normally!!
 				QString out = QString::fromLocal8Bit(compileProcess.readAllStandardError().data());
@@ -273,7 +274,6 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 				qDebug("compiling msg out: %s",qPrintable(out));
 				return false;
 			}
-
 		}
 	}
 	qDebug("Compiled shaders at %i",tt.elapsed());

@@ -9,8 +9,8 @@
 #include "RibFileStack.h"
 #include "export_rib.h"
 #include "utilities_hqrender.h"
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/meshmodel.h>
+#include <common/interfaces.h>
 
 
 
@@ -91,13 +91,23 @@ private:
   inline const QString mainFileName() { return QString("scene.rib"); }
   	
   //parser_rib.cpp
-  bool makeScene(MeshModel &m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* imagesRendered);
-  int convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, vcg::CallBackPos * cb);
+  int numberOfDummies, numOfObject;
+  struct ObjValues {
+    vcg::Matrix44f objectMatrix;
+	float objectBound[6]; // xmin, xmax, ymin, ymax, zmin, zmax
+	QStringList objectShader;
+	QString objectId;
+	QString objectDisplacementbound;
+  };
+  bool makeScene(MeshModel &m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);
+  QString parseObject(RibFileStack* files, QString destDir/*, QString** filename*/, int currentFrame, MeshModel &m, RichParameterSet &par, QStringList* textureList);
+  int convertObject(RibFileStack* files, FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues);
   int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);
   int writeMatrix(FILE* fout, vcg::Matrix44f matrix, bool transposed = true);
   QString readArray(RibFileStack* files,QString arrayString = "");
-  vcg::Matrix44f readMatrix(RibFileStack* files,QString line);
-  enum searchType{ ERR, ARCHIVE, SHADER, TEXTURE };
+  //QString readMatrix(RibFileStack* files,QString line);
+  vcg::Matrix44f getMatrix(QString matrixString);
+  enum searchType{ ERR, ARCHIVE, SHADER, TEXTURE, PROCEDURAL };
   QStringList readSearchPath(RibFileStack* files,QString line, int* type);  
 };
 

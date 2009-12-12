@@ -14,7 +14,7 @@ public:
 	bool pushFile(QString* path);
 	bool pushFile(QFile* file);
 	QString topNextLine();
-	bool isEmpty();
+	bool isEmpty() const;
 	bool addSubDirs(QStringList dirs);	
 private:
 	QStack< QPair<QFile*, QTextStream*>* >* stack;
