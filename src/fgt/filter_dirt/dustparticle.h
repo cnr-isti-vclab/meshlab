@@ -23,8 +23,8 @@
 #ifndef DUSTPARTICLE_H
 #define DUSTPARTICLE_H
 #include<vector>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/meshmodel.h>
+#include <common/interfaces.h>
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
 #include<vcg/complex/trimesh/base.h>

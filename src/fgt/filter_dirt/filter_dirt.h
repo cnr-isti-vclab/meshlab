@@ -28,15 +28,16 @@
 #include <QStringList>
 #include <QString>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/meshmodel.h>
+#include <common/interfaces.h>
 #include<vector>
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
 #include<vcg/complex/trimesh/base.h>
-
+#include "muParser.h"
 
 using namespace vcg;
+using namespace mu;
 
 class DustEdge;//Never used
 class DustVertex;//Never used
@@ -52,9 +53,19 @@ class FilterDirt : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
+    protected:
+        double x,y,z,nx,ny,nz,r,g,b,q,rad;
+        //double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
+        double v,f,v0i,v1i,v2i;
+        std::vector<std::string> v_attrNames;
+        std::vector<double> v_attrValue;
+        //std::vector<std::string> f_attrNames;
+        //std::vector<double> f_attrValue;
+        std::vector<CMeshO::PerVertexAttributeHandle<float> > vhandlers;
+        //std::vector<CMeshO::PerFaceAttributeHandle<float> > fhandlers;
 
-	public:
-		enum {FP_DIRT} ;
+    public:
+        enum {FP_DIRT} ;
 		
         FilterDirt();
         ~FilterDirt(){};
@@ -68,6 +79,8 @@ class FilterDirt : public QObject, public MeshFilterInterface
         virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
         virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
         virtual FilterClass getClass(QAction *);
+        void setPerVertexVariables(Parser &p);
+        void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
 
 };
 

@@ -28,6 +28,7 @@
 #include "dustsampler.h"
 
 
+
 #include <vcg/math/random_generator.h>
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/space/index/spatial_hashing.h>
@@ -51,49 +52,50 @@
 
 using namespace std;
 using namespace vcg;
+using namespace mu;
 
 
 
 FilterDirt::FilterDirt()
 {
-	
+
     typeList << 
-    FP_DIRT;
+            FP_DIRT;
     
-	FilterIDType tt;
-	foreach(tt , types())
+    FilterIDType tt;
+    foreach(tt , types())
 	actionList << new QAction(filterName(tt), this);
 }
 
 QString FilterDirt::filterName(FilterIDType filterId) const
 {
-	switch (filterId) {
-		case FP_DIRT:
-			return QString("Dust Accumulation");
-			break;
-		default:
-            assert(0); return QString("error");
-			break;
-	}
+    switch (filterId) {
+    case FP_DIRT:
+        return QString("Dust Accumulation");
+        break;
+    default:
+        assert(0); return QString("error");
+        break;
+    }
 }
- QString FilterDirt::filterInfo(FilterIDType filterId) const
+QString FilterDirt::filterInfo(FilterIDType filterId) const
 {
-	switch (filterId) {
-		case FP_DIRT:
-			return QString("Simulate dust accumulation over the mesh");
-			break;
-		default:
-            assert(0); return QString("error");
-			break;
-	}
+    switch (filterId) {
+    case FP_DIRT:
+        return QString("Simulate dust accumulation over the mesh");
+        break;
+    default:
+        assert(0); return QString("error");
+        break;
+    }
 }
 
- void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par){
+void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par){
     par.addParam(new RichInt("nparticles",1000,"Number of Dust Particles",""));
     return;
- }
+}
 
- int FilterDirt::getRequirements(QAction */*action*/)
+int FilterDirt::getRequirements(QAction */*action*/)
 {	
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
 }
@@ -105,9 +107,29 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
     vector<DustParticle<CMeshO> > dustParticleVec;
     DustSampler<CMeshO> ts(dustVertexVec,dustParticleVec);
     MeshModel *currMM=md.mm();
-    tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::Montecarlo(currMM->cm,ts,par.getInt("nparticles"));
+    std::string func_d = "y*y";
+    currMM->updateDataMask(MeshModel::MM_VERTQUALITY);
+    mu::Parser p;
+    setPerVertexVariables(p);
+    p.SetExpr(func_d);
 
-    //tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::WeightedMontecarlo(currMM->cm,ts,par.getInt("nparticles"));
+    CMeshO::VertexIterator vi;
+
+    for(vi=currMM->cm.vert.begin();vi!=currMM->cm.vert.end();++vi)
+    {
+        setAttributes(vi,currMM->cm);
+        try {
+            (*vi).Q() = p.Eval();
+        } catch(Parser::exception_type &e) {
+            errorMessage = e.GetMsg().c_str();
+            return false;
+        }
+    }
+
+
+    //tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::Montecarlo(currMM->cm,ts,par.getInt("nparticles"));
+
+    tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::WeightedMontecarlo(currMM->cm,ts,par.getInt("nparticles"));
 
 
     MeshModel* dmm=md.addNewMesh("Dust Mesh");
@@ -130,10 +152,57 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
     return true;
 }
 
- MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *)
+MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *)
 {
-	return MeshFilterInterface::VertexColoring;
+    return MeshFilterInterface::VertexColoring;
 }
 
+void FilterDirt::setPerVertexVariables(Parser &p)
+{
+    p.DefineVar("x", &x);
+    p.DefineVar("y", &y);
+    p.DefineVar("z", &z);
+    p.DefineVar("nx", &nx);
+    p.DefineVar("ny", &ny);
+    p.DefineVar("nz", &nz);
+    p.DefineVar("r", &r);
+    p.DefineVar("g", &g);
+    p.DefineVar("b", &b);
+    p.DefineVar("q", &q);
+    p.DefineVar("vi",&v);
+    p.DefineVar("rad",&rad);
+
+    // define var for user-defined attributes (if any exists)
+    // if vector is empty, code won't be executed
+    for(int i = 0; i < (int) v_attrNames.size(); i++)
+        p.DefineVar(v_attrNames[i],&v_attrValue[i]);
+}
+
+void FilterDirt::setAttributes(CMeshO::VertexIterator &vi, CMeshO &m)
+{
+    x = (*vi).P()[0]; // coord x
+    y = (*vi).P()[1]; // coord y
+    z = (*vi).P()[2]; // coord z
+
+    nx = (*vi).N()[0]; // normal coord x
+    ny = (*vi).N()[1]; // normal coord y
+    nz = (*vi).N()[2]; // normal coord z
+
+    r = (*vi).C()[0];  // color R
+    g = (*vi).C()[1];  // color G
+    b = (*vi).C()[2];  // color B
+
+    q = (*vi).Q();     // quality
+
+    if(tri::HasPerVertexRadius(m)) rad = (*vi).R();
+    else rad=0;
+
+    v = vi - m.vert.begin(); // zero based index of current vertex
+
+    // if user-defined attributes exist (vector is not empty)
+    //  set variables to explicit value obtained through attribute's handler
+    for(int i = 0; i < (int) v_attrValue.size(); i++)
+        v_attrValue[i] = vhandlers[i][vi];
+}
 
 Q_EXPORT_PLUGIN(FilterDirt)
