@@ -25,8 +25,8 @@
 #include <QtGui>
 
 #include "filter_fractal.h"
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/meshmodel.h>
+#include <common/interfaces.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/allocate.h>

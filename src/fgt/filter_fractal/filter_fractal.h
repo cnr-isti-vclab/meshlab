@@ -28,8 +28,8 @@
 #include <QStringList>
 #include <QString>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/meshmodel.h>
+#include <common/interfaces.h>
 
 class FractalArgs
 {

@@ -1,8 +1,11 @@
 include (../../shared.pri)
 
+#INCLUDEPATH  += ../../meshlab
+
 HEADERS      += filter_fractal.h 
 
-SOURCES      += filter_fractal.cpp 
+SOURCES      += filter_fractal.cpp \
+                ../../common/filterparameter.cpp
 
 TARGET        = filter_fractal
 TEMPLATE      = lib
