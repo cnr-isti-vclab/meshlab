@@ -224,8 +224,6 @@ public:
 	bool  suspendedEditor;
 protected:
 
-	RichParameterSet prefs;
-	void initPreferences();
 	void initializeGL();
 	void initTexture();
 	void displayInfo();
@@ -233,8 +231,7 @@ protected:
 
 	QString GetMeshInfoString();
 	void paintGL();
-	void resizeGL(int width, int height);
-	void keyReleaseEvent ( QKeyEvent * e ); 
+    void keyReleaseEvent ( QKeyEvent * e );
 	void keyPressEvent ( QKeyEvent * e ); 
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);

@@ -87,14 +87,6 @@ GLArea::GLArea(QWidget *parent, RichParameterSet *current)
 
 }
 
-void GLArea::initPreferences()
-{
-	//QSettings settings;
-	//prefs.clear();
-	//GUIDO// prefs.addColor("BackgroundTop",    settings.value("BackgroundTop").value<QColor>(), "Top Background Color", "");
-	//GUIDO// prefs.addColor("BackgroundBottom", settings.value("BackgroundBottom").value<QColor>(), "Bottom Background Color", "");
-}
-
 GLArea::~GLArea()
 {
 	// warn any iRender plugin that we're deleting glarea
@@ -444,14 +436,6 @@ void GLArea::displayInfo()
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 
-}
-
-
-void GLArea::resizeGL(int _width, int _height)
-{
-	glViewport(0,0, _width, _height);
-	curSiz.setWidth(_width);
-	curSiz.setHeight(_height);
 }
 
 
@@ -850,7 +834,11 @@ void GLArea::setSnapshotSetting(const SnapshotSetting & s)
 
 void GLArea::setView()
 {
-	GLfloat fAspect = (GLfloat)curSiz.width()/ curSiz.height();
+    glViewport(0,0, this->width(),this->height());
+    curSiz.setWidth(this->width());
+    curSiz.setHeight(this->height());
+
+    GLfloat fAspect = (GLfloat)curSiz.width()/ curSiz.height();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
