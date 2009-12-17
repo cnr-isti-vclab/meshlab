@@ -972,8 +972,10 @@ case FP_CLUSTERED_SAMPLING :
 			int sampleNum = par.getInt("SampleNum");
 			int relaxIter = par.getInt("RelaxIter");
 			int randSeed = par.getInt("RandSeed");
-			bool saveSampleFlag=par.getBool("SaveSample");
-			bool qualityFlag = par.getBool("QualityFlag");
+                        // Following two lines commented by Alessandro Giannini
+                        // Parameters "SaveSample" and "QualityFlag" not defined in initParameterSet for FP_VORONOI_CLUSTERING
+                        //bool saveSampleFlag=par.getBool("SaveSample");
+                        //bool qualityFlag = par.getBool("QualityFlag");
 			CMeshO *cm = &md.mm()->cm;				
 //			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh");
 			vector<CMeshO::VertexType *> seedVec;
