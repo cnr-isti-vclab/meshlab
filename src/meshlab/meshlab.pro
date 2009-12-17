@@ -1,6 +1,6 @@
 VCGDIR = ../../../vcglib
 GLEWDIR = ../external/glew-1.5.1
-CONFIG += debug_and_release 
+#CONFIG += debug_and_release
 
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN
