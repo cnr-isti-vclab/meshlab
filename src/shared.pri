@@ -7,7 +7,7 @@ QT += xml
 
 VCGDIR  = ../../../../vcglib
 GLEWDIR = ../../external/glew-1.5.1
-mac:LIBS += ../../meshlab/meshlab.app/Contents/MacOS/libcommon.dylib
+mac:LIBS += ../../common/libcommon.dylib
 
 
 win32-msvc2005:debug:  LIBS += -L../../common/debug -lcommon
@@ -26,6 +26,7 @@ win32-msvc2008:DEFINES += GLEW_STATIC
 # CONFIG += warn_off
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
+DEPENDPATH += $$VCGDIR
 
 # Uncomment these if you want to experiment with newer gcc compilers
 # (here using the one provided with macports)

@@ -1,5 +1,7 @@
 config += debug_and_release
 TEMPLATE      = subdirs
-SUBDIRS       = meshlab \
+CONFIG += ordered
+SUBDIRS       = common \
+                meshlab \
                 meshlabserver \
                 meshlabplugins/meshlabpluginsv12.pro

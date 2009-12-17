@@ -1,5 +1,7 @@
 TEMPLATE      = subdirs
-SUBDIRS       = meshlab \
+CONFIG       += ordered
+SUBDIRS       = common \
+                meshlab \
                 meshlabplugins/io_base \
                 meshlabplugins/filter_colorize \
 				sampleplugins/sampledecoration \
