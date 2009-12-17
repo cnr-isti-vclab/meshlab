@@ -887,6 +887,8 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) 
 					{
 									mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
+                                    int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+                                    if(degNum) GLA()->log.Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
 									mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
 									vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
 									vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
