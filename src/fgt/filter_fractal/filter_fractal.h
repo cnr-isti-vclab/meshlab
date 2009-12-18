@@ -90,6 +90,7 @@ class FilterFractal : public QObject, public MeshFilterInterface
             void computeSpectralWeights(FractalArgs &args);
             bool generateTerrain    (MeshModel &mm, FractalArgs &args, vcg::CallBackPos* cb);
             bool generateFractalMesh(MeshModel &mm, FractalArgs &args, vcg::CallBackPos* cb);
+            bool generateCraters    (MeshModel &mm);
 
             double fBM          (CoordType &point, FractalArgs &args);
             double StandardMF   (CoordType &point, FractalArgs &args);
@@ -98,7 +99,7 @@ class FilterFractal : public QObject, public MeshFilterInterface
             double RidgedMF     (CoordType &point, FractalArgs &args);
 
             float spectralWeight[21];
-            enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH};
+            enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
             double (FilterFractal::*vertexDisp[5]) (CoordType &, FractalArgs&);
 };
 

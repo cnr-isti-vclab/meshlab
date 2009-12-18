@@ -47,7 +47,7 @@ FilterFractal::FilterFractal()
     vertexDisp[3] = &FilterFractal::HybridMF;
     vertexDisp[4] = &FilterFractal::RidgedMF;
 
-    typeList << CR_FRACTAL_TERRAIN << FP_FRACTAL_MESH;
+    typeList << CR_FRACTAL_TERRAIN << FP_FRACTAL_MESH << FP_CRATERS;
     FilterIDType tt;
     foreach(tt , types())
 	actionList << new QAction(filterName(tt), this);
@@ -63,6 +63,9 @@ FilterFractal::FilterFractal()
             break;
         case FP_FRACTAL_MESH:
             return QString("Fractal Displacement");
+            break;
+        case FP_CRATERS:
+            return QString("Craters Generation");
             break;
         default:
             assert(0); return QString("error");
@@ -87,6 +90,9 @@ FilterFractal::FilterFractal()
             return desc;
         }
         break;
+        case FP_CRATERS:
+            return QString("Add craters onto the mesh.");
+        break;
         default:
             assert(0); return QString("error");
             break;
@@ -104,7 +110,6 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
     case FP_FRACTAL_MESH:
         par.addParam(new RichInt("smoothingSteps", 10, "Normals smoothing steps:", "After the subdivision step, face normals will be smoothed to make the perturbation more homogeneous. This parameter represents the number of smoothing steps." ));
         break;
-    default: assert(0);
     }
 
     par.addParam(new RichFloat("seed", 1, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
@@ -125,7 +130,6 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
             par.addParam(new RichBool("saveAsQuality", false, "Save as vertex quality", "Saves the perturbation value as vertex quality."));
         break;
         case CR_FRACTAL_TERRAIN: break;
-        default: assert(0);
     }
     return;
 }
@@ -149,6 +153,9 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterS
             args.saveAsQuality = par.getBool("saveAsQuality");
             return generateFractalMesh(*(m.mm()), args, cb);
         break;
+        case FP_CRATERS:
+            return generateCraters(*(m.mm()));
+        break;
         default: assert(0);
     }
     return false;
@@ -161,6 +168,7 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterS
             return MeshFilterInterface::MeshCreation;
         break;
         case FP_FRACTAL_MESH:
+        case FP_CRATERS:
             return MeshFilterInterface::Remeshing;
         break;
         default: assert(0);
@@ -177,6 +185,9 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &m, RichParameterS
         case FP_FRACTAL_MESH:
             return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
         break;
+        case FP_CRATERS:
+            return MeshModel::MM_NONE;
+        break;
         default: assert(0);
     }
 }
@@ -189,6 +200,7 @@ int FilterFractal::postCondition(QAction *filter) const
             return MeshModel::MM_UNKNOWN;
             break;
         case FP_FRACTAL_MESH:
+        case FP_CRATERS:
             return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL | MeshModel::MM_VERTQUALITY;
             break;
         default: assert(0);
@@ -197,6 +209,11 @@ int FilterFractal::postCondition(QAction *filter) const
 // ----------------------------------------------------------------------
 
 // -------------------- Private functions -------------------------------
+bool FilterFractal::generateCraters(MeshModel &mm)
+{
+    return true;
+}
+
 bool FilterFractal::generateTerrain(MeshModel &mm, FractalArgs &args, vcg::CallBackPos* cb)
 {
     CMeshO* m = &mm.cm;
