@@ -30,31 +30,7 @@
 
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
-
-class FractalArgs
-{
-public:
-    float octaves, remainder, l, h, offset, gain, seed, scale;
-    int subdivisionSteps, algorithmId, smoothingSteps;
-    bool saveAsQuality;
-
-    FractalArgs(int algorithmId, float seed, float octaves, float lacunarity, float fractalIncrement,
-                float offset, float gain, float scale)
-    {
-        this->algorithmId = algorithmId;
-        this->seed = seed;
-        this->octaves = octaves;
-        this->remainder = octaves - (int)octaves;
-        l = lacunarity;
-        h = fractalIncrement;
-        this->offset = offset;
-        this->gain = gain;
-        this->scale = scale;
-        this->smoothingSteps = 1;
-        this->subdivisionSteps = 2;
-        this->saveAsQuality = false;
-    }
-};
+#include "fractal_perturbation.h"
 
 class FilterFractal : public QObject, public MeshFilterInterface
 {
@@ -69,7 +45,7 @@ class FilterFractal : public QObject, public MeshFilterInterface
 
         public:
             FilterFractal();
-            ~FilterFractal(){}
+            ~FilterFractal(){delete fractalArgs;}
 
             virtual QString filterName(FilterIDType filter) const;
             virtual QString filterInfo(FilterIDType filter) const;
@@ -87,20 +63,17 @@ class FilterFractal : public QObject, public MeshFilterInterface
             virtual FilterClass getClass(QAction *);
 
        private:
-            void computeSpectralWeights(FractalArgs &args);
-            bool generateTerrain    (MeshModel &mm, FractalArgs &args, vcg::CallBackPos* cb);
-            bool generateFractalMesh(MeshModel &mm, FractalArgs &args, vcg::CallBackPos* cb);
-            bool generateCraters    (MeshModel &mm);
+            void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
+            void initParameterSetForCratersGeneration   (QAction *, MeshDocument &, RichParameterSet &);
 
-            double fBM          (CoordType &point, FractalArgs &args);
-            double StandardMF   (CoordType &point, FractalArgs &args);
-            double HeteroMF     (CoordType &point, FractalArgs &args);
-            double HybridMF     (CoordType &point, FractalArgs &args);
-            double RidgedMF     (CoordType &point, FractalArgs &args);
+            double computeFractalPerturbation(CoordType &point);
+            bool generateTerrain    (MeshModel &mm, vcg::CallBackPos* cb);
+            bool generateFractalMesh(MeshModel &mm, vcg::CallBackPos* cb);
+            bool generateCraters    (MeshDocument &md);
 
-            float spectralWeight[21];
             enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
-            double (FilterFractal::*vertexDisp[5]) (CoordType &, FractalArgs&);
+
+            FractalArgs* fractalArgs;
 };
 
 #endif
