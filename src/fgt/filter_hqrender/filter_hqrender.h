@@ -104,10 +104,11 @@ private:
   int convertObject(FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues);
   int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);
   int writeMatrix(FILE* fout, vcg::Matrix44f matrix, bool transposed = true);
-  QString readArray(RibFileStack* files,QString arrayString = "");
+  //QString readArray(RibFileStack* files,QString arrayString = "");
   vcg::Matrix44f getMatrix(QString matrixString);
   enum searchType{ ERR, ARCHIVE, SHADER, TEXTURE, PROCEDURAL };
-  QStringList readSearchPath(RibFileStack* files,QString line, int* type);  
+  //QStringList readSearchPath(RibFileStack* files,QString line, int* type);  
+  QStringList readSearchPath(const QStringList* token, int* type);
 };
 
 #endif

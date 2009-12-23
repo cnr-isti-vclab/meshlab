@@ -3,7 +3,8 @@ include (../../shared.pri)
 HEADERS       += filter_hqrender.h \
 		export_rib.h \
 		RibFileStack.h \
-		utilities_hqrender.h
+		utilities_hqrender.h \
+		ribProcedure.h
 			
 
 SOURCES       += filter_hqrender.cpp \

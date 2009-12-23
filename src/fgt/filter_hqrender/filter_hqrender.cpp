@@ -85,18 +85,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 {
 	 switch(ID(action))	 {
 		case FP_HIGHQUALITY_RENDER :  
-			{
-			//parlst.addParam(new RichInt("FormatX", 800, "Format X"));
-			//parlst.addParam(new RichInt("FormatY", 600, "Format Y"));
-			parlst.addParam(new RichInt("FormatX", 320, "Format X"));
-			parlst.addParam(new RichInt("FormatY", 200, "Format Y"));
-			parlst.addParam(new RichFloat("PixelAspectRatio", 1.0, "Pixel aspect ratio"));
-			parlst.addParam(new RichBool("Autoscale",true,"Auto-scale mesh","Check if the object will be scaled on render scene"));			
-			QStringList alignValueList = (QStringList() << "Center" << "Top" << "Bottom");
-			parlst.addParam(new RichEnum("AlignX",0,alignValueList,"Align X"));
-			parlst.addParam(new RichEnum("AlignY",0,alignValueList,"Align Y"));
-			parlst.addParam(new RichEnum("AlignZ",0,alignValueList,"Align Z"));
-			
+		{
 			//update the template list
 			templates = QStringList();
 			foreach(QString subDir, templatesDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
@@ -110,18 +99,24 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 				qDebug(qPrintable(this->errorMessage));
 			}
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));
-			//parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));
+      //parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));			
 			parlst.addParam(new RichString("ImageName", "default", "Name of output image"));
 			parlst.addParam(new RichEnum("ImageFormat", 0, imageFormatsSupported, "Output image format"));
-
-			//DON'T WORK!!not implemented
-			//delRibFiles = true;
-			//FileValue fv("");
-			//parlst.addParam(new RichSaveFile("SceneName",&fv,&FileDecoration(&fv,".rib","Name of file rib to save","If not specified, the files will be removed")));
+			parlst.addParam(new RichBool("ShowResult",true,"Show the images created?","If checked a window with the created images will be showed at finish"));
+			//parlst.addParam(new RichInt("FormatX", 800, "Format X"));
+			//parlst.addParam(new RichInt("FormatY", 600, "Format Y"));
+			parlst.addParam(new RichInt("FormatX", 320, "Format X"));
+			parlst.addParam(new RichInt("FormatY", 200, "Format Y"));
+			parlst.addParam(new RichFloat("PixelAspectRatio", 1.0, "Pixel aspect ratio"));
+			parlst.addParam(new RichBool("Autoscale",true,"Auto-scale mesh","Check if the object will be scaled on render scene"));			
+			QStringList alignValueList = (QStringList() << "Center" << "Top" << "Bottom");
+			parlst.addParam(new RichEnum("AlignX",0,alignValueList,"Align X"));
+			parlst.addParam(new RichEnum("AlignY",0,alignValueList,"Align Y"));
+			parlst.addParam(new RichEnum("AlignZ",0,alignValueList,"Align Z"));			
 			parlst.addParam(new RichBool("SaveScene",false,"Save the files created for rendering?",
 				"If checked the scene will be created in the same directory of mesh, else in the temporary system folder and then removed"));
 			break;
-			}
+		}
 		default : assert(0); 
 	}
 }
@@ -129,13 +124,8 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 // The Real Core Function doing the actual mesh processing.
 bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-	// Typical usage of the callback for showing a nice progress bar in the bottom. 
-	// First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
-	//cb(100*i/m.cm.vert.size(), "Randomly Displacing...");
-	// Log function dump textual info in the lower part of the MeshLab screen. 
-	//Log(GLLogStream::FILTER,"Successfully displaced %i vertices",m.cm.vn);
 	this->cb = cb;
-	QTime tt; tt.start(); //debug
+	QTime tt; tt.start(); //time for debuging
 	qDebug("Starting apply filter");
 
 	QString templateName = templates.at(par.getEnum("scene"));
@@ -154,6 +144,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 	//creating of destination directory
 	bool delRibFiles = !par.getBool("SaveScene");
+	//if SaveScene is true create in same mesh directory, otherwise in system temporary directry
 	QDir destDir = QDir::temp(); //system temporary directry
 	if(!delRibFiles) {
 		//destDir = QDir(par.getSaveFileName("SceneName"));
@@ -208,14 +199,14 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	
 	//check if the final rib file will render any image
 	if(imagesRendered.size() == 0) {
-		this->errorMessage = "The template hasn't statement to render any image";
+		this->errorMessage = "The template hasn't a statement to render any image";
 		return false;
 	}
 
 	//copy the rest of template (shaders, textures, procedural..)
-	copyFiles(templateDir, destDir, textureDirs);
-	copyFiles(templateDir, destDir, shaderDirs);
-	copyFiles(templateDir, destDir, proceduralDirs);
+	copyFiles(&templateDir, &destDir, &textureDirs);
+	copyFiles(&templateDir, &destDir, &shaderDirs);
+	copyFiles(&templateDir, &destDir, &proceduralDirs);
 	qDebug("Copied needed file at %i",tt.elapsed());
 	QStringList aqsisEnv = QProcess::systemEnvironment();
 
@@ -383,26 +374,27 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	cb(100, qPrintable("Created " + QString::number(imagesRendered.size())+" images"));
 
 	//run piqls with rendered image
-	QProcess piqslProcess;
-	piqslProcess.setWorkingDirectory(destDirString);
-	piqslProcess.setEnvironment(aqsisEnv);
-	toRun = aqsisDir + aqsisBinPath() + QDir::separator() + piqslName();
-	//if there'isnt image, it stops before...
-	foreach(QString img, imagesRendered) {
-		toRun += " " + img;
+	if(par.getBool("ShowResult")) {
+		QProcess piqslProcess;
+		piqslProcess.setWorkingDirectory(destDirString);
+		piqslProcess.setEnvironment(aqsisEnv);
+		toRun = aqsisDir + aqsisBinPath() + QDir::separator() + piqslName();
+		//if there'isnt image, it stops before...
+		foreach(QString img, imagesRendered) {
+			toRun += " " + img;
+		}
+		qDebug("Runnig piqsl command: %s", qPrintable(toRun));
+		piqslProcess.start(toRun);
+		
+		piqslProcess.waitForFinished(-1); //no check error...
+		piqslProcess.terminate();
 	}
-	qDebug("Runnig piqsl command: %s", qPrintable(toRun));
-	piqslProcess.start(toRun);
-	
-	piqslProcess.waitForFinished(-1); //no check error...
-	piqslProcess.terminate();
-
 	//only now we can delete recursively all created files (if it's required)
 	if(delRibFiles) {
 		QString dirName = destDir.dirName();
 		QDir temp = destDir;
 		temp.cdUp();
-		delDir(temp, dirName);
+		delDir(&temp, &dirName);
 		delRibFiles = false;
 	}
 	qDebug("finsish to apply filter at %i",tt.elapsed());
@@ -417,7 +409,7 @@ void FilterHighQualityRender::updateOutputProcess() {
 	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
 	//qDebug("aqsis.exe output: %s",qPrintable(out));
 	out = QStringList(out.trimmed().split(' ')).last(); //take only the last
-	qDebug("aqsis output taken: %s",qPrintable(out));
+	//qDebug("aqsis output taken: %s",qPrintable(out));
 	int currentCb = int(out.toFloat());
 	if(currentCb < lastCb)
 		worldBeginRendered++;
@@ -425,7 +417,7 @@ void FilterHighQualityRender::updateOutputProcess() {
 		QString::number(worldBeginRendered) + "/" + QString::number(numOfWorldBegin) + ")";
 	int value = int( (100 * (worldBeginRendered - 1) + currentCb ) / numOfWorldBegin );
 	cb(value, qPrintable(msg)); //update progress bar
-	qDebug("cb value: worldBeginRendered %i last %i current %i effective %i" ,worldBeginRendered,lastCb,currentCb,value);
+	//qDebug("cb value: worldBeginRendered %i last %i current %i effective %i" ,worldBeginRendered,lastCb,currentCb,value);
 	lastCb = currentCb;
 	//restore the signal handling
 	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));

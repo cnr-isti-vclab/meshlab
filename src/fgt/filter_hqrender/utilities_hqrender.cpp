@@ -1,14 +1,14 @@
 #include "utilities_hqrender.h"
 
 //path must have the filename
-QString UtilitiesHQR::getDirFromPath(QString* path) {
+QString UtilitiesHQR::getDirFromPath(const QString* path) {
 	//return path->left(path->lastIndexOf(QDir::separator())); //don't work :/
 	if(path->lastIndexOf('\\') == -1 && path->lastIndexOf('/') == -1)
 		return ".";
 	return path->left(std::max<int>(path->lastIndexOf('\\'),path->lastIndexOf('/')));
 }
 
-QString UtilitiesHQR::getFileNameFromPath(QString* path, bool type) {
+QString UtilitiesHQR::getFileNameFromPath(const QString* path, bool type) {
 	//return path->right(path->size() - 1 - path->lastIndexOf(QDir::separator())); //don't work :/
 	QString temp = path->right(path->size() - 1 - std::max<int>(path->lastIndexOf('\\'),path->lastIndexOf('/')));
 	if(type)
@@ -18,7 +18,7 @@ QString UtilitiesHQR::getFileNameFromPath(QString* path, bool type) {
 }
 
 //if path contains a space, is wrapped in quotes (e.g. ..\"Program files"\..)	
-QString UtilitiesHQR::quotesPath(QString* path) {
+QString UtilitiesHQR::quotesPath(const QString* path) {
 	QStringList dirs = path->split(QDir::separator());
 	QString temp("");
 	for(int i = 0; i < dirs.size(); i++) {
@@ -33,9 +33,9 @@ QString UtilitiesHQR::quotesPath(QString* path) {
 }
 
 //if dir not exist, create it
-bool UtilitiesHQR::checkDir(QString destDirString, QString path) {
-	QDir destDir(destDirString);
-	QStringList pathDirs = path.split('/');
+bool UtilitiesHQR::checkDir(const QString* destDirString, const QString* path) {
+	QDir destDir(*destDirString);
+	QStringList pathDirs = path->split('/');
 	foreach(QString dir, pathDirs) {
 		if(!destDir.cd(dir)) {
 			destDir.mkdir(dir);
@@ -47,9 +47,9 @@ bool UtilitiesHQR::checkDir(QString destDirString, QString path) {
 }
 
 //take all files in fromDir/[dirs] directories and copy them in dest/[dirs]
-bool UtilitiesHQR::copyFiles(QDir fromDir, QDir destDir, QStringList dirs) {
-	QDir src = fromDir, dest = destDir;
-	foreach(QString dir, dirs) {
+bool UtilitiesHQR::copyFiles(const QDir* fromDir, const QDir* destDir, const QStringList* dirs) {
+	QDir src = *fromDir, dest = *destDir;
+	foreach(QString dir, *dirs) {
 		if(dir != "." && src.cd(dir)) {
 			if(!dest.mkdir(dir)) {
 				if(!dest.cd(dir))
@@ -71,26 +71,26 @@ bool UtilitiesHQR::copyFiles(QDir fromDir, QDir destDir, QStringList dirs) {
 }
 
 //delete a directory and all file and subdirectory (recursive calls)
-bool UtilitiesHQR::delDir(QDir dir, QString toDel) {
-	qDebug("Deleting: %s in %s", qPrintable(toDel), qPrintable(dir.absolutePath()));
-	if(!dir.rmdir(toDel)) {
-		dir.cd(toDel);
-		qDebug("I'm in %s", qPrintable(dir.absolutePath()));
-		QStringList dirs = dir.entryList(QDir::Files|QDir::NoDotAndDotDot);
+bool UtilitiesHQR::delDir(QDir* dir, const QString* toDel) {
+	qDebug("Deleting: %s in %s", qPrintable(*toDel), qPrintable(dir->absolutePath()));
+	if(!dir->rmdir(*toDel)) {
+		dir->cd(*toDel);
+		qDebug("I'm in %s", qPrintable(dir->absolutePath()));
+		QStringList dirs = dir->entryList(QDir::Files|QDir::NoDotAndDotDot);
 		foreach(QString entry, dirs) {
-			qDebug("Cycle1 deleting file: %s in %s", qPrintable(entry), qPrintable(dir.absolutePath()));	
-			dir.remove(entry);
+			qDebug("Cycle1 deleting file: %s in %s", qPrintable(entry), qPrintable(dir->absolutePath()));	
+			dir->remove(entry);
 		}
-		dirs = dir.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
+		dirs = dir->entryList(QDir::Dirs|QDir::NoDotAndDotDot);
 		foreach(QString entry, dirs) {
-			qDebug("Cycle2 deleting dir: %s in %s", qPrintable(entry), qPrintable(dir.absolutePath()));	
-			if(!dir.rmdir(entry)) {
-				QDir temp = dir;
-				delDir(temp, entry);
+			qDebug("Cycle2 deleting dir: %s in %s", qPrintable(entry), qPrintable(dir->absolutePath()));	
+			if(!dir->rmdir(entry)) {
+				QDir temp = *dir;
+				delDir(&temp, &entry);
 			}
 		}
-		dir.cdUp();
-		if(!dir.rmdir(toDel))
+		dir->cdUp();
+		if(!dir->rmdir(*toDel))
 			return false;
 	}
 	return true;

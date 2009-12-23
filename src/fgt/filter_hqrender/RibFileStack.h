@@ -5,6 +5,7 @@
 #include <QPair>
 #include <QString>
 #include <QStringList>
+#include "ribProcedure.h"
 
 class RibFileStack {
 	
@@ -13,12 +14,22 @@ public:
 	~RibFileStack();
 	bool pushFile(QString* path);
 	bool pushFile(QFile* file);
-	QString topNextLine();
-	bool isEmpty() const;
-	bool addSubDirs(QStringList dirs);	
+	bool hasNext() const;
+	bool addSubDirs(QStringList dirs);
+	QString nextStatement(int* type, bool manageReadArchive = true);
+	bool readArchive(QString line);
 private:
 	QStack< QPair<QFile*, QTextStream*>* >* stack;
 	QString templateDir;
-	bool popFile();
 	QStringList subDir;
+	bool popFile();
+	int isRibProcedure(QString line) const;
+	bool inString(QString line) const;
+	QString nextLine;
+	int nextLineType;
+	QString topNextLine(bool* end);
+
+	QHash<QString, int>* ribProc;
+
+
 };
