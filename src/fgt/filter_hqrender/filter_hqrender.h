@@ -94,20 +94,18 @@ private:
   int numberOfDummies, numOfObject;
   struct ObjValues {
     vcg::Matrix44f objectMatrix;
-	float objectBound[6]; // xmin, xmax, ymin, ymax, zmin, zmax
-	QStringList objectShader;
-	QString objectId;
-	QString objectDisplacementbound;
+	  float objectBound[6]; // xmin, xmax, ymin, ymax, zmin, zmax
+	  QStringList objectShader;
+	  QString objectId;
+	  QString objectDisplacementbound;
   };
   bool makeScene(MeshModel &m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);
   QString parseObject(RibFileStack* files, QString destDir, int currentFrame, MeshModel &m, RichParameterSet &par, QStringList* textureList);
-  int convertObject(FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues);
+  bool convertObject(FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues);
   int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);
-  int writeMatrix(FILE* fout, vcg::Matrix44f matrix, bool transposed = true);
-  //QString readArray(RibFileStack* files,QString arrayString = "");
-  vcg::Matrix44f getMatrix(QString matrixString);
-  enum searchType{ ERR, ARCHIVE, SHADER, TEXTURE, PROCEDURAL };
-  //QStringList readSearchPath(RibFileStack* files,QString line, int* type);  
+  int writeMatrix(FILE* fout, const vcg::Matrix44f* matrix, bool transposed = true);
+  vcg::Matrix44f getMatrix(const QString* matrixString)  const;
+  enum searchType{ ERR, ARCHIVE, SHADER, TEXTURE, PROCEDURAL };  
   QStringList readSearchPath(const QStringList* token, int* type);
 };
 

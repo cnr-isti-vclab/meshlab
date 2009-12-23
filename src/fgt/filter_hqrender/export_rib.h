@@ -29,7 +29,6 @@ typedef typename SaveMeshType::FacePointer FacePointer;
 typedef typename SaveMeshType::VertexIterator VertexIterator;
 typedef typename SaveMeshType::FaceIterator FaceIterator;
 
-
 static int Save(SaveMeshType &m,  const char * filename, bool binary, CallBackPos *cb=0) {
 	return Save(m,filename, Mask::IOM_ALL, binary, cb);
 }
@@ -46,8 +45,7 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
   
   FILE *fout = fopen(filename,"wb");
   if(fout==NULL) {
-    //pi.status=::vcg::ply::E_CANTOPEN;
-	//return ::vcg::ply::E_CANTOPEN;
+    return E_CANTOPEN;
   }
 
   QTime tt; tt.start(); //debug
@@ -77,8 +75,8 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
   int incr = m.fn/cbStep, i=0;
   for(i=0; i<m.fn; i++) {
     fprintf(fout,"3 ");//\n");
-	if(i%incr == 0)
-		cb(++cbValue, "Exporting face topology");
+  	if(i%incr == 0)
+	  	cb(++cbValue, "Exporting face topology");
   }
   fprintf(fout,"\n");
   fprintf(fout,"]\n[\n");
@@ -88,18 +86,18 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
   //second step: index of vertex for face
   UpdateFlags<SaveMeshType>::VertexClearV(m);
   for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
-	if(i%incr == 0)
-		cb(++cbValue, "Exporting index of verteces");
+	  if(i%incr == 0)
+		  cb(++cbValue, "Exporting index of verteces");
     for(int j=0; j<3; ++j) {
       int indexOfVertex = (*fi).V(j) - &(m.vert[0]);
-	  fprintf(fout,"%i ",indexOfVertex);
-	  //if it's the first visit, set visited bit
-	  if(!(*fi).V(j)->IsV()) {
-		(*fi).V(j)->SetV();
+	    fprintf(fout,"%i ",indexOfVertex);
+	    //if it's the first visit, set visited bit
+	    if(!(*fi).V(j)->IsV()) {
+		    (*fi).V(j)->SetV();
+	    }
 	  }
-	}
-	//fprintf(fout,"\n");
-	fprintf(fout," ");
+	  //fprintf(fout,"\n");
+	  fprintf(fout," ");
   }
   fprintf(fout,"\n]\n");
   qDebug("coords %i",tt.elapsed());
@@ -113,9 +111,9 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
   for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi, ++i) {
     if(i%incr == 0) cb(++cbValue, "Exporting vertex coordinates");
     if(vi->IsV()) {
-	  Point3f p = mat * vi->P();
-	  fprintf(fout,"%g %g %g ",p[0],p[1],p[2]);
-	}
+	    Point3f p = mat * vi->P();
+	    fprintf(fout,"%g %g %g ",p[0],p[1],p[2]);
+	  }
   }
   fprintf(fout,"\n]\n");
   qDebug("coords %i",tt.elapsed());
@@ -125,111 +123,92 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
   if(HasPerVertexNormal(m) && (savemask & Mask::IOM_VERTNORMAL)) {
     fprintf(fout,"\"N\"\n[\n");
     for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
-	  if(i%incr == 0) cb(++cbValue, "Exporting vertex normals");
-	  //for each face, foreach vertex write normal
-	  for(int j=0; j<3; ++j) {			
-            Point3f n = mat * (*fi).V(j)->N(); //transform normal too
-            fprintf(fout,"%g %g %g ",n[0],n[1],n[2]);
+	    if(i%incr == 0) cb(++cbValue, "Exporting vertex normals");
+	    //for each face, foreach vertex write normal
+	    for(int j=0; j<3; ++j) {			
+        Point3f n = mat * (*fi).V(j)->N(); //transform normal too
+        fprintf(fout,"%g %g %g ",n[0],n[1],n[2]);
+	    }
 	  }
-	}
-	fprintf(fout,"\n]\n");
-	qDebug("normal %i",tt.elapsed());	
+	  fprintf(fout,"\n]\n");
+	  qDebug("normal %i",tt.elapsed());	
   }
   cbValue = (++step)*cbStep; i=0;
 
   //fifth step: vertex color (ignore face color?)
   if(m.HasPerVertexColor() && (savemask & Mask::IOM_VERTCOLOR)) {
     fprintf(fout,"\"Cs\"\n[\n");
-	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
-	  if(i%incr == 0) cb(++cbValue, "Exporting vertex colors");
-	  //for each face, foreach vertex write color
-	  for(int j=0; j<3; ++j) {
-	    Color4b &c=(*fi).V(j)->C();
-		fprintf(fout,"%g %g %g ",float(c[0])/255,float(c[1])/255,float(c[2])/255);
+	  for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
+	    if(i%incr == 0) cb(++cbValue, "Exporting vertex colors");
+	    //for each face, foreach vertex write color
+	    for(int j=0; j<3; ++j) {
+	      Color4b &c=(*fi).V(j)->C();
+    		fprintf(fout,"%g %g %g ",float(c[0])/255,float(c[1])/255,float(c[2])/255);
+   	  }
 	  }
-	}
-	fprintf(fout,"\n]\n");
-	qDebug("color %i",tt.elapsed());
+	  fprintf(fout,"\n]\n");
+	  qDebug("color %i",tt.elapsed());
   }
   cbValue = (++step)*cbStep; i=0;
 
   //sixth step: texture coordinates (for edge)
   if((HasPerVertexTexCoord(m) && (savemask & Mask::IOM_VERTTEXCOORD)) || 
 	  (HasPerWedgeTexCoord(m) && (savemask & Mask::IOM_WEDGTEXCOORD))) {
-	fprintf(fout,"\"st\"\n[\n"); i=0;
-	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
+  	fprintf(fout,"\"st\"\n[\n"); i=0;
+	  for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
       if(i%incr == 0) cb(++cbValue, "Exporting vertex/edge texture coordinates");
-	  //for each face, foreach vertex write uv coord
-	  for(int j=0; j<3; ++j) {
-	    fprintf(fout,"%g %g ",(*fi).WT(j).U() , 1.0 - (*fi).WT(j).V()); //v origin axis is up
+	    //for each face, foreach vertex write uv coord
+	    for(int j=0; j<3; ++j) {
+	      fprintf(fout,"%g %g ",(*fi).WT(j).U() , 1.0 - (*fi).WT(j).V()); //v origin axis is up
+	    }
 	  }
-	}
-	fprintf(fout,"\n]\n");
-	qDebug("texcoords %i",tt.elapsed());
+	  fprintf(fout,"\n]\n");
+	  qDebug("texcoords %i",tt.elapsed());
   }
   cbValue = (++step)*cbStep; i=0;
 
   //seventh step: vertex quality
   if(HasPerVertexQuality(m) && (savemask & Mask::IOM_VERTQUALITY)) {
-	fprintf(fout,"\"Q\"\n[\n"); i=0;
-	for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
-	  if(i%incr == 0) cb(++cbValue, "Exporting vertex quality");
-	  //for each face, foreach vertex write its quality
-	  for(int j=0; j<3; ++j) {
-	    fprintf(fout,"%g ",(*fi).V(j)->Q());
-	  }
-	}
-	fprintf(fout,"\n]\n");
-	qDebug("quality %i",tt.elapsed());
+	  fprintf(fout,"\"Q\"\n[\n"); i=0;
+	  for(FaceIterator fi=m.face.begin(); fi!=m.face.end(); ++fi, ++i) {
+	    if(i%incr == 0) cb(++cbValue, "Exporting vertex quality");
+	    //for each face, foreach vertex write its quality
+	    for(int j=0; j<3; ++j) {
+	      fprintf(fout,"%g ",(*fi).V(j)->Q());
+  	  }
+  	}
+  	fprintf(fout,"\n]\n");
+  	qDebug("quality %i",tt.elapsed());
   }
   cb(100, "Exporting completed");
   fclose(fout);
 
-  return 0;
+  return RibError::E_NOERROR;
 }
 
-static const char *ErrorMsg(int error)
-{/*
-  static std::vector<std::string> ply_error_msg;
-  if(ply_error_msg.empty())
-  {
-    ply_error_msg.resize(PlyInfo::E_MAXPLYINFOERRORS );
-    ply_error_msg[ply::E_NOERROR				]="No errors";
-	  ply_error_msg[ply::E_CANTOPEN				]="Can't open file";
-    ply_error_msg[ply::E_NOTHEADER ]="Header not found";
-	  ply_error_msg[ply::E_UNESPECTEDEOF	]="Eof in header";
-	  ply_error_msg[ply::E_NOFORMAT				]="Format not found";
-	  ply_error_msg[ply::E_SYNTAX				]="Syntax error on header";
-	  ply_error_msg[ply::E_PROPOUTOFELEMENT]="Property without element";
-	  ply_error_msg[ply::E_BADTYPENAME		]="Bad type name";
-	  ply_error_msg[ply::E_ELEMNOTFOUND		]="Element not found";
-	  ply_error_msg[ply::E_PROPNOTFOUND		]="Property not found";
-	  ply_error_msg[ply::E_BADTYPE				]="Bad type on addtoread";
-	  ply_error_msg[ply::E_INCOMPATIBLETYPE]="Incompatible type";
-	  ply_error_msg[ply::E_BADCAST				]="Bad cast";
-
-    ply_error_msg[PlyInfo::E_NO_VERTEX      ]="No vertex field found";
-    ply_error_msg[PlyInfo::E_NO_FACE        ]="No face field found";
-	  ply_error_msg[PlyInfo::E_SHORTFILE      ]="Unespected eof";
-	  ply_error_msg[PlyInfo::E_NO_3VERTINFACE ]="Face with more than 3 vertices";
-	  ply_error_msg[PlyInfo::E_BAD_VERT_INDEX ]="Bad vertex index in face";
-	  ply_error_msg[PlyInfo::E_NO_6TCOORD     ]="Face with no 6 texture coordinates";
-	  ply_error_msg[PlyInfo::E_DIFFER_COLORS  ]="Number of color differ from vertices";
-  }
-*/
-  static const char * dae_error_msg[] =
-		{
-			"No errors"
-		};
-
-		if(error>0 || error<0) return "Unknown error";
-		else return dae_error_msg[error];
-
- 
+enum RibError {
+  E_NOERROR,				// 0
+		// Errors of  open(..)
+	E_CANTOPEN,				// 1
+	E_MAXRIBERRORS
 };
 
-  static int GetExportMaskCapability()
+static const char *ErrorMsg(int error) {
+  static std::vector<std::string> rib_error_msg;
+  if(rib_error_msg.empty())
   {
+    rib_error_msg.resize(E_MAXRIBERRORS);
+    rib_error_msg[E_NOERROR		]="No errors";
+	  rib_error_msg[E_CANTOPEN  ]="Can't open file";    
+  }
+
+  if(error > E_MAXRIBERRORS || error < 0)
+    return "Unknown error";
+  else
+    return rib_error_msg[error].c_str();
+};
+
+ static int GetExportMaskCapability() {
 	  int capability = 0;			
 	  capability |= vcg::tri::io::Mask::IOM_VERTCOORD    ;
 	  //capability |= vcg::tri::io::Mask::IOM_VERTFLAGS    ;

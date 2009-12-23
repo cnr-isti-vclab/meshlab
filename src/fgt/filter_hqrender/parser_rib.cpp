@@ -24,7 +24,8 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 	FILE* fout;
 	fout = fopen(qPrintable(destDirString + QDir::separator() + mainFileName()),"wb");
 	if(fout==NULL)	{
-	
+    this->errorMessage = "Impossible to create file: " + destDirString + QDir::separator() + mainFileName();
+    return false;
 	}
 	qDebug("Starting to write rib file into %s",qPrintable(destDirString + QDir::separator() + mainFileName()));
 	
@@ -73,8 +74,7 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 							*textureDirs = dirList;
 							break;
 						case FilterHighQualityRender::PROCEDURAL:
-							*proceduralDirs = dirList;
-					
+							*proceduralDirs = dirList;					
 							break;
 						case FilterHighQualityRender::ERR:
 							//ignore: maybe an error or another searchpath type (not in RISpec3.2)
@@ -98,7 +98,10 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 			case ribParser::FRAMEBEGIN:
 			{
 				QStringList token = ribParser::splitStatement(&line);				
-				currentFrame = token[1].toInt(); //no check on cast
+        bool isNum;
+        int i = token[1].toInt(&isNum);
+				if(isNum)
+          currentFrame = i;
 				if(currentFrame == 1) { //questo è casino con animazioni
 					if(numOfFrames > 0)
 						isFrameDeclaration = true;
@@ -145,8 +148,7 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 			{
 				//transformation camera
 				if(numOfFrames > 0) {
-					//line = readArray(&files,line); ////
-					transfCamera = getMatrix(line);					
+					transfCamera = getMatrix(&line);					
 				}
 				break;
 			}
@@ -170,6 +172,9 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 					fprintf(fout,"ReadArchive \"world.rib\"\n");
 					fout = fopen(qPrintable(filename),"wb");
 					if(fout == NULL)	{
+            this->errorMessage = "Impossible to create file: " + filename;
+            fclose(fmain);
+            return false;
 					}
 				}
 				break;
@@ -192,8 +197,12 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 				QString filename = parseObject(&files, destDirString, currentFrame, m, par, textureList);
 				qDebug("fuori: %s",qPrintable(filename));
 				writeLine = false;
+        if(filename == "") { //error in parseObject
+          fclose(fmain);
+          return false;
+        }
 				fprintf(fout,"ReadArchive \"%s\"\n",qPrintable(filename));
-				break;
+        break;
 			}
 			case ribParser::NOMORESTATEMENT:
 			{
@@ -219,6 +228,8 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 	QString name = "object" + QString::number(numOfObject) + ".rib";
 	FILE* fout = fopen(qPrintable(destDirString + QDir::separator() + name),"wb");
 	if(fout == NULL) {
+    this->errorMessage = "Impossible to create file: " + destDirString + QDir::separator() + name;
+    return "";
 	}
 	qDebug("parse object");
 	//if it's a dummy object, i need the the follow value:
@@ -255,7 +266,7 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 			}
 			case ribParser::TRANSFORM:
 			{
-				current->objectMatrix = getMatrix(line);
+				current->objectMatrix = getMatrix(&line);
 				break;
 			}
 			case ribParser::BOUND:
@@ -317,7 +328,9 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 	}
 	fclose(fout);
 
-	if(isDummy) {
+	if(!isDummy)
+		numOfObject++;
+	else {
 		qDebug("Found dummy object");
 		//delete the previous file
 		QDir tmp = QDir(destDirString);
@@ -327,18 +340,20 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 		numberOfDummies++;
 		FILE *fmesh = fopen(qPrintable(destDirString + QDir::separator() + name),"wb");
 		if(fmesh==NULL) {
+      this->errorMessage = "Impossible to create the file: " + destDirString + QDir::separator() + name;
+      return "";
 		}
-		convertObject(fmesh, destDirString, m, par, textureList, current);
-		fclose(fmesh);		
-	} 
-	else
-		numOfObject++;
+    bool res = convertObject(fmesh, destDirString, m, par, textureList, current);
+    fclose(fmesh);
+    if(!res)
+      return "";		
+	}
 	delete current;
 	return name;
 }
 
 //write on a opened file the attribute of object entity
-int FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues)
+bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues)
 {	
 	fprintf(fout,"AttributeBegin\n");
 	//name
@@ -397,7 +412,7 @@ int FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshMode
 	
 	vcg::Matrix44f result = templateMatrix * alignMatrix * scaleMatrix * translateBBMatrix;
 	//write transformation matrix (after transpose it)
-	writeMatrix(fout,result);
+	writeMatrix(fout, &result);
 	QString bound = "Bound";
 	for(int i=0; i<6; i++)
 		bound += " " + QString::number(dummyValues->objectBound[i]);
@@ -434,11 +449,18 @@ int FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshMode
 		//make the conversion only once
 		convertedGeometry = true;
 		QString geometryDest = destDir + QDir::separator() + filename;			
-		vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, false, cb);
-		Log(GLLogStream::FILTER,"Successfully converted mesh");					
+		int res = vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, false, cb);
+    if(res != vcg::tri::io::ExporterRIB<CMeshO>::E_NOERROR) {
+      fclose(fout);
+	    this->errorMessage = QString(vcg::tri::io::ExporterRIB<CMeshO>::ErrorMsg(res));
+      return false;
+    }
+    else
+		  Log(GLLogStream::FILTER,"Successfully converted mesh");
 	}
 	fprintf(fout,"AttributeEnd\n");
-	return 0;  //errors...
+  fclose(fout);
+	return true;
 }
 
 
@@ -470,7 +492,7 @@ int FilterHighQualityRender::makeAnimation(FILE* fout, int numOfFrame,vcg::Matri
 		float rot = float(360*(frame-1)/numOfFrame);
 		result = result.SetRotateDeg(rot,vcg::Point3f(0.0,0.0,1.0));
 		result = transfCamera * result;
-		writeMatrix(fout,result);
+		writeMatrix(fout, &result);
 		fprintf(fout,"ReadArchive \"world.rib\"\nFrameEnd\n");
 	}
 	return 0; //errors
@@ -501,20 +523,20 @@ QStringList FilterHighQualityRender::readSearchPath(const QStringList* token, in
 }
 
 //write a vcg::Matrix44f to file
-int FilterHighQualityRender::writeMatrix(FILE* fout, vcg::Matrix44f matrix, bool transposed) {
+int FilterHighQualityRender::writeMatrix(FILE* fout, const vcg::Matrix44f* matrix, bool transposed) {
 	fprintf(fout,"Transform [ ");
 	for(int i = 0; i<4; i++)
 		for(int j = 0; j<4; j++)
-			fprintf(fout,"%f ",(transposed)? matrix.ElementAt(j,i) : matrix.ElementAt(i,j));
+			fprintf(fout,"%f ",(transposed)? matrix->ElementAt(j,i) : matrix->ElementAt(i,j));
 	fprintf(fout,"]\n");
 	return 0;
 }
 
 //get a vcg::Matrix44f from line (and transpose it)
-vcg::Matrix44f FilterHighQualityRender::getMatrix(QString matrixString) {
+vcg::Matrix44f FilterHighQualityRender::getMatrix(const QString* matrixString) const {
 	float t[16];
 	int k=0;
-	QStringList list = matrixString.split(' ');
+	QStringList list = matrixString->split(' ');
 	for(int i=0; i<list.size(); i++) {
 		if(list[i].trimmed().contains('[') || list[i].trimmed().contains(']')) {
 			list[i] = list[i].remove('[');

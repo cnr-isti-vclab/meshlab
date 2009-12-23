@@ -324,17 +324,17 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//every time the render process write a message, receive a signal
 	worldBeginRendered = 1; lastCb = 0;
 	qDebug("number of world begin found: %i",numOfWorldBegin);
-	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
-	connect(&renderProcess, SIGNAL(readyReadStandardError()),this, SLOT(errSgn()));
+	connect(&renderProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(updateOutputProcess()));
+	connect(&renderProcess, SIGNAL(readyReadStandardError()) , this, SLOT(errSgn()));
 	cb(0, "Rendering image with Aqsis");
 #if !defined(NO_RENDERING)
-	renderProcess.start(toRun);	
+	renderProcess.start(toRun);
 	if (!renderProcess.waitForFinished(-1)) {
 		this->errorMessage = "An error occured in Aqsis";
-        return false;
+    return false;
 	}
 #endif
-	disconnect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));	
+	disconnect(&renderProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(updateOutputProcess()));	
 	//if process Aqsis is stopped, no image are created
 	qDebug("aqsis process finished");
 	
@@ -369,10 +369,10 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	}
 
 	qDebug("end: %i",tt.elapsed());
-	Log(GLLogStream::FILTER,"Successfully created high quality image");
-	//Log(GLLogStream::FILTER,"Aqsis has rendered image successfully");
 	cb(100, qPrintable("Created " + QString::number(imagesRendered.size())+" images"));
-
+  Log(GLLogStream::FILTER,"Successfully created high quality image");
+	//Log(GLLogStream::FILTER,"Aqsis has rendered image successfully");
+	
 	//run piqls with rendered image
 	if(par.getBool("ShowResult")) {
 		QProcess piqslProcess;
