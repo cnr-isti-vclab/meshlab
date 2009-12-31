@@ -5,12 +5,14 @@ HEADERS = filter_physics.h \
     ODEFacade.h \
     PhysicsEngineFacade.h \
     MeshSubFilter.h \
-    GravitySubFilter.h
+    GravitySubFilter.h \
+    RandomDropFilter.h
 SOURCES = filter_physics.cpp \
     ODEFacade.cpp \
     GravitySubFilter.cpp \
     ../../common/filterparameter.cpp \
-    MeshSubFilter.cpp
+    MeshSubFilter.cpp \
+    RandomDropFilter.cpp
 TARGET = filter_physics
 TEMPLATE = lib
 QT += opengl
