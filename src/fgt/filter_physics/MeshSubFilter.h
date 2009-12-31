@@ -5,8 +5,8 @@
 #ifndef MESHSUBFILTER_H
 #define MESHSUBFILTER_H
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/meshmodel.h>
+#include <common/interfaces.h>
 
 #include <vcg/math/matrix44.h>
 

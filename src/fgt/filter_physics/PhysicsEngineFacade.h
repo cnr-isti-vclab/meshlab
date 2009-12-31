@@ -5,7 +5,7 @@
 #ifndef PHYSICS_ENGINE_FACADE_H
 #define PHYSICS_ENGINE_FACADE_H
 
-#include <meshlab/meshmodel.h>
+#include <common/meshmodel.h>
 
 #include <vcg/math/matrix44.h>
 
