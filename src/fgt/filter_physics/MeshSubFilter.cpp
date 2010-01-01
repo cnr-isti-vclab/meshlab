@@ -20,3 +20,7 @@ bool MeshSubFilter::configurationHasChanged(RichParameterSet& par){
     m_seconds = par.getInt("seconds");
     return changed;
 }
+
+void MeshSubFilter::initialize(MeshDocument&, RichParameterSet&){
+    m_steps = m_seconds / m_stepSize;
+}

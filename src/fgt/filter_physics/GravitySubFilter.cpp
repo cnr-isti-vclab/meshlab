@@ -31,6 +31,8 @@ bool GravitySubFilter::configurationHasChanged(RichParameterSet& par){
 }
 
 void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par){
+    MeshSubFilter::initialize(md, par);
+
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
     m_engine.setGlobalForce(gravity);
@@ -42,7 +44,6 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par){
     for(unsigned int i = 0; i < md.size(); i++)
         m_layersTrans.push_back(LayerTransformations());
 
-    m_steps = m_seconds / m_stepSize;
     for(int i = 0; i <= m_steps; i++){
         for(unsigned int j = 0; j < md.size(); j++){
             m_layersTrans[j].push_back(m_engine.getTransformationMatrix(*md.getMesh(j)));

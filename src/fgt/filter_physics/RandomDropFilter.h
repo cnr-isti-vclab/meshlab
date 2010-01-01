@@ -22,8 +22,8 @@ protected:
 
 private:
     int m_randomLayer;
-    int m_distance;
-    float m_dropRate;
+    int m_dropRate;
+    float m_distance;
     ODEFacade m_engine;
 };
 

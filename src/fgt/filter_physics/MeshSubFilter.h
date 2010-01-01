@@ -22,7 +22,7 @@ protected:
     typedef std::vector<vcg::Matrix44f> LayerTransformations;
     typedef std::vector<LayerTransformations> LayersTransformations;
 
-    virtual void initialize(MeshDocument&, RichParameterSet&) = 0;
+    virtual void initialize(MeshDocument&, RichParameterSet&);
     virtual bool configurationHasChanged(RichParameterSet& par);
 
     int m_steps;
