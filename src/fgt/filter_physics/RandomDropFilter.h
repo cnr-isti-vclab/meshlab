@@ -18,7 +18,7 @@ public:
 protected:
     virtual void initialize(MeshDocument&, RichParameterSet&);
     virtual bool configurationHasChanged(RichParameterSet& par);
-    void addRandomObject(MeshDocument& md);
+    virtual void addRandomObject(MeshDocument& md);
 
 private:
     int m_randomLayer;

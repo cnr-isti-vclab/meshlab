@@ -1,6 +1,6 @@
 #include "MeshSubFilter.h"
 
-MeshSubFilter::MeshSubFilter() : m_stepSize(0.01), m_steps(-1), m_seconds(-1){
+MeshSubFilter::MeshSubFilter() : m_steps(-1), m_seconds(-1), m_stepSize(0.01), m_stepsPerSecond(1.0f/m_stepSize) {
 }
 
 void MeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){

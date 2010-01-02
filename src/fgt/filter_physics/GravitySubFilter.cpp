@@ -37,15 +37,14 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par){
     m_engine.clear();
     m_engine.setGlobalForce(gravity);
 
-    for(unsigned int i = 0; i < md.size(); i++)
+    for(int i = 0; i < md.size(); i++)
         m_engine.registerTriMesh(*md.getMesh(i), m_currentSceneryLayer == i ? true : false);
 
     m_layersTrans.clear();
-    for(unsigned int i = 0; i < md.size(); i++)
-        m_layersTrans.push_back(LayerTransformations());
+    m_layersTrans.resize(md.size());
 
     for(int i = 0; i <= m_steps; i++){
-        for(unsigned int j = 0; j < md.size(); j++){
+        for(int j = 0; j < md.size(); j++){
             m_layersTrans[j].push_back(m_engine.getTransformationMatrix(*md.getMesh(j)));
         }
         m_engine.integrate(m_stepSize);

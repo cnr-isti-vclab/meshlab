@@ -28,6 +28,7 @@ protected:
     int m_steps;
     int m_seconds;
     const float m_stepSize;
+    const unsigned int m_stepsPerSecond;
     LayersTransformations m_layersTrans;
 };
 
