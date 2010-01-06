@@ -9,6 +9,7 @@ using namespace vcg;
 FilterPhysics::FilterPhysics(){
     typeList << FP_PHYSICS_GRAVITY;
     typeList << FP_PHYSICS_RNDDROP;
+    typeList << FP_PHYSICS_RNDFILL;
     
     FilterIDType tt;
     foreach(tt , types())
@@ -24,6 +25,8 @@ FilterPhysics::~FilterPhysics(){
         return QString("Physics gravity demo");
     case FP_PHYSICS_RNDDROP:
         return QString("Physics random drop demo");
+    case FP_PHYSICS_RNDFILL:
+        return QString("Physics random fill demo");
     default:
         assert(0);
         break;
@@ -35,6 +38,8 @@ FilterPhysics::~FilterPhysics(){
         return QString("Runs a physics gravity simulation on a set of meshes");
     case FP_PHYSICS_RNDDROP:
         return QString("Runs a random physics gravity simulation on a set of meshes");
+    case FP_PHYSICS_RNDFILL:
+        return QString("Runs a random physics mesh fill simulation");
     default:
         assert(0);
         break;
@@ -49,6 +54,8 @@ void FilterPhysics::initParameterSet(QAction* action,MeshDocument& md, RichParam
     case FP_PHYSICS_RNDDROP:
         m_rndDropFilter.initParameterSet(action, md, par);
         break;
+    case FP_PHYSICS_RNDFILL:
+        m_rndFillFilter.initParameterSet(action, md, par);
     default:
         break;
     }
@@ -61,6 +68,9 @@ bool FilterPhysics::applyFilter(QAction* action, MeshDocument &md, RichParameter
         break;
     case FP_PHYSICS_RNDDROP:
         return m_rndDropFilter.applyFilter(action, md, par, cb);
+        break;
+    case FP_PHYSICS_RNDFILL:
+        return m_rndFillFilter.applyFilter(action, md, par, cb);
         break;
     default:
         break;

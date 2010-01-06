@@ -11,7 +11,7 @@ RandomDropFilter::RandomDropFilter() : m_randomLayer(-1), m_dropRate(-1), m_dist
 }
 
 void RandomDropFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
-    MeshSubFilter::initParameterSet(action, md, par);
+    DynamicMeshSubFilter::initParameterSet(action, md, par);
 
     QStringList layers;
     for(int i = 1; i <= md.size(); i++){
@@ -24,7 +24,7 @@ void RandomDropFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
 }
 
 bool RandomDropFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    MeshSubFilter::applyFilter(filter, md, par, cb);
+    DynamicMeshSubFilter::applyFilter(filter, md, par, cb);
 
     int currentStep  = (par.getDynamicFloat("timeline") * m_steps) / m_stepsPerSecond;
     int randomObjects = m_seconds/m_dropRate;
@@ -43,7 +43,7 @@ bool RandomDropFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
 }
 
 void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par){
-    MeshSubFilter::initialize(md, par);
+    DynamicMeshSubFilter::initialize(md, par);
 
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
@@ -66,6 +66,10 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par){
 
     m_layersTrans.clear();
     m_layersTrans.resize(md.size());
+
+    for(int i = 0; i < m_layersTrans.size(); i++){
+        m_layersTrans[i].reserve(m_steps);
+    }
 
     for(int i = 0; i <= m_steps; i++){
         int currentRndObject = md.size() - randomObjects + i/(m_stepsPerSecond*m_dropRate);
@@ -99,8 +103,8 @@ void RandomDropFilter::addRandomObject(MeshDocument& md){
     meshCopy->visible = false;
 }
 
-bool RandomDropFilter::configurationHasChanged(RichParameterSet& par){
-    bool changed = MeshSubFilter::configurationHasChanged(par) ||
+bool RandomDropFilter::configurationHasChanged(MeshDocument& md, RichParameterSet& par){
+    bool changed = DynamicMeshSubFilter::configurationHasChanged(md, par) ||
                    m_randomLayer != par.getEnum("randomLayer") ||
                    m_distance != par.getFloat("distance") ||
                    m_dropRate != par.getInt("dropRate");

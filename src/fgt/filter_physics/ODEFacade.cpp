@@ -23,6 +23,9 @@ void ODEFacade::initialize(){
 	m_world = dWorldCreate();
 	m_space = dSimpleSpaceCreate(0);
         m_contactGroup = dJointGroupCreate(m_maxContacts);
+
+        /*dWorldSetCFM(m_world, 0.001f);
+        dWorldSetERP(m_world, 0.9f);*/
 }
 
 void ODEFacade::clear(){
@@ -99,6 +102,7 @@ void ODEFacade::setAsRigidBody(MeshModel& mesh, bool isRigidBody){
         dMassSetParameters(&m_registeredMeshes[index()].second->mass, inertia.Mass(),
                            inertia.CenterOfMass()[0], inertia.CenterOfMass()[1], inertia.CenterOfMass()[2],
                            IT[0][0], IT[1][1], IT[2][2], IT[0][1], IT[0][2], IT[1][2]);
+        dBodySetMass(m_registeredMeshes[index()].second->body, &m_registeredMeshes[index()].second->mass);
 
     }
 
@@ -173,6 +177,12 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
         contacts[i].surface.bounce = 0.1;
         contacts[i].surface.bounce_vel = 0.1;
         contacts[i].surface.soft_cfm = 0.01;
+        /*contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
+        contacts[i].surface.mu = dInfinity;
+        contacts[i].surface.mu2 = 0;
+        contacts[i].surface.bounce = 0.1;
+        contacts[i].surface.bounce_vel = 0.1;
+        contacts[i].surface.soft_cfm = 0.01;*/
     }
 
     int collisions = dCollide(o1, o2, m_maxContacts, &contacts[0].geom, sizeof(dContact));

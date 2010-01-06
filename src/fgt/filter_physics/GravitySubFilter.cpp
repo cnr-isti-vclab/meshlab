@@ -4,7 +4,7 @@ GravitySubFilter::GravitySubFilter() : m_currentSceneryLayer(-1){
 }
 
 void GravitySubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet& par){
-    MeshSubFilter::initParameterSet(action, md, par);
+    DynamicMeshSubFilter::initParameterSet(action, md, par);
 
     QStringList layers;
     for(int i = 1; i <= md.size(); i++){
@@ -14,7 +14,7 @@ void GravitySubFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
 }
 
 bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    MeshSubFilter::applyFilter(filter, md, par, cb);
+    DynamicMeshSubFilter::applyFilter(filter, md, par, cb);
 
     int currentStep  = (par.getDynamicFloat("timeline") * m_steps) / 100;
 
@@ -24,14 +24,14 @@ bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     return true;
 }
 
-bool GravitySubFilter::configurationHasChanged(RichParameterSet& par){
-    bool changed = MeshSubFilter::configurationHasChanged(par) || m_currentSceneryLayer != par.getEnum("layers");
+bool GravitySubFilter::configurationHasChanged(MeshDocument& md, RichParameterSet& par){
+    bool changed = DynamicMeshSubFilter::configurationHasChanged(md, par) || m_currentSceneryLayer != par.getEnum("layers");
     m_currentSceneryLayer = par.getEnum("layers");
     return changed;
 }
 
 void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par){
-    MeshSubFilter::initialize(md, par);
+    DynamicMeshSubFilter::initialize(md, par);
 
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
@@ -42,6 +42,10 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par){
 
     m_layersTrans.clear();
     m_layersTrans.resize(md.size());
+
+    for(int i = 0; i < m_layersTrans.size(); i++){
+        m_layersTrans[i].reserve(m_steps);
+    }
 
     for(int i = 0; i <= m_steps; i++){
         for(int j = 0; j < md.size(); j++){

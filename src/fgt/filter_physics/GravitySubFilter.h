@@ -5,10 +5,10 @@
 #ifndef GRAVITYSUBFILTER_H
 #define GRAVITYSUBFILTER_H
 
-#include "MeshSubFilter.h"
+#include "DynamicMeshSubFilter.h"
 #include "ODEFacade.h"
 
-class GravitySubFilter : public MeshSubFilter{
+class GravitySubFilter : public DynamicMeshSubFilter{
 public:
     GravitySubFilter();
 
@@ -17,7 +17,7 @@ public:
 
 protected:
     virtual void initialize(MeshDocument&, RichParameterSet&);
-    virtual bool configurationHasChanged(RichParameterSet& par);
+    virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
 
 private:
     int m_currentSceneryLayer;

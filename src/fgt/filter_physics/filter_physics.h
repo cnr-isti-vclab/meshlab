@@ -8,6 +8,7 @@
 #include "ODEFacade.h"
 #include "GravitySubFilter.h"
 #include "RandomDropFilter.h"
+#include "RandomFillFilter.h"
 
 #include <QObject>
 #include <QStringList>
@@ -22,7 +23,7 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     Q_INTERFACES(MeshFilterInterface)
 
     public:
-    enum {FP_PHYSICS_GRAVITY, FP_PHYSICS_RNDDROP} ;
+    enum {FP_PHYSICS_GRAVITY, FP_PHYSICS_RNDDROP, FP_PHYSICS_RNDFILL} ;
 
     FilterPhysics();
     ~FilterPhysics();
@@ -42,6 +43,7 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     private:
     GravitySubFilter m_gravityFilter;
     RandomDropFilter m_rndDropFilter;
+    RandomFillFilter m_rndFillFilter;
 };
 
 #endif

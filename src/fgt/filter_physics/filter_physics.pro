@@ -5,12 +5,15 @@ HEADERS = filter_physics.h \
     PhysicsEngineFacade.h \
     MeshSubFilter.h \
     GravitySubFilter.h \
-    RandomDropFilter.h
+    RandomDropFilter.h \
+    RandomFillFilter.h \
+    DynamicMeshSubFilter.h
 SOURCES = filter_physics.cpp \
     ODEFacade.cpp \
     GravitySubFilter.cpp \
-    MeshSubFilter.cpp \
-    RandomDropFilter.cpp
+    RandomDropFilter.cpp \
+    RandomFillFilter.cpp \
+    DynamicMeshSubFilter.cpp
 TARGET = filter_physics
 CONFIG += x86
 LIBS += -L/usr/local/lib \

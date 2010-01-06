@@ -11,25 +11,12 @@
 #include <vcg/math/matrix44.h>
 
 #include <vector>
+#include <string>
 
 class MeshSubFilter{
 public:
-    MeshSubFilter();
-    virtual void initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par);
-    virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
-
-protected:
-    typedef std::vector<vcg::Matrix44f> LayerTransformations;
-    typedef std::vector<LayerTransformations> LayersTransformations;
-
-    virtual void initialize(MeshDocument&, RichParameterSet&);
-    virtual bool configurationHasChanged(RichParameterSet& par);
-
-    int m_steps;
-    int m_seconds;
-    const float m_stepSize;
-    const unsigned int m_stepsPerSecond;
-    LayersTransformations m_layersTrans;
+    virtual void initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par) = 0;
+    virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb) = 0;
 };
 
 #endif // MESHSUBFILTER_H

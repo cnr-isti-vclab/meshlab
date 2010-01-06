@@ -5,10 +5,10 @@
 #ifndef RANDOMDROPFILTER_H
 #define RANDOMDROPFILTER_H
 
-#include "MeshSubFilter.h"
+#include "DynamicMeshSubFilter.h"
 #include "ODEFacade.h"
 
-class RandomDropFilter : public MeshSubFilter{
+class RandomDropFilter : public DynamicMeshSubFilter{
 public:
     RandomDropFilter();
 
@@ -17,7 +17,7 @@ public:
 
 protected:
     virtual void initialize(MeshDocument&, RichParameterSet&);
-    virtual bool configurationHasChanged(RichParameterSet& par);
+    virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
     virtual void addRandomObject(MeshDocument& md);
 
 private:
