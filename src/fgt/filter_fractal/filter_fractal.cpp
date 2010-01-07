@@ -110,14 +110,14 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
 
 void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, MeshDocument &md, RichParameterSet &par)
 {
-    par.addParam(new RichDynamicFloat("scaleFactor", 0.4, 0, 1.0, "Scale factor:", "Scales down the resulting perturbation of the given value."));
+    par.addParam(new RichDynamicFloat("heightFactor", 0.4, -1.0, 1.0, "Height factor:", "Scales the resulting perturbation height of the given value."));
 
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
         par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable results."));
         break;
     case FP_FRACTAL_MESH:
-        par.addParam(new RichInt("smoothingSteps", 10, "Normals smoothing steps:", "After the subdivision step, face normals will be smoothed to make the perturbation more homogeneous. This parameter represents the number of smoothing steps." ));
+        par.addParam(new RichInt("smoothingSteps", 10, "Normals smoothing steps:", "Face normals will be smoothed to make the perturbation more homogeneous. This parameter represents the number of smoothing steps." ));
         break;
     }
 
@@ -152,7 +152,7 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameter
 {
     fractalArgs->setFields(par.getEnum("algorithm"),par.getFloat("seed"), par.getFloat("octaves"),
                            par.getFloat("lacunarity"), par.getFloat("fractalIncrement"), par.getFloat("offset"),
-                           par.getFloat("gain"), par.getDynamicFloat("scaleFactor"));
+                           par.getFloat("gain"), par.getDynamicFloat("heightFactor"));
 
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
@@ -356,7 +356,7 @@ double FilterFractal::computeFractalPerturbation(CoordType &point)
         break;
     }
 
-    return perturbation * fractalArgs->scale;
+    return perturbation;
 }
 // ---------------------------------------------------------------------
 

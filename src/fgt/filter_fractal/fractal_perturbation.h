@@ -9,7 +9,7 @@ using namespace vcg;
 class FractalArgs
 {
 public:
-    float octaves, remainder, l, h, offset, gain, seed, scale;
+    float octaves, remainder, l, h, offset, gain, seed, heightFactor;
     int subdivisionSteps, algorithmId, smoothingSteps;
     bool saveAsQuality;
     float spectralWeight[21];
@@ -17,7 +17,7 @@ public:
     FractalArgs(){}
 
     void setFields(int algorithmId, float seed, float octaves, float lacunarity, float fractalIncrement,
-                   float offset, float gain, float scale)
+                   float offset, float gain, float heightFactor)
     {
         this->algorithmId = algorithmId;
         this->seed = seed;
@@ -27,7 +27,7 @@ public:
         h = fractalIncrement;
         this->offset = offset;
         this->gain = gain;
-        this->scale = scale;
+        this->heightFactor = heightFactor;
         updateSpectralWeights();
     }
 
@@ -61,7 +61,7 @@ public:
         if(args.remainder != .0)
             noise += (args.remainder * math::Perlin::Noise(x, y, z) * args.spectralWeight[(int)args.octaves]);
 
-        return noise;
+        return noise * args.heightFactor;
     }
 
     static double StandardMF(CoordType &point, FractalArgs &args)
@@ -78,7 +78,7 @@ public:
             noise *= (args.remainder * (math::Perlin::Noise(x, y, z) *
                                         args.spectralWeight[(int)args.octaves] + args.offset));
 
-        return noise;
+        return noise * args.heightFactor;
     }
 
     static double HeteroMF(CoordType &point, FractalArgs &args)
@@ -101,7 +101,7 @@ public:
             increment *= args.remainder;
             noise += increment;
         }
-        return noise;
+        return noise * args.heightFactor;
     }
 
     static double HybridMF(CoordType &point, FractalArgs &args)
@@ -125,12 +125,12 @@ public:
             signal = (args.offset + math::Perlin::Noise(x, y, z)) * args.spectralWeight[(int)args.octaves];
             noise += (weight * signal * args.remainder);
         }
-        return noise;
+        return noise * args.heightFactor;
     }
 
     static double RidgedMF(CoordType &point, FractalArgs &args)
     {
-        double x = point[0], y = point[1], z = point[2];
+        double x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
         double signal = pow(args.offset - fabs(math::Perlin::Noise(x, y, z)), 2);
         double noise = signal, weight = .0;
         x *= args.l; y *= args.l; z *= args.l;
@@ -144,7 +144,7 @@ public:
             noise += signal;
             x *= args.l; y *= args.l; z *= args.l;
         }
-        return noise;
+        return noise * args.heightFactor;
     }
 };
 
