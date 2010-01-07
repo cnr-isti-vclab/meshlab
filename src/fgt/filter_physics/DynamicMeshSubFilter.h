@@ -3,6 +3,11 @@
 
 #include "MeshSubFilter.h"
 
+#include <vcg/math/matrix44.h>
+
+#include <vector>
+#include <string>
+
 class DynamicMeshSubFilter : public MeshSubFilter{
 public:
     DynamicMeshSubFilter();
@@ -18,8 +23,6 @@ protected:
 
     int m_steps;
     int m_seconds;
-    const float m_stepSize;
-    const unsigned int m_stepsPerSecond;
     LayersTransformations m_layersTrans;
 
 private:

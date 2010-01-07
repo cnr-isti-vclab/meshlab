@@ -63,6 +63,7 @@ protected:
 
         static dWorldID m_world;
         static dSpaceID m_space;
+        static dContact m_contacts[];
         static dJointGroupID m_contactGroup;
 
         static MeshContainer m_registeredMeshes;

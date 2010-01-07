@@ -1,6 +1,6 @@
 #include "DynamicMeshSubFilter.h"
 
-DynamicMeshSubFilter::DynamicMeshSubFilter() : m_steps(-1), m_seconds(-1), m_stepSize(0.01), m_stepsPerSecond(1.0f/m_stepSize) {
+DynamicMeshSubFilter::DynamicMeshSubFilter() : m_steps(-1), m_seconds(-1) {
 }
 
 void DynamicMeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){

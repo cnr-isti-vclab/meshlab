@@ -13,7 +13,8 @@ SOURCES = filter_physics.cpp \
     GravitySubFilter.cpp \
     RandomDropFilter.cpp \
     RandomFillFilter.cpp \
-    DynamicMeshSubFilter.cpp
+    DynamicMeshSubFilter.cpp \
+    MeshSubFilter.cpp
 TARGET = filter_physics
 CONFIG += x86
 LIBS += -L/usr/local/lib \

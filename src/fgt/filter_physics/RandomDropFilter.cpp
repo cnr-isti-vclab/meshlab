@@ -26,7 +26,7 @@ void RandomDropFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
 bool RandomDropFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
     DynamicMeshSubFilter::applyFilter(filter, md, par, cb);
 
-    int currentStep  = (par.getDynamicFloat("timeline") * m_steps) / m_stepsPerSecond;
+    int currentStep  = par.getDynamicFloat("timeline") / 100 * m_steps;
     int randomObjects = m_seconds/m_dropRate;
     int currentRandomObject = md.size() - randomObjects + currentStep/(m_stepsPerSecond*m_dropRate);
 

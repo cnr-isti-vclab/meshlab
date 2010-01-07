@@ -6,8 +6,9 @@ using namespace std;
 using namespace vcg;
 
 bool ODEFacade::m_initialized;
-const int ODEFacade::m_maxContacts = 40;
+const int ODEFacade::m_maxContacts = 20;
 dSpaceID ODEFacade::m_space;
+dContact ODEFacade::m_contacts[m_maxContacts];
 dWorldID ODEFacade::m_world;
 dJointGroupID ODEFacade::m_contactGroup;
 ODEFacade::MeshContainer ODEFacade::m_registeredMeshes;
@@ -156,7 +157,7 @@ void ODEFacade::updateTransform(){
 
 void ODEFacade::integrate(float step){
     dSpaceCollide(m_space, this, collisionCallback);
-    dWorldStep(m_world, step);
+    dWorldStepFast1(m_world, step, 10);
     dJointGroupEmpty(m_contactGroup);
 }
 
@@ -169,25 +170,23 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
     dBodyID body1 = dGeomGetBody(o1);
     dBodyID body2 = dGeomGetBody(o2);
 
-    dContact contacts[m_maxContacts];
-
     for(int i = 0; i < m_maxContacts; i++){
-        contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
-        contacts[i].surface.mu = 0.5;
-        contacts[i].surface.bounce = 0.1;
-        contacts[i].surface.bounce_vel = 0.1;
-        contacts[i].surface.soft_cfm = 0.01;
-        /*contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
-        contacts[i].surface.mu = dInfinity;
-        contacts[i].surface.mu2 = 0;
-        contacts[i].surface.bounce = 0.1;
-        contacts[i].surface.bounce_vel = 0.1;
-        contacts[i].surface.soft_cfm = 0.01;*/
+        m_contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
+        m_contacts[i].surface.mu = 0.5;
+        m_contacts[i].surface.bounce = 0.1;
+        m_contacts[i].surface.bounce_vel = 0.1;
+        m_contacts[i].surface.soft_cfm = 0.01;
+        /*m_contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
+        m_contacts[i].surface.mu = dInfinity;
+        m_contacts[i].surface.mu2 = 0;
+        m_contacts[i].surface.bounce = 0.1;
+        m_contacts[i].surface.bounce_vel = 0.1;
+        m_contacts[i].surface.soft_cfm = 0.01;*/
     }
 
-    int collisions = dCollide(o1, o2, m_maxContacts, &contacts[0].geom, sizeof(dContact));
+    int collisions = dCollide(o1, o2, m_maxContacts, &m_contacts[0].geom, sizeof(dContact));
     for(int i = 0; i < collisions; i++){
-        dJointID joint = dJointCreateContact(m_world, m_contactGroup, &contacts[i]);
+        dJointID joint = dJointCreateContact(m_world, m_contactGroup, &m_contacts[i]);
         dJointAttach(joint, body1, body2);
     }
 }

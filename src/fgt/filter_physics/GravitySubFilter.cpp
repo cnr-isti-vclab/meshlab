@@ -16,7 +16,7 @@ void GravitySubFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
 bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
     DynamicMeshSubFilter::applyFilter(filter, md, par, cb);
 
-    int currentStep  = (par.getDynamicFloat("timeline") * m_steps) / 100;
+    int currentStep  = par.getDynamicFloat("timeline") / 100 * m_steps;
 
     for(int i = 0; i < md.size(); i++)
         md.getMesh(i)->cm.Tr = m_layersTrans[i][currentStep];
