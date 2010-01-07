@@ -98,7 +98,8 @@ bool UtilitiesHQR::delDir(QDir* dir, const QString* toDel) {
 
 //return the number of ciphers of a integer
 int UtilitiesHQR::numberOfCiphers(int number) {
-	float n = 0;
-	while( (number / pow(float(10),++n)) > 1);
-	return int(n - 1);
+    int digits = 1, pten=10;
+    while ( pten <= number )
+        { digits++; pten*=10; }
+	return digits;
 }

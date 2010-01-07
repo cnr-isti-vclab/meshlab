@@ -183,7 +183,7 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
   cb(100, "Exporting completed");
   fclose(fout);
 
-  return RibError::E_NOERROR;
+  return E_NOERROR;
 }
 
 enum RibError {
