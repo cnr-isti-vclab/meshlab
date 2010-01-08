@@ -17,6 +17,18 @@ Modifications:
 
 ---- muparser_v130
 
+---- ode-0.11.1
+put there the direct unzip of the ode-0.11.1.zip file 
+https://sourceforge.net/projects/opende/files/ODE/0.11.1/ode-0.11.1.zip/download
+compilation info:
+
+for mac:
+./configure --with-drawstuff=X11
+make
+cp ode/src/.libs/libode.a ../lib/macx/
+
+
+
 ---- qhull-2003.1
 Direct expansion of qhull-2003.1.tar.gz. 
 Downloaded from www.qhull.org.
