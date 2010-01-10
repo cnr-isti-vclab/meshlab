@@ -1,0 +1,26 @@
+##RenderMan RIB-Structure 1.1 Entity
+version 3.03
+FrameBegin 1
+	Hider "hidden" "int jitter" [ 0 ]
+	Display "./Maps/F1Scene.om" "shadow" "z" "float append" [1]
+	#Display "+./Maps/F1Scene.om" "framebuffer" "rgb"
+	##Include Archives/Cameras/F1CS3B1persp300OccLamp.rib
+	ReadArchive "F1CS3B1persp300OccLamp.rib"
+	WorldBegin
+		Atmosphere "MOSAICfog"
+			"uniform float isMist" [ 0.0 ]
+			"uniform float Misi" [ 0.0 ]
+			"uniform float Hi" [ 0.0 ]
+			"uniform float Di" [ 0.0 ]
+			"uniform float Sta" [ 0.0 ]
+			"uniform float MistType" [ 0.0 ]
+			"uniform color MistCol" [ 0.0 0.0 0.600000023842 ]
+		##Scene light illuminates
+		##Include Archives/Objects/F1OB0S1column.rib
+		ReadArchive "F1OB0S1column.rib"
+		##Include Archives/Objects/F1OB0S1dummy.rib
+		ReadArchive "F1OB0S1dummy.rib"
+		##Include Archives/Objects/F1OB0S1walls.rib
+		ReadArchive "F1OB0S1walls.rib"
+	WorldEnd
+FrameEnd

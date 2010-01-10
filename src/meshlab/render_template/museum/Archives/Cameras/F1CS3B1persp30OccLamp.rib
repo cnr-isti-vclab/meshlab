@@ -1,0 +1,14 @@
+##RenderMan RIB-Structure 1.1 Entity
+version 3.03
+Format 256 256 1
+ShadingRate 10.0
+PixelSamples 4 4
+PixelFilter "box" 1 1
+Clipping 0.1 60.0
+Projection "perspective" "fov" [ 90.0 ]
+ScreenWindow -1.0 1.0 -1.0 1.0
+##CameraOrientation [ 0.0 0.0 0.0 ] [ 0.0 0.0 1.0 ]
+Transform [ -0.707106530666 -5.97709401973e-07 -0.707107067108 0.0
+            0.707107067108 1.27616459622e-07 -0.707106530666 0.0
+            -5.33193770025e-07 1.0 -2.83370894749e-07 0.0
+            -1.27283556139e-05 9.97217739496e-06 30.0000038147 1.0 ]

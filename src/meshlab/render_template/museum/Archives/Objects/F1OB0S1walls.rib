@@ -1,0 +1,24 @@
+##RenderMan RIB-Structure 1.1 Entity
+version 3.03
+AttributeBegin
+	Attribute "identifier" "string name" [ "walls" ]
+	Attribute "user" "integer id" [ -873934254 ]
+	Transform [ 8.72424507141 0.0 0.0 0.0
+	            0.0 9.26684188843 0.0 0.0
+	            0.0 0.0 7.07114362717 0.0
+	            1.99715805054 -0.195063859224 4.97654724121 1.0 ]
+	Bound -1.00000047684 1.00000047684 -1.00000071526 1.00000047684 -1.0 1.0
+	ShadingInterpolation "smooth"
+	Attribute "displacementbound" "float sphere" [ 0.10000000149 ] "string coordinatesystem" [ "shader" ]
+	AttributeBegin
+		Attribute "identifier" "string name" [ "MB1Material.003" ]
+		Attribute "user" "integer id" [ -1844444345 ]
+		##Include Archives/Materials/F1MB1Material.003.rib
+		ReadArchive "F1MB1Material.003.rib"
+		Color [ 0.880352199078 0.898598253727 0.756618857384 ]
+		Opacity [ 1.0 1.0 1.0 ]
+		Sides 2
+		##Include Archives/Geometry/F1MRXM0Cube.001.rib
+		ReadArchive "F1MRXM0Cube.001.rib"
+	AttributeEnd
+AttributeEnd
