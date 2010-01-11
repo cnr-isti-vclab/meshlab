@@ -836,7 +836,8 @@ case FP_CLUSTERED_SAMPLING :
 			bool sampleFace=par.getBool("SampleFace");
 
 			
-			mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
+            mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
+            mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
 			mm1->updateDataMask(MeshModel::MM_FACEMARK);
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm1->cm);
 			tri::UpdateFlags<CMeshO>::FaceProjection(mm1->cm);
