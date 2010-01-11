@@ -9,14 +9,18 @@ VCGDIR  = ../../../../vcglib
 GLEWDIR = ../../external/glew-1.5.1
 mac:LIBS += ../../common/libcommon.dylib
 
+#correct qmake syntax requires CONFIG(option, list of options)
+CONFIG(release, debug|release) {
+	win32-msvc2005:  LIBS += ../../common/release/common.lib
+	win32-msvc2008:  LIBS += ../../common/release/common.lib
+	win32-g++:LIBS += -L../../common/release -lcommon
+} 
 
-win32-msvc2005:debug:  LIBS += -L../../common/debug -lcommon
-win32-msvc2008:debug:  LIBS += -L../../common/debug -lcommon
-win32-g++:debug:  LIBS += -L../../common/debug -lcommon
-
-win32-msvc2005:release:  LIBS += -L../../common/release -lcommon
-win32-msvc2008:release:  LIBS += -L../../common/release -lcommon
-win32-g++:release:LIBS += -L../../common/release -lcommon
+CONFIG(debug, debug|release) {
+	win32-msvc2005:  LIBS += ../../common/debug/common.lib
+	win32-msvc2008:  LIBS += ../../common/debug/common.lib
+	win32-g++:  LIBS += -L../../common/debug -lcommon
+}
 
 win32-msvc2005:DEFINES += GLEW_STATIC
 win32-msvc2008:DEFINES += GLEW_STATIC 
