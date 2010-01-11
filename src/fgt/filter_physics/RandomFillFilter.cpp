@@ -18,6 +18,8 @@ void RandomFillFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
 }
 
 bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
+    if(md.size() < 2) return true;
+
     int containerLayer = par.getEnum("containerLayer");
     int fillLayer = par.getEnum("fillLayer");
     int fillOffset = md.size();

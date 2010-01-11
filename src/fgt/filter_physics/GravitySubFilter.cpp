@@ -14,6 +14,8 @@ void GravitySubFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
 }
 
 bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
+    if(md.size() < 2) return true;
+
     DynamicMeshSubFilter::applyFilter(filter, md, par, cb);
 
     int currentStep  = par.getDynamicFloat("timeline") / 100 * m_steps;
