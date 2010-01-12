@@ -33,9 +33,12 @@
 #include <vcg/simplex/edge/base.h>
 #include <vcg/simplex/face/base.h>
 #include <vcg/simplex/face/component_ocf.h>
-#include <vcg/simplex/face/topology.h>
 
 #include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/trimesh/allocate.h>
+
+#include <vcg/simplex/face/topology.h>
+
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/flag.h>
