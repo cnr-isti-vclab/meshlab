@@ -24,79 +24,78 @@
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
 
-#include <QObject>
-#include <QStringList>
-#include <QList>
-
 #include <common/interfaces.h>
 #include "transformDialog.h"
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshFilterInterface)
+ Q_INTERFACES(MeshFilterInterface)
 
-		public:
-	/* naming convention :
+public:
+         /* naming convention :
 		 - FP -> Filter Plugin
 		 - name of the filter separated by _
 	*/
-	enum {  FP_LOOP_SS,
-          FP_BUTTERFLY_SS,
-          FP_REMOVE_UNREFERENCED_VERTEX,
-				  FP_REMOVE_DUPLICATED_VERTEX,
-          FP_REMOVE_FACES_BY_AREA,
-				  FP_REMOVE_FACES_BY_EDGE,
-					FP_REMOVE_NON_MANIFOLD_FACE,
-					FP_REMOVE_NON_MANIFOLD_VERTEX,
-					FP_CLUSTERING,
-          FP_QUADRIC_SIMPLIFICATION,
-          FP_QUADRIC_TEXCOORD_SIMPLIFICATION,
-          FP_NORMAL_EXTRAPOLATION,
-		  FP_COMPUTE_PRINC_CURV_DIR,
-          FP_MIDPOINT,
-          FP_REORIENT ,
-          FP_INVERT_FACES,
-				  FP_TRANSFORM,
-				  FP_FREEZE_TRANSFORM,
-          FP_CLOSE_HOLES_TRIVIAL,
-          FP_CLOSE_HOLES,
-					FP_CYLINDER_UNWRAP,
-					FP_REFINE_CATMULL,
-          } ;
+   enum {
+     FP_LOOP_SS,
+     FP_BUTTERFLY_SS,
+     FP_REMOVE_UNREFERENCED_VERTEX,
+     FP_REMOVE_DUPLICATED_VERTEX,
+     FP_REMOVE_FACES_BY_AREA,
+     FP_REMOVE_FACES_BY_EDGE,
+     FP_REMOVE_NON_MANIFOLD_FACE,
+     FP_REMOVE_NON_MANIFOLD_VERTEX,
+     FP_CLUSTERING,
+     FP_QUADRIC_SIMPLIFICATION,
+     FP_QUADRIC_TEXCOORD_SIMPLIFICATION,
+     FP_NORMAL_EXTRAPOLATION,
+     FP_COMPUTE_PRINC_CURV_DIR,
+     FP_MIDPOINT,
+     FP_REORIENT ,
+     FP_INVERT_FACES,
+     FP_TRANSFORM,
+     FP_FREEZE_TRANSFORM,
+     FP_CLOSE_HOLES_TRIVIAL,
+     FP_CLOSE_HOLES,
+     FP_CYLINDER_UNWRAP,
+     FP_REFINE_CATMULL,
+     FP_REFINE_HALF_CATMULL,
+     FP_QUAD_PAIRING,
+ } ;
 
 
 
-	ExtraMeshFilterPlugin();
-	~ExtraMeshFilterPlugin();
-	virtual QString filterName(FilterIDType filter) const;
-  virtual QString filterInfo(FilterIDType filter) const;
+ ExtraMeshFilterPlugin();
+ ~ExtraMeshFilterPlugin();
+ virtual QString filterName(FilterIDType filter) const;
+ virtual QString filterInfo(FilterIDType filter) const;
 
-  virtual FilterClass getClass(QAction *);
-	virtual bool autoDialog(QAction *) ;
-	virtual bool customDialog(QAction *filter);
+ virtual FilterClass getClass(QAction *);
+ virtual bool autoDialog(QAction *) ;
+ virtual bool customDialog(QAction *filter);
 
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, RichParameterSet & params, MainWindowInterface *mw);
-  virtual int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual bool applyFilter(QAction */*filter*/, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
+ virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+ virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, RichParameterSet & params, MainWindowInterface *mw);
+ virtual int getRequirements(QAction *);
+ virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+ virtual bool applyFilter(QAction */*filter*/, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
 
 protected:
 
 
-	TransformDialog *transformDialog;
+ TransformDialog *transformDialog;
 
-	float lastq_QualityThr;
-	bool lastq_QualityWeight;
-	bool lastq_PreserveBoundary;
-	bool lastq_Selected;
-	bool lastq_PreserveNormal;
-	bool lastq_OptimalPlacement;
-	bool lastq_PlanarQuadric;
+ float lastq_QualityThr;
+ bool lastq_QualityWeight;
+ bool lastq_PreserveBoundary;
+ bool lastq_Selected;
+ bool lastq_PreserveNormal;
+ bool lastq_OptimalPlacement;
+ bool lastq_PlanarQuadric;
 
-	float lastqtex_QualityThr;
-	float lastqtex_extratw;
+ float lastqtex_QualityThr;
+ float lastqtex_extratw;
 };
 
 #endif

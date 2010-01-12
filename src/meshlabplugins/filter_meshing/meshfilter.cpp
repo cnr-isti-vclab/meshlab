@@ -32,10 +32,6 @@
 #include <vcg/complex/trimesh/bitquad_support.h>
 #include <vcg/complex/trimesh/bitquad_creation.h>
 #include <vcg/complex/trimesh/clustering.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/complex/trimesh/update/curvature_fitting.h>
 #include <vcg/space/normal_extrapolation.h>
@@ -49,36 +45,35 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallB
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 {
-  typeList << FP_LOOP_SS<<
-    FP_BUTTERFLY_SS<<
-    FP_REMOVE_UNREFERENCED_VERTEX<<
-    FP_REMOVE_DUPLICATED_VERTEX<<
-    FP_REMOVE_FACES_BY_AREA<<
-    FP_REMOVE_FACES_BY_EDGE<<
-    FP_CLUSTERING<<
-    FP_QUADRIC_SIMPLIFICATION<<
-	  FP_QUADRIC_TEXCOORD_SIMPLIFICATION<<
-    FP_MIDPOINT<<
-    FP_REORIENT <<
-    FP_INVERT_FACES<<
-		FP_REMOVE_NON_MANIFOLD_FACE<<
-		FP_REMOVE_NON_MANIFOLD_VERTEX<<
-    FP_NORMAL_EXTRAPOLATION<<
-		FP_COMPUTE_PRINC_CURV_DIR<<
-		FP_CLOSE_HOLES<<
-		FP_FREEZE_TRANSFORM<<
-		FP_TRANSFORM<<
-		FP_CYLINDER_UNWRAP<<
-		FP_REFINE_CATMULL;
+    typeList << FP_LOOP_SS <<
+            FP_BUTTERFLY_SS <<
+            FP_REMOVE_UNREFERENCED_VERTEX <<
+            FP_REMOVE_DUPLICATED_VERTEX <<
+            FP_REMOVE_FACES_BY_AREA <<
+            FP_REMOVE_FACES_BY_EDGE <<
+            FP_CLUSTERING <<
+            FP_QUADRIC_SIMPLIFICATION <<
+            FP_QUADRIC_TEXCOORD_SIMPLIFICATION <<
+            FP_MIDPOINT <<
+            FP_REORIENT <<
+            FP_INVERT_FACES <<
+            FP_REMOVE_NON_MANIFOLD_FACE <<
+            FP_REMOVE_NON_MANIFOLD_VERTEX <<
+            FP_NORMAL_EXTRAPOLATION <<
+            FP_COMPUTE_PRINC_CURV_DIR <<
+            FP_CLOSE_HOLES <<
+            FP_FREEZE_TRANSFORM <<
+            FP_TRANSFORM <<
+            FP_CYLINDER_UNWRAP <<
+            FP_REFINE_CATMULL <<
+            FP_REFINE_HALF_CATMULL <<
+            FP_QUAD_PAIRING;
 
 
   FilterIDType tt;
 
 	foreach(tt , types())
 		actionList << new QAction(filterName(tt), this);
-
-	//genericELD = new GenericELDialog();
-	//genericELD->hide();
 
 	transformDialog = new TransformDialog();
 	transformDialog->hide();
@@ -95,73 +90,76 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 	lastqtex_extratw = 0.0;
 }
 
- ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction *a)
+ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction *a)
 {
-  switch(ID(a))
-  {
+    switch(ID(a))
+    {
     case FP_REMOVE_UNREFERENCED_VERTEX :
     case FP_REMOVE_DUPLICATED_VERTEX :
     case FP_REMOVE_FACES_BY_AREA:
     case FP_REMOVE_FACES_BY_EDGE :
     case FP_REMOVE_NON_MANIFOLD_FACE:
     case FP_REMOVE_NON_MANIFOLD_VERTEX:
-      return MeshFilterInterface::Cleaning;
+        return MeshFilterInterface::Cleaning;
     case FP_BUTTERFLY_SS :
     case FP_LOOP_SS :
     case FP_MIDPOINT :
-		case FP_QUADRIC_SIMPLIFICATION :
-		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :
-		case FP_CLUSTERING :
-		case FP_CLOSE_HOLES:
-		case FP_REFINE_CATMULL:
-         return MeshFilterInterface::Remeshing;
-		case FP_NORMAL_EXTRAPOLATION:
-		case FP_INVERT_FACES:
-		case FP_REORIENT :
-		case FP_COMPUTE_PRINC_CURV_DIR:
-		case FP_TRANSFORM:
-						 return MeshFilterInterface::Normal;
-		case FP_FREEZE_TRANSFORM:
-							 return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
-		case FP_CYLINDER_UNWRAP:
-						 return MeshFilterInterface::Smoothing;
+    case FP_QUADRIC_SIMPLIFICATION :
+    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :
+    case FP_CLUSTERING :
+    case FP_CLOSE_HOLES:
+    case FP_REFINE_CATMULL:
+    case FP_REFINE_HALF_CATMULL:
+    case FP_QUAD_PAIRING:
+        return MeshFilterInterface::Remeshing;
+    case FP_NORMAL_EXTRAPOLATION:
+    case FP_INVERT_FACES:
+    case FP_REORIENT :
+    case FP_COMPUTE_PRINC_CURV_DIR:
+    case FP_TRANSFORM:
+        return MeshFilterInterface::Normal;
+    case FP_FREEZE_TRANSFORM:
+        return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
+    case FP_CYLINDER_UNWRAP:
+        return MeshFilterInterface::Smoothing;
 
-    default : assert(0); return MeshFilterInterface::Generic;
-  }
+    default :
+            assert(0); return MeshFilterInterface::Generic;
+    }
 }
 
 
- QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
+QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 {
- switch(filter)
-  {
-		case FP_LOOP_SS :		                  return QString("Loop Subdivision Surfaces");
-		case FP_BUTTERFLY_SS :								return QString("Butterfly Subdivision Surfaces");
-		case FP_REMOVE_UNREFERENCED_VERTEX :	return QString("Remove Unreferenced Vertex");
-		case FP_REMOVE_DUPLICATED_VERTEX :		return QString("Remove Duplicated Vertex");
-		case FP_REMOVE_FACES_BY_AREA :     		return QString("Remove Zero Area Faces");
-		case FP_REMOVE_FACES_BY_EDGE :				return QString("Remove Faces with edges longer than...");
-		case FP_QUADRIC_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation");
-		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation (with texture)");
-		case FP_CLUSTERING :	                return QString("Clustering decimation");
-		case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
-		case FP_REORIENT :	                  return QString("Re-Orient all faces coherentely");
-		case FP_INVERT_FACES:									return QString("Invert Faces Orientation");
-		case FP_TRANSFORM:	                	return QString("Apply Transform");
-		case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
-		case FP_REMOVE_NON_MANIFOLD_FACE:	        return QString("Remove Non Manifold Faces");
-		case FP_REMOVE_NON_MANIFOLD_VERTEX:	        return QString("Remove Non Manifold Vertices");
-		case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
-		case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions");
-		case FP_CLOSE_HOLES:	          return QString("Close Holes");
-		case FP_CYLINDER_UNWRAP:	     return QString("Geometric Cylindrical Unwrapping");
-		case FP_REFINE_CATMULL:				return QString("Catmull-Clark Subdivision Surfaces");
+    switch(filter)
+    {
+        case FP_LOOP_SS :                       return QString("Loop Subdivision Surfaces");
+        case FP_BUTTERFLY_SS :              	return QString("Butterfly Subdivision Surfaces");
+        case FP_REMOVE_UNREFERENCED_VERTEX :	return QString("Remove Unreferenced Vertex");
+        case FP_REMOVE_DUPLICATED_VERTEX :		return QString("Remove Duplicated Vertex");
+        case FP_REMOVE_FACES_BY_AREA :     		return QString("Remove Zero Area Faces");
+        case FP_REMOVE_FACES_BY_EDGE :          return QString("Remove Faces with edges longer than...");
+        case FP_QUADRIC_SIMPLIFICATION :        return QString("Quadric Edge Collapse Decimation");
+        case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation (with texture)");
+        case FP_CLUSTERING :	                return QString("Clustering decimation");
+        case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
+        case FP_REORIENT :	                  return QString("Re-Orient all faces coherentely");
+        case FP_INVERT_FACES:									return QString("Invert Faces Orientation");
+        case FP_TRANSFORM:	                	return QString("Apply Transform");
+        case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
+        case FP_REMOVE_NON_MANIFOLD_FACE:	        return QString("Remove Non Manifold Faces");
+        case FP_REMOVE_NON_MANIFOLD_VERTEX:	        return QString("Remove Non Manifold Vertices");
+        case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
+        case FP_COMPUTE_PRINC_CURV_DIR:	        return QString("Compute curvature principal directions");
+        case FP_CLOSE_HOLES:	          return QString("Close Holes");
+        case FP_CYLINDER_UNWRAP:	     return QString("Geometric Cylindrical Unwrapping");
+        case FP_REFINE_CATMULL:				return QString("Catmull-Clark Subdivision Surfaces");
+    case FP_REFINE_HALF_CATMULL:				return QString("Tri to Quad by 4-8 Subdivision");
+    case FP_QUAD_PAIRING:				return QString("Tri to Quad by smart triangle pairing");
 
-
-
-		default: assert(0);
-  }
-  return QString("error!");
+        default: assert(0);
+    }
+    return QString("error!");
 
 }
 
@@ -198,9 +196,13 @@ ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 		case FP_COMPUTE_PRINC_CURV_DIR:			return tr("Compute the principal directions of curvature with several algorithms");
 		case FP_CLOSE_HOLES :								return tr("Close holes smaller than a given threshold");
 		case FP_CYLINDER_UNWRAP:						return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
-		case FP_REFINE_CATMULL:				return QString("Apply the Catmull-Clark Subdivision Surfaces. Note Position of the new vertces is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generate a quad mesh otherwise it honores it the faux-edge bits");
-
-		default : assert(0);
+  case FP_REFINE_CATMULL:				return QString("Apply the Catmull-Clark Subdivision Surfaces. Note Position of the new vertces is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generate a quad mesh otherwise it honores it the faux-edge bits");
+  case FP_REFINE_HALF_CATMULL:				return QString("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme. It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces (it adds only a single vertex for each triangle instead of four)."
+                                                           "<br> See <b>4–8 Subdivision</b>"
+                                                           "<br> <i>Luiz Velho, Denis Zorin </i>"
+                                                           "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
+  case FP_QUAD_PAIRING:				return QString("Convert a tri mesh into a quad mesh by pairing triangles.");
+        default : assert(0);
 	}
   return QString();
 }
@@ -209,8 +211,10 @@ ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 {
   switch(ID(action))
   {
-		case FP_REFINE_CATMULL : return MeshModel::MM_FACEFACETOPO;
-    case FP_REMOVE_NON_MANIFOLD_FACE:
+  case FP_QUAD_PAIRING: return MeshModel::MM_FACEFACETOPO;
+  case FP_REFINE_CATMULL : return MeshModel::MM_FACEFACETOPO;
+  case FP_REFINE_HALF_CATMULL : return MeshModel::MM_FACEFACETOPO;
+        case FP_REMOVE_NON_MANIFOLD_FACE:
     case FP_LOOP_SS :
     case FP_BUTTERFLY_SS :
     case FP_MIDPOINT :
@@ -744,13 +748,34 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 
 			return true;
 		}
-		if(ID(filter) == (FP_REFINE_CATMULL))
-		{
-			tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
-			tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);			
-			return true;
-		}
-	 		
-	return true;
+  if(ID(filter) == FP_REFINE_HALF_CATMULL)
+  {
+      m.updateDataMask(MeshModel::MM_FACEQUALITY);
+      tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
+      tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
+      assert(tri::BitQuadCreation<CMeshO>::IsBitTriQuadConventional(m.cm));
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+      m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+      m.updateDataMask(MeshModel::MM_POLYGONAL);
+  }
+  if(ID(filter) == FP_REFINE_CATMULL)
+  { // in practice it is just a simple double application of the previous step.
+      m.updateDataMask(MeshModel::MM_FACEQUALITY);
+      tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
+      assert(tri::BitQuadCreation<CMeshO>::IsBitTriQuadConventional(m.cm));
+      tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+      tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
+      tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+  }
+  if(ID(filter) == FP_QUAD_PAIRING)
+  {
+      m.updateDataMask(MeshModel::MM_FACEQUALITY);
+
+      tri::BitQuadCreation<CMeshO>::MakeTriEvenBySplit(m.cm);
+      //bool ret = tri::BitQuadCreation<CMeshO>::MakePureByFlip(m.cm,100);
+      tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
+  }
+  return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
