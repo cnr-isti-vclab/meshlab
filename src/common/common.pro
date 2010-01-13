@@ -6,18 +6,16 @@ GLEWCODE = $$GLEWDIR/src/glew.c
 CONFIG(debug) {
 	win32-msvc2005:DESTDIR     = ./debug
 	win32-msvc2008:DESTDIR     = ./debug
-	win32-g++:DESTDIR     = ./debug
+    win32-g++:DLLDESTDIR     = ./debug
 }
 
 CONFIG(release) {
 	win32-msvc2005:DESTDIR     = ./release
 	win32-msvc2008:DESTDIR     = ./release
-	win32-g++:DESTDIR     = ./release
+    win32-g++:DLLDESTDIR     = ./release
 }
 
-
-mac:DESTDIR       = ../meshlab/meshlab.app/Contents/MacOS
-
+mac:DLLDESTDIR       = .
 
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
@@ -38,7 +36,6 @@ INCLUDEPATH += .
 DEFINES += GLEW_STATIC
 win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_WARNINGS
 win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_WARNINGS
-
 
 # Input
 HEADERS += filterparameter.h \
