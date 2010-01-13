@@ -83,7 +83,7 @@ cp shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shadersrm
 for x in $QTCOMPONENTS
 do
 #    cp -R $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks 
-rsync -avu --exclude='*debug*' $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks
+rsync -quiet -avu --exclude='*debug*' $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks
 done
 
 echo "now trying to change the paths in the meshlab executable"
@@ -153,7 +153,7 @@ plugins/libeditpaint.dylib \
 plugins/libeditrgbtri.dylib \
 plugins/libeditsegment.dylib \
 plugins/libeditslice.dylib \
-plugins/libeditstraightener.dylib \
+plugins/libedit_straightener.dylib \
 plugins/libmeshdecorate.dylib \
 plugins/librender_gdp.dylib \
 plugins/librender_rfx.dylib \
@@ -181,8 +181,7 @@ done
 
 echo "Now Changing " #--------------------------
 
-EXECNAMES="MacOS/meshlab $PLUGINSNAMES" 
-QTLIBPATH="/usr/local/Trolltech/Qt-4.3.3/lib"
+EXECNAMES="MacOS/libcommon.1.dylib MacOS/meshlab $PLUGINSNAMES" 
 for x in $EXECNAMES
 do
   install_name_tool -change QtCore.framework/Versions/4/QtCore       @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore       $BUNDLE/meshlab.app/Contents/$x
