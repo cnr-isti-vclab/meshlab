@@ -34,9 +34,7 @@
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 
-#define SAMPLES_PER_EDGE 15 //modificare, length/epsilon
-//Sistemare la gestione buco
-//rimozione componente connessa?
+#define SAMPLES_PER_EDGE 5 //modificare, length/epsilon
 
 // Polyline (set of consecutive segments)
 struct polyline {
@@ -288,8 +286,14 @@ private:
                                 MeshModel *a,            //mesh A
                                 MeshFaceGrid &grid,      //grid A
                                 CMeshO::ScalarType max_dist );   //Max search distance
+		bool simpleCheckRedundancy( CMeshO::FacePointer f,   //face
+									MeshModel *a,            //mesh A
+									MeshFaceGrid &grid,      //grid A
+									CMeshO::ScalarType max_dist,//Max search distance
+									bool test );   
         bool isBorderVert( CMeshO::FacePointer f, int i);
         bool isOnBorder( CMeshO::CoordType point, CMeshO::FacePointer f );
+		bool isOnEdge( CMeshO::CoordType point, CMeshO::FacePointer f );
         bool isAdjacent( CMeshO::FacePointer f1, CMeshO::FacePointer f2 );
         int  sharesVertex( CMeshO::FacePointer f1, CMeshO::FacePointer f2 );
         void handleBorder( aux_info &info,                                            //Auxiliar information for triangulatio
@@ -299,9 +303,10 @@ private:
         polyline cutComponent(  polyline comp,                                   //Component to be cut
                                 polyline border,                                 //border
                                 vcg::Matrix44<CMeshO::ScalarType> rot_mat );     //Rotation matrix
-        int searchComponent( aux_info &info,                            //Auxiliar info
-                             vcg::Segment3<CMeshO::ScalarType> s,       //query segment
-                             bool &conn );
+        int searchComponent(	aux_info &info,								//Auxiliar info
+								vcg::Point3<CMeshO::ScalarType> P0,			//Start border point
+								vcg::Point3<CMeshO::ScalarType> P1,			//End border point
+								bool &conn );
 		bool findIntersection(  CMeshO::FacePointer currentF,				//face
 								vcg::Segment3<float> edge,				//edge
 								int last_split,							//last splitted edge
