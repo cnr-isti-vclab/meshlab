@@ -2,14 +2,18 @@
 
 PluginManager::PluginManager()
 {
-	pluginsDir=QDir(getPluginDirPath());
+    //pluginsDir=QDir(getPluginDirPath());
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-	qApp->addLibraryPath(getPluginDirPath());
-	qApp->addLibraryPath(getBaseDirPath());
+    //qApp->addLibraryPath(getPluginDirPath());
+    //qApp->addLibraryPath(getBaseDirPath());
 }
 
 void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 {
+    pluginsDir=QDir(getPluginDirPath());
+  // without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
+    qApp->addLibraryPath(getPluginDirPath());
+    qApp->addLibraryPath(getBaseDirPath());
 	QStringList pluginfilters;
 #if defined(Q_OS_WIN)
 	pluginfilters << "*.dll";		
@@ -20,7 +24,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(pluginfilters);
 	
-	qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
+    qDebug( "Current Plugins Dir is: %s ",qPrintable(pluginsDir.absolutePath()));
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) 
 	{
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
@@ -104,6 +108,7 @@ QString PluginManager::getBaseDirPath()
 		if(baseDir.exists("plugins")) break;
 		baseDir.cdUp();
 	}
+    qDebug("The base dir is %s",qPrintable(baseDir.absolutePath()));
 #endif
 	return baseDir.absolutePath();
 }
