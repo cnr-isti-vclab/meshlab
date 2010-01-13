@@ -690,7 +690,6 @@ void MainWindow::loadMeshLabSettings()
         if(!docElem.isNull())
 		{
 			RichParameterFactory::create(docElem,&rpar);
-			qDebug("param %i,%s loaded from settings",ii,qPrintable(rpar->name));
             if (!defaultGlobalParams.hasParameter(rpar->name))
             {
                 qDebug("Warning in the saved parameters there were parameters that are not in the HardWired ones.\n"
