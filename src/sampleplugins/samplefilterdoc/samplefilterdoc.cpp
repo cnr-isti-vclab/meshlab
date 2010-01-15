@@ -94,12 +94,17 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action,MeshDocument & /*m*
 											true,
 											"Delete Layers ",
 											"Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
-			parlst.addParam(new RichBool ("MergeVertices",
+                  parlst.addParam(new RichBool ("MergeVertices",
 											true,
 											"Merge duplicate vertices",
 											"Merge the vertices that are duplicated among different layers. \n\n"
 											"Very useful when the layers are spliced portions of a single big mesh."));
-												break;
+                  parlst.addParam(new RichBool ("AlsoUnreferenced",
+                                                                                        false,
+                                                                                        "Keep unreferenced vertices",
+                                                                                        "Do not discard unreferenced vertices from source layers\n\n"
+                                                                                        "Necessary for point-only layers"));
+                  break;
 
 		default : assert(0); 
 	}
@@ -116,7 +121,8 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 			bool deleteLayer = par.getBool("DeleteLayer");
 			bool mergeVisible = par.getBool("MergeVisible");
 			bool mergeVertices = par.getBool("MergeVertices");
-			
+                        bool alsounreferenced = par.getBool("AlsoUnreferenced");
+
 			MeshModel *destMesh= md.addNewMesh("Merged Mesh");
 			md.meshList.front();
 			QList<MeshModel *> toBeDeletedList;
@@ -131,8 +137,9 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 							cb(cnt*100/md.meshList.size(), "Merging layers...");
 							tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
 							toBeDeletedList.push_back(mmp);
-							tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
+                                                        tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm,false,alsounreferenced);
 							tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
+                                                        destMesh->updateDataMask(mmp);
 					}
 				}		
 			}
