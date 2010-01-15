@@ -13,6 +13,7 @@ public:
     int subdivisionSteps, algorithmId, smoothingSteps;
     bool saveAsQuality;
     float spectralWeight[21];
+    float zoom_window_side, zoom_org_x, zoom_org_y;
 
     FractalArgs(){}
 
@@ -28,6 +29,9 @@ public:
         this->offset = offset;
         this->gain = gain;
         this->heightFactor = heightFactor;
+        zoom_window_side = 1;
+        zoom_org_x = 0;
+        zoom_org_y = 0;
         updateSpectralWeights();
     }
 
@@ -130,7 +134,7 @@ public:
 
     static double RidgedMF(CoordType &point, FractalArgs &args)
     {
-        double x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
+        double x = point[0] + args.seed, y = point[1] + args.seed, z = point[2] + args.seed;
         double signal = pow(args.offset - fabs(math::Perlin::Noise(x, y, z)), 2);
         double noise = signal, weight = .0;
         x *= args.l; y *= args.l; z *= args.l;

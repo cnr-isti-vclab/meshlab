@@ -138,7 +138,11 @@ void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, Mesh
     case FP_FRACTAL_MESH:
         par.addParam(new RichBool("saveAsQuality", false, "Save as vertex quality", "Saves the perturbation value as vertex quality."));
         break;
-    case CR_FRACTAL_TERRAIN: break;
+    case CR_FRACTAL_TERRAIN:
+        par.addParam(new RichDynamicFloat("zoom_w_size", 1.0, .0, 10.0, "Zoom window size:", "The zoom window is a square. This parameter is the ratio between the side of the zoom window and the size of the original window. A value larger than one means zoom out; a value smaller than one means zoom in."));
+        par.addParam(new RichDynamicFloat("zoom_tx", .0, -10.0, 10.0, "Zoom Origin (x):", "The zoom window will be translated on the x-axis of a quantity equal to the product of this parameter and the side length of the original window."));
+        par.addParam(new RichDynamicFloat("zoom_ty", .0, -10.0, 10.0, "Zoom Origin (y):", "The zoom window will be translated on the y-axis of a quantity equal to the product of this parameter and the side length of the original window."));
+        break;
     }
     return;
 }
@@ -159,6 +163,9 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameter
         {
             int steps = par.getInt("steps");
             fractalArgs->subdivisionSteps = (steps>2)? steps : 2;
+            fractalArgs->zoom_window_side = par.getDynamicFloat("zoom_w_size");
+            fractalArgs->zoom_org_x = par.getDynamicFloat("zoom_tx");
+            fractalArgs->zoom_org_y = par.getDynamicFloat("zoom_ty");
             return generateTerrain(*(md.mm()), cb);
         }
         break;
@@ -238,6 +245,13 @@ bool FilterFractal::generateTerrain(MeshModel &mm, vcg::CallBackPos* cb)
     int subSteps = fractalArgs->subdivisionSteps;
     int k = (int)(pow(2, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
 
+    double step = 1/(double)k2;
+    double new_step = step * fractalArgs->zoom_window_side;
+    double tmp = step * k;
+    double zoom_tx = tmp * fractalArgs->zoom_org_x;
+    double zoom_ty = tmp * fractalArgs->zoom_org_y;
+    double x = .0, y = .0;
+
     // grid generation
     vcg::tri::Allocator<CMeshO>::AddVertices(*m, vertexCount);
     vcg::tri::Allocator<CMeshO>::AddFaces(*m, faceCount);
@@ -247,7 +261,9 @@ bool FilterFractal::generateTerrain(MeshModel &mm, vcg::CallBackPos* cb)
     cb(0, "Grid construction..");
     for(vi = m->vert.begin(); vi!=m->vert.end(); ++vi)
     {
-        (*vi).P() = CoordType((i%k2)/(double)k2, i/((double)vertexCount), .0);
+        x = (i%k2) * new_step + zoom_tx;
+        y = (i/k2) * new_step + zoom_ty;
+        (*vi).P() = CoordType(x, y, .0);
         ivp[i++] = &*vi;
     }
 
