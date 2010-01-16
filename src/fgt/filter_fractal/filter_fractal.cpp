@@ -86,7 +86,7 @@ QString FilterFractal::filterInfo(FilterIDType filterId) const
         }
         break;
     case FP_CRATERS:
-        return QString("Add craters onto the mesh.");
+        return QString("Add craters onto the mesh. There must be at least two layers:<ul><li>the mesh on which to generate craters;</li><li>a layer containing samples that represent central points of craters.</li></ul>");
         break;
     default:
         assert(0); return QString("error");
@@ -103,7 +103,7 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
         initParameterSetForFractalDisplacement(filter, md, par);
         break;
     case FP_CRATERS:
-        initParameterSetForCratersGeneration(filter, md, par);
+        initParameterSetForCratersGeneration(md, par);
         break;
     }
 }
@@ -147,12 +147,31 @@ void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, Mesh
     return;
 }
 
-void FilterFractal::initParameterSetForCratersGeneration(QAction *, MeshDocument &, RichParameterSet &)
+void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichParameterSet &par)
 {
+    if(md.meshList.size() < 2){
+        return;
+    }
+
     return;
 }
 
 bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos* cb)
+{
+    switch(ID(filter))
+    {
+    case CR_FRACTAL_TERRAIN:
+    case FP_FRACTAL_MESH:
+        return applyFractalDisplacementFilter(filter, md, par, cb);
+        break;
+    case FP_CRATERS:
+        return generateCraters(md);
+        break;
+    }
+    return false;
+}
+
+bool FilterFractal::applyFractalDisplacementFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
     fractalArgs->setFields(par.getEnum("algorithm"),par.getFloat("seed"), par.getFloat("octaves"),
                            par.getFloat("lacunarity"), par.getFloat("fractalIncrement"), par.getFloat("offset"),
@@ -173,9 +192,6 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameter
         fractalArgs->smoothingSteps =  par.getInt("smoothingSteps");
         fractalArgs->saveAsQuality = par.getBool("saveAsQuality");
         return generateFractalMesh(*(md.mm()), cb);
-        break;
-    case FP_CRATERS:
-        return generateCraters(md);
         break;
     default: assert(0);
     }
@@ -207,7 +223,7 @@ int FilterFractal::getRequirements(QAction *filter)
         return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
         break;
     case FP_CRATERS:
-        return MeshModel::MM_VERTFACETOPO;
+        return MeshModel::MM_NONE;
         break;
     default: assert(0);
     }
@@ -221,8 +237,10 @@ int FilterFractal::postCondition(QAction *filter) const
         return MeshModel::MM_UNKNOWN;
         break;
     case FP_FRACTAL_MESH:
-    case FP_CRATERS:
         return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL | MeshModel::MM_VERTQUALITY;
+        break;
+    case FP_CRATERS:
+        return MeshModel::MM_NONE;
         break;
     default: assert(0);
     }
@@ -232,9 +250,18 @@ int FilterFractal::postCondition(QAction *filter) const
 // -------------------- Private functions -------------------------------
 bool FilterFractal::generateCraters(MeshDocument &md)
 {
+    if (md.meshList.size() < 2)
+    {
+        Log(GLLogStream::SYSTEM, "Craters Generation filter error: there must be at least two layers to apply this filter.");
+        return false;
+    }
+
+    /*
     tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
     tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
     tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
+    */
+
     return true;
 }
 

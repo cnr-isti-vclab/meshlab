@@ -64,7 +64,8 @@ class FilterFractal : public QObject, public MeshFilterInterface
 
        private:
             void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
-            void initParameterSetForCratersGeneration   (QAction *, MeshDocument &, RichParameterSet &);
+            void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterSet &par);
+            bool applyFractalDisplacementFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 
             double computeFractalPerturbation(CoordType &point);
             bool generateTerrain    (MeshModel &mm, vcg::CallBackPos* cb);
