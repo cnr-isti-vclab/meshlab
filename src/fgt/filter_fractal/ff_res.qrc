@@ -1,5 +1,6 @@
 <RCC>
     <qresource>
-        <file>ff_description.txt</file>
+        <file>ff_fractal_description.txt</file>
+	  <file>ff_craters_description.txt</file>
     </qresource>
 </RCC>

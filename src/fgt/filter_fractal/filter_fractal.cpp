@@ -70,28 +70,28 @@ QString FilterFractal::filterName(FilterIDType filterId) const
 
 QString FilterFractal::filterInfo(FilterIDType filterId) const
 {
+    QString filename, description;
     switch (filterId) {
     case CR_FRACTAL_TERRAIN:
     case FP_FRACTAL_MESH:
-        {
-            QString desc;
-            QFile f(":/ff_description.txt");
-            if(f.open(QFile::ReadOnly))
-            {
-                QTextStream stream(&f);
-                desc = stream.readAll();
-                f.close();
-            }
-            return desc;
-        }
+        filename = ":/ff_fractal_description.txt";
         break;
     case FP_CRATERS:
-        return QString("Add craters onto the mesh. There must be at least two layers:<ul><li>the mesh on which to generate craters;</li><li>a layer containing samples that represent central points of craters.</li></ul>");
+        filename = ":/ff_craters_description.txt";
         break;
     default:
         assert(0); return QString("error");
         break;
     }
+
+    QFile f(filename);
+    if(f.open(QFile::ReadOnly))
+    {
+        QTextStream stream(&f);
+        description = stream.readAll();
+        f.close();
+    }
+    return description;
 }
 
 void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par)
@@ -149,9 +149,31 @@ void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, Mesh
 
 void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichParameterSet &par)
 {
-    if(md.meshList.size() < 2){
-        return;
+    int meshCount = md.meshList.size();
+    if(meshCount < 2) return;
+
+    // tries to detect the target mesh
+    MeshModel* target = md.mm();
+    MeshModel* samples = md.mm();
+    MeshModel* tmpMesh;
+    if (target->cm.fn == 0){ // this is probably the samples layer
+        for(int i=0; i<meshCount; i++)
+        {
+            tmpMesh = md.meshList.at(i);
+            if (tmpMesh->cm.fn > 0)
+            {
+                target = tmpMesh;
+                break;
+            }
+        }
     }
+
+    par.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh on which craters will be generated."));
+    par.addParam(new RichMesh("samples_mesh", samples, &md, "Samples layer:", "The samples that represent the central points of craters."));
+
+    float maxVal = target->cm.bbox.Diag() * 0.1;
+    par.addParam(new RichAbsPerc("max_radius", maxVal * 0.5, maxVal * 0.01, maxVal, "Maximum radius:", "The maximum radius value <i>rmax</i> of the radial function. A random value will be chosen in the range <i>[min, rmax]</i>"));
+    par.addParam(new RichAbsPerc("max_depth", maxVal * 0.5, maxVal * 0.01, maxVal, "Maximum depth:", "The maximum depth of a crater."));
 
     return;
 }
@@ -165,7 +187,7 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameter
         return applyFractalDisplacementFilter(filter, md, par, cb);
         break;
     case FP_CRATERS:
-        return generateCraters(md);
+        return generateCraters(md, par);
         break;
     }
     return false;
@@ -248,13 +270,18 @@ int FilterFractal::postCondition(QAction *filter) const
 // ----------------------------------------------------------------------
 
 // -------------------- Private functions -------------------------------
-bool FilterFractal::generateCraters(MeshDocument &md)
+bool FilterFractal::generateCraters(MeshDocument &md, RichParameterSet &par)
 {
     if (md.meshList.size() < 2)
     {
-        Log(GLLogStream::SYSTEM, "Craters Generation filter error: there must be at least two layers to apply this filter.");
+        Log(GLLogStream::SYSTEM, "There must be at least two layers to apply the craters generation filter.");
         return false;
     }
+
+    MeshModel* target = par.getMesh("target_mesh");
+    MeshModel* samples = par.getMesh("samples_mesh");
+
+    qDebug() << samples->cm.vn;
 
     /*
     tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
@@ -401,6 +428,7 @@ double FilterFractal::computeFractalPerturbation(CoordType &point)
 
     return perturbation;
 }
+
 // ---------------------------------------------------------------------
 
 Q_EXPORT_PLUGIN(FilterFractal)

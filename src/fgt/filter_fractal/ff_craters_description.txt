@@ -1,0 +1,8 @@
+Generates craters onto a mesh using radial functions.<br />
+There must be at least two layers to apply this filter:<br />
+<ul>
+    <li>the layer that contains the target mesh;</li>
+    <li>the layer that contains the samples which represent the central points of craters.</li>
+</ul>
+
+The Gaussian radial function is used as basis for the outline of craters.

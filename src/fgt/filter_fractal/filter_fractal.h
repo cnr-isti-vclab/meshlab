@@ -70,7 +70,7 @@ class FilterFractal : public QObject, public MeshFilterInterface
             double computeFractalPerturbation(CoordType &point);
             bool generateTerrain    (MeshModel &mm, vcg::CallBackPos* cb);
             bool generateFractalMesh(MeshModel &mm, vcg::CallBackPos* cb);
-            bool generateCraters    (MeshDocument &md);
+            bool generateCraters    (MeshDocument &md, RichParameterSet &par);
 
             enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
 
