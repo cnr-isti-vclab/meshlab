@@ -4,47 +4,9 @@
 #include <vcg/math/base.h>
 #include <vcg/math/perlin_noise.h>
 
+#include "filter_args.h"
+
 using namespace vcg;
-
-class FractalArgs
-{
-public:
-    float octaves, remainder, l, h, offset, gain, seed, heightFactor;
-    int subdivisionSteps, algorithmId, smoothingSteps;
-    bool saveAsQuality;
-    float spectralWeight[21];
-    float zoom_window_side, zoom_org_x, zoom_org_y;
-
-    FractalArgs(){}
-
-    void setFields(int algorithmId, float seed, float octaves, float lacunarity, float fractalIncrement,
-                   float offset, float gain, float heightFactor)
-    {
-        this->algorithmId = algorithmId;
-        this->seed = seed;
-        this->octaves = octaves;
-        this->remainder = octaves - (int)octaves;
-        l = lacunarity;
-        h = fractalIncrement;
-        this->offset = offset;
-        this->gain = gain;
-        this->heightFactor = heightFactor;
-        zoom_window_side = 1;
-        zoom_org_x = 0;
-        zoom_org_y = 0;
-        updateSpectralWeights();
-    }
-
-    void updateSpectralWeights()
-    {
-        float frequency = 1.0;
-        for(int i=0; i<=(int)octaves; i++)
-        {
-            spectralWeight[i] = pow(frequency, -h);
-            frequency *= l;
-        }
-    }
-};
 
 template <class MeshType>
         class FractalPerturbation

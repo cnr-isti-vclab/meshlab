@@ -170,11 +170,8 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
 
     par.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh on which craters will be generated."));
     par.addParam(new RichMesh("samples_mesh", samples, &md, "Samples layer:", "The samples that represent the central points of craters."));
-
-    float maxVal = target->cm.bbox.Diag() * 0.1;
-    par.addParam(new RichAbsPerc("max_radius", maxVal * 0.5, maxVal * 0.01, maxVal, "Maximum radius:", "The maximum radius value <i>rmax</i> of the radial function. A random value will be chosen in the range <i>[min, rmax]</i>"));
-    par.addParam(new RichAbsPerc("max_depth", maxVal * 0.5, maxVal * 0.01, maxVal, "Maximum depth:", "The maximum depth of a crater."));
-
+    par.addParam(new RichDynamicFloat("max_radius", 0.2, 0, 1, "Craters radius:", "Defines the maximum radius of craters in range [0, 1]. Values near 1 mean very large craters."));
+    par.addParam(new RichDynamicFloat("max_depth", 0.2, 0, 1, "Craters depth:", "Defines the maximum depth of craters in range [0, 1]. Values near 1 mean very deep craters."));
     return;
 }
 
@@ -187,7 +184,7 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameter
         return applyFractalDisplacementFilter(filter, md, par, cb);
         break;
     case FP_CRATERS:
-        return generateCraters(md, par);
+        return applyCratersGenerationFilter(md, par, cb);
         break;
     }
     return false;
@@ -220,6 +217,20 @@ bool FilterFractal::applyFractalDisplacementFilter (QAction*  filter, MeshDocume
     return false;
 }
 
+bool FilterFractal::applyCratersGenerationFilter(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+{
+    if (md.meshList.size() < 2)
+    {
+        Log(GLLogStream::FILTER, "There must be at least two layers to apply the craters generation filter.");
+        return false;
+    }
+
+    // reads parameters
+    CratersArgs args(par.getMesh("target_mesh"), par.getMesh("samples_mesh"),
+                     par.getDynamicFloat("max_radius"), par.getDynamicFloat("max_depth"));
+    return generateCraters(md, args, cb);
+}
+
 MeshFilterInterface::FilterClass FilterFractal::getClass(QAction* filter)
 {
     switch(ID(filter)) {
@@ -245,7 +256,7 @@ int FilterFractal::getRequirements(QAction *filter)
         return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
         break;
     case FP_CRATERS:
-        return MeshModel::MM_NONE;
+        return MeshModel::MM_VERTFACETOPO;
         break;
     default: assert(0);
     }
@@ -270,25 +281,55 @@ int FilterFractal::postCondition(QAction *filter) const
 // ----------------------------------------------------------------------
 
 // -------------------- Private functions -------------------------------
-bool FilterFractal::generateCraters(MeshDocument &md, RichParameterSet &par)
+bool FilterFractal::generateCraters(MeshDocument &md, CratersArgs &args, vcg::CallBackPos *cb)
 {
-    if (md.meshList.size() < 2)
+    /* stores with each sample the following attributes:
+       - crater radius
+       - crater depth
+       - vertexes of the target mesh within the radius
+     */
+    CMeshO::PerVertexAttributeHandle<float> rh = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.samples_mesh), std::string("Radius"));
+    CMeshO::PerVertexAttributeHandle<float> dh = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.samples_mesh), std::string("Depth"));
+    CMeshO::PerVertexAttributeHandle<std::vector<VertexPointer>* > lh = tri::Allocator<CMeshO>::AddPerVertexAttribute<std::vector<VertexPointer>* >(*(args.samples_mesh), std::string("CraterVertexes"));
+
+    VertexIterator target_vi;
+    VertexIterator samples_vi;
+    std::vector<VertexPointer>* craterVertexes;
+
+    if(!args.target_mesh->HasPerVertexQuality())
     {
-        Log(GLLogStream::SYSTEM, "There must be at least two layers to apply the craters generation filter.");
-        return false;
+        qDebug() << "The target mesh does not have vertex quality";
+        args.target_model->updateDataMask(MeshModel::MM_VERTQUALITY);
     }
 
-    MeshModel* target = par.getMesh("target_mesh");
-    MeshModel* samples = par.getMesh("samples_mesh");
+    // generates craters attributes and fills the lists
+    for(samples_vi = args.samples_mesh->vert.begin(); samples_vi != args.samples_mesh->vert.end(); ++samples_vi)
+    {
+        rh[samples_vi] = args.generateRadius();
+        dh[samples_vi] = args.generateDepth();
+        craterVertexes = new std::vector<VertexPointer>();
+        lh[samples_vi] = craterVertexes;
 
-    qDebug() << samples->cm.vn;
+        for(target_vi = args.target_mesh->vert.begin(); target_vi != args.target_mesh->vert.end(); ++target_vi)
+        {
+            if(vcg::Distance((*target_vi).P(), (*samples_vi).P()) <= rh[samples_vi])
+            {
+                lh[samples_vi]->push_back(&*target_vi);
+                (*target_vi).Q() = 1;
+            }
+        }
+    }
 
-    /*
-    tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
-    tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-    tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
-    */
+    // face selections
+    tri::UpdateFlags<CMeshO>::FaceClearV(*(args.target_mesh));
 
+
+
+    tri::Allocator<CMeshO>::DeletePerVertexAttribute<float>(*(args.samples_mesh), rh);
+    tri::Allocator<CMeshO>::DeletePerVertexAttribute<float>(*(args.samples_mesh), dh);
+
+    // attenzione: qui bisogna eliminare esplicitamente i vettori: non basta eliminare l'attributo
+    tri::Allocator<CMeshO>::DeletePerVertexAttribute<std::vector<VertexPointer>* >(*(args.samples_mesh), lh);
     return true;
 }
 

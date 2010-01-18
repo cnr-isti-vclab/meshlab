@@ -30,51 +30,53 @@
 
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
+#include "filter_args.h"
 #include "fractal_perturbation.h"
 
 class FilterFractal : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    Q_INTERFACES(MeshFilterInterface)
 
-        typedef CMeshO::CoordType       CoordType;
-        typedef CMeshO::VertexPointer   VertexPointer;
-        typedef CMeshO::VertexIterator  VertexIterator;
-        typedef CMeshO::FacePointer     FacePointer;
-        typedef CMeshO::FaceIterator    FaceIterator;
+    typedef CMeshO::CoordType       CoordType;
+    typedef CMeshO::VertexPointer   VertexPointer;
+    typedef CMeshO::VertexIterator  VertexIterator;
+    typedef CMeshO::FacePointer     FacePointer;
+    typedef CMeshO::FaceIterator    FaceIterator;
 
-        public:
-            FilterFractal();
-            ~FilterFractal(){delete fractalArgs;}
+public:
+    FilterFractal();
+    ~FilterFractal(){delete fractalArgs;}
 
-            virtual QString filterName(FilterIDType filter) const;
-            virtual QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
 
-            virtual int getRequirements(QAction *);
-            virtual bool autoDialog(QAction *){return true;}
+    virtual int getRequirements(QAction *);
+    virtual bool autoDialog(QAction *){return true;}
 
-            virtual void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
-            virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
+    virtual void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
+    virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
 
-            virtual bool applyFilter(QAction *, MeshModel&, RichParameterSet &, vcg::CallBackPos *){assert(0); return false;}
-            virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-            virtual int postCondition(QAction *action) const;
+    virtual bool applyFilter (QAction *, MeshModel&, RichParameterSet &, vcg::CallBackPos *){assert(0); return false;}
+    virtual bool applyFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+    virtual int postCondition(QAction *action) const;
 
-            virtual FilterClass getClass(QAction *);
+    virtual FilterClass getClass(QAction *);
 
-       private:
-            void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
-            void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterSet &par);
-            bool applyFractalDisplacementFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+private:
+    void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
+    void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterSet &par);
+    bool applyFractalDisplacementFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+    bool applyCratersGenerationFilter   (MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 
-            double computeFractalPerturbation(CoordType &point);
-            bool generateTerrain    (MeshModel &mm, vcg::CallBackPos* cb);
-            bool generateFractalMesh(MeshModel &mm, vcg::CallBackPos* cb);
-            bool generateCraters    (MeshDocument &md, RichParameterSet &par);
+    double computeFractalPerturbation(CoordType &point);
+    bool generateTerrain    (MeshModel &mm, vcg::CallBackPos* cb);
+    bool generateFractalMesh(MeshModel &mm, vcg::CallBackPos* cb);
+    bool generateCraters    (MeshDocument &md, CratersArgs &args, vcg::CallBackPos *cb);
 
-            enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
+    enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
 
-            FractalArgs* fractalArgs;
+    FractalArgs* fractalArgs;
 };
 
 #endif
