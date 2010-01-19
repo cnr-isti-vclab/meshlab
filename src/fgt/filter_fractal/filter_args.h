@@ -74,7 +74,7 @@ public:
         vcg::tri::Allocator<CMeshO>::CompactFaceVector(*target_mesh);
 
         float target_bb_diag = target_mesh->bbox.Diag();
-        max_radius = target_bb_diag * 0.3 * max_r;
+        max_radius = target_bb_diag * 0.5 * max_r;
         min_radius = target_bb_diag * 0.5 * 0.02;
         radius_range = max_radius - min_radius;
         max_depth = target_bb_diag * 0.2 * max_d;

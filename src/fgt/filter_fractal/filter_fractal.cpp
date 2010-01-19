@@ -33,6 +33,7 @@
 #include <vcg/complex/trimesh/refine.h>
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/math/base.h>
+#include "craters_utils.h"
 
 using namespace std;
 using namespace vcg;
@@ -256,7 +257,7 @@ int FilterFractal::getRequirements(QAction *filter)
         return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
         break;
     case FP_CRATERS:
-        return MeshModel::MM_VERTFACETOPO;
+        return MeshModel::MM_FACEFACETOPO;
         break;
     default: assert(0);
     }
@@ -286,50 +287,41 @@ bool FilterFractal::generateCraters(MeshDocument &md, CratersArgs &args, vcg::Ca
     /* stores with each sample the following attributes:
        - crater radius
        - crater depth
-       - vertexes of the target mesh within the radius
+       - faces of the target mesh within the radius
      */
     CMeshO::PerVertexAttributeHandle<float> rh = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.samples_mesh), std::string("Radius"));
     CMeshO::PerVertexAttributeHandle<float> dh = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.samples_mesh), std::string("Depth"));
-    CMeshO::PerVertexAttributeHandle<std::vector<VertexPointer>* > lh = tri::Allocator<CMeshO>::AddPerVertexAttribute<std::vector<VertexPointer>* >(*(args.samples_mesh), std::string("CraterVertexes"));
+    CMeshO::PerVertexAttributeHandle<std::vector<FacePointer>* > lh = tri::Allocator<CMeshO>::AddPerVertexAttribute<std::vector<FacePointer>* >(*(args.samples_mesh), std::string("CraterFaces"));
 
-    VertexIterator target_vi;
-    VertexIterator samples_vi;
-    std::vector<VertexPointer>* craterVertexes;
+    VertexIterator vi;
+    FacePointer fp = 0;
 
-    if(!args.target_mesh->HasPerVertexQuality())
+    if(!vcg::tri::HasFFAdjacency(*(args.target_mesh)))
     {
-        qDebug() << "The target mesh does not have vertex quality";
-        args.target_model->updateDataMask(MeshModel::MM_VERTQUALITY);
+        args.target_model->updateDataMask(MeshModel::MM_FACEFACETOPO);
     }
+    args.target_model->updateDataMask(MeshModel::MM_FACECOLOR);
+    std::vector<FacePointer>::iterator cfi;
 
-    // generates craters attributes and fills the lists
-    for(samples_vi = args.samples_mesh->vert.begin(); samples_vi != args.samples_mesh->vert.end(); ++samples_vi)
+    for(vi = args.samples_mesh->vert.begin(); vi != args.samples_mesh->vert.end(); ++vi)
     {
-        rh[samples_vi] = args.generateRadius();
-        dh[samples_vi] = args.generateDepth();
-        craterVertexes = new std::vector<VertexPointer>();
-        lh[samples_vi] = craterVertexes;
+        rh[vi] = args.generateRadius();             // sets the crater radius
+        dh[vi] = args.generateDepth();              // sets the crater depth
+        lh[vi] = new std::vector<FacePointer>();    // creates the face list
 
-        for(target_vi = args.target_mesh->vert.begin(); target_vi != args.target_mesh->vert.end(); ++target_vi)
+        fp = CratersUtils<CMeshO>::getClosestFace<float>(args.target_mesh, &*vi);
+        CratersUtils<CMeshO>::SelectCraterFaces<float>(args.target_mesh, fp, &*vi, rh[vi], lh[vi]);
+
+        for(cfi = lh[vi]->begin(); cfi!=lh[vi]->end(); ++cfi)
         {
-            if(vcg::Distance((*target_vi).P(), (*samples_vi).P()) <= rh[samples_vi])
-            {
-                lh[samples_vi]->push_back(&*target_vi);
-                (*target_vi).Q() = 1;
-            }
+            (*cfi)->C() = Color4b::Red;
         }
     }
-
-    // face selections
-    tri::UpdateFlags<CMeshO>::FaceClearV(*(args.target_mesh));
-
-
-
     tri::Allocator<CMeshO>::DeletePerVertexAttribute<float>(*(args.samples_mesh), rh);
     tri::Allocator<CMeshO>::DeletePerVertexAttribute<float>(*(args.samples_mesh), dh);
 
     // attenzione: qui bisogna eliminare esplicitamente i vettori: non basta eliminare l'attributo
-    tri::Allocator<CMeshO>::DeletePerVertexAttribute<std::vector<VertexPointer>* >(*(args.samples_mesh), lh);
+    tri::Allocator<CMeshO>::DeletePerVertexAttribute<std::vector<FacePointer>* >(*(args.samples_mesh), lh);
     return true;
 }
 

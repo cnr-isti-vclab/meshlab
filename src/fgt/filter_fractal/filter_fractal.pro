@@ -1,7 +1,8 @@
 include (../../shared.pri)
 HEADERS += filter_fractal.h \
     fractal_perturbation.h \
-    filter_args.h
+    filter_args.h \
+    craters_utils.h
 SOURCES += filter_fractal.cpp
 TARGET = filter_fractal
 TEMPLATE = lib
