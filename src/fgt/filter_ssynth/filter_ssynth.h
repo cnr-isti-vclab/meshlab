@@ -31,16 +31,16 @@
 #include <common/interfaces.h>
 #include <meshlabplugins/io_x3d/io_x3d.h>
 
-class FilterSSynth : public QObject, public MeshFilterInterface{
+class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInterface{
     Q_OBJECT
     Q_INTERFACES(MeshFilterInterface)
-
+        Q_INTERFACES(MeshIOInterface)
     public:
             enum {CR_SSYNTH} ;
-                    
+
             FilterSSynth();
             ~FilterSSynth(){};
-    
+
             virtual QString filterName(FilterIDType filter) const;
             virtual QString filterInfo(FilterIDType filter) const;
             virtual int getRequirements(QAction *);
@@ -49,11 +49,27 @@ class FilterSSynth : public QObject, public MeshFilterInterface{
             virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
             virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
             virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-            virtual FilterClass getClass(QAction *);
+            virtual FilterClass getClass(QAction* filter);
             void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
-            bool openX3D(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent=0);
-        private:
+            static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
+                        virtual int postCondition(QAction* filter) const;
            // int &mask=0;
-            QString ssynth(QString grammar,int seed);
+
+
+
+                        QList<Format> importFormats() const;
+                        QList<Format> exportFormats() const;
+
+                        virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
+                    void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst);
+                        //virtual void applyPreOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
+                        bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
+                        bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent);
+
+private:
+         QString ssynth(QString grammar,int seed,vcg::CallBackPos *cb);
+                QString grammar;
+                int seed;
+               QString renderTemplate;
         };
 #endif // FILTER_SSYNTH_H
