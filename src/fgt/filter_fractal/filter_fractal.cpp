@@ -171,8 +171,11 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
 
     par.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh on which craters will be generated."));
     par.addParam(new RichMesh("samples_mesh", samples, &md, "Samples layer:", "The samples that represent the central points of craters."));
-    par.addParam(new RichDynamicFloat("max_radius", 0.2, 0, 1, "Craters radius:", "Defines the maximum radius of craters in range [0, 1]. Values near 1 mean very large craters."));
-    par.addParam(new RichDynamicFloat("max_depth", 0.2, 0, 1, "Craters depth:", "Defines the maximum depth of craters in range [0, 1]. Values near 1 mean very deep craters."));
+    par.addParam(new RichDynamicFloat("min_radius", 0.3, 0, 1, "Min crater radius:", "Defines the minimum radius of craters in range [0, 1]. Values near 0 mean very small craters."));
+    par.addParam(new RichDynamicFloat("max_radius", 0.6, 0, 1, "Max crater radius:", "Defines the maximum radius of craters in range [0, 1]. Values near 1 mean very large craters."));
+    par.addParam(new RichDynamicFloat("min_depth", 0.3, 0, 1, "Min crater depth:", "Defines the minimum depth of craters in range [0, 1]."));
+    par.addParam(new RichDynamicFloat("max_depth", 0.6, 0, 1, "Max crater depth:", "Defines the maximum depth of craters in range [0, 1]. Values near 1 mean very deep craters."));
+    par.addParam(new RichDynamicFloat("resolution", 0.5, 0, 1, "Craters resolution:", "This parameter defines the quality of generated craters. 1 means maximum quality."));
     return;
 }
 
@@ -228,7 +231,9 @@ bool FilterFractal::applyCratersGenerationFilter(MeshDocument &md, RichParameter
 
     // reads parameters
     CratersArgs args(par.getMesh("target_mesh"), par.getMesh("samples_mesh"),
-                     par.getDynamicFloat("max_radius"), par.getDynamicFloat("max_depth"));
+                     par.getDynamicFloat("min_radius"), par.getDynamicFloat("max_radius"),
+                     par.getDynamicFloat("min_depth"), par.getDynamicFloat("max_depth"),
+                     par.getDynamicFloat("resolution"));
     return generateCraters(md, args, cb);
 }
 
@@ -291,37 +296,52 @@ bool FilterFractal::generateCraters(MeshDocument &md, CratersArgs &args, vcg::Ca
      */
     CMeshO::PerVertexAttributeHandle<float> rh = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.samples_mesh), std::string("Radius"));
     CMeshO::PerVertexAttributeHandle<float> dh = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.samples_mesh), std::string("Depth"));
-    CMeshO::PerVertexAttributeHandle<std::vector<FacePointer>* > lh = tri::Allocator<CMeshO>::AddPerVertexAttribute<std::vector<FacePointer>* >(*(args.samples_mesh), std::string("CraterFaces"));
-
-    VertexIterator vi;
-    FacePointer fp = 0;
+    CMeshO::PerVertexAttributeHandle<FacePointer> fh = tri::Allocator<CMeshO>::AddPerVertexAttribute<FacePointer>(*(args.samples_mesh), std::string("CentralFace"));
 
     if(!vcg::tri::HasFFAdjacency(*(args.target_mesh)))
     {
         args.target_model->updateDataMask(MeshModel::MM_FACEFACETOPO);
     }
-    args.target_model->updateDataMask(MeshModel::MM_FACECOLOR);
-    std::vector<FacePointer>::iterator cfi;
+    vcg::tri::UpdateSelection<CMeshO>::ClearFace(*(args.target_mesh));
 
+    VertexIterator vi;
+    float maxRadius = .0;
+
+    // first loop: identification and selection of crater faces
     for(vi = args.samples_mesh->vert.begin(); vi != args.samples_mesh->vert.end(); ++vi)
     {
         rh[vi] = args.generateRadius();             // sets the crater radius
+        if(rh[vi] > maxRadius) maxRadius = rh[vi];  // updates, if necessary, the maxRadius
         dh[vi] = args.generateDepth();              // sets the crater depth
-        lh[vi] = new std::vector<FacePointer>();    // creates the face list
-
-        fp = CratersUtils<CMeshO>::getClosestFace<float>(args.target_mesh, &*vi);
-        CratersUtils<CMeshO>::SelectCraterFaces<float>(args.target_mesh, fp, &*vi, rh[vi], lh[vi]);
-
-        for(cfi = lh[vi]->begin(); cfi!=lh[vi]->end(); ++cfi)
-        {
-            (*cfi)->C() = Color4b::Red;
-        }
+        fh[vi] = CratersUtils<CMeshO>::getClosestFace<float>(args.target_mesh, &*vi);
+        CratersUtils<CMeshO>::SelectCraterFaces<float>(args.target_mesh, fh[vi], &*vi, rh[vi]);
     }
+
+    // refinement of crater faces
+    float edgeThreshold = maxRadius * 2 / (50 * args.resolution);
+    int maxIterations = 7;
+    int iter = 0;
+    while(Refine<CMeshO, MidPoint<CMeshO> >
+          (*(args.target_mesh), MidPoint<CMeshO>(args.target_mesh), edgeThreshold, true, cb)
+          && iter++ < maxIterations);
+
+    // radial function application
+    std::vector<FacePointer> craterFaces;
+    for(vi = args.samples_mesh->vert.begin(); vi != args.samples_mesh->vert.end(); ++vi)
+    {
+        fh[vi] = CratersUtils<CMeshO>::getClosestFace<float>(args.target_mesh, &*vi);
+        CratersUtils<CMeshO>::SelectCraterFaces<float>(args.target_mesh, fh[vi], &*vi, rh[vi], &craterFaces);
+        CratersUtils<CMeshO>::applyRadialPerturbation<float>
+                (args.target_mesh, craterFaces, &(*vi), rh[vi], dh[vi]);
+    }
+
+    tri::Allocator<CMeshO>::DeletePerVertexAttribute<FacePointer>(*(args.samples_mesh), fh);
     tri::Allocator<CMeshO>::DeletePerVertexAttribute<float>(*(args.samples_mesh), rh);
     tri::Allocator<CMeshO>::DeletePerVertexAttribute<float>(*(args.samples_mesh), dh);
 
-    // attenzione: qui bisogna eliminare esplicitamente i vettori: non basta eliminare l'attributo
-    tri::Allocator<CMeshO>::DeletePerVertexAttribute<std::vector<FacePointer>* >(*(args.samples_mesh), lh);
+    // updating bounding box and normals
+    vcg::tri::UpdateBounding<CMeshO>::Box(*(args.target_mesh));
+    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(*(args.target_mesh));
     return true;
 }
 

@@ -6,6 +6,7 @@
 #include <vcg/complex/intersection.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/space/sphere3.h>
+#include <vcg/math/base.h>
 
 template<class MeshType>
 class CratersUtils
@@ -48,8 +49,8 @@ public:
     static void SelectCraterFaces(MeshType *m,              // target mesh
                                   FacePointer startingFace, // face under the crater centre
                                   VertexPointer centre,     // crater centre
-                                  CoordScalarType radius,   // crater radius
-                                  std::vector<FacePointer>* craterFaces // vector of crater faces (output)
+                                  CoordScalarType radius,    // crater radius
+                                  std::vector<FacePointer>* toFill = 0
                                   )
     {
         assert(vcg::tri::HasFFAdjacency(*m));
@@ -60,6 +61,10 @@ public:
         std::vector<FacePointer> fl;
         fl.push_back(startingFace);
 
+        if(toFill)
+        {
+            toFill->clear();
+        }
         FacePointer f;
         Point3<CoordScalarType> dummyPoint;
         std::pair<CoordScalarType, CoordScalarType> dummyPair;
@@ -75,7 +80,11 @@ public:
                 if(vcg::IntersectionSphereTriangle<CoordScalarType, FaceType>
                         (craterSphere, *f, dummyPoint, &dummyPair))
                 {   // intersection test succedeed
-                    craterFaces->push_back(f);
+                    if(toFill)
+                    {
+                        toFill->push_back(f);
+                    }
+                    f->SetS();
                     for(int i=0; i<3; i++)
                     {
                         if(!f->FFp(i)->IsV())
@@ -87,6 +96,44 @@ public:
             }
         }
     }
+
+    template<class ScalarType>
+    static void applyRadialPerturbation(MeshType *m, std::vector<FacePointer> &craterFaces,
+            VertexPointer centre, ScalarType radius, ScalarType depth)
+    {
+        vcg::tri::UpdateFlags<MeshType>::VertexClearV(*m);
+        typename std::vector<FacePointer>::iterator fi;
+        VertexPointer vp;
+        ScalarType perturbation = .0;
+
+        for(fi = craterFaces.begin(); fi!=craterFaces.end(); ++fi)
+        {
+            for(int i=0; i<3; i++)
+            {
+                vp = (*fi)->V(i);
+                if(!vp->IsV())
+                {
+                    vp->SetV();
+                    perturbation = CratersUtils<MeshType>::applyRadialPerturbation<ScalarType>
+                                   (vp->P(), centre->P(), radius, depth);
+                    vp->P() += (centre->N() * perturbation);
+                }
+            }
+        }
+    }
+
+    template<class ScalarType>
+    static ScalarType applyRadialPerturbation(Point3<ScalarType> &p, Point3<ScalarType> &centre,
+                                       ScalarType radius, ScalarType depth)
+    {
+        ScalarType result = .0;
+        ScalarType dist = vcg::Distance(p, centre);
+        double exponent = - pow((2 * dist / radius), 2);
+        result = - depth * exp(exponent);
+        return result;
+    }
+
+
 };
 
 

@@ -19,7 +19,6 @@ public:
     float spectralWeight[21];
     float zoom_window_side, zoom_org_x, zoom_org_y;
 
-
     FractalArgs(){}
 
     void setFields(int algorithmId, float seed, float octaves, float lacunarity, float fractalIncrement,
@@ -60,8 +59,10 @@ public:
     CMeshO* target_mesh;
     CMeshO* samples_mesh;
     float max_radius, max_depth, min_radius, min_depth, radius_range, depth_range;
+    float resolution;
 
-    CratersArgs(MeshModel* target, MeshModel* samples, float max_r, float max_d)
+    CratersArgs(MeshModel* target, MeshModel* samples, float min_r, float max_r,
+                float min_d, float max_d, float res)
     {
         generator = new vcg::math::SubtractiveRingRNG();
 
@@ -74,26 +75,30 @@ public:
         vcg::tri::Allocator<CMeshO>::CompactFaceVector(*target_mesh);
 
         float target_bb_diag = target_mesh->bbox.Diag();
-        max_radius = target_bb_diag * 0.5 * max_r;
-        min_radius = target_bb_diag * 0.5 * 0.02;
+        max_radius = target_bb_diag * 0.2 * max_r;
+        min_radius = target_bb_diag * 0.2 * min_r;
         radius_range = max_radius - min_radius;
         max_depth = target_bb_diag * 0.2 * max_d;
-        min_depth = target_bb_diag * 0.2 * 0.02;
+        min_depth = target_bb_diag * 0.2 * min_d;
         depth_range = max_depth - min_depth;
+
+        this->resolution = res;
     }
 
     ~CratersArgs(){ delete generator; }
 
+    /* generates a crater radius within the specified range */
     float generateRadius()
     {
         float rnd = generator->generate01closed();
         return min_radius + radius_range * rnd;
     }
 
+    /* generates a crater depth within the specified range */
     float generateDepth()
     {
         float rnd = generator->generate01closed();
-        return min_depth + radius_range * rnd;
+        return min_depth + depth_range * rnd;
     }
 
 private:
