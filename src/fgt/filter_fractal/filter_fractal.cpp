@@ -33,6 +33,7 @@
 #include <vcg/complex/trimesh/refine.h>
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/math/base.h>
+#include <vcg/space/plane3.h>
 #include "craters_utils.h"
 
 using namespace std;
@@ -289,33 +290,35 @@ int FilterFractal::postCondition(QAction *filter) const
 // -------------------- Private functions -------------------------------
 bool FilterFractal::generateCraters(MeshDocument &md, CratersArgs &args, vcg::CallBackPos *cb)
 {
-    /* stores with each sample the following attributes:
-       - crater radius
-       - crater depth
-       - faces of the target mesh within the radius
-     */
     CMeshO::PerVertexAttributeHandle<float> rh = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.samples_mesh), std::string("Radius"));
     CMeshO::PerVertexAttributeHandle<float> dh = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.samples_mesh), std::string("Depth"));
     CMeshO::PerVertexAttributeHandle<FacePointer> fh = tri::Allocator<CMeshO>::AddPerVertexAttribute<FacePointer>(*(args.samples_mesh), std::string("CentralFace"));
 
-    if(!vcg::tri::HasFFAdjacency(*(args.target_mesh)))
-    {
-        args.target_model->updateDataMask(MeshModel::MM_FACEFACETOPO);
-    }
+    args.target_model->updateDataMask(MeshModel::MM_FACEFACETOPO);
+    args.target_model->updateDataMask(MeshModel::MM_FACECOLOR);
     vcg::tri::UpdateSelection<CMeshO>::ClearFace(*(args.target_mesh));
 
-    VertexIterator vi;
-    float maxRadius = .0;
+    CratersUtils<CMeshO>::findSamplesFaces<float>(args.target_mesh, args.samples_mesh, fh);
 
-    // first loop: identification and selection of crater faces
-    for(vi = args.samples_mesh->vert.begin(); vi != args.samples_mesh->vert.end(); ++vi)
+    // selection of crater faces
+    float maxRadius = .0;
+    for(VertexIterator vi = args.samples_mesh->vert.begin(); vi != args.samples_mesh->vert.end(); ++vi)
     {
         rh[vi] = args.generateRadius();             // sets the crater radius
         if(rh[vi] > maxRadius) maxRadius = rh[vi];  // updates, if necessary, the maxRadius
         dh[vi] = args.generateDepth();              // sets the crater depth
-        fh[vi] = CratersUtils<CMeshO>::getClosestFace<float>(args.target_mesh, &*vi);
         CratersUtils<CMeshO>::SelectCraterFaces<float>(args.target_mesh, fh[vi], &*vi, rh[vi]);
     }
+
+    /*
+    for(FaceIterator fi=args.target_mesh->face.begin(); fi!=args.target_mesh->face.end(); ++fi)
+    {
+        if( (*fi).IsS() )
+        {
+            (*fi).C() = Color4b::Red;
+        }
+    }
+    */
 
     // refinement of crater faces
     float edgeThreshold = maxRadius * 2 / (50 * args.resolution);
@@ -326,15 +329,16 @@ bool FilterFractal::generateCraters(MeshDocument &md, CratersArgs &args, vcg::Ca
           && iter++ < maxIterations);
 
     // radial function application
+    CratersUtils<CMeshO>::findSamplesFaces<float>(args.target_mesh, args.samples_mesh, fh);
     std::vector<FacePointer> craterFaces;
-    for(vi = args.samples_mesh->vert.begin(); vi != args.samples_mesh->vert.end(); ++vi)
+    for(VertexIterator vi = args.samples_mesh->vert.begin(); vi != args.samples_mesh->vert.end(); ++vi)
     {
-        fh[vi] = CratersUtils<CMeshO>::getClosestFace<float>(args.target_mesh, &*vi);
         CratersUtils<CMeshO>::SelectCraterFaces<float>(args.target_mesh, fh[vi], &*vi, rh[vi], &craterFaces);
         CratersUtils<CMeshO>::applyRadialPerturbation<float>
                 (args.target_mesh, craterFaces, &(*vi), rh[vi], dh[vi]);
     }
 
+    // deleting attributes
     tri::Allocator<CMeshO>::DeletePerVertexAttribute<FacePointer>(*(args.samples_mesh), fh);
     tri::Allocator<CMeshO>::DeletePerVertexAttribute<float>(*(args.samples_mesh), rh);
     tri::Allocator<CMeshO>::DeletePerVertexAttribute<float>(*(args.samples_mesh), dh);
