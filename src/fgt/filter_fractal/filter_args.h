@@ -58,11 +58,12 @@ public:
     MeshModel* samples_model;
     CMeshO* target_mesh;
     CMeshO* samples_mesh;
-    float max_radius, max_depth, min_radius, min_depth, radius_range, depth_range;
+    int algorithm;
+    float max_radius, max_depth, min_radius, min_depth, radius_range, depth_range, profile_factor;
     float resolution;
 
-    CratersArgs(MeshModel* target, MeshModel* samples, float min_r, float max_r,
-                float min_d, float max_d, float res)
+    CratersArgs(MeshModel* target, MeshModel* samples, int alg, float min_r, float max_r,
+                float min_d, float max_d, float p_factor, float res)
     {
         generator = new vcg::math::SubtractiveRingRNG();
 
@@ -74,6 +75,7 @@ public:
         vcg::tri::Allocator<CMeshO>::CompactVertexVector(*target_mesh);
         vcg::tri::Allocator<CMeshO>::CompactFaceVector(*target_mesh);
 
+        algorithm = alg;
         float target_bb_diag = target_mesh->bbox.Diag();
         max_radius = target_bb_diag * 0.2 * max_r;
         min_radius = target_bb_diag * 0.2 * min_r;
@@ -81,8 +83,8 @@ public:
         max_depth = target_bb_diag * 0.2 * max_d;
         min_depth = target_bb_diag * 0.2 * min_d;
         depth_range = max_depth - min_depth;
-
-        this->resolution = res;
+        profile_factor = p_factor;
+        resolution = res;
     }
 
     ~CratersArgs(){ delete generator; }

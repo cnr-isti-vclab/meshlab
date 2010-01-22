@@ -172,10 +172,16 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
 
     par.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh on which craters will be generated."));
     par.addParam(new RichMesh("samples_mesh", samples, &md, "Samples layer:", "The samples that represent the central points of craters."));
+
+    QStringList algList;
+    algList << "Gaussian" << "Multiquadric" << "Inverse Multiquadric" << "Cauchy";
+    par.addParam(new RichEnum("rbf", 0, algList, "Radial function:", "The radial function used to generate craters."));
+
     par.addParam(new RichDynamicFloat("min_radius", 0.3, 0, 1, "Min crater radius:", "Defines the minimum radius of craters in range [0, 1]. Values near 0 mean very small craters."));
     par.addParam(new RichDynamicFloat("max_radius", 0.6, 0, 1, "Max crater radius:", "Defines the maximum radius of craters in range [0, 1]. Values near 1 mean very large craters."));
     par.addParam(new RichDynamicFloat("min_depth", 0.3, 0, 1, "Min crater depth:", "Defines the minimum depth of craters in range [0, 1]."));
     par.addParam(new RichDynamicFloat("max_depth", 0.6, 0, 1, "Max crater depth:", "Defines the maximum depth of craters in range [0, 1]. Values near 1 mean very deep craters."));
+    par.addParam(new RichDynamicFloat("profile_factor", 2, 0, 10, "Profile factor:", "The profile factor controls the ratio between crater borders and crater effective area. Use [1, 4] values to obtain reasonable results. This parameter is not considered in multiquadric radial functions."));
     par.addParam(new RichDynamicFloat("resolution", 0.5, 0, 1, "Craters resolution:", "This parameter defines the quality of generated craters. 1 means maximum quality."));
     return;
 }
@@ -231,10 +237,10 @@ bool FilterFractal::applyCratersGenerationFilter(MeshDocument &md, RichParameter
     }
 
     // reads parameters
-    CratersArgs args(par.getMesh("target_mesh"), par.getMesh("samples_mesh"),
+    CratersArgs args(par.getMesh("target_mesh"), par.getMesh("samples_mesh"), par.getEnum("rbf"),
                      par.getDynamicFloat("min_radius"), par.getDynamicFloat("max_radius"),
                      par.getDynamicFloat("min_depth"), par.getDynamicFloat("max_depth"),
-                     par.getDynamicFloat("resolution"));
+                     par.getDynamicFloat("profile_factor"), par.getDynamicFloat("resolution"));
     return generateCraters(md, args, cb);
 }
 
@@ -335,7 +341,7 @@ bool FilterFractal::generateCraters(MeshDocument &md, CratersArgs &args, vcg::Ca
     {
         CratersUtils<CMeshO>::SelectCraterFaces<float>(args.target_mesh, fh[vi], &*vi, rh[vi], &craterFaces);
         CratersUtils<CMeshO>::applyRadialPerturbation<float>
-                (args.target_mesh, craterFaces, &(*vi), rh[vi], dh[vi]);
+                (args.target_mesh, args.algorithm, craterFaces, &(*vi), rh[vi], dh[vi], args.profile_factor);
     }
 
     // deleting attributes
