@@ -196,7 +196,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		return false; //message already set
 	qDebug("Cycle ending at %i",tt.elapsed());
 	Log(GLLogStream::FILTER,"Successfully created scene");
-	
+
+
 	//check if the final rib file will render any image
 	if(imagesRendered.size() == 0) {
 		this->errorMessage = "The template hasn't a statement to render any image";
@@ -225,19 +226,36 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	
 	QString aqsisDir;
 	bool found = false;
-	foreach(QString envElem, aqsisEnv) { //looking for AQSISHOME variable
-		if(envElem.contains("AQSISHOME")) {
+	foreach(QString envElem, aqsisEnv) { //looking for (AQSISHOME|PATH) variable
+		if(envElem.contains("AQSISHOME", Qt::CaseInsensitive)) { //old version of aqsis? (1.4)
 			qDebug("founded environment variable value: %s", qPrintable(envElem));
-			aqsisDir = envElem.remove("AQSISHOME="); //the string is "AQSISHOME='path'"
+			aqsisDir = envElem.remove("AQSISHOME=", Qt::CaseInsensitive); //the string is "AQSISHOME='path'"
 			qDebug("aqsis directory: %s", qPrintable(aqsisDir));
 			found = true;
 			break;
+		}
+		if(envElem.startsWith("PATH=", Qt::CaseInsensitive)) { //aqsis 1.6
+			qDebug("founded environment variable value: %s", qPrintable(envElem));
+			QStringList pathlist = envElem.remove("PATH=", Qt::CaseInsensitive).split(';');
+			foreach(QString str, pathlist) {
+				if(str.contains("aqsis", Qt::CaseInsensitive)) { //is it enough?
+					qDebug("founded environment variable value: %s", qPrintable(str));
+					aqsisDir = str;
+					qDebug("aqsis directory: %s", qPrintable(aqsisDir));
+					found = true;
+					break;
+				}
+			}
+			if(found) break;
 		}
 	}
 	if(!found) {
 		this->errorMessage = "Aqsis is not installed correctly";
 		return false;
 	}
+	if(!aqsisDir.contains("bin"))
+		aqsisDir += QDir::separator() + aqsisBinPath();
+
 #if defined(Q_OS_WIN)
 	//if os is win and a dir contains a space, it must be wrapped in quotes (..\"Program files"\..)
 	aqsisDir = quotesPath(&aqsisDir);
@@ -251,7 +269,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			compileProcess.setWorkingDirectory(destDirString + QDir::separator() + dirStr);
 			compileProcess.setEnvironment(aqsisEnv);
 			qDebug("compiling shader working directory: %s",qPrintable(destDirString + QDir::separator() + dirStr));
-			QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqslName()+" *.sl";
+			QString toRun = aqsisDir + aqslName()+ " *.sl";
 			qDebug("compiling command: %s",qPrintable(toRun));
 			compileProcess.start(toRun);
 			if (!compileProcess.waitForFinished(-1)) { //wait the finish of process
@@ -300,7 +318,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 			//set working directory the location of texture
 			convertTextureProcess.setWorkingDirectory(destDirString + QDir::separator() + newImageDir);
 			qDebug("convert texture working directory: %s",qPrintable(destDirString + QDir::separator() + newImageDir));
-			QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + teqserName() + " " + getFileNameFromPath(&textureName,false) +".tiff " + getFileNameFromPath(&textureName,false) + ".tx";
+			QString toRun = aqsisDir + teqserName() + " " + getFileNameFromPath(&textureName,false) +".tiff " + getFileNameFromPath(&textureName,false) + ".tx";
 			qDebug("convert command: %s",qPrintable(toRun));
 			convertTextureProcess.start(toRun);				
 			if (!convertTextureProcess.waitForFinished(-1)) { //wait the finish of process
@@ -319,7 +337,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	//run the aqsis rendering
 	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
 	renderProcess.setEnvironment(aqsisEnv);
-	QString toRun = aqsisDir + aqsisBinPath() + QDir::separator() + aqsisName()+ " -progress -progressformat=%p "+ mainFileName();
+	QString toRun = aqsisDir + aqsisName()+ " -progress -progressformat=%p "+ mainFileName();
 	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
 	//every time the render process write a message, receive a signal
 	worldBeginRendered = 1; lastCb = 0;
@@ -378,7 +396,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 		QProcess piqslProcess;
 		piqslProcess.setWorkingDirectory(destDirString);
 		piqslProcess.setEnvironment(aqsisEnv);
-		toRun = aqsisDir + aqsisBinPath() + QDir::separator() + piqslName();
+		toRun = aqsisDir + piqslName();
 		//if there'isnt image, it stops before...
 		foreach(QString img, imagesRendered) {
 			toRun += " " + img;

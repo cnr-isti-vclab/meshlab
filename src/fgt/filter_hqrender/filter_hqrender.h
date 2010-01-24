@@ -82,7 +82,7 @@ private:
   inline const QString aqsisBinPath() 
   { 
   #if defined(Q_OS_WIN)
-	return QString("bin");
+	return QString("bin/");
   #elif defined(Q_OS_MAC)
 	return QString("/Contents/Resources/bin/");
   #endif
