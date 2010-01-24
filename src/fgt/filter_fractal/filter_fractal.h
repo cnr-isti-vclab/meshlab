@@ -43,10 +43,11 @@ class FilterFractal : public QObject, public MeshFilterInterface
     typedef CMeshO::VertexIterator  VertexIterator;
     typedef CMeshO::FacePointer     FacePointer;
     typedef CMeshO::FaceIterator    FaceIterator;
+    typedef CMeshO::FaceType        FaceType;
 
 public:
     FilterFractal();
-    ~FilterFractal(){delete fractalArgs;}
+    ~FilterFractal(){}
 
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
@@ -70,13 +71,11 @@ private:
     bool applyCratersGenerationFilter   (MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 
     double computeFractalPerturbation(CoordType &point);
-    bool generateTerrain    (MeshModel &mm, vcg::CallBackPos* cb);
-    bool generateFractalMesh(MeshModel &mm, vcg::CallBackPos* cb);
-    bool generateCraters    (MeshDocument &md, CratersArgs &args, vcg::CallBackPos *cb);
+    bool generateTerrain    (MeshModel &mm, FractalArgs<float> &args, vcg::CallBackPos* cb);
+    bool generateFractalMesh(MeshModel &mm, FractalArgs<float> &args, vcg::CallBackPos* cb);
+    bool generateCraters    (CratersArgs<float> &args, vcg::CallBackPos *cb);
 
     enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
-
-    FractalArgs* fractalArgs;
 };
 
 #endif

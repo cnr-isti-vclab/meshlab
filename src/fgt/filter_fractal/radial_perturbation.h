@@ -11,6 +11,7 @@ template<class ScalarType>
 class RadialPerturbation
 {
 public:
+
     static ScalarType Gaussian(Point3<ScalarType> &p, Point3<ScalarType> &centre,
                                ScalarType radius, ScalarType depth, ScalarType profileFactor)
     {

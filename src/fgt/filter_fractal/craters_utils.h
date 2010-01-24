@@ -9,44 +9,45 @@
 #include <vcg/space/sphere3.h>
 #include <vcg/math/base.h>
 #include <vcg/space/box3.h>
+#include "filter_args.h"
 #include "radial_perturbation.h"
+#include "fractal_perturbation.h"
 
 template<class MeshType>
 class CratersUtils
 {
 public:
-    typedef typename MeshType::FacePointer      FacePointer;
-    typedef typename MeshType::FaceIterator     FaceIterator;
-    typedef typename MeshType::FaceType         FaceType;
-    typedef typename MeshType::VertexPointer    VertexPointer;
-    typedef typename MeshType::VertexIterator   VertexIterator;
-    typedef typename MeshType::template PerVertexAttributeHandle<FacePointer> FaceHandle;
+    typedef typename MeshType::FacePointer          FacePointer;
+    typedef typename MeshType::FaceIterator         FaceIterator;
+    typedef typename MeshType::FaceType             FaceType;
+    typedef typename MeshType::VertexPointer        VertexPointer;
+    typedef typename MeshType::VertexIterator       VertexIterator;
+    typedef std::pair<VertexPointer, FacePointer>   SampleFace;
+    typedef std::vector<SampleFace>                 SampleFaceVector;
 
-    /* finds the faces onto which the samples lie and stores them using the given handle */
     template<class ScalarType>
-    static void findSamplesFaces(MeshType *target, MeshType *samples, FaceHandle &fh)
+    static void FindSamplesFaces(MeshType *target, MeshType *samples, SampleFaceVector &sfv)
     {
-        vcg::tri::UpdateFlags<MeshType>::VertexClearV(*samples);
-        VertexIterator vi;
-        Box3<ScalarType> bbox;
+        vcg::Box3<ScalarType> bbox;
+        float a, b, c;
         int undiscoveredFaces = samples->vert.size();
-        FaceIterator fi = target->face.begin();
-        ScalarType a, b, c;
 
+        vcg::tri::UpdateFlags<CMeshO>::VertexClearV(*samples);
+        FaceIterator fi = target->face.begin();
         while(fi!=target->face.end() && undiscoveredFaces>0)
         {
             (*fi).GetBBox(bbox);
-            for(vi=samples->vert.begin(); vi!=samples->vert.end(); ++vi)
-            {
-                if((*vi).IsV()) continue;               // sample's face discovered
-                if(!(bbox.IsIn((*vi).P()))) continue;   // sample not contained in the bounding box
 
-                // barycentric test
+            for(VertexIterator vi=samples->vert.begin(); vi!=samples->vert.end(); ++vi)
+            {
+                if((*vi).IsV()) continue;
+                if(!bbox.IsIn((*vi).P())) continue;
+
                 vcg::InterpolationParameters<FaceType, ScalarType>((*fi), (*vi).P(), a, b, c);
-                if(a <= 1 && a >=0 && b <=1 && b>=0 && c<=1 && c>=0)
-                {   // face found
+                if (a>=0 && a<=1 && b>=0 && b<=1 && c>=0 && c<=1)
+                {
                     (*vi).SetV();
-                    fh[vi] = &(*fi);
+                    sfv.push_back( SampleFace(&(*vi), &(*fi)));
                     undiscoveredFaces--;
                 }
             }
@@ -54,14 +55,14 @@ public:
         }
     }
 
+
     /* detectes the faces of the crater starting from a given face */
     template<class CoordScalarType>
-    static void SelectCraterFaces(MeshType *m,              // target mesh
-                                  FacePointer startingFace, // face under the crater centre
-                                  VertexPointer centre,     // crater centre
-                                  CoordScalarType radius,    // crater radius
-                                  std::vector<FacePointer>* toFill = 0
-                                                                     )
+    static void GetCraterFaces(MeshType *m,              // target mesh
+                               FacePointer startingFace, // face under the crater centre
+                               VertexPointer centre,     // crater centre
+                               CoordScalarType radius,    // crater radius
+                               std::vector<FacePointer> &toFill)
     {
         assert(vcg::tri::HasFFAdjacency(*m));
         vcg::tri::UpdateFlags<MeshType>::FaceClearV(*m);
@@ -71,10 +72,7 @@ public:
         std::vector<FacePointer> fl;
         fl.push_back(startingFace);
 
-        if(toFill)
-        {
-            toFill->clear();
-        }
+        toFill.clear();
         FacePointer f;
         Point3<CoordScalarType> dummyPoint;
         std::pair<CoordScalarType, CoordScalarType> dummyPair;
@@ -90,11 +88,7 @@ public:
                 if(vcg::IntersectionSphereTriangle<CoordScalarType, FaceType>
                    (craterSphere, *f, dummyPoint, &dummyPair))
                 {   // intersection test succedeed
-                    if(toFill)
-                    {
-                        toFill->push_back(f);
-                    }
-                    f->SetS();
+                    toFill.push_back(f);
                     for(int i=0; i<3; i++)
                     {
                         if(!f->FFp(i)->IsV())
@@ -108,10 +102,16 @@ public:
     }
 
     template<class ScalarType>
-    static void applyRadialPerturbation(MeshType *m, int algorithm, std::vector<FacePointer> &craterFaces,
-                                        VertexPointer centre, ScalarType radius, ScalarType depth, ScalarType profileFactor)
+    static void applyRadialPerturbation(CratersArgs<ScalarType> &args, VertexPointer centre,
+                                        std::vector<FacePointer> &craterFaces, ScalarType radius,
+                                        ScalarType depth)
     {
-        vcg::tri::UpdateFlags<MeshType>::VertexClearV(*m);
+        vcg::tri::UpdateFlags<MeshType>::VertexClearV(*(args.target_mesh));
+        if(args.save_as_quality)
+        {
+            args.target_model->updateDataMask(MeshModel::MM_VERTQUALITY);
+        }
+
         typename std::vector<FacePointer>::iterator fi;
         VertexPointer vp;
         ScalarType perturbation = .0;
@@ -125,26 +125,44 @@ public:
                 {
                     vp->SetV();
 
-                    switch(algorithm)
+                    // applies the radial perturbation
+                    switch(args.algorithm)
                     {
                     case 0: // gaussian rbf
                         perturbation = RadialPerturbation<ScalarType>::Gaussian
-                                       (vp->P(), centre->P(), radius, depth, profileFactor);
+                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
                         break;
                     case 1: // multiquadric rbf
                         perturbation = RadialPerturbation<ScalarType>::Multiquadric
-                                       (vp->P(), centre->P(), radius, depth, profileFactor);
+                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
                         break;
                     case 2: // inverse multiquadric rbf
                         perturbation = RadialPerturbation<ScalarType>::InverseMultiquadric
-                                       (vp->P(), centre->P(), radius, depth, profileFactor);
+                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
                         break;
                     case 3: // cauchy rbf
                         perturbation = RadialPerturbation<ScalarType>::Cauchy
-                                       (vp->P(), centre->P(), radius, depth, profileFactor);
+                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
                         break;
                     }
-                    vp->P() += (centre->N() * perturbation);
+
+                    // limits the perturbation to negative values
+                    if(perturbation > 0) perturbation = 0;
+
+                    // if necessary, inverts the perturbation
+                    if(args.invert_perturbation)
+                    {
+                        perturbation = -perturbation;
+                    }
+
+                    // applies the perturbation to the current vertex or stores it
+                    // as vertex quality
+                    if(args.save_as_quality)
+                    {
+                        vp->Q() += perturbation;
+                    } else {
+                        vp->P() += (centre->N() * perturbation);
+                    }
                 }
             }
         }

@@ -10,19 +10,18 @@
 
 /* FractalArgs encapsulates arguments for CR_FRACTAL_TERRAIN filter
    and FP_FRACTAL_MESH filter. */
+template <class ScalarType>
 class FractalArgs
 {
 public:
-    float octaves, remainder, l, h, offset, gain, seed, heightFactor;
+    ScalarType octaves, remainder, l, h, offset, gain, seed, heightFactor;
     int subdivisionSteps, algorithmId, smoothingSteps;
     bool saveAsQuality;
-    float spectralWeight[21];
-    float zoom_window_side, zoom_org_x, zoom_org_y;
+    ScalarType spectralWeight[21];
+    ScalarType zoom_window_side, zoom_org_x, zoom_org_y;
 
-    FractalArgs(){}
-
-    void setFields(int algorithmId, float seed, float octaves, float lacunarity, float fractalIncrement,
-                   float offset, float gain, float heightFactor)
+    FractalArgs(int algorithmId, ScalarType seed, ScalarType octaves, ScalarType lacunarity,
+                ScalarType fractalIncrement, ScalarType offset, ScalarType gain, ScalarType heightFactor)
     {
         this->algorithmId = algorithmId;
         this->seed = seed;
@@ -41,7 +40,7 @@ public:
 
     void updateSpectralWeights()
     {
-        float frequency = 1.0;
+        ScalarType frequency = 1.0;
         for(int i=0; i<=(int)octaves; i++)
         {
             spectralWeight[i] = pow(frequency, -h);
@@ -50,7 +49,9 @@ public:
     }
 };
 
+
 /* wrapper for FP_CRATERS filter arguments */
+template <class ScalarType>
 class CratersArgs
 {
 public:
@@ -58,14 +59,15 @@ public:
     MeshModel* samples_model;
     CMeshO* target_mesh;
     CMeshO* samples_mesh;
+    FractalArgs<ScalarType>* ppNoiseArgs;
     int algorithm;
-    float max_radius, max_depth, min_radius, min_depth, radius_range, depth_range, profile_factor;
-    float resolution;
+    ScalarType max_radius, max_depth, min_radius, min_depth, radius_range, depth_range, profile_factor;
+    bool save_as_quality, invert_perturbation, postprocessing_noise;
 
-    CratersArgs(MeshModel* target, MeshModel* samples, int alg, float min_r, float max_r,
-                float min_d, float max_d, float p_factor, float res)
+    CratersArgs(MeshModel* target, MeshModel* samples, int alg, int seed, ScalarType min_r, ScalarType max_r,
+                ScalarType min_d, ScalarType max_d, ScalarType p_factor, bool save_as_quality, bool invert)
     {
-        generator = new vcg::math::SubtractiveRingRNG();
+        generator = new vcg::math::SubtractiveRingRNG(seed);
 
         target_model = target;
         samples_model = samples;
@@ -76,30 +78,34 @@ public:
         vcg::tri::Allocator<CMeshO>::CompactFaceVector(*target_mesh);
 
         algorithm = alg;
+        this->save_as_quality = save_as_quality;
+        invert_perturbation = invert;
+
         float target_bb_diag = target_mesh->bbox.Diag();
-        max_radius = target_bb_diag * 0.2 * max_r;
-        min_radius = target_bb_diag * 0.2 * min_r;
+        max_radius = target_bb_diag * 0.1 * max_r;
+        min_radius = target_bb_diag * 0.1 * min_r;
         radius_range = max_radius - min_radius;
-        max_depth = target_bb_diag * 0.2 * max_d;
-        min_depth = target_bb_diag * 0.2 * min_d;
+        max_depth = target_bb_diag * 0.1 * max_d;
+        min_depth = target_bb_diag * 0.1 * min_d;
         depth_range = max_depth - min_depth;
         profile_factor = p_factor;
-        resolution = res;
     }
 
-    ~CratersArgs(){ delete generator; }
+    ~CratersArgs(){
+        delete generator;
+    }
 
     /* generates a crater radius within the specified range */
-    float generateRadius()
+    ScalarType generateRadius()
     {
-        float rnd = generator->generate01closed();
+        ScalarType rnd = generator->generate01closed();
         return min_radius + radius_range * rnd;
     }
 
     /* generates a crater depth within the specified range */
-    float generateDepth()
+    ScalarType generateDepth()
     {
-        float rnd = generator->generate01closed();
+        ScalarType rnd = generator->generate01closed();
         return min_depth + depth_range * rnd;
     }
 

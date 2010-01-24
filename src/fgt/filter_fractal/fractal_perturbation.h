@@ -8,15 +8,39 @@
 
 using namespace vcg;
 
-template <class MeshType>
-        class FractalPerturbation
+template<class ScalarType>
+class FractalPerturbation
 {
 public:
-    typedef typename MeshType::CoordType CoordType;
 
-    static double fBM(CoordType &point, FractalArgs &args)
+    static ScalarType computeFractalPerturbation(FractalArgs<ScalarType> &args, Point3<ScalarType> &point)
     {
-        double noise = .0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
+        ScalarType perturbation = .0;
+        switch(args.algorithmId)
+        {
+        case 0: //fBM
+            perturbation = FractalPerturbation<ScalarType>::fBM(point, args);
+            break;
+        case 1: //standard multifractal
+            perturbation = FractalPerturbation<ScalarType>::StandardMF(point, args);
+            break;
+        case 2: //heterogeneous multifractal
+            perturbation = FractalPerturbation<ScalarType>::HeteroMF(point, args);
+            break;
+        case 3: //hybrid multifractal
+            perturbation = FractalPerturbation<ScalarType>::HybridMF(point, args);
+            break;
+        case 4: //ridged multifractal
+            perturbation = FractalPerturbation<ScalarType>::RidgedMF(point, args);
+            break;
+        }
+
+        return perturbation;
+    }
+
+    static ScalarType fBM(Point3<ScalarType> &point, FractalArgs<ScalarType> &args)
+    {
+        ScalarType noise = .0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
 
         for(int i=0; i<(int)args.octaves; i++)
         {
@@ -30,9 +54,9 @@ public:
         return noise * args.heightFactor;
     }
 
-    static double StandardMF(CoordType &point, FractalArgs &args)
+    static ScalarType StandardMF(Point3<ScalarType> &point, FractalArgs<ScalarType> &args)
     {
-        double noise = 1.0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
+        ScalarType noise = 1.0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
 
         for(int i=0; i<(int)args.octaves; i++)
         {
@@ -47,10 +71,10 @@ public:
         return noise * args.heightFactor;
     }
 
-    static double HeteroMF(CoordType &point, FractalArgs &args)
+    static ScalarType HeteroMF(Point3<ScalarType> &point, FractalArgs<ScalarType> &args)
     {
-        double noise = .0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
-        double increment = .0;
+        ScalarType noise = .0, x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
+        ScalarType increment = .0;
         noise = (args.offset + math::Perlin::Noise(x, y, z)) * args.spectralWeight[0];
         x *= args.l; y *= args.l; z *= args.l;
 
@@ -70,11 +94,11 @@ public:
         return noise * args.heightFactor;
     }
 
-    static double HybridMF(CoordType &point, FractalArgs &args)
+    static ScalarType HybridMF(Point3<ScalarType> &point, FractalArgs<ScalarType> &args)
     {
-        double x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
-        double noise = (args.offset + math::Perlin::Noise(x, y, z));
-        double weight = noise, signal = .0;
+        ScalarType x = point[0]+args.seed, y = point[1]+args.seed, z = point[2]+args.seed;
+        ScalarType noise = (args.offset + math::Perlin::Noise(x, y, z));
+        ScalarType weight = noise, signal = .0;
         x *= args.l; y *= args.l; z *= args.l;
 
         for(int i=1; i<(int)args.octaves; i++)
@@ -94,11 +118,11 @@ public:
         return noise * args.heightFactor;
     }
 
-    static double RidgedMF(CoordType &point, FractalArgs &args)
+    static ScalarType RidgedMF(Point3<ScalarType> &point, FractalArgs<ScalarType> &args)
     {
-        double x = point[0] + args.seed, y = point[1] + args.seed, z = point[2] + args.seed;
-        double signal = pow(args.offset - fabs(math::Perlin::Noise(x, y, z)), 2);
-        double noise = signal, weight = .0;
+        ScalarType x = point[0] + args.seed, y = point[1] + args.seed, z = point[2] + args.seed;
+        ScalarType signal = pow(args.offset - fabs(math::Perlin::Noise(x, y, z)), 2);
+        ScalarType noise = signal, weight = .0;
         x *= args.l; y *= args.l; z *= args.l;
 
         for(int i=1; i<(int)args.octaves; i++)
