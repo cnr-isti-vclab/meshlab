@@ -39,8 +39,7 @@ class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInt
             enum {CR_SSYNTH} ;
 
             FilterSSynth();
-            ~FilterSSynth(){};
-
+            ~FilterSSynth(){}
             virtual QString filterName(FilterIDType filter) const;
             virtual QString filterInfo(FilterIDType filter) const;
             virtual int getRequirements(QAction *);
@@ -53,7 +52,6 @@ class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInt
             void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
             static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
                         virtual int postCondition(QAction* filter) const;
-           // int &mask=0;
 
 
 
@@ -62,13 +60,11 @@ class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInt
 
                         virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
                     void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst);
-                        //virtual void applyPreOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
                         bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
                         bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent);
 
 private:
          QString ssynth(QString grammar,int seed,vcg::CallBackPos *cb);
-                QString grammar;
                 int seed;
                QString renderTemplate;
         };

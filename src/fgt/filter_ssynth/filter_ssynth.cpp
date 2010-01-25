@@ -34,6 +34,7 @@ FilterSSynth::FilterSSynth(){
             .arg("</template>");
     foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
+        //num=0;
 }
 //FilterSSynth::~FilterSSynth(){}
 QString FilterSSynth::filterName(FilterIDType filter) const
@@ -62,11 +63,22 @@ QString FilterSSynth::filterInfo(FilterIDType filterId) const
 }
 void FilterSSynth::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par)
 {
-        //par.addParam(new RichOpenFile(QString("openf"),QString(""),QString(".es")));
-    par.addParam(new RichString("grammar","set maxdepth 40 R1 R2 rule R1 { { x 1 rz 6 ry 6 s 0.99 } R1 { s 2 } sphere } rule R2 {{ x -1 rz 6 ry 6 s 0.99 } R2 { s 2 } sphere} ","Eisen Script grammar","Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot "));
-    par.addParam(new RichInt("seed",1,"seed for random construction",""));
-   // par.addParam(new RichOpenFile("openg","",".ES","Open grammar",""));
-    //par.addParam(new RichSaveFile("saveg",par.findParameter("grammar")->val,NULL));
+   RichOpenFile* opens=new RichOpenFile(tr("openfile"),tr(""),tr("*.*"),tr(""),tr(""),tr(""));
+
+   //FileDecoration * fc=new FileDecoration()
+  // RichSaveFile* saves=new RichSaveFile(tr("exportg"),v,)
+    //par.addParam(new RichOpenFile(QString("openf"),QString(""),QString(".es")));
+   //RichString* str=new RichString("oioin","","","");
+   //str->accept(opens->pd);
+   RichString* grammar=new RichString("grammar","set maxdepth 40 R1 R2 rule R1 { { x 1 rz 6 ry 6 s 0.99 } R1 { s 2 } sphere } rule R2 {{ x -1 rz 6 ry 6 s 0.99 } R2 { s 2 } sphere} ","Eisen Script grammar","Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot and triangle ");
+   /*FileValue* v=new FileValue(tr("exportedgrammar"));
+   v->set(*(grammar->val));
+   FileDecoration* fc=new FileDecoration(v,tr("ES"),tr("Exported EisenScript grammar"),QString::Null());
+   RichSaveFile* saves=new RichSaveFile(tr("expg"),v,fc);*/
+   //par.addParam(new RichString("grammar","set maxdepth 40 R1 R2 rule R1 { { x 1 rz 6 ry 6 s 0.99 } R1 { s 2 } sphere } rule R2 {{ x -1 rz 6 ry 6 s 0.99 } R2 { s 2 } sphere} ","Eisen Script grammar","Write a grammar according to Eisen Script specification and using the primitives box, sphere, mesh, dot and triangle "));
+   par.addParam(grammar);
+   par.addParam(new RichInt("seed",1,"seed for random construction",""));
+  // par.addParam(saves);
     return;
 }
 void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget* parent)
@@ -87,6 +99,9 @@ bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, RichParameter
     QString path=ssynth(grammar->val->getString(),seed->val->getInt(),cb);
     if(QFile::exists(path)){
     QFile file(path);
+    //CMeshO cm=md.mm()->cm;
+    //MeshModel m=*(md.mm());
+    //grammars[m]=grammar->val->getString();
     int mask;
     const QString name(file.fileName());
 
@@ -164,8 +179,7 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
  QList<MeshIOInterface::Format> FilterSSynth::exportFormats() const
  {
          QList<MeshIOInterface::Format> formats;
-         formats<< MeshIOInterface::Format("Eisen Script File", tr("ES"));
-         return formats;
+     return formats ;
  }
  bool FilterSSynth::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par, CallBackPos *cb, QWidget *parent)
 {
@@ -176,7 +190,8 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
         grammar.open(QFile::ReadOnly|QFile::Text);
         QString gcontent(grammar.readAll());
         grammar.close();
-        this->grammar=gcontent;
+       // CMeshO cm=m.cm;
+       // grammars[m]=gcontent;
         QString x3dfile(FilterSSynth::ssynth(gcontent,this->seed,cb));
         if(QFile::exists(x3dfile)){
         openX3D(x3dfile,m,mask,cb);
@@ -191,26 +206,12 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
  }
  bool FilterSSynth::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
  {
-         if(formatName.toUpper()==QString("ES")){
-                 if(grammar!=tr("")){
-                        if (cb !=NULL) (*cb)(99, "Saving ES File...");
-                        QFile tosave(fileName);
-                        tosave.open(QFile::WriteOnly|QFile::Text);
-                        QTextStream outp(&tosave);
-                        outp << grammar;
-                        tosave.close();
-                        return true;
-                 }
-                 else QMessageBox::critical(parent,tr("Error"),tr("Nothing to save"));
-         }
-         else {
-                 QMessageBox::critical(parent,tr("Error"),tr("Wrong format"));
-                return false;
-         }
+     return true;
  }
  void FilterSSynth::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const{}
  void FilterSSynth::initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst){
          parlst.addParam(new RichInt(tr("seed"),1,tr("Seed for random mesh generation")));
+
  }
  Q_EXPORT_PLUGIN(FilterSSynth)
 
