@@ -18,10 +18,10 @@ public:
 protected:
     virtual void initialize(MeshDocument&, RichParameterSet&);
     virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
-    virtual void addRandomObject(MeshDocument& md);
+    virtual void addRandomObject(MeshDocument& md, int meshID);
 
 private:
-    int m_randomLayer;
+    MeshModel* m_randomMesh;
     int m_dropRate;
     float m_distance;
     ODEFacade m_engine;

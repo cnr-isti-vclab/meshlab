@@ -20,7 +20,7 @@ protected:
     virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
 
 private:
-    int m_currentSceneryLayer;
+    MeshModel* m_scenery;
     ODEFacade m_engine;
 };
 

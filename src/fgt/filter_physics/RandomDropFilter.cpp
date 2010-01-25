@@ -4,27 +4,26 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <sstream>
 
 using namespace std;
 
-RandomDropFilter::RandomDropFilter() : m_randomLayer(-1), m_dropRate(-1), m_distance(-1){
+RandomDropFilter::RandomDropFilter() : m_randomMesh(0), m_dropRate(-1), m_distance(-1){
 }
 
 void RandomDropFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
     DynamicMeshSubFilter::initParameterSet(action, md, par);
-
-    QStringList layers;
-    for(int i = 1; i <= md.size(); i++){
-        layers.push_back(QString::number(i));
-    }
-
-    par.addParam(new RichEnum("randomLayer", 0, layers, "Random object layer", "Select the layer that contains the object that will spawn randomly"));
-    par.addParam(new RichFloat("distance", 1.0f, "Random radius interval", "The object will spawn in a random position contained in the specified radius"));
-    par.addParam(new RichInt("dropRate", 2, "Drop rate", "The drop rate"));
+    par.addParam(new RichMesh("randomMesh", 0, &md, "Random mesh", "This mesh will be randomly spawned in the scene"));
+    par.addParam(new RichFloat("distance", 1.0f, "Random spawn radius", "The object will spawn in a random position contained in the specified radius"));
+    par.addParam(new RichInt("dropRate", 2, "Drop rate (sec)", "The drop rate of the filler mesh in seconds"));
 }
 
 bool RandomDropFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    if(md.size() < 2) return true;
+    if(md.size() < 2 || par.getMesh("randomMesh") == 0 || par.getInt("dropRate") < 0)
+        return false;
+
+    if(par.getInt("dropRate") == 0)
+        return true;
 
     DynamicMeshSubFilter::applyFilter(filter, md, par, cb);
 
@@ -61,10 +60,10 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par){
     }
 
     for(int i = 0; i < randomObjects; i++)
-        addRandomObject(md);
+        addRandomObject(md, i);
 
     for(int i = 0; i < md.size() - randomObjects; i++)
-        m_engine.registerTriMesh(*md.getMesh(i), m_randomLayer == i ? false : true);
+        m_engine.registerTriMesh(*md.getMesh(i), m_randomMesh == md.getMesh(i) ? false : true);
 
     m_layersTrans.clear();
     m_layersTrans.resize(md.size());
@@ -91,10 +90,12 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par){
     }
 }
 
-void RandomDropFilter::addRandomObject(MeshDocument& md){
-    MeshModel* meshCopy = md.addNewMesh("randomMesh");
-    vcg::tri::Append<CMeshO,CMeshO>::Mesh(meshCopy->cm, md.getMesh(m_randomLayer)->cm, false, true);
-    meshCopy->cm.Tr = md.getMesh(m_randomLayer)->cm.Tr;
+void RandomDropFilter::addRandomObject(MeshDocument& md, int meshID){
+    ostringstream meshName;
+    meshName << "randomMesh" << meshID;
+    MeshModel* meshCopy = md.addNewMesh(meshName.str().c_str());
+    vcg::tri::Append<CMeshO,CMeshO>::Mesh(meshCopy->cm, m_randomMesh->cm, false, true);
+    meshCopy->cm.Tr = m_randomMesh->cm.Tr;
 
     float x = meshCopy->cm.Tr.GetColumn3(3).X() + m_distance/2.0f - static_cast<float>(rand())/RAND_MAX*m_distance;
     float y = meshCopy->cm.Tr.GetColumn3(3).Y() + m_distance/2.0f - static_cast<float>(rand())/RAND_MAX*m_distance;
@@ -107,11 +108,11 @@ void RandomDropFilter::addRandomObject(MeshDocument& md){
 
 bool RandomDropFilter::configurationHasChanged(MeshDocument& md, RichParameterSet& par){
     bool changed = DynamicMeshSubFilter::configurationHasChanged(md, par) ||
-                   m_randomLayer != par.getEnum("randomLayer") ||
+                   m_randomMesh != par.getMesh("randomMesh") ||
                    m_distance != par.getFloat("distance") ||
                    m_dropRate != par.getInt("dropRate");
 
-    m_randomLayer = par.getEnum("randomLayer");
+    m_randomMesh = par.getMesh("randomMesh");
     m_distance = par.getFloat("distance");
     m_dropRate = par.getInt("dropRate");
 

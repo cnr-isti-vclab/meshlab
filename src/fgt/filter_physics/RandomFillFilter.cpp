@@ -3,37 +3,35 @@
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/inertia.h>
 
+#include <sstream>
+
 using namespace std;
 using namespace vcg;
 
 void RandomFillFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
-    QStringList layers;
-    for(int i = 1; i <= md.size(); i++){
-        layers.push_back(QString::number(i));
-    }
-
-    par.addParam(new RichEnum("containerLayer", 0, layers, "Container object layer", "Select the layer that contains the object that will act as a container"));
-    par.addParam(new RichEnum("fillLayer", 0, layers, "Fill object layer", "Select the layer that contains the object that will be used to fill"));
+    par.addParam(new RichMesh("container", 0, &md, "Container mesh", "This mesh will act as a container for the filling mesh"));
+    par.addParam(new RichMesh("filler", 0, &md, "Filler mesh", "The container mesh will be filled with this mesh"));
     par.addParam(new RichInt("fillCounter", 1, "Fill counter", "The number of object used to fill the container"));
 }
 
 bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    if(md.size() < 2) return true;
+    if(md.size() < 2 || par.getMesh("container") == 0 || par.getMesh("container") == par.getMesh("filler") || par.getInt("fillCounter") < 0)
+        return false;
 
-    int containerLayer = par.getEnum("containerLayer");
-    int fillLayer = par.getEnum("fillLayer");
+    MeshModel* container = par.getMesh("container");
+    MeshModel* filler = par.getMesh("filler");
     int fillOffset = md.size();
 
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
     m_engine.setGlobalForce(gravity);
-    m_engine.registerTriMesh(*md.getMesh(containerLayer), true);
+    m_engine.registerTriMesh(*container, true);
 
     tri::Inertia<CMeshO> inertia;
-    inertia.Compute(md.getMesh(containerLayer)->cm);
+    inertia.Compute(container->cm);
 
     for(int i = 0; i < par.getInt("fillCounter"); i++){
-        addRandomObject(md, fillLayer, inertia.CenterOfMass());
+        addRandomObject(md, filler, inertia.CenterOfMass(), i);
         m_engine.registerTriMesh(*md.getMesh(fillOffset++));
         for(int j = 0; j < m_stepsPerSecond; j++){
             m_engine.integrate(m_stepSize);
@@ -44,9 +42,11 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     return true;
 }
 
-void RandomFillFilter::addRandomObject(MeshDocument& md, int fillLayer, const vcg::Point3<float>& origin){
-    MeshModel* meshCopy = md.addNewMesh("fillMesh");
-    vcg::tri::Append<CMeshO,CMeshO>::Mesh(meshCopy->cm, md.getMesh(fillLayer)->cm, false, true);
-    meshCopy->cm.Tr = md.getMesh(fillLayer)->cm.Tr;
+void RandomFillFilter::addRandomObject(MeshDocument& md, MeshModel* filler, const vcg::Point3<float>& origin, int meshID){
+    ostringstream meshName;
+    meshName << "randomMesh" << meshID;
+    MeshModel* meshCopy = md.addNewMesh(meshName.str().c_str());
+    vcg::tri::Append<CMeshO,CMeshO>::Mesh(meshCopy->cm, filler->cm, false, true);
+    meshCopy->cm.Tr = filler->cm.Tr;
     meshCopy->cm.Tr.SetColumn(3, origin);
 }

@@ -12,10 +12,9 @@ public:
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
 
 protected:
-    virtual void addRandomObject(MeshDocument& md, int fillLayer, const vcg::Point3<float>& origin);
+    virtual void addRandomObject(MeshDocument& md, MeshModel* filler, const vcg::Point3<float>& origin, int meshID);
 
 private:
-    int m_fillLayer;
     int m_dropRate;
     ODEFacade m_engine;
 };

@@ -9,6 +9,9 @@ void DynamicMeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, Ri
 }
 
 bool DynamicMeshSubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
+    if(par.getInt("seconds") < 0)
+        return false;
+
     if(configurationHasChanged(md, par))
         initialize(md, par);
 
@@ -22,7 +25,7 @@ bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParamet
         for(int i = 0; i < m_files.size(); i++)
             changed |= m_files.at(i) != md.getMesh(i)->fileName;
     else
-        changed = true;
+        changed |= true;
 
     m_files.clear();
     for(int i = 0; i < md.size(); i++)

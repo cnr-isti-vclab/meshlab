@@ -1,22 +1,19 @@
 #include "GravitySubFilter.h"
 
-GravitySubFilter::GravitySubFilter() : m_currentSceneryLayer(-1){
+GravitySubFilter::GravitySubFilter() : m_scenery(0){
 }
 
 void GravitySubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet& par){
     DynamicMeshSubFilter::initParameterSet(action, md, par);
-
-    QStringList layers;
-    for(int i = 1; i <= md.size(); i++){
-        layers.push_back(QString::number(i));
-    }
-    par.addParam(new RichEnum("layers", 0, layers, "Scenery layer", "Select the layer that will act as the static scenery"));
+    par.addParam(new RichMesh("scenery", 0, &md, "Static environment mesh", "This mesh represent the static environment of the simulation"));
 }
 
 bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    if(md.size() < 2) return true;
+    if(md.size() < 2 || par.getMesh("scenery") == 0)
+        return false;
 
-    DynamicMeshSubFilter::applyFilter(filter, md, par, cb);
+    if(!DynamicMeshSubFilter::applyFilter(filter, md, par, cb))
+        return false;
 
     int currentStep  = par.getDynamicFloat("timeline") / 100 * m_steps;
 
@@ -27,8 +24,8 @@ bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
 }
 
 bool GravitySubFilter::configurationHasChanged(MeshDocument& md, RichParameterSet& par){
-    bool changed = DynamicMeshSubFilter::configurationHasChanged(md, par) || m_currentSceneryLayer != par.getEnum("layers");
-    m_currentSceneryLayer = par.getEnum("layers");
+    bool changed = DynamicMeshSubFilter::configurationHasChanged(md, par) || m_scenery != par.getMesh("scenery");
+    m_scenery = par.getMesh("scenery");
     return changed;
 }
 
@@ -40,7 +37,7 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par){
     m_engine.setGlobalForce(gravity);
 
     for(int i = 0; i < md.size(); i++)
-        m_engine.registerTriMesh(*md.getMesh(i), m_currentSceneryLayer == i ? true : false);
+        m_engine.registerTriMesh(*md.getMesh(i), m_scenery == md.getMesh(i) ? true : false);
 
     m_layersTrans.clear();
     m_layersTrans.resize(md.size());

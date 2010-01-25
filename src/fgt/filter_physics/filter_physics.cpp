@@ -35,11 +35,11 @@ FilterPhysics::~FilterPhysics(){
  QString FilterPhysics::filterInfo(FilterIDType filterId) const{
     switch (filterId) {
     case FP_PHYSICS_GRAVITY:
-        return QString("Runs a physics gravity simulation on a set of meshes");
+        return QString("Runs a physics gravity simulation on a set of meshes. Once a static environment mesh has been selected, all other meshes will interact with it dynamically under the influence of gravity.");
     case FP_PHYSICS_RNDDROP:
-        return QString("Runs a random physics gravity simulation on a set of meshes");
+        return QString("Runs a random physics gravity simulation on a set of meshes. The selected random mesh will be spawn on the scene and will interact dynamically under the influence of gravity with all other objects that will be considered as static environment.");
     case FP_PHYSICS_RNDFILL:
-        return QString("Runs a random physics mesh fill simulation");
+        return QString("Runs a random physics mesh fill simulation. A mesh will act as a container for a number of copies of a selected filler mesh.");
     default:
         assert(0);
         break;
