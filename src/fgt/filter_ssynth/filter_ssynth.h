@@ -51,9 +51,7 @@ class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInt
             virtual FilterClass getClass(QAction* filter);
             void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
             static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
-                        virtual int postCondition(QAction* filter) const;
-
-
+            virtual int postCondition(QAction* filter) const;
 
                         QList<Format> importFormats() const;
                         QList<Format> exportFormats() const;
@@ -64,8 +62,11 @@ class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInt
                         bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent);
 
 private:
-         QString ssynth(QString grammar,int seed,vcg::CallBackPos *cb);
+         QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);
+         QString GetTemplate(int sphereres);
+        // bool HasRec(QString *grammar);
                 int seed;
                QString renderTemplate;
+               QString spheres[6];
         };
 #endif // FILTER_SSYNTH_H

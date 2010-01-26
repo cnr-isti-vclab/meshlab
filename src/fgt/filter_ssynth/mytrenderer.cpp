@@ -41,12 +41,12 @@ void MyTrenderer::drawSphere(SyntopiaCore::Math::Vector3f center, float radius, 
                                         QString scale=QString("%1 %2 %3")
                                                 .arg(diff).arg(diff).arg(diff);
                                         t.substitute("{x3dsphscale}",scale);
-                                        QString colors("");
-                                        for(int i=0;i<126;i++){
-                                                colors.append(QString::number(rgb.x())).append(" ").append(QString::number(rgb.y())).append(" ").append(QString::number(rgb.z())).append(" ").append(QString::number(alpha)).append(" ");
-                                        }
-                                        t.substitute("{x3dspherecol}",colors);
+                                        
                                 }
+								t.substitute("{r}", QString::number(rgb.x()));
+                                        t.substitute("{g}", QString::number(rgb.y()));
+                                        t.substitute("{b}", QString::number(rgb.z()));
+                                        t.substitute("{alpha}", QString::number(alpha));
                                 t.substitute("{rad}", QString::number(radius));
                                 output.append(t.getText());
 }

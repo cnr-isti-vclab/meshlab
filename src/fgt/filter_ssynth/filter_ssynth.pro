@@ -15,8 +15,13 @@ win32-msvc2005:LIBS += ../../external/lib/win32-msvc2005/ssynth.lib
 win32-msvc2008:LIBS += ../../external/lib/win32-msvc2008/ssynth.lib
 win32-g++:LIBS += ../../external/lib/win32-gcc/libssynth.a
 linux-g++:LIBS += ../../external/lib/linux-g++/libssynth.a
+macx:DESTDIR = ../../external/lib/macx/libssynth.a
 TARGET = filter_ssynth
 TEMPLATE = lib
 QT += opengl
 CONFIG += plugin
-OTHER_FILES += 
+OTHER_FILES += x3d.rendertemplate \
+    x3d2.rendertemplate \
+    x3d3.rendertemplate \
+    x3d4.rendertemplate
+RESOURCES += ssynthres.qrc
