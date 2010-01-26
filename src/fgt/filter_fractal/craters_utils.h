@@ -26,16 +26,21 @@ public:
     typedef std::vector<SampleFace>                 SampleFaceVector;
 
     template<class ScalarType>
-    static void FindSamplesFaces(MeshType *target, MeshType *samples, SampleFaceVector &sfv)
+    static void FindSamplesFaces(MeshType *target, MeshType *samples, SampleFaceVector &sfv,
+                                 vcg::CallBackPos* cb)
     {
         vcg::Box3<ScalarType> bbox;
         float a, b, c;
         int undiscoveredFaces = samples->vert.size();
+        int steps = target->face.size(), step = 0;
+        char buffer[50];
 
         vcg::tri::UpdateFlags<CMeshO>::VertexClearV(*samples);
         FaceIterator fi = target->face.begin();
         while(fi!=target->face.end() && undiscoveredFaces>0)
         {
+            sprintf(buffer, "Finding samples faces (%i remaining)..", undiscoveredFaces);
+            cb(100 * (step++)/steps, buffer);
             (*fi).GetBBox(bbox);
 
             for(VertexIterator vi=samples->vert.begin(); vi!=samples->vert.end(); ++vi)
@@ -115,6 +120,13 @@ public:
         typename std::vector<FacePointer>::iterator fi;
         VertexPointer vp;
         ScalarType perturbation = .0;
+        FractalArgs<ScalarType>* fArgs;
+        if(args.postprocessing_noise)
+        {
+            fArgs = new FractalArgs<ScalarType>(args.target_model, 2, 0, 8, 2, 0.9, 0.4, 2.5, 0.4);
+        }
+        Point3<ScalarType> p;
+        ScalarType noisePerturbation = .0;
 
         for(fi = craterFaces.begin(); fi!=craterFaces.end(); ++fi)
         {
@@ -124,6 +136,7 @@ public:
                 if(!vp->IsV())
                 {
                     vp->SetV();
+                    p = vp->P();
 
                     // applies the radial perturbation
                     switch(args.algorithm)
@@ -149,6 +162,20 @@ public:
                     // limits the perturbation to negative values
                     if(perturbation > 0) perturbation = 0;
 
+                    // applies the post-processing noise to the temporary point
+                    // to obtain the fractal perturbation
+
+                    if (args.postprocessing_noise)
+                    {
+                        noisePerturbation = FractalPerturbation<ScalarType>::computeFractalPerturbation(*fArgs, p);
+                        while(noisePerturbation > args.min_depth/2)
+                        {
+                            noisePerturbation /= 2;
+                        }
+                        perturbation += noisePerturbation;
+                    }
+
+
                     // if necessary, inverts the perturbation
                     if(args.invert_perturbation)
                     {
@@ -165,6 +192,11 @@ public:
                     }
                 }
             }
+        }
+
+        if(args.postprocessing_noise)
+        {
+            delete fArgs;
         }
     }
 };

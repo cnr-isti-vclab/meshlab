@@ -47,7 +47,9 @@ class FilterFractal : public QObject, public MeshFilterInterface
 
 public:
     FilterFractal();
-    ~FilterFractal(){}
+    ~FilterFractal(){
+        delete cache;
+    }
 
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
@@ -76,6 +78,8 @@ private:
     bool generateCraters    (CratersArgs<float> &args, vcg::CallBackPos *cb);
 
     enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
+
+    FractalMeshCache<float> *cache;
 };
 
 #endif

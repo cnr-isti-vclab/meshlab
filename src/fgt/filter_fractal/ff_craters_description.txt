@@ -1,8 +1,10 @@
 Generates craters onto a mesh using radial functions.<br />
 There must be at least two layers to apply this filter:<br />
 <ul>
-    <li>the layer that contains the target mesh;</li>
+    <li>the layer that contains the target mesh; we assume that this mesh is sufficiently refined;</li>
     <li>the layer that contains the samples which represent the central points of craters.</li>
 </ul>
 
-The Gaussian radial function is used as basis for the outline of craters.
+There are four radial functions available to generate craters: Gaussian, Multiquadric, Inverse Multiquadric
+and Cauchy. If you want the preview to work, be sure to select the target mesh layer before launching the
+filter. You can select this layer by clicking on it in the layer dialog.

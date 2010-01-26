@@ -46,6 +46,8 @@ FilterFractal::FilterFractal()
     FilterIDType tt;
     foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
+
+    cache = new FractalMeshCache<float>();
 }
 // -------------------------------------------------------------------
 
@@ -91,6 +93,12 @@ QString FilterFractal::filterInfo(FilterIDType filterId) const
         description = stream.readAll();
         f.close();
     }
+
+    if(filterId == FP_FRACTAL_MESH)
+    {
+        description += "<br /><br />Hint: search a good compromise between offset and height factor parameter.";
+    }
+
     return description;
 }
 
@@ -110,7 +118,7 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
 
 void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, MeshDocument &md, RichParameterSet &par)
 {
-    par.addParam(new RichDynamicFloat("heightFactor", 0.4, -1.0, 1.0, "Height factor:", "Scales the resulting perturbation height of the given value."));
+    par.addParam(new RichFloat("heightFactor", 0.4, "Height factor:", "Scales the resulting perturbation height of the given value."));
 
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
@@ -181,11 +189,7 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
     par.addParam(new RichDynamicFloat("min_depth", 0.3, 0, 1, "Min crater depth:", "Defines the minimum depth of craters in range [0, 1]."));
     par.addParam(new RichDynamicFloat("max_depth", 0.6, 0, 1, "Max crater depth:", "Defines the maximum depth of craters in range [0, 1]. Values near 1 mean very deep craters."));
     par.addParam(new RichDynamicFloat("profile_factor", 2, 1, 10, "Profile factor:", "The profile factor controls the ratio between crater borders and crater effective area. Use [1, 4] values to obtain reasonable results. This parameter is not considered in multiquadric radial functions."));
-
-    QStringList ppNoise;
-    ppNoise << "None" << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal" << "Hybrid multifractal terrain" << "Ridged multifractal terrain";
-    par.addParam(new RichEnum("ppNoise", 0, ppNoise, "Post-processing noise:", "Post-processing effect: slightly perturbates the crater's vertexes with a fractal function."));
-
+    par.addParam(new RichBool("ppNoise", false, "Postprocessing noise", "Slightly perturbates the craters with a noise function."));
     par.addParam(new RichBool("invert", false, "Invert perturbation", "If checked, inverts the sign of radial perturbation to create bumps instead of craters."));
     par.addParam(new RichBool("save_as_quality", false, "Save as vertex quality", "Saves the perturbation as vertex quality."));
     return;
@@ -208,9 +212,9 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameter
 
 bool FilterFractal::applyFractalDisplacementFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-    FractalArgs<float> args(par.getEnum("algorithm"),par.getFloat("seed"), par.getFloat("octaves"),
+    FractalArgs<float> args(md.mm(), par.getEnum("algorithm"),par.getFloat("seed"), par.getFloat("octaves"),
                            par.getFloat("lacunarity"), par.getFloat("fractalIncrement"), par.getFloat("offset"),
-                           par.getFloat("gain"), par.getDynamicFloat("heightFactor"));
+                           par.getFloat("gain"), par.getFloat("heightFactor"));
 
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
@@ -241,12 +245,33 @@ bool FilterFractal::applyCratersGenerationFilter(MeshDocument &md, RichParameter
         return false;
     }
 
+    CMeshO* samples = &(par.getMesh("samples_mesh")->cm);
+    if (samples->face.size() > 0)
+    {
+        Log(GLLogStream::FILTER, "The sample layer selected is not a sample layer.");
+        return false;
+    }
+
+    float minRadius = par.getDynamicFloat("min_radius");
+    float maxRadius = par.getDynamicFloat("max_radius");
+    if (maxRadius <= minRadius)
+    {
+        Log(GLLogStream::FILTER, "Min radius is greater than max radius.");
+    }
+
+    float minDepth = par.getDynamicFloat("min_depth");
+    float maxDepth = par.getDynamicFloat("max_depth");
+    if (maxDepth <= minDepth)
+    {
+        Log(GLLogStream::FILTER, "Min depth is greater than max depth.");
+    }
+
     // reads parameters
     CratersArgs<float> args(par.getMesh("target_mesh"), par.getMesh("samples_mesh"), par.getEnum("rbf"),
-                     par.getInt("seed"), par.getDynamicFloat("min_radius"), par.getDynamicFloat("max_radius"),
-                     par.getDynamicFloat("min_depth"), par.getDynamicFloat("max_depth"),
+                     par.getInt("seed"), minRadius, maxRadius, minDepth, maxDepth,
                      par.getDynamicFloat("profile_factor"), par.getBool("save_as_quality"),
-                     par.getBool("invert"));
+                     par.getBool("invert"), par.getBool("ppNoise"));
+
     return generateCraters(args, cb);
 }
 
@@ -304,9 +329,11 @@ bool FilterFractal::generateCraters(CratersArgs<float> &args, vcg::CallBackPos *
     // finds samples faces
     args.target_model->updateDataMask(MeshModel::MM_FACEFACETOPO);
     SampleFaceVector sfv;
-    CratersUtils<CMeshO>::FindSamplesFaces<float>(args.target_mesh, args.samples_mesh, sfv);
+    CratersUtils<CMeshO>::FindSamplesFaces<float>(args.target_mesh, args.samples_mesh, sfv, cb);
 
     // detectes crater faces and applies the radial perturbation
+    int cratersNo = args.samples_mesh->vert.size(), currentCrater = 0;
+    char buffer[50];
     SampleFaceVector::iterator sfvi;
     SampleFace p;
     float radius = .0, depth = .0;
@@ -316,6 +343,8 @@ bool FilterFractal::generateCraters(CratersArgs<float> &args, vcg::CallBackPos *
         p = (*sfvi);
         radius = args.generateRadius();
         depth = args.generateDepth();
+        sprintf(buffer, "Generating crater %i...", currentCrater);
+        cb(100*(currentCrater++)/cratersNo, buffer);
         CratersUtils<CMeshO>::GetCraterFaces<float>(args.target_mesh, p.second, p.first, radius, craterFaces);
         CratersUtils<CMeshO>::applyRadialPerturbation<float>(args, p.first, craterFaces, radius, depth);
     }
@@ -406,24 +435,48 @@ bool FilterFractal::generateFractalMesh(MeshModel &mm, FractalArgs<float> &args,
     // smoothes vertex normals
     tri::Smooth<CMeshO>::VertexNormalLaplacian(*m, args.smoothingSteps, false);
 
-    double perturbation = .0;
-    char buffer[50];
-    int i=0, vertexCount = m->vn;
-
-    // calculates seed factor and spectral weights
-    args.seed = args.seed * (*m).vn / 100;
+    // calculates seed factor
+    args.seed = args.seed * m->vn / 100;
 
     // adds per-vertex quality if needed
     if(args.saveAsQuality)
         mm.updateDataMask(MeshModel::MM_VERTQUALITY);
 
-    // computes perturbation
-    for(VertexIterator vi=(*m).vert.begin(); vi!=(*m).vert.end(); ++vi)
+    // updates, if necessary, the cache content with the new projected points
+    char buffer[50];          // char buffer used in progress bar handling
+    sprintf(buffer, "Updating cache..");
+    cb(0, buffer);
+    cache->updateCache(args);
+
+    // applies the perturbation
+    int i=0, vertexCount = m->vn;
+    float perturbation = .0, minPerturbation = .0, pert[vertexCount];
+    std::vector< Point3<float> >::iterator pi = cache->projectedPoints->begin();
+    for(VertexIterator vi=(*m).vert.begin(); vi!=(*m).vert.end(); ++vi, ++pi, ++i)
     {
-        sprintf(buffer, "Computing perturbation on vertex %d..", i++);
+        sprintf(buffer, "Calculating perturbation on vertex %d..", i);
         cb(100*i/vertexCount, buffer);
-        if ((*vi).IsD()) continue;
-        perturbation = FractalPerturbation<float>::computeFractalPerturbation(args, (*vi).P());
+
+        pert[i] = FractalPerturbation<float>::computeFractalPerturbation(args, (*pi));
+        if (minPerturbation == .0)
+        {
+            minPerturbation = fabs(pert[i]);
+        } else
+        {
+            if (fabs(pert[i]) < minPerturbation)
+            {
+                minPerturbation = fabs(pert[i]);
+            }
+        }        
+    }
+
+    i=0;
+    for(VertexIterator vi=(*m).vert.begin(); vi!=(*m).vert.end(); ++vi, ++i)
+    {
+        sprintf(buffer, "Applying perturbation on vertex %d..", i);
+        cb(100*i/vertexCount, buffer);
+
+        perturbation = pert[i] - minPerturbation;
         if(args.saveAsQuality)
         {
             (*vi).Q() = perturbation;
