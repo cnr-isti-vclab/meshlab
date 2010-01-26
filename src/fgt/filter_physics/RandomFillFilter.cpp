@@ -18,6 +18,8 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     if(md.size() < 2 || par.getMesh("container") == 0 || par.getMesh("container") == par.getMesh("filler") || par.getInt("fillCounter") < 0)
         return false;
 
+    if(cb != 0) (*cb)(0, "Physics renderization of the scene started...");
+
     MeshModel* container = par.getMesh("container");
     MeshModel* filler = par.getMesh("filler");
     int fillOffset = md.size();
@@ -31,6 +33,8 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     inertia.Compute(container->cm);
 
     for(int i = 0; i < par.getInt("fillCounter"); i++){
+        if(cb != 0) (*cb)(98.f*i/par.getInt("fillCounter"), "Computing...");
+
         addRandomObject(md, filler, inertia.CenterOfMass(), i);
         m_engine.registerTriMesh(*md.getMesh(fillOffset++));
         for(int j = 0; j < m_stepsPerSecond; j++){
@@ -38,6 +42,8 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
         }
     }
     m_engine.updateTransform();
+
+    if(cb != 0) (*cb)(0, "Physics renderization of the scene completed...");
 
     return true;
 }

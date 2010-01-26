@@ -18,15 +18,12 @@ protected:
     typedef std::vector<vcg::Matrix44f> LayerTransformations;
     typedef std::vector<LayerTransformations> LayersTransformations;
 
-    virtual void initialize(MeshDocument&, RichParameterSet&);
+    virtual void initialize(MeshDocument&, RichParameterSet&, vcg::CallBackPos* cb);
     virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
 
     int m_steps;
     int m_seconds;
     LayersTransformations m_layersTrans;
-
-private:
-    std::vector<std::string> m_files;
 };
 
 #endif // DYNAMICMESHSUBFILTER_H

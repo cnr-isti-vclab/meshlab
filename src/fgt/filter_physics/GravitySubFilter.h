@@ -16,7 +16,7 @@ public:
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
 
 protected:
-    virtual void initialize(MeshDocument&, RichParameterSet&);
+    virtual void initialize(MeshDocument&, RichParameterSet&, vcg::CallBackPos* cb);
     virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
 
 private:

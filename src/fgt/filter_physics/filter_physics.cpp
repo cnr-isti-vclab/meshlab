@@ -2,6 +2,7 @@
 
 #include <Qt>
 #include <QtGui>
+#include <QMessageBox>
 
 using namespace std;
 using namespace vcg;
@@ -62,19 +63,24 @@ void FilterPhysics::initParameterSet(QAction* action,MeshDocument& md, RichParam
 }
 
 bool FilterPhysics::applyFilter(QAction* action, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
+    bool ret = true;
+
     switch(ID(action)){
     case FP_PHYSICS_GRAVITY:
-        return m_gravityFilter.applyFilter(action, md, par, cb);
+        ret = m_gravityFilter.applyFilter(action, md, par, cb);
         break;
     case FP_PHYSICS_RNDDROP:
-        return m_rndDropFilter.applyFilter(action, md, par, cb);
+        ret = m_rndDropFilter.applyFilter(action, md, par, cb);
         break;
     case FP_PHYSICS_RNDFILL:
-        return m_rndFillFilter.applyFilter(action, md, par, cb);
+        ret = m_rndFillFilter.applyFilter(action, md, par, cb);
         break;
     default:
         break;
     }
+
+    if(!ret)
+        QMessageBox::critical(0, QString("Error"), QString("Invalid filter configuration parameters"));
 
     return true;
 }

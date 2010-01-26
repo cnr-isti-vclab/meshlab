@@ -29,8 +29,10 @@ bool GravitySubFilter::configurationHasChanged(MeshDocument& md, RichParameterSe
     return changed;
 }
 
-void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par){
-    DynamicMeshSubFilter::initialize(md, par);
+void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb){
+    DynamicMeshSubFilter::initialize(md, par, cb);
+
+    if(cb != 0) (*cb)(0, "Physics pre-renderization of the scene started...");
 
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
@@ -47,9 +49,13 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par){
     }
 
     for(int i = 0; i <= m_steps; i++){
+        if(cb != 0) (*cb)(98.f*i/m_steps, "Computing...");
+
         for(int j = 0; j < md.size(); j++){
             m_layersTrans[j].push_back(m_engine.getTransformationMatrix(*md.getMesh(j)));
         }
         m_engine.integrate(m_stepSize);
     }
+
+    if(cb != 0) (*cb)(99, "Physics pre-renderization of the scene completed...");
 }

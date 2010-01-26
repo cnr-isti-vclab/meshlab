@@ -43,8 +43,10 @@ bool RandomDropFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     return true;
 }
 
-void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par){
-    DynamicMeshSubFilter::initialize(md, par);
+void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb){
+    DynamicMeshSubFilter::initialize(md, par, cb);
+
+    if(cb != 0) (*cb)(0, "Physics pre-renderization of the scene started...");
 
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
@@ -73,6 +75,8 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par){
     }
 
     for(int i = 0; i <= m_steps; i++){
+        if(cb != 0) (*cb)(98.f*i/m_steps, "Computing...");
+
         int currentRndObject = md.size() - randomObjects + i/(m_stepsPerSecond*m_dropRate);
 
         if(i != 0 && i % (m_stepsPerSecond*m_dropRate) == 0)
@@ -88,6 +92,8 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par){
 
         m_engine.integrate(m_stepSize);
     }
+
+    if(cb != 0) (*cb)(99, "Physics pre-renderization of the scene completed...");
 }
 
 void RandomDropFilter::addRandomObject(MeshDocument& md, int meshID){

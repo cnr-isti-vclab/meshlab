@@ -14,6 +14,8 @@ public:
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb) = 0;
 
 protected:
+    enum SubType{ GRAVITY, RANDOMDROP, RANDOMFILL };
+
     static const float m_stepSize;
     static const unsigned int m_stepsPerSecond;
 };
