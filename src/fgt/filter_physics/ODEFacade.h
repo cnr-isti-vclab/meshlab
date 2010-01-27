@@ -22,7 +22,12 @@ public:
         virtual void updateTransform();
 
         virtual vcg::Matrix44f getTransformationMatrix(MeshModel& mesh);
+
         virtual void setGlobalForce(float force[3]);
+        virtual void setIterations(int iterations);
+        virtual void setMaxContacts(int contacts);
+        virtual void setBounciness(float bounciness);
+
         virtual void integrate(float step);
         virtual void clear();
 	
@@ -59,11 +64,12 @@ protected:
 
         //This class is a monostate
         static bool m_initialized;
-        static const int m_maxContacts;
+        static int m_maxIterations;
+        static float m_bounciness;
 
         static dWorldID m_world;
         static dSpaceID m_space;
-        static dContact m_contacts[];
+        static std::vector<dContact> m_contacts;
         static dJointGroupID m_contactGroup;
 
         static MeshContainer m_registeredMeshes;

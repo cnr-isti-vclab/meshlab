@@ -55,6 +55,9 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
     m_engine.setGlobalForce(gravity);
+    m_engine.setIterations(m_iterations);
+    m_engine.setMaxContacts(m_contacts);
+    m_engine.setBounciness(m_bounciness);
 
     srand((unsigned)time(0));
     int randomObjects = m_seconds/m_dropRate;

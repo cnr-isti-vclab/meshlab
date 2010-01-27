@@ -23,8 +23,12 @@ protected:
     void saveMeshState(MeshDocument& md);
 
     int m_fps;
+    int m_iterations;
+    int m_contacts;
     int m_steps;
     int m_seconds;
+    float m_bounciness;
+
     LayersTransformations m_layersTrans;
     std::vector<std::string> m_files;
     std::vector<MeshModel*> m_state;

@@ -16,7 +16,12 @@ public:
         virtual void updateTransform() = 0;
 
         virtual vcg::Matrix44f getTransformationMatrix(MeshModel& mesh) = 0;
+
         virtual void setGlobalForce(float force[3]) = 0;
+        virtual void setIterations(int iterations) = 0;
+        virtual void setMaxContacts(int contacts) = 0;
+        virtual void setBounciness(float bounciness) = 0;
+
         virtual void integrate(float step) = 0;
         virtual void clear() = 0;
 	

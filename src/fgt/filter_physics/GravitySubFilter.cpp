@@ -42,6 +42,9 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
     m_engine.setGlobalForce(gravity);
+    m_engine.setIterations(m_iterations);
+    m_engine.setMaxContacts(m_contacts);
+    m_engine.setBounciness(m_bounciness);
 
     for(int i = 0; i < md.size(); i++)
         m_engine.registerTriMesh(*md.getMesh(i), m_scenery == md.getMesh(i) ? true : false);

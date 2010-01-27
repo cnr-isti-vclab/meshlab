@@ -23,7 +23,7 @@ void RandomFillFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
 }
 
 bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    if(md.size() < 2 || par.getMesh("container") == 0 || par.getMesh("container") == par.getMesh("filler") || par.getInt("fillCounter") < 0)
+    if(md.size() < 2 || par.getMesh("container") == 0 || par.getMesh("container") == par.getMesh("filler") || par.getInt("fillCounter") < 0 || par.getInt("fps") <= 0 || par.getInt("iterations") <= 0 || par.getInt("contacts") <= 0 || par.getFloat("bounciness") < 0.f || par.getFloat("bounciness") > 1.f)
         return false;
 
     if(cb != 0) (*cb)(0, "Physics renderization of the scene started...");
@@ -35,6 +35,9 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
     m_engine.clear();
     m_engine.setGlobalForce(gravity);
+    m_engine.setIterations(par.getInt("iterations"));
+    m_engine.setMaxContacts(par.getInt("contacts"));
+    m_engine.setBounciness(par.getFloat("bounciness"));
     m_engine.registerTriMesh(*container, true);
 
     tri::Inertia<CMeshO> inertia;

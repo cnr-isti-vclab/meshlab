@@ -6,9 +6,11 @@ using namespace std;
 using namespace vcg;
 
 bool ODEFacade::m_initialized;
-const int ODEFacade::m_maxContacts = 20;
+int ODEFacade::m_maxIterations = 10;
+float ODEFacade::m_bounciness = 0.1f;
+
 dSpaceID ODEFacade::m_space;
-dContact ODEFacade::m_contacts[m_maxContacts];
+std::vector<dContact> ODEFacade::m_contacts(20);
 dWorldID ODEFacade::m_world;
 dJointGroupID ODEFacade::m_contactGroup;
 ODEFacade::MeshContainer ODEFacade::m_registeredMeshes;
@@ -23,7 +25,7 @@ void ODEFacade::initialize(){
 	dInitODE();
 	m_world = dWorldCreate();
 	m_space = dSimpleSpaceCreate(0);
-        m_contactGroup = dJointGroupCreate(m_maxContacts);
+        m_contactGroup = dJointGroupCreate(0);
 
         /*dWorldSetCFM(m_world, 0.001f);
         dWorldSetERP(m_world, 0.9f);*/
@@ -103,7 +105,7 @@ void ODEFacade::setAsRigidBody(MeshModel& mesh, bool isRigidBody){
         dMassSetParameters(&m_registeredMeshes[index()].second->mass, inertia.Mass() > 0.f ? inertia.Mass() : 1.f,
                            inertia.CenterOfMass()[0], inertia.CenterOfMass()[1], inertia.CenterOfMass()[2],
                            IT[0][0], IT[1][1], IT[2][2], IT[0][1], IT[0][2], IT[1][2]);
-        //For now it is best to let ODE do the job automatically
+        //For now it's best to let ODE do the job automatically
         //dBodySetMass(m_registeredMeshes[index()].second->body, &m_registeredMeshes[index()].second->mass);
 
     }
@@ -158,7 +160,7 @@ void ODEFacade::updateTransform(){
 
 void ODEFacade::integrate(float step){
     dSpaceCollide(m_space, this, collisionCallback);
-    dWorldStepFast1(m_world, step, 10);
+    dWorldStepFast1(m_world, step, m_maxIterations);
     dJointGroupEmpty(m_contactGroup);
 }
 
@@ -171,10 +173,10 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
     dBodyID body1 = dGeomGetBody(o1);
     dBodyID body2 = dGeomGetBody(o2);
 
-    for(int i = 0; i < m_maxContacts; i++){
+    for(int i = 0; i < m_contacts.size(); i++){
         m_contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
         m_contacts[i].surface.mu = 0.5;
-        m_contacts[i].surface.bounce = 0.1;
+        m_contacts[i].surface.bounce = m_bounciness;
         m_contacts[i].surface.bounce_vel = 0.1;
         m_contacts[i].surface.soft_cfm = 0.01;
         /*m_contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
@@ -185,7 +187,7 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
         m_contacts[i].surface.soft_cfm = 0.01;*/
     }
 
-    int collisions = dCollide(o1, o2, m_maxContacts, &m_contacts[0].geom, sizeof(dContact));
+    int collisions = dCollide(o1, o2, m_contacts.size(), &m_contacts[0].geom, sizeof(dContact));
     for(int i = 0; i < collisions; i++){
         dJointID joint = dJointCreateContact(m_world, m_contactGroup, &m_contacts[i]);
         dJointAttach(joint, body1, body2);
@@ -220,4 +222,16 @@ vcg::Matrix44f ODEFacade::getTransformationMatrix(MeshModel& mesh){
     matrix[3][3] = 1.f;
 
     return matrix;
+}
+
+void ODEFacade::setIterations(int iterations){
+    m_maxIterations = iterations;
+}
+
+void ODEFacade::setMaxContacts(int contacts){
+    m_contacts.resize(contacts);
+}
+
+void ODEFacade::setBounciness(float bounciness){
+    m_bounciness = bounciness;
 }
