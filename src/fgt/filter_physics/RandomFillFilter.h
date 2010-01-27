@@ -8,6 +8,8 @@
 
 class RandomFillFilter : public MeshSubFilter{
 public:
+    RandomFillFilter();
+
     virtual void initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
 
@@ -17,6 +19,8 @@ protected:
 private:
     int m_dropRate;
     ODEFacade m_engine;
+
+    static int m_filterType;
 };
 
 #endif // RANDOMFILLFILTER_H

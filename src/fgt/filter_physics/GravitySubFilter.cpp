@@ -1,6 +1,10 @@
 #include "GravitySubFilter.h"
 
+int GravitySubFilter::m_filterType = -1;
+
 GravitySubFilter::GravitySubFilter() : m_scenery(0){
+    MeshSubFilter::m_currentFilterType += 1;
+    m_filterType = MeshSubFilter::m_currentFilterType;
 }
 
 void GravitySubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet& par){
@@ -24,8 +28,9 @@ bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
 }
 
 bool GravitySubFilter::configurationHasChanged(MeshDocument& md, RichParameterSet& par){
-    bool changed = DynamicMeshSubFilter::configurationHasChanged(md, par) || m_scenery != par.getMesh("scenery");
+    bool changed = DynamicMeshSubFilter::configurationHasChanged(md, par) || m_scenery != par.getMesh("scenery") || m_currentFilterType != m_filterType;
     m_scenery = par.getMesh("scenery");
+    m_currentFilterType = m_filterType;
     return changed;
 }
 

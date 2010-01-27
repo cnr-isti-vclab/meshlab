@@ -8,6 +8,13 @@
 using namespace std;
 using namespace vcg;
 
+int RandomFillFilter::m_filterType = -1;
+
+RandomFillFilter::RandomFillFilter(){
+    MeshSubFilter::m_currentFilterType += 1;
+    m_filterType = MeshSubFilter::m_currentFilterType;
+}
+
 void RandomFillFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
     par.addParam(new RichMesh("container", 0, &md, "Container mesh", "This mesh will act as a container for the filling mesh"));
     par.addParam(new RichMesh("filler", 0, &md, "Filler mesh", "The container mesh will be filled with this mesh"));

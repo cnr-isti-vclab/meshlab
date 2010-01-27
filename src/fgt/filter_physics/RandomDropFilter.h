@@ -25,6 +25,8 @@ private:
     int m_dropRate;
     float m_distance;
     ODEFacade m_engine;
+
+    static int m_filterType;
 };
 
 #endif // RANDOMDROPFILTER_H

@@ -8,7 +8,11 @@
 
 using namespace std;
 
+int RandomDropFilter::m_filterType = -1;
+
 RandomDropFilter::RandomDropFilter() : m_randomMesh(0), m_dropRate(-1), m_distance(-1){
+    MeshSubFilter::m_currentFilterType += 1;
+    m_filterType = MeshSubFilter::m_currentFilterType;
 }
 
 void RandomDropFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
@@ -93,6 +97,11 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
         m_engine.integrate(m_stepSize);
     }
 
+    /* Was need for old correctness testing
+    m_files.clear();
+    for(int i = 0; i < md.size(); i++)
+        m_files.push_back(md.getMesh(i)->fileName);*/
+
     if(cb != 0) (*cb)(99, "Physics pre-renderization of the scene completed...");
 }
 
@@ -116,11 +125,13 @@ bool RandomDropFilter::configurationHasChanged(MeshDocument& md, RichParameterSe
     bool changed = DynamicMeshSubFilter::configurationHasChanged(md, par) ||
                    m_randomMesh != par.getMesh("randomMesh") ||
                    m_distance != par.getFloat("distance") ||
-                   m_dropRate != par.getInt("dropRate");
+                   m_dropRate != par.getInt("dropRate") ||
+                   m_currentFilterType != m_filterType;
 
     m_randomMesh = par.getMesh("randomMesh");
     m_distance = par.getFloat("distance");
     m_dropRate = par.getInt("dropRate");
+    m_currentFilterType = m_filterType;
 
     return changed;
 }

@@ -14,10 +14,11 @@ public:
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb) = 0;
 
 protected:
-    enum SubType{ GRAVITY, RANDOMDROP, RANDOMFILL };
+    enum FilterType{ FILTERTYPE_UNDEFINED, FILTERTYPE_GRAVITY, FILTERTYPE_RANDOMDROP, FILTERTYPE_RANDOMFILL };
 
     static const float m_stepSize;
     static const unsigned int m_stepsPerSecond;
+    static int m_currentFilterType;
 };
 
 #endif // MESHSUBFILTER_H

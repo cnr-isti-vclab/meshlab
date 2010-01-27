@@ -22,6 +22,8 @@ protected:
 private:
     MeshModel* m_scenery;
     ODEFacade m_engine;
+
+    static int m_filterType;
 };
 
 #endif // GRAVITYSUBFILTER_H

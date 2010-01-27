@@ -103,7 +103,8 @@ void ODEFacade::setAsRigidBody(MeshModel& mesh, bool isRigidBody){
         dMassSetParameters(&m_registeredMeshes[index()].second->mass, inertia.Mass() > 0.f ? inertia.Mass() : 1.f,
                            inertia.CenterOfMass()[0], inertia.CenterOfMass()[1], inertia.CenterOfMass()[2],
                            IT[0][0], IT[1][1], IT[2][2], IT[0][1], IT[0][2], IT[1][2]);
-        dBodySetMass(m_registeredMeshes[index()].second->body, &m_registeredMeshes[index()].second->mass);
+        //For now it is best to let ODE do the job automatically
+        //dBodySetMass(m_registeredMeshes[index()].second->body, &m_registeredMeshes[index()].second->mass);
 
     }
 

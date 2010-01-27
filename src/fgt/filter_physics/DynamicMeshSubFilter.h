@@ -20,10 +20,16 @@ protected:
 
     virtual void initialize(MeshDocument&, RichParameterSet&, vcg::CallBackPos* cb);
     virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
+    void saveMeshState(MeshDocument& md);
 
     int m_steps;
     int m_seconds;
     LayersTransformations m_layersTrans;
+    std::vector<std::string> m_files;
+    std::vector<MeshModel*> m_state;
+
+private:
+    bool compareMesh(MeshModel* m1, MeshModel* m2);
 };
 
 #endif // DYNAMICMESHSUBFILTER_H
