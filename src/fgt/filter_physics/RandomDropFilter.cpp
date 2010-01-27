@@ -33,7 +33,7 @@ bool RandomDropFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
 
     int currentStep  = par.getDynamicFloat("timeline") / 100 * m_steps;
     int randomObjects = m_seconds/m_dropRate;
-    int currentRandomObject = md.size() - randomObjects + currentStep/(m_stepsPerSecond*m_dropRate);
+    int currentRandomObject = md.size() - randomObjects + currentStep/(m_fps*m_dropRate);
 
     for(int i = 0; i < md.size(); i++){
         md.getMesh(i)->cm.Tr = m_layersTrans[i][currentStep];
@@ -58,7 +58,7 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
 
     srand((unsigned)time(0));
     int randomObjects = m_seconds/m_dropRate;
-    m_steps = m_seconds/m_stepSize;
+    m_steps = m_seconds * m_fps;
 
     foreach(MeshModel *mesh, md.meshList){
         if(mesh->fileName.find("randomMesh") == 0)
@@ -81,9 +81,9 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
     for(int i = 0; i <= m_steps; i++){
         if(cb != 0) (*cb)(98.f*i/m_steps, "Computing...");
 
-        int currentRndObject = md.size() - randomObjects + i/(m_stepsPerSecond*m_dropRate);
+        int currentRndObject = md.size() - randomObjects + i/(m_fps * m_dropRate);
 
-        if(i != 0 && i % (m_stepsPerSecond*m_dropRate) == 0)
+        if(i != 0 && i % (m_fps * m_dropRate) == 0)
             m_engine.registerTriMesh(*md.getMesh(currentRndObject - 1), false);
 
         for(int j = 0; j < currentRndObject; j++){
@@ -94,7 +94,7 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
             m_layersTrans[j].push_back(vcg::Matrix44<float>::Identity());
         }
 
-        m_engine.integrate(m_stepSize);
+        m_engine.integrate(1.0f / m_fps);
     }
 
     /* Was need for old correctness testing

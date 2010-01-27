@@ -10,14 +10,12 @@
 
 class MeshSubFilter{
 public:
-    virtual void initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par) = 0;
+    MeshSubFilter();
+
+    virtual void initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb) = 0;
 
 protected:
-    enum FilterType{ FILTERTYPE_UNDEFINED, FILTERTYPE_GRAVITY, FILTERTYPE_RANDOMDROP, FILTERTYPE_RANDOMFILL };
-
-    static const float m_stepSize;
-    static const unsigned int m_stepsPerSecond;
     static int m_currentFilterType;
 };
 

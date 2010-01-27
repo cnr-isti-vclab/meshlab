@@ -16,6 +16,7 @@ RandomFillFilter::RandomFillFilter(){
 }
 
 void RandomFillFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
+    MeshSubFilter::initParameterSet(action, md, par);
     par.addParam(new RichMesh("container", 0, &md, "Container mesh", "This mesh will act as a container for the filling mesh"));
     par.addParam(new RichMesh("filler", 0, &md, "Filler mesh", "The container mesh will be filled with this mesh"));
     par.addParam(new RichInt("fillCounter", 1, "Fill counter", "The number of object used to fill the container"));
@@ -44,8 +45,8 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
 
         addRandomObject(md, filler, inertia.CenterOfMass(), i);
         m_engine.registerTriMesh(*md.getMesh(fillOffset++));
-        for(int j = 0; j < m_stepsPerSecond; j++){
-            m_engine.integrate(m_stepSize);
+        for(int j = 0; j < par.getInt("fps"); j++){
+            m_engine.integrate(1.0f / par.getInt("fps"));
         }
     }
     m_engine.updateTransform();

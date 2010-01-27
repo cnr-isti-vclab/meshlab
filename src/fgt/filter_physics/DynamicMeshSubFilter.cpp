@@ -2,16 +2,17 @@
 
 #include <vcg/complex/trimesh/append.h>
 
-DynamicMeshSubFilter::DynamicMeshSubFilter() : m_steps(-1), m_seconds(-1) {
+DynamicMeshSubFilter::DynamicMeshSubFilter() : m_fps(-1), m_steps(-1), m_seconds(-1) {
 }
 
 void DynamicMeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
+    MeshSubFilter::initParameterSet(action, md, par);
     par.addParam(new RichInt("seconds", 1, "Simulation interval (sec)", "Physics simulation interval in seconds"));
-    par.addParam(new RichDynamicFloat("timeline", 0, 0, 100, "Timeline %", "Physics simulation is run"));
+    par.addParam(new RichDynamicFloat("timeline", 0, 0, 100, "Timeline %", "Controls the point in timeline of the simulation"));
 }
 
 bool DynamicMeshSubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    if(par.getInt("seconds") < 0)
+    if(par.getInt("seconds") < 0 || par.getInt("fps") <= 0)
         return false;
 
     if(configurationHasChanged(md, par))
@@ -22,6 +23,7 @@ bool DynamicMeshSubFilter::applyFilter(QAction* filter, MeshDocument &md, RichPa
 
 bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParameterSet& par){
     bool changed = m_seconds != par.getInt("seconds");
+    changed |= m_fps != par.getInt("fps");
 
     // Does not work because meshlab fails at restoring the original translation matrix in the preview checkbox logic
     /* Dim: the transformation matrices should not change
@@ -52,6 +54,7 @@ bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParamet
         m_files.push_back(md.getMesh(i)->fileName);*/
 
     m_seconds = par.getInt("seconds");
+    m_fps = par.getInt("fps");
     return changed;
 }
 
@@ -71,5 +74,5 @@ void DynamicMeshSubFilter::saveMeshState(MeshDocument& md){
 }
 
 void DynamicMeshSubFilter::initialize(MeshDocument&, RichParameterSet&, vcg::CallBackPos* cb){
-    m_steps = m_seconds / m_stepSize;
+    m_steps = m_seconds * m_fps;
 }

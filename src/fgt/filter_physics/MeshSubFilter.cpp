@@ -1,6 +1,13 @@
 #include "MeshSubFilter.h"
 
-const float MeshSubFilter::m_stepSize = 0.02;
-const unsigned int MeshSubFilter::m_stepsPerSecond = 1.0f/m_stepSize;
-//MeshSubFilter::FilterType MeshSubFilter::m_currentFilterType = FILTERTYPE_UNDEFINED;
 int MeshSubFilter::m_currentFilterType = 0;
+
+MeshSubFilter::MeshSubFilter(){
+}
+
+void MeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
+    par.addParam(new RichInt("fps", 50, "Frames per second", "The number of times per second the physics simulation is updated"));
+    par.addParam(new RichInt("iterations", 10, "Physics method iterations", "Number of iterations of the physics iterative method for equation solving"));
+    par.addParam(new RichInt("collisions", 20, "Max collisions", "Maximum number of collision per object pair"));
+    par.addParam(new RichFloat("bounciness", 0.1f, "Bounciness", "The amount of bounciness of a collision: 0 means the surfaces are not bouncy at all, 1 is the maximum bounciness"));
+}

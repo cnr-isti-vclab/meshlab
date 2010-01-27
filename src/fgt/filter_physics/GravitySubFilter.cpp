@@ -59,7 +59,7 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
         for(int j = 0; j < md.size(); j++){
             m_layersTrans[j].push_back(m_engine.getTransformationMatrix(*md.getMesh(j)));
         }
-        m_engine.integrate(m_stepSize);
+        m_engine.integrate(1.0f / m_fps);
     }
 
     if(cb != 0) (*cb)(99, "Physics pre-renderization of the scene completed...");

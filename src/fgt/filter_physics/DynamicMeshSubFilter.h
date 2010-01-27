@@ -22,6 +22,7 @@ protected:
     virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
     void saveMeshState(MeshDocument& md);
 
+    int m_fps;
     int m_steps;
     int m_seconds;
     LayersTransformations m_layersTrans;
