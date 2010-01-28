@@ -159,7 +159,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 			}	
 		case FP_QHULL_ALPHA_COMPLEX_AND_SHAPE:
 			{
-			    parlst.addParam(new RichAbsPerc("alpha",0,0,m.cm.bbox.Diag(),tr("Alpha value"),tr("Compute the alpha value as percentage of the diagonal of the bbox")));
+			    parlst.addParam(new RichAbsPerc("alpha",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),tr("Alpha value"),tr("Compute the alpha value as percentage of the diagonal of the bbox")));
 				parlst.addParam(new RichEnum("Filtering", 0, 
 									QStringList() << "Alpha Complex" << "Alpha Shape" , 
 									tr("Get:"), 
