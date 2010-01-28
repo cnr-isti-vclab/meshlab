@@ -24,11 +24,7 @@
 #define SAMPLE_DECORATE_PLUGIN_H
 
 #include <QObject>
-#include <QAction>
-#include <QList>
-
-#include <meshlab/interfaces.h>
-#include <meshlab/meshmodel.h>
+#include <common/interfaces.h>
 
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
@@ -60,8 +56,8 @@ class DecorateShadowPlugin : public QObject, public MeshDecorateInterface
                 <<"Variance shadow mapping with blur";
     }
 
-    virtual QString Info(QAction *);
-    virtual QString ST(FilterIDType filter) const;
+    virtual QString filterInfo(QAction *) const;
+    virtual QString filterName(FilterIDType filter) const;
 
 public:
      
@@ -72,7 +68,7 @@ public:
 
         FilterIDType tt;
         foreach(tt , types()){
-          actionList << new QAction(ST(tt), this);
+          actionList << new QAction(filterName(tt), this);
         }
         QAction *ap;
         foreach(ap,actionList){
@@ -83,7 +79,7 @@ public:
 	QList<QAction *> actions () const {return actionList;}
     virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet  * /*parent*/ par, GLArea * /*parent*/);
     virtual void Decorate(QAction *a, MeshModel &m,  GLArea *gla,QFont qf);
-    virtual void initGlobalParameterSet(QAction *, RichParameterSet  * /*globalparam*/);
+    virtual void initGlobalParameterSet(QAction *, RichParameterSet  & globalparam);
 private:
     DecorateShader* _decoratorSH, *_decoratorSSAO;
     inline const QString DecorateShadowSSAORadius() { return  "MeshLab::Decoration::SSAORadius" ; }

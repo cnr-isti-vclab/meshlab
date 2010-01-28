@@ -24,8 +24,6 @@
 #ifndef SHADOW_MAPPING_H_
 #define SHADOW_MAPPING_H_
 
-#include <decorate_shader.h>
-
 class ShadowMapping : public DecorateShader
 {
 

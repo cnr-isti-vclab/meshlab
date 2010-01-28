@@ -21,8 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
-
+#include "decorate_shader.h"
 #include "shadow_mapping.h"
+#include <common/pluginmanager.h>
 
 ShadowMapping::ShadowMapping():DecorateShader()
 {
@@ -54,7 +55,7 @@ bool ShadowMapping::init()
             this->_shadowMappingProgram,
             this->_shadowMappingVert,
             this->_shadowMappingFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/sm/object")));
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/sm/object")));
 }
 
 void ShadowMapping::renderingFromLightSetup(MeshModel& m, GLArea* gla){

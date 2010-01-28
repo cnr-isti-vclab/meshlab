@@ -22,11 +22,8 @@
 ****************************************************************************/
 #ifndef DECORATE_SHADER_H
 #define DECORATE_SHADER_H
-#include <cassert>
-#include <QImage>
-#include <QFile>
-#include <GL/glew.h>
-#include <meshlab/meshmodel.h>
+#include <QObject>
+#include <common/interfaces.h>
 #include <meshlab/glarea.h>
 
 #define BLUR_COEF 0.4

@@ -21,7 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
+#include "decorate_shader.h"
 #include "variance_shadow_mapping.h"
+#include <common/pluginmanager.h>
 
 VarianceShadowMapping::VarianceShadowMapping():ShadowMapping()
 {
@@ -52,12 +54,12 @@ bool VarianceShadowMapping::init()
             this->_depthShaderProgram,
             this->_depthVert,
             this->_depthFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsm/depthVSM"))) ||
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsm/depthVSM"))) ||
        !compileAndLink(
             this->_shadowMappingProgram,
             this->_shadowMappingVert,
             this->_shadowMappingFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsm/objectVSM"))))
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsm/objectVSM"))))
         return false;
 
     return true;

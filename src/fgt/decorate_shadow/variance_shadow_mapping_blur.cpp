@@ -21,7 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
+#include "decorate_shader.h"
 #include "variance_shadow_mapping_blur.h"
+#include <common/pluginmanager.h>
 
 VarianceShadowMappingBlur::VarianceShadowMappingBlur():VarianceShadowMapping()
 {
@@ -53,17 +55,17 @@ bool VarianceShadowMappingBlur::init()
             this->_depthShaderProgram,
             this->_depthVert,
             this->_depthFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsmb/depthVSM"))) ||
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsmb/depthVSM"))) ||
        !compileAndLink(
             this->_shadowMappingProgram,
             this->_shadowMappingVert,
             this->_shadowMappingFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsmb/objectVSM"))) ||
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsmb/objectVSM"))) ||
        !compileAndLink(
             this->_blurShaderProgram,
             this->_blurVert,
             this->_blurFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsmb/blurVSM"))))
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsmb/blurVSM"))))
         return false;
     return true;
 }

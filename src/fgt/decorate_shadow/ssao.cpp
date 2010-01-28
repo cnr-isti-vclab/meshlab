@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "ssao.h"
-
+#include <common/pluginmanager.h>
 SSAO::SSAO(float radius):DecorateShader()
 {
     this->_radius = radius;
@@ -90,17 +90,17 @@ bool SSAO::init()
             this->_ssaoShaderProgram,
             this->_ssaoVert,
             this->_ssaoFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/ssao"))) ||
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/ssao"))) ||
        !compileAndLink(
             this->_normalMapShaderProgram,
             this->_normalMapVert,
             this->_normalMapFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/normalMap"))) ||
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/normalMap"))) ||
        !compileAndLink(
             this->_blurShaderProgram,
             this->_blurVert,
             this->_blurFrag,
-            MainWindowInterface::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/blur"))))
+            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/blur"))))
         return false;
     return true;
 }

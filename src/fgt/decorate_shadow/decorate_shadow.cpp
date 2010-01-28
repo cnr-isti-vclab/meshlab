@@ -25,23 +25,31 @@
 
 using namespace vcg;
 
-const QString DecorateShadowPlugin::Info(QAction *action)
+QString DecorateShadowPlugin::filterInfo(QAction *action) const
 {
     switch(ID(action)){
         case DP_SHOW_SHADOW :           return tr("Enable shadow mapping");
         case DP_SHOW_SSAO:              return tr("Enable Screen Space Ambient Occlusion");
-    }
-    assert(0);
-    return QString();
+    default:     assert(0); return QString();
+    }  
 }
- 
-void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterSet *parset)
+
+QString DecorateShadowPlugin::filterName(FilterIDType id) const
+{
+    switch(id){
+        case DP_SHOW_SHADOW :           return tr("Enable shadow mapping");
+        case DP_SHOW_SSAO:              return tr("Enable Screen Space Ambient Occlusion");
+    default:     assert(0); return QString();
+    }
+}
+
+void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
 {
     switch(ID(action)){
         case DP_SHOW_SHADOW : {
-            assert(!(parset->hasParameter(this->DecorateShadowMethod())));
+            assert(!(parset.hasParameter(this->DecorateShadowMethod())));
             int method = SH_MAP_VSM_BLUR;
-            parset->addParam(
+            parset.addParam(
                     new RichEnum(
                         this->DecorateShadowMethod(),
                         method,
@@ -53,9 +61,9 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
         }
 
         case DP_SHOW_SSAO : {
-            assert(!(parset->hasParameter(this->DecorateShadowSSAORadius())));
+            assert(!(parset.hasParameter(this->DecorateShadowSSAORadius())));
             float radius = 0.25f;
-            parset->addParam(
+            parset.addParam(
                     new RichFloat(this->DecorateShadowSSAORadius(),
                     radius,
                     "Uniform parameter for SSAO shader",
@@ -67,17 +75,6 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
     }
 }		
 		
-const QString DecorateShadowPlugin::ST(FilterIDType filter) const
-{
-    switch(filter)
-    {
-        case DP_SHOW_SHADOW     : return QString("Shadow mapping");
-        case DP_SHOW_SSAO       : return QString("SSAO");
-        default: assert(0);
-    }
-    return QString("error!");
-}
-
 bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, RichParameterSet  * parset, GLArea* gla){
     bool result;
     switch(ID(action)){

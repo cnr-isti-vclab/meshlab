@@ -24,14 +24,6 @@
 #ifndef SSAO_H
 #define SSAO_H
 
-#include <cassert>
-#include <QString>
-#include <QImage>
-#include <QFile>
-#include <GL/glew.h>
-#include <meshlab/interfaces.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/glarea.h>
 #include <decorate_shader.h>
 
 class SSAO : public DecorateShader
