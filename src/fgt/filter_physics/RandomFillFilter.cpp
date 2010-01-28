@@ -4,6 +4,9 @@
 #include <vcg/complex/trimesh/inertia.h>
 
 #include <sstream>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
 
 using namespace std;
 using namespace vcg;
@@ -19,11 +22,13 @@ void RandomFillFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
     MeshSubFilter::initParameterSet(action, md, par);
     par.addParam(new RichMesh("container", 0, &md, "Container mesh", "This mesh will act as a container for the filling mesh"));
     par.addParam(new RichMesh("filler", 0, &md, "Filler mesh", "The container mesh will be filled with this mesh"));
-    par.addParam(new RichInt("fillCounter", 1, "Fill counter", "The number of object used to fill the container"));
+    //par.addParam(new RichInt("fillCounter", 1, "Fill counter", "The number of object used to fill the container"));
+    par.addParam(new RichBool("useRandomVertices", true, "Random spawn points", "If true the filling objects will spawn at random positions in the container mesh instead of being spawn at the center of mass"));
+    //par.addParam(new RichMesh("randomVertices", 0, &md, "Random vertices mesh", "The filling objects will be positioned at randomly generated vertices of this mesh"));
 }
 
 bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    if(md.size() < 2 || par.getMesh("container") == 0 || par.getMesh("container") == par.getMesh("filler") || par.getInt("fillCounter") < 0 || par.getInt("fps") <= 0 || par.getInt("iterations") <= 0 || par.getInt("contacts") <= 0 || par.getFloat("bounciness") < 0.f || par.getFloat("bounciness") > 1.f)
+    if(md.size() < 2 || par.getMesh("container") == 0 || par.getMesh("container") == par.getMesh("filler") /*|| par.getInt("fillCounter") < 0*/ || par.getInt("fps") <= 0 || par.getInt("iterations") <= 0 || par.getInt("contacts") <= 0 || par.getFloat("bounciness") < 0.f || par.getFloat("bounciness") > 1.f)
         return false;
 
     if(cb != 0) (*cb)(0, "Physics renderization of the scene started...");
@@ -40,23 +45,64 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     m_engine.setBounciness(par.getFloat("bounciness"));
     m_engine.registerTriMesh(*container, true);
 
-    tri::Inertia<CMeshO> inertia;
-    inertia.Compute(container->cm);
+    srand((unsigned)time(0));
 
-    for(int i = 0; i < par.getInt("fillCounter"); i++){
-        if(cb != 0) (*cb)(98.f*i/par.getInt("fillCounter"), "Computing...");
+    tri::Inertia<CMeshO> inertiaContainer, inertiaFiller;
+    inertiaContainer.Compute(par.getMesh("container")->cm);
+    inertiaFiller.Compute(par.getMesh("filler")->cm);
+    int objects = abs(inertiaContainer.Mass()/inertiaFiller.Mass())/2;
 
-        addRandomObject(md, filler, inertia.CenterOfMass(), i);
-        m_engine.registerTriMesh(*md.getMesh(fillOffset++));
+    if(par.getBool("useRandomVertices")){
+        for(int i = 0; i < objects; i++){
+            if(cb != 0) (*cb)(50.f*i/objects, "Computing...");
+            addRandomObject(md, filler, getRandomOrigin(par), i);
+            m_engine.registerTriMesh(*md.getMesh(fillOffset++));
+        }
+
         for(int j = 0; j < par.getInt("fps"); j++){
-            m_engine.integrate(1.0f / par.getInt("fps"));
+            if(cb != 0) (*cb)(50 + 48.f*j/par.getInt("fps"), "Computing...");
+            m_engine.integrate(1.0f/par.getInt("fps"));
+        }
+    }else{
+        for(int i = 0; i < objects; i++){
+            if(cb != 0) (*cb)(98.f*i/objects, "Computing...");
+            addRandomObject(md, filler, inertiaContainer.CenterOfMass(), i);
+            m_engine.registerTriMesh(*md.getMesh(fillOffset++));
+
+            for(int j = 0; j < par.getInt("fps")/2; j++)
+                m_engine.integrate(1.0f/par.getInt("fps"));
         }
     }
+
+    /*for(int i = 0; i < objects; i++){
+        if(cb != 0) (*cb)(50.f*i/objects, "Computing...");
+
+        if(par.getBool("useRandomVertices"))
+            addRandomObject(md, filler, getRandomOrigin(par), i);
+        else
+            addRandomObject(md, filler, inertiaContainer.CenterOfMass(), i);
+
+        m_engine.registerTriMesh(*md.getMesh(fillOffset++));
+    }
+
+    for(int j = 0; j < par.getInt("fps"); j++){
+        if(cb != 0) (*cb)(50 + 48.f*j/par.getInt("fps"), "Computing...");
+        m_engine.integrate(1.0f / par.getInt("fps"));
+    }*/
+
     m_engine.updateTransform();
 
     if(cb != 0) (*cb)(0, "Physics renderization of the scene completed...");
 
     return true;
+}
+
+vcg::Point3<float> RandomFillFilter::getRandomOrigin(RichParameterSet& par){
+    //int randomVertex = static_cast<float>(rand())/RAND_MAX*(par.getMesh("randomVertices")->cm.vert.size() - 1);
+    //return par.getMesh("randomVertices")->cm.vert[randomVertex].P();
+    int randomFace = static_cast<float>(rand())/RAND_MAX*(par.getMesh("container")->cm.face.size() - 1);
+    CFaceO& face = par.getMesh("container")->cm.face[randomFace];
+    return face.P(0) + (face.N() * par.getMesh("filler")->cm.bbox.Diag());
 }
 
 void RandomFillFilter::addRandomObject(MeshDocument& md, MeshModel* filler, const vcg::Point3<float>& origin, int meshID){

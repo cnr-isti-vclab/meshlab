@@ -17,6 +17,8 @@ protected:
     virtual void addRandomObject(MeshDocument& md, MeshModel* filler, const vcg::Point3<float>& origin, int meshID);
 
 private:
+    vcg::Point3<float> getRandomOrigin(RichParameterSet& par);
+
     int m_dropRate;
     ODEFacade m_engine;
 
