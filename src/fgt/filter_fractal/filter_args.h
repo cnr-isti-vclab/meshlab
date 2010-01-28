@@ -22,6 +22,7 @@ public:
     bool saveAsQuality;
     ScalarType spectralWeight[21];
     ScalarType zoom_window_side, zoom_org_x, zoom_org_y;
+    ScalarType scale;
 
     FractalArgs(MeshModel* mm, int algorithmId, ScalarType seed, ScalarType octaves, ScalarType lacunarity,
                 ScalarType fractalIncrement, ScalarType offset, ScalarType gain, ScalarType heightFactor)
@@ -53,66 +54,6 @@ public:
     }
 };
 
-/* This class is used as cache for the FRACTAL_MESH filter */
-template <class ScalarType>
-class FractalMeshCache
-{
-public:
-    QString meshName;
-    ScalarType meshSeed;
-    unsigned int vertNo;
-    std::vector< Point3<ScalarType> >* projectedPoints;
-
-    FractalMeshCache()
-    {
-        projectedPoints = new std::vector< Point3<ScalarType> >();
-        meshName = "";
-        meshSeed = -1.0;
-        vertNo = -1;
-    }
-
-    ~FractalMeshCache()
-    {
-        projectedPoints ->clear();
-        delete projectedPoints;
-    }
-
-    void updateCache(FractalArgs<ScalarType> &args)
-    {
-        std::string str = args.mesh->fileName;
-        QString s(str.c_str());
-        bool nameMatches = (s == meshName);
-        bool vertMatches = (args.mesh->cm.vert.size() == vertNo);
-        if(nameMatches && meshSeed == args.seed && vertMatches) return; // we can use the cache content
-
-        projectedPoints->clear();
-
-        // fills the cache
-        Box3<ScalarType> bbox = args.mesh->cm.bbox;
-        ScalarType minDim = bbox.DimX();
-        if (bbox.DimY() < minDim) minDim = bbox.DimY();
-        if (bbox.DimZ() < minDim) minDim = bbox.DimZ();
-        Point3<ScalarType> center = bbox.Center(), projection;
-        Sphere3<ScalarType> bSphere(center, minDim/100);
-        Line3<ScalarType> ray;
-        ray.SetOrigin(center);
-
-        CMeshO* cm = &(args.mesh->cm);
-        CMeshO::VertexIterator vi;
-        for(vi = cm->vert.begin(); vi!=cm->vert.end(); ++vi)
-        {
-            ray.SetDirection((*vi).P() - center);
-            IntersectionLineSphere<ScalarType>(bSphere, ray, projection, projection);
-            projectedPoints->push_back(projection);
-        }
-
-        // stores informations about the cache content
-        meshSeed = args.seed;
-        meshName = s;
-        vertNo = args.mesh->cm.vert.size();
-    }
-};
-
 /* wrapper for FP_CRATERS filter arguments */
 template <class ScalarType>
 class CratersArgs
@@ -125,6 +66,7 @@ public:
     int algorithm;
     ScalarType max_radius, max_depth, min_radius, min_depth, radius_range, depth_range, profile_factor;
     bool save_as_quality, invert_perturbation, postprocessing_noise;
+    FractalArgs<ScalarType>* fArgs;
 
     CratersArgs(MeshModel* target, MeshModel* samples, int alg, int seed, ScalarType min_r, ScalarType max_r,
                 ScalarType min_d, ScalarType max_d, ScalarType p_factor, bool save_as_quality, bool invert,
@@ -143,7 +85,6 @@ public:
         algorithm = alg;
         this->save_as_quality = save_as_quality;
         invert_perturbation = invert;
-        postprocessing_noise = ppNoise;
 
         float target_bb_diag = target_mesh->bbox.Diag();
         max_radius = target_bb_diag * 0.1 * max_r;
@@ -153,10 +94,24 @@ public:
         min_depth = target_bb_diag * 0.05 * min_d;
         depth_range = max_depth - min_depth;
         profile_factor = p_factor;
+
+        postprocessing_noise = ppNoise;
+        if (postprocessing_noise)
+        {
+            fArgs = new FractalArgs<ScalarType>(target_model, 0, 1, 8, 2, 0.55, 0, 0, 0.02);
+            fArgs->smoothingSteps = 10;
+            fArgs->seed = 1;
+            fArgs->scale = 1;
+        }
     }
 
     ~CratersArgs(){
         delete generator;
+
+        if(postprocessing_noise)
+        {
+            delete fArgs;
+        }
     }
 
     /* generates a crater radius within the specified range */

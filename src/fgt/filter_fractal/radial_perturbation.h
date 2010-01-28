@@ -2,6 +2,7 @@
 #define RADIAL_PERTURBATION_H
 
 #include <vcg/space/point3.h>
+#include <algorithm>
 
 #define SQRT2 1.42421356
 
@@ -52,6 +53,16 @@ public:
         ScalarType den = squaredRadius + squaredProfile * squaredDist;
         ScalarType fact2 = 1 - num / den;
         return (fact1 * fact2);
+    }
+
+    static ScalarType f(Point3<ScalarType> &p, Point3<ScalarType> &centre,
+                        ScalarType radius, ScalarType depth, ScalarType profileFactor)
+    {
+        ScalarType dist = vcg::Distance(p, centre);
+        ScalarType radius4 = pow(radius, 4);
+        ScalarType tmp1 = std::min(ScalarType(0), dist-radius);
+        ScalarType tmp2 = depth * (1 - (1/radius4) * fabs(radius4 - pow(dist, 4))) - depth/2;
+        return (std::max(tmp1, tmp2));
     }
 };
 

@@ -120,13 +120,10 @@ public:
         typename std::vector<FacePointer>::iterator fi;
         VertexPointer vp;
         ScalarType perturbation = .0;
-        FractalArgs<ScalarType>* fArgs;
-        if(args.postprocessing_noise)
-        {
-            fArgs = new FractalArgs<ScalarType>(args.target_model, 2, 0, 8, 2, 0.9, 0.4, 2.5, 0.4);
-        }
         Point3<ScalarType> p;
         ScalarType noisePerturbation = .0;
+        Point3<ScalarType> trasl = -(args.target_mesh->bbox.min);
+        ScalarType diag = args.target_mesh->bbox.Diag();
 
         for(fi = craterFaces.begin(); fi!=craterFaces.end(); ++fi)
         {
@@ -155,26 +152,21 @@ public:
                         break;
                     case 3: // cauchy rbf
                         perturbation = RadialPerturbation<ScalarType>::Cauchy
-                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
+                                       (vp->P(), centre->P(), radius, depth, args.profile_factor) + depth/3;
                         break;
+                    case 4:
+                        perturbation = RadialPerturbation<ScalarType>::f
+                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
                     }
-
-                    // limits the perturbation to negative values
-                    if(perturbation > 0) perturbation = 0;
 
                     // applies the post-processing noise to the temporary point
                     // to obtain the fractal perturbation
-
                     if (args.postprocessing_noise)
                     {
-                        noisePerturbation = FractalPerturbation<ScalarType>::computeFractalPerturbation(*fArgs, p);
-                        while(noisePerturbation > args.min_depth/2)
-                        {
-                            noisePerturbation /= 2;
-                        }
-                        perturbation += noisePerturbation;
+                        p = (p+trasl) / diag;
+                        perturbation += (FractalPerturbation<ScalarType>::
+                                         computeFractalPerturbation(*(args.fArgs), p) * diag);
                     }
-
 
                     // if necessary, inverts the perturbation
                     if(args.invert_perturbation)
@@ -192,11 +184,6 @@ public:
                     }
                 }
             }
-        }
-
-        if(args.postprocessing_noise)
-        {
-            delete fArgs;
         }
     }
 };

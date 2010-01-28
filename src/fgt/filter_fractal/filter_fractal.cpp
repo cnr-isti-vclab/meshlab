@@ -46,8 +46,6 @@ FilterFractal::FilterFractal()
     FilterIDType tt;
     foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
-
-    cache = new FractalMeshCache<float>();
 }
 // -------------------------------------------------------------------
 
@@ -118,7 +116,8 @@ void FilterFractal::initParameterSet(QAction* filter,MeshDocument &md, RichParam
 
 void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, MeshDocument &md, RichParameterSet &par)
 {
-    par.addParam(new RichFloat("heightFactor", 0.4, "Height factor:", "Scales the resulting perturbation height of the given value."));
+    bool terrain_filter = (ID(filter) == CR_FRACTAL_TERRAIN);
+    par.addParam(new RichFloat("heightFactor", terrain_filter? 0.4: 0.01, "Height factor:", "Scales the resulting perturbation height of the given value."));
 
     switch(ID(filter)) {
     case CR_FRACTAL_TERRAIN:
@@ -138,12 +137,13 @@ void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, Mesh
     par.addParam(new RichDynamicFloat("octaves", 8.0, 1.0, 20.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the terrain. Reasonable values are in range [2,9]."));
     par.addParam(new RichFloat("lacunarity", 4.0, "Lacunarity:", "The gap between noise frequencies. This parameter is used in conjunction with fractal increment to compute the spectral weights that contribute to the noise in each octave."));
     par.addParam(new RichFloat("fractalIncrement", 0.2, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
-    par.addParam(new RichFloat("offset", 0.6, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
+    par.addParam(new RichFloat("offset", terrain_filter? 0.6 : 0.83, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
     par.addParam(new RichFloat("gain", 2.5, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
 
     switch(ID(filter))
     {
     case FP_FRACTAL_MESH:
+        par.addParam(new RichDynamicFloat("scale", 1, 0, 10, "Scale factor:", "Scales the fractal perturbation in and out. Values larger than 1 mean zoom out; values smaller than one mean zoom in."));
         par.addParam(new RichBool("saveAsQuality", false, "Save as vertex quality", "Saves the perturbation value as vertex quality."));
         break;
     case CR_FRACTAL_TERRAIN:
@@ -158,7 +158,6 @@ void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, Mesh
 void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichParameterSet &par)
 {
     int meshCount = md.meshList.size();
-    if(meshCount < 2) return;
 
     // tries to detect the target mesh
     MeshModel* target = md.mm();
@@ -181,7 +180,7 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
     par.addParam(new RichInt("seed", 0, "Seed:", "The seed with which the random number generator is initialized. The random generator generates radius and depth for each crater into the given range."));
 
     QStringList algList;
-    algList << "Gaussian" << "Multiquadric" << "Inverse Multiquadric" << "Cauchy";
+    algList << "Gaussian" << "Multiquadric" << "Inverse Multiquadric" << "Cauchy" << "Temp function";
     par.addParam(new RichEnum("rbf", 1, algList, "Radial function:", "The radial function used to generate craters."));
 
     par.addParam(new RichDynamicFloat("min_radius", 0.3, 0, 1, "Min crater radius:", "Defines the minimum radius of craters in range [0, 1]. Values near 0 mean very small craters."));
@@ -229,6 +228,7 @@ bool FilterFractal::applyFractalDisplacementFilter (QAction*  filter, MeshDocume
         break;
     case FP_FRACTAL_MESH:
         args.smoothingSteps =  par.getInt("smoothingSteps");
+        args.scale = par.getDynamicFloat("scale");
         args.saveAsQuality = par.getBool("saveAsQuality");
         return generateFractalMesh(*(md.mm()), args, cb);
         break;
@@ -241,14 +241,14 @@ bool FilterFractal::applyCratersGenerationFilter(MeshDocument &md, RichParameter
 {
     if (md.meshList.size() < 2)
     {
-        Log(GLLogStream::FILTER, "There must be at least two layers to apply the craters generation filter.");
+        errorMessage = "There must be at least two layers to apply the craters generation filter.";
         return false;
     }
 
     CMeshO* samples = &(par.getMesh("samples_mesh")->cm);
     if (samples->face.size() > 0)
     {
-        Log(GLLogStream::FILTER, "The sample layer selected is not a sample layer.");
+        errorMessage = "The sample layer selected is not a sample layer.";
         return false;
     }
 
@@ -256,14 +256,16 @@ bool FilterFractal::applyCratersGenerationFilter(MeshDocument &md, RichParameter
     float maxRadius = par.getDynamicFloat("max_radius");
     if (maxRadius <= minRadius)
     {
-        Log(GLLogStream::FILTER, "Min radius is greater than max radius.");
+        errorMessage =  "Min radius is greater than max radius.";
+        return false;
     }
 
     float minDepth = par.getDynamicFloat("min_depth");
     float maxDepth = par.getDynamicFloat("max_depth");
     if (maxDepth <= minDepth)
     {
-        Log(GLLogStream::FILTER, "Min depth is greater than max depth.");
+        errorMessage = "Min depth is greater than max depth.";
+        return false;
     }
 
     // reads parameters
@@ -442,45 +444,26 @@ bool FilterFractal::generateFractalMesh(MeshModel &mm, FractalArgs<float> &args,
     if(args.saveAsQuality)
         mm.updateDataMask(MeshModel::MM_VERTQUALITY);
 
-    // updates, if necessary, the cache content with the new projected points
-    char buffer[50];          // char buffer used in progress bar handling
-    sprintf(buffer, "Updating cache..");
-    cb(0, buffer);
-    cache->updateCache(args);
+    float diag = m->bbox.Diag(), perturbation = .0;
+    Box3<float> bbox = m->bbox;
+    Point3<float> trasl = -m->bbox.min, p;
+    Point3<float> mid = (m->bbox.Center() + trasl) / diag;
+    char buffer[50];
+    int vCount = m->vert.size(), i=0;
 
-    // applies the perturbation
-    int i=0, vertexCount = m->vn;
-    float perturbation = .0, minPerturbation = .0, pert[vertexCount];
-    std::vector< Point3<float> >::iterator pi = cache->projectedPoints->begin();
-    for(VertexIterator vi=(*m).vert.begin(); vi!=(*m).vert.end(); ++vi, ++pi, ++i)
-    {
-        sprintf(buffer, "Calculating perturbation on vertex %d..", i);
-        cb(100*i/vertexCount, buffer);
-
-        pert[i] = FractalPerturbation<float>::computeFractalPerturbation(args, (*pi));
-        if (minPerturbation == .0)
-        {
-            minPerturbation = fabs(pert[i]);
-        } else
-        {
-            if (fabs(pert[i]) < minPerturbation)
-            {
-                minPerturbation = fabs(pert[i]);
-            }
-        }        
-    }
-
-    i=0;
-    for(VertexIterator vi=(*m).vert.begin(); vi!=(*m).vert.end(); ++vi, ++i)
+    for(VertexIterator vi=m->vert.begin(); vi!=m->vert.end(); ++vi)
     {
         sprintf(buffer, "Applying perturbation on vertex %d..", i);
-        cb(100*i/vertexCount, buffer);
+        cb(100*(i++)/vCount, buffer);
 
-        perturbation = pert[i] - minPerturbation;
+        p = ((*vi).P() + trasl) / diag;      // normalizes the point
+        p = ((p - mid) * args.scale) + mid;  // applies the scale factor
+
+        perturbation = FractalPerturbation<float>::computeFractalPerturbation(args, p) * diag;
         if(args.saveAsQuality)
         {
             (*vi).Q() = perturbation;
-        }else {
+        } else {
             (*vi).P() += ((*vi).N() * perturbation);
         }
     }
