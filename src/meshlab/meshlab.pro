@@ -1,7 +1,7 @@
 VCGDIR = ../../../vcglib
 GLEWDIR = ../external/glew-1.5.1
 #CONFIG += debug_and_release
-
+DESTDIR = ../meshlabdistrib
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN
 # CONFIG += warn_off
@@ -96,17 +96,17 @@ macx:QMAKE_POST_LINK ="cp ../common/libcommon* meshlab.app/Contents/MacOS; insta
 
 
 
-CONFIG(debug,debug | release) {
-	win32-msvc2005:debug:LIBS		+= -L../common/debug -lcommon
-	win32-msvc2008:debug:LIBS		+= -L../common/debug -lcommon
-	win32-g++:debug:LIBS        	+= -L../common/debug -lcommon
-}
+#CONFIG(debug,debug | release) {
+win32-msvc2005:LIBS		+= -L../meshlabdistrib -lcommon
+win32-msvc2008:LIBS		+= -L../meshlabdistrib -lcommon
+win32-g++:LIBS        	+= -L../meshlabdistrib -lcommon
+#}
 
-CONFIG(release,debug | release) {
-	win32-msvc2005:release:LIBS     += -L../common/release -lcommon
-	win32-msvc2008:release:LIBS     += -L../common/release -lcommon
-	win32-g++:release:LIBS 			+= -L../common/release -lcommon
-}
+#CONFIG(release,debug | release) {
+#	win32-msvc2005:release:LIBS     += -L../common/release -lcommon
+#	win32-msvc2008:release:LIBS     += -L../common/release -lcommon
+#	win32-g++:release:LIBS 			+= -L../common/release -lcommon
+#}
 
 unix:LIBS += -L../common -lcommon
 
