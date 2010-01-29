@@ -8,6 +8,7 @@ SOURCES        = mainserver.cpp
 RC_FILE = ../meshlab/meshlab.rc
 
 QT           += xml opengl
+DESTDIR = ../meshlabdistrib
 
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
@@ -15,17 +16,17 @@ win32:DEFINES += NOMINMAX
 
 mac:LIBS += ../meshlab/meshlab.app/Contents/MacOS/libcommon.dylib
 
-CONFIG (debug,debug | release) {
-	win32-msvc2005:debug:  LIBS += -L../common/debug -lcommon
-	win32-msvc2008:debug:  LIBS += -L../common/debug -lcommon
-	win32-g++:debug:  LIBS += -L../common/debug -lcommon
-}
+#CONFIG (debug,debug | release) {
+win32-msvc2005:  LIBS += -L../meshlabdistrib -lcommon
+win32-msvc2008:  LIBS += -L../meshlabdistrib -lcommon
+win32-g++:  LIBS += -L../meshlabdistrib -lcommon
+#}
 
-CONFIG (release,debug | release) {
-	win32-msvc2005:release:  LIBS += -L../common/release -lcommon
-	win32-msvc2008:release:  LIBS += -L../common/release -lcommon
-	win32-g++:release:LIBS += -L../common/release -lcommon
-}
+#CONFIG (release,debug | release) {
+#	win32-msvc2005:release:  LIBS += -L../common/release -lcommon
+#	win32-msvc2008:release:  LIBS += -L../common/release -lcommon
+#	win32-g++:release:LIBS += -L../common/release -lcommon
+#}
 
 win32-msvc2005:DEFINES += GLEW_STATIC
 win32-msvc2008:DEFINES += GLEW_STATIC 
