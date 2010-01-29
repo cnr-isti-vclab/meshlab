@@ -10,17 +10,17 @@ GLEWDIR = ../../external/glew-1.5.1
 mac:LIBS += ../../common/libcommon.dylib
 
 #correct qmake syntax requires CONFIG(option, list of options)
-CONFIG(release, debug|release) {
-	win32-msvc2005:  LIBS += ../../common/release/common.lib
-	win32-msvc2008:  LIBS += ../../common/release/common.lib
-	win32-g++:LIBS += -L../../common/release -lcommon
-} 
 
-CONFIG(debug, debug|release) {
-	win32-msvc2005:  LIBS += ../../common/debug/common.lib
-	win32-msvc2008:  LIBS += ../../common/debug/common.lib
-	win32-g++:  LIBS += -L../../common/debug -lcommon
-}
+win32-msvc2005:  LIBS += ../../meshlabdistrib/common.lib
+win32-msvc2008:  LIBS += ../../meshlabdistrib/common.lib
+win32-g++:LIBS += -L../../meshlabdistrib -lcommon
+ 
+
+#CONFIG(debug, debug|release) {
+#	win32-msvc2005:  LIBS += ../../common/debug/common.lib
+#	win32-msvc2008:  LIBS += ../../common/debug/common.lib
+#	win32-g++:  LIBS += -L../../common/debug -lcommon
+#}
 
 win32-msvc2005:DEFINES += GLEW_STATIC
 win32-msvc2008:DEFINES += GLEW_STATIC 
@@ -49,12 +49,12 @@ win32:DEFINES += NOMINMAX
 # old printf are all around the code
 win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
-CONFIG(release){
+CONFIG(release,debug | release){
 # Uncomment the following line to disable assert in mingw
 #DEFINES += NDEBUG
  }
 
-DESTDIR       = ../../meshlab/plugins
+DESTDIR       = ../../meshlabdistrib/plugins
 # uncomment in you local copy only in emergency cases. 
 # We should never be too permissive
 # win32-g++:QMAKE_CXXFLAGS += -fpermissive
