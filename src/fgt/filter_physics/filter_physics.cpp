@@ -23,11 +23,11 @@ FilterPhysics::~FilterPhysics(){
  QString FilterPhysics::filterName(FilterIDType filterId) const{
     switch (filterId) {
     case FP_PHYSICS_GRAVITY:
-        return QString("Physics gravity demo");
+        return QString("Physics gravity simulation");
     case FP_PHYSICS_RNDDROP:
-        return QString("Physics random drop demo");
+        return QString("Physics random drop simulation");
     case FP_PHYSICS_RNDFILL:
-        return QString("Physics random fill demo");
+        return QString("Physics random fill simulation");
     default:
         assert(0);
         break;

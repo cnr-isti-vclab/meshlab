@@ -22,7 +22,7 @@ protected:
 
 private:
     MeshModel* m_randomMesh;
-    int m_dropRate;
+    float m_dropRate;
     float m_distance;
     ODEFacade m_engine;
 

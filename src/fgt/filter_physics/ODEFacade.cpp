@@ -2,6 +2,8 @@
 
 #include <vcg/complex/trimesh/inertia.h>
 
+#include <algorithm>
+
 using namespace std;
 using namespace vcg;
 
@@ -31,9 +33,10 @@ void ODEFacade::initialize(){
         dWorldSetERP(m_world, 0.9f);*/
 }
 
-void ODEFacade::clear(){
+void ODEFacade::clear(MeshDocument& md){
     for(MeshContainer::iterator i = m_registeredMeshes.begin(); i != m_registeredMeshes.end(); i++){
-        tri::Allocator<CMeshO>::DeletePerMeshAttribute(i->first->cm, "physicsID");
+        if(md.meshList.contains(i->first))
+            tri::Allocator<CMeshO>::DeletePerMeshAttribute(i->first->cm, "physicsID");
 
         dGeomDestroy(i->second->geom);
         if(i->second->body)

@@ -38,7 +38,7 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     int fillOffset = md.size();
 
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
-    m_engine.clear();
+    m_engine.clear(md);
     m_engine.setGlobalForce(gravity);
     m_engine.setIterations(par.getInt("iterations"));
     m_engine.setMaxContacts(par.getInt("contacts"));

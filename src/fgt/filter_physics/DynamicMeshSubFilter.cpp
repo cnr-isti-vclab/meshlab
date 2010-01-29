@@ -2,12 +2,12 @@
 
 #include <vcg/complex/trimesh/append.h>
 
-DynamicMeshSubFilter::DynamicMeshSubFilter() : m_fps(-1), m_iterations(-1), m_contacts(-1), m_steps(-1), m_seconds(-1), m_bounciness(-1) {
+DynamicMeshSubFilter::DynamicMeshSubFilter() : m_fps(-1), m_iterations(-1), m_contacts(-1), m_steps(-1), m_seconds(-1), m_meshes(-1), m_bounciness(-1) {
 }
 
 void DynamicMeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
     MeshSubFilter::initParameterSet(action, md, par);
-    par.addParam(new RichInt("seconds", 1, "Simulation interval (sec)", "Physics simulation interval in seconds"));
+    par.addParam(new RichInt("seconds", 10, "Simulation interval (sec)", "Physics simulation interval in seconds"));
     par.addParam(new RichDynamicFloat("timeline", 0, 0, 100, "Timeline %", "Controls the point in timeline of the simulation"));
 }
 
@@ -27,6 +27,7 @@ bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParamet
     changed |= m_iterations != par.getInt("iterations");
     changed |= m_contacts != par.getInt("contacts");
     changed |= m_bounciness != par.getFloat("bounciness");
+    changed |= m_meshes != md.size();
 
     // Does not work because meshlab fails at restoring the original translation matrix in the preview checkbox logic
     /* Dim: the transformation matrices should not change
@@ -61,6 +62,7 @@ bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParamet
     m_iterations = par.getInt("iterations");
     m_contacts = par.getInt("contacts");
     m_bounciness = par.getFloat("bounciness");
+    m_meshes = md.size();
     return changed;
 }
 

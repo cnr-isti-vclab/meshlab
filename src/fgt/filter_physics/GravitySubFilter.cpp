@@ -40,7 +40,7 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
     if(cb != 0) (*cb)(0, "Physics pre-renderization of the scene started...");
 
     static float gravity[3] = {0.0f, -9.8f, 0.0f};
-    m_engine.clear();
+    m_engine.clear(md);
     m_engine.setGlobalForce(gravity);
     m_engine.setIterations(m_iterations);
     m_engine.setMaxContacts(m_contacts);

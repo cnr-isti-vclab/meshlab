@@ -29,7 +29,7 @@ public:
         virtual void setBounciness(float bounciness);
 
         virtual void integrate(float step);
-        virtual void clear();
+        virtual void clear(MeshDocument& md);
 	
 protected:
 	virtual void initialize();
