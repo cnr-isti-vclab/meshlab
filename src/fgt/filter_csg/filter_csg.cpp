@@ -25,10 +25,12 @@
 #include <QtGui>
 #include "filter_csg.h"
 
+#include "fixed.h"
 #include "intercept.h"
 
 using namespace std;
 using namespace vcg;
+using namespace vcg::intercept;
 
 FilterCSG::FilterCSG()
 {
@@ -109,8 +111,9 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             secondMesh->updateDataMask(MeshModel::MM_FACENORMAL);
 
             typedef CMeshO::ScalarType scalar;
-            typedef Intercept<scalar> intercept;
-            const Point3<scalar> delta(par.getFloat("Delta"), par.getFloat("Delta"), par.getFloat("Delta"));
+            typedef Intercept<vcg::math::fixed<8,vcg::math::base32>,scalar> intercept;
+            const float d = par.getFloat("Delta");
+            const Point3f delta(d, d, d);
             InterceptVolume<intercept> v(InterceptSet3<intercept>(firstMesh->cm, delta)),
             tmp(InterceptSet3<intercept>(secondMesh->cm, delta));
 

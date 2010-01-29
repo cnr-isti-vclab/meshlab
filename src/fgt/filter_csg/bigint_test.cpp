@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2007                                                \/)\/    *
+* Copyright(C) 2010                                                \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,47 +21,57 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef FILTERCSGPLUGIN_H
-#define FILTERCSGPLUGIN_H
+/*
+Bigint test tool
+This program creates random bigints and operates on them.
+The same operations are also performed using native 64-bits integers, to check
+the correctness of the bigint computation.
+If the output is correct, piping it through "uniq -u" (only showing unique lines)
+should produce no output, otherwise the correct computation and the incorrect one
+should be shown in this order
+*/
 
-#include <QObject>
-#include <QStringList>
-#include <QString>
+#include <iostream>
+#include "bigint.h"
 
-#include <common/meshmodel.h>
-#include <common/interfaces.h>
+using namespace vcg::math;
+using namespace std;
 
+#define tbits 8
+#define mysub(x,y) (x<y? y-x : x-y)
+#define log(a,b,c)     cout << c << '\t' << a << '\t' << b << '\t' << a + b << '\t' << (a < b) << '\t' << mysub(a,b) << '\t' << a * b << '\t' << (a >> c) << '\t' << (b << c) << endl
 
-class FilterCSG : public QObject, public MeshFilterInterface
+int main()
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshFilterInterface)
+  uint8_t r[8];
 
-    enum {
-        CSG_OPERATION_INTERSECTION  = 0,
-        CSG_OPERATION_UNION         = 1,
-        CSG_OPERATION_DIFFERENCE    = 2
-    };
+  cout << hex;
 
-public:
-    enum {FP_CSG};
+  srand(time(NULL));
+  for (int tests = 0; tests < 10000; ++tests) {
+    for (int i = 0; i < 8; ++i)
+      r[i] = rand();
 
-    FilterCSG();
-    ~FilterCSG() {};
+    size_t sa = ((rand() % 7) + 1);
+    size_t myshift = rand() % (sa * 8);
+    bigint8 a = r[0];
+    uint64_t a64 = r[0];
 
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+    for (size_t i = 1; i < sa; ++i) {
+      a = (a << tbits) + r[i];
+      a64 = (a64 << tbits) + r[i];
+    }
 
-    virtual bool autoDialog(QAction *) { return true; }
+    
+    bigint8 b = r[sa];
+    uint64_t b64 = r[sa];
+    for (size_t i = sa + 1; i < 8; ++i) {
+      b = (b << tbits) + r[i];
+      b64 = (b64 << tbits) + r[i];
+    }
+    log(a64,b64,myshift);
+    log(a,b,myshift);
+  }
 
-    virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
-    virtual void initParameterSet(QAction *, MeshModel &, RichParameterSet &) { assert(0); }
-
-    virtual bool applyFilter(QAction *, MeshDocument &, RichParameterSet &, vcg::CallBackPos *);
-    virtual bool applyFilter(QAction *, MeshModel &, RichParameterSet &, vcg::CallBackPos *) { assert(0); return false; }
-
-    virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Layer; }
-};
-
-
-#endif
+  return 0;
+}

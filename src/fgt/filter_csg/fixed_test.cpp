@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2007                                                \/)\/    *
+* Copyright(C) 2010                                                \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,47 +21,31 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef FILTERCSGPLUGIN_H
-#define FILTERCSGPLUGIN_H
+/*
+Fixed test tool
+A few examples of fixed point math.
+*/
 
-#include <QObject>
-#include <QStringList>
-#include <QString>
+#include "fixed.h"
 
-#include <common/meshmodel.h>
-#include <common/interfaces.h>
+#include <iostream>
 
+using namespace std;
+using namespace vcg::math;
 
-class FilterCSG : public QObject, public MeshFilterInterface
+typedef vcg::math::fixed<8,vcg::math::base32> fixed_base;
+
+int main()
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshFilterInterface)
-
-    enum {
-        CSG_OPERATION_INTERSECTION  = 0,
-        CSG_OPERATION_UNION         = 1,
-        CSG_OPERATION_DIFFERENCE    = 2
-    };
-
-public:
-    enum {FP_CSG};
-
-    FilterCSG();
-    ~FilterCSG() {};
-
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
-
-    virtual bool autoDialog(QAction *) { return true; }
-
-    virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
-    virtual void initParameterSet(QAction *, MeshModel &, RichParameterSet &) { assert(0); }
-
-    virtual bool applyFilter(QAction *, MeshDocument &, RichParameterSet &, vcg::CallBackPos *);
-    virtual bool applyFilter(QAction *, MeshModel &, RichParameterSet &, vcg::CallBackPos *) { assert(0); return false; }
-
-    virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Layer; }
-};
-
-
-#endif
+  fixed_base t;
+  fixed_base a = 3.5;
+  fixed_base b = 1.5;
+  vcg::math::fixed<16> c = a * a;
+  vcg::math::fixed<16> d = a * b;
+  cout << ceil(a) << endl;
+  cout << floor(a) << endl;
+  cout << floor(c) << endl;
+  cout << ceil(c) << endl;
+  cout << (c>d) << endl;
+  return 0;
+}
