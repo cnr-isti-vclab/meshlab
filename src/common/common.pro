@@ -2,18 +2,17 @@ VCGDIR  = ../../../vcglib
 GLEWDIR = ../external/glew-1.5.1
 GLEWCODE = $$GLEWDIR/src/glew.c
 
+#CONFIG(debug,debug | release) {
+	win32-msvc2005:DESTDIR     = ../meshlabdistrib
+	win32-msvc2008:DESTDIR     = ../meshlabdistrib
+    win32-g++:DLLDESTDIR     = ../meshlabdistrib
+#}
 
-CONFIG(debug,debug | release) {
-	win32-msvc2005:DESTDIR     = ./debug
-	win32-msvc2008:DESTDIR     = ./debug
-    win32-g++:DLLDESTDIR     = ./debug
-}
-
-CONFIG(release,debug | release) {
-	win32-msvc2005:DESTDIR     = ./release
-	win32-msvc2008:DESTDIR     = ./release
-    win32-g++:DLLDESTDIR     = ./release
-}
+#CONFIG(release,debug | release) {
+#	win32-msvc2005:DESTDIR     = ./release
+#	win32-msvc2008:DESTDIR     = ./release
+#    win32-g++:DLLDESTDIR     = ./release
+#}
 
 mac:DLLDESTDIR       = .
 
