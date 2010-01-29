@@ -96,13 +96,13 @@ macx:QMAKE_POST_LINK ="cp ../common/libcommon* meshlab.app/Contents/MacOS; insta
 
 
 
-CONFIG(debug) {
+CONFIG(debug,debug | release) {
 	win32-msvc2005:debug:LIBS		+= -L../common/debug -lcommon
 	win32-msvc2008:debug:LIBS		+= -L../common/debug -lcommon
 	win32-g++:debug:LIBS        	+= -L../common/debug -lcommon
 }
 
-CONFIG(release) {
+CONFIG(release,debug | release) {
 	win32-msvc2005:release:LIBS     += -L../common/release -lcommon
 	win32-msvc2008:release:LIBS     += -L../common/release -lcommon
 	win32-g++:release:LIBS 			+= -L../common/release -lcommon

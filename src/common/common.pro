@@ -3,13 +3,13 @@ GLEWDIR = ../external/glew-1.5.1
 GLEWCODE = $$GLEWDIR/src/glew.c
 
 
-CONFIG(debug) {
+CONFIG(debug,debug | release) {
 	win32-msvc2005:DESTDIR     = ./debug
 	win32-msvc2008:DESTDIR     = ./debug
     win32-g++:DLLDESTDIR     = ./debug
 }
 
-CONFIG(release) {
+CONFIG(release,debug | release) {
 	win32-msvc2005:DESTDIR     = ./release
 	win32-msvc2008:DESTDIR     = ./release
     win32-g++:DLLDESTDIR     = ./release
