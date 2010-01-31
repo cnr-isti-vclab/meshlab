@@ -2,7 +2,7 @@
 
 #include <vcg/complex/trimesh/append.h>
 
-DynamicMeshSubFilter::DynamicMeshSubFilter() : m_fps(-1), m_iterations(-1), m_contacts(-1), m_steps(-1), m_seconds(-1), m_meshes(-1), m_bounciness(-1) {
+DynamicMeshSubFilter::DynamicMeshSubFilter() : m_fps(-1), m_iterations(-1), m_contacts(-1), m_steps(-1), m_seconds(-1), m_bounciness(-1) {
 }
 
 void DynamicMeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par){
@@ -27,7 +27,6 @@ bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParamet
     changed |= m_iterations != par.getInt("iterations");
     changed |= m_contacts != par.getInt("contacts");
     changed |= m_bounciness != par.getFloat("bounciness");
-    changed |= m_meshes != md.size();
 
     // Does not work because meshlab fails at restoring the original translation matrix in the preview checkbox logic
     /* Dim: the transformation matrices should not change
@@ -47,7 +46,7 @@ bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParamet
     saveMeshState(md);*/
 
     // Old correctness testing
-    /*if(md.size() == m_files.size())
+    if(md.size() == m_files.size())
         for(int i = 0; i < m_files.size(); i++)
             changed |= m_files.at(i) != md.getMesh(i)->fileName;
     else
@@ -55,14 +54,13 @@ bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParamet
 
     m_files.clear();
     for(int i = 0; i < md.size(); i++)
-        m_files.push_back(md.getMesh(i)->fileName);*/
+        m_files.push_back(md.getMesh(i)->fileName);
 
     m_seconds = par.getInt("seconds");
     m_fps = par.getInt("fps");
     m_iterations = par.getInt("iterations");
     m_contacts = par.getInt("contacts");
     m_bounciness = par.getFloat("bounciness");
-    m_meshes = md.size();
     return changed;
 }
 

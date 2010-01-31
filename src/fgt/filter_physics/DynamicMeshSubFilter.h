@@ -27,7 +27,6 @@ protected:
     int m_contacts;
     int m_steps;
     int m_seconds;
-    int m_meshes;
     float m_bounciness;
 
     LayersTransformations m_layersTrans;

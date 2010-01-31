@@ -24,6 +24,7 @@ private:
     MeshModel* m_randomMesh;
     float m_dropRate;
     float m_distance;
+    bool m_bboxUnit;
     ODEFacade m_engine;
 
     static int m_filterType;

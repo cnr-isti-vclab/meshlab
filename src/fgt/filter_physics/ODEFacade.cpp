@@ -3,6 +3,7 @@
 #include <vcg/complex/trimesh/inertia.h>
 
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 using namespace vcg;
@@ -105,7 +106,7 @@ void ODEFacade::setAsRigidBody(MeshModel& mesh, bool isRigidBody){
 
         Matrix33f IT;
         inertia.InertiaTensor(IT);
-        dMassSetParameters(&m_registeredMeshes[index()].second->mass, inertia.Mass() > 0.f ? inertia.Mass() : 1.f,
+        dMassSetParameters(&m_registeredMeshes[index()].second->mass, abs(inertia.Mass()),
                            inertia.CenterOfMass()[0], inertia.CenterOfMass()[1], inertia.CenterOfMass()[2],
                            IT[0][0], IT[1][1], IT[2][2], IT[0][1], IT[0][2], IT[1][2]);
         //For now it's best to let ODE do the job automatically
@@ -199,7 +200,7 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
 
 vcg::Matrix44f ODEFacade::getTransformationMatrix(MeshModel& mesh){
     if(!tri::HasPerMeshAttribute(mesh.cm, "physicsID"))
-        return vcg::Matrix44f();
+        return mesh.cm.Tr;
 
     MeshIndex index = tri::Allocator<CMeshO>::GetPerMeshAttribute<unsigned int>(mesh.cm, "physicsID");
 
