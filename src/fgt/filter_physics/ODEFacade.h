@@ -52,6 +52,7 @@ protected:
             dTriMeshDataID data;
             dReal (*vertices)[3];
             dReal (*normals)[3];
+            dReal centerOfMass[3];
             dTriIndex (*indices)[3];
         };
 
@@ -60,7 +61,6 @@ protected:
 
         static void collisionCallback(void* data, dGeomID o1, dGeomID o2);
         void collisionCallback(dGeomID o1, dGeomID o2);
-        void updateEngineTransform(MeshModel& mesh);
 
         //This class is a monostate
         static bool m_initialized;

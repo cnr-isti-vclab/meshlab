@@ -32,7 +32,7 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     virtual QString filterInfo(FilterIDType filter) const;
 
     virtual int getRequirements(QAction*){return MeshModel::MM_FACEVERT | MeshModel::MM_FACENORMAL;}
-    virtual int postCondition( QAction* ) const{return MeshModel::MM_TRANSFMATRIX;}
+    virtual int postCondition( QAction* ) const{return MeshModel::MM_FACENORMAL; /*MeshModel::MM_TRANSFMATRIX; */}
 
     virtual bool autoDialog(QAction*) {return true;}
     virtual void initParameterSet(QAction*, MeshDocument&, RichParameterSet&);

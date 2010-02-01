@@ -29,9 +29,6 @@ void ODEFacade::initialize(){
 	m_world = dWorldCreate();
 	m_space = dSimpleSpaceCreate(0);
         m_contactGroup = dJointGroupCreate(0);
-
-        /*dWorldSetCFM(m_world, 0.001f);
-        dWorldSetERP(m_world, 0.9f);*/
 }
 
 void ODEFacade::clear(MeshDocument& md){
@@ -56,15 +53,27 @@ void ODEFacade::registerTriMesh(MeshModel& mesh, bool scenery){
     if(tri::HasPerMeshAttribute(mesh.cm, "physicsID"))
         return;
 
+    if(mesh.cm.Tr != vcg::Matrix44f::Identity()){
+        vcg::tri::UpdatePosition<CMeshO>::Matrix(mesh.cm, mesh.cm.Tr);
+        mesh.cm.Tr.SetIdentity();
+    }
+
+    tri::Inertia<CMeshO> inertia;
+    inertia.Compute(mesh.cm);
+    Point3f center = mesh.cm.bbox.Center();
+
     ODEMesh* odeMesh = new ODEMesh();
     odeMesh->vertices = new dReal[mesh.cm.vert.size()][3];
     odeMesh->normals = new dReal[mesh.cm.face.size()][3];
     odeMesh->indices = new dTriIndex[mesh.cm.face.size()][3];
+    odeMesh->centerOfMass[0] = scenery ? 0.f : inertia.CenterOfMass()[0];
+    odeMesh->centerOfMass[1] = scenery ? 0.f : inertia.CenterOfMass()[1];
+    odeMesh->centerOfMass[2] = scenery ? 0.f : inertia.CenterOfMass()[2];
 
     int i = 0;
     for(CMeshO::ConstVertexIterator vi = mesh.cm.vert.begin(); vi != mesh.cm.vert.end(); vi++, i++){
         for(int j = 0; j < 3; j++){
-            odeMesh->vertices[i][j] = vi->P()[j];
+            odeMesh->vertices[i][j] = vi->P()[j] - odeMesh->centerOfMass[j] ;
         }
     }
 
@@ -104,61 +113,50 @@ void ODEFacade::setAsRigidBody(MeshModel& mesh, bool isRigidBody){
         tri::Inertia<CMeshO> inertia;
         inertia.Compute(m_registeredMeshes[index()].first->cm);
 
-        Matrix33f IT;
-        inertia.InertiaTensor(IT);
-        dMassSetParameters(&m_registeredMeshes[index()].second->mass, abs(inertia.Mass()),
-                           inertia.CenterOfMass()[0], inertia.CenterOfMass()[1], inertia.CenterOfMass()[2],
-                           IT[0][0], IT[1][1], IT[2][2], IT[0][1], IT[0][2], IT[1][2]);
-        //For now it's best to let ODE do the job automatically
-        //dBodySetMass(m_registeredMeshes[index()].second->body, &m_registeredMeshes[index()].second->mass);
+        dMass* mass = &m_registeredMeshes[index()].second->mass;
+        dMassSetTrimesh(mass, 1.0f, m_registeredMeshes[index()].second->geom);
+        mass->mass = 10;
 
+        dReal centerOfMass[3] = { mass->c[0], mass->c[1], mass->c[2] };
+        dMassTranslate(&m_registeredMeshes[index()].second->mass, -centerOfMass[0], -centerOfMass[1], -centerOfMass[2]);
+        dBodySetMass(m_registeredMeshes[index()].second->body, &m_registeredMeshes[index()].second->mass);
+        dBodySetPosition(m_registeredMeshes[index()].second->body, inertia.CenterOfMass()[0], inertia.CenterOfMass()[1], inertia.CenterOfMass()[2]);
     }
-
-    updateEngineTransform(mesh);
-}
-
-void ODEFacade::updateEngineTransform(MeshModel& mesh){
-    if(!tri::HasPerMeshAttribute(mesh.cm, "physicsID"))
-        return;
-
-    MeshIndex index = tri::Allocator<CMeshO>::GetPerMeshAttribute<unsigned int>(mesh.cm, "physicsID");
-
-    Point3<float> trans = mesh.cm.Tr.GetColumn3(3);
-    dGeomSetPosition(m_registeredMeshes[index()].second->geom, trans.X(), trans.Y(), trans.Z());
-
-    dMatrix3 rotationMatrix;
-
-    rotationMatrix[0] = mesh.cm.Tr[0][0];
-    rotationMatrix[1] = mesh.cm.Tr[0][1];
-    rotationMatrix[2] = mesh.cm.Tr[0][2];
-    rotationMatrix[3] = 0.f;
-    rotationMatrix[4] = mesh.cm.Tr[1][0];
-    rotationMatrix[5] = mesh.cm.Tr[1][1];
-    rotationMatrix[6] = mesh.cm.Tr[1][2];
-    rotationMatrix[7] = 0.f;
-    rotationMatrix[8] = mesh.cm.Tr[2][0];
-    rotationMatrix[9] = mesh.cm.Tr[2][1];
-    rotationMatrix[10] = mesh.cm.Tr[2][2];
-    rotationMatrix[11] = 0.f;
-
-    dGeomSetRotation(m_registeredMeshes[index()].second->geom, rotationMatrix);
 }
 
 void ODEFacade::updateTransform(){
     for(MeshContainer::iterator i = m_registeredMeshes.begin(); i != m_registeredMeshes.end(); i++){
-        const dReal* position = dGeomGetPosition(i->second->geom);
-        i->first->cm.Tr.SetTranslate(position[0], position[1], position[2]);
+        const dReal* position = 0;
+        const dReal* rotation = 0;
 
-        const dReal* rotation = dGeomGetRotation(i->second->geom);
+        if(i->second->body != 0){
+            position = dBodyGetPosition(i->second->body);
+            rotation = dBodyGetRotation(i->second->body);
+        }else{
+            position = dGeomGetPosition(i->second->geom);
+            rotation = dGeomGetRotation(i->second->geom);
+        }
+
         i->first->cm.Tr[0][0] = rotation[0];
         i->first->cm.Tr[0][1] = rotation[1];
         i->first->cm.Tr[0][2] = rotation[2];
+        i->first->cm.Tr[0][3] = position[0];
         i->first->cm.Tr[1][0] = rotation[4];
         i->first->cm.Tr[1][1] = rotation[5];
         i->first->cm.Tr[1][2] = rotation[6];
+        i->first->cm.Tr[1][3] = position[1];
         i->first->cm.Tr[2][0] = rotation[8];
         i->first->cm.Tr[2][1] = rotation[9];
         i->first->cm.Tr[2][2] = rotation[10];
+        i->first->cm.Tr[2][3] = position[2];
+        i->first->cm.Tr[3][0] = 0.f;
+        i->first->cm.Tr[3][1] = 0.f;
+        i->first->cm.Tr[3][2] = 0.f;
+        i->first->cm.Tr[3][3] = 1.f;
+
+        vcg::Matrix44f m;
+        m.SetTranslate(-i->second->centerOfMass[0], -i->second->centerOfMass[1], -i->second->centerOfMass[2]);
+        i->first->cm.Tr *= m;
     }
 }
 
@@ -183,12 +181,6 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
         m_contacts[i].surface.bounce = m_bounciness;
         m_contacts[i].surface.bounce_vel = 0.1;
         m_contacts[i].surface.soft_cfm = 0.01;
-        /*m_contacts[i].surface.mode = dContactBounce | dContactSoftCFM;
-        m_contacts[i].surface.mu = dInfinity;
-        m_contacts[i].surface.mu2 = 0;
-        m_contacts[i].surface.bounce = 0.1;
-        m_contacts[i].surface.bounce_vel = 0.1;
-        m_contacts[i].surface.soft_cfm = 0.01;*/
     }
 
     int collisions = dCollide(o1, o2, m_contacts.size(), &m_contacts[0].geom, sizeof(dContact));
@@ -205,8 +197,16 @@ vcg::Matrix44f ODEFacade::getTransformationMatrix(MeshModel& mesh){
     MeshIndex index = tri::Allocator<CMeshO>::GetPerMeshAttribute<unsigned int>(mesh.cm, "physicsID");
 
     vcg::Matrix44f matrix;
-    const dReal* position = dGeomGetPosition(m_registeredMeshes[index()].second->geom);
-    const dReal* rotation = dGeomGetRotation(m_registeredMeshes[index()].second->geom);
+    const dReal* position = 0;
+    const dReal* rotation = 0;
+
+    if(m_registeredMeshes[index()].second->body != 0){
+        position = dBodyGetPosition(m_registeredMeshes[index()].second->body);
+        rotation = dBodyGetRotation(m_registeredMeshes[index()].second->body);
+    }else{
+        position = dGeomGetPosition(m_registeredMeshes[index()].second->geom);
+        rotation = dGeomGetRotation(m_registeredMeshes[index()].second->geom);
+    }
 
     matrix[0][0] = rotation[0];
     matrix[0][1] = rotation[1];
@@ -225,7 +225,10 @@ vcg::Matrix44f ODEFacade::getTransformationMatrix(MeshModel& mesh){
     matrix[3][2] = 0.f;
     matrix[3][3] = 1.f;
 
-    return matrix;
+    vcg::Matrix44f m;
+    m.SetTranslate(-m_registeredMeshes[index()].second->centerOfMass[0], -m_registeredMeshes[index()].second->centerOfMass[1], -m_registeredMeshes[index()].second->centerOfMass[2]);
+
+    return matrix * m;
 }
 
 void ODEFacade::setIterations(int iterations){
