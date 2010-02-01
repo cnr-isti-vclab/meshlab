@@ -86,7 +86,7 @@ bool FilterPhysics::applyFilter(QAction* action, MeshDocument &md, RichParameter
 }
 
  MeshFilterInterface::FilterClass FilterPhysics::getClass(QAction *){
-    return MeshFilterInterface::Generic;
+    return MeshFilterInterface::Layer;
 }
 
 Q_EXPORT_PLUGIN(FilterPhysics)
