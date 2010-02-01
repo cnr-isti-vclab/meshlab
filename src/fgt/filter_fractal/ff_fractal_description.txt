@@ -51,8 +51,8 @@ Some good parameter values to start with are:<br />
         <td align="center">2</td>
         <td align="center">8</td>
         <td align="center">4</td>
-        <td align="center">0.23</td>
-        <td align="center">0.6</td>
+        <td align="center">0.5</td>
+        <td align="center">0.9</td>
         <td align="center">2</td>
     </tr>
 </table>

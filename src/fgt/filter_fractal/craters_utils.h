@@ -9,9 +9,123 @@
 #include <vcg/space/sphere3.h>
 #include <vcg/math/base.h>
 #include <vcg/space/box3.h>
-#include "filter_args.h"
-#include "radial_perturbation.h"
+#include <vcg/space/index/grid_static_ptr.h>
 #include "fractal_perturbation.h"
+
+#define SQRT2 1.42421356
+
+using namespace vcg;
+
+template<class ScalarType>
+class RadialPerturbation
+{
+public:
+
+    static ScalarType Gaussian(Point3<ScalarType> &p, Point3<ScalarType> &centre,
+                               ScalarType radius, ScalarType depth, ScalarType profileFactor)
+    {
+        ScalarType dist = vcg::Distance(p, centre);
+        ScalarType tmp = profileFactor * dist;
+        return (- depth * exp(- pow(tmp/radius, 2)));
+    }
+
+    static ScalarType Multiquadric(Point3<ScalarType> &p, Point3<ScalarType> &centre,
+                               ScalarType radius, ScalarType depth, ScalarType profileFactor)
+    {
+        ScalarType dist = vcg::Distance(p, centre);
+        ScalarType fact1 = sqrt(pow(radius, 2) + pow(dist, 2)) / radius - SQRT2;
+        ScalarType fact2 = depth / (1 - SQRT2);
+        return - (fact1 * fact2);
+    }
+
+    static ScalarType f(Point3<ScalarType> &p, Point3<ScalarType> &centre,
+                        ScalarType radius, ScalarType depth, ScalarType profileFactor)
+    {
+        ScalarType dist = vcg::Distance(p, centre);
+        ScalarType radius4 = pow(radius, 4);
+        ScalarType tmp1 = std::min(ScalarType(0), dist-radius);
+        ScalarType tmp2 = depth * (1 - (1/radius4) * fabs(radius4 - pow(dist, 4))) - depth/2;
+        return (std::max(tmp1, tmp2));
+    }
+};
+
+
+/* wrapper for FP_CRATERS filter arguments */
+template <class ScalarType>
+class CratersArgs
+{
+public:
+    MeshModel* target_model;
+    MeshModel* samples_model;
+    CMeshO* target_mesh;
+    CMeshO* samples_mesh;
+    int algorithm;
+    ScalarType max_radius, max_depth, min_radius, min_depth, radius_range, depth_range, profile_factor;
+    bool save_as_quality, invert_perturbation, postprocessing_noise;
+    FractalArgs<ScalarType>* fArgs;
+
+    CratersArgs(MeshModel* target, MeshModel* samples, int alg, int seed, ScalarType min_r, ScalarType max_r,
+                ScalarType min_d, ScalarType max_d, ScalarType p_factor, bool save_as_quality, bool invert,
+                bool ppNoise)
+    {
+        generator = new vcg::math::SubtractiveRingRNG(seed);
+
+        target_model = target;
+        samples_model = samples;
+        target_mesh = &(target->cm);
+        samples_mesh = &(samples->cm);
+        vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex(*target_mesh);
+        vcg::tri::Allocator<CMeshO>::CompactVertexVector(*target_mesh);
+        vcg::tri::Allocator<CMeshO>::CompactFaceVector(*target_mesh);
+
+        algorithm = alg;
+        this->save_as_quality = save_as_quality;
+        invert_perturbation = invert;
+
+        float target_bb_diag = target_mesh->bbox.Diag();
+        max_radius = target_bb_diag * 0.1 * max_r;
+        min_radius = target_bb_diag * 0.1 * min_r;
+        radius_range = max_radius - min_radius;
+        max_depth = target_bb_diag * 0.05 * max_d;
+        min_depth = target_bb_diag * 0.05 * min_d;
+        depth_range = max_depth - min_depth;
+        profile_factor = p_factor;
+
+        postprocessing_noise = ppNoise;
+        if (postprocessing_noise)
+        {
+            ScalarType heightFactor = target_mesh->bbox.Diag() * 0.02;
+            fArgs = new FractalArgs<ScalarType>(target_model, 0, 1, 8, 2, 0.55, 0, 0, heightFactor, 1, 1, false);
+        }
+    }
+
+    ~CratersArgs(){
+        delete generator;
+
+        if(postprocessing_noise)
+        {
+            delete fArgs;
+        }
+    }
+
+    /* generates a crater radius within the specified range */
+    ScalarType generateRadius()
+    {
+        ScalarType rnd = generator->generate01closed();
+        return min_radius + radius_range * rnd;
+    }
+
+    /* generates a crater depth within the specified range */
+    ScalarType generateDepth()
+    {
+        ScalarType rnd = generator->generate01closed();
+        return min_depth + depth_range * rnd;
+    }
+
+private:
+    vcg::math::RandomGenerator* generator;
+};
+
 
 template<class MeshType>
 class CratersUtils
@@ -24,44 +138,39 @@ public:
     typedef typename MeshType::VertexIterator       VertexIterator;
     typedef std::pair<VertexPointer, FacePointer>   SampleFace;
     typedef std::vector<SampleFace>                 SampleFaceVector;
+    typedef typename MeshType::ScalarType           MeshScalarType;
+    typedef GridStaticPtr<FaceType, MeshScalarType> MetroMeshGrid;
+    typedef tri::FaceTmark<MeshType>                MarkerFace;
 
+    /* Finds the nearest faces of samples and stores the pairs (sample, nearest_face)
+       in the "sfv" vector (third parameter). */
     template<class ScalarType>
-    static void FindSamplesFaces(MeshType *target, MeshType *samples, SampleFaceVector &sfv,
-                                 vcg::CallBackPos* cb)
+    static void FindSamplesFaces(MeshType *target, MeshType *samples, SampleFaceVector &sfv)
     {
-        vcg::Box3<ScalarType> bbox;
-        float a, b, c;
-        int undiscoveredFaces = samples->vert.size();
-        int steps = target->face.size(), step = 0;
-        char buffer[50];
+        tri::UpdateNormals<CMeshO>::PerFaceNormalized(*target);
+        tri::UpdateFlags<CMeshO>::FaceProjection(*target);
 
-        vcg::tri::UpdateFlags<CMeshO>::VertexClearV(*samples);
-        FaceIterator fi = target->face.begin();
-        while(fi!=target->face.end() && undiscoveredFaces>0)
+        MetroMeshGrid mmg;
+        mmg.Set(target->face.begin(), target->face.end());
+        MarkerFace markerFunctor;
+        markerFunctor.SetMesh(target);
+        vcg::face::PointDistanceBaseFunctor<MeshScalarType> PDistFunct;
+        FacePointer nearestFace;
+        MeshScalarType dist_upper_bound = target->bbox.Diag()/10, dist;
+        Point3<MeshScalarType> closest;
+        sfv.clear();
+        SampleFace* tmpPair;
+        int i=0;
+
+        for(VertexIterator vi=samples->vert.begin(); vi!=samples->vert.end(); ++vi, ++i)
         {
-            sprintf(buffer, "Finding samples faces (%i remaining)..", undiscoveredFaces);
-            cb(100 * (step++)/steps, buffer);
-            (*fi).GetBBox(bbox);
-
-            for(VertexIterator vi=samples->vert.begin(); vi!=samples->vert.end(); ++vi)
-            {
-                if((*vi).IsV()) continue;
-                if(!bbox.IsIn((*vi).P())) continue;
-
-                vcg::InterpolationParameters<FaceType, ScalarType>((*fi), (*vi).P(), a, b, c);
-                if (a>=0 && a<=1 && b>=0 && b<=1 && c>=0 && c<=1)
-                {
-                    (*vi).SetV();
-                    sfv.push_back( SampleFace(&(*vi), &(*fi)));
-                    undiscoveredFaces--;
-                }
-            }
-            ++fi;
+            nearestFace = mmg.GetClosest(PDistFunct, markerFunctor, (*vi).P(), dist_upper_bound, dist, closest);
+            tmpPair = new SampleFace(&(*vi), nearestFace);
+            sfv.push_back(*tmpPair);
         }
     }
 
-
-    /* detectes the faces of the crater starting from a given face */
+    /* Detectes the faces of a crater starting from a given face. */
     template<class CoordScalarType>
     static void GetCraterFaces(MeshType *m,              // target mesh
                                FacePointer startingFace, // face under the crater centre
@@ -121,8 +230,7 @@ public:
         VertexPointer vp;
         ScalarType perturbation = .0;
         Point3<ScalarType> p;
-        ScalarType noisePerturbation = .0;
-        Point3<ScalarType> trasl = -(args.target_mesh->bbox.min);
+        Point3<ScalarType> center = args.target_mesh->bbox.Center();
         ScalarType diag = args.target_mesh->bbox.Diag();
 
         for(fi = craterFaces.begin(); fi!=craterFaces.end(); ++fi)
@@ -147,26 +255,20 @@ public:
                                        (vp->P(), centre->P(), radius, depth, args.profile_factor);
                         break;
                     case 2: // inverse multiquadric rbf
-                        perturbation = RadialPerturbation<ScalarType>::InverseMultiquadric
-                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
-                        break;
-                    case 3: // cauchy rbf
-                        perturbation = RadialPerturbation<ScalarType>::Cauchy
-                                       (vp->P(), centre->P(), radius, depth, args.profile_factor) + depth/3;
-                        break;
-                    case 4:
                         perturbation = RadialPerturbation<ScalarType>::f
                                        (vp->P(), centre->P(), radius, depth, args.profile_factor);
                     }
 
                     // applies the post-processing noise to the temporary point
                     // to obtain the fractal perturbation
+                    /*
                     if (args.postprocessing_noise)
                     {
-                        p = (p+trasl) / diag;
+                        p = (p-center)/diag;
                         perturbation += (FractalPerturbation<ScalarType>::
-                                         computeFractalPerturbation(*(args.fArgs), p) * diag);
+                                         computeFractalPerturbation(*(args.fArgs), p) * args.fArgs->maxHeight);
                     }
+                    */
 
                     // if necessary, inverts the perturbation
                     if(args.invert_perturbation)
@@ -187,5 +289,7 @@ public:
         }
     }
 };
+
+
 
 #endif // CRATERS_UTILS_H

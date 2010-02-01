@@ -30,7 +30,7 @@
 
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
-#include "filter_args.h"
+#include "craters_utils.h"
 #include "fractal_perturbation.h"
 
 class FilterFractal : public QObject, public MeshFilterInterface
@@ -44,6 +44,10 @@ class FilterFractal : public QObject, public MeshFilterInterface
     typedef CMeshO::FacePointer     FacePointer;
     typedef CMeshO::FaceIterator    FaceIterator;
     typedef CMeshO::FaceType        FaceType;
+
+    typedef std::pair< VertexPointer, float >   PertPair;
+    typedef std::vector<PertPair>               PertVector;
+    typedef PertVector::iterator                PertIterator;
 
 public:
     FilterFractal();
@@ -67,13 +71,10 @@ public:
 private:
     void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
     void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterSet &par);
-    bool applyFractalDisplacementFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
     bool applyCratersGenerationFilter   (MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 
-    double computeFractalPerturbation(CoordType &point);
-    bool generateTerrain    (MeshModel &mm, FractalArgs<float> &args, vcg::CallBackPos* cb);
-    bool generateFractalMesh(MeshModel &mm, FractalArgs<float> &args, vcg::CallBackPos* cb);
     bool generateCraters    (CratersArgs<float> &args, vcg::CallBackPos *cb);
+    void generateGrid       (CMeshO& m, int subSteps, float& gridSide);
 
     enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
 };
