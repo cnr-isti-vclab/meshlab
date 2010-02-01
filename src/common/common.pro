@@ -2,11 +2,11 @@ VCGDIR  = ../../../vcglib
 GLEWDIR = ../external/glew-1.5.1
 GLEWCODE = $$GLEWDIR/src/glew.c
 
-#CONFIG(debug,debug | release) {
-	win32-msvc2005:DESTDIR     = ../distrib
-	win32-msvc2008:DESTDIR     = ../distrib
-    win32-g++:DLLDESTDIR     = ../distrib
-#}
+
+win32-msvc2005:DESTDIR     = ../distrib
+win32-msvc2008:DESTDIR     = ../distrib
+win32-g++:DLLDESTDIR     = ../distrib
+
 
 #CONFIG(release,debug | release) {
 #	win32-msvc2005:DESTDIR     = ./release
