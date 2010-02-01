@@ -25,7 +25,6 @@ SOURCES       += epoch_io.cpp \
 		$$VCGDIR/wrap/ply/plylib.cpp
                 
 TARGET        = io_epoch
-DESTDIR       = ../../meshlab/plugins
 QT           += xml
 
 win32-msvc2005:LIBS	   += ../../external/lib/win32-msvc2005/bz2.lib
