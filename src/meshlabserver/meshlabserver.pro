@@ -8,7 +8,7 @@ SOURCES        = mainserver.cpp
 RC_FILE = ../meshlab/meshlab.rc
 
 QT           += xml opengl
-DESTDIR = ../meshlabdistrib
+DESTDIR = ../distrib
 
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max

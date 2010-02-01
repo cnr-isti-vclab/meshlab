@@ -11,9 +11,9 @@ mac:LIBS += ../../common/libcommon.dylib
 
 #correct qmake syntax requires CONFIG(option, list of options)
 
-win32-msvc2005:  LIBS += ../../meshlabdistrib/common.lib
-win32-msvc2008:  LIBS += ../../meshlabdistrib/common.lib
-win32-g++:LIBS += -L../../meshlabdistrib -lcommon
+win32-msvc2005:  LIBS += ../../distrib/common.lib
+win32-msvc2008:  LIBS += ../../distrib/common.lib
+win32-g++:LIBS += -L../../distrib -lcommon
  
 
 #CONFIG(debug, debug|release) {
