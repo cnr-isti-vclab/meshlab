@@ -96,11 +96,10 @@ macx:QMAKE_POST_LINK ="cp ../common/libcommon* meshlab.app/Contents/MacOS; insta
 
 
 
-#CONFIG(debug,debug | release) {
-win32-msvc2005:LIBS		+= -L../meshlabdistrib -lcommon
-win32-msvc2008:LIBS		+= -L../meshlabdistrib -lcommon
-win32-g++:LIBS        	+= -L../meshlabdistrib -lcommon
-#}
+
+win32-msvc2005:LIBS		+= -L../distrib -lcommon
+win32-msvc2008:LIBS		+= -L../distrib -lcommon
+win32-g++:LIBS        	+= -L../distrib -lcommon
 
 #CONFIG(release,debug | release) {
 #	win32-msvc2005:release:LIBS     += -L../common/release -lcommon
