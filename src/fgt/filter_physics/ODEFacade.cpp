@@ -32,8 +32,8 @@ void ODEFacade::initialize(){
 
 void ODEFacade::clear(MeshDocument& md){
     for(MeshContainer::iterator i = m_registeredMeshes.begin(); i != m_registeredMeshes.end(); i++){
-        if(md.meshList.contains(i->first))
-            tri::Allocator<CMeshO>::DeletePerMeshAttribute(i->first->cm, "physicsID");
+        /*if(tri::HasPerMeshAttribute(i->first->cm, "physicsID"))
+            tri::Allocator<CMeshO>::DeletePerMeshAttribute(i->first->cm, "physicsID");*/
 
         dGeomDestroy(i->second->geom);
         if(i->second->body)
@@ -50,7 +50,7 @@ void ODEFacade::setGlobalForce(float force[3]){
 
 void ODEFacade::registerTriMesh(MeshModel& mesh, bool scenery){
     if(tri::HasPerMeshAttribute(mesh.cm, "physicsID"))
-        return;
+        tri::Allocator<CMeshO>::DeletePerMeshAttribute(mesh.cm, "physicsID");
 
     if(mesh.cm.Tr != vcg::Matrix44f::Identity()){
         vcg::tri::UpdatePosition<CMeshO>::Matrix(mesh.cm, mesh.cm.Tr);

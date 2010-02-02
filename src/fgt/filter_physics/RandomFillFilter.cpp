@@ -46,10 +46,15 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
 
     srand((unsigned)time(0));
 
+    vcg::tri::UpdatePosition<CMeshO>::Matrix(filler->cm, filler->cm.Tr);
+    filler->cm.Tr.SetIdentity();
+
     tri::Inertia<CMeshO> inertiaContainer, inertiaFiller;
     inertiaContainer.Compute(par.getMesh("container")->cm);
     inertiaFiller.Compute(par.getMesh("filler")->cm);
+
     int objects = abs(inertiaContainer.Mass()/inertiaFiller.Mass())*par.getFloat("factor");
+    filler->cm.Tr.SetColumn(3, - inertiaFiller.CenterOfMass());
 
     if(par.getBool("useRandomVertices")){
         for(int i = 0; i < objects; i++){
@@ -74,6 +79,7 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     }
 
     m_engine.updateTransform();
+    filler->cm.Tr.SetIdentity();
 
     if(cb != 0) (*cb)(0, "Physics renderization of the scene completed...");
     return true;
@@ -91,5 +97,5 @@ void RandomFillFilter::addRandomObject(MeshDocument& md, MeshModel* filler, cons
     MeshModel* meshCopy = md.addNewMesh(meshName.str().c_str());
     vcg::tri::Append<CMeshO,CMeshO>::Mesh(meshCopy->cm, filler->cm, false, true);
     meshCopy->cm.Tr = filler->cm.Tr;
-    meshCopy->cm.Tr.SetColumn(3, origin);
+    meshCopy->cm.Tr.SetColumn(3, meshCopy->cm.Tr.GetColumn3(3) + origin);
 }
