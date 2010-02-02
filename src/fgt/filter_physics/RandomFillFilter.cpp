@@ -80,9 +80,9 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
 }
 
 vcg::Point3<float> RandomFillFilter::getRandomOrigin(RichParameterSet& par){
-    int randomFace = static_cast<float>(rand())/RAND_MAX*(par.getMesh("container")->cm.face.size() - 1);
-    CFaceO& face = par.getMesh("container")->cm.face[randomFace];
-    return face.P(0) + (face.N() * par.getMesh("filler")->cm.bbox.Diag());
+    int randomVertex = static_cast<float>(rand())/RAND_MAX*(par.getMesh("container")->cm.vert.size() - 1);
+    CVertexO& vertex = par.getMesh("container")->cm.vert[randomVertex];
+    return vertex.P() + (vertex.N() * par.getMesh("filler")->cm.bbox.Diag());
 }
 
 void RandomFillFilter::addRandomObject(MeshDocument& md, MeshModel* filler, const vcg::Point3<float>& origin, int meshID){

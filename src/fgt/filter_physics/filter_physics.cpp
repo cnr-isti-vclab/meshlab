@@ -25,9 +25,9 @@ FilterPhysics::~FilterPhysics(){
     case FP_PHYSICS_GRAVITY:
         return QString("Physics gravity simulation");
     case FP_PHYSICS_RNDDROP:
-        return QString("Physics random drop simulation");
+        return QString("Physics random drop");
     case FP_PHYSICS_RNDFILL:
-        return QString("Physics random fill simulation");
+        return QString("Physics random fill");
     default:
         assert(0);
         break;

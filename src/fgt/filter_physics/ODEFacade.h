@@ -64,7 +64,6 @@ protected:
 
         //This class is a monostate
         static bool m_initialized;
-        static int m_maxIterations;
         static float m_bounciness;
 
         static dWorldID m_world;
