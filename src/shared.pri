@@ -39,7 +39,7 @@ DEPENDPATH += $$VCGDIR
 # macx-g++:QMAKE_CXXFLAGS_RELEASE += -O3
 
 macx:QMAKE_CXX=g++-4.2
-macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../../meshlab/plugins/lib$${TARGET}.dylib"
+##macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../../meshlab/plugins/lib$${TARGET}.dylib"
 
 # the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max

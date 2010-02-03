@@ -9,12 +9,13 @@ RC_FILE = ../meshlab/meshlab.rc
 
 QT           += xml opengl
 DESTDIR = ../distrib
-
+macx:DESTDIR = ../distrib/meshlab.app/Contents/MacOS/
+macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlabserver"
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 
-mac:LIBS += ../meshlab/meshlab.app/Contents/MacOS/libcommon.dylib
+mac:LIBS += ../distrib/meshlab.app/Contents/MacOS/libcommon.dylib
 
 
 win32-msvc2005:  LIBS += -L../distrib -lcommon
