@@ -11,64 +11,70 @@
 #include <vcg/space/box3.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include "fractal_perturbation.h"
-
-#define SQRT2 1.42421356
-
-using namespace vcg;
-
-template<class ScalarType>
-class RadialPerturbation
-{
-public:
-
-    static ScalarType Gaussian(Point3<ScalarType> &p, Point3<ScalarType> &centre,
-                               ScalarType radius, ScalarType depth, ScalarType profileFactor)
-    {
-        ScalarType dist = vcg::Distance(p, centre);
-        ScalarType tmp = profileFactor * dist;
-        return (- depth * exp(- pow(tmp/radius, 2)));
-    }
-
-    static ScalarType Multiquadric(Point3<ScalarType> &p, Point3<ScalarType> &centre,
-                               ScalarType radius, ScalarType depth, ScalarType profileFactor)
-    {
-        ScalarType dist = vcg::Distance(p, centre);
-        ScalarType fact1 = sqrt(pow(radius, 2) + pow(dist, 2)) / radius - SQRT2;
-        ScalarType fact2 = depth / (1 - SQRT2);
-        return - (fact1 * fact2);
-    }
-
-    static ScalarType f(Point3<ScalarType> &p, Point3<ScalarType> &centre,
-                        ScalarType radius, ScalarType depth, ScalarType profileFactor)
-    {
-        ScalarType dist = vcg::Distance(p, centre);
-        ScalarType radius4 = pow(radius, 4);
-        ScalarType tmp1 = std::min(ScalarType(0), dist-radius);
-        ScalarType tmp2 = depth * (1 - (1/radius4) * fabs(radius4 - pow(dist, 4))) - depth/2;
-        return (std::max(tmp1, tmp2));
-    }
-};
+#include "filter_functors.h"
 
 
 /* wrapper for FP_CRATERS filter arguments */
 template <class ScalarType>
-class CratersArgs
+        class CratersArgs
 {
 public:
+    RadialFunctor<ScalarType>* radialFunctor;
+    RadialFunctor<ScalarType>* blendingFunctor;
+    NoiseFunctor<ScalarType>* noiseFunctor;
+    CraterFunctor<ScalarType>* craterFunctor;
     MeshModel* target_model;
     MeshModel* samples_model;
     CMeshO* target_mesh;
     CMeshO* samples_mesh;
-    int algorithm;
-    ScalarType max_radius, max_depth, min_radius, min_depth, radius_range, depth_range, profile_factor;
-    bool save_as_quality, invert_perturbation, postprocessing_noise;
+    int smoothingSteps;
+    ScalarType max_radius, max_depth, min_radius, min_depth, radius_range, depth_range;
+    bool save_as_quality, postprocessing_noise, successiveImpacts;
     FractalArgs<ScalarType>* fArgs;
 
-    CratersArgs(MeshModel* target, MeshModel* samples, int alg, int seed, ScalarType min_r, ScalarType max_r,
-                ScalarType min_d, ScalarType max_d, ScalarType p_factor, bool save_as_quality, bool invert,
-                bool ppNoise)
+    CratersArgs(MeshModel* target, MeshModel* samples, int radial_alg, int seed,
+                ScalarType min_r, ScalarType max_r, ScalarType min_d, ScalarType max_d,
+                int smoothingSteps, bool save_as_quality, bool invert, bool ppNoise, bool successiveImpacts,
+                ScalarType elevation, int blending_alg, ScalarType blendingThreshold)
     {
         generator = new vcg::math::SubtractiveRingRNG(seed);
+
+        switch(radial_alg)
+        {
+        case 0:
+            radialFunctor = new GaussianBlending<ScalarType>();
+            break;
+        case 1:
+            radialFunctor = new MultiquadricBlending<ScalarType>();
+            break;
+        case 2:
+            radialFunctor = new F3Blending<ScalarType>();
+            break;
+        }
+
+        switch(blending_alg)
+        {
+        case 0:
+            blendingFunctor = new ExponentialBlending<ScalarType>();
+            break;
+        case 1:
+            blendingFunctor = new LinearBlending<ScalarType>();
+            break;
+        case 2:
+            blendingFunctor = new GaussianBlending<ScalarType>();
+            break;
+        case 3:
+            blendingFunctor = new F3Blending<ScalarType>();
+            break;
+        }
+
+        postprocessing_noise = ppNoise;
+        if (ppNoise)
+        {
+            noiseFunctor = new FBMNoiseFunctor<ScalarType>(8, 0.7, 2);
+        }
+        craterFunctor = new CraterFunctor<ScalarType>(radialFunctor, blendingFunctor,
+            noiseFunctor, blendingThreshold, elevation, ppNoise, invert);
 
         target_model = target;
         samples_model = samples;
@@ -78,34 +84,27 @@ public:
         vcg::tri::Allocator<CMeshO>::CompactVertexVector(*target_mesh);
         vcg::tri::Allocator<CMeshO>::CompactFaceVector(*target_mesh);
 
-        algorithm = alg;
         this->save_as_quality = save_as_quality;
-        invert_perturbation = invert;
+        this->successiveImpacts = successiveImpacts;
+        this->smoothingSteps = smoothingSteps;
 
         float target_bb_diag = target_mesh->bbox.Diag();
-        max_radius = target_bb_diag * 0.1 * max_r;
-        min_radius = target_bb_diag * 0.1 * min_r;
+        max_radius = target_bb_diag * 0.25 * max_r;
+        min_radius = target_bb_diag * 0.25 * min_r;
         radius_range = max_radius - min_radius;
-        max_depth = target_bb_diag * 0.05 * max_d;
-        min_depth = target_bb_diag * 0.05 * min_d;
+        max_depth = target_bb_diag * 0.25 * max_d;
+        min_depth = target_bb_diag * 0.25 * min_d;
         depth_range = max_depth - min_depth;
-        profile_factor = p_factor;
-
-        postprocessing_noise = ppNoise;
-        if (postprocessing_noise)
-        {
-            ScalarType heightFactor = target_mesh->bbox.Diag() * 0.02;
-            fArgs = new FractalArgs<ScalarType>(target_model, 0, 1, 8, 2, 0.55, 0, 0, heightFactor, 1, 1, false);
-        }
     }
 
     ~CratersArgs(){
-        delete generator;
+        delete radialFunctor;
+        delete blendingFunctor;
 
         if(postprocessing_noise)
-        {
-            delete fArgs;
-        }
+            delete noiseFunctor;
+        delete craterFunctor;
+        delete generator;
     }
 
     /* generates a crater radius within the specified range */
@@ -138,13 +137,13 @@ public:
     typedef typename MeshType::VertexIterator       VertexIterator;
     typedef std::pair<VertexPointer, FacePointer>   SampleFace;
     typedef std::vector<SampleFace>                 SampleFaceVector;
-    typedef typename MeshType::ScalarType           MeshScalarType;
-    typedef GridStaticPtr<FaceType, MeshScalarType> MetroMeshGrid;
+    typedef typename MeshType::ScalarType           ScalarType;
+    typedef GridStaticPtr<FaceType, ScalarType>     MetroMeshGrid;
     typedef tri::FaceTmark<MeshType>                MarkerFace;
+    typedef typename MeshType::template PerVertexAttributeHandle<ScalarType> PertHandle;
 
     /* Finds the nearest faces of samples and stores the pairs (sample, nearest_face)
        in the "sfv" vector (third parameter). */
-    template<class ScalarType>
     static void FindSamplesFaces(MeshType *target, MeshType *samples, SampleFaceVector &sfv)
     {
         tri::UpdateNormals<CMeshO>::PerFaceNormalized(*target);
@@ -154,10 +153,10 @@ public:
         mmg.Set(target->face.begin(), target->face.end());
         MarkerFace markerFunctor;
         markerFunctor.SetMesh(target);
-        vcg::face::PointDistanceBaseFunctor<MeshScalarType> PDistFunct;
+        vcg::face::PointDistanceBaseFunctor<ScalarType> PDistFunct;
         FacePointer nearestFace;
-        MeshScalarType dist_upper_bound = target->bbox.Diag()/10, dist;
-        Point3<MeshScalarType> closest;
+        ScalarType dist_upper_bound = target->bbox.Diag()/10, dist;
+        Point3<ScalarType> closest;
         sfv.clear();
         SampleFace* tmpPair;
         int i=0;
@@ -171,25 +170,24 @@ public:
     }
 
     /* Detectes the faces of a crater starting from a given face. */
-    template<class CoordScalarType>
     static void GetCraterFaces(MeshType *m,              // target mesh
                                FacePointer startingFace, // face under the crater centre
                                VertexPointer centre,     // crater centre
-                               CoordScalarType radius,    // crater radius
+                               ScalarType radius,    // crater radius
                                std::vector<FacePointer> &toFill)
     {
         assert(vcg::tri::HasFFAdjacency(*m));
         vcg::tri::UpdateFlags<MeshType>::FaceClearV(*m);
         vcg::tri::UpdateFlags<MeshType>::VertexClearV(*m);
 
-        vcg::Sphere3<CoordScalarType> craterSphere(centre->P(), radius); // crater sphere
+        vcg::Sphere3<ScalarType> craterSphere(centre->P(), radius); // crater sphere
         std::vector<FacePointer> fl;
         fl.push_back(startingFace);
 
         toFill.clear();
         FacePointer f;
-        Point3<CoordScalarType> dummyPoint;
-        std::pair<CoordScalarType, CoordScalarType> dummyPair;
+        Point3<ScalarType> dummyPoint;
+        std::pair<ScalarType, ScalarType> dummyPair;
 
         while(!fl.empty())
         {
@@ -199,7 +197,7 @@ public:
             if(!f->IsV())
             {
                 f->SetV();
-                if(vcg::IntersectionSphereTriangle<CoordScalarType, FaceType>
+                if(vcg::IntersectionSphereTriangle<ScalarType, FaceType>
                    (craterSphere, *f, dummyPoint, &dummyPair))
                 {   // intersection test succedeed
                     toFill.push_back(f);
@@ -215,23 +213,16 @@ public:
         }
     }
 
-    template<class ScalarType>
-    static void applyRadialPerturbation(CratersArgs<ScalarType> &args, VertexPointer centre,
-                                        std::vector<FacePointer> &craterFaces, ScalarType radius,
-                                        ScalarType depth)
+    static void GetRadialPerturbation(CratersArgs<ScalarType> &args, VertexPointer centre,
+                                      std::vector<FacePointer> &craterFaces, ScalarType radius,
+                                      ScalarType depth, PertHandle& pertHandle)
     {
         vcg::tri::UpdateFlags<MeshType>::VertexClearV(*(args.target_mesh));
-        if(args.save_as_quality)
-        {
-            args.target_model->updateDataMask(MeshModel::MM_VERTQUALITY);
-        }
 
         typename std::vector<FacePointer>::iterator fi;
         VertexPointer vp;
         ScalarType perturbation = .0;
         Point3<ScalarType> p;
-        Point3<ScalarType> center = args.target_mesh->bbox.Center();
-        ScalarType diag = args.target_mesh->bbox.Diag();
 
         for(fi = craterFaces.begin(); fi!=craterFaces.end(); ++fi)
         {
@@ -241,55 +232,30 @@ public:
                 if(!vp->IsV())
                 {
                     vp->SetV();
-                    p = vp->P();
+                    p = (vp->P() - centre->P())/radius;
+                    perturbation = (*(args.craterFunctor))(p) * depth;
 
-                    // applies the radial perturbation
-                    switch(args.algorithm)
+                    // stores the perturbation in the passed handle, according to
+                    // the successiveImpacts flag
+                    if(args.successiveImpacts)
                     {
-                    case 0: // gaussian rbf
-                        perturbation = RadialPerturbation<ScalarType>::Gaussian
-                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
-                        break;
-                    case 1: // multiquadric rbf
-                        perturbation = RadialPerturbation<ScalarType>::Multiquadric
-                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
-                        break;
-                    case 2: // inverse multiquadric rbf
-                        perturbation = RadialPerturbation<ScalarType>::f
-                                       (vp->P(), centre->P(), radius, depth, args.profile_factor);
-                    }
-
-                    // applies the post-processing noise to the temporary point
-                    // to obtain the fractal perturbation
-                    /*
-                    if (args.postprocessing_noise)
-                    {
-                        p = (p-center)/diag;
-                        perturbation += (FractalPerturbation<ScalarType>::
-                                         computeFractalPerturbation(*(args.fArgs), p) * args.fArgs->maxHeight);
-                    }
-                    */
-
-                    // if necessary, inverts the perturbation
-                    if(args.invert_perturbation)
-                    {
-                        perturbation = -perturbation;
-                    }
-
-                    // applies the perturbation to the current vertex or stores it
-                    // as vertex quality
-                    if(args.save_as_quality)
-                    {
-                        vp->Q() += perturbation;
+                        if(perturbation < 0)
+                        {
+                            pertHandle[vp] = std::min(perturbation, pertHandle[vp]);
+                        } else
+                        {
+                            if(pertHandle[vp] == .0)
+                            {
+                                pertHandle[vp] += perturbation;
+                            }
+                        }
                     } else {
-                        vp->P() += (centre->N() * perturbation);
+                        pertHandle[vp] += perturbation;
                     }
                 }
             }
         }
     }
 };
-
-
 
 #endif // CRATERS_UTILS_H

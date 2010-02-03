@@ -38,7 +38,7 @@
 using namespace std;
 using namespace vcg;
 
-// --------- constructor and destructor ------------------------------
+// ------- MeshFilterInterface implementation ------------------------
 FilterFractal::FilterFractal()
 {
     typeList << CR_FRACTAL_TERRAIN << FP_FRACTAL_MESH << FP_CRATERS;
@@ -46,9 +46,7 @@ FilterFractal::FilterFractal()
     foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
 }
-// -------------------------------------------------------------------
 
-// ------- MeshFilterInterface implementation ------------------------
 QString FilterFractal::filterName(FilterIDType filterId) const
 {
     switch (filterId) {
@@ -166,6 +164,7 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
     par.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh on which craters will be generated."));
     par.addParam(new RichMesh("samples_mesh", samples, &md, "Samples layer:", "The samples that represent the central points of craters."));
     par.addParam(new RichInt("seed", 0, "Seed:", "The seed with which the random number generator is initialized. The random generator generates radius and depth for each crater into the given range."));
+    par.addParam(new RichInt("smoothingSteps", 5, "Normals smoothing steps:", "Vertex normals are smoothed this number of times before generating craters."));
 
     QStringList algList;
     algList << "f1 (Gaussian)" << "f2 (Multiquadric)" << "f3";
@@ -175,7 +174,13 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
     par.addParam(new RichDynamicFloat("max_radius", 0.6, 0, 1, "Max crater radius:", "Defines the maximum radius of craters in range [0, 1]. Values near 1 mean very large craters."));
     par.addParam(new RichDynamicFloat("min_depth", 0.3, 0, 1, "Min crater depth:", "Defines the minimum depth of craters in range [0, 1]."));
     par.addParam(new RichDynamicFloat("max_depth", 0.6, 0, 1, "Max crater depth:", "Defines the maximum depth of craters in range [0, 1]. Values near 1 mean very deep craters."));
-    par.addParam(new RichDynamicFloat("profile_factor", 2, 1, 10, "Profile factor:", "The profile factor controls the ratio between crater borders and crater effective area. Use [1, 4] values to obtain reasonable results. This parameter is not considered in multiquadric radial functions."));
+    par.addParam(new RichDynamicFloat("elevation", 0.4, 0, 1, "Elevation:", "Defines how much the crater rise itself from the mesh surface, giving an \"impact-effect\"."));
+
+    QStringList blendList;
+    blendList << "Exponential blending" << "Linear blending" << "Gaussian blending" << "f3 blending";
+    par.addParam(new RichEnum("blend", 0, blendList, "Blending algorithm:", "The algorithm that is used to blend the perturbation towards the mesh surface."));
+    par.addParam(new RichDynamicFloat("blendThreshold", 0.8, 0, 1, "Blending threshold:", "The fraction of craters radius beyond which the radial function is replaced with the blending function."));
+    par.addParam(new RichBool("successiveImpacts", true, "Successive impacts", "If not checked, the impact-effects of generated craters will be superimposed with each other."));
     par.addParam(new RichBool("ppNoise", false, "Postprocessing noise", "Slightly perturbates the craters with a noise function."));
     par.addParam(new RichBool("invert", false, "Invert perturbation", "If checked, inverts the sign of radial perturbation to create bumps instead of craters."));
     par.addParam(new RichBool("save_as_quality", false, "Save as vertex quality", "Saves the perturbation as vertex quality."));
@@ -256,8 +261,10 @@ bool FilterFractal::applyCratersGenerationFilter(MeshDocument &md, RichParameter
     // reads parameters
     CratersArgs<float> args(par.getMesh("target_mesh"), par.getMesh("samples_mesh"), par.getEnum("rbf"),
                             par.getInt("seed"), minRadius, maxRadius, minDepth, maxDepth,
-                            par.getDynamicFloat("profile_factor"), par.getBool("save_as_quality"),
-                            par.getBool("invert"), par.getBool("ppNoise"));
+                            par.getInt("smoothingSteps"), par.getBool("save_as_quality"), par.getBool("invert"),
+                            par.getBool("ppNoise"), par.getBool("successiveImpacts"),
+                            par.getDynamicFloat("elevation"), par.getEnum("blend"),
+                            par.getDynamicFloat("blendThreshold"));
 
     return generateCraters(args, cb);
 }
@@ -308,14 +315,23 @@ int FilterFractal::postCondition(QAction *filter) const
 // -------------------- Private functions -------------------------------
 bool FilterFractal::generateCraters(CratersArgs<float> &args, vcg::CallBackPos *cb)
 {
-    typedef std::pair<VertexPointer, FacePointer> SampleFace;
-    typedef std::vector<SampleFace> SampleFaceVector;
+    typedef std::pair<VertexPointer, FacePointer>   SampleFace;
+    typedef std::vector<SampleFace>                 SampleFaceVector;
+    typedef CMeshO::PerVertexAttributeHandle<float> Handle;
+
+    // enables per-vertex-quality if needed
+    if(args.save_as_quality)
+        args.target_model->updateDataMask(MeshModel::MM_VERTQUALITY);
+
+    // smoothes vertex normals
+    cb(0, "Smoothing vertex normals..");
+    tri::Smooth<CMeshO>::VertexNormalLaplacian(*(args.target_mesh), args.smoothingSteps, false);
 
     // finds samples faces
     args.target_model->updateDataMask(MeshModel::MM_FACEFACETOPO);
     args.target_model->updateDataMask(MeshModel::MM_FACEMARK);
     SampleFaceVector sfv;
-    CratersUtils<CMeshO>::FindSamplesFaces<float>(args.target_mesh, args.samples_mesh, sfv);
+    CratersUtils<CMeshO>::FindSamplesFaces(args.target_mesh, args.samples_mesh, sfv);
 
     // detectes crater faces and applies the radial perturbation
     int cratersNo = args.samples_mesh->vert.size(), currentCrater = 0;
@@ -325,6 +341,14 @@ bool FilterFractal::generateCraters(CratersArgs<float> &args, vcg::CallBackPos *
     float radius = .0, depth = .0;
     std::vector<FacePointer> craterFaces;
 
+    // per-vertex float attribute
+    Handle h = tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(*(args.target_mesh), std::string("perturbation"));
+    for(VertexIterator vi=args.target_mesh->vert.begin(); vi!=args.target_mesh->vert.end(); ++vi)
+    {
+        h[vi] = .0;
+    }
+
+    // calculates the perturbation and stores it in the per-vertex-attribute
     for(sfvi=sfv.begin(); sfvi!=sfv.end(); ++sfvi)
     {
         p = (*sfvi);
@@ -332,11 +356,25 @@ bool FilterFractal::generateCraters(CratersArgs<float> &args, vcg::CallBackPos *
         depth = args.generateDepth();
         sprintf(buffer, "Generating crater %i...", currentCrater);
         cb(100*(currentCrater++)/cratersNo, buffer);
-        CratersUtils<CMeshO>::GetCraterFaces<float>(args.target_mesh, p.second, p.first, radius, craterFaces);
-        CratersUtils<CMeshO>::applyRadialPerturbation<float>(args, p.first, craterFaces, radius, depth);
+        CratersUtils<CMeshO>::GetCraterFaces(args.target_mesh, p.second, p.first, radius, craterFaces);
+        CratersUtils<CMeshO>::GetRadialPerturbation(args, p.first, craterFaces, radius, depth, h);
+    }
+
+    for(VertexIterator vi=args.target_mesh->vert.begin(); vi!=args.target_mesh->vert.end(); ++vi)
+    {
+        if(h[vi] == .0) continue;
+
+        if(args.save_as_quality)
+        {
+            (*vi).Q() = h[vi];
+        } else
+        {
+            (*vi).P() += ((*vi).N() * h[vi]);
+        }
     }
 
     // updates bounding box and normals
+    tri::Allocator<CMeshO>::DeletePerVertexAttribute(*(args.target_mesh), std::string("perturbation"));
     vcg::tri::UpdateBounding<CMeshO>::Box(*(args.target_mesh));
     vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(*(args.target_mesh));
     return true;
