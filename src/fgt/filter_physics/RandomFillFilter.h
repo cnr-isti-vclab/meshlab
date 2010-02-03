@@ -12,6 +12,7 @@ public:
 
     virtual void initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
+    virtual bool parametersAreNotCorrect(MeshDocument& md, RichParameterSet& par);
 
 protected:
     virtual void addRandomObject(MeshDocument& md, MeshModel* filler, const vcg::Point3<float>& origin, int meshID);

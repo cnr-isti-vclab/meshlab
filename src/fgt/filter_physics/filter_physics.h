@@ -31,8 +31,8 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     virtual QString filterName(FilterIDType filter) const;
     virtual QString filterInfo(FilterIDType filter) const;
 
-    virtual int getRequirements(QAction*){return MeshModel::MM_FACEVERT | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL; }
-    virtual int postCondition( QAction* ) const{return MeshModel::MM_FACENORMAL; /*MeshModel::MM_TRANSFMATRIX; */}
+    virtual int getRequirements(QAction*){return MeshModel::MM_FACEVERT | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL | MeshModel::MM_FACEFACETOPO; }
+    virtual int postCondition( QAction* ) const{return MeshModel::MM_FACENORMAL | MeshModel::MM_TRANSFMATRIX;}
 
     virtual bool autoDialog(QAction*) {return true;}
     virtual void initParameterSet(QAction*, MeshDocument&, RichParameterSet&);

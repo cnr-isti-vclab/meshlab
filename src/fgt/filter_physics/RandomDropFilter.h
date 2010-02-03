@@ -14,6 +14,7 @@ public:
 
     virtual void initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
+    virtual bool parametersAreNotCorrect(MeshDocument& md, RichParameterSet& par);
 
 protected:
     virtual void initialize(MeshDocument&, RichParameterSet&, vcg::CallBackPos* cb);
@@ -24,7 +25,6 @@ private:
     MeshModel* m_randomMesh;
     float m_dropRate;
     float m_distance;
-    bool m_bboxUnit;
     ODEFacade m_engine;
 
     static int m_filterType;

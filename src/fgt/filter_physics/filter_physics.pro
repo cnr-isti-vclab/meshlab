@@ -2,7 +2,6 @@ include (../../shared.pri)
 DEFINES += dSINGLE
 HEADERS = filter_physics.h \
     ODEFacade.h \
-    PhysicsEngineFacade.h \
     MeshSubFilter.h \
     GravitySubFilter.h \
     RandomDropFilter.h \

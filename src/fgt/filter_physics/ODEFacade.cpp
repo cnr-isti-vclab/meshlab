@@ -10,6 +10,7 @@ using namespace vcg;
 
 bool ODEFacade::m_initialized;
 float ODEFacade::m_bounciness = 0.1f;
+float ODEFacade::m_friction = 10.f;
 
 dSpaceID ODEFacade::m_space;
 std::vector<dContact> ODEFacade::m_contacts(20);
@@ -31,14 +32,9 @@ void ODEFacade::initialize(){
 }
 
 void ODEFacade::clear(MeshDocument& md){
-    for(MeshContainer::iterator i = m_registeredMeshes.begin(); i != m_registeredMeshes.end(); i++){
-        /*if(tri::HasPerMeshAttribute(i->first->cm, "physicsID"))
-            tri::Allocator<CMeshO>::DeletePerMeshAttribute(i->first->cm, "physicsID");*/
-
+    for(MeshIterator i = m_registeredMeshes.begin(); i != m_registeredMeshes.end(); i++){
         dGeomDestroy(i->second->geom);
-        if(i->second->body)
-            dBodyDestroy(i->second->body);
-
+        if(i->second->body) dBodyDestroy(i->second->body);
         delete i->second;
     }
     m_registeredMeshes.clear();
@@ -49,8 +45,12 @@ void ODEFacade::setGlobalForce(float force[3]){
 }
 
 void ODEFacade::registerTriMesh(MeshModel& mesh, bool scenery){
-    if(tri::HasPerMeshAttribute(mesh.cm, "physicsID"))
-        tri::Allocator<CMeshO>::DeletePerMeshAttribute(mesh.cm, "physicsID");
+    MeshIterator entry = m_registeredMeshes.find(&mesh);
+    if(entry != m_registeredMeshes.end())
+        return;
+
+    if(!scenery && hasBorders(mesh))
+        throw ODEInvalidMeshException();
 
     if(mesh.cm.Tr != vcg::Matrix44f::Identity()){
         vcg::tri::UpdatePosition<CMeshO>::Matrix(mesh.cm, mesh.cm.Tr);
@@ -86,52 +86,51 @@ void ODEFacade::registerTriMesh(MeshModel& mesh, bool scenery){
 
     odeMesh->data = dGeomTriMeshDataCreate();
     dGeomTriMeshDataBuildSingle1(odeMesh->data, odeMesh->vertices, 3*sizeof(dReal), mesh.cm.vert.size(), odeMesh->indices, 3*mesh.cm.face.size(), 3*sizeof(dTriIndex), odeMesh->normals);
-
     odeMesh->geom = dCreateTriMesh(m_space, odeMesh->data, 0, 0, 0);
-
-    MeshIndex index = tri::Allocator<CMeshO>::AddPerMeshAttribute<unsigned int>(mesh.cm, "physicsID");
-    index() = m_registeredMeshes.size();
-    m_registeredMeshes.push_back(make_pair(&mesh, odeMesh));
-
+    m_registeredMeshes.insert(make_pair(&mesh, odeMesh));
     setAsRigidBody(mesh, !scenery);
 }
 
+bool ODEFacade::hasBorders(MeshModel& mesh){
+    for(CMeshO::FaceIterator i = mesh.cm.face.begin(); i != mesh.cm.face.end(); i++)
+        for(int j = 0; j < 3; j++)
+            if(vcg::face::IsBorder(*i, j)) return true;
+
+    return false;
+}
+
+
 void ODEFacade::setAsRigidBody(MeshModel& mesh, bool isRigidBody){
-    if(!tri::HasPerMeshAttribute(mesh.cm, "physicsID"))
+    MeshIterator entry = m_registeredMeshes.find(&mesh);
+    if(entry == m_registeredMeshes.end())
         return;
 
-    MeshIndex index = tri::Allocator<CMeshO>::GetPerMeshAttribute<unsigned int>(mesh.cm, "physicsID");
+    if(!isRigidBody && entry->second->body != 0){ // This mesh was registered as a rigid body
+        dBodyDestroy(entry->second->body);
+        entry->second->body = 0;
+    }else if(isRigidBody && entry->second->body == 0){ // This mesh was registered as part of the scenery
+        entry->second->body = dBodyCreate(m_world);
+        dGeomSetBody(entry->second->geom, entry->second->body);
 
-    if(!isRigidBody && m_registeredMeshes[index()].second->body != 0){ // This mesh was registered as a rigid body
-        dBodyDestroy(m_registeredMeshes[index()].second->body);
-        m_registeredMeshes[index()].second->body = 0;
-    }else if(isRigidBody && m_registeredMeshes[index()].second->body == 0){ // This mesh was registered as part of the scenery
-        m_registeredMeshes[index()].second->body = dBodyCreate(m_world);
-        dGeomSetBody(m_registeredMeshes[index()].second->geom, m_registeredMeshes[index()].second->body);
-
-        dMass* mass = &m_registeredMeshes[index()].second->mass;
-        dMassSetTrimesh(mass, 1.0f, m_registeredMeshes[index()].second->geom);
+        dMass* mass = &entry->second->mass;
+        dMassSetTrimesh(mass, 1.0f, entry->second->geom);
+        if(mass->mass < 0) throw ODEInvalidMeshException();
         mass->mass = 5;
 
         dReal centerOfMass[3] = { mass->c[0], mass->c[1], mass->c[2] };
-        dMassTranslate(&m_registeredMeshes[index()].second->mass, -centerOfMass[0], -centerOfMass[1], -centerOfMass[2]);
-        dBodySetMass(m_registeredMeshes[index()].second->body, &m_registeredMeshes[index()].second->mass);
-        dBodySetPosition(m_registeredMeshes[index()].second->body, m_registeredMeshes[index()].second->centerOfMass[0], m_registeredMeshes[index()].second->centerOfMass[1], m_registeredMeshes[index()].second->centerOfMass[2]);
+        dMassTranslate(&entry->second->mass, -centerOfMass[0], -centerOfMass[1], -centerOfMass[2]);
+        dBodySetMass(entry->second->body, &entry->second->mass);
+        dBodySetPosition(entry->second->body, entry->second->centerOfMass[0], entry->second->centerOfMass[1], entry->second->centerOfMass[2]);
     }
 }
 
 void ODEFacade::updateTransform(){
     for(MeshContainer::iterator i = m_registeredMeshes.begin(); i != m_registeredMeshes.end(); i++){
-        const dReal* position = 0;
-        const dReal* rotation = 0;
+        if(i->second->body == 0)
+            return;
 
-        if(i->second->body != 0){
-            position = dBodyGetPosition(i->second->body);
-            rotation = dBodyGetRotation(i->second->body);
-        }else{
-            position = dGeomGetPosition(i->second->geom);
-            rotation = dGeomGetRotation(i->second->geom);
-        }
+        const dReal* position = dBodyGetPosition(i->second->body);
+        const dReal* rotation = dBodyGetRotation(i->second->body);
 
         i->first->cm.Tr[0][0] = rotation[0];
         i->first->cm.Tr[0][1] = rotation[1];
@@ -173,7 +172,7 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
 
     for(int i = 0; i < m_contacts.size(); i++){
         m_contacts[i].surface.mode = dContactBounce;
-        m_contacts[i].surface.mu = 0.5;
+        m_contacts[i].surface.mu = m_friction;
         m_contacts[i].surface.bounce = m_bounciness;
         m_contacts[i].surface.bounce_vel = 0.1;
     }
@@ -186,22 +185,13 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
 }
 
 vcg::Matrix44f ODEFacade::getTransformationMatrix(MeshModel& mesh){
-    if(!tri::HasPerMeshAttribute(mesh.cm, "physicsID"))
+    MeshIterator entry = m_registeredMeshes.find(&mesh);
+    if(entry == m_registeredMeshes.end() || entry->second->body == 0)
         return mesh.cm.Tr;
 
-    MeshIndex index = tri::Allocator<CMeshO>::GetPerMeshAttribute<unsigned int>(mesh.cm, "physicsID");
-
     vcg::Matrix44f matrix;
-    const dReal* position = 0;
-    const dReal* rotation = 0;
-
-    if(m_registeredMeshes[index()].second->body != 0){
-        position = dBodyGetPosition(m_registeredMeshes[index()].second->body);
-        rotation = dBodyGetRotation(m_registeredMeshes[index()].second->body);
-    }else{
-        position = dGeomGetPosition(m_registeredMeshes[index()].second->geom);
-        rotation = dGeomGetRotation(m_registeredMeshes[index()].second->geom);
-    }
+    const dReal* position = dBodyGetPosition(entry->second->body);
+    const dReal* rotation = dBodyGetRotation(entry->second->body);
 
     matrix[0][0] = rotation[0];
     matrix[0][1] = rotation[1];
@@ -221,7 +211,7 @@ vcg::Matrix44f ODEFacade::getTransformationMatrix(MeshModel& mesh){
     matrix[3][3] = 1.f;
 
     vcg::Matrix44f m;
-    m.SetTranslate(-m_registeredMeshes[index()].second->centerOfMass[0], -m_registeredMeshes[index()].second->centerOfMass[1], -m_registeredMeshes[index()].second->centerOfMass[2]);
+    m.SetTranslate(-entry->second->centerOfMass[0], -entry->second->centerOfMass[1], -entry->second->centerOfMass[2]);
 
     return matrix * m;
 }
@@ -236,4 +226,8 @@ void ODEFacade::setMaxContacts(int contacts){
 
 void ODEFacade::setBounciness(float bounciness){
     m_bounciness = bounciness;
+}
+
+void ODEFacade::setFriction(float friction){
+    m_friction = friction;
 }

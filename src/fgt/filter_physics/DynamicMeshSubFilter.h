@@ -13,6 +13,7 @@ public:
     DynamicMeshSubFilter();
     virtual void initParameterSet(QAction* action,MeshDocument& md, RichParameterSet & par);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
+    virtual bool parametersAreNotCorrect(MeshDocument& md, RichParameterSet& par);
 
 protected:
     typedef std::vector<vcg::Matrix44f> LayerTransformations;
@@ -20,7 +21,6 @@ protected:
 
     virtual void initialize(MeshDocument&, RichParameterSet&, vcg::CallBackPos* cb);
     virtual bool configurationHasChanged(MeshDocument& md, RichParameterSet& par);
-    void saveMeshState(MeshDocument& md);
 
     int m_fps;
     int m_iterations;
@@ -28,13 +28,12 @@ protected:
     int m_steps;
     int m_seconds;
     float m_bounciness;
+    float m_gravity;
+    float m_friction;
 
     LayersTransformations m_layersTrans;
     std::vector<std::string> m_files;
     std::vector<MeshModel*> m_state;
-
-private:
-    bool compareMesh(MeshModel* m1, MeshModel* m2);
 };
 
 #endif // DYNAMICMESHSUBFILTER_H

@@ -13,9 +13,6 @@ void GravitySubFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
 }
 
 bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    if(md.size() < 2 || par.getMesh("scenery") == 0)
-        return false;
-
     if(!DynamicMeshSubFilter::applyFilter(filter, md, par, cb))
         return false;
 
@@ -25,6 +22,10 @@ bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
         md.getMesh(i)->cm.Tr = m_layersTrans[i][currentStep];
 
     return true;
+}
+
+bool GravitySubFilter::parametersAreNotCorrect(MeshDocument& md, RichParameterSet& par){
+    return DynamicMeshSubFilter::parametersAreNotCorrect(md, par) || md.size() < 2 || par.getMesh("scenery") == 0;
 }
 
 bool GravitySubFilter::configurationHasChanged(MeshDocument& md, RichParameterSet& par){
@@ -39,12 +40,13 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
 
     if(cb != 0) (*cb)(0, "Physics pre-renderization of the scene started...");
 
-    static float gravity[3] = {0.0f, -9.8f, 0.0f};
+    float gravity[3] = {0.0f, m_gravity, 0.0f};
     m_engine.clear(md);
     m_engine.setGlobalForce(gravity);
     m_engine.setIterations(m_iterations);
     m_engine.setMaxContacts(m_contacts);
     m_engine.setBounciness(m_bounciness);
+    m_engine.setFriction(m_friction);
 
     for(int i = 0; i < md.size(); i++)
         m_engine.registerTriMesh(*md.getMesh(i), m_scenery == md.getMesh(i) ? true : false);
@@ -62,6 +64,7 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
         for(int j = 0; j < md.size(); j++){
             m_layersTrans[j].push_back(m_engine.getTransformationMatrix(*md.getMesh(j)));
         }
+
         m_engine.integrate(1.0f / m_fps);
     }
 

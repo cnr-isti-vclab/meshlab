@@ -5,15 +5,22 @@
 #ifndef ODE_FACADE_H
 #define ODE_FACADE_H
 
-#include "PhysicsEngineFacade.h"
-
-#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/math/matrix44.h>
+#include <common/meshmodel.h>
 
 #include <ode/ode.h>
 
-#include <vector>
+#include <map>
+#include <exception>
 
-class ODEFacade : public PhysicsEngineFacade{
+class ODEInvalidMeshException : public std::exception{
+public:
+    const char* what() const throw(){
+        return "Incorrect mesh: dynamic meshes can't have borders or a negative mass (check normals)!";
+    }
+};
+
+class ODEFacade{
 public:
 	ODEFacade();
 	
@@ -27,6 +34,7 @@ public:
         virtual void setIterations(int iterations);
         virtual void setMaxContacts(int contacts);
         virtual void setBounciness(float bounciness);
+        virtual void setFriction(float friction);
 
         virtual void integrate(float step);
         virtual void clear(MeshDocument& md);
@@ -56,15 +64,17 @@ protected:
             dTriIndex (*indices)[3];
         };
 
-        typedef std::vector<std::pair<MeshModel*, ODEMesh*> > MeshContainer;
-        typedef CMeshO::PerMeshAttributeHandle<unsigned int> MeshIndex;
+        typedef std::map<MeshModel*, ODEMesh*> MeshContainer;
+        typedef MeshContainer::iterator MeshIterator;
 
         static void collisionCallback(void* data, dGeomID o1, dGeomID o2);
         void collisionCallback(dGeomID o1, dGeomID o2);
+        bool hasBorders(MeshModel& mesh);
 
         //This class is a monostate
         static bool m_initialized;
         static float m_bounciness;
+        static float m_friction;
 
         static dWorldID m_world;
         static dSpaceID m_space;
@@ -72,6 +82,6 @@ protected:
         static dJointGroupID m_contactGroup;
 
         static MeshContainer m_registeredMeshes;
-};
+    };
 
 #endif

@@ -4,6 +4,8 @@
 #include <QtGui>
 #include <QMessageBox>
 
+#include <exception>
+
 using namespace std;
 using namespace vcg;
 
@@ -63,24 +65,32 @@ void FilterPhysics::initParameterSet(QAction* action,MeshDocument& md, RichParam
 }
 
 bool FilterPhysics::applyFilter(QAction* action, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
-    bool ret = true;
+    try{
+        bool ret = true;
 
-    switch(ID(action)){
-    case FP_PHYSICS_GRAVITY:
-        ret = m_gravityFilter.applyFilter(action, md, par, cb);
-        break;
-    case FP_PHYSICS_RNDDROP:
-        ret = m_rndDropFilter.applyFilter(action, md, par, cb);
-        break;
-    case FP_PHYSICS_RNDFILL:
-        ret = m_rndFillFilter.applyFilter(action, md, par, cb);
-        break;
-    default:
-        break;
+        switch(ID(action)){
+        case FP_PHYSICS_GRAVITY:
+            ret = m_gravityFilter.applyFilter(action, md, par, cb);
+            break;
+        case FP_PHYSICS_RNDDROP:
+            ret = m_rndDropFilter.applyFilter(action, md, par, cb);
+            break;
+        case FP_PHYSICS_RNDFILL:
+            ret = m_rndFillFilter.applyFilter(action, md, par, cb);
+            break;
+        default:
+            break;
+        }
+
+        if(!ret){
+            QMessageBox::critical(0, QString("Error"), QString("Invalid filter configuration: check your parameters"));
+            return false;
+        }
+    }catch(std::exception& ex){
+        MeshSubFilter::clearLastAppliedFilter();
+        QMessageBox::critical(0, QString("Error"), ex.what());
+        return false;
     }
-
-    if(!ret)
-        QMessageBox::critical(0, QString("Error"), QString("Invalid filter configuration parameters"));
 
     return true;
 }
