@@ -94,9 +94,8 @@ void RandomDropFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
         if(i != 0 && i % spawnInterval == 0)
             m_engine.registerTriMesh(*md.getMesh(meshes++), false);
 
-        for(int j = 0; j < md.size(); j++){
+        for(int j = 0; j < md.size(); j++)
             m_layersTrans[j].push_back(m_engine.getTransformationMatrix(*md.getMesh(j)));
-        }
 
         m_engine.integrate(1.0f / m_fps);
     }

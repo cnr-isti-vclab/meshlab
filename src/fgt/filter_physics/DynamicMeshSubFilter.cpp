@@ -9,7 +9,7 @@ void DynamicMeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, Ri
     MeshSubFilter::initParameterSet(action, md, par);
     par.addParam(new RichFloat("gravity", -1.f, "Gravity", "Gravity force value"));
     par.addParam(new RichInt("seconds", 10, "Simulation interval (sec)", "Physics simulation interval in seconds"));
-    par.addParam(new RichDynamicFloat("timeline", 0, 0, 100, "Timeline %", "Controls the point in timeline of the simulation"));
+    par.addParam(new RichDynamicFloat("timeline", 0, 0, 100, "Timeline %", "Controls the timeline of the simulation"));
 }
 
 bool DynamicMeshSubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){

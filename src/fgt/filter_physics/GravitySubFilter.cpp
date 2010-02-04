@@ -17,10 +17,7 @@ bool GravitySubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
         return false;
 
     int currentStep  = par.getDynamicFloat("timeline") / 100 * m_steps;
-
-    for(int i = 0; i < md.size(); i++)
-        md.getMesh(i)->cm.Tr = m_layersTrans[i][currentStep];
-
+    for(int i = 0; i < md.size(); i++) md.getMesh(i)->cm.Tr = m_layersTrans[i][currentStep];
     return true;
 }
 
@@ -61,9 +58,8 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
     for(int i = 0; i <= m_steps; i++){
         if(cb != 0) (*cb)(98.f*i/m_steps, "Computing...");
 
-        for(int j = 0; j < md.size(); j++){
+        for(int j = 0; j < md.size(); j++)
             m_layersTrans[j].push_back(m_engine.getTransformationMatrix(*md.getMesh(j)));
-        }
 
         m_engine.integrate(1.0f / m_fps);
     }
