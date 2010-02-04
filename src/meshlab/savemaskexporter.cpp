@@ -21,67 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-/****************************************************************************
-  History
-
- $Log$
- Revision 1.12  2007/11/25 09:48:39  cignoni
- Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
-
- Revision 1.11  2007/04/16 09:24:37  cignoni
- ** big change **
- Added Layers managemnt.
- Interfaces are changing...
-
- Revision 1.10  2007/03/26 08:25:10  zifnab1974
- added eol at the end of the files
-
- Revision 1.9  2007/03/20 16:22:34  cignoni
- Big small change in accessing mesh interface. First step toward layers
-
- Revision 1.8  2006/10/10 21:14:34  cignoni
- changed the name of the mask member
-
- Revision 1.7  2006/01/31 09:34:29  fmazzant
- bug-fix on savemaskexporter, when press cancel returns -1.
-
- Revision 1.6  2006/01/30 14:27:29  fmazzant
- update GetMaskCapability of PLY,OFF and STL.
-
- Revision 1.5  2006/01/30 14:02:04  fmazzant
- bug-fix
-
- Revision 1.4  2006/01/30 10:02:57  fmazzant
- update none selection
-
- Revision 1.3  2006/01/30 00:26:40  fmazzant
- deleted small bug
-
- Revision 1.2  2006/01/29 23:52:43  fmazzant
- correct a small bug
-
- Revision 1.1  2006/01/26 18:39:19  fmazzant
- moved mask dialog exporter from mashio to meshlab
-
- Revision 1.18  2006/01/19 15:59:00  fmazzant
- moved savemaskexporter to mainwindows
-
- Revision 1.17  2006/01/19 12:45:00  fmazzant
- deleted SaveMaskExporterDialog::Initialize()
-
- Revision 1.16  2006/01/19 09:25:28  fmazzant
- cleaned code & deleted history log
-
- Revision 1.15  2006/01/18 14:57:25  fmazzant
- added Lib3dsNode in export_3ds
-
- Revision 1.14  2006/01/18 00:44:27  fmazzant
- added control for unchecked wedgytexcood when textures is empty
-
- Revision 1.13  2006/01/17 13:48:54  fmazzant
- added capability mask on export file format
-
- ****************************************************************************/
 #include <Qt>
 #include <QtGui>
 #include <QFileInfo>
@@ -90,8 +29,8 @@
 #include "savemaskexporter.h"
 #include "changetexturename.h"
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterSet *par,GLArea* glar): 
-QDialog(parent),m(m),capability(capability),defaultBits(defaultBits),par(par),glar(glar)
+SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterSet *_parSet,GLArea* glar):
+QDialog(parent),m(m),capability(capability),defaultBits(defaultBits),parSet(_parSet),glar(glar)
 {
 	ui = new Ui::MaskExporterDialog();
 	InitDialog();
@@ -109,13 +48,13 @@ void SaveMaskExporterDialog::InitDialog()
 	ui->renametextureButton->setDisabled(true);
 
   stdParFrame = new StdParFrame(this,glar);
-	stdParFrame->loadFrameContent(*par);
+    stdParFrame->loadFrameContent(*parSet);
   QVBoxLayout *vbox = new QVBoxLayout(this);
 	vbox->addWidget(stdParFrame);
 	ui->saveParBox->setLayout(vbox);
 
 	// Show the additional parameters only for formats that have some.
-	if(par->isEmpty()) ui->saveParBox->hide();
+    if(parSet->isEmpty()) ui->saveParBox->hide();
 								else ui->saveParBox->show();
 	//all - none
 	ui->AllButton->setChecked(true);
@@ -248,7 +187,7 @@ void SaveMaskExporterDialog::SlotOkButton()
 	for(unsigned int i=0;i<m->cm.textures.size();i++)
 		m->cm.textures[i] = ui->listTextureName->item(i)->text().toStdString();
 	this->mask=newmask;
-	stdParFrame->readValues(*par);
+    stdParFrame->readValues(*parSet);
 }
 
 void SaveMaskExporterDialog::SlotCancelButton()
