@@ -19,10 +19,7 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-#include <QtGui>
 
-#include <math.h>
-#include <stdlib.h>
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
@@ -773,8 +770,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
       m.updateDataMask(MeshModel::MM_FACEQUALITY);
 
       tri::BitQuadCreation<CMeshO>::MakeTriEvenBySplit(m.cm);
-      //bool ret = tri::BitQuadCreation<CMeshO>::MakePureByFlip(m.cm,100);
+      bool ret = tri::BitQuadCreation<CMeshO>::MakePureByFlip(m.cm,100);
       tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
+      m.updateDataMask(MeshModel::MM_POLYGONAL);
   }
   return true;
 }

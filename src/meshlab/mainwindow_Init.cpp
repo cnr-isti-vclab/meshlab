@@ -22,15 +22,15 @@
 ****************************************************************************/
 
 
+#include "../common/interfaces.h"
+
 #include <QtGui>
 #include <QToolBar>
 #include <QProgressBar>
 #include <QHttp>
 #include <QFileOpenEvent>
 #include <QFile>
- #include <QtXml>
-
-#include "../common/interfaces.h"
+#include <QtXml>
 #include "mainwindow.h"
 #include "glarea.h"
 #include "plugindialog.h"
