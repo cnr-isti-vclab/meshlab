@@ -16,5 +16,6 @@ SOURCES = filter_physics.cpp \
     MeshSubFilter.cpp
 TARGET = filter_physics
 CONFIG += x86
-LIBS += -L/usr/local/lib \
-    -lode
+mac:LIBS += -L../../external/lib/macx -lode
+
+INCLUDEPATH  *= ../../external/ode-0.11.1/include
