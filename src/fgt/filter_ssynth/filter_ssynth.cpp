@@ -113,10 +113,9 @@ int FilterSSynth::getRequirements(QAction *)
                         try
                         {
             RuleSet* rs=parser.parseRuleset();
-            if(maxdepth>0)
-				rs->setRulesMaxDepth(maxdepth);
             rs->resolveNames();
             rs->dumpInfo();
+                        if(maxdepth>0)rs->setRulesMaxDepth(maxdepth);
             RandomStreams::SetSeed(seed);
             Builder b(&renderer,rs,false);
             b.build();
@@ -165,9 +164,10 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
         this->renderTemplate=GetTemplate(sphereres);
         if(this->renderTemplate!=QString::Null()){
         QFile grammar(fileName);
-		grammar.open(QFile::ReadOnly|QFile::Text);
+                grammar.open(QFile::ReadOnly|QFile::Text);
         QString gcontent(grammar.readAll());
         grammar.close();
+                if(maxrec>0)ParseRec(&gcontent,maxrec);
         QString x3dfile(FilterSSynth::ssynth(gcontent,maxrec,this->seed,cb));
         if(QFile::exists(x3dfile)){
         openX3D(x3dfile,m,mask,cb);
@@ -217,7 +217,22 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
      QString templateR(tr.readAll());
      return templateR;
  }
-
+ void FilterSSynth::ParseRec(QString* grammar, int maxrec){
+         int idx=grammar->indexOf("set maxdepth");
+         int end=tr("set maxdepth").length()+idx;
+         while(!grammar->operator [](end).isNumber())
+                 end++;
+         QString grec;
+         while(grammar->operator [](end).isNumber()){
+                 grec.append(grammar->operator [](end));
+                 end++;
+         }
+         if(grec.toInt()<maxrec){
+         QString tosub=QString("set maxdepth ").append(QString::number(maxrec)).append(" ");
+         QString maxrestr=grammar->mid(idx,--end);
+         grammar->replace(maxrestr,tosub);
+         }
+ }
  Q_EXPORT_PLUGIN(FilterSSynth)
 
 
