@@ -6,6 +6,7 @@ There must be at least two layers to apply this filter:<br />
 </ul>
 
 There are three radial functions available to generate craters, two of which are Gaussian and Multiquadric,
-and the third is a variant of multiquadric.
+and the third is a variant of multiquadric. Blending functions are also provided to blend
+the crater elevation towards the mesh surface.
 If you want the preview to work, be sure to select the target mesh layer before launching the
 filter. You can select this layer by clicking on it in the layer dialog.

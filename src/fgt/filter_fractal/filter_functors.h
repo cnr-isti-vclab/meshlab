@@ -9,7 +9,8 @@
 
 using namespace vcg;
 
-/* functor that exposes a () operator with normalized domain and codomain ([1, 0] ranges) */
+/* Functor that exposes a () operator that is supposed to be used
+   with normalized domain and codomain. */
 template<class ScalarType>
 class Normalized3DFunctor
 {
@@ -17,7 +18,9 @@ public:
     virtual ScalarType operator()(const Point3<ScalarType>& normalizedPoint) = 0;
 };
 
-/* radial functors: the result depends only on the distance between point and origin */
+// ---------------------- blending/radial functors ----------------------------------------
+/* Radial functors: the result depends only on the distance between point and origin.
+   The origin is simply the (0, 0, 0) point. */
 template<class ScalarType>
 class RadialFunctor: public Normalized3DFunctor<ScalarType>
 {
@@ -45,8 +48,11 @@ private:
     Point3<ScalarType>* org;
 };
 
-/* Blending functors - codomain in [1, 0].
-   These functors can be used as radial basis functions by inverting the sign of the results. */
+/* Concrete blending functors - codomain in [1, 0].
+   These functors can be used as radial basis functions by inverting
+   the sign of the result. */
+
+/* Gaussian blending/radial functor */
 template<class ScalarType>
 class GaussianBlending: public RadialFunctor<ScalarType>
 {
@@ -57,6 +63,7 @@ public:
     }
 };
 
+/* Multiquadric blending/radial functor */
 template<class ScalarType>
 class MultiquadricBlending: public RadialFunctor<ScalarType>
 {
@@ -67,6 +74,7 @@ public:
     }
 };
 
+/* Another kind of simple blending/radial functor */
 template<class ScalarType>
 class F3Blending: public RadialFunctor<ScalarType>
 {
@@ -78,6 +86,7 @@ public:
     }
 };
 
+/* Exponential blending/radial functor */
 template<class ScalarType>
 class ExponentialBlending: public RadialFunctor<ScalarType>
 {
@@ -97,6 +106,7 @@ public:
     }
 };
 
+/* Linear blending/radial functor */
 template<class ScalarType>
 class LinearBlending: public RadialFunctor<ScalarType>
 {
@@ -107,8 +117,48 @@ public:
         return (ScalarType)(1-x);
     }
 };
+// --------------------- end of blending/radial functors -------------------------------
 
-/* noise functors */
+// --------------------- noise functors ------------------------------------------------
+/* Noise functor: defines the template algorithm to compute
+   the fractal displacement values for terrain generation.
+   The basic algorithm relies on perlin noise and takes three parameters:
+   - octaves: the number of noise frequency that are considered to
+     generate the displacement. Each octave has a precise frequency;
+   - lacunarity l: this is the parameter that defines the multiplicative gap
+     between successive frequencies, starting from 1.
+     Example: if we have a lacunarity of 2, and four octaves, then the
+     noise frequencies are: 1 -> 2 -> 4 -> 8. If the lacunarity is 3
+     we have the following frequencies: 1 -> 3 -> 9 -> 27;
+   - fractal increment h: this parameter defines how "heavy" is the noise
+     in each frequency. For each frequency, the noise "weight" is
+     calculated as pow(frequency, -h). So each frequency has its
+     own "spectral weight". By definition, the lower is h, the higher
+     is the noise contribution for each frequency.
+   In every terrain generation algorithm we have implemented, spectral
+   weights can be pre-computed, in order to provide a faster generation process.
+   Every single algorithm provides its own methods to:
+   - initialize the noise value;
+   - update the noise value at each frequency (e.g. fBM algorithm adds the
+     noise contributions of each frequency, while standard multifractal
+     algorithm multiplies them with each other.)
+
+   Four of the five terrain generation algorithms take other parameters. These algorithms
+   are the standard multifractal, heterogeneous multifractal, hybrid multifractal
+   and ridged multifractal ones, and the parameters mentioned above are: offset and gain.
+   The offset parameter is added to the noise contribution of each frequency in different
+   ways in different algorithms. Basically offset emphasizes the noise contribution at
+   each frequency, as fractal increment does. The difference between the two is that
+   fractal increment defines the weight of each noise frequency, whereas offset
+   is multiplied by this quantity. Because offset is not an exponent as fractal increment
+   is, we can use offset for a fine tuning of the noise contribution.
+   The gain parameter is used only in the ridged multifractal algorithm, and defines
+   how rough the generated terrain will be.
+
+   Detailed algorithms description can be found in:
+        Ebert, D.S., Musgrave, F.K., Peachey, D., Perlin, K., and Worley, S.
+        Texturing and Modeling: A Procedural Approach.
+*/
 template<class ScalarType>
 class NoiseFunctor: public Normalized3DFunctor<ScalarType>
 {
@@ -119,9 +169,18 @@ public:
         h = _h;
         l = _l;
         remainder = _octaves - (int)octaves;
-        precomputeSpectralWeights();
+        precomputeSpectralWeights();    // precomputes spectral weights
     }
 
+    /* This is the noise template algorithm.
+       Concrete noise functors have to define two functions:
+       - init(x, y, z, noise): initialization of noise given the coordinates of
+         the initial point;
+       - update(i, x, y, z, noise): updates the noise value given:
+         - the current octave i;
+         - (displaced) coordinates of the point x, y and z;
+         - the current noise value computed so far (noise).
+     */
     ScalarType operator()(const Point3<ScalarType>& p)
     {
         ScalarType x = p.X(), y = p.Y(), z = p.Z(), noise = ScalarType(.0);
@@ -155,14 +214,15 @@ private:
     void precomputeSpectralWeights()
     {
         ScalarType frequency = 1.0;
-        for(int i=0; i<=(int)octaves; i++)
+        for(int i=0; i<=octaves; i++)
         {
-            spectralWeight[i] = pow(frequency, -h);
-            frequency *= l;
+            spectralWeight[i] = pow(frequency, -h); // determines how "heavy" is the i-th octave
+            frequency *= l;     // calculates the next octave frequency
         }
     }
 };
 
+/* FBM noise functor */
 template<class ScalarType>
 class FBMNoiseFunctor: public NoiseFunctor<ScalarType>
 {
@@ -182,6 +242,7 @@ public:
     }
 };
 
+/* standard multifractal noise functor */
 template<class ScalarType>
 class StandardMFNoiseFunctor: public NoiseFunctor<ScalarType>
 {
@@ -206,6 +267,7 @@ public:
     ScalarType offset;
 };
 
+/* heterogeneous multifractal noise functor */
 template<class ScalarType>
 class HeteroMFNoiseFunctor: public NoiseFunctor<ScalarType>
 {
@@ -235,6 +297,7 @@ public:
     ScalarType offset;
 };
 
+/* hybrid multifractal noise functor */
 template<class ScalarType>
 class HybridMFNoiseFunctor: public NoiseFunctor<ScalarType>
 {
@@ -268,6 +331,7 @@ public:
     ScalarType weight, signal, perlin;
 };
 
+/* ridged multifractal noise functor */
 template<class ScalarType>
 class RidgedMFNoiseFunctor: public NoiseFunctor<ScalarType>
 {
@@ -303,21 +367,21 @@ public:
     ScalarType offset, gain;
     ScalarType weight, signal, perlin;
 };
+// ---------------------- end of noise functors -------------------------------------------
 
-
-/* crater functor */
+// -------------------------- crater functor ----------------------------------------------
 template<class ScalarType>
 class CraterFunctor: public Normalized3DFunctor<ScalarType>
 {
 private:
-    RadialFunctor<ScalarType>* radialFunctor;
-    RadialFunctor<ScalarType>* blendingFunctor;
-    NoiseFunctor<ScalarType>* noiseFunctor;
-    Point3<ScalarType>* origin;
-    ScalarType blendingThreshold, blendingRange;
-    ScalarType elevationFactor;
-    ScalarType maxRadial;
-    bool noiseEnabled, invert;
+    RadialFunctor<ScalarType>* radialFunctor;   // the radial functor
+    RadialFunctor<ScalarType>* blendingFunctor; // the blending functor
+    NoiseFunctor<ScalarType>* noiseFunctor;     // the optional noise functor
+    Point3<ScalarType>* origin;                 // (0, 0, 0) point
+    ScalarType blendingThreshold, blendingRange;// blending threshold and range
+    ScalarType elevationFactor;                 // how much elevated is the crater from zero
+    ScalarType maxRadial;                       // the radial value at blending threshold
+    bool noiseEnabled, invert;                  // noise and invert flags
 
 public:
     CraterFunctor(RadialFunctor<ScalarType>* _radialFunctor,
@@ -334,7 +398,7 @@ public:
         noiseEnabled = _noiseEnabled;
         invert = _invert;
         blendingThreshold = _blendingThreshold;
-        blendingRange = 1 - blendingThreshold;
+        blendingRange = 1 - blendingThreshold;  // blending range is [0, 1 - blending threshold]
         elevationFactor = _elevationFactor;
         maxRadial = -(*radialFunctor)(blendingThreshold) + elevationFactor;
         ScalarType zero = ScalarType(0);
@@ -345,20 +409,22 @@ public:
 
     ScalarType operator()(const Point3<ScalarType>& normalizedPoint)
     {
+        // calculates the (0, 1) distance from the origin
         ScalarType x = vcg::Distance(normalizedPoint, *origin), result;
-        if (x <= blendingThreshold)
-        {
+        if (x <= blendingThreshold) // we are in crater "depression"
+        {   // so we must apply the radial functor and eventually the noise one
             result = -(*radialFunctor)(x) + elevationFactor;
             if (noiseEnabled)
             {
                 result += ((*noiseFunctor)(normalizedPoint) * ScalarType(0.15));
             }
         } else
-        {
+        {   // blending portion
             result = (*blendingFunctor)((x - blendingThreshold)/blendingRange) * maxRadial;
         }
         return (result * (invert?-1:1));
     }
 };
+// ---------------------- end of crater functor -------------------------------------------
 
 #endif // FILTER_FUNCTORS_H

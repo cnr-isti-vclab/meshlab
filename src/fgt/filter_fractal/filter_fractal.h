@@ -28,26 +28,13 @@
 #include <QStringList>
 #include <QString>
 
-#include <common/meshmodel.h>
 #include <common/interfaces.h>
 #include "craters_utils.h"
-#include "fractal_perturbation.h"
 
 class FilterFractal : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
     Q_INTERFACES(MeshFilterInterface)
-
-    typedef CMeshO::CoordType       CoordType;
-    typedef CMeshO::VertexPointer   VertexPointer;
-    typedef CMeshO::VertexIterator  VertexIterator;
-    typedef CMeshO::FacePointer     FacePointer;
-    typedef CMeshO::FaceIterator    FaceIterator;
-    typedef CMeshO::FaceType        FaceType;
-
-    typedef std::pair< VertexPointer, float >   PertPair;
-    typedef std::vector<PertPair>               PertVector;
-    typedef PertVector::iterator                PertIterator;
 
 public:
     FilterFractal();
@@ -64,17 +51,13 @@ public:
 
     virtual bool applyFilter (QAction *, MeshModel&, RichParameterSet &, vcg::CallBackPos *){assert(0); return false;}
     virtual bool applyFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-    virtual int postCondition(QAction *action) const;
 
+    virtual int postCondition(QAction *action) const;
     virtual FilterClass getClass(QAction *);
 
 private:
     void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
     void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterSet &par);
-    bool applyCratersGenerationFilter   (MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-
-    bool generateCraters    (CratersArgs<float> &args, vcg::CallBackPos *cb);
-    void generateGrid       (CMeshO& m, int subSteps, float& gridSide);
 
     enum {CR_FRACTAL_TERRAIN, FP_FRACTAL_MESH, FP_CRATERS};
 };
