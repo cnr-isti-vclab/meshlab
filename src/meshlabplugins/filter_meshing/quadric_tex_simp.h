@@ -23,9 +23,6 @@
 #ifndef __QUADRICTEXSIMP_H
 #define __QUADRICTEXSIMP_H
 
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/local_optimization.h>
 #include <vcg/complex/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/container/simple_temporary_data.h>

@@ -24,8 +24,6 @@
 #ifndef EXTRADECORATEPLUGIN_H
 #define EXTRADECORATEPLUGIN_H
 
-#include <QObject>
-
 #include <common/interfaces.h>
 #include <wrap/gui/coordinateframe.h>
 

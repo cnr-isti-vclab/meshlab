@@ -21,11 +21,10 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <math.h>
 #include "meshdecorate.h"
-#include <QGLWidget>
 #include <wrap/gl/addons.h>
 #include <meshlab/glarea.h>
+
 using namespace vcg;
 using namespace std;
 
