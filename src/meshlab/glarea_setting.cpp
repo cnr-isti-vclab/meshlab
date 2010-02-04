@@ -4,8 +4,8 @@
 void GLAreaSetting::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
 {
     defaultGlobalParamSet->addParam(new RichColor(backgroundBotColorParam(),QColor(128,128,255),"MeshLab Bottom BackGround Color ","MeshLab GLarea's BackGround Color(bottom corner)"));
-    defaultGlobalParamSet->addParam(new RichColor(backgroundTopColorParam(),QColor(  0, 0,   0),"MeshLab Top BackGround Color(top corner)","MeshLab GLarea's BackGround Color(top corner)"));
-    defaultGlobalParamSet->addParam(new RichColor(logAreaColorParam(),   QColor(255, 32, 32),"MeshLab GLarea's Log Area Color(bottom corner)","MeshLab GLarea's BackGround Color(bottom corner)"));
+    defaultGlobalParamSet->addParam(new RichColor(backgroundTopColorParam(),QColor(  0, 0,   0),"MeshLab Top BackGround Color","MeshLab GLarea's BackGround Color(top corner)"));
+    defaultGlobalParamSet->addParam(new RichColor(logAreaColorParam(),   QColor(128,16,16),"MeshLab GLarea's Log Area Color","MeshLab GLarea's BackGround Color(bottom corner)"));
 
 
     defaultGlobalParamSet->addParam(new RichColor(baseLightAmbientColorParam()	,QColor( 32, 32, 32),"MeshLab Base Light Ambient Color","MeshLab GLarea's BackGround Color(bottom corner)"));

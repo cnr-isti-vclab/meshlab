@@ -379,6 +379,7 @@ void GLArea::displayInfo()
 	qFont.setPixelSize(12);
 
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
+    glas.logAreaColor[3]=128;
     glColor(glas.logAreaColor);
 	int lineNum =4;
 	float lineSpacing = qFont.pixelSize()*1.5f;
