@@ -165,7 +165,8 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 
 		if(oi.mask & tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
-
+        m.Enable(oi.mask);
+        if(m.hasDataMask(MeshModel::MM_POLYGONAL)) qDebug("Mesh is Polygonal!");
 		mask = oi.mask;
 	}
 	else if (formatName.toUpper() == tr("PTX"))
