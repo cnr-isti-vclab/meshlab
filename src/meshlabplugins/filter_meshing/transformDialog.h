@@ -71,12 +71,10 @@ Revision 1.4  2006/01/17 14:18:03  mariolatronico
 #ifndef TRANSFORM_DIALOG_H
 #define TRANSFORM_DIALOG_H
 
-#include <QDialog>
+#include <common/interfaces.h> // for CMeshO
 #include <QButtonGroup>
 #include <QDoubleValidator>
 #include "ui_transformDialog.h"
-#include <vcg/math/matrix44.h>
-#include <common/interfaces.h> // for CMeshO
 
 using vcg::Matrix44f;
 //#define PI 3.14159265
