@@ -23,8 +23,6 @@
 
 #ifndef FILTER_CREATE_H
 #define FILTER_CREATE_H
-
-#include <QObject>
 #include <common/interfaces.h>
 
 class FilterCreate : public QObject, public MeshFilterInterface
