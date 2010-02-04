@@ -186,8 +186,7 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdP
 {
  if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
-	//vLayout->setAlignment(Qt::AlignLeading);
-	vLayout->setAlignment(Qt::AlignLeading);
+    vLayout->setAlignment(Qt::AlignLeft);
 	setLayout(vLayout);
 
 	//QLabel *ql;
@@ -212,8 +211,7 @@ void StdParFrame::loadFrameContent( RichParameter* par,MeshDocument *mdPt /*= 0*
 {
 	if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
-	//vLayout->setAlignment(Qt::AlignLeading);
-	vLayout->setAlignment(Qt::AlignLeading);
+    vLayout->setAlignment(Qt::AlignLeft);
 	setLayout(vLayout);
 
 	QString descr;
@@ -905,6 +903,7 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 	maxVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->max;
 	valueLE = new QLineEdit(p);
 	valueSlider = new QSlider(Qt::Horizontal,p);
+    valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 	fieldDesc = new QLabel(rp->pd->fieldDesc);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
@@ -919,8 +918,9 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 	
 	QHBoxLayout* lay = new QHBoxLayout(p);
 	lay->addWidget(valueLE,0,Qt::AlignHCenter);
-	lay->addWidget(valueSlider,0,Qt::AlignHCenter);
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+    //lay->addWidget(valueSlider,0,Qt::AlignJustify);
+    lay->addWidget(valueSlider,0,0);
+    gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
 	connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
 	connect(valueSlider,SIGNAL(valueChanged(int)),this,SLOT(setValue(int)));
