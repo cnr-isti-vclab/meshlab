@@ -81,7 +81,7 @@ bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, RichParameter
     if(QFile::exists(path)){
     QFile file(path);
     int mask;
-    const QString name(file.fileName());
+     QString name(file.fileName());
         openX3D(name,*(md.mm()),mask,cb);
     file.remove();
     return true;
@@ -219,7 +219,9 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
  }
  void FilterSSynth::ParseRec(QString* grammar, int maxrec){
          int idx=grammar->indexOf("set maxdepth");
+                 if(idx>-1){
          int end=tr("set maxdepth").length()+idx;
+                 //int end=tr("set maxdepth").length();
          while(!grammar->operator [](end).isNumber())
                  end++;
          QString grec;
@@ -229,9 +231,10 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
          }
          if(grec.toInt()<maxrec){
          QString tosub=QString("set maxdepth ").append(QString::number(maxrec)).append(" ");
-         QString maxrestr=grammar->mid(idx,--end);
+         QString maxrestr=grammar->mid(idx,end-idx);
          grammar->replace(maxrestr,tosub);
          }
+                 }
  }
  Q_EXPORT_PLUGIN(FilterSSynth)
 
