@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include<QObject>
 #include "mainwindow.h"
 #include "stdpardialog.h"
 using namespace vcg;

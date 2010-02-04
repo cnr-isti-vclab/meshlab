@@ -21,12 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <GL/glew.h>
-#include <QtGui>
-
-// widget capace di fare rendering di un Modello
-#include <vcg/space/box3.h>
-#include <wrap/gl/space.h>
 #include "../common/interfaces.h"
 #include "glarea.h"
 #include "layerDialog.h"

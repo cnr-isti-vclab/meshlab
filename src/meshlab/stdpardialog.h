@@ -81,15 +81,13 @@ Added standard plugin window support
 #ifndef MESHLAB_STDPARDIALOG_H
 #define MESHLAB_STDPARDIALOG_H
 
-#include <QtCore>
-#include <QAction>
-#include <QtGui>
-#include <QObject>
-//#include <QDoubleSpinBox>
-
 #include "../common/interfaces.h"
-#include <cassert>
-
+#include<QCheckBox>
+#include<QSpinBox>
+#include<QTableWidget>
+#include<QComboBox>
+#include<QGridLayout>
+#include<QDockWidget>
 
 class MeshLabWidget : public QWidget
 {
