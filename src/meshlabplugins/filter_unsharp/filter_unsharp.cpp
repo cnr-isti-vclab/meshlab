@@ -382,9 +382,10 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 	}
 }
 
-bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
+bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
-	switch(ID(filter))
+    MeshModel &m=*(md.mm());
+    switch(ID(filter))
 	{
 		case FP_CREASE_CUT :{
 				float angleDeg = par.getFloat("angleDeg");

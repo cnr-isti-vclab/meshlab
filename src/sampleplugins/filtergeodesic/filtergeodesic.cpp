@@ -105,9 +105,10 @@ QString FilterGeodesic::filterName(FilterIDType filter) const
   return 0;
 }
 
-bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * /*cb*/) 
+bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
-	CMeshO::FaceIterator fi;
+    MeshModel &m=*(md.mm());
+    CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
 	switch (ID(filter)) {
 		case FP_QUALITY_POINT_GEODESIC:

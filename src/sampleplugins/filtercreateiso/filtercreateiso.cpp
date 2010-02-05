@@ -96,9 +96,10 @@ FilterCreateIso::~FilterCreateIso() {
   return 0;
 }
 
-bool FilterCreateIso::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
+bool FilterCreateIso::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
-	CMeshO::FaceIterator fi;
+    MeshModel &m=*(md.mm());
+    CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
 	if(filter->text() == filterName(FP_CREATEISO) )
 	{

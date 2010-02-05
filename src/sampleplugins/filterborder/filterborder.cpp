@@ -112,9 +112,10 @@ void FilterBorder::initParameterSet(QAction *action,MeshModel &m, RichParameterS
 
 
 
-bool FilterBorder::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
+bool FilterBorder::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
-	CMeshO::FaceIterator fi;
+    MeshModel &m=*(md.mm());
+    CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
 	switch(ID(filter))
   {
