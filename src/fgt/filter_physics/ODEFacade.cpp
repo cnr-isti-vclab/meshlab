@@ -100,7 +100,7 @@ bool ODEFacade::hasBorders(MeshModel& mesh){
 }
 
 
-void ODEFacade::setAsRigidBody(MeshModel& mesh, bool isRigidBody){
+void ODEFacade::setAsRigidBody(MeshModel& mesh, bool isRigidBody) throw(ODEInvalidMeshException) {
     MeshIterator entry = m_registeredMeshes.find(&mesh);
     if(entry == m_registeredMeshes.end())
         return;

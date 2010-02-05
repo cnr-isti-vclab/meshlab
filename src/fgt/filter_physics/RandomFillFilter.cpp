@@ -24,8 +24,8 @@ void RandomFillFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
     par.addParam(new RichMesh("container", 0, &md, "Container mesh", "This mesh will act as a container for the filling mesh"));
     par.addParam(new RichMesh("filler", 0, &md, "Filler mesh", "The container mesh will be filled with this mesh"));
     par.addParam(new RichFloat("factor", 0.5f, "Volume ratio factor", "The ratio between the container and the filler object will be multiplied by this factor. The volume ratio determines the number of filling objects to be spawn."));
-    par.addParam(new RichFloat("seconds", 0.5f, "Simulation interval (sec)", "Physics simulation update interval in seconds"));
-    par.addParam(new RichFloat("updateFrequency", 1.f, "Update frequency", "The frequency with which the simulation gets updated"));
+    par.addParam(new RichFloat("seconds", 1.f, "Simulation interval (sec)", "Physics simulation update interval in seconds"));
+    par.addParam(new RichFloat("updateFrequency", 1.f, "Update frequency", "The frequency with which the simulation gets updated in case the objects spawn at the center of mass"));
     par.addParam(new RichBool("flipNormal", false, "Flip container normals", "If true the container normals will be flipped."));
     par.addParam(new RichBool("useRandomVertices", true, "Random spawn points", "If true the filling objects will spawn at random positions in the container mesh instead of being spawn at the center of mass"));
 }
@@ -46,7 +46,6 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
         vcg::tri::Clean<CMeshO>::FlipMesh(container->cm);
         tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(container->cm);
         container->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-        par.setValue("flipNormal", BoolValue(false)); // Why does it not work??
     }
 
     m_engine.clear(md);
@@ -84,13 +83,9 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     // To refactor when the right algorithm has be found
     if(par.getBool("useRandomVertices")){
         for(int i = 0; i < objects; i++){
-            if(cb != 0) (*cb)(98.f*i/objects, "Computing...");
+            if(cb != 0) (*cb)(50.f*i/objects, "Computing...");
             addRandomObject(md, filler, getRandomOrigin(par), restoredMeshes + i);
             m_engine.registerTriMesh(*md.getMesh(fillOffset++));
-
-            /*if(i % frequency == 0)
-                for(int j = 0; j < par.getFloat("seconds") * par.getInt("fps"); j++)
-                    m_engine.integrate(1.0f/par.getInt("fps"));*/
         }
         for(int j = 0; j < par.getFloat("seconds") * par.getInt("fps"); j++){
             if(cb != 0) (*cb)(50 + 48.f*j/(par.getFloat("seconds") * par.getInt("fps")), "Computing...");
@@ -111,6 +106,12 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
     m_engine.updateTransform();
     filler->cm.Tr.SetIdentity();
     m_currentFilterType = m_filterType;
+
+    if(par.getBool("flipNormal")){
+        vcg::tri::Clean<CMeshO>::FlipMesh(container->cm);
+        tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(container->cm);
+        container->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+    }
 
     if(cb != 0) (*cb)(99, "Physics renderization of the scene completed...");
     return true;

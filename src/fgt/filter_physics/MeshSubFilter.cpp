@@ -14,6 +14,9 @@ void MeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, RichParam
 }
 
 void MeshSubFilter::initialize(MeshDocument& md, RichParameterSet&, vcg::CallBackPos* cb){
+    //TODO: Not working properly with meshlab for now; when the issue will be patched in meshlab, this code and the MM_TRANSFMATRIX
+    //      postCondition in filter_physics.h can be uncommented */
+
     /*if(md.mm()->cm.Tr != vcg::Matrix44f::Identity())
         throw MatrixNotFreezedException();*/
 }
