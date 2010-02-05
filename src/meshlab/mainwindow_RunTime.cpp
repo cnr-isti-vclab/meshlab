@@ -314,7 +314,7 @@ void MainWindow::runFilterScript()
   FilterScript::iterator ii;
   for(ii= GLA()->filterHistory.actionList.begin();ii!= GLA()->filterHistory.actionList.end();++ii)
   {
-    QAction *action = filterMap[ (*ii).first];
+    QAction *action = PM.actionFilterMap[ (*ii).first];
 	  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 
     int req=iFilter->getRequirements(action);

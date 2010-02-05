@@ -178,7 +178,6 @@ private:
 	//QList<QAction *> decoratorActionList;
     
 	PluginManager PM;
-
      
 	/* 
 		Note this part should be detached from MainWindow just like the loading plugin part.
@@ -204,7 +203,10 @@ public:
 	  assert(glw);
 	  return glw;
 	}
-  QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
+
+	const PluginManager& pluginManager() const { return PM; }
+
+  //QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
   static QStatusBar *&globalStatusBar()
   {
     static QStatusBar *_qsb=0;
