@@ -223,8 +223,12 @@ void FilterScriptDialog::editSelectedFilterParameters()
 	if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())
 	{
 		//now set values to be the old values
+		RichParameterCopyConstructor cc;
 		for(int i = 0; i < newParameterSet.paramList.size(); i++)
-			newParameterSet.paramList[i]->val = oldParameterSet.paramList[i]->val;	
+		{
+			oldParameterSet.paramList[i]->accept(cc);
+			newParameterSet.paramList[i]->val = cc.lastCreated->val;
+		}	
 	} else
 		qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";
 
