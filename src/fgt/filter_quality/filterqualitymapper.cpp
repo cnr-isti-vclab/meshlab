@@ -124,9 +124,10 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 
 // The Real Core Function doing the actual mesh processing.
 // Apply color to mesh vertexes
-bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
+bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-	Q_UNUSED(filter);
+    MeshModel &m=*(md.mm());
+    Q_UNUSED(filter);
 	Q_UNUSED(cb);
 
 	EQUALIZER_INFO eqData;

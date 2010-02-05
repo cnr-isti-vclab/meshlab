@@ -70,7 +70,7 @@ public:
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	void showParserError(const QString &s, mu::Parser::exception_type &e);
 	void normalizeVertexQuality(MeshModel &m);
 	void normalizeFaceQuality(MeshModel &m);

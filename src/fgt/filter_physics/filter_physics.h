@@ -37,7 +37,6 @@ class FilterPhysics : public QObject, public MeshFilterInterface
     virtual bool autoDialog(QAction*) {return true;}
     virtual void initParameterSet(QAction*, MeshDocument&, RichParameterSet&);
     virtual bool applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb);
-    virtual bool applyFilter(QAction*, MeshModel&, RichParameterSet&, vcg::CallBackPos*) { assert(0); return false;}
     virtual FilterClass getClass(QAction *);
 
     private:

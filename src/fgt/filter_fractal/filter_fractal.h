@@ -49,7 +49,6 @@ public:
     virtual void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
     virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
 
-    virtual bool applyFilter (QAction *, MeshModel&, RichParameterSet &, vcg::CallBackPos *){assert(0); return false;}
     virtual bool applyFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 
     virtual int postCondition(QAction *action) const;

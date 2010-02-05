@@ -148,9 +148,10 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
 
 
 /* The Real Core Function doing the actual mesh processing */
-bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet &params, vcg::CallBackPos *cb)
+bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &params, vcg::CallBackPos *cb)
 {	
-	if( ID(filter) != FP_ERODE)
+    MeshModel &m=*(md.mm());
+    if( ID(filter) != FP_ERODE)
 	{
 		assert (0);
 		return false;

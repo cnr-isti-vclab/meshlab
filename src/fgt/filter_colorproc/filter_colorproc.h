@@ -63,7 +63,6 @@ class FilterColorProc : public QObject, public MeshFilterInterface
 		virtual bool autoDialog(QAction *);
                 virtual void initParameterSet(QAction *,MeshDocument&, RichParameterSet & /*parent*/);
                 virtual bool applyFilter(QAction *filter, MeshDocument&, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
-                virtual bool applyFilter(QAction */*filter*/, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;}
 	  int postCondition(QAction* filter) const;
 		int getPreConditions(QAction *) const;
 };
