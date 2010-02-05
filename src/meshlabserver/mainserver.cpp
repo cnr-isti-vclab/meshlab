@@ -169,7 +169,7 @@ bool Script(MeshDocument &meshDocument, QString scriptfile){
 		if (action == NULL)
 		{
 			printf("filter %s not found",qPrintable((*ii).first));
-			exit(0);
+			return false;
 		}
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 		iFilter->setLog(NULL);
@@ -251,8 +251,9 @@ int main(int argc, char *argv[])
 	int mask=0;
 	if(argc < 3) Usage();
 	int i = 1;
-	QDir currentdir = QDir::current();
-	QString tmp = currentdir.absolutePath();
+	QString res = qApp->applicationDirPath();
+	QDir currentdir(qApp->applicationDirPath());
+	
 	while(i < argc)
 	{
 		if(argv[i][0] != '-') Usage();
