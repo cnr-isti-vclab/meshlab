@@ -79,7 +79,6 @@ public:
  virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, RichParameterSet & params, MainWindowInterface *mw);
  virtual int getRequirements(QAction *);
  virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
- virtual bool applyFilter(QAction */*filter*/, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
 
 protected:
 

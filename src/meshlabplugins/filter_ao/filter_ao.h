@@ -85,7 +85,7 @@ public:
 	                                           MeshModel &/*m*/,
 	                                           RichParameterSet & /*parent*/);
 	virtual       bool        applyFilter     (QAction *filter,
-	                                           MeshModel &m,
+                                               MeshDocument &md,
 	                                           RichParameterSet & /*parent*/,
 	                                           vcg::CallBackPos * cb) ;
 	void  initTextures          (void);

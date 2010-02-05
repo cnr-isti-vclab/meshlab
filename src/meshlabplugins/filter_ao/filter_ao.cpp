@@ -115,9 +115,10 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
 		default: assert(0);
 	}
 }
-bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
+bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-	if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION ) perFace=true;
+    MeshModel &m=*(md.mm());
+    if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION ) perFace=true;
 	else perFace = false;
 	
 	useGPU = par.getBool("useGPU");

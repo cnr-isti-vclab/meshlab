@@ -68,8 +68,7 @@ public:
 	virtual void initParameterSet(QAction *,MeshDocument &md, RichParameterSet &parent);
 	virtual int getRequirements(QAction *action);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet &parent, vcg::CallBackPos *cb) ;
-	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet &parent, vcg::CallBackPos *cb)
-	{assert(0); return false;}
+
 };
 
 #endif

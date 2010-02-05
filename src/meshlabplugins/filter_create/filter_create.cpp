@@ -93,8 +93,9 @@ void FilterCreate::initParameterSet(QAction *action,MeshModel &m, RichParameterS
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterCreate::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
+    MeshModel &m=(*md.mm());
   switch(ID(filter))	 {
     case CR_TETRAHEDRON :
       vcg::tri::Tetrahedron<CMeshO>(m.cm);

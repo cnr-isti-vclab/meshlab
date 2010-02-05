@@ -265,11 +265,10 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m,
 
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
-bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
-                                    RichParameterSet & par,
-                                    vcg::CallBackPos *cb)
+bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-	float limit = -std::numeric_limits<float>::epsilon();
+    MeshModel &m=*(md.mm());
+    float limit = -std::numeric_limits<float>::epsilon();
 	
 	if (ID(filter) == FP_CURVATURE_EDGE_FLIP) {		
 		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);

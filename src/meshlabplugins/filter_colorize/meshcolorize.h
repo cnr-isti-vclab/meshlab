@@ -129,7 +129,7 @@ public:
 	virtual bool autoDialog(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
   virtual int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 };
 
