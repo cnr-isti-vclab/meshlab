@@ -45,7 +45,7 @@ first version
 #define EDITSTRAIGHTENER_H
 
 #include <GL/glew.h>
-#include <QTGui>
+#include <QtGui>
 #include <common/interfaces.h>
 
 #include <wrap/gui/activecoordinateframe.h>
