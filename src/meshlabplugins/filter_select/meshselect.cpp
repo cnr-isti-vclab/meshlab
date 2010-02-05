@@ -134,9 +134,10 @@ bool SelectionFilterPlugin::autoDialog(QAction *action)
 }
 
 
-bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, RichParameterSet & par, vcg::CallBackPos * cb) 
+bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
-	CMeshO::FaceIterator fi;
+    MeshModel &m=*(md.mm());
+    CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
 	switch(ID(action))
   {
