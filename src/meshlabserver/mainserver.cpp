@@ -38,7 +38,6 @@ public:
 PluginManager PM;
 RichParameterSet defaultGlobal;
 
-QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
 std::vector<MeshIOInterface*> meshIOPlugins;
  
 // Here we need a better way to find the plugins directory. 
@@ -59,7 +58,7 @@ void loadPlugins(FILE *fp=0)
                 fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
     }
 
-	printf("Total %i filtering actions\n", filterMap.size());
+	printf("Total %i filtering actions\n", PM.actionFilterMap.size());
 	printf("Total %i io plugins\n", meshIOPlugins.size());
 }
 
@@ -166,7 +165,12 @@ bool Script(MeshDocument &meshDocument, QString scriptfile){
 		QString &name = (*ii).first;
 		printf("filter: %s\n",qPrintable((*ii).first));
 		
-		QAction *action = filterMap[ (*ii).first];
+		QAction *action = PM.actionFilterMap[ (*ii).first];
+		if (action == NULL)
+		{
+			printf("filter %s not found",qPrintable((*ii).first));
+			exit(0);
+		}
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 		iFilter->setLog(NULL);
 		int req = iFilter->getRequirements(action);
@@ -247,6 +251,8 @@ int main(int argc, char *argv[])
 	int mask=0;
 	if(argc < 3) Usage();
 	int i = 1;
+	QDir currentdir = QDir::current();
+	QString tmp = currentdir.absolutePath();
 	while(i < argc)
 	{
 		if(argv[i][0] != '-') Usage();
@@ -255,7 +261,7 @@ int main(int argc, char *argv[])
 			case 'i' :  
 				while( ((i+1) < argc) && argv[i+1][0] != '-')
 				{
-					meshNamesIn << argv[i+1];
+					meshNamesIn << currentdir.absoluteFilePath(argv[i+1]);
 					printf("Input mesh  %s\n", qPrintable(meshNamesIn.last() ));
 					i++;
 				}
@@ -267,7 +273,7 @@ int main(int argc, char *argv[])
 				{
 					while( ((i+1) < argc) && argv[i+1][0] != '-')
 					{
-						meshNamesOut << argv[i+1];
+						meshNamesOut << currentdir.absoluteFilePath(argv[i+1]);
 						printf("output mesh  %s\n", qPrintable(meshNamesOut.last()));
 						i++;
 					}
@@ -419,7 +425,7 @@ int main(int argc, char *argv[])
 					printf("Missing script name\n");  
 					exit(-1);
 				}
-				scriptName = argv[i+1];
+				scriptName = currentdir.absoluteFilePath(argv[i+1]);
 				printf("script %s\n", qPrintable(scriptName));
 				i += 2;
 				break; 
