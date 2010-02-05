@@ -96,6 +96,19 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 
 	return true;
 }
+bool MeshModel::Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm)
+  {
+      // Needed to be defined here for splatrender as long there is no "MeshlabCore" library.
+      using namespace vcg;
+      glPushMatrix();
+      glMultMatrix(cm.Tr);
+      if( (_cm == GLW::CMPerFace)  && (!tri::HasPerFaceColor(cm)) ) _cm=GLW::CMNone;
+      if( (_tm == GLW::TMPerWedge )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
+      if( (_tm == GLW::TMPerWedgeMulti )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
+      glw.Draw(_dm,_cm,_tm);
+      glPopMatrix();
+      return true;
+  }
 
 bool MeshModel::RenderSelectedFaces()
 {
@@ -157,5 +170,101 @@ int MeshModel::io2mm(int single_iobit)
 			return MM_NONE;  // FIXME: Returning this is not the best solution (!)
 			break;
 	} ;
+}
+
+void MeshModelState::create(int _mask, MeshModel* _m)
+{
+    m=_m;
+    changeMask=_mask;
+    if(changeMask & MeshModel::MM_VERTCOLOR)
+    {
+        vertColor.resize(m->cm.vert.size());
+        std::vector<vcg::Color4b>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+            if(!(*vi).IsD()) (*ci)=(*vi).C();
+    }
+
+    if(changeMask & MeshModel::MM_VERTCOORD)
+    {
+        vertCoord.resize(m->cm.vert.size());
+        std::vector<vcg::Point3f>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+             if(!(*vi).IsD()) (*ci)=(*vi).P();
+    }
+
+    if(changeMask & MeshModel::MM_VERTNORMAL)
+    {
+        vertNormal.resize(m->cm.vert.size());
+        std::vector<vcg::Point3f>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci = vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+             if(!(*vi).IsD()) (*ci)=(*vi).N();
+    }
+
+    if(changeMask & MeshModel::MM_FACEFLAGSELECT)
+    {
+        faceSelection.resize(m->cm.face.size());
+        std::vector<bool>::iterator ci;
+        CMeshO::FaceIterator fi;
+        for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+         if(!(*fi).IsD()) (*ci) = (*fi).IsS();
+    }
+    if(changeMask & MeshModel::MM_TRANSFMATRIX)
+        Tr = m->cm.Tr;
+}
+
+bool MeshModelState::apply(MeshModel *_m)
+{
+  if(_m != m) return false;
+    if(changeMask & MeshModel::MM_VERTCOLOR)
+    {
+        if(vertColor.size() != m->cm.vert.size()) return false;
+        std::vector<vcg::Color4b>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+            if(!(*vi).IsD()) (*vi).C()=(*ci);
+    }
+
+    if(changeMask & MeshModel::MM_VERTCOORD)
+    {
+        if(vertCoord.size() != m->cm.vert.size()) return false;
+        std::vector<vcg::Point3f>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+            if(!(*vi).IsD()) (*vi).P()=(*ci);
+    }
+
+    if(changeMask & MeshModel::MM_VERTNORMAL)
+    {
+        if(vertNormal.size() != m->cm.vert.size()) return false;
+        std::vector<vcg::Point3f>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci=vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+            if(!(*vi).IsD()) (*vi).N()=(*ci);
+
+        //now reset the face normals
+        vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
+    }
+
+    if(changeMask & MeshModel::MM_FACEFLAGSELECT)
+    {
+        if(faceSelection.size() != m->cm.face.size()) return false;
+        std::vector<bool>::iterator ci;
+        CMeshO::FaceIterator fi;
+        for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+        {
+            if((*ci))
+                (*fi).SetS();
+            else
+                (*fi).ClearS();
+        }
+    }
+
+    if(changeMask & MeshModel::MM_TRANSFMATRIX)
+        m->cm.Tr=Tr;
+
+    return true;
 }
 

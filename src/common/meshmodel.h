@@ -134,50 +134,50 @@ public:
  - to know what elements are changed by a filter and therefore should be saved/restored in case of dynamic filters with a preview
 	*/
  	enum MeshElement {
-		MM_NONE							= 0x00000000,
+        MM_NONE						= 0x00000000,
 		MM_VERTCOORD				= 0x00000001,
 		MM_VERTNORMAL				= 0x00000002,
 		MM_VERTFLAG					= 0x00000004,
 		MM_VERTCOLOR				= 0x00000008,
-		MM_VERTQUALITY			= 0x00000010,
+        MM_VERTQUALITY              = 0x00000010,
 		MM_VERTMARK					= 0x00000020,
-		MM_VERTFACETOPO			= 0x00000040,
+        MM_VERTFACETOPO             = 0x00000040,
 		MM_VERTCURV					= 0x00000080,
-		MM_VERTCURVDIR			= 0x00000100,
+        MM_VERTCURVDIR              = 0x00000100,
 		MM_VERTRADIUS				= 0x00000200,
-		MM_VERTTEXCOORD			= 0x00000400,
-		MM_VERTNUMBER       = 0x00000800,
+        MM_VERTTEXCOORD             = 0x00000400,
+        MM_VERTNUMBER               = 0x00000800,
 
 		MM_FACEVERT					= 0x00001000,
 		MM_FACENORMAL				= 0x00002000,
 		MM_FACEFLAG					= 0x00004000,
 		MM_FACECOLOR				= 0x00008000,
-		MM_FACEQUALITY			= 0x00010000,
+        MM_FACEQUALITY              = 0x00010000,
 		MM_FACEMARK					= 0x00020000,
-		MM_FACEFACETOPO			= 0x00040000,
-		MM_FACENUMBER       = 0x00080000,
+        MM_FACEFACETOPO             = 0x00040000,
+        MM_FACENUMBER               = 0x00080000,
 
-		MM_WEDGTEXCOORD			= 0x00100000,
+        MM_WEDGTEXCOORD             = 0x00100000,
 		MM_WEDGNORMAL				= 0x00200000,
 		MM_WEDGCOLOR				= 0x00400000,
 
 
-		MM_UNKNOWN          = 0x00800000,
+        MM_UNKNOWN                  = 0x00800000,
 
 
 // 	SubParts of bits
-		MM_VERTFLAGSELECT		= 0x01000000,
-		MM_FACEFLAGSELECT		= 0x02000000,
+        MM_VERTFLAGSELECT           = 0x01000000,
+        MM_FACEFLAGSELECT           = 0x02000000,
 // This part should be deprecated.
-		MM_VERTFLAGBORDER		= 0x04000000,
-		MM_FACEFLAGBORDER		= 0x08000000,
+        MM_VERTFLAGBORDER           = 0x04000000,
+        MM_FACEFLAGBORDER           = 0x08000000,
 
 // Per Mesh Stuff....
-		MM_CAMERA						= 0x10000000,
-		MM_TRANSFMATRIX     = 0x20000000,
-    MM_COLOR            = 0x40000000,
-    MM_POLYGONAL        = 0x80000000,
-		MM_ALL							= 0xffffffff
+        MM_CAMERA					= 0x10000000,
+        MM_TRANSFMATRIX             = 0x20000000,
+        MM_COLOR                    = 0x40000000,
+        MM_POLYGONAL                = 0x80000000,
+        MM_ALL						= 0xffffffff
 	} ;
 
 
@@ -188,9 +188,8 @@ public:
 	std::string fileName;
 
 	/*
-
 	Bitmask denoting what fields are currently used in the mesh
-  it is composed by MeshElement enums.
+    it is composed by MeshElement enums.
 	it should be changed by only mean the following functions:
 
 	updateDataMask(neededStuff)
@@ -206,14 +205,7 @@ public:
 private:
   int currentDataMask;
 public:
-  // Bitmask denoting what fields are loaded/saved
-  // it is composed by OR-ing IOM_XXXX enums (defined in tri::io::Mask)
-//  int ioMask;
-
-	bool visible; // used in rendering; Needed for toggling on and off the meshes
-
-  //abstract pointer to fileformat's dependent additional info
-  //AdditionalInfo* addinfo;
+   bool visible; // used in rendering; Needed for toggling on and off the meshes
 
   MeshModel(const char *meshName=0) {
     glw.m=&cm;
@@ -223,28 +215,13 @@ public:
 		currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
 		currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
 
-    //ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS | IOM_VERTNORMAL;
-
-    visible=true;
+        visible=true;
 		cm.Tr.SetIdentity();
 		cm.sfn=0;
 		if(meshName) fileName=meshName;
   }
 
-  bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm)
-	{
-		// Needed to be defined here for splatrender as long there is no "MeshlabCore" library.
-		using namespace vcg;
-		glPushMatrix();
-		glMultMatrix(cm.Tr);
-		if( (_cm == GLW::CMPerFace)  && (!tri::HasPerFaceColor(cm)) ) _cm=GLW::CMNone;
-		if( (_tm == GLW::TMPerWedge )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
-		if( (_tm == GLW::TMPerWedgeMulti )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
-		glw.Draw(_dm,_cm,_tm);
-		glPopMatrix();
-		return true;
-	}
-
+  bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
   bool RenderSelectedFaces();
 
 
@@ -267,7 +244,7 @@ public:
 	{
 		return ((currentDataMask & maskToBeTested)!= 0);
 	}
-	void updateDataMask(MeshModel *m)
+    void updateDataMask(MeshModel *m)
   {
 		updateDataMask(m->currentDataMask);
 	}
@@ -462,104 +439,9 @@ private:
 	vcg::Matrix44f Tr;
 public:
   // This function save the <mask> portion of a mesh into the private members of the MeshModelState class;
-	void create(int _mask, MeshModel* _m)
-	{
-		m=_m;
-		changeMask=_mask;
-		if(changeMask & MeshModel::MM_VERTCOLOR)
-		{
-			vertColor.resize(m->cm.vert.size());
-			std::vector<vcg::Color4b>::iterator ci;
-			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-				if(!(*vi).IsD()) (*ci)=(*vi).C();
-		}
-
-		if(changeMask & MeshModel::MM_VERTCOORD)
-		{
-			vertCoord.resize(m->cm.vert.size());
-			std::vector<vcg::Point3f>::iterator ci;
-			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-				 if(!(*vi).IsD()) (*ci)=(*vi).P();
-		}
-
-		if(changeMask & MeshModel::MM_VERTNORMAL)
-		{
-			vertNormal.resize(m->cm.vert.size());
-			std::vector<vcg::Point3f>::iterator ci;
-			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-				 if(!(*vi).IsD()) (*ci)=(*vi).N();
-		}
-
-		if(changeMask & MeshModel::MM_FACEFLAGSELECT)
-		{
-			faceSelection.resize(m->cm.face.size());
-			std::vector<bool>::iterator ci;
-			CMeshO::FaceIterator fi;
-			for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
-			 if(!(*fi).IsD()) (*ci) = (*fi).IsS();
-		}
-		if(changeMask & MeshModel::MM_TRANSFMATRIX)
-			Tr = m->cm.Tr;
-	}
-
-	bool apply(MeshModel *_m)
-	{
-	  if(_m != m) return false;
-		if(changeMask & MeshModel::MM_VERTCOLOR)
-		{
-			if(vertColor.size() != m->cm.vert.size()) return false;
-			std::vector<vcg::Color4b>::iterator ci;
-			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-				if(!(*vi).IsD()) (*vi).C()=(*ci);
-		}
-
-		if(changeMask & MeshModel::MM_VERTCOORD)
-		{
-			if(vertCoord.size() != m->cm.vert.size()) return false;
-			std::vector<vcg::Point3f>::iterator ci;
-			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-				if(!(*vi).IsD()) (*vi).P()=(*ci);
-		}
-
-		if(changeMask & MeshModel::MM_VERTNORMAL)
-		{
-			if(vertNormal.size() != m->cm.vert.size()) return false;
-			std::vector<vcg::Point3f>::iterator ci;
-			CMeshO::VertexIterator vi;
-			for(vi = m->cm.vert.begin(), ci=vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-				if(!(*vi).IsD()) (*vi).N()=(*ci);
-
-			//now reset the face normals
-			vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
-		}
-
-		if(changeMask & MeshModel::MM_FACEFLAGSELECT)
-		{
-			if(faceSelection.size() != m->cm.face.size()) return false;
-			std::vector<bool>::iterator ci;
-			CMeshO::FaceIterator fi;
-			for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
-			{
-				if((*ci))
-					(*fi).SetS();
-				else
-					(*fi).ClearS();
-			}
-		}
-		
-		if(changeMask & MeshModel::MM_TRANSFMATRIX)
-			m->cm.Tr=Tr;
-
-		return true;
-  }
-
+    void create(int _mask, MeshModel* _m);
+    bool apply(MeshModel *_m);
 	bool isValid(MeshModel *m);
-
 };
 
 #endif
