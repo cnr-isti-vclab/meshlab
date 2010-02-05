@@ -16,7 +16,7 @@ win32-g++:DLLDESTDIR     = ../distrib
 
 mac:DLLDESTDIR       = .
 macx:QMAKE_POST_LINK ="cp libcommon.*dylib ../distrib/meshlab.app/Contents/MacOs/"
-
+unix:DESTDIR = ../distrib
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
 
@@ -30,7 +30,7 @@ win32-msvc2008:CONFIG  += staticlib
 QT += opengl
 QT += xml
 
-TARGET = 
+TARGET =
 DEPENDPATH += .
 INCLUDEPATH += .
 DEFINES += GLEW_STATIC
