@@ -43,8 +43,7 @@ public:
 	virtual bool autoDialog(QAction *);
 	virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual bool applyFilter(QAction *, MeshModel &, RichParameterSet &, vcg::CallBackPos * ) { assert(0); return false;} ;
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 };
 
 #endif

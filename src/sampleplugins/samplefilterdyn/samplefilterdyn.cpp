@@ -114,8 +114,9 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, Ri
 
 // The Real Core Function doing the actual mesh processing.
 // It changes the color of the mesh according to a perlin noise function
-bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *)
+bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *)
 {
+    MeshModel &m=*(md.mm());
     const Color4b baseColor = par.getColor4b("baseColor");
 	const float percentage  = par.getDynamicFloat("percentage");
 	const float frequency   = math::Clamp(par.getDynamicFloat("frequency"),1.f,1000.f);

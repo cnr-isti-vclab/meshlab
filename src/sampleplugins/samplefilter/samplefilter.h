@@ -52,7 +52,7 @@ public:
 	virtual QString filterInfo(FilterIDType filter) const;
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	virtual int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
     FilterClass getClass(QAction *a);
 

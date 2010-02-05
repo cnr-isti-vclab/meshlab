@@ -315,8 +315,9 @@ T log_2(const T num)
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, RichParameterSet &par, vcg::CallBackPos *cb)
+bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
+    MeshModel &m=*(md.mm());
 	switch(ID(filter))	 {
 		case FP_UV_TO_COLOR : {
 			int vcount = m.cm.vert.size();
