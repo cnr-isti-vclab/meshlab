@@ -48,7 +48,7 @@ bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParame
         container->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
     }
 
-    m_engine.clear(md);
+    m_engine.clear();
     m_engine.setGlobalForce(gravity);
     m_engine.setIterations(par.getInt("iterations"));
     m_engine.setMaxContacts(par.getInt("contacts"));

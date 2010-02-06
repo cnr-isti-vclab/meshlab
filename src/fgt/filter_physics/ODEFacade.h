@@ -76,7 +76,7 @@ public:
         /**
           * Unregisters all meshes
           */
-        virtual void clear(MeshDocument& md);
+        virtual void clear();
 	
 protected:
 	virtual void initialize();

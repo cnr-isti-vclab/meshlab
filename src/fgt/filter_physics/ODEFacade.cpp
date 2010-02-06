@@ -31,7 +31,7 @@ void ODEFacade::initialize(){
         m_contactGroup = dJointGroupCreate(0);
 }
 
-void ODEFacade::clear(MeshDocument& md){
+void ODEFacade::clear(){
     for(MeshIterator i = m_registeredMeshes.begin(); i != m_registeredMeshes.end(); i++){
         dGeomDestroy(i->second->geom);
         if(i->second->body) dBodyDestroy(i->second->body);
