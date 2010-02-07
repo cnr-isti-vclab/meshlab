@@ -170,7 +170,7 @@ void ODEFacade::collisionCallback(dGeomID o1, dGeomID o2){
     dBodyID body1 = dGeomGetBody(o1);
     dBodyID body2 = dGeomGetBody(o2);
 
-    for(int i = 0; i < m_contacts.size(); i++){
+    for(unsigned i = 0; i < m_contacts.size(); i++){
         m_contacts[i].surface.mode = dContactBounce;
         m_contacts[i].surface.mu = m_friction;
         m_contacts[i].surface.bounce = m_bounciness;

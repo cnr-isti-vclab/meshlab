@@ -51,7 +51,7 @@ void GravitySubFilter::initialize(MeshDocument& md, RichParameterSet& par, vcg::
     m_layersTrans.clear();
     m_layersTrans.resize(md.size());
 
-    for(int i = 0; i < m_layersTrans.size(); i++){
+    for(unsigned i = 0; i < m_layersTrans.size(); i++){
         m_layersTrans[i].reserve(m_steps);
     }
 

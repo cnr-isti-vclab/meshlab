@@ -12,7 +12,7 @@ void DynamicMeshSubFilter::initParameterSet(QAction* action,MeshDocument& md, Ri
     par.addParam(new RichDynamicFloat("timeline", 0, 0, 100, "Timeline %", "Controls the timeline of the simulation"));
 }
 
-bool DynamicMeshSubFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
+bool DynamicMeshSubFilter::applyFilter(QAction*, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
     if(parametersAreNotCorrect(md, par))
         return false;
 
@@ -22,7 +22,7 @@ bool DynamicMeshSubFilter::applyFilter(QAction* filter, MeshDocument &md, RichPa
     return true;
 }
 
-bool DynamicMeshSubFilter::parametersAreNotCorrect(MeshDocument& md, RichParameterSet& par){
+bool DynamicMeshSubFilter::parametersAreNotCorrect(MeshDocument&, RichParameterSet& par){
     return par.getInt("seconds") < 0 || par.getInt("fps") <= 0 || par.getInt("iterations") <= 0 || par.getInt("contacts") <= 0 || par.getFloat("bounciness") < 0 || par.getFloat("bounciness") > 1;
 }
 
@@ -35,8 +35,8 @@ bool DynamicMeshSubFilter::configurationHasChanged(MeshDocument& md, RichParamet
     changed |= m_gravity != par.getFloat("gravity");
     changed |= m_friction != par.getFloat("friction");
 
-    if(md.size() == m_files.size())
-        for(int i = 0; i < m_files.size(); i++)
+    if(unsigned(md.size()) == m_files.size())
+        for(unsigned i = 0; i < m_files.size(); i++)
             changed |= m_files.at(i) != md.getMesh(i)->fileName;
     else
         changed = true;

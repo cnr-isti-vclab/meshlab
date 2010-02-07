@@ -30,7 +30,7 @@ void RandomFillFilter::initParameterSet(QAction* action,MeshDocument& md, RichPa
     par.addParam(new RichBool("useRandomVertices", true, "Random spawn points", "If true the filling objects will spawn at random positions in the container mesh instead of being spawn at the center of mass"));
 }
 
-bool RandomFillFilter::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
+bool RandomFillFilter::applyFilter(QAction*, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos* cb){
     if(parametersAreNotCorrect(md, par))
         return false;
 
