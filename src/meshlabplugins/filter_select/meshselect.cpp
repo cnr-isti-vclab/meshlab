@@ -97,7 +97,6 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 						
 						parlst.addParam(new RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
 						parlst.addParam(new RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
-						parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));						
 					}
 					break;
 			case FP_SELECT_BY_COLOR:
@@ -108,10 +107,7 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 				colorspace << "HSV" << "RGB";
 				parlst.addParam(new RichEnum("ColorSpace", 0, colorspace, tr("Pick Color Space"), tr("The color space that the sliders will manipulate.") ));
 
-				QStringList mode;
-				mode << "Start Over" << "Add" << "Subtract";
-				parlst.addParam(new RichEnum("Mode", 0, mode, tr("Mode:"), tr("The mode of this filter.  Start Over clears the selection completely before selecting based on the color.  Add just adds to the current selection bases on color and subtract takes away from the selection the triangles with a vertex matching the color.") ));
-
+                parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));
 				
 				parlst.addParam(new RichDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f,  tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
 				parlst.addParam(new RichDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f,  tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
@@ -126,7 +122,7 @@ bool SelectionFilterPlugin::autoDialog(QAction *action)
 {
 	 switch(ID(action))
 	 {
-		 case  FP_SELECT_BY_COLOR:
+         case FP_SELECT_BY_COLOR:
 		 case FP_SELECT_BY_QUALITY:
 			 return true;
 	 }
@@ -134,7 +130,7 @@ bool SelectionFilterPlugin::autoDialog(QAction *action)
 }
 
 
-bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
+bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
     MeshModel &m=*(md.mm());
     CMeshO::FaceIterator fi;
@@ -142,7 +138,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 	switch(ID(action))
   {
   case FP_SELECT_DELETE_FACE : 
-		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+        for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD() && (*fi).IsS() ) tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
     break;
@@ -151,10 +147,10 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
     for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD() && (*fi).IsS() )
-					tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
-		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-			if(!(*vi).IsD() && (*vi).IsS() )
-					tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
+                    tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
+        for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+            if(!(*vi).IsD() && (*vi).IsS() )
+                    tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
     break;
   case FP_SELECT_ALL    : tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
@@ -188,74 +184,46 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 			float green = targetColor.greenF();
 			float blue = targetColor.blueF();
 			
-			float hue = (targetColor.hue()+1)/360.0f;// because in QT hueF() returns a value -1 to 0.7 
+            float hue = targetColor.hue()/360.0f;// Normalized into [0..1) range
 			float saturation = targetColor.saturationF();
 			float value = targetColor.valueF();
-			
-			//qDebug() << "r " << red << " g " << green << " b " << blue;
-			//qDebug() << "h " << hue << " s " << saturation << " v " << value;
-			
+
 			//like fuzz factor in photoshop
 			float valueRH = par.getDynamicFloat("PercentRH");
 			float valueGS = par.getDynamicFloat("PercentGS");
 			float valueBV = par.getDynamicFloat("PercentBV");
-			
-			float lowRH = (colorSpace ? red - valueRH : hue - valueRH );
-			float lowGS = (colorSpace ? green - valueGS : saturation - valueGS );
-			float lowBV = (colorSpace ? blue - valueBV : value - valueBV );
-			float highRH = (colorSpace ? red + valueRH : hue + valueRH );
-			float highGS = (colorSpace ? green + valueGS : saturation + valueGS );
-			float highBV = (colorSpace ? blue + valueBV : value + valueBV );
-			
-			//qDebug() << lowRH << " " << lowGS << " " << lowBV;
-			//qDebug() << highRH << " " << highGS << " " << highBV;
-						
-			//now modify the selection
-			if(mode == 0)
+
+            //clear any existing selection
+            if(mode == 0)
 			{
-				//clear any existing selection
-				tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
-			}
+
+                tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+                tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+            }
 					
 			//now loop through all the faces
-			CMeshO::FaceIterator fi;
-			for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+            for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 			{
-				if(!(*fi).IsD())
+                if(!(*vi).IsD())
 				{
-					Color4f colorv0 = Color4f::Construct((*fi).V(0)->C());
-					Color4f colorv1 = Color4f::Construct((*fi).V(1)->C());
-					Color4f colorv2 = Color4f::Construct((*fi).V(2)->C());
-					
-					colorv0 = ColorSpace<float>::RGBtoHSV(colorv0);
-					colorv1 = ColorSpace<float>::RGBtoHSV(colorv1);
-					colorv2 = ColorSpace<float>::RGBtoHSV(colorv2);
-						
-					//if(colorv0[0] < 0) qDebug() << "value was less than 0";
-					//qDebug() << colorv0[0] << " " << colorv0[1] << " " << colorv0[2];
-					//qDebug() << colorv1[0] << " " << colorv1[1] << " " << colorv1[2];
-					//qDebug() << colorv2[0] << " " << colorv2[1] << " " << colorv2[2];
-					
-					if( (colorv0[0] > lowRH && colorv0[0] < highRH &&
-						colorv0[1] > lowGS && colorv0[1] < highGS &&
-						colorv0[2] > lowBV && colorv0[2] < highBV) ||
-						(colorv1[0] > lowRH && colorv1[0] < highRH &&
-						colorv1[1] > lowGS && colorv1[1] < highGS &&
-						colorv1[2] > lowBV && colorv1[2] < highBV) ||
-						(colorv2[0] > lowRH && colorv2[0] < highRH &&
-						colorv2[1] > lowGS && colorv2[1] < highGS &&
-						colorv2[2] > lowBV && colorv2[2] < highBV)
-							)
-					{
-						//add
-						if(mode <= 1)
-							(*fi).SetS();
-						else if(mode == 2)
-							(*fi).ClearS();
+                    Color4f colorv = Color4f::Construct((*vi).C());
+					if(colorSpace == 0){
+                        colorv = ColorSpace<float>::RGBtoHSV(colorv);
+                        if( fabsf(colorv[0] - hue) <= valueRH &&
+                            fabsf(colorv[1] - saturation) <= valueGS &&
+                            fabsf(colorv[2] - value) <= valueBV  )
+                                   (*vi).SetS();
 					}
-					
+                    else    {
+                    if( fabsf(colorv[0] - red) <= valueRH &&
+                        fabsf(colorv[1] - green) <= valueGS &&
+                        fabsf(colorv[2] - blue) <= valueBV  )
+                                    (*vi).SetS();
+					}					
 				}
 			}
+            if(par.getBool("Inclusive")) tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
+                                     else tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
 		}
 		break;
 

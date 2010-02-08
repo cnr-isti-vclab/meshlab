@@ -60,6 +60,7 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
   virtual FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
   void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst);
 	bool autoDialog(QAction *action);
+    virtual int postCondition( QAction* ) const {return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;};
 
 	virtual int getRequirements(QAction *);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
