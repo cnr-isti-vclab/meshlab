@@ -24,6 +24,7 @@
 #include "ui_customDialog.h"
 #include "customDialog.h"
 #include <QPalette>
+ #include <QHeaderView>
 #include "stdpardialog.h"
 using namespace vcg;
 
