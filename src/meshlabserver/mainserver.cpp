@@ -35,228 +35,250 @@ public:
 	bool operator <(const FilterData &d) const {return name<d.name;}
 };
 
-PluginManager PM;
-RichParameterSet defaultGlobal;
-
-std::vector<MeshIOInterface*> meshIOPlugins;
- 
-// Here we need a better way to find the plugins directory. 
-// To be implemented:
-// use the QSettings togheter with MeshLab. 
-// When meshlab starts if he find the plugins write the absolute path of that directory in a persistent qsetting place. 
-// Here we use that QSetting. If it is not set we remember to run meshlab first once. 
-// in this way it works safely on mac too and allows the user to put the small meshlabserver binary wherever they desire (/usr/local/bin). 
-
-void loadPlugins(FILE *fp=0)
+class MeshLabServer
 {
-    PM.loadPlugins(defaultGlobal);
-
-    if(fp) 
-    {
-        foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins()) 
-            foreach(QAction *filterAction, iFilter->actions())
-                fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
-    }
-
-	printf("Total %i filtering actions\n", PM.actionFilterMap.size());
-	printf("Total %i io plugins\n", meshIOPlugins.size());
-}
-
-bool Open(MeshModel &mm, QString fileName)
-{
-	// Opening files in a transparent form (IO plugins contribution is hidden to user)
-	QStringList filters;
-	
-	// HashTable storing all supported formats togheter with
-	// the (1-based) index  of first plugin which is able to open it
-    QHash<QString, MeshIOInterface*> allKnownFormats;
-	
-    PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
-
-	QFileInfo fi(fileName);
-	QDir curdir= QDir::current();
-	// this change of dir is needed for subsequent textures/materials loading
-	//QDir::setCurrent(fi.absoluteDir().absolutePath());
-	
-	QString extension = fi.suffix();
-	qDebug("Opening a file with extention %s",qPrintable(extension));
-	// retrieving corresponding IO plugin
-    MeshIOInterface* pCurrentIOPlugin = allKnownFormats[extension.toLower()];
-    if (pCurrentIOPlugin == 0)
-	{	
-        printf("Error encountered while opening file: ");
-        return false;
-	}
-	int mask = 0;
-	
-	RichParameterSet prePar;
-	pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
-	
-	if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
-  {
-    printf("MeshLabServer: Failed loading of %s from dir %s\n",qPrintable(fileName),qPrintable(curdir.path()));
-    return false;
-  }
-	vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);
-	QDir::setCurrent(curdir.path());
-  return true;
-}
-
-bool Save(MeshModel *mm, int mask, QString fileName)
-{
-	// Opening files in a transparent form (IO plugins contribution is hidden to user)
-	QStringList filters;
-	
-	// HashTable storing all supported formats togheter with
-	// the (1-based) index  of first plugin which is able to open it
-    QHash<QString, MeshIOInterface*> allKnownFormats;
-	
-    PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
-
-	QFileInfo fi(fileName);
-	// this change of dir is needed for subsequent textures/materials loading
-	// QDir::setCurrent(fi.absoluteDir().absolutePath());
-	
-	QString extension = fi.suffix();
-	
-	// retrieving corresponding IO plugin
-    MeshIOInterface* pCurrentIOPlugin = allKnownFormats[extension.toLower()];
-    if (pCurrentIOPlugin == 0)
-	{	
-    printf("Error encountered while opening file: ");
-		//QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
-		//QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
-		return false;
-	}
-
-	// optional saving parameters (like ascii/binary encoding)
-	RichParameterSet savePar;
-	pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
-	
-	if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask, savePar))
-    {
-        printf("Failed saving\n");
-        return false;
-    }
-
-    return true;
-}
-
-
-bool Script(MeshDocument &meshDocument, QString scriptfile){
-	
-	MeshModel &mm = *meshDocument.mm();
-	
-	FilterScript scriptPtr;
-	
-	//Open/Load FilterScript 
-	
-	if (scriptfile.isEmpty())
+	public:
+	MeshLabServer()
 	{
-		printf("No script specified\n");
-		return false;
 	}
-	scriptPtr.open(scriptfile);
-	printf("Starting Script of %i actions",scriptPtr.actionList.size());
-	FilterScript::iterator ii;
-	for(ii = scriptPtr.actionList.begin();ii!= scriptPtr.actionList.end();++ii)
+
+	~MeshLabServer()
 	{
-		RichParameterSet &par = (*ii).second;
-		QString &name = (*ii).first;
-		printf("filter: %s\n",qPrintable((*ii).first));
-		
-		QAction *action = PM.actionFilterMap[ (*ii).first];
-		if (action == NULL)
+	}
+
+	static bool FilterCallBack(const int pos, const char * str)
+	{
+		int static lastPos=-1;
+		if(pos==lastPos) return true;
+		lastPos=pos;
+		printf(str);
+		return true;
+	}
+
+	// Here we need a better way to find the plugins directory.
+	// To be implemented:
+	// use the QSettings togheter with MeshLab.
+	// When meshlab starts if he find the plugins write the absolute path of that directory in a persistent qsetting place.
+	// Here we use that QSetting. If it is not set we remember to run meshlab first once.
+	// in this way it works safely on mac too and allows the user to put the small meshlabserver binary wherever they desire (/usr/local/bin).
+
+	void loadPlugins(FILE *fp=0)
+	{
+		PM.loadPlugins(defaultGlobal);
+
+		if(fp)
 		{
-			printf("filter %s not found",qPrintable((*ii).first));
+			foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+				foreach(QAction *filterAction, iFilter->actions())
+					fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
+		}
+
+		printf("Total %i filtering actions\n", PM.actionFilterMap.size());
+		printf("Total %i io plugins\n", PM.meshIOPlug.size());
+	}
+
+	bool Open(MeshModel &mm, QString fileName)
+	{
+		// Opening files in a transparent form (IO plugins contribution is hidden to user)
+		QStringList filters;
+
+		// HashTable storing all supported formats togheter with
+		// the (1-based) index  of first plugin which is able to open it
+		QHash<QString, MeshIOInterface*> allKnownFormats;
+
+		PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
+
+		QFileInfo fi(fileName);
+		QDir curdir= QDir::current();
+		// this change of dir is needed for subsequent textures/materials loading
+		//QDir::setCurrent(fi.absoluteDir().absolutePath());
+
+		QString extension = fi.suffix();
+		qDebug("Opening a file with extention %s",qPrintable(extension));
+		// retrieving corresponding IO plugin
+		MeshIOInterface* pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+		if (pCurrentIOPlugin == 0)
+		{
+			printf("Error encountered while opening file: ");
 			return false;
 		}
-		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-		iFilter->setLog(NULL);
-		int req = iFilter->getRequirements(action);
-		mm.updateDataMask(req);
-				//make sure the PARMESH parameters are initialized
-		RichParameterSet &parameterSet = (*ii).second;
-		for(int i = 0; i < parameterSet.paramList.size(); i++)
-		{	
-			//get a modifieable reference
-			RichParameter* parameter = parameterSet.paramList[i];
-				
-			//if this is a mesh paramter and the index is valid
-			if(parameter->val->isMesh())
-			{  
-				MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
-				if(	md->meshindex < meshDocument.size() && 
-					md->meshindex >= 0  )
+		int mask = 0;
+
+		RichParameterSet prePar;
+		pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
+
+		if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
+		{
+			printf("MeshLabServer: Failed loading of %s from dir %s\n",qPrintable(fileName),qPrintable(curdir.path()));
+			return false;
+		}
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);
+		QDir::setCurrent(curdir.path());
+		return true;
+	}
+
+	bool Save(MeshModel *mm, int mask, QString fileName)
+	{
+		// Opening files in a transparent form (IO plugins contribution is hidden to user)
+		QStringList filters;
+
+		// HashTable storing all supported formats togheter with
+		// the (1-based) index  of first plugin which is able to open it
+		QHash<QString, MeshIOInterface*> allKnownFormats;
+
+		PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
+
+		QFileInfo fi(fileName);
+		// this change of dir is needed for subsequent textures/materials loading
+		// QDir::setCurrent(fi.absoluteDir().absolutePath());
+
+		QString extension = fi.suffix();
+
+		// retrieving corresponding IO plugin
+		MeshIOInterface* pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+		if (pCurrentIOPlugin == 0)
+		{
+		printf("Error encountered while opening file: ");
+			//QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
+			//QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
+			return false;
+		}
+
+		// optional saving parameters (like ascii/binary encoding)
+		RichParameterSet savePar;
+		pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
+
+		if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask, savePar))
+		{
+			printf("Failed saving\n");
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool Script(MeshDocument &meshDocument, QString scriptfile){
+
+		MeshModel &mm = *meshDocument.mm();
+
+		FilterScript scriptPtr;
+
+		//Open/Load FilterScript
+
+		if (scriptfile.isEmpty())
+		{
+			printf("No script specified\n");
+			return false;
+		}
+		scriptPtr.open(scriptfile);
+		printf("Starting Script of %i actions",scriptPtr.actionList.size());
+		FilterScript::iterator ii;
+		for(ii = scriptPtr.actionList.begin();ii!= scriptPtr.actionList.end();++ii)
+		{
+			RichParameterSet &par = (*ii).second;
+			QString &name = (*ii).first;
+			printf("filter: %s\n",qPrintable((*ii).first));
+
+			QAction *action = PM.actionFilterMap[ (*ii).first];
+			if (action == NULL)
+			{
+				printf("filter %s not found",qPrintable((*ii).first));
+				return false;
+			}
+			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+			iFilter->setLog(NULL);
+			int req = iFilter->getRequirements(action);
+			mm.updateDataMask(req);
+					//make sure the PARMESH parameters are initialized
+			RichParameterSet &parameterSet = (*ii).second;
+			for(int i = 0; i < parameterSet.paramList.size(); i++)
+			{
+				//get a modifieable reference
+				RichParameter* parameter = parameterSet.paramList[i];
+
+				//if this is a mesh paramter and the index is valid
+				if(parameter->val->isMesh())
 				{
-					RichMesh* rmesh = new RichMesh(parameter->name,meshDocument.getMesh(md->meshindex),&meshDocument);
-					parameterSet.paramList.replace(i,rmesh);
-				} else
-				{
-					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
-					printf("One of the filters in the script needs more meshes than you have loaded.\n");
-					exit(-1);
+					MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
+					if(	md->meshindex < meshDocument.size() &&
+						md->meshindex >= 0  )
+					{
+						RichMesh* rmesh = new RichMesh(parameter->name,meshDocument.getMesh(md->meshindex),&meshDocument);
+						parameterSet.paramList.replace(i,rmesh);
+					} else
+					{
+						printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
+						printf("One of the filters in the script needs more meshes than you have loaded.\n");
+						exit(-1);
+					}
+					delete parameter;
 				}
-				delete parameter;
+			}
+
+			bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, FilterCallBack);
+			//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
+			//GLA()->log.Logf(GLLogStream::WARNING,"Re-Applied filter %s",qPrintable((*ii).first));
+
+			if(!ret)
+			{
+				printf("Problem with filter: %s\n",qPrintable((*ii).first));
+				return false;
 			}
 		}
-		
-		bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, NULL);
-		//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
-		//GLA()->log.Logf(GLLogStream::WARNING,"Re-Applied filter %s",qPrintable((*ii).first));
-		
-		if(!ret)
-		{
-			printf("Problem with filter: %s\n",qPrintable((*ii).first));
-			return false;
-		}
-	}
-	
-	return true;
-}
 
-void Usage()
-{
-	printf("\nUsage:\n"
-		"    meshlabserver arg1 arg2 ...  \n"
-		"where args can be: \n"
-		" -i [filename...]  mesh(s) that has to be loaded\n" 
-		" -o [filename...]  mesh(s) where to write the result(s)\n"
-		" -s filename		    script to be applied\n"
-		" -d filename       dump on a text file a list of all the filtering fucntion\n" 
-		" -om options       data to save in the output files: vc -> vertex colors, vf -> vertex flags, vq -> vertex quality, vn-> vertex normals, vt -> vertex texture coords, "
-		" fc -> face colors, ff -> face flags, fq -> face quality, fn-> face normals, "
-		" wc -> wedge colors, wn-> wedge normals, wt -> wedge texture coords \n"
-		"Example:\n"
-		"	'meshlabserver -i input.obj -o output.ply -s meshclean.mlx -om vc fq wn'\n"
-		"\nNotes:\n\n"
-		"There can be multiple meshes loaded and the order they are listed matters because \n"
-		"filters that use meshes as parameters choose the mesh based on the order.\n"
-		"The number of output meshes must be either one or equal to the number of input meshes.\n"
-		"If the number of output meshes is one then only the first mesh in the input list is saved.\n"
-		"The format of the output mesh is guessed by the used extension.\n"
-		"Script is optional and must be in the format saved by MeshLab.\n"
-		);
-	
-	exit(-1);
-}
+		return true;
+	}
+
+	void Usage()
+	{
+		printf("\nUsage:\n"
+			"    meshlabserver arg1 arg2 ...  \n"
+			"where args can be: \n"
+			" -i [filename...]  mesh(s) that has to be loaded\n"
+			" -o [filename...]  mesh(s) where to write the result(s)\n"
+			" -s filename		    script to be applied\n"
+			" -d filename       dump on a text file a list of all the filtering fucntion\n"
+			" -om options       data to save in the output files: vc -> vertex colors, vf -> vertex flags, vq -> vertex quality, vn-> vertex normals, vt -> vertex texture coords, "
+			" fc -> face colors, ff -> face flags, fq -> face quality, fn-> face normals, "
+			" wc -> wedge colors, wn-> wedge normals, wt -> wedge texture coords \n"
+			"Example:\n"
+			"	'meshlabserver -i input.obj -o output.ply -s meshclean.mlx -om vc fq wn'\n"
+			"\nNotes:\n\n"
+			"There can be multiple meshes loaded and the order they are listed matters because \n"
+			"filters that use meshes as parameters choose the mesh based on the order.\n"
+			"The number of output meshes must be either one or equal to the number of input meshes.\n"
+			"If the number of output meshes is one then only the first mesh in the input list is saved.\n"
+			"The format of the output mesh is guessed by the used extension.\n"
+			"Script is optional and must be in the format saved by MeshLab.\n"
+			);
+
+		exit(-1);
+	}
+
+private:
+	PluginManager PM;
+	RichParameterSet defaultGlobal;
+
+};
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);  
+	MeshLabServer server;
 	MeshDocument meshDocument;
 	QStringList meshNamesIn, meshNamesOut;
 	QString scriptName;
 	FILE *filterFP=0;
 	int mask=0;
-	if(argc < 3) Usage();
+	if(argc < 3) server.Usage();
 	int i = 1;
 	QString res = qApp->applicationDirPath();
 	QDir currentdir(qApp->applicationDirPath());
 	
 	while(i < argc)
 	{
-		if(argv[i][0] != '-') Usage();
+		if(argv[i][0] != '-') server.Usage();
 		switch(argv[i][1])
 		{
 			case 'i' :  
@@ -443,7 +465,7 @@ int main(int argc, char *argv[])
 	}
 	
 	printf("Loading Plugins:\n");
-	loadPlugins(filterFP);
+	server.loadPlugins(filterFP);
 	
 	
 	if(meshNamesIn.isEmpty()) {
@@ -453,7 +475,7 @@ int main(int argc, char *argv[])
 		for(int i = 0; i < meshNamesIn.size(); i++)
 		{
 			MeshModel *mm = new MeshModel( meshNamesIn.at(i).toStdString().c_str() );
-			Open(*mm, meshNamesIn.at(i));
+			server.Open(*mm, meshNamesIn.at(i));
 			printf("Mesh %s loaded has %i vn %i fn\n", mm->fileName.c_str(), mm->cm.vn, mm->cm.fn);
 
 			//now add it to the document
@@ -466,7 +488,7 @@ int main(int argc, char *argv[])
 	if(!scriptName.isEmpty())
 	{		
 		printf("Apply FilterScript: '%s'\n",qPrintable(scriptName));
-		bool returnValue = Script(meshDocument, scriptName);
+		bool returnValue = server.Script(meshDocument, scriptName);
 		if(!returnValue)
 		{
 			printf("Failed to apply FilterScript\n");
@@ -485,7 +507,7 @@ int main(int argc, char *argv[])
 	{
 		for(int i = 0; i < meshNamesOut.size(); i++)
 		{
-			Save(meshDocument.getMesh(i), mask, meshNamesOut.at(i));
+			server.Save(meshDocument.getMesh(i), mask, meshNamesOut.at(i));
 			printf("Mesh %s saved with: %i vn %i fn\n", qPrintable(meshNamesOut.at(i)), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
 		}
 	}		
