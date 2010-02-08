@@ -95,11 +95,17 @@ class MeshLabWidget : public QWidget
 public:
 	MeshLabWidget(QWidget* p,RichParameter* rpar);
 	
-	virtual void resetWidgetValue() = 0;
+    // this one is called by resetValue to reset the values inside the widgets.
+    virtual void resetWidgetValue() = 0;
+    // bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
 	virtual void collectWidgetValue() = 0;
 	virtual void setWidgetValue(const Value& nv) = 0;
 	virtual ~MeshLabWidget();
-	void resetValue();
+
+    // called when the user press the 'default' button to reset the parameter values to its default.
+    // It just set the parameter value and then it calls the specialized resetWidgetValue() to update also the widget.
+    void resetValue();
+    // update the parameter with the current widget values and return it.
 	Value& getWidgetValue();
 
 	RichParameter* rp;
@@ -508,6 +514,9 @@ public:
 
 	void loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdPt = 0);
 	void loadFrameContent(RichParameter* par,MeshDocument *mdPt = 0);
+
+    // The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
+    // This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
 	void readValues(RichParameterSet &curParSet);
 	void resetValues(RichParameterSet &curParSet);
 

@@ -374,14 +374,14 @@ MeshlabStdDialog::~MeshlabStdDialog()
 	//qDebug("log range is %f ",log10(fabs(m_max-m_min)));
 	  absSB->setDecimals(decimals);
 	  absSB->setSingleStep((m_max-m_min)/100.0);
-	  float defaultv = rp->pd->defVal->getAbsPerc();
-		absSB->setValue(defaultv);
+	  float initVal = rp->val->getAbsPerc();
+		absSB->setValue(initVal);
 
 	  percSB->setMinimum(-200);
 	  percSB->setMaximum(200);
 	  percSB->setAlignment(Qt::AlignRight);
 		percSB->setSingleStep(0.5);
-	  percSB->setValue((100*(defaultv - m_min))/(m_max - m_min));
+	  percSB->setValue((100*(initVal - m_min))/(m_max - m_min));
 		percSB->setDecimals(3);
 		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
 		QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
@@ -487,7 +487,7 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
 			lay->addWidget(coordSB[i]);
 		}
-	this->setValue(paramName,rp->pd->defVal->getPoint3f());
+	this->setValue(paramName,rp->val->getPoint3f());
 	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 		{
 			getPoint3Button = new QPushButton("Get",p);
@@ -610,7 +610,7 @@ EnumWidget::EnumWidget(QWidget *p, RichEnum* rpar)
 :ComboWidget(p,rpar)
 {
 	//you MUST call it!!!!
-	Init(p,rpar->pd->defVal->getEnum(),reinterpret_cast<EnumDecoration*>(rpar->pd)->enumvalues);
+	Init(p,rpar->val->getEnum(),reinterpret_cast<EnumDecoration*>(rpar->pd)->enumvalues);
 	//assert(enumCombo != NULL);
 }
 
@@ -907,10 +907,10 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 	fieldDesc = new QLabel(rp->pd->fieldDesc);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
-	valueSlider->setValue(floatToInt(rp->pd->defVal->getFloat()));
+	valueSlider->setValue(floatToInt(rp->val->getFloat()));
 	const DynamicFloatDecoration* dfd = reinterpret_cast<const DynamicFloatDecoration*>(&(rp->pd));
 	valueLE->setValidator(new QDoubleValidator (dfd->min,dfd->max, 5, valueLE));
-	valueLE->setText(QString::number(rp->pd->defVal->getFloat()));
+	valueLE->setText(QString::number(rp->val->getFloat()));
 
 	
 	int row = gridLay->rowCount() - 1;
@@ -1032,7 +1032,7 @@ BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
 {
 	cb = new QCheckBox(rp->pd->fieldDesc,p);
 	cb->setToolTip(rp->pd->tooltip);
-	cb->setChecked(rp->pd->defVal->getBool());
+	cb->setChecked(rp->val->getBool());
 
 	//gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
 
@@ -1049,7 +1049,7 @@ void BoolWidget::collectWidgetValue()
 
 void BoolWidget::resetWidgetValue()
 {
-	cb->setChecked(rp->val->getBool());
+	cb->setChecked(rp->pd->defVal->getBool());
 }
 
 BoolWidget::~BoolWidget()
@@ -1084,7 +1084,7 @@ LineEditWidget::~LineEditWidget()
 IntWidget::IntWidget( QWidget* p,RichInt* rpar )
 :LineEditWidget(p,rpar)
 {
-	lned->setText(QString::number(rp->pd->defVal->getInt()));
+	lned->setText(QString::number(rp->val->getInt()));
 }
 
 void IntWidget::collectWidgetValue()
@@ -1094,7 +1094,7 @@ void IntWidget::collectWidgetValue()
 
 void IntWidget::resetWidgetValue()
 {
-	lned->setText(QString::number(rp->val->getInt()));
+	lned->setText(QString::number(rp->pd->defVal->getInt()));
 }
 
 void IntWidget::setWidgetValue( const Value& nv )
@@ -1105,7 +1105,7 @@ void IntWidget::setWidgetValue( const Value& nv )
 FloatWidget::FloatWidget( QWidget* p,RichFloat* rpar )
 :LineEditWidget(p,rpar)
 {
-	lned->setText(QString::number(rp->pd->defVal->getFloat(),'g',3));
+	lned->setText(QString::number(rp->val->getFloat(),'g',3));
 }
 
 void FloatWidget::collectWidgetValue()
@@ -1115,7 +1115,7 @@ void FloatWidget::collectWidgetValue()
 
 void FloatWidget::resetWidgetValue()
 {
-	lned->setText(QString::number(rp->val->getFloat(),'g',3));
+	lned->setText(QString::number(rp->pd->defVal->getFloat(),'g',3));
 }
 
 void FloatWidget::setWidgetValue( const Value& nv )
@@ -1126,7 +1126,7 @@ void FloatWidget::setWidgetValue( const Value& nv )
 StringWidget::StringWidget( QWidget* p,RichString* rpar )
 :LineEditWidget(p,rpar)
 {
-	lned->setText(rp->pd->defVal->getString());
+	lned->setText(rp->val->getString());
 }
 
 void StringWidget::collectWidgetValue()
@@ -1136,7 +1136,7 @@ void StringWidget::collectWidgetValue()
 
 void StringWidget::resetWidgetValue()
 {
-	lned->setText(rp->val->getString());
+	lned->setText(rp->pd->defVal->getString());
 }
 
 void StringWidget::setWidgetValue( const Value& nv )
