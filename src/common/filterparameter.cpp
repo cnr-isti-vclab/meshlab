@@ -169,7 +169,7 @@ void RichParameterSet::clear()
 
 void RichParameterCopyConstructor::visit( RichBool& pd )
 {
-	lastCreated = new RichBool(pd.name,pd.val->getBool(),pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichBool(pd.name,pd.val->getBool(),pd.pd->defVal->getBool(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichInt& pd )
@@ -443,7 +443,13 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		assert(0);
 	}
 
-	if(type == "RichOpenFile")  
+	if(type == "RichDynamicFloat")
+	{
+		*par = new RichDynamicFloat(name, np.attribute("value").toFloat(), np.attribute("min").toFloat(), np.attribute("max").toFloat(), desc, tooltip);
+		return;
+	}
+
+	if(type == "RichOpenFile")
 	{ 
 		//to be implemented
 		assert(0);
@@ -457,7 +463,7 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		assert(0);
 	}
 
-	if(type=="Point3f") 
+	if(type=="RichPoint3f")
 	{
 		Point3f val;
 		val[0]=np.attribute("x").toFloat();
@@ -583,8 +589,9 @@ RichBool::RichBool( const QString nm,const bool defval,const QString desc/*=QStr
 {}
 
 
-//RichBool::RichBool( const QString nm,const bool val,const bool defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(val),new BoolDecoration(new BoolValue(defval),desc,tltip))
-//{}
+RichBool::RichBool( const QString nm,const bool val,const bool defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(val),new BoolDecoration(new BoolValue(defval),desc,tltip))
+{}
+
 void RichBool::accept( Visitor& v )
 {
 	v.visit(*this);
