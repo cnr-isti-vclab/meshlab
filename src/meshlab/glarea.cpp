@@ -65,7 +65,7 @@ GLArea::GLArea(QWidget *parent, RichParameterSet *current)
 	pointSize = 2.0f;
 	layerDialog = new LayerDialog(this);
 	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	connect((const MeshDocument*)&meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(setCurrentlyActiveLayer(int)));
+    connect((const MeshDocument*)&meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -498,11 +498,9 @@ void GLArea::saveSnapshot()
 	update();
 }
 
-void GLArea::setCurrentlyActiveLayer(int meshId)
+void GLArea::updateLayer()
 {
-	//qDebug() << "setCurrent: " << meshId;
-
-	//if we have an edit tool open, notify it that the current layer has changed
+    //if we have an edit tool open, notify it that the current layer has changed
 	if(iEdit)
 	{
 		assert(lastModelEdited);  //if there is an editor last model edited should always be set when start edit is called

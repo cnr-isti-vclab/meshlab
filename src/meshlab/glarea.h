@@ -176,7 +176,7 @@ signals:
 public slots:
 
 	// Called when we change layer, notifies the edit tool if one is open
-	void setCurrentlyActiveLayer(int meshId);
+    void updateLayer();
 	
 public:
 	
