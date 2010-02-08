@@ -20,6 +20,16 @@ public:
     }
 };
 
+/**
+  * This class provides a facade (a simplified abstraction) for the use of the Open Dynamics Engine within Meshlab.
+  * To use it one has to:
+  * 1) register one or more meshes with registerTriMesh method
+  * 2) change the default parameters of the simulation via the set* methods, if needed
+  * 3) perform one ore more simulation steps via the integrate method
+  * 4) synchronize the transformation matrices of meshlab via the updateTransform method
+  * Please keep in mind that by no circumstances the transformation matrices of the registered meshes will be automatically
+  * updated by this class.
+  */
 class ODEFacade{
 public:
 	ODEFacade();
@@ -49,23 +59,27 @@ public:
         virtual vcg::Matrix44f getTransformationMatrix(MeshModel& mesh);
 
         /**
-          * Sets a global force that will act on all registered meshes.
+          * Sets a global force that will act on all registered meshes. The force is expressed in Newton and you can use it
+          * to set the gravity of your simulation, for example. If not set there will be no force acting in the simulation.
           */
         virtual void setGlobalForce(float force[3]);
         /**
-          * Sets the number of iterations of the iterative stepping function.
+          * Sets the number of iterations of the iterative stepping function. The default value is set to 10. The higher
+          * the value the more accurate will be the simulation.
           */
         virtual void setIterations(int iterations);
         /**
-          * Sets the maximum number of contacts to be generated in a collision of a pair of objects
+          * Sets the maximum number of contacts to be generated in a collision of a pair of objects. The standard value is set to
+          * 20. The higher the value the more contacts will be generated and the less interpenetration will occur.
           */
         virtual void setMaxContacts(int contacts);
         /**
-          * Sets the bounciness of a contact
+          * Sets the bounciness of a contact between (0..1). 0 means the surfaces are not bouncy at all, 1 is the maximum bouncyness.
+          * The default bounciness is set to 0.1.
           */
         virtual void setBounciness(float bounciness);
         /**
-          * Sets the coloumb friction coefficient of contact
+          * Sets the coloumb friction coefficient of contact between 0 and infinity. The default value is set to 10.
           */
         virtual void setFriction(float friction);
 
