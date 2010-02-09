@@ -84,9 +84,10 @@ class BaseSampler
 		if (qualitySampling)	
 			m->vert.back().Q() = f.V(0)->Q()*p[0] + f.V(1)->Q()*p[2] + f.V(2)->Q()*p[2];
 	}
-	
-	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const Point2i &tp)
+        void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const Point2i &tp, float edgeDist)
 	{
+                if (edgeDist != .0) return;
+
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 
 		if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0); 
@@ -96,8 +97,13 @@ class BaseSampler
 		if(tex)
 		{
 			QRgb val;
-			int xpos = tex->width()  * (float(tp[0])/texSamplingWidth);
-			int ypos = tex->height() * (1.0- float(tp[1])/texSamplingHeight);
+                        // Computing normalized texels position
+                        int xpos = (int)(tex->width()  * (float(tp[0])/texSamplingWidth)) % tex->width();
+                        int ypos = (int)(tex->height() * (1.0- float(tp[1])/texSamplingHeight)) % tex->height();
+
+                        if (xpos < 0) xpos += tex->width();
+                        if (ypos < 0) ypos += tex->height();
+
 			val = tex->pixel(xpos,ypos);
 			m->vert.back().C().SetRGB(qRed(val),qGreen(val),qBlue(val));
 		}
@@ -677,6 +683,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 							if(mps.texSamplingHeight==0) mps.texSamplingHeight = mps.tex->height();
 					}
 					mps.uvSpaceFlag = par.getBool("TextureSpace");
+                                        vcg::tri::UpdateFlags<CMeshO>::FaceClearB(curMM->cm);
 					tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,mps.texSamplingWidth,mps.texSamplingHeight);
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 					mm->updateDataMask(MeshModel::MM_VERTNORMAL | MeshModel::MM_VERTCOLOR);

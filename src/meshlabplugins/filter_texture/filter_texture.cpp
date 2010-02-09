@@ -673,8 +673,8 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			// Rasterizing triangles
 			RasterSampler rs(img);
 			rs.InitCallback(cb, m.cm.fn, 0, 80);
-			TextureCorrectedWEdge<CMeshO,RasterSampler,true>(m.cm,rs,textW,textH);
-			
+                        //TextureCorrectedWEdge<CMeshO,RasterSampler,true>(m.cm,rs,textW,textH);
+                        vcg::tri::SurfaceSampling<CMeshO,RasterSampler>::Texture(m.cm,rs,textW,textH,true);
 			// Revert alpha values from border edge pixel to 255
 			cb(81, "Cleaning up texture ...");
 			for (int y=0; y<textH; ++y)
@@ -867,11 +867,13 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			{
 				TransferColorSampler sampler(srcMesh->cm, img, upperbound); // color sampling
 				sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
-				TextureCorrectedWEdge<CMeshO,TransferColorSampler, false>(trgMesh->cm,sampler,img.width(),img.height());
+                                // TextureCorrectedWEdge<CMeshO,TransferColorSampler, false>(trgMesh->cm,sampler,img.width(),img.height());
+                                vcg::tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
 			} else {
 				TransferColorSampler sampler(srcMesh->cm, img, &srcImg, upperbound); // texture sampling
 				sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
-				TextureCorrectedWEdge<CMeshO,TransferColorSampler, false>(trgMesh->cm,sampler,img.width(),img.height());
+                                // TextureCorrectedWEdge<CMeshO,TransferColorSampler, false>(trgMesh->cm,sampler,img.width(),img.height());
+                                vcg::tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
 			}
 
 			// Revert alpha values from border edge pixel to 255
@@ -900,8 +902,8 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			
 			// Assign texture
 			if (assign && !overwrite) {
-				m.cm.textures.clear();
-				m.cm.textures.push_back(textName.toStdString());
+                                trgMesh->cm.textures.clear();
+                                trgMesh->cm.textures.push_back(textName.toStdString());
 			}
 			cb(100, "Done");
 		}

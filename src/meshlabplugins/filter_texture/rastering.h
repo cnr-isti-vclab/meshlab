@@ -122,7 +122,7 @@ public:
 		currFace = NULL;
 	}
 	
-	// expects points outside face (face affecting) with baycentric coords = (bX, bY, -<distance from closest edge>)
+        // expects points outside face (affecting face color) with edge distance > 0
 	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp, float edgeDist= 0.0)
 	{
 		CMeshO::VertexType::ColorType c;
@@ -300,6 +300,7 @@ public:
 	}
 };
 
+/*
 template <class MetroMesh, class VertexSampler, bool EDGEBARYCENTRIC>
 static void SingleFaceRasterWEdge(typename MetroMesh::FaceType &f,  VertexSampler &ps, 
 								  const vcg::Point2<typename MetroMesh::ScalarType> & v0, 
@@ -339,7 +340,7 @@ static void SingleFaceRasterWEdge(typename MetroMesh::FaceType &f,  VertexSample
 	S dn2 = -d02[0];
 	
 	//Calcolo orientamento
-	bool flipped = d02 * vcg::Point2<S>(-d10[1], d10[0]) >= 0;
+        bool flipped = !(d02 * vcg::Point2<S>(-d10[1], d10[0]) >= 0);
 	
 	// Precalcolo Calcolo edge di bordo
 	vcg::Segment2<S> borderEdges[3];
@@ -390,7 +391,7 @@ static void SingleFaceRasterWEdge(typename MetroMesh::FaceType &f,  VertexSample
 				{
 					vcg::Point2<S> close;
 					S dst;
-					if ( (flipped && n[i]<0 || !flipped && n[i]>0) &&
+                                        if ( (!flipped && n[i]<0 || flipped && n[i]>0) &&
 						(dst = ((close = ClosestPoint(borderEdges[i], px)) - px).Norm()) < minDst &&
 						close.X() > px.X()-1 && close.X() < px.X()+1 &&
 						close.Y() > px.Y()-1 && close.Y() < px.Y()+1)
@@ -447,6 +448,6 @@ static void TextureCorrectedWEdge(MetroMesh & m, VertexSampler &ps, int textureW
 			//vcg::tri::SurfaceSampling<MetroMesh,VertexSampler>::SingleFaceRaster(*fi,  ps, ti[0],ti[1],ti[2]);
 			SingleFaceRasterWEdge<MetroMesh,VertexSampler, EDGEBARYCENTRIC>(*fi,  ps, ti[0],ti[1],ti[2]);
 		}
-}
+}*/
 
 #endif
