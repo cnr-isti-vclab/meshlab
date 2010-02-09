@@ -5,7 +5,7 @@
 class MyTrenderer:public StructureSynth::Model::Rendering::TemplateRenderer{
 public:
         MyTrenderer(StructureSynth::Model::Rendering::Template templ):StructureSynth::Model::Rendering::TemplateRenderer(templ){ workingTempl=templ;}
-        //~MyTrenderer();
+        ~MyTrenderer(){output.clear();};
         void drawBox(SyntopiaCore::Math::Vector3f base,
                                 SyntopiaCore::Math::Vector3f dir1 ,
                                 SyntopiaCore::Math::Vector3f dir2,
