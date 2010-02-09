@@ -359,7 +359,7 @@ void RichParameterXMLVisitor::visit( RichMesh& pd )
 	fillRichParameterAttribute("RichMesh",pd.name,QString::number(dec->meshindex),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
-void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
+bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 {
 	QString name=np.attribute("name");
 	QString type=np.attribute("type");
@@ -369,72 +369,114 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 
 	qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
 
+	bool corrconv = false;
 	if(type=="RichBool")    
 	{ 
+		QString val = np.attribute("value").toLower();
+		if ((val != QString("true")) || (val != QString("false")))
+			return false;
 		*par = new RichBool(name,np.attribute("value")!=QString("false"),desc,tooltip); 
-		return; 
+		return true; 
 	}
 
 	if(type=="RichInt")     
 	{ 
-		*par = new RichInt(name,np.attribute("value").toInt(),desc,tooltip); 
-		return; 
+		int val = np.attribute("value").toInt(&corrconv);
+		if (!corrconv)
+			return false;
+		*par = new RichInt(name,val,desc,tooltip); 
+		return true;
 	}
 
 	if(type=="RichFloat")   
 	{ 
-		*par = new RichFloat(name,np.attribute("value").toFloat(),desc,tooltip);
-		return;
+		float val = np.attribute("value").toFloat(&corrconv);
+		if (!corrconv)
+			return false;	
+		*par = new RichFloat(name,val,desc,tooltip);
+		return true;
 	}
 
 	if(type=="RichString")  
 	{ 
 		*par = new RichString(name,np.attribute("value"),desc,tooltip); 
-		return; 
+		return true; 
 	}
 	
 	if(type=="RichAbsPerc") 
 	{ 
-		*par = new RichAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat(),desc,tooltip); 
-		return; 
+		float val = np.attribute("value").toFloat(&corrconv);
+		if ((!corrconv) && (val >= 0.0f) && (val <= 100.0f))
+			return false;
+		float min = np.attribute("min").toFloat(&corrconv);
+		if (!corrconv) 
+			return false;
+		float max = np.attribute("max").toFloat(&corrconv);
+		if (!corrconv) 
+			return false;
+		*par = new RichAbsPerc(name,val,min,max,desc,tooltip); 
+		return true; 
 	}
 
 	if(type=="RichColor")		
 	{ 
-		unsigned int r = np.attribute("r").toUInt(); 
-		unsigned int g = np.attribute("g").toUInt(); 
-		unsigned int b = np.attribute("b").toUInt(); 
-		unsigned int a = np.attribute("a").toUInt(); 
+		unsigned int r = np.attribute("r").toUInt(&corrconv);
+		if ((!corrconv) && (r >= 0) && (r <= 255))
+			return false;
+		unsigned int g = np.attribute("g").toUInt(&corrconv); 
+		if ((!corrconv) && (g >= 0) && (g <= 255))
+			return false;
+		unsigned int b = np.attribute("b").toUInt(&corrconv); 
+		if ((!corrconv) && (b >= 0) && (b <= 255))
+			return false;
+		unsigned int a = np.attribute("a").toUInt(&corrconv);
+		if ((!corrconv) && (a >= 0) && (a <= 255))
+			return false;
 		QColor col(r,g,b,a);
 		*par= new RichColor(name,col,desc,tooltip); 
-		return; 
+		return true; 
 	}
 
 	if(type=="RichMatrix44f")
 	{
 		Matrix44f mm;
 		for(int i=0;i<16;++i)
-			mm.V()[i]=np.attribute(QString("val")+QString::number(i)).toFloat();
+		{
+			float val = np.attribute(QString("val")+QString::number(i)).toFloat(&corrconv);
+			if (!corrconv)
+				return false;
+			mm.V()[i]=val;
+		}
 		*par = new RichMatrix44f(name,mm,desc,tooltip);    
-		return;                    
+		return true;                    
 	}
 
 	if(type=="RichEnum")
 	{
 		QStringList list = QStringList::QStringList();
-		int enum_card = np.attribute(QString("enum_cardinality")).toUInt();
+		int enum_card = np.attribute(QString("enum_cardinality")).toUInt(&corrconv);
+		if (!corrconv) 
+			return false;
 
 		for(int i=0;i<enum_card;++i)
 			list<<np.attribute(QString("enum_val")+QString::number(i));
 
-		*par = new RichEnum(name,np.attribute("value").toInt(),list,desc,tooltip);
-		return;
+		int val = np.attribute("value").toInt(&corrconv);
+		if ((!corrconv) && (val >=0) && (val < enum_card)) 
+			return false;
+		*par = new RichEnum(name,val,list,desc,tooltip);
+		return true;
 	}
 
 	if(type == "RichMesh")  
 	{ 
-		*par = new RichMesh(name, np.attribute("value").toInt(),desc,tooltip); 
-		return; 
+		int val = np.attribute("value").toInt(&corrconv);
+		
+		if (!corrconv) 
+			return false;
+
+		*par = new RichMesh(name, val,desc,tooltip); 
+		return true; 
 	}
 
 	if(type == "RichFloatList")
@@ -445,8 +487,19 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 
 	if(type == "RichDynamicFloat")
 	{
-		*par = new RichDynamicFloat(name, np.attribute("value").toFloat(), np.attribute("min").toFloat(), np.attribute("max").toFloat(), desc, tooltip);
-		return;
+		float min = np.attribute("min").toFloat(&corrconv);
+		if (!corrconv) 
+			return false;
+		float max = np.attribute("max").toFloat(&corrconv);
+		if (!corrconv) 
+			return false;
+
+		float val = np.attribute("value").toFloat(&corrconv);
+		if ((!corrconv) && (val >= min) && (val <= max))
+			return false;
+
+		*par = new RichDynamicFloat(name, val, min, max, desc, tooltip);
+		return true;
 	}
 
 	if(type == "RichOpenFile")
@@ -466,11 +519,18 @@ void RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 	if(type=="RichPoint3f")
 	{
 		Point3f val;
-		val[0]=np.attribute("x").toFloat();
-		val[1]=np.attribute("y").toFloat();
-		val[2]=np.attribute("z").toFloat();
+		val[0]=np.attribute("x").toFloat(&corrconv);
+		if (!corrconv) 
+			return false;
+		val[1]=np.attribute("y").toFloat(&corrconv);
+		if (!corrconv) 
+			return false;
+		val[2]=np.attribute("z").toFloat(&corrconv);
+		if (!corrconv) 
+			return false;
+
 		*par = new RichPoint3f(name, val,desc,tooltip);  
-		return; 
+		return true; 
 	}
 
 	assert(0); // we are trying to parse an unknown xml element

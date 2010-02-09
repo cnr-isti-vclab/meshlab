@@ -475,7 +475,7 @@ public:
 };
 
 class RichAbsPerc : public RichParameter
-{
+{ 
 public:
 	RichAbsPerc(const QString nm,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString());
 	RichAbsPerc(const QString nm,const float val,const float defval,const float minval,const float maxval,const QString desc=QString(),const QString tltip=QString());
@@ -586,7 +586,7 @@ public:
 class RichParameterFactory
 {
 public:
-	static void create(const QDomElement& np,RichParameter** par);
+	static bool create(const QDomElement& np,RichParameter** par);
 };
 
 class RichParameterXMLVisitor : public Visitor
