@@ -689,11 +689,16 @@ void MainWindow::loadMeshLabSettings()
 		RichParameter* rpar = NULL;
         if(!docElem.isNull())
 		{
-			RichParameterFactory::create(docElem,&rpar);
+            bool ret = RichParameterFactory::create(docElem,&rpar);
+            if (!ret)
+            {
+                qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
+                continue;
+            }
             if (!defaultGlobalParams.hasParameter(rpar->name))
             {
-                qDebug("Warning in the saved parameters there were parameters that are not in the HardWired ones.\n"
-                       "This should not happen. Ignored parameter %s",qPrintable(rpar->name));
+                qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
+                       "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
             }
             else currentGlobalParams.addParam(rpar);
 		}

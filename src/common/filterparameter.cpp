@@ -373,7 +373,7 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 	if(type=="RichBool")    
 	{ 
 		QString val = np.attribute("value").toLower();
-		if ((val != QString("true")) || (val != QString("false")))
+        if ((val != QString("true")) && (val != QString("false")))
 			return false;
 		*par = new RichBool(name,np.attribute("value")!=QString("false"),desc,tooltip); 
 		return true; 
