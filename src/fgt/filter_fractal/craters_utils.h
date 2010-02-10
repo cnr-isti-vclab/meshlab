@@ -281,6 +281,7 @@ public:
         if(args.save_as_quality)
             args.target_model->updateDataMask(MeshModel::MM_VERTQUALITY);
 
+        tri::UpdateFlags<MeshType>::FaceProjection(args.target_model->cm);
         // smoothes vertex normals
         cb(0, "Smoothing vertex normals..");
         tri::Smooth<MeshType>::VertexNormalLaplacian(*(args.target_mesh), args.smoothingSteps, false);

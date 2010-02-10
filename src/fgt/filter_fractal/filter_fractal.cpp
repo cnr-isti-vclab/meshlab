@@ -214,31 +214,32 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameter
         break;
     case FP_CRATERS:
         {
-            if (md.meshList.size() < 2)
-            {
+            if (md.meshList.size() < 2) {
                 errorMessage = "There must be at least two layers to apply the craters generation filter.";
                 return false;
             }
 
             CMeshO* samples = &(par.getMesh("samples_mesh")->cm);
-            if (samples->face.size() > 0)
-            {
+            if (samples->face.size() > 0) {
                 errorMessage = "The sample layer selected is not a sample layer.";
+                return false;
+            }
+            CMeshO* target = &(par.getMesh("target_mesh")->cm);
+            if (samples == target) {
+                errorMessage = "The sample layer and the target layer must be different.";
                 return false;
             }
 
             float minRadius = par.getDynamicFloat("min_radius");
             float maxRadius = par.getDynamicFloat("max_radius");
-            if (maxRadius <= minRadius)
-            {
+            if (maxRadius <= minRadius)  {
                 errorMessage =  "Min radius is greater than max radius.";
                 return false;
             }
 
             float minDepth = par.getDynamicFloat("min_depth");
             float maxDepth = par.getDynamicFloat("max_depth");
-            if (maxDepth <= minDepth)
-            {
+            if (maxDepth <= minDepth) {
                 errorMessage = "Min depth is greater than max depth.";
                 return false;
             }
