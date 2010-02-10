@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 	if(argc < 3) server.Usage();
 	int i = 1;
 	QString res = qApp->applicationDirPath();
-	QDir currentdir(qApp->applicationDirPath());
+        QDir currentdir(QDir::currentPath());
 	
 	while(i < argc)
 	{
