@@ -514,7 +514,7 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
 	} else 
-		printf("No Script to apply.");
+                printf("No Script to apply.\n");
 	
 	//if there is not one name or an equal number of in and out names then exit 
 	if(meshNamesOut.isEmpty() )
