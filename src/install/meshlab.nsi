@@ -193,6 +193,7 @@ Section "MainSection" SEC01
   File ${QT_BASE}\plugins\imageformats\qgif4.dll
   File ${QT_BASE}\plugins\imageformats\qtiff4.dll
   SetOutPath "$INSTDIR"
+  File "${DISTRIB_FOLDER}\common.dll"
   File "${QT_BASE}\bin\QtCore4.dll"
   File "${QT_BASE}\bin\QtGui4.dll"
   File "${QT_BASE}\bin\QtOpenGL4.dll"
@@ -200,6 +201,7 @@ Section "MainSection" SEC01
   File "${QT_BASE}\bin\QtNetwork4.dll"
   ;File "C:\MinGW\bin\mingwm10.dll"
   File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
+  File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"
   File "..\..\docs\readme.txt"
   ;File "..\..\docs\history.txt"
   File "..\..\docs\gpl.txt"
