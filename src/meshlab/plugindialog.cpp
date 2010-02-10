@@ -163,7 +163,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 	else parent=item->text(0);
 	QString fileName=pathDirectory+"/"+parent;
 	QPluginLoader loader(fileName);
-	qDebug(qPrintable("Trying to load the plugin "+fileName));
+    qDebug("Trying to load the plugin '%s'",qPrintable(fileName));
 	QObject *plugin = loader.instance();
 	if (plugin) {
 		MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
