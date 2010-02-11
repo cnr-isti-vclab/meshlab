@@ -718,8 +718,8 @@ public:
 	bool Parametrize(MeshType *mesh,bool Two_steps=true)
 	{
 		bool done;
-		const int limit0=15000;//00;
-		const int limit1=30000;
+		const int limit0=10000;//00;
+		const int limit1=20000;
 		if ((!Two_steps)||(lower_limit>limit0)||(mesh->fn<limit1))
 		{
 			done=InitBaseMesh<MeshType>(mesh,lower_limit,interval,true,true);
