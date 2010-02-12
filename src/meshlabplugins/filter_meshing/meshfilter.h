@@ -25,7 +25,6 @@
 #define EXTRAFILTERSPLUGIN_H
 
 #include <common/interfaces.h>
-#include "transformDialog.h"
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
@@ -58,7 +57,6 @@ public:
      FP_SCALE,
      FP_CENTER,
      FP_INVERT_FACES,
-     FP_TRANSFORM,
      FP_FREEZE_TRANSFORM,
      FP_CLOSE_HOLES_TRIVIAL,
      FP_CLOSE_HOLES,
@@ -76,19 +74,12 @@ public:
  virtual QString filterInfo(FilterIDType filter) const;
 
  virtual FilterClass getClass(QAction *);
- virtual bool autoDialog(QAction *) ;
- virtual bool customDialog(QAction *filter);
-
  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
- virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, RichParameterSet & params, MainWindowInterface *mw);
  virtual int getRequirements(QAction *);
  virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
  virtual int postCondition(QAction *filter) const;
 
 protected:
-
-
- TransformDialog *transformDialog;
 
  float lastq_QualityThr;
  bool lastq_QualityWeight;
