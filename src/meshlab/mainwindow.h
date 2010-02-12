@@ -48,7 +48,7 @@ class QProgressDialog;
 class QHttp;
 
 
-class MainWindow : public QMainWindow, MainWindowInterface
+class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
@@ -140,11 +140,10 @@ private slots:
 
 	///////////Solt Wrapper for QMdiArea //////////////////
 	void wrapSetActiveSubWindow(QWidget* window);
-
 private:
+    void createStdPluginWnd(); // this one is
 	void initGlobalParameters();
-	void createStdPluginWnd();
-	void createActions();
+    void createActions();
 	void createMenus();
 	void fillFilterMenu();
 	void fillDecorateMenu();
@@ -157,8 +156,6 @@ private:
 	void updateRecentFileActions();
 	void setCurrentFile(const QString &fileName);
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
-	//void saveHistory(QAction *action,const RichParameterSet &params);
-	//void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type);
 
 
 	QHttp *httpReq;
@@ -173,11 +170,8 @@ private:
 	QSignalMapper *windowMapper;
 	QDir pluginsDir;
 	QStringList pluginFileNames;
-	//std::vector<MeshIOInterface*> meshIOPlugins;
-	//QList<QAction *> editActionList;
-	//QList<QAction *> decoratorActionList;
-    
-	PluginManager PM;
+
+    PluginManager PM;
      
 	/* 
 		Note this part should be detached from MainWindow just like the loading plugin part.

@@ -418,29 +418,17 @@ void MainWindow::startFilter()
 				return;
 			}
 
-	// (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
-  // bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
-	RichParameterSet parList;
+    // just to be sure...
+    createStdPluginWnd();
 
-	//Hide the std dialog just in case to avoid that two different filters runs mixed
-	//stddialog->hide();
-
-	if(iFilter->autoDialog(action))
-	{
-
-		createStdPluginWnd();
-		/// Start the automatic dialog with the collected parameters
-		stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this,GLA());
-	}
-	else if(iFilter->customDialog(action))
-	{
-		// Start the custom dialog with the collected parameters
-		// the filter should try to mimics the behaviour of the autodialog.
-		// invoking hte execute filter function of the mainwindow each time that the user press apply
-		iFilter->getCustomParameters(action, GLA(),*(GLA()->mm()), parList, this);
-  }
-	else 
-			executeFilter(action, parList, false);
+    // (2) Ask for filter parameters and eventally directly invoke the filter
+    // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
+    // if no dialog is created the filter must be executed immediately
+    if(! stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this,GLA()) )
+    {
+        RichParameterSet dummyParSet;
+        executeFilter(action, dummyParSet, false);
+    }
 }
 
 /*

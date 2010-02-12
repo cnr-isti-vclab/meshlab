@@ -41,7 +41,7 @@ StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla)
 
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindowInterface *mwi, QWidget *gla)  
+bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
 {
 		validcache = false;
 		curAction=action;
@@ -56,8 +56,10 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		curgla=gla;
 
 		mfi->initParameterSet(action, *mdp, curParSet);
-		curmask = mfi->postCondition(action);
-		createFrame();
+        curmask = mfi->postCondition(action);
+        if(curParSet.isEmpty() && !isDynamic()) return false;
+
+        createFrame();
 		loadFrameContent(mdp);
 		if(isDynamic())
 		{
@@ -65,11 +67,11 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
 			connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 		}
+        return true;
   }
 
 	bool MeshlabStdDialog::isDynamic()
 	{
-		//return (curParSet.getDynamicFloatMask()!= 0);
 		return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 	}
 

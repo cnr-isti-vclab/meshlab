@@ -210,58 +210,6 @@ public:
 
 };
 
-/* this is used to callback the executeFilter() function
-	when the apply button of the standard plugin window
-	is clicked
-*/
-class MainWindowInterface
-{
-public:
-	//isPreview tells whether this execution is being used to produce or preview a result
-	virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){};
-	virtual ~MainWindowInterface(){};
-	
-	// This function is to find the dir where all the deployed stuff reside. 
-	// We mean the stuff used by default by MeshLab and that should not interest the standard user
-	// like for example the plugins directory, the textures used by the shaders, the cubemaps, the shaders etc.
-	// During development this stuff is in the meshlab/src/meshlab dir
-	// once deployed it depends on the OS
-	// - on windows is in the installation dir
-	// - on macs it is in inside the application bundle (to allow easy application moving)
-	
-	//static QString getBaseDirPath()
-	//{
-	//	QDir baseDir(qApp->applicationDirPath());
-	//	
-	//	#if defined(Q_OS_WIN)
-	//	// Windows: 
-	//	// during development with visual studio binary could be in the debug/release subdir.
-	//	// once deployed plugins dir is in the application directory, so 
-	//			if (baseDir.dirName() == "debug" || baseDir.dirName() == "release")		baseDir.cdUp();
-	//	#endif 
-
-	//	#if defined(Q_OS_MAC)
-	//	// Mac: during developmentwith xcode  and well deployed the binary is well buried.
-	//			for(int i=0;i<6;++i){
-	//					if(baseDir.exists("plugins")) break;
-	//					baseDir.cdUp();
-	//				}
-	//	#endif
-	//	return baseDir.absolutePath();
-	//}
-	//
-	//static QString getPluginDirPath()
-	//{
-	//	QDir pluginsDir(getBaseDirPath());
-	//	if(!pluginsDir.exists("plugins"))
-	//			QMessageBox::warning(0,"Meshlab Initialization","Serious error. Unable to find the plugins directory.");
-	//	
-	//	pluginsDir.cd("plugins");
-	//	return pluginsDir.absolutePath();
-	//}
-};
-
-
 
 class MeshFilterInterface : public MeshLabInterface
 {
@@ -395,26 +343,12 @@ public:
 		return MissingItems.isEmpty();
 	}
 
-	//  this function returns true if the filter has parameters that must be filled with an automatically build dialog.
-	virtual bool autoDialog(QAction *) {return false;}
-	
 	// This function is called to initialized the list of parameters. 
-	// it is called by the auto dialog framework to know the list of parameters.
+    // it is always called. If a filter does not need parameter it leave it empty and the framework
+    // will not create a dialog (unless for previewing)
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*par*/) {}
 	virtual void initParameterSet(QAction *filter,MeshDocument &md, RichParameterSet &par) 
 	{initParameterSet(filter,*(md.mm()),par);}
-
-	//  this function returns true if the filter has a personally customized dialog..
-	virtual bool customDialog(QAction *) {return false;}
-	
-	// This function is invoked for filters with a custom dialog of a filter and when has the params 
-	// it notify it to the mainwindow with the collected parameters
-	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, RichParameterSet & params, MainWindowInterface *mw) 
-	{
-		assert(mw);
-		mw->executeFilter(action, params, false);
-		return true;
-	}	
 
   /// Standard stuff that usually should not be redefined. 
 	void setLog(GLLogStream *log) { this->log = log ; }

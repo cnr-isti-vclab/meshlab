@@ -566,6 +566,7 @@ private:
 // This dialog is automatically configurated starting from the parameter asked by a given filter. 
 // It can handle dynamic parameters that modify only partially a given mesh. 
 
+class MainWindow;
 class MeshlabStdDialog : public QDockWidget
 {
 	  Q_OBJECT
@@ -578,7 +579,7 @@ public:
 	void createFrame();
 	void loadFrameContent(MeshDocument *mdPt=0);
 
-	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi, QWidget *gla=0);
+    bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
 	bool isDynamic();
 
 private slots:
@@ -603,7 +604,7 @@ public:
 	MeshModel *curModel;
 	MeshDocument * curMeshDoc;
 	MeshFilterInterface *curmfi;
-	MainWindowInterface *curmwi;
+    MainWindow *curmwi;
 	QWidget * curgla;
 	RichParameterSet curParSet;
 	RichParameterSet prevParSet;
