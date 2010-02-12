@@ -53,6 +53,10 @@ public:
      FP_COMPUTE_PRINC_CURV_DIR,
      FP_MIDPOINT,
      FP_REORIENT ,
+     FP_FLIP_AND_SWAP,
+     FP_ROTATE,
+     FP_SCALE,
+     FP_CENTER,
      FP_INVERT_FACES,
      FP_TRANSFORM,
      FP_FREEZE_TRANSFORM,
@@ -67,7 +71,7 @@ public:
 
 
  ExtraMeshFilterPlugin();
- ~ExtraMeshFilterPlugin();
+ ~ExtraMeshFilterPlugin(){};
  virtual QString filterName(FilterIDType filter) const;
  virtual QString filterInfo(FilterIDType filter) const;
 
@@ -79,6 +83,7 @@ public:
  virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, RichParameterSet & params, MainWindowInterface *mw);
  virtual int getRequirements(QAction *);
  virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+ virtual int postCondition(QAction *filter) const;
 
 protected:
 

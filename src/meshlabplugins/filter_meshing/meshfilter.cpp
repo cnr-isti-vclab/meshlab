@@ -53,6 +53,10 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
             FP_QUADRIC_TEXCOORD_SIMPLIFICATION <<
             FP_MIDPOINT <<
             FP_REORIENT <<
+            FP_FLIP_AND_SWAP <<
+            FP_ROTATE <<
+            FP_SCALE <<
+            FP_CENTER <<
             FP_INVERT_FACES <<
             FP_REMOVE_NON_MANIFOLD_FACE <<
             FP_REMOVE_NON_MANIFOLD_VERTEX <<
@@ -114,6 +118,10 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction *a)
     case FP_REORIENT :
     case FP_COMPUTE_PRINC_CURV_DIR:
     case FP_TRANSFORM:
+    case FP_ROTATE:
+    case FP_CENTER:
+    case FP_SCALE:
+    case FP_FLIP_AND_SWAP:
         return MeshFilterInterface::Normal;
     case FP_FREEZE_TRANSFORM:
         return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
@@ -142,6 +150,10 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
         case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
         case FP_REORIENT :	                  return QString("Re-Orient all faces coherentely");
         case FP_INVERT_FACES:									return QString("Invert Faces Orientation");
+    case FP_SCALE:	                	return QString("Scale Mesh");
+    case FP_CENTER:	                	return QString("Center Mesh");
+    case FP_ROTATE:	                	return QString("Rotate Mesh");
+        case FP_FLIP_AND_SWAP:	                	return QString("Flip and/or swap axis");
         case FP_TRANSFORM:	                	return QString("Apply Transform");
         case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
         case FP_REMOVE_NON_MANIFOLD_FACE:	        return QString("Remove Non Manifold Faces");
@@ -158,14 +170,6 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     }
     return QString("error!");
 
-}
-
-ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
-//	if(genericELD) delete genericELD;
-//	if(transformDialog)		delete transformDialog;
-//	for (int i = 0; i < actionList.count() ; i++ ) {
-//		delete actionList.at(i);
-//	}
 }
 
  QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
@@ -187,6 +191,10 @@ ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
     case FP_REORIENT : 			            return tr("Re-orient in a consistent way all the faces of the mesh");
     case FP_INVERT_FACES : 			        return tr("Invert faces orientation, flip the normal of the mesh");
+  case FP_SCALE : 	              return tr("Generate a matrix transformation that scale the mesh. The mesh can be also automatically scaled to a unit side box. ");
+  case FP_CENTER : 	              return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
+  case FP_ROTATE : 	              return tr("Generate a matrix transformation that rotates the mesh. The mesh can be rotated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
+  case FP_FLIP_AND_SWAP : 	              return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order.");
     case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");
     case FP_FREEZE_TRANSFORM : 	        return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh");
     case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces");
@@ -224,6 +232,10 @@ ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
     case FP_REMOVE_FACES_BY_AREA:
     case FP_REMOVE_FACES_BY_EDGE:
     case FP_CLUSTERING:
+  case FP_ROTATE:
+  case FP_CENTER:
+  case FP_SCALE:
+  case FP_FLIP_AND_SWAP:
     case FP_TRANSFORM:
     case FP_FREEZE_TRANSFORM:
     case FP_NORMAL_EXTRAPOLATION:
@@ -311,12 +323,60 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 		  break;
 		case FP_CYLINDER_UNWRAP:	
 			parlst.addParam(new RichFloat("startAngle", 0,"Start angle (deg)", "The starting angle of the unrolling process."));
-		  parlst.addParam(new RichFloat("endAngle",360,"End angle (deg)","The ending angle of the unrolling process. Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
-			parlst.addParam(new RichFloat("radius", 0,"Projection Radius", "If non zero, this parameter specifies the desired radius of the reference cylinder used for the projection. Changing this parameter affect the <b>X</b> horizontal scaling of the resulting mesh. If zero (default) the average distance of the mesh from the axis is chosen."));
-			
+            parlst.addParam(new RichFloat("endAngle",360,"End angle (deg)","The ending angle of the unrolling process. Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
+			parlst.addParam(new RichFloat("radius", 0,"Projection Radius", "If non zero, this parameter specifies the desired radius of the reference cylinder used for the projection. Changing this parameter affect the <b>X</b> horizontal scaling of the resulting mesh. If zero (default) the average distance of the mesh from the axis is chosen."));			
 		break;
-		case FP_NORMAL_EXTRAPOLATION:
-			parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to estimate and propagate normals."));
+          case FP_FLIP_AND_SWAP:
+        parlst.addParam(new RichBool ("flipX",false,"Flip X axis","If selected the axis will be swapped (mesh mirrored along the YZ plane"));
+        parlst.addParam(new RichBool ("flipY",false,"Flip Y axis","If selected the axis will be swapped (mesh mirrored along the XZ plane"));
+        parlst.addParam(new RichBool ("flipZ",false,"Flip Z axis","If selected the axis will be swapped (mesh mirrored along the XY plane"));
+        parlst.addParam(new RichBool ("swapXY",false,"Swap X-Y axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
+        parlst.addParam(new RichBool ("swapXZ",false,"Swap X-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
+        parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
+          break;
+        case FP_ROTATE:{
+          QStringList rotMethod;
+  rotMethod.push_back("X axis");
+  rotMethod.push_back("Y axis");
+  rotMethod.push_back("Z axis");
+  rotMethod.push_back("custom axis");
+  parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
+  QStringList rotCenter;
+  rotCenter.push_back("origin");
+  rotCenter.push_back("barycenter");
+  rotCenter.push_back("custom point");
+  parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
+  parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
+  parlst.addParam(new RichBool("snapFlag",false,"Snap angle","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
+  parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
+  parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+  parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
+      }
+  break;
+  case FP_CENTER:{
+          Box3f &bb=m.cm.bbox;
+          parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.DimX(),5.0*bb.DimX(),"X Axis","Scaling"));
+          parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.DimY(),5.0*bb.DimY(),"Y Axis","Scaling"));
+          parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.DimZ(),5.0*bb.DimZ(),"Z Axis","Scaling"));
+          parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
+      }
+          break;
+  case FP_SCALE:{
+          parlst.addParam(new RichDynamicFloat("axisX",1,0.1,10,"X Axis","Scaling"));
+          parlst.addParam(new RichDynamicFloat("axisY",1,0.1,10,"Y Axis","Scaling"));
+          parlst.addParam(new RichDynamicFloat("axisZ",1,0.1,10,"Z Axis","Scaling"));
+          parlst.addParam(new RichBool("uniformFlag",true,"Uniform Scaling","If selected an uniform scaling (the same for all the three axis) is applied (the X axis value is used)"));
+          QStringList scaleCenter;
+          scaleCenter.push_back("origin");
+          scaleCenter.push_back("barycenter");
+          scaleCenter.push_back("custom point");
+          parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of rotation:"), tr("Choose a method")));
+          parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+          parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
+      }
+  break;
+  case FP_NORMAL_EXTRAPOLATION:
+          parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to estimate and propagate normals."));
 			break;
 			 }
 }
@@ -336,6 +396,10 @@ bool ExtraMeshFilterPlugin::autoDialog(QAction *action)
 		case FP_MIDPOINT :
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
+        case FP_ROTATE:
+  case FP_SCALE:
+  case FP_CENTER:
+        case FP_FLIP_AND_SWAP:
 		case FP_CYLINDER_UNWRAP:	
 		case FP_NORMAL_EXTRAPOLATION:
 		  return true;
@@ -583,6 +647,103 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
+    if (ID(filter) == (FP_ROTATE) ) {
+        Matrix44f trRot; trRot.SetIdentity();
+        Point3f axis;
+        Point3f tranVec;
+        Matrix44f trTran,trTranInv;
+
+        switch(par.getEnum("rotAxis"))
+        {
+            case 0: axis=Point3f(1,0,0); break;
+            case 1: axis=Point3f(0,1,0);break;
+            case 2: axis=Point3f(0,0,1);break;
+            case 3: axis=par.getPoint3f("customAxis");break;
+        }
+        switch(par.getEnum("rotCenter"))
+        {
+            case 0: tranVec=Point3f(0,0,0); break;
+            case 1: tranVec=m.cm.bbox.Center(); break;
+            case 2: tranVec=par.getPoint3f("customCenter");break;
+        }
+
+        float angleDeg= par.getDynamicFloat("angle");
+        float snapAngle = par.getFloat("snapAngle");
+        if(par.getBool("snapFlag"))
+            angleDeg = floor(angleDeg / snapAngle)*snapAngle;
+
+        trRot.SetRotateDeg(angleDeg,axis);
+        trTran.SetTranslate(tranVec);
+        trTranInv.SetTranslate(-tranVec);
+        m.cm.Tr=trTran*trRot*trTranInv;
+    }
+
+    if (ID(filter) == (FP_CENTER) ) {
+        Matrix44f trTran; trTran.SetIdentity();
+
+        float xScale= par.getDynamicFloat("axisX");
+        float yScale= par.getDynamicFloat("axisY");
+        float zScale= par.getDynamicFloat("axisZ");
+
+        trTran.SetTranslate(xScale,yScale,zScale);
+        if(par.getBool("centerFlag"))
+            trTran.SetTranslate(-m.cm.bbox.Center());
+
+        m.cm.Tr=trTran;
+    }
+
+    if (ID(filter) == (FP_SCALE) ) {
+        Matrix44f trScale; trScale.SetIdentity();
+        Point3f tranVec;
+        Matrix44f trTran,trTranInv;
+
+        float xScale= par.getDynamicFloat("axisX");
+        float yScale= par.getDynamicFloat("axisY");
+        float zScale= par.getDynamicFloat("axisZ");
+        if(par.getBool("uniformFlag"))
+            trScale.SetScale(xScale,xScale,xScale);
+        else
+            trScale.SetScale(xScale,yScale,zScale);
+        if(par.getBool("unitFlag"))
+        {
+            float maxSide= max(m.cm.bbox.DimX(),max(m.cm.bbox.DimY(),m.cm.bbox.DimZ()));
+            trScale.SetScale(1.0/maxSide,1.0/maxSide,1.0/maxSide);
+        }
+        switch(par.getEnum("scaleCenter"))
+        {
+            case 0: tranVec=Point3f(0,0,0); break;
+            case 1: tranVec=m.cm.bbox.Center(); break;
+            case 2: tranVec=par.getPoint3f("customCenter");break;
+        }
+
+        trTran.SetTranslate(tranVec);
+        trTranInv.SetTranslate(-tranVec);
+        m.cm.Tr=trTran*trScale*trTranInv;
+        //m.cm.Tr=trScale;
+    }
+    if (ID(filter) == (FP_FLIP_AND_SWAP) ) {
+
+        Matrix44f tr; tr.SetIdentity();
+        if(par.getBool("flipX")) { Matrix44f flipM; flipM.SetIdentity(); flipM[0][0]=-1.0f; tr *= flipM; }
+        if(par.getBool("flipY")) { Matrix44f flipM; flipM.SetIdentity(); flipM[1][1]=-1.0f; tr *= flipM; }
+        if(par.getBool("flipZ")) { Matrix44f flipM; flipM.SetIdentity(); flipM[2][2]=-1.0f; tr *= flipM; }
+
+        if(par.getBool("swapXY")) { Matrix44f swapM; swapM.SetIdentity();
+            swapM[0][0]=0.0f; swapM[0][1]=1.0f;
+            swapM[1][0]=1.0f; swapM[1][1]=0.0f;
+            tr *= swapM; }
+        if(par.getBool("swapXZ")) { Matrix44f swapM; swapM.SetIdentity();
+            swapM[0][0]=0.0f; swapM[0][2]=1.0f;
+            swapM[2][0]=1.0f; swapM[2][2]=0.0f;
+            tr *= swapM; }
+        if(par.getBool("swapYZ")) { Matrix44f swapM; swapM.SetIdentity();
+            swapM[1][1]=0.0f; swapM[1][2]=1.0f;
+            swapM[2][1]=1.0f; swapM[2][2]=0.0f;
+            tr *= swapM; }
+        m.cm.Tr=tr;
+    }
+
+
 
   if (ID(filter) == (FP_NORMAL_EXTRAPOLATION) ) {
     NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"),-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
@@ -775,5 +936,18 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
       m.updateDataMask(MeshModel::MM_POLYGONAL);
   }
   return true;
+}
+int ExtraMeshFilterPlugin::postCondition(QAction *filter) const
+{
+    switch(ID(filter))
+    {
+    case FP_FLIP_AND_SWAP:
+    case FP_SCALE:
+    case FP_CENTER:
+    case FP_ROTATE:
+        return MeshModel::MM_TRANSFMATRIX;
+        break;
+    default: return MeshModel::MM_UNKNOWN;
+    }
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
