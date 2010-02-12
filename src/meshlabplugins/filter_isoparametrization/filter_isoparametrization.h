@@ -33,9 +33,6 @@
 #include <stat_remeshing.h>
 #include <common/interfaces.h>
 
-//#include <math.h>
-//#include <vcg/complex/trimesh/update/color.h>
-
 class FilterIsoParametrization : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
@@ -50,16 +47,15 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
 		FilterIsoParametrization();
 		~FilterIsoParametrization();
 
-    virtual FilterClass getClass(QAction *);
+        virtual FilterClass getClass(QAction *);
 		virtual QString filterName(FilterIDType filter) const;
 		virtual QString filterInfo(FilterIDType filter) const;
 
 		virtual int getRequirements(QAction *);
 
-		virtual bool autoDialog(QAction *);
-                virtual void initParameterSet(QAction *,MeshDocument&, RichParameterSet & /*parent*/);
-                virtual bool applyFilter(QAction *filter, MeshDocument&, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
-	  int postCondition(QAction* filter) const;
+        virtual void initParameterSet(QAction *,MeshDocument&, RichParameterSet & /*parent*/);
+        virtual bool applyFilter(QAction *filter, MeshDocument&, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
+        int postCondition(QAction* filter) const;
 		int getPreConditions(QAction *) const;
 		void PrintStats(CMeshO *mesh);
 		AbstractMesh abs_mesh;
@@ -67,5 +63,5 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
 		//IsoParametrization IsoParam;
 		CMeshO::PerMeshAttributeHandle<IsoParametrization> isoPHandle;
 		DiamSampler DiamSampl;
-};
+    };
 #endif

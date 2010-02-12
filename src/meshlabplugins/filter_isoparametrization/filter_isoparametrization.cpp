@@ -362,19 +362,6 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
   //return (MeshFilterInterface::Remeshing);
 }
 
-bool FilterIsoParametrization::autoDialog(QAction *a)
-{
-  (void)a;
-  /*switch(ID(a))
-  {
-    case CP_INVERT :
-    case CP_SCATTER_PER_MESH: return false;
-    default : return true;
-  }
-  assert(0);*/
-  return true;
-}
-
 int FilterIsoParametrization::postCondition( QAction* filter ) const
 {
 	(void)filter;

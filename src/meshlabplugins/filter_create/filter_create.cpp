@@ -162,14 +162,5 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   return MeshModel::MM_NONE;
 }
 
-bool FilterCreate::autoDialog(QAction* action)
-{
-  switch(ID(action))
-  {
-    case CR_BOX:
-    case CR_CONE:      return true;
-    default:					 return false;
-  }
-}
 
 Q_EXPORT_PLUGIN(FilterCreate)
