@@ -161,13 +161,15 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
         this->seed=par.findParameter("seed")->val->getInt();
         int maxrec=par.findParameter("maxrec")->val->getInt();
         int sphereres=par.findParameter("sphereres")->val->getInt();
+        int maxobj=par.findParameter("maxobj")->val->getInt();
         this->renderTemplate=GetTemplate(sphereres);
         if(this->renderTemplate!=QString::Null()){
         QFile grammar(fileName);
                 grammar.open(QFile::ReadOnly|QFile::Text);
         QString gcontent(grammar.readAll());
         grammar.close();
-                if(maxrec>0)ParseRec(&gcontent,maxrec);
+                if(maxrec>0)ParseGram(&gcontent,maxrec,tr("set maxdepth"));
+                if(maxobj>0)ParseGram(&gcontent,maxobj,tr("set maxobjects"));
         QString x3dfile(FilterSSynth::ssynth(gcontent,maxrec,this->seed,cb));
         if(QFile::exists(x3dfile)){
         openX3D(x3dfile,m,mask,cb);
@@ -191,7 +193,7 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
          parlst.addParam(new RichInt(tr("seed"),1,tr("Seed for random mesh generation"),tr("write a seed for the random generation of the mesh")));
          parlst.addParam(new RichInt("maxrec",0,"set the maximum recursion","the mesh is built recursively according to the productions of the grammar, so a limit is needed. If set to 0 meshlab will generate the mesh according to the maximum recursion set in the file"));
          parlst.addParam(new RichInt("sphereres",1,"set maximum resolution of sphere primitves, it must be included between 1 and 4","increasing the resolution of the spheres will improve the quality of the mesh "));
-
+         parlst.addParam(new RichInt("maxobj",0,"set the maximum number of object to be rendered","you can set a limit to the maximum numer of primitives rendered. If set to 0 meshlab will generate the mesh according to the input file"));
      }
  QString FilterSSynth::GetTemplate(int sphereres){
      QString filen;
@@ -217,11 +219,10 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
      QString templateR(tr.readAll());
      return templateR;
  }
- void FilterSSynth::ParseRec(QString* grammar, int maxrec){
-         int idx=grammar->indexOf("set maxdepth");
+ void FilterSSynth::ParseGram(QString* grammar, int max,QString pattern){
+         int idx=grammar->indexOf(pattern);
                  if(idx>-1){
-         int end=tr("set maxdepth").length()+idx;
-                 //int end=tr("set maxdepth").length();
+         int end=pattern.length()+idx;
          while(!grammar->operator [](end).isNumber())
                  end++;
          QString grec;
@@ -229,12 +230,17 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
                  grec.append(grammar->operator [](end));
                  end++;
          }
-         if(grec.toInt()<maxrec){
-         QString tosub=QString("set maxdepth ").append(QString::number(maxrec)).append(" ");
+                 QString tosub=QString(pattern).append(" ").append(QString::number(max)).append(" ");
          QString maxrestr=grammar->mid(idx,end-idx);
-         grammar->replace(maxrestr,tosub);
+        /* if(pattern=="set maxobjects")grammar->replace(maxrestr,tosub);
+                 else if(grec.toInt()<max)grammar->replace(maxrestr,tosub);*/
+      grammar->replace(maxrestr,tosub);
+     }
+
+         else if(pattern=="set maxobjects"){
+             QString tosub=QString(pattern).append(" ").append(QString::number(max)).append(" \n");
+             grammar->insert(0,tosub);
          }
-                 }
  }
  Q_EXPORT_PLUGIN(FilterSSynth)
 

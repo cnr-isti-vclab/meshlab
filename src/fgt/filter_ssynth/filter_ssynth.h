@@ -43,7 +43,6 @@ class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInt
             virtual QString filterName(FilterIDType filter) const;
             virtual QString filterInfo(FilterIDType filter) const;
             virtual int getRequirements(QAction *);
-            virtual bool autoDialog(QAction *) {return true;}
             virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};
             virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
             virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
@@ -62,7 +61,7 @@ class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInt
 private:
          QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);
          QString GetTemplate(int sphereres);
-             void ParseRec(QString* grammar,int maxrec);
+             void ParseGram(QString* grammar,int max,QString pattern);
                 int seed;
                QString renderTemplate;
                QString spheres[6];
