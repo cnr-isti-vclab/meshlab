@@ -116,19 +116,6 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 			break;
 		}
 }
-// Return true if the specified action has an automatic dialog.
-// return false if the action has no parameters or has an self generated dialog.
-bool SelectionFilterPlugin::autoDialog(QAction *action)
-{
-	 switch(ID(action))
-	 {
-         case FP_SELECT_BY_COLOR:
-		 case FP_SELECT_BY_QUALITY:
-			 return true;
-	 }
-  return false;
-}
-
 
 bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
@@ -176,8 +163,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 	break;
   case FP_SELECT_BY_COLOR:
 		{
-			int mode = par.getEnum("Mode");
-			int colorSpace = par.getEnum("ColorSpace");
+            int colorSpace = par.getEnum("ColorSpace");
 			QColor targetColor = par.getColor("Color");
 			
 			float red = targetColor.redF();
@@ -193,14 +179,9 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 			float valueGS = par.getDynamicFloat("PercentGS");
 			float valueBV = par.getDynamicFloat("PercentBV");
 
-            //clear any existing selection
-            if(mode == 0)
-			{
+            tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+            tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
 
-                tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
-                tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
-            }
-					
 			//now loop through all the faces
             for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 			{
