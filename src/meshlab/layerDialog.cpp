@@ -163,7 +163,7 @@ void LayerDialog::updateTable()
     QTableWidgetItem *item;
 		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
 
-		item = new QTableWidgetItem(QFileInfo(meshList.at(i)->fileName.c_str()).fileName());
+        item = new QTableWidgetItem(meshList.at(i)->shortName());
 		if(meshList.at(i)==gla->mm()) {
 						item->setBackground(QBrush(Qt::yellow));
 						item->setForeground(QBrush(Qt::blue));

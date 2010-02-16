@@ -48,7 +48,7 @@ class QProgressDialog;
 class QHttp;
 
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, MainWindowInterface
 {
 	Q_OBJECT
 

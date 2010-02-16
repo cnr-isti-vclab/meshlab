@@ -45,7 +45,16 @@ class RenderMode;
 class GLArea;
 
 
-
+/* this is used to callback the executeFilter() function
+            when the apply button of the standard plugin window
+            is clicked
+    */
+    class MainWindowInterface
+    {
+    public:
+            //isPreview tells whether this execution is being used to produce or preview a result
+            virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){};
+    };
 
 // The basic interface for opening and saving a mesh.
 // The plugins for opening and saving different mesh types must be derived from this class.

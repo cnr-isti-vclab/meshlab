@@ -92,10 +92,10 @@ public:
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-	QString getFileName()							{return QString(mm()->fileName.c_str());}
+    QString getFileName()							{return QString(mm()->shortName());}
 	void		setFileName(QString name)	
     {
-    mm()->fileName = qPrintable(name); 
+    mm()->setFileName(name);
 		setWindowTitle(QFileInfo(name).fileName()+tr("[*]"));
 		layerDialog->setWindowTitle("Layer Dialog for "+QFileInfo(name).fileName());			
 	  

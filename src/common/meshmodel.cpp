@@ -34,8 +34,7 @@ MeshModel *MeshDocument::getMesh(const char *name)
 {
 	foreach(MeshModel *mmp, meshList)
 			{
-				QString shortName( QFileInfo(mmp->fileName.c_str()).fileName() );
-				if(shortName == name) return mmp;
+                if(mmp->shortName() == name) return mmp;
 			}
 	assert(0);
 	return 0;
@@ -48,21 +47,20 @@ void MeshDocument::setCurrentMesh(unsigned int i)
 	emit currentMeshChanged(i);
 }
 
-MeshModel *MeshDocument::addNewMesh(const char *meshName,MeshModel *newMesh)
+MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh)
 {
 	QString newName=meshName;
 
 	for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
 	{
-		QString shortName( (*mmi)->fileName.c_str() );
-		if(shortName == newName)
+        if((*mmi)->shortName() == newName)
 			newName = newName+"_copy";
 	}
 
 	if(newMesh==0)
 		newMesh=new MeshModel(qPrintable(newName));
 	else
-		newMesh->fileName = qPrintable(newName);
+        newMesh->setFileName(newName);
 
 	meshList.push_back(newMesh);
 	currentMesh=meshList.back();
@@ -268,3 +266,7 @@ bool MeshModelState::apply(MeshModel *_m)
     return true;
 }
 
+const QString MeshModel::shortName() const
+{
+    return QFileInfo(fullPathFileName).fileName();
+}

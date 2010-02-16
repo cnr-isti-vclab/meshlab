@@ -705,7 +705,7 @@ void MainWindow::saveProject()
 
   foreach(MeshModel * mp, meshDoc.meshList)
 	{
-		meshNameVector.push_back(mp->fileName.c_str());
+        meshNameVector.push_back(qPrintable(mp->shortName()));
 		transfVector.push_back(mp->cm.Tr);
 	}
 	bool ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
@@ -717,8 +717,7 @@ void MainWindow::saveProject()
 
 bool MainWindow::openProject(QString fileName)
 {
-	bool openRes=true;
-	if (fileName.isEmpty())
+    if (fileName.isEmpty())
 	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "*.aln");
 	if (fileName.isEmpty()) return false;
 	else
@@ -731,19 +730,27 @@ bool MainWindow::openProject(QString fileName)
 
 	vector<RangeMap> rmv;
 
-	ALNParser::ParseALN(rmv,qPrintable(fileName));
+    int retVal=ALNParser::ParseALN(rmv,qPrintable(fileName));
+    if(retVal != ALNParser::NoError)
+    {
+        QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
+        return false;
+    }
+
 	// this change of dir is needed for subsequent textures/materials loading
 	QFileInfo fi(fileName);
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
 
-	vector<RangeMap>::iterator ir;
+    bool openRes=true;
+    vector<RangeMap>::iterator ir;
 	for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
 	{
 		if(ir==rmv.begin()) openRes = open((*ir).filename.c_str());
-		else								openRes = open((*ir).filename.c_str(),GLA());
+        else				openRes = open((*ir).filename.c_str(),GLA());
 
-		GLA()->mm()->cm.Tr=(*ir).trasformation;
+        if(openRes) GLA()->mm()->cm.Tr=(*ir).trasformation;
 	}
+    if(this->GLA() == 0) return false;
 	this->GLA()->resetTrackBall();
 	return true;
 }
@@ -753,7 +760,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
 
-	// HashTable storing all supported formats togheter with
+    // HashTable storing all supported formats together with
 	// the (1-based) index  of first plugin which is able to open it
 	QHash<QString, MeshIOInterface*> allKnownFormats;
 
@@ -849,7 +856,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					gla->meshDoc.addNewMesh(qPrintable(fileName),mm);
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
-					gla->setFileName(mm->fileName.c_str());
+                    gla->setFileName(mm->shortName());
 					if(newGla){
 						mdiarea->addSubWindow(gla);
 					}
@@ -932,11 +939,7 @@ void MainWindow::reload()
 
 bool MainWindow::save()
 {
-	QString fileName;
-	fileName = QString(GLA()->mm()->fileName.c_str());
-
-	return saveAs(fileName);
-
+    return saveAs(GLA()->mm()->fullName());
 }
 
 
@@ -948,10 +951,8 @@ bool MainWindow::saveAs(QString fileName)
 
     PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
 
-	//QString fileName;
-	
 	if (fileName.isEmpty())
-		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->fileName.c_str(), filters.join("\n"));
+        fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->shortName(), filters.join("\n"));
 	
 	bool ret = false;
 
@@ -1009,7 +1010,7 @@ bool MainWindow::saveAs(QString fileName)
 		GLA()->log.Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
 
 		qApp->restoreOverrideCursor();
-		GLA()->mm()->fileName = fileName.toStdString();
+        //GLA()->mm()->fileName = fileName.toStdString();
 		GLA()->setFileName(fileName);
 		QSettings settings;
 		int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();

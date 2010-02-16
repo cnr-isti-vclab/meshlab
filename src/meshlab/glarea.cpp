@@ -408,7 +408,7 @@ void GLArea::displayInfo()
 	}
 	else
 	{
-		renderText(middleCol,startPos+ 1*lineSpacing,tr("<%1>").arg(QFileInfo(mm()->fileName.c_str()).fileName()),qFont);
+        renderText(middleCol,startPos+ 1*lineSpacing,tr("<%1>").arg(mm()->shortName()),qFont);
 		renderText(middleCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc.vn()),qFont);
 		renderText(middleCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc.fn()),qFont);
 	}

@@ -21,8 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "mainwindow.h"
+
 #include "stdpardialog.h"
+#include <QtGui>
 using namespace vcg;
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 :QDockWidget(QString("Plugin"), p),curmask(MeshModel::MM_UNKNOWN)
@@ -41,7 +42,7 @@ StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla)
 
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
+bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindowInterface *mwi, QWidget *gla)
 {
 		validcache = false;
 		curAction=action;
@@ -51,8 +52,6 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		prevParSet.clear();
 		curModel = mm;
 		curMeshDoc = mdp;
-//		MainWindow * mwp = dynamic_cast<MainWindow *>(mwi);
-//		MainWindow * mwp = (MainWindow *)(mwi);
 		curgla=gla;
 
 		mfi->initParameterSet(action, *mdp, curParSet);
@@ -655,7 +654,7 @@ MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
 
 	for(int i=0;i<md->meshList.size();++i)
 	 {
-		QString shortName(QFileInfo(md->meshList.at(i)->fileName.c_str()).fileName());
+        QString shortName = md->meshList.at(i)->shortName();
 		meshNames.push_back(shortName);
 		if(md->meshList.at(i) == rp->pd->defVal->getMesh()) defaultMeshIndex = i;
 	 }

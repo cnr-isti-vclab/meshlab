@@ -55,6 +55,7 @@
 #include <QList>
 #include <QString>
 #include <QStringList>
+#include <QFileInfo>
 #include <QObject>
 
 class CEdge;
@@ -183,9 +184,10 @@ public:
 
   CMeshO cm;
 
+
 public:
   vcg::GlTrimesh<CMeshO> glw;
-	std::string fileName;
+
 
 	/*
 	Bitmask denoting what fields are currently used in the mesh
@@ -204,6 +206,17 @@ public:
 
 private:
   int currentDataMask;
+  QString fullPathFileName;
+public:
+  // Some notes about the files and naming.
+  // in a future the path should be moved outside the meshmodel into the meshdocument (and assume that all the meshes resides in a common subtree)
+  // currently we just fix the interface and make the pathname private for avoiding future hassles.
+
+  const QString fullName() const {return fullPathFileName;};
+  const QString shortName() const;
+  const QString pathName() const {QFileInfo fi(fullName()); return fi.absolutePath();};
+
+  void setFileName(QString newFileName) {fullPathFileName = newFileName;}
 public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
 
@@ -218,7 +231,7 @@ public:
         visible=true;
 		cm.Tr.SetIdentity();
 		cm.sfn=0;
-		if(meshName) fileName=meshName;
+        if(meshName) fullPathFileName=meshName;
   }
 
   bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);

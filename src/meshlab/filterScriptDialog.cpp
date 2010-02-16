@@ -87,7 +87,7 @@ void FilterScriptDialog::applyScript()
 		for(int i = 0; i < parameterSet.paramList.size(); i++)
 		{	
 			//get a modifieable reference
-			RichParameter* parameter = parameterSet.paramList[i];
+        //	RichParameter* parameter = parameterSet.paramList[i];
 		
 			//if this is a mesh paramter and the pointer not valid
 		//	if(parameter.fieldType == FilterParameter::PARMESH &&
