@@ -1,11 +1,11 @@
 #include "io_3dcoform.h"
 
-bool 3DCoformIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &par, vcg::CallBackPos *cb=0, QWidget *parent=0)
+bool CoformIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &par, vcg::CallBackPos *cb, QWidget *parent)
 {
 	return true;
 }
 
-bool 3DCoformIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent= 0)ù
+bool CoformIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
 {
 	return false;
 }
@@ -13,7 +13,7 @@ bool 3DCoformIOPlugin::save(const QString &formatName, const QString &fileName, 
 /*
 	returns the list of the file's type which can be imported
 */
-QList<MeshIOInterface::Format> 3DCoformIOPlugin::importFormats() const
+QList<MeshIOInterface::Format> CoformIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 	return formatList;
@@ -22,7 +22,7 @@ QList<MeshIOInterface::Format> 3DCoformIOPlugin::importFormats() const
 /*
 	returns the list of the file's type which can be exported
 */
-QList<MeshIOInterface::Format> 3DCoformIOPlugin::exportFormats() const
+QList<MeshIOInterface::Format> CoformIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("3DRI File Format"	,tr("3DRI"));

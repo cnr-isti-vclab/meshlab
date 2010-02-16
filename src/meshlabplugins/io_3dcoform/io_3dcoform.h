@@ -1,14 +1,15 @@
-#ifndef 3DCOFORMIOPLUGIN_H
-#define 3DCOFORMIOPLUGIN_H
+#ifndef COFORMIOPLUGIN_H
+#define COFORMIOPLUGIN_H
 
 #include <QList>
 #include <common/interfaces.h>
 
-class 3DCoformIOPlugin : public QObject, public MeshIOInterface
+class CoformIOPlugin : public QObject, public MeshIOInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshIOInterface)
 public:
+	CoformIOPlugin() {}
 
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
