@@ -115,7 +115,7 @@ void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWi
 			{
 					if(mp->cm.textures.size()>0)
 					{
-						QFileInfo meshBaseDir(mp->fileName.c_str());
+                        QFileInfo meshBaseDir(mp->fullName());
 						theParser.setMeshTexture(meshBaseDir.absolutePath()+"/"+QString(mp->cm.textures[0].c_str()));
 					}			
 			}

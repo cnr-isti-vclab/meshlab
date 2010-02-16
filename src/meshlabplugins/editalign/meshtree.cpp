@@ -186,7 +186,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 			GluedIdVec.push_back(mn->id);							
 			GluedTrVec.push_back(vcg::Matrix44d::Construct(mn->tr()));				
 			PaddedTrVec[mn->id]=GluedTrVec.back();
-			names[mn->id]=mn->m->fileName;
+            names[mn->id]=qPrintable(mn->m->shortName());
 		}
 	}		
 		

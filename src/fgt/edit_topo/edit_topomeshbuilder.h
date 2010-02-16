@@ -273,7 +273,7 @@ public:
 				dialog->setBarVal(i+1);
 			}
 
-		outMesh.fileName = "Retopology.ply";
+        outMesh.setFileName("Retopology.ply");
 		tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
 
 		dialog->setStatusLabel("Normals");
@@ -354,7 +354,7 @@ public:
 		}
 		else return false;
 
-		outMesh.fileName = "Retopology.ply";
+        outMesh.setFileName("Retopology.ply");
 		tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
 
 		// compute face normals, and select faces for not found vertices (to smooth them)

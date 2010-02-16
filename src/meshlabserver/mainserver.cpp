@@ -495,10 +495,10 @@ int main(int argc, char *argv[])
 		{
 			MeshModel *mm = new MeshModel( meshNamesIn.at(i).toStdString().c_str() );
 			server.Open(*mm, meshNamesIn.at(i));
-			printf("Mesh %s loaded has %i vn %i fn\n", mm->fileName.c_str(), mm->cm.vn, mm->cm.fn);
+            printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.vn, mm->cm.fn);
 
 			//now add it to the document
-			meshDocument.addNewMesh(mm->fileName.c_str(), mm);
+            meshDocument.addNewMesh(qPrintable(mm->shortName()), mm);
 		}
 		//the first mesh is the one the script is applied to
 		meshDocument.setCurrentMesh(0);

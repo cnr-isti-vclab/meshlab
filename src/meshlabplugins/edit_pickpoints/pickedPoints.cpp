@@ -243,7 +243,7 @@ void PickedPoints::translatePoints(vcg::Matrix44f &translation)
 }
 
 QString PickedPoints::getSuggestedPickedPointsFileName(const MeshModel &meshModel){
-	QString outputFileName(meshModel.fileName.c_str());
+    QString outputFileName(meshModel.shortName());
 	
 	//remove postfix
 	outputFileName.truncate(outputFileName.length()-4);

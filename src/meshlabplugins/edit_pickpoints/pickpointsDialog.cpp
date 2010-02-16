@@ -774,7 +774,7 @@ void PickPointsDialog::savePointsToFile()
 	
 		if("" != filename)
 		{
-			pickedPoints->save(filename, QString(meshModel->fileName.c_str()));
+            pickedPoints->save(filename, QString(meshModel->shortName()));
 			savePointsToMetaData();
 		}
 	}	

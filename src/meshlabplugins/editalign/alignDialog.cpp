@@ -155,7 +155,7 @@ void AlignDialog::updateButtons()
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
 {
-		QString meshName = QFileInfo(meshNode->m->fileName.c_str()).fileName();
+        QString meshName = meshNode->m->shortName();
 
 		QString labelText;
 		setText(0, QString::number(meshNode->id));		
