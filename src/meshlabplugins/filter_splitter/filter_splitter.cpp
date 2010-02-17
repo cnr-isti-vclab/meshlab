@@ -117,11 +117,8 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 		{
 			// creating the new layer
 			// that is the back one
-			MeshModel *mm= new MeshModel();
-			md.meshList.push_back(mm);
-
-			MeshModel *destMesh     = md.meshList.back();	// destination = last
-			MeshModel *currentMesh  = md.mm();				// source = current
+            MeshModel *currentMesh  = md.mm();				// source = current
+            MeshModel *destMesh= md.addNewMesh("SelectedSubset"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 
 			// select all points involved
 			tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
@@ -158,8 +155,7 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			}
 
 			// init new layer
-			destMesh->fileName = "newlayer.ply";								// mesh name
-			tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
+            tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
 			for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
 				face::ComputeNormalizedNormal(*fi);
 			tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
@@ -171,18 +167,13 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 		{
 			// creating the new layer
 			// that is the back one
-			MeshModel *mm= new MeshModel();
-			md.meshList.push_back(mm);
-
-			MeshModel *destMesh     = md.meshList.back();	// destination = last
-			MeshModel *currentMesh  = md.mm();				// source = current
-
+            MeshModel *currentMesh  = md.mm();				// source = current
+            MeshModel *destMesh= md.addNewMesh("duplicated"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 			tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, false, true); // the last true means "copy all vertices"
 
 			Log(GLLogStream::FILTER,"Duplicated current model to layer %i", md.meshList.size());
 
 			// init new layer
-			destMesh->fileName = "newlayer.ply";								// mesh name
 			tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
 			for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
 				face::ComputeNormalizedNormal(*fi);

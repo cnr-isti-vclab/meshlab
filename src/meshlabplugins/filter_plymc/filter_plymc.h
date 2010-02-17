@@ -24,7 +24,6 @@
 #ifndef _FILTER_PLYMC_H_
 #define _FILTER_PLYMC_H_
 
-#include <QObject>
 #include <common/interfaces.h>
 
 class PlyMCPlugin : public QObject, public MeshFilterInterface
@@ -39,8 +38,7 @@ public:
 	
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
-	virtual bool autoDialog(QAction *) {return true;}
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
     FilterClass getClass(QAction *a);
 

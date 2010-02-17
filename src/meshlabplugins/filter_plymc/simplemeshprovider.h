@@ -113,24 +113,25 @@ template<class TriMeshType>
       ALNParser::ParseALN(rmaps, alnName);
 
       for(int i=0; i<rmaps.size(); i++)
-      {
-	TrV.push_back(rmaps[i].trasformation);
-	meshnames.push_back(rmaps[i].filename);
-	WV.push_back(rmaps[i].quality);
-	BBV.push_back(Box3f());
-      }
+          AddSingleMesh(rmaps[i].filename, rmaps[i].trasformation, rmaps[i].quality);
+
       return true;
+    }
+
+    bool AddSingleMesh(const char* meshName, Matrix44f &tr, float meshWeight=1)
+    {
+        assert(WV.size()==meshnames.size() && TrV.size() == WV.size());
+        TrV.push_back(tr);
+        meshnames.push_back(meshName);
+        WV.push_back(meshWeight);
+        BBV.push_back(Box3f());
+        return true;
     }
 
     bool AddSingleMesh(const char* meshName)
     {
-        assert(WV.size()==meshnames.size() && TrV.size() == WV.size());
-        TrV.push_back(Matrix44f());
-        TrV.back().SetIdentity();
-        meshnames.push_back(meshName);
-        WV.push_back(1);
-        BBV.push_back(Box3f());
-		return true;
+        Matrix44f identity; identity.SetIdentity();
+        return AddSingleMesh(meshName, identity);
     }
 
     vcg::Box3f bb(int i) {return BBV[i];}

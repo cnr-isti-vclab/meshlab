@@ -21,19 +21,10 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
+#include "filter_plymc.h"
 #include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-
 #include <wrap/io_trimesh/export_vmi.h>
 
-#include "filter_plymc.h"
 #include "plymc.h"
 #include "simplemeshprovider.h"
 
@@ -94,53 +85,68 @@ PlyMCPlugin::PlyMCPlugin()
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
 {
-	 switch(ID(action))	 {
+     switch(ID(action))
+     {
         case FP_PLYMC :
           parlst.addParam(new RichAbsPerc("voxSize",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),"Voxel Side", "VoxelSide"));
           parlst.addParam(new RichInt("subdiv",1,"SubVol Splitting","the level of recursive splitting of the volume"));
           parlst.addParam(new RichInt("geodesic",true,"Geodesic Weighting"," "));
           parlst.addParam(new RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
-break;
+        break;
 		default : assert(0); 
 	}
 }
 
 // The Real Core Function doing the actual mesh processing.
-// Move Vertex of a random quantity
 bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
-    MeshModel &m=*(md.mm());
-		srand(time(NULL)); 
-		SMesh sm;
-	  m.updateDataMask(MeshModel::MM_FACEQUALITY);
-		tri::Append<SMesh,CMeshO>::Mesh(sm,m.cm);
-	 
-		tri::io::ExporterVMI<SMesh>::Save(sm,"pippo.vmi");
+   // MeshModel &m=*(md.mm());
+    srand(time(NULL));
+
     tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> > pmc;
     tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> >::Parameter &p = pmc.p;
-		
-		int subdiv=par.getInt("subdiv");
-		p.IDiv=Point3i(subdiv,subdiv,subdiv);
-		p.IPosS=Point3i(0,0,0);
-		p.IPosE[0]=p.IDiv[0]-1; p.IPosE[1]=p.IDiv[1]-1; p.IPosE[2]=p.IDiv[2]-1;
-		printf("AutoComputing all subVolumes on a %ix%ix%i\n",p.IDiv[0],p.IDiv[1],p.IDiv[2]);
 
-	  p.VoxSize=par.getAbsPerc("voxSize");
-		p.NCell=0; 
-    pmc.MP.AddSingleMesh("pippo.vmi");
-		pmc.Process();
-		if(par.getBool("openResult"))
-		{
-        for(size_t i=0;i<p.OutNameVec.size();++i)
-			{
-				MeshModel *mp=md.addNewMesh(p.OutNameVec[i].c_str());
-				tri::io::ImporterPLY<CMeshO>::Open(mp->cm,p.OutNameVec[i].c_str());
-				tri::UpdateBounding<CMeshO>::Box(mp->cm);
-				tri::UpdateNormals<CMeshO>::PerVertexPerFace(mp->cm);
-			}
-		}			
-   QFile::remove("pippo.vmi");
-	return true;
+    int subdiv=par.getInt("subdiv");
+    p.IDiv=Point3i(subdiv,subdiv,subdiv);
+    p.IPosS=Point3i(0,0,0);
+    p.IPosE[0]=p.IDiv[0]-1; p.IPosE[1]=p.IDiv[1]-1; p.IPosE[2]=p.IDiv[2]-1;
+    printf("AutoComputing all subVolumes on a %ix%ix%i\n",p.IDiv[0],p.IDiv[1],p.IDiv[2]);
+
+    p.VoxSize=par.getAbsPerc("voxSize");
+    p.NCell=0;
+
+    foreach(MeshModel*mm, md.meshList)
+    {
+        SMesh sm;
+        mm->updateDataMask(MeshModel::MM_FACEQUALITY);
+        tri::Append<SMesh,CMeshO>::Mesh(sm,mm->cm);
+        QString mshTmpPath=QDir::tempPath()+QString("/")+QString(mm->shortName());
+        qDebug("Saving tmp file %s",qPrintable(mshTmpPath));
+        int retVal = tri::io::ExporterVMI<SMesh>::Save(sm,qPrintable(mshTmpPath) );
+        if(retVal!=0)
+        {
+            qDebug("Failed to write vmi temp file %s",qPrintable(mshTmpPath));
+            return false;
+        }
+        pmc.MP.AddSingleMesh(qPrintable(mshTmpPath));
+    }
+    pmc.Process();
+
+    if(par.getBool("openResult"))
+    {
+    for(size_t i=0;i<p.OutNameVec.size();++i)
+        {
+            MeshModel *mp=md.addNewMesh(p.OutNameVec[i].c_str());
+            tri::io::ImporterPLY<CMeshO>::Open(mp->cm,p.OutNameVec[i].c_str());
+            tri::UpdateBounding<CMeshO>::Box(mp->cm);
+            tri::UpdateNormals<CMeshO>::PerVertexPerFace(mp->cm);
+        }
+    }
+
+    for(int i=0;i<pmc.MP.size();++i)
+            QFile::remove(pmc.MP.MeshName(i).c_str());
+
+   return true;
 }
 
 Q_EXPORT_PLUGIN(PlyMCPlugin)

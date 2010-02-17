@@ -192,7 +192,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
 	pr.lineWidthPt=200;
 	pr.scale=2/maxdim;
-	pr.crossHairs=true;
+    //pr.crossHairs=true;
 
 	// get filter specific params and execute filter
 	switch(ID(filter))

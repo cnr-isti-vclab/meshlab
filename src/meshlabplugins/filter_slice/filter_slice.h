@@ -26,13 +26,7 @@
 #define FILTER_SLICE_H
 
 #include <QObject>
-#include <QAction>
-#include <QActionGroup>
-#include <QList>
-#include <QStringList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 #include <vcg/simplex/edge/base.h>
 #include <vcg/complex/edgemesh/base.h>
@@ -76,7 +70,6 @@ public:
 	virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-  virtual bool applyFilter(QAction * /* filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
 	virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
 
 	static void capHole(MeshModel* orig, MeshModel* dest, int capDir=CAP_CW);
