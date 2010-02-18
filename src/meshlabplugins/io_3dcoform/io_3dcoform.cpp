@@ -18,6 +18,7 @@ bool CoformIOPlugin::open(const QString &formatName, const QString &fileName, Me
 		QFile file(fileName);
 		if (!file.open(QIODevice::ReadOnly))
 			return false;
+
 		cofDiag->exec(); 
 	}
 	else 
@@ -62,7 +63,8 @@ void CoformIOPlugin::GetExportMaskCapability( QString &format, int &capability, 
 
 CoformIOPlugin::CoformIOPlugin()
 {
-	cofDiag = new CoformImportDialog();
+	setupModel();
+	cofDiag = new CoformImportDialog(model);
 	cofDiag->hide();
 	initImportingFiltersExt();
 }
@@ -70,6 +72,7 @@ CoformIOPlugin::CoformIOPlugin()
 CoformIOPlugin::~CoformIOPlugin()
 {
 	delete cofDiag;
+	delete model;
 }
 
 void CoformIOPlugin::initImportingFiltersExt()
@@ -78,6 +81,31 @@ void CoformIOPlugin::initImportingFiltersExt()
 	stl.push_back(tr("ZIP files (.zip)"));
 	stl.push_back(tr("COLLADA files (.dae)"));
 	cofDiag->addExtensionFilters(stl);
+}
+
+void CoformIOPlugin::setupModel()
+{
+	model = new QStandardItemModel(0,2,this);
+	model->setHeaderData(0, Qt::Horizontal, tr("UUID"));
+	model->setHeaderData(1, Qt::Horizontal, tr("File Name"));
+}
+
+QString CoformIOPlugin::computePluginsPath() const
+{
+	QDir pluginsDir(PluginManager::getPluginDirPath());
+	pluginsDir.cd("3D-COFORM");
+	qDebug("U3D plugins dir %s", qPrintable(pluginsDir.absolutePath()));
+	return pluginsDir.absolutePath();
+}
+
+bool CoformIOPlugin::getUuidAndFileList(const QString hostURL,const int port,QList< UuidFileNamePair >& res) const
+{
+	return true;
+}	
+
+QString CoformIOPlugin::query() const
+{
+	return QString();
 }
 
 Q_EXPORT_PLUGIN(CoformIOPlugin)
