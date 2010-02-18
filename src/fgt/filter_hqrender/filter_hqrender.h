@@ -30,7 +30,8 @@ public:
   virtual QString filterInfo(FilterIDType filter) const;
   virtual bool autoDialog(QAction *) {return true;}
   virtual void initParameterSet(QAction *,MeshModel &m, RichParameterSet & param);
-  virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & param, vcg::CallBackPos * cb) ;
+  //virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & param, vcg::CallBackPos * cb) ;
+  virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & param, vcg::CallBackPos * cb) ;
   virtual FilterClass getClass(QAction *a);
 
 private slots:
@@ -99,9 +100,9 @@ private:
 	  QString objectId;
 	  QString objectDisplacementbound;
   };
-  bool makeScene(MeshModel &m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);
-  QString parseObject(RibFileStack* files, QString destDir, int currentFrame, MeshModel &m, RichParameterSet &par, QStringList* textureList);
-  bool convertObject(FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues);
+  bool makeScene(MeshModel* m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);
+  QString parseObject(RibFileStack* files, QString destDir, int currentFrame, MeshModel* m, RichParameterSet &par, QStringList* textureList);
+  bool convertObject(FILE* fout, QString destDir, MeshModel* m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues);
   int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);
   int writeMatrix(FILE* fout, const vcg::Matrix44f* matrix, bool transposed = true);
   vcg::Matrix44f getMatrix(const QString* matrixString)  const;

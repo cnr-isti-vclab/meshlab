@@ -122,8 +122,9 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
+	MeshModel* m = md.mm();
 	this->cb = cb;
 	QTime tt; tt.start(); //time for debuging
 	qDebug("Starting apply filter");
@@ -135,7 +136,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 	QString templateDirString = getDirFromPath(&templatePath);
 
 	//directory of current mesh
-	QString meshDirString = QString(m.fileName.c_str());
+	//QString meshDirString = QString(m.fileName.c_str());
+	QString meshDirString = QString(m->fullName());
 	meshDirString = getDirFromPath(&meshDirString);
 
 	//name and format of final image
@@ -184,8 +186,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshModel &m, RichPar
 
 	//TEXTURE: take the list of texture mesh
 	QStringList textureList = QStringList();
-	for(int i=0; i<m.cm.textures.size(); i++) {
-		textureList << QString(m.cm.textures[i].c_str());
+	for(int i=0; i<m->cm.textures.size(); i++) {
+		textureList << QString(m->cm.textures[i].c_str());
 	}
 	
 	QStringList shaderDirs, textureDirs, proceduralDirs, imagesRendered;

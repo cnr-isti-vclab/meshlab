@@ -3,7 +3,7 @@
 
 using namespace UtilitiesHQR;
 
-bool FilterHighQualityRender::makeScene(MeshModel &m,
+bool FilterHighQualityRender::makeScene(MeshModel* m,
 									   QStringList* textureList,
 									   RichParameterSet &par,
 									   QString templatePath,
@@ -224,7 +224,7 @@ bool FilterHighQualityRender::makeScene(MeshModel &m,
 }
 
 //object is a sequence beetwen the statement AttributeBegin and AttributeEnd
-QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDirString, int currentFrame, MeshModel &m, RichParameterSet &par, QStringList* textureList) {
+QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDirString, int currentFrame, MeshModel* m, RichParameterSet &par, QStringList* textureList) {
 	QString name = "object" + QString::number(numOfObject) + ".rib";
 	FILE* fout = fopen(qPrintable(destDirString + QDir::separator() + name),"wb");
 	if(fout == NULL) {
@@ -353,7 +353,7 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 }
 
 //write on a opened file the attribute of object entity
-bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshModel &m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues)
+bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshModel* m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues)
 {	
 	fprintf(fout,"AttributeBegin\n");
 	//name
@@ -371,15 +371,15 @@ bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshMod
 	//autoscale
 	float scale = 1.0;
 	if(par.getBool("Autoscale")) {
-		float ratioX = dummyX / m.cm.trBB().DimX();
-		float ratioY = dummyY / m.cm.trBB().DimY();
-		float ratioZ = dummyZ / m.cm.trBB().DimZ();
+		float ratioX = dummyX / m->cm.trBB().DimX();
+		float ratioY = dummyY / m->cm.trBB().DimY();
+		float ratioZ = dummyZ / m->cm.trBB().DimZ();
 		scale = std::min<float>(ratioX, std::min<float>(ratioY, ratioZ)); //scale factor is min ratio
 		scaleMatrix.SetScale(scale,scale,scale);
 	}
 	
 	//center mesh
-	vcg::Point3f c = m.cm.trBB().Center();
+	vcg::Point3f c = m->cm.trBB().Center();
 	vcg::Matrix44f translateBBMatrix;
 	translateBBMatrix.SetTranslate(-c[0],-c[1],-c[2]);
 			
@@ -387,23 +387,23 @@ bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshMod
 	float dx = 0.0, dy = 0.0, dz = 0.0;				
 	switch(par.getEnum("AlignX")) {
 		case FilterHighQualityRender::TOP:
-			dx = (dummyX - m.cm.trBB().DimX() * scale) / 2;	break;
+			dx = (dummyX - m->cm.trBB().DimX() * scale) / 2;	break;
         case FilterHighQualityRender::BOTTOM:
-			dx = -(dummyX - m.cm.trBB().DimX() * scale) / 2; break;
+			dx = -(dummyX - m->cm.trBB().DimX() * scale) / 2; break;
         case FilterHighQualityRender::CENTER: break; //is already center
 	}
 	switch(par.getEnum("AlignY")) {
 		case FilterHighQualityRender::TOP:
-			dy = (dummyY - m.cm.trBB().DimY() * scale) / 2; break;
+			dy = (dummyY - m->cm.trBB().DimY() * scale) / 2; break;
         case FilterHighQualityRender::BOTTOM:
-			dy = -(dummyY - m.cm.trBB().DimY() * scale) / 2; break;
+			dy = -(dummyY - m->cm.trBB().DimY() * scale) / 2; break;
         case FilterHighQualityRender::CENTER: break; //is already center
 	}			
 	switch(par.getEnum("AlignZ")) {
 		case FilterHighQualityRender::TOP:
-			dz = (dummyZ - m.cm.trBB().DimZ() * scale) / 2; break;
+			dz = (dummyZ - m->cm.trBB().DimZ() * scale) / 2; break;
         case FilterHighQualityRender::BOTTOM:
-			dz = -(dummyZ - m.cm.trBB().DimZ() * scale) / 2; break;
+			dz = -(dummyZ - m->cm.trBB().DimZ() * scale) / 2; break;
         case FilterHighQualityRender::CENTER: break; //is already center
 	}
 	vcg::Matrix44f alignMatrix;
@@ -434,7 +434,7 @@ bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshMod
 		fprintf(fout,"%s\n",qPrintable(line.trimmed()));
 	}
 	//texture mapping (are TexCoord needed for texture mapping?)
-	if(!textureList->empty() > 0 && (m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord())) {
+	if(!textureList->empty() > 0 && (m->cm.HasPerWedgeTexCoord() || m->cm.HasPerVertexTexCoord())) {
 		//multi-texture don't work!I need ad-hoc shader and to read the texture index for vertex..
 		//foreach(QString textureName, *textureList) {
 
@@ -449,7 +449,7 @@ bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshMod
 		//make the conversion only once
 		convertedGeometry = true;
 		QString geometryDest = destDir + QDir::separator() + filename;			
-		int res = vcg::tri::io::ExporterRIB<CMeshO>::Save(m.cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, false, cb);
+		int res = vcg::tri::io::ExporterRIB<CMeshO>::Save(m->cm, qPrintable(geometryDest), vcg::tri::io::Mask::IOM_ALL, false, cb);
     if(res != vcg::tri::io::ExporterRIB<CMeshO>::E_NOERROR) {
       fclose(fout);
 	    this->errorMessage = QString(vcg::tri::io::ExporterRIB<CMeshO>::ErrorMsg(res));
