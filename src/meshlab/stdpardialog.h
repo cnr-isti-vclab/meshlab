@@ -589,6 +589,7 @@ private slots:
   void toggleHelp();
 	void togglePreview();
 	void applyDynamic();
+    void changeCurrentMesh(int meshInd);
 
 public:
 	QFrame *qf;

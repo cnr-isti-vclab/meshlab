@@ -66,8 +66,17 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
 			connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 		}
+        connect(curMeshDoc, SIGNAL(currentMeshChanged(int)),this, SLOT(changeCurrentMesh(int)));
         return true;
   }
+
+    void MeshlabStdDialog::changeCurrentMesh(int meshInd)
+    {
+        meshState.apply(curModel);
+        curModel=curMeshDoc->meshList.at(meshInd);
+        meshState.create(curmask, curModel);
+        applyDynamic();
+    }
 
 	bool MeshlabStdDialog::isDynamic()
 	{
@@ -183,7 +192,7 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 }
 
 //void StdParFrame::loadFrameContent(ParameterDeclarationSet &curParSet,MeshDocument *mdPt)
-void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdPt)
+void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument */*mdPt*/)
 {
  if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
@@ -208,7 +217,7 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdP
 	adjustSize();
 }
 
-void StdParFrame::loadFrameContent( RichParameter* par,MeshDocument *mdPt /*= 0*/ )
+void StdParFrame::loadFrameContent( RichParameter* par,MeshDocument */*mdPt*/ /*= 0*/ )
 {
 	if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
@@ -335,7 +344,7 @@ void MeshlabStdDialog::closeClick()
 
 
 // click event for the standard red crossed close button in the upper right widget's corner
-void MeshlabStdDialog::closeEvent(QCloseEvent * event)
+void MeshlabStdDialog::closeEvent(QCloseEvent * /*event*/)
 {
 	closeClick();
 }
@@ -695,7 +704,7 @@ void MeshWidget::resetWidgetValue()
 	enumCombo->setCurrentIndex(defaultMeshIndex);
 }
 
-void MeshWidget::setWidgetValue( const Value& nv )
+void MeshWidget::setWidgetValue( const Value& /*nv*/ )
 {
 	//WARNING!!!!! I HAVE TO THINK CAREFULLY ABOUT THIS FUNCTION!!!
 	assert(0);
@@ -1202,7 +1211,7 @@ void SaveFileWidget::resetWidgetValue()
 {
 }
 
-void SaveFileWidget::setWidgetValue( const Value& nv )
+void SaveFileWidget::setWidgetValue( const Value& /*nv*/ )
 {
 
 }
