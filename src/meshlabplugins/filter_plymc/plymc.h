@@ -306,7 +306,7 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w )
 
 void Process()
 {
-    printf("bbox scanning...\r"); fflush(stdout);
+    printf("bbox scanning...\n"); fflush(stdout);
     Matrix44f Id; Id.SetIdentity();
     MP.InitBBox();
     printf("Completed BBox Scanning                   \n");

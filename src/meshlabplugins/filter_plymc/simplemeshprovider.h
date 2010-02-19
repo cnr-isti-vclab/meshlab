@@ -113,7 +113,7 @@ template<class TriMeshType>
       ALNParser::ParseALN(rmaps, alnName);
 
       for(int i=0; i<rmaps.size(); i++)
-          AddSingleMesh(rmaps[i].filename, rmaps[i].trasformation, rmaps[i].quality);
+          AddSingleMesh(rmaps[i].filename.c_str(), rmaps[i].trasformation, rmaps[i].quality);
 
       return true;
     }
@@ -160,33 +160,35 @@ template<class TriMeshType>
 	fullBBox.SetNull();
 
         for(int i=0;i<int(meshnames.size());++i)
-        {
+    {
             Box3d b;
             bool ret;
             Matrix44f mt;
             Matrix44f Id; Id.SetIdentity();
             mt.Import(TrV[i]);
-	    printf("bbox scanning %4i/%i [%16s]      \r",i+1,(int)meshnames.size(), meshnames[i].c_str());
+            printf("bbox scanning %4i/%i [%16s]      \r",i+1,(int)meshnames.size(), meshnames[i].c_str());
             if(tri::io::Importer<TriMeshType>::FileExtension(meshnames[i],"PLY"))
             {
-	      if(!(TrV[i]==Id))
-		  ret=ply::ScanBBox(meshnames[i].c_str(),BBV[i],mt,true,0);
-	      else
-		  ret=vcg::ply::ScanBBox(meshnames[i].c_str(),BBV[i]);
-	      if( ! ret)
-	      {
-		  printf("\n\nwarning:\n file '%s' not found\n",meshnames[i].c_str());
-		  continue;
-	      }
-	    }
-	    else
-            {
+                if(!(TrV[i]==Id))
+                    ret=ply::ScanBBox(meshnames[i].c_str(),BBV[i],mt,true,0);
+                else
+                    ret=vcg::ply::ScanBBox(meshnames[i].c_str(),BBV[i]);
+
+            }
+            else
+            {   printf("Trying to import a non-ply file %s\n",meshnames[i].c_str());fflush(stdout);
                 TriMeshType m;
-                tri::io::Importer<TriMeshType>::Open(m,meshnames[i].c_str());
+                int retVal=tri::io::Importer<TriMeshType>::Open(m,meshnames[i].c_str());
+                ret = (retVal==0);
                 tri::UpdateBounding<TriMeshType>::Box(m);
                 BBV[i].Import(m.bbox);
             }
-	    fullBBox.Add(BBV[i]);
+            if( ! ret)
+            {
+                printf("\n\nwarning:\n file '%s' not found\n",meshnames[i].c_str());fflush(stdout);
+                continue;
+            }
+            fullBBox.Add(BBV[i]);
         }
         return true;
     }

@@ -117,19 +117,26 @@ bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParamet
 
     foreach(MeshModel*mm, md.meshList)
     {
-        SMesh sm;
-        mm->updateDataMask(MeshModel::MM_FACEQUALITY);
-        tri::Append<SMesh,CMeshO>::Mesh(sm,mm->cm);
-        QString mshTmpPath=QDir::tempPath()+QString("/")+QString(mm->shortName());
-        qDebug("Saving tmp file %s",qPrintable(mshTmpPath));
-        int retVal = tri::io::ExporterVMI<SMesh>::Save(sm,qPrintable(mshTmpPath) );
-        if(retVal!=0)
+        if(mm->visible)
         {
-            qDebug("Failed to write vmi temp file %s",qPrintable(mshTmpPath));
-            return false;
+            SMesh sm;
+            mm->updateDataMask(MeshModel::MM_FACEQUALITY);
+            tri::Append<SMesh,CMeshO>::Mesh(sm, mm->cm);
+            tri::UpdatePosition<SMesh>::Matrix(sm, mm->cm.Tr,true);
+            tri::UpdateBounding<SMesh>::Box(sm);
+            //QString mshTmpPath=QDir::tempPath()+QString("/")+QString(mm->shortName())+QString(".vmi");
+            QString mshTmpPath=QString("__TMP")+QString(mm->shortName())+QString(".vmi");
+            qDebug("Saving tmp file %s",qPrintable(mshTmpPath));
+            int retVal = tri::io::ExporterVMI<SMesh>::Save(sm,qPrintable(mshTmpPath) );
+            if(retVal!=0)
+            {
+                qDebug("Failed to write vmi temp file %s",qPrintable(mshTmpPath));
+                return false;
+            }
+            pmc.MP.AddSingleMesh(qPrintable(mshTmpPath));
         }
-        pmc.MP.AddSingleMesh(qPrintable(mshTmpPath));
     }
+
     pmc.Process();
 
     if(par.getBool("openResult"))
@@ -142,9 +149,9 @@ bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParamet
             tri::UpdateNormals<CMeshO>::PerVertexPerFace(mp->cm);
         }
     }
-
-    for(int i=0;i<pmc.MP.size();++i)
-            QFile::remove(pmc.MP.MeshName(i).c_str());
+//
+//    for(int i=0;i<pmc.MP.size();++i)
+//            QFile::remove(pmc.MP.MeshName(i).c_str());
 
    return true;
 }

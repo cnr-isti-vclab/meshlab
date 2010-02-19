@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 	case 'L' :  p.SmoothNum =atoi(argv[i]+2);printf("Setting Laplacian SmoothNum to %i\n",p.SmoothNum);break;
 	case 'R' :  p.RefillNum =atoi(argv[i]+2);printf("Setting Refilling Num to %i\n",p.RefillNum);break;
 	case 'q' :  p.QualitySmoothVox=atof(argv[i]+2);printf("Setting QualitySmoothThr  to %f; \n",p.QualitySmoothVox);break;
-	case 'Q' :  p.QualitySmoothAbs=atof(argv[i]+2);printf("Setting QualitySmoothAbsolute to %f; it will override the default %i voxel value\n",p.QualitySmoothAbs,p.QualitySmoothVox);break;
+    case 'Q' :  p.QualitySmoothAbs=atof(argv[i]+2);printf("Setting QualitySmoothAbsolute to %f; it will override the default %f voxel value\n",p.QualitySmoothAbs,p.QualitySmoothVox);break;
 	case 'l' :  p.IntraSmoothFlag=true; printf("Setting Laplacian Smooth after expansion \n");break;
 	case 'G' :  p.GeodesicQualityFlag=false; printf("Disabling Geodesic Quality\n");break;
 	case 'F' :  p.PLYFileQualityFlag=true; p.GeodesicQualityFlag=false; printf("Enabling PlyFile (and disabling Geodesic) Quality\n");break;
