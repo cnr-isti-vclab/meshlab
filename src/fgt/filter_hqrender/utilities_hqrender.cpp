@@ -8,15 +8,6 @@ QString UtilitiesHQR::getDirFromPath(const QString* path) {
 	return path->left(std::max<int>(path->lastIndexOf('\\'),path->lastIndexOf('/')));
 }
 
-QString UtilitiesHQR::getFileNameFromPath(const QString* path, bool type) {
-	//return path->right(path->size() - 1 - path->lastIndexOf(QDir::separator())); //don't work :/
-	QString temp = path->right(path->size() - 1 - std::max<int>(path->lastIndexOf('\\'),path->lastIndexOf('/')));
-	if(type)
-		return temp;
-	else
-		return temp.left(temp.lastIndexOf('.'));
-}
-
 //if path contains a space, is wrapped in quotes (e.g. ..\"Program files"\..)	
 QString UtilitiesHQR::quotesPath(const QString* path) {
 	QStringList dirs = path->split(QDir::separator());

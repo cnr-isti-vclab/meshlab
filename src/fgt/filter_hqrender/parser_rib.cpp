@@ -290,7 +290,7 @@ QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDi
 				QString deb = "";
 				foreach(QString s,token)
 					deb += "str: " + s + "\n";
-				qDebug(qPrintable(deb));
+				//qDebug(qPrintable(deb));
 				//RISpec3.2 not specify what and how many attributes are there in renderman
 				//"user id" and "displacemetbound" don't be needed (perhaps)
 				if(token[2] == "user" && current->objectId == "")
@@ -440,7 +440,7 @@ bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshMod
 
 		//read only the first texture
 		QString textureName = textureList->first();
-		fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(getFileNameFromPath(&textureName,false)));								
+    fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(textureName));								
 	}
 	//geometry
 	QString filename = "geometry.rib";
@@ -478,8 +478,10 @@ int FilterHighQualityRender::makeAnimation(FILE* fout, int numOfFrame,vcg::Matri
 					if(frame == 1)
 						statement += imageName;
 					else {
-						imageName = getFileNameFromPath(&imageName,false);
-						statement += imageName + QString::number(frame) + ".tiff";
+						//imageName = getFileNameFromPath(&imageName,false);
+						//QString temp = path->right(path->size() - 1 - std::max<int>(path->lastIndexOf('\\'),path->lastIndexOf('/')));
+	          //return temp.left(temp.lastIndexOf('.'));
+            statement += imageName + QString::number(frame) + ".tiff";
 				}
 				statement += "\" " + token[2] + " " + token[3];
 				for(int i = 4; i<token.size(); i++) {

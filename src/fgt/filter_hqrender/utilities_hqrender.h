@@ -5,7 +5,6 @@
 
 namespace UtilitiesHQR {
   QString getDirFromPath(const QString* path);
-  QString getFileNameFromPath(const QString* path, bool type = true);
   QString quotesPath(const QString* path);
   bool checkDir(const QString* destDirString, const QString* path);
   bool copyFiles(const QDir* templateDir, const QDir* destDir, const QStringList* dirs);

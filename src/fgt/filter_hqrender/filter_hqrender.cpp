@@ -129,17 +129,13 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	QTime tt; tt.start(); //time for debuging
 	qDebug("Starting apply filter");
 
-	QString templateName = templates.at(par.getEnum("scene"));
-	QString templatePath = templatesDir.absolutePath() + QDir::separator() + templateName + QDir::separator() + templateName + ".rib";
-    QDir templateDir(templatesDir);
-	templateDir.cd(templateName);
-	QString templateDirString = getDirFromPath(&templatePath);
+	QString templateName = templates.at(par.getEnum("scene")); //name of selected template
+	QDir templateDir(templatesDir.absolutePath() + QDir::separator() + templateName); //dir of selected template (in string)
+  QString templatePath = templateDir.absolutePath() + QDir::separator() + templateName + ".rib";
 
 	//directory of current mesh
-	//QString meshDirString = QString(m.fileName.c_str());
-	QString meshDirString = QString(m->fullName());
-	meshDirString = getDirFromPath(&meshDirString);
-
+	QString meshDirString = m->pathName();
+	
 	//name and format of final image
 	QString imageName = par.getString("ImageName");
 	int imageFormat = par.getEnum("ImageFormat");
@@ -181,20 +177,24 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 		return false;
 	}
 
-	//destination diretory + main file	
+	//destination diretory (+ main file	?)
 	QString destDirString = destDir.absolutePath();
 
 	//TEXTURE: take the list of texture mesh
-	QStringList textureList = QStringList();
+	QStringList textureListPath = QStringList();
+  QStringList textureListName = QStringList();
 	for(int i=0; i<m->cm.textures.size(); i++) {
-		textureList << QString(m->cm.textures[i].c_str());
+    QString path = QString(m->cm.textures[i].c_str());
+		textureListPath << path;
+    QString name = path.right(path.size() - 1 - std::max<int>(path.lastIndexOf('\\'),path.lastIndexOf('/')));
+    textureListName << name;
 	}
 	
 	QStringList shaderDirs, textureDirs, proceduralDirs, imagesRendered;
 	
 	//read the template files and create the new scenes files
 	qDebug("Starting reading cycle %i",tt.elapsed());
-	if(!makeScene(m, &textureList, par, templatePath, destDirString, &shaderDirs, &textureDirs, &proceduralDirs, &imagesRendered))
+  if(!makeScene(m, &textureListName, par, templatePath, destDirString, &shaderDirs, &textureDirs, &proceduralDirs, &imagesRendered))
 		return false; //message already set
 	qDebug("Cycle ending at %i",tt.elapsed());
 	Log(GLLogStream::FILTER,"Successfully created scene");
@@ -287,13 +287,13 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	}
 	qDebug("Compiled shaders at %i",tt.elapsed());
 	
-	//Copy and convert to tiff format, all mesh textures, in dest dir and convert the to renderman format
-	//multi-texture not supported!Copy and convert only the first texture
-	if(textureList.count() > 0) {
+	//all mesh textures are copied in dest dir and are converted to tiff format, then are converted to renderman format
+	//*******multi-texture not supported!The plugin copies and converts only the first texture***********
+	if(textureListPath.count() > 0) {
 	//foreach(QString textureName, textureList) {
-		QString textureName = textureList.first();
-
-		QFile srcFile(meshDirString + QDir::separator() + textureName);
+		QString texturePath = textureListPath.first(); //it's a texture path...
+    QString textureName = textureListName.first();
+		QFile srcFile(meshDirString + QDir::separator() + texturePath);
 
 		//position in the first readable/writable between textures directories
 		QString newImageDir = ".";
@@ -305,7 +305,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 			}
 		}
 		qDebug("source texture directory: %s", qPrintable(srcFile.fileName()));
-		QString newTex = destDirString + QDir::separator() + newImageDir + QDir::separator() + getFileNameFromPath(&textureName,false);
+		QString newTex = destDirString + QDir::separator() + newImageDir + QDir::separator() + textureName;
 		qDebug("destination texture directory: %s", qPrintable(newTex + ".tiff"));
 		if(srcFile.exists())
 		{
@@ -320,9 +320,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 			//set working directory the location of texture
 			convertTextureProcess.setWorkingDirectory(destDirString + QDir::separator() + newImageDir);
 			qDebug("convert texture working directory: %s",qPrintable(destDirString + QDir::separator() + newImageDir));
-			QString toRun = aqsisDir + teqserName() + " " + getFileNameFromPath(&textureName,false) +".tiff " + getFileNameFromPath(&textureName,false) + ".tx";
+			QString toRun = aqsisDir + teqserName() + " " + textureName + ".tiff " + textureName + ".tx";
 			qDebug("convert command: %s",qPrintable(toRun));
-			convertTextureProcess.start(toRun);				
+			convertTextureProcess.start(toRun);
 			if (!convertTextureProcess.waitForFinished(-1)) { //wait the finish of process
 				QByteArray err = convertTextureProcess.readAllStandardError();
 				this->errorMessage = "Is impossible to convert the texture " + textureName + "\n" + QString(err);				
