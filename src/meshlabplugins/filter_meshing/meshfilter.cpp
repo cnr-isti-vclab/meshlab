@@ -64,6 +64,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
             FP_COMPUTE_PRINC_CURV_DIR <<
             FP_CLOSE_HOLES <<
             FP_FREEZE_TRANSFORM <<
+            FP_RESET_TRANSFORM <<
             FP_CYLINDER_UNWRAP <<
             FP_REFINE_CATMULL <<
             FP_REFINE_HALF_CATMULL <<
@@ -120,6 +121,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction *a)
     case FP_FLIP_AND_SWAP:
         return MeshFilterInterface::Normal;
     case FP_FREEZE_TRANSFORM:
+    case FP_RESET_TRANSFORM:
         return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
     case FP_CYLINDER_UNWRAP:
         return MeshFilterInterface::Smoothing;
@@ -150,7 +152,8 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_CENTER:	                	return QString("Center Mesh");
     case FP_ROTATE:	                	return QString("Rotate Mesh");
         case FP_FLIP_AND_SWAP:	                	return QString("Flip and/or swap axis");
-        case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
+    case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
+    case FP_RESET_TRANSFORM:	            return QString("Reset Current Matrix");
         case FP_REMOVE_NON_MANIFOLD_FACE:	        return QString("Remove Non Manifold Faces");
         case FP_REMOVE_NON_MANIFOLD_VERTEX:	        return QString("Remove Non Manifold Vertices");
         case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
@@ -190,7 +193,8 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
   case FP_CENTER : 	              return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
   case FP_ROTATE : 	              return tr("Generate a matrix transformation that rotates the mesh. The mesh can be rotated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
   case FP_FLIP_AND_SWAP : 	              return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order.");
-    case FP_FREEZE_TRANSFORM : 	        return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh");
+  case FP_RESET_TRANSFORM : 	        return tr("Set the current transformation matrix to the Identity. ");
+    case FP_FREEZE_TRANSFORM : 	        return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
     case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 		case FP_COMPUTE_PRINC_CURV_DIR:			return tr("Compute the principal directions of curvature with several algorithms");
 		case FP_CLOSE_HOLES :								return tr("Close holes smaller than a given threshold");
@@ -229,6 +233,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
   case FP_ROTATE:
   case FP_CENTER:
   case FP_SCALE:
+  case FP_RESET_TRANSFORM:
   case FP_FLIP_AND_SWAP:
     case FP_FREEZE_TRANSFORM:
     case FP_NORMAL_EXTRAPOLATION:
@@ -569,7 +574,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
-    if (ID(filter) == (FP_ROTATE) ) {
+    if (ID(filter) == FP_RESET_TRANSFORM ) {
+        m.cm.Tr.SetIdentity();
+    }
+
+    if (ID(filter) == FP_ROTATE ) {
         Matrix44f trRot; trRot.SetIdentity();
         Point3f axis;
         Point3f tranVec;
@@ -868,6 +877,7 @@ int ExtraMeshFilterPlugin::postCondition(QAction *filter) const
     case FP_SCALE:
     case FP_CENTER:
     case FP_ROTATE:
+    case FP_RESET_TRANSFORM:
         return MeshModel::MM_TRANSFMATRIX;
         break;
     default: return MeshModel::MM_UNKNOWN;
