@@ -70,27 +70,30 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
         return true;
   }
 
-    void MeshlabStdDialog::changeCurrentMesh(int meshInd)
+void MeshlabStdDialog::changeCurrentMesh(int meshInd)
+{
+    if(isDynamic())
     {
         meshState.apply(curModel);
         curModel=curMeshDoc->meshList.at(meshInd);
         meshState.create(curmask, curModel);
         applyDynamic();
     }
+}
 
-	bool MeshlabStdDialog::isDynamic()
-	{
-		return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
-	}
+bool MeshlabStdDialog::isDynamic()
+{
+    return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
+}
 
 
-	void MeshlabStdDialog::clearValues()
-	{
-		curAction = NULL;
-		curModel = NULL;
-		curmfi = NULL;
-		curmwi = NULL;
-	}
+void MeshlabStdDialog::clearValues()
+{
+    curAction = NULL;
+    curModel = NULL;
+    curmfi = NULL;
+    curmwi = NULL;
+}
 
 void MeshlabStdDialog::createFrame()
 {

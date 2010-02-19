@@ -89,7 +89,6 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 	if(currentMesh == mmToDel)
 	{
 		setCurrentMesh(0);
-		emit currentMeshChanged(0);
 	}
 
 	return true;

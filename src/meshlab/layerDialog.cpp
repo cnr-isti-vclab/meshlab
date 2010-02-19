@@ -56,7 +56,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	connect(ui->layerTableWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(showContextMenu(const QPoint&)));
 	connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
-
+    connect(&(gla->meshDoc), SIGNAL(currentMeshChanged(int)),this, SLOT(updateTable()));
 	//connect(	ui->deleteButton, SIGNAL(cellClicked(int, int)) , this,  SLOT(openIn(int,int)) );
 }
 void LayerDialog::toggleStatus(int row, int col)

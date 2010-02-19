@@ -44,22 +44,22 @@ namespace Ui
 class LayerDialog : public QDockWidget
 {
 	Q_OBJECT
-	public:
-     LayerDialog(QWidget *parent = 0);
-	 ~LayerDialog();
-     void updateTable();
-     void updateLog(GLLogStream &Log);
+public:
+    LayerDialog(QWidget *parent = 0);
+    ~LayerDialog();
+    void updateLog(GLLogStream &Log);
 
-	public slots:
-		void toggleStatus(int row, int column);
-		void showEvent ( QShowEvent * event );
-		void showContextMenu(const QPoint& pos);
-		void showLayerMenu();
+public slots:
+    void updateTable();
+    void toggleStatus(int row, int column);
+    void showEvent ( QShowEvent * event );
+    void showContextMenu(const QPoint& pos);
+    void showLayerMenu();
 
-	private:
-		Ui::layerDialog* ui;
-		GLArea *gla;
-		MainWindow *mw;
+private:
+    Ui::layerDialog* ui;
+    GLArea *gla;
+    MainWindow *mw;
 };
 
 
