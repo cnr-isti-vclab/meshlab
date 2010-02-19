@@ -103,7 +103,7 @@ int SaveMaskExporterDialog::GetNewMask()
 	false : otherwise.
 
 */
-bool SaveMaskExporterDialog::shouldBeChecked(int bit, int capabilityBits, int defaultBits)
+bool SaveMaskExporterDialog::shouldBeChecked(int bit, int /*capabilityBits*/, int defaultBits)
 {
 	if(!m->hasDataMask(MeshModel::io2mm(bit))) return false;
 	//if( (bit & meshBits) == 0 ) return false;
@@ -111,7 +111,7 @@ bool SaveMaskExporterDialog::shouldBeChecked(int bit, int capabilityBits, int de
 	return true;
 }
 
-bool SaveMaskExporterDialog::shouldBeEnabled(int iobit, int capabilityBits, int defaultBits)
+bool SaveMaskExporterDialog::shouldBeEnabled(int iobit, int capabilityBits, int /*defaultBits*/)
 {
 	if( (iobit & capabilityBits) == 0 ) return false;
 	int mmbit = MeshModel::io2mm(iobit);
