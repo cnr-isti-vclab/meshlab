@@ -253,13 +253,17 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			case 3:Parametrizator.SetParameters(cb,targetAbstractMinFaceNum,tolerance,IsoParametrizator::SM_L2,convergenceSpeed);break;
 			default:Parametrizator.SetParameters(cb,targetAbstractMinFaceNum,tolerance,IsoParametrizator::SM_Euristic,convergenceSpeed);break;
 		}
-		bool done=Parametrizator.Parametrize<CMeshO>(mesh,doublestep);
+		IsoParametrizator::ReturnCode ret=Parametrizator.Parametrize<CMeshO>(mesh,doublestep);
 		
-		float aggregate,L2;
-		int n_faces;
-		Parametrizator.getValues(aggregate,L2,n_faces);
-		Log("Num Faces of Abstract Domain: %d, One way stretch efficiency: %.4f, Area+Angle Distorsion %.4f  ",n_faces,L2,aggregate*100.f);
-		if (!done)
+		if (ret==IsoParametrizator::Done)
+		{
+			Parametrizator.PrintAttributes();
+			float aggregate,L2;
+			int n_faces;
+			Parametrizator.getValues(aggregate,L2,n_faces);
+			Log("Num Faces of Abstract Domain: %d, One way stretch efficiency: %.4f, Area+Angle Distorsion %.4f  ",n_faces,L2,aggregate*100.f);
+		}
+		else
 		{
 			if (!isTXTenabled)
 				m->clearDataMask(MeshModel::MM_VERTTEXCOORD);
@@ -271,7 +275,11 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 				m->clearDataMask(MeshModel::MM_VERTCOLOR);
 			if (!isFColorenabled)
 				m->clearDataMask(MeshModel::MM_FACECOLOR);
-			this->errorMessage="Mesh is non two-manifold or non watertigh";
+			if (ret==IsoParametrizator::NonPrecondition)
+				this->errorMessage="non possible parameterization because of violated preconditions";
+			else
+			if (ret==IsoParametrizator::FailParam)
+				this->errorMessage="non possible parameterization cause because missing the intepolation for some triangle of original the mesh (maybe due to topologycal noise)";
 			return false;
 		}
 		Parametrizator.ExportMeshes(para_mesh,abs_mesh);
@@ -339,6 +347,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		float border_size=par.getDynamicFloat("BorderSize");
 		MeshModel* mm=md.addNewMesh("Diam-Parameterized");
 		mm->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+		mm->updateDataMask(MeshModel::MM_VERTCOLOR);
 		CMeshO *rem=&mm->cm;
 		DiamondParametrizator DiaPara;
 		DiaPara.Init(&isoPHandle());
