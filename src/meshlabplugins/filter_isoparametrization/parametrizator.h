@@ -33,7 +33,9 @@
 #include <dual_coord_optimization.h>
 #include <float.h>
 #include <lm.h>
+#ifndef _MESHLAB
 #include <wrap/io_trimesh/export_ply.h>
+#endif
 //#include <EquilaterizeMesh.h>
 
 #include <opt_patch.h>
@@ -55,6 +57,8 @@ class MyTriEdgeCollapse: public ParamEdgeCollapse<BaseMesh>{};
 class IsoParametrizator{
 
 public:
+	typedef enum ReturnCode{NonPrecondition,FailParam,Done};
+
 	BaseMesh final_mesh;
 	BaseMesh base_mesh;
 	typedef BaseMesh::ScalarType ScalarType;
@@ -161,6 +165,7 @@ private:
 			base_mesh.vert[i].ClearFlags();
 		for (unsigned int i=0;i<base_mesh.face.size();i++)
 			base_mesh.face[i].ClearFlags();
+		InitVoronoiArea();
 	}
 
 	void InitIMark()
@@ -172,8 +177,8 @@ private:
 	
 
 	void ParaDecimate(const int &targetFaces,
-										const int &interval,
-										bool execute_flip=false)
+					  const int &interval,
+					  bool execute_flip=false)
 	{
 		vcg::LocalOptimization<BaseMesh> DeciSession(base_mesh);
 		DeciSession.Init<MyTriEdgeCollapse >();
@@ -287,7 +292,8 @@ private:
 			
 			testParametrization<BaseMesh>(base_mesh,final_mesh);
 		}
-	
+
+		
 	}
 
 	///ASSOCIATE SURVIVED VERTEX FROM DECIMATION
@@ -347,7 +353,7 @@ private:
 
 
 	template <class MeshType>
-	bool InitBaseMesh(MeshType *mesh,
+	ReturnCode InitBaseMesh(MeshType *mesh,
 		const int &targetFaces,
 		const int &interval,
 		bool execute_flip=true,
@@ -358,20 +364,24 @@ private:
 				mesh->vert[i].ClearFlags();
 			for (unsigned int i=0;i<mesh->face.size();i++)
 				mesh->face[i].ClearFlags();
-
+		
 		///INITIALIZATION
 		InitializeStructures<MeshType>(mesh);
 		
 		///TEST PRECONDITIONS
 		bool isOK=Preconditions(base_mesh);
 		if (!isOK)
-			return false;
+			return NonPrecondition;
+
+		
 
 		///DECIMATION & PARAMETRIZATION
 		ParaDecimate(targetFaces,interval,execute_flip);
 
 		///SET BEST FIND STOP POINT
-		SetBestStatus(test_interpolation);
+		isOK=SetBestStatus(test_interpolation);
+		if ((!isOK)&&(test_interpolation))
+			return FailParam;
 
 		///THEN CLEAR STACK
 		ClearStack();
@@ -407,7 +417,7 @@ private:
 			PrintAttributes();
 		}
 		#endif
-		return true;
+		return Done;
 	}
 
 	void CompactBaseDomain()
@@ -493,8 +503,11 @@ private:
 			{
 				BaseVertex * vert=to_restore->face[i].vertices_bary[j].first;
 				CoordType bary=to_restore->face[i].vertices_bary[j].second;
+				bool done=NormalizeBaryCoords(bary);
+				assert(done);
 				base_mesh.face[i].vertices_bary[j].first=vert;
 				base_mesh.face[i].vertices_bary[j].second=bary;
+
 				AssingFather(*vert,&base_mesh.face[i],bary,base_mesh);
 
 				//vert->father=&base_mesh.face[i];
@@ -560,7 +573,13 @@ private:
 	{
 		std::sort(ParaStack.begin(),ParaStack.end());
 		int indexmin=0;
-		bool isOK_interp=false;
+		bool isOK_interp;
+
+		if (test_interpolation)
+			isOK_interp=false;
+		else
+			isOK_interp=true;
+
 		RestoreStatus(indexmin);
 		if (test_interpolation)
 		{
@@ -600,6 +619,7 @@ private:
 #endif
 		
 		ClearStack();
+		isOK_interp=TestInterpolation();
 		return (isOK_interp);
 	}
 
@@ -715,24 +735,28 @@ public:
 	///PARAMETRIZATION FUNCTIONS 
 	///initialize the mesh 
 	template <class MeshType>
-	bool Parametrize(MeshType *mesh,bool Two_steps=true)
-	{
+	ReturnCode Parametrize(MeshType *mesh,bool Two_steps=true)
+	{				
+		///clean unreferenced vertices
+		vcg::tri::Clean<MeshType>::RemoveUnreferencedVertex(*mesh);
 		bool done;
-		const int limit0=10000;//00;
-		const int limit1=20000;
+		const int limit0=15000;//00;
+		const int limit1=30000;
 		if ((!Two_steps)||(lower_limit>limit0)||(mesh->fn<limit1))
 		{
-			done=InitBaseMesh<MeshType>(mesh,lower_limit,interval,true,true);
-			if (!done)
-				return false;
+			
+			ReturnCode res=InitBaseMesh<MeshType>(mesh,lower_limit,interval,true,true);
+			if (res!=Done)
+				return res;
 		}
 		else
 		{
 			///do a first parametrization step
 			printf("\n STEP 1 \n");
-			done=InitBaseMesh<MeshType>(mesh,limit0,1,false,false);
-			if (!done)
-				return false;
+			InitVoronoiArea();
+			ReturnCode res=InitBaseMesh<MeshType>(mesh,limit0,1,false,false);
+			if (res!=Done)
+				return res;
 
 			ParamMesh para_mesh0;
 			AbstractMesh abs_mesh0;
@@ -740,20 +764,26 @@ public:
 			ExportMeshes(para_mesh0,abs_mesh0);
 
 			printf("\n STEP 2 \n");
-			done=InitBaseMesh<AbstractMesh>(&abs_mesh0,lower_limit,interval,true,true);
-			if (!done)
-				return false;
-
+			res=InitBaseMesh<AbstractMesh>(&abs_mesh0,lower_limit,interval,true,true);
+			if (res!=Done)
+				return res;
+			
+			
 			ParamMesh para_mesh1;
 			AbstractMesh abs_mesh1;
 			ExportMeshes(para_mesh1,abs_mesh1);
-		
+
+			
+
 			///constrauct an ISOPARAM
+			printf("\n STEP 2.5 \n");
 			IsoParametrization IsoParam1;
-			done=IsoParam1.Init(&abs_mesh1,&para_mesh1);
+			bool done=IsoParam1.Init(&abs_mesh1,&para_mesh1,true);
+			
 			if (!done)
-				return false;
-			printf("\n merging \n");
+				return FailParam;
+			
+			printf("\n merging 0 \n");
 			///copy initial mesh 
 			final_mesh.Clear();
 			base_mesh.Clear();
@@ -811,7 +841,7 @@ public:
 		InitVoronoiArea();
 		FinalOptimization();
 		GlobalOptimizeStep();
-		return true;
+		return Done;
 	}
 
 	///perform one or more flip steps
@@ -1116,8 +1146,11 @@ public:
 			CoordType bary=final_mesh.vert[i].Bary;
 			int index=(*cur).second;
 			para_mesh.vert[i].T().N()=index;
+			bool done=NormalizeBaryCoords(bary);
+			assert(done);
 			para_mesh.vert[i].T().U()=bary.X();
 			para_mesh.vert[i].T().V()=bary.Y();
+			
 		}
 	}
 

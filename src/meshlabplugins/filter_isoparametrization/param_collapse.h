@@ -46,9 +46,12 @@ public:
 	FaceType* edgeF[2];
 	edgeF[0]=on_edge[0];
 	edgeF[1]=on_edge[1];
-        ScalarType costArea=EstimateAreaByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
-        ScalarType lenght=EstimateLenghtByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
+    ScalarType costArea=EstimateAreaByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
+    ScalarType lenght=EstimateLenghtByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
 
+	if (costArea<0)
+		assert(0);
+	assert(lenght>=0);
 	return (pow(lenght,2)+costArea);
   }
 	
@@ -642,7 +645,7 @@ void Execute(BaseMesh &m)
 		UVToAlphaBeta(HresVert,param1,orderedFaces1,m);
 
 		
-    //PatchesOptimizer<BaseMesh>::OptimizeUV(this->pos.V(1),m);
+        /*PatchesOptimizer<BaseMesh>::OptimizeUV(this->pos.V(1),m);*/
 	
 //---------------------------///
 		///get the non border one that is the one survived

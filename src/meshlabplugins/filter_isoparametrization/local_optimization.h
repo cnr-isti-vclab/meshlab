@@ -113,6 +113,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	typedef typename MeshType::CoordType CoordType;
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename vcg::tri::AreaPreservingTexCoordOptimization<MeshType> OptType;
+	//typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType;
 	
 	
 	std::vector<VertexType*> starCenter;
@@ -155,6 +156,9 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	InitDampRestUV(hlev_mesh);
 
 	assert(testParamCoords(hlev_mesh));
+	
+	/*for (int i=0;i<10;i++)*/
+		vcg::tri::SmoothTexCoords(hlev_mesh);
 
 	if (hlev_mesh.vn==0)
 		return;
@@ -170,6 +174,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	bool b0=NonFolded<MeshType>(hlev_mesh);
 	
 
+	
 
 	///initialize optimization
 	OptType opt(hlev_mesh);
@@ -185,8 +190,9 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 		conv*=1.0/(ScalarType)((accuracy-1)*10.0);
 
 	opt.SetSpeed(speed0);
-
-	/*int ite=*/opt.IterateUntilConvergence(conv);
+	opt.IterateUntilConvergence(conv);
+	/*opt.IterateN(100);*/
+	/*int ite=*/
 
 	if (!testParamCoords(hlev_mesh))
 		return;///no modifications problems with optimization 

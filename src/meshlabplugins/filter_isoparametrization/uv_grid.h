@@ -182,7 +182,6 @@ public:
 				for (unsigned int k=0;k<data[i][j].size();k++)
 				{
 					FaceType *f=data[i][j][k];
-					//printf("qui\n");
 					vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
 					vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
 					vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());

@@ -851,7 +851,9 @@ public:
 
 		int num=getSharedVertices(f0,f1,f2,shared);
 		if (num<1)
+		{
 			return -1;
+		}
 		//assert((num==1)||(num==2));
 		if (num==2)///ude diamond
 		{
@@ -879,8 +881,10 @@ public:
 		bool b2=GE0(I2,UV2,StarIndex,uvI2);
 		IndexDomain=StarIndex;
 		if ((!b0)||(!b1)||(!b2))
+		{
+			printf("AZZZ 1\n");
 			return -1;
-
+		}
 		assert((uvI0.X()>=-1)&&(uvI0.Y()>=-1)&&(uvI0.X()<=1)&&(uvI0.Y()<=1));
 		assert((uvI1.X()>=-1)&&(uvI1.Y()>=-1)&&(uvI1.X()<=1)&&(uvI1.Y()<=1));
 		assert((uvI2.X()>=-1)&&(uvI2.Y()>=-1)&&(uvI2.X()<=1)&&(uvI2.Y()<=1)); 
@@ -1080,8 +1084,42 @@ public:
 		AbstractVertex *shared[3];
 
 		int num=getSharedVertices(f0,f1,f2,shared);
-		assert((num==1)||(num==2));
 
+		/*///if num==1
+		if (num==0)
+		{
+			float alpha=bary3D.X();
+			float beta =bary3D.Y();
+			float gamma=bary3D.Z();
+#ifndef _MESHLAB
+			printf("problems with interpolation, solved...");
+#endif
+			if ((alpha>beta)&&(alpha>gamma))
+			{
+				I=I0;
+				UV=f->V(0)->T().P();
+			}
+			else
+			if ((beta>alpha)&&(beta>gamma))
+			{
+				I=I1;
+				UV=f->V(1)->T().P();
+			}
+			else
+			{
+				I=I2;
+				UV=f->V(2)->T().P();
+			}
+			
+			return;
+		}*/
+
+		assert((num==1)||(num==2));
+		if ((num!=1)&&(num!=2))
+		{
+			printf("DOMAIN %d\m",num);
+			assert(0);
+		}
 		if (num==1)///use the star domain
 		{
 			//printf("phi 0\n");

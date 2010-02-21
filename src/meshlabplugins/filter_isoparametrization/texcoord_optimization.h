@@ -959,7 +959,7 @@ void SmoothTexCoords(MESH_TYPE &m){
   sum.Start();*/
   
 	for (typename MESH_TYPE::VertexIterator v=m.vert.begin(); v!=m.vert.end(); v++) {
-		sum[v].Zero();
+		sum[v].SetZero();
     div[v]=0;
 	}
 
@@ -969,7 +969,8 @@ void SmoothTexCoords(MESH_TYPE &m){
 		div[f->V(2)] +=2; sum[f->V(2)] += f->V(1)->T().P(); sum[f->V(2)] += f->V(0)->T().P();
 	}
 
-	for (typename MESH_TYPE::VertexIterator v=m.vert.begin(); v!=m.vert.end(); v++) // if (!v->IsB()) 
+	for (typename MESH_TYPE::VertexIterator v=m.vert.begin(); v!=m.vert.end(); v++) 
+	if (!v->IsB()) 
   {
 		//if (v->div>0) {
 	    if (div[v]>0) {

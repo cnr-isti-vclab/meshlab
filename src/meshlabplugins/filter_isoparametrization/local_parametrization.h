@@ -815,6 +815,7 @@ bool testParametrization(MeshType &domain,
 				{
 					//printf("\n PAR ERROR : Father<->son \n");
 					fath_son++;
+					v->father=face;
 					is_good=false;
 				}
 			}

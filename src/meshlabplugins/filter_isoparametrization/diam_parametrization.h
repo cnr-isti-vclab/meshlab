@@ -81,7 +81,7 @@ class DiamondParametrizator
 	}
 
 template <class FaceType>
-vcg::Point2f QuadCoord(FaceType * curr,const int &vert_num)
+void QuadCoord(FaceType * curr,const int &vert_num,vcg::Point2f &UVQuad,int &indexQuad)
 {
 	typedef typename FaceType::VertexType VertexType;
 	typedef typename FaceType::ScalarType ScalarType;
@@ -96,13 +96,14 @@ vcg::Point2f QuadCoord(FaceType * curr,const int &vert_num)
 	vcg::Point2f UV=v->T().P();
 	
 	///transform in diamond coordinates
-	vcg::Point2f UVDiam,UVQuad;
+	vcg::Point2f UVDiam/*,UVQuad*/;
 	isoParam->GE1(I,UV,DiamIndex,UVDiam);
 	
 	///transform in quad coordinates
 	isoParam->GE1Quad(DiamIndex,UVDiam,UVQuad);
 
-	return (UVQuad);
+	indexQuad=DiamIndex;
+	/*return (UVQuad);*/
 }
 
 template <class FaceType>
@@ -122,10 +123,11 @@ template <class FaceType>
 		assert((curr->WT(0).N()==curr->WT(1).N())&&(curr->WT(1).N()==curr->WT(2).N()));
 		
 		vcg::Point2f UVQuad[3];
+		int index[3];
 
-		UVQuad[0]=QuadCoord(curr,0);
-		UVQuad[1]=QuadCoord(curr,1);
-		UVQuad[2]=QuadCoord(curr,2);
+		QuadCoord(curr,0,UVQuad[0],index[0]);
+		QuadCoord(curr,1,UVQuad[1],index[1]);
+		QuadCoord(curr,2,UVQuad[2],index[2]);
 
 		///outern border
 		vcg::Box2<ScalarType> bbox,bbox0;
@@ -385,18 +387,30 @@ template <class FaceType>
 		typedef ParamMesh::FaceType FaceType;
 	
 		ParamMesh *to_param=isoParam->ParaMesh();
-		
+		int edge_size=(int)ceil(sqrt((ScalarType)num_diamonds));
+		ScalarType edgedim=1.0/(ScalarType)edge_size;
 		for (unsigned int i=0;i<to_param->face.size();i++)
 		{
 			///get the current face and test the edges
 			FaceType * curr=&to_param->face[i];
 			for (int j=0;j<3;j++)
 			{
-				vcg::Point2f QCoord=QuadCoord(curr,j);
+				vcg::Point2f QCoord;
+				vcg::Point2i IntCoord;
+				int index;
+				QuadCoord(curr,j,QCoord,index);
+				IntCoord.X()=index/edge_size;
+				IntCoord.Y()=index%edge_size;
 				///transform from [ -border,1 + border] to [0,1]
 				QCoord+=vcg::Point2f(border,border);
 				QCoord/=(ScalarType)1.0+(ScalarType)2.0*border;
 				assert((QCoord.X()>=0)&&(QCoord.X()<=1)&&(QCoord.Y()>=0)&&(QCoord.Y()<=1));
+
+				QCoord*=edgedim;
+				QCoord.X()+=edgedim*(ScalarType)IntCoord.X();
+				QCoord.Y()+=edgedim*(ScalarType)IntCoord.Y();
+				assert(QCoord.X()<=1);
+				assert(QCoord.Y()<=1);
 				curr->WT(j).P()=QCoord;
 				///and finally set for global texture coords
 			}

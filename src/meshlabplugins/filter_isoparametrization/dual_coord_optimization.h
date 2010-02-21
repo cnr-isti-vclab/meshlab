@@ -10,7 +10,8 @@ class BaryOptimizatorDual
 	typedef typename MeshType::CoordType  CoordType;
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename vcg::tri::AreaPreservingTexCoordOptimization<MeshType> OptType;
-	//typedef typename vcg::tri::MIPSTexCoordOptimization<MeshType> OptType1;
+	//typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType;
+	//typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType;
 
 
 public:
@@ -438,7 +439,8 @@ void MinimizeStep(const int &phaseNum)
 			conv*=1.0/(ScalarType)((accuracy-1)*10.0);
 
 		opt.SetSpeed(speed0);
-		/*int ite=*/opt.IterateUntilConvergence(conv);
+		opt.IterateUntilConvergence(conv);
+		//opt.IterateUntilConvergence();
 
 		///test for uv errors
 		bool IsOK=true;
