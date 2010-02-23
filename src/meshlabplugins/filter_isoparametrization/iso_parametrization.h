@@ -25,7 +25,13 @@ class AbstractVertex  : public vcg::VertexSimp2< AbstractVertex, AbstractEdge, A
 {
 public:
 	CoordType RPos;
-	
+
+  template < class LeftV>
+  void ImportLocal(const LeftV  & left )
+  {
+      vcg::VertexSimp2< AbstractVertex, AbstractEdge, AbstractFace, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::TexCoord2f,vcg::vertex::BitFlags>::ImportLocal( left);
+      this->RPos = left.RPos;
+  }
 };
 
 class AbstractFace    : public vcg::FaceSimp2  < AbstractVertex, AbstractEdge, AbstractFace, 
@@ -54,6 +60,13 @@ class ParamVertex: public vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace,
 											vcg::vertex::CurvatureDirf >
 {
 public:
+    template < class LeftV>
+    void ImportLocal(const LeftV  & left )
+    {
+        vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf >::ImportLocal( left);
+        this->RPos = left.RPos;
+    }
+
 	CoordType RPos;
 	static const bool Has_Auxiliary(){return false;}
 };
