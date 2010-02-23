@@ -20,46 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-
- $Log$
- Revision 1.11  2008/04/04 10:07:14  cignoni
- Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
-
- Revision 1.10  2007/11/26 07:35:25  cignoni
- Yet another small cosmetic change to the interface of the io filters.
-
- Revision 1.9  2007/11/25 09:48:38  cignoni
- Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
-
- Revision 1.8  2007/07/12 23:13:30  ggangemi
- changed "tri::io::Mask::Mask::IOM_FACECOLOR" to "tri::io::Mask::IOM_FACECOLOR"
-
- Revision 1.7  2007/07/10 06:52:47  cignoni
- small patch to allow the loading of per wedge color into faces.
-
- Revision 1.6  2007/04/16 09:25:28  cignoni
- ** big change **
- Added Layers managemnt.
- Interfaces are changing again...
-
- Revision 1.5  2007/03/20 16:23:07  cignoni
- Big small change in accessing mesh interface. First step toward layers
-
- Revision 1.4  2007/03/20 15:52:45  cignoni
- Patched issue related to path with non ascii chars
-
- Revision 1.3  2007/03/20 10:51:26  cignoni
- attempting to solve unicode bug in filenames
-
- Revision 1.2  2007/01/19 00:51:59  cignoni
- Now meshlab ask for automatic cleaning of stl files
-
- Revision 1.1  2006/11/30 22:55:06  cignoni
- Separated very basic io filters to the more advanced one into two different plugins baseio and meshio
-
-*****************************************************************************/
 #include <Qt>
 #include <QtGui>
 
@@ -70,17 +30,15 @@
 #include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/import_off.h>
 #include <wrap/io_trimesh/import_ptx.h>
+#include <wrap/io_trimesh/import_vmi.h>
 
 #include <wrap/io_trimesh/export_ply.h>
 #include <wrap/io_trimesh/export_stl.h>
 #include <wrap/io_trimesh/export_obj.h>
 #include <wrap/io_trimesh/export_vrml.h>
 #include <wrap/io_trimesh/export_dxf.h>
+#include <wrap/io_trimesh/export_vmi.h>
 #include <wrap/io_trimesh/export.h>
-
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/clean.h>
 
 using namespace std;
 using namespace vcg;
@@ -201,21 +159,35 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		// update mask
 		mask = importparams.mask;
 	}
-	else if (formatName.toUpper() == tr("OFF"))
-	{
-		int loadMask;
-		if (!tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(),loadMask))
-			return false;
+    else if (formatName.toUpper() == tr("OFF"))
+    {
+        int loadMask;
+        if (!tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(),loadMask))
+            return false;
     m.Enable(loadMask);
-		
-		int result = tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
-		if (result != 0)  // OFFCodes enum is protected
-		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result));
-			return false;
-		}
-	}
-	else 
+
+        int result = tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+        if (result != 0)  // OFFCodes enum is protected
+        {
+            errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result));
+            return false;
+        }
+    }
+    else if (formatName.toUpper() == tr("VMI"))
+    {
+        int loadMask;
+        if (!tri::io::ImporterVMI<CMeshO>::LoadMask(filename.c_str(),loadMask))
+            return false;
+        m.Enable(loadMask);
+
+        int result = tri::io::ImporterVMI<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+        if (result != 0)
+        {
+            errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result));
+            return false;
+        }
+    }
+    else
   {
     assert(0); // Unknown File type
     return false;
@@ -320,6 +292,7 @@ QList<MeshIOInterface::Format> BaseMeshIOPlugin::importFormats() const
 	formatList << Format("Quad Object"				,						tr("QOBJ"));
 	formatList << Format("Object File Format"						, tr("OFF"));
 	formatList << Format("PTX File Format"							, tr("PTX"));
+    formatList << Format("VCG Dump File Format"							, tr("VMI"));
 
 	return formatList;
 }
@@ -381,14 +354,4 @@ void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, c
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 }
 
-/*
-const QString BaseMeshIOPlugin::filterInfo( FilterIDType filter )
-{
-	return QString("");
-}
-
-const QString BaseMeshIOPlugin::filterName( FilterIDType filter )
-{
-	return QString("");
-}*/
 Q_EXPORT_PLUGIN(BaseMeshIOPlugin)
