@@ -32,12 +32,8 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 	FILE* fmain = fout; //if change the output file, save the main	
 	convertedGeometry = false; //if the mesh is already converted
 	int currentFrame = 0;
-	int numOfFrames = 0;
-	//int numOfFrames = par.getInt("frames");
 	vcg::Matrix44f transfCamera = vcg::Matrix44f::Identity();
 	bool stop = false;
-	bool isFrameDeclaration = false;
-	QStringList frameDeclaration = QStringList();
 	bool currentDisplayTypeIsFile = false;
 	bool anyOtherDisplayType = false;
 	numberOfDummies = 0; //the dummy object could be than one (e.g. for ambient occlusion passes)
@@ -102,21 +98,10 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
         int i = token[1].toInt(&isNum);
 				if(isNum)
           currentFrame = i;
-				if(currentFrame == 1) { //questo è casino con animazioni
-					if(numOfFrames > 0)
-						isFrameDeclaration = true;
-				}
 				break;
 			}
 			case ribParser::FRAMEEND:
-			{
-				//if there's an animation, stop the processing of other possible frame		
-				if(numOfFrames > 0 && currentFrame == 1) {
-					fprintf(fout,"%s\n",qPrintable(line));
-					writeLine = false;
-					makeAnimation(fout,numOfFrames,transfCamera,frameDeclaration,par.getString("ImageName"));
-					stop = true;
-				}
+			{	
 				break;
 			}
 			case ribParser::DISPLAY: 
@@ -146,10 +131,6 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 			}
 			case ribParser::TRANSFORM:
 			{
-				//transformation camera
-				if(numOfFrames > 0) {
-					transfCamera = getMatrix(&line);					
-				}
 				break;
 			}
 			case ribParser::WORLDBEGIN:
@@ -157,37 +138,15 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 				numOfWorldBegin++;
 				//if there's another type of display the format is not change
 				if(!anyOtherDisplayType && currentDisplayTypeIsFile) {
-					fprintf(fout,"%s\n", qPrintable(newFormat));
-					frameDeclaration << newFormat;
+					fprintf(fout,"%s\n", qPrintable(newFormat));					
 				}
 				currentDisplayTypeIsFile = false;
 				anyOtherDisplayType = false;
 				//is right?yes,because before the next WorldBegin will there be a new Display statement
-				
-				//make another file if there is an animation					
-				if(numOfFrames > 0) {
-					isFrameDeclaration = false;
-					//it's certainly the first WorldBegin
-					QString filename = destDirString + QDir::separator() + "world.rib";
-					fprintf(fout,"ReadArchive \"world.rib\"\n");
-					fout = fopen(qPrintable(filename),"wb");
-					if(fout == NULL)	{
-            this->errorMessage = "Impossible to create file: " + filename;
-            fclose(fmain);
-            return false;
-					}
-				}
 				break;
 			}
 			case ribParser::WORLDEND:
 			{
-				if(numOfFrames > 0) {
-					//it's certainly the first WorldEnd
-					fprintf(fout,"%s\n",qPrintable(line));
-					fclose(fout);
-					fout = fmain;
-					writeLine = false;
-				}
 				break;
 			}
 			case ribParser::ATTRIBUTEBEGIN:
@@ -216,8 +175,6 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 			//copy the same line in file
 			fprintf(fout,"%s\n",qPrintable(line));
 		}
-		if(isFrameDeclaration && statementType != ribParser::FRAMEBEGIN && statementType != ribParser::TRANSFORM)
-			frameDeclaration << line;
 	}
 	fclose(fout);
 	return true;
@@ -463,43 +420,6 @@ bool FilterHighQualityRender::convertObject(FILE* fout, QString destDir, MeshMod
 	return true;
 }
 
-
-//rivedere....nome file
-int FilterHighQualityRender::makeAnimation(FILE* fout, int numOfFrame,vcg::Matrix44f transfCamera, QStringList frameDeclaration, QString imageName) {
-	//with numOfFrame+2 the last image is the same of first
-	for(int frame=2; frame<numOfFrame+1; frame++) {
-		fprintf(fout,"FrameBegin %i\n",frame);
-		foreach(QString statement, frameDeclaration) {
-			QStringList token = statement.split(' ');
-			if(token[0].trimmed() == "Display") {
-				statement = token[0] + " \"";
-				if(token[2].trimmed() == "\"file\"")
-					statement += "+";			
-					if(frame == 1)
-						statement += imageName;
-					else {
-						//imageName = getFileNameFromPath(&imageName,false);
-						//QString temp = path->right(path->size() - 1 - std::max<int>(path->lastIndexOf('\\'),path->lastIndexOf('/')));
-	          //return temp.left(temp.lastIndexOf('.'));
-            statement += imageName + QString::number(frame) + ".tiff";
-				}
-				statement += "\" " + token[2] + " " + token[3];
-				for(int i = 4; i<token.size(); i++) {
-					statement += token[i];
-				}
-			}
-			fprintf(fout,"%s\n",qPrintable(statement));
-		}
-		vcg::Matrix44f result;
-		float rot = float(360*(frame-1)/numOfFrame);
-		result = result.SetRotateDeg(rot,vcg::Point3f(0.0,0.0,1.0));
-		result = transfCamera * result;
-		writeMatrix(fout, &result);
-		fprintf(fout,"ReadArchive \"world.rib\"\nFrameEnd\n");
-	}
-	return 0; //errors
-}
-
 //return an a list of directory (separated by ':' character)
 QStringList FilterHighQualityRender::readSearchPath(const QStringList* token, int* type) {
 	//the line maybe: Option "searchpath" "string type" [ ..values..]
@@ -520,7 +440,7 @@ QStringList FilterHighQualityRender::readSearchPath(const QStringList* token, in
 	if((*token)[index] == "\"")
 		index++;
 	//else err?
-	QStringList dirs = (*token)[index].split(':'); //it's the standard method divide dirs with character ':' ?
+	QStringList dirs = (*token)[index].split(':'); //is it the standard method divide dirs with character ':' ?
 	return dirs;		
 }
 

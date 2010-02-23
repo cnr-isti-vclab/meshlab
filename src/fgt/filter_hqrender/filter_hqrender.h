@@ -103,7 +103,6 @@ private:
   bool makeScene(MeshModel* m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);
   QString parseObject(RibFileStack* files, QString destDir, int currentFrame, MeshModel* m, RichParameterSet &par, QStringList* textureList);
   bool convertObject(FILE* fout, QString destDir, MeshModel* m, RichParameterSet &par, QStringList* textureList, ObjValues* dummyValues);
-  int makeAnimation(FILE* fout, int numOfFrame, vcg::Matrix44f initialCamera, QStringList frameDeclaration, QString imageName);
   int writeMatrix(FILE* fout, const vcg::Matrix44f* matrix, bool transposed = true);
   vcg::Matrix44f getMatrix(const QString* matrixString)  const;
   enum searchType{ ERR, ARCHIVE, SHADER, TEXTURE, PROCEDURAL };  

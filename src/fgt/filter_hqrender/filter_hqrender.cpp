@@ -199,7 +199,6 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	qDebug("Cycle ending at %i",tt.elapsed());
 	Log(GLLogStream::FILTER,"Successfully created scene");
 
-
 	//check if the final rib file will render any image
 	if(imagesRendered.size() == 0) {
 		this->errorMessage = "The template hasn't a statement to render any image";
