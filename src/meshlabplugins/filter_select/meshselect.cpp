@@ -97,7 +97,8 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 						
 						parlst.addParam(new RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
 						parlst.addParam(new RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
-					}
+            parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));
+          }
 					break;
 			case FP_SELECT_BY_COLOR:
 			{
@@ -240,6 +241,14 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
    case FP_SELECT_BY_COLOR:		return MeshModel::MM_VERTCOLOR;
 	 default: return 0;
   }
+}
+
+int SelectionFilterPlugin::postCondition(QAction *action) const
+ {
+    if(ID(action) != FP_SELECT_DELETE_FACE && ID(action) != FP_SELECT_DELETE_FACEVERT)
+       return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
+
+    return MeshModel::MM_UNKNOWN;
 }
 
 Q_EXPORT_PLUGIN(SelectionFilterPlugin)

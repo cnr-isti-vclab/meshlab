@@ -59,10 +59,9 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
   
   virtual FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
   void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst);
-    virtual int postCondition( QAction* ) const {return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;};
-
-	virtual int getRequirements(QAction *);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  virtual int postCondition( QAction* ) const;
+  virtual int getRequirements(QAction *);
+  virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 };
 
 #endif
