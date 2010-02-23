@@ -30,7 +30,8 @@ public:
         typedef typename BaseMesh::CoordType   CoordType;
         typedef BaseMesh TriMeshType;
 
-
+	static EnergyType &EType(){static EnergyType E;return E;};
+	
 	inline ParamEdgeCollapse(const EdgeType &p, int mark)
 	{    
         Super::localMark = mark;
@@ -665,7 +666,7 @@ void Execute(BaseMesh &m)
 		
 		this->pos.V(1)->RPos=oldRPos;
 		
-    bool b=SmartOptimizeStar<BaseMesh>(this->pos.V(1),m,Accuracy());
+    /*bool b=*/SmartOptimizeStar<BaseMesh>(this->pos.V(1),m,Accuracy(),EType());
 		
 		/*int t1=clock();
 		time_opt+=(t1-t0);*/

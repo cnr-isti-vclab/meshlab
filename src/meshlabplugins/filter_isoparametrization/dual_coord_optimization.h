@@ -10,9 +10,10 @@ class BaryOptimizatorDual
 	typedef typename MeshType::CoordType  CoordType;
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename vcg::tri::AreaPreservingTexCoordOptimization<MeshType> OptType;
-	//typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType;
+	typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType1;
 	//typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType;
 
+	 EnergyType EType;
 
 public:
 	struct param_domain{
@@ -416,9 +417,9 @@ void MinimizeStep(const int &phaseNum)
 		if ((!b)||(!isOK))
 			RestoreRestUV<MeshType>(*currMesh);
 
-		OptType opt(*currMesh);
+		/*OptType opt(*currMesh);
 		opt.TargetCurrentGeometry();
-		opt.SetBorderAsFixed();
+		opt.SetBorderAsFixed();*/
 
 		///save previous values
 		InitDampRestUV(*currMesh);
@@ -426,9 +427,7 @@ void MinimizeStep(const int &phaseNum)
 		
 
 		///NEW SETTING SPEED
-		/*ScalarType edge_esteem=GetSmallestUVEdgeSize<MeshType>(*currMesh);
-		ScalarType speed0=edge_esteem*0.01;
-		ScalarType conv=edge_esteem*0.0005;*/
+		
 		ScalarType edge_esteem=GetSmallestUVHeight(*currMesh);
 		
 
@@ -438,8 +437,24 @@ void MinimizeStep(const int &phaseNum)
 		if (accuracy>1)
 			conv*=1.0/(ScalarType)((accuracy-1)*10.0);
 
-		opt.SetSpeed(speed0);
-		opt.IterateUntilConvergence(conv);
+		if (EType==EN_EXTMips)
+		{
+			OptType opt(*currMesh);
+			opt.TargetCurrentGeometry();
+			opt.SetBorderAsFixed();
+			opt.SetSpeed(speed0);
+			opt.IterateUntilConvergence(conv);
+		}
+		else
+		if (EType==EN_MeanVal)
+		{
+			OptType1 opt(*currMesh);
+			opt.TargetCurrentGeometry();
+			opt.SetBorderAsFixed();
+			opt.SetSpeed(speed0);
+			opt.IterateUntilConvergence(conv);
+		}
+
 		//opt.IterateUntilConvergence();
 
 		///test for uv errors
@@ -529,8 +544,11 @@ public:
 	void Init(MeshType &_domain,
 			  MeshType &_h_res_mesh,
 			  vcg::CallBackPos *_cb,
-			  int _accuracy=1)
+			  int _accuracy=1,
+			  EnergyType _EType=EN_EXTMips)
 	{
+		EType=_EType;
+
 		step=0;
 		cb=_cb;		
 		accuracy=_accuracy;

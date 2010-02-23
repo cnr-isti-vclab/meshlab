@@ -745,6 +745,7 @@ void AssingFather(typename MeshType::VertexType &v,
 									typename MeshType::CoordType &bary,
 									MeshType &domain)
 {
+#ifdef _DEBUG
 	const typename MeshType::ScalarType eps=(typename MeshType::ScalarType)0.00001;
 	assert((father-&(*domain.face.begin()))<domain.face.size());
 	assert(!(father->IsD()));
@@ -754,7 +755,7 @@ void AssingFather(typename MeshType::VertexType &v,
 				 (bary.Z()>=0)&&(bary.Z()<=1)&&
 				 ((bary.X()+bary.Y()+bary.Z())<=1+eps)&&
 				 ((bary.X()+bary.Y()+bary.Z())>=1-eps));
-
+#endif
 	v.father=father;
 	v.Bary=bary;
 }
@@ -776,7 +777,7 @@ bool testParametrization(MeshType &domain,
 	{
 		VertexType *v=&Hlev.vert[i];
 		bool isGoodAddr=true;
-		if ((v->father-&(*domain.face.begin()))>=domain.face.size())
+		if ((v->father-&(*domain.face.begin()))>=(int)domain.face.size())
 		{
 			printf("\n ADDRESS EXCEEDS OF %d \n",v->father-&(*domain.face.begin()));
 			wrong_address++;

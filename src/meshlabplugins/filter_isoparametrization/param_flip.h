@@ -18,6 +18,8 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 	ScalarType diff;
 
 	public:
+	
+	static EnergyType &EType(){static EnergyType E;return E;};
 
 	bool savedomain;
 	
@@ -281,10 +283,10 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 		OptimizeStar<BaseMesh>(v2);
 		OptimizeStar<BaseMesh>(v3);*/
 		
-		SmartOptimizeStar<BaseMesh>(v0,m,Accuracy());
-		SmartOptimizeStar<BaseMesh>(v1,m,Accuracy());
-		SmartOptimizeStar<BaseMesh>(v2,m,Accuracy());
-		SmartOptimizeStar<BaseMesh>(v3,m,Accuracy());	
+		SmartOptimizeStar<BaseMesh>(v0,m,Accuracy(),EType());
+		SmartOptimizeStar<BaseMesh>(v1,m,Accuracy(),EType());
+		SmartOptimizeStar<BaseMesh>(v2,m,Accuracy(),EType());
+		SmartOptimizeStar<BaseMesh>(v3,m,Accuracy(),EType());	
 		/*int t1=clock();
 		time_opt+=(t1-t0);*/
 	}

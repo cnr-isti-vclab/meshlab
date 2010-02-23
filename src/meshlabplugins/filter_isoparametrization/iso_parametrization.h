@@ -3,6 +3,8 @@
 
 // stuff to define the mesh
 #include <vcg/simplex/vertex/base.h>
+#include <wrap/io_trimesh/export_ply.h>
+#include <wrap/io_trimesh/import_ply.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/simplex/face/base.h>
 #include <vcg/simplex/face/component_rt.h>
@@ -1130,7 +1132,7 @@ public:
 		assert((num==1)||(num==2));
 		if ((num!=1)&&(num!=2))
 		{
-			printf("DOMAIN %d\m",num);
+			printf("DOMAIN %d\n",num);
 			assert(0);
 		}
 		if (num==1)///use the star domain
@@ -1286,7 +1288,7 @@ public:
 		int ret=Theta(I,UV,face,baryVal);
 			
 		pos3D=CoordType(0,0,0);
-		for (int i=0;i<face.size();i++)
+		for (int i=0;i<(int)face.size();i++)
 		{
 			CoordType pos=face[i]->V(0)->P()*baryVal[i].X()+
 						  face[i]->V(1)->P()*baryVal[i].Y()+
@@ -1446,8 +1448,8 @@ public:
 		const int &I,
 		vcg::Point2<ScalarType> &bary)
 	{
-		AbstractMesh* diam_domain=diamond_meshes[DiamIndex].domain;
-		int index;
+		/*AbstractMesh* diam_domain=diamond_meshes[DiamIndex].domain;*/
+		//int index;
 		CoordType bary3d;
 		///then find barycentryc coordinates with respect to such face
 		int local_face=diamond_meshes[DiamIndex].Global2Local(I);
@@ -1467,8 +1469,8 @@ public:
 		const int &I,
 		vcg::Point2<ScalarType> &bary)
 	{
-		AbstractMesh* star_domain=star_meshes[StarIndex].domain;
-		int index;
+		//AbstractMesh* star_domain=star_meshes[StarIndex].domain;
+		/*int index;*/
 		CoordType bary3d;
 		///then find barycentryc coordinates with respect to such face
 		int local_face=star_meshes[StarIndex].Global2Local(I);
@@ -1704,7 +1706,29 @@ public:
 		return index;
 	}
 
+	void SaveBaseDomain(char *pathname)
+	{
+		vcg::tri::io::ExporterPLY<AbstractMesh>::Save(*AbsMesh(),pathname);
+	}
 	
+	void LoadBaseDomain(char *pathname)
+	{
+		vcg::tri::io::ImporterPLY<AbstractMesh>::Open(*AbsMesh(),pathname);
+		//UpdateStructures<AbstractMesh>(AbsMesh());
+		///set father to son link
+		
+	}
+	
+	template <class MeshType>
+	void CopyParametrization(MeshType	* _param_mesh)
+	{
+		for (int i=0;i<_param_mesh->vert.size();i++)
+		{
+			_param_mesh->vert[i].T().P()=ParaMesh()->vert[i].T().P();
+			_param_mesh->vert[i].T().N()=ParaMesh()->vert[i].T().N();
+		}
+	}
+
 	template <class MeshType>
 	int LoadMCP(AbstractMesh * _abstract_mesh,
 			  ParamMesh	 * _param_mesh,

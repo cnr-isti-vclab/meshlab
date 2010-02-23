@@ -397,8 +397,7 @@ void SumVertex()
 }
 
  ScalarType Iterate(){
-    
-   
+
 	InitSum();
 		
 	ScalarType tot_proj_area=getProjArea();
@@ -789,7 +788,10 @@ public:
     if (  !Super::isFixed[v] )
 	  if (		div[v]>0.000001 ) {
 		  PointType swap=v->T().P();
-		  v->T().P() = sum[v]/div[v];
+		  PointType goal=sum[v]/div[v];
+		
+		  v->T().P() = goal*0.1+swap*0.9;
+
 		  //v->T().P()=v->RestUV*(1-v->Damp)+(sum[v]/div[v])*(v->Damp);
 		  ScalarType temp=(swap-v->T().P()).SquaredNorm();
 		  if (max<temp)

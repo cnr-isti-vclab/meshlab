@@ -140,7 +140,7 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& /*md*/
   }
 	case ISOP_DIAMPARAM :
 	{
-		 par.addParam(new RichDynamicFloat("BorderSize",0.05,0.01,0.5,"BorderSize ratio", "This specify the border for each diamond.<br>"
+		 par.addParam(new RichDynamicFloat("BorderSize",0.05f,0.01f,0.5f,"BorderSize ratio", "This specify the border for each diamond.<br>"
 																				"The bigger is the less triangles are splitted, but the more UV space is used."));								 
 		break;										
 	}
@@ -285,21 +285,26 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		Parametrizator.ExportMeshes(para_mesh,abs_mesh);
 		isoPHandle=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
 		bool isOK=isoPHandle().Init(&abs_mesh,&para_mesh);
+
+		///copy back to original mesh
+		/*m->updateDataMask(MeshModel::MM_VERTTEXCOORD);*/
+		isoPHandle().CopyParametrization<CMeshO>(mesh);
+
 		if (!isOK)
 		{
 			Log("Problems gathering parameterization \n");
 			return false;
 		}
-		if (!isTXTenabled)
-				m->clearDataMask(MeshModel::MM_VERTTEXCOORD);
+		/*if (!isTXTenabled)
+				m->clearDataMask(MeshModel::MM_VERTTEXCOORD);*/
 		if (!isVMarkenabled)
 				m->clearDataMask(MeshModel::MM_VERTMARK);
 		if (!isFMarkenabled)
 				m->clearDataMask(MeshModel::MM_FACEMARK);
-		if (!isVColorenabled)
+		/*if (!isVColorenabled)
 				m->clearDataMask(MeshModel::MM_VERTCOLOR);
 		if (!isFColorenabled)
-				m->clearDataMask(MeshModel::MM_FACECOLOR);
+				m->clearDataMask(MeshModel::MM_FACECOLOR);*/
 		return true;
 	}
 	case ISOP_REMESHING :

@@ -3,6 +3,8 @@
 
 #include "statistics.h"
 
+typedef enum EnergyType{EN_EXTMips,EN_MeanVal};
+
 template <class MeshType>
 bool UnFold(MeshType &mesh,int /*num_faces*/,bool fix_selected=false)
 {
@@ -106,14 +108,14 @@ typename MeshType::ScalarType StarDistorsion(typename MeshType::VertexType *v)
 
 ///optimize a single star
 template <class MeshType>
-void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy=1)
+void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy=1,EnergyType En=EN_EXTMips)
 {
 	typedef typename MeshType::VertexType VertexType;
 	typedef typename MeshType::FaceType FaceType;
 	typedef typename MeshType::CoordType CoordType;
 	typedef typename MeshType::ScalarType ScalarType;
 	typedef typename vcg::tri::AreaPreservingTexCoordOptimization<MeshType> OptType;
-	//typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType;
+	typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType1;
 	
 	
 	std::vector<VertexType*> starCenter;
@@ -149,6 +151,13 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 		}
 	}
 
+	/*for (int i=0;i<10;i++)*/
+	if (En==EN_MeanVal)
+		for (int i=0;i<4;i++)
+			vcg::tri::SmoothTexCoords(hlev_mesh);
+	else
+		vcg::tri::SmoothTexCoords(hlev_mesh);
+
 	///get a copy of submesh
 	std::vector<typename MeshType::VertexType*> ordered_vertex;
 	CopyHlevMesh(ordered_faces,hlev_mesh,ordered_vertex);
@@ -157,8 +166,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 
 	assert(testParamCoords(hlev_mesh));
 	
-	/*for (int i=0;i<10;i++)*/
-		vcg::tri::SmoothTexCoords(hlev_mesh);
+	
 
 	if (hlev_mesh.vn==0)
 		return;
@@ -177,20 +185,41 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	
 
 	///initialize optimization
-	OptType opt(hlev_mesh);
-	opt.TargetCurrentGeometry();
-	opt.SetBorderAsFixed();
+	if (En==EN_EXTMips)
+	{
+		OptType opt(hlev_mesh);
+		opt.TargetCurrentGeometry();
+		opt.SetBorderAsFixed();
 
-	////SETTING SPEED
-	ScalarType edge_esteem=GetSmallestUVHeight(hlev_mesh);
+		////SETTING SPEED
+		ScalarType edge_esteem=GetSmallestUVHeight(hlev_mesh);
 
-	ScalarType speed0=edge_esteem*0.5;//0.05;
-	ScalarType conv=edge_esteem*0.2;//edge_esteem*0.05;
-	if (accuracy>1)
-		conv*=1.0/(ScalarType)((accuracy-1)*10.0);
+		ScalarType speed0=edge_esteem*0.5;//0.05;
+		ScalarType conv=edge_esteem*0.2;//edge_esteem*0.05;
+		if (accuracy>1)
+			conv*=1.0/(ScalarType)((accuracy-1)*10.0);
 
-	opt.SetSpeed(speed0);
-	opt.IterateUntilConvergence(conv);
+		opt.SetSpeed(speed0);
+		opt.IterateUntilConvergence(conv);
+	}
+	else
+		if (En==EN_MeanVal)
+		{
+			OptType1 opt(hlev_mesh);
+			opt.TargetCurrentGeometry();
+			opt.SetBorderAsFixed();
+
+			////SETTING SPEED
+			ScalarType edge_esteem=GetSmallestUVHeight(hlev_mesh);
+
+			ScalarType speed0=edge_esteem*0.5;//0.05;
+			ScalarType conv=edge_esteem*0.2;//edge_esteem*0.05;
+			if (accuracy>1)
+				conv*=1.0/(ScalarType)((accuracy-1)*10.0);
+
+			opt.SetSpeed(speed0);
+			opt.IterateUntilConvergence(conv);
+		}
 	/*opt.IterateN(100);*/
 	/*int ite=*/
 
@@ -205,6 +234,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 		printf("@");
 #endif
 		//return;
+		RestoreRestUV(hlev_mesh);
 	}
 
 	bool inside=true;
@@ -282,7 +312,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 
 
 template <class MeshType>
-bool SmartOptimizeStar(typename MeshType::VertexType *center,MeshType &base_domain,int accuracy=1)
+bool SmartOptimizeStar(typename MeshType::VertexType *center,MeshType &base_domain,int accuracy=1,EnergyType En=EN_EXTMips)
 {
 	typedef typename MeshType::VertexType VertexType;
 	typedef typename MeshType::FaceType FaceType;
@@ -303,7 +333,7 @@ bool SmartOptimizeStar(typename MeshType::VertexType *center,MeshType &base_doma
 	if (ratio<=1)
 		return false;
 	else
-		OptimizeStar<MeshType>(center,base_domain,accuracy);
+		OptimizeStar<MeshType>(center,base_domain,accuracy,En);
 	return true;
 }
 #endif

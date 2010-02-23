@@ -7,6 +7,7 @@
 #include <vcg/simplex/face/component_rt.h>
 #include <vcg/simplex/edge/base.h>
 #include <vcg/complex/trimesh/base.h>
+#include "iso_parametrization.h"
 
 class BaseVertex;
 class BaseEdge;    
@@ -46,6 +47,39 @@ public:
 	
 	vcg::Color4b OriginalCol;
 	//int num_collapse;
+
+  void ImportLocal(const BaseVertex  & left )
+  {
+    vcg::VertexSimp2< BaseVertex, BaseEdge, BaseFace, 
+	vcg::vertex::VFAdj, 
+	vcg::vertex::Coord3f, 
+	vcg::vertex::Normal3f, 
+	vcg::vertex::Mark, 
+	vcg::vertex::BitFlags,
+	vcg::vertex::Color4b,
+	vcg::vertex::TexCoord2f>::ImportLocal(left);
+
+    this->area=left.area;
+	this->RPos=left.RPos;
+	this->brother=left.brother;
+	this->father=left.father;
+	this->Bary=left.Bary;
+  }
+  
+   template < class LeftV>
+  void ImportLocal(const LeftV  & left )
+  {
+    vcg::VertexSimp2< BaseVertex, BaseEdge, BaseFace, 
+	vcg::vertex::VFAdj, 
+	vcg::vertex::Coord3f, 
+	vcg::vertex::Normal3f, 
+	vcg::vertex::Mark, 
+	vcg::vertex::BitFlags,
+	vcg::vertex::Color4b,
+	vcg::vertex::TexCoord2f>::ImportLocal(left);
+  }
+
+  
 };
 
 ///class maintaing additional auxiliary data used during the parameterization
@@ -109,6 +143,39 @@ public:
 	vcg::Color4b group;
 	ScalarType areadelta;
 	vcg::Color4b colorDivision;
+
+   template < class LeftV>
+  void ImportLocal(const LeftV  & left )
+  {
+    vcg::FaceSimp2  < BaseVertex, BaseEdge, BaseFace, 
+	vcg::face::VFAdj, 
+	vcg::face::FFAdj,
+	vcg::face::VertexRef, 
+	vcg::face::BitFlags,
+	vcg::face::EdgePlane,
+	vcg::face::Mark,
+	vcg::face::Normal3f,
+	vcg::face::Color4b>::ImportLocal(left);
+  }
+	
+  void ImportLocal(const BaseFace  & left )
+  {
+    vcg::FaceSimp2  < BaseVertex, BaseEdge, BaseFace, 
+	vcg::face::VFAdj, 
+	vcg::face::FFAdj,
+	vcg::face::VertexRef, 
+	vcg::face::BitFlags,
+	vcg::face::EdgePlane,
+	vcg::face::Mark,
+	vcg::face::Normal3f,
+	vcg::face::Color4b>::ImportLocal(left);
+    this->vertices_bary = std::vector<std::pair<BaseVertex*,vcg::Point3f> > (left.vertices_bary);
+	this->group=left.group;
+	this->areadelta=left.areadelta;
+	this->colorDivision=left.colorDivision;
+  }
+
+ 
 };              
 
 /// the main mesh class 

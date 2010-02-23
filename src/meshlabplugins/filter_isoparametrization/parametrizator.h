@@ -58,17 +58,16 @@ class IsoParametrizator{
 
 public:
 	typedef enum ReturnCode{NonPrecondition,FailParam,Done};
+	
 
 	BaseMesh final_mesh;
 	BaseMesh base_mesh;
 	typedef BaseMesh::ScalarType ScalarType;
 	typedef BaseMesh::CoordType CoordType;
 	vcg::CallBackPos *cb;
+	EnergyType EType;
 private:
-	//Statistic stat;
-	/*vcg::GlTrimesh<BaseMesh> glWrap;
-	vcg::GlTrimesh<BaseMesh> glWrapAbstract;*/
-
+	
 	void InitVoronoiArea()
 	{
 		///area deviation respect to original
@@ -347,7 +346,7 @@ private:
 		
 		std::sort(ord_vertex.begin(),ord_vertex.end());
 		for (unsigned int i=0;i<ord_vertex.size();i++)
-				SmartOptimizeStar<BaseMesh>(ord_vertex[i].v,base_mesh,MyTriEdgeCollapse::Accuracy());
+				SmartOptimizeStar<BaseMesh>(ord_vertex[i].v,base_mesh,MyTriEdgeCollapse::Accuracy(),EType);
 			
 	}
 
@@ -422,12 +421,17 @@ private:
 
 	void CompactBaseDomain()
 	{
+		/*testParametrization<BaseMesh>(base_mesh,final_mesh);
+		system("pause");*/
 		vcg::tri::Allocator<BaseMesh>::CompactVertexVector(base_mesh);
 		vcg::tri::Allocator<BaseMesh>::CompactFaceVector(base_mesh);
+		UpdateStructures(&base_mesh);
 		///reassing
-		for (int i=0;i<base_mesh.face.size();i++)
+		//for (int i=0;i<(int)base_mesh.face.size();i++)
+		for (int i=0;i<(int)base_mesh.face.size();i++)
 		{
 			int size=base_mesh.face[i].vertices_bary.size();
+			/*assert(size>0);*/
 			for (int j=0;j<size;j++)
 			{
 				BaseVertex* son=base_mesh.face[i].vertices_bary[j].first;
@@ -438,6 +442,8 @@ private:
 				AssingFather(*son,&base_mesh.face[i],bary,base_mesh);
 			}
 		}
+		/*testParametrization<BaseMesh>(base_mesh,final_mesh);
+		system("pause");*/
 	}
 
 	///save the current status of the parameterization
@@ -503,8 +509,12 @@ private:
 			{
 				BaseVertex * vert=to_restore->face[i].vertices_bary[j].first;
 				CoordType bary=to_restore->face[i].vertices_bary[j].second;
+#ifdef _DEBUG
 				bool done=NormalizeBaryCoords(bary);
 				assert(done);
+#else
+				NormalizeBaryCoords(bary);
+#endif
 				base_mesh.face[i].vertices_bary[j].first=vert;
 				base_mesh.face[i].vertices_bary[j].second=bary;
 
@@ -583,13 +593,13 @@ private:
 		RestoreStatus(indexmin);
 		if (test_interpolation)
 		{
-			while ((!isOK_interp)&&(indexmin<ParaStack.size()))
+			while ((!isOK_interp)&&(indexmin<(int)ParaStack.size()))
 			{
 				isOK_interp=TestInterpolation();
 				if (!isOK_interp)
 				{
 					indexmin++;
-					if (indexmin<ParaStack.size())
+					if (indexmin<(int)ParaStack.size())
 						RestoreStatus(indexmin);
 				}
 			}	
@@ -724,7 +734,7 @@ public:
 	  printf("\n GLOBAL OPTIMIZATION \n");
 #endif
 	  BaryOptimizatorDual<BaseMesh> BaryOpt;
-	  BaryOpt.Init(base_mesh,final_mesh,cb,accuracy);
+	  BaryOpt.Init(base_mesh,final_mesh,cb,accuracy,EType);
 	  BaryOpt.Optimize();
 #ifndef _MESHLAB
 	  printf("\n POST DUAL OPT:	\n");
@@ -735,11 +745,15 @@ public:
 	///PARAMETRIZATION FUNCTIONS 
 	///initialize the mesh 
 	template <class MeshType>
-	ReturnCode Parametrize(MeshType *mesh,bool Two_steps=true)
-	{				
+	ReturnCode Parametrize(MeshType *mesh,bool Two_steps=true,EnergyType _EType=EN_EXTMips)
+	{		
+		EType=_EType;
+		MyTriEdgeCollapse::EType()=EType;
+		MyTriEdgeFlip::EType()=EType;
+
 		///clean unreferenced vertices
 		vcg::tri::Clean<MeshType>::RemoveUnreferencedVertex(*mesh);
-		bool done;
+		/*bool done;*/
 		const int limit0=15000;//00;
 		const int limit1=30000;
 		if ((!Two_steps)||(lower_limit>limit0)||(mesh->fn<limit1))
@@ -792,13 +806,13 @@ public:
 			UpdateTopologies<BaseMesh>(&final_mesh);
 			UpdateTopologies<BaseMesh>(&base_mesh);
 
-			for (int i=0;i<base_mesh.vert.size();i++)
+			for (int i=0;i<(int)base_mesh.vert.size();i++)
 				base_mesh.vert[i].RPos=abs_mesh1.vert[i].P();
-			for (int i=0;i<final_mesh.vert.size();i++)
+			for (int i=0;i<(int)final_mesh.vert.size();i++)
 				final_mesh.vert[i].RPos=para_mesh0.vert[i].P();
 
 			///finally merge in between
-			for (int i=0;i<para_mesh0.vert.size();i++)
+			for (int i=0;i<(int)para_mesh0.vert.size();i++)
 			{
 				///get the index of the first parametrization process
 				int Index0=para_mesh0.vert[i].T().N();
@@ -826,7 +840,7 @@ public:
 			}
 
 			///set father to son link
-			for (int i=0;i<final_mesh.vert.size();i++)
+			for (int i=0;i<(int)final_mesh.vert.size();i++)
 			{
 				BaseFace* base_f=final_mesh.vert[i].father;
 				CoordType bary=final_mesh.vert[i].Bary;
@@ -1146,8 +1160,12 @@ public:
 			CoordType bary=final_mesh.vert[i].Bary;
 			int index=(*cur).second;
 			para_mesh.vert[i].T().N()=index;
+#ifdef _DEBUG
 			bool done=NormalizeBaryCoords(bary);
 			assert(done);
+#else
+			NormalizeBaryCoords(bary);
+#endif
 			para_mesh.vert[i].T().U()=bary.X();
 			para_mesh.vert[i].T().V()=bary.Y();
 			

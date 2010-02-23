@@ -134,9 +134,9 @@ public:
 		
 		//const ScalarType _EPSILON = ScalarType(0.000000001);
 		vcg::Point2i cell=Cell(UV);
-		if (cell.X()>=data.size())
+		if (cell.X()>=(int)data.size())
 			cell.X()-=1;
-		if (cell.Y()>=data.size())
+		if (cell.Y()>=(int)data.size())
 			cell.Y()-=1;
 		if (cell.X()<0)
 			cell.X()=0;
