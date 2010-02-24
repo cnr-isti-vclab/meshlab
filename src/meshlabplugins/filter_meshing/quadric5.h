@@ -198,7 +198,7 @@ public:
 		ScalarType p[5]; 
 		ScalarType q[5];
 		ScalarType r[5];
-		ScalarType A[5][5];  
+//		ScalarType A[5][5];
 		ScalarType e1[5];
 		ScalarType e2[5];
 

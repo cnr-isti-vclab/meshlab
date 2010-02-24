@@ -68,7 +68,7 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBack
 	DeciSession.SetTargetSimplices(TargetFaceNum);
 	DeciSession.SetTimeBudget(0.1f); // this allow to update the progress bar 10 time for sec...
 //  if(TargetError< numeric_limits<double>::max() ) DeciSession.SetTargetMetric(TargetError);
-  int startFn=m.fn;
+  //int startFn=m.fn;
   int faceToDel=m.fn-TargetFaceNum;
  while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
  {

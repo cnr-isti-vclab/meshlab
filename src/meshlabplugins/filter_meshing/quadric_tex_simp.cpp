@@ -60,14 +60,14 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallB
 		TargetFaceNum= m.fn - (m.sfn-TargetFaceNum);
 	DeciSession.SetTargetSimplices(TargetFaceNum);
 	DeciSession.SetTimeBudget(0.1f);
-	int startFn=m.fn;
+//	int startFn=m.fn;
   
 	int faceToDel=m.fn-TargetFaceNum;
 	
 	while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
 	{
     char buf[256];
-    sprintf(buf,"Simplifing heap size %i ops %i\n",DeciSession.h.size(),DeciSession.nPerfmormedOps);
+    sprintf(buf,"Simplifing heap size %i ops %i\n",int(DeciSession.h.size()),DeciSession.nPerfmormedOps);
 	   cb(100-100*(m.fn-TargetFaceNum)/(faceToDel), buf);
 	};
 

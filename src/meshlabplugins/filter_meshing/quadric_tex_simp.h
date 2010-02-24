@@ -182,7 +182,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	static TriEdgeCollapseQuadricTexParameter & Params(){static TriEdgeCollapseQuadricTexParameter p; return p;}
 
 	    // Final Clean up after the end of the simplification process
-    static void Finalize(TriMeshType &m,HeapType &h_ret)
+    static void Finalize(TriMeshType &m,HeapType & /*h_ret*/)
     {
 			vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromVF(m);
 
