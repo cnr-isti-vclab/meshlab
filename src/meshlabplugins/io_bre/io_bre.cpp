@@ -50,33 +50,30 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
   {
     return E_CANTOPEN;
   }
-  qint64 fileSize =  file.size();
-
-  // Bre Header lesen
+  // read Bre header
   BreHeader header;
   if( false == header.Read(file))
   {
     return E_UNABLEREADHEADER;
   }
+  //test if DataType is supported
   int test_type = header.DataType();
   if ((test_type != 0) && (test_type != -1))
   {
     return E_NOTSUPPORTED;
   }
 
+  //create VertexGrid
   VertexGrid grid(header.ExtentX(), header.ExtentY());
 
-  qint64 headerSize = header.Size();
   qint64 breElementSize = 20;
-  qint64 TestSize = (fileSize - headerSize) % breElementSize; //test if file valid
-
-  Point3f curPoint;
+  qint64 TestSize = (file.size() - header.Size()) % breElementSize; //test if file is valid
   if (TestSize != 0)
   {
     return E_INVALIDFILE;
   }
-  int numberElements = (fileSize - headerSize) / breElementSize;
 
+  int numberElements = (file.size() - header.Size()) / breElementSize; //get number of Bre elements
 
   if (( header.Version() == 0x101 ) || ( header.Version() == 0x201 ))
   {
@@ -91,20 +88,23 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
     //Add projector position as mesh attribute
     CMeshO::PerMeshAttributeHandle<Point3f> proPos = vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<Point3f>  (m,std::string("Projector position"));
     proPos() = header.ProjectorPosition();
-    int result;
 
-    if (pointsonly == true)
+    int result;
+    if (pointsonly == true) 
     {
+      //in the case of points only the number of added vertices is known and Allocator can be called only once before reading the elements
       CMeshO::VertexIterator vertexItr=vcg::tri::Allocator<CMeshO>::AddVertices(m, numberElements);
+      //read in the Bre elements (vertices, colors and quality)
       result = vcg::tri::io::BreElement::ReadBreElementsRaw( file, vertexItr, numberElements, cb); 
     }
     else
     {
+      //read in the Bre elements (vertices, colors and quality) and triangulate everything
       result = vcg::tri::io::ReadBreElementsInGrid(file, grid,m, test_type,numberElements, cb);
     }
     if ((result == 0) && (header.Transformed() == true))
     {
-      
+      //if transformed before, undo transformation (will be changed soon)
       Matrix44f inverse = vcg::Inverse(header.Matrix());
       m.Tr = inverse;
       return result;
@@ -125,6 +125,7 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
 ///////////////////////////////////////////////////////////////////////////////////////////
 // class BreMeshIOPlugin
 ///////////////////////////////////////////////////////////////////////////////////////////
+
 // initialize importing parameters
 void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
 {
@@ -241,8 +242,7 @@ bool vcg::tri::io::BreHeader::Read(QFile &file)
   {
     m_data = m_data.fill(0, 1024);
   }
-
-  // Falls das Lesen fehl schlägt, wird m_data wieder mit 0 gefüllt.
+  //if reading is not successful, m_data will be refilled with 0 
   bool success = ( 1 == file.read(m_data.data(), 256));
   
   const QString testBR = "BR";
@@ -253,12 +253,10 @@ bool vcg::tri::io::BreHeader::Read(QFile &file)
   {
     success = (file.read(m_data.data()+256, (Size()-256)) == (Size()-256));
   }
-
   if ( !success ) 
   {
     m_data = m_data.fill(0, 1024);
   }
-
   return success;
 }
 
@@ -366,7 +364,7 @@ bool vcg::tri::io::BreElement::Read(QFile &file)
     m_data.fill(0, 20);
   }
 
-  // Falls das Lesen fehl schlägt, wird m_data wieder mit 0 gefüllt.
+  //if reading is not successful, m_data will be refilled with 0 
   if ( 20 != file.read(m_data.data(), 20) ) 
   {
     m_data.fill(0, 20);
@@ -468,7 +466,7 @@ void  vcg::tri::io::VertexGrid::SetValue( int col,  int row , Point3f curPoint, 
 {
   if ((col > m_width) || (row > m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
-    return;// 0; //out of grid range
+    return; //out of grid range
   }
   vcg::tri::io::VertexGrid::Vertex curVertex;
   curVertex.X = curPoint.X();
@@ -488,7 +486,7 @@ Point3f vcg::tri::io::VertexGrid::GetValue( int col,  int row)
 {
   if ((col > m_width) || (row > m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
-    return 0; //out of grid range (get)
+    return 0; //out of grid range
   }
 
   Point3f result;
