@@ -269,7 +269,7 @@ bool vcg::tri::io::BreHeader::Read(QFile &file)
 
 int vcg::tri::io::BreHeader::Version() const 
 {
-  return *((unsigned __int16*) (m_data.data() + 2));
+  return *((quint16 *) (m_data.data() + 2));
 }
 
 float vcg::tri::io::BreHeader::SpacingX() const 
@@ -306,23 +306,23 @@ Point3f vcg::tri::io::BreHeader::ProjectorPosition() const
       return -1;
     }
 
-    return (*(__int32*) (m_data.data() + 620)) != 0;
+    return (*(qint32*) (m_data.data() + 620)) != 0;
   }
 
 
 int vcg::tri::io::BreHeader::ExtentX() const 
 {
-  return *((unsigned __int16*) (m_data.data() + 14));
+  return *((quint16*) (m_data.data() + 14));
 }
 
 int vcg::tri::io::BreHeader::ExtentY() const 
 {
-  return *((unsigned __int16*) (m_data.data() + 16));
+  return *((quint16*) (m_data.data() + 16));
 }
 
 int vcg::tri::io::BreHeader::Size() const 
 {
-  return *((unsigned __int16*) (m_data.data() + 4));
+  return *((quint16*) (m_data.data() + 4));
 }
 
 
@@ -349,7 +349,7 @@ bool vcg::tri::io::BreHeader::Transformed() const
     return false;
   }
 
-  return (*(unsigned __int16*) (m_data.data() + 62)) != 0;
+  return (*(quint16*) (m_data.data() + 62)) != 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -395,26 +395,26 @@ uchar vcg::tri::io::BreElement::Quality() const
 QPoint vcg::tri::io::BreElement::Pixel() const 
 {
   QPoint pnt;
-  pnt.setX(static_cast<float>(*((unsigned __int16*)(m_data.data()+14))));
-  pnt.setY(static_cast<float>(*((unsigned __int16*)(m_data.data()+16))));
+  pnt.setX(static_cast<float>(*((quint16*)(m_data.data()+14))));
+  pnt.setY(static_cast<float>(*((quint16*)(m_data.data()+16))));
   return pnt;
 }
 
 uchar vcg::tri::io::BreElement::Red() const 
 {
-  unsigned __int16 rgb = *((unsigned __int16*)(m_data.data()+18));
+  quint16 rgb = *((quint16*)(m_data.data()+18));
   return (rgb  >> 7) & 0xf8;
 }
 
 uchar vcg::tri::io::BreElement::Green() const 
 {
-  unsigned __int16 rgb = *((unsigned __int16*)(m_data.data()+18));
+  quint16 rgb = *((quint16*)(m_data.data()+18));
   return (rgb  >> 2) & 0xf8;
 }
 
 uchar vcg::tri::io::BreElement::Blue() const 
 {
-  unsigned __int16 rgb = *((unsigned __int16*)(m_data.data()+18));
+  quint16 rgb = *((quint16*)(m_data.data()+18));
   return (rgb  << 3) & 0xf8;
 }
 

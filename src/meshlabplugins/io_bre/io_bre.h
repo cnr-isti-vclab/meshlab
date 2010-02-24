@@ -115,14 +115,14 @@ namespace io  {
   public:
     //VertexGrid();
     VertexGrid(int width, int height);
-    void VertexGrid::SetValue( int col,  int row , Point3f curPointt, GLbyte red, GLbyte green, GLbyte blue, uchar quality);
+    void SetValue( int col,  int row , Point3f curPointt, GLbyte red, GLbyte green, GLbyte blue, uchar quality);
     Point3f GetValue(int col,  int row);
     GLbyte Red( int col,  int row);
     GLbyte Green( int col,  int row);
     GLbyte Blue( int col,  int row);
     uchar Quality( int col,  int row);
     bool IsValid(int col, int row);
-    VertexGrid::~VertexGrid();
+    ~VertexGrid();
     int m_width;
     int m_height;
 
