@@ -321,7 +321,7 @@ private:
 		{
 			ScalarType dist;
 			BaseVertex *v;
-			bool operator <(const vert_para &other)
+      bool operator <(const vert_para &other) const
 			{return (dist>other.dist);}
 		};
 
@@ -676,7 +676,7 @@ public:
 			return S;
 		}
 
-		inline bool operator < (const ParaInfo &P_info){
+    inline bool operator < (const ParaInfo &P_info) const{
 			switch (SM())
 			{
 			case (SM_Area): return AreaDist<P_info.AreaDist;
