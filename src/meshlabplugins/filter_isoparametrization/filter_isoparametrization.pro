@@ -26,10 +26,12 @@ TARGET        = filter_isoparametrization
 INCLUDEPATH  += ./  \
                 ../../external/levmar-2.3/
 
-win32-msvc2005:QMAKE_CXXFLAGS   +=  /openmp
-win32-msvc2008:QMAKE_CXXFLAGS   +=  /openmp
-win32-g++:QMAKE_CXXFLAGS   +=  -fopenmp
-linux-g++:QMAKE_CXXFLAGS   +=  -fopenmp
+win32-msvc2005:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
+win32-msvc2008:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
+win32-g++:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
+linux-g++:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
+macx:QMAKE_CXXFLAGS += -fopenmp -D_USE_OMP
+macx:QMAKE_LFLAGS += -fopenmp
 
 win32-msvc.net:LIBS	+= ../../external/lib/win32-msvc.net/levmar.lib
 win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/levmar.lib
@@ -38,6 +40,7 @@ win32-g++:LIBS		+= -L../../external/lib/win32-gcc -llevmar
 linux-g++:LIBS		+= -L../../external/lib/linux-g++ -llevmar
 macx:LIBS += ../../external/lib/macx/liblevmar.a
 
-QMAKE_CXXFLAGS += -fpermissive
+# Please never ever uncomment this...
+#QMAKE_CXXFLAGS += -fpermissive
 
 CONFIG       += opengl

@@ -3,10 +3,11 @@
 
 #define abstraction_num 10
 #define flip_factor 1.5f
-#ifdef _MSC_VER
-#define _USE_OMP
-//#undef _USE_OMP
-#endif
+
+// it uses the from qmake definitions
+//#define _USE_OMP
+
 #define _MESHLAB
+
 
 #endif
