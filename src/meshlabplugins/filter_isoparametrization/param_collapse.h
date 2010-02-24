@@ -576,8 +576,8 @@ void Execute(BaseMesh &m)
 		assert(this->pos.V(0)!=this->pos.V(1));
 		assert(!this->pos.V(0)->IsD());
 		assert(!this->pos.V(1)->IsD());
-		assert((this->pos.V(0)-&(*m.vert.begin()))<m.vert.size());
-		assert((this->pos.V(1)-&(*m.vert.begin()))<m.vert.size());
+    assert(size_t((this->pos.V(0)-&(*m.vert.begin())))<m.vert.size());
+    assert(size_t((this->pos.V(1)-&(*m.vert.begin())))<m.vert.size());
 				
     std::vector<FaceType*> result;
     std::vector<FaceType*> in_v0;

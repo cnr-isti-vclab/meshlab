@@ -204,15 +204,8 @@ void FilterIsoParametrization::PrintStats(CMeshO *mesh)
 
 bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, RichParameterSet & par, vcg::CallBackPos  *cb)
 {
-  (void) par;
   MeshModel* m = md.mm();  //get current mesh from document
-  
-
- 
   CMeshO *mesh=&m->cm;
-  
-
-  //return true;
   switch(ID(filter))
   {
 	case ISOP_PARAM :

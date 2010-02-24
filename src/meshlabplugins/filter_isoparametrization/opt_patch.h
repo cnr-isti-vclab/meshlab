@@ -353,10 +353,10 @@ public:
 			}
 		}
 		//assert(num==Minf.Hres_vert.size());
-		if (num!=Minf.Hres_vert.size())
+    if (size_t(num)!=Minf.Hres_vert.size())
 		{	
 			printf("num0 %d \n",num);
-			printf("num1 %d \n",Minf.Hres_vert.size());
+      printf("num1 %d \n",int(Minf.Hres_vert.size()));
 		}
 
 		center->RPos=Minf.to_optimize->RPos;

@@ -9,7 +9,7 @@ template <class MeshType>
 bool UnFold(MeshType &mesh,int /*num_faces*/,bool fix_selected=false)
 {
   typedef typename MeshType::ScalarType ScalarType;
-  static int folds=0;
+  //static int folds=0;
   std::vector<typename MeshType::FaceType*> folded_faces;
   bool unfolded=NonFolded<MeshType>(mesh,folded_faces);
   if (unfolded)return (true);

@@ -821,14 +821,14 @@ public:
 				CoordType bary0=CoordType (p2bary.X(),p2bary.Y(),1-p2bary.X()-p2bary.Y());
 				bool isOK=NormalizeBaryCoords(bary0);
 				assert(isOK);
-				assert(Index0<para_mesh1.face.size());
+        assert(size_t(Index0)<para_mesh1.face.size());
 
 				///get the correspondent face
 				ParamFace *f1=&para_mesh1.face[Index0];
 				int I_final=-1;
 				vcg::Point2<ScalarType> UV_final;
 				IsoParam1.Phi(f1,bary0,I_final,UV_final);
-				assert(I_final<abs_mesh1.face.size());
+        assert(size_t(I_final)<abs_mesh1.face.size());
 		
 				CoordType bary2=CoordType(UV_final.X(),UV_final.Y(),1-UV_final.X()-UV_final.Y());
 				isOK=NormalizeBaryCoords(bary2);

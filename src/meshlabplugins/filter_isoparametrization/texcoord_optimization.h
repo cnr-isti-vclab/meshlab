@@ -39,8 +39,8 @@ bool testParamCoordsPoint(const vcg::Point2<ScalarType> &p)
 template<class MESH_TYPE> 
 class TexCoordOptimization{
 protected:
-  SimpleTempData<typename MESH_TYPE::VertContainer, int > isFixed;
   MESH_TYPE &m;
+  SimpleTempData<typename MESH_TYPE::VertContainer, int > isFixed;
 public:
 
   /* Tpyes */
