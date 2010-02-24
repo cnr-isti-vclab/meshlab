@@ -91,27 +91,28 @@ int vcg::tri::io::ImporterBRE<OpenMeshType>::Open( MeshModel &meshModel, OpenMes
     //Add projector position as mesh attribute
     CMeshO::PerMeshAttributeHandle<Point3f> proPos = vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<Point3f>  (m,std::string("Projector position"));
     proPos() = header.ProjectorPosition();
+    int result;
 
     if (pointsonly == true)
     {
       CMeshO::VertexIterator vertexItr=vcg::tri::Allocator<CMeshO>::AddVertices(m, numberElements);
-      int result = vcg::tri::io::BreElement::ReadBreElementsRaw( file, vertexItr, numberElements, cb); 
+      result = vcg::tri::io::BreElement::ReadBreElementsRaw( file, vertexItr, numberElements, cb); 
+    }
+    else
+    {
+      result = vcg::tri::io::ReadBreElementsInGrid(file, grid,m, test_type,numberElements, cb);
+    }
+    if ((result == 0) && (header.Transformed() == true))
+    {
+      
+      Matrix44f inverse = vcg::Inverse(header.Matrix());
+      m.Tr = inverse;
       return result;
     }
     else
     {
-      int result = vcg::tri::io::ReadBreElementsInGrid(file, grid,m, test_type,numberElements, cb);
       return result;
     }
-/*    if ((result == 0) && (header.Transformed == true))
-    {
-      UndoTransformation(m,header.Matrix());
-      return result
-    }
-    else
-    {
-      return result;
-    }/**/
     
   }
   else
@@ -148,11 +149,6 @@ bool BreMeshIOPlugin::open(const QString &formatName, const QString &fileName, M
 	  errorMessage = errorMsgFormat.arg(fileName, ErrorMsg(result));
 	  return false;
 	}
-
-
-//  bool points = false;
-
-  
   return true;
 }
 
@@ -197,7 +193,6 @@ void BreMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability, 
 
 void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
 {
-  
 	if(format.toUpper() == tr("BRE"))
 		par.addParam(new RichBool("Unify",true, "Unify Duplicated Vertices",
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));		
@@ -471,7 +466,7 @@ vcg::tri::io::VertexGrid::~VertexGrid()
 
 void  vcg::tri::io::VertexGrid::SetValue( int col,  int row , Point3f curPoint, GLbyte red, GLbyte green, GLbyte blue, uchar quality) 
 {
-  if ((col > m_width) || (row > m_height) || ((col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
+  if ((col > m_width) || (row > m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
     return;// 0; //out of grid range
   }
@@ -491,7 +486,7 @@ void  vcg::tri::io::VertexGrid::SetValue( int col,  int row , Point3f curPoint, 
 
 Point3f vcg::tri::io::VertexGrid::GetValue( int col,  int row) 
 {
-  if ((col > m_width) || (row > m_height) || ((col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
+  if ((col > m_width) || (row > m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
     return 0; //out of grid range (get)
   }
@@ -508,7 +503,7 @@ Point3f vcg::tri::io::VertexGrid::GetValue( int col,  int row)
 
 GLbyte vcg::tri::io::VertexGrid::Red( int col,  int row) 
 {
-  if ((col > m_width) || (row > m_height) || ((col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
+  if ((col > m_width) || (row > m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
     return E_RANGERED; //out of grid range (red)
   }
@@ -523,7 +518,7 @@ GLbyte vcg::tri::io::VertexGrid::Red( int col,  int row)
 
 GLbyte vcg::tri::io::VertexGrid::Green( int col,  int row) 
 {
-  if ((col > m_width) || (row > m_height) || ((col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
+  if ((col > m_width) || (row > m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
     return E_RANGEGREEN; //out of grid range (green)
   }
@@ -538,7 +533,7 @@ GLbyte vcg::tri::io::VertexGrid::Green( int col,  int row)
 
 GLbyte vcg::tri::io::VertexGrid::Blue( int col,  int row) 
 {
-  if ((col > m_width) || (row > m_height) || ((col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
+  if ((col > m_width) || (row > m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
     return E_RANGEBLUE;//out of grid range (blue)
   }
@@ -553,7 +548,7 @@ GLbyte vcg::tri::io::VertexGrid::Blue( int col,  int row)
 
 uchar vcg::tri::io::VertexGrid::Quality( int col,  int row) 
 {
-  if ((col > m_width) || (row > m_height) || ((col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
+  if ((col > m_width) || (row > m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
     return E_RANGEQUALITY;//out of grid range (blue)
   }
@@ -569,7 +564,7 @@ uchar vcg::tri::io::VertexGrid::Quality( int col,  int row)
 
 bool vcg::tri::io::VertexGrid::IsValid( int col, int row)
 {
-  if ((col >= m_width) || (row >= m_height) || ((col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
+  if ((col >= m_width) || (row >= m_height) || ((int)(col*row*sizeof(vcg::tri::io::VertexGrid::Vertex)) > m_grid.size()))
   {
     return E_RANGEVAL; //out of grid range (val)
   }
@@ -732,24 +727,6 @@ int vcg::tri::io::ReadBreElementsInGrid( QFile &file, VertexGrid &grid, CMeshO &
   }
   return E_NOERROR;
 }
-
-/*
-void UndoTransformation( CMeshO& mesh, const Matrix44f& matrix ) 
-{
-// vcg::Eigen::Matrix<Scalar,4,4> inverse;
-
-  if ( matrix != Matrix44f::Identity() ) 
-  {
-    Matrix44f inverse = vcg::Inverse(matrix);
-    int i;
-    for ( i=0; i<mesh.vert.size(); ++i ) 
-    {
-      
-    }
-  }
-}/**/
-  
-
 
 /*
 
