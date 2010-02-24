@@ -347,22 +347,18 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		
 		case FP_UV_WEDGE_TO_VERTEX : {
 			int vn = m.cm.vn;
-			if (!m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
-				m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
+      m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
 			vcg::tri::AttributeSeam::SplitVertex(m.cm, ExtractVertex, CompareVertex);
 			if (m.cm.vn != vn)
 			{
-				if (m.hasDataMask(MeshModel::MM_FACEFACETOPO))
 					m.clearDataMask(MeshModel::MM_FACEFACETOPO);
-				if (m.hasDataMask(MeshModel::MM_VERTFACETOPO))
 					m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 			}
 		}
 		break;
 		
 		case FP_BASIC_TRIANGLE_MAPPING : {
-			if (!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-				m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+        m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 			
 			// Get Parameters
 			int sideDim = par.getInt("sidedim");
