@@ -12,10 +12,13 @@ public:
 		DISPLAY,
 		FRAMEBEGIN,
 		FRAMEEND,
+    GEOMETRIC, //Pag. 201 RISpec3.2
 		MAKE,
 		MAKECUBEFACEENVIRONMENT,
 		OPTION,
 		READARCHIVE,
+    SOLIDBEGIN,
+    SOLIDEND,
 		SURFACE,
 		TRANSFORM,
 		WORLDBEGIN,
@@ -35,25 +38,25 @@ public:
 		proc->insert("AttributeEnd", ribParser::ATTRIBUTEEND);
 		proc->insert("Basis", ribParser::OTHER);
 		proc->insert("Begin", ribParser::OTHER);
-		proc->insert("Blobby", ribParser::OTHER);
+    proc->insert("Blobby", ribParser::GEOMETRIC);
 		proc->insert("Bound", ribParser::BOUND);
 		proc->insert("Clipping", ribParser::OTHER);
 		proc->insert("ClippingPlane", ribParser::OTHER);
 		proc->insert("Color", ribParser::OTHER);
 		proc->insert("ColorSamples", ribParser::OTHER);
 		proc->insert("ConcatTransform", ribParser::OTHER);
-		proc->insert("Cone", ribParser::OTHER);
+    proc->insert("Cone", ribParser::GEOMETRIC);
 		proc->insert("Context", ribParser::OTHER);
 		proc->insert("CoordinateSystem", ribParser::OTHER);
 		proc->insert("CoordSysTransform", ribParser::OTHER);
 		proc->insert("CropWindow", ribParser::OTHER);
-		proc->insert("Curves", ribParser::OTHER);
-		proc->insert("Cylinder", ribParser::OTHER);
+    proc->insert("Curves", ribParser::GEOMETRIC);
+    proc->insert("Cylinder", ribParser::GEOMETRIC);
 		proc->insert("Declare", ribParser::OTHER);
 		proc->insert("DepthOfField", ribParser::OTHER);
 		proc->insert("Detail", ribParser::OTHER);
 		proc->insert("DetailRange", ribParser::OTHER);
-		proc->insert("Disk", ribParser::OTHER);
+    proc->insert("Disk", ribParser::GEOMETRIC);
 		proc->insert("Displacement", ribParser::OTHER);
 		proc->insert("Display", ribParser::DISPLAY);
 		proc->insert("End", ribParser::OTHER);
@@ -64,12 +67,12 @@ public:
 		proc->insert("FrameAspectRatio", ribParser::OTHER);
 		proc->insert("FrameBegin", ribParser::FRAMEBEGIN);
 		proc->insert("FrameEnd", ribParser::FRAMEEND);
-		proc->insert("GeneralPolygon", ribParser::OTHER);
+    proc->insert("GeneralPolygon", ribParser::GEOMETRIC);
 		proc->insert("GeometricApproximation", ribParser::OTHER);
-		proc->insert("Geometry", ribParser::OTHER);
+    proc->insert("Geometry", ribParser::GEOMETRIC);
 		proc->insert("GetContext", ribParser::OTHER);
 		proc->insert("Hider", ribParser::OTHER);
-		proc->insert("Hyperboloid", ribParser::OTHER);
+    proc->insert("Hyperboloid", ribParser::GEOMETRIC);
 		proc->insert("Identity", ribParser::OTHER);
 		proc->insert("Illuminate", ribParser::OTHER);
 		proc->insert("Imager", ribParser::OTHER);
@@ -82,24 +85,24 @@ public:
 		proc->insert("Matte", ribParser::OTHER);
 		proc->insert("MotionBegin", ribParser::OTHER);
 		proc->insert("MotionEnd", ribParser::OTHER);
-		proc->insert("NuPatch", ribParser::OTHER);
+    proc->insert("NuPatch", ribParser::GEOMETRIC);
 		proc->insert("ObjectBegin", ribParser::OTHER);
 		proc->insert("ObjectEnd", ribParser::OTHER);
 		proc->insert("ObjectInstance", ribParser::OTHER);
 		proc->insert("Opacity", ribParser::OTHER);
 		proc->insert("Option", ribParser::OPTION);
 		proc->insert("Orientation", ribParser::OTHER);
-		proc->insert("Paraboloid", ribParser::OTHER);
-		proc->insert("Patch", ribParser::OTHER);
-		proc->insert("PatchMesh", ribParser::OTHER);
+    proc->insert("Paraboloid", ribParser::GEOMETRIC);
+    proc->insert("Patch", ribParser::GEOMETRIC);
+    proc->insert("PatchMesh", ribParser::GEOMETRIC);
 		proc->insert("Perspective", ribParser::OTHER);
 		proc->insert("PixelFilter", ribParser::OTHER);
 		proc->insert("PixelSamples", ribParser::OTHER);
 		proc->insert("PixelVariance", ribParser::OTHER);
-		proc->insert("Points", ribParser::OTHER);
-		proc->insert("PointsGeneralPolygons", ribParser::OTHER);
-		proc->insert("PointsPolygons", ribParser::OTHER);
-		proc->insert("Polygon", ribParser::OTHER);
+    proc->insert("Points", ribParser::GEOMETRIC);
+    proc->insert("PointsGeneralPolygons", ribParser::GEOMETRIC);
+    proc->insert("PointsPolygons", ribParser::GEOMETRIC);
+    proc->insert("Polygon", ribParser::GEOMETRIC);
 		proc->insert("Procedural", ribParser::OTHER);
 		proc->insert("Projection", ribParser::OTHER);
 		proc->insert("Quantize", ribParser::OTHER);
@@ -114,19 +117,19 @@ public:
 		proc->insert("Shutter", ribParser::OTHER);
 		proc->insert("Sides", ribParser::OTHER);
 		proc->insert("Skew", ribParser::OTHER);
-		proc->insert("SolidBegin", ribParser::OTHER);
-		proc->insert("SolidEnd", ribParser::OTHER);
-		proc->insert("Sphere", ribParser::OTHER);
-		proc->insert("SubdivisionMesh", ribParser::OTHER);
+    proc->insert("SolidBegin", ribParser::SOLIDBEGIN);
+    proc->insert("SolidEnd", ribParser::SOLIDEND);
+    proc->insert("Sphere", ribParser::GEOMETRIC);
+    proc->insert("SubdivisionMesh", ribParser::GEOMETRIC);
 		proc->insert("Surface", ribParser::SURFACE);
 		proc->insert("TextureCoordinates", ribParser::OTHER);
-		proc->insert("Torus", ribParser::OTHER);
+    proc->insert("Torus", ribParser::GEOMETRIC);
 		proc->insert("Transform", ribParser::TRANSFORM);
 		proc->insert("TransformBegin", ribParser::OTHER);
 		proc->insert("TransformEnd", ribParser::OTHER);
 		proc->insert("TransformPoints", ribParser::OTHER);
 		proc->insert("Translate", ribParser::OTHER);
-		proc->insert("TrimCurve", ribParser::OTHER);
+    proc->insert("TrimCurve", ribParser::GEOMETRIC);
 		proc->insert("version", ribParser::OTHER); //not a procedure, but a keyword
 		proc->insert("WorldBegin", ribParser::WORLDBEGIN);
 		proc->insert("WorldEnd", ribParser::WORLDEND);
