@@ -315,13 +315,22 @@ public:
 	float max;
 };
 
-class FileDecoration : public ParameterDecoration
+class SaveFileDecoration : public ParameterDecoration
 {
 public:
-	FileDecoration(FileValue* defvalue,const QString extension=QString(".*"),const QString desc = QString(),const QString tltip = QString());
-	~FileDecoration(){}
+	SaveFileDecoration(FileValue* defvalue,const QString extension,const QString desc = QString(),const QString tltip = QString());
+	~SaveFileDecoration(){}
 	
 	QString ext;
+};
+
+class OpenFileDecoration : public ParameterDecoration
+{
+public:
+	OpenFileDecoration(FileValue* directorydefvalue,const QStringList extensions,const QString desc = QString(),const QString tltip = QString());
+	~OpenFileDecoration(){}
+
+	QStringList exts;
 };
 
 
@@ -534,8 +543,7 @@ public:
 class RichOpenFile : public RichParameter
 {
 public:
-	RichOpenFile(const QString nm,const QString defval,const QString ext = QString("*.*"),const QString desc=QString(),const QString tltip=QString());
-	RichOpenFile(const QString nm,const QString val,const QString defval,const QString ext = QString("*.*"),const QString desc=QString(),const QString tltip=QString());
+	RichOpenFile( const QString nm,const QString directorydefval,const QStringList exts ,const QString desc =QString(),const QString tltip =QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichOpenFile();
@@ -544,8 +552,8 @@ public:
 class RichSaveFile : public RichParameter
 {
 public:
-	RichSaveFile(const QString nm,FileValue* v,FileDecoration* prdec);
-	RichSaveFile(const QString nm,FileValue* val,FileValue* v,FileDecoration* prdec);
+	RichSaveFile(const QString nm,FileValue* v,SaveFileDecoration* prdec);
+	RichSaveFile(const QString nm,FileValue* val,FileValue* v,SaveFileDecoration* prdec);
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichSaveFile();

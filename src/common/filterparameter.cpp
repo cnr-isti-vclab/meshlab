@@ -226,9 +226,10 @@ void RichParameterCopyConstructor::visit( RichDynamicFloat& pd )
 	lastCreated = new RichDynamicFloat(pd.name,pd.val->getDynamicFloat(),pd.pd->defVal->getDynamicFloat(),dec->min,dec->max,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
-void RichParameterCopyConstructor::visit( RichOpenFile& /*pd*/ )
+void RichParameterCopyConstructor::visit( RichOpenFile& pd )
 {
-	/*lastCreated = new OpenFileWidget(par,&pd);*/
+	OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(pd.pd);
+	lastCreated = new RichOpenFile(pd.name,pd.pd->defVal->getFileName(),dec->exts,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichSaveFile& /*pd*/ )
@@ -343,9 +344,13 @@ void RichParameterXMLVisitor::visit(RichDynamicFloat& pd)
 	parElem.setAttribute("max",QString::number(dec->max));
 }
 
-void RichParameterXMLVisitor::visit( RichOpenFile& /*pd*/ )
+void RichParameterXMLVisitor::visit( RichOpenFile& pd )
 {
-	assert(0);
+	fillRichParameterAttribute("RichOpenFile",pd.name,pd.val->getFileName(),pd.pd->fieldDesc,pd.pd->tooltip);
+	OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(pd.pd);
+	parElem.setAttribute("exts_cardinality",dec->exts.size());
+	for(int ii = 0; ii < dec->exts.size();++ii)
+		parElem.setAttribute(QString("ext_val")+QString::number(ii),dec->exts[ii]);
 }
 
 void RichParameterXMLVisitor::visit( RichSaveFile& /*pd*/ )
@@ -504,8 +509,18 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 
 	if(type == "RichOpenFile")
 	{ 
-		//to be implemented
-		assert(0);
+		QStringList list = QStringList::QStringList();
+		int exts_card = np.attribute(QString("exts_cardinality")).toUInt(&corrconv);
+		if (!corrconv) 
+			return false;
+
+		for(int i=0;i<exts_card;++i)
+			list<<np.attribute(QString("exts_val")+QString::number(i));
+
+		QString defdir = np.attribute("value");
+
+		*par = new RichOpenFile(name,defdir,list,desc,tooltip);
+		return true;
 	}
 
 	if(type == "RichSaveFile")  
@@ -533,7 +548,7 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		return true; 
 	}
 
-	assert(0); // we are trying to parse an unknown xml element
+	return false;
 }
 
 BoolValue::BoolValue( const bool val ) : pval(val)
@@ -601,7 +616,12 @@ DynamicFloatDecoration::DynamicFloatDecoration( DynamicFloatValue* defvalue, con
 
 }
 
-FileDecoration::FileDecoration( FileValue* defvalue,const QString extension/*=QString(".*")*/,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),ext(extension)
+SaveFileDecoration::SaveFileDecoration( FileValue* defvalue,const QString extension/*=QString(".*")*/,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),ext(extension)
+{
+
+}
+
+OpenFileDecoration::OpenFileDecoration( FileValue* directorydefvalue,const QStringList extensions,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(directorydefvalue,desc,tltip),exts(extensions)
 {
 
 }
@@ -967,15 +987,11 @@ RichDynamicFloat::~RichDynamicFloat()
 
 }
 
-RichOpenFile::RichOpenFile( const QString nm,const QString defval,const QString /*ext*/ /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new FileValue(defval),new FileDecoration(new FileValue(defval),tltip,desc))
+RichOpenFile::RichOpenFile( const QString nm,const QString directorydefval,const QStringList exts /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new FileValue(directorydefval),new OpenFileDecoration(new FileValue(directorydefval),exts,desc,tltip))
 {
 
 }
 
-RichOpenFile::RichOpenFile( const QString nm,const QString val,const QString defval,const QString /*ext*/ /*= QString("*.*")*/,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new FileValue(val),new FileDecoration(new FileValue(defval),tltip,desc))
-{
-
-}
 void RichOpenFile::accept( Visitor& v )
 {
 	v.visit(*this);
@@ -991,12 +1007,12 @@ RichOpenFile::~RichOpenFile()
 
 }
 
-RichSaveFile::RichSaveFile( const QString nm,FileValue* v,FileDecoration* prdec ) :RichParameter(nm,v,prdec)
+RichSaveFile::RichSaveFile( const QString nm,FileValue* v,SaveFileDecoration* prdec ) :RichParameter(nm,v,prdec)
 {
 
 }
 
-RichSaveFile::RichSaveFile( const QString nm,FileValue* /*val*/,FileValue* v,FileDecoration* prdec ):RichParameter(nm,v,prdec)
+RichSaveFile::RichSaveFile( const QString nm,FileValue* /*val*/,FileValue* v,SaveFileDecoration* prdec ):RichParameter(nm,v,prdec)
 {
 
 }
