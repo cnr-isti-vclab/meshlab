@@ -1348,6 +1348,11 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichPoint3f& pd )
 	lastCreated = new QTableWidgetItem(pst/*,lst*/);
 }
 
+void RichParameterToQTableWidgetItemConstructor::visit(RichOpenFile& pd)
+{
+	lastCreated = new QTableWidgetItem(pd.val->getFileName()/*,lst*/);
+}
+
 void RichParameterToQTableWidgetItemConstructor::visit( RichColor& pd )
 {
 	QPixmap pix(10,10);
@@ -1372,3 +1377,67 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
 }
 
 
+
+OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )
+:MeshLabWidget(p,rdf),fl()
+{
+	filename = new QLineEdit(p);
+	filename->setText(tr(""));
+	browse = new QPushButton(p);
+	descLab = new QLabel(rp->pd->fieldDesc,p);
+	browse->setText("...");
+	//const QColor cl = rp->pd->defVal->getColor();
+	//resetWidgetValue();
+	int row = gridLay->rowCount() - 1;
+	gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+	QHBoxLayout* lay = new QHBoxLayout(p);
+	lay->addWidget(filename,2);
+	lay->addWidget(browse);
+
+	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+
+	connect(browse,SIGNAL(clicked()),this,SLOT(selectFile()));
+	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+}
+
+void OpenFileWidget::selectFile()
+{
+	OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
+	QString ext;
+	fl = QFileDialog::getOpenFileName(this,tr("Open"),dec->defVal->getFileName(),dec->exts.join(" "));
+	collectWidgetValue();
+	updateFileName(fl);
+	emit dialogParamChanged();
+}
+
+void OpenFileWidget::collectWidgetValue()
+{
+	rp->val->set(FileValue(fl));
+}
+
+void OpenFileWidget::resetWidgetValue()
+{
+	QString fle = rp->pd->defVal->getFileName();
+	fl = fle;
+	updateFileName(fle);
+}
+
+
+void OpenFileWidget::setWidgetValue(const Value& nv)
+{
+	QString fle = nv.getFileName();
+	fl = fle;
+	updateFileName(QString());
+}
+
+void OpenFileWidget::updateFileName( const FileValue& file )
+{
+	filename->setText(file.getFileName());
+}
+
+OpenFileWidget::~OpenFileWidget()
+{
+	delete filename;
+	delete browse;
+	delete descLab;
+}

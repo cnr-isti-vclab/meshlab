@@ -425,7 +425,32 @@ public:
 	void setMesh(MeshModel * newMesh);
 };
 
+class OpenFileWidget : public MeshLabWidget
+{
+	Q_OBJECT
+public:
+	OpenFileWidget(QWidget *p, RichOpenFile* rdf);
+	~OpenFileWidget();
 
+	void collectWidgetValue();
+	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
+
+protected:
+	QLineEdit* filename;
+	QPushButton* browse;
+	QString fl;
+	QLabel* descLab;
+
+
+signals:
+	void dialogParamChanged();
+
+private:
+	void  updateFileName(const FileValue& file);
+private slots:
+	void selectFile();
+};
 /*
 class QVariantListWidget : public MeshLabWidget
 {
@@ -633,8 +658,8 @@ public:
 	void visit(RichEnum& pd){lastCreated = new EnumWidget(par,&pd);};
 	void visit(RichFloatList& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new FloatListWidget(par,&pd);*/};
 	void visit(RichDynamicFloat& pd){lastCreated = new DynamicFloatWidget(par,&pd);};
-	void visit(RichOpenFile& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new OpenFileWidget(par,&pd);*/};
-	void visit(RichSaveFile& pd){lastCreated = new SaveFileWidget(par,&pd);};
+	void visit(RichOpenFile& pd){lastCreated = new OpenFileWidget(par,&pd);};
+	void visit(RichSaveFile& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new SaveFileWidget(par,&pd);*/};
 	void visit(RichMesh& pd){lastCreated = new MeshWidget(par,&pd);};
 
 	~RichWidgetInterfaceConstructor() {}
@@ -662,7 +687,7 @@ public:
 	void visit(RichEnum& pd);
 	void visit(RichFloatList& /*pd*/){assert(0);};
 	void visit(RichDynamicFloat& pd);
-	void visit(RichOpenFile& /*pd*/){assert(0);};
+	void visit(RichOpenFile& pd);
 	void visit(RichSaveFile& /*pd*/){assert(0);};
 	void visit(RichMesh& /*pd*/){assert(0);};
 
