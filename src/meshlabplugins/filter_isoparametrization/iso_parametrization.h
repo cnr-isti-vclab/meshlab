@@ -13,6 +13,7 @@
 #include "local_parametrization.h"
 #include "uv_grid.h"
 #include <vcg/complex/trimesh/stat.h>
+#include "param_mesh.h"
 
 ///ABSTRACT MESH THAT MAINTAINS THE WHOLE PARAMETERIZATION
 class AbstractVertex;
@@ -59,13 +60,26 @@ class ParamVertex: public vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace,
 											vcg::vertex::Normal3f, vcg::vertex::VFAdj, 
 											vcg::vertex::Coord3f,vcg::vertex::Color4b,
 											vcg::vertex::TexCoord2f,vcg::vertex::BitFlags,
-											vcg::vertex::CurvatureDirf >
+											vcg::vertex::CurvatureDirf,
+											vcg::vertex::Qualityf>
 {
 public:
     template < class LeftV>
     void ImportLocal(const LeftV  & left )
     {
-        vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf >::ImportLocal( left);
+        vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
+    }
+	
+	
+    void ImportLocal(const ParamVertex  & left )
+    {
+        vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
+        this->RPos = left.RPos;
+    }
+	
+	void ImportLocal(const BaseVertex  & left )
+    {
+        vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
         this->RPos = left.RPos;
     }
 
@@ -76,10 +90,23 @@ public:
 class ParamFace: public vcg::FaceSimp2  <  ParamVertex, ParamEdge, ParamFace, 
 	vcg::face::VFAdj,vcg::face::FFAdj,vcg::face::VertexRef,
   vcg::face::Color4b,vcg::face::BitFlags,
-  vcg::face::WedgeTexCoord2f,vcg::face::Normal3f,
-  vcg::face::Qualityf // not really needed
+  vcg::face::Normal3f/*
+  vcg::face::WedgeTexCoord2f,*/
+  //,
+  //vcg::face::Qualityf // not really needed
   >
-{};
+{
+public:
+	/*template < class LeftV>
+    void ImportLocal(const LeftV  & left )
+    {
+       vcg::FaceSimp2  <  ParamVertex, ParamEdge, ParamFace, 
+	vcg::face::VFAdj,vcg::face::FFAdj,vcg::face::VertexRef,
+  vcg::face::Color4b,vcg::face::BitFlags,
+  vcg::face::WedgeTexCoord2f,vcg::face::Normal3f,
+  vcg::face::Qualityf>::ImportLocal( left);
+    }*/
+};
 class ParamMesh: public vcg::tri::TriMesh<std::vector<ParamVertex>, std::vector<ParamFace> > 
 {
 //public:
@@ -1652,6 +1679,23 @@ public:
 			}
 		}
 
+		///test param mesh
+		for (unsigned int i=0;i<param_mesh->vert.size();i++)
+		{
+			if (!(param_mesh->vert[i].IsD()))
+			{
+				ParamVertex *v0=&param_mesh->vert[i];
+				ParamMesh::CoordType bary=ParamMesh::CoordType(v0->T().U(),v0->T().V(),1-v0->T().U()-v0->T().V());
+				int patchNum=v0->T().N();
+				if (!testBaryCoords(bary))
+					return false;
+				if (patchNum<0)
+					return false;
+				if (patchNum>AbsMesh()->fn)
+					return false;
+			}
+		}
+
 		Area3d=vcg::tri::Stat<ParamMesh>::ComputeMeshArea(*param_mesh);
 		AbstractArea=(ScalarType)abstract_mesh->fn*fix_num;
 		
@@ -1708,15 +1752,109 @@ public:
 
 	void SaveBaseDomain(char *pathname)
 	{
-		vcg::tri::io::ExporterPLY<AbstractMesh>::Save(*AbsMesh(),pathname);
-	}
+		/*vcg::tri::io::ExporterPLY<AbstractMesh>::Save(*AbsMesh(),pathname);*/
+		/*Warp(0);*/
+		FILE *f;
+		f=fopen(pathname,"w+");
 	
-	void LoadBaseDomain(char *pathname)
+		std::map<AbstractVertex*,int> vertexmap;
+		typedef std::map<AbstractVertex*,int>::iterator iteMapVert;
+
+		///add vertices
+		fprintf(f,"%d,%d \n",AbsMesh()->fn,AbsMesh()->vn);
+		int index=0;
+		for (unsigned int i=0;i<AbsMesh()->vert.size();i++)
+		{
+			AbstractVertex* vert=&AbsMesh()->vert[i];
+			if (!vert->IsD())
+			{
+				vertexmap.insert(std::pair<AbstractVertex*,int>(vert,index));
+				CoordType pos=vert->P();
+				CoordType RPos=vert->RPos;
+				fprintf(f,"%f,%f,%f;\n",pos.X(),pos.Y(),pos.Z());
+				index++;
+			}
+		}
+
+		///add faces
+		for (unsigned int i=0;i<AbsMesh()->face.size();i++)
+		{
+			AbstractFace* face=&AbsMesh()->face[i];
+			if (!face->IsD())
+			{
+				AbstractVertex* v0=face->V(0);
+				AbstractVertex* v1=face->V(1);
+				AbstractVertex* v2=face->V(2);
+				iteMapVert vertIte;
+				vertIte=vertexmap.find(v0);
+				assert(vertIte!=vertexmap.end());
+				int index0=(*vertIte).second;
+				vertIte=vertexmap.find(v1);
+				assert(vertIte!=vertexmap.end());
+				int index1=(*vertIte).second;
+				vertIte=vertexmap.find(v2);
+				assert(vertIte!=vertexmap.end());
+				int index2=(*vertIte).second;
+				assert((index0!=index1)&&(index1!=index2));
+				fprintf(f,"%d,%d,%d \n",index0,index1,index2);
+			}
+		}
+		fclose(f);
+	}
+
+	template <class MeshType>
+	bool LoadBaseDomain(char *pathname,
+						MeshType	*_input_mesh,
+						ParamMesh	 * _param_mesh,
+						bool test=true,
+						bool use_quality=true)
 	{
-		vcg::tri::io::ImporterPLY<AbstractMesh>::Open(*AbsMesh(),pathname);
-		//UpdateStructures<AbstractMesh>(AbsMesh());
-		///set father to son link
+		param_mesh=_param_mesh;
+		param_mesh->Clear();
+		vcg::tri::Append<ParamMesh,MeshType>::Mesh(*param_mesh,*_input_mesh);
+
+		///quality copy to index of texture
+		for (int i=0;i<param_mesh->vert.size();i++)
+			param_mesh->vert[i].T().N()=(int)param_mesh->vert[i].Q();
+
+		/*if (AbsMesh()!=NULL)
+			delete(AbsMesh());*/
+
+		AbsMesh()=new AbstractMesh();
+		FILE *f=NULL;              
+		f=fopen(pathname,"r");
+		if (f==NULL)
+			return -1;
 		
+		///read vertices
+		fscanf(f,"%d,%d \n",&abstract_mesh->fn,&abstract_mesh->vn);
+		abstract_mesh->vert.resize(abstract_mesh->vn);
+		abstract_mesh->face.resize(abstract_mesh->fn);
+
+		for (unsigned int i=0;i<abstract_mesh->vert.size();i++)
+		{
+			AbstractVertex* vert=&abstract_mesh->vert[i];
+			CoordType pos;
+			fscanf(f,"%f,%f,%f;\n",&pos.X(),&pos.Y(),&pos.Z());
+			vert->P()=pos;
+		}
+
+		///add faces
+		for (unsigned int i=0;i<abstract_mesh->face.size();i++)
+		{
+			AbstractFace* face=&abstract_mesh->face[i];
+			if (!face->IsD())
+			{
+				int index0,index1,index2;
+				fscanf(f,"%d,%d,%d \n",&index0,&index1,&index2);
+				abstract_mesh->face[i].V(0)=&abstract_mesh->vert[index0];
+				abstract_mesh->face[i].V(1)=&abstract_mesh->vert[index1];
+				abstract_mesh->face[i].V(2)=&abstract_mesh->vert[index2];
+			}
+		}
+		UpdateTopologies<AbstractMesh>(AbsMesh());
+		fclose(f);
+		return (Update(test));
 	}
 	
 	template <class MeshType>
@@ -1726,6 +1864,7 @@ public:
 		{
 			_param_mesh->vert[i].T().P()=ParaMesh()->vert[i].T().P();
 			_param_mesh->vert[i].T().N()=ParaMesh()->vert[i].T().N();
+			_param_mesh->vert[i].Q()=(MeshType::ScalarType)ParaMesh()->vert[i].T().N();
 		}
 	}
 

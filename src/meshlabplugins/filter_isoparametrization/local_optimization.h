@@ -234,7 +234,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 		printf("@");
 #endif
 		//return;
-		RestoreRestUV(hlev_mesh);
+		/*RestoreRestUV(hlev_mesh);*/
 	}
 
 	bool inside=true;

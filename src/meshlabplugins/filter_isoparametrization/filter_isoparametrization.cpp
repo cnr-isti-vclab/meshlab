@@ -42,7 +42,9 @@ FilterIsoParametrization::FilterIsoParametrization()
 {
   typeList << ISOP_PARAM
            << ISOP_REMESHING
-					 << ISOP_DIAMPARAM;
+		   << ISOP_DIAMPARAM
+		   << ISOP_LOAD
+		   << ISOP_SAVE;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -63,6 +65,8 @@ FilterIsoParametrization::~FilterIsoParametrization()
     case ISOP_PARAM : return "Iso Parametrization";
     case ISOP_REMESHING : return "Iso Parametrization Remeshing";
     case ISOP_DIAMPARAM : return "Iso Parametrization transfer to Original mesh";
+	case ISOP_LOAD : return "Iso Parametrization Load Abstract Domain";
+	case ISOP_SAVE : return "Iso Parametrization Save Abstract Domain";
     default: assert(0);
   }
   return QString("error!");
@@ -84,6 +88,14 @@ FilterIsoParametrization::~FilterIsoParametrization()
 			"For more details see: <br>"
 			"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
 			"IEEE Transaction of Visualization and Computer Graphics 2009";
+	case ISOP_LOAD : return "<br>	 Load the Isoparametrinzation from a saved Abstract Mesh  <br>"
+			"For more details see: <br>"
+			"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
+			"IEEE Transaction of Visualization and Computer Graphics 2009";
+	case ISOP_SAVE : return "<br>	 Save the Isoparametrinzation on an Abstract Mesh  <br>"
+			"For more details see: <br>"
+			"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
+			"IEEE Transaction of Visualization and Computer Graphics 2009";
    default: assert(0);
   }
   return QString("error!");
@@ -100,7 +112,7 @@ FilterIsoParametrization::~FilterIsoParametrization()
 	return MeshModel::MM_UNKNOWN;
 }
 
-void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& /*md*/, RichParameterSet & par)
+void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, RichParameterSet & par)
 {
   
   switch(ID(a))
@@ -137,12 +149,30 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& /*md*/
 	{
 		 par.addParam(new RichInt("SamplingRate",10,"Sampling Rate", "This specify the sampling rate for remeshing."));
 		 break;
-  }
+	}
 	case ISOP_DIAMPARAM :
 	{
 		 par.addParam(new RichDynamicFloat("BorderSize",0.05f,0.01f,0.5f,"BorderSize ratio", "This specify the border for each diamond.<br>"
-																				"The bigger is the less triangles are splitted, but the more UV space is used."));								 
+																"The bigger is the less triangles are splitted, but the more UV space is used."));								 
 		break;										
+	}
+	case ISOP_LOAD : 
+	{
+		QFileInfo fi(md.mm()->fullName());
+		QString fileName = fi.baseName();
+		
+		fileName = fileName.append(".abs");
+		par.addParam(new RichString("AbsName", fileName, "Abstract Mesh file", "Set the abstract mesh as basedomain"));
+		break;
+	}
+	case ISOP_SAVE : 
+	{
+		QFileInfo fi(md.mm()->fullName());
+		QString fileName = fi.baseName();
+		
+		fileName = fileName.append(".abs");
+		par.addParam(new RichString("AbsName", fileName, "Abstract Mesh file", "Set the abstract mesh as basedomain"));
+		break;
 	}
 }
 }
@@ -351,6 +381,51 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		DiaPara.Init(&isoPHandle());
 		DiaPara.SetCoordinates<CMeshO>(*rem,border_size);
 		vcg::tri::UpdateNormals<CMeshO>::PerFace(*rem);
+		return true;
+	}
+	case ISOP_LOAD : 
+	{
+		QString AbsName = par.getString("AbsName");
+		bool isTXTenabled=m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
+		if (!isTXTenabled)
+		{
+			this->errorMessage="Per Vertex Text Coordinates are not enabled";
+			return false;
+		}
+		if(!QFile(m->fullName()).exists())
+		{
+			this->errorMessage="File not exists";
+			return false;
+		}
+		bool b=vcg::tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
+		if (!b)
+			isoPHandle=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
+
+		QByteArray ba = AbsName.toLatin1();
+		char *path=ba.data();
+		bool Done=isoPHandle().LoadBaseDomain<CMeshO>(path,mesh,&para_mesh,true);
+		if (!Done)
+		{
+			this->errorMessage="Abstract domain doesnt fit well with the parametrized mesh";
+			return false;
+		}
+		return true;
+	}
+	case ISOP_SAVE : 
+	{
+		bool b=vcg::tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
+		if (!b)
+		{
+			this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
+			return false;
+		}
+		/*QString Qpath=m->fullName();*/
+
+		QString AbsName = par.getString("AbsName");
+		
+		QByteArray ba = AbsName.toLatin1();
+		char *path=ba.data();
+		isoPHandle().SaveBaseDomain(path);
 		return true;
 	}
   }
