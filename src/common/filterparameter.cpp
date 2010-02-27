@@ -426,16 +426,16 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 	if(type=="RichColor")		
 	{ 
 		unsigned int r = np.attribute("r").toUInt(&corrconv);
-		if ((!corrconv) && (r >= 0) && (r <= 255))
+    if ((!corrconv) && (r <= 255))
 			return false;
 		unsigned int g = np.attribute("g").toUInt(&corrconv); 
-		if ((!corrconv) && (g >= 0) && (g <= 255))
+    if ((!corrconv) && (g <= 255))
 			return false;
 		unsigned int b = np.attribute("b").toUInt(&corrconv); 
-		if ((!corrconv) && (b >= 0) && (b <= 255))
+    if ((!corrconv) && (b <= 255))
 			return false;
 		unsigned int a = np.attribute("a").toUInt(&corrconv);
-		if ((!corrconv) && (a >= 0) && (a <= 255))
+    if ((!corrconv) && (a <= 255))
 			return false;
 		QColor col(r,g,b,a);
 		*par= new RichColor(name,col,desc,tooltip); 
