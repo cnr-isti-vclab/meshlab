@@ -310,25 +310,18 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		bool isOK=isoPHandle().Init(&abs_mesh,&para_mesh);
 
 		///copy back to original mesh
-		/*m->updateDataMask(MeshModel::MM_VERTTEXCOORD);*/
-		isoPHandle().CopyParametrization<CMeshO>(mesh);
+    isoPHandle().CopyParametrization<CMeshO>(mesh);
 
 		if (!isOK)
 		{
 			Log("Problems gathering parameterization \n");
 			return false;
 		}
-		/*if (!isTXTenabled)
-				m->clearDataMask(MeshModel::MM_VERTTEXCOORD);*/
-		if (!isVMarkenabled)
+    if (!isVMarkenabled)
 				m->clearDataMask(MeshModel::MM_VERTMARK);
 		if (!isFMarkenabled)
 				m->clearDataMask(MeshModel::MM_FACEMARK);
-		/*if (!isVColorenabled)
-				m->clearDataMask(MeshModel::MM_VERTCOLOR);
-		if (!isFColorenabled)
-				m->clearDataMask(MeshModel::MM_FACECOLOR);*/
-		return true;
+    return true;
 	}
 	case ISOP_REMESHING :
 	{
@@ -437,54 +430,19 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
   switch(ID(a))
   {
     case ISOP_PARAM : return MeshFilterInterface::Remeshing;
-	case ISOP_REMESHING : return MeshFilterInterface::Remeshing;
-	case ISOP_DIAMPARAM : return MeshFilterInterface::Remeshing;
+    case ISOP_REMESHING : return MeshFilterInterface::Remeshing;
+    case ISOP_DIAMPARAM : return MeshFilterInterface::Remeshing;
     default: return MeshFilterInterface::Remeshing;
   }
-  //return (MeshFilterInterface::Remeshing);
 }
 
-int FilterIsoParametrization::postCondition( QAction* filter ) const
+int FilterIsoParametrization::postCondition( QAction* /*filter*/ ) const
 {
-	(void)filter;
-   /* switch(ID(filter))
-    {
-        case CP_SCATTER_PER_MESH : return MeshModel::MM_COLOR;
-        default : return MeshModel::MM_VERTCOLOR;
-    }*/
 	 return MeshModel::MM_UNKNOWN;
 }
 
-int FilterIsoParametrization::getPreConditions( QAction * filter ) const
+int FilterIsoParametrization::getPreConditions( QAction * /*filter*/ ) const
 {
-	(void)filter;
-	/*switch(ID(filter))
-	{
-		case CP_FILLING :
-		case CP_COLOURISATION :
-		case CP_SCATTER_PER_MESH :
-		case CP_PERLIN_COLOR :
-		case CP_COLOR_NOISE :
-		{
-			return MeshFilterInterface::FP_Generic;
-			break;
-		}
-		case CP_THRESHOLDING :
-		case CP_BRIGHTNESS :
-		case CP_CONTRAST :
-		case CP_CONTR_BRIGHT :
-		case CP_GAMMA :
-		case CP_INVERT :
-		case CP_EQUALIZE :
-		case CP_DESATURATION :
-		case CP_WHITE_BAL :
-		case CP_LEVELS :
-		{
-			return MeshFilterInterface::FP_VertexColor;	
-			break;
-		}
-		default: assert(0); return MeshFilterInterface::FP_Generic;
-	}*/
 	return MeshFilterInterface::FP_Generic;
 }
 

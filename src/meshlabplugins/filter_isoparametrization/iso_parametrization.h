@@ -1864,7 +1864,7 @@ public:
 		{
 			_param_mesh->vert[i].T().P()=ParaMesh()->vert[i].T().P();
 			_param_mesh->vert[i].T().N()=ParaMesh()->vert[i].T().N();
-			_param_mesh->vert[i].Q()=(MeshType::ScalarType)ParaMesh()->vert[i].T().N();
+      _param_mesh->vert[i].Q()=(typename MeshType::ScalarType)ParaMesh()->vert[i].T().N();
 		}
 	}
 
