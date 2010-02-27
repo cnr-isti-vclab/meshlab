@@ -26,11 +26,13 @@
 
 EditSelectFactory::EditSelectFactory()
 {
-	editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a rectagular region", this);
-	editSelectConnected = new QAction(QIcon(":/images/select_face_connected.png"),"Select Connected Components in a region", this);
-	
-	actionList << editSelect;
-	actionList << editSelectConnected;
+    editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a rectagular region", this);
+    editSelectConnected = new QAction(QIcon(":/images/select_face_connected.png"),"Select Connected Components in a region", this);
+    editSelectVert = new QAction(QIcon(":/images/select_vertex.png"),"Select Vertexes", this);
+
+    actionList << editSelectVert;
+    actionList << editSelect;
+    actionList << editSelectConnected;
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -46,16 +48,18 @@ QList<QAction *> EditSelectFactory::actions() const
 MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
 {
 	if(action == editSelect)
-		return new ExtraMeshEditPlugin(false);
-	else if(action == editSelectConnected)
-		return new ExtraMeshEditPlugin(true);
+      return new EditSelectPlugin(EditSelectPlugin::SELECT_FACE_MODE);
+  else if(action == editSelectConnected)
+      return new EditSelectPlugin(EditSelectPlugin::SELECT_CONN_MODE);
+  else if(action == editSelectVert)
+      return new EditSelectPlugin(EditSelectPlugin::SELECT_VERT_MODE);
 	 
 	assert(0); //should never be asked for an action that isnt here
 }
 
 QString EditSelectFactory::getEditToolDescription(QAction *a)
 {
-	return ExtraMeshEditPlugin::Info();
+  return EditSelectPlugin::Info();
 }
 
 Q_EXPORT_PLUGIN(EditSelectFactory)

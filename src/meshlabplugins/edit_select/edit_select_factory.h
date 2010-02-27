@@ -48,8 +48,9 @@ public:
 private:
 	QList <QAction *> actionList;
 	
-	QAction *editSelect;
-	QAction *editSelectConnected;
+  QAction *editSelect;
+  QAction *editSelectVert;
+  QAction *editSelectConnected;
 };
 
 #endif

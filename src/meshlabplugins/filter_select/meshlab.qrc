@@ -1,6 +1,7 @@
 <RCC>
-    <qresource prefix="/" >
+    <qresource prefix="/">
         <file>images/delete_face.png</file>
         <file>images/delete_facevert.png</file>
+        <file>images/delete_vert.png</file>
     </qresource>
 </RCC>

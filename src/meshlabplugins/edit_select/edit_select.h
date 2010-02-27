@@ -25,15 +25,18 @@
 
 #include <common/interfaces.h>
 
-class ExtraMeshEditPlugin : public QObject, public MeshEditInterface
+class EditSelectPlugin : public QObject, public MeshEditInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
-			
-public:
-    ExtraMeshEditPlugin(bool _ConnectedMode);
 
-    virtual ~ExtraMeshEditPlugin() {}
+
+public:
+  enum { SELECT_FACE_MODE, SELECT_VERT_MODE, SELECT_CONN_MODE } ;
+
+  EditSelectPlugin(int _ConnectedMode);
+
+    virtual ~EditSelectPlugin() {}
 
     static QString Info();
     virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
@@ -49,15 +52,16 @@ public:
     QPoint cur;
     QPoint prev;
     bool isDragging;
-		bool connectedMode;
-    std::vector<CMeshO::FacePointer> LastSel;
-    
+    int selectionMode;
+    std::vector<CMeshO::FacePointer> LastSelFace;
+    std::vector<CMeshO::VertexPointer> LastSelVert;
+
 signals:
 	void setSelectionRendering(bool);
 
 private:
-  typedef enum {SMAdd, SMClear,SMSub} SelMode;
-  SelMode selMode;
+  typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode; // How the selection are composed
+  ComposingSelMode composingSelMode;
 	bool selectFrontFlag;
   void DrawXORRect(GLArea * gla, bool doubleDraw);
 };
