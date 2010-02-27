@@ -153,7 +153,8 @@ public slots:
 		emit updateMainWindowMenus();
 	} 
 
-	void setSelectionRendering(bool enabled);
+  void setSelectFaceRendering(bool enabled);
+  void setSelectVertRendering(bool enabled);
 
   void suspendEditToggle()
 		{	

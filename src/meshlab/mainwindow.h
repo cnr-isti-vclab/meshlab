@@ -107,8 +107,9 @@ private slots:
 	void applyRenderMode();
 	//void applyColorMode();
 	void toggleBackFaceCulling();
-	void toggleSelectionRendering();
-	void applyDecorateMode();
+  void toggleSelectFaceRendering();
+  void toggleSelectVertRendering();
+  void applyDecorateMode();
 	///////////Slot Menu View ////////////////////////
 	void fullScreen();
 	void showToolbarFile();
@@ -281,7 +282,8 @@ private:
 	QAction *setFancyLightingAct;
     QAction *setLightAct;
 	QAction *backFaceCullAct;
-  QAction *setSelectionRenderingAct;
+  QAction *setSelectFaceRenderingAct;
+  QAction *setSelectVertRenderingAct;
 
 	QActionGroup *colorModeGroupAct;
 	QAction *colorModeNoneAct;

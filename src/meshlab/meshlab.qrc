@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/" >
+    <qresource prefix="/">
         <file>images/backlines.png</file>
         <file>images/bbox.png</file>
         <file>images/cursors/plain.png</file>
@@ -22,7 +22,6 @@
         <file>images/points.png</file>
         <file>images/reload.png</file>
         <file>images/save.png</file>
-        <file>images/selected.png</file>
         <file>images/smooth.png</file>
         <file>images/snapshot.png</file>
         <file>images/textures.png</file>
@@ -33,5 +32,7 @@
         <file>images/layer_edit_locked.png</file>
         <file>images/layer_edit_unlocked.png</file>
         <file>images/100mesh.html</file>
+        <file>images/selected_face.png</file>
+        <file>images/selected_vert.png</file>
     </qresource>
 </RCC>

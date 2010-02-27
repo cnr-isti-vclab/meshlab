@@ -108,7 +108,8 @@ class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
 
 class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > {
 public :
-	int sfn; //The number of selected faces.
+  int sfn; //The number of selected faces.
+  int svn; //The number of selected faces.
   vcg::Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
   const vcg::Box3f &trBB() {
 	static vcg::Box3f bb;
@@ -230,12 +231,14 @@ public:
 
         visible=true;
 		cm.Tr.SetIdentity();
-		cm.sfn=0;
+    cm.sfn=0;
+    cm.svn=0;
         if(meshName) fullPathFileName=meshName;
   }
 
   bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
-  bool RenderSelectedFaces();
+  bool RenderSelectedFace();
+  bool RenderSelectedVert();
 
 
   // This function is roughly equivalent to the updateDataMask,
@@ -334,8 +337,8 @@ public:
     bool backFaceCull;
     bool doubleSideLighting;
     bool fancyLighting;
-    bool castShadow;
-    bool selectedFaces;
+    bool selectedFace;
+    bool selectedVert;
     vcg::Point3f lightDir;
 
 
@@ -349,8 +352,8 @@ public:
 			backFaceCull = false;
 			doubleSideLighting = false;
 			fancyLighting = false;
-			castShadow = false;
-      selectedFaces=false;
+      selectedFace=false;
+      selectedVert=false;
     }
 		
 }; // end class RenderMode

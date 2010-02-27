@@ -107,7 +107,7 @@ bool MeshModel::Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW
       return true;
   }
 
-bool MeshModel::RenderSelectedFaces()
+bool MeshModel::RenderSelectedFace()
 {
   glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT );
   glEnable(GL_POLYGON_OFFSET_FILL);
@@ -135,7 +135,34 @@ bool MeshModel::RenderSelectedFaces()
 	glPopAttrib();
   return true;
 }
-
+bool MeshModel::RenderSelectedVert()
+{
+  glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT );
+  glEnable(GL_POLYGON_OFFSET_FILL);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_BLEND);
+  glDepthMask(GL_FALSE);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
+  glColor4f(1.0f,0.0,0.0,.3f);
+  glPolygonOffset(-1.0, -1);
+  glPointSize(2.0);
+  glPushMatrix();
+  glMultMatrix(cm.Tr);
+  glBegin(GL_POINTS);
+  cm.svn=0;
+  CMeshO::VertexIterator vi;
+  for(vi=cm.vert.begin();vi!=cm.vert.end();++vi)
+    if(!(*vi).IsD() && (*vi).IsS())
+    {
+      glVertex((*vi).cP());
+      ++cm.svn;
+    }
+  glEnd();
+  glPopMatrix();
+  glPopAttrib();
+  return true;
+}
 
 int MeshModel::io2mm(int single_iobit)
 {

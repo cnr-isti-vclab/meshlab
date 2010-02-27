@@ -195,11 +195,15 @@ void MainWindow::createActions()
 	backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
 
-	setSelectionRenderingAct 	  = new QAction(QIcon(":/images/selected.png"),tr("Selected Face Rendering"),this);
-	setSelectionRenderingAct->setCheckable(true);
-	setSelectionRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
-	//setSelectionRenderingAct->setShortcut(Qt::CTRL+Qt::Key_S);
-	connect(setSelectionRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectionRendering()));
+  setSelectFaceRenderingAct 	  = new QAction(QIcon(":/images/selected_face.png"),tr("Selected Face Rendering"),this);
+  setSelectFaceRenderingAct->setCheckable(true);
+  setSelectFaceRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
+  connect(setSelectFaceRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectFaceRendering()));
+
+  setSelectVertRenderingAct 	  = new QAction(QIcon(":/images/selected_vert.png"),tr("Selected Vertex Rendering"),this);
+  setSelectVertRenderingAct->setCheckable(true);
+  setSelectVertRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
+  connect(setSelectVertRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectVertRendering()));
 
 	//////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
@@ -308,7 +312,8 @@ void MainWindow::createToolBars()
 	renderToolBar->addActions(renderModeGroupAct->actions());
 	renderToolBar->addAction(renderModeTextureAct);
 	renderToolBar->addAction(setLightAct);
-	renderToolBar->addAction(setSelectionRenderingAct);
+  renderToolBar->addAction(setSelectFaceRenderingAct);
+  renderToolBar->addAction(setSelectVertRenderingAct);
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
@@ -383,7 +388,8 @@ void MainWindow::createMenus()
 	renderModeMenu->addAction(backFaceCullAct);
 	renderModeMenu->addActions(renderModeGroupAct->actions());
 	renderModeMenu->addAction(renderModeTextureAct);
-	renderModeMenu->addAction(setSelectionRenderingAct);
+  renderModeMenu->addAction(setSelectFaceRenderingAct);
+  renderModeMenu->addAction(setSelectVertRenderingAct);
 
 	lightingModeMenu=renderMenu->addMenu(tr("&Lighting"));
 	lightingModeMenu->addAction(setLightAct);

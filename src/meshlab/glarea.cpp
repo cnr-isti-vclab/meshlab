@@ -294,8 +294,9 @@ void GLArea::paintGL()
 		if(iEdit) iEdit->Decorate(*mm(),this);
 
 		// Draw the selection
-		if(rm.selectedFaces)  mm()->RenderSelectedFaces();
-		QAction * p;
+    if(rm.selectedFace)  mm()->RenderSelectedFace();
+    if(rm.selectedVert)  mm()->RenderSelectedVert();
+    QAction * p;
 		foreach(p , iDecoratorsList)
 				{
 					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
@@ -412,9 +413,10 @@ void GLArea::displayInfo()
 		renderText(middleCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc.vn()),qFont);
 		renderText(middleCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc.fn()),qFont);
 	}
-	if(rm.selectedFaces || mm()->cm.sfn>0)
-		 renderText(middleCol,startPos+ 4*lineSpacing,tr("Selected: %1").arg(mm()->cm.sfn),qFont);
-	renderText(rightCol,startPos+ 4*lineSpacing,GetMeshInfoString(),qFont);
+  if(rm.selectedFace || rm.selectedVert || mm()->cm.sfn>0 || mm()->cm.svn>0 )
+      renderText(middleCol,startPos+ 4*lineSpacing,tr("Selection: v:%1 f:%2").arg(mm()->cm.svn).arg(mm()->cm.sfn),qFont);
+
+  renderText(rightCol,startPos+ 4*lineSpacing,GetMeshInfoString(),qFont);
 
   if(fov>5) renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
 			 else renderText(rightCol,startPos+1*lineSpacing,QString("FOV: Ortho"),qFont);
@@ -787,10 +789,15 @@ void GLArea::setBackFaceCulling(bool enabled)
 	updateGL();
 }
 
-void GLArea::setSelectionRendering(bool enabled)
+void GLArea::setSelectFaceRendering(bool enabled)
 {
-	rm.selectedFaces = enabled;
-	updateGL();
+  rm.selectedFace = enabled;
+  updateGL();
+}
+void GLArea::setSelectVertRendering(bool enabled)
+{
+  rm.selectedVert = enabled;
+  updateGL();
 }
 
 void GLArea::setLightModel()

@@ -225,7 +225,8 @@ void MainWindow::updateMenus()
 
 				setFancyLightingAct->setChecked(rm.fancyLighting);
 				setDoubleLightingAct->setChecked(rm.doubleSideLighting);
-				setSelectionRenderingAct->setChecked(rm.selectedFaces);
+        setSelectFaceRenderingAct->setChecked(rm.selectedFace);
+        setSelectVertRenderingAct->setChecked(rm.selectedVert);
 
 				// Check only the active decorations
 				foreach (QAction *a,      PM.decoratorActionList){a->setChecked(false);a->setEnabled(true);}
@@ -367,8 +368,10 @@ void MainWindow::runFilterScript()
 			GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
 		}
 		if(iFilter->getClass(action) & MeshFilterInterface::Selection )
-			GLA()->setSelectionRendering(true);
-
+    {
+        GLA()->setSelectFaceRendering(true);
+        GLA()->setSelectVertRendering(true);
+    }
 		if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
 			GLA()->resetTrackBall();
 		/* to be changed */
@@ -496,8 +499,10 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
   }
 	if(iFilter->getClass(action) & MeshFilterInterface::Selection )
-	    GLA()->setSelectionRendering(true);
-			
+  {
+      GLA()->setSelectVertRendering(true);
+      GLA()->setSelectFaceRendering(true);
+  }
 	if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
 	    GLA()->resetTrackBall();
 
@@ -563,8 +568,6 @@ void MainWindow::applyEditMode()
 		GLA()->addMeshEditor(action, iEdit);
 	}
 	GLA()->setCurrentEditAction(action);
-
-	//setSelectionRendering(true);
 
 	updateMenus();
 }
@@ -669,10 +672,15 @@ void MainWindow::toggleBackFaceCulling()
 	GLA()->setBackFaceCulling(!rm.backFaceCull);
 }
 
-void MainWindow::toggleSelectionRendering()
+void MainWindow::toggleSelectFaceRendering()
 {
-	RenderMode &rm = GLA()->getCurrentRenderMode();
-	GLA()->setSelectionRendering(!rm.selectedFaces);
+  RenderMode &rm = GLA()->getCurrentRenderMode();
+  GLA()->setSelectFaceRendering(!rm.selectedFace);
+}
+void MainWindow::toggleSelectVertRendering()
+{
+  RenderMode &rm = GLA()->getCurrentRenderMode();
+  GLA()->setSelectVertRendering(!rm.selectedVert);
 }
 
 bool MainWindow::openIn(QString /* fileName */)
