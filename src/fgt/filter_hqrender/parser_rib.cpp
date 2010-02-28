@@ -15,10 +15,10 @@ bool FilterHighQualityRender::resetBound() {
 
 bool FilterHighQualityRender::resetGraphicsState() {
   //graphics state initialization (only interesting things)
-  transfMatrix = QStack<vcg::Matrix44f>();
-  transfMatrix << vcg::Matrix44f::Identity();
-  surfaceShader = QStack<QString>();
-  surfaceShader << ""; //nothing to set implementation-dependent default surface shader
+  transfMatrixStack = QStack<vcg::Matrix44f>();
+  transfMatrixStack << vcg::Matrix44f::Identity();
+  surfaceShaderStack = QStack<QString>();
+  surfaceShaderStack << ""; //nothing to set implementation-dependent default surface shader
 	resetBound();
   return true;
 }
@@ -73,8 +73,9 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
   bool solidBegin = false; //true only if define a dummy object
 	bool writeLine = true; //true if the line has to be write to final file
   resetGraphicsState(); //transformation matrix, bound, surface shader
+  QQueue<Procedure> procedures = QQueue<Procedure>(); //every time it's found a procedural call it's stored here
 	//reading cycle
-	while(!files.hasNext() && !stop) {
+	while(files.hasNext() && !stop) {
 		if(!solidBegin)
       writeLine = true;
     int statementType = 0; //type of statement
@@ -173,16 +174,16 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
       //set transform in graphics state
       case ribParser::TRANSFORM:
 			{
-        transfMatrix.pop();
-        transfMatrix.push(getMatrix(&line));
+        transfMatrixStack.pop();
+        transfMatrixStack.push(getMatrix(&line));
 				break;
       }
       //set surface in graphics state
       case ribParser::SURFACE: 
 			{
 				//the surface shader remain the same of template
-				surfaceShader.pop();
-        surfaceShader.push(line);				
+				surfaceShaderStack.pop();
+        surfaceShaderStack.push(line);
 				break;
 			}
       //set bound in graphics state
@@ -231,7 +232,7 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
       }
       //the end of solid definition
       case ribParser::SOLIDEND: {
-        if(solidBegin) {
+        if(solidBegin) { //if and only if foundDummy is true
           QString filename = convertObject(currentFrame, destDirString, m, par, textureList);
           qDebug("dummy conversion, filename: %s",qPrintable(filename));
 				  if(filename == "") { //error in parseObject
@@ -268,31 +269,95 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
       //add a new graphics state "level"
       case ribParser::ATTRIBUTEBEGIN: 
 			{
-        transfMatrix.push(transfMatrix.top());
-        surfaceShader.push(surfaceShader.top());
+        transfMatrixStack.push(transfMatrixStack.top());
+        surfaceShaderStack.push(surfaceShaderStack.top());
         break;
 			}
       //remove a "level" to graphics state stack
       case ribParser::ATTRIBUTEEND:
       {
-        transfMatrix.pop();
-        surfaceShader.pop();
+        transfMatrixStack.pop();
+        surfaceShaderStack.pop();
         break;
+      }
+      //a procedural statement: managed at the end of cycle
+      case ribParser::PROCEDURAL: 
+      {
+        //manage only dealayedreadarchive
+        //0: Procedural 
+        //1: " 
+        //2: DelayedReadArchive
+        //3: " 
+        //4: [ 
+        //5: " 
+        //6: filename 
+        //7: " 
+        //8: ]
+        //9: [
+        //10-15: bound element
+        //11: ]
+        QStringList token = ribParser::splitStatement(&line);
+        if(token[2] == "DelayedReadArchive") {
+          qDebug("found a procedural: %s",qPrintable(token[6]));
+          Procedure p = Procedure();
+          p.name = token[6];
+          p.matrix = transfMatrixStack.top();
+          p.surfaceShader = surfaceShaderStack.top();
+          //have i to read bound from actual graphics state or from procedural call?
+          for(int i = 0; i < 6; i++)
+            p.bound[i] = token[10 + i].toFloat(); //from procedural call (don't check if it's a number)
+            //p.bound[i] = objectBound[i]; //from actual graphics state
+          procedures.enqueue(p);
+        }
+        break;				
       }
       //the end of scene is reached
 			case ribParser::NOMORESTATEMENT:
 			{
 				qDebug("Stack empty");
-				stop = true;
-				writeLine = false;
+        stop = true;
+				writeLine = false;        
 			}
-		}
+		} //end of switch
 
 		if(writeLine) {
 			//copy the same line in file
 			fprintf(fout,"%s\n",qPrintable(line));
 		}
-	}
+    
+    if((!files.hasNext() || stop) && !procedures.isEmpty()) {
+      qDebug("There's a procedural to manage");
+      //continue the cycle over procedure files..
+      Procedure p = procedures.dequeue();
+      //add procedure to rib file stack if exist
+      bool noProc = false;
+      while(!files.searchFile(p.name) && !noProc)
+        if(procedures.isEmpty())
+          noProc = true;
+        else
+          p = procedures.dequeue();
+      
+      if(!noProc) { //it's true only if all procedures elements don't exist
+        fclose(fout);
+        fout = fopen(qPrintable(destDirString + QDir::separator() + p.name),"wb");
+	      if(fout==NULL)	{
+          this->errorMessage = "Impossible to create file: " + destDirString + QDir::separator() + p.name;
+          return false;
+	      }
+	      qDebug("Starting to write rib file into %s",qPrintable(destDirString + QDir::separator() + p.name));
+	
+        //restore the graphics state to the procedure call state
+        transfMatrixStack << p.matrix;
+        surfaceShaderStack << p.surfaceShader;
+        for(int i = 0; i < 6; i++)
+          objectBound[i] = p.bound[i];
+        //continue cycle
+        writeLine = true;
+        stop = false;
+      }
+    }
+
+	} //end of cycle
 	fclose(fout);
 	return true;
 }
@@ -671,7 +736,7 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
 	}
 	vcg::Matrix44f alignMatrix;
 	alignMatrix = alignMatrix.SetTranslate(dx,dy,dz);
-	vcg::Matrix44f templateMatrix = transfMatrix.top(); //by default is identity
+	vcg::Matrix44f templateMatrix = transfMatrixStack.top(); //by default is identity
 	
 	vcg::Matrix44f result = templateMatrix * alignMatrix * scaleMatrix * translateBBMatrix;
 	//write transformation matrix (after transpose it)
@@ -693,7 +758,7 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
 	/*if(dummyValues->objectDisplacementbound != "")
 		fprintf(fout,"%s\n",qPrintable(dummyValues->objectDisplacementbound.trimmed()));*/
 	//shader
-	fprintf(fout,"%s\n",qPrintable(surfaceShader.top()));
+	fprintf(fout,"%s\n",qPrintable(surfaceShaderStack.top()));
 	//texture mapping (are TexCoord needed for texture mapping?)
 	if(!textureList->empty() > 0 && (m->cm.HasPerWedgeTexCoord() || m->cm.HasPerVertexTexCoord())) {
 		//multi-texture don't work!I need ad-hoc shader and to read the texture index for vertex..

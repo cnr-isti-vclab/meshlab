@@ -100,8 +100,14 @@ private:
 	  QString objectId;
 	  QString objectDisplacementbound;
   };*/
-  QStack<vcg::Matrix44f> transfMatrix;
-  QStack<QString> surfaceShader;
+  struct Procedure {
+    QString name;
+    vcg::Matrix44f matrix;
+    float bound[6];
+    QString surfaceShader;
+  };
+  QStack<vcg::Matrix44f> transfMatrixStack;
+  QStack<QString> surfaceShaderStack;
   float objectBound[6]; // xmin, xmax, ymin, ymax, zmin, zmax
 
   bool makeScene(MeshModel* m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);

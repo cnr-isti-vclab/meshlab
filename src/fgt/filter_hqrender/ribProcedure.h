@@ -16,6 +16,7 @@ public:
 		MAKE,
 		MAKECUBEFACEENVIRONMENT,
 		OPTION,
+    PROCEDURAL,
 		READARCHIVE,
     SOLIDBEGIN,
     SOLIDEND,
@@ -88,7 +89,7 @@ public:
     proc->insert("NuPatch", ribParser::GEOMETRIC);
 		proc->insert("ObjectBegin", ribParser::OTHER);
 		proc->insert("ObjectEnd", ribParser::OTHER);
-		proc->insert("ObjectInstance", ribParser::OTHER);
+    proc->insert("ObjectInstance", ribParser::GEOMETRIC);
 		proc->insert("Opacity", ribParser::OTHER);
 		proc->insert("Option", ribParser::OPTION);
 		proc->insert("Orientation", ribParser::OTHER);
@@ -103,7 +104,7 @@ public:
     proc->insert("PointsGeneralPolygons", ribParser::GEOMETRIC);
     proc->insert("PointsPolygons", ribParser::GEOMETRIC);
     proc->insert("Polygon", ribParser::GEOMETRIC);
-		proc->insert("Procedural", ribParser::OTHER);
+    proc->insert("Procedural", ribParser::PROCEDURAL);
 		proc->insert("Projection", ribParser::OTHER);
 		proc->insert("Quantize", ribParser::OTHER);
 		proc->insert("ReadArchive", ribParser::READARCHIVE);
@@ -136,7 +137,7 @@ public:
 		return proc;
 	}
 
-	//split a statement in word (strings are unique word, like '\"' , '[' and ']' )
+	//split a statement in word (strings are unique word, like so '\"' , '[' and ']' )
 	static QStringList splitStatement(const QString* line) {
 		QString str = line->trimmed();
 		

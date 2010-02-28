@@ -92,7 +92,7 @@ QString RibFileStack::nextStatement(int* type, bool manageReadArchive) {
 	*type = nextLineType;
 
 	if(*type == ribParser::READARCHIVE) {
-		qDebug("is a ReadArchive");
+		//qDebug("is a ReadArchive");
 		QStringList token = ribParser::splitStatement(&str);
 		//0: ReadArchive,
 		//1: " ,
@@ -144,18 +144,24 @@ bool RibFileStack::readArchive(QString line) {
 	//test if it's a statement to open a new file
 	if(ribProc->value(token[0]) == ribParser::READARCHIVE) {
 		//if it's a ReadArchive statement search the next file to parse
+		QString filename = token[2]; //token[2] is the file name
 		//search in subdir list
-		QString filename = token[2];		
-		//token[2] is the file name
-		for(int i=0; i<subDir.size(); i++) {
-			QString str(templateDir + QDir::separator() + (subDir)[i] + QDir::separator() + filename);
-			//qDebug("looking for: %s",qPrintable(str));
-			if(pushFile(&str)) {
-				return true;
-			}
-		}		
+    return searchFile(filename);		
 	}
 	return false;
+}
+
+//search file in subdir and add to stack
+bool RibFileStack::searchFile(QString filename) {
+  //search in subdir list
+	for(int i=0; i<subDir.size(); i++) {
+		QString str(templateDir + QDir::separator() + (subDir)[i] + QDir::separator() + filename);
+		//qDebug("looking for: %s",qPrintable(str));
+		if(pushFile(&str)) {
+			return true;
+		}
+	}
+  return false;
 }
 
 //true if in line there's a string opened and not closed
@@ -192,7 +198,7 @@ int RibFileStack::isRibProcedure(QString line) const {
 }
 
 bool RibFileStack::hasNext() const {
-	return stack->isEmpty();
+	return !stack->isEmpty();
 };
 
 //append a directory list to the list of stack

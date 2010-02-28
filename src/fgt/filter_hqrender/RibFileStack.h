@@ -18,6 +18,7 @@ public:
 	bool addSubDirs(QStringList dirs);
 	QString nextStatement(int* type, bool manageReadArchive = true);
 	bool readArchive(QString line);
+  bool searchFile(QString filename);
 private:
 	QStack< QPair<QFile*, QTextStream*>* >* stack;
 	QString templateDir;
