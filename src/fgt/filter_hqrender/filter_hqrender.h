@@ -12,8 +12,6 @@
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
 
-
-
 class FilterHighQualityRender : public QObject, public MeshFilterInterface
 {
   Q_OBJECT
@@ -30,10 +28,10 @@ public:
   virtual QString filterInfo(FilterIDType filter) const;
   virtual bool autoDialog(QAction *) {return true;}
   virtual void initParameterSet(QAction *,MeshModel &m, RichParameterSet & param);
-  //virtual bool applyFilter(QAction *filter, MeshModel &m, RichParameterSet & param, vcg::CallBackPos * cb) ;
   virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & param, vcg::CallBackPos * cb) ;
   virtual FilterClass getClass(QAction *a);
-
+  void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);	
+	
 private slots:
   void updateOutputProcess();
   void errSgn();  
@@ -48,37 +46,45 @@ private:
   enum alignValue { CENTER, TOP, BOTTOM };
   bool convertedGeometry;
 	
-  inline const QString aqsisName() 
-  { 
-  #if defined(Q_OS_WIN)
-	return QString("aqsis.exe");
-  #elif defined(Q_OS_MAC)
-	return QString("aqsis");
-  #endif
+  inline QString AqsisBinPathParam() const { return  "MeshLab::Filter::AqsisBinPath" ; }
+
+  enum aqsisFile { AQSIS, AQSL, TEQSER, PIQSL };
+  QStringList aqsisFileName;
+  
+  const void setAqsisFileName() {
+    #if defined(Q_OS_WIN)
+    aqsisFileName = QStringList() << "aqsis.exe" << "aqsl.exe" << "teqser.exe" << "piqsl.exe";
+    #elif defined(Q_OS_MAC)
+	  aqsisFileName = QStringList() << "aqsis" << "aqsl" << "teqser" << "piqsl";
+    #endif
   }
-  inline const QString aqslName() 
-  { 
-  #if defined(Q_OS_WIN)
-	return QString("aqsl.exe");
-  #elif defined(Q_OS_MAC)
-	return QString("aqsl");
-  #endif
+  /*inline const QString aqsisName() { 
+    #if defined(Q_OS_WIN)
+	  return QString("aqsis.exe");
+    #elif defined(Q_OS_MAC)
+	  return QString("aqsis");
+    #endif
   }
-  inline const QString teqserName() 
-  { 
-  #if defined(Q_OS_WIN)
-	return QString("teqser.exe");
-  #elif defined(Q_OS_MAC)
-	return QString("teqser");
-  #endif
+  inline const QString aqslName() { 
+    #if defined(Q_OS_WIN)
+	  return QString("aqsl.exe");
+    #elif defined(Q_OS_MAC)
+	  return QString("aqsl");
+    #endif
   }
-  inline const QString piqslName() 
-  { 
-  #if defined(Q_OS_WIN)
-	return QString("piqsl.exe");
-  #elif defined(Q_OS_MAC)
-	return QString("piqsl");
-  #endif
+  inline const QString teqserName() { 
+    #if defined(Q_OS_WIN)
+	  return QString("teqser.exe");
+    #elif defined(Q_OS_MAC)
+	  return QString("teqser");
+    #endif
+  }
+  inline const QString piqslName() { 
+    #if defined(Q_OS_WIN)
+	  return QString("piqsl.exe");
+    #elif defined(Q_OS_MAC)
+	  return QString("piqsl");
+    #endif
   }
   inline const QString aqsisBinPath() 
   { 
@@ -87,31 +93,33 @@ private:
   #elif defined(Q_OS_MAC)
 	return QString("/Contents/Resources/bin/");
   #endif
+  }*/
+  inline const QString defaultAqsisBinPath() {
+    #if defined(Q_OS_WIN)
+    return "c:/Program Files (x86)/Aqsis/bin";
+    //return "c:/Program Files/Aqsis/bin";
+    #elif defined(Q_OS_MAC)
+    return "/Applications/Aqsis.app/Contents/Resources/bin";
+    #endif
   }
 
   inline const QString mainFileName() { return QString("scene.rib"); }
   	
   //parser_rib.cpp
   int numberOfDummies, numOfObject;
-  /*struct ObjValues {
-    vcg::Matrix44f objectMatrix;
-	  float objectBound[6]; // xmin, xmax, ymin, ymax, zmin, zmax
-	  QStringList objectShader;
-	  QString objectId;
-	  QString objectDisplacementbound;
-  };*/
+  //the state graphics at procedure call time
   struct Procedure {
     QString name;
     vcg::Matrix44f matrix;
     float bound[6];
     QString surfaceShader;
   };
+  //Graphics state
   QStack<vcg::Matrix44f> transfMatrixStack;
   QStack<QString> surfaceShaderStack;
   float objectBound[6]; // xmin, xmax, ymin, ymax, zmin, zmax
 
   bool makeScene(MeshModel* m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);
-  //QString parseObject(RibFileStack* files, QString destDir, int currentFrame, MeshModel* m, RichParameterSet &par, QStringList* textureList);
   QString convertObject(int currentFrame, QString destDir, MeshModel* m, RichParameterSet &par, QStringList* textureList);
   bool resetBound();
   bool resetGraphicsState();

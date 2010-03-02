@@ -3,16 +3,17 @@
 
 using namespace UtilitiesHQR;
 
+//reset the current bound to infinite (default RIS)
 bool FilterHighQualityRender::resetBound() {
 	// xmin, xmax, ymin, ymax, zmin, zmax
-  //default RIS bound is infinite
-	for(int i=0; i< 6; i=i+2)
+  for(int i=0; i< 6; i=i+2)
 		objectBound[i] = std::numeric_limits<float>::min();
 	for(int i=1; i<6; i=i+2)
 		objectBound[i] = std::numeric_limits<float>::max();
   return true;
 }
 
+//reset graphics state (transformation matrix, bound, surface shader) to default value
 bool FilterHighQualityRender::resetGraphicsState() {
   //graphics state initialization (only interesting things)
   transfMatrixStack = QStack<vcg::Matrix44f>();
@@ -22,7 +23,6 @@ bool FilterHighQualityRender::resetGraphicsState() {
 	resetBound();
   return true;
 }
-
 
 //read source files and write to destination file
 //if it's found the attribute name with value "dummy", the following geometry statement
@@ -99,6 +99,7 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 							*textureDirs = dirList;
 							break;
 						case FilterHighQualityRender::PROCEDURAL:
+							files.addSubDirs(dirList);
 							*proceduralDirs = dirList;					
 							break;
 						case FilterHighQualityRender::ERR:
@@ -362,318 +363,7 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 	return true;
 }
 
-
-/*bool FilterHighQualityRender::makeScene(MeshModel* m,
-									   QStringList* textureList,
-									   RichParameterSet &par,
-									   QString templatePath,
-									   QString destDirString,
-									   QStringList* shaderDirs,
-									   QStringList* textureDirs,
-									   QStringList* proceduralDirs,
-									   QStringList* imagesRendered) {
-	
-	RibFileStack files(getDirFromPath(&templatePath)); //constructor
-	//open file and stream
-	if(!files.pushFile(&templatePath)) {
-		this->errorMessage = "Template path is wrong: " + templatePath;
-		return false;
-	}
-	
-	//output file
-	FILE* fout;
-	fout = fopen(qPrintable(destDirString + QDir::separator() + mainFileName()),"wb");
-	if(fout==NULL)	{
-    this->errorMessage = "Impossible to create file: " + destDirString + QDir::separator() + mainFileName();
-    return false;
-	}
-	qDebug("Starting to write rib file into %s",qPrintable(destDirString + QDir::separator() + mainFileName()));
-	
-	FILE* fmain = fout; //if change the output file, save the main	
-	convertedGeometry = false; //if the mesh is already converted
-	int currentFrame = 0;
-	vcg::Matrix44f transfObject = vcg::Matrix44f::Identity();
-	bool stop = false;
-	bool currentDisplayTypeIsFile = false;
-	bool anyOtherDisplayType = false;
-	numberOfDummies = 0; //the dummy object could be than one (e.g. for ambient occlusion passes)
-	QString newFormat = "Format " + 
-						QString::number(par.getInt("FormatX")) + " " +
-						QString::number(par.getInt("FormatY")) + " " +
-						QString::number(par.getFloat("PixelAspectRatio"));
-	numOfWorldBegin = 0; //the number of world begin statement found (for progress bar)
-	numOfObject = 0;
-	//reading cycle
-	//int debugCount = 0;
-	while(!files.hasNext() && !stop) {
-		//if((++debugCount)%200 == 0)	qDebug("Time after %i statement: %i",debugCount,tt.elapsed());
-
-		bool writeLine = true;
-		int statementType = 0;
-		QString line = files.nextStatement(&statementType);		
-		
-		switch(statementType) {
-			case ribParser::OPTION: {
-				QStringList token = ribParser::splitStatement(&line);
-				//statement to declare other directory for the template
-				if(token[2] == "searchpath") {
-					int type = 0;
-					QStringList dirList = readSearchPath(&token,&type);
-					switch(type) {
-						case FilterHighQualityRender::ARCHIVE:
-							files.addSubDirs(dirList);
-							break;
-						case FilterHighQualityRender::SHADER:
-							*shaderDirs = dirList;
-							break;
-						case FilterHighQualityRender::TEXTURE:
-							*textureDirs = dirList;
-							break;
-						case FilterHighQualityRender::PROCEDURAL:
-							*proceduralDirs = dirList;					
-							break;
-						case FilterHighQualityRender::ERR:
-							//ignore: maybe an error or another searchpath type (not in RISpec3.2)
-							break;
-					}
-				}
-				break;
-			}
-			case ribParser::MAKE:
-			case ribParser::MAKECUBEFACEENVIRONMENT:
-			{
-				QStringList token = ribParser::splitStatement(&line);				
-				QString path = token[2]; //for MakeTexture, MakeShadow, MakeLatLongEnvironment
-				if(statementType == ribParser::MAKECUBEFACEENVIRONMENT)
-					path = token[7];
-				path = getDirFromPath(&path);
-				//qDebug("check dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
-				checkDir(&destDirString,&path);
-				break;
-			}
-			case ribParser::FRAMEBEGIN:
-			{
-				QStringList token = ribParser::splitStatement(&line);				
-        bool isNum;
-        int i = token[1].toInt(&isNum);
-				if(isNum)
-          currentFrame = i;
-				break;
-			}
-			//case ribParser::FRAMEEND:
-			//{	
-			//	break;
-			//}
-			case ribParser::DISPLAY: 
-			{
-				//if output is not a file the format must be the same!! framebuffer is ignored and commented
-				QStringList token = ribParser::splitStatement(&line);							
-				//create the path if needed
-				QString path = token[2];
-				path = getDirFromPath(&path);
-				//qDebug("check dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
-				checkDir(&destDirString,&path);
-
-				//if there's more "Display" statement with one that's "file" is not considered a final image
-				if(token[5] != "framebuffer")
-					if (!anyOtherDisplayType && token[5] == "file") {
-						currentDisplayTypeIsFile = true;
-						QString img = token[2];
-						if(img.startsWith('+'))
-							img = img.mid(1,img.size());
-						*imagesRendered << img;
-					}
-					else
-						anyOtherDisplayType = true;
-				else
-					line = "#" + line; //if there's a framebuffer will be open pqsl automatically									 
-				break;
-			}
-			case ribParser::TRANSFORM:
-			{
-        transfObject = getMatrix(&line);
-				break;
-      }
-			case ribParser::WORLDBEGIN:
-			{
-				numOfWorldBegin++;
-				//if there's another type of display the format is not change
-				if(!anyOtherDisplayType && currentDisplayTypeIsFile) {
-					fprintf(fout,"%s\n", qPrintable(newFormat));					
-				}
-				currentDisplayTypeIsFile = false;
-				anyOtherDisplayType = false;
-				//is right?yes,because before the next WorldBegin will there be a new Display statement
-        transfObject = vcg::Matrix44f::Identity(); //reset the graphics state
-				break;
-			}
-			//case ribParser::WORLDEND:
-			//{
-			//	break;
-			//}
-			case ribParser::ATTRIBUTEBEGIN:
-			{
-				//is an object (peraphs)
-				//write it (o convert it if it's named dummy) to another file
-				QString filename = parseObject(&files, destDirString, currentFrame, m, par, textureList);
-				qDebug("fuori: %s",qPrintable(filename));
-				writeLine = false;
-        if(filename == "") { //error in parseObject
-          fclose(fmain);
-          return false;
-        }
-				fprintf(fout,"ReadArchive \"%s\"\n",qPrintable(filename));
-        break;
-			}
-			case ribParser::NOMORESTATEMENT:
-			{
-				qDebug("Stack empty");
-				stop = true;
-				writeLine = false;
-			}
-		}
-
-		if(writeLine) {
-			//copy the same line in file
-			fprintf(fout,"%s\n",qPrintable(line));
-		}
-	}
-	fclose(fout);
-	return true;
-}*/
-
-//object is a sequence beetwen the statement AttributeBegin and AttributeEnd
-/*
-QString FilterHighQualityRender::parseObject(RibFileStack* files, QString destDirString, int currentFrame, MeshModel* m, RichParameterSet &par, QStringList* textureList) {
-	QString name = "object" + QString::number(numOfObject) + ".rib";
-	FILE* fout = fopen(qPrintable(destDirString + QDir::separator() + name),"wb");
-	if(fout == NULL) {
-    this->errorMessage = "Impossible to create file: " + destDirString + QDir::separator() + name;
-    return "";
-	}
-	qDebug("parse object");
-	//if it's a dummy object, i need the the follow value:
-	ObjValues* current = new ObjValues();
-	current->objectMatrix = vcg::Matrix44f::Identity();
-	//default RIS bound is infinite
-	for(int i=0; i< 6; i=i+2)
-		current->objectBound[i] = std::numeric_limits<float>::min();
-	for(int i=1; i<6; i=i+2)
-		current->objectBound[i] = std::numeric_limits<float>::max();
-
-	//write AttributeBegin statement (already readed)
-	fprintf(fout,"AttributeBegin\n");
-
-	//write next statement and looking for an object called "dummy"...
-	int c = 1; //number of nestled "AttributeBegin"
-	bool isDummy = false; //if is dummy stops to write
-	while(c != 0 && !files->hasNext()) {		
-		int statementType = 0;
-		QString line = files->nextStatement(&statementType);		
-		
-		switch(statementType) {
-			case ribParser::ATTRIBUTEBEGIN:
-				++c;
-				break;
-			case ribParser::ATTRIBUTEEND:
-				--c;
-				break;
-			case ribParser::SURFACE:
-			{
-				//the surface shader remain the same of template
-				current->objectShader << line;				
-				break;
-			}
-			case ribParser::TRANSFORM:
-			{
-				current->objectMatrix = getMatrix(&line);
-				break;
-			}
-			case ribParser::BOUND:
-			{
-				//take the transformation bound
-				QStringList token = ribParser::splitStatement(&line);
-				int index = 1;
-				if(token[index] == "[")
-					index++;
-				for(int i=0; i<6; i++) {
-					bool isNumber;
-					float number = token[index+i].toFloat(&isNumber);
-					if(isNumber)
-						current->objectBound[i] = number;
-				}
-				break;
-			}
-			case ribParser::ATTRIBUTE:
-			{
-				QStringList token = ribParser::splitStatement(&line);
-				QString deb = "";
-				foreach(QString s,token)
-					deb += "str: " + s + "\n";
-				//qDebug(qPrintable(deb));
-				//RISpec3.2 not specify what and how many attributes are there in renderman
-				//"user id" and "displacemetbound" don't be needed (perhaps)
-				if(token[2] == "user" && current->objectId == "")
-					current->objectId = line;	//only first time (can be nestled id attributes)
-			
-				if(token[2] == "displacementbound")
-					current->objectDisplacementbound = line;
-
-				if(token[2] == "identifier") {
-					//Attribute "identifier" "string name" [ "object name" ]
-					if(token[5] == "string name" || token[5] == "name") {
-						int index = 7;
-						if(token[index] == "[")
-							index++;
-						if(token[index] == "\"")
-							index++;
-						if(token[index].trimmed().toLower() == "dummy") {//found a dummy object?
-							qDebug("object name is dummy");
-							isDummy = true;
-						}
-					}
-				}
-				break;
-			}
-			case ribParser::NOMORESTATEMENT:
-			{
-				c = 0;
-				break;
-			}
-		}
-		
-		if(!isDummy) {
-			fprintf(fout,"%s\n",qPrintable(line));		
-		}
-	}
-	fclose(fout);
-
-	if(!isDummy)
-		numOfObject++;
-	else {
-		qDebug("Found dummy object");
-		//delete the previous file
-		QDir tmp = QDir(destDirString);
-		tmp.remove(name);
-		//and create another one
-		name = "meshF" + QString::number(currentFrame) + "O" + QString::number(numberOfDummies) + ".rib";
-		numberOfDummies++;
-		FILE *fmesh = fopen(qPrintable(destDirString + QDir::separator() + name),"wb");
-		if(fmesh==NULL) {
-      this->errorMessage = "Impossible to create the file: " + destDirString + QDir::separator() + name;
-      return "";
-		}
-    bool res = convertObject(fmesh, destDirString, m, par, textureList, current);
-    fclose(fmesh);
-    if(!res)
-      return "";		
-	}
-	delete current;
-	return name;
-}
-*/
 //write to an opened file the attribute of object entity
-
 QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir, MeshModel* m, RichParameterSet &par, QStringList* textureList)//, ObjValues* dummyValues)
 {	
 	QString name = "meshF" + QString::number(currentFrame) + "O" + QString::number(numberOfDummies) + ".rib";
@@ -686,10 +376,6 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
   fprintf(fout,"AttributeBegin\n");
 	//name
 	fprintf(fout,"Attribute \"identifier\" \"string name\" [ \"meshlabMesh\" ]\n");
-	//id
-	/*if(dummyValues->objectId != "")
-		fprintf(fout,"%s\n",qPrintable(dummyValues->objectId.trimmed()));
-		*/
 	//modify the transformation matrix
 	vcg::Matrix44f scaleMatrix = vcg::Matrix44f::Identity();
 	float dummyX = objectBound[1] - objectBound[0];
@@ -705,7 +391,7 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
 		scale = std::min<float>(ratioX, std::min<float>(ratioY, ratioZ)); //scale factor is min ratio
 		scaleMatrix.SetScale(scale,scale,scale);
 	}
-	
+
 	//center mesh
 	vcg::Point3f c = m->cm.trBB().Center();
 	vcg::Matrix44f translateBBMatrix;
@@ -741,22 +427,18 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
 	vcg::Matrix44f result = templateMatrix * alignMatrix * scaleMatrix * translateBBMatrix;
 	//write transformation matrix (after transpose it)
 	writeMatrix(fout, &result);
-	QString bound = "Bound";
+	//write bounding box (not modified) /////VA MODIFICATO IL BB?????
+	/*QString bound = "Bound";
 	for(int i=0; i<6; i++)
 		bound += " " + QString::number(objectBound[i]);
-	/*fprintf(fout,"Bound %g %g %g %g %g %g",
-		m.cm.trBB().min.X(), m.cm.trBB().max.X(),
-		m.cm.trBB().min.Y(), m.cm.trBB().max.Y(),
-		m.cm.trBB().min.Z(), m.cm.trBB().max.Z());*/
-	
-	//write bounding box (not modified) /////VA MODIFICATO IL BB?????
-	fprintf(fout,"%s\n",qPrintable(bound));
-	
+	fprintf(fout,"%s\n",qPrintable(bound));*/
+	fprintf(fout,"Bound %g %g %g %g %g %g",
+		m->cm.trBB().min.X(), m->cm.trBB().max.X(),
+		m->cm.trBB().min.Y(), m->cm.trBB().max.Y(),
+		m->cm.trBB().min.Z(), m->cm.trBB().max.Z());
+
 	//force the shading interpolation to smooth
-    fprintf(fout,"ShadingInterpolation \"smooth\"\n");
-	//displacementBound
-	/*if(dummyValues->objectDisplacementbound != "")
-		fprintf(fout,"%s\n",qPrintable(dummyValues->objectDisplacementbound.trimmed()));*/
+  fprintf(fout,"ShadingInterpolation \"smooth\"\n");
 	//shader
 	fprintf(fout,"%s\n",qPrintable(surfaceShaderStack.top()));
 	//texture mapping (are TexCoord needed for texture mapping?)
