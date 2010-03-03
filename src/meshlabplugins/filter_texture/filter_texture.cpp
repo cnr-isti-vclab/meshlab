@@ -49,10 +49,10 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 	switch(filterId) {
 		case FP_UV_TO_COLOR : return QString("UV to Color"); 
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
-		case FP_BASIC_TRIANGLE_MAPPING : return QString("Basic Triangle Mapping");
+    case FP_BASIC_TRIANGLE_MAPPING : return QString("Trivial Per-Triangle Parametrization ");
 		case FP_SET_TEXTURE : return QString("Set Texture");
 		case FP_COLOR_TO_TEXTURE : return QString("Vertex Color to Texture");
-		case FP_TRANSFER_TO_TEXTURE : return QString("Transfer to Texture");
+    case FP_TRANSFER_TO_TEXTURE : return QString("Transfer Color to Texture (between 2 meshes)");
 		case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Texture to Vertex Color (between 2 meshes)"); // TODO Choose a name
 		default : assert(0); 
 	}
@@ -66,9 +66,9 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 	{
 		case FP_UV_TO_COLOR :  return QString("Maps the UV Space into a color space, thus colorizing mesh vertices according to UV coords.");
 		case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
-		case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a basic parametrization.");
+    case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
 		case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>"
-											 "If the texture provided exists it will be simply set else a dummy one will be created in the same directory.");
+                       "If the texture provided exists it will be simply associated to the current mesh else a dummy texture will be created and saved in the same directory.");
 		case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture accordingly to per vertex color.");
 		case FP_TRANSFER_TO_TEXTURE : return QString("Transfer texture/vertex color from one mesh to another's texture.");
 		case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Generates Vertex Color values picking color from another mesh texture.");
@@ -169,7 +169,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
 			parlst.addParam(new RichInt("sidedim", 0, "Quads per line", "Indicates how many triangles have to be put on each line (every quad contains two triangles)\nLeave 0 for automatic calculation"));
 			parlst.addParam(new RichInt("textdim", 1024, "Texture Dimension (px)", "Gives an indication on how big the texture is"));
 			parlst.addParam(new RichInt("border", 2, "Inter-Triangle border (px)", "Specifies how many pixels to be left between triangles in parametrization domain"));
-			parlst.addParam(new RichEnum("method", 0, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
+      parlst.addParam(new RichEnum("method", 1, QStringList("Basic") << "Space-optimizing", "Method", "Choose space optimizing to map smaller faces into smaller triangles in parametrizazion domain"));
 			break;
 		case FP_SET_TEXTURE : {
 			QString fileName = extractFilenameWOExt(md.mm());
@@ -696,90 +696,6 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		break;
 		
 		case FP_TRANSFER_TO_TEXTURE : {
-			/*MeshModel *srcMesh = par.getMesh("sourceMesh");
-			MeshModel *trgMesh = par.getMesh("targetMesh");
-			float upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
-			QString textName = par.getString("textName");
-			int textW = par.getInt("textW");
-			int textH = par.getInt("textH");
-			bool overwrite = par.getBool("overwrite");
-			bool assign = par.getBool("assign");
-			
-			assert (srcMesh != NULL);
-			assert (trgMesh != NULL);
-			CheckError(!QFile(trgMesh->fileName.c_str()).exists(), "Save the target mesh before creating a texture");
-			CheckError(trgMesh->cm.fn == 0 || trgMesh->cm.fn == 0, "Both meshes require to have faces");
-			CheckError(!trgMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Target mesh doesn't have Per Wedge Texture Coordinates");
-			CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per Vertex Color");
-			
-			QString filePath(trgMesh->fileName.c_str());
-			filePath = filePath.left(std::max<int>(filePath.lastIndexOf('\\'),filePath.lastIndexOf('/'))+1);
-			
-			if (!overwrite)
-			{
-				// Check textName and eventually add .png ext
-				CheckError(textName.length() == 0, "Texture file not specified");
-				CheckError(std::max<int>(textName.lastIndexOf("\\"),textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
-				if (!textName.endsWith(".png", Qt::CaseInsensitive))
-					textName.append(".png");
-				filePath.append(textName);
-			} else {
-				CheckError(trgMesh->cm.textures.empty(), "Mesh has no associated texture to overwrite");
-				filePath.append(trgMesh->cm.textures[0].c_str());
-			}
-			
-			CheckError(textW <= 0, "Texture Width has an incorrect value");
-			CheckError(textH <= 0, "Texture Height has an incorrect value");
-			
-			// Image creation
-			QImage img(QSize(textW,textH), QImage::Format_ARGB32);
-			img.fill(qRgba(0,0,0,0));
-			
-			// Compute (texture-space) border edges
-			trgMesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
-			vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(trgMesh->cm);
-			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
-			
-			// Rasterizing faces
-			srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
-			vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
-			vcg::tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
-			TransferColorSampler sampler(srcMesh->cm, img, upperbound); // color sampling
-			sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
-			TextureCorrected<CMeshO,TransferColorSampler>(trgMesh->cm,sampler,img.width(),img.height());
-			
-			// Revert alpha values from border edge pixel to 255
-			cb(81, "Cleaning up texture ...");
-			for (int y=0; y<textH; ++y)
-				for (int x=0; x<textW; ++x)
-				{
-					QRgb px = img.pixel(x,y);
-					if (qAlpha(px) < 255 && qAlpha(px) > 0)
-						img.setPixel(x,y, px | 0xff000000);
-				}
-			
-			// PullPush
-			cb(85, "Filling texture holes...");
-			vcg::PullPush(img, qRgba(0,0,0,0));
-			
-			// Undo topology changes
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(trgMesh->cm);
-			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
-			
-			// Save texture
-			cb(90, "Saving texture ...");
-			CheckError(!img.save(filePath), "Texture file cannot be saved");
-			Log(GLLogStream::FILTER, "Texture \"%s\" Created", filePath.toStdString().c_str());
-			assert(QFile(filePath).exists());
-			
-			// Assign texture
-			if (assign && !overwrite) {
-				m.cm.textures.clear();
-				m.cm.textures.push_back(textName.toStdString());
-			}
-			cb(100, "Done");
-			*/
-			
 			//////////////////////////////////////////////////////
 			
 			MeshModel *srcMesh = par.getMesh("sourceMesh");
