@@ -153,7 +153,7 @@ bool BreMeshIOPlugin::open(const QString &formatName, const QString &fileName, M
   return true;
 }
 
-bool BreMeshIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget */*parent*/)
+bool BreMeshIOPlugin::save(const QString &/*formatName*/,const QString &/*fileName*/, MeshModel &, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos *, QWidget */*parent*/)
 {
   return false;
 }
@@ -189,7 +189,7 @@ void BreMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability, 
   {
     capability = 0;
     defaultBits = 0;
-  }/**/
+  }*/
 }
 
 void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
@@ -205,7 +205,7 @@ void BreMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/,
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
 		par.addParam(new RichBool("Binary",true, "Binary encoding",
 								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format"));		
-  /**/
+  */
 }
 
 void BreMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par) 
@@ -745,7 +745,7 @@ bool BGrid<T>::TriangleContainZ( const OpenObjects::TCoord<T>& a, const OpenObje
   det = (a.X() - c.X()) * (point.Y() - c.Y()) - (a.Y() - c.Y()) * (point.X() - c.X());
   
   return ! (det < tolerance );
-}/**/
+}*/
 
 
 

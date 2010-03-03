@@ -51,7 +51,7 @@ class MeshLabServer
 		int static lastPos=-1;
 		if(pos==lastPos) return true;
 		lastPos=pos;
-		printf(str);
+    printf("%s",str);
 		return true;
 	}
 
@@ -176,8 +176,8 @@ class MeshLabServer
 		FilterScript::iterator ii;
 		for(ii = scriptPtr.actionList.begin();ii!= scriptPtr.actionList.end();++ii)
 		{
-			RichParameterSet &par = (*ii).second;
-			QString &name = (*ii).first;
+      //RichParameterSet &par = (*ii).second;
+      //QString &name = (*ii).first;
 			printf("filter: %s\n",qPrintable((*ii).first));
 
 			QAction *action = PM.actionFilterMap[ (*ii).first];

@@ -679,7 +679,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 									plyFilename.append(".x.ply");	
 									savedMeshVector.push_back(qPrintable(plyFilename));
 									int mask= tri::io::Mask::IOM_VERTCOORD + tri::io::Mask::IOM_VERTCOLOR + tri::io::Mask::IOM_VERTQUALITY;
-									int result = tri::io::ExporterPLY<CMeshO>::Save(mm,qPrintable(plyFilename),mask);
+                                    tri::io::ExporterPLY<CMeshO>::Save(mm,qPrintable(plyFilename),mask);
 								}
 						else 
 								{

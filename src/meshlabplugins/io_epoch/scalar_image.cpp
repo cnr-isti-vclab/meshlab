@@ -124,7 +124,7 @@ bool ScalarImage<float>::Open(const char *filename)
 
 		for (int i=0; i<imagesize; ++i)
 		{
-			for (int j=0; j<sizeof(short); ++j)
+      for (size_t j=0; j<sizeof(short); ++j)
 			{
 				correct_buffer[sizeof(short)*i +j] = uncompressed_buffer[imagesize*j + i];
 			}
