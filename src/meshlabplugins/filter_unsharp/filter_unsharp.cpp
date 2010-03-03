@@ -378,8 +378,7 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 			"<0 and >100 linearly extrapolate between the two mesh <br>"));
 		}
 		break;
-	default : assert(0);
-	}
+  }
 }
 
 bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
