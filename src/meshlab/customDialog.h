@@ -103,5 +103,4 @@ private:
 	QVector<RichParameter*> vrp; 
 	void dispatch(const RichParameter& par);
 	QPushButton* closebut;
-	int maxlen[2];
 };

@@ -31,8 +31,7 @@ using namespace vcg;
 CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defparset, QWidget * parent)
 		:QDialog(parent),curParSet(curparset),defParSet(defparset)
 {
-	maxlen[0] = 0;
-	maxlen[1] = 0;
+	//this->setWindowTitle(tr("Globals"));
 	setModal(false);
 	closebut = new QPushButton("Close",this);
 	//QVBoxLayout* layout = new QVBoxLayout(parent);
@@ -40,18 +39,22 @@ CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defpar
 	setLayout(layout);
 	tw = new QTableWidget(curParSet.paramList.size(),2,this);
 	updateSettings();
-	int totlen = 0;
-	for (unsigned int jj =0; jj < 2;++jj)
+	//int totlen = 0;
+	/*for (unsigned int jj =0; jj < 2;++jj)
 	{
 		tw->setColumnWidth(jj,maxlen[jj]);
 		totlen += maxlen[jj];
 	}
 
+	
+	setMinimumWidth(totlen);*/
+	int totlen = tw->columnWidth(0) + tw->columnWidth(1) + this->frameSize().width();
 	setMinimumWidth(totlen);
 	layout->addWidget(tw,0,0,1,5);
 	layout->addWidget(closebut,1,4,1,1);
 	connect(tw,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),this,SLOT(openSubDialog(QTableWidgetItem*)));
 	connect(closebut,SIGNAL(clicked()),this,SLOT(close()));
+	this->setWindowTitle(tr("Globals"));
 }
 
 void CustomDialog::openSubDialog( QTableWidgetItem* itm )
@@ -76,19 +79,23 @@ void CustomDialog::updateSettings()
 	slst.push_back("Variable Name");
 	slst.push_back("Variable Value");
 	tw->setHorizontalHeaderLabels(slst);
-	tw->setWordWrap(false);
+	tw->horizontalHeader()->setStretchLastSection(true);
+	tw->setShowGrid(true);
+	//tw->setWordWrap(false);
 	tw->verticalHeader()->hide();
 
-	tw->horizontalHeader()->setResizeMode(tw->columnCount() - 1, QHeaderView::Stretch);
+	tw->setSelectionBehavior(QAbstractItemView::SelectRows);
 	
-	int sz = tw->font().pointSize();
+	//tw->horizontalHeader()->setResizeMode(tw->columnCount() - 1, QHeaderView::Stretch);
+	
+	//int sz = tw->font().pointSize();
 	for(int ii = 0;ii < curParSet.paramList.size();++ii)
 	{
 		QTableWidgetItem* item = new QTableWidgetItem(curParSet.paramList.at(ii)->name);
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 
-		if (maxlen[0] < item->text().size() * sz)
-			maxlen[0] = item->text().size() * sz;
+		//if (maxlen[0] < item->text().size() * sz)
+		//	maxlen[0] = item->text().size() * sz;
 		//item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 
 		tw->setItem(ii,0,item);
@@ -97,10 +104,17 @@ void CustomDialog::updateSettings()
 		curParSet.paramList[ii]->accept(v);
 		v.lastCreated->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
 		tw->setItem(ii,1,v.lastCreated);
-		if (maxlen[1] < v.lastCreated->text().size() * sz)
-			maxlen[1] = v.lastCreated->text().size() * sz;
+		//if (maxlen[1] < v.lastCreated->text().size() * sz)
+		//	maxlen[1] = v.lastCreated->text().size() * sz;
 		vrp.push_back(curParSet.paramList.at(ii));
 	}
+	tw->resizeColumnsToContents();
+	tw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+	//tw->setColumnWidth(0,tw->horizontalHeader()->width());
+	//tw->setColumnWidth(1,tw->horizontalHeader()->width());
+
+	/*emit tw->horizontalHeader()->sectionAutoResize( 0,QHeaderView::ResizeToContents);
+	emit tw->horizontalHeader()->sectionAutoResize( 1,QHeaderView::ResizeToContents);*/
 }
 //Maybe a MeshDocument parameter is needed. See loadFrameContent definition
 SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultPar, QWidget* parent /*= 0*/ )
