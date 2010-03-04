@@ -31,7 +31,6 @@ using namespace vcg;
 CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defparset, QWidget * parent)
 		:QDialog(parent),curParSet(curparset),defParSet(defparset)
 {
-	//this->setWindowTitle(tr("Globals"));
 	setModal(false);
 	closebut = new QPushButton("Close",this);
 	//QVBoxLayout* layout = new QVBoxLayout(parent);
@@ -39,22 +38,13 @@ CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defpar
 	setLayout(layout);
 	tw = new QTableWidget(curParSet.paramList.size(),2,this);
 	updateSettings();
-	//int totlen = 0;
-	/*for (unsigned int jj =0; jj < 2;++jj)
-	{
-		tw->setColumnWidth(jj,maxlen[jj]);
-		totlen += maxlen[jj];
-	}
-
-	
-	setMinimumWidth(totlen);*/
 	int totlen = tw->columnWidth(0) + tw->columnWidth(1) + this->frameSize().width();
 	setMinimumWidth(totlen);
 	layout->addWidget(tw,0,0,1,5);
 	layout->addWidget(closebut,1,4,1,1);
 	connect(tw,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),this,SLOT(openSubDialog(QTableWidgetItem*)));
 	connect(closebut,SIGNAL(clicked()),this,SLOT(close()));
-	this->setWindowTitle(tr("Globals"));
+	this->setWindowTitle(tr("Global Parameters Window"));
 }
 
 void CustomDialog::openSubDialog( QTableWidgetItem* itm )
