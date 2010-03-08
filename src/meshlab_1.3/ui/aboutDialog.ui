@@ -1,0 +1,266 @@
+<ui version="4.0" >
+ <class>aboutDialog</class>
+ <widget class="QDialog" name="aboutDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>665</width>
+    <height>643</height>
+   </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize" >
+   <size>
+    <width>65536</width>
+    <height>65536</height>
+   </size>
+  </property>
+  <property name="windowTitle" >
+   <string>About MeshLab</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset/>
+  </property>
+  <property name="modal" >
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QGroupBox" name="groupBoxSx" >
+     <property name="title" >
+      <string/>
+     </property>
+     <property name="flat" >
+      <bool>false</bool>
+     </property>
+     <layout class="QHBoxLayout" >
+      <property name="spacing" >
+       <number>0</number>
+      </property>
+      <property name="leftMargin" >
+       <number>0</number>
+      </property>
+      <property name="topMargin" >
+       <number>0</number>
+      </property>
+      <property name="rightMargin" >
+       <number>0</number>
+      </property>
+      <property name="bottomMargin" >
+       <number>0</number>
+      </property>
+      <item>
+       <layout class="QVBoxLayout" >
+        <item>
+         <widget class="QLabel" name="labelMLLogo" >
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="pixmap" >
+           <pixmap resource="../meshlab.qrc" >:/images/eye_256_splash.png</pixmap>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>20</width>
+            <height>5</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QWidget" native="1" name="widget" />
+        </item>
+        <item>
+         <widget class="QLabel" name="labelMLName" >
+          <property name="font" >
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelMLLink" >
+          <property name="text" >
+           <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:8pt;">&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:12pt;">&lt;a href="http://meshlab.sourceforge.net">&lt;span style=" text-decoration: underline; color:#0000ff;">http://meshlab.sourceforge.net/ &lt;/span>&lt;/a> &lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:12;">Protected by the GPL&lt;/p>&lt;/body>&lt;/html></string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="openExternalLinks" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>20</width>
+            <height>5</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" >
+        <item>
+         <widget class="QLabel" name="label" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">&#xd;&lt;html>&#xd;&lt;head>&#xd;  &lt;title>&lt;/title>&#xd;&lt;/head>&#xd;&lt;body&#xd; style="font-family: 'Lucida Grande'; font-size: 10pt; font-weight: 400; font-style: normal;">&#xd;&lt;b>General Info&lt;/b> &lt;br>&#xd;MeshLab is an extensible mesh&#xd;processing system, aimed to the user assisted cleaning, filtering,&#xd;editing and rendering of unstructured 3D triangular meshes. The&#xd;tool found its natural use for the processiing of the meshes that&#xd;usually arise in 3D scanning. The system is heavily based on the VCG&#xd;library (&lt;a href="http://vcg.sf.net">http://vcg.sf.net&lt;/a>).&#xd;&lt;br>&#xd;&lt;b>References&lt;/b>&lt;br>&#xd;Please, when using this tool in any academic activity, cite its use&#xd;with the following reference:&lt;br>&#xd;&lt;i>MeshLab&lt;br>&#xd;Visual Computing Lab - ISTI - CNR&lt;br>&#xd;http://meshlab.sourceforge.net/&lt;/i>&#xd;&lt;br>&#xd;&lt;b>Contacts&lt;/b>&lt;br>&#xd;For bug reports,&#xd;feature requests and technical issues please use the following&#xd;sourceforge services.&lt;br>&#xd;&amp;nbsp;&amp;nbsp;&amp;nbsp; - &lt;a&#xd; href="http://sourceforge.net/forum/forum.php?forum_id=499533">help&#xd;forum&lt;/a>&lt;br>&#xd;&amp;nbsp;&amp;nbsp;&amp;nbsp; - &lt;a&#xd; href="http://sourceforge.net/tracker/?group_id=149444&amp;amp;atid=774731">bug&#xd;report tracking system &lt;/a>&lt;br>&#xd;&amp;nbsp;&amp;nbsp;&amp;nbsp; - &lt;a&#xd; href="http://sourceforge.net/tracker/?group_id=149444&amp;amp;atid=774734">feature&#xd;request tracking system&lt;/a>&lt;br>&#xd;For any other general, high level, question about MeshLab&amp;nbsp; (no&#xd;bug issue or feature request&#xd;please) please contact: &lt;br>&#xd;&lt;a&#xd; href="mailto:p.cignoni@isti.cnr.it?subject=%5BMeshLab%5D%20Info%20request">Paolo&#xd;Cignoni ( p.cignoni@isti.cnr.it )&#xd;&lt;/a>&lt;br>&#xd;&lt;b>Authors&lt;/b> &lt;br>&#xd;&lt;span style="font-style: italic;">Main Designer&lt;/span>:&lt;br>&#xd;&amp;nbsp;&amp;nbsp;&amp;nbsp; - Paolo Cignoni&lt;br>&#xd;&lt;span style="font-style: italic;">Stable Contributors&lt;/span>:&lt;br>&#xd;&amp;nbsp;&amp;nbsp;&amp;nbsp; - Marco Callieri&lt;br>&#xd;&amp;nbsp;&amp;nbsp;&amp;nbsp; - Massimiliano Corsini&lt;br>&#xd;&amp;nbsp;&amp;nbsp;&amp;nbsp; - Fabio Ganovelli&lt;br>&#xd;&amp;nbsp;&amp;nbsp;&amp;nbsp; - Guido Ranzuglia&lt;br>&#xd;The complete list of authors is available &lt;a&#xd; href="http://meshlab.sourceforge.net/wiki/index.php/Developers">&#xd;here &lt;/a> &lt;br>&#xd;Some of the authors of MeshLab have received finacial support&#xd;from various projects, acknowledged &lt;a&#xd; href="http://meshlab.sourceforge.net/wiki/index.php/Licenses#Acknowledgments">here&#xd;&lt;/a>&lt;br>&#xd;&lt;/body>&#xd;&lt;/html>&#xd;</string>
+          </property>
+          <property name="wordWrap" >
+           <bool>true</bool>
+          </property>
+          <property name="openExternalLinks" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QLabel" name="labelVCGLogo_4" >
+         <property name="minimumSize" >
+          <size>
+           <width>186</width>
+           <height>150</height>
+          </size>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+         <property name="pixmap" >
+          <pixmap resource="../meshlab.qrc" >:/images/logo.png</pixmap>
+         </property>
+         <property name="scaledContents" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelVCGDescription" >
+         <property name="text" >
+          <string>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">&#xd;&lt;html>&#xd;&lt;head>&#xd;  &lt;meta name="qrichtext" content="1">&#xd;  &lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&#xd;&lt;/head>&#xd;&lt;body&#xd; style="font-family: 'Lucida Grande'; font-size: 10pt; font-weight: 400; font-style: normal;">&#xd;Copyright(C) 2005-2009&lt;br>&#xd;&lt;br>&#xd;Paolo Cignoni &lt;br>&#xd;&lt;a href="http://vcg.isti.cnr.it/%7Ecignoni">&#xd;http://vcg.isti.cnr.it/~cignoni&lt;/a> &lt;br>&#xd;Visual Computing Lab &lt;br>&#xd;&lt;a href="http://vcg.isti.cnr.it"> http://vcg.isti.cnr.it&lt;/a>&#xd;&lt;br>&#xd;ISTI - Italian National Research Council&lt;br>&#xd;&lt;a href="http://www.isti.cnr.it"> http://www.isti.cnr.it&lt;/a>&#xd;&lt;br>&#xd;&lt;/body>&#xd;&lt;/html>&#xd;</string>
+         </property>
+         <property name="openExternalLinks" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" >
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>2</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="okButton" >
+           <property name="text" >
+            <string>OK</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../meshlab.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>okButton</sender>
+   <signal>clicked()</signal>
+   <receiver>aboutDialog</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>518</x>
+     <y>499</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>282</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
