@@ -37,7 +37,7 @@
 
 #include "../common/interfaces.h"
 #include "../common/filterscript.h"
-#include "layerDialog.h"
+//#include "layerDialog.h"
 #include "glarea_setting.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
@@ -75,7 +75,7 @@ private:
 
 
 public:
-	LayerDialog *layerDialog;
+	//LayerDialog *layerDialog;
   // Layer Management stuff. 
 	MeshDocument meshDoc;
 	MeshModel *mm(){return meshDoc.mm();}
@@ -97,7 +97,7 @@ public:
     {
     mm()->setFileName(name);
 		setWindowTitle(QFileInfo(name).fileName()+tr("[*]"));
-		layerDialog->setWindowTitle("Layer Dialog for "+QFileInfo(name).fileName());			
+		//layerDialog->setWindowTitle("Layer Dialog for "+QFileInfo(name).fileName());			
 	  
     ss.basename=QFileInfo(getFileName()).baseName().append("Snap");
 	}

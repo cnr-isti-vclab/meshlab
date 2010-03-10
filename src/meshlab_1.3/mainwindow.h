@@ -54,7 +54,7 @@ class MainWindow : public QMainWindow, MainWindowInterface
 
 public:
 	// callback function to execute a filter
-	void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview);
+	//void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview);
 
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);
@@ -82,15 +82,15 @@ private slots:
 	void openRecentFile();
 	bool saveAs(QString fileName = QString());
 	bool save();
-	bool saveSnapshot();
+	//bool saveSnapshot();
 	///////////Slot Menu Edit ////////////////////////
 	void applyEditMode();
 	void suspendEditMode();
 	///////////Slot Menu Filter ////////////////////////
-	void startFilter();
-	void applyLastFilter();
-	void runFilterScript();
-	void showFilterScript();
+	//void startFilter();
+	//void applyLastFilter();
+	//void runFilterScript();
+	//void showFilterScript();
 	/////////// Slot Menu Render /////////////////////
 	void renderBbox();
 	void renderPoint();
@@ -117,17 +117,17 @@ private slots:
 	void showInfoPane();
 	void showTrackBall();
 	void resetTrackBall();
-	void showLayerDlg();
+	//void showLayerDlg();
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
 	void updateMenus();
 	void updateStdDialog();
 
 	///////////Slot Menu Preferences /////////////////
-	void setCustomize();
+	//void setCustomize();
 	///////////Slot Menu Help ////////////////////////
-	void about();
-	void aboutPlugins();
+	/*void about();
+	void aboutPlugins();*/
 	void helpOnline();
 	void helpOnscreen();
 	void submitBug();
@@ -146,10 +146,10 @@ private:
 	void initGlobalParameters();
     void createActions();
 	void createMenus();
-	void fillFilterMenu();
-	void fillDecorateMenu();
+	/*void fillFilterMenu();
+	void fillDecorateMenu();*/
 	void fillRenderMenu();
-	void fillEditMenu();
+	//void fillEditMenu();
 	void createToolBars();
 	void loadMeshLabSettings();
 	void loadPlugins();

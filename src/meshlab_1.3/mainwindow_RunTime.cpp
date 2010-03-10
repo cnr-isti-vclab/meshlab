@@ -30,14 +30,14 @@
 
 #include "mainwindow.h"
 #include "glarea.h"
-#include "plugindialog.h"
-#include "filterScriptDialog.h"
-#include "customDialog.h"
-#include "saveSnapshotDialog.h"
-#include "ui_aboutDialog.h"
-#include "savemaskexporter.h"
+//#include "plugindialog.h"
+//#include "filterScriptDialog.h"
+//#include "customDialog.h"
+//#include "saveSnapshotDialog.h"
+//#include "ui_aboutDialog.h"
+//#include "savemaskexporter.h"
 #include "stdpardialog.h"
-#include "layerDialog.h"
+//#include "layerDialog.h"
 #include "alnParser.h"
 
 #include <wrap/io_trimesh/io_mask.h>
@@ -145,9 +145,9 @@ void MainWindow::updateMenus()
 	reloadAct->setEnabled(active);
 	saveAct->setEnabled(active);
 	saveAsAct->setEnabled(active);
-	saveSnapshotAct->setEnabled(active);
-	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
-	editMenu->setEnabled(active && !editMenu->actions().isEmpty());
+	//saveSnapshotAct->setEnabled(active);
+	//filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
+	//editMenu->setEnabled(active && !editMenu->actions().isEmpty());
 	renderMenu->setEnabled(active);
 	fullScreenAct->setEnabled(active);
 	trackBallMenu->setEnabled(active);
@@ -244,13 +244,13 @@ void MainWindow::updateMenus()
 
 	}
 
-	if(GLA())
+	/*if(GLA())
 	{
 		showLayerDlgAct->setChecked(GLA()->layerDialog->isVisible());
-		//if(GLA()->layerDialog->isVisible())
+		if(GLA()->layerDialog->isVisible())
 		GLA()->layerDialog->updateTable();
 		GLA()->layerDialog->updateLog(GLA()->log);
-	}
+	}*/
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -293,92 +293,92 @@ void MainWindow::endEdit()
 {
 	GLA()->endEdit();
 }
-void MainWindow::applyLastFilter()
-{
-  if(GLA()==0) return;
-  GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
-}
-void MainWindow::showFilterScript()
-{
-  FilterScriptDialog dialog(this);
-	dialog.setScript(&(GLA()->filterHistory));
-	if (dialog.exec()==QDialog::Accepted)
-	{
-			runFilterScript();
-      return ;
-	}
+//void MainWindow::applyLastFilter()
+//{
+//  if(GLA()==0) return;
+//  GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
+//}
+//void MainWindow::showFilterScript()
+//{
+//  FilterScriptDialog dialog(this);
+//	dialog.setScript(&(GLA()->filterHistory));
+//	if (dialog.exec()==QDialog::Accepted)
+//	{
+//			runFilterScript();
+//      return ;
+//	}
+//
+//}
 
-}
-
-void MainWindow::runFilterScript()
-{
-  FilterScript::iterator ii;
-  for(ii= GLA()->filterHistory.actionList.begin();ii!= GLA()->filterHistory.actionList.end();++ii)
-  {
-    QAction *action = PM.actionFilterMap[ (*ii).first];
-	  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-
-    int req=iFilter->getRequirements(action);
-    GLA()->mm()->updateDataMask(req);
-    iFilter->setLog(&(GLA()->log));
-		
-		MeshDocument &meshDocument=GLA()->meshDoc;
-		RichParameterSet &parameterSet = (*ii).second;
-		
-		for(int i = 0; i < parameterSet.paramList.size(); i++)
-		{	
-			//get a modifieable reference
-			RichParameter* parameter = parameterSet.paramList[i];
-
-			//if this is a mesh paramter and the index is valid
-			if(parameter->val->isMesh())
-			{  
-				MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
-				if(	md->meshindex < meshDocument.size() && 
-					md->meshindex >= 0  )
-				{
-					RichMesh* rmesh = new RichMesh(parameter->name,meshDocument.getMesh(md->meshindex),&meshDocument);
-					parameterSet.paramList.replace(i,rmesh);
-				} else
-				{
-					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
-					printf("One of the filters in the script needs more meshes than you have loaded.\n");
-					exit(-1);
-				}
-				delete parameter;
-			}
-		}
-    //iFilter->applyFilter( action, *(GLA()->mm()), (*ii).second, QCallBack );
-
-		//WARNING!!!!!!!!!!!!
-		/* to be changed */
-		iFilter->applyFilter( action, meshDocument, (*ii).second, QCallBack );
-		
-		if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
-			GLA()->setColorMode(vcg::GLW::CMPerFace);
-			GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
-		}
-		if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
-			GLA()->setColorMode(vcg::GLW::CMPerVert);
-			GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-		}
-		if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
-		{
-			GLA()->setColorMode(vcg::GLW::CMPerMesh);
-			GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
-		}
-		if(iFilter->getClass(action) & MeshFilterInterface::Selection )
-    {
-        GLA()->setSelectFaceRendering(true);
-        GLA()->setSelectVertRendering(true);
-    }
-		if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
-			GLA()->resetTrackBall();
-		/* to be changed */
-
-    GLA()->log.Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
-	}
-}
+//void MainWindow::runFilterScript()
+//{
+//  FilterScript::iterator ii;
+//  for(ii= GLA()->filterHistory.actionList.begin();ii!= GLA()->filterHistory.actionList.end();++ii)
+//  {
+//    QAction *action = PM.actionFilterMap[ (*ii).first];
+//	  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+//
+//    int req=iFilter->getRequirements(action);
+//    GLA()->mm()->updateDataMask(req);
+//    iFilter->setLog(&(GLA()->log));
+//		
+//		MeshDocument &meshDocument=GLA()->meshDoc;
+//		RichParameterSet &parameterSet = (*ii).second;
+//		
+//		for(int i = 0; i < parameterSet.paramList.size(); i++)
+//		{	
+//			//get a modifieable reference
+//			RichParameter* parameter = parameterSet.paramList[i];
+//
+//			//if this is a mesh paramter and the index is valid
+//			if(parameter->val->isMesh())
+//			{  
+//				MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
+//				if(	md->meshindex < meshDocument.size() && 
+//					md->meshindex >= 0  )
+//				{
+//					RichMesh* rmesh = new RichMesh(parameter->name,meshDocument.getMesh(md->meshindex),&meshDocument);
+//					parameterSet.paramList.replace(i,rmesh);
+//				} else
+//				{
+//					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
+//					printf("One of the filters in the script needs more meshes than you have loaded.\n");
+//					exit(-1);
+//				}
+//				delete parameter;
+//			}
+//		}
+//    //iFilter->applyFilter( action, *(GLA()->mm()), (*ii).second, QCallBack );
+//
+//		//WARNING!!!!!!!!!!!!
+//		/* to be changed */
+//		iFilter->applyFilter( action, meshDocument, (*ii).second, QCallBack );
+//		
+//		if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
+//			GLA()->setColorMode(vcg::GLW::CMPerFace);
+//			GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+//		}
+//		if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
+//			GLA()->setColorMode(vcg::GLW::CMPerVert);
+//			GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+//		}
+//		if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
+//		{
+//			GLA()->setColorMode(vcg::GLW::CMPerMesh);
+//			GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
+//		}
+//		if(iFilter->getClass(action) & MeshFilterInterface::Selection )
+//    {
+//        GLA()->setSelectFaceRendering(true);
+//        GLA()->setSelectVertRendering(true);
+//    }
+//		if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
+//			GLA()->resetTrackBall();
+//		/* to be changed */
+//
+//    GLA()->log.Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
+//	}
+//}
 
 
 // /////////////////////////////////////////////////
@@ -389,50 +389,50 @@ void MainWindow::runFilterScript()
 // - executeFilter callback invoked when the params have been set up.
 
 
-void MainWindow::startFilter()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-    iFilter->setLog(&(GLA()->log));
-	if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
+//void MainWindow::startFilter()
+//{
+	//QAction *action = qobject_cast<QAction *>(sender());
+	//MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+ //   iFilter->setLog(&(GLA()->log));
+	//if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
 
-  // In order to avoid that a filter changes something assumed by the current editing tool,
-	// before actually starting the filter we close the current editing tool (if any).
-	if(GLA()) GLA()->endEdit();
-	updateMenus();
+ // // In order to avoid that a filter changes something assumed by the current editing tool,
+	//// before actually starting the filter we close the current editing tool (if any).
+	//if(GLA()) GLA()->endEdit();
+	//updateMenus();
 
-	QStringList missingStuff;
-	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
-	{
-		qDebug("MeshCreation");
-        GLArea *gla=new GLArea(mdiarea,&currentGlobalParams);
-        addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
-		gla->meshDoc.addNewMesh("untitled.ply");
-		gla->setFileName("untitled.ply");
-		mdiarea->addSubWindow(gla);
-		if(mdiarea->isVisible()) gla->showMaximized();
-	}
-	else
-		if (!iFilter->isFilterApplicable(action,(*GLA()->mm()),missingStuff))
-			{
-				QString enstr = missingStuff.join(",");
-				QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
-				"Current mesh does not have <i>" + enstr + "</i>."));
-				return;
-			}
+	//QStringList missingStuff;
+	//if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
+	//{
+	//	qDebug("MeshCreation");
+ //       GLArea *gla=new GLArea(mdiarea,&currentGlobalParams);
+ //       addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
+	//	gla->meshDoc.addNewMesh("untitled.ply");
+	//	gla->setFileName("untitled.ply");
+	//	mdiarea->addSubWindow(gla);
+	//	if(mdiarea->isVisible()) gla->showMaximized();
+	//}
+	//else
+	//	if (!iFilter->isFilterApplicable(action,(*GLA()->mm()),missingStuff))
+	//		{
+	//			QString enstr = missingStuff.join(",");
+	//			QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
+	//			"Current mesh does not have <i>" + enstr + "</i>."));
+	//			return;
+	//		}
 
-    // just to be sure...
-    createStdPluginWnd();
+ //   // just to be sure...
+ //   createStdPluginWnd();
 
-    // (2) Ask for filter parameters and eventally directly invoke the filter
-    // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
-    // if no dialog is created the filter must be executed immediately
-    if(! stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this,GLA()) )
-    {
-        RichParameterSet dummyParSet;
-        executeFilter(action, dummyParSet, false);
-    }
-}
+ //   // (2) Ask for filter parameters and eventally directly invoke the filter
+ //   // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
+ //   // if no dialog is created the filter must be executed immediately
+ //   if(! stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this,GLA()) )
+ //   {
+ //       RichParameterSet dummyParSet;
+ //       executeFilter(action, dummyParSet, false);
+ //   }
+//}
 
 /*
 	callback function that actually start the chosen filter.
@@ -441,78 +441,78 @@ void MainWindow::startFilter()
 	from the automatic dialog
 	from the user defined dialog
 */
-void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool isPreview)
-{
-
-	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
-
-  qb->show();
-  iFilter->setLog(&(GLA()->log));
-
-	// Ask for filter requirements (eg a filter can need topology, border flags etc)
-  // and statisfy them
-	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
-  int req=iFilter->getRequirements(action);
-  GLA()->mm()->updateDataMask(req);
-  qApp->restoreOverrideCursor();
-
-	// (3) save the current filter and its parameters in the history
-	if(!isPreview) 
-		GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
-
-  // (4) Apply the Filter
-	bool ret;
-  qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-	QTime tt; tt.start();
-	GLA()->meshDoc.busy=true;
-	ret=iFilter->applyFilter(action,   GLA()->meshDoc, params, QCallBack);
-	GLA()->meshDoc.busy=false;
-  qApp->restoreOverrideCursor();
-
-  // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
-
-	if(ret)
-	{
-		GLA()->log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
-		GLA()->setWindowModified(true);
-		GLA()->setLastAppliedFilter(action);
-		lastFilterAct->setText(QString("Apply filter ") + action->text());
-		lastFilterAct->setEnabled(true);
-	}
-  else // filter has failed. show the message error.
-	{
-		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(action->text())+iFilter->errorMsg()); // text
-	}
-  // at the end for filters that change the color, or selection set the appropriate rendering mode
-  if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
-    GLA()->setColorMode(vcg::GLW::CMPerFace);
-		GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
-  }
-  if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
-    GLA()->setColorMode(vcg::GLW::CMPerVert);
-		GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-  }
-  if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
-  {
-    GLA()->setColorMode(vcg::GLW::CMPerMesh);
-    GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
-  }
-	if(iFilter->getClass(action) & MeshFilterInterface::Selection )
-  {
-      GLA()->setSelectVertRendering(true);
-      GLA()->setSelectFaceRendering(true);
-  }
-	if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
-	    GLA()->resetTrackBall();
-
-	if(iFilter->getClass(action) & MeshFilterInterface::Texture )
-	    GLA()->updateTexture();
-
-  qb->reset();
-  updateMenus();
-  GLA()->update();
-}
+//void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool isPreview)
+//{
+//
+//	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
+//
+//  qb->show();
+//  iFilter->setLog(&(GLA()->log));
+//
+//	// Ask for filter requirements (eg a filter can need topology, border flags etc)
+//  // and statisfy them
+//	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+//	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
+//  int req=iFilter->getRequirements(action);
+//  GLA()->mm()->updateDataMask(req);
+//  qApp->restoreOverrideCursor();
+//
+//	// (3) save the current filter and its parameters in the history
+//	if(!isPreview) 
+//		GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
+//
+//  // (4) Apply the Filter
+//	bool ret;
+//  qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+//	QTime tt; tt.start();
+//	GLA()->meshDoc.busy=true;
+//	ret=iFilter->applyFilter(action,   GLA()->meshDoc, params, QCallBack);
+//	GLA()->meshDoc.busy=false;
+//  qApp->restoreOverrideCursor();
+//
+//  // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
+//
+//	if(ret)
+//	{
+//		GLA()->log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
+//		GLA()->setWindowModified(true);
+//		GLA()->setLastAppliedFilter(action);
+//		lastFilterAct->setText(QString("Apply filter ") + action->text());
+//		lastFilterAct->setEnabled(true);
+//	}
+//  else // filter has failed. show the message error.
+//	{
+//		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(action->text())+iFilter->errorMsg()); // text
+//	}
+//  // at the end for filters that change the color, or selection set the appropriate rendering mode
+//  if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
+//    GLA()->setColorMode(vcg::GLW::CMPerFace);
+//		GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+//  }
+//  if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
+//    GLA()->setColorMode(vcg::GLW::CMPerVert);
+//		GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+//  }
+//  if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
+//  {
+//    GLA()->setColorMode(vcg::GLW::CMPerMesh);
+//    GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
+//  }
+//	if(iFilter->getClass(action) & MeshFilterInterface::Selection )
+//  {
+//      GLA()->setSelectVertRendering(true);
+//      GLA()->setSelectFaceRendering(true);
+//  }
+//	if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
+//	    GLA()->resetTrackBall();
+//
+//	if(iFilter->getClass(action) & MeshFilterInterface::Texture )
+//	    GLA()->updateTexture();
+//
+//  qb->reset();
+//  updateMenus();
+//  GLA()->update();
+//}
 
 // Edit Mode Managment
 // At any point there can be a single editing plugin active.
@@ -685,10 +685,10 @@ void MainWindow::toggleSelectVertRendering()
 
 bool MainWindow::openIn(QString /* fileName */)
 {
-	bool wasLayerVisible=GLA()->layerDialog->isVisible();
-	GLA()->layerDialog->setVisible(false);
+	//bool wasLayerVisible=GLA()->layerDialog->isVisible();
+	//GLA()->layerDialog->setVisible(false);
 	bool ret= open(QString(),GLA());
-	GLA()->layerDialog->setVisible(wasLayerVisible);
+	//GLA()->layerDialog->setVisible(wasLayerVisible);
 	return ret;
 }
 
@@ -824,7 +824,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				bool newGla = false;
 				if(gla==0){
                         gla=new GLArea(mdiarea,&currentGlobalParams);
-                        addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
+                        //addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 						newGla =true;
 						pCurrentIOPlugin->setLog(&(gla->log));
 					}
@@ -1001,19 +1001,19 @@ bool MainWindow::saveAs(QString fileName)
 
 		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
 
-		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar,this->GLA());
+		/*SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar,this->GLA());
 		maskDialog.exec();
 		int mask = maskDialog.GetNewMask();
 		maskDialog.close();
 		if(maskDialog.result() == QDialog::Rejected)
 			return false;
 		if(mask == -1)
-			return false;
+			return false;*/
 
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 		qb->show();
 		QTime tt; tt.start();
-		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
+		//ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
 		qb->reset();
 		GLA()->log.Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
 
@@ -1029,40 +1029,40 @@ bool MainWindow::saveAs(QString fileName)
 	return ret;
 }
 
-bool MainWindow::saveSnapshot()
-{
+//bool MainWindow::saveSnapshot()
+//{
+//
+//	SaveSnapshotDialog dialog(this);
+//
+//	SnapshotSetting ss = GLA()->getSnapshotSetting();
+//	dialog.setValues(ss);
+//
+//	if (dialog.exec()==QDialog::Accepted)
+//	{
+//		ss=dialog.getValues();
+//		GLA()->setSnapshotSetting(ss);
+//		GLA()->saveSnapshot();
+//		return true;
+//	}
+//
+//	return false;
+//}
+//void MainWindow::about()
+//{
+//	QDialog *about_dialog = new QDialog();
+//	Ui::aboutDialog temp;
+//	temp.setupUi(about_dialog);
+//	temp.labelMLName->setText(appName()+"   ("+__DATE__+")");
+//	//about_dialog->setFixedSize(566,580);
+//	about_dialog->show();
+//}
 
-	SaveSnapshotDialog dialog(this);
-
-	SnapshotSetting ss = GLA()->getSnapshotSetting();
-	dialog.setValues(ss);
-
-	if (dialog.exec()==QDialog::Accepted)
-	{
-		ss=dialog.getValues();
-		GLA()->setSnapshotSetting(ss);
-		GLA()->saveSnapshot();
-		return true;
-	}
-
-	return false;
-}
-void MainWindow::about()
-{
-	QDialog *about_dialog = new QDialog();
-	Ui::aboutDialog temp;
-	temp.setupUi(about_dialog);
-	temp.labelMLName->setText(appName()+"   ("+__DATE__+")");
-	//about_dialog->setFixedSize(566,580);
-	about_dialog->show();
-}
-
-void MainWindow::aboutPlugins()
-{
-	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
-	PluginDialog dialog(pluginsDir.absolutePath(), pluginFileNames, this);
-	dialog.exec();
-}
+//void MainWindow::aboutPlugins()
+//{
+//	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
+//	PluginDialog dialog(pluginsDir.absolutePath(), pluginFileNames, this);
+//	dialog.exec();
+//}
 
 void MainWindow::helpOnscreen()
 {
@@ -1087,14 +1087,14 @@ void MainWindow::showToolbarRender(){
 void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
-void MainWindow::showLayerDlg() {if(GLA() != 0) 	GLA()->layerDialog->setVisible( !GLA()->layerDialog->isVisible() );}
+//void MainWindow::showLayerDlg() {if(GLA() != 0) 	GLA()->layerDialog->setVisible( !GLA()->layerDialog->isVisible() );}
 
-void MainWindow::setCustomize()
-{
-	CustomDialog dialog(currentGlobalParams,defaultGlobalParams, this);
-	connect(&dialog,SIGNAL(applyCustomSetting()),this,SLOT(updateCustomSettings()));
-	dialog.exec();
-}
+//void MainWindow::setCustomize()
+//{
+//	CustomDialog dialog(currentGlobalParams,defaultGlobalParams, this);
+//	connect(&dialog,SIGNAL(applyCustomSetting()),this,SLOT(updateCustomSettings()));
+//	dialog.exec();
+//}
 
 void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
 void MainWindow::renderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }

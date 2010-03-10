@@ -33,10 +33,10 @@
 #include <QtXml>
 #include "mainwindow.h"
 #include "glarea.h"
-#include "plugindialog.h"
-#include "customDialog.h"
-#include "saveSnapshotDialog.h"
-#include "ui_congratsDialog.h"
+//#include "plugindialog.h"
+//#include "customDialog.h"
+//#include "saveSnapshotDialog.h"
+//#include "ui_congratsDialog.h"
 
 QProgressBar *MainWindow::qb;
 
@@ -236,10 +236,10 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
-	showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
+	/*showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
 	showLayerDlgAct->setCheckable(true);
 	showLayerDlgAct->setChecked(true);
-	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));
+	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));*/
 
 
 	//////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
@@ -304,8 +304,8 @@ void MainWindow::createToolBars()
 	mainToolBar->addAction(openAct);
 	mainToolBar->addAction(reloadAct);
 	mainToolBar->addAction(saveAct);
-	mainToolBar->addAction(saveSnapshotAct);
-	mainToolBar->addAction(showLayerDlgAct);
+	/*mainToolBar->addAction(saveSnapshotAct);
+	mainToolBar->addAction(showLayerDlgAct);*/
 
 	renderToolBar = addToolBar(tr("Render"));
 	//renderToolBar->setIconSize(QSize(32,32));
@@ -321,7 +321,7 @@ void MainWindow::createToolBars()
 
 	filterToolBar = addToolBar(tr("Action"));
 
-	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
+	/*foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
 	{		
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
@@ -330,7 +330,7 @@ void MainWindow::createToolBars()
 				editToolBar->addAction(editAction);
 			} else qDebug() << "action was null";
 		}
-	}
+	}*/
 }
 
 
@@ -349,8 +349,8 @@ void MainWindow::createMenus()
 
 	fileMenuNew = fileMenu->addMenu(tr("New"));
 
-	fileMenu->addSeparator();
-	fileMenu->addAction(saveSnapshotAct);
+	/*fileMenu->addSeparator();
+	fileMenu->addAction(saveSnapshotAct);*/
 	separatorAct = fileMenu->addSeparator();
 
 	for (int i = 0; i < MAXRECENTFILES; ++i) fileMenu->addAction(recentFileActs[i]);
@@ -359,11 +359,11 @@ void MainWindow::createMenus()
 	fileMenu->addAction(exitAct);
 
 	//////////////////// Menu Edit //////////////////////////////////////////////////////////////////////////
-	editMenu = menuBar()->addMenu(tr("&Edit"));
-	editMenu->addAction(suspendEditModeAct);
+	/*editMenu = menuBar()->addMenu(tr("&Edit"));
+	editMenu->addAction(suspendEditModeAct);*/
 
   //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
-	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
+	/*filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addSeparator();
@@ -378,7 +378,7 @@ void MainWindow::createMenus()
 	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
 	filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
 	filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
-	filterMenuTexture = filterMenu->addMenu(tr("Texture"));
+	filterMenuTexture = filterMenu->addMenu(tr("Texture"));*/
 	
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
@@ -430,7 +430,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(fullScreenAct);
-	viewMenu->addAction(showLayerDlgAct);
+	//viewMenu->addAction(showLayerDlgAct);
 
 	trackBallMenu = viewMenu->addMenu(tr("&Trackball"));
 	trackBallMenu->addAction(showTrackBallAct);
@@ -462,56 +462,56 @@ void MainWindow::createMenus()
 	helpMenu->addAction(submitBugAct);
 	helpMenu->addAction(checkUpdatesAct);
 
-	fillFilterMenu();
-	fillEditMenu();
+	/*fillFilterMenu();
+	fillEditMenu();*/
 	fillRenderMenu();
-	fillDecorateMenu();
+	//fillDecorateMenu();
 }
 
-void MainWindow::fillFilterMenu()
-{
-	foreach(MeshFilterInterface *iFilter,PM.meshFilterPlugins())
-	{
-		foreach(QAction *filterAction, iFilter->actions())
-		{
-			filterAction->setToolTip(iFilter->filterInfo(filterAction));
-			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
-			int filterClass = iFilter->getClass(filterAction);
-
-			if( (filterClass & MeshFilterInterface::FaceColoring) || (filterClass & MeshFilterInterface::VertexColoring) ) filterMenuColorize->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::Selection) filterMenuSelect->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Cleaning ) filterMenuClean->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Remeshing ) filterMenuRemeshing->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Smoothing ) filterMenuSmoothing->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Normal ) filterMenuNormal->addAction(filterAction);
-			if( (filterClass &  MeshFilterInterface::Quality ) || (filterClass & MeshFilterInterface::Measure  )	)	 filterMenuQuality->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Layer ) filterMenuLayer->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::MeshCreation ) fileMenuNew->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::RangeMap )	filterMenuRangeMap->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::PointSet )	filterMenuPointSet->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::Sampling )	filterMenuSampling->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::Texture)		filterMenuTexture->addAction(filterAction);
-			 //  MeshFilterInterface::Generic :
-			if(filterClass == 0) filterMenu->addAction(filterAction);
-
-			if(!filterAction->icon().isNull())
-				filterToolBar->addAction(filterAction);
-		}
-	}	
-}
-
-void MainWindow::fillDecorateMenu()
-{
-	foreach(MeshDecorateInterface *iDecorate,PM.meshDecoratePlugins())
-	{
-		foreach(QAction *decorateAction, iDecorate->actions())
-		{
-			connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
-			decorateAction->setToolTip(iDecorate->filterInfo(decorateAction));
-			renderMenu->addAction(decorateAction);
-		}
-	}
-}
+//void MainWindow::fillFilterMenu()
+//{
+//	foreach(MeshFilterInterface *iFilter,PM.meshFilterPlugins())
+//	{
+//		foreach(QAction *filterAction, iFilter->actions())
+//		{
+//			filterAction->setToolTip(iFilter->filterInfo(filterAction));
+//			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
+//			int filterClass = iFilter->getClass(filterAction);
+//
+//			if( (filterClass & MeshFilterInterface::FaceColoring) || (filterClass & MeshFilterInterface::VertexColoring) ) filterMenuColorize->addAction(filterAction);
+//			if(filterClass & MeshFilterInterface::Selection) filterMenuSelect->addAction(filterAction);
+//			if(filterClass &  MeshFilterInterface::Cleaning ) filterMenuClean->addAction(filterAction);
+//			if(filterClass &  MeshFilterInterface::Remeshing ) filterMenuRemeshing->addAction(filterAction);
+//			if(filterClass &  MeshFilterInterface::Smoothing ) filterMenuSmoothing->addAction(filterAction);
+//			if(filterClass &  MeshFilterInterface::Normal ) filterMenuNormal->addAction(filterAction);
+//			if( (filterClass &  MeshFilterInterface::Quality ) || (filterClass & MeshFilterInterface::Measure  )	)	 filterMenuQuality->addAction(filterAction);
+//			if(filterClass &  MeshFilterInterface::Layer ) filterMenuLayer->addAction(filterAction);
+//			if(filterClass & MeshFilterInterface::MeshCreation ) fileMenuNew->addAction(filterAction);
+//			if(filterClass & MeshFilterInterface::RangeMap )	filterMenuRangeMap->addAction(filterAction);
+//			if(filterClass & MeshFilterInterface::PointSet )	filterMenuPointSet->addAction(filterAction);
+//			if(filterClass & MeshFilterInterface::Sampling )	filterMenuSampling->addAction(filterAction);
+//			if(filterClass & MeshFilterInterface::Texture)		filterMenuTexture->addAction(filterAction);
+//			 //  MeshFilterInterface::Generic :
+//			if(filterClass == 0) filterMenu->addAction(filterAction);
+//
+//			if(!filterAction->icon().isNull())
+//				filterToolBar->addAction(filterAction);
+//		}
+//	}	
+//}
+//
+//void MainWindow::fillDecorateMenu()
+//{
+//	foreach(MeshDecorateInterface *iDecorate,PM.meshDecoratePlugins())
+//	{
+//		foreach(QAction *decorateAction, iDecorate->actions())
+//		{
+//			connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
+//			decorateAction->setToolTip(iDecorate->filterInfo(decorateAction));
+//			renderMenu->addAction(decorateAction);
+//		}
+//	}
+//}
 
 void MainWindow::fillRenderMenu()
 {
@@ -521,19 +521,19 @@ void MainWindow::fillRenderMenu()
 	}
 }
 
-void MainWindow::fillEditMenu()
-{
-	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
-	{		
-		foreach(QAction* editAction, iEditFactory->actions())
-		{
-			editMenu->addAction(editAction);
-
-			connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
-			//editActionList.push_back(editAction);
-		}
-	}
-}
+//void MainWindow::fillEditMenu()
+//{
+//	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
+//	{		
+//		foreach(QAction* editAction, iEditFactory->actions())
+//		{
+//			editMenu->addAction(editAction);
+//
+//			connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
+//			//editActionList.push_back(editAction);
+//		}
+//	}
+//}
 
 
 void MainWindow::loadPlugins()
@@ -782,7 +782,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
 				// This preference values store when you did the last request for a mail
 				settings.setValue("congratsMeshCounter",loadedMeshCounter);
 
-				QDialog *congratsDialog = new QDialog();
+				/*QDialog *congratsDialog = new QDialog();
 				Ui::CongratsDialog temp;
 				temp.setupUi(congratsDialog);
 
@@ -790,7 +790,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
 				temp.congratsTextEdit->setHtml(tttt);
 				congratsDialog->exec();
 				if(congratsDialog->result()==QDialog::Accepted)
-					QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
+					QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));*/
 			}
 	}
 }
