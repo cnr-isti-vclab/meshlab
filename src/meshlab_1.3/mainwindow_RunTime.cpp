@@ -38,7 +38,7 @@
 //#include "savemaskexporter.h"
 #include "stdpardialog.h"
 //#include "layerDialog.h"
-#include "alnParser.h"
+//#include "alnParser.h"
 
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
@@ -716,10 +716,10 @@ void MainWindow::saveProject()
         meshNameVector.push_back(qPrintable(mp->shortName()));
 		transfVector.push_back(mp->cm.Tr);
 	}
-	bool ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
+	/*bool ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
 
 	if(!ret)
-	 QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
+	 QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));*/
 
 }
 
@@ -736,20 +736,20 @@ bool MainWindow::openProject(QString fileName)
 		lastUsedDirectory.setPath(path);
 	}
 
-	vector<RangeMap> rmv;
+	/*vector<RangeMap> rmv;
 
     int retVal=ALNParser::ParseALN(rmv,qPrintable(fileName));
     if(retVal != ALNParser::NoError)
     {
         QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
         return false;
-    }
+    }*/
 
 	// this change of dir is needed for subsequent textures/materials loading
 	QFileInfo fi(fileName);
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
 
-    bool openRes=true;
+    /*bool openRes=true;
     vector<RangeMap>::iterator ir;
 	for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
 	{
@@ -757,7 +757,7 @@ bool MainWindow::openProject(QString fileName)
         else				openRes = open((*ir).filename.c_str(),GLA());
 
         if(openRes) GLA()->mm()->cm.Tr=(*ir).trasformation;
-	}
+	}*/
     if(this->GLA() == 0) return false;
 	this->GLA()->resetTrackBall();
 	return true;
