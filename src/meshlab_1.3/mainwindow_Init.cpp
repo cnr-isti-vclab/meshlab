@@ -315,13 +315,13 @@ void MainWindow::createToolBars()
   renderToolBar->addAction(setSelectFaceRenderingAct);
   renderToolBar->addAction(setSelectVertRenderingAct);
 
-	editToolBar = addToolBar(tr("Edit"));
+	/*editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
 	editToolBar->addSeparator();
 
 	filterToolBar = addToolBar(tr("Action"));
 
-	/*foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
+	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
 	{		
 		foreach(QAction* editAction, iEditFactory->actions())
 		{

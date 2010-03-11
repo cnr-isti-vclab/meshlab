@@ -83,9 +83,9 @@ private slots:
 	bool saveAs(QString fileName = QString());
 	bool save();
 	//bool saveSnapshot();
-	///////////Slot Menu Edit ////////////////////////
-	void applyEditMode();
-	void suspendEditMode();
+	/////////////Slot Menu Edit ////////////////////////
+	//void applyEditMode();
+	//void suspendEditMode();
 	///////////Slot Menu Filter ////////////////////////
 	//void startFilter();
 	//void applyLastFilter();
@@ -109,7 +109,7 @@ private slots:
 	void toggleBackFaceCulling();
   void toggleSelectFaceRendering();
   void toggleSelectVertRendering();
-  void applyDecorateMode();
+  //void applyDecorateMode();
 	///////////Slot Menu View ////////////////////////
 	void fullScreen();
 	void showToolbarFile();
@@ -207,19 +207,19 @@ public:
     static QStatusBar *_qsb=0;
     return _qsb;
   }
-	QMenu* layerMenu() { return filterMenuLayer; }
+	//QMenu* layerMenu() { return filterMenuLayer; }
 
 private:
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;
-	QToolBar *editToolBar;
-	QToolBar *filterToolBar;
+	/*QToolBar *editToolBar;
+	QToolBar *filterToolBar;*/
 
 	///////// Menus ///////////////
 	QMenu *fileMenu;
 	QMenu *fileMenuNew;
-	QMenu *filterMenu;
+	/*QMenu *filterMenu;
 	QMenu *filterMenuSelect;
   QMenu *filterMenuClean;
   QMenu *filterMenuRemeshing;
@@ -233,7 +233,7 @@ private:
   QMenu *filterMenuSampling;
 	QMenu *filterMenuTexture;
 
-	QMenu *editMenu;
+	QMenu *editMenu;*/
 
   //Render Menu and SubMenu ////
 	QMenu *shadersMenu;

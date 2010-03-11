@@ -522,55 +522,55 @@ void MainWindow::endEdit()
 //
 
 
-void MainWindow::suspendEditMode()
-{
-   // return if no window is open
-  if(!GLA()) return;
-
-	// return if no editing action is currently ongoing
-  if(!GLA()->getCurrentEditAction()) return;
-
-	GLA()->suspendEditToggle();
-	updateMenus();
-}
-void MainWindow::applyEditMode()
-{
-	if(!GLA()) { //prevents crash without mesh
-		QAction *action = qobject_cast<QAction *>(sender());
-		action->setChecked(false);
-		return;
-	}
-
-	QAction *action = qobject_cast<QAction *>(sender());
-
-	if(GLA()->getCurrentEditAction()) //prevents multiple buttons pushed
-		{
-		  if(action==GLA()->getCurrentEditAction()) // We have double pressed the same action and that means disable that actioon
-			{
-				if(GLA()->suspendedEditor)
-				{
-					suspendEditMode();
-					return;
-				}
-				GLA()->endEdit();
-				updateMenus();
-				return;
-			}
-			assert(0); // it should be impossible to start an action without having ended the previous one.
-			return;
-		}
-
-	//if this GLArea does not have an instance of this action's MeshEdit tool then give it one
-	if(!GLA()->editorExistsForAction(action))
-	{
-		MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(action->parent());
-		MeshEditInterface *iEdit = iEditFactory->getMeshEditInterface(action);
-		GLA()->addMeshEditor(action, iEdit);
-	}
-	GLA()->setCurrentEditAction(action);
-
-	updateMenus();
-}
+//void MainWindow::suspendEditMode()
+//{
+//   // return if no window is open
+//  if(!GLA()) return;
+//
+//	// return if no editing action is currently ongoing
+//  if(!GLA()->getCurrentEditAction()) return;
+//
+//	GLA()->suspendEditToggle();
+//	updateMenus();
+//}
+//void MainWindow::applyEditMode()
+//{
+//	if(!GLA()) { //prevents crash without mesh
+//		QAction *action = qobject_cast<QAction *>(sender());
+//		action->setChecked(false);
+//		return;
+//	}
+//
+//	QAction *action = qobject_cast<QAction *>(sender());
+//
+//	if(GLA()->getCurrentEditAction()) //prevents multiple buttons pushed
+//		{
+//		  if(action==GLA()->getCurrentEditAction()) // We have double pressed the same action and that means disable that actioon
+//			{
+//				if(GLA()->suspendedEditor)
+//				{
+//					suspendEditMode();
+//					return;
+//				}
+//				GLA()->endEdit();
+//				updateMenus();
+//				return;
+//			}
+//			assert(0); // it should be impossible to start an action without having ended the previous one.
+//			return;
+//		}
+//
+//	//if this GLArea does not have an instance of this action's MeshEdit tool then give it one
+//	if(!GLA()->editorExistsForAction(action))
+//	{
+//		MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(action->parent());
+//		MeshEditInterface *iEdit = iEditFactory->getMeshEditInterface(action);
+//		GLA()->addMeshEditor(action, iEdit);
+//	}
+//	GLA()->setCurrentEditAction(action);
+//
+//	updateMenus();
+//}
 
 void MainWindow::applyRenderMode()
 {
@@ -599,36 +599,36 @@ void MainWindow::applyRenderMode()
 }
 
 
-void MainWindow::applyDecorateMode()
-{
-	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
-
-	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
-
-	bool found=false;
-	 QAction * p;
-	foreach(p,GLA()->iDecoratorsList)
-	{
-		if(p->text()==action->text()){
-			GLA()->iDecoratorsList.remove(p);
-			GLA()->log.Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
-			found=true;
-		}
-	}
-
-	if(!found){
-	  //RichParameterSet * decoratorParams = new RichParameterSet();
-		//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
-		bool ret = iDecorateTemp->StartDecorate(action,*GLA()->mm(), &currentGlobalParams, GLA());
-		if(ret) {
-				GLA()->iDecoratorsList.push_back(action);
-				GLA()->log.Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
-				}
-				else GLA()->log.Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
-		
-	}
-	GLA()->update();
-}
+//void MainWindow::applyDecorateMode()
+//{
+//	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
+//
+//	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
+//
+//	bool found=false;
+//	 QAction * p;
+//	foreach(p,GLA()->iDecoratorsList)
+//	{
+//		if(p->text()==action->text()){
+//			GLA()->iDecoratorsList.remove(p);
+//			GLA()->log.Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+//			found=true;
+//		}
+//	}
+//
+//	if(!found){
+//	  //RichParameterSet * decoratorParams = new RichParameterSet();
+//		//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
+//		bool ret = iDecorateTemp->StartDecorate(action,*GLA()->mm(), &currentGlobalParams, GLA());
+//		if(ret) {
+//				GLA()->iDecoratorsList.push_back(action);
+//				GLA()->log.Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
+//				}
+//				else GLA()->log.Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+//		
+//	}
+//	GLA()->update();
+//}
 
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
