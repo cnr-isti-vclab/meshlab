@@ -458,7 +458,7 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 
 	if(type=="RichEnum")
 	{
-		QStringList list = QStringList::QStringList();
+    QStringList list = QStringList();
 		int enum_card = np.attribute(QString("enum_cardinality")).toUInt(&corrconv);
 		if (!corrconv) 
 			return false;
@@ -509,7 +509,7 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 
 	if(type == "RichOpenFile")
 	{ 
-		QStringList list = QStringList::QStringList();
+    QStringList list = QStringList();
 		int exts_card = np.attribute(QString("exts_cardinality")).toUInt(&corrconv);
 		if (!corrconv) 
 			return false;
