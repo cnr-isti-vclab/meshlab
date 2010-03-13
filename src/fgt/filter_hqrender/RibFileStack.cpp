@@ -112,11 +112,17 @@ QString RibFileStack::nextStatement(int* type, bool manageReadArchive) {
 				//qDebug("nextline: %s type: %d",qPrintable(nextLine),nextLineType);
 				return nextStatement(type, manageReadArchive); //read the first line of new file, if found it
 			}
-			else
-				return str;
+      else  {
+			  nextLine = "";
+        nextLineType = ribParser::NOMORESTATEMENT;
+        return str;
+      }
 		}
-		else
-			return str;
+    else {
+      nextLine = "";
+      nextLineType = ribParser::NOMORESTATEMENT;  		
+      return str;
+    }
 	}
 	else { //it isn't a ReadArchive procedure
 		bool end;

@@ -432,7 +432,7 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
 	for(int i=0; i<6; i++)
 		bound += " " + QString::number(objectBound[i]);
 	fprintf(fout,"%s\n",qPrintable(bound));*/
-	fprintf(fout,"Bound %g %g %g %g %g %g",
+	fprintf(fout,"Bound %g %g %g %g %g %g\n",
 		m->cm.trBB().min.X(), m->cm.trBB().max.X(),
 		m->cm.trBB().min.Y(), m->cm.trBB().max.Y(),
 		m->cm.trBB().min.Z(), m->cm.trBB().max.Z());

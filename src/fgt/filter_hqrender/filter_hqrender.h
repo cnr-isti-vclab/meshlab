@@ -58,42 +58,7 @@ private:
 	  aqsisFileName = QStringList() << "aqsis" << "aqsl" << "teqser" << "piqsl";
     #endif
   }
-  /*inline const QString aqsisName() { 
-    #if defined(Q_OS_WIN)
-	  return QString("aqsis.exe");
-    #elif defined(Q_OS_MAC)
-	  return QString("aqsis");
-    #endif
-  }
-  inline const QString aqslName() { 
-    #if defined(Q_OS_WIN)
-	  return QString("aqsl.exe");
-    #elif defined(Q_OS_MAC)
-	  return QString("aqsl");
-    #endif
-  }
-  inline const QString teqserName() { 
-    #if defined(Q_OS_WIN)
-	  return QString("teqser.exe");
-    #elif defined(Q_OS_MAC)
-	  return QString("teqser");
-    #endif
-  }
-  inline const QString piqslName() { 
-    #if defined(Q_OS_WIN)
-	  return QString("piqsl.exe");
-    #elif defined(Q_OS_MAC)
-	  return QString("piqsl");
-    #endif
-  }
-  inline const QString aqsisBinPath() 
-  { 
-  #if defined(Q_OS_WIN)
-	return QString("bin/");
-  #elif defined(Q_OS_MAC)
-	return QString("/Contents/Resources/bin/");
-  #endif
-  }*/
+
   inline const QString defaultAqsisBinPath() {
     #if defined(Q_OS_WIN)
     return "c:/Program Files (x86)/Aqsis/bin";

@@ -63,10 +63,10 @@ bool UtilitiesHQR::copyFiles(const QDir* fromDir, const QDir* destDir, const QSt
 
 //delete a directory and all file and subdirectory (recursive calls)
 bool UtilitiesHQR::delDir(QDir* dir, const QString* toDel) {
-	qDebug("Deleting: %s in %s", qPrintable(*toDel), qPrintable(dir->absolutePath()));
+	//qDebug("Deleting: %s in %s", qPrintable(*toDel), qPrintable(dir->absolutePath()));
 	if(!dir->rmdir(*toDel)) {
 		dir->cd(*toDel);
-		qDebug("I'm in %s", qPrintable(dir->absolutePath()));
+		//qDebug("I'm in %s", qPrintable(dir->absolutePath()));
 		QStringList dirs = dir->entryList(QDir::Files|QDir::NoDotAndDotDot);
 		foreach(QString entry, dirs) {
 			qDebug("Cycle1 deleting file: %s in %s", qPrintable(entry), qPrintable(dir->absolutePath()));	
