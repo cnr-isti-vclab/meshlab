@@ -74,18 +74,6 @@ FilterSplitterPlugin::FilterSplitterPlugin()
 	}
 }
 
-// Return true if the specified action has an automatic dialog.
-// return false if the action has no parameters or has an self generated dialog.
-bool FilterSplitterPlugin::autoDialog(QAction *action)
-{
-	 switch(ID(action))
-	 {
-		 case FP_SPLITSELECT:
-			 return true;
-	 }
-  return false;
-}
-
 // This function define the needed parameters for each filter.
 void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst)
 {

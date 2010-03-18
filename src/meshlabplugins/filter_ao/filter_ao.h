@@ -73,8 +73,7 @@ public:
     virtual QString			filterInfo(FilterIDType filterId) const;
 
     virtual int         getRequirements (QAction *action);
-	virtual       bool        autoDialog      (QAction *) {return true;}
-	
+
     virtual FilterClass getClass(QAction *filter)
 	{
 		if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION) return MeshFilterInterface::FaceColoring;

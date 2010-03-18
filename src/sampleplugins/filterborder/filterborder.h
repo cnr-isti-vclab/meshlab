@@ -60,8 +60,7 @@ class FilterBorder : public QObject, public MeshFilterInterface
   virtual FilterClass getClass(QAction *);
   virtual int getRequirements(QAction *);
 
-	virtual bool autoDialog(QAction *) {return true;}
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 

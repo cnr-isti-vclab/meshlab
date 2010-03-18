@@ -37,7 +37,6 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
   
 public:
 
-	virtual bool autoDialog(QAction *) {return true;}
 
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;

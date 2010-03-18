@@ -436,17 +436,6 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
   }
 }
 
-bool FilterColorProc::autoDialog(QAction *a)
-{
-  switch(ID(a))
-  {
-    case CP_INVERT :
-    case CP_SCATTER_PER_MESH: return false;
-    default : return true;
-  }
-  assert(0);
-}
-
 int FilterColorProc::postCondition( QAction* filter ) const
 {
     switch(ID(filter))

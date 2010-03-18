@@ -104,9 +104,8 @@ MeshFilterInterface::Remeshing;
   virtual FilterClass getClass(QAction *);
   virtual int getRequirements(QAction *);
 
-	virtual bool autoDialog(QAction *);
-	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+  virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	
 };
 

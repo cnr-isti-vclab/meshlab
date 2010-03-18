@@ -405,20 +405,6 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a)
   }
 }
 
-bool ExtraMeshColorizePlugin::autoDialog(QAction *a) {
-	switch(ID(a)) 
-	{
-		case CP_DISCRETE_CURVATURE:
-		case CP_TRIANGLE_QUALITY: 
-		case CP_VERTEX_SMOOTH:
-		case CP_FACE_SMOOTH:
-		case CP_MAP_QUALITY_INTO_COLOR:
-				return true;
-    
-		default: return false;
-  }
-}
-
 int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const 
 {
 	switch(ID(a)) 

@@ -161,11 +161,6 @@ public:
   QList<Format> importFormats() const;
   QList<Format> exportFormats() const;
 
-  virtual bool autoDialog(QAction *) 
-  {
-    return true;
-  }
-
   void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
   bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);

@@ -83,24 +83,6 @@ FilterMeasurePlugin::FilterMeasurePlugin()
 	}
 }
 
-// Return true if the specified action has an automatic dialog.
-// return false if the action has no parameters or has an self generated dialog.
- bool FilterMeasurePlugin::autoDialog(QAction *action)
- {
-     switch(ID(action))
-	 {
-  case FP_MEASURE_GEOM:
-  case FP_MEASURE_TOPO:
-  case FP_MEASURE_TOPO_QUAD:
-  case FP_MEASURE_GAUSSCURV:
-  case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION:
-         return false;
-  case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
-         return true;
-     }
-     return false;
- }
-
 // This function define the needed parameters for each filter. 
 void FilterMeasurePlugin::initParameterSet(QAction *action, MeshDocument &m, RichParameterSet & par)
 {

@@ -202,14 +202,4 @@ void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParamete
 	return;
 }
 
-bool FilterGeodesic::autoDialog(QAction *action) 
-{
-	switch(ID(action))	 
-		{
-			case FP_QUALITY_POINT_GEODESIC : return true; 
-			case FP_QUALITY_BORDER_GEODESIC : return false; 
-			default: assert(0); return false;
-		}
-}
-
 Q_EXPORT_PLUGIN(FilterGeodesic)

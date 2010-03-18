@@ -64,8 +64,7 @@ public:
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
     FilterClass getClass(QAction *a);
-	virtual bool autoDialog(QAction *) {return true;}
-	virtual void initParameterSet(QAction *,MeshDocument &md, RichParameterSet &parent);
+  virtual void initParameterSet(QAction *,MeshDocument &md, RichParameterSet &parent);
 	virtual int getRequirements(QAction *action);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet &parent, vcg::CallBackPos *cb) ;
 

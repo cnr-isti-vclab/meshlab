@@ -127,8 +127,7 @@ public:
 	int postCondition( QAction* ) const;
 
   virtual FilterClass getClass(QAction *);
-	virtual bool autoDialog(QAction *);
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
   virtual int getRequirements(QAction *);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 

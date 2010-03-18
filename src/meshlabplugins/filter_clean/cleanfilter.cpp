@@ -225,13 +225,6 @@ CleanFilter::~CleanFilter() {
   return 0;
 }
 
-	bool CleanFilter::autoDialog(QAction *action)
-	{
-		if(ID(action)==FP_REMOVE_DUPLICATE_FACE) return false;
-		return true;
-	}
-
-
 void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParameterSet & parlst)
 { 
 	pair<float,float> qualityRange;

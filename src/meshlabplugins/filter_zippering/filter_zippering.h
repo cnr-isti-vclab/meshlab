@@ -271,7 +271,6 @@ public:
 	
         virtual QString filterName(FilterIDType filter) const;
         virtual QString filterInfo(FilterIDType filter) const;
-        virtual bool autoDialog(QAction *) {return true;}
         virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
         int getRequirements(QAction *action);
         virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;

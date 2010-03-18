@@ -277,29 +277,7 @@ int FilterUnsharp::postCondition(QAction *a) const
   return 0;
 }
 
-bool FilterUnsharp::autoDialog(QAction *action) 
-{
-	switch(ID(action))
-	{
-			case FP_CREASE_CUT :
-		  case FP_TWO_STEP_SMOOTH:
-			case FP_LAPLACIAN_SMOOTH:
-			case FP_DEPTH_SMOOTH:
-			case FP_TAUBIN_SMOOTH:
-			case FP_SD_LAPLACIAN_SMOOTH:
-			case FP_UNSHARP_GEOMETRY:		
-			case FP_UNSHARP_QUALITY:		
-			case FP_UNSHARP_VERTEX_COLOR:	
-			case FP_UNSHARP_NORMAL:
-			case FP_LINEAR_MORPH :
-			case FP_DIRECTIONAL_PRESERVATION:
-					return true;
-	}
-	return false;
-}
-
 void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
-//void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, RichParameterSet & parlst)
 {
 	switch(ID(action))
 	{
