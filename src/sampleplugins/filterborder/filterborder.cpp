@@ -106,7 +106,7 @@ void FilterBorder::initParameterSet(QAction *action,MeshModel &m, RichParameterS
 		  parlst.addParam(new RichInt("IterationNum",1,"Iteration","Number of times that the removal of face border is iterated."));
 		  parlst.addParam(new RichBool("DeleteVertices",true,"Delete unreferenced vertices","Remove the vertexes that remains unreferneced after the face removal."));
  		  break;
-		default: assert(0);
+  default: break; // do not add any parameter for the other filters
   }
 }
 

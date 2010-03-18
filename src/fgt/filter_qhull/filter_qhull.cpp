@@ -193,7 +193,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 				break;
 				break;
 			}
-		default : assert(0); 
+   default: break; // do not add any parameter for the other filters
 	}
 }
 

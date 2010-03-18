@@ -276,8 +276,7 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
        parlst.addParam(new RichBool(
                "Repeat", true, "Iterate until convergence", "Iterates the algorithm until it reaches convergence"));
        break;
-
-	default: assert(0);
+  default: break; // do not add any parameter for the other filters
   }
 }
 

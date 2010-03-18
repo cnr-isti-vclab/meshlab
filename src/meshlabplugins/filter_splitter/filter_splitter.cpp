@@ -89,8 +89,8 @@ void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/
 			}
 			break;
 
-		default : assert(0);
-	}
+   default: break; // do not add any parameter for the other filters
+  }
 }
 
 // Core Function doing the actual mesh processing.

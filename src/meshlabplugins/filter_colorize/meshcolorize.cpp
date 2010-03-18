@@ -155,7 +155,8 @@ int ExtraMeshColorizePlugin::getRequirements(QAction *action)
 }
 
 
-void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, RichParameterSet & par) {
+void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, RichParameterSet & par)
+{
 	switch(ID(a))
   {
 		case CP_FACE_SMOOTH: 
@@ -193,8 +194,8 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, RichPara
 		} 
 		break;
 	
-	default: assert(0);
-	}
+  default: break; // do not add any parameter for the other filters
+  }
 }
 
 bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)

@@ -84,7 +84,6 @@ QualityMapperFilter::QualityMapperFilter()
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
-//void QualityMapperFilter::initParList(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
 	 switch(ID(action))	 {
 		case FP_QUALITY_MAPPER :
@@ -117,9 +116,8 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 				parlst.addParam(new RichString("csvFileName", "", "Custom TF Filename", "Filename of the transfer function to be loaded, used only if you have chosen the Custom Transfer Function." ));
 			}
 			break;
-											
-		default : assert(0); break;
-	}
+   default: break; // do not add any parameter for the other filters
+  }
 }
 
 // The Real Core Function doing the actual mesh processing.

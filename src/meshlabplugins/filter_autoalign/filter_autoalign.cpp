@@ -79,7 +79,6 @@ QString FilterAutoalign::filterInfo(FilterIDType filterId) const
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, RichParameterSet & parlst) 
-//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
 	 MeshModel *target;
 	 switch(ID(action))	 {
@@ -108,8 +107,8 @@ void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, R
 			 parlst.addParam(new RichInt("Rotation Num",64,"RotationNumber", "sss"));
 			 break;		
 			 
-		default : assert(0); 
-	}
+   default: break; // do not add any parameter for the other filters
+  }
 }
 
 // The Real Core Function doing the actual mesh processing.

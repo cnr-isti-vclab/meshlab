@@ -95,10 +95,9 @@ void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
           parlst.addParam(new RichInt("smoothNum",1,"Volume Laplacian iter","the level of recursive splitting of the volume"));
           parlst.addParam(new RichInt("wideNum",3,"Widening","the level of recursive splitting of the volume"));
           parlst.addParam(new RichBool("mergeColor",true,"Merge Color","the level of recursive splitting of the volume"));
-
         break;
-		default : assert(0); 
-	}
+     default: break; // do not add any parameter for the other filters
+  }
 }
 
 // The Real Core Function doing the actual mesh processing.

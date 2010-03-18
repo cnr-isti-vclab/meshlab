@@ -108,8 +108,8 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &/*m*/, Ri
 														 "The frequency of the Noise on the mesh. Higher numbers means smaller spots."));
 			break;
 			
-		default : assert(0); 
-	}
+   default: break; // do not add any parameter for the other filters
+  }
 }
 
 // The Real Core Function doing the actual mesh processing.

@@ -640,8 +640,8 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 																				 "Values greater than zero mean an external surface, and lower than zero mean an internal surface.<br> "
 																				 "In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation.")));
 		 } break; 
-		default : assert(0); 
-	}
+   default: break; // do not add any parameter for the other filters
+  }
 }
 
 bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)

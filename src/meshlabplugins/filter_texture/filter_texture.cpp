@@ -215,8 +215,8 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
 											tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering color")));
 			}
 			break;
-		default : assert(0); 
-	}
+  default: break; // do not add any parameter for the other filters
+  }
 }
 
 

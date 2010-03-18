@@ -197,8 +197,8 @@ void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParamete
 			case FP_QUALITY_POINT_GEODESIC :
 					parlst.addParam(new RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
 					break;
-			default: assert(0);
-		}
+    default: break; // do not add any parameter for the other filters
+    }
 	return;
 }
 

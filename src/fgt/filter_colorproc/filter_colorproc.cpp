@@ -224,7 +224,7 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
         par.addParam(new RichInt("noiseBits", 1, "Noise bits:","Bits of noise added to each RGB channel. Example: 3 noise bits adds three random offsets in the [-4,+4] interval to each RGB channels."));
         break;
     }
-    default: assert(0);
+    default: break; // do not add any parameter for the other filters
 	}
 }
 

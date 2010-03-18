@@ -134,9 +134,8 @@ void PoissonPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameter
 											 "The default value is 1.0 (no offsetting)."));
 			
 			break;
-											
-		default : assert(0); 
-	}
+   default: break; // do not add any parameter for the other filters
+  }
 }
 
 // The Real Core Function doing the actual mesh processing.

@@ -289,8 +289,8 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 			parlst.addParam(new RichString("z","(z0+z1)/2","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2"));
 			break;
 
-		default : assert(0); 
-	}
+    default: break; // do not add any parameter for the other filters
+  }
 }
 
 // The Real Core Function doing the actual mesh processing.

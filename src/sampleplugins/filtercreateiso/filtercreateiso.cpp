@@ -136,7 +136,7 @@ void FilterCreateIso::initParameterSet(QAction *action,MeshModel &m, RichParamet
     case FP_CREATEISO :
 		  parlst.addParam(new RichInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation"));
  		  break;
-		default: assert(0);
+  default: break; // do not add any parameter for the other filters
   }
 }
 

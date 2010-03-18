@@ -121,7 +121,7 @@ void FilterZippering::initParameterSet(QAction *action, MeshDocument &md, RichPa
                                 parlst.addParam( new RichAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path") );
 								parlst.addParam( new RichBool("FaceQuality", false, "Use face quality to select redundant face", "If selected, previously computed face quality will be used in order to select redundant faces.") );
                 break;
-                default : assert(0);
+    default: break; // do not add any parameter for the other filters
         }
 }
 

@@ -106,8 +106,8 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action,MeshDocument & /*m*
                                                                                         "Necessary for point-only layers"));
                   break;
 
-		default : assert(0); 
-	}
+   default: break; // do not add any parameter for the other filters
+  }
 }
 
 // The Real Core Function doing the actual mesh processing.
