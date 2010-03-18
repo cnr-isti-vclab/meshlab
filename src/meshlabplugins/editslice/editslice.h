@@ -37,10 +37,16 @@
 
 typedef CMeshO n_Mesh;
 
+class n_Vertex;
 class n_Face;
 class n_Edge;
-class n_Vertex  : public vcg::VertexSimp2<n_Vertex, n_Edge, n_Face, vcg::vertex::Coord3f, vcg::vertex::BitFlags> {};
-class n_Edge    : public vcg::EdgeSimp2<n_Vertex,n_Edge, n_Vertex, vcg::edge::VertexRef> {};
+
+class n_UsedTypes: public vcg::UsedTypes < vcg::Use<n_Vertex>::AsVertexType,
+                                          vcg::Use<n_Edge   >::AsEdgeType,
+                                          vcg::Use<n_Face  >::AsFaceType >{};
+
+class n_Vertex  : public vcg::Vertex<n_UsedTypes, vcg::vertex::Coord3f, vcg::vertex::BitFlags> {};
+class n_Edge    : public vcg::Edge<n_UsedTypes, vcg::edge::VertexRef> {};
 
 
 class n_EdgeMesh: public vcg::edg::EdgeMesh< std::vector<n_Vertex>, std::vector<n_Edge> > {};
