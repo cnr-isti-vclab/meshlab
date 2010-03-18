@@ -11,6 +11,9 @@ public:
 		Scale=1.25f;
 		KernelDepth = -1;
 		Offset = 1.0;
+		NoResetSamples = false;
+		NoClipTree = false;
+		
 	}
 	bool Verbose,NoResetSamples,NoClipTree,Confidence;
 

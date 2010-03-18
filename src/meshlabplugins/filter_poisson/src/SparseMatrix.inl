@@ -228,10 +228,10 @@ int SparseMatrix<T>::SolveSymmetric(const SparseMatrix<T>& M,const Vector<T2>& b
 	Vector<T2> d,r,Md;
 	T2 alpha,beta,rDotR;
 	Md.Resize(b.Dimensions());
-	if(reset){
+	//if(reset){
 		solution.Resize(b.Dimensions());
 		solution.SetZero();
-	}
+	//}
 	d=r=b-M.Multiply(solution);
 	rDotR=r.Dot(r);
 	if(b.Dot(b)<=eps){
