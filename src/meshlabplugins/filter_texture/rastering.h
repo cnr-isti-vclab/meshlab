@@ -151,16 +151,20 @@ public:
 class TransferColorSampler
 {
 	typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
-	
+    typedef vcg::GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
+
 	QImage &trgImg;
 	QImage *srcImg;
 	float dist_upper_bound;
 	bool fromTexture;
 	MetroMeshGrid unifGridFace;
-	
+    VertexMeshGrid   unifGridVert;
+    bool useVertexSampling;
+
 	// Callback stuff
 	vcg::CallBackPos *cb;
 	const CMeshO::FaceType *currFace;
+    CMeshO *srcMesh;
 	int faceNo, faceCnt, start, offset;
 	
 	typedef vcg::tri::FaceTmark<CMeshO> MarkerFace;
@@ -200,9 +204,13 @@ public:
 	TransferColorSampler(CMeshO &_srcMesh, QImage &_trgImg, float upperBound)
 	: trgImg(_trgImg), dist_upper_bound(upperBound)
 	{
-		unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
+        srcMesh=&_srcMesh;
+        useVertexSampling = _srcMesh.face.empty();
+        if(useVertexSampling) unifGridVert.Set(_srcMesh.vert.begin(),_srcMesh.vert.end());
+                        else  unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
 		markerFunctor.SetMesh(&_srcMesh);
 		fromTexture = false;
+
 	}
 	
 	TransferColorSampler(CMeshO &_srcMesh, QImage &_trgImg, QImage *_srcImg, float upperBound)
@@ -210,9 +218,10 @@ public:
 	{
 		assert(_srcImg != NULL);
 		srcImg = _srcImg;
-		unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
-		markerFunctor.SetMesh(&_srcMesh);
+        unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
+        markerFunctor.SetMesh(&_srcMesh);
 		fromTexture = true;
+        useVertexSampling=false;
 	}
 	
 	void InitCallback(vcg::CallBackPos *_cb, int _faceNo, int _start=0, int _offset=100)
@@ -250,6 +259,19 @@ public:
 		startPt[2] = bary[0]*f.V(0)->P().Z()+bary[1]*f.V(1)->P().Z()+bary[2]*f.V(2)->P().Z();
 		
 		// Retrieve closest point on source mesh
+
+        if(useVertexSampling)
+        {
+            CMeshO::VertexType   *nearestV=0;
+            float dist=dist_upper_bound;
+            nearestV =  vcg::tri::GetClosestVertex<CMeshO,VertexMeshGrid>(*srcMesh,unifGridVert,startPt,dist_upper_bound,dist); //(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+        //if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
+            //if(storeDistanceAsQualityFlag)  p.Q() = dist;
+            if(dist == dist_upper_bound) return ;
+            trgImg.setPixel(tp.X(), trgImg.height() - tp.Y(), qRgba(nearestV->C()[0], nearestV->C()[1], nearestV->C()[2], 255));
+        }
+        else // sampling from a mesh
+        {
 		CMeshO::CoordType closestPt;
 		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 		float dist=dist_upper_bound;
@@ -297,6 +319,7 @@ public:
 			if (&f != currFace) {currFace = &f; ++faceCnt;}
 			cb(start + faceCnt*offset/faceNo, "Rasterizing faces ...");
 		}
+    }
 	}
 };
 
