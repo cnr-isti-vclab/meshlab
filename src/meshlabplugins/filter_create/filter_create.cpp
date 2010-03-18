@@ -36,9 +36,7 @@ FilterCreate::FilterCreate()
 	  actionList << new QAction(filterName(tt), this);
 }
 
-// ST() must return the very short string describing each filtering action
-// (this string is used also to define the menu entry)
- QString FilterCreate::filterName(FilterIDType filterId) const
+QString FilterCreate::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
     case CR_BOX : return QString("Box");
@@ -75,7 +73,7 @@ FilterCreate::FilterCreate()
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterCreate::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterSet & parlst)
 {
 	 switch(ID(action))	 {
 
@@ -86,14 +84,14 @@ void FilterCreate::initParameterSet(QAction *action,MeshModel &m, RichParameterS
       parlst.addParam(new RichFloat("r0",1,"Radius 1","Radius of the bottom circumference"));
       parlst.addParam(new RichFloat("r1",2,"Radius 2","Radius of the top circumference"));
       parlst.addParam(new RichFloat("h",3,"Height","Height of the Cone"));
+      parlst.addParam(new RichInt("subdiv",36,"Side","Number of sides of the polygonal approximation of the cone"));
       break;
 		default : return;
 	}
 }
 
 // The Real Core Function doing the actual mesh processing.
-// Move Vertex of a random quantity
-bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
     MeshModel &m=(*md.mm());
   switch(ID(filter))	 {
@@ -126,7 +124,8 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       float r0=par.getFloat("r0");
       float r1=par.getFloat("r1");
       float h=par.getFloat("h");
-      vcg::tri::Cone<CMeshO>(m.cm,r0,r1,h);
+      int subdiv=par.getInt("subdiv");
+      vcg::tri::Cone<CMeshO>(m.cm,r0,r1,h,subdiv);
       break;
    }
  	 vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
