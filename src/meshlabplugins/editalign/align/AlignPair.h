@@ -75,14 +75,16 @@ public:
 
 /*********************** Classi Accessorie ****************************/
 
-class A2Face ;
+class A2Vertex;
 class A2Edge ;
-//class A2Vertex :public  VertexVN<double, A2Edge, A2Face>{};
-//class A2Face  : public  FaceRTFMFN<A2Vertex, A2Edge , A2Face>{};
-//class A2Mesh: public  tri::TriMesh< std::vector<A2Vertex >, std::vector<A2Face > >
+class A2Face ;
 
-class A2Vertex   : public vcg::VertexSimp2<A2Vertex,A2Edge,A2Face,vcg::vertex::Coord3d,vcg::vertex::Normal3d,vcg::vertex::BitFlags> {};
-class A2Face     : public vcg::FaceSimp2 < A2Vertex,A2Edge,A2Face,vcg::face::VertexRef, vcg::face::Normal3d, vcg::face::EdgePlane,vcg::face::Mark,vcg::face::BitFlags> {};
+class A2UsedTypes: public vcg::UsedTypes < vcg::Use<A2Vertex>::AsVertexType,
+                                          vcg::Use<A2Edge  >::AsEdgeType,
+                                          vcg::Use<A2Face  >::AsFaceType >{};
+
+class A2Vertex   : public vcg::Vertex<A2UsedTypes,vcg::vertex::Coord3d,vcg::vertex::Normal3d,vcg::vertex::BitFlags> {};
+class A2Face     : public vcg::Face< A2UsedTypes,vcg::face::VertexRef, vcg::face::Normal3d, vcg::face::EdgePlane,vcg::face::Mark,vcg::face::BitFlags> {};
 class A2Mesh     : public vcg::tri::TriMesh< std::vector<A2Vertex>, std::vector<A2Face> > 
 { 
 public:

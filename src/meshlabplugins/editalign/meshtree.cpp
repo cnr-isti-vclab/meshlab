@@ -128,8 +128,8 @@ void MeshTree::Process(vcg::AlignPair::Param &ap)
 	ResVec.resize(OG.SVA.size());
 	ResVecPtr.clear();
 
-	cb(0,qPrintable(buf.sprintf("Computed %i possible Arcs :\n",OG.SVA.size())));
-	int i=0;
+  cb(0,qPrintable(buf.sprintf("Computed %i possible Arcs :\n",int(OG.SVA.size()))));
+  size_t i=0;
 	for(i=0;i<OG.SVA.size() && OG.SVA[i].norm_area > .1; ++i)
   {	
 		fprintf(stdout,"%4i -> %4i Area:%5i NormArea:%5.3f\n",OG.SVA[i].s,OG.SVA[i].t,OG.SVA[i].area,OG.SVA[i].norm_area);

@@ -80,7 +80,7 @@ public:
 	vcg::AlignPair::Param defaultAP;  // default alignment parameters
 	
 	// this callback MUST be redefined because we are able to manage internally the layer change.
-	virtual void LayerChanged(MeshDocument &md, MeshModel &oldMeshModel, GLArea *parent)
+  virtual void LayerChanged(MeshDocument &/*md*/, MeshModel &/*oldMeshModel*/, GLArea */*parent*/)
 	{ 
 	// add code here to manage the external layer switching
 	}

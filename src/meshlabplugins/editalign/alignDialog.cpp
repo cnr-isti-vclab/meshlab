@@ -52,7 +52,7 @@ bool AlignCallBackPos(const int pos, const char * message )
 	return true;
 }
 // This signal is used to make a connection between the closure of the align dialog and the end of the editing in the GLArea
-void AlignDialog::closeEvent ( QCloseEvent * event )
+void AlignDialog::closeEvent ( QCloseEvent * /*event*/ )
 {
   emit closing();
 }
@@ -171,7 +171,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
 }
 
 
-MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, vcg::AlignPair::Result *A, MeshTreeWidgetItem *parent)
+MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* /*meshTree*/, vcg::AlignPair::Result *A, MeshTreeWidgetItem *parent)
 {
 		n=0;
 		a=A;

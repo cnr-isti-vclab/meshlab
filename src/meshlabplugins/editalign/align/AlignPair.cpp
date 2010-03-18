@@ -53,7 +53,7 @@ bool AlignPair::A2Mesh::Init(const Matrix44d &Tr,bool hasborderflag)
 {
 	Matrix44d Idn; Idn.SetIdentity();
 	//int t1=clock();
-  int unref =  tri::Clean<A2Mesh>::RemoveUnreferencedVertex(*this);
+  tri::Clean<A2Mesh>::RemoveUnreferencedVertex(*this);
   //int t2=clock();
 	if(Tr!=Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this,Tr); 
 	//int t3=clock();  
@@ -354,7 +354,7 @@ bool AlignPair::Align(
     int tts1=clock();
 		//printf("Found %d pairs\n",(int)Pfix.size());
 		//if(!ChoosePoints(Pfix,Nfix,Pmov,OPmov,ap.PassLoFilter,ap.PassHiFilter,H))		
-		if(Pfix.size()<ap.MinPointNum)
+    if(int(Pfix.size())<ap.MinPointNum)
 		{
 			status = TOO_FEW_POINTS;
 			ii.Time=clock();
@@ -435,9 +435,7 @@ bool AlignPair::Align(
 			status = TOO_MUCH_SHARE;
 			return false;
 		}
-	char buf[800];
-	sprintf(buf,"Init %i\nLoop %i\n\nSearch %i\n least sqrt %i\n",tt1-tt0,tt2-tt1,ttsearch,ttleast);
-	printf(buf);
+  printf("Init %i\nLoop %i\n\nSearch %i\n least sqrt %i\n",tt1-tt0,tt2-tt1,ttsearch,ttleast);
 
 	return true;
 }
@@ -545,7 +543,6 @@ int AlignPair::SearchTranslate(A2Grid &u,
 	return maxfnd;
 }
 #if 0
-/*
 int AlignPair::SearchTranslate(UGrid< A2Mesh::face_container > &u,
 								 		vector< Point3d > &movvert,
 										vector< Point3d > &movnorm,
@@ -628,12 +625,12 @@ static int LocRnd(int n){
 // Scelta a caso semplice
 bool AlignPair::SampleMovVertRandom(vector<A2Vertex> &vert, int SampleNum)
 {
-	if(vert.size()<=SampleNum) return true;
+  if(int(vert.size())<=SampleNum) return true;
 	int i;
 	for(i=0;i<SampleNum;++i)
 	{
 		int pos=LocRnd(vert.size());
-		assert(pos>=0 && pos < vert.size());
+    assert(pos>=0 && pos < int(vert.size()));
 		swap(vert[i],vert[pos]);
 	}
 	vert.resize(SampleNum);
@@ -656,36 +653,35 @@ bool AlignPair::SampleMovVertNormalEqualized(vector<A2Vertex> &vert, int SampleN
 {
 //  assert(0);
 
-	int t0=clock();
+//	int t0=clock();
 	static vector<Point3d> NV;
 	if(NV.size()==0)
 		{
 			GenNormal<double>::Uniform(30,NV);
-			printf("Generated %i normals\n",NV.size());
+      printf("Generated %i normals\n",int(NV.size()));
 		}
 	// Bucket vector dove, per ogni normale metto gli indici 
 	// dei vertici ad essa corrispondenti
 	vector<vector <int> > BKT(NV.size());
-	int i,ind;
-	for(i=0;i<vert.size();++i)
+  for(size_t i=0;i<vert.size();++i)
 	{
-		ind=GenNormal<double>::BestMatchingNormal(vert[i].N(),NV);
+    int ind=GenNormal<double>::BestMatchingNormal(vert[i].N(),NV);
 		BKT[ind].push_back(i);
 	}
-	int t1=clock();
+  //int t1=clock();
 	
 	// vettore di contatori per sapere quanti punti ho gia' preso per ogni bucket
 	vector <int> BKTpos(BKT.size(),0);
 	
-	if(SampleNum >= vert.size()) SampleNum= vert.size()-1;
+  if(SampleNum >= int(vert.size())) SampleNum= vert.size()-1;
 
-	for(i=0;i<SampleNum;) 
+  for(int i=0;i<SampleNum;)
 		{
-			ind=LocRnd(BKT.size()); // Scelgo un Bucket
+      int ind=LocRnd(BKT.size()); // Scelgo un Bucket
  			int &CURpos = BKTpos[ind];
 			vector<int> &CUR = BKT[ind];
 
-			if(CURpos<CUR.size())
+      if(CURpos<int(CUR.size()))
 			{
 				swap(CUR[CURpos], CUR[ CURpos + LocRnd(BKT[ind].size()-CURpos)]);
 				swap(vert[i],vert[CUR[CURpos]]);
@@ -694,7 +690,7 @@ bool AlignPair::SampleMovVertNormalEqualized(vector<A2Vertex> &vert, int SampleN
 			}
 		}
 	vert.resize(SampleNum);
-	int t2=clock();
+//	int t2=clock();
 //	printf("Matching   %6i\n",t1-t0);
 //	printf("Collecting %6i\n",t2-t1);
 //  printf("Total      %6i\n",t2-t0);
