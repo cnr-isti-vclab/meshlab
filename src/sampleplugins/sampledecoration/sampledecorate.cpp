@@ -80,7 +80,7 @@ bool SampleMeshDecoratePlugin::StartDecorate( QAction * /*mode*/, MeshModel &/*m
 	return true;
 }
 
-void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QFont /*qf*/)
+void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &/*m*/, GLArea *gla, QFont /*qf*/)
 {
 	static QString lastname("unitialized");
 	switch(ID(a))

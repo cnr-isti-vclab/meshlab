@@ -137,7 +137,7 @@ void BreMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QStr
   
 }
 
-bool BreMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
+bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
   // initializing progress bar status
 	if (cb != NULL)		(*cb)(0, "Loading...");
@@ -183,7 +183,7 @@ QList<MeshIOInterface::Format> BreMeshIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void BreMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
+void BreMeshIOPlugin::GetExportMaskCapability(QString &/*format*/, int &/*capability*/, int &/*defaultBits*/) const
 {
 	/*if(format.toUpper() == tr("BRE"))
   {
@@ -199,7 +199,7 @@ void BreMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/,
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));		
   
 }
-void BreMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
+void BreMeshIOPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet &/*par*/)
 {
   /*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))

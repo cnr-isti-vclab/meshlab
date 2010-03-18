@@ -180,7 +180,7 @@ bool ScalarImage<unsigned char>::Open(const char *filename)
 		unsigned int mysize = w*h;
 		v.resize(w*h);
 		BZ2_bzBuffToBuffDecompress((char*)&*v.begin(), &mysize, compressed_buffer, compressed_size, 0, 0);
-		if (mysize != w*h)
+    if (mysize != (unsigned int)(w*h))
 		{
 			qDebug("This is very wrong. The uncompressed size is not the expected size");
 			return false;
