@@ -5,8 +5,9 @@ SUBDIRS       = common \
                 meshlab \
                 meshlabserver \
                 meshlabplugins/io_base\
-				meshlabplugins/io_3ds\
-				meshlabplugins/io_collada \
+        meshlabplugins/io_3ds\
+        meshlabplugins/io_bre\
+        meshlabplugins/io_collada \
 				meshlabplugins/io_epoch\
 				meshlabplugins/io_u3d\
 				meshlabplugins/io_tri\
