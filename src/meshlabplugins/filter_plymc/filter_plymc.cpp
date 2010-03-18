@@ -89,9 +89,13 @@ void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
      {
         case FP_PLYMC :
           parlst.addParam(new RichAbsPerc("voxSize",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),"Voxel Side", "VoxelSide"));
-          parlst.addParam(new RichInt("subdiv",1,"SubVol Splitting","the level of recursive splitting of the volume"));
-          parlst.addParam(new RichInt("geodesic",true,"Geodesic Weighting"," "));
+          parlst.addParam(new RichInt("subdiv",1,"SubVol Splitting","The level of recursive splitting of the subvolume reconstruction process. '2'' means that a 2x2x2 partition is created and the reconstruction proess generate 8 matching meshes. It is useful for reconsruction at very high resolution."));
+          parlst.addParam(new RichFloat("geodesic",3.0,"Geodesic Weighting"," "));
           parlst.addParam(new RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
+          parlst.addParam(new RichInt("smoothNum",1,"Volume Laplacian iter","the level of recursive splitting of the volume"));
+          parlst.addParam(new RichInt("wideNum",3,"Widening","the level of recursive splitting of the volume"));
+          parlst.addParam(new RichBool("mergeColor",true,"Merge Color","the level of recursive splitting of the volume"));
+
         break;
 		default : assert(0); 
 	}
@@ -100,21 +104,24 @@ void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 // The Real Core Function doing the actual mesh processing.
 bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
-   // MeshModel &m=*(md.mm());
     srand(time(NULL));
 
     tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> > pmc;
     tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> >::Parameter &p = pmc.p;
 
     int subdiv=par.getInt("subdiv");
+
     p.IDiv=Point3i(subdiv,subdiv,subdiv);
     p.IPosS=Point3i(0,0,0);
     p.IPosE[0]=p.IDiv[0]-1; p.IPosE[1]=p.IDiv[1]-1; p.IPosE[2]=p.IDiv[2]-1;
     printf("AutoComputing all subVolumes on a %ix%ix%i\n",p.IDiv[0],p.IDiv[1],p.IDiv[2]);
 
     p.VoxSize=par.getAbsPerc("voxSize");
+    p.QualitySmoothVox = par.getFloat("geodesic");
+    p.SmoothNum = par.getInt("smoothNum");
+    p.WideNum = par.getInt("wideNum");
     p.NCell=0;
-
+    p.MergeColor=p.VertSplatFlag=par.getBool("mergeColor");
     foreach(MeshModel*mm, md.meshList)
     {
         if(mm->visible)

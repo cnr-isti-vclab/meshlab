@@ -29,6 +29,7 @@
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/simplex/vertex/base.h>
 #include <vcg/simplex/face/base.h>
+#include <vcg/complex/used_types.h>
 #include <vcg/complex/trimesh/base.h>
 
 #include <vcg/complex/trimesh/update/position.h>
@@ -58,32 +59,38 @@
 #include "tri_edge_collapse_mc.h"
 namespace vcg {
     namespace tri {
+      
+      // Simple prototype for later use...
+      template<class MeshType>
+              void Simplify( MeshType &m, float perc);
+              
+              
 
-template < class SMesh, class MeshProvider>
-class PlyMC
-{
+  template < class SMesh, class MeshProvider>
+  class PlyMC
+  {
+      public:
+    class MCVertex;
+    class MCEdge;
+    class MCFace;
+
+    class MCUsedTypes: public vcg::UsedTypes <vcg::Use<MCVertex>::template AsVertexType,
+                                              vcg::Use<MCEdge  >::template AsEdgeType,
+                                              vcg::Use<MCFace  >::template AsFaceType >{};
+
+    class MCVertex  : public Vertex< MCUsedTypes, vertex::Coord3f, vertex::Color4b, vertex::Mark, vertex::VFAdj, vertex::BitFlags, vertex::Qualityf>{};
+    class MCEdge : public Edge<MCUsedTypes,edge::VertexRef> {
     public:
-	class MCVertex;
-	class MCEdge;
-	class MCFace;
+      inline MCEdge() {};
+      inline MCEdge( MCVertex * v0, MCVertex * v1){this->V(0) = v0; this->V(1) = v1; };
+      static inline MCEdge OrderedEdge(MCVertex* v0,MCVertex* v1){
+       if(v0<v1) return MCEdge(v0,v1);
+       else return MCEdge(v1,v0);
+      }
+    };
 
-	class MCVertex  : public VertexSimp2< MCVertex,  MCEdge, MCFace, vertex::Coord3f, vertex::Color4b, vertex::Mark, vertex::VFAdj, vertex::BitFlags, vertex::Qualityf>{};
-	class DummyType; 
-	class MCEdge : public EdgeSimp2<MCVertex,MCEdge,DummyType,edge::VertexRef> {
-	public:
-		inline MCEdge() {};
-		inline MCEdge( MCVertex * v0, MCVertex * v1){this->V(0) = v0; this->V(1) = v1; };
-		static inline MCEdge OrderedEdge(MCVertex* v0,MCVertex* v1){
-		 if(v0<v1) return MCEdge(v0,v1);
-		 else return MCEdge(v1,v0);
-		}
-
-	//  inline MyEdge( Edge<MyEdge,MyVertex> &e):Edge<MyEdge,MyVertex>(e){};
-	};
-
-	class MCFace    : public FaceSimp2< MCVertex,    MCEdge, MCFace, face::VertexRef, face::VFAdj, face::BitFlags> {};
-	class MCMesh	: public vcg::tri::TriMesh< std::vector< MCVertex>, std::vector< MCFace > > {};
-
+    class MCFace    : public Face< MCUsedTypes, face::VertexRef, face::VFAdj, face::BitFlags> {};
+    class MCMesh	: public vcg::tri::TriMesh< std::vector< MCVertex>, std::vector< MCFace > > {};
 
 
 	//******************************************
@@ -96,35 +103,35 @@ class PlyMC
 	public:
 		Parameter()
 		{
-		NCell=10000;
-		WideNum= 3;
-		WideSize=0;
-		VoxSize=0;
-		IPosS=Point3i(0,0,0);  // SubVolume Start
-                IPosE=Point3i(0,0,0);  // SubVolume End
-		IPosB=Point3i(0,0,0);  // SubVolume to restart from in lexicographic order (useful for crashes)
-		IPos=Point3i(0,0,0);
-                IDiv=Point3i(1,1,1);
-		VerboseLevel=0;
-		SliceNum=1;
-		FillThr=12;
-		ExpAngleDeg=30;
-		SmoothNum=1;
-		RefillNum=1;
-		IntraSmoothFlag = false;
-		QualitySmoothAbs = 0.0f; //  0 means un-setted value.
-		QualitySmoothVox = 3.0f; // expressed in voxel
-		OffsetFlag=false;
-		OffsetThr=-3;
-		GeodesicQualityFlag=true;
-		PLYFileQualityFlag=false;
-		SaveVolumeFlag=false;
-		SafeBorder=1;
-		CleaningFlag=false;
-		SimplificationFlag=false;
-		VertSplatFlag=false;
-                MergeColor=false;
-                basename = "plymcout";
+            NCell=10000;
+            WideNum= 3;
+            WideSize=0;
+            VoxSize=0;
+            IPosS=Point3i(0,0,0);  // SubVolume Start
+            IPosE=Point3i(0,0,0);  // SubVolume End
+            IPosB=Point3i(0,0,0);  // SubVolume to restart from in lexicographic order (useful for crashes)
+            IPos=Point3i(0,0,0);
+            IDiv=Point3i(1,1,1);
+            VerboseLevel=0;
+            SliceNum=1;
+            FillThr=12;
+            ExpAngleDeg=30;
+            SmoothNum=1;
+            RefillNum=1;
+            IntraSmoothFlag = false;
+            QualitySmoothAbs = 0.0f; //  0 means un-setted value.
+            QualitySmoothVox = 3.0f; // expressed in voxel
+            OffsetFlag=false;
+            OffsetThr=-3;
+            GeodesicQualityFlag=true;
+            PLYFileQualityFlag=false;
+            SaveVolumeFlag=false;
+            SafeBorder=1;
+            CleaningFlag=false;
+            SimplificationFlag=false;
+            VertSplatFlag=false;
+            MergeColor=false;
+            basename = "plymcout";
 		}
 
 		int NCell;
@@ -317,8 +324,9 @@ void Process()
     Point3i gridsize;
     Point3f voxdim;
     fullb.Offset(fullb.Diag() * 0.1 );
-    int saveMask;
-   if(!p.MergeColor) saveMask &= tri::io::Mask::IOM_VERTCOLOR ;
+
+    int saveMask=0;
+   if(p.MergeColor) saveMask |= tri::io::Mask::IOM_VERTCOLOR ;
 
     voxdim = fullb.max - fullb.min;
 
@@ -460,7 +468,7 @@ void Process()
 		      tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameVec.back().c_str(),saveMask);
 		      if(p.SimplificationFlag)
 		      {
-			  Simplify(me, VV.voxel[0]/2);
+        Simplify<MCMesh>(me, VV.voxel[0]/2);
 			  tri::io::ExporterPLY<MCMesh>::Save(me,(filename+std::string(".d.ply")).c_str(),saveMask);
 		      }
 		  }

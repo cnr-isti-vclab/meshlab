@@ -195,10 +195,15 @@ template<class TriMeshType>
 
 };
 
-class MyEdge;
-class SFace;
-class SVertex     : public VertexSimp2< SVertex,  MyEdge, SFace, vertex::Coord3f, vertex::Normal3f,vertex::VFAdj, vertex::BitFlags, vertex::Color4b, vertex::Qualityf>{};
-class SFace       : public FaceSimp2< SVertex,    MyEdge, SFace, face::VertexRef, face::Normal3f,face::Qualityf, face::VFAdj, face::BitFlags> {};
+        class SVertex;
+        class SEdge;
+        class SFace;
+        class SUsedTypes: public vcg::UsedTypes < vcg::Use<SVertex>::AsVertexType,
+                                                  vcg::Use<SEdge   >::AsEdgeType,
+                                                  vcg::Use<SFace  >::AsFaceType >{};
+
+class SVertex     : public Vertex< SUsedTypes, vertex::Coord3f, vertex::Normal3f,vertex::VFAdj, vertex::BitFlags, vertex::Color4b, vertex::Qualityf>{};
+class SFace       : public Face< SUsedTypes, face::VertexRef, face::Normal3f,face::Qualityf, face::VFAdj, face::BitFlags> {};
 class SMesh       : public vcg::tri::TriMesh< std::vector< SVertex>, std::vector< SFace > > {};
 
 #endif // SIMPLEMESHPROVIDER_H
