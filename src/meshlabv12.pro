@@ -28,7 +28,7 @@ SUBDIRS       = common \
 				meshlabplugins/filter_splitter \
 				meshlabplugins/filter_select \
 				meshlabplugins/filter_texture \
-				meshlabplugins/filter_unsharp \
+                meshlabplugins/filter_unsharp \
 				meshlabplugins/filter_zippering \
 #				meshlabplugins/filter_curvature_from_sliding \
 #				meshlabplugins/filter_perceptualmetric \
@@ -39,7 +39,7 @@ SUBDIRS       = common \
 				meshlabplugins/edit_select \
 				meshlabplugins/edit_pickpoints \
 #				meshlabplugins/edit_phototexturing \
-				meshlabplugins/editslice \
+        meshlabplugins/editslice \
 				meshlabplugins/editalign \
 				meshlabplugins/editmeasure \
 				meshlabplugins/editrgbtri \
@@ -55,15 +55,17 @@ SUBDIRS       = common \
 				sampleplugins/filterborder \
 				sampleplugins/filtergeodesic \
 				sampleplugins/filtercreateiso \
-				fgt/filter_trioptimize \
-				fgt/filter_aging \
-				fgt/edit_quality \
-				fgt/filter_quality \
-				fgt/edit_texture\
-				fgt/editpaint\
-				fgt/filter_colorproc \
-				fgt/edit_hole \
+                fgt/filter_aging \
+                fgt/filter_colorproc \
+                fgt/filter_fractal \
+                fgt/filter_func \
+                fgt/filter_qhull \
+                fgt/filter_quality \
+                fgt/filter_trioptimize \
+                fgt/decorate_shadow \
+                fgt/edit_hole \
+                fgt/editpaint\
+                fgt/edit_quality \
+                fgt/edit_texture\
 				fgt/edit_topo \
 				fgt/render_rfx \
-				fgt/filter_func \
-				fgt/filter_qhull
