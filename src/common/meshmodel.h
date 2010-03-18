@@ -34,6 +34,7 @@
 #include <vcg/simplex/face/base.h>
 #include <vcg/simplex/face/component_ocf.h>
 
+#include <vcg/complex/used_types.h>
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/allocate.h>
 
@@ -58,13 +59,20 @@
 #include <QFileInfo>
 #include <QObject>
 
+//Forward Declarations
+
+class CVertexO;
 class CEdge;
 class CFaceO;
-class CVertexO;
+
+class CUsedTypesO: public vcg::UsedTypes < vcg::Use<CVertexO>::AsVertexType,
+                                          vcg::Use<CEdge   >::AsEdgeType,
+                                          vcg::Use<CFaceO  >::AsFaceType >{};
+
 
 //Vert Mem Occupancy  --- 40b ---
 
-class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO,
+class CVertexO  : public vcg::Vertex< CUsedTypesO,
   vcg::vertex::InfoOcf,           /*  4b */
   vcg::vertex::Coord3f,           /* 12b */
   vcg::vertex::BitFlags,          /*  4b */
@@ -81,7 +89,7 @@ class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO,
 };
 
 
-class CEdge : public vcg::EdgeSimp2<CVertexO,CEdge,CFaceO, vcg::edge::EVAdj> {
+class CEdge : public vcg::Edge<CUsedTypesO, vcg::edge::EVAdj> {
 public:
 	inline CEdge(){};
   inline CEdge( CVertexO * v0, CVertexO * v1){ V(0)= v0 ; V(1)= v1;};
@@ -93,7 +101,7 @@ public:
 
 //Face Mem Occupancy  --- 32b ---
 
-class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
+class CFaceO    : public vcg::Face<  CUsedTypesO,
       vcg::face::InfoOcf,              /* 4b */
       vcg::face::VertexRef,            /*12b */
       vcg::face::BitFlags,             /* 4b */
