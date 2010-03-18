@@ -97,6 +97,7 @@ class ExtraMeshColorizePlugin : public QObject, public MeshFilterInterface
 public:
 
     enum  {
+        CP_CLAMP_QUALITY,
       CP_MAP_QUALITY_INTO_COLOR,
       CP_DISCRETE_CURVATURE,
       CP_TRIANGLE_QUALITY,
