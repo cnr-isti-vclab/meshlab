@@ -112,15 +112,14 @@ void FilterMeasurePlugin::initParameterSet(QAction *action, MeshDocument &m, Ric
          par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that is used as a lower bound for the set of bins (all the value smaller this one will be put in the first bin)"));
          par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that is used as a upper bound for the set of bins (all the value over this one will be put in the last bin)"));
          par.addParam(new RichInt("binNum",20,"Number of bins","Number of bins in which the range of values is subdivided"));
-     }break;
+        } break;
 	}
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
 {
 	CMeshO::FaceIterator fi;
-	int numFacesSel,numVertSel;
 
 	switch(ID(filter))
   {
