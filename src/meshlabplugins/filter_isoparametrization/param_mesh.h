@@ -13,10 +13,13 @@ class BaseVertex;
 class BaseEdge;    
 class BaseFace;
 
+class BaseUsedTypes: public vcg::UsedTypes < vcg::Use<BaseVertex>::AsVertexType,
+                                          vcg::Use<BaseEdge   >::AsEdgeType,
+                                          vcg::Use<BaseFace  >::AsFaceType >{};
 
 
 ///AUXILIARY STRUCTURES USED FOR PARAMETRIZATION COMPUTATION
-class BaseVertex  : public vcg::VertexSimp2< BaseVertex, BaseEdge, BaseFace, 
+class BaseVertex  : public vcg::Vertex< BaseUsedTypes,
 	vcg::vertex::VFAdj, 
 	vcg::vertex::Coord3f, 
 	vcg::vertex::Normal3f, 
@@ -50,7 +53,7 @@ public:
 
   void ImportLocal(const BaseVertex  & left )
   {
-    vcg::VertexSimp2< BaseVertex, BaseEdge, BaseFace, 
+    vcg::Vertex< BaseUsedTypes,
 	vcg::vertex::VFAdj, 
 	vcg::vertex::Coord3f, 
 	vcg::vertex::Normal3f, 
@@ -69,7 +72,7 @@ public:
    template < class LeftV>
   void ImportLocal(const LeftV  & left )
   {
-    vcg::VertexSimp2< BaseVertex, BaseEdge, BaseFace, 
+    vcg::Vertex< BaseUsedTypes,
 	vcg::vertex::VFAdj, 
 	vcg::vertex::Coord3f, 
 	vcg::vertex::Normal3f, 
@@ -111,7 +114,7 @@ public:
 
 class BaseFace;
 
-class BaseEdge : public vcg::EdgeSimp2<BaseVertex,BaseEdge,BaseFace,vcg::edge::EVAdj> {
+class BaseEdge : public vcg::Edge<BaseUsedTypes,vcg::edge::EVAdj> {
 public:
 	inline BaseEdge() {};
 	inline BaseEdge( BaseVertex * v0, BaseVertex * v1)
@@ -127,7 +130,7 @@ public:
 };
 
 
-class BaseFace    : public vcg::FaceSimp2  < BaseVertex, BaseEdge, BaseFace, 
+class BaseFace    : public vcg::Face  < BaseUsedTypes,
 	vcg::face::VFAdj, 
 	vcg::face::FFAdj,
 	vcg::face::VertexRef, 
@@ -147,7 +150,7 @@ public:
    template < class LeftV>
   void ImportLocal(const LeftV  & left )
   {
-    vcg::FaceSimp2  < BaseVertex, BaseEdge, BaseFace, 
+    vcg::Face  < BaseUsedTypes,
 	vcg::face::VFAdj, 
 	vcg::face::FFAdj,
 	vcg::face::VertexRef, 
@@ -160,7 +163,7 @@ public:
 	
   void ImportLocal(const BaseFace  & left )
   {
-    vcg::FaceSimp2  < BaseVertex, BaseEdge, BaseFace, 
+    vcg::Face  < BaseUsedTypes,
 	vcg::face::VFAdj, 
 	vcg::face::FFAdj,
 	vcg::face::VertexRef, 

@@ -19,7 +19,13 @@
 class AbstractVertex;
 class AbstractEdge;    
 class AbstractFace;
-class AbstractVertex  : public vcg::VertexSimp2< AbstractVertex, AbstractEdge, AbstractFace, 
+
+class AbstractUsedTypes: public vcg::UsedTypes < vcg::Use<AbstractVertex>::AsVertexType,
+                                          vcg::Use<AbstractEdge   >::AsEdgeType,
+                                          vcg::Use<AbstractFace  >::AsFaceType >{};
+
+
+class AbstractVertex  : public vcg::Vertex< AbstractUsedTypes,
 	vcg::vertex::VFAdj, 
 	vcg::vertex::Coord3f,
 	vcg::vertex::TexCoord2f,
@@ -32,12 +38,12 @@ public:
   template < class LeftV>
   void ImportLocal(const LeftV  & left )
   {
-      vcg::VertexSimp2< AbstractVertex, AbstractEdge, AbstractFace, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::TexCoord2f,vcg::vertex::BitFlags>::ImportLocal( left);
+      vcg::Vertex< AbstractUsedTypes, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::TexCoord2f,vcg::vertex::BitFlags>::ImportLocal( left);
       this->RPos = left.RPos;
   }
 };
 
-class AbstractFace    : public vcg::FaceSimp2  < AbstractVertex, AbstractEdge, AbstractFace, 
+class AbstractFace    : public vcg::Face  < AbstractUsedTypes,
 	vcg::face::VFAdj, 
 	vcg::face::FFAdj,
 	vcg::face::VertexRef,
@@ -56,7 +62,13 @@ class ParamVertex;
 class ParamEdge;    
 class ParamFace;
 
-class ParamVertex: public vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, 
+
+class ParamUsedTypes: public vcg::UsedTypes < vcg::Use<ParamVertex>::AsVertexType,
+                                          vcg::Use<ParamEdge   >::AsEdgeType,
+                                          vcg::Use<ParamFace  >::AsFaceType >{};
+
+
+class ParamVertex: public vcg::Vertex< ParamUsedTypes,
 											vcg::vertex::Normal3f, vcg::vertex::VFAdj, 
 											vcg::vertex::Coord3f,vcg::vertex::Color4b,
 											vcg::vertex::TexCoord2f,vcg::vertex::BitFlags,
@@ -67,19 +79,19 @@ public:
     template < class LeftV>
     void ImportLocal(const LeftV  & left )
     {
-        vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
+        vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
     }
 	
 	
     void ImportLocal(const ParamVertex  & left )
     {
-        vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
+        vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
         this->RPos = left.RPos;
     }
 	
 	void ImportLocal(const BaseVertex  & left )
     {
-        vcg::VertexSimp2< ParamVertex, ParamEdge, ParamFace, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
+        vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
         this->RPos = left.RPos;
     }
 
@@ -87,7 +99,7 @@ public:
 	static const bool Has_Auxiliary(){return false;}
 };
 
-class ParamFace: public vcg::FaceSimp2  <  ParamVertex, ParamEdge, ParamFace, 
+class ParamFace: public vcg::Face <  ParamUsedTypes,
 	vcg::face::VFAdj,vcg::face::FFAdj,vcg::face::VertexRef,
   vcg::face::Color4b,vcg::face::BitFlags,
   vcg::face::Normal3f/*
