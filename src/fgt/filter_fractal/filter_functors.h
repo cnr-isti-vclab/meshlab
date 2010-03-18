@@ -230,7 +230,7 @@ public:
     FBMNoiseFunctor(ScalarType _octaves, ScalarType _h, ScalarType _l)
         :NoiseFunctor<ScalarType>(_octaves, _h, _l) {}
 
-    inline void init(ScalarType&x, ScalarType& y, ScalarType& z, ScalarType& noise)
+    inline void init(ScalarType&/*x*/, ScalarType& /*y*/, ScalarType& /*z*/, ScalarType& noise)
     {
         noise = ScalarType(.0);
     }
@@ -253,7 +253,7 @@ public:
         offset = _offset;
     }
 
-    inline void init(ScalarType&x, ScalarType& y, ScalarType& z, ScalarType& noise)
+    inline void init(ScalarType&/*x*/, ScalarType& /*y*/, ScalarType& /*z*/, ScalarType& noise)
     {
         noise = ScalarType(1.0);
     }
