@@ -218,6 +218,8 @@ Section "MainSection" SEC01
   ;File "C:\MinGW\bin\mingwm10.dll"
   File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
   File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"
+  File "${QT_BASE}\..\mingw\bin\libgomp-1.dll"
+  
   File "..\..\docs\readme.txt"
   ;File "..\..\docs\history.txt"
   File "..\..\docs\gpl.txt"

@@ -8,7 +8,7 @@ class PluginManager
 public:
     PluginManager();
 enum TypeIO{IMPORT,EXPORT};
-	void loadPlugins(RichParameterSet& defaultGlobal);
+        void loadPlugins(RichParameterSet& defaultGlobal);
 
 	inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
 	inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
@@ -28,6 +28,8 @@ enum TypeIO{IMPORT,EXPORT};
 	QVector<MeshEditInterfaceFactory*> meshEditInterfacePlug;
 	QVector<QAction *> editActionList;
 	QVector<QAction *> decoratorActionList;
+
+        QStringList pluginsLoaded;
 };
 
 #endif // PLUGINMANAGER_H

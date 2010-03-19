@@ -31,7 +31,8 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 		QObject *plugin = loader.instance();
 		if (plugin) 
 		{
-			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+                    pluginsLoaded.push_back(fileName);
+                    MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
 			{
 				QAction *filterAction;

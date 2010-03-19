@@ -62,7 +62,7 @@ MainWindow::MainWindow()
         icon.addPixmap(QPixmap(":images/eye48.png"));
         setWindowIcon(icon);
 
-	PM.loadPlugins(defaultGlobalParams);
+        PM.loadPlugins(defaultGlobalParams);
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
 	createActions();

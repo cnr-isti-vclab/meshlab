@@ -169,8 +169,8 @@ private:
 	static QProgressBar *qb;
 	QMdiArea *mdiarea;
 	QSignalMapper *windowMapper;
-	QDir pluginsDir;
-	QStringList pluginFileNames;
+        //QDir pluginsDir;
+        //QStringList pluginFileNames;
 
     PluginManager PM;
      

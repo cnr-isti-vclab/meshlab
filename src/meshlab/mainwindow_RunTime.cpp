@@ -1059,8 +1059,8 @@ void MainWindow::about()
 
 void MainWindow::aboutPlugins()
 {
-	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
-	PluginDialog dialog(pluginsDir.absolutePath(), pluginFileNames, this);
+	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginManager().getPluginDirPath()));
+        PluginDialog dialog(pluginManager().getPluginDirPath(), pluginManager().pluginsLoaded, this);
 	dialog.exec();
 }
 
