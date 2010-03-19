@@ -9,7 +9,7 @@
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\2009.05\qt"
+!define QT_BASE "C:\Qt\2010.02.1\qt"
 !define DISTRIB_FOLDER "../distrib"
 
 ; MUI 1.67 compatible ------
@@ -79,6 +79,7 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\plugins"
   ; IO Plugins (9)
   File "${DISTRIB_FOLDER}/plugins\io_base.dll"
+  File "${DISTRIB_FOLDER}/plugins\io_bre.dll"
   File "${DISTRIB_FOLDER}/plugins\io_epoch.dll"
   File "${DISTRIB_FOLDER}/plugins\io_collada.dll"
   File "${DISTRIB_FOLDER}/plugins\io_3ds.dll"
@@ -100,6 +101,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_create.dll"
 
+  File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_func.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_isoparametrization.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_measure.dll"
@@ -151,6 +153,8 @@ Section "MainSection" SEC01
   ; decorate plugins (2)
   File "${DISTRIB_FOLDER}/plugins\meshdecorate.dll"
   File "${DISTRIB_FOLDER}/plugins\sampledecoration.dll"
+  File "${DISTRIB_FOLDER}/plugins\decorate_shadow.dll"
+  
   ; render plugins (1)
   File "${DISTRIB_FOLDER}/plugins\render_splatting.dll"
   File "${DISTRIB_FOLDER}/plugins\render_gdp.dll"
@@ -200,7 +204,7 @@ Section "MainSection" SEC01
   File "${QT_BASE}\bin\QtXml4.dll"
   File "${QT_BASE}\bin\QtNetwork4.dll"
   ;File "C:\MinGW\bin\mingwm10.dll"
-  File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
+  ;File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
   File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"
   File "..\..\docs\readme.txt"
   ;File "..\..\docs\history.txt"
@@ -238,9 +242,8 @@ FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
-  Delete "$INSTDIR\qt*.dll"
+  Delete "$INSTDIR\*.dll"
   Delete "$INSTDIR\*.txt"
-  Delete "$INSTDIR\ming*.dll"
   Delete "$INSTDIR\*.exe"
   Delete "$INSTDIR\shaders\*.frag"
   Delete "$INSTDIR\shaders\*.vert"
