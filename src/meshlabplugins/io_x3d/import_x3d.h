@@ -1578,6 +1578,7 @@ namespace io {
 				findAndParseAttribute(colorIndex, geometry, "colorIndex", "");
 				findAndParseAttribute(normalIndex, geometry, "normalIndex", "");
 				findAndParseAttribute(texCoordIndex, geometry, "texCoordIndex", "");
+			
 				int offset = m.vert.size();
 				int nVertex = coordList.size()/3;
 				//Load vertex in the mesh
@@ -1603,7 +1604,7 @@ namespace io {
 					if (m.HasPerVertexNormal() && normalPerVertex == "true" && (info->mask & vcg::tri::io::Mask::IOM_VERTNORMAL))
 						getNormal(normalList, vv * 3, m.vert[offset + vv].N(), tMatrix);
 					//Load texture coordinate per vertex
-					if (m.HasPerVertexTexCoord() && (info->mask & vcg::tri::io::Mask::IOM_VERTCOORD))
+					if (m.HasPerVertexTexCoord() && (info->mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD))
 						getTextureCoord(texture, vv * 2, m.vert[offset + vv].cP(), m.vert[offset + vv].T(), tMatrix);
 					if (cb !=NULL && (vv%1000 == 0)) (*cb)(10 + 80*info->numvert/info->numface + 81*vv/(2*nVertex*info->numface), "Loading X3D Object...");
 				}
@@ -1684,7 +1685,7 @@ namespace io {
 							//Load per wegde texture coordinate
 							if(HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
 							{
-								if (texCoordIndex.isEmpty() && !m.HasPerVertexTexCoord())
+								if (texCoordIndex.isEmpty())// && !m.HasPerVertexTexCoord())
 									getTextureCoord(texture, index*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix);
 								else if (!texCoordIndex.isEmpty() && (indexVect.at(tt + ff*3) + initPolygon) < texCoordIndex.size())
 									getTextureCoord(texture, texCoordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt()*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix); 
@@ -2485,7 +2486,7 @@ namespace io {
 									textureInfo[0].textureTransform = createTextureTrasformMatrix(textureTransformList.at(0).toElement());
 							}
 						}
-
+						
 						int colorComponent = (!color.isNull() && color.tagName() == "Color")? 3: 4;
 						//Get first valid texture
 						TextureInfo texture;
@@ -2626,6 +2627,11 @@ public:
 				return result;
 			}
 			info->doc = document;
+			QFile file("translartion.x3d");
+			file.open(QIODevice::WriteOnly | QIODevice::Text);
+		    QTextStream out(&file);
+			document->save(out, 1);
+
 			return LoadMaskByDom(document, info, info->filename);
 			/*wchar_t *file = coco_string_create(filename);
 			try 
