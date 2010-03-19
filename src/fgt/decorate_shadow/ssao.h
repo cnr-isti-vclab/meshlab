@@ -24,7 +24,7 @@
 #ifndef SSAO_H
 #define SSAO_H
 
-#include <decorate_shader.h>
+#include "decorate_shader.h"
 
 class SSAO : public DecorateShader
 {

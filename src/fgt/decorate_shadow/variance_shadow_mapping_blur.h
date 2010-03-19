@@ -24,7 +24,7 @@
 #ifndef VARIANCE_SHADOW_MAPPING_BLUR_H
 #define VARIANCE_SHADOW_MAPPING_BLUR_H
 
-#include <variance_shadow_mapping.h>
+#include "variance_shadow_mapping.h"
 
 class VarianceShadowMappingBlur : public VarianceShadowMapping
 {

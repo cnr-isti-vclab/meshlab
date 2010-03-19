@@ -24,7 +24,7 @@
 #ifndef VARIANCE_SHADOW_MAPPING_H
 #define VARIANCE_SHADOW_MAPPING_H
 
-#include <shadow_mapping.h>
+#include "shadow_mapping.h"
 
 
 class VarianceShadowMapping : public ShadowMapping
