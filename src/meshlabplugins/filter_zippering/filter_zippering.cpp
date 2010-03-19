@@ -41,7 +41,7 @@
 //#define REDUNDANCY_ONLY 1
 //#define REFINE_PATCH_ONLY 1
 #define MAX_LOOP 150
-
+using namespace vcg;
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
@@ -156,7 +156,7 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
 
     for ( unsigned int j = 0; j < edge_samples.size(); j ++ ) {
         CMeshO::FacePointer nearestF = 0;
-        vcg::tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&m->cm); m->cm.UnMarkAll();
+        vcg::tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&m->cm); tri::UnMarkAll(m->cm);
         vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
         MeshFaceGrid::ScalarType  dist = max_dist;  MeshFaceGrid::CoordType closest;
         //Search closest point on A
@@ -185,7 +185,7 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
         // samples on A
         for ( int k = 0; k < edge_samples.size(); k ++ ) {
             CMeshO::FacePointer nearestF = 0;
-            vcg::tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&m->cm); m->cm.UnMarkAll();
+            vcg::tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&m->cm); tri::UnMarkAll(m->cm);
             vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
             MeshFaceGrid::ScalarType  dist = max_dist;  MeshFaceGrid::CoordType closest;
             //Search closest point on A
@@ -222,7 +222,7 @@ bool FilterZippering::simpleCheckRedundancy(   CMeshO::FacePointer f,   //face
 	//search for max_edge
 	float max_edge = std::max( vcg::Distance<float>(f->P(0),f->P(1)), std::max( vcg::Distance<float>(f->P(1),f->P(2)), vcg::Distance<float>(f->P(2),f->P(0)) ) );
 	float dist = max_dist; CMeshO::FacePointer nearestF = 0; vcg::Point3<CMeshO::ScalarType> closest;
-	vcg::tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&m->cm); m->cm.UnMarkAll();
+  vcg::tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&m->cm); UnMarkAll(m->cm);
     vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 	nearestF =  grid.GetClosest(PDistFunct, markerFunctor, qp, max_dist, dist, closest);
 	if (nearestF == 0) return false;	//too far away
@@ -622,9 +622,9 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	/*end*/
 
     a->cm.face.EnableFFAdjacency();   vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm); 
-    a->cm.face.EnableMark(); a->cm.UnMarkAll();
+    a->cm.face.EnableMark(); tri::UnMarkAll(a->cm);
     b->cm.face.EnableFFAdjacency();      vcg::tri::UpdateTopology<CMeshO>::FaceFace(b->cm); 
-    b->cm.face.EnableMark(); b->cm.UnMarkAll();
+    b->cm.face.EnableMark(); tri::UnMarkAll(b->cm);
     vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);   vcg::tri::UpdateFlags<CMeshO>::FaceProjection(a->cm);  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
     vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(b->cm);   vcg::tri::UpdateFlags<CMeshO>::FaceProjection(b->cm);  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(b->cm);
     CMeshO::ScalarType epsilon  = par.getAbsPerc("distance");

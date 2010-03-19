@@ -237,7 +237,7 @@ bool AlignPair::InitFix(AlignPair::A2Mesh *fm,
 												A2Grid &u,
 												int PreferredGridSize)
 {
-	fm->InitFaceIMark();
+  tri::InitFaceIMark(*fm);
 
 	Box3d bb2=fm->bbox;
 //	double MinDist= fm->bbox.Diag()*pp.MinDistPerc;

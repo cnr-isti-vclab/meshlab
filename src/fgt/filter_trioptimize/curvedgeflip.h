@@ -326,7 +326,7 @@ public:
 				for (unsigned int i = 0; i < 3; i++)
 					if ((*fi).V1(i) - (*fi).V0(i) > 0) {
 						PosType newpos(&*fi, i);
-						Insert(heap, newpos, m.IMark());
+            Insert(heap, newpos, tri::IMark(m));
 					}
 	}
 }; // end CurvEdgeFlip class

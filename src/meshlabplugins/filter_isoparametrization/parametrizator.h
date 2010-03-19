@@ -169,9 +169,9 @@ private:
 
 	void InitIMark()
 	{
-		base_mesh.IMark()=0;
-		base_mesh.InitFaceIMark();
-		base_mesh.InitVertexIMark();
+    vcg::tri::IMark(base_mesh)=0;
+    vcg::tri::InitFaceIMark(base_mesh);
+    vcg::tri::InitVertexIMark(base_mesh);
 	}
 	
 

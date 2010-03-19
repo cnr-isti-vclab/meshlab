@@ -75,8 +75,8 @@ bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 		m.updateDataMask(MeshModel::MM_VERTCOLOR);
 		tri::UpdateColor<CMeshO>::VertexConstant(m.cm,Color4b(150, 150, 150, 255));
 	}
-	m.cm.InitFaceIMark();
-	m.cm.InitVertexIMark();
+  tri::InitFaceIMark(m.cm);
+  tri::InitVertexIMark(m.cm);
 		
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	
@@ -310,12 +310,12 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
 				case COLOR_SMOOTH:
 					paintbox->getUndoStack()->beginMacro("Color Smooth");
 					smoothed_vertices.clear();
-					m.cm.UnMarkAll();
+          tri::UnMarkAll(m.cm);
 					break;
 				case MESH_SMOOTH:
 					paintbox->getUndoStack()->beginMacro("Mesh Smooth");
 					smoothed_vertices.clear();
-					m.cm.UnMarkAll();
+          tri::UnMarkAll(m.cm);
 					break;
 					
 				default :
@@ -858,7 +858,7 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 	
 	if (current_options & EPP_AVG_NORMAL ) normal = Point3f(0.0, 0.0, 0.0);
 	
-	m.cm.UnMarkAll();
+  tri::UnMarkAll(m.cm);
 	
 	if (selection->size() == 0) {
 		CMeshO::FaceIterator fi;
@@ -955,7 +955,7 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 				{
 					intern = true;
 					if (vertex_result == NULL) continue;
-					else if (!m.cm.IsMarked(fac->V(j)))
+          else if (!tri::IsMarked(m.cm,fac->V(j)))
 					{
 						vd.position.setX((int)p[j].x()); vd.position.setY((int)p[j].y());
 						pair<CVertexO *, PickingData> data(fac->V(j), vd);
@@ -963,7 +963,7 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 						
 						if (current_options & EPP_AVG_NORMAL ) normal += fac->V(j)->N();
 						
-						m.cm.Mark(fac->V(j));
+            tri::Mark(m.cm,fac->V(j));
 					}
 				}
 				
@@ -980,16 +980,16 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 			} 
 		}
 		
-		if (intern && !m.cm.IsMarked(fac)) 
+    if (intern && !tri::IsMarked(m.cm,fac))
 		{
-			m.cm.Mark(fac);
+      tri::Mark(m.cm,fac);
 			selection->push_back(fac);
 			surround.clear();
 			for (int lauf=0; lauf<3; lauf++) getSurroundingFacesVF(fac,lauf,&surround);
 
 			for (unsigned int lauf3=0; lauf3<surround.size(); lauf3++)
 			{
-				if (!m.cm.IsMarked(surround[lauf3])) 
+        if (!tri::IsMarked(m.cm,surround[lauf3]))
 				{
 						temp.push_back(surround[lauf3]);
 				} 
