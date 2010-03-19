@@ -54,12 +54,12 @@ bool VarianceShadowMapping::init()
             this->_depthShaderProgram,
             this->_depthVert,
             this->_depthFrag,
-            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsm/depthVSM"))) ||
+            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/vsm/depthVSM"))) ||
        !compileAndLink(
             this->_shadowMappingProgram,
             this->_shadowMappingVert,
             this->_shadowMappingFrag,
-            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/vsm/objectVSM"))))
+            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/vsm/objectVSM"))))
         return false;
 
     return true;

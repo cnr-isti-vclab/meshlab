@@ -90,17 +90,17 @@ bool SSAO::init()
             this->_ssaoShaderProgram,
             this->_ssaoVert,
             this->_ssaoFrag,
-            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/ssao"))) ||
+            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/ssao/ssao"))) ||
        !compileAndLink(
             this->_normalMapShaderProgram,
             this->_normalMapVert,
             this->_normalMapFrag,
-            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/normalMap"))) ||
+            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/ssao/normalMap"))) ||
        !compileAndLink(
             this->_blurShaderProgram,
             this->_blurVert,
             this->_blurFrag,
-            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/ssao/blur"))))
+            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/ssao/blur"))))
         return false;
     return true;
 }

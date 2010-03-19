@@ -55,7 +55,7 @@ bool ShadowMapping::init()
             this->_shadowMappingProgram,
             this->_shadowMappingVert,
             this->_shadowMappingFrag,
-            PluginManager::getBaseDirPath().append(QString("/../fgt/decorate_shadow/shader/sm/object")));
+            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/sm/object")));
 }
 
 void ShadowMapping::renderingFromLightSetup(MeshModel& m, GLArea* gla){
