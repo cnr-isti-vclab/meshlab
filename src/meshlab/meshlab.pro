@@ -92,7 +92,7 @@ INCLUDEPATH += . \
 CONFIG += stl
 
 macx:LIBS += ../common/libcommon.dylib
-macx:QMAKE_POST_LINK ="cp ../common/libcommon* ../distrib/meshlab.app/Contents/MacOS; install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlab"
+macx:QMAKE_POST_LINK ="cp -P ../common/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS; install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlab"
 
 
 
