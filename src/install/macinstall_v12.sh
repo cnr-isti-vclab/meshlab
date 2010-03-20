@@ -9,7 +9,7 @@
 # make release
 # Note that sometimes you have to copy by hand the icons in the meshlab.app/Contents/Resources directory
 
-cd ../meshlab
+cd ../distrib
 QTPATH="/Library/Frameworks"
 APPNAME="meshlab.app"
 
@@ -24,7 +24,7 @@ if [ -e $APPNAME -a -d $APPNAME ]
 then
   echo "------------------"
 else
-  echo "Started in the wrong dir"
+  echo "Started in the wrong dir: I have not found the MeshLab.app"
   exit 0
 fi
 
@@ -36,7 +36,7 @@ mkdir $BUNDLE
 cp -r meshlab.app $BUNDLE
 
 # copy the files icons into the app.
-cp images/meshlab_obj.icns $BUNDLE/$APPNAME/Contents/Resources
+cp ../meshlab/images/meshlab_obj.icns $BUNDLE/$APPNAME/Contents/Resources
 
 mkdir $BUNDLE/$APPNAME/Contents/Frameworks   
 mkdir $BUNDLE/$APPNAME/Contents/plugins   
@@ -56,17 +56,17 @@ mkdir $BUNDLE/sample
 mkdir $BUNDLE/sample/images
 mkdir $BUNDLE/sample/normalmap
 
-cp ../sample/texturedknot.ply $BUNDLE/sample
-cp ../sample/texturedknot.obj $BUNDLE/sample
-cp ../sample/texturedknot.mtl $BUNDLE/sample
-cp ../sample/TextureDouble_A.png $BUNDLE/sample
-cp ../sample/Laurana50k.ply $BUNDLE/sample
-cp ../sample/duck_triangulate.dae $BUNDLE/sample
-cp ../sample/images/duckCM.jpg $BUNDLE/sample/images
-cp ../sample/seashell.gts $BUNDLE/sample
-cp ../sample/chameleon4k.pts $BUNDLE/sample
-cp ../sample/normalmap/laurana500.* $BUNDLE/sample/normalmap
-cp ../sample/normalmap/matteonormb.* $BUNDLE/sample/normalmap
+cp sample/texturedknot.ply $BUNDLE/sample
+cp sample/texturedknot.obj $BUNDLE/sample
+cp sample/texturedknot.mtl $BUNDLE/sample
+cp sample/TextureDouble_A.png $BUNDLE/sample
+cp sample/Laurana50k.ply $BUNDLE/sample
+cp sample/duck_triangulate.dae $BUNDLE/sample
+cp sample/images/duckCM.jpg $BUNDLE/sample/images
+cp sample/seashell.gts $BUNDLE/sample
+cp sample/chameleon4k.pts $BUNDLE/sample
+cp sample/normalmap/laurana500.* $BUNDLE/sample/normalmap
+cp sample/normalmap/matteonormb.* $BUNDLE/sample/normalmap
 
 mkdir $BUNDLE/$APPNAME/Contents/textures   
 cp textures/*.png $BUNDLE/$APPNAME/Contents/textures/
@@ -79,6 +79,9 @@ cp shaders/*.gdp shaders/*.vert shaders/*.frag shaders/*.txt  $BUNDLE/$APPNAME/C
 #added rendermonkey shaders
 mkdir $BUNDLE/$APPNAME/Contents/shadersrm   
 cp shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shadersrm
+#added shadowmapping shaders
+cp -r shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
+
 
 for x in $QTCOMPONENTS
 do
@@ -110,6 +113,7 @@ plugins/libfilter_clean.dylib \
 plugins/libfilter_colorize.dylib \
 plugins/libfilter_colorproc.dylib \
 plugins/libfilter_create.dylib \
+plugins/libfilter_fractal.dylib \
 plugins/libfilter_func.dylib \
 plugins/libfilter_isoparametrization.dylib \
 plugins/libfilter_measure.dylib \
@@ -118,6 +122,7 @@ plugins/libfilter_mls.dylib \
 plugins/libfilter_plymc.dylib \
 plugins/libfilter_poisson.dylib \
 plugins/libfilter_qhull.dylib \
+plugins/libfilter_quality.dylib \
 plugins/libfilter_sampling.dylib \
 plugins/libfilter_select.dylib \
 plugins/libfilter_splitter.dylib \
@@ -125,22 +130,21 @@ plugins/libfilter_texture.dylib \
 plugins/libfilter_trioptimize.dylib \
 plugins/libfilter_unsharp.dylib \
 plugins/libfilter_zippering.dylib \
-plugins/libfilter_qhull.dylib \
-plugins/libfilter_quality.dylib \
 plugins/libfilterborder.dylib \
 plugins/libfiltercreateiso.dylib \
 plugins/libfiltergeodesic.dylib \
-plugins/libio_base.dylib \
 plugins/libio_3ds.dylib \
+plugins/libio_base.dylib \
+plugins/libio_bre.dylib \
 plugins/libio_collada.dylib \
 plugins/libio_epoch.dylib \
 plugins/libio_expe.dylib \
 plugins/libio_gts.dylib \
-plugins/libio_u3d.dylib \
-plugins/libio_tri.dylib \
-plugins/libio_x3d.dylib \
-plugins/libio_pdb.dylib \
 plugins/libio_m.dylib \
+plugins/libio_pdb.dylib \
+plugins/libio_tri.dylib \
+plugins/libio_u3d.dylib \
+plugins/libio_x3d.dylib \
 plugins/libedit_hole.dylib \
 plugins/libedit_pickpoints.dylib \
 plugins/libedit_quality.dylib \
@@ -155,6 +159,7 @@ plugins/libeditsegment.dylib \
 plugins/libeditslice.dylib \
 plugins/libedit_straightener.dylib \
 plugins/libmeshdecorate.dylib \
+plugins/libdecorate_shadow.dylib \
 plugins/librender_gdp.dylib \
 plugins/librender_rfx.dylib \
 plugins/librender_splatting.dylib \
@@ -189,6 +194,7 @@ do
   install_name_tool -change QtNetwork.framework/Versions/4/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork $BUNDLE/meshlab.app/Contents/$x
   install_name_tool -change QtOpenGL.framework/Versions/4/QtOpenGL   @executable_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL   $BUNDLE/meshlab.app/Contents/$x
   install_name_tool -change QtXml.framework/Versions/4/QtXml         @executable_path/../Frameworks/QtXml.framework/Versions/4/QtXml         $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change libcommon.1.dylib                        @executable_path/libcommon.1.dylib         $BUNDLE/meshlab.app/Contents/$x
 done
 
 cd ../install
