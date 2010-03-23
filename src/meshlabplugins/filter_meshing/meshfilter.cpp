@@ -68,7 +68,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
             FP_CYLINDER_UNWRAP <<
             FP_REFINE_CATMULL <<
             FP_REFINE_HALF_CATMULL <<
-            FP_QUAD_PAIRING;
+            FP_QUAD_PAIRING <<
+            FP_FAUX_CREASE;
 
 
   FilterIDType tt;
@@ -110,6 +111,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction *a)
     case FP_REFINE_CATMULL:
     case FP_REFINE_HALF_CATMULL:
     case FP_QUAD_PAIRING:
+    case FP_FAUX_CREASE:
         return MeshFilterInterface::Remeshing;
     case FP_NORMAL_EXTRAPOLATION:
     case FP_INVERT_FACES:
@@ -163,6 +165,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
         case FP_REFINE_CATMULL:				return QString("Catmull-Clark Subdivision Surfaces");
     case FP_REFINE_HALF_CATMULL:				return QString("Tri to Quad by 4-8 Subdivision");
     case FP_QUAD_PAIRING:				return QString("Tri to Quad by smart triangle pairing");
+    case FP_FAUX_CREASE:				return QString("Crease Marking with NonFaux Edges");
 
         default: assert(0);
     }
@@ -205,6 +208,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
                                                            "<br> <i>Luiz Velho, Denis Zorin </i>"
                                                            "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
   case FP_QUAD_PAIRING:				return QString("Convert a tri mesh into a quad mesh by pairing triangles.");
+  case FP_FAUX_CREASE:				return QString("Mark the crease edges of a mesh as Non-Faux according to edge dihedral angle.");
         default : assert(0);
 	}
   return QString();
@@ -214,6 +218,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 {
   switch(ID(action))
   {
+  case FP_FAUX_CREASE: return MeshModel::MM_FACEFACETOPO;
   case FP_QUAD_PAIRING: return MeshModel::MM_FACEFACETOPO;
   case FP_REFINE_CATMULL : return MeshModel::MM_FACEFACETOPO;
   case FP_REFINE_HALF_CATMULL : return MeshModel::MM_FACEFACETOPO;
@@ -373,7 +378,10 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
           parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
       }
   break;
-  case FP_NORMAL_EXTRAPOLATION:
+  case FP_FAUX_CREASE:
+          parlst.addParam(new RichFloat ("AngleDeg",(int)45,"Angle Threshold (deg)","The angle threshold for considering an edge a crease. If the normals between two faces forms an angle larger than the threshold the edge is considered a crease."));
+  break;
+   case FP_NORMAL_EXTRAPOLATION:
           parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to estimate and propagate normals."));
 			break;
 			 }
@@ -866,6 +874,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
       if(!ret) Log("Warning BitQuadCreation<CMeshO>::MakePureByFlip failed.");
       tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
       m.updateDataMask(MeshModel::MM_POLYGONAL);
+  }
+  if(ID(filter)==FP_FAUX_CREASE)
+  {
+    float AngleDeg = par.getFloat("AngleDeg");
+    tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+    tri::UpdateFlags<CMeshO>::FaceFauxCrease(m.cm,math::ToRad(AngleDeg));
   }
   return true;
 }
