@@ -464,11 +464,13 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 											"Number of samples",
 											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
 			parlst.addParam(new RichEnum("Sampling", 0, 
-									QStringList() << "Similar Triangle" << "Dual Similar Triangle" << "Long Edge Subdiv" , 
+                  QStringList() << "Similar Triangle" << "Dual Similar Triangle" << "Long Edge Subdiv" << "Sample Edges" << "Sample NonFaux Edges",
 									tr("Element to sample:"), 
 									tr(	"<b>Similar Triangle</b>: each triangle is subdivided into similar triangles and the internal vertices of these triangles are considered. This sampling leave space around edges and vertices for separate sampling of these entities.<br>"
 											"<b>Dual Similar Triangle</b>: each triangle is subdivided into similar triangles and the internal vertices of these triangles are considered.  <br>"
-											"<b>Long Edge Subdiv</b> each triangle is recursively subdivided along the longest edge. <br>"
+                      "<b>Long Edge Subdiv</b> each triangle is recursively subdivided along the longest edge. <br>"
+                      "<b>Sample Edges</b> Only the edges of the mesh are uniformly sampled. <br>"
+                      "<b>Sample NonFaux Edges</b> Only the non-faux edges of the mesh are uniformly sampled. <br>"
 									))); 
 											
 			 parlst.addParam(new RichBool("Random", false,
@@ -492,7 +494,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 			break;
 		case FP_ELEMENT_SUBSAMPLING :
 			parlst.addParam(new RichEnum("Sampling", 0, 
-									QStringList() << "Vertex" << "Edge" << "Face", 
+                  QStringList() << "Vertex" << "Edge" << "Face",
 									tr("Element to sample:"), 
 									tr("Choose what mesh element has to be used for the subsampling. At most one point sample will be added for each one of the chosen elements"))); 
 			parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be chosen. Being a subsampling of the original elements if this number should not be larger than the number of elements of the original mesh."));
@@ -500,9 +502,11 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 		case FP_POISSONDISK_SAMPLING :
 			parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
 			parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
-			parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is x means that x * <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
+      parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is <i>K</i> means that<i>K</i> x <poisson sample> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
 			parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud."));
-			break;
+      parlst.addParam(new RichBool("RefineFlag", false, "Refine Existing Samples", "If true the vertices of the below mesh are used as starting vertices, and they will utterly refined by adding more and more points until possible. "));
+      parlst.addParam(new RichMesh("RefineMesh", md.mm(),&md, "Samples to be refined", "Used only if the above option is checked. "));
+      break;
 		case FP_VARIABLEDISK_SAMPLING :
 			parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
 			parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
@@ -659,8 +663,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 			switch(par.getEnum("Sampling"))
 				{
 					case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::VertexUniform(curMM->cm,mps,par.getInt("SampleNum"));	break;
-					case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllEdge(curMM->cm,mps);		break;
-					case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
+          case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,false);		break;
+          case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
 				}
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);		
@@ -729,9 +733,15 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 				case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), true ,par.getBool("Random"));
 									Log(GLLogStream::FILTER,"Dual Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
 									break;			
-				case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"), par.getBool("Random"));
-									Log(GLLogStream::FILTER,"Subdivision Sampling created a new mesh of %i points",md.mm()->cm.vn);			
-									break;			
+      case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"), par.getBool("Random"));
+                Log(GLLogStream::FILTER,"Subdivision Sampling created a new mesh of %i points",md.mm()->cm.vn);
+                break;
+      case 3 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), true);
+                Log(GLLogStream::FILTER,"Edge Sampling created a new mesh of %i points",md.mm()->cm.vn);
+                break;
+      case 4 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), false);
+                Log(GLLogStream::FILTER,"Non Faux Edge Sampling created a new mesh of %i points",md.mm()->cm.vn);
+                break;
 
 			}
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
@@ -781,7 +791,7 @@ case FP_CLUSTERED_SAMPLING :
 		case FP_VARIABLEDISK_SAMPLING :
 		{
 			bool subsampleFlag = par.getBool("Subsample");
-			if (md.mm()->cm.fn==0 && subsampleFlag==false)
+      if (md.mm()->cm.fn==0 && subsampleFlag==false)
 			{
 				errorMessage = "This filter requires a mesh. It does not work on PointSet.";
 				return false; // cannot continue
@@ -822,10 +832,17 @@ case FP_CLUSTERED_SAMPLING :
 						pp.adaptiveRadiusFlag=true;
 						pp.radiusVariance = par.getFloat("RadiusVariance");
 						Log("Variable Density variance is %f, radius can vary from %f to %f",pp.radiusVariance,radius/pp.radiusVariance,radius*pp.radiusVariance);
-			}			
-			
-            //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(curMM->cm, mps, *presampledMesh, radius,pp);
-            tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
+      }
+      else
+      {
+        if(par.getBool("RefineFlag"))
+        {
+        pp.preGenFlag=true;
+        pp.preGenMesh=&(par.getMesh("RefineMesh")->cm);
+        }
+      }
+            tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(curMM->cm, mps, *presampledMesh, radius,pp);
+            //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
 
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
