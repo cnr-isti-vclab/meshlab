@@ -14,6 +14,8 @@ DEPENDPATH += $$VCGDIR \
 HEADERS = ../common/interfaces.h \
     mainwindow.h \
     glarea.h \
+    multiViewer_Container.h \
+    viewer.h \
     glarea_setting.h \
     #plugindialog.h \
     #customDialog.h \
@@ -30,6 +32,7 @@ SOURCES = main.cpp \
     mainwindow_Init.cpp \
     mainwindow_RunTime.cpp \
     glarea.cpp \
+    multiViewer_Container.cpp \
     #plugindialog.cpp \
     #customDialog.cpp \
     #filterScriptDialog.cpp \
