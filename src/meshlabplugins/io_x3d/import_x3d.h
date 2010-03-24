@@ -2627,11 +2627,10 @@ public:
 				return result;
 			}
 			info->doc = document;
-			QFile file("translartion.x3d");
+			/*QFile file("temp.x3d");
 			file.open(QIODevice::WriteOnly | QIODevice::Text);
 		    QTextStream out(&file);
-			document->save(out, 1);
-
+			document->save(out, 1);*/
 			return LoadMaskByDom(document, info, info->filename);
 			/*wchar_t *file = coco_string_create(filename);
 			try 
