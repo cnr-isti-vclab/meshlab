@@ -235,6 +235,16 @@ void MeshModelState::create(int _mask, MeshModel* _m)
         for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
          if(!(*fi).IsD()) (*ci) = (*fi).IsS();
     }
+
+	if(changeMask & MeshModel::MM_VERTFLAGSELECT)
+	{
+		vertSelection.resize(m->cm.vert.size());
+		std::vector<bool>::iterator ci;
+		CMeshO::VertexIterator vi;
+		for(vi = m->cm.vert.begin(), ci = vertSelection.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+			if(!(*vi).IsD()) (*ci) = (*vi).IsS();
+	}
+
     if(changeMask & MeshModel::MM_TRANSFMATRIX)
         Tr = m->cm.Tr;
 }
@@ -285,6 +295,20 @@ bool MeshModelState::apply(MeshModel *_m)
                 (*fi).ClearS();
         }
     }
+
+	if(changeMask & MeshModel::MM_VERTFLAGSELECT)
+	{
+		if(vertSelection.size() != m->cm.vert.size()) return false;
+		std::vector<bool>::iterator ci;
+		CMeshO::VertexIterator vi;
+		for(vi = m->cm.vert.begin(), ci = vertSelection.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+		{
+			if((*ci))
+				(*vi).SetS();
+			else
+				(*vi).ClearS();
+		}
+	}
 
     if(changeMask & MeshModel::MM_TRANSFMATRIX)
         m->cm.Tr=Tr;

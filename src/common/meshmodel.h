@@ -460,6 +460,7 @@ private:
 	std::vector<vcg::Point3f> vertCoord;
 	std::vector<vcg::Point3f> vertNormal;
 	std::vector<bool> faceSelection;
+	std::vector<bool> vertSelection;
 	vcg::Matrix44f Tr;
 public:
   // This function save the <mask> portion of a mesh into the private members of the MeshModelState class;
