@@ -276,4 +276,13 @@ int SelectionFilterPlugin::postCondition(QAction *action) const
     return MeshModel::MM_UNKNOWN;
 }
 
+int SelectionFilterPlugin::getPreConditions( QAction * action) const
+{
+	switch(ID(action))
+	{
+	case FP_SELECT_BY_COLOR:		return MeshModel::MM_VERTCOLOR;
+	case FP_SELECT_BY_QUALITY:		return MeshModel::MM_VERTQUALITY;
+	default: return 0;
+	}
+}
 Q_EXPORT_PLUGIN(SelectionFilterPlugin)
