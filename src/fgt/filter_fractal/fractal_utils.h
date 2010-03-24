@@ -5,6 +5,7 @@
 #include <common/meshmodel.h>
 #include <vcg/complex/trimesh/smooth.h>
 #include "filter_functors.h"
+#include <vector>
 
 using namespace vcg;
 
@@ -163,7 +164,7 @@ public:
     static void GenerateGrid(MeshType& m, int subSteps, float& gridSide)
     {
         m.Clear();
-        int k = (int)(pow(2, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
+        int k = (int)(pow(2.0f, subSteps)), k2 = k+1, vertexCount = k2*k2, faceCount = 2*k*k, i=0, j=0;
         ScalarType x = .0, y = .0;
         gridSide = k2;
 
@@ -172,7 +173,7 @@ public:
 
         // generates the vertex coords
         VertexIterator vi;
-        VertexPointer ivp[vertexCount];
+		std::vector<VertexPointer> ivp(vertexCount);
         for(vi = m.vert.begin(); vi!=m.vert.end(); ++vi)
         {
             x = (i%k2);
