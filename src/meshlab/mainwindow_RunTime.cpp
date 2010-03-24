@@ -467,7 +467,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	QTime tt; tt.start();
 	GLA()->meshDoc.busy=true;
   RichParameterSet MergedEnvironment(params);
-  MergedEnvironment.paramList.append(currentGlobalParams.paramList);
+  MergedEnvironment.join(currentGlobalParams);
   ret=iFilter->applyFilter(action,   GLA()->meshDoc, MergedEnvironment, QCallBack);
 	GLA()->meshDoc.busy=false;
   qApp->restoreOverrideCursor();
