@@ -70,9 +70,36 @@ FilterHighQualityRender::FilterClass FilterHighQualityRender::getClass(QAction *
 
 //add global parameter to set aqsis bin path correctly
 void FilterHighQualityRender::initGlobalParameterSet(QAction *action, RichParameterSet &parset) {
+  //on windows i could use PATH system environment to find directory..on mac os?
+  QStringList aqsisEnv = QProcess::systemEnvironment();
+  QString aqsisDir = defaultAqsisBinPath();
+	bool found = false;
+	foreach(QString envElem, aqsisEnv) { //looking for (AQSISHOME|PATH) variable
+		if(envElem.contains("AQSISHOME", Qt::CaseInsensitive)) { //old version of aqsis? (1.4)
+			qDebug("founded environment variable value: %s", qPrintable(envElem));
+			aqsisDir = envElem.remove("AQSISHOME=", Qt::CaseInsensitive); //the string is "AQSISHOME='path'"
+			qDebug("aqsis directory: %s", qPrintable(aqsisDir));
+			found = true;
+			break;
+		}
+		if(envElem.startsWith("PATH=", Qt::CaseInsensitive)) { //aqsis 1.6
+			qDebug("founded environment variable value: %s", qPrintable(envElem));
+			QStringList pathlist = envElem.remove("PATH=", Qt::CaseInsensitive).split(';');
+			foreach(QString str, pathlist) {
+				if(str.contains("aqsis", Qt::CaseInsensitive)) { //is it enough?
+					qDebug("founded environment variable value: %s", qPrintable(str));
+					aqsisDir = str;
+					qDebug("aqsis directory: %s", qPrintable(aqsisDir));
+					found = true;
+					break;
+				}
+			}
+			if(found) break;
+		}
+	}
   assert(!parset.hasParameter(AqsisBinPathParam()));
-	parset.addParam(new RichString(AqsisBinPathParam(), defaultAqsisBinPath(), "", ""));
-  //on windows i could use PATH system environment to find directory..
+	parset.addParam(new RichString(AqsisBinPathParam(), aqsisDir, "", ""));
+  //parset.addParam(new RichString(AqsisBinPathParam(), defaultAqsisBinPath(), "", "")); //no search, use default
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -99,23 +126,27 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 				this->errorMessage = "No template scene has been found in \"render_template\" directory";
 				qDebug(qPrintable(this->errorMessage));
 			}
-			parlst.addParam(new RichEnum("scene",0,templates,"Select scene"));
-      //parlst.addParam(new RichInt("frames",0, "Number of frames for animation (0 for no animation)"));			
-			parlst.addParam(new RichString("ImageName", "default", "Name of output image"));
-			parlst.addParam(new RichEnum("ImageFormat", 0, imageFormatsSupported, "Output image format"));
-			parlst.addParam(new RichBool("ShowResult",true,"Show the images created?","If checked a window with the created images will be showed at finish"));
-			//parlst.addParam(new RichInt("FormatX", 800, "Format X"));
-			//parlst.addParam(new RichInt("FormatY", 600, "Format Y"));
-			parlst.addParam(new RichInt("FormatX", 320, "Format X"));
-			parlst.addParam(new RichInt("FormatY", 200, "Format Y"));
-			parlst.addParam(new RichFloat("PixelAspectRatio", 1.0, "Pixel aspect ratio"));
-			parlst.addParam(new RichBool("Autoscale",true,"Auto-scale mesh","Check if the object will be scaled on render scene"));			
+			parlst.addParam(new RichEnum("scene",0,templates,"Select scene",
+        "Select the scene where the loaded mesh will be drawed in."));			
+			parlst.addParam(new RichString("ImageName", "default", "Name of output image",
+        "The name of final result. If the images is more than one will be numbered."));
+			parlst.addParam(new RichEnum("ImageFormat", 0, imageFormatsSupported, "Output image format",
+        "The format of the final image (or images, if it's more than one)"));
+			parlst.addParam(new RichBool("ShowResult",true,"Show the images created?",
+        "If checked a window, with the created images, will be showed at finish."));
+			parlst.addParam(new RichInt("FormatX", 640, "Format X", "Final image/s lenght size."));
+			parlst.addParam(new RichInt("FormatY", 480, "Format Y", "Final image/s width size."));
+			parlst.addParam(new RichFloat("PixelAspectRatio", 1.0, "Pixel aspect ratio", "Final image/s pixel aspect ratio."));
+			parlst.addParam(new RichBool("Autoscale",true,"Auto-scale mesh","Check if the mesh will be scaled on render scene"));			
 			QStringList alignValueList = (QStringList() << "Center" << "Top" << "Bottom");
-			parlst.addParam(new RichEnum("AlignX",0,alignValueList,"Align X"));
-			parlst.addParam(new RichEnum("AlignY",0,alignValueList,"Align Y"));
-			parlst.addParam(new RichEnum("AlignZ",0,alignValueList,"Align Z"));			
-			parlst.addParam(new RichBool("SaveScene",false,"Save the files created for rendering?",
-				"If checked the scene will be created in the same directory of mesh, else in the temporary system folder and then removed"));
+			parlst.addParam(new RichEnum("AlignX",0,alignValueList,"Align X",
+        "If it's checked the mesh will be aligned with scene x axis"));
+			parlst.addParam(new RichEnum("AlignY",0,alignValueList,"Align Y",
+			  "If it's checked the mesh will be aligned with scene y axis"));
+      parlst.addParam(new RichEnum("AlignZ",0,alignValueList,"Align Z",			
+			  "If it's checked the mesh will be aligned with scene z axis"));
+      parlst.addParam(new RichBool("SaveScene",false,"Save the files created for rendering?",
+				"If it's checked the scene will be created in the same directory of mesh, else in the temporary system folder and then removed"));
 			break;
 		}
 		default : assert(0); 
