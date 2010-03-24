@@ -33,6 +33,42 @@
 #include "meshmodel.h"
 
 
+//enum TypeId {BOOL,INT,FLOAT,STRING,MATRIX44F,POINT3F,COLOR,ENUM,MESH,GROUP,FILENAME};
+//
+//class Binding
+//{
+//public:
+//	TypeId tid;
+//	QString name;
+//	QString value;	
+//}; 
+//
+//class BindingSet
+//{
+//public:
+//	QList<Binding> binds;
+//
+//	bool declare(const TypeId id,const QString& nm,const QString& val);
+//};
+//
+//class Environment
+//{
+//public:
+//	BindingSet globals;
+//	BindingSet locals;
+//
+//	int evalInt(const QString& val,bool& conv) const;
+//	float evalFloat(const QString& val,bool& conv) const;
+//	bool evalBool(const QString& val,bool& conv) const;
+//};
+//
+//class Decoration
+//{
+//public:
+//	QString fieldDesc;
+//	QString tooltip;
+//};
+
 class Value
 {
 public:
@@ -216,6 +252,38 @@ public:
 private:
 	MeshModel* pval;
 };
+
+/*************************/
+
+//class ParameterDeclaration
+//{
+//public:
+//	const QString name;
+//	Value* val;
+//
+//	virtual void accept(Visitor& v) = 0;
+//	virtual bool operator==(const ParameterDeclaration& rp) = 0;
+//	virtual ~RichParameter();
+//};
+//
+//class BoolDeclaration
+//{
+//public:
+//	BoolDeclaration(const QString nm,const bool defval);
+//	bool operator==(const ParameterDeclaration& rp);
+//	void accept(Visitor& v);
+//	~BoolDeclaration();
+//};
+//
+//class IntDeclaration
+//{
+//public:
+//	IntDeclaration(const QString nm,const bool defval);
+//	bool operator==(const ParameterDeclaration& rp);
+//	void accept(Visitor& v);
+//	~IntDeclaration();
+//};
+
 
 /******************************/
 
@@ -646,6 +714,7 @@ public:
 
 	RichParameterSet& operator=(const RichParameterSet& rps);
 	RichParameterSet& copy(const RichParameterSet& rps);
+	RichParameterSet& join(const RichParameterSet& rps);
 	bool operator==(const RichParameterSet& rps);
 
 	RichParameterSet& addParam(RichParameter* pd);

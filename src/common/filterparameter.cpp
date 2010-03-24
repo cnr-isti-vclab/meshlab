@@ -165,6 +165,17 @@ void RichParameterSet::clear()
 {
 	paramList.clear();
 }
+
+RichParameterSet& RichParameterSet::join( const RichParameterSet& rps )
+{
+	RichParameterCopyConstructor copyvisitor;
+	for(int ii = 0;ii < rps.paramList.size();++ii)
+	{
+		rps.paramList.at(ii)->accept(copyvisitor);
+		paramList.push_back(copyvisitor.lastCreated);
+	}
+	return (*this);
+}
 /****************************************/
 
 void RichParameterCopyConstructor::visit( RichBool& pd )
