@@ -39,6 +39,7 @@
 #include "../common/filterscript.h"
 //#include "layerDialog.h"
 #include "glarea_setting.h"
+#include "viewer.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -63,12 +64,12 @@ public:
 };
 
 class MeshModel;
-class GLArea : public QGLWidget
+class GLArea : public QGLWidget, public Viewer
 {
 	Q_OBJECT
 
 public:
-    GLArea(QWidget *parent, RichParameterSet *current);
+    GLArea(QWidget *parent, RichParameterSet *current, int id);
 	~GLArea();
 	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 private:

@@ -36,6 +36,7 @@
 #include "../common/pluginmanager.h"
 #include "glarea.h"
 #include "stdpardialog.h"
+#include "multiViewer_Container.h"
 
 #define MAXRECENTFILES 4
 
@@ -125,6 +126,7 @@ private slots:
 
 	///////////Slot Menu Preferences /////////////////
 	//void setCustomize();
+	void setSplit();
 	///////////Slot Menu Help ////////////////////////
 	/*void about();
 	void aboutPlugins();*/
@@ -192,11 +194,13 @@ private:
 public:
 	GLArea *GLA() const {
 	  if(mdiarea->currentSubWindow()==0) return 0;
-	  GLArea *glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow());
-	  if(glw) return glw;
-	  glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow()->widget());
-	  assert(glw);
-	  return glw;
+	  MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+	  if(!mvc) 
+		  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+	  GLArea *glw =  (GLArea*)(mvc->currentView());//qobject_cast<GLArea*>qobject_cast(mvc->currentView());
+	  if(glw) 
+		  return glw;
+	  else return 0;
 	}
 
 	const PluginManager& pluginManager() const { return PM; }
@@ -305,6 +309,7 @@ private:
 	QAction *closeAllAct;
 	///////////Actions Menu Preferences /////////////////
 	QAction *setCustomizeAct;
+	QAction *setSplitAct;
 	///////////Actions Menu Help ////////////////////////
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;

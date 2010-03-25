@@ -277,6 +277,9 @@ void MainWindow::createActions()
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
 
+	setSplitAct = new QAction(tr("&Split view"),this);
+	connect(setSplitAct, SIGNAL(triggered()), this, SLOT(setSplit()));
+
 	//////////////Action Menu About ///////////////////////////////////////////////////////////////////////////
 	aboutAct = new QAction(tr("&About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
@@ -452,6 +455,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
 	preferencesMenu->addAction(setCustomizeAct);
+	preferencesMenu->addAction(setSplitAct);
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -747,6 +751,7 @@ void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char 
 // and update the loaded mesh counter
 void MainWindow::setCurrentFile(const QString &fileName)
 {
+	
 	QSettings settings;
 	QStringList files = settings.value("recentFileList").toStringList();
 	files.removeAll(fileName);

@@ -822,8 +822,12 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				}
 				//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 				bool newGla = false;
-				if(gla==0){
-                        gla=new GLArea(mdiarea,&currentGlobalParams);
+				MultiViewer_Container *mvcont;
+				if(mdiarea->currentSubWindow()==0){
+					    mvcont = new MultiViewer_Container(mdiarea); 
+						int id = mvcont->getNextViewerId();
+                        gla=new GLArea(mdiarea,&currentGlobalParams,id);		
+						mvcont->addView(gla);
                         //addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 						newGla =true;
 						pCurrentIOPlugin->setLog(&(gla->log));
@@ -860,15 +864,17 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 							postOpenDialog.exec();
 							pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 						}
+					
 					gla->meshDoc.busy=true;
 					gla->meshDoc.addNewMesh(qPrintable(fileName),mm);
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
                     gla->setFileName(mm->shortName());
-					if(newGla){
-						mdiarea->addSubWindow(gla);
+					if(newGla){ 
+						//mdiarea->addSubWindow(gla);IO
+						mdiarea->addSubWindow(mvcont);
 					}
-					if(mdiarea->isVisible()) gla->showMaximized();
+					if(mdiarea->isVisible()) mvcont->showMaximized();
 					setCurrentFile(fileName);
 
 					if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
@@ -1095,6 +1101,47 @@ void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
 //	connect(&dialog,SIGNAL(applyCustomSetting()),this,SLOT(updateCustomSettings()));
 //	dialog.exec();
 //}
+
+void MainWindow::setSplit()
+{
+	if(mdiarea->currentSubWindow()==0) return;
+	MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+	if(!mvc) 
+	  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+	GLArea *glw =  (GLArea*)(mvc->currentView());
+	int id = mvc->getNextViewerId();
+    GLArea *glwClone=new GLArea(mdiarea,&currentGlobalParams,id);		
+	mvc->addView(glwClone);
+
+	//copia puntatori della lista di mesh
+	glwClone->meshDoc.busy=true;
+	for each(MeshModel *mmp in glw->meshDoc.meshList)
+		glwClone->meshDoc.addNewMesh(mmp->fullName().toLatin1(), mmp);
+
+	glwClone->setFileName(glwClone->mm()->shortName());
+
+	//currentMesh?
+
+	int mask =0;
+	if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+		glwClone->setColorMode(GLW::CMPerFace);
+	if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
+	{
+		glwClone->setColorMode(GLW::CMPerVert);
+	}
+	if(glw->mm()->cm.textures.empty())
+	{
+		glwClone->setTextureMode(GLW::TMPerWedgeMulti);
+	}
+
+	updateMenus();
+	
+	glwClone->meshDoc.busy=false;
+	glwClone->resetTrackBall();
+	
+	glwClone->update();
+
+}
 
 void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
 void MainWindow::renderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }

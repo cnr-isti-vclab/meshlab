@@ -33,10 +33,12 @@
 using namespace std;
 using namespace vcg;
 
-GLArea::GLArea(QWidget *parent, RichParameterSet *current)
+GLArea::GLArea(QWidget *parent, RichParameterSet *current, int id)
 : QGLWidget(parent)
 {
-    this->updateCustomSettingValues(*current);
+    this->id =id;
+	
+	this->updateCustomSettingValues(*current);
 	animMode=AnimNone;
 	iRenderer=0; //Shader support
 	iEdit=0;
@@ -971,3 +973,4 @@ void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
 {
     GLAreaSetting::initGlobalParameterSet(defaultGlobalParamSet);
 }
+
