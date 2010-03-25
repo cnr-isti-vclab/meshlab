@@ -1023,15 +1023,15 @@ MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
 		helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
 		gridLay = qobject_cast<QGridLayout*>(p->layout());
 		assert(gridLay != 0);
+
 		row = gridLay->rowCount();
-
-
 		//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-		if ((row == 1) && (rpar->val->isBool()))
+		if ((row == 1) && (rpar->val->isBool()))	
 		{
-			QLabel* lab = new QLabel("",p);
-			gridLay->addWidget(lab);
-			gridLay->addWidget(helpLab,row + 1,3,1,1,Qt::AlignTop);
+			
+			QLabel* lb = new QLabel("",p);
+			gridLay->addWidget(lb);
+			gridLay->addWidget(helpLab,row+1,3,1,1,Qt::AlignTop);
 		}
 		///////////////////////////////////////////////////////////////////////
 		else
@@ -1059,13 +1059,17 @@ BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
 	cb->setToolTip(rp->pd->tooltip);
 	cb->setChecked(rp->val->getBool());
 
+
+	//gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
+
+	//int row = gridLay->rowCount() -1 ;
 	//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-	gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
 	if (row == 1)
 		gridLay->addWidget(cb,row + 1,0,1,2,Qt::AlignTop);
 	///////////////////////////////////////////////////////////////////////
 	else
 		gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
+
 	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
 
 }
