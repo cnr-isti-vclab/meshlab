@@ -106,7 +106,7 @@ static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool bin
   //third step: vertex coordinates
   fprintf(fout,"\"P\"\n[\n");
   Matrix44f mat = Matrix44f::Identity();
-  mat = mat.SetScale(1.0,1.0,-1.0);
+  mat = mat.SetScale(1.0,1.0,1.0);
   incr = m.vn/cbStep;
   for(VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); ++vi, ++i) {
     if(i%incr == 0) cb(++cbValue, "Exporting vertex coordinates");
