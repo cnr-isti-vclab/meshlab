@@ -83,6 +83,7 @@ Added standard plugin window support
 
 #include "../common/interfaces.h"
 #include<QCheckBox>
+#include<QRadioButton>
 #include<QSpinBox>
 #include<QTableWidget>
 #include<QComboBox>
@@ -113,13 +114,16 @@ public:
 signals:
 	void parameterChanged();
 protected:
+	int row;
 	QGridLayout* gridLay;
 	void InitRichParameter(RichParameter* rpar);
 };
 
 class BoolWidget : public MeshLabWidget 
 {
+	//QLabel* lab;
 	QCheckBox* cb;
+	//QRadioButton* cb;
 public:
 	BoolWidget(QWidget* p,RichBool* rb);
 	~BoolWidget();

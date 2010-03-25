@@ -199,18 +199,19 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument */*m
 {
  if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
-    vLayout->setAlignment(Qt::AlignLeft);
+    vLayout->setAlignment(Qt::AlignTop);
+	//QLabel* lb = new QLabel("",this);
+	//vLayout->addWidget(lb);
+	
 	setLayout(vLayout);
-
+	
 	//QLabel *ql;
-
-	QList<RichParameter*> &parList =curParSet.paramList;
 
 	QString descr;
 	RichWidgetInterfaceConstructor rwc(this);
-	for(int i = 0; i < parList.count(); i++)
+	for(int i = 0; i < curParSet.paramList.count(); i++)
 	{
-		RichParameter* fpi=parList.at(i);
+		RichParameter* fpi=curParSet.paramList.at(i);
 		fpi->accept(rwc);
 		//vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
 		stdfieldwidgets.push_back(rwc.lastCreated);
@@ -224,7 +225,7 @@ void StdParFrame::loadFrameContent( RichParameter* par,MeshDocument */*mdPt*/ /*
 {
 	if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
-    vLayout->setAlignment(Qt::AlignLeft);
+    vLayout->setAlignment(Qt::AlignTop);
 	setLayout(vLayout);
 
 	QString descr;
@@ -234,7 +235,6 @@ void StdParFrame::loadFrameContent( RichParameter* par,MeshDocument */*mdPt*/ /*
 		//vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
 		stdfieldwidgets.push_back(rwc.lastCreated);
 		helpList.push_back(rwc.lastCreated->helpLab);
-
 	showNormal();
 	adjustSize();
 }
@@ -399,7 +399,7 @@ MeshlabStdDialog::~MeshlabStdDialog()
 		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
 		QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
 
-		int row = gridLay->rowCount() - 1;
+		//int row = gridLay->rowCount() - 1;
 		gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
 
 		QGridLayout* lay = new QGridLayout(p);
@@ -476,7 +476,7 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 {
 
 	paramName = rpf->name;
-	int row = gridLay->rowCount() - 1;
+	//int row = gridLay->rowCount() - 1;
 
 	descLab = new QLabel(rpf->pd->fieldDesc,p);
 	descLab->setToolTip(rpf->pd->fieldDesc);
@@ -592,7 +592,7 @@ void ComboWidget::Init(QWidget *p,int defaultEnum, QStringList values)
 	enumCombo = new QComboBox(p);
   enumCombo->addItems(values);
 	setIndex(defaultEnum);
-	int row = gridLay->rowCount() - 1;
+	//int row = gridLay->rowCount() - 1;
 	gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
 	gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
 	connect(enumCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
@@ -926,7 +926,7 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 	valueLE->setText(QString::number(rp->val->getFloat()));
 
 	
-	int row = gridLay->rowCount() - 1;
+	//int row = gridLay->rowCount() - 1;
 	gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
 	
 	QHBoxLayout* lay = new QHBoxLayout(p);
@@ -1023,8 +1023,19 @@ MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
 		helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
 		gridLay = qobject_cast<QGridLayout*>(p->layout());
 		assert(gridLay != 0);
-		int row = gridLay->rowCount();
-		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
+		row = gridLay->rowCount();
+
+
+		//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
+		if ((row == 1) && (rpar->val->isBool()))
+		{
+			QLabel* lab = new QLabel("",p);
+			gridLay->addWidget(lab);
+			gridLay->addWidget(helpLab,row + 1,3,1,1,Qt::AlignTop);
+		}
+		///////////////////////////////////////////////////////////////////////
+		else
+			gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
 	}
 }
 
@@ -1043,14 +1054,18 @@ MeshLabWidget::~MeshLabWidget()
 BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
 :MeshLabWidget(p,rb)
 {
+
 	cb = new QCheckBox(rp->pd->fieldDesc,p);
 	cb->setToolTip(rp->pd->tooltip);
 	cb->setChecked(rp->val->getBool());
 
-	//gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
-
-	int row = gridLay->rowCount() -1 ;
+	//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
 	gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
+	if (row == 1)
+		gridLay->addWidget(cb,row + 1,0,1,2,Qt::AlignTop);
+	///////////////////////////////////////////////////////////////////////
+	else
+		gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
 	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
 
 }
@@ -1067,6 +1082,7 @@ void BoolWidget::resetWidgetValue()
 
 BoolWidget::~BoolWidget()
 {
+	//delete lab;
 	delete cb;
 }
 
@@ -1081,7 +1097,7 @@ LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 {
 	lab = new QLabel(rp->pd->fieldDesc,this);
 	lned = new QLineEdit(this);
-	int row = gridLay->rowCount() -1;
+	//int row = gridLay->rowCount() -1;
 	
 	lab->setToolTip(rp->pd->tooltip);
 	gridLay->addWidget(lab,row,0,Qt::AlignTop);
@@ -1247,7 +1263,7 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 	//const QColor cl = rp->pd->defVal->getColor();
 	//resetWidgetValue();
 	initWidgetValue();
-	int row = gridLay->rowCount() - 1;
+	//int row = gridLay->rowCount() - 1;
 	gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
 	QHBoxLayout* lay = new QHBoxLayout(p);
@@ -1388,7 +1404,7 @@ OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )
 	browse->setText("...");
 	//const QColor cl = rp->pd->defVal->getColor();
 	//resetWidgetValue();
-	int row = gridLay->rowCount() - 1;
+	//int row = gridLay->rowCount() - 1;
 	gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 	QHBoxLayout* lay = new QHBoxLayout(p);
 	lay->addWidget(filename,2);
