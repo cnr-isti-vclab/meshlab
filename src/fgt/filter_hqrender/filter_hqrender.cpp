@@ -324,7 +324,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 			qDebug("compiling shader working directory: %s",qPrintable(destDirString + QDir::separator() + dirStr));
       foreach(QString shaderName, QDir(compileProcess.workingDirectory()).entryList(QStringList("*.sl")))
         {
-          QString toRun = /*aqsisBinDirString +"/" +*/ aqsisFileName[AQSL]+ " "+shaderName;
+          QString toRun = aqsisBinDirString +"/" + aqsisFileName[AQSL]+ " "+shaderName;
           qDebug("compiling command: %s",qPrintable(toRun));
           qDebug("Path is %s",qPrintable(compileProcess.processEnvironment().value("PATH")));
           compileProcess.start(toRun);
@@ -333,6 +333,10 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
             QString out = QString::fromLocal8Bit(compileProcess.readAllStandardError().data());
             this->errorMessage = "Unable to compile the shaders of template" + out;
             qDebug("compiling msg err: %s",qPrintable(out));
+            QProcess::ProcessError errr= compileProcess.error();
+            if(errr==QProcess::FailedToStart) qDebug("QProcess::FailedToStart");
+            if(errr==QProcess::ReadError    ) qDebug("QProcess::ReadError");
+            if(errr==QProcess::FailedToStart) qDebug("QProcess::FailedToStart");
             return false;
           }
           qDebug("compiling msg out: %s",compileProcess.readAllStandardOutput().data());
@@ -393,8 +397,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
   
 	//***run the aqsis rendering
 	renderProcess.setWorkingDirectory(destDirString); //for the shaders/maps reference
-	//renderProcess.setEnvironment(aqsisEnv);
-  QString toRun = aqsisBinDirString +"/"+aqsisFileName[AQSIS] + " -progress -progressformat=%p "+ mainFileName();
+  renderProcess.setProcessEnvironment(env);
+  QString toRun = aqsisBinDirString +"/"+aqsisFileName[AQSIS] + " -progress " /*+"\"-progressformat=%p\" "*/+ mainFileName();
 	qDebug("Runnig aqsis command: %s", qPrintable(toRun));
 	//every time the render process write a message, receive a signal
 	worldBeginRendered = 1; lastCb = 0;
@@ -452,7 +456,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	if(par.getBool("ShowResult")) {
 		QProcess piqslProcess;
 		piqslProcess.setWorkingDirectory(destDirString);
-		//piqslProcess.setEnvironment(aqsisEnv);
+    piqslProcess.setProcessEnvironment(env);
     toRun = aqsisBinDirString +"/" + aqsisFileName[PIQSL];
 		//if there'isnt image, it stops before...
 		foreach(QString img, imagesRendered) {
@@ -479,23 +483,30 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 
 void FilterHighQualityRender::updateOutputProcess() {
 	//a thread for each signal => working with signal disabled
-	disconnect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
+  //disconnect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
 	//the format is a number which say the percentage (maybe more that one)
 	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
-	//qDebug("aqsis.exe output: %s",qPrintable(out));
-	out = QStringList(out.trimmed().split(' ')).last(); //take only the last
-	//qDebug("aqsis output taken: %s",qPrintable(out));
-	int currentCb = int(out.toFloat());
+  qDebug("aqsis.exe output: %s",qPrintable(out));
+
+  QStringList TokenList(out.trimmed().split(' '));
+  QStringList TokenList2 = TokenList.filter(QRegExp("[0-9][0-9]"));
+  if(TokenList2.size()>0) out = TokenList2.at(0);//take only the first
+ // if(out.right(1) =="%")
+  out.chop(1);
+  qDebug("aqsis output taken: %s",qPrintable(out));
+
+  int currentCb = int(out.toFloat());
 	if(currentCb < lastCb)
 		worldBeginRendered++;
 	QString msg = "Rendering image with Aqsis (pass: " +
 		QString::number(worldBeginRendered) + "/" + QString::number(numOfWorldBegin) + ")";
 	int value = int( (100 * (worldBeginRendered - 1) + currentCb ) / numOfWorldBegin );
-	cb(value, qPrintable(msg)); //update progress bar
+  //cb(value, qPrintable(msg)); //update progress bar
+  qDebug("cb %i, '%s'",value,qPrintable(msg));
 	//qDebug("cb value: worldBeginRendered %i last %i current %i effective %i" ,worldBeginRendered,lastCb,currentCb,value);
 	lastCb = currentCb;
 	//restore the signal handling
-	connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
+  //connect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
 }
 
 void FilterHighQualityRender::errSgn() {
