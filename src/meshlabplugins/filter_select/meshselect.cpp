@@ -121,6 +121,11 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 				parlst.addParam(new RichDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f,  tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
 			}
 			break;
+			case FP_SELECT_INVERT:
+			{
+				 parlst.addParam(new RichBool("InvFaces", true, "Invert Faces", "If true the filter will invert the selected faces."));
+				 parlst.addParam(new RichBool("InvVerts", true, "Invert Vertices", "If true the filter will invert the selected vertices."));
+			}
 		}
 }
 
@@ -164,8 +169,10 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
       tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
       tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   break;
   case FP_SELECT_INVERT :
-      tri::UpdateSelection<CMeshO>::InvertVertex(m.cm);
-      tri::UpdateSelection<CMeshO>::InvertFace(m.cm);  break;
+	  if (par.getBool("InvVerts"))
+		tri::UpdateSelection<CMeshO>::InvertVertex(m.cm);
+	  if (par.getBool("InvFaces"))
+		tri::UpdateSelection<CMeshO>::InvertFace(m.cm);  break;
   case FP_SELECT_ERODE  : tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
                           tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm); 
   break;
