@@ -278,7 +278,7 @@ void MainWindow::dropEvent ( QDropEvent * event )
 
 void MainWindow::delCurrentMesh()
 {
-	GLA()->meshDoc.delMesh(GLA()->meshDoc.mm());
+	GLA()->meshDoc->delMesh(GLA()->meshDoc->mm());
 	//stddialog->hide();
 	GLA()->updateGL();
 	updateMenus();
@@ -578,7 +578,7 @@ void MainWindow::applyRenderMode()
 
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	iRenderTemp->Init(action,GLA()->meshDoc,GLA()->getCurrentRenderMode(),GLA());
+	iRenderTemp->Init(action,*(GLA()->meshDoc),GLA()->getCurrentRenderMode(),GLA());
 
 	if(action->text() == tr("None"))
 	{
@@ -707,7 +707,7 @@ void MainWindow::saveProject()
 		lastUsedDirectory.setPath(path);
 	}
 
-	MeshDocument &meshDoc=GLA()->meshDoc;
+	MeshDocument &meshDoc=*(GLA()->meshDoc);
 	vector<string> meshNameVector;
 	vector<Matrix44f> transfVector;
 
@@ -826,7 +826,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				if(mdiarea->currentSubWindow()==0){
 					    mvcont = new MultiViewer_Container(mdiarea); 
 						int id = mvcont->getNextViewerId();
-                        gla=new GLArea(mdiarea,&currentGlobalParams,id);		
+						gla=new GLArea(mdiarea,&currentGlobalParams,id, &(mvcont->meshDoc));		
 						mvcont->addView(gla);
                         //addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 						newGla =true;
@@ -865,8 +865,8 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 							pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 						}
 					
-					gla->meshDoc.busy=true;
-					gla->meshDoc.addNewMesh(qPrintable(fileName),mm);
+					gla->meshDoc->busy=true;
+					gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
                     gla->setFileName(mm->shortName());
@@ -923,7 +923,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 					if(delVertNum>0 || delFaceNum>0 )
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-					GLA()->meshDoc.busy=false;
+					GLA()->meshDoc->busy=false;
 					if(newGla) GLA()->resetTrackBall();
 				}
 			}
@@ -1110,17 +1110,15 @@ void MainWindow::setSplit()
 	  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
 	GLArea *glw =  (GLArea*)(mvc->currentView());
 	int id = mvc->getNextViewerId();
-    GLArea *glwClone=new GLArea(mdiarea,&currentGlobalParams,id);		
+	GLArea *glwClone=new GLArea(mdiarea,&currentGlobalParams,id, &(mvc->meshDoc));		
 	mvc->addView(glwClone);
 
 	//copia puntatori della lista di mesh
-	glwClone->meshDoc.busy=true;
+	/*glwClone->meshDoc.busy=true;
 	for each(MeshModel *mmp in glw->meshDoc.meshList)
 		glwClone->meshDoc.addNewMesh(mmp->fullName().toLatin1(), mmp);
 
 	glwClone->setFileName(glwClone->mm()->shortName());
-
-	//currentMesh?
 
 	int mask =0;
 	if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
@@ -1132,11 +1130,11 @@ void MainWindow::setSplit()
 	if(glw->mm()->cm.textures.empty())
 	{
 		glwClone->setTextureMode(GLW::TMPerWedgeMulti);
-	}
+	}*/
 
 	updateMenus();
 	
-	glwClone->meshDoc.busy=false;
+	/*glwClone->meshDoc.busy=false;*/
 	glwClone->resetTrackBall();
 	
 	glwClone->update();

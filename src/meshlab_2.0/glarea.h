@@ -69,7 +69,7 @@ class GLArea : public QGLWidget, public Viewer
 	Q_OBJECT
 
 public:
-    GLArea(QWidget *parent, RichParameterSet *current, int id);
+    GLArea(QWidget *parent, RichParameterSet *current, int id, MeshDocument *meshDoc);
 	~GLArea();
 	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 private:
@@ -78,8 +78,8 @@ private:
 public:
 	//LayerDialog *layerDialog;
   // Layer Management stuff. 
-	MeshDocument meshDoc;
-	MeshModel *mm(){return meshDoc.mm();}
+	MeshDocument *meshDoc;
+	MeshModel *mm(){return meshDoc->mm();}
  
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
@@ -174,6 +174,8 @@ public slots:
 signals:
 	void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
 	void glareaClosed();					//someone has closed the glarea
+
+	void currentViewerChanged(int currentId);         // set this viewer as current
   
 public slots:
 
