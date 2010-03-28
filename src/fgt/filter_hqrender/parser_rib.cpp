@@ -67,7 +67,7 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 						QString::number(par.getInt("FormatX")) + " " +
 						QString::number(par.getInt("FormatY")) + " " +
 						QString::number(par.getFloat("PixelAspectRatio"));
-	numOfWorldBegin = 0; //the number of world begin statement found (for progress bar)
+  numOfWorldBegin = 0; //the number of world begin statement found (for progress bar)
 	numOfObject = 0;
   bool foundDummy = false;
   bool solidBegin = false; //true only if define a dummy object
@@ -139,6 +139,8 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 				QStringList token = ribParser::splitStatement(&line);							
 				//create the path if needed
 				QString path = token[2];
+        if(path.startsWith('+.'))
+				  path = path.mid(2,path.size());
 				path = getDirFromPath(&path);
 				//qDebug("check dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
 				checkDir(&destDirString,&path);
@@ -158,13 +160,18 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 					line = "#" + line; //if there's a framebuffer will be open pqsl automatically									 
 				break;
 			}
+      case ribParser::SCREENWINDOW:
+      {
+        writeLine = false;
+        break;
+      }
       //a new world description (reset graphics state)
 			case ribParser::WORLDBEGIN:
 			{
 				numOfWorldBegin++;
 				//if there's another type of display the format is not change
 				if(!anyOtherDisplayType && currentDisplayTypeIsFile) {
-					fprintf(fout,"%s\n", qPrintable(newFormat));					
+					fprintf(fout,"%s\n", qPrintable(newFormat));
 				}
 				currentDisplayTypeIsFile = false;
 				anyOtherDisplayType = false;
@@ -427,11 +434,7 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
 	vcg::Matrix44f result = templateMatrix * alignMatrix * scaleMatrix * translateBBMatrix;
 	//write transformation matrix (after transpose it)
 	writeMatrix(fout, &result);
-	//write bounding box (not modified) /////VA MODIFICATO IL BB?????
-	/*QString bound = "Bound";
-	for(int i=0; i<6; i++)
-		bound += " " + QString::number(objectBound[i]);
-	fprintf(fout,"%s\n",qPrintable(bound));*/
+	//write bounding box
 	fprintf(fout,"Bound %g %g %g %g %g %g\n",
 		m->cm.trBB().min.X(), m->cm.trBB().max.X(),
 		m->cm.trBB().min.Y(), m->cm.trBB().max.Y(),

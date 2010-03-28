@@ -18,6 +18,7 @@ public:
 		OPTION,
     PROCEDURAL,
 		READARCHIVE,
+    SCREENWINDOW,
     SOLIDBEGIN,
     SOLIDEND,
 		SURFACE,
@@ -112,7 +113,7 @@ public:
 		proc->insert("ReverseOrientation", ribParser::OTHER);
 		proc->insert("Rotate", ribParser::OTHER);
 		proc->insert("Scale", ribParser::OTHER);
-		proc->insert("ScreenWindow", ribParser::OTHER);
+    proc->insert("ScreenWindow", ribParser::SCREENWINDOW);
 		proc->insert("ShadingInterpolation", ribParser::OTHER);
 		proc->insert("ShadingRate", ribParser::OTHER);
 		proc->insert("Shutter", ribParser::OTHER);
