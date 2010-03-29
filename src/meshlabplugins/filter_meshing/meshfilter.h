@@ -66,6 +66,7 @@ public:
      FP_REFINE_HALF_CATMULL,
      FP_QUAD_PAIRING,
      FP_FAUX_CREASE,
+	 FP_VATTR_SEAM
  } ;
 
 
