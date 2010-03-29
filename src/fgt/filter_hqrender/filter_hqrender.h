@@ -85,7 +85,7 @@ private:
   QStack<QString> surfaceShaderStack;
   float objectBound[6]; // xmin, xmax, ymin, ymax, zmin, zmax
 
-  bool makeScene(MeshModel* m, QStringList* textureList, RichParameterSet &par, QString templatePath, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);
+  bool makeScene(MeshModel* m, QStringList* textureList, RichParameterSet &par, QFileInfo* templateFile, QString destDirString, QStringList* shaderDirs, QStringList* textureDirs, QStringList* proceduralDirs, QStringList* imagesRendered);
   QString convertObject(int currentFrame, QString destDir, MeshModel* m, RichParameterSet &par, QStringList* textureList);
   bool resetBound();
   bool resetGraphicsState();

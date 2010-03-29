@@ -22,7 +22,7 @@ FilterHighQualityRender::FilterHighQualityRender()
   templatesDir = PluginManager::getBaseDirPath();
 
   if(!templatesDir.cd("render_template")) {
-	qDebug("Error. I was expecting to find the render_template dir. Now i am in dir %s",qPrintable(templatesDir.absolutePath()));
+	  qDebug("Error. I was expecting to find the render_template dir. Now i am in dir %s",qPrintable(templatesDir.absolutePath()));
     ;//this->errorMessage = "\"render_template\" folder not found";
   }
 
@@ -117,15 +117,14 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 			//update the template list
 			templates = QStringList();
 			foreach(QString subDir, templatesDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        //foreach directory, search a file with the same name
 				QString temp(templatesDir.absolutePath() + QDir::separator() + subDir + QDir::separator() + subDir + ".rib");
 				if(QFile::exists(temp))
 					templates << subDir;
 			}
 			if(templates.isEmpty())
-			{
-				this->errorMessage = "No template scene has been found in \"render_template\" directory";
-				qDebug(qPrintable(this->errorMessage));
-			}
+			  qDebug("No template scene has been found in \"render_template\" directory");
+
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene",
         "Select the scene where the loaded mesh will be drawed in."));			
 			parlst.addParam(new RichString("ImageName", "default", "Name of output image",
@@ -157,9 +156,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
   //***check if the AqsisBinPathParam() parameter it's correct***
-  //assert(par.hasParameter(AqsisBinPathParam()));
   QString aqsisBinDirString = par.getString(AqsisBinPathParam());
-  //QString aqsisBinDirString = defaultAqsisBinPath();
   QDir aqsisBinDir = QDir(aqsisBinDirString);
   qDebug("Presumed Aqsis directory: %s", qPrintable(aqsisBinDir.absolutePath()));
   if(!aqsisBinDir.exists()) {
@@ -192,9 +189,8 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 		return false;
 	}
 	QString templateName = templates.at(par.getEnum("scene")); //name of selected template
-	QDir templateDir(templatesDir.absolutePath() + QDir::separator() + templateName); //dir of selected template (in string)
-  QString templatePath = templateDir.absolutePath() + QDir::separator() + templateName + ".rib";
-
+	QFileInfo templateFile = QFileInfo(templatesDir.absolutePath() + QDir::separator() + templateName + QDir::separator() + templateName + ".rib");
+  
 	//directory of current mesh
 	QString meshDirString = m->pathName();
 	
@@ -222,30 +218,27 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	int k = 0;
 	while(destDir.cd(newDir)) {
 		destDir.cdUp();
-		newDir = templateName + "(" + QString::number(++k) + ")"; //dir templateName+k
+		newDir = templateName + " - " + QFileInfo(m->fullName()).completeBaseName() + "(" + QString::number(++k) + ")"; //dir templateName+k
 	}
 	if(!destDir.mkdir(newDir) || !destDir.cd(newDir)) {
 		this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
 		return false;
 	}
 
-	//destination diretory (+ main file	?)
+	//destination diretory
 	QString destDirString = destDir.absolutePath();
 
 	//***Texture: take the list of texture mesh
 	QStringList textureListPath = QStringList();
-  QStringList textureListName = QStringList();
 	for(int i=0; i<m->cm.textures.size(); i++) {
     QString path = QString(m->cm.textures[i].c_str());
 		textureListPath << path;
-    QString name = path.right(path.size() - 1 - std::max<int>(path.lastIndexOf('\\'),path.lastIndexOf('/')));
-    textureListName << name.left(name.indexOf('.'));
 	}
 	
 	//***read the template files and create the new scenes files
 	QStringList shaderDirs, textureDirs, proceduralDirs, imagesRendered;
 	qDebug("Starting reading cycle %i",tt.elapsed());
-  if(!makeScene(m, &textureListName, par, templatePath, destDirString, &shaderDirs, &textureDirs, &proceduralDirs, &imagesRendered))
+  if(!makeScene(m, &textureListPath, par, &templateFile, destDirString, &shaderDirs, &textureDirs, &proceduralDirs, &imagesRendered))
 		return false; //message already set
 	qDebug("Cycle ending at %i",tt.elapsed());
 	Log(GLLogStream::FILTER,"Successfully created scene");
@@ -257,9 +250,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	}
 
 	//***copy the rest of template files (shaders, textures, procedural..)
-	copyFiles(&templateDir, &destDir, &textureDirs);
-	copyFiles(&templateDir, &destDir, &shaderDirs);
-	copyFiles(&templateDir, &destDir, &proceduralDirs);
+	copyFiles(&templateFile.dir(), &destDir, &textureDirs);
+	copyFiles(&templateFile.dir(), &destDir, &shaderDirs);
+	copyFiles(&templateFile.dir(), &destDir, &proceduralDirs);
 	qDebug("Copied needed file at %i",tt.elapsed());
 	
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -274,41 +267,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
       env.insert("PATH", "/Applications/Aqsis.app/Contents/Resources/bin:"+env.value("PATH"));
 		 }
   #endif
-	/*
-	QString aqsisDir;
-	bool found = false;
-	foreach(QString envElem, aqsisEnv) { //looking for (AQSISHOME|PATH) variable
-		if(envElem.contains("AQSISHOME", Qt::CaseInsensitive)) { //old version of aqsis? (1.4)
-			qDebug("founded environment variable value: %s", qPrintable(envElem));
-			aqsisDir = envElem.remove("AQSISHOME=", Qt::CaseInsensitive); //the string is "AQSISHOME='path'"
-			qDebug("aqsis directory: %s", qPrintable(aqsisDir));
-			found = true;
-			break;
-		}
-		if(envElem.startsWith("PATH=", Qt::CaseInsensitive)) { //aqsis 1.6
-			qDebug("founded environment variable value: %s", qPrintable(envElem));
-			QStringList pathlist = envElem.remove("PATH=", Qt::CaseInsensitive).split(';');
-			foreach(QString str, pathlist) {
-				if(str.contains("aqsis", Qt::CaseInsensitive)) { //is it enough?
-					qDebug("founded environment variable value: %s", qPrintable(str));
-					aqsisDir = str;
-					qDebug("aqsis directory: %s", qPrintable(aqsisDir));
-					found = true;
-					break;
-				}
-			}
-			if(found) break;
-		}
-	}
-	if(!found) {
-		this->errorMessage = "Aqsis is not installed correctly";
-		return false;
-	}
-	if(!aqsisDir.contains("bin"))
-		aqsisDir += QDir::separator() + aqsisBinPath();
-*/
 
-;
 	//***compile the shaders with current aqsis shader compiler version
 	foreach(QString dirStr, shaderDirs) {
 		if(destDir.exists(dirStr)) {
@@ -343,11 +302,9 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	
 	//***all mesh textures are copied in a textures directory and are converted to tiff format, then to renderman format
 	if(textureListPath.count() > 0) {
-	//(*******multi-texture not supported!The plugin copies and converts only the first texture***********)
-	//foreach(QString textureName, textureList) {
-		QString texturePath = textureListPath.first(); //it's a texture path...
-    QString textureName = textureListName.first(); //just texture name
-    QFile srcFile(meshDirString + QDir::separator() + texturePath);
+	//(IMPORTANT: multi-texture not supported!The plugin copies and converts only the first texture)
+		QString textureName = QFileInfo(textureListPath.first()).completeBaseName(); //just texture name
+    QFile srcFile(meshDirString + QDir::separator() + textureListPath.first());
 
 		//destination directory it's the first readable/writable between textures directories
 		QString newImageDir = ".";
@@ -418,7 +375,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	QString imageFormatString = imageFormatsSupported.at(imageFormat);	
 	int n = numberOfCiphers(imagesRendered.size());//n is the ciphers number of imagesRendered.size()
 	for(int i = 0; i < imagesRendered.size(); i++) {
-		QString currentImage = destDir.absolutePath() + QDir::separator() + imagesRendered.at(i);
+		QString currentImage = destDirString + QDir::separator() + imagesRendered.at(i);
 		qDebug("rendering result image position: %s", qPrintable(currentImage));
 		QImage image;
 		if(!image.load(currentImage)) {
@@ -463,7 +420,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 		piqslProcess.waitForFinished(-1); //no check error...
 		piqslProcess.terminate();
 	}
-	//**only now we can delete recursively all created files (if it's required)
+	//***only now we can delete recursively all created files (if it's required)
 	if(delRibFiles) {
 		QString dirName = destDir.dirName();
 		QDir temp = destDir;

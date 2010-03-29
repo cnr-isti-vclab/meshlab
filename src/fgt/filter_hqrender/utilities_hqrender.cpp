@@ -1,13 +1,5 @@
 #include "utilities_hqrender.h"
 
-//path must have the filename
-QString UtilitiesHQR::getDirFromPath(const QString* path) {
-	//return path->left(path->lastIndexOf(QDir::separator())); //don't work :/
-	if(path->lastIndexOf('\\') == -1 && path->lastIndexOf('/') == -1)
-		return ".";
-	return path->left(std::max<int>(path->lastIndexOf('\\'),path->lastIndexOf('/')));
-}
-
 //if path contains a space, is wrapped in quotes (e.g. ..\"Program files"\..)	
 QString UtilitiesHQR::quotesPath(const QString* path) {
 	QStringList dirs = path->split(QDir::separator());
@@ -26,15 +18,7 @@ QString UtilitiesHQR::quotesPath(const QString* path) {
 //if dir not exist, create it
 bool UtilitiesHQR::checkDir(const QString* destDirString, const QString* path) {
 	QDir destDir(*destDirString);
-	QStringList pathDirs = path->split('/');
-	foreach(QString dir, pathDirs) {
-		if(!destDir.cd(dir)) {
-			destDir.mkdir(dir);
-			destDir.cd(dir);
-			qDebug("created: %s", qPrintable(destDir.absolutePath()));	
-		}
-	}
-	return true;
+  return destDir.mkpath(QString(*path));
 }
 
 //take all files in fromDir/[dirs] directories and copy them in dest/[dirs]

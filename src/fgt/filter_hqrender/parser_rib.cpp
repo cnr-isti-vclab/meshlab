@@ -30,7 +30,7 @@ bool FilterHighQualityRender::resetGraphicsState() {
 bool FilterHighQualityRender::makeScene(MeshModel* m,
 									   QStringList* textureList,
 									   RichParameterSet &par,
-									   QString templatePath,
+                     QFileInfo* templateFile,
 									   QString destDirString,
 									   QStringList* shaderDirs,
 									   QStringList* textureDirs,
@@ -39,10 +39,12 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 {
   
   //rib file structure
-  RibFileStack files(getDirFromPath(&templatePath)); //constructor
+
+  //RibFileStack files(getDirFromPath(&templatePath)); //constructor
+  RibFileStack files(templateFile->absolutePath()); //constructor
 	//open file and stream
-	if(!files.pushFile(&templatePath)) {
-		this->errorMessage = "Template path is wrong: " + templatePath;
+	if(!files.pushFile(&templateFile->absoluteFilePath())) {
+		this->errorMessage = "Template path is wrong: " + templateFile->absoluteFilePath();
 		return false;
 	}
 	
@@ -117,7 +119,7 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 				QString path = token[2]; //for MakeTexture, MakeShadow, MakeLatLongEnvironment
 				if(statementType == ribParser::MAKECUBEFACEENVIRONMENT)
 					path = token[7];
-				path = getDirFromPath(&path);
+				path = QFileInfo(path).path();
 				//qDebug("check dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
 				checkDir(&destDirString,&path);
 				break;
@@ -141,7 +143,7 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
 				QString path = token[2];
         if(path.startsWith('+.'))
 				  path = path.mid(2,path.size());
-				path = getDirFromPath(&path);
+				path = QFileInfo(path).path();
 				//qDebug("check dir! line: %s\npath: %s",qPrintable(line),qPrintable(path));
 				checkDir(&destDirString,&path);
 
@@ -450,7 +452,7 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
 		//foreach(QString textureName, *textureList) {
 
 		//read only the first texture
-		QString textureName = textureList->first();
+		QString textureName = QFileInfo(textureList->first()).completeBaseName();
     fprintf(fout,"Surface \"paintedplastic\" \"Kd\" 1.0 \"Ks\" 0.0 \"texturename\" [\"%s.tx\"]\n", qPrintable(textureName));								
 	}
 	//geometry
