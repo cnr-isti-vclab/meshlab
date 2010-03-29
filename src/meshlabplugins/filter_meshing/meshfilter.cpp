@@ -1000,6 +1000,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			vcg::tri::AttributeSeam::ASExtract<CMeshO, CMeshO> vExtract(mask);
 			vcg::tri::AttributeSeam::ASCompare<CMeshO>         vCompare(mask);
 			const bool r = vcg::tri::AttributeSeam::SplitVertex(m.cm, vExtract, vCompare);
+			m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
+			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
+			m.clearDataMask(MeshModel::MM_VERTFLAGBORDER);
 			return r;
 		}
 	}
