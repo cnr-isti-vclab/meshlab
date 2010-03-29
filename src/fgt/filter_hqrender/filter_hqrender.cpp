@@ -186,6 +186,11 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	QTime tt; tt.start(); //time for debuging
 	qDebug("Starting apply filter");
 
+  if(templates.isEmpty()) //there aren't any template
+	{
+	  this->errorMessage = "No template scene has been found in \"render_template\" directory";
+		return false;
+	}
 	QString templateName = templates.at(par.getEnum("scene")); //name of selected template
 	QDir templateDir(templatesDir.absolutePath() + QDir::separator() + templateName); //dir of selected template (in string)
   QString templatePath = templateDir.absolutePath() + QDir::separator() + templateName + ".rib";
@@ -205,31 +210,21 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 		//destDir = QDir(par.getSaveFileName("SceneName"));
 		destDir = QDir(meshDirString);
 	}
-	//create scene directory
+	//create scene directory if don't exists
 	if(!destDir.cd("scene")) {
-		if(destDir.mkdir("scene")) {
-			if(!destDir.cd("scene")) {
-				this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
-				return false;
-			}
-		}
-		else {
+    if(!destDir.mkdir("scene") || !destDir.cd("scene")) {
 			this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
 			return false;
-		}
+		}		
 	}
 	//create a new directory with template name
-	QString newDir = templateName;
+	QString newDir = templateName + " - " + QFileInfo(m->fullName()).completeBaseName();
 	int k = 0;
 	while(destDir.cd(newDir)) {
 		destDir.cdUp();
-		newDir = templateName + QString::number(++k); //dir templateName+k
+		newDir = templateName + "(" + QString::number(++k) + ")"; //dir templateName+k
 	}
-	if(!destDir.mkdir(newDir)) {
-		this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
-		return false;
-	}
-	if(!destDir.cd(newDir)) {
+	if(!destDir.mkdir(newDir) || !destDir.cd(newDir)) {
 		this->errorMessage = "Creating scene directory at " + destDir.absolutePath();
 		return false;
 	}
@@ -417,7 +412,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 	//if process Aqsis is stopped, no image are created
 	qDebug("aqsis process finished");
 	
-	//**copy the rendering result image in mesh folder (maybe a set of file)
+	//***copy the rendering result image in mesh folder (maybe a set of file)
 	QString finalImage = meshDirString + QDir::separator() + imageName;
 	qDebug("final image position: %s", qPrintable(finalImage));
 	QString imageFormatString = imageFormatsSupported.at(imageFormat);	
@@ -486,14 +481,14 @@ void FilterHighQualityRender::updateOutputProcess() {
   //disconnect(&renderProcess, SIGNAL(readyReadStandardOutput()),this, SLOT(updateOutputProcess()));
 	//the format is a number which say the percentage (maybe more that one)
 	QString out = QString::fromLocal8Bit(renderProcess.readAllStandardOutput().data());
-  qDebug("aqsis.exe output: %s",qPrintable(out));
+  //qDebug("aqsis.exe output: %s",qPrintable(out));
 
   QStringList TokenList(out.trimmed().split(' '));
   QStringList TokenList2 = TokenList.filter(QRegExp("[0-9][0-9]"));
   if(TokenList2.size()>0) out = TokenList2.at(0);//take only the first
  // if(out.right(1) =="%")
   out.chop(1);
-  qDebug("aqsis output taken: %s",qPrintable(out));
+  //qDebug("aqsis output taken: %s",qPrintable(out));
 
   int currentCb = int(out.toFloat());
 	if(currentCb < lastCb)
@@ -501,8 +496,8 @@ void FilterHighQualityRender::updateOutputProcess() {
 	QString msg = "Rendering image with Aqsis (pass: " +
 		QString::number(worldBeginRendered) + "/" + QString::number(numOfWorldBegin) + ")";
 	int value = int( (100 * (worldBeginRendered - 1) + currentCb ) / numOfWorldBegin );
-  //cb(value, qPrintable(msg)); //update progress bar
-  qDebug("cb %i, '%s'",value,qPrintable(msg));
+  cb(value, qPrintable(msg)); //update progress bar
+  //qDebug("cb %i, '%s'",value,qPrintable(msg));
 	//qDebug("cb value: worldBeginRendered %i last %i current %i effective %i" ,worldBeginRendered,lastCb,currentCb,value);
 	lastCb = currentCb;
 	//restore the signal handling
