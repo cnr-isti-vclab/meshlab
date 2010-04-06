@@ -233,7 +233,11 @@ void MainWindow::createActions()
 
 	resetTrackBallAct = new QAction (tr("Reset &Trackball"), this);
 	resetTrackBallAct->setShortcutContext(Qt::ApplicationShortcut);
-	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
+#if defined(Q_OS_MAC)
+  resetTrackBallAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_H);
+#else
+  resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
+#endif
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
 	showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
