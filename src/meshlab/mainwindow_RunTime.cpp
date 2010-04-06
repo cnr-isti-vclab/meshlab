@@ -959,11 +959,25 @@ bool MainWindow::saveAs(QString fileName)
 
 	QHash<QString, MeshIOInterface*> allKnownFormats;
 
-    PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
+  PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
+  MeshModel *mmm=GLA()->mm();
 
-	if (fileName.isEmpty())
-        fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->shortName(), filters.join("\n"));
-	
+  QString defaultExt = "*." + mmm->suffixName().toLower();
+  if(defaultExt == "*.") defaultExt = "*.ply";
+
+  QFileDialog saveDialog(this,tr("Save Current Layer"), mmm->fullName());
+  saveDialog.setNameFilters(filters);
+  saveDialog.setAcceptMode(QFileDialog::AcceptSave);
+  QStringList matchingExtensions=filters.filter(defaultExt);
+  if(!matchingExtensions.isEmpty())
+    saveDialog.selectNameFilter(matchingExtensions.last());
+
+ if (fileName.isEmpty()){
+   int dialogRet = saveDialog.exec();
+   if(dialogRet==QDialog::Rejected	) return false;
+    fileName=saveDialog.selectedFiles ().first();
+  }
+
 	bool ret = false;
 
 	QStringList fs = fileName.split(".");

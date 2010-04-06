@@ -224,6 +224,7 @@ public:
   const QString fullName() const {return fullPathFileName;};
   const QString shortName() const;
   const QString pathName() const {QFileInfo fi(fullName()); return fi.absolutePath();};
+  const QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();};
 
   void setFileName(QString newFileName) {fullPathFileName = newFileName;}
 public:
