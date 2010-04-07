@@ -52,7 +52,6 @@ class GLArea;
     class MainWindowInterface
     {
     public:
-            //isPreview tells whether this execution is being used to produce or preview a result
             virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){};
     };
 
@@ -65,9 +64,9 @@ class MeshLabInterface
 public:
 	typedef int FilterIDType;
 	MeshLabInterface() :log(0) {}; 
-
+private:
 	GLLogStream *log;	
-	
+public:
 	
 	/// Standard stuff that usually should not be redefined. 
 	void setLog(GLLogStream *log) { this->log = log ; }
@@ -358,9 +357,6 @@ public:
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*par*/) {}
 	virtual void initParameterSet(QAction *filter,MeshDocument &md, RichParameterSet &par) 
 	{initParameterSet(filter,*(md.mm()),par);}
-
-  /// Standard stuff that usually should not be redefined. 
-	void setLog(GLLogStream *log) { this->log = log ; }
 		
 	/// This function is invoked by the framework when the apply filter fails to give some info to the user about the fiter failure
 	/// Filters should avoid using QMessageBox for reporting errors. 

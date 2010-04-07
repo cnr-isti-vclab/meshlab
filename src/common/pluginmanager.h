@@ -6,9 +6,9 @@
 class PluginManager
 {
 public:
-    PluginManager();
-enum TypeIO{IMPORT,EXPORT};
-        void loadPlugins(RichParameterSet& defaultGlobal);
+  PluginManager();
+  enum TypeIO{IMPORT,EXPORT};
+  void loadPlugins(RichParameterSet& defaultGlobal);
 
 	inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
 	inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
@@ -17,7 +17,7 @@ enum TypeIO{IMPORT,EXPORT};
 	inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
 	void LoadFormats(QStringList &filters, QHash<QString, MeshIOInterface*> &allKnownFormats, int type);
 	static QString getPluginDirPath();
-    static QString getBaseDirPath();
+  static QString getBaseDirPath();
 
 	QDir pluginsDir;
 	QMap<QString,QAction*> actionFilterMap;
@@ -29,7 +29,7 @@ enum TypeIO{IMPORT,EXPORT};
 	QVector<QAction *> editActionList;
 	QVector<QAction *> decoratorActionList;
 
-        QStringList pluginsLoaded;
+  QStringList pluginsLoaded;
 };
 
 #endif // PLUGINMANAGER_H
