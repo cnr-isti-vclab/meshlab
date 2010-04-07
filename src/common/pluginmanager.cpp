@@ -24,31 +24,24 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(pluginfilters);
 	
-    qDebug( "Current Plugins Dir is: %s ",qPrintable(pluginsDir.absolutePath()));
+  qDebug( "Current Plugins Dir is: %s ",qPrintable(pluginsDir.absolutePath()));
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) 
 	{
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
 		if (plugin) 
 		{
-                    pluginsLoaded.push_back(fileName);
-                    MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+      pluginsLoaded.push_back(fileName);
+      MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
 			{
-				QAction *filterAction;
-				foreach(filterAction, iFilter->actions())
+        meshFilterPlug.push_back(iFilter);
+        foreach(QAction *filterAction, iFilter->actions())
 				{
 					actionFilterMap.insert(filterAction->text(),filterAction);
 					iFilter->initGlobalParameterSet(filterAction,defaultGlobal);
-					//filterAction->setToolTip(iFilter->filterInfo(filterAction));
-					//connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
-					// if(fp) 
-					//	 fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));	
 				}
-
-				meshFilterPlug.push_back(iFilter);
 			}
-			
 
 			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
 			if (iIO) 
@@ -58,38 +51,26 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 			if (iDecorator)
 			{
 				meshDecoratePlug.push_back(iDecorator);
-
-				QAction *decoratorAction;
-				foreach(decoratorAction, iDecorator->actions())
+        foreach(QAction *decoratorAction, iDecorator->actions())
 				{
-					//actionMap.insert(decoratorAction->name(),decoratorAction);
 					editActionList.push_back(decoratorAction);
 					iDecorator->initGlobalParameterSet(decoratorAction,defaultGlobal);
-					//connect(decoratorAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
-					//decoratorAction->setToolTip(iDecorator->Info(decoratorAction));
-					//renderMenu->addAction(decoratorAction);
 				}
 			}
 
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 			if (iRender)
-				//addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 				meshRenderPlug.push_back(iRender);
-
 			
 			MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
-            //QAction *editAction = 0;
 			if(iEditFactory)
 			{
-				//qDebug() << "Here with filename:" << fileName;
 				meshEditInterfacePlug.push_back(iEditFactory);
 				foreach(QAction* editAction, iEditFactory->actions())
 					editActionList.push_back(editAction);
 			}
 		}
 	}
-
-
 }
 
 QString PluginManager::getBaseDirPath()
