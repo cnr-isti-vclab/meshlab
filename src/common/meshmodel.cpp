@@ -93,7 +93,7 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 
 	return true;
 }
-bool MeshModel::Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm)
+bool MeshModel::Render(GLW::DrawMode _dm, GLW::ColorMode _cm, GLW::TextureMode _tm)
   {
       // Needed to be defined here for splatrender as long there is no "MeshlabCore" library.
       using namespace vcg;
@@ -203,7 +203,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
     if(changeMask & MeshModel::MM_VERTCOLOR)
     {
         vertColor.resize(m->cm.vert.size());
-        std::vector<vcg::Color4b>::iterator ci;
+        std::vector<Color4b>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
             if(!(*vi).IsD()) (*ci)=(*vi).C();
@@ -212,7 +212,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
     if(changeMask & MeshModel::MM_VERTCOORD)
     {
         vertCoord.resize(m->cm.vert.size());
-        std::vector<vcg::Point3f>::iterator ci;
+        std::vector<Point3f>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
              if(!(*vi).IsD()) (*ci)=(*vi).P();
@@ -221,7 +221,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
     if(changeMask & MeshModel::MM_VERTNORMAL)
     {
         vertNormal.resize(m->cm.vert.size());
-        std::vector<vcg::Point3f>::iterator ci;
+        std::vector<Point3f>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
              if(!(*vi).IsD()) (*ci)=(*vi).N();
@@ -255,7 +255,7 @@ bool MeshModelState::apply(MeshModel *_m)
     if(changeMask & MeshModel::MM_VERTCOLOR)
     {
         if(vertColor.size() != m->cm.vert.size()) return false;
-        std::vector<vcg::Color4b>::iterator ci;
+        std::vector<Color4b>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
             if(!(*vi).IsD()) (*vi).C()=(*ci);
@@ -264,7 +264,7 @@ bool MeshModelState::apply(MeshModel *_m)
     if(changeMask & MeshModel::MM_VERTCOORD)
     {
         if(vertCoord.size() != m->cm.vert.size()) return false;
-        std::vector<vcg::Point3f>::iterator ci;
+        std::vector<Point3f>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
             if(!(*vi).IsD()) (*vi).P()=(*ci);
@@ -273,13 +273,13 @@ bool MeshModelState::apply(MeshModel *_m)
     if(changeMask & MeshModel::MM_VERTNORMAL)
     {
         if(vertNormal.size() != m->cm.vert.size()) return false;
-        std::vector<vcg::Point3f>::iterator ci;
+        std::vector<Point3f>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci=vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
             if(!(*vi).IsD()) (*vi).N()=(*ci);
 
         //now reset the face normals
-        vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
+        tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
     }
 
     if(changeMask & MeshModel::MM_FACEFLAGSELECT)
@@ -319,4 +319,83 @@ bool MeshModelState::apply(MeshModel *_m)
 const QString MeshModel::shortName() const
 {
     return QFileInfo(fullPathFileName).fileName();
+}
+
+
+/**** DATAMASK STUFF ****/
+
+bool MeshModel::hasDataMask(const int maskToBeTested) const
+{
+  return ((currentDataMask & maskToBeTested)!= 0);
+}
+  void MeshModel::updateDataMask(MeshModel *m)
+{
+  updateDataMask(m->currentDataMask);
+}
+
+void MeshModel::updateDataMask(int neededDataMask)
+{
+  if( ( (neededDataMask & MM_FACEFACETOPO)!=0) && !hasDataMask(MM_FACEFACETOPO) )
+  {
+    cm.face.EnableFFAdjacency();
+    tri::UpdateTopology<CMeshO>::FaceFace(cm);
+  }
+  if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && !hasDataMask(MM_VERTFACETOPO) )
+  {
+    cm.vert.EnableVFAdjacency();
+    cm.face.EnableVFAdjacency();
+    tri::UpdateTopology<CMeshO>::VertexFace(cm);
+  }
+  if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0)	&& !hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.EnableWedgeTex();
+  if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
+  if( ( (neededDataMask & MM_FACEQUALITY)!=0)		&& !hasDataMask(MM_FACEQUALITY))		cm.face.EnableQuality();
+  if( ( (neededDataMask & MM_FACEMARK)!=0)			&& !hasDataMask(MM_FACEMARK))				cm.face.EnableMark();
+  if( ( (neededDataMask & MM_VERTMARK)!=0)			&& !hasDataMask(MM_VERTMARK))				cm.vert.EnableMark();
+  if( ( (neededDataMask & MM_VERTCURV)!=0)			&& !hasDataMask(MM_VERTCURV))				cm.vert.EnableCurvature();
+  if( ( (neededDataMask & MM_VERTCURVDIR)!=0)		&& !hasDataMask(MM_VERTCURVDIR))		cm.vert.EnableCurvatureDir();
+  if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
+  if( ( (neededDataMask & MM_VERTTEXCOORD)!=0)  && !hasDataMask(MM_VERTTEXCOORD))		cm.vert.EnableTexCoord();
+
+  if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
+       ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
+  {
+    if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO))
+         tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
+    else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
+    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
+  }
+
+  currentDataMask |= neededDataMask;
+ }
+
+void MeshModel::clearDataMask(int unneededDataMask)
+{
+  if( ( (unneededDataMask & MM_VERTFACETOPO)!=0)	&& hasDataMask(MM_VERTFACETOPO)) {cm.face.DisableVFAdjacency();
+                                                                                    cm.vert.DisableVFAdjacency(); }
+  if( ( (unneededDataMask & MM_FACEFACETOPO)!=0)	&& hasDataMask(MM_FACEFACETOPO))	cm.face.DisableFFAdjacency();
+
+  if( ( (unneededDataMask & MM_WEDGTEXCOORD)!=0)	&& hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.DisableWedgeTex();
+  if( ( (unneededDataMask & MM_FACECOLOR)!=0)			&& hasDataMask(MM_FACECOLOR))			cm.face.DisableColor();
+  if( ( (unneededDataMask & MM_FACEQUALITY)!=0)		&& hasDataMask(MM_FACEQUALITY))		cm.face.DisableQuality();
+  if( ( (unneededDataMask & MM_FACEMARK)!=0)			&& hasDataMask(MM_FACEMARK))			cm.face.DisableMark();
+  if( ( (unneededDataMask & MM_VERTMARK)!=0)			&& hasDataMask(MM_VERTMARK))			cm.vert.DisableMark();
+  if( ( (unneededDataMask & MM_VERTCURV)!=0)			&& hasDataMask(MM_VERTCURV))			cm.vert.DisableCurvature();
+  if( ( (unneededDataMask & MM_VERTCURVDIR)!=0)		&& hasDataMask(MM_VERTCURVDIR))		cm.vert.DisableCurvatureDir();
+  if( ( (unneededDataMask & MM_VERTRADIUS)!=0)		&& hasDataMask(MM_VERTRADIUS))		cm.vert.DisableRadius();
+  if( ( (unneededDataMask & MM_VERTTEXCOORD)!=0)	&& hasDataMask(MM_VERTTEXCOORD))	cm.vert.DisableTexCoord();
+
+  currentDataMask = currentDataMask & (~unneededDataMask);
+}
+
+void MeshModel::Enable(int openingFileMask)
+{
+  if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD ) updateDataMask(MM_VERTTEXCOORD);
+  if( openingFileMask & tri::io::Mask::IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
+  if( openingFileMask & tri::io::Mask::IOM_VERTCOLOR    ) updateDataMask(MM_VERTCOLOR);
+  if( openingFileMask & tri::io::Mask::IOM_FACECOLOR    ) updateDataMask(MM_FACECOLOR);
+  if( openingFileMask & tri::io::Mask::IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
+  if( openingFileMask & tri::io::Mask::IOM_CAMERA       ) updateDataMask(MM_CAMERA);
+  if( openingFileMask & tri::io::Mask::IOM_VERTQUALITY  ) updateDataMask(MM_VERTQUALITY);
+  if( openingFileMask & tri::io::Mask::IOM_FACEQUALITY  ) updateDataMask(MM_FACEQUALITY);
+  if( openingFileMask & tri::io::Mask::IOM_BITPOLYGONAL ) updateDataMask(MM_POLYGONAL);
 }
