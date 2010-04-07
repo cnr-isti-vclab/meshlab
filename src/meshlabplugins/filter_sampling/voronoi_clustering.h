@@ -148,7 +148,7 @@ static void GetAreaAndFrontier(MeshType &m, PerVertexPointerHandle &sources,
 			if((*vi).IsV()) borderVec.push_back(&*vi);
 }		
 
-static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter, int percentileClamping, vcg::CallBackPos *cb=0)
+static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int relaxIter, int /*percentileClamping*/, vcg::CallBackPos *cb=0)
 {			
 	for(int iter=0;iter<relaxIter;++iter)
 	{
@@ -170,13 +170,13 @@ static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int
 		
 		// Smaller area region are discarded
 		Distribution<float> H;
-		for(int i=0;i<regionArea.size();++i)
+    for(size_t i=0;i<regionArea.size();++i)
 			if(regionArea[i].second) H.Add(regionArea[i].first);
 			
 		float areaThreshold;
 		if(iter==0) areaThreshold = H.Percentile(.1f);
 		else areaThreshold = H.Percentile(.001f);
-		qDebug("We have found %i regions range (%f %f), avg area is %f, Variance is %f 10perc is %f",seedVec.size(),H.Min(),H.Max(),H.Avg(),H.StandardDeviation(),areaThreshold);
+    qDebug("We have found %i regions range (%f %f), avg area is %f, Variance is %f 10perc is %f",(int)seedVec.size(),H.Min(),H.Max(),H.Avg(),H.StandardDeviation(),areaThreshold);
   
 		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: Searching New Seeds");
 			
@@ -195,7 +195,7 @@ static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int
 				}
 		}
 		std::vector<VertexPointer> newSeeds;
-		for(int i=0;i<seedMaxima.size();++i)
+    for(size_t i=0;i<seedMaxima.size();++i)
 			if(seedMaxima[i].second) 
 					{
 						seedMaxima[i].second->C() = Color4b::Gray;
@@ -204,15 +204,15 @@ static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int
 					}
 		
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);		
-		for(int i=0;i<seedVec.size();++i)
+    for(size_t i=0;i<seedVec.size();++i)
 			seedVec[i]->C() = Color4b::Black;
 		
-		for(int i=0;i<borderVec.size();++i)
+    for(size_t i=0;i<borderVec.size();++i)
 			borderVec[i]->C() = Color4b::Gray;
 		
 		swap(newSeeds,seedVec);
 		
-		for(int i=0;i<seedVec.size();++i)
+    for(size_t i=0;i<seedVec.size();++i)
 			seedVec[i]->C() = Color4b::White;
 
 		tri::Allocator<CMeshO>::DeletePerVertexAttribute (m,"sources");			
