@@ -280,6 +280,9 @@ void MainWindow::createActions()
 	setSplitAct = new QAction(tr("&Split view"),this);
 	connect(setSplitAct, SIGNAL(triggered()), this, SLOT(setSplit()));
 
+	setUnsplitAct = new QAction(tr("&Close current view"),this);
+	connect(setUnsplitAct, SIGNAL(triggered()), this, SLOT(setUnsplit()));
+
 	//////////////Action Menu About ///////////////////////////////////////////////////////////////////////////
 	aboutAct = new QAction(tr("&About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
@@ -456,6 +459,7 @@ void MainWindow::createMenus()
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
 	preferencesMenu->addAction(setCustomizeAct);
 	preferencesMenu->addAction(setSplitAct);
+	preferencesMenu->addAction(setUnsplitAct);
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));

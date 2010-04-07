@@ -225,8 +225,8 @@ void MainWindow::updateMenus()
 
 				setFancyLightingAct->setChecked(rm.fancyLighting);
 				setDoubleLightingAct->setChecked(rm.doubleSideLighting);
-        setSelectFaceRenderingAct->setChecked(rm.selectedFace);
-        setSelectVertRenderingAct->setChecked(rm.selectedVert);
+				setSelectFaceRenderingAct->setChecked(rm.selectedFace);
+				setSelectVertRenderingAct->setChecked(rm.selectedVert);
 
 				// Check only the active decorations
 				foreach (QAction *a,      PM.decoratorActionList){a->setChecked(false);a->setEnabled(true);}
@@ -242,6 +242,15 @@ void MainWindow::updateMenus()
 		foreach (QAction *a,PM.decoratorActionList)
 				a->setEnabled(false);
 
+	}
+
+	//Viewer
+	if(active) {
+		MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+		if(!mvc) 
+		  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+		setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
+		setSplitAct->setEnabled(mvc->viewerCounter()<6);
 	}
 
 	/*if(GLA())
@@ -1139,6 +1148,20 @@ void MainWindow::setSplit()
 	
 	glwClone->update();
 
+}
+
+void MainWindow::setUnsplit()
+{
+	if(mdiarea->currentSubWindow()==0) return;
+	MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+	if(!mvc) 
+	  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+
+	assert(mvc->viewerCounter() >1);
+
+	mvc->removeView(mvc->currentView()->getId());
+
+	updateMenus();
 }
 
 void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }

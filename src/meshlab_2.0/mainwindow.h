@@ -127,6 +127,7 @@ private slots:
 	///////////Slot Menu Preferences /////////////////
 	//void setCustomize();
 	void setSplit();
+	void setUnsplit();
 	///////////Slot Menu Help ////////////////////////
 	/*void about();
 	void aboutPlugins();*/
@@ -310,6 +311,8 @@ private:
 	///////////Actions Menu Preferences /////////////////
 	QAction *setCustomizeAct;
 	QAction *setSplitAct;
+	QAction *setUnsplitAct;
+
 	///////////Actions Menu Help ////////////////////////
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;
