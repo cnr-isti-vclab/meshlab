@@ -66,8 +66,8 @@ GLArea:: GLArea(QWidget *parent, RichParameterSet *current, int id, MeshDocument
 	nearPlane = .2f;
 	farPlane = 5.f;
 	pointSize = 2.0f;
-	//layerDialog = new LayerDialog(this);
-	//layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	//layerDialog = new LayerDialog(this); **
+	//layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea); **
     connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,

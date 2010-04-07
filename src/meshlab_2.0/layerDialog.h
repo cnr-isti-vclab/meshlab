@@ -1,8 +1,8 @@
 /****************************************************************************
 * MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
+* An extendible mesh processor                                    o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005, 2006                                          \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,65 +20,47 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef __MAULTIVIEWER_CONTAINER_H__
-#define __MAULTIVIEWER_CONTAINER_H__
+/****************************************************************************
+History
 
-#include "../../../vcglib/wrap/ply/plylib.h"
-#include "../../../vcglib/wrap/io_trimesh/import_ply.h"
-#include "../../../vcglib/wrap/io_trimesh/export_ply.h"
+$Log: stdpardialog.cpp,v $
+****************************************************************************/
+#ifndef LAYER_DIALOG_H
+#define LAYER_DIALOG_H
+#include <QtGui>
 
-#include <QWidget>
-#include <QVector>
-#include <QGridLayout>
+class GLArea;
+class MainWindow;
+class QTableWidget;
+class GLLogStream;
 
-#include "../common/meshmodel.h"
-#include "viewer.h"
-#include "layerDialog.h"
+#include <QDialog>
 
+namespace Ui 
+{
+	class layerDialog;
+} 
 
-// Class list
-
-class RichParameterSet;
-
-class MultiViewer_Container : public QWidget
+class LayerDialog : public QDockWidget
 {
 	Q_OBJECT
-
 public:
-	MultiViewer_Container(QWidget *parent);
-    ~MultiViewer_Container();
-	
-	/// load an image in the painter widget, the imageNumber is the index of imageList that has the image wanted (0-base index!)
-	void addView(Viewer* viewer);
-	void removeView(int);
-	/// update all the visual widgets at one time (glw, imageVis, tree, imageMag)
-	void updateAll();
-	Viewer* currentView();
-    int getNextViewerId();
-
-	int viewerCounter();
-	void updateLayout();
-
-	void connectToLayerDialog(Viewer* viewer);
-
-	LayerDialog *layerDialog;
-	MeshDocument meshDoc;
-	int currentId;
+    LayerDialog(QWidget *parent = 0);
+    ~LayerDialog();
+    void updateLog(GLLogStream &Log);
 
 public slots:
+    void updateTable();
+    void toggleStatus(int row, int column);
+    void showEvent ( QShowEvent * event );
+    void showContextMenu(const QPoint& pos);
+    void showLayerMenu();
 
-	// Called when we change viewer, set the current viewer
-    void updateCurrent(int current);
-	
 private:
-	int idCounter;
-	QVector<Viewer *> viewerList; /// widgets for the OpenGL contexts and images
-	QGridLayout *mainLayout;
-
-	void keyPressEvent(QKeyEvent *keyEv);
-	// other stuff
-	void resizeEvent ( QResizeEvent *);
-	
+    Ui::layerDialog* ui;
+    //GLArea *gla; **
+    MainWindow *mw;
 };
 
-#endif // __MAULTIVIEWER_CONTAINER_H__
+
+#endif

@@ -23,7 +23,7 @@ HEADERS = ../common/interfaces.h \
     #saveSnapshotDialog.h \
     #savemaskexporter.h \
     #changetexturename.h \
-    #layerDialog.h \
+    layerDialog.h \
     stdpardialog.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
@@ -37,7 +37,7 @@ SOURCES = main.cpp \
     #customDialog.cpp \
     #filterScriptDialog.cpp \
     #saveSnapshotDialog.cpp \
-    #layerDialog.cpp \
+    layerDialog.cpp \
     #savemaskexporter.cpp \
     #changetexturename.cpp \
     stdpardialog.cpp \
@@ -45,8 +45,8 @@ SOURCES = main.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
     glarea_setting.cpp
 
-#FORMS = ui/savesnapshotDialog.ui \
- #   ui/layerDialog.ui \
+FORMS =    ui/layerDialog.ui 
+ #   ui/savesnapshotDialog.ui \
  #   ui/filterScriptDialog.ui \
  #   ui/customDialog.ui \
  #   ui/aboutDialog.ui \

@@ -33,6 +33,9 @@ MultiViewer_Container::MultiViewer_Container(QWidget *parent)
 	mainLayout = new QGridLayout;
 
 	idCounter=0;
+
+	layerDialog = new LayerDialog(this);
+	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	
 	setLayout(mainLayout);
 }
@@ -41,6 +44,7 @@ MultiViewer_Container::~MultiViewer_Container(){
 	for each(Viewer* viewer in viewerList)
 		delete viewer;
 	delete mainLayout;
+	delete layerDialog;
 }
 
 int MultiViewer_Container::getNextViewerId(){
@@ -70,6 +74,10 @@ void MultiViewer_Container::removeView(int viewerId){
 			updateLayout();
 		}
 	}
+}
+
+void MultiViewer_Container::connectToLayerDialog(Viewer* viewer){
+	connect(((GLArea*) viewer)->meshDoc, SIGNAL(currentMeshChanged(int)),layerDialog, SLOT(updateTable()));
 }
 
 void MultiViewer_Container::updateCurrent(int current){

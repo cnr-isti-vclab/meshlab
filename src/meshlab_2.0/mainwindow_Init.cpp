@@ -236,10 +236,10 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
-	/*showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
+	showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
 	showLayerDlgAct->setCheckable(true);
 	showLayerDlgAct->setChecked(true);
-	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));*/
+	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));
 
 
 	//////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
@@ -310,8 +310,8 @@ void MainWindow::createToolBars()
 	mainToolBar->addAction(openAct);
 	mainToolBar->addAction(reloadAct);
 	mainToolBar->addAction(saveAct);
-	/*mainToolBar->addAction(saveSnapshotAct);
-	mainToolBar->addAction(showLayerDlgAct);*/
+	//mainToolBar->addAction(saveSnapshotAct);
+	mainToolBar->addAction(showLayerDlgAct);
 
 	renderToolBar = addToolBar(tr("Render"));
 	//renderToolBar->setIconSize(QSize(32,32));
@@ -436,7 +436,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(fullScreenAct);
-	//viewMenu->addAction(showLayerDlgAct);
+	viewMenu->addAction(showLayerDlgAct);
 
 	trackBallMenu = viewMenu->addMenu(tr("&Trackball"));
 	trackBallMenu->addAction(showTrackBallAct);

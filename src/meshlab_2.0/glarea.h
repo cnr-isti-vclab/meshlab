@@ -37,7 +37,7 @@
 
 #include "../common/interfaces.h"
 #include "../common/filterscript.h"
-//#include "layerDialog.h"
+//#include "layerDialog.h"  **
 #include "glarea_setting.h"
 #include "viewer.h"
 
@@ -76,7 +76,7 @@ private:
 
 
 public:
-	//LayerDialog *layerDialog;
+	//LayerDialog *layerDialog; **
   // Layer Management stuff. 
 	MeshDocument *meshDoc;
 	MeshModel *mm(){return meshDoc->mm();}
@@ -94,7 +94,8 @@ public:
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
     QString getFileName()							{return QString(mm()->shortName());}
-	void		setFileName(QString name)	
+	
+	void setFileName(QString name)	
     {
     mm()->setFileName(name);
 		setWindowTitle(QFileInfo(name).fileName()+tr("[*]"));

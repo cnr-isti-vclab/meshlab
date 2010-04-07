@@ -37,7 +37,7 @@
 //#include "ui_aboutDialog.h"
 //#include "savemaskexporter.h"
 #include "stdpardialog.h"
-//#include "layerDialog.h"
+#include "layerDialog.h"
 //#include "alnParser.h"
 
 #include <wrap/io_trimesh/io_mask.h>
@@ -232,6 +232,15 @@ void MainWindow::updateMenus()
 				foreach (QAction *a,      PM.decoratorActionList){a->setChecked(false);a->setEnabled(true);}
 				foreach (QAction *a,   GLA()->iDecoratorsList){a->setChecked(true);}
 
+				//Viewer
+				MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+				if(!mvc) 
+				  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+
+				setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
+				setSplitAct->setEnabled(mvc->viewerCounter()<6);
+
+
 	} // if active
 	else
 	{
@@ -244,22 +253,18 @@ void MainWindow::updateMenus()
 
 	}
 
-	//Viewer
-	if(active) {
+	
+	if(GLA())
+	{
 		MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
 		if(!mvc) 
 		  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
-		setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
-		setSplitAct->setEnabled(mvc->viewerCounter()<6);
-	}
 
-	/*if(GLA())
-	{
-		showLayerDlgAct->setChecked(GLA()->layerDialog->isVisible());
-		if(GLA()->layerDialog->isVisible())
-		GLA()->layerDialog->updateTable();
-		GLA()->layerDialog->updateLog(GLA()->log);
-	}*/
+		showLayerDlgAct->setChecked(mvc->layerDialog->isVisible());
+		if(mvc->layerDialog->isVisible())
+		mvc->layerDialog->updateTable();
+		mvc->layerDialog->updateLog(GLA()->log);
+	}
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -694,10 +699,15 @@ void MainWindow::toggleSelectVertRendering()
 
 bool MainWindow::openIn(QString /* fileName */)
 {
-	//bool wasLayerVisible=GLA()->layerDialog->isVisible();
-	//GLA()->layerDialog->setVisible(false);
+	if(mdiarea->currentSubWindow()==0) return false;
+	MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+	if(!mvc) 
+	  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+	
+	bool wasLayerVisible=mvc->layerDialog->isVisible();
+	mvc->layerDialog->setVisible(false);
 	bool ret= open(QString(),GLA());
-	//GLA()->layerDialog->setVisible(wasLayerVisible);
+	mvc->layerDialog->setVisible(wasLayerVisible);
 	return ret;
 }
 
@@ -837,7 +847,8 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						int id = mvcont->getNextViewerId();
 						gla=new GLArea(mdiarea,&currentGlobalParams,id, &(mvcont->meshDoc));		
 						mvcont->addView(gla);
-                        //addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
+                        addDockWidget(Qt::RightDockWidgetArea,mvcont->layerDialog);
+						mvcont->connectToLayerDialog(gla);
 						newGla =true;
 						pCurrentIOPlugin->setLog(&(gla->log));
 					}
@@ -1102,7 +1113,14 @@ void MainWindow::showToolbarRender(){
 void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
-//void MainWindow::showLayerDlg() {if(GLA() != 0) 	GLA()->layerDialog->setVisible( !GLA()->layerDialog->isVisible() );}
+void MainWindow::showLayerDlg() {
+	if(mdiarea->currentSubWindow()==0) return;
+	MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+	if(!mvc) 
+	  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+
+	if(GLA() != 0) 	
+		mvc->layerDialog->setVisible( !mvc->layerDialog->isVisible() );}
 
 //void MainWindow::setCustomize()
 //{

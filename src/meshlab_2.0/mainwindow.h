@@ -118,7 +118,7 @@ private slots:
 	void showInfoPane();
 	void showTrackBall();
 	void resetTrackBall();
-	//void showLayerDlg();
+	void showLayerDlg();
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
 	void updateMenus();
