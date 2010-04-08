@@ -249,27 +249,6 @@ public:
     };
 	
 	
-	// The FilterPrecondition enum is used to build the prerequisite bitmask that each filter reports. 
-	// This mask is used to explicitate what data a filter really needs in order to start. 
-	// For example algorithms that compute per face quality have as precondition the existence of faces 
-	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
-	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
-	// and Face as precondition.
-	// These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness. 
-	// They are also used to grayout menus un-appliable entries.
-	
-	enum FilterPrecondition
-	{
-			FP_Generic          =0x00000, // Should be avoided if possible
-			FP_Face             =0x00001, //  
-			FP_VertexColor      =0x00002, //  
-			FP_VertexQuality    =0x00004, //  
-			FP_VertexRadius     =0x00008, //  
-			FP_WedgeTexCoord    =0x00010, //
-			FP_FaceColor        =0x00020, //  
-			FP_VertexTexCoord   =0x00040 //
-	};
-	
 	MeshFilterInterface() : MeshLabInterface() {}
 	virtual ~MeshFilterInterface() {}
 
@@ -291,13 +270,15 @@ public:
 	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
 	virtual int getRequirements(QAction *){return MeshModel::MM_NONE;}
 	
-	// The FilterPrecondition mask is used to explicitate what a filter really needs to be applied. 
+  // The FilterPrecondition mask is used to explicitate what kind of data a filter really needs to be applied.
 	// For example algorithms that compute per face quality have as precondition the existence of faces 
 	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
 	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
 	// and Face as precondition.
-	virtual int getPreConditions(QAction *) const {return FP_Generic;}
+  // These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness.
+  // They are also used to grayout menus un-appliable entries.
 
+  virtual int getPreConditions(QAction *) const {return MeshModel::MM_NONE;}
 
 	// Function used by the framework to get info about the mesh properties changed by the filter.
 	// It is widely used by the meshlab's preview system.
@@ -320,28 +301,28 @@ public:
 		int preMask = getPreConditions(act);
 		MissingItems.clear();
 		
-		if (preMask == MeshFilterInterface::FP_Generic) // no precondition specified. 
+    if (preMask == MeshModel::MM_NONE) // no precondition specified.
 			return true;
 		
-		if (preMask & MeshFilterInterface::FP_VertexColor && !m.hasDataMask(MeshModel::MM_VERTCOLOR))
+    if (preMask & MeshModel::MM_VERTCOLOR && !m.hasDataMask(MeshModel::MM_VERTCOLOR))
 				MissingItems.push_back("Vertex Color");
 
-		if (preMask & MeshFilterInterface::FP_FaceColor && !m.hasDataMask(MeshModel::MM_FACECOLOR))
+    if (preMask & MeshModel::MM_FACECOLOR && !m.hasDataMask(MeshModel::MM_FACECOLOR))
 				MissingItems.push_back("Face Color");
 				
-		if (preMask & MeshFilterInterface::FP_VertexQuality && !m.hasDataMask(MeshModel::MM_VERTQUALITY))
+    if (preMask & MeshModel::MM_VERTQUALITY && !m.hasDataMask(MeshModel::MM_VERTQUALITY))
 				MissingItems.push_back("Vertex Quality");
 
-		if (preMask & MeshFilterInterface::FP_WedgeTexCoord && !m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+    if (preMask & MeshModel::MM_WEDGTEXCOORD && !m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 				MissingItems.push_back("Per Wedge Texture Coords");
 
-		if (preMask & MeshFilterInterface::FP_VertexTexCoord && !m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
+    if (preMask & MeshModel::MM_VERTTEXCOORD && !m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
 				MissingItems.push_back("Per Vertex Texture Coords");
 
-		if (preMask & MeshFilterInterface::FP_VertexRadius && !m.hasDataMask(MeshModel::MM_VERTRADIUS))
+    if (preMask & MeshModel::MM_VERTRADIUS && !m.hasDataMask(MeshModel::MM_VERTRADIUS))
 				MissingItems.push_back("Vertex Radius");
 
-		if (preMask & MeshFilterInterface::FP_Face && (m.cm.fn==0))
+    if (preMask & MeshModel::MM_FACENUMBER && (m.cm.fn==0))
 				MissingItems.push_back("Non empty Face Set");
 
 		return MissingItems.isEmpty();
