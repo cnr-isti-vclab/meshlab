@@ -134,7 +134,7 @@ void SplatRendererPlugin::configureShaders()
 	}
 }
 
-void SplatRendererPlugin::Init(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla)
+void SplatRendererPlugin::Init(QAction *, MeshDocument &, RenderMode &, QGLWidget *gla)
 {
 	mIsSupported = true;
 	gla->makeCurrent();
@@ -246,7 +246,7 @@ void SplatRendererPlugin::updateRenderBuffer()
 	}
 }
 
-void SplatRendererPlugin::Render(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget * /* gla */)
+void SplatRendererPlugin::Render(QAction *, MeshDocument &md, RenderMode &rm, QGLWidget * /* gla */)
 {
 	GL_TEST_ERR
 
