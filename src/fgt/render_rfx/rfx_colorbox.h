@@ -37,6 +37,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QSlider>
+#include <vcg/space/color4.h>
 #include "rfx_dialog.h"
 
 class RfxColorBox : public QWidget
@@ -51,15 +52,9 @@ public:
 		Returns the current color as an array of float value between 0 and 1.
 		@return the current color as float array.
 	*/
-	float* getColorf(){
-		float r, g, b, a;
-		r = this->_redS->value() / 255.0f;
-		g = this->_greenS->value() / 255.0f;
-		b = this->_blueS->value() / 255.0f;
-		a = this->_alphaS->value() / 255.0f;
-
-		float vals[4] = {r, g, b, a};
-		return vals;
+	inline vcg::Color4f getColorf(){
+		vcg::Color4f c(_redS->value() / 255.0f,_greenS->value() / 255.0f,_blueS->value() / 255.0f,_alphaS->value() / 255.0f);
+		return c;
 	}
 
 public slots:

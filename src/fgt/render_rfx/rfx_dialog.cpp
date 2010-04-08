@@ -552,11 +552,11 @@ void RfxDialog::ChangeValue(const QString& val)
 				} else {
 					RfxColorBox *cBox = dynamic_cast<RfxColorBox*>(sender);
 					if (cBox != NULL) {
-						float* newVal = cBox->getColorf();
-						oldVal[0] = newVal[0];
-						oldVal[1] = newVal[1];
-						oldVal[2] = newVal[2];
-						oldVal[3] = newVal[3];
+						vcg::Color4f newVal = cBox->getColorf();
+						oldVal[0] = newVal.X();
+						oldVal[1] = newVal.Y();
+						oldVal[2] = newVal.Z();
+						oldVal[3] = newVal.W();
 						uni->PassToShader();
 						mGLWin->updateGL();
 						return;
