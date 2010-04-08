@@ -885,7 +885,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					{
 						renderModeTextureAct->setChecked(true);
 						renderModeTextureAct->setEnabled(true);
-						GLA()->setTextureMode(GLW::TMPerWedgeMulti);
+            if(tri::HasPerVertexTexCoord(GLA()->mm()->cm) )
+              GLA()->setTextureMode(GLW::TMPerVert);
+            if(tri::HasPerWedgeTexCoord(GLA()->mm()->cm) )
+              GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 					}
 					
 					 // In case of polygonal meshes the normal should be updated accordingly
@@ -1122,7 +1125,10 @@ void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
 void MainWindow::renderTexture()
 {
 	QAction *a = qobject_cast<QAction* >(sender());
-	GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);
+  if( tri::HasPerVertexTexCoord(GLA()->mm()->cm))
+    GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerVert);
+  if( tri::HasPerWedgeTexCoord(GLA()->mm()->cm))
+    GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);
 }
 
 
