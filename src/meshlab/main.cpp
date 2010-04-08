@@ -28,7 +28,7 @@
 int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
-  QLocale::setDefault(QLocale(QLocale::English,QLocale::UnitedStates));
+  QLocale::setDefault(QLocale::C);
   QCoreApplication::setOrganizationName("VCG");
   QCoreApplication::setApplicationName("MeshLab");
 	
