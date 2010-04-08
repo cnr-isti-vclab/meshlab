@@ -277,13 +277,9 @@ public:
 	// This string is printed in the top of the parameter window 
 	// so it should be at least one or two paragraphs long.
 	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
-	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
+  // This string is used in the 'About plugin' dialog and by meshlabserver to create the filter list page.
 	virtual QString filterInfo(FilterIDType filter) const =0;
 	
-	// The very short string (a few words) describing each filtering action 
-	// This string is used also to define the menu entry
-	//virtual QString filterName(FilterIDType filter) const =0;
-
 	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
 	// For example filters that perform an action only on the selection will be placed in the Selection Class

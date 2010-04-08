@@ -283,7 +283,6 @@ public:
     bool fancyLighting;
     bool selectedFace;
     bool selectedVert;
-    vcg::Point3f lightDir;
 
 
 		RenderMode()
