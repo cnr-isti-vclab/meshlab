@@ -33,7 +33,7 @@ static int Save(SaveMeshType &m,  const char * filename, bool binary, CallBackPo
 	return Save(m,filename, Mask::IOM_ALL, binary, cb);
 }
 
-static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool binary, CallBackPos *cb=0)
+static int Save(SaveMeshType &mm,  const char * filename, int savemask, bool /*binary*/, CallBackPos *cb=0)
 {
   //ignore binary for now!
 

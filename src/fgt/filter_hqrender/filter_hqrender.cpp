@@ -69,7 +69,7 @@ FilterHighQualityRender::FilterClass FilterHighQualityRender::getClass(QAction *
 }
 
 //add global parameter to set aqsis bin path correctly
-void FilterHighQualityRender::initGlobalParameterSet(QAction *action, RichParameterSet &parset) {
+void FilterHighQualityRender::initGlobalParameterSet(QAction */*action*/, RichParameterSet &parset) {
   //on windows i could use PATH system environment to find directory..on mac os?
   QStringList aqsisEnv = QProcess::systemEnvironment();
   QString aqsisDir = defaultAqsisBinPath();
@@ -109,7 +109,7 @@ void FilterHighQualityRender::initGlobalParameterSet(QAction *action, RichParame
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, RichParameterSet & parlst) 
+void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &/*m*/, RichParameterSet & parlst)
 {
 	 switch(ID(action))	 {
 		case FP_HIGHQUALITY_RENDER :  
@@ -123,8 +123,10 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 					templates << subDir;
 			}
 			if(templates.isEmpty())
-			  qDebug("No template scene has been found in \"render_template\" directory");
-
+			{
+				this->errorMessage = "No template scene has been found in \"render_template\" directory";
+        qDebug("%s",qPrintable(this->errorMessage));
+			}
 			parlst.addParam(new RichEnum("scene",0,templates,"Select scene",
         "Select the scene where the loaded mesh will be drawed in."));			
 			parlst.addParam(new RichString("ImageName", "default", "Name of output image",
@@ -153,7 +155,7 @@ void FilterHighQualityRender::initParameterSet(QAction *action, MeshModel &m, Ri
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterHighQualityRender::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
   //***check if the AqsisBinPathParam() parameter it's correct***
   QString aqsisBinDirString = par.getString(AqsisBinPathParam());
@@ -230,7 +232,7 @@ bool FilterHighQualityRender::applyFilter(QAction *filter, MeshDocument &md, Ric
 
 	//***Texture: take the list of texture mesh
 	QStringList textureListPath = QStringList();
-	for(int i=0; i<m->cm.textures.size(); i++) {
+  for(size_t i=0; i<m->cm.textures.size(); i++) {
     QString path = QString(m->cm.textures[i].c_str());
 		textureListPath << path;
 	}
