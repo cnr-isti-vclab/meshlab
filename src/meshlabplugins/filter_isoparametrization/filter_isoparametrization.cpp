@@ -441,9 +441,4 @@ int FilterIsoParametrization::postCondition( QAction* /*filter*/ ) const
 	 return MeshModel::MM_UNKNOWN;
 }
 
-int FilterIsoParametrization::getPreConditions( QAction * /*filter*/ ) const
-{
-	return MeshFilterInterface::FP_Generic;
-}
-
 Q_EXPORT_PLUGIN(FilterIsoParametrization)

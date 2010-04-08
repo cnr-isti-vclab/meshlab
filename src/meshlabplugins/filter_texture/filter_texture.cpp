@@ -81,16 +81,16 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
 {
 	switch (ID(a))
 	{
-		case FP_UV_TO_COLOR : return MeshFilterInterface::FP_VertexTexCoord;
-		case FP_UV_WEDGE_TO_VERTEX : return MeshFilterInterface::FP_WedgeTexCoord;
-		case FP_BASIC_TRIANGLE_MAPPING : return MeshFilterInterface::FP_Face;
-		case FP_SET_TEXTURE : return MeshFilterInterface::FP_WedgeTexCoord;
-		case FP_COLOR_TO_TEXTURE : return MeshFilterInterface::FP_WedgeTexCoord + MeshFilterInterface::FP_VertexColor;
-		case FP_TRANSFER_TO_TEXTURE : return FP_Generic;
-		case FP_TEX_TO_VCOLOR_TRANSFER : return FP_Generic;
+    case FP_UV_TO_COLOR : return MeshModel::MM_VERTTEXCOORD;
+    case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_WEDGTEXCOORD;
+    case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_FACENUMBER;
+    case FP_SET_TEXTURE : return MeshModel::MM_WEDGTEXCOORD;
+    case FP_COLOR_TO_TEXTURE : return MeshModel::MM_VERTCOLOR;
+    case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
+    case FP_TEX_TO_VCOLOR_TRANSFER : return MeshModel::MM_NONE;
 		default: assert(0);
 	}
-	return MeshFilterInterface::FP_Generic;
+  return MeshModel::MM_NONE;
 }
 
 int FilterTexturePlugin::getRequirements(QAction *a)

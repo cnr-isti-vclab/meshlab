@@ -419,27 +419,27 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const
 		case   CP_RANDOM_FACE:	
     case   CP_DISCRETE_CURVATURE:
     case   CP_COLOR_NON_TOPO_COHERENT:
-				return MeshFilterInterface::FP_Face;
+      return MeshModel::MM_FACENUMBER;
 
   case   CP_CLAMP_QUALITY:
     case   CP_MAP_QUALITY_INTO_COLOR:
-				return MeshFilterInterface::FP_VertexQuality;
+        return MeshModel::MM_VERTQUALITY;
 
     case   CP_FACE_TO_VERTEX:
     case   CP_FACE_SMOOTH:
-				return MeshFilterInterface::FP_FaceColor;
+        return MeshModel::MM_FACECOLOR;
 
     case   CP_VERTEX_SMOOTH:
     case   CP_VERTEX_TO_FACE:
-				return MeshFilterInterface::FP_VertexColor;
+        return MeshModel::MM_VERTCOLOR;
 
 	  case   CP_TEXTURE_TO_VERTEX:
     case   CP_TEXBORDER: 
-				return MeshFilterInterface::FP_WedgeTexCoord;
+        return MeshModel::MM_WEDGTEXCOORD;
 
     default: assert(0);
 	}
-	return MeshFilterInterface::FP_Generic;
+  return MeshModel::MM_NONE;
 }
 
 int ExtraMeshColorizePlugin::postCondition( QAction* a ) const 

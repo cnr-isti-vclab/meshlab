@@ -180,7 +180,7 @@ int FilterUnsharp::getPreConditions(QAction *a) const
   {
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_QUALITY:
-					return MeshFilterInterface::FP_Face | MeshFilterInterface::FP_VertexQuality;
+          return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTQUALITY;
   		case FP_SD_LAPLACIAN_SMOOTH:
 			case FP_HC_LAPLACIAN_SMOOTH:
 			case FP_LAPLACIAN_SMOOTH:
@@ -199,13 +199,13 @@ int FilterUnsharp::getPreConditions(QAction *a) const
 			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
 			case FP_FACE_NORMAL_NORMALIZE:	  
 			case FP_CREASE_CUT:
-					return MeshFilterInterface::FP_Face;
+          return MeshModel::MM_FACENUMBER;
 			case FP_UNSHARP_VERTEX_COLOR:	     
-					return MeshFilterInterface::FP_Face | MeshFilterInterface::FP_VertexColor;
+          return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTCOLOR;
 
-			case FP_VERTEX_NORMAL_NORMALIZE:	  return MeshFilterInterface::FP_Generic;
+      case FP_VERTEX_NORMAL_NORMALIZE:	  return MeshModel::MM_NONE;
 					
-    default : assert(0); return MeshFilterInterface::FP_Generic;
+    default : assert(0); return MeshModel::MM_NONE;
   }
 }
 
