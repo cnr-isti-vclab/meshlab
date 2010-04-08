@@ -15,9 +15,9 @@ RibFileStack::~RibFileStack() {
 };
 
 //open file and push the text stream to stack
-bool RibFileStack::pushFile(QString* path) {
-	if(QFile::exists(*path)) {
-		QFile* file = new QFile(*path);
+bool RibFileStack::pushFile(QString path) {
+  if(QFile::exists(path)) {
+    QFile* file = new QFile(path);
 		return pushFile(file);
 	} else {
 		return false;
@@ -163,7 +163,7 @@ bool RibFileStack::searchFile(QString filename) {
 	for(int i=0; i<subDir.size(); i++) {
 		QString str(templateDir + QDir::separator() + (subDir)[i] + QDir::separator() + filename);
 		//qDebug("looking for: %s",qPrintable(str));
-		if(pushFile(&str)) {
+    if(pushFile(str)) {
 			return true;
 		}
 	}

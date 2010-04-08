@@ -252,9 +252,9 @@ bool FilterHighQualityRender::applyFilter(QAction */*filter*/, MeshDocument &md,
 	}
 
 	//***copy the rest of template files (shaders, textures, procedural..)
-	copyFiles(&templateFile.dir(), &destDir, &textureDirs);
-	copyFiles(&templateFile.dir(), &destDir, &shaderDirs);
-	copyFiles(&templateFile.dir(), &destDir, &proceduralDirs);
+  copyFiles(templateFile.dir(), destDir, textureDirs);
+  copyFiles(templateFile.dir(), destDir, shaderDirs);
+  copyFiles(templateFile.dir(), destDir, proceduralDirs);
 	qDebug("Copied needed file at %i",tt.elapsed());
 	
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();

@@ -22,9 +22,8 @@ bool UtilitiesHQR::checkDir(const QString* destDirString, const QString* path) {
 }
 
 //take all files in fromDir/[dirs] directories and copy them in dest/[dirs]
-bool UtilitiesHQR::copyFiles(const QDir* fromDir, const QDir* destDir, const QStringList* dirs) {
-	QDir src = *fromDir, dest = *destDir;
-	foreach(QString dir, *dirs) {
+bool UtilitiesHQR::copyFiles(QDir src, QDir dest, const QStringList dirs) {
+  foreach(QString dir, dirs) {
 		if(dir != "." && src.cd(dir)) {
 			if(!dest.mkdir(dir)) {
 				if(!dest.cd(dir))

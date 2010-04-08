@@ -43,7 +43,7 @@ bool FilterHighQualityRender::makeScene(MeshModel* m,
   //RibFileStack files(getDirFromPath(&templatePath)); //constructor
   RibFileStack files(templateFile->absolutePath()); //constructor
 	//open file and stream
-	if(!files.pushFile(&templateFile->absoluteFilePath())) {
+  if(!files.pushFile(templateFile->absoluteFilePath())) {
 		this->errorMessage = "Template path is wrong: " + templateFile->absoluteFilePath();
 		return false;
 	}

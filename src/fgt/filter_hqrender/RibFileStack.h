@@ -12,7 +12,7 @@ class RibFileStack {
 public:
 	RibFileStack(QString dir);
 	~RibFileStack();
-	bool pushFile(QString* path);
+  bool pushFile(QString path);
 	bool pushFile(QFile* file);
 	bool hasNext() const;
 	bool addSubDirs(QStringList dirs);
