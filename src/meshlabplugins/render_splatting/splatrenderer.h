@@ -99,9 +99,9 @@ public:
 
 	void initActionList();
 
-	virtual bool isSupported() {return mIsSupported;}
-	virtual void Init(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
-	virtual void Render(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
+	bool isSupported() {return mIsSupported;}
+	void Init(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
+	void Render(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
 
 };
 

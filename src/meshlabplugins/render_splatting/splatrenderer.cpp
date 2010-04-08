@@ -136,6 +136,11 @@ void SplatRendererPlugin::configureShaders()
 
 void SplatRendererPlugin::Init(QAction *, MeshDocument &, RenderMode &, QGLWidget *gla)
 {
+	if (!(md.mm()->hasDataMask(MeshModel::MM_VERTRADIUS)))
+	{
+		QMessageBox::warning(0, tr("Splat Render Failure"), QString("Warning the current mesh <font color=red>'" + md.mm()->fullName() + "'</font> cannot not be rendered.<br><i>Radius per vertex attribute</i> must be present."));
+		return;
+	}
 	mIsSupported = true;
 	gla->makeCurrent();
 	// FIXME this should be done in meshlab !!! ??
