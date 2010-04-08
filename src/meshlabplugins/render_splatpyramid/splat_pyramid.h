@@ -36,8 +36,7 @@ using namespace std;
 #include <QString>
 
 #include <GL/glew.h>
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 #include <vcg/math/matrix44.h>
 #include <meshlab/glarea.h>
 

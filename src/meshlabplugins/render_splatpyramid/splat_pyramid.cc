@@ -44,35 +44,37 @@ void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &,
 	bool color_per_vertex = false;
 
 	foreach(MeshModel * mp, md.meshList) {
-	// Create a new primitive from given file
-	objects.push_back( Object( objects.size() ) );
+    if(mp->hasDataMask(MeshModel::MM_VERTRADIUS))
+    {
+    // Create a new primitive from given file
+    objects.push_back( Object( objects.size() ) );
 
-	vector<Surfeld> *surfels = (objects.back()).getSurfels();
+    vector<Surfeld> *surfels = (objects.back()).getSurfels();
 
-	if (mp->hasDataMask( MeshModel::MM_VERTCOLOR ) )
-		color_per_vertex = true;	
-	  
-	Color4b c (180, 180, 180, 255);
-	float quality = 0.0001;
-	double radius = 1.0;
+    if (mp->hasDataMask( MeshModel::MM_VERTCOLOR ) )
+      color_per_vertex = true;
 
-	int pos = 0;
-	CMeshO::VertexIterator vi;
+    Color4b c (180, 180, 180, 255);
+    float quality = 0.0001;
+    double radius = 1.0;
 
-	for(vi=mp->cm.vert.begin(); vi!=mp->cm.vert.end(); ++vi)
-		if(!(*vi).IsD())
-		{
-			Point3f p = (*vi).P();
-			Point3f n = (*vi).N();
-			radius = (*vi).R();
-			if (color_per_vertex)
-			c = (*vi).C();
+    int pos = 0;
+    CMeshO::VertexIterator vi;
 
-			surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
-			++pos;
-		}
-	}
-  
+    for(vi=mp->cm.vert.begin(); vi!=mp->cm.vert.end(); ++vi)
+      if(!(*vi).IsD())
+      {
+        Point3f p = (*vi).P();
+        Point3f n = (*vi).N();
+        radius = (*vi).R();
+        if (color_per_vertex)
+        c = (*vi).C();
+
+        surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
+        ++pos;
+      }
+    }
+  }
 	if (color_per_vertex)
 		render_mode =  PYRAMID_POINTS_COLOR;
 	else

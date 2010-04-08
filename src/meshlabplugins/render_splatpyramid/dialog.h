@@ -3,7 +3,7 @@
 
 #include <map>
 #include <GL/glew.h>
-#include <meshlab/meshmodel.h>
+#include <common/interfaces.h>
 #include <QtGui>
 #include <QGLWidget>
 #include "shaderStructs.h"
