@@ -134,7 +134,7 @@ void SplatRendererPlugin::configureShaders()
 	}
 }
 
-void SplatRendererPlugin::Init(QAction *, MeshDocument &, RenderMode &, QGLWidget *gla)
+void SplatRendererPlugin::Init(QAction * a, MeshDocument & md, RenderMode &, QGLWidget *gla)
 {
 	if (!(md.mm()->hasDataMask(MeshModel::MM_VERTRADIUS)))
 	{
