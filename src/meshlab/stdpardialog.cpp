@@ -693,13 +693,16 @@ void MeshWidget::setMesh(MeshModel * newMesh)
 {
 	for(int i=0; i < md->meshList.size(); ++i)
 	{
-		if(md->meshList.at(i) == newMesh) setIndex(i);
+		if(md->meshList.at(i) == newMesh) 
+			setIndex(i);
 	}
 }
 
 void MeshWidget::collectWidgetValue()
 {
-	rp->val->set(MeshValue(md->meshList.at(enumCombo->currentIndex())));
+	MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(rp->pd);
+	dec->meshindex = enumCombo->currentIndex();
+	rp->val->set(MeshValue(md->meshList.at(dec->meshindex)));
 }
 
 void MeshWidget::resetWidgetValue()
