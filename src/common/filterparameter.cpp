@@ -929,7 +929,7 @@ RichMesh::RichMesh( const QString nm,int meshindex,const QString /*desc*//*=QStr
 
 }
 
-RichMesh::RichMesh( const QString nm,MeshModel* /*val*/,MeshModel* defval,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm, new MeshValue(defval),new MeshDecoration( new MeshValue(defval),doc,desc,tltip))
+RichMesh::RichMesh( const QString nm,MeshModel* val,MeshModel* defval,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm, new MeshValue(val),new MeshDecoration( new MeshValue(defval),doc,desc,tltip))
 {
 
 }
