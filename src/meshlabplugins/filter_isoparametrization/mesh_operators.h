@@ -341,8 +341,9 @@ void CopySubMeshLevels(std::vector<typename MeshType::FaceType*> &faces,
 		father->vertices_bary.push_back(std::pair<VertexType *,vcg::Point3f>(son,bary));
 	}
 }
-///return in result the intersection, while in_v0 and in_v1 return 
-///faces shareb by each vertex
+///return false if the the two vertices has no common faces,
+/// it stores in <result> the intersection of the faces in v0 and v1, while in_v0 and in_v1 it returns
+///the faces shared by each vertex
 template <class MeshType>
 inline bool getSharedFace(typename MeshType::VertexType *v0,
 													typename MeshType::VertexType *v1,
@@ -362,11 +363,11 @@ inline bool getSharedFace(typename MeshType::VertexType *v0,
 
 	std::set<FaceType*> faces0;
 
-	///faces in v0
+  ///put faces in v0 in a <set>
 	for(;!vfi0.End();++vfi0)
 		faces0.insert(vfi0.F());
 
-	///faces in v1 + intersection between both
+  ///put faces exclusively in v1 in <in_v1> in and build up the vector <result> containing the  intersection between both vertices
 	for(;!vfi1.End();++vfi1)
 		if (faces0.count(vfi1.F())!=0)
 			result.push_back(vfi1.F());
@@ -380,17 +381,13 @@ inline bool getSharedFace(typename MeshType::VertexType *v0,
 	bool border=(result.size()==1);
 	for(;!vfi2.End();++vfi2)
 	{
-		if  (non_shared)
-			in_v0.push_back(vfi2.F());
-		else
-		{
 			if ((!border)&&((result[0]!=vfi2.F())&&(result[1]!=vfi2.F())))
 				in_v0.push_back(vfi2.F());
 			else
 				if ((border)&&((result[0]!=vfi2.F())))
 					in_v0.push_back(vfi2.F());
-		}
 	}
+  return true;
 }
 
 

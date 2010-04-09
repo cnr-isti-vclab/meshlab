@@ -358,22 +358,16 @@ private:
 		bool execute_flip=true,
 		bool test_interpolation=true)
 	{
-			
-			for (unsigned int i=0;i<mesh->vert.size();i++)
-				mesh->vert[i].ClearFlags();
-			for (unsigned int i=0;i<mesh->face.size();i++)
-				mesh->face[i].ClearFlags();
-		
+    vcg::tri::UpdateFlags<MeshType>::VertexClearV(*mesh);
+    vcg::tri::UpdateFlags<MeshType>::FaceClearV(*mesh);
+
+    ///TEST PRECONDITIONS
+    bool isOK=Preconditions(*mesh);
+    if (!isOK) return NonPrecondition;
+
 		///INITIALIZATION
 		InitializeStructures<MeshType>(mesh);
 		
-		///TEST PRECONDITIONS
-		bool isOK=Preconditions(base_mesh);
-		if (!isOK)
-			return NonPrecondition;
-
-		
-
 		///DECIMATION & PARAMETRIZATION
 		ParaDecimate(targetFaces,interval,execute_flip);
 
@@ -708,21 +702,20 @@ public:
 		vcg::tri::UpdateTopology<MeshType>::FaceFace(mesh);
 
 		b=vcg::tri::Clean<MeshType>::IsTwoManifoldFace(mesh);
-		if (!b)
-			return false;
+    if (!b) return false;
 
 		b=vcg::tri::Clean<MeshType>::IsTwoManifoldVertexFF(mesh);
-		if (!b)
-			return false;
+    if (!b) return false;
 
 		b=vcg::tri::Clean<MeshType>::IsSizeConsistent(mesh);
-		if (!b)
-			return false;
+		if (!b)			return false;
 
-		for (unsigned int i=0;i<mesh.face.size();i++)
-			for (unsigned int j=0;j<3;j++)
-				if (mesh.face[i].FFp(j)==(&mesh.face[i]))
-					return false;
+    int cc=vcg::tri::Clean<MeshType>::ConnectedComponents(mesh);
+    if(cc>1) return false;
+
+    int boundaryEdgeNum, internalEdgeNum;
+    vcg::tri::Clean<MeshType>::CountEdges(mesh,internalEdgeNum,boundaryEdgeNum);
+    if(boundaryEdgeNum>0) return false;
 
 		return true;
 	}

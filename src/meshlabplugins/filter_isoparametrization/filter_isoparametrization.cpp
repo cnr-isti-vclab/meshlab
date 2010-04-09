@@ -247,7 +247,9 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		int stopCriteria=par.getEnum("stopCriteria");
 		bool doublestep=par.getBool("DoubleStep");
 		IsoParametrizator Parametrizator;
-		
+
+    m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+
 		bool isTXTenabled=m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
 		if (!isTXTenabled)
 			m->updateDataMask(MeshModel::MM_VERTTEXCOORD);

@@ -629,6 +629,7 @@ public:
 };
 
 
+#if 0  // Temporarly commented out. It still have to be thoroughly tested...
 
 template<class MESH_TYPE> 
 class WachspressTexCoordOptimization:public TexCoordOptimization<MESH_TYPE>{
@@ -719,6 +720,7 @@ public:
   
 };
 
+#endif
 
 template<class MESH_TYPE> 
 class MeanValueTexCoordOptimization:public TexCoordOptimization<MESH_TYPE>{
@@ -832,6 +834,7 @@ public:
     #define vs (f->V(s)->P())
     #define vd (f->V(d)->P())
     #define vo (f->V(o)->P())
+    #define EPSILON 1e-4
 
 	  for (FaceIterator f=Super::m.face.begin(); f!=Super::m.face.end(); f++){
 		  int s=0,d=1,o=2;

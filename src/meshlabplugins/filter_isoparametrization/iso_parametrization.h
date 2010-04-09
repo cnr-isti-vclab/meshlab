@@ -1826,7 +1826,7 @@ public:
 		vcg::tri::Append<ParamMesh,MeshType>::Mesh(*param_mesh,*_input_mesh);
 
 		///quality copy to index of texture
-		for (int i=0;i<param_mesh->vert.size();i++)
+    for (size_t i=0;i<param_mesh->vert.size();i++)
 			param_mesh->vert[i].T().N()=(int)param_mesh->vert[i].Q();
 
 		/*if (AbsMesh()!=NULL)
