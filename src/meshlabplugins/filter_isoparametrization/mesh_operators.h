@@ -16,7 +16,7 @@ void UpdateStructures(MeshType *mesh)
 	vcg::tri::UpdateNormals<MeshType>::PerFaceNormalized(*mesh);
 	vcg::tri::UpdateNormals<MeshType>::PerVertexNormalized(*mesh);
 	vcg::tri::UpdateTopology<MeshType>::FaceFace(*mesh);
-	vcg::tri::UpdateTopology<BaseMesh>::TestFaceFace(*mesh);
+  vcg::tri::UpdateTopology<MeshType>::TestFaceFace(*mesh);
 	vcg::tri::UpdateTopology<MeshType>::VertexFace(*mesh);
 	vcg::tri::UpdateEdges<MeshType>::Set(*mesh);
 	vcg::tri::UpdateFlags<MeshType>::FaceBorderFromFF(*mesh);
