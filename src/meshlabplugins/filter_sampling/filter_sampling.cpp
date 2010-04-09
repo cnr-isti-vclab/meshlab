@@ -132,8 +132,8 @@ public:
 	CMeshO *samplePtMesh;  /// the mesh containing the sample points
 	CMeshO *closestPtMesh; /// the mesh containing the corresponding closest points that have been found
 	
-	MetroMeshVertexGrid   unifVertexGrid;
-	MetroMeshFaceGrid   unifFaceGrid;
+  MetroMeshVertexGrid   unifGridVert;
+  MetroMeshFaceGrid   unifGridFace;
 
 	// Parameters
 		double          min_dist;
@@ -146,6 +146,7 @@ public:
     // globals parameters driving the samples. 
     int             n_total_samples;
     int             n_samples;
+    bool useVertexSampling;
 		float dist_upper_bound;  // samples that have a distance beyond this threshold distance are not considered. 
 		typedef tri::FaceTmark<CMeshO> MarkerFace;
 		MarkerFace markerFunctor;
@@ -165,9 +166,12 @@ public:
 		{
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
 			tri::UpdateFlags<CMeshO>::FaceProjection(*m);
+      if(m->fn==0) useVertexSampling = true;
+              else useVertexSampling = false;
 
-			unifFaceGrid.Set(m->face.begin(),m->face.end());
-			markerFunctor.SetMesh(m);
+      if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
+                      else  unifGridFace.Set(m->face.begin(),m->face.end());
+      markerFunctor.SetMesh(m);
 			hist.SetRange(0.0, m->bbox.Diag()/100.0, 100);
 		}
 		min_dist = std::numeric_limits<double>::max();
@@ -198,9 +202,13 @@ float AddSample(const CMeshO::CoordType &startPt,const CMeshO::CoordType &startN
 
     // compute distance between startPt and the mesh S2
 		CMeshO::FaceType   *nearestF=0;
-		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
+    CMeshO::VertexType   *nearestV=0;
+    vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 		dist=dist_upper_bound;
-		nearestF =  unifFaceGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+    if(useVertexSampling)
+      nearestV =  tri::GetClosestVertex<CMeshO,MetroMeshVertexGrid>(*m,unifGridVert,startPt,dist_upper_bound,dist);
+      else
+       nearestF =  unifGridFace.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
 
     // update distance measures
     if(dist == dist_upper_bound)
@@ -323,7 +331,7 @@ void AddVert(CMeshO::VertexType &p)
 
 				Point3f interp;
 				bool ret = InterpolationParameters(*nearestF,closestPt, interp[0], interp[1], interp[2]);
-				assert(ret);
+        //assert(ret);
 				interp[2]=1.0-interp[1]-interp[0];
 
 				if(coordFlag) p.P()=closestPt;
@@ -419,7 +427,10 @@ FilterDocSampling::FilterDocSampling()
 {
   switch(ID(action))
   {
-		case FP_VORONOI_COLORING :
+
+    case FP_DISK_COLORING :
+    case FP_VORONOI_COLORING : return  MeshModel::MM_VERTFACETOPO  | MeshModel::MM_VERTQUALITY| MeshModel::MM_VERTCOLOR;
+
 		case FP_VORONOI_CLUSTERING : return  MeshModel::MM_VERTFACETOPO;
 
 		case FP_VERTEX_RESAMPLING :
@@ -431,8 +442,7 @@ FilterDocSampling::FilterDocSampling()
 		case FP_VARIABLEDISK_SAMPLING :
 		case FP_POISSONDISK_SAMPLING :
 		case FP_STRATIFIED_SAMPLING :   
-		case FP_CLUSTERED_SAMPLING :   
-		case FP_DISK_COLORING :  return 0; 
+    case FP_CLUSTERED_SAMPLING : return 0;
 		
 		case FP_TEXEL_SAMPLING  :  return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTNORMAL;
 
@@ -859,6 +869,14 @@ case FP_CLUSTERED_SAMPLING :
 			bool sampleFauxEdge=par.getBool("SampleFauxEdge");
 			bool sampleFace=par.getBool("SampleFace");
 
+      if(sampleEdge && mm0->cm.fn==0) {
+        Log("Disabled edge sampling. Meaningless when sampling point clouds");
+        sampleEdge=false;
+      }
+      if(sampleFace && mm0->cm.fn==0) {
+        Log("Disabled face sampling. Meaningless when sampling point clouds");
+        sampleFace=false;
+      }
 			
             mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
             mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
@@ -1062,7 +1080,7 @@ case FP_CLUSTERED_SAMPLING :
 						Box3f bb(p-Point3f(radius,radius,radius),p+Point3f(radius,radius,radius));
 						GridGetInBox(sht, markerFunctor, bb, closests);
 						
-						for(int i=0; i<closests.size(); ++i)
+            for(size_t i=0; i<closests.size(); ++i)
 						{
 							float dist = Distance(p,closests[i]->cP());
 							if(dist < radius)
