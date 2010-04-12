@@ -33,6 +33,7 @@
 #include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/complex/trimesh/update/curvature_fitting.h>
 #include <vcg/space/normal_extrapolation.h>
+#include <vcg/space/fitting3.h>
 #include "quadric_tex_simp.h"
 #include "quadric_simp.h"
 
@@ -57,6 +58,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 		<< FP_REORIENT
 		<< FP_FLIP_AND_SWAP
 		<< FP_ROTATE
+    << FP_ROTATE_FIT
+    << FP_PRINCIPAL_AXIS
 		<< FP_SCALE
 		<< FP_CENTER
 		<< FP_INVERT_FACES
@@ -121,8 +124,10 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 		case FP_REORIENT                         :
 		case FP_COMPUTE_PRINC_CURV_DIR           :
 		case FP_ROTATE                           :
+    case FP_ROTATE_FIT                           :
 		case FP_CENTER                           :
 		case FP_SCALE                            :
+    case FP_PRINCIPAL_AXIS                            :
 		case FP_FLIP_AND_SWAP                    : return MeshFilterInterface::Normal;
 
 		case FP_FREEZE_TRANSFORM                 :
@@ -155,6 +160,8 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 		case FP_SCALE                            : return tr("Scale Mesh");
 		case FP_CENTER                           : return tr("Center Mesh");
 		case FP_ROTATE                           : return tr("Rotate Mesh");
+    case FP_ROTATE_FIT                       : return tr("Rotate to Fit to a plane");
+    case FP_PRINCIPAL_AXIS                   : return tr("Align to Principal Axis");
 		case FP_FLIP_AND_SWAP                    : return tr("Flip and/or swap axis");
 		case FP_FREEZE_TRANSFORM                 : return tr("Freeze Current Matrix");
 		case FP_RESET_TRANSFORM                  : return tr("Reset Current Matrix");
@@ -198,6 +205,8 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_SCALE                            : return tr("Generate a matrix transformation that scale the mesh. The mesh can be also automatically scaled to a unit side box. ");
 		case FP_CENTER                           : return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
 		case FP_ROTATE                           : return tr("Generate a matrix transformation that rotates the mesh. The mesh can be rotated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
+    case FP_ROTATE_FIT                       : return tr("Generate a matrix transformation that rotates the mesh so that the selected set of points fit well the XY plane.");
+    case FP_PRINCIPAL_AXIS                   : return tr("Generate a matrix transformation that rotates the mesh aligning it to its principal axis of inertia. if the mesh is watertight the Intertia tensor is computed assuming the interior of the mesh has a uniform density. In case of an open mesh or a point clouds the inerta tensor is computed assuming each vertex is a constant puntual mass.");
 		case FP_FLIP_AND_SWAP                    : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order.");
 		case FP_RESET_TRANSFORM                  : return tr("Set the current transformation matrix to the Identity. ");
 		case FP_FREEZE_TRANSFORM                 : return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
@@ -246,6 +255,8 @@ int ExtraMeshFilterPlugin::getRequirements(QAction * action)
 		case FP_REMOVE_FACES_BY_EDGE             :
 		case FP_CLUSTERING                       :
 		case FP_ROTATE                           :
+    case FP_ROTATE_FIT                       :
+    case FP_PRINCIPAL_AXIS                   :
 		case FP_CENTER                           :
 		case FP_SCALE                            :
 		case FP_RESET_TRANSFORM                  :
@@ -355,28 +366,32 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 			parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
 			break;
 
-		case FP_ROTATE:
-			{
-				QStringList rotMethod;
-				rotMethod.push_back("X axis");
-				rotMethod.push_back("Y axis");
-				rotMethod.push_back("Z axis");
-				rotMethod.push_back("custom axis");
-				parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
-				QStringList rotCenter;
-				rotCenter.push_back("origin");
-				rotCenter.push_back("barycenter");
-				rotCenter.push_back("custom point");
-				parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
-				parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
-				parlst.addParam(new RichBool("snapFlag",false,"Snap angle","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
-				parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
-				parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
-				parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
-			}
-			break;
-
-		case FP_CENTER:
+  case FP_ROTATE:
+    {
+      QStringList rotMethod;
+      rotMethod.push_back("X axis");
+      rotMethod.push_back("Y axis");
+      rotMethod.push_back("Z axis");
+      rotMethod.push_back("custom axis");
+      parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
+      QStringList rotCenter;
+      rotCenter.push_back("origin");
+      rotCenter.push_back("barycenter");
+      rotCenter.push_back("custom point");
+      parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
+      parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
+      parlst.addParam(new RichBool("snapFlag",false,"Snap angle","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
+      parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
+      parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+      parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
+    }
+    break;
+    case FP_PRINCIPAL_AXIS:
+      {
+        parlst.addParam(new RichBool("pointsFlag",m.cm.fn==0,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
+      }
+     break;
+    case FP_CENTER:
 			{
 				Box3f &bb=m.cm.bbox;
 				parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.DimX(),5.0*bb.DimX(),"X Axis","Scaling"));
@@ -652,6 +667,35 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	if (ID(filter) == FP_RESET_TRANSFORM ) {
 		m.cm.Tr.SetIdentity();
 	}
+  if (ID(filter) ==  FP_ROTATE_FIT)
+    {
+      Box3f bbox; //il bbox delle facce selezionate
+      std::vector< Point3f > selected_pts; //devo copiare i punti per il piano di fitting
+
+      if(m.cm.svn==0)
+      {tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+        tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
+      }
+      for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+        if(!(*vi).IsD() && (*vi).IsS() ){
+        Point3f p = (*vi).P();
+        bbox.Add(p);
+        selected_pts.push_back(p);
+      }
+      Log("Using %i vertexes to fit a build plane",int(selected_pts.size()));
+      Plane3f plane;
+
+      PlaneFittingPoints(selected_pts,plane); //calcolo il piano di fitting
+
+      Log("New Z axis is %f %f %f",plane.Direction()[0],plane.Direction()[1],plane.Direction()[2]);
+      Matrix44f tr1; tr1.SetTranslate(-bbox.Center());
+      Matrix44f tr2; tr2.SetTranslate(bbox.Center());
+      Point3f rotAxis=Point3f(0,0,1) ^ plane.Direction();
+      rotAxis.Normalize();
+      float angleRad = Angle(Point3f(0,0,1),plane.Direction());
+      Matrix44f rt; rt.SetRotateRad(angleRad,rotAxis);
+      m.cm.Tr = rt*tr1;
+    }
 
 	if (ID(filter) == FP_ROTATE ) {
 		Matrix44f trRot; trRot.SetIdentity();
@@ -684,6 +728,57 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		m.cm.Tr=trTran*trRot*trTranInv;
 	}
 
+  if (ID(filter) == (FP_PRINCIPAL_AXIS) ) {
+    if(par.getBool("pointsFlag"))
+    {
+      Matrix33f cov;
+      Point3f bp(0,0,0);
+      vector<Point3f> PtVec;
+      for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end();++vi)
+        if(!(*vi).IsD()) {
+          PtVec.push_back((*vi).cP());
+          bp+=(*vi).cP();
+        }
+
+      bp/=m.cm.vn;
+
+      cov.Covariance(PtVec,bp);
+      for(int i=0;i<3;i++)
+        qDebug("%8.3f %8.3f %8.3f ",cov[i][0],cov[i][1],cov[i][2]);
+      qDebug("\n");
+      Matrix33f eigenvecMatrix;
+      Point3f eigenvecVector;
+      int n;
+      Jacobi(cov,eigenvecVector,eigenvecMatrix,n);
+      for(int i=0;i<3;i++)
+        qDebug("%8.3f %8.3f %8.3f ",eigenvecMatrix[i][0],eigenvecMatrix[i][1],eigenvecMatrix[i][2]);
+
+      qDebug("\n%8.3f %8.3f %8.3f ",eigenvecVector[0],eigenvecVector[1],eigenvecVector[2]);
+
+      Matrix44f trTran; trTran.SetIdentity();
+      for(int i=0;i<3;++i)
+        for(int j=0;j<3;++j)
+          trTran[i][j] = eigenvecMatrix[i][j];
+      trTran.transposeInPlace();
+      m.cm.Tr=trTran;
+    }
+    else
+    {
+      tri::Inertia<CMeshO> I;
+      I.Compute(m.cm);
+
+      Matrix44f PCA;
+      Point4f pcav;
+      I.InertiaTensorEigen(PCA,pcav);
+      for(int i=0;i<4;i++)
+          qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
+      PCA.transposeInPlace();
+
+      for(int i=0;i<4;i++)
+          qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
+      m.cm.Tr=PCA;
+    }
+  }
 	if (ID(filter) == (FP_CENTER) ) {
 		Matrix44f trTran; trTran.SetIdentity();
 
@@ -1000,11 +1095,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			vcg::tri::AttributeSeam::ASExtract<CMeshO, CMeshO> vExtract(mask);
 			vcg::tri::AttributeSeam::ASCompare<CMeshO>         vCompare(mask);
 			const bool r = vcg::tri::AttributeSeam::SplitVertex(m.cm, vExtract, vCompare);
-			m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
-			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-			m.clearDataMask(MeshModel::MM_VERTFLAGBORDER);
-			return r;
+      return r;
 		}
 	}
 
