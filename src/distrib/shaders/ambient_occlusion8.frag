@@ -78,6 +78,13 @@ void main(void)
 {
    float potTexPages = getPotSize(numTexPages);
 
-   for (float z3D=0.0; z3D<numTexPages; z3D+=1.0)
-      gl_FragData[int(z3D)] = occlusionQuery(z3D, potTexPages);
+      if(numTexPages > 0.) gl_FragData[0] = occlusionQuery(0., potTexPages);
+      if(numTexPages > 1.) gl_FragData[1] = occlusionQuery(1., potTexPages);
+      if(numTexPages > 2.) gl_FragData[2] = occlusionQuery(2., potTexPages);
+      if(numTexPages > 3.) gl_FragData[3] = occlusionQuery(3., potTexPages);
+      if(numTexPages > 4.) gl_FragData[4] = occlusionQuery(4., potTexPages);
+      if(numTexPages > 5.) gl_FragData[5] = occlusionQuery(5., potTexPages);
+      if(numTexPages > 6.) gl_FragData[6] = occlusionQuery(6., potTexPages);
+      if(numTexPages > 7.) gl_FragData[7] = occlusionQuery(7., potTexPages);
+	
 }
