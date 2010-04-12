@@ -202,12 +202,31 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 				Matrix33f IT;
 				I.InertiaTensor(IT);
 				Log("Inertia Tensor is :");		
-				Log("    | % 8.4f  8.4f  8.4f |",IT[0][0],IT[0][1],IT[0][2]);		
-				Log("    | % 8.4f  8.4f  8.4f |",IT[1][0],IT[1][1],IT[1][2]);		
-				Log("    | % 8.4f  8.4f  8.4f |",IT[2][0],IT[2][1],IT[2][2]);								
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[0][0],IT[0][1],IT[0][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
 				
 				Log("Mesh Surface is %f", Area);
 				
+        Matrix44f PCA;
+        Point4f pcav;
+        I.InertiaTensorEigen(PCA,pcav);
+        Log("Principal axes are :");
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
+
+       // Point3f ax0(PCA[0][0],PCA[0][1],PCA[0][2]);
+       // Point3f ax1(PCA[1][0],PCA[1][1],PCA[1][2]);
+       // Point3f ax2(PCA[2][0],PCA[2][1],PCA[2][2]);
+
+       // Log("ax0*ax1 %f (len ax0 %f) ",ax0*ax1, Norm(ax0));
+       // Log("ax1*ax2 %f (len ax1 %f) ",ax1*ax2, Norm(ax1));
+       // Log("ax0*ax2 %f (len ax2 %f) ",ax0*ax2, Norm(ax2));
+
+        Log("axis momenta are :");
+        Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
+
 			}
 		break;
         /************************************************************/
