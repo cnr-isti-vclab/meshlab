@@ -71,7 +71,7 @@ void RenderRFX::initActionList()
 	}
 #endif
 
-	if (!shadersDir.cd("shadersrm")) {
+	if (!shadersDir.cd("shaders\\shadersrm")) {
 		QMessageBox::information(0, "MeshLab",
 		                            "Unable to find the render monkey "
 		                            "shaders directory.\n"
