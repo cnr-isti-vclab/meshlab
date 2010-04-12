@@ -357,14 +357,18 @@ public:
     virtual QAction *AC(FilterIDType filterID)
   	{
 			QString idName=this->filterName(filterID);
+      return AC(idName);
+    }
+
+    virtual QAction *AC(QString idName)
+    {
       foreach( QAction *tt, actionList)
         if( idName  == tt->text() ) return tt;
-			
-			qDebug("unable to find the action corresponding to action  '%i'",filterID);
-			assert(0);
+
+      qDebug("unable to find the action corresponding to action  '%s'",qPrintable(idName));
+      assert(0);
       return 0;
     }
-	 
 	 
     virtual QList<QAction *> actions() const { return actionList;}
 	  virtual QList<FilterIDType> types() const { return typeList;}

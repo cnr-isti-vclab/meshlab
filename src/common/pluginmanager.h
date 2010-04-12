@@ -20,7 +20,8 @@ public:
   static QString getBaseDirPath();
 
 	QDir pluginsDir;
-	QMap<QString,QAction*> actionFilterMap;
+  QMap<QString, QAction*> actionFilterMap;
+  QMap<QString, MeshFilterInterface*> stringFilterMap;
 	QVector<MeshIOInterface*> meshIOPlug;
 	QVector<MeshFilterInterface*> meshFilterPlug;
 	QVector<MeshRenderInterface*> meshRenderPlug;

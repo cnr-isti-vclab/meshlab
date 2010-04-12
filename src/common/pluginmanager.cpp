@@ -39,6 +39,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
         foreach(QAction *filterAction, iFilter->actions())
 				{
 					actionFilterMap.insert(filterAction->text(),filterAction);
+          stringFilterMap.insert(filterAction->text(),iFilter);
 					iFilter->initGlobalParameterSet(filterAction,defaultGlobal);
 				}
 			}

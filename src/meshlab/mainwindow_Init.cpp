@@ -474,10 +474,12 @@ void MainWindow::createMenus()
 
 void MainWindow::fillFilterMenu()
 {
-	foreach(MeshFilterInterface *iFilter,PM.meshFilterPlugins())
-	{
-		foreach(QAction *filterAction, iFilter->actions())
-		{
+
+  QMap<QString,MeshFilterInterface *>::iterator msi;
+  for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
+    {
+      MeshFilterInterface * iFilter= msi.value();
+      QAction *filterAction = iFilter->AC((msi.key()));
 			filterAction->setToolTip(iFilter->filterInfo(filterAction));
 			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 			int filterClass = iFilter->getClass(filterAction);
@@ -501,7 +503,6 @@ void MainWindow::fillFilterMenu()
 			if(!filterAction->icon().isNull())
 				filterToolBar->addAction(filterAction);
 		}
-	}	
 }
 
 void MainWindow::fillDecorateMenu()
