@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "render_rfx.h"
+#include <common/pluginmanager.h>
 
 RenderRFX::RenderRFX()
 {
@@ -54,7 +55,7 @@ QList<QAction*> RenderRFX::actions()
 
 void RenderRFX::initActionList()
 {
-	QDir shadersDir = QDir(qApp->applicationDirPath());
+	QDir shadersDir = PluginManager::getBaseDirPath();
 
 #if defined(Q_OS_WIN)
 	if (shadersDir.dirName() == "debug"   ||
