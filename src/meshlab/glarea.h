@@ -52,6 +52,7 @@ public:
 	QString basename;
 	int counter;
 	int resolution;
+  bool transparentBackground;
 		
 	SnapshotSetting()
 	{
@@ -59,6 +60,7 @@ public:
 		basename="snapshot";
 		counter=0;
 		resolution=1;
+    transparentBackground=true;
 	};
 };
 
@@ -104,7 +106,6 @@ public:
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 
-    const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
 	void updateFps(float deltaTime);
 	
 	void showTrackBall(bool b)		{trackBallVisible = b; updateGL();}
@@ -114,7 +115,6 @@ public:
 
 	void toggleHelpVisible()      {helpVisible = !helpVisible; update();}  
 	void setBackFaceCulling(bool enabled);
-	void setSnapshotSetting(const SnapshotSetting & s);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
 	void saveSnapshot();
@@ -283,12 +283,12 @@ public:
 	float nearPlane;
 	float farPlane;
   float pointSize;
+  SnapshotSetting ss;
 private:
 	float cfps;
 	float lastTime;
 	
-	SnapshotSetting ss;
-	QImage snapBuffer;
+  QImage snapBuffer;
 	bool takeSnapTile;
   
 	enum AnimMode { AnimNone, AnimSpin, AnimInterp};

@@ -248,12 +248,14 @@ void GLArea::paintGL()
   QTime time;
   time.start();
 	initTexture();
-	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
+  glClearColor(1.0,1.0,1.0,0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 	setView();  // Set Modelview and Projection matrix
-	drawGradient();  // draws the background
+  if((!takeSnapTile) || (takeSnapTile && !ss.transparentBackground) )
+    drawGradient();  // draws the background
+
   drawLight();
 
 	glPushMatrix();
@@ -825,11 +827,6 @@ void GLArea::setLightModel()
 		}
 	}
     else glDisable(GL_LIGHTING);
-}
-
-void GLArea::setSnapshotSetting(const SnapshotSetting & s)
-{
-	ss=s;
 }
 
 void GLArea::setView()

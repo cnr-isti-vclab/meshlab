@@ -1053,14 +1053,12 @@ bool MainWindow::saveSnapshot()
 
 	SaveSnapshotDialog dialog(this);
 
-	SnapshotSetting ss = GLA()->getSnapshotSetting();
-	dialog.setValues(ss);
+  dialog.setValues(GLA()->ss);
 
 	if (dialog.exec()==QDialog::Accepted)
 	{
-		ss=dialog.getValues();
-		GLA()->setSnapshotSetting(ss);
-		GLA()->saveSnapshot();
+    GLA()->ss=dialog.getValues();
+    GLA()->saveSnapshot();
 		return true;
 	}
 

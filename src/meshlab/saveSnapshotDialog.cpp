@@ -64,7 +64,7 @@ SnapshotSetting SaveSnapshotDialog::getValues()
 	settings.outdir=ui->outDirLineEdit->text();
 	settings.counter=ui->counterSpinBox->value();
 	settings.resolution=ui->resolutionSpinBox->value();
-
+  settings.transparentBackground=ui->backgroundCheckBox->isChecked();
 	return settings;
 }
 
