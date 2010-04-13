@@ -46,7 +46,8 @@ MultiViewer_Container::MultiViewer_Container(QWidget *parent)
 }
 
 MultiViewer_Container::~MultiViewer_Container(){
-	for each(Viewer* viewer in viewerList)
+
+        foreach(Viewer* viewer,viewerList)
 		delete viewer;
 	delete mainLayout;
 	delete mainSplitter;
@@ -255,7 +256,7 @@ void MultiViewer_Container::updateCurrent(int current){
 }
 
 void MultiViewer_Container::updateLayout(){
-	for each(Viewer* viewer in viewerList)
+        foreach( Viewer* viewer,viewerList)
 		//splitter->removeWidget((GLArea*)viewer);
 	for (int i=0; i< viewerList.count(); i++){
 		int row = i/2;
@@ -265,7 +266,7 @@ void MultiViewer_Container::updateLayout(){
 }
 
 Viewer* MultiViewer_Container::currentView(){
-	for each ( Viewer* viewer in viewerList)
+        foreach( Viewer* viewer,viewerList)
 		if (viewer->getId() == currentId)
 			return viewer;
 }
