@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'layerDialog.ui'
 **
-** Created: Fri 9. Apr 16:41:36 2010
+** Created: Tue 13. Apr 16:55:48 2010
 **      by: Qt User Interface Compiler version 4.5.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!

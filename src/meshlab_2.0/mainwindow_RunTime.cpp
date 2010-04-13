@@ -238,13 +238,9 @@ void MainWindow::updateMenus()
 				  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
 
 				setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
-				setSplitHAct->setEnabled(mvc->viewerCounter()<6);
-				setSplitVAct->setEnabled(mvc->viewerCounter()<6);
 				GLArea* current =(GLArea*) mvc->currentView();
-				if(current->size().height()/2 < current->minimumSizeHint().height())
-					setSplitHAct->setEnabled(false);
-				if(current->size().width()/2 < current->minimumSizeHint().width())
-					setSplitVAct->setEnabled(false);
+				setSplitHAct->setEnabled(current->size().height()/2 > current->minimumSizeHint().height());
+				setSplitVAct->setEnabled(current->size().width()/2 > current->minimumSizeHint().width());
 
 
 	} // if active
