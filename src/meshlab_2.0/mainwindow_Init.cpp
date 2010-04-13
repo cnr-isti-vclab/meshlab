@@ -274,11 +274,17 @@ void MainWindow::createActions()
 	connect(showFilterScriptAct, SIGNAL(triggered()), this, SLOT(showFilterScript()));
 
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
+	
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
+	
+	setSplitGroupAct = new QActionGroup(this);	setSplitGroupAct->setExclusive(true);
 
-	setSplitAct = new QAction(tr("&Split view"),this);
-	connect(setSplitAct, SIGNAL(triggered()), this, SLOT(setSplit()));
+	setSplitHAct	  = new QAction(tr("&Horizontally"),setSplitGroupAct);
+
+	setSplitVAct	  = new QAction(tr("&Vertically"),setSplitGroupAct);
+
+	connect(setSplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(setSplit(QAction *)));
 
 	setUnsplitAct = new QAction(tr("&Close current view"),this);
 	connect(setUnsplitAct, SIGNAL(triggered()), this, SLOT(setUnsplit()));
@@ -458,7 +464,15 @@ void MainWindow::createMenus()
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
 	preferencesMenu->addAction(setCustomizeAct);
-	preferencesMenu->addAction(setSplitAct);
+
+		// Split SUBmenu
+	splitModeMenu = preferencesMenu->addMenu(tr("&Split current view"));
+
+	splitModeMenu->addAction(setSplitHAct);
+	splitModeMenu->addAction(setSplitVAct);
+
+	////////
+
 	preferencesMenu->addAction(setUnsplitAct);
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////

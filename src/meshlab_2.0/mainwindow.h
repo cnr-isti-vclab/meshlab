@@ -126,7 +126,7 @@ private slots:
 
 	///////////Slot Menu Preferences /////////////////
 	//void setCustomize();
-	void setSplit();
+	void setSplit(QAction *qa);
 	void setUnsplit();
 	///////////Slot Menu Help ////////////////////////
 	/*void about();
@@ -246,6 +246,7 @@ private:
 	QMenu *renderModeMenu;
 	QMenu *lightingModeMenu;
 	QMenu *colorModeMenu;
+	QMenu *splitModeMenu;
 
 	//View Menu and SubMenu //////
 	QMenu *viewMenu;
@@ -310,7 +311,9 @@ private:
 	QAction *closeAllAct;
 	///////////Actions Menu Preferences /////////////////
 	QAction *setCustomizeAct;
-	QAction *setSplitAct;
+	QAction *setSplitHAct;
+	QAction *setSplitVAct;
+    QActionGroup *setSplitGroupAct;
 	QAction *setUnsplitAct;
 
 	///////////Actions Menu Help ////////////////////////

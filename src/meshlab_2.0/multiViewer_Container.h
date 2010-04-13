@@ -30,6 +30,7 @@
 #include <QWidget>
 #include <QVector>
 #include <QGridLayout>
+#include <QSplitter>
 
 #include "../common/meshmodel.h"
 #include "viewer.h"
@@ -49,7 +50,7 @@ public:
     ~MultiViewer_Container();
 	
 	/// load an image in the painter widget, the imageNumber is the index of imageList that has the image wanted (0-base index!)
-	void addView(Viewer* viewer);
+	void addView(Viewer* viewer, bool horiz);
 	void removeView(int);
 	/// update all the visual widgets at one time (glw, imageVis, tree, imageMag)
 	void updateAll();
@@ -74,6 +75,7 @@ private:
 	int idCounter;
 	QVector<Viewer *> viewerList; /// widgets for the OpenGL contexts and images
 	QGridLayout *mainLayout;
+	QSplitter* mainSplitter;
 
 	void keyPressEvent(QKeyEvent *keyEv);
 	// other stuff

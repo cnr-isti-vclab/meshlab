@@ -603,6 +603,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 	    else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
   }
   emit currentViewerChanged(id);
+  emit updateMainWindowMenus();
 	update();
 }
 

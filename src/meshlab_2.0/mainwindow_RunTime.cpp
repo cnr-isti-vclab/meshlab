@@ -238,7 +238,13 @@ void MainWindow::updateMenus()
 				  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
 
 				setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
-				setSplitAct->setEnabled(mvc->viewerCounter()<6);
+				setSplitHAct->setEnabled(mvc->viewerCounter()<6);
+				setSplitVAct->setEnabled(mvc->viewerCounter()<6);
+				GLArea* current =(GLArea*) mvc->currentView();
+				if(current->size().height()/2 < current->minimumSizeHint().height())
+					setSplitHAct->setEnabled(false);
+				if(current->size().width()/2 < current->minimumSizeHint().width())
+					setSplitVAct->setEnabled(false);
 
 
 	} // if active
@@ -846,7 +852,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					    mvcont = new MultiViewer_Container(mdiarea); 
 						int id = mvcont->getNextViewerId();
 						gla=new GLArea(mdiarea,&currentGlobalParams,id, &(mvcont->meshDoc));		
-						mvcont->addView(gla);
+						mvcont->addView(gla, true);
                         addDockWidget(Qt::RightDockWidgetArea,mvcont->layerDialog);
 						mvcont->connectToLayerDialog(gla);
 						newGla =true;
@@ -1129,7 +1135,7 @@ void MainWindow::showLayerDlg() {
 //	dialog.exec();
 //}
 
-void MainWindow::setSplit()
+void MainWindow::setSplit(QAction *qa)
 {
 	if(mdiarea->currentSubWindow()==0) return;
 	MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
@@ -1137,31 +1143,14 @@ void MainWindow::setSplit()
 	  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
 	GLArea *glw =  (GLArea*)(mvc->currentView());
 	int id = mvc->getNextViewerId();
-	GLArea *glwClone=new GLArea(mdiarea,&currentGlobalParams,id, &(mvc->meshDoc));		
-	mvc->addView(glwClone);
-
-	//copia puntatori della lista di mesh
-	/*glwClone->meshDoc.busy=true;
-	for each(MeshModel *mmp in glw->meshDoc.meshList)
-		glwClone->meshDoc.addNewMesh(mmp->fullName().toLatin1(), mmp);
-
-	glwClone->setFileName(glwClone->mm()->shortName());
-
-	int mask =0;
-	if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
-		glwClone->setColorMode(GLW::CMPerFace);
-	if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
-	{
-		glwClone->setColorMode(GLW::CMPerVert);
-	}
-	if(glw->mm()->cm.textures.empty())
-	{
-		glwClone->setTextureMode(GLW::TMPerWedgeMulti);
-	}*/
+	GLArea *glwClone=new GLArea(mdiarea,&currentGlobalParams,id, &(mvc->meshDoc));	
+	if(qa->text() == tr("&Horizontally"))	
+		mvc->addView(glwClone, false);
+	else
+		mvc->addView(glwClone, true);
 
 	updateMenus();
 	
-	/*glwClone->meshDoc.busy=false;*/
 	glwClone->resetTrackBall();
 	
 	glwClone->update();
