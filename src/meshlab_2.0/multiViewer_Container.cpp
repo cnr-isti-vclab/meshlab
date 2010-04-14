@@ -26,30 +26,23 @@
 using namespace vcg; 
 
 MultiViewer_Container::MultiViewer_Container(QWidget *parent)
-: QWidget(parent)
+: QSplitter(parent)
 {
 	viewerList = QVector<Viewer*>();
-	
-	mainLayout = new QGridLayout;
-	mainSplitter = new QSplitter();
-	mainSplitter->setChildrenCollapsible(false);
-	mainSplitter->setOpaqueResize(false);
-	mainLayout->addWidget(mainSplitter);
+
+	setChildrenCollapsible(false);
 
 	idCounter=0;
 
 	layerDialog = new LayerDialog(this);
-	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	layerDialog->setAllowedAreas (Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	
-	setLayout(mainLayout);
 	
 }
 
 MultiViewer_Container::~MultiViewer_Container(){
 	foreach(Viewer* viewer, viewerList)
 		delete viewer;
-	delete mainLayout;
-	delete mainSplitter;
 	delete layerDialog;
 }
 
@@ -58,17 +51,37 @@ int MultiViewer_Container::getNextViewerId(){
 }
 
 void MultiViewer_Container::addView(Viewer* viewer, bool horiz){
+	//The Viewers are organized like in a BSP tree.
+	// Every new viewer are added within an Horizontal splitter. Its orientation could change according to next insertions.
+	//		HSplit
+	//      /   \
+	//   View1   VSplit
+	//           /   \
+	//        View2  HSplit
+	//                 /
+	//               View3
+	//In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions). 
+
 	viewerList.append(viewer);
 	int count = viewerCounter();
 
-	if (count==1){
-		mainSplitter->addWidget((GLArea*) viewer);
+	//CASE 1: only when the first viewer is opened. Here there is no current view.
+	if (count==1){ 
+		addWidget((GLArea*) viewer);
 	}
 
 	else{
 		GLArea* current = (GLArea*)currentView();
 		QSplitter* parentSplitter = qobject_cast<QSplitter *>(current->parent());
-		if(parentSplitter->count()==1){
+		//CASE 2: Simple insertion inside the parent splitter (right branch).
+		//Example: Add View3:
+		//
+		//			  HSplit					HSplit
+		//             /             =>			/    \
+		//           View1					 View1   HSplit
+		//                                             |
+		//                                           View2
+		if(parentSplitter->count()==1){ 
 			if(horiz)
 				parentSplitter->setOrientation(Qt::Horizontal);
 			else parentSplitter->setOrientation(Qt::Vertical);
@@ -78,6 +91,7 @@ void MultiViewer_Container::addView(Viewer* viewer, bool horiz){
 			parentSplitter->addWidget(newSplitter);
 			newSplitter->addWidget((GLArea*)viewer);
 
+			//Setting the size of the widgets inside parent splitter.
 			QList<int> *sizes = new QList<int>();
 			
 			if(parentSplitter->orientation()== Qt::Horizontal){
@@ -91,24 +105,36 @@ void MultiViewer_Container::addView(Viewer* viewer, bool horiz){
 
 			parentSplitter->setSizes(*sizes);
 
+			parentSplitter->setHandleWidth(2);
+
 			newSplitter->setChildrenCollapsible(false);
 			
 		}
+		//CASE 3: The parent splitter has two children. The insertion is on the left branch.
+        //Example: Add View3:
+		//
+		//			  	HSplit					 HSplit
+		//        		/    \					 /    \
+		//        View1     HSplit      =>   VSplit   HSplit 
+		//					  |              /    \      |
+		//					View2        View1  HSplit  View2
+		//                                         |
+		//                                       View3
 		else{
-			int index = parentSplitter->indexOf(current);
 			QSplitter* newSplitter;
 			if(horiz)
 				newSplitter = new QSplitter(Qt::Horizontal);
 			else newSplitter = new QSplitter(Qt::Vertical);
 
 			QList<int> sizes2 = parentSplitter->sizes();
-			parentSplitter->insertWidget(index, newSplitter);
+			parentSplitter->insertWidget(0, newSplitter);
 			
 			QSplitter* newSplitter2 = new QSplitter(Qt::Horizontal);
 			newSplitter2->addWidget((GLArea*)viewer);
 			current->setParent(newSplitter);
 			newSplitter->addWidget(newSplitter2);
 
+			//Setting the size of the widgets inside parent splitter
 			QList<int> *sizes = new QList<int>();
 			if(newSplitter->orientation()== Qt::Horizontal){
 					sizes->append(parentSplitter->width()/2);
@@ -121,164 +147,52 @@ void MultiViewer_Container::addView(Viewer* viewer, bool horiz){
 
 			parentSplitter->setSizes(sizes2);
 			newSplitter->setSizes(*sizes);
+			newSplitter->setHandleWidth(2);
 
 			newSplitter->setChildrenCollapsible(false);
 			newSplitter2->setChildrenCollapsible(false);
 		}
 	}
 
-
-	//if (count<=2){
-	//	if(horiz)
-	//		mainSplitter->setOrientation(Qt::Horizontal);
-	//	else mainSplitter->setOrientation(Qt::Vertical);
-	//	mainSplitter->addWidget((GLArea*)viewer);
-	//}
-	//else{
-	//	GLArea* current = (GLArea*)currentView();
-	//	QSplitter* parentSplitter = qobject_cast<QSplitter *>(current->parent());
-	//	if(parentSplitter->count()==2){
-	//		int index = parentSplitter->indexOf(current);
-	//		QSplitter* newSplitter;
-	//		if(horiz)
-	//			newSplitter = new QSplitter(Qt::Horizontal);
-	//		else newSplitter = new QSplitter(Qt::Vertical);
-	//		parentSplitter->insertWidget(index, newSplitter);
-	//		current->setParent(newSplitter);
-	//		newSplitter->addWidget((GLArea*)viewer);
-
-	//		newSplitter->setChildrenCollapsible(false);
-	//	}
-	//	/*else{
-	//		if(horiz)
-	//			parentSplitter->setOrientation(Qt::Horizontal);
-	//		else parentSplitter->setOrientation(Qt::Vertical);
-	//		parentSplitter->addWidget((GLArea*)viewer);
-	//	}*/
-	//}
-
-	//if (count==1){
-	//	mainSplitter->addWidget((GLArea*) viewer);
-	//}
-	//else if (count==2){
-	//	if(horiz)
-	//		mainSplitter->setOrientation(Qt::Horizontal);
-	//	else mainSplitter->setOrientation(Qt::Vertical);
-	//	QSplitter* newSplitter = new QSplitter(Qt::Horizontal);
-	//	newSplitter->addWidget((GLArea*)viewer);
-	//	newSplitter->setChildrenCollapsible(false);
-	//	newSplitter->setOpaqueResize(false);
-
-	//	QList<int> *sizes = new QList<int>();
-	//	int width = mainSplitter->width();
-	//	int heigh = mainSplitter->height();
-	//	if(mainSplitter->orientation()== Qt::Horizontal){
-	//			sizes->append(mainSplitter->width()/2);
-	//			sizes->append(mainSplitter->width()/2);
-	//	}
-	//	else{
-	//			sizes->append(mainSplitter->height()/2);
-	//			sizes->append(mainSplitter->height()/2);
-	//	}
-	//	
-
-	//	mainSplitter->addWidget(newSplitter);
-	//	mainSplitter->setSizes(*sizes);
-	//}
-	//else{
-	//	GLArea* current = (GLArea*)currentView();
-	//	QSplitter* parentSplitter = qobject_cast<QSplitter *>(current->parent());
-	//	if(parentSplitter->count()==2){
-	//	
-	//		int index = parentSplitter->indexOf(current);
-	//		QSplitter* newSplitter;
-	//		if(horiz)
-	//			newSplitter = new QSplitter(Qt::Horizontal);
-	//		else newSplitter = new QSplitter(Qt::Vertical);
-	//		QList<int> sizes2 = parentSplitter->sizes();
-	//		parentSplitter->insertWidget(index, newSplitter);
-	//		parentSplitter->setSizes(sizes2);
-
-	//		current->setParent(newSplitter);
-	//		QSplitter* newSplitter2 = new QSplitter(Qt::Horizontal);
-	//		newSplitter2->addWidget((GLArea*)viewer);
-	//		newSplitter->addWidget(newSplitter2);
-
-
-	//		QList<int> *sizes = new QList<int>();
-	//		int width = parentSplitter->width();
-	//		int heigh = parentSplitter->height();
-	//		if(newSplitter->orientation()== Qt::Horizontal){
-	//				sizes->append(parentSplitter->width()/2);
-	//				sizes->append(parentSplitter->width()/2);
-	//		}
-	//		else{
-	//				sizes->append(parentSplitter->height()/2);
-	//				sizes->append(parentSplitter->height()/2);
-	//		}
-
-	//		newSplitter->setSizes(*sizes);
-
-	//		newSplitter->setChildrenCollapsible(false);
-	//		newSplitter2->setChildrenCollapsible(false);
-	//		/*newSplitter->setOpaqueResize(false);
-	//		newSplitter2->setOpaqueResize(false);*/
-	//	}
-	//	else{
-	//	//if(parentSplitter->count()==2){
-	//		//int index = parentSplitter->indexOf(current);
-	//		if(horiz)
-	//			parentSplitter->setOrientation(Qt::Horizontal);
-	//		else parentSplitter->setOrientation(Qt::Vertical);
-
-	//		QSplitter* newSplitter = new QSplitter(Qt::Horizontal);
-
-	//		parentSplitter->addWidget(newSplitter);
-	//		newSplitter->addWidget((GLArea*)viewer);
-
-	//		QList<int> *sizes = new QList<int>();
-	//		int width = parentSplitter->width();
-	//		int heigh = parentSplitter->height();
-	//		if(parentSplitter->orientation()== Qt::Horizontal){
-	//				sizes->append(parentSplitter->width()/2);
-	//				sizes->append(parentSplitter->width()/2);
-	//		}
-	//		else{
-	//				sizes->append(parentSplitter->height()/2);
-	//				sizes->append(parentSplitter->height()/2);
-	//		}
-
-	//		parentSplitter->setSizes(*sizes);
-
-	//		newSplitter->setChildrenCollapsible(false);
-	//		//newSplitter->setOpaqueResize(false);
-	//	}
-	//	//}
-	//	/*else{
-	//		if(horiz)
-	//			parentSplitter->setOrientation(Qt::Horizontal);
-	//		else parentSplitter->setOrientation(Qt::Vertical);
-	//		parentSplitter->addWidget((GLArea*)viewer);
-	//	}*/
-	//}
-
 	currentId = viewer->getId();
 	//action for new viewer
     connect((GLArea*) viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
 
+
 }
 
 void MultiViewer_Container::removeView(int viewerId){
-	//DA RIFARE
 	for (int i=0; i< viewerList.count(); i++){
 		Viewer* viewer = viewerList.at(i);
 		if (viewer->getId() == viewerId){
 			viewerList.remove(i);
 			QSplitter* parentSplitter = qobject_cast<QSplitter *>(((GLArea*)viewer)->parent());
 			delete viewer;
+
+			//CASE 1: Simple deletion.
+			//Example: Cancel View2:
+			//
+			//		HSplit					HSplit
+			//		 /    \					/
+			//	View1   HSplit	=>		View1
+			//			  |
+			//          View2
+
 			if(parentSplitter->count()==0)
 				delete parentSplitter;
-			if(parentSplitter->count()==1){
+
+			//CASE 2: Complex deletion, adjust the tree.
+			// Example: Cancel View1:
+			//
+			//		 HSplit						   HSplit
+			//		 /     \					   /    \
+			//	 VSplit    HSplit      =>     HSplit   HSplit 
+			//	 /    \        |				| 	     |
+			// View1  HSplit  View2			  View3	   View2  
+			//          |
+			//        View3
+
+			else if(parentSplitter->count()==1){
 				QSplitter* parentParentSplitter = qobject_cast<QSplitter *>(parentSplitter->parent());
 				if(parentParentSplitter){
 					int index = parentParentSplitter->indexOf(parentSplitter);
@@ -292,12 +206,6 @@ void MultiViewer_Container::removeView(int viewerId){
 			updateLayout();
 		}
 	}
-
-
-		/*if(horiz)
-					parentSplitter->setOrientation(Qt::Horizontal);
-				else
-					parentSplitter->setOrientation(Qt::Vertical);*/
 }
 
 void MultiViewer_Container::connectToLayerDialog(Viewer* viewer){

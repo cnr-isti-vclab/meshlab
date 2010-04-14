@@ -29,7 +29,6 @@
 
 #include <QWidget>
 #include <QVector>
-#include <QGridLayout>
 #include <QSplitter>
 
 #include "../common/meshmodel.h"
@@ -41,7 +40,7 @@
 
 class RichParameterSet;
 
-class MultiViewer_Container : public QWidget
+class MultiViewer_Container : public QSplitter
 {
 	Q_OBJECT
 
@@ -74,8 +73,6 @@ public slots:
 private:
 	int idCounter;
 	QVector<Viewer *> viewerList; /// widgets for the OpenGL contexts and images
-	QGridLayout *mainLayout;
-	QSplitter* mainSplitter;
 
 	void keyPressEvent(QKeyEvent *keyEv);
 	// other stuff

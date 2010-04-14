@@ -239,6 +239,11 @@ void MainWindow::updateMenus()
 
 				setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
 				GLArea* current =(GLArea*) mvc->currentView();
+
+				int heigh= current->size().height();
+				int width = current->size().width();
+				int heighM= current->minimumSizeHint().height();
+				int widthM = current->minimumSizeHint().width();
 				setSplitHAct->setEnabled(current->size().height()/2 > current->minimumSizeHint().height());
 				setSplitVAct->setEnabled(current->size().width()/2 > current->minimumSizeHint().width());
 
@@ -847,7 +852,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				if(mdiarea->currentSubWindow()==0){
 					    mvcont = new MultiViewer_Container(mdiarea); 
 						int id = mvcont->getNextViewerId();
-						gla=new GLArea(mdiarea,&currentGlobalParams,id, &(mvcont->meshDoc));		
+						gla=new GLArea(mdiarea,&currentGlobalParams,id, &(mvcont->meshDoc)); //SAREBBE MEGLIO METTERE DA SUBITO CHE E'FIGLIO DI MVC MA DEVI MODIFICARE IL COSTRUTTORE DI GLAREA		
 						mvcont->addView(gla, true);
                         addDockWidget(Qt::RightDockWidgetArea,mvcont->layerDialog);
 						mvcont->connectToLayerDialog(gla);
