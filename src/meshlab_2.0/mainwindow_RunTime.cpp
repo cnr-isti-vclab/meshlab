@@ -853,7 +853,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					    mvcont = new MultiViewer_Container(mdiarea); 
 						int id = mvcont->getNextViewerId();
 						gla=new GLArea(mdiarea,&currentGlobalParams,id, &(mvcont->meshDoc)); //SAREBBE MEGLIO METTERE DA SUBITO CHE E'FIGLIO DI MVC MA DEVI MODIFICARE IL COSTRUTTORE DI GLAREA		
-						mvcont->addView(gla, true);
+						mvcont->addView(gla, Qt::Horizontal);
                         addDockWidget(Qt::RightDockWidgetArea,mvcont->layerDialog);
 						mvcont->connectToLayerDialog(gla);
 						newGla =true;
@@ -1146,9 +1146,9 @@ void MainWindow::setSplit(QAction *qa)
 	int id = mvc->getNextViewerId();
 	GLArea *glwClone=new GLArea(mdiarea,&currentGlobalParams,id, &(mvc->meshDoc));	
 	if(qa->text() == tr("&Horizontally"))	
-		mvc->addView(glwClone, false);
+		mvc->addView(glwClone, Qt::Vertical);
 	else
-		mvc->addView(glwClone, true);
+		mvc->addView(glwClone, Qt::Horizontal);
 
 	updateMenus();
 	

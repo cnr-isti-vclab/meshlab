@@ -50,7 +50,7 @@ int MultiViewer_Container::getNextViewerId(){
 	return idCounter++;
 }
 
-void MultiViewer_Container::addView(Viewer* viewer, bool horiz){
+void MultiViewer_Container::addView(Viewer* viewer,Qt::Orientation orient){//bool horiz){
 	//The Viewers are organized like in a BSP tree.
 	// Every new viewer are added within an Horizontal splitter. Its orientation could change according to next insertions.
 	//		HSplit
@@ -82,9 +82,8 @@ void MultiViewer_Container::addView(Viewer* viewer, bool horiz){
 		//                                             |
 		//                                           View2
 		if(parentSplitter->count()==1){ 
-			if(horiz)
-				parentSplitter->setOrientation(Qt::Horizontal);
-			else parentSplitter->setOrientation(Qt::Vertical);
+
+			parentSplitter->setOrientation(orient);
 
 			QSplitter* newSplitter = new QSplitter(Qt::Horizontal);
 
@@ -122,9 +121,7 @@ void MultiViewer_Container::addView(Viewer* viewer, bool horiz){
 		//                                       View3
 		else{
 			QSplitter* newSplitter;
-			if(horiz)
-				newSplitter = new QSplitter(Qt::Horizontal);
-			else newSplitter = new QSplitter(Qt::Vertical);
+			newSplitter = new QSplitter(orient);
 
 			QList<int> sizes2 = parentSplitter->sizes();
 			parentSplitter->insertWidget(0, newSplitter);

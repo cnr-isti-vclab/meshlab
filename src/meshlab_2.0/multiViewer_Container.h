@@ -49,7 +49,7 @@ public:
     ~MultiViewer_Container();
 	
 	/// load an image in the painter widget, the imageNumber is the index of imageList that has the image wanted (0-base index!)
-	void addView(Viewer* viewer, bool horiz);
+	void addView(Viewer* viewer,  Qt::Orientation);//bool horiz);
 	void removeView(int);
 	/// update all the visual widgets at one time (glw, imageVis, tree, imageMag)
 	void updateAll();
