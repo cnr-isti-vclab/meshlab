@@ -647,8 +647,8 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	float notch = e->delta()/ float(WHEEL_STEP);
   switch(e->modifiers())
   {
-    case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  *= powf(1.2f, notch); break;
-    case Qt::ControlModifier											: clipRatioNear *= powf(1.2f, notch); break;
+    case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50.0f); break;
+    case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
     case Qt::AltModifier													: pointSize = math::Clamp(pointSize*powf(1.2f, notch),0.01f,150.0f);
 			foreach(MeshModel * mp, meshDoc.meshList)
 				mp->glw.SetHintParamf(GLW::HNPPointSize,pointSize);
@@ -843,7 +843,8 @@ void GLArea::setView()
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
 	float viewRatio = 1.75f;
 	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
-
+ if(fov==5)
+   cameraDist = 1000; // small hack for orthographic projection where camera distance is rather meaningless...
 	nearPlane = cameraDist - 2.f*clipRatioNear;
 	farPlane =  cameraDist + 10.f*clipRatioFar;
 	if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
