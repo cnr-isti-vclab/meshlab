@@ -8,8 +8,6 @@ HEADERS += gridaccell.h
 HEADERS += vase_utils.h
 HEADERS += balloon.h
 HEADERS += myheap.h
-HEADERS += OLD.h
-
 
 SOURCES += edit_vase.cpp
 SOURCES += fieldinterpolator.cpp
