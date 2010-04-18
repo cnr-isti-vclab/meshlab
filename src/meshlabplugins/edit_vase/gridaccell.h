@@ -48,6 +48,7 @@ public:
     int pos2off( float p, int dim ){
         int v = round( (p-bbox.min[dim])/delta + padsize-.5 );
         // return myclamp( v, 0, size(dim)-1);
+        assert(v>=0 && v<size(dim));
         return v;
     }
     /// Converts a volumetric offset in a 3D space coordinate
@@ -64,6 +65,7 @@ public:
     }
     /// Converts an offset on grid in object space coordinate
     float off2pos( int i, int dim ){
+        assert(i>=0 && i<size(dim));
         return (i-padsize+.5)*delta + bbox.min[dim];
     }
     /// Does not allocate memory, refer to Init

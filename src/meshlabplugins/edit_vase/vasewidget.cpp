@@ -31,7 +31,7 @@ VaseWidget::VaseWidget(QWidget *parent, MeshModel &m, GLArea* gla)
     if( ui.surface->isChecked() )
         balloon->rm |= Balloon::SHOW_SURF;
     if( ui.surf2acc_check->isChecked() )
-        balloon->rm |= Balloon::SHOW_SURF_TO_ACC;
+        balloon->rm |= Balloon::SHOW_3DDDR;
     if( ui.surf2vol_check->isChecked() )
         balloon->rm |= Balloon::SHOW_SURF_TO_VOL;
 
@@ -143,8 +143,8 @@ void VaseWidget::on_surf2vol_check_toggled(bool checked){
 }
 
 void VaseWidget::on_surf2acc_check_toggled(bool checked){
-    if( checked ) balloon->rm |=  Balloon::SHOW_SURF_TO_ACC;
-    else          balloon->rm &= ~Balloon::SHOW_SURF_TO_ACC;
+    if( checked ) balloon->rm |=  Balloon::SHOW_3DDDR;
+    else          balloon->rm &= ~Balloon::SHOW_3DDDR;
     gla->update();
 }
 

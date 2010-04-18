@@ -23,7 +23,8 @@ void Balloon::init( int gridsize, int gridpad ){
     // Remember that rays will take a step JUST in their direction, so if they lie exactly
     // on the bbox, they would go outside. The code below corrects this from happening.
     Box3f enlargedbb = cloud.bbox;
-    float del = .99*vol.getDelta(); // almost +1 voxel in each direction
+    // float del = .99*vol.getDelta(); // almost +1 voxel in each direction
+    float del = .50*vol.getDelta(); // ADEBUG: almost to debug correspondences
     Point3f offset( del,del,del );
     enlargedbb.Offset( offset );
     vol.Set_SEDF( enlargedbb );
@@ -35,9 +36,8 @@ void Balloon::init( int gridsize, int gridpad ){
     gridAccell.init( vol, cloud );
     qDebug() << "Finished hashing rays into the volume";
 
-    //--- Extract zero level set surface & compute its normals
+    //--- Extract zero level set surface
     vol.isosurface( surf, 0 );
-    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace( surf );
     qDebug() << "Extracted balloon isosurface (" << surf.vn << " " << surf.fn << ")";
 }
 void Balloon::updateViewField(){
@@ -170,6 +170,7 @@ void Balloon::interpolateField(){
 }
 void Balloon::evolveBalloon(){
     numiterscompleted++;
+    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
     // TODO: actual evolution
 }
 
@@ -214,6 +215,9 @@ void Balloon::render_isosurface(GLArea* gla){
     surf_renderer.Draw(dm, cm, tm);
 }
 void Balloon::render_surf_to_acc(){
+    gridAccell.render();
+
+#if 0
     glDisable( GL_LIGHTING );
     const float ONETHIRD = 1.0f/3.0f;
     Point3f fcenter;
@@ -228,12 +232,11 @@ void Balloon::render_surf_to_acc(){
         gridAccell.pos2off( fcenter, off );
         vol.pos2off( fcenter, o );
         gridAccell.off2pos( off, fcenter );
-        gl3DBox( fcenter, vol.getDelta()*.95, true );
+        vcg::drawBox( fcenter, vol.getDelta()*.95, true );
 
-        // o[0]++; o[1]++; o[2]++;
 
+        // SHO BLOCK
         qDebug() << "full volume: " << endl << vol.toString(2, o[2]);
-
         // DEBUG: examine field values around current coordinate
         QString q;       
         qDebug();
@@ -242,7 +245,6 @@ void Balloon::render_surf_to_acc(){
                   vol.Val(o[0]-1,o[1],o[2]),   vol.Val(o[0],o[1],o[2]), vol.Val(o[0]+1,o[1]+0,o[2]),
                   vol.Val(o[0]-1,o[1]-1,o[2]), vol.Val(o[0],o[1]-1,o[2]), vol.Val(o[0]+1,o[1]-1,o[2]) );
         qDebug() << q;
-
         qDebug();
         o = off; // use the gridaccell data
         q.sprintf("%2.2f %2.2f %2.2f \n%2.2f %2.2f %2.2f \n%2.2f %2.2f %2.2f",
@@ -250,25 +252,33 @@ void Balloon::render_surf_to_acc(){
                   vol.Val(o[0]-1,o[1],o[2]),   vol.Val(o[0],o[1],o[2]), vol.Val(o[0]+1,o[1]+0,o[2]),
                   vol.Val(o[0]-1,o[1]-1,o[2]), vol.Val(o[0],o[1]-1,o[2]), vol.Val(o[0]+1,o[1]-1,o[2]) );
         qDebug() << q;
-
     }
+#endif
+
     glEnable( GL_LIGHTING );
 }
 void Balloon::render_surf_to_vol(){
-    glDisable( GL_LIGHTING );
-    const float ONETHIRD = 1.0f/3.0f;
-    Point3f fcenter;
-    Point3i off;
-    glColor3f(0.0, 1.0, 0.0);
-    for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
-        CFaceO& f = *(fi);
-        fcenter = f.P(0) + f.P(1) + f.P(2);
-        fcenter = myscale( fcenter, ONETHIRD );
-        vol.pos2off( fcenter, off );
-        vol.off2pos( off, fcenter );
-        gl3DBox( fcenter, vol.getDelta()*.95, true );
-    }
-    glEnable( GL_LIGHTING );
+    if( !vol.isInit() ) return;
+    Point3f p, proj;
+    glDisable(GL_LIGHTING);
+    for(int i=0;i<vol.size(0);i++)
+        for(int j=0;j<vol.size(1);j++)
+            for(int k=0;k<vol.size(2);k++){
+                if( i!=3 || j!=6 || k!=5 ) continue;
+
+                MyVoxel& v = vol.Voxel(i,j,k);
+                vol.off2pos(i,j,k,p);
+                // Only ones belonging to active band
+                if( v.status ==  2 ){ // && ( tri::Index(surf, v.face)==35||tri::Index(surf, v.face)==34) ){
+                    assert( v.face != 0 );
+                    vcg::drawBox(p, .05*vol.getDelta());
+                    Point3f proj;
+                    float dist = vcg::SignedFacePointDistance(*v.face, p, proj);
+                    //proj = vcg::FaceCentroid(*v.face);
+                    vcg::drawSegment( p, proj );
+                }
+            }
+    glEnable(GL_LIGHTING);
 }
 void Balloon::render(GLArea* gla){
     if( rm & SHOW_CLOUD )
@@ -277,9 +287,9 @@ void Balloon::render(GLArea* gla){
         vol.render();
     if( rm & SHOW_SURF )
         render_isosurface(gla);
-    if( rm & SHOW_ACCEL )
-        gridAccell.render();
-    if( rm & SHOW_SURF_TO_ACC )
+    //if( rm & SHOW_ACCEL )
+    //    gridAccell.render();
+    if( rm & SHOW_3DDDR )
         render_surf_to_acc();
     if( rm & SHOW_SURF_TO_VOL )
         render_surf_to_vol();

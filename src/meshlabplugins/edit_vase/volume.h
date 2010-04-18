@@ -28,15 +28,17 @@ class MyVoxel{
     private:
         float   field;
     public:
-        CFaceO* face;      // corresponding balloon face
-        float   fdst;      // distance from that face
-        bool    isTouched; //
+        CFaceO* face;    // corresponding balloon face
+        float   fdst;    // distance from that face
+        int     status;  // status: {0: untouched, 1: in queue, 2: popped}
+        int     index;   // index of MyVoxel in current active band
         /// Set field to zero and NULL the face pointer
         MyVoxel(){
-            field = 0;
-            face = 0;
-            fdst = FLT_MAX; // so anything will be closer
-            isTouched = false;
+            field  = 0;
+            face   = 0;
+            index  = 0;
+            fdst   = FLT_MAX; // so anything will be closer
+            status = 0;
         }
         float &V(){
             return field;
@@ -88,6 +90,13 @@ class Volume{
         /// Compute volume-to-surface correspondences (stored in MyVoxel::face)
         /// up to DELTA away (in object space)
         void updateSurfaceCorrespondence( CMeshO& balloon_mesh, GridAccell& gridAccell, float DELTA=0 );
+        /// Check sample in range
+        bool checkRange( Point3i newo ){
+            assert( newo[0] >= 0 && newo[0] < size(0) );
+            assert( newo[1] >= 0 && newo[1] < size(1) );
+            assert( newo[2] >= 0 && newo[2] < size(2) );
+        }
+
 
         // Getters
         float getDelta() const{ return delta; }
@@ -101,6 +110,12 @@ class Volume{
         }
 
         // Access methods (for assignments and similar)
+        MyVoxel& Voxel(const Point3i off){
+            return Voxel( off[0], off[1], off[2] );
+        }
+        MyVoxel& Voxel(const int &x,const int &y,const int &z){
+            return grid.cV( x, y, z );
+        }
         float &Val(const Point3i off){
             return Val( off[0], off[1], off[2] );
         }

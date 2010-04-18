@@ -83,20 +83,20 @@ void GridAccell::render(){
     if( !isInit() ) return;
 
     //--- OpenGL stuff
-    // glEnable(GL_BLEND);
-    glShadeModel(GL_FLAT);
+     glDisable(GL_LIGHTING);
     glColor4f(1.0,0.0,0.0,0.1);
 
     //--- Visit the volume
+    glLineWidth(1.0);
     Point3f p(0,0,0);
     for(int i=0;i<size(0);i++)
         for(int j=0;j<size(1);j++)
             for(int k=0;k<size(2);k++)
                 if( Val(i,j,k).size() > 0 ){
                     off2pos(i,j,k,p);
-                    gl3DBox( p, .95*delta );
+                    vcg::drawBox( p, .95*delta, true );
                 }
 
     //--- Post OpenGL stuff
-    // glDisable(GL_BLEND);
+     glEnable(GL_LIGHTING);
 }

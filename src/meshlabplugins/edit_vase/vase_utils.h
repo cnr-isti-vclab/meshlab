@@ -2,6 +2,7 @@
 #define EDIT_VASE_UTILS_H
 
 #include <common/interfaces.h> // Lots of meshlab stuff
+#include <stdarg.h> // vararg processing
 
 namespace vcg{
 
@@ -12,10 +13,20 @@ QString toString( const Point3i& p );
 /// Clams float values
 float myclamp(float val, float low, float high);
 /// Draws an opengl box given center and edge length showing only wireframe
-void gl3DBox(Point3f& center, float edgel, bool wireframe=true);
-void gl3DBox(Point3i& center, float edgel, bool wireframe=true);
+void drawBox(Point3f& center, float edgel, bool wireframe=true);
+void drawBox(Point3i& center, float edgel, bool wireframe=true);
+/// Draws an opengl line in between two points
+void drawSegment( Point3f& start, Point3f& stop );
+/// Computes baricenter of set of points (BROKEN)
+// Point3f baricenter(Point3f* points, ...);
+/// Face barycenter
+Point3f FaceCentroid( const CFaceO& f );
 /// Scales a point by "s" isotropically
 Point3f myscale( const Point3f& p, float s );
-/// Intersection between a ray and the box (PBRT p.179)
+/// Triangle point intersection, slightly different from the method in VCG to return signed distance
+float SignedFacePointDistance( CFaceO& f, const Point3f& q );
+float SignedFacePointDistance( CFaceO& f, const Point3f& q, Point3f& a );
+
+
 } // Namespace vcg
 #endif // EDIT_VASE_UTILS_H

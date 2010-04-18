@@ -18,8 +18,8 @@ public:
          SHOW_CLOUD         = 0x00000001, // Show the cloud
          SHOW_VOLUME        = 0x00000002, // Show the balloon
          SHOW_SURF          = 0x00000004, // Show the isosurface
-         SHOW_ACCEL         = 0x00000008, // Show the accelleration grid
-         SHOW_SURF_TO_ACC   = 0x00000010,
+         // SHOW_ACCEL         = 0x00000008, // Show the accelleration grid
+         SHOW_3DDDR         = 0x00000010, // 3D-DDR voxels
          SHOW_SURF_TO_VOL   = 0x00000020,
 
          SURF_XCOLOR        = 0x00000100, // Show no color
@@ -61,7 +61,7 @@ private:
     void render_cloud();
     /// Renders the balloon isosurface with particular RenderMode
     void render_isosurface(GLArea* gla);
-    /// Renders boxes of locations
+    /// Renders volume boxes and correspondences to surface
     void render_surf_to_vol();
     void render_surf_to_acc();
 };
