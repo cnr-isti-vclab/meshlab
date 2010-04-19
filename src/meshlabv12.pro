@@ -26,6 +26,7 @@ SUBDIRS       = common \
 				meshlabplugins/filter_plymc \
 				meshlabplugins/filter_poisson \
 				meshlabplugins/filter_sampling \
+				meshlabplugins/filter_slice \
 				meshlabplugins/filter_splitter \
 				meshlabplugins/filter_select \
 				meshlabplugins/filter_texture \
