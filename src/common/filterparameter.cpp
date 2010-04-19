@@ -243,9 +243,10 @@ void RichParameterCopyConstructor::visit( RichOpenFile& pd )
 	lastCreated = new RichOpenFile(pd.name,pd.pd->defVal->getFileName(),dec->exts,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
-void RichParameterCopyConstructor::visit( RichSaveFile& /*pd*/ )
+void RichParameterCopyConstructor::visit( RichSaveFile& pd )
 {
-	/*lastCreated = new SaveFileWidget(par,&pd);*/
+	SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(pd.pd);
+	lastCreated = new RichSaveFile(pd.name,pd.pd->defVal->getFileName(),dec->ext,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichMesh& pd )
@@ -364,9 +365,11 @@ void RichParameterXMLVisitor::visit( RichOpenFile& pd )
 		parElem.setAttribute(QString("ext_val")+QString::number(ii),dec->exts[ii]);
 }
 
-void RichParameterXMLVisitor::visit( RichSaveFile& /*pd*/ )
+void RichParameterXMLVisitor::visit( RichSaveFile& pd )
 {
-	assert(0);
+	fillRichParameterAttribute("RichOpenFile",pd.name,pd.val->getFileName(),pd.pd->fieldDesc,pd.pd->tooltip);
+	SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(pd.pd);
+	parElem.setAttribute("ext",dec->ext);
 }
 
 void RichParameterXMLVisitor::visit( RichMesh& pd )
@@ -536,10 +539,10 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 
 	if(type == "RichSaveFile")  
 	{ 
-		//par.addOpenFileName(name, np.attribute(ValueName())); return; 
-		
-		//to be implemented
-		assert(0);
+		QString deffile = np.attribute("value");
+		QString ext = np.attribute("ext");
+		*par = new RichSaveFile(name,deffile,ext,desc,tooltip);
+		return true;
 	}
 
 	if(type=="RichPoint3f")
@@ -1018,15 +1021,11 @@ RichOpenFile::~RichOpenFile()
 
 }
 
-RichSaveFile::RichSaveFile( const QString nm,FileValue* v,SaveFileDecoration* prdec ) :RichParameter(nm,v,prdec)
+RichSaveFile::RichSaveFile( const QString nm,const QString filedefval,const QString ext,const QString desc/*=QString()*/,const QString tltip/*=QString()*/) :RichParameter(nm,new FileValue(filedefval),new SaveFileDecoration(new FileValue(filedefval),ext,desc,tltip))
 {
 
 }
 
-RichSaveFile::RichSaveFile( const QString nm,FileValue* /*val*/,FileValue* v,SaveFileDecoration* prdec ):RichParameter(nm,v,prdec)
-{
-
-}
 void RichSaveFile::accept( Visitor& v )
 {
 	v.visit(*this);

@@ -620,8 +620,7 @@ public:
 class RichSaveFile : public RichParameter
 {
 public:
-	RichSaveFile(const QString nm,FileValue* v,SaveFileDecoration* prdec);
-	RichSaveFile(const QString nm,FileValue* val,FileValue* v,SaveFileDecoration* prdec);
+	RichSaveFile::RichSaveFile( const QString nm,const QString filedefval,const QString ext,const QString desc =QString(),const QString tltip =QString());
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichSaveFile();
