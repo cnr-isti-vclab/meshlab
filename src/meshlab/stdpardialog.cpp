@@ -1223,24 +1223,6 @@ void OpenFileWidget::resetWidgetValue()
 }
 */
 
-SaveFileWidget::SaveFileWidget( QWidget* p,RichSaveFile* rpar )
-:MeshLabWidget(p,rpar)
-{
-}
-
-
-void SaveFileWidget::collectWidgetValue()
-{
-}
-
-void SaveFileWidget::resetWidgetValue()
-{
-}
-
-void SaveFileWidget::setWidgetValue( const Value& /*nv*/ )
-{
-
-}
 /*
 ql = new QLabel(fpi.fieldDesc,this);
 ql->setToolTip(fpi.fieldToolTip);
@@ -1399,10 +1381,8 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
 	lastCreated = new QTableWidgetItem(QString::number(pd.val->getDynamicFloat())/*,lst*/);
 }
 
-
-
-OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )
-:MeshLabWidget(p,rdf),fl()
+IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
+:MeshLabWidget(p,rpar),fl()
 {
 	filename = new QLineEdit(p);
 	filename->setText(tr(""));
@@ -1423,6 +1403,43 @@ OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 }
 
+IOFileWidget::~IOFileWidget()
+{
+	delete filename;
+	delete browse;
+	delete descLab;
+}
+
+void IOFileWidget::collectWidgetValue()
+{
+	rp->val->set(FileValue(fl));
+}
+
+void IOFileWidget::resetWidgetValue()
+{
+	QString fle = rp->pd->defVal->getFileName();
+	fl = fle;
+	updateFileName(fle);
+}
+
+
+void IOFileWidget::setWidgetValue(const Value& nv)
+{
+	QString fle = nv.getFileName();
+	fl = fle;
+	updateFileName(QString());
+}
+
+void IOFileWidget::updateFileName( const FileValue& file )
+{
+	filename->setText(file.getFileName());
+}
+
+OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )
+:IOFileWidget(p,rdf)
+{
+}
+
 void OpenFileWidget::selectFile()
 {
 	OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
@@ -1433,34 +1450,48 @@ void OpenFileWidget::selectFile()
 	emit dialogParamChanged();
 }
 
-void OpenFileWidget::collectWidgetValue()
-{
-	rp->val->set(FileValue(fl));
-}
-
-void OpenFileWidget::resetWidgetValue()
-{
-	QString fle = rp->pd->defVal->getFileName();
-	fl = fle;
-	updateFileName(fle);
-}
-
-
-void OpenFileWidget::setWidgetValue(const Value& nv)
-{
-	QString fle = nv.getFileName();
-	fl = fle;
-	updateFileName(QString());
-}
-
-void OpenFileWidget::updateFileName( const FileValue& file )
-{
-	filename->setText(file.getFileName());
-}
+//void OpenFileWidget::collectWidgetValue()
+//{
+//	rp->val->set(FileValue(fl));
+//}
+//
+//void OpenFileWidget::resetWidgetValue()
+//{
+//	QString fle = rp->pd->defVal->getFileName();
+//	fl = fle;
+//	updateFileName(fle);
+//}
+//
+//
+//void OpenFileWidget::setWidgetValue(const Value& nv)
+//{
+//	QString fle = nv.getFileName();
+//	fl = fle;
+//	updateFileName(QString());
+//}
 
 OpenFileWidget::~OpenFileWidget()
 {
-	delete filename;
-	delete browse;
-	delete descLab;
 }
+
+
+SaveFileWidget::SaveFileWidget( QWidget* p,RichSaveFile* rpar )
+:IOFileWidget(p,rpar)
+{
+}
+
+SaveFileWidget::~SaveFileWidget()
+{
+}
+
+void SaveFileWidget::selectFile()
+{
+	SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(rp->pd);
+	QString ext;
+	fl = QFileDialog::getSaveFileName(this,tr("Save"),dec->defVal->getFileName(),dec->ext);
+	collectWidgetValue();
+	updateFileName(fl);
+	emit dialogParamChanged();
+}
+
+

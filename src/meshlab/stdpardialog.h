@@ -215,17 +215,6 @@ public:
 */
 
 
-class SaveFileWidget : public MeshLabWidget
-{
-public:
-	SaveFileWidget(QWidget* p,RichSaveFile* rpar);
-
-	void collectWidgetValue();
-	void resetWidgetValue();
-	void setWidgetValue(const Value& nv);
-};
-
-
 /// Widget to enter a color.
 // public QHBoxLayout,
 class ColorWidget : public MeshLabWidget
@@ -429,30 +418,59 @@ public:
 	void setMesh(MeshModel * newMesh);
 };
 
-class OpenFileWidget : public MeshLabWidget
+class IOFileWidget : public MeshLabWidget
 {
 	Q_OBJECT
-public:
-	OpenFileWidget(QWidget *p, RichOpenFile* rdf);
-	~OpenFileWidget();
 
+protected:
+	IOFileWidget(QWidget* p,RichParameter* rpar);
+	~IOFileWidget();
+
+	void  updateFileName(const FileValue& file);
+
+public:
 	void collectWidgetValue();
 	void resetWidgetValue();
 	void setWidgetValue(const Value& nv);
+
+protected slots:
+	virtual void selectFile() = 0;
+
+signals:
+	void dialogParamChanged();
+
 
 protected:
 	QLineEdit* filename;
 	QPushButton* browse;
 	QString fl;
 	QLabel* descLab;
+};
 
+class SaveFileWidget : public IOFileWidget
+{
+	Q_OBJECT
+public:
+	SaveFileWidget(QWidget* p,RichSaveFile* rpar);
+	~SaveFileWidget(); 
 
-signals:
-	void dialogParamChanged();
+protected slots:
+	void selectFile();
 
-private:
-	void  updateFileName(const FileValue& file);
-private slots:
+};
+
+class OpenFileWidget : public IOFileWidget
+{
+	Q_OBJECT
+public:
+	OpenFileWidget(QWidget *p, RichOpenFile* rdf);
+	~OpenFileWidget();
+
+	/*void collectWidgetValue();
+	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);*/
+
+protected slots:
 	void selectFile();
 };
 /*
@@ -663,7 +681,7 @@ public:
 	void visit(RichFloatList& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new FloatListWidget(par,&pd);*/};
 	void visit(RichDynamicFloat& pd){lastCreated = new DynamicFloatWidget(par,&pd);};
 	void visit(RichOpenFile& pd){lastCreated = new OpenFileWidget(par,&pd);};
-	void visit(RichSaveFile& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new SaveFileWidget(par,&pd);*/};
+	void visit(RichSaveFile& pd){lastCreated = new SaveFileWidget(par,&pd);};
 	void visit(RichMesh& pd){lastCreated = new MeshWidget(par,&pd);};
 
 	~RichWidgetInterfaceConstructor() {}
