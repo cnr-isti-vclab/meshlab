@@ -122,7 +122,7 @@ class KDTree
 				m->meshList.push_back(slice1);
 				QString layername;
 				layername=name+"L.ply";
-				slice1->fileName = layername.toStdString().c_str();								// mesh name
+				slice1->setFileName(layername);								// mesh name
 				slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(mm->cm,VERTEX_LEFT,VERTEX_LEFT);
         vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(mm->cm);
@@ -137,7 +137,7 @@ class KDTree
 				MeshModel* cap= new MeshModel();
 				m->meshList.push_back(cap);
 				layername=name+"_slice.ply";
-				cap->fileName=layername.toStdString().c_str();
+				cap->setFileName(layername);			
 				cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				ExtraFilter_SlicePlugin::capHole(slice1,cap);
 
@@ -146,7 +146,7 @@ class KDTree
 					MeshModel* dup= new MeshModel();
 					m->meshList.push_back(dup);
 					layername=name+"_extr.ply";
-					dup->fileName = layername.toStdString().c_str();								// mesh name
+					dup->setFileName(layername);											// mesh name
 					dup->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 					ExtraFilter_SlicePlugin::extrude(cap, dup, eps, planeAxis);
 				}
@@ -159,7 +159,7 @@ class KDTree
 				MeshModel* slice2= new MeshModel();
 				m->meshList.push_back(slice2);
 				layername=name+"R.ply";
-				slice2->fileName = layername.toStdString().c_str();								// mesh name
+				slice2->setFileName(layername);											// mesh name
 				slice2->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(mm->cm,VERTEX_RIGHT,VERTEX_RIGHT);
 				vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(mm->cm);

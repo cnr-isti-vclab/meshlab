@@ -27,9 +27,13 @@
 
 #include <QObject>
 #include <common/interfaces.h>
+#include <vcg/complex/used_types.h>
 
+#include <vcg/simplex/vertex/base.h>
 #include <vcg/simplex/edge/base.h>
 #include <vcg/complex/edgemesh/base.h>
+
+#include <vcg/simplex/vertex/component.h>
 
 #include <wrap/io_edgemesh/export_svg.h>
 
@@ -37,17 +41,16 @@
 //#include "svgpro.h"
 
 
+
+class MyVertex;
 class MyEdge;
 class MyFace;
-class MyVertex  : public vcg::VertexSimp2< MyVertex, MyEdge, MyFace,
-vcg::vertex::Coord3f,     /* 12b */
-vcg::vertex::BitFlags,    /*  4b */
-vcg::vertex::EmptyVEAdj
->{
-};
 
-class MyEdge    : public vcg::EdgeSimp2<MyVertex,MyEdge,MyFace, vcg::edge::VertexRef> {};
+class MyUsedTypes: public vcg::UsedTypes < vcg::Use<MyVertex>::AsVertexType,vcg::Use<MyFace>::AsFaceType,vcg::Use<MyEdge>::AsEdgeType>{};
 
+class MyVertex: public vcg::Vertex < MyUsedTypes,vcg::vertex::Coord3f,vcg::vertex::BitFlags,vcg::vertex::VEAdj>{};
+class MyFace: public vcg::Face < MyUsedTypes, vcg::face::VertexRef>{};
+class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef> {};
 
 class MyEdgeMesh: public vcg::edg::EdgeMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 
@@ -61,6 +64,7 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 public:
 	enum { FP_SINGLE_PLANE, FP_PARALLEL_PLANES, FP_RECURSIVE_SLICE };
 	enum { CAP_CW, CAP_CCW };
+	enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
 
