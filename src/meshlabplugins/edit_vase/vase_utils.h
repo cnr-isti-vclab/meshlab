@@ -2,6 +2,7 @@
 #define EDIT_VASE_UTILS_H
 
 #include <common/interfaces.h> // Lots of meshlab stuff
+#include "vcg/complex/trimesh/update/curvature.h"
 #include <stdarg.h> // vararg processing
 
 namespace vcg{
@@ -20,13 +21,12 @@ void drawSegment( Point3f& start, Point3f& stop );
 /// Computes baricenter of set of points (BROKEN)
 // Point3f baricenter(Point3f* points, ...);
 /// Face barycenter
-Point3f FaceCentroid( const CFaceO& f );
+Point3f faceCentroid( const CFaceO& f );
 /// Scales a point by "s" isotropically
 Point3f myscale( const Point3f& p, float s );
 /// Triangle point intersection, slightly different from the method in VCG to return signed distance
 float SignedFacePointDistance( CFaceO& f, const Point3f& q );
 float SignedFacePointDistance( CFaceO& f, const Point3f& q, Point3f& a );
-
 
 } // Namespace vcg
 #endif // EDIT_VASE_UTILS_H

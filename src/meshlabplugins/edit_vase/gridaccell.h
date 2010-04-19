@@ -71,7 +71,7 @@ public:
     /// Does not allocate memory, refer to Init
     GridAccell(){ sz=Point3i(0,0,0); }
     /// Allocates memory for a grid of the given size
-    void init( const Volume& v, CMeshO& pcloud );
+    void init( Volume& v, CMeshO& pcloud );
     /// Accessor for memory grid representation
     inline PointerVector& Val( const int x, const int y, const int z ){
         return Vol[x+y*sz[0]+z*sz[0]*sz[1]];

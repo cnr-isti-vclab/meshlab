@@ -127,6 +127,8 @@ void FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
 }
 
 void FieldInterpolator::AddConstraint( unsigned int vidx, FieldType omega, FieldType val){
+    assert( !math::IsNAN(val) );
+    assert( omega != 0 );
     A_dyn->coeffRef(vidx,vidx) += omega;
     xb->coeffRef(vidx) += omega*val;
 }

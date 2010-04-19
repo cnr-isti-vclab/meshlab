@@ -2,7 +2,8 @@
 using namespace vcg;
 
 // Create a grid accell based on the volume
-void GridAccell::init( const Volume& vol, CMeshO& pcloud ){
+void GridAccell::init( Volume& vol, CMeshO& pcloud ){
+    assert( vol.isInit() );
 
     // Init the data structure
     this->sz = vol.getSize();

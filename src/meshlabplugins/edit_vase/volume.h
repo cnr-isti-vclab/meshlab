@@ -25,21 +25,19 @@ class GridAccell;
   * the corresponding face and querying the variation at that particular location.
   */
 class MyVoxel{
-    private:
-        float   field;
     public:
+        float   field;   // signed distance from surface
         CFaceO* face;    // corresponding balloon face
-        float   fdst;    // distance from that face
         int     status;  // status: {0: untouched, 1: in queue, 2: popped}
         int     index;   // index of MyVoxel in current active band
         /// Set field to zero and NULL the face pointer
         MyVoxel(){
             field  = 0;
             face   = 0;
-            index  = 0;
-            fdst   = FLT_MAX; // so anything will be closer
             status = 0;
+            index  = 0;
         }
+        /// Required by marching cubes
         float &V(){
             return field;
         }
@@ -81,15 +79,17 @@ class Volume{
         void init( int gridsize, int padsize, vcg::Box3f bbox );
         /// Retrieves a 2D (image) slice from the volume
         QPixmap& getSlice(int dim, int slice);
-        /// Set EDF to particular value
-        void Set_SEDF( const vcg::Box3f&  bbox );
+        /// Set SEDF according to continuous function
+        void initField( const vcg::Box3f&  bbox );
+        /// Set SEDF according to given surface
+        void initField( CMeshO& surface, GridAccell& accell );
         /// Computes isosurface of current volume
         void isosurface( CMeshO& balloon_mesh, float offset=0 );
         /// Render every cube just for illustration
         void render();
-        /// Compute volume-to-surface correspondences (stored in MyVoxel::face)
-        /// up to DELTA away (in object space)
-        void updateSurfaceCorrespondence( CMeshO& balloon_mesh, GridAccell& gridAccell, float DELTA=0 );
+        /// Compute volume-to-surface correspondences (stored in MyVoxel::face) in a band around the surface
+        /// up to DELTA away (in object space) inserting the volumetric indexes in the band vector.
+        void updateSurfaceCorrespondence( CMeshO& balloon_mesh, GridAccell& gridAccell, float DELTA, std::vector<Point3i>& band );
         /// Check sample in range
         bool checkRange( Point3i newo ){
             assert( newo[0] >= 0 && newo[0] < size(0) );
@@ -132,7 +132,7 @@ class Volume{
                    ofi[2]>=0 && ofi[2]<size(2);
         }
         const Point3i& size(){ return grid.ISize(); }
-        inline const int size(int dim){ return sz[dim]; }
+        inline int size(int dim) { return sz[dim]; }
         /// Converts a general position to a voxel index
         void pos2off( const Point3f& pos, Point3i& off ){
             off[0] = pos2off( pos[0], 0 );

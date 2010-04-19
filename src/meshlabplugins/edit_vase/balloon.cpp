@@ -16,10 +16,13 @@ void Balloon::init( int gridsize, int gridpad ){
     vol.init( gridsize, gridpad, cloud.bbox );
     qDebug() << "Created a volume of sizes: " << vol.size(0) << " " << vol.size(1) << " " << vol.size(2);
 
-    //--- Construct EDF of initial wrapping volume using BBOX
+    //--- Compute hashing of ray intersections (using similar space structure of volume)
+    gridAccell.init( vol, cloud );
+    qDebug() << "Finished hashing rays into the volume";
+
+    //--- Construct EDF of initial wrapping volume (BBOX)
     // Instead of constructing isosurface exactly on the bounding box, stay a bit large,
     // so that ray-isosurface intersections will not fail for that region.
-    //
     // Remember that rays will take a step JUST in their direction, so if they lie exactly
     // on the bbox, they would go outside. The code below corrects this from happening.
     Box3f enlargedbb = cloud.bbox;
@@ -27,18 +30,14 @@ void Balloon::init( int gridsize, int gridpad ){
     float del = .50*vol.getDelta(); // ADEBUG: almost to debug correspondences
     Point3f offset( del,del,del );
     enlargedbb.Offset( offset );
-    vol.Set_SEDF( enlargedbb );
-    qDebug() << "constructing EDF of box: " << vcg::toString(enlargedbb.min);
-    // qDebug() << vol.toString(2,5);
-    // exit(0);
-
-    //--- Compute hashing of ray intersections
-    gridAccell.init( vol, cloud );
-    qDebug() << "Finished hashing rays into the volume";
-
-    //--- Extract zero level set surface
+    vol.initField( enlargedbb );    
+    
+    //--- Extract initial zero level set surface
     vol.isosurface( surf, 0 );
-    qDebug() << "Extracted balloon isosurface (" << surf.vn << " " << surf.fn << ")";
+    qDebug() << "Extracted balloon isosurface (" << surf.vn << " " << surf.fn << ")";    
+
+    //--- Re-compute isosurface so that marching-cube and EDF match
+    // vol.initField(surf, gridAccell);
 }
 void Balloon::updateViewField(){
     //--- Setup the interpolation system
@@ -136,20 +135,20 @@ void Balloon::interpolateField(){
     // qDebug() << "Solving field interpolation";
     finterp.Solve();
 
-    if( true ){
-        //--- Perform exponential (max) distance mapping
-        float maxdst = -FLT_MAX, mindst = FLT_MAX;
-        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++)
-            maxdst = ((*vi).Q()>maxdst) ? (*vi).Q() : maxdst;
-        float sigma2 = vol.getDelta(); sigma2*=sigma2;
-        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++)
-            (*vi).Q() = exp( - powf((*vi).Q()-maxdst,2) / sigma2 );
-
-        maxdst = -FLT_MAX; mindst = FLT_MAX;
-        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++){
-            maxdst = ((*vi).Q()>maxdst) ? (*vi).Q() : maxdst;
-            mindst = ((*vi).Q()<mindst) ? (*vi).Q() : mindst;
-        }
+    if( false ){
+//        //--- Perform exponential (max) distance mapping
+//        float maxdst = -FLT_MAX, mindst = FLT_MAX;
+//        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++)
+//            maxdst = ((*vi).Q()>maxdst) ? (*vi).Q() : maxdst;
+//        float sigma2 = vol.getDelta(); sigma2*=sigma2;
+//        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++)
+//            (*vi).Q() = exp( - powf((*vi).Q()-maxdst,2) / sigma2 );
+//
+//        maxdst = -FLT_MAX; mindst = FLT_MAX;
+//        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++){
+//            maxdst = ((*vi).Q()>maxdst) ? (*vi).Q() : maxdst;
+//            mindst = ((*vi).Q()<mindst) ? (*vi).Q() : mindst;
+//        }
         // qDebug() << mindst << " " << maxdst;
 
         //--- Transfer vertex quality to surface
@@ -160,7 +159,7 @@ void Balloon::interpolateField(){
     }
     else{
         //--- Transfer vertex quality to surface
-        rm &= !SURF_FCOLOR; // disable face colors
+        rm &= ~SURF_FCOLOR; // disable face colors
         rm |= SURF_VCOLOR; // enable vertex colors
         Histogram<float> H;
         tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
@@ -169,9 +168,77 @@ void Balloon::interpolateField(){
     }
 }
 void Balloon::evolveBalloon(){
+
+//    // Compute normalized Mean-Curvature
+//    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+//        VertexCurvature(&*vi,true);
+//        (*vi).Q() = (*vi).Kh();
+//    }
+//    Histogram<float> H;
+//    tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
+//    tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
+//    return;
+
+    // Test whether applying it more than one time does nothing (1-1 conversion)
+    // vol.initField(surf, gridAccell); return;
+
+    // Update iteration counter
     numiterscompleted++;
-    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
-    // TODO: actual evolution
+
+    //--- Compute active band around surface and correspondences
+    // Memory estimation: we move at most by 1 voxel, so we need to update at least the 2 neighborhood
+    // of a voxel on each side so that the implicit function will be correct, this resulting in 2 voxels
+    // per side thus: 2+2+1 per face.
+    std::vector<Point3i> band;
+    band.reserve(5*surf.fn);
+    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta(), band );
+
+    //--- Compute updates from amount stored in vertex quality
+    float a,b,c;
+    Point3f voxp;
+    std::vector<float> updates(band.size(),0);
+    float maxdst = -FLT_MAX, mindst = FLT_MAX;
+    for(unsigned int i=0; i<band.size(); i++){
+        Point3i& voxi = band[i];
+        MyVoxel& v = vol.Voxel(voxi);
+        CFaceO& f = *v.face;
+        // extract projected points on surface and obtain barycentric coordinates
+        // TODO: double work, it was already computed during correspodence, write a new function?
+        Point3f proj;
+        vol.off2pos(voxi, voxp);
+        vcg::SignedFacePointDistance(f, voxp, proj);
+        Triangle3<float> triFace( f.P(0), f.P(1), f.P(2) );
+        vcg::InterpolationParameters(triFace, proj, a,b,c);
+        updates[i] = a*f.V(0)->Q() + b*f.V(1)->Q() + c*f.V(2)->Q();
+        // qDebug("from face %d - %.2f", Index(surf, f), val);
+
+        //--- Zero the band information so that next extraction will be successfull
+        v.status = 0;
+        v.face = 0;
+        v.index = 0;
+
+        //--- Keep track of max/min of updates[]
+        maxdst = (updates[i]>maxdst) ? updates[i] : maxdst;
+        mindst = (updates[i]<mindst) ? updates[i] : mindst;
+    }
+
+    //--- Apply exponential functions to modulate and regularize the updates
+    float sigma2 = vol.getDelta(); sigma2*=sigma2;
+    float k1, k2;
+    for(unsigned int i=0; i<band.size(); i++){
+        Point3i& voxi = band[i];
+        MyVoxel& v = vol.Voxel(voxi);
+        //--- Faster if further
+        k1 = exp( -powf(updates[i]-maxdst,2) / (3*sigma2) );
+        //--- Slowdown weight (according to distance from surface)
+        k2 = 1 - exp( -powf(updates[i],2) / sigma2 );
+
+        //--- Update
+        v.field += .25*k1*k2;
+    }
+
+    //--- Extract initial zero level set surface
+    vol.isosurface( surf, 0 );
 }
 
 //---------------------------------------------------------------------------------------//
@@ -264,7 +331,7 @@ void Balloon::render_surf_to_vol(){
     for(int i=0;i<vol.size(0);i++)
         for(int j=0;j<vol.size(1);j++)
             for(int k=0;k<vol.size(2);k++){
-                if( i!=3 || j!=6 || k!=5 ) continue;
+                // if( i!=3 || j!=6 || k!=5 ) continue;
 
                 MyVoxel& v = vol.Voxel(i,j,k);
                 vol.off2pos(i,j,k,p);

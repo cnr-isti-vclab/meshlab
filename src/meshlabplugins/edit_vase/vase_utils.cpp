@@ -108,8 +108,8 @@ void drawBox(Point3f& center, float edgel, bool wireframe){
     glEnd();
 }
 
-static float ONETHIRD = 1.0/3.0;
-Point3f FaceCentroid( const CFaceO& f ){
+Point3f faceCentroid( const CFaceO& f ){
+    static float ONETHIRD = 1.0/3.0;
     Point3f ret;
     ret = f.P(0) + f.P(1) + f.P(2);
     ret = myscale( ret, ONETHIRD );
