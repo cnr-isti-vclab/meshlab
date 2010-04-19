@@ -10,7 +10,7 @@ HEADERS += balloon.h
 HEADERS += myheap.h
 
 SOURCES += edit_vase.cpp
-# SOURCES += fieldinterpolator.cpp
+SOURCES += fieldinterpolator.cpp
 SOURCES += volume.cpp
 SOURCES += vasewidget.cpp
 SOURCES += gridaccell.cpp

@@ -2,8 +2,8 @@
 #define EDIT_VASE_UTILS_H
 
 #include <common/interfaces.h> // Lots of meshlab stuff
-#include "vcg/complex/trimesh/update/curvature.h"
 #include <stdarg.h> // vararg processing
+// #include "vcg/complex/trimesh/update/curvature.h"
 
 namespace vcg{
 
