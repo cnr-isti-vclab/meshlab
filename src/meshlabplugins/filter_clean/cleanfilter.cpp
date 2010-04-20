@@ -20,92 +20,18 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
 
- $Log$
- Revision 1.19  2008/04/08 10:16:04  cignoni
- added missing std:: and vcg::
-
- Revision 1.18  2007/12/14 14:57:20  cignoni
- Improved ball pivoting params and descriptions
-
- Revision 1.17  2007/12/13 00:19:35  cignoni
- removed deprecated setD
-
- Revision 1.16  2007/10/02 08:13:38  cignoni
- New filter interface. Hopefully more clean and easy to use.
-
- Revision 1.15  2007/06/11 15:26:43  ponchio
- *** empty log message ***
-
- Revision 1.14  2007/05/30 15:10:54  ponchio
- *** empty log message ***
-
- Revision 1.13  2007/05/22 15:26:02  cignoni
- Improved params of ball pivoting (again)
-
- Revision 1.12  2007/05/22 15:16:43  cignoni
- Improved params of ball pivoting
-
- Revision 1.11  2007/04/16 09:25:28  cignoni
- ** big change **
- Added Layers managemnt.
- Interfaces are changing again...
-
- Revision 1.10  2007/03/20 16:23:07  cignoni
- Big small change in accessing mesh interface. First step toward layers
-
- Revision 1.9  2007/02/08 23:46:15  pirosu
- merged srcpar and par in the GetStdParameters() function
-
- Revision 1.8  2007/01/11 19:52:25  pirosu
- fixed bug for QT 4.1.0/dotnet2003
- removed the request of the window title to the plugin. The action description is used instead.
-
- Revision 1.7  2006/12/27 21:41:58  pirosu
- Added improvements for the standard plugin window:
- split of the apply button in two buttons:ok and apply
- added support for parameters with absolute and percentage values
-
- Revision 1.6  2006/12/13 17:37:27  pirosu
- Added standard plugin window support
-
- 
- Revision 1.5  2006/11/29 00:59:15  cignoni
- Cleaned plugins interface; changed useless help class into a plain string
-
- Revision 1.4  2006/11/27 06:57:19  cignoni
- Wrong way of using the __DATE__ preprocessor symbol
-
- Revision 1.3  2006/11/07 17:26:01  cignoni
- small gcc compiling issues
-
- Revision 1.2  2006/11/07 14:56:23  zifnab1974
- Changes for compilation with gcc 3.4.6 on linux AMD64
-
- Revision 1.1  2006/11/07 09:09:27  cignoni
- First Working release, moved in from epoch svn
-
- Revision 1.1  2006/01/20 13:03:27  cignoni
- *** empty log message ***
-
-*****************************************************************************/
 #include <Qt>
 #include <QtGui>
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
-#include <vcg/math/matrix33.h>
 
 #include "cleanfilter.h"
 #include "align_tools.h"
 
-#include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/create/platonic.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/complex/trimesh/create/ball_pivoting.h>
 
@@ -147,16 +73,16 @@ CleanFilter::~CleanFilter() {
 {
  switch(filter)
   {
-	  case FP_BALL_PIVOTING :								return QString("Ball Pivoting Surface Reconstruction");
+    case FP_BALL_PIVOTING :								  return QString("Ball Pivoting Surface Reconstruction");
 	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
-	  case FP_ALIGN_WITH_PICKED_POINTS :	return AlignTools::FilterName;
-  	case FP_SELECTBYANGLE :  return QString("Select Faces by view angle"); 
-    case FP_REMOVE_TVERTEX_FLIP :  return QString("Remove T-Vertices by edge flip");
-    case FP_REMOVE_TVERTEX_COLLAPSE : return QString("Remove T-Vertices by edge collapse");
-    case FP_MERGE_CLOSE_VERTEX : return QString("Merge Close Vertices");
-    case FP_REMOVE_DUPLICATE_FACE: return QString("Remove Duplicate Faces");
+    case FP_ALIGN_WITH_PICKED_POINTS :	    return QString("Align Mesh using Picked Points");
+    case FP_SELECTBYANGLE :                 return QString("Select Faces by view angle");
+    case FP_REMOVE_TVERTEX_FLIP :           return QString("Remove T-Vertices by edge flip");
+    case FP_REMOVE_TVERTEX_COLLAPSE :       return QString("Remove T-Vertices by edge collapse");
+    case FP_MERGE_CLOSE_VERTEX :            return QString("Merge Close Vertices");
+    case FP_REMOVE_DUPLICATE_FACE:          return QString("Remove Duplicate Faces");
 		default: assert(0);
   }
   return QString("error!");
