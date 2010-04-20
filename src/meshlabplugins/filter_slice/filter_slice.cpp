@@ -217,7 +217,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 			
 			//actual cut of the mesh
 
-			if (!tri::Clean<CMeshO>::IsTwoManifoldFace(base->cm) || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
+      if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base->cm)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
 			{
 				Log(GLLogStream::FILTER,"Mesh is not two manifold, cannot apply filter");
 				return false;
@@ -335,7 +335,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 			MeshModel* orig=m.mm();
 			for(int i=0;i<planeNum;++i)
 			{
-				if (!tri::Clean<CMeshO>::IsTwoManifoldFace(base->cm) || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
+        if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base->cm)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
 				{
 					Log(GLLogStream::FILTER,"Mesh is not two manifold, cannot apply filter");
 					return false;

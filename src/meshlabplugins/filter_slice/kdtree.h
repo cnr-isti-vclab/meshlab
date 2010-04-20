@@ -75,9 +75,7 @@ class KDTree
 			if (mm->cm.vn<=0)
 				return;
 			mm->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-			//assert (tri::Clean<CMeshO>::IsTwoManifoldFace(mm->cm));
-			//assert (tri::Clean<CMeshO>::CountNonManifoldVertexFF(mm->cm,false) == 0);
-			if (!tri::Clean<CMeshO>::IsTwoManifoldFace(mm->cm) || tri::Clean<CMeshO>::CountNonManifoldVertexFF(mm->cm,false) != 0)
+      if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(mm->cm)>0 || tri::Clean<CMeshO>::CountNonManifoldVertexFF(mm->cm,false) != 0)
 				return;
 
 			if (rightChild!=0 && leftChild!=0)

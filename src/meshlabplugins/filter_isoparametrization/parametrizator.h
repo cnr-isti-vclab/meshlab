@@ -700,17 +700,13 @@ public:
 	{
 		bool b;
 		vcg::tri::UpdateTopology<MeshType>::FaceFace(mesh);
-
-		b=vcg::tri::Clean<MeshType>::IsTwoManifoldFace(mesh);
-    if (!b) return false;
-
-		b=vcg::tri::Clean<MeshType>::IsTwoManifoldVertexFF(mesh);
-    if (!b) return false;
+    if(vcg::tri::Clean<MeshType>::CountNonManifoldEdgeFF(mesh)>0 ) return false;
+    if(vcg::tri::Clean<MeshType>::CountNonManifoldVertexFF(mesh)>0 ) return false;
 
 		b=vcg::tri::Clean<MeshType>::IsSizeConsistent(mesh);
 		if (!b)			return false;
 
-    int cc=vcg::tri::Clean<MeshType>::ConnectedComponents(mesh);
+    int cc=vcg::tri::Clean<MeshType>::CountConnectedComponents(mesh);
     if(cc>1) return false;
 
     int boundaryEdgeNum, internalEdgeNum;

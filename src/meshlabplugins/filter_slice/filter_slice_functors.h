@@ -76,7 +76,7 @@ public :
 	{
 		Segment3f seg(ep.V()->P(),ep.VFlip()->P());
 	  Point3f pp;
-    Intersection<Segment3f>(p,seg,pp);
+    IntersectionPlaneSegment<typename MESH_TYPE::ScalarType>(p,seg,pp);
     nv.P()=pp;
     nv.Q()=VERTEX_SLICE;
 	}

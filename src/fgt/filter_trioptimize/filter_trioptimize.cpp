@@ -281,7 +281,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		
-		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+    if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
 			errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -326,7 +326,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			Log(GLLogStream::FILTER, "%d curvature edge flips performed in %.2f sec.",  optimiz.nPerfmormedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
 		}
 	if (ID(filter) == FP_PLANAR_EDGE_FLIP) {
-		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+    if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
 					errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
 					return false; // can't continue, mesh can't be processed
 				}

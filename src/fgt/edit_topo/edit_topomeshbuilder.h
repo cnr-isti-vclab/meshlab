@@ -254,7 +254,7 @@ public:
 		{(*fi).ClearS(); for(int i=0; i<3; i++) (*fi).V(i)->ClearS(); }
 
 		outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-		if(tri::Clean<CMeshO>::IsTwoManifoldFace(outMesh.cm))
+    if(tri::Clean<CMeshO>::CountNonManifoldEdgeFF(outMesh.cm)==0)
 			for(int i=0; i<iterations; i++)
 			{
 				dialog->setStatusLabel("Iter: "+QString("%1").arg(i+1));
@@ -341,7 +341,7 @@ public:
 		{(*fi).ClearS(); for(int i=0; i<3; i++) (*fi).V(i)->ClearS(); }
 
 		outMesh.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-		if(tri::Clean<CMeshO>::IsTwoManifoldFace(outMesh.cm))
+    if(tri::Clean<CMeshO>::CountNonManifoldEdgeFF(outMesh.cm)==0)
 		{
 			for(int i=0; i<it; i++)
 			{

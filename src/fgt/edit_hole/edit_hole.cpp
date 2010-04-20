@@ -83,7 +83,7 @@ void EditHolePlugin::mouseMoveEvent(QMouseEvent * /*e*/, MeshModel &/*m*/, GLAre
 bool EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
 	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-	if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) )
+  if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0)
 	{
 		QMessageBox::critical(0, tr("Manifoldness Failure"), QString("Hole's managing requires manifoldness."));
 		return false; // can't continue, mesh can't be processed

@@ -409,20 +409,20 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 				double alpha = par.getAbsPerc("alpha");
 
 				bool alphashape = false;
-				char* name = "";
+        QString name;
 				switch(par.getEnum("Filtering"))
 				{
 					case 0 :	
 						alphashape=false;	
-						name = ("Alpha Complex");
+            name = QString("Alpha Complex");
 						break;
 					case 1 :
 						alphashape=true;
-						name =("Alpha Shapes");
+            name =QString("Alpha Shapes");
 						break;
 				}
 
-				MeshModel &pm =*md.addNewMesh(name);
+        MeshModel &pm =*md.addNewMesh(qPrintable(name));
 
 				if (!alphashape && !pm.hasDataMask(MeshModel::MM_FACEQUALITY))
 				{
@@ -517,8 +517,8 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 					if (reorient){
 						pm2.updateDataMask(MeshModel::MM_FACEFACETOPO);
 						bool oriented,orientable;
-						if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(pm2.cm) ) {
-								errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness"; // text
+            if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(pm2.cm)>0) {
+                errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness";
 								return false; // can't continue, mesh can't be processed
 						}
 						
@@ -543,5 +543,8 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 				else return false;
 			}
 	}
+
+  assert(0);
+  return false;
 }
 Q_EXPORT_PLUGIN(QhullPlugin)
