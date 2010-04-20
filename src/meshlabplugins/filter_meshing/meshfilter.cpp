@@ -119,15 +119,16 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 		case FP_FAUX_CREASE                      :
 		case FP_VATTR_SEAM                       : return MeshFilterInterface::Remeshing;
 
-		case FP_NORMAL_EXTRAPOLATION             :
+    case FP_NORMAL_EXTRAPOLATION             : return MeshFilterInterface::FilterClass( MeshFilterInterface::Normal + MeshFilterInterface::PointSet );
+
 		case FP_INVERT_FACES                     :
 		case FP_REORIENT                         :
 		case FP_COMPUTE_PRINC_CURV_DIR           :
 		case FP_ROTATE                           :
-    case FP_ROTATE_FIT                           :
+    case FP_ROTATE_FIT                       :
 		case FP_CENTER                           :
 		case FP_SCALE                            :
-    case FP_PRINCIPAL_AXIS                            :
+    case FP_PRINCIPAL_AXIS                   :
 		case FP_FLIP_AND_SWAP                    : return MeshFilterInterface::Normal;
 
 		case FP_FREEZE_TRANSFORM                 :
@@ -847,7 +848,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 
   if (ID(filter) == (FP_NORMAL_EXTRAPOLATION) ) {
-	NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"),-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
+    tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+    NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"),-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
 	}
 
   if (ID(filter) == (FP_COMPUTE_PRINC_CURV_DIR) ) {
