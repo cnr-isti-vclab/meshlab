@@ -109,7 +109,7 @@ bool MeshModel::Render(GLW::DrawMode _dm, GLW::ColorMode _cm, GLW::TextureMode _
 
 bool MeshModel::RenderSelectedFace()
 {
-  glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT );
+  glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT);
   glEnable(GL_POLYGON_OFFSET_FILL);
   glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
@@ -137,16 +137,15 @@ bool MeshModel::RenderSelectedFace()
 }
 bool MeshModel::RenderSelectedVert()
 {
-  glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT );
-  glEnable(GL_POLYGON_OFFSET_FILL);
+  glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT);
   glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
   glEnable(GL_BLEND);
   glDepthMask(GL_FALSE);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
   glColor4f(1.0f,0.0,0.0,.3f);
-  glPolygonOffset(-1.0, -1);
-  glPointSize(2.0);
+  glDepthRange(0.00,0.999);
+  glPointSize(3.0);
   glPushMatrix();
   glMultMatrix(cm.Tr);
   glBegin(GL_POINTS);
