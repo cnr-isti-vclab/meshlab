@@ -145,24 +145,25 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 {
 	switch (filter)
 	{
-		case FP_LOOP_SS                          : return tr("Loop Subdivision Surfaces");
-		case FP_BUTTERFLY_SS                     : return tr("Butterfly Subdivision Surfaces");
-		case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Remove Unreferenced Vertex");
+    case FP_LOOP_SS                          : return tr("Subdivision Surfaces: Loop");
+    case FP_BUTTERFLY_SS                     : return tr("Subdivision Surfaces: Butterfly Subdivision");
+    case FP_MIDPOINT                         : return tr("Subdivision Surfaces: Midpoint");
+    case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
+    case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Remove Unreferenced Vertex");
 		case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Remove Duplicated Vertex");
 		case FP_REMOVE_FACES_BY_AREA             : return tr("Remove Zero Area Faces");
 		case FP_REMOVE_FACES_BY_EDGE             : return tr("Remove Faces with edges longer than...");
 		case FP_QUADRIC_SIMPLIFICATION           : return tr("Quadric Edge Collapse Decimation");
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Quadric Edge Collapse Decimation (with texture)");
 		case FP_CLUSTERING                       : return tr("Clustering decimation");
-		case FP_MIDPOINT                         : return tr("Midpoint Subdivision Surfaces");
-		case FP_REORIENT                         : return tr("Re-Orient all faces coherentely");
+    case FP_REORIENT                         : return tr("Re-Orient all faces coherentely");
 		case FP_INVERT_FACES                     : return tr("Invert Faces Orientation");
-		case FP_SCALE                            : return tr("Scale Mesh");
-		case FP_CENTER                           : return tr("Center Mesh");
-		case FP_ROTATE                           : return tr("Rotate Mesh");
-    case FP_ROTATE_FIT                       : return tr("Rotate to Fit to a plane");
-    case FP_PRINCIPAL_AXIS                   : return tr("Align to Principal Axis");
-		case FP_FLIP_AND_SWAP                    : return tr("Flip and/or swap axis");
+    case FP_SCALE                            : return tr("Transform: Scale");
+    case FP_CENTER                           : return tr("Transform: Move, Translate, Center");
+    case FP_ROTATE                           : return tr("Transform: Rotate");
+    case FP_ROTATE_FIT                       : return tr("Transform: Rotate to Fit to a plane");
+    case FP_PRINCIPAL_AXIS                   : return tr("Transform: Align to Principal Axis");
+    case FP_FLIP_AND_SWAP                    : return tr("Transform: Flip and/or swap axis");
 		case FP_FREEZE_TRANSFORM                 : return tr("Freeze Current Matrix");
 		case FP_RESET_TRANSFORM                  : return tr("Reset Current Matrix");
 		case FP_REMOVE_NON_MANIFOLD_FACE         : return tr("Remove Non Manifold Faces");
@@ -171,8 +172,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 		case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
 		case FP_CLOSE_HOLES                      : return tr("Close Holes");
 		case FP_CYLINDER_UNWRAP                  : return tr("Geometric Cylindrical Unwrapping");
-		case FP_REFINE_CATMULL                   : return tr("Catmull-Clark Subdivision Surfaces");
-		case FP_REFINE_HALF_CATMULL              : return tr("Tri to Quad by 4-8 Subdivision");
+    case FP_REFINE_HALF_CATMULL              : return tr("Tri to Quad by 4-8 Subdivision");
 		case FP_QUAD_PAIRING                     : return tr("Tri to Quad by smart triangle pairing");
 		case FP_FAUX_CREASE                      : return tr("Crease Marking with NonFaux Edges");
 		case FP_VATTR_SEAM                       : return tr("Vertex Attribute Seam");
@@ -477,7 +477,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			ID(filter) == FP_BUTTERFLY_SS ||
 			ID(filter) == FP_MIDPOINT )
 		{
-			if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) )
+      if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
 			{
 				errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
 				return false; // can't continue, mesh can't be processed
@@ -558,7 +558,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	  {
 		bool oriented;
 		bool orientable;
-			if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+      if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm)>0 ) {
 					errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness"; // text
 					return false; // can't continue, mesh can't be processed
 			}
@@ -860,7 +860,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	  switch(par.getEnum("Method")){
 
 		  case 0:
-			  if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+        if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0 ) {
 				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
 				return false; // can't continue, mesh can't be processed
 				}
@@ -869,18 +869,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		  case 2:
 			  vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
 			  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-			  if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+        if ( ! tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
 				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
 				return false; // can't continue, mesh can't be processed
 				}
 			  vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycles(m.cm); break;
 		  case 3:
 			  vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
-			  if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
-				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
-				return false; // can't continue, mesh can't be processed
-				}
-				tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm);
+        tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm);
 				break;
 		  default:assert(0);break;
 

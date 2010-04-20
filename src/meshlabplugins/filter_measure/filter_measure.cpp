@@ -110,27 +110,34 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 				CMeshO &m=md.mm()->cm;	
 				md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);				
 				md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);				
-                tri::Allocator<CMeshO>::CompactFaceVector(m);
-                tri::Allocator<CMeshO>::CompactVertexVector(m);
-                tri::UpdateTopology<CMeshO>::FaceFace(m);
+        tri::Allocator<CMeshO>::CompactFaceVector(m);
+        tri::Allocator<CMeshO>::CompactVertexVector(m);
+        tri::UpdateTopology<CMeshO>::FaceFace(m);
 				tri::UpdateTopology<CMeshO>::VertexFace(m);
 				
-				bool edgeManif = tri::Clean<CMeshO>::IsTwoManifoldFace(m);
-				bool vertManif = tri::Clean<CMeshO>::IsTwoManifoldVertexFFVF(m);
+        int edgeManif = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
+        int faceEdgeManif = tri::UpdateSelection<CMeshO>::CountFace(m);
+        tri::UpdateSelection<CMeshO>::ClearVertex(m);
+        tri::UpdateSelection<CMeshO>::ClearFace(m);
+
+        int vertManif = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
+        tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
+        int faceVertManif = tri::UpdateSelection<CMeshO>::CountFace(m);
 				int edgeNum=0,borderNum=0;
 				tri::Clean<CMeshO>::CountEdges(m, edgeNum, borderNum);
 				int holeNum;
 				Log("V: %6i E: %6i F:%6i",m.vn,edgeNum,m.fn);
 				Log("Boundary Edges %i",borderNum); 
 				
-				int connectedComponentsNum = tri::Clean<CMeshO>::ConnectedComponents(m);
+        int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
 				Log("Mesh is composed by %i connected component(s)",connectedComponentsNum);
 				
-				if(edgeManif && vertManif) 
+        if(edgeManif==0 && vertManif==0)
 					Log("Mesh has is two-manifold ");
 					
-				if(!edgeManif) Log("Mesh has some non two manifold edges\n");
-				if(!vertManif) Log("Mesh has some non two manifold vertexes\n");
+        if(edgeManif!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeManif,faceEdgeManif);
+
+        if(vertManif!=0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n",vertManif,faceVertManif);
 				
 				// For Manifold meshes compute some other stuff
 				if(vertManif && edgeManif)

@@ -21,17 +21,15 @@
 *                                                                           *
 ****************************************************************************/
 #include <QtGui>
-#include <limits>
-#include "meshcolorize.h"
-#include "color_manifold.h"
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/complex/trimesh/update/quality.h>
+#include <limits>
+#include "meshcolorize.h"
 
 
   class Frange
@@ -50,23 +48,16 @@ using namespace vcg;
 
 ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     typeList << 
-            CP_CLAMP_QUALITY <<
+    CP_CLAMP_QUALITY <<
     CP_MAP_QUALITY_INTO_COLOR <<
     CP_DISCRETE_CURVATURE <<
     CP_TRIANGLE_QUALITY <<
-		CP_SELFINTERSECT_SELECT <<
-		CP_SELFINTERSECT_COLOR <<
-    CP_BORDER <<
-		CP_TEXBORDER <<
-    CP_COLOR_NON_MANIFOLD_FACE <<
-    CP_COLOR_NON_MANIFOLD_VERTEX <<
     CP_VERTEX_SMOOTH <<
 		CP_FACE_SMOOTH <<
 		CP_VERTEX_TO_FACE <<
 		CP_FACE_TO_VERTEX <<
 		CP_TEXTURE_TO_VERTEX <<
-    //CP_COLOR_NON_TOPO_COHERENT <<
-		CP_RANDOM_FACE;
+    CP_RANDOM_FACE;
     
   FilterIDType tt;
   foreach(tt , types())
@@ -76,23 +67,17 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
   switch(c)
   {
-  case CP_CLAMP_QUALITY: return tr("Clamp vertex quality");
-    case CP_MAP_QUALITY_INTO_COLOR:   return QString("Colorize by Quality");
-    case CP_DISCRETE_CURVATURE:                 return QString("Discrete Curvatures");
-    case CP_TRIANGLE_QUALITY:         return QString("Triangle quality");
-    case CP_SELFINTERSECT_COLOR:      return QString("Self Intersections");
-    case CP_SELFINTERSECT_SELECT:     return QString("Self Intersecting Faces");
-    case CP_BORDER:                   return QString("Border");
-    case CP_TEXBORDER:                   return QString("Texture Border");
-    case CP_COLOR_NON_MANIFOLD_FACE:  return QString("Color non Manifold Faces");
-    case CP_COLOR_NON_MANIFOLD_VERTEX:return QString("Color non Manifold Vertices");
-    case CP_COLOR_NON_TOPO_COHERENT:  return QString("Color edges topologically non coherent");
-    case CP_VERTEX_SMOOTH:                   return QString("Laplacian Smooth Vertex Color");
-    case CP_FACE_SMOOTH:                   return QString("Laplacian Smooth Face Color");
-    case CP_VERTEX_TO_FACE:                   return QString("Vertex to Face color transfer");
-    case CP_FACE_TO_VERTEX:                   return QString("Face to Vertex color transfer");
-	case CP_TEXTURE_TO_VERTEX:                   return QString("Texture to Vertex color transfer");
-		case CP_RANDOM_FACE:         return QString("Random Face Color");
+    case CP_CLAMP_QUALITY:             return QString("Clamp vertex quality");
+    case CP_MAP_QUALITY_INTO_COLOR:    return QString("Colorize by Quality");
+    case CP_DISCRETE_CURVATURE:        return QString("Discrete Curvatures");
+    case CP_TRIANGLE_QUALITY:          return QString("Triangle quality");
+    case CP_COLOR_NON_TOPO_COHERENT:   return QString("Color edges topologically non coherent");
+    case CP_VERTEX_SMOOTH:             return QString("Smooth: Laplacian Vertex Color");
+    case CP_FACE_SMOOTH:               return QString("Smooth: Laplacian  Face Color");
+    case CP_VERTEX_TO_FACE:            return QString("Transfer Color: Vertex to Face");
+    case CP_FACE_TO_VERTEX:            return QString("Transfer Color: Face to Vertex");
+    case CP_TEXTURE_TO_VERTEX:         return QString("Transfer Color: Texture to Vertex");
+    case CP_RANDOM_FACE:               return QString("Random Face Color");
 			
     default: assert(0);
   }
@@ -108,12 +93,6 @@ QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const
 																							 "'<i>Discrete Differential-Geometry Operators for Triangulated 2-Manifolds</i>' <br>"
 																							 "M. Meyer, M. Desbrun, P. Schroder, A. H. Barr");
     case CP_TRIANGLE_QUALITY:        return tr("Colorize faces depending on triangle quality:<br/>1: minimum ratio height/edge among the edges<br/>2: ratio between radii of incenter and circumcenter<br/>3:  2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM, M transform triangle into equilateral");
-    case CP_SELFINTERSECT_SELECT:    return tr("Select only self intersecting faces.");
-    case CP_SELFINTERSECT_COLOR:     return tr("Colorize only self intersecting faces.");
-    case CP_BORDER :                 return tr("Colorize only border edges.");
-    case CP_TEXBORDER :                 return tr("Colorize only border edges.");
-    case CP_COLOR_NON_MANIFOLD_FACE: return tr("Colorize the non manifold edges, eg the edges where there are more than two incident faces");
-    case CP_COLOR_NON_MANIFOLD_VERTEX:return tr("Colorize only non manifold edges eg. ");
     case CP_VERTEX_SMOOTH:                   return QString("Laplacian Smooth Vertex Color");
     case CP_FACE_SMOOTH:                   return QString("Laplacian Smooth Face Color");
     case CP_VERTEX_TO_FACE:                   return QString("Vertex to Face color transfer");
@@ -133,13 +112,6 @@ int ExtraMeshColorizePlugin::getRequirements(QAction *action)
   {
     case CP_DISCRETE_CURVATURE:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV;
     case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR;
-    case CP_SELFINTERSECT_SELECT:
-		case CP_SELFINTERSECT_COLOR:
-		            return MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
-    case CP_BORDER:             return MeshModel::MM_FACEFLAGBORDER;
-    case CP_TEXBORDER:                   return MeshModel::MM_FACEFACETOPO;
-    case CP_COLOR_NON_MANIFOLD_FACE:       
-    case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACEFACETOPO;
     case CP_RANDOM_FACE:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
     case CP_CLAMP_QUALITY:   return 0;
     case CP_MAP_QUALITY_INTO_COLOR:   return 0;
@@ -237,7 +209,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
     }
   case CP_DISCRETE_CURVATURE:
     {
-			if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+      if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0) {
 				errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
 				return false; // can't continue, mesh can't be processed
 			}
@@ -292,50 +264,11 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
 		break;
     }
 
-  case CP_SELFINTERSECT_SELECT:
-	case CP_SELFINTERSECT_COLOR:
-    {
-      vector<CFaceO *> IntersFace;
-			vector<CFaceO *>::iterator fpi;
-      tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
-			if(ID(filter)==CP_SELFINTERSECT_COLOR) 
-				{
-					tri::UpdateColor<CMeshO>::FaceConstant(m.cm,Color4b::White);
-					for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
-						(*fpi)->C()=Color4b::Red;
-				}
-			else
-			{
-				tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   
-				for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
-					(*fpi)->SetS();
-			}
-    break;  
-    }
 
-  case CP_BORDER:
-    vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
-    break;
-	case CP_RANDOM_FACE:
+  case CP_RANDOM_FACE:
     vcg::tri::UpdateColor<CMeshO>::MultiFaceRandom(m.cm);
     break;
-	case CP_TEXBORDER:
-		vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
-		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
-    vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
-		
-		// Just to be sure restore standard topology and border flags 
-		tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-    tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
-    break;
-  case CP_COLOR_NON_MANIFOLD_FACE:
-    ColorManifoldFace<CMeshO>(m.cm);
-    break;
-  case CP_COLOR_NON_MANIFOLD_VERTEX:
-    ColorManifoldVertex<CMeshO>(m.cm);
-    break;
+
   case CP_VERTEX_SMOOTH:
 		{
 		int iteration = par.getInt("iteration");
@@ -382,20 +315,16 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a)
   {
     case   CP_CLAMP_QUALITY:
       return MeshFilterInterface::Quality;
-    case   CP_BORDER:
-    case   CP_TEXBORDER:
-    case   CP_COLOR_NON_MANIFOLD_VERTEX:
-    case   CP_COLOR_NON_MANIFOLD_FACE:
     case   CP_MAP_QUALITY_INTO_COLOR:
     case   CP_DISCRETE_CURVATURE:
     case   CP_COLOR_NON_TOPO_COHERENT:
     case   CP_VERTEX_SMOOTH:
     case   CP_FACE_TO_VERTEX:
         return MeshFilterInterface::VertexColoring; 	
+
 	  case   CP_TEXTURE_TO_VERTEX:
 				return MeshFilterInterface::VertexColoring; 
-	  case   CP_SELFINTERSECT_SELECT: return MeshFilterInterface::Selection;
-    case   CP_SELFINTERSECT_COLOR:
+
     case   CP_TRIANGLE_QUALITY:
 		case   CP_RANDOM_FACE:	
     case   CP_FACE_SMOOTH:
@@ -410,11 +339,6 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const
 {
 	switch(ID(a)) 
 	{
-    case   CP_BORDER:
-    case   CP_COLOR_NON_MANIFOLD_VERTEX:
-    case   CP_COLOR_NON_MANIFOLD_FACE:
-	  case   CP_SELFINTERSECT_SELECT: 
-		case   CP_SELFINTERSECT_COLOR:
     case   CP_TRIANGLE_QUALITY:
 		case   CP_RANDOM_FACE:	
     case   CP_DISCRETE_CURVATURE:
@@ -434,8 +358,6 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const
         return MeshModel::MM_VERTCOLOR;
 
 	  case   CP_TEXTURE_TO_VERTEX:
-    case   CP_TEXBORDER: 
-        return MeshModel::MM_WEDGTEXCOORD;
 
     default: assert(0);
 	}
@@ -446,22 +368,16 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const
 {
 	switch(ID(a)) 
 	{
-	  case   CP_SELFINTERSECT_SELECT: 
-		case   CP_SELFINTERSECT_COLOR:
     case   CP_TRIANGLE_QUALITY:
 		case   CP_RANDOM_FACE:	
     case   CP_COLOR_NON_TOPO_COHERENT:
     case   CP_FACE_SMOOTH:
     case   CP_VERTEX_TO_FACE:
 				return MeshModel::MM_FACECOLOR;
-    case   CP_BORDER:
-    case   CP_COLOR_NON_MANIFOLD_VERTEX:
-    case   CP_COLOR_NON_MANIFOLD_FACE:
     case   CP_MAP_QUALITY_INTO_COLOR:
     case   CP_FACE_TO_VERTEX:
     case   CP_VERTEX_SMOOTH:
 	  case   CP_TEXTURE_TO_VERTEX:
-    case   CP_TEXBORDER: 
 				return MeshModel::MM_VERTCOLOR;
 
 		case   CP_DISCRETE_CURVATURE:

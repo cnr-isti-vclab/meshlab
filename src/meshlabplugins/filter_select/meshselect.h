@@ -39,26 +39,29 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 		 - name of the plugin separated by _
 	*/
 	enum { 
-		FP_SELECT_ALL, 
-		FP_SELECT_NONE, 
-		FP_SELECT_INVERT, 
+    FP_SELECT_ALL,
+    FP_SELECT_NONE,
+    FP_SELECT_INVERT,
     FP_SELECT_DELETE_VERT,
     FP_SELECT_DELETE_FACE,
-		FP_SELECT_DELETE_FACEVERT, 
-		FP_SELECT_ERODE, 
-		FP_SELECT_DILATE, 
-		FP_SELECT_BORDER_FACES,
-		FP_SELECT_BY_QUALITY,
-		FP_SELECT_BY_RANGE,
-		FP_SELECT_BY_COLOR
+    FP_SELECT_DELETE_FACEVERT,
+    FP_SELECT_ERODE,
+    FP_SELECT_DILATE,
+    FP_SELECT_BORDER,
+    FP_SELECT_BY_QUALITY,
+    FP_SELECT_BY_RANGE,
+    FP_SELECT_BY_COLOR,CP_SELFINTERSECT_SELECT,
+    CP_SELECT_TEXBORDER,
+    CP_SELECT_NON_MANIFOLD_FACE,
+    CP_SELECT_NON_MANIFOLD_VERTEX
 	} ;
 
 	SelectionFilterPlugin();
-	~SelectionFilterPlugin();
+  //~SelectionFilterPlugin();
 	virtual QString filterInfo(FilterIDType filter) const;
   virtual QString filterName(FilterIDType filter) const;
   
-  virtual FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
+  virtual FilterClass getClass(QAction *);
   void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst);
   int getPreConditions(QAction *) const;
   int postCondition( QAction* ) const;

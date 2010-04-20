@@ -25,35 +25,15 @@
 #include <math.h>
 #include <stdlib.h>
 #include "meshselect.h"
-#include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/space/colorspace.h>
 
 using namespace vcg;
 
- QString SelectionFilterPlugin::filterName(FilterIDType filter) const
+SelectionFilterPlugin::SelectionFilterPlugin()
 {
- switch(filter)
-  {
-	  case FP_SELECT_ALL :		             return QString("Select All");
-	  case FP_SELECT_NONE :		             return QString("Select None");
-    case FP_SELECT_INVERT :		           return QString("Invert Selection");
-    case FP_SELECT_DELETE_VERT :		     return QString("Delete Selected Vertices");
-    case FP_SELECT_DELETE_FACE :		     return QString("Delete Selected Faces");
-    case FP_SELECT_DELETE_FACEVERT :		 return QString("Delete Selected Faces and Vertices");
-	  case FP_SELECT_ERODE :		           return QString("Erode Selection");
-	  case FP_SELECT_DILATE :		           return QString("Dilate Selection");
-	  case FP_SELECT_BORDER_FACES:		     return QString("Select Border Faces");
-	  case FP_SELECT_BY_QUALITY :		       return QString("Select by Vertex Quality");
-	  case FP_SELECT_BY_RANGE:						 return QString("Select by Coord range");
-	  case FP_SELECT_BY_COLOR:						 return QString("Select Face by Vertex Color");
-  }
-  return QString("Unknown filter");
-}
-
-SelectionFilterPlugin::SelectionFilterPlugin() 
-{
-  typeList << 
+  typeList <<
     FP_SELECT_ALL <<
     FP_SELECT_NONE <<
     FP_SELECT_DELETE_VERT <<
@@ -61,13 +41,17 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     FP_SELECT_DELETE_FACEVERT <<
     FP_SELECT_ERODE <<
     FP_SELECT_DILATE <<
-    FP_SELECT_BORDER_FACES <<
-		FP_SELECT_INVERT <<
-		FP_SELECT_BY_QUALITY <<
-		FP_SELECT_BY_COLOR;
-  
+    FP_SELECT_BORDER <<
+    FP_SELECT_INVERT <<
+    FP_SELECT_BY_QUALITY <<
+    CP_SELFINTERSECT_SELECT <<
+    CP_SELECT_TEXBORDER <<
+    CP_SELECT_NON_MANIFOLD_FACE <<
+    CP_SELECT_NON_MANIFOLD_VERTEX <<
+    FP_SELECT_BY_COLOR;
+
   FilterIDType tt;
-  
+
   foreach(tt , types())
     {
       actionList << new QAction(filterName(tt), this);
@@ -83,14 +67,59 @@ SelectionFilterPlugin::SelectionFilterPlugin()
             actionList.last()->setShortcut(QKeySequence ("Shift+Del"));
             actionList.last()->setIcon(QIcon(":/images/delete_facevert.png"));
       }
-    }	  
+    }
 }
-SelectionFilterPlugin::~SelectionFilterPlugin() 
+
+ QString SelectionFilterPlugin::filterName(FilterIDType filter) const
 {
-	for (int i = 0; i < actionList.count() ; i++ ) {
-		delete actionList.at(i);
-	}
+ switch(filter)
+  {
+	  case FP_SELECT_ALL :		             return QString("Select All");
+	  case FP_SELECT_NONE :		             return QString("Select None");
+    case FP_SELECT_INVERT :		           return QString("Invert Selection");
+    case FP_SELECT_DELETE_VERT :		     return QString("Delete Selected Vertices");
+    case FP_SELECT_DELETE_FACE :		     return QString("Delete Selected Faces");
+    case FP_SELECT_DELETE_FACEVERT :		 return QString("Delete Selected Faces and Vertices");
+	  case FP_SELECT_ERODE :		           return QString("Erode Selection");
+	  case FP_SELECT_DILATE :		           return QString("Dilate Selection");
+    case FP_SELECT_BORDER:		     return QString("Select Border Faces");
+	  case FP_SELECT_BY_QUALITY :		       return QString("Select by Vertex Quality");
+	  case FP_SELECT_BY_RANGE:						 return QString("Select by Coord range");
+	  case FP_SELECT_BY_COLOR:						 return QString("Select Face by Vertex Color");
+  case CP_SELFINTERSECT_SELECT:      return QString("Self Intersecting Faces");
+    case CP_SELECT_TEXBORDER:            return QString("Select Vertex Texture Seams");
+    case CP_SELECT_NON_MANIFOLD_FACE:    return QString("Select non Manifold Edges ");
+    case CP_SELECT_NON_MANIFOLD_VERTEX:  return QString("Select non Manifold Vertices");
+
+  }
+  return QString("Unknown filter");
 }
+ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
+  {
+   switch(filterId)
+   {
+     case FP_SELECT_DILATE : return tr("Dilate (expand) the current set of selected faces");
+     case FP_SELECT_DELETE_VERT : return tr("Delete the current set of selected vertices; faces that share one of the deleted vertexes are deleted too.");
+     case FP_SELECT_DELETE_FACE : return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");
+     case FP_SELECT_DELETE_FACEVERT : return tr("Delete the current set of selected faces and all the vertices surrounded by that faces.");
+   case CP_SELFINTERSECT_SELECT:    return tr("Select only self intersecting faces.");
+     case FP_SELECT_ERODE  : return tr("Erode (reduce) the current set of selected faces");
+     case FP_SELECT_INVERT : return tr("Invert the current set of selected faces");
+     case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");
+     case FP_SELECT_ALL    : return tr("Select all the faces of the current mesh");
+     case FP_SELECT_BORDER    : return tr("Select all the faces on the boundary");
+     case FP_SELECT_BY_QUALITY    : return tr("Select all the faces with all the vertexes within the specified quality range");
+     case FP_SELECT_BY_COLOR:  return tr("Select part of the mesh based on its color.");
+   case CP_SELECT_TEXBORDER :                 return tr("Colorize only border edges.");
+   case CP_SELECT_NON_MANIFOLD_FACE:   return tr("Select the faces and the vertices incident on non manifold edges (e.g. edges where more than two faces are incident); note that this function select the components that are related to non manifold edges. The case of non manifold vertices is specifically managed by the pertinent filter.");
+   case CP_SELECT_NON_MANIFOLD_VERTEX: return tr("Select the non manifold vertices that do not belong to non manifold edges. For example two cones connected by their apex. Vertices incident on non manifold edges are ignored.");
+
+
+   }
+   assert(0);
+   return QString();
+  }
+
 void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
 		switch(ID(action))
@@ -131,8 +160,8 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 
 bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
-    MeshModel &m=*(md.mm());
-    CMeshO::FaceIterator fi;
+  MeshModel &m=*(md.mm());
+  CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
 	switch(ID(action))
   {
@@ -179,7 +208,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   case FP_SELECT_DILATE : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);  
                           tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
   break;
-  case FP_SELECT_BORDER_FACES: tri::UpdateSelection<CMeshO>::FaceFromBorder(m.cm);  
+  case FP_SELECT_BORDER: tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
   break;
   case FP_SELECT_BY_QUALITY: 
 		{
@@ -237,59 +266,104 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
                                      else tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
 		}
 		break;
+  case CP_SELECT_TEXBORDER:
+    tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
+    tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+    tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
+
+    // Just to be sure restore standard topology and border flags
+    tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+    tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+    break;
+  case CP_SELECT_NON_MANIFOLD_FACE:
+    tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm,true);
+    break;
+  case CP_SELECT_NON_MANIFOLD_VERTEX:
+    tri::Clean<CMeshO>::CountNonManifoldVertexFF(m.cm,true);
+    break;
+  case CP_SELFINTERSECT_SELECT:
+    {
+      std::vector<CFaceO *> IntersFace;
+      std::vector<CFaceO *>::iterator fpi;
+      tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
+      tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+      for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
+        (*fpi)->SetS();
+    break;
+    }
 
   default:  assert(0);
   }
   return true;
 }
 
-QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const 
- {
-  switch(filterId)
-  {
-    case FP_SELECT_DILATE : return tr("Dilate (expand) the current set of selected faces");  
-    case FP_SELECT_DELETE_VERT : return tr("Delete the current set of selected vertices; faces that share one of the deleted vertexes are deleted too.");
-    case FP_SELECT_DELETE_FACE : return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");  
-    case FP_SELECT_DELETE_FACEVERT : return tr("Delete the current set of selected faces and all the vertices surrounded by that faces.");  
-    case FP_SELECT_ERODE  : return tr("Erode (reduce) the current set of selected faces");  
-    case FP_SELECT_INVERT : return tr("Invert the current set of selected faces");  
-    case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");  
-    case FP_SELECT_ALL    : return tr("Select all the faces of the current mesh");  
-    case FP_SELECT_BORDER_FACES    : return tr("Select all the faces on the boundary");  
-    case FP_SELECT_BY_QUALITY    : return tr("Select all the faces with all the vertexes within the specified quality range");
-    case FP_SELECT_BY_COLOR:  return tr("Select part of the mesh based on its color.");
-  }  
-  assert(0);
-  return QString();
- }
+MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action)
+{
+  switch(ID(action))
+    {
+    case   CP_SELFINTERSECT_SELECT:
+    case   CP_SELECT_NON_MANIFOLD_VERTEX:
+    case   CP_SELECT_NON_MANIFOLD_FACE:
+          return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
+
+      case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
+      case FP_SELECT_BY_COLOR : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::FaceColoring);
+      case FP_SELECT_BY_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
+    }
+  return MeshFilterInterface::Selection;
+}
 
  int SelectionFilterPlugin::getRequirements(QAction *action)
 {
  switch(ID(action))
   {
-   case FP_SELECT_BORDER_FACES:   return  MeshModel::MM_FACEFLAGBORDER;
-   case FP_SELECT_BY_COLOR:		return MeshModel::MM_VERTCOLOR;
+  case CP_SELECT_NON_MANIFOLD_FACE:
+  case CP_SELECT_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACEFACETOPO;
+   case FP_SELECT_BORDER:   return  MeshModel::MM_FACEFLAGBORDER;
+  case CP_SELECT_TEXBORDER:                   return MeshModel::MM_FACEFACETOPO;
+  case CP_SELFINTERSECT_SELECT:
+              return MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
+
 	 default: return 0;
   }
 }
 
 int SelectionFilterPlugin::postCondition(QAction *action) const
- {
-    if(ID(action) != FP_SELECT_DELETE_VERT &&
-       ID(action) != FP_SELECT_DELETE_FACE &&
-       ID(action) != FP_SELECT_DELETE_FACEVERT)
-       return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
-
-    return MeshModel::MM_UNKNOWN;
+{
+  switch(ID(action))
+  {
+    case FP_SELECT_ALL:
+    case FP_SELECT_NONE:
+    case FP_SELECT_INVERT:
+    case FP_SELECT_ERODE:
+    case FP_SELECT_DILATE:
+    case FP_SELECT_BORDER:
+    case FP_SELECT_BY_QUALITY:
+    case FP_SELECT_BY_RANGE:
+    case FP_SELECT_BY_COLOR:
+    case CP_SELFINTERSECT_SELECT:
+    case CP_SELECT_TEXBORDER:
+    case CP_SELECT_NON_MANIFOLD_FACE:
+    case CP_SELECT_NON_MANIFOLD_VERTEX:
+      return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
+  }
+  return MeshModel::MM_UNKNOWN;
 }
 
 int SelectionFilterPlugin::getPreConditions( QAction * action) const
 {
 	switch(ID(action))
 	{
-	case FP_SELECT_BY_COLOR:		return MeshModel::MM_VERTCOLOR;
-	case FP_SELECT_BY_QUALITY:		return MeshModel::MM_VERTQUALITY;
-	default: return 0;
+  case   CP_SELECT_NON_MANIFOLD_VERTEX:
+  case   CP_SELECT_NON_MANIFOLD_FACE:
+  case   CP_SELFINTERSECT_SELECT:
+    case FP_SELECT_BORDER:        return MeshModel::MM_FACENUMBER;
+    case FP_SELECT_BY_COLOR:      return MeshModel::MM_VERTCOLOR;
+    case FP_SELECT_BY_QUALITY:		return MeshModel::MM_VERTQUALITY;
+    case CP_SELECT_TEXBORDER:     return MeshModel::MM_WEDGTEXCOORD;
 	}
+  return 0;
 }
 Q_EXPORT_PLUGIN(SelectionFilterPlugin)
