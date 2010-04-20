@@ -1,7 +1,10 @@
 include (../../shared.pri)
 
-HEADERS       += filter_plymc.h 							volume.h\
-		voxel.h
+HEADERS       += filter_plymc.h \
+                 volume.h\
+                 voxel.h \
+                 plymc.h \
+                 simplemeshprovider.h
 
 SOURCES       += filter_plymc.cpp \
 ../../../../vcglib/wrap/ply/plylib.cpp 

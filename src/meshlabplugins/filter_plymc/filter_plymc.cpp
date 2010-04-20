@@ -57,7 +57,10 @@ PlyMCPlugin::PlyMCPlugin()
  QString PlyMCPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-        case FP_PLYMC :  return QString("The surface reconstrction algorithm that have been used for a long time inside the ISTI-Visual Computer Lab. It is mostly a variant of the Curless et al.  approach with some original weighting schemes, a different expansion rule, a new aprroach to hole filling through voluem filling.");
+        case FP_PLYMC :  return QString(
+              "The surface reconstrction algorithm that have been used for a long time inside the ISTI-Visual Computer Lab."
+              "It is mostly a variant of the Curless et al. e.g. a volumetric approach with some original weighting schemes,"
+              "a different expansion rule, and another approach to hole filling through volume dilation.");
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -89,12 +92,12 @@ void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
      {
         case FP_PLYMC :
           parlst.addParam(new RichAbsPerc("voxSize",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),"Voxel Side", "VoxelSide"));
-          parlst.addParam(new RichInt("subdiv",1,"SubVol Splitting","The level of recursive splitting of the subvolume reconstruction process. '2'' means that a 2x2x2 partition is created and the reconstruction proess generate 8 matching meshes. It is useful for reconsruction at very high resolution."));
-          parlst.addParam(new RichFloat("geodesic",3.0,"Geodesic Weighting"," "));
-          parlst.addParam(new RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
-          parlst.addParam(new RichInt("smoothNum",1,"Volume Laplacian iter","the level of recursive splitting of the volume"));
-          parlst.addParam(new RichInt("wideNum",3,"Widening","the level of recursive splitting of the volume"));
-          parlst.addParam(new RichBool("mergeColor",true,"Merge Color","the level of recursive splitting of the volume"));
+          parlst.addParam(    new RichInt("subdiv",1,"SubVol Splitting","The level of recursive splitting of the subvolume reconstruction process. A value of '3' means that a 3x3x3 regular space subdivision is created and the reconstruction process generate 8 matching meshes. It is useful for reconsruction objects at a very high resolution. Default value (1) means no splitting."));
+          parlst.addParam(  new RichFloat("geodesic",3.0,"Geodesic Weighting"," "));
+          parlst.addParam(   new RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
+          parlst.addParam(    new RichInt("smoothNum",1,"Volume Laplacian iter","the level of recursive splitting of the volume"));
+          parlst.addParam(    new RichInt("wideNum",3,"Widening","the level of recursive splitting of the volume"));
+          parlst.addParam   (new RichBool("mergeColor",true,"Merge Color","the level of recursive splitting of the volume"));
         break;
      default: break; // do not add any parameter for the other filters
   }
