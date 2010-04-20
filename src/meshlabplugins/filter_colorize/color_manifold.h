@@ -62,36 +62,7 @@ Filter that it colors the edge non manifold
 
 namespace vcg{
 
-	template<class MESH_TYPE>
-		void ColorManifoldFace(MESH_TYPE &m)
-	{	
-		assert(m.HasFFTopology());
-
-		typename MESH_TYPE::VertexIterator vi;
-		typename MESH_TYPE::FaceIterator fi;
-   
-    tri::UpdateColor<MESH_TYPE>::VertexConstant(m, Color4b::White);
-
-		// Test per gli edge manifold
-		for (fi = m.face.begin(); fi != m.face.end(); ++fi)	if (!fi->IsD())
-			{
-        for(int i=0;i<3;++i)
-        if(!IsManifold(*fi,i)){
-					(*fi).V0(i)->C().SetRGB(255,0,0);
-					(*fi).V1(i)->C().SetRGB(255,0,0);
-          }
-		  }
-	}
-	
-  template<class MESH_TYPE>
-	void ColorManifoldVertex(MESH_TYPE &m)
-	{	
-		assert(HasFFAdjacency(m));
-		
-		tri::UpdateColor<MESH_TYPE>::VertexConstant(m, Color4b::White);
-		tri::Clean<MESH_TYPE>::CountNonManifoldVertexFF(m,true);
-		tri::UpdateColor<MESH_TYPE>::VertexSelected(m, Color4b::Red);
-	}		
+TO BE REMOVED
 
 } // end namespace
 #endif
