@@ -69,8 +69,8 @@ QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
-		case FP_VERT_AMBIENT_OCCLUSION :  return QString("Vertex Ambient Occlusion"); 
-		case FP_FACE_AMBIENT_OCCLUSION :  return QString("Face Ambient Occlusion"); 
+    case FP_VERT_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion - Per Vertex");
+    case FP_FACE_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion - Per Face");
 		default : assert(0); 
 	}
 	
