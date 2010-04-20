@@ -1,6 +1,8 @@
 #include "balloon.h"
 #include "float.h"
 #include "math.h"
+// cannot put this in headers, or it will cause trouble
+#include "vcg/complex/trimesh/update/curvature.h"
 using namespace vcg;
 
 //---------------------------------------------------------------------------------------//
@@ -36,8 +38,10 @@ void Balloon::init( int gridsize, int gridpad ){
     vol.isosurface( surf, 0 );
     qDebug() << "Extracted balloon isosurface (" << surf.vn << " " << surf.fn << ")";    
 
-    //--- Re-compute isosurface so that marching-cube and EDF match
+    // Test whether applying it more than one time does nothing (1-1 conversion)
+    // Put this in a button callback so can visually inspect (passed...)
     // vol.initField(surf, gridAccell);
+    return;
 }
 void Balloon::updateViewField(){
     //--- Setup the interpolation system
@@ -127,6 +131,7 @@ void Balloon::updateViewField(){
                 fi->Q() /= tot_w[ tri::Index(surf,*fi) ];
         }
         //--- Transfer the average distance stored in face quality to a color
+        //    and do it only for the selection (true)
         tri::UpdateColor<CMeshO>::FaceQualityRamp(surf, true);
     }
 }
@@ -167,39 +172,85 @@ void Balloon::interpolateField(){
         // qDebug() << "Interpolated field showed as vertex color!";
     }
 }
+void Balloon::computeCurvature(){
+    // Enable curvature supports, How do I avoid a
+    // double computation of topology here?
+    surf.vert.EnableCurvature();
+    surf.vert.EnableVFAdjacency();
+    surf.face.EnableVFAdjacency();
+    surf.face.EnableFFAdjacency();
+    vcg::tri::UpdateTopology<CMeshO>::VertexFace( surf );
+
+    //--- Compute curvature and its bounds
+    tri::UpdateCurvature<CMeshO>::MeanAndGaussian( surf );
+    float absmax = -FLT_MAX;
+    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+        float cabs = fabs((*vi).Kg());
+        absmax = (cabs>absmax) ? cabs : absmax;
+    }
+
+    //--- Enable color coding
+    rm &= ~SURF_FCOLOR;
+    rm |= SURF_VCOLOR;
+
+    //--- Map curvature to two color ranges:
+    //    Blue => Yellow: negative values
+    //    Yellow => Red:  positive values
+    typedef unsigned char CT;
+    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+        if( (*vi).Kg() < 0 )
+            (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Blue, fabs((*vi).Kg())/absmax );
+        else
+            (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Red, (*vi).Kg()/absmax);
+    }
+}
 void Balloon::evolveBalloon(){
-
-//    // Compute normalized Mean-Curvature
-//    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
-//        VertexCurvature(&*vi,true);
-//        (*vi).Q() = (*vi).Kh();
-//    }
-//    Histogram<float> H;
-//    tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
-//    tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
-//    return;
-
-    // Test whether applying it more than one time does nothing (1-1 conversion)
-    // vol.initField(surf, gridAccell); return;
-
     // Update iteration counter
     numiterscompleted++;
 
-    //--- Compute active band around surface and correspondences
-    // Memory estimation: we move at most by 1 voxel, so we need to update at least the 2 neighborhood
-    // of a voxel on each side so that the implicit function will be correct, this resulting in 2 voxels
-    // per side thus: 2+2+1 per face.
-    std::vector<Point3i> band;
-    band.reserve(5*surf.fn);
-    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta(), band );
+
+    // Compute normalized Mean-Curvature and assign it to quality
+    // computeCurvature();
+
+//--- DEBUG;
+#if 1
+//    qDebug() << vol.band.size();
+//    vol.band.clear();
+//    vol.band.reserve(5*surf.fn);
+//    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
+//    qDebug() << vol.band.size();
+    // Update the band
+//    for(unsigned int i=0; i<vol.band.size(); i++){
+//        Point3i& voxi = vol.band[i];
+//        MyVoxel& v = vol.Voxel(voxi);
+//        v.field -= .05;
+//    }
+    vol.isosurface( surf, 0 );
+    for(unsigned int i=0; i<vol.band.size(); i++){
+        Point3i& voxi = vol.band[i];
+        MyVoxel& v = vol.Voxel(voxi);
+        v.status = 0;
+        v.face = 0;
+        v.index = 0;
+        v.field = NAN;
+    }
+    vol.band.clear();
+    vol.band.reserve(5*surf.fn);
+    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
+    qDebug() << vol.band.size();
+    // qDebug() << "FN: " << surf.fn;
+    return;
+#endif
 
     //--- Compute updates from amount stored in vertex quality
     float a,b,c;
     Point3f voxp;
-    std::vector<float> updates(band.size(),0);
-    float maxdst = -FLT_MAX, mindst = FLT_MAX;
-    for(unsigned int i=0; i<band.size(); i++){
-        Point3i& voxi = band[i];
+    std::vector<float> updates_view(vol.band.size(),0);
+    std::vector<float> updates_curv(vol.band.size(),0);
+    float view_maxdst = -FLT_MAX;
+    float curv_maxval = -FLT_MAX;
+    for(unsigned int i=0; i<vol.band.size(); i++){
+        Point3i& voxi = vol.band[i];
         MyVoxel& v = vol.Voxel(voxi);
         CFaceO& f = *v.face;
         // extract projected points on surface and obtain barycentric coordinates
@@ -209,36 +260,49 @@ void Balloon::evolveBalloon(){
         vcg::SignedFacePointDistance(f, voxp, proj);
         Triangle3<float> triFace( f.P(0), f.P(1), f.P(2) );
         vcg::InterpolationParameters(triFace, proj, a,b,c);
-        updates[i] = a*f.V(0)->Q() + b*f.V(1)->Q() + c*f.V(2)->Q();
-        // qDebug("from face %d - %.2f", Index(surf, f), val);
 
-        //--- Zero the band information so that next extraction will be successfull
-        v.status = 0;
-        v.face = 0;
-        v.index = 0;
+        // Interpolate update amounts & keep track of the range
+        updates_view[i] = a*f.V(0)->Q() + b*f.V(1)->Q() + c*f.V(2)->Q();
+        view_maxdst = (updates_view[i]>view_maxdst) ? updates_view[i] : view_maxdst;
 
-        //--- Keep track of max/min of updates[]
-        maxdst = (updates[i]>maxdst) ? updates[i] : maxdst;
-        mindst = (updates[i]<mindst) ? updates[i] : mindst;
+        // Interpolate curvature amount & keep track of the range
+        if( surf.vert.IsCurvatureEnabled() )
+            updates_curv[i] = a*f.V(0)->Kg() + b*f.V(1)->Kg() + c*f.V(2)->Kg();
+            curv_maxval = (fabs(updates_curv[i])>curv_maxval) ? fabs(updates_curv[i]) : curv_maxval;
     }
+    qDebug("max curvature: %f", curv_maxval);
 
     //--- Apply exponential functions to modulate and regularize the updates
     float sigma2 = vol.getDelta(); sigma2*=sigma2;
-    float k1, k2;
-    for(unsigned int i=0; i<band.size(); i++){
-        Point3i& voxi = band[i];
+    float k1, k2, k3;
+    for(unsigned int i=0; i<vol.band.size(); i++){
+        Point3i& voxi = vol.band[i];
         MyVoxel& v = vol.Voxel(voxi);
         //--- Faster if further
-        k1 = exp( -powf(updates[i]-maxdst,2) / (3*sigma2) );
+        k1 = exp( -powf(updates_view[i]-view_maxdst,2) / (3*sigma2) );
         //--- Slowdown weight (according to distance from surface)
-        k2 = 1 - exp( -powf(updates[i],2) / sigma2 );
+        k2 = 1 - exp( -powf(updates_view[i],2) / sigma2 );
+        //--- Curvature weight
+        if( surf.vert.IsCurvatureEnabled() )
+            k3 = updates_curv[i] / curv_maxval; // sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
 
         //--- Update
-        v.field += .25*k1*k2;
+        // v.field += .25*k1*k2;
+        v.field += 0; // .001*k3;
     }
 
     //--- Extract initial zero level set surface
     vol.isosurface( surf, 0 );
+
+    //--- Zero the band information so that next extraction will be successfull
+    for(unsigned int i=0; i<vol.band.size(); i++){
+        Point3i& voxi = vol.band[i];
+        MyVoxel& v = vol.Voxel(voxi);
+        v.status = 0;
+        v.face = 0;
+        v.index = 0;
+        v.field = NAN;
+    }
 }
 
 //---------------------------------------------------------------------------------------//

@@ -51,6 +51,7 @@ public:
     void init(int gridsize, int gridpad);
     void updateViewField();
     void interpolateField();
+    void computeCurvature();
     void evolveBalloon();
 
     //--- Render

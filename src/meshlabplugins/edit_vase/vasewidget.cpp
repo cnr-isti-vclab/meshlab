@@ -125,6 +125,12 @@ void VaseWidget::on_evolveButton_released(){
     gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
     gla->update();
 }
+void VaseWidget::on_laplButton_released(){
+    balloon->computeCurvature();
+    gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
+    gla->update();
+    balloon->rm |= Balloon::SURF_VCOLOR;
+}
 
 void VaseWidget::on_viewDirs_toggled(bool checked){
     if( checked ) balloon->rm |=  Balloon::SHOW_CLOUD;
@@ -187,4 +193,3 @@ if( false ){
     glEnable(GL_LIGHTING);
     // glDisable(GL_BLEND);
 } */
-

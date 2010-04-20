@@ -3,7 +3,6 @@
 
 #include <common/interfaces.h> // Lots of meshlab stuff
 #include <stdarg.h> // vararg processing
-// #include "vcg/complex/trimesh/update/curvature.h"
 
 namespace vcg{
 

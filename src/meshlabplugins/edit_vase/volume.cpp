@@ -143,7 +143,7 @@ void Volume::initField( const vcg::Box3f&  inbbox ){
                     else
                         grid.Val(i,j,k) = +1;
     }
-    else{
+    else if( false){
         // Radius in object space
         double r = 1;
         Point3f p;
@@ -160,23 +160,50 @@ void Volume::initField( const vcg::Box3f&  inbbox ){
                     grid.Val(i,j,k) = p[0]*p[0] + p[2]*p[2] + p[1]*p[1] - r*r;
                 }
     }
+    else{
+        // Void all volume
+        for(int i=0;i<size(0);i++) for(int j=0;j<size(1);j++) for(int k=0;k<size(2);k++)
+            grid.Val(i,j,k) = NAN;
+        // Radius in object space
+        double r = 1.1;
+        Point3f p;
+        Point3f center = bbox.Center();
+        qDebug() << "Cylinder along Z: " << center[0] << " " << center[1] << " " << center[2] << endl;
+        center[1] = 0;
+
+        for(int i=0;i<size(0);i++)
+            for(int j=0;j<size(1);j++)
+                for(int k=getPadding();k<size(2)-getPadding()+1;k++){
+                    // implicit cylinder equation
+                    off2pos(i,j,k,p);
+                    p -= center;
+                    // Cylinder along Y (vertical)
+                    grid.Val(i,j,k) = p[0]*p[0] + p[1]*p[1] - r*r;
+                }
+    }
 }
 void Volume::initField( CMeshO& surface, GridAccell& accell ){
-    // To set field we should capture *at least* one voxel
-    float DELTA = 1.01*getDelta();
-    // Compute the voxel-surface correspondence and distances
-    std::vector<Point3i> band;
-    // Memory estimation: we only need one voxel on each side, thus ~3 per face
-    band.reserve(3*surface.fn);
-    // Compute the correspondences + update field
-    updateSurfaceCorrespondence( surface, accell, DELTA, band );
-
-    // DEBUG: set to NAN (voxel ignored by MC)
-    // for(int i=0; i<size(0); i++) for(int j=0;j<size(1);j++) for(int k=0;k<size(2);k++)
-    //    grid.Val(i,j,k) = NAN;
-
-    // Extract a new iso-surface, which linearly approximates surface in a marching cube-sense
+    //--- Extract a new iso-surface, which linearly approximates surface in a marching cube-sense
     isosurface( surface, 0 );
+
+    //--- Clear the current band
+    for(unsigned int i=0; i<band.size(); i++){
+        Point3i& voxi = band[i];
+        MyVoxel& v = Voxel(voxi);
+        v.status = 0;
+        v.face = 0;
+        v.index = 0;
+        v.field = NAN;
+    }
+    band.clear();
+
+    //--- Compute active band distances around surface and correspondences
+    // Memory estimation: we move at most by 1 voxel, so we need to update at least the 2 neighborhood
+    // of a voxel on each side so that the implicit function will be correct, this resulting in 2 voxels
+    // per side thus: 2+2+1 per face.
+    const float DELTA = 2*getDelta();
+    band.reserve(5*surface.fn);
+    updateSurfaceCorrespondence( surface, accell, DELTA );
 }
 
 void Volume::isosurface( CMeshO& mesh, float offset ){
@@ -206,7 +233,7 @@ void Volume::isosurface( CMeshO& mesh, float offset ){
 }
 
 /// gridaccell is needed only to retrieve the correct face=>voxel index
-void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, float DELTA, std::vector<Point3i>& band){
+void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, float DELTA ){
     // The capacity of the band is estiamted to be enough to reach DELTA away
     MinHeap<float> pq( band.capacity() );
 
@@ -219,6 +246,9 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
         // Compute hash index from face center
         CFaceO& f = *(fi);
         p = faceCentroid( f );
+        // ADEBUG: skip invalid samples
+        if( math::IsNAN(p[0]) || math::IsNAN(p[1]) || math::IsNAN(p[2]) )
+            continue;
         gridAccell.pos2off( p, o ); // Convert faces in OBJ space (OK!)
 
         // Initialize the exploration queue for this face: compute the distance value for the 8 corners of the voxel containing
@@ -260,7 +290,10 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
         //--- Retrieve current voxel index and pop it
         debd = pq.top().first;
         indx = pq.top().second;
-        assert( indx < band.size() );
+        if( indx>band.size() ){
+            qDebug("bindex %d, bandsz %d", indx, band.size());
+            assert( indx < band.size() );
+        }
         pq.pop();
 
         //--- Retrieve voxel & mark it as visited, also compute the real signed distance

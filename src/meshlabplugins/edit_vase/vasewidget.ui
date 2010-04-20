@@ -232,6 +232,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="laplButton">
+             <property name="text">
+              <string>Lapl</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="evolveButton">
              <property name="text">
               <string>Evolve</string>

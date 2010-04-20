@@ -30,6 +30,7 @@ private:
     // float slice_off; // which offset from 0 the slice is taken from
 
 private slots:
+    void on_laplButton_released();
     void on_surf2acc_check_toggled(bool checked);
     void on_surf2vol_check_toggled(bool checked);
     void on_iterationButton_released();

@@ -69,9 +69,18 @@ class Volume{
         // Volume represented by the grid
         vcg::Box3f bbox;
         // Pre allocated 2D matrixes for slicing
-        QPixmap  slices_2D[3];
+        QPixmap  slices_2D[3];      
 
     public:
+
+        /// Compute volume-to-surface correspondences (stored in MyVoxel::face) in a band around the surface
+        /// up to DELTA away (in object space) inserting the volumetric indexes in the band vector.
+        /// Used by initField(CMeshO&, accell)
+        void updateSurfaceCorrespondence( CMeshO& balloon_mesh, GridAccell& gridAccell, float DELTA );
+
+        /// Indexes of current band
+        std::vector<Point3i> band;
+
         // Constructors / Factories
         /// Empty, refer to Init(...)
         Volume(){ sz=Point3i(0,0,0); }
@@ -81,15 +90,12 @@ class Volume{
         QPixmap& getSlice(int dim, int slice);
         /// Set SEDF according to continuous function
         void initField( const vcg::Box3f&  bbox );
-        /// Set SEDF according to given surface
+        /// Set SEDF so that MC woudl give "surface" as output
         void initField( CMeshO& surface, GridAccell& accell );
         /// Computes isosurface of current volume
         void isosurface( CMeshO& balloon_mesh, float offset=0 );
         /// Render every cube just for illustration
         void render();
-        /// Compute volume-to-surface correspondences (stored in MyVoxel::face) in a band around the surface
-        /// up to DELTA away (in object space) inserting the volumetric indexes in the band vector.
-        void updateSurfaceCorrespondence( CMeshO& balloon_mesh, GridAccell& gridAccell, float DELTA, std::vector<Point3i>& band );
         /// Check sample in range
         bool checkRange( Point3i newo ){
             assert( newo[0] >= 0 && newo[0] < size(0) );

@@ -17,6 +17,7 @@ void FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
     //--- Activate topology support for mesh
     mesh->face.EnableFFAdjacency();
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(*mesh);
+    // CHECK: are these two really required? especially the second
     mesh->vert.EnableVFAdjacency();
     mesh->face.EnableVFAdjacency();
     vcg::tri::UpdateTopology<CMeshO>::VertexFace(*mesh);
