@@ -213,6 +213,28 @@ void MultiViewer_Container::updateCurrent(int current){
 	currentId=current;
 }
 
+void MultiViewer_Container::updatePressViewers(QMouseEvent *e){
+	foreach(Viewer* viewer, viewerList)
+		if(viewer->getId() != currentId){
+			((GLArea*) viewer)->mousePressEvent2(e);
+		}
+}
+
+void MultiViewer_Container::updateMoveViewers(QMouseEvent *e){
+	foreach(Viewer* viewer, viewerList)
+		if(viewer->getId() != currentId){
+			((GLArea*) viewer)->mouseMoveEvent(e);
+		}
+}
+
+void MultiViewer_Container::updateReleaseViewers(QMouseEvent *e){
+	foreach(Viewer* viewer, viewerList)
+		if(viewer->getId() != currentId){
+			((GLArea*) viewer)->mouseReleaseEvent(e);
+		}
+}
+
+
 void MultiViewer_Container::updateLayout(){
 	foreach(Viewer* viewer, viewerList)
 		//splitter->removeWidget((GLArea*)viewer);
@@ -233,11 +255,11 @@ int MultiViewer_Container::viewerCounter(){
 	return viewerList.count();
 }
 
-void MultiViewer_Container::resizeEvent ( QResizeEvent * event ) {
-	/*if(data->imageList.size()!=0){
-		imageVis->adjustSize();
-	}*/
-}
+//void MultiViewer_Container::resizeEvent ( QResizeEvent * event ) {
+//	/*if(data->imageList.size()!=0){
+//		imageVis->adjustSize();
+//	}*/
+//}
 /// update all the visual widgets at one time (glw, imageVis, tree, imageMag)
 void MultiViewer_Container::updateAll(){
 	/*glw->update();

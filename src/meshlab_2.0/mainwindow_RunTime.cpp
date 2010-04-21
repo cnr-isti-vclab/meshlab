@@ -849,10 +849,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 				bool newGla = false;
 				MultiViewer_Container *mvcont;
-				if(mdiarea->currentSubWindow()==0){
+				if(gla==0){
 					    mvcont = new MultiViewer_Container(mdiarea); 
 						int id = mvcont->getNextViewerId();
-						gla=new GLArea(mdiarea,&currentGlobalParams,id, &(mvcont->meshDoc)); //SAREBBE MEGLIO METTERE DA SUBITO CHE E'FIGLIO DI MVC MA DEVI MODIFICARE IL COSTRUTTORE DI GLAREA		
+						gla=new GLArea(mdiarea,mvcont, &currentGlobalParams,id, &(mvcont->meshDoc)); //SAREBBE MEGLIO METTERE DA SUBITO CHE E'FIGLIO DI MVC MA DEVI MODIFICARE IL COSTRUTTORE DI GLAREA		
 						mvcont->addView(gla, Qt::Horizontal);
                         addDockWidget(Qt::RightDockWidgetArea,mvcont->layerDialog);
 						mvcont->connectToLayerDialog(gla);
@@ -1144,7 +1144,7 @@ void MainWindow::setSplit(QAction *qa)
 	  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
 	GLArea *glw =  (GLArea*)(mvc->currentView());
 	int id = mvc->getNextViewerId();
-	GLArea *glwClone=new GLArea(mdiarea,&currentGlobalParams,id, &(mvc->meshDoc));	
+	GLArea *glwClone=new GLArea(mdiarea,mvc, &currentGlobalParams,id, &(mvc->meshDoc));	
 	if(qa->text() == tr("&Horizontally"))	
 		mvc->addView(glwClone, Qt::Vertical);
 	else

@@ -40,6 +40,7 @@
 //#include "layerDialog.h"  **
 #include "glarea_setting.h"
 #include "viewer.h"
+#include "multiViewer_Container.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -69,7 +70,7 @@ class GLArea : public QGLWidget, public Viewer
 	Q_OBJECT
 
 public:
-    GLArea(QWidget *parent, RichParameterSet *current, int id, MeshDocument *meshDoc);
+    GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current, int id, MeshDocument *meshDoc);
 	~GLArea();
 	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 private:
@@ -80,6 +81,7 @@ public:
   // Layer Management stuff. 
 	MeshDocument *meshDoc;
 	MeshModel *mm(){return meshDoc->mm();}
+	MultiViewer_Container *mvc;
  
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
@@ -113,6 +115,8 @@ public:
 	bool isHelpVisible()      {return helpVisible;}  
 	bool isTrackBallVisible()		{return trackBallVisible;}
 	bool isDefaultTrackBall()   {return activeDefaultTrackball;}
+
+	bool isCurrent() { return mvc->currentId == id;}
 
 	void toggleHelpVisible()      {helpVisible = !helpVisible; update();}  
 	void setBackFaceCulling(bool enabled);
@@ -239,8 +243,13 @@ protected:
     void keyReleaseEvent ( QKeyEvent * e );
 	void keyPressEvent ( QKeyEvent * e ); 
 	void mousePressEvent(QMouseEvent *event);
+
+public:
 	void mouseMoveEvent(QMouseEvent *event);
+	void mousePressEvent2(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
+
+protected:
 	void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
 	void tabletEvent(QTabletEvent *e);

@@ -61,6 +61,10 @@ public:
 
 	void connectToLayerDialog(Viewer* viewer);
 
+	void updatePressViewers(QMouseEvent *e);
+	void updateMoveViewers(QMouseEvent *e);
+	void updateReleaseViewers(QMouseEvent *e);
+
 	LayerDialog *layerDialog;
 	MeshDocument meshDoc;
 	int currentId;
@@ -76,7 +80,7 @@ private:
 
 	void keyPressEvent(QKeyEvent *keyEv);
 	// other stuff
-	void resizeEvent ( QResizeEvent *);
+	//void resizeEvent ( QResizeEvent *);
 	
 };
 

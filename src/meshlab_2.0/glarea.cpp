@@ -33,11 +33,12 @@
 using namespace std;
 using namespace vcg;
 
-GLArea:: GLArea(QWidget *parent, RichParameterSet *current, int id, MeshDocument *meshDoc)
+GLArea:: GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current, int id, MeshDocument *meshDoc)
 : QGLWidget(parent)
 {
     this->id =id;
 	this->meshDoc = meshDoc;
+	mvc = mvcont;
 	
 	this->updateCustomSettingValues(*current);
 	animMode=AnimNone;
@@ -559,9 +560,12 @@ void GLArea::keyReleaseEvent ( QKeyEvent * e )
 	e->ignore();
 	if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
 	else{
-      if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-      if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-      if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+      if(e->key()==Qt::Key_Control) 
+		  trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+      if(e->key()==Qt::Key_Shift) 
+		  trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+      if(e->key()==Qt::Key_Alt) 
+		  trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
   }
 }
 
@@ -570,9 +574,12 @@ void GLArea::keyPressEvent ( QKeyEvent * e )
 	e->ignore();
 	if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
 	else{
-      if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-      if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-      if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+      if(e->key()==Qt::Key_Control) 
+		  trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+      if(e->key()==Qt::Key_Shift) 
+		  trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+      if(e->key()==Qt::Key_Alt) 
+		  trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
   }
 }
 
@@ -605,7 +612,39 @@ void GLArea::mousePressEvent(QMouseEvent*e)
   emit currentViewerChanged(id);
   emit updateMainWindowMenus();
 	update();
+ if(isCurrent())
+	 if(e->modifiers() & Qt::MetaModifier)
+		  mvc->updatePressViewers(e);
 }
+
+void GLArea::mousePressEvent2(QMouseEvent*e)
+{
+  e->accept();
+
+  if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
+		  iEdit->mousePressEvent(e,*mm(),this);
+  else {
+	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) &&
+          (e->button()==Qt::LeftButton) )
+            activeDefaultTrackball=false;
+	      else activeDefaultTrackball=true;
+
+	    if (isDefaultTrackBall())
+			{
+					if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+																															else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+					if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+																														else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+					if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+																													else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+
+          trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+			}
+	    else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
+  }
+	update();
+}
+
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 {
@@ -620,6 +659,10 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 		    else trackball_light.MouseMove(e->x(),height()-e->y());
         update();
       }
+	 if(isCurrent())
+		if(e->modifiers() & Qt::MetaModifier)
+		  mvc->updateMoveViewers(e);
+
 }
 // When mouse is released we set the correct mouse cursor
 void GLArea::mouseReleaseEvent(QMouseEvent*e)
@@ -635,6 +678,8 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
         }
 
 	update();
+	if(isCurrent())
+		  mvc->updateReleaseViewers(e);
 }
 
 //Processing of tablet events, interesting only for painting plugins
