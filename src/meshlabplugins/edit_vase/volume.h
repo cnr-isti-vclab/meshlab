@@ -120,7 +120,7 @@ class Volume{
             return Voxel( off[0], off[1], off[2] );
         }
         MyVoxel& Voxel(const int &x,const int &y,const int &z){
-            return grid.cV( x, y, z );
+            return grid.V( x, y, z );
         }
         float &Val(const Point3i off){
             return Val( off[0], off[1], off[2] );

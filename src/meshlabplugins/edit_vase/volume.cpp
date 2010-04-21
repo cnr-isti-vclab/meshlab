@@ -119,8 +119,8 @@ void Volume::initField( const vcg::Box3f&  inbbox ){
             d = DistancePoint3Box3( pos, inbbox );
             sgn = inbbox.IsInEx( pos )==true?-1:1;
             grid.Val(i,j,k) = sgn*d;
-            grid.cV(i,j,k).status = 0;
-            grid.cV(i,j,k).face = 0;
+            grid.V(i,j,k).status = 0;
+            grid.V(i,j,k).face = 0;
         }
     }
     // Completely fill volume with zeros
@@ -257,7 +257,7 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
         for( int i=0; i<8; i++ ){
             // Offset the origin and compute new point
             newo = Point3i(o[0]+off[i][0], o[1]+off[i][1], o[2]+off[i][2]);
-            MyVoxel& v = grid.cV(newo[0], newo[1], newo[2]);
+            MyVoxel& v = grid.V(newo[0], newo[1], newo[2]);
             off2pos(newo, newp); // Convert offset to position (OK!)
             dist = fabs( vcg::SignedFacePointDistance(f, newp) );
             // If has never been touched... insert it
@@ -299,7 +299,7 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
         //--- Retrieve voxel & mark it as visited, also compute the real signed distance
         // and set it in the voxel (fast marching used unsigned distance)
         newo =  band.at( indx );
-        MyVoxel& v = grid.cV(newo[0], newo[1], newo[2]);
+        MyVoxel& v = grid.V(newo[0], newo[1], newo[2]);
         v.status = 2; // Never visit it again
         CFaceO& f = *(v.face); // Parent supporting face
         off2pos(newo, newp);
@@ -309,7 +309,7 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
         for( int i=0; i<26; i++ ){
             // Neighbor offset
             neigh_o = Point3i(newo[0]+off26[i][0], newo[1]+off26[i][1], newo[2]+off26[i][2]);
-            MyVoxel& neigh_v = grid.cV(neigh_o[0], neigh_o[1], neigh_o[2]);
+            MyVoxel& neigh_v = grid.V(neigh_o[0], neigh_o[1], neigh_o[2]);
             if( neigh_v.status == 2 ) continue; // skip popped areas
             off2pos(neigh_o, neigh_p);
             dist = fabs( vcg::SignedFacePointDistance(f, neigh_p ) );
