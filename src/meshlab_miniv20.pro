@@ -1,7 +1,7 @@
 TEMPLATE      = subdirs
 CONFIG       += ordered
 SUBDIRS       = common \
-                meshlab_2.0 \
+                meshlab_20 \
 		#		meshlabserver \
                 meshlabplugins/io_base 
              #   meshlabplugins/filter_colorize \
