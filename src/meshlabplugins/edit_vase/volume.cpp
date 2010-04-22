@@ -238,14 +238,13 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
     MinHeap<float> pq( band.capacity() );
 
     //--- INITIALIZATION
-    float ONETHIRD=1.0/3.0;
     Point3i o, newo;
     Point3f p, newp;
     float   dist;
     for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
         // Compute hash index from face center
         CFaceO& f = *(fi);
-        p = faceCentroid( f );
+        p = Barycenter( f );
         // ADEBUG: skip invalid samples
         if( math::IsNAN(p[0]) || math::IsNAN(p[1]) || math::IsNAN(p[2]) )
             continue;

@@ -405,7 +405,7 @@ void Balloon::render_surf_to_vol(){
                     vcg::drawBox(p, .05*vol.getDelta());
                     Point3f proj;
                     float dist = vcg::SignedFacePointDistance(*v.face, p, proj);
-                    //proj = vcg::FaceCentroid(*v.face);
+                    //proj = vcg::Barycenter(*v.face);
                     vcg::drawSegment( p, proj );
                 }
             }

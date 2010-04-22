@@ -1,6 +1,7 @@
 #include <vase_utils.h>
 #include <string>
 #include <stdlib.h> //sprintf
+#include <vcg/space/triangle3.h>
 
 namespace vcg{
 
@@ -106,14 +107,6 @@ void drawBox(Point3f& center, float edgel, bool wireframe){
         glVertex3f(center[0]+hedge, center[1]-hedge, center[2]-hedge);
         glVertex3f(center[0]+hedge, center[1]-hedge, center[2]+hedge);
     glEnd();
-}
-
-Point3f faceCentroid( const CFaceO& f ){
-    static float ONETHIRD = 1.0/3.0;
-    Point3f ret;
-    ret = f.P(0) + f.P(1) + f.P(2);
-    ret = myscale( ret, ONETHIRD );
-    return ret;
 }
 
 
