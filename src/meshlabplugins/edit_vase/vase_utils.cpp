@@ -178,20 +178,21 @@ float SignedFacePointDistance( CFaceO& f, const Point3f& q, Point3f& closest ){
 
     return dist;
 }
-Point3f baricenter(Point3f* points, ...){
-    va_list ap;
-    Point3f bari;
-    Point3f* p;
-    float count=0;
-    va_start(ap, p);
-    while (p) {
-       bari += *p;
-       count++;
-       p = va_arg(ap, Point3f*);
-    }
-    va_end(ap);
-    return myscale(bari, 1.0/count);
-}
+/// This was buggy... never debugged..
+//Point3f baricenter(Point3f* points, ...){
+//    va_list ap;
+//    Point3f bari;
+//    Point3f* p;
+//    float count=0;
+//    va_start(ap, p);
+//    while (p) {
+//       bari += *p;
+//       count++;
+//       p = va_arg(ap, Point3f*);
+//    }
+//    va_end(ap);
+//    return myscale(bari, 1.0/count);
+//}
 void drawSegment( Point3f& srt, Point3f& end ){
     glBegin(GL_LINES);
         glVertex3f( srt[0], srt[1], srt[2] );
