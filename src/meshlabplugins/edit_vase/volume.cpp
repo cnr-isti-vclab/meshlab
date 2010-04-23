@@ -118,7 +118,10 @@ void Volume::initField( const vcg::Box3f&  inbbox ){
             off2pos( i,j,k, pos );
             d = DistancePoint3Box3( pos, inbbox );
             sgn = inbbox.IsInEx( pos )==true?-1:1;
-            grid.Val(i,j,k) = sgn*d;
+            //if(d<2.0*delta)
+              grid.Val(i,j,k) = sgn*d;
+            //else
+            //  grid.Val(i,j,k) = NAN;
             grid.V(i,j,k).status = 0;
             grid.V(i,j,k).face = 0;
         }
@@ -275,7 +278,7 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
             // If has never been touched... insert it
             if( v.status == 0 ){
                 v.field   = dist;
-                v.sfield = sdist;
+                //if(math::IsNAN(v.sfield)) v.sfield = sdist;
                 v.index   = band.size();
                 v.face    = &f;
                 v.status  = 2;
@@ -285,6 +288,7 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
             // It has been inserted already, but an update is needed
             else if( v.status == 2 && dist < v.field ){
                 v.field = dist;
+                //v.sfield = sdist;
                 v.face = &f;
                 pq.push(dist, v.index);
             }
@@ -316,7 +320,9 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
         v.status = 2; // Never visit it again
         CFaceO& f = *(v.face); // Parent supporting face
         off2pos(newo, newp);
-        v.field = vcg::SignedFacePointDistance(f, newp);
+        v.field = fabs(vcg::SignedFacePointDistance(f, newp));
+        if(math::IsNAN(v.sfield)) v.sfield= vcg::SignedFacePointDistance(f, newp);
+
         //--- Visit its neighbors and (update | add) them to queue
         for( int i=0; i<26; i++ ){
             // Neighbor offset

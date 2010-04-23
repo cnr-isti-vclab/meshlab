@@ -180,6 +180,7 @@ void Balloon::computeCurvature(){
     surf.face.EnableVFAdjacency();
     surf.face.EnableFFAdjacency();
     vcg::tri::UpdateTopology<CMeshO>::VertexFace( surf );
+    vcg::tri::UpdateTopology<CMeshO>::FaceFace( surf );
 
     //--- Compute curvature and its bounds
     tri::UpdateCurvature<CMeshO>::MeanAndGaussian( surf );
@@ -213,7 +214,7 @@ void Balloon::evolveBalloon(){
     // computeCurvature();
 
 //--- DEBUG;
-#if 1
+#if 0
 //    qDebug() << vol.band.size();
 //    vol.band.clear();
 //    vol.band.reserve(5*surf.fn);
@@ -288,7 +289,8 @@ void Balloon::evolveBalloon(){
 
         //--- Update
         // v.field += .25*k1*k2;
-        v.field += 0; // .001*k3;
+        //v.field += 0; // .001*k3;
+        v.sfield += .1*k3;
     }
 
     //--- Extract initial zero level set surface
