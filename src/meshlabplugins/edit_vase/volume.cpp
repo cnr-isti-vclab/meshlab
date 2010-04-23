@@ -194,6 +194,7 @@ void Volume::initField( CMeshO& surface, GridAccell& accell ){
         v.face = 0;
         v.index = 0;
         v.field = NAN;
+        v.sfield = NAN;
     }
     band.clear();
 
@@ -214,17 +215,25 @@ void Volume::isosurface( CMeshO& mesh, float offset ){
     MyMarchingCubes	mc(mesh, walker);
     // Extract isoband at "offset" distance
     walker.BuildMesh<MyMarchingCubes>(mesh, this->grid, mc, offset);
+    // add an additional attribute for storing the original grid coordinate.
+    // so it is easy to detect for each vertex
+    CMeshO::PerVertexAttributeHandle<Point3f> MCIH;
+    if(!vcg::tri::HasPerVertexAttribute (mesh,std::string("OrigCoord")))
+          MCIH = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f>  (mesh,std::string("OrigCoord"));
+    else  MCIH = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>  (mesh,std::string("OrigCoord"));
 
     // Rescale the marching cube mesh
     for(CMeshO::VertexIterator vi=mesh.vert.begin();vi!=mesh.vert.end();vi++){
+        MCIH[vi]=(*vi).P(); // save the original coords
         (*vi).P()[0] = ((*vi).P()[0]-padsize) * delta + bbox.min[0];
         (*vi).P()[1] = ((*vi).P()[1]-padsize) * delta + bbox.min[1];
         (*vi).P()[2] = ((*vi).P()[2]-padsize) * delta + bbox.min[2];
     }
 
     // Update surface normals
-    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace( mesh );
-    
+    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized( mesh );
+    vcg::tri::UpdateFlags<CMeshO>::FaceProjection(mesh); // needed to have more robust face distance tests
+
     // DEBUG: Update bounding box and print out center
     // vcg::tri::UpdateBounding<CMeshO>::Box(mesh);
     // Check whether we are at right position
@@ -241,6 +250,9 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
     Point3i o, newo;
     Point3f p, newp;
     float   dist;
+    CMeshO::PerVertexAttributeHandle<Point3f> MCIH = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>  (surf,std::string("OrigCoord"));
+    assert(vcg::tri::HasPerVertexAttribute(surf,std::string("OrigCoord")));
+
     for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
         // Compute hash index from face center
         CFaceO& f = *(fi);
@@ -258,10 +270,12 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
             newo = Point3i(o[0]+off[i][0], o[1]+off[i][1], o[2]+off[i][2]);
             MyVoxel& v = grid.V(newo[0], newo[1], newo[2]);
             off2pos(newo, newp); // Convert offset to position (OK!)
-            dist = fabs( vcg::SignedFacePointDistance(f, newp) );
+            float sdist = vcg::SignedFacePointDistance(f, newp) ;
+            dist = fabs(sdist);
             // If has never been touched... insert it
             if( v.status == 0 ){
                 v.field   = dist;
+                v.sfield = sdist;
                 v.index   = band.size();
                 v.face    = &f;
                 v.status  = 2;
@@ -303,7 +317,6 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
         CFaceO& f = *(v.face); // Parent supporting face
         off2pos(newo, newp);
         v.field = vcg::SignedFacePointDistance(f, newp);
-
         //--- Visit its neighbors and (update | add) them to queue
         for( int i=0; i<26; i++ ){
             // Neighbor offset

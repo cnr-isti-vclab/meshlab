@@ -24,6 +24,7 @@ Point3f myscale( const Point3f& p, float s );
 /// Triangle point intersection, slightly different from the method in VCG to return signed distance
 float SignedFacePointDistance( CFaceO& f, const Point3f& q );
 float SignedFacePointDistance( CFaceO& f, const Point3f& q, Point3f& a );
+float SignedFacePointDistance( CFaceO& f,  CMeshO::PerVertexAttributeHandle<Point3f> MCIH, const Point3f& q, const Point3i& qi,Point3f& closest );
 
 } // Namespace vcg
 #endif // EDIT_VASE_UTILS_H

@@ -26,12 +26,14 @@ class GridAccell;
   */
 class MyVoxel{
     public:
-        float   field;   // signed distance from surface
+        float   sfield;   // signed distance from surface
+        float   field;   // unsigned distance from surface (used for the band updating)
         CFaceO* face;    // corresponding balloon face
         int     status;  // status: {0: untouched, 1: in queue, 2: popped}
         int     index;   // index of MyVoxel in current active band
         /// Set field to zero and NULL the face pointer
         MyVoxel(){
+            sfield  = 0;
             field  = 0;
             face   = 0;
             status = 0;
@@ -39,7 +41,7 @@ class MyVoxel{
         }
         /// Required by marching cubes
         float &V(){
-            return field;
+            return sfield;
         }
 };
  /**
