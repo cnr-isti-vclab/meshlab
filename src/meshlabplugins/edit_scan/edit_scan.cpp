@@ -120,7 +120,7 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea*){
         scanpoints();
     }
 
-    // Draw the scanned samples stored in the cloud
+    //--- Draw the scanned samples stored in the cloud
     glDisable(GL_LIGHTING);
         cloud->cm.C() = Color4b(255,200,200,255);
         glColor4f(.4f,.4f,1.f,.6f);
@@ -128,7 +128,7 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea*){
         cloud->Render(GLW::DMPoints, GLW::CMPerMesh, GLW::TMNone);
     glEnable(GL_LIGHTING);
 
-    //--- Shows the view directions
+    //--- Shows the view directions of the scanned samples
     // The "decorate plugin does nothing inside GLW, but does it directly
     // put these before ->Render
     //    cloud->updateDataMask(MeshModel::MM_VERTNORMAL);
@@ -144,6 +144,10 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea*){
             glVertex((*vi).P()+(*vi).N()*LineLen);
         }
     glEnd();
+
+    //--- Draw the laser beam (just to help interfacing)
+    // must be done after all 3D stuff is done as well
+    sline.render();
 }
 
 ScanLineGeom::ScanLineGeom(int N, float width){
@@ -151,17 +155,15 @@ ScanLineGeom::ScanLineGeom(int N, float width){
     Point2f srt = myGluProject(Point3f(-width/2,0,0));
     Point2f sto = myGluProject(Point3f(+width/2,0,0));
     float delta = width/N;
-    qDebug() << "Scanpoint list: ";
+    // qDebug() << "Scanpoint list: ";
     for( float i=0; i<1; i+=delta ){
         if( N==1 )
             i = .5;
-
         Point2f curr = srt*(1-i) + sto*i;
         soff.push_back(curr);
-        qDebug() << " - " << toString( curr );
+        // qDebug() << " - " << toString( curr );
         Point2i currI( curr[0], curr[1] );
         bbox.Add(currI);
-
         if( N==1 )
             break;
     }
