@@ -1,17 +1,6 @@
 #include "edit_scan.h"
 #include "wrap/gui/trackball.h"
-
-// Re-definition of the one in #include "wrap/qt/trackball.h"
-// Lacks the CTRL modifier so that I can re-use it for my needs, all others are enabled
-static vcg::Trackball::Button MyQT2VCG(Qt::MouseButton qtbt, Qt::KeyboardModifiers modifiers){
-  int vcgbt = vcg::Trackball::BUTTON_NONE;
-  if (qtbt & Qt::LeftButton)	vcgbt |= vcg::Trackball::BUTTON_LEFT;
-  if (qtbt & Qt::RightButton)	vcgbt |= vcg::Trackball::BUTTON_LEFT;
-  if (qtbt & Qt::MidButton)		vcgbt |= vcg::Trackball::BUTTON_MIDDLE;
-  if (modifiers & Qt::ShiftModifier)		vcgbt |= vcg::Trackball::KEY_SHIFT;
-  if (modifiers & Qt::AltModifier)			vcgbt |= vcg::Trackball::KEY_ALT;
-  return vcg::Trackball::Button (vcgbt);
-}
+#include "wrap/qt/trackball.h" //QT2VCG trackball function
 
 Point2f myGluProject( Point3f p ){
     // retrieve matrixes from the pipeline
@@ -98,19 +87,19 @@ bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
 
 // This is called only when mouse is pressed at first during a drag or a click is received
 void VirtualScan::mousePressEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
-    gla->trackball.MouseDown(e->x(),gla->height()-e->y(), MyQT2VCG(e->button(), e->modifiers() ) );
+    gla->trackball.MouseDown(e->x(),gla->height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
     gla->update();
 }
 // This is called during the whole drag
 void VirtualScan::mouseMoveEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
-    isScanning = (e->modifiers() & Qt::ControlModifier);
+    // isScanning = (e->modifiers() & Qt::ControlModifier);
     // isScanning = (e->modifiers() & Qt::MetaModifier);
     gla->trackball.MouseMove(e->x(),gla->height()-e->y());
     gla->update();
 }
 void VirtualScan::mouseReleaseEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
     isScanning = false;
-    gla->trackball.MouseUp(e->x(),gla->height()-e->y(), MyQT2VCG(e->button(), e->modifiers() ) );
+    gla->trackball.MouseUp(e->x(),gla->height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
     gla->update();
 }
 void VirtualScan::Decorate(MeshModel& mm, GLArea*){

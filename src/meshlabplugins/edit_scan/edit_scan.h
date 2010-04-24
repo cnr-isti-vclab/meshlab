@@ -51,6 +51,14 @@ public:
     virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
     virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea* );
     virtual void mouseReleaseEvent(QMouseEvent *, MeshModel &, GLArea* );
+    virtual void keyReleaseEvent(QKeyEvent*, MeshModel &/*m*/, GLArea *){
+        isScanning = false;
+    }
+    virtual void keyPressEvent(QKeyEvent *e, MeshModel &/*m*/, GLArea *){
+        if( e->key() == Qt::Key_S ){
+            isScanning = true;
+        }
+    }
 
     //--- Dummy implementation of MeshEditInterfaceFactory, passes control to this MeshEditInterface
     VirtualScan(){
