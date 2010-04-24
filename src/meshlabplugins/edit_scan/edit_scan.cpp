@@ -103,7 +103,8 @@ void VirtualScan::mousePressEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
 }
 // This is called during the whole drag
 void VirtualScan::mouseMoveEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
-    isScanning = (e->modifiers() & Qt::MetaModifier);
+    isScanning = (e->modifiers() & Qt::ControlModifier);
+    // isScanning = (e->modifiers() & Qt::MetaModifier);
     gla->trackball.MouseMove(e->x(),gla->height()-e->y());
     gla->update();
 }
