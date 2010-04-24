@@ -205,43 +205,37 @@ void Balloon::computeCurvature(){
             (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Red, (*vi).Kg()/absmax);
     }
 }
+
+// HP: a correspondence has already been executed once!
 void Balloon::evolveBalloon(){
     // Update iteration counter
     numiterscompleted++;
 
-
-    // Compute normalized Mean-Curvature and assign it to quality
-    // computeCurvature();
-
-//--- DEBUG;
-#if 0
-//    qDebug() << vol.band.size();
-//    vol.band.clear();
-//    vol.band.reserve(5*surf.fn);
-//    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
-//    qDebug() << vol.band.size();
-    // Update the band
-//    for(unsigned int i=0; i<vol.band.size(); i++){
-//        Point3i& voxi = vol.band[i];
-//        MyVoxel& v = vol.Voxel(voxi);
-//        v.field -= .05;
-//    }
-    vol.isosurface( surf, 0 );
-    for(unsigned int i=0; i<vol.band.size(); i++){
-        Point3i& voxi = vol.band[i];
-        MyVoxel& v = vol.Voxel(voxi);
-        v.status = 0;
-        v.face = 0;
-        v.index = 0;
-        v.field = NAN;
+    //--- THIS IS A DEBUG TEST, ATTEMPTS TO DEBUG
+    if( false ){
+        //--- Test uniform band update
+        for(unsigned int i=0; i<vol.band.size(); i++){
+            Point3i& voxi = vol.band[i];
+            MyVoxel& v = vol.Voxel(voxi);
+            v.sfield += .05;
+        }
+        //--- Estrai isosurface
+        vol.isosurface( surf, 0 );
+        //--- Clear band for next isosurface, clearing the corresponding computation field
+        for(unsigned int i=0; i<vol.band.size(); i++){
+            Point3i& voxi = vol.band[i];
+            MyVoxel& v = vol.Voxel(voxi);
+            v.status = 0;
+            v.face = 0;
+            v.index = 0;
+            v.field = NAN;
+        }
+        vol.band.clear();
+        //--- Update correspondences & band
+        vol.band.reserve(5*surf.fn);
+        vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
+        return;
     }
-    vol.band.clear();
-    vol.band.reserve(5*surf.fn);
-    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
-    qDebug() << vol.band.size();
-    // qDebug() << "FN: " << surf.fn;
-    return;
-#endif
 
     //--- Compute updates from amount stored in vertex quality
     float a,b,c;
@@ -267,11 +261,14 @@ void Balloon::evolveBalloon(){
         view_maxdst = (updates_view[i]>view_maxdst) ? updates_view[i] : view_maxdst;
 
         // Interpolate curvature amount & keep track of the range
-        if( surf.vert.IsCurvatureEnabled() )
+        if( surf.vert.IsCurvatureEnabled() ){
             updates_curv[i] = a*f.V(0)->Kg() + b*f.V(1)->Kg() + c*f.V(2)->Kg();
             curv_maxval = (fabs(updates_curv[i])>curv_maxval) ? fabs(updates_curv[i]) : curv_maxval;
+        }
     }
-    qDebug("max curvature: %f", curv_maxval);
+    // Only meaningful if it has been computed..
+    if( surf.vert.IsCurvatureEnabled() )
+        qDebug("max curvature: %f", curv_maxval);
 
     //--- Apply exponential functions to modulate and regularize the updates
     float sigma2 = vol.getDelta(); sigma2*=sigma2;
@@ -280,7 +277,7 @@ void Balloon::evolveBalloon(){
         Point3i& voxi = vol.band[i];
         MyVoxel& v = vol.Voxel(voxi);
         //--- Faster if further
-        k1 = exp( -powf(updates_view[i]-view_maxdst,2) / (3*sigma2) );
+        k1 = exp( -powf(updates_view[i]-view_maxdst,2) / (sigma2) );
         //--- Slowdown weight (according to distance from surface)
         k2 = 1 - exp( -powf(updates_view[i],2) / sigma2 );
         //--- Curvature weight
@@ -288,15 +285,14 @@ void Balloon::evolveBalloon(){
             k3 = updates_curv[i] / curv_maxval; // sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
 
         //--- Update
-        // v.field += .25*k1*k2;
-        //v.field += 0; // .001*k3;
-        v.sfield += .1*k3;
+        v.sfield += .25*k1*k2*vol.getDelta();
+        //v.sfield += 0; // .001*k3;
+        // v.sfield += .1*k3;
     }
 
-    //--- Extract initial zero level set surface
+    //--- Estrai isosurface
     vol.isosurface( surf, 0 );
-
-    //--- Zero the band information so that next extraction will be successfull
+    //--- Clear band for next isosurface, clearing the corresponding computation field
     for(unsigned int i=0; i<vol.band.size(); i++){
         Point3i& voxi = vol.band[i];
         MyVoxel& v = vol.Voxel(voxi);
@@ -305,6 +301,10 @@ void Balloon::evolveBalloon(){
         v.index = 0;
         v.field = NAN;
     }
+    vol.band.clear();
+    //--- Update correspondences & band
+    vol.band.reserve(5*surf.fn);
+    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
 }
 
 //---------------------------------------------------------------------------------------//
