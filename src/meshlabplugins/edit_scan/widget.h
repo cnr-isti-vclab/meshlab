@@ -10,15 +10,9 @@ namespace Ui {
 }
 
 // Defines the bounds (more than 1 object use them)
-#define MIN_SAMPFREQ 1
-#define MAX_SAMPFREQ 30
-#define DEF_SAMPFREQ 5
-#define MIN_SCANWIDTH 0
-#define MAX_SCANWIDTH 100
-#define DEF_SCANWIDTH 20
-#define MIN_NUMSAMPLE 2
-#define MAX_NUMSAMPLE 100
-#define DEF_NUMSAMPLE 10
+enum {MIN_SAMPFREQ   = 1,   MAX_SAMPFREQ   = 30,    DEF_SAMPFREQ   = 5};
+enum {MIN_SCANWIDTH  = 1,   MAX_SCANWIDTH  = 100,   DEF_SCANWIDTH  = 30};
+enum {MIN_NUMSAMPLE  = 2,   MAX_NUMSAMPLE  = 100,   DEF_NUMSAMPLE  = 10};
 
 class Widget : public QDockWidget {
     Q_OBJECT
@@ -49,6 +43,7 @@ public:
 
 signals:
     void laser_parameter_updated();
+    void scan_requested();
 
 private:
     Ui::Widget *ui;
@@ -84,16 +79,20 @@ private:
 
 private slots:
     void on_sbox_numsamples_valueChanged(int val){
-        numsample = qBound(MIN_SAMPFREQ,  val, MAX_SAMPFREQ);
+        numsample = qBound((int)MIN_NUMSAMPLE,  val, (int)MAX_NUMSAMPLE);
         emit laser_parameter_updated();
     }
     void on_sbox_width_valueChanged(int val){
-        scanwidth = qBound(MIN_SCANWIDTH, val, MAX_SCANWIDTH);
+        scanwidth = qBound((int)MIN_SCANWIDTH, val, (int)MAX_SCANWIDTH);
         emit laser_parameter_updated();
     }
     void on_sbox_freq_valueChanged(int val){
-        sampfreq  = qBound(MIN_NUMSAMPLE, val, MAX_NUMSAMPLE);
+        sampfreq  = qBound((int)MIN_SAMPFREQ, val, (int)MAX_SAMPFREQ);
         emit laser_parameter_updated();
+    }
+    void on_scanbutton_released(){
+        emit laser_parameter_updated(); // just to be sure
+        emit scan_requested();
     }
 };
 #endif // WIDGET_H

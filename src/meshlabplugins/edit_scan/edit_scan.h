@@ -9,10 +9,14 @@
 using namespace vcg;
 using namespace std;
 
+#define SCANPOINTSIZE 5
+
 class ScanLine{
 public:
     // Screen offsets of scan points
     vector<Point2f> soff;
+    // Object space locations (for rendering)
+    vector<Point3f> soff_obj;
     Box2i bbox;
     bool isScanning;
 
@@ -41,6 +45,8 @@ private:
     QTimer *timer;
     // The UI of the plugin
     Widget* widget;
+    // The parent
+    GLArea* gla;
 
 public slots:
     void laser_parameter_updated();
@@ -81,6 +87,11 @@ private:
 public slots:
     // called repeatedly by the timer
     void readytoscan(){ sampleReady = true; }
+    void scan_requested(){
+        isScanning = true;
+        sampleReady = true;
+        gla->update();
+    }
 };
 
 #endif

@@ -69,6 +69,7 @@ double randn(){
 bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
     assert(md.mm() != NULL); // Model exists
     this->md = &md;
+    this->gla = gla;
     gla->fov = 5; // Orthographic
     isScanning = false; // Trigger is off initially
     timer = 0;
@@ -80,10 +81,8 @@ bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
     widget = new Widget(gla->window());
     connect(widget, SIGNAL(laser_parameter_updated()),
             this, SLOT(laser_parameter_updated()));
-
-    // Redraw scene (to correct project/unproject) and initialize the scanner
-    gla->repaint();
-    this->laser_parameter_updated();
+    connect(widget, SIGNAL(scan_requested()),
+            this, SLOT(scan_requested()));
 
     return true;
 }
@@ -97,6 +96,7 @@ void VirtualScan::laser_parameter_updated(){
     qDebug("period: %d, samples: %d, width: %f", period, numsamp, width);
 
     //--- Create the geometry of the scanline
+    gla->update(); // since we use gluproject
     sline = ScanLine( numsamp, width );
     // sline = ScanLineGeom( 10, .1 ); // hardcoded parameters (GUI independent)
 
@@ -105,6 +105,9 @@ void VirtualScan::laser_parameter_updated(){
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(readytoscan()));
     timer->start(period); // period of repetition in ms
+
+    //--- Update the laser rendering
+    gla->update();
 }
 void VirtualScan::EndEdit(MeshModel &, GLArea* ){
     //--- Attempts to save the cloud in the layer (CRASH!)
@@ -118,6 +121,7 @@ void VirtualScan::EndEdit(MeshModel &, GLArea* ){
 
 // This is called only when mouse is pressed at first during a drag or a click is received
 void VirtualScan::mousePressEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
+    this->laser_parameter_updated();
     gla->trackball.MouseDown(e->x(),gla->height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
     gla->update();
 }
@@ -135,7 +139,8 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
     // Scan the mesh only if we are triggering a scan and if the scanner is ready to suck in a new sample
     // This needs to be done after the mesh rendering has been done, but before any the scanned cloud is drawn!!
     if( isScanning && sampleReady ){
-        sampleReady = false; // We used the sample, jump to next one
+        sampleReady = false;
+        isScanning = false;
         scanpoints();
     }
 
@@ -143,7 +148,7 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
     glDisable(GL_LIGHTING);
         cloud->cm.C() = Color4b(255,200,200,255);
         glColor4f(.4f,.4f,1.f,.6f);
-        cloud->glw.SetHintParamf(GLW::HNPPointSize,5);
+        cloud->glw.SetHintParamf(GLW::HNPPointSize,SCANPOINTSIZE);
         cloud->Render(GLW::DMPoints, GLW::CMPerMesh, GLW::TMNone);
     glEnable(GL_LIGHTING);
 
@@ -174,7 +179,7 @@ ScanLine::ScanLine(int N, float width){
     Point2f sto = myGluProject(Point3f(+width/2,0,0));
     float delta = width/N;
     // qDebug() << "Scanpoint list: ";
-    for( float i=0; i<1; i+=delta ){
+    for( float i=0; i<=1; i+=delta ){
         if( N==1 )
             i = .5;
         Point2f curr = srt*(1-i) + sto*i;
@@ -182,6 +187,10 @@ ScanLine::ScanLine(int N, float width){
         // qDebug() << " - " << toString( curr );
         Point2i currI( curr[0], curr[1] );
         bbox.Add(currI);
+        // Invert samples and put them as close camera as possible
+        Point3f curr_o = myGluUnProject(curr,0.01);
+        soff_obj.push_back(curr_o);
+
         if( N==1 )
             break;
     }
@@ -224,6 +233,32 @@ void VirtualScan::scanpoints(){
     delete [] buffer;
 }
 void ScanLine::render(GLArea* gla){
+#if 0
+    //--- DEBUG! why mv[4,3] = -1000?
+    GLdouble mv[16];  glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+    for(int i=0; i<4; i++)
+        qDebug() << mv[4*i+0] << " " << mv[4*i+1] << " " << mv[4*i+2] << " " << mv[4*i+3];
+    qDebug();
+#endif
+
+    // since image space drawing is not working, then
+    // draw in object space instead!
+    glPointSize(SCANPOINTSIZE);
+    glColor(Color4f(255,0,0,255));
+    glPushMatrix();
+        glLoadIdentity();
+        glBegin(GL_POINTS);
+            for(int i=0; i<soff_obj.size(); i++){
+                Point3f p = soff_obj[i];
+                // TODO: correction for the -1000 offset meshlab seems to put
+                p[2]-=1000;
+                glVertex(p);
+            }
+        glEnd();
+    glPopMatrix();
+
+// This draws directly in 2D image space
+#if 0
     // Attempts to render the scanline
     glDisable(GL_DEPTH_TEST);
     // Now draw some 2D stuff
@@ -237,6 +272,7 @@ void ScanLine::render(GLArea* gla){
         glLoadIdentity();
         glRectf(100,100, 200, 200);
     glPopMatrix();
+#endif
 }
 
 // Must be at the end of everything in CPP file or get segfault at plugin load
