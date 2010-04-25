@@ -67,22 +67,53 @@ double randn(){
 }
 
 bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
-    // Check a model exists and save it
-    assert(md.mm() != NULL);
-    // We are scanning... set orthographic
-    gla->fov = 5;
-    // Create a scanline
-    sline = ScanLineGeom(10, 1);
-    // Create a new model to store the scan cloud
+    assert(md.mm() != NULL); // Model exists
+    this->md = &md;
+    gla->fov = 5; // Orthographic
+    isScanning = false; // Trigger is off initially
+    timer = 0;
+
+    //--- Create a new model to store the scan cloud
     cloud = new MeshModel("Scan cloud");
-    // Set initial state
-    isScanning = false;
-    // Create a timer which measures the scanning frequency (time in ms)
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(readytoscan()));
-    timer->start(100); // frequency of repetitions
+
+    //--- Instantiate the UI, connect
+    widget = new Widget(gla->window());
+    connect(widget, SIGNAL(laser_parameter_updated()),
+            this, SLOT(laser_parameter_updated()));
+
+    // Redraw scene (to correct project/unproject) and initialize the scanner
+    gla->repaint();
+    this->laser_parameter_updated();
 
     return true;
+}
+// We need to refresh the laser scan completely!
+void VirtualScan::laser_parameter_updated(){
+    //--- Retrieve values from GUI
+    int   period = 1000 / widget->getSampfreq();
+    int   numsamp = widget->getNumsample();
+    float width = widget->getScanwidth()*md->mm()->cm.bbox.Diag()/100.0;
+
+    qDebug("period: %d, samples: %d, width: %f", period, numsamp, width);
+
+    //--- Create the geometry of the scanline
+    sline = ScanLine( numsamp, width );
+    // sline = ScanLineGeom( 10, .1 ); // hardcoded parameters (GUI independent)
+
+    //--- Create a timer which enables scanning periodically
+    if( timer!=0 ) delete timer;
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(readytoscan()));
+    timer->start(period); // period of repetition in ms
+}
+void VirtualScan::EndEdit(MeshModel &, GLArea* ){
+    //--- Attempts to save the cloud in the layer (CRASH!)
+    // md->addNewMesh("Scan cloud", cloud);
+    // md->addNewMesh("test");
+    // gla->meshDoc.addNewMesh("test");
+
+    delete cloud; // TODO: This should be removed if we add it to the mesh document
+    delete widget;
 }
 
 // This is called only when mouse is pressed at first during a drag or a click is received
@@ -92,8 +123,6 @@ void VirtualScan::mousePressEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
 }
 // This is called during the whole drag
 void VirtualScan::mouseMoveEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
-    // isScanning = (e->modifiers() & Qt::ControlModifier);
-    // isScanning = (e->modifiers() & Qt::MetaModifier);
     gla->trackball.MouseMove(e->x(),gla->height()-e->y());
     gla->update();
 }
@@ -102,7 +131,7 @@ void VirtualScan::mouseReleaseEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
     gla->trackball.MouseUp(e->x(),gla->height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
     gla->update();
 }
-void VirtualScan::Decorate(MeshModel& mm, GLArea*){
+void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
     // Scan the mesh only if we are triggering a scan and if the scanner is ready to suck in a new sample
     // This needs to be done after the mesh rendering has been done, but before any the scanned cloud is drawn!!
     if( isScanning && sampleReady ){
@@ -136,11 +165,10 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea*){
     glEnd();
 
     //--- Draw the laser beam (just to help interfacing)
-    // must be done after all 3D stuff is done as well
-    sline.render();
+    sline.render(gla);
 }
 
-ScanLineGeom::ScanLineGeom(int N, float width){
+ScanLine::ScanLine(int N, float width){
     // Compute start and stop coordinates in image space
     Point2f srt = myGluProject(Point3f(-width/2,0,0));
     Point2f sto = myGluProject(Point3f(+width/2,0,0));
@@ -170,7 +198,7 @@ void VirtualScan::scanpoints(){
     for( unsigned int i=0; i<sline.soff.size(); i++ ){
         //--- Get curren scan point offset
         Point2f curr = sline.soff[i];
-        qDebug() << "scannign sample: " << toString(curr);
+        // qDebug() << "scannign sample: " << toString(curr);
         //--- Convert point into the buffer offset
         Point2i currb;
         currb[0] = round( curr[0]-sline.bbox.min[0] );
@@ -186,7 +214,7 @@ void VirtualScan::scanpoints(){
         Point3f sample = myGluUnProject( curr, z );
         Point3f sample2 = myGluUnProject( curr, z+.01);
         Point3f viewdir = (sample-sample2).normalized();
-        qDebug() << "correspodning in object space to: " << toString(sample);
+        // qDebug() << "correspodning in object space to: " << toString(sample);
 
         //--- Add scanned sample to the cloud
         cloud->cm.vert.push_back(dummy);
@@ -195,22 +223,20 @@ void VirtualScan::scanpoints(){
     }
     delete [] buffer;
 }
-void ScanLineGeom::render(){
+void ScanLine::render(GLArea* gla){
     // Attempts to render the scanline
-    #if 0
-        glDisable(GL_DEPTH_TEST);
-        // Now draw some 2D stuff
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-            glLoadIdentity();
-            glOrtho(0, gla->width(), gla->height(), 0, -1, 1);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-            glLoadIdentity();
-            glRectf(100,100, 200, 200);
-        glPopMatrix();
-    #endif
+    glDisable(GL_DEPTH_TEST);
+    // Now draw some 2D stuff
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+        glLoadIdentity();
+        glOrtho(0, gla->width(), gla->height(), 0, -1, 1);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+        glLoadIdentity();
+        glRectf(100,100, 200, 200);
+    glPopMatrix();
 }
 
 // Must be at the end of everything in CPP file or get segfault at plugin load

@@ -4,19 +4,21 @@
 #include <common/interfaces.h> // meshlab stuff
 #include "meshlab/glarea.h" // required if you access members
 #include <vector>
+#include "widget.h"
 
 using namespace vcg;
 using namespace std;
 
-class ScanLineGeom{
+class ScanLine{
 public:
     // Screen offsets of scan points
     vector<Point2f> soff;
     Box2i bbox;
-    ScanLineGeom(){}
-    ScanLineGeom(int N, float aperture);
     bool isScanning;
-    void render();
+
+    ScanLine(){}
+    ScanLine(int N, float aperture);
+    void render(GLArea* gla);
 };
 
 class VirtualScan : public QObject, public MeshEditInterface, public MeshEditInterfaceFactory{
@@ -30,23 +32,24 @@ private:
     MeshDocument*    md;
     // Keeps the scanned cloud
     MeshModel*    cloud;
-    ScanLineGeom  sline;
+    ScanLine  sline;
     bool     isScanning;
     bool    sampleReady;
     // Function that performs the scan
     void scanpoints();
     // Timer to sample scanner
     QTimer *timer;
+    // The UI of the plugin
+    Widget* widget;
+
+public slots:
+    void laser_parameter_updated();
 
 public:
     //--- Dummy implementation of MeshEditInterface
     static const QString Info(){ return tr("Virtual Scan "); }
     virtual bool StartEdit(MeshDocument &md, GLArea *parent);
-    virtual void EndEdit(MeshModel &, GLArea* gla){
-        // md->addNewMesh("Scan cloud", cloud);
-        // md->addNewMesh("test");
-        // gla->meshDoc.addNewMesh("test");
-    }
+    virtual void EndEdit(MeshModel &, GLArea* gla);
     virtual void Decorate(MeshModel& m, GLArea* gla);
     virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
     virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea* );
@@ -55,9 +58,8 @@ public:
         isScanning = false;
     }
     virtual void keyPressEvent(QKeyEvent *e, MeshModel &/*m*/, GLArea *){
-        if( e->key() == Qt::Key_S ){
+        if( e->key() == Qt::Key_S )
             isScanning = true;
-        }
     }
 
     //--- Dummy implementation of MeshEditInterfaceFactory, passes control to this MeshEditInterface
@@ -77,6 +79,7 @@ private:
     //--- Virtual scan functions
     void scanPoints();
 public slots:
+    // called repeatedly by the timer
     void readytoscan(){ sampleReady = true; }
 };
 
