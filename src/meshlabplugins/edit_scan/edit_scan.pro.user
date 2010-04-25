@@ -72,15 +72,15 @@
   <valuemap type="QVariantMap">
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList">
-    <value type="QString">Apple_PubSub_Socket_Render=/tmp/launch-qYm1RP/Render</value>
+    <value type="QString">Apple_PubSub_Socket_Render=/tmp/launch-HB6srV/Render</value>
     <value type="QString">COMMAND_MODE=unix2003</value>
-    <value type="QString">DISPLAY=/tmp/launch-nJGktF/:0</value>
+    <value type="QString">DISPLAY=/tmp/launch-6Z6Ywn/:0</value>
     <value type="QString">HOME=/Users/ata2</value>
     <value type="QString">LOGNAME=ata2</value>
     <value type="QString">PATH=/Developer/Tools/Qt:/usr/bin:/bin:/usr/sbin:/sbin</value>
     <value type="QString">QTDIR=/usr/local/Qt4.6</value>
     <value type="QString">SHELL=/bin/bash</value>
-    <value type="QString">SSH_AUTH_SOCK=/tmp/launch-riNXRq/Listeners</value>
+    <value type="QString">SSH_AUTH_SOCK=/tmp/launch-JDaVUl/Listeners</value>
     <value type="QString">TMPDIR=/var/folders/nT/nTstT998GAStacv9t5mUAk+++TQ/-Tmp-/</value>
     <value type="QString">USER=ata2</value>
     <value type="QString">__CF_USER_TEXT_ENCODING=0x1F7:0:0</value>
@@ -101,15 +101,15 @@
   <valuemap type="QVariantMap">
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList">
-    <value type="QString">Apple_PubSub_Socket_Render=/tmp/launch-qYm1RP/Render</value>
+    <value type="QString">Apple_PubSub_Socket_Render=/tmp/launch-HB6srV/Render</value>
     <value type="QString">COMMAND_MODE=unix2003</value>
-    <value type="QString">DISPLAY=/tmp/launch-nJGktF/:0</value>
+    <value type="QString">DISPLAY=/tmp/launch-6Z6Ywn/:0</value>
     <value type="QString">HOME=/Users/ata2</value>
     <value type="QString">LOGNAME=ata2</value>
     <value type="QString">PATH=/Developer/Tools/Qt:/usr/bin:/bin:/usr/sbin:/sbin</value>
     <value type="QString">QTDIR=/usr/local/Qt4.6</value>
     <value type="QString">SHELL=/bin/bash</value>
-    <value type="QString">SSH_AUTH_SOCK=/tmp/launch-riNXRq/Listeners</value>
+    <value type="QString">SSH_AUTH_SOCK=/tmp/launch-JDaVUl/Listeners</value>
     <value type="QString">TMPDIR=/var/folders/nT/nTstT998GAStacv9t5mUAk+++TQ/-Tmp-/</value>
     <value type="QString">USER=ata2</value>
     <value type="QString">__CF_USER_TEXT_ENCODING=0x1F7:0:0</value>
@@ -128,15 +128,15 @@
   <valuemap type="QVariantMap">
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList">
-    <value type="QString">Apple_PubSub_Socket_Render=/tmp/launch-qYm1RP/Render</value>
+    <value type="QString">Apple_PubSub_Socket_Render=/tmp/launch-HB6srV/Render</value>
     <value type="QString">COMMAND_MODE=unix2003</value>
-    <value type="QString">DISPLAY=/tmp/launch-nJGktF/:0</value>
+    <value type="QString">DISPLAY=/tmp/launch-6Z6Ywn/:0</value>
     <value type="QString">HOME=/Users/ata2</value>
     <value type="QString">LOGNAME=ata2</value>
     <value type="QString">PATH=/Developer/Tools/Qt:/usr/bin:/bin:/usr/sbin:/sbin</value>
     <value type="QString">QTDIR=/usr/local/Qt4.6</value>
     <value type="QString">SHELL=/bin/bash</value>
-    <value type="QString">SSH_AUTH_SOCK=/tmp/launch-riNXRq/Listeners</value>
+    <value type="QString">SSH_AUTH_SOCK=/tmp/launch-JDaVUl/Listeners</value>
     <value type="QString">TMPDIR=/var/folders/nT/nTstT998GAStacv9t5mUAk+++TQ/-Tmp-/</value>
     <value type="QString">USER=ata2</value>
     <value type="QString">__CF_USER_TEXT_ENCODING=0x1F7:0:0</value>

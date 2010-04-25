@@ -84,6 +84,9 @@ bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
     connect(widget, SIGNAL(scan_requested()),
             this, SLOT(scan_requested()));
 
+    //--- Compute initial beam
+    laser_parameter_updated();
+
     return true;
 }
 // We need to refresh the laser scan completely!
@@ -91,13 +94,18 @@ void VirtualScan::laser_parameter_updated(){
     //--- Retrieve values from GUI
     int   period = 1000 / widget->getSampfreq();
     int   numsamp = widget->getNumsample();
-    float width = widget->getScanwidth()*md->mm()->cm.bbox.Diag()/100.0;
 
-    qDebug("period: %d, samples: %d, width: %f", period, numsamp, width);
+    // Compute start and stop coordinates in image space
+    Point2f delta( widget->getScanwidth()*gla->height()/(3.0*100.0), 0 );
+    Point2f str( gla->width()/2, gla->height()/2 ); str-=delta;
+    Point2f sto( gla->width()/2, gla->height()/2 ); sto+=delta;
+    // float width = *md->mm()->cm.bbox.MaxDim()/100.0;
+    qDebug("period: %d, samples: %d", period, numsamp);
+    qDebug() << toString(str) << " " << toString(sto);
 
     //--- Create the geometry of the scanline
     gla->update(); // since we use gluproject
-    sline = ScanLine( numsamp, width );
+    sline = ScanLine( numsamp, str, sto);
     // sline = ScanLineGeom( 10, .1 ); // hardcoded parameters (GUI independent)
 
     //--- Create a timer which enables scanning periodically
@@ -173,26 +181,16 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
     sline.render(gla);
 }
 
-ScanLine::ScanLine(int N, float width){
-    // Compute start and stop coordinates in image space
-    Point2f srt = myGluProject(Point3f(-width/2,0,0));
-    Point2f sto = myGluProject(Point3f(+width/2,0,0));
-    float delta = width/N;
-    // qDebug() << "Scanpoint list: ";
-    for( float i=0; i<=1; i+=delta ){
-        if( N==1 )
-            i = .5;
-        Point2f curr = srt*(1-i) + sto*i;
+ScanLine::ScanLine(int N, Point2f& srt, Point2f& end ){
+    float delta = 1.0 / (N-1);
+    qDebug() << "Scanpoint list: ";
+    float alpha=0;
+    for( int i=0; i<N; i++, alpha+=delta ){
+        Point2f curr = srt*(1-alpha) + end*alpha;
         soff.push_back(curr);
-        // qDebug() << " - " << toString( curr );
+        qDebug() << " - " << toString( curr );
         Point2i currI( curr[0], curr[1] );
         bbox.Add(currI);
-        // Invert samples and put them as close camera as possible
-        Point3f curr_o = myGluUnProject(curr,0.01);
-        soff_obj.push_back(curr_o);
-
-        if( N==1 )
-            break;
     }
     // Retrieve a block 2 pixel larger from buffer
     bbox.Offset(2);
@@ -241,38 +239,28 @@ void ScanLine::render(GLArea* gla){
     qDebug();
 #endif
 
-    // since image space drawing is not working, then
-    // draw in object space instead!
+    // This draws directly in 2D image space
+    glDisable(GL_DEPTH_TEST);
     glPointSize(SCANPOINTSIZE);
     glColor(Color4f(255,0,0,255));
-    glPushMatrix();
-        glLoadIdentity();
-        glBegin(GL_POINTS);
-            for(int i=0; i<soff_obj.size(); i++){
-                Point3f p = soff_obj[i];
-                // TODO: correction for the -1000 offset meshlab seems to put
-                p[2]-=1000;
-                glVertex(p);
-            }
-        glEnd();
-    glPopMatrix();
-
-// This draws directly in 2D image space
-#if 0
-    // Attempts to render the scanline
-    glDisable(GL_DEPTH_TEST);
-    // Now draw some 2D stuff
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
         glLoadIdentity();
-        glOrtho(0, gla->width(), gla->height(), 0, -1, 1);
+        glOrtho(0, gla->width(), 0, gla->height(), -1, 1);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+            glColor3f(1.0,0.0,0.0);
+            glBegin(GL_POINTS);
+                for(int i=0; i<soff.size(); i++)
+                    glVertex(soff[i]);
+                // glVertex2f( gla->width()/2, gla->height()/2 );
+            glEnd();
+            // glRectf(100,100, 200, 200);
+        glPopMatrix(); // restore modelview
+    // The pop must be done in the projection mode
+    glMatrixMode(GL_PROJECTION);
     glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-        glLoadIdentity();
-        glRectf(100,100, 200, 200);
-    glPopMatrix();
-#endif
 }
 
 // Must be at the end of everything in CPP file or get segfault at plugin load

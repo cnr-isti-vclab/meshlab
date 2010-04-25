@@ -9,19 +9,17 @@
 using namespace vcg;
 using namespace std;
 
-#define SCANPOINTSIZE 5
+#define SCANPOINTSIZE 2
 
 class ScanLine{
 public:
     // Screen offsets of scan points
     vector<Point2f> soff;
-    // Object space locations (for rendering)
-    vector<Point3f> soff_obj;
     Box2i bbox;
     bool isScanning;
 
     ScanLine(){}
-    ScanLine(int N, float aperture);
+    ScanLine(int N, Point2f&, Point2f& );
     void render(GLArea* gla);
 };
 
