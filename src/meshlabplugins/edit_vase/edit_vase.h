@@ -8,6 +8,9 @@
 
 using namespace vcg;
 
+// This plugin only defines one action
+static QAction act(QIcon(":/images/vase.png"),"Volume Aware Surface Extraction", NULL);
+
 class Vase : public QObject, public MeshEditInterface, public MeshEditInterfaceFactory{
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
@@ -16,31 +19,20 @@ class Vase : public QObject, public MeshEditInterface, public MeshEditInterfaceF
 private:
     // Instance of dialog window
     VaseWidget* gui;
-    // Plugin defines this single action
-    QAction* action;
 
 public:
     //--- Dummy implementation of MeshEditInterface, passes all control to Widget
     static const QString Info(){ return tr("VASE"); }
-    virtual bool StartEdit(MeshModel &m, GLArea* gla){
-        gui = new VaseWidget( gla->window(), m, gla );
-        // Try to force the widget on the right hand side
-        //addDockWidget( Qt::RightDockWidgetArea, gui );
-        return true;
-    }
+    virtual bool StartEdit(MeshModel &m, GLArea* gla);
     virtual void EndEdit(MeshModel &, GLArea*){ delete gui; }
     virtual void Decorate(MeshModel& m, GLArea* gla){ gui->decorate(m,gla); }
     virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
     virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea* );
     virtual void mouseReleaseEvent(QMouseEvent *, MeshModel &, GLArea* );
-
     //--- Dummy implementation of MeshEditInterfaceFactory, passes control to this MeshEditInterface
-    Vase();
-    virtual ~Vase(){ delete action; }
-    virtual QList<QAction *> actions() const{
-        QList<QAction *> actionList;
-        return actionList << action;
-    }
+    Vase(){};
+    virtual ~Vase(){}
+    virtual QList<QAction *> actions() const{ QList<QAction *> actionList; return actionList << &act; }
     virtual MeshEditInterface* getMeshEditInterface(QAction* ){ return this; }
     virtual QString getEditToolDescription(QAction *){  return this->Info(); }
 };

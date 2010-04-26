@@ -2,15 +2,10 @@
 #include "wrap/gui/trackball.h"
 #include "wrap/qt/trackball.h" //QT2VCG trackball function
 
-Vase::Vase(){
-    action = new QAction(QIcon(":/images/vase.png"),"Volume Aware Surface Extraction", this);
-    action->setCheckable(true);
+bool Vase::StartEdit(MeshModel &m, GLArea* gla){
+    gui = new VaseWidget( gla->window(), m, gla );
+    return true;
 }
-
-
-
-
-
 
 //--- Trackball controls similarly to the ones in non-edit mode
 void Vase::mousePressEvent(QMouseEvent* e, MeshModel &, GLArea* gla){
