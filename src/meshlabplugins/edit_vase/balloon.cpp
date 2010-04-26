@@ -32,16 +32,23 @@ void Balloon::init( int gridsize, int gridpad ){
     float del = .50*vol.getDelta(); // ADEBUG: almost to debug correspondences
     Point3f offset( del,del,del );
     enlargedbb.Offset( offset );
-    vol.initField( enlargedbb );    
+    vol.initField( enlargedbb );  // init volumetric field with the bounding box
     
     //--- Extract initial zero level set surface
-    vol.isosurface( surf, 0 );
-    qDebug() << "Extracted balloon isosurface (" << surf.vn << " " << surf.fn << ")";    
-
-    // Test whether applying it more than one time does nothing (1-1 conversion)
-    // Put this in a button callback so can visually inspect (passed...)
-    // vol.initField(surf, gridAccell);
-    return;
+    vol.isosurface( surf, 0 ); // qDebug() << "Extracted balloon isosurface (" << surf.vn << " " << surf.fn << ")";
+    //--- Clear band for next isosurface, clearing the corresponding computation field
+    for(unsigned int i=0; i<vol.band.size(); i++){
+        Point3i& voxi = vol.band[i];
+        MyVoxel& v = vol.Voxel(voxi);
+        v.status = 0;
+        v.face = 0;
+        v.index = 0;
+        v.field = NAN;
+    }
+    vol.band.clear();
+    //--- Update correspondences & band
+    vol.band.reserve(5*surf.fn);
+    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
 }
 void Balloon::updateViewField(){
     //--- Setup the interpolation system
@@ -136,41 +143,18 @@ void Balloon::updateViewField(){
     }
 }
 void Balloon::interpolateField(){
+    //--- Mark property active
+    surf.vert.QualityEnabled = true;
+
     //--- Interpolate the field
-    // qDebug() << "Solving field interpolation";
     finterp.Solve();
 
-    if( false ){
-//        //--- Perform exponential (max) distance mapping
-//        float maxdst = -FLT_MAX, mindst = FLT_MAX;
-//        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++)
-//            maxdst = ((*vi).Q()>maxdst) ? (*vi).Q() : maxdst;
-//        float sigma2 = vol.getDelta(); sigma2*=sigma2;
-//        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++)
-//            (*vi).Q() = exp( - powf((*vi).Q()-maxdst,2) / sigma2 );
-//
-//        maxdst = -FLT_MAX; mindst = FLT_MAX;
-//        for(CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++){
-//            maxdst = ((*vi).Q()>maxdst) ? (*vi).Q() : maxdst;
-//            mindst = ((*vi).Q()<mindst) ? (*vi).Q() : mindst;
-//        }
-        // qDebug() << mindst << " " << maxdst;
-
-        //--- Transfer vertex quality to surface
-        rm &= ~SURF_FCOLOR; // disable face colors
-        rm |= SURF_VCOLOR; // enable vertex colors
-        tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,0,1);
-        // qDebug() << "Exp transform showed as vertex color!";
-    }
-    else{
-        //--- Transfer vertex quality to surface
-        rm &= ~SURF_FCOLOR; // disable face colors
-        rm |= SURF_VCOLOR; // enable vertex colors
-        Histogram<float> H;
-        tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
-        tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
-        // qDebug() << "Interpolated field showed as vertex color!";
-    }
+    //--- Transfer vertex quality to surface
+    rm &= ~SURF_FCOLOR; // disable face colors
+    rm |= SURF_VCOLOR; // enable vertex colors
+    Histogram<float> H;
+    tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
+    tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
 }
 void Balloon::computeCurvature(){
     // Enable curvature supports, How do I avoid a
@@ -257,18 +241,21 @@ void Balloon::evolveBalloon(){
         vcg::InterpolationParameters(triFace, proj, a,b,c);
 
         // Interpolate update amounts & keep track of the range
-        updates_view[i] = a*f.V(0)->Q() + b*f.V(1)->Q() + c*f.V(2)->Q();
-        view_maxdst = (updates_view[i]>view_maxdst) ? updates_view[i] : view_maxdst;
-
+        if( surf.vert.QualityEnabled ){
+            updates_view[i] = a*f.V(0)->Q() + b*f.V(1)->Q() + c*f.V(2)->Q();
+            view_maxdst = (updates_view[i]>view_maxdst) ? updates_view[i] : view_maxdst;
+        }
         // Interpolate curvature amount & keep track of the range
-        if( surf.vert.IsCurvatureEnabled() ){
+        if( surf.vert.CurvatureEnabled ){
             updates_curv[i] = a*f.V(0)->Kg() + b*f.V(1)->Kg() + c*f.V(2)->Kg();
             curv_maxval = (fabs(updates_curv[i])>curv_maxval) ? fabs(updates_curv[i]) : curv_maxval;
         }
     }
     // Only meaningful if it has been computed..
-    if( surf.vert.IsCurvatureEnabled() )
+    if( surf.vert.CurvatureEnabled )
         qDebug("max curvature: %f", curv_maxval);
+    if( surf.vert.QualityEnabled )
+        qDebug("max ditance: %f", view_maxdst);
 
     //--- Apply exponential functions to modulate and regularize the updates
     float sigma2 = vol.getDelta(); sigma2*=sigma2;
@@ -276,18 +263,23 @@ void Balloon::evolveBalloon(){
     for(unsigned int i=0; i<vol.band.size(); i++){
         Point3i& voxi = vol.band[i];
         MyVoxel& v = vol.Voxel(voxi);
-        //--- Faster if further
-        k1 = exp( -powf(updates_view[i]-view_maxdst,2) / (sigma2) );
-        //--- Slowdown weight (according to distance from surface)
-        k2 = 1 - exp( -powf(updates_view[i],2) / sigma2 );
-        //--- Curvature weight
-        if( surf.vert.IsCurvatureEnabled() )
+
+        //--- Distance weights
+        if( surf.vert.QualityEnabled ){
+            //Faster if I am located further
+            k1 = exp( -powf(updates_view[i]-view_maxdst,2) / (.25*sigma2) );
+            //Slowdown weight, smaller if converging
+            k2 = 1 - exp( -powf(updates_view[i],2) / (.25*sigma2) );
+        }
+        //--- Curvature weight (faster if spiky)
+        if( surf.vert.CurvatureEnabled )
             k3 = updates_curv[i] / curv_maxval; // sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
 
-        //--- Update
-        v.sfield += .25*k1*k2*vol.getDelta();
-        //v.sfield += 0; // .001*k3;
-        // v.sfield += .1*k3;
+        //--- Apply the update on the implicit field
+        if( surf.vert.QualityEnabled )
+            v.sfield += .25*k1*k2*vol.getDelta();
+        if( surf.vert.CurvatureEnabled )
+            v.sfield += .1*k3;
     }
 
     //--- Estrai isosurface
@@ -305,6 +297,9 @@ void Balloon::evolveBalloon(){
     //--- Update correspondences & band
     vol.band.reserve(5*surf.fn);
     vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
+    //--- Disable curvature and quality
+    surf.vert.CurvatureEnabled = false;
+    surf.vert.QualityEnabled = false;
 }
 
 //---------------------------------------------------------------------------------------//

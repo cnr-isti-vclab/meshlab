@@ -17,6 +17,13 @@ SOURCES += gridaccell.cpp
 SOURCES += vase_utils.cpp
 SOURCES += balloon.cpp
 
+#--- SUPPORT FOR TRACKBALL
+VCGDIR = ../../../../vcglib
+HEADERS += $$VCGDIR/wrap/gui/trackball.h
+HEADERS += $$VCGDIR/wrap/gui/trackmode.h
+SOURCES += $$VCGDIR/wrap/gui/trackball.cpp
+SOURCES += $$VCGDIR/wrap/gui/trackmode.cpp
+
 # EIGEN + CHOLMOD STUFF
 INCLUDEPATH += /sw/include/eigen3
 INCLUDEPATH += /sw/include/suitesparse

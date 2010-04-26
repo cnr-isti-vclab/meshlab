@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>340</width>
+    <width>410</width>
     <height>754</height>
    </rect>
   </property>
@@ -82,7 +82,7 @@
             <string>surf2vol</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -211,7 +211,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="numItersSpin"/>
+            <widget class="QSpinBox" name="numItersSpin">
+             <property name="value">
+              <number>1</number>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>

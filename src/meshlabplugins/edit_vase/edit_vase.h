@@ -30,15 +30,12 @@ public:
     }
     virtual void EndEdit(MeshModel &, GLArea*){ delete gui; }
     virtual void Decorate(MeshModel& m, GLArea* gla){ gui->decorate(m,gla); }
-    virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ){}
-    virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea* ){}
-    virtual void mouseReleaseEvent(QMouseEvent *, MeshModel &, GLArea* ){}
+    virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
+    virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea* );
+    virtual void mouseReleaseEvent(QMouseEvent *, MeshModel &, GLArea* );
 
     //--- Dummy implementation of MeshEditInterfaceFactory, passes control to this MeshEditInterface
-    Vase(){
-        action = new QAction(QIcon(":/images/vase.png"),"Volume Aware Surface Extraction", this);
-        action->setCheckable(true);
-    }
+    Vase();
     virtual ~Vase(){ delete action; }
     virtual QList<QAction *> actions() const{
         QList<QAction *> actionList;

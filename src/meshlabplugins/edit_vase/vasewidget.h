@@ -11,7 +11,7 @@ using namespace vcg;
 
 class VaseWidget : public QDockWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     void update_slice();

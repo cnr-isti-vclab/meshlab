@@ -8,23 +8,19 @@ VaseWidget::VaseWidget(QWidget *parent, MeshModel &m, GLArea* gla)
 	
     // Set orthographic visualization (meshlab assumes 5 degrees...)
     gla->fov = 5;
-    // Create a new balloon based on the current point cloud
-    balloon = new Balloon( m.cm );
     // Setup the widget
 	ui.setupUi(this);
-    this->setWidget(ui.frame);
-    // Let widget size itself
-    QPoint p=parent->mapToGlobal(QPoint(0,0));
-    this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
-    // Not sure what this does??
-    this->setFloating(true);
-    // Don't allow to show the docking
-    this->setAllowedAreas(Qt::RightDockWidgetArea);
+    this->setWidget(ui.frame);  
+    setFloating(false);
+    setAllowedAreas(Qt::RightDockWidgetArea);
+    ((QMainWindow*) parent)->addDockWidget( Qt::RightDockWidgetArea, this );
+
+    // Create a new balloon based on the current point cloud
+    balloon = new Balloon( m.cm );
     // Init slicer
     this->update_slice();
     // Turn off the volume slicer
     this->ui.slicebox->setVisible(false);
-
     // Inherit the render flags from the UI
     if( ui.viewDirs->isChecked() )
         balloon->rm |= Balloon::SHOW_CLOUD;
@@ -37,6 +33,9 @@ VaseWidget::VaseWidget(QWidget *parent, MeshModel &m, GLArea* gla)
 
     // Open it up
     this->show();
+
+    // Launch an init by default
+    this->on_initButton_released();
 }
 VaseWidget::~VaseWidget(){
     delete balloon;
@@ -110,26 +109,26 @@ void VaseWidget::on_iterationButton_released(){
 }
 void VaseWidget::on_refreshButton_released(){
     balloon->updateViewField();
-    gla->log.Log(GLLogStream::FILTER, "Refreshed field");
+    gla->log.Log(GLLogStream::FILTER, "Refreshed view-based distance field");
     balloon->render(gla);
     gla->update();
 }
 void VaseWidget::on_interpButton_released(){
     balloon->interpolateField();
     balloon->rm |= Balloon::SURF_VCOLOR;
-    gla->log.Log(GLLogStream::FILTER, "Field has been interpolated, colors interpolated on vertices");
+    gla->log.Log(GLLogStream::FILTER, "Disstance field interpolated");
     gla->update();
 }
 void VaseWidget::on_evolveButton_released(){
     balloon->evolveBalloon();
-    gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
+    gla->log.Logf(GLLogStream::FILTER, "Finished ballon evolution iteration %d", balloon->numiterscompleted);
     gla->update();
 }
 void VaseWidget::on_laplButton_released(){
     balloon->computeCurvature();
+    balloon->rm |= Balloon::SURF_VCOLOR;
     gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
     gla->update();
-    balloon->rm |= Balloon::SURF_VCOLOR;
 }
 
 void VaseWidget::on_viewDirs_toggled(bool checked){
