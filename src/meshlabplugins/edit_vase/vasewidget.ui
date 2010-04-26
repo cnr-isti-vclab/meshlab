@@ -62,7 +62,7 @@
             <string>view dirs</string>
            </property>
            <property name="checked">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -72,7 +72,7 @@
             <string>surface</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -92,7 +92,7 @@
             <string>3D-DDR</string>
            </property>
            <property name="checked">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -128,7 +128,7 @@
               <number>1000</number>
              </property>
              <property name="value">
-              <number>5</number>
+              <number>50</number>
              </property>
             </widget>
            </item>

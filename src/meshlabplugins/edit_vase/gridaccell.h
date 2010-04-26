@@ -85,7 +85,10 @@ public:
     /// Renders the intersections
     void render();
     /// Trace a ray in the current volume updating PointerVectors in the traversed cells
-    void trace_ray(Ray3f& rayPtr);
+    /// Before starting the marching we pull the ray back of the quantity "off", so that
+    /// we are able to test for intersections with triangles which are slightly behind
+    /// the surface. The default value is not really zero, it gets converted to -Delta.
+    void trace_ray(Ray3f& rayPtr, float off=0);
 };
 
 } // Namespace VCG

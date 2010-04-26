@@ -27,16 +27,23 @@ void GridAccell::init( Volume& vol, CMeshO& pcloud ){
         trace_ray( rays[i] );
     }
 }
-void GridAccell::trace_ray(Ray3f& ray){
+void GridAccell::trace_ray(Ray3f& ray, float off){
     // Point3i ps; pos2off( p, ps );
     // qDebug() << "Tracing: " << toString(p);
     // qDebug() << "Start offset " << toString(ps);
 
+#if 1
+    // We want to test intersections "off" distance behind the ray as well
+    float rayT = 1e-20;
+    Point3f p = ray.P((off==0)?-this->delta:off);
+    Point3f d = ray.Direction();
+#else
     // Create a ray copy and make a microscopic step in
     // direction d to avoid zero intersect (similar PBRT)
     float rayT = 1e-20;
     Point3f p = ray.P(rayT);
     Point3f d = ray.Direction();
+#endif
 
     // Set up 3D DDA for current ray
     // NOTE: The -.5*delta is the only difference w.r.t. PBRT as they were using a

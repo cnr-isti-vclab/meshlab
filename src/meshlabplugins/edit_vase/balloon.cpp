@@ -279,7 +279,7 @@ void Balloon::evolveBalloon(){
         if( surf.vert.QualityEnabled )
             v.sfield += .25*k1*k2*vol.getDelta();
         if( surf.vert.CurvatureEnabled )
-            v.sfield += .1*k3;
+            v.sfield += .1*k3*k2;
     }
 
     //--- Estrai isosurface
