@@ -70,6 +70,7 @@ public:
     VirtualScan(){
         action = new QAction(QIcon(":/images/scan.png"),"Virtual scanner", this);
         action->setCheckable(true);
+        widget = NULL;
     }
     virtual ~VirtualScan(){ delete action; }
     virtual QList<QAction *> actions() const{
@@ -90,6 +91,7 @@ public slots:
         sampleReady = true;
         gla->update();
     }
+    void save_requested();
 };
 
 #endif

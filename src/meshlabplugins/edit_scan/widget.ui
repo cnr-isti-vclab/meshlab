@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>170</width>
+    <width>175</width>
     <height>625</height>
    </rect>
   </property>
@@ -25,6 +25,13 @@
      <widget class="QPushButton" name="scanbutton">
       <property name="text">
        <string>Scan (S)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="saveButton">
+      <property name="text">
+       <string>Export cloud...</string>
       </property>
      </widget>
     </item>

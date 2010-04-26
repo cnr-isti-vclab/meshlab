@@ -44,6 +44,7 @@ public:
 signals:
     void laser_parameter_updated();
     void scan_requested();
+    void save_requested();
 
 private:
     Ui::Widget *ui;
@@ -91,8 +92,10 @@ private slots:
         emit laser_parameter_updated();
     }
     void on_scanbutton_released(){
-        emit laser_parameter_updated(); // just to be sure
         emit scan_requested();
+    }
+    void on_saveButton_released(){
+        emit save_requested();
     }
 };
 #endif // WIDGET_H
