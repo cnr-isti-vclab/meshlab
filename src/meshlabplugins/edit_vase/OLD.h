@@ -41,4 +41,29 @@ void Balloon::render_surf_to_vol(){
     glEnable( GL_LIGHTING );
 }
 
+//---------------------------------------------------------------------------------------------------
+//
+//                             POINT 2 SURFACE CORRESPONDENCE
+//
+//---------------------------------------------------------------------------------------------------
+// Init
+typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
+MetroMeshFaceGrid   unifGridFace;
+typedef tri::FaceTmark<CMeshO> MarkerFace;
+MarkerFace markerFunctor;
+
+tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
+tri::UpdateFlags<CMeshO>::FaceProjection(*m);
+unifGridFace.Set(m->face.begin(),m->face.end());
+markerFunctor.SetMesh(m);
+
+// and then when you need to find the closest point on a surface from a starting point
+ Point3f       closestPt,      normf, bestq, ip;
+float dist = dist_upper_bound;
+
+// compute distance between startPt and the mesh S2
+CMeshO::FaceType   *nearestF=0;
+vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
+nearestF =  unifGridFace.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+
 

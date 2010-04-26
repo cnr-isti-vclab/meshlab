@@ -57,7 +57,7 @@ void Balloon::updateViewField(){
     // finterp.Init( &surf, COMBINATORIAL );
 
     // Shared data
-    enum INITMODE {FACEINTERSECTIONS, BIFACEINTERSECTIONS, BOXINTERSECTIONS} mode;
+    enum INITMODE {BIFACEINTERSECTIONS, FACEINTERSECTIONS, BOXINTERSECTIONS} mode;
     mode = FACEINTERSECTIONS;
     const float ONETHIRD = 1.0f/3.0f;
     float t,u,v; // Ray-Triangle intersection parameters
@@ -130,11 +130,63 @@ void Balloon::updateViewField(){
         tri::UpdateQuality<CMeshO>::FaceConstant(surf, 0);
         std::vector<float> tot_w( surf.fn, 0 );
 
+        // We clear the ray-triangles correspondence information + distance information
+        // to get ready for the next step
+        gridAccell.clearCorrespondences();
+
         // In this first phase, we scan through faces and we update the information
-        // contained in the rays.
-
+        // contained in the rays. We try to have a many-1 correspondence in between
+        // rays and faces: each face can have more than one ray, but one ray can only
+        // have one face associated with it. This face can either be behind or in
+        // front of the ray startpoint.
         for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
+            CFaceO& f = *(fi);
+            f.ClearS();
+            f.C() = Color4b(255,255,255, 255);
+            f.Q() = 0; // initialize
+            Point3f fcenter = f.P(0) + f.P(1) + f.P(2);
+            fcenter = myscale( fcenter, ONETHIRD );
+            gridAccell.pos2off( fcenter, off );
+            PointerVector& prays = gridAccell.Val(off[0], off[1], off[2]);
 
+            // We check each of the possibly intersecting rays and we associate this face
+            // with him if and only if this face is the closest to it. Note that we study
+            // the values of t,u,v directly as a t<0 is accepted as intersecting.
+            for(unsigned int i=0; i<prays.size(); i++){
+                vcg::IntersectionRayTriangle<float>(prays[i]->ray, f.P(0), f.P(1), f.P(2), t, u, v);
+                // If the ray falls within the domain of the face
+                if( u>=0 && u<=1 && v>=0 && v<=1 ){
+                    // If no face was associated with this ray or this face is closer
+                    // than the one that I stored previously
+                    if( prays[i]->f==NULL || fabs(prays[i]->t)<fabs(t) ){
+                        prays[i]->f=&f;
+                        prays[i]->t=t;
+                    }
+                }
+            }
+        }
+
+        // Now we scan through the rays, we visit the "best" corresponding face and we
+        // set a constraint on this face. Also we modify the color of the face so that
+        // an approximation can be visualized
+        for(unsigned int i=0; i<gridAccell.rays.size(); i++){
+            // Retrieve the corresponding face and signed distance
+            Ray3f& ray = gridAccell.rays[i].ray;
+            CFaceO& f = *(gridAccell.rays[i].f);
+            float t = gridAccell.rays[i].t;
+
+            // Color the faces, if more than one, take average
+            tot_w[ tri::Index(surf,f) ]++;
+            f.Q() += t; // normalize with tot_w after
+            f.SetS(); // enable the face for coloring
+
+            // I was lazy and didn't store the u,v... we need to recompute them
+            vcg::IntersectionRayTriangle<float>(ray, f.P(0), f.P(1), f.P(2), t, u, v);
+
+            //--- Add the barycenter-weighted constraints to the vertices of the face
+            finterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA*(1-u-v), t );
+            finterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA*(u), t );
+            finterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA*(v), t );
         }
     }
 }
@@ -239,7 +291,7 @@ void Balloon::evolveBalloon(){
         // Interpolate update amounts & keep track of the range
         if( surf.vert.QualityEnabled ){
             updates_view[i] = a*f.V(0)->Q() + b*f.V(1)->Q() + c*f.V(2)->Q();
-            view_maxdst = (updates_view[i]>view_maxdst) ? updates_view[i] : view_maxdst;
+            view_maxdst = (fabs(updates_view[i])>view_maxdst) ? fabs(updates_view[i]) : view_maxdst;
         }
         // Interpolate curvature amount & keep track of the range
         if( surf.vert.CurvatureEnabled ){
@@ -263,7 +315,7 @@ void Balloon::evolveBalloon(){
         //--- Distance weights
         if( surf.vert.QualityEnabled ){
             //Faster if I am located further
-            k1 = exp( -powf(updates_view[i]-view_maxdst,2) / (.25*sigma2) );
+            k1 = exp( -powf(fabs(updates_view[i])-view_maxdst,2) / (.25*sigma2) );
             //Slowdown weight, smaller if converging
             k2 = 1 - exp( -powf(updates_view[i],2) / (.25*sigma2) );
         }
@@ -274,8 +326,12 @@ void Balloon::evolveBalloon(){
         //--- Apply the update on the implicit field
         if( surf.vert.QualityEnabled )
             v.sfield += .25*k1*k2*vol.getDelta();
-        if( surf.vert.CurvatureEnabled )
+        // if we don't have computed the distance field, we don't really know how to
+        // modulate the laplacian accordingly...
+        if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled )
             v.sfield += .1*k3*k2;
+        else if( surf.vert.CurvatureEnabled )
+            v.sfield += .1*k3;
     }
 
     //--- Estrai isosurface

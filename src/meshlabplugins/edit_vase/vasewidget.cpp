@@ -102,6 +102,7 @@ void VaseWidget::on_iterationButton_released(){
     for(int i=0; i<ui.numItersSpin->value(); i++){
         balloon->updateViewField();
         balloon->interpolateField();
+        balloon->computeCurvature();
         balloon->evolveBalloon();
         gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
         gla->update();
@@ -116,7 +117,7 @@ void VaseWidget::on_refreshButton_released(){
 void VaseWidget::on_interpButton_released(){
     balloon->interpolateField();
     balloon->rm |= Balloon::SURF_VCOLOR;
-    gla->log.Log(GLLogStream::FILTER, "Disstance field interpolated");
+    gla->log.Log(GLLogStream::FILTER, "Distance field interpolated");
     gla->update();
 }
 void VaseWidget::on_evolveButton_released(){

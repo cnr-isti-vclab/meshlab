@@ -24,8 +24,8 @@ public:
     CFaceO*    f;
     // Looking forward to the next version of C++-Ox, I cannot stand writing this stupid stuff just because this language is a syntactical mess...
     PokingRay(){
-        t = 0;
-        f = 0;
+        t = +FLT_MAX;
+        f = NULL;
     }
 };
 
@@ -41,9 +41,10 @@ typedef std::vector< PTRTYPE > PointerVector;
   * might intersect the geometry defined within the same cell
   */
 class GridAccell{
-private:
-    /// Store all rays
+public:
+    /// Store all rays (TODO: put back to private....)
     std::vector<PokingRay> rays;
+private:
     /// Linear memory for volume Vol[x,y,z]
     std::vector<PointerVector> Vol;
     /// Grid sizes
@@ -108,6 +109,11 @@ public:
     /// we are able to test for intersections with triangles which are slightly behind
     /// the surface. The default value is not really zero, it gets converted to -Delta.
     void trace_ray(PokingRay& pray, float off=0);
+
+    /// This function scans through the PokingRay array and reset the correspondence information
+    /// and the distance information (used to compute a new correspondence)
+    void clearCorrespondences();
+
 };
 
 } // Namespace VCG
