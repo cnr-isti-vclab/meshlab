@@ -2,19 +2,18 @@
 #define VASEPLUGIN_H
 
 #include <common/interfaces.h> // meshlab stuff
-#include <common/meshmodel.h> // CMesh0
 #include <vasewidget.h> // vase widget GUI class
 #include "balloon.h" // all balloon logic in here
 
 using namespace vcg;
 
 // This plugin only defines one action
-static QAction act(QIcon(":/images/vase.png"),"Volume Aware Surface Extraction", NULL);
+//static QAction act(QIcon(":/images/vase.png"),"Volume Aware Surface Extraction", NULL);
 
-class Vase : public QObject, public MeshEditInterface, public MeshEditInterfaceFactory{
+class EditVasePlugin : public QObject, public MeshEditInterface {
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
-    Q_INTERFACES(MeshEditInterfaceFactory)
+//    Q_INTERFACES(MeshEditInterfaceFactory)
 
 private:
     // Instance of dialog window
@@ -22,7 +21,7 @@ private:
 
 public:
     //--- Dummy implementation of MeshEditInterface, passes all control to Widget
-    static const QString Info(){ return tr("VASE"); }
+    static QString Info(){ return tr("VASE"); }
     virtual bool StartEdit(MeshModel &m, GLArea* gla);
     virtual void EndEdit(MeshModel &, GLArea*){ delete gui; }
     virtual void Decorate(MeshModel& m, GLArea* gla){ gui->decorate(m,gla); }
@@ -30,11 +29,11 @@ public:
     virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea* );
     virtual void mouseReleaseEvent(QMouseEvent *, MeshModel &, GLArea* );
     //--- Dummy implementation of MeshEditInterfaceFactory, passes control to this MeshEditInterface
-    Vase(){};
-    virtual ~Vase(){}
-    virtual QList<QAction *> actions() const{ QList<QAction *> actionList; return actionList << &act; }
-    virtual MeshEditInterface* getMeshEditInterface(QAction* ){ return this; }
-    virtual QString getEditToolDescription(QAction *){  return this->Info(); }
+    EditVasePlugin(){};
+    virtual ~EditVasePlugin(){}
+//    virtual QList<QAction *> actions() const{ QList<QAction *> actionList; return actionList << &act; }
+//    virtual MeshEditInterface* getMeshEditInterface(QAction* ){ return this; }
+//    virtual QString getEditToolDescription(QAction *){  return this->Info(); }
 };
 
 #endif

@@ -1,5 +1,6 @@
 include (../../shared.pri)
 HEADERS += edit_vase.h
+HEADERS += edit_vase_factory.h
 # HEADERS += OLD.h
 # HEADERS += fieldinterpolator.h
 HEADERS += volume.h
@@ -10,6 +11,7 @@ HEADERS += balloon.h
 HEADERS += myheap.h
 
 SOURCES += edit_vase.cpp
+SOURCES += edit_vase_factory.cpp
 SOURCES += fieldinterpolator.cpp
 SOURCES += volume.cpp
 SOURCES += vasewidget.cpp
