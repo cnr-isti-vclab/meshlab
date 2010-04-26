@@ -11,10 +11,29 @@ namespace vcg{
 class Volume;
 
 /**
+  * Each ray is a triple of elements, the startpoint/direction
+  * of the basic ray, the value of the parameter T along
+  * the direction that caused an intersection with face f.
+  *
+  * If we have no intersection, then f=t=0.
+  */
+class PokingRay{
+public:
+    Ray3f    ray;
+    float      t;
+    CFaceO*    f;
+    // Looking forward to the next version of C++-Ox, I cannot stand writing this stupid stuff just because this language is a syntactical mess...
+    PokingRay(){
+        t = 0;
+        f = 0;
+    }
+};
+
+/**
   * Basic type of pointer for whole class, used to build a template like class
   * without all the syntactic overload of one
   */
-typedef Ray3f* PTRTYPE;
+typedef PokingRay* PTRTYPE;
 typedef std::vector< PTRTYPE > PointerVector;
 
 /**
@@ -24,8 +43,8 @@ typedef std::vector< PTRTYPE > PointerVector;
 class GridAccell{
 private:
     /// Store all rays
-    std::vector<Ray3f> rays;
-    /// Linear memory for volume
+    std::vector<PokingRay> rays;
+    /// Linear memory for volume Vol[x,y,z]
     std::vector<PointerVector> Vol;
     /// Grid sizes
     Point3i sz;
@@ -88,7 +107,7 @@ public:
     /// Before starting the marching we pull the ray back of the quantity "off", so that
     /// we are able to test for intersections with triangles which are slightly behind
     /// the surface. The default value is not really zero, it gets converted to -Delta.
-    void trace_ray(Ray3f& rayPtr, float off=0);
+    void trace_ray(PokingRay& pray, float off=0);
 };
 
 } // Namespace VCG

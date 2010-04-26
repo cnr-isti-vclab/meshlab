@@ -1,7 +1,7 @@
 include (../../shared.pri)
 HEADERS += edit_vase.h
 HEADERS += edit_vase_factory.h
-# HEADERS += OLD.h
+HEADERS += OLD.h
 # HEADERS += fieldinterpolator.h
 HEADERS += volume.h
 HEADERS += vasewidget.h

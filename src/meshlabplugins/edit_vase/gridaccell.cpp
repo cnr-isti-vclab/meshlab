@@ -18,7 +18,7 @@ void GridAccell::init( Volume& vol, CMeshO& pcloud ){
     // Convert Point+Normal into a ray and store it in GridAccell
     int i=0;
     for(CMeshO::VertexIterator vi=pcloud.vert.begin(); vi!=pcloud.vert.end(); ++vi, ++i)
-        rays[i] = Ray3f( (*vi).P(), (*vi).N().normalized() );
+        rays[i].ray = Ray3f( (*vi).P(), (*vi).N().normalized() );
 
     // Trace EVERY ray in the volume and hash the intersection
     for(int i=0; i<rays.size(); i++){
@@ -27,7 +27,12 @@ void GridAccell::init( Volume& vol, CMeshO& pcloud ){
         trace_ray( rays[i] );
     }
 }
-void GridAccell::trace_ray(Ray3f& ray, float off){
+void GridAccell::trace_ray(PokingRay& pray, float off){
+    // We want to go behind the pixel, you better give me a default of 0,
+    // a negative number, or a negative number very close to zero if you
+    // want to turn it off.
+    assert( off<=0 );
+
     // Point3i ps; pos2off( p, ps );
     // qDebug() << "Tracing: " << toString(p);
     // qDebug() << "Start offset " << toString(ps);
@@ -35,14 +40,14 @@ void GridAccell::trace_ray(Ray3f& ray, float off){
 #if 1
     // We want to test intersections "off" distance behind the ray as well
     float rayT = 1e-20;
-    Point3f p = ray.P((off==0)?-this->delta:off);
-    Point3f d = ray.Direction();
+    Point3f p = pray.ray.P((off==0)?-this->delta:off);
+    Point3f d = pray.ray.Direction();
 #else
     // Create a ray copy and make a microscopic step in
     // direction d to avoid zero intersect (similar PBRT)
     float rayT = 1e-20;
-    Point3f p = ray.P(rayT);
-    Point3f d = ray.Direction();
+    Point3f p = pray.ray.P(rayT);
+    Point3f d = pray.ray.Direction();
 #endif
 
     // Set up 3D DDA for current ray
@@ -72,7 +77,7 @@ void GridAccell::trace_ray(Ray3f& ray, float off){
     // Walk ray through voxel grid
     for (;;){
         // Store pointer to the ray in the structure
-        Val( Pos[0], Pos[1], Pos[2] ).push_back( &ray );
+        Val( Pos[0], Pos[1], Pos[2] ).push_back( &pray );
         // Advance to next voxel
         int bits = ((NextCrossingT[0] < NextCrossingT[1]) << 2) +
                    ((NextCrossingT[0] < NextCrossingT[2]) << 1) +

@@ -56,36 +56,13 @@ void Balloon::updateViewField(){
     finterp.Init( &surf, COTANGENT );
     // finterp.Init( &surf, COMBINATORIAL );
 
-    //--- DEBUG: Create a dummy QUALITY field Q() on mesh vertices and add constraints
-    #if false
-        rm |= SURF_VCOLOR;
-        float OMEGA = 100;
-        tri::UpdateQuality<CMeshO>::VertexConstant(surf, 0);
-        for( int i=0; i<surf.vert.size(); i++ ){
-            CVertexO& v = surf.vert[i];
-            float f = v.P()[1];
-            if( fabs(f)>.9 ){
-                v.Q() = f;
-                // rfinterp.AddConstraint( i, OMEGA, f );
-                //qDebug() << "active constraints at vertex " << i << " val: " << f << endl;
-            }
-        }
-        // Map vertex quality to a color
-        Histogramf H;
-        tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
-        tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
-        qDebug() << H.Percentile(1.0f);
-        return;
-    #endif
-
     // Shared data
-    enum INITMODE {TESTINTERP, FACEINTERSECTIONS, BOXINTERSECTIONS} mode;
+    enum INITMODE {FACEINTERSECTIONS, BIFACEINTERSECTIONS, BOXINTERSECTIONS} mode;
     mode = FACEINTERSECTIONS;
     const float ONETHIRD = 1.0f/3.0f;
     float t,u,v; // Ray-Triangle intersection parameters
     Point3f fcenter;
     Point3i off;
-
 
     // Uses the face centroid as a hash key in the accellGrid to determine which
     // rays might intersect the current face.
@@ -116,11 +93,11 @@ void Balloon::updateViewField(){
             Point3f fcenter = f.P(0) + f.P(1) + f.P(2);
             fcenter = myscale( fcenter, ONETHIRD );
             gridAccell.pos2off( fcenter, off );
-            PointerVector& rays = gridAccell.Val(off[0], off[1], off[2]);
+            PointerVector& prays = gridAccell.Val(off[0], off[1], off[2]);
             // Each intersecting ray gives a contribution on the face to each of the
             // face vertices according to the barycentric weights
-            for(unsigned int i=0; i<rays.size(); i++)
-                if( vcg::IntersectionRayTriangle<float>(*rays[i], f.P(0), f.P(1), f.P(2), t, u, v) ){
+            for(unsigned int i=0; i<prays.size(); i++)
+                if( vcg::IntersectionRayTriangle<float>(prays[i]->ray, f.P(0), f.P(1), f.P(2), t, u, v) ){
                     // Color the faces, if more than one, take average
                     tot_w[ tri::Index(surf,f) ]++;
                     f.Q() += t; // normalize with tot_w after
@@ -140,6 +117,25 @@ void Balloon::updateViewField(){
         //--- Transfer the average distance stored in face quality to a color
         //    and do it only for the selection (true)
         tri::UpdateColor<CMeshO>::FaceQualityRamp(surf, true);
+    }
+    // This is the variation that adds to add constraints on both sides of the isosurface
+    // to cope with noise but especially to guarantee convergence of the surface. If we go
+    // through a sample, a negative force field will be generated that will push the
+    // isosurface back close to the sample.
+    else if( mode == BIFACEINTERSECTIONS ){
+        this->rm ^= SURF_VCOLOR;
+        this->rm |= SURF_FCOLOR;
+        surf.face.EnableColor();
+        surf.face.EnableQuality();
+        tri::UpdateQuality<CMeshO>::FaceConstant(surf, 0);
+        std::vector<float> tot_w( surf.fn, 0 );
+
+        // In this first phase, we scan through faces and we update the information
+        // contained in the rays.
+
+        for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
+
+        }
     }
 }
 void Balloon::interpolateField(){
