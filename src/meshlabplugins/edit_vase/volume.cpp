@@ -1,5 +1,6 @@
 #include "volume.h"
 #include "myheap.h" // only required by source
+#include "../filter_plymc/plymc.h" // remove bad triangles from marching cubes
 
 using namespace vcg;
 /// the array is used to scan a single voxel that contains the triangle in the initialization
@@ -232,6 +233,16 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
         (*vi).P()[1] = ((*vi).P()[1]-padsize) * delta + bbox.min[1];
         (*vi).P()[2] = ((*vi).P()[2]-padsize) * delta + bbox.min[2];
     }
+
+
+    //--- Remove slivers which might crash the whole system (reuses the one defined by plymc)
+    // Paolo: il parametro perc va dato in funzione della grandezza del voxel se gli dai come
+    // perc: perc=voxel.side/4 sei safe
+    mesh.vert.EnableMark();
+    mesh.vert.EnableVFAdjacency();
+    mesh.face.EnableVFAdjacency();
+    tri::UpdateTopology<CMeshO>::VertexFace( mesh );
+    tri::Simplify( mesh, getDelta()/4 );
 
     // Update surface normals
     vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized( mesh );
