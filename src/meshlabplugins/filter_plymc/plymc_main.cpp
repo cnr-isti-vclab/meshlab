@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
 	  //        case 'B' :	p.SafeBorder =atoi(argv[i]+2);printf("Setting SafeBorder among blocks to %i*%i (default 1)\n",p.SafeBorder,Volume<Voxelf>::BLOCKSIDE());break;
 	case 'p' :	p.VertSplatFlag =true; printf("Enabling VertexSplatting instead of face rasterization\n");break;
 	case 'd' : p.VerboseLevel=atoi(argv[i]+2);printf("Enabling VerboseLevel= %i )\n",p.VerboseLevel);break;
-	case 'D' : p.SliceNum=atoi(argv[i]+2);printf("Enabling Debug Volume saving of %i slices (VerboseLevel=1)\n",p.SliceNum);break;
+  case 'D' : p.VerboseLevel=1; p.SliceNum=atoi(argv[i]+2);printf("Enabling Debug Volume saving of %i slices (VerboseLevel=1)\n",p.SliceNum);break;
 	case 'M' :	p.SimplificationFlag =true; printf("Enabling PostReconstruction simplification\n"); break;
 		default : {printf("Error unable to parse option '%s'\n",argv[i]); exit(0);}
     }

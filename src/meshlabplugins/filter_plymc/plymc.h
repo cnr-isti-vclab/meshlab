@@ -174,60 +174,73 @@ namespace vcg {
 
 /// PLYMC Methods
 
-void InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
+bool InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
 {
-    tri::io::Importer<SMesh>::Open(m,filename);
+    typename SMesh::VertexIterator vi;
+    int loadmask;
+    int ret = tri::io::Importer<SMesh>::Open(m,filename,loadmask);
+    if(ret)
+    {
+      printf("Error: unabe to open mesh '%s'",filename);
+      return false;
+    }
 
-    if(p.CleaningFlag){
-        int dup = tri::Clean<SMesh>::RemoveDuplicateVertex(m);
-        int unref =  tri::Clean<SMesh>::RemoveUnreferencedVertex(m);
-        printf("Removed %i duplicates and %i unref",dup,unref);
+    if(p.VertSplatFlag)
+    {
+      if(!(loadmask & tri::io::Mask::IOM_VERTNORMAL))
+      {
+        printf("Error, pointset MUST have normals");
+        exit(-1);
+      }
+      else printf("Ok Pointset has normals\n");
+      for(vi=m.vert.begin(); vi!=m.vert.end();++vi)
+        if(math::Abs(SquaredNorm((*vi).N())-1.0)>0.0001)
+        {
+        printf("Error: mesh has not per vertex normalized normals\n");
+        return false;
+      }
+
+      if(!(loadmask & tri::io::Mask::IOM_VERTQUALITY))
+        tri::UpdateQuality<SMesh>::VertexConstant(m,0);
+      tri::UpdateNormals<SMesh>::PerVertexMatrix(m,Tr);
+      //if(!(loadmask & tri::io::Mask::IOM_VERTCOLOR))
+      //  saveMask &= ~tri::io::Mask::IOM_VERTCOLOR;
+    }
+    else // processing for triangle meshes
+    {
+      if(p.CleaningFlag){
+          int dup = tri::Clean<SMesh>::RemoveDuplicateVertex(m);
+          int unref =  tri::Clean<SMesh>::RemoveUnreferencedVertex(m);
+          printf("Removed %i duplicates and %i unref",dup,unref);
+      }
+
+      tri::UpdateNormals<SMesh>::PerVertexNormalizedPerFaceNormalized(m);
+      if(p.GeodesicQualityFlag) {
+          tri::UpdateTopology<SMesh>::VertexFace(m);
+          tri::UpdateFlags<SMesh>::FaceBorderFromVF(m);
+          tri::UpdateQuality<SMesh>::VertexGeodesicFromBorder(m);
+        }
     }
 
     tri::UpdatePosition<SMesh>::Matrix(m,Tr,false);
     tri::UpdateBounding<SMesh>::Box(m);
     printf("Init Mesh %s (%ivn,%ifn)\n",filename,m.vn,m.fn);
 
-
-    tri::UpdateNormals<SMesh>::PerVertexNormalizedPerFaceNormalized(m);
-    if(p.GeodesicQualityFlag) {
-        tri::UpdateTopology<SMesh>::VertexFace(m);
-        tri::UpdateFlags<SMesh>::FaceBorderFromVF(m);
-        tri::UpdateQuality<SMesh>::VertexGeodesicFromBorder(m);
-    }
-
-    typename SMesh::VertexIterator vi;
-
     for(vi=m.vert.begin(); vi!=m.vert.end();++vi)
         VV.Interize((*vi).P());
+    return true;
+  }
 
-#if 0
+// This function add a mesh (or a point cloud to the volume)
+// the point cloud MUST have normalized vertex normals.
 
-        /// Point cloud inits
-    {
-            if(!(loadmask & tri::io::Mask::IOM_VERTNORMAL))
-                {
-                    printf("Error, pointset MUST have normals");
-                    exit(-1);
-                }
-            else printf("Ok Pointset has normals\n");
-
-            if(!(loadmask & tri::io::Mask::IOM_VERTQUALITY))
-                tri::UpdateQuality<SMesh>::VertexConstant(m,0);
-            tri::UpdateNormals<SMesh>::PerVertexMatrix(m,Tr);
-        }
-
-    if(!(loadmask & tri::io::Mask::IOM_VERTCOLOR))
-            saveMask &= ~tri::io::Mask::IOM_VERTCOLOR;
-#endif
-}
-
-// Th
 bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w )
 {
     typename SMesh::VertexIterator vi;
     typename SMesh::FaceIterator fi;
     if(!m.bbox.Collide(VV.SubBoxSafe)) return false;
+    size_t found =meshname.find_last_of("/\\");
+    std::string shortname = meshname.substr(found+1);
 
     Volume <Voxelf> B;
     B.Init(VV);
@@ -279,23 +292,23 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w )
 
     int vstp=0;
     if(p.VerboseLevel>0) {
-        B.SlicedPPM(meshname.c_str(),SFormat("%02i",vstp),p.SliceNum	);
-        B.SlicedPPMQ(meshname.c_str(),SFormat("%02i",vstp),p.SliceNum	);
-        vstp++;
+      B.SlicedPPM(shortname.c_str(),std::string(SFormat("%02i",vstp)).c_str(),p.SliceNum	);
+      B.SlicedPPMQ(shortname.c_str(),std::string(SFormat("%02i",vstp)).c_str(),p.SliceNum	);
+      vstp++;
     }
     for(int i=0;i<p.WideNum;++i) {
     B.Expand(math::ToRad(p.ExpAngleDeg));
-        if(p.VerboseLevel>1) B.SlicedPPM(meshname.c_str(),SFormat("%02ie",vstp++),p.SliceNum	);
+        if(p.VerboseLevel>1) B.SlicedPPM(shortname.c_str(),SFormat("%02ie",vstp++),p.SliceNum	);
         B.Refill(p.FillThr);
-        if(p.VerboseLevel>1) B.SlicedPPM(meshname.c_str(),SFormat("%02if",vstp++),p.SliceNum	);
+        if(p.VerboseLevel>1) B.SlicedPPM(shortname.c_str(),SFormat("%02if",vstp++),p.SliceNum	);
         if(p.IntraSmoothFlag)
         {
             Volume <Voxelf> SM;
             SM.Init(VV);
             SM.CopySmooth(B,1,p.QualitySmoothAbs);
             B=SM;
-            if(p.VerboseLevel>1) B.SlicedPPM(meshname.c_str(),SFormat("%02is",vstp++),p.SliceNum	);
-//			if(VerboseLevel>1) B.SlicedPPMQ(meshname,SFormat("%02is",vstp),SliceNum	);
+            if(p.VerboseLevel>1) B.SlicedPPM(shortname.c_str(),SFormat("%02is",vstp++),p.SliceNum	);
+//			if(VerboseLevel>1) B.SlicedPPMQ(shortname,SFormat("%02is",vstp),SliceNum	);
         }
     }
     if(p.SmoothNum>0)
@@ -304,14 +317,14 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w )
             SM.Init(VV);
             SM.CopySmooth(B,1,p.QualitySmoothAbs);
             B=SM;
-            if(p.VerboseLevel>1) B.SlicedPPM(meshname.c_str(),SFormat("%02isf",vstp++),p.SliceNum	);
+            if(p.VerboseLevel>1) B.SlicedPPM(shortname.c_str(),SFormat("%02isf",vstp++),p.SliceNum	);
         }
     VV.Merge(B);
-    if(p.VerboseLevel>0) VV.SlicedPPMQ("merge_",meshname.c_str(),p.SliceNum	);
+    if(p.VerboseLevel>0) VV.SlicedPPMQ(std::string("merge_").c_str(),shortname.c_str(),p.SliceNum	);
     return true;
 }
 
-void Process()
+void Process(vcg::CallBackPos *cb=0)
 {
     printf("bbox scanning...\n"); fflush(stdout);
     Matrix44f Id; Id.SetIdentity();
@@ -385,7 +398,12 @@ void Process()
 		    SMesh *sm;
 		    if(!MP.Find(i,sm) )
 		    {
-			InitMesh(*sm,MP.MeshName(i).c_str(),MP.Tr(i));
+          res = InitMesh(*sm,MP.MeshName(i).c_str(),MP.Tr(i));
+          if(!res)
+          {
+            printf("Failed Init of mesh %s",MP.MeshName(i).c_str());
+            return;
+          }
 		    }
 		    res |= AddMeshToVolumeM(*sm, MP.MeshName(i),MP.W(i));
 		  }
@@ -398,8 +416,8 @@ void Process()
 		    VV.Offset(p.OffsetThr);
 		    if (p.VerboseLevel>0)
 		    {
-			VV.SlicedPPM("finaloff","__",p.SliceNum);
-			VV.SlicedPPMQ("finaloff","__",p.SliceNum);
+          VV.SlicedPPM("finaloff","__",p.SliceNum);
+          VV.SlicedPPMQ("finaloff","__",p.SliceNum);
 		    }
 		}
 		//if(p.VerboseLevel>1) VV.SlicedPPM(filename.c_str(),SFormat("_%02im",i),p.SliceNum	);

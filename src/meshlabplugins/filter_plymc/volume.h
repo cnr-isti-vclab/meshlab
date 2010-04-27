@@ -585,7 +585,8 @@ void DeInterize( Point3x & vert ) const	// OK
 bool SplatVert( const Point3x & v0, double quality, const Point3x & nn, Color4b c)
 {
 	Box3i ibox;
-	
+
+  assert(math::Abs(SquaredNorm(nn) - 1.0) < 0.0001); // Just a safety check that the vertex normals are NORMALIZED!
 	ibox.min=Point3i(floor(v0[0]),floor(v0[1]),floor(v0[2]));
 	ibox.max=Point3i( ceil(v0[0]), ceil(v0[1]), ceil(v0[2]));
 	ibox.Intersect(SubPartSafe);
@@ -1092,7 +1093,7 @@ int  Normalize(int thr, float maxdistance=std::numeric_limits<float>::max() )
 
 
 // Salva 
-void SlicedPPMQ( const char * filename,const char *tag,int SliceNum=1)
+void SlicedPPMQ( const char * filename,const char *tag,int SliceNum)
 	{
         std::string basename=filename;
         std::string name;
@@ -1167,6 +1168,7 @@ void SlicedPPM( const char * filename,const char *tag,int SliceNum=1)
 		if(iz>=SubPartSafe.min[2] && iz<SubPartSafe.max[2])
 		{
 			name=SFormat("%s_%03i_%s.ppm",filename,iz,tag);
+      printf("Saving slice '%s'",name.c_str());
 			FILE * fp = fopen(name.c_str(),"wb");
 			if(!fp) return;
 			fprintf(fp,

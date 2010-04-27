@@ -47,7 +47,7 @@ PlyMCPlugin::PlyMCPlugin()
  QString PlyMCPlugin::filterName(FilterIDType filterId) const 
 {
   switch(filterId) {
-        case FP_PLYMC :  return QString("VCG Reconstruction");
+  case FP_PLYMC :  return QString("Surface Reconstruction: VCG");
 		default : assert(0); 
 	}
 }
@@ -60,7 +60,7 @@ PlyMCPlugin::PlyMCPlugin()
         case FP_PLYMC :  return QString(
               "The surface reconstrction algorithm that have been used for a long time inside the ISTI-Visual Computer Lab."
               "It is mostly a variant of the Curless et al. e.g. a volumetric approach with some original weighting schemes,"
-              "a different expansion rule, and another approach to hole filling through volume dilation.");
+              "a different expansion rule, and another approach to hole filling through volume dilation/relaxations.");
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -97,14 +97,14 @@ void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
           parlst.addParam(   new RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
           parlst.addParam(    new RichInt("smoothNum",1,"Volume Laplacian iter","the level of recursive splitting of the volume"));
           parlst.addParam(    new RichInt("wideNum",3,"Widening","the level of recursive splitting of the volume"));
-          parlst.addParam   (new RichBool("mergeColor",true,"Merge Color","the level of recursive splitting of the volume"));
+          parlst.addParam   (new RichBool("mergeColor",true,"Vertex Splatting","This option use a different way to build up the volume, instead of using "));
         break;
      default: break; // do not add any parameter for the other filters
   }
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
     srand(time(NULL));
 
@@ -130,9 +130,10 @@ bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParamet
         {
             SMesh sm;
             mm->updateDataMask(MeshModel::MM_FACEQUALITY);
-            tri::Append<SMesh,CMeshO>::Mesh(sm, mm->cm);
+            tri::Append<SMesh,CMeshO>::Mesh(sm, mm->cm,false,p.VertSplatFlag); // note the last parameter of the append to prevent removal of unreferenced vertices...
             tri::UpdatePosition<SMesh>::Matrix(sm, mm->cm.Tr,true);
             tri::UpdateBounding<SMesh>::Box(sm);
+            tri::UpdateNormals<SMesh>::NormalizeVertex(sm);
             //QString mshTmpPath=QDir::tempPath()+QString("/")+QString(mm->shortName())+QString(".vmi");
             QString mshTmpPath=QString("__TMP")+QString(mm->shortName())+QString(".vmi");
             qDebug("Saving tmp file %s",qPrintable(mshTmpPath));
@@ -146,7 +147,7 @@ bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParamet
         }
     }
 
-    pmc.Process();
+    pmc.Process(cb);
 
     if(par.getBool("openResult"))
     {
@@ -158,9 +159,9 @@ bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParamet
             tri::UpdateNormals<CMeshO>::PerVertexPerFace(mp->cm);
         }
     }
-//
-//    for(int i=0;i<pmc.MP.size();++i)
-//            QFile::remove(pmc.MP.MeshName(i).c_str());
+
+    for(int i=0;i<pmc.MP.size();++i)
+            QFile::remove(pmc.MP.MeshName(i).c_str());
 
    return true;
 }
