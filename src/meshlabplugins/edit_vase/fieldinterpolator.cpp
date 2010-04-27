@@ -156,10 +156,10 @@ void FieldInterpolator::Solve(){
     llt.solveInPlace(*xb);
     //-- Copy the results back in Q() field of surface
     // cout << "X: ";
-    bool hasnan = false;
+    // bool hasnan = false;
     for(unsigned int vi=0; vi<mesh->vert.size(); vi++){
         (mesh->vert[vi]).Q() = (*xb)[vi];
-        hasnan = hasnan || math::IsNAN( (*xb)[vi] );
+        // hasnan = hasnan || math::IsNAN( (*xb)[vi] );
         // cout << (*xb)[vi] << " ";
     }
     // cout << endl;

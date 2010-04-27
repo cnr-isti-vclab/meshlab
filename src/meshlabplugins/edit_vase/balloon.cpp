@@ -1,7 +1,7 @@
 #include "balloon.h"
 #include "float.h"
 #include "math.h"
-// #include "../filter_plymc/plymc.h"
+#include "../filter_plymc/plymc.h"
 #include "vcg/complex/trimesh/update/curvature.h"
 
 using namespace vcg;
@@ -338,6 +338,17 @@ void Balloon::evolveBalloon(){
 
     //--- Estrai isosurface
     vol.isosurface( surf, 0 );
+
+    //--- Remove slivers which might crash the whole system (reuses the one defined by plymc)
+    // Paolo: il parametro perc va dato in funzione della grandezza del voxel se gli dai come
+    // perc: perc=voxel.side/4 sei safe
+    surf.vert.EnableVFAdjacency();
+    surf.face.EnableVFAdjacency();
+    surf.face.EnableFFAdjacency();
+    vcg::tri::UpdateTopology<CMeshO>::VertexFace( surf );
+    vcg::tri::UpdateTopology<CMeshO>::FaceFace( surf );
+    tri::Simplify( surf, vol.getDelta()/4 );
+
     //--- Clear band for next isosurface, clearing the corresponding computation field
     for(unsigned int i=0; i<vol.band.size(); i++){
         Point3i& voxi = vol.band[i];

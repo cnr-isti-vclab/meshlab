@@ -8,7 +8,7 @@
 namespace vcg{
 
 // Forward declaration
-class Volume;
+class MyVolume;
 
 /**
   * Each ray is a triple of elements, the startpoint/direction
@@ -91,7 +91,7 @@ public:
     /// Does not allocate memory, refer to Init
     GridAccell(){ sz=Point3i(0,0,0); }
     /// Allocates memory for a grid of the given size
-    void init( Volume& v, CMeshO& pcloud );
+    void init( MyVolume& v, CMeshO& pcloud );
     /// Accessor for memory grid representation
     inline PointerVector& Val( const int x, const int y, const int z ){
         return Vol[x+y*sz[0]+z*sz[0]*sz[1]];

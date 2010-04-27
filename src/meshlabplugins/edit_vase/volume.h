@@ -58,7 +58,7 @@ class MyVoxel{
   * structured.
   *
   */
-class Volume{
+class MyVolume{
     private:
         // Internal uniform grid representation
         SimpleVolume<MyVoxel> grid;
@@ -85,7 +85,7 @@ class Volume{
 
         // Constructors / Factories
         /// Empty, refer to Init(...)
-        Volume(){ sz=Point3i(0,0,0); }
+        MyVolume(){ sz=Point3i(0,0,0); }
         /// Initialize the volume
         void init( int gridsize, int padsize, vcg::Box3f bbox );
         /// Retrieves a 2D (image) slice from the volume

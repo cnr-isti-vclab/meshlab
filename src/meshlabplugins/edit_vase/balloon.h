@@ -31,7 +31,7 @@ public:
     /// Pointer to the underlying point cloud
     CMeshO& cloud;
     /// Volumetric representation
-    Volume vol;
+    MyVolume vol;
     /// Surface representation
     CMeshO surf;
     /// Accellerator for ray-surface intersection

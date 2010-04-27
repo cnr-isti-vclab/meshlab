@@ -16,7 +16,7 @@ const Point3i off26[26] = { Point3i(-1, -1, -1), Point3i(-1,  0, -1), Point3i(-1
                                    Point3i( 0, -1,  1), Point3i( 0,  0,  1), Point3i( 0, +1,  1),
                                    Point3i( 1, -1,  1), Point3i( 1,  0,  1), Point3i( 1, +1,  1) };
 
-void Volume::init( int gridsize, int padsize, vcg::Box3f bbox ){
+void MyVolume::init( int gridsize, int padsize, vcg::Box3f bbox ){
     // Extract length of longest edge
     int maxdimi = bbox.MaxDim();
     Point3f dim = bbox.Dim();
@@ -55,7 +55,7 @@ void Volume::init( int gridsize, int padsize, vcg::Box3f bbox ){
     slices_2D[2] = QPixmap( dimx,dimy );
 }
 
-QPixmap& Volume::getSlice(int dim, int slice){
+QPixmap& MyVolume::getSlice(int dim, int slice){
     assert( dim>=0 && dim<3 );
 
     float max_val = 0;
@@ -106,7 +106,7 @@ QPixmap& Volume::getSlice(int dim, int slice){
     return slices_2D[dim];
 }
 
-void Volume::initField( const vcg::Box3f&  inbbox ){
+void MyVolume::initField( const vcg::Box3f&  inbbox ){
     // Triangulate the bounding box
     if( true ){
         qDebug() << "constructing EDF of box: [" << vcg::toString(inbbox.min) << " " << vcg::toString(inbbox.max) << "]";
@@ -185,7 +185,7 @@ void Volume::initField( const vcg::Box3f&  inbbox ){
                 }
     }
 }
-void Volume::initField( CMeshO& surface, GridAccell& accell ){
+void MyVolume::initField( CMeshO& surface, GridAccell& accell ){
     //--- Extract a new iso-surface, which linearly approximates surface in a marching cube-sense
     isosurface( surface, 0 );
 
@@ -210,7 +210,7 @@ void Volume::initField( CMeshO& surface, GridAccell& accell ){
     updateSurfaceCorrespondence( surface, accell, DELTA );
 }
 
-void Volume::isosurface( CMeshO& mesh, float offset ){
+void MyVolume::isosurface( CMeshO& mesh, float offset ){
     // Run marching cubes on regular lattice
     typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<MyVoxel> >	MyWalker;
     typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
@@ -245,7 +245,7 @@ void Volume::isosurface( CMeshO& mesh, float offset ){
 }
 
 /// gridaccell is needed only to retrieve the correct face=>voxel index
-void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, float DELTA ){
+void MyVolume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, float DELTA ){
     // The capacity of the band is estiamted to be enough to reach DELTA away
     MinHeap<float> pq( band.capacity() );
 
@@ -359,7 +359,7 @@ void Volume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell, 
 
 }
 
-void Volume::render(){
+void MyVolume::render(){
     if( !this->isInit() ) return;
 
     qDebug() << "Volume::render()";
@@ -381,7 +381,7 @@ void Volume::render(){
             }
     glEnable(GL_LIGHTING);
 }
-QString Volume::toString(int dim, int a){
+QString MyVolume::toString(int dim, int a){
     assert(dim==2); // code below only slices along z
 
     QString ret;
