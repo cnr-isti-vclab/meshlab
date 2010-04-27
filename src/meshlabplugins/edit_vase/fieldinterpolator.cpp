@@ -136,6 +136,8 @@ void FieldInterpolator::AddConstraint( unsigned int vidx, FieldType omega, Field
 void FieldInterpolator::Solve(){
     
     //--- DEBUG: Damp the matrix on file, so that matlab can read it and compute solution
+    // You need to remove the first few lines from the matrix.txt before being able to import
+    // the matrix successfully!!
     #if 0
         ofstream myfile;
         myfile.open ("/Users/ata2/workspace/workspace_vase/cholmod_verify_posdefi/matrix.txt");
@@ -154,12 +156,13 @@ void FieldInterpolator::Solve(){
     llt.solveInPlace(*xb);
     //-- Copy the results back in Q() field of surface
     // cout << "X: ";
+    bool hasnan = false;
     for(unsigned int vi=0; vi<mesh->vert.size(); vi++){
         (mesh->vert[vi]).Q() = (*xb)[vi];
+        hasnan = hasnan || math::IsNAN( (*xb)[vi] );
         // cout << (*xb)[vi] << " ";
     }
     // cout << endl;
-
 
     //--- DEBUG: Read the matlab computed solution from file
     #if 0

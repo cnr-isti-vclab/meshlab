@@ -33,8 +33,8 @@ public:
     }
     /// Free the memory stored for sparse matrixes
     ~FieldInterpolator(){
-        // if( A_dyn!=0 ) delete A_dyn;
-        // if( xb!=0 ) delete xb;
+        if( A_dyn!=0 ) delete A_dyn;
+        if( xb!=0 ) delete xb;
     }
     /// Creates the sparse laplacian matrixes used by the solver using the specified on the domain of mesh
     void Init(CMeshO* mesh, LAPLACIAN laptype=COMBINATORIAL);

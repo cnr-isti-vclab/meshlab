@@ -1,8 +1,9 @@
 #include "balloon.h"
 #include "float.h"
 #include "math.h"
-// cannot put this in headers, or it will cause trouble
+// #include "../filter_plymc/plymc.h"
 #include "vcg/complex/trimesh/update/curvature.h"
+
 using namespace vcg;
 
 //---------------------------------------------------------------------------------------//
@@ -174,6 +175,7 @@ void Balloon::updateViewField(){
             Ray3f& ray = gridAccell.rays[i].ray;
             CFaceO& f = *(gridAccell.rays[i].f);
             float t = gridAccell.rays[i].t;
+            assert( !math::IsNAN(t) );
 
             // Color the faces, if more than one, take average
             tot_w[ tri::Index(surf,f) ]++;
