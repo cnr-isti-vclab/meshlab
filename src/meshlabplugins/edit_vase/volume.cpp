@@ -234,7 +234,6 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
         (*vi).P()[2] = ((*vi).P()[2]-padsize) * delta + bbox.min[2];
     }
 
-
     //--- Remove slivers which might crash the whole system (reuses the one defined by plymc)
     // Paolo: il parametro perc va dato in funzione della grandezza del voxel se gli dai come
     // perc: perc=voxel.side/4 sei safe
@@ -243,16 +242,16 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
     mesh.face.EnableVFAdjacency();
     tri::UpdateTopology<CMeshO>::VertexFace( mesh );
     tri::Simplify( mesh, getDelta()/4 );
+    // tri::Simplify( mesh, getDelta()/16 );
 
-    // Update surface normals
-    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized( mesh );
-    vcg::tri::UpdateFlags<CMeshO>::FaceProjection(mesh); // needed to have more robust face distance tests
+    //--- The simplify operation removed some vertices
+    tri::Allocator<CMeshO>::CompactVertexVector( mesh );
+    tri::Allocator<CMeshO>::CompactFaceVector( mesh );
 
-    // DEBUG: Update bounding box and print out center
-    // vcg::tri::UpdateBounding<CMeshO>::Box(mesh);
-    // Check whether we are at right position
-    // Point3f center = mesh.bbox.Center();
-    // qDebug() << "Isosurface center: " << center[0] << " " << center[1] << " " << center[2] << endl;
+    //--- Update surface normals
+    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized( mesh );
+    //--- Face orientation, needed to have more robust face distance tests
+    tri::UpdateFlags<CMeshO>::FaceProjection(mesh);
 }
 
 /// gridaccell is needed only to retrieve the correct face=>voxel index

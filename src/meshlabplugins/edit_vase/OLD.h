@@ -67,3 +67,21 @@ vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 nearestF =  unifGridFace.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
 
 
+
+// ------------- CLEANING -------------
+if(par.getBool("AutoClean"))
+{
+    int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
+    if(nullFaces) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d null faces", nullFaces);
+    int deldupvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+        if(deldupvert) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);
+
+    int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+    if(delvert) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
+    m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+    tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+    tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+}
+
+tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+tri::UpdateBounding<CMeshO>::Box(m.cm);
