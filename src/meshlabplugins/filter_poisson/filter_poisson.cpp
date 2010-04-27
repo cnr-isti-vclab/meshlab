@@ -70,7 +70,7 @@ PoissonPlugin::PoissonPlugin()
  QString PoissonPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_POISSON_RECON :  return QString("Poisson Reconstruction"); 
+  case FP_POISSON_RECON :  return QString("Surface Reconstruction: Poisson");
 		default : assert(0); 
 	}
 	return QString("Error: Unknown Filter"); 
