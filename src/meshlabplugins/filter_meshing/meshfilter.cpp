@@ -395,9 +395,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
     case FP_CENTER:
 			{
 				Box3f &bb=m.cm.bbox;
-				parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.DimX(),5.0*bb.DimX(),"X Axis","Scaling"));
-				parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.DimY(),5.0*bb.DimY(),"Y Axis","Scaling"));
-				parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.DimZ(),5.0*bb.DimZ(),"Z Axis","Scaling"));
+        parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","Absolute translation amount along the X axis"));
+        parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Absolute translation amount along the Y axis"));
+        parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Absolute translation amount along the Z axis"));
 				parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
 			}
 			break;
