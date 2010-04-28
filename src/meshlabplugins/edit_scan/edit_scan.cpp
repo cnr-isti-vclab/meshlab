@@ -1,7 +1,7 @@
 #include "edit_scan.h"
 #include "wrap/gui/trackball.h"
 #include "wrap/qt/trackball.h" //QT2VCG trackball function
-#include "wrap/io_trimesh/export_obj.h"
+#include "wrap/qt/to_string.h" //QT2VCG trackball function
 
 Point2f myGluProject( Point3f p ){
     // retrieve matrixes from the pipeline
@@ -33,35 +33,7 @@ Point3f myGluUnProject( Point2f p, float z ){
     Point3f retf( q[0], q[1], q[2] );
     return retf;
 }
-QString toString( const Point4f& p ){
-    QString s;
-    s.sprintf("%f %f %f %f", p[0], p[1], p[2], p[3]);
-    return s;
-}
-QString toString( const Point3f& p ){
-    QString s;
-    s.sprintf("%f %f %f", p[0], p[1], p[2]);
-    return s;
-}
-QString toString( const Point2f& p ){
-    QString s;
-    s.sprintf("%f %f", p[0], p[1]);
-    return s;
-}
-QString toString( const Point2i& p ){
-    QString s;
-    s.sprintf("%d %d", p[0], p[1]);
-    return s;
-}
-QString toString(Matrix44f& m){
-    QString mat;
-    for(int i=0; i<3; i++){
-        mat.append( toString( m.GetRow4(i) ) );
-        mat.append("\n");
-    }
-    return mat;
-}
-CVertexO dummy; // dummy for vertex insertion
+
 double randn(){
     static double N=100;
     return (rand() % ((int)N)) / N -.5;
@@ -121,36 +93,15 @@ void VirtualScan::laser_parameter_updated(){
     gla->update();
 }
 void VirtualScan::EndEdit(MeshModel&, GLArea* ){
-    //--- Threee different attempts to save the cloud in the layer.
-    // This simply does not work... see the bug-report: http://sourceforge.net/tracker/?func=detail&aid=2992139&group_id=149444&atid=774731
-    // md->addNewMesh("Scan cloud", cloud);
-    // gla->meshDoc.addNewMesh("test");
-    // md->addNewMesh("test");
-    // Since I cannot use a layer inside an edit, take a look at VirtualScan:save_requested
 
     delete cloud;
     delete widget;
 }
 
 void VirtualScan::save_requested(){
-    // Setup a dialog
-    QString mesh_filename = md->mm()->fullName();
-    mesh_filename.append("_scan.obj");
-    QFileDialog saveDialog(gla,tr("Save scanned mesh"), mesh_filename);
-    saveDialog.setAcceptMode(QFileDialog::AcceptSave);
-    // saveDialog.setNameFilters(filters);
-
-    // Execute it and retrieve filename
-    int retval= saveDialog.exec();
-    QString fileName = saveDialog.selectedFiles().first();
-    if ( fileName.isEmpty() || (retval==QDialog::Rejected) )
-        return;
-
-    // Save cloud on file
-    int mask = vcg::tri::io::Mask::IOM_VERTNORMAL; // Position is saved regardless
-    int err = tri::io::ExporterOBJ<CMeshO>::Save(cloud->cm, fileName.toAscii(), mask);
-    if( err != 0 )
-        qDebug() << "An error occured while trying to save the cloud!";
+    md->addNewMesh("scan",cloud,false);
+    //--- Create a new model to store the scan cloud
+    cloud = new MeshModel("Scan cloud");
 }
 
 // This is called only when mouse is pressed at first during a drag or a click is received
@@ -185,7 +136,8 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
         cloud->glw.SetHintParamf(GLW::HNPPointSize,SCANPOINTSIZE);
         cloud->Render(GLW::DMPoints, GLW::CMPerMesh, GLW::TMNone);
     glEnable(GL_LIGHTING);
-
+    if(widget->getDrawLineFlag())
+    {
     //--- Shows the view directions of the scanned samples
     // The "decorate plugin does nothing inside GLW, but does it directly
     // put these before ->Render
@@ -202,7 +154,7 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
             glVertex((*vi).P()+(*vi).N()*LineLen);
         }
     glEnd();
-
+  }
     //--- Draw the laser beam (just to help interfacing)
     sline.render(gla);
 }
@@ -250,10 +202,9 @@ void VirtualScan::scanpoints(){
         // qDebug() << "correspodning in object space to: " << toString(sample);
 
         //--- Add scanned sample to the cloud
-        cloud->cm.vert.push_back(dummy);
+        tri::Allocator<CMeshO>::AddVertices(cloud->cm,1);
         cloud->cm.vert.back().P() = sample;
         cloud->cm.vert.back().N() = viewdir;
-        cloud->cm.vn++;
     }
     delete [] buffer;
 }

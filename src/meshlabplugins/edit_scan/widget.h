@@ -32,6 +32,7 @@ public:
         sampfreq  = ui->dial_freq->value();
         scanwidth = ui->dial_width->value();
         numsample = ui->dial_numsamples->value();
+
     }
     ~Widget(){
         delete ui;
@@ -40,6 +41,7 @@ public:
     int getSampfreq(){ return sampfreq; }
     int getScanwidth(){ return scanwidth; }
     int getNumsample(){ return numsample; }
+    bool getDrawLineFlag() {return  ui->drawLineCheckBox->isChecked(); }
 
 signals:
     void laser_parameter_updated();

@@ -47,7 +47,7 @@ void MeshDocument::setCurrentMesh(unsigned int i)
 	emit currentMeshChanged(i);
 }
 
-MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh)
+MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bool setAsCurrent)
 {
 	QString newName=meshName;
 
@@ -62,8 +62,6 @@ MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh)
       if(lastNum) newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
       else newName = baseName+"_1";
     }
-//        newName = newName+"_copy";
-
 	}
 
 	if(newMesh==0)
@@ -72,9 +70,8 @@ MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh)
         newMesh->setFileName(newName);
 
 	meshList.push_back(newMesh);
-	currentMesh=meshList.back();
-	emit currentMeshChanged(meshList.size()-1);
-
+  if(setAsCurrent)
+    this->setCurrentMesh(meshList.size()-1);
 	return newMesh;
 }
 
