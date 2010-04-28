@@ -34,5 +34,6 @@
         <file>images/100mesh.html</file>
         <file>images/selected_face.png</file>
         <file>images/selected_vert.png</file>
+        <file>images/facebook.gif</file>
     </qresource>
 </RCC>

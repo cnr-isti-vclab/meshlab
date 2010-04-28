@@ -979,6 +979,14 @@ bool MainWindow::saveAs(QString fileName)
    int dialogRet = saveDialog.exec();
    if(dialogRet==QDialog::Rejected	) return false;
     fileName=saveDialog.selectedFiles ().first();
+    QFileInfo fi(fileName);
+    if(fi.suffix().isEmpty())
+    {
+      QString ext = saveDialog.selectedNameFilter();
+      ext.chop(1); ext = ext.right(4);
+      fileName = fileName + ext;
+      qDebug("File without extension adding it by hand '%s'", qPrintable(fileName));
+    }
   }
 
 	bool ret = false;

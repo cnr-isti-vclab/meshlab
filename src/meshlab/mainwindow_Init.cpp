@@ -778,8 +778,8 @@ void MainWindow::setCurrentFile(const QString &fileName)
 #if not defined(__DISABLE_AUTO_STATS__)
 		checkForUpdates(false);
 #endif
-		int congratsMeshCounter = settings.value("congratsMeshCounter",0).toInt();
-		if(loadedMeshCounter > congratsMeshCounter + 100 )
+    int congratsMeshCounter = settings.value("congratsMeshCounter",50).toInt();
+    if(loadedMeshCounter > congratsMeshCounter * 2 )
 			{
 				QFile txtFile(":/images/100mesh.html");
 				txtFile.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -790,8 +790,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
 				QDialog *congratsDialog = new QDialog();
 				Ui::CongratsDialog temp;
 				temp.setupUi(congratsDialog);
-
-				temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
+        temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
 				temp.congratsTextEdit->setHtml(tttt);
 				congratsDialog->exec();
 				if(congratsDialog->result()==QDialog::Accepted)
