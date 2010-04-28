@@ -94,6 +94,7 @@ public slots:
 		void glueByPicking();
 		void alignParam();
 		void alignParamCurrent();
+    void hideRevealGluedMesh();
 		
 		void DrawArc( vcg::AlignPair::Result *A );
 signals:

@@ -118,6 +118,7 @@ bool EditAlignPlugin::StartEdit(MeshModel &/*_mm*/, GLArea *_gla )
 		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
 		connect(alignDialog->ui.falseColorCB, SIGNAL(valueChanged(bool)) , _gla->window(),  SLOT(updateGL() ) );
 		connect(alignDialog->ui.recalcButton, SIGNAL(clicked()) , this,  SLOT(recalcCurrentArc() ) );
+    connect(alignDialog->ui.hideRevealButton,  SIGNAL(clicked()) , this,  SLOT(hideRevealGluedMesh() ) );
 
 	}
 	alignDialog->edit=this;
@@ -143,6 +144,15 @@ assert(alignDialog);
 delete alignDialog;
 alignDialog=0;
 }    
+
+void EditAlignPlugin::hideRevealGluedMesh()
+{
+  foreach(MeshNode *mn, meshTree.nodeList)
+        if(!mn->glued) mn->m->visible=!(mn->m->visible);
+
+  alignDialog->rebuildTree();
+  gla->update();
+}
 
 void EditAlignPlugin::glueByPicking()
 {

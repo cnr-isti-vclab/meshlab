@@ -144,13 +144,14 @@ void AlignDialog::updateDialog()
 
 void AlignDialog::updateButtons()
 {
-	if(currentNode()->glued)  ui.glueHereButton->setText("Unglue Mesh");
-	                     else ui.glueHereButton->setText("Glue Mesh Here");
-		
-	ui.pointBasedAlignButton->setDisabled(currentNode()->glued);
-	ui.manualAlignButton->setDisabled    (currentNode()->glued);
-	ui.recalcButton->setDisabled    (currentArc==0);
-	ui.icpParamCurrentButton->setDisabled    (currentArc==0);
+    if(currentNode()->glued)
+         ui.glueHereButton->setText("Unglue Mesh   ");
+    else ui.glueHereButton->setText("Glue Here Mesh");
+
+  ui.pointBasedAlignButton->setDisabled(currentNode()->glued);
+  ui.manualAlignButton->setDisabled    (currentNode()->glued);
+  ui.recalcButton->setDisabled    (currentArc==0);
+  ui.icpParamCurrentButton->setDisabled    (currentArc==0);
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
