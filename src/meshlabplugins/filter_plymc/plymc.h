@@ -163,8 +163,9 @@ namespace vcg {
 		bool VertSplatFlag;
 		bool MergeColor;
 		std::string basename;
-		std::vector<std::string> OutNameVec;
-	}; //end Parameter class
+    std::vector<std::string> OutNameVec;
+    std::vector<std::string> OutNameSimpVec;
+  }; //end Parameter class
 	
 /// PLYMC Data
 
@@ -482,13 +483,14 @@ void Process(vcg::CallBackPos *cb=0)
 		  TotMC+=t2-t1;
 		  if(me.vn >0 || me.fn >0)
 		  {
-								      p.OutNameVec.push_back(filename+std::string(".ply"));
-		      tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameVec.back().c_str(),saveMask);
-		      if(p.SimplificationFlag)
-		      {
-        Simplify<MCMesh>(me, VV.voxel[0]/2);
-			  tri::io::ExporterPLY<MCMesh>::Save(me,(filename+std::string(".d.ply")).c_str(),saveMask);
-		      }
+        p.OutNameVec.push_back(filename+std::string(".ply"));
+        tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameVec.back().c_str(),saveMask);
+        if(p.SimplificationFlag)
+        {
+          p.OutNameSimpVec.push_back(filename+std::string(".d.ply"));
+          Simplify<MCMesh>(me, VV.voxel[0]/2);
+          tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameSimpVec.back().c_str(),saveMask);
+        }
 		  }
 		  int t3=clock();  //--------
 		  TotSav+=t3-t2;

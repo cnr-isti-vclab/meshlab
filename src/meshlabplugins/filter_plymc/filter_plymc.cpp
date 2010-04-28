@@ -93,11 +93,12 @@ void PlyMCPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
         case FP_PLYMC :
           parlst.addParam(new RichAbsPerc("voxSize",m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),"Voxel Side", "VoxelSide"));
           parlst.addParam(    new RichInt("subdiv",1,"SubVol Splitting","The level of recursive splitting of the subvolume reconstruction process. A value of '3' means that a 3x3x3 regular space subdivision is created and the reconstruction process generate 8 matching meshes. It is useful for reconsruction objects at a very high resolution. Default value (1) means no splitting."));
-          parlst.addParam(  new RichFloat("geodesic",3.0,"Geodesic Weighting"," "));
+          parlst.addParam(  new RichFloat("geodesic",3.0,"Geodesic Weighting","The influence of each range map is weighted with its geodesic distance from the borders. In this way when two (or more ) range maps overlaps their contribution blends smoothly hiding possible misalignments. "));
           parlst.addParam(   new RichBool("openResult",true,"Show Result","if not checked the result is only saved into the current directory"));
-          parlst.addParam(    new RichInt("smoothNum",1,"Volume Laplacian iter","the level of recursive splitting of the volume"));
-          parlst.addParam(    new RichInt("wideNum",3,"Widening","the level of recursive splitting of the volume"));
-          parlst.addParam   (new RichBool("mergeColor",true,"Vertex Splatting","This option use a different way to build up the volume, instead of using "));
+          parlst.addParam(    new RichInt("smoothNum",1,"Volume Laplacian iter","How many volume smoothing step are performed to clean out the eventually noisy borders"));
+          parlst.addParam(    new RichInt("wideNum",3,"Widening" ," How many voxel the field is expanded. Larger this value more holes will be filled"));
+          parlst.addParam(   new RichBool("mergeColor",false,"Vertex Splatting","This option use a different way to build up the volume, instead of using rasterization of the triangular face it splat the vertices into the grids. It works under the assumption that you have at least one sample for each voxel of your reconstructed volume."));
+          parlst.addParam(   new RichBool("simplification",false,"Post Merge simplification","After the merging an automatic simplification step is performed."));
         break;
      default: break; // do not add any parameter for the other filters
   }
@@ -124,6 +125,7 @@ bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParamet
     p.WideNum = par.getInt("wideNum");
     p.NCell=0;
     p.MergeColor=p.VertSplatFlag=par.getBool("mergeColor");
+    p.SimplificationFlag = par.getBool("simplification");
     foreach(MeshModel*mm, md.meshList)
     {
         if(mm->visible)
@@ -152,9 +154,12 @@ bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParamet
     if(par.getBool("openResult"))
     {
     for(size_t i=0;i<p.OutNameVec.size();++i)
-        {
-            MeshModel *mp=md.addNewMesh(p.OutNameVec[i].c_str());
-            tri::io::ImporterPLY<CMeshO>::Open(mp->cm,p.OutNameVec[i].c_str());
+        {string name;
+            if(!p.SimplificationFlag) name = p.OutNameVec[i].c_str();
+            else name = p.OutNameSimpVec[i].c_str();
+
+            MeshModel *mp=md.addNewMesh(name.c_str(),0,false);
+            tri::io::ImporterPLY<CMeshO>::Open(mp->cm,name.c_str());
             tri::UpdateBounding<CMeshO>::Box(mp->cm);
             tri::UpdateNormals<CMeshO>::PerVertexPerFace(mp->cm);
         }
