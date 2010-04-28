@@ -744,6 +744,8 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 					}
 				}
 				// update bounding box, normals
+        Matrix44f rot; rot.SetRotateDeg(180,Point3f(0,1,0));
+        tri::UpdatePosition<CMeshO>::Matrix(m.cm,rot,false);
 				tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	
 				tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
 				tri::UpdateBounding<CMeshO>::Box(m.cm);
