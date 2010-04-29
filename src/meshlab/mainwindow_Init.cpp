@@ -794,7 +794,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
 				temp.congratsTextEdit->setHtml(tttt);
 				congratsDialog->exec();
 				if(congratsDialog->result()==QDialog::Accepted)
-					QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
+          QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?cc=g.ranzuglia@isti.cnr.it&subject=[MeshLab] Reporting Info on MeshLab Usage"));
 			}
 	}
 }
