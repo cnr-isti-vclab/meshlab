@@ -290,7 +290,9 @@ public:
 	// NO GUI interaction should be done here. No dialog asking, no messagebox errors. 
 	// this function will also be called by the commandline framework.
 	// If you want report errors, use the errorMsg() string. It will displayed in case of filters returning false.
-	
+  // When implementing your applyFilter, you should use the cb function to report to the framework the current state of the processing.
+  // During your (long) processing you should call from time to time cb(perc,descriptiveString), where perc is an int (0..100)
+  // saying what you are doing and at what point of the computation you currently are.
     virtual bool applyFilter(QAction *   filter, MeshDocument &md,   RichParameterSet & par,       vcg::CallBackPos *cb) =0;
 
 	// Function used by the framework to test if a filter is applicable to a mesh.
