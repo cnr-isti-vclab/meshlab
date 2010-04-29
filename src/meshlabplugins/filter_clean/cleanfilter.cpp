@@ -73,7 +73,7 @@ CleanFilter::~CleanFilter() {
 {
  switch(filter)
   {
-    case FP_BALL_PIVOTING :								  return QString("Ball Pivoting Surface Reconstruction");
+ case FP_BALL_PIVOTING :								  return QString("Surface Reconstruction: Ball Pivoting");
 	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
