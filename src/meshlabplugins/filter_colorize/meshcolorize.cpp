@@ -70,7 +70,7 @@ QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
     case CP_CLAMP_QUALITY:             return QString("Clamp vertex quality");
     case CP_MAP_QUALITY_INTO_COLOR:    return QString("Colorize by Quality");
     case CP_DISCRETE_CURVATURE:        return QString("Discrete Curvatures");
-    case CP_TRIANGLE_QUALITY:          return QString("Triangle quality");
+    case CP_TRIANGLE_QUALITY:          return QString("Per Face Quality according to Triangle shape and aspect ratio");
     case CP_COLOR_NON_TOPO_COHERENT:   return QString("Color edges topologically non coherent");
     case CP_VERTEX_SMOOTH:             return QString("Smooth: Laplacian Vertex Color");
     case CP_FACE_SMOOTH:               return QString("Smooth: Laplacian  Face Color");
@@ -92,7 +92,7 @@ QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const
     case CP_DISCRETE_CURVATURE :     return tr("Colorize according to various discrete curvature computed as described in:<br>"
 																							 "'<i>Discrete Differential-Geometry Operators for Triangulated 2-Manifolds</i>' <br>"
 																							 "M. Meyer, M. Desbrun, P. Schroder, A. H. Barr");
-    case CP_TRIANGLE_QUALITY:        return tr("Colorize faces depending on triangle quality:<br/>1: minimum ratio height/edge among the edges<br/>2: ratio between radii of incenter and circumcenter<br/>3:  2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM, M transform triangle into equilateral");
+    case CP_TRIANGLE_QUALITY:        return tr("Compute a quality and colorize faces depending on triangle quality:<br/>1: minimum ratio height/edge among the edges<br/>2: ratio between radii of incenter and circumcenter<br/>3:  2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM, M transform triangle into equilateral");
     case CP_VERTEX_SMOOTH:                   return QString("Laplacian Smooth Vertex Color");
     case CP_FACE_SMOOTH:                   return QString("Laplacian Smooth Face Color");
     case CP_VERTEX_TO_FACE:                   return QString("Vertex to Face color transfer");
@@ -111,7 +111,7 @@ int ExtraMeshColorizePlugin::getRequirements(QAction *action)
   switch(ID(action))
   {
     case CP_DISCRETE_CURVATURE:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV;
-    case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR;
+    case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
     case CP_RANDOM_FACE:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
     case CP_CLAMP_QUALITY:   return 0;
     case CP_MAP_QUALITY_INTO_COLOR:   return 0;
@@ -244,23 +244,24 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
 			int metric = par.getEnum("Metric");
 			switch(metric){ 
 			case 0: { //area / max edge
-				max = sqrt(3.0f)/2.0f;
-				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
-					if(!(*fi).IsD()) 
-						(*fi).C().ColorRamp(min, max, vcg::Quality((*fi).P(0), (*fi).P(1),(*fi).P(2)));
-			} break;
+          max = sqrt(3.0f)/2.0f;
+          for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+            if(!(*fi).IsD())
+              (*fi).Q() = vcg::Quality((*fi).P(0), (*fi).P(1),(*fi).P(2));
+        } break;
 			case 1: { //inradius / circumradius
-				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
-					if(!(*fi).IsD()) 
-						(*fi).C().ColorRamp(min, max, vcg::QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2)));
-			} break;
+          for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+            if(!(*fi).IsD())
+              (*fi).Q() = vcg::QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2));
+        } break;
 			case 2: { //mean ratio
-				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
-					if(!(*fi).IsD()) 
-						(*fi).C().ColorRamp(min, max, vcg::QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2)));
-			} break;
+          for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+            if(!(*fi).IsD())
+              (*fi).Q() = vcg::QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2));
+        } break;
 			default: assert(0);
 			} 
+      tri::UpdateColor<CMeshO>::FaceQualityRamp(m.cm,min,max,false);
 		break;
     }
 
@@ -326,6 +327,8 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a)
 				return MeshFilterInterface::VertexColoring; 
 
     case   CP_TRIANGLE_QUALITY:
+        return FilterClass(Quality + FaceColoring);
+
 		case   CP_RANDOM_FACE:	
     case   CP_FACE_SMOOTH:
     case   CP_VERTEX_TO_FACE:
@@ -369,7 +372,9 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const
 	switch(ID(a)) 
 	{
     case   CP_TRIANGLE_QUALITY:
-		case   CP_RANDOM_FACE:	
+      return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
+
+    case   CP_RANDOM_FACE:
     case   CP_COLOR_NON_TOPO_COHERENT:
     case   CP_FACE_SMOOTH:
     case   CP_VERTEX_TO_FACE:
