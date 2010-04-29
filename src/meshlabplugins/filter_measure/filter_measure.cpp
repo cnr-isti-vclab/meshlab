@@ -44,12 +44,14 @@ using namespace vcg;
 FilterMeasurePlugin::FilterMeasurePlugin() 
 { 
 	typeList << 
-	FP_MEASURE_TOPO <<
-	FP_MEASURE_TOPO_QUAD <<
-	FP_MEASURE_GAUSSCURV <<
-	FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION <<
+    FP_MEASURE_TOPO <<
+    FP_MEASURE_TOPO_QUAD <<
+    FP_MEASURE_GAUSSCURV <<
+    FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION <<
+    FP_MEASURE_FACE_QUALITY_DISTRIBUTION <<
     FP_MEASURE_VERTEX_QUALITY_HISTOGRAM <<
-	FP_MEASURE_GEOM;
+    FP_MEASURE_FACE_QUALITY_HISTOGRAM <<
+    FP_MEASURE_GEOM;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -59,13 +61,15 @@ FilterMeasurePlugin::FilterMeasurePlugin()
  QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_MEASURE_TOPO :  return QString("Compute Topological Measures"); 
-		case FP_MEASURE_TOPO_QUAD :  return QString("Compute Topological Measures for Quad Meshes"); 
-		case FP_MEASURE_GEOM :  return QString("Compute Geometric Measures"); 
-		case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature"); 
-        case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION :  return QString("Per Vertex Quality Stat");
-  case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM :  return QString("Histogram of Quality Per Vertex");
-		default : assert(0); 
+    case FP_MEASURE_TOPO :  return QString("Compute Topological Measures");
+    case FP_MEASURE_TOPO_QUAD :  return QString("Compute Topological Measures for Quad Meshes");
+    case FP_MEASURE_GEOM :  return QString("Compute Geometric Measures");
+    case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature");
+    case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION :  return QString("Per Vertex Quality Stat");
+    case FP_MEASURE_FACE_QUALITY_DISTRIBUTION :  return QString("Per Face Quality Stat");
+    case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM :  return QString("Histogram of Quality Per Vertex");
+    case FP_MEASURE_FACE_QUALITY_HISTOGRAM :  return QString("Histogram of Quality Per Vertex");
+  default : assert(0);
 	}
 }
 
@@ -77,9 +81,11 @@ FilterMeasurePlugin::FilterMeasurePlugin()
 		case FP_MEASURE_TOPO_QUAD :  return QString("Selected faces are moved (or duplicated) in a new layer"); 
 		case FP_MEASURE_GEOM :  return QString("Create a new layer containing the same model as the current one");
 		case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature");
-        case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION : return QString("Compute some statistical measures (min, max, med, stdev, variance, about the distribution of per vertex quality values");
-  case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM : return QString("Compute a histogram with a given number of bin of the per vertex quality");
-		default : assert(0); 
+    case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION : return QString("Compute some statistical measures (min, max, med, stdev, variance, about the distribution of per vertex quality values");
+    case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM : return QString("Compute a histogram with a given number of bin of the per vertex quality");
+    case FP_MEASURE_FACE_QUALITY_DISTRIBUTION : return QString("Compute some statistical measures (min, max, med, stdev, variance, about the distribution of per face quality values");
+    case FP_MEASURE_FACE_QUALITY_HISTOGRAM : return QString("Compute a histogram with a given number of bin of the per face quality");
+    default : assert(0);
 	}
 }
 
@@ -88,7 +94,8 @@ void FilterMeasurePlugin::initParameterSet(QAction *action, MeshDocument &m, Ric
 {
 	 switch(ID(action))	 
 	 {
-  case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
+   case FP_MEASURE_FACE_QUALITY_HISTOGRAM :
+   case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
          {
          pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.mm()->cm);
          par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that is used as a lower bound for the set of bins (all the value smaller this one will be put in the first bin)"));
@@ -238,10 +245,14 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		break;
         /************************************************************/
         case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION :
+  case FP_MEASURE_FACE_QUALITY_DISTRIBUTION :
 			{
 				CMeshO &m=md.mm()->cm;
 				Distribution<float> DD;
-			  tri::Stat<CMeshO>::ComputePerVertexQualityDistribution( m, DD, false);
+        if(ID(filter)==FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION)
+          tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
+        else
+          tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
 				
 				Log("   Min %f Max %f",DD.Min(),DD.Max());		
 				Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));		
@@ -282,7 +293,8 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 					}
 				Log("integrated is %f (%f*pi)", totalSum,totalSum/M_PI);												
 			} break;
-          case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
+  case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
+  case FP_MEASURE_FACE_QUALITY_HISTOGRAM:
             {
             CMeshO &m=md.mm()->cm;
             float RangeMin = par.getFloat("minVal");
@@ -292,15 +304,25 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
             Histogramf H;
             H.SetRange(RangeMin,RangeMax,binNum);
-            for(CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+            if(ID(filter)==FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION)
+            {
+              for(CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
                 if(!(*vi).IsD())
                 {
                 assert(!math::IsNAN((*vi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
                 H.Add((*vi).Q());
+              }
+            }else{
+              for(CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi)
+                if(!(*fi).IsD())
+                {
+                assert(!math::IsNAN((*fi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
+                H.Add((*fi).Q());
+              }
             }
-                Log("(         -inf..%15.7f) : %i",RangeMin,H.BinCountInd(0));
+            Log("(         -inf..%15.7f) : %i",RangeMin,H.BinCountInd(0));
             for(int i=1;i<=binNum;++i)
-                Log("[%15.7f..%15.7f) : %i",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
+              Log("[%15.7f..%15.7f) : %i",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
 
             Log("[%15.7f..             +inf) : %i",RangeMax,H.BinCountInd(binNum+1));
         } break;
@@ -320,7 +342,9 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
     case FP_MEASURE_TOPO_QUAD :
   case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION:
   case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
-      return MeshFilterInterface::Measure; 
+  case FP_MEASURE_FACE_QUALITY_DISTRIBUTION:
+  case FP_MEASURE_FACE_QUALITY_HISTOGRAM:
+      return MeshFilterInterface::Measure;
 		default :  assert(0);
 			return MeshFilterInterface::Generic;
   }
