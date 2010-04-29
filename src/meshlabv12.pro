@@ -5,9 +5,9 @@ SUBDIRS       = common \
                 meshlab \
                 meshlabserver \
                 meshlabplugins/io_base\
-        meshlabplugins/io_3ds\
-        meshlabplugins/io_bre\
-        meshlabplugins/io_collada \
+        		meshlabplugins/io_3ds\
+        		meshlabplugins/io_bre\
+        		meshlabplugins/io_collada \
 				meshlabplugins/io_epoch\
 				meshlabplugins/io_u3d\
 				meshlabplugins/io_tri\
@@ -20,6 +20,7 @@ SUBDIRS       = common \
 				meshlabplugins/filter_clean \
 				meshlabplugins/filter_colorize \
 				meshlabplugins/filter_create \
+				meshlabplugins/filter_isoparametrization \
 				meshlabplugins/filter_measure \
 				meshlabplugins/filter_meshing \
 				meshlabplugins/filter_mls \
@@ -30,7 +31,7 @@ SUBDIRS       = common \
 				meshlabplugins/filter_splitter \
 				meshlabplugins/filter_select \
 				meshlabplugins/filter_texture \
-                meshlabplugins/filter_unsharp \
+        		meshlabplugins/filter_unsharp \
 				meshlabplugins/filter_zippering \
 #				meshlabplugins/filter_curvature_from_sliding \
 #				meshlabplugins/filter_perceptualmetric \
@@ -41,13 +42,12 @@ SUBDIRS       = common \
 				meshlabplugins/edit_select \
 				meshlabplugins/edit_pickpoints \
 #				meshlabplugins/edit_phototexturing \
-        meshlabplugins/editslice \
+#		        meshlabplugins/editslice \
 				meshlabplugins/editalign \
 				meshlabplugins/editmeasure \
 				meshlabplugins/editrgbtri \
 				meshlabplugins/editsegment \
-				meshlabplugins/edit_straightener \
-				meshlabplugins/filter_isoparametrization \
+#				meshlabplugins/edit_straightener \
 				sampleplugins/sampleedit \
 				sampleplugins/samplefilter \
 				sampleplugins/samplefilterdyn \
@@ -61,6 +61,7 @@ SUBDIRS       = common \
                 fgt/filter_colorproc \
                 fgt/filter_fractal \
                 fgt/filter_func \
+#                fgt/filter_ssynth \
                 fgt/filter_qhull \
                 fgt/filter_quality \
                 fgt/filter_trioptimize \
@@ -70,4 +71,4 @@ SUBDIRS       = common \
                 fgt/edit_quality \
                 fgt/edit_texture\
 				fgt/edit_topo \
-				fgt/render_rfx \
+        fgt/render_rfx
