@@ -77,8 +77,8 @@ mkdir $BUNDLE/$APPNAME/Contents/shaders
 cp shaders/*.gdp shaders/*.vert shaders/*.frag shaders/*.txt  $BUNDLE/$APPNAME/Contents/shaders
 
 #added rendermonkey shaders
-mkdir $BUNDLE/$APPNAME/Contents/shadersrm   
-cp shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shadersrm
+mkdir $BUNDLE/$APPNAME/Contents/shaders/shadersrm   
+cp shaders/shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shaders/shadersrm
 #added shadowmapping shaders
 cp -r shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
 
@@ -125,6 +125,7 @@ plugins/libfilter_qhull.dylib \
 plugins/libfilter_quality.dylib \
 plugins/libfilter_sampling.dylib \
 plugins/libfilter_select.dylib \
+plugins/libfilter_slice.dylib \
 plugins/libfilter_splitter.dylib \
 plugins/libfilter_texture.dylib \
 plugins/libfilter_trioptimize.dylib \
@@ -156,8 +157,6 @@ plugins/libeditmeasure.dylib \
 plugins/libeditpaint.dylib \
 plugins/libeditrgbtri.dylib \
 plugins/libeditsegment.dylib \
-plugins/libeditslice.dylib \
-plugins/libedit_straightener.dylib \
 plugins/libmeshdecorate.dylib \
 plugins/libdecorate_shadow.dylib \
 plugins/librender_gdp.dylib \
