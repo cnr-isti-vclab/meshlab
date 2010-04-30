@@ -51,6 +51,7 @@ CleanFilter::CleanFilter()
     << FP_REMOVE_TVERTEX_FLIP
     << FP_REMOVE_TVERTEX_COLLAPSE
 		<< FP_REMOVE_DUPLICATE_FACE
+    << FP_REMOVE_FOLD_FACE
 		<< FP_MERGE_CLOSE_VERTEX;
 
   FilterIDType tt;
@@ -83,6 +84,7 @@ CleanFilter::~CleanFilter() {
     case FP_REMOVE_TVERTEX_COLLAPSE :       return QString("Remove T-Vertices by edge collapse");
     case FP_MERGE_CLOSE_VERTEX :            return QString("Merge Close Vertices");
     case FP_REMOVE_DUPLICATE_FACE:          return QString("Remove Duplicate Faces");
+  case FP_REMOVE_FOLD_FACE:          return QString("Remove Isolated folded face by edge flip");
 		default: assert(0);
   }
   return QString("error!");
@@ -105,6 +107,7 @@ CleanFilter::~CleanFilter() {
     case FP_REMOVE_TVERTEX_FLIP : return QString("Removes t-vertices by flipping the opposite edge on the degenerate face if the triangulation quality improves");
     case FP_MERGE_CLOSE_VERTEX : return QString("Merge togheter all the vertices that are nearer than the speicified threshold. Like a unify duplicated vertices but with some tolerance.");
     case FP_REMOVE_DUPLICATE_FACE : return QString("Remove all the duplicate faces. Two faces are considered equal if they are composed by the same set of verticies, regardless of the order of the vertices.");
+  case FP_REMOVE_FOLD_FACE : return QString("Remove all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
     default: assert(0);
   }
   return QString("error!");
@@ -121,6 +124,7 @@ CleanFilter::~CleanFilter() {
     case FP_REMOVE_ISOLATED_COMPLEXITY :
     case FP_REMOVE_TVERTEX_COLLAPSE :
     case FP_REMOVE_TVERTEX_FLIP :
+  case FP_REMOVE_FOLD_FACE :
     case FP_MERGE_CLOSE_VERTEX :
     case FP_REMOVE_DUPLICATE_FACE:
       return MeshFilterInterface::Cleaning;     
@@ -141,6 +145,7 @@ CleanFilter::~CleanFilter() {
         return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK;
     case FP_REMOVE_TVERTEX_COLLAPSE: return MeshModel::MM_VERTMARK;
     case FP_REMOVE_TVERTEX_FLIP: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+  case FP_REMOVE_FOLD_FACE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
     case FP_SELECTBYANGLE:
 		case FP_ALIGN_WITH_PICKED_POINTS:
 		case FP_MERGE_CLOSE_VERTEX:
@@ -335,12 +340,21 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
         Log(GLLogStream::FILTER,"Successfully merged %d vertices", total);
     }
     break;
-   case FP_REMOVE_DUPLICATE_FACE :
-    {
-        int total = tri::Clean<CMeshO>::RemoveDuplicateFace(m.cm);
-        Log(GLLogStream::FILTER,"Successfully deleted %d duplicated faces", total);
-    }
-    break;
+  case FP_REMOVE_DUPLICATE_FACE :
+   {
+       int total = tri::Clean<CMeshO>::RemoveDuplicateFace(m.cm);
+       Log(GLLogStream::FILTER,"Successfully deleted %d duplicated faces", total);
+   }
+   break;
+  case FP_REMOVE_FOLD_FACE:
+   {
+     m.updateDataMask(MeshModel::MM_FACECOLOR);
+     tri::UpdateColor<CMeshO>::FaceConstant(m.cm, Color4b::White);
+       int total = tri::Clean<CMeshO>::RemoveFaceFoldByFlip(m.cm);
+       tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);
+       Log(GLLogStream::FILTER,"Successfully flipped %d folded faces", total);
+   }
+   break;
 
   default : assert(0); // unknown filter;
 	}

@@ -83,6 +83,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
     FP_SELECTBYANGLE,
     FP_REMOVE_TVERTEX_FLIP,
     FP_REMOVE_TVERTEX_COLLAPSE,
+    FP_REMOVE_FOLD_FACE,
     FP_REMOVE_DUPLICATE_FACE,
 		FP_MERGE_CLOSE_VERTEX
   } ;
