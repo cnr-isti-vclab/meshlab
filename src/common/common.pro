@@ -36,6 +36,7 @@ DEFINES += GLEW_STATIC
 win32-msvc2005:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_WARNINGS
 
+
 # Input
 HEADERS += filterparameter.h \
     filterscript.h \

@@ -30,15 +30,14 @@ QT           += xml
 win32-msvc2005:LIBS	   += ../../external/lib/win32-msvc2005/bz2.lib
 win32-msvc2008:LIBS	   += ../../external/lib/win32-msvc2008/bz2.lib
 win32-g++:LIBS	+= ../../external/lib/win32-gcc/libbz2.a
-linux-g++:LIBS	+= ../../external/lib/linux-g++/libbz2.a
+unix:LIBS	+= ../../external/lib/unix/libbz2.a
 
 win32-msvc2005:INCLUDEPATH += ../../external/bzip2-1.0.5
 win32-msvc2008:INCLUDEPATH += ../../external/bzip2-1.0.5
 win32-g++:INCLUDEPATH  += ../../external/bzip2-1.0.5
-linux-g++:INCLUDEPATH	+= ../../external/bzip2-1.0.5
+unix:INCLUDEPATH	+= ../../external/bzip2-1.0.5
 
 mac:LIBS   += -lbz2
-unix:LIBS += -lbz2
 
 CONFIG(release, debug|release) {
 	win32-g++:release:QMAKE_CXXFLAGS -= -O2

@@ -6,8 +6,8 @@
 
 // Note that these includes are system-wide, not the ones of Meshlab
 #define EIGEN_CHOLMOD_SUPPORT
-#include <Eigen/Cholesky>
-#include <Eigen/Sparse>
+#include <vcg/Eigen/Cholesky>
+#include <vcg/Eigen/Sparse>
 
 namespace vcg{
 

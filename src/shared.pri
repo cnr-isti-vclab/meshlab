@@ -7,6 +7,7 @@ QT += xml
 
 VCGDIR  = ../../../../vcglib
 GLEWDIR = ../../external/glew-1.5.1
+
 mac:LIBS += ../../common/libcommon.dylib
 
 #correct qmake syntax requires CONFIG(option, list of options)
@@ -14,7 +15,7 @@ mac:LIBS += ../../common/libcommon.dylib
 win32-msvc2005:  LIBS += ../../distrib/common.lib
 win32-msvc2008:  LIBS += ../../distrib/common.lib
 win32-g++:LIBS += -L../../distrib -lcommon
- 
+unix:LIBS += -L../../distrib -lcommon
 
 #CONFIG(debug, debug|release) {
 #	win32-msvc2005:  LIBS += ../../common/debug/common.lib

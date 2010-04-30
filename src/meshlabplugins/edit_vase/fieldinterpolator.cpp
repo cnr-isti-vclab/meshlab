@@ -1,6 +1,7 @@
 #include "fieldinterpolator.h"
 #include <iostream>
 #include <fstream>
+#include <vcg/Eigen/Eigen>
 
 using namespace std;
 using namespace Eigen;

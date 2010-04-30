@@ -30,7 +30,7 @@ SUBDIRS       = common \
 #                fgt/filter_physics \
 #                fgt/filter_fractal \
 #                fgt/decorate_shadow \
-                meshlabplugins/edit_vase\
+#               meshlabplugins/edit_vase\
 #                fgt/render_rfx\
 #                meshlabplugins/render_splatpyramid \
 #               meshlabplugins/io_collada

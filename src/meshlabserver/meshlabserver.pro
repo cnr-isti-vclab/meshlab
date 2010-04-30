@@ -21,7 +21,8 @@ mac:LIBS += ../distrib/meshlab.app/Contents/MacOS/libcommon.dylib
 win32-msvc2005:  LIBS += -L../distrib -lcommon
 win32-msvc2008:  LIBS += -L../distrib -lcommon
 win32-g++:  LIBS += -L../distrib -lcommon
-linux-g++:  LIBS += -L../common -lcommon
+unix:  LIBS += -L../distrib -lcommon
+unix:QMAKE_RPATHDIR += ../distrib
 
 #CONFIG (release,debug | release) {
 #	win32-msvc2005:release:  LIBS += -L../common/release -lcommon
