@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.2.3b"
+!define PRODUCT_VERSION "1.2.3"
 !define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -86,8 +86,8 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}\shaders\decorate_shadow\vsmb\*.frag"
   File "${DISTRIB_FOLDER}\shaders\decorate_shadow\vsmb\*.vert"
   File "${DISTRIB_FOLDER}\shaders\*.frag"
-  SetOutPath "$INSTDIR\shadersrm"
-  File "${DISTRIB_FOLDER}\shadersrm\*.rfx"
+  SetOutPath "$INSTDIR\shaders\shadersrm"
+  File "${DISTRIB_FOLDER}\shaders\shadersrm\*.rfx"
   SetOutPath "$INSTDIR\plugins"
   ; IO Plugins (9)
   File "${DISTRIB_FOLDER}/plugins\io_base.dll"
@@ -127,7 +127,9 @@ Section "MainSection" SEC01
   
   File "${DISTRIB_FOLDER}/plugins\filter_sampling.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_select.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_splitter.dll"
+  
   
   File "${DISTRIB_FOLDER}/plugins\filter_texture.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_trioptimize.dll"
@@ -151,8 +153,6 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\editrgbtri.dll"
   File "${DISTRIB_FOLDER}/plugins\editsegment.dll"
 
-  File "${DISTRIB_FOLDER}/plugins\editslice.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_straightener.dll"
   File "${DISTRIB_FOLDER}/plugins\sampleedit.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_pickpoints.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_quality.dll"
