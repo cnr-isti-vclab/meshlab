@@ -37,7 +37,7 @@ class FilterFunctionPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 protected:
-	double x,y,z,nx,ny,nz,r,g,b,q,rad;
+  double x,y,z,nx,ny,nz,r,g,b,q,fq,rad;
 	double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
 	double v,f,v0i,v1i,v2i;
 	std::vector<std::string> v_attrNames;
@@ -67,9 +67,11 @@ public:
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
 	virtual FilterClass getClass(QAction *);
+  virtual int postCondition(QAction *action) const;
   virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual int getRequirements(QAction *);
   virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+
 	void showParserError(const QString &s, mu::Parser::exception_type &e);
 	void normalizeVertexQuality(MeshModel &m);
 	void normalizeFaceQuality(MeshModel &m);

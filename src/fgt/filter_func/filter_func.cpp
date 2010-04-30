@@ -72,12 +72,12 @@ FilterFunctionPlugin::~FilterFunctionPlugin()
 		case FF_VERT_SELECTION :  return QString("Conditional Vertex Selection");
 		case FF_FACE_SELECTION : return QString("Conditional Face Selection");
 		case FF_GEOM_FUNC :  return QString("Geometric Function");
-		case FF_FACE_COLOR : return QString("Per-Face Color Function");
-		case FF_FACE_QUALITY : return QString("Per-Face Quality Function");
-		case FF_VERT_COLOR : return QString("Per-Vertex Color Function");
-		case FF_VERT_QUALITY : return QString("Per-Vertex Quality Function");
-		case FF_DEF_VERT_ATTRIB : return QString("Define New Per-Vertex Attribute");
-		case FF_DEF_FACE_ATTRIB : return QString("Define New Per-Face Attribute");
+    case FF_FACE_COLOR : return QString("Per Face Color Function");
+    case FF_FACE_QUALITY : return QString("Per Face Quality Function");
+    case FF_VERT_COLOR : return QString("Per Vertex Color Function");
+    case FF_VERT_QUALITY : return QString("Per Vertex Quality Function");
+    case FF_DEF_VERT_ATTRIB : return QString("Define New Per Vertex Attribute");
+    case FF_DEF_FACE_ATTRIB : return QString("Define New Per Face Attribute");
 		case FF_GRID : return QString("Grid Generator");
 		case FF_REFINE : return QString("Refine User-Defined");
 		case FF_ISOSURFACE : return QString("Implicit Surface");
@@ -169,11 +169,34 @@ const QString PerFaceAttributeString("It's possibile to use per-face variables l
 		case FF_DEF_VERT_ATTRIB	: return MeshFilterInterface::Layer;
 		case FF_DEF_FACE_ATTRIB	: return MeshFilterInterface::Layer; 
 		
-		
 		default			  : return MeshFilterInterface::Generic;
   }
 }
-
+ int FilterFunctionPlugin::postCondition(QAction *action) const
+ {
+   switch(ID(action))
+   {
+   case FF_VERT_SELECTION :
+   case FF_FACE_SELECTION :
+     return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
+   case FF_FACE_COLOR		:
+     return MeshModel::MM_FACECOLOR;
+   case FF_GEOM_FUNC :
+     return MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL + MeshModel::MM_FACENORMAL;
+   case FF_VERT_COLOR :
+     return MeshModel::MM_VERTCOLOR;
+   case FF_VERT_QUALITY :
+     return MeshModel::MM_VERTQUALITY+MeshModel::MM_VERTCOLOR;
+   case FF_FACE_QUALITY  :
+     return MeshModel::MM_FACECOLOR + MeshModel::MM_FACEQUALITY;
+   case FF_DEF_VERT_ATTRIB :
+   case FF_GRID :
+   case FF_ISOSURFACE :
+   case FF_DEF_FACE_ATTRIB :
+   case FF_REFINE :
+     return MeshModel::MM_UNKNOWN;
+   }
+ }
  int FilterFunctionPlugin::getRequirements(QAction *action)
 {
   switch(ID(action))
@@ -968,6 +991,10 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 	g2 = (*fi).V(2)->C()[1];
 	b2 = (*fi).V(2)->C()[2];
 	
+  if(HasPerFaceQuality(m))
+         fq=(*fi).Q();
+    else fq=0;
+
 	// set face color attributes
 	if(HasPerFaceColor(m)){
 		r = (*fi).C()[0];
@@ -1065,6 +1092,9 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p)
 	p.DefineVar("r", &r);
 	p.DefineVar("g", &g);
 	p.DefineVar("b", &b);
+
+  // face quality
+  p.DefineVar("q", &fq);
 
 	// index
 	p.DefineVar("fi",&f);
