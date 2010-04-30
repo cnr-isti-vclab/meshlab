@@ -122,18 +122,25 @@ void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWi
 			}
 
 	theParser.Parse(md);
-	activeShader = theParser.GetShader();
-	assert(activeShader);
+  RfxShader *tmp = theParser.GetShader();
+  //activeShader = theParser.GetShader();
+  //assert(activeShader);
 
-	if (dialog) {
-		dialog->close();
-		delete dialog;
-	}
+  if (dialog) {
+    dialog->close();
+    delete dialog;
+  }
 
 	//verifies if there's some special attributes in the shader.
-	if(!activeShader->checkSpecialAttributeDataMask(&md))
+  if(!tmp->checkSpecialAttributeDataMask(&md))
+  {
+    if (activeShader) {
+      delete activeShader;
+      activeShader = NULL;
+    }
 		return;
-	
+  }
+  activeShader = tmp;
 
 	parent->makeCurrent();
 	GLenum err = glewInit();
@@ -156,7 +163,8 @@ void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWi
 
 void RenderRFX::Render(QAction *action, MeshDocument &md,  RenderMode &rm, QGLWidget *parent)
 {
-	assert(activeShader);
+
+  if(!activeShader) return;
 	rm.textureMode = vcg::GLW::TMPerWedge;
 	
 	
