@@ -89,8 +89,8 @@ namespace vcg {
       }
     };
 
-    class MCFace    : public Face< MCUsedTypes, face::VertexRef, face::VFAdj, face::BitFlags> {};
-    class MCMesh	: public vcg::tri::TriMesh< std::vector< MCVertex>, std::vector< MCFace > > {};
+    class MCFace    : public Face< MCUsedTypes, face::InfoOcf, face::VertexRef, face::FFAdjOcf, face::VFAdjOcf, face::BitFlags> {};
+    class MCMesh	: public vcg::tri::TriMesh< std::vector< MCVertex>, face::vector_ocf< MCFace > > {};
 
 
 	//******************************************
@@ -392,8 +392,10 @@ void Process(vcg::CallBackPos *cb=0)
 		for(int i=0;i<MP.size();++i)
 		{
 		  Box3f bbb= MP.bb(i);
-
-		  // if bbox of mesh #i is part of the subblock, then process it
+      /**********************/
+      cb((i+1)/MP.size(),"Step 1: Converting meshes into volume");
+      /**********************/
+      // if bbox of mesh #i is part of the subblock, then process it
 		  if(bbb.Collide(VV.SubBoxSafe))
 		  {
 		    SMesh *sm;
@@ -462,8 +464,12 @@ void Process(vcg::CallBackPos *cb=0)
 		  MarchingCubes	mc(me, walker);
 		  Box3i currentSubBox=VV.SubPartSafe;
 		  Point3i currentSubBoxRes=VV.ssz;
-		  walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
-		  typename MCMesh::VertexIterator vi;
+      /**********************/
+      cb(50,"Step 2: Marching Cube...");
+      /**********************/
+      walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
+
+      typename MCMesh::VertexIterator vi;
 		  Box3f bbb; bbb.Import(VV.SubPart);
 		  for(vi=me.vert.begin();vi!=me.vert.end();++vi)
 		  {
@@ -487,8 +493,16 @@ void Process(vcg::CallBackPos *cb=0)
         tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameVec.back().c_str(),saveMask);
         if(p.SimplificationFlag)
         {
+          /**********************/
+          cb(50,"Step 3: Simplify mesh...");
+          /**********************/
           p.OutNameSimpVec.push_back(filename+std::string(".d.ply"));
-          Simplify<MCMesh>(me, VV.voxel[0]/2);
+          me.face.EnableVFAdjacency();
+          Simplify<MCMesh>(me, VV.voxel[0]/4.0);
+          tri::Allocator<MCMesh>::CompactFaceVector(me);
+          me.face.EnableFFAdjacency();
+          tri::Clean<MCMesh>::RemoveTVertexByFlip(me,20,true);
+          tri::Clean<MCMesh>::RemoveFaceFoldByFlip(me);
           tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameSimpVec.back().c_str(),saveMask);
         }
 		  }
@@ -530,7 +544,7 @@ template<   class MeshType>
     tri::UpdateTopology<MeshType>::VertexFace(m);
     vcg::LocalOptimization<MeshType> DeciSession(m);
     MyColl::bb()=m.bbox;
-    float TargetError = 8*perc;
+    float TargetError = perc;
     printf("Asked an error lenght of %f using a error of %f\n",perc,TargetError);
     int FinalSize = m.fn*3/4;
     int t1=clock();
@@ -538,13 +552,13 @@ template<   class MeshType>
     int t2=clock();
     printf("Initial Heap Size %i\n",(int)DeciSession.h.size());
     MyColl::areaThr()=TargetError*TargetError;
-    DeciSession.SetTargetSimplices(FinalSize);
-    DeciSession.SetTimeBudget(0.5f);
+    //DeciSession.SetTargetSimplices(FinalSize);
+    DeciSession.SetTimeBudget(1.0f);
     if(TargetError < std::numeric_limits<float>::max() ) DeciSession.SetTargetMetric(TargetError);
 
     printf("mesh  %d %d Error %g \n",m.vn,m.fn,DeciSession.currMetric);
 
-    while(DeciSession.DoOptimization() && m.fn>FinalSize && DeciSession.currMetric < TargetError)
+    while(DeciSession.DoOptimization() && DeciSession.currMetric < TargetError)
         //while(DeciSession.DoOptimization())
         printf("Current Mesh size %7i heap sz %9i err %9g \r",m.fn,(int)DeciSession.h.size(),DeciSession.currMetric);
     int t3=clock();
