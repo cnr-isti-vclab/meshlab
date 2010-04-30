@@ -514,7 +514,7 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, RenderMode &rm
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);	
 
 			glBindTexture( tIter->Target, tIter->tId );
-			rm.textureMode = GLW::TMPerVert;
+      rm.textureMode = GLW::TMPerWedge;
 			
 			++tIter;
 			++n;
