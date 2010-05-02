@@ -178,7 +178,7 @@ void FieldInterpolator::Solve(){
 
 
 
-
+/*
 
 //-----------------------------------------------------------------------------------------//
 //
@@ -317,3 +317,5 @@ void mesh_onering_iterate( CMeshO* mesh ){
         qDebug() << endl;
     }
 }
+
+*/
