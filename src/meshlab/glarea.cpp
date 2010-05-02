@@ -580,7 +580,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
   e->accept();
 	setFocus();
 
-  if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
+  if( (iEdit && !suspendedEditor) )
 		  iEdit->mousePressEvent(e,*mm(),this);
   else {
 	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) &&
@@ -606,7 +606,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 {
-      if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
+      if( (iEdit && !suspendedEditor) )
     		  	iEdit->mouseMoveEvent(e,*mm(),this);
       else {
 		    if (isDefaultTrackBall())
@@ -623,7 +623,7 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
   //clearFocus();
 	activeDefaultTrackball=true;
-	if( (iEdit && !suspendedEditor) && (e->button() != Qt::MidButton) )
+    if( (iEdit && !suspendedEditor) )
 			iEdit->mouseReleaseEvent(e,*mm(),this);
     else {
           if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
