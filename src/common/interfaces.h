@@ -315,6 +315,9 @@ public:
     if (preMask & MeshModel::MM_VERTQUALITY && !m.hasDataMask(MeshModel::MM_VERTQUALITY))
 				MissingItems.push_back("Vertex Quality");
 
+    if (preMask & MeshModel::MM_FACEQUALITY && !m.hasDataMask(MeshModel::MM_FACEQUALITY))
+        MissingItems.push_back("Face Quality");
+
     if (preMask & MeshModel::MM_WEDGTEXCOORD && !m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 				MissingItems.push_back("Per Wedge Texture Coords");
 
@@ -499,7 +502,6 @@ public:
 		assert(NULL != md.mm());
 		return (StartEdit(*(md.mm()), parent));	
 	}
-		
 	// Called when the user press the second time the button 
 	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
     
