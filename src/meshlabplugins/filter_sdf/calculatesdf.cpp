@@ -47,8 +47,6 @@ void CalculateSDF::makeFacesNVolume(bool smoothing, bool smoothingAnisotropic, i
 
 // basically shoot rays opposite the normal and do something with the distances we receive
 float CalculateSDF::traceSdfConeAt( const Point3f& p, const Point3f& n ){
-    assert( m_rayIntersect->isInitialized() );
-
     float result = 0.0;
     Ray3f ray = get_normal_opposite(p, n);
     float distanceCounter = 0.0;
@@ -132,14 +130,14 @@ float CalculateSDF::traceSdfConeAt( const Point3f& p, const Point3f& n ){
     return result;
 }
 
-void CalculateSDF::init(SDFMODE mode){
+void CalculateSDF::init(SDFMODE mode, vector<float>& results){
     //--- Prepare the data structures
     m_rayIntersect->Init(*mesh, gridsize);
 
     if(mode == FACES){
         //--- Allocate the memory
         origins = vector<Ray3f>( mesh->fn );
-        results = new vector<float>( mesh->fn,0 );
+        results.resize( mesh->fn,0 );
 
         //--- Initialize the query (face center/normal)
         for(int i=0; i<mesh->fn; i++)
@@ -149,10 +147,10 @@ void CalculateSDF::init(SDFMODE mode){
         assert(0);
 }
 
-vector<float>* CalculateSDF::compute(){
-    //--- Compute the queries
-    for(int i=0; i<origins.size(); i++)
-        (*results)[i] = traceSdfConeAt( origins[i].Origin(), origins[i].Direction() );
+void CalculateSDF::compute(vector<float>& results){
+  //--- Compute the queries
+    for(int i=0; i<1 /*origins.size()*/; i++)
+        results[i] = traceSdfConeAt( origins[i].Origin(), origins[i].Direction() );
 
     //--- Only apply smoothing if on vertices
     // if (!postprocess(mesh, onVertices, results, normalize, smoothing && onVertices))
@@ -160,5 +158,4 @@ vector<float>* CalculateSDF::compute(){
 
     // perform smoothing on the mesh itself
     // makeFacesNVolume(smoothing, smoothingAnisotropic, smoothingIterations );
-    return results;
 }

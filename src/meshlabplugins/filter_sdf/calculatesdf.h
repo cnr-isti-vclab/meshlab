@@ -28,7 +28,7 @@ public:
         this->smoothing = false;
         this->smoothingAnisotropic = false;
         this->smoothingIterations = 1;
-        this->gridsize = 40;
+        this->gridsize = 20;
     }
 
 private:
@@ -70,8 +70,8 @@ protected:
 	
 public:
     enum SDFMODE {VERTICES,FACES};
-    void init(SDFMODE mode);
-    vector<float>* compute();
+    void init(SDFMODE mode, vector<float>& results);
+    void compute( vector<float>& results );
 };
 
 #endif
