@@ -472,8 +472,9 @@ void MainWindow::createMenus()
 	fillDecorateMenu();
 }
 
-void MainWindow::fillFilterMenu()
-{
+void MainWindow::fillFilterMenu(){
+  // Connects the events of the actions within colorize to the method which shows their tooltip
+  connect(filterMenuColorize, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
 
   QMap<QString,MeshFilterInterface *>::iterator msi;
   for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
@@ -481,27 +482,27 @@ void MainWindow::fillFilterMenu()
       MeshFilterInterface * iFilter= msi.value();
       QAction *filterAction = iFilter->AC((msi.key()));
 			filterAction->setToolTip(iFilter->filterInfo(filterAction));
-			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
-			int filterClass = iFilter->getClass(filterAction);
+      connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
-			if( (filterClass & MeshFilterInterface::FaceColoring) || (filterClass & MeshFilterInterface::VertexColoring) ) filterMenuColorize->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::Selection) filterMenuSelect->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Cleaning ) filterMenuClean->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Remeshing ) filterMenuRemeshing->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Smoothing ) filterMenuSmoothing->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Normal ) filterMenuNormal->addAction(filterAction);
-			if( (filterClass &  MeshFilterInterface::Quality ) || (filterClass & MeshFilterInterface::Measure  )	)	 filterMenuQuality->addAction(filterAction);
-			if(filterClass &  MeshFilterInterface::Layer ) filterMenuLayer->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::MeshCreation ) fileMenuNew->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::RangeMap )	filterMenuRangeMap->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::PointSet )	filterMenuPointSet->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::Sampling )	filterMenuSampling->addAction(filterAction);
-			if(filterClass & MeshFilterInterface::Texture)		filterMenuTexture->addAction(filterAction);
-			 //  MeshFilterInterface::Generic :
-			if(filterClass == 0) filterMenu->addAction(filterAction);
-
-			if(!filterAction->icon().isNull())
-				filterToolBar->addAction(filterAction);
+      int filterClass = iFilter->getClass(filterAction);
+      if( filterClass & MeshFilterInterface::FaceColoring )   filterMenuColorize->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::VertexColoring ) filterMenuColorize->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Selection )      filterMenuSelect->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Cleaning )       filterMenuClean->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Remeshing )      filterMenuRemeshing->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Smoothing )      filterMenuSmoothing->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Normal )         filterMenuNormal->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Quality )        filterMenuQuality->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Measure  )	      filterMenuQuality->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Layer )          filterMenuLayer->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::MeshCreation )   fileMenuNew->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::RangeMap )       filterMenuRangeMap->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::PointSet )       filterMenuPointSet->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Sampling )       filterMenuSampling->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Texture)         filterMenuTexture->addAction(filterAction);
+      //  MeshFilterInterface::Generic :
+      if(filterClass == 0)                                    filterMenu->addAction(filterAction);
+      if(!filterAction->icon().isNull())                      filterToolBar->addAction(filterAction);
 		}
 }
 

@@ -91,7 +91,8 @@ private slots:
 	void applyLastFilter();
 	void runFilterScript();
 	void showFilterScript();
-	/////////// Slot Menu Render /////////////////////
+  void showTooltip(QAction*);
+  /////////// Slot Menu Render /////////////////////
 	void renderBbox();
 	void renderPoint();
 	void renderWire();
