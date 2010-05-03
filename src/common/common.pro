@@ -13,7 +13,8 @@ win32-g++:DLLDESTDIR = ../distrib
 # win32-msvc2008:DESTDIR     = ./release
 # win32-g++:DLLDESTDIR     = ./release
 # }
-unix:DLLDESTDIR = ../distrib
+linux-g++-32:DLLDESTDIR = ../distrib
+linux-g++-64:DLLDESTDIR = ../distrib
 mac:DLLDESTDIR = .
 macx:QMAKE_POST_LINK = "cp libcommon.*dylib ../distrib/meshlab.app/Contents/MacOs/"
 INCLUDEPATH *= ../.. \
@@ -22,7 +23,8 @@ INCLUDEPATH *= ../.. \
 TEMPLATE = lib
 win32-g++:CONFIG += dll
 macx-g++:CONFIG += dll
-unix:CONFIG += dll
+linux-g++-32:CONFIG += dll
+linux-g++-64:CONFIG += dll
 win32-msvc2005:CONFIG += staticlib
 win32-msvc2008:CONFIG += staticlib
 

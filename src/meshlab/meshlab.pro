@@ -107,8 +107,10 @@ win32-g++:LIBS        	+= -L../distrib -lcommon
 #	win32-g++:release:LIBS 			+= -L../common/release -lcommon
 #}
 
-unix:!mac:LIBS += -L../distrib -lcommon
-unix:!mac:QMAKE_RPATHDIR += ../distrib
+linux-g++-32:LIBS += -L../distrib -lcommon
+linux-g++-32:QMAKE_RPATHDIR += ../distrib
+linux-g++-64:LIBS += -L../distrib -lcommon
+linux-g++-64:QMAKE_RPATHDIR += ../distrib
 
 
 # uncomment in your local copy only in emergency cases.
