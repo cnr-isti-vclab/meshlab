@@ -16,7 +16,7 @@ win32-g++:DLLDESTDIR = ../distrib
 
 mac:DLLDESTDIR = .
 
-macx:QMAKE_POST_LINK = "cp libcommon.*dylib ../distrib/meshlab.app/Contents/MacOs/"
+macx:QMAKE_POST_LINK = "cp libcommon.* ../distrib/meshlab.app/Contents/MacOs/"
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
     $$GLEWDIR/include
