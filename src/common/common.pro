@@ -23,7 +23,7 @@ INCLUDEPATH *= ../.. \
 TEMPLATE = lib
 linux-g++-32:CONFIG += dll
 linux-g++-32:DESTDIR = ../distrib
-linux-g++-64::CONFIG += dll
+linux-g++-64:CONFIG += dll
 linux-g++-64:DESTDIR = ../distrib
 
 unix:CONFIG += dll
