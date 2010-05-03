@@ -143,9 +143,9 @@ private:
         return getClass();
     }
     // NOTE: Paolo informed that this will be killed sooner or later.
-    // any behavior defined therein should be moved to getPreConditions()
+    // any behavior defined therein should be moved to getPostConditions()
     int getRequirements(QAction*  action ){
-        return getPreConditions( action );
+        return postConditions();
     }
     int getPreConditions(QAction* ) const{
         return getPreConditions();

@@ -1,10 +1,13 @@
 #ifndef __CALCULATE_SDF_H_
 #define __CALCULATE_SDF_H_
 
+// If this flag is enabled, only one ray for cone is casted
+#define DEBUG_SDF_SINGLERAY
+
 #include <qobject.h>
 #include <qthread.h>
 #include <QApplication.h>
-#include "rayintersect.h"
+#include <vcg/space/index/aabb_binary_tree/aabb_binary_tree.h>
 
 //--- ATA2: these have been added to bridge with MeshLAB
 // the dialog utilities m_progDlg have been removed
@@ -20,20 +23,20 @@ class CalculateSDF{
 public:
     CalculateSDF(CMeshO* mesh){
         this->mesh = mesh;
-        this->m_rayIntersect = new RayIntersect(mesh);
-        this->numCones = 3;
-        this->coneSeperation = 20;
-        this->raysInCone = 4;
-        this->gaussianWeights = true;
+        // this->m_rayIntersect = new RayIntersect(mesh);
+        this->raysInCone = 20;
+        this->coneAperture = 70; // DEGREES
+        // this->gaussianWeights = true;
         this->smoothing = false;
         this->smoothingAnisotropic = false;
         this->smoothingIterations = 1;
-        this->gridsize = 20;
+        // this->gridsize = 20;
     }
 
 private:
     // Original mesh and intersectoin accellerator
-    RayIntersect* m_rayIntersect;
+    vcg::AABBBinaryTreeIndex<CFaceO, float, vcg::EmptyClass> sIndex;
+    // RayIntersect* m_rayIntersect;
     CMeshO* mesh;
 
     // Processing data structures
@@ -41,14 +44,13 @@ private:
     vector<float>* results;
 
     // Options
-    int numCones;
-    float coneSeperation;
     int raysInCone;
-    bool gaussianWeights;
+    float coneAperture;
     bool smoothing;
     bool smoothingAnisotropic;
     int smoothingIterations;
-    int gridsize;
+
+    // int gridsize;
 
 
 protected:
@@ -71,7 +73,7 @@ protected:
 public:
     enum SDFMODE {VERTICES,FACES};
     void init(SDFMODE mode, vector<float>& results);
-    void compute( vector<float>& results );
+    void compute( vector<float>& results, vcg::CallBackPos* cb=0 );
 };
 
 #endif

@@ -10,5 +10,6 @@ class SdfPlugin : public SingleMeshFilterInterface{
 public:
     SdfPlugin();
     bool applyFilter(MeshDocument&, RichParameterSet &, vcg::CallBackPos*);
+    int getPostconditions(){ return MeshModel::MM_FACEQUALITY; }
 };
 #endif
