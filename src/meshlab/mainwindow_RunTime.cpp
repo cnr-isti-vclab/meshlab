@@ -353,7 +353,6 @@ void MainWindow::runFilterScript()
 		//WARNING!!!!!!!!!!!!
 		/* to be changed */
 		iFilter->applyFilter( action, meshDocument, (*ii).second, QCallBack );
-		
 		if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
 			GLA()->setColorMode(vcg::GLW::CMPerFace);
 			GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
@@ -380,6 +379,14 @@ void MainWindow::runFilterScript()
 	}
 }
 
+// Receives the action that wants to show a tooltip and display it
+// on screen at the current mouse position.
+// TODO: have the tooltip always display with fixed width at the right
+//       hand side of the menu entry (not invasive)
+void MainWindow::showTooltip(QAction* q){
+  QString tip = q->toolTip();
+  QToolTip::showText(QCursor::pos(), tip);
+}
 
 // /////////////////////////////////////////////////
 // The Very Important Procedure of applying a filter
