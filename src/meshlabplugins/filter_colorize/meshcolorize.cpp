@@ -83,18 +83,17 @@ QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
   }
   return QString("error!");
 }
-QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const 
-{
+QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const {
   switch(filterId){
-  case CP_CLAMP_QUALITY:             return QString("Clamp quality vertex values to a given range according to specific values or to percentiles");
+  case CP_CLAMP_QUALITY:             return QString("Clamp vertex quality values to a given range according to specific values or to percentiles");
   case CP_MAP_VQUALITY_INTO_COLOR :  return QString("Color vertices depending on their quality field (manually equalized).");
   case CP_MAP_FQUALITY_INTO_COLOR :  return QString("Color faces depending on their quality field (manually equalized).");
   case CP_DISCRETE_CURVATURE :       return QString("Colorize according to various discrete curvature computed as described in:<br>"
                                                    "'<i>Discrete Differential-Geometry Operators for Triangulated 2-Manifolds</i>' <br>"
                                                    "M. Meyer, M. Desbrun, P. Schroder, A. H. Barr");
-  case CP_TRIANGLE_QUALITY:         return QString("Compute a quality and colorize faces depending on triangle quality:<br/>"
-                                                   "1: minimum ratio height/edge among the edges<br/>"
-                                                   "2: ratio between radii of incenter and circumcenter<br/>"
+  case CP_TRIANGLE_QUALITY:         return QString("Compute a quality and colorize faces depending on triangle quality:<br>"
+                                                   "1: minimum ratio height/edge among the edges<br>"
+                                                   "2: ratio between radii of incenter and circumcenter<br>"
                                                    "3: 2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM, M transform triangle into equilateral");
   case CP_VERTEX_SMOOTH:            return QString("Laplacian Smooth Vertex Color");
   case CP_FACE_SMOOTH:              return QString("Laplacian Smooth Face Color");
@@ -107,14 +106,15 @@ QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const
   }
 }
 
+// What "new" properties the plugin requires
 int ExtraMeshColorizePlugin::getRequirements(QAction *action){
   switch(ID(action)){
   case CP_DISCRETE_CURVATURE:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV;
   case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
   case CP_RANDOM_FACE:              return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
   case CP_CLAMP_QUALITY:            return 0; // TODO: split clamp on vertex & faces and add requirements
-  case CP_MAP_VQUALITY_INTO_COLOR:  return MeshModel::MM_VERTQUALITY;
-  case CP_MAP_FQUALITY_INTO_COLOR:  return MeshModel::MM_FACEQUALITY;
+  case CP_MAP_VQUALITY_INTO_COLOR:  return MeshModel::MeshModel::MM_VERTCOLOR;
+  case CP_MAP_FQUALITY_INTO_COLOR:  return MeshModel::MeshModel::MM_FACECOLOR;
   case CP_VERTEX_SMOOTH:            return 0; // TODO: should it be MM_NONE?
   case CP_FACE_SMOOTH:              return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR ;
   case CP_VERTEX_TO_FACE:           return MeshModel::MM_FACECOLOR;
@@ -205,6 +205,31 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
       }
       break;
     }
+   case CP_MAP_FQUALITY_INTO_COLOR: {
+       float RangeMin = par.getFloat("minVal");
+       float RangeMax = par.getFloat("maxVal");
+       float perc = par.getDynamicFloat("perc");
+
+       Histogramf H;
+       ComputePerFaceQualityHistogram(m.cm,H);
+       float PercLo = H.Percentile(perc/100.f);
+       float PercHi = H.Percentile(1.0-perc/100.f);
+
+       // Make the range and percentile symmetric w.r.t. zero, so that
+       // the value zero is always colored in yellow
+       if(par.getBool("zeroSym")){
+         RangeMin = min(RangeMin, -math::Abs(RangeMax));
+         RangeMax = max(math::Abs(RangeMin), RangeMax);
+         PercLo = min(PercLo, -math::Abs(PercHi));
+         PercHi = max(math::Abs(PercLo), PercHi);
+       }
+
+       tri::UpdateColor<CMeshO>::FaceQualityRamp(m.cm,PercLo,PercHi);
+       Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
+           H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100-perc);
+       break;
+   }
+
   case CP_DISCRETE_CURVATURE:
     {
       if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0) {
