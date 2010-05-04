@@ -208,7 +208,7 @@ void U3DIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichPar
 
 void U3DIOPlugin::saveParameters(const RichParameterSet &par)
 {
-	vcg::Point3f from_target_to_camera = vcg::Point3f(- par.getPoint3f(QString("position_val")) + par.getPoint3f(QString("target_val")));
+        vcg::Point3f from_target_to_camera = vcg::Point3f(par.getPoint3f(QString("position_val")) - par.getPoint3f(QString("target_val")));
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters* sw = _param._campar;
 	//vcg::Point3f p = avoidExponentialNotation(sw->_obj_pos,_param._campar->_obj_bbox_diag);
 	vcg::Point3f p = sw->_obj_pos;
