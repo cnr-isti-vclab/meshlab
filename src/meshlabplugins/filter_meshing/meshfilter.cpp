@@ -939,7 +939,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 					Point3f p = (*vi).P();
 					float ro,theta,phi;
 					p.Y()=0;
-					p.ToPolar(ro,theta,phi);
+                                        p.ToPolarRad(ro,theta,phi);
 					float thetaDeg = math::ToDeg(theta);
 					int loopIndex =0;
 					while(thetaDeg<endAngleDeg)
