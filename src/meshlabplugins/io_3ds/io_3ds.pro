@@ -26,6 +26,8 @@ win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/3ds.lib
 win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/3ds.lib
 win32-g++:LIBS		+= ../../external/lib/win32-gcc/lib3ds.a
 linux-g++:LIBS += ../../external/lib/linux-g++/lib3ds.a
+linux-g++-32:LIBS += ../../external/lib/linux-g++-32/lib3ds.a
+linux-g++-64:LIBS += ../../external/lib/linux-g++-64/lib3ds.a
 
 # unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/lib/unix -l3ds
 

@@ -15,6 +15,7 @@ mac:LIBS += ../../common/libcommon.dylib
 win32-msvc2005:  LIBS += ../../distrib/common.lib
 win32-msvc2008:  LIBS += ../../distrib/common.lib
 win32-g++:LIBS += -L../../distrib -lcommon
+linux-g++:LIBS += -L../../distrib -lcommon
 linux-g++-32:LIBS += -L../../distrib -lcommon
 linux-g++-64:LIBS += -L../../distrib -lcommon
 

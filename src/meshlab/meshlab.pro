@@ -107,6 +107,8 @@ win32-g++:LIBS        	+= -L../distrib -lcommon
 #	win32-g++:release:LIBS 			+= -L../common/release -lcommon
 #}
 
+linux-g++:LIBS += -L../distrib -lcommon
+linux-g++:QMAKE_RPATHDIR += ../distrib
 linux-g++-32:LIBS += -L../distrib -lcommon
 linux-g++-32:QMAKE_RPATHDIR += ../distrib
 linux-g++-64:LIBS += -L../distrib -lcommon
