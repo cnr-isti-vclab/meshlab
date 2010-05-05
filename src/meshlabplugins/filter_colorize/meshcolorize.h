@@ -88,29 +88,6 @@ removed color_curvature.h in favour of curvature.h
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h>
 
-//------------------------------------------------------------------------------
-//
-// TODO: this is ready to be moved in VCGLib, but I don't have write access to it!
-//
-//------------------------------------------------------------------------------
-#include <vcg/complex/trimesh/stat.h>
-typedef CMeshO MeshType;
-typedef CMeshO::FaceIterator FaceIterator;
-namespace vcg{
-  static void ComputePerFaceQualityHistogram( MeshType & m, Histogramf &h, bool selectionOnly=false ){
-    FaceIterator fi;
-    int HistSize=10000;
-    std::pair<float,float> minmax = tri::Stat<MeshType>::ComputePerFaceQualityMinMax(m);
-    h.Clear();
-    h.SetRange( minmax.first,minmax.second, HistSize );
-    for(fi = m.face.begin(); fi != m.face.end(); ++fi)
-      if(!(*fi).IsD() &&  ((!selectionOnly) || (*fi).IsS()) ){
-        assert(!math::IsNAN((*fi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
-      h.Add((*fi).Q());
-    }
-  }
-} //-- vcg::
-
 class ExtraMeshColorizePlugin : public QObject, public MeshFilterInterface
 {
     Q_OBJECT

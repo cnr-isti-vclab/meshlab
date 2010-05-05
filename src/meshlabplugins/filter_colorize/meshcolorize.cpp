@@ -211,7 +211,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
        float perc = par.getDynamicFloat("perc");
 
        Histogramf H;
-       ComputePerFaceQualityHistogram(m.cm,H);
+       tri::Stat<CMeshO>::ComputePerFaceQualityHistogram(m.cm,H);
        float PercLo = H.Percentile(perc/100.f);
        float PercHi = H.Percentile(1.0-perc/100.f);
 
