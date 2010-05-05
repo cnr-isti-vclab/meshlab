@@ -513,9 +513,13 @@ public:
 
 		typename std::vector<FaceType*>::iterator fib;
 		for(fib=inBox.begin();fib!=inBox.end();++fib)
-			if(vcg::tri::Clean<MESH>::TestIntersection( *fib, f ))
-				return true;
-
+		{
+			if (f != *fib)
+			{
+				if(vcg::tri::Clean<MESH>::TestIntersection( *fib, f ))
+					return true;
+			}
+		}
 		return false;
 	};
 
