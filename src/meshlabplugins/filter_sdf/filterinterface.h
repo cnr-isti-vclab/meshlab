@@ -37,9 +37,9 @@
   * \endcode
   */
 class SingleMeshFilterInterface : public QObject, public MeshFilterInterface{
-
+  
 public:
-    /**
+  /**
       * @brief Constructor for a filter plugin of a given name
       *
       * @param name the name of the plugin.
@@ -53,11 +53,11 @@ public:
       * }
       * \endcode
       */
-    SingleMeshFilterInterface(QString actionname){
-        typeList << 0; // add a dummy type to the typelist
-        actionList << new QAction( actionname, this );
-    }
-    /**
+  SingleMeshFilterInterface(QString actionname){
+    typeList << 0; // add a dummy type to the typelist
+    actionList << new QAction( actionname, this );
+  }
+  /**
       * @brief Text displayed in "Help => About Plugins"
       *
       * This is a (optional) brief paragraph that describes the functionalities offered by the filter.
@@ -67,10 +67,10 @@ public:
       * You don't have to implement this method, in that case a simple "No documentation available"
       * will be showed.
       */
-    virtual QString filterInfo() const{
-        return "No documentation available";
-    }
-    /**
+  virtual QString filterInfo() const{
+    return "No documentation available";
+  }
+  /**
       * @brief The type of filter being implemented
       * @note optional, filter belongs to MeshFilterInterface::Generic by default
       *
@@ -79,11 +79,11 @@ public:
       * by meshlab to determine in which filter sub-menu-entry insert this filter. The default value adds the
       * plugin to the bottom of the list.
       */
-    virtual FilterClass getClass(){
-        return MeshFilterInterface::Generic;
-    }
-
-    /**
+  virtual FilterClass getClass(){
+    return MeshFilterInterface::Generic;
+  }
+  
+  /**
       * @brief The type of filter being implemented
       * @note optional, the most basic filter has no parameters
       *
@@ -91,9 +91,9 @@ public:
       * parameter set according to your mesh document (data dependent parameters). A GUI will be
       * automatically designed according to this parameters.
       */
-    virtual void initParameterSet(MeshDocument &, RichParameterSet &){ }
-
-    /**
+  virtual void initParameterSet(MeshDocument &, RichParameterSet &){ qDebug() << "HERE2!"; }
+  
+  /**
       * @brief The implementation of the filter algorithm
       * @note required, you will get a linker error otherwise
       *
@@ -101,20 +101,20 @@ public:
       * and is used to understand what type of plugin is being developed. This information will be used
       * by meshlab to determine in which filter sub-folder insert this filter.
       */
-    virtual bool applyFilter(MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos* cb = 0) = 0;
-
-    /**
+  virtual bool applyFilter(MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos* cb = 0) = 0;
+  
+  /**
       * @brief The pre-conditions required by the filter on the input mesh
       * @note optional, filter doesn't require anything by default
       *
       * This method should return a combination of the values defined from MeshModel::MeshElement.
       * You can combine elements using the bit-operator |.
       */
-    virtual int getPreConditions() const{
-        return MeshModel::MM_NONE;
-    }
-
-    /**
+  virtual int getPreConditions() const{
+    return MeshModel::MM_NONE;
+  }
+  
+  /**
       * @brief The post-conditions of the input mesh
       * @note optional, filter doesn't add any additional field to the output mesh
       * @todo Revise this documentation, never used postConditions() before
@@ -122,10 +122,10 @@ public:
       * This method should return a combination of the values defined from MeshModel::MeshElement.
       * You can combine elements using the bit-operator |.
       */
-    virtual int postConditions() const{
-        return MeshModel::MM_NONE;
-    }
-
+  virtual int postConditions() const{
+    return MeshModel::MM_NONE;
+  }
+  
 //--------------------------------------------------------------------------------------
 //            dummy implementation of VIRTUAL METHODS: MeshFilterInterface
 //
@@ -133,32 +133,32 @@ public:
 // the public interface of MeshFilterInterface above.
 //--------------------------------------------------------------------------------------
 private:
-    QString filterName(FilterIDType ) const{
-        return actionList[0]->text();
-    }
-    QString filterInfo(FilterIDType ) const{
-        return filterInfo();
-    }
-    FilterClass getClass(QAction *){
-        return getClass();
-    }
-    // NOTE: Paolo informed that this will be killed sooner or later.
-    // any behavior defined therein should be moved to getPostConditions()
-    int getRequirements(QAction*  action ){
-        return postConditions();
-    }
-    int getPreConditions(QAction* ) const{
-        return getPreConditions();
-    }
-    int postCondition() const{
-        return MeshModel::MM_NONE;
-    }
-    bool applyFilter(QAction *, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos * cb){
-        return applyFilter(md, par, cb);
-    }
-    void initParameterSet(QAction *, MeshDocument &md, RichParameterSet &par){
-        initParameterSet(md,par);
-    }
+  QString filterName(FilterIDType ) const{
+    return actionList[0]->text();
+  }
+  QString filterInfo(FilterIDType ) const{
+    return filterInfo();
+  }
+  FilterClass getClass(QAction *){
+    return getClass();
+  }
+  // NOTE: Paolo informed that this will be killed sooner or later.
+  // any behavior defined therein should be moved to getPostConditions()
+  int getRequirements(QAction* ){
+    return postConditions();
+  }
+  int getPreConditions(QAction* ) const{
+    return getPreConditions();
+  }
+  int postCondition() const{
+    return MeshModel::MM_NONE;
+  }
+  bool applyFilter(QAction *, MeshDocument &md, RichParameterSet& par, vcg::CallBackPos * cb){
+    return applyFilter(md, par, cb);
+  }
+  virtual void initParameterSet(QAction *, MeshDocument &md, RichParameterSet &par){
+    initParameterSet(md,par);
+  }
 };
 
 #endif // SINGLEMESHFILTERINTERFACE_H

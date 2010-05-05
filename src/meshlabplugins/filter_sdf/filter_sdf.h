@@ -1,7 +1,6 @@
 #ifndef COMPUTESDFPLUGIN_H
 #define COMPUTESDFPLUGIN_H
 #include <filterinterface.h>
-#include "calculatesdf.h"
 
 class SdfPlugin : public SingleMeshFilterInterface{
     Q_OBJECT
@@ -9,7 +8,8 @@ class SdfPlugin : public SingleMeshFilterInterface{
 
 public:
     SdfPlugin();
-    bool applyFilter(MeshDocument&, RichParameterSet &, vcg::CallBackPos*);
-    int getPostconditions(){ return MeshModel::MM_FACEQUALITY; }
+    bool applyFilter(MeshDocument&, RichParameterSet&, vcg::CallBackPos*);
+    virtual void initParameterSet(MeshDocument&, RichParameterSet &);
+    
 };
 #endif
