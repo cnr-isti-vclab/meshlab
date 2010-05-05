@@ -413,7 +413,7 @@ MeshlabStdDialog::~MeshlabStdDialog()
 
 		connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
 		connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-		connect(this,SIGNAL(dialogParamChanged()),p,SLOT(parameterChanged()));
+		connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
   }
 
   AbsPercWidget::~AbsPercWidget()
@@ -1478,6 +1478,7 @@ OpenFileWidget::~OpenFileWidget()
 SaveFileWidget::SaveFileWidget( QWidget* p,RichSaveFile* rpar )
 :IOFileWidget(p,rpar)
 {
+	filename->setText(rpar->val->getFileName());
 }
 
 SaveFileWidget::~SaveFileWidget()
