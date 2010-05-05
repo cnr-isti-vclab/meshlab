@@ -34,6 +34,8 @@
 #include <wrap/gl/math.h>
 #include <wrap/gl/trimesh.h>
 #include <wrap/gui/trackball.h>
+#include <vcg/math/shot.h>
+#include <wrap/gl/shot.h>
 
 #include "../common/interfaces.h"
 #include "../common/filterscript.h"
@@ -41,6 +43,9 @@
 #include "glarea_setting.h"
 #include "viewer.h"
 #include "multiViewer_Container.h"
+
+//mathematics
+#include <vcg/math/quaternion.h>
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -68,6 +73,8 @@ class MeshModel;
 class GLArea : public QGLWidget, public Viewer
 {
 	Q_OBJECT
+
+	typedef vcg::Shot<double> Shot;
 
 public:
     GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current, int id, MeshDocument *meshDoc);
@@ -127,6 +134,7 @@ public:
 	void setLightModel();
 	void setView();
     void resetTrackBall();
+	void loadShot();
 	std::list<QAction *> iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
@@ -309,7 +317,144 @@ private:
 	int tileCol, tileRow, totalCols, totalRows;
 	void setCursorTrack(vcg::TrackMode *tm);
 
-	
+	void initializeShot(Shot &shot);
+
+	/*
+	Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
+	to apply "refCamera" o "track".
+	*/
+	template <class T>
+	vcg::Shot<T> getShotFromTrack(vcg::Shot<T> &refCamera, vcg::Trackball *track){
+		vcg::Shot<T> view;
+
+		double _near, _far;
+		_near = 0.1;
+		_far = 100;
+
+		//get OpenGL modelview matrix after applying the trackball
+		GlShot<vcg::Shot<T> >::SetView(refCamera, _near, _far);
+		glPushMatrix();
+		track->GetView();
+		track->Apply();
+		vcg::Matrix44d model;
+		glGetv(GL_MODELVIEW_MATRIX, model);
+		glPopMatrix();
+		GlShot<vcg::Shot<T> >::UnsetView();
+
+		//get translation out of modelview
+		vcg::Point3d tra;
+		tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
+		model[0][3] = model[1][3] = model[2][3] = 0;
+
+		//get pure rotation out of modelview
+		double det = model.Determinant();
+		double idet = 1/pow(det, 1/3.0); //inverse of the determinant
+		model *= idet;
+		model[3][3] = 1;
+		view.Extrinsics.SetRot(model);
+
+		//get pure translation out of modelview
+		vcg::Matrix44d imodel = model;
+		vcg::Transpose(imodel);
+		tra = -(imodel*tra);
+		tra *= idet;
+		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
+
+		//use same current intrinsics
+		view.Intrinsics = refCamera.Intrinsics;
+
+		return view;
+	}
+
+	/*
+	Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
+	to apply "refCamera" o "track".
+	*/
+	template <class T>
+	vcg::Shot<T> getShotFromTrack2(vcg::Shot<T> &refCamera, vcg::Trackball *track){
+		vcg::Shot<T> view;
+
+		double _near, _far;
+		_near = 0.1;
+		_far = 100;
+
+		//---------------------- ALTERED--------------------
+
+		// //get OpenGL modelview matrix after applying the trackball
+		// GlShot<vcg::Shot<T> >::SetView(refCamera, _near, _far);
+		//	glPushMatrix();
+		//	track->GetView();
+		//	track->Apply();
+		//	vcg::Matrix44d model;
+		//	glGetv(GL_MODELVIEW_MATRIX, model);
+		//	glPopMatrix();
+		// GlShot<vcg::Shot<T> >::UnsetView();
+
+		//GlShot<vcg::Shot<T> >::SetView(refCamera, _near, _far); //mi serve per la proj di refcamera... altrimenti come la ottengo?
+		vcg::Matrix44f shotExtr;
+		refCamera.GetWorldToExtrinsicsMatrix().ToMatrix(shotExtr);
+
+		////legge la matrice di proj settata prima
+		//vcg::Matrix44f proj; 
+		//glGetv(GL_PROJECTION_MATRIX,proj);
+		//GlShot<vcg::Shot<T> >::UnsetView();
+
+		////aggiorna la matrice di rototraslazione di track
+		//int viewport[] = {0,0,width(),height()};
+		//track->camera.SetView(proj.V(),shotExtr.V(), viewport);
+
+		vcg::Matrix44f model2;
+		model2 = (shotExtr)* track->Matrix();
+		vcg::Matrix44d model;
+		model2.ToMatrix(model);
+
+		//---------------------- ORIGINAL--------------------
+
+		//get translation out of modelview
+		vcg::Point3d tra;
+		tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
+		model[0][3] = model[1][3] = model[2][3] = 0;
+
+		//get pure rotation out of modelview
+		double det = model.Determinant();
+		double idet = 1/pow(det, 1/3.0); //inverse of the determinant
+		model *= idet;
+		model[3][3] = 1;
+		view.Extrinsics.SetRot(model);
+
+		//get pure translation out of modelview
+		vcg::Matrix44d imodel = model;
+		vcg::Transpose(imodel);
+		tra = -(imodel*tra);
+		tra *= idet;
+		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
+
+		//use same current intrinsics
+		view.Intrinsics = refCamera.Intrinsics;
+
+		return view;
+	}
+
+	/*
+	Given a Shot "from", and a trackball "tb" replaces "tb" with a trackball "tb'" such that:
+	"from" o "tb" = "tb'"
+	*/
+	template <class T>
+	void Shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
+		
+		Shot id;
+
+		vcg::Quaterniond qto;     qto.FromMatrix(id.Extrinsics.Rot());
+		vcg::Quaterniond qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
+
+		/*float sca=tb.track.sca;
+		tb.track.sca=1;*/
+		tb.track.tra += ( tb.track.rot.Inverse().Rotate( vcg::Point3f::Construct(-from.Extrinsics.Tra()) + tb.center ) ) / tb.track.sca;
+		tb.track.rot = vcg::Quaternionf::Construct(qto.Inverse() * qfrom) * tb.track.rot;
+		tb.track.tra -= ( tb.track.rot.Inverse().Rotate( vcg::Point3f::Construct(-  id.Extrinsics.Tra()) + tb.center ) ) / tb.track.sca;
+
+		//aggiustare sca e tra per mettere il centro della trackbal al punto giusto
+	}
 };
 
 

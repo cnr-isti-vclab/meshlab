@@ -258,18 +258,18 @@ void GLArea::paintGL()
 
 	setView();  // Set Modelview and Projection matrix
 	drawGradient();  // draws the background
-  drawLight();
+    drawLight();
 
 	glPushMatrix();
 
 	// Finally apply the Trackball for the model
 	trackball.GetView();
-  trackball.Apply(false);
+    trackball.Apply(false);
 	glPushMatrix();
 
 	//glScale(d);
-  //	glTranslate(-FullBBox.Center());
-  setLightModel();
+    //glTranslate(-FullBBox.Center());
+    setLightModel();
 
 	// Set proper colorMode
 	if(rm.colorMode != GLW::CMNone)
@@ -680,6 +680,16 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 	update();
 	if(isCurrent())
 		  mvc->updateReleaseViewers(e);
+
+	//TestShot
+	Shot shot1; initializeShot(shot1);
+	Shot shot2; initializeShot(shot2);
+	shot1.Extrinsics.SetTra(Point3<double>(0,0,10));
+	shot2.Extrinsics.SetTra(Point3<double>(0,0,10));
+
+	shot1 = getShotFromTrack(shot1,&trackball);
+	shot2 = getShotFromTrack2(shot2, &trackball);
+
 }
 
 //Processing of tablet events, interesting only for painting plugins
@@ -1022,3 +1032,108 @@ void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
     GLAreaSetting::initGlobalParameterSet(defaultGlobalParamSet);
 }
 
+
+void GLArea::initializeShot(Shot &shot) 
+{
+    
+	//Da vedere
+	shot.Intrinsics.PixelSizeMm[0]=0.036916077;
+    shot.Intrinsics.PixelSizeMm[1]=0.036916077;
+
+    shot.Intrinsics.FocalMm= 27.846098; //per avere circa 60 gradi
+    shot.Intrinsics.DistorCenterPx[0]=width()/2;
+    shot.Intrinsics.DistorCenterPx[1]=height()/2;
+    shot.Intrinsics.CenterPx[0]=width()/2;
+    shot.Intrinsics.CenterPx[1]=height()/2;
+    shot.Intrinsics.ViewportPx[0]=width();
+    shot.Intrinsics.ViewportPx[1]=height();
+
+    shot.Extrinsics.SetIdentity();
+
+	//Shot newshot;
+	//vcg::Box3<double> box;
+	//box.Import(meshDoc->bbox());
+	//newshot.Extrinsics.SetIdentity();
+	//vcg::Point3d c = box.Center();
+	//vcg::Point3d v = c - vcg::Point3d(0, 0, 3*box.Diag());
+	//newshot.SetViewPoint(v);
+	//newshot.LookAt(c, vcg::Point3d(0, 1, 0));
+
+
+	//vcg::Camera<double> &cam = shot.Intrinsics;
+	//double dx = cam.ViewportPx[0]*cam.PixelSizeMm[0];
+
+	////if we have the focal we compute the angle (and viceversa)
+	//cout << "Focal: " << cam.FocalMm << endl;
+	//cout << "dx: " << dx << endl;
+	//double angle = 60.0;
+	//if(dx != 0 && cam.FocalMm != 0) { //we have the focal
+	//	angle = atan(dx/cam.FocalMm)*180.0f/M_PI;
+	//} else if(dx != 0) {
+	//	cam.FocalMm = dx/tan(angle*M_PI/180.0f);
+	//} else {
+	//	cam.FocalMm = 60;
+	//}
+
+	//cout << "Angle: " << angle << endl;
+	//cout << "Focal: " << cam.FocalMm << endl;
+	//cout << endl;
+
+	//newshot.Intrinsics.SetPerspective(angle/2, width()/(double)height(), cam.FocalMm, vcg::Point2<int>(width(), height()));
+	//vcg::Camera<double> &cam1 = newshot.Intrinsics;
+	//double dx1 = cam.ViewportPx[0]*cam1.PixelSizeMm[0];
+	//cout << "Dx now: " << dx1 << " fcal: " << newshot.Intrinsics.FocalMm << endl;
+	//return newshot;
+}	
+
+void GLArea::loadShot(){
+	//Shot test
+	Shot shot;
+	initializeShot(shot);
+	//oppure lo leggi da file
+
+	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
+	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
+	/*fov=60;
+	float focal = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2)));*/
+
+	// This parameter is the one that controls:
+	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
+	float viewRatio = 1.75f;
+	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+
+	//Esempi di shot di ingresso
+	//shot.Extrinsics.SetTra(Point3d(0, 0, cameraDist));
+	vcg::Matrix44d rot;
+	rot.Identity();
+	rot.SetRotateDeg(90,Point3<double>(0,1,0));
+	shot.Extrinsics.SetRot(rot);
+	shot.Extrinsics.SetTra(Inverse(rot)*Point3d(0, 0, cameraDist));
+	
+	//correct the traslation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+	//T(gl) S R T(t) => S R T(S^(-1) R^(-1)(gl) + t)
+	//Shot doesn't introduce scaling
+	//To compensate S^(-1) R^(-1)(gl)we add to t S^(-1) R^(-1)(-gl)
+	shot.Extrinsics.SetTra(shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, -cameraDist)));
+
+	//reset trackball. The point of view must be set only by the shot
+	trackball.Reset();
+	float newScale= 3.0f/meshDoc->bbox().Diag();
+	trackball.track.sca = newScale;
+	trackball.track.tra =  -meshDoc->bbox().Center();
+	
+	Shot2Track(shot, cameraDist,trackball);
+
+	//Test on trackball
+	/*Matrix44f s_inv = Matrix44f().SetScale(1/trackball.track.sca, 1/trackball.track.sca, 1/trackball.track.sca);
+	vcg::Matrix44f rot_inv;
+	Inverse(trackball.track.rot).ToMatrix(rot_inv);
+
+	Shot2Track(shot, cameraDist,trackball);
+
+	trackball.track.tra += s_inv*rot_inv*Point3f(0, 0, cameraDist);*/
+
+	//Shot2Track(shot, cameraDist,trackball);
+
+	updateGL();
+}

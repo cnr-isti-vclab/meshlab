@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>images/backlines.png</file>
         <file>images/bbox.png</file>
+	<file>images/camera.png</file>
         <file>images/cursors/plain.png</file>
         <file>images/cursors/plain_pan.png</file>
         <file>images/cursors/plain_trackball.png</file>

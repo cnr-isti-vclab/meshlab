@@ -110,6 +110,7 @@ private slots:
 	void toggleBackFaceCulling();
   void toggleSelectFaceRendering();
   void toggleSelectVertRendering();
+	void loadShot();
   //void applyDecorateMode();
 	///////////Slot Menu View ////////////////////////
 	void fullScreen();
@@ -296,6 +297,8 @@ private:
         QAction *colorModePerMeshAct;
 	QAction *colorModePerVertexAct;
 	QAction *colorModePerFaceAct;
+
+	QAction *loadShotAct;
 	///////////Actions Menu View ////////////////////////
 	QAction *fullScreenAct;
 	QAction *showToolbarStandardAct;

@@ -205,6 +205,12 @@ void MainWindow::createActions()
   setSelectVertRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
   connect(setSelectVertRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectVertRendering()));
 
+	loadShotAct = new QAction(QIcon(":/images/camera.png"),tr("Load Shot"),this);
+	loadShotAct->setCheckable(false);
+	loadShotAct->setShortcutContext(Qt::ApplicationShortcut);
+	loadShotAct->setShortcut(Qt::CTRL+Qt::Key_W);
+	connect(loadShotAct, SIGNAL(triggered()), this, SLOT(loadShot()));
+
 	//////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
 	fullScreenAct->setCheckable(true);
@@ -324,8 +330,10 @@ void MainWindow::createToolBars()
 	renderToolBar->addActions(renderModeGroupAct->actions());
 	renderToolBar->addAction(renderModeTextureAct);
 	renderToolBar->addAction(setLightAct);
-  renderToolBar->addAction(setSelectFaceRenderingAct);
-  renderToolBar->addAction(setSelectVertRenderingAct);
+	renderToolBar->addAction(setSelectFaceRenderingAct);
+	renderToolBar->addAction(setSelectVertRenderingAct);
+
+	renderToolBar->addAction(loadShotAct);
 
 	/*editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
@@ -438,6 +446,9 @@ void MainWindow::createMenus()
 	shadersMenu = renderMenu->addMenu(tr("&Shaders"));
 
 	renderMenu->addSeparator();
+
+	//Shot SUBmenu
+	renderMenu ->addAction(loadShotAct);
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));

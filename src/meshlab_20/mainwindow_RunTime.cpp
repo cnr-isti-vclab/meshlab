@@ -1172,6 +1172,8 @@ void MainWindow::setUnsplit()
 	updateMenus();
 }
 
+void MainWindow::loadShot()        { GLA()->loadShot(); }
+
 void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
 void MainWindow::renderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
 void MainWindow::renderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
