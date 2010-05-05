@@ -246,7 +246,7 @@ void RichParameterCopyConstructor::visit( RichOpenFile& pd )
 void RichParameterCopyConstructor::visit( RichSaveFile& pd )
 {
 	SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(pd.pd);
-	lastCreated = new RichSaveFile(pd.name,pd.pd->defVal->getFileName(),dec->ext,pd.pd->fieldDesc,pd.pd->tooltip);
+	lastCreated = new RichSaveFile(pd.name,pd.val->getFileName(),dec->ext,pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichMesh& pd )
