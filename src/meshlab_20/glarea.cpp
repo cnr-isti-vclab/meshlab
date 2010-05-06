@@ -617,6 +617,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 		  mvc->updatePressViewers(e);
 }
 
+//Usato per lockare le view, affinchè ciascuna di loro riceva lo stesso evento
 void GLArea::mousePressEvent2(QMouseEvent*e)
 {
   e->accept();
@@ -1086,11 +1087,110 @@ void GLArea::initializeShot(Shot &shot)
 	//return newshot;
 }	
 
+void GLArea::readShotFromFile(Shot &shot) 
+{
+	QString filename = QFileDialog::getOpenFileName(this, tr("Load Project"), "./", tr("Xml Files (*.xml)"));
+	
+	QFile qf(filename);
+	QFileInfo qfInfo(filename);
+
+	if( !qf.open(QIODevice::ReadOnly ) )
+		return;
+
+	QString project_path = qfInfo.absoluteFilePath();
+
+	QDomDocument doc("RegProjectML");    //It represents the XML document
+	if(!doc.setContent( &qf ))	
+		return;
+
+	QDomElement root = doc.documentElement();
+	QDomNode node;
+
+	int devices=0;
+	node = root.firstChild();
+
+	//Devices
+	while(!node.isNull()){
+		if(QString::compare(node.nodeName(),"Device")==0)
+		{
+			QString type = node.attributes().namedItem("type").nodeValue();
+			if (type== "GlImageWidget")
+			{
+				//Aligned Image
+				if(QString::compare(node.attributes().namedItem("aligned").nodeValue(),"1")==0){
+					QDomNode nodeb = node.firstChild();
+					QDomNamedNodeMap attr = nodeb.attributes();
+					vcg::Point3d tra;
+					tra[0] = attr.namedItem("SimTra").nodeValue().section(' ',0,0).toDouble();
+					tra[1] = attr.namedItem("SimTra").nodeValue().section(' ',1,1).toDouble();
+					tra[2] = attr.namedItem("SimTra").nodeValue().section(' ',2,2).toDouble();
+					shot.Extrinsics.SetTra(-tra);
+					//shot.Extrinsics.sca = attr.namedItem("SimTra").nodeValue().section(' ',3,3).toInt();
+
+					vcg::Matrix44d rot;
+					QStringList values =  attr.namedItem("SimRot").nodeValue().split(" ", QString::SkipEmptyParts);
+					for(int y = 0; y < 4; y++)
+						for(int x = 0; x < 4; x++)
+							rot[y][x] = values[x + 4*y].toDouble();
+					shot.Extrinsics.SetRot(rot);
+
+					vcg::Camera<double> &cam = shot.Intrinsics;
+					cam.FocalMm = attr.namedItem("Focal").nodeValue().toDouble();
+					cam.ViewportPx.X() = attr.namedItem("Viewport").nodeValue().section(' ',0,0).toInt();
+					cam.ViewportPx.Y() = attr.namedItem("Viewport").nodeValue().section(' ',1,1).toInt();
+					cam.CenterPx[0] = attr.namedItem("Center").nodeValue().section(' ',0,0).toInt();
+					cam.CenterPx[1] = attr.namedItem("Center").nodeValue().section(' ',1,1).toInt();
+					cam.PixelSizeMm[0] = attr.namedItem("ScaleF").nodeValue().section(' ',0,0).toDouble();
+					cam.PixelSizeMm[1] = attr.namedItem("ScaleF").nodeValue().section(' ',1,1).toDouble();
+					cam.k[0] = attr.namedItem("LensDist").nodeValue().section(' ',0,0).toDouble();
+					cam.k[1] = attr.namedItem("LensDist").nodeValue().section(' ',1,1).toDouble();
+
+					// scale correction
+					float scorr = attr.namedItem("ScaleCorr").nodeValue().toDouble();
+					if(scorr != 0.0) {
+						cam.PixelSizeMm[0] *= scorr;
+						cam.PixelSizeMm[1] *= scorr;
+					}
+
+				}
+			}
+		}
+		node = node.nextSibling();
+	}
+	qDebug("End file reading");
+	qf.close();
+}
+
 void GLArea::loadShot(){
 	//Shot test
 	Shot shot;
 	initializeShot(shot);
-	//oppure lo leggi da file
+
+	////oppure lo leggi da file-------------------------------------------------------
+	//readShotFromFile(shot); 
+	////resize viewport
+	//int w = shot.Intrinsics.ViewportPx[0];
+	//int h = shot.Intrinsics.ViewportPx[1];
+
+	//if(w > width()) {
+	//	h = h*width()/w;
+	//	w = width();
+	//}
+	//if(h > height()) {
+	//	w = w*height()/h;
+	//	h = height();
+	//}
+	//shot.Intrinsics.DistorCenterPx[0]=w/2;
+ //   shot.Intrinsics.DistorCenterPx[1]=h/2;
+ //   shot.Intrinsics.CenterPx[0]=w/2;
+ //   shot.Intrinsics.CenterPx[1]=h/2;
+ //   shot.Intrinsics.ViewportPx[0]=w;
+ //   shot.Intrinsics.ViewportPx[1]=h;
+	////-----------------------------------------------------------------------------------------
+
+
+
+
 
 	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
 	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
@@ -1112,8 +1212,8 @@ void GLArea::loadShot(){
 	
 	//correct the traslation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
 	//T(gl) S R T(t) => S R T(S^(-1) R^(-1)(gl) + t)
-	//Shot doesn't introduce scaling
 	//To compensate S^(-1) R^(-1)(gl)we add to t S^(-1) R^(-1)(-gl)
+	//Shot doesn't introduce scaling
 	shot.Extrinsics.SetTra(shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, -cameraDist)));
 
 	//reset trackball. The point of view must be set only by the shot

@@ -318,6 +318,7 @@ private:
 	void setCursorTrack(vcg::TrackMode *tm);
 
 	void initializeShot(Shot &shot);
+	void readShotFromFile(Shot &shot);
 
 	/*
 	Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
