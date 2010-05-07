@@ -1,7 +1,6 @@
 #include "fieldinterpolator.h"
 #include <iostream>
 #include <fstream>
-#include <vcg/Eigen/Eigen>
 
 using namespace std;
 using namespace Eigen;
@@ -113,6 +112,7 @@ void FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
 
                 // Compute cotangent coefficient
                 cotcoeff = .5 * ( cos(alpha)/sin(alpha) + cos(beta)/sin(beta) );
+                assert( !isinf(cotcoeff) );
                 totcoeff += cotcoeff;
 
                 // Off-diagonal entries (symmetric) Only lower diagonal

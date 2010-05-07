@@ -27,7 +27,12 @@ HEADERS += $$VCGDIR/wrap/gui/trackmode.h
 SOURCES += $$VCGDIR/wrap/gui/trackball.cpp
 SOURCES += $$VCGDIR/wrap/gui/trackmode.cpp
 
-# EIGEN + CHOLMOD STUFF
+#--- EIGEN + CHOLMOD STUFF
+# Note that the current version of Eigen is buggy, consequently, 
+# the one that ships with meshlab is buggy as well!!
+# The define below change the include directives to use the 
+# development version of Eigen, where the bug has been fixed
+# DEFINES += USE_EIGEN_DEVTRUNK
 INCLUDEPATH += /sw/include/eigen3
 INCLUDEPATH += /sw/include/suitesparse
 LIBS += -L/sw/lib -lamd -lcamd -lccolamd -lcholmod -lcolamd -lcxsparse -lblas

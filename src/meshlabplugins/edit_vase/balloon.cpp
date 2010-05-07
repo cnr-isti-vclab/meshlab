@@ -330,9 +330,9 @@ void Balloon::evolveBalloon(){
         // if we don't have computed the distance field, we don't really know how to
         // modulate the laplacian accordingly...
         if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled )
-            v.sfield += .1*k3*k2;
+            v.sfield += 0; //.25*k3*k2;
         else if( surf.vert.CurvatureEnabled )
-            v.sfield += .1*k3;
+            v.sfield += 0; //.1*k3;
     }
 
     //--- Estrai isosurface
@@ -455,7 +455,8 @@ void Balloon::render_surf_to_vol(){
                     assert( v.face != 0 );
                     vcg::drawBox(p, .05*vol.getDelta());
                     Point3f proj;
-                    float dist = vcg::SignedFacePointDistance(*v.face, p, proj);
+                    // float dist = vcg::SignedFacePointDistance(*v.face, p, proj);
+                    vcg::SignedFacePointDistance(*v.face, p, proj);
                     //proj = vcg::Barycenter(*v.face);
                     vcg::drawSegment( p, proj );
                 }

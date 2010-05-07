@@ -242,8 +242,15 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
     mesh.face.EnableVFAdjacency();
     tri::UpdateTopology<CMeshO>::VertexFace( mesh );
     tri::Simplify( mesh, getDelta()/4 );
-    // tri::Simplify( mesh, getDelta()/16 );
 
+    //--- CHECK THAT THERE ARE NO DEGENERATE TRIANGLES
+    for(CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); fi++){
+        CFaceO& f = *(fi);
+        float edgel1 = (f.P(0)-f.P(1)).Norm(); assert( edgel1>1e-20 );
+        float edgel2 = (f.P(0)-f.P(2)).Norm(); assert( edgel2>1e-20 );
+        float edgel3 = (f.P(1)-f.P(2)).Norm(); assert( edgel3>1e-20 );
+    }
+    
     //--- The simplify operation removed some vertices
     tri::Allocator<CMeshO>::CompactVertexVector( mesh );
     tri::Allocator<CMeshO>::CompactFaceVector( mesh );
