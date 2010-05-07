@@ -135,6 +135,8 @@ public:
 	void setView();
     void resetTrackBall();
 	void loadShot();
+	void loadShot(Shot &shot);
+	void sendShot();
 	std::list<QAction *> iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
@@ -427,7 +429,7 @@ private:
 		vcg::Matrix44d imodel = model;
 		vcg::Transpose(imodel);
 		tra = -(imodel*tra);
-		tra *= idet;
+		//tra *= idet; IOOOOOOOOOOOOOOOOOOOOOOOOOO
 		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
 
 		//use same current intrinsics

@@ -34,6 +34,7 @@
 #include "../common/meshmodel.h"
 #include "viewer.h"
 #include "layerDialog.h"
+#include <wrap/gl/shot.h>
 
 
 // Class list
@@ -43,6 +44,8 @@ class RichParameterSet;
 class MultiViewer_Container : public QSplitter
 {
 	Q_OBJECT
+
+	typedef vcg::Shot<double> Shot;
 
 public:
 	MultiViewer_Container(QWidget *parent);
@@ -62,6 +65,7 @@ public:
 	void connectToLayerDialog(Viewer* viewer);
 
 	void updatePressViewers(QMouseEvent *e);
+	void updateTrackballInViewers(Shot &shot);
 	void updateMoveViewers(QMouseEvent *e);
 	void updateReleaseViewers(QMouseEvent *e);
 

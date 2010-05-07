@@ -613,8 +613,47 @@ void GLArea::mousePressEvent(QMouseEvent*e)
   emit updateMainWindowMenus();
 	update();
  if(isCurrent())
-	 if(e->modifiers() & Qt::MetaModifier)
-		  mvc->updatePressViewers(e);
+	 if(e->modifiers() & Qt::MetaModifier){
+		 sendShot();
+		 mvc->updatePressViewers(e);
+	 }
+}
+
+void GLArea::sendShot()
+{
+	Shot shot;
+	initializeShot(shot);
+	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
+	shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2)));
+
+	//The new shot doesn't have to introduce a traslation from the center
+	/*Matrix44f s_inv = Matrix44f().SetScale(1/trackball.track.sca, 1/trackball.track.sca, 1/trackball.track.sca);
+	vcg::Matrix44f rot_inv;
+	Inverse(trackball.track.rot).ToMatrix(rot_inv);*/
+    Point3f center = /*s_inv*rot_inv* */meshDoc->bbox().Center();
+	trackball.track.tra += center;
+
+// This parameter is the one that controls:
+	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
+	float viewRatio = 1.75f;
+	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+	shot.Extrinsics.SetTra( shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+	
+	Shot newShot = getShotFromTrack2(shot, &trackball);
+
+	trackball.track.tra -= center;
+
+	//// This parameter is the one that controls:
+	//// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
+	//float viewRatio = 1.75f;
+	//float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+
+	//add the traslation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+	//T(gl) S R T(t) => S R T(S^(-1) R^(-1)(gl) + t)
+	//Add traslation S^(-1) R^(-1)(gl)
+	//Shot doesn't introduce scaling
+	//newShot.Extrinsics.SetTra( newShot.Extrinsics.Tra() + (Inverse(newShot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+	mvc->updateTrackballInViewers(newShot);
 }
 
 //Usato per lockare le view, affinchè ciascuna di loro riceva lo stesso evento
@@ -648,8 +687,8 @@ void GLArea::mousePressEvent2(QMouseEvent*e)
 
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
-{
-      if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
+{  
+	if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
     		  	iEdit->mouseMoveEvent(e,*mm(),this);
       else {
 		    if (isDefaultTrackBall())
@@ -663,6 +702,7 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 	 if(isCurrent())
 		if(e->modifiers() & Qt::MetaModifier)
 		  mvc->updateMoveViewers(e);
+			//sendShot();
 
 }
 // When mouse is released we set the correct mouse cursor
@@ -1162,6 +1202,7 @@ void GLArea::readShotFromFile(Shot &shot)
 }
 
 void GLArea::loadShot(){
+
 	//Shot test
 	Shot shot;
 	initializeShot(shot);
@@ -1188,10 +1229,27 @@ void GLArea::loadShot(){
  //   shot.Intrinsics.ViewportPx[1]=h;
 	////-----------------------------------------------------------------------------------------
 
+// This parameter is the one that controls:
+	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
+	float viewRatio = 1.75f;
+	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
 
+	//Esempi di shot di ingresso
+	shot.Extrinsics.SetTra(Point3d(1, 0, cameraDist));
+	/*vcg::Matrix44d rot;
+	rot.Identity();
+	rot.SetRotateDeg(90,Point3<double>(0,1,0));
+	shot.Extrinsics.SetRot(rot);
+	shot.Extrinsics.SetTra(Inverse(rot)*Point3d(0, 0, cameraDist));*/
 
+	loadShot(shot);
+}
 
-
+//Shot is not modified!!!
+void GLArea::loadShot(Shot &shot){
+	
+	int id = getId();
+	
 	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
 	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
 	/*fov=60;
@@ -1201,14 +1259,6 @@ void GLArea::loadShot(){
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
 	float viewRatio = 1.75f;
 	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
-
-	//Esempi di shot di ingresso
-	//shot.Extrinsics.SetTra(Point3d(0, 0, cameraDist));
-	vcg::Matrix44d rot;
-	rot.Identity();
-	rot.SetRotateDeg(90,Point3<double>(0,1,0));
-	shot.Extrinsics.SetRot(rot);
-	shot.Extrinsics.SetTra(Inverse(rot)*Point3d(0, 0, cameraDist));
 	
 	//correct the traslation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
 	//T(gl) S R T(t) => S R T(S^(-1) R^(-1)(gl) + t)
@@ -1223,6 +1273,10 @@ void GLArea::loadShot(){
 	trackball.track.tra =  -meshDoc->bbox().Center();
 	
 	Shot2Track(shot, cameraDist,trackball);
+
+	//Shot è rimesso a posto
+	shot.Extrinsics.SetTra((Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+
 
 	//Test on trackball
 	/*Matrix44f s_inv = Matrix44f().SetScale(1/trackball.track.sca, 1/trackball.track.sca, 1/trackball.track.sca);

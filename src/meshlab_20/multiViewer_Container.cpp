@@ -234,6 +234,14 @@ void MultiViewer_Container::updateReleaseViewers(QMouseEvent *e){
 		}
 }
 
+void MultiViewer_Container::updateTrackballInViewers(Shot &shot)
+{
+	foreach(Viewer* viewer, viewerList)
+		if(viewer->getId() != currentId){
+			((GLArea*) viewer)->loadShot(shot);
+		}
+}
+
 
 void MultiViewer_Container::updateLayout(){
 	foreach(Viewer* viewer, viewerList)
