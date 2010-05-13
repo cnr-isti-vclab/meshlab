@@ -250,7 +250,7 @@ class compareFaceQuality {
 
 		bool operator () (const std::pair<CMeshO::FacePointer,char> f1, const std::pair<CMeshO::FacePointer,char> f2) {
 			//quality f1 < quality f2 return true
-			return ( f1.first->Q() < f2.first->Q() );
+			return ( f1.first->Q() > f2.first->Q() );
 		}
 };
 
