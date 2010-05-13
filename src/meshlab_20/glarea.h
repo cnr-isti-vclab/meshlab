@@ -135,7 +135,7 @@ public:
 	void setView();
     void resetTrackBall();
 	void loadShot();
-	void loadShot(Shot &shot);
+	void loadShot(const Shot &shot);
 	void sendShot();
 	std::list<QAction *> iDecoratorsList;
 
@@ -429,7 +429,7 @@ private:
 		vcg::Matrix44d imodel = model;
 		vcg::Transpose(imodel);
 		tra = -(imodel*tra);
-		//tra *= idet; IOOOOOOOOOOOOOOOOOOOOOOOOOO
+		//tra *= idet; //SOTTILE
 		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
 
 		//use same current intrinsics
@@ -444,7 +444,6 @@ private:
 	*/
 	template <class T>
 	void Shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
-		
 		Shot id;
 
 		vcg::Quaterniond qto;     qto.FromMatrix(id.Extrinsics.Rot());
@@ -456,7 +455,9 @@ private:
 		tb.track.rot = vcg::Quaternionf::Construct(qto.Inverse() * qfrom) * tb.track.rot;
 		tb.track.tra -= ( tb.track.rot.Inverse().Rotate( vcg::Point3f::Construct(-  id.Extrinsics.Tra()) + tb.center ) ) / tb.track.sca;
 
-		//aggiustare sca e tra per mettere il centro della trackbal al punto giusto
+		//aggiustare sca e tra per mettere il centro della trackball al punto giusto
+
+
 	}
 };
 

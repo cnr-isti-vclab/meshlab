@@ -612,10 +612,9 @@ void GLArea::mousePressEvent(QMouseEvent*e)
   emit currentViewerChanged(id);
   emit updateMainWindowMenus();
 	update();
- if(isCurrent())
+  if(isCurrent())
 	 if(e->modifiers() & Qt::MetaModifier){
 		 sendShot();
-		 mvc->updatePressViewers(e);
 	 }
 }
 
@@ -626,37 +625,46 @@ void GLArea::sendShot()
 	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
 	shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2)));
 
-	//The new shot doesn't have to introduce a traslation from the center
-	/*Matrix44f s_inv = Matrix44f().SetScale(1/trackball.track.sca, 1/trackball.track.sca, 1/trackball.track.sca);
-	vcg::Matrix44f rot_inv;
-	Inverse(trackball.track.rot).ToMatrix(rot_inv);*/
-    Point3f center = /*s_inv*rot_inv* */meshDoc->bbox().Center();
+	//The new shot doesn't have to introduce a translation from the center
+    Point3f center = meshDoc->bbox().Center();
 	trackball.track.tra += center;
 
-// This parameter is the one that controls:
+	// This parameter is the one that controls:
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
 	float viewRatio = 1.75f;
 	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+
+	//add the translation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
+	//Add translation S^(-1) R^(-1)(gl)
+	//Shot doesn't introduce scaling
+	//---------------------------------------------------------------------
 	shot.Extrinsics.SetTra( shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
 	
 	Shot newShot = getShotFromTrack2(shot, &trackball);
 
 	trackball.track.tra -= center;
 
-	//// This parameter is the one that controls:
-	//// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
-	//float viewRatio = 1.75f;
-	//float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+	//Expressing scaling as a translation along z
+	//k is the ratio between default scale and new scale
+	double oldScale= 3.0f/meshDoc->bbox().Diag();
+	double k= oldScale/trackball.track.sca;
 
-	//add the traslation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
-	//T(gl) S R T(t) => S R T(S^(-1) R^(-1)(gl) + t)
-	//Add traslation S^(-1) R^(-1)(gl)
-	//Shot doesn't introduce scaling
-	//newShot.Extrinsics.SetTra( newShot.Extrinsics.Tra() + (Inverse(newShot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+    //Apply this formula
+	// R(t+p) = kR'(t'+p) forall p, R=R', k is a costant
+	// R(t)= kR(t')
+	// t = k*t'
+	Point3d t1 = newShot.Extrinsics.Tra();
+	
+	Matrix44d rapM = Matrix44d().SetScale(k, k, k);
+	Point3d t0 = rapM*t1;
+
+	newShot.Extrinsics.SetTra(t0);
+
 	mvc->updateTrackballInViewers(newShot);
 }
 
-//Usato per lockare le view, affinchè ciascuna di loro riceva lo stesso evento
+//Useless: //Useless: now viewers communicate only through shots
 void GLArea::mousePressEvent2(QMouseEvent*e)
 {
   e->accept();
@@ -688,6 +696,7 @@ void GLArea::mousePressEvent2(QMouseEvent*e)
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 {  
+	int id = getId();
 	if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
     		  	iEdit->mouseMoveEvent(e,*mm(),this);
       else {
@@ -701,8 +710,7 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
       }
 	 if(isCurrent())
 		if(e->modifiers() & Qt::MetaModifier)
-		  mvc->updateMoveViewers(e);
-			//sendShot();
+			sendShot();
 
 }
 // When mouse is released we set the correct mouse cursor
@@ -719,17 +727,15 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
         }
 
 	update();
-	if(isCurrent())
-		  mvc->updateReleaseViewers(e);
 
-	//TestShot
-	Shot shot1; initializeShot(shot1);
-	Shot shot2; initializeShot(shot2);
-	shot1.Extrinsics.SetTra(Point3<double>(0,0,10));
-	shot2.Extrinsics.SetTra(Point3<double>(0,0,10));
+	////TestShot
+	//Shot shot1; initializeShot(shot1);
+	//Shot shot2; initializeShot(shot2);
+	//shot1.Extrinsics.SetTra(Point3<double>(0,0,10));
+	//shot2.Extrinsics.SetTra(Point3<double>(0,0,10));
 
-	shot1 = getShotFromTrack(shot1,&trackball);
-	shot2 = getShotFromTrack2(shot2, &trackball);
+	//shot1 = getShotFromTrack(shot1,&trackball);
+	//shot2 = getShotFromTrack2(shot2, &trackball);
 
 }
 
@@ -1091,6 +1097,7 @@ void GLArea::initializeShot(Shot &shot)
 
     shot.Extrinsics.SetIdentity();
 
+	//Da textAlignSuite
 	//Shot newshot;
 	//vcg::Box3<double> box;
 	//box.Import(meshDoc->bbox());
@@ -1235,7 +1242,7 @@ void GLArea::loadShot(){
 	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
 
 	//Esempi di shot di ingresso
-	shot.Extrinsics.SetTra(Point3d(1, 0, cameraDist));
+	shot.Extrinsics.SetTra(Point3d(0, 0, cameraDist*2));
 	/*vcg::Matrix44d rot;
 	rot.Identity();
 	rot.SetRotateDeg(90,Point3<double>(0,1,0));
@@ -1245,10 +1252,9 @@ void GLArea::loadShot(){
 	loadShot(shot);
 }
 
-//Shot is not modified!!!
-void GLArea::loadShot(Shot &shot){
+void GLArea::loadShot(const Shot &shot_){
 	
-	int id = getId();
+	Shot shot = shot_;
 	
 	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
 	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
@@ -1260,9 +1266,9 @@ void GLArea::loadShot(Shot &shot){
 	float viewRatio = 1.75f;
 	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
 	
-	//correct the traslation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
-	//T(gl) S R T(t) => S R T(S^(-1) R^(-1)(gl) + t)
-	//To compensate S^(-1) R^(-1)(gl)we add to t S^(-1) R^(-1)(-gl)
+	//correct the translation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
+	//To compensate S^(-1)R^(-1)gl we add to t S^(-1) R^(-1)(-gl)
 	//Shot doesn't introduce scaling
 	shot.Extrinsics.SetTra(shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, -cameraDist)));
 
@@ -1272,11 +1278,34 @@ void GLArea::loadShot(Shot &shot){
 	trackball.track.sca = newScale;
 	trackball.track.tra =  -meshDoc->bbox().Center();
 	
+	Point3f point = meshDoc->bbox().Center();
+	Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
 	Shot2Track(shot, cameraDist,trackball);
 
-	//Shot è rimesso a posto
-	shot.Extrinsics.SetTra((Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+	//Expressing the translation along Z with a scale factor k
+	Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
 
+	//k is the ratio between the distances along z of two correspondent points (before and after the traslazion) 
+	//from the point of view
+	float k= abs(p2.Z()/p1.Z());
+
+	float sca= trackball.track.sca/k;
+	Point3f tra = trackball.track.tra;
+	
+	// Apply this formula:
+	// SR(t+p) -v = k[S'R'(t'+p) -v] forall p, R=R', k is a costant
+	// SR(t) -v = k[S'R(t') -v]
+	// t' = 1/k* S'^-1St + (k-1)/k S'^-1*R^-1v
+	Matrix44f s0 = Matrix44f().SetScale(trackball.track.sca,trackball.track.sca, trackball.track.sca);
+	Matrix44f s1 = Matrix44f().SetScale(sca, sca, sca);
+	Matrix44f r;
+	trackball.track.rot.ToMatrix(r);
+	Matrix44f rapM = Matrix44f().SetScale(1/k, 1/k, 1/k);
+	Matrix44f rapM2 = Matrix44f().SetScale(1-1/k, 1-1/k, 1-1/k);
+	Point3f t1 = rapM*Inverse(s1)*s0*tra + rapM2*Inverse(s1)*Inverse(r)*Point3f(0,0,cameraDist);
+
+	trackball.track.sca =sca;
+	trackball.track.tra =t1;
 
 	//Test on trackball
 	/*Matrix44f s_inv = Matrix44f().SetScale(1/trackball.track.sca, 1/trackball.track.sca, 1/trackball.track.sca);

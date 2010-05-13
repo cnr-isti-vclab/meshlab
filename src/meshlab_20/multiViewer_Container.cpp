@@ -213,6 +213,8 @@ void MultiViewer_Container::updateCurrent(int current){
 	currentId=current;
 }
 
+
+//Useless: now viewers communicate only through shots
 void MultiViewer_Container::updatePressViewers(QMouseEvent *e){
 	foreach(Viewer* viewer, viewerList)
 		if(viewer->getId() != currentId){
@@ -220,6 +222,7 @@ void MultiViewer_Container::updatePressViewers(QMouseEvent *e){
 		}
 }
 
+//Useless: now viewers communicate only through shots
 void MultiViewer_Container::updateMoveViewers(QMouseEvent *e){
 	foreach(Viewer* viewer, viewerList)
 		if(viewer->getId() != currentId){
@@ -227,6 +230,7 @@ void MultiViewer_Container::updateMoveViewers(QMouseEvent *e){
 		}
 }
 
+//Useless: now viewers communicate only through shots
 void MultiViewer_Container::updateReleaseViewers(QMouseEvent *e){
 	foreach(Viewer* viewer, viewerList)
 		if(viewer->getId() != currentId){
