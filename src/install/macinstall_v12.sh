@@ -37,6 +37,10 @@ cp -r meshlab.app $BUNDLE
 
 # copy the files icons into the app.
 cp ../meshlab/images/meshlab_obj.icns $BUNDLE/$APPNAME/Contents/Resources
+# copy the qt.conf file in the resources to avoid problems with qt's jpg dll
+cp ../install/qt.conf $BUNDLE/$APPNAME/Contents/Resources
+
+
 
 mkdir $BUNDLE/$APPNAME/Contents/Frameworks   
 mkdir $BUNDLE/$APPNAME/Contents/plugins   
