@@ -102,7 +102,7 @@ QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const {
   case CP_TEXTURE_TO_VERTEX:        return QString("Texture to Vertex color transfer");
   case CP_COLOR_NON_TOPO_COHERENT : return QString("Color edges topologically non coherent.");
   case CP_RANDOM_FACE:              return QString("Colorize Faces randomly. If internal edges are present they are used");
-  default: assert(0);
+  default: assert(0); return QString("");
   }
 }
 
@@ -113,14 +113,14 @@ int ExtraMeshColorizePlugin::getRequirements(QAction *action){
   case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
   case CP_RANDOM_FACE:              return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
   case CP_CLAMP_QUALITY:            return 0; // TODO: split clamp on vertex & faces and add requirements
-  case CP_MAP_VQUALITY_INTO_COLOR:  return MeshModel::MeshModel::MM_VERTCOLOR;
-  case CP_MAP_FQUALITY_INTO_COLOR:  return MeshModel::MeshModel::MM_FACECOLOR;
+  case CP_MAP_VQUALITY_INTO_COLOR:  return MeshModel::MM_VERTCOLOR;
+  case CP_MAP_FQUALITY_INTO_COLOR:  return MeshModel::MM_FACECOLOR;
   case CP_VERTEX_SMOOTH:            return 0; // TODO: should it be MM_NONE?
   case CP_FACE_SMOOTH:              return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR ;
   case CP_VERTEX_TO_FACE:           return MeshModel::MM_FACECOLOR;
   case CP_FACE_TO_VERTEX:           return MeshModel::MM_VERTCOLOR;
   case CP_TEXTURE_TO_VERTEX:        return MeshModel::MM_FACECOLOR;
-  default: assert(0);
+  default: assert(0); return 0;
   }
   return 0;
 }
@@ -357,6 +357,7 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
 
   default:
     assert(0);
+	return MeshFilterInterface::Generic;
   }
 }
 
@@ -381,6 +382,7 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const{
   case   CP_TEXTURE_TO_VERTEX:
     return MeshModel::MM_NONE; // TODO: wrong? compare with original
   default: assert(0);
+	  return MeshModel::MM_NONE;
   }
 }
 
@@ -404,6 +406,7 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const{
   case CP_CLAMP_QUALITY:
     return MeshModel::MM_VERTQUALITY;
   default: assert(0);
+     return MeshModel::MM_NONE;
 	}
 }
 
