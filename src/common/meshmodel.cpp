@@ -65,7 +65,8 @@ MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bo
 			  newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
 		  else 
 			  newName = baseName+"_1";
-		  newName = newName + "." + info.suffix();
+		  if (info.suffix() != QString(""))
+			newName = newName + "." + info.suffix();
 		}
 	}
 
