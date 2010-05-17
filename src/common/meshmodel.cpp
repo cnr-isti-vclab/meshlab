@@ -49,19 +49,24 @@ void MeshDocument::setCurrentMesh(unsigned int i)
 
 MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bool setAsCurrent)
 {
-	QString newName=meshName;
+	QFileInfo info(meshName);
+	QString newName=info.fileName();
 
 	for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
 	{
-    if((*mmi)->shortName() == newName)
-    {
-      QFileInfo info(newName);
-      QString baseName=info.baseName();
-      int lastNum = baseName.right(1).toInt();
-      if( baseName.right(2).toInt() >= 10) lastNum = baseName.right(1).toInt();
-      if(lastNum) newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
-      else newName = baseName+"_1";
-    }
+		if((*mmi)->fullName() == newName)
+		{
+		  QFileInfo fi((*mmi)->fullName());
+		  QString baseName = fi.baseName();
+		  int lastNum = baseName.right(1).toInt();
+		  if( baseName.right(2).toInt() >= 10) 
+			  lastNum = baseName.right(1).toInt();
+		  if(lastNum) 
+			  newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
+		  else 
+			  newName = baseName+"_1";
+		  newName = newName + "." + info.suffix();
+		}
 	}
 
 	if(newMesh==0)
