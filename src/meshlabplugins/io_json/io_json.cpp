@@ -58,8 +58,10 @@ bool JSONIOPlugin::save(const QString & formatName,const QString & fileName, Mes
 	(void)par;
 	(void)cb;
 	(void)parent;
+  vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+  vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 
-	const size_t maxValuesPerLine = 10; // must be > 0
+  const size_t maxValuesPerLine = 10; // must be > 0
 
 	if (formatName.toUpper() != tr("JSON")) return false;
 
