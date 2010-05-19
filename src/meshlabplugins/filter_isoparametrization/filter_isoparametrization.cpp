@@ -300,11 +300,24 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 				m->clearDataMask(MeshModel::MM_VERTCOLOR);
 			if (!isFColorenabled)
 				m->clearDataMask(MeshModel::MM_FACECOLOR);
-			if (ret==IsoParametrizator::NonPrecondition)
-				this->errorMessage="non possible parameterization because of violated preconditions";
+		
+			if (ret==IsoParametrizator::MultiComponent)
+				this->errorMessage="non possible parameterization because of multi componet mesh";
+			else
+			if (ret==IsoParametrizator::NonSizeCons)
+				this->errorMessage="non possible parameterization because of non size consistent mesh";
+			else
+			if (ret==IsoParametrizator::NonManifoldE)
+				this->errorMessage="non possible parameterization because of non manifold edges";
+			else
+			if (ret==IsoParametrizator::NonManifoldV)
+				this->errorMessage="non possible parameterization because of non manifold vertices";
+			else
+			if (ret==IsoParametrizator::NonWatertigh)
+				this->errorMessage="non possible parameterization because of non watertight mesh";
 			else
 			if (ret==IsoParametrizator::FailParam)
-				this->errorMessage="non possible parameterization cause because missing the intepolation for some triangle of original the mesh (maybe due to topologycal noise)";
+				this->errorMessage="non possible parameterization cause one of the following reasons:\n Topologycal noise \n Too Low resolution mesh \n Too Bad triangulation \n";
 			return false;
 		}
 		Parametrizator.ExportMeshes(para_mesh,abs_mesh);
@@ -381,12 +394,16 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 	case ISOP_LOAD : 
 	{
 		QString AbsName = par.getString("AbsName");
+		/*bool isTXTenabled=m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
 		bool isTXTenabled=m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
 		if (!isTXTenabled)
-		{
-			this->errorMessage="Per Vertex Text Coordinates are not enabled";
-			return false;
-		}
+		{*/
+			//this->errorMessage="Per Vertex Text Coordinates are not enabled";
+			//return false;
+		m->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+		m->updateDataMask(MeshModel::MM_VERTTEXCOORD);
+		m->updateDataMask(MeshModel::MM_FACECOLOR);
+		//}
 		if(!QFile(m->fullName()).exists())
 		{
 			this->errorMessage="File not exists";

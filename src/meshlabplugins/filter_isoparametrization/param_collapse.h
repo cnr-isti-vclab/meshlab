@@ -55,7 +55,11 @@ public:
 	assert(lenght>=0);
 	return (pow(lenght,2)+costArea);
   }
-	
+
+	inline bool IsFeasible(){
+		return LinkConditions(pos);
+	}
+
   inline void SetHlevMeshUV(const std::vector<BaseFace*> &LowFace,
                                                     std::vector<BaseFace*> &HiFace,
                                                         std::vector<BaseVertex*> &HiVertex)

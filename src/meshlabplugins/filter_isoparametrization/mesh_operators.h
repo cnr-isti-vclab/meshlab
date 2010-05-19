@@ -19,6 +19,7 @@ void UpdateStructures(MeshType *mesh)
   vcg::tri::UpdateTopology<MeshType>::TestFaceFace(*mesh);
 	vcg::tri::UpdateTopology<MeshType>::VertexFace(*mesh);
 	vcg::tri::UpdateEdges<MeshType>::Set(*mesh);
+	vcg::tri::UpdateFlags<MeshType>::Clear(*mesh);
 	vcg::tri::UpdateFlags<MeshType>::FaceBorderFromFF(*mesh);
 	vcg::tri::UpdateFlags<MeshType>::VertexBorderFromFace(*mesh);
 }
@@ -400,7 +401,7 @@ inline void getSharedFace(std::vector<typename MeshType::VertexType*> &vertices,
 	typedef typename MeshType::CoordType CoordType;
 
 	typename std::vector<VertexType*>::const_iterator vi;
-
+	faces.clear();
 	for (vi=vertices.begin();vi!=vertices.end();vi++)
 	{
 		assert(!(*vi)->IsD());

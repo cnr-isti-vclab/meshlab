@@ -822,6 +822,7 @@ bool testParametrization(MeshType &domain,
 			}
 		}
 	}
+	
 	if (num_del>0)
 		printf("\n PAR ERROR %d Father isDel  \n",num_del);
 	if (num_null>0)

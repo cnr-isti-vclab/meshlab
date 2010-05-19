@@ -102,8 +102,8 @@ public:
 class ParamFace: public vcg::Face <  ParamUsedTypes,
 	vcg::face::VFAdj,vcg::face::FFAdj,vcg::face::VertexRef,
   vcg::face::Color4b,vcg::face::BitFlags,
-  vcg::face::Normal3f/*
-  vcg::face::WedgeTexCoord2f,*/
+  vcg::face::Normal3f,
+	vcg::face::WedgeTexCoord2f
   //,
   //vcg::face::Qualityf // not really needed
   >

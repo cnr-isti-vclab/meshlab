@@ -57,7 +57,12 @@ class MyTriEdgeCollapse: public ParamEdgeCollapse<BaseMesh>{};
 class IsoParametrizator{
 
 public:
-	typedef enum ReturnCode{NonPrecondition,FailParam,Done};
+	typedef enum ReturnCode{MultiComponent,
+													NonSizeCons,
+													NonManifoldE,
+													NonManifoldV,
+													NonWatertigh,
+													FailParam,Done};
 	
 
 	BaseMesh final_mesh;
@@ -290,6 +295,7 @@ private:
 			}
 			
 			testParametrization<BaseMesh>(base_mesh,final_mesh);
+			
 		}
 
 		
@@ -298,18 +304,32 @@ private:
 	///ASSOCIATE SURVIVED VERTEX FROM DECIMATION
 	void AssociateRemaining()
 	{
+		printf("\n ASSOCIATE REMAINING \n");
 		for (unsigned int i=0;i<base_mesh.vert.size();i++)
 			if (base_mesh.vert[i].brother!=NULL)
 			{
 				BaseVertex* v=&base_mesh.vert[i];
 				BaseVertex* vb=v->brother;
 				vcg::face::VFIterator<BaseFace> vfi2(v);
-				BaseFace *f=vfi2.F();
+				///take the face that has lower number of vertices
+				BaseFace *fmin=vfi2.F();
 				int index=vfi2.I();
+				int sizeMin=fmin->vertices_bary.size();
+				while (!vfi2.End())
+				{
+					BaseFace *f=vfi2.F();
+					if (f->vertices_bary.size()<sizeMin)
+					{
+						sizeMin=f->vertices_bary.size();
+						fmin=f;
+						index=vfi2.I();
+					}
+					vfi2++;
+				}
 				CoordType bary=CoordType(0,0,0);
 				bary[index]=1.f;
-				f->vertices_bary.push_back(std::pair<BaseVertex*,vcg::Point3f>(vb,bary));
-				AssingFather(*vb,f,bary,base_mesh);
+				fmin->vertices_bary.push_back(std::pair<BaseVertex*,vcg::Point3f>(vb,bary));
+				AssingFather(*vb,fmin,bary,base_mesh);
 				/*vb->father=f;
 				assert(!f->IsD());
 				vb->Bary=bary;*/
@@ -340,14 +360,17 @@ private:
 			{
 				BaseVertex *v=&base_mesh.vert[i];
 				ScalarType val=StarDistorsion<BaseMesh>(&base_mesh.vert[i]);
+				//printf("i: %d\n",i);
 				ord_vertex[i].dist=val;
 				ord_vertex[i].v=v;
 			}
 		
 		std::sort(ord_vertex.begin(),ord_vertex.end());
 		for (unsigned int i=0;i<ord_vertex.size();i++)
+		{
+				printf("%3.3f\n",ord_vertex[i].dist);
 				SmartOptimizeStar<BaseMesh>(ord_vertex[i].v,base_mesh,MyTriEdgeCollapse::Accuracy(),EType);
-			
+		}	
 	}
 
 
@@ -362,8 +385,9 @@ private:
     vcg::tri::UpdateFlags<MeshType>::FaceClearV(*mesh);
 
     ///TEST PRECONDITIONS
-    bool isOK=Preconditions(*mesh);
-    if (!isOK) return NonPrecondition;
+    ReturnCode ret=Preconditions(*mesh);
+		
+    if (ret!=Done) return ret;
 
 		///INITIALIZATION
 		InitializeStructures<MeshType>(mesh);
@@ -372,7 +396,7 @@ private:
 		ParaDecimate(targetFaces,interval,execute_flip);
 
 		///SET BEST FIND STOP POINT
-		isOK=SetBestStatus(test_interpolation);
+		bool isOK=SetBestStatus(test_interpolation);
 		if ((!isOK)&&(test_interpolation))
 			return FailParam;
 
@@ -696,24 +720,24 @@ public:
 
 	///PRECONDITIONS
 	template <class MeshType>
-	bool Preconditions(MeshType &mesh)
+	ReturnCode Preconditions(MeshType &mesh)
 	{
 		bool b;
 		vcg::tri::UpdateTopology<MeshType>::FaceFace(mesh);
-    if(vcg::tri::Clean<MeshType>::CountNonManifoldEdgeFF(mesh)>0 ) return false;
-    if(vcg::tri::Clean<MeshType>::CountNonManifoldVertexFF(mesh)>0 ) return false;
+    if(vcg::tri::Clean<MeshType>::CountNonManifoldEdgeFF(mesh)>0 ) return NonManifoldE;
+    if(vcg::tri::Clean<MeshType>::CountNonManifoldVertexFF(mesh)>0 ) return NonManifoldV;
 
 		b=vcg::tri::Clean<MeshType>::IsSizeConsistent(mesh);
-		if (!b)			return false;
+		if (!b)	return NonSizeCons;
 
     int cc=vcg::tri::Clean<MeshType>::CountConnectedComponents(mesh);
-    if(cc>1) return false;
+    if(cc>1) return MultiComponent;
 
     int boundaryEdgeNum, internalEdgeNum;
     vcg::tri::Clean<MeshType>::CountEdges(mesh,internalEdgeNum,boundaryEdgeNum);
-    if(boundaryEdgeNum>0) return false;
+    if(boundaryEdgeNum>0) return NonWatertigh;
 
-		return true;
+		return Done;
 	}
 
 	///perform a global optimization step
@@ -731,6 +755,23 @@ public:
 #endif
 	}
 
+	template <class MeshType>
+	void ScaleMesh(MeshType &m,
+								 const ScalarType &factor)
+	{
+		for (int i=0;i<m.vert.size();i++)
+			if (!m.vert[i].IsD())
+				m.vert[i].P()*=factor;
+	}
+	
+	template <class MeshType>
+	void TranslateMesh(MeshType &m,const typename MeshType::CoordType &vect)
+	{
+		for (int i=0;i<m.vert.size();i++)
+			if (!m.vert[i].IsD())
+				m.vert[i].P()+=vect;
+	}
+
 	///PARAMETRIZATION FUNCTIONS 
 	///initialize the mesh 
 	template <class MeshType>
@@ -745,10 +786,17 @@ public:
 		/*bool done;*/
 		const int limit0=15000;//00;
 		const int limit1=30000;
+		
+		vcg::tri::UpdateBounding<MeshType>::Box(*mesh);
+		ScalarType factor=100.0/mesh->bbox.Diag();
+		CoordType transl=-mesh->bbox.Center();
+		TranslateMesh(*mesh,transl);
+		ScaleMesh(*mesh,factor);
 		if ((!Two_steps)||(lower_limit>limit0)||(mesh->fn<limit1))
 		{
-			
-			ReturnCode res=InitBaseMesh<MeshType>(mesh,lower_limit,interval,true,true);
+			ReturnCode res=InitBaseMesh<MeshType>(mesh,lower_limit,interval,true,true);	
+			ScaleMesh(*mesh,1.0/factor);
+			TranslateMesh(*mesh,-transl);
 			if (res!=Done)
 				return res;
 		}
@@ -758,6 +806,8 @@ public:
 			printf("\n STEP 1 \n");
 			InitVoronoiArea();
 			ReturnCode res=InitBaseMesh<MeshType>(mesh,limit0,1,false,false);
+			ScaleMesh(*mesh,1.0/factor);
+			TranslateMesh(*mesh,-transl);
 			if (res!=Done)
 				return res;
 
@@ -792,6 +842,8 @@ public:
 			base_mesh.Clear();
 			vcg::tri::Append<BaseMesh,ParamMesh>::Mesh(final_mesh,para_mesh0,false,true);
 			vcg::tri::Append<BaseMesh,AbstractMesh>::Mesh(base_mesh,abs_mesh1,false,true);
+			///scale by a factor
+			
 			UpdateTopologies<BaseMesh>(&final_mesh);
 			UpdateTopologies<BaseMesh>(&base_mesh);
 
@@ -838,12 +890,19 @@ public:
 				assert(bary.X()+bary.Y()<=1.0001);
 				base_f->vertices_bary.push_back(std::pair<BaseVertex *,CoordType>(&final_mesh.vert[i],bary));
 			}
+		 InitVoronoiArea();
+		 FinalOptimization();
+		 printf("STEP 3 \n");
 		}
 		///finally perform the final optimization step
-		printf("STEP 3 \n");
 		InitVoronoiArea();
-		FinalOptimization();
+		//FinalOptimization();
 		GlobalOptimizeStep();
+
+		ScaleMesh(final_mesh,1.0/factor);
+		TranslateMesh(final_mesh,-transl);
+		ScaleMesh(base_mesh,1.0/factor);
+		TranslateMesh(base_mesh,-transl);
 		return Done;
 	}
 

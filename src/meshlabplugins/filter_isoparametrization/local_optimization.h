@@ -127,6 +127,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	///create star
 	CreateMeshVertexStar(starCenter,ordered_faces,star_domain);
 	ParametrizeStarEquilateral<MeshType>(star_domain);
+	assert(testParamCoords(star_domain));
 
 	///get all the vertices in H definition that shuld be optimized
 	///and initialize vertices with u,v coordinates
@@ -146,25 +147,28 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 			VertexType* to_parametrize=test_face->vertices_bary[i].first;
 			to_parametrize->T().U()=u;
 			to_parametrize->T().V()=v;
-		
+		  assert(testParamCoords<VertexType>(to_parametrize));
 			HresVert.push_back(to_parametrize);
 		}
 	}
 
-	/*for (int i=0;i<10;i++)*/
-	if (En==EN_MeanVal)
-		for (int i=0;i<4;i++)
-			vcg::tri::SmoothTexCoords(hlev_mesh);
-	else
-		vcg::tri::SmoothTexCoords(hlev_mesh);
+	///*for (int i=0;i<10;i++)*/
+	//if (En==EN_MeanVal)
+	//	for (int i=0;i<4;i++)
+	//		vcg::tri::SmoothTexCoords(hlev_mesh);
+	//else
+	vcg::tri::SmoothTexCoords(hlev_mesh);
 
 	///get a copy of submesh
 	std::vector<typename MeshType::VertexType*> ordered_vertex;
 	CopyHlevMesh(ordered_faces,hlev_mesh,ordered_vertex);
-	UpdateTopologies<MeshType>(&hlev_mesh);
-	InitDampRestUV(hlev_mesh);
-
 	assert(testParamCoords(hlev_mesh));
+	UpdateTopologies<MeshType>(&hlev_mesh);
+	//vcg::tri::SmoothTexCoords(hlev_mesh);
+	InitDampRestUV(hlev_mesh);
+	assert(testParamCoords(hlev_mesh));
+	//vcg::tri::SmoothTexCoords(hlev_mesh);
+	
 	
 	
 
@@ -224,8 +228,10 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	/*int ite=*/
 
 	if (!testParamCoords(hlev_mesh))
-		return;///no modifications problems with optimization 
-
+	{
+		RestoreRestUV(hlev_mesh);
+		//return;///no modifications problems with optimization 
+	}
 	///folded during optimization
 	bool b1=NonFolded<MeshType>(hlev_mesh);
 	if ((b0)&&(!b1))
@@ -234,7 +240,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 		printf("@");
 #endif
 		//return;
-		/*RestoreRestUV(hlev_mesh);*/
+		RestoreRestUV(hlev_mesh);
 	}
 
 	bool inside=true;
