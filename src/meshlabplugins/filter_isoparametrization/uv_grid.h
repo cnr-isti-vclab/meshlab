@@ -170,12 +170,19 @@ public:
 	{
 
 		ScalarType dist=100.0;
+		vcg::Point2<ScalarType> UVTest=UV;
 
+		///then project to the bbox
 		if (!bbox2.IsIn(UV))
-			return false;
+		{
+			UVTest= ClosestPoint2Box2(UV,bbox2);
+			///move toward to the center
+			UVTest=UVTest+(bbox2.Center()-UVTest)*0.0001;
+			bbox2.IsIn(UVTest);
+		}
 
 		//const ScalarType _EPSILON = ScalarType(0.000000001);
-		vcg::Point2i cell=Cell(UV);
+		vcg::Point2i cell=Cell(UVTest);
 		///test for each face
 		for (unsigned int i=0;i<data.size();i++)
 			for (unsigned int j=0;j<data[i].size();j++)
@@ -188,7 +195,7 @@ public:
 					vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
 					vcg::Point2<ScalarType> closest;
 					ScalarType dist_test;
-					t2d.PointDistance(UV,dist_test,closest);
+					t2d.PointDistance(UVTest,dist_test,closest);
 					if (dist_test<dist)
 					{
 						dist=dist_test;

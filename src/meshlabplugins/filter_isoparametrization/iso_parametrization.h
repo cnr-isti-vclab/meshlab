@@ -450,6 +450,7 @@ private:
 				//CreateMeshVertexStar(starCenter,ordered_faces,*star_meshes[index].domain);
 				///get faces referenced by vertices
 				getSharedFace<AbstractMesh>(starCenter,ordered_faces);
+				
 				CopyMeshFromFacesAbs<AbstractMesh>(ordered_faces,ordered_vert,*star_meshes[index].domain);
 
 				UpdateTopologies(star_meshes[index].domain);
@@ -1827,8 +1828,11 @@ public:
 
 		///quality copy to index of texture
     for (size_t i=0;i<param_mesh->vert.size();i++)
+		{
+			/*int val0=(int)param_mesh->vert[i].Q();
+			int val1=param_mesh->vert[i].T().N();*/
 			param_mesh->vert[i].T().N()=(int)param_mesh->vert[i].Q();
-
+		}
 		/*if (AbsMesh()!=NULL)
 			delete(AbsMesh());*/
 
