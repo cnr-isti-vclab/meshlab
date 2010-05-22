@@ -133,6 +133,7 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
     glDisable(GL_LIGHTING);
         cloud->cm.C() = Color4b(255,200,200,255);
         glColor4f(.4f,.4f,1.f,.6f);
+        cloud->glw.cdm = GLW::DMPoints;
         cloud->glw.SetHintParamf(GLW::HNPPointSize,SCANPOINTSIZE);
         cloud->Render(GLW::DMPoints, GLW::CMPerMesh, GLW::TMNone);
     glEnable(GL_LIGHTING);
