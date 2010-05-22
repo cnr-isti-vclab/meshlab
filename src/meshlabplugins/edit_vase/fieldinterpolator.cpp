@@ -77,6 +77,8 @@ void FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
         // Iterate throgh every vertice
         for(unsigned int vi=0; vi<mesh->vert.size(); vi++){
             vI   = &mesh->vert[vi];
+            if( vI->IsD() ) continue; // skip deleted
+            
             vI_i = vcg::tri::Index(*mesh,vI);
 
             // Zero the total coefficient

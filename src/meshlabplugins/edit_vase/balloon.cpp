@@ -219,7 +219,7 @@ void Balloon::computeCurvature(){
     tri::UpdateCurvature<CMeshO>::MeanAndGaussian( surf );
     float absmax = -FLT_MAX;
     for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
-        float cabs = fabs((*vi).Kg());
+        float cabs = fabs((*vi).Kh());
         absmax = (cabs>absmax) ? cabs : absmax;
     }
 
@@ -232,10 +232,10 @@ void Balloon::computeCurvature(){
     //    Yellow => Red:  positive values
     typedef unsigned char CT;
     for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
-        if( (*vi).Kg() < 0 )
-            (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Blue, fabs((*vi).Kg())/absmax );
+        if( (*vi).Kh() < 0 )
+            (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Blue, fabs((*vi).Kh())/absmax );
         else
-            (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Red, (*vi).Kg()/absmax);
+            (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Red, (*vi).Kh()/absmax);
     }
 }
 
@@ -296,7 +296,7 @@ void Balloon::evolveBalloon(){
         }
         // Interpolate curvature amount & keep track of the range
         if( surf.vert.CurvatureEnabled ){
-            updates_curv[i] = a*f.V(0)->Kg() + b*f.V(1)->Kg() + c*f.V(2)->Kg();
+            updates_curv[i] = a*f.V(0)->Kh() + b*f.V(1)->Kh() + c*f.V(2)->Kh();
             curv_maxval = (fabs(updates_curv[i])>curv_maxval) ? fabs(updates_curv[i]) : curv_maxval;
         }
     }
@@ -330,9 +330,9 @@ void Balloon::evolveBalloon(){
         // if we don't have computed the distance field, we don't really know how to
         // modulate the laplacian accordingly...
         if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled )
-            v.sfield += 0; //.25*k3*k2;
+            v.sfield += .1*k3*k2;
         else if( surf.vert.CurvatureEnabled )
-            v.sfield += 0; //.1*k3;
+            v.sfield += .1*k3;
     }
 
     //--- Estrai isosurface

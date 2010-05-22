@@ -32,7 +32,7 @@ SOURCES += $$VCGDIR/wrap/gui/trackmode.cpp
 # the one that ships with meshlab is buggy as well!!
 # The define below change the include directives to use the 
 # development version of Eigen, where the bug has been fixed
-# DEFINES += USE_EIGEN_DEVTRUNK
+DEFINES += USE_EIGEN_DEVTRUNK
 INCLUDEPATH += /sw/include/eigen3
 INCLUDEPATH += /sw/include/suitesparse
 LIBS += -L/sw/lib -lamd -lcamd -lccolamd -lcholmod -lcolamd -lcxsparse -lblas
