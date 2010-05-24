@@ -35,6 +35,7 @@
 #include <QColorDialog>
 #include "../common/pluginmanager.h"
 #include "glarea.h"
+#include "layerDialog.h"
 #include "stdpardialog.h"
 
 #define MAXRECENTFILES 4
@@ -169,6 +170,7 @@ private:
 	MeshlabStdDialog *stddialog;
 	static QProgressBar *qb;
 	QMdiArea *mdiarea;
+	LayerDialog *layerDialog;
 	QSignalMapper *windowMapper;
         //QDir pluginsDir;
         //QStringList pluginFileNames;

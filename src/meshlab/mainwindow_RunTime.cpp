@@ -246,10 +246,15 @@ void MainWindow::updateMenus()
 
 	if(GLA())
 	{
-		showLayerDlgAct->setChecked(GLA()->layerDialog->isVisible());
+		showLayerDlgAct->setChecked(layerDialog->isVisible());
 		//if(GLA()->layerDialog->isVisible())
-		GLA()->layerDialog->updateTable();
-		GLA()->layerDialog->updateLog(GLA()->log);
+		layerDialog->updateTable();
+		layerDialog->updateLog(GLA()->log);
+	}
+	else
+	{
+		if(layerDialog->isVisible())
+			layerDialog->updateTable();
 	}
 }
 
@@ -413,7 +418,6 @@ void MainWindow::startFilter()
 	{
 		qDebug("MeshCreation");
         GLArea *gla=new GLArea(mdiarea,&currentGlobalParams);
-        addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 		gla->meshDoc.addNewMesh("untitled.ply");
 		gla->setFileName("untitled.ply");
 		mdiarea->addSubWindow(gla);
@@ -694,10 +698,10 @@ void MainWindow::toggleSelectVertRendering()
 
 bool MainWindow::openIn(QString /* fileName */)
 {
-	bool wasLayerVisible=GLA()->layerDialog->isVisible();
-	GLA()->layerDialog->setVisible(false);
+	bool wasLayerVisible=layerDialog->isVisible();
+	layerDialog->setVisible(false);
 	bool ret= open(QString(),GLA());
-	GLA()->layerDialog->setVisible(wasLayerVisible);
+	layerDialog->setVisible(wasLayerVisible);
 	return ret;
 }
 
@@ -833,7 +837,6 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				bool newGla = false;
 				if(gla==0){
                         gla=new GLArea(mdiarea,&currentGlobalParams);
-                        addDockWidget(Qt::RightDockWidgetArea,gla->layerDialog);
 						newGla =true;
 						pCurrentIOPlugin->setLog(&(gla->log));
 					}
@@ -1119,7 +1122,7 @@ void MainWindow::showToolbarRender(){
 void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
-void MainWindow::showLayerDlg() {if(GLA() != 0) 	GLA()->layerDialog->setVisible( !GLA()->layerDialog->isVisible() );}
+void MainWindow::showLayerDlg() {if(GLA() != 0) 	layerDialog->setVisible( !layerDialog->isVisible() );}
 
 void MainWindow::setCustomize()
 {

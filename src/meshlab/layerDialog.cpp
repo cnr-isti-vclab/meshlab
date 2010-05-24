@@ -43,8 +43,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
 	setVisible(false);
 	LayerDialog::ui->setupUi(this);
-	gla=qobject_cast<GLArea *>(parent);
-	mw=qobject_cast<MainWindow *>(gla->parentWidget()->parentWidget());
+	mw=qobject_cast<MainWindow *>(parent);
 
 	connect(ui->layerTableWidget, SIGNAL(cellClicked(int, int)), this, SLOT(toggleStatus(int,int)) );
 	connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
@@ -56,7 +55,6 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	connect(ui->layerTableWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(showContextMenu(const QPoint&)));
 	connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
-    connect(&(gla->meshDoc), SIGNAL(currentMeshChanged(int)),this, SLOT(updateTable()));
 	//connect(	ui->deleteButton, SIGNAL(cellClicked(int, int)) , this,  SLOT(openIn(int,int)) );
 }
 void LayerDialog::toggleStatus(int row, int col)
@@ -65,12 +63,12 @@ void LayerDialog::toggleStatus(int row, int col)
 	{
 		case 0 :
 			//the user has chosen to switch the layer
-			gla->meshDoc.setCurrentMesh(row);
+			mw->GLA()->meshDoc.setCurrentMesh(row);
 			break;
 		case 1 :
 		{
 			//the user has clicke on one of the eyes
-			QList<MeshModel *> &meshList=gla->meshDoc.meshList;
+			QList<MeshModel *> &meshList= mw->GLA()->meshDoc.meshList;
 			// NICE TRICK.
 			// If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
 			// Very useful for comparing meshes
@@ -87,7 +85,7 @@ void LayerDialog::toggleStatus(int row, int col)
 	}
 	//make sure the right row is colored or that they right eye is drawn (open or closed)
 	updateTable();
-	gla->update();
+	mw->GLA()->update();
 }
 
 void LayerDialog::showEvent ( QShowEvent * /* event*/ )
@@ -112,7 +110,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 	// switch layer
 	int row = ui->layerTableWidget->rowAt(pos.y());
 	if (row>=0)
-		gla->meshDoc.setCurrentMesh(row);
+		mw->GLA()->meshDoc.setCurrentMesh(row);
 
 	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
 		MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
@@ -149,7 +147,13 @@ void LayerDialog::updateLog(GLLogStream &log)
 void LayerDialog::updateTable()
 {
 	if(!isVisible()) return;
-	QList<MeshModel *> &meshList=gla->meshDoc.meshList;
+	if(isVisible() & !mw->GLA())
+	{
+		setVisible(false);
+		//The layer dialog cannot be opened unless a new document is opened
+		return;
+	}
+	QList<MeshModel *> &meshList= mw->GLA()->meshDoc.meshList;
 	//qDebug("Items in list: %d", meshList.size());
 	ui->layerTableWidget->clear();
 	ui->layerTableWidget->setColumnCount(3);
@@ -164,7 +168,7 @@ void LayerDialog::updateTable()
 		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
 
         item = new QTableWidgetItem(meshList.at(i)->shortName());
-		if(meshList.at(i)==gla->mm()) {
+		if(meshList.at(i)== mw->GLA()->mm()) {
 						item->setBackground(QBrush(Qt::yellow));
 						item->setForeground(QBrush(Qt::blue));
 						}

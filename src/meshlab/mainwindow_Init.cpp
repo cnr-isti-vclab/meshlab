@@ -44,6 +44,9 @@ MainWindow::MainWindow()
 {
 	//workspace = new QWorkspace(this);
 	mdiarea = new QMdiArea(this);
+	layerDialog = new LayerDialog(this);
+	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	addDockWidget(Qt::RightDockWidgetArea,layerDialog);
 	//setCentralWidget(workspace);
 	setCentralWidget(mdiarea);
 	windowMapper = new QSignalMapper(this);

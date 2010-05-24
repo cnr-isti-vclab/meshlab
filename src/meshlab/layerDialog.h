@@ -58,7 +58,6 @@ public slots:
 
 private:
     Ui::layerDialog* ui;
-    GLArea *gla;
     MainWindow *mw;
 };
 

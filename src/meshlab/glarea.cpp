@@ -23,7 +23,6 @@
 
 #include "../common/interfaces.h"
 #include "glarea.h"
-#include "layerDialog.h"
 #include "mainwindow.h"
 
 #include <wrap/gl/picking.h>
@@ -63,8 +62,7 @@ GLArea::GLArea(QWidget *parent, RichParameterSet *current)
 	nearPlane = .2f;
 	farPlane = 5.f;
 	pointSize = 2.0f;
-	layerDialog = new LayerDialog(this);
-	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	
     connect((const MeshDocument*)&meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
@@ -86,7 +84,6 @@ GLArea::~GLArea()
 	// warn any iRender plugin that we're deleting glarea
 	if (iRenderer)
 		iRenderer->Finalize(currentShader, meshDoc, this);
-	delete this->layerDialog;
 }
 
 
