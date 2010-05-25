@@ -58,6 +58,10 @@ class DiamondParametrizator
 		///first step first associating initial faces to diamond
 		for (unsigned int i=0;i<to_param->face.size();i++)
 		{
+			#ifndef _MESHLAB
+			if ((i%1000)==0)
+			printf("associating diamond %d - %d \n",i,i+1000);
+			#endif
 			FaceType *curr=&to_param->face[i];
 			AssignDiamond(curr);
 			curr->C()=colorDiam[curr->WT(0).N()];
@@ -340,10 +344,8 @@ template <class FaceType>
 		alphaMap.clear();
 
 		ParamMesh *to_param=isoParam->ParaMesh();
-		///copy paramesh
-		
 
-		
+		///copy paramesh
 
 		typedef ParamMesh::VertexType VertexType;
 		typedef ParamMesh::FaceType FaceType;
@@ -357,6 +359,10 @@ template <class FaceType>
 			FaceType * curr=&to_param->face[i];
 			InterpData Idata[3];
 			bool to_split[3];
+#ifndef _MESHLAB
+			if ((i%1000)==0)
+			printf("testing face %d - %d \n",i,i+1000);
+#endif
 			bool is_out=To_Split<FaceType>(curr,border,to_split,Idata);
 			if (is_out){
 				for (int edge=0;edge<3;edge++)
@@ -391,6 +397,10 @@ template <class FaceType>
 		ScalarType edgedim=1.0/(ScalarType)edge_size;
 		for (unsigned int i=0;i<to_param->face.size();i++)
 		{
+			#ifndef _MESHLAB
+			if ((i%1000)==0)
+			printf("setting Wedge coords %d - %d \n",i,i+1000);
+			#endif
 			///get the current face and test the edges
 			FaceType * curr=&to_param->face[i];
 			for (int j=0;j<3;j++)
@@ -527,11 +537,16 @@ public:
 
 		bool done=true;
 		/*int n0=to_param->fn;*/
+		int step=0;
 		while (done)
 		{
+			#ifndef _MESHLAB
+				printf("step %d \n",step);
+			#endif
 			AssociateDiamond();
 			done=Split(border);
 			isoParam->Update();
+			step++;
 		}
 
 		AssociateDiamond();

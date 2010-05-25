@@ -404,6 +404,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		m->updateDataMask(MeshModel::MM_VERTTEXCOORD);
 		m->updateDataMask(MeshModel::MM_FACECOLOR);
 		m->updateDataMask(MeshModel::MM_VERTQUALITY);
+		m->updateDataMask(MeshModel::MM_FACEMARK);
 		//}
 		if(!QFile(m->fullName()).exists())
 		{

@@ -103,7 +103,9 @@ class ParamFace: public vcg::Face <  ParamUsedTypes,
 	vcg::face::VFAdj,vcg::face::FFAdj,vcg::face::VertexRef,
   vcg::face::Color4b,vcg::face::BitFlags,
   vcg::face::Normal3f,
-	vcg::face::WedgeTexCoord2f
+	vcg::face::WedgeTexCoord2f,
+	vcg::face::Mark,
+	vcg::face::EdgePlane
   //,
   //vcg::face::Qualityf // not really needed
   >
@@ -1708,7 +1710,6 @@ public:
 					return false;
 			}
 		}
-
 		Area3d=vcg::tri::Stat<ParamMesh>::ComputeMeshArea(*param_mesh);
 		AbstractArea=(ScalarType)abstract_mesh->fn*fix_num;
 		
@@ -1816,6 +1817,16 @@ public:
 	}
 
 	template <class MeshType>
+	bool SetParamMesh(MeshType	*_input_mesh,
+										ParamMesh	 * _param_mesh)
+	{
+		param_mesh=_param_mesh;
+		param_mesh->Clear();
+		vcg::tri::Append<ParamMesh,MeshType>::Mesh(*param_mesh,*_input_mesh);
+		return(Update(true));
+	}
+
+	template <class MeshType>
 	bool LoadBaseDomain(char *pathname,
 						MeshType	*_input_mesh,
 						ParamMesh	 * _param_mesh,
@@ -1824,14 +1835,18 @@ public:
 	{
 		param_mesh=_param_mesh;
 		param_mesh->Clear();
+		/*vcg::tri::Allocator<MeshType>::CompactVertexVector(*_input_mesh);
+		vcg::tri::Allocator<MeshType>::CompactFaceVector(*_input_mesh);*/
 		vcg::tri::Append<ParamMesh,MeshType>::Mesh(*param_mesh,*_input_mesh);
+		/*UpdateStructures<ParamMesh>(param_mesh);*/
 
 		///quality copy to index of texture
     for (size_t i=0;i<param_mesh->vert.size();i++)
 		{
-			/*int val0=(int)param_mesh->vert[i].Q();
-			int val1=param_mesh->vert[i].T().N();*/
-			param_mesh->vert[i].T().N()=(int)param_mesh->vert[i].Q();
+			int val0=(int)param_mesh->vert[i].Q();
+			//int val1=param_mesh->vert[i].T().N();*/
+			param_mesh->vert[i].T().N()=val0;
+			assert(param_mesh->vert[i].T().N()>=0);
 		}
 		/*if (AbsMesh()!=NULL)
 			delete(AbsMesh());*/
@@ -1870,6 +1885,7 @@ public:
 		}
 		UpdateTopologies<AbstractMesh>(AbsMesh());
 		fclose(f);
+		
 		return (Update(test));
 	}
 	
