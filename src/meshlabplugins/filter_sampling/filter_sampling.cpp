@@ -330,7 +330,7 @@ void AddVert(CMeshO::VertexType &p)
 				if(dist == dist_upper_bound) return ;																				
 
 				Point3f interp;
-				bool ret = InterpolationParameters(*nearestF,closestPt, interp[0], interp[1], interp[2]);
+				bool ret = InterpolationParameters(*nearestF,(*nearestF).cN(),closestPt, interp[0], interp[1], interp[2]);
         //assert(ret);
 				interp[2]=1.0-interp[1]-interp[0];
 
