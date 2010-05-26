@@ -39,11 +39,12 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 	public:
-		enum { ISOP_PARAM,
-           ISOP_REMESHING,
-		   ISOP_DIAMPARAM,
-		   ISOP_LOAD,
-		   ISOP_SAVE
+		enum {ISOP_PARAM,
+          ISOP_REMESHING,
+					ISOP_DIAMPARAM,
+					ISOP_LOAD,
+					ISOP_SAVE,
+					ISOP_TRANSFER
        };
 
 		FilterIsoParametrization();

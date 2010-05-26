@@ -1671,6 +1671,14 @@ public:
 
 	}
 
+	void Clear()
+	{
+		face_to_vert.clear();
+		star_meshes.clear();
+		face_meshes.clear();
+		diamond_meshes.clear();
+	}
+
 	bool Update(bool test=true)
 	{
 		UpdateTopologies(abstract_mesh);
@@ -1830,6 +1838,7 @@ public:
 	bool LoadBaseDomain(char *pathname,
 						MeshType	*_input_mesh,
 						ParamMesh	 * _param_mesh,
+						AbstractMesh *_absMesh,
 						bool test=true,
 						bool use_quality=true)
 	{
@@ -1851,7 +1860,10 @@ public:
 		/*if (AbsMesh()!=NULL)
 			delete(AbsMesh());*/
 
-		AbsMesh()=new AbstractMesh();
+		//AbsMesh()=new AbstractMesh();
+		AbsMesh()=_absMesh;
+		AbsMesh()->Clear();
+
 		FILE *f=NULL;              
 		f=fopen(pathname,"r");
 		if (f==NULL)
