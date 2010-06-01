@@ -431,8 +431,8 @@ void MinimizeStep(const int &phaseNum)
 		ScalarType edge_esteem=GetSmallestUVHeight(*currMesh);
 		
 
-		ScalarType speed0=edge_esteem*0.1;
-		ScalarType conv=edge_esteem*0.002;
+		ScalarType speed0=edge_esteem*0.2;
+		ScalarType conv=edge_esteem*0.01;
 
 		if (accuracy>1)
 			conv*=1.0/(ScalarType)((accuracy-1)*10.0);

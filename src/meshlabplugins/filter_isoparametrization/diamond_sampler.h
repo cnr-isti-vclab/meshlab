@@ -153,8 +153,10 @@ public:
 	//typedef enum SampleAttr{SMNormal, SMColor, SMPosition};
 
 	///sample the parametrization
-	void SamplePos(const int &size)
+	bool SamplePos(const int &size)
 	{
+		if (size<2)
+			return false;
 		sampleSize=size;
 		DeAllocatePos();//clear old data
 		AllocatePos(size);	///allocate for new one
@@ -201,6 +203,7 @@ public:
 					val=CoordType(0,0,0);*/
 					SampledPos[diam][j][k]=val;
 				}
+				return true;
 				/*#ifndef _MESHLAB
 				printf("In Face: %f \n",(ScalarType)inFace/(ScalarType)global);
 				printf("In Diamond: %f \n",(ScalarType)inEdge/(ScalarType)global);
