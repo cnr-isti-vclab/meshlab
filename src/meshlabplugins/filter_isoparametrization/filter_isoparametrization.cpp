@@ -358,15 +358,21 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 				this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
 				return false;
 			}
-
+			
 
 			int SamplingRate=par.getInt("SamplingRate");
+			if (!SamplingRate>2)
+			{
+				this->errorMessage="Sampling rate must be >1";
+				return false;
+			}
 			MeshModel* mm=md.addNewMesh("Re-meshed");
 
 			CMeshO *rem=&mm->cm;
 
 			DiamSampl.Init(&isoPHandle());
-			DiamSampl.SamplePos(SamplingRate);
+			bool done=DiamSampl.SamplePos(SamplingRate);
+			assert(done);
 			DiamSampl.GetMesh<CMeshO>(*rem);
 
 			int n_diamonds,inFace,inEdge,inStar,n_merged;
