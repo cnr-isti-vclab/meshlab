@@ -748,7 +748,7 @@ public:
 #endif
 	  BaryOptimizatorDual<BaseMesh> BaryOpt;
 	  BaryOpt.Init(base_mesh,final_mesh,cb,accuracy,EType);
-	  BaryOpt.Optimize();
+	  BaryOpt.Optimize(4.0/(double)accuracy,accuracy*4);
 #ifndef _MESHLAB
 	  printf("\n POST DUAL OPT:	\n");
 	  PrintAttributes();
