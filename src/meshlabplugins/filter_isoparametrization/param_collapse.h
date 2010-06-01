@@ -57,7 +57,7 @@ public:
   }
 
 	inline bool IsFeasible(){
-		return LinkConditions(pos);
+    return LinkConditions(Super::pos);
 	}
 
   inline void SetHlevMeshUV(const std::vector<BaseFace*> &LowFace,

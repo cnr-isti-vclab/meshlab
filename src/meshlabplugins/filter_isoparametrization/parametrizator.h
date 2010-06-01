@@ -324,7 +324,7 @@ private:
 						fmin=f;
 						index=vfi2.I();
 					}
-					vfi2++;
+          ++vfi2;
 				}
 				CoordType bary=CoordType(0,0,0);
 				bary[index]=1.f;

@@ -100,7 +100,7 @@ class IsoTransfer
 		///then for each vertex find the closest
 		for (int i=0;i<to_assing.vert.size();i++)
 		{
-			MeshType::VertexType *vert=&to_assing.vert[i];
+      typename MeshType::VertexType *vert=&to_assing.vert[i];
 			if (!vert->IsD())
 			{
 				ScalarType dist;
