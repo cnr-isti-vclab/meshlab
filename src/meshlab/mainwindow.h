@@ -124,6 +124,8 @@ private slots:
 	void updateWindowMenu();
 	void updateMenus();
 	void updateStdDialog();
+	void setSplit(QAction *qa);
+	void setUnsplit();
 
 	///////////Slot Menu Preferences /////////////////
 	void setCustomize();
@@ -195,12 +197,26 @@ private:
 public:
 	GLArea *GLA() const {
 	  if(mdiarea->currentSubWindow()==0) return 0;
-	  GLArea *glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow());
-	  if(glw) return glw;
-	  glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow()->widget());
+	  MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+	  if(!mvc) 
+		  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+	  GLArea *glw =  (GLArea*) (mvc->currentView());
 	  assert(glw);
+	  if(glw) 
 	  return glw;
+	  else return 0;
 	}
+
+	MultiViewer_Container* currentDocContainer() const {
+		if(mdiarea->currentSubWindow()==0) return 0;
+		MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+		if(!mvc){ 
+			mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+			return mvc;
+		}
+		else return 0;
+	}
+
 
 	const PluginManager& pluginManager() const { return PM; }
 
@@ -254,7 +270,7 @@ private:
 	QMenu *windowsMenu;
 	QMenu *preferencesMenu;
 	QMenu *helpMenu;
-
+	QMenu *splitModeMenu;
 
 	//////////// Actions Menu File ///////////////////////
 	QAction *openAct;
@@ -306,6 +322,10 @@ private:
 	QAction *windowsCascadeAct;
 	QAction *windowsNextAct;
 	QAction *closeAllAct;
+	QAction *setSplitHAct;
+	QAction *setSplitVAct;
+    QActionGroup *setSplitGroupAct;
+	QAction *setUnsplitAct;
 	///////////Actions Menu Preferences /////////////////
 	QAction *setCustomizeAct;
 	///////////Actions Menu Help ////////////////////////
