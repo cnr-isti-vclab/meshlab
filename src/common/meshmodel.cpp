@@ -51,9 +51,12 @@ MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bo
 {
 	QFileInfo info(meshName);
 	QString newName=info.fileName();
+	int newId=-1;
 
 	for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
 	{
+		if(newId < (*mmi)->id) newId = (*mmi)->id;
+
 		if((*mmi)->fullName() == newName)
 		{
 		  QFileInfo fi((*mmi)->fullName());
@@ -75,7 +78,12 @@ MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bo
 	else
         newMesh->setFileName(newName);
 
+	newMesh->id= ++newId;
+
 	meshList.push_back(newMesh);
+
+	emit layerSetChanged();
+
   if(setAsCurrent)
     this->setCurrentMesh(meshList.size()-1);
 	return newMesh;
@@ -102,6 +110,8 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 	{
 		setCurrentMesh(0);
 	}
+
+	emit layerSetChanged();
 
 	return true;
 }

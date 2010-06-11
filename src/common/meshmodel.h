@@ -234,6 +234,7 @@ public:
   void setFileName(QString newFileName) {fullPathFileName = newFileName;}
 public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
+   int id;
 
   MeshModel(const char *meshName=0) {
     glw.m=&cm;
@@ -376,6 +377,8 @@ public:
 	signals:
 		//when ever the current mesh changed this will send out the index of the newest mesh
 		void currentMeshChanged(int index);
+		//when ever the meshList is changed
+		void layerSetChanged();
 
 };// end class MeshDocument
 
