@@ -262,7 +262,7 @@ void AlignDialog::onClickItem(QTreeWidgetItem * item, int column )
 													else mItem->setIcon(1,QIcon(":/layer_eye_close.png"));
 					}
 		else {
-						gla->meshDoc.setCurrentMesh(nn->id);
+						gla->meshDoc->setCurrentMesh(nn->id);
 						updateCurrentNodeBackground();
 					}
 	} else {
