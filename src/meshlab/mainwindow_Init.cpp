@@ -32,7 +32,6 @@
 #include <QFile>
 #include <QtXml>
 #include "mainwindow.h"
-#include "glarea.h"
 #include "plugindialog.h"
 #include "customDialog.h"
 #include "saveSnapshotDialog.h"
@@ -268,6 +267,17 @@ void MainWindow::createActions()
 
 	closeAllAct = new QAction(tr("Close &All Windows"), this);
 	connect(closeAllAct, SIGNAL(triggered()),mdiarea, SLOT(closeAllSubWindows()));
+
+	setSplitGroupAct = new QActionGroup(this);	setSplitGroupAct->setExclusive(true);
+
+	setSplitHAct	  = new QAction(tr("&Horizontally"),setSplitGroupAct);
+
+	setSplitVAct	  = new QAction(tr("&Vertically"),setSplitGroupAct);
+
+	connect(setSplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(setSplit(QAction *)));
+
+	setUnsplitAct = new QAction(tr("&Close current view"),this);
+	connect(setUnsplitAct, SIGNAL(triggered()), this, SLOT(setUnsplit()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
 	lastFilterAct = new QAction(tr("Apply filter"),this);
