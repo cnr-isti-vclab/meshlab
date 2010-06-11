@@ -32,8 +32,8 @@
 using namespace std;
 using namespace vcg;
 
-GLArea::GLArea(QWidget *parent, RichParameterSet *current)
-: QGLWidget(parent)
+GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
+: Viewer(mvcont)
 {
     this->updateCustomSettingValues(*current);
 	animMode=AnimNone;
@@ -63,12 +63,15 @@ GLArea::GLArea(QWidget *parent, RichParameterSet *current)
 	farPlane = 5.f;
 	pointSize = 2.0f;
 	
-    connect((const MeshDocument*)&meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
+	updateLayerSetVisibilities();
+
+    connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
+	connect(meshDoc, SIGNAL(layerSetChanged()), this, SLOT(updateLayerSetVisibilities()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
 	*/
-	MainWindow* mainwindow = dynamic_cast<MainWindow*>(parent->parentWidget());
+	MainWindow* mainwindow = dynamic_cast<MainWindow*>(mvcont->parentWidget()->parentWidget());
 	//connecting the MainWindow Slots to GLArea signal (simple passthrough)
 	if(mainwindow != NULL){
 		connect(this,SIGNAL(updateMainWindowMenus()),mainwindow,SLOT(updateMenus()));
@@ -83,7 +86,7 @@ GLArea::~GLArea()
 {
 	// warn any iRender plugin that we're deleting glarea
 	if (iRenderer)
-		iRenderer->Finalize(currentShader, meshDoc, this);
+		iRenderer->Finalize(currentShader, *meshDoc, this);
 }
 
 
@@ -277,17 +280,18 @@ void GLArea::paintGL()
 	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
 	else glDisable(GL_CULL_FACE);
 
-	if(!meshDoc.busy)
+	if(!meshDoc->busy)
 	{
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-		if (iRenderer) iRenderer->Render(currentShader, meshDoc, rm, this);
+		if (iRenderer) iRenderer->Render(currentShader, *meshDoc, rm, this);
 		else
 		{
 
-			foreach(MeshModel * mp, meshDoc.meshList)
+			foreach(MeshModel * mp, meshDoc->meshList)
 				{
-					if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+					//Mesh visibility is read from the viewer visibility map, not from the mesh 
+					if(visibilityMap[mp->id]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
 		}
 		if(iEdit) iEdit->Decorate(*mm(),this);
@@ -349,6 +353,10 @@ void GLArea::paintGL()
 		updateFps(time.elapsed());
 	}
 
+	//Draw highlight if it is the current viewer
+	if(mvc->currentId==id)
+		displayViewerHighlight();
+
 	// Finally display HELP if requested
 	if (isHelpVisible()) displayHelp();
 
@@ -380,7 +388,10 @@ void GLArea::displayInfo()
 
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
     glas.logAreaColor[3]=128;
+	if(mvc->currentId==id)
     glColor(glas.logAreaColor);
+	else 
+		glColor(vcg::Color4b(128,128,128,128));
 	int lineNum =4;
 	float lineSpacing = qFont.pixelSize()*1.5f;
 	float barHeight = -1 + 2.0*(lineSpacing*(lineNum+.25))/float(curSiz.height());
@@ -399,9 +410,10 @@ void GLArea::displayInfo()
  	float startPos = curSiz.height()-(5+lineSpacing*(lineNum));
 
 	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
-	log.glDraw(this,-1,3,lineSpacing,qFont);
+	//TODO TEMPORANEO BISOGNA SCRIVERE SOLO LE INFO RELATIVE ALLO STATO DELLA GLAREA CORRENTE
+	//log.glDraw(this,-1,3,lineSpacing,qFont);
 
-	if(meshDoc.size()==1)
+	if(meshDoc->size()==1)
 	{
 		renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm()->cm.vn),qFont);
 		renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm()->cm.fn),qFont);
@@ -409,8 +421,8 @@ void GLArea::displayInfo()
 	else
 	{
         renderText(middleCol,startPos+ 1*lineSpacing,tr("<%1>").arg(mm()->shortName()),qFont);
-		renderText(middleCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc.vn()),qFont);
-		renderText(middleCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc.fn()),qFont);
+		renderText(middleCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc->vn()),qFont);
+		renderText(middleCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc->fn()),qFont);
 	}
   if(rm.selectedFace || rm.selectedVert || mm()->cm.sfn>0 || mm()->cm.svn>0 )
       renderText(middleCol,startPos+ 4*lineSpacing,tr("Selection: v:%1 f:%2").arg(mm()->cm.svn).arg(mm()->cm.sfn),qFont);
@@ -431,6 +443,46 @@ void GLArea::displayInfo()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+
+}
+
+void GLArea::displayViewerHighlight()
+{
+	// Enter in 2D screen Mode again
+	glPushAttrib(GL_LINE_BIT);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(-1,1,-1,1,-1,1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	/*glEnable(GL_BLEND);*/
+
+	/*glBlendFunc(GL_ONE,GL_SRC_ALPHA);*/
+	glColor(vcg::Color4b::Yellow);
+	glLineWidth(3);
+	glBegin(GL_LINES);
+
+	glVertex2f(-1.f,1.f);     glVertex2f(1.f,1.f);
+	glVertex2f(1.f,1.f);		glVertex2f(1.f,-1.f);
+	glVertex2f(1.f,-1.f);		glVertex2f(-1.f,-1.f);
+	glVertex2f(-1.f,-1.f);	glVertex2f(-1.f,1.f);		
+
+	glEnd();
+
+	// Closing 2D
+	glPopAttrib();
+	glPopMatrix(); // restore modelview
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopAttrib();
 
 }
 
@@ -505,11 +557,11 @@ void GLArea::updateLayer()
 	if(iEdit)
 	{
 		assert(lastModelEdited);  //if there is an editor last model edited should always be set when start edit is called
-		iEdit->LayerChanged(meshDoc, *lastModelEdited, this);
+		iEdit->LayerChanged(*meshDoc, *lastModelEdited, this);
 
 		//now update the last model edited
 		//TODO this is not the best design....   iEdit should maybe keep track of the model on its own
-		lastModelEdited = meshDoc.mm();
+		lastModelEdited = meshDoc->mm();
 	}
 }
 
@@ -520,9 +572,9 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 
 	iEdit = actionToMeshEditMap.value(currentEditor);
 	assert(iEdit);
-	lastModelEdited = meshDoc.mm();
-	if (!iEdit->StartEdit(meshDoc, this))
-		//iEdit->EndEdit(*(meshDoc.mm()), this);
+	lastModelEdited = meshDoc->mm();
+	if (!iEdit->StartEdit(*meshDoc, this))
+		//iEdit->EndEdit(*(meshDoc->mm()), this);
 		endEdit();
 	else
 		log.Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
@@ -640,6 +692,7 @@ void GLArea::tabletEvent(QTabletEvent*e)
 
 void GLArea::wheelEvent(QWheelEvent*e)
 {
+	setFocus();
 	const int WHEEL_STEP = 120;
 	float notch = e->delta()/ float(WHEEL_STEP);
   switch(e->modifiers())
@@ -647,7 +700,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
     case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50.0f); break;
     case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
     case Qt::AltModifier													: pointSize = math::Clamp(pointSize*powf(1.2f, notch),0.01f,150.0f);
-			foreach(MeshModel * mp, meshDoc.meshList)
+			foreach(MeshModel * mp, meshDoc->meshList)
 				mp->glw.SetHintParamf(GLW::HNPPointSize,pointSize);
 			break;
     case Qt::ShiftModifier												: fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
@@ -664,6 +717,12 @@ void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
   hasToPick=true;
   pointToPick=Point2i(e->x(),height()-e->y());
 	updateGL();
+}
+
+void GLArea::focusInEvent ( QFocusEvent * e )
+{
+	QWidget::focusInEvent(e);
+	emit currentViewerChanged(id);
 }
 
 void GLArea::setCursorTrack(vcg::TrackMode *tm)
@@ -703,14 +762,14 @@ void GLArea::initTexture()
 {
 	if(hasToUpdateTexture)
 	{
-        foreach (MeshModel *mp,meshDoc.meshList)
+        foreach (MeshModel *mp,meshDoc->meshList)
             mp->glw.TMId.clear();
 
 		qDebug("Beware: deleting the texutres could lead to problems for shared textures.");
 		hasToUpdateTexture = false;
 	}
 
-    foreach (MeshModel *mp, meshDoc.meshList)
+    foreach (MeshModel *mp, meshDoc->meshList)
     {
         if(!mp->cm.textures.empty() && mp->glw.TMId.empty()){
             glEnable(GL_TEXTURE_2D);
@@ -908,9 +967,9 @@ void GLArea::updateFps(float deltaTime)
 void GLArea::resetTrackBall()
 {
 	trackball.Reset();
-	float newScale= 3.0f/meshDoc.bbox().Diag();
+	float newScale= 3.0f/meshDoc->bbox().Diag();
 	trackball.track.sca = newScale;
-	trackball.track.tra =  -meshDoc.bbox().Center();
+	trackball.track.tra =  -meshDoc->bbox().Center();
 	updateGL();
 }
 
@@ -943,7 +1002,7 @@ void GLArea::sendViewDir(QString name)
 
 void GLArea::sendCameraPos(QString name)
 {
-		Point3f pos=meshDoc.mm()->cm.shot.GetViewPoint();
+		Point3f pos=meshDoc->mm()->cm.shot.GetViewPoint();
 	emit transmitViewDir(name, pos);
 }
 
@@ -965,4 +1024,37 @@ void GLArea::updateCustomSettingValues( RichParameterSet& rps )
 void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
 {
     GLAreaSetting::initGlobalParameterSet(defaultGlobalParamSet);
+}
+
+//Don't alter the state of the other elements in the visibility map
+void GLArea::updateLayerSetVisibilities()
+{
+	//Align visibilityMap state with meshList state
+	QMapIterator<int, bool> i(visibilityMap);
+	while (i.hasNext()) {
+		i.next();
+		bool found =false;
+		foreach(MeshModel * mp, meshDoc->meshList)
+		{
+			if(mp->id == i.key())
+			{
+				found = true;
+				break;
+			}
+		}
+		if(!found)
+			visibilityMap.remove(i.key());
+	}
+
+	foreach(MeshModel * mp, meshDoc->meshList)
+	{
+		//Insert the new pair in the map; 
+		if(!visibilityMap.contains(mp->id))
+			visibilityMap.insert(mp->id,mp->visible);
+	}
+}
+
+void GLArea::updateLayerSetVisibility(int meshId, bool visibility)
+{
+	visibilityMap.insert(meshId,visibility);
 }
