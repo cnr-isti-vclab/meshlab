@@ -32,7 +32,6 @@ $Log: stdpardialog.cpp,v $
 
 #include "ui_layerDialog.h"
 #include "layerDialog.h"
-#include "glarea.h"
 #include "mainwindow.h"
 
 using namespace std;
@@ -63,12 +62,12 @@ void LayerDialog::toggleStatus(int row, int col)
 	{
 		case 0 :
 			//the user has chosen to switch the layer
-			mw->GLA()->meshDoc.setCurrentMesh(row);
+			mw->GLA()->meshDoc->setCurrentMesh(row);
 			break;
 		case 1 :
 		{
 			//the user has clicke on one of the eyes
-			QList<MeshModel *> &meshList= mw->GLA()->meshDoc.meshList;
+			QList<MeshModel *> &meshList= mw->GLA()->meshDoc->meshList;
 			// NICE TRICK.
 			// If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
 			// Very useful for comparing meshes
@@ -77,10 +76,15 @@ void LayerDialog::toggleStatus(int row, int col)
 					foreach(MeshModel *mp, meshList)
 					{
 						mp->visible=false;
+						mw->GLA()->updateLayerSetVisibility(mp->id, mp->visible);
 					}
 
 			if(meshList.at(row)->visible)  meshList.at(row)->visible = false;
 			else   meshList.at(row)->visible = true;
+
+			//Update current GLArea visibility 
+			//TODO. Evitare il metodo GLA()
+			mw->GLA()->updateLayerSetVisibility(meshList.at(row)->id, meshList.at(row)->visible);
 		}
 	}
 	//make sure the right row is colored or that they right eye is drawn (open or closed)
@@ -110,7 +114,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 	// switch layer
 	int row = ui->layerTableWidget->rowAt(pos.y());
 	if (row>=0)
-		mw->GLA()->meshDoc.setCurrentMesh(row);
+		mw->GLA()->meshDoc->setCurrentMesh(row);
 
 	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
 		MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
@@ -146,6 +150,7 @@ void LayerDialog::updateLog(GLLogStream &log)
 
 void LayerDialog::updateTable()
 {
+	//TODO:Check if the current viewer is a GLArea
 	if(!isVisible()) return;
 	if(isVisible() & !mw->GLA())
 	{
@@ -153,7 +158,7 @@ void LayerDialog::updateTable()
 		//The layer dialog cannot be opened unless a new document is opened
 		return;
 	}
-	QList<MeshModel *> &meshList= mw->GLA()->meshDoc.meshList;
+	QList<MeshModel *> &meshList= mw->GLA()->meshDoc->meshList;
 	//qDebug("Items in list: %d", meshList.size());
 	ui->layerTableWidget->clear();
 	ui->layerTableWidget->setColumnCount(3);
@@ -164,6 +169,11 @@ void LayerDialog::updateTable()
 	ui->layerTableWidget->setShowGrid(false);
 	for(int i=0;i<meshList.size();++i)
 	 {
+		 //Restore mesh visibility according to the current visibility map
+		 //very good to keep viewer state consistent
+		if( mw->GLA()->visibilityMap.contains(meshList.at(i)->id))
+			meshList.at(i)->visible =mw->GLA()->visibilityMap[meshList.at(i)->id];
+		 
     QTableWidgetItem *item;
 		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
 
