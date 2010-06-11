@@ -33,21 +33,21 @@ SUBDIRS       = common \
 				meshlabplugins/filter_texture \
         		meshlabplugins/filter_unsharp \
 				meshlabplugins/filter_zippering \
-#				meshlabplugins/filter_curvature_from_sliding \
-#				meshlabplugins/filter_perceptualmetric \
-#				meshlabplugins/render_splat_pyramid \
-				meshlabplugins/render_splatting \
-				meshlabplugins/render_gdp \
+			meshlabplugins/filter_curvature_from_sliding \
+			meshlabplugins/filter_perceptualmetric \
+#			meshlabplugins/render_splat_pyramid \
+			meshlabplugins/render_splatting \
+			meshlabplugins/render_gdp \
 				meshlabplugins/meshdecorate \
 				meshlabplugins/edit_select \
 				meshlabplugins/edit_pickpoints \
-#				meshlabplugins/edit_phototexturing \
-#		        meshlabplugins/editslice \
+##				meshlabplugins/edit_phototexturing \
+##		        meshlabplugins/editslice \
 				meshlabplugins/editalign \
 				meshlabplugins/editmeasure \
 				meshlabplugins/editrgbtri \
 				meshlabplugins/editsegment \
-#				meshlabplugins/edit_straightener \
+##				meshlabplugins/edit_straightener \
 				sampleplugins/sampleedit \
 				sampleplugins/samplefilter \
 				sampleplugins/samplefilterdyn \
@@ -55,20 +55,20 @@ SUBDIRS       = common \
 				sampleplugins/sampledecoration \
 				sampleplugins/io_m\
 				sampleplugins/filterborder \
-				sampleplugins/filtergeodesic \
-				sampleplugins/filtercreateiso \
-                fgt/filter_aging \
-                fgt/filter_colorproc \
-                fgt/filter_fractal \
-                fgt/filter_func \
-#                fgt/filter_ssynth \
-                fgt/filter_qhull \
-                fgt/filter_quality \
-                fgt/filter_trioptimize \
+			sampleplugins/filtergeodesic \
+			sampleplugins/filtercreateiso \
+             fgt/filter_aging \
+              fgt/filter_colorproc \
+#                fgt/filter_fractal \
+               fgt/filter_func \
+              fgt/filter_ssynth \
+              fgt/filter_qhull \
+              fgt/filter_quality \
+               fgt/filter_trioptimize \
                 fgt/decorate_shadow \
                 fgt/edit_hole \
                 fgt/editpaint\
                 fgt/edit_quality \
                 fgt/edit_texture\
 				fgt/edit_topo \
-        fgt/render_rfx
+				fgt/render_rfx 
