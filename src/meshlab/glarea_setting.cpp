@@ -1,4 +1,4 @@
-#include "glarea.h"
+#include "../common/filterparameter.h"
 #include "glarea_setting.h"
 
 void GLAreaSetting::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
