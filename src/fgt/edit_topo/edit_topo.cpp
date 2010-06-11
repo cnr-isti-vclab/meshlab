@@ -1210,16 +1210,16 @@ void edit_topo::on_mesh_create()
 	out.clear();
 
 	if(first_model_generated)
-		parentGla->meshDoc.meshList.pop_back();
+		parentGla->meshDoc->meshList.pop_back();
 	
 
 	MeshModel *mm= new MeshModel();
-	parentGla->meshDoc.meshList.push_back(mm);
+	parentGla->meshDoc->meshList.push_back(mm);
 	first_model_generated = true;
 
 
-	MeshModel *m = parentGla->meshDoc.meshList.back();	// destination = new mesh
-	MeshModel *currentMesh  = parentGla->meshDoc.mm();	// source = current	mesh
+	MeshModel *m = parentGla->meshDoc->meshList.back();	// destination = new mesh
+	MeshModel *currentMesh  = parentGla->meshDoc->mm();	// source = current	mesh
 
 	// if debug value is true, the algorithm will respond with all the
 	// auto generated vertices.
