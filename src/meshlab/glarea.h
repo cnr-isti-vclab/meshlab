@@ -25,7 +25,7 @@
 #define GLAREA_H
 #include <GL/glew.h>
 #include <QTimer>
-#include <QGLWidget>
+
 #include <QTime>
 #include <QtGui>
 #include <vcg/space/plane3.h>
@@ -38,6 +38,7 @@
 #include "../common/interfaces.h"
 #include "../common/filterscript.h"
 #include "glarea_setting.h"
+#include "viewer.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -64,12 +65,12 @@ public:
 };
 
 class MeshModel;
-class GLArea : public QGLWidget
+class GLArea : public Viewer
 {
 	Q_OBJECT
 
 public:
-    GLArea(QWidget *parent, RichParameterSet *current);
+    GLArea(MultiViewer_Container *mvcont, RichParameterSet *current);
 	~GLArea();
 	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 private:
@@ -77,8 +78,8 @@ private:
 
 public:
   // Layer Management stuff. 
-	MeshDocument meshDoc;
-	MeshModel *mm(){return meshDoc.mm();}
+	
+	MeshModel *mm(){return meshDoc->mm();}
  
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
@@ -104,6 +105,8 @@ public:
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 
 	void updateFps(float deltaTime);
+	
+	bool isCurrent() { return mvc->currentId == id;}
 	
 	void showTrackBall(bool b)		{trackBallVisible = b; updateGL();}
 	bool isHelpVisible()      {return helpVisible;}  
@@ -171,12 +174,15 @@ signals:
 	void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
 	void glareaClosed();					//someone has closed the glarea
   
+	void currentViewerChanged(int currentId);
+
 public slots:
 
 	// Called when we change layer, notifies the edit tool if one is open
     void updateLayer();
 	
 public:
+	void focusInEvent ( QFocusEvent * event );
 	
 	//call when the editor changes
 	void setCurrentEditAction(QAction *editAction);
@@ -225,6 +231,7 @@ protected:
 	void initializeGL();
 	void initTexture();
 	void displayInfo();
+	void displayViewerHighlight();
 	void displayHelp();
 
 	QString GetMeshInfoString();
@@ -281,6 +288,16 @@ public:
 	float farPlane;
   float pointSize;
   SnapshotSetting ss;
+
+   // Store for each mesh if it is visible for the current viewer.
+   QMap<int, bool> visibilityMap;
+
+ // Update viewer visibility map
+	void updateLayerSetVisibility(int meshId, bool visibility);
+
+public slots:
+	void updateLayerSetVisibilities();
+
 private:
 	float cfps;
 	float lastTime;
