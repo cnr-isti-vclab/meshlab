@@ -33,8 +33,8 @@ SUBDIRS       = common \
 				meshlabplugins/filter_texture \
         		meshlabplugins/filter_unsharp \
 				meshlabplugins/filter_zippering \
-			meshlabplugins/filter_curvature_from_sliding \
-			meshlabplugins/filter_perceptualmetric \
+#			meshlabplugins/filter_curvature_from_sliding \
+#			meshlabplugins/filter_perceptualmetric \
 #			meshlabplugins/render_splat_pyramid \
 			meshlabplugins/render_splatting \
 			meshlabplugins/render_gdp \
@@ -61,7 +61,7 @@ SUBDIRS       = common \
               fgt/filter_colorproc \
 #                fgt/filter_fractal \
                fgt/filter_func \
-              fgt/filter_ssynth \
+#              fgt/filter_ssynth \
               fgt/filter_qhull \
               fgt/filter_quality \
                fgt/filter_trioptimize \
