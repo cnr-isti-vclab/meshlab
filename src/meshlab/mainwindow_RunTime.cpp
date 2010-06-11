@@ -29,15 +29,12 @@
 #include <QDesktopServices>
 
 #include "mainwindow.h"
-#include "glarea.h"
 #include "plugindialog.h"
 #include "filterScriptDialog.h"
 #include "customDialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
-#include "stdpardialog.h"
-#include "layerDialog.h"
 #include "alnParser.h"
 
 #include <wrap/io_trimesh/io_mask.h>
@@ -109,6 +106,30 @@ void MainWindow::updateWindowMenu()
 	windowsMenu->addAction(windowsCascadeAct);
 	windowsMenu->addAction(windowsNextAct);
 	windowsNextAct->setEnabled(mdiarea-> subWindowList().size()>1);
+
+	menuBar()->addSeparator();
+
+	// Split/Unsplit SUBmenu
+	if((mdiarea-> subWindowList().size()>0)){
+		splitModeMenu = windowsMenu->addMenu(tr("&Split current view"));
+
+		splitModeMenu->addAction(setSplitHAct);
+		splitModeMenu->addAction(setSplitVAct);
+
+		windowsMenu->addAction(setUnsplitAct);
+
+		MultiViewer_Container *mvc = currentDocContainer();
+		if(mvc)
+		{
+			setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
+			Viewer* current = mvc->currentView();
+
+			setSplitHAct->setEnabled(current->size().height()/2 > current->minimumSizeHint().height());
+			setSplitVAct->setEnabled(current->size().width()/2 > current->minimumSizeHint().width());
+
+			menuBar()->addSeparator();
+		}
+	}
 
 	QList<QMdiSubWindow*> windows = mdiarea->subWindowList();
 
@@ -258,6 +279,39 @@ void MainWindow::updateMenus()
 	}
 }
 
+void MainWindow::setSplit(QAction *qa)
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	if(mvc) 
+	{
+		GLArea *glwClone=new GLArea(mvc, &currentGlobalParams);	
+		if(qa->text() == tr("&Horizontally"))	
+			mvc->addView(glwClone, Qt::Vertical);
+		else
+			mvc->addView(glwClone, Qt::Horizontal);
+
+		updateMenus();
+
+		glwClone->resetTrackBall();
+
+		glwClone->update();
+	}
+
+}
+
+void MainWindow::setUnsplit()
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	if(mvc) 
+	{
+		assert(mvc->viewerCounter() >1);
+
+		mvc->removeView(mvc->currentView()->getId());
+
+		updateMenus();
+	}
+}
+
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
 	//qDebug("dragEnterEvent: %s",event->format());
@@ -283,9 +337,11 @@ void MainWindow::dropEvent ( QDropEvent * event )
 
 void MainWindow::delCurrentMesh()
 {
-	GLA()->meshDoc.delMesh(GLA()->meshDoc.mm());
+	//MeshDoc accessed through current container
+	currentDocContainer()->meshDoc.delMesh(currentDocContainer()->meshDoc.mm());
 	//stddialog->hide();
-	GLA()->updateGL();
+	//Update all viewers
+	currentDocContainer()->updateAll();
 	updateMenus();
 }
 
@@ -327,7 +383,7 @@ void MainWindow::runFilterScript()
     GLA()->mm()->updateDataMask(req);
     iFilter->setLog(&(GLA()->log));
 		
-		MeshDocument &meshDocument=GLA()->meshDoc;
+		MeshDocument *meshDocument=GLA()->meshDoc;
 		RichParameterSet &parameterSet = (*ii).second;
 		
 		for(int i = 0; i < parameterSet.paramList.size(); i++)
@@ -339,14 +395,14 @@ void MainWindow::runFilterScript()
 			if(parameter->val->isMesh())
 			{  
 				MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
-				if(	md->meshindex < meshDocument.size() && 
+				if(	md->meshindex < meshDocument->size() && 
 					md->meshindex >= 0  )
 				{
-					RichMesh* rmesh = new RichMesh(parameter->name,meshDocument.getMesh(md->meshindex),&meshDocument);
+					RichMesh* rmesh = new RichMesh(parameter->name,meshDocument->getMesh(md->meshindex),meshDocument);
 					parameterSet.paramList.replace(i,rmesh);
 				} else
 				{
-					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), md->meshindex );
+					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument->size(), md->meshindex );
 					printf("One of the filters in the script needs more meshes than you have loaded.\n");
 					exit(-1);
 				}
@@ -357,7 +413,7 @@ void MainWindow::runFilterScript()
 
 		//WARNING!!!!!!!!!!!!
 		/* to be changed */
-		iFilter->applyFilter( action, meshDocument, (*ii).second, QCallBack );
+		iFilter->applyFilter( action, *meshDocument, (*ii).second, QCallBack );
 		if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
 			GLA()->setColorMode(vcg::GLW::CMPerFace);
 			GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
@@ -417,11 +473,14 @@ void MainWindow::startFilter()
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		qDebug("MeshCreation");
-        GLArea *gla=new GLArea(mdiarea,&currentGlobalParams);
-		gla->meshDoc.addNewMesh("untitled.ply");
+		MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea); 
+		connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+		GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
+		gla->meshDoc->addNewMesh("untitled.ply");
 		gla->setFileName("untitled.ply");
-		mdiarea->addSubWindow(gla);
-		if(mdiarea->isVisible()) gla->showMaximized();
+		//mdiarea->addSubWindow(gla); //Now there is the container
+		mdiarea->addSubWindow(mvcont);
+		if(mdiarea->isVisible()) mvcont->showMaximized();
 	}
 	else
 		if (!iFilter->isFilterApplicable(action,(*GLA()->mm()),missingStuff))
@@ -438,7 +497,7 @@ void MainWindow::startFilter()
     // (2) Ask for filter parameters and eventally directly invoke the filter
     // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
     // if no dialog is created the filter must be executed immediately
-    if(! stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this,GLA()) )
+    if(! stddialog->showAutoDialog(iFilter, GLA()->mm(), (GLA()->meshDoc), action, this,GLA()) )
     {
         RichParameterSet dummyParSet;
         executeFilter(action, dummyParSet, false);
@@ -476,11 +535,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	bool ret;
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	QTime tt; tt.start();
-	GLA()->meshDoc.busy=true;
+	GLA()->meshDoc->busy=true;
   RichParameterSet MergedEnvironment(params);
   MergedEnvironment.join(currentGlobalParams);
-  ret=iFilter->applyFilter(action,   GLA()->meshDoc, MergedEnvironment, QCallBack);
-	GLA()->meshDoc.busy=false;
+  ret=iFilter->applyFilter(action, *(GLA()->meshDoc), MergedEnvironment, QCallBack);
+	GLA()->meshDoc->busy=false;
   qApp->restoreOverrideCursor();
 
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
@@ -524,7 +583,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
   qb->reset();
   updateMenus();
-  GLA()->update();
+  //GLA()->update(); //now there is the container
+  MultiViewer_Container* mvc = currentDocContainer();
+  if(mvc)
+	  mvc->updateAll();
+
 }
 
 // Edit Mode Managment
@@ -591,7 +654,7 @@ void MainWindow::applyRenderMode()
 
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	iRenderTemp->Init(action,GLA()->meshDoc,GLA()->getCurrentRenderMode(),GLA());
+	iRenderTemp->Init(action,*(GLA()->meshDoc),GLA()->getCurrentRenderMode(),GLA());
 
 	if(action->text() == tr("None"))
 	{
@@ -720,11 +783,11 @@ void MainWindow::saveProject()
 		lastUsedDirectory.setPath(path);
 	}
 
-	MeshDocument &meshDoc=GLA()->meshDoc;
+	MeshDocument *meshDoc=GLA()->meshDoc;
 	vector<string> meshNameVector;
 	vector<Matrix44f> transfVector;
 
-  foreach(MeshModel * mp, meshDoc.meshList)
+  foreach(MeshModel * mp, meshDoc->meshList)
 	{
         meshNameVector.push_back(qPrintable(mp->shortName()));
 		transfVector.push_back(mp->cm.Tr);
@@ -836,7 +899,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 				bool newGla = false;
 				if(gla==0){
-                        gla=new GLArea(mdiarea,&currentGlobalParams);
+						MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea); 
+						connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+						gla=new GLArea(mvcont, &currentGlobalParams); 		
+						mvcont->addView(gla, Qt::Horizontal);
 						newGla =true;
 						pCurrentIOPlugin->setLog(&(gla->log));
 					}
@@ -872,15 +938,17 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 							postOpenDialog.exec();
 							pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 						}
-					gla->meshDoc.busy=true;
-					gla->meshDoc.addNewMesh(qPrintable(fileName),mm);
+					gla->meshDoc->busy=true;
+					gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
                     gla->setFileName(mm->shortName());
-					if(newGla){
-						mdiarea->addSubWindow(gla);
+					if(newGla){ //Now there is the container
+						//mdiarea->addSubWindow(gla);
+						mdiarea->addSubWindow(gla->mvc);
 					}
-					if(mdiarea->isVisible()) gla->showMaximized();
+
+					if(mdiarea->isVisible()) gla->mvc->showMaximized();
 					setCurrentFile(fileName);
 
 					if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
@@ -932,7 +1000,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 					if(delVertNum>0 || delFaceNum>0 )
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-					GLA()->meshDoc.busy=false;
+					GLA()->meshDoc->busy=false;
 					if(newGla) GLA()->resetTrackBall();
 				}
 			}
