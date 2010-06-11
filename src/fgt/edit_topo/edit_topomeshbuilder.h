@@ -157,7 +157,7 @@ public:
 
 			Point3f interp;
 			// Try to interpolate vertex colors and normals
-			if(InterpolationParameters<MESH_TYPE::FaceType,MESH_TYPE::ScalarType>(*nearestF,(*nearestF).cN(), closestPt, interp[0], interp[1], interp[2]))
+      if(InterpolationParameters<typename MESH_TYPE::FaceType,typename MESH_TYPE::ScalarType>(*nearestF,(*nearestF).cN(), closestPt, interp[0], interp[1], interp[2]))
 			{
 				interp[2]=1.0-interp[1]-interp[0];
 
