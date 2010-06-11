@@ -38,7 +38,6 @@ added Filter History Dialogs
 #include "ui_filterScriptDialog.h"
 #include "filterScriptDialog.h"
 #include "mainwindow.h"
-#include "stdpardialog.h"
 
 //using namespace vcg;
 
@@ -218,7 +217,7 @@ void FilterScriptDialog::editSelectedFilterParameters()
 	//fill the paramter set with all the names and descriptions which are lost in the 
 	//filter script
 	RichParameterSet newParameterSet;
-	iFilter->initParameterSet(action, mainWindow->GLA()->meshDoc, newParameterSet);
+	iFilter->initParameterSet(action, *(mainWindow->GLA()->meshDoc), newParameterSet);
 
 	if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())
 	{
@@ -233,7 +232,7 @@ void FilterScriptDialog::editSelectedFilterParameters()
 		qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";
 
 	//launch the dialog
-	GenericParamDialog parameterDialog(this, &newParameterSet, "Edit Parameters", &mainWindow->GLA()->meshDoc);
+	GenericParamDialog parameterDialog(this, &newParameterSet, "Edit Parameters", mainWindow->GLA()->meshDoc);
 	int result = parameterDialog.exec();
 	if(result == QDialog::Accepted){
 		//keep the changes	
