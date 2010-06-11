@@ -2,7 +2,7 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
@@ -12,11 +12,20 @@
    height="1052.3622047"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.44.1"
+   inkscape:version="0.46"
    sodipodi:docbase="/Users/cignoni/Documents/devel/meshlab/src/sampleplugins/sampleedit"
-   sodipodi:docname="icon_info.svg">
+   sodipodi:docname="icon_info.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
   <defs
-     id="defs4" />
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -27,15 +36,16 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="23.62348"
-     inkscape:cx="402.73111"
-     inkscape:cy="661.09127"
+     inkscape:zoom="5.8594472"
+     inkscape:cx="402.8313"
+     inkscape:cy="661.25573"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:window-width="1027"
      inkscape:window-height="776"
      inkscape:window-x="45"
-     inkscape:window-y="22" />
+     inkscape:window-y="22"
+     showgrid="false" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -65,9 +75,9 @@
        inkscape:export-ydpi="471.64999" />
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:black;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times"
-       x="396.6828"
-       y="399.38934"
+       style="font-size:24px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman;-inkscape-font-specification:Times New Roman Italic"
+       x="398.85675"
+       y="398.28107"
        id="text1872"
        sodipodi:linespacing="125%"
        inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/sampleplugins/sampleedit/path1876.png"
@@ -75,8 +85,8 @@
        inkscape:export-ydpi="471.64999"><tspan
          sodipodi:role="line"
          id="tspan1874"
-         x="396.6828"
-         y="399.38934"
-         style="font-size:24px;font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Utopia">i</tspan></text>
+         x="398.85675"
+         y="398.28107"
+         style="font-size:24px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Times New Roman;-inkscape-font-specification:Times New Roman Italic">i</tspan></text>
   </g>
 </svg>
