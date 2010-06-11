@@ -25,7 +25,6 @@
 #include "customDialog.h"
 #include <QPalette>
  #include <QHeaderView>
-#include "stdpardialog.h"
 using namespace vcg;
 
 CustomDialog::CustomDialog(RichParameterSet& curparset, RichParameterSet& defparset, QWidget * parent)
