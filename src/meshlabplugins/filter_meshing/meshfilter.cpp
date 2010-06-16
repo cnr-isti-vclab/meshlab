@@ -49,8 +49,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 		<< FP_BUTTERFLY_SS
 		<< FP_REMOVE_UNREFERENCED_VERTEX
 		<< FP_REMOVE_DUPLICATED_VERTEX
-		<< FP_REMOVE_FACES_BY_AREA
-		<< FP_REMOVE_FACES_BY_EDGE
+    << FP_SELECT_FACES_BY_AREA
+    << FP_SELECT_FACES_BY_EDGE
 		<< FP_CLUSTERING
 		<< FP_QUADRIC_SIMPLIFICATION
 		<< FP_QUADRIC_TEXCOORD_SIMPLIFICATION
@@ -63,8 +63,6 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 		<< FP_SCALE
 		<< FP_CENTER
 		<< FP_INVERT_FACES
-		<< FP_REMOVE_NON_MANIFOLD_FACE
-		<< FP_REMOVE_NON_MANIFOLD_VERTEX
 		<< FP_NORMAL_EXTRAPOLATION
 		<< FP_COMPUTE_PRINC_CURV_DIR
 		<< FP_CLOSE_HOLES
@@ -101,10 +99,8 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 	{
 		case FP_REMOVE_UNREFERENCED_VERTEX       :
 		case FP_REMOVE_DUPLICATED_VERTEX         :
-		case FP_REMOVE_FACES_BY_AREA             :
-		case FP_REMOVE_FACES_BY_EDGE             :
-		case FP_REMOVE_NON_MANIFOLD_FACE         :
-		case FP_REMOVE_NON_MANIFOLD_VERTEX       : return MeshFilterInterface::Cleaning;
+    case FP_SELECT_FACES_BY_AREA             :
+    case FP_SELECT_FACES_BY_EDGE             : return MeshFilterInterface::Cleaning;
 
 		case FP_BUTTERFLY_SS                     :
 		case FP_LOOP_SS                          :
@@ -152,8 +148,8 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
     case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Remove Unreferenced Vertex");
 		case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Remove Duplicated Vertex");
-		case FP_REMOVE_FACES_BY_AREA             : return tr("Remove Zero Area Faces");
-		case FP_REMOVE_FACES_BY_EDGE             : return tr("Remove Faces with edges longer than...");
+    case FP_SELECT_FACES_BY_AREA             : return tr("Remove Zero Area Faces");
+    case FP_SELECT_FACES_BY_EDGE             : return tr("Select Faces with edges longer than...");
 		case FP_QUADRIC_SIMPLIFICATION           : return tr("Quadric Edge Collapse Decimation");
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Quadric Edge Collapse Decimation (with texture)");
 		case FP_CLUSTERING                       : return tr("Clustering decimation");
@@ -167,8 +163,6 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_FLIP_AND_SWAP                    : return tr("Transform: Flip and/or swap axis");
 		case FP_FREEZE_TRANSFORM                 : return tr("Freeze Current Matrix");
 		case FP_RESET_TRANSFORM                  : return tr("Reset Current Matrix");
-		case FP_REMOVE_NON_MANIFOLD_FACE         : return tr("Remove Non Manifold Faces");
-		case FP_REMOVE_NON_MANIFOLD_VERTEX       : return tr("Remove Non Manifold Vertices");
 		case FP_NORMAL_EXTRAPOLATION             : return tr("Compute normals for point sets");
 		case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
 		case FP_CLOSE_HOLES                      : return tr("Close Holes");
@@ -193,12 +187,9 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_MIDPOINT                         : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint");
 		case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
 		case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
-		case FP_REMOVE_FACES_BY_AREA             : return tr("Removes null faces (the one with area equal to zero)");
-		case FP_REMOVE_FACES_BY_EDGE             : return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");
-		case FP_REMOVE_NON_MANIFOLD_FACE         : return tr("Remove non 2-manifold edges by removing some of the faces incident on non manifold edges");
-		case FP_REMOVE_NON_MANIFOLD_VERTEX       : return tr("Remove non 2-manifold vertices, that vertices where the number of faces that can be reached using only face-face connectivity is different from the number of faces actually incident on that vertex.<br>"
-		                                                     "Typical example think to two isolated triangles connected by a single vertex building a <i>hourglass</i> shape.");
-		case FP_CLUSTERING                       : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
+    case FP_SELECT_FACES_BY_AREA             : return tr("Removes null faces (the one with area equal to zero)");
+    case FP_SELECT_FACES_BY_EDGE             : return tr("Select all triangles having an edge with lenght greater or equal than a given threshold");
+    case FP_CLUSTERING                       : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
 		case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
 		case FP_REORIENT                         : return tr("Re-orient in a consistent way all the faces of the mesh");
@@ -241,19 +232,17 @@ int ExtraMeshFilterPlugin::getRequirements(QAction * action)
 		case FP_REFINE_CATMULL                   : return MeshModel::MM_FACEFACETOPO;
 		case FP_REFINE_HALF_CATMULL              : return MeshModel::MM_FACEFACETOPO;
 
-		case FP_REMOVE_NON_MANIFOLD_FACE         :
 		case FP_LOOP_SS                          :
 		case FP_BUTTERFLY_SS                     :
 		case FP_MIDPOINT                         :
 		case FP_CLOSE_HOLES                      : return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
 
-		case FP_REMOVE_NON_MANIFOLD_VERTEX       :
 		case FP_REORIENT                         : return MeshModel::MM_FACEFACETOPO;
 
 		case FP_REMOVE_UNREFERENCED_VERTEX       :
 		case FP_REMOVE_DUPLICATED_VERTEX         :
-		case FP_REMOVE_FACES_BY_AREA             :
-		case FP_REMOVE_FACES_BY_EDGE             :
+    case FP_SELECT_FACES_BY_AREA             :
+    case FP_SELECT_FACES_BY_EDGE             :
 		case FP_CLUSTERING                       :
 		case FP_ROTATE                           :
     case FP_ROTATE_FIT                       :
@@ -340,10 +329,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 			parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 			break;
 
-		case FP_REMOVE_FACES_BY_EDGE:
-			maxVal = m.cm.bbox.Diag();
-			parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the faces with an edge <b>longer</b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps."));
-			parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
+    case FP_SELECT_FACES_BY_EDGE:
+      maxVal = m.cm.bbox.Diag()/2.0f;
+      parlst.addParam(new RichDynamicFloat("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the faces with an edge <b>longer</b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps."));
 			break;
 
 		case FP_CLUSTERING:
@@ -365,7 +353,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 			parlst.addParam(new RichBool ("swapXY",false,"Swap X-Y axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
 			parlst.addParam(new RichBool ("swapXZ",false,"Swap X-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
 			parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
-			break;
+      parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+      break;
 
   case FP_ROTATE:
     {
@@ -385,6 +374,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
       parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
       parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
       parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
+      parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
     }
     break;
     case FP_PRINCIPAL_AXIS:
@@ -399,7 +389,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Absolute translation amount along the Y axis"));
         parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Absolute translation amount along the Z axis"));
 				parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
-			}
+        parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+      }
 			break;
 
 		case FP_SCALE:
@@ -415,7 +406,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 				parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of rotation:"), tr("Choose a method")));
 				parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
 				parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
-			}
+        parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+      }
 			break;
 
 		case FP_FAUX_CREASE:
@@ -504,17 +496,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		 m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		 vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
-	if (ID(filter) == FP_REMOVE_FACES_BY_EDGE ) {
-	bool selected  = par.getBool("Selected");
-	float threshold = par.getAbsPerc("Threshold");
-		int delFaceNum;
-	  if(selected) delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<true>(m.cm,0,threshold );
-		 else    delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<false>(m.cm,0,threshold );
-	m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-		Log(GLLogStream::FILTER, "Removed %d faces with and edge longer than %f",delFaceNum,threshold);
+  if (ID(filter) == FP_SELECT_FACES_BY_EDGE ) {
+    float threshold = par.getDynamicFloat("Threshold");
+    int selFaceNum;
+    selFaceNum=tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
+    Log(GLLogStream::FILTER, "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
 	}
 
-  if(ID(filter) == (FP_REMOVE_FACES_BY_AREA) )
+  if(ID(filter) == (FP_SELECT_FACES_BY_AREA) )
 	  {
 		int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
 		Log(GLLogStream::FILTER, "Removed %d null faces", nullFaces);
@@ -534,26 +523,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		if (delvert != 0)
 		  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
-
-	if(ID(filter) == (FP_REMOVE_NON_MANIFOLD_FACE) )
-	  {
-		int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
-
-			if(nonManif) Log(GLLogStream::FILTER, "Removed %d Non Manifold Faces", nonManif);
-							else Log(GLLogStream::FILTER, "Mesh is two-manifold. Nothing done.", nonManif);
-
-			 m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-	  }
-
-		if(ID(filter) == (FP_REMOVE_NON_MANIFOLD_VERTEX) )
-		{
-			int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldVertex(m.cm);
-
-			if(nonManif) Log(GLLogStream::FILTER, "Removed %d Non Manifold Vertex", nonManif);
-			else Log(GLLogStream::FILTER, "Mesh is two-manifold. Nothing done.", nonManif);
-
-			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-		}
 
 	if(ID(filter) == (FP_REORIENT) )
 	  {
@@ -586,6 +555,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	if (ID(filter) == (FP_INVERT_FACES) )
 	{
 	  tri::Clean<CMeshO>::FlipMesh(m.cm);
+    if(m.hasDataMask(MeshModel::MM_POLYGONAL))
+    {
+      for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) if(!(*fi).IsD())
+      {
+        if((*fi).IsF(1) != (*fi).IsF(2) )
+        {
+          bool fff = (*fi).IsF(2);        // save 2
+          if((*fi).IsF(1)) (*fi).SetF(2); // copy 1 -> 2
+                      else (*fi).ClearF(2);
+          if(fff) (*fi).SetF(1);          // copy saved -> 1
+             else (*fi).ClearF(1);
+        }
+      }
+  }
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	}
@@ -727,6 +710,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		trTran.SetTranslate(tranVec);
 		trTranInv.SetTranslate(-tranVec);
 		m.cm.Tr=trTran*trRot*trTranInv;
+
+		if(par.getEnum("Freeze")){
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+      tri::UpdateBounding<CMeshO>::Box(m.cm);
+      m.cm.Tr.SetIdentity();
+		}
 	}
 
   if (ID(filter) == (FP_PRINCIPAL_AXIS) ) {
@@ -780,6 +770,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
       m.cm.Tr=PCA;
     }
   }
+
 	if (ID(filter) == (FP_CENTER) ) {
 		Matrix44f trTran; trTran.SetIdentity();
 
@@ -821,7 +812,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		trTran.SetTranslate(tranVec);
 		trTranInv.SetTranslate(-tranVec);
 		m.cm.Tr=trTran*trScale*trTranInv;
-		//m.cm.Tr=trScale;
+    //m.cm.Tr=trScale;
 	}
 	if (ID(filter) == (FP_FLIP_AND_SWAP) ) {
 
@@ -1106,11 +1097,14 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 {
 	switch (ID(filter))
 	{
+    case FP_ROTATE_FIT       :
+    case FP_PRINCIPAL_AXIS   :
 		case FP_FLIP_AND_SWAP    :
 		case FP_SCALE            :
 		case FP_CENTER           :
-		case FP_ROTATE           :
-		case FP_RESET_TRANSFORM  : return MeshModel::MM_TRANSFMATRIX;
+    case FP_ROTATE           : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL;
+    case FP_RESET_TRANSFORM  : return MeshModel::MM_TRANSFMATRIX ;
+    case FP_SELECT_FACES_BY_EDGE: return MeshModel::MM_FACEFLAGSELECT;
 
 		default                  : return MeshModel::MM_UNKNOWN;
 	}
