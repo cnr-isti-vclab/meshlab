@@ -385,13 +385,14 @@ void GLArea::displayInfo()
 	qFont.setStyleStrategy(QFont::NoAntialias);
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(12);
-
-	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
+  Color4b logAreaColorInactive = glas.logAreaColor;
+  logAreaColorInactive[0]/=2;
+  logAreaColorInactive[1]/=2;
+  logAreaColorInactive[2]/=2;
+  glBlendFunc(GL_ONE,GL_SRC_ALPHA);
     glas.logAreaColor[3]=128;
-	if(mvc->currentId==id)
-    glColor(glas.logAreaColor);
-	else 
-		glColor(vcg::Color4b(128,128,128,128));
+  if(mvc->currentId==id) glColor(glas.logAreaColor);
+                   else  glColor(logAreaColorInactive);
 	int lineNum =4;
 	float lineSpacing = qFont.pixelSize()*1.5f;
 	float barHeight = -1 + 2.0*(lineSpacing*(lineNum+.25))/float(curSiz.height());
@@ -402,39 +403,38 @@ void GLArea::displayInfo()
     glVertex2f( 1.f,-1.f);          glVertex2f( 1.f,barHeight);
 	glEnd();
 
-	// First the LOG
-	glColor4f(1,1,1,1);
+  glColor4f(1,1,1,1);
 
-  float middleCol=curSiz.width()*0.40;
-  float rightCol=curSiz.width()*0.85;
+  float leftCol = 20;
+  float rightCol=curSiz.width()*0.5;
  	float startPos = curSiz.height()-(5+lineSpacing*(lineNum));
 
-	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
+  //	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
 	//TODO TEMPORANEO BISOGNA SCRIVERE SOLO LE INFO RELATIVE ALLO STATO DELLA GLAREA CORRENTE
 	//log.glDraw(this,-1,3,lineSpacing,qFont);
 
 	if(meshDoc->size()==1)
 	{
-		renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm()->cm.vn),qFont);
-		renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm()->cm.fn),qFont);
+    renderText(rightCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm()->cm.vn),qFont);
+    renderText(rightCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm()->cm.fn),qFont);
 	}
 	else
 	{
-        renderText(middleCol,startPos+ 1*lineSpacing,tr("<%1>").arg(mm()->shortName()),qFont);
-		renderText(middleCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc->vn()),qFont);
-		renderText(middleCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc->fn()),qFont);
+      renderText(rightCol,startPos+ 1*lineSpacing,tr("<%1>").arg(mm()->shortName()),qFont);
+      renderText(rightCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc->vn()),qFont);
+      renderText(rightCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc->fn()),qFont);
 	}
   if(rm.selectedFace || rm.selectedVert || mm()->cm.sfn>0 || mm()->cm.svn>0 )
-      renderText(middleCol,startPos+ 4*lineSpacing,tr("Selection: v:%1 f:%2").arg(mm()->cm.svn).arg(mm()->cm.sfn),qFont);
+      renderText(rightCol,startPos+ 4*lineSpacing,tr("Selection: v:%1 f:%2").arg(mm()->cm.svn).arg(mm()->cm.sfn),qFont);
 
-  renderText(rightCol,startPos+ 4*lineSpacing,GetMeshInfoString(),qFont);
+  renderText(leftCol,startPos+ 4*lineSpacing,GetMeshInfoString(),qFont);
 
-  if(fov>5) renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
-			 else renderText(rightCol,startPos+1*lineSpacing,QString("FOV: Ortho"),qFont);
+  if(fov>5) renderText(leftCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
+       else renderText(leftCol,startPos+1*lineSpacing,QString("FOV: Ortho"),qFont);
 	if ((cfps>0) && (cfps<500))
-			renderText(rightCol,startPos+2*lineSpacing,QString("FPS: %1").arg(cfps,7,'f',1),qFont);
+      renderText(leftCol,startPos+2*lineSpacing,QString("FPS: %1").arg(cfps,7,'f',1),qFont);
 	if ((clipRatioNear!=1) || (clipRatioFar!=1))
-			renderText(rightCol,startPos+3*lineSpacing,QString("Clipping: N:%1 F:%2").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1),qFont);
+      renderText(leftCol,startPos+3*lineSpacing,QString("Clipping: N:%1 F:%2").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1),qFont);
 
 
 	// Closing 2D
@@ -462,21 +462,17 @@ void GLArea::displayViewerHighlight()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
-	/*glEnable(GL_BLEND);*/
-
-	/*glBlendFunc(GL_ONE,GL_SRC_ALPHA);*/
-	glColor(vcg::Color4b::Yellow);
-	glLineWidth(3);
-	glBegin(GL_LINES);
-
-	glVertex2f(-1.f,1.f);     glVertex2f(1.f,1.f);
-	glVertex2f(1.f,1.f);		glVertex2f(1.f,-1.f);
-	glVertex2f(1.f,-1.f);		glVertex2f(-1.f,-1.f);
-	glVertex2f(-1.f,-1.f);	glVertex2f(-1.f,1.f);		
-
-	glEnd();
-
-	// Closing 2D
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glColor4f(1.0f,1.0f,1.0f,0.3f);
+  for(int width =5; width>0 ; width -= 2)
+      {
+      glLineWidth(width);
+      glBegin(GL_LINE_LOOP);
+        glVertex2f(-1.f,1.f);     glVertex2f( 1.f,1.f); glVertex2f( 1.f,-1.f);    glVertex2f(-1.f,-1.f);
+      glEnd();
+    }
+  // Closing 2D
 	glPopAttrib();
 	glPopMatrix(); // restore modelview
 	glMatrixMode(GL_PROJECTION);
