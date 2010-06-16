@@ -49,17 +49,17 @@ int MultiViewer_Container::getNextViewerId(){
 }
 
 void MultiViewer_Container::addView(Viewer* viewer,Qt::Orientation orient){
-	//The Viewers are organized like in a BSP tree.
-	// Every new viewer is added within an Horizontal splitter. Its orientation could change according to next insertions.
-	//		HSplit
-	//      /   \
-	//   View1   VSplit
-	//           /   \
-	//        View2  HSplit
-	//                 /
-	//               View3
-	//In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions). 
-
+/* The Viewers are organized like a BSP tree.
+   Every new viewer is added within an Horizontal splitter. Its orientation could change according to next insertions.
+      HSplit
+        /   \
+     View1   VSplit
+             /   \
+          View2  HSplit
+                   /
+                 View3
+  In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions).
+*/
 	viewerList.append(viewer);
 	int count = viewerCounter();
 
@@ -71,15 +71,18 @@ void MultiViewer_Container::addView(Viewer* viewer,Qt::Orientation orient){
 	else{
 		Viewer* current = currentView();
 		QSplitter* parentSplitter = qobject_cast<QSplitter *>(current->parent());
-		//CASE 2: Simple insertion inside the parent splitter (right branch). The insertion is on the parent's right branch.
-		//Example: Add View2:
-		//
-		//			  HSplit					HSplit
-		//             /             =>			/    \
-		//           View1					 View1   HSplit
-		//                                             |
-		//                                           View2
-		if(parentSplitter->count()==1){ 
+/*
+  CASE 2: Simple insertion inside the parent splitter (right branch). The insertion is on the parent's right branch.
+  Example: Add View2:
+
+          HSplit           HSplit
+           /       =>      /    \
+        View1           View1   HSplit
+                                   |
+                                  View2
+
+*/
+  if(parentSplitter->count()==1){
 
 			parentSplitter->setOrientation(orient);
 
@@ -107,19 +110,20 @@ void MultiViewer_Container::addView(Viewer* viewer,Qt::Orientation orient){
 			newSplitter->setChildrenCollapsible(false);
 			
 		}
-		//CASE 3: The parent splitter has two children. The insertion is on the parent's left branch.
-        //Example: Add View3:
-		//
-		//			  	HSplit					 HSplit
-		//        		/    \					 /    \
-		//        View1     HSplit      =>   VSplit   HSplit 
-		//					  |              /    \      |
-		//					View2        View1  HSplit  View2
-		//                                         |
-		//                                       View3
-		else{
-			QSplitter* newSplitter;
-			newSplitter = new QSplitter(orient);
+  /*
+    CASE 3: The parent splitter has two children. The insertion is on the parent's left branch.
+        Example: Add View3:
+
+              HSplit                  HSplit
+              /    \                 /     \
+          View1     HSplit  =>   VSplit    HSplit
+            |                    /    \      |
+          View2              View1  HSplit  View2
+                                             |
+                                            View3
+  */
+  else{
+      QSplitter* newSplitter = new QSplitter(orient);
 
 			QList<int> sizes2 = parentSplitter->sizes();
 			parentSplitter->insertWidget(0, newSplitter);
@@ -164,29 +168,31 @@ void MultiViewer_Container::removeView(int viewerId){
 			QSplitter* parentSplitter = qobject_cast<QSplitter *>(viewer->parent());
 			delete viewer;
 
-			//CASE 1: Simple deletion.
-			//Example: Cancel View2:
-			//
-			//		HSplit					HSplit
-			//		 /    \					/
-			//	View1   HSplit	=>		View1
-			//			  |
-			//          View2
+/*
+    CASE 1: Simple deletion.
+    Example: Cancel View2:
 
+        HSplit            HSplit
+         /    \             |
+      View1   HSplit  =>   View1
+               |
+              View2
+*/
 			if(parentSplitter->count()==0)
 				delete parentSplitter;
 
-			//CASE 2: Complex deletion, adjust the tree.
-			// Example: Cancel View1:
-			//
-			//		 HSplit						   HSplit
-			//		 /     \					   /    \
-			//	 VSplit    HSplit      =>     HSplit   HSplit 
-			//	 /    \        |				| 	     |
-			// View1  HSplit  View2			  View3	   View2  
-			//          |
-			//        View3
+/*
+    CASE 2: Complex deletion, adjust the tree.
+     Example: Cancel View1:
 
+           HSplit                 HSplit
+          /      \                /    \
+       VSplit    HSplit   =>   HSplit   HSplit
+       /    \        |           | 	     |
+     View1  HSplit  View2      View3	   View2
+              |
+            View3
+*/
 			else if(parentSplitter->count()==1){
 				QSplitter* parentParentSplitter = qobject_cast<QSplitter *>(parentSplitter->parent());
 				if(parentParentSplitter){
@@ -212,6 +218,8 @@ Viewer* MultiViewer_Container::currentView(){
 	foreach ( Viewer* viewer, viewerList)
 		if (viewer->getId() == currentId)
 			return viewer;
+  assert(0);
+  return 0;
 }
 
 int MultiViewer_Container::viewerCounter(){
