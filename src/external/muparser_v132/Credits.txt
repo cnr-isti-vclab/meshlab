@@ -1,0 +1,28 @@
+######################################################################
+#                                                                    #
+#                 __________                                         # 
+#    _____   __ __\______   \_____  _______  ______  ____ _______    #
+#   /     \ |  |  \|     ___/\__  \ \_  __ \/  ___/_/ __ \\_  __ \   # 
+#  |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/   # 
+#  |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|      #
+#        \/                       \/            \/      \/           #
+#                                                                    #
+#  Copyright (C) 2010                                                #
+#  Ingo Berg                                                         # 
+#                                                                    #
+######################################################################
+
+Credits:
+--------
+
+I'd like to thank all the people contacting me with suggestions and 
+bug reports. Your feedback is always welcome and helps to improve this 
+project. 
+
+Especially I'd like to thank:
+-----------------------------
+
+Francesco Montorsi for setting up the new parser build system as well 
+as the SVN server at sourceforge. Ion Vasilief for Feedback, 
+suggestions and help with the MSVC6 adaptation, Giampaolo Belini for 
+his help in fixing bugs.
