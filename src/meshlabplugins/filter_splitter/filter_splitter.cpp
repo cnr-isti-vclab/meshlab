@@ -157,7 +157,7 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			// that is the back one
             MeshModel *currentMesh  = md.mm();				// source = current
             MeshModel *destMesh= md.addNewMesh("duplicated"); // After Adding a mesh to a MeshDocument the new mesh is the current one
-			tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, false, true); // the last true means "copy all vertices"
+      tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm);
 
 			Log(GLLogStream::FILTER,"Duplicated current model to layer %i", md.meshList.size());
 
