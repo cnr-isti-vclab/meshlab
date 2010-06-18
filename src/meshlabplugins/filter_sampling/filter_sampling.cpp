@@ -72,7 +72,7 @@ class BaseSampler
 	void AddVert(const CMeshO::VertexType &p) 
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
-		m->vert.back().ImportLocal(p);
+		m->vert.back().ImportData(p);
 	}
 	
 	void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
