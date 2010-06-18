@@ -227,7 +227,7 @@ inline void ExtractVertex(const CMeshO & srcMesh, const CMeshO::FaceType & f, in
 	(void)dstMesh;
 	// This is done to preserve every single perVertex property
 	// perVextex Texture Coordinate is instead obtained from perWedge one.
-	v.ImportLocal(*f.cV(whichWedge));
+	v.ImportData(*f.cV(whichWedge));
 	v.T() = f.cWT(whichWedge);
 }
 
