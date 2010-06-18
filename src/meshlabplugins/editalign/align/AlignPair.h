@@ -76,11 +76,10 @@ public:
 /*********************** Classi Accessorie ****************************/
 
 class A2Vertex;
-class A2Edge ;
+
 class A2Face ;
 
 class A2UsedTypes: public vcg::UsedTypes < vcg::Use<A2Vertex>::AsVertexType,
-                                          vcg::Use<A2Edge  >::AsEdgeType,
                                           vcg::Use<A2Face  >::AsFaceType >{};
 
 class A2Vertex   : public vcg::Vertex<A2UsedTypes,vcg::vertex::Coord3d,vcg::vertex::Normal3d,vcg::vertex::BitFlags> {};
