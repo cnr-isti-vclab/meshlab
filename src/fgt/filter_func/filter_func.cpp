@@ -196,6 +196,7 @@ const QString PerFaceAttributeString("It's possibile to use per-face variables l
    case FF_REFINE :
      return MeshModel::MM_UNKNOWN;
    }
+   return MeshModel::MM_UNKNOWN;
  }
  int FilterFunctionPlugin::getRequirements(QAction *action)
 {
@@ -328,7 +329,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			
 				// muparser initialization and explicitely define parser variables
 				Parser p;
-				setPerVertexVariables(p);
+        setPerVertexVariables(p,m.cm);
 
 				// set expression inserted by user as string (required by muparser)
 				p.SetExpr(expr);
@@ -379,7 +380,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			
 				// muparser initialization and explicitely define parser variables
 				Parser p;
-				setPerFaceVariables(p);
+        setPerFaceVariables(p,m.cm);
 
 				// set expression inserted by user as string (required by muparser)
 				p.SetExpr(select.toStdString());
@@ -430,9 +431,9 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				// function for x,y and z must use different parser and variables
 				Parser p1,p2,p3;
 
-				setPerVertexVariables(p1);
-				setPerVertexVariables(p2);
-				setPerVertexVariables(p3);
+        setPerVertexVariables(p1,m.cm);
+        setPerVertexVariables(p2,m.cm);
+        setPerVertexVariables(p3,m.cm);
 
 				p1.SetExpr(func_x);
 				p2.SetExpr(func_y);
@@ -498,7 +499,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				
 				// muparser initialization and define custom variables
 				Parser p;
-				setPerVertexVariables(p);
+        setPerVertexVariables(p,m.cm);
 
 				// set expression to calc with parser
 				p.SetExpr(func_q);
@@ -543,9 +544,9 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				// every function must uses own parser and variables
 				Parser p1,p2,p3;
 
-				setPerFaceVariables(p1);
-				setPerFaceVariables(p2);
-				setPerFaceVariables(p3);
+        setPerFaceVariables(p1,m.cm);
+        setPerFaceVariables(p2,m.cm);
+        setPerFaceVariables(p3,m.cm);
 
 				p1.SetExpr(func_r);
 				p2.SetExpr(func_g);
@@ -601,10 +602,10 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				// muparser initialization and define custom variables
 				Parser pf;
-				setPerFaceVariables(pf);
+        setPerFaceVariables(pf,m.cm);
 					
 				// set expression to calc with parser
-				pf.SetExpr(func_q);
+          pf.SetExpr(func_q);
 
 				time_t start = clock();
 				errorMessage = "";
@@ -643,15 +644,24 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				std::string expr = par.getString("expr").toStdString();
 
 				// add per-vertex attribute with type float and name specified by user
-				if(tri::HasPerVertexAttribute(m.cm,name)) 
+        CMeshO::PerVertexAttributeHandle<float> h;
+        if(tri::HasPerVertexAttribute(m.cm,name))
 				{
-					errorMessage = "attribute already exists"; 
+          h = tri::Allocator<CMeshO>::GetPerVertexAttribute<float>(m.cm, name);
+              if(!tri::Allocator<CMeshO>::IsValidHandle<float>(m.cm,h))
+          {
+          errorMessage = "attribute already exists with a different type";
 					return false;
+          }
 				}
-				CMeshO::PerVertexAttributeHandle<float> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<float> (m.cm,name);
+        else
+          h = tri::Allocator<CMeshO>::AddPerVertexAttribute<float> (m.cm,name);
 
+        std::vector<std::string> AllVertexAttribName;
+        tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m.cm,AllVertexAttribName);
+        qDebug("Now mesh has %i vertex float attribute",AllVertexAttribName.size());
 				Parser p;
-				setPerVertexVariables(p);
+        setPerVertexVariables(p,m.cm);
 				p.SetExpr(expr);
 
 				time_t start = clock();
@@ -691,15 +701,21 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				std::string expr = par.getString("expr").toStdString();
 				
 				// add per-face attribute with type float and name specified by user
-				if(tri::HasPerFaceAttribute(m.cm,name)) 
-				{
-					errorMessage = "attribute already exists"; 
-					return false;
-				}
-				CMeshO::PerFaceAttributeHandle<float> h = tri::Allocator<CMeshO>::AddPerFaceAttribute<float> (m.cm,name);
-				
+        // add per-vertex attribute with type float and name specified by user
+        CMeshO::PerFaceAttributeHandle<float> h;
+        if(tri::HasPerFaceAttribute(m.cm,name))
+        {
+          h = tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m.cm, name);
+          if(!tri::Allocator<CMeshO>::IsValidHandle<float>(m.cm,h))
+          {
+          errorMessage = "attribute already exists with a different type";
+          return false;
+          }
+        }
+        else
+          h = tri::Allocator<CMeshO>::AddPerFaceAttribute<float> (m.cm,name);
 				Parser p;
-				setPerFaceVariables(p);
+        setPerFaceVariables(p,m.cm);
 				p.SetExpr(expr);
 
 				time_t start = clock();
@@ -719,12 +735,12 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 					}
 				}
 
-				// add string, double and handler to vector.
-				// vectors keep tracks of new attributes and let muparser use explicit variables
-				// it's possibile to use custom attributes in other filters
-				f_attrNames.push_back(name);
-				f_attrValue.push_back(0);
-				fhandlers.push_back(h);
+//				// add string, double and handler to vector.
+//				// vectors keep tracks of new attributes and let muparser use explicit variables
+//				// it's possibile to use custom attributes in other filters
+//				f_attrNames.push_back(name);
+//				f_attrValue.push_back(0);
+//				fhandlers.push_back(h);
 
 				// if succeded log stream contains number of vertices processed and time elapsed
 				Log(GLLogStream::FILTER, "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
@@ -1021,7 +1037,7 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 // Function explicitely define parser variables to perform per-vertex filter action
 // x, y, z for vertex coord, nx, ny, nz for normal coord, r, g ,b for color
 // and q for quality 
-void FilterFunctionPlugin::setPerVertexVariables(Parser &p)
+void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 {
 	p.DefineVar("x", &x);
 	p.DefineVar("y", &y);
@@ -1038,12 +1054,27 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p)
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed
-	for(int i = 0; i < (int) v_attrNames.size(); i++)
-		p.DefineVar(v_attrNames[i],&v_attrValue[i]);
+  std::vector<std::string> AllVertexAttribName;
+  tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m,AllVertexAttribName);
+  vhandlers.clear();
+  v_attrNames.clear();
+  v_attrValue.clear();
+  for(int i = 0; i < (int) AllVertexAttribName.size(); i++)
+  {
+    CMeshO::PerVertexAttributeHandle<float> hh = tri::Allocator<CMeshO>::GetPerVertexAttribute<float>(m, AllVertexAttribName[i]);
+    if(tri::Allocator<CMeshO>::IsValidHandle<float>(m,hh))
+    {
+      vhandlers.push_back(hh);
+      v_attrNames.push_back(AllVertexAttribName[i]);
+      v_attrValue.push_back(0);
+      p.DefineVar(v_attrNames.back(), &v_attrValue.back());
+      qDebug("Adding custom per vertex variable %s",v_attrNames.back().c_str());
+    }
+  }
 }
 
 // Function explicitely define parser variables to perform Per-Face filter action
-void FilterFunctionPlugin::setPerFaceVariables(Parser &p)
+void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 {
 	// coord of the three vertices within a face
 	p.DefineVar("x0", &x0);
@@ -1104,8 +1135,23 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p)
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed
-	for(int i = 0; i < (int) f_attrNames.size(); i++)
-		p.DefineVar(f_attrNames[i],&f_attrValue[i]);
+  std::vector<std::string> AllFaceAttribName;
+  tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(m,AllFaceAttribName);
+  fhandlers.clear();
+  f_attrNames.clear();
+  f_attrValue.clear();
+  for(int i = 0; i < (int) AllFaceAttribName.size(); i++)
+  {
+    CMeshO::PerFaceAttributeHandle<float> hh = tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m, AllFaceAttribName[i]);
+    if(tri::Allocator<CMeshO>::IsValidHandle<float>(m,hh))
+    {
+      fhandlers.push_back(hh);
+      f_attrNames.push_back(AllFaceAttribName[i]);
+      f_attrValue.push_back(0);
+      p.DefineVar(f_attrNames.back(), &f_attrValue.back());
+    }
+  }
+
 }
 
 Q_EXPORT_PLUGIN(FilterFunctionPlugin)

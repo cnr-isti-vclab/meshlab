@@ -79,8 +79,8 @@ public:
 	void mapFaceQualityIntoColor(MeshModel &m);
 	void setAttributes(CMeshO::VertexIterator &vi,CMeshO &m);
 	void setAttributes(CMeshO::FaceIterator &fi,CMeshO &m);
-	void setPerVertexVariables(mu::Parser &p);
-	void setPerFaceVariables(mu::Parser &p);
+  void setPerVertexVariables(mu::Parser &p, CMeshO &m);
+  void setPerFaceVariables(mu::Parser &p, CMeshO &m);
 
 };
 
