@@ -404,7 +404,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
 				MeshModel* ref = par.getMesh("ControlMesh");
 				pPoints = new MeshModel();
 				pPoints->updateDataMask(ref);
-				vcg::tri::Append<CMeshO,CMeshO>::Mesh(pPoints->cm, ref->cm, false, true);  // the last true means "copy all vertices"
+				vcg::tri::Append<CMeshO,CMeshO>::Mesh(pPoints->cm, ref->cm);  // the last true means "copy all vertices"
 				vcg::tri::UpdateBounding<CMeshO>::Box(pPoints->cm);
 				pPoints->cm.Tr = ref->cm.Tr;
 			}
