@@ -381,14 +381,16 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	case FP_LAPLACIAN_SMOOTH :
 	  {
 			int stepSmoothNum = par.getInt("stepSmoothNum");
-			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      bool Selected=par.getBool("Selected");
+      if(Selected && m.cm.svn==0)
+          m.cm.svn=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			
 			bool boundarySmooth = par.getBool("Boundary");
 			if(boundarySmooth) 
 					tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
 					
-      tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,cnt>0,cb);
-			Log(GLLogStream::FILTER, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+      tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cb);
+      Log(GLLogStream::FILTER, "Smoothed %d vertices", Selected>0 ? m.cm.svn : m.cm.vn);
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 		break;
