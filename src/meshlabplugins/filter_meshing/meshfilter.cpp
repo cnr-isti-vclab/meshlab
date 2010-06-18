@@ -84,6 +84,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 	lastq_QualityThr       = 0.3f;
 	lastq_PreserveBoundary = false;
 	lastq_PreserveNormal   = false;
+  lastq_PreserveTopology = false;
 	lastq_OptimalPlacement = true;
 	lastq_Selected         = false;
 	lastq_PlanarQuadric    = false;
@@ -295,6 +296,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 			parlst.addParam(new RichFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
 			parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries"));
 			parlst.addParam(new RichBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface"));
+      parlst.addParam(new RichBool ("PreserveTopology",lastq_PreserveTopology,"Preserve Topology","Avoid all the collapses that should cause a topology change in the mesh (like closing holes, squeezing handles, etc). If checked the genus of the mesh should stay unchanged."));
 			parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
 			parlst.addParam(new RichBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh."));
 			parlst.addParam(new RichBool ("QualityWeight",lastq_QualityWeight,"Weighted Simplification","Use the Per-Vertex quality as a weighting factor for the simplification. The weight is used as a error amplification value, so a vertex with a high quality value will not be simplified and a portion of the mesh with low quality values will be aggressively simplified."));
@@ -465,94 +467,92 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
 	MeshModel & m = *md.mm();
+switch(ID(filter))
+{
+case  FP_LOOP_SS:
+case  FP_BUTTERFLY_SS:
+case  FP_MIDPOINT:
+      {
+        if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
+        {
+          errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
+          return false; // can't continue, mesh can't be processed
+        }
 
-	if( ID(filter) == FP_LOOP_SS ||
-			ID(filter) == FP_BUTTERFLY_SS ||
-			ID(filter) == FP_MIDPOINT )
-		{
-      if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
-			{
-				errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
-			}
+        bool  selected  = par.getBool("Selected");
+        float threshold = par.getAbsPerc("Threshold");
 
-			bool  selected  = par.getBool("Selected");
-			float threshold = par.getAbsPerc("Threshold");
+        switch(ID(filter)) {
+        case FP_LOOP_SS :
+          tri::RefineOddEven<CMeshO, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO> >
+              (m.cm, tri::OddPointLoop<CMeshO>(), tri::EvenPointLoop<CMeshO>(), threshold, selected, cb);
+          break;
+        case FP_BUTTERFLY_SS :
+          Refine<CMeshO,MidPointButterfly<CMeshO> >
+              (m.cm, MidPointButterfly<CMeshO>(), threshold, selected, cb);
+          break;
+        case FP_MIDPOINT :
+          Refine<CMeshO,MidPoint<CMeshO> >
+              (m.cm, MidPoint<CMeshO>(&m.cm), threshold, selected, cb);
+        }
+        m.clearDataMask(MeshModel::MM_VERTFACETOPO);
+        vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+      } break;
 
-			switch(ID(filter)) {
-				case FP_LOOP_SS :
-		tri::RefineOddEven<CMeshO, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO> >
-		  (m.cm, tri::OddPointLoop<CMeshO>(), tri::EvenPointLoop<CMeshO>(), threshold, selected, cb);
-		break;
-				case FP_BUTTERFLY_SS :
-					Refine<CMeshO,MidPointButterfly<CMeshO> >
-						(m.cm, MidPointButterfly<CMeshO>(), threshold, selected, cb);
-					break;
-				case FP_MIDPOINT :
-					Refine<CMeshO,MidPoint<CMeshO> >
-						(m.cm, MidPoint<CMeshO>(&m.cm), threshold, selected, cb);
-			}
+case FP_SELECT_FACES_BY_EDGE:
+      {
+          float threshold = par.getDynamicFloat("Threshold");
+          int selFaceNum = tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
+          Log(GLLogStream::FILTER, "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
+      } break;
 
-		 m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-		 vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		}
-  if (ID(filter) == FP_SELECT_FACES_BY_EDGE ) {
-    float threshold = par.getDynamicFloat("Threshold");
-    int selFaceNum;
-    selFaceNum=tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
-    Log(GLLogStream::FILTER, "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
-	}
-
-  if(ID(filter) == (FP_SELECT_FACES_BY_AREA) )
+case FP_SELECT_FACES_BY_AREA:
 	  {
 		int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
 		Log(GLLogStream::FILTER, "Removed %d null faces", nullFaces);
 	  m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-	  }
+    } break;
 
-  if(ID(filter) == (FP_REMOVE_UNREFERENCED_VERTEX) )
+case FP_REMOVE_UNREFERENCED_VERTEX:
 	  {
 		int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		Log(GLLogStream::FILTER, "Removed %d unreferenced vertices",delvert);
-	  }
+    } break;
 
-	if(ID(filter) == (FP_REMOVE_DUPLICATED_VERTEX) )
+case FP_REMOVE_DUPLICATED_VERTEX:
 	  {
 		int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 		Log(GLLogStream::FILTER, "Removed %d duplicated vertices", delvert);
 		if (delvert != 0)
 		  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	  }
+    } break;
 
-	if(ID(filter) == (FP_REORIENT) )
+case FP_REORIENT:
 	  {
-		bool oriented;
-		bool orientable;
+      bool oriented, orientable;
       if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm)>0 ) {
-					errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness"; // text
-					return false; // can't continue, mesh can't be processed
-			}
+        errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness"; // text
+        return false; // can't continue, mesh can't be processed
+      }
 
-		tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-			vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
+      tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
+      vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+      vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
+      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+  } break;
 
-//			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_BORDERFLAG);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	  }
-
-	if(ID(filter) == (FP_CLUSTERING))
-	  {
-	  float threshold = par.getAbsPerc("Threshold");
-				vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
-				ClusteringGrid.Init(m.cm.bbox,100000,threshold);
-				ClusteringGrid.AddMesh(m.cm);
-				ClusteringGrid.ExtractMesh(m.cm);
+case FP_CLUSTERING:
+  {
+      float threshold = par.getAbsPerc("Threshold");
+      vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
+      ClusteringGrid.Init(m.cm.bbox,100000,threshold);
+      ClusteringGrid.AddMesh(m.cm);
+      ClusteringGrid.ExtractMesh(m.cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	  m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-	  }
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+    } break;
 
-	if (ID(filter) == (FP_INVERT_FACES) )
+case FP_INVERT_FACES:
 	{
 	  tri::Clean<CMeshO>::FlipMesh(m.cm);
     if(m.hasDataMask(MeshModel::MM_POLYGONAL))
@@ -563,26 +563,27 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
         {
           bool fff = (*fi).IsF(2);        // save 2
           if((*fi).IsF(1)) (*fi).SetF(2); // copy 1 -> 2
-                      else (*fi).ClearF(2);
+          else (*fi).ClearF(2);
           if(fff) (*fi).SetF(1);          // copy saved -> 1
-             else (*fi).ClearF(1);
+          else (*fi).ClearF(1);
         }
       }
-  }
+    }
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-	}
+  } break;
 
-	if (ID(filter) == (FP_FREEZE_TRANSFORM) ) {
+case FP_FREEZE_TRANSFORM:
+  {
 		tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
 		m.cm.Tr.SetIdentity();
-	}
+  } break;
 
 
-	if (ID(filter) == (FP_QUADRIC_SIMPLIFICATION) ) {
-
+case FP_QUADRIC_SIMPLIFICATION:
+  {
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
 
@@ -590,6 +591,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		tri::TriEdgeCollapseQuadricParameter &pp = tri::MyTriEdgeCollapse::Params();
 		pp.QualityThr=lastq_QualityThr =par.getFloat("QualityThr");
 		pp.PreserveBoundary=lastq_PreserveBoundary = par.getBool("PreserveBoundary");
+    pp.PreserveTopology=lastq_PreserveTopology = par.getBool("PreserveTopology");
 		pp.QualityWeight=lastq_QualityWeight = par.getBool("QualityWeight");
 		pp.NormalCheck=lastq_PreserveNormal = par.getBool("PreserveNormal");
 		pp.OptimalPlacement=lastq_OptimalPlacement = par.getBool("OptimalPlacement");
@@ -613,10 +615,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
-	}
+  } break;
 
-
-	if (ID(filter) == (FP_QUADRIC_TEXCOORD_SIMPLIFICATION) ) {
+case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
+  {
 		if(!tri::HasPerWedgeTexCoord(m.cm))
 		{
 			errorMessage="Warning: nothing have been done. Mesh has no Texture.";
@@ -625,15 +627,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		if ( ! tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) ) {
 	  errorMessage = "Mesh has some inconsistent tex coords (some faces without texture)"; // text
 	  return false; // can't continue, mesh can't be processed
-	}
+    }
 
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
 
-
 		tri::MyTriEdgeCollapseQTex::SetDefaultParams();
 		tri::TriEdgeCollapseQuadricTexParameter & pp=tri::MyTriEdgeCollapseQTex::Params();
-
 
 		lastqtex_QualityThr = pp.QualityThr = par.getFloat("QualityThr");
 		lastqtex_extratw = pp.ExtraTCoordWeight = par.getFloat("Extratcoordw");
@@ -647,44 +647,49 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
-	}
-	if (ID(filter) == FP_RESET_TRANSFORM ) {
+  } break;
+
+case FP_RESET_TRANSFORM :
+  {
 		m.cm.Tr.SetIdentity();
-	}
-  if (ID(filter) ==  FP_ROTATE_FIT)
+  } break;
+
+case FP_ROTATE_FIT:
     {
-      Box3f bbox; //il bbox delle facce selezionate
+      Box3f selBox; //il bbox delle facce selezionate
       std::vector< Point3f > selected_pts; //devo copiare i punti per il piano di fitting
 
       if(m.cm.svn==0)
-      {tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+      {
+        tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
         tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
       }
+
       for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
         if(!(*vi).IsD() && (*vi).IsS() ){
         Point3f p = (*vi).P();
-        bbox.Add(p);
+        selBox.Add(p);
         selected_pts.push_back(p);
       }
-      Log("Using %i vertexes to fit a build plane",int(selected_pts.size()));
+      Log("Using %i vertexes to build a fitting  plane",int(selected_pts.size()));
       Plane3f plane;
-
-      PlaneFittingPoints(selected_pts,plane); //calcolo il piano di fitting
+      PlaneFittingPoints(selected_pts,plane);
 
       Log("New Z axis is %f %f %f",plane.Direction()[0],plane.Direction()[1],plane.Direction()[2]);
-      Matrix44f tr1; tr1.SetTranslate(-bbox.Center());
-      Matrix44f tr2; tr2.SetTranslate(bbox.Center());
+
+      Matrix44f tr1; tr1.SetTranslate(-selBox.Center());
+      Matrix44f tr2; tr2.SetTranslate(selBox.Center());
       Point3f rotAxis=Point3f(0,0,1) ^ plane.Direction();
       rotAxis.Normalize();
       float angleRad = Angle(Point3f(0,0,1),plane.Direction());
       Matrix44f rt; rt.SetRotateRad(angleRad,rotAxis);
       m.cm.Tr = rt*tr1;
-    }
+    } break;
 
-	if (ID(filter) == FP_ROTATE ) {
+case FP_ROTATE :
+  {
 		Matrix44f trRot; trRot.SetIdentity();
-		Point3f axis;
-		Point3f tranVec;
+    Point3f axis, tranVec;
 		Matrix44f trTran,trTranInv;
 
 		switch(par.getEnum("rotAxis"))
@@ -711,15 +716,17 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		trTranInv.SetTranslate(-tranVec);
 		m.cm.Tr=trTran*trRot*trTranInv;
 
-		if(par.getEnum("Freeze")){
+    if(par.getBool("Freeze")){
       tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
       tri::UpdateBounding<CMeshO>::Box(m.cm);
       m.cm.Tr.SetIdentity();
 		}
-	}
+  } break;
 
-  if (ID(filter) == (FP_PRINCIPAL_AXIS) ) {
+case FP_PRINCIPAL_AXIS:
+  {
     if(par.getBool("pointsFlag"))
     {
       Matrix33f cov;
@@ -769,9 +776,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
           qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
       m.cm.Tr=PCA;
     }
-  }
+  } break;
 
-	if (ID(filter) == (FP_CENTER) ) {
+case FP_CENTER:
+  {
 		Matrix44f trTran; trTran.SetIdentity();
 
 		float xScale= par.getDynamicFloat("axisX");
@@ -783,9 +791,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			trTran.SetTranslate(-m.cm.bbox.Center());
 
 		m.cm.Tr=trTran;
-	}
+  } break;
 
-	if (ID(filter) == (FP_SCALE) ) {
+case FP_SCALE:
+  {
 		Matrix44f trScale; trScale.SetIdentity();
 		Point3f tranVec;
 		Matrix44f trTran,trTranInv;
@@ -812,10 +821,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		trTran.SetTranslate(tranVec);
 		trTranInv.SetTranslate(-tranVec);
 		m.cm.Tr=trTran*trScale*trTranInv;
-    //m.cm.Tr=trScale;
-	}
-	if (ID(filter) == (FP_FLIP_AND_SWAP) ) {
+  } break;
 
+case FP_FLIP_AND_SWAP:
+  {
 		Matrix44f tr; tr.SetIdentity();
 		if(par.getBool("flipX")) { Matrix44f flipM; flipM.SetIdentity(); flipM[0][0]=-1.0f; tr *= flipM; }
 		if(par.getBool("flipY")) { Matrix44f flipM; flipM.SetIdentity(); flipM[1][1]=-1.0f; tr *= flipM; }
@@ -834,16 +843,16 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			swapM[2][1]=1.0f; swapM[2][2]=0.0f;
 			tr *= swapM; }
 		m.cm.Tr=tr;
-	}
+  } break;
 
-
-
-  if (ID(filter) == (FP_NORMAL_EXTRAPOLATION) ) {
+case FP_NORMAL_EXTRAPOLATION :
+  {
     tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
     NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"),-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
-	}
+  } break;
 
-  if (ID(filter) == (FP_COMPUTE_PRINC_CURV_DIR) ) {
+case FP_COMPUTE_PRINC_CURV_DIR:
+  {
 
 	  if(par.getBool("Autoclean")){
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
@@ -874,42 +883,39 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		  default:assert(0);break;
 
 	  }
-  }
+  } break;
 
+  case FP_CLOSE_HOLES:
+  {
+    size_t OriginalSize= m.cm.face.size();
+    int MaxHoleSize = par.getInt("MaxHoleSize");
+    bool SelectedFlag = par.getBool("Selected");
+    bool SelfIntersectionFlag = par.getBool("SelfIntersection");
+    bool NewFaceSelectedFlag = par.getBool("NewFaceSelected");
+    int holeCnt;
+    if( SelfIntersectionFlag )
+      holeCnt = tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
+    else
+      holeCnt = tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
+    Log("Closed %i holes and added %i new faces",holeCnt,m.cm.fn-OriginalSize);
+    assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
+    tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 
-  if(ID(filter) == (FP_CLOSE_HOLES))
-	  {
-	  size_t OriginalSize= m.cm.face.size();
-	  int MaxHoleSize = par.getInt("MaxHoleSize");
-		bool SelectedFlag = par.getBool("Selected");
-	  bool SelfIntersectionFlag = par.getBool("SelfIntersection");
-	  bool NewFaceSelectedFlag = par.getBool("NewFaceSelected");
-			int holeCnt;
-	  if( SelfIntersectionFlag )
-		  holeCnt = tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
-	  else
-		  holeCnt = tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
-			Log("Closed %i holes and added %i new faces",holeCnt,m.cm.fn-OriginalSize);
-	  assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
-	  tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+    // hole filling filter does not correctly update the border flags (but the topology is still ok!)
+    m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
+    if(NewFaceSelectedFlag)
+    {
+      tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+      for(size_t i=OriginalSize;i<m.cm.face.size();++i)
+        if(!m.cm.face[i].IsD()) m.cm.face[i].SetS();
+    }
+  } break;
 
-	  // hole filling filter does not correctly update the border flags (but the topology is still ok!)
-	  m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
-	  if(NewFaceSelectedFlag)
-	  {
-		tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
-		for(size_t i=OriginalSize;i<m.cm.face.size();++i)
-		  if(!m.cm.face[i].IsD()) m.cm.face[i].SetS();
-	  }
-	  //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-	  }
-
-  if(ID(filter) == (FP_CYLINDER_UNWRAP))
+  case FP_CYLINDER_UNWRAP:
 	  {
 		float startAngleDeg = par.getFloat("startAngle");
 		float endAngleDeg = par.getFloat("endAngle");
 		float radius = par.getFloat("radius");
-		// a
 
 		// Number of unrolling. (e.g. if the user set start=-15 end=375 there are two loops)
 		int numLoop =	int(1+(endAngleDeg-startAngleDeg)/360.0);
@@ -930,7 +936,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 					Point3f p = (*vi).P();
 					float ro,theta,phi;
 					p.Y()=0;
-                                        p.ToPolarRad(ro,theta,phi);
+          p.ToPolarRad(ro,theta,phi);
 					float thetaDeg = math::ToDeg(theta);
 					int loopIndex =0;
 					while(thetaDeg<endAngleDeg)
@@ -995,8 +1001,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				tri::UpdateBounding<CMeshO>::Box(um->cm);
 
 			return true;
-		}
-  if(ID(filter) == FP_REFINE_HALF_CATMULL)
+    } break;
+
+  case FP_REFINE_HALF_CATMULL:
   {
 	  m.updateDataMask(MeshModel::MM_FACEQUALITY);
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
@@ -1005,9 +1012,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	  m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 	  m.updateDataMask(MeshModel::MM_POLYGONAL);
-  }
-  if(ID(filter) == FP_REFINE_CATMULL)
-  { // in practice it is just a simple double application of the previous step.
+  } break;
+
+  case FP_REFINE_CATMULL :
+  { // in practice it is just a simple double application of the FP_REFINE_HALF_CATMULL.
 	  m.updateDataMask(MeshModel::MM_FACEQUALITY);
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 	  assert(tri::BitQuadCreation<CMeshO>::IsBitTriQuadConventional(m.cm));
@@ -1015,36 +1023,29 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 	  tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
 	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
-  }
-  if(ID(filter) == FP_QUAD_PAIRING)
+  } break;
+
+  case FP_QUAD_PAIRING :
   {
 	  m.updateDataMask(MeshModel::MM_FACEQUALITY);
-
 	  tri::BitQuadCreation<CMeshO>::MakeTriEvenBySplit(m.cm);
 	  bool ret = tri::BitQuadCreation<CMeshO>::MakePureByFlip(m.cm,100);
 	  if(!ret) Log("Warning BitQuadCreation<CMeshO>::MakePureByFlip failed.");
 	  tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
 	  m.updateDataMask(MeshModel::MM_POLYGONAL);
-  }
-  if(ID(filter)==FP_FAUX_CREASE)
+  } break;
+
+  case FP_FAUX_CREASE :
   {
 	float AngleDeg = par.getFloat("AngleDeg");
 	tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	tri::UpdateFlags<CMeshO>::FaceFauxCrease(m.cm,math::ToRad(AngleDeg));
-  }
+  } break;
 
-	if (ID(filter) == FP_VATTR_SEAM)
+  case FP_VATTR_SEAM :
 	{
 		unsigned int vmask = 0;
 		vmask |= vcg::tri::AttributeSeam::POSITION_PER_VERTEX;
-		/*
-		switch (par.getEnum("PositionMode"))
-		{
-			case 0  : break;
-			case 1  : vmask |= vcg::tri::AttributeSeam::POSITION_PER_VERTEX; break;
-			default : break;
-		}
-		*/
 
 		unsigned int nmask = 0;
 		switch (par.getEnum("NormalMode"))
@@ -1088,8 +1089,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
       return r;
 		}
-	}
-
+  } break;
+}
 	return true;
 }
 
