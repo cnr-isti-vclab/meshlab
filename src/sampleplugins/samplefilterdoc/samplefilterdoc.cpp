@@ -137,7 +137,9 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 							cb(cnt*100/md.meshList.size(), "Merging layers...");
 							tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
 							toBeDeletedList.push_back(mmp);
-                                                        tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm,false,alsounreferenced);
+							if(!alsounreferenced)
+									vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmp->cm);
+							tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
 							tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
                                                         destMesh->updateDataMask(mmp);
 					}
