@@ -132,7 +132,7 @@ bool PlyMCPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParamet
         {
             SMesh sm;
             mm->updateDataMask(MeshModel::MM_FACEQUALITY);
-            tri::Append<SMesh,CMeshO>::Mesh(sm, mm->cm,false,p.VertSplatFlag); // note the last parameter of the append to prevent removal of unreferenced vertices...
+						tri::Append<SMesh,CMeshO>::Mesh(sm, mm->cm/*,false,p.VertSplatFlag*/); // note the last parameter of the append to prevent removal of unreferenced vertices...
             tri::UpdatePosition<SMesh>::Matrix(sm, mm->cm.Tr,true);
             tri::UpdateBounding<SMesh>::Box(sm);
             tri::UpdateNormals<SMesh>::NormalizeVertex(sm);
