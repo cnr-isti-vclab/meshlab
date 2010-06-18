@@ -122,12 +122,12 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
         tri::UpdateTopology<CMeshO>::FaceFace(m);
 				tri::UpdateTopology<CMeshO>::VertexFace(m);
 				
-        int edgeManif = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
+        int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
         int faceEdgeManif = tri::UpdateSelection<CMeshO>::CountFace(m);
         tri::UpdateSelection<CMeshO>::ClearVertex(m);
         tri::UpdateSelection<CMeshO>::ClearFace(m);
 
-        int vertManif = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
+        int vertManifNum = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
         tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
         int faceVertManif = tri::UpdateSelection<CMeshO>::CountFace(m);
 				int edgeNum=0,borderNum=0;
@@ -139,15 +139,15 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
         int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
 				Log("Mesh is composed by %i connected component(s)",connectedComponentsNum);
 				
-        if(edgeManif==0 && vertManif==0)
+        if(edgeManifNum==0 && vertManifNum==0)
 					Log("Mesh has is two-manifold ");
 					
-        if(edgeManif!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeManif,faceEdgeManif);
+        if(edgeManifNum!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeManifNum,faceEdgeManif);
 
-        if(vertManif!=0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n",vertManif,faceVertManif);
+        if(vertManifNum!=0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n",vertManifNum,faceVertManif);
 				
 				// For Manifold meshes compute some other stuff
-				if(vertManif && edgeManif)
+        if(vertManifNum==0 && edgeManifNum==0)
 				{
 					holeNum = tri::Clean<CMeshO>::CountHoles(m);
 					Log("Mesh has %i holes",holeNum);
