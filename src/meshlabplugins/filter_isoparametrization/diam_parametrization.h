@@ -554,7 +554,7 @@ public:
 
 		///copy parametrization to the new mesh
 		mesh.Clear();
-		vcg::tri::Append<MeshType,ParamMesh>::Mesh(mesh,*isoParam->ParaMesh(),false,true);
+		vcg::tri::Append<MeshType,ParamMesh>::Mesh(mesh,*isoParam->ParaMesh());
 		
 	}
 

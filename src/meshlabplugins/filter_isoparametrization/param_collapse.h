@@ -1,19 +1,22 @@
 #ifndef PARAM_COLLAPSE
 #define PARAM_COLLAPSE
 
+#include <set>
+
 // local optimization
 #include <vcg/complex/local_optimization.h>
-#include <vcg/math/quadric.h>
 #include <vcg/complex/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/complex/local_optimization/tri_edge_flip.h>
-#include <set>
 #include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/trimesh/edge_collapse.h>
+#include <vcg/space/color4.h>
+#include <vcg/math/quadric.h>
 
 #include <local_parametrization.h>
 #include <mesh_operators.h>
-#include <vcg/space/color4.h>
 #include <lm.h>
 #include <uv_grid.h>
+
 #include "opt_patch.h"
 #include "local_optimization.h"
 

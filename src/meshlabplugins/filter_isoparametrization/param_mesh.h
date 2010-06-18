@@ -51,7 +51,7 @@ public:
 	vcg::Color4b OriginalCol;
 	//int num_collapse;
 
-  void ImportLocal(const BaseVertex  & left )
+	void ImportData(const BaseVertex  & left )
   {
     vcg::Vertex< BaseUsedTypes,
 	vcg::vertex::VFAdj, 
@@ -60,7 +60,7 @@ public:
 	vcg::vertex::Mark, 
 	vcg::vertex::BitFlags,
 	vcg::vertex::Color4b,
-	vcg::vertex::TexCoord2f>::ImportLocal(left);
+	vcg::vertex::TexCoord2f>::ImportData(left);
 
     this->area=left.area;
 	this->RPos=left.RPos;
@@ -70,7 +70,7 @@ public:
   }
   
    template < class LeftV>
-  void ImportLocal(const LeftV  & left )
+	void ImportData(const LeftV  & left )
   {
     vcg::Vertex< BaseUsedTypes,
 	vcg::vertex::VFAdj, 
@@ -79,7 +79,7 @@ public:
 	vcg::vertex::Mark, 
 	vcg::vertex::BitFlags,
 	vcg::vertex::Color4b,
-	vcg::vertex::TexCoord2f>::ImportLocal(left);
+	vcg::vertex::TexCoord2f>::ImportData(left);
   }
 
   
@@ -148,7 +148,7 @@ public:
 	vcg::Color4b colorDivision;
 
    template < class LeftV>
-  void ImportLocal(const LeftV  & left )
+	void ImportData(const LeftV  & left )
   {
     vcg::Face  < BaseUsedTypes,
 	vcg::face::VFAdj, 
@@ -158,10 +158,10 @@ public:
 	vcg::face::EdgePlane,
 	vcg::face::Mark,
 	vcg::face::Normal3f,
-	vcg::face::Color4b>::ImportLocal(left);
+	vcg::face::Color4b>::ImportData(left);
   }
 	
-  void ImportLocal(const BaseFace  & left )
+	void ImportData(const BaseFace  & left )
   {
     vcg::Face  < BaseUsedTypes,
 	vcg::face::VFAdj, 
@@ -171,7 +171,7 @@ public:
 	vcg::face::EdgePlane,
 	vcg::face::Mark,
 	vcg::face::Normal3f,
-	vcg::face::Color4b>::ImportLocal(left);
+	vcg::face::Color4b>::ImportData(left);
     this->vertices_bary = std::vector<std::pair<BaseVertex*,vcg::Point3f> > (left.vertices_bary);
 	this->group=left.group;
 	this->areadelta=left.areadelta;

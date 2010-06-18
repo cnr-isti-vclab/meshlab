@@ -30,9 +30,10 @@ win32-msvc2005:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
 win32-msvc2008:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
 #win32-g++:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
 win32-g++:QMAKE_LFLAGS += -fopenmp
-linux-g++:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
-linux-g++-32:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
+#linux-g++:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
+#linux-g++-32:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
 linux-g++-64:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
+
 macx:QMAKE_CXXFLAGS += -fopenmp -D_USE_OMP
 macx:QMAKE_LFLAGS += -fopenmp
 

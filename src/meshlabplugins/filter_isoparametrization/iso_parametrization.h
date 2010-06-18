@@ -17,11 +17,9 @@
 
 ///ABSTRACT MESH THAT MAINTAINS THE WHOLE PARAMETERIZATION
 class AbstractVertex;
-class AbstractEdge;    
 class AbstractFace;
 
 class AbstractUsedTypes: public vcg::UsedTypes < vcg::Use<AbstractVertex>::AsVertexType,
-                                          vcg::Use<AbstractEdge   >::AsEdgeType,
                                           vcg::Use<AbstractFace  >::AsFaceType >{};
 
 
@@ -36,9 +34,9 @@ public:
 	CoordType RPos;
 
   template < class LeftV>
-  void ImportLocal(const LeftV  & left )
+	void ImportData(const LeftV  & left )
   {
-      vcg::Vertex< AbstractUsedTypes, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::TexCoord2f,vcg::vertex::BitFlags>::ImportLocal( left);
+			vcg::Vertex< AbstractUsedTypes, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::TexCoord2f,vcg::vertex::BitFlags>::ImportData( left);
       this->RPos = left.RPos;
   }
 };
@@ -59,12 +57,10 @@ class AbstractMesh: public vcg::tri::TriMesh<std::vector<AbstractVertex>, std::v
 
 ///HIGH RESOLUTION MESH THAT HAS TO BE PARAMETERIZED
 class ParamVertex;
-class ParamEdge;    
 class ParamFace;
 
 
 class ParamUsedTypes: public vcg::UsedTypes < vcg::Use<ParamVertex>::AsVertexType,
-                                          vcg::Use<ParamEdge   >::AsEdgeType,
                                           vcg::Use<ParamFace  >::AsFaceType >{};
 
 
@@ -77,21 +73,21 @@ class ParamVertex: public vcg::Vertex< ParamUsedTypes,
 {
 public:
     template < class LeftV>
-    void ImportLocal(const LeftV  & left )
+		void ImportData(const LeftV  & left )
     {
-        vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
+				vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportData( left);
     }
 	
 	
-    void ImportLocal(const ParamVertex  & left )
+		void ImportData(const ParamVertex  & left )
     {
-        vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
+				vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportData( left);
         this->RPos = left.RPos;
     }
 	
-	void ImportLocal(const BaseVertex  & left )
+	void ImportData(const BaseVertex  & left )
     {
-        vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportLocal( left);
+				vcg::Vertex< ParamUsedTypes, vcg::vertex::Normal3f, vcg::vertex::VFAdj, vcg::vertex::Coord3f,vcg::vertex::Color4b, vcg::vertex::TexCoord2f,vcg::vertex::BitFlags, vcg::vertex::CurvatureDirf,vcg::vertex::Qualityf >::ImportData( left);
         this->RPos = left.RPos;
     }
 
@@ -112,13 +108,13 @@ class ParamFace: public vcg::Face <  ParamUsedTypes,
 {
 public:
 	/*template < class LeftV>
-    void ImportLocal(const LeftV  & left )
+		void ImportData(const LeftV  & left )
     {
        vcg::FaceSimp2  <  ParamVertex, ParamEdge, ParamFace, 
 	vcg::face::VFAdj,vcg::face::FFAdj,vcg::face::VertexRef,
   vcg::face::Color4b,vcg::face::BitFlags,
   vcg::face::WedgeTexCoord2f,vcg::face::Normal3f,
-  vcg::face::Qualityf>::ImportLocal( left);
+	vcg::face::Qualityf>::ImportData( left);
     }*/
 };
 class ParamMesh: public vcg::tri::TriMesh<std::vector<ParamVertex>, std::vector<ParamFace> > 

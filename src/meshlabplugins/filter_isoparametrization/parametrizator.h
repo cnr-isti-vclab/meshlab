@@ -105,8 +105,8 @@ private:
 		///copy
 		base_mesh.Clear();
 		final_mesh.Clear();
-		vcg::tri::Append<BaseMesh,MeshType>::Mesh(base_mesh,*mesh,false,true);
-		vcg::tri::Append<BaseMesh,MeshType>::Mesh(final_mesh,*mesh,false,true);
+		vcg::tri::Append<BaseMesh,MeshType>::Mesh(base_mesh,*mesh);
+		vcg::tri::Append<BaseMesh,MeshType>::Mesh(final_mesh,*mesh);
 
 		///update auxiliary structures
 		UpdateStructures(&base_mesh);
@@ -473,7 +473,7 @@ private:
 		BaseMesh *mesh=ParaStack.back().AbsMesh;
 		CompactBaseDomain();
 
-		vcg::tri::Append<BaseMesh,BaseMesh>::Mesh(*mesh,base_mesh,false,true);
+		vcg::tri::Append<BaseMesh,BaseMesh>::Mesh(*mesh,base_mesh);
 
 	
 		for (unsigned int i=0;i<base_mesh.vert.size();i++)
@@ -518,7 +518,7 @@ private:
 		BaseMesh *to_restore=ParaStack[index_status].AbsMesh;
 	
 		///restore saved abstract mesh and link
-		vcg::tri::Append<BaseMesh,BaseMesh>::Mesh(base_mesh,*to_restore,false,true);
+		vcg::tri::Append<BaseMesh,BaseMesh>::Mesh(base_mesh,*to_restore);
 		for (unsigned int i=0;i<to_restore->face.size();i++)
 		{
 			int size=to_restore->face[i].vertices_bary.size();
@@ -840,8 +840,8 @@ public:
 			///copy initial mesh 
 			final_mesh.Clear();
 			base_mesh.Clear();
-			vcg::tri::Append<BaseMesh,ParamMesh>::Mesh(final_mesh,para_mesh0,false,true);
-			vcg::tri::Append<BaseMesh,AbstractMesh>::Mesh(base_mesh,abs_mesh1,false,true);
+			vcg::tri::Append<BaseMesh,ParamMesh>::Mesh(final_mesh,para_mesh0);
+			vcg::tri::Append<BaseMesh,AbstractMesh>::Mesh(base_mesh,abs_mesh1);
 			///scale by a factor
 			
 			UpdateTopologies<BaseMesh>(&final_mesh);
@@ -1182,8 +1182,8 @@ public:
 		abs_mesh.Clear();
 
 		///copy meshes
-		vcg::tri::Append<AbstractMesh,BaseMesh>::Mesh(abs_mesh,base_mesh,false,true);
-		vcg::tri::Append<ParamMesh,BaseMesh>::Mesh(para_mesh,final_mesh,false,true);
+		vcg::tri::Append<AbstractMesh,BaseMesh>::Mesh(abs_mesh,base_mesh);
+		vcg::tri::Append<ParamMesh,BaseMesh>::Mesh(para_mesh,final_mesh);
 
 		///copy additional values
 		for (unsigned int i=0;i<base_mesh.vert.size();i++)
