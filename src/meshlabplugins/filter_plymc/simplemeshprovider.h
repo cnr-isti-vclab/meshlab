@@ -196,10 +196,8 @@ template<class TriMeshType>
 };
 
         class SVertex;
-        class SEdge;
         class SFace;
-        class SUsedTypes: public vcg::UsedTypes < vcg::Use<SVertex>::AsVertexType,
-                                                  vcg::Use<SEdge   >::AsEdgeType,
+				class SUsedTypes: public vcg::UsedTypes < vcg::Use<SVertex>::AsVertexType,
                                                   vcg::Use<SFace  >::AsFaceType >{};
 
 class SVertex     : public Vertex< SUsedTypes, vertex::Coord3f, vertex::Normal3f,vertex::VFAdj, vertex::BitFlags, vertex::Color4b, vertex::Qualityf>{};
