@@ -1835,8 +1835,8 @@ public:
 						MeshType	*_input_mesh,
 						ParamMesh	 * _param_mesh,
 						AbstractMesh *_absMesh,
-						bool test=true,
-						bool use_quality=true)
+            bool test=true)
+//						bool use_quality=true)
 	{
 		param_mesh=_param_mesh;
 		param_mesh->Clear();

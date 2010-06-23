@@ -98,7 +98,7 @@ class IsoTransfer
 		TRGrid.Set(IsoParam.ParaMesh()->face.begin(),IsoParam.ParaMesh()->face.end());
 		ScalarType maxDist=IsoParam.ParaMesh()->bbox.Diag();
 		///then for each vertex find the closest
-		for (int i=0;i<to_assing.vert.size();i++)
+    for (size_t i=0;i<to_assing.vert.size();i++)
 		{
       typename MeshType::VertexType *vert=&to_assing.vert[i];
 			if (!vert->IsD())
@@ -114,7 +114,7 @@ class IsoTransfer
 					  (bary.Y()>=0)&&(bary.Y()<=1)&&
 						(bary.Z()>=0)&&(bary.Z()<=1)))
 				{
-						printf("%d,%3.3f,%3.3f,%3.3f",i,bary.X(),bary.Y(),bary.Z());
+            printf("%i,%3.3f,%3.3f,%3.3f",int(i),bary.X(),bary.Y(),bary.Z());
 						system("pause");
 				}
 				Clamp(bary);

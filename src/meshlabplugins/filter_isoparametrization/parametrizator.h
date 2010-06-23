@@ -314,7 +314,7 @@ private:
 				///take the face that has lower number of vertices
 				BaseFace *fmin=vfi2.F();
 				int index=vfi2.I();
-				int sizeMin=fmin->vertices_bary.size();
+        size_t sizeMin=fmin->vertices_bary.size();
 				while (!vfi2.End())
 				{
 					BaseFace *f=vfi2.F();
@@ -759,7 +759,7 @@ public:
 	void ScaleMesh(MeshType &m,
 								 const ScalarType &factor)
 	{
-		for (int i=0;i<m.vert.size();i++)
+    for (size_t i=0;i<m.vert.size();i++)
 			if (!m.vert[i].IsD())
 				m.vert[i].P()*=factor;
 	}
@@ -767,7 +767,7 @@ public:
 	template <class MeshType>
 	void TranslateMesh(MeshType &m,const typename MeshType::CoordType &vect)
 	{
-		for (int i=0;i<m.vert.size();i++)
+    for (size_t i=0;i<m.vert.size();i++)
 			if (!m.vert[i].IsD())
 				m.vert[i].P()+=vect;
 	}
