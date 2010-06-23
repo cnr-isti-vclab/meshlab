@@ -485,7 +485,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			//delete(isoPHandle());
 			isoPHandle=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*trgMesh,"isoparametrization");
 			isoPHandle().AbsMesh()=&abs_mesh;
-			bool done=isoPHandle().SetParamMesh<CMeshO>(trgMesh,&para_mesh);
+      isoPHandle().SetParamMesh<CMeshO>(trgMesh,&para_mesh);
 			
 			return true;
 		}
