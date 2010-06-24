@@ -3,6 +3,7 @@
 
 #include <defines.h>
 
+
 #include <param_collapse.h>
 #include <param_flip.h>
 
@@ -11,6 +12,7 @@
 #include <iso_parametrization.h>
 
 ///auxiliary structures
+
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/append.h>
@@ -57,7 +59,7 @@ class MyTriEdgeCollapse: public ParamEdgeCollapse<BaseMesh>{};
 class IsoParametrizator{
 
 public:
-	typedef enum ReturnCode{MultiComponent,
+	 enum ReturnCode{MultiComponent,
 													NonSizeCons,
 													NonManifoldE,
 													NonManifoldV,
@@ -337,7 +339,7 @@ private:
 			}
 	}
 
-	typedef struct vert_para
+	struct vert_para
 		{
 			ScalarType dist;
 			BaseVertex *v;
@@ -677,7 +679,7 @@ public:
 	
 	int TimeStepDeci,TimeStepFlip;
 
-	typedef struct ParaInfo
+	struct ParaInfo
 	{
 		ScalarType AggrDist;
 		ScalarType AreaDist;

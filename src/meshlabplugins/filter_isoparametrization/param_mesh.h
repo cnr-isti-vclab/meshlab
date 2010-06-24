@@ -2,10 +2,7 @@
 #define PARAM_MESH
 
 // stuff to define the mesh
-#include <vcg/simplex/vertex/base.h>
-#include <vcg/simplex/face/base.h>
 #include <vcg/simplex/face/component_rt.h>
-#include <vcg/simplex/edge/base.h>
 #include <vcg/complex/trimesh/base.h>
 #include "iso_parametrization.h"
 

@@ -24,14 +24,12 @@
 #include <Qt>
 #include <QtGui>
 #include "defines.h"
+
+#include "../../common/meshmodel.h"
 #include <filter_isoparametrization.h>
 #include <iso_transfer.h>
 #include <vcg/complex/trimesh/update/normal.h>
 
-//#include <vcg/complex/trimesh/update/flag.h>
-//#include <vcg/complex/trimesh/update/color.h>
-//#include <vcg/space/colorspace.h>
-//#include <vcg/math/random_generator.h>
 
 #include <stdlib.h>
 #include <time.h>

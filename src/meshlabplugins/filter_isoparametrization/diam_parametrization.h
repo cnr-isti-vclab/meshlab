@@ -19,7 +19,7 @@ class DiamondParametrizator
 	typedef std::pair<int,int> EdgeKey;
 
 	///interpolation data
-	typedef struct InterpData
+	struct InterpData
 	{
 		float alpha;
 		int I;

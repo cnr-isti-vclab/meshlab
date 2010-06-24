@@ -13,7 +13,7 @@ class PatchesOptimizer
 	typedef typename MeshType::ScalarType ScalarType;
 
 public:
-	typedef struct minInfoUV
+	 struct minInfoUV
 	{
 	public:
 

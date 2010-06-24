@@ -3,7 +3,7 @@
 
 #include "statistics.h"
 
-typedef enum EnergyType{EN_EXTMips,EN_MeanVal};
+enum EnergyType{EN_EXTMips,EN_MeanVal};
 
 template <class MeshType>
 bool UnFold(MeshType &mesh,int /*num_faces*/,bool fix_selected=false)

@@ -2,13 +2,10 @@
 #define TRI_PARAMETRIZATION	
 
 // stuff to define the mesh
-#include <vcg/simplex/vertex/base.h>
-#include <wrap/io_trimesh/export_ply.h>
+ #include <wrap/io_trimesh/export_ply.h>
 #include <wrap/io_trimesh/import_ply.h>
 #include <vcg/space/triangle3.h>
-#include <vcg/simplex/face/base.h>
 #include <vcg/simplex/face/component_rt.h>
-#include <vcg/simplex/edge/base.h>
 #include <vcg/complex/trimesh/base.h>
 #include "local_parametrization.h"
 #include "uv_grid.h"
