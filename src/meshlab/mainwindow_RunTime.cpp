@@ -107,7 +107,7 @@ void MainWindow::updateWindowMenu()
 	windowsMenu->addAction(windowsNextAct);
 	windowsNextAct->setEnabled(mdiarea-> subWindowList().size()>1);
 
-	menuBar()->addSeparator();
+	windowsMenu->addSeparator();
 
 	// Split/Unsplit SUBmenu
 	if((mdiarea-> subWindowList().size()>0)){
@@ -127,7 +127,7 @@ void MainWindow::updateWindowMenu()
 			setSplitHAct->setEnabled(current->size().height()/2 > current->minimumSizeHint().height());
 			setSplitVAct->setEnabled(current->size().width()/2 > current->minimumSizeHint().width());
 
-			menuBar()->addSeparator();
+			windowsMenu->addSeparator();
 		}
 	}
 
