@@ -429,7 +429,7 @@ private:
 		vcg::Matrix44d imodel = model;
 		vcg::Transpose(imodel);
 		tra = -(imodel*tra);
-		//tra *= idet; //SOTTILE
+		tra *= idet; 
 		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
 
 		//use same current intrinsics
@@ -439,27 +439,90 @@ private:
 	}
 
 	/*
-	Given a Shot "from", and a trackball "tb" replaces "tb" with a trackball "tb'" such that:
-	"from" o "tb" = "tb'"
+	TBD
 	*/
 	template <class T>
 	void Shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
-		Shot id;
 
-		vcg::Quaterniond qto;     qto.FromMatrix(id.Extrinsics.Rot());
 		vcg::Quaterniond qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
 
-		/*float sca=tb.track.sca;
-		tb.track.sca=1;*/
-		tb.track.tra += ( tb.track.rot.Inverse().Rotate( vcg::Point3f::Construct(-from.Extrinsics.Tra()) + tb.center ) ) / tb.track.sca;
-		tb.track.rot = vcg::Quaternionf::Construct(qto.Inverse() * qfrom) * tb.track.rot;
-		tb.track.tra -= ( tb.track.rot.Inverse().Rotate( vcg::Point3f::Construct(-  id.Extrinsics.Tra()) + tb.center ) ) / tb.track.sca;
+		Matrix44f rotFrom;
+		from.Extrinsics.Rot().ToMatrix(rotFrom);
 
+		Point3f oldC= meshDoc->bbox().Center();
+
+		Point3f p1 = rotFrom*(vcg::Point3f::Construct(from.Extrinsics.Tra())/*+(oldC)*/);
+
+//Expressing the translation along Z with a scale factor k
+		Point3f p2 = (/*(tb.track.Matrix()*(oldC))- */Point3f(0,0,cameraDist));
+
+		//k is the ratio between the distances along z of two correspondent points (before and after the traslation) 
+		//from the point of view
+		float k= abs(p2.Z()/p1.Z());
+
+
+		trackball.track.sca =k;
+
+		Point3f glLookAt = Point3f(0,0,-cameraDist);
+
+		tb.track.rot = vcg::Quaternionf::Construct(qfrom);
+		Point3d fromTra = from.Extrinsics.Tra();
+		Point3d fromTraSca = from.Extrinsics.Tra()* tb.track.sca;
+        Point3f fromTraScaRot = tb.track.rot.Rotate(vcg::Point3f::Construct(from.Extrinsics.Tra())* tb.track.sca);
+
+		Point3f glLookAtRot = tb.track.rot.Rotate(glLookAt);
+		tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()) /*- tb.track.rot.Inverse().Rotate(glLookAt)*/);
+		tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(Point3f(0,0,cameraDist)))*(1/tb.track.sca /*-tb.track.sca*/);
+
+		//tb.track.tra +=  (vcg::Point3f::Construct(from.Extrinsics.Tra())* tb.track.sca - tb.track.rot.Inverse().Rotate(glLookAt));
+		
+
+		//tb.track.tra = Point3f(0,0,0);
 		//aggiustare sca e tra per mettere il centro della trackball al punto giusto
-
-
+		// per ora fatto fuori
+		//tb.track.tra *= tb.track.sca; 
 	}
 };
+//
+///*
+//	Given a Shot "from", and a trackball "tb" replaces "tb" with a trackball "tb'" such that:
+//	"from" o "tb" = "id" o "tb'" where "id" is a shot with identic rot e no traslation
+//	*/
+//	template <class T>
+//	void Shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
+//		Shot id;
+//
+//		vcg::Quaterniond qto;     qto.FromMatrix(id.Extrinsics.Rot());
+//		vcg::Quaterniond qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
+//
+//		Point3f oldC= meshDoc->bbox().Center();
+//
+//		Matrix44f rotFrom;
+//		from.Extrinsics.Rot().ToMatrix(rotFrom);
+//
+//		Point3f p1 = rotFrom*(vcg::Point3f::Construct(from.Extrinsics.Tra())+(oldC));
+//
+//		//Expressing the translation along Z with a scale factor k
+//		Point3f p2 = ((tb.track.Matrix()*(oldC))- Point3f(0,0,cameraDist));
+//
+//		//k is the ratio between the distances along z of two correspondent points (before and after the traslation) 
+//		//from the point of view
+//		float k= abs(p2.Z()/p1.Z());
+//
+//		trackball.track.sca /=k;
+//
+//		/*float sca=tb.track.sca;
+//		tb.track.sca=1;*/
+//		tb.track.tra = (-oldC)/*/trackball.track.sca*/;
+//		tb.track.tra += ( tb.track.rot.Inverse().Rotate( vcg::Point3f::Construct(-from.Extrinsics.Tra()) + oldC ) )/*/ tb.track.sca*/ ;
+//		tb.track.rot = vcg::Quaternionf::Construct(qto.Inverse() * qfrom) * tb.track.rot;
+//		tb.track.tra -= ( tb.track.rot.Inverse().Rotate( vcg::Point3f::Construct(-  id.Extrinsics.Tra()) + tb.center ) )/ tb.track.sca;
+//
+//		//aggiustare sca e tra per mettere il centro della trackball al punto giusto
+//		// per ora fatto fuori
+//		//tb.track.tra *= tb.track.sca; 
+//	}
+//};
 
 
 #endif

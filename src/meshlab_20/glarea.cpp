@@ -625,10 +625,6 @@ void GLArea::sendShot()
 	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
 	shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2)));
 
-	//The new shot doesn't have to introduce a translation from the center
-    Point3f center = meshDoc->bbox().Center();
-	trackball.track.tra += center;
-
 	// This parameter is the one that controls:
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
 	float viewRatio = 1.75f;
@@ -643,23 +639,21 @@ void GLArea::sendShot()
 	
 	Shot newShot = getShotFromTrack2(shot, &trackball);
 
-	trackball.track.tra -= center;
+	////Expressing scaling as a translation along z
+	////k is the ratio between default scale and new scale
+	//double oldScale= 3.0f/meshDoc->bbox().Diag();
+	//double k= oldScale/trackball.track.sca;
 
-	//Expressing scaling as a translation along z
-	//k is the ratio between default scale and new scale
-	double oldScale= 3.0f/meshDoc->bbox().Diag();
-	double k= oldScale/trackball.track.sca;
+ //   //Apply this formula
+	//// R(t+p) = kR'(t'+p) forall p, R=R', k is a costant
+	//// R(t)= kR(t')
+	//// t = k*t'
+	//Point3d t1 = newShot.Extrinsics.Tra();
+	//
+	//Matrix44d rapM = Matrix44d().SetScale(k, k, k);
+	//Point3d t0 = rapM*t1;
 
-    //Apply this formula
-	// R(t+p) = kR'(t'+p) forall p, R=R', k is a costant
-	// R(t)= kR(t')
-	// t = k*t'
-	Point3d t1 = newShot.Extrinsics.Tra();
-	
-	Matrix44d rapM = Matrix44d().SetScale(k, k, k);
-	Point3d t0 = rapM*t1;
-
-	newShot.Extrinsics.SetTra(t0);
+	//newShot.Extrinsics.SetTra(t0);
 
 	mvc->updateTrackballInViewers(newShot);
 }
@@ -1212,29 +1206,29 @@ void GLArea::loadShot(){
 
 	//Shot test
 	Shot shot;
-	initializeShot(shot);
+	//initializeShot(shot);
 
-	////oppure lo leggi da file-------------------------------------------------------
-	//readShotFromFile(shot); 
-	////resize viewport
-	//int w = shot.Intrinsics.ViewportPx[0];
-	//int h = shot.Intrinsics.ViewportPx[1];
+	//oppure lo leggi da file-------------------------------------------------------
+	readShotFromFile(shot); 
+	//resize viewport
+	int w = shot.Intrinsics.ViewportPx[0];
+	int h = shot.Intrinsics.ViewportPx[1];
 
-	//if(w > width()) {
-	//	h = h*width()/w;
-	//	w = width();
-	//}
-	//if(h > height()) {
-	//	w = w*height()/h;
-	//	h = height();
-	//}
-	//shot.Intrinsics.DistorCenterPx[0]=w/2;
- //   shot.Intrinsics.DistorCenterPx[1]=h/2;
- //   shot.Intrinsics.CenterPx[0]=w/2;
- //   shot.Intrinsics.CenterPx[1]=h/2;
- //   shot.Intrinsics.ViewportPx[0]=w;
- //   shot.Intrinsics.ViewportPx[1]=h;
-	////-----------------------------------------------------------------------------------------
+	/*if(w > width()) {
+		h = h*width()/w;
+		w = width();
+	}
+	if(h > height()) {
+		w = w*height()/h;
+		h = height();
+	}*/
+	shot.Intrinsics.DistorCenterPx[0]=w/2;
+    shot.Intrinsics.DistorCenterPx[1]=h/2;
+    shot.Intrinsics.CenterPx[0]=w/2;
+    shot.Intrinsics.CenterPx[1]=h/2;
+    shot.Intrinsics.ViewportPx[0]=w;
+    shot.Intrinsics.ViewportPx[1]=h;
+	//-----------------------------------------------------------------------------------------
 
 // This parameter is the one that controls:
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
@@ -1242,7 +1236,7 @@ void GLArea::loadShot(){
 	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
 
 	//Esempi di shot di ingresso
-	shot.Extrinsics.SetTra(Point3d(0, 0, cameraDist*2));
+	//shot.Extrinsics.SetTra(Point3d(0, 0, cameraDist*2));
 	/*vcg::Matrix44d rot;
 	rot.Identity();
 	rot.SetRotateDeg(90,Point3<double>(0,1,0));
@@ -1265,22 +1259,19 @@ void GLArea::loadShot(const Shot &shot_){
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
 	float viewRatio = 1.75f;
 	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
-	
-	//correct the translation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
-	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
-	//To compensate S^(-1)R^(-1)gl we add to t S^(-1) R^(-1)(-gl)
-	//Shot doesn't introduce scaling
-	shot.Extrinsics.SetTra(shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, -cameraDist)));
 
 	//reset trackball. The point of view must be set only by the shot
 	trackball.Reset();
 	float newScale= 3.0f/meshDoc->bbox().Diag();
 	trackball.track.sca = newScale;
-	trackball.track.tra =  -meshDoc->bbox().Center();
+	//trackball.track.tra =  -meshDoc->bbox().Center();
 	
 	Point3f point = meshDoc->bbox().Center();
 	Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
 	Shot2Track(shot, cameraDist,trackball);
+
+	//Shot test;
+	//getShotFromTrack2(shot, &trackball);
 
 	//Expressing the translation along Z with a scale factor k
 	Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
@@ -1305,7 +1296,7 @@ void GLArea::loadShot(const Shot &shot_){
 	Point3f t1 = rapM*Inverse(s1)*s0*tra + rapM2*Inverse(s1)*Inverse(r)*Point3f(0,0,cameraDist);
 
 	trackball.track.sca =sca;
-	trackball.track.tra =t1;
+	trackball.track.tra =t1 /*+ tb.track.rot.Inverse().Rotate(glLookAt)*/ ;
 
 	//Test on trackball
 	/*Matrix44f s_inv = Matrix44f().SetScale(1/trackball.track.sca, 1/trackball.track.sca, 1/trackball.track.sca);
@@ -1320,3 +1311,72 @@ void GLArea::loadShot(const Shot &shot_){
 
 	updateGL();
 }
+
+//void GLArea::loadShot(const Shot &shot_){
+//	
+//	Shot shot = shot_;
+//	
+//	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
+//	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
+//	/*fov=60;
+//	float focal = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2)));*/
+//
+//	// This parameter is the one that controls:
+//	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
+//	float viewRatio = 1.75f;
+//	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+//	
+//	//correct the translation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+//	//T(gl)*S*R*T(t) => SR(t)+ gl => S R (S^(-1)R^(-1)gl + t)
+//	//To compensate S^(-1)R^(-1)gl we add to t S^(-1) R^(-1)(-gl)
+//	//Shot doesn't introduce scaling
+//	shot.Extrinsics.SetTra(shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, -cameraDist)));
+//
+//	//reset trackball. The point of view must be set only by the shot
+//	trackball.Reset();
+//	float newScale= 3.0f/meshDoc->bbox().Diag();
+//	trackball.track.sca = newScale;
+//	//trackball.track.tra =  -meshDoc->bbox().Center();
+//	
+//	Point3f point = meshDoc->bbox().Center();
+//	Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
+//	Shot2Track(shot, cameraDist,trackball);
+//
+//	//Expressing the translation along Z with a scale factor k
+//	Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
+//
+//	//k is the ratio between the distances along z of two correspondent points (before and after the traslazion) 
+//	//from the point of view
+//	float k= abs(p2.Z()/p1.Z());
+//
+//	float sca= trackball.track.sca/k;
+//	Point3f tra = trackball.track.tra;
+//	
+//	// Apply this formula:
+//	// SR(t+p) -v = k[S'R'(t'+p) -v] forall p, R=R', k is a costant
+//	// SR(t) -v = k[S'R(t') -v]
+//	// t' = 1/k* S'^-1St + (k-1)/k S'^-1*R^-1v
+//	Matrix44f s0 = Matrix44f().SetScale(trackball.track.sca,trackball.track.sca, trackball.track.sca);
+//	Matrix44f s1 = Matrix44f().SetScale(sca, sca, sca);
+//	Matrix44f r;
+//	trackball.track.rot.ToMatrix(r);
+//	Matrix44f rapM = Matrix44f().SetScale(1/k, 1/k, 1/k);
+//	Matrix44f rapM2 = Matrix44f().SetScale(1-1/k, 1-1/k, 1-1/k);
+//	Point3f t1 = rapM*Inverse(s1)*s0*tra + rapM2*Inverse(s1)*Inverse(r)*Point3f(0,0,cameraDist);
+//
+//	trackball.track.sca =sca;
+//	trackball.track.tra =t1;
+//
+//	//Test on trackball
+//	/*Matrix44f s_inv = Matrix44f().SetScale(1/trackball.track.sca, 1/trackball.track.sca, 1/trackball.track.sca);
+//	vcg::Matrix44f rot_inv;
+//	Inverse(trackball.track.rot).ToMatrix(rot_inv);
+//
+//	Shot2Track(shot, cameraDist,trackball);
+//
+//	trackball.track.tra += s_inv*rot_inv*Point3f(0, 0, cameraDist);*/
+//
+//	//Shot2Track(shot, cameraDist,trackball);
+//
+//	updateGL();
+//}
