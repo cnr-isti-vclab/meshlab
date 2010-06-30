@@ -56,8 +56,8 @@ struct aux_info {
         if ( c.Length() < eps ) { c.P1() = c.P0(); v.second = v.first; }
         //check if c doesn't lie on existing edges
         //if it does, split edge
-        for ( int i = 0; i < trash.size(); i ++ ) {
-            for ( int j = 0; j < trash[i].edges.size(); j ++ ) { //Only one trash component
+        for ( size_t i = 0; i < trash.size(); i ++ ) {
+            for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) { //Only one trash component
                 vcg::Segment3<CMeshO::ScalarType> a, b;
                 a = trash[i].edges[j]; b = c;
                 float tx0 =  (float) (b.P0().X() - a.P0().X())/(a.P1().X() - a.P0().X());
@@ -116,7 +116,7 @@ struct aux_info {
 
         bool found = false;
         for ( unsigned int j = 0; j < border.size(); j ++ ) {
-            for ( int i = 0; i < border[j].verts.size() && !found; i ++ ) {
+            for ( size_t i = 0; i < border[j].verts.size() && !found; i ++ ) {
                 if ( border[j].verts[i].first == v.second ) { found = true; border[j].edges.insert( border[j].edges.begin() + i, c ); border[j].verts.insert( border[j].verts.begin() + i, v ); }           //insert before i-th element
 				else 
 				if ( border[j].verts[i].second == v.first ) { found = true; border[j].edges.insert( border[j].edges.begin() + i + 1, c ); border[j].verts.insert( border[j].verts.begin() + i + 1, v ); }   //insert after i-th element
@@ -141,9 +141,9 @@ struct aux_info {
                 }
         }//end if (!found)
 
-        for ( int k = 0; k < border.size(); k ++) {
-            for ( int i = 0; i < trash.size(); i ++ ) {
-                for ( int j = 0; j < trash[i].verts.size(); j ++ ) { //Only one trash component
+        for ( size_t k = 0; k < border.size(); k ++) {
+            for ( size_t i = 0; i < trash.size(); i ++ ) {
+                for ( size_t j = 0; j < trash[i].verts.size(); j ++ ) { //Only one trash component
                     if ( trash[i].verts[j].first == border[k].verts.back().second ) {
                         trash[i].edges[j].P0() = border[k].edges.back().P1();
                         //trash[i].edges.erase( trash[i].edges.begin() + j ); trash[i].verts.erase( trash[i].verts.begin() + j )
@@ -200,15 +200,15 @@ struct aux_info {
     }
 
     // Number of t.component
-    virtual int nTComponent( ) {
+    virtual size_t nTComponent( ) {
         return trash.size();
     }
 
 	// Add vertex in original triangle
 	virtual bool addVertex( CMeshO::VertexPointer v, int v_index ) {
 		int cnt = 0; int split = -1;
-		for ( int i = 0; i < trash.size(); i ++ ) {	//one component only
-			for ( int j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
+    for ( size_t i = 0; i < trash.size(); i ++ ) {	//one component only
+      for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
 				if ( vcg::SquaredDistance<float>( trash[i].edges[j], v->P() ) <= eps ) { 
 					 cnt++; split = j;
 				}	
@@ -230,8 +230,8 @@ struct aux_info {
 		}
 
 		if ( cnt == 2 ) {	// search for closest vertex and copy vertex coords
-			for ( int i = 0; i < trash.size(); i ++ ) {	//one component only
-				for ( int j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
+      for ( size_t i = 0; i < trash.size(); i ++ ) {	//one component only
+        for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
 					if ( vcg::Distance<float>( trash[i].edges[j].P0(), v->P() ) <= eps ) { 
 						 v->P() = trash[i].edges[j].P0();
 					}	
@@ -275,7 +275,7 @@ public:
         int getRequirements(QAction *action);
         virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
         FilterClass getClass(QAction *a);
-        virtual int postCondition( QAction *a ) const { return MeshModel::MM_FACEFACETOPO|MeshModel::MM_VERTNORMAL; }
+        virtual int postCondition( QAction */*a*/ ) const { return MeshModel::MM_FACEFACETOPO|MeshModel::MM_VERTNORMAL; }
 
 
 

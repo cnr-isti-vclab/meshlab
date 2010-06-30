@@ -145,13 +145,13 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
     int i; for (i=0; i<3 && !vcg::face::IsBorder(*face, i); i++) {}   //i-edge on patch border
     if (i == 3)  for (i = 0; i < 3 && !(face->FFp(i)->IsD()); i++) {}
     assert( i<3 );
-	int samplePerEdge = SAMPLES_PER_EDGE;
+  size_t samplePerEdge = SAMPLES_PER_EDGE;
 
     //samples edge in uniform way
     std::vector< vcg::Point3< CMeshO::ScalarType > > edge_samples;
     vcg::Point3< CMeshO::ScalarType > edge_dir = face->P1(i) - face->P(i); edge_dir.Normalize();
     float step = 1.0/(samplePerEdge+1); //step length
-    for( int j = 0; j <= samplePerEdge; j++ ) {
+    for( size_t j = 0; j <= samplePerEdge; j++ ) {
         edge_samples.push_back( face->P(i) + edge_dir * (j * step) );
     }
 
@@ -182,9 +182,9 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
     for ( int j = (i+1)%3; j != i; j = (j+1)%3 ) {
 		samplePerEdge = SAMPLES_PER_EDGE;
         edge_samples.clear(); edge_dir = face->P1(j) - face->P(j); edge_dir.Normalize();
-        for( int k = 0; k <= samplePerEdge; k++ )  edge_samples.push_back( face->P(j) + (face->P1(j) - face->P(j)) * (k * step) ); //campionamento
+        for( size_t k = 0; k <= samplePerEdge; k++ )  edge_samples.push_back( face->P(j) + (face->P1(j) - face->P(j)) * (k * step) ); //campionamento
         // samples on A
-        for ( int k = 0; k < edge_samples.size(); k ++ ) {
+        for ( size_t k = 0; k < edge_samples.size(); k ++ ) {
             CMeshO::FacePointer nearestF = 0;
             vcg::tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&m->cm); tri::UnMarkAll(m->cm);
             vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
@@ -315,21 +315,21 @@ bool FilterZippering::isAdjacent( CMeshO::FacePointer f1, CMeshO::FacePointer f2
  */
 void FilterZippering::handleBorder( aux_info &info,                                             //Auxiliar information for triangulatio
                                     vcg::Point3<CMeshO::ScalarType> N,                          //face normal (useful for proiection)
-                                    std::vector<CMeshO::CoordType> &coords,                     //output coords
+                                    std::vector<CMeshO::CoordType> &/*coords*/,                     //output coords
                                     std::vector<int> &pointers ) {                              //output triangles
 	// rotation matrix (will be used for projection on plane)
     vcg::Matrix44<CMeshO::ScalarType> rot_matrix;
     rot_matrix.SetRotateRad( vcg::Angle<CMeshO::ScalarType>( N, vcg::Point3<CMeshO::ScalarType>(0.0, 0.0, 1.0) ), N ^ vcg::Point3<CMeshO::ScalarType>(0.0, 0.0, 1.0) );
 	//border refinement - brand new method?
 	//Remove intersecating border
-	for (int i = 0; i < info.border.size(); i ++) {
-		for ( int j = 0; j < info.border[i].edges.size(); j++) {
+  for (size_t i = 0; i < info.border.size(); i ++) {
+    for ( size_t j = 0; j < info.border[i].edges.size(); j++) {
 			//project one border segment on face
 			vcg::Segment2f s(   vcg::Point2f((rot_matrix * info.border[i].edges[j].P0()).X(), (rot_matrix * info.border[i].edges[j].P0()).Y()),
 								vcg::Point2f((rot_matrix * info.border[i].edges[j].P1()).X(), (rot_matrix * info.border[i].edges[j].P1()).Y()) );	//projects edge on plane
 			vcg::Point2f x;
-			for ( int k = i+1; k < info.border.size(); k++) {
-				for ( int h = 0; h < info.border[k].edges.size(); h++) {
+      for ( size_t k = i+1; k < info.border.size(); k++) {
+        for ( size_t h = 0; h < info.border[k].edges.size(); h++) {
 					vcg::Segment2f t(   vcg::Point2f((rot_matrix * info.border[k].edges[h].P0()).X(), (rot_matrix * info.border[k].edges[h].P0()).Y()),
 										vcg::Point2f((rot_matrix * info.border[k].edges[h].P1()).X(), (rot_matrix * info.border[k].edges[h].P1()).Y()) );	//projects edge on plane
 					if ( vcg::SegmentSegmentIntersection( s, t, x ) ) {
@@ -342,10 +342,10 @@ void FilterZippering::handleBorder( aux_info &info,                             
 		}
 	}
 	//Split border if necessary
-	for (int i = 0; i < info.border.size(); i ++) {
-		for ( int j = 1; j < info.border[i].edges.size(); j++ ) {
+  for (size_t i = 0; i < info.border.size(); i ++) {
+    for ( size_t j = 1; j < info.border[i].edges.size(); j++ ) {
 			//check if P0 lies on trash edge, then split border (skip first edge)
-			for ( int k = 0; k < info.trash[0].edges.size(); k++ ) {
+      for ( size_t k = 0; k < info.trash[0].edges.size(); k++ ) {
 				if ( vcg::SquaredDistance<float>( info.trash[0].edges[k], info.border[i].edges[j].P0() ) == 0.0f ) { //approxim
 					//Split is needed
 					polyline newborder; newborder.edges.insert( newborder.edges.begin(), info.border[i].edges.begin() + j, info.border[i].edges.end() );
@@ -360,31 +360,31 @@ void FilterZippering::handleBorder( aux_info &info,                             
 	}
 
     // For each border...
-    for (int i = 0; i < info.border.size(); i ++) {
+    for (size_t i = 0; i < info.border.size(); i ++) {
         //search for component intersecated by border and split it into two or more components
         bool conn = true; int c = searchComponent( info, info.border[i].edges.front().P0(), info.border[i].edges.back().P1(), conn ); polyline current;
         if ( conn ) current = info.conn[c]; else current = info.trash[c];
         info.AddCComponent( cutComponent( current, info.border[i], rot_matrix ) );
 		polyline rev_border = info.border[i]; std::reverse( rev_border.edges.begin(), rev_border.edges.end() );
-        for ( int k = 0; k < rev_border.edges.size(); k ++) rev_border.edges[k].Flip();
+        for ( size_t k = 0; k < rev_border.edges.size(); k ++) rev_border.edges[k].Flip();
         info.AddTComponent( cutComponent( current, rev_border, rot_matrix ) );
         if ( conn ) info.RemoveCComponent( c ); else info.RemoveTComponent( c );
     }
 	//No border; triangulation of the whole face
 	if ( info.border.size() == 0 ) {
         info.conn = info.trash;
-        for ( int  i = 0; i < info.conn.size(); i ++ ) {
+        for ( size_t  i = 0; i < info.conn.size(); i ++ ) {
             reverse( info.conn[i].edges.begin(), info.conn[i].edges.end() );
-            for ( int j = 0; j < info.conn[i].edges.size(); j ++ ) info.conn[i].edges[j].Flip();
+            for ( size_t j = 0; j < info.conn[i].edges.size(); j ++ ) info.conn[i].edges[j].Flip();
             reverse( info.conn[i].verts.begin(), info.conn[i].verts.end() );
-            for ( int j = 0; j < info.conn[i].verts.size(); j ++ ) info.conn[i].verts[j] = std::make_pair(info.conn[i].verts[j].second, info.conn[i].verts[j].first);
+            for ( size_t j = 0; j < info.conn[i].verts.size(); j ++ ) info.conn[i].verts[j] = std::make_pair(info.conn[i].verts[j].second, info.conn[i].verts[j].first);
         }
     }
     //triangulation of Ccomponent
     for ( int i = 0; i < info.nCComponent(); i ++ ) {
         std::vector< vcg::Point3<CMeshO::ScalarType> > points;  //coords vector
         std::vector< int > vertices;          //vertices vector
-        for ( int j = 0; j < info.conn[i].edges.size(); j ++ )  {
+        for ( size_t j = 0; j < info.conn[i].edges.size(); j ++ )  {
             points.push_back( info.conn[i].edges[j].P0() );
             vertices.push_back( info.conn[i].verts[j].first );
         }
@@ -394,9 +394,9 @@ void FilterZippering::handleBorder( aux_info &info,                             
         while ( indices.size() == 0 && ++iters < MAX_LOOP ) {
             vcg::glu_tesselator::tesselate( outlines, indices );    //glu tessellator
             if ( indices.size() == 0 )
-                for ( int k = 0; k < outlines[0].size(); k ++ ) outlines[0][k] = outlines[0][k] * 10.0; //glu tessellator doesn't work properly for close points, so we scale coords in order to obtain a triangulation, if needed
+                for ( size_t k = 0; k < outlines[0].size(); k ++ ) outlines[0][k] = outlines[0][k] * 10.0; //glu tessellator doesn't work properly for close points, so we scale coords in order to obtain a triangulation, if needed
         }
-        for ( int k = 0; k < indices.size(); k ++ )  pointers.push_back( vertices[indices[k]] );    //save indices, in order to create new faces
+        for ( size_t k = 0; k < indices.size(); k ++ )  pointers.push_back( vertices[indices[k]] );    //save indices, in order to create new faces
     }
 }
 
@@ -417,7 +417,7 @@ polyline FilterZippering::cutComponent( polyline comp,                          
     int startedge = 0, endedge = 0; float min_dist_s = vcg::SquaredDistance<CMeshO::ScalarType>( comp.edges[0], startpoint ), min_dist_e = vcg::SquaredDistance<CMeshO::ScalarType>( comp.edges[0], endpoint );
     bool v_start = false, v_end = false;
     // search where startpoint and endpoint lie
-    for ( int i = 0; i < comp.edges.size(); i ++ ) {
+    for ( size_t i = 0; i < comp.edges.size(); i ++ ) {
 		if ( !v_start && vcg::SquaredDistance<CMeshO::ScalarType>( comp.edges[i], startpoint ) <= min_dist_s ) { startedge = i; min_dist_s = vcg::SquaredDistance<CMeshO::ScalarType>( comp.edges[i], startpoint ); }
         if ( !v_end && vcg::SquaredDistance<CMeshO::ScalarType>( comp.edges[i], endpoint ) <= min_dist_e ) { endedge = i; min_dist_e = vcg::SquaredDistance<CMeshO::ScalarType>( comp.edges[i], endpoint ); }
         if ( comp.edges[i].P1() == startpoint ) { startedge = i; v_start = true; }  //lies on a vertex
@@ -513,17 +513,17 @@ int FilterZippering::searchComponent(			aux_info &info,								//Auxiliar info
 	for ( int i = 0; i < info.nCComponent(); i ++ ) {
 		//for each ccon search for edges nearest to P0 and P1
 		float distP0 = 200000*eps; float distP1 = 200000*eps;
-		for ( int j = 0; j < info.conn[i].edges.size(); j ++ ) {
+    for ( size_t j = 0; j < info.conn[i].edges.size(); j ++ ) {
 			if ( vcg::SquaredDistance<float>( info.conn[i].edges[j], P0 ) < distP0 ) distP0 = vcg::SquaredDistance<float>( info.conn[i].edges[j], P0 );
 			if ( vcg::SquaredDistance<float>( info.conn[i].edges[j], P1 ) < distP1 ) distP1 = vcg::SquaredDistance<float>( info.conn[i].edges[j], P1 );
 		}
 		if ( distP0 + distP1 < distanceC ) { distanceC = distP0 + distP1; nearestC = i; }
 	}
 
-	for ( int i = 0; i < info.nTComponent(); i ++ ) {
+  for ( size_t i = 0; i < info.nTComponent(); i ++ ) {
 		//for each trash search for edges nearest to P0 and P1
 		float distP0 = 200000*eps; float distP1 = 200000*eps;
-		for ( int j = 0; j < info.trash[i].edges.size(); j ++ ) {
+    for ( size_t j = 0; j < info.trash[i].edges.size(); j ++ ) {
 			if ( vcg::SquaredDistance<float>( info.trash[i].edges[j], P0 ) < distP0 ) distP0 = vcg::SquaredDistance<float>( info.trash[i].edges[j], P0 );
 			if ( vcg::SquaredDistance<float>( info.trash[i].edges[j], P1 ) < distP1 ) distP1 = vcg::SquaredDistance<float>( info.trash[i].edges[j], P1 );
 		}
@@ -597,7 +597,7 @@ bool FilterZippering::findIntersection(  CMeshO::FacePointer currentF,				//face
  * - MeshRefinement: faces where patch vertices lie are re-triangulated
  * Based on Zippered Polygon Meshes from Range Images, by G.Turk, M.Levoy, Siggraph 1994
  */
-bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterZippering::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
 { if ( md.size() == 1 )   {
         Log(GLLogStream::FILTER,"Please add a second mesh");
         return false;
@@ -634,8 +634,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	//update bounding box
     vcg::tri::UpdateBounding<CMeshO>::Box( a->cm ); eps = a->cm.bbox.Diag() / 1000000;
 
-	for ( int i = 0; i < a->cm.face.size(); i ++ ) a->cm.face[i].Q() = 0.0;
-	for ( int i = 0; i < b->cm.face.size(); i ++ ) b->cm.face[i].Q() = 1.0;
+  for ( size_t i = 0; i < a->cm.face.size(); i ++ ) a->cm.face[i].Q() = 0.0;
+  for ( size_t i = 0; i < b->cm.face.size(); i ++ ) b->cm.face[i].Q() = 1.0;
 
 #ifdef PREERODE
 	/* Pre-Erosion step (F.Ganovelli improvement)
@@ -759,14 +759,15 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	start = clock();
 	grid_a.Set( a->cm.face.begin(), a->cm.face.end() );  //Grid on A
 	grid_b.Set( b->cm.face.begin(), b->cm.face.end() );  //Grid on B
-	bool changed; vcg::face::Pos<CMeshO::FaceType> p; int c_faces = 0;
+  //bool changed;
+  vcg::face::Pos<CMeshO::FaceType> p; int c_faces = 0;
 	std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality > faces_pqueue;
 	remove_faces.clear();
 	
 	if (par.getBool("FaceQuality")) {
 		Log(GLLogStream::FILTER, "Using Face Quality...");
 		//insert in the PQueue faces from A border
-		for ( int i = 0; i < ccons_a.size(); i ++ ) { 
+    for ( size_t i = 0; i < ccons_a.size(); i ++ ) {
 			vcg::face::Pos<CMeshO::FaceType> p = ccons_a[i].p;
 			do {
 				if ( !p.F()->IsD() && checkRedundancy( p.F(), b, grid_b, epsilon ) ) 
@@ -775,7 +776,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 			} while ( p.F() != ccons_a[i].p.F() );
 		}
 		//insert in the PQueue faces from B border
-		for ( int i = 0; i < ccons_b.size(); i ++ ) { 
+    for ( size_t i = 0; i < ccons_b.size(); i ++ ) {
 			vcg::face::Pos<CMeshO::FaceType> p = ccons_b[i].p;
 			do {
 				if ( !p.F()->IsD() && checkRedundancy( p.F(), a, grid_a, epsilon ) )  
@@ -823,7 +824,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	} 
 	else {	//do not use face quality
 		Log(GLLogStream::FILTER, "Using Standard predicate...");	
-		for ( int i = 0; i < ccons_a.size(); i ++ ) { 
+    for ( size_t i = 0; i < ccons_a.size(); i ++ ) {
 			vcg::face::Pos<CMeshO::FaceType> p = ccons_a[i].p;
 			if ( p.F()->IsD() ) continue;
 			do {
@@ -832,7 +833,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 			} while ( p.F() != ccons_a[i].p.F() );
 		}
 
-		for ( int i = 0; i < ccons_b.size(); i ++ ) { 
+    for ( size_t i = 0; i < ccons_b.size(); i ++ ) {
 			vcg::face::Pos<CMeshO::FaceType> p = ccons_b[i].p;
 			if ( p.F()->IsD() ) continue;
 			do {
@@ -921,11 +922,11 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	std::vector<std::pair<int,int> > b_pos;						//pos container
 	
 	//store pos information for each border of B
-	for ( int i = 0; i < ccons_b.size(); i ++ )  
+  for ( size_t i = 0; i < ccons_b.size(); i ++ )
 		b_pos.push_back( std::make_pair( vcg::tri::Index(b->cm, ccons_b[i].p.F()), ccons_b[i].p.E() ) );
 	
 	//use previously stored information in order to explore the whole border
-	for ( int i = 0; i < b_pos.size(); i ++ ) {
+  for ( size_t i = 0; i < b_pos.size(); i ++ ) {
 		vcg::face::Pos<CMeshO::FaceType> p; 
 		p.Set( &(b->cm.face[b_pos[i].first]), b_pos[i].second, b->cm.face[b_pos[i].first].V(b_pos[i].second) );
 		CMeshO::FacePointer start = p.F(); 
@@ -981,7 +982,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex( a->cm );
 	vcg::tri::Clean<CMeshO>::RemoveDuplicateVertex( a->cm );
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector( a->cm ); 
-	int limit = a->cm.face.size();	//save number of faces of a
+  size_t limit = a->cm.face.size();	//save number of faces of a
 	//before append, remove deleted faces from mesh B 
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector( b->cm ); 
 	vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex( b->cm );
@@ -1013,11 +1014,11 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	std::map<CMeshO::FacePointer, aux_info> map_info;
 	aux_info dummy;			//dummy info
 	std::pair<std::map<CMeshO::FacePointer, aux_info>::iterator,bool> ret_val; //return value of insert
-	for ( int i = 0; i < a->cm.face.size(); i ++) visited[i] = false;	//no face previously visited
+  for ( size_t i = 0; i < a->cm.face.size(); i ++) visited[i] = false;	//no face previously visited
     std::vector< CMeshO::FacePointer > tbt_faces;   //To Be Triangulated
     std::vector< CMeshO::FacePointer > tbr_faces;   //To Be Removed
     std::vector< int > verts;
-	for ( int c = 0; c < ccons.size(); c ++ ) {
+  for ( size_t c = 0; c < ccons.size(); c ++ ) {
 		if ( vcg::tri::Index( a->cm, ccons[c].p.F() ) < limit ) continue;
         if ( visited[ccons[c].p.F()] || ccons[c].p.F()->IsD() ) continue; 
 		vcg::face::Pos<CMeshO::FaceType> p = ccons[c].p; p.FlipV();//CCW order
@@ -1387,7 +1388,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
         } while ( p.F() != ccons[c].p.F() );
     }//end for
 
-    for ( int i = 0; i < tbr_faces.size(); i++) {
+    for ( size_t i = 0; i < tbr_faces.size(); i++) {
         if (!tbr_faces[i]->IsD()) vcg::tri::Allocator<CMeshO>::DeleteFace(a->cm, *tbr_faces[i]);
     }
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
@@ -1400,8 +1401,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
      * vertices and edges
      */
 	std::sort( tbt_faces.begin(), tbt_faces.end() ); std::vector<CMeshO::FacePointer>::iterator itr = std::unique( tbt_faces.begin(), tbt_faces.end() ); tbt_faces.resize(itr - tbt_faces.begin() );
-    std::vector< CMeshO::CoordType > coords; int patch_verts = verts.size();
-	for ( int i = 0; i < tbt_faces.size(); i ++ ) {
+    std::vector< CMeshO::CoordType > coords; size_t patch_verts = verts.size();
+  for ( size_t i = 0; i < tbt_faces.size(); i ++ ) {
 		if ( !tbt_faces[i]->IsD() ) {
             handleBorder( map_info[tbt_faces[i]], tbt_faces[i]->N(), coords, verts );
             vcg::tri::Allocator<CMeshO>::DeleteFace(a->cm, *tbt_faces[i]);
@@ -1413,7 +1414,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	// Add new faces
     int n_faces = a->cm.face.size(); int t_faces = 0;
 	CMeshO::FaceIterator fn = vcg::tri::Allocator<CMeshO>::AddFaces( a->cm, verts.size()/3 );
-    for ( int k = 0; k < verts.size(); k += 3 ) { 
+    for ( size_t k = 0; k < verts.size(); k += 3 ) {
 		CMeshO::VertexPointer v0 = &(a->cm.vert[verts[k]]);
 		CMeshO::VertexPointer v1 = &(a->cm.vert[verts[k+1]]);
 		CMeshO::VertexPointer v2 = &(a->cm.vert[verts[k+2]]);
