@@ -65,10 +65,6 @@ Initial Commit
 
 #include <list>
 #include <utility>
-#include <QFont>
-
-class QGLWidget;
-class GLArea;
 
 class GLLogStream 
 {
@@ -83,7 +79,6 @@ public:
 	
 	virtual ~GLLogStream () {}
   void print(QStringList &list);		// Fills a QStringList with the log entries 
-  void glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font);
   void Save(int Level, const char *filename);
   void Clear() {S.clear();}
 	void Logf(int Level, const char * f, ... );

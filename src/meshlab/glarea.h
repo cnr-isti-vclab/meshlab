@@ -83,7 +83,7 @@ public:
  
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
-	GLLogStream log;
+  GLLogStream *log;
 	FilterScript filterHistory;
     GLAreaSetting glas;
 	QSize curSiz;

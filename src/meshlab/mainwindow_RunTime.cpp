@@ -270,7 +270,7 @@ void MainWindow::updateMenus()
 		showLayerDlgAct->setChecked(layerDialog->isVisible());
 		//if(GLA()->layerDialog->isVisible())
 		layerDialog->updateTable();
-		layerDialog->updateLog(GLA()->log);
+    layerDialog->updateLog(*GLA()->log);
 	}
 	else
 	{
@@ -381,7 +381,7 @@ void MainWindow::runFilterScript()
 
     int req=iFilter->getRequirements(action);
     GLA()->mm()->updateDataMask(req);
-    iFilter->setLog(&(GLA()->log));
+    iFilter->setLog(GLA()->log);
 		
 		MeshDocument *meshDocument=GLA()->meshDoc;
 		RichParameterSet &parameterSet = (*ii).second;
@@ -436,7 +436,7 @@ void MainWindow::runFilterScript()
 			GLA()->resetTrackBall();
 		/* to be changed */
 
-    GLA()->log.Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
+    GLA()->log->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
 }
 
@@ -461,7 +461,7 @@ void MainWindow::startFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-    iFilter->setLog(&(GLA()->log));
+    iFilter->setLog(GLA()->log);
 	if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
 
   // In order to avoid that a filter changes something assumed by the current editing tool,
@@ -517,7 +517,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
 
   qb->show();
-  iFilter->setLog(&(GLA()->log));
+  iFilter->setLog(GLA()->log);
 
 	// Ask for filter requirements (eg a filter can need topology, border flags etc)
   // and statisfy them
@@ -546,7 +546,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 	if(ret)
 	{
-		GLA()->log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
+    GLA()->log->Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
 		GLA()->setWindowModified(true);
 		GLA()->setLastAppliedFilter(action);
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
@@ -658,18 +658,18 @@ void MainWindow::applyRenderMode()
 
 	if(action->text() == tr("None"))
 	{
-		GLA()->log.Logf(GLLogStream::SYSTEM,"No Shader");
+    GLA()->log->Logf(GLLogStream::SYSTEM,"No Shader");
 		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
 	} else {
 		if(iRenderTemp->isSupported())
 		{
 			GLA()->setRenderer(iRenderTemp,action);
-			GLA()->log.Logf(GLLogStream::SYSTEM,"%s",qPrintable(action->text()));	// Prints out action name
+      GLA()->log->Logf(GLLogStream::SYSTEM,"%s",qPrintable(action->text()));	// Prints out action name
 		}
 		else
 		{
 			GLA()->setRenderer(0,0); //vertex and fragment programs not supported
-			GLA()->log.Logf(GLLogStream::WARNING,"Shader not supported!");
+      GLA()->log->Logf(GLLogStream::WARNING,"Shader not supported!");
 		}
 	}
 }
@@ -687,7 +687,7 @@ void MainWindow::applyDecorateMode()
 	{
 		if(p->text()==action->text()){
 			GLA()->iDecoratorsList.remove(p);
-			GLA()->log.Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+      GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
 			found=true;
 		}
 	}
@@ -698,9 +698,9 @@ void MainWindow::applyDecorateMode()
 		bool ret = iDecorateTemp->StartDecorate(action,*GLA()->mm(), &currentGlobalParams, GLA());
 		if(ret) {
 				GLA()->iDecoratorsList.push_back(action);
-				GLA()->log.Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
+        GLA()->log->Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
 				}
-				else GLA()->log.Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+        else GLA()->log->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
 		
 	}
 	GLA()->update();
@@ -904,10 +904,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						gla=new GLArea(mvcont, &currentGlobalParams); 		
 						mvcont->addView(gla, Qt::Horizontal);
 						newGla =true;
-						pCurrentIOPlugin->setLog(&(gla->log));
+            pCurrentIOPlugin->setLog(gla->log);
 					}
 				else
-					pCurrentIOPlugin->setLog(&(GLA()->log));
+          pCurrentIOPlugin->setLog(GLA()->log);
 				
 				qb->show();
 				RichParameterSet prePar;
@@ -974,7 +974,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					{
 									mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
                                     int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-                                    if(degNum) GLA()->log.Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
+                                    if(degNum) GLA()->log->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
 									mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
 									vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
 									vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
@@ -1096,7 +1096,7 @@ bool MainWindow::saveAs(QString fileName)
 			return false;
 		}
 		//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-		pCurrentIOPlugin->setLog(&(GLA()->log));
+    pCurrentIOPlugin->setLog(GLA()->log);
 
 		int capability=0,defaultBits=0;
 		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
@@ -1120,7 +1120,7 @@ bool MainWindow::saveAs(QString fileName)
 		QTime tt; tt.start();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
 		qb->reset();
-		GLA()->log.Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
+    GLA()->log->Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
 
 		qApp->restoreOverrideCursor();
         //GLA()->mm()->fileName = fileName.toStdString();

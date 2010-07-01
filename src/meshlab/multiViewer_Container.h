@@ -28,6 +28,7 @@
 #include <QSplitter>
 
 #include "../common/meshmodel.h"
+#include "../common/GLLogStream.h"
 
 
 // Class list
@@ -56,7 +57,10 @@ public:
 	void update(int id);
 
 	MeshDocument meshDoc;
-	int currentId;
+  int currentId;
+
+  GLLogStream Log;
+  GLLogStream *LogPtr() {return &Log;}
 
 signals:
     void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow

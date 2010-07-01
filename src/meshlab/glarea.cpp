@@ -36,6 +36,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 : Viewer(mvcont)
 {
     this->updateCustomSettingValues(*current);
+  log=mvcont->LogPtr();
 	animMode=AnimNone;
 	iRenderer=0; //Shader support
 	iEdit=0;
@@ -170,8 +171,8 @@ void GLArea::pasteTile()
         .arg(ss.basename)
         .arg(ss.counter++,2,10,QChar('0'));
 			bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
-			if (ret) log.Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
-					else log.Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
+      if (ret) log->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
+          else log->Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
 
 			takeSnapTile=false;
 			snapBuffer=QImage();
@@ -362,7 +363,7 @@ void GLArea::paintGL()
 
   int error = glGetError();
 	if(error) {
-		log.Logf(GLLogStream::WARNING,"There are gl errors");
+    log->Logf(GLLogStream::WARNING,"There are gl errors");
 	}
 }
 
@@ -573,7 +574,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 		//iEdit->EndEdit(*(meshDoc->mm()), this);
 		endEdit();
 	else
-		log.Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
+    log->Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
 }
 
 
@@ -790,8 +791,8 @@ void GLArea::initTexture()
                 while(bestW>MaxTextureSize) bestW /=2;
                 while(bestH>MaxTextureSize) bestH /=2;
 
-                log.Log(GLLogStream::SYSTEM,"Loading textures");
-                log.Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
+                log->Log(GLLogStream::SYSTEM,"Loading textures");
+                log->Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
                 imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
                 imgGL=convertToGLFormat(imgScaled);
                 mp->glw.TMId.push_back(0);

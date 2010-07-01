@@ -80,24 +80,3 @@ void GLLogStream::Save(int /*Level*/, const char * filename )
 	for(li=S.begin();li!=S.end();++li)
         fprintf(fp,"%s",qPrintable((*li).second));
 }
-
-
-void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font)
-{
-	if( nlines > (int)S.size() ) nlines = S.size();
-	QList<pair <int,QString> > ::iterator li;
-	li=S.begin();
-
-	advance(li,S.size()-nlines); 
-
-	if(li==S.end())
-		li=S.begin();
-
-	int StartLine =  qgl->height() - (nlines * vSpacing+5);
-
-	for(;li!=S.end();++li)
-	{
-		if(Level == -1 || (*li).first == Level)
-			qgl->renderText(20,StartLine+=vSpacing,(*li).second,font);
-	}
-}
