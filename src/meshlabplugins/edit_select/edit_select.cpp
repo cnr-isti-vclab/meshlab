@@ -186,7 +186,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
       switch(composingSelMode)
       {
         case SMSub :  // Subtract mode : The faces in the rect must be de-selected
-            for(vpi=LastSelVert.begin();vpi!=NewSelVert.end();++vpi)
+            for(vpi=LastSelVert.begin();vpi!=LastSelVert.end();++vpi)
                 (*vpi)->SetS();
             for(vpi=NewSelVert.begin();vpi!=NewSelVert.end();++vpi)
                 (*vpi)->ClearS();
