@@ -330,9 +330,8 @@ void AddVert(CMeshO::VertexType &p)
 				if(dist == dist_upper_bound) return ;																				
 
 				Point3f interp;
-				bool ret = InterpolationParameters(*nearestF,(*nearestF).cN(),closestPt, interp[0], interp[1], interp[2]);
-        //assert(ret);
-				interp[2]=1.0-interp[1]-interp[0];
+        InterpolationParameters(*nearestF,(*nearestF).cN(),closestPt, interp[0], interp[1], interp[2]);
+        interp[2]=1.0-interp[1]-interp[0];
 
 				if(coordFlag) p.P()=closestPt;
 				if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
