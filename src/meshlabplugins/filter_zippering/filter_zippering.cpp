@@ -630,9 +630,8 @@ bool FilterZippering::applyFilter(QAction */*filter*/, MeshDocument &md, RichPar
 	//Search for face on patch border
   vector< tri::Hole<CMeshO>::Info > ccons, ccons_a, ccons_b; //info (will contain info aboud borders of A and B)
   eps = a->cm.bbox.Diag() / 1000000;
-
-  for ( size_t i = 0; i < a->cm.face.size(); i ++ ) a->cm.face[i].Q() = 0.0;
-  for ( size_t i = 0; i < b->cm.face.size(); i ++ ) b->cm.face[i].Q() = 1.0;
+  tri::UpdateQuality<CMeshO>::FaceConstant(a->cm,0);
+  tri::UpdateQuality<CMeshO>::FaceConstant(b->cm,0);
 
 #ifdef PREERODE
 	/* Pre-Erosion step (F.Ganovelli improvement)
