@@ -32,23 +32,13 @@
 #include "meshcolorize.h"
 
 
-  class Frange
-  {
-  public:
-    Frange(){}
-    Frange(std::pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
-    Frange(float _min,float _max):minV(_min),maxV(_max){}
-
-    float minV;
-    float maxV;
-  };
-
 using namespace std;
 using namespace vcg;
 
 ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     typeList << 
     CP_CLAMP_QUALITY <<
+    CP_SATURATE_QUALITY <<
     CP_MAP_VQUALITY_INTO_COLOR <<
     CP_MAP_FQUALITY_INTO_COLOR <<
     CP_DISCRETE_CURVATURE <<
@@ -67,14 +57,15 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 
 QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
   switch(c){
-  case CP_CLAMP_QUALITY:             return QString("Clamp vertex quality");
+  case CP_CLAMP_QUALITY:             return QString("Clamp Vertex Quality");
+  case CP_SATURATE_QUALITY:          return QString("Saturate Vertex Quality");
   case CP_MAP_VQUALITY_INTO_COLOR:   return QString("Colorize by vertex Quality");
   case CP_MAP_FQUALITY_INTO_COLOR:   return QString("Colorize by face Quality");
   case CP_DISCRETE_CURVATURE:        return QString("Discrete Curvatures");
   case CP_TRIANGLE_QUALITY:          return QString("Per Face Quality according to Triangle shape and aspect ratio");
   case CP_COLOR_NON_TOPO_COHERENT:   return QString("Color edges topologically non coherent");
   case CP_VERTEX_SMOOTH:             return QString("Smooth: Laplacian Vertex Color");
-  case CP_FACE_SMOOTH:               return QString("Smooth: Laplacian  Face Color");
+  case CP_FACE_SMOOTH:               return QString("Smooth: Laplacian Face Color");
   case CP_VERTEX_TO_FACE:            return QString("Transfer Color: Vertex to Face");
   case CP_FACE_TO_VERTEX:            return QString("Transfer Color: Face to Vertex");
   case CP_TEXTURE_TO_VERTEX:         return QString("Transfer Color: Texture to Vertex");
@@ -86,6 +77,8 @@ QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
 QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const {
   switch(filterId){
   case CP_CLAMP_QUALITY:             return QString("Clamp vertex quality values to a given range according to specific values or to percentiles");
+  case CP_SATURATE_QUALITY:          return QString("Saturate vertex quality, so that for each vertex the gradient of the quality is lower than the given threshold value (in absolute value)\n"
+                                                    "The saturation is done in a conservative way (quality is always decreased and never increased)");
   case CP_MAP_VQUALITY_INTO_COLOR :  return QString("Color vertices depending on their quality field (manually equalized).");
   case CP_MAP_FQUALITY_INTO_COLOR :  return QString("Color faces depending on their quality field (manually equalized).");
   case CP_DISCRETE_CURVATURE :       return QString("Colorize according to various discrete curvature computed as described in:<br>"
@@ -111,6 +104,7 @@ int ExtraMeshColorizePlugin::getRequirements(QAction *action){
   switch(ID(action)){
   case CP_DISCRETE_CURVATURE:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV;
   case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
+  case CP_SATURATE_QUALITY:         return MeshModel::MM_VERTFACETOPO;
   case CP_RANDOM_FACE:              return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
   case CP_CLAMP_QUALITY:            return 0; // TODO: split clamp on vertex & faces and add requirements
   case CP_MAP_VQUALITY_INTO_COLOR:  return MeshModel::MM_VERTCOLOR;
@@ -152,6 +146,12 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
                                         "Absolute curvature is defined as |H|+|K| and RMS curvature as sqrt(4* H^2 - 2K) as explained in <br><i>Improved curvature estimation"
                                         "for watershed segmentation of 3-dimensional meshes </i> by S. Pulla, A. Razdan, G. Farin. ")));
       break;
+  case CP_SATURATE_QUALITY:
+      par.addParam(new RichFloat("gradientThr",1,"Gradient Threshold","The maximum value admitted for the quality gradient (in absolute valu)"));
+      par.addParam(new RichBool("updateColor",false,"Update ColorMap","if true the color ramp is computed again"));
+
+      break;
+
   case CP_CLAMP_QUALITY:
   case CP_MAP_VQUALITY_INTO_COLOR:
       minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
@@ -173,6 +173,17 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
 bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb){
  MeshModel &m=*(md.mm());
  switch(ID(filter)) {
+  case CP_SATURATE_QUALITY:{
+     tri::UpdateQuality<CMeshO>::VertexSaturate(m.cm, par.getFloat("gradientThr"));
+     if(par.getBool("updateColor"))
+     {
+       Histogramf H;
+       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+       tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
+     }
+     Log("Saturated ");
+   }
+break;
   case CP_CLAMP_QUALITY:
   case CP_MAP_VQUALITY_INTO_COLOR:{
       float RangeMin = par.getFloat("minVal");	
@@ -335,6 +346,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
 
 MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
   switch(ID(a)){
+  case   CP_SATURATE_QUALITY:
   case   CP_CLAMP_QUALITY:
     return MeshFilterInterface::Quality;
 
@@ -368,6 +380,7 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const{
   case CP_DISCRETE_CURVATURE:
   case CP_COLOR_NON_TOPO_COHERENT:
     return MeshModel::MM_FACENUMBER;
+  case CP_SATURATE_QUALITY:
   case CP_CLAMP_QUALITY:
   case CP_MAP_VQUALITY_INTO_COLOR:
     return MeshModel::MM_VERTQUALITY;
@@ -404,7 +417,8 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const{
   case CP_DISCRETE_CURVATURE:
     return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTNUMBER;
   case CP_CLAMP_QUALITY:
-    return MeshModel::MM_VERTQUALITY;
+  case CP_SATURATE_QUALITY:
+    return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
   default: assert(0);
      return MeshModel::MM_NONE;
 	}
