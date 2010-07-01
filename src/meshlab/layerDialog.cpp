@@ -134,8 +134,8 @@ void LayerDialog::updateLog(GLLogStream &log)
 
 	pair<int,QString> logElem;
 	QString preWarn    = "<font face=\"courier\" size=3 color=\"red\"> Warning: " ;
-	QString preSystem  = "<font face=\"courier\" size=2 color=\"grey\"> System:  " ;
-	QString preFilter  = "<font face=\"courier\" size=2 color=\"black\"> Filter:  " ;
+  QString preSystem  = "<font face=\"courier\" size=2 color=\"grey\">" ;
+  QString preFilter  = "<font face=\"courier\" size=2 color=\"black\">" ;
 
 	QString post   = "</font>";
 
