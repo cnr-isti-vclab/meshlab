@@ -155,6 +155,11 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 					int genus = tri::Clean<CMeshO>::MeshGenus(m, holeNum, connectedComponentsNum, edgeNum);
 					Log("Genus is %i",genus);
 				}
+        else
+        {
+          Log("Mesh has a undefined number of holes (non 2-manifold mesh)");
+          Log("Genus is undefined (non 2-manifold mesh)");
+      }
 			}
 		break;
 		/************************************************************/ 
