@@ -380,6 +380,8 @@ bool PickPointsDialog::drawNormalAsPin()
 
 void PickPointsDialog::addPoint(vcg::Point3f &point, QString &name, bool present)
 {
+	//bool result = GLPickTri<CMeshO>::PickNearestFace(currentMousePosition.x(),gla->height()-currentMousePosition.y(),
+	//	mm.cm, face);
 	CMeshO::FaceType *face = 0;
 	
 	//qDebug() << "present: " << present;
@@ -736,6 +738,7 @@ PickedPoints * PickPointsDialog::getPickedPoints()
 }
 
 void PickPointsDialog::loadPoints(QString filename){
+	vcg::tri::UpdateFlags<CMeshO>::FaceProjection(meshModel->cm);
 	//clear the points tree and template in case it was loaded
 	clearTemplate();
 		
