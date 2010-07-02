@@ -114,6 +114,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
     gla->update();
     prev=cur;
     cur=event->pos();
+	isDragging = false;
   }
 
   void EditSelectPlugin::DrawXORRect(GLArea * gla, bool doubleDraw)
