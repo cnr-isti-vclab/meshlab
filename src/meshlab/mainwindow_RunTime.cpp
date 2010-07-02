@@ -608,6 +608,7 @@ void MainWindow::suspendEditMode()
 
 	GLA()->suspendEditToggle();
 	updateMenus();
+	GLA()->update();
 }
 void MainWindow::applyEditMode()
 {
