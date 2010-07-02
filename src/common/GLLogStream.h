@@ -77,8 +77,9 @@ public:
 		DEBUG = 3
 	};
 	
-	virtual ~GLLogStream () {}
-  void print(QStringList &list);		// Fills a QStringList with the log entries 
+   GLLogStream ();
+   ~GLLogStream (){};
+  void print(QStringList &list);		// Fills a QStringList with the log entries
   void Save(int Level, const char *filename);
   void Clear() {S.clear();}
 	void Logf(int Level, const char * f, ... );
@@ -88,8 +89,16 @@ public:
         qDebug("LOG: %i %s",Level,buf);
 	}
 
+  void SetBookmark();
+  void ClearBookmark();
+  void BackToBookmark();
+
 //private:
   QList<std::pair<int,QString> > S;
+
+private:
+  int bookmark; /// this field is used to place a bookmark for restoring the log. Useful for previeweing
+
 };
 
 #endif //GLLOGSTREAM_H

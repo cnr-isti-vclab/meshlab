@@ -60,7 +60,10 @@ Fixed starting position
 #include "GLLogStream.h"
 
 using namespace std;
-
+GLLogStream::GLLogStream()
+{
+  ClearBookmark();
+}
 
 void GLLogStream::Logf(int Level, const char * f, ... )
 {
@@ -79,4 +82,21 @@ void GLLogStream::Save(int /*Level*/, const char * filename )
 	QList<pair <int,QString> > ::iterator li;
 	for(li=S.begin();li!=S.end();++li)
         fprintf(fp,"%s",qPrintable((*li).second));
+}
+
+void GLLogStream::ClearBookmark()
+{
+  bookmark = -1;
+}
+
+void GLLogStream::SetBookmark()
+{
+  bookmark=S.size();
+}
+
+void GLLogStream::BackToBookmark()
+{
+  if(bookmark<0) return;
+  while(S.size() > size_t(bookmark) )
+    S.removeLast();
 }

@@ -461,8 +461,10 @@ void MainWindow::startFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-    iFilter->setLog(GLA()->log);
+  iFilter->setLog(GLA()->log);
+
 	if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
+  GLA()->log->SetBookmark();
 
   // In order to avoid that a filter changes something assumed by the current editing tool,
 	// before actually starting the filter we close the current editing tool (if any).
@@ -528,9 +530,13 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
   qApp->restoreOverrideCursor();
 
 	// (3) save the current filter and its parameters in the history
-	if(!isPreview) 
+  if(!isPreview)
+  {
 		GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
-
+    GLA()->log->ClearBookmark();
+  }
+  else
+    GLA()->log->BackToBookmark();
   // (4) Apply the Filter
 	bool ret;
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
