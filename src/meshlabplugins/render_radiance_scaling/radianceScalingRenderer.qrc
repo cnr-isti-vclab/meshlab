@@ -1,0 +1,10 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/RadianceScalingRenderer">
+    <file>shaders/01_buffer.vs</file>
+    <file>shaders/01_buffer.fs</file>
+    <file>shaders/02_rs.vs</file>
+    <file>shaders/02_rs.fs</file>
+    <file>litSpheres/ls01.png</file>
+    <file>litSpheres/ls02.png</file>
+</qresource>
+</RCC>
