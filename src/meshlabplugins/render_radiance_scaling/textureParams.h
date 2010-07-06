@@ -24,7 +24,6 @@
 #define TEXTURE_PARAMS_H
 
 #include <GL/glew.h>
-#include <GL/gl.h>
 
 class TextureParams {
  public:

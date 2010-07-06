@@ -25,7 +25,6 @@
 #define TEXTURE_FORMAT_H
 
 #include <GL/glew.h>
-#include <GL/gl.h>
 
 class TextureFormat {
  public:
