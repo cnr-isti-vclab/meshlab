@@ -861,7 +861,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	filters.front().append(" *.aln)");
 	QStringList fileNameList;
 	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"), lastUsedDirectory.path(), filters.join("\n"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"), lastUsedDirectory.path(), filters.join(";;"));
 	else fileNameList.push_back(fileName);
 
 	if (fileNameList.isEmpty())	return false;
