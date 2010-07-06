@@ -20,8 +20,8 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef __MAULTIVIEWER_CONTAINER_H__
-#define __MAULTIVIEWER_CONTAINER_H__
+#ifndef __MULTIVIEWER_CONTAINER_H__
+#define __MULTIVIEWER_CONTAINER_H__
 
 #include <QWidget>
 #include <QVector>
@@ -35,8 +35,34 @@
 
 class RichParameterSet;
 class Viewer;
+class MultiViewer_Container;
 
-class MultiViewer_Container : public QSplitter
+class Splitter : public QSplitter
+{
+	Q_OBJECT	
+
+public:
+	Splitter ( QWidget * parent = 0 );
+	Splitter(Qt::Orientation orientation, QWidget *parent = 0);
+
+	MultiViewer_Container *getRootContainer();
+
+protected:
+	QSplitterHandle *createHandle();
+};
+
+class SplitterHandle : public QSplitterHandle
+{
+	Q_OBJECT
+
+public:
+	SplitterHandle(Qt::Orientation orientation, QSplitter *parent);
+
+protected:
+	void mousePressEvent ( QMouseEvent * e ); 
+};
+
+class MultiViewer_Container : public Splitter
 {
 	Q_OBJECT
 
@@ -56,6 +82,9 @@ public:
 	void updateAll();
 	void update(int id);
 
+	Viewer* getViewer(int id);
+	int getViewerByPicking(QPoint);
+
 	MeshDocument meshDoc;
   int currentId;
 
@@ -74,4 +103,4 @@ private:
 	QVector<Viewer *> viewerList; /// widgets for the OpenGL contexts and images
 };
 
-#endif // __MAULTIVIEWER_CONTAINER_H__
+#endif // __MULTIVIEWER_CONTAINER_H__
