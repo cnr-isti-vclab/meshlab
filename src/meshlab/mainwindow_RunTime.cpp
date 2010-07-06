@@ -287,7 +287,7 @@ void MainWindow::setSplit(QAction *qa)
 		GLArea *glwClone=new GLArea(mvc, &currentGlobalParams);	
 		if(qa->text() == tr("&Horizontally"))	
 			mvc->addView(glwClone, Qt::Vertical);
-		else
+		else if(qa->text() == tr("&Vertically"))
 			mvc->addView(glwClone, Qt::Horizontal);
 
 		updateMenus();
@@ -305,11 +305,151 @@ void MainWindow::setUnsplit()
 	if(mvc) 
 	{
 		assert(mvc->viewerCounter() >1);
-
+		
 		mvc->removeView(mvc->currentView()->getId());
 
 		updateMenus();
 	}
+}
+
+//Update the split/unsplit menu that appears right clicking on a splitter's handle 
+void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplitter *origin){
+		MultiViewer_Container *mvc =  currentDocContainer();
+		int epsilon =10;
+		splitMenu->clear();
+		unSplitMenu->clear();
+		//the viewer to split/unsplit is chosen through picking
+
+		//Vertical handle allows to split horizontally
+		if(orientation == Qt::Vertical)
+		{
+			splitUpAct->setData(point);
+			splitDownAct->setData(point);
+
+			//check if the viewer on the top is splittable according to its size
+			int pickingId = mvc->getViewerByPicking(QPoint(point.x(), point.y()-epsilon));
+			if(pickingId>=0)
+				splitUpAct->setEnabled(mvc->getViewer(pickingId)->size().width()/2 > mvc->getViewer(pickingId)->minimumSizeHint().width());
+
+			//the viewer on top can be closed only if the splitter over the handle that orginated the event has one child 
+			bool unSplittabilityUp = true;
+			Splitter * upSplitter = qobject_cast<Splitter *>(origin->widget(0));
+			if(upSplitter)
+				unSplittabilityUp = !(upSplitter->count()>1);
+			unsplitUpAct->setEnabled(unSplittabilityUp);
+			
+			//check if the viewer below is splittable according to its size
+			pickingId = mvc->getViewerByPicking(QPoint(point.x(), point.y()+epsilon));
+			if(pickingId>=0)
+				splitDownAct->setEnabled(mvc->getViewer(pickingId)->size().width()/2 > mvc->getViewer(pickingId)->minimumSizeHint().width());
+
+			//the viewer below can be closed only if the splitter ounder the handle that orginated the event has one child 
+			bool unSplittabilityDown = true;
+			Splitter * downSplitter = qobject_cast<Splitter *>(origin->widget(1));
+			if(downSplitter)
+				unSplittabilityDown = !(downSplitter->count()>1);
+			unsplitDownAct->setEnabled(unSplittabilityDown);
+
+			splitMenu->addAction(splitUpAct);
+			splitMenu->addAction(splitDownAct);
+
+			unsplitUpAct->setData(point);
+			unsplitDownAct->setData(point);
+
+			unSplitMenu->addAction(unsplitUpAct);
+			unSplitMenu->addAction(unsplitDownAct);
+		}
+		//Horizontal handle allows to split vertically
+		else if (orientation == Qt::Horizontal)
+		{
+			splitRightAct->setData(point);
+			splitLeftAct->setData(point);
+
+			//check if the viewer on the right is splittable according to its size
+			int pickingId =mvc->getViewerByPicking(QPoint(point.x()+epsilon, point.y()));
+			if(pickingId>=0)
+				splitRightAct->setEnabled(mvc->getViewer(pickingId)->size().height()/2 > mvc->getViewer(pickingId)->minimumSizeHint().height());
+			
+			//the viewer on the rigth can be closed only if the splitter on the right the handle that orginated the event has one child 
+			bool unSplittabilityRight = true;
+			Splitter * rightSplitter = qobject_cast<Splitter *>(origin->widget(1));
+			if(rightSplitter)
+				unSplittabilityRight = !(rightSplitter->count()>1);
+			unsplitRightAct->setEnabled(unSplittabilityRight);
+
+			//check if the viewer on the left is splittable according to its size
+			pickingId =mvc->getViewerByPicking(QPoint(point.x()-epsilon, point.y()));
+			if(pickingId>=0)
+				splitLeftAct->setEnabled(mvc->getViewer(pickingId)->size().height()/2 > mvc->getViewer(pickingId)->minimumSizeHint().height());
+			
+			//the viewer on the left can be closed only if the splitter on the left of the handle that orginated the event has one child 		
+			bool unSplittabilityLeft = true;
+			Splitter * leftSplitter = qobject_cast<Splitter *>(origin->widget(0));
+			if(leftSplitter)
+				unSplittabilityLeft = !(leftSplitter->count()>1);
+			unsplitLeftAct->setEnabled(unSplittabilityLeft);
+
+			splitMenu->addAction(splitRightAct);
+			splitMenu->addAction(splitLeftAct);
+
+			unsplitRightAct->setData(point);
+			unsplitLeftAct->setData(point);
+
+			unSplitMenu->addAction(unsplitRightAct);
+			unSplitMenu->addAction(unsplitLeftAct);
+		}
+
+		handleMenu->popup(point);	
+}
+
+
+void MainWindow::splitFromHandle(QAction *qa )
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	QPoint point = qa->data().toPoint();
+	int epsilon =10;
+
+	if(qa->text() == tr("&Right"))
+		point.setX(point.x()+ epsilon);
+	else if(qa->text() == tr("&Left"))
+		point.setX(point.x()- epsilon);
+	else if(qa->text() == tr("&Up"))
+		point.setY(point.y()- epsilon);
+	else if(qa->text() == tr("&Down"))
+		point.setY(point.y()+ epsilon);
+	
+	int newCurrent = mvc->getViewerByPicking(point);
+	mvc->updateCurrent(newCurrent);
+
+	QAction *act;
+	if(qa->text() == tr("&Right")||qa->text() == tr("&Left"))
+		act= new QAction(tr("&Horizontally"), this);
+	else if(qa->text() == tr("&Up")||qa->text() == tr("&Down"))
+		act= new QAction(tr("&Vertically"), this);
+
+	setSplit(act);
+}
+
+void MainWindow::unsplitFromHandle(QAction * qa)
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	
+	QPoint point = qa->data().toPoint();
+	int epsilon =10;
+
+	if(qa->text() == tr("&Right"))
+		point.setX(point.x()+ epsilon);
+	else if(qa->text() == tr("&Left"))
+		point.setX(point.x()- epsilon);
+	else if(qa->text() == tr("&Up"))
+		point.setY(point.y()- epsilon);
+	else if(qa->text() == tr("&Down"))
+		point.setY(point.y()+ epsilon);
+	
+	int newCurrent = mvc->getViewerByPicking(point);
+	mvc->updateCurrent(newCurrent);
+
+	setUnsplit();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
