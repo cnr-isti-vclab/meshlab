@@ -38,6 +38,7 @@ SUBDIRS       = common \
 #			meshlabplugins/render_splat_pyramid \
 			meshlabplugins/render_splatting \
 			meshlabplugins/render_gdp \
+			meshlabplugins/render_radiance_scaling \
 				meshlabplugins/meshdecorate \
 				meshlabplugins/edit_select \
 				meshlabplugins/edit_pickpoints \
