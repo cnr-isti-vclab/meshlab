@@ -312,6 +312,24 @@ void MainWindow::createActions()
 
 	checkUpdatesAct = new QAction(tr("Check for updates"), this);
 	connect(checkUpdatesAct, SIGNAL(triggered()), this, SLOT(checkForUpdates()));
+
+	///////////////Action Menu Split/Unsplit from handle////////////////////////////////////////////////////////
+	splitGroupAct = new QActionGroup(this);
+	unsplitGroupAct = new QActionGroup(this);	
+
+	splitUpAct = new QAction(tr("&Up"),splitGroupAct);
+	splitDownAct = new QAction(tr("&Down"),splitGroupAct);
+	unsplitUpAct = new QAction(tr("&Up"),unsplitGroupAct);
+	unsplitDownAct = new QAction(tr("&Down"),unsplitGroupAct);
+	splitRightAct = new QAction(tr("&Right"),splitGroupAct);
+	splitLeftAct = new QAction(tr("&Left"),splitGroupAct);		
+
+	unsplitRightAct = new QAction(tr("&Right"),unsplitGroupAct);
+	unsplitLeftAct = new QAction(tr("&Left"),unsplitGroupAct);
+
+	connect(splitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(splitFromHandle(QAction *)));
+
+	connect(unsplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(unsplitFromHandle(QAction *)));
 }
 
 void MainWindow::createToolBars()
@@ -483,6 +501,11 @@ void MainWindow::createMenus()
 	fillEditMenu();
 	fillRenderMenu();
 	fillDecorateMenu();
+
+	//////////////////// Menu Split/Unsplit from handle
+	handleMenu = new QMenu(this);
+	splitMenu = handleMenu->addMenu(tr("&Split"));
+	unSplitMenu = handleMenu->addMenu("&Close");
 }
 
 void MainWindow::fillFilterMenu(){
