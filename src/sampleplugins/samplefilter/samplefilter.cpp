@@ -115,7 +115,7 @@ bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 	}
 	
 	// Log function dump textual info in the lower part of the MeshLab screen. 
-	Log(GLLogStream::FILTER,"Successfully displaced %i vertices",m.cm.vn);
+	Log("Successfully displaced %i vertices",m.cm.vn);
 	
 	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
 	if(par.getBool("UpdateNormals"))	

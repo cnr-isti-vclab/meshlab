@@ -761,7 +761,7 @@ bool FilterZippering::applyFilter(QAction */*filter*/, MeshDocument &md, RichPar
 	remove_faces.clear();
 	
 	if (par.getBool("FaceQuality")) {
-		Log(GLLogStream::FILTER, "Using Face Quality...");
+		Log( "Using Face Quality...");
 		//insert in the PQueue faces from A border
     for ( size_t i = 0; i < ccons_a.size(); i ++ ) {
       face::Pos<CMeshO::FaceType> p = ccons_a[i].p;
@@ -819,7 +819,7 @@ bool FilterZippering::applyFilter(QAction */*filter*/, MeshDocument &md, RichPar
 		}
 	} 
 	else {	//do not use face quality
-		Log(GLLogStream::FILTER, "Using Standard predicate...");	
+		Log( "Using Standard predicate...");	
     for ( size_t i = 0; i < ccons_a.size(); i ++ ) {
       face::Pos<CMeshO::FaceType> p = ccons_a[i].p;
 			if ( p.F()->IsD() ) continue;
@@ -1447,7 +1447,7 @@ bool FilterZippering::applyFilter(QAction */*filter*/, MeshDocument &md, RichPar
   tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(a->cm);
 
 	Log(GLLogStream::DEBUG, "**********************" );
-    Log(GLLogStream::FILTER, "End - Remove %d faces from patch - Created %d new faces - Timing T1 %d T2 %d T3 %d", c_faces, t_faces, t1-start, t2-t1, t3-t2);
+    Log( "End - Remove %d faces from patch - Created %d new faces - Timing T1 %d T2 %d T3 %d", c_faces, t_faces, t1-start, t2-t1, t3-t2);
 
     return true;
 }

@@ -132,7 +132,7 @@ bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 			secondMesh->clearDataMask(MeshModel::MM_VERTMARK);
 
 			// Log function dump textual info in the lower part of the MeshLab screen. 
-			Log(GLLogStream::FILTER,(res)?" Automatic Rough Alignment Done":"Automatic Rough Alignment Failed");
+			Log((res)?" Automatic Rough Alignment Done":"Automatic Rough Alignment Failed");
 				delete fpcs;
 		} break;
 		case FP_BEST_ROTATION :

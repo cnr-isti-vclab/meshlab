@@ -496,8 +496,8 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 				}
 				assert(face == faceNo);
 				assert(it == buckets[buckSize-1].end());
-				Log(GLLogStream::FILTER, "Biggest triangle's catheti are %.2f px long", (cache[0].P(0)-cache[0].P(2)).Norm() * textDim);
-				Log(GLLogStream::FILTER, "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
+				Log( "Biggest triangle's catheti are %.2f px long", (cache[0].P(0)-cache[0].P(2)).Norm() * textDim);
+				Log( "Smallest triangle's catheti are %.2f px long", (cache[cache.size()-1].P(0)-cache[cache.size()-1].P(2)).Norm() * textDim);
 				
 			}
 			else //BASIC
@@ -562,7 +562,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 						}
 					}
 				}
-				Log(GLLogStream::FILTER, "Triangles' catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
+				Log( "Triangles' catheti are %.2f px long", (1.0/sideDim-border-bordersq2)*textDim);
 			}
 		}
 		break;
@@ -610,7 +610,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 				
 				// Save texture
 				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
-				Log(GLLogStream::FILTER, "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+				Log( "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
 				assert(textFile.exists());
 			}
 			
@@ -683,7 +683,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			// Save texture
 			cb(90, "Saving texture ...");
 			CheckError(!img.save(filePath), "Texture file cannot be saved");
-			Log(GLLogStream::FILTER, "Texture \"%s\" Created", filePath.toStdString().c_str());
+			Log( "Texture \"%s\" Created", filePath.toStdString().c_str());
 			assert(QFile(filePath).exists());
 			
 			// Assign texture
@@ -800,7 +800,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			// Save texture
 			cb(90, "Saving texture ...");
 			CheckError(!img.save(filePath), "Texture file cannot be saved");
-			Log(GLLogStream::FILTER, "Texture \"%s\" Created", filePath.toStdString().c_str());
+			Log( "Texture \"%s\" Created", filePath.toStdString().c_str());
 			assert(QFile(filePath).exists());
 			
 			// Assign texture

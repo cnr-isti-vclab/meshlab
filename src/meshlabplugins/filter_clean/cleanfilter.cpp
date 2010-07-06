@@ -233,19 +233,19 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
       // the main processing
       pivot.BuildMesh(cb);
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-			Log(GLLogStream::FILTER,"Reconstructed surface. Added %i faces",m.cm.fn-startingFn); 		
+			Log("Reconstructed surface. Added %i faces",m.cm.fn-startingFn); 		
 	  } break;
     case FP_REMOVE_ISOLATED_DIAMETER:
 	  {
       float minCC= par.getAbsPerc("MinComponentDiag");		
       std::pair<int,int> delInfo= tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,minCC);
-			Log(GLLogStream::FILTER,"Removed %2 connected components out of %1", delInfo.second, delInfo.first); 		
+			Log("Removed %2 connected components out of %1", delInfo.second, delInfo.first); 		
     }break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
 	  {
       float minCC= par.getInt("MinComponentSize");		
       std::pair<int,int> delInfo=tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize(m.cm,minCC);
-			Log(GLLogStream::FILTER,"Removed %i connected components out of %i", delInfo.second, delInfo.first); 		
+			Log("Removed %i connected components out of %i", delInfo.second, delInfo.first); 		
 	  }break;
     case FP_REMOVE_WRT_Q:
 	  {
@@ -269,7 +269,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						 }
 								 
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-			Log(GLLogStream::FILTER,"Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
+			Log("Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
 
 	  }break;
     case FP_ALIGN_WITH_PICKED_POINTS:
@@ -322,7 +322,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
         bool repeat = par.getBool("Repeat");
 
         int total = tri::Clean<CMeshO>::RemoveTVertexByCollapse(m.cm, threshold, repeat);
-        Log(GLLogStream::FILTER,"Successfully removed %d t-vertices", total);
+        Log("Successfully removed %d t-vertices", total);
     }
         break;
     case FP_REMOVE_TVERTEX_FLIP :
@@ -330,20 +330,20 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
         float threshold = par.getFloat("Threshold");
         bool repeat = par.getBool("Repeat");
         int total = tri::Clean<CMeshO>::RemoveTVertexByFlip(m.cm, threshold, repeat);
-        Log(GLLogStream::FILTER,"Successfully removed %d t-vertices", total);
+        Log("Successfully removed %d t-vertices", total);
     }
     break;
    case FP_MERGE_CLOSE_VERTEX :
     {
         float threshold = par.getAbsPerc("Threshold");
         int total = tri::Clean<CMeshO>::MergeCloseVertex(m.cm, threshold);
-        Log(GLLogStream::FILTER,"Successfully merged %d vertices", total);
+        Log("Successfully merged %d vertices", total);
     }
     break;
   case FP_REMOVE_DUPLICATE_FACE :
    {
        int total = tri::Clean<CMeshO>::RemoveDuplicateFace(m.cm);
-       Log(GLLogStream::FILTER,"Successfully deleted %d duplicated faces", total);
+       Log("Successfully deleted %d duplicated faces", total);
    }
    break;
   case FP_REMOVE_FOLD_FACE:
@@ -352,7 +352,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
      tri::UpdateColor<CMeshO>::FaceConstant(m.cm, Color4b::White);
        int total = tri::Clean<CMeshO>::RemoveFaceFoldByFlip(m.cm);
        tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);
-       Log(GLLogStream::FILTER,"Successfully flipped %d folded faces", total);
+       Log("Successfully flipped %d folded faces", total);
    }
    break;
 

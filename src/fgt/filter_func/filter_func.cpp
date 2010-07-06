@@ -368,7 +368,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 						tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
 		
 				// if succeded log stream contains number of vertices and time elapsed
-				Log(GLLogStream::FILTER, "selected %d vertices in %.2f sec.", numvert, (clock() - start) / (float) CLOCKS_PER_SEC);
+				Log( "selected %d vertices in %.2f sec.", numvert, (clock() - start) / (float) CLOCKS_PER_SEC);
 					
 				return true;
 			}
@@ -413,7 +413,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				}
 
 				// if succeded log stream contains number of vertices and time elapsed
-				Log(GLLogStream::FILTER, "selected %d faces in %.2f sec.", numface, (clock() - start) / (float) CLOCKS_PER_SEC);
+				Log( "selected %d faces in %.2f sec.", numface, (clock() - start) / (float) CLOCKS_PER_SEC);
 					
 				return true;
 			}
@@ -486,7 +486,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				}
 
 				// if succeded log stream contains number of vertices processed and time elapsed
-				Log(GLLogStream::FILTER, "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
+				Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 				return true;
 			}
@@ -528,7 +528,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				if(par.getBool("map")) mapVertexQualityIntoColor(m);
 
 				// if succeded log stream contains number of vertices and time elapsed
-				Log(GLLogStream::FILTER, "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
+				Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 				return true;
 			}
@@ -588,7 +588,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				}
 
 				// if succeded log stream contains number of vertices processed and time elapsed
-				Log(GLLogStream::FILTER, "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+				Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 				return true;
 
@@ -632,7 +632,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				if(par.getBool("map")) mapFaceQualityIntoColor(m);
 
 				// if succeded log stream contains number of faces processed and time elapsed
-				Log(GLLogStream::FILTER, "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+				Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 				return true;
 			}
@@ -689,7 +689,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				vhandlers.push_back(h);
 
 				// if succeded log stream contains number of vertices processed and time elapsed
-				Log(GLLogStream::FILTER, "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
+				Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 				return true;
 			}
@@ -743,7 +743,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 //				fhandlers.push_back(h);
 
 				// if succeded log stream contains number of vertices processed and time elapsed
-				Log(GLLogStream::FILTER, "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+				Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 				return true;
 			}

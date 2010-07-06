@@ -147,7 +147,7 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 			}
 			
 			if( deleteLayer )	{
-				Log(GLLogStream::FILTER, "Deleted %d merged layers", toBeDeletedList.size());
+				Log( "Deleted %d merged layers", toBeDeletedList.size());
 				foreach(MeshModel *mmp,toBeDeletedList) {
 						md.delMesh(mmp); 
 					}
@@ -156,7 +156,7 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 			if( mergeVertices )	
 			{
 				int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
-				Log(GLLogStream::FILTER, "Removed %d duplicated vertices", delvert);
+				Log( "Removed %d duplicated vertices", delvert);
 			}
 			
 			tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(destMesh->cm);
@@ -164,7 +164,7 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 
 
 			// Log function dump textual info in the lower part of the MeshLab screen. 
-			Log(GLLogStream::FILTER,"Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
+			Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
 				
 		} break;
 		default: assert (0);

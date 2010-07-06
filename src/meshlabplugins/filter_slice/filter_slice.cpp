@@ -185,7 +185,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 		pr.sizeCm=Point2f(sizeCm[0],sizeCm[2]);
 	else
 		pr.sizeCm=Point2f(sizeCm[0],sizeCm[1]);
-	Log(GLLogStream::FILTER,"sizecm %fx%f",pr.sizeCm[0],pr.sizeCm[1]);
+	Log("sizecm %fx%f",pr.sizeCm[0],pr.sizeCm[1]);
 
 	pr.lineWidthPt=200;
 	pr.scale=2/maxdim;
@@ -219,7 +219,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
       if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base->cm)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
 			{
-				Log(GLLogStream::FILTER,"Mesh is not two manifold, cannot apply filter");
+				Log("Mesh is not two manifold, cannot apply filter");
 				return false;
 			}
 
@@ -337,7 +337,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 			{
         if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base->cm)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
 				{
-					Log(GLLogStream::FILTER,"Mesh is not two manifold, cannot apply filter");
+					Log("Mesh is not two manifold, cannot apply filter");
 					return false;
 				}
 

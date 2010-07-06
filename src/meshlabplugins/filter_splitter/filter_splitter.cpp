@@ -135,11 +135,11 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				currentMesh->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 
-				Log(GLLogStream::FILTER,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+				Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 			}
 			else								// keep original faces
 			{
-				Log(GLLogStream::FILTER,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+				Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 			}
 
 			// init new layer
@@ -159,7 +159,7 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
             MeshModel *destMesh= md.addNewMesh("duplicated"); // After Adding a mesh to a MeshDocument the new mesh is the current one
       tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm);
 
-			Log(GLLogStream::FILTER,"Duplicated current model to layer %i", md.meshList.size());
+			Log("Duplicated current model to layer %i", md.meshList.size());
 
 			// init new layer
 			tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box

@@ -255,17 +255,17 @@ break;
       int curvType = par.getEnum("CurvatureType");
 			
 			switch(curvType){ 
-          case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m.cm);        Log(GLLogStream::FILTER, "Computed Mean Curvature");      break;
-			    case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvature(m.cm);    Log(GLLogStream::FILTER, "Computed Gaussian Curvature"); break;
-          case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m.cm);         Log(GLLogStream::FILTER, "Computed RMS Curvature"); break;
-          case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m.cm);    Log(GLLogStream::FILTER, "Computed ABS Curvature"); break;
+          case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m.cm);        Log( "Computed Mean Curvature");      break;
+			    case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvature(m.cm);    Log( "Computed Gaussian Curvature"); break;
+          case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m.cm);         Log( "Computed RMS Curvature"); break;
+          case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m.cm);    Log( "Computed ABS Curvature"); break;
 					default : assert(0);
       }      
       
       Histogramf H;
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
       tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
-      Log(GLLogStream::FILTER, "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
+      Log( "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
 			m.updateDataMask(MeshModel::MM_VERTQUALITY);
 			m.updateDataMask(MeshModel::MM_VERTCOLOR);
     break;

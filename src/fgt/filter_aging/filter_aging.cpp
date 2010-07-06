@@ -405,7 +405,7 @@ void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, bool updateErosi
 void GeometryAgingPlugin::computeMeanCurvature(CMeshO &m) 
 {
 	int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m);
-	if(delvert) Log(GLLogStream::FILTER, "Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
+	if(delvert) Log( "Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
 	tri::Allocator<CMeshO>::CompactVertexVector(m);
 	tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m);
 	tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m);

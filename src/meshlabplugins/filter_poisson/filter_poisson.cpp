@@ -178,7 +178,7 @@ bool PoissonPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	
 	int ret= Execute2(pp, Pts, Nor, mesh,center,scale,cb);
 	mesh.resetIterator();
-	Log(GLLogStream::FILTER,"Successfully created a mesh of %i vert and %i faces",mesh.outOfCorePointCount()+mesh.inCorePoints.size(),mesh.triangleCount());
+	Log("Successfully created a mesh of %i vert and %i faces",mesh.outOfCorePointCount()+mesh.inCorePoints.size(),mesh.triangleCount());
 	
 	//m.cm.Clear();
 	
@@ -226,7 +226,7 @@ for (i=0; i < nr_faces; i++){
 //		mesh.triangles[i].idx[2]+=mesh.inCorePoints.size();
 //		}
 //	Build(m.cm,mesh.inCorePoints,mesh.triangles);
-	Log(GLLogStream::FILTER,"Successfully created a mesh of %i faces",pm.cm.vn);
+	Log("Successfully created a mesh of %i faces",pm.cm.vn);
 	
 	vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
   vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);

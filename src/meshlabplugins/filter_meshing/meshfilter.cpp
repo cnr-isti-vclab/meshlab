@@ -503,26 +503,26 @@ case FP_SELECT_FACES_BY_EDGE:
       {
           float threshold = par.getDynamicFloat("Threshold");
           int selFaceNum = tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
-          Log(GLLogStream::FILTER, "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
+          Log( "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
       } break;
 
 case FP_SELECT_FACES_BY_AREA:
 	  {
 		int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
-		Log(GLLogStream::FILTER, "Removed %d null faces", nullFaces);
+		Log( "Removed %d null faces", nullFaces);
 	  m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
     } break;
 
 case FP_REMOVE_UNREFERENCED_VERTEX:
 	  {
 		int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-		Log(GLLogStream::FILTER, "Removed %d unreferenced vertices",delvert);
+		Log( "Removed %d unreferenced vertices",delvert);
     } break;
 
 case FP_REMOVE_DUPLICATED_VERTEX:
 	  {
 		int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-		Log(GLLogStream::FILTER, "Removed %d duplicated vertices", delvert);
+		Log( "Removed %d duplicated vertices", delvert);
 		if (delvert != 0)
 		  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
     } break;
@@ -603,11 +603,11 @@ case FP_QUADRIC_SIMPLIFICATION:
 		if(par.getBool("AutoClean"))
 		{
 			int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
-			if(nullFaces) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d null faces", nullFaces);
+			if(nullFaces) Log( "PostSimplification Cleaning: Removed %d null faces", nullFaces);
 			int deldupvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-			if(deldupvert) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);
+			if(deldupvert) Log( "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			if(delvert) Log(GLLogStream::FILTER, "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
+			if(delvert) Log( "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 			tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
@@ -856,7 +856,7 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 
 	  if(par.getBool("Autoclean")){
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			Log(GLLogStream::FILTER, "Removed %d unreferenced vertices",delvert);
+			Log( "Removed %d unreferenced vertices",delvert);
 	  }
 
 	  switch(par.getEnum("Method")){

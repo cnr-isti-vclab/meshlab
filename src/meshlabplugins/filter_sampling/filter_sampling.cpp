@@ -676,7 +676,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
           case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
 				}
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);		
+			Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);		
 		}
 		break;
 		case FP_TEXEL_SAMPLING :  
@@ -719,7 +719,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 			else tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
+			Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
 			break;
 		case FP_STRATIFIED_SAMPLING :  
@@ -737,19 +737,19 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 			switch(samplingMethod)
 			{
 				case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), false ,par.getBool("Random"));
-									Log(GLLogStream::FILTER,"Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
+									Log("Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
 									break;			
 				case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), true ,par.getBool("Random"));
-									Log(GLLogStream::FILTER,"Dual Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
+									Log("Dual Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
 									break;			
       case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"), par.getBool("Random"));
-                Log(GLLogStream::FILTER,"Subdivision Sampling created a new mesh of %i points",md.mm()->cm.vn);
+                Log("Subdivision Sampling created a new mesh of %i points",md.mm()->cm.vn);
                 break;
       case 3 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), true);
-                Log(GLLogStream::FILTER,"Edge Sampling created a new mesh of %i points",md.mm()->cm.vn);
+                Log("Edge Sampling created a new mesh of %i points",md.mm()->cm.vn);
                 break;
       case 4 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), false);
-                Log(GLLogStream::FILTER,"Non Faux Edge Sampling created a new mesh of %i points",md.mm()->cm.vn);
+                Log("Non Faux Edge Sampling created a new mesh of %i points",md.mm()->cm.vn);
                 break;
 
 			}
@@ -778,7 +778,7 @@ case FP_CLUSTERED_SAMPLING :
 							ClusteringGrid.ExtractPointSet(mm->cm);
 							ClusteringGrid.SelectPointSet(curMM->cm);
 							tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
-							Log(GLLogStream::FILTER,"Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
+							Log("Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
 						}						
 						break;			
 				case 1 :	
@@ -789,7 +789,7 @@ case FP_CLUSTERED_SAMPLING :
 							ClusteringGrid.SelectPointSet(curMM->cm);
 							tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
 							ClusteringGrid.ExtractPointSet(mm->cm);
-							Log(GLLogStream::FILTER,"Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
+							Log("Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);			
 						}						
 						break;			
 			}
@@ -854,7 +854,7 @@ case FP_CLUSTERED_SAMPLING :
             //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
 
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log(GLLogStream::FILTER,"Sampling created a new mesh of %i points",md.mm()->cm.vn);
+			Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
 			break;
 			
@@ -992,9 +992,9 @@ case FP_CLUSTERED_SAMPLING :
 			volumeBox.Offset(volumeBox.Diag()/10.0f);
 			BestDim(volumeBox , voxelSize, volumeDim );
 			
-			Log(GLLogStream::FILTER,"Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
-			Log(GLLogStream::FILTER,"     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
-			Log(GLLogStream::FILTER,"     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
+			Log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
+			Log("     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
+			Log("     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
 			
 			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag,absDistFlag, cb);
 			tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
@@ -1002,7 +1002,7 @@ case FP_CLUSTERED_SAMPLING :
 			{
 				float mergeThr =offsetMesh->cm.bbox.Diag()/10000.0f;
 				int total = tri::Clean<CMeshO>::MergeCloseVertex(offsetMesh->cm,mergeThr);
-				Log(GLLogStream::FILTER,"Successfully merged %d vertices with a distance lower than %f", total,mergeThr);
+				Log("Successfully merged %d vertices with a distance lower than %f", total,mergeThr);
             }
 			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
 		} break;
