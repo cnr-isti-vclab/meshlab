@@ -127,6 +127,10 @@ private slots:
 	void setSplit(QAction *qa);
 	void setUnsplit();
 
+	///////////Slot PopUp Menu Handles /////////////////////
+	void splitFromHandle(QAction * qa);
+	void unsplitFromHandle(QAction * qa);
+
 	///////////Slot Menu Preferences /////////////////
 	void setCustomize();
 	///////////Slot Menu Help ////////////////////////
@@ -217,6 +221,7 @@ public:
 		else return 0;
 	}
 
+	void setHandleMenu(QPoint p, Qt::Orientation o, QSplitter *origin);
 
 	const PluginManager& pluginManager() const { return PM; }
 
@@ -271,6 +276,10 @@ private:
 	QMenu *preferencesMenu;
 	QMenu *helpMenu;
 	QMenu *splitModeMenu;
+	//////////// Split/Unsplit Menu from handle///////////
+	QMenu *handleMenu;
+	QMenu *splitMenu;
+	QMenu *unSplitMenu;
 
 	//////////// Actions Menu File ///////////////////////
 	QAction *openAct;
@@ -335,6 +344,23 @@ private:
 	QAction *onlineHelpAct;
 	QAction *onscreenHelpAct;
 	QAction *checkUpdatesAct;
+	///////////Actions Menu Split/UnSplit from Handle ////////////////////////
+
+	QActionGroup *splitGroupAct;
+	QActionGroup *unsplitGroupAct;	
+
+	QAction *splitUpAct;
+	QAction *splitDownAct;
+
+	QAction *unsplitUpAct;
+	QAction *unsplitDownAct;
+
+	QAction *splitRightAct;
+	QAction *splitLeftAct;
+
+	QAction *unsplitRightAct;
+	QAction *unsplitLeftAct;
+
 	////////////////////////////////////////////////////
 };
 
