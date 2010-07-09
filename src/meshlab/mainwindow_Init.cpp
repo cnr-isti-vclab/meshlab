@@ -271,13 +271,38 @@ void MainWindow::createActions()
 	setSplitGroupAct = new QActionGroup(this);	setSplitGroupAct->setExclusive(true);
 
 	setSplitHAct	  = new QAction(tr("&Horizontally"),setSplitGroupAct);
-
 	setSplitVAct	  = new QAction(tr("&Vertically"),setSplitGroupAct);
 
 	connect(setSplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(setSplit(QAction *)));
 
 	setUnsplitAct = new QAction(tr("&Close current view"),this);
 	connect(setUnsplitAct, SIGNAL(triggered()), this, SLOT(setUnsplit()));
+
+	linkViewersAct = new QAction (tr("Link Viewers"), this);
+	linkViewersAct->setCheckable(true);
+	connect(linkViewersAct, SIGNAL(triggered()), this, SLOT(linkViewers()));
+
+	viewFromGroupAct =  new QActionGroup(this);	viewFromGroupAct->setExclusive(true);
+
+	viewTopAct	  = new QAction(tr("Top"),viewFromGroupAct);
+	viewBottomAct	  = new QAction(tr("Bottom"),viewFromGroupAct);
+	viewLeftAct	  = new QAction(tr("Left"),viewFromGroupAct);
+	viewRightAct	  = new QAction(tr("Right"),viewFromGroupAct);
+	viewFrontAct	  = new QAction(tr("Front"),viewFromGroupAct);
+	viewBackAct	  = new QAction(tr("Back"),viewFromGroupAct);
+
+	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
+
+	viewFromFileAct = new QAction (tr("View from file"), this);
+	connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
+
+	copyShotToClipboardAct = new QAction (tr("Copy shot"), this);
+	copyShotToClipboardAct->setShortcut(QKeySequence::Copy);
+	connect(copyShotToClipboardAct, SIGNAL(triggered()), this, SLOT(copyViewToClipBoard()));
+
+	pasteShotFromClipboardAct = new QAction (tr("Paste shot"), this);
+	pasteShotFromClipboardAct->setShortcut(QKeySequence::Paste);
+	connect(pasteShotFromClipboardAct, SIGNAL(triggered()), this, SLOT(pasteViewFromClipboard()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
 	lastFilterAct = new QAction(tr("Apply filter"),this);
