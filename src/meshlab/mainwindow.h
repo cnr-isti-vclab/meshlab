@@ -126,6 +126,11 @@ private slots:
 	void updateStdDialog();
 	void setSplit(QAction *qa);
 	void setUnsplit();
+	void linkViewers();
+	void viewFrom(QAction *qa);
+	void readViewFromFile();
+	void copyViewToClipBoard();
+	void pasteViewFromClipboard();
 
 	///////////Slot PopUp Menu Handles /////////////////////
 	void splitFromHandle(QAction * qa);
@@ -276,6 +281,7 @@ private:
 	QMenu *preferencesMenu;
 	QMenu *helpMenu;
 	QMenu *splitModeMenu;
+	QMenu *viewFromMenu;
 	//////////// Split/Unsplit Menu from handle///////////
 	QMenu *handleMenu;
 	QMenu *splitMenu;
@@ -335,17 +341,7 @@ private:
 	QAction *setSplitVAct;
     QActionGroup *setSplitGroupAct;
 	QAction *setUnsplitAct;
-	///////////Actions Menu Preferences /////////////////
-	QAction *setCustomizeAct;
-	///////////Actions Menu Help ////////////////////////
-	QAction *aboutAct;
-	QAction *aboutPluginsAct;
-	QAction *submitBugAct;
-	QAction *onlineHelpAct;
-	QAction *onscreenHelpAct;
-	QAction *checkUpdatesAct;
-	///////////Actions Menu Split/UnSplit from Handle ////////////////////////
-
+	///////////Actions Menu Windows -> Split/UnSplit from Handle ////////////////////////
 	QActionGroup *splitGroupAct;
 	QActionGroup *unsplitGroupAct;	
 
@@ -360,6 +356,33 @@ private:
 
 	QAction *unsplitRightAct;
 	QAction *unsplitLeftAct;
+
+	///////////Actions Menu Windows -> View From ////////////////////////
+	QActionGroup *viewFromGroupAct;
+	QAction *viewTopAct;
+	QAction *viewBottomAct;
+	QAction *viewLeftAct;
+	QAction *viewRightAct;
+	QAction *viewFrontAct;
+	QAction *viewBackAct;
+	QAction *viewFromFileAct;
+
+	///////////Actions Menu Windows -> Link/Copy/Paste View ////////////////////////
+public:
+	QAction *linkViewersAct;
+private:
+	QAction *copyShotToClipboardAct;
+	QAction *pasteShotFromClipboardAct;
+
+	///////////Actions Menu Preferences /////////////////
+	QAction *setCustomizeAct;
+	///////////Actions Menu Help ////////////////////////
+	QAction *aboutAct;
+	QAction *aboutPluginsAct;
+	QAction *submitBugAct;
+	QAction *onlineHelpAct;
+	QAction *onscreenHelpAct;
+	QAction *checkUpdatesAct;
 
 	////////////////////////////////////////////////////
 };
