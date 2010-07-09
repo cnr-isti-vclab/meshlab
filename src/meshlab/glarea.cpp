@@ -365,6 +365,11 @@ void GLArea::paintGL()
 	if(error) {
     log->Logf(GLLogStream::WARNING,"There are gl errors");
 	}
+
+	//check if viewers are linked
+	MainWindow *window = (MainWindow*) QApplication::activeWindow();
+	if(window && window->linkViewersAct->isChecked())
+			mvc->updateTrackballInViewers();
 }
 
 void GLArea::displayInfo()
@@ -652,18 +657,20 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 {
-      if( (iEdit && !suspendedEditor) )
-    		  	iEdit->mouseMoveEvent(e,*mm(),this);
-      else {
-		    if (isDefaultTrackBall())
-			{
-			  trackball.MouseMove(e->x(),height()-e->y());
-			  setCursorTrack(trackball.current_mode);
-			}
-		    else trackball_light.MouseMove(e->x(),height()-e->y());
-        update();
-      }
+	if( (iEdit && !suspendedEditor) )
+		iEdit->mouseMoveEvent(e,*mm(),this);
+	else {
+		if (isDefaultTrackBall())
+		{
+			trackball.MouseMove(e->x(),height()-e->y());
+			setCursorTrack(trackball.current_mode);
+		}
+		else trackball_light.MouseMove(e->x(),height()-e->y());
+		update();
+	}
+
 }
+
 // When mouse is released we set the correct mouse cursor
 void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
@@ -896,6 +903,7 @@ void GLArea::setView()
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
 	float viewRatio = 1.75f;
 	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+
  if(fov==5)
    cameraDist = 1000; // small hack for orthographic projection where camera distance is rather meaningless...
 	nearPlane = cameraDist - 2.f*clipRatioNear;
@@ -1055,3 +1063,434 @@ void GLArea::updateLayerSetVisibility(int meshId, bool visibility)
 {
 	visibilityMap.insert(meshId,visibility);
 }
+
+// --------------- Methods involving shots -------------------------------------
+
+float GLArea::getCameraDistance()
+{
+	// This parameter is the one that controls:
+	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
+	float viewRatio = 1.75f;
+	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+
+	return cameraDist;
+}
+
+void GLArea::initializeShot(Shot &shot) 
+{
+	//Da vedere
+	shot.Intrinsics.PixelSizeMm[0]=0.036916077;
+    shot.Intrinsics.PixelSizeMm[1]=0.036916077;
+
+    shot.Intrinsics.DistorCenterPx[0]=width()/2;
+    shot.Intrinsics.DistorCenterPx[1]=height()/2;
+    shot.Intrinsics.CenterPx[0]=width()/2;
+    shot.Intrinsics.CenterPx[1]=height()/2;
+    shot.Intrinsics.ViewportPx[0]=width();
+    shot.Intrinsics.ViewportPx[1]=height();
+
+	double viewportYMm = shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
+	float defaultFov=60.0;
+	shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(defaultFov/2))); //27.846098mm
+
+    shot.Extrinsics.SetIdentity();
+}
+
+bool GLArea::viewFromFile() 
+{
+	Shot shot;
+	
+	QString filename = QFileDialog::getOpenFileName(this, tr("Load Project"), "./", tr("Xml Files (*.xml)"));
+	
+	QFile qf(filename);
+	QFileInfo qfInfo(filename);
+
+	if( !qf.open(QIODevice::ReadOnly ) )
+		return false;
+
+	QString project_path = qfInfo.absoluteFilePath();
+
+	QDomDocument doc("XmlDocument");    //It represents the XML document
+	if(!doc.setContent( &qf ))	
+		return false;
+
+	QString type = doc.doctype().name();
+
+	//TextAlign file project
+	if(type == "RegProjectML")
+		loadShotFromTextAlignFile(shot, doc);
+	//View State file
+	else if(type == "ViewState")
+		loadViewFromViewStateFile(shot, doc);
+
+	qDebug("End file reading");
+	qf.close();
+
+	return true;
+}
+
+void GLArea::loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc) 
+{
+	QDomElement root = doc.documentElement();
+	QDomNode node;
+
+	node = root.firstChild();
+
+	//Devices
+	while(!node.isNull()){
+		if(QString::compare(node.nodeName(),"Device")==0)
+		{
+			QString type = node.attributes().namedItem("type").nodeValue();
+			if (type== "GlImageWidget")
+			{
+				//Aligned Image
+				if(QString::compare(node.attributes().namedItem("aligned").nodeValue(),"1")==0){
+					QDomNode nodeb = node.firstChild();
+					QDomNamedNodeMap attr = nodeb.attributes();
+					vcg::Point3d tra;
+					tra[0] = attr.namedItem("SimTra").nodeValue().section(' ',0,0).toDouble();
+					tra[1] = attr.namedItem("SimTra").nodeValue().section(' ',1,1).toDouble();
+					tra[2] = attr.namedItem("SimTra").nodeValue().section(' ',2,2).toDouble();
+					shot.Extrinsics.SetTra(-tra);
+
+					vcg::Matrix44d rot;
+					QStringList values =  attr.namedItem("SimRot").nodeValue().split(" ", QString::SkipEmptyParts);
+					for(int y = 0; y < 4; y++)
+						for(int x = 0; x < 4; x++)
+							rot[y][x] = values[x + 4*y].toDouble();
+					shot.Extrinsics.SetRot(rot);
+
+					vcg::Camera<double> &cam = shot.Intrinsics;
+					cam.FocalMm = attr.namedItem("Focal").nodeValue().toDouble();
+					cam.ViewportPx.X() = attr.namedItem("Viewport").nodeValue().section(' ',0,0).toInt();
+					cam.ViewportPx.Y() = attr.namedItem("Viewport").nodeValue().section(' ',1,1).toInt();
+					cam.CenterPx[0] = attr.namedItem("Center").nodeValue().section(' ',0,0).toInt();
+					cam.CenterPx[1] = attr.namedItem("Center").nodeValue().section(' ',1,1).toInt();
+					cam.PixelSizeMm[0] = attr.namedItem("ScaleF").nodeValue().section(' ',0,0).toDouble();
+					cam.PixelSizeMm[1] = attr.namedItem("ScaleF").nodeValue().section(' ',1,1).toDouble();
+					cam.k[0] = attr.namedItem("LensDist").nodeValue().section(' ',0,0).toDouble();
+					cam.k[1] = attr.namedItem("LensDist").nodeValue().section(' ',1,1).toDouble();
+
+					// scale correction
+					float scorr = attr.namedItem("ScaleCorr").nodeValue().toDouble();
+					if(scorr != 0.0) {
+						cam.PixelSizeMm[0] *= scorr;
+						cam.PixelSizeMm[1] *= scorr;
+					}
+
+				}
+			}
+		}
+		node = node.nextSibling();
+	}
+
+	//Adjust params for Meshlab settings
+
+	//resize viewport
+	int w = shot.Intrinsics.ViewportPx[0];
+	int h = shot.Intrinsics.ViewportPx[1];
+
+	shot.Intrinsics.DistorCenterPx[0]=w/2;
+	shot.Intrinsics.DistorCenterPx[1]=h/2;
+	shot.Intrinsics.CenterPx[0]=w/2;
+	shot.Intrinsics.CenterPx[1]=h/2;
+	shot.Intrinsics.ViewportPx[0]=w;
+	shot.Intrinsics.ViewportPx[1]=h;
+
+	//Compute new scale
+	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
+	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
+
+	float cameraDist = getCameraDistance();
+
+	Matrix44f rotFrom;
+	shot.Extrinsics.Rot().ToMatrix(rotFrom);
+
+	Point3f p1 = rotFrom*(vcg::Point3f::Construct(shot.Extrinsics.Tra()));
+
+	Point3f p2 = (Point3f(0,0,cameraDist));
+
+	trackball.track.sca =abs(p2.Z()/p1.Z());
+
+	loadShot(QPair<Shot, float> (shot,trackball.track.sca));
+
+}
+
+void GLArea::loadViewFromViewStateFile(Shot &shot, QDomDocument &doc)
+{
+
+	QDomElement root = doc.documentElement();
+	QDomNode node = root.firstChild();
+
+	while(!node.isNull()){
+		if(QString::compare(node.nodeName(),"CamParam")==0)
+		{
+			QDomNamedNodeMap attr = node.attributes();
+			vcg::Point3d tra;
+			tra[0] = attr.namedItem("SimTra").nodeValue().section(' ',0,0).toDouble();
+			tra[1] = attr.namedItem("SimTra").nodeValue().section(' ',1,1).toDouble();
+			tra[2] = attr.namedItem("SimTra").nodeValue().section(' ',2,2).toDouble();
+			shot.Extrinsics.SetTra(-tra);
+
+			vcg::Matrix44d rot;
+			QStringList values =  attr.namedItem("SimRot").nodeValue().split(" ", QString::SkipEmptyParts);
+			for(int y = 0; y < 4; y++)
+				for(int x = 0; x < 4; x++)
+					rot[y][x] = values[x + 4*y].toDouble();
+			shot.Extrinsics.SetRot(rot);
+
+			vcg::Camera<double> &cam = shot.Intrinsics;
+			cam.FocalMm = attr.namedItem("Focal").nodeValue().toDouble();
+			cam.ViewportPx.X() = attr.namedItem("Viewport").nodeValue().section(' ',0,0).toInt();
+			cam.ViewportPx.Y() = attr.namedItem("Viewport").nodeValue().section(' ',1,1).toInt();
+			cam.CenterPx[0] = attr.namedItem("Center").nodeValue().section(' ',0,0).toInt();
+			cam.CenterPx[1] = attr.namedItem("Center").nodeValue().section(' ',1,1).toInt();
+			cam.PixelSizeMm[0] = attr.namedItem("ScaleF").nodeValue().section(' ',0,0).toDouble();
+			cam.PixelSizeMm[1] = attr.namedItem("ScaleF").nodeValue().section(' ',1,1).toDouble();
+			cam.k[0] = attr.namedItem("LensDist").nodeValue().section(' ',0,0).toDouble();
+			cam.k[1] = attr.namedItem("LensDist").nodeValue().section(' ',1,1).toDouble();
+
+			// scale correction
+			float scorr = attr.namedItem("ScaleCorr").nodeValue().toDouble();
+			if(scorr != 0.0) {
+				cam.PixelSizeMm[0] *= scorr;
+				cam.PixelSizeMm[1] *= scorr;
+			}
+		}
+		else if (QString::compare(node.nodeName(),"ViewSettings")==0)
+		{
+			QDomNamedNodeMap attr = node.attributes();
+			trackball.track.sca = attr.namedItem("TrackScale").nodeValue().section(' ',0,0).toFloat();
+			nearPlane = attr.namedItem("NearPlane").nodeValue().section(' ',0,0).toFloat();
+			farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();
+		}
+		else if (QString::compare(node.nodeName(),"Render")==0)
+		{
+			QDomNamedNodeMap attr = node.attributes();
+			rm.drawMode = (vcg::GLW::DrawMode) (attr.namedItem("DrawMode").nodeValue().section(' ',0,0).toInt());
+			rm.colorMode = (vcg::GLW::ColorMode) (attr.namedItem("ColorMode").nodeValue().section(' ',0,0).toInt());
+			rm.textureMode = (vcg::GLW::TextureMode) (attr.namedItem("TextureMode").nodeValue().section(' ',0,0).toInt());
+			rm.lighting = (attr.namedItem("Lighting").nodeValue().section(' ',0,0).toInt() != 0);
+			rm.backFaceCull = (attr.namedItem("BackFaceCull").nodeValue().section(' ',0,0).toInt() != 0);
+			rm.doubleSideLighting = (attr.namedItem("DoubleSideLighting").nodeValue().section(' ',0,0).toInt() != 0);
+			rm.fancyLighting = (attr.namedItem("FancyLighting").nodeValue().section(' ',0,0).toInt() != 0);
+			rm.selectedFace = (attr.namedItem("SelectedFace").nodeValue().section(' ',0,0).toInt() != 0);
+			rm.selectedVert = (attr.namedItem("SelectedVert").nodeValue().section(' ',0,0).toInt() != 0);
+		}
+		node = node.nextSibling();
+	}
+
+	loadShot(QPair<Shot, float> (shot,trackball.track.sca));
+}
+
+void GLArea::viewToClipboard()
+{
+	QClipboard *clipboard = QApplication::clipboard();
+	Shot shot = shotFromTrackball().first;
+
+	QDomDocument doc("ViewState");
+	QDomElement root = doc.createElement("project");
+	doc.appendChild( root );
+	QDomElement shotElem = doc.createElement( "CamParam" );
+
+	vcg::Point3d tra = -(shot.Extrinsics.Tra());
+	QString str = QString("%1 %2 %3 1").arg(tra[0]).arg(tra[1]).arg(tra[2]);
+	shotElem.setAttribute("SimTra", str);
+	vcg::Matrix44d rot = shot.Extrinsics.Rot();
+	str = QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16 ")
+		.arg(rot[0][0]).arg(rot[0][1])
+		.arg(rot[0][2]).arg(rot[0][3])
+		.arg(rot[1][0]).arg(rot[1][1])
+		.arg(rot[1][2]).arg(rot[1][3])
+		.arg(rot[2][0]).arg(rot[2][1])
+		.arg(rot[2][2]).arg(rot[2][3])
+		.arg(rot[3][0]).arg(rot[3][1])
+		.arg(rot[3][2]).arg(rot[3][3]);
+	shotElem.setAttribute( "SimRot", str);
+
+	vcg::Camera<double> &cam = shot.Intrinsics;
+
+	shotElem.setAttribute( "Focal", cam.FocalMm);
+
+	str = QString("%1 %2").arg(cam.k[0]).arg(cam.k[1]);
+	shotElem.setAttribute( "LensDist", str);
+
+	str = QString("%1 %2").arg(cam.PixelSizeMm[0]).arg(cam.PixelSizeMm[1]);
+	shotElem.setAttribute( "ScaleF", str);
+
+	str = QString("%1 %2").arg(cam.ViewportPx[0]).arg(cam.ViewportPx[1]);
+	shotElem.setAttribute( "Viewport", str);
+
+	str = QString("%1 %2").arg((int)(cam.DistorCenterPx[0])).arg((int)(cam.DistorCenterPx[1]));
+	shotElem.setAttribute( "Center", str);
+
+	str = QString("%1").arg((double) 1);
+	shotElem.setAttribute( "ScaleCorr", str);
+
+	root.appendChild(shotElem);
+
+	QDomElement settingsElem = doc.createElement( "ViewSettings" );
+	settingsElem.setAttribute( "TrackScale", trackball.track.sca);
+	settingsElem.setAttribute( "NearPlane", nearPlane);
+	settingsElem.setAttribute( "FarPlane", farPlane);
+	root.appendChild(settingsElem);
+
+
+	QDomElement renderElem = doc.createElement( "Render");
+	renderElem.setAttribute("DrawMode",rm.drawMode);
+	renderElem.setAttribute("ColorMode",rm.colorMode);
+	renderElem.setAttribute("TextureMode",rm.textureMode);
+	renderElem.setAttribute("Lighting",rm.lighting);
+	renderElem.setAttribute("BackFaceCull",rm.backFaceCull);
+	renderElem.setAttribute("DoubleSideLighting",rm.doubleSideLighting);
+	renderElem.setAttribute("FancyLighting",rm.fancyLighting);
+	renderElem.setAttribute("SelectedFace",rm.selectedFace);
+	renderElem.setAttribute("SelectedVert",rm.selectedVert);
+	root.appendChild(renderElem);
+
+	clipboard->setText(doc.toString()); //.remove(QChar('\n')));
+}
+
+void GLArea::viewFromClipboard()
+{
+	QClipboard *clipboard = QApplication::clipboard();
+	QString shotString = clipboard->text();
+
+	Shot shot;
+
+	QDomDocument doc("StringDoc");  
+	doc.setContent(shotString);
+
+	loadViewFromViewStateFile(shot, doc);
+}
+
+QPair<vcg::Shot<double>,float> GLArea::shotFromTrackball()
+{
+	Shot shot;
+	initializeShot(shot);
+
+	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
+	shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2)));
+
+	float cameraDist = getCameraDistance();
+
+	//add the translation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
+	//Add translation S^(-1) R^(-1)(gl)
+	//Shot doesn't introduce scaling
+	//---------------------------------------------------------------------
+	shot.Extrinsics.SetTra( shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+	
+	Shot newShot = track2ShotCPU(shot, &trackball);
+
+	////Expressing scaling as a translation along z
+	////k is the ratio between default scale and new scale
+	//double oldScale= 3.0f/meshDoc->bbox().Diag();
+	//double k= oldScale/trackball.track.sca;
+
+	////Apply this formula
+	//// R(t+p) = kR'(t'+p) forall p, R=R', k is a costant
+	//// R(t)= kR(t')
+	//// t = k*t'
+	//Point3d t1 = newShot.Extrinsics.Tra();
+	//
+	//Matrix44d rapM = Matrix44d().SetScale(k, k, k);
+	//Point3d t0 = rapM*t1;
+
+	//newShot.Extrinsics.SetTra(t0);
+
+	return QPair<Shot, float> (newShot,trackball.track.sca);
+}
+
+void GLArea::loadShot(const QPair<vcg::Shot<double>,float> &shotAndScale){
+	
+	Shot shot = shotAndScale.first;
+	
+	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
+	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
+
+	float cameraDist = getCameraDistance();
+
+	//reset trackball. The point of view must be set only by the shot
+	trackball.Reset();
+	trackball.track.sca = shotAndScale.second;
+	
+	/*Point3f point = meshDoc->bbox().Center();
+	Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));*/
+	shot2Track(shot, cameraDist,trackball);
+
+	//Expressing the translation along Z with a scale factor k
+	//Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
+
+	////k is the ratio between the distances along z of two correspondent points (before and after the traslazion) 
+	////from the point of view
+	//float k= abs(p2.Z()/p1.Z());
+
+	//float sca= trackball.track.sca/k;
+	//Point3f tra = trackball.track.tra;
+	//
+	//// Apply this formula:
+	//// SR(t+p) -v = k[S'R'(t'+p) -v] forall p, R=R', k is a costant
+	//// SR(t) -v = k[S'R(t') -v]
+	//// t' = 1/k* S'^-1St + (k-1)/k S'^-1*R^-1v
+	//Matrix44f s0 = Matrix44f().SetScale(trackball.track.sca,trackball.track.sca, trackball.track.sca);
+	//Matrix44f s1 = Matrix44f().SetScale(sca, sca, sca);
+	//Matrix44f r;
+	//trackball.track.rot.ToMatrix(r);
+	//Matrix44f rapM = Matrix44f().SetScale(1/k, 1/k, 1/k);
+	//Matrix44f rapM2 = Matrix44f().SetScale(1-1/k, 1-1/k, 1-1/k);
+	//Point3f t1 = rapM*Inverse(s1)*s0*tra + rapM2*Inverse(s1)*Inverse(r)*Point3f(0,0,cameraDist);
+
+	//trackball.track.sca =sca;
+	//trackball.track.tra =t1 /*+ tb.track.rot.Inverse().Rotate(glLookAt)*/ ;
+
+	update();
+}
+
+void GLArea::createOrthoView(QString dir)
+{
+	Shot view;
+	initializeShot(view);
+
+	fov =5;
+	double viewportYMm = view.Intrinsics.PixelSizeMm[1]*view.Intrinsics.ViewportPx[1];
+	view.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2))); //27.846098 equivalente a circa 60 gradi
+
+	trackball.Reset();
+	float newScale= 3.0f/meshDoc->bbox().Diag();
+	trackball.track.sca = newScale;
+	trackball.track.tra =  -meshDoc->bbox().Center();
+
+	vcg::Matrix44d rot;
+
+	if(dir == tr("Top"))
+		rot.SetRotateDeg(90,Point3<double>(1,0,0));
+	else if(dir == tr("Bottom"))
+		rot.SetRotateDeg(90,Point3<double>(-1,0,0));
+	else if(dir == tr("Left"))
+		rot.SetRotateDeg(90,Point3<double>(0,1,0));
+	else if(dir == tr("Right"))
+		rot.SetRotateDeg(90,Point3<double>(0,-1,0));
+	else if(dir == tr("Front"))
+		rot.SetRotateDeg(0,Point3<double>(0,1,0));
+	else if(dir == tr("Back"))
+		rot.SetRotateDeg(180,Point3<double>(0,1,0));
+
+	view.Extrinsics.SetRot(rot);
+
+	float cameraDist = getCameraDistance();
+
+	//add the translation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
+	//Add translation S^(-1) R^(-1)(gl)
+	//Shot doesn't introduce scaling
+	//---------------------------------------------------------------------
+	view.Extrinsics.SetTra( view.Extrinsics.Tra() + (Inverse(view.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+
+	Shot shot = track2ShotCPU(view, &trackball);
+	
+	QPair<Shot,float> shotAndScale = QPair<Shot,float> (shot, trackball.track.sca);
+	loadShot(shotAndScale);
+}
+
+

@@ -288,3 +288,12 @@ void MultiViewer_Container::updateAll(){
 void MultiViewer_Container::update(int id){
 	getViewer(id)->update();
 }
+
+void MultiViewer_Container::updateTrackballInViewers()
+{
+	QPair<Shot,float> shotAndScale = ((GLArea*)currentView())->shotFromTrackball();
+	foreach(Viewer* viewer, viewerList)
+		if(viewer->getId() != currentId){
+			((GLArea*) viewer)->loadShot(shotAndScale);
+		}
+}

@@ -34,6 +34,8 @@
 #include <wrap/gl/math.h>
 #include <wrap/gl/trimesh.h>
 #include <wrap/gui/trackball.h>
+#include <vcg/math/shot.h>
+#include <wrap/gl/shot.h>
 
 #include "../common/interfaces.h"
 #include "../common/filterscript.h"
@@ -69,6 +71,8 @@ class GLArea : public Viewer
 {
 	Q_OBJECT
 
+	typedef vcg::Shot<double> Shot;
+
 public:
     GLArea(MultiViewer_Container *mvcont, RichParameterSet *current);
 	~GLArea();
@@ -83,7 +87,7 @@ public:
  
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
-  GLLogStream *log;
+	GLLogStream *log;
 	FilterScript filterHistory;
     GLAreaSetting glas;
 	QSize curSiz;
@@ -302,7 +306,7 @@ private:
 	float cfps;
 	float lastTime;
 	
-  QImage snapBuffer;
+	QImage snapBuffer;
 	bool takeSnapTile;
   
 	enum AnimMode { AnimNone, AnimSpin, AnimInterp};
@@ -310,8 +314,132 @@ private:
 	int tileCol, tileRow, totalCols, totalRows;
 	void setCursorTrack(vcg::TrackMode *tm);
 
+	//-----------Shot support----------------------------
+public:
+	QPair<Shot, float > shotFromTrackball();
+	bool viewFromFile();
+	void createOrthoView(QString);
+	void viewToClipboard();
+	void viewFromClipboard();
+	void loadShot(const QPair<Shot, float> &) ;
+
+private:
+
+	float getCameraDistance();
+	void initializeShot(Shot &shot);
+	void loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc);
+	void loadViewFromViewStateFile(Shot &shot, QDomDocument &doc);
+	
+
+	/*
+	Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
+	to apply "refCamera" o "track" (via GPU).
+	*/
+	template <class T>
+	vcg::Shot<T> track2ShotGPU(vcg::Shot<T> &refCamera, vcg::Trackball *track){
+		vcg::Shot<T> view;
+
+		double _near, _far;
+		_near = 0.1;
+		_far = 100;
+
+		//get OpenGL modelview matrix after applying the trackball
+		GlShot<vcg::Shot<T> >::SetView(refCamera, _near, _far);
+		glPushMatrix();
+		track->GetView();
+		track->Apply();
+		vcg::Matrix44d model;
+		glGetv(GL_MODELVIEW_MATRIX, model);
+		glPopMatrix();
+		GlShot<vcg::Shot<T> >::UnsetView();
+
+		//get translation out of modelview
+		vcg::Point3d tra;
+		tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
+		model[0][3] = model[1][3] = model[2][3] = 0;
+
+		//get pure rotation out of modelview
+		double det = model.Determinant();
+		double idet = 1/pow(det, 1/3.0); //inverse of the determinant
+		model *= idet;
+		model[3][3] = 1;
+		view.Extrinsics.SetRot(model);
+
+		//get pure translation out of modelview
+		vcg::Matrix44d imodel = model;
+		vcg::Transpose(imodel);
+		tra = -(imodel*tra);
+		tra *= idet;
+		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
+
+		//use same current intrinsics
+		view.Intrinsics = refCamera.Intrinsics;
+
+		return view;
+	}
+
+	/*
+	Given a shot "refCamera" and a trackball "track", computes a new shot which is equivalent
+	to apply "refCamera" o "track" (via CPU).
+	*/
+	template <class T>
+	vcg::Shot<T> track2ShotCPU(vcg::Shot<T> &refCamera, vcg::Trackball *track){
+		vcg::Shot<T> view;
+
+		double _near, _far;
+		_near = 0.1;
+		_far = 100;
+
+		//get shot extrinsics matrix 
+		vcg::Matrix44f shotExtr;
+		refCamera.GetWorldToExtrinsicsMatrix().ToMatrix(shotExtr);
+
+		vcg::Matrix44f model2;
+		model2 = (shotExtr)* track->Matrix();
+		vcg::Matrix44d model;
+		model2.ToMatrix(model);
+
+		//get translation out of modelview
+		vcg::Point3d tra;
+		tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
+		model[0][3] = model[1][3] = model[2][3] = 0;
+
+		//get pure rotation out of modelview
+		double det = model.Determinant();
+		double idet = 1/pow(det, 1/3.0); //inverse of the determinant
+		model *= idet;
+		model[3][3] = 1;
+		view.Extrinsics.SetRot(model);
+
+		//get pure translation out of modelview
+		vcg::Matrix44d imodel = model;
+		vcg::Transpose(imodel);
+		tra = -(imodel*tra);
+		tra *= idet; 
+		view.Extrinsics.SetTra(vcg::Point3<T>::Construct(tra));
+
+		//use same current intrinsics
+		view.Intrinsics = refCamera.Intrinsics;
+
+		return view;
+	}
+
+	/*
+	TBD
+	*/
+	template <class T>
+	void shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
+
+		vcg::Quaterniond qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
+
+		tb.track.rot = vcg::Quaternionf::Construct(qfrom);
+		tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()));
+		tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(Point3f(0,0,cameraDist)))*(1/tb.track.sca); 
+	}
 	
 };
+
+
 
 
 #endif

@@ -66,7 +66,7 @@ class MultiViewer_Container : public Splitter
 {
 	Q_OBJECT
 
-	/*typedef vcg::Shot<double> Shot;*/
+	typedef vcg::Shot<double> Shot;
 
 public:
 	MultiViewer_Container(QWidget *parent);
@@ -84,6 +84,8 @@ public:
 
 	Viewer* getViewer(int id);
 	int getViewerByPicking(QPoint);
+
+	void updateTrackballInViewers();
 
 	MeshDocument meshDoc;
   int currentId;

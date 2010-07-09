@@ -109,14 +109,35 @@ void MainWindow::updateWindowMenu()
 
 	windowsMenu->addSeparator();
 
-	// Split/Unsplit SUBmenu
+	
 	if((mdiarea-> subWindowList().size()>0)){
+		// Split/Unsplit SUBmenu
 		splitModeMenu = windowsMenu->addMenu(tr("&Split current view"));
 
 		splitModeMenu->addAction(setSplitHAct);
 		splitModeMenu->addAction(setSplitVAct);
 
 		windowsMenu->addAction(setUnsplitAct);
+
+		// Link act
+		windowsMenu->addAction(linkViewersAct);
+
+		// View From SUBmenu
+		viewFromMenu = windowsMenu->addMenu(tr("&View from"));
+
+		viewFromMenu->addAction(viewTopAct);
+		viewFromMenu->addAction(viewBottomAct);
+		viewFromMenu->addAction(viewLeftAct);
+		viewFromMenu->addAction(viewRightAct);
+		viewFromMenu->addAction(viewFrontAct);
+		viewFromMenu->addAction(viewBackAct);
+
+		// View From File act
+		windowsMenu->addAction(viewFromFileAct);
+
+		// Copy and paste shot acts
+		windowsMenu->addAction(copyShotToClipboardAct);
+		windowsMenu->addAction(pasteShotFromClipboardAct);
 
 		MultiViewer_Container *mvc = currentDocContainer();
 		if(mvc)
@@ -126,6 +147,10 @@ void MainWindow::updateWindowMenu()
 
 			setSplitHAct->setEnabled(current->size().height()/2 > current->minimumSizeHint().height());
 			setSplitVAct->setEnabled(current->size().width()/2 > current->minimumSizeHint().width());
+
+			linkViewersAct->setEnabled(currentDocContainer()->viewerCounter()>1);
+			if(currentDocContainer()->viewerCounter()==1)
+				linkViewersAct->setChecked(false);
 
 			windowsMenu->addSeparator();
 		}
@@ -450,6 +475,38 @@ void MainWindow::unsplitFromHandle(QAction * qa)
 	mvc->updateCurrent(newCurrent);
 
 	setUnsplit();
+}
+
+void MainWindow::linkViewers()
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	mvc->updateTrackballInViewers();
+}
+
+void MainWindow::viewFrom(QAction *qa)
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	((GLArea*)mvc->currentView())->createOrthoView(qa->text());
+}
+
+void MainWindow::readViewFromFile()
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	((GLArea*)mvc->currentView())->viewFromFile();
+	updateMenus();
+}
+
+void MainWindow::copyViewToClipBoard()
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	((GLArea*)mvc->currentView())->viewToClipboard();
+}
+
+void MainWindow::pasteViewFromClipboard()
+{
+	MultiViewer_Container *mvc = currentDocContainer();
+	((GLArea*)mvc->currentView())->viewFromClipboard();
+	updateMenus();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
