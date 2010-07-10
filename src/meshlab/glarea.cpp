@@ -1210,7 +1210,7 @@ void GLArea::loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc)
 
 	Point3f p2 = (Point3f(0,0,cameraDist));
 
-	trackball.track.sca =abs(p2.Z()/p1.Z());
+  trackball.track.sca =fabs(p2.Z()/p1.Z());
 
 	loadShot(QPair<Shot, float> (shot,trackball.track.sca));
 

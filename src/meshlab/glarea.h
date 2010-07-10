@@ -434,7 +434,7 @@ private:
 
 		tb.track.rot = vcg::Quaternionf::Construct(qfrom);
 		tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()));
-		tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(Point3f(0,0,cameraDist)))*(1/tb.track.sca); 
+    tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(vcg::Point3f(0,0,cameraDist)))*(1/tb.track.sca);
 	}
 	
 };
