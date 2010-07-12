@@ -750,6 +750,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	if(ret)
 	{
     GLA()->log->Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
+    MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
+
 		GLA()->setWindowModified(true);
 		GLA()->setLastAppliedFilter(action);
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
@@ -758,6 +760,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
   else // filter has failed. show the message error.
 	{
 		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(action->text())+iFilter->errorMsg()); // text
+    MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
 	}
   // at the end for filters that change the color, or selection set the appropriate rendering mode
   if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
@@ -785,6 +788,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	    GLA()->updateTexture();
 
   qb->reset();
+
   updateMenus();
   //GLA()->update(); //now there is the container
   MultiViewer_Container* mvc = currentDocContainer();
