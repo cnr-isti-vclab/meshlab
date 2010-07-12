@@ -57,8 +57,8 @@ void SplitterHandle::mousePressEvent ( QMouseEvent * e )
 
 	if(e->button()== Qt::RightButton)
 	{
-		MainWindow *window = (MainWindow*) QApplication::activeWindow();
-		window->setHandleMenu(mapToGlobal(e->pos()), orientation(), splitter());
+		MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
+		if (window) window->setHandleMenu(mapToGlobal(e->pos()), orientation(), splitter());
 	}
 }
 
@@ -291,9 +291,13 @@ void MultiViewer_Container::update(int id){
 
 void MultiViewer_Container::updateTrackballInViewers()
 {
-	QPair<Shot,float> shotAndScale = ((GLArea*)currentView())->shotFromTrackball();
-	foreach(Viewer* viewer, viewerList)
-		if(viewer->getId() != currentId){
-			((GLArea*) viewer)->loadShot(shotAndScale);
-		}
+	GLArea* glArea = qobject_cast<GLArea*>(currentView());
+	if(glArea)
+	{
+		QPair<Shot,float> shotAndScale = glArea->shotFromTrackball();
+		foreach(Viewer* viewer, viewerList)
+			if(viewer->getId() != currentId){
+				((GLArea*) viewer)->loadShot(shotAndScale);
+			}
+	}
 }

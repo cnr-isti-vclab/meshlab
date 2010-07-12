@@ -486,26 +486,34 @@ void MainWindow::linkViewers()
 void MainWindow::viewFrom(QAction *qa)
 {
 	MultiViewer_Container *mvc = currentDocContainer();
-	((GLArea*)mvc->currentView())->createOrthoView(qa->text());
+	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
+	if(glArea)
+		glArea->createOrthoView(qa->text());
 }
 
 void MainWindow::readViewFromFile()
 {
 	MultiViewer_Container *mvc = currentDocContainer();
-	((GLArea*)mvc->currentView())->viewFromFile();
+	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
+	if(glArea)
+		glArea->viewFromFile();
 	updateMenus();
 }
 
 void MainWindow::copyViewToClipBoard()
 {
 	MultiViewer_Container *mvc = currentDocContainer();
-	((GLArea*)mvc->currentView())->viewToClipboard();
+	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
+	if(glArea)
+		glArea->viewToClipboard();
 }
 
 void MainWindow::pasteViewFromClipboard()
 {
 	MultiViewer_Container *mvc = currentDocContainer();
-	((GLArea*)mvc->currentView())->viewFromClipboard();
+	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
+	if(glArea)
+		glArea->viewFromClipboard();
 	updateMenus();
 }
 

@@ -209,7 +209,7 @@ public:
 	  MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
 	  if(!mvc) 
 		  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
-	  GLArea *glw =  (GLArea*) (mvc->currentView());
+	  GLArea *glw =  qobject_cast<GLArea*>(mvc->currentView());
 	  assert(glw);
 	  if(glw) 
 	  return glw;
