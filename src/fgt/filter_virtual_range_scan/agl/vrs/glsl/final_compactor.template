@@ -1,0 +1,29 @@
+uniform int totalElements;
+uniform int survivors;
+uniform int currentBests;
+uniform int targetSide;
+uniform int survivorsSide;
+uniform int currentBestsSide;
+
+void main()
+{
+    ivec2 coords = ivec2( gl_FragCoord.xy );
+    int myPos = coords.y * targetSide + coords.x;
+    int x = 0, y = 0;
+    int fromSurvivors = 0;
+
+    if( myPos < survivors )
+    {   // copy the survivor
+        y = myPos / survivorsSide;
+        x = myPos - y * survivorsSide;
+        fromSurvivors = 1;
+    }
+    else
+    {   // append the sample of current view
+        myPos = myPos - survivors;
+        y = myPos / currentBestsSide;
+        x = myPos - y * currentBestsSide;
+    }
+
+    ivec2 texelCoords = ivec2( x, y );
+    vec4 val = vec4( 0.0, 0.0, 0.0, 0.0 );

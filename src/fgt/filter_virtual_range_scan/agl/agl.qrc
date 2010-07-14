@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="compactor.template">vrs/glsl/compactor.template</file>
+        <file alias="copier.vert">vrs/glsl/copier.vert</file>
+        <file alias="copier.frag">vrs/glsl/copier.frag</file>
+        <file alias="dead_masker.vert">vrs/glsl/dead_masker.vert</file>
+        <file alias="dead_masker.frag">vrs/glsl/dead_masker.frag</file>
+        <file alias="dead_masker_negation.vert">vrs/glsl/dead_masker_negation.vert</file>
+        <file alias="dead_masker_negation.frag">vrs/glsl/dead_masker_negation.frag</file>
+        <file alias="depth_fixer.vert">vrs/glsl/depth_fixer.vert</file>
+        <file alias="depth_fixer.frag">vrs/glsl/depth_fixer.frag</file>
+        <file alias="discriminator.vert">vrs/glsl/discriminator.vert</file>
+        <file alias="discriminator.frag">vrs/glsl/discriminator.frag</file>
+        <file alias="final_compactor.template">vrs/glsl/final_compactor.template</file>
+        <file alias="killer.vert">vrs/glsl/killer.vert</file>
+        <file alias="killer.frag">vrs/glsl/killer.frag</file>
+        <file alias="level_builder.vert">vrs/glsl/level_builder.vert</file>
+        <file alias="level_builder.frag">vrs/glsl/level_builder.frag</file>
+        <file alias="mask_updater.vert">vrs/glsl/mask_updater.vert</file>
+        <file alias="mask_updater.frag">vrs/glsl/mask_updater.frag</file>
+        <file alias="detectors/depth_range_detector.vert">vrs/glsl/detectors/depth_range_detector.vert</file>
+        <file alias="detectors/depth_range_detector.frag">vrs/glsl/detectors/depth_range_detector.frag</file>
+        <file alias="detectors/detector.vert">vrs/glsl/detectors/detector.vert</file>
+        <file alias="detectors/detector.frag">vrs/glsl/detectors/detector.frag</file>
+    </qresource>
+</RCC>
