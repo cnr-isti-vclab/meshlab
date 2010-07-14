@@ -1197,7 +1197,9 @@ void GLArea::loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc)
 	shot.Intrinsics.ViewportPx[0]=w;
 	shot.Intrinsics.ViewportPx[1]=h;
 
-	//Compute new scale
+	// The shot loaded from TextAlign doesn't have a scale. Trackball needs it.
+	// The scale factor is computed as the ratio between cameraDistance and the z coordinate of the translation 
+	// introduced by the shot.
 	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
 	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
 
@@ -1210,12 +1212,15 @@ void GLArea::loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc)
 
 	Point3f p2 = (Point3f(0,0,cameraDist));
 
-  trackball.track.sca =fabs(p2.Z()/p1.Z());
+	trackball.track.sca =fabs(p2.Z()/p1.Z());
 
 	loadShot(QPair<Shot, float> (shot,trackball.track.sca));
 
 }
 
+/* 
+ViewState file is an xml file format created by Meshlab with the action "copyToClipboard"
+*/
 void GLArea::loadViewFromViewStateFile(Shot &shot, QDomDocument &doc)
 {
 
@@ -1374,7 +1379,7 @@ QPair<vcg::Shot<double>,float> GLArea::shotFromTrackball()
 
 	float cameraDist = getCameraDistance();
 
-	//add the translation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+	//add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have te same view---------------
 	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
 	//Add translation S^(-1) R^(-1)(gl)
 	//Shot doesn't introduce scaling
@@ -1480,7 +1485,7 @@ void GLArea::createOrthoView(QString dir)
 
 	float cameraDist = getCameraDistance();
 
-	//add the translation introduced by gluLookAt() (0,0,cameraDist)---------------------------------------
+	//add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have te same view---------------
 	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
 	//Add translation S^(-1) R^(-1)(gl)
 	//Shot doesn't introduce scaling

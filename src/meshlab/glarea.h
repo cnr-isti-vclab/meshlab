@@ -425,7 +425,9 @@ private:
 	}
 
 	/*
-	TBD
+	Given a shot "from" and a trackball "track", updates "track" with "from" extrinsics.
+	A traslation involving cameraDistance is included. This is necessary to compensate a trasformation that OpenGL performs
+	at the end of the graphic pipeline.
 	*/
 	template <class T>
 	void shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
@@ -434,7 +436,7 @@ private:
 
 		tb.track.rot = vcg::Quaternionf::Construct(qfrom);
 		tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()));
-    tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(vcg::Point3f(0,0,cameraDist)))*(1/tb.track.sca);
+		tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(vcg::Point3f(0,0,cameraDist)))*(1/tb.track.sca);
 	}
 	
 };
