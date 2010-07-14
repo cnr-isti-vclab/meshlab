@@ -45,16 +45,16 @@ using namespace std;
 //#define REFINE_PATCH_ONLY 1
 #define MAX_LOOP 150
 using namespace vcg;
+
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
 FilterZippering::FilterZippering() 
 { 
-        typeList << FP_ZIPPERING;
+        typeList <<  FP_REDUNDANCY <<  FP_ZIPPERING;
   
-  foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+	foreach(FilterIDType tt , types()) actionList << new QAction(filterName(tt), this);
 }
 
 // ST() must return the very short string describing each filtering action 
@@ -62,7 +62,8 @@ FilterZippering::FilterZippering()
  QString FilterZippering::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-                case FP_ZIPPERING :  return QString("Zippering");
+		case FP_REDUNDANCY :  return QString("Select Redundant Faces");
+        case FP_ZIPPERING :  return QString("Zippering");
 		default : assert(0); 
 	}
 }
@@ -72,7 +73,8 @@ FilterZippering::FilterZippering()
  QString FilterZippering::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-                case FP_ZIPPERING :  return QString("Merge two meshes, a mesh with holes and a mesh-patch, into a single one; hole is filled using patch's triangles. Based on <b>Zippered Polygon Meshes from Range Images,</b> by G.Turk, M.Levoy, Siggraph 1994");
+		case FP_REDUNDANCY:  return QString("Remove redundant faces from one mesh or from both of them, starting from borders.");
+		case FP_ZIPPERING :  return QString("Merge two triangle meshes into a single one. This method doesn't provide check on redundancy. Based on <b>Controlledand Adaptive Mesh Zippering,</b> by S.Marras, F.Ganovelli, P.Cignoni.");
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -82,7 +84,8 @@ FilterZippering::FilterZippering()
 {
   switch(ID(action))
   {
-    case FP_ZIPPERING:  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK | MeshModel::MM_VERTCOLOR;
+    case FP_REDUNDANCY:  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK | MeshModel::MM_VERTCOLOR;
+    case FP_ZIPPERING :  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK | MeshModel::MM_VERTCOLOR;
     default: assert(0);
   }
   return 0;
@@ -94,11 +97,12 @@ FilterZippering::FilterZippering()
  FilterZippering::FilterClass FilterZippering::getClass(QAction *a)
 {
   switch(ID(a))
-	{
-                case FP_ZIPPERING :  return MeshFilterInterface::Remeshing;
+  {
+		case FP_REDUNDANCY: return MeshFilterInterface::Selection;
+        case FP_ZIPPERING : return MeshFilterInterface::Remeshing;
 		default : assert(0); 
-	}
-	return MeshFilterInterface::Generic;
+  }
+  return MeshFilterInterface::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -113,19 +117,33 @@ void FilterZippering::initParameterSet(QAction *action, MeshDocument &md, RichPa
          MeshModel *target;
          float maxVal = 0.0;
          switch(ID(action))	 {
-                case FP_ZIPPERING :
-								//Improvements needed
-                                foreach (target, md.meshList) {
-                                    if ( target->cm.bbox.Diag() > maxVal ) maxVal = target->cm.bbox.Diag();
-                                    if (target != md.mm())  break;
-                                }
-                                parlst.addParam( new RichMesh("FirstMesh", md.mm(), &md, "Mesh (with holes)", "The mesh with holes.") );
-                                parlst.addParam( new RichMesh("SecondMesh", target, &md, "Patch", "The mesh that will be used as patch.") );
-                                parlst.addParam( new RichAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path") );
+			case FP_REDUNDANCY:
+								//get diagonals
+								foreach (target, md.meshList) {
+								if ( target->cm.bbox.Diag() > maxVal ) maxVal = target->cm.bbox.Diag();
+								if (target != md.mm())  break;
+								}
+								parlst.addParam( new RichMesh("FirstMesh", md.mm(), &md, "Mesh (with holes)", "The mesh with holes.") );
+								parlst.addParam( new RichMesh("SecondMesh", md.mm(), &md, "Patch", "The mesh that will be used as patch.") );
+								parlst.addParam( new RichAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path") );
+								parlst.addParam( new RichBool("UseQuality", false, "Use quality to select redundant face", "If selected, previously computed face quality will be used in order to select redundant faces.") );
+								parlst.addParam( new RichBool("FastErosion", false, "Use fast erosion algorithm", "If selected, improves the speed-up of algorithm (results may be not accurate). Useful for large meshes.") );
+								parlst.addParam( new RichBool("FullProcessing", false, "Process the whole Mesh", "If selected, redundancy test is performed over the whole surface of the mesh") );
+								break;
+								
+            case FP_ZIPPERING :
+								//get diagonals
+								foreach (target, md.meshList) {
+									if ( target->cm.bbox.Diag() > maxVal ) maxVal = target->cm.bbox.Diag();
+									if (target != md.mm())  break;
+								}
+								parlst.addParam( new RichMesh("FirstMesh", md.mm(), &md, "Mesh (with holes)", "The mesh with holes.") );
+								parlst.addParam( new RichMesh("SecondMesh", target, &md, "Patch", "The mesh that will be used as patch.") );
+								parlst.addParam( new RichAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path") );
 								parlst.addParam( new RichBool("FaceQuality", false, "Use face quality to select redundant face", "If selected, previously computed face quality will be used in order to select redundant faces.") );
 								parlst.addParam( new RichBool("RedundancyOnly", false, "Remove redundant faces only", "If selected, remove redundant faces only without performing other operations.") );
 								break;
-    default: break; // do not add any parameter for the other filters
+				default: break; // do not add any parameter for the other filters
         }
 }
 
@@ -592,6 +610,66 @@ bool FilterZippering::findIntersection(  CMeshO::FacePointer currentF,				//face
 	return true;
 }
 
+/**
+ * Initialize queue for the selection of redundant faces.
+ * @param queue The queue (unsorted)
+ * @param m00   First mesh
+ * @param m01   Second mesh
+ * @param fullProcess If true, insert all the faces in the queue
+ */
+bool FilterZippering::Init( vector< pair<CMeshO::FacePointer,char> >& queue,
+						    MeshModel& a,
+							MeshModel& b,
+							bool fullProcess ) {
+	//full process mode: store all faces in the queue
+	if ( fullProcess ) {
+		// all the faces from A
+		for ( CMeshO::FaceIterator fi = a.cm.face.begin(); fi != a.cm.face.end(); ++fi ) 
+			queue.push_back( std::make_pair(&*fi, 'A') );
+		// all the faces from B
+		for ( CMeshO::FaceIterator fi = b.cm.face.begin(); fi != b.cm.face.end(); ++fi ) 
+			queue.push_back( std::make_pair(&*fi, 'B') );
+		return true;
+	}
+
+	//normal mode: store only border faces
+	vector< tri::Hole<CMeshO>::Info > a_border;
+	vector< tri::Hole<CMeshO>::Info > b_border;
+	//get information about border of the mesh
+	tri::Hole<CMeshO>::GetInfo( a.cm, false, a_border );
+	tri::Hole<CMeshO>::GetInfo( b.cm, false, b_border );
+
+	if ( a_border.empty() && b_border.empty() ) {
+		Log( "No border face, exiting" );
+		return false;
+	}
+	//face from A-border
+	for ( size_t i = 0; i < a_border.size(); i ++ ) {
+		face::Pos<CMeshO::FaceType> p = a_border[i].p;
+		if ( p.F()->IsD() ) continue;
+		do {
+			//TODO: rivedere il checkRedundancy
+			if ( !p.F()->IsD() && checkRedundancy( p.F(), b, grid_b, epsilon ) ) 
+				queue.push_back( make_pair(p.F(),'A') );
+			p.NextB();
+		} while ( p.F() != ccons_a[i].p.F() );
+	}
+	//face from B-border
+    for ( size_t i = 0; i < b_border.size(); i ++ ) {
+		face::Pos<CMeshO::FaceType> p = b_border[i].p;
+		if ( p.F()->IsD() ) continue;
+		do {
+			if ( !p.F()->IsD() && checkRedundancy( p.F(), a, grid_a, epsilon ) )  
+				queue.push_back( make_pair(p.F(),'B') );
+			p.NextB();
+		} while ( p.F() != b_border[i].p.F() );
+	}
+	//check if queue is empty
+	if (queue.empty()) return false;
+	//queue is not empty, return true
+	return true;
+}
+
 /* Zippering of two meshes (Turk approach)
  * Given two mesh, a mesh with one or more holes (A) and a second mesh, a patch (B), fill a hole onto m surface
  * using faces of patch. Algorithm const of three steps:
@@ -600,8 +678,14 @@ bool FilterZippering::findIntersection(  CMeshO::FacePointer currentF,				//face
  * - MeshRefinement: faces where patch vertices lie are re-triangulated
  * Based on Zippered Polygon Meshes from Range Images, by G.Turk, M.Levoy, Siggraph 1994
  */
-bool FilterZippering::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, CallBackPos */*cb*/)
+bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, CallBackPos */*cb*/)
 {
+
+	if (ID(filter) == FP_REDUNDANCY) {
+
+		return true;
+	}
+	
     MeshModel *a = par.getMesh("FirstMesh");
     MeshModel *b = par.getMesh("SecondMesh");
 

@@ -259,13 +259,13 @@ class FilterZippering : public QObject, public MeshFilterInterface
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
 
-        typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MeshFaceGrid;
-        typedef vcg::GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MeshVertGrid;
-
-
+    typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MeshFaceGrid;
+    typedef vcg::GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MeshVertGrid;
 
 public:
-        enum { FP_ZIPPERING  };
+		//Different operations in different plugins
+        enum { FP_REDUNDANCY, 
+			   FP_ZIPPERING	};
 
         FilterZippering();
 	
@@ -310,6 +310,12 @@ private:
 								int last_split,							//last splitted edge
 								int &splitted_edge,						//currently splitted edge
 								vcg::Point3<CMeshO::ScalarType> &hit );	//approximate intersection point
+
+		bool Init( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,
+				   MeshModel& a,
+				   MeshModel& b,
+				   bool fullProcess );
+
         float eps;
 };
 
