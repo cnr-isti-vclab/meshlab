@@ -20,52 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
 
- $Log$
- Revision 1.99  2008/04/15 10:45:51  cignoni
- Added support of color in off files
-
- Revision 1.98  2008/04/04 10:03:53  cignoni
- Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
-
- Revision 1.97  2007/11/26 07:35:26  cignoni
- Yet another small cosmetic change to the interface of the io filters.
-
- Revision 1.96  2007/11/25 09:48:39  cignoni
- Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
-
- Revision 1.95  2007/10/17 21:24:36  cignoni
- corrected orthographic error in report string
-
- Revision 1.94  2007/04/16 09:25:30  cignoni
- ** big change **
- Added Layers managemnt.
- Interfaces are changing again...
-
- Revision 1.93  2007/03/20 16:23:10  cignoni
- Big small change in accessing mesh interface. First step toward layers
-
- Revision 1.92  2007/03/20 15:52:47  cignoni
- Patched issue related to path with non ascii chars
-
- Revision 1.91  2006/12/01 10:41:11  granzuglia
- fixed a little bug: added return true in the off-file
-
- Revision 1.90  2006/11/30 22:55:05  cignoni
- Separated very basic io filters to the more advanced one into two different plugins baseio and meshio
-
- Revision 1.89  2006/11/29 00:59:19  cignoni
- Cleaned plugins interface; changed useless help class into a plain string
-
- Revision 1.88  2006/11/16 11:25:32  e_cerisoli
- Update meshio.cpp: new file I/O
-
- Revision 1.87  2006/10/10 21:10:33  cignoni
- progress bar bug
-
-*****************************************************************************/
 #include <Qt>
 #include <QtGui>
 

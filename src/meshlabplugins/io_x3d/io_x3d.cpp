@@ -20,46 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
- History
- $Log$
- Revision 1.11  2008/04/04 14:08:23  cignoni
- Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
- Revision 1.10  2008/02/20 21:59:37  gianpaolopalma
- Added support to file .x3dv and .wrl
-
- Revision 1.9  2008/02/15 08:27:44  cignoni
- - '>> 'changed into '> >'
- - Used HasPerFaceSomething(M) instead of M.HasPerFaceSomething() that is deprecated.
- - many unsigned warning removed
- - added const to some functions parameters (FindDEF, FindAndReplaceUSE ...)
-
- Revision 1.8  2008/02/14 13:00:22  gianpaolopalma
- Changed assignment of defaultBits in the method GetExportMaskCapability
-
- Revision 1.7  2008/02/13 15:18:20  gianpaolopalma
- Updating mesh mask accoding to mesh data supported
-
- Revision 1.6  2008/02/11 09:28:33  gianpaolopalma
- return error code if file doesn't contain geometry
-
- Revision 1.5  2008/02/08 17:02:09  gianpaolopalma
- Improved memory management
-
- Revision 1.4  2008/02/06 13:09:10  gianpaolopalma
- Updated vertexs and faces number in addinfo
-
- Revision 1.3  2008/02/05 16:38:55  gianpaolopalma
- Added texture file path in the mesh
-
- Revision 1.2  2008/02/04 13:28:36  gianpaolopalma
- Added management to texture coordinates per vertex
-
- Revision 1.1  2008/02/02 13:41:08  gianpaolopalma
- First working version
-
-*****************************************************************************/
 #include <Qt>
 #include <QtGui>
 #include <QtXml>

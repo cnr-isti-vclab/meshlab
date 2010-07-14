@@ -24,7 +24,6 @@
 #define RADIANCESCALINGRENDERER_H
 
 #include <GL/glew.h>
-#include <common/meshmodel.h>
 #include <common/interfaces.h>
 
 #include <QObject>

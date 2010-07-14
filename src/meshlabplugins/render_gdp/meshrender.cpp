@@ -20,78 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-$Log$
-Revision 1.25  2008/04/04 14:16:05  cignoni
-Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
-Revision 1.24  2007/09/09 17:56:13  ldpmatic
-Minor changes to avoid memory leak.
-Added two glGetError() to avoid MeshLab to crash when the plugin encounters some error on its way
-
-Revision 1.23  2007/03/12 15:24:00  cignoni
-Safer dir search for plugins for mac
-
-Revision 1.22  2007/02/28 00:02:57  cignoni
-Added casts for mac compiling
-
-Revision 1.21  2007/02/20 13:05:50  corsini
-*** empty log message ***
-
-Revision 1.20  2007/02/20 13:05:23  corsini
-add log file for shader compilation and linking error
-
-Revision 1.19  2006/12/24 22:46:34  cignoni
-Corrected bug about a wrong glUniform1fARB  (thanks Clement Menier!)
-
-Revision 1.18  2006/05/26 04:09:52  cignoni
-Still debugging 0.7
-
-Revision 1.17  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.16  2006/03/08 17:26:13  ggangemi
-added texture tab
-
-Revision 1.15  2006/02/27 05:02:01  ggangemi
-Added texture support
-
-Revision 1.14  2006/02/25 13:44:45  ggangemi
-Action "None" is now exported from MeshRenderPlugin
-
-Revision 1.13  2006/02/21 17:26:38  ggangemi
-RenderMode is now passed to MeshRender::Init()
-
-Revision 1.11  2006/02/19 02:57:49  ggangemi
-Now each shader can change the opengl status
-
-Revision 1.10  2006/02/09 00:42:40  ggangemi
-now GLArea is passed to the shaderDialog
-
-Revision 1.9  2006/02/03 12:27:08  ggangemi
-improved shaderDialog support
-
-Revision 1.8  2006/01/25 16:58:05  ggangemi
-shaderdialog closed every time the user changes the current shader
-
-Revision 1.7  2006/01/25 02:59:38  ggangemi
-added shadersDialog initial support
-
-Revision 1.6  2005/12/24 04:18:46  ggangemi
-Added generic .gdp shaders support
-
-Revision 1.5  2005/12/05 18:11:28  ggangemi
-Added toon shader example
-
-Revision 1.4  2005/12/05 16:52:57  ggangemi
-new interfaces
-
-Revision 1.3  2005/12/03 22:50:06  cignoni
-Added copyright info
-
-****************************************************************************/
 #include <QtGui>
 
 #include <math.h>
