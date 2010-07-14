@@ -145,8 +145,7 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 				"3: Regularity : stop at minimum number of irregular vertices<br>"
 				"4: L2 : stop at minimum OneWay L2 Stretch Eff")));
 
-			//par.addParam(new RichDynamicFloat("convergenceSpeed", 1, 1,4, "Convergence Speed", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results");
-			par.addParam(new RichInt("convergenceSpeed",2, "Convergence Speed", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results"));
+      par.addParam(new RichInt("convergenceSpeed",2, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results"));
 			par.addParam(new RichBool("DoubleStep",true,"Double Step","Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust, but it may increase the distorsion"));
 			break;
 		}
@@ -259,6 +258,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			IsoParametrizator Parametrizator;
 
 			m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+      m->updateDataMask(MeshModel::MM_VERTQUALITY); // needed to store patch index
 
 			bool isTXTenabled=m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
 			if (!isTXTenabled)
