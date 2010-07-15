@@ -310,11 +310,16 @@ private:
 								int last_split,							//last splitted edge
 								int &splitted_edge,						//currently splitted edge
 								vcg::Point3<CMeshO::ScalarType> &hit );	//approximate intersection point
-
-		bool Init( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,
-				   MeshModel& a,
-				   MeshModel& b,
-				   bool fullProcess );
+		//init unsorted queue 
+		bool Init_q( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//the queue
+				     MeshModel* a,												//mesh A
+				     MeshModel* b,												//mesh B
+				     bool fullProcess );											//fullProcess flag
+		//init priority queue (overload)
+		bool Init_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+				      MeshModel* a,												//mesh A
+				      MeshModel* b,												//mesh B
+				      bool fullProcess );	
 
         float eps;
 };

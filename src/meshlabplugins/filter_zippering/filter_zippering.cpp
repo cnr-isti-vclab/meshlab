@@ -617,17 +617,17 @@ bool FilterZippering::findIntersection(  CMeshO::FacePointer currentF,				//face
  * @param m01   Second mesh
  * @param fullProcess If true, insert all the faces in the queue
  */
-bool FilterZippering::Init( vector< pair<CMeshO::FacePointer,char> >& queue,
-						    MeshModel& a,
-							MeshModel& b,
+bool FilterZippering::Init_q( vector< pair<CMeshO::FacePointer,char> >& queue,
+						    MeshModel* a,
+							MeshModel* b,
 							bool fullProcess ) {
 	//full process mode: store all faces in the queue
 	if ( fullProcess ) {
 		// all the faces from A
-		for ( CMeshO::FaceIterator fi = a.cm.face.begin(); fi != a.cm.face.end(); ++fi ) 
+		for ( CMeshO::FaceIterator fi = a->cm.face.begin(); fi != a->cm.face.end(); ++fi ) 
 			queue.push_back( std::make_pair(&*fi, 'A') );
 		// all the faces from B
-		for ( CMeshO::FaceIterator fi = b.cm.face.begin(); fi != b.cm.face.end(); ++fi ) 
+		for ( CMeshO::FaceIterator fi = b->cm.face.begin(); fi != b->cm.face.end(); ++fi ) 
 			queue.push_back( std::make_pair(&*fi, 'B') );
 		return true;
 	}
@@ -636,8 +636,8 @@ bool FilterZippering::Init( vector< pair<CMeshO::FacePointer,char> >& queue,
 	vector< tri::Hole<CMeshO>::Info > a_border;
 	vector< tri::Hole<CMeshO>::Info > b_border;
 	//get information about border of the mesh
-	tri::Hole<CMeshO>::GetInfo( a.cm, false, a_border );
-	tri::Hole<CMeshO>::GetInfo( b.cm, false, b_border );
+	tri::Hole<CMeshO>::GetInfo( a->cm, false, a_border );
+	tri::Hole<CMeshO>::GetInfo( b->cm, false, b_border );
 
 	if ( a_border.empty() && b_border.empty() ) {
 		Log( "No border face, exiting" );
@@ -648,19 +648,73 @@ bool FilterZippering::Init( vector< pair<CMeshO::FacePointer,char> >& queue,
 		face::Pos<CMeshO::FaceType> p = a_border[i].p;
 		if ( p.F()->IsD() ) continue;
 		do {
-			//TODO: rivedere il checkRedundancy
-			if ( !p.F()->IsD() && checkRedundancy( p.F(), b, grid_b, epsilon ) ) 
-				queue.push_back( make_pair(p.F(),'A') );
+			if ( !p.F()->IsD())  queue.push_back( make_pair(p.F(),'A') );	//label 'A'
 			p.NextB();
-		} while ( p.F() != ccons_a[i].p.F() );
+		} while ( p.F() != a_border[i].p.F() ); //visit the whole border
 	}
 	//face from B-border
     for ( size_t i = 0; i < b_border.size(); i ++ ) {
 		face::Pos<CMeshO::FaceType> p = b_border[i].p;
 		if ( p.F()->IsD() ) continue;
 		do {
-			if ( !p.F()->IsD() && checkRedundancy( p.F(), a, grid_a, epsilon ) )  
-				queue.push_back( make_pair(p.F(),'B') );
+			if ( !p.F()->IsD() )  queue.push_back( make_pair(p.F(),'B') );	//label 'B'
+			p.NextB();
+		} while ( p.F() != b_border[i].p.F() );
+	}
+	//check if queue is empty
+	if (queue.empty()) return false;
+	//queue is not empty, return true
+	return true;
+}
+
+/**
+ * Initialize queue for the selection of redundant faces (overload for priority queue)
+ * @param queue The queue (unsorted)
+ * @param m00   First mesh
+ * @param m01   Second mesh
+ * @param fullProcess If true, insert all the faces in the queue
+ */
+bool FilterZippering::Init_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,
+							MeshModel* a,
+							MeshModel* b,
+							bool fullProcess ) {
+	//full process mode: store all faces in the queue
+	if ( fullProcess ) {
+		// all the faces from A
+		for ( CMeshO::FaceIterator fi = a->cm.face.begin(); fi != a->cm.face.end(); ++fi ) 
+			queue.push( std::make_pair(&*fi, 'A') );
+		// all the faces from B
+		for ( CMeshO::FaceIterator fi = b->cm.face.begin(); fi != b->cm.face.end(); ++fi ) 
+			queue.push( std::make_pair(&*fi, 'B') );
+		return true;
+	}
+
+	//normal mode: store only border faces
+	vector< tri::Hole<CMeshO>::Info > a_border;
+	vector< tri::Hole<CMeshO>::Info > b_border;
+	//get information about border of the mesh
+	tri::Hole<CMeshO>::GetInfo( a->cm, false, a_border );
+	tri::Hole<CMeshO>::GetInfo( b->cm, false, b_border );
+
+	if ( a_border.empty() && b_border.empty() ) {
+		Log( "No border face, exiting" );
+		return false;
+	}
+	//face from A-border
+	for ( size_t i = 0; i < a_border.size(); i ++ ) {
+		face::Pos<CMeshO::FaceType> p = a_border[i].p;
+		if ( p.F()->IsD() ) continue;
+		do {
+			if ( !p.F()->IsD())  queue.push( make_pair(p.F(),'A') );	//label 'A'
+			p.NextB();
+		} while ( p.F() != a_border[i].p.F() ); //visit the whole border
+	}
+	//face from B-border
+    for ( size_t i = 0; i < b_border.size(); i ++ ) {
+		face::Pos<CMeshO::FaceType> p = b_border[i].p;
+		if ( p.F()->IsD() ) continue;
+		do {
+			if ( !p.F()->IsD() )  queue.push( make_pair(p.F(),'B') );	//label 'B'
 			p.NextB();
 		} while ( p.F() != b_border[i].p.F() );
 	}
@@ -681,13 +735,9 @@ bool FilterZippering::Init( vector< pair<CMeshO::FacePointer,char> >& queue,
 bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, CallBackPos */*cb*/)
 {
 
-	if (ID(filter) == FP_REDUNDANCY) {
-
-		return true;
-	}
 	
-    MeshModel *a = par.getMesh("FirstMesh");
-    MeshModel *b = par.getMesh("SecondMesh");
+    MeshModel* a = par.getMesh("FirstMesh");
+    MeshModel* b = par.getMesh("SecondMesh");
 
     if ( a == b )   {
           errorMessage="Please add a second mesh";
@@ -697,19 +747,35 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	clock_t start, t1, t2, t3;
 
 	//enable FF adjacency, mark, compute normals for face (both on A and B)
-  a->updateDataMask(MeshModel::MM_FACEFACETOPO + MeshModel::MM_FACEMARK + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR);
-  b->updateDataMask(MeshModel::MM_FACEFACETOPO + MeshModel::MM_FACEMARK + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR);
-  tri::UnMarkAll(a->cm);
-  tri::UnMarkAll(b->cm);
+	a->updateDataMask(MeshModel::MM_FACEFACETOPO + MeshModel::MM_FACEMARK + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR);
+	b->updateDataMask(MeshModel::MM_FACEFACETOPO + MeshModel::MM_FACEMARK + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR);
+	tri::UnMarkAll(a->cm);
+	tri::UnMarkAll(b->cm);
 
-  tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);
-  tri::UpdateFlags<CMeshO>::FaceProjection(a->cm);
-  tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
-  tri::UpdateNormals<CMeshO>::PerFaceNormalized(b->cm);
-  tri::UpdateFlags<CMeshO>::FaceProjection(b->cm);
-  tri::UpdateNormals<CMeshO>::PerVertexNormalized(b->cm);
+	tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);
+	tri::UpdateFlags<CMeshO>::FaceProjection(a->cm);
+	tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
+	tri::UpdateNormals<CMeshO>::PerFaceNormalized(b->cm);
+	tri::UpdateFlags<CMeshO>::FaceProjection(b->cm);
+	tri::UpdateNormals<CMeshO>::PerVertexNormalized(b->cm);
     //epsilon - search threshold
 	CMeshO::ScalarType epsilon  = par.getAbsPerc("distance");
+
+	vector< pair<CMeshO::FacePointer,char> > generic_queue; //unsorted queue
+	priority_queue< pair<CMeshO::FacePointer,char>, vector< pair<CMeshO::FacePointer,char> >, compareFaceQuality > priority_queue;	//priority queue
+
+	/**
+	 * Filter Redundancy: Select redundant faces from the surface of the meshes.
+	 */
+	if (ID(filter) == FP_REDUNDANCY) {
+		//if user chooses to usequality, initialize priority queue... 
+		if ( par.getBool("UseQuality") ) 
+			Init_pq( priority_queue, a, b, par.getBool("FullProcessing") );
+		//...else initialize unsorted queue
+		else
+			Init_q( generic_queue, a, b, par.getBool("FullProcessing") );
+		return true;
+	}
  
 	//Search for face on patch border
   vector< tri::Hole<CMeshO>::Info > ccons, ccons_a, ccons_b; //info (will contain info aboud borders of A and B)
@@ -841,8 +907,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	grid_b.Set( b->cm.face.begin(), b->cm.face.end() );  //Grid on B
   //bool changed;
   face::Pos<CMeshO::FaceType> p; int c_faces = 0;
-  priority_queue< pair<CMeshO::FacePointer,char>, vector< pair<CMeshO::FacePointer,char> >, compareFaceQuality > faces_pqueue;
-	remove_faces.clear();
+  std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality > faces_pqueue;	//the queue
+  remove_faces.clear();
 	
 	if (par.getBool("FaceQuality")) {
 		Log( "Using Face Quality...");
