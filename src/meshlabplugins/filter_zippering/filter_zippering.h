@@ -325,7 +325,13 @@ private:
 							  MeshModel* a,													//mesh A
 							  MeshModel* b,													//mesh B
 							  float epsilon );												//max search distance
+		//select redundant face (normal method, priority queue)
+		void selectRedundant_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+								 MeshModel* a,													//mesh A
+							     MeshModel* b,													//mesh B
+							     float epsilon );												//max search distance
 	
+
         float eps;
 };
 

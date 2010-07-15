@@ -785,6 +785,56 @@ void FilterZippering::selectRedundant( std::vector< std::pair<CMeshO::FacePointe
 		}
 	}
 }
+
+
+/**
+ * Select redundant faces from meshes A and B. A face is said to be redundant if
+ * a number of samples of the face project on the surface of the other mesh.
+ * @param queue priority queue containing face-pointers from both meshes ordered by quality
+ * @param a, b the meshes involved in the process
+ * @param epsilon Maximum search distance
+ */
+void FilterZippering::selectRedundant_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+										  MeshModel* a,													//mesh A
+							              MeshModel* b,													//mesh B
+										  float epsilon ) {												//max search distance
+	//create grid on the meshes (needed for nearest point search)
+	MeshFaceGrid grid_a; grid_a.Set( a->cm.face.begin(), a->cm.face.end() );  //Grid A
+	MeshFaceGrid grid_b; grid_b.Set( b->cm.face.begin(), b->cm.face.end() );  //Grid B
+	//clear selection on both meshes
+	tri::UpdateSelection<CMeshO>::Clear( a->cm );
+	tri::UpdateSelection<CMeshO>::Clear( b->cm );
+
+	//process face once at the time until queue is not empty
+	while ( !queue.empty() ) {
+		//extract face from the queue
+		CMeshO::FacePointer currentF = queue.top().first;  char choose = queue.top().second; queue.pop();
+		if ( currentF->IsD() || currentF->IsS() ) continue;	//no op if face is deleted or selected (already tested)
+		//face from mesh A, test redundancy with respect to B
+		if (choose == 'A') {
+			if ( checkRedundancy( currentF, b, grid_b, epsilon ) ) {
+				//if face is redundant, set is as Selectedand put new border faces in of the queue
+				currentF->SetS();
+				//insert adjacent faces at the beginning of the queue 
+				queue.push( make_pair(currentF->FFp(0),'A') );
+				queue.push( make_pair(currentF->FFp(1),'A') );
+				queue.push( make_pair(currentF->FFp(2),'A') );
+			}
+		}
+		//face is from mesh B, test redundancy with respect to A
+		else {
+			if ( checkRedundancy( currentF, a, grid_a, epsilon ) ) {
+				//if face is redundant, remove it from B and put new border faces at the top of the queue
+				//in order to guarantee that A and B will be tested alternatively
+				currentF->SetS();
+				//insert adjacent faces at the beginning of the queue 
+				queue.push( make_pair(currentF->FFp(0),'B') );
+				queue.push( make_pair(currentF->FFp(1),'B') );
+				queue.push( make_pair(currentF->FFp(2),'B') );
+			}
+		}
+	}
+}
 	
 
 /* Zippering of two meshes (Turk approach)
@@ -824,13 +874,14 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
     //epsilon - search threshold
 	CMeshO::ScalarType epsilon  = par.getAbsPerc("distance");
 
-	vector< pair<CMeshO::FacePointer,char> > generic_queue; //unsorted queue
-	priority_queue< pair<CMeshO::FacePointer,char>, vector< pair<CMeshO::FacePointer,char> >, compareFaceQuality > priority_queue;	//priority queue
-
 	/**
 	 * Filter Redundancy: Select redundant faces from the surface of the meshes.
 	 */
 	if (ID(filter) == FP_REDUNDANCY) {
+		//queues
+		vector< pair<CMeshO::FacePointer,char> > generic_queue; //unsorted queue
+		priority_queue< pair<CMeshO::FacePointer,char>, vector< pair<CMeshO::FacePointer,char> >, compareFaceQuality > priority_queue;	//priority queue
+
 		//if user chooses to usequality, initialize priority queue... 
 		if ( par.getBool("UseQuality") )  {
 			if ( !Init_pq( priority_queue, a, b, par.getBool("FullProcessing") ) ) {
@@ -845,18 +896,21 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 				return false;
 			}
 		}
-		//TODO: visitare la coda, per ogni faccia della coda esaminare il redundancy usando
-		//non solo i buchi ma anche le facce selezionate, aggiornare la coda se necessario
-		//NESSUNA RIMOZIONE
-
+		
 		CMeshO::ScalarType epsilon  = par.getAbsPerc("distance");
 
 		//if ( par.getBool("FastErosion")  && par.getBool("UseQuality") ) selectRedundantFast_pq();
 		//if ( par.getBool("FastErosion")  && !par.getBool("UseQuality") ) selectRedundantFast();
-		//if ( !par.getBool("FastErosion") && par.getBool("UseQuality") ) selectRedundant_pq();
-		if ( !par.getBool("FastErosion") && !par.getBool("UseQuality") ) 
+		if ( !par.getBool("FastErosion") && par.getBool("UseQuality") ) {
+			Log( "Quality-based Redundancy" );
+			selectRedundant_pq( priority_queue, a, b, epsilon );
+		}
+		if ( !par.getBool("FastErosion") && !par.getBool("UseQuality") ) {
+			Log( "Standard Redunancy" );
 			selectRedundant( generic_queue, a, b, epsilon );
+		}
 
+		Log( "Redundant faces selected" );
 		return true;
 	}
  
@@ -980,162 +1034,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
   tri::Hole<CMeshO>::GetInfo( a->cm, false, ccons_a );
   tri::Hole<CMeshO>::GetInfo( b->cm, false, ccons_b );		 //info about borders
 #endif
-
-	/* STEP 1 - Removing Redundant Surfaces
-     * Repeat until mesh surface remain unchanged:
-     *   - Remove redundant triangles on the boundary of patch
-     */
-	start = clock();
-	grid_a.Set( a->cm.face.begin(), a->cm.face.end() );  //Grid on A
-	grid_b.Set( b->cm.face.begin(), b->cm.face.end() );  //Grid on B
-  //bool changed;
-  face::Pos<CMeshO::FaceType> p; int c_faces = 0;
-  std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality > faces_pqueue;	//the queue
-  remove_faces.clear();
-	
-	if (par.getBool("FaceQuality")) {
-		Log( "Using Face Quality...");
-		//insert in the PQueue faces from A border
-    for ( size_t i = 0; i < ccons_a.size(); i ++ ) {
-      face::Pos<CMeshO::FaceType> p = ccons_a[i].p;
-			do {
-				if ( !p.F()->IsD() && checkRedundancy( p.F(), b, grid_b, epsilon ) ) 
-          faces_pqueue.push( make_pair(p.F(),'A') );
-				p.NextB();
-			} while ( p.F() != ccons_a[i].p.F() );
-		}
-		//insert in the PQueue faces from B border
-    for ( size_t i = 0; i < ccons_b.size(); i ++ ) {
-      face::Pos<CMeshO::FaceType> p = ccons_b[i].p;
-			do {
-				if ( !p.F()->IsD() && checkRedundancy( p.F(), a, grid_a, epsilon ) )  
-          faces_pqueue.push( make_pair(p.F(),'B') );
-				p.NextB();
-			} while ( p.F() != ccons_b[i].p.F() );
-		}
-		//while queue is not empty...
-		while ( !faces_pqueue.empty() ) {
-			CMeshO::FacePointer currentF = faces_pqueue.top().first; 
-			char choose = faces_pqueue.top().second;
-			faces_pqueue.pop();
-			if ( currentF->IsD() ) continue;	//no op, face is already deleted
-			if (choose == 'A') {
-				if ( checkRedundancy( currentF, b, grid_b, epsilon ) ) {
-					//face has to be removed, so we delete and update topology
-          tri::Allocator<CMeshO>::DeleteFace( a->cm, *currentF ); c_faces++;
-					currentF->FFp(0)->FFp(currentF->FFi(0)) = currentF->FFp(0); //topology update
-					currentF->FFp(0)->FFi(currentF->FFi(0)) = currentF->FFi(0);
-          faces_pqueue.push( make_pair(currentF->FFp(0),'A') );
-					currentF->FFp(1)->FFp(currentF->FFi(1)) = currentF->FFp(1);
-					currentF->FFp(1)->FFi(currentF->FFi(1)) = currentF->FFi(1);
-          faces_pqueue.push( make_pair(currentF->FFp(1),'A') );
-					currentF->FFp(2)->FFp(currentF->FFi(2)) = currentF->FFp(2);
-					currentF->FFp(2)->FFi(currentF->FFi(2)) = currentF->FFi(2);
-          faces_pqueue.push( make_pair(currentF->FFp(2),'A') );
-				}
-			}
-			else {
-				if ( checkRedundancy( currentF, a, grid_a, epsilon ) ) {
-					//face is redundant, so we delete and update topology
-          tri::Allocator<CMeshO>::DeleteFace( b->cm, *currentF ); c_faces++;
-					currentF->FFp(0)->FFp(currentF->FFi(0)) = currentF->FFp(0);	//topology update
-					currentF->FFp(0)->FFi(currentF->FFi(0)) = currentF->FFi(0);
-          faces_pqueue.push( make_pair(currentF->FFp(0),'B') );
-					currentF->FFp(1)->FFp(currentF->FFi(1)) = currentF->FFp(1);
-					currentF->FFp(1)->FFi(currentF->FFi(1)) = currentF->FFi(1);
-          faces_pqueue.push( make_pair(currentF->FFp(1),'B') );
-					currentF->FFp(2)->FFp(currentF->FFi(2)) = currentF->FFp(2);
-					currentF->FFp(2)->FFi(currentF->FFi(2)) = currentF->FFi(2);
-          faces_pqueue.push( make_pair(currentF->FFp(2),'B') );
-				}
-			}
-		}
-	} 
-	else {	//do not use face quality
-		Log( "Using Standard predicate...");	
-    for ( size_t i = 0; i < ccons_a.size(); i ++ ) {
-      face::Pos<CMeshO::FaceType> p = ccons_a[i].p;
-			if ( p.F()->IsD() ) continue;
-			do {
-        if ( !p.F()->IsD() && checkRedundancy( p.F(), b, grid_b, epsilon ) ) remove_faces.push_back( make_pair(p.F(),'A') );
-				p.NextB();
-			} while ( p.F() != ccons_a[i].p.F() );
-		}
-
-    for ( size_t i = 0; i < ccons_b.size(); i ++ ) {
-      face::Pos<CMeshO::FaceType> p = ccons_b[i].p;
-			if ( p.F()->IsD() ) continue;
-			do {
-        if ( !p.F()->IsD() && checkRedundancy( p.F(), a, grid_a, epsilon ) )  remove_faces.push_back( make_pair(p.F(),'B') );
-				p.NextB();
-			} while ( p.F() != ccons_b[i].p.F() );
-		}
-	
-		while ( !remove_faces.empty() ) {
-			CMeshO::FacePointer currentF = remove_faces.back().first; 
-			char choose = remove_faces.back().second;
-			remove_faces.pop_back();
-			if ( currentF->IsD() ) continue;	//no op
-			if (choose == 'A') {
-				if ( checkRedundancy( currentF, b, grid_b, epsilon ) ) {
-					//if face is redundant, remove it from A and put new border faces at the top of the queue
-					//in order to guarantee that A and B will be tested alternatively
-          tri::Allocator<CMeshO>::DeleteFace( a->cm, *currentF ); c_faces++;
-					currentF->FFp(0)->FFp(currentF->FFi(0)) = currentF->FFp(0); //topology update
-					currentF->FFp(0)->FFi(currentF->FFi(0)) = currentF->FFi(0);
-					//insert as first element
-          remove_faces.insert( remove_faces.begin(), make_pair(currentF->FFp(0),'A') );
-					currentF->FFp(1)->FFp(currentF->FFi(1)) = currentF->FFp(1);
-					currentF->FFp(1)->FFi(currentF->FFi(1)) = currentF->FFi(1);
-					//insert as first element
-          remove_faces.insert( remove_faces.begin(), make_pair(currentF->FFp(1),'A') );
-					currentF->FFp(2)->FFp(currentF->FFi(2)) = currentF->FFp(2);
-					currentF->FFp(2)->FFi(currentF->FFi(2)) = currentF->FFi(2);
-					//insert as first element
-          remove_faces.insert( remove_faces.begin(), make_pair(currentF->FFp(2),'A') );
-				}
-			}
-			else {
-				if ( checkRedundancy( currentF, a, grid_a, epsilon ) ) {
-					//if face is redundant, remove it from B and put new border faces at the top of the queue
-					//in order to guarantee that A and B will be tested alternatively
-          tri::Allocator<CMeshO>::DeleteFace( b->cm, *currentF ); c_faces++;
-					currentF->FFp(0)->FFp(currentF->FFi(0)) = currentF->FFp(0);	//topology update
-					currentF->FFp(0)->FFi(currentF->FFi(0)) = currentF->FFi(0);
-					//insert as first element
-          remove_faces.insert( remove_faces.begin(), make_pair(currentF->FFp(0),'B') );
-					currentF->FFp(1)->FFp(currentF->FFi(1)) = currentF->FFp(1);
-					currentF->FFp(1)->FFi(currentF->FFi(1)) = currentF->FFi(1);
-					//insert as first element
-          remove_faces.insert( remove_faces.begin(), make_pair(currentF->FFp(1),'B') );
-					currentF->FFp(2)->FFp(currentF->FFi(2)) = currentF->FFp(2);
-					currentF->FFp(2)->FFi(currentF->FFi(2)) = currentF->FFi(2);
-					//insert as first element
-          remove_faces.insert( remove_faces.begin(), make_pair(currentF->FFp(2),'B') );
-				}
-			}
-		}
-	}//end else
-
-	//update topology 
-    tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
-  tri::UpdateTopology<CMeshO>::FaceFace(b->cm);
-
-	//Redundancy Only selected -> exit
-	if ( par.getBool("RedundancyOnly") ) {
-		Log(GLLogStream::DEBUG, "Removed %d redundant faces", c_faces);
-		//post-processing
-    tri::UpdateBounding<CMeshO>::Box( a->cm );
-    tri::Clean<CMeshO>::RemoveUnreferencedVertex( a->cm );
-    tri::Clean<CMeshO>::RemoveDuplicateVertex( a->cm );
-    tri::Clean<CMeshO>::RemoveUnreferencedVertex( b->cm );
-    tri::Clean<CMeshO>::RemoveDuplicateVertex( b->cm );
-		a->cm.face.DisableColor();
-		b->cm.face.DisableColor();
-		return true;
-	}
-	t1 = clock();
-	/*End step 1*/
 
 	/*****************
 	 * Border Refinement
@@ -1680,8 +1578,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
   tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(a->cm);
 
 	Log(GLLogStream::DEBUG, "**********************" );
-    Log( "End - Remove %d faces from patch - Created %d new faces - Timing T1 %d T2 %d T3 %d", c_faces, t_faces, t1-start, t2-t1, t3-t2);
-
+    
     return true;
 }
 
