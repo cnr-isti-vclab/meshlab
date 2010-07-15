@@ -76,6 +76,8 @@ mkdir $BUNDLE/$APPNAME/Contents/textures
 cp textures/*.png $BUNDLE/$APPNAME/Contents/textures/
 mkdir $BUNDLE/$APPNAME/Contents/textures/cubemaps   
 cp textures/cubemaps/uffizi*.jpg $BUNDLE/$APPNAME/Contents/textures/cubemaps
+mkdir $BUNDLE/$APPNAME/Contents/textures/litspheres   
+cp textures/litspheres/*.png $BUNDLE/$APPNAME/Contents/textures/litspheres
 
 mkdir $BUNDLE/$APPNAME/Contents/shaders   
 cp shaders/*.gdp shaders/*.vert shaders/*.frag shaders/*.txt  $BUNDLE/$APPNAME/Contents/shaders
@@ -164,6 +166,7 @@ plugins/libeditsegment.dylib \
 plugins/libmeshdecorate.dylib \
 plugins/libdecorate_shadow.dylib \
 plugins/librender_gdp.dylib \
+plugins/librender_radiance_scaling.dylib \
 plugins/librender_rfx.dylib \
 plugins/librender_splatting.dylib \
 plugins/libsampledecoration.dylib \
