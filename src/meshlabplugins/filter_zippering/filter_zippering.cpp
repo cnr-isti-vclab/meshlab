@@ -139,7 +139,6 @@ void FilterZippering::initParameterSet(QAction *action, MeshDocument &md, RichPa
 								}
 								parlst.addParam( new RichMesh("FirstMesh", md.mm(), &md, "Mesh (with holes)", "The mesh with holes.") );
 								parlst.addParam( new RichMesh("SecondMesh", target, &md, "Patch", "The mesh that will be used as patch.") );
-								parlst.addParam( new RichAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path") );
 								parlst.addParam( new RichBool("FaceQuality", false, "Use face quality to select redundant face", "If selected, previously computed face quality will be used in order to select redundant faces.") );
 								parlst.addParam( new RichBool("RedundancyOnly", false, "Remove redundant faces only", "If selected, remove redundant faces only without performing other operations.") );
 								break;
@@ -163,10 +162,16 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
                                         CMeshO::ScalarType max_dist )
 {
     // Step1: check if border edge can be projected on m
-    int i; for (i=0; i<3 && !face::IsBorder(*face, i); i++) {}   //i-edge on patch border
-    if (i == 3)  for (i = 0; i < 3 && !(face->FFp(i)->IsD()); i++) {}
+    
+	//search for border edge
+	//edge adjacent to a selected face can be considered as border edge
+	int i;
+	for ( i = 0; i < 3; i ++ ) {
+		if ( face::IsBorder(*face, i) ) break;
+		if ( face->FFp(i)->IsS() ) break;
+	}
     assert( i<3 );
-  size_t samplePerEdge = SAMPLES_PER_EDGE;
+	size_t samplePerEdge = SAMPLES_PER_EDGE;
 
     //samples edge in uniform way
     vector< Point3< CMeshO::ScalarType > > edge_samples;
@@ -187,6 +192,7 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
         if ( nearestF == 0 )                    return false;   //no face within given range
         if ( isOnBorder(closest, nearestF ) )   return false;   //closest point on border
 		if ( nearestF->IsD() )					return false;
+		if ( nearestF->IsS() )					return false;	//face is selected (will be deleted)
     }
 
     //check if V2(i) has a closest point on border of m
@@ -198,6 +204,7 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
     if ( nearestF == 0 )					return false;    //no face within given range
     if ( isOnBorder( closest, nearestF ) )	return false;    //closest point on border
 	if ( nearestF->IsD() )					return false;
+	if ( nearestF->IsS() )					return false;
 
     //check if edges are completely projectable on m
     for ( int j = (i+1)%3; j != i; j = (j+1)%3 ) {
@@ -215,6 +222,7 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
             if ( nearestF == 0 )                    return false;   //no face within given range
             if ( isOnBorder(closest, nearestF ) )   return false;   //closest point on border
 			if ( nearestF->IsD() )					return false;
+			if ( nearestF->IsS() )					return false;
         }
     }
     // redundant
@@ -267,7 +275,7 @@ bool FilterZippering::isOnBorder( Point3f point, CMeshO::FacePointer f )  {
     int cnt = 0;
     for ( int i = 0; i < 3; i ++ ) {
        Line3<CMeshO::ScalarType> line( f->P(i), f->P1(i) - f->P(i) );
-       if ( Distance( line, point ) <= eps && face::IsBorder( *f, i ) ) { //lying on border edge
+       if ( Distance( line, point ) <= eps && ( face::IsBorder( *f, i ) || f->FFp(i)->IsS() ) ) { //lying on border edge
             cnt ++;
        }
     }
@@ -311,7 +319,10 @@ bool FilterZippering::isBorderVert( CMeshO::FacePointer f, int i ) {
     face::Pos<CMeshO::FaceType> p( f, i, f->V(i) );
     //loop
     do {
+		//border
         if ( face::IsBorder( *p.F(), p.E() ) ) return true;
+		//adj to selected face
+		if ( p.F()->FFp(p.E())->IsS() ) return true;
         p.FlipE(); p.FlipF();
     } while(p.F() != f);
     return false;
@@ -724,6 +735,58 @@ bool FilterZippering::Init_pq( std::priority_queue< std::pair<CMeshO::FacePointe
 	return true;
 }
 
+
+/**
+ * Select redundant faces from meshes A and B. A face is said to be redundant if
+ * a number of samples of the face project on the surface of the other mesh.
+ * @param queue Unsorted queue containing face-pointers from both meshes
+ * @param a, b the meshes involved in the process
+ * @param epsilon Maximum search distance
+ */
+void FilterZippering::selectRedundant( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
+							  MeshModel* a,													//mesh A
+							  MeshModel* b,													//mesh B
+							  float epsilon ) {												//max search distance
+	//create grid on the meshes (needed for nearest point search)
+	MeshFaceGrid grid_a; grid_a.Set( a->cm.face.begin(), a->cm.face.end() );  //Grid A
+	MeshFaceGrid grid_b; grid_b.Set( b->cm.face.begin(), b->cm.face.end() );  //Grid B
+	//clear selection on both meshes
+	tri::UpdateSelection<CMeshO>::Clear( a->cm );
+	tri::UpdateSelection<CMeshO>::Clear( b->cm );
+
+	//process face once at the time until queue is not empty
+	while ( !queue.empty() ) {
+		//extract face from the queue
+		CMeshO::FacePointer currentF = queue.back().first;  char choose = queue.back().second; queue.pop_back();
+		if ( currentF->IsD() || currentF->IsS() ) continue;	//no op if face is deleted or selected (already tested)
+		//face from mesh A, test redundancy with respect to B
+		if (choose == 'A') {
+			if ( checkRedundancy( currentF, b, grid_b, epsilon ) ) {
+				//if face is redundant, remove it from A and put new border faces at the top of the queue
+				//in order to guarantee that A and B will be tested alternatively
+				currentF->SetS();
+				//insert adjacent faces at the beginning of the queue 
+				queue.insert( queue.begin(), make_pair(currentF->FFp(0),'A') );
+				queue.insert( queue.begin(), make_pair(currentF->FFp(1),'A') );
+				queue.insert( queue.begin(), make_pair(currentF->FFp(2),'A') );
+			}
+		}
+		//face is from mesh B, test redundancy with respect to A
+		else {
+			if ( checkRedundancy( currentF, a, grid_a, epsilon ) ) {
+				//if face is redundant, remove it from B and put new border faces at the top of the queue
+				//in order to guarantee that A and B will be tested alternatively
+				currentF->SetS();
+				//insert adjacent faces at the beginning of the queue 
+				queue.insert( queue.begin(), make_pair(currentF->FFp(0),'B') );
+				queue.insert( queue.begin(), make_pair(currentF->FFp(1),'B') );
+				queue.insert( queue.begin(), make_pair(currentF->FFp(2),'B') );
+			}
+		}
+	}
+}
+	
+
 /* Zippering of two meshes (Turk approach)
  * Given two mesh, a mesh with one or more holes (A) and a second mesh, a patch (B), fill a hole onto m surface
  * using faces of patch. Algorithm const of three steps:
@@ -769,11 +832,31 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	 */
 	if (ID(filter) == FP_REDUNDANCY) {
 		//if user chooses to usequality, initialize priority queue... 
-		if ( par.getBool("UseQuality") ) 
-			Init_pq( priority_queue, a, b, par.getBool("FullProcessing") );
+		if ( par.getBool("UseQuality") )  {
+			if ( !Init_pq( priority_queue, a, b, par.getBool("FullProcessing") ) ) {
+				Log("Meshes haven't border faces - Please select Full Processing option");
+				return false;
+			}
+		}
 		//...else initialize unsorted queue
-		else
-			Init_q( generic_queue, a, b, par.getBool("FullProcessing") );
+		else  {
+			if ( !Init_q( generic_queue, a, b, par.getBool("FullProcessing") ) ) {
+				Log("Meshes haven't border faces - Please select Full Processing option");
+				return false;
+			}
+		}
+		//TODO: visitare la coda, per ogni faccia della coda esaminare il redundancy usando
+		//non solo i buchi ma anche le facce selezionate, aggiornare la coda se necessario
+		//NESSUNA RIMOZIONE
+
+		CMeshO::ScalarType epsilon  = par.getAbsPerc("distance");
+
+		//if ( par.getBool("FastErosion")  && par.getBool("UseQuality") ) selectRedundantFast_pq();
+		//if ( par.getBool("FastErosion")  && !par.getBool("UseQuality") ) selectRedundantFast();
+		//if ( !par.getBool("FastErosion") && par.getBool("UseQuality") ) selectRedundant_pq();
+		if ( !par.getBool("FastErosion") && !par.getBool("UseQuality") ) 
+			selectRedundant( generic_queue, a, b, epsilon );
+
 		return true;
 	}
  

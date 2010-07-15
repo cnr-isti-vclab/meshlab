@@ -320,7 +320,12 @@ private:
 				      MeshModel* a,												//mesh A
 				      MeshModel* b,												//mesh B
 				      bool fullProcess );	
-
+		//select redundant face (normal method, unsorted queue)
+		void selectRedundant( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
+							  MeshModel* a,													//mesh A
+							  MeshModel* b,													//mesh B
+							  float epsilon );												//max search distance
+	
         float eps;
 };
 
