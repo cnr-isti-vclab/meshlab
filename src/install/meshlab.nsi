@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.2.3"
+!define PRODUCT_VERSION "1.3.0b"
 !define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -169,6 +169,7 @@ Section "MainSection" SEC01
   
   ; render plugins (1)
   File "${DISTRIB_FOLDER}/plugins\render_splatting.dll"
+  File "${DISTRIB_FOLDER}/plugins\render_radiance_scaling.dll"
   File "${DISTRIB_FOLDER}/plugins\render_gdp.dll"
   File "${DISTRIB_FOLDER}/plugins\render_rfx.dll"
 
@@ -189,6 +190,9 @@ Section "MainSection" SEC01
   ;File "${DISTRIB_FOLDER}/textures\NPR Metallic Outline.tga"
   File "${DISTRIB_FOLDER}/textures\hatch*.jpg"
 
+  SetOutPath "$INSTDIR\textures\litspheres"
+  File "${DISTRIB_FOLDER}/textures\litspheres\*.png"
+    
   SetOutPath "$INSTDIR\textures\cubemaps"
   File "${DISTRIB_FOLDER}/textures\cubemaps\uffizi*.jpg"
   SetOutPath "$INSTDIR\samples"
@@ -292,10 +296,10 @@ Section Uninstall
   RMDir "$INSTDIR\samples\images"
   RMDir "$INSTDIR\samples"
   RMDir "$INSTDIR\textures\cubemaps"
-  RMDir "$INSTDIR\textures"
-  RMDir "$INSTDIR\shaders"
-  RMDir "$INSTDIR\shadersrm"
-  RMDir "$INSTDIR"
+  RMDir /r "$INSTDIR\textures"
+  RMDir /r "$INSTDIR\shaders"
+  RMDir /r "$INSTDIR\shadersrm"
+  RMDir /r "$INSTDIR"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}" 
