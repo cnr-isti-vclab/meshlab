@@ -38,7 +38,6 @@
 #include <wrap/gl/shot.h>
 
 #include "../common/interfaces.h"
-#include "../common/filterscript.h"
 #include "glarea_setting.h"
 #include "viewer.h"
 
@@ -88,8 +87,7 @@ public:
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
 	GLLogStream *log;
-	FilterScript filterHistory;
-    GLAreaSetting glas;
+  GLAreaSetting glas;
 	QSize curSiz;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
@@ -327,8 +325,8 @@ private:
 
 	float getCameraDistance();
 	void initializeShot(Shot &shot);
-	void loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc);
-	void loadViewFromViewStateFile(Shot &shot, QDomDocument &doc);
+  void loadShotFromTextAlignFile(const QDomDocument &doc);
+  void loadViewFromViewStateFile(const QDomDocument &doc);
 	
 
 	/*

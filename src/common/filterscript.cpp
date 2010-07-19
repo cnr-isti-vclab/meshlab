@@ -20,33 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
 
-$Log$
-Revision 1.7  2008/01/22 14:22:24  sherholz
-Changed type checking, when saving the script file, from "fieldVal.type() == Variant::" to "fieldType == FilterParameter::"; Now parameter of type AbsPerc, Color or Enum can be saved and loaded.
-
-Revision 1.6  2007/10/02 07:59:42  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.5  2006/06/27 08:07:42  cignoni
-Restructured plugins interface for simplifying the server
-
-Revision 1.4  2006/06/18 20:40:06  cignoni
-Completed Open/Save of scripts
-
-Revision 1.3  2006/06/16 07:28:21  zifnab1974
-changed call to dom.save because gcc didn't like a reference to a variable created inside the function call
-
-Revision 1.2  2006/06/16 01:26:07  cignoni
-Added Initial Filter Script Dialog
-
-Revision 1.1  2006/06/15 13:05:57  cignoni
-added Filter History Dialogs
-
-
-****************************************************************************/
 
 #include <GL/glew.h>
 #include <algorithm>

@@ -20,20 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.4  2006/01/04 13:27:52  alemochi
-Added help in plugin dialog
-
-Revision 1.3  2005/12/20 03:33:16  davide_portelli
-Modified PluginDialog.
-
-Revision 1.2  2005/12/03 22:49:46  cignoni
-Added copyright info
-
-****************************************************************************/
-
 #ifndef PLUGINDIALOG_H
 #define PLUGINDIALOG_H
 

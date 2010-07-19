@@ -30,8 +30,11 @@
 #include<QString>
 #include <QPair>
 #include <QAction>
-#include "meshmodel.h"
-
+#include <vcg/math/matrix44.h>
+#include <vcg/space/color4.h>
+#include <wrap/callback.h>
+class MeshModel;
+class MeshDocument;
 
 //enum TypeId {BOOL,INT,FLOAT,STRING,MATRIX44F,POINT3F,COLOR,ENUM,MESH,GROUP,FILENAME};
 //

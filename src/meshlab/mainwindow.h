@@ -67,7 +67,7 @@ signals:
 
 public slots:
 
-	bool open(QString fileName=QString(), GLArea *gla=0);
+  bool open(QString fileName=QString(), GLArea *gla=0);
 	bool openIn(QString fileName=QString());
 	bool openProject(QString fileName=QString());
 	void saveProject();
@@ -79,7 +79,8 @@ public slots:
 private slots:
 
 	//////////// Slot Menu File //////////////////////
-	void reload();
+  void newDocument();
+  void reload();
 	void openRecentFile();
 	bool saveAs(QString fileName = QString());
 	bool save();
@@ -165,7 +166,7 @@ private:
 	void fillEditMenu();
 	void createToolBars();
 	void loadMeshLabSettings();
-	void loadPlugins();
+  // void loadPlugins();
 	void keyPressEvent(QKeyEvent *);
 	void updateRecentFileActions();
 	void setCurrentFile(const QString &fileName);
@@ -183,8 +184,6 @@ private:
 	QMdiArea *mdiarea;
 	LayerDialog *layerDialog;
 	QSignalMapper *windowMapper;
-        //QDir pluginsDir;
-        //QStringList pluginFileNames;
 
     PluginManager PM;
      
@@ -204,21 +203,22 @@ private:
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 
 public:
+  MeshDocument *meshDoc() {
+    assert(currentViewContainer());
+    return &currentViewContainer()->meshDoc;
+  }
+
 	GLArea *GLA() const {
 	  if(mdiarea->currentSubWindow()==0) return 0;
-	  MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
-	  if(!mvc) 
-		  mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
-	  GLArea *glw =  qobject_cast<GLArea*>(mvc->currentView());
-	  assert(glw);
-	  if(glw) 
+    MultiViewer_Container *mvc = currentViewContainer();
+    if(!mvc) return 0;
+    GLArea *glw =  qobject_cast<GLArea*>(mvc->currentView());
 	  return glw;
-	  else return 0;
 	}
 
-	MultiViewer_Container* currentDocContainer() const {
-		if(mdiarea->currentSubWindow()==0) return 0;
-		MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+  MultiViewer_Container* currentViewContainer() const {
+    if(mdiarea->currentSubWindow()==0) return 0;
+    MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
 		if(!mvc){ 
 			mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
 			return mvc;
@@ -226,11 +226,11 @@ public:
 		else return 0;
 	}
 
+
 	void setHandleMenu(QPoint p, Qt::Orientation o, QSplitter *origin);
 
 	const PluginManager& pluginManager() const { return PM; }
 
-  //QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
   static QStatusBar *&globalStatusBar()
   {
     static QStatusBar *_qsb=0;
@@ -387,31 +387,36 @@ private:
 	////////////////////////////////////////////////////
 };
 
+/// Event filter that is installed to intercept the open events sent directly by the Operative System
 class FileOpenEater : public QObject
 {
-Q_OBJECT
+  Q_OBJECT
 
 public:
-FileOpenEater() {noEvent=true;}
-MainWindow *mainWindow;
-bool noEvent;
+  FileOpenEater(MainWindow *_mainWindow)
+  {
+    mainWindow= _mainWindow;
+    noEvent=true;
+  }
+
+  MainWindow *mainWindow;
+  bool noEvent;
 
 protected:
 
-bool eventFilter(QObject *obj, QEvent *event)
- {
-	 if (event->type() == QEvent::FileOpen) {
-						noEvent=false;
-						QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
-						mainWindow->open(fileEvent->file());
-						// QMessageBox::information(0,"Meshlab",fileEvent->file());
-						return true;
-        } else {
-             // standard event processing
-             return QObject::eventFilter(obj, event);
-         }
-     }
- };
+  bool eventFilter(QObject *obj, QEvent *event)
+  {
+    if (event->type() == QEvent::FileOpen) {
+      noEvent=false;
+      QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
+      mainWindow->open(fileEvent->file());
+      return true;
+    } else {
+      // standard event processing
+      return QObject::eventFilter(obj, event);
+    }
+  }
+};
 
 #endif
 #endif

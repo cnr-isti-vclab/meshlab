@@ -280,7 +280,7 @@ int MultiViewer_Container::viewerCounter(){
 	return viewerList.count();
 }
 
-void MultiViewer_Container::updateAll(){
+void MultiViewer_Container::updateAllViewer(){
 	foreach ( Viewer* viewer, viewerList)
 		viewer->update();
 }

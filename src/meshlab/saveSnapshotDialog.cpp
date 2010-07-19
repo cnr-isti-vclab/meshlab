@@ -20,21 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.3  2007/07/10 06:49:19  cignoni
-correct resizing behaviour
-
-Revision 1.2  2005/12/06 10:42:03  vannini
-Snapshot dialog now works
-
-Revision 1.1  2005/12/05 18:15:27  vannini
-Added snapshot save dialog (not used yet)
-
-
-****************************************************************************/
-
 #include "ui_savesnapshotDialog.h"
 #include "saveSnapshotDialog.h"
 

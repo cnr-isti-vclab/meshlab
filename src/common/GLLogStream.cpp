@@ -20,37 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.14  2007/03/27 12:20:15  cignoni
-Revamped logging iterface, changed function names in automatic parameters, better selection handling
-
-Revision 1.13  2007/03/03 02:03:25  cignoni
-Reformatted lower bar, added number of selected faces. Updated about dialog
-
-Revision 1.12  2006/10/31 12:22:39  ganovelli
-corrected bug arised with 2005 compiler (decrementation of end() of empty vector)
-
-Revision 1.11  2006/02/15 01:53:24  glvertex
-Debugged drawing method
-
-Revision 1.10  2006/01/25 15:37:15  glvertex
-Added variable vertical spacing
-
-Revision 1.9  2006/01/17 16:35:27  glvertex
-Added Scalable fonts
-
-Revision 1.8  2006/01/07 12:07:16  glvertex
-Set default font
-
-Revision 1.7  2006/01/02 19:13:57  glvertex
-Multi level logging
-
-Revision 1.6  2005/12/22 20:05:09  glvertex
-Fixed starting position
-
-****************************************************************************/
 
 #include <QFont>
 #include <QGLWidget>

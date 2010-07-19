@@ -98,16 +98,16 @@ public:
 	void DrawVertLabel(MeshModel &m, QGLWidget *gla, QFont qf);
 	void DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf);
 	void DrawCamera(MeshModel &m, QGLWidget *gla, QFont qf);
-    void DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf);
+  void DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf);
 
 	QHash<MeshModel *, bool> isMeshOk;
 	
 	virtual void Decorate(QAction *a, MeshModel &m,  GLArea *gla,QFont qf);
 	virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
 
-    void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
-    inline QString TextureStyleParam() const { return  "MeshLab::Decoration::TextureStyle" ; }
-    bool textureWireParam;
+  void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
+  inline QString TextureStyleParam() const { return  "MeshLab::Decoration::TextureStyle" ; }
+  bool textureWireParam;
 };
 
 #endif

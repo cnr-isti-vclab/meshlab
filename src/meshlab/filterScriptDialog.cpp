@@ -20,19 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.3  2006/06/18 20:40:06  cignoni
-Completed Open/Save of scripts
 
-Revision 1.2  2006/06/16 01:26:07  cignoni
-Added Initial Filter Script Dialog
-
-Revision 1.1  2006/06/15 13:05:57  cignoni
-added Filter History Dialogs
-
-****************************************************************************/
 #include <QFileDialog>
 
 #include "ui_filterScriptDialog.h"
@@ -90,7 +78,7 @@ void FilterScriptDialog::applyScript()
 		
 			//if this is a mesh paramter and the pointer not valid
 		//	if(parameter.fieldType == FilterParameter::PARMESH &&
-		//			!mainWindow->GLA()->meshDoc.meshList.contains((MeshModel*)parameter.pointerVal) )
+    //			!mainWindow->meshDoc().meshList.contains((MeshModel*)parameter.pointerVal) )
 		//	{
 		//		//if the meshmodel pointer is not in the document but not null there must be a problem
 		//		if(NULL != parameter.pointerVal )
@@ -98,14 +86,14 @@ void FilterScriptDialog::applyScript()
 		//			qDebug() << "meshdoc gave us null";
 		//			QMessageBox::critical(this, tr("Script Failure"), QString("Failed because you set a script parameter to be a mesh which does not exist anymore."));
 		//			return;
-		//		} else if(parameter.fieldVal.toInt() >= mainWindow->GLA()->meshDoc.meshList.size() || parameter.fieldVal.toInt() < 0)
+    //		} else if(parameter.fieldVal.toInt() >= mainWindow->meshDoc().meshList.size() || parameter.fieldVal.toInt() < 0)
 		//		{
 		//			qDebug() << "integer is out of bounds:" << parameter.fieldVal.toInt();
 		//			QMessageBox::critical(this, tr("Script Failure"), QString("One of the filters in the script needs more meshes than you have loaded."));
 		//			return;
 		//		} else {
 		//			qDebug() << "meshdoc has non null value";
-		//			parameter.pointerVal = mainWindow->GLA()->meshDoc.getMesh(parameter.fieldVal.toInt());
+    //			parameter.pointerVal = mainWindow->meshDoc().getMesh(parameter.fieldVal.toInt());
 		//		}
 		//	} 
 		//	
@@ -217,7 +205,7 @@ void FilterScriptDialog::editSelectedFilterParameters()
 	//fill the paramter set with all the names and descriptions which are lost in the 
 	//filter script
 	RichParameterSet newParameterSet;
-	iFilter->initParameterSet(action, *(mainWindow->GLA()->meshDoc), newParameterSet);
+  iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);
 
 	if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())
 	{
@@ -232,7 +220,7 @@ void FilterScriptDialog::editSelectedFilterParameters()
 		qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";
 
 	//launch the dialog
-	GenericParamDialog parameterDialog(this, &newParameterSet, "Edit Parameters", mainWindow->GLA()->meshDoc);
+  GenericParamDialog parameterDialog(this, &newParameterSet, "Edit Parameters", mainWindow->meshDoc());
 	int result = parameterDialog.exec();
 	if(result == QDialog::Accepted){
 		//keep the changes	

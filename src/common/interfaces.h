@@ -32,8 +32,7 @@
 #include <QTabletEvent>
 #include "filterparameter.h"
 #include "GLLogStream.h"
-
-
+#include "meshmodel.h"
 
 class QWidget;
 class QGLWidget;
@@ -45,24 +44,29 @@ class RenderMode;
 class GLArea;
 
 
-/* this is used to callback the executeFilter() function
-            when the apply button of the standard plugin window
-            is clicked
+/** The MainWindowInterface class defines just the executeFilter() callback function
+    that is invoked by the standard parameter input dialog.
+    It is used as base class of the MainWindow.
     */
-    class MainWindowInterface
-    {
-    public:
-            virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){};
-    };
+class MainWindowInterface
+{
+public:
+  virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){};
+};
 
-// The basic interface for opening and saving a mesh.
-// The plugins for opening and saving different mesh types must be derived from this class.
-//
+/** \brief The MeshLabInterface class is the base of all the plugin interfaces.
 
+  The main idea common to all the framework is that each plugin export a set of actions, internally each action is associated to a FilterIDType, and for each action a name and a formatted INFO is defined.
+  For coding easyness ID are more practical (you can use them in switches). Using action on the other hand is practical because it simplify their management in menus/toolbars and it allows to define icons and other things in a automatic way.
+*/
 class MeshLabInterface
 {
 public:
-	typedef int FilterIDType;
+  /** the type used to identify plugin actions; there is a one-to-one relation betweeen an ID and an Action.
+    \todo To be renamed as ActionIDType
+    */
+  typedef int FilterIDType;
+
 	MeshLabInterface() :log(0) {}; 
 private:
 	GLLogStream *log;	
@@ -72,53 +76,31 @@ public:
 	void setLog(GLLogStream *log) { this->log = log ; }
 	// This fucntion must be used to communicate useful information collected in the parsing/saving of the files. 
 	// NEVER EVER use a msgbox to say something to the user.
-	void Log(const char * f, ... ) 
-	{
-		if(log)
-		{	
-			char buf[4096];
-			va_list marker;
-			va_start( marker, f );     
-			vsprintf(buf,f,marker);
-			va_end( marker );              
-			log->Log(GLLogStream::FILTER,buf);
-		}
-	}
+  void Log(const char * f, ... );
+  void Log(int Level, const char * f, ... ) ;
 
-	void Log(int Level, const char * f, ... ) 
-	{
-		if(log)
-		{	
-			char buf[4096];
-			va_list marker;
-			va_start( marker, f );     
-			vsprintf(buf,f,marker);
-			va_end( marker );              
-			log->Log(Level,buf);
-		}
-	}
+  /** \brief This function is called by the framework, for each decoration at the start of the plugins.
+   it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
+   For the global parameters the following rules apply:
 
-	// This function is called by the framework, for each decoration at the start of the plugins.
-	// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
-	// For the global parameters the following rules apply:
-	// * there is a *hardwired* default value, that is directly coded into the plugin
-	// * there is a *saved* value that is stored into persistent location into the user space (registry/home/library) and it is stored in the classical default value of the parameter
-	// * there is a *current* value that is currently used, different for each decoration instance and that is not stored permanently.
-	//
-	// The plugin use the current value to draw its decoration.
-	// at startup the current value is always silently initialized to the saved value.
-	// User can revert current value to the saved values and to the hardwired values. 
-	// In the dialog for each parameter some buttons should be present:
-	// 
-	// * load (from the registry), 
-	// * save (to the registry), 
-	// * reset (from the hardwired).
+   \li there is a <b>hardwired</b> default value, that is directly coded into the plugin
+   \li there is a <b>saved</b> value that is stored into persistent location into the user space (registry/home/library) and it is stored in the classical default value of the parameter
+   \li there is a <b>current</b> value that is currently used, different for each decoration instance and that is not stored permanently.
 
-	// If your plugins/action has no GlobalParameter, do nothing.
-	// The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
-	// At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values) 
-	// If a filter wants to save some permanent stuff should set the permanent default values.
+   The plugin use the current value to draw its decoration.
+   at startup the current value is always silently initialized to the saved value.
+   User can revert current value to the saved values and to the hardwired values.
+   In the dialog for each parameter some buttons should be present:
 
+   \li load (from the registry),
+   \li save (to the registry),
+   \li reset (from the hardwired).
+
+   If your plugins/action has no GlobalParameter, do nothing.
+   The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
+   At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values)
+   If a filter wants to save some permanent stuff should set the permanent default values.
+*/
 	virtual void initGlobalParameterSet(QAction * /*format*/, RichParameterSet & /*globalparam*/) {}
 
 	// The longer string describing each filtering action. 
@@ -133,7 +115,8 @@ public:
 	virtual QString filterName(FilterIDType ) const =0;
 
 };
-
+/** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
+  */
 class MeshIOInterface : public MeshLabInterface
 {
 public:
@@ -161,7 +144,7 @@ public:
 
 	// The very short string (a few words) describing each filtering action 
 	// This string is used also to define the menu entry
-	QString filterName(FilterIDType ) const {return QString();};
+  QString filterName(FilterIDType) const {return QString();};
 
 	
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
@@ -189,14 +172,15 @@ public:
 
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
     
+  /// callback used to actually load a mesh from a file
   virtual bool open(
-      const QString &format,					// the extension of the format e.g. "PLY"
-			const QString &fileName,				// The name of the file to be opened
-      MeshModel &m,										// The mesh that is filled with the file content 
-      int &mask,											// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
-			const RichParameterSet & par,	// The parameters that have been set up in the initPreOpenParameter()
-      vcg::CallBackPos *cb=0,					// standard callback for reporting progress in the loading
-      QWidget *parent=0)=0;						// you should not use this...
+      const QString &format,					/// the extension of the format e.g. "PLY"
+      const QString &fileName,				/// The name of the file to be opened
+      MeshModel &m,										/// The mesh that is filled with the file content
+      int &mask,											/// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
+      const RichParameterSet & par,	/// The parameters that have been set up in the initPreOpenParameter()
+      vcg::CallBackPos *cb=0,					/// standard callback for reporting progress in the loading
+      QWidget *parent=0)=0;						/// you should not use this...
     
   virtual bool save(
       const QString &format, // the extension of the format e.g. "PLY"
@@ -217,35 +201,34 @@ public:
 	QString errorMessage;
 
 };
+/**
+  \brief The MeshFilterInterface class provide the interface of the filter plugins.
 
-
+*/
 class MeshFilterInterface : public MeshLabInterface
 {
 public:
- 
-	
-	// The FilterClass enum represents the set of keywords that must be used to categorize a filter.
-	// Each filter can belong to one or more filtering class, or-ed togheter. 
-	// The filter class 
-	
+  /** The FilterClass enum represents the set of keywords that must be used to categorize a filter.
+   Each filter can belong to one or more filtering class, or-ed togheter.
+  */
 	enum FilterClass 
 	{ 
-        Generic          =0x00000, // Should be avoided if possible
-        Selection        =0x00001, // select or de-select something, basic operation on selections (like deleting)
-        Cleaning         =0x00002, // Filters that can be used to clean meshes (duplicated vertices etc)
-        Remeshing        =0x00004, // Simplification, Refinement, Reconstruction and mesh optimization
+        Generic          =0x00000, /*!< Should be avoided if possible. */  //
+        Selection        =0x00001, /*!<  select or de-select something, basic operation on selections (like deleting)*/
+        Cleaning         =0x00002, /*!<  Filters that can be used to clean meshes (duplicated vertices etc)*/
+        Remeshing        =0x00004, /*!<  Simplification, Refinement, Reconstruction and mesh optimization*/
         FaceColoring     =0x00008,
         VertexColoring   =0x00010,
         MeshCreation     =0x00020,
-        Smoothing        =0x00040, // Stuff that does not change the topology, but just the vertex positions
+        Smoothing        =0x00040, /*!<  Stuff that does not change the topology, but just the vertex positions*/
         Quality          =0x00080,
-        Layer            =0x00100, // Layers, attributes
-        Normal           =0x00200, // Normal, Curvature, orientation (rotations and transformations fall here)
+        Layer            =0x00100, /*!<  Layers, attributes */
+        Normal           =0x00200, /*!<  Normal, Curvature, orientation (rotations and transformations fall here)*/
         Sampling         =0x00400,
         Texture          =0x00800,
-        RangeMap         =0x01000, // filters specific for range map processing
+        RangeMap         =0x01000, /*!<  filters specific for range map processing*/
         PointSet         =0x02000,
-        Measure          =0x04000  // Filters that compute measures and information on meshes.
+        Measure          =0x04000  /*!<  Filters that compute measures and information on meshes.*/
     };
 	
 	
@@ -397,7 +380,7 @@ protected:
 };
 
 
-/*
+/**
 Used to customized the rendering process. 
 Rendering plugins are now responsible of the rendering of the whole MeshDocument and not only of a single MeshModel. 
 
@@ -451,15 +434,15 @@ public:
   MeshDecorateInterface(): MeshLabInterface() {}
   virtual ~MeshDecorateInterface() {}
 
-    virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/){assert(0); return false;};
-		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/,QFont qf) = 0;
-		virtual void EndDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-        
-    virtual QList<QAction *> actions() const { return actionList;}
-    virtual QList<FilterIDType> types() const { return typeList;}
+  virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/){assert(0); return false;};
+  virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/,QFont qf) = 0;
+  virtual void EndDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+
+  virtual QList<QAction *> actions() const { return actionList;}
+  virtual QList<FilterIDType> types() const { return typeList;}
 protected:
-    QList <QAction *> actionList;
-    QList <FilterIDType> typeList;	
+  QList <QAction *> actionList;
+  QList <FilterIDType> typeList;
 	virtual FilterIDType ID(QAction *a) const
 	{
 		foreach( FilterIDType tt, types())
@@ -530,8 +513,11 @@ public:
 };
 
 
-/* MeshEditInterfaceFactory
- * 
+/** MeshEditInterfaceFactory
+    \short The MeshEditInterfaceFactory class is a <i>factory</i> is used to generate a object for each starting of an editing filter.
+
+    This is needed because editing filters have a internal state, so if you want to have an editing tool for two different documents you have to instance two objects.
+    This class is used by the framework to generate an independent MeshEditInterface for each document.
  */
 class MeshEditInterfaceFactory
 {

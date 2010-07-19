@@ -58,6 +58,8 @@
 #include <QStringList>
 #include <QFileInfo>
 #include <QObject>
+#include "GLLogStream.h"
+#include "filterscript.h"
 
 // Forward declarations needed for creating the used types
 class CVertexO;
@@ -340,13 +342,16 @@ public:
 	/// The list of MeshModels.
 	QList<MeshModel *> meshList;
 
+  GLLogStream Log;
+  FilterScript filterHistory;
+
 	int size() const {return meshList.size();}
 	bool busy;    // used in processing. To disable access to the mesh by the rendering thread
 
-	//add a new mesh with the given name
+  ///add a new mesh with the given name
   MeshModel *addNewMesh(const char *meshName,MeshModel *newMesh=0, bool setAsCurrent=true);
 
-	//remove the mesh from the list and delete it from memory
+  ///remove the mesh from the list and delete it from memory
 	bool delMesh(MeshModel *mmToDel);
 
   int vn() /// Sum of all the vertices of all the meshes

@@ -20,20 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.3  2006/06/16 07:27:20  zifnab1974
-don't use class name in member definition. GCC 4.1 complains
-
-Revision 1.2  2006/06/16 01:26:07  cignoni
-Added Initial Filter Script Dialog
-
-Revision 1.1  2006/06/15 13:05:57  cignoni
-added Filter History Dialogs
-
-****************************************************************************/
-
 #include <QDialog>
 #include "../common/filterscript.h"
 

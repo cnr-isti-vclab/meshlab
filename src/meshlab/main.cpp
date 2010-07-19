@@ -54,11 +54,11 @@ int main(int argc, char *argv[])
   MainWindow window;
   window.showMaximized();
 
-  // This filter is installed to intercept the open events sent directly by the Operative System. 
-	FileOpenEater *filterObj=new FileOpenEater();
-  filterObj->mainWindow=&window;
+  // This event filter is installed to intercept the open events sent directly by the Operative System.
+  FileOpenEater *filterObj=new FileOpenEater(&window);
 	app.installEventFilter(filterObj);
 	app.processEvents();
+
 	if(argc>1)	
 	{
 		QString helpOpt1="-h";

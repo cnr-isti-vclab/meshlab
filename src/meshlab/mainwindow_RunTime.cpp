@@ -84,7 +84,7 @@ void MainWindow::updateStdDialog()
 {
 	if(stddialog!=0){
 		if(GLA()!=0){
-			if(stddialog->curModel != GLA()->mm()){
+      if(stddialog->curModel != meshDoc()->mm()){
 				stddialog->curgla=0; // invalidate the curgla member that is no more valid.
 				stddialog->close();
 			}
@@ -139,20 +139,22 @@ void MainWindow::updateWindowMenu()
 		windowsMenu->addAction(copyShotToClipboardAct);
 		windowsMenu->addAction(pasteShotFromClipboardAct);
 
-		MultiViewer_Container *mvc = currentDocContainer();
+    MultiViewer_Container *mvc = currentViewContainer();
 		if(mvc)
 		{
 			setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
 			Viewer* current = mvc->currentView();
+      if(current)
+      {
+        setSplitHAct->setEnabled(current->size().height()/2 > current->minimumSizeHint().height());
+        setSplitVAct->setEnabled(current->size().width()/2 > current->minimumSizeHint().width());
 
-			setSplitHAct->setEnabled(current->size().height()/2 > current->minimumSizeHint().height());
-			setSplitVAct->setEnabled(current->size().width()/2 > current->minimumSizeHint().width());
+        linkViewersAct->setEnabled(currentViewContainer()->viewerCounter()>1);
+        if(currentViewContainer()->viewerCounter()==1)
+          linkViewersAct->setChecked(false);
 
-			linkViewersAct->setEnabled(currentDocContainer()->viewerCounter()>1);
-			if(currentDocContainer()->viewerCounter()==1)
-				linkViewersAct->setChecked(false);
-
-			windowsMenu->addSeparator();
+        windowsMenu->addSeparator();
+      }
 		}
 	}
 
@@ -205,7 +207,7 @@ void MainWindow::updateMenus()
 
 	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
-	if(active){
+  if(active && GLA()){
 				const RenderMode &rm=GLA()->getCurrentRenderMode();
 				switch (rm.drawMode) {
 					case GLW::DMBox:				renderBboxAct->setChecked(true);                break;
@@ -217,7 +219,7 @@ void MainWindow::updateMenus()
 					case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
 				default: break;
 				}
-				colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm()->cm));
+        colorModePerFaceAct->setEnabled(HasPerFaceColor(meshDoc()->mm()->cm));
 				switch (rm.colorMode)
 				{
                                         case GLW::CMNone:	colorModeNoneAct->setChecked(true);	      break;
@@ -263,7 +265,7 @@ void MainWindow::updateMenus()
 				showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 				showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 				backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
-				renderModeTextureAct->setEnabled(GLA()->mm() && !GLA()->mm()->cm.textures.empty());
+        renderModeTextureAct->setEnabled(meshDoc()->mm() && !meshDoc()->mm()->cm.textures.empty());
 				renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
 
 				setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
@@ -306,7 +308,7 @@ void MainWindow::updateMenus()
 
 void MainWindow::setSplit(QAction *qa)
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	if(mvc) 
 	{
 		GLArea *glwClone=new GLArea(mvc, &currentGlobalParams);	
@@ -326,7 +328,7 @@ void MainWindow::setSplit(QAction *qa)
 
 void MainWindow::setUnsplit()
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	if(mvc) 
 	{
 		assert(mvc->viewerCounter() >1);
@@ -339,7 +341,7 @@ void MainWindow::setUnsplit()
 
 //Update the split/unsplit menu that appears right clicking on a splitter's handle 
 void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplitter *origin){
-		MultiViewer_Container *mvc =  currentDocContainer();
+    MultiViewer_Container *mvc =  currentViewContainer();
 		int epsilon =10;
 		splitMenu->clear();
 		unSplitMenu->clear();
@@ -430,7 +432,7 @@ void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplit
 
 void MainWindow::splitFromHandle(QAction *qa )
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	QPoint point = qa->data().toPoint();
 	int epsilon =10;
 
@@ -457,7 +459,7 @@ void MainWindow::splitFromHandle(QAction *qa )
 
 void MainWindow::unsplitFromHandle(QAction * qa)
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	
 	QPoint point = qa->data().toPoint();
 	int epsilon =10;
@@ -479,13 +481,13 @@ void MainWindow::unsplitFromHandle(QAction * qa)
 
 void MainWindow::linkViewers()
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	mvc->updateTrackballInViewers();
 }
 
 void MainWindow::viewFrom(QAction *qa)
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
 	if(glArea)
 		glArea->createOrthoView(qa->text());
@@ -493,7 +495,7 @@ void MainWindow::viewFrom(QAction *qa)
 
 void MainWindow::readViewFromFile()
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
 	if(glArea)
 		glArea->viewFromFile();
@@ -502,7 +504,7 @@ void MainWindow::readViewFromFile()
 
 void MainWindow::copyViewToClipBoard()
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
 	if(glArea)
 		glArea->viewToClipboard();
@@ -510,7 +512,7 @@ void MainWindow::copyViewToClipBoard()
 
 void MainWindow::pasteViewFromClipboard()
 {
-	MultiViewer_Container *mvc = currentDocContainer();
+  MultiViewer_Container *mvc = currentViewContainer();
 	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
 	if(glArea)
 		glArea->viewFromClipboard();
@@ -543,10 +545,8 @@ void MainWindow::dropEvent ( QDropEvent * event )
 void MainWindow::delCurrentMesh()
 {
 	//MeshDoc accessed through current container
-	currentDocContainer()->meshDoc.delMesh(currentDocContainer()->meshDoc.mm());
-	//stddialog->hide();
-	//Update all viewers
-	currentDocContainer()->updateAll();
+  currentViewContainer()->meshDoc.delMesh(currentViewContainer()->meshDoc.mm());
+  currentViewContainer()->updateAllViewer();
 	updateMenus();
 }
 
@@ -567,7 +567,7 @@ void MainWindow::applyLastFilter()
 void MainWindow::showFilterScript()
 {
   FilterScriptDialog dialog(this);
-	dialog.setScript(&(GLA()->filterHistory));
+  dialog.setScript(&(meshDoc()->filterHistory));
 	if (dialog.exec()==QDialog::Accepted)
 	{
 			runFilterScript();
@@ -579,17 +579,16 @@ void MainWindow::showFilterScript()
 void MainWindow::runFilterScript()
 {
   FilterScript::iterator ii;
-  for(ii= GLA()->filterHistory.actionList.begin();ii!= GLA()->filterHistory.actionList.end();++ii)
+  for(ii= meshDoc()->filterHistory.actionList.begin();ii!= meshDoc()->filterHistory.actionList.end();++ii)
   {
     QAction *action = PM.actionFilterMap[ (*ii).first];
 	  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 
     int req=iFilter->getRequirements(action);
-    GLA()->mm()->updateDataMask(req);
+    meshDoc()->mm()->updateDataMask(req);
     iFilter->setLog(GLA()->log);
 		
-		MeshDocument *meshDocument=GLA()->meshDoc;
-		RichParameterSet &parameterSet = (*ii).second;
+    RichParameterSet &parameterSet = (*ii).second;
 		
 		for(int i = 0; i < parameterSet.paramList.size(); i++)
 		{	
@@ -600,37 +599,37 @@ void MainWindow::runFilterScript()
 			if(parameter->val->isMesh())
 			{  
 				MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
-				if(	md->meshindex < meshDocument->size() && 
+        if(	md->meshindex < meshDoc()->size() &&
 					md->meshindex >= 0  )
 				{
-					RichMesh* rmesh = new RichMesh(parameter->name,meshDocument->getMesh(md->meshindex),meshDocument);
+          RichMesh* rmesh = new RichMesh(parameter->name,meshDoc()->getMesh(md->meshindex),meshDoc());
 					parameterSet.paramList.replace(i,rmesh);
 				} else
 				{
-					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument->size(), md->meshindex );
+          printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md->meshindex );
 					printf("One of the filters in the script needs more meshes than you have loaded.\n");
 					exit(-1);
 				}
 				delete parameter;
 			}
 		}
-    //iFilter->applyFilter( action, *(GLA()->mm()), (*ii).second, QCallBack );
+    //iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
 
 		//WARNING!!!!!!!!!!!!
 		/* to be changed */
-		iFilter->applyFilter( action, *meshDocument, (*ii).second, QCallBack );
+    iFilter->applyFilter( action, *meshDoc(), (*ii).second, QCallBack );
 		if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
 			GLA()->setColorMode(vcg::GLW::CMPerFace);
-			GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+      meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
 		}
 		if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
 			GLA()->setColorMode(vcg::GLW::CMPerVert);
-			GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+      meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
 		}
 		if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
 		{
 			GLA()->setColorMode(vcg::GLW::CMPerMesh);
-			GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
+      meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
 		}
 		if(iFilter->getClass(action) & MeshFilterInterface::Selection )
     {
@@ -666,17 +665,16 @@ void MainWindow::startFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-  iFilter->setLog(GLA()->log);
 
-	if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
-  GLA()->log->SetBookmark();
+  if(currentViewContainer() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
 
   // In order to avoid that a filter changes something assumed by the current editing tool,
 	// before actually starting the filter we close the current editing tool (if any).
 	if(GLA()) GLA()->endEdit();
-	updateMenus();
 
-	QStringList missingStuff;
+  updateMenus();
+
+  QStringList missingPreconditions;
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		qDebug("MeshCreation");
@@ -685,26 +683,33 @@ void MainWindow::startFilter()
 		GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
 		gla->meshDoc->addNewMesh("untitled.ply");
 		gla->setFileName("untitled.ply");
-		//mdiarea->addSubWindow(gla); //Now there is the container
 		mdiarea->addSubWindow(mvcont);
-		if(mdiarea->isVisible()) mvcont->showMaximized();
+    iFilter->setLog(mvcont->LogPtr());
+    mvcont->LogPtr()->SetBookmark();
+
+    if(mdiarea->isVisible()) mvcont->showMaximized();
 	}
 	else
-		if (!iFilter->isFilterApplicable(action,(*GLA()->mm()),missingStuff))
+    if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))
 			{
-				QString enstr = missingStuff.join(",");
+        QString enstr = missingPreconditions.join(",");
 				QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
 				"Current mesh does not have <i>" + enstr + "</i>."));
 				return;
 			}
 
+  if(currentViewContainer())
+  {
+    iFilter->setLog(currentViewContainer()->LogPtr());
+    currentViewContainer()->LogPtr()->SetBookmark();
+  }
     // just to be sure...
     createStdPluginWnd();
 
     // (2) Ask for filter parameters and eventally directly invoke the filter
     // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
     // if no dialog is created the filter must be executed immediately
-    if(! stddialog->showAutoDialog(iFilter, GLA()->mm(), (GLA()->meshDoc), action, this,GLA()) )
+    if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
     {
         RichParameterSet dummyParSet;
         executeFilter(action, dummyParSet, false);
@@ -724,44 +729,46 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
 
   qb->show();
-  iFilter->setLog(GLA()->log);
+  iFilter->setLog(&meshDoc()->Log);
 
 	// Ask for filter requirements (eg a filter can need topology, border flags etc)
   // and statisfy them
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
   int req=iFilter->getRequirements(action);
-  GLA()->mm()->updateDataMask(req);
+  meshDoc()->mm()->updateDataMask(req);
   qApp->restoreOverrideCursor();
 
 	// (3) save the current filter and its parameters in the history
   if(!isPreview)
   {
-		GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
-    GLA()->log->ClearBookmark();
+    meshDoc()->filterHistory.actionList.append(qMakePair(action->text(),params));
+    meshDoc()->Log.ClearBookmark();
   }
   else
-    GLA()->log->BackToBookmark();
+    meshDoc()->Log.BackToBookmark();
   // (4) Apply the Filter
 	bool ret;
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	QTime tt; tt.start();
-	GLA()->meshDoc->busy=true;
+  meshDoc()->busy=true;
   RichParameterSet MergedEnvironment(params);
   MergedEnvironment.join(currentGlobalParams);
-  ret=iFilter->applyFilter(action, *(GLA()->meshDoc), MergedEnvironment, QCallBack);
-	GLA()->meshDoc->busy=false;
+  ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
+  meshDoc()->busy=false;
   qApp->restoreOverrideCursor();
 
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
 	if(ret)
 	{
-    GLA()->log->Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
+    meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
     MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
-
-		GLA()->setWindowModified(true);
-		GLA()->setLastAppliedFilter(action);
+    if(GLA())
+    {
+      GLA()->setWindowModified(true);
+      GLA()->setLastAppliedFilter(action);
+    }
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
 		lastFilterAct->setEnabled(true);
 	}
@@ -773,24 +780,24 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
   // at the end for filters that change the color, or selection set the appropriate rendering mode
   if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
     GLA()->setColorMode(vcg::GLW::CMPerFace);
-		GLA()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+    meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
   }
   if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
     GLA()->setColorMode(vcg::GLW::CMPerVert);
-		GLA()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+    meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
   }
   if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
   {
     GLA()->setColorMode(vcg::GLW::CMPerMesh);
-    GLA()->mm()->updateDataMask(MeshModel::MM_COLOR);
+    meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
   }
 	if(iFilter->getClass(action) & MeshFilterInterface::Selection )
   {
       GLA()->setSelectVertRendering(true);
       GLA()->setSelectFaceRendering(true);
   }
-	if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
-	    GLA()->resetTrackBall();
+  if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
+      GLA()->resetTrackBall();
 
 	if(iFilter->getClass(action) & MeshFilterInterface::Texture )
 	    GLA()->updateTexture();
@@ -798,10 +805,10 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
   qb->reset();
 
   updateMenus();
-  //GLA()->update(); //now there is the container
-  MultiViewer_Container* mvc = currentDocContainer();
+  GLA()->update(); //now there is the container
+  MultiViewer_Container* mvc = currentViewContainer();
   if(mvc)
-	  mvc->updateAll();
+    mvc->updateAllViewer();
 
 }
 
@@ -870,7 +877,7 @@ void MainWindow::applyRenderMode()
 
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	iRenderTemp->Init(action,*(GLA()->meshDoc),GLA()->getCurrentRenderMode(),GLA());
+  iRenderTemp->Init(action,*(meshDoc()),GLA()->getCurrentRenderMode(),GLA());
 
 	if(action->text() == tr("None"))
 	{
@@ -911,7 +918,7 @@ void MainWindow::applyDecorateMode()
 	if(!found){
 	  //RichParameterSet * decoratorParams = new RichParameterSet();
 		//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
-		bool ret = iDecorateTemp->StartDecorate(action,*GLA()->mm(), &currentGlobalParams, GLA());
+    bool ret = iDecorateTemp->StartDecorate(action,*meshDoc()->mm(), &currentGlobalParams, GLA());
 		if(ret) {
 				GLA()->iDecoratorsList.push_back(action);
         GLA()->log->Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
@@ -999,11 +1006,10 @@ void MainWindow::saveProject()
 		lastUsedDirectory.setPath(path);
 	}
 
-	MeshDocument *meshDoc=GLA()->meshDoc;
-	vector<string> meshNameVector;
+  vector<string> meshNameVector;
 	vector<Matrix44f> transfVector;
 
-  foreach(MeshModel * mp, meshDoc->meshList)
+  foreach(MeshModel * mp, meshDoc()->meshList)
 	{
         meshNameVector.push_back(qPrintable(mp->shortName()));
 		transfVector.push_back(mp->cm.Tr);
@@ -1048,11 +1054,16 @@ bool MainWindow::openProject(QString fileName)
 		if(ir==rmv.begin()) openRes = open((*ir).filename.c_str());
         else				openRes = open((*ir).filename.c_str(),GLA());
 
-        if(openRes) GLA()->mm()->cm.Tr=(*ir).trasformation;
+        if(openRes) meshDoc()->mm()->cm.Tr=(*ir).trasformation;
 	}
     if(this->GLA() == 0) return false;
 	this->GLA()->resetTrackBall();
 	return true;
+}
+
+void MainWindow::newDocument()
+{
+  return;
 }
 
 bool MainWindow::open(QString fileName, GLArea *gla)
@@ -1064,7 +1075,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	// the (1-based) index  of first plugin which is able to open it
 	QHash<QString, MeshIOInterface*> allKnownFormats;
 
-    PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
+  PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 	filters.push_back("ALN project ( *.aln)");
 	filters.front().chop(1);
 	filters.front().append(" *.aln)");
@@ -1175,13 +1186,13 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					}
 					renderModeTextureAct->setChecked(false);
 					renderModeTextureAct->setEnabled(false);
-					if(!GLA()->mm()->cm.textures.empty())
+          if(!meshDoc()->mm()->cm.textures.empty())
 					{
 						renderModeTextureAct->setChecked(true);
 						renderModeTextureAct->setEnabled(true);
-            if(tri::HasPerVertexTexCoord(GLA()->mm()->cm) )
+            if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
               GLA()->setTextureMode(GLW::TMPerVert);
-            if(tri::HasPerWedgeTexCoord(GLA()->mm()->cm) )
+            if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
               GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 					}
 					
@@ -1216,7 +1227,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 					if(delVertNum>0 || delFaceNum>0 )
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-					GLA()->meshDoc->busy=false;
+          meshDoc()->busy=false;
 					if(newGla) GLA()->resetTrackBall();
 				}
 			}
@@ -1246,7 +1257,7 @@ void MainWindow::reload()
 
 bool MainWindow::save()
 {
-    return saveAs(GLA()->mm()->fullName());
+    return saveAs(meshDoc()->mm()->fullName());
 }
 
 
@@ -1257,7 +1268,7 @@ bool MainWindow::saveAs(QString fileName)
 	QHash<QString, MeshIOInterface*> allKnownFormats;
 
   PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
-  MeshModel *mmm=GLA()->mm();
+  MeshModel *mmm=meshDoc()->mm();
 
   QString defaultExt = "*." + mmm->suffixName().toLower();
   if(defaultExt == "*.") defaultExt = "*.ply";
@@ -1320,9 +1331,9 @@ bool MainWindow::saveAs(QString fileName)
 		// optional saving parameters (like ascii/binary encoding)
 		RichParameterSet savePar;
 
-		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
+    pCurrentIOPlugin->initSaveParameter(extension,*(this->meshDoc()->mm()),savePar);
 
-		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar,this->GLA());
+    SaveMaskExporterDialog maskDialog(new QWidget(),this->meshDoc()->mm(),capability,defaultBits,&savePar,this->GLA());
 		maskDialog.exec();
 		int mask = maskDialog.GetNewMask();
 		maskDialog.close();
@@ -1334,12 +1345,12 @@ bool MainWindow::saveAs(QString fileName)
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 		qb->show();
 		QTime tt; tt.start();
-		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
+    ret = pCurrentIOPlugin->save(extension, fileName, *this->meshDoc()->mm() ,mask,savePar,QCallBack,this);
 		qb->reset();
     GLA()->log->Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
 
 		qApp->restoreOverrideCursor();
-        //GLA()->mm()->fileName = fileName.toStdString();
+        //meshDoc()->mm()->fileName = fileName.toStdString();
 		GLA()->setFileName(fileName);
 		QSettings settings;
 		int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
@@ -1425,9 +1436,9 @@ void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
 void MainWindow::renderTexture()
 {
 	QAction *a = qobject_cast<QAction* >(sender());
-  if( tri::HasPerVertexTexCoord(GLA()->mm()->cm))
+  if( tri::HasPerVertexTexCoord(meshDoc()->mm()->cm))
     GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerVert);
-  if( tri::HasPerWedgeTexCoord(GLA()->mm()->cm))
+  if( tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm))
     GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);
 }
 

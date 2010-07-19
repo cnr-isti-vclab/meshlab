@@ -28,6 +28,7 @@
 #include <vcg/math/matrix44.h>
 #include <wrap/qt/col_qt_convert.h>
 
+#include "meshmodel.h"
 #include "filterparameter.h"
 
 

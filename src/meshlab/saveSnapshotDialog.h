@@ -20,23 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.4  2006/06/08 11:55:07  zifnab1974
-Do not use classname in class definition
-
-Revision 1.3  2006/01/02 17:19:19  glvertex
-Changed include directive to new .ui filenames
-
-Revision 1.2  2005/12/06 10:42:03  vannini
-Snapshot dialog now works
-
-Revision 1.1  2005/12/05 18:15:27  vannini
-Added snapshot save dialog (not used yet)
-
-
-****************************************************************************/
 
 #include "glarea.h"
 #include <QDialog>

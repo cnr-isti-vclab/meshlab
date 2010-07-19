@@ -21,27 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-/****************************************************************************
-  History
-
- $Log$
- Revision 1.2  2007/03/26 08:25:09  zifnab1974
- added eol at the end of the files
-
- Revision 1.1  2006/01/26 18:39:19  fmazzant
- moved mask dialog exporter from mashio to meshlab
-
- Revision 1.2  2006/01/19 09:51:04  fmazzant
- cleaned code
-
- Revision 1.1  2006/01/16 15:30:26  fmazzant
- added rename texture dialog for exporter
- removed old maskobj
-
- 
-
- ****************************************************************************/
-
 #ifndef __VCGLIB_TEXTURE_RENAME
 #define __VCGLIB_TEXTURE_RENAME
 

@@ -20,13 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-
-$Log: stdpardialog.cpp,v $
-
-****************************************************************************/
-
 #include <GL/glew.h>
 #include <QtGui>
 
@@ -62,12 +55,12 @@ void LayerDialog::toggleStatus(int row, int col)
 	{
 		case 0 :
 			//the user has chosen to switch the layer
-			mw->GLA()->meshDoc->setCurrentMesh(row);
+			mw->meshDoc()->setCurrentMesh(row);
 			break;
 		case 1 :
 		{
 			//the user has clicke on one of the eyes
-			QList<MeshModel *> &meshList= mw->GLA()->meshDoc->meshList;
+			QList<MeshModel *> &meshList= mw->meshDoc()->meshList;
 			// NICE TRICK.
 			// If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
 			// Very useful for comparing meshes
@@ -114,7 +107,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 	// switch layer
 	int row = ui->layerTableWidget->rowAt(pos.y());
 	if (row>=0)
-		mw->GLA()->meshDoc->setCurrentMesh(row);
+		mw->meshDoc()->setCurrentMesh(row);
 
 	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
 		MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
@@ -158,7 +151,7 @@ void LayerDialog::updateTable()
 		//The layer dialog cannot be opened unless a new document is opened
 		return;
 	}
-	QList<MeshModel *> &meshList= mw->GLA()->meshDoc->meshList;
+	QList<MeshModel *> &meshList= mw->meshDoc()->meshList;
 	//qDebug("Items in list: %d", meshList.size());
 	ui->layerTableWidget->clear();
 	ui->layerTableWidget->setColumnCount(3);

@@ -20,33 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.7  2006/01/06 00:16:57  glvertex
-Renamed Dialog to customDialog
 
-Revision 1.6  2006/01/02 19:13:57  glvertex
-Multi level logging
-
-Revision 1.5  2006/01/02 17:19:19  glvertex
-Changed include directive to new .ui filenames
-
-Revision 1.4  2005/12/04 16:50:15  glvertex
-Removed [using namespace] directive form .h
-Renaming in QT style
-Adapted method behavior to the new ui interface
-
-Revision 1.3  2005/12/03 22:49:46  cignoni
-Added copyright info
-
-Revision 1.3  2005/11/24 01:38:36  cignoni
-Added new plugins intefaces, tested with shownormal render mode
-
-Revision 1.2  2005/11/21 12:12:54  cignoni
-Added copyright info
-
-****************************************************************************/
 
 #include <QDialog>
 #include <QDockWidget>

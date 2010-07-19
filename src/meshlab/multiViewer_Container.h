@@ -28,8 +28,6 @@
 #include <QSplitter>
 
 #include "../common/meshmodel.h"
-#include "../common/GLLogStream.h"
-
 
 // Class list
 
@@ -79,7 +77,7 @@ public:
     int getNextViewerId();
 	int viewerCounter();
 
-	void updateAll();
+  void updateAllViewer();
 	void update(int id);
 
 	Viewer* getViewer(int id);
@@ -90,8 +88,7 @@ public:
 	MeshDocument meshDoc;
   int currentId;
 
-  GLLogStream Log;
-  GLLogStream *LogPtr() {return &Log;}
+  GLLogStream *LogPtr() {return &meshDoc.Log;}
 
 signals:
     void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow

@@ -20,64 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-
-$Log$
-Revision 1.16  2008/04/16 12:05:51  cignoni
-option for title of the dialog
-
-Revision 1.15  2008/01/28 13:02:00  cignoni
-added support for filters on collection of meshes (layer filters)
-
-Revision 1.14  2007/11/30 07:19:09  cignoni
-moved generic dialog to the meshlab base
-
-Revision 1.13  2007/11/20 18:26:16  ponchio
-Added enum support for auto dialogs, working.
-
-Revision 1.12  2007/11/19 17:09:20  ponchio
-added enum value. [untested].
-
-Revision 1.11  2007/11/19 15:51:50  cignoni
-Added frame abstraction for reusing the std dialog mechanism
-
-Revision 1.10  2007/11/05 13:34:41  cignoni
-added color and Help
-
-Revision 1.9  2007/10/02 07:59:44  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.8  2007/03/26 08:25:10  zifnab1974
-added eol at the end of the files
-
-Revision 1.7  2007/02/27 23:58:36  cignoni
-Changed apply/ok into apply/close
-
-Revision 1.6  2007/01/13 02:02:28  cignoni
-Changed loadFrameContent to pass the QString not as a reference (to avoid a temp var referencing)
-
-Revision 1.5  2007/01/11 19:51:46  pirosu
-fixed bug for QT 4.1.0/dotnet2003
-removed the request of the window title to the plugin. The action description is used instead.
-
-Revision 1.4  2007/01/11 10:40:09  cignoni
-Renamed ambiguous min/max vars
-
-Revision 1.3  2006/12/27 21:41:41  pirosu
-Added improvements for the standard plugin window:
-split of the apply button in two buttons:ok and apply
-added support for parameters with absolute and percentage values
-
-Revision 1.2  2006/12/13 21:54:35  pirosu
-2 updates for the standard plugin window: 1) it recovers its last size when it is undocked and 2) it closes itself when a filter is applied (only if it is floating)
-
-
-Revision 1.0  2006/12/13 17:37:02  pirosu
-Added standard plugin window support
-
-****************************************************************************/
-
 #ifndef MESHLAB_STDPARDIALOG_H
 #define MESHLAB_STDPARDIALOG_H
 

@@ -28,6 +28,7 @@
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
 #include <wrap/qt/col_qt_convert.h>
+#include <wrap/qt/shot_qt.h>
 
 using namespace std;
 using namespace vcg;
@@ -1098,9 +1099,7 @@ void GLArea::initializeShot(Shot &shot)
 
 bool GLArea::viewFromFile() 
 {
-	Shot shot;
-	
-	QString filename = QFileDialog::getOpenFileName(this, tr("Load Project"), "./", tr("Xml Files (*.xml)"));
+  QString filename = QFileDialog::getOpenFileName(this, tr("Load Project"), "./", tr("Xml Files (*.xml)"));
 	
 	QFile qf(filename);
 	QFileInfo qfInfo(filename);
@@ -1118,10 +1117,10 @@ bool GLArea::viewFromFile()
 
 	//TextAlign file project
 	if(type == "RegProjectML")
-		loadShotFromTextAlignFile(shot, doc);
+    loadShotFromTextAlignFile(doc);
 	//View State file
 	else if(type == "ViewState")
-		loadViewFromViewStateFile(shot, doc);
+    loadViewFromViewStateFile(doc);
 
 	qDebug("End file reading");
 	qf.close();
@@ -1129,10 +1128,11 @@ bool GLArea::viewFromFile()
 	return true;
 }
 
-void GLArea::loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc) 
+void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 {
 	QDomElement root = doc.documentElement();
 	QDomNode node;
+  Shot shot;
 
 	node = root.firstChild();
 
@@ -1146,39 +1146,8 @@ void GLArea::loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc)
 				//Aligned Image
 				if(QString::compare(node.attributes().namedItem("aligned").nodeValue(),"1")==0){
 					QDomNode nodeb = node.firstChild();
-					QDomNamedNodeMap attr = nodeb.attributes();
-					vcg::Point3d tra;
-					tra[0] = attr.namedItem("SimTra").nodeValue().section(' ',0,0).toDouble();
-					tra[1] = attr.namedItem("SimTra").nodeValue().section(' ',1,1).toDouble();
-					tra[2] = attr.namedItem("SimTra").nodeValue().section(' ',2,2).toDouble();
-					shot.Extrinsics.SetTra(-tra);
-
-					vcg::Matrix44d rot;
-					QStringList values =  attr.namedItem("SimRot").nodeValue().split(" ", QString::SkipEmptyParts);
-					for(int y = 0; y < 4; y++)
-						for(int x = 0; x < 4; x++)
-							rot[y][x] = values[x + 4*y].toDouble();
-					shot.Extrinsics.SetRot(rot);
-
-					vcg::Camera<double> &cam = shot.Intrinsics;
-					cam.FocalMm = attr.namedItem("Focal").nodeValue().toDouble();
-					cam.ViewportPx.X() = attr.namedItem("Viewport").nodeValue().section(' ',0,0).toInt();
-					cam.ViewportPx.Y() = attr.namedItem("Viewport").nodeValue().section(' ',1,1).toInt();
-					cam.CenterPx[0] = attr.namedItem("Center").nodeValue().section(' ',0,0).toInt();
-					cam.CenterPx[1] = attr.namedItem("Center").nodeValue().section(' ',1,1).toInt();
-					cam.PixelSizeMm[0] = attr.namedItem("ScaleF").nodeValue().section(' ',0,0).toDouble();
-					cam.PixelSizeMm[1] = attr.namedItem("ScaleF").nodeValue().section(' ',1,1).toDouble();
-					cam.k[0] = attr.namedItem("LensDist").nodeValue().section(' ',0,0).toDouble();
-					cam.k[1] = attr.namedItem("LensDist").nodeValue().section(' ',1,1).toDouble();
-
-					// scale correction
-					float scorr = attr.namedItem("ScaleCorr").nodeValue().toDouble();
-					if(scorr != 0.0) {
-						cam.PixelSizeMm[0] *= scorr;
-						cam.PixelSizeMm[1] *= scorr;
-					}
-
-				}
+          ReadShotFromQDomNode(shot,nodeb);
+        }
 			}
 		}
 		node = node.nextSibling();
@@ -1221,53 +1190,25 @@ void GLArea::loadShotFromTextAlignFile(Shot &shot, QDomDocument &doc)
 /* 
 ViewState file is an xml file format created by Meshlab with the action "copyToClipboard"
 */
-void GLArea::loadViewFromViewStateFile(Shot &shot, QDomDocument &doc)
+void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 {
-
+  Shot shot;
 	QDomElement root = doc.documentElement();
 	QDomNode node = root.firstChild();
 
-	while(!node.isNull()){
-		if(QString::compare(node.nodeName(),"CamParam")==0)
-		{
-			QDomNamedNodeMap attr = node.attributes();
-			vcg::Point3d tra;
-			tra[0] = attr.namedItem("SimTra").nodeValue().section(' ',0,0).toDouble();
-			tra[1] = attr.namedItem("SimTra").nodeValue().section(' ',1,1).toDouble();
-			tra[2] = attr.namedItem("SimTra").nodeValue().section(' ',2,2).toDouble();
-			shot.Extrinsics.SetTra(-tra);
-
-			vcg::Matrix44d rot;
-			QStringList values =  attr.namedItem("SimRot").nodeValue().split(" ", QString::SkipEmptyParts);
-			for(int y = 0; y < 4; y++)
-				for(int x = 0; x < 4; x++)
-					rot[y][x] = values[x + 4*y].toDouble();
-			shot.Extrinsics.SetRot(rot);
-
-			vcg::Camera<double> &cam = shot.Intrinsics;
-			cam.FocalMm = attr.namedItem("Focal").nodeValue().toDouble();
-			cam.ViewportPx.X() = attr.namedItem("Viewport").nodeValue().section(' ',0,0).toInt();
-			cam.ViewportPx.Y() = attr.namedItem("Viewport").nodeValue().section(' ',1,1).toInt();
-			cam.CenterPx[0] = attr.namedItem("Center").nodeValue().section(' ',0,0).toInt();
-			cam.CenterPx[1] = attr.namedItem("Center").nodeValue().section(' ',1,1).toInt();
-			cam.PixelSizeMm[0] = attr.namedItem("ScaleF").nodeValue().section(' ',0,0).toDouble();
-			cam.PixelSizeMm[1] = attr.namedItem("ScaleF").nodeValue().section(' ',1,1).toDouble();
-			cam.k[0] = attr.namedItem("LensDist").nodeValue().section(' ',0,0).toDouble();
-			cam.k[1] = attr.namedItem("LensDist").nodeValue().section(' ',1,1).toDouble();
-
-			// scale correction
-			float scorr = attr.namedItem("ScaleCorr").nodeValue().toDouble();
-			if(scorr != 0.0) {
-				cam.PixelSizeMm[0] *= scorr;
-				cam.PixelSizeMm[1] *= scorr;
-			}
-		}
+  while(!node.isNull())
+  {
+    if (QString::compare(node.nodeName(),"CamParam")==0)
+      ReadShotFromQDomNode<Shot>(shot,node);
 		else if (QString::compare(node.nodeName(),"ViewSettings")==0)
 		{
 			QDomNamedNodeMap attr = node.attributes();
 			trackball.track.sca = attr.namedItem("TrackScale").nodeValue().section(' ',0,0).toFloat();
 			nearPlane = attr.namedItem("NearPlane").nodeValue().section(' ',0,0).toFloat();
-			farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();
+			farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();      
+      clipRatioNear = (getCameraDistance()-nearPlane)/2.0f ;
+      clipRatioFar = (farPlane-getCameraDistance())/10.0f ;
+
 		}
 		else if (QString::compare(node.nodeName(),"Render")==0)
 		{
@@ -1360,13 +1301,9 @@ void GLArea::viewFromClipboard()
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	QString shotString = clipboard->text();
-
-	Shot shot;
-
 	QDomDocument doc("StringDoc");  
 	doc.setContent(shotString);
-
-	loadViewFromViewStateFile(shot, doc);
+  loadViewFromViewStateFile(doc);
 }
 
 QPair<vcg::Shot<double>,float> GLArea::shotFromTrackball()

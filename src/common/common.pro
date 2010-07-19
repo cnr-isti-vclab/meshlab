@@ -16,7 +16,14 @@ win32-g++:DLLDESTDIR = ../distrib
 
 mac:DLLDESTDIR = .
 
-macx:QMAKE_POST_LINK = "cp libcommon.* ../distrib/meshlab.app/Contents/MacOs/"
+macx:QMAKE_POST_LINK = "\
+if [ -d  ../distrib/meshlab.app/Contents/MacOs/ ]; \
+then  \
+echo "Copying";  \
+else  \
+mkdir ../distrib/meshlab.app/Contents/MacOs/;  \
+fi;   \
+cp libcommon.* ../distrib/meshlab.app/Contents/MacOs/"
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
     $$GLEWDIR/include
@@ -51,6 +58,7 @@ HEADERS += filterparameter.h \
     pluginmanager.h \
     ../../../vcglib/wrap/gl/trimesh.h
 SOURCES += filterparameter.cpp \
+    interfaces.cpp \
     filterscript.cpp \
     GLLogStream.cpp \
     meshmodel.cpp \
