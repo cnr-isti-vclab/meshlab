@@ -1169,8 +1169,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 	// The shot loaded from TextAlign doesn't have a scale. Trackball needs it.
 	// The scale factor is computed as the ratio between cameraDistance and the z coordinate of the translation 
 	// introduced by the shot.
-	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
-	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
+	fov = shot.GetFovFromFocal();
 
 	float cameraDist = getCameraDistance();
 
@@ -1348,8 +1347,7 @@ void GLArea::loadShot(const QPair<vcg::Shot<double>,float> &shotAndScale){
 	
 	Shot shot = shotAndScale.first;
 	
-	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
-	fov = 2*(vcg::math::ToDeg(atanf(viewportYMm/(2*shot.Intrinsics.FocalMm))));
+	fov = shot.GetFovFromFocal();
 
 	float cameraDist = getCameraDistance();
 
