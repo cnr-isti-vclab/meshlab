@@ -128,9 +128,9 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 		{
 			par.addParam(new RichInt("targetAbstractMinFaceNum",100,"Abstract Min Mesh Size",
 				"This number and the following one indicate the range face number of the abstract mesh that is used for the parametrization process.<br>"
-				"The algorithm will choose the abstract mesh with the best number of triangles within the specified interval.<br>"
+        "The algorithm will choose the best abstract mesh with the number of triangles within the specified interval.<br>"
 				"If the mesh has a very simple structure this range can be very low and strict;"
-				"for a roughly spherical object if you specify a range of [8,8] faces you get a octahedral abstract mesh, e.g. a geometry image.<br>"
+        "for a roughly spherical object if you can specify a range of [8,8] faces you get a octahedral abstract mesh, e.g. a geometry image.<br>"
 				"Large numbers (greater than 400) are usually not of practical use."));
 			par.addParam(new RichInt("targetAbstractMaxFaceNum",200,"Abstract Max Mesh Size", "See above."));
 			QStringList stopCriteriaList;
@@ -139,7 +139,7 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 			stopCriteriaList.push_back("Regularity");
 			stopCriteriaList.push_back("L2");
 
-			par.addParam(new RichEnum("stopCriteria", 0, stopCriteriaList, tr("Optimization Criteria"),
+      par.addParam(new RichEnum("stopCriteria", 1, stopCriteriaList, tr("Optimization Criteria"),
 				tr("<p style=\'white-space:pre\'>"
 				"Choose a metric to stop the parametrization within the interval<br>"
 				"1: Best Heuristic : stop considering both isometry and number of faces of base domain<br>"
@@ -158,8 +158,13 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 		}
 	case ISOP_DIAMPARAM :
 		{
-			par.addParam(new RichDynamicFloat("BorderSize",0.05f,0.01f,0.5f,"BorderSize ratio", "This specify the border for each diamond.<br>"
-				"The bigger is the less triangles are splitted, but the more UV space is used."));								 
+      par.addParam(new RichDynamicFloat("BorderSize",0.1f,0.01f,0.5f,"BorderSize ratio",
+          "This parameter controls the amount of space that must be left between each diamond when building the atlas."
+          "It directly affects how many triangle are splitted during this conversion. <br>"
+          "In abstract parametrization mesh triangles can naturally cross the triangles of the abstract domain, so when converting "
+          "to a standard parametrization we must cut all the triangles that protrudes outside each diamond more than the specified threshold."
+          "The unit of the threshold is in percentage of the size of the diamond,"
+          "The bigger the threshold the less triangles are splitted, but the more UV space is used (wasted)."));
 			break;										
 		}
 	case ISOP_LOAD : 
@@ -168,7 +173,7 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 			QString fileName = fi.baseName();
 
 			fileName = fileName.append(".abs");
-			par.addParam(new RichString("AbsName", fileName, "Abstract Mesh file", "Set the abstract mesh as basedomain"));
+      par.addParam(new RichString("AbsName", fileName, "Abstract Mesh file", "The filename of the abstract mesh that has to be loaded"));
 			break;
 		}
 	case ISOP_SAVE : 
@@ -177,21 +182,21 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 			QString fileName = fi.baseName();
 
 			fileName = fileName.append(".abs");
-			par.addParam(new RichString("AbsName", fileName, "Abstract Mesh file", "Set the abstract mesh as basedomain"));
+      par.addParam(new RichString("AbsName", fileName, "Abstract Mesh file", "The filename where the abstract mesh has to be saved"));
 			break;
 		}
 	case ISOP_TRANSFER:
 		{
-			par.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
-				"The mesh to be Isoparameterized"));
-		}
+      par.addParam(new RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",	"The mesh already having an Isoparameterization"));
+      par.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",	"The mesh to be Isoparameterized"));
+    }
 	}
 }
 
 void FilterIsoParametrization::PrintStats(CMeshO *mesh)
 {
-	vcg::tri::UpdateTopology<CMeshO>::FaceFace(*mesh);
-	vcg::tri::UpdateTopology<CMeshO>::VertexFace(*mesh);
+  tri::UpdateTopology<CMeshO>::FaceFace(*mesh);
+  tri::UpdateTopology<CMeshO>::VertexFace(*mesh);
 	int non_reg=NumRegular<CMeshO>(*mesh);
 	float minE,maxE,avE,stdE;
 	float minAr,maxAr,avAr,stdAr;
@@ -251,7 +256,6 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 	{
 	case ISOP_PARAM :
 		{
-
 			int targetAbstractMinFaceNum = par.getInt("targetAbstractMinFaceNum");
 			int targetAbstractMaxFaceNum = par.getInt("targetAbstractMaxFaceNum");
 			int convergenceSpeed = par.getInt("convergenceSpeed");
@@ -302,46 +306,44 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			}
 			else
 			{
-				if (!isTXTenabled)
-					m->clearDataMask(MeshModel::MM_VERTTEXCOORD);
-				if (!isFMarkenabled)
-					m->clearDataMask(MeshModel::MM_FACEMARK);
-				if (!isVMarkenabled)
-					m->clearDataMask(MeshModel::MM_VERTMARK);
-				if (!isVColorenabled)
-					m->clearDataMask(MeshModel::MM_VERTCOLOR);
-				if (!isFColorenabled)
-					m->clearDataMask(MeshModel::MM_FACECOLOR);
-
-				if (ret==IsoParametrizator::MultiComponent)
-					this->errorMessage="non possible parameterization because of multi componet mesh";
-				else
-					if (ret==IsoParametrizator::NonSizeCons)
-						this->errorMessage="non possible parameterization because of non size consistent mesh";
-					else
-						if (ret==IsoParametrizator::NonManifoldE)
-							this->errorMessage="non possible parameterization because of non manifold edges";
-						else
-							if (ret==IsoParametrizator::NonManifoldV)
-								this->errorMessage="non possible parameterization because of non manifold vertices";
-							else
-								if (ret==IsoParametrizator::NonWatertigh)
-									this->errorMessage="non possible parameterization because of non watertight mesh";
-								else
-									if (ret==IsoParametrizator::FailParam)
-										this->errorMessage="non possible parameterization cause one of the following reasons:\n Topologycal noise \n Too Low resolution mesh \n Too Bad triangulation \n";
-				return false;
+        if (!isTXTenabled)    m->clearDataMask(MeshModel::MM_VERTTEXCOORD);
+        if (!isFMarkenabled)  m->clearDataMask(MeshModel::MM_FACEMARK);
+        if (!isVMarkenabled)  m->clearDataMask(MeshModel::MM_VERTMARK);
+        if (!isVColorenabled) m->clearDataMask(MeshModel::MM_VERTCOLOR);
+        if (!isFColorenabled) m->clearDataMask(MeshModel::MM_FACECOLOR);
+        switch(ret)
+        {
+        case IsoParametrizator::MultiComponent:
+          this->errorMessage="non possible parameterization because of multi componet mesh"; return false;
+        case IsoParametrizator::NonSizeCons:
+          this->errorMessage="non possible parameterization because of non size consistent mesh"; return false;
+        case IsoParametrizator::NonManifoldE:
+          this->errorMessage="non possible parameterization because of non manifold edges"; return false;
+        case IsoParametrizator::NonManifoldV:
+          this->errorMessage="non possible parameterization because of non manifold vertices";return false;
+        case IsoParametrizator::NonWatertigh:
+          this->errorMessage="non possible parameterization because of non watertight mesh"; return false;
+        case IsoParametrizator::FailParam:
+          this->errorMessage="non possible parameterization cause one of the following reasons:\n Topologycal noise \n Too Low resolution mesh \n Too Bad triangulation \n"; return false;
+        default:
+          this->errorMessage="unknown error"; return false;
+        }
 			}
-			Parametrizator.ExportMeshes(para_mesh,abs_mesh);
-			isoPHandle=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
-			bool isOK=isoPHandle().Init(&abs_mesh,&para_mesh);
+      // At this point we are sure that everithing went ok so we can allocate surely the abstract
+      AbstractMesh *abs_mesh = new AbstractMesh();
+      ParamMesh *para_mesh = new ParamMesh();
+      Parametrizator.ExportMeshes(*para_mesh,*abs_mesh);
+      CMeshO::PerMeshAttributeHandle<IsoParametrization> isoPHandle;
+      isoPHandle=tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
+
+      bool isOK=isoPHandle().Init(abs_mesh,para_mesh);
 
 			///copy back to original mesh
 			isoPHandle().CopyParametrization<CMeshO>(mesh);
 
 			if (!isOK)
 			{
-				Log("Problems gathering parameterization \n");
+        this->errorMessage="Problems gathering parameterization \n";
 				return false;
 			}
 			if (!isVMarkenabled)
@@ -352,7 +354,10 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		}
 	case ISOP_REMESHING :
 		{
-			bool b=vcg::tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
+      CMeshO::PerMeshAttributeHandle<IsoParametrization> isoPHandle =
+          tri::Allocator<CMeshO>::GetPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
+
+      bool b=tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
 			if (!b)
 			{
 				this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
@@ -369,7 +374,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			MeshModel* mm=md.addNewMesh("Re-meshed");
 
 			CMeshO *rem=&mm->cm;
-
+      DiamSampler DiamSampl;
 			DiamSampl.Init(&isoPHandle());
 			bool done=DiamSampl.SamplePos(SamplingRate);
 			assert(done);
@@ -386,12 +391,14 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			mm->updateDataMask(MeshModel::MM_VERTFACETOPO);
 			PrintStats(rem);
-			vcg::tri::UpdateNormals<CMeshO>::PerFace(*rem);
+      tri::UpdateNormals<CMeshO>::PerFace(*rem);
 			return true;
 		}
 	case ISOP_DIAMPARAM :
 		{
-			bool b=vcg::tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
+      CMeshO::PerMeshAttributeHandle<IsoParametrization> isoPHandle =
+          tri::Allocator<CMeshO>::GetPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
+      bool b=tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
 			if (!b)
 			{
 				this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
@@ -406,39 +413,39 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			DiamondParametrizator DiaPara;
 			DiaPara.Init(&isoPHandle());
 			DiaPara.SetCoordinates<CMeshO>(*rem,border_size);
-			vcg::tri::UpdateNormals<CMeshO>::PerFace(*rem);
+      tri::UpdateNormals<CMeshO>::PerFace(*rem);
 			return true;
 		}
 	case ISOP_LOAD : 
 		{
 			QString AbsName = par.getString("AbsName");
-			/*bool isTXTenabled=m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
-			bool isTXTenabled=m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
-			if (!isTXTenabled)
-			{*/
-			//this->errorMessage="Per Vertex Text Coordinates are not enabled";
-			//return false;
 			m->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 			m->updateDataMask(MeshModel::MM_VERTTEXCOORD);
 			m->updateDataMask(MeshModel::MM_FACECOLOR);
 			m->updateDataMask(MeshModel::MM_VERTQUALITY);
 			m->updateDataMask(MeshModel::MM_FACEMARK);
-			//}
 			if(!QFile(m->fullName()).exists())
 			{
 				this->errorMessage="File not exists";
 				return false;
 			}
-			bool b=vcg::tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
+      CMeshO::PerMeshAttributeHandle<IsoParametrization> isoPHandle =
+          tri::Allocator<CMeshO>::GetPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
+
+      bool b=tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
 			if (!b)
-				isoPHandle=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
+        isoPHandle=tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
 
 			QByteArray ba = AbsName.toLatin1();
 			char *path=ba.data();
-			bool Done=isoPHandle().LoadBaseDomain<CMeshO>(path,mesh,&para_mesh,&abs_mesh,true);
+      AbstractMesh *abs_mesh = new AbstractMesh();
+      ParamMesh *para_mesh = new ParamMesh();
+      bool Done=isoPHandle().LoadBaseDomain<CMeshO>(path,mesh,para_mesh,abs_mesh,true);
 			if (!Done)
 			{
 				this->errorMessage="Abstract domain doesnt fit well with the parametrized mesh";
+        delete para_mesh;
+        delete abs_mesh;
 				return false;
 			}
 			return true;
@@ -446,7 +453,10 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 	case ISOP_SAVE : 
 		{
 			m->updateDataMask(MeshModel::MM_VERTQUALITY);
-			bool b=vcg::tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
+      CMeshO::PerMeshAttributeHandle<IsoParametrization> isoPHandle =
+          tri::Allocator<CMeshO>::GetPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
+
+      bool b=tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
 			if (!b)
 			{
 				this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
@@ -463,29 +473,37 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 		}
 	case ISOP_TRANSFER:
 		{
-			bool b=vcg::tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*mesh,isoPHandle);
+      MeshModel *mmtrg = par.getMesh("targetMesh");
+      MeshModel *mmsrc = par.getMesh("targetMesh");
+      CMeshO *trgMesh=&mmtrg->cm;
+      CMeshO *srcMesh=&mmsrc->cm;
+
+      CMeshO::PerMeshAttributeHandle<IsoParametrization> isoPHandle =
+          tri::Allocator<CMeshO>::GetPerMeshAttribute<IsoParametrization>(*mesh,"isoparametrization");
+
+      bool b=tri::Allocator<CMeshO>::IsValidHandle<IsoParametrization>(*srcMesh,isoPHandle);
 			if (!b)
 			{
-				this->errorMessage="You must compute the Base domain before remeshing. Use the Isoparametrization command.";
+        this->errorMessage="Your source mesh must have the abstract isoparametrization. Use the Isoparametrization command.";
 				return false;
 			}
 			IsoTransfer IsoTr;
-			MeshModel *mm = par.getMesh("targetMesh");
-			mm->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
-			mm->updateDataMask(MeshModel::MM_VERTTEXCOORD);
-			mm->updateDataMask(MeshModel::MM_FACECOLOR);
-			mm->updateDataMask(MeshModel::MM_VERTQUALITY);
-			mm->updateDataMask(MeshModel::MM_FACEMARK);
-			CMeshO *trgMesh=&mm->cm;
-			IsoTr.Transfer<CMeshO>(isoPHandle(),*trgMesh);
+      AbstractMesh *abs_mesh = isoPHandle().AbsMesh();
+      ParamMesh *para_mesh = isoPHandle().ParaMesh();
+
+      mmtrg->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+      mmtrg->updateDataMask(MeshModel::MM_VERTTEXCOORD);
+      mmtrg->updateDataMask(MeshModel::MM_FACECOLOR);
+      mmtrg->updateDataMask(MeshModel::MM_VERTQUALITY);
+      mmtrg->updateDataMask(MeshModel::MM_FACEMARK);
+      IsoTr.Transfer<CMeshO>(isoPHandle(),*trgMesh);
 			
 			isoPHandle().Clear();
-			vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(*mesh,isoPHandle);
+      tri::Allocator<CMeshO>::DeletePerMeshAttribute(*srcMesh,isoPHandle);
 			
-			//delete(isoPHandle());
-			isoPHandle=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*trgMesh,"isoparametrization");
-			isoPHandle().AbsMesh()=&abs_mesh;
-      isoPHandle().SetParamMesh<CMeshO>(trgMesh,&para_mesh);
+      isoPHandle=tri::Allocator<CMeshO>::AddPerMeshAttribute<IsoParametrization>(*trgMesh,"isoparametrization");
+      isoPHandle().AbsMesh()=abs_mesh;
+      isoPHandle().SetParamMesh<CMeshO>(trgMesh,para_mesh);
 			
 			return true;
 		}

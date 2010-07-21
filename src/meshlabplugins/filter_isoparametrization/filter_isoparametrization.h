@@ -60,10 +60,6 @@ class FilterIsoParametrization : public QObject, public MeshFilterInterface
         virtual bool applyFilter(QAction *filter, MeshDocument&, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
         int postCondition(QAction* filter) const;
 		void PrintStats(CMeshO *mesh);
-		AbstractMesh abs_mesh;
-		ParamMesh para_mesh;
-		//IsoParametrization IsoParam;
-		CMeshO::PerMeshAttributeHandle<IsoParametrization> isoPHandle;
-		DiamSampler DiamSampl;
+
     };
 #endif
