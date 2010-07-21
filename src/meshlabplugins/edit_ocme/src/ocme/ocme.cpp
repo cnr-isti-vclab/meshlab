@@ -143,13 +143,14 @@ void OCME::RecordCellsSetModification(){
 }
 void OCME::StopRecordCellsSetModification(){
 		record_cells_set_modification = false;
-		::RemoveDuplicates(removed_cells);
-		::RemoveDuplicates(added_cells);
-		::RemoveDuplicates(touched_cells);
+		::RemoveDuplicates(removed_cells);std::sort(removed_cells.begin(),removed_cells.end());
+		::RemoveDuplicates(added_cells);std::sort(added_cells.begin(),added_cells.end());
+		::RemoveDuplicates(touched_cells);std::sort(touched_cells.begin(),touched_cells.end());
 
 		std::vector<CellKey> output;
 
 		output.reserve(added_cells.size());
+
 		 std::set_difference(added_cells.begin(),added_cells.end(),removed_cells.begin(),removed_cells.end(),std::back_inserter(output));
 		added_cells = output;
 

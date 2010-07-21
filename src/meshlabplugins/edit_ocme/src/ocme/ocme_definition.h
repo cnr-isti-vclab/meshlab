@@ -436,13 +436,20 @@ struct OCME{
 	++++++++++++++++++++++++++++++ END  Rendering ++++++++++++++++++++++++++++++
 	*/
 
-	/* move the vertex from cell c to cell new_c and update GIndex gposv 
+	/*
+	++++++++++++++++++++++++++++++++ Edit/Commit ++++++++++++++++++++++++++++++
 	*/
-	//void MoveFace(GIndex & gposv, Cell *&  c,  Cell *& new_c);	
 
-	// DEBUG 
+	/*
+		keep trace of the faces and vertices taken for editing.
+		These containers are used to find out which element have been deleted by difference
+	*/
+	std::vector<GIndex> edited_faces;
+	std::vector<GIndex> edited_vertices;
+	std::vector<Cell*>	toCleanUpCells;					// cells that contain deleted elements
+
 	// Build a mesh with all the faces of a single cell whose vertices are also
-	// in the same cell
+	// in the same cell (only debug purpose)
 	template <class MeshType>
 	void ExtractContainedFacesFromASingleCell(CellKey ck , MeshType & m,bool loadall = false, bool includeExternals = true);
 
@@ -457,6 +464,13 @@ struct OCME{
 	// Build a mesh where the elements contained in cells may be edited
 	template <class MeshType>
 	void Edit(  std::vector<Cell*> & cells, MeshType & m,  AttributeMapper attr_map = AttributeMapper());
+
+
+	// find the removed elements
+	template <class MeshType>
+	void FindRemovedElements( MeshType & m,
+														typename MeshType::template PerVertexAttributeHandle<GIndex> &gPosV,
+														typename MeshType::template PerFaceAttributeHandle<GIndex> & gPosF );
 
 	// commit a mesh that was previously built with edit
 	template <class MeshType>
@@ -518,6 +532,10 @@ struct OCME{
 	which was already referring the vertex as external
 	*/
 	void RebindInternal(std::vector<Cell*>   toRebindCells, std::vector<Cell*>   & toCleanUpCells);
+
+	/*
+	++++++++++++++++++++++++++++++++ End Edit/Commit ++++++++++++++++++++++++++++++
+	*/
 
 	// create a new OCME
 	void Create(const char * name, unsigned int pagesize = 1024);

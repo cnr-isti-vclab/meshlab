@@ -9,6 +9,65 @@ extern unsigned int lockedMark;
 extern unsigned int computed_vert2externalsMark;
 
 
+
+// find the removed elements
+template <class MeshType>
+void OCME::FindRemovedElements( MeshType & m,
+																typename MeshType::template PerVertexAttributeHandle<GIndex> &gPosV,
+																typename MeshType::template PerFaceAttributeHandle<GIndex>& gPosF
+																){
+		typename MeshType::FaceIterator fi;
+		typename MeshType::VertexIterator vi;
+		unsigned int i;
+
+		std::vector<GIndex> committing_faces;
+		std::vector<GIndex> committing_vertices;
+
+		/*
+			find the GIndex being committed
+		*/
+		i = 0;
+		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
+		{
+				GIndex gposv = gPosV [i];
+				if(!gposv.IsUnassigned() && !(*vi).IsD())
+						committing_vertices.push_back(gposv);
+		}
+
+		i = 0;
+		for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i){
+						GIndex gposf = gPosF [i];
+						if(!gposf.IsUnassigned() && !(*fi).IsD())
+								committing_faces.push_back(gposf);
+				}
+
+		/*
+			find the GIndex that were taken in edit and are not being committed back
+		*/
+
+		std::vector<GIndex> deleted_elements;
+		SetDifference(edited_faces,committing_faces,deleted_elements);
+		for(unsigned int i = 0; i < deleted_elements.size(); ++i){
+				Cell* c = GetCell(deleted_elements[i].ck,false);
+				assert(c);
+				c->ecd->deleted_face.SetAsVectorOfMarked();
+				c->ecd->deleted_face.SetMarked(deleted_elements[i].i,true);
+				toCleanUpCells.push_back(c);
+				}
+
+
+		SetDifference(edited_vertices,committing_vertices,deleted_elements);
+		for( i = 0; i < deleted_elements.size(); ++i){
+				Cell* c = GetCell(deleted_elements[i].ck,false);
+				assert(c);
+				c->ecd->deleted_vertex.SetAsVectorOfMarked();
+				c->ecd->deleted_vertex.SetMarked(deleted_elements[i].i,true);
+				toCleanUpCells.push_back(c);
+				}
+
+		::RemoveDuplicates(toCleanUpCells);
+}
+
 template <class MeshType>
 void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 	typedef typename MeshType::ScalarType ScalarType; 
@@ -45,13 +104,16 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 	vcg::SimpleTempData<typename MeshType::VertContainer,GIndex> gPosVOld(m.vert);	// create the temporary data
 	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi) gPosVOld[vi] = gPosV[vi];	// copy the attribute		
 	
+
+	FindRemovedElements(m,gPosV,gPosF);
+
 	/* we will (temporarily) need to know the global index of new external vertices.*/
 
 	typedef std::pair<GIndex,GIndex> R2E;				// reference 2 externals/ The first GIndex is to externalReferences, the second to vert
 	std::map<GIndex,GIndex> :: iterator r2e_i;		
 	std::map<GIndex,GIndex> ref_2_ext;					// store all the new reference to externals
 
-	std::vector<Cell*>	toCleanUpCells,					// cells that contain deleted elements
+	std::vector<Cell*>
 						toRebind,						// cells that contain moved vertices
 						toCleanUpCells_vert2externals;	// cells than contain temporary map from vert to externals
 

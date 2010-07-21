@@ -311,6 +311,25 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			(*ci)->face->FreeAll();
 	}
 
+	{
+
+	typename MeshType::FaceIterator fi;
+	typename MeshType::VertexIterator vi;
+	unsigned int i;
+	// trace the elements that have been taken for editing
+	edited_faces.clear();
+	edited_vertices.clear();
+
+	i = 0;
+	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
+			if(!(*vi).IsD()  && !lockedV[i])
+					edited_vertices.push_back(gPosV[i]);
+
+	i = 0;
+	for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i)
+			if(!(*fi).IsD()  && !lockedF[i])
+					edited_faces.push_back(gPosF[i]);
+	}
 }
 
 template <class MeshType>
@@ -319,7 +338,6 @@ void OCME::Edit(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper
 	std::vector<Cell*>::iterator ci; 
 
 	++generic_bool; // mark cells taken for editing
-
 
 	/*	extend the set of cells to edit with those in the same 3D space
 		ar different levels

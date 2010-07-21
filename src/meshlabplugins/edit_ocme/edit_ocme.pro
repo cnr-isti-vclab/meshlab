@@ -58,7 +58,7 @@ DESTDIR = ../../../../meshlab/src/distrib/plugins
 # We should never be too permissive
 # win32-g++:QMAKE_CXXFLAGS += -fpermissive
 contains(TEMPLATE,lib):CONFIG(debug, debug|release) { 
-    unix:TARGET = $$member(TARGET, 0)_debug
+		unix:TARGET = $$member(TARGET, 0)_DEBUG
     else:TARGET = $$member(TARGET, 0)d
 }
 HEADERS = edit_ocme_factory.h \

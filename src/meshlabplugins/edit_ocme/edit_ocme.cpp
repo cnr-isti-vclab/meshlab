@@ -204,7 +204,7 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 	if(isDragging)
 			DrawXORRect(gla);
 
-#define _RELEASED_
+
 	rendering.unlock();
 
 #ifndef _RELEASED_
@@ -525,8 +525,19 @@ void OcmeEditPlugin::edit(){
 
 
 	for(unsigned int i = 0; i < mm->cm.face.size();++i)
-		if(!mm->cm.face[i].IsD())
-			if( lockedF[i] ) for(unsigned int fi = 0; fi < 3; ++ fi )lockedV[mm->cm.face[i].V(fi)] = 1;
+			if(!mm->cm.face[i].IsD())
+					if( lockedF[i] ) {
+			for(unsigned int fi = 0; fi < 3; ++ fi ){
+								lockedV[mm->cm.face[i].V(fi)] = 1;
+								mm->cm.face[i].V(fi)->SetS();
+		}
+			mm->cm.face[i].SetS();
+	}
+
+	for(unsigned int i = 0; i < mm->cm.vert.size();++i)
+			if( lockedV[i] ) mm->cm.vert[i].SetS();
+
+
 
 	vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 

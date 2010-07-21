@@ -466,7 +466,7 @@ main (int argc,char **argv )
 
 			stat(argv[i],&buf);
 			meshona->stat.input_file_size+=buf.st_size;
-												if(buf.st_size < 50 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
+												if(buf.st_size < 500 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
 
 				int mask = 0;
 

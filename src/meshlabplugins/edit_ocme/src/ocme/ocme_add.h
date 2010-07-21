@@ -73,6 +73,8 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	typename MeshType::FaceIterator fi;
 	typename MeshType::VertexIterator vi;
 
+	static unsigned int n_duplicate_removal = 0;
+
 	int h;
 	Cell * c = NULL; // current cell. Cache the last used cell because very often this is coherent from face to face
 
@@ -106,6 +108,11 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 
 	/* Here the main cycle. for each face of the mesh put it in the hashed multigrid */
 	for(fi = m.face.begin(); fi != m.face.end(); ++fi) if(!(*fi).IsD()){
+
+		if(added_cells.size() > (n_duplicate_removal+1)*1000){
+				::RemoveDuplicates(this->added_cells);
+				++n_duplicate_removal;
+		}
 
 		// 1: find the proper level
 		h = ComputeLevel<MeshType>(*fi,sr);

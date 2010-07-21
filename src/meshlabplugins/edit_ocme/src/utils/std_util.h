@@ -11,6 +11,16 @@ void RemoveDuplicates(STD_CONTAINER & cont){
 	cont.erase(newend,cont.end());
 }
 
+template <class STD_CONTAINER>
+void SetDifference(STD_CONTAINER & A,STD_CONTAINER & B,STD_CONTAINER & A_B){
+A_B.clear();
+A_B.reserve(A.size());
+std::sort(A.begin(),A.end());
+std::sort(B.begin(),B.end());
+std::set_difference(A.begin(),A.end(),B.begin(),B.end(),std::back_inserter(A_B));
+}
+
+
 template <class CONT>
 void Delete(CONT & todelete){  ;CONT  tmp; todelete.clear();tmp.swap(todelete);}
 
