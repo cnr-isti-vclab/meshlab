@@ -271,7 +271,15 @@ public:
 
 };// end class MeshModel
 
+class TagBase
+{
+	int id;
+	QString typeName;
+	QList<int> referringMeshes;
+	QList<int> referringRasters;
+	QString filterOwner;
 
+}; //end class TagBase
 
 class RenderMode
 {
@@ -341,6 +349,9 @@ public:
 	/// The very important member:
 	/// The list of MeshModels.
 	QList<MeshModel *> meshList;
+
+	///The list of the taggings of all the meshes/rasters of the project
+	QList<TagBase *> tagList;
 
   GLLogStream Log;
   FilterScript filterHistory;
