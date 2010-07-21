@@ -20,14 +20,20 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+/****************************************************************************
+History
+
+$Log: stdpardialog.cpp,v $
+****************************************************************************/
 #ifndef LAYER_DIALOG_H
 #define LAYER_DIALOG_H
 #include <QtGui>
 
 class GLArea;
 class MainWindow;
-class QTableWidget;
+class QTreeWidget;
 class GLLogStream;
+class MeshModel;
 
 #include <QDialog>
 
@@ -35,6 +41,14 @@ namespace Ui
 {
 	class layerDialog;
 } 
+
+class MeshTreeWidgetItem : public QTreeWidgetItem
+{
+	public:
+	MeshTreeWidgetItem(MeshModel *);
+
+	MeshModel *m;
+};
 
 class LayerDialog : public QDockWidget
 {
@@ -46,10 +60,11 @@ public:
 
 public slots:
     void updateTable();
-    void toggleStatus(int row, int column);
+    void toggleStatus(QTreeWidgetItem * , int );
     void showEvent ( QShowEvent * event );
     void showContextMenu(const QPoint& pos);
     void showLayerMenu();
+	void adaptColumns(QTreeWidgetItem * item);
 
 private:
     Ui::layerDialog* ui;
