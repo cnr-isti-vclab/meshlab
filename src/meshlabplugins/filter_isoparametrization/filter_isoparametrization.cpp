@@ -64,7 +64,7 @@ QString FilterIsoParametrization::filterName(FilterIDType filter) const
 	{
 	case ISOP_PARAM :			return "Iso Parametrization";
 	case ISOP_REMESHING : return "Iso Parametrization Remeshing";
-	case ISOP_DIAMPARAM : return "Iso Parametrization transfer to Original mesh";
+  case ISOP_DIAMPARAM : return "Iso Parametrization Build Atlased Mesh";
 	case ISOP_LOAD :			return "Iso Parametrization Load Abstract Domain";
 	case ISOP_SAVE :			return "Iso Parametrization Save Abstract Domain";
 	case ISOP_TRANSFER:		return "Iso Parametrization transfer between meshes";
@@ -77,30 +77,32 @@ QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
-	case ISOP_PARAM : return "<br>   Parameterization of a two-manifold triangular mesh   <br>"
+  case ISOP_PARAM : return "<br>   The filter build the abstract Isoparameterization of a two-manifold triangular mesh   <br>"
 											"An adaptively chosen abstract domain of the parameterization is built. For more details see: <br>"
 											"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
-											"IEEE Transaction of Visualization and Computer Graphics 2009";
-	case ISOP_REMESHING : return "<br>	 Remeshing based on an Abstract domain   <br>"
+                      "IEEE Transaction of Visualization and Computer Graphics 2010";
+  case ISOP_REMESHING : return "<br>	 Remeshing based on an Abstract Isoparameterization, each triangle of the domain is recursively subdivided. <br>"
 													"For more details see: <br>"
 													"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
-													"IEEE Transaction of Visualization and Computer Graphics 2009";
-	case ISOP_DIAMPARAM : return "<br>	 Transfer the Isoparametrization to a Diamond-parametrization over the original mesh  <br>"
+                          "IEEE Transaction of Visualization and Computer Graphics 2010";
+  case ISOP_DIAMPARAM : return "<br>	 The filter build a new mesh with a standard atlased per wedge texture. The atlas is simply done by "
+                         "splitting each triangle of the abstract domain<br>"
 													"For more details see: <br>"
 													"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
-													"IEEE Transaction of Visualization and Computer Graphics 2009";
-	case ISOP_LOAD : return "<br>	 Load the Isoparametrinzation from a saved Abstract Mesh  <br>"
+                          "IEEE Transaction of Visualization and Computer Graphics 2010";
+  case ISOP_LOAD : return "<br>	 Load the Isoparameterization from a saved Abstract Mesh  <br>"
 										 "For more details see: <br>"
 										 "Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
-										 "IEEE Transaction of Visualization and Computer Graphics 2009";
-	case ISOP_SAVE : return "<br>	 Save the Isoparametrinzation on an Abstract Mesh  <br>"
+                     "IEEE Transaction of Visualization and Computer Graphics 2010";
+  case ISOP_SAVE : return "<br>	 Save the Isoparameterization on an Abstract Mesh  <br>"
 										 "For more details see: <br>"
 										 "Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
-										 "IEEE Transaction of Visualization and Computer Graphics 2009";
-	case ISOP_TRANSFER:return "<br>	 Transfer the Isoparametrization between two meshes  <br>"
+                     "IEEE Transaction of Visualization and Computer Graphics 2010";
+  case ISOP_TRANSFER:return "<br>	 Transfer the Isoparametrization between two meshes, the two meshes must be reasonably similar and well aligned."
+                    " It is useful to transfer back an isoparam onto the original mesh after having computed it on a dummy, clean watertight model.<br>"
 											 "For more details see: <br>"
 											 "Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
-											 "IEEE Transaction of Visualization and Computer Graphics 2009";
+                       "IEEE Transaction of Visualization and Computer Graphics 2010";
 	default: assert(0);
 	}
 	return QString("error!");

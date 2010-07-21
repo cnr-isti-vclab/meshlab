@@ -44,7 +44,7 @@ win32-g++:LIBS		+= -L../../external/lib/win32-gcc -llevmar
 linux-g++:LIBS		+= -L../../external/lib/linux-g++ -llevmar
 linux-g++-32:LIBS		+= -L../../external/lib/linux-g++-32 -llevmar
 linux-g++-64:LIBS		+= -L../../external/lib/linux-g++-64 -llevmar
-macx:LIBS += ../../external/lib/macx/liblevmar.a
+macx:LIBS += ../../../src/external/lib/macx/liblevmar.a
 
 # Please never ever uncomment this...
 #QMAKE_CXXFLAGS += -fpermissive
