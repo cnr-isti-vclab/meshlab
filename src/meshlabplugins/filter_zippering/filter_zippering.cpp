@@ -42,7 +42,6 @@ using namespace vcg;
 using namespace std;
 
 #define MAX_LOOP 150
-using namespace vcg;
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -405,7 +404,15 @@ void FilterZippering::handleBorder( aux_info &info,                             
             if ( indices.size() == 0 )
                 for ( size_t k = 0; k < outlines[0].size(); k ++ ) outlines[0][k] = outlines[0][k] * 10.0; //glu tessellator doesn't work properly for close points, so we scale coords in order to obtain a triangulation, if needed
         }
-        for ( size_t k = 0; k < indices.size(); k ++ )  pointers.push_back( vertices[indices[k]] );    //save indices, in order to create new faces
+		for ( size_t k = 0; k < indices.size(); k += 3 )  {
+			if ( (vertices[indices[k]] != vertices[indices[k+1]]) &&
+				 (vertices[indices[k]] != vertices[indices[k+2]]) &&
+				 (vertices[indices[k+1]] != vertices[indices[k+2]] ) ) {
+				pointers.push_back( vertices[indices[k]] );    //save indices, in order to create new faces
+				pointers.push_back( vertices[indices[k+1]] );
+				pointers.push_back( vertices[indices[k+2]] );
+			}
+		}
     }
 }
 
@@ -949,12 +956,15 @@ void FilterZippering::projectFace( CMeshO::FacePointer f,							//pointer to the
 	stack.push_back( make_pair( tri::Index( a->cm, f->V(e) ),
                                 tri::Index( a->cm, f->V1(e) ) ) );    //indices of border vertices
 
+	//while there are border edges...
 	while ( !stack.empty() ) {
+
+		//avoid infinite loop
 		if ( cnt++ > 2*MAX_LOOP ) {
 			Log(GLLogStream::DEBUG, "Loop"); 
 			stack.clear(); 
 			continue;
-		} //avoid infinite loop
+		} 
 
 		pair< int, int > current_edge = stack.back(); stack.pop_back();   //vertex indices
 		assert( current_edge.first != current_edge.second );
@@ -1465,7 +1475,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		}
 
 		//remove duplicates from vector to-be-triangulated
-		sort( tbt_faces.begin(), tbt_faces.end() ); 
+		sort( tbt_faces.begin(), tbt_faces.end() );  int k;
 		vector<CMeshO::FacePointer>::iterator itr = unique( tbt_faces.begin(), tbt_faces.end() ); 
 		tbt_faces.resize(itr - tbt_faces.begin() );
 		//retriangulation of the faces and removal of the remaining part
@@ -1486,6 +1496,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 			CMeshO::VertexPointer v0 = &(a->cm.vert[verts[k]]);
 			CMeshO::VertexPointer v1 = &(a->cm.vert[verts[k+1]]);
 			CMeshO::VertexPointer v2 = &(a->cm.vert[verts[k+2]]);
+			if ( v0 == v1 || v1 == v2 || v0 == v2 )
+				continue;
 			//correct orientation of face normals
 			if ( k < patch_verts ) {
 				(*fn).V(0) = v0; (*fn).V(1) = v1; (*fn).V(2) = v2; (*fn).N() = ( (*fn).P(0) - (*fn).P(2) )^( (*fn).P(1)-(*fn).P(2) );

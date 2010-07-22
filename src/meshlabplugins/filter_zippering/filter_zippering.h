@@ -208,6 +208,11 @@ struct aux_info {
 	virtual bool addVertex( CMeshO::VertexPointer v, int v_index ) {
 		int cnt = 0; int split = -1;
     for ( size_t i = 0; i < trash.size(); i ++ ) {	//one component only
+
+		for ( size_t j = 0; j < trash[i].verts.size(); j ++ ) {	//search for closest edge
+			if ( trash[i].verts[j].first == v_index ) return false;
+		}
+
       for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
 				if ( vcg::SquaredDistance<float>( trash[i].edges[j], v->P() ) <= eps ) { 
 					 cnt++; split = j;
