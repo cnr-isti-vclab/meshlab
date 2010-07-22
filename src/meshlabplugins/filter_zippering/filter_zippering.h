@@ -310,6 +310,9 @@ private:
 								int last_split,							//last splitted edge
 								int &splitted_edge,						//currently splitted edge
 								vcg::Point3<CMeshO::ScalarType> &hit );	//approximate intersection point
+
+
+
 		//init unsorted queue 
 		bool Init_q( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//the queue
 				     MeshModel* a,												//mesh A
@@ -321,16 +324,99 @@ private:
 				      MeshModel* b,												//mesh B
 				      bool fullProcess );	
 		//select redundant face (normal method, unsorted queue)
-		void selectRedundant( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
-							  MeshModel* a,													//mesh A
-							  MeshModel* b,													//mesh B
-							  float epsilon );												//max search distance
+		int selectRedundant( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
+							 MeshModel* a,													//mesh A
+							 MeshModel* b,													//mesh B
+							 float epsilon );												//max search distance
 		//select redundant face (normal method, priority queue)
-		void selectRedundant_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
-								 MeshModel* a,													//mesh A
-							     MeshModel* b,													//mesh B
-							     float epsilon );												//max search distance
-	
+		int selectRedundant_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+								MeshModel* a,													//mesh A
+							    MeshModel* b,													//mesh B
+							    float epsilon );												//max search distance
+		//refine border of a mesh, splitting faces having two border edges
+		int refineBorder( MeshModel* m );	
+		//project face of B on the surface of A
+		void projectFace( CMeshO::FacePointer f,								//pointer to the face that will be projected
+						  MeshModel* a,											//mesh A
+						  MeshFaceGrid grid_a,									//grid on A
+						  float max_dist,										//max dist search
+						  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+						  std::vector< CMeshO::FacePointer >& tbt_faces,		//vector to-be-triangulated faces
+						  std::vector< CMeshO::FacePointer >& tbr_faces, 		//vector to-be-removed faces
+						  std::vector< int >& verts );							//vector of indices
+		
+		//case 01: vertices of border edge project on the same face
+		void handleBorderEdgeSF ( std::pair< int, int >& current_edge,					//current border edge
+								  MeshModel* a,											//mesh A
+								  CMeshO::FacePointer startF,							//face where first vertex lies
+								  CMeshO::FacePointer endF,								//face where second vertex lies
+								  CMeshO::FacePointer splittingF,						//splitting face
+								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+								  std::vector< int >& verts );							//vector of indices
+
+		//case 02: vertices of border edge project on adjacent faces
+		void handleBorderEdgeAF ( std::pair< int, int >& current_edge,					//current border edge
+								  MeshModel* a,											//mesh A
+								  CMeshO::FacePointer startF,							//face where first vertex lies
+								  CMeshO::FacePointer endF,								//face where second vertex lies
+								  CMeshO::FacePointer splittingF,						//splitting face
+								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+								  std::vector< int >& verts );							//vector of indices
+
+		//case 03: vertices of border edge project on non-adjacent faces
+		void handleBorderEdgeNF ( std::pair< int, int >& current_edge,					//current border edge
+								  MeshModel* a,											//mesh A
+								  CMeshO::FacePointer startF,							//face where first vertex lies
+								  CMeshO::FacePointer endF,								//face where second vertex lies
+								  CMeshO::FacePointer splittingF,						//splitting face
+								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+								  std::vector< int >& verts );							//vector of indices
+
+		//case 04: both vertices of current_edge project on another border edge
+		//return true if the whole current_edge project on border edge
+		bool handleBorderEdgeBB ( std::pair< int, int >& current_edge,					//current border edge
+								  MeshModel* a,											//mesh A
+								  MeshFaceGrid grid_a,									//grid on A (needed for sampling)
+								  float max_dist,										//max search dist (needed for sampling)
+								  vcg::Point3<CMeshO::ScalarType> closestStart,			    //closest point on startF
+								  vcg::Point3<CMeshO::ScalarType> closestEnd,				//closest point on endF
+								  CMeshO::FacePointer startF,							//face where first vertex lies
+								  CMeshO::FacePointer endF,								//face where second vertex lies
+								  CMeshO::FacePointer splittingF,						//splitting face
+								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+								  std::vector< int >& verts );							//vector of indices
+
+
+		//case 04: both vertices of current_edge project on another border edge
+		//return true if the whole current_edge project on border edge
+		bool handleBorderEdgeBB ( std::pair< int, int >& current_edge,					//current border edge
+								  MeshModel* a,											//mesh A
+								  MeshFaceGrid grid_a,									//grid on A (needed for sampling)
+								  float max_dist,										//max search dist (needed for sampling)
+								  CMeshO::FacePointer startF,							//face where first vertex lies
+								  CMeshO::FacePointer endF,								//face where second vertex lies
+								  CMeshO::FacePointer splittingF,						//splitting face
+								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+								  std::vector< int >& verts );							//vector of indices
+
+		//case 05: one of the vertices doesn't project on the surface of the mesh
+		void handleBorderEdgeOB ( std::pair< int, int >& current_edge,					//current border edge
+								  int direction,										//splitting direction (1 from start to end, 0 from end to start)
+								  MeshModel* a,											//mesh A
+								  MeshFaceGrid grid_a,									//grid on A (needed for sampling)
+								  float max_dist,										//max search dist (needed for sampling)
+								  CMeshO::FacePointer startF,							//face where first vertex lies
+								  CMeshO::FacePointer endF,								//face where second vertex lies
+								  CMeshO::FacePointer splittingF,						//splitting face
+								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+								  std::vector< CMeshO::FacePointer >& tbt_faces,		//stack containing pointers to face that wille be retriangulated
+								  std::vector< int >& verts );							//vector of indices
 
         float eps;
 };
