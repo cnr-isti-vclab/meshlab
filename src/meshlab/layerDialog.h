@@ -69,6 +69,9 @@ public slots:
 private:
     Ui::layerDialog* ui;
     MainWindow *mw;
+
+	void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
+	void updateColumnNumber(QTreeWidgetItem * item);
 };
 
 

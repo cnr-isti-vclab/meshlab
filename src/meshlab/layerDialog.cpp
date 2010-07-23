@@ -196,11 +196,10 @@ void LayerDialog::updateTable()
 		}
 		ui->layerTreeWidget->insertTopLevelItem(i,item);
 
-		//recomputing columns TO BE USED IN FUTURE
-		/*int columnChild= item2->columnCount();
-		int columnParent = ui->layerTreeWidget->columnCount();
-		if(columnChild - columnParent>0)
-			ui->layerTreeWidget->setColumnCount(columnParent+ (columnChild-columnParent));*/
+		//Adding default annotations
+		addDefaultNotes(item, meshList.at(i));
+
+		//Adding tags
 
 	}
 	for(int i=0; i< ui->layerTreeWidget->columnCount(); i++)
@@ -213,6 +212,32 @@ void LayerDialog::adaptColumns(QTreeWidgetItem * item)
 	for(int i=0; i< ui->layerTreeWidget->columnCount(); i++)
 		ui->layerTreeWidget->resizeColumnToContents(i);
 
+}
+
+//Add default annotations for each mesh about faces and vertices number
+void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel)
+{
+	QTreeWidgetItem *faces = new QTreeWidgetItem();
+	faces->setText(3, QString("Faces"));
+	faces->setText(4, QString::number(meshModel->cm.fn));	
+	parent->addChild(faces);
+	updateColumnNumber(faces);
+
+	QTreeWidgetItem *vertices = new QTreeWidgetItem();
+	vertices->setText(3, QString("Vertices"));
+	vertices->setText(4, QString::number(meshModel->cm.vn));	
+	parent->addChild(vertices);
+	updateColumnNumber(vertices);
+}
+
+//Add, if necessary, columns to the treeWidget. 
+//It must be called every time a new treeWidget item is added to the tree.
+void LayerDialog::updateColumnNumber(QTreeWidgetItem * item)
+{
+	int columnChild= item->columnCount();
+	int columnParent = ui->layerTreeWidget->columnCount();
+	if(columnChild - columnParent>0)
+		ui->layerTreeWidget->setColumnCount(columnParent + (columnChild-columnParent));
 }
 
 LayerDialog::~LayerDialog()
