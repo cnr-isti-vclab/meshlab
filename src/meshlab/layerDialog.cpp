@@ -222,8 +222,8 @@ LayerDialog::~LayerDialog()
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 {
-	if(meshModel->visible)  setIcon(0,QIcon(":/layer_eye_open.png"));
-	else setIcon(0,QIcon(":/layer_eye_close.png"));
+  if(meshModel->visible)  setIcon(0,QIcon(":/images/layer_eye_open.png"));
+  else setIcon(0,QIcon(":/images/layer_eye_close.png"));
 
 	setIcon(1,QIcon(":/images/layer_edit_unlocked.png"));
 
