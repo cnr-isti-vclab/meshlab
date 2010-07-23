@@ -33,6 +33,8 @@ public:
 
     void updateGlobalParameterSet( RichParameterSet& rps );
     static void initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet);
+
+    RichParameterSet *currentGlobalParamSet;
 };
 
 

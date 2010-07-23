@@ -38,4 +38,5 @@ void GLAreaSetting::updateGlobalParameterSet( RichParameterSet& rps )
     textureMinFilter = rps.getEnum(this->textureMinFilterParam());
     textureMagFilter = rps.getEnum(this->textureMagFilterParam());
 
+    currentGlobalParamSet=&rps;
 }

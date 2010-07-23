@@ -1146,7 +1146,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				}
 
 				int mask = 0;
-				MeshModel *mm= new MeshModel();
+        MeshModel *mm= new MeshModel(gla->meshDoc);
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,prePar,QCallBack,this /*gla*/))
 				{
 					QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text

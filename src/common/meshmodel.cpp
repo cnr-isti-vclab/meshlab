@@ -30,6 +30,30 @@
 
 using namespace vcg;
 
+TagBase::TagBase(MeshDocument *parent)
+{
+ _id=parent->newTagId();
+}
+
+
+//deletes each meshModel
+MeshDocument::~MeshDocument()
+{
+  foreach(MeshModel *mmp, meshList)
+    delete mmp;
+}
+
+//returns the mesh ata given position in the list
+MeshModel *MeshDocument::getMesh(int i)
+{
+  foreach(MeshModel *mmp, meshList)
+  {
+    if(mmp->id() == i) return mmp;
+  }
+  assert(0);
+  return 0;
+}
+
 MeshModel *MeshDocument::getMesh(const char *name)
 {
 	foreach(MeshModel *mmp, meshList)
@@ -42,22 +66,26 @@ MeshModel *MeshDocument::getMesh(const char *name)
 
 void MeshDocument::setCurrentMesh(unsigned int i)
 {
-  assert(i < (unsigned int)meshList.size());
-	currentMesh=meshList.at(i);
-	emit currentMeshChanged(i);
+  foreach(MeshModel *mmp, meshList)
+  {
+    if(mmp->id() == i)
+    {
+      currentMesh = mmp;
+      emit currentMeshChanged(i);
+      return;
+    }
+  }
+  assert(0);
+  return;
 }
 
 MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bool setAsCurrent)
 {
 	QFileInfo info(meshName);
 	QString newName=info.fileName();
-	int newId=-1;
-
-	for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
+  for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
 	{
-		if(newId < (*mmi)->id) newId = (*mmi)->id;
-
-		if((*mmi)->fullName() == newName)
+    if((*mmi)->fullName() == newName)
 		{
 		  QFileInfo fi((*mmi)->fullName());
 		  QString baseName = fi.baseName();
@@ -74,11 +102,9 @@ MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bo
 	}
 
 	if(newMesh==0)
-		newMesh=new MeshModel(qPrintable(newName));
+    newMesh=new MeshModel(this,qPrintable(newName));
 	else
         newMesh->setFileName(newName);
-
-	newMesh->id= ++newId;
 
 	meshList.push_back(newMesh);
 
@@ -115,6 +141,24 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 
 	return true;
 }
+
+
+MeshModel::MeshModel(MeshDocument *parent, const char *meshName) {
+  glw.m=&cm;
+  _id=parent->newMeshId();
+  // These data are always active on the mesh
+  currentDataMask = MM_NONE;
+  currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
+  currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
+
+      visible=true;
+  cm.Tr.SetIdentity();
+  cm.sfn=0;
+  cm.svn=0;
+      if(meshName) fullPathFileName=meshName;
+}
+
+
 bool MeshModel::Render(GLW::DrawMode _dm, GLW::ColorMode _cm, GLW::TextureMode _tm)
   {
       // Needed to be defined here for splatrender as long there is no "MeshlabCore" library.

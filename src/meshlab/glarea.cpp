@@ -29,6 +29,7 @@
 #include <wrap/qt/trackball.h>
 #include <wrap/qt/col_qt_convert.h>
 #include <wrap/qt/shot_qt.h>
+#include <wrap/qt/checkGLError.h>
 
 using namespace std;
 using namespace vcg;
@@ -67,8 +68,9 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	
 	updateLayerSetVisibilities();
 
-    connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
-	connect(meshDoc, SIGNAL(layerSetChanged()), this, SLOT(updateLayerSetVisibilities()));
+  connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
+  connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateDecoration(int)));
+  connect(meshDoc, SIGNAL(layerSetChanged()), this, SLOT(updateLayerSetVisibilities()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -293,7 +295,7 @@ void GLArea::paintGL()
 			foreach(MeshModel * mp, meshDoc->meshList)
 				{
 					//Mesh visibility is read from the viewer visibility map, not from the mesh 
-					if(visibilityMap[mp->id]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+          if(visibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
 		}
 		if(iEdit) iEdit->Decorate(*mm(),this);
@@ -363,9 +365,9 @@ void GLArea::paintGL()
 	if (isHelpVisible()) displayHelp();
 
   int error = glGetError();
-	if(error) {
-    log->Logf(GLLogStream::WARNING,"There are gl errors");
-	}
+  if(error) {
+    log->Logf(GLLogStream::WARNING,qPrintable(checkGLError::makeString("There are gl errors:")));
+  }
 
 	//check if viewers are linked
   MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
@@ -567,6 +569,18 @@ void GLArea::updateLayer()
 		lastModelEdited = meshDoc->mm();
 	}
 }
+
+void GLArea::updateDecoration(int oldCurrentMeshIndex)
+{
+  foreach(QAction *p , iDecoratorsList)
+      {
+        MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+
+//        decorInterface->EndDecorate(p,*mm(),mainwindow->,qFont);
+        decorInterface->StartDecorate(p,*mm(),this->glas.currentGlobalParamSet,this);
+      }
+}
+
 
 void GLArea::setCurrentEditAction(QAction *editAction)
 {
@@ -1042,7 +1056,7 @@ void GLArea::updateLayerSetVisibilities()
 		bool found =false;
 		foreach(MeshModel * mp, meshDoc->meshList)
 		{
-			if(mp->id == i.key())
+      if(mp->id() == i.key())
 			{
 				found = true;
 				break;
@@ -1055,8 +1069,8 @@ void GLArea::updateLayerSetVisibilities()
 	foreach(MeshModel * mp, meshDoc->meshList)
 	{
 		//Insert the new pair in the map; 
-		if(!visibilityMap.contains(mp->id))
-			visibilityMap.insert(mp->id,mp->visible);
+    if(!visibilityMap.contains(mp->id()))
+      visibilityMap.insert(mp->id(),mp->visible);
 	}
 }
 

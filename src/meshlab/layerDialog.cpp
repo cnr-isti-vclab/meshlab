@@ -66,30 +66,30 @@ void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
 	if(!mItem) return; // user clicked on other info 
 	else{
-		int row= mItem->m->id;
+    int clickedId= mItem->m->id();
 		switch(col)
 		{
 		case 0 :
 			{
 				//the user has clicked on one of the eyes
-				QList<MeshModel *> &meshList= mw->GLA()->meshDoc->meshList;
+        MeshDocument  *md= mw->GLA()->meshDoc;
 				// NICE TRICK.
 				// If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
 				// Very useful for comparing meshes
 
 				if(QApplication::keyboardModifiers() == Qt::ControlModifier)
-					foreach(MeshModel *mp, meshList)
+          foreach(MeshModel *mp, md->meshList)
 				{
 					mp->visible=false;
-					mw->GLA()->updateLayerSetVisibility(mp->id, mp->visible);
+          mw->GLA()->updateLayerSetVisibility(mp->id(), mp->visible);
 				}
 
-				if(meshList.at(row)->visible)  meshList.at(row)->visible = false;
-				else   meshList.at(row)->visible = true;
+        if(md->getMesh(clickedId)->visible)  md->getMesh(clickedId)->visible = false;
+        else   md->getMesh(clickedId)->visible = true;
 
 				//Update current GLArea visibility 
 				//TODO. Evitare il metodo GLA()
-				mw->GLA()->updateLayerSetVisibility(meshList.at(row)->id, meshList.at(row)->visible);
+        mw->GLA()->updateLayerSetVisibility(md->getMesh(clickedId)->id(), md->getMesh(clickedId)->visible);
 			}
 		case 1 :
 
@@ -97,7 +97,7 @@ void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
 
 		case 3 :
 			//the user has chosen to switch the layer
-			mw->GLA()->meshDoc->setCurrentMesh(row);
+      mw->GLA()->meshDoc->setCurrentMesh(clickedId);
 			break;
 		}
 		//make sure the right row is colored or that they right eye is drawn (open or closed)
@@ -129,10 +129,8 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(ui->layerTreeWidget->itemAt(pos.x(),pos.y()));
 	if(!mItem) return; // user clicked on other info 
 	else{
-		int row= mItem->m->id;
-
-		if (row>=0)
-			mw->GLA()->meshDoc->setCurrentMesh(row);
+    if (mItem->m)
+      mw->GLA()->meshDoc->setCurrentMesh(mItem->m->id());
 
 		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
 			MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
@@ -177,27 +175,27 @@ void LayerDialog::updateTable()
 		//The layer dialog cannot be opened unless a new document is opened
 		return;
 	}
-	QList<MeshModel *> &meshList= mw->GLA()->meshDoc->meshList;
-	
+  MeshDocument *md=mw->GLA()->meshDoc;
+
 	ui->layerTreeWidget->clear();
 	ui->layerTreeWidget->setColumnCount(4);
 	ui->layerTreeWidget->header()->hide();
-	for(int i=0;i<meshList.size();++i)
+  foreach(MeshModel* mmd, md->meshList)
 	{
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
-		if( mw->GLA()->visibilityMap.contains(meshList.at(i)->id))
-			meshList.at(i)->visible =mw->GLA()->visibilityMap[meshList.at(i)->id];
+    if( mw->GLA()->visibilityMap.contains(mmd->id()))
+      mmd->visible =mw->GLA()->visibilityMap[mmd->id()];
 
-		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(meshList.at(i));
-		if(meshList.at(i)== mw->GLA()->mm()) {
+    MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd);
+    if(mmd== mw->GLA()->mm()) {
 			item->setBackground(3,QBrush(Qt::yellow));
 			item->setForeground(3,QBrush(Qt::blue));
 		}
-		ui->layerTreeWidget->insertTopLevelItem(i,item);
+    ui->layerTreeWidget->addTopLevelItem(item);
 
 		//Adding default annotations
-		addDefaultNotes(item, meshList.at(i));
+    addDefaultNotes(item, mmd);
 
 		//Adding tags
 
@@ -252,7 +250,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 
 	setIcon(1,QIcon(":/images/layer_edit_unlocked.png"));
 
-	setText(2, QString::number(meshModel->id));	
+  setText(2, QString::number(meshModel->id()));
 	
 	QString meshName = meshModel->shortName(); 
 	setText(3, meshName);	

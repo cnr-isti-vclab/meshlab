@@ -223,7 +223,11 @@ public:
 private:
   int currentDataMask;
   QString fullPathFileName;
+  int _id;
+
 public:
+
+  inline int id() const {return _id;}
   // Some notes about the files and naming.
   // in a future the path should be moved outside the meshmodel into the meshdocument (and assume that all the meshes resides in a common subtree)
   // currently we just fix the interface and make the pathname private for avoiding future hassles.
@@ -236,23 +240,8 @@ public:
   void setFileName(QString newFileName) {fullPathFileName = newFileName;}
 public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
-   int id;
 
-  MeshModel(const char *meshName=0) {
-    glw.m=&cm;
-
-		// These data are always active on the mesh
-		currentDataMask = MM_NONE;
-		currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
-		currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
-
-        visible=true;
-		cm.Tr.SetIdentity();
-    cm.sfn=0;
-    cm.svn=0;
-        if(meshName) fullPathFileName=meshName;
-  }
-
+  MeshModel(MeshDocument *parent, const char *meshName=0);
   bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
   bool RenderSelectedFace();
   bool RenderSelectedVert();
@@ -271,10 +260,20 @@ public:
 
 };// end class MeshModel
 
+class MeshDocument;
+/**
+  The TagBase class define the base class from which each filter has to derive its own tag class.
+
+  */
 class TagBase
 {
+private:
+  int _id;
+
 public:
-	int id;
+  TagBase(MeshDocument *parent);
+  int id() const {return _id;}
+
 	QString typeName;
 	QList<int> referringMeshes;
 	QList<int> referringRasters;
@@ -321,23 +320,17 @@ public:
 
 	MeshDocument(): QObject()
 	{
+    tagIdCounter=0;
+    meshIdCounter=0;
 		currentMesh = NULL;
-        busy=true;
+    busy=true;
 	}
 
 	//deletes each meshModel
-	~MeshDocument()
-	{
-		foreach(MeshModel *mmp, meshList)
-			delete mmp;
-	}
+  ~MeshDocument();
 
 	//returns the mesh ata given position in the list
-	MeshModel *getMesh(int i)
-	{
-		return meshList.at(i);
-	}
-
+  MeshModel *getMesh(int i);
 	MeshModel *getMesh(const char *name);
 
 	//set the current mesh to be the one at index i
@@ -351,8 +344,14 @@ public:
 	/// The list of MeshModels.
 	QList<MeshModel *> meshList;
 
+  int tagIdCounter;
+  int meshIdCounter;
+
 	///The list of the taggings of all the meshes/rasters of the project
 	QList<TagBase *> tagList;
+
+  int newTagId() {return tagIdCounter++;}
+  int newMeshId() {return meshIdCounter++;}
 
   GLLogStream Log;
   FilterScript filterHistory;
@@ -365,6 +364,11 @@ public:
 
   ///remove the mesh from the list and delete it from memory
 	bool delMesh(MeshModel *mmToDel);
+
+  ///add a new mesh with the given name
+  MeshModel *addNewTag(TagBase *newTag);
+
+
 
   int vn() /// Sum of all the vertices of all the meshes
 	{
@@ -392,9 +396,10 @@ public:
 		MeshModel *currentMesh;
 
 	signals:
-		//when ever the current mesh changed this will send out the index of the newest mesh
+    ///when ever the current mesh changed this will send out the index of the newest mesh
 		void currentMeshChanged(int index);
-		//when ever the meshList is changed
+
+    ///when ever the meshList is changed
 		void layerSetChanged();
 
 };// end class MeshDocument

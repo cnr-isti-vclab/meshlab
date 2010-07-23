@@ -39,6 +39,7 @@ class QGLWidget;
 class QString;
 class QVariant;
 class QMouseEvent;
+class QTreeWidgetItem;
 class MeshModel;
 class RenderMode;
 class GLArea;
@@ -335,7 +336,22 @@ public:
 	virtual QString filterName(QAction *a) const {return this->filterName(ID(a));};
 	virtual QString filterName(FilterIDType filterID) const =0;// const {return MeshLabInterface::filterName(filterID);};
 
-    virtual FilterIDType ID(QAction *a) const
+
+
+  /**
+  This is a virtual function, so every filter/edit must implement it.
+
+  In each update, the layerDialog visits the meshlist of the document, and for each mesh asks to the meshDocument the correspondent list of taggings.
+  For each one it invokes the callback and inserts formatted strings (or a treeWidgetItem) into the treeWidget.
+
+  In order to generate different TreeWidgetItem according to the position of the tag,
+  MeshModel* mm and RasterModel* rm pointers ar needed.
+  In fact, a tag is displayed below all the meshes/rasters it refers and in the global list of tags.
+  It makes sense displaying different info in each position.
+  */
+  virtual QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel *mm=0) {assert (0); return 0;}
+
+  virtual FilterIDType ID(QAction *a) const
   	{
       foreach( FilterIDType tt, types())
         if( a->text() == this->filterName(tt) ) return tt;

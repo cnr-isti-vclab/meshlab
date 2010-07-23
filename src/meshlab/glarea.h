@@ -182,7 +182,8 @@ public slots:
 
 	// Called when we change layer, notifies the edit tool if one is open
     void updateLayer();
-	
+    void updateDecoration(int oldMeshInd);
+
 public:
 	void focusInEvent ( QFocusEvent * event );
 	
