@@ -48,6 +48,7 @@ public:
 
 	virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
 	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+
 	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
 	virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
 	virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
@@ -99,11 +100,14 @@ public:
 	vcg::Trackball curr_track;
 
 void 	suspendEditMode();
+void DrawCellsToEdit();
 public slots:
 	void loadOcm();				// load an ocm database
 	void closeOcm();			// close an ocm database
 	void createOcm();			// create an ocm database
 	void edit();					// edit current selection
+	void markEditable();  // mark as selected (flag S) the editable element on the editing mesh
+	void drop();					// drop current selection
 	void commit();				// commit
 	void add();						// add new mesh
 	void addFromDisk();		// add from disk

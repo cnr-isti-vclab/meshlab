@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>398</height>
+    <height>431</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -173,7 +173,7 @@
     <property name="geometry">
      <rect>
       <x>250</x>
-      <y>340</y>
+      <y>380</y>
       <width>131</width>
       <height>27</height>
      </rect>
@@ -186,7 +186,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>340</y>
+      <y>380</y>
       <width>93</width>
       <height>27</height>
      </rect>
@@ -199,7 +199,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>340</y>
+      <y>380</y>
       <width>151</width>
       <height>27</height>
      </rect>
@@ -214,7 +214,7 @@
       <x>190</x>
       <y>220</y>
       <width>160</width>
-      <height>61</height>
+      <height>128</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -226,9 +226,23 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="dropSelectionPushButton">
+       <property name="text">
+        <string>Drop ROI</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="editPushButton">
        <property name="text">
-        <string>Edit Selected</string>
+        <string>Edit ROI</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="markEditablePushButton">
+       <property name="text">
+        <string>Select Editable</string>
        </property>
       </widget>
      </item>

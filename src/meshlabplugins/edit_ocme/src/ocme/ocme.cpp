@@ -177,6 +177,9 @@ void OCME::MarkTouchedAdded(const CellKey & key ){
 		added_cells.push_back(key);
 }
 
+void OCME::DropEdited(  ){
+		++generic_bool; // mark cells taken for editing
+}
 int OCME::ComputeLevel(const float & l){
 	return   (int)( std::log(((float)this->params.side_factor) *  float(l)   ) / log(2.f)); 
 }

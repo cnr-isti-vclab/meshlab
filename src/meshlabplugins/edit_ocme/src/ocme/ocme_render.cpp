@@ -24,9 +24,14 @@ void DrawCellSel ( CellKey & ck, int mode = 0 )
 	ubox.min=vcg::Point3f ( -0.5,-0.5,-0.5 );
 	ubox.max=-ubox.min;
 
+
 	vcg::Color4b c;
-	c = c.Scatter ( 32,lev+16 );
-	glColor ( c );
+	if(mode=3)
+			c = vcg::Color4b(230,0,0,127);
+	else{
+					c = c.Scatter ( 32,lev+16 );
+			}
+	glColor( c );
 
 	glPushMatrix();
 
@@ -36,9 +41,10 @@ void DrawCellSel ( CellKey & ck, int mode = 0 )
 			glScalef ( stepf*0.1 ,stepf*0.1  ,stepf*0.1 );
 			vcg::glBoxFlat ( ubox );
 			break;
-		case 1:	glTranslatef ( ( p[0]+ 0.5 ) *stepf, ( p[1]+ 0.5 ) *stepf, ( p[2]+ 0.5 ) *stepf );
+		case 1:;
+		case 3: glTranslatef ( ( p[0]+ 0.5 ) *stepf, ( p[1]+ 0.5 ) *stepf, ( p[2]+ 0.5 ) *stepf );
 			glScalef ( stepf ,stepf ,stepf );
-			vcg::glBoxWire ( ubox );
+			vcg::glBoxFlat ( ubox );
 			break;
 		case 2:	glTranslatef ( ( p[0]+ 0.5 ) *stepf, ( p[1]+ 0.5 ) *stepf, ( p[2]+ 0.5 ) *stepf );
 			glScalef ( stepf*0.1 ,stepf*0.1  ,stepf*0.1 );

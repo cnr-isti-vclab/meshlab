@@ -465,6 +465,8 @@ struct OCME{
 	template <class MeshType>
 	void Edit(  std::vector<Cell*> & cells, MeshType & m,  AttributeMapper attr_map = AttributeMapper());
 
+	// Undo edit
+	void 	DropEdited();
 
 	// find the removed elements
 	template <class MeshType>

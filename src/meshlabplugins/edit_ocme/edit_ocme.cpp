@@ -105,6 +105,28 @@ vcg::Box3f GetViewVolumeBBox()
 
 }
 
+void OcmeEditPlugin::DrawCellsToEdit( ){
+
+		// render all the cells only on the stencil buffer
+		glColorMask(false,false,false,false);
+		for(unsigned int i  = 0; i < cells_to_edit.size(); ++i)
+			DrawCellSel(cells_to_edit[i]->key,1);
+		glColorMask(true,true,true,true);
+
+		glDepthFunc(GL_EQUAL);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		glDisable(GL_LIGHTING);
+		glColor4b(0,0,0,127);
+		for(unsigned int i  = 0; i < cells_to_edit.size(); ++i)
+			DrawCellSel(cells_to_edit[i]->key,1);
+
+		glEnable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glDepthFunc(GL_LESS);
+
+}
+
 void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 {
 	rendering.lock();
@@ -193,13 +215,15 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 		if ( vcg::Pick ( pickx, gla->height()-picky, all_keys,results, DrawCell /*DrawImpostor*/) )
 		{
 			CellKey cellkey  = *results[0];
-			cells_to_edit.push_back(ocme->GetCell(cellkey));
+			Cell *c = ocme->GetCell(cellkey,false);
+			cells_to_edit.push_back(c);
 		}
 	}
 
-	// draw the cells selected as sphere
-	for(unsigned int i  = 0; i < cells_to_edit.size(); ++i)
-		DrawCellSel(cells_to_edit[i]->key,2);
+	DrawCellsToEdit();
+//	// draw the cells selected as sphere
+//	for(unsigned int i  = 0; i < cells_to_edit.size(); ++i)
+//		DrawCellSel(cells_to_edit[i]->key,1);
 
 	if(isDragging)
 			DrawXORRect(gla);
@@ -243,6 +267,7 @@ void OcmeEditPlugin::updateButtonsState(){
 
 		odw->loadOcmPushButton->setEnabled(!ocme_loaded);
 		odw->createOcmPushButton->setEnabled(!ocme_loaded);
+		//odw->markEditablePushButton->setEnabled(!mm->cm.face.empty());
 }
 
 bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
@@ -265,6 +290,8 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	QObject::connect(odw->createOcmPushButton,SIGNAL(clicked()),this,SLOT(createOcm()));
 	QObject::connect(odw->closeOcmPushButton,SIGNAL(clicked()),this,SLOT(closeOcm()));
 	QObject::connect(odw->editPushButton,SIGNAL(clicked()),this,SLOT(edit()));
+	QObject::connect(odw->markEditablePushButton ,SIGNAL(clicked() ),this,SLOT( markEditable() ));
+	QObject::connect(odw->dropSelectionPushButton,SIGNAL(clicked()),this,SLOT(drop()));
 	QObject::connect(odw->commitPushButton,SIGNAL(clicked()),this,SLOT(commit()));
 	QObject::connect(odw->addPushButton,SIGNAL(clicked()),this,SLOT(add()));
 	QObject::connect(odw->fillAttrMeshPushButton ,SIGNAL(clicked() ),this,SLOT( fillMeshAttribute()));
@@ -472,6 +499,33 @@ void OcmeEditPlugin::createOcm(){
 
 	}
 }
+void OcmeEditPlugin::drop(){
+		ocme->renderCache.controller.pause();
+		mm->cm.Clear();
+		cells_to_edit.clear();
+		ocme->DropEdited();
+		ocme->renderCache.controller.resume();
+}
+
+void OcmeEditPlugin::markEditable(){
+		CMeshO::  PerVertexAttributeHandle<unsigned char>  lockedV =
+				vcg::tri::Allocator<CMeshO>::  GetPerVertexAttribute<unsigned char> (mm->cm,"ocme_locked");
+
+		CMeshO::  PerFaceAttributeHandle<unsigned char>  lockedF =
+				vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<unsigned char> (mm->cm,"ocme_locked");
+
+		for(CMeshO::VertexIterator vi = mm->cm.vert.begin(); vi != mm->cm.vert.end(); ++vi )
+				if(!(*vi).IsD())
+						if(!lockedV[*vi]) (*vi).SetS();
+
+		for(CMeshO::FaceIterator fi = mm->cm.face.begin(); fi != mm->cm.face.end(); ++fi )
+				if(!(*fi).IsD()){
+						bool ed = !lockedF[*fi];
+						for(unsigned int i = 0; i < (*fi).VN() ; ++i)
+								 ed = ed &&  !lockedV[(*fi).V(i)];
+						if(ed) (*fi).SetS();
+						}
+}
 
 void OcmeEditPlugin::edit(){
 
@@ -513,29 +567,29 @@ void OcmeEditPlugin::edit(){
 	cells_to_edit.clear();
 
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace ( mm->cm );
-
-	CMeshO::  PerFaceAttributeHandle<GIndex>  gposf =
-			vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
-
-	CMeshO::  PerVertexAttributeHandle<unsigned char>  lockedV =
-			vcg::tri::Allocator<CMeshO>::  GetPerVertexAttribute<unsigned char> (mm->cm,"ocme_locked");
-
-	CMeshO::  PerFaceAttributeHandle<unsigned char>  lockedF =
-			vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<unsigned char> (mm->cm,"ocme_locked");
-
-
-	for(unsigned int i = 0; i < mm->cm.face.size();++i)
-			if(!mm->cm.face[i].IsD())
-					if( lockedF[i] ) {
-			for(unsigned int fi = 0; fi < 3; ++ fi ){
-								lockedV[mm->cm.face[i].V(fi)] = 1;
-								mm->cm.face[i].V(fi)->SetS();
-		}
-			mm->cm.face[i].SetS();
-	}
-
-	for(unsigned int i = 0; i < mm->cm.vert.size();++i)
-			if( lockedV[i] ) mm->cm.vert[i].SetS();
+//
+//	CMeshO::  PerFaceAttributeHandle<GIndex>  gposf =
+//			vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
+//
+//	CMeshO::  PerVertexAttributeHandle<unsigned char>  lockedV =
+//			vcg::tri::Allocator<CMeshO>::  GetPerVertexAttribute<unsigned char> (mm->cm,"ocme_locked");
+//
+//	CMeshO::  PerFaceAttributeHandle<unsigned char>  lockedF =
+//			vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<unsigned char> (mm->cm,"ocme_locked");
+//
+//
+//	for(unsigned int i = 0; i < mm->cm.face.size();++i)
+//			if(!mm->cm.face[i].IsD())
+//					if( lockedF[i] ) {
+//			for(unsigned int fi = 0; fi < 3; ++ fi ){
+//								lockedV[mm->cm.face[i].V(fi)] = 1;
+//								mm->cm.face[i].V(fi)->SetS();
+//		}
+//			mm->cm.face[i].SetS();
+//	}
+//
+//	for(unsigned int i = 0; i < mm->cm.vert.size();++i)
+//			if( lockedV[i] ) mm->cm.vert[i].SetS();
 
 
 
