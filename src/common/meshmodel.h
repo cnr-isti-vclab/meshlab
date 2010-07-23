@@ -273,6 +273,7 @@ public:
 
 class TagBase
 {
+public:
 	int id;
 	QString typeName;
 	QList<int> referringMeshes;
