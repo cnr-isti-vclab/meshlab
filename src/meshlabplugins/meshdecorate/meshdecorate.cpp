@@ -534,6 +534,7 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m,QGLWidget *gla, QFont qf)
 
 void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf)
 {
+  if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return;
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
