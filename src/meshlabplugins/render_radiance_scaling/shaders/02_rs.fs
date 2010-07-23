@@ -192,9 +192,9 @@ void main(void) {
   vec3 n = texture2D(norm,gl_TexCoord[0].st).xyz;
 
   if(n==vec3(0.0)) {
-    gl_FragColor = vec4(1.0);
+//    gl_FragColor = vec4(1.0);
+    discard;  // So we can see the original background, outside the mesh.
     return;
-    //discard;
   }
 
   // data
@@ -205,12 +205,14 @@ void main(void) {
   vec3  l = normalize(gl_LightSource[0].position.xyz);
   vec4  m = gl_FrontMaterial.diffuse;
 
+  //Initialize the depth of the fragment with the just saved depth
+  gl_FragDepth = texture2D(norm,gl_TexCoord[0].st).w;
+
   if(display==0) {
     // lambertian lighting
     float cosineTerm = max(dot(n,l),0.0);
     float warpedTerm = enabled ? cosineTerm*warp(cosineTerm,c) : cosineTerm;
     gl_FragColor = m*warpedTerm;
-  
   } else if(display==1) {
     // using lit spheres 
     if(twoLS) {

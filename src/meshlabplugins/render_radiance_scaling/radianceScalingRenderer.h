@@ -108,6 +108,7 @@ inline void RadianceScalingRendererPlugin::swapToWorldMode() {
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
   glDepthMask(GL_TRUE);
+  glEnable(GL_DEPTH_TEST);
 }
 
 inline void RadianceScalingRendererPlugin::drawQuad() {

@@ -41,5 +41,6 @@ void main(void) {
   float gy  = -n.y*gs;
 
   gl_FragData[0] = vec4(gx,gy,depth,1.0);          
-  gl_FragData[1] = vec4(n,depth);
+  //gl_FragData[1] = vec4(n,depth);
+  gl_FragData[1] = vec4(n,gl_FragCoord.z);
 }
