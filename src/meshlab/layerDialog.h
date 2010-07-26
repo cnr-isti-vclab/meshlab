@@ -34,6 +34,8 @@ class MainWindow;
 class QTreeWidget;
 class GLLogStream;
 class MeshModel;
+class MeshDocument;
+class TagBase;
 
 #include <QDialog>
 
@@ -70,8 +72,9 @@ private:
     Ui::layerDialog* ui;
     MainWindow *mw;
 
-	void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
-	void updateColumnNumber(QTreeWidgetItem * item);
+	void addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *meshModel);
+	void addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag,  MeshDocument &md, MeshModel *mm);
+	void updateColumnNumber(const QTreeWidgetItem * item);
 };
 
 

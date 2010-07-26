@@ -175,31 +175,34 @@ void LayerDialog::updateTable()
 		//The layer dialog cannot be opened unless a new document is opened
 		return;
 	}
-  MeshDocument *md=mw->GLA()->meshDoc;
+	MeshDocument *md=mw->GLA()->meshDoc;
 
 	ui->layerTreeWidget->clear();
 	ui->layerTreeWidget->setColumnCount(4);
 	ui->layerTreeWidget->header()->hide();
-  foreach(MeshModel* mmd, md->meshList)
+	foreach(MeshModel* mmd, md->meshList)
 	{
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
-    if( mw->GLA()->visibilityMap.contains(mmd->id()))
-      mmd->visible =mw->GLA()->visibilityMap[mmd->id()];
+		if( mw->GLA()->visibilityMap.contains(mmd->id()))
+			mmd->visible =mw->GLA()->visibilityMap[mmd->id()];
 
-    MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd);
-    if(mmd== mw->GLA()->mm()) {
+		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd);
+		if(mmd== mw->GLA()->mm()) {
 			item->setBackground(3,QBrush(Qt::yellow));
 			item->setForeground(3,QBrush(Qt::blue));
 		}
-    ui->layerTreeWidget->addTopLevelItem(item);
+		ui->layerTreeWidget->addTopLevelItem(item);
 
 		//Adding default annotations
-    addDefaultNotes(item, mmd);
+		addDefaultNotes(item, mmd);
 
 		//Adding tags
-
+		QList<TagBase *> tags = md->getMeshTags(mmd->id());
+		foreach( TagBase *tag, tags)
+			addTreeWidgetItem(item, tag, *md, mmd);
 	}
+
 	for(int i=0; i< ui->layerTreeWidget->columnCount(); i++)
 		ui->layerTreeWidget->resizeColumnToContents(i);
 }
@@ -207,13 +210,13 @@ void LayerDialog::updateTable()
 void LayerDialog::adaptColumns(QTreeWidgetItem * item)
 {
 	item->setExpanded(item->isExpanded());
-	for(int i=0; i< ui->layerTreeWidget->columnCount(); i++)
+	for(int i=3; i< ui->layerTreeWidget->columnCount(); i++)
 		ui->layerTreeWidget->resizeColumnToContents(i);
 
 }
 
 //Add default annotations for each mesh about faces and vertices number
-void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel)
+void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *meshModel)
 {
 	QTreeWidgetItem *faces = new QTreeWidgetItem();
 	faces->setText(3, QString("Faces"));
@@ -228,9 +231,25 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 	updateColumnNumber(vertices);
 }
 
+void LayerDialog::addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag, MeshDocument &md, MeshModel *mm)
+{
+	QMap<QString,MeshFilterInterface *>::const_iterator msi;
+	for(msi =  mw->pluginManager().stringFilterMap.begin(); msi != mw->pluginManager().stringFilterMap.end();++msi)
+	{
+		MeshFilterInterface * iFilter= msi.value();
+		QString prova = msi.key();
+		if(msi.key() == tag->filterOwner)
+		{
+			QTreeWidgetItem *item = iFilter->tagDump(tag,md,mm);
+			parent->addChild(item);
+			updateColumnNumber(item);
+		}
+	}
+}
+
 //Add, if necessary, columns to the treeWidget. 
 //It must be called every time a new treeWidget item is added to the tree.
-void LayerDialog::updateColumnNumber(QTreeWidgetItem * item)
+void LayerDialog::updateColumnNumber(const QTreeWidgetItem * item)
 {
 	int columnChild= item->columnCount();
 	int columnParent = ui->layerTreeWidget->columnCount();
@@ -245,13 +264,13 @@ LayerDialog::~LayerDialog()
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 {
-  if(meshModel->visible)  setIcon(0,QIcon(":/images/layer_eye_open.png"));
-  else setIcon(0,QIcon(":/images/layer_eye_close.png"));
+	if(meshModel->visible)  setIcon(0,QIcon(":/images/layer_eye_open.png"));
+	else setIcon(0,QIcon(":/images/layer_eye_close.png"));
 
 	setIcon(1,QIcon(":/images/layer_edit_unlocked.png"));
 
-  setText(2, QString::number(meshModel->id()));
-	
+	setText(2, QString::number(meshModel->id()));
+
 	QString meshName = meshModel->shortName(); 
 	setText(3, meshName);	
 
