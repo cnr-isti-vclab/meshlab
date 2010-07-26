@@ -422,6 +422,21 @@ private:
 								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
 								  std::vector< CMeshO::FacePointer >& tbt_faces,		//stack containing pointers to face that wille be retriangulated
 								  std::vector< int >& verts );							//vector of indices
+		
+		int preProcess ( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
+						 MeshModel* a,
+						 MeshModel* b, 
+						 MeshFaceGrid grid_a,									//grid on A
+						 MeshFaceGrid grid_b,									//grid on A
+						 float max_dist );										//max dist search
+
+		int preProcess_pq ( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+							MeshModel* a,
+							MeshModel* b, 
+							MeshFaceGrid grid_a,									//grid on A
+							MeshFaceGrid grid_b,									//grid on A
+							float max_dist );										//max dist search
+
 
         float eps;
 };

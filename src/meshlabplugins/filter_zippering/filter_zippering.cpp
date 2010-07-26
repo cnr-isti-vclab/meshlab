@@ -38,6 +38,8 @@
 #include <wrap/gl/glu_tesselator.h>
 
 
+#include <ctime>
+
 using namespace vcg;
 using namespace std;
 
@@ -81,8 +83,8 @@ FilterZippering::FilterZippering()
 {
   switch(ID(action))
   {
-    case FP_REDUNDANCY:  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK | MeshModel::MM_VERTCOLOR;
-    case FP_ZIPPERING :  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK | MeshModel::MM_VERTCOLOR;
+	case FP_REDUNDANCY:  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK | MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
+	case FP_ZIPPERING :  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK | MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
     default: assert(0);
   }
   return 0;
@@ -120,12 +122,12 @@ void FilterZippering::initParameterSet(QAction *action, MeshDocument &md, RichPa
 								if ( target->cm.bbox.Diag() > maxVal ) maxVal = target->cm.bbox.Diag();
 								if (target != md.mm())  break;
 								}
-								parlst.addParam( new RichMesh("FirstMesh", md.mm(), &md, "Mesh (with holes)", "The mesh with holes.") );
-								parlst.addParam( new RichMesh("SecondMesh", md.mm(), &md, "Patch", "The mesh that will be used as patch.") );
+								parlst.addParam( new RichMesh("FirstMesh", md.mm(), &md, "Source Mesh", "The mesh with holes.") );
+								parlst.addParam( new RichMesh("SecondMesh", md.mm(), &md, "Target Mesh", "The mesh that will be used as patch.") );
 								parlst.addParam( new RichAbsPerc("distance", maxVal*0.01, 0, maxVal, "Max distance", "Max distance between mesh and path") );
 								parlst.addParam( new RichBool("UseQuality", false, "Use quality to select redundant face", "If selected, previously computed face quality will be used in order to select redundant faces.") );
 								//parlst.addParam( new RichBool("FastErosion", false, "Use fast erosion algorithm", "If selected, improves the speed-up of algorithm (results may be not accurate). Useful for large meshes.") );
-								parlst.addParam( new RichBool("FullProcessing", false, "Process the whole Mesh", "If selected, redundancy test is performed over the whole surface of the mesh") );
+								parlst.addParam( new RichBool("FullProcessing", false, "Process the whole Target Mesh", "If selected, redundancy test is performed over the whole surface of the mesh") );
 								break;
 								
             case FP_ZIPPERING :
@@ -241,10 +243,10 @@ bool FilterZippering::checkRedundancy(  CMeshO::FacePointer face,
  * @return true if face can be considered redundant, false otherwise
 */
 bool FilterZippering::simpleCheckRedundancy(   CMeshO::FacePointer f,   //face
-                                MeshModel *m,            //mesh A
-                                MeshFaceGrid &grid,      //grid A
-								CMeshO::ScalarType max_dist,
-								bool test) {   //Max search distance
+											   MeshModel *m,            //mesh A
+											   MeshFaceGrid &grid,      //grid A
+											   CMeshO::ScalarType max_dist,
+											   bool test) {   //Max search distance
 
 	Point3f qp = Barycenter(*f); //f barycenter
 	//search for max_edge
@@ -255,7 +257,7 @@ bool FilterZippering::simpleCheckRedundancy(   CMeshO::FacePointer f,   //face
 	nearestF =  grid.GetClosest(PDistFunct, markerFunctor, qp, max_dist, dist, closest);
 	if (nearestF == 0) return false;	//too far away
 	float min_q = min( nearestF->V(0)->Q(), min( nearestF->V(1)->Q(), nearestF->V(2)->Q() ) ); //min distance of nearestF's vertices from M-border
-	float max_q = max( f->V(0)->Q(), max( f->V(1)->Q(), f->V(2)->Q() ) );						 //max distance of F's vertices from A-border
+	float max_q = max( f->V(0)->Q(), max( f->V(1)->Q(), f->V(2)->Q() ) );					   //max distance of F's vertices from A-border
 	if ( min_q <= max_edge ) return false;
 	if (test) if ( min_q <= max_q ) return false;
 	return true;
@@ -616,14 +618,11 @@ bool FilterZippering::Init_q( vector< pair<CMeshO::FacePointer,char> >& queue,
 						    MeshModel* a,
 							MeshModel* b,
 							bool fullProcess ) {
-	//full process mode: store all faces in the queue
+	//full process mode: store all faces of target mesh in the in the queue
 	if ( fullProcess ) {
-		// all the faces from B
+		//store all the faces from B
 		for ( CMeshO::FaceIterator fi = b->cm.face.begin(); fi != b->cm.face.end(); ++fi ) 
 			queue.push_back( std::make_pair(&*fi, 'B') );
-		// all the faces from A
-		for ( CMeshO::FaceIterator fi = a->cm.face.begin(); fi != a->cm.face.end(); ++fi ) 
-			queue.push_back( std::make_pair(&*fi, 'A') );
 		return true;
 	}
 
@@ -678,9 +677,6 @@ bool FilterZippering::Init_pq( std::priority_queue< std::pair<CMeshO::FacePointe
 		// all the faces from B
 		for ( CMeshO::FaceIterator fi = b->cm.face.begin(); fi != b->cm.face.end(); ++fi ) 
 			queue.push( std::make_pair(&*fi, 'B') );
-		// all the faces from A
-		for ( CMeshO::FaceIterator fi = a->cm.face.begin(); fi != a->cm.face.end(); ++fi ) 
-			queue.push( std::make_pair(&*fi, 'A') );
 		return true;
 	}
 
@@ -719,6 +715,97 @@ bool FilterZippering::Init_pq( std::priority_queue< std::pair<CMeshO::FacePointe
 	return true;
 }
 
+int FilterZippering::preProcess (vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
+								 MeshModel* a,
+								 MeshModel* b, 
+								 MeshFaceGrid grid_a,									//grid on A
+								 MeshFaceGrid grid_b,									//grid on A
+								 float max_dist ) {										//max dist search
+
+	//face count
+	int fc = 0;
+
+	// update distance from border (A)
+	a->updateDataMask(MeshModel::MM_VERTFACETOPO);
+	vcg::tri::UpdateTopology<CMeshO>::VertexFace(a->cm);
+	vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromVF(a->cm);
+	vcg::tri::UpdateQuality<CMeshO>::VertexGeodesicFromBorder(a->cm);
+	a->updateDataMask(-MeshModel::MM_VERTFACETOPO);	//is that correct?
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
+	// update distance from border (B)
+	b->updateDataMask(MeshModel::MM_VERTFACETOPO);
+	vcg::tri::UpdateTopology<CMeshO>::VertexFace(b->cm);
+	vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromVF(b->cm);
+	vcg::tri::UpdateQuality<CMeshO>::VertexGeodesicFromBorder(b->cm);
+	b->updateDataMask(-MeshModel::MM_VERTFACETOPO); //is that correct?
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(b->cm);
+	//perform simpleCheckRedundancy on faces of the queue
+	for ( int i = 0; i < queue.size(); i ++ ) {
+		if ( queue[i].second == 'B' ) {
+			if ( simpleCheckRedundancy( queue[i].first, a, grid_a, max_dist, true ) ) {
+				queue[i].first->SetS(); fc++;
+			}
+		}
+		if ( queue[i].second == 'A' ) {
+			if ( simpleCheckRedundancy( queue[i].first, b, grid_b, max_dist, true ) ) {
+				queue[i].first->SetS(); fc++;
+			}
+		}
+	}
+	return fc;
+}
+
+int FilterZippering::preProcess_pq ( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+									MeshModel* a,
+									MeshModel* b, 
+									MeshFaceGrid grid_a,									//grid on A
+									MeshFaceGrid grid_b,									//grid on A
+									float max_dist ) {										//max dist search
+
+	//face count
+	int fc = 0;
+
+	// update distance from border (A)
+	a->updateDataMask(MeshModel::MM_VERTFACETOPO);
+	vcg::tri::UpdateTopology<CMeshO>::VertexFace(a->cm);
+	vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromVF(a->cm);
+	vcg::tri::UpdateQuality<CMeshO>::VertexGeodesicFromBorder(a->cm);
+	a->updateDataMask(-MeshModel::MM_VERTFACETOPO);	//is that correct?
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
+	// update distance from border (B)
+	b->updateDataMask(MeshModel::MM_VERTFACETOPO);
+	vcg::tri::UpdateTopology<CMeshO>::VertexFace(b->cm);
+	vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromVF(b->cm);
+	vcg::tri::UpdateQuality<CMeshO>::VertexGeodesicFromBorder(b->cm);
+	b->updateDataMask(-MeshModel::MM_VERTFACETOPO); //is that correct?
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(b->cm);
+
+	//tmp queue
+	vector< std::pair<CMeshO::FacePointer,char> > tmp_queue;
+	//copy data in a support vector
+	while (!queue.empty()) {
+		tmp_queue.push_back( queue.top() );
+		queue.pop();
+	}
+	//perform simpleCheckRedundancy on faces of the vector
+	for ( int i = 0; i < tmp_queue.size(); i ++ ) {
+		if ( tmp_queue[i].second == 'B' ) {
+			if ( simpleCheckRedundancy( tmp_queue[i].first, a, grid_a, max_dist, true ) ) {
+				tmp_queue[i].first->SetS(); fc++;
+			}
+			//store non-redundant faces for future check
+			else queue.push( tmp_queue[i] );
+		}
+		if ( tmp_queue[i].second == 'A' ) {
+			if ( simpleCheckRedundancy( tmp_queue[i].first, b, grid_b, max_dist, true ) ) {
+				tmp_queue[i].first->SetS(); fc++;
+			}
+			else queue.push( tmp_queue[i] );
+		}
+	}
+
+	return fc;
+}
 
 /**
  * Select redundant faces from meshes A and B. A face is said to be redundant if
@@ -739,6 +826,8 @@ int FilterZippering::selectRedundant( std::vector< std::pair<CMeshO::FacePointer
 	tri::UpdateSelection<CMeshO>::Clear( b->cm );
 	//count selected faces
 	int sf = 0;
+	//fast pre processing
+	sf = preProcess( queue, a, b, grid_a, grid_b, epsilon );
 
 	//process face once at the time until queue is not empty
 	while ( !queue.empty() ) {
@@ -752,9 +841,9 @@ int FilterZippering::selectRedundant( std::vector< std::pair<CMeshO::FacePointer
 				//in order to guarantee that A and B will be tested alternatively
 				currentF->SetS(); sf++;
 				//insert adjacent faces at the beginning of the queue 
-				queue.insert( queue.begin(), make_pair(currentF->FFp(0),'A') );
-				queue.insert( queue.begin(), make_pair(currentF->FFp(1),'A') );
-				queue.insert( queue.begin(), make_pair(currentF->FFp(2),'A') );
+				if ( !currentF->FFp(0)->IsS() ) queue.push_back( make_pair(currentF->FFp(0),'A') );
+				if ( !currentF->FFp(1)->IsS() ) queue.push_back( make_pair(currentF->FFp(1),'A') );
+				if ( !currentF->FFp(2)->IsS() ) queue.push_back( make_pair(currentF->FFp(2),'A') );
 			}
 		}
 		//face is from mesh B, test redundancy with respect to A
@@ -764,9 +853,9 @@ int FilterZippering::selectRedundant( std::vector< std::pair<CMeshO::FacePointer
 				//in order to guarantee that A and B will be tested alternatively
 				currentF->SetS(); sf++;
 				//insert adjacent faces at the beginning of the queue 
-				queue.insert( queue.begin(), make_pair(currentF->FFp(0),'B') );
-				queue.insert( queue.begin(), make_pair(currentF->FFp(1),'B') );
-				queue.insert( queue.begin(), make_pair(currentF->FFp(2),'B') );
+				if ( !currentF->FFp(0)->IsS() ) queue.push_back( make_pair(currentF->FFp(0),'B') );
+				if ( !currentF->FFp(0)->IsS() ) queue.push_back( make_pair(currentF->FFp(1),'B') );
+				if ( !currentF->FFp(0)->IsS() ) queue.push_back( make_pair(currentF->FFp(2),'B') );
 			}
 		}
 	}
@@ -794,6 +883,8 @@ int FilterZippering::selectRedundant_pq( std::priority_queue< std::pair<CMeshO::
 	tri::UpdateSelection<CMeshO>::Clear( b->cm );
 	//count selected faces
 	int sf = 0;
+	//fast pre processing
+	sf = preProcess_pq( queue, a, b, grid_a, grid_b, epsilon );
 
 	//process face once at the time until queue is not empty
 	while ( !queue.empty() ) {
@@ -1343,8 +1434,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
       }
 
 	//enable FF adjacency, mark, compute normals for face (both on A and B)
-	a->updateDataMask(MeshModel::MM_FACEFACETOPO + MeshModel::MM_FACEMARK + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR);
-	b->updateDataMask(MeshModel::MM_FACEFACETOPO + MeshModel::MM_FACEMARK + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR);
+	a->updateDataMask(MeshModel::MM_FACEFACETOPO + MeshModel::MM_FACEMARK + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR + MeshModel::MM_VERTQUALITY);
+	b->updateDataMask(MeshModel::MM_FACEFACETOPO + MeshModel::MM_FACEMARK + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR + MeshModel::MM_VERTQUALITY);
 	tri::UnMarkAll(a->cm);
 	tri::UnMarkAll(b->cm);
 
@@ -1357,6 +1448,9 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	//fixed eps 
 	eps = 0.00001f;
 
+	clock_t t1, t2;
+	t1 = clock();
+	
 	/**
 	 * Filter Redundancy: Select redundant faces from the surface of the meshes.
 	 */
@@ -1368,18 +1462,18 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		//if user chooses to usequality, initialize priority queue... 
 		if ( par.getBool("UseQuality") )  {
 			if ( !Init_pq( priority_queue, a, b, par.getBool("FullProcessing") ) ) {
-				Log("Meshes haven't border faces - Please select Full Processing option");
+				Log("Target mesh has no border faces - Please select Full Processing option");
 				return false;
 			}
 		}
 		//...else initialize unsorted queue
 		else  {
 			if ( !Init_q( generic_queue, a, b, par.getBool("FullProcessing") ) ) {
-				Log("Meshes haven't border faces - Please select Full Processing option");
+				Log("Target mesh has no border faces - Please select Full Processing option");
 				return false;
 			}
 		}
-		
+		Log( "elapsed time: %f", (clock()-t1)/CLOCKS_PER_SEC );
 		CMeshO::ScalarType epsilon  = par.getAbsPerc("distance");
 		int sf;
 		//if ( par.getBool("FastErosion")  && par.getBool("UseQuality") ) selectRedundantFast_pq();
@@ -1391,6 +1485,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		if ( /*!par.getBool("FastErosion") &&*/ !par.getBool("UseQuality") ) {
 			Log( "Standard Redunancy" );
 			sf = selectRedundant( generic_queue, a, b, epsilon );
+			Log( "elapsed time: %f", (t2-t1)/CLOCKS_PER_SEC );
 		}
 
 		Log( "Selected %i redundant faces", sf );
