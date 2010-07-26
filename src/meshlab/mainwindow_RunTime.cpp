@@ -317,6 +317,7 @@ void MainWindow::setSplit(QAction *qa)
 		else if(qa->text() == tr("&Vertically"))
 			mvc->addView(glwClone, Qt::Horizontal);
 
+
 		updateMenus();
 
 		glwClone->resetTrackBall();

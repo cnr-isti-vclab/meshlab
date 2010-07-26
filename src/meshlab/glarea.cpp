@@ -776,7 +776,13 @@ void GLArea::updateTexture()
 	hasToUpdateTexture = true;
 }
 
-// Texture loading done during the first paint.
+/** initTexture loads all the required textures (if necessary).
+It is called every time in the glpaint. 
+It assumes that:
+- there is a shared gl wrapper for all the contexts (same texture id for different glareas)
+- the values stored in the glwrapper for the texture id are an indicator if there is the need of loading a texture (0 means load that texture)
+
+*/
 void GLArea::initTexture()
 {
 	if(hasToUpdateTexture)
