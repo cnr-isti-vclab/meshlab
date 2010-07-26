@@ -359,16 +359,20 @@ public:
 	int size() const {return meshList.size();}
 	bool busy;    // used in processing. To disable access to the mesh by the rendering thread
 
-  ///add a new mesh with the given name
+  ///Returns for mesh whose id is 'meshId' the list of the associated  tags
+  QList<TagBase *> getMeshTags(int meshId);
+	
+	///add a new mesh with the given name
   MeshModel *addNewMesh(const char *meshName,MeshModel *newMesh=0, bool setAsCurrent=true);
 
   ///remove the mesh from the list and delete it from memory
 	bool delMesh(MeshModel *mmToDel);
 
-  ///add a new mesh with the given name
-  MeshModel *addNewTag(TagBase *newTag);
+  ///add a new tag in the tagList
+  void addNewTag(TagBase *newTag);
 
-
+  ///remove the tag with the given id
+  void removeTag(int id);
 
   int vn() /// Sum of all the vertices of all the meshes
 	{

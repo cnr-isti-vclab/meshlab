@@ -64,6 +64,19 @@ MeshModel *MeshDocument::getMesh(const char *name)
 	return 0;
 }
 
+QList<TagBase *> MeshDocument::getMeshTags(int meshId)
+{
+	QList<TagBase *> meshTags;
+	foreach(TagBase *tag, tagList)
+		foreach(int id, tag->referringMeshes)
+		{
+			if(id==meshId)
+				meshTags.append(tag);
+		}
+	
+	return meshTags;
+}
+
 void MeshDocument::setCurrentMesh(unsigned int i)
 {
   foreach(MeshModel *mmp, meshList)
@@ -142,6 +155,16 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 	return true;
 }
 
+void MeshDocument::addNewTag(TagBase *newTag)
+{
+	tagList.append(newTag);
+}
+
+void MeshDocument::removeTag(int id){
+	foreach(TagBase *tag, tagList)
+		if(tag->id() ==id)
+			delete tag;
+}
 
 MeshModel::MeshModel(MeshDocument *parent, const char *meshName) {
   glw.m=&cm;
