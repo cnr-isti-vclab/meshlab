@@ -265,22 +265,21 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(base->cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
 			
-			MeshModel *slice1= new MeshModel();
+			MeshModel *slice1= m.addNewMesh("slice");
 			//m.meshList.push_back(slice1);
-			QString layername;
-			slice1->setFileName("slice");								// mesh name
+			QString layername;								
 			slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_LEFT,VERTEX_LEFT);
       vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base->cm);
       createSlice(base,slice1);
 			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
 
-			MeshModel* cap= new MeshModel();
-			m.meshList.push_back(cap);
-			cap->setFileName("plane");								// mesh name
+			MeshModel* cap= m.addNewMesh("plane");
+			//m.meshList.push_back(cap);
 			cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			capHole(slice1,cap);
-			delete slice1;
+			//delete slice1;
+			m.delMesh(slice1);
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(cap->cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(cap->cm);
 			vcg::tri::UpdateBounding<CMeshO>::Box(cap->cm);
@@ -296,7 +295,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 			
 			if(parlst.getBool("capBase"))
 			{
-				MeshModel* cap= new MeshModel();
+				MeshModel* cap= m.addNewMesh("slices");
 				capHole(m.mm(),cap);
 				tri::Append<CMeshO,CMeshO>::Mesh(m.mm()->cm, cap->cm);
 				m.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
@@ -372,10 +371,11 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				vcg::tri::UpdateTopology<CMeshO>::FaceFace(base->cm);
 				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
 				
-				MeshModel *slice1= new MeshModel();
-				m.meshList.push_back(slice1);
 				QString layername;
 				layername.sprintf("slice_%d-%d.ply",i,i+1);
+				MeshModel *slice1= m.addNewMesh(qPrintable(layername));
+				//m.meshList.push_back(slice1);
+				
 				slice1->setFileName(layername);								// mesh name
 				slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_LEFT,VERTEX_LEFT);
@@ -386,20 +386,21 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
         createSlice(base,slice1);
 				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
 
-				MeshModel* cap= new MeshModel();
-				m.meshList.push_back(cap);
 				layername.sprintf("plane_%d.ply",i+1);
+				MeshModel* cap= m.addNewMesh(qPrintable(layername));
+				//m.meshList.push_back(cap);
+				
 				cap->setFileName(layername);								// mesh name
 				cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				capHole(slice1,cap);
 				if (eps!=0)
 				{
-					MeshModel* dup= new MeshModel();
-					m.meshList.push_back(dup);
 					layername.sprintf("plane_%d_extruded.ply",i+1);
+					MeshModel* dup= m.addNewMesh(qPrintable(layername));
+					//m.meshList.push_back(dup);
 					dup->setFileName(layername);								// mesh name
 					dup->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);					
-					extrude(cap, dup, eps, planeAxis);
+					extrude(&m,cap, dup, eps, planeAxis);
 				}
 				if (hidePlanes)
 					cap->visible=false;
@@ -410,9 +411,9 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(slice1->cm);
 				vcg::tri::UpdateBounding<CMeshO>::Box(slice1->cm);
 
-				MeshModel* slice2= new MeshModel();
-				m.meshList.push_back(slice2);
 				layername.sprintf("slice_%d-%d.ply",i+1,i+2);
+				MeshModel* slice2= m.addNewMesh(qPrintable(layername));
+				//m.meshList.push_back(slice2);
 				slice2->setFileName(layername);								// mesh name
 				slice2->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_RIGHT,VERTEX_RIGHT);
@@ -468,7 +469,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 	return true;
 }
 
-void ExtraFilter_SlicePlugin::extrude(MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
+void ExtraFilter_SlicePlugin::extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
 {
 	tri::Append<CMeshO,CMeshO>::Mesh(dest->cm, orig->cm);
 	tri::UpdateTopology<CMeshO>::FaceFace(dest->cm);
@@ -505,7 +506,7 @@ void ExtraFilter_SlicePlugin::extrude(MeshModel* orig, MeshModel* dest, float ep
   }
 	if (nv<2) return;
 	//I have at least 3 vertexes
-	MeshModel* tempMesh= new MeshModel();
+	MeshModel* tempMesh= doc->addNewMesh("temp mesh");
 	tri::Append<CMeshO,CMeshO>::Mesh(tempMesh->cm, orig->cm);
 	for (int i=0;i<tempMesh->cm.vert.size();i++)
 		tempMesh->cm.vert[i].P()+=planeAxis*eps/2;
@@ -513,7 +514,7 @@ void ExtraFilter_SlicePlugin::extrude(MeshModel* orig, MeshModel* dest, float ep
 	tri::Append<CMeshO,CMeshO>::Mesh(dest->cm, tempMesh->cm);
 	delete tempMesh;
 	//create the new mesh and the triangulation between the clones
-	tempMesh= new MeshModel();
+	tempMesh=doc->addNewMesh("temp mesh 2");
 	CMeshO::VertexIterator vi=vcg::tri::Allocator<CMeshO>::AddVertices(tempMesh->cm,2*nv);
 
 	//I have at least 6 vertexes
@@ -592,7 +593,7 @@ bool ExtraFilter_SlicePlugin::autoDialog(QAction *action)
 
 void ExtraFilter_SlicePlugin::createSlice(MeshModel* currentMesh, MeshModel* destMesh)
 {
-  tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, true);
+  tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm/*, true*/);
   tri::UpdateTopology<CMeshO>::FaceFace(destMesh->cm);
   tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
   destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation

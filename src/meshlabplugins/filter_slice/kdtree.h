@@ -115,12 +115,10 @@ class KDTree
 			
 
 			
-				
-				MeshModel *slice1= new MeshModel();
-				m->meshList.push_back(slice1);
-				QString layername;
-				layername=name+"L.ply";
-				slice1->setFileName(layername);								// mesh name
+			QString layername;
+			layername=name+"L.ply";
+				MeshModel *slice1= m->addNewMesh(qPrintable(layername));
+				m->meshList.push_back(slice1);						// mesh name
 				slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(mm->cm,VERTEX_LEFT,VERTEX_LEFT);
         vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(mm->cm);
@@ -132,32 +130,29 @@ class KDTree
 				tri::UpdateBounding<CMeshO>::Box(slice1->cm);						// updates bounding box
 				slice1->cm.Tr = (mm->cm).Tr;								// copy transformation
 				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
-				MeshModel* cap= new MeshModel();
-				m->meshList.push_back(cap);
 				layername=name+"_slice.ply";
-				cap->setFileName(layername);			
+				MeshModel* cap= m->addNewMesh(qPrintable(layername));
+				m->meshList.push_back(cap);
 				cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				ExtraFilter_SlicePlugin::capHole(slice1,cap);
 
 				if (eps!=0)
 				{
-					MeshModel* dup= new MeshModel();
-					m->meshList.push_back(dup);
 					layername=name+"_extr.ply";
-					dup->setFileName(layername);											// mesh name
+					MeshModel* dup = m->addNewMesh(qPrintable(layername));		
+					m->meshList.push_back(dup);
 					dup->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-					ExtraFilter_SlicePlugin::extrude(cap, dup, eps, planeAxis);
+					ExtraFilter_SlicePlugin::extrude(m,cap, dup, eps, planeAxis);
 				}
 
 				tri::Append<CMeshO,CMeshO>::Mesh(slice1->cm, cap->cm);
 				tri::Clean<CMeshO>::RemoveDuplicateVertex(slice1->cm);
 				vcg::tri::UpdateTopology<CMeshO>::FaceFace(slice1->cm);
 				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(slice1->cm);
-				
-				MeshModel* slice2= new MeshModel();
-				m->meshList.push_back(slice2);
 				layername=name+"R.ply";
-				slice2->setFileName(layername);											// mesh name
+				MeshModel* slice2= m->addNewMesh(qPrintable(layername));
+				m->meshList.push_back(slice2);
+			
 				slice2->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(mm->cm,VERTEX_RIGHT,VERTEX_RIGHT);
 				vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(mm->cm);

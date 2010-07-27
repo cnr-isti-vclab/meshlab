@@ -77,7 +77,7 @@ public:
 	virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
 
 	static void capHole(MeshModel* orig, MeshModel* dest, int capDir=CAP_CW);
-	static void extrude(MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
+	static void extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
 private:
 	SVGProperties pr;
 	void createSlice(MeshModel* orig,MeshModel* dest);
