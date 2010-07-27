@@ -141,6 +141,8 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			{
 				Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 			}
+			vcg::tri::UpdateFlags<CMeshO>::VertexClear(destMesh->cm,CMeshO::VertexType::SELECTED);
+			vcg::tri::UpdateFlags<CMeshO>::FaceClear(destMesh->cm,CMeshO::FaceType::SELECTED);
 
 			// init new layer
             tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
