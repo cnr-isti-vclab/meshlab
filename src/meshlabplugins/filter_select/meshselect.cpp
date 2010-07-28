@@ -208,7 +208,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   case FP_SELECT_DILATE : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);  
                           tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
   break;
-  case FP_SELECT_BORDER: tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
+  case FP_SELECT_BORDER: tri::UpdateSelection<CMeshO>::FaceFromBorderFlag(m.cm);
   break;
   case FP_SELECT_BY_QUALITY: 
 		{
