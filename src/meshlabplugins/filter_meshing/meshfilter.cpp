@@ -99,9 +99,9 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 	switch (ID(a))
 	{
 		case FP_REMOVE_UNREFERENCED_VERTEX       :
-		case FP_REMOVE_DUPLICATED_VERTEX         :
+		case FP_REMOVE_DUPLICATED_VERTEX         :return MeshFilterInterface::Cleaning;
     case FP_SELECT_FACES_BY_AREA             :
-    case FP_SELECT_FACES_BY_EDGE             : return MeshFilterInterface::Cleaning;
+	case FP_SELECT_FACES_BY_EDGE             : return MeshFilterInterface::FilterClass(MeshFilterInterface::Cleaning + MeshFilterInterface::Selection);
 
 		case FP_BUTTERFLY_SS                     :
 		case FP_LOOP_SS                          :
