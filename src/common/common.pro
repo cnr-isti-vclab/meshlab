@@ -21,7 +21,10 @@ if [ -d  ../distrib/meshlab.app/Contents/MacOs/ ]; \
 then  \
 echo "Copying";  \
 else  \
-mkdir ../distrib/meshlab.app/Contents/MacOs/;  \
+mkdir ../distrib;  \
+mkdir ../distrib/meshlab.app ;  \
+mkdir ../distrib/meshlab.app/Contents;  \
+mkdir ../distrib/meshlab.app/Contents/MacOs;  \
 fi;   \
 cp libcommon.* ../distrib/meshlab.app/Contents/MacOs/"
 INCLUDEPATH *= ../.. \
