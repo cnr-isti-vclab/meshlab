@@ -85,7 +85,7 @@ bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 	QObject::connect(paintbox, SIGNAL(typeChange(ToolType)), this, SLOT(setToolType(ToolType)));
 
 	parent->update();
-	
+
 	selection = new vector<CMeshO::FacePointer>();
 	latest_event.pressure = 0.0;
 	
@@ -95,6 +95,8 @@ bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 	buffer_width = glarea->curSiz.width();
 	buffer_height = glarea->curSiz.height();
 	glarea->setMouseTracking(true);
+
+	connect(this, SIGNAL(setSelectionRendering(bool)),glarea,SLOT(setSelectFaceRendering(bool)) );
 	
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));
 	return true;
@@ -145,6 +147,7 @@ void EditPaintPlugin::setToolType(ToolType t)
 	{
 		case MESH_SELECT :
 			current_options = EPP_PICK_FACES | EPP_DRAW_CURSOR;
+			emit setSelectionRendering(true);
 			break;
 			
 		case COLOR_PAINT:

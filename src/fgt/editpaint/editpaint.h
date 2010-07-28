@@ -67,6 +67,10 @@ public:
 	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual void tabletEvent(QTabletEvent *, MeshModel & , GLArea *);
 
+
+signals:
+	void setSelectionRendering(bool);
+
 public slots:
 	void update();
 	void setToolType(ToolType t);
