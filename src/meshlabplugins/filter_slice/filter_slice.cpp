@@ -300,7 +300,8 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				tri::Append<CMeshO,CMeshO>::Mesh(m.mm()->cm, cap->cm);
 				m.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				tri::UpdateTopology<CMeshO>::FaceFace(m.mm()->cm);
-				delete cap;
+				//delete cap;
+				m.delMesh(cap);
 			}
 
 			float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
@@ -512,7 +513,8 @@ void ExtraFilter_SlicePlugin::extrude(MeshDocument* doc,MeshModel* orig, MeshMod
 		tempMesh->cm.vert[i].P()+=planeAxis*eps/2;
 	//create the clone and move it eps/2 on the right
 	tri::Append<CMeshO,CMeshO>::Mesh(dest->cm, tempMesh->cm);
-	delete tempMesh;
+	//delete tempMesh;
+	doc->delMesh(tempMesh);
 	//create the new mesh and the triangulation between the clones
 	tempMesh=doc->addNewMesh("temp mesh 2");
 	CMeshO::VertexIterator vi=vcg::tri::Allocator<CMeshO>::AddVertices(tempMesh->cm,2*nv);
@@ -565,7 +567,8 @@ void ExtraFilter_SlicePlugin::extrude(MeshDocument* doc,MeshModel* orig, MeshMod
 	vcg::tri::UpdateTopology<CMeshO>::FaceFace(dest->cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(dest->cm);
 	vcg::tri::UpdateBounding<CMeshO>::Box(dest->cm);
-	delete tempMesh;
+	doc->delMesh(tempMesh);
+	//delete tempMesh;
 }
  MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
 {
