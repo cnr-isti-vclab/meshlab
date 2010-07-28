@@ -26,6 +26,7 @@
 #include "filter_dirt.h"
 #include "dustparticle.h"
 #include "dustsampler.h"
+#include "dirt_utils.h"
 
 
 
@@ -91,7 +92,9 @@ QString FilterDirt::filterInfo(FilterIDType filterId) const
 }
 
 void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par){
-    par.addParam(new RichInt("nparticles",1000,"Number of Dust Particles",""));
+    par.addParam(new RichInt("nparticles",1000,"Number of Dust Particles","Number of Dust Particles to Generate"));
+    par.addParam(new RichDynamicFloat("step",0,0,10,"Steps","Steps of simulation"));
+
     return;
 }
 
@@ -103,11 +106,16 @@ int FilterDirt::getRequirements(QAction */*action*/)
 bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
 
+
+
+
     vector<Point3f> dustVertexVec;
     vector<DustParticle<CMeshO> > dustParticleVec;
+
     DustSampler<CMeshO> ts(dustVertexVec,dustParticleVec);
     MeshModel *currMM=md.mm();
-    std::string func_d = "y*y";
+
+    std::string func_d = "ny";
     currMM->updateDataMask(MeshModel::MM_VERTQUALITY);
     mu::Parser p;
     setPerVertexVariables(p);
@@ -126,15 +134,13 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         }
     }
 
-
-    //tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::Montecarlo(currMM->cm,ts,par.getInt("nparticles"));
-
     tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::WeightedMontecarlo(currMM->cm,ts,par.getInt("nparticles"));
-
-
+    //dmm -> Dust Mesh Model
     MeshModel* dmm=md.addNewMesh("Dust Mesh");
+
     dmm->cm.Clear();
     tri::Allocator<CMeshO>::AddVertices(dmm->cm,dustVertexVec.size());
+
     CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<DustParticle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
 
 

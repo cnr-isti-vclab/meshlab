@@ -64,16 +64,17 @@ public:
     void AddFace(FaceType &f, CoordType p){
         sampleVec->push_back(f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2] );
         DustParticle<MeshType> part;
-        part.setFace(f);
-        part.setBarCoord(p);
+        part.face=&f;
+        part.bar_coord=p;
         dpVec->push_back(part);
 
     };
     //void AddTextureSample(const FaceType &, const CoordType &, const Point2i &){};
 private:
     std::vector<CoordType> *sampleVec;
-    std::vector< DustParticle<MeshType> > *dpVec;
-    bool vectorOwner;
+   bool vectorOwner;
+   std::vector< DustParticle<MeshType> > *dpVec; /*Vector of Dust Particle */
+
 };
 
 #endif
