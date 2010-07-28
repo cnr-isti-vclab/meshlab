@@ -99,7 +99,7 @@ inline void RadianceScalingRendererPlugin::swapToScreenMode() {
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  glDepthMask(GL_FALSE);
+  //glDepthMask(GL_FALSE);
 }
 
 inline void RadianceScalingRendererPlugin::swapToWorldMode() {
