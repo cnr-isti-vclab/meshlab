@@ -166,9 +166,13 @@ void MeshDocument::addNewTag(TagBase *newTag)
 }
 
 void MeshDocument::removeTag(int id){
-	foreach(TagBase *tag, tagList)
-		if(tag->id() ==id)
+	for(int i = 0; i<tagList.count(); i++){
+		TagBase *tag = (TagBase *)tagList.at(i);
+		if(tag->id() ==id){
+			tagList.removeAt(i);
 			delete tag;
+		}
+	}
 }
 
 MeshModel::MeshModel(MeshDocument *parent, const char *meshName) {
