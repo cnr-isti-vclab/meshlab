@@ -71,11 +71,11 @@ bool VarianceShadowMappingBlur::init()
 }
 
 
-void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
+void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
 
-    this->renderingFromLightSetup(m, gla);
+    this->renderingFromLightSetup(md, gla);
     glMatrixMode(GL_PROJECTION);
         glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
     glMatrixMode(GL_MODELVIEW);
@@ -91,7 +91,11 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
     RenderMode rm = gla->getCurrentRenderMode();
     glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+    foreach(MeshModel *m, md.meshList)
+    if(m->visible)
+      {
+        m->Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+      }
     glDisable(GL_POLYGON_OFFSET_FILL);
 
     this->renderingFromLightUnsetup();
@@ -164,11 +168,15 @@ void VarianceShadowMappingBlur::runShader(MeshModel& m, GLArea* gla){
 
     glPushAttrib(GL_COLOR_BUFFER_BIT);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_FALSE); // to avoid the fact that when saving a snapshot we get semitransparent shadowed areas.
-        m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+    foreach(MeshModel *m, md.meshList)
+        if(m->visible)
+          {
+            m->Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+          }
     glPopAttrib();
     glUseProgram(0);
 
-                            glDepthFunc((GLenum)depthFuncOld);
+    glDepthFunc((GLenum)depthFuncOld);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
 }

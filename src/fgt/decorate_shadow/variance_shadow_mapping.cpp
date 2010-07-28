@@ -65,11 +65,11 @@ bool VarianceShadowMapping::init()
     return true;
 }
 
-void VarianceShadowMapping::runShader(MeshModel& m, GLArea* gla){
+void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
 
-    this->renderingFromLightSetup(m, gla);
+    this->renderingFromLightSetup(md, gla);
 
     glMatrixMode(GL_PROJECTION);
         glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
@@ -86,7 +86,12 @@ void VarianceShadowMapping::runShader(MeshModel& m, GLArea* gla){
 
     glUseProgram(this->_depthShaderProgram);
     RenderMode rm = gla->getCurrentRenderMode();
-    m.Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+    foreach(MeshModel *m, md.meshList)
+    if(m->visible)
+      {
+        m->Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+      }
+
     glDisable(GL_POLYGON_OFFSET_FILL);
 
     this->unbind();
@@ -117,7 +122,11 @@ void VarianceShadowMapping::runShader(MeshModel& m, GLArea* gla){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+    foreach(MeshModel *m, md.meshList)
+    if(m->visible)
+      {
+        m->Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+      }
 
     glDisable(GL_BLEND);
     glDepthFunc((GLenum)depthFuncOld);

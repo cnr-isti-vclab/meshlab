@@ -278,7 +278,14 @@ public:
 	QList<int> referringMeshes;
 	QList<int> referringRasters;
 	QString filterOwner;
+  int property;
 
+  enum TagProperty {
+    TP_NONE               = 0x00000000,
+    TP_UNIQUE             = 0x00000001,
+    TP_UPDATABLE  	       = 0x00000002,
+
+  };
 }; //end class TagBase
 
 class RenderMode

@@ -75,7 +75,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
     }
 }		
 		
-bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, RichParameterSet  * parset, GLArea* gla){
+bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& m, RichParameterSet* parset, GLArea* gla){
     bool result;
     switch(ID(action)){
         case DP_SHOW_SHADOW :
@@ -114,21 +114,19 @@ bool DecorateShadowPlugin::StartDecorate(QAction* action, MeshModel& m, RichPara
     }
 }
 
-void DecorateShadowPlugin::Decorate(QAction *action, MeshModel &m, GLArea *gla, QFont /*qf*/)
+void DecorateShadowPlugin::decorate(QAction *action, MeshDocument &md, RichParameterSet *, GLArea *gla)
 {
-    if(m.visible){
-        switch(ID(action)){
+   switch(ID(action)){
             case DP_SHOW_SHADOW :
-                this->_decoratorSH->runShader(m, gla);
+                this->_decoratorSH->runShader(md, gla);
                 break;
 
             case DP_SHOW_SSAO:
-                this->_decoratorSSAO->runShader(m, gla);
+                this->_decoratorSSAO->runShader(md, gla);
                 break;
 
             default: assert(0);
         }
-    }
 }
 
 Q_EXPORT_PLUGIN(DecorateShadowPlugin)

@@ -243,12 +243,14 @@ public:
   // This string is used in the 'About plugin' dialog and by meshlabserver to create the filter list page.
 	virtual QString filterInfo(FilterIDType filter) const =0;
 	
-	// The FilterClass describes in which generic class of filters it fits. 
+  /** The FilterClass describes in which generic class of filters it fits.
 	// This choice affect the submenu in which each filter will be placed 
 	// For example filters that perform an action only on the selection will be placed in the Selection Class
+  */
 	virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
 	
-	// The filters can have some additional requirements on the mesh capabiliteis. 
+  /**
+   The filters can have some additional requirements on the mesh capabiliteis.
 	// For example if a filters requires Face-Face Adjacency you shoud re-implement 
 	// this function making it returns MeshModel::MM_FACEFACETOPO. 
 	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
@@ -256,81 +258,56 @@ public:
   // Furthermore, requirements are checked just before the invocation of a filter. If your filter
   // outputs a never used before mesh property (e.g. face colors), it will be allocated by a call
   // to MeshModel::updateDataMask(...)
+  */
   virtual int getRequirements(QAction *){return MeshModel::MM_NONE;}
 	
-  // The FilterPrecondition mask is used to explicitate what kind of data a filter really needs to be applied.
+  /** The FilterPrecondition mask is used to explicitate what kind of data a filter really needs to be applied.
 	// For example algorithms that compute per face quality have as precondition the existence of faces 
 	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
 	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
 	// and Face as precondition.
   // These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness.
   // They are also used to grayout menus un-appliable entries.
-
+  */
   virtual int getPreConditions(QAction *) const {return MeshModel::MM_NONE;}
 
-	// Function used by the framework to get info about the mesh properties changed by the filter.
+  /** Function used by the framework to get info about the mesh properties changed by the filter.
 	// It is widely used by the meshlab's preview system.
 	//TO BE REPLACED WITH = 0
+  */
 	virtual int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
 
-	// The main function that applies the selected filter with the already stabilished parameters
-	// This function is called by the framework after getting the user params 
-	// NO GUI interaction should be done here. No dialog asking, no messagebox errors. 
-	// this function will also be called by the commandline framework.
-	// If you want report errors, use the errorMsg() string. It will displayed in case of filters returning false.
-  // When implementing your applyFilter, you should use the cb function to report to the framework the current state of the processing.
-  // During your (long) processing you should call from time to time cb(perc,descriptiveString), where perc is an int (0..100)
-  // saying what you are doing and at what point of the computation you currently are.
+  /** \brief applies the selected filter with the already stabilished parameters
+  * This function is called by the framework after getting values for the parameters specified in the \ref InitParameterSet
+  * NO GUI interaction should be done here. No dialog asking, no messagebox errors.
+  * Think that his function will also be called by the commandline framework.
+  * If you want report errors, use the \ref errorMsg() string. It will displayed in case of filters returning false.
+  * When implementing your applyFilter, you should use the cb function to report to the framework the current state of the processing.
+  * During your (long) processing you should call from time to time cb(perc,descriptiveString), where perc is an int (0..100)
+  * saying what you are doing and at what point of the computation you currently are.
+  * \sa errorMsg
+  * \sa initParameterSet
+  */
     virtual bool applyFilter(QAction *   filter, MeshDocument &md,   RichParameterSet & par,       vcg::CallBackPos *cb) =0;
 
-	// Function used by the framework to test if a filter is applicable to a mesh.
-	// For istance a colorize by quality filter cannot be applied to a mesh without per-vertex-quality.
-    // if return false it fills a list of strings describing the missing items.
-	bool isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const
-	{	
-		int preMask = getPreConditions(act);
-		MissingItems.clear();
-		
-    if (preMask == MeshModel::MM_NONE) // no precondition specified.
-			return true;
-		
-    if (preMask & MeshModel::MM_VERTCOLOR && !m.hasDataMask(MeshModel::MM_VERTCOLOR))
-				MissingItems.push_back("Vertex Color");
-
-    if (preMask & MeshModel::MM_FACECOLOR && !m.hasDataMask(MeshModel::MM_FACECOLOR))
-				MissingItems.push_back("Face Color");
-				
-    if (preMask & MeshModel::MM_VERTQUALITY && !m.hasDataMask(MeshModel::MM_VERTQUALITY))
-				MissingItems.push_back("Vertex Quality");
-
-    if (preMask & MeshModel::MM_FACEQUALITY && !m.hasDataMask(MeshModel::MM_FACEQUALITY))
-        MissingItems.push_back("Face Quality");
-
-    if (preMask & MeshModel::MM_WEDGTEXCOORD && !m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-				MissingItems.push_back("Per Wedge Texture Coords");
-
-    if (preMask & MeshModel::MM_VERTTEXCOORD && !m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
-				MissingItems.push_back("Per Vertex Texture Coords");
-
-    if (preMask & MeshModel::MM_VERTRADIUS && !m.hasDataMask(MeshModel::MM_VERTRADIUS))
-				MissingItems.push_back("Vertex Radius");
-
-    if (preMask & MeshModel::MM_FACENUMBER && (m.cm.fn==0))
-				MissingItems.push_back("Non empty Face Set");
-
-		return MissingItems.isEmpty();
-	}
+  /** \brief tests if a filter is applicable to a mesh.
+  This function is a handy wrapper used by the framework for the \a getPreConditions callback;
+  For istance a colorize by quality filter cannot be applied to a mesh without per-vertex-quality.
+  On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
+  */
+  bool isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const;
 
 	// This function is called to initialized the list of parameters. 
-    // it is always called. If a filter does not need parameter it leave it empty and the framework
-    // will not create a dialog (unless for previewing)
+  // it is always called. If a filter does not need parameter it leave it empty and the framework
+  // will not create a dialog (unless for previewing)
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*par*/) {}
 	virtual void initParameterSet(QAction *filter,MeshDocument &md, RichParameterSet &par) 
 	{initParameterSet(filter,*(md.mm()),par);}
 		
-	/// This function is invoked by the framework when the apply filter fails to give some info to the user about the fiter failure
-	/// Filters should avoid using QMessageBox for reporting errors. 
-	/// Failing filters should put some meaningful information inside the errorMessage string.
+  /** \brief is invoked by the framework when the applyFilter fails to give some info to the user about the fiter failure
+    * Filters \b must never use QMessageBox for reporting errors.
+    * Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
+    */
 	const QString &errorMsg() {return this->errorMessage;}
 	virtual QString filterInfo(QAction *a) const {return this->filterInfo(ID(a));};
 	virtual QString filterName(QAction *a) const {return this->filterName(ID(a));};
@@ -339,17 +316,18 @@ public:
 
 
   /**
-  This is a virtual function, so every filter/edit must implement it.
+  Builds a QTreeWidgetItem that visually describes a given Tag.
+  This is a virtual function, so every filter/edit that generates Tag should implement it.
 
   In each update, the layerDialog visits the meshlist of the document, and for each mesh asks to the meshDocument the correspondent list of taggings.
-  For each one it invokes the callback and inserts formatted strings (or a treeWidgetItem) into the treeWidget.
+  For each tag it invokes this callback and inserts the generated QtreeWidgetItem) into the treeWidget
 
   In order to generate different TreeWidgetItem according to the position of the tag,
-  MeshModel* mm and RasterModel* rm pointers ar needed.
-  In fact, a tag is displayed below all the meshes/rasters it refers and in the global list of tags.
-  It makes sense displaying different info in each position.
+  MeshModel* mm and RasterModel* rm pointers are needed.
+  In fact, a tag is displayed below all the meshes/rasters it refers and in the global list of tags,
+  so, it makes sense displaying different info in each position.
   */
-  virtual QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel *mm=0) {assert (0); return 0;}
+  virtual QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel */*mm*/) {assert (0); return 0;}
 
   virtual FilterIDType ID(QAction *a) const
   	{
@@ -421,7 +399,7 @@ public:
 	MeshRenderInterface() :MeshLabInterface() {}
     virtual ~MeshRenderInterface() {}
 		
-    virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){};
+  virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){};
 	virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
 	virtual void Finalize(QAction * /*mode*/, MeshDocument &/*m*/, GLArea * /*parent*/){};
 	virtual bool isSupported() = 0;
@@ -440,19 +418,59 @@ public:
 
 
 };
+/**
+  MeshDecorateInterface is the base class of all <b> decorators </b>
+  Decorators are 'read-only' visualization aids that helps to show some data about a document.
 
+  There are two classes of Decorations
+  - PerMesh
+  - PerDocument
+
+  Some example of PerDocument Decorations
+    - backgrounds
+    - trackball icon
+    - axis
+    - shadows
+    - screen space Ambient occlusion (think it as a generic 'darkner')
+
+  Some example of PerMesh Decorations
+    - coloring of selected vertex/face
+    - displaying of normals/curvature directions
+    - display of specific tagging
+  */
 
 class MeshDecorateInterface : public MeshLabInterface
 {
 public:
   typedef int FilterIDType;
 
+  /** The DecorationClass enum represents the set of keywords that must be used to categorize a filter.
+   Each filter can belong to one or more filtering class, or-ed togheter.
+  */
+  enum DecorationClass
+  {
+        Generic          =0x00000, /*!< Should be avoided if possible. */  //
+        PerMesh          =0x00001, /*!<  Decoration that are applied on a single mesh */
+        PerDocument      =0x00002, /*!<  Decoration that are applied on a single mesh */
+        PreRendering     =0x00004, /*!<  Decoration that are applied <i>before</i> the rendering of the document/mesh */
+        PostRendering    =0x00008, /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
+  };
+
   MeshDecorateInterface(): MeshLabInterface() {}
   virtual ~MeshDecorateInterface() {}
 
-  virtual bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/){assert(0); return false;};
-  virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/,QFont qf) = 0;
-  virtual void EndDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+  virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) =0;
+  virtual void decorate(QAction * /*mode*/,  MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/) = 0;
+  virtual void endDecorate(QAction * /*mode*/,   MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/){};
+
+  /** \brief tests if a decoration is applicable to a mesh.
+  For istance curvature cannot be shown on a mesh without curvature.
+  On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
+  It is invoked only for decoration of \i PerMesh class;
+  */
+  virtual bool isDecorationApplicable(QAction */*action*/, const MeshModel& /*m*/, QString&/*MissingItems*/) const {return true;};
+
+  virtual int getDecorationClass(QAction */*action*/) const {return Generic;}
 
   virtual QList<QAction *> actions() const { return actionList;}
   virtual QList<FilterIDType> types() const { return typeList;}
@@ -463,8 +481,6 @@ protected:
 	{
 		foreach( FilterIDType tt, types())
 			if( a->text() == this->filterName(tt) ) return tt;
-
-
 		qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
 		assert(0);
 		return -1;

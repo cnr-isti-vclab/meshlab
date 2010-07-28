@@ -307,7 +307,7 @@ void GLArea::paintGL()
 		foreach(p , iDecoratorsList)
 				{
 					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-					decorInterface->Decorate(p,*mm(),this,qFont);
+          decorInterface->decorate(p,*meshDoc,this->glas.currentGlobalParamSet, this);
 				}
 
 		glPopAttrib();
@@ -364,9 +364,9 @@ void GLArea::paintGL()
 	// Finally display HELP if requested
 	if (isHelpVisible()) displayHelp();
 
-  int error = glGetError();
-  if(error) {
-    log->Logf(GLLogStream::WARNING,qPrintable(checkGLError::makeString("There are gl errors:")));
+  QString error = checkGLError::makeString("There are gl errors:");
+  if(!error.isEmpty()) {
+    log->Logf(GLLogStream::WARNING,qPrintable(error));
   }
 
 	//check if viewers are linked
@@ -422,11 +422,11 @@ void GLArea::displayInfo()
 	//TODO TEMPORANEO BISOGNA SCRIVERE SOLO LE INFO RELATIVE ALLO STATO DELLA GLAREA CORRENTE
 	//log.glDraw(this,-1,3,lineSpacing,qFont);
 
-	if(meshDoc->size()==1)
-	{
+  if(meshDoc->size()==1)
+  {
     renderText(rightCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm()->cm.vn),qFont);
     renderText(rightCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm()->cm.fn),qFont);
-	}
+  }
 	else
 	{
       renderText(rightCol,startPos+ 1*lineSpacing,tr("<%1>").arg(mm()->shortName()),qFont);
@@ -448,6 +448,7 @@ void GLArea::displayInfo()
 
 	// Closing 2D
 	glPopAttrib();
+  glMatrixMode(GL_MODELVIEW);
 	glPopMatrix(); // restore modelview
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
@@ -570,14 +571,13 @@ void GLArea::updateLayer()
 	}
 }
 
-void GLArea::updateDecoration(int oldCurrentMeshIndex)
+void GLArea::updateDecoration(int /*oldCurrentMeshIndex*/)
 {
   foreach(QAction *p , iDecoratorsList)
       {
         MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-
-//        decorInterface->EndDecorate(p,*mm(),mainwindow->,qFont);
-        decorInterface->StartDecorate(p,*mm(),this->glas.currentGlobalParamSet,this);
+        decorInterface->endDecorate(p, *meshDoc,this->glas.currentGlobalParamSet,this);
+        decorInterface->startDecorate(p,*meshDoc, this->glas.currentGlobalParamSet,this);
       }
 }
 

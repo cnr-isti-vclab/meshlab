@@ -105,7 +105,7 @@ bool SSAO::init()
     return true;
 }
 
-void SSAO::runShader(MeshModel& m, GLArea* gla){
+void SSAO::runShader(MeshDocument& md, GLArea* gla){
 
         /***********************************************************/
         //NORMAL MAP and DEPTH MAP generation
@@ -124,7 +124,11 @@ void SSAO::runShader(MeshModel& m, GLArea* gla){
 
         glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        m.Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        foreach(MeshModel *m, md.meshList)
+        if(m->visible)
+          {
+            m->Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
+          }
         glUseProgram(0);
 
         /***********************************************************/

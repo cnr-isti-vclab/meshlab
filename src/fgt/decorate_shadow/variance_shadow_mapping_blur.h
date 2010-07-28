@@ -46,7 +46,7 @@ public:
       * @param m the mesh model.
       * @param gla GLArea reference.
       */
-    void runShader(MeshModel&, GLArea*);
+    void runShader(MeshDocument&, GLArea*);
 
 private:
 

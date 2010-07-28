@@ -905,27 +905,19 @@ void MainWindow::applyDecorateMode()
 
 	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
 
-	bool found=false;
-	 QAction * p;
-	foreach(p,GLA()->iDecoratorsList)
-	{
-		if(p->text()==action->text()){
-			GLA()->iDecoratorsList.remove(p);
-      GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
-			found=true;
-		}
-	}
+  bool found=GLA()->iDecoratorsList.removeOne(action);
 
-	if(!found){
-	  //RichParameterSet * decoratorParams = new RichParameterSet();
+  if(found)
+    GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+  else{
+    //RichParameterSet * decoratorParams = new RichParameterSet();
 		//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
-    bool ret = iDecorateTemp->StartDecorate(action,*meshDoc()->mm(), &currentGlobalParams, GLA());
+    bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
 		if(ret) {
 				GLA()->iDecoratorsList.push_back(action);
-        GLA()->log->Logf(GLLogStream::SYSTEM,"Enable Decorate mode %s",qPrintable(action->text()));
+        GLA()->log->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
 				}
         else GLA()->log->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
-		
 	}
 	GLA()->update();
 }

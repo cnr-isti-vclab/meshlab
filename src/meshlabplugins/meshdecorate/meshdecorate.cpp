@@ -73,8 +73,10 @@ QString ExtraMeshDecoratePlugin::filterName(FilterIDType filter) const
     return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QFont qf)
+void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParameterSet *rm, GLArea *gla)
 {
+  MeshModel &m=*(md.mm());
+  QFont qf;
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
     switch (ID(a))
@@ -167,7 +169,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, GLArea *gla, QF
 			m.glw.DrawWirePolygonal<GLW::NMNone,GLW::CMNone>();
 			glPopAttrib();
         } break;
-    case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,qf); break;
+    case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,rm,qf); break;
     } // end switch;
 	glPopMatrix();
 
@@ -450,47 +452,43 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 }
 
 
-
-bool ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, RichParameterSet *rm, GLArea *)
-{	
-	if( ID(action) == DP_SHOW_VERT_LABEL || ID(action) == DP_SHOW_FACE_LABEL)
-				{
-					if(m.cm.vn <1000 && m.cm.fn<2000) {
-									isMeshOk[&m] = true;
-									return true;
-						}					
-					QMessageBox::StandardButton ret=QMessageBox::question(0,"","Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW <br> Do you REALLY want this? ",QMessageBox::Yes|QMessageBox::No);
-					if(ret==QMessageBox::Yes) isMeshOk[&m] = true; 
-					else isMeshOk[&m] = false; 
-					return isMeshOk[&m];
-				}
-	if( ID(action) == DP_SHOW_VERT_PRINC_CURV_DIR )
-	{
-		if(!m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
-	}
+bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const
+{
+  if( ID(action) == DP_SHOW_VERT_LABEL || ID(action) == DP_SHOW_FACE_LABEL)
+        {
+          if(m.cm.vn <1000 && m.cm.fn<2000) return true;
+          else {
+            ErrorMessage=QString("Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW <br> Do you REALLY want this? ");
+            return false;
+          }
+        }
+  if( ID(action) == DP_SHOW_VERT_PRINC_CURV_DIR )
+  {
+    if(!m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
+  }
     if( ID(action) == DP_SHOW_TEXPARAM )
     {
-        textureWireParam = rm->getBool(this->TextureStyleParam());
         if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return false;
     }
-	return true;
+  return true;
+}
+
+bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &m, RichParameterSet *rm, GLArea *)
+{	
+return true;
 }
 void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf)
 {
-	assert(isMeshOk.contains(&m));
 	glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
 	glColor3f(.4f,.4f,.4f);
-	if(isMeshOk[&m])
-	{
 				for(size_t i=0;i<m.cm.face.size();++i)
 					if(!m.cm.face[i].IsD())
 							{
 								Point3f bar=Barycenter(m.cm.face[i]);
 								gla->renderText(bar[0],bar[1],bar[2],tr("%1").arg(i),qf);		
 							}
-	}
 	glPopAttrib();
 }
 
@@ -501,14 +499,10 @@ void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QGLWidget *gla, QFont q
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
 	glColor3f(.4f,.4f,.4f);
-	assert(isMeshOk.contains(&m));
-	if(isMeshOk[&m])
-			{
-					for(size_t i=0;i<m.cm.vert.size();++i){
-								if(!m.cm.vert[i].IsD())
-											gla->renderText(m.cm.vert[i].P()[0],m.cm.vert[i].P()[1],m.cm.vert[i].P()[2],tr("%1").arg(i),qf);		
-					}
-			}	
+    for(size_t i=0;i<m.cm.vert.size();++i){
+          if(!m.cm.vert[i].IsD())
+                gla->renderText(m.cm.vert[i].P()[0],m.cm.vert[i].P()[1],m.cm.vert[i].P()[2],tr("%1").arg(i),qf);
+    }
 	glPopAttrib();			
 }
 
@@ -532,7 +526,7 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m,QGLWidget *gla, QFont qf)
 	glPopAttrib();			
 }
 
-void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf)
+void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, QGLWidget *gla,  RichParameterSet *rm, QFont qf)
 {
   if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return;
     glMatrixMode(GL_PROJECTION);
@@ -557,7 +551,8 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m,QGLWidget *gla, QFont qf
     glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    if(textureWireParam==true)  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if( rm->getBool(this->TextureStyleParam()) )
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                            else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     if(!m.glw.TMId.empty())
     {

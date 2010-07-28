@@ -46,7 +46,7 @@ public:
       * @param m the mesh model.
       * @param gla GLArea reference.
       */
-    void runShader(MeshModel&, GLArea*);
+    void runShader(MeshDocument&, GLArea*);
 
 protected:
 
@@ -61,7 +61,7 @@ protected:
       * @param m the MeshModel.
       * @param gla GlArea
       */
-    void renderingFromLightSetup(MeshModel&, GLArea*);
+    void renderingFromLightSetup(MeshDocument&, GLArea*);
 
     /**
       * Restores the previous settings

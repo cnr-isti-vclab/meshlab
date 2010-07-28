@@ -57,7 +57,7 @@ public:
       * @param m the mesh model.
       * @param gla GLArea reference.
       */
-    virtual void runShader(MeshModel&, GLArea*) = 0;
+    virtual void runShader(MeshDocument&, GLArea*) = 0;
 
 protected:
     bool _initOk;

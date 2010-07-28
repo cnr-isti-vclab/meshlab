@@ -44,10 +44,10 @@ public:
 
     /**
       * Applies the decoration running the shaders.
-      * @param m the mesh model.
+      * @param md the meshDocument .
       * @param gla GLArea reference.
       */
-    void runShader(MeshModel&, GLArea*);
+    void runShader(MeshDocument&, GLArea*);
 
 private:
 

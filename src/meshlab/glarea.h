@@ -122,8 +122,8 @@ public:
 	void saveSnapshot();
 	void setLightModel();
 	void setView();
-    void resetTrackBall();
-	std::list<QAction *> iDecoratorsList;
+  void resetTrackBall();
+  QList<QAction *> iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
@@ -239,7 +239,7 @@ protected:
 
 	QString GetMeshInfoString();
 	void paintGL();
-    void keyReleaseEvent ( QKeyEvent * e );
+  void keyReleaseEvent ( QKeyEvent * e );
 	void keyPressEvent ( QKeyEvent * e ); 
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
@@ -248,7 +248,6 @@ protected:
 	void wheelEvent(QWheelEvent*e);
 	void tabletEvent(QTabletEvent *e);
 	bool drawSelection;
-
 	void hideEvent(QHideEvent * event);
 
 private:

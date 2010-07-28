@@ -58,11 +58,9 @@ bool ShadowMapping::init()
             PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/sm/object")));
 }
 
-void ShadowMapping::renderingFromLightSetup(MeshModel& m, GLArea* gla){
-    vcg::Box3f bb = m.cm.bbox;
-    vcg::Point3f center;
-    center = bb.Center();
-
+void ShadowMapping::renderingFromLightSetup(MeshDocument& md, GLArea* gla){
+    vcg::Box3f bb = md.bbox();
+    vcg::Point3f center = bb.Center();
     float diag = bb.Diag();
 
     GLfloat lP[4];
@@ -110,11 +108,11 @@ void ShadowMapping::renderingFromLightUnsetup(){
     glPopMatrix();
 }
 
-void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
+void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
 
-    this->renderingFromLightSetup(m, gla);
+    this->renderingFromLightSetup(md, gla);
 
     glMatrixMode(GL_PROJECTION);
         glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
@@ -133,7 +131,11 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
     this->bind();
 
     RenderMode rm = gla->getCurrentRenderMode();
-    m.Render(rm.drawMode, rm.colorMode,rm.textureMode);
+    foreach(MeshModel *m, md.meshList)
+      if(m->visible)
+      {
+      m->Render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
+      }
     glDisable(GL_POLYGON_OFFSET_FILL);
 
     //unbinding the FBO
@@ -162,7 +164,11 @@ void ShadowMapping::runShader(MeshModel& m, GLArea* gla){
     glUniform1i(loc, 0);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    m.Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+    foreach(MeshModel *m, md.meshList)
+    if(m->visible)
+      {
+        m->Render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+      }
     glDisable(GL_BLEND);
     glDepthFunc((GLenum)depthFuncOld);
     glUseProgram(0);
