@@ -44,11 +44,20 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	LayerDialog::ui->setupUi(this);
 	mw=qobject_cast<MainWindow *>(parent);
 
+	tagMenu = new QMenu(this);
+	removeTagAct = new QAction(tr("&Remove Tag"),this);
+	tagMenu->addAction(removeTagAct);
+	connect(removeTagAct, SIGNAL(triggered()), this, SLOT(removeTag()));
+
+	updateTagAct = new QAction(tr("&Update Tag"),this);
+	tagMenu->addAction(updateTagAct);
+	//connect(updateTagAct, SIGNAL(triggered()), this, SLOT(?????????????));
+
 	// The following connection is used to associate the click with the change of the current mesh. 
 	connect(ui->layerTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(toggleStatus(QTreeWidgetItem * , int ) ) );
 	
-	connect(ui->layerTreeWidget, SIGNAL(itemExpanded(QTreeWidgetItem * )) , this,  SLOT(adaptColumns(QTreeWidgetItem *)));
-	connect(ui->layerTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptColumns(QTreeWidgetItem *)));
+	connect(ui->layerTreeWidget, SIGNAL(itemExpanded(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
+	connect(ui->layerTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
 
 
 	connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
@@ -127,10 +136,10 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 {
 	// switch layer
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(ui->layerTreeWidget->itemAt(pos.x(),pos.y()));
-	if(!mItem) return; // user clicked on other info 
-	else{
-    if (mItem->m)
-      mw->GLA()->meshDoc->setCurrentMesh(mItem->m->id());
+	QTreeWidgetItem *tItem = dynamic_cast<QTreeWidgetItem *>(ui->layerTreeWidget->itemAt(pos.x(),pos.y()));
+	if(mItem){ 
+		if (mItem->m)
+			mw->GLA()->meshDoc->setCurrentMesh(mItem->m->id());
 
 		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
 			MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
@@ -141,6 +150,22 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 			}
 		}
 	}
+	else if(tItem){
+		bool ok;
+		int idToRemove = tItem->text(2).toInt(&ok);
+		if(ok){
+			removeTagAct->setData(idToRemove);
+			tagMenu->popup(mapToGlobal(pos));
+		}
+	}
+	else return; // user clicked on other info 
+}
+
+void LayerDialog::removeTag()
+{
+	MeshDocument *md=mw->GLA()->meshDoc;
+	md->removeTag(removeTagAct->data().toInt());
+	updateTable();
 }
 
 void LayerDialog::updateLog(GLLogStream &log)
@@ -179,13 +204,16 @@ void LayerDialog::updateTable()
 
 	ui->layerTreeWidget->clear();
 	ui->layerTreeWidget->setColumnCount(4);
+	ui->layerTreeWidget->setColumnWidth(0,40);
+	ui->layerTreeWidget->setColumnWidth(1,20);
+	ui->layerTreeWidget->setColumnWidth(2,20);
 	ui->layerTreeWidget->header()->hide();
 	foreach(MeshModel* mmd, md->meshList)
 	{
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
 		if( mw->GLA()->visibilityMap.contains(mmd->id()))
-			mmd->visible =mw->GLA()->visibilityMap[mmd->id()];
+			mmd->visible =mw->GLA()->visibilityMap.value(mmd->id());
 
 		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd);
 		if(mmd== mw->GLA()->mm()) {
@@ -193,6 +221,8 @@ void LayerDialog::updateTable()
 			item->setForeground(3,QBrush(Qt::blue));
 		}
 		ui->layerTreeWidget->addTopLevelItem(item);
+
+		item->setExpanded(expandedMap.value(qMakePair(mmd->id(),-1)));
 
 		//Adding default annotations
 		addDefaultNotes(item, mmd);
@@ -203,16 +233,36 @@ void LayerDialog::updateTable()
 			addTreeWidgetItem(item, tag, *md, mmd);
 	}
 
-	for(int i=0; i< ui->layerTreeWidget->columnCount(); i++)
+	for(int i=3; i< ui->layerTreeWidget->columnCount(); i++)
 		ui->layerTreeWidget->resizeColumnToContents(i);
 }
 
-void LayerDialog::adaptColumns(QTreeWidgetItem * item)
+void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 {
 	item->setExpanded(item->isExpanded());
 	for(int i=3; i< ui->layerTreeWidget->columnCount(); i++)
 		ui->layerTreeWidget->resizeColumnToContents(i);
 
+	//Update expandedMap
+	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
+	if(mItem){
+		int meshId = mItem->m->id();
+		bool ok;
+		int tagId = mItem->text(2).toInt(&ok);
+		if(ok)
+			//MeshTreeWidgetItems don't have a tag id, so we use -1
+			updateExpandedMap(meshId, -1, item->isExpanded());
+	}
+	else {
+		MeshTreeWidgetItem *parent = dynamic_cast<MeshTreeWidgetItem *>(item->parent());
+		if(parent){
+			int meshId = parent->m->id();
+			bool ok;
+			int tagId = item->text(2).toInt(&ok);
+			if(ok)
+				updateExpandedMap(meshId, tagId, item->isExpanded());
+		}
+	}
 }
 
 //Add default annotations for each mesh about faces and vertices number
@@ -243,6 +293,7 @@ void LayerDialog::addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag, MeshD
 			QTreeWidgetItem *item = iFilter->tagDump(tag,md,mm);
 			parent->addChild(item);
 			updateColumnNumber(item);
+			item->setExpanded(expandedMap.value(qMakePair(mm->id(),tag->id())));
 		}
 	}
 }
@@ -256,6 +307,12 @@ void LayerDialog::updateColumnNumber(const QTreeWidgetItem * item)
 	if(columnChild - columnParent>0)
 		ui->layerTreeWidget->setColumnCount(columnParent + (columnChild-columnParent));
 }
+
+void LayerDialog::updateExpandedMap(int meshId, int tagId, bool expanded)
+{
+	expandedMap.insert(qMakePair(meshId, tagId),expanded);
+}
+
 
 LayerDialog::~LayerDialog()
 {
