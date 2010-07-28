@@ -92,7 +92,7 @@ void MeshDocument::setCurrentMesh(unsigned int i)
   return;
 }
 
-MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bool setAsCurrent)
+MeshModel * MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bool setAsCurrent)
 {
 	QFileInfo info(meshName);
 	QString newName=info.fileName();
@@ -124,7 +124,7 @@ MeshModel *MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bo
 	emit layerSetChanged();
 
   if(setAsCurrent)
-    this->setCurrentMesh(meshList.size()-1);
+    this->setCurrentMesh(newMesh->id());
 	return newMesh;
 }
 
@@ -147,7 +147,12 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 
 	if(currentMesh == mmToDel)
 	{
-		setCurrentMesh(0);
+		if (!meshList.isEmpty())
+			setCurrentMesh(this->meshList.at(0)->id());
+		else
+		{
+			this->Log.Logf(GLLogStream::SYSTEM,"Empty MeshDocument: should never happened!");
+		}
 	}
 
 	emit layerSetChanged();
@@ -178,7 +183,9 @@ MeshModel::MeshModel(MeshDocument *parent, const char *meshName) {
   cm.Tr.SetIdentity();
   cm.sfn=0;
   cm.svn=0;
-      if(meshName) fullPathFileName=meshName;
+      if(meshName) 
+		  fullPathFileName=meshName;
+	  
 }
 
 
