@@ -37,6 +37,10 @@ $Log: meshedit.cpp,v $
 #include "align/OccupancyGrid.h" 
 #include <wrap/gui/trackball.h>
 
+
+//WARNING!!!!!!!! : the id should be removed using instead the MeshModel's id
+
+
 class MeshNode
 {
 public:
