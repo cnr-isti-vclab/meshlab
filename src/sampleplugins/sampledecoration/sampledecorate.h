@@ -74,8 +74,8 @@ public:
 	QList<QAction *> actions () const {return actionList;}
 	QString basename;
 	
-	bool StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*parent*/ par, GLArea * /*parent*/);
-  void Decorate(QAction *a, MeshModel &m, GLArea *gla,QFont qf);
+  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*parent*/ par, GLArea * /*parent*/);
+  void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla);
 	void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);	
 		
 };
