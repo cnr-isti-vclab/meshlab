@@ -2,8 +2,8 @@ include (../../shared.pri)
 
 QT += opengl
 
-HEADERS       += meshdecorate.h
-SOURCES       += meshdecorate.cpp \
+HEADERS       += decorate_base.h
+SOURCES       += decorate_base.cpp \
                $$VCGDIR/wrap/gui/coordinateframe.cpp
 
-TARGET        = meshdecorate
+TARGET        = decorate_base

@@ -18,7 +18,7 @@ SUBDIRS       = common \                          # the common framework, used b
 #                meshlabplugins/edit_select \
 #                meshlabplugins/filter_create\
 #                meshlabplugins/filter_select \
-#                meshlabplugins/meshdecorate \
+#                meshlabplugins/decorate_base \
 #                meshlabplugins/filter_colorize\
 #                meshlabplugins/filter_measure\
 #                meshlabplugins/filter_sampling\

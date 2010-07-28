@@ -39,7 +39,7 @@ SUBDIRS       = common \
 			meshlabplugins/render_splatting \
 			meshlabplugins/render_gdp \
 			meshlabplugins/render_radiance_scaling \
-				meshlabplugins/meshdecorate \
+        meshlabplugins/decorate_base \
 				meshlabplugins/edit_select \
 				meshlabplugins/edit_pickpoints \
 ##				meshlabplugins/edit_phototexturing \

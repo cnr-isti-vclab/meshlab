@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "meshdecorate.h"
+#include "decorate_base.h"
 #include <wrap/gl/addons.h>
 #include <meshlab/glarea.h>
 
