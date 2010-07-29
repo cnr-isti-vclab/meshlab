@@ -16,6 +16,12 @@ win32-g++:DLLDESTDIR = ../distrib
 
 mac:DLLDESTDIR = .
 
+# The following lines are necessary to avoid that when you re-compile everything you still find old dll in the plugins dir
+macx:QMAKE_CLEAN +=  ../distrib/plugins/*.dylib
+win32:QMAKE_CLEAN +=  ../distrib/plugins/*.dll
+linux-g++:QMAKE_CLEAN +=  ../distrib/plugins/*.so
+
+
 macx:QMAKE_POST_LINK = "\
 if [ -d  ../distrib/meshlab.app/Contents/MacOs/ ]; \
 then  \
