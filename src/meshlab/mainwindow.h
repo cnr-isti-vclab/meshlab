@@ -186,8 +186,8 @@ private:
 	QSignalMapper *windowMapper;
 
     PluginManager PM;
-     
-	/* 
+
+		/* 
 		Note this part should be detached from MainWindow just like the loading plugin part.
 		
 		For each running instance of meshlab, for the global params we have default (hardwired) values and current(saved,modified) values. 
@@ -197,16 +197,20 @@ private:
 	
 	RichParameterSet currentGlobalParams;
 	RichParameterSet defaultGlobalParams;
-  
+	
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 
 public:
+
   MeshDocument *meshDoc() {
     assert(currentViewContainer());
     return &currentViewContainer()->meshDoc;
   }
+
+  const RichParameterSet& currentGlobalPars() const { return currentGlobalParams; }
+  const RichParameterSet& defaultGlobalPars() const { return defaultGlobalParams; }
 
 	GLArea *GLA() const {
 	  if(mdiarea->currentSubWindow()==0) return 0;
