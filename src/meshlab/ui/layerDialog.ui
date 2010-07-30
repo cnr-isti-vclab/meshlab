@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>263</width>
-    <height>407</height>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Layer Dialog</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QTreeWidget" name="layerTreeWidget">
       <column>
@@ -66,7 +66,32 @@
      </layout>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="logPlainTextEdit"/>
+     <layout class="QVBoxLayout" name="subLayout">
+      <item>
+       <widget class="QPlainTextEdit" name="logPlainTextEdit"/>
+      </item>
+      <item>
+       <widget class="QTreeWidget" name="decParsTree">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <attribute name="headerVisible">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="headerVisible">
+         <bool>false</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
