@@ -57,8 +57,15 @@ public:
 
 /** \brief The MeshLabInterface class is the base of all the plugin interfaces.
 
-  The main idea common to all the framework is that each plugin export a set of actions, internally each action is associated to a FilterIDType, and for each action a name and a formatted INFO is defined.
-  For coding easyness ID are more practical (you can use them in switches). Using action on the other hand is practical because it simplify their management in menus/toolbars and it allows to define icons and other things in a automatic way.
+  The main idea common to all the framework is that each plugin export a set of actions,
+  internally each action is associated to a FilterIDType, and for each action a name and a formatted INFO is defined.
+
+  For coding easyness ID are more practical (you can use them in switches).
+  Using action on the other hand is practical because it simplify their management in menus/toolbars and it allows to define icons and other things in a automatic way.
+  Moreover ID are UNSAFE (different plugin can have same id) so they should be used only INTERNALLY
+
+    \todo There is inconsistency in the usage of ID and actions for retrieving particular filters. Remove.
+
 */
 class MeshLabInterface
 {
@@ -80,22 +87,25 @@ public:
   void Log(const char * f, ... );
   void Log(int Level, const char * f, ... ) ;
 
-  /** \brief This function is called by the framework, for each decoration at the start of the plugins.
-   it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
+  /** \brief This function is called by the framework, for each plugin that has global parameters (e.g. \ref MeshDecorateInterface) at the start of the application.
+   The rationale is to allow to each plugin to have a list of global persistent parameters that can be changed from the meshlab itself and whose value is persistent between different meshlab invocations.
+   A typical example is the background color.
+
    For the global parameters the following rules apply:
 
-   \li there is a <b>hardwired</b> default value, that is directly coded into the plugin
-   \li there is a <b>saved</b> value that is stored into persistent location into the user space (registry/home/library) and it is stored in the classical default value of the parameter
-   \li there is a <b>current</b> value that is currently used, different for each decoration instance and that is not stored permanently.
+   \li there is a <b>hardwired</b> default value: a safe consistent value that is directly coded into the plugin and to which the user can always revert if needed.
+   \li there is a <b>saved</b> value: a value that is stored into a persistent location into the user space (registry/home/library) and it is presented as default value of the parameter at each MeshLab invocation.
+   \li there is a <b>current</b> value: a value that is currently used, different for each document instance and that is not stored permanently.
 
    The plugin use the current value to draw its decoration.
    at startup the current value is always silently initialized to the saved value.
    User can revert current value to the saved values and to the hardwired values.
    In the dialog for each parameter some buttons should be present:
 
-   \li load (from the registry),
-   \li save (to the registry),
-   \li reset (from the hardwired).
+   \li apply: use the currently edited parameter value without saving it anywhere. After the closure of the document these values will be lost.
+   \li load:  load from the saved values
+   \li save:  save to a permanent location the current value (to the registry),
+   \li reset:  revert to the hardwired values
 
    If your plugins/action has no GlobalParameter, do nothing.
    The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
@@ -113,7 +123,7 @@ public:
 
 	// The very short string (a few words) describing each filtering action 
 	// This string is used also to define the menu entry
-	virtual QString filterName(FilterIDType ) const =0;
+  virtual QString filterName(FilterIDType ) const =0;
 
 };
 /** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
