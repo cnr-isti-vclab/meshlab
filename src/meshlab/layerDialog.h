@@ -36,6 +36,8 @@ class GLLogStream;
 class MeshModel;
 class MeshDocument;
 class TagBase;
+class MeshDecorateInterface;
+class StdParFrame;
 
 #include <QDialog>
 
@@ -52,17 +54,33 @@ class MeshTreeWidgetItem : public QTreeWidgetItem
 	MeshModel *m;
 };
 
+class DecoratorParamsTreeWidget : public QFrame
+{
+	Q_OBJECT
+public:
+	DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent);
+	~DecoratorParamsTreeWidget();
+private:
+	QPushButton* savebut;
+	QPushButton* resetbut;
+	QPushButton* applybut;
+	QPushButton* loadbut;
+	StdParFrame* frame;
+	QGridLayout* dialoglayout;
+};
+
 class LayerDialog : public QDockWidget
 {
 	Q_OBJECT
 public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
-    void updateLog(GLLogStream &Log);
+	void updateLog(GLLogStream &Log);
+	void updateDecoratorParsView();
 
 public slots:
     void updateTable();
-    void toggleStatus(QTreeWidgetItem * , int );
+	void toggleStatus(QTreeWidgetItem * , int );
     void showEvent ( QShowEvent * event );
     void showContextMenu(const QPoint& pos);
     void showLayerMenu();
@@ -80,6 +98,7 @@ private:
 
 	//It stores if the treeWidgetItems are expanded or not
 	QMap< QPair<int ,int> ,  bool> expandedMap;
+	QMap<GLArea*,QList<QAction*> > dec;
 
 	void addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *meshModel);
 	void addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag,  MeshDocument &md, MeshModel *mm);

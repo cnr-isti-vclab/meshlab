@@ -69,6 +69,8 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	connect(ui->layerTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(showContextMenu(const QPoint&)));
 	connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
+	//connect(mw,SIGNAL(selectedDecoration(GLArea*,QAction*)),this,SLOT(addParamsToDecorationDialog(GLArea*,QAction*)));
+	//connect(mw,SIGNAL(unSelectedDecoration(GLArea*,QAction*)),this,SLOT(removeParamsFromDecorationDialog(GLArea*,QAction*)));
 }
 void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
 {
@@ -319,6 +321,41 @@ LayerDialog::~LayerDialog()
 	delete ui;
 }
 
+void LayerDialog::updateDecoratorParsView() 
+{
+	ui->decParsTree->clear();
+	ui->decParsTree->setColumnCount(1);
+	if (mw->GLA()->iDecoratorsList.size() == 0)
+	{
+		ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
+		return;
+	}
+	QList<QAction*>& decList =  mw->GLA()->iDecoratorsList;
+	QList<QTreeWidgetItem*> treeItem;
+	for(int ii = 0; ii < decList.size();++ii)
+	{
+		MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(decList[ii]->parent());
+		if (!decPlug)
+		{
+			mw->GLA()->log->Logf(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
+			return;
+		}
+		else
+		{
+			QTreeWidgetItem* item = new QTreeWidgetItem();
+			item->setText(0,decList[ii]->text());
+			QTreeWidgetItem* childItem = new QTreeWidgetItem();
+			item->addChild(childItem);	
+			DecoratorParamsTreeWidget* dpti = new DecoratorParamsTreeWidget(decList[ii],mw,ui->decParsTree);
+			dpti->setAutoFillBackground(true);
+			ui->decParsTree->setItemWidget(childItem,0,dpti);
+			treeItem.append(item);
+		}
+	}
+	ui->decParsTree->insertTopLevelItems(0,treeItem);
+	ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::MinimumExpanding);
+}
+
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 {
 	if(meshModel->visible)  setIcon(0,QIcon(":/images/layer_eye_open.png"));
@@ -334,5 +371,48 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 	m=meshModel;
 }
 
+DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent)
+:QFrame(parent)
+{
+	RichParameterSet fakeSet;
+	MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(act->parent());
+	if (!decPlug)
+		mw->GLA()->log->Logf(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
+	else
+	{
+		decPlug->initGlobalParameterSet(act,fakeSet);
+		for(int jj = 0;jj < fakeSet.paramList.size();++jj)
+		{
+			RichParameterSet currSet = mw->currentGlobalPars();
+			RichParameter* par = currSet.findParameter(fakeSet.paramList[jj]->name);
+			fakeSet.setValue(fakeSet.paramList[jj]->name,*(par->val));
+		}
+		
+		dialoglayout = new QGridLayout(parent);
 
+		frame = new StdParFrame(parent,mw->GLA());
+		frame->loadFrameContent(fakeSet,mw->GLA()->meshDoc);
+		savebut = new QPushButton("Save",parent);
+		resetbut = new QPushButton("Reset",parent);
+		applybut = new QPushButton("Apply",parent);
+		loadbut = new QPushButton("Load",parent);
 
+		dialoglayout->addWidget(savebut,1,0);
+		dialoglayout->addWidget(resetbut,1,1);
+		dialoglayout->addWidget(loadbut,1,2);
+		dialoglayout->addWidget(applybut,1,3);
+		dialoglayout->addWidget(frame,0,0,1,4);
+		this->setLayout(dialoglayout);
+	}
+}
+
+DecoratorParamsTreeWidget::~DecoratorParamsTreeWidget()
+{
+	/*delete savebut;
+	delete resetbut;
+	delete applybut;
+	delete loadbut;
+	delete frame;
+	delete dialoglayout;*/
+	//delete dialoglayout;
+}

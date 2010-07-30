@@ -297,7 +297,8 @@ void MainWindow::updateMenus()
 		showLayerDlgAct->setChecked(layerDialog->isVisible());
 		//if(GLA()->layerDialog->isVisible())
 		layerDialog->updateTable();
-    layerDialog->updateLog(*GLA()->log);
+		layerDialog->updateLog(*GLA()->log);
+		//layerDialog->updateDecoratorParsView();
 	}
 	else
 	{
@@ -902,13 +903,15 @@ void MainWindow::applyRenderMode()
 void MainWindow::applyDecorateMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
-
+	
 	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
 
   bool found=GLA()->iDecoratorsList.removeOne(action);
 
   if(found)
+  {
     GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+  }
   else{
     //RichParameterSet * decoratorParams = new RichParameterSet();
 		//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
@@ -919,7 +922,11 @@ void MainWindow::applyDecorateMode()
 				}
         else GLA()->log->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
 	}
+	layerDialog->updateDecoratorParsView();
+	layerDialog->updateLog(*GLA()->log);
+	layerDialog->update();
 	GLA()->update();
+	
 }
 
 bool MainWindow::QCallBack(const int pos, const char * str)
