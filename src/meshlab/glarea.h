@@ -238,7 +238,7 @@ protected:
 	void displayHelp();
 
 	QString GetMeshInfoString();
-	void paintGL();
+  void paintEvent(QPaintEvent *event);
   void keyReleaseEvent ( QKeyEvent * e );
 	void keyPressEvent ( QKeyEvent * e ); 
 	void mousePressEvent(QMouseEvent *event);

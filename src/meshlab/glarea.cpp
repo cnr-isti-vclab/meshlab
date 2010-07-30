@@ -67,6 +67,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	pointSize = 2.0f;
 	
 	updateLayerSetVisibilities();
+  setAutoFillBackground(false);
 
   connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
   connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateDecoration(int)));
@@ -247,8 +248,9 @@ void GLArea::drawLight()
 
 }
 
-void GLArea::paintGL()
-{
+void GLArea::paintEvent(QPaintEvent *event)
+ {
+     makeCurrent();
   QTime time;
   time.start();
 	initTexture();
@@ -375,86 +377,63 @@ void GLArea::paintGL()
 			mvc->updateTrackballInViewers();
 }
 
+
 void GLArea::displayInfo()
 {
-	// Enter in 2D screen Mode again
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(-1,1,-1,1,-1,1);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+  QPainter painter(this);
+  painter.setRenderHint(QPainter::TextAntialiasing);
+  painter.setPen(Qt::white);
+  qFont.setStyleStrategy(QFont::NoAntialias);
+  qFont.setFamily("Helvetica");
+  qFont.setPixelSize(12);
+  painter.setFont(qFont);
+  float barHeight = qFont.pixelSize()*5;
+  QFontMetrics metrics = QFontMetrics(font());
+  int border = qMax(4, metrics.leading());
 
-	qFont.setStyleStrategy(QFont::NoAntialias);
-	qFont.setFamily("Helvetica");
-	qFont.setPixelSize(12);
-  Color4b logAreaColorInactive = glas.logAreaColor;
-  logAreaColorInactive[0]/=2;
-  logAreaColorInactive[1]/=2;
-  logAreaColorInactive[2]/=2;
-  glBlendFunc(GL_ONE,GL_SRC_ALPHA);
-    glas.logAreaColor[3]=128;
-  if(mvc->currentId==id) glColor(glas.logAreaColor);
-                   else  glColor(logAreaColorInactive);
-	int lineNum =4;
-	float lineSpacing = qFont.pixelSize()*1.5f;
-	float barHeight = -1 + 2.0*(lineSpacing*(lineNum+.25))/float(curSiz.height());
+  QRect Column_0(width()/10, this->height()-barHeight+border, width()/2, this->height()-border);
+  QRect Column_1(width()/2 , this->height()-barHeight+border, width(),   this->height()-border);
 
+  Color4b logAreaColor = glas.logAreaColor;
+  glas.logAreaColor[3]=128;
+  if(mvc->currentId!=id) logAreaColor /=2.0;
 
-	glBegin(GL_QUADS);
-    glVertex2f(-1.f,barHeight);     glVertex2f(-1.f,-1.f);
-    glVertex2f( 1.f,-1.f);          glVertex2f( 1.f,barHeight);
-	glEnd();
+  painter.fillRect(QRect(0, this->height()-barHeight, width(), this->height()), ColorConverter::ToQColor(logAreaColor));
 
-  glColor4f(1,1,1,1);
-
-  float leftCol = 20;
-  float rightCol=curSiz.width()*0.5;
- 	float startPos = curSiz.height()-(5+lineSpacing*(lineNum));
-
-  //	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
-	//TODO TEMPORANEO BISOGNA SCRIVERE SOLO LE INFO RELATIVE ALLO STATO DELLA GLAREA CORRENTE
-	//log.glDraw(this,-1,3,lineSpacing,qFont);
+  QString col1Text,col0Text;
 
   if(meshDoc->size()==1)
   {
-    renderText(rightCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm()->cm.vn),qFont);
-    renderText(rightCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm()->cm.fn),qFont);
+    col1Text += QString("Vertices: %1\n").arg(mm()->cm.vn);
+    col1Text += QString("Faces: %1\n").arg(mm()->cm.fn);
   }
-	else
-	{
-      renderText(rightCol,startPos+ 1*lineSpacing,tr("<%1>").arg(mm()->shortName()),qFont);
-      renderText(rightCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc->vn()),qFont);
-      renderText(rightCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc->fn()),qFont);
-	}
+  else
+  {
+    col1Text += QString("<%1>\n").arg(mm()->shortName());
+    col1Text += QString("Vertices: %1 (%2)\n").arg(mm()->cm.vn).arg(meshDoc->vn());
+    col1Text += QString("Faces: %1 (%2)\n").arg(mm()->cm.fn).arg(meshDoc->fn());
+  }
+
   if(rm.selectedFace || rm.selectedVert || mm()->cm.sfn>0 || mm()->cm.svn>0 )
-      renderText(rightCol,startPos+ 4*lineSpacing,tr("Selection: v:%1 f:%2").arg(mm()->cm.svn).arg(mm()->cm.sfn),qFont);
+    col1Text += QString("Selection: v:%1 f:%2\n").arg(mm()->cm.svn).arg(mm()->cm.sfn);
 
-  renderText(leftCol,startPos+ 4*lineSpacing,GetMeshInfoString(),qFont);
+  col1Text += GetMeshInfoString();
 
-  if(fov>5) renderText(leftCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
-       else renderText(leftCol,startPos+1*lineSpacing,QString("FOV: Ortho"),qFont);
-	if ((cfps>0) && (cfps<500))
-      renderText(leftCol,startPos+2*lineSpacing,QString("FPS: %1").arg(cfps,7,'f',1),qFont);
-	if ((clipRatioNear!=1) || (clipRatioFar!=1))
-      renderText(leftCol,startPos+3*lineSpacing,QString("Clipping: N:%1 F:%2").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1),qFont);
+  if(fov>5) col0Text += QString("FOV: %1\n").arg(fov);
+  else col0Text += QString("FOV: Ortho\n");
+  if ((cfps>0) && (cfps<999))
+    col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
+  if ((clipRatioNear!=1) || (clipRatioFar!=1))
+    col0Text += QString("Clipping: N:%1 F:%2\n").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1);
 
+  painter.drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
+  painter.drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
 
-	// Closing 2D
-	glPopAttrib();
-  glMatrixMode(GL_MODELVIEW);
-	glPopMatrix(); // restore modelview
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-
+  painter.end();
+  glPopAttrib();
 }
+
 
 void GLArea::displayViewerHighlight()
 {
@@ -727,7 +706,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
       trackball.MouseWheel( e->delta()/ float(WHEEL_STEP));
       break;
 	}
-	updateGL();
+  update();
 }
 
 
@@ -735,7 +714,7 @@ void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
 {
   hasToPick=true;
   pointToPick=Point2i(e->x(),height()-e->y());
-	updateGL();
+  update();
 }
 
 void GLArea::focusInEvent ( QFocusEvent * e )
@@ -762,14 +741,14 @@ void GLArea::setCursorTrack(vcg::TrackMode *tm)
 void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 {
 	rm.drawMode = mode;
-	updateGL();
+  update();
 }
 
 
 void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 {
 	rm.colorMode = mode;
-	updateGL();
+  update();
 }
 void GLArea::updateTexture()
 {
@@ -847,13 +826,13 @@ void GLArea::initTexture()
 void GLArea::setTextureMode(vcg::GLW::TextureMode mode)
 {
 	rm.textureMode = mode;
-	updateGL();
+  update();
 }
 
 void GLArea::setLight(bool state)
 {
 	rm.lighting = state;
-	updateGL();
+  update();
 }
 
 void GLArea::setLightMode(bool state,LightingModel lmode)
@@ -863,24 +842,24 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 	  case LDOUBLE:		rm.doubleSideLighting = state;	break;
 	  case LFANCY:		rm.fancyLighting = state; break;
 	}
-	updateGL();
+  update();
 }
 
 void GLArea::setBackFaceCulling(bool enabled)
 {
 	rm.backFaceCull = enabled;
-	updateGL();
+  update();
 }
 
 void GLArea::setSelectFaceRendering(bool enabled)
 {
   rm.selectedFace = enabled;
-  updateGL();
+  update();
 }
 void GLArea::setSelectVertRendering(bool enabled)
 {
   rm.selectedVert = enabled;
-  updateGL();
+  update();
 }
 
 void GLArea::setLightModel()
@@ -996,7 +975,7 @@ void GLArea::resetTrackBall()
 	float newScale= 3.0f/meshDoc->bbox().Diag();
 	trackball.track.sca = newScale;
 	trackball.track.tra =  -meshDoc->bbox().Center();
-	updateGL();
+  update();
 }
 
 void GLArea::hideEvent(QHideEvent * /*event*/)
