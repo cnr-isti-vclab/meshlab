@@ -66,6 +66,6 @@ void GLLogStream::SetBookmark()
 void GLLogStream::BackToBookmark()
 {
   if(bookmark<0) return;
-  while(S.size() > size_t(bookmark) )
+  while(S.size() > bookmark )
     S.removeLast();
 }
