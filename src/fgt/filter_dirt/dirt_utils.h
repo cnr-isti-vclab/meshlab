@@ -30,11 +30,9 @@
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
 #include<vcg/complex/trimesh/base.h>
+#include <vcg/space/point3.h>
 
 
-/*
-
-*/
 CMeshO::CoordType fromBarCoords(CMeshO::CoordType b,CMeshO::FaceType &face){
     CMeshO::CoordType c;
     CMeshO::CoordType p0=face.P(0);
@@ -73,4 +71,42 @@ CMeshO::CoordType toBarCoords(CMeshO::CoordType c,CMeshO::FaceType &face){
     b[2]=1-b[0]-b[1];
     return b;
 };
+
+
+/*
+  @description Simulate the movement of a point, affected by a force "dir" on a face.
+
+  @parameter CMeshO::CoordType p coordinates of the point
+  @parameter CMeshO::FaceType face - pointer to the face
+  @parameter CmeshO;;CoordType dir
+  @return new barycentric coordinates of the point
+*/
+
+CMeshO::CoordType StepForward(CMeshO::CoordType p, CMeshO::FaceType &face, CMeshO::CoordType dir){
+
+    int angle = acos(p.dot(dir)/(p.Norm()*dir.Norm()));
+
+    Point3<float> bary;
+
+    if(angle!=0){
+
+        bary=face.P(0);/*Just to do something*/
+    }
+
+    /*Conversion to barycentric coords*/
+
+    //InterpolationParameters(face,face.N(),p,bary);
+
+    bary=toBarCoords(bary,face);/* */
+
+    return bary;
+
+};
+
+void DrawDirt(MeshDocument &md,std::vector<Point3f> &dp){
+
+//TODO
+};
+
+
 #endif // DIRT_UTILS_H

@@ -50,6 +50,7 @@
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <vector>
+#include <muParser.h>
 
 using namespace std;
 using namespace vcg;
@@ -93,7 +94,7 @@ QString FilterDirt::filterInfo(FilterIDType filterId) const
 
 void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par){
     par.addParam(new RichInt("nparticles",1000,"Number of Dust Particles","Number of Dust Particles to Generate"));
-    par.addParam(new RichDynamicFloat("step",0,0,10,"Steps","Steps of simulation"));
+    //par.addParam(new RichDynamicFloat("step",0,0,10,"Steps","Steps of simulation"));
 
     return;
 }
@@ -107,52 +108,78 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 {
 
 
+    if(md.size()>=2){//This is temporary just to try new steps of simulation
 
 
-    vector<Point3f> dustVertexVec;
-    vector<DustParticle<CMeshO> > dustParticleVec;
+        MeshModel* dmesh=md.getMesh("Dust Mesh");
+        Point3f dir;
+        Point3f new_bar_coords;
+        dir[0]=0;
+        dir[1]=1;
+        dir[2]=0;
+        if(dmesh!=0){
+                   CMeshO::VertexIterator vi;//= dmesh->cm.vert.begin();
+                   CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > pi = tri::Allocator<CMeshO>::GetPerVertexAttribute<DustParticle<CMeshO> >(dmesh->cm,"ParticleInfo");
 
-    DustSampler<CMeshO> ts(dustVertexVec,dustParticleVec);
-    MeshModel *currMM=md.mm();
+                   for(vi=dmesh->cm.vert.begin();vi!=dmesh->cm.vert.end();++vi){
 
-    std::string func_d = "ny";
-    currMM->updateDataMask(MeshModel::MM_VERTQUALITY);
-    mu::Parser p;
-    setPerVertexVariables(p);
-    p.SetExpr(func_d);
+                       new_bar_coords = StepForward((*vi).P(),*(pi[vi].face),dir);
+                       //(*vi).P()= fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
+                       if(new_bar_coords[0]<0 && new_bar_coords[1] && new_bar_coords[2]){
+                       //The new position is outside
 
-    CMeshO::VertexIterator vi;
+                       }
+                   }
+              }
 
-    for(vi=currMM->cm.vert.begin();vi!=currMM->cm.vert.end();++vi)
-    {
-        setAttributes(vi,currMM->cm);
-        try {
-            (*vi).Q() = p.Eval();
-        } catch(Parser::exception_type &e) {
-            errorMessage = e.GetMsg().c_str();
-            return false;
+    }else{
+
+        vector<Point3f> dustVertexVec;
+        vector<DustParticle<CMeshO> > dustParticleVec;
+
+        DustSampler<CMeshO> ts(dustVertexVec,dustParticleVec);
+        MeshModel* currMM=md.mm();
+
+        std::string func_d = "ny";
+        currMM->updateDataMask(MeshModel::MM_VERTQUALITY);
+        Parser p;
+        setPerVertexVariables(p);
+        p.SetExpr(func_d);
+
+        CMeshO::VertexIterator vi;
+
+        for(vi=currMM->cm.vert.begin();vi!=currMM->cm.vert.end();++vi)
+        {
+            setAttributes(vi,currMM->cm);
+            try {
+                (*vi).Q() = p.Eval();
+            } catch(Parser::exception_type &e) {
+                errorMessage = e.GetMsg().c_str();
+                return false;
+            }
         }
-    }
 
-    tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::WeightedMontecarlo(currMM->cm,ts,par.getInt("nparticles"));
-    //dmm -> Dust Mesh Model
-    MeshModel* dmm=md.addNewMesh("Dust Mesh");
+        tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::WeightedMontecarlo(currMM->cm,ts,par.getInt("nparticles"));
+        //dmm -> Dust Mesh Model
+        MeshModel* dmm=md.addNewMesh("Dust Mesh");
 
-    dmm->cm.Clear();
-    tri::Allocator<CMeshO>::AddVertices(dmm->cm,dustVertexVec.size());
+        dmm->cm.Clear();
+        tri::Allocator<CMeshO>::AddVertices(dmm->cm,dustVertexVec.size());
 
-    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<DustParticle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
+        CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<DustParticle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
 
 
-    CMeshO::VertexIterator vIter=dmm->cm.vert.begin();
-    vector<Point3f>::iterator dvIter;
-    std::vector< DustParticle<CMeshO> >::iterator dpIter=dustParticleVec.begin();
+        CMeshO::VertexIterator vIter=dmm->cm.vert.begin();
+        vector<Point3f>::iterator dvIter;
+        std::vector< DustParticle<CMeshO> >::iterator dpIter=dustParticleVec.begin();
 
-    for(dvIter=dustVertexVec.begin();dvIter!=dustVertexVec.end();++dvIter){
-        (*vIter).P()=CMeshO::CoordType ((*dvIter)[0],(*dvIter)[1],(*dvIter)[2]);
-        ph[vIter]=(*dpIter);
-        ++dpIter;
-        ++vIter;
+        for(dvIter=dustVertexVec.begin();dvIter!=dustVertexVec.end();++dvIter){
+            (*vIter).P()=CMeshO::CoordType ((*dvIter)[0],(*dvIter)[1],(*dvIter)[2]);
+
+            ph[vIter]=(*dpIter);
+            ++dpIter;
+            ++vIter;
+        }
     }
 
     return true;

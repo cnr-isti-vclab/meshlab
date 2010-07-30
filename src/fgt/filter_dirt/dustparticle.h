@@ -39,7 +39,7 @@ class DustParticle{
     typedef typename MeshType::FacePointer  FacePointer;
 public:
     DustParticle(){
-        speed=10;
+
     };
 
     ~DustParticle(){};
@@ -49,7 +49,10 @@ public:
         FacePointer face;
         CoordType bar_coord;
         float mass;
-        float speed;
+        float speed;/*to delete?*/
+
+        float ad_coeff;/*Adhesion Coefficient*/
+
         // Position History
         //std::vector<CMeshO::CoordType> pos_his;
 };
