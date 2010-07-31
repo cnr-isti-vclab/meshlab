@@ -125,7 +125,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 
                        new_bar_coords = StepForward((*vi).P(),*(pi[vi].face),dir);
                        //(*vi).P()= fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
-                       if(new_bar_coords[0]<0 && new_bar_coords[1] && new_bar_coords[2]){
+                       if(new_bar_coords[0]<0 || new_bar_coords[1]<0 || new_bar_coords[2]<0){
                        //The new position is outside
 
                        }
