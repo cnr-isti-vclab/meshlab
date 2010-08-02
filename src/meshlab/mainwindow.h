@@ -210,6 +210,7 @@ public:
   }
 
   const RichParameterSet& currentGlobalPars() const { return currentGlobalParams; }
+  RichParameterSet& currentGlobalPars() { return currentGlobalParams; }
   const RichParameterSet& defaultGlobalPars() const { return defaultGlobalParams; }
 
 	GLArea *GLA() const {

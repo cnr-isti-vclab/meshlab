@@ -298,12 +298,14 @@ void MainWindow::updateMenus()
 		//if(GLA()->layerDialog->isVisible())
 		layerDialog->updateTable();
 		layerDialog->updateLog(*GLA()->log);
-		//layerDialog->updateDecoratorParsView();
+		layerDialog->updateDecoratorParsView();
 	}
 	else
 	{
 		if(layerDialog->isVisible())
+		{
 			layerDialog->updateTable();
+		}
 	}
 }
 

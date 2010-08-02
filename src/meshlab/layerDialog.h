@@ -28,6 +28,7 @@ $Log: stdpardialog.cpp,v $
 #ifndef LAYER_DIALOG_H
 #define LAYER_DIALOG_H
 #include <QtGui>
+#include "../common/filterparameter.h"
 
 class GLArea;
 class MainWindow;
@@ -60,7 +61,16 @@ class DecoratorParamsTreeWidget : public QFrame
 public:
 	DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent);
 	~DecoratorParamsTreeWidget();
+
+public slots:
+	void save();
+	void reset();
+	void apply();
+	void load();
+
 private:
+	MainWindow* mainWin;
+	RichParameterSet tmpSet;
 	QPushButton* savebut;
 	QPushButton* resetbut;
 	QPushButton* applybut;

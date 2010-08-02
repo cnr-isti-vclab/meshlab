@@ -372,47 +372,101 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 }
 
 DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent)
-:QFrame(parent)
+:QFrame(parent),mainWin(mw),frame(NULL),savebut(NULL),resetbut(NULL),applybut(NULL),loadbut(NULL),dialoglayout(NULL)
 {
-	RichParameterSet fakeSet;
 	MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(act->parent());
 	if (!decPlug)
 		mw->GLA()->log->Logf(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
 	else
 	{
-		decPlug->initGlobalParameterSet(act,fakeSet);
-		for(int jj = 0;jj < fakeSet.paramList.size();++jj)
+		decPlug->initGlobalParameterSet(act,tmpSet);
+		if (tmpSet.paramList.size() != 0)
 		{
-			RichParameterSet currSet = mw->currentGlobalPars();
-			RichParameter* par = currSet.findParameter(fakeSet.paramList[jj]->name);
-			fakeSet.setValue(fakeSet.paramList[jj]->name,*(par->val));
+			for(int jj = 0;jj < tmpSet.paramList.size();++jj)
+			{
+				RichParameterSet currSet = mw->currentGlobalPars();
+				RichParameter* par = currSet.findParameter(tmpSet.paramList[jj]->name);
+				tmpSet.setValue(tmpSet.paramList[jj]->name,*(par->val));
+			}
+			
+			dialoglayout = new QGridLayout(parent);
+
+			frame = new StdParFrame(parent,mw->GLA());
+			frame->loadFrameContent(tmpSet,mw->GLA()->meshDoc);
+			savebut = new QPushButton("Save",parent);
+			resetbut = new QPushButton("Reset",parent);
+			applybut = new QPushButton("Apply",parent);
+			loadbut = new QPushButton("Load",parent);
+
+			dialoglayout->addWidget(savebut,1,0);
+			dialoglayout->addWidget(resetbut,1,1);
+			dialoglayout->addWidget(loadbut,1,2);
+			dialoglayout->addWidget(applybut,1,3);
+			dialoglayout->addWidget(frame,0,0,1,4);
+			this->setLayout(dialoglayout);
+			connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
+			connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
+			connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
+			connect(loadbut,SIGNAL(clicked()),this,SLOT(load()));
 		}
-		
-		dialoglayout = new QGridLayout(parent);
-
-		frame = new StdParFrame(parent,mw->GLA());
-		frame->loadFrameContent(fakeSet,mw->GLA()->meshDoc);
-		savebut = new QPushButton("Save",parent);
-		resetbut = new QPushButton("Reset",parent);
-		applybut = new QPushButton("Apply",parent);
-		loadbut = new QPushButton("Load",parent);
-
-		dialoglayout->addWidget(savebut,1,0);
-		dialoglayout->addWidget(resetbut,1,1);
-		dialoglayout->addWidget(loadbut,1,2);
-		dialoglayout->addWidget(applybut,1,3);
-		dialoglayout->addWidget(frame,0,0,1,4);
-		this->setLayout(dialoglayout);
 	}
 }
 
 DecoratorParamsTreeWidget::~DecoratorParamsTreeWidget()
 {
-	/*delete savebut;
+	delete savebut;
 	delete resetbut;
 	delete applybut;
 	delete loadbut;
 	delete frame;
-	delete dialoglayout;*/
+	delete dialoglayout;
 	//delete dialoglayout;
+}
+
+void DecoratorParamsTreeWidget::save()
+{
+	apply();
+	QDomDocument doc("MeshLabSettings");
+	RichParameterXMLVisitor v(doc);
+	for(int ii = 0;ii < tmpSet.paramList.size();++ii)
+	{
+		RichParameter* p = tmpSet.paramList[ii];
+		p->accept(v);
+		doc.appendChild(v.parElem);
+		QString docstring =  doc.toString();
+		//qDebug("Writing into Settings param with name %s and content ****%s****",qPrintable(tmppar->name),qPrintable(docstring));
+		QSettings setting;
+		setting.setValue(p->name,QVariant(docstring));
+		p->pd->defVal->set(*p->val);
+	}
+}
+
+void DecoratorParamsTreeWidget::reset()
+{
+	//qDebug("resetting the value of param %s to the hardwired default",qPrintable(curPar->name));
+	for(int ii = 0;ii < tmpSet.paramList.size();++ii)
+	{
+		const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(tmpSet.paramList[ii]->name));
+		tmpSet.paramList[ii]->val->set(*(defPar.val));
+		frame->stdfieldwidgets.at(ii)->setWidgetValue(*(tmpSet.paramList[ii]->val));
+	}
+	apply();
+}
+
+void DecoratorParamsTreeWidget::apply()
+{
+	RichParameterSet& current = mainWin->currentGlobalPars();
+	for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
+	{
+		frame->stdfieldwidgets[ii]->collectWidgetValue();
+		RichParameter* r = frame->stdfieldwidgets[ii]->rp;
+		current.setValue(r->name,*(r->val));
+	}
+	mainWin->updateCustomSettings();
+}
+
+void DecoratorParamsTreeWidget::load()
+{
+	for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
+		frame->stdfieldwidgets[ii]->resetValue();
 }
