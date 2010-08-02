@@ -670,7 +670,8 @@ void MainWindow::startFilter()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 
-  if(currentViewContainer() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
+  if(currentViewContainer() == NULL) return;
+  if(GLA() == NULL) return;
 
   // In order to avoid that a filter changes something assumed by the current editing tool,
 	// before actually starting the filter we close the current editing tool (if any).
@@ -682,16 +683,17 @@ void MainWindow::startFilter()
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		qDebug("MeshCreation");
-		MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea); 
-		connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
-		GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
-		gla->meshDoc->addNewMesh("untitled.ply");
-		gla->setFileName("untitled.ply");
-		mdiarea->addSubWindow(mvcont);
-    iFilter->setLog(mvcont->LogPtr());
-    mvcont->LogPtr()->SetBookmark();
+//		MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
+//		connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+//		GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
 
-    if(mdiarea->isVisible()) mvcont->showMaximized();
+    GLA()->meshDoc->addNewMesh("untitled.ply");
+//		gla->setFileName("untitled.ply");
+//    mdiarea->addSubWindow(mvcont);
+//    iFilter->setLog(mvcont->LogPtr());
+//    mvcont->LogPtr()->SetBookmark();
+
+    //if(mdiarea->isVisible()) mvcont->showMaximized();
 	}
 	else
     if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))

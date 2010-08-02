@@ -91,7 +91,10 @@ MainWindow::MainWindow()
 void MainWindow::createActions()
 {
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
-	openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
+  newAct = new QAction(QIcon(":/images/open.png"),tr("New Empty Document..."), this);
+  connect(newAct, SIGNAL(triggered()), this, SLOT(newMeshDocument()));
+
+  openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
 	openAct->setShortcutContext(Qt::ApplicationShortcut);
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
@@ -398,7 +401,8 @@ void MainWindow::createMenus()
 {
 	//////////////////// Menu File ////////////////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
-	fileMenu->addAction(openAct);
+  fileMenu->addAction(newAct);
+  fileMenu->addAction(openAct);
 	fileMenu->addAction(openInAct);
 	fileMenu->addAction(openProjectAct);
 	fileMenu->addAction(closeAct);
@@ -429,6 +433,7 @@ void MainWindow::createMenus()
 	filterMenu->addSeparator();
 	filterMenuSelect = filterMenu->addMenu(tr("Selection"));
 	filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));
+  filterMenuCreate = filterMenu->addMenu(tr("Create New Mesh Layer"));
 	filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing, simplification and reconstruction"));
 	filterMenuColorize = filterMenu->addMenu(tr("Color Creation and Processing"));
 	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
@@ -556,7 +561,7 @@ void MainWindow::fillFilterMenu(){
       if( filterClass & MeshFilterInterface::Quality )        filterMenuQuality->addAction(filterAction);
       if( filterClass & MeshFilterInterface::Measure  )	      filterMenuQuality->addAction(filterAction);
       if( filterClass & MeshFilterInterface::Layer )          filterMenuLayer->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::MeshCreation )   fileMenuNew->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::MeshCreation )   filterMenuCreate->addAction(filterAction);
       if( filterClass & MeshFilterInterface::RangeMap )       filterMenuRangeMap->addAction(filterAction);
       if( filterClass & MeshFilterInterface::PointSet )       filterMenuPointSet->addAction(filterAction);
       if( filterClass & MeshFilterInterface::Sampling )       filterMenuSampling->addAction(filterAction);

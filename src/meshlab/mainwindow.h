@@ -255,6 +255,7 @@ private:
 	QMenu *fileMenuNew;
 	QMenu *filterMenu;
 	QMenu *filterMenuSelect;
+  QMenu *filterMenuCreate;
   QMenu *filterMenuClean;
   QMenu *filterMenuRemeshing;
 	QMenu *filterMenuColorize;
@@ -293,7 +294,8 @@ private:
 	QMenu *unSplitMenu;
 
 	//////////// Actions Menu File ///////////////////////
-	QAction *openAct;
+  QAction *newAct;
+  QAction *openAct;
 	QAction *openInAct,*openProjectAct;
 	QAction *closeAct;
 	QAction *reloadAct;
