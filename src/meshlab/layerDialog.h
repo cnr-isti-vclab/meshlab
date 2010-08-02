@@ -73,7 +73,7 @@ private:
 	RichParameterSet tmpSet;
 	QPushButton* savebut;
 	QPushButton* resetbut;
-	QPushButton* applybut;
+	//QPushButton* applybut;
 	QPushButton* loadbut;
 	StdParFrame* frame;
 	QGridLayout* dialoglayout;

@@ -323,8 +323,20 @@ LayerDialog::~LayerDialog()
 
 void LayerDialog::updateDecoratorParsView() 
 {
+	QStringList expIt;
+	int ind=0;
+	while(QTreeWidgetItem *item = ui->decParsTree->topLevelItem(ind))
+	{
+			if (item->isExpanded())
+				expIt.push_back(item->text(0));
+			++ind;
+	}
 	ui->decParsTree->clear();
-	ui->decParsTree->setColumnCount(1);
+	if (!mw->GLA())
+	{
+		ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
+		return;
+	}
 	if (mw->GLA()->iDecoratorsList.size() == 0)
 	{
 		ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
@@ -353,7 +365,14 @@ void LayerDialog::updateDecoratorParsView()
 		}
 	}
 	ui->decParsTree->insertTopLevelItems(0,treeItem);
+	foreach(QString st,expIt)
+	{
+		QList<QTreeWidgetItem*> res = ui->decParsTree->findItems(st,Qt::MatchExactly);
+		if (res.size() != 0)
+			res[0]->setExpanded(true);
+	}
 	ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::MinimumExpanding);
+	//ui->decParsTree->expandAll();
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
@@ -372,7 +391,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 }
 
 DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent)
-:QFrame(parent),mainWin(mw),frame(NULL),savebut(NULL),resetbut(NULL),applybut(NULL),loadbut(NULL),dialoglayout(NULL)
+:QFrame(parent),mainWin(mw),frame(NULL),savebut(NULL),resetbut(NULL),loadbut(NULL),dialoglayout(NULL)
 {
 	MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(act->parent());
 	if (!decPlug)
@@ -395,16 +414,19 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			frame->loadFrameContent(tmpSet,mw->GLA()->meshDoc);
 			savebut = new QPushButton("Save",parent);
 			resetbut = new QPushButton("Reset",parent);
-			applybut = new QPushButton("Apply",parent);
+			//applybut = new QPushButton("Apply",parent);
 			loadbut = new QPushButton("Load",parent);
 
 			dialoglayout->addWidget(savebut,1,0);
 			dialoglayout->addWidget(resetbut,1,1);
 			dialoglayout->addWidget(loadbut,1,2);
-			dialoglayout->addWidget(applybut,1,3);
-			dialoglayout->addWidget(frame,0,0,1,4);
+			//dialoglayout->addWidget(applybut,1,3);
+			dialoglayout->addWidget(frame,0,0,1,3);
 			this->setLayout(dialoglayout);
-			connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
+			//connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
+			//for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
+			connect(frame,SIGNAL(parameterChanged()),this,SLOT(apply()));
+
 			connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
 			connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
 			connect(loadbut,SIGNAL(clicked()),this,SLOT(load()));
@@ -416,7 +438,7 @@ DecoratorParamsTreeWidget::~DecoratorParamsTreeWidget()
 {
 	delete savebut;
 	delete resetbut;
-	delete applybut;
+	//delete applybut;
 	delete loadbut;
 	delete frame;
 	delete dialoglayout;
@@ -463,6 +485,7 @@ void DecoratorParamsTreeWidget::apply()
 		current.setValue(r->name,*(r->val));
 	}
 	mainWin->updateCustomSettings();
+	mainWin->GLA()->updateDecoration(mainWin->GLA()->meshDoc->mm()->id());
 }
 
 void DecoratorParamsTreeWidget::load()

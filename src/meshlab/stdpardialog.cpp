@@ -285,18 +285,21 @@ void MeshlabStdDialog::applyClick()
 	stdParFrame->readValues(curParSet);
 	
 	////int mask = 0;//curParSet.getDynamicFloatMask();
-	if(curmask)	meshState.apply(curModel);
+	if(curmask)	
+		meshState.apply(curModel);
 
 	//PreView Caching: if the apply parameters are the same to those used in the preview mode
 	//we don't need to reapply the filter to the mesh
 	bool isEqual = (curParSet == prevParSet);
-        if ((isEqual) && (validcache))
+    if ((isEqual) && (validcache))
 		meshCacheState.apply(curModel);
 	else
 		curmwi->executeFilter(q, curParSet, false);
 
-	if(curmask)	meshState.create(curmask, curModel);
-	if(this->curgla) this->curgla->update();
+	if(curmask)	
+		meshState.create(curmask, curModel);
+	if(this->curgla) 
+		this->curgla->update();
 
 }
 

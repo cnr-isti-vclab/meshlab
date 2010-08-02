@@ -305,6 +305,7 @@ void MainWindow::updateMenus()
 		if(layerDialog->isVisible())
 		{
 			layerDialog->updateTable();
+			layerDialog->updateDecoratorParsView();
 		}
 	}
 }
