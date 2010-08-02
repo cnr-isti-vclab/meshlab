@@ -31,7 +31,7 @@ class VarianceShadowMapping : public ShadowMapping
 {
 
 public:
-    VarianceShadowMapping();
+    VarianceShadowMapping(float);
     ~VarianceShadowMapping();
 
     /**

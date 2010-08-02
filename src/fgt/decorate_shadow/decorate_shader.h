@@ -248,7 +248,12 @@ protected:
     bool compileAndLink(GLuint& program, GLuint& vertex, GLuint& fragment, QString& path){
         //load the file containing the vertex shader
         QFile* file = new QFile(path + QString(".vert"));
-        file->open(QIODevice::ReadOnly | QIODevice::Text);
+        bool ret=file->open(QIODevice::ReadOnly | QIODevice::Text);
+        if(!ret)
+        {
+          qDebug("Unable to open '%s'",qPrintable(path + QString(".vert")));
+          return false;
+        }
 
         QByteArray bArray = file->readAll();
         GLint ShaderLen = (GLint) bArray.length();

@@ -25,7 +25,7 @@
 #include "variance_shadow_mapping.h"
 #include <common/pluginmanager.h>
 
-VarianceShadowMapping::VarianceShadowMapping():ShadowMapping()
+VarianceShadowMapping::VarianceShadowMapping(float intensity):ShadowMapping(intensity)
 {
     this->_depth = 0;
 

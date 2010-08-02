@@ -25,8 +25,9 @@
 #include "shadow_mapping.h"
 #include <common/pluginmanager.h>
 
-ShadowMapping::ShadowMapping():DecorateShader()
+ShadowMapping::ShadowMapping(float intensity):DecorateShader()
 {
+    this->_intensity=intensity;
     this->_shadowMappingVert = 0;
     this->_shadowMappingFrag = 0;
     this->_shadowMappingProgram = 0;
@@ -156,6 +157,9 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
 
     GLuint matrixLoc = glGetUniformLocation(this->_shadowMappingProgram, "mvpl");
     glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
+
+    GLuint shadowIntensityLoc = glGetUniformLocation(this->_shadowMappingProgram, "shadowIntensity");
+    glUniform1f(shadowIntensityLoc, this->_intensity);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->_shadowMap);

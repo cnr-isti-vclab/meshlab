@@ -29,7 +29,7 @@ class ShadowMapping : public DecorateShader
 
 public:
 
-    ShadowMapping();
+    ShadowMapping(float);
     ~ShadowMapping();
 
     /**
@@ -49,7 +49,10 @@ public:
     void runShader(MeshDocument&, GLArea*);
 
 protected:
-
+    /** The darkness of the shadow.
+      *
+      */
+    float _intensity;
     /**
       * Sets up the needed resources(FBO and textures) to apply the shader.
       * @return false if something went wrong, true otherwise.

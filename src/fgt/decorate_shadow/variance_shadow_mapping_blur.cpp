@@ -25,7 +25,7 @@
 #include "variance_shadow_mapping_blur.h"
 #include <common/pluginmanager.h>
 
-VarianceShadowMappingBlur::VarianceShadowMappingBlur():VarianceShadowMapping()
+VarianceShadowMappingBlur::VarianceShadowMappingBlur(float intensity):VarianceShadowMapping(intensity)
 {
     this->_blurH = 0;
     this->_blurV = 0;

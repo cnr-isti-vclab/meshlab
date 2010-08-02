@@ -30,7 +30,7 @@ class VarianceShadowMappingBlur : public VarianceShadowMapping
 {
 
 public:
-    VarianceShadowMappingBlur();
+    VarianceShadowMappingBlur(float);
     ~VarianceShadowMappingBlur();
 
     /**
