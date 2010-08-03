@@ -1213,8 +1213,8 @@ void edit_topo::on_mesh_create()
 		parentGla->meshDoc->meshList.pop_back();
 	
 
-	MeshModel *mm= new MeshModel();
-	parentGla->meshDoc->meshList.push_back(mm);
+        MeshModel *mm= parentGla->meshDoc->addNewMesh("");
+        //parentGla->meshDoc->meshList.push_back(mm);
 	first_model_generated = true;
 
 
