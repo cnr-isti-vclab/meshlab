@@ -2,7 +2,7 @@ uniform mat4 mvpl;
 uniform sampler2D shadowMap;
 uniform float texSize;
 varying vec4 shadowCoord; 
-
+uniform float shadowIntensity; // 1.0 black, 0, transparent
 
 vec4 shadowCoordPostW;
 float chebyshevUpperBound( float distance) {
@@ -29,5 +29,7 @@ void main() {
   if (shadow > 0.4)
     discard;
 
-  gl_FragColor = vec4(vec3(0.0), 0.5 - shadow);
+  // gl_FragColor = vec4(vec3(0.0), 0.5 - shadow);
+  gl_FragColor = vec4(vec3(0.0), (shadowIntensity-shadow));
+
 } 

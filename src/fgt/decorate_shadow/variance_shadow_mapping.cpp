@@ -117,6 +117,9 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->_shadowMap);
 
+    GLuint shadowIntensityLoc = glGetUniformLocation(this->_shadowMappingProgram, "shadowIntensity");
+    glUniform1f(shadowIntensityLoc, this->_intensity);
+
     GLuint loc = glGetUniformLocation(this->_shadowMappingProgram, "shadowMap");
     glUniform1i(loc, 0);
     glEnable(GL_BLEND);

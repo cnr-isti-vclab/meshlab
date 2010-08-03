@@ -158,6 +158,9 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     GLuint matrixLoc = glGetUniformLocation(this->_shadowMappingProgram, "mvpl");
     glUniformMatrix4fv(matrixLoc, 1, 0, mvpl.V());
 
+    GLuint shadowIntensityLoc = glGetUniformLocation(this->_shadowMappingProgram, "shadowIntensity");
+    glUniform1f(shadowIntensityLoc, this->_intensity);
+
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->_blurV);

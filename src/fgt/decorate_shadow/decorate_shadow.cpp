@@ -57,7 +57,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
                         "Shader used to perform shadow mapping decoration",
                         "Shadow mapping method")
                     );
-            parset.addParam(new RichFloat(this->DecorateShadowIntensity(),0.3,"Shadow Intensity","Shadow Intensity"));
+            parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(),0.3,0,1.0f,"Shadow Intensity","Shadow Intensity"));
             break;
         }
 
@@ -86,15 +86,15 @@ bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& m, RichP
             }
             switch (parset->getEnum(DecorateShadowMethod())){
                 case SH_MAP:
-                    this->_decoratorSH = new ShadowMapping(parset->getFloat(this->DecorateShadowIntensity()));
+                    this->_decoratorSH = new ShadowMapping(parset->getDynamicFloat(this->DecorateShadowIntensity()));
                     break;
 
                 case SH_MAP_VSM:
-                    this->_decoratorSH = new VarianceShadowMapping(parset->getFloat(this->DecorateShadowIntensity()));
+                    this->_decoratorSH = new VarianceShadowMapping(parset->getDynamicFloat(this->DecorateShadowIntensity()));
                     break;
 
                 case SH_MAP_VSM_BLUR:
-                    this->_decoratorSH = new VarianceShadowMappingBlur(parset->getFloat(this->DecorateShadowIntensity()));
+                    this->_decoratorSH = new VarianceShadowMappingBlur(parset->getDynamicFloat(this->DecorateShadowIntensity()));
                     break;
 
                 default: assert(0);
