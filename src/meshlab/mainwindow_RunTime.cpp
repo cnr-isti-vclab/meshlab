@@ -187,8 +187,14 @@ void MainWindow::setColorMode(QAction *qa)
 
 void MainWindow::updateMenus()
 {
+
 	bool active = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-	openInAct->setEnabled(active);
+  if(active && meshDoc()->meshList.empty())
+  {
+    filterMenuCreate->setEnabled(true);
+    return;
+  }
+  openInAct->setEnabled(active);
 	closeAct->setEnabled(active);
 	reloadAct->setEnabled(active);
 	saveAct->setEnabled(active);
@@ -1066,9 +1072,15 @@ bool MainWindow::openProject(QString fileName)
 	return true;
 }
 
-void MainWindow::newDocument()
+GLArea* MainWindow::newDocument()
 {
-  return;
+  MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
+  connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+  GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
+  mvcont->addView(gla, Qt::Horizontal);
+  mdiarea->addSubWindow(gla->mvc);
+  if(mdiarea->isVisible()) gla->mvc->showMaximized();
+  return gla;
 }
 
 bool MainWindow::open(QString fileName, GLArea *gla)
@@ -1129,17 +1141,14 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					return false;
 				}
 				//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-				bool newGla = false;
-				if(gla==0){
-						MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea); 
-						connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
-						gla=new GLArea(mvcont, &currentGlobalParams); 		
-						mvcont->addView(gla, Qt::Horizontal);
-						newGla =true;
-            pCurrentIOPlugin->setLog(gla->log);
-					}
-				else
-          pCurrentIOPlugin->setLog(GLA()->log);
+
+        if(!gla) {
+         gla= newDocument();
+         // gla=GLA();
+        }
+        assert(gla);
+
+        pCurrentIOPlugin->setLog(gla->log);
 				
 				qb->show();
 				RichParameterSet prePar;
@@ -1175,10 +1184,6 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
                     gla->setFileName(mm->shortName());
-					if(newGla){ //Now there is the container
-						//mdiarea->addSubWindow(gla);
-						mdiarea->addSubWindow(gla->mvc);
-					}
 
 					if(mdiarea->isVisible()) gla->mvc->showMaximized();
 					setCurrentFile(fileName);
@@ -1233,11 +1238,12 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					if(delVertNum>0 || delFaceNum>0 )
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
           meshDoc()->busy=false;
-					if(newGla) GLA()->resetTrackBall();
+         //if(newGla)
+          GLA()->resetTrackBall();
 				}
 			}
 	}// end foreach file of the input list
-	if(GLA()) GLA()->update();
+  GLA()->update();
 	qb->reset();
 	return true;
 }

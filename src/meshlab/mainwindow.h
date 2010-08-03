@@ -79,7 +79,7 @@ public slots:
 private slots:
 
 	//////////// Slot Menu File //////////////////////
-  void newDocument();
+  GLArea* newDocument();
   void reload();
 	void openRecentFile();
 	bool saveAs(QString fileName = QString());

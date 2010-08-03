@@ -403,6 +403,8 @@ void GLArea::displayInfo()
 
   QString col1Text,col0Text;
 
+   if(meshDoc->size()>0)
+  {
   if(meshDoc->size()==1)
   {
     col1Text += QString("Vertices: %1\n").arg(mm()->cm.vn);
@@ -426,7 +428,7 @@ void GLArea::displayInfo()
     col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
   if ((clipRatioNear!=1) || (clipRatioFar!=1))
     col0Text += QString("Clipping: N:%1 F:%2\n").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1);
-
+}
   painter.drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
   painter.drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
 

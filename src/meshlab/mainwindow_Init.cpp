@@ -92,7 +92,7 @@ void MainWindow::createActions()
 {
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
   newAct = new QAction(QIcon(":/images/open.png"),tr("New Empty Document..."), this);
-  connect(newAct, SIGNAL(triggered()), this, SLOT(newMeshDocument()));
+  connect(newAct, SIGNAL(triggered()), this, SLOT(newDocument()));
 
   openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
 	openAct->setShortcutContext(Qt::ApplicationShortcut);
