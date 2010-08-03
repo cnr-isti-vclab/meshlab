@@ -493,12 +493,13 @@ int main(int argc, char *argv[])
 	{
 		for(int i = 0; i < meshNamesIn.size(); i++)
 		{
-			MeshModel *mm = new MeshModel( meshNamesIn.at(i).toStdString().c_str() );
-			server.Open(*mm, meshNamesIn.at(i));
-            printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.vn, mm->cm.fn);
 
 			//now add it to the document
-            meshDocument.addNewMesh(qPrintable(mm->shortName()), mm);
+            meshDocument.addNewMesh(meshNamesIn.at(i).toStdString().c_str());
+           // MeshModel *mm = new MeshModel( meshNamesIn.at(i).toStdString().c_str() );
+            server.Open(*(meshDocument.mm()), meshNamesIn.at(i));
+            MeshModel* mm = meshDocument.mm();
+printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.vn, mm->cm.fn);
 		}
 		//the first mesh is the one the script is applied to
 		meshDocument.setCurrentMesh(0);
