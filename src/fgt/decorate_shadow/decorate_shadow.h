@@ -84,7 +84,7 @@ private:
     DecorateShader* _decoratorSH, *_decoratorSSAO;
     inline const QString DecorateShadowSSAORadius() { return  "MeshLab::Decoration::SSAORadius" ; }
     inline const QString DecorateShadowMethod() { return  "MeshLab::Decoration::ShadowMethod" ; }
-    inline const QString DecorateShadowIntensity() { return  "MeshLab::Decoration::ShadowIntensity" ; }
+    inline const QString DecorateShadowIntensity() { return  "MeshLab::Decoration::ShadowIntensityVal" ; }
 
 };
 
