@@ -411,7 +411,7 @@ void MainWindow::createMenus()
 	fileMenu->addAction(saveAsAct);
 	fileMenu->addAction(saveProjectAct);
 
-	fileMenuNew = fileMenu->addMenu(tr("New"));
+	//fileMenuNew = fileMenu->addMenu(tr("New"));
 
 	fileMenu->addSeparator();
 	fileMenu->addAction(saveSnapshotAct);

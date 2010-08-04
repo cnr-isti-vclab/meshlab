@@ -252,7 +252,7 @@ private:
 
 	///////// Menus ///////////////
 	QMenu *fileMenu;
-	QMenu *fileMenuNew;
+	//QMenu *fileMenuNew;
 	QMenu *filterMenu;
 	QMenu *filterMenuSelect;
   QMenu *filterMenuCreate;
