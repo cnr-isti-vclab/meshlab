@@ -45,8 +45,8 @@ CMeshO::CoordType fromBarCoords(CMeshO::CoordType b,CMeshO::FaceType &face){
 };
 
 /*
+TO DELETE
 
-*/
 CMeshO::CoordType toBarCoords(CMeshO::CoordType c,CMeshO::FaceType &face){
 
     CMeshO::CoordType b;
@@ -72,11 +72,11 @@ CMeshO::CoordType toBarCoords(CMeshO::CoordType c,CMeshO::FaceType &face){
     return b;
 };
 
-
+*/
 /*
   @description Simulate the movement of a point, affected by a force "dir" on a face.
 
-  @parameter CMeshO::CoordType p coordinates of the point
+  @parameter CMeshO::CoordType p - coordinates of the point
   @parameter CMeshO::FaceType face - pointer to the face
   @parameter CmeshO;;CoordType dir
   @return new barycentric coordinates of the point
@@ -86,26 +86,39 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p, CMeshO::FaceType &face, CMesh
 
     int angle = acos(p.dot(dir)/(p.Norm()*dir.Norm()));
 
-    Point3<float> bary;
+    Point3<float> new_pos;
 
     if(angle!=0){
-
-        bary=face.P(0);/*Just to do something*/
+        new_pos=face.P(0);/*Just to do something*/
     }
 
     /*Conversion to barycentric coords*/
+    Point3<float> bar_coords;
+    InterpolationParameters(face,face.N(),new_pos,bar_coords);
 
-    //InterpolationParameters(face,face.N(),p,bary);
-
-    bary=toBarCoords(bary,face);/* */
-
-    return bary;
+    return bar_coords;
 
 };
 
 void DrawDirt(MeshDocument &md,std::vector<Point3f> &dp){
 
 //TODO
+};
+
+/*
+Reference: http://mathworld.wolfram.com/Line-LineIntersection.html
+*/
+CMeshO::CoordType ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::CoordType p3,CMeshO::CoordType p4){
+
+    Point3<float> a=p2-p1;
+    Point3<float> b=p4-p3;
+    Point3<float> c=p3-p1;
+
+    float s = ((c^b)*((a^b)))  /   pow(((a^b).Norm()),2);
+
+    Point3<float> int_point=p1+a*s;
+
+    return int_point;
 };
 
 
