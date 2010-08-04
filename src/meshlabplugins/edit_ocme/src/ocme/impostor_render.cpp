@@ -33,9 +33,9 @@
 		}
 		glPopAttrib();
 
-
-
 		vcg::Point3f p,n;
+
+                glPointSize(5);
 		glBegin(GL_POINTS);
 		for(	PointCellIterator pi   = this->proxies.begin(); pi != this->proxies .end(); ++pi  ){
 				this->GetPointNormal(*pi,p,n);
@@ -44,31 +44,7 @@
 		}
 		glEnd();
 
-//		if(!polygons.empty())
-//			for(unsigned int pi = 0; pi < polygons.size(); ++pi){
-//
-//				glBegin(GL_POLYGON);
-//					glNormal(polygons[pi][0]);
-//						for(int  i = 1;  i < polygons[pi].size(); ++i) {
-//							glVertex(polygons[pi][i]);
-//						}
-//				glEnd();
-//
-//			}
-//		else
-//		{
-//			glBegin(GL_POINTS);
-//			glVertex(box.Center());
-//			glEnd();
-//		}
 	}
-/*
-template <class ImpostorMeshType, int GRIDSIZE>
 
-	void ImpostorClustering<ImpostorMeshType,   GRIDSIZE>::Render(){
-		if(!uptodate)
-		{vcg::tri::UpdateNormals<ImpostorMeshType>::PerVertexPerFace (mesh );uptodate=true;}
-		glw.template Draw<vcg::GLW::DMFlat,     vcg::GLW::CMNone,vcg::GLW::TMNone> ();
-	}*/
 
  

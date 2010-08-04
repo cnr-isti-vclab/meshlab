@@ -429,8 +429,7 @@ void OcmeEditPlugin::loadOcm(){
 
 		UpdateBoundingBox();
 		setTrackBall();
-		mm = new MeshModel("Ocm patch");
-		gla->meshDoc->addNewMesh("Ocm patch",mm);
+                mm = gla->meshDoc->addNewMesh("Ocm patch");
 		ocme_loaded = true;
 		updateButtonsState();
 
@@ -485,8 +484,8 @@ void OcmeEditPlugin::createOcm(){
 		ocme->Create(ocm_name.toAscii());
 		ocme->InitRender();
 
-		mm = new MeshModel("Ocm patch");
-		gla->meshDoc->addNewMesh("Ocm patch",mm);
+
+                mm = gla->meshDoc->addNewMesh("Ocm patch");
 
 		/* paramters to be exposed somehow later  on */
 		ocme->params.side_factor = 20;

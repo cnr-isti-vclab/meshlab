@@ -26,7 +26,7 @@
 
 OcmeEditFactory::OcmeEditFactory()
 {
-	editOcme = new QAction(QIcon(":/images/icon_ocme.png"),"OCME", this);
+        editOcme = new QAction(QIcon(":/icons/icon_ocme.png"),"OCME", this);
 	
 	actionList << editOcme;
 	

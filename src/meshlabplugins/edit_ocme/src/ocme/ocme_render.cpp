@@ -281,11 +281,11 @@ void OCME::Render(){
 	 else
 	  {
 //				c = c.Scatter ( 32,COff(cells_to_render[i]->key.h) );
-		c = vcg::Color4b::Cyan;
+//		c = vcg::Color4b::Cyan;
 //			 c.ColorRamp(0, maxp-minp,cells_to_render[i]->rd->priority+minp)
-		glEnable(GL_COLOR_MATERIAL);
-		 glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
-		 glColor ( c );
+//		glEnable(GL_COLOR_MATERIAL);
+//		 glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
+//		 glColor ( c );
 		 cells_to_render[i]->impostor->Render(this->renderParams.render_subcells);
 	 }
 }

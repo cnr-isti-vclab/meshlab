@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/cur_ocme.png</file>
-        <file>images/icon_ocme.png</file>
+        <file>icons/icon_ocme.png</file>
+        <file>icons/cur_ocme.png</file>
     </qresource>
 </RCC>
