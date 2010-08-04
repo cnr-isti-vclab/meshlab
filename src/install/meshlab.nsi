@@ -46,7 +46,7 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v123BETA_${NOW}.exe"
+OutFile "MeshLabDevel_v130BETA_${NOW}.exe"
 InstallDir "$PROGRAMFILES\VCG\MeshLab"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -127,7 +127,7 @@ Section "MainSection" SEC01
   
   File "${DISTRIB_FOLDER}/plugins\filter_sampling.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_select.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
+  ; File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_splitter.dll"
   
   
@@ -163,7 +163,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\edit_topo.dll"
 
   ; decorate plugins (2)
-  File "${DISTRIB_FOLDER}/plugins\meshdecorate.dll"
+  File "${DISTRIB_FOLDER}/plugins\decorate_base.dll"
   File "${DISTRIB_FOLDER}/plugins\sampledecoration.dll"
   File "${DISTRIB_FOLDER}/plugins\decorate_shadow.dll"
   
