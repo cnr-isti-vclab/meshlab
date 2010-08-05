@@ -247,20 +247,21 @@ protected:
     */
     bool compileAndLink(GLuint& program, GLuint& vertex, GLuint& fragment, QString& path){
         //load the file containing the vertex shader
-        QFile* file = new QFile(path + QString(".vert"));
-        bool ret=file->open(QIODevice::ReadOnly | QIODevice::Text);
+        QFile vertexShaderFile(path + QString(".vert"));
+        bool ret=vertexShaderFile.open(QIODevice::ReadOnly | QIODevice::Text);
         if(!ret)
         {
           qDebug("Unable to open '%s'",qPrintable(path + QString(".vert")));
           return false;
         }
 
-        QByteArray bArray = file->readAll();
+        QByteArray bArray = vertexShaderFile.readAll();
         GLint ShaderLen = (GLint) bArray.length();
         GLubyte* ShaderSource = (GLubyte *)bArray.data();
 
         //create a new vertex shader
-        vertex= glCreateShader(GL_VERTEX_SHADER);
+        if(vertex==0)
+          vertex= glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertex, 1, (const GLchar **)&ShaderSource, &ShaderLen);
         //compile the vertex shader
         glCompileShader(vertex);
@@ -269,18 +270,19 @@ protected:
             return false;
 
         //close the vertex file
-        file->close();
+        vertexShaderFile.close();
 
         //load the file containing the fragment shader
-        file = new QFile(path + QString(".frag"));
-        file->open(QIODevice::ReadOnly | QIODevice::Text);
+        QFile fragmentShaderFile(path + QString(".frag"));
+        fragmentShaderFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
-        bArray = file->readAll();
+        bArray = fragmentShaderFile.readAll();
         ShaderLen = (GLint) bArray.length();
         ShaderSource = (GLubyte *)bArray.data();
 
         //create a new fragment shader
-        fragment= glCreateShader(GL_FRAGMENT_SHADER);
+        if(fragment==0)
+          fragment= glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragment, 1, (const GLchar **)&ShaderSource, &ShaderLen);
         //compile the fragment shader
         glCompileShader(fragment);
@@ -289,10 +291,11 @@ protected:
             return false;
 
         //close the fragment file
-        file->close();
+        fragmentShaderFile.close();
 
         //create a new shader program with the vertex and fragment shader loaded/compiled above
-        program = glCreateProgram();
+        if(program==0)
+          program = glCreateProgram();
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
         glLinkProgram(program);
