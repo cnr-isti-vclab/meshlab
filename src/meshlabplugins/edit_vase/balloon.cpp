@@ -50,12 +50,17 @@ void Balloon::init( int gridsize, int gridpad ){
     vol.band.reserve(5*surf.fn);
     vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
 }
-void Balloon::updateViewField(){
+bool Balloon::initializeField(){
     //--- Setup the interpolation system
+    // if we fail, signal the failure to the caller
     float OMEGA = 1e8;
-    finterp.Init( &surf, COTANGENT );
-    // finterp.Init( &surf, COMBINATORIAL );
-
+    LAPLACIAN type = COTANGENT; // COMBINATORIAL
+    bool op_succeed = finterp.Init( &surf, type ); 
+    if( !op_succeed ){
+        finterp.ColorizeIllConditioned( type );
+        return false;
+    }
+    
     // Shared data
     enum INITMODE {BIFACEINTERSECTIONS, FACEINTERSECTIONS, BOXINTERSECTIONS} mode;
     mode = FACEINTERSECTIONS;
@@ -190,6 +195,8 @@ void Balloon::updateViewField(){
             finterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA*(v), t );
         }
     }
+    
+    return true;
 }
 void Balloon::interpolateField(){
     //--- Mark property active
@@ -197,7 +204,7 @@ void Balloon::interpolateField(){
 
     //--- Interpolate the field
     finterp.Solve();
-
+       
     //--- Transfer vertex quality to surface
     rm &= ~SURF_FCOLOR; // disable face colors
     rm |= SURF_VCOLOR; // enable vertex colors
@@ -325,16 +332,28 @@ void Balloon::evolveBalloon(){
             k3 = updates_curv[i] / curv_maxval; // sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
 
         //--- Apply the update on the implicit field
-        if( surf.vert.QualityEnabled )
+        if( surf.vert.QualityEnabled ){
             v.sfield += .25*k1*k2*vol.getDelta();
+        }
         // if we don't have computed the distance field, we don't really know how to
         // modulate the laplacian accordingly...
-        if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled )
-            v.sfield += .1*k3*k2;
-        else if( surf.vert.CurvatureEnabled )
-            v.sfield += .1*k3;
+        if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled ){
+          v.sfield += .1*k3*k2;
+        }
+        else if( surf.vert.CurvatureEnabled ){
+          v.sfield += .1*k3;     
+        }
     }
 
+    //--- DEBUG LINES: what's being updated
+    if( surf.vert.QualityEnabled )
+      qDebug() << "updating implicit function using distance field";
+    if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled )
+      qDebug() << "updating implicit function using (modulated) curvature";  
+    else if( surf.vert.CurvatureEnabled )
+      qDebug() << "updating implicit function using (unmodulated) curvature";  
+    
+    
     //--- Estrai isosurface
     vol.isosurface( surf, 0 );
 

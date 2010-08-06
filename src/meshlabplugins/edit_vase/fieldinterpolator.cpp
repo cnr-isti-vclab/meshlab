@@ -10,7 +10,7 @@ using namespace vcg;
 // of a SQUARE matrix with the appropriate mesh coefficients. Constraints on vertices
 // are added by the function AddConstraint
 void test_cholmod2();
-void FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
+bool FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
     // Testing function
     // test_cholmod2(); exit(0);
 
@@ -29,7 +29,6 @@ void FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
     A_dyn = new DynamicSparseMatrix<FieldType>(mesh->vn,mesh->vn);
     xb = new Matrix<FieldType, Dynamic, 1>(mesh->vn);
     xb->setZero(mesh->vn);
-
 
     // Fill in the entries of A_dyn and xb
     if( laptype == COMBINATORIAL ){
@@ -96,40 +95,96 @@ void FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
                 vJ_i = vcg::tri::Index(*mesh,vJ);
 
                 // alpha-spoke
-                A_pos = pos;
-                A_pos.FlipE();
-                vA = A_pos.VFlip();
-                v1 = vI->P()-vA->P();
-                v2 = vJ->P()-vA->P();
-                alpha = acos( v1.dot(v2) / (v1.Norm()*v2.Norm()) );
-
+                { 
+                    A_pos = pos;
+                    A_pos.FlipE();
+                    vA = A_pos.VFlip();
+                    v1 = vI->P() - vA->P();
+                    v2 = vJ->P() - vA->P();
+                    alpha = acos( v1.dot(v2) / (v1.Norm()*v2.Norm()) );
+                    if( isinf(alpha) ) return false;
+                }
+                
                 // beta-spoke
-                B_pos = pos;
-                B_pos.FlipF();
-                B_pos.FlipE();
-                vB = B_pos.VFlip();
-                v1 = vI->P()-vB->P();
-                v2 = vJ->P()-vB->P();
-                beta = acos( v1.dot(v2) / (v1.Norm()*v2.Norm()) );
-
+                {
+                    B_pos = pos;
+                    B_pos.FlipF();
+                    B_pos.FlipE();
+                    vB = B_pos.VFlip();
+                    v1 = vI->P() - vB->P();
+                    v2 = vJ->P() - vB->P();
+                    beta = acos( v1.dot(v2) / (v1.Norm()*v2.Norm()) );
+                    if( isinf(beta) ) return false;
+                }
+                
                 // Compute cotangent coefficient
                 cotcoeff = .5 * ( cos(alpha)/sin(alpha) + cos(beta)/sin(beta) );
-                assert( !isinf(cotcoeff) );
+                if( isinf(cotcoeff) ) {
+                    qDebug("*********************************************************************************");
+                    qDebug("*                                  WARNING                                       ");
+                    qDebug("* interpolation initialization failed because of ill-conditioned triangulation   ");
+                    qDebug("* found triangle generating infinite cotangent coefficient:                      ");
+                    qDebug("*       cotcoeff: %.2f     alpha: %.2f     beta: %.2f                            ", cotcoeff, alpha, beta);
+                    qDebug("*********************************************************************************");     
+                    return false;
+                }
+                // Update the coefficients
                 totcoeff += cotcoeff;
-
                 // Off-diagonal entries (symmetric) Only lower diagonal
                 if(vI_i > vJ_i)
-                    A_dyn->coeffRef(vI_i,vJ_i) = -cotcoeff;
+                  A_dyn->coeffRef(vI_i,vJ_i) = -cotcoeff;
                 else
-                    A_dyn->coeffRef(vJ_i,vI_i) = -cotcoeff;
+                  A_dyn->coeffRef(vJ_i,vI_i) = -cotcoeff;
             }
             while(vJ != firstV);
             // Diagonal entries
             A_dyn->coeffRef(vI_i,vI_i) = totcoeff;
         }
     }
+    
+    return true;
 }
+void FieldInterpolator::ColorizeIllConditioned(LAPLACIAN laptype){
+    assert( laptype == COTANGENT );
+    // Disable face coloring (which enables vertex)
+    // and flush the vertex coloring
+    // mesh->face.DisableColor();
+    // mesh->vert.EnableColor(); -- why is this illegal?
+    // tri::UpdateColor<CMeshO>::VertexConstant(*mesh, Color4b::Black);
+    
+    // Reset vertex quality
+    tri::UpdateQuality<CMeshO>::VertexConstant(*mesh,0);
 
+    // Test index coloring
+    // for(unsigned int vi=0; vi<mesh->vert.size(); vi++)
+    //   mesh->vert[vi].Q() = vcg::tri::Index(*mesh,mesh->vert[vi]);
+    
+    int indexes[5] = {0,1,2,0,1};
+    for(CMeshO::FaceIterator fi=mesh->face.begin();fi!=mesh->face.end();fi++){
+        CFaceO& f = *(fi);
+        // Consider each of the three vertices
+        for(int i=1; i<=3; i++){
+            int iprev = indexes[i-1];
+            int icurr = indexes[i];
+            int inext = indexes[i+1];
+            // Curr is of interest
+            Point3f va = f.P(iprev)-f.P(icurr);
+            Point3f vb = f.P(inext)-f.P(icurr);
+            float alpha = acos( va.dot(vb) / (va.Norm()*vb.Norm()) );
+            // Set its quality to 1
+            if( alpha==0 ){
+                fi->V(icurr)->Q() = 1;
+                float ratio = (f.P(iprev)-f.P(inext)).Norm() / va.Norm();
+                qDebug("ratio between edges: %.4f", ratio);
+                
+            }
+//            if( alpha==0 ) fi->V(iprev)->Q() = 1;
+//            if( alpha==0 ) fi->V(inext)->Q() = 1;
+            
+        }
+    }
+    tri::UpdateColor<CMeshO>::VertexQualityRamp(*mesh);
+}
 void FieldInterpolator::AddConstraint( unsigned int vidx, FieldType omega, FieldType val){
     assert( !math::IsNAN(val) );
     assert( omega != 0 );
@@ -137,7 +192,6 @@ void FieldInterpolator::AddConstraint( unsigned int vidx, FieldType omega, Field
     xb->coeffRef(vidx) += omega*val;
 }
 void FieldInterpolator::Solve(){
-    
     //--- DEBUG: Damp the matrix on file, so that matlab can read it and compute solution
     // You need to remove the first few lines from the matrix.txt before being able to import
     // the matrix successfully!!

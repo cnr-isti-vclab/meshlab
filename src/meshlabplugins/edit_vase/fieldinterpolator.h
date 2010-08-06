@@ -33,6 +33,7 @@ private:
     /// The EIGEN matrices/vectors involved in the interpolation
     Eigen::DynamicSparseMatrix<FieldType>* A_dyn;
     Eigen::Matrix<FieldType, Eigen::Dynamic, 1>* xb;
+    
 public:
     /// Refer to Init
     FieldInterpolator(){
@@ -45,7 +46,10 @@ public:
         if( xb!=0 ) delete xb;
     }
     /// Creates the sparse laplacian matrixes used by the solver using the specified on the domain of mesh
-    void Init(CMeshO* mesh, LAPLACIAN laptype=COMBINATORIAL);
+    /// @return false if initialization has failed for bad-conditioned triangles
+    bool Init(CMeshO* mesh, LAPLACIAN laptype=COMBINATORIAL);
+    /// Assigns color to vertexes and faces highlighting ill-conditioned elements according to the selected laplacian
+    void ColorizeIllConditioned(LAPLACIAN laptype);
     /// Adds a constraint to vertex vidx
     void AddConstraint( unsigned int vidx, FieldType omega, FieldType val);
     /// Solves the interpolation problem by Cholesky returning the solution in the Q() vertex property

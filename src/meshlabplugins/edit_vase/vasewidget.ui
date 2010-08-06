@@ -213,7 +213,7 @@
            <item>
             <widget class="QSpinBox" name="numItersSpin">
              <property name="value">
-              <number>1</number>
+              <number>36</number>
              </property>
             </widget>
            </item>

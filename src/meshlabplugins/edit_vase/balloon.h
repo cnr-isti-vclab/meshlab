@@ -47,9 +47,9 @@ public:
     Balloon( CMeshO& _cloud ) : cloud( _cloud ){}
 
 
-    //--- Logic
+    //--- Logic (if failed, return != 0) 
     void init(int gridsize, int gridpad);
-    void updateViewField();
+    bool initializeField();
     void interpolateField();
     void computeCurvature();
     void evolveBalloon();

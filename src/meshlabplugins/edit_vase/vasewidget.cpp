@@ -99,19 +99,22 @@ void VaseWidget::on_slice_offset_sliderMoved(int){
     update_slice();
 }
 void VaseWidget::on_iterationButton_released(){
+    bool op_succeed = false;
     for(int i=0; i<ui.numItersSpin->value(); i++){
-        balloon->updateViewField();
-        balloon->interpolateField();
-        balloon->computeCurvature();
+        gla->log.Logf(GLLogStream::FILTER, "\n----- began iteration %d -----", balloon->numiterscompleted);
+        op_succeed = balloon->initializeField();    if( !op_succeed ) break;
+        balloon->interpolateField();                if( !op_succeed ) break;
+        balloon->computeCurvature();                if( !op_succeed ) break;
         balloon->evolveBalloon();
-        gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
+        qDebug("----- finished -----"); 
+        // gla->log.Logf(GLLogStream::FILTER, "----- Finished iteration %d\n", balloon->numiterscompleted);
         gla->update();
     }
 }
 void VaseWidget::on_refreshButton_released(){
-    balloon->updateViewField();
-    gla->log.Log(GLLogStream::FILTER, "Refreshed view-based distance field");
-    balloon->render(gla);
+    bool op_failed = balloon->initializeField();
+    balloon->render(gla); // why is this here????
+    gla->log.Logf(GLLogStream::FILTER, "Refreshed view-based distance field %s", ((op_failed)?"**FAILED!**":"completed") );
     gla->update();
 }
 void VaseWidget::on_interpButton_released(){
@@ -128,7 +131,7 @@ void VaseWidget::on_evolveButton_released(){
 void VaseWidget::on_laplButton_released(){
     balloon->computeCurvature();
     balloon->rm |= Balloon::SURF_VCOLOR;
-    gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
+    // gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
     gla->update();
 }
 
