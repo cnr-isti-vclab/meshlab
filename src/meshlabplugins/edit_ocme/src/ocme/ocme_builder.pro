@@ -26,6 +26,7 @@ win32 {
 }
 
 DEFINES += NO_BERKELEY
+DEFINES += _DEBUG
 
 # Input
 HEADERS += ocme.h \

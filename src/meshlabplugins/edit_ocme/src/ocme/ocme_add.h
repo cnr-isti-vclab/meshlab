@@ -143,7 +143,7 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 			if(  vp.IsUnassigned()){												// check if it has already been assigned
                                 CellKey ckv = ComputeCellKey((*fi).V(i)->P(),h);                                    // no: find in which cell is should be stored
                                 Cell* ext_c = ( ckv == c->key)?c:	GetCellC(ckv);                              // no: get this cell (caching: try if is the one already in c)
-																added_cells.push_back(ckv);
+                                added_cells.push_back(ckv);
 
                                 if(!ext_c->generic_bool()) {                                                   // if it is the first occurrence of the cell
                                     UpdateCellsAttributes(ext_c,attr_map);                                          // make sure it contains all the attributes
@@ -160,6 +160,9 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 			if (vp.ck == ck)														// if it has been assigned to the the face cell
 				vIndex[i] = vp.i;													// just copy its order
 			else{
+                                Cell * ext_c = GetCell(vp.ck,false);
+                                assert(ext_c != NULL);
+                                CreateDependence(c,ext_c);
 				int ext_pos = c->GetExternalReference(vp,false);					// check if  the reference to this vertex has already been created
 				if(ext_pos!=-1)														// yes
 					vIndex[i] =  c->GetVertexPointingToExternalReference(ext_pos);	//   yes: find out the corresponding vertex and assign it

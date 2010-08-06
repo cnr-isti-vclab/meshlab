@@ -566,9 +566,9 @@ void OcmeEditPlugin::edit(){
 	cells_to_edit.clear();
 
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace ( mm->cm );
-//
-//	CMeshO::  PerFaceAttributeHandle<GIndex>  gposf =
-//			vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
+
+        CMeshO::  PerFaceAttributeHandle<GIndex>  gposf =
+                        vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
 //
 //	CMeshO::  PerVertexAttributeHandle<unsigned char>  lockedV =
 //			vcg::tri::Allocator<CMeshO>::  GetPerVertexAttribute<unsigned char> (mm->cm,"ocme_locked");
@@ -577,9 +577,18 @@ void OcmeEditPlugin::edit(){
 //			vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<unsigned char> (mm->cm,"ocme_locked");
 //
 //
-//	for(unsigned int i = 0; i < mm->cm.face.size();++i)
-//			if(!mm->cm.face[i].IsD())
-//					if( lockedF[i] ) {
+
+        if(!mm->cm.face.IsColorEnabled())
+            mm->cm.face.EnableColor();
+
+        vcg::Color4b c;
+        for(unsigned int i = 0; i < mm->cm.face.size();++i)
+
+            if(!mm->cm.face[i].IsD()){
+                        c = c.Scatter(32,gposf[i].ck.h+16);
+                            mm->cm.face[i].C() = c;
+                        }
+
 //			for(unsigned int fi = 0; fi < 3; ++ fi ){
 //								lockedV[mm->cm.face[i].V(fi)] = 1;
 //								mm->cm.face[i].V(fi)->SetS();

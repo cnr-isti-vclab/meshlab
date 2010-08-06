@@ -191,11 +191,11 @@ if(ext_cell == cell)
 
 	 
 
-	/// Phase 2. Adjust all the references and compact external vertices
-	///		(a) adjust the references to the vertex from the faces
-	///		(b) compute which external references will be removed
-	///		(c) build the remapping of externals
-
+        /* Phase 2. Adjust all the references and compact external vertices
+        / 		(a) adjust the references to the vertex from the faces
+        / 		(b) compute which external references will be removed
+        / 		(c) build the remapping of externals
+        */
 	RmIte  res;
 	for( ci = cs.begin(); ci != cs.end(); ++ci){
 		Cell * cell = *ci;
@@ -313,8 +313,9 @@ this->CheckExternalsCoherent(cell);
 
 		lgn->Append("phase 4");
 
-	/// Phase 4. Adjust the GIndex in the excternal references of the cells
-	// in the dependent set of all the cells that have had their vertex compacted
+        /* Phase 4. Adjust the GIndex in the external references of the cells
+           in the dependent set of all the cells that have had their vertex conteiner compacted
+        */
 
 	std::map<Cell*,std::vector<unsigned int> * >::iterator mi;
 	++kernelSetMark;

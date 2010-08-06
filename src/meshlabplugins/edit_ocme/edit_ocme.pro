@@ -1,6 +1,7 @@
 # this is the common include for all the plugins
 TEMPLATE = lib
 CONFIG += plugin
+CONFIG += debug
 QT += opengl
 QT += xml
 VCGDIR = ../../../../vcglib
@@ -48,7 +49,7 @@ win32:DEFINES += NOMINMAX
 # old printf are all around the code
 win32-msvc2005:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_DEPRECATE
-CONFIG(release,debug | release):
+# CONFIG(release,debug | release):
 
 # Uncomment the following line to disable assert in mingw
 # DEFINES += NDEBUG
@@ -148,6 +149,6 @@ HEADERS += ./src/ocme/ocme_definition.h \
 #		-ldb_cxx-4.7
 
 # #DEFINES += GLEW_STATIC
-DEFINES += _RELEASE_ASSERT_
+# DEFINES += _RELEASE_ASSERT_
 DEFINES +=  NO_BERKELEY
-#DEFINES += _DEBUG
+DEFINES += _DEBUG

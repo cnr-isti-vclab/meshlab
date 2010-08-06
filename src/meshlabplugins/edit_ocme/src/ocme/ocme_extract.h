@@ -102,7 +102,6 @@ void OCME::ExtractContainedFacesFromASingleCell( CellKey ck , MeshType & m, bool
 template <class MeshType>
 void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper attr_map){
 
-
 	//// phase 1. Copy all the vertices
 
 	///* for each cell, keep the position of the beginng of its copy in the mesh vertices m.vert*/
@@ -295,6 +294,7 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 					/* export the sdelected attributes */
 					attr_map.ExportFace(*ci, *fi ,i);
 
+
 					/* mark the face with "locked" flag */
 					lockedF[*fi] = locked?1:0;/* TODO: just to avoid the not-so-tested class for vector of bool in simple_temporary_data.h*/
 				}		
@@ -385,8 +385,8 @@ void OCME::ExtractMesh(MeshType & m){
 
   int i=0;
 
-	for( CellsIterator ci = cells.begin(); ci != cells.end(); ++ci,++i)
-		sel_cells.push_back((*ci).second);
+for( CellsIterator ci = cells.begin(); ci != cells.end(); ++ci,++i)
+        sel_cells.push_back((*ci).second);
 
  Edit(sel_cells,m);
 }

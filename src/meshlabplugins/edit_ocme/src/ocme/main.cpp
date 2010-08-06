@@ -225,7 +225,7 @@ void AddFromDisk(OCME * ocme, std::vector<std::string> files){
 					vcgMesh m;
 					struct stat buf;
 					stat(name.c_str(),&buf);
-					if(buf.st_size < 50 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
+                                        if(buf.st_size < 200 * (1<<20)){// if the file is less that 200MB load the mesh in memory and then add it
 
 						int mask = 0;
 
@@ -526,7 +526,7 @@ main (int argc,char **argv )
 		}
 
 	}
-	meshona->RemoveEmptyCells();
+        meshona->RemoveEmptyCells();
  		start = clock();
 		printf("number of cells: %d \n number of chains %d\n",
 			meshona->cells.size(),

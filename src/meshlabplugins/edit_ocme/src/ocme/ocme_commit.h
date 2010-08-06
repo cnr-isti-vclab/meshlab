@@ -13,9 +13,9 @@ extern unsigned int computed_vert2externalsMark;
 // find the removed elements
 template <class MeshType>
 void OCME::FindRemovedElements( MeshType & m,
-																typename MeshType::template PerVertexAttributeHandle<GIndex> &gPosV,
-																typename MeshType::template PerFaceAttributeHandle<GIndex>& gPosF
-																){
+                                typename MeshType::template PerVertexAttributeHandle<GIndex> &gPosV,
+                                typename MeshType::template PerFaceAttributeHandle<GIndex>& gPosF
+                        ){
 		typename MeshType::FaceIterator fi;
 		typename MeshType::VertexIterator vi;
 		unsigned int i;
@@ -111,11 +111,11 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 
 	typedef std::pair<GIndex,GIndex> R2E;				// reference 2 externals/ The first GIndex is to externalReferences, the second to vert
 	std::map<GIndex,GIndex> :: iterator r2e_i;		
-	std::map<GIndex,GIndex> ref_2_ext;					// store all the new reference to externals
+        std::map<GIndex,GIndex> ref_2_ext;				// store all the new reference to externals
 
 	std::vector<Cell*>
-						toRebind,						// cells that contain moved vertices
-						toCleanUpCells_vert2externals;	// cells than contain temporary map from vert to externals
+                        toRebind,					// cells that contain moved vertices
+                        toCleanUpCells_vert2externals;                  // cells than contain temporary map from vert to externals
 
 	RecordCellsSetModification();
 	// find which scale interval will be associated with this mesh
@@ -126,18 +126,16 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 
 	int h;
 
-		++generic_bool;                 // mark the cells whose attributes are aligned with attr_map
+        ++generic_bool;                                                 // mark the cells whose attributes are aligned with attr_map
 	++computed_vert2externalsMark ;
 
-	// Phase 1: update all the vertices
+	// Phase 1: commit all the vertices
 
 	lgn->Append("committing vertices");
 	/* Run over all the vertices and move those vertices which are in cells not in the interval sr */
-	Cell * c = NULL;														// current cell. Cache the last used cell because very often this is coherent from vertex to vertex
+        Cell * c = NULL;						// current cell. Cache the last used cell because very often this is coherent from vertex to vertex
 		
 #ifdef _DEBUG
-	for(CellsIterator ci = cells.begin(); ci != cells.end(); ++ci)
-		RAssert((*ci).second->ecd->deleted_face.Empty());
 
 
 		for(fi = m.face.begin(); fi != m.face.end(); ++fi)
@@ -148,11 +146,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 					RAssert(!(*fi).V(1)->IsD());
 					RAssert(!(*fi).V(2)->IsD());
 				}
-			}else{
-					RAssert(lockedV[(*fi).V(0)]!=0);
-					RAssert(lockedV[(*fi).V(1)]!=0);
-					RAssert(lockedV[(*fi).V(2)]!=0);
-			}
+                        }
 #endif
 
 	unsigned int ii = 0;
@@ -206,14 +200,14 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 				CellKey new_cell_key = ComputeCellKey ((*vi).P(),new_h);		
 
 				if(!( gposv.ck  == new_cell_key) ){			// the vertex must be moved
-					Cell * new_c = GetCell(new_cell_key);	// find out the new Cell
+					Cell * new_c = GetCell(new_cell_key);           // find out the new Cell
 					assert(!(*(c->vert))[gposv.i].isExternal);
-					MoveVertex(gposv,c,new_c);				// move the vertex from cell c to cell new_c and update gposv
-					gPosV[*vi] = gposv;                     // gposv has been chaned by MoveVertex
-					CreateDependence(c,new_c);				// create a dependence between the cells
-					toRebind.push_back(c);					// put c in the set of cells whose vertex have been moved away
+					MoveVertex(gposv,c,new_c);			// move the vertex from cell c to cell new_c and update gposv
+					gPosV[*vi] = gposv;                             // gposv has been changed by MoveVertex
+					CreateDependence(c,new_c);			// create a dependence between the cells
+					toRebind.push_back(c);				// put c in the set of cells whose vertex have been moved away
 					toCleanUpCells.push_back(c);			// put c in the set of cells that contain removed elements
-					c = new_c;								// update the pointer of the current cell (we'll see what's better)
+					c = new_c;					// update the pointer of the current cell (we'll see what's better)
 					assert(!(*(c->vert))[gposv.i].isExternal);
 				}
 			}
@@ -252,17 +246,18 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 			// 1: find in which level the face should be
 			h = ComputeLevel<MeshType>(*fi,srM);
 
-			if( sr.Include(h) ) 					// if	"the level the face should be put" is within the range of the mesh 
-				h = gposf.ck.h;						// then let it be in the same level it was at extraction time
+                        if( sr.Include(h) ) 					// if	"the level the face should be put" is within the range of the mesh
+				h = gposf.ck.h;					// then let it be in the same level it was at extraction time
 				
 			// 2. find the proper cell in the level h 
 			/* very first choice, pick the cell that contains the  min corner of the bounding box */
 			for(int i = 0; i < 3 ; ++i) facebox.Add((*fi).V(i)->P()); 
 			 
-			ck = ComputeCellKey(facebox.min,h);
+                        ck = ComputeCellKey(facebox.min,h);
+                        //ck = gposf.ck; // debugging: let's see if it is only when the face migrates
 
 			if( (!c) || !(c->key == ck))				// check if the current cell is the right one
-				c = GetCell(ck);						// if not update it
+				c = GetCell(ck);				// if not update it
 		}
 
 		// 3: put the face in the cell (just the object OFace, without specifying the references
@@ -272,16 +267,16 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		if(gposf.IsUnassigned() ){											// this means this face has been added now
 			if(!(*fi).IsD()){												// if it was deleted before committ just skip it
 				gposf.i  = gPosF[*fi].i  = c -> AddFace(OFace());			// add the face to it	 and
-				gposf.ck = gPosF[*fi].ck = ck;								// update the GIndex stored in gPosV
+				gposf.ck = gPosF[*fi].ck = ck;						// update the GIndex stored in gPosV
 			}else
-				continue;													// it was added and deleted before the commit, just skip it
-		}else{																// The face was already in the database			
+				continue;								// it was added and deleted before the commit, just skip it
+		}else{											// The face was already in the database			
 			if( (*fi).IsD() ){
-				Cell * oldfCellF = GetCell(gposf.ck,false);					// get the cell where the face was
-				RAssert(oldfCellF != NULL);									// it has to exists	
+				Cell * oldfCellF = GetCell(gposf.ck,false);				// get the cell where the face was
+				RAssert(oldfCellF != NULL);						// it has to exists	
 				RAssert(oldfCellF->face->Size() > gposf.i);
 				oldfCellF->ecd->deleted_face.SetAsVectorOfMarked();
-				oldfCellF->ecd->deleted_face.SetMarked(gposf.i,true);		// mark as deleted
+				oldfCellF->ecd->deleted_face.SetMarked(gposf.i,true);                   // mark as deleted
 				/* insert the cell among whose have to be cleaned after the commit		*/
 				toCleanUpCells.push_back(oldfCellF);
 				continue;
@@ -299,52 +294,53 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		*/
 
 		// 4.  Set the face-to-vertex references 
-		typename MeshType::VertexType ov;
-                unsigned int vIndex[3];
+                int vIndex[3];
                 for(int i = 0; i < 3 ; ++i){
-			GIndex vp  = gPosV[(*fi).V(i)];	// put in vp the GIndex of the vertex i 	
+			GIndex vp  = gPosV[(*fi).V(i)];         // put in vp the GIndex of the vertex i 	
 			
 			if(vp.ck  == c->key ){			// the vertex is in the same cell as the face
-				vIndex[i] = vp.i;			// just assign the order
+				vIndex[i] = vp.i;		// just assign the order
 			}else{
 				/*
 					the vertex is not in the same cell as the face but in another cell: vp.ck. 
 				*/
-				int ext_pos = c->GetExternalReference(vp,false);							// check if the cell already contain an external reference to the vertex
-				if(ext_pos == -1){															// no:
- 					ext_pos = c->GetExternalReference(vp,true);								//  create a new external reference
+				int ext_pos = c->GetExternalReference(vp,false);			// check if the cell already contains an external reference to the vertex
+				if(ext_pos == -1){							// no:
+ 					ext_pos = c->GetExternalReference(vp,true);			//  create a new external reference
 					OVertex ov;
-					ov.SetIndexToExternal( ext_pos ) ;										//  set the reference to the externals	
+					ov.SetIndexToExternal( ext_pos ) ;				//  set the reference to the externals	
 
- 					vIndex[i] = c->AddVertex(ov);											//  add the vertex
-					ref_2_ext.insert(R2E(GIndex(c->key,ext_pos),GIndex(vp.ck,vIndex[i])));	//  remember which vertex refers to this new external references
+ 					vIndex[i] = c->AddVertex(ov);					//  add the (external) vertex
+                                        ref_2_ext.insert(R2E(GIndex(c->key,ext_pos),GIndex(c->key,vIndex[i])));	//  remember which vertex refers to this new external reference
 
-					Cell * extc = GetCell((*c->externalReferences)[ext_pos].ck,false);		//  set the dependency between the cells
+                                        Cell * extc = GetCell((*c->externalReferences)[ext_pos].ck,false);	//  set the dependency between the cells
 					assert(extc);
 					CreateDependence(c,extc);
  				}
 				else
-				{ 
-					r2e_i = ref_2_ext.find(GIndex(c->key,ext_pos));						// yes: find which vertex refers to the external reference	
-					if(r2e_i==ref_2_ext.end())											// if it fails, it means there was already such a vertex
+                                {                                                                       // yes:
+                                        r2e_i = ref_2_ext.find(GIndex(c->key,ext_pos));			// find if the vertex referring  to this   external reference has been added in this commit
+                                        if(r2e_i==ref_2_ext.end())					// no, it was already there
 					{
 						if( !c->ecd->computed_vert2externals()){
 							c->ComputeVert2Externals();
 							c->ecd->computed_vert2externals = FBool(&computed_vert2externalsMark);
+                                                        c->ecd->computed_vert2externals = true;
 							toCleanUpCells_vert2externals.push_back(c);
 						}
 							vIndex[i] = c->GetVertexPointingToExternalReference(ext_pos);	// Find which vertex refers to ext_pos
+                                                        assert(vIndex[i]!=-1);
 					}
 					else
-						vIndex[i] = (*r2e_i).second.i;									// yes: assign it	
+                                                vIndex[i] = (*r2e_i).second.i;				// yes: assign it
 				}
 			}
 			RAssert(vIndex[i]<c->vert->Size());
 
+
 			(*c->face)[gposf.i].v[i] = vIndex[i];
 		}
 		// update the bounding box of the cell c to contain the bbox of the face	
-		const Box4 old_box = c->bbox;
 		c->bbox.Add(facebox,sr);
 	}
 
@@ -371,20 +367,18 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 
 	}
 
-	if(!toCleanUpCells.empty()){
-		RemoveDuplicates(toCleanUpCells);
-		RemoveDeletedFaces(toCleanUpCells);
-		RemoveDeletedVertices(toCleanUpCells);
+        if(!toCleanUpCells.empty()){
+                RemoveDuplicates(toCleanUpCells);
+                RemoveDeletedFaces(toCleanUpCells);
+                RemoveDeletedVertices(toCleanUpCells);
 
-//DEBUG /////////////////////////////////////////////////////////
 #ifdef _DEBUG
-		std::vector<Cell*>::iterator ci;
+                std::vector<Cell*>::iterator ci;
 for(ci  = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci)
 this->CheckExternalRefAreExternal(*ci);
 #endif
-// ///////////////////////////////////////////////////////////////
 
-	}
+        }
 #ifdef _DEBUG
 	// DEBUG - check
 	for(std::vector<Cell*>::iterator ci = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci)
