@@ -22,7 +22,7 @@ private:
 public:
     //--- Dummy implementation of MeshEditInterface, passes all control to Widget
     static QString Info(){ return tr("VASE"); }
-    virtual bool StartEdit(MeshModel &m, GLArea* gla);
+    virtual bool StartEdit(MeshDocument &md, GLArea* gla);
     virtual void EndEdit(MeshModel &, GLArea*){ delete gui; }
     virtual void Decorate(MeshModel& m, GLArea* gla){ gui->decorate(m,gla); }
     virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );

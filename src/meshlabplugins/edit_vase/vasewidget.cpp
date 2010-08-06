@@ -1,9 +1,11 @@
 #include "vasewidget.h"
+#include <vcg/complex/trimesh/append.h>
+
 #include <QPainter>
 
 using namespace vcg;
 
-VaseWidget::VaseWidget(QWidget *parent, MeshModel &m, GLArea* gla)
+VaseWidget::VaseWidget(QWidget *parent, MeshDocument &md, GLArea* gla)
     : QDockWidget(parent), gla( gla ){
 	
     // Set orthographic visualization (meshlab assumes 5 degrees...)
@@ -16,7 +18,9 @@ VaseWidget::VaseWidget(QWidget *parent, MeshModel &m, GLArea* gla)
     ((QMainWindow*) parent)->addDockWidget( Qt::RightDockWidgetArea, this );
 
     // Create a new balloon based on the current point cloud
-    balloon = new Balloon( m.cm );
+    balloon = new Balloon( md.mm()->cm );
+    // Save a reference to the document so we can modify it (append balloons at runtime)
+    meshDocument = &md;
     // Init slicer
     this->update_slice();
     // Turn off the volume slicer
@@ -133,6 +137,14 @@ void VaseWidget::on_laplButton_released(){
     balloon->rm |= Balloon::SURF_VCOLOR;
     // gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
     gla->update();
+}
+void VaseWidget::on_pushButton_released(){
+    // This way of creating a new model in the model is awkward
+    //  - why there is not a MeshModel( CMeshO& mesh )? 
+    //  - what's the need to specify the name twice?
+    MeshModel* mm = new MeshModel("Balloon");
+    vcg::tri::Append<CMeshO,CMeshO>::Mesh(mm->cm, balloon->surf);
+    meshDocument->addNewMesh("Balloon",mm,false);
 }
 
 void VaseWidget::on_viewDirs_toggled(bool checked){

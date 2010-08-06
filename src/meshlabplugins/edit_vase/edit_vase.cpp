@@ -2,8 +2,8 @@
 #include "wrap/gui/trackball.h"
 #include "wrap/qt/trackball.h" //QT2VCG trackball function
 
-bool EditVasePlugin::StartEdit(MeshModel &m, GLArea* gla){
-    gui = new VaseWidget( gla->window(), m, gla );
+bool EditVasePlugin::StartEdit(MeshDocument &md, GLArea* gla){
+    gui = new VaseWidget( gla->window(), md, gla );
     return true;
 }
 

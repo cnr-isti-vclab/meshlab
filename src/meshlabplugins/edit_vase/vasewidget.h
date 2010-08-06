@@ -15,7 +15,7 @@ class VaseWidget : public QDockWidget
 
 public:
     void update_slice();
-    VaseWidget(QWidget *parent, MeshModel &m, GLArea* gla );
+    VaseWidget(QWidget *parent, MeshDocument &md, GLArea* gla );
     ~VaseWidget();
     void decorate(MeshModel &m, GLArea* gla);
 
@@ -23,6 +23,7 @@ private:
     Ui::VaseWidget ui;
     QWidget* parent;
     GLArea* gla;
+    MeshDocument* meshDocument;
     Balloon* balloon;
 
     // Controls for the slice UI
@@ -30,6 +31,7 @@ private:
     // float slice_off; // which offset from 0 the slice is taken from
 
 private slots:
+    void on_pushButton_released();
     void on_laplButton_released();
     void on_surf2acc_check_toggled(bool checked);
     void on_surf2vol_check_toggled(bool checked);
