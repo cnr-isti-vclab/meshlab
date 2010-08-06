@@ -575,10 +575,11 @@ case FP_INVERT_FACES:
 
 case FP_FREEZE_TRANSFORM:
   {
-		tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		tri::UpdateBounding<CMeshO>::Box(m.cm);
-		m.cm.Tr.SetIdentity();
+    tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+    tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
+    tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+    tri::UpdateBounding<CMeshO>::Box(m.cm);
+    m.cm.Tr.SetIdentity();
   } break;
 
 
@@ -791,6 +792,14 @@ case FP_CENTER:
 			trTran.SetTranslate(-m.cm.bbox.Center());
 
 		m.cm.Tr=trTran;
+    if(par.getBool("Freeze")){
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+      tri::UpdateBounding<CMeshO>::Box(m.cm);
+      m.cm.Tr.SetIdentity();
+    }
+
   } break;
 
 case FP_SCALE:
@@ -820,7 +829,16 @@ case FP_SCALE:
 
 		trTran.SetTranslate(tranVec);
 		trTranInv.SetTranslate(-tranVec);
+
 		m.cm.Tr=trTran*trScale*trTranInv;
+    if(par.getBool("Freeze")){
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+      tri::UpdateBounding<CMeshO>::Box(m.cm);
+      m.cm.Tr.SetIdentity();
+    }
+
   } break;
 
 case FP_FLIP_AND_SWAP:
@@ -843,6 +861,15 @@ case FP_FLIP_AND_SWAP:
 			swapM[2][1]=1.0f; swapM[2][2]=0.0f;
 			tr *= swapM; }
 		m.cm.Tr=tr;
+
+    if(par.getBool("Freeze")){
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+      tri::UpdateBounding<CMeshO>::Box(m.cm);
+      m.cm.Tr.SetIdentity();
+    }
+
   } break;
 
 case FP_NORMAL_EXTRAPOLATION :
