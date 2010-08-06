@@ -160,6 +160,77 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 	return true;
 }
 
+RasterModel * MeshDocument::addNewRaster(const char *rasterName, RasterModel *newRaster)
+{
+	QFileInfo info(rasterName);
+	QString newName=info.fileName();
+  for(QList<RasterModel*>::iterator ri=rasterList.begin();ri!=rasterList.end();++ri)
+	{
+    if((*ri)->getName() == newName)
+		{
+		  QFileInfo fi((*ri)->getName());
+		  QString baseName = fi.baseName();
+		  int lastNum = baseName.right(1).toInt();
+		  if( baseName.right(2).toInt() >= 10) 
+			  lastNum = baseName.right(1).toInt();
+		  if(lastNum) 
+			  newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
+		  else 
+			  newName = baseName+"_1";
+		  if (info.suffix() != QString(""))
+			newName = newName + "." + info.suffix();
+		}
+	}
+
+	if(newRaster==0)
+    newRaster=new RasterModel(this,qPrintable(newName));
+	else
+        newRaster->setRasterName(newName);
+
+	rasterList.push_back(newRaster);
+
+	emit layerSetChanged();
+
+	//c'è il concetto di currentRaster?
+	/*if(setAsCurrent)
+		this->setCurrentMesh(newMesh->id());*/
+
+	return newRaster;
+}
+
+bool MeshDocument::delRaster(RasterModel *rasterToDel)
+{
+	if(rasterList.size()==1) return false;
+
+	QMutableListIterator<RasterModel *> i(rasterList);
+
+	while (i.hasNext())
+	{
+		RasterModel *r = i.next();
+
+		if (r==rasterToDel)
+		{
+			i.remove();
+			delete rasterToDel;
+		}
+	}
+
+	//c'è il concetto di currentRaster?
+	/*if(currentMesh == mmToDel)
+	{
+		if (!meshList.isEmpty())
+			setCurrentMesh(this->meshList.at(0)->id());
+		else
+		{
+			this->Log.Logf(GLLogStream::SYSTEM,"Empty MeshDocument: should never happened!");
+		}
+	}*/
+
+	emit layerSetChanged();
+
+	return true;
+}
+
 void MeshDocument::addNewTag(TagBase *newTag)
 {
 	tagList.append(newTag);
@@ -293,6 +364,19 @@ int MeshModel::io2mm(int single_iobit)
 			return MM_NONE;  // FIXME: Returning this is not the best solution (!)
 			break;
 	} ;
+}
+
+Raster::Raster(RasterModel *_parent, const QString pathName, const QString _semantic){
+	parent = _parent;
+	semantic =_semantic;
+	fullPathFileName = pathName;
+
+	image = QImage(pathName);
+}
+
+RasterModel::RasterModel(MeshDocument *parent, const char *_rasterName) {
+  _id=parent->newRasterId(); 
+	rasterName= _rasterName;
 }
 
 void MeshModelState::create(int _mask, MeshModel* _m)

@@ -260,6 +260,54 @@ public:
 
 };// end class MeshModel
 
+/*
+Raster Class
+the base class for a registered image that contains the path, the semantic and the data of the image
+*/
+class RasterModel;
+
+class Raster
+{
+public:
+	RasterModel *parent;
+	QString semantic;
+	QString fullPathFileName;
+	QImage image;
+
+	Raster(RasterModel *parent, const QString pathName, const QString _semantic);
+}; //end class Raster
+
+/*
+RasterModel Class
+The base class for keeping a set of "registered" images (e.g. images that can be projected onto a 3D space).
+Each Raster model is composed by a list of registered images, each image with its own "semantic" (color, depth, normals, quality, masks)
+and with all the images sharing the same shot. 
+*/
+
+class RasterModel 
+{
+	typedef vcg::Shot<double> Shot;
+
+public:
+	Shot viewSpec;
+	QString rasterName;
+
+	///The list of the registered images
+	QList<Raster *> rasterList;
+
+private:
+	int _id;
+
+public:
+	inline int id() const {return _id;}
+	void setRasterName(QString newFileName) {rasterName = newFileName;}
+	const QString getName() const {return rasterName;};
+
+	RasterModel(MeshDocument *parent, const char *_rasterName=0);
+
+
+};// end class RasterModel
+
 class MeshDocument;
 /**
   The TagBase class define the base class from which each filter has to derive its own tag class.
@@ -329,7 +377,8 @@ public:
 	{
     tagIdCounter=0;
     meshIdCounter=0;
-		currentMesh = NULL;
+	rasterIdCounter=0;
+	currentMesh = NULL;
     busy=true;
 	}
 
@@ -353,12 +402,17 @@ public:
 
   int tagIdCounter;
   int meshIdCounter;
+  int rasterIdCounter;
 
 	///The list of the taggings of all the meshes/rasters of the project
 	QList<TagBase *> tagList;
 
+	//The list of the raster models of the project
+	QList<RasterModel *> rasterList;
+
   int newTagId() {return tagIdCounter++;}
   int newMeshId() {return meshIdCounter++;}
+  int newRasterId() {return rasterIdCounter++;}
 
   GLLogStream Log;
   FilterScript filterHistory;
@@ -374,6 +428,12 @@ public:
 
   ///remove the mesh from the list and delete it from memory
 	bool delMesh(MeshModel *mmToDel);
+
+  ///add a new raster model 
+  RasterModel *addNewRaster(const char *rasterName,RasterModel *newRaster=0);
+
+	///remove the raster from the list and delete it from memory
+  bool delRaster(RasterModel *rasterToDel);
 
   ///add a new tag in the tagList
   void addNewTag(TagBase *newTag);
