@@ -30,14 +30,14 @@ void OCME::FindRemovedElements( MeshType & m,
 		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
 		{
 				GIndex gposv = gPosV [i];
-				if(!gposv.IsUnassigned() && !(*vi).IsD())
+                                if(!gposv.IsUnassigned() )
 						committing_vertices.push_back(gposv);
 		}
 
 		i = 0;
 		for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i){
 						GIndex gposf = gPosF [i];
-						if(!gposf.IsUnassigned() && !(*fi).IsD())
+                                                if(!gposf.IsUnassigned() )
 								committing_faces.push_back(gposf);
 				}
 
