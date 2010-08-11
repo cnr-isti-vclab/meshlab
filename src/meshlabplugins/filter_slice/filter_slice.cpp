@@ -596,7 +596,7 @@ bool ExtraFilter_SlicePlugin::autoDialog(QAction *action)
 
 void ExtraFilter_SlicePlugin::createSlice(MeshModel* currentMesh, MeshModel* destMesh)
 {
-//CRASH!!!!!!!!!!!!!!!!!!!!!!!!!
+  tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
   tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, true);
   tri::UpdateTopology<CMeshO>::FaceFace(destMesh->cm);
   tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
