@@ -1,4 +1,5 @@
 #include "pluginmanager.h"
+#include <QtScript/QtScript>
 
 PluginManager::PluginManager()
 {
@@ -8,7 +9,7 @@ PluginManager::PluginManager()
     //qApp->addLibraryPath(getBaseDirPath());
 }
 
-void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
+void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* eng)
 {
     pluginsDir=QDir(getPluginDirPath());
   // without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -41,6 +42,8 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 					actionFilterMap.insert(filterAction->text(),filterAction);
           stringFilterMap.insert(filterAction->text(),iFilter);
 					iFilter->initGlobalParameterSet(filterAction,defaultGlobal);
+					if (eng != NULL)
+						iFilter->registerScriptProxyFunctions(eng);
 				}
 			}
 

@@ -50,6 +50,7 @@ win32-msvc2008:CONFIG += staticlib
 QT += opengl
 QT += xml
 
+
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .

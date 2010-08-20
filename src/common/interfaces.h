@@ -43,7 +43,7 @@ class QTreeWidgetItem;
 class MeshModel;
 class RenderMode;
 class GLArea;
-
+class QScriptEngine;
 
 /** The MainWindowInterface class defines just the executeFilter() callback function
     that is invoked by the standard parameter input dialog.
@@ -338,6 +338,9 @@ public:
   so, it makes sense displaying different info in each position.
   */
   virtual QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel */*mm*/) {assert (0); return 0;}
+
+
+  virtual void registerScriptProxyFunctions(QScriptEngine* eng) {};
 
   virtual FilterIDType ID(QAction *a) const
   	{

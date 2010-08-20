@@ -25,7 +25,7 @@
 #define PLUGINMANAGER_H
 
 #include "interfaces.h"
-
+class QScriptEngine;
 /**
   \brief This class provides the basic tools for managing all the plugins. It is used by both meshlab and meshlab server.
   */
@@ -34,7 +34,7 @@ class PluginManager
 public:
   PluginManager();
   enum TypeIO{IMPORT,EXPORT};
-  void loadPlugins(RichParameterSet& defaultGlobal);
+  void loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* eng = NULL);
 
 	inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
 	inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
