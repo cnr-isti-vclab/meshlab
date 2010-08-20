@@ -64,7 +64,7 @@ MainWindow::MainWindow()
         icon.addPixmap(QPixmap(":images/eye48.png"));
         setWindowIcon(icon);
 
-        PM.loadPlugins(defaultGlobalParams);
+        PM.loadPlugins(defaultGlobalParams,&eng);
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
 	createActions();
@@ -318,6 +318,10 @@ void MainWindow::createActions()
 	showFilterScriptAct->setEnabled(true);
 	connect(showFilterScriptAct, SIGNAL(triggered()), this, SLOT(showFilterScript()));
 
+	showScriptEditAct = new QAction(tr("Script Editor"),this);
+	showScriptEditAct->setEnabled(true);
+	connect(showScriptEditAct, SIGNAL(triggered()), this, SLOT(showScriptEditor()));
+
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
@@ -430,6 +434,7 @@ void MainWindow::createMenus()
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
+	filterMenu->addAction(showScriptEditAct);
 	filterMenu->addSeparator();
 	filterMenuSelect = filterMenu->addMenu(tr("Selection"));
 	filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));

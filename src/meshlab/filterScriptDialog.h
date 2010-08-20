@@ -26,6 +26,7 @@
 namespace Ui 
 {
 	class scriptDialog;
+	class scriptEditor;
 } 
 
 class FilterScriptDialog : public QDialog
@@ -61,4 +62,21 @@ private:
 	Ui::scriptDialog* ui;
   FilterScript *scriptPtr;
 
+};
+
+class EditorScriptDialog : public QDialog
+{
+	Q_OBJECT
+public:
+	EditorScriptDialog(QWidget *parent = 0);
+	~EditorScriptDialog();
+	private slots:
+		void applyScript();
+		void saveScript();	
+		void openScript();	
+	public:
+		const QString& scriptCode() const;
+private:
+	Ui::scriptEditor* ui;
+	QString code;
 };

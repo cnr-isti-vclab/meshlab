@@ -52,7 +52,8 @@ FORMS = ui/layerDialog.ui \
     ui/aboutDialog.ui \
     ui/renametexture.ui \
     ui/savemaskexporter.ui \
-    ui/congratsDialog.ui
+    ui/congratsDialog.ui \
+	ui/scriptEditor.ui
 RESOURCES = meshlab.qrc
 
 # to add windows icon
@@ -71,6 +72,8 @@ ICON = images/meshlab.icns
 QT += opengl
 QT += xml
 QT += network
+QT += script
+
 
 # the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max

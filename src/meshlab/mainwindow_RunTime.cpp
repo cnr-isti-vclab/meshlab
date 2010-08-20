@@ -587,6 +587,24 @@ void MainWindow::showFilterScript()
 
 }
 
+void MainWindow::showScriptEditor()
+{
+	EditorScriptDialog dialog(this);
+	if (dialog.exec()==QDialog::Accepted)
+	{
+		QScriptValue val = eng.newQObject(meshDoc());
+		eng.globalObject().setProperty("md",val);
+		QScriptValue result = eng.evaluate(dialog.scriptCode());
+		if (result.isError())
+		{
+			meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",result.property("lineNumber").toInt32(),qPrintable(result.toString()));
+			layerDialog->updateLog(meshDoc()->Log);
+		}
+		else
+			this->updateGL();
+	}
+}
+
 void MainWindow::runFilterScript()
 {
   FilterScript::iterator ii;
@@ -940,24 +958,6 @@ void MainWindow::applyDecorateMode()
 	
 }
 
-bool MainWindow::QCallBack(const int pos, const char * str)
-{
-  int static lastPos=-1;
-	if(pos==lastPos) return true;
-	lastPos=pos;
-
-  static QTime currTime;
-	if(currTime.elapsed()< 100) return true;
-	currTime.start();
-  MainWindow::globalStatusBar()->showMessage(str,5000);
-	qb->show();
-	qb->setEnabled(true);
-	qb->setValue(pos);
-	MainWindow::globalStatusBar()->update();
-  qApp->processEvents();
-	return true;
-}
-
 void MainWindow::setLight()
 {
 	GLA()->setLight(!GLA()->getCurrentRenderMode().lighting);
@@ -1087,11 +1087,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
-
+	
     // HashTable storing all supported formats together with
 	// the (1-based) index  of first plugin which is able to open it
 	QHash<QString, MeshIOInterface*> allKnownFormats;
-
   PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 	filters.push_back("ALN project ( *.aln)");
 	filters.front().chop(1);
@@ -1495,4 +1494,22 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     e->accept();
   }
   else e->ignore();
+}
+
+bool MainWindow::QCallBack(const int pos, const char * str)
+{
+	int static lastPos=-1;
+	if(pos==lastPos) return true;
+	lastPos=pos;
+
+	static QTime currTime;
+	if(currTime.elapsed()< 100) return true;
+	currTime.start();
+	MainWindow::globalStatusBar()->showMessage(str,5000);
+	qb->show();
+	qb->setEnabled(true);
+	qb->setValue(pos);
+	MainWindow::globalStatusBar()->update();
+	qApp->processEvents();
+	return true;
 }

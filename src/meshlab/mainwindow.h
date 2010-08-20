@@ -27,6 +27,7 @@
 //None of this should happen if we are compiling c, not c++
 #ifdef __cplusplus
 #include <GL/glew.h>
+#include <QtScript\QtScript>
 
 #include <QDir>
 #include <QMainWindow>
@@ -93,6 +94,7 @@ private slots:
 	void applyLastFilter();
 	void runFilterScript();
 	void showFilterScript();
+	void showScriptEditor();
   void showTooltip(QAction*);
   /////////// Slot Menu Render /////////////////////
 	void renderBbox();
@@ -184,6 +186,13 @@ private:
 	QMdiArea *mdiarea;
 	LayerDialog *layerDialog;
 	QSignalMapper *windowMapper;
+
+
+
+	/******************************************************************REMOVE IT!!!!************************************************/
+	QScriptEngine eng; 
+	/******************************************************************REMOVE IT!!!!************************************************/
+
 
     PluginManager PM;
 
@@ -304,6 +313,7 @@ private:
 	QAction *lastFilterAct;
 	QAction *runFilterScriptAct;
 	QAction *showFilterScriptAct;
+	QAction* showScriptEditAct;
 	QAction *recentFileActs[MAXRECENTFILES];
 	QAction *separatorAct;
 	QAction *exitAct;
