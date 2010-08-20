@@ -4,6 +4,7 @@ TEMPLATE      = lib
 CONFIG       += plugin
 QT += opengl
 QT += xml
+QT += script
 
 VCGDIR  = ../../../../vcglib
 GLEWDIR = ../../external/glew-1.5.1
