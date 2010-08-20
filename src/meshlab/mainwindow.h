@@ -27,7 +27,7 @@
 //None of this should happen if we are compiling c, not c++
 #ifdef __cplusplus
 #include <GL/glew.h>
-#include <QtScript\QtScript>
+#include <QtScript>
 
 #include <QDir>
 #include <QMainWindow>
