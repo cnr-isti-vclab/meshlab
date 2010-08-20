@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "samplefilter.h"
+#include <QtScript\QtScript>
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -43,6 +44,7 @@ QString ExtraSamplePlugin::filterName(FilterIDType filterId) const
 		case FP_MOVE_VERTEX :  return QString("Random vertex displacement"); 
 		default : assert(0); 
 	}
+  return QString();
 }
 
 // Info() must return the longer string describing each filtering action 
@@ -126,4 +128,41 @@ bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 	return true;
 }
 
+bool callback(const int pos,const char* str)
+{
+	return true;
+}
+
+void ExtraSamplePlugin::randomDisplacement( MeshDocument* mod,float perc,bool updtnrml)
+{
+	RichParameterSet rp;
+	QAction act(filterName(FP_MOVE_VERTEX), this);
+	initParameterSet(&act,*(mod->mm()),rp);
+	rp.setValue("Displacement",FloatValue(perc));
+	rp.setValue("UpdateNormals",BoolValue(updtnrml));
+	applyFilter(&act,*mod,rp,callback);
+}
+
+//QScriptValue ExtraSamplePluginToScriptValue(QScriptEngine *engine, ExtraSamplePlugin* const &in)
+//{ return engine->newQObject(in); }
+//
+//void ExtraSamplePluginFromScriptValue(const QScriptValue &object, ExtraSamplePlugin* &out)
+//{ out = qobject_cast<ExtraSamplePlugin*>(object.toQObject()); }
+
+QScriptValue mySpecialQObjectConstructor(QScriptContext *context,
+										 QScriptEngine *engine)
+{
+	QObject *object = new ExtraSamplePlugin();
+	return engine->newQObject(object, QScriptEngine::ScriptOwnership);
+}
+
+void ExtraSamplePlugin::registerScriptProxyFunctions( QScriptEngine* eng )
+{
+	QScriptValue ctor = eng->newFunction(mySpecialQObjectConstructor);
+	QScriptValue metaObject = eng->newQMetaObject(&ExtraSamplePlugin::staticMetaObject, ctor);
+	eng->globalObject().setProperty("ExtraSamplePlugin", metaObject);
+}
+
 Q_EXPORT_PLUGIN(ExtraSamplePlugin)
+
+

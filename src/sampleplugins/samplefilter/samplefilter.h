@@ -37,6 +37,7 @@ add sampleplugins
 #include <QObject>
 
 #include <common/interfaces.h>
+class QScriptEngine;
 
 class ExtraSamplePlugin : public QObject, public MeshFilterInterface
 {
@@ -46,15 +47,20 @@ class ExtraSamplePlugin : public QObject, public MeshFilterInterface
 public:
 	enum { FP_MOVE_VERTEX  } ;
 
-	ExtraSamplePlugin();
+	Q_INVOKABLE ExtraSamplePlugin();
 	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
+	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
     FilterClass getClass(QAction *a);
+	void registerScriptProxyFunctions(QScriptEngine* eng);
+
+public slots:
+	void randomDisplacement(MeshDocument* mod,float,bool updtnrml);
 
 };
+
 
 #endif
