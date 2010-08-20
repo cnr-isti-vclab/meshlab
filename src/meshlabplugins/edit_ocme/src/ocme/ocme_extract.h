@@ -324,11 +324,14 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
 			if(!(*vi).IsD()  && !lockedV[i])
 					edited_vertices.push_back(gPosV[i]);
+        std::sort(edited_vertices.begin(),edited_vertices.end());
 
 	i = 0;
 	for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i)
 			if(!(*fi).IsD()  && !lockedF[i])
 					edited_faces.push_back(gPosF[i]);
+        std::sort(edited_faces.begin(),edited_faces.end());
+
 	}
 }
 

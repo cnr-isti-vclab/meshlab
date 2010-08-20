@@ -21,9 +21,23 @@ struct MemDbgBase{
 #ifdef WIN32
 struct MemDbg: public MemDbgBase{
 	static int & Level() {static int   level = 0; return level;}
-	static bool CheckHeap(int level){ return (level>Level())?(0!=_CrtCheckMemory()):true;}
-	static void SetBreakAlloc(int value ){_CrtSetBreakAlloc(value );value = 0;}
-	static void DumpMemoryLeaks(){_CrtDumpMemoryLeaks();}
+	static bool CheckHeap(int level){ 
+		#ifdef WIN32
+		return (level>Level())?(0!=_CrtCheckMemory()):true;
+		#else
+		return true;
+		#endif
+	}
+	static void SetBreakAlloc(int value ){
+		#ifdef WIN32
+		_CrtSetBreakAlloc(value );
+		#endif
+		value = 0;}
+	static void DumpMemoryLeaks(){
+		#ifdef WIN32
+		_CrtDumpMemoryLeaks();
+		#endif
+	}
 
 	static std::vector<_CrtMemState> &  NV(){static std::vector<_CrtMemState> name_value;return   name_value;}
 
@@ -32,10 +46,14 @@ struct MemDbg: public MemDbgBase{
 	static void SetPoint(unsigned int   n){
 		n=n;
 		if(!All())  NV().resize(128);
+		#ifdef WIN32
 		_CrtMemCheckpoint(& NV()[n]);
+		#endif
 	}
 	static unsigned int MemFromPoint(unsigned int p){
+		#ifdef WIN32
 		_CrtMemCheckpoint(&MemState());
+		#endif
 		return MemState().lTotalCount -  NV()[p].lTotalCount;
 	}
 	static void End(){Delete(NV());}

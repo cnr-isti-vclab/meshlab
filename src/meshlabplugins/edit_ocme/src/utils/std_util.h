@@ -6,6 +6,7 @@
 /* sort the container and remove duplicates*/
 template <class STD_CONTAINER>
 void RemoveDuplicates(STD_CONTAINER & cont){
+        if(cont.empty()) return;
 	std::sort(cont.begin(),cont.end());
 	typename STD_CONTAINER::iterator newend = std::unique(cont.begin(),cont.end());
 	cont.erase(newend,cont.end());

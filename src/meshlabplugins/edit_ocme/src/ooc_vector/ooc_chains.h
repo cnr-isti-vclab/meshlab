@@ -611,7 +611,8 @@ void Chain<TYPE>::Compact(std::vector<unsigned int> &deleted){
 	unsigned int	siz = 0,	//	index of the last non deleted element being written , finally new size of the chain
                         cnt = 0;	//	index of the non deleted element being copied (moved)
 
-        std::sort(deleted.begin(),deleted.end());
+        //std::sort(deleted.begin(),deleted.end());
+        ::RemoveDuplicates(deleted);
 	for(unsigned int di = 0; di < deleted.size(); ++di,++cnt)
             for(; cnt < deleted[di]; ++cnt){
                         tmp = (*this)[cnt];
@@ -647,10 +648,12 @@ void Chain<TYPE>::Compact(std::vector<unsigned int> &deleted){
 
 template <class TYPE> 
 void  Chain<TYPE>::BuildRemap(std::vector<unsigned int> &deleted,std::vector<unsigned int> &remap){
-	remap.resize(this->size);
-	unsigned int di = 0;
-	unsigned int id = 0;
-        std::sort(deleted.begin(),deleted.end());
+        unsigned int di = 0;
+        unsigned int id = 0;
+
+        ::RemoveDuplicates(deleted);
+        remap.resize(this->size);
+
 	for( id = 0; id < deleted.size(); ){
 		for(; di < deleted[id]; ++di)
 			remap[di] = di-id;

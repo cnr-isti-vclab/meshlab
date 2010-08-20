@@ -158,15 +158,15 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		if(gposv.IsUnassigned() ){											// this means this vertex has been added 
 			if(!(*vi).IsD()){												// if it was deleted before committ just skip it
 				CellKey ck( (*vi).P(), sr.min );							// get the CellKey where it should go (no specific reason for sr.min, except lazyness)
-				Cell * newc = GetCell(ck);									// get the cell
-				if(!newc->generic_bool()){
-					this->UpdateCellsAttributes(newc,attr_map);
-					newc->generic_bool = FBool(&generic_bool);
+                                c = GetCell(ck);									// get the cell
+                                if(!c->generic_bool()){
+                                        this->UpdateCellsAttributes(c,attr_map);
+                                        c->generic_bool = FBool(&generic_bool);
 				}
-				unsigned int pos = gPosV[*vi].i = newc -> AddVertex(OVertex(*vi ) );	// add the vertex to it
-				attr_map.ImportVertex(newc,*vi,pos);									// import all the attributes
-				gPosV[*vi].ck = ck;														// update the GIndex stored in gPosV
-			}
+                                gposv.i = gPosV[*vi].i = c -> AddVertex(OVertex(*vi ) );	// add the vertex to it
+                                attr_map.ImportVertex(c,*vi,gposv.i);									// import all the attributes
+                                gposv.ck = gPosV[*vi].ck = ck;														// update the GIndex stored in gPosV
+                            }
 		}	
 		else																			// it is not a new vertex
 		{
@@ -246,7 +246,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 			// 1: find in which level the face should be
 			h = ComputeLevel<MeshType>(*fi,srM);
 
-                        if( sr.Include(h) ) 					// if	"the level the face should be put" is within the range of the mesh
+                        if( sr.Include(h) && !gposf.IsUnassigned()) 		// if	"the level the face should be put" is within the range of the mesh
 				h = gposf.ck.h;					// then let it be in the same level it was at extraction time
 				
 			// 2. find the proper cell in the level h 

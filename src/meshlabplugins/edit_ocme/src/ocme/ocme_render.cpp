@@ -274,7 +274,7 @@ void OCME::Render(){
 			if(vcg::tri::HasPerVertexColor(cells_to_render[i]->rd->Mesh()))
 																default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMPerVert,vcg::GLW::TMNone>();
 			else
-																default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMLast,vcg::GLW::TMNone>();
+                                                                                                                                default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMLast,vcg::GLW::TMNone>();
 
 			cells_to_render[i]->rd->renderCacheToken->unlock();
 		}

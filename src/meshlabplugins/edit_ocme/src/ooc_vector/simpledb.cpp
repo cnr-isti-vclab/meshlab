@@ -108,11 +108,11 @@ SimpleDb::~SimpleDb(){
 
 
 SimpleDb::Index SimpleDb::Put(const Index &  pos, void * buf, unsigned int siz){
-		FILE * f = files[pos.IFile()];
-		f = files[pos.IFile()];
-		fseek(f,pos.ISeg()*segment_size,SEEK_SET);
-		fwrite(buf,siz,1,f);	// actually write the buffer to the file
-		return pos;
+                FILE * f = files[pos.IFile()];
+                f = files[pos.IFile()];
+                fseek(f,pos.ISeg()*segment_size,SEEK_SET);
+                fwrite(buf,siz,1,f);	// actually write the buffer to the file
+                return pos;
 }
 
 SimpleDb::Index SimpleDb::PutSingle(std::string name, void * buf, unsigned long siz){

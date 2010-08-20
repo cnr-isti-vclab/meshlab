@@ -7,7 +7,7 @@
 /* -------------------------  CachePolicy implementation -------------------- */
 /* -------------------------------------------------------------------------- */
 
-CachePolicy::CachePolicy():edit_mode(false),memory_limit(20*(1<<20)),memory_occupied(0){}
+CachePolicy::CachePolicy():edit_mode(false),memory_limit(500*(1<<20)),memory_occupied(0){}
 
 void CachePolicy::UnloadOneChunk(bool and_save){
 		pop_heap(lru_queue.begin(),lru_queue.end());

@@ -91,13 +91,13 @@ this->CheckExternalsCoherent(*ci);
 		if( (*ci)->ecd->is_in_kernel())
 			{
 				(*ci) ->ecd->deleted_vertex.SetAsVectorOfBool();	
-				(*ci) ->ecd->deleted_face.SetAsVectorOfBool();
+//				(*ci) ->ecd->deleted_face.SetAsVectorOfBool();
 				(*ci) ->ecd->deleted_externals.SetAsVectorOfBool();
 			}
 			else
 			{
 				(*ci) ->ecd->deleted_vertex.SetAsVectorOfMarked();	
-				(*ci) ->ecd->deleted_face.SetAsVectorOfMarked();	
+//				(*ci) ->ecd->deleted_face.SetAsVectorOfMarked();
 				(*ci) ->ecd->deleted_externals.SetAsVectorOfMarked();
 			}
 
@@ -107,8 +107,8 @@ this->CheckExternalsCoherent(*ci);
 	for(   ci = cs.begin(); ci != cs.end(); ++ci ){
 		MarkTouched((*ci)->key);
 		Cell * cell = (*ci);
-		cell->ecd->deleted_face.SetAsVectorOfMarked();
-		RAssert(cell->ecd->deleted_face.marked_elements.empty());
+//		cell->ecd->deleted_face.SetAsVectorOfMarked();
+//		RAssert(cell->ecd->deleted_face.marked_elements.empty());
 
 		this->CheckFaceVertDeletions(cell);	
 #ifdef _DEBUG
@@ -159,7 +159,6 @@ if(ext_cell == cell)
 
 		cell->ecd->deleted_vertex.SetAsVectorOfMarked();
 
-		std::sort(cell->ecd->deleted_vertex.marked_elements.begin(),cell->ecd->deleted_vertex.marked_elements.end());
 		vchain->BuildRemap( cell->ecd->deleted_vertex.marked_elements, *cell_remap);			// build the remapping from the current 
 
 #ifdef _DEBUG
@@ -167,9 +166,9 @@ if(ext_cell == cell)
 
 		this->CheckFaceVertDeletions(cell);	
 		cell->ecd->deleted_vertex.SetAsVectorOfBool();
-		cell->ecd->deleted_face.SetAsVectorOfBool();
+//		cell->ecd->deleted_face.SetAsVectorOfBool();
 		for(unsigned int fi = 0; fi < fchain->Size();++fi)
-			if(!cell->ecd->deleted_face.IsMarked(fi))
+//			if(!cell->ecd->deleted_face.IsMarked(fi))
 		{
 			OFace tmp = (*fchain)[fi];	
 			RAssert(!cell->ecd->deleted_vertex.IsMarked(tmp[0]));
@@ -184,7 +183,7 @@ if(ext_cell == cell)
 					RAssert((*cell_remap)[ti]>=0);
 				}
 		
-		cell->ecd->deleted_face.SetAsVectorOfMarked();
+//		cell->ecd->deleted_face.SetAsVectorOfMarked();
 		cell->ecd->deleted_vertex.SetAsVectorOfMarked();
 #endif
 	}
@@ -397,10 +396,13 @@ void OCME::RemoveUnreferencedExternal(  std::vector<Cell*> & cells){
 }
 
 void OCME::RemoveEmptyCells(  ){
+                std::vector<Cell*> toremove;
 		CellsIterator ci;
 		for(ci = cells.begin(); ci != cells.end(); ++ci)
 				if((*ci).second->IsEmpty())
-						RemoveCell((*ci).second->key);
+                                    toremove.push_back((*ci).second);
+                for(unsigned int i = 0; i < toremove.size(); ++i)
+                    RemoveCell(toremove[i]->key);
 }
 
 void OCME::RemoveCell(const CellKey & key){

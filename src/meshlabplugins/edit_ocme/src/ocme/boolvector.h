@@ -16,7 +16,6 @@ struct BoolVector{
 	void SetMode(bool _mode){
 								if(mode==_mode) return;
 								 
-								std::vector<unsigned int>::iterator maxid = std::max_element(marked_elements.begin(),marked_elements.end());
 								if(!mode){
 									if(!marked_elements.empty()){
 										std::sort(marked_elements.begin(),marked_elements.end());
