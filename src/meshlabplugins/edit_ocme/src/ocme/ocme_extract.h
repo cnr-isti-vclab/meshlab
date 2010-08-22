@@ -34,8 +34,6 @@ void OCME::ExtractContainedFacesFromASingleCell( CellKey ck , MeshType & m, bool
 	Cell* c = GetCell(ck,false);
 	sprintf(lgn->Buf(),"start adding vertices clock(): %d ", clock());
 
-	if(ck==CellKey(-2,-4,15,1))
-			ck =CellKey(-2,-4,15,1);
 	if(loadall){
 		c->face->LoadAll();
  		c->vert->LoadAll();

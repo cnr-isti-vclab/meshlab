@@ -33,7 +33,7 @@
 
 /* OCME include */
 #include <ocme/ocme.h>
-#include <vcglib/wrap/gui/trackball.h>
+#include <wrap/gui/trackball.h>
 
 class OcmeEditPlugin : public QObject, public MeshEditInterface
 {

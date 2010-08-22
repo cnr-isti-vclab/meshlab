@@ -101,7 +101,7 @@ void OCME::FillSamples(std::vector<CellKey> & cs){
 				// *** we should have an ad hoc function FillSamplesFromASingleCell
 				// *** TO DO.
 
-				this->ExtractContainedFacesFromASingleCell(cs[i],tmp,true,false);
+                                this->ExtractContainedFacesFromASingleCell(cs[i],tmp,true,true);
 
 				/* clear the data that will be recomputed */
 				c->impostor->ClearDataCumulate();

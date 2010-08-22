@@ -29,7 +29,7 @@ $Log: meshedit.cpp,v $
 #include <math.h>
 #include <stdlib.h>
 #include <meshlab/glarea.h>
-#include <meshlab/mainwindow.h>
+//#include <meshlab/mainwindow.h>
 #include "edit_ocme.h"
 
 #include "ui_ocme.h"
@@ -40,7 +40,7 @@ using namespace std;
 using namespace vcg;
 
 
-#define _RELEASED_
+//#define _RELEASED_
 
 OcmeEditPlugin::OcmeEditPlugin() {
 		showTouched = false;
@@ -304,9 +304,9 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	QObject::connect(odw->addFromDiskPushButton ,SIGNAL(clicked() ),this,SLOT( addFromDisk() ));
 
 
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), gla, SLOT(updateGL()));
-	timer->start(300);
+//	QTimer *timer = new QTimer(this);
+//	connect(timer, SIGNAL(timeout()), gla, SLOT(updateGL()));
+//	timer->start(300);
 
 	// store current trackball
 	curr_track.track.sca = gla->trackball.track.sca;

@@ -181,6 +181,7 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
                 if(!c->generic_bool()) {                                                   // if it is the first occurrence of the cell
                     UpdateCellsAttributes(c,attr_map);                                          // make sure it contains all the attributes
                     c->generic_bool = FBool(&generic_bool);
+                    c->generic_bool = true;
                 }
 
                 unsigned int f_pos =  c->AddFace(OFace(vIndex[0],vIndex[1],vIndex[2]));		// assing the face to the cell

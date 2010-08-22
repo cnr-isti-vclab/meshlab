@@ -225,8 +225,7 @@ void OCME::Render(){
 	RAssert(MemDbg::CheckHeap(1));
 
 	vcg::Color4b c;
-	vcg::GlTrimesh<vcgMesh> glw;
-	std::list<Cell*>::iterator ori;
+
 
 	/* increase mark */
 	++to_render_fbool;
@@ -261,8 +260,8 @@ void OCME::Render(){
 	RAssert(MemDbg::CheckHeap(1));
  	::RemoveDuplicates(cells_to_render);
 	for(unsigned int i = 0; i < cells_to_render.size(); ++i)
-			if(!cells_to_render[i]->generic_bool()) { // generic_bool() == the cell is taken in editing
-	 if(cells_to_render[i]->rd->renderCacheToken && cells_to_render[i]->rd->renderCacheToken->lock() )
+         if(!cells_to_render[i]->generic_bool()) { // generic_bool() == the cell is taken in editing
+          if(cells_to_render[i]->rd->renderCacheToken && cells_to_render[i]->rd->renderCacheToken->lock() )
 	 {
 			//c = c.Scatter ( 32,COff(cells_to_render[i]->key.h) );
 			 c = vcg::Color4b::Gray;
@@ -271,10 +270,10 @@ void OCME::Render(){
 
 			default_renderer.m = &cells_to_render[i]->rd->Mesh();
 
-			if(vcg::tri::HasPerVertexColor(cells_to_render[i]->rd->Mesh()))
-																default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMPerVert,vcg::GLW::TMNone>();
+                        if(vcg::tri::HasPerVertexColor(cells_to_render[i]->rd->Mesh()))
+                            default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMPerVert,vcg::GLW::TMNone>();
 			else
-                                                                                                                                default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMLast,vcg::GLW::TMNone>();
+                            default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMLast,vcg::GLW::TMNone>();
 
 			cells_to_render[i]->rd->renderCacheToken->unlock();
 		}
