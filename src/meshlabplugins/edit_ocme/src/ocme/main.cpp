@@ -552,10 +552,8 @@ n_cells\t \t \t %10lu \n \
 n_chains\t \t \t %10lu \n \
 n_chunks_faces\t \t \t %10lu (%f per cell)\n \
 n_chunks_vertex\t \t \t %10lu (%f per cell)\n \
-n_chunks_external\t \t \t %10lu (%f per cell)\n  \n \
 size_faces\t \t \t %10lu \n \
 size_vertex\t \t \t %10lu \n \
-size_external\t \t \t %10lu \n \
 size_dependences\t \t \t %10lu \n \
 size_lcm_table\t \t \t %10lu \n \
 size_ocme_table\t \t \t %10lu \n \
@@ -574,10 +572,10 @@ meshona->stat.n_cells ,
 			meshona->stat.n_chains,
 			meshona->stat.n_chunks_faces,meshona->stat.n_chunks_faces_avg_per_cell,
 			meshona->stat.n_chunks_vertex,meshona->stat.n_chunks_vertex_avg_per_cell,
-			meshona->stat.n_chunks_external,meshona->stat.n_chunks_external_avg_per_cell,
+
 			meshona->stat.size_faces,
 			meshona->stat.size_vertex,
-			meshona->stat.size_external,
+
 			meshona->stat.size_dependences,
 			meshona->stat.size_lcm_allocation_table,
 			meshona->stat.size_ocme_table,

@@ -6,115 +6,153 @@
 #include "ocme_definition.h"
 #include "../ooc_vector/berkeleydb/ooc_chains_berkeleydb.hpp"
 
+
 extern unsigned int generic_bool;
+
+
+template <class MeshType>
+struct Joiner{
+
+    typedef typename MeshType::VertexPointer VertexPointer;
+    typedef typename MeshType::VertexIterator VertexIterator;
+    typedef typename MeshType::FaceIterator FaceIterator;
+
+class RemoveDuplicateVert_Compare{
+public:
+        inline bool operator()(VertexPointer const &a, VertexPointer const &b)
+        {
+                return (*a).cP() < (*b).cP();
+        }
+};
+
+
+static void JoinDuplicateVertex( MeshType & m, typename MeshType::template PerVertexAttributeHandle<GISet>  & gPosV )
+{
+        if(m.vert.size()==0 || m.vn==0) return;
+
+        std::map<VertexPointer, VertexPointer> mp;
+        size_t i,j;
+        VertexIterator vi;
+        int deleted=0;
+        int k=0;
+        size_t num_vert = m.vert.size();
+        std::vector<VertexPointer> perm(num_vert);
+        for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi, ++k)
+                perm[k] = &(*vi);
+
+        RemoveDuplicateVert_Compare c_obj;
+
+        std::sort(perm.begin(),perm.end(),c_obj);
+
+        j = 0;
+        i = j;
+        mp[perm[i]] = perm[j];
+        ++i;
+        for(;i!=num_vert;)
+        {
+                if( (! (*perm[i]).IsD()) &&
+                        (! (*perm[j]).IsD()) &&
+                        (*perm[i]).P() == (*perm[j]).cP() )
+                {
+                        VertexPointer t = perm[i];
+                        mp[perm[i]] = perm[j];
+
+                        gPosV[*perm[j]].Add(gPosV[*t]);
+                        ++i;
+                        vcg::tri::Allocator<MeshType>::DeleteVertex(m,*t);
+                        deleted++;
+                }
+                else
+                {
+                        j = i;
+                        ++i;
+                }
+        }
+        FaceIterator fi;
+        for(fi = m.face.begin(); fi!=m.face.end(); ++fi)
+                if( !(*fi).IsD() )
+                        for(k = 0; k < 3; ++k)
+                                if( mp.find( (typename MeshType::VertexPointer)(*fi).V(k) ) != mp.end() )
+                                {
+                                        (*fi).V(k) = &*mp[ (*fi).V(k) ];
+                                }
+
+        vcg::tri::Allocator<MeshType>::CompactVertexVector(m);
+    }
+};
+
 
 template <class MeshType>
 void OCME::ExtractVerticesFromASingleCell( CellKey ck , MeshType & m){
 
-	//// phase 1. Copy all the vertices
-	Cell* c = GetCell(ck,false);
-
-	typename MeshType::VertexIterator vi;
-	Chain<OVertex> * chain = c->vert;
-	RAssert(chain != NULL);
-	vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,chain->Size());
-
-	chain->LoadAll();
-	for(unsigned int i = 0; i < chain->Size(); ++i,++vi) 
-		if((*chain)[i].isExternal )  vcg::tri::Allocator<MeshType>::DeleteVertex(m,*vi);
-		else
-		(*vi).P() = (*chain)[i].P();
- 	chain->FreeAll();
+//	//// phase 1. Copy all the vertices
+//	Cell* c = GetCell(ck,false);
+//
+//	typename MeshType::VertexIterator vi;
+//	Chain<OVertex> * chain = c->vert;
+//	RAssert(chain != NULL);
+//	vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,chain->Size());
+//
+//	chain->LoadAll();
+//	for(unsigned int i = 0; i < chain->Size(); ++i,++vi)
+//		if((*chain)[i].isExternal )  vcg::tri::Allocator<MeshType>::DeleteVertex(m,*vi);
+//		else
+//		(*vi).P() = (*chain)[i].P();
+// 	chain->FreeAll();
 }
 
 template <class MeshType>
-void OCME::ExtractContainedFacesFromASingleCell( CellKey ck , MeshType & m, bool loadall, bool includeExternals){
+ void OCME::ExtractContainedFacesFromASingleCell( CellKey ck , MeshType & m, bool loadall, bool includeExternals){
 
-	//// phase 1. Copy all the vertices
-	Cell* c = GetCell(ck,false);
-	sprintf(lgn->Buf(),"start adding vertices clock(): %d ", clock());
+    Cell * c = GetCell(ck,false);
+    assert(c);
 
-	if(loadall){
-		c->face->LoadAll();
- 		c->vert->LoadAll();
-	}
+    c->vert->LoadAll();
+    c->face->LoadAll();
+
+     if ( !c->IsEmpty()){
+            Chain<OFace> *  	face_chain	= c->face;
+            Chain<OVertex> * vertex_chain = c->vert;
+
+            RAssert(face_chain!=NULL);
+            RAssert(vertex_chain!=NULL);
+
+            typename MeshType::VertexIterator  vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,vertex_chain->Size());
+            for(unsigned int i = 0; i < vertex_chain->Size(); ++i,++vi)
+                    {
+                        /* Here there should be the importer from OVertex to vcgVertex */
+                        (*vi).P() = (*vertex_chain)[i].P();
+                    }
 
 
-	typename MeshType::VertexIterator vi;
-	Chain<OVertex> * chain = c->vert;
-	RAssert(chain != NULL);
-	Chain<GIndex> * extref = c->externalReferences;
+            typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
+            for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
+                for(unsigned int i = 0; i < 3; ++i){
+                        assert((*face_chain)[ff][i] < m.vert.size());
+                       (*fi).V(i) = &m.vert[(*face_chain)[ff][i]];
+                   }
+            }
 
-	vi  =vcg::tri::Allocator<MeshType>::AddVertices(m,chain->Size());
+          }
 
-	for(unsigned int i = 0; i < chain->Size(); ++i,++vi)
-		if((*chain)[i].isExternal)
-		{
-			if(includeExternals){
-				Cell * cell;   int index;
-				FindExternalVertexCellIndex( (*extref)[(*chain)[i].GetIndexToExternal()],cell,index);
-				RAssert(cell);
-
-				(*vi).P() = (*(cell->vert))[index].P();
-				// export ...
-			}
-			else
-				vcg::tri::Allocator<MeshType>::DeleteVertex(m,*vi);
-		}
-		else
-			{
-	 			/* Here there should be the importer from OVertex to vcgVertex */
-				(*vi).P() = (*chain)[i].P();
-				// export ...
-			}
- 
-	//// phase 2. Copy all the faces
-	Chain<OFace> *  &	face_chain		= c->face;				// get the face chain
-	Chain<OVertex> * &  vertex_chain	= c->vert;				// get the vertex chain
-	RAssert(face_chain!=NULL);
-	RAssert(vertex_chain!=NULL);
-
-	typename MeshType::VertexPointer vp[3];
-	for(unsigned int i = 0; i < face_chain->Size(); ++i){
-		OFace of = (*face_chain)[i];
-		int vpi;
-		for(vpi = 0; vpi < 3; ++vpi){
-			if(includeExternals || !((*vertex_chain)[ of[vpi] ]).isExternal)
-				vp[vpi] = & m.vert[ of[vpi] ];
-			else
-				break;
-		}
-		if(vpi==3){
-			typename MeshType::FaceIterator fi = vcg::tri::Allocator<MeshType>::AddFaces(m,1);
-			(*fi).V(0) = vp[0];(*fi).V(1) = vp[1];(*fi).V(2) = vp[2];
-		}	
-	}
-
-	if(loadall){
-		c->face->FreeAll();
- 		c->vert->FreeAll();
-	}
-
+           c->vert->FreeAll();
+           c->face->FreeAll();
 }
 
 template <class MeshType>
 void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper attr_map){
 
-	//// phase 1. Copy all the vertices
-
-	///* for each cell, keep the position of the beginng of its copy in the mesh vertices m.vert*/
-	std::map<Cell*,int> vertOffsets;
-
+        m.Clear();
 	RemoveDuplicates(sel_cells);
 	sprintf(lgn->Buf(),"start adding vertices clock(): %d ", static_cast<int>(clock()));
         lgn->Push();
 
-	// create an attibute that will store the address in ocme for the vertex
-	typename MeshType::template PerVertexAttributeHandle<GIndex> gPosV =
-		vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<GIndex> (m,"ocme_gindex");
+        // create an attibute that will store the address in ocme for the vertex
+        typename MeshType::template PerVertexAttributeHandle<GISet> gPosV =
+                vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<GISet> (m,"ocme_gindex");
 
-	if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosV))
-		gPosV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GIndex> (m,"ocme_gindex");
+        if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosV))
+                gPosV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GISet> (m,"ocme_gindex");
 
 	// create an attibute that will store if the  vertex is locked or not
 	typename MeshType::template PerVertexAttributeHandle<unsigned char> lockedV =
@@ -146,15 +184,9 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 
 
 	ScaleRange sr; 
-	int curr_pos = 0;
+        int offset = 0;
 	std::vector<Cell*>::iterator ci;
 
-//DEBUG ///////////////////////////////////////////////////////
-#ifdef _DEBUG
-	for(ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci)
-		this->CheckExternalRefAreExternal(*ci);
-#endif
-//////////////////////////////////////////////////////////////
 
 	bool locked;
 	typename MeshType::VertexIterator vi;
@@ -171,7 +203,7 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			sr.Add((*ci)->key.h);
 			Chain<OVertex> * chain = (*ci)->vert;
 			RAssert(chain != NULL);
-			vertOffsets.insert ( std::pair<Cell*,int>(*ci,curr_pos));
+
 	 		vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,chain->Size());
 
 			locked = (*ci)->ecd->locked() ;
@@ -180,127 +212,38 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			// The vertex that was allocated to store a vertex that is not pointed by anything
 			// is deleted (refer to the header of ocme_definition.h for more explanation)
 			for(unsigned int i = 0; i < chain->Size(); ++i,++vi)
-				if((*chain)[i].isExternal){
-					gPosV[*vi].SetExternal();
-					vcg::tri::Allocator<MeshType>::DeleteVertex(m,*vi);
+                                {
+                                    gPosV[*vi].Clear();
+                                    int ind = gPosV[*vi].Index((*ci)->key);
+                                    assert(ind == -1);
 
-					lockedV[*vi] = 1;		// set it as locked..It is onlyfor consistency in the debug
-				}
-				else
-					{	
-						/* associate the global index to the vertex beign copied */
-						gPosV[*vi] = GIndex((*ci)->key,i); 
-						/* Here there should be the importer from OVertex to vcgVertex */
-						(*vi).P() = (*chain)[i].P();
+                                    /* add this cells to the cells storing this vertices */
+                                    gPosV[*vi].Add(GIndex((*ci)->key,i));
 
-						/*  export all the attributes specified */
-						attr_map.ExportVertex(*ci,*vi,i);
+                                    /* Here there should be the importer from OVertex to vcgVertex */
+                                    (*vi).P() = (*chain)[i].P();
 
-						/* mark with the "editable" flag */
-						lockedV[*vi] = locked? 1 : 0 ; /* TODO: just to avoid the not-so-tested class for vector of bool in simple_temporary_data.h*/
-					}
-			curr_pos += chain->Size();
-		}
-        lgn->Append("phase 2");
+                                    /*  export all the attributes specified */
+                                    attr_map.ExportVertex(*ci,*vi,i);
 
-	//// phase 2. Copy all the faces
-	//// Here the real work, convert the integer pointer of the faces to pointer to the mesh vertices	
-	int ici ;
-	for(ici = 0,ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci,++ici)
-		if ( !(*ci)->IsEmpty())
-	{
-		Chain<OFace> *  &	face_chain		= (*ci)->face;					// get the face chain
-		Chain<OVertex> * &  vertex_chain	= (*ci)->vert;					// get the vertex chain
-		Chain<GIndex> * &   external_chain  = (*ci)->externalReferences;	// get the external_references chain
-		RAssert(face_chain!=NULL);
-		RAssert(vertex_chain!=NULL);
-		RAssert(external_chain!=NULL);
+                                    /* mark with the "editable" flag */
+                                    lockedV[*vi] = locked? 1 : 0 ; /* TODO: just to avoid the not-so-tested class for vector of bool in simple_temporary_data.h*/
+                                }
 
-		std::map<Cell*,int>::iterator cell_off = vertOffsets.find(*ci);	// get the offset of the cell
-		RAssert(cell_off != vertOffsets.end());
-		int offset =  (*cell_off).second;
-		locked = (*ci)->ecd->locked();
+                            Chain<OFace> * face_chain	= (*ci)->face;		// get the face chain
+                            RAssert(face_chain!=NULL);
 
-		unsigned int vp[3];
-		for(unsigned int i = 0; i < face_chain->Size(); ++i){
-			OFace of = (*face_chain)[i];
-			Cell * ext_Cell = NULL;
-			int ext_i,vpi=0;
-
-			if(locked)
-			for( vpi = 0; vpi < 3; ++vpi){
-				
-				if( ((*vertex_chain)[ of[vpi] ]).isExternal) // the vertex is external (i.e. stored in another cell)
-				{
-					GIndex ext_gi = 	(* external_chain )[ (int)(*vertex_chain)[ of[vpi] ].GetIndexToExternal() ];
-
-					// fetch the cell and the index where the vertex is actually stored 
-					ext_gi = FindExternalVertexCellIndex(ext_gi , ext_Cell,ext_i);
-
-					// find the offset of that cell
-					std::map<Cell*,int>::iterator ext_cell_off = vertOffsets.find(ext_Cell);
-
-					if( (ext_cell_off != vertOffsets.end()) && (!(*ext_cell_off).first->ecd->locked()))
-						break;								//it means at least one vertex in inside the cell..
-				}
-			}
-			
-			if(!locked ||(vpi<3)) 		// if at least one vertex is in the edit region the face MUST be created
-			{
-			for( vpi = 0; vpi < 3; ++vpi) 
-				if( ((*vertex_chain)[ of[vpi] ]).isExternal) // the vertex is external (i.e. stored in another cell)
-				{
-					GIndex ext_gi = 	(* external_chain )[ (int)(*vertex_chain)[ of[vpi] ].GetIndexToExternal() ];
-
-					// fetch the cell and the index where the vertex is actually stored 
-					ext_gi = FindExternalVertexCellIndex(ext_gi , ext_Cell,ext_i);
-
-					// find the offset of that cell
-					std::map<Cell*,int>::iterator ext_cell_off = vertOffsets.find(ext_Cell);
-
-					if((ext_cell_off == vertOffsets.end()))
-						{
-	 						vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,1);
-							lockedV[*vi] = 1;
-							gPosV[*vi] = ext_gi;
-							(*vi).P() = (*(ext_Cell->vert))[ext_i].P();
-							attr_map.ExportVertex(ext_Cell,*vi,ext_i);
-
-							vp[vpi] = m.vert.size()-1;
-						}
-					else
-						vp[vpi] =  (*ext_cell_off).second + ext_i;
-					RAssert(!m.vert[vp[vpi]].IsD());
-				}
-				else
-				{
-					RAssert(! m.vert[ offset + of[vpi] ].IsD());
-					// set the the pointer to it
-					vp[vpi] =  offset + of[vpi] ;
-				}
-				{ 
-					/* Add the face  and copy the pointer to the vertices*/				 
-					typename MeshType::FaceIterator  fi = vcg::tri::Allocator<MeshType>::AddFaces(m,1);
-
-					/* associate the global index to the face beign copied	*/
-					gPosF[*fi] = GIndex((*ci)->key,i);
-
-					(*fi).V(0) = &m.vert[vp[0]]; 
-					(*fi).V(1) = &m.vert[vp[1]];
-					(*fi).V(2) = &m.vert[vp[2]];
-
-					/* export the sdelected attributes */
-					attr_map.ExportFace(*ci, *fi ,i);
-
-
-					/* mark the face with "locked" flag */
-					lockedF[*fi] = locked?1:0;/* TODO: just to avoid the not-so-tested class for vector of bool in simple_temporary_data.h*/
-				}		
-			}
-		}
-		}
-	sprintf(lgn->Buf(),"end adding faces clock(): %d ", static_cast<int>(clock()));
-	lgn->Push(true);
+                            typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
+                            for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
+                                gPosF[*fi] = GIndex((*ci)->key,ff);
+                                for(unsigned int i = 0; i < 3; ++i){
+                                        int iii = ((*face_chain)[ff][i]);
+                                        assert(iii+offset < m.vert.size());
+                                       (*fi).V(i) = &m.vert[iii+offset];
+                                   }
+                            }
+                            offset = m.vert.size();
+              }
 
 	range() = sr;
 
@@ -309,28 +252,47 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			(*ci)->face->FreeAll();
 	}
 
-	{
+        ///CHECK
+                for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+                    for( GISet::iterator gi = gPosV[*vi].begin(); gi != gPosV[*vi].end();++gi){
+                        Cell *c = GetCell((*gi).first,false);
+                        assert(c);
+                        assert(c->vert->Size() > (*gi).second);
+                    }
 
-	typename MeshType::FaceIterator fi;
-	typename MeshType::VertexIterator vi;
-	unsigned int i;
-	// trace the elements that have been taken for editing
-	edited_faces.clear();
-	edited_vertices.clear();
+        Joiner<MeshType>::JoinDuplicateVertex(m,gPosV);
 
-	i = 0;
-	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
-			if(!(*vi).IsD()  && !lockedV[i])
-					edited_vertices.push_back(gPosV[i]);
-        std::sort(edited_vertices.begin(),edited_vertices.end());
+        {
 
-	i = 0;
-	for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i)
-			if(!(*fi).IsD()  && !lockedF[i])
-					edited_faces.push_back(gPosF[i]);
-        std::sort(edited_faces.begin(),edited_faces.end());
+            typename MeshType::FaceIterator fi;
+            typename MeshType::VertexIterator vi;
+            unsigned int i;
+            // trace the elements that have been taken for editing
+            edited_faces.clear();
+            edited_vertices.clear();
 
-	}
+            i = 0;
+            for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
+                            if(!(*vi).IsD()  && !lockedV[i])
+                                            edited_vertices.push_back(gPosV[i]);
+            std::sort(edited_vertices.begin(),edited_vertices.end());
+
+            i = 0;
+            for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i)
+                            if(!(*fi).IsD()  && !lockedF[i])
+                                            edited_faces.push_back(gPosF[i]);
+            std::sort(edited_faces.begin(),edited_faces.end());
+
+        }
+
+///CHECK
+        for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+            for( GISet::iterator gi = gPosV[*vi].begin(); gi != gPosV[*vi].end();++gi){
+                Cell *c = GetCell((*gi).first,false);
+                assert(c);
+                assert(c->vert->Size() > (*gi).second);
+            }
+
 }
 
 

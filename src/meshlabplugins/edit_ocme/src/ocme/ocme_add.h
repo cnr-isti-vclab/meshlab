@@ -79,12 +79,12 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	Cell * c = NULL; // current cell. Cache the last used cell because very often this is coherent from face to face
 
 	// create an attibute that will store the address in ocme
-	typename MeshType::template PerVertexAttributeHandle<GIndex> gPos =  
-		vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GIndex> (m,"gpos");
+        typename MeshType::template PerVertexAttributeHandle<GISet> gPos =
+                vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GISet> (m,"gpos");
 
         // initialize to unassigned
 	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-		gPos[vi].SetUnassigned() ;	// set the vertex as unassigned	(i.e. to process)	
+                gPos[vi].Clear() ;	// set the vertex as unassigned	(i.e. to process)
 	
 	// decide which scale interval will be associated with this mesh
 	ScaleRange sr = ScaleRangeOfMesh(m);
@@ -102,7 +102,6 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 
 
 	int n_box_updates = 0;
-	std::vector<Cell*> toCleanUp;
 
 	RecordCellsSetModification();
 
@@ -128,62 +127,27 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 		if( (c==NULL) || !(c->key == ck)){		// check if the current cell is the right one
 			c = GetCellC(ck);					// if not update it
 			added_cells.push_back(ck);
-	}
+                }
 
-
-		/*  The vertices can be internal to the cell or external									*/
-		/*  In the type OVertex there is bool to indicate this (OVertex::isExternal)			*/
-		/*  If it is external its global index is put in the vector Cell::externalReferences		*/
-		/*  and the position in Cell::externalReferences is stored as the first coordinate of vertex    */
-		/*	position. Amen.																			*/
-
-		int vIndex[3];
-		for(int i = 0; i < 3 ; ++i){
-			GIndex vp  = gPos[(*fi).V(i)];										
-			if(  vp.IsUnassigned()){												// check if it has already been assigned
-                                CellKey ckv = ComputeCellKey((*fi).V(i)->P(),h);                                    // no: find in which cell is should be stored
-                                Cell* ext_c = ( ckv == c->key)?c:	GetCellC(ckv);                              // no: get this cell (caching: try if is the one already in c)
-                                added_cells.push_back(ckv);
-
-                                if(!ext_c->generic_bool()) {                                                   // if it is the first occurrence of the cell
-                                    UpdateCellsAttributes(ext_c,attr_map);                                          // make sure it contains all the attributes
-                                    ext_c->generic_bool = FBool(&generic_bool);
-                                }
-
-                                int vpos =  ext_c-> AddVertex(OVertex(*(*fi).V(i)) );                               // no: add the vertex to it
-                                attr_map.ImportVertex(ext_c,*(*fi).V(i),vpos);                                      // import all the attributes specified
-				
-                                vp = gPos[(*fi).V(i)] = GIndex(ckv,vpos);                                           // no: get the GIndex
-			}
-
-			// here the vertex has been assigned globally for sure
-			if (vp.ck == ck)														// if it has been assigned to the the face cell
-				vIndex[i] = vp.i;													// just copy its order
-			else{
-                                Cell * ext_c = GetCell(vp.ck,false);
-                                assert(ext_c != NULL);
-                                CreateDependence(c,ext_c);
-				int ext_pos = c->GetExternalReference(vp,false);					// check if  the reference to this vertex has already been created
-				if(ext_pos!=-1)														// yes
-					vIndex[i] =  c->GetVertexPointingToExternalReference(ext_pos);	//   yes: find out the corresponding vertex and assign it
-				else{																// no
-					ext_pos = c->AddExternalReference(vp);							//    no: add the external references						
-					vIndex[i] = c->AddExternalVertex(ext_pos);						//	  no: add the corresponding vertex
-					c->ecd->vert2externals.insert(std::pair<unsigned int,unsigned int>(ext_pos,vIndex[i]));
-					toCleanUp.push_back(c);
-				}
-			}
-
-		//	assert(vIndex[i]<c->vert->Size());
-			
-		}
-        // add the face to the cell
-                if(!c->generic_bool()) {                                                   // if it is the first occurrence of the cell
-                    UpdateCellsAttributes(c,attr_map);                                          // make sure it contains all the attributes
+                if(!c->generic_bool()) {                                            // if it is the first occurrence of the cell
+                    UpdateCellsAttributes(c,attr_map);                              // make sure it contains all the attributes
                     c->generic_bool = FBool(&generic_bool);
                     c->generic_bool = true;
                 }
 
+
+		int vIndex[3];
+		for(int i = 0; i < 3 ; ++i){
+                         vIndex[i] = gPos[(*fi).V(i)].Index(ck);                                          // get the index of the vertx in this cell (or -1)
+                        if(vIndex[i]==-1){
+                             vIndex[i] = c-> AddVertex(OVertex(*(*fi).V(i)) );                               // no: add the vertex to it
+                             gPos[(*fi).V(i)].Add(GIndex(ck,vIndex[i]));                                     // record to index
+                         }
+
+                         attr_map.ImportVertex(c,*(*fi).V(i),vIndex[i]);                                      // import all the attributes specified
+                        }
+
+                // add the face to the cell
                 unsigned int f_pos =  c->AddFace(OFace(vIndex[0],vIndex[1],vIndex[2]));		// assing the face to the cell
                 attr_map.ImportFace( c,  *fi  ,f_pos);                                          // import all the attributes specified
 
@@ -236,14 +200,7 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 		}
 	}
 
-
 	StopRecordCellsSetModification();
-
-	/* clear the temporary data of the cells*/
-	RemoveDuplicates(toCleanUp);
-	for(std::vector<Cell*>::iterator i=toCleanUp.begin();i != toCleanUp.end();++i)
-                (*i)->ecd->vert2externals.clear();
-
 	vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute (m,gPos);
 }
 

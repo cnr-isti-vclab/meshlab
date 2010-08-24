@@ -19,7 +19,6 @@
 
 unsigned int kernelSetMark;
 unsigned int lockedMark;
-unsigned int computed_vert2externalsMark;
 unsigned int impostor_updated;
 unsigned int to_render_fbool;
 unsigned int generic_bool;
@@ -112,7 +111,7 @@ OCME::OCME(){
                     params.side_factor = 50;
                     kernelSetMark = 1;
                     lockedMark = 1;
-                    computed_vert2externalsMark = 1;
+                   
                     impostor_updated = 1;
                     to_render_fbool = 1;
                     streaming_mode = false;
@@ -184,22 +183,7 @@ int OCME::ComputeLevel(const float & l){
 	return   (int)( std::log(((float)this->params.side_factor) *  float(l)   ) / log(2.f)); 
 }
 
-void OCME::MoveVertex(GIndex & gposv,  Cell *&  c,   Cell *& new_c){
-		const unsigned int v_id = gposv.i;
-		OVertex   v = (*c->vert)[v_id];
-		assert( !v.isExternal);
 
-		/*update the value of the GIndex and add  a copy of the vertex to the destination cell */
-		gposv.ck  = new_c->key;
-		gposv.i   = new_c->AddVertex(v);
-
-		assert(!(*(new_c->vert))[gposv.i].isExternal);
-
-		/* add the reference to the new vertex */
-		int ext_i = c->AddExternalReference(gposv);
-		/* set the vertex as external */
-		(*c->vert)[v_id].SetIndexToExternal(ext_i);
-}
 
 void OCME::MoveFace(GIndex & from, const CellKey &  to){
 	Cell * cellFrom = GetCell(from.ck,false);
@@ -325,7 +309,6 @@ Cell* OCME::GetCell(const CellKey & key,bool ifnot_create){
 				Cell * newc =  NewCell(key);;
 				newc->face				= AddElement<OFace>		("f",newc);
 				newc->vert				= AddElement<OVertex>	("v",newc);
-				newc->externalReferences= AddElement<GIndex>	("e",newc);
 				if(this->record_cells_set_modification) {
 						this->added_cells.push_back(key);
 						this->touched_cells.push_back(key);
@@ -354,7 +337,6 @@ Cell* OCME::GetCellC(const CellKey & key,bool ifnot_create){
 				Cell * newc =  NewCell(key);;
 				newc->face				= AddElement<OFace>		("f",newc);
 				newc->vert				= AddElement<OVertex>	("v",newc);
-				newc->externalReferences= AddElement<GIndex>	("e",newc);
 				newc->impostor->InitDataCumulate(key.BBox3f());
 				return newc;
 		}
@@ -362,127 +344,6 @@ Cell* OCME::GetCellC(const CellKey & key,bool ifnot_create){
 		return NULL;
 	}
 
-GIndex OCME::FindExternalVertexGIndex(GIndex gi ){
-		RAssert(gi.i>=0);
-		Cell * curr_cell = NULL;
-		curr_cell = this->GetCell(gi.ck,false);																// find the cell 
-
-                if(curr_cell==NULL)  {
-                    sprintf(lgn->Buf(),"g: %d %d %d %d , %d",gi.ck.x,gi.ck.y,gi.ck.z,gi.ck.h,gi.i );lgn->Push();
-                    RAssert(curr_cell!=NULL);
-                }
-		const OVertex  & ov = (*(curr_cell->vert))[gi.i];													// fetch the vertex 
-		if (ov.isExternal)																					// if it is external again
-		 	 return FindExternalVertexGIndex((*(curr_cell->externalReferences))[(int)ov.GetIndexToExternal()]);	// recur
-		  else
-			 return gi;																						// otherwise we are done
-	}
-	GIndex OCME::FindExternalVertexCellIndex(GIndex gi,Cell *& c, int & i){
-			GIndex g = FindExternalVertexGIndex( gi );
-			c = this->GetCell(g.ck,false);
-                        if(c==NULL) {
-                            sprintf(lgn->Buf(),"g: %d %d %d %d , %d",g.ck.x,g.ck.y,g.ck.z,g.ck.h,g.i );lgn->Push();
-                            RAssert(c!=NULL);
-                        }
-			i = g.i;
-			return g;
-	}
-
-	void OCME::Rebind(std::vector<Cell*>   & toRebindCells){
-
-		std::vector<Cell*>   dep_cells;
-
-		// compute the dependent set
-		ComputeDependentCells(toRebindCells,dep_cells);
-		toRebindCells.insert(toRebindCells.end(),dep_cells.begin(),dep_cells.end());
-		RemoveDuplicates(toRebindCells);
-
-		std::vector<Cell*>::iterator ci;
-		for(ci  = dep_cells.begin(); ci !=  dep_cells.end(); ++ci) {
-			(*ci)->ecd->deleted_vertex.SetAsVectorOfBool();
-			for(unsigned int i  = 0 ; i < (*((*ci)->vert)).Size(); ++i)
-				if( !(*ci)->ecd->deleted_vertex.IsMarked(i) )
-					if( (*(*ci)->vert)[i].isExternal)
-						{
-                                                    Cell * c; int id;
-                                                    int ei = (*(*ci)->vert)[i].GetIndexToExternal();
-                                                    GIndex   gi = (*((*ci)->externalReferences))[ei];
-                                                    gi = this->FindExternalVertexCellIndex(gi,c,id);
-                                                    (*((*ci)->externalReferences))[ei] = gi;
-
-                                                    /* it may happen that a vertex that was moved away from a cell is then moved
-                                                    back to it. */
-                                                    if(*ci != c)				// a cell is implicitly dependent on itself
-                                                            CreateDependence(*ci,c);
-						}
-				}
-	}
-void OCME::RebindInternal(std::vector<Cell*>  toRebindCells, std::vector<Cell*>  & toCleanUpCells){
-	std::vector<Cell*>::iterator ci;
-
-	for(ci  = toRebindCells.begin(); ci != toRebindCells.end(); ++ci){
-		/*	run over all the faces and update those pointers to vertex that are external
-			but refer to another vertex in the same cell
-		*/
- 
-		for(unsigned int fi = 0 ; fi < (*ci)->face->Size(); ++fi)
-			for(unsigned int vi  = 0 ; vi < 3; ++vi){
-				unsigned int viii = (*(*ci)->face)[fi][vi];
-
-
-                                RAssert(viii < (*ci)->vert->Size());
-//DEBUG
-if(viii >= (*ci)->vert->Size()){
-    sprintf(lgn->Buf(),"%d %d",viii,(*ci)->vert->Size());
-    lgn->Push();
-}
-//...
-				OVertex  ov = (*(*ci)->vert)[viii];
-					if(ov.isExternal){
-
-                                        unsigned int   fvi = 	(*(*ci)->face)[fi][vi];
-//lgn->Append(".2");
-					unsigned int ei = ov.GetIndexToExternal();
-//lgn->Append(".3");
-
-					RAssert(ei < (*ci)->externalReferences->Size());	
-					RAssert(fvi>=0);
-					GIndex  gi = (*((*ci)->externalReferences))[ei];
- 
-					if((*ci)->key == gi.ck){								// is a self external reference
- 
-						(*ci)->ecd->deleted_vertex.SetMarked(fvi,true);		// mark the vertex as deleted
- 
-						toCleanUpCells.push_back(*ci);						// the cell will contained deleted elements. remember to clea it up
- 
-                                                (*(*ci)->face)[fi][vi] =  gi.i;										// update the internal reference to the new value
- 
-					}
- 
-				}
-			}
-
-			/*
-			At this point the vertices that are external, not referred by any face and 
-			referring in the same cell should be deleted becuase NO MORE references exist to them
-			*/
-			for(unsigned int vi  = 0 ; vi < (*ci)->vert->Size(); ++vi){
-				OVertex  ov = (*(*ci)->vert)[vi];
-				if(ov.isExternal){
-					unsigned int ei = ov.GetIndexToExternal();
-					RAssert(ei >=0);
-                                        RAssert((*ci)->ecd!=NULL);
-					GIndex  gi = (*((*ci)->externalReferences))[ei];
-                                        if((*ci)->key == gi.ck){					// is a self external reference
-						(*ci)->ecd->deleted_vertex.SetMarked(vi,true);		// mark the vertex as deleted
-                                                toCleanUpCells.push_back(*ci);				// the cell will contained deleted elements. remember to clean it up
-				}
-			}
-		}
-	}
-  lgn->Append("B5.3.9");
-	RemoveDuplicates(toCleanUpCells);
-}
 
 void OCME::Create(const char * name, unsigned int pagesize){
 	oce.params.blockSizeBytes = pagesize;
@@ -599,10 +460,7 @@ void OCME::RecStats(){
 	this->stat.n_cells = cells.size();
 	 this->stat.size_lcm_allocation_table = oce.SizeOfMem();
 	for(ci = this->cells.begin(); ci!= this->cells.end(); ++ci){
-		stat.n_chains += 3;// TEMPORARY
-		stat.n_chunks_external	+=	(*ci).second->externalReferences->chunks.size();
-		stat.size_external		+=	(*ci).second->externalReferences->chunks.size()*
-									(*ci).second->externalReferences->ChunkSize();
+		stat.n_chains += 3;// TEMPORARY               
 		stat.n_chunks_faces		+=	(*ci).second->face->chunks.size();
 		stat.size_faces			+=	(*ci).second->face->chunks.size()*(*ci).second->face->ChunkSize();
 
@@ -659,9 +517,7 @@ char *	OCME::DeSerialize ( char * const buf ){
 
 			/* set face and vertex if needed */
 			if((*ai).first == std::string("f"))				c.face				= (Chain<OFace>*)chain; else
-			if((*ai).first == std::string("v"))				c.vert				= (Chain<OVertex>*)chain; else
-			if((*ai).first == std::string("e"))				c.externalReferences= (Chain<GIndex>*)chain;
-			 
+                        if((*ai).first == std::string("v"))				c.vert				= (Chain<OVertex>*)chain;
 		 }
 
 

@@ -52,37 +52,19 @@ struct OFace{
 
 
 struct OVertex{
-	OVertex(bool _isExternal = false):isExternal(_isExternal){}
+        OVertex( ) {}
 
 	template <class VertexType>
-	OVertex(const float & x,const float & y,const float & z, bool _isExternal = false):isExternal(_isExternal){
+        OVertex(const float & x,const float & y,const float & z){
 	 p[0]=x;p[1]=y;p[2]=z;}
-	OVertex(const vcg::Point3f _p, bool _isExternal = false):isExternal(_isExternal){ p = _p; }
+        OVertex(const vcg::Point3f _p){ p = _p; }
 	
 	template <class VertexType>
-	OVertex(const VertexType & v){
-	 p =v.P();
-	 isExternal = false;
-	}
-	/*
-	TODO, take these booleans out of the way. Flags will be stored separately
-	*/
-	// isExternal is true if the vertex is not in this cell
-	bool isExternal;
+        OVertex(const VertexType & v){ p =v.P();}
 
-
-	unsigned int GetIndexToExternal()const{ 
-											RAssert(isExternal);
-											RAssert(p[0]>=0);
-											RAssert( (p[0]-floor(p[0]))==0.0);
-										return (unsigned int) p[0];
-									}
-	void SetIndexToExternal(unsigned int v){p[0] = static_cast<float>( v);p[1]= p[2]=0.0;isExternal = true;};
 	vcg::Point3f & P(){return p;}
 
 private:
-	// if isExternal == false this is the position of the vertex
-	// otherwise p[0] indicates the position in Cell::externalReferences
 	vcg::Point3f p;
 };
 

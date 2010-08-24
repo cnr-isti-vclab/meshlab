@@ -53,12 +53,41 @@ struct GIndex{
 	void SetUnassigned(){ i = -1; }
 	bool IsUnassigned()	{return  (i==-1);}
 
-	void SetExternal()	{ i = -2; }
-	bool IsExternal()	{return  (i==-2);}
+};
 
-//DEBUG///////////////////////////////
-//	 vcg::Point3f p;
-//////////////////////////////////////
+
+/* GISet is the set of GIndex corresponding to the same vertex*/
+struct GISet{
+    std::map<CellKey,unsigned int > giset;
+    typedef std::map<CellKey,unsigned int >::iterator iterator;
+
+    void Add(GIndex gi){
+        giset.insert(std::make_pair(gi.ck,gi.i));
+    }
+    void Add(GISet &gis){ giset.insert(gis.giset.begin(),gis.giset.end());}
+    void Clear(){giset.clear();}
+    bool IsUnassigned(){return giset.empty();}
+
+    iterator begin(){return giset.begin();}
+    iterator end(){return giset.end();}
+
+    const  bool   & operator < (const GISet & o) const {
+        return giset<o.giset;
+    }
+
+
+
+    void sub(GISet & o){
+        for(iterator i = o.begin(); i!=o.end(); ++i)
+            giset.erase((*i).first);
+    }
+
+    int Index(CellKey ck){
+        iterator gi = giset.find(ck);
+        if(gi==giset.end()) return -1;
+        else
+            return (*gi).second;
+    }
 };
 
 /*
@@ -105,15 +134,9 @@ struct Box4{
 struct EditCommitAuxData{
 	BoolVector deleted_face;
 	BoolVector deleted_vertex;
-	BoolVector deleted_externals;
 
 	FBool is_in_kernel;
 	FBool locked;
-	FBool computed_vert2externals;
-
-		/* for each esternal reference keeps the corresponding vertex*/
-		std::map<unsigned int,unsigned int> vert2externals;
-
 };
 
 /* per cell auxiliary data structure for rendering */
@@ -186,10 +209,6 @@ struct Cell{
 	/* all the vertices assigned to this cell. NOTE: this is a shortcut, "vert" is also in this->elements */
 	Chain<OVertex>  *vert;
 
-/*  references to vertices referred in this cell but contained in another */
-	Chain<GIndex>   *externalReferences;
-
-
 	// auxiliary data needed for edit/Commit
 	EditCommitAuxData	*	ecd;
 
@@ -197,11 +216,6 @@ struct Cell{
 	void InitEditCommitAuxData();
 	void ClearEditCommitAuxData();
 
-	// fill vert2externals
-	void ComputeVert2Externals();
-
-	// return (if it exists) the vertex corresponding to the ei-th external reference
-	int GetVertexPointingToExternalReference(const unsigned int    ei);
 
 	// auxiliary data needed for rendering
 	RenderAuxData		*	rd;
@@ -234,8 +248,6 @@ struct Cell{
 	// add a vertex
 	unsigned int AddVertex(OVertex );
 
-	// add an external vertex
-	unsigned int AddExternalVertex(unsigned int  pos);
 
 	template <class VertexType>
 	void ExportVertexAttribute(std::string attr_name, const unsigned int & i, VertexType & v );
@@ -259,12 +271,6 @@ struct Cell{
 //		/*nafb::Call(name,dst,)
 //		(*ii).second->GetValue(pos,dst)*/;
 //	}
-
-	// add external vertex
-	int AddExternalReference(const GIndex & gi);
-
-	// test if a GIndex is already among the external references (optionally create it)
-	int GetExternalReference(const GIndex & gi, bool ifnot_create = false);
 
 	Impostor  * impostor;
 	

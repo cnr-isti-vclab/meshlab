@@ -47,102 +47,102 @@ namespace io {
 
 template <class GIDX>
 void AddFace(OFace & fi, OCME * ocm, Chain<OVertex> * vert,GIDX & gPos,ScaleRange sr,std::vector<Cell*> & toCleanUp){
-
-		static Cell * c = NULL;
-		// 1: find the proper level
-		float l = -1.0;
-		for(int i = 0; i < 3; ++i)
-			l = std::max< float>((float)l,( (*vert)[fi[i]].P() - (*vert)[fi[(i+1)%3]].P()).SquaredNorm());
-	 
-		int h = std::max<float>(std::min<float>(l,sr.max),sr.min); 
-
-		// 2. find the proper cell in the level h 
-		/* very first choice, pick the cell that contains the  min corner of the bounding box */
-		vcg::Box3<float> facebox;
-		vcg::Point3f verts[3],p,n;
-		for(int i = 0; i < 3 ; ++i) {verts[i] = (*vert)[fi[i]].P(); facebox.Add(verts[i] );}
-		p = (verts[0]+verts[1]+verts[2])/3.f;
-		n = ((verts[1]-verts[0])^(verts[2]-verts[0])).Normalize();
-		 
-		CellKey ck = ComputeCellKey(facebox.min,h);
-
-		// 3. now we know that the cell where this face must to be put is "ck". Set che vertex pointers. 
-		if( (c==NULL) || !(c->key == ck))		// check if the current cell is the right one
-			c = ocm->GetCellC(ck);					// if not update it
-
-
-		/*  The vertices can be internal to the cell or external									*/
-		/*  In the type OVertex there is bool to indicate this (OVertex::isExternal)				*/
-		/*  If it is external its global index is put in the vector Cell::externalReferences		*/
-		/*  and the position in Cell::externalReferences is stored as the first coordinate of vertex*/
-		/*	position. Amen.																			*/
-
-		OVertex ov;
-		int vIndex[3];
-		for(int i = 0; i < 3 ; ++i){
-			GIndex vp  = gPos[ fi[i] ];										
-			if(  vp.IsUnassigned()){												// check if it has already been assigned
-				CellKey ckv = ComputeCellKey( (*vert)[fi[i]].P() ,h);					// no: find in which cell is should be stored
-				Cell* ext_c = ( ckv == c->key)?c:	ocm->GetCellC(ckv);					// no: get this cell (caching: try if is the one already in c) 
-				int vpos =  ext_c-> AddVertex( (*vert)[fi[i]]  );				// no: add the vertex to it
-				vp = gPos[fi[i]] = GIndex(ckv,vpos);							// no: get the GIndex
-			}
-
-			// here the vertex has been assigned globally for sure
-			if (vp.ck == ck)														// if it has been assigned to the the face cell
-				vIndex[i] = vp.i;													// just copy its order
-			else{
-				int ext_pos = c->GetExternalReference(vp,false);					// check if  the reference to this vertex has already been created
-				if(ext_pos!=-1)														// yes
-					vIndex[i] =  c->GetVertexPointingToExternalReference(ext_pos);	//   yes: find out the corresponding vertex and assign it
-				else{																// no
-					ext_pos = c->AddExternalReference(vp);							//    no: add the external references						
-					vIndex[i] = c->AddExternalVertex(ext_pos);						//	  no: add the corresponding vertex
-                    c->ecd->vert2externals.insert(std::pair<unsigned int,unsigned int>(ext_pos,vIndex[i]));
-					toCleanUp.push_back(c);
-				}
-			}
-
-		//	assert(vIndex[i]<c->vert->Size());
-			
-		}
-        // add the face to the cell
-		c->AddFace(OFace(vIndex[0],vIndex[1],vIndex[2]));
-       // add the sample to the impostor
-		c->impostor->AddSample(p,n);
-
-		/* Handling the bounding boxes of the cell.
-		The bounding box 3 of a cell must include all the faces that cross that cell and that are
-		assigned to the same level. 
-		The fourth dimension of the bounding box encodes the level and it will be used at editing time.
-	
-		When a cell "c" must be enable for editing, we will have to load all the cells of the same level
-		that intersect c. Furthermore we will have to load the upper and lower levels as written in sr (ScaleRange).
-
-		This wil guarantee the correct connectivity. For what concerns the geometry, we can decide to load all
-		the cells from the set to the root and some more  lower levels. The key idea is that you are not enabled
-		to change what you do not see.
-		*/
-
-		// update the bounding box of the cell c to contain the bbox of the face	
-		const Box4 old_box = c->bbox;
-		c->bbox.Add(facebox,sr);
-		
-		// if the bounding box has enlarged then expand the bounding box of all the cells
-		// touched by the bounding box to include the face
-		std::vector<CellKey> overlapping;
-		std::vector<CellKey>::iterator oi;
-
-		// get the cells at the same level "h" intersected by the bounding box of the face
-		ocm->OverlappingBBoxes( facebox, h,overlapping);
-
-		Cell * ovl_cell = NULL;	// pointer to the overlapping cell
-		
-		for(oi = overlapping.begin(); oi != overlapping.end(); ++oi){
-			/* get the overlapping cell. If there is no such overlapping cell it must be created*/
-			ovl_cell = ocm->GetCellC((*oi),true);			
-			ovl_cell->bbox.Add(facebox, sr);	// update its bounding box
-		}
+//
+//		static Cell * c = NULL;
+//		// 1: find the proper level
+//		float l = -1.0;
+//		for(int i = 0; i < 3; ++i)
+//			l = std::max< float>((float)l,( (*vert)[fi[i]].P() - (*vert)[fi[(i+1)%3]].P()).SquaredNorm());
+//
+//		int h = std::max<float>(std::min<float>(l,sr.max),sr.min);
+//
+//		// 2. find the proper cell in the level h
+//		/* very first choice, pick the cell that contains the  min corner of the bounding box */
+//		vcg::Box3<float> facebox;
+//		vcg::Point3f verts[3],p,n;
+//		for(int i = 0; i < 3 ; ++i) {verts[i] = (*vert)[fi[i]].P(); facebox.Add(verts[i] );}
+//		p = (verts[0]+verts[1]+verts[2])/3.f;
+//		n = ((verts[1]-verts[0])^(verts[2]-verts[0])).Normalize();
+//
+//		CellKey ck = ComputeCellKey(facebox.min,h);
+//
+//		// 3. now we know that the cell where this face must to be put is "ck". Set che vertex pointers.
+//		if( (c==NULL) || !(c->key == ck))		// check if the current cell is the right one
+//			c = ocm->GetCellC(ck);					// if not update it
+//
+//
+//		/*  The vertices can be internal to the cell or external									*/
+//		/*  In the type OVertex there is bool to indicate this (OVertex::isExternal)				*/
+//		/*  If it is external its global index is put in the vector Cell::externalReferences		*/
+//		/*  and the position in Cell::externalReferences is stored as the first coordinate of vertex*/
+//		/*	position. Amen.																			*/
+//
+//		OVertex ov;
+//		int vIndex[3];
+//		for(int i = 0; i < 3 ; ++i){
+//			GIndex vp  = gPos[ fi[i] ];
+//			if(  vp.IsUnassigned()){												// check if it has already been assigned
+//				CellKey ckv = ComputeCellKey( (*vert)[fi[i]].P() ,h);					// no: find in which cell is should be stored
+//				Cell* ext_c = ( ckv == c->key)?c:	ocm->GetCellC(ckv);					// no: get this cell (caching: try if is the one already in c)
+//				int vpos =  ext_c-> AddVertex( (*vert)[fi[i]]  );				// no: add the vertex to it
+//				vp = gPos[fi[i]] = GIndex(ckv,vpos);							// no: get the GIndex
+//			}
+//
+//			// here the vertex has been assigned globally for sure
+//			if (vp.ck == ck)														// if it has been assigned to the the face cell
+//				vIndex[i] = vp.i;													// just copy its order
+//			else{
+//				int ext_pos = c->GetExternalReference(vp,false);					// check if  the reference to this vertex has already been created
+//				if(ext_pos!=-1)														// yes
+//					vIndex[i] =  c->GetVertexPointingToExternalReference(ext_pos);	//   yes: find out the corresponding vertex and assign it
+//				else{																// no
+//					ext_pos = c->AddExternalReference(vp);							//    no: add the external references
+//					vIndex[i] = c->AddExternalVertex(ext_pos);						//	  no: add the corresponding vertex
+//                    c->ecd->vert2externals.insert(std::pair<unsigned int,unsigned int>(ext_pos,vIndex[i]));
+//					toCleanUp.push_back(c);
+//				}
+//			}
+//
+//		//	assert(vIndex[i]<c->vert->Size());
+//
+//		}
+//        // add the face to the cell
+//		c->AddFace(OFace(vIndex[0],vIndex[1],vIndex[2]));
+//       // add the sample to the impostor
+//		c->impostor->AddSample(p,n);
+//
+//		/* Handling the bounding boxes of the cell.
+//		The bounding box 3 of a cell must include all the faces that cross that cell and that are
+//		assigned to the same level.
+//		The fourth dimension of the bounding box encodes the level and it will be used at editing time.
+//
+//		When a cell "c" must be enable for editing, we will have to load all the cells of the same level
+//		that intersect c. Furthermore we will have to load the upper and lower levels as written in sr (ScaleRange).
+//
+//		This wil guarantee the correct connectivity. For what concerns the geometry, we can decide to load all
+//		the cells from the set to the root and some more  lower levels. The key idea is that you are not enabled
+//		to change what you do not see.
+//		*/
+//
+//		// update the bounding box of the cell c to contain the bbox of the face
+//		const Box4 old_box = c->bbox;
+//		c->bbox.Add(facebox,sr);
+//
+//		// if the bounding box has enlarged then expand the bounding box of all the cells
+//		// touched by the bounding box to include the face
+//		std::vector<CellKey> overlapping;
+//		std::vector<CellKey>::iterator oi;
+//
+//		// get the cells at the same level "h" intersected by the bounding box of the face
+//		ocm->OverlappingBBoxes( facebox, h,overlapping);
+//
+//		Cell * ovl_cell = NULL;	// pointer to the overlapping cell
+//
+//		for(oi = overlapping.begin(); oi != overlapping.end(); ++oi){
+//			/* get the overlapping cell. If there is no such overlapping cell it must be created*/
+//			ovl_cell = ocm->GetCellC((*oi),true);
+//			ovl_cell->bbox.Add(facebox, sr);	// update its bounding box
+//		}
 }
 
 /** 
@@ -835,8 +835,6 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 			}
 
 			RemoveDuplicates(toCleanUp);
-			for(std::vector<Cell*>::iterator i=toCleanUp.begin();i != toCleanUp.end();++i)
-                                (*i)->ecd->vert2externals.clear();
 
 			oce.TrashEverything( );
 }

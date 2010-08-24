@@ -110,9 +110,10 @@ void OCME::FillSamples(std::vector<CellKey> & cs){
 				for(vcgMesh::FaceIterator fi = tmp.face.begin(); fi != tmp.face.end(); ++fi){
 						vcg::Point3f bary   = vcg::Barycenter(*fi);
 						vcg::Point3f pp[3];
+                                                vcg::Point3f n = vcg::Normal(*fi).Normalize();
 						for(int i  = 0; i < 3; ++i) pp[i]  = ((*fi).V(i))->P();
-						c->impostor->AddSample(bary,vcg::Normal(*fi));	// collect a sample for the impostor
-						for(int i = 0; i < 3; ++i) c->impostor->AddSample(bary*0.5+pp[i]*0.5,vcg::Normal(*fi));	// collect a sample for the impostor
+                                                c->impostor->AddSample(bary,n);	// collect a sample for the impostor
+                                                for(int i = 0; i < 3; ++i) c->impostor->AddSample(bary*0.5+pp[i]*0.5,n);	// collect a sample for the impostor
 				}
 		}
 }

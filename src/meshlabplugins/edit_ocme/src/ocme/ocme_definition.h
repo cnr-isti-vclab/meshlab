@@ -23,7 +23,6 @@
 
 extern unsigned int kernelSetMark;
 extern unsigned int lockedMark;
-extern unsigned int computed_vert2externalsMark;
 extern unsigned int impostor_updated;
 extern unsigned int to_render_fbool;
 extern double cellsizes[30];
@@ -44,20 +43,6 @@ std::string ToString(CellKey key);
 
 extern Logging * lgn;
 
-
-/*
-  1.1 How a mesh is extracted form a set of cells. In Cell::vert there are also 
-  vertices which are not actually stored in the current cell  but in another one
-  but we want the 1-1 correpondence between  Cell::vert and the vertices in the mesh we are creating. 
-
-  With this correspondence, we can get a vertex just by offsetting (see vertexOffsets in the code
-  of ExtractMesh) otherwise we should have kept a whole map for redirecting all the vertices and it
-  would be less efficient in time (note that this operation should be quite fast)
-
-  On the cons there is some waste of memory, i.e. a OVertex (13 bytes) for each external vertex instead
-  of putting a negative vertex index in the face (for example) to indicate the position of the vertex 
-  in external pointers. Who cares? Not me.
-*/
 
 struct CachedMap{
 		typedef std::map<CellKey,Cell*> CellsContainer;
@@ -87,10 +72,10 @@ struct OCME{
 
 	struct Statistics{
 	Statistics():	n_cells(0),n_chains(0),n_chunks_faces(0),n_chunks_vertex(0),
-					n_chunks_external(0),size_faces(0),size_vertex(0),size_external(0),
+                                        size_faces(0),size_vertex(0),
 					size_dependences(0),size_lcm_allocation_table(0),size_ocme_table(0),size_impostors(0),n_getcell(0),
 					n_files(0),n_chunks_faces_avg_per_cell(0),n_chunks_vertex_avg_per_cell(0),
-					n_triangles(0),n_chunks_external_avg_per_cell(0),  n_vertices(0),
+                                        n_triangles(0),  n_vertices(0),
 					input_file_size(0),time_disk_write(0.0),
 					time_disk_read(0.0),time_total(0.0)
 	{}
@@ -102,10 +87,10 @@ struct OCME{
 			n_chains,
 			n_chunks_faces,
 			n_chunks_vertex,
-			n_chunks_external,
+
 			size_faces,
 			size_vertex,
-			size_external,
+
 			size_dependences,
 			size_lcm_allocation_table,
 			size_ocme_table,
@@ -117,7 +102,7 @@ struct OCME{
 
 		float	n_chunks_faces_avg_per_cell,
 				n_chunks_vertex_avg_per_cell,
-				n_chunks_external_avg_per_cell,
+
 				time_for_loading,
 				time_disk_write,
 				time_disk_read,
@@ -129,7 +114,7 @@ struct OCME{
 		unsigned long TotalSize(){
 			return 	size_faces	+
 					size_vertex	+
-					size_external +
+
 					size_lcm_allocation_table +
 					size_dependences +
 					size_ocme_table +
@@ -338,10 +323,6 @@ struct OCME{
 	void BuildImpostorsHierarchyPartial(std::vector<CellKey> & fromCells);
 	void BuildImpostorsHierarchyPartial(std::vector<Cell*> & fromCells);
 
-	/* move the vertex from cell c to cell new_c and update GIndex gposv
-	Note: the vertex must not be external in c
-	*/
-	void MoveVertex(GIndex & gposv, Cell *&  c,  Cell *& new_c);	
 
 	/* move the face from GIndex from to cell with CellKey to new_c and update GIndex gposv
 	  Update from with the new GINdex
@@ -445,8 +426,8 @@ struct OCME{
 		These containers are used to find out which element have been deleted by difference
 	*/
 	std::vector<GIndex> edited_faces;
-	std::vector<GIndex> edited_vertices;
-	std::vector<Cell*>	toCleanUpCells;					// cells that contain deleted elements
+        std::vector<GISet>  edited_vertices;
+        std::vector<Cell*>  toCleanUpCells;					// cells that contain deleted elements
 
 	// Build a mesh with all the faces of a single cell whose vertices are also
 	// in the same cell (only debug purpose)
@@ -471,8 +452,8 @@ struct OCME{
 	// find the removed elements
 	template <class MeshType>
 	void FindRemovedElements( MeshType & m,
-														typename MeshType::template PerVertexAttributeHandle<GIndex> &gPosV,
-														typename MeshType::template PerFaceAttributeHandle<GIndex> & gPosF );
+                                typename MeshType::template PerVertexAttributeHandle<GISet> &gPosV,
+                                typename MeshType::template PerFaceAttributeHandle<GIndex> & gPosF );
 
 	// commit a mesh that was previously built with edit
 	template <class MeshType>
@@ -492,18 +473,9 @@ struct OCME{
 	*/
 	void RemoveDeletedFaces(  std::vector<Cell*> & cells);
 
-	/*  This function takes care of updating the face-vertex adjacencies,
-	both inside the same cell and the external. For this reason not only
-	the cells passed will be affected but also the cells in the dependent set,
-	because they can contain references to vertices of the cells in "cells"
+        /*
 	*/
 	void RemoveDeletedVertices(    std::vector<Cell*>   cells);
-
-	/* 
-	An external reference is not explicitly deleted. What happen is that no vertex
-	of other cells refer to it, therefore this can be solved only loading the depended set
-	*/
-	void RemoveUnreferencedExternal(  std::vector<Cell*> & cells);
 
 
 	/*
@@ -518,26 +490,8 @@ struct OCME{
 	template <class MeshType>
 	void ExtractMesh( MeshType & m);
 
-	/* find the global index of the i-th vertex of cell c */
-	GIndex FindExternalVertexGIndex(GIndex gi);						// return the GIndex
-	GIndex FindExternalVertexCellIndex(GIndex gi,Cell *& c,int & i);	// return cell and index
 
-	/* toRebindCells contains cells where at least one vertex has  been moved to another cell.
-	If the vertex was referenced from a third cell, we have an externals which points to an external.
-	FindExternalVertexCellIndex would work (becuase it is recursive) BUT we CHOOSE to keep all these
-	"adjacencies" one step. 
-	This function enforce it.
-	*/
-	void Rebind(std::vector<Cell*>  & toRebindCells);
 
-	/* this function handles the special case where a vertex is moved to a cell
-	which was already referring the vertex as external
-	*/
-	void RebindInternal(std::vector<Cell*>   toRebindCells, std::vector<Cell*>   & toCleanUpCells);
-
-	/*
-	++++++++++++++++++++++++++++++++ End Edit/Commit ++++++++++++++++++++++++++++++
-	*/
 
 	// create a new OCME
 	void Create(const char * name, unsigned int pagesize = 1024);
@@ -581,23 +535,11 @@ struct OCME{
 	// verify if all the undeleted faces point to undeleted vertices 
 	bool CheckFaceVertexAdj(Cell *);
 
-	// verify if all the external references point to non deleted vertices
-	bool CheckExternalVertexAdj(Cell *);
-
-	// verify if all relation between vert and externalReference is injective
-	bool CheckVertexToExternalRef(Cell*);
-
-	// verify if the external references are actually external
-	bool CheckExternalRefAreExternal(Cell*);
-
 	// verify that dep is really the dependent set of kn
 	bool CheckDependentSet( std::vector<Cell*> &  dep);
 
 
 
-//DEBUG///////////////////////
-bool CheckExternalsCoherent(Cell*);
-///////////////////////////////
 };
 
 #endif

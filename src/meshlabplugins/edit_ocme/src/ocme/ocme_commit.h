@@ -6,66 +6,71 @@
 #include "../utils/std_util.h"
 
 extern unsigned int lockedMark;
-extern unsigned int computed_vert2externalsMark;
 
 
 
 // find the removed elements
 template <class MeshType>
 void OCME::FindRemovedElements( MeshType & m,
-                                typename MeshType::template PerVertexAttributeHandle<GIndex> &gPosV,
+                                typename MeshType::template PerVertexAttributeHandle<GISet> &gPosV,
                                 typename MeshType::template PerFaceAttributeHandle<GIndex>& gPosF
                         ){
-		typename MeshType::FaceIterator fi;
-		typename MeshType::VertexIterator vi;
-		unsigned int i;
 
-		std::vector<GIndex> committing_faces;
-		std::vector<GIndex> committing_vertices;
+                typename MeshType::FaceIterator fi;
+                typename MeshType::VertexIterator vi;
+                unsigned int i;
 
-		/*
-			find the GIndex being committed
-		*/
-		i = 0;
-		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
-		{
-				GIndex gposv = gPosV [i];
+                std::vector<GIndex> committing_faces;
+                std::vector<GISet> committing_vertices;
+
+                /*
+                        find the GIndex being committed
+                */
+                i = 0;
+                for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
+                {
+                                GISet gposv = gPosV [i];
                                 if(!gposv.IsUnassigned() )
-						committing_vertices.push_back(gposv);
-		}
+                                          committing_vertices.push_back(gposv);
+                }
 
-		i = 0;
-		for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i){
-						GIndex gposf = gPosF [i];
+                i = 0;
+                for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i){
+                                                GIndex gposf = gPosF [i];
                                                 if(!gposf.IsUnassigned() )
-								committing_faces.push_back(gposf);
-				}
+                                                                committing_faces.push_back(gposf);
+                                }
 
-		/*
-			find the GIndex that were taken in edit and are not being committed back
-		*/
+                /*
+                        find the GIndex that were taken in edit and are not being committed back
+                */
 
-		std::vector<GIndex> deleted_elements;
-		SetDifference(edited_faces,committing_faces,deleted_elements);
-		for(unsigned int i = 0; i < deleted_elements.size(); ++i){
-				Cell* c = GetCell(deleted_elements[i].ck,false);
-				assert(c);
-				c->ecd->deleted_face.SetAsVectorOfMarked();
-				c->ecd->deleted_face.SetMarked(deleted_elements[i].i,true);
-				toCleanUpCells.push_back(c);
-				}
+                std::vector<GIndex> deleted_faces;
+                SetDifference(edited_faces,committing_faces,deleted_faces);
+                for(unsigned int i = 0; i < deleted_faces.size(); ++i){
+                                Cell* c = GetCell(deleted_faces[i].ck,false);
+                                assert(c);
+                                c->ecd->deleted_face.SetAsVectorOfMarked();
+                                c->ecd->deleted_face.SetMarked(deleted_faces[i].i,true);
+                                toCleanUpCells.push_back(c);
+                                }
+
+                std::vector<GISet> deleted_vertices;
+
+                SetDifference(edited_vertices,committing_vertices,deleted_vertices);
+                for( i = 0; i < deleted_vertices.size(); ++i)
+                        for(GISet::iterator di = deleted_vertices[i].begin(); di != deleted_vertices[i].end();++di )
+                            {
+                                Cell* c = GetCell((*di).first,false);
+                                assert(c);
+                                c->ecd->deleted_vertex.SetAsVectorOfMarked();
+                                c->ecd->deleted_vertex.SetMarked((*di).second,true);
+                                toCleanUpCells.push_back(c);
+                                }
+
+                ::RemoveDuplicates(toCleanUpCells);
 
 
-		SetDifference(edited_vertices,committing_vertices,deleted_elements);
-		for( i = 0; i < deleted_elements.size(); ++i){
-				Cell* c = GetCell(deleted_elements[i].ck,false);
-				assert(c);
-				c->ecd->deleted_vertex.SetAsVectorOfMarked();
-				c->ecd->deleted_vertex.SetMarked(deleted_elements[i].i,true);
-				toCleanUpCells.push_back(c);
-				}
-
-		::RemoveDuplicates(toCleanUpCells);
 }
 
 template <class MeshType>
@@ -79,8 +84,8 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		If this operation fails it means you are trying to commit something you did not take
 		in edit with Edit(). In this case the function return, you should have called AddMesh.
 	*/
-	typename MeshType::template PerVertexAttributeHandle<GIndex> gPosV =  
-		vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<GIndex> (m,"ocme_gindex");
+        typename MeshType::template PerVertexAttributeHandle<GISet> gPosV =
+                vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<GISet> (m,"ocme_gindex");
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosV));
 
 	typename MeshType::template PerFaceAttributeHandle<GIndex> gPosF =  
@@ -101,23 +106,23 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedF));
 
 	/* we will temporarily need a copy of the vertex position */
-	vcg::SimpleTempData<typename MeshType::VertContainer,GIndex> gPosVOld(m.vert);	// create the temporary data
-	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi) gPosVOld[vi] = gPosV[vi];	// copy the attribute		
-	
+  //      vcg::SimpleTempData<typename MeshType::VertContainer,GISet> gPosVNew(m.vert);	// create the temporary data
 
-	FindRemovedElements(m,gPosV,gPosF);
 
-	/* we will (temporarily) need to know the global index of new external vertices.*/
+////////// check
+        for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+            for( GISet::iterator gi = gPosV[*vi].begin(); gi != gPosV[*vi].end();++gi){
+                Cell *c = GetCell((*gi).first,false);
+                assert(c);
+                assert(c->vert->Size() > (*gi).second);
+            }
 
-	typedef std::pair<GIndex,GIndex> R2E;				// reference 2 externals/ The first GIndex is to externalReferences, the second to vert
-	std::map<GIndex,GIndex> :: iterator r2e_i;		
-        std::map<GIndex,GIndex> ref_2_ext;				// store all the new reference to externals
 
-	std::vector<Cell*>
-                        toRebind,					// cells that contain moved vertices
-                        toCleanUpCells_vert2externals;                  // cells than contain temporary map from vert to externals
+        FindRemovedElements(m,gPosV,gPosF);
+
 
 	RecordCellsSetModification();
+
 	// find which scale interval will be associated with this mesh
 	ScaleRange srM = ScaleRangeOfMesh(m);
 
@@ -125,265 +130,145 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 	ScaleRange sr = srE();
 
 	int h;
-
         ++generic_bool;                                                 // mark the cells whose attributes are aligned with attr_map
-	++computed_vert2externalsMark ;
 
-	// Phase 1: commit all the vertices
 
-	lgn->Append("committing vertices");
 	/* Run over all the vertices and move those vertices which are in cells not in the interval sr */
-        Cell * c = NULL;						// current cell. Cache the last used cell because very often this is coherent from vertex to vertex
+        Cell * c = NULL; // current cell. Cache the last used cell because very often this is coherent from vertex to vertex
 		
-#ifdef _DEBUG
 
 
-		for(fi = m.face.begin(); fi != m.face.end(); ++fi)
-			if( lockedF[*fi]==0){
-				if(!(*fi).IsD())
-				{
-					RAssert(!(*fi).V(0)->IsD());
-					RAssert(!(*fi).V(1)->IsD());
-					RAssert(!(*fi).V(2)->IsD());
-				}
-                        }
-#endif
+       // Phase 1: delete the vertices that are marked as deleted in the mesh
+       lgn->Append("deleting vertices marked as D in the mesh");
+     {
+        unsigned int ii = 0;
+         for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++ii)
+                if(lockedV[*vi]==0)													//   skip if the vertex is not editable
+        {
+                 GISet   gposv = gPosV[*vi];
 
-	unsigned int ii = 0;
-	 for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++ii)
-		if(lockedV[*vi]==0)													//   skip if the vertex is not editable
-	{
-                GIndex   gposv = gPosV[*vi];
-
-		if(gposv.IsUnassigned() ){											// this means this vertex has been added 
-			if(!(*vi).IsD()){												// if it was deleted before committ just skip it
-				CellKey ck( (*vi).P(), sr.min );							// get the CellKey where it should go (no specific reason for sr.min, except lazyness)
-                                c = GetCell(ck);									// get the cell
-                                if(!c->generic_bool()){
-                                        this->UpdateCellsAttributes(c,attr_map);
-                                        c->generic_bool = FBool(&generic_bool);
-				}
-                                gposv.i = gPosV[*vi].i = c -> AddVertex(OVertex(*vi ) );	// add the vertex to it
-                                attr_map.ImportVertex(c,*vi,gposv.i);									// import all the attributes
-                                gposv.ck = gPosV[*vi].ck = ck;														// update the GIndex stored in gPosV
-                            }
-		}	
-		else																			// it is not a new vertex
-		{
-			if(  gposv.IsExternal() )													// if the vertex is external we do not need to do anything
-					continue;															// skip to the next vertex
-
-			if( (!c) || (!(c->key ==  gposv.ck)) )										// check if the current cell is the right one
-				c = GetCell(gposv.ck);													// if not update it
-
-			assert(!(*(c->vert))[gposv.i].isExternal);
-			/*	the vertex was not external and was already in the database				*/	
-			if((*vi).IsD())	{						
-				/* if it has been deleted then add it to the list of deleted vertices	*/
-				c->ecd->deleted_vertex.SetAsVectorOfMarked();
-				c->ecd->deleted_vertex.SetMarked(gposv.i,true);
-				/* insert the cell among whose have to be cleaned after the commit		*/
-				toCleanUpCells.push_back(c);
-				continue;
-			}
-			else{											// the vertex is not new and has not been deleted
-				/* There are two reasons for having to move the vertex in another cell : */
-				/* A) the range of levels has changed and the level of the cell currently storing the vertex 
-				is outside the new range */
-				/* OR */
-				/* B) the vertex position has been changed */
-
-				/* Find the cell where the vertex should be */
-				// check the level
-				int new_h = std::max( std::min(srM.min,gposv.ck.h),srM.max);
-				/* find out his new CellKey					*/
-				CellKey new_cell_key = ComputeCellKey ((*vi).P(),new_h);		
-
-				if(!( gposv.ck  == new_cell_key) ){			// the vertex must be moved
-					Cell * new_c = GetCell(new_cell_key);           // find out the new Cell
-					assert(!(*(c->vert))[gposv.i].isExternal);
-					MoveVertex(gposv,c,new_c);			// move the vertex from cell c to cell new_c and update gposv
-					gPosV[*vi] = gposv;                             // gposv has been changed by MoveVertex
-					CreateDependence(c,new_c);			// create a dependence between the cells
-					toRebind.push_back(c);				// put c in the set of cells whose vertex have been moved away
-					toCleanUpCells.push_back(c);			// put c in the set of cells that contain removed elements
-					c = new_c;					// update the pointer of the current cell (we'll see what's better)
-					assert(!(*(c->vert))[gposv.i].isExternal);
-				}
-			}
-		}
-
-		/* Here the components of the vertex can be copied */
-		assert(!(*(c->vert))[gposv.i].isExternal);
-		(*(c->vert))[gposv.i].P() = (*vi).P();
-
-		if(!c->generic_bool()){
-			this->UpdateCellsAttributes(c,attr_map);
-			c->generic_bool = FBool(&generic_bool);
-		}
-		attr_map.ImportVertex(c,*vi,gposv.i);			// import all the attributes
-	}
-
-	lgn->Append("committing faces");
-	
-	// Phase 2. update the faces
-
+                 if(!gposv.IsUnassigned() && (*vi).IsD()){
+                     for(GISet::iterator dvi = gposv.begin(); dvi != gposv.end(); ++dvi){
+                         Cell * dvc = GetCell((*dvi).first,false);
+                         assert(dvc);
+                         dvc->ecd->deleted_vertex.SetAsVectorOfMarked();
+                         dvc->ecd->deleted_vertex.SetMarked((*dvi).second,true);
+                         toCleanUpCells.push_back(dvc);
+                     }
+                 }
+        }
+     }
+       vcg::Box3<ScalarType> facebox;
 	/* Here the main cycle. for each face of the mesh put it in the hashed multigrid */
 	for(fi = m.face.begin(); fi != m.face.end(); ++fi) 
 		if( lockedF[*fi]==0)						// skip if not editable
 	{
 		CellKey ck;
-		vcg::Box3<ScalarType> facebox;
-
-		GIndex     gposf = gPosF[*fi];
+                GIndex     gposf = gPosF[*fi]; // note: gPosF[] will not be updated because it is won't be used again
+                                               // before it is destroyed
 
 		if( ((&(*fi) - &(*m.face.begin()))%1000) == 0){
 			sprintf(lgn->Buf(),"committed %d faces  \r",&(*fi) - &(*m.face.begin()));
 			lgn->Push();
 		}
 
-		if(!(*fi).IsD()){							// phase 1-2 only for non deleted faces
-			// 1: find in which level the face should be
-			h = ComputeLevel<MeshType>(*fi,srM);
 
-                        if( sr.Include(h) && !gposf.IsUnassigned()) 		// if	"the level the face should be put" is within the range of the mesh
-				h = gposf.ck.h;					// then let it be in the same level it was at extraction time
-				
-			// 2. find the proper cell in the level h 
-			/* very first choice, pick the cell that contains the  min corner of the bounding box */
-			for(int i = 0; i < 3 ; ++i) facebox.Add((*fi).V(i)->P()); 
-			 
-                        ck = ComputeCellKey(facebox.min,h);
-                        //ck = gposf.ck; // debugging: let's see if it is only when the face migrates
+                if((*fi).IsD()){                // face is deleted
+                    if(!gposf.IsUnassigned()){  // it is in the database
+                                                // remove it from the db
+                        Cell * c = GetCell(gposf.ck,false);
+                        assert(c);
+                        c->ecd->deleted_face.SetAsVectorOfMarked();
+                        c->ecd->deleted_face.SetMarked(gposf.i,true);
+                        toCleanUpCells.push_back(c);
+                     }
+                    // it was not in the database. It has been added and remove during editing...forget it
+                    continue;
+                }
 
-			if( (!c) || !(c->key == ck))				// check if the current cell is the right one
-				c = GetCell(ck);				// if not update it
+                // compute the cell where to put this face
+                {
+                    // find in which level the face should be
+                    h = ComputeLevel<MeshType>(*fi,srM);
+
+                    if( sr.Include(h) && !gposf.IsUnassigned()) 		// if	"the level the face should be put" is within the range of the mesh
+                            h = gposf.ck.h;					// then let it be in the same level it was at extraction time
+
+                    // 2. find the proper cell in the level h
+                    /* very first choice, pick the cell that contains the  min corner of the bounding box */
+                    for(int i = 0; i < 3 ; ++i) facebox.Add((*fi).V(i)->P());
+
+                    ck = ComputeCellKey(facebox.min,h);
+                    //ck = gposf.ck; // debugging: let's see if it is only when the face migrates
+
+                    if( (!c) || !(c->key == ck))				// check if the current cell is the right one
+                            c = GetCell(ck);				// if not update it
 		}
 
-		// 3: put the face in the cell (just the object OFace, without specifying the references
-		// and update is global index. Consider all the cases (it has been fresh added, it has been deleted, it did not change)
-		 
-		/* The face is going to be added to cell c (key ck)*/
-		if(gposf.IsUnassigned() ){											// this means this face has been added now
-			if(!(*fi).IsD()){												// if it was deleted before committ just skip it
-				gposf.i  = gPosF[*fi].i  = c -> AddFace(OFace());			// add the face to it	 and
-				gposf.ck = gPosF[*fi].ck = ck;						// update the GIndex stored in gPosV
-			}else
-				continue;								// it was added and deleted before the commit, just skip it
-		}else{											// The face was already in the database			
-			if( (*fi).IsD() ){
-				Cell * oldfCellF = GetCell(gposf.ck,false);				// get the cell where the face was
-				RAssert(oldfCellF != NULL);						// it has to exists	
-				RAssert(oldfCellF->face->Size() > gposf.i);
-				oldfCellF->ecd->deleted_face.SetAsVectorOfMarked();
-				oldfCellF->ecd->deleted_face.SetMarked(gposf.i,true);                   // mark as deleted
-				/* insert the cell among whose have to be cleaned after the commit		*/
-				toCleanUpCells.push_back(oldfCellF);
-				continue;
-			}else
-				if( !(ck == gposf.ck) )	{	
-					RAssert(c->key==ck);
-					toCleanUpCells.push_back(GetCell(gposf.ck,false));		// put gposf.ck in the set of cells that contain removed elements
-					MoveFace(gposf,ck);
-					gPosF[*fi] = gposf;
-				}
-		}
 
+
+                if(gposf.IsUnassigned() ){ // it is a brand new face											// this means this face has been added now
+                                gposf.i  =  c -> AddFace(OFace());			// add the face to it	 and
+                                gposf.ck =  ck;						// update the GIndex stored in gPosV
+                        }else
+                        if( !(ck == gposf.ck) )	{
+                                RAssert(c->key==ck);
+                                toCleanUpCells.push_back(GetCell(gposf.ck,false));		// put gposf.ck in the set of cells that contain removed elements
+                                MoveFace(gposf,ck); // note: this function updates gposf
+                            }
 
 		/* Set the references to the vertices
 		*/
-
-		// 4.  Set the face-to-vertex references 
                 int vIndex[3];
                 for(int i = 0; i < 3 ; ++i){
-			GIndex vp  = gPosV[(*fi).V(i)];         // put in vp the GIndex of the vertex i 	
-			
-			if(vp.ck  == c->key ){			// the vertex is in the same cell as the face
-				vIndex[i] = vp.i;		// just assign the order
-			}else{
-				/*
-					the vertex is not in the same cell as the face but in another cell: vp.ck. 
-				*/
-				int ext_pos = c->GetExternalReference(vp,false);			// check if the cell already contains an external reference to the vertex
-				if(ext_pos == -1){							// no:
- 					ext_pos = c->GetExternalReference(vp,true);			//  create a new external reference
-					OVertex ov;
-					ov.SetIndexToExternal( ext_pos ) ;				//  set the reference to the externals	
+                        vIndex[i] = gPosV[(*fi).V(i)].Index(ck);
+                        assert(c->key == ck);
+                        assert(vIndex[i] < (int) c->vert->Size());
+                        // get the index of the vertx in this cell (or -1)
+                        if(vIndex[i]==-1){ // this vertex was not in ck at edit time
+                             vIndex[i] = c-> AddVertex(OVertex(*(*fi).V(i)) );                            // no: add the vertex to it
+                             gPosV[(*fi).V(i)].Add(GIndex(ck,vIndex[i]));                                 // record to index
+                         }
+                         attr_map.ImportVertex(c,*(*fi).V(i),vIndex[i]);                                      // import all the attributes specified
+                         (*c->face)[gposf.i][i] = vIndex[i];
+                         assert(vIndex[i] < (int) c->vert->Size());
+                     }
 
- 					vIndex[i] = c->AddVertex(ov);					//  add the (external) vertex
-                                        ref_2_ext.insert(R2E(GIndex(c->key,ext_pos),GIndex(c->key,vIndex[i])));	//  remember which vertex refers to this new external reference
+                // update the bounding box of the cell c to contain the bbox of the face
+                c->bbox.Add(facebox,sr);
+                }
 
-                                        Cell * extc = GetCell((*c->externalReferences)[ext_pos].ck,false);	//  set the dependency between the cells
-					assert(extc);
-					CreateDependence(c,extc);
- 				}
-				else
-                                {                                                                       // yes:
-                                        r2e_i = ref_2_ext.find(GIndex(c->key,ext_pos));			// find if the vertex referring  to this   external reference has been added in this commit
-                                        if(r2e_i==ref_2_ext.end())					// no, it was already there
-					{
-						if( !c->ecd->computed_vert2externals()){
-							c->ComputeVert2Externals();
-							c->ecd->computed_vert2externals = FBool(&computed_vert2externalsMark);
-                                                        c->ecd->computed_vert2externals = true;
-							toCleanUpCells_vert2externals.push_back(c);
-						}
-							vIndex[i] = c->GetVertexPointingToExternalReference(ext_pos);	// Find which vertex refers to ext_pos
-                                                        assert(vIndex[i]!=-1);
-					}
-					else
-                                                vIndex[i] = (*r2e_i).second.i;				// yes: assign it
-				}
-			}
-			RAssert(vIndex[i]<c->vert->Size());
-
-
-			(*c->face)[gposf.i].v[i] = vIndex[i];
-		}
-		// update the bounding box of the cell c to contain the bbox of the face	
-		c->bbox.Add(facebox,sr);
-	}
-
-
-	lgn->Append("B5.");
-//	PrintCellsWithMarkedFacesTMP();
-
-	// Phase 5. rebind externals so that the external references do not point to external vertex
-	// (i.e. single step)
-
-	if(!toRebind.empty()){
-		RemoveDuplicates(toRebind);
-		Rebind(toRebind);
-		std::vector<Cell*> internalRebounded;
-		RebindInternal(toRebind, internalRebounded);
-		Rebind(internalRebounded);
-		toCleanUpCells.insert(toCleanUpCells.end(),internalRebounded.begin(), internalRebounded.end());
-	}
-        if(!toCleanUpCells_vert2externals.empty()){
-		RemoveDuplicates(toCleanUpCells_vert2externals);
-		std::vector<Cell*>::iterator ci;
-		for(ci = toCleanUpCells_vert2externals.begin(); ci != toCleanUpCells_vert2externals.end();++ci)
-                        (*ci)->ecd->vert2externals.clear();
-
-	}
+//      lgn->Append(" deleting   vertices moved from cell");
+//      {
+//         unsigned int ii = 0;
+//          for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++ii)
+//                 if(lockedV[*vi]==0)													//   skip if the vertex is not editable
+//         {
+//                  GISet   gposv = gPosV[*vi];
+//                  GISet   gposv_old = gPosVOld[*vi];
+//                  gposv_old.sub(gposv);
+//                  for(GISet::iterator dvi = gposv_old.begin(); dvi != gposv_old.end(); ++dvi){
+//                      Cell * dvc = GetCell((*dvi).first,false);
+//                      assert(dvc);
+//                      dvc->ecd->deleted_vertex.SetAsVectorOfMarked();
+//                      dvc->ecd->deleted_vertex.SetMarked((*dvi).second,true);
+//                      toCleanUpCells.push_back(dvc);
+//                  }
+//         }
+//      }
 
         if(!toCleanUpCells.empty()){
                 RemoveDuplicates(toCleanUpCells);
                 RemoveDeletedFaces(toCleanUpCells);
                 RemoveDeletedVertices(toCleanUpCells);
-
-#ifdef _DEBUG
-                std::vector<Cell*>::iterator ci;
-for(ci  = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci)
-this->CheckExternalRefAreExternal(*ci);
-#endif
-
         }
+
+        for(std::vector<Cell*>::iterator ci = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci)
+                if( !CheckFaceVertexAdj(*ci))
+                        CheckFaceVertexAdj(*ci);
+
 #ifdef _DEBUG
 	// DEBUG - check
-	for(std::vector<Cell*>::iterator ci = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci)
-		if( !CheckFaceVertexAdj(*ci))
-			CheckFaceVertexAdj(*ci);
 
 	for(std::vector<Cell*>::iterator ci = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci)
 		RAssert((*ci)->ecd->deleted_face.Empty());

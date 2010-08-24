@@ -288,10 +288,6 @@ void OCME::Render(){
 		 cells_to_render[i]->impostor->Render(this->renderParams.render_subcells);
 	 }
 }
-	else
-	{
-			qDebug(".");
-	}
 	 renderCache.controller.updatePriorities();
 
 	 render_mutex.unlock();

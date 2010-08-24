@@ -170,25 +170,7 @@ char * Cell::DeSerialize (char * buffer ){
 
 bool Cell::IsEmpty(){ 
 	for(std::map<std::string, ChainBase *  >::iterator mi =  this->elements.begin(); mi != this->elements.end();++mi)
-//		if( (*mi).second!=vert)								// vertices will be considered apart
-//			if( (*mi).second!= externalReferences)			//  
 				if( (*mi).second->Size() > 0) return false;
-
-	/* If the cells contains only external vertices and no faces it is empty 
-		This is correct only if the external references point always directly to 
-		the actual instance of the vertices (i.e. not to another external reference).
-		This is guaranteed at the end of Commit but not in general, so handle with care.
-		TODO: This may need a second thought 
-	
-	if(this->vert)
-		if(this->vert->Size()>0){
-			for(unsigned int vi =0; vi < this->vert->Size(); ++vi)
-				if( !(* (this->vert))[vi].isExternal)
-					return false;	// there is a vertex which, although is not referred by any face, it is not an
-									// external reference and so the cell is not empty
-		}
-	*/	  
-
 	return true;
 }
 
@@ -209,35 +191,4 @@ unsigned int Cell::AddVertex(OVertex  v){
 
 	return vert->AddElem(v);
 
-}
-unsigned int Cell::AddExternalVertex(unsigned int pos){ unsigned int id =vert->AddElem(); (*vert)[ id ].SetIndexToExternal(pos);return id;}
-int Cell::AddExternalReference(const GIndex & gi){return  externalReferences->AddElem(gi);};
-
-int Cell::GetExternalReference(const GIndex & gi, bool ifnot_create){
-	
-	// brute force linear search (/* TODO it n log(n) */ 
-	for(unsigned int i = 0 ;  i < (*externalReferences).Size(); ++i){
-		if(  (*externalReferences)[i] == gi)
-			return i;
-	}
-
-	if(ifnot_create){
-		(*externalReferences).AddElem(gi);
-		return (int)(*externalReferences).Size()-1;
-	}
-
-	return -1;
-}
-
-void Cell::ComputeVert2Externals(){
-	Chain<OVertex> * vert = this->vert;
-	for(unsigned int vi = 0;vi < vert->Size(); ++vi)
-		if((*vert)[vi].isExternal)
-                        ecd->vert2externals.insert(std::pair<unsigned int , unsigned int>((*vert)[vi].GetIndexToExternal(),vi));
-}
-
-int Cell::GetVertexPointingToExternalReference(const unsigned int    ei){
-        std::map<unsigned int,unsigned int>::iterator res = ecd->vert2externals.find(ei);
-        if(res == ecd->vert2externals.end()) return -1;
-	return (*res).second;
 }
