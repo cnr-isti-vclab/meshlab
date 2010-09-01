@@ -23,7 +23,6 @@
 
 #include "samplefilter.h"
 #include <QtScript>
-#include "..\..\common\scriptinterface.h"
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions

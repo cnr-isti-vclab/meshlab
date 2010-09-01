@@ -323,8 +323,8 @@ public:
 	const QString &errorMsg() {return this->errorMessage;}
 	virtual QString filterInfo(QAction *a) const {return this->filterInfo(ID(a));};
 	virtual QString filterName(QAction *a) const {return this->filterName(ID(a));};
-	virtual QString filterName(FilterIDType filterID) const =0;// const {return MeshLabInterface::filterName(filterID);};
-	virtual QString filterScriptFunctionName(FilterIDType filterID) {return "";}
+  virtual QString filterName(FilterIDType /*filterID*/) const =0;// const {return MeshLabInterface::filterName(filterID);};
+  virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) {return "";}
 
 
 

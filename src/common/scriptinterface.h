@@ -23,7 +23,7 @@
 
 #ifndef SCRIPTINTERFACE_H
 #define SCRIPTINTERFACE_H
-#include <QtScript\QtScript>
+#include <QtScript>
 #include "filterparameter.h"
 
 class ScriptAdapterGenerator

@@ -83,13 +83,11 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 		MeshDocument md;
 		MeshModel mm(&md);	
 		vcg::tri::Tetrahedron<CMeshO>(mm.cm);
-
+    mm.updateDataMask(MeshModel::MM_ALL);
 		QString code = "";
 		code += "Plugins = { };\n";
 
-		foreach(MeshFilterInterface* mi,this->meshFilterPlug)
-
-		foreach(MeshFilterInterface* mi,this->meshFilterPlug)
+    foreach(MeshFilterInterface* mi,this->meshFilterPlug)
 		{
 			QString pname = mi->pluginName();
 			code += "Plugins." + pname + " = { };\n";
