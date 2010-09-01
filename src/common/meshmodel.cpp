@@ -92,6 +92,28 @@ void MeshDocument::setCurrentMesh(unsigned int i)
   return;
 }
 
+//if i is <0 it means that no currentRaster is set
+void MeshDocument::setCurrentRaster(unsigned int i)
+{
+  if(i<0)
+  {
+	  currentRaster=0;
+	  return;
+  }
+
+  foreach(RasterModel *rmp, rasterList)
+  {
+    if(rmp->id() == i)
+    {
+      currentRaster = rmp;
+      return;
+    }
+  }
+  assert(0);
+  return;
+}
+
+
 MeshModel * MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bool setAsCurrent)
 {
 	QFileInfo info(meshName);
@@ -121,7 +143,7 @@ MeshModel * MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, b
 
 	meshList.push_back(newMesh);
 
-	emit layerSetChanged();
+	emit meshSetChanged();
 
   if(setAsCurrent)
     this->setCurrentMesh(newMesh->id());
@@ -155,7 +177,7 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 		}
 	}
 
-	emit layerSetChanged();
+	emit meshSetChanged();
 
 	return true;
 }
@@ -189,19 +211,19 @@ RasterModel * MeshDocument::addNewRaster(const char *rasterName, RasterModel *ne
 
 	rasterList.push_back(newRaster);
 
-	emit layerSetChanged();
+	emit rasterSetChanged();
 
-	//c'è il concetto di currentRaster?
-	/*if(setAsCurrent)
-		this->setCurrentMesh(newMesh->id());*/
+	//Add new plane
+	Plane *plane = new Plane(newRaster, rasterName, QString());
+	newRaster->addPlane(plane);
+
+	this->setCurrentRaster(newRaster->id());
 
 	return newRaster;
 }
 
 bool MeshDocument::delRaster(RasterModel *rasterToDel)
 {
-	if(rasterList.size()==1) return false;
-
 	QMutableListIterator<RasterModel *> i(rasterList);
 
 	while (i.hasNext())
@@ -215,18 +237,10 @@ bool MeshDocument::delRaster(RasterModel *rasterToDel)
 		}
 	}
 
-	//c'è il concetto di currentRaster?
-	/*if(currentMesh == mmToDel)
-	{
-		if (!meshList.isEmpty())
-			setCurrentMesh(this->meshList.at(0)->id());
-		else
-		{
-			this->Log.Logf(GLLogStream::SYSTEM,"Empty MeshDocument: should never happened!");
-		}
-	}*/
+	if(currentRaster == rasterToDel)
+		setCurrentRaster(-1);
 
-	emit layerSetChanged();
+	emit rasterSetChanged();
 
 	return true;
 }
@@ -366,7 +380,7 @@ int MeshModel::io2mm(int single_iobit)
 	} ;
 }
 
-Raster::Raster(RasterModel *_parent, const QString pathName, const QString _semantic){
+Plane::Plane(RasterModel *_parent, const QString pathName, const QString _semantic){
 	parent = _parent;
 	semantic =_semantic;
 	fullPathFileName = pathName;
@@ -377,6 +391,18 @@ Raster::Raster(RasterModel *_parent, const QString pathName, const QString _sema
 RasterModel::RasterModel(MeshDocument *parent, const char *_rasterName) {
   _id=parent->newRasterId(); 
 	rasterName= _rasterName;
+	visible=false;
+}
+
+void RasterModel::setShot(Shot &shot)
+{
+	viewSpec = shot;
+}
+
+void RasterModel::addPlane(Plane *plane)
+{
+	planeList.append(plane);
+	currentPlane = plane;
 }
 
 void MeshModelState::create(int _mask, MeshModel* _m)

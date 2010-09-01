@@ -261,12 +261,12 @@ public:
 };// end class MeshModel
 
 /*
-Raster Class
+Plane Class
 the base class for a registered image that contains the path, the semantic and the data of the image
 */
 class RasterModel;
 
-class Raster
+class Plane
 {
 public:
 	RasterModel *parent;
@@ -274,8 +274,8 @@ public:
 	QString fullPathFileName;
 	QImage image;
 
-	Raster(RasterModel *parent, const QString pathName, const QString _semantic);
-}; //end class Raster
+	Plane(RasterModel *parent, const QString pathName, const QString _semantic);
+}; //end class Plane
 
 /*
 RasterModel Class
@@ -291,19 +291,24 @@ class RasterModel
 public:
 	Shot viewSpec;
 	QString rasterName;
+	bool visible; // used in rendering; Needed for switching from mesh view mode to raster view mode and vice versa.
 
 	///The list of the registered images
-	QList<Raster *> rasterList;
+	QList<Plane *> planeList;
+	Plane *currentPlane;
 
 private:
 	int _id;
 
 public:
 	inline int id() const {return _id;}
-	void setRasterName(QString newFileName) {rasterName = newFileName;}
-	const QString getName() const {return rasterName;};
-
+	
 	RasterModel(MeshDocument *parent, const char *_rasterName=0);
+
+	void setRasterName(QString newFileName) {rasterName = newFileName;};
+	void setShot(Shot &shot);
+	const QString getName() const {return rasterName;}
+	void addPlane(Plane * plane);
 
 
 };// end class RasterModel
@@ -379,6 +384,7 @@ public:
     meshIdCounter=0;
 	rasterIdCounter=0;
 	currentMesh = NULL;
+	currentRaster = 0;
     busy=true;
 	}
 
@@ -389,11 +395,19 @@ public:
   MeshModel *getMesh(int i);
 	MeshModel *getMesh(const char *name);
 
-	//set the current mesh to be the one at index i
+	//set the current mesh to be the one at index i of the mesh list
 	void setCurrentMesh(unsigned int i);
+
+	//set the current raster to be the one at index i of the raster list
+	void setCurrentRaster(unsigned int i);
 
 	MeshModel *mm() {
 		return currentMesh;
+	}
+
+	//Could return 0 if no raster has been selected
+	RasterModel *rm(){
+		return currentRaster;
 	}
 
 	/// The very important member:
@@ -465,13 +479,18 @@ public:
 
 	private:
 		MeshModel *currentMesh;
+		//the current raster model 
+		RasterModel* currentRaster;
 
 	signals:
     ///when ever the current mesh changed this will send out the index of the newest mesh
 		void currentMeshChanged(int index);
 
-    ///when ever the meshList is changed
-		void layerSetChanged();
+    ///whenever the meshList is changed
+		void meshSetChanged();
+
+	///whenever the rasterList is changed
+		void rasterSetChanged();
 
 };// end class MeshDocument
 
