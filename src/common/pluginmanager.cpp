@@ -1,5 +1,7 @@
 #include "pluginmanager.h"
 #include <QtScript/QtScript>
+#include <vcg/complex/trimesh/create/platonic.h>
+#include "scriptinterface.h"
 
 PluginManager::PluginManager()
 {
@@ -42,8 +44,6 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 					actionFilterMap.insert(filterAction->text(),filterAction);
           stringFilterMap.insert(filterAction->text(),iFilter);
 					iFilter->initGlobalParameterSet(filterAction,defaultGlobal);
-					if (eng != NULL)
-						iFilter->registerScriptProxyFunctions(eng);
 				}
 			}
 
@@ -74,6 +74,46 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 					editActionList.push_back(editAction);
 			}
 		}
+	}
+
+	/*******************************************/
+
+	if (eng != 0)
+	{
+		MeshDocument md;
+		MeshModel mm(&md);	
+		vcg::tri::Tetrahedron<CMeshO>(mm.cm);
+
+		QString code = "";
+		code += "Plugins = { };\n";
+
+		foreach(MeshFilterInterface* mi,this->meshFilterPlug)
+
+		foreach(MeshFilterInterface* mi,this->meshFilterPlug)
+		{
+			QString pname = mi->pluginName();
+			code += "Plugins." + pname + " = { };\n";
+			foreach(MeshFilterInterface::FilterIDType tt,mi->types())
+			{
+				QString filterName = mi->filterName(tt);
+				QString filterFunction = mi->filterScriptFunctionName(tt);
+				ScriptAdapterGenerator gen;
+				QAction act(filterName,NULL);
+				RichParameterSet rp;
+				mi->initParameterSet(&act,mm,rp);
+				QString gencode = gen.funCodeGenerator(filterName,rp);
+				code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
+			}
+		}
+
+		QScriptValue initFun  = eng->newFunction(PluginInterfaceInit,  this);
+		eng->globalObject().setProperty("_initParameterSet", initFun);
+
+		QScriptValue applyFun = eng->newFunction(PluginInterfaceApply, this);
+		eng->globalObject().setProperty("_applyFilter", applyFun);
+
+		eng->evaluate(code);
+		qDebug(qPrintable(code));
 	}
 }
 
