@@ -1145,7 +1145,8 @@ void GLArea::loadRaster(int id)
 
 			//TODO temporaneo... poi bisogna creare un defaultShot
 			createOrthoView("Front");
-			rm->setShot(shotFromTrackball().first);
+			Shot* tmpShot = &(shotFromTrackball().first);
+			rm->setShot(*tmpShot);
 		}
 }
 
