@@ -8,6 +8,8 @@ SOURCES        = mainserver.cpp
 RC_FILE = ../meshlab/meshlab.rc
 
 QT           += xml opengl
+QT += script
+
 DESTDIR = ../distrib
 macx:DESTDIR = ../distrib/meshlab.app/Contents/MacOS/
 macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlabserver"
