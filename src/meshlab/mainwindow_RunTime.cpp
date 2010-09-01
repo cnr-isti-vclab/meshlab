@@ -41,6 +41,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/clean.h>
+#include "../common/scriptinterface.h"
 
 using namespace std;
 using namespace vcg;
@@ -590,11 +591,15 @@ void MainWindow::showFilterScript()
 void MainWindow::showScriptEditor()
 {
 	EditorScriptDialog dialog(this);
+
 	if (dialog.exec()==QDialog::Accepted)
 	{
+		registerTypes(&eng);
+		//QScriptValue val = eng.newQObject(meshDoc());
 		QScriptValue val = eng.newQObject(meshDoc());
 		eng.globalObject().setProperty("md",val);
-		QScriptValue result = eng.evaluate(dialog.scriptCode());
+		QString code = dialog.scriptCode();
+		QScriptValue result = eng.evaluate(code);
 		if (result.isError())
 		{
 			meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",result.property("lineNumber").toInt32(),qPrintable(result.toString()));
