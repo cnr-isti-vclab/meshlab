@@ -77,7 +77,7 @@ QList<TagBase *> MeshDocument::getMeshTags(int meshId)
 	return meshTags;
 }
 
-void MeshDocument::setCurrentMesh(unsigned int i)
+void MeshDocument::setCurrentMesh( int i)
 {
   foreach(MeshModel *mmp, meshList)
   {
@@ -93,7 +93,7 @@ void MeshDocument::setCurrentMesh(unsigned int i)
 }
 
 //if i is <0 it means that no currentRaster is set
-void MeshDocument::setCurrentRaster(unsigned int i)
+void MeshDocument::setCurrentRaster( int i)
 {
   if(i<0)
   {

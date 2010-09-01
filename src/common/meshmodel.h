@@ -396,10 +396,10 @@ public:
 	MeshModel *getMesh(const char *name);
 
 	//set the current mesh to be the one at index i of the mesh list
-	void setCurrentMesh(unsigned int i);
+  void setCurrentMesh( int i);
 
 	//set the current raster to be the one at index i of the raster list
-	void setCurrentRaster(unsigned int i);
+  void setCurrentRaster( int i);
 
 	MeshModel *mm() {
 		return currentMesh;
