@@ -51,22 +51,24 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 
 	updateTagAct = new QAction(tr("&Update Tag"),this);
 	tagMenu->addAction(updateTagAct);
-	//connect(updateTagAct, SIGNAL(triggered()), this, SLOT(?????????????));
+	//TODO connect(updateTagAct, SIGNAL(triggered()), this, SLOT(?????????????));
 
 	// The following connection is used to associate the click with the change of the current mesh. 
-	connect(ui->layerTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(toggleStatus(QTreeWidgetItem * , int ) ) );
+	connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(toggleStatus(QTreeWidgetItem * , int ) ) );
 	
-	connect(ui->layerTreeWidget, SIGNAL(itemExpanded(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
-	connect(ui->layerTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
+	connect(ui->meshTreeWidget, SIGNAL(itemExpanded(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
+	connect(ui->meshTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
 
+	// The following connection is used to associate the click with the switch between raster and mesh view. 
+	connect(ui->rasterTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(toggleStatus(QTreeWidgetItem * , int ) ) );
 
 	connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
 	connect(ui->deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );
 
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
-	ui->layerTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	ui->meshTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-	connect(ui->layerTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
+	connect(ui->meshTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(showContextMenu(const QPoint&)));
 	connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
 	//connect(mw,SIGNAL(selectedDecoration(GLArea*,QAction*)),this,SLOT(addParamsToDecorationDialog(GLArea*,QAction*)));
@@ -75,8 +77,9 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
 {
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
-	if(!mItem) return; // user clicked on other info 
-	else{
+	RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(item);
+	if(mItem) 
+	{
     int clickedId= mItem->m->id();
 		switch(col)
 		{
@@ -92,15 +95,14 @@ void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
           foreach(MeshModel *mp, md->meshList)
 				{
 					mp->visible=false;
-          mw->GLA()->updateLayerSetVisibility(mp->id(), mp->visible);
+          mw->GLA()->addMeshSetVisibility(mp->id(), mp->visible);
 				}
 
         if(md->getMesh(clickedId)->visible)  md->getMesh(clickedId)->visible = false;
         else   md->getMesh(clickedId)->visible = true;
 
 				//Update current GLArea visibility 
-				//TODO. Evitare il metodo GLA()
-        mw->GLA()->updateLayerSetVisibility(md->getMesh(clickedId)->id(), md->getMesh(clickedId)->visible);
+        mw->GLA()->addMeshSetVisibility(md->getMesh(clickedId)->id(), md->getMesh(clickedId)->visible);
 			}
 		case 1 :
 
@@ -115,6 +117,40 @@ void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
 		updateTable();
 		mw->GLA()->update();
 	}
+	else if(rItem)
+	{
+		int clickedId= rItem->r->id();
+
+		switch(col)
+		{
+		case 0 :
+			{
+				//the user has clicked on one of the eyes
+				MeshDocument  *md= mw->GLA()->meshDoc;
+
+				//Only one raster could be visible
+				foreach(RasterModel *rm, md->rasterList)
+					if(rm->id()!= clickedId)
+						rm->visible=false;
+
+				if(rItem->r->visible){
+					rItem->r->visible = false;
+					mw->GLA()->setIsRaster(false);
+				}
+				else{
+					rItem->r->visible = true;
+					mw->GLA()->setIsRaster(true);
+					mw->GLA()->loadRaster(clickedId);
+				}
+
+				//Update current GLArea visibility 
+				mw->GLA()->updateRasterSetVisibilities( );
+			}
+		}
+		updateTable();
+		mw->GLA()->update();
+	}
+	else return; // user clicked on other info
 }
 
 void LayerDialog::showEvent ( QShowEvent * /* event*/ )
@@ -137,8 +173,8 @@ void LayerDialog::showLayerMenu()
 void LayerDialog::showContextMenu(const QPoint& pos)
 {
 	// switch layer
-	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(ui->layerTreeWidget->itemAt(pos.x(),pos.y()));
-	QTreeWidgetItem *tItem = dynamic_cast<QTreeWidgetItem *>(ui->layerTreeWidget->itemAt(pos.x(),pos.y()));
+	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
+	QTreeWidgetItem *tItem = dynamic_cast<QTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
 	if(mItem){ 
 		if (mItem->m)
 			mw->GLA()->meshDoc->setCurrentMesh(mItem->m->id());
@@ -147,7 +183,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 			MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
 			if (mainwindow)
 			{
-				mainwindow->layerMenu()->popup(ui->layerTreeWidget->mapToGlobal(pos));
+				mainwindow->layerMenu()->popup(ui->meshTreeWidget->mapToGlobal(pos));
 				return;
 			}
 		}
@@ -204,25 +240,25 @@ void LayerDialog::updateTable()
 	}
 	MeshDocument *md=mw->GLA()->meshDoc;
 
-	ui->layerTreeWidget->clear();
-	ui->layerTreeWidget->setColumnCount(4);
-	ui->layerTreeWidget->setColumnWidth(0,40);
-	ui->layerTreeWidget->setColumnWidth(1,20);
-	ui->layerTreeWidget->setColumnWidth(2,20);
-	ui->layerTreeWidget->header()->hide();
+	ui->meshTreeWidget->clear();
+	ui->meshTreeWidget->setColumnCount(4);
+	ui->meshTreeWidget->setColumnWidth(0,40);
+	ui->meshTreeWidget->setColumnWidth(1,20);
+	ui->meshTreeWidget->setColumnWidth(2,20);
+	ui->meshTreeWidget->header()->hide();
 	foreach(MeshModel* mmd, md->meshList)
 	{
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
-		if( mw->GLA()->visibilityMap.contains(mmd->id()))
-			mmd->visible =mw->GLA()->visibilityMap.value(mmd->id());
+		if( mw->GLA()->meshVisibilityMap.contains(mmd->id()))
+			mmd->visible =mw->GLA()->meshVisibilityMap.value(mmd->id());
 
 		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd);
 		if(mmd== mw->GLA()->mm()) {
 			item->setBackground(3,QBrush(Qt::yellow));
 			item->setForeground(3,QBrush(Qt::blue));
 		}
-		ui->layerTreeWidget->addTopLevelItem(item);
+		ui->meshTreeWidget->addTopLevelItem(item);
 
 		item->setExpanded(expandedMap.value(qMakePair(mmd->id(),-1)));
 
@@ -235,15 +271,48 @@ void LayerDialog::updateTable()
 			addTreeWidgetItem(item, tag, *md, mmd);
 	}
 
-	for(int i=3; i< ui->layerTreeWidget->columnCount(); i++)
-		ui->layerTreeWidget->resizeColumnToContents(i);
+	for(int i=3; i< ui->meshTreeWidget->columnCount(); i++)
+		ui->meshTreeWidget->resizeColumnToContents(i);
+
+	//RasterTreewWidget
+	ui->rasterTreeWidget->clear();
+	ui->rasterTreeWidget->setColumnCount(4);
+	ui->rasterTreeWidget->setColumnWidth(0,40);
+	ui->rasterTreeWidget->setColumnWidth(1,20);
+	//TODO The fourth column is fake... solo per ora, è per evitare che l'ultimacolonna si allunghi indefinitivamente
+	//mettere una lunghezza fissa è inutile perchè non so quanto è lungo il nome.
+	ui->rasterTreeWidget->header()->hide();
+	foreach(RasterModel* rmd, md->rasterList)
+	{
+		//Restore raster visibility according to the current visibility map
+		//very good to keep viewer state consistent
+		if( mw->GLA()->rasterVisibilityMap.contains(rmd->id()))	
+			rmd->visible =mw->GLA()->rasterVisibilityMap.value(rmd->id());
+
+		RasterTreeWidgetItem *item = new RasterTreeWidgetItem(rmd);
+		if(rmd== mw->GLA()->meshDoc->rm()) {
+			item->setBackground(2,QBrush(Qt::yellow));
+			item->setForeground(2,QBrush(Qt::blue));
+		}
+		ui->rasterTreeWidget->addTopLevelItem(item);
+
+		//TODO scommenta quando inserisci tutta la lista dei planes
+		//item->setExpanded(expandedMap.value(qMakePair(mmd->id(),-1)));
+	}
+
+	for(int i=2; i< ui->rasterTreeWidget->columnCount(); i++)
+		ui->rasterTreeWidget->resizeColumnToContents(i);
+
+
 }
 
+//Reconstruct the correct layout of the treewidget after updating the main table. It is necessary to keep the changing 
+// (ex. the expansions of the treeWidgetItem) the user does.
 void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 {
 	item->setExpanded(item->isExpanded());
-	for(int i=3; i< ui->layerTreeWidget->columnCount(); i++)
-		ui->layerTreeWidget->resizeColumnToContents(i);
+	for(int i=3; i< ui->meshTreeWidget->columnCount(); i++)
+		ui->meshTreeWidget->resizeColumnToContents(i);
 
 	//Update expandedMap
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
@@ -255,7 +324,7 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 			//MeshTreeWidgetItems don't have a tag id, so we use -1
 			updateExpandedMap(meshId, -1, item->isExpanded());
 	}
-	else {
+	else { //Other TreeWidgetItems
 		MeshTreeWidgetItem *parent = dynamic_cast<MeshTreeWidgetItem *>(item->parent());
 		if(parent){
 			int meshId = parent->m->id();
@@ -283,13 +352,13 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *mes
 	updateColumnNumber(vertices);
 }
 
+//Add a new item (not a MeshTreeWidgetItem but a tag item) to the treeWidget
 void LayerDialog::addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag, MeshDocument &md, MeshModel *mm)
 {
 	QMap<QString,MeshFilterInterface *>::const_iterator msi;
 	for(msi =  mw->pluginManager().stringFilterMap.begin(); msi != mw->pluginManager().stringFilterMap.end();++msi)
 	{
 		MeshFilterInterface * iFilter= msi.value();
-		QString prova = msi.key();
 		if(msi.key() == tag->filterOwner)
 		{
 			QTreeWidgetItem *item = iFilter->tagDump(tag,md,mm);
@@ -305,9 +374,9 @@ void LayerDialog::addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag, MeshD
 void LayerDialog::updateColumnNumber(const QTreeWidgetItem * item)
 {
 	int columnChild= item->columnCount();
-	int columnParent = ui->layerTreeWidget->columnCount();
+	int columnParent = ui->meshTreeWidget->columnCount();
 	if(columnChild - columnParent>0)
-		ui->layerTreeWidget->setColumnCount(columnParent + (columnChild-columnParent));
+		ui->meshTreeWidget->setColumnCount(columnParent + (columnChild-columnParent));
 }
 
 void LayerDialog::updateExpandedMap(int meshId, int tagId, bool expanded)
@@ -388,6 +457,19 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 	setText(3, meshName);	
 
 	m=meshModel;
+}
+
+RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)
+{
+	if(rasterModel->visible)  setIcon(0,QIcon(":/images/layer_eye_open.png"));
+	else setIcon(0,QIcon(":/images/layer_eye_close.png"));
+
+	setText(1, QString::number(rasterModel->id()));
+
+	QString rasterName = rasterModel->getName();
+	setText(2, rasterName);	
+
+	r=rasterModel;
 }
 
 DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent)

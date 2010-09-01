@@ -83,7 +83,7 @@ public:
   // Layer Management stuff. 
 	
 	MeshModel *mm(){return meshDoc->mm();}
- 
+	
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
 	GLLogStream *log;
@@ -292,13 +292,20 @@ public:
   SnapshotSetting ss;
 
    // Store for each mesh if it is visible for the current viewer.
-   QMap<int, bool> visibilityMap;
+   QMap<int, bool> meshVisibilityMap;
 
- // Update viewer visibility map
-	void updateLayerSetVisibility(int meshId, bool visibility);
+	 // Store for each raster if it is visible for the current viewer.
+   QMap<int, bool> rasterVisibilityMap;
+
+ // Add an entry in the mesh visibility map
+	void addMeshSetVisibility(int meshId, bool visibility);
+
+// Add an entry in the raster visibility map
+	void addRasterSetVisibility(int rasterId, bool visibility);
 
 public slots:
-	void updateLayerSetVisibilities();
+	void updateMeshSetVisibilities();
+	void updateRasterSetVisibilities();
 
 private:
 	float cfps;
@@ -311,6 +318,26 @@ private:
 	AnimMode animMode; 
 	int tileCol, tileRow, totalCols, totalRows;
 	void setCursorTrack(vcg::TrackMode *tm);
+
+	//-----------Raster support----------------------------
+private:
+	bool _isRaster; // true if the viewer is a RasterViewer, false if is a MeshViewer; default value is false.
+
+	int zoomx, zoomy;
+	bool zoom;
+	double opacity;
+	GLuint targetTex;           // here we store the reference image. The raster image is rendered as a texture
+
+public:
+	bool isRaster() {return _isRaster;}
+	void setIsRaster(bool viewMode);
+	void loadRaster(int id);
+
+	void setOpacity(int o) { opacity = o/100.0; updateGL(); } //between 0 and 100
+	void setTarget(QImage &image);
+
+private:
+	void drawTarget();
 
 	//-----------Shot support----------------------------
 public:

@@ -66,12 +66,20 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	farPlane = 5.f;
 	pointSize = 2.0f;
 	
-	updateLayerSetVisibilities();
+	updateMeshSetVisibilities();
+	updateRasterSetVisibilities();
   setAutoFillBackground(false);
+
+	//Ratser support
+	_isRaster =false;
+	opacity = 0.5;
+	zoom = false;
+	targetTex = 0;
 
   connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
   connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateDecoration(int)));
-  connect(meshDoc, SIGNAL(layerSetChanged()), this, SLOT(updateLayerSetVisibilities()));
+  connect(meshDoc, SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
+  connect(meshDoc, SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -92,6 +100,7 @@ GLArea::~GLArea()
 	// warn any iRender plugin that we're deleting glarea
 	if (iRenderer)
 		iRenderer->Finalize(currentShader, *meshDoc, this);
+	if(targetTex) glDeleteTextures(1, &targetTex);
 }
 
 
@@ -264,6 +273,10 @@ void GLArea::paintEvent(QPaintEvent *event)
 
   drawLight();
 
+//If it is a raster viewer draw the image as a texture
+	if(isRaster())
+		drawTarget();
+
 	glPushMatrix();
 
 	// Finally apply the Trackball for the model
@@ -297,7 +310,7 @@ void GLArea::paintEvent(QPaintEvent *event)
 			foreach(MeshModel * mp, meshDoc->meshList)
 				{
 					//Mesh visibility is read from the viewer visibility map, not from the mesh 
-          if(visibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+          if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
 		}
 		if(iEdit) iEdit->Decorate(*mm(),this);
@@ -602,66 +615,78 @@ void GLArea::closeEvent(QCloseEvent *event)
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
-	e->ignore();
-	if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
-	else{
-      if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-      if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-      if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+	if(!isRaster())
+	{
+		e->ignore();
+		if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
+		else{
+			if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+			if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+			if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+		}
   }
 }
 
 void GLArea::keyPressEvent ( QKeyEvent * e )
 {
-	e->ignore();
-	if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
-	else{
-      if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-      if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-      if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-  }
+	if(!isRaster())
+	{
+		e->ignore();
+		if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
+		else{
+			if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+			if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+			if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+		}
+	}
 }
 
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
-  e->accept();
+	e->accept();
 	setFocus();
+	
+	if(!isRaster())
+	{
+		if( (iEdit && !suspendedEditor) )
+			iEdit->mousePressEvent(e,*mm(),this);
+		else {
+			if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) &&
+				(e->button()==Qt::LeftButton) )
+				activeDefaultTrackball=false;
+			else activeDefaultTrackball=true;
 
-  if( (iEdit && !suspendedEditor) )
-		  iEdit->mousePressEvent(e,*mm(),this);
-  else {
-	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) &&
-          (e->button()==Qt::LeftButton) )
-            activeDefaultTrackball=false;
-	      else activeDefaultTrackball=true;
-
-	    if (isDefaultTrackBall())
+			if (isDefaultTrackBall())
 			{
-					if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-																															else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-					if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-																														else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-					if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-																													else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+				if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+				if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+				if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
 
-          trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+				trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 			}
-	    else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
-  }
+			else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
+		}
+	}
 	update();
 }
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 {
-	if( (iEdit && !suspendedEditor) )
-		iEdit->mouseMoveEvent(e,*mm(),this);
-	else {
-		if (isDefaultTrackBall())
-		{
-			trackball.MouseMove(e->x(),height()-e->y());
-			setCursorTrack(trackball.current_mode);
+	if(!isRaster())
+	{
+		if( (iEdit && !suspendedEditor) )
+			iEdit->mouseMoveEvent(e,*mm(),this);
+		else {
+			if (isDefaultTrackBall())
+			{
+				trackball.MouseMove(e->x(),height()-e->y());
+				setCursorTrack(trackball.current_mode);
+			}
+			else trackball_light.MouseMove(e->x(),height()-e->y());
 		}
-		else trackball_light.MouseMove(e->x(),height()-e->y());
 		update();
 	}
 
@@ -693,30 +718,36 @@ void GLArea::tabletEvent(QTabletEvent*e)
 void GLArea::wheelEvent(QWheelEvent*e)
 {
 	setFocus();
-	const int WHEEL_STEP = 120;
-	float notch = e->delta()/ float(WHEEL_STEP);
-  switch(e->modifiers())
-  {
-    case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50.0f); break;
-    case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
-    case Qt::AltModifier													: pointSize = math::Clamp(pointSize*powf(1.2f, notch),0.01f,150.0f);
+	if(!isRaster())
+	{
+		const int WHEEL_STEP = 120;
+		float notch = e->delta()/ float(WHEEL_STEP);
+		switch(e->modifiers())
+		{
+		case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50.0f); break;
+		case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
+		case Qt::AltModifier													: pointSize = math::Clamp(pointSize*powf(1.2f, notch),0.01f,150.0f);
 			foreach(MeshModel * mp, meshDoc->meshList)
 				mp->glw.SetHintParamf(GLW::HNPPointSize,pointSize);
 			break;
-    case Qt::ShiftModifier												: fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
-    default:
-      trackball.MouseWheel( e->delta()/ float(WHEEL_STEP));
-      break;
+		case Qt::ShiftModifier												: fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
+		default:
+			trackball.MouseWheel( e->delta()/ float(WHEEL_STEP));
+			break;
+		}
 	}
-  update();
+	update();
 }
 
 
 void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
 {
-  hasToPick=true;
-  pointToPick=Point2i(e->x(),height()-e->y());
-  update();
+  	if(!isRaster())
+	{
+		hasToPick=true;
+		pointToPick=Point2i(e->x(),height()-e->y());
+	}
+	update();
 }
 
 void GLArea::focusInEvent ( QFocusEvent * e )
@@ -1034,10 +1065,11 @@ void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
 }
 
 //Don't alter the state of the other elements in the visibility map
-void GLArea::updateLayerSetVisibilities()
+void GLArea::updateMeshSetVisibilities()
 {
-	//Align visibilityMap state with meshList state
-	QMapIterator<int, bool> i(visibilityMap);
+	//Align meshVisibilityMap state with meshList state
+	//Deleting from the map the visibility of the deleted meshes 
+	QMapIterator<int, bool> i(meshVisibilityMap);
 	while (i.hasNext()) {
 		i.next();
 		bool found =false;
@@ -1050,20 +1082,136 @@ void GLArea::updateLayerSetVisibilities()
 			}
 		}
 		if(!found)
-			visibilityMap.remove(i.key());
+			meshVisibilityMap.remove(i.key());
 	}
 
 	foreach(MeshModel * mp, meshDoc->meshList)
 	{
-		//Insert the new pair in the map; 
-    if(!visibilityMap.contains(mp->id()))
-      visibilityMap.insert(mp->id(),mp->visible);
+		//Insert the new pair in the map; If the key is already in the map, its value will be overwritten
+      meshVisibilityMap.insert(mp->id(),mp->visible);
 	}
 }
 
-void GLArea::updateLayerSetVisibility(int meshId, bool visibility)
+//Don't alter the state of the other elements in the visibility map
+void GLArea::updateRasterSetVisibilities()
 {
-	visibilityMap.insert(meshId,visibility);
+	//Align rasterVisibilityMap state with rasterList state
+	//Deleting from the map the visibility of the deleted rasters 
+	QMapIterator<int, bool> i(rasterVisibilityMap);
+	while (i.hasNext()) {
+		i.next();
+		bool found =false;
+		foreach(RasterModel * rp, meshDoc->rasterList)
+		{
+      if(rp->id() == i.key())
+			{
+				found = true;
+				break;
+			}
+		}
+		if(!found)
+			rasterVisibilityMap.remove(i.key());
+	}
+
+	foreach(RasterModel * rp, meshDoc->rasterList)
+	{
+		//Insert the new pair in the map;If the key is already in the map, its value will be overwritten
+      rasterVisibilityMap.insert(rp->id(),rp->visible);
+	}
+}
+
+void GLArea::addMeshSetVisibility(int meshId, bool visibility)
+{
+	meshVisibilityMap.insert(meshId,visibility);
+}
+
+void GLArea::addRasterSetVisibility(int rasterId, bool visibility)
+{
+	rasterVisibilityMap.insert(rasterId,visibility);
+}
+
+// --------------- Raster view -------------------------------------
+void GLArea::setIsRaster(bool viewMode){
+	_isRaster= viewMode;
+}
+
+void GLArea::loadRaster(int id)
+{ 
+	foreach(RasterModel *rm, meshDoc->rasterList)
+		if(rm->id()==id){
+			meshDoc->setCurrentRaster(id);
+			setTarget(rm->currentPlane->image);
+			//load his shot or a default shot
+
+			//TODO temporaneo... poi bisogna creare un defaultShot
+			createOrthoView("Front");
+			rm->setShot(shotFromTrackball().first);
+		}
+}
+
+void GLArea::drawTarget() {
+  if(!targetTex) return;
+
+  double ratio = 1.0f;
+  //ratio = align.imageRatio;	quale ratio?
+
+//set orthogonal view
+  glPushMatrix();
+  glLoadIdentity();
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  gluOrtho2D(-1.0f*ratio, 1.0f*ratio, -1, 1);
+
+  glColor4f(1, 1, 1, opacity);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, targetTex);
+
+  glColor3f(1.0f, 1.0f, 1.0f);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0f, 0.0f);	//first point
+  glVertex3f(-1.0f*ratio, -1.0f, 0.0f);
+  glTexCoord2f(1.0f, 0.0f);	//second point
+  glVertex3f(1.0f*ratio, -1.0f, 0.0f);
+  glTexCoord2f(1.0f, 1.0f);	//third point
+  glVertex3f(1.0f*ratio, 1.0f, 0.0f);
+  glTexCoord2f(0.0f, 1.0f);	//fourth point
+  glVertex3f(-1.0f*ratio, 1.0f, 0.0f);
+  glEnd();
+
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
+
+//restore view
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+}
+
+
+void GLArea::setTarget(QImage &image) {
+
+  if (targetTex) {
+    glDeleteTextures(1, &targetTex);
+    targetTex = 0;
+  }
+  // create texture
+  glGenTextures(1, &targetTex);
+  QImage tximg = QGLWidget::convertToGLFormat(image);
+  glBindTexture(GL_TEXTURE_2D, targetTex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, tximg.width(), tximg.height(),
+               0, GL_RGBA, GL_UNSIGNED_BYTE, tximg.bits());
+
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 // --------------- Methods involving shots -------------------------------------
@@ -1363,7 +1511,7 @@ void GLArea::loadShot(const QPair<vcg::Shot<double>,float> &shotAndScale){
 	//Expressing the translation along Z with a scale factor k
 	//Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
 
-	////k is the ratio between the distances along z of two correspondent points (before and after the traslazion) 
+	////k is the ratio between the distances along z of two correspondent points (before and after the traslation) 
 	////from the point of view
 	//float k= abs(p2.Z()/p1.Z());
 

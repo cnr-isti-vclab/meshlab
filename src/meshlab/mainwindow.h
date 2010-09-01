@@ -73,6 +73,7 @@ public slots:
 	bool openProject(QString fileName=QString());
 	void saveProject();
 	void delCurrentMesh();
+	void delCurrentRaster();
 	void updateGL();
 	void endEdit();
 	void updateCustomSettings();

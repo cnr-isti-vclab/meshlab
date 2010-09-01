@@ -16,7 +16,16 @@
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <widget class="QTreeWidget" name="layerTreeWidget">
+     <widget class="QTreeWidget" name="meshTreeWidget">
+      <column>
+       <property name="text">
+        <string notr="true">1</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTreeWidget" name="rasterTreeWidget">
       <column>
        <property name="text">
         <string notr="true">1</string>

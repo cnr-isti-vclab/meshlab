@@ -140,6 +140,7 @@ void MainWindow::updateWindowMenu()
 		windowsMenu->addAction(copyShotToClipboardAct);
 		windowsMenu->addAction(pasteShotFromClipboardAct);
 
+		//Enabling the actions
     MultiViewer_Container *mvc = currentViewContainer();
 		if(mvc)
 		{
@@ -323,11 +324,18 @@ void MainWindow::setSplit(QAction *qa)
 	if(mvc) 
 	{
 		GLArea *glwClone=new GLArea(mvc, &currentGlobalParams);	
+		bool isRaster = GLA()->isRaster();
 		if(qa->text() == tr("&Horizontally"))	
 			mvc->addView(glwClone, Qt::Vertical);
 		else if(qa->text() == tr("&Vertically"))
 			mvc->addView(glwClone, Qt::Horizontal);
 
+		//The loading of the raster must be here
+		if(isRaster){
+			glwClone->setIsRaster(true);
+			if(GLA()->meshDoc->rm()->id()>=0)
+				glwClone->loadRaster(GLA()->meshDoc->rm()->id());
+		}
 
 		updateMenus();
 
@@ -351,7 +359,7 @@ void MainWindow::setUnsplit()
 	}
 }
 
-//Update the split/unsplit menu that appears right clicking on a splitter's handle 
+//set the split/unsplit menu that appears right clicking on a splitter's handle 
 void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplitter *origin){
     MultiViewer_Container *mvc =  currentViewContainer();
 		int epsilon =10;
@@ -559,6 +567,13 @@ void MainWindow::delCurrentMesh()
 	//MeshDoc accessed through current container
   currentViewContainer()->meshDoc.delMesh(currentViewContainer()->meshDoc.mm());
   currentViewContainer()->updateAllViewer();
+	updateMenus();
+}
+
+void MainWindow::delCurrentRaster()
+{
+	//MeshDoc accessed through current container
+  currentViewContainer()->meshDoc.delRaster(currentViewContainer()->meshDoc.rm());
 	updateMenus();
 }
 
@@ -1100,6 +1115,8 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	filters.push_back("ALN project ( *.aln)");
 	filters.front().chop(1);
 	filters.front().append(" *.aln)");
+	//Add filters for images
+    filters.push_back("Images (*.png *.xpm *.jpg)");
 	QStringList fileNameList;
 	if (fileName.isEmpty())
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"), lastUsedDirectory.path(), filters.join(";;"));
@@ -1118,6 +1135,36 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	{
 			QFileInfo fi(fileName);
 			if(fi.suffix().toLower()=="aln") openProject(fileName);
+			else if( fi.suffix().toLower()=="png" || fi.suffix().toLower()=="xpm" || fi.suffix().toLower()=="jpg")
+			{
+				qb->show();
+
+				if(!fi.exists()) 	{
+					QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
+					QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+					return false;
+				}
+				if(!fi.isReadable()) 	{
+					QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+					QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+					return false;
+				}
+
+				// this change of dir is needed for subsequent textures/materials loading
+				QDir::setCurrent(fi.absoluteDir().absolutePath());
+
+				if(!GLA())
+					newDocument();
+
+				RasterModel *rm= new RasterModel(GLA()->meshDoc);
+
+				GLA()->meshDoc->busy=true;
+				GLA()->meshDoc->addNewRaster(qPrintable(fileName),rm);
+				meshDoc()->busy=false;
+
+				if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
+				updateMenus();
+			}
 			else
 			{
 				if(!fi.exists()) 	{
@@ -1146,14 +1193,14 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				}
 				//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 
-        if(!gla) {
-         gla= newDocument();
-         // gla=GLA();
-        }
-        assert(gla);
+				if(!gla) {
+					gla= newDocument();
+					// gla=GLA();
+				}
+				assert(gla);
 
-        pCurrentIOPlugin->setLog(gla->log);
-				
+				pCurrentIOPlugin->setLog(gla->log);
+
 				qb->show();
 				RichParameterSet prePar;
 				pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
@@ -1164,7 +1211,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				}
 
 				int mask = 0;
-        MeshModel *mm= new MeshModel(gla->meshDoc);
+				MeshModel *mm= new MeshModel(gla->meshDoc);
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,prePar,QCallBack,this /*gla*/))
 				{
 					QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text
@@ -1178,16 +1225,16 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					RichParameterSet par;
 					pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 					if(!par.isEmpty())
-						{
-							GenericParamDialog postOpenDialog(this, &par, tr("Post-Open Processing"));
-							postOpenDialog.exec();
-							pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
-						}
+					{
+						GenericParamDialog postOpenDialog(this, &par, tr("Post-Open Processing"));
+						postOpenDialog.exec();
+						pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
+					}
 					gla->meshDoc->busy=true;
 					gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
-                    gla->setFileName(mm->shortName());
+					gla->setFileName(mm->shortName());
 
 					if(mdiarea->isVisible()) gla->mvc->showMaximized();
 					setCurrentFile(fileName);
@@ -1200,31 +1247,31 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					}
 					renderModeTextureAct->setChecked(false);
 					renderModeTextureAct->setEnabled(false);
-          if(!meshDoc()->mm()->cm.textures.empty())
+					if(!meshDoc()->mm()->cm.textures.empty())
 					{
 						renderModeTextureAct->setChecked(true);
 						renderModeTextureAct->setEnabled(true);
-            if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
-              GLA()->setTextureMode(GLW::TMPerVert);
-            if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
-              GLA()->setTextureMode(GLW::TMPerWedgeMulti);
+						if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
+							GLA()->setTextureMode(GLW::TMPerVert);
+						if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
+							GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 					}
-					
-					 // In case of polygonal meshes the normal should be updated accordingly
+
+					// In case of polygonal meshes the normal should be updated accordingly
 					if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) 
 					{
-									mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
-                                    int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-                                    if(degNum) GLA()->log->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
-									mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
-									vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
-									vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
+						mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
+						int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+						if(degNum) GLA()->log->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
+						mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
+						vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
+						vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
 					} // standard case
 					else {
-							if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-										vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
-							else
-										vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
+						if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+							vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
+						else
+							vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
 					}
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 
@@ -1241,13 +1288,13 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 					if(delVertNum>0 || delFaceNum>0 )
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-          meshDoc()->busy=false;
-         //if(newGla)
-          GLA()->resetTrackBall();
+					meshDoc()->busy=false;
+					//if(newGla)
+					GLA()->resetTrackBall();
 				}
 			}
 	}// end foreach file of the input list
-  GLA()->update();
+	GLA()->update();
 	qb->reset();
 	return true;
 }
@@ -1272,7 +1319,7 @@ void MainWindow::reload()
 
 bool MainWindow::save()
 {
-    return saveAs(meshDoc()->mm()->fullName());
+	return saveAs(meshDoc()->mm()->fullName());
 }
 
 

@@ -35,6 +35,7 @@ class MainWindow;
 class QTreeWidget;
 class GLLogStream;
 class MeshModel;
+class RasterModel;
 class MeshDocument;
 class TagBase;
 class MeshDecorateInterface;
@@ -53,6 +54,14 @@ class MeshTreeWidgetItem : public QTreeWidgetItem
 	MeshTreeWidgetItem(MeshModel *);
 
 	MeshModel *m;
+};
+
+class RasterTreeWidgetItem : public QTreeWidgetItem
+{
+	public:
+	RasterTreeWidgetItem(RasterModel *);
+
+	RasterModel *r;
 };
 
 class DecoratorParamsTreeWidget : public QFrame
