@@ -161,5 +161,20 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   return MeshModel::MM_NONE;
 }
 
+QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
+ {
+	switch(filterID) 
+	{
+		case CR_BOX : return QString("box");
+		case CR_SPHERE: return QString("sphere");
+		case CR_ICOSAHEDRON: return QString("icosahedron");
+		case CR_DODECAHEDRON: return QString("dodecahedron");
+		case CR_OCTAHEDRON: return QString("octahedron");
+		case CR_TETRAHEDRON: return QString("tetrahedron");
+		case CR_CONE: return QString("cone");
+		default : assert(0);
+	}
+ }
+
 
 Q_EXPORT_PLUGIN(FilterCreate)

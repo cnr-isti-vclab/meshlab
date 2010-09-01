@@ -41,6 +41,8 @@ public:
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	virtual int getRequirements(QAction *action);
+	QString filterScriptFunctionName(FilterIDType filterID);
+	virtual QString pluginName(void) const { return "FilterCreate"; }
 };
 
 #endif
