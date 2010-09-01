@@ -386,7 +386,7 @@ void GLArea::paintEvent(QPaintEvent *event)
 
 	//check if viewers are linked
   MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
-	if(window && window->linkViewersAct->isChecked())
+	if(window && window->linkViewersAct->isChecked() && mvc->currentId==id)
 			mvc->updateTrackballInViewers();
 }
 

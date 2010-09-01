@@ -74,8 +74,12 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	//connect(mw,SIGNAL(selectedDecoration(GLArea*,QAction*)),this,SLOT(addParamsToDecorationDialog(GLArea*,QAction*)));
 	//connect(mw,SIGNAL(unSelectedDecoration(GLArea*,QAction*)),this,SLOT(removeParamsFromDecorationDialog(GLArea*,QAction*)));
 }
+
 void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
 {
+	//Necessary because here the raster could be loaded and it needs an opengl context
+	mw->GLA()->makeCurrent();
+
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
 	RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(item);
 	if(mItem) 
