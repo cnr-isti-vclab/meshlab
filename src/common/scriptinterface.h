@@ -41,6 +41,7 @@ QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine
 QScriptValue IRichParameterSet_prototype_setBool(QScriptContext* c,QScriptEngine* e);
 QScriptValue IRichParameterSet_prototype_setInt(QScriptContext* c,QScriptEngine* e);
 QScriptValue IRichParameterSet_prototype_setAbsPerc(QScriptContext* c,QScriptEngine* e);
+QScriptValue IRichParameterSet_prototype_setFloat(QScriptContext* c,QScriptEngine* e);
 
 QScriptValue IRichParameterSet_ctor(QScriptContext* c,QScriptEngine* e);
 

@@ -90,17 +90,23 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
     foreach(MeshFilterInterface* mi,this->meshFilterPlug)
 		{
 			QString pname = mi->pluginName();
-			code += "Plugins." + pname + " = { };\n";
-			foreach(MeshFilterInterface::FilterIDType tt,mi->types())
+			if (pname != "")
 			{
-				QString filterName = mi->filterName(tt);
-				QString filterFunction = mi->filterScriptFunctionName(tt);
-				ScriptAdapterGenerator gen;
-				QAction act(filterName,NULL);
-				RichParameterSet rp;
-				mi->initParameterSet(&act,mm,rp);
-				QString gencode = gen.funCodeGenerator(filterName,rp);
-				code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
+				code += "Plugins." + pname + " = { };\n";
+				foreach(MeshFilterInterface::FilterIDType tt,mi->types())
+				{
+					QString filterName = mi->filterName(tt);
+					QString filterFunction = mi->filterScriptFunctionName(tt);
+					if (filterFunction != "")
+					{
+						ScriptAdapterGenerator gen;
+						QAction act(filterName,NULL);
+						RichParameterSet rp;
+						mi->initParameterSet(&act,mm,rp);
+						QString gencode = gen.funCodeGenerator(filterName,rp);
+						code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
+					}
+				}
 			}
 		}
 

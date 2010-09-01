@@ -107,6 +107,15 @@ QScriptValue IRichParameterSet_prototype_setAbsPerc(QScriptContext* c,QScriptEng
 	return e->undefinedValue();
 }
 
+QScriptValue IRichParameterSet_prototype_setFloat( QScriptContext* c,QScriptEngine* e )
+{
+	RichParameterSet* rset = qscriptvalue_cast<RichParameterSet*>(c->thisObject());
+	QString varname = c->argument(0).toString();
+	float val = (float) c->argument(1).toNumber();
+	rset->setValue(varname,FloatValue(val));
+	return e->undefinedValue();
+}
+
 QScriptValue IRichParameterSet_ctor(QScriptContext* c,QScriptEngine* e)
 {
 	RichParameterSet* p = new RichParameterSet();
@@ -136,5 +145,7 @@ void registerTypes(QScriptEngine* eng)
 	richset_ctor.property("prototype").setProperty("setInt",intfun);
 	QScriptValue abspercfun = eng->newFunction(IRichParameterSet_prototype_setAbsPerc,2);
 	richset_ctor.property("prototype").setProperty("setAbsPerc",abspercfun);
+	QScriptValue floatfun = eng->newFunction(IRichParameterSet_prototype_setFloat,2);
+	richset_ctor.property("prototype").setProperty("setFloat",floatfun);
 	eng->globalObject().setProperty("IRichParameterSet",richset_ctor);
 }
