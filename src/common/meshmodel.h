@@ -427,7 +427,7 @@ public:
   MeshModel *addNewMesh(const char *meshName,MeshModel *newMesh=0, bool setAsCurrent=true);
 
   ///remove the mesh from the list and delete it from memory
-	bool delMesh(MeshModel *mmToDel);
+  bool delMesh(MeshModel *mmToDel);
 
   ///add a new raster model 
   RasterModel *addNewRaster(const char *rasterName,RasterModel *newRaster=0);

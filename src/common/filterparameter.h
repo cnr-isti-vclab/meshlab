@@ -104,6 +104,7 @@ public:
 	virtual bool isFileName() const {return false;}
 
 
+	virtual QString typeName() const = 0; 
 	virtual void	set(const Value& p) = 0;
 	virtual ~Value(){}
 };
@@ -114,6 +115,7 @@ public:
 	BoolValue(const bool val);
 	inline bool getBool() const {return pval;}
 	inline bool isBool() const {return true;}
+	inline QString typeName() const {return QString("Bool");}
 	inline void	set(const Value& p) {pval  = p.getBool();}
 	~BoolValue() {}
 private:
@@ -126,6 +128,7 @@ public:
 	IntValue(const int val) : pval(val){};
 	inline int	getInt() const {return pval;}
 	inline bool isInt() const {return true;}
+	inline QString typeName() const {return QString("Int");}
 	inline void	set(const Value& p) {pval = p.getInt();}
 	~IntValue(){}
 private:
@@ -138,6 +141,7 @@ public:
 	FloatValue(const float val) :pval(val){};
 	inline float	getFloat() const {return pval;}
 	inline bool isFloat() const {return true;}
+	inline QString typeName() const {return QString("Float");}
 	inline void	set(const Value& p) {pval = p.getFloat();}
 	~FloatValue(){}
 private:
@@ -150,6 +154,7 @@ public:
 	StringValue(const QString& val) :pval(val){};
 	inline QString getString() const {return pval;}
 	inline bool isString() const {return true;}
+	inline QString typeName() const {return QString("String");}
 	inline void	set(const Value& p) {pval = p.getString();}
 	~StringValue(){}
 private:
@@ -162,6 +167,7 @@ public:
 	Matrix44fValue(const vcg::Matrix44f& val) :pval(val){};
 	inline vcg::Matrix44f getMatrix44f() const {return pval;}
 	inline bool isMatrix44f() const {return true;}
+	inline QString typeName() const {return QString("Matrix44f");}
 	inline void	set(const Value& p){pval = p.getMatrix44f();}
 	~Matrix44fValue(){}
 private:
@@ -174,6 +180,7 @@ public:
 	Point3fValue(const vcg::Point3f& val) : pval(val){};
 	inline vcg::Point3f getPoint3f() const {return pval;}
 	inline bool isPoint3f() const {return true;}
+	inline QString typeName() const {return QString("Point3f");}
 	inline void	set(const Value& p) {pval = p.getPoint3f();}
 	~Point3fValue(){} 
 private:
@@ -186,6 +193,7 @@ public:
 	ColorValue(QColor val) :pval(val){};
 	inline QColor getColor() const {return pval;}
 	inline bool isColor() const {return true;}
+	inline QString typeName() const {return QString("Color");}
 	inline void	set(const Value& p) {pval = p.getColor();}
 	~ColorValue(){}
 private:
@@ -197,6 +205,7 @@ class AbsPercValue : public FloatValue
 public:
 	AbsPercValue(const float val) :FloatValue(val){};
 	inline float getAbsPerc() const {return getFloat();}
+	inline QString typeName() const {return QString("AbsPerc");}
 	inline bool isAbsPerc() const {return true;}
 	~AbsPercValue(){}
 };
@@ -207,6 +216,7 @@ public:
 	EnumValue(const int val) :IntValue(val){};
 	inline int getEnum() const {return getInt();}
 	inline bool isEnum() const {return true;}
+	inline QString typeName() const {return QString("Enum");}
 	~EnumValue(){}
 };
 
@@ -216,6 +226,7 @@ public:
 	FloatListValue(QList<float>& val) :pval(val){};
 	inline QList<float> getFloatList() const  {return pval;}
 	inline void	set(const Value& p) {pval = p.getFloatList();}
+	inline QString typeName() const {return QString("FloatList");}
 	inline bool isFloatList() const {return true;}
 	~FloatListValue() {}
 private:
@@ -228,6 +239,7 @@ public:
 	DynamicFloatValue(const float val) :FloatValue(val){};
 	inline float getDynamicFloat() const {return getFloat();}
 	inline bool isDynamicFloat() const {return true;}
+	inline QString typeName() const {return QString("DynamicFloat");}
 	~DynamicFloatValue() {}
 };
 
@@ -237,6 +249,7 @@ public:
 	FileValue(QString filename) :pval(filename){};
 	inline QString getFileName() const {return pval;}
 	inline bool isFileName() const {return true;}
+	inline QString typeName() const {return QString("FileName");}
 	inline void	set(const Value& p) {pval = p.getFileName();}
 	~FileValue(){}
 private:
@@ -249,6 +262,7 @@ public:
 	MeshValue(MeshModel* mesh) : pval(mesh){};
 	inline MeshModel* getMesh() const {return pval;}
 	inline bool isMesh() const {return true;}
+	inline QString typeName() const {return QString("Mesh");}
 	inline void	set(const Value& p) {pval = p.getMesh();}
 	~MeshValue(){}
 

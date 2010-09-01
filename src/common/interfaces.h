@@ -87,6 +87,8 @@ public:
   void Log(const char * f, ... );
   void Log(int Level, const char * f, ... ) ;
 
+  virtual QString pluginName(void) const { return ""; }
+
   /** \brief This function is called by the framework, for each plugin that has global parameters (e.g. \ref MeshDecorateInterface) at the start of the application.
    The rationale is to allow to each plugin to have a list of global persistent parameters that can be changed from the meshlab itself and whose value is persistent between different meshlab invocations.
    A typical example is the background color.
@@ -322,6 +324,7 @@ public:
 	virtual QString filterInfo(QAction *a) const {return this->filterInfo(ID(a));};
 	virtual QString filterName(QAction *a) const {return this->filterName(ID(a));};
 	virtual QString filterName(FilterIDType filterID) const =0;// const {return MeshLabInterface::filterName(filterID);};
+	virtual QString filterScriptFunctionName(FilterIDType filterID) {return "";}
 
 
 
@@ -338,9 +341,6 @@ public:
   so, it makes sense displaying different info in each position.
   */
   virtual QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel */*mm*/) {assert (0); return 0;}
-
-
-  virtual void registerScriptProxyFunctions(QScriptEngine* eng) {};
 
   virtual FilterIDType ID(QAction *a) const
   	{
@@ -371,7 +371,7 @@ public:
 	 
     virtual QList<QAction *> actions() const { return actionList;}
 	  virtual QList<FilterIDType> types() const { return typeList;}
-
+	QString generatedScriptCode;
 protected:
     // Each plugins exposes a set of filtering possibilities. 
 		// Each filtering procedure corresponds to a single QAction with a corresponding FilterIDType id. 
