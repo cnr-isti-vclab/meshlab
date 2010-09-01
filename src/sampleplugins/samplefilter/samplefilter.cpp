@@ -23,6 +23,7 @@
 
 #include "samplefilter.h"
 #include <QtScript>
+#include "..\..\common\scriptinterface.h"
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -73,7 +74,7 @@ ExtraSamplePlugin::FilterClass ExtraSamplePlugin::getClass(QAction *a)
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define, 
+// For each parameter you need to define, 
 // - the name of the parameter, 
 // - the string shown in the dialog 
 // - the default value
@@ -128,41 +129,13 @@ bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 	return true;
 }
 
-bool callback(const int pos,const char* str)
+QString ExtraSamplePlugin::filterScriptFunctionName( FilterIDType filterID )
 {
-	return true;
-}
-
-void ExtraSamplePlugin::randomDisplacement( MeshDocument* mod,float perc,bool updtnrml)
-{
-	RichParameterSet rp;
-	QAction act(filterName(FP_MOVE_VERTEX), this);
-	initParameterSet(&act,*(mod->mm()),rp);
-	rp.setValue("Displacement",FloatValue(perc));
-	rp.setValue("UpdateNormals",BoolValue(updtnrml));
-	applyFilter(&act,*mod,rp,callback);
-}
-
-//QScriptValue ExtraSamplePluginToScriptValue(QScriptEngine *engine, ExtraSamplePlugin* const &in)
-//{ return engine->newQObject(in); }
-//
-//void ExtraSamplePluginFromScriptValue(const QScriptValue &object, ExtraSamplePlugin* &out)
-//{ out = qobject_cast<ExtraSamplePlugin*>(object.toQObject()); }
-
-QScriptValue mySpecialQObjectConstructor(QScriptContext *context,
-										 QScriptEngine *engine)
-{
-	QObject *object = new ExtraSamplePlugin();
-	return engine->newQObject(object, QScriptEngine::ScriptOwnership);
-}
-
-void ExtraSamplePlugin::registerScriptProxyFunctions( QScriptEngine* eng )
-{
-	QScriptValue ctor = eng->newFunction(mySpecialQObjectConstructor);
-	QScriptValue metaObject = eng->newQMetaObject(&ExtraSamplePlugin::staticMetaObject, ctor);
-	eng->globalObject().setProperty("ExtraSamplePlugin", metaObject);
+	switch(filterID) {
+		case FP_MOVE_VERTEX :  return QString("randomVerticesDisplacement"); 
+		default : assert(0); 
+	}
+	return QString();
 }
 
 Q_EXPORT_PLUGIN(ExtraSamplePlugin)
-
-

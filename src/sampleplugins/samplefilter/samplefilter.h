@@ -47,18 +47,17 @@ class ExtraSamplePlugin : public QObject, public MeshFilterInterface
 public:
 	enum { FP_MOVE_VERTEX  } ;
 
-	Q_INVOKABLE ExtraSamplePlugin();
-	
+	ExtraSamplePlugin();
+
+	virtual QString pluginName(void) const { return "ExtraSamplePlugin"; }
+
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
     bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
     FilterClass getClass(QAction *a);
-	void registerScriptProxyFunctions(QScriptEngine* eng);
-
-public slots:
-	void randomDisplacement(MeshDocument* mod,float,bool updtnrml);
+	QString filterScriptFunctionName(FilterIDType filterID);
 
 };
 
