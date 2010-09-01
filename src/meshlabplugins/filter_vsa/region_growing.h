@@ -24,6 +24,7 @@ public:
         typedef typename FaceType::ScalarType ScalarType;
 	typedef typename std::list<RegionType> ::iterator TriRegIterator;
         typedef typename std::list<RegionType*>::iterator AdjIterator;
+        typedef typename PlanarRegion<MeshType>::Pov Pov;
 
 	std::list<RegionType> regions;
 	std::vector<RegionType*> workingset;
@@ -382,10 +383,13 @@ void GrowStepOnce(){
                                 }
                         }
 
-                        void ComputeShots(){
-                            int vpsize[2] = {800,800};
+                        void ComputeShots(int * vpsize, int pps){
                             for(TriRegIterator tri = regions.begin(); tri != regions.end(); ++tri)
-                                (*tri).ComputeShot(vpsize,10000.f / m->bbox.Diag());
+                                (*tri).ComputeShot(vpsize,pps);
+                        }
+                        void GetAllShots( std::vector<Pov> & povs){
+                            for(TriRegIterator tri = regions.begin(); tri != regions.end(); ++tri)
+                                povs.insert(povs.end(),(*tri).povs.begin(),(*tri).povs.end());
                         }
 };
 

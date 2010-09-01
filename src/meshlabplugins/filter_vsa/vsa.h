@@ -47,6 +47,7 @@ public:
         enum { FP_VSA  } ;
 
         VsaPlugin();
+        virtual ~VsaPlugin();
 	
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
