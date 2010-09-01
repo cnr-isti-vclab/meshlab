@@ -10,7 +10,8 @@ QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 	int ii;
 	for(ii = 0;ii < (set.paramList.size() - 1);++ii)
 		names += set.paramList[ii]->name + ", ";
-	names += set.paramList[ii]->name;
+	if (set.paramList.size() != 0)
+		names += set.paramList[ii]->name;
 	return names;
 }
 
