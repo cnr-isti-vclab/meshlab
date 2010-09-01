@@ -237,7 +237,7 @@ FilterScriptDialog::~FilterScriptDialog()
 
 
 
-EditorScriptDialog::EditorScriptDialog( QWidget *parent /*= 0*/ )
+EditorScriptDialog::EditorScriptDialog( QWidget * /* parent = 0*/ )
 :code()
 {
 	ui = new Ui::scriptEditor();

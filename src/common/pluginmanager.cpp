@@ -117,7 +117,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 		eng->globalObject().setProperty("_applyFilter", applyFun);
 
 		eng->evaluate(code);
-		qDebug(qPrintable(code));
+    qDebug("Code:\n %s",qPrintable(code));
 	}
 }
 

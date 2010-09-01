@@ -31,7 +31,7 @@ QString ScriptAdapterGenerator::funCodeGenerator(const QString&  filtername,cons
 
 Q_DECLARE_METATYPE(MeshDocument*)
 
-static bool TestCallback(const int pos,const char* str)
+static bool TestCallback(const int , const char* )
 {
 	return true;
 }
@@ -116,7 +116,7 @@ QScriptValue IRichParameterSet_prototype_setFloat( QScriptContext* c,QScriptEngi
 	return e->undefinedValue();
 }
 
-QScriptValue IRichParameterSet_ctor(QScriptContext* c,QScriptEngine* e)
+QScriptValue IRichParameterSet_ctor(QScriptContext* /*c*/,QScriptEngine* e)
 {
 	RichParameterSet* p = new RichParameterSet();
 	QScriptValue res = e->toScriptValue(*p);
@@ -129,7 +129,7 @@ QScriptValue IRichParameterSet_ctor(QScriptContext* c,QScriptEngine* e)
 QScriptValue myprint (QScriptContext* sc, QScriptEngine* se)
 {
 	// do what you want
-	qDebug(qPrintable(sc->argument(0).toString()));
+  qDebug("%s",qPrintable(sc->argument(0).toString()));
 	return QScriptValue(se, 0);
 }
 

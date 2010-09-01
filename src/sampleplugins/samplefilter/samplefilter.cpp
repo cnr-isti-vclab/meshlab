@@ -99,7 +99,7 @@ void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParam
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool ExtraSamplePlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*md.mm();
 	srand(time(NULL)); 
