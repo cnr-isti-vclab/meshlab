@@ -61,7 +61,7 @@ namespace vrs
             // builds stages
             Start< MeshType > start( srcMesh, params->povs, &res );
             lastViews = start.views;
-            ConeFilter coneFilter( params->frontFacingCone, &res );
+            ConeFilter coneFilter( params->frontFacingConeU, &res );
             Compactor inputCompactor( &res );
             inputCompactor.setParameters( "mask_pyramid", "outMask", "mask_pyramid",
                                           "input", "best", "best", "input_compactor" );

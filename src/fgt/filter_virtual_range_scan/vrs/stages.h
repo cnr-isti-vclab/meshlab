@@ -54,12 +54,12 @@ namespace vrs
             PixelData* tmpData = (*(res->pdm))[ "bestPosition" ];
 
             on( "killer", "killer_shader" );
-            string samplers[] = { "bestPosition", "bestNormal", "outMask", "eyeNormalBest" };
+            string samplers[] = { "bestPosition", "bestNormal", "outMask", "inputEyeNormal" };
             bindPixelData( samplers, 4, samplers );
             glClear( GL_COLOR_BUFFER_BIT );
-            glPointSize( 3.0f );
+            //glPointSize( 3.0f );
             Utils::feed_coords( tmpData->side, tmpData->side, tmpData->length );
-            glPointSize( 1.0f );
+            //glPointSize( 1.0f );
             off();
 
             // reset matrices
@@ -289,7 +289,7 @@ namespace vrs
             float bigJump = depthRange * res->params->bigDepthJump;
             float angleInRadians = ( res->params->angleThreshold * PI ) / 180.0;
             float thresholdCosine = cos( angleInRadians );
-            angleInRadians = ( (res->params->frontFacingCone/2.0) * PI ) / 180.0;
+            angleInRadians = ( (res->params->frontFacingConeF/2.0) * PI ) / 180.0;
             float frontFacingCosine = cos( angleInRadians );
 
             on( "detection", "detector_shader" );

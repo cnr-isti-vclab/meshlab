@@ -5,8 +5,13 @@
 #include "utils.h"
 #include "configurations.h"
 
+#include <wrap/gl/shot.h>
+#include <vcg/space/box2.h>
+
 namespace vrs
 {
+    typedef pair< vcg::Shot< float >, vcg::Box2i > Pov;
+
     class VRSParameters
     {
     public:
@@ -20,7 +25,11 @@ namespace vrs
         float smallDepthJump;               // the maximum allowable depth jump to recognize mesh patches continuity
         float angleThreshold;               // the threshold angle (degrees) used in feature detection step
         float bigDepthJump;                 // used to detect big depth offset
-        float frontFacingCone;              // the angle (in degrees) used to determine whether a pixel "is facing" the observer
+        float frontFacingConeU;             // the angle (in degrees) used to determine whether a pixel "is facing" the observer (uniform sampling)
+        float frontFacingConeF;             // the facing cone gap used in the feature sensitive sampling step
+
+        vector< Pov > customPovs;           // custom point-of-views
+        bool useCustomPovs;
 
         // the available attributes of each output sample
         enum SampleAttributes

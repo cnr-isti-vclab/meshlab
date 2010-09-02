@@ -2,6 +2,7 @@
 #define START_H
 
 #include <vcg/space/point3.h>
+#include <wrap/gl/shot.h>
 #include <vector>
 #include <map>
 #include "stage.h"
@@ -19,21 +20,31 @@ namespace vrs
     public:
         typedef typename Mesh::ScalarType           ScalarType;
         typedef typename vcg::Point3< ScalarType >  MyPoint;
+        typedef typename vcg::Shot< ScalarType >             ShotType;
 
         Start( Mesh* src, int povs, SamplerResources* res )
             :Stage( res )
         {
             m = src;
-            this->povs = povs;
-            radius = ( m->bbox.Diag() / 2 ) * 1.2;
-            center = m->bbox.Center();
-            MyPoint coneAxis( res->params->coneAxis[0],
-                              res->params->coneAxis[1],
-                              res->params->coneAxis[2] );
-            coneAxis.Normalize();
-            float coneGap = ( res->params->coneGap / 180.0f ) * PI;
-            generatePovs( povs, radius, center, views, coneAxis, coneGap );
-            generateUpVectors( views, center, upVector );
+
+            if( res->params->useCustomPovs )
+            {
+                assert( res->params->customPovs.size() > 0 );
+            }
+            else
+            {   // distribute povs uniformly in a cone of directions
+                this->povs = povs;
+                radius = ( m->bbox.Diag() / 2 ) * 1.2;
+                center = m->bbox.Center();
+                MyPoint coneAxis( res->params->coneAxis[0],
+                                  res->params->coneAxis[1],
+                                  res->params->coneAxis[2] );
+                coneAxis.Normalize();
+                float coneGap = ( res->params->coneGap / 180.0f ) * PI;
+                generatePovs( povs, radius, center, views, coneAxis, coneGap );
+                generateUpVectors( views, center, upVector );
+            }
+
             currentPov = 0;
         }
 
@@ -41,29 +52,56 @@ namespace vrs
 
         virtual void go( void )
         {
-            static int i=0;
-            char buf[100];
-            sprintf( buf, "start%d", i++ );
-
             // generates attributes screenshots
             on( "start", "start_shader" );
-            Point3< ScalarType >& p = views[ currentPov ];
-            Point3< ScalarType >& up = upVector[ currentPov ];
 
-            glMatrixMode( GL_PROJECTION );
-            glLoadIdentity();
-            glOrtho( -radius, radius, -radius, radius, -radius, radius );
+            if( res->params->useCustomPovs )
+            {
+                // there's no need to call UnsetView(), since the modelview
+                // and projection matrices are resetted in the killer stage
+                /*
+                if( currentPov > 0 )
+                {
+                    GlShot< ShotType >::UnsetView();
+                }
+                */
 
-            glMatrixMode( GL_MODELVIEW );
-            glLoadIdentity();
-            gluLookAt( center.X(), center.Y(), center.Z(),
-                       p.X(), p.Y(), p.Z(),
-                       up.X(), up.Y(), up.Z() );
+                Pov& p = res->params->customPovs[ currentPov ];
+                ScalarType nearPlane, farPlane;
+                GlShot< ShotType >::GetNearFarPlanes( p.first, m->bbox, nearPlane, farPlane );
+                GlShot< ShotType >::SetView( p.first, nearPlane, farPlane );
+
+                glEnable( GL_SCISSOR_TEST );
+                Box2i& scissorBox = p.second;
+                vcg::Point2i min = scissorBox.min;
+                int width = scissorBox.DimX();
+                int height = scissorBox.DimY();
+                glScissor( (GLint)min.X(), (GLint)min.Y(), (GLsizei)width, (GLsizei)height );
+            }
+            else
+            {
+                Point3< ScalarType >& p = views[ currentPov ];
+                Point3< ScalarType >& up = upVector[ currentPov ];
+                glMatrixMode( GL_PROJECTION );
+                glLoadIdentity();
+                glOrtho( -radius, radius, -radius, radius, -radius, radius );
+
+                glMatrixMode( GL_MODELVIEW );
+                glLoadIdentity();
+                gluLookAt( center.X(), center.Y(), center.Z(),
+                           p.X(), p.Y(), p.Z(),
+                           up.X(), up.Y(), up.Z() );
+            }
 
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
             render();
             //res->fbo->screenshots( buf );
             off();
+
+            if( res->params->useCustomPovs )
+            {   
+                glDisable( GL_SCISSOR_TEST );
+            }
 
             Utils::saveMatrices();
 
@@ -77,7 +115,15 @@ namespace vrs
 
         bool nextPov( void )
         {
-            return ( ++currentPov < povs );
+            currentPov++;
+            if( res->params->useCustomPovs )
+            {
+                return ( currentPov < res->params->customPovs.size() );
+            }
+            else
+            {
+                return ( currentPov < povs );
+            }
         }
 
         //private:
@@ -266,7 +312,7 @@ namespace vrs
         void generateUpVectors( vector< MyPoint >& povs, MyPoint& center,
                                 vector< MyPoint >& target )
         {
-            srand( time(NULL) );
+            srand( 12345 );
             target.clear();
             MyPoint dir;
             MyPoint up;

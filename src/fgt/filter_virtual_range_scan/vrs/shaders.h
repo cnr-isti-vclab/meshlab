@@ -350,7 +350,7 @@ namespace vrs
             const string fragmentProgram = STRINGFY(
 
                     uniform sampler2D outMask;
-            uniform sampler2D eyeNormalBest;
+            uniform sampler2D inputEyeNormal;
 
             varying vec2    sample_coords;
             varying vec3    sample_eye_normal;
@@ -362,7 +362,7 @@ namespace vrs
 
                 if( mask_val > 0.5 )
                 {
-                    vec3 current_eye_normal = normalize( texelFetch( eyeNormalBest, frag_coords, 0 ) );
+                    vec3 current_eye_normal = normalize( texelFetch( inputEyeNormal, frag_coords, 0 ) );
                     vec3 norm_sample_eye_normal = normalize( sample_eye_normal );
                     vec3 perfect_view = vec3( 0.0, 0.0, -1.0 );
 
@@ -614,12 +614,31 @@ namespace vrs
                 return ( isValid( first ) && isValid( second ) );
             }
 
-            bool smallDepthJumpTest( ivec2 first, ivec2 second )
+            // the three pixels must lie on the same mesh patch, and the central
+            // one must be the nearest
+            bool smallDepthJumpTest( ivec2 first, ivec2 second, ivec2 center )
             {
+                float centralDepth = texelFetch( inputDepth, center, 0 ).x;
                 float firstDepth = texelFetch( inputDepth, first, 0 ).x;
                 float secondDepth = texelFetch( inputDepth, second, 0 ).x;
-                float diff = abs( firstDepth - secondDepth );
-                return ( diff < smallDepthJump );
+
+                bool ok = false;
+                if( firstDepth < centralDepth )
+                {
+                    ok = ( secondDepth < centralDepth );
+                }
+                else
+                {
+                    ok = ( secondDepth >= centralDepth );
+                }
+
+                if( !ok )
+                {
+                    return false;
+                }
+
+                float jump = max( abs( firstDepth - centralDepth ), abs( secondDepth - centralDepth ) );
+                return ( jump <= smallDepthJump );
             }
 
             bool attributeTest( ivec2 first, ivec2 second )
@@ -636,7 +655,7 @@ namespace vrs
                 ivec2 n2 = my_coords + neighbours[ pairIndex ][ 1 ];
 
                 if( !validTest( n1, n2 ) ) return false;
-                if( !smallDepthJumpTest( n1, n2 ) ) return false;
+                if( !smallDepthJumpTest( n1, n2, my_coords ) ) return false;
                 return ( attributeTest( n1, n2 ) );
             }
 

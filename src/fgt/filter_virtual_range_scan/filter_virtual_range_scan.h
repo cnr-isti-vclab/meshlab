@@ -50,7 +50,7 @@ public:
     virtual QString filterInfo(FilterIDType filter) const;
 
     virtual int getRequirements(QAction *);
-    virtual void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
+    virtual void initParameterSet(QAction*, MeshModel&, RichParameterSet &){ ;}
     virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
 
     virtual bool applyFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);

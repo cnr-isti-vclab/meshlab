@@ -75,13 +75,19 @@ void FilterVirtualRangeScan::initParameterSet(QAction* filter,MeshDocument &md, 
                                    "The mesh will be sampled uniformly from a texture of v x v pixels, where v is the chosen value.") );
         par.addParam( new RichInt( "features_side", 512, "Feature sampling resolution:",
                                    "The filter performs feature detection from a texture of v x v pixels, where v is the chosen value.") );
-        par.addParam( new RichDynamicFloat( "frontFacingCone", 40, 0.0f, 180.0f,
-                                            "Front facing cone:",
+        par.addParam( new RichDynamicFloat( "frontFacingConeU", 40, 0.0f, 180.0f,
+                                            "Front facing cone (uniform):",
                                             QString("Pixels whose normal is directed towards the viewer are considered front-facing.<br />") +
-                                            "To be front-facing, these normals must reside within a given cone of directions, whose angle is set with this parameter."));
+                                            "To be front-facing, these normals must reside within a given cone of directions, whose angle is set with this parameter.<br />" +
+                                            "Only the front-facing pixels form the uniform samples cloud" ) );
         par.addParam( new RichDynamicFloat( "bigJump", 0.1, 0.0, 1.0, "Big depth jump threshold:",
                                             QString("The filter detects mesh borders and big offsets within the mesh by testing the depth of neighbours pixels.<br />") +
                                             "This parameter controls the (normalized) minimum depth offset for a depth jump to be recognized.") );
+        par.addParam( new RichDynamicFloat( "frontFacingConeF", 40, 0.0f, 180.0f,
+                                            "Front facing cone (features):",
+                                            QString("Look at the <i>Front facing cone (uniform)</i> parameter description to understand when a pixel is") +
+                                            "said <i>front-facing</i>. In the feature sensitive sampling step, border pixels are recognized as features if " +
+                                            "they are facing the observer within a given cone of direction, whose gap is specified (in degrees) with this parameter." ) );
         par.addParam( new RichDynamicFloat( "smallJump", 0.01f, 0.001f, 0.1f, "Small depth jump threshold:",
                                             QString("To be considered on the same mesh patch, neighbours pixels must be within this depth range.<br />") +
                                             "For example, if the max depth value is 0.6 and the min depth value is 0.4, then a value of 0.01 "+
@@ -112,12 +118,16 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
         vrsParams.coneGap = par.getDynamicFloat( "coneGap" );
         vrsParams.uniformResolution = par.getInt( "uniform_side" );
         vrsParams.featureResolution = par.getInt( "features_side" );
-        vrsParams.frontFacingCone = par.getDynamicFloat( "frontFacingCone" );
+        vrsParams.frontFacingConeU = par.getDynamicFloat( "frontFacingConeU" );
+        vrsParams.frontFacingConeF = par.getDynamicFloat( "frontFacingConeF" );
         vrsParams.bigDepthJump = par.getDynamicFloat( "bigJump" );
         vrsParams.smallDepthJump = par.getDynamicFloat( "smallJump" );
         vrsParams.angleThreshold = par.getDynamicFloat( "normalsAngle" );
         vrsParams.attributeMask = VRSParameters::POSITION |
                                   VRSParameters::NORMAL;
+
+        // we don't want to use custom povs
+        vrsParams.useCustomPovs = false;
 
         bool oneMesh = par.getBool( "oneMesh" );
         MeshModel* curMeshModel = md.mm();
