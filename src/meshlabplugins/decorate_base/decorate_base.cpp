@@ -473,10 +473,11 @@ bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const Mesh
   return true;
 }
 
-bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &m, RichParameterSet *rm, GLArea *)
+bool ExtraMeshDecoratePlugin::startDecorate(QAction * /*action*/, MeshDocument &/*m*/, RichParameterSet */*rm*/, GLArea *)
 {	
-return true;
+ return true;
 }
+
 void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf)
 {
 	glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
