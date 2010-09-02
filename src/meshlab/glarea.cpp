@@ -257,7 +257,7 @@ void GLArea::drawLight()
 
 }
 
-void GLArea::paintEvent(QPaintEvent *event)
+void GLArea::paintEvent(QPaintEvent */*event*/)
  {
      makeCurrent();
   QTime time;
@@ -368,7 +368,10 @@ void GLArea::paintEvent(QPaintEvent *event)
 	// on the bottom of the glArea
 	if(infoAreaVisible)
 	{
-		displayInfo();
+    glEnable(GL_BLEND);
+    glEnable(GL_MULTISAMPLE);
+
+    displayInfo();
 		updateFps(time.elapsed());
 	}
 
@@ -389,12 +392,41 @@ void GLArea::paintEvent(QPaintEvent *event)
 	if(window && window->linkViewersAct->isChecked() && mvc->currentId==id)
 			mvc->updateTrackballInViewers();
 }
+void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
+{
+  painter->save();
+  qFont.setStyleStrategy(QFont::NoAntialias);
+  qFont.setFamily("Helvetica");
+  qFont.setPixelSize(10);
+  painter->setFont(qFont);
 
+  QString tableText;
+  for(int i=0;i<4;i++)
+    tableText+=QString("\t%1\t%2\t%3\t%4\n")
+      .arg(mm()->cm.Tr[i][0],5,'f',2).arg(mm()->cm.Tr[i][1],5,'f',2)
+      .arg(mm()->cm.Tr[i][2],5,'f',2).arg(mm()->cm.Tr[i][3],5,'f',2);
+
+  QTextOption TO;
+  QTextOption::Tab ttt;
+  ttt.type=QTextOption::DelimiterTab;
+  ttt.delimiter = '.';
+  const int columnSpacing = 40;
+  ttt.position=columnSpacing;
+  QList<QTextOption::Tab> TabList;
+  for(int i=0;i<4;++i){
+    TabList.push_back(ttt);
+    ttt.position+=columnSpacing;
+  }
+  TO.setTabs(TabList);
+  painter->drawText(areaRect, tableText, TO);
+  painter->restore();
+}
 
 void GLArea::displayInfo()
 {
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   QPainter painter(this);
+  painter.save();
   painter.setRenderHint(QPainter::TextAntialiasing);
   painter.setPen(Qt::white);
   qFont.setStyleStrategy(QFont::NoAntialias);
@@ -406,7 +438,8 @@ void GLArea::displayInfo()
   int border = qMax(4, metrics.leading());
 
   QRect Column_0(width()/10, this->height()-barHeight+border, width()/2, this->height()-border);
-  QRect Column_1(width()/2 , this->height()-barHeight+border, width(),   this->height()-border);
+  QRect Column_1(width()/2 , this->height()-barHeight+border, width()*3/4,   this->height()-border);
+  QRect Column_2(width()*3/4 , this->height()-barHeight+border, width(),   this->height()-border);
 
   Color4b logAreaColor = glas.logAreaColor;
   glas.logAreaColor[3]=128;
@@ -441,10 +474,11 @@ void GLArea::displayInfo()
     col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
   if ((clipRatioNear!=1) || (clipRatioFar!=1))
     col0Text += QString("Clipping: N:%1 F:%2\n").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1);
-}
   painter.drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
   painter.drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
-
+  if(mm()->cm.Tr != Matrix44f::Identity() ) displayMatrix(&painter, Column_2);
+}
+  painter.restore();
   painter.end();
   glPopAttrib();
 }

@@ -110,7 +110,7 @@ public:
 	
 	bool isCurrent() { return mvc->currentId == id;}
 	
-	void showTrackBall(bool b)		{trackBallVisible = b; updateGL();}
+  void showTrackBall(bool b)		{trackBallVisible = b; update();}
 	bool isHelpVisible()      {return helpVisible;}  
 	bool isTrackBallVisible()		{return trackBallVisible;}
 	bool isDefaultTrackBall()   {return activeDefaultTrackball;}
@@ -234,6 +234,7 @@ protected:
 	void initializeGL();
 	void initTexture();
 	void displayInfo();
+  void displayMatrix(QPainter *painter, QRect areaRect);
 	void displayViewerHighlight();
 	void displayHelp();
 

@@ -577,11 +577,6 @@ void MainWindow::delCurrentRaster()
 	updateMenus();
 }
 
-void MainWindow::updateGL()
-{
-	GLA()->updateGL();
-}
-
 void MainWindow::endEdit()
 {
 	GLA()->endEdit();
@@ -621,7 +616,7 @@ void MainWindow::showScriptEditor()
 			layerDialog->updateLog(meshDoc()->Log);
 		}
 		else
-			this->updateGL();
+      GLA()->update();
 	}
 }
 
