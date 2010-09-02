@@ -90,7 +90,7 @@ static void SeedToVertexConversion(MeshType &m,std::vector<CoordType> &seedPVec,
 		}
 }
 
-static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, bool frontierFlag=true,vcg::CallBackPos *cb=0)
+static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, bool frontierFlag=true)
 {
 		tri::Geo<CMeshO> g;
 		VertexPointer farthest;
