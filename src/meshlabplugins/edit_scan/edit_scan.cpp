@@ -48,7 +48,7 @@ bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
     timer = 0;
 
     //--- Create a new model to store the scan cloud
-    cloud = new MeshModel("Scan cloud");
+    cloud = new MeshModel(&md, "Scan cloud");
 
     //--- Instantiate the UI, and connect events
     widget = new Widget(gla->window());
@@ -101,7 +101,7 @@ void VirtualScan::EndEdit(MeshModel&, GLArea* ){
 void VirtualScan::save_requested(){
     md->addNewMesh("scan",cloud,false);
     //--- Create a new model to store the scan cloud
-    cloud = new MeshModel("Scan cloud");
+    cloud = new MeshModel(this->md, "Scan cloud");
 }
 
 // This is called only when mouse is pressed at first during a drag or a click is received

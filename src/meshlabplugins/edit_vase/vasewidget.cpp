@@ -88,7 +88,7 @@ void VaseWidget::on_initButton_released(){
     int gridsize = ui.gridsize->text().toInt();
     int gridpad  = ui.padsize->text().toInt();
     balloon->init( gridsize, gridpad );
-    gla->log.Log(GLLogStream::FILTER, "Field refreshed with new distances");
+    gla->log->Log(GLLogStream::FILTER, "Field refreshed with new distances");
     gla->update();
 
     // Pick Z slice and update slice view
@@ -105,7 +105,7 @@ void VaseWidget::on_slice_offset_sliderMoved(int){
 void VaseWidget::on_iterationButton_released(){
     bool op_succeed = false;
     for(int i=0; i<ui.numItersSpin->value(); i++){
-        gla->log.Logf(GLLogStream::FILTER, "\n----- began iteration %d -----", balloon->numiterscompleted);
+        gla->log->Logf(GLLogStream::FILTER, "\n----- began iteration %d -----", balloon->numiterscompleted);
         op_succeed = balloon->initializeField();    if( !op_succeed ) break;
         balloon->interpolateField();                if( !op_succeed ) break;
         balloon->computeCurvature();                if( !op_succeed ) break;
@@ -118,18 +118,18 @@ void VaseWidget::on_iterationButton_released(){
 void VaseWidget::on_refreshButton_released(){
     bool op_failed = balloon->initializeField();
     balloon->render(gla); // why is this here????
-    gla->log.Logf(GLLogStream::FILTER, "Refreshed view-based distance field %s", ((op_failed)?"**FAILED!**":"completed") );
+    gla->log->Logf(GLLogStream::FILTER, "Refreshed view-based distance field %s", ((op_failed)?"**FAILED!**":"completed") );
     gla->update();
 }
 void VaseWidget::on_interpButton_released(){
     balloon->interpolateField();
     balloon->rm |= Balloon::SURF_VCOLOR;
-    gla->log.Log(GLLogStream::FILTER, "Distance field interpolated");
+    gla->log->Log(GLLogStream::FILTER, "Distance field interpolated");
     gla->update();
 }
 void VaseWidget::on_evolveButton_released(){
     balloon->evolveBalloon();
-    gla->log.Logf(GLLogStream::FILTER, "Finished ballon evolution iteration %d", balloon->numiterscompleted);
+    gla->log->Logf(GLLogStream::FILTER, "Finished ballon evolution iteration %d", balloon->numiterscompleted);
     gla->update();
 }
 void VaseWidget::on_laplButton_released(){
@@ -142,9 +142,10 @@ void VaseWidget::on_pushButton_released(){
     // This way of creating a new model in the model is awkward
     //  - why there is not a MeshModel( CMeshO& mesh )? 
     //  - what's the need to specify the name twice?
-    MeshModel* mm = new MeshModel("Balloon");
-    vcg::tri::Append<CMeshO,CMeshO>::Mesh(mm->cm, balloon->surf);
-    meshDocument->addNewMesh("Balloon",mm,false);
+    MeshModel* mm = new MeshModel(this->meshDocument, "Balloon");
+    qDebug() << "warning: save has been disabled, Append fails";
+    //vcg::tri::Append<CMeshO,CMeshO>::Mesh(mm->cm, balloon->surf);
+    // meshDocument->addNewMesh("Balloon",mm,false);
 }
 
 void VaseWidget::on_viewDirs_toggled(bool checked){

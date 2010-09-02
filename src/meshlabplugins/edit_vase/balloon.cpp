@@ -278,7 +278,7 @@ void Balloon::evolveBalloon(){
     }
 
     //--- Compute updates from amount stored in vertex quality
-    float a,b,c;
+    Point3f c; // barycentric coefficients
     Point3f voxp;
     std::vector<float> updates_view(vol.band.size(),0);
     std::vector<float> updates_curv(vol.band.size(),0);
@@ -294,16 +294,22 @@ void Balloon::evolveBalloon(){
         vol.off2pos(voxi, voxp);
         vcg::SignedFacePointDistance(f, voxp, proj);
         Triangle3<float> triFace( f.P(0), f.P(1), f.P(2) );
-        vcg::InterpolationParameters(triFace, proj, a,b,c);
+
+        // Paolo, is this really necessary?
+        int axis;
+        if     (f.Flags() & CFaceO::NORMX )   axis = 0;
+        else if(f.Flags() & CFaceO::NORMY )   axis = 1;
+        else                                    axis = 2;
+        vcg::InterpolationParameters(triFace, axis, proj, c);
 
         // Interpolate update amounts & keep track of the range
         if( surf.vert.QualityEnabled ){
-            updates_view[i] = a*f.V(0)->Q() + b*f.V(1)->Q() + c*f.V(2)->Q();
+            updates_view[i] = c[0]*f.V(0)->Q() + c[1]*f.V(1)->Q() + c[2]*f.V(2)->Q();
             view_maxdst = (fabs(updates_view[i])>view_maxdst) ? fabs(updates_view[i]) : view_maxdst;
         }
         // Interpolate curvature amount & keep track of the range
         if( surf.vert.CurvatureEnabled ){
-            updates_curv[i] = a*f.V(0)->Kh() + b*f.V(1)->Kh() + c*f.V(2)->Kh();
+            updates_curv[i] = c[0]*f.V(0)->Kh() + c[1]*f.V(1)->Kh() + c[2]*f.V(2)->Kh();
             curv_maxval = (fabs(updates_curv[i])>curv_maxval) ? fabs(updates_curv[i]) : curv_maxval;
         }
     }
