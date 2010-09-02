@@ -283,8 +283,8 @@ void LayerDialog::updateTable()
 	ui->rasterTreeWidget->setColumnCount(4);
 	ui->rasterTreeWidget->setColumnWidth(0,40);
 	ui->rasterTreeWidget->setColumnWidth(1,20);
-	//TODO The fourth column is fake... solo per ora, è per evitare che l'ultimacolonna si allunghi indefinitivamente
-	//mettere una lunghezza fissa è inutile perchè non so quanto è lungo il nome.
+	//TODO The fourth column is fake... solo per ora, E' per evitare che l'ultimacolonna si allunghi indefinitivamente
+	//mettere una lunghezza fissa e' inutile perche' non so quanto e' lungo il nome.
 	ui->rasterTreeWidget->header()->hide();
 	foreach(RasterModel* rmd, md->rasterList)
 	{
@@ -323,8 +323,8 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 	if(mItem){
 		int meshId = mItem->m->id();
 		bool ok;
-		int tagId = mItem->text(2).toInt(&ok);
-		if(ok)
+    int tagId = mItem->text(2).toInt(&ok);
+    if(ok && tagId >=0 )
 			//MeshTreeWidgetItems don't have a tag id, so we use -1
 			updateExpandedMap(meshId, -1, item->isExpanded());
 	}
