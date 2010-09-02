@@ -54,7 +54,15 @@ FORMS = ui/layerDialog.ui \
     ui/savemaskexporter.ui \
     ui/congratsDialog.ui \
 	ui/scriptEditor.ui
+
+	
+	win32-msvc2005: RCC_DIR = $(ConfigurationName)
+	win32-msvc2008: RCC_DIR = $(ConfigurationName)
+
+
 RESOURCES = meshlab.qrc
+
+
 
 # to add windows icon
 RC_FILE = meshlab.rc
