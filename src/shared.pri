@@ -69,3 +69,7 @@ contains(TEMPLATE,lib) {
       else:TARGET = $$member(TARGET, 0)d
    }
 }
+
+
+	win32-msvc2005: RCC_DIR = $(ConfigurationName)
+	win32-msvc2008: RCC_DIR = $(ConfigurationName)
