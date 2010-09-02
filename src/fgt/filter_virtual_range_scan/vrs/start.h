@@ -118,7 +118,7 @@ namespace vrs
             currentPov++;
             if( res->params->useCustomPovs )
             {
-                return ( currentPov < res->params->customPovs.size() );
+                return ( currentPov < (int)res->params->customPovs.size() );
             }
             else
             {

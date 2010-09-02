@@ -25,6 +25,12 @@
 #include <QtGui>
 
 #include "filter_virtual_range_scan.h"
+#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/trimesh/update/position.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/append.h>
 
 using namespace std;
 using namespace vcg;
@@ -70,6 +76,10 @@ void FilterVirtualRangeScan::initParameterSet(QAction* filter,MeshDocument &md, 
         par.addParam( new RichDynamicFloat( "xConeAxis", 0.0f, -1.0f, 1.0f, "Cone axis (X):", "The X component of povs looking cone's axis.") );
         par.addParam( new RichDynamicFloat( "yConeAxis", 1.0f, -1.0f, 1.0f, "Cone axis (Y):", "The Y component of povs looking cone's axis.") );
         par.addParam( new RichDynamicFloat( "zConeAxis", 0.0f, -1.0f, 1.0f, "Cone axis (Z):", "The Z component of povs looking cone's axis.") );
+
+        par.addParam( new RichBool( "useCustomPovs", false, "Use povs contained in the following layer, ignoring the above parameters", "" ) );
+        par.addParam( new RichMesh( "povsLayer", md.mm(), &md, "Povs layer:", "" ) );
+
         par.addParam( new RichDynamicFloat( "coneGap", 360.0f, 0.0f, 360.0f, "Cone gap:", "The looking cone gap (in degrees).") );
         par.addParam( new RichInt( "uniform_side", 64, "Uniform sampling resolution:",
                                    "The mesh will be sampled uniformly from a texture of v x v pixels, where v is the chosen value.") );
@@ -95,6 +105,7 @@ void FilterVirtualRangeScan::initParameterSet(QAction* filter,MeshDocument &md, 
                                             "less or equal 1/100th of (0.6 - 0.4) = 0.2.") );
         par.addParam( new RichDynamicFloat( "normalsAngle", 60, 0, 180, "Normals angle threshold:",
                                             "The minimum angle between neighbour pixels normals for the center pixel to be considered feature.") );
+
         par.addParam( new RichBool( "oneMesh", true, "Unify uniform and feature samples",
                                     QString("If checked, generates a unique mesh that contains both uniform and feature samples.<br />") +
                                     "If not checked, generates two output meshes: the first contains uniform samples and the second contains feature samples.") );
@@ -111,11 +122,30 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
     {
     case FP_VRS:
 
-        vrsParams.povs = par.getInt( "povs" );
-        vrsParams.coneAxis[ 0 ] = par.getDynamicFloat( "xConeAxis" );
-        vrsParams.coneAxis[ 1 ] = par.getDynamicFloat( "yConeAxis" );
-        vrsParams.coneAxis[ 2 ] = par.getDynamicFloat( "zConeAxis" );
-        vrsParams.coneGap = par.getDynamicFloat( "coneGap" );
+        bool useLayerPovs = par.getBool( "useCustomPovs" );
+        if( useLayerPovs )
+        {
+            MeshModel* tmpMesh = par.getMesh( "povsLayer" );
+            assert( tmpMesh );
+            CMeshO::PerMeshAttributeHandle< std::vector<Pov>  > povs_handle;
+            povs_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<Pov> > (tmpMesh->cm,"pointofviews");
+            if (!vcg::tri::Allocator<CMeshO>::IsValidHandle(tmpMesh->cm,povs_handle) )
+            {
+                errorMessage = "Can't apply the filter because the selected layer contains no point of views.";
+                return false;
+            }
+
+            vrsParams.customPovs = povs_handle(); // copies the povs data
+        }
+        else
+        {
+            vrsParams.povs = par.getInt( "povs" );
+            vrsParams.coneAxis[ 0 ] = par.getDynamicFloat( "xConeAxis" );
+            vrsParams.coneAxis[ 1 ] = par.getDynamicFloat( "yConeAxis" );
+            vrsParams.coneAxis[ 2 ] = par.getDynamicFloat( "zConeAxis" );
+            vrsParams.coneGap = par.getDynamicFloat( "coneGap" );
+        }
+
         vrsParams.uniformResolution = par.getInt( "uniform_side" );
         vrsParams.featureResolution = par.getInt( "features_side" );
         vrsParams.frontFacingConeU = par.getDynamicFloat( "frontFacingConeU" );
@@ -125,9 +155,7 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
         vrsParams.angleThreshold = par.getDynamicFloat( "normalsAngle" );
         vrsParams.attributeMask = VRSParameters::POSITION |
                                   VRSParameters::NORMAL;
-
-        // we don't want to use custom povs
-        vrsParams.useCustomPovs = false;
+        vrsParams.useCustomPovs = useLayerPovs;
 
         bool oneMesh = par.getBool( "oneMesh" );
         MeshModel* curMeshModel = md.mm();
