@@ -391,7 +391,7 @@ FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *a)
 	}
 }
 
-QTreeWidgetItem * FilterMeasurePlugin::tagDump(TagBase * _tag, MeshDocument &md, MeshModel *mm)
+QTreeWidgetItem * FilterMeasurePlugin::tagDump(TagBase * _tag, MeshDocument &/*md*/, MeshModel */*mm*/)
 {
 	MeasureTopoTag *tag = (MeasureTopoTag *) _tag;
 	QTreeWidgetItem *newTag = new QTreeWidgetItem();
