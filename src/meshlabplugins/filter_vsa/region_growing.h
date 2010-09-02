@@ -162,53 +162,39 @@ void PushHeap(std::vector<FaceType*> & candi, RegionType & r){
         }
 
 bool IsRelaxed(){
-			
-                        ScalarType _ave_error=0;
-                        ScalarType _ave_var= 0;
-                        ScalarType _changed=0,nr=0;
-			bool itis = true;
+    ScalarType _ave_error=0;
+    ScalarType _ave_var= 0;
+    ScalarType _changed = 0.0;
+    int nr=0;
+;
 
-                        typename std::list<RegionType>::iterator ri;
-			worst=NULL;; 
-			worst_err = -1; 
-			printf("working set size: %d\n",workingset.size());
-			for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd){
-				++nr;
-				(*ri).UpdateError();
-				_ave_error+=(*ri).approx_err;
-				_ave_var+=(*ri).approx_var;
-				_changed+=(*ri).changed;
-				(*ri).changed=0;
-				//faceserr.push_back((*ri).worst);
-				//push_heap(faceserr.begin(),faceserr.end());
-				if((*ri).worst.val*(*ri).size > worst_err){
-							worst = (*ri).worst.f;
-							worst_err = (*ri).worst.val*(*ri).size;
-				}
-			}
+    typename std::list<RegionType>::iterator ri;
+    worst=NULL;;
+    worst_err = -1;
+    qDebug("working set size: %d\n",workingset.size());
+    for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd){
+            ++nr;
+            (*ri).UpdateError();
+            _ave_error+=(*ri).approx_err;
+            _ave_var+=(*ri).approx_var;
+            _changed+=(*ri).changed;
+            (*ri).changed=0;
+            //faceserr.push_back((*ri).worst);
+            //push_heap(faceserr.begin(),faceserr.end());
+            if((*ri).worst.val*(*ri).size > worst_err){
+                                    worst = (*ri).worst.f;
+                                    worst_err = (*ri).worst.val*(*ri).size;
+            }
+    }
 
 
-			_ave_error/=nr;
-			_ave_var/=nr;
-			_changed/=n_faces;
+    _ave_error/=nr;
+    _ave_var/=nr;
+    _changed/=n_faces;
 
-                        qDebug("%f %f %f-------",_ave_error,_ave_var,_changed);
-			//(*regions.begin()).CutOff(worst);
+    qDebug("Err:%f Changed: %f-------",_ave_error,_changed);
 
-			if(ave_error==-1) itis=false;
-			else
-			if (_changed<changed) itis=false;
-//			else
-//				if (_ave_error<ave_error) itis=false;
-
-			ave_error=_ave_error;
-			ave_var=_ave_var;
-			changed = _changed;
-			//return false;
-			return true;
-			if  (itis && (n_steps!=1)){printf("RELAXED\n"); return true;}
-
-			else return false;
+    return false;
 
 		}
 	

@@ -327,6 +327,7 @@ void PlanarRegion< MeshType>::CutOff(FaceType*f){
 template<class MeshType>
 void PlanarRegion< MeshType>:: ComputeShot( int *vpsize, int pps , std::vector<Pov > &  povs ){
 
+
     assert(!face.empty());
 
     CoordType pn = face[0]->V(0)->P();
@@ -337,7 +338,18 @@ void PlanarRegion< MeshType>:: ComputeShot( int *vpsize, int pps , std::vector<P
     vcg::Point2<ScalarType> p2;
     vcg::Box2<ScalarType> box;
 
+    // make sure the plane does not intersect the triangles
+   float delta = 0.0, projz;
+    for(FaceIterator fi = face.begin(); fi != face.end(); ++fi)
+        for(int i = 0; i < 3; ++i){
+        projz = ((**fi).V(i)->P() - ori) * p.Direction();
+        if(  projz > delta)
+            delta = projz;
+    }
+
     // project all the vertices on the approximating plane and create the bbox 2d
+    ori+=p.Direction()*delta;
+    p.Init(ori,p.Direction());
     for(FaceIterator fi = face.begin(); fi != face.end(); ++fi)
         for(int i = 0; i < 3; ++i){
             pn = this->p.Projection((**fi).V(i)->P());

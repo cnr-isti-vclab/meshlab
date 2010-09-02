@@ -57,16 +57,6 @@ VsaPlugin::VsaPlugin()
 }
 
 VsaPlugin::~VsaPlugin(){
-//    typedef RegionGrower<CMeshO>::Pov Pov;
-//    CMeshO::PerMeshAttributeHandle<RegionGrower<CMeshO> * > rg_handle;
-//    rg_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<RegionGrower<CMeshO> *> (md.mm()->cm,"regiongrower");
-//    if (vcg::tri::Allocator<CMeshO>::IsValidHandle(md.mm()->cm,rg_handle) && (  rg_handle() != NULL))
-//            delete rg_handle();
-//
-//    CMeshO::PerMeshAttributeHandle<std::vector<Pov> * > povs_handle;
-//    povs_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<Pov> *> (md.mm()->cm,"pointofviews");
-//    if (vcg::tri::Allocator<CMeshO>::IsValidHandle(md.mm()->cm,povs_handle) && (  povs_handle() != NULL))
-//            delete povs_handle();
 
 }
 
@@ -104,7 +94,7 @@ void VsaPlugin::initParameterSet(QAction *action,MeshDocument &  m , RichParamet
                   parlst.addParam(new RichInt ("MaxPatches", 10,"maximum number of patches to use"));
                   parlst.addParam(new RichBool ("ComputeSamplingViews", false,"Also compute the view for sampling",""));
                   parlst.addParam(new RichInt ("Width", 1024,"width of the viewport"));
-                  parlst.addParam(new RichInt ("Heigth", 512,"height of the viewport"));
+                  parlst.addParam(new RichInt ("Height", 512,"height of the viewport"));
                   parlst.addParam(new RichInt ("Resolution", 10000,"Linear resolution: number of samples along the diagonal of the bbox"));
                   break;
 
@@ -135,7 +125,7 @@ bool VsaPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
                         rg_handle().Refill();
 
 
-                        for(int ns = 0; ns < 20; ++ns)
+                        for(int ns = 0; ns < 10*maxpatches; ++ns)
                             rg_handle().GrowStep();
 
                         for(  RegionGrower<CMeshO>::TriRegIterator ti = rg_handle().regions.begin(); ti != rg_handle().regions.end(); ++ti)
@@ -151,7 +141,7 @@ bool VsaPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
                             vpsize[1] = par.getInt("Height");
                             pps = par.getInt("Resolution");
                             Log("Computing Views");
-                            rg_handle().ComputeShots(vpsize,pps);
+                            rg_handle().ComputeShots(vpsize,float(pps)/md.mm()->cm.bbox.Diag());
 
                             CMeshO::PerMeshAttributeHandle<std::vector<Pov>  > povs_handle;
                             povs_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<Pov> > (md.mm()->cm,"pointofviews");
