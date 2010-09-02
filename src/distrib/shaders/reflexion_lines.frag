@@ -34,7 +34,7 @@ uniform float Smoothing;
 uniform float Shading;
 
 float arcSinus(float x) {
-	return x * (1 + x*x * ((1.0/6.0) + x*x * ((3.0/40.0) + (15.0/336.0)*x*x)));
+	return x * (1.0 + x*x * ((1.0/6.0) + x*x * ((3.0/40.0) + (15.0/336.0)*x*x)));
 }
 
 void main (void)

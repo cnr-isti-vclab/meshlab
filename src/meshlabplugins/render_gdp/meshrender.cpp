@@ -44,12 +44,12 @@ void MeshShaderRenderPlugin::initActionList() {
 	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins"  )
 		shadersDir.cdUp();
 #elif defined(Q_OS_MAC)
-	if (shadersDir.dirName() == "MacOS") {
+//	if (shadersDir.dirName() == "MacOS") {
 		for(int i=0;i<6;++i){
 			if(shadersDir.exists("shaders")) break;
 			shadersDir.cdUp();
 		}
-	}
+//	}
 #endif
 	bool ret=shadersDir.cd("shaders");
   if(!ret) 
@@ -188,8 +188,9 @@ void MeshShaderRenderPlugin::initActionList() {
 						
 						//Textures
 						
-						shadersDir.cdUp();
-						shadersDir.cd("textures");
+            QDir textureDir(shadersDir);
+            textureDir.cdUp();
+            textureDir.cd("textures");
 						elem = root.firstChildElement("TexturedUsed");
 						if (!elem.isNull()) {
 							QDomNode unif = elem.firstChild();
@@ -209,8 +210,6 @@ void MeshShaderRenderPlugin::initActionList() {
 								unif = unif.nextSibling();
 							}
 						}
-						shadersDir.cdUp();
-						shadersDir.cd("shaders");
 
 						//End Textures
 
@@ -220,15 +219,18 @@ void MeshShaderRenderPlugin::initActionList() {
 						qa->setCheckable(false);
 						actionList << qa;
 					}
-				} else {
+          else qDebug("Failed root.nodeName() == GLSLang) (for %s)",qPrintable(fileName));
+        } else {
+          qDebug("Failed doc.setContent(%s)",qPrintable(fileName));
 					file.close();
 				}
 			}
+      else  qDebug("Failed file.open(%s)",qPrintable(shadersDir.absoluteFilePath(fileName)));
 		}
 	}
 }
 
-void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla) 
+void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, RenderMode &rm, QGLWidget *gla)
 {
 	if (sDialog) {
 		sDialog->close();

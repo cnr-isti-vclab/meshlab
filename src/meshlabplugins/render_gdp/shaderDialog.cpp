@@ -69,7 +69,7 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QW
 
 		qgrid->addWidget(varNameLabel, row, 0);
 
-		int varNum = getVarsNumber(i->second.type);
+    int varNum = UniformVariable::getVarsNumber(i->second.type);
 
 		switch (i->second.widget) {
 
@@ -270,7 +270,7 @@ void ShaderDialog::setColorValue(const QString &varName)
 
 		}
 	}
-	glarea->updateGL();
+  glarea->update();
 }
 
 
@@ -301,7 +301,7 @@ void ShaderDialog::valuesChanged(const QString &varNameAndIndex) {
 			}
 												} break;
 	}
-	glarea->updateGL();
+  glarea->update();
 
 }
 
@@ -312,7 +312,7 @@ void ShaderDialog::setColorMode(int state) {
 	} else {
 		rendMode->colorMode = GLW::CMNone;
 	}
-	glarea->updateGL();
+  glarea->update();
 }
 
 void ShaderDialog::changeTexturePath(int i) {
@@ -371,5 +371,5 @@ void ShaderDialog::reloadTexture(int i) {
 	glTexParameteri( shaderInfo->textureInfo[i].Target, GL_TEXTURE_WRAP_T, shaderInfo->textureInfo[i].WrapT ); 
 	glTexParameteri( shaderInfo->textureInfo[i].Target, GL_TEXTURE_WRAP_R, shaderInfo->textureInfo[i].WrapR ); 
 
-	glarea->updateGL();
+  glarea->update();
 }

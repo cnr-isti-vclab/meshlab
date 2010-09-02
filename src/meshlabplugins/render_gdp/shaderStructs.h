@@ -28,6 +28,16 @@
 #include <QString>
 #include <vector>
 
+
+
+enum {
+  SINGLE_INT = 1,
+  SINGLE_FLOAT = 5,
+  ARRAY_2_FLOAT = 6,
+  ARRAY_3_FLOAT = 7,
+  ARRAY_4_FLOAT = 8
+};
+
 struct UniformVariable {
 	short type;
 	short widget;
@@ -39,6 +49,16 @@ struct UniformVariable {
 		int ival[4];
 		float fval[4];
 	};
+  static int getVarsNumber(int i) {
+    switch (i) {
+      case SINGLE_INT: return 1; break;
+      case SINGLE_FLOAT: return 1; break;
+      case ARRAY_2_FLOAT: return 2; break;
+      case ARRAY_3_FLOAT: return 3; break;
+      case ARRAY_4_FLOAT: return 4; break;
+      default: return 0; break;
+    }
+  }
 };
 
 struct TextureInfo {
@@ -61,25 +81,6 @@ struct ShaderInfo {
 	std::vector<TextureInfo> textureInfo;
 	int shaderProg;
 };
-
-enum {
-	SINGLE_INT = 1,
-	SINGLE_FLOAT = 5,
-	ARRAY_2_FLOAT = 6,
-	ARRAY_3_FLOAT = 7,
-	ARRAY_4_FLOAT = 8
-};
-
-static int getVarsNumber(int i) {
-	switch (i) {
-		case SINGLE_INT: return 1; break; 
-		case SINGLE_FLOAT: return 1; break;
-		case ARRAY_2_FLOAT: return 2; break;
-		case ARRAY_3_FLOAT: return 3; break;
-		case ARRAY_4_FLOAT: return 4; break;
-		default: return 0; break;
-	}
-}
 
 
 enum {
