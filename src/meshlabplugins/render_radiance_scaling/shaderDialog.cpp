@@ -65,12 +65,12 @@ void ShaderDialog::enableChanged(int) {
   bool enableChecked = (_ui.enableCheckBox->checkState()==Qt::Checked) ? true : false;
 
   _wrp->setEnable(enableChecked);
-  _gla->updateGL();
+  _gla->update();
 }
 
 void ShaderDialog::invertChanged(int) {
   (_ui.invertCheckBox->checkState()==Qt::Checked) ? _wrp->setInvert(true) : _wrp->setInvert(false);
-  _gla->updateGL();
+  _gla->update();
 }
 
 void ShaderDialog::displayChanged(int index) {
@@ -96,7 +96,7 @@ void ShaderDialog::displayChanged(int index) {
   }
   
   _wrp->setDisplay(index);
-  _gla->updateGL();
+  _gla->update();
 }
 
 void ShaderDialog::enhancementChanged(int value) {
@@ -106,7 +106,7 @@ void ShaderDialog::enhancementChanged(int value) {
   s.setNum(val,'f',2); 
   _ui.enLabel->setText(s);
   _wrp->setEnhancement(val);
-  _gla->updateGL();
+  _gla->update();
 }
 
 void ShaderDialog::transitionChanged(int value) {
@@ -116,7 +116,7 @@ void ShaderDialog::transitionChanged(int value) {
   s.setNum(val,'f',2); 
   _ui.transitionLabel->setText(s);
   _wrp->setTransition(val);
-  _gla->updateGL();
+  _gla->update();
 }
 
 void ShaderDialog::litChanged(int) {
@@ -140,7 +140,7 @@ void ShaderDialog::litChanged(int) {
   }
   
   _wrp->setLit(doubleLit);
-  _gla->updateGL();
+  _gla->update();
 }
 
 void ShaderDialog::changeIcon(QString path,int icon) {
@@ -170,7 +170,7 @@ void ShaderDialog::load1Clicked() {
   changeIcon(filename,convex_icon);
 
   _wrp->setConvexLit(filename);
-  _gla->updateGL();
+  _gla->update();
 }
 
 void ShaderDialog::load2Clicked() {
@@ -183,5 +183,5 @@ void ShaderDialog::load2Clicked() {
   changeIcon(filename,concav_icon);
 
   _wrp->setConcavLit(filename);
-  _gla->updateGL();
+  _gla->update();
 }
