@@ -186,7 +186,9 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 {
 	switch (filterID)
 	{
-		case FP_LOOP_SS                          : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");
+		case FP_LOOP_SS                          : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices.<br/><br/>"
+																												 "Alternatives weighting schemes are based on the paper <i>Barthe, L. & Kobbelt, L.</i> <b>Subdivision scheme tuning around extraordinary vertices</b> Computer Aided Geometric Design, 2004, 21, 561-583.<br/>"
+																												 "The current implementation of these schemes don't handle vertices of valence > 12.");
 		case FP_BUTTERFLY_SS                     : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");
 		case FP_MIDPOINT                         : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint");
 		case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
@@ -220,8 +222,9 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_VATTR_SEAM                       : return tr("Make all selected vertex attributes connectivity-independent:<br/>"
 		                                                     "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
 		                                                     "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
-		case FP_REFINE_LS3_LOOP									 : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This subdivision method take normals into account."
-																												 "\n\nWarning ! After subivision, vertices's normals will be excessively smoothed. You will need to recompute them.");
+		case FP_REFINE_LS3_LOOP									 : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This subdivision method take normals into account. See <i>Boyé, S. Guennebaud, G. & Schlick, C.</i> <b>Least squares subdivision surfaces</b> Computer Graphics Forum, 2010.<br/><br/>"
+																												 "Alternatives weighting schemes are based on the paper <i>Barthe, L. & Kobbelt, L.</i> <b>Subdivision scheme tuning around extraordinary vertices</b> Computer Aided Geometric Design, 2004, 21, 561-583.<br/>"
+																												 "The current implementation of these schemes don't handle vertices of valence > 12");
 
 		default                                  : assert(0);
 	}
