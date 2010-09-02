@@ -262,22 +262,9 @@ private:
 
 	///////// Menus ///////////////
 	QMenu *fileMenu;
-	//QMenu *fileMenuNew;
-	QMenu *filterMenu;
-	QMenu *filterMenuSelect;
-  QMenu *filterMenuCreate;
-  QMenu *filterMenuClean;
-  QMenu *filterMenuRemeshing;
-	QMenu *filterMenuColorize;
-  QMenu *filterMenuSmoothing;
-  QMenu *filterMenuQuality;
-	QMenu *filterMenuNormal;
+  QMenu *filterMenu;
   QMenu *filterMenuLayer;
-  QMenu *filterMenuRangeMap;
-  QMenu *filterMenuPointSet;
-  QMenu *filterMenuSampling;
-	QMenu *filterMenuTexture;
-
+  QMenu *filterMenuCreate;
 	QMenu *editMenu;
 
   //Render Menu and SubMenu ////
@@ -332,7 +319,7 @@ private:
 	QAction *renderModeTextureAct;
 	QAction *setDoubleLightingAct;
 	QAction *setFancyLightingAct;
-    QAction *setLightAct;
+  QAction *setLightAct;
 	QAction *backFaceCullAct;
   QAction *setSelectFaceRenderingAct;
   QAction *setSelectVertRenderingAct;

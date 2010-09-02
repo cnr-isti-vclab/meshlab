@@ -241,7 +241,8 @@ public:
         Texture          =0x00800,
         RangeMap         =0x01000, /*!<  filters specific for range map processing*/
         PointSet         =0x02000,
-        Measure          =0x04000  /*!<  Filters that compute measures and information on meshes.*/
+        Measure          =0x04000,  /*!<  Filters that compute measures and information on meshes.*/
+        Polygonal        =0x08000  /*!<  Filters that works on polygonal and quad meshes.*/
     };
 	
 	

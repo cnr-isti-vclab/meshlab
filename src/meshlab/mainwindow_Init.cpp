@@ -436,19 +436,6 @@ void MainWindow::createMenus()
 	filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addAction(showScriptEditAct);
 	filterMenu->addSeparator();
-	filterMenuSelect = filterMenu->addMenu(tr("Selection"));
-	filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));
-  filterMenuCreate = filterMenu->addMenu(tr("Create New Mesh Layer"));
-	filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing, simplification and reconstruction"));
-	filterMenuColorize = filterMenu->addMenu(tr("Color Creation and Processing"));
-	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
-	filterMenuQuality = filterMenu->addMenu(tr("Quality Measure and computations"));
-	filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
-	filterMenuLayer = filterMenu->addMenu(tr("Layer and Attribute Management"));
-	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
-	filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
-	filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
-	filterMenuTexture = filterMenu->addMenu(tr("Texture"));
 	
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
@@ -545,7 +532,23 @@ void MainWindow::createMenus()
 
 void MainWindow::fillFilterMenu(){
   // Connects the events of the actions within colorize to the method which shows their tooltip
-  connect(filterMenuColorize, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+
+  QMenu *filterMenuSelect = filterMenu->addMenu(tr("Selection"));
+  QMenu *filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));
+         filterMenuCreate = filterMenu->addMenu(tr("Create New Mesh Layer"));
+  QMenu *filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing, simplification and reconstruction"));
+  QMenu *filterMenuPolygonal = filterMenu->addMenu(tr("Polygonal and Quad Mesh"));
+  QMenu *filterMenuColorize = filterMenu->addMenu(tr("Color Creation and Processing"));
+  QMenu *filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
+  QMenu *filterMenuQuality = filterMenu->addMenu(tr("Quality Measure and computations"));
+  QMenu *filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
+         filterMenuLayer = filterMenu->addMenu(tr("Layer and Attribute Management"));
+  QMenu *filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
+  QMenu *filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
+  QMenu *filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
+  QMenu *filterMenuTexture = filterMenu->addMenu(tr("Texture"));
+
+  connect(filterMenu, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
 
   QMap<QString,MeshFilterInterface *>::iterator msi;
   for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
@@ -571,6 +574,7 @@ void MainWindow::fillFilterMenu(){
       if( filterClass & MeshFilterInterface::PointSet )       filterMenuPointSet->addAction(filterAction);
       if( filterClass & MeshFilterInterface::Sampling )       filterMenuSampling->addAction(filterAction);
       if( filterClass & MeshFilterInterface::Texture)         filterMenuTexture->addAction(filterAction);
+      if( filterClass & MeshFilterInterface::Polygonal)       filterMenuPolygonal->addAction(filterAction);
       //  MeshFilterInterface::Generic :
       if(filterClass == 0)                                    filterMenu->addAction(filterAction);
       if(!filterAction->icon().isNull())                      filterToolBar->addAction(filterAction);
