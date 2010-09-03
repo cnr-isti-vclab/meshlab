@@ -39,7 +39,7 @@ class DustParticle{
     typedef typename MeshType::FacePointer  FacePointer;
 public:
     DustParticle(){
-
+    mass=1;
     };
 
     ~DustParticle(){};

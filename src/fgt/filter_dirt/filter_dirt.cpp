@@ -114,7 +114,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         Point3f dir;
         Point3f new_bar_coords;
         dir[0]=0;
-        dir[1]=1;
+        dir[1]=0.1;
         dir[2]=0;
         if(dmesh!=0){
                    CMeshO::VertexIterator vi;//= dmesh->cm.vert.begin();
@@ -122,8 +122,12 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 
                    for(vi=dmesh->cm.vert.begin();vi!=dmesh->cm.vert.end();++vi){
 
-                       new_bar_coords = StepForward((*vi).P(),*(pi[vi].face),dir);
+                       //new_bar_coords = StepForward((*vi).P(),*(pi[vi].face),dir);
+                       (*vi).P()=fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
+
+
                        //(*vi).P()=
+                   /*
                        if(new_bar_coords[0]<0 || new_bar_coords[1]<0 || new_bar_coords[2]<0){
                        //The new position is outside
 
@@ -134,6 +138,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
                        (*vi).P()=fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
 
                        }
+                   */
                    }
               }
 

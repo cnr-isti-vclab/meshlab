@@ -83,21 +83,37 @@ CMeshO::CoordType toBarCoords(CMeshO::CoordType c,CMeshO::FaceType &face){
 */
 
 CMeshO::CoordType StepForward(CMeshO::CoordType p, CMeshO::FaceType &face, CMeshO::CoordType dir){
-
-    int angle = acos(p.dot(dir)/(p.Norm()*dir.Norm()));
-
+    int t=1;
     Point3<float> new_pos;
 
-    if(angle!=0){
-        new_pos=face.P(0);/*Just to do something*/
-    }
+    Point3<float> n= face.N();
+    float b=n[0]*dir[0]+n[1]*dir[1]+n[2]*dir[2];
+    float a=dir.dot(n);
+    Point3<float> f;
+    //Calcolo la componente della forza lungo il piano
+    f[0]=dir[0]-a*n[0];
+    f[1]=dir[1]-a*n[1];
+    f[2]=dir[2]-a*n[2];
 
-    /*Conversion to barycentric coords*/
+    new_pos[0]=p[0]+0.5*f[0]*t*t;
+    new_pos[1]=p[1]+0.5*f[1]*t*t;
+    new_pos[2]=p[2]+0.5*f[2]*t*t;
+
+
+    /*
+    int angle = acos(p.dot(dir)/(p.Norm()*dir.Norm()));
+
+
+    if(angle!=0){
+        new_pos=face.P(0);//Just to do something
+    }
+    //Conversion to barycentric coords
+
+    */
     Point3<float> bar_coords;
     InterpolationParameters(face,face.N(),new_pos,bar_coords);
 
     return bar_coords;
-
 };
 
 void DrawDirt(MeshDocument &md,std::vector<Point3f> &dp){
