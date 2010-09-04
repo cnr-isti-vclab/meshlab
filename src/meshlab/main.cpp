@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
 		}
 	
   MainWindow window;
-  window.showMaximized();
+  window.show();
+  // window.showMaximized();
 
   // This event filter is installed to intercept the open events sent directly by the Operative System.
   FileOpenEater *filterObj=new FileOpenEater(&window);
