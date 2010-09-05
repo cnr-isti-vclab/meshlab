@@ -2,6 +2,8 @@
 #include "float.h"
 #include "math.h"
 #include "vcg/complex/trimesh/update/curvature.h"
+// #include "vcg/complex/trimesh/update/curvature_fitting.h"
+
 
 using namespace vcg;
 
@@ -63,7 +65,7 @@ bool Balloon::initializeField(){
     
     // Shared data
     enum INITMODE {BIFACEINTERSECTIONS, FACEINTERSECTIONS, BOXINTERSECTIONS} mode;
-    mode = FACEINTERSECTIONS;
+    mode = BIFACEINTERSECTIONS;
     const float ONETHIRD = 1.0f/3.0f;
     float t,u,v; // Ray-Triangle intersection parameters
     Point3f fcenter;
@@ -159,6 +161,7 @@ bool Balloon::initializeField(){
             // the values of t,u,v directly as a t<0 is accepted as intersecting.
             for(unsigned int i=0; i<prays.size(); i++){
                 vcg::IntersectionRayTriangle<float>(prays[i]->ray, f.P(0), f.P(1), f.P(2), t, u, v);
+                                
                 // If the ray falls within the domain of the face
                 if( u>=0 && u<=1 && v>=0 && v<=1 ){
                     // If no face was associated with this ray or this face is closer
@@ -177,6 +180,12 @@ bool Balloon::initializeField(){
         for(unsigned int i=0; i<gridAccell.rays.size(); i++){
             // Retrieve the corresponding face and signed distance
             Ray3f& ray = gridAccell.rays[i].ray;
+            // Removing degenerate triangles could cause a ray to fail the intersection test!!
+            if( gridAccell.rays[i].f == NULL){
+                qDebug() << "warning: ray #" << i << "has provided NULL intersection";
+                         // << toString(ray.Origin()) << " " << toString(ray.Direction());
+                continue;
+            }
             CFaceO& f = *(gridAccell.rays[i].f);
             float t = gridAccell.rays[i].t;
             assert( !math::IsNAN(t) );
@@ -194,6 +203,15 @@ bool Balloon::initializeField(){
             finterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA*(u), t );
             finterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA*(v), t );
         }
+        
+        //--- Normalize in case there is more than 1 ray per-face
+        for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
+            if( tot_w[ tri::Index(surf,*fi) ] > 0 )
+                fi->Q() /= tot_w[ tri::Index(surf,*fi) ];
+        }
+        //--- Transfer the average distance stored in face quality to a color
+        //    and do it only for the selection (true)
+        tri::UpdateColor<CMeshO>::FaceQualityRamp(surf, true);
     }
     
     return true;
@@ -221,7 +239,9 @@ void Balloon::computeCurvature(){
     surf.face.EnableFFAdjacency();
     vcg::tri::UpdateTopology<CMeshO>::VertexFace( surf );
     vcg::tri::UpdateTopology<CMeshO>::FaceFace( surf );
-
+  
+    // tri::UpdateCurvatureFitting<CMeshO>::computeCurvature( surf );            
+             
     //--- Compute curvature and its bounds
     tri::UpdateCurvature<CMeshO>::MeanAndGaussian( surf );
     float absmax = -FLT_MAX;
@@ -339,27 +359,28 @@ void Balloon::evolveBalloon(){
 
         //--- Apply the update on the implicit field
         if( surf.vert.QualityEnabled ){
-            v.sfield += .25*k1*k2*vol.getDelta();
+            v.sfield += vcg::sign( .25f*k1*k2*vol.getDelta(), updates_view[i]);
         }
         // if we don't have computed the distance field, we don't really know how to
         // modulate the laplacian accordingly...
+#ifdef ENABLE_CURVATURE_IN_EVOLUTION
         if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled ){
           v.sfield += .1*k3*k2;
         }
         else if( surf.vert.CurvatureEnabled ){
           v.sfield += .1*k3;     
         }
+#endif
     }
 
-    //--- DEBUG LINES: what's being updated
+    //--- DEBUG LINES: what's being updated (cannot put above cause it's in a loop)
     if( surf.vert.QualityEnabled )
       qDebug() << "updating implicit function using distance field";
     if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled )
       qDebug() << "updating implicit function using (modulated) curvature";  
     else if( surf.vert.CurvatureEnabled )
       qDebug() << "updating implicit function using (unmodulated) curvature";  
-    
-    
+       
     //--- Estrai isosurface
     vol.isosurface( surf, 0 );
 

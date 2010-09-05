@@ -116,9 +116,9 @@ void VaseWidget::on_iterationButton_released(){
     }
 }
 void VaseWidget::on_refreshButton_released(){
-    bool op_failed = balloon->initializeField();
+    bool op_succeeded = balloon->initializeField();
     balloon->render(gla); // why is this here????
-    gla->log->Logf(GLLogStream::FILTER, "Refreshed view-based distance field %s", ((op_failed)?"**FAILED!**":"completed") );
+    gla->log->Logf(GLLogStream::FILTER, "Refreshed view-based distance field %s", ((op_succeeded)?"completed":"**FAILED!**") );
     gla->update();
 }
 void VaseWidget::on_interpButton_released(){

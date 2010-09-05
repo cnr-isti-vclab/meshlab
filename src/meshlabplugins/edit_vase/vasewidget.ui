@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>410</width>
-    <height>754</height>
+    <height>788</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -213,7 +213,7 @@
            <item>
             <widget class="QSpinBox" name="numItersSpin">
              <property name="value">
-              <number>36</number>
+              <number>1</number>
              </property>
             </widget>
            </item>

@@ -36,8 +36,11 @@ public:
     CMeshO surf;
     /// Accellerator for ray-surface intersection
     GridAccell gridAccell;
-    /// Scalar field interpolator
+    /// Scalar field interpolator (one constraint per poking ray)
     FieldInterpolator finterp;
+    /// Smootfield interpolator (one constraint per vertex)
+    // FieldInterpolator sinterp;
+    
     /// Defines the rendering style of the ballon
     RenderModes rm;
     /// Keeps track of the number of evolution iterations done
