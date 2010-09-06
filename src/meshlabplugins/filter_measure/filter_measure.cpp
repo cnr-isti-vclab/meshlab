@@ -87,8 +87,8 @@ FilterMeasurePlugin::FilterMeasurePlugin()
     case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature");
     case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION :  return QString("Per Vertex Quality Stat");
     case FP_MEASURE_FACE_QUALITY_DISTRIBUTION :  return QString("Per Face Quality Stat");
-    case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM :  return QString("Histogram of Quality Per Vertex");
-    case FP_MEASURE_FACE_QUALITY_HISTOGRAM :  return QString("Histogram of Quality Per Vertex");
+    case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM :  return QString("Per Vertex Quality Histogram");
+    case FP_MEASURE_FACE_QUALITY_HISTOGRAM :  return QString("Per Face Quality Histogram");
   default : assert(0);
 	}
 }
