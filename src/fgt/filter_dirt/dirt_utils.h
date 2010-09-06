@@ -46,7 +46,7 @@ CMeshO::CoordType fromBarCoords(CMeshO::CoordType b,CMeshO::FaceType &face){
 
 /*
 TO DELETE
-
+*/
 CMeshO::CoordType toBarCoords(CMeshO::CoordType c,CMeshO::FaceType &face){
 
     CMeshO::CoordType b;
@@ -72,7 +72,7 @@ CMeshO::CoordType toBarCoords(CMeshO::CoordType c,CMeshO::FaceType &face){
     return b;
 };
 
-*/
+
 /*
   @description Simulate the movement of a point, affected by a force "dir" on a face.
 
@@ -90,7 +90,7 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p, CMeshO::FaceType &face, CMesh
     float b=n[0]*dir[0]+n[1]*dir[1]+n[2]*dir[2];
     float a=dir.dot(n);
     Point3<float> f;
-    //Calcolo la componente della forza lungo il piano
+    //Calcolo le componenti della forza lungo il piano
     f[0]=dir[0]-a*n[0];
     f[1]=dir[1]-a*n[1];
     f[2]=dir[2]-a*n[2];
@@ -100,19 +100,22 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p, CMeshO::FaceType &face, CMesh
     new_pos[2]=p[2]+0.5*f[2]*t*t;
 
 
-    /*
+/*
     int angle = acos(p.dot(dir)/(p.Norm()*dir.Norm()));
 
 
     if(angle!=0){
         new_pos=face.P(0);//Just to do something
     }
+
+*/
+
     //Conversion to barycentric coords
-
-    */
-    Point3<float> bar_coords;
-    InterpolationParameters(face,face.N(),new_pos,bar_coords);
-
+    CMeshO::CoordType bar_coords;
+    bar_coords=toBarCoords(new_pos,face);
+    //InterpolationParameters( face, face.N(),new_pos,bar_coords[0],bar_coords[1],bar_coords[2] );
+    //InterpolationParameters(face,new_pos,bar_coords[0],bar_coords[1],bar_coords[2]);
+    printf("prova");
     return bar_coords;
 };
 
@@ -121,9 +124,23 @@ void DrawDirt(MeshDocument &md,std::vector<Point3f> &dp){
 //TODO
 };
 
+
+CMeshO::CoordType ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::FaceType &face){
+    CMeshO::CoordType int_point;
+    CMeshO::ScalarType t,u,v;
+    Segment3f seg = Segment3f(p1,p2);
+    IntersectionSegmentTriangle(seg,face.P(0),face.P(1),face.P(2),t,u,v);
+    int_point[0]=u;
+            int_point[1]=v;
+            int_point[2]=1-u-v;
+            //int_point=fromBarCoords(t,u,v,face);
+    return int_point;
+};
+
 /*
 Reference: http://mathworld.wolfram.com/Line-LineIntersection.html
 */
+/*
 CMeshO::CoordType ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::CoordType p3,CMeshO::CoordType p4){
 
     Point3<float> a=p2-p1;
@@ -136,6 +153,15 @@ CMeshO::CoordType ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,
 
     return int_point;
 };
+*/
 
+bool IsOnFace(CMeshO::CoordType &p, CMeshO::FaceType &f){
+    CMeshO::CoordType bc;
 
+    //InterpolationParameters(f,f.N(),p,bc[0],bc[1],bc[2]);
+    bc=toBarCoords(p,f);
+    if(bc[0]<0 || bc[1]<0 || bc[2]<0) return false;
+
+    return true;
+};
 #endif // DIRT_UTILS_H

@@ -114,16 +114,29 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         Point3f dir;
         Point3f new_bar_coords;
         dir[0]=0;
-        dir[1]=0.1;
+        dir[1]=-0.1;
         dir[2]=0;
         if(dmesh!=0){
                    CMeshO::VertexIterator vi;//= dmesh->cm.vert.begin();
                    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > pi = tri::Allocator<CMeshO>::GetPerVertexAttribute<DustParticle<CMeshO> >(dmesh->cm,"ParticleInfo");
-
+                   CMeshO::CoordType new_pos;
                    for(vi=dmesh->cm.vert.begin();vi!=dmesh->cm.vert.end();++vi){
+                        //new_bar_coords = StepForward((*vi).P(),*(pi[vi].face),dir);
+                       //(*vi).P()=StepForward((*vi).P(),*(pi[vi].face),dir);
+                       new_pos=fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
 
-                       //new_bar_coords = StepForward((*vi).P(),*(pi[vi].face),dir);
-                       (*vi).P()=fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
+                       //(*vi).P()=fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
+                       if(IsOnFace(new_pos,*(pi[vi].face))                           ){
+                       (*vi).P()=new_pos;
+                       }else{
+                       (*vi).P()=fromBarCoords(
+                               ComputeIntersection(
+                                       (*vi).P(),new_pos,*(pi[vi].face)
+                                       ),*(pi[vi].face))
+                                 ;
+                        }
+
+
 
 
                        //(*vi).P()=
