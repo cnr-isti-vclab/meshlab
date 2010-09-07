@@ -21,7 +21,7 @@ void GridAccell::init( MyVolume& vol, CMeshO& pcloud ){
         rays[i].ray = Ray3f( (*vi).P(), (*vi).N().normalized() );
 
     // Trace EVERY ray in the volume and hash the intersection
-    for(int i=0; i<rays.size(); i++){
+    for(size_t i=0; i<rays.size(); i++){
         // NACTIVEDEBUG
         // if( i!=12 ) continue;
         trace_ray( rays[i] );

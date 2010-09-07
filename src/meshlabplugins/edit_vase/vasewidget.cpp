@@ -142,7 +142,7 @@ void VaseWidget::on_pushButton_released(){
     // This way of creating a new model in the model is awkward
     //  - why there is not a MeshModel( CMeshO& mesh )? 
     //  - what's the need to specify the name twice?
-    MeshModel* mm = new MeshModel(this->meshDocument, "Balloon");
+    //MeshModel* mm = new MeshModel(this->meshDocument, "Balloon");
     qDebug() << "warning: save has been disabled, Append fails";
     //vcg::tri::Append<CMeshO,CMeshO>::Mesh(mm->cm, balloon->surf);
     // meshDocument->addNewMesh("Balloon",mm,false);

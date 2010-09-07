@@ -241,7 +241,8 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
     mesh.vert.EnableVFAdjacency();
     mesh.face.EnableVFAdjacency();
     tri::UpdateTopology<CMeshO>::VertexFace( mesh );
-    tri::Simplify( mesh, getDelta()/4 );
+    //tri::MCSimplify( mesh, getDelta()/4 );
+    tri::MCSimplify( mesh, 0.0);
 
     //--- The simplify operation removed some vertices
     tri::Allocator<CMeshO>::CompactVertexVector( mesh );
@@ -330,7 +331,7 @@ void MyVolume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell
         debd = pq.top().first;
         indx = pq.top().second;
         if( indx>band.size() ){
-            qDebug("bindex %d, bandsz %d", indx, band.size());
+            qDebug("bindex %d, bandsz %d", indx, int(band.size()));
             assert( indx < band.size() );
         }
         pq.pop();
