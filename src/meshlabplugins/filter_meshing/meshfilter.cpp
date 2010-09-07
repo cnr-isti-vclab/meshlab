@@ -111,12 +111,12 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  :
 		case FP_CLUSTERING                       :
 		case FP_CLOSE_HOLES                      :
-		case FP_REFINE_CATMULL                   :
-		case FP_REFINE_HALF_CATMULL              :
-		case FP_QUAD_PAIRING                     :
-		case FP_FAUX_CREASE                      :
+    case FP_FAUX_CREASE                      :
 		case FP_VATTR_SEAM                       :
 		case FP_REFINE_LS3_LOOP									 : return MeshFilterInterface::Remeshing;
+    case FP_REFINE_CATMULL                   :
+    case FP_REFINE_HALF_CATMULL              :
+    case FP_QUAD_PAIRING                     :return MeshFilterInterface::FilterClass(MeshFilterInterface::Remeshing+MeshFilterInterface::Polygonal);
 
     case FP_NORMAL_EXTRAPOLATION             : return MeshFilterInterface::FilterClass( MeshFilterInterface::Normal + MeshFilterInterface::PointSet );
 
@@ -1114,7 +1114,13 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 
   case FP_QUAD_PAIRING :
   {
-	  m.updateDataMask(MeshModel::MM_FACEQUALITY);
+    m.updateDataMask(MeshModel::MM_FACEQUALITY );
+    m.updateDataMask(MeshModel::MM_FACEFACETOPO );
+    if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
+    {
+      errorMessage = "Mesh has some not 2 manifoldfaces, filter require manifoldness"; // text
+      return false;
+    }
 	  tri::BitQuadCreation<CMeshO>::MakeTriEvenBySplit(m.cm);
 	  bool ret = tri::BitQuadCreation<CMeshO>::MakePureByFlip(m.cm,100);
 	  if(!ret) Log("Warning BitQuadCreation<CMeshO>::MakePureByFlip failed.");
