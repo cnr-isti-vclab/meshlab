@@ -43,7 +43,8 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     FP_SELECT_DILATE <<
     FP_SELECT_BORDER <<
     FP_SELECT_INVERT <<
-    FP_SELECT_BY_QUALITY <<
+    FP_SELECT_BY_VERT_QUALITY <<
+    FP_SELECT_BY_FACE_QUALITY <<
     CP_SELFINTERSECT_SELECT <<
     CP_SELECT_TEXBORDER <<
     CP_SELECT_NON_MANIFOLD_FACE <<
@@ -83,7 +84,8 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 	  case FP_SELECT_ERODE :		           return QString("Erode Selection");
 	  case FP_SELECT_DILATE :		           return QString("Dilate Selection");
     case FP_SELECT_BORDER:		     return QString("Select Border Faces");
-	  case FP_SELECT_BY_QUALITY :		       return QString("Select by Vertex Quality");
+    case FP_SELECT_BY_VERT_QUALITY :		       return QString("Select by Vertex Quality");
+  case FP_SELECT_BY_FACE_QUALITY :		       return QString("Select by Face Quality");
 	  case FP_SELECT_BY_RANGE:						 return QString("Select by Coord range");
 	  case FP_SELECT_BY_COLOR:						 return QString("Select Face by Vertex Color");
   case CP_SELFINTERSECT_SELECT:      return QString("Self Intersecting Faces");
@@ -108,7 +110,8 @@ SelectionFilterPlugin::SelectionFilterPlugin()
      case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");
      case FP_SELECT_ALL    : return tr("Select all the faces of the current mesh");
      case FP_SELECT_BORDER    : return tr("Select all the faces on the boundary");
-     case FP_SELECT_BY_QUALITY    : return tr("Select all the faces with all the vertexes within the specified quality range");
+     case FP_SELECT_BY_VERT_QUALITY    : return tr("Select all the faces with all the vertexes within the specified quality range");
+   case FP_SELECT_BY_FACE_QUALITY    : return tr("Select all the faces with within the specified quality range");
      case FP_SELECT_BY_COLOR:  return tr("Select part of the mesh based on its color.");
    case CP_SELECT_TEXBORDER :                 return tr("Colorize only border edges.");
    case CP_SELECT_NON_MANIFOLD_FACE:   return tr("Select the faces and the vertices incident on non manifold edges (e.g. edges where more than two faces are incident); note that this function select the components that are related to non manifold edges. The case of non manifold vertices is specifically managed by the pertinent filter.");
@@ -124,18 +127,28 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 {
 		switch(ID(action))
 		{
-			case FP_SELECT_BY_QUALITY: 
-					{
-						std::pair<float,float> minmax =  tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm); 
-						float minq=minmax.first;
-						float maxq=minmax.second;
-						
-						parlst.addParam(new RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
-						parlst.addParam(new RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
-            parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));
-          }
-					break;
-			case FP_SELECT_BY_COLOR:
+    case FP_SELECT_BY_VERT_QUALITY:
+        {
+          std::pair<float,float> minmax =  tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+          float minq=minmax.first;
+          float maxq=minmax.second;
+
+          parlst.addParam(new RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
+          parlst.addParam(new RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
+          parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."));
+        }
+        break;
+    case FP_SELECT_BY_FACE_QUALITY:
+        {
+          std::pair<float,float> minmax =  tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm);
+          float minq=minmax.first;
+          float maxq=minmax.second;
+
+          parlst.addParam(new RichDynamicFloat("minQ", minq*0.75+maxq*.25, minq, maxq,  tr("Min Quality"), tr("Minimum acceptable quality value") ));
+          parlst.addParam(new RichDynamicFloat("maxQ", minq*0.25+maxq*.75, minq, maxq,  tr("Max Quality"), tr("Maximum acceptable quality value") ));
+        }
+        break;
+      case FP_SELECT_BY_COLOR:
 			{
 				parlst.addParam(new RichColor("Color",Color4b::Black, tr("Color To Select"), tr("Color that you want to be selected.") ));
 				
@@ -210,16 +223,23 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   break;
   case FP_SELECT_BORDER: tri::UpdateSelection<CMeshO>::FaceFromBorderFlag(m.cm);
   break;
-  case FP_SELECT_BY_QUALITY: 
-		{
-			float minQ = par.getDynamicFloat("minQ");	
-			float maxQ = par.getDynamicFloat("maxQ");	
-			bool inclusiveFlag = par.getBool("Inclusive");
-			tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.cm, minQ, maxQ);  
-			if(inclusiveFlag) tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
-			else tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
-		}
-	break;
+  case FP_SELECT_BY_VERT_QUALITY:
+    {
+      float minQ = par.getDynamicFloat("minQ");
+      float maxQ = par.getDynamicFloat("maxQ");
+      bool inclusiveFlag = par.getBool("Inclusive");
+      tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.cm, minQ, maxQ);
+      if(inclusiveFlag) tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
+      else tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
+    }
+  break;
+  case FP_SELECT_BY_FACE_QUALITY:
+    {
+      float minQ = par.getDynamicFloat("minQ");
+      float maxQ = par.getDynamicFloat("maxQ");
+      tri::UpdateSelection<CMeshO>::FaceFromQualityRange(m.cm, minQ, maxQ);
+    }
+  break;
   case FP_SELECT_BY_COLOR:
 		{
             int colorSpace = par.getEnum("ColorSpace");
@@ -310,7 +330,8 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
 
       case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
       case FP_SELECT_BY_COLOR : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::FaceColoring);
-      case FP_SELECT_BY_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
+      case FP_SELECT_BY_FACE_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
+    case FP_SELECT_BY_VERT_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
     }
   return MeshFilterInterface::Selection;
 }
@@ -340,7 +361,8 @@ int SelectionFilterPlugin::postCondition(QAction *action) const
     case FP_SELECT_ERODE:
     case FP_SELECT_DILATE:
     case FP_SELECT_BORDER:
-    case FP_SELECT_BY_QUALITY:
+    case FP_SELECT_BY_VERT_QUALITY:
+  case FP_SELECT_BY_FACE_QUALITY:
     case FP_SELECT_BY_RANGE:
     case FP_SELECT_BY_COLOR:
     case CP_SELFINTERSECT_SELECT:
@@ -361,7 +383,8 @@ int SelectionFilterPlugin::getPreConditions( QAction * action) const
   case   CP_SELFINTERSECT_SELECT:
     case FP_SELECT_BORDER:        return MeshModel::MM_FACENUMBER;
     case FP_SELECT_BY_COLOR:      return MeshModel::MM_VERTCOLOR;
-    case FP_SELECT_BY_QUALITY:		return MeshModel::MM_VERTQUALITY;
+    case FP_SELECT_BY_VERT_QUALITY:		return MeshModel::MM_VERTQUALITY;
+  case FP_SELECT_BY_FACE_QUALITY:		return MeshModel::MM_FACEQUALITY;
     case CP_SELECT_TEXBORDER:     return MeshModel::MM_WEDGTEXCOORD;
 	}
   return 0;
