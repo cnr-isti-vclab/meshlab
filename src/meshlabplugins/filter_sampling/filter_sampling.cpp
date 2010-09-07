@@ -464,10 +464,14 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
  		  parlst.addParam(new RichInt ("SampleNum", md.mm()->cm.vn,
 											"Number of samples",
 											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
-			parlst.addParam(new RichBool("Weighted",  false,
-										 "Quality Weighted Sampling",
-										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices."));
-											break;
+      parlst.addParam(new RichBool("Weighted",  false,
+                     "Quality Weighted Sampling",
+                     "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices."));
+      parlst.addParam(new RichBool("ExactNum",  true,
+                     "Exact Sample Num",
+                     "If the required total number of samples is not a strict exact requirement we can exploit a different algorithm"
+                     "based on the choice of the number of samples inside each triangle by a random Poisson-distributed number with mean equal to the expected number of samples times the area of the triangle over the surface of the whole mesh."));
+                      break;
 		case FP_STRATIFIED_SAMPLING :  
  		   parlst.addParam(new RichInt ("SampleNum",  std::max(100000,md.mm()->cm.vn),
 											"Number of samples",
@@ -716,7 +720,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 			BaseSampler mps(&(mm->cm));
 			if(par.getBool("Weighted")) 
 				tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
-			else tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+      else if(par.getBool("ExactNum")) tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+      else tri::SurfaceSampling<CMeshO,BaseSampler>::MontecarloPoisson(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
