@@ -4,7 +4,6 @@
 #include "vcg/complex/trimesh/update/curvature.h"
 // #include "vcg/complex/trimesh/update/curvature_fitting.h"
 
-
 using namespace vcg;
 
 //---------------------------------------------------------------------------------------//
@@ -30,8 +29,8 @@ void Balloon::init( int gridsize, int gridpad ){
     // Remember that rays will take a step JUST in their direction, so if they lie exactly
     // on the bbox, they would go outside. The code below corrects this from happening.
     Box3f enlargedbb = cloud.bbox;
-    // float del = .99*vol.getDelta(); // almost +1 voxel in each direction
-    float del = .50*vol.getDelta(); // ADEBUG: almost to debug correspondences
+    float del = .99*vol.getDelta(); // almost +1 voxel in each direction
+    // float del = .50*vol.getDelta(); // ADEBUG: almost to debug correspondences
     Point3f offset( del,del,del );
     enlargedbb.Offset( offset );
     vol.initField( enlargedbb );  // init volumetric field with the bounding box
@@ -55,9 +54,9 @@ void Balloon::init( int gridsize, int gridpad ){
 bool Balloon::initializeField(){
     //--- Setup the interpolation system
     // if we fail, signal the failure to the caller
-    float OMEGA = 1e8;
+    float OMEGA = 1e7; // 1e8
     LAPLACIAN type = COTANGENT; // COMBINATORIAL
-    bool op_succeed = finterp.Init( &surf, type ); 
+    bool op_succeed = finterp.Init( &surf, 1, type ); 
     if( !op_succeed ){
         finterp.ColorizeIllConditioned( type );
         return false;
@@ -137,7 +136,7 @@ bool Balloon::initializeField(){
         tri::UpdateQuality<CMeshO>::FaceConstant(surf, 0);
         std::vector<float> tot_w( surf.fn, 0 );
 
-        // We clear the ray-triangles correspondence information + distance information
+        // We clear the pokingRay-triangle correspondence information + distance information
         // to get ready for the next step
         gridAccell.clearCorrespondences();
 
@@ -160,30 +159,39 @@ bool Balloon::initializeField(){
             // with him if and only if this face is the closest to it. Note that we study
             // the values of t,u,v directly as a t<0 is accepted as intersecting.
             for(unsigned int i=0; i<prays.size(); i++){
-                vcg::IntersectionRayTriangle<float>(prays[i]->ray, f.P(0), f.P(1), f.P(2), t, u, v);
-                                
+                Line3<float> line(prays[i]->ray.Origin(), prays[i]->ray.Direction());
+                
                 // If the ray falls within the domain of the face
-                if( u>=0 && u<=1 && v>=0 && v<=1 ){
+                if( IntersectionLineTriangle(line, f.P(0), f.P(1), f.P(2), t, u, v) ){
+                
+                    // DEBUG
+                    // f.C() = t>0 ? Color4b(0,0,255,255) : f.C() = Color4b(255,0,0,255);
+                    
+                    // DEBUG
+                    // if( prays[i]->f!=NULL && fabs(t)<fabs(prays[i]->t) ){
+                    //    prays[i]->f->C() = Color4b(255,0,0,255);
+                    //    qDebug() << "replaced: " << tri::Index(surf,prays[i]->f) << " from t: " << prays[i]->t << " to " << tri::Index(surf,f) << t;
+                    // }
+                    
                     // If no face was associated with this ray or this face is closer
                     // than the one that I stored previously
-                    if( prays[i]->f==NULL || fabs(prays[i]->t)<fabs(t) ){
+                    if( prays[i]->f==NULL || fabs(t)<fabs(prays[i]->t) ){
                         prays[i]->f=&f;
                         prays[i]->t=t;
                     }
                 }
             }
         }
-
+       
         // Now we scan through the rays, we visit the "best" corresponding face and we
         // set a constraint on this face. Also we modify the color of the face so that
         // an approximation can be visualized
         for(unsigned int i=0; i<gridAccell.rays.size(); i++){
             // Retrieve the corresponding face and signed distance
             Ray3f& ray = gridAccell.rays[i].ray;
-            // Removing degenerate triangles could cause a ray to fail the intersection test!!
+            // The use of vcg::Simplify to remove degenerate triangles could cause a ray to fail the intersection test!!
             if( gridAccell.rays[i].f == NULL){
-                qDebug() << "warning: ray #" << i << "has provided NULL intersection";
-                         // << toString(ray.Origin()) << " " << toString(ray.Direction());
+                qDebug() << "warning: ray #" << i << "has provided NULL intersection"; // << toString(ray.Origin()) << " " << toString(ray.Direction());
                 continue;
             }
             CFaceO& f = *(gridAccell.rays[i].f);
@@ -194,7 +202,10 @@ bool Balloon::initializeField(){
             tot_w[ tri::Index(surf,f) ]++;
             f.Q() += t; // normalize with tot_w after
             f.SetS(); // enable the face for coloring
-
+ 
+            // DEBUG
+            // f.C() = Color4b(0,255,0,255);
+ 
             // I was lazy and didn't store the u,v... we need to recompute them
             vcg::IntersectionRayTriangle<float>(ray, f.P(0), f.P(1), f.P(2), t, u, v);
 
@@ -202,6 +213,7 @@ bool Balloon::initializeField(){
             finterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA*(1-u-v), t );
             finterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA*(u), t );
             finterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA*(v), t );
+            assert( u>=0 && u<=1 && v>=0 && v<=1 );
         }
         
         //--- Normalize in case there is more than 1 ray per-face
@@ -209,8 +221,7 @@ bool Balloon::initializeField(){
             if( tot_w[ tri::Index(surf,*fi) ] > 0 )
                 fi->Q() /= tot_w[ tri::Index(surf,*fi) ];
         }
-        //--- Transfer the average distance stored in face quality to a color
-        //    and do it only for the selection (true)
+        //--- Transfer the average distance stored in face quality to a color and do it only for the selection (true)
         tri::UpdateColor<CMeshO>::FaceQualityRamp(surf, true);
     }
     
@@ -221,7 +232,7 @@ void Balloon::interpolateField(){
     surf.vert.QualityEnabled = true;
 
     //--- Interpolate the field
-    finterp.Solve();
+    finterp.SolveInQuality();
        
     //--- Transfer vertex quality to surface
     rm &= ~SURF_FCOLOR; // disable face colors
@@ -231,39 +242,54 @@ void Balloon::interpolateField(){
     tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
 }
 void Balloon::computeCurvature(){
-    // Enable curvature supports, How do I avoid a
-    // double computation of topology here?
-    surf.vert.EnableCurvature();
-    surf.vert.EnableVFAdjacency();
-    surf.face.EnableVFAdjacency();
-    surf.face.EnableFFAdjacency();
-    vcg::tri::UpdateTopology<CMeshO>::VertexFace( surf );
-    vcg::tri::UpdateTopology<CMeshO>::FaceFace( surf );
-  
-    // tri::UpdateCurvatureFitting<CMeshO>::computeCurvature( surf );            
-             
-    //--- Compute curvature and its bounds
-    tri::UpdateCurvature<CMeshO>::MeanAndGaussian( surf );
-    float absmax = -FLT_MAX;
-    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
-        float cabs = fabs((*vi).Kh());
-        absmax = (cabs>absmax) ? cabs : absmax;
-    }
-
-    //--- Enable color coding
-    rm &= ~SURF_FCOLOR;
-    rm |= SURF_VCOLOR;
-
-    //--- Map curvature to two color ranges:
-    //    Blue => Yellow: negative values
-    //    Yellow => Red:  positive values
-    typedef unsigned char CT;
-    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
-        if( (*vi).Kh() < 0 )
-            (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Blue, fabs((*vi).Kh())/absmax );
-        else
-            (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Red, (*vi).Kh()/absmax);
-    }
+    #if FALSE
+        float OMEGA = 1e2; // interpolation coefficient
+        sinterp.Init( &surf, 3, COTANGENT );  
+        for( CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++ )
+            sinterp.AddConstraint3( tri::Index(surf,*vi), OMEGA, (*vi).P()[0], (*vi).P()[1], (*vi).P()[2] );
+        FieldInterpolator::XBType* coords[3];
+        sinterp.Solve(coords);
+        for( CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++ ){
+            int vIdx = tri::Index(surf,*vi);
+            (*vi).P()[0] = (*coords[0])(vIdx);   
+            (*vi).P()[1] = (*coords[1])(vIdx);
+            (*vi).P()[2] = (*coords[2])(vIdx);
+        }
+    #else      
+        // Enable curvature supports, How do I avoid a
+        // double computation of topology here?
+        surf.vert.EnableCurvature();
+        surf.vert.EnableVFAdjacency();
+        surf.face.EnableVFAdjacency();
+        surf.face.EnableFFAdjacency();
+        vcg::tri::UpdateTopology<CMeshO>::VertexFace( surf );
+        vcg::tri::UpdateTopology<CMeshO>::FaceFace( surf );
+      
+        // tri::UpdateCurvatureFitting<CMeshO>::computeCurvature( surf );            
+                 
+        //--- Compute curvature and its bounds
+        tri::UpdateCurvature<CMeshO>::MeanAndGaussian( surf );
+        float absmax = -FLT_MAX;
+        for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+            float cabs = fabs((*vi).Kh());
+            absmax = (cabs>absmax) ? cabs : absmax;
+        }
+    
+        //--- Enable color coding
+        rm &= ~SURF_FCOLOR;
+        rm |= SURF_VCOLOR;
+    
+        //--- Map curvature to two color ranges:
+        //    Blue => Yellow: negative values
+        //    Yellow => Red:  positive values
+        typedef unsigned char CT;
+        for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+            if( (*vi).Kh() < 0 )
+                (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Blue, fabs((*vi).Kh())/absmax );
+            else
+                (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Red, (*vi).Kh()/absmax);
+        }
+    #endif
 }
 
 // HP: a correspondence has already been executed once!
@@ -363,10 +389,10 @@ void Balloon::evolveBalloon(){
         }
         // if we don't have computed the distance field, we don't really know how to
         // modulate the laplacian accordingly...
-#ifdef ENABLE_CURVATURE_IN_EVOLUTION
-        if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled ){
-          v.sfield += .1*k3*k2;
-        }
+#ifdef TRUE // ENABLE_CURVATURE_IN_EVOLUTION
+//        if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled ){
+//          v.sfield += .1*k3*k2;
+//        }
         else if( surf.vert.CurvatureEnabled ){
           v.sfield += .1*k3;     
         }

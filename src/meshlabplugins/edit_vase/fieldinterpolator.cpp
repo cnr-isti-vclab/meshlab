@@ -10,7 +10,7 @@ using namespace vcg;
 // of a SQUARE matrix with the appropriate mesh coefficients. Constraints on vertices
 // are added by the function AddConstraint
 void test_cholmod2();
-bool FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
+bool FieldInterpolator::Init(CMeshO* mesh, int numVars, LAPLACIAN laptype){
     // Testing function
     // test_cholmod2(); exit(0);
 
@@ -25,12 +25,25 @@ bool FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
     // Store mesh pointer & master OMEGA
     this->mesh = mesh;
 
-    // Allocate memory: square matrix to feed cholesky
-    A_dyn = new DynamicSparseMatrix<FieldType>(mesh->vn,mesh->vn);
-    xb = new Matrix<FieldType, Dynamic, 1>(mesh->vn);
-    xb->setZero(mesh->vn);
-
-    // Fill in the entries of A_dyn and xb
+    // Allocate memory
+    if( A != NULL ) delete A;
+    A = new AType(mesh->vn,mesh->vn);
+    assert( numVars == 1 || numVars == 3 );
+    if( numVars == 1 ){
+        if( xb0 != NULL ) delete xb0;
+        xb0 = new XBType(mesh->vn);
+        xb0->setZero(mesh->vn);    
+    }
+    else if( numVars == 3 ){
+        if( xb0 != NULL ) delete xb0;
+        xb0 = new XBType(mesh->vn); xb0->setZero(mesh->vn);
+        if( xb1 != NULL ) delete xb1;
+        xb1 = new XBType(mesh->vn); xb1->setZero(mesh->vn);
+        if( xb2 != NULL ) delete xb2;
+        xb2 = new XBType(mesh->vn); xb2->setZero(mesh->vn);
+    }
+      
+    // Fill in the entries of A and xb
     if( laptype == COMBINATORIAL ){
         // Iterate throgh every vertice
         CVertexO* v;
@@ -51,14 +64,14 @@ bool FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
                 // Off-diagonal entries (symmetric)
                 // Only lower diagonal
                 if(v_i>vNeigh_i)
-                    A_dyn->coeffRef(v_i,vNeigh_i) = -1;
+                    A->coeffRef(v_i,vNeigh_i) = -1;
                 else
-                    A_dyn->coeffRef(vNeigh_i,v_i) = -1;
+                    A->coeffRef(vNeigh_i,v_i) = -1;
                 numNeighs++;
             }
             while(vNeigh != firstV);
             // Diagonal entries
-            A_dyn->coeffRef(v_i,v_i) = numNeighs;
+            A->coeffRef(v_i,v_i) = numNeighs;
             // Was I doing it right?
             assert(pos.NumberOfIncidentVertices() == numNeighs);
         }
@@ -132,16 +145,21 @@ bool FieldInterpolator::Init(CMeshO* mesh, LAPLACIAN laptype){
                 totcoeff += cotcoeff;
                 // Off-diagonal entries (symmetric) Only lower diagonal
                 if(vI_i > vJ_i)
-                  A_dyn->coeffRef(vI_i,vJ_i) = -cotcoeff;
+                  A->coeffRef(vI_i,vJ_i) = -cotcoeff;
                 else
-                  A_dyn->coeffRef(vJ_i,vI_i) = -cotcoeff;
+                  A->coeffRef(vJ_i,vI_i) = -cotcoeff;
             }
             while(vJ != firstV);
             // Diagonal entries
-            A_dyn->coeffRef(vI_i,vI_i) = totcoeff;
+            A->coeffRef(vI_i,vI_i) = totcoeff;
         }
     }
     
+    // Bi-laplacian
+#ifdef USEBILAP
+    AType Atr = A->transpose();
+    (*A) = Atr * (*A);
+#endif
     return true;
 }
 void FieldInterpolator::ColorizeIllConditioned(LAPLACIAN laptype){
@@ -185,21 +203,28 @@ void FieldInterpolator::ColorizeIllConditioned(LAPLACIAN laptype){
     }
     tri::UpdateColor<CMeshO>::VertexQualityRamp(*mesh);
 }
-void FieldInterpolator::AddConstraint( unsigned int vidx, FieldType omega, FieldType val){
+void FieldInterpolator::AddConstraint( unsigned int vidx, FieldType omega, FieldType val ){
     assert( !math::IsNAN(val) );
     assert( omega != 0 );
-    A_dyn->coeffRef(vidx,vidx) += omega;
-    xb->coeffRef(vidx) += omega*val;
+    A->coeffRef(vidx,vidx) += omega;
+    xb0->coeffRef(vidx) += omega*val;
 }
-void FieldInterpolator::Solve(){
+void FieldInterpolator::AddConstraint3( unsigned int vidx, FieldType omega, FieldType val0, FieldType val1, FieldType val2 ){
+    assert( xb1 != NULL && xb2 != NULL );
+    A->coeffRef(vidx,vidx) += omega;
+    (*xb0)(vidx) += omega*val0;
+    (*xb1)(vidx) += omega*val1;
+    (*xb2)(vidx) += omega*val2; 
+}
+void FieldInterpolator::SolveInQuality(){
     //--- DEBUG: Damp the matrix on file, so that matlab can read it and compute solution
     // You need to remove the first few lines from the matrix.txt before being able to import
     // the matrix successfully!!
     #if 0
         ofstream myfile;
         myfile.open ("/Users/ata2/workspace/workspace_vase/cholmod_verify_posdefi/matrix.txt");
-        myfile << *A_dyn;
-        cout << *A_dyn;
+        myfile << *A;
+        cout << *A;
         myfile.close();
         myfile.open("/Users/ata2/workspace/workspace_vase/cholmod_verify_posdefi/vector.txt");
         myfile << *xb;
@@ -208,14 +233,14 @@ void FieldInterpolator::Solve(){
     #endif
 
     //--- Construct the cholesky factorization
-    SparseLLT<SparseMatrix<FieldType> ,Cholmod> llt(*A_dyn);
+    SparseLLT<SparseMatrix<FieldType> ,Cholmod> llt(*A);
     //--- Solve the linear system
-    llt.solveInPlace(*xb);
+    llt.solveInPlace(*xb0);
     //-- Copy the results back in Q() field of surface
     // cout << "X: ";
     // bool hasnan = false;
     for(unsigned int vi=0; vi<mesh->vert.size(); vi++){
-        (mesh->vert[vi]).Q() = (*xb)[vi];
+        (mesh->vert[vi]).Q() = (*xb0)[vi];
         // hasnan = hasnan || math::IsNAN( (*xb)[vi] );
         // cout << (*xb)[vi] << " ";
     }
@@ -228,11 +253,12 @@ void FieldInterpolator::Solve(){
         infile >> (mesh->vert[vi]).Q();
     #endif
 }
-
-
-
-
-
+void FieldInterpolator::Solve( Matrix<FieldType, Dynamic, 1>* sols[3] ){
+    SparseLLT<SparseMatrix<FieldType> ,Cholmod> llt(*A);
+    llt.solveInPlace(*xb0); sols[0] = xb0;
+    llt.solveInPlace(*xb1); sols[1] = xb1;
+    llt.solveInPlace(*xb2); sols[2] = xb2;
+}
 
 /*
 
@@ -249,36 +275,36 @@ void test_cholmod2(){
     typedef double FieldType;
 
     // These are how I defined them
-    Eigen::DynamicSparseMatrix<FieldType>* A_dyn;
-    A_dyn = new DynamicSparseMatrix<FieldType>(6,6);
+    Eigen::DynamicSparseMatrix<FieldType>* A;
+    A = new DynamicSparseMatrix<FieldType>(6,6);
     // Equivalent to VectorXd or VectorXf (http://eigen.tuxfamily.org/dox/TutorialCore.html#TutorialCoreMatrixTypes)
     Eigen::Matrix<FieldType, Eigen::Dynamic, 1>* xb;
     xb = new Matrix<FieldType, Dynamic, 1>(6);
     xb->setZero(6);
 
     // MOD
-    A.insert(0,0) = 4;   A_dyn->coeffRef(0,0) =  4;
-    A.insert(1,0) = -1;  A_dyn->coeffRef(1,0) = -1;
-    A.insert(2,0) = -1;  A_dyn->coeffRef(2,0) = -1;
-    A.insert(4,0) = -1;  A_dyn->coeffRef(4,0) = -1;
-    A.insert(5,0) = -1;  A_dyn->coeffRef(5,0) = -1;
-    A.insert(1,1) = 104; A_dyn->coeffRef(1,1) =  104;
-    A.insert(2,1) = -1;  A_dyn->coeffRef(2,1) = -1;
-    A.insert(3,1) = -1;  A_dyn->coeffRef(3,1) = -1;
-    A.insert(4,1) = -1;  A_dyn->coeffRef(4,1) = -1;
-    A.insert(2,2) = 4;   A_dyn->coeffRef(2,2) =  4;
-    A.insert(3,2) = -1;  A_dyn->coeffRef(3,2) = -1;
-    A.insert(5,2) = -1;  A_dyn->coeffRef(5,2) = -1;
-    A.insert(3,3) = 4;   A_dyn->coeffRef(3,3) = 4;
-    A.insert(4,3) = -1;  A_dyn->coeffRef(4,3) = -1;
-    A.insert(5,3) = -1;  A_dyn->coeffRef(5,3) = -1;
-    A.insert(4,4) = 4;   A_dyn->coeffRef(4,4) = 4;
-    A.insert(5,4) = -1;  A_dyn->coeffRef(5,4) = -1;
-    A.insert(5,5) = 104; A_dyn->coeffRef(5,5) = 104;
+    A.insert(0,0) = 4;   A->coeffRef(0,0) =  4;
+    A.insert(1,0) = -1;  A->coeffRef(1,0) = -1;
+    A.insert(2,0) = -1;  A->coeffRef(2,0) = -1;
+    A.insert(4,0) = -1;  A->coeffRef(4,0) = -1;
+    A.insert(5,0) = -1;  A->coeffRef(5,0) = -1;
+    A.insert(1,1) = 104; A->coeffRef(1,1) =  104;
+    A.insert(2,1) = -1;  A->coeffRef(2,1) = -1;
+    A.insert(3,1) = -1;  A->coeffRef(3,1) = -1;
+    A.insert(4,1) = -1;  A->coeffRef(4,1) = -1;
+    A.insert(2,2) = 4;   A->coeffRef(2,2) =  4;
+    A.insert(3,2) = -1;  A->coeffRef(3,2) = -1;
+    A.insert(5,2) = -1;  A->coeffRef(5,2) = -1;
+    A.insert(3,3) = 4;   A->coeffRef(3,3) = 4;
+    A.insert(4,3) = -1;  A->coeffRef(4,3) = -1;
+    A.insert(5,3) = -1;  A->coeffRef(5,3) = -1;
+    A.insert(4,4) = 4;   A->coeffRef(4,4) = 4;
+    A.insert(5,4) = -1;  A->coeffRef(5,4) = -1;
+    A.insert(5,5) = 104; A->coeffRef(5,5) = 104;
     A.finalize();
 
     // MOD
-    std::cerr << MatrixXd(*A_dyn) << "\n\n";
+    std::cerr << MatrixXd(*A) << "\n\n";
 
     // Create a full copy of the matrix
     MatrixXd AFULL(A);
@@ -306,11 +332,11 @@ void test_cholmod2(){
     std::cout << "SPAR: " << xs.transpose()  << endl;
 
     // Using my way of declaring
-    SparseLLT<SparseMatrix<FieldType> ,Cholmod> llt2(*A_dyn);
+    SparseLLT<SparseMatrix<FieldType> ,Cholmod> llt2(*A);
     llt2.solveInPlace(*xb);
     std::cout << "SPAR2: " << (*xb).transpose()  << endl;
 
-    delete A_dyn;
+    delete A;
     delete xb;
 }
 

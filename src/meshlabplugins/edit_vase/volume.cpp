@@ -147,7 +147,7 @@ void MyVolume::initField( const vcg::Box3f&  inbbox ){
                     else
                         grid.Val(i,j,k) = +1;
     }
-    else if( false){
+    else if( true ){
         // Radius in object space
         double r = 1;
         Point3f p;
@@ -241,8 +241,7 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
     mesh.vert.EnableVFAdjacency();
     mesh.face.EnableVFAdjacency();
     tri::UpdateTopology<CMeshO>::VertexFace( mesh );
-    //tri::MCSimplify( mesh, getDelta()/4 );
-    tri::MCSimplify( mesh, 0.0);
+    tri::Simplify( mesh, getDelta()/10 ); // was 4 then 20
 
     //--- The simplify operation removed some vertices
     tri::Allocator<CMeshO>::CompactVertexVector( mesh );

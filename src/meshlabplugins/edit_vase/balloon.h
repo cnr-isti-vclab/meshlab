@@ -38,8 +38,8 @@ public:
     GridAccell gridAccell;
     /// Scalar field interpolator (one constraint per poking ray)
     FieldInterpolator finterp;
-    /// Smootfield interpolator (one constraint per vertex)
-    // FieldInterpolator sinterp;
+    /// Smoothing interpolator (one constraint per vertex)
+    FieldInterpolator sinterp;
     
     /// Defines the rendering style of the ballon
     RenderModes rm;

@@ -105,7 +105,7 @@ void VaseWidget::on_slice_offset_sliderMoved(int){
 void VaseWidget::on_iterationButton_released(){
     bool op_succeed = false;
     for(int i=0; i<ui.numItersSpin->value(); i++){
-        gla->log->Logf(GLLogStream::FILTER, "\n----- began iteration %d -----", balloon->numiterscompleted);
+        qDebug("\n----- began iteration %d -----", balloon->numiterscompleted);
         op_succeed = balloon->initializeField();    if( !op_succeed ) break;
         balloon->interpolateField();                if( !op_succeed ) break;
         balloon->computeCurvature();                if( !op_succeed ) break;
