@@ -115,6 +115,12 @@ void FilterMeasurePlugin::initParameterSet(QAction *action, MeshDocument &m, Ric
 	 switch(ID(action))	 
 	 {
    case FP_MEASURE_FACE_QUALITY_HISTOGRAM :
+         {
+         pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.mm()->cm);
+         par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that is used as a lower bound for the set of bins (all the value smaller this one will be put in the first bin)"));
+         par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that is used as a upper bound for the set of bins (all the value over this one will be put in the last bin)"));
+         par.addParam(new RichInt("binNum",20,"Number of bins","Number of bins in which the range of values is subdivided"));
+        } break;
    case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
          {
          pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.mm()->cm);
