@@ -16,6 +16,7 @@ class MCTriEdgeCollapse: public tri::TriEdgeCollapse< MCTriMesh, MYTYPE> {
 	public:
     typedef  typename MCTriMesh::VertexPointer VertexPointer;
     typedef  typename MCTriMesh::VertexType::EdgeType EdgeType;
+    typedef  typename MCTriMesh::FaceType FaceType;
     typedef  typename MCTriMesh::VertexType::CoordType CoordType;
     typedef typename MCTriMesh::VertexType::ScalarType ScalarType;
 
@@ -23,7 +24,10 @@ class MCTriEdgeCollapse: public tri::TriEdgeCollapse< MCTriMesh, MYTYPE> {
 		static Box3f bb; 
 		return bb;
     }
-	
+ static bool &preserveBBox() {
+   static bool _preserveBBox=true;
+   return _preserveBBox;
+ }
 	inline MCTriEdgeCollapse(  const EdgeType &p, int mark) 
 	{
                 this->localMark = mark;
@@ -46,7 +50,8 @@ class MCTriEdgeCollapse: public tri::TriEdgeCollapse< MCTriMesh, MYTYPE> {
 			
 		// non MC plane collapse return highest cost
  //       if(diffCnt>2) return   this->_priority=std::numeric_limits<float>::max() ;
-		
+    if(preserveBBox())
+        {
 		// collapse on the bbox border. Avoid it. 
         if(p0[0]==bb().min[0] || p0[0]==bb().max[0]) return this->_priority=std::numeric_limits<float>::max() ;
         if(p0[1]==bb().min[1] || p0[1]==bb().max[1]) return this->_priority=std::numeric_limits<float>::max() ;
@@ -54,8 +59,8 @@ class MCTriEdgeCollapse: public tri::TriEdgeCollapse< MCTriMesh, MYTYPE> {
         if(p1[0]==bb().min[0] || p1[0]==bb().max[0]) return this->_priority=std::numeric_limits<float>::max() ;
         if(p1[1]==bb().min[1] || p1[1]==bb().max[1]) return this->_priority=std::numeric_limits<float>::max() ;
         if(p1[2]==bb().min[2] || p1[2]==bb().max[2]) return this->_priority=std::numeric_limits<float>::max() ;
-
-        else return this->_priority=Distance(p0,p1);
+      }
+    return this->_priority=Distance(p0,p1);
 	}
  
 	static float & areaThr(){
@@ -71,14 +76,14 @@ class MCTriEdgeCollapse: public tri::TriEdgeCollapse< MCTriMesh, MYTYPE> {
         std::vector<VertexPointer> starVec1;
 //        int count0=0,count1=0;
 
-        vcg::face::VVStarVF<typename MCTriMesh::FaceType>(this->pos.V(0),starVec0);
+        vcg::face::VVStarVF<FaceType>(this->pos.V(0),starVec0);
 //        for(size_t i=0;i<starVec.size();++i)
 //        {
 //          if(	(p0[0]==starVec[i]->cP()[0]) )  count0++;
 //          if(	(p0[1]==starVec[i]->cP()[1]) )  count0++;
 //          if(	(p0[2]==starVec[i]->cP()[2]) )  count0++;
 //        }
-        vcg::face::VVStarVF<typename MCTriMesh::FaceType>(this->pos.V(1),starVec1);
+        vcg::face::VVStarVF<FaceType>(this->pos.V(1),starVec1);
 //        for(size_t i=0;i<starVec.size();++i)
 //         {
 //           if( (p1[0]==starVec[i]->cP()[0]) )  count1++;

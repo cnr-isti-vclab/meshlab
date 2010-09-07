@@ -32,15 +32,15 @@ class PlyMCPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-    enum { FP_PLYMC  } ;
+      enum { FP_PLYMC, FP_MC_SIMPLIFY } ;
 
 	PlyMCPlugin();
 	
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
-    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-    FilterClass getClass(QAction *a);
+  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+  virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  FilterClass getClass(QAction *a);
 
 };
 

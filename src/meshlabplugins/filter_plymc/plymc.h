@@ -62,7 +62,7 @@ namespace vcg {
       
       // Simple prototype for later use...
       template<class MeshType>
-              void Simplify( MeshType &m, float perc);
+      void MCSimplify( MeshType &m, float perc, bool preserveBB=true, vcg::CallBackPos *cb=0);
               
               
 
@@ -498,7 +498,7 @@ void Process(vcg::CallBackPos *cb=0)
           /**********************/
           p.OutNameSimpVec.push_back(filename+std::string(".d.ply"));
           me.face.EnableVFAdjacency();
-          Simplify<MCMesh>(me, VV.voxel[0]/4.0);
+          MCSimplify<MCMesh>(me, VV.voxel[0]/4.0);
           tri::Allocator<MCMesh>::CompactFaceVector(me);
           me.face.EnableFFAdjacency();
           tri::Clean<MCMesh>::RemoveTVertexByFlip(me,20,true);
@@ -535,8 +535,10 @@ template < class MeshType>
             inline PlyMCTriEdgeCollapse(  const EdgeType &p, int i) :MCTEC(p,i){}
  };
 
+
+
 template<   class MeshType>
-        void Simplify( MeshType &m, float perc)
+void MCSimplify( MeshType &m, float absoluteError, bool preserveBB, vcg::CallBackPos *cb)
 {
     typedef PlyMCTriEdgeCollapse<MeshType> MyColl;
 
@@ -544,26 +546,52 @@ template<   class MeshType>
     tri::UpdateTopology<MeshType>::VertexFace(m);
     vcg::LocalOptimization<MeshType> DeciSession(m);
     MyColl::bb()=m.bbox;
-    float TargetError = perc;
-    printf("Asked an error lenght of %f using a error of %f\n",perc,TargetError);
-    int FinalSize = m.fn*3/4;
-    int t1=clock();
+    MyColl::preserveBBox()=preserveBB;
+    if(absoluteError==0)
+    {
+      // guess the mc side.
+      // In a MC mesh the vertices are on the egdes of the cells. and the edges are (mostly) on face of the cells.
+      // If you have  2 vert over the same face xy they share z
+
+      std::vector<float> ZSet;
+
+      typename MeshType::FaceIterator fi;
+      for(fi = m.face.begin();fi!=m.face.end();++fi)
+        if(!(*fi).IsD())
+        {
+         Point3f v0=(*fi).V(0)->P();
+         Point3f v1=(*fi).V(1)->P();
+         Point3f v2=(*fi).V(2)->P();
+         if(v0[2]==v1[2] && v0[1]!=v1[1] && v0[0]!=v1[0]) ZSet.push_back(v0[2]);
+         if(v0[2]==v2[2] && v0[1]!=v1[1] && v2[0]!=v2[0]) ZSet.push_back(v0[2]);
+         if(v1[2]==v2[2] && v1[1]!=v1[1] && v2[0]!=v2[0]) ZSet.push_back(v0[2]);
+         if(ZSet.size()>100) break;
+       }
+      std::sort(ZSet.begin(),ZSet.end());
+      std::vector<float>::iterator lastV = std::unique(ZSet.begin(),ZSet.end());
+      ZSet.resize(lastV-ZSet.begin());
+      float Delta=0;
+      for(size_t i = 0; i< ZSet.size()-1;++i)
+      {
+        Delta = std::max(ZSet[i+1]-ZSet[i],Delta);
+        qDebug("%f",Delta);
+      }
+      absoluteError= Delta/4.0f;
+    }
+    qDebug("Simplifying at absoluteError=%f",absoluteError);
+
+    float TargetError = absoluteError;
+    char buf[1024];
     DeciSession.template Init< MyColl > ();
-    int t2=clock();
-    printf("Initial Heap Size %i\n",(int)DeciSession.h.size());
+
     MyColl::areaThr()=TargetError*TargetError;
-    //DeciSession.SetTargetSimplices(FinalSize);
     DeciSession.SetTimeBudget(1.0f);
     if(TargetError < std::numeric_limits<float>::max() ) DeciSession.SetTargetMetric(TargetError);
-
-    printf("mesh  %d %d Error %g \n",m.vn,m.fn,DeciSession.currMetric);
-
     while(DeciSession.DoOptimization() && DeciSession.currMetric < TargetError)
-        //while(DeciSession.DoOptimization())
-        printf("Current Mesh size %7i heap sz %9i err %9g \r",m.fn,(int)DeciSession.h.size(),DeciSession.currMetric);
-    int t3=clock();
-    printf("mesh  %d %d Error %g \n",m.vn,m.fn,DeciSession.currMetric);
-    printf("\nCompleted in (%i+%i) msec\n",t2-t1,t3-t2);
+      {
+        sprintf(buf,"Simplyfing %7i err %9g \r",m.fn,DeciSession.currMetric);
+        if (cb) cb(int(100.0f*DeciSession.currMetric/TargetError),buf);
+      }
 }
 
 
