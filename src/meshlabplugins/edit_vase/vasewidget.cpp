@@ -109,7 +109,7 @@ void VaseWidget::on_iterationButton_released(){
         op_succeed = balloon->initializeField();    if( !op_succeed ) break;
         balloon->interpolateField();                if( !op_succeed ) break;
         balloon->computeCurvature();                if( !op_succeed ) break;
-        balloon->evolveBalloon();
+        balloon->evolve();
         qDebug("----- finished -----"); 
         // gla->log.Logf(GLLogStream::FILTER, "----- Finished iteration %d\n", balloon->numiterscompleted);
         gla->update();
@@ -128,7 +128,7 @@ void VaseWidget::on_interpButton_released(){
     gla->update();
 }
 void VaseWidget::on_evolveButton_released(){
-    balloon->evolveBalloon();
+    balloon->evolve();
     gla->log->Logf(GLLogStream::FILTER, "Finished ballon evolution iteration %d", balloon->numiterscompleted);
     gla->update();
 }

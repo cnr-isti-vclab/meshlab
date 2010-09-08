@@ -55,7 +55,7 @@ public:
     bool initializeField();
     void interpolateField();
     void computeCurvature();
-    void evolveBalloon();
+    void evolve();
 
     //--- Render
     void render(GLArea* gla);

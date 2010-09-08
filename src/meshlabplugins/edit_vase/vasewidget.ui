@@ -128,7 +128,7 @@
               <number>1000</number>
              </property>
              <property name="value">
-              <number>5</number>
+              <number>10</number>
              </property>
             </widget>
            </item>
@@ -138,7 +138,7 @@
               <number>10</number>
              </property>
              <property name="value">
-              <number>3</number>
+              <number>4</number>
              </property>
             </widget>
            </item>
@@ -213,7 +213,7 @@
            <item>
             <widget class="QSpinBox" name="numItersSpin">
              <property name="value">
-              <number>1</number>
+              <number>5</number>
              </property>
             </widget>
            </item>

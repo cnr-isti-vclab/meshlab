@@ -241,8 +241,8 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
     mesh.vert.EnableVFAdjacency();
     mesh.face.EnableVFAdjacency();
     tri::UpdateTopology<CMeshO>::VertexFace( mesh );
-    tri::Simplify( mesh, getDelta()/10 ); // was 4 then 20
-
+    tri::MCSimplify<CMeshO>( mesh, getDelta()/4 );
+    
     //--- The simplify operation removed some vertices
     tri::Allocator<CMeshO>::CompactVertexVector( mesh );
     tri::Allocator<CMeshO>::CompactFaceVector( mesh );

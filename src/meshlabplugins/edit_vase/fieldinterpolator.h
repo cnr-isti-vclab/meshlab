@@ -7,14 +7,14 @@
 // Note that these includes are system-wide, not the ones of Meshlab
 #define EIGEN_CHOLMOD_SUPPORT
 
-#ifdef USE_EIGEN_DEVTRUNK
-  //--- DEV version of eigen
-  #include <Eigen/Cholesky>
-  #include <Eigen/Sparse>
+#ifndef USE_EIGEN_LOCAL
+    //--- Eigen shipping with meshlab
+    #include <vcg/Eigen/Cholesky>
+    #include <vcg/Eigen/Sparse>
 #else  
-  //--- Eigen shipping with meshlab
-  #include <vcg/Eigen/Cholesky>
-  #include <vcg/Eigen/Sparse>
+    //--- DEV version of eigen
+    #include <Eigen/Cholesky>
+    #include <Eigen/Sparse>
 #endif
 
 namespace vcg{

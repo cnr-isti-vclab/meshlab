@@ -2,7 +2,7 @@
 #include "float.h"
 #include "math.h"
 #include "vcg/complex/trimesh/update/curvature.h"
-// #include "vcg/complex/trimesh/update/curvature_fitting.h"
+#include "vcg/complex/trimesh/update/curvature_fitting.h"
 
 using namespace vcg;
 
@@ -29,7 +29,9 @@ void Balloon::init( int gridsize, int gridpad ){
     // Remember that rays will take a step JUST in their direction, so if they lie exactly
     // on the bbox, they would go outside. The code below corrects this from happening.
     Box3f enlargedbb = cloud.bbox;
-    float del = .99*vol.getDelta(); // almost +1 voxel in each direction
+    // float del = .99*vol.getDelta(); // almost +1 voxel in each direction
+    float del = 1.99*vol.getDelta(); // USED FOR DEBUG
+    
     // float del = .50*vol.getDelta(); // ADEBUG: almost to debug correspondences
     Point3f offset( del,del,del );
     enlargedbb.Offset( offset );
@@ -54,7 +56,7 @@ void Balloon::init( int gridsize, int gridpad ){
 bool Balloon::initializeField(){
     //--- Setup the interpolation system
     // if we fail, signal the failure to the caller
-    float OMEGA = 1e7; // 1e8
+    float OMEGA = 1; // 1e8
     LAPLACIAN type = COTANGENT; // COMBINATORIAL
     bool op_succeed = finterp.Init( &surf, 1, type ); 
     if( !op_succeed ){
@@ -243,8 +245,8 @@ void Balloon::interpolateField(){
 }
 void Balloon::computeCurvature(){
     #if FALSE
-        float OMEGA = 1e2; // interpolation coefficient
-        sinterp.Init( &surf, 3, COTANGENT );  
+        float OMEGA = 1; // interpolation coefficient
+        sinterp.Init( &surf, 3, COMBINATORIAL );  
         for( CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++ )
             sinterp.AddConstraint3( tri::Index(surf,*vi), OMEGA, (*vi).P()[0], (*vi).P()[1], (*vi).P()[2] );
         FieldInterpolator::XBType* coords[3];
@@ -255,7 +257,18 @@ void Balloon::computeCurvature(){
             (*vi).P()[1] = (*coords[1])(vIdx);
             (*vi).P()[2] = (*coords[2])(vIdx);
         }
-    #else      
+    #endif
+
+    #if TRUE
+        surf.vert.EnableCurvature();
+        surf.vert.EnableCurvatureDir();
+        tri::UpdateCurvatureFitting<CMeshO>::computeCurvature( surf );
+        for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+            (*vi).Kh() = ( (*vi).K1() + (*vi).K2() ) / 2;
+        }
+    #endif
+        
+    #if FALSE
         // Enable curvature supports, How do I avoid a
         // double computation of topology here?
         surf.vert.EnableCurvature();
@@ -264,21 +277,23 @@ void Balloon::computeCurvature(){
         surf.face.EnableFFAdjacency();
         vcg::tri::UpdateTopology<CMeshO>::VertexFace( surf );
         vcg::tri::UpdateTopology<CMeshO>::FaceFace( surf );
-      
-        // tri::UpdateCurvatureFitting<CMeshO>::computeCurvature( surf );            
-                 
+                      
         //--- Compute curvature and its bounds
         tri::UpdateCurvature<CMeshO>::MeanAndGaussian( surf );
+    #endif
+        
+    if( surf.vert.CurvatureEnabled ){
+        //--- Enable color coding
+        rm &= ~SURF_FCOLOR;
+        rm |= SURF_VCOLOR;
+    
+        //--- DEBUG compute curvature bounds
         float absmax = -FLT_MAX;
         for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
             float cabs = fabs((*vi).Kh());
             absmax = (cabs>absmax) ? cabs : absmax;
         }
-    
-        //--- Enable color coding
-        rm &= ~SURF_FCOLOR;
-        rm |= SURF_VCOLOR;
-    
+        
         //--- Map curvature to two color ranges:
         //    Blue => Yellow: negative values
         //    Yellow => Red:  positive values
@@ -289,11 +304,11 @@ void Balloon::computeCurvature(){
             else
                 (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Red, (*vi).Kh()/absmax);
         }
-    #endif
+    }
 }
 
 // HP: a correspondence has already been executed once!
-void Balloon::evolveBalloon(){
+void Balloon::evolve(){
     // Update iteration counter
     numiterscompleted++;
 
@@ -328,7 +343,8 @@ void Balloon::evolveBalloon(){
     Point3f voxp;
     std::vector<float> updates_view(vol.band.size(),0);
     std::vector<float> updates_curv(vol.band.size(),0);
-    float view_maxdst = -FLT_MAX;
+    float view_max_absdst = -FLT_MAX;
+    float view_max_dst = -FLT_MAX, view_min_dst = +FLT_MAX;
     float curv_maxval = -FLT_MAX;
     for(unsigned int i=0; i<vol.band.size(); i++){
         Point3i& voxi = vol.band[i];
@@ -351,7 +367,9 @@ void Balloon::evolveBalloon(){
         // Interpolate update amounts & keep track of the range
         if( surf.vert.QualityEnabled ){
             updates_view[i] = c[0]*f.V(0)->Q() + c[1]*f.V(1)->Q() + c[2]*f.V(2)->Q();
-            view_maxdst = (fabs(updates_view[i])>view_maxdst) ? fabs(updates_view[i]) : view_maxdst;
+            view_max_absdst = (fabs(updates_view[i])>view_max_absdst) ? fabs(updates_view[i]) : view_max_absdst;
+            // view_max_dst = updates_view[i]>view_max_dst ? updates_view[i] : view_max_dst;
+            // view_min_dst = updates_view[i]<view_min_dst ? updates_view[i] : view_min_dst;
         }
         // Interpolate curvature amount & keep track of the range
         if( surf.vert.CurvatureEnabled ){
@@ -360,32 +378,43 @@ void Balloon::evolveBalloon(){
         }
     }
     // Only meaningful if it has been computed..
+    qDebug("Delta: %f", vol.getDelta());
+    
+    
+    if( surf.vert.QualityEnabled )
+        qDebug("view distance: min %.3f max %.3f", view_min_dst, view_max_dst);
     if( surf.vert.CurvatureEnabled )
         qDebug("max curvature: %f", curv_maxval);
-    if( surf.vert.QualityEnabled )
-        qDebug("max ditance: %f", view_maxdst);
 
     //--- Apply exponential functions to modulate and regularize the updates
-    float sigma2 = vol.getDelta(); sigma2*=sigma2;
-    float k1, k2, k3;
+    float sigma2 = vol.getDelta()*vol.getDelta();
+    float k1, k3;
+    float targetdst = vol.getDelta()/2;
+
+    float max_speed = vol.getDelta()/2;
+    // Slowdown weight, smaller if converging
+    float k2 = 1 - exp( -powf(view_max_absdst,2) / sigma2 );
+    
+    
     for(unsigned int i=0; i<vol.band.size(); i++){
         Point3i& voxi = vol.band[i];
         MyVoxel& v = vol.Voxel(voxi);
 
         //--- Distance weights
-        if( surf.vert.QualityEnabled ){
-            //Faster if I am located further
-            k1 = exp( -powf(fabs(updates_view[i])-view_maxdst,2) / (.25*sigma2) );
-            //Slowdown weight, smaller if converging
-            k2 = 1 - exp( -powf(updates_view[i],2) / (.25*sigma2) );
+        if( surf.vert.QualityEnabled ){             
+            // Faster if I am located further
+            k1 = exp( -powf(fabs(updates_view[i])-view_max_absdst,2) / sigma2 );
         }
         //--- Curvature weight (faster if spiky)
         if( surf.vert.CurvatureEnabled )
-            k3 = updates_curv[i] / curv_maxval; // sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
+            k3 = updates_curv[i] / curv_maxval; 
+            k3 = sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
 
         //--- Apply the update on the implicit field
         if( surf.vert.QualityEnabled ){
-            v.sfield += vcg::sign( .25f*k1*k2*vol.getDelta(), updates_view[i]);
+            v.sfield += vcg::sign( k1*k2*max_speed, updates_view[i] );
+            // v.sfield += vcg::sign( .15f*k1*k2*vol.getDelta(), updates_view[i]);
+            // v.sfield += .25f * k1 * vol.getDelta();
         }
         // if we don't have computed the distance field, we don't really know how to
         // modulate the laplacian accordingly...
@@ -394,7 +423,7 @@ void Balloon::evolveBalloon(){
 //          v.sfield += .1*k3*k2;
 //        }
         else if( surf.vert.CurvatureEnabled ){
-          v.sfield += .1*k3;     
+            v.sfield += .1*k3; // prev .1
         }
 #endif
     }
