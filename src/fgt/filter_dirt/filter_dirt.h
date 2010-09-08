@@ -27,7 +27,6 @@
 #include <QObject>
 #include <QStringList>
 #include <QString>
-
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
 #include<vector>
@@ -38,15 +37,6 @@
 
 using namespace vcg;
 using namespace mu;
-/*
-class DustEdge;//Never used
-class DustVertex;//Never used
-class DustFace;
-
-class DustVertex : public VertexSimp2<DustVertex, DustEdge, DustFace> {};
-class DustFace:public FaceSimp2< DustVertex, DustEdge, DustFace,face::Normal3f>{};
-class DustMesh:public tri::TriMesh< std::vector<DustVertex>,std::vector<DustFace> >{};
-*/
 
 
 class FilterDirt : public QObject, public MeshFilterInterface

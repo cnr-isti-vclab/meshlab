@@ -57,7 +57,6 @@ using namespace vcg;
 using namespace mu;
 
 
-
 FilterDirt::FilterDirt()
 {
 
@@ -114,49 +113,30 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         Point3f dir;
         Point3f new_bar_coords;
         dir[0]=0;
-        dir[1]=-0.1;
-        dir[2]=0;
+        dir[1]=-0.5;
+        dir[2]=-0.50;
         if(dmesh!=0){
                    CMeshO::VertexIterator vi;//= dmesh->cm.vert.begin();
                    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > pi = tri::Allocator<CMeshO>::GetPerVertexAttribute<DustParticle<CMeshO> >(dmesh->cm,"ParticleInfo");
                    CMeshO::CoordType new_pos;
                    for(vi=dmesh->cm.vert.begin();vi!=dmesh->cm.vert.end();++vi){
-                        //new_bar_coords = StepForward((*vi).P(),*(pi[vi].face),dir);
-                       //(*vi).P()=StepForward((*vi).P(),*(pi[vi].face),dir);
-                       new_pos=fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
-
-                       //(*vi).P()=fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
-                       if(IsOnFace(new_pos,*(pi[vi].face))                           ){
-                       (*vi).P()=new_pos;
-                       }else{
-                       (*vi).P()=fromBarCoords(
-                               ComputeIntersection(
-                                       (*vi).P(),new_pos,*(pi[vi].face)
-                                       ),*(pi[vi].face))
-                                 ;
+                        new_pos=StepForward((*vi).P(),*(pi[vi].face),dir);
+                        CMeshO::CoordType int_p;
+                        CMeshO::FacePointer new_f;
+                        if(ComputeIntersection((*vi).P(),new_pos,*(pi[vi].face),int_p,new_f)){
+                            //new_pos=int_p;
+                            //(*vi).P()=new_pos;
+                            //(*vi).P()=int_p;
+                            //pi[vi].face=new_f;
+                        }else{
+                            (*vi).P()=new_pos;
                         }
 
-
-
-
-                       //(*vi).P()=
-                   /*
-                       if(new_bar_coords[0]<0 || new_bar_coords[1]<0 || new_bar_coords[2]<0){
-                       //The new position is outside
-
-
-
-                       }else{
-
-                       (*vi).P()=fromBarCoords(StepForward((*vi).P(),*(pi[vi].face),dir),*pi[vi].face);
-
-                       }
-                   */
-                   }
+                    }
               }
 
     }else{
-
+        //First Application
         vector<Point3f> dustVertexVec;
         vector<DustParticle<CMeshO> > dustParticleVec;
 
