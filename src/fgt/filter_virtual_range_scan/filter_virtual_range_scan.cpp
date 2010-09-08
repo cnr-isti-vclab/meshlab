@@ -25,6 +25,8 @@
 #include <QtGui>
 
 #include "filter_virtual_range_scan.h"
+#include "my_gl_widget.h"
+
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/update/position.h>
@@ -122,6 +124,7 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
     {
     case FP_VRS:
 
+
         bool useLayerPovs = par.getBool( "useCustomPovs" );
         if( useLayerPovs )
         {
@@ -180,6 +183,7 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
             secondMesh = &( secondMeshModel->cm );
         }
 
+        /*
         innerContext = new QGLContext( QGLFormat() );
         innerContext->makeCurrent();
         glewInit();
@@ -191,6 +195,17 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
         sampler.generateSamples();
 
         delete innerContext;
+        */
+
+        MyGLWidget* tmpWidget = new MyGLWidget( 0 );
+        tmpWidget->params = &vrsParams;
+        tmpWidget->inputMesh = startMesh;
+        tmpWidget->uniformSamplesMesh = firstMesh;
+        tmpWidget->featureSamplesMesh = secondMesh;
+        tmpWidget->samplerListener = this;
+        this->cb = cb;
+        tmpWidget->show();
+
         return true;
         break;
     }
@@ -235,28 +250,32 @@ int FilterVirtualRangeScan::postCondition(QAction *filter) const
 // SamplerListener implementation
 void FilterVirtualRangeScan::startingSetup( void )
 {
-    cb( 0, "Starting setup..." );
+    //cb( 0, "Starting setup..." );
 }
 
 void FilterVirtualRangeScan::setupComplete( int povs )
 {
+    /*
     char buf[ 100 ];
     sprintf( buf, "Processing pov 1 of %d", vrsParams.povs );
     cb( 0, buf );
     samplingFeatures = false;
+    */
 }
 
 void FilterVirtualRangeScan::povProcessed( int pov, int samples )
 {
+    /*
     char buf[ 250 ];
     sprintf( buf, "Processing pov %d of %d (%d %s samples)...", pov + 1,
              vrsParams.povs, samples, samplingFeatures? "feature" : "uniform" );
     cb( (pov + 1)/vrsParams.povs * 100, buf );
+    */
 }
 
 void FilterVirtualRangeScan::startingFeatureSampling( void )
 {
-    samplingFeatures = true;
+    //samplingFeatures = true;
 }
 // ----------------------------------------------------------------------
 Q_EXPORT_PLUGIN(FilterVirtualRangeScan)

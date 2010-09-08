@@ -474,6 +474,20 @@ namespace vrs
             free(tex);
             glBindTexture( GL_TEXTURE_2D, 0 );
         }
+
+        static void dumpConfiguration( FboConfiguration* conf, QString prefix = "conf" )
+        {
+            QString filename;
+            for( unsigned int i=0; i<conf->size(); i++ )
+            {
+                FboAttachment& a = (*conf)[i];
+                if( a.attachmentPoint != GL_DEPTH_ATTACHMENT )
+                {
+                    filename = prefix + "_" + QString::number(i) + ".txt";
+                    downloadAndDumpTexture( filename, a.pData->textureId, 0 );
+                }
+            }
+        }
     };
 }
 
