@@ -56,7 +56,7 @@ void Balloon::init( int gridsize, int gridpad ){
 bool Balloon::initializeField(){
     //--- Setup the interpolation system
     // if we fail, signal the failure to the caller
-    float OMEGA = 1; // 1e8
+    float OMEGA = 1e3; // 1e8
     LAPLACIAN type = COTANGENT; // COMBINATORIAL
     bool op_succeed = finterp.Init( &surf, 1, type ); 
     if( !op_succeed ){
@@ -361,15 +361,15 @@ void Balloon::evolve(){
         int axis;
         if     (f.Flags() & CFaceO::NORMX )   axis = 0;
         else if(f.Flags() & CFaceO::NORMY )   axis = 1;
-        else                                    axis = 2;
+        else                                  axis = 2;
         vcg::InterpolationParameters(triFace, axis, proj, c);
 
         // Interpolate update amounts & keep track of the range
         if( surf.vert.QualityEnabled ){
             updates_view[i] = c[0]*f.V(0)->Q() + c[1]*f.V(1)->Q() + c[2]*f.V(2)->Q();
             view_max_absdst = (fabs(updates_view[i])>view_max_absdst) ? fabs(updates_view[i]) : view_max_absdst;
-            // view_max_dst = updates_view[i]>view_max_dst ? updates_view[i] : view_max_dst;
-            // view_min_dst = updates_view[i]<view_min_dst ? updates_view[i] : view_min_dst;
+            view_max_dst = updates_view[i]>view_max_dst ? updates_view[i] : view_max_dst;
+            view_min_dst = updates_view[i]<view_min_dst ? updates_view[i] : view_min_dst;
         }
         // Interpolate curvature amount & keep track of the range
         if( surf.vert.CurvatureEnabled ){
@@ -379,8 +379,7 @@ void Balloon::evolve(){
     }
     // Only meaningful if it has been computed..
     qDebug("Delta: %f", vol.getDelta());
-    
-    
+        
     if( surf.vert.QualityEnabled )
         qDebug("view distance: min %.3f max %.3f", view_min_dst, view_max_dst);
     if( surf.vert.CurvatureEnabled )
@@ -389,16 +388,20 @@ void Balloon::evolve(){
     //--- Apply exponential functions to modulate and regularize the updates
     float sigma2 = vol.getDelta()*vol.getDelta();
     float k1, k3;
-    float targetdst = vol.getDelta()/2;
 
-    float max_speed = vol.getDelta()/2;
-    // Slowdown weight, smaller if converging
+    //--- Maximum speed: avoid over-shoothing by limiting update speed
+    // E_view + alpha*E_smooth
+    float balance_coeff = .5;
+
+    // Slowdown weight, smaller if worst case scenario is very converging
     float k2 = 1 - exp( -powf(view_max_absdst,2) / sigma2 );
-    
-    
+        
     for(unsigned int i=0; i<vol.band.size(); i++){
         Point3i& voxi = vol.band[i];
         MyVoxel& v = vol.Voxel(voxi);
+
+        //--- Avoids over-shooting, as maximum speed is bound to dist from surface
+        float max_speed = std::min( vol.getDelta()/2, std::abs(updates_view[i]) );
 
         //--- Distance weights
         if( surf.vert.QualityEnabled ){             
@@ -407,25 +410,34 @@ void Balloon::evolve(){
         }
         //--- Curvature weight (faster if spiky)
         if( surf.vert.CurvatureEnabled )
-            k3 = updates_curv[i] / curv_maxval; 
+            // k3 = updates_curv[i] / curv_maxval;
             k3 = sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
 
         //--- Apply the update on the implicit field
         if( surf.vert.QualityEnabled ){
+            float prev = v.sfield;
             v.sfield += vcg::sign( k1*k2*max_speed, updates_view[i] );
+            if( v.sfield < 0 && prev > 0){
+                qDebug("Update from f=%.3f to %.3f", prev, v.sfield);
+                qDebug("k1: %.2f", k1);
+                qDebug("k3: %.2f", k3);
+                qDebug("max_speed: %.2f", max_speed);
+            }
+
             // v.sfield += vcg::sign( .15f*k1*k2*vol.getDelta(), updates_view[i]);
             // v.sfield += .25f * k1 * vol.getDelta();
         }
         // if we don't have computed the distance field, we don't really know how to
         // modulate the laplacian accordingly...
-#ifdef TRUE // ENABLE_CURVATURE_IN_EVOLUTION
+// #if TRUE // ENABLE_CURVATURE_IN_EVOLUTION
 //        if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled ){
-//          v.sfield += .1*k3*k2;
-//        }
-        else if( surf.vert.CurvatureEnabled ){
-            v.sfield += .1*k3; // prev .1
+        //          v.sfield += .1*k3*k2;
+        //        }
+
+        if( surf.vert.CurvatureEnabled ){
+            v.sfield += k3*balance_coeff*max_speed; // prev .1
         }
-#endif
+// #endif
     }
 
     //--- DEBUG LINES: what's being updated (cannot put above cause it's in a loop)
