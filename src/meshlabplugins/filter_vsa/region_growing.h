@@ -8,13 +8,6 @@
 #include "planar_region.h"
 #include <vcg/complex/trimesh/allocate.h>
 
-template <class STD_CONTAINER>
-void RemoveDuplicates(STD_CONTAINER & cont){
-        if(cont.empty()) return;
-        std::sort(cont.begin(),cont.end());
-        typename STD_CONTAINER::iterator newend = std::unique(cont.begin(),cont.end());
-        cont.erase(newend,cont.end());
-}
 template <class MeshType>
 class RegionGrower{
 public:
@@ -28,12 +21,13 @@ public:
 
 	std::list<RegionType> regions;
 	std::vector<RegionType*> workingset;
-	int n_faces;
+        int n_faces,target_max_regions;
 	FaceType * lastAdded;
         ScalarType	ave_error // average error (over single regions' error)
-				  ,ave_var,// average variance (over single regions' error)
-					changed,	// faces that have changed from previous step ([0..1))
-					err;
+                        ,ave_var,// average variance (over single regions' error)
+                        changed,	// faces that have changed from previous step ([0..1))
+                        err,
+                        target_error; // taget error
 	FaceType * worst;
         ScalarType worst_err ;
         MeshType * m;
@@ -56,14 +50,66 @@ public:
 	std::vector<CandiFace> facesheap;
 	std::vector<FaceError<FaceType> > faceserr;
 
+        struct ErrorEval {
+
+            void Add(const float & v){
+                if(!ns){
+                if(v < samples[i_min]) i_min = 0; else {++i_min;
+                    if(v > samples[i_max])  i_max = 0;else ++i_max;
+                }
+                if(i_min == samples.size()) {i_min = 0; for(int i= 0; i < samples.size(); ++i) if(samples[i]<samples[i_min]) i_min = i; }
+                if(i_max == samples.size()) {i_max = 0; for(int i= 0; i < samples.size(); ++i) if(samples[i]>samples[i_max]) i_max = i; }
+            }
+                samples.pop_back();samples.push_front(v);
+                boxes.pop_back(); boxes.push_front(vcg::Point2f(samples[i_min],samples[i_max]));
+                ++ns ;
+            }
+
+            float BoxOverlap(){
+                float maxsize =  std::max( boxes.back()[1]-boxes.back()[0], (*boxes.begin())[1]-(*boxes.begin())[0]);
+                float overlap =  std::max(0.f, std::min(boxes.back()[1],(*boxes.begin())[1])-std::max(boxes.back()[0],(*boxes.begin())[0]));
+                assert(overlap <= maxsize);
+                return  (maxsize  > 0.f)?overlap / maxsize:0.0;
+            }
+            float RelativeDecrease(){
+                if (ns<2) return std::numeric_limits<float>::max();
+                return (samples[0]<10e-22)?0.0:(samples[1]-samples[0])/samples[0];
+            }
+
+            void Init(int n ){
+
+            samples.clear();
+            boxes.clear();
+            for(int i = 0 ; i < n; ++i) samples.push_front(std::numeric_limits<float>::max());
+            for(int i = 0 ; i < n; ++i) boxes.push_front(vcg::Point2f(n,n-i));
+            i_max = i_min = 0;
+            ns = 0;
+        }
+
+        private:
+            int i_min,i_max;            // index of min and max element in the queue
+            std::deque<float> samples;
+            std::deque<vcg::Point2f> boxes;
+            int ns;
+
+        };
+
+        ErrorEval erroreval;
         // init
-        void Init(MeshType & mesh, int n_seeds){
+        void Init(MeshType & mesh, int n_seeds,int max_regions, float max_err){
+            erroreval.Init(10);
             m = &mesh;
             vcg::tri::Allocator<MeshType>::CompactFaceVector(*m);
             vcg::tri::UpdateTopology<MeshType>::FaceFace(*m);
 
+            float area = 0.f;
+            for(typename MeshType::FaceIterator fi =  m->face.begin(); fi != m->face.end(); ++fi)
+                area += vcg::DoubleArea(*fi);
+            area/=2.f;
+            target_error = area*max_err*max_err;
+            target_max_regions = max_regions;
 
-            // create an attibute that will store the address in ocme for the vertex
+            // tte an attibute that will store the address in ocme for the vertex
             attr_r = vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<int*> (*m,"r");
             if(!vcg::tri::Allocator<MeshType>::IsValidHandle(*m,attr_r))
                     attr_r = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<int*> (*m,"r");
@@ -161,42 +207,41 @@ void PushHeap(std::vector<FaceType*> & candi, RegionType & r){
                                                 c.push_back((*fi)->FFp(i));
         }
 
-bool IsRelaxed(){
-    ScalarType _ave_error=0;
-    ScalarType _ave_var= 0;
-    ScalarType _changed = 0.0;
-    int nr=0;
-;
+        bool IsRelaxed(){
 
-    typename std::list<RegionType>::iterator ri;
-    worst=NULL;;
-    worst_err = -1;
-    qDebug("working set size: %d\n",workingset.size());
-    for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd){
-            ++nr;
-            (*ri).UpdateError();
-            _ave_error+=(*ri).approx_err;
-            _ave_var+=(*ri).approx_var;
-            _changed+=(*ri).changed;
-            (*ri).changed=0;
-            //faceserr.push_back((*ri).worst);
-            //push_heap(faceserr.begin(),faceserr.end());
-            if((*ri).worst.val*(*ri).size > worst_err){
-                                    worst = (*ri).worst.f;
-                                    worst_err = (*ri).worst.val*(*ri).size;
-            }
-    }
+                                ScalarType _ave_error=0;
+                                ScalarType _ave_var= 0;
+                                ScalarType _changed = 0.0;
+                                int nr=0;
+
+                                typename std::list<RegionType>::iterator ri;
+                                worst=NULL;;
+                                worst_err = -1;
+                                qDebug("working set size: %d\n",workingset.size());
+                                for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd){
+                                        ++nr;
+                                        (*ri).UpdateError();
+                                        _ave_error+=(*ri).approx_err;
+                                        _ave_var+=(*ri).approx_var;
+                                        _changed+=(*ri).changed;
+                                        (*ri).changed=0;
+                                        if((*ri).worst.val*(*ri).size > worst_err){
+                                                                worst = (*ri).worst.f;
+                                                                worst_err = (*ri).worst.val*(*ri).size;
+                                        }
+                                }
 
 
-    _ave_error/=nr;
-    _ave_var/=nr;
-    _changed/=n_faces;
+                                _ave_error/=nr;
+                                _ave_var/=nr;
+                                _changed/=n_faces;
 
-    qDebug("Err:%f Changed: %f-------",_ave_error,_changed);
+                                erroreval.Add(_ave_error);
+                                qDebug("Err:%f ov: %f-------",_ave_error,erroreval.BoxOverlap());
 
-    return false;
 
-		}
+                                return  (erroreval.BoxOverlap() > 0.5) || (erroreval.RelativeDecrease() < 0.1);
+                        }
 	
 void GrowStepOnce(){
 		CandiFace cf;	
@@ -287,60 +332,42 @@ void GrowStepOnce(){
 
 	}
 
-	void Restart(){
-				std::vector<FaceType*>  candi;
-                                typename std::vector<RegionType*>::iterator si;
-				TriRegIterator ri;
-                                typename RegionType::AdjIterator ai;
-				facesheap.clear();
+        bool Restart(){
+                std::vector<FaceType*>  candi;
+                TriRegIterator ri;
+                facesheap.clear();
 
-				// clean all the regions
-                                for(ri = regions.begin(); ri != regions.end(); ++ri){
-					(*ri).Clean();
-                                        workingset.push_back(&*ri);
-                                    }
- 
-                         if(false && IsRelaxed()){// it's time to place a new seed
-				workingset.clear();
-				//RegionType * wr = (RegionType*)worst->r;// regions to which the new seed belongs
-				FaceError<FaceType>  wrs;
-				
-				//do{
-				//	pop_heap(faceserr.begin(),faceserr.end());
-				//	wrs = faceserr.back();
-				//	qDebug("ERROR: %f\n",wrs.val);
-				//	faceserr.pop_back();
-				//}while(((RegionType*)(wrs.f->r))->worst.val != wrs.val);
-				
+                if(IsRelaxed()){
+                    if( (worst_err <= target_error) || (regions.size() >= target_max_regions))
+                        return false;
+                    else
+                    {
+                        erroreval.Init(10);
+                        FaceError<FaceType>  wrs;
+                        wrs.f = worst;
+                        wrs.val = worst_err;
+                        printf("worst triangle error %f\n",worst_err);
 
+                        CreateRegion(wrs.f);// CreateRegion changes wr->r
 
-//				RegionType * wr = (RegionType*)wrs.f->r;
-                                RegionType * wr = (RegionType*) attr_r[worst];// regions to which the new seed belongs
-				wrs.f = worst;
-				wrs.val = worst_err;
-				printf("worst triangle error %f\n",worst_err);
-				workingset.push_back(wr);
-				for(ai = wr->adj.begin(); ai != wr->adj.end(); ++ai)// put all its neichbors onthe working set
-				 workingset.push_back(*ai);
-				CreateRegion(wrs.f);// CreateRegion changes wr->r
-                                workingset.push_back((RegionType*)attr_r[wrs.f]);// put the region itself
-				// reset state variables
-				 ave_error=-1;
-			   ave_var=-1;
-				 err=0.0; 
-				 changed=0;
-			 }
+                        // reset state variables
+                         ave_error=-1;
+                         ave_var=-1;
+                         err=0.0;
+                         changed=0;
+                    }
+                }
+                     for(ri = regions.begin(); ri != regions.end(); ++ri)
+                     {
+                             candi.clear();
+                             (*ri).Refit();            // fit a plane to the region
+                             Restart(*ri);             // clear stuff in the region, move the seed to the best fitting to the plabne
+                             Candidates(*ri,candi);    // take the (three) faces candidatees
+                             PushHeap(candi,(*ri));    // put the faces on to the heap
+                     }
+                return true;
+            }
 
-			 for(si = workingset.begin(); si != workingset.end(); ++si)
-			 {
-				 candi.clear();		
-                                 (*si)->Refit();            // fit a plane to the region
-                                 Restart(**si);              // clear stuff in the region, move the seed to the best fitting to the plabne
-                                 Candidates(**si,candi); // take the (three) faces candidatees
-				 PushHeap(candi,*(*si));   // put the faces on to the heap
-			 }
-
-	}
 			void CutOff(){}
 
 

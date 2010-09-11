@@ -91,7 +91,9 @@ void VsaPlugin::initParameterSet(QAction *action,MeshDocument &  m , RichParamet
 {
 	 switch(ID(action))	 {
                 case FP_VSA :
+                  parlst.addParam(new RichInt ("MinPatches", 10,"minimum number of patches to use"));
                   parlst.addParam(new RichInt ("MaxPatches", 10,"maximum number of patches to use"));
+                  parlst.addParam(new RichFloat ("MaxError", 0.25,"target error"));
                   parlst.addParam(new RichBool ("ComputeSamplingViews", false,"Also compute the view for sampling",""));
                   parlst.addParam(new RichInt ("Width", 1024,"width of the viewport"));
                   parlst.addParam(new RichInt ("Height", 512,"height of the viewport"));
@@ -114,25 +116,30 @@ bool VsaPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
                 case FP_VSA :
 		{
 			// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
+                        int minpatches = par.getInt("MinPatches");
                         int maxpatches = par.getInt("MaxPatches");
+                        float target_error = par.getFloat("MaxError");
 
                         CMeshO::PerMeshAttributeHandle<RegionGrower<CMeshO>  > rg_handle;
                         rg_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<RegionGrower<CMeshO> > (md.mm()->cm,"regiongrower");
                         if (!vcg::tri::Allocator<CMeshO>::IsValidHandle(md.mm()->cm,rg_handle) )
                             rg_handle = vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<RegionGrower<CMeshO> > (md.mm()->cm,"regiongrower");
 
-                        rg_handle().Init(md.mm()->cm,maxpatches);
+                        rg_handle().Init(md.mm()->cm,minpatches,maxpatches,target_error);
                         rg_handle().Refill();
 
 
-                        for(int ns = 0; ns < 10*maxpatches; ++ns)
+                        while(rg_handle().Restart())
                             rg_handle().GrowStep();
 
-                        for(  RegionGrower<CMeshO>::TriRegIterator ti = rg_handle().regions.begin(); ti != rg_handle().regions.end(); ++ti)
+                        unsigned int i=0, n_regions = rg_handle().regions.size();
+                        for(  RegionGrower<CMeshO>::TriRegIterator ti = rg_handle().regions.begin(); ti != rg_handle().regions.end(); ++ti,++i){
+                            (*ti).color = (*ti).color.Scatter(n_regions,i);
                             for( RegionGrower<CMeshO>::RegionType::FaceIterator fi = (*ti).face.begin(); fi != (*ti).face.end(); ++fi)
                                 (*fi)->C() = (*ti).color;
+                        }
 
-                        Log("Mesh Partitioned in Almost Planar regions");
+                        Log("Mesh Partitioned in %d Almost Planar regions",n_regions);
                         bool alsoviews = par.getBool("ComputeSamplingViews");
 
                         if(alsoviews){

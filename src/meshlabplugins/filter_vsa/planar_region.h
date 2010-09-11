@@ -239,31 +239,22 @@ void PlanarRegion< MeshType>::Refit(){
 
 template<class MeshType>
 void PlanarRegion< MeshType>::UpdateError( ){
-//	std::vector<FaceErr> toSort;
-//	std::vector<FaceErr>::iterator si,sit;
-        FaceIterator fi,fi1;
+        FaceIterator fi;
 
-	float err=0,var=0,max_err=-1.0;
-	for(fi=face.begin(); fi != face.end(); ++fi)
-//		toSort.push_back(FaceErr((*fi),Evaluate(**fi)));
-	{
-	//for(si=toSort.begin(); si != toSort.end(); ++si)
-	//{
-	float e =Evaluate(**fi);
-		err+=e;
-		if(e > max_err) {
-			worst.val = e;
-			worst.f = *fi;
-		 }
+        float err=0,var=0,max_err=-1.0;
+        for(fi=face.begin(); fi != face.end(); ++fi)
+        {
+        float e =Evaluate(**fi);
+                err+=e;
+                if(e > max_err) {
+                        worst.val = e;
+                        worst.f = *fi;
+                        max_err = e;
+                 }
 }
-	//}
-	approx_err =err;
-
-//	for(si=toSort.begin(); si != toSort.end(); ++si)
-//		var+=sqrt(((*si).val-err)*((*si).val-err));
-//	var/=toSort.size();
-	var = 0.0;
-	approx_var = var;
+        approx_err =err;
+        var = 0.0;
+        approx_var = var;
 }
 
 template<class MeshType>
