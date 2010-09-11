@@ -27,7 +27,6 @@
 #include "filter_virtual_range_scan.h"
 #include "my_gl_widget.h"
 
-#include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/normal.h>
