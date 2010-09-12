@@ -254,16 +254,21 @@ namespace vs
             glGetFloatv( GL_MODELVIEW_MATRIX, resources->mvMatrix );
             glGetFloatv( GL_PROJECTION_MATRIX, resources->projMatrix );
 
+             if( resources->params->useCustomPovs )
+                 GlShot< ShotType >::UnsetView();
+
             glMatrixMode( GL_PROJECTION );
             glLoadIdentity();
             glMatrixMode( GL_MODELVIEW );
             glLoadIdentity();
+
         }
 
         bool nextPov( void )
         {
             currentPov++;
-            return ( currentPov < (int)povs.size() );
+            int si = (resources->params->useCustomPovs)?resources->params->customPovs.size():(int)povs.size();
+            return ( currentPov < si );
         }
 
         int                     currentPov;
