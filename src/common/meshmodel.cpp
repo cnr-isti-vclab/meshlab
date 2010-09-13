@@ -418,6 +418,15 @@ void MeshModelState::create(int _mask, MeshModel* _m)
             if(!(*vi).IsD()) (*ci)=(*vi).C();
     }
 
+    if(changeMask & MeshModel::MM_VERTQUALITY)
+    {
+        vertQuality.resize(m->cm.vert.size());
+        std::vector<float>::iterator qi;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), qi = vertQuality.begin(); vi != m->cm.vert.end(); ++vi, ++qi)
+            if(!(*vi).IsD()) (*qi)=(*vi).Q();
+    }
+
     if(changeMask & MeshModel::MM_VERTCOORD)
     {
         vertCoord.resize(m->cm.vert.size());
@@ -468,6 +477,14 @@ bool MeshModelState::apply(MeshModel *_m)
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
             if(!(*vi).IsD()) (*vi).C()=(*ci);
+    }
+    if(changeMask & MeshModel::MM_VERTQUALITY)
+    {
+        if(vertQuality.size() != m->cm.vert.size()) return false;
+        std::vector<float>::iterator qi;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), qi = vertQuality.begin(); vi != m->cm.vert.end(); ++vi, ++qi)
+            if(!(*vi).IsD()) (*vi).Q()=(*qi);
     }
 
     if(changeMask & MeshModel::MM_VERTCOORD)
