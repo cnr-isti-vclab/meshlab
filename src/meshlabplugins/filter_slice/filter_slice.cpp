@@ -24,13 +24,6 @@
 #include "filter_slice.h"
 //#include <stdlib.h>
 #include <vcg/complex/intersection.h>
-#include <vcg/complex/edgemesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/refine.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/update/selection.h>
 #include <algorithm>
 
 
@@ -50,7 +43,7 @@ using namespace vcg;
 ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
 {
 	typeList << FP_PARALLEL_PLANES
-					 <<FP_RECURSIVE_SLICE
+//					 <<FP_RECURSIVE_SLICE
 					 <<FP_SINGLE_PLANE;
 
   foreach(FilterIDType tt , types())
@@ -64,7 +57,7 @@ ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
   switch(filterId) {
 		case FP_PARALLEL_PLANES :  return QString("Cross section parallel planes");
 		case FP_RECURSIVE_SLICE :  return QString("Cross section recursive");
-		case FP_SINGLE_PLANE :  return QString("Cross section single plane");
+    case FP_SINGLE_PLANE    :  return QString("Cross section single plane");
 		default : assert(0);
 	}
   return QString("error!");
@@ -196,12 +189,8 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 	{
 		case FP_SINGLE_PLANE:
 			{			
-			//float planeDist = parlst.getAbsPerc("planeDist");
-			float planeDist=0;
 			float planeOffset = parlst.getFloat("planeOffset");
-			//bool absOffset = parlst.getBool("absOffset");
-      RefPlane reference= RefPlane(parlst.getEnum("relativeTo"));
-			Point3f planeCenter;
+      Point3f planeCenter;
 			Plane3f slicingPlane;
 
 			pr.numCol=1;
@@ -223,20 +212,14 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				return false;
 			}
 
-			switch(reference)
+      switch(RefPlane(parlst.getEnum("relativeTo")))
 			{
-			  case REF_CENTER:
-				  planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox center
+        case REF_CENTER:  planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox center
 				  break;
-
-			  case REF_MIN:
-					planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox min
+        case REF_MIN:     planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox min
 					break;
-
-			  case REF_ORIG:
-				  planeCenter = planeAxis*planeOffset;  //origin
+        case REF_ORIG:    planeCenter = planeAxis*planeOffset;  //origin
 				  break;
-			  
 			}
 
 			//planeCenter+=planeAxis*planeDist;
@@ -472,103 +455,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
 void ExtraFilter_SlicePlugin::extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
 {
-	tri::Append<CMeshO,CMeshO>::Mesh(dest->cm, orig->cm);
-	tri::UpdateTopology<CMeshO>::FaceFace(dest->cm);
-	//create the clone, move it eps/2 on the left and invert its normals
-	for (int i=0;i<dest->cm.vert.size();i++)
-		dest->cm.vert[i].P()-=planeAxis*eps/2;
-	tri::Clean<CMeshO>::FlipMesh(dest->cm);
-	vcg::tri::UpdateTopology<CMeshO>::FaceFace(dest->cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(dest->cm);
-	//find the border outlines
-	std::vector< std::vector<Point3f> > outlines;
-  std::vector<Point3f> outline;
-  vcg::tri::UpdateFlags<CMeshO>::VertexClearV(dest->cm);
-  vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(dest->cm);
-  int nv=0;
-  for(int i=0;i<dest->cm.face.size();i++)
-  {
-    for (int j=0;j<3;j++)
-    if (!dest->cm.face[i].IsV() && dest->cm.face[i].IsB(j))
-    {
-      CFaceO* startB=&(dest->cm.face[i]);
-      vcg::face::Pos<CFaceO> p(startB,j);
-	    do
-      {
-				p.V()->SetV();
-        outline.push_back(p.V()->P());
-        p.NextB();
-				nv++;
-      }
-      while(!p.V()->IsV());
-      outlines.push_back(outline);
-      outline.clear();
-    }
-  }
-	if (nv<2) return;
-	//I have at least 3 vertexes
-	MeshModel* tempMesh= doc->addNewMesh("temp mesh");
-	tri::Append<CMeshO,CMeshO>::Mesh(tempMesh->cm, orig->cm);
-	for (int i=0;i<tempMesh->cm.vert.size();i++)
-		tempMesh->cm.vert[i].P()+=planeAxis*eps/2;
-	//create the clone and move it eps/2 on the right
-	tri::Append<CMeshO,CMeshO>::Mesh(dest->cm, tempMesh->cm);
-	//delete tempMesh;
-	doc->delMesh(tempMesh);
-	//create the new mesh and the triangulation between the clones
-	tempMesh=doc->addNewMesh("temp mesh 2");
-	CMeshO::VertexIterator vi=vcg::tri::Allocator<CMeshO>::AddVertices(tempMesh->cm,2*nv);
-
-	//I have at least 6 vertexes
-	for (int i=0;i<outlines.size();i++)
-  {
-		(&*vi)->P()=outlines[i][0];
-		CVertexO* v0=(&*vi); ++vi;
-		(&*vi)->P()=outlines[i][0]+planeAxis*eps;
-		CVertexO* v1=(&*vi); ++vi;
-		CVertexO* vs0=v0;	//we need the start point
-		CVertexO* vs1=v1; //to close the loop
-//		Log(0,"%d",outlines[i].size());
-		for(int j=1;j<outlines[i].size();++j)
-		{
-			(&*vi)->P()=outlines[i][j];
-			CVertexO* v2=(&*vi); ++vi;
-			(&*vi)->P()=outlines[i][j]+planeAxis*eps;
-			CVertexO* v3=(&*vi); ++vi;
-			CMeshO::FaceIterator fi=vcg::tri::Allocator<CMeshO>::AddFaces(tempMesh->cm,2);
-
-			(&*fi)->V(2)=v0;
-			(&*fi)->V(1)=v1;
-			(&*fi)->V(0)=v2;
-			++fi;
-			(&*fi)->V(0)=v1;
-			(&*fi)->V(1)=v2;
-			(&*fi)->V(2)=v3;
-
-			v0=v2;
-			v1=v3;
-			if (j==outlines[i].size()-1)
-			{
-				CMeshO::FaceIterator fi=vcg::tri::Allocator<CMeshO>::AddFaces(tempMesh->cm,2);
-				(&*fi)->V(2)=v0;
-				(&*fi)->V(1)=v1;
-				(&*fi)->V(0)=vs0;
-				++fi;
-				(&*fi)->V(0)=v1;
-				(&*fi)->V(1)=vs0;
-				(&*fi)->V(2)=vs1;
-			}
-		}
-  }
-
-	tri::Append<CMeshO,CMeshO>::Mesh(dest->cm, tempMesh->cm);
-	tri::Clean<CMeshO>::RemoveDuplicateVertex(dest->cm);
-	dest->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-	vcg::tri::UpdateTopology<CMeshO>::FaceFace(dest->cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(dest->cm);
-	vcg::tri::UpdateBounding<CMeshO>::Box(dest->cm);
-	doc->delMesh(tempMesh);
-	//delete tempMesh;
+  tri::ExtrudeBoundary<CMeshO>(orig->cm,dest->cm,eps,planeAxis);
 }
  MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
 {

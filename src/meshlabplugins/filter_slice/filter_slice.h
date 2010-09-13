@@ -27,18 +27,18 @@
 
 #include <QObject>
 #include <common/interfaces.h>
-#include <vcg/complex/used_types.h>
-
-#include <vcg/simplex/vertex/base.h>
-#include <vcg/simplex/edge/base.h>
 #include <vcg/complex/edgemesh/base.h>
 
-#include <vcg/simplex/vertex/component.h>
-
+#include <vcg/complex/edgemesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/refine.h>
+#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/trimesh/update/selection.h>
 #include <wrap/io_edgemesh/export_svg.h>
 
 #include <vcg/space/plane3.h>
-//#include "svgpro.h"
 
 
 
@@ -84,5 +84,110 @@ private:
 	
 	
 };
+
+namespace vcg {
+  namespace tri {
+
+template <class MeshType>
+    bool ExtrudeBoundary(MeshType &orig, MeshType &dest, float eps, Point3f planeAxis)
+{
+  tri::Append<MeshType,MeshType>::Mesh(dest, orig);
+  tri::UpdateTopology<MeshType>::FaceFace(dest);
+  //create the clone, move it eps/2 on the left and invert its normals
+  for (int i=0;i<dest.vert.size();i++)
+    dest.vert[i].P()-=planeAxis*eps/2;
+  tri::Clean<MeshType>::FlipMesh(dest);
+  vcg::tri::UpdateTopology<MeshType>::FaceFace(dest);
+  vcg::tri::UpdateNormals<MeshType>::PerVertexPerFace(dest);
+  //find the border outlines
+  std::vector< std::vector<Point3f> > outlines;
+  std::vector<Point3f> outline;
+  vcg::tri::UpdateFlags<MeshType>::VertexClearV(dest);
+  vcg::tri::UpdateFlags<MeshType>::FaceBorderFromFF(dest);
+  int nv=0;
+  for(int i=0;i<dest.face.size();i++)
+  {
+    for (int j=0;j<3;j++)
+    if (!dest.face[i].IsV() && dest.face[i].IsB(j))
+    {
+      CFaceO* startB=&(dest.face[i]);
+      vcg::face::Pos<CFaceO> p(startB,j);
+      do
+      {
+        p.V()->SetV();
+        outline.push_back(p.V()->P());
+        p.NextB();
+        nv++;
+      }
+      while(!p.V()->IsV());
+      outlines.push_back(outline);
+      outline.clear();
+    }
+  }
+  if (nv<2) return false;
+  //I have at least 3 vertexes
+  MeshType tempMesh;
+  tri::Append<MeshType,MeshType>::Mesh(tempMesh, orig);
+  for (int i=0;i<tempMesh.vert.size();i++)
+    tempMesh.vert[i].P()+=planeAxis*eps/2;
+  //create the clone and move it eps/2 on the right
+  tri::Append<MeshType,MeshType>::Mesh(dest, tempMesh);
+  //delete tempMesh;
+  tempMesh.Clear();
+  typename MeshType::VertexIterator vi=vcg::tri::Allocator<MeshType>::AddVertices(tempMesh,2*nv);
+
+  //I have at least 6 vertexes
+  for (int i=0;i<outlines.size();i++)
+  {
+    (&*vi)->P()=outlines[i][0];
+    CVertexO* v0=(&*vi); ++vi;
+    (&*vi)->P()=outlines[i][0]+planeAxis*eps;
+    CVertexO* v1=(&*vi); ++vi;
+    CVertexO* vs0=v0;	//we need the start point
+    CVertexO* vs1=v1; //to close the loop
+//		Log(0,"%d",outlines[i].size());
+    for(int j=1;j<outlines[i].size();++j)
+    {
+      (&*vi)->P()=outlines[i][j];
+      CVertexO* v2=(&*vi); ++vi;
+      (&*vi)->P()=outlines[i][j]+planeAxis*eps;
+      CVertexO* v3=(&*vi); ++vi;
+      typename MeshType::FaceIterator fi=vcg::tri::Allocator<MeshType>::AddFaces(tempMesh,2);
+
+      (&*fi)->V(2)=v0;
+      (&*fi)->V(1)=v1;
+      (&*fi)->V(0)=v2;
+      ++fi;
+      (&*fi)->V(0)=v1;
+      (&*fi)->V(1)=v2;
+      (&*fi)->V(2)=v3;
+
+      v0=v2;
+      v1=v3;
+      if (j==outlines[i].size()-1)
+      {
+        typename MeshType::FaceIterator fi=vcg::tri::Allocator<MeshType>::AddFaces(tempMesh,2);
+        (&*fi)->V(2)=v0;
+        (&*fi)->V(1)=v1;
+        (&*fi)->V(0)=vs0;
+        ++fi;
+        (&*fi)->V(0)=v1;
+        (&*fi)->V(1)=vs0;
+        (&*fi)->V(2)=vs1;
+      }
+    }
+  }
+
+  tri::Append<MeshType,MeshType>::Mesh(dest, tempMesh);
+  tri::Clean<MeshType>::RemoveDuplicateVertex(dest);
+  vcg::tri::UpdateTopology<MeshType>::FaceFace(dest);
+  vcg::tri::UpdateNormals<MeshType>::PerVertexPerFace(dest);
+  vcg::tri::UpdateBounding<MeshType>::Box(dest);
+  return true;
+  }
+
+
+} // end namespace tri
+} // end namespace vcg
 
 #endif
