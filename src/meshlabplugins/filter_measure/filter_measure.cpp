@@ -351,7 +351,7 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
 			Histogramf H;
 			H.SetRange(RangeMin,RangeMax,binNum);
-			if(ID(filter)==FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION)
+      if(ID(filter)==FP_MEASURE_VERTEX_QUALITY_HISTOGRAM)
 			{
 				for(CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 					if(!(*vi).IsD())
