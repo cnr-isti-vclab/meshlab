@@ -36,8 +36,7 @@
 
 using namespace vs;
 
-class FilterVirtualRangeScan : public QObject, public MeshFilterInterface,
-                  private SamplerListener
+class FilterVirtualRangeScan : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
     Q_INTERFACES(MeshFilterInterface)
@@ -59,14 +58,6 @@ public:
     virtual FilterClass getClass(QAction *);
 
 private:
-
-    // SamplerListener implementation
-    virtual void startingSetup( void );
-    virtual void setupComplete( int povs );
-    virtual void povProcessed( int pov, int samples );
-    virtual void startingFeatureSampling( void );
-    vcg::CallBackPos* cb;
-    bool samplingFeatures;
     VSParameters vrsParams;
 
     enum {FP_VRS};

@@ -180,30 +180,15 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
             secondMesh = &( secondMeshModel->cm );
         }
 
-        /*
-        innerContext = new QGLContext( QGLFormat() );
-        innerContext->makeCurrent();
-        glewInit();
-        glEnable( GL_DEPTH_TEST );
+        MyGLWidget* tmpWidget = new MyGLWidget( &vrsParams, startMesh, firstMesh, secondMesh );
+        bool ok = tmpWidget->result;
+        if( !ok )
+        {
+            errorMessage = "cannot initialize a new OpenGL context.";
+        }
+        delete tmpWidget;
 
-        Sampler< CMeshO > sampler( &vrsParams, startMesh, firstMesh, secondMesh );
-        sampler.listeners.push_back( this );
-        this->cb = cb;
-        sampler.generateSamples();
-
-        delete innerContext;
-        */
-
-        MyGLWidget* tmpWidget = new MyGLWidget( 0 );
-        tmpWidget->params = &vrsParams;
-        tmpWidget->inputMesh = startMesh;
-        tmpWidget->uniformSamplesMesh = firstMesh;
-        tmpWidget->featureSamplesMesh = secondMesh;
-        tmpWidget->samplerListener = this;
-        this->cb = cb;
-        tmpWidget->show();
-
-        return true;
+        return ok;
         break;
     }
     return false;
@@ -242,37 +227,6 @@ int FilterVirtualRangeScan::postCondition(QAction *filter) const
     }
 
     return MeshModel::MM_NONE;
-}
-
-// SamplerListener implementation
-void FilterVirtualRangeScan::startingSetup( void )
-{
-    //cb( 0, "Starting setup..." );
-}
-
-void FilterVirtualRangeScan::setupComplete( int povs )
-{
-    /*
-    char buf[ 100 ];
-    sprintf( buf, "Processing pov 1 of %d", vrsParams.povs );
-    cb( 0, buf );
-    samplingFeatures = false;
-    */
-}
-
-void FilterVirtualRangeScan::povProcessed( int pov, int samples )
-{
-    /*
-    char buf[ 250 ];
-    sprintf( buf, "Processing pov %d of %d (%d %s samples)...", pov + 1,
-             vrsParams.povs, samples, samplingFeatures? "feature" : "uniform" );
-    cb( (pov + 1)/vrsParams.povs * 100, buf );
-    */
-}
-
-void FilterVirtualRangeScan::startingFeatureSampling( void )
-{
-    //samplingFeatures = true;
 }
 // ----------------------------------------------------------------------
 Q_EXPORT_PLUGIN(FilterVirtualRangeScan)

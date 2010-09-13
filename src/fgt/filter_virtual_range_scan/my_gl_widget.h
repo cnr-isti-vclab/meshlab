@@ -11,88 +11,53 @@ class MyGLWidget: public QGLWidget
 {
 
 public:
-    MyGLWidget( QWidget* parent ): QGLWidget( parent )
+    MyGLWidget( VSParameters*   params,
+                CMeshO*         inputMesh,
+                CMeshO*         uniformSamplesMesh,
+                CMeshO*         featureSamplesMesh )
+                    : QGLWidget( (QWidget*)0 )
     {
+        this->params = params;
+        this->inputMesh = inputMesh;
+        this->uniformSamplesMesh = uniformSamplesMesh;
+        this->featureSamplesMesh = featureSamplesMesh;
         this->setFixedSize( 200, 200 );
+        this->result = false;
+
+        updateGL();
     }
 
-    VSParameters*      params;
+    VSParameters*       params;
     CMeshO*             inputMesh;
     CMeshO*             uniformSamplesMesh;
     CMeshO*             featureSamplesMesh;
     SamplerListener*    samplerListener;
+    bool                result;
 
 protected:
     virtual void initializeGL( void )
     {
-        /*
-        qDebug( "Initializing MyGLWidget..." );
+        GLenum result = glewInit();
+        assert( result == GLEW_OK );
+        glEnable( GL_DEPTH_TEST );
+        glEnable( GL_TEXTURE_2D );
         glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
-        glEnable( GL_DEPTH_TEST );
 
         if( this->context()->isValid() )
         {
-            qDebug( "The OpenGL context is valid" );
+            Sampler< CMeshO >::generateSamples
+                    ( params, inputMesh, uniformSamplesMesh, featureSamplesMesh, 0 );
+            this->result = true;
         }
         else
         {
-            qDebug( "The OpenGL context is not valid." );
-        }
-
-        glMatrixMode( GL_PROJECTION );
-        glLoadIdentity();
-
-        glMatrixMode( GL_MODELVIEW );
-        glLoadIdentity();
-
-        glViewport( (GLint)0, (GLint)0, (GLsizei)200, (GLsizei)200 );
-
-        glColor3f( 1.0f, 0.0f, 0.0f );
-        */
-
-        glewInit();
-        glEnable( GL_DEPTH_TEST );
-        glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-
-        if( this->context()->isValid() )
-        {
-            qDebug( "The OpenGL context is valid" );
-        }
-        else
-        {
-            qDebug( "The OpenGL context is not valid." );
-        }
+            this->result = false;
+        }        
     }
 
     virtual void paintGL( void )
     {
-        /*
-        FboConfiguration* conf = Utils::createFboConfiguration( 1, 64, true );
-        Fbo fbo;
-        fbo.bind();
-        fbo.setConfiguration( conf );
-
-        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-        glBegin( GL_QUADS );
-        glVertex3f( -0.5f,  -0.5f,  -0.5f );
-        glVertex3f(  0.5f,  -0.5f,  -0.5f );
-        glVertex3f(  0.5f,   0.5f,  -0.5f );
-        glVertex3f( -0.5f,   0.5f,  -0.5f );
-        glEnd();
-
-        fbo.screenshots( "test" );
-
-        fbo.setConfiguration(0);
-        fbo.unbind();
-
-        Utils::dumpConfiguration( conf, "start" );
-        delete conf;
-        */
-
-        Sampler< CMeshO >::generateSamples
-                ( params, inputMesh, uniformSamplesMesh, featureSamplesMesh, samplerListener );
-
-        hide();
+        ;
     }
 
 };

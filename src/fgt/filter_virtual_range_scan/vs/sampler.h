@@ -35,12 +35,20 @@ namespace vs
                   MeshType*         featureSamplesMesh,
                   SamplerListener*  listener = 0 )
         {
-            listener->startingSetup();
+            if( listener ){ listener->startingSetup(); }
 
             // OpenGL initialization
-            assert( glGetError() == GL_NO_ERROR );
+            GLenum err = glGetError();
+            if( err != GL_NO_ERROR )
+            {
+                const GLubyte* errStr = gluErrorString( err );
+                qDebug( "OpenGL error: %s", (const char*)errStr );
+                assert( 0 );
+            }
+
             glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
             glEnable( GL_DEPTH_TEST );
+            glEnable( GL_TEXTURE_2D );
 
             // prepare input/output mesh
             vcg::tri::UpdateBounding< MeshType >::Box( *inputMesh );
@@ -66,7 +74,7 @@ namespace vs
             FinalCompactor                  finalCompactor  ( &resources );
             FeatureDetector                 detector        ( &resources );
 
-            listener->setupComplete( resources.params->povs );
+            if( listener ){ listener->setupComplete( resources.params->povs ); }
             GLint* samplesCount = &( resources.buffers[ "best_position" ]->elements );
 
             // *** sampling ***
@@ -75,7 +83,7 @@ namespace vs
             {
                 if( i==1 )
                 {
-                    listener->startingFeatureSampling();
+                    if( listener ){ listener->startingFeatureSampling(); }
                     resources.changeResolution();
                     extractor.currentPov = 0;
                 }
@@ -84,7 +92,7 @@ namespace vs
                 extractor.go();
                 if( i==0 ){ coneFilter.go(); }else{ detector.go(); }
                 inputCompactor.go();
-                listener->povProcessed( 1, *samplesCount );
+                if( listener ){ listener->povProcessed( 1, *samplesCount ); }
 
                 // subsequent povs
                 while( extractor.nextPov() )
@@ -99,7 +107,7 @@ namespace vs
                     aliveMasker.go();
                     aliveCompactor.go();
                     finalCompactor.go();
-                    listener->povProcessed( extractor.currentPov + 1, *samplesCount );
+                    if( listener ){ listener->povProcessed( extractor.currentPov + 1, *samplesCount ); }
                 }
 
                 // download samples
@@ -111,7 +119,14 @@ namespace vs
             // finalize resources
             resources.fbo->unbind();
             resources.finalize();
-            assert( glGetError() == GL_NO_ERROR );
+
+            err = glGetError();
+            if( err != GL_NO_ERROR )
+            {
+                const GLubyte* errStr = gluErrorString( err );
+                qDebug( "OpenGL error: %s", (const char*)errStr );
+                assert( 0 );
+            }
         }
 
     private:
