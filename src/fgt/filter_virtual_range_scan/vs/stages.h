@@ -86,7 +86,8 @@ namespace vs
         // shader facilities
         void bindSampler( QString samplerName, PixelData* pData )
         {
-            GLchar* c = (GLchar*)samplerName.toStdString().c_str();
+            const string str = samplerName.toStdString();
+            const GLchar* c = (const GLchar*)( str.c_str() );
             GLint loc = glGetUniformLocation( prog->programId, c  );
             GLint textureUnit = (GLint)samplers.size();
             pData->bind( textureUnit );
@@ -123,15 +124,17 @@ namespace vs
 
         void uploadFloat( QString uniformName, GLfloat value )
         {
-            GLchar* name = (GLchar*)uniformName.toStdString().c_str();
-            GLint loc = glGetUniformLocation( prog->programId, name );
+            const string str = uniformName.toStdString();
+            const GLchar* c = (const GLchar*)( str.c_str() );
+            GLint loc = glGetUniformLocation( prog->programId, c );
             glUniform1f( loc, value );
         }
 
         void uploadInt( QString uniformName, GLint value )
         {
-            GLchar* name = (GLchar*)uniformName.toStdString().c_str();
-            GLint loc = glGetUniformLocation( prog->programId, name );
+            const string str = uniformName.toStdString();
+            const GLchar* c = (const GLchar*)( str.c_str() );
+            GLint loc = glGetUniformLocation( prog->programId, c );
             glUniform1i( loc, value );
         }
 
