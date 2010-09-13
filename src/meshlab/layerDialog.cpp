@@ -571,7 +571,7 @@ void DecoratorParamsTreeWidget::apply()
 		current.setValue(r->name,*(r->val));
 	}
 	mainWin->updateCustomSettings();
-	mainWin->GLA()->updateDecoration(mainWin->GLA()->meshDoc->mm()->id());
+  mainWin->GLA()->updateDecoration();
 }
 
 void DecoratorParamsTreeWidget::load()

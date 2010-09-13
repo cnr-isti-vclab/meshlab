@@ -76,8 +76,8 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	zoom = false;
 	targetTex = 0;
 
-  connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()));
-  connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateDecoration(int)));
+  connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()),Qt::QueuedConnection);
+  connect(meshDoc, SIGNAL(meshModified()), this, SLOT(updateDecoration()),Qt::QueuedConnection);
   connect(meshDoc, SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
   connect(meshDoc, SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
@@ -299,7 +299,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
 	else glDisable(GL_CULL_FACE);
 
-	if(!meshDoc->busy)
+  if(!meshDoc->isBusy())
 	{
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -599,7 +599,7 @@ void GLArea::updateLayer()
 	}
 }
 
-void GLArea::updateDecoration(int /*oldCurrentMeshIndex*/)
+void GLArea::updateDecoration()
 {
   foreach(QAction *p , iDecoratorsList)
       {
