@@ -190,9 +190,9 @@ void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
 				break;
 			case HoleListModel::ManualBridging:
 				oldAbutmentPresence = holesModel->PickedAbutment();
-				gla->meshDoc->busy=true;
+				gla->meshDoc->setBusy(true);
 				holesModel->addBridgeFace(pickedFace, cur.x(), inverseY);
-				gla->meshDoc->busy=false;
+				gla->meshDoc->setBusy(false);
 				if(holesModel->PickedAbutment() != oldAbutmentPresence)
 				{
 					if(oldAbutmentPresence == true)
@@ -265,7 +265,7 @@ void EditHolePlugin::updateDWeight(int val)
 
 void EditHolePlugin::fill()
 {
-  gla->meshDoc->busy=true;
+  gla->meshDoc->setBusy(true);
 	if(holesModel->getState() == HoleListModel::Filled)
 		holesModel->acceptFilling(false);
 
@@ -275,7 +275,7 @@ void EditHolePlugin::fill()
 		holesModel->fill( FgtHole<CMeshO>::MinimumWeight);
 	else
 		holesModel->fill( FgtHole<CMeshO>::SelfIntersection);
-  gla->meshDoc->busy=false;
+  gla->meshDoc->setBusy(false);
 	upGlA();
 }
 
@@ -283,19 +283,19 @@ void EditHolePlugin::acceptFill()
 {
 	if(holesModel->getState() == HoleListModel::Filled)
 	{
-	  gla->meshDoc->busy=true;
+    gla->meshDoc->setBusy(true);
 		holesModel->acceptFilling(true);
-		gla->meshDoc->busy=false;
+    gla->meshDoc->setBusy(false);
 		gla->setWindowModified(true);
 	}
 }
 
 void EditHolePlugin::cancelFill()
 {
-	gla->meshDoc->busy=true;
+  gla->meshDoc->setBusy(true);
 	if(holesModel->getState() == HoleListModel::Filled)
 		holesModel->acceptFilling(false);
-	gla->meshDoc->busy=false;
+  gla->meshDoc->setBusy(false);
 }
 
 void EditHolePlugin::updateBridgeSldValue(int val)
@@ -322,18 +322,18 @@ void EditHolePlugin::manualBridge()
 
 void EditHolePlugin::autoBridge()
 {
-	gla->meshDoc->busy=true;
+  gla->meshDoc->setBusy(true);
 	bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
 	holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
-	gla->meshDoc->busy=false;
+  gla->meshDoc->setBusy(false);
 	upGlA();
 }
 
 void EditHolePlugin::closeNMHoles()
 {
-	gla->meshDoc->busy=true;
+  gla->meshDoc->setBusy(true);
 	holesModel->closeNonManifolds();
-	gla->meshDoc->busy=false;
+  gla->meshDoc->setBusy(false);
 	upGlA();
 }
 
@@ -351,9 +351,9 @@ void EditHolePlugin::acceptBridges()
 
 void EditHolePlugin::clearBridge()
 {
-	gla->meshDoc->busy=true;
+  gla->meshDoc->setBusy(true);
 	holesModel->removeBridges();
-	gla->meshDoc->busy=false;
+  gla->meshDoc->setBusy(false);
 	upGlA();
 }
 
