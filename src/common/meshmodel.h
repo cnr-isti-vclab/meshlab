@@ -432,8 +432,16 @@ public:
   FilterScript filterHistory;
 
 	int size() const {return meshList.size();}
-	bool busy;    // used in processing. To disable access to the mesh by the rendering thread
+  bool isBusy() { return busy;}    // used in processing. To disable access to the mesh by the rendering thread
+  void setBusy(bool _busy)
+  {
+    if(busy && _busy==false) emit meshModified();
+    busy=_busy;
+  }
 
+  private:
+    bool  busy;
+  public:
   ///Returns for mesh whose id is 'meshId' the list of the associated  tags
   QList<TagBase *> getMeshTags(int meshId);
 	
@@ -486,6 +494,9 @@ public:
     ///when ever the current mesh changed this will send out the index of the newest mesh
 		void currentMeshChanged(int index);
 
+    /// whenever a mesh is modified by a filter
+    void meshModified();
+
     ///whenever the meshList is changed
 		void meshSetChanged();
 
@@ -504,9 +515,10 @@ public:
 class MeshModelState
 {
 private:
-	int changeMask; // a bit mask indicating what have been changed. Composed of
+  int changeMask; // a bit mask indicating what have been changed. Composed of MeshModel::MeshElement (e.g. stuff like MeshModel::MM_VERTCOLOR)
 	MeshModel *m; // the mesh which the changes refers to.
-	std::vector<vcg::Color4b> vertColor;
+  std::vector<float> vertQuality;
+  std::vector<vcg::Color4b> vertColor;
 	std::vector<vcg::Point3f> vertCoord;
 	std::vector<vcg::Point3f> vertNormal;
 	std::vector<bool> faceSelection;

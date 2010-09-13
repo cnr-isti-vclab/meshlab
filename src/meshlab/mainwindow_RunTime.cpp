@@ -797,11 +797,12 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	bool ret;
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	QTime tt; tt.start();
-  meshDoc()->busy=true;
+  meshDoc()->setBusy(true);
   RichParameterSet MergedEnvironment(params);
   MergedEnvironment.join(currentGlobalParams);
   ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
-  meshDoc()->busy=false;
+  meshDoc()->setBusy(false);
+
   qApp->restoreOverrideCursor();
 
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
@@ -1153,9 +1154,9 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 				RasterModel *rm= new RasterModel(GLA()->meshDoc);
 
-				GLA()->meshDoc->busy=true;
+        GLA()->meshDoc->setBusy(true);
 				GLA()->meshDoc->addNewRaster(qPrintable(fileName),rm);
-				meshDoc()->busy=false;
+        meshDoc()->setBusy(false);
 
 				if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
 				updateMenus();
@@ -1225,7 +1226,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						postOpenDialog.exec();
 						pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 					}
-					gla->meshDoc->busy=true;
+          gla->meshDoc->setBusy(true);
 					gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
@@ -1283,7 +1284,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 					if(delVertNum>0 || delFaceNum>0 )
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-					meshDoc()->busy=false;
+          meshDoc()->setBusy(false);
 					//if(newGla)
 					GLA()->resetTrackBall();
 				}
