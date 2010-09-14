@@ -8,7 +8,7 @@
 
 #include "fixed.h"
 
-#undef OLD
+#define OLD 1
 
 #define p2print(point) ((point).X()) << ", " << ((point).Y())
 #define p3print(point) p2print(point) << ", " << ((point).Z())
@@ -50,7 +50,7 @@ namespace vcg {
 #else
             inline bool operator <(const Intercept &other) const { return _dist < other._dist; }
 #endif
-            //inline bool operator <(const DistType &other) const { return _dist < other; }
+            inline bool operator <(const DistType &other) const { return _dist < other; }
             
             //inline friend bool operator<(const fraction &_dist, const Intercept &other) { return _dist < other._dist; }
 
@@ -79,13 +79,13 @@ namespace vcg {
             inline InterceptRay() { }
             
             inline InterceptRay(const ContainerType &set) : v(set) {
-                std::sort(v.begin(), v.end());
                 cleanup();
                 assert (isValid());
             }
             
 #if OLD
             inline void cleanup() {
+                std::sort(v.begin(), v.end());
                 v.resize(v.size());
             }
 #else
@@ -93,6 +93,7 @@ namespace vcg {
                 ContainerType newv;
                 newv.reserve(v.size());
 
+                std::sort(v.begin(), v.end());
                 typename ContainerType::const_iterator from = v.begin();
                 while (from != v.end()) {
                     typename ContainerType::const_iterator to = from + 1;
@@ -143,42 +144,22 @@ namespace vcg {
                 return true;
             }
 
-            inline const InterceptType& GetIntercept(const DistType& s, const DistType& u) const {
-                typename ContainerType::const_iterator p = std::lower_bound(v.begin(), v.end(), InterceptType(s,-2));
-                assert (IsInExt(s) != IsInExt(u));
+            inline const InterceptType& GetIntercept(const DistType& s) const {
+                typename ContainerType::const_iterator p = std::lower_bound(v.begin(), v.end(), s);
+                assert (IsInExt(s) != IsInExt(s+1));
                 assert (p != v.end());
-                // TODO
-                //if (p->dist() == s && p->sort_norm() < 0)
-                //if (p->dist() == s)
-                //  p++;
-                assert (InterceptType(s,-2) < *p && *p < InterceptType(u,2));
+                assert (s <= p->dist() && p->dist() <= s+1);
                 return *p;
             }
 
-            inline int IsInExtDebug(const DistType& s) const {
-                typename ContainerType::const_iterator p = std::lower_bound(v.begin(), v.end(), InterceptType(s,-2));
+            inline int IsInExt(const DistType& s) const {
+                typename ContainerType::const_iterator p = std::lower_bound(v.begin(), v.end(), s);
                 if (p == v.end())
                     return -1;
                 else if (p->dist() == s)
                     return 0;
                 else
-                    return 2*((p - v.begin()) & 1) - 1;
-            }
-
-            inline int IsInExt(const DistType& s) const {
-                int r = IsInExtDebug(s);
-                debugInOut << *this << " contains " << s << "? " << r << endl;
-                return r;
-            }
-
-            inline bool IsInOld(const DistType& s) const {
-                typename ContainerType::const_iterator p = std::lower_bound(v.begin(), v.end(), InterceptType(s,-2));
-                //if (p != v.end() && p->dist() == s && p->sort_norm() < 0)
-                if (p != v.end() && p->dist() == s)
-                    //p++;
-                    p = v.end();
-                debugInOut << *this << " contains " << s << "? " << (p != v.end() && (p - v.begin()) & 1) << endl;
-                return p != v.end() && (p - v.begin()) & 1;
+                    return ((p - v.begin()) & 1) ? 1 : -1;
             }
 
             inline InterceptRay operator &(const InterceptRay & other) const {
@@ -307,22 +288,13 @@ namespace vcg {
             inline const IRayType& GetInterceptRay (const vcg::Point2i &p) const {
                 assert(bbox.IsIn(p));
                 vcg::Point2i c = p - bbox.min;
-                assert(c.X() < ray.size() && c.Y() < ray[c.X()].size());
+                assert(c.X() >= 0 && c.Y() >= 0);
+                assert(size_t(c.X()) < ray.size() && size_t(c.Y()) < ray[c.X()].size());
                 return ray[c.X()][c.Y()];
             }
 
             inline int IsInExt (const vcg::Point2i &p, const DistType& s) const {
-                int r;
-                if (bbox.IsIn(p))
-                    r = GetInterceptRay(p).IsInExt(s);
-                else
-                    r = -1;
-                assert (-1 <= r && r <= 1);
-                return r;
-            }
-
-            inline bool IsInOld (const vcg::Point2i &p, DistType s) const {
-                return bbox.IsIn(p) && GetInterceptRay(p).IsInOld(s);
+                return bbox.IsIn(p) ? GetInterceptRay(p).IsInExt(s) : -1;
             }
 
             inline InterceptBeam &operator &=(const InterceptBeam & other) {
@@ -430,14 +402,13 @@ namespace vcg {
             }
 
             template <const int coord>
-                    inline const InterceptType& GetIntercept (const Point3i &p1, const Point3i &p2) const {
+                    inline const InterceptType& GetIntercept (const Point3i &p1) const {
                 assert(0 <= coord && coord < 3);
-                assert(p2 == p1 + Point3i(coord == 0, coord == 1, coord == 2));
-                assert(IsInExt(p1) != IsInExt(p2));
+                assert(IsInExt(p1) != IsInExt(p1 + Point3i(coord == 0, coord == 1, coord == 2)));
 
                 const int c1 = (coord + 1) % 3;
                 const int c2 = (coord + 2) % 3;
-                return beam[coord].GetInterceptRay(Point2i(p1.V(c1), p1.V(c2))).GetIntercept(p1.V(coord), p2.V(coord));
+                return beam[coord].GetInterceptRay(Point2i(p1.V(c1), p1.V(c2))).GetIntercept(p1.V(coord));
             }
 
             inline const InterceptRay<InterceptType> & GetInterceptRay (int coord, const vcg::Point3i &p) const {
@@ -576,7 +547,8 @@ namespace vcg {
             inline void resize(size_t size) { set.resize(size); }
 
             inline void AddIntercept (const int i, const InterceptType &x) {
-                assert(i >= 0 && i < set.size());
+                assert(i >= 0);
+                assert(size_t(i) < set.size());
                 set[i].AddIntercept(x);
             }
 
@@ -614,7 +586,8 @@ namespace vcg {
             inline void AddIntercept (const vcg::Point2i &p, const InterceptType &x) {
                 assert(bbox.IsIn(p));
                 vcg::Point2i c = p - bbox.min;
-                assert(c.X() >= 0 && c.X() < set.size());
+                assert(c.X() >= 0);
+                assert(size_t(c.X()) < set.size());
                 set[c.X()].AddIntercept(c.Y(), x);
             }
 
@@ -675,34 +648,6 @@ namespace vcg {
 
                         if (debugRaster)
                             debugRasterOut << x << "," << y << ": " << p3print(Point3dt(n0,n1,n2)) << " -> ";
-
-                        /*
-                        if (n0>0 || n1>0 || n2>0) {
-                            if (n0 == 0 &&
-                                (d21[crd1] > 0 || d21[crd2] < 0))
-                                n0 = 1;
-
-                            if (n1 == 0 &&
-                                (d02[crd1] > 0 || d02[crd2] < 0))
-                                n1 = 1;
-
-                            if (n2 == 0 &&
-                                (d10[crd1] > 0 || d10[crd2] < 0))
-                                n2 = 1;
-                        } else {
-                            if (n0 == 0 &&
-                                (d21[crd1] < 0 || d21[crd2] > 0))
-                                n0 = -1;
-
-                            if (n1 == 0 &&
-                                (d02[crd1] < 0 || d02[crd2] > 0))
-                                n1 = -1;
-
-                            if (n2 == 0 &&
-                                (d10[crd1] < 0 || d10[crd2] > 0))
-                                n2 = -1;
-                        }
-                        */
 
                         if (crd1 > crd2) {
                             if (n2 == 0)
@@ -771,9 +716,9 @@ namespace vcg {
                     bbox(Point3i(floor(m.bbox.min.X() / d.X()) -1,
                                  floor(m.bbox.min.Y() / d.Y()) -1,
                                  floor(m.bbox.min.Z() / d.Z()) -1),
-                         Point3i(ceil(m.bbox.max.X() / d.X()) + 0,
-                                 ceil(m.bbox.max.Y() / d.Y()) + 0,
-                                 ceil(m.bbox.max.Z() / d.Z()) + 0))
+                         Point3i(ceil(m.bbox.max.X() / d.X()),
+                                 ceil(m.bbox.max.Y() / d.Y()),
+                                 ceil(m.bbox.max.Z() / d.Z())))
             {
                 const Point3x invDelta(Scalar(1) / delta.X(),
                                        Scalar(1) / delta.Y(),
@@ -830,13 +775,10 @@ namespace vcg {
             template<typename EXTRACTOR_TYPE>
             void BuildMesh(MeshType &mesh, InterceptVolume<InterceptType> &volume, EXTRACTOR_TYPE &extractor)
             {
-                //Init(volume);
                 _volume = &volume;
                 _mesh = &mesh;
                 _mesh->Clear();
-                vcg::Point3i p1, p2;
 
-                //Begin();
                 extractor.Initialize();
                 for (int j=_volume->bbox.min.Y(); j<=_volume->bbox.max.Y(); ++j)
                 {
@@ -844,9 +786,9 @@ namespace vcg {
                         for (int k=_volume->bbox.min.Z(); k<=_volume->bbox.max.Z(); ++k)
                             extractor.ProcessCell(vcg::Point3i(i,j,k),
                                                   vcg::Point3i(i+1,j+1,k+1));
-                    //NextSlice();
                 }
                 extractor.Finalize();
+
                 _volume = NULL;
                 _mesh = NULL;
             }
@@ -857,15 +799,13 @@ namespace vcg {
                     void GetIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) {
                 assert(p2 == p1 + vcg::Point3i(coord == 0, coord == 1, coord == 2));
                 assert(_volume->IsInExt(p1) != _volume->IsInExt(p2));
+
                 p = &*vcg::tri::Allocator<MeshType>::AddVertices(*_mesh, 1);
-                const InterceptType& i = _volume->GetIntercept<coord>(p1, p2);
+                const InterceptType& i = _volume->GetIntercept<coord>(p1);
                 p->P().V(coord) = i.dist().toFloat();
                 p->P().V((coord+1)%3) = p1[(coord+1)%3];
                 p->P().V((coord+2)%3) = p1[(coord+2)%3];
-                if (!(p1.V(coord) <= p->P().V(coord) && p->P().V(coord) <= p2.V(coord))) {
-                    cerr << "Inconsistency: " << p3print(p1) << " <= " << p3print(p->P()) << " <= " << p3print(p2) << endl;
-                    cerr << (_volume->GetInterceptRay(coord, p2)) << endl;
-                }
+
                 assert(p1.V(coord) <= p->P().V(coord) && p->P().V(coord) <= p2.V(coord));
 
                 p->P().Scale(_volume->delta);
