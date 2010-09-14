@@ -56,7 +56,9 @@ void Balloon::init( int gridsize, int gridpad ){
 bool Balloon::initializeField(){
     //--- Setup the interpolation system
     // if we fail, signal the failure to the caller
-    float OMEGA = 1e3; // 1e8
+    // float OMEGA = 1e3; // 1e8
+    float OMEGA = 1e8; // 1e8
+
     LAPLACIAN type = COTANGENT; // COMBINATORIAL
     bool op_succeed = finterp.Init( &surf, 1, type ); 
     if( !op_succeed ){
@@ -392,6 +394,8 @@ void Balloon::evolve(){
     //--- Maximum speed: avoid over-shoothing by limiting update speed
     // E_view + alpha*E_smooth
     float balance_coeff = .5;
+    //--- Max evolution speed proportional to grid size
+    float max_speed = vol.getDelta()/2;
 
     // Slowdown weight, smaller if worst case scenario is very converging
     float k2 = 1 - exp( -powf(view_max_absdst,2) / sigma2 );
@@ -400,8 +404,9 @@ void Balloon::evolve(){
         Point3i& voxi = vol.band[i];
         MyVoxel& v = vol.Voxel(voxi);
 
-        //--- Avoids over-shooting, as maximum speed is bound to dist from surface
-        float max_speed = std::min( vol.getDelta()/2, std::abs(updates_view[i]) );
+        //--- If I know current distance avoid over-shooting, as maximum speed is bound to dist from surface
+        if( surf.vert.QualityEnabled )
+            max_speed = std::min( vol.getDelta()/2, std::abs(updates_view[i]) );
 
         //--- Distance weights
         if( surf.vert.QualityEnabled ){             
@@ -416,14 +421,16 @@ void Balloon::evolve(){
         //--- Apply the update on the implicit field
         if( surf.vert.QualityEnabled ){
             float prev = v.sfield;
-            v.sfield += vcg::sign( k1*k2*max_speed, updates_view[i] );
-            if( v.sfield < 0 && prev > 0){
-                qDebug("Update from f=%.3f to %.3f", prev, v.sfield);
+            if( updates_view[i] == view_min_dst && view_min_dst < 0 ){
+                qDebug("UPDATE VALUE %.3f (negative for expansion)", vcg::sign( k1*k2*max_speed, updates_view[i] ) );
+                qDebug("d_view: %.2f", updates_view[i]);
                 qDebug("k1: %.2f", k1);
-                qDebug("k3: %.2f", k3);
+                qDebug("k2: %.2f", k2);
                 qDebug("max_speed: %.2f", max_speed);
+                qDebug("Prev   value %.3f", updates_view[i] );
+                qDebug("Curvature update: %.3f", k3*balance_coeff*max_speed );
             }
-
+            v.sfield += vcg::sign( k1*k2*max_speed, updates_view[i] );
             // v.sfield += vcg::sign( .15f*k1*k2*vol.getDelta(), updates_view[i]);
             // v.sfield += .25f * k1 * vol.getDelta();
         }
@@ -434,7 +441,13 @@ void Balloon::evolve(){
         //          v.sfield += .1*k3*k2;
         //        }
 
-        if( surf.vert.CurvatureEnabled ){
+
+
+        // When we are retro-compensating for over-shooting disable smoothing
+        if( surf.vert.CurvatureEnabled && updates_view[i] > 0){
+            // qDebug() << " " << k3 << " " << max_speed;
+            v.sfield += k3*balance_coeff*max_speed; // prev .1
+        } else if( surf.vert.CurvatureEnabled && !surf.vert.QualityEnabled ) {
             v.sfield += k3*balance_coeff*max_speed; // prev .1
         }
 // #endif

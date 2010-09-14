@@ -1,6 +1,7 @@
 #include "volume.h"
-#include "myheap.h" // only required by source
-#include "../filter_plymc/plymc.h" // remove bad triangles from marching cubes
+#include "myheap.h"                                 // maxheap for correspondence band
+#include "../filter_plymc/plymc.h"                  // remove bad triangles from marching cubes
+#include <vcg/complex/trimesh/smooth.h>             // mesh smoothing
 
 using namespace vcg;
 /// the array is used to scan a single voxel that contains the triangle in the initialization
@@ -242,24 +243,46 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
     mesh.face.EnableVFAdjacency();
     tri::UpdateTopology<CMeshO>::VertexFace( mesh );
     tri::MCSimplify<CMeshO>( mesh, getDelta()/4 );
-    
+
     //--- The simplify operation removed some vertices
     tri::Allocator<CMeshO>::CompactVertexVector( mesh );
     tri::Allocator<CMeshO>::CompactFaceVector( mesh );
 
-    //--- CHECK THAT THERE ARE NO DEGENERATE TRIANGLES
-    for(CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); fi++){
-        CFaceO& f = *(fi);
-        float edgel1 = (f.P(0)-f.P(1)).Norm(); assert( edgel1>1e-20 );
-        float edgel2 = (f.P(0)-f.P(2)).Norm(); assert( edgel2>1e-20 );
-        float edgel3 = (f.P(1)-f.P(2)).Norm(); assert( edgel3>1e-20 );
-    }   
-    
     //--- Final Cleanup
     mesh.face.EnableFFAdjacency();
     tri::Clean<CMeshO>::RemoveTVertexByFlip(mesh,20,true);
     tri::Clean<CMeshO>::RemoveFaceFoldByFlip(mesh);
-    
+
+    #ifdef REMOVE_DEGENERATE_FACES
+        int total = tri::Clean<CMeshO>::MergeCloseVertex(mesh, getDelta()/8);
+        qDebug("Successfully merged %d vertices", total);
+        // merging close might introduce non-manifolds
+        tri::Clean<CMeshO>::RemoveNonManifoldFace(mesh);
+        // Make sure this is not messing up the topology
+        tri::Allocator<CMeshO>::CompactVertexVector( mesh );
+        tri::Allocator<CMeshO>::CompactFaceVector( mesh );
+        mesh.face.EnableFFAdjacency();
+        mesh.vert.EnableMark();
+        mesh.vert.EnableVFAdjacency();
+        mesh.face.EnableVFAdjacency();
+        tri::UpdateTopology<CMeshO>::VertexFace( mesh );
+    #endif
+
+    //--- Post-processing
+    // tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cb);
+
+    // DEBUG!!! PAOLO ASKED TO CALL IT TWICE
+    #ifdef REPEAT_SIMPLIFY_PROCESS
+            tri::UpdateTopology<CMeshO>::VertexFace( mesh );
+            tri::MCSimplify<CMeshO>( mesh, getDelta()/4 );
+            tri::Allocator<CMeshO>::CompactVertexVector( mesh );
+            tri::Allocator<CMeshO>::CompactFaceVector( mesh );
+            mesh.face.EnableFFAdjacency();
+            tri::Clean<CMeshO>::RemoveTVertexByFlip(mesh,20,true);
+            tri::Clean<CMeshO>::RemoveFaceFoldByFlip(mesh);
+        }
+    #endif
+
     //--- Update surface normals
     tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized( mesh );
     //--- Face orientation, needed to have more robust face distance tests
