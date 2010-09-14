@@ -26,6 +26,8 @@ void GridAccell::init( MyVolume& vol, CMeshO& pcloud ){
         // if( i!=12 ) continue;
         trace_ray( rays[i] );
     }
+    // Initializes the iterator
+    iter.init(this);
 }
 void GridAccell::trace_ray(PokingRay& pray, float off){
     // We want to go behind the pixel, you better give me a default of 0,
@@ -118,4 +120,82 @@ void GridAccell::clearCorrespondences(){
         rays[i].f = NULL;
         rays[i].t = +FLT_MAX;
     }
+}
+
+//-------------------------------------------------------------------------------------------//
+//
+//                                  ITERATOR / QUERY
+//
+//-------------------------------------------------------------------------------------------//
+void GridAccellIterator::init(GridAccell* parent){
+    this->parent = parent;
+    this->v = &( parent->Val(0,0,0) );
+}
+void GridAccellIterator::first(Point3f& p){
+    //--- Convert the bounding box in grid space
+    parent->pos2off( p, box.max );
+    box.min = box.max;
+
+    //--- Initialize starting point
+    curr = box.min;
+    v = &( parent->Val(curr) );
+    offset = 0;
+}
+void GridAccellIterator::first(CFaceO& f){
+    //--- Compute bbox of face
+    Box3f f_bbox;
+    f_bbox.Add(f.P(0));
+    f_bbox.Add(f.P(1));
+    f_bbox.Add(f.P(2));
+
+    //--- Convert the bounding box in grid space
+    parent->pos2off( f_bbox.max, box.max );
+    parent->pos2off( f_bbox.min, box.min );
+
+    //--- Initialize starting point
+    curr = box.min;
+    v = &( parent->Val(curr) );
+    offset = -1;
+    
+#ifdef DEBUG_GRIDACCELL_ITERATOR
+    qDebug() << "new query initiated on " << toString(box.min);
+#endif
+
+    //--- Visit first valid
+    this->next();
+}
+void GridAccellIterator::next(){
+#ifdef DEBUG_GRIDACCELL_ITERATOR
+    qDebug() << "next element required";
+#endif
+    // Until I find a non-empty list continue explore
+    for(; curr.X() <= box.max.X(); curr.X()++ ){
+        for(; curr.Y() <= box.max.Y(); curr.Y()++ ){
+            for(; curr.Z() <= box.max.Z(); curr.Z()++ ){
+                v = &( parent->Val(curr) );
+                if( v->size() != 0 && ++offset < v->size() ){
+#ifdef DEBUG_GRIDACCELL_ITERATOR
+                    qDebug() << "Accepted next [curr: " << toString(curr) << " offset: " << offset << "]";
+#endif
+                    return;
+                }
+            }
+        }
+    }
+#ifdef DEBUG_GRIDACCELL_ITERATOR
+    qDebug() << "nothing has been found";
+#endif
+}
+bool GridAccellIterator::isDone(){
+    bool condition = curr.X() >= box.max.X() && curr.Y() >= box.max.Y() && curr.Z() >= box.max.Z() && offset >= v->size();
+#ifdef DEBUG_GRIDACCELL_ITERATOR
+    qDebug("isDone: (%s) (%d/%d %d/%d %d/%d => %d/%d)", condition?"y":"n", curr.X(),box.max.X(), curr.Y(),box.max.Y(), curr.Z(),box.max.Z(), offset+1, v->size() );
+#endif
+    return condition;
+}
+PokingRay& GridAccellIterator::currentItem(){
+#ifdef DEBUG_GRIDACCELL_ITERATOR
+    qDebug("extracted element");
+#endif
+    return *( (*v)[offset] );
 }

@@ -38,6 +38,8 @@ public:
     GridAccell gridAccell;
     /// Scalar field interpolator (one constraint per poking ray)
     FieldInterpolator finterp;
+    /// How close am I to the data? (1: close 0: far)
+    FieldInterpolator winterp;
     /// Smoothing interpolator (one constraint per vertex)
     FieldInterpolator sinterp;
     
@@ -48,7 +50,6 @@ public:
 
     /// Constructor: set default render mode
     Balloon( CMeshO& _cloud ) : cloud( _cloud ){}
-
 
     //--- Logic (if failed, return != 0) 
     void init(int gridsize, int gridpad);

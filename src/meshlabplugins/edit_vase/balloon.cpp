@@ -53,21 +53,34 @@ void Balloon::init( int gridsize, int gridpad ){
     vol.band.reserve(5*surf.fn);
     vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
 }
+
 bool Balloon::initializeField(){
     //--- Setup the interpolation system
     // if we fail, signal the failure to the caller
+    // Lower levels of omega might cause overshoothing problems
     // float OMEGA = 1e3; // 1e8
     float OMEGA = 1e8; // 1e8
 
     LAPLACIAN type = COTANGENT; // COMBINATORIAL
-    bool op_succeed = finterp.Init( &surf, 1, type ); 
+    bool op_succeed = finterp.Init( &surf, 1, type );
     if( !op_succeed ){
         finterp.ColorizeIllConditioned( type );
         return false;
     }
+
+
+    float OMEGA_VERTEX = 1e-1;
+    float OMEGA_DATA   = 1e-1;
+    winterp.Init( &surf, 1, type );
+    if( !op_succeed ){
+        winterp.ColorizeIllConditioned( type );
+        return false;
+    }
+
     
     // Shared data
     enum INITMODE {BIFACEINTERSECTIONS, FACEINTERSECTIONS, BOXINTERSECTIONS} mode;
+    // mode = BIFACEINTERSECTIONS;
     mode = BIFACEINTERSECTIONS;
     const float ONETHIRD = 1.0f/3.0f;
     float t,u,v; // Ray-Triangle intersection parameters
@@ -87,7 +100,9 @@ bool Balloon::initializeField(){
             f.C() = ( rays.size()>0 ) ? Color4b(255,0,0,255) : Color4b(255,255,255,255);
         }
         qDebug() << "WARNING: test-mode only, per vertex field not updated!!";
-    }
+    }  
+    // Each intersecting ray gives a contribution on the face to each of the
+    // face vertices according to the barycentric weights
     else if( mode == FACEINTERSECTIONS ){
         this->rm ^= SURF_VCOLOR;
         this->rm |= SURF_FCOLOR;
@@ -102,12 +117,13 @@ bool Balloon::initializeField(){
             f.Q() = 0; // initialize
             Point3f fcenter = f.P(0) + f.P(1) + f.P(2);
             fcenter = myscale( fcenter, ONETHIRD );
-            gridAccell.pos2off( fcenter, off );
-            PointerVector& prays = gridAccell.Val(off[0], off[1], off[2]);
-            // Each intersecting ray gives a contribution on the face to each of the
-            // face vertices according to the barycentric weights
-            for(unsigned int i=0; i<prays.size(); i++)
-                if( vcg::IntersectionRayTriangle<float>(prays[i]->ray, f.P(0), f.P(1), f.P(2), t, u, v) ){
+            // NEW/OLD ITERATOR
+            // gridAccell.pos2off( fcenter, off );
+            // PointerVector& prays = gridAccell.Val(off[0], off[1], off[2]);
+            // for(unsigned int i=0; i<prays.size(); i++){ Ray3f& ray = prays[i]->ray;
+            for(gridAccell.iter.first(fcenter); !gridAccell.iter.isDone(); gridAccell.iter.next()){
+                Ray3f& ray = gridAccell.iter.currentItem().ray;
+                if( vcg::IntersectionRayTriangle<float>(ray, f.P(0), f.P(1), f.P(2), t, u, v) ){
                     // Color the faces, if more than one, take average
                     tot_w[ tri::Index(surf,f) ]++;
                     f.Q() += t; // normalize with tot_w after
@@ -117,6 +133,7 @@ bool Balloon::initializeField(){
                     finterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA*(u), t );
                     finterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA*(v), t );
                 }
+            }
         }
 
         //--- Normalize in case there is more than 1 ray per-face
@@ -162,8 +179,13 @@ bool Balloon::initializeField(){
             // We check each of the possibly intersecting rays and we associate this face
             // with him if and only if this face is the closest to it. Note that we study
             // the values of t,u,v directly as a t<0 is accepted as intersecting.
-            for(unsigned int i=0; i<prays.size(); i++){
-                Line3<float> line(prays[i]->ray.Origin(), prays[i]->ray.Direction());
+            for(gridAccell.iter.first(f); !gridAccell.iter.isDone(); gridAccell.iter.next()){
+            // for(gridAccell.iter.first(fcenter); !gridAccell.iter.isDone(); gridAccell.iter.next()){
+                PokingRay& pray = gridAccell.iter.currentItem();
+                Line3<float> line(pray.ray.Origin(), pray.ray.Direction());
+
+            // for(unsigned int i=0; i<prays.size(); i++){
+            //    Line3<float> line(prays[i]->ray.Origin(), prays[i]->ray.Direction());
                 
                 // If the ray falls within the domain of the face
                 if( IntersectionLineTriangle(line, f.P(0), f.P(1), f.P(2), t, u, v) ){
@@ -179,14 +201,18 @@ bool Balloon::initializeField(){
                     
                     // If no face was associated with this ray or this face is closer
                     // than the one that I stored previously
-                    if( prays[i]->f==NULL || fabs(t)<fabs(prays[i]->t) ){
-                        prays[i]->f=&f;
-                        prays[i]->t=t;
+                    if( pray.f==NULL || fabs(t)<fabs(pray.t) ){
+                        pray.f=&f;
+                        pray.t=t;
                     }
                 }
             }
         }
        
+        //--- Add constraints on vertexes of balloon
+        for(CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++)
+            winterp.AddConstraint( tri::Index(surf,*vi), OMEGA_VERTEX, 0 );
+
         // Now we scan through the rays, we visit the "best" corresponding face and we
         // set a constraint on this face. Also we modify the color of the face so that
         // an approximation can be visualized
@@ -217,6 +243,12 @@ bool Balloon::initializeField(){
             finterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA*(1-u-v), t );
             finterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA*(u), t );
             finterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA*(v), t );
+
+            //--- And for the second interpolator
+            winterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA_DATA*(1-u-v), 1 );
+            winterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA_DATA*(u),     1 );
+            winterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA_DATA*(v),     1 );
+
             assert( u>=0 && u<=1 && v>=0 && v<=1 );
         }
         
@@ -236,11 +268,14 @@ void Balloon::interpolateField(){
     surf.vert.QualityEnabled = true;
 
     //--- Interpolate the field
-    finterp.SolveInQuality();
-       
+    // finterp.SolveInQuality();
+
+    //--- Interpolate the field
+    winterp.SolveInQuality();
+
     //--- Transfer vertex quality to surface
     rm &= ~SURF_FCOLOR; // disable face colors
-    rm |= SURF_VCOLOR; // enable vertex colors
+    rm |=  SURF_VCOLOR; // enable vertex colors
     Histogram<float> H;
     tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
     tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));

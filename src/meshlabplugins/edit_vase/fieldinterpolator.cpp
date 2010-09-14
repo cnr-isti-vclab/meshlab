@@ -193,7 +193,7 @@ void FieldInterpolator::ColorizeIllConditioned(LAPLACIAN laptype){
             if( alpha==0 ){
                 fi->V(icurr)->Q() = 1;
                 float ratio = (f.P(iprev)-f.P(inext)).Norm() / va.Norm();
-                qDebug("ratio between edges: %.4f", ratio);
+                // qDebug("ratio between edges: %.4f", ratio);
                 
             }
 //            if( alpha==0 ) fi->V(iprev)->Q() = 1;
