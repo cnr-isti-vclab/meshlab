@@ -41,7 +41,7 @@ FilterCSG::FilterCSG()
 {
     typeList << FP_CSG;
 
-    foreach(FilterIDType tt , types())
+    foreach(FilterIDType tt, types())
         actionList << new QAction(filterName(tt), this);
 }
 
@@ -61,7 +61,11 @@ QString FilterCSG::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
     case FP_CSG:
-        return "Constructive Solid Geometry operation filter. Based on ...";
+        return "Constructive Solid Geometry operation filter.<br>"
+                "For more details see: <br>"
+                "Rocchini, Cignoni, Ganovelli, Montani, Pingi and Scopigno, "
+                "'Marching Intersections: an Efficient Resampling Algorithm for Surface Management'<br>"
+                "In Proceedings of Shape Modeling International (SMI) 2001";
 
     default:
         assert(0);
@@ -120,35 +124,27 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             typedef Intercept<fraction,scalar> intercept;
             const scalar d = par.getFloat("Delta");
             const Point3f delta(d, d, d);
-            Log(0, "First volume");
+            Log(0, "Rasterizing first volume...");
             InterceptVolume<intercept> v = InterceptSet3<intercept>(firstMesh->cm, delta);
-
-            ofstream out1("/Users/ranma42/Desktop/v1.intercepts.txt");
-            out1 << v;
-            out1.close();
-
-            Log(0, "Second volume");
+            Log(0, "Rasterizing second volume...");
             InterceptVolume<intercept> tmp = InterceptSet3<intercept>(secondMesh->cm, delta);
-
-            ofstream out2("/Users/ranma42/Desktop/v2.intercepts.txt");
-            out2 << tmp;
-            out2.close();
-
-            Log(0, "Volumes rasterized");
 
             MeshModel *mesh;
             switch(par.getEnum("Operator")){
             case CSG_OPERATION_INTERSECTION:
+                Log(0, "Intersection...");
                 v &= tmp;
                 mesh = md.addNewMesh("intersection");
                 break;
 
             case CSG_OPERATION_UNION:
+                Log(0, "Union...");
                 v |= tmp;
                 mesh = md.addNewMesh("union");
                 break;
 
             case CSG_OPERATION_DIFFERENCE:
+                Log(0, "Difference...");
                 v -= tmp;
                 mesh = md.addNewMesh("difference");
                 break;
@@ -158,17 +154,17 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
                 return true;
             }
 
-            ofstream out3("/Users/ranma42/Desktop/out.intercepts.txt");
-            out3 << v;
-            out3.close();
-
-            Log("[MARCHING CUBES] Building mesh...");
+            Log(0, "Building mesh...");
             typedef vcg::intercept::Walker<CMeshO, intercept> MyWalker;
             typedef vcg::tri::ExtendedMarchingCubes<CMeshO, MyWalker> MyExtendedMarchingCubes;
             typedef vcg::tri::MarchingCubes<CMeshO, MyWalker> MyMarchingCubes;
             MyWalker walker;
             MyMarchingCubes mc(mesh->cm, walker);
             walker.BuildMesh<MyMarchingCubes>(mesh->cm, v, mc);
+            Log(0, "Done");
+
+            vcg::tri::UpdateBounding<CMeshO>::Box(mesh->cm);
+            vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mesh->cm);
         }
         return true;
 

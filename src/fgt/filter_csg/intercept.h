@@ -17,7 +17,7 @@ namespace vcg {
     namespace intercept {
         using namespace vcg::math;
         
-        const bool debugRaster = true;
+        const bool debugRaster = false;
         ofstream debugRasterOut("/Users/ranma42/Desktop/out.raster.txt");
         ofstream debugInOut("/Users/ranma42/Desktop/out.in.txt");
 
@@ -146,7 +146,7 @@ namespace vcg {
 
             inline const InterceptType& GetIntercept(const DistType& s) const {
                 typename ContainerType::const_iterator p = std::lower_bound(v.begin(), v.end(), s);
-                assert (IsInExt(s) != IsInExt(s+1));
+                assert (IsInExt(s) != IsInExt(s+1) || IsInExt(s) == 0);
                 assert (p != v.end());
                 assert (s <= p->dist() && p->dist() <= s+1);
                 return *p;
@@ -317,12 +317,12 @@ namespace vcg {
                 vcg::Box2i newbbox(bbox);
                 newbbox.Add(other.bbox);
 
-                ray.resize(newbbox.DimX());
-                for(int i = newbbox.DimX() - 1; i >= 0; --i) {
-                    ray[i].resize(newbbox.DimY());
-                    for(int j = newbbox.DimY() - 1; j >= 0; --j) {
+                ray.resize(newbbox.DimX() + 1);
+                for(int i = newbbox.DimX(); i >= 0; --i) {
+                    ray[i].resize(newbbox.DimY() + 1);
+                    for(int j = newbbox.DimY(); j >= 0; --j) {
                         vcg::Point2i p = newbbox.min + vcg::Point2i(i,j);
-                        ray[i][j] = (bbox.IsIn(p) ? GetInterceptRay(p) : IRayType()) &
+                        ray[i][j] = (bbox.IsIn(p) ? GetInterceptRay(p) : IRayType()) |
                                     (other.bbox.IsIn(p) ? other.GetInterceptRay(p) : IRayType());
                     }
                 }
@@ -483,8 +483,8 @@ namespace vcg {
                                     c = ' ';
                                 else if (in > 0)
                                     c = '#';
-                                out << p3print(Point3i(i,j,k)) << " -> " << in << "[" << c << "]" << endl;
-                                //out << c;
+                                //out << p3print(Point3i(i,j,k)) << " -> " << in << "[" << c << "]" << endl;
+                                out << c;
                             }
                             out << '+' << endl;
                         }
@@ -650,11 +650,6 @@ namespace vcg {
                             debugRasterOut << x << "," << y << ": " << p3print(Point3dt(n0,n1,n2)) << " -> ";
 
                         if (crd1 > crd2) {
-                            if (n2 == 0)
-                                n2 = d10[crd1];
-                            if (n2 == 0)
-                                n2 -= d10[crd2];
-
                             if (n0 == 0)
                                 n0 = d21[crd1];
                             if (n0 == 0)
@@ -664,12 +659,12 @@ namespace vcg {
                                 n1 = d02[crd1];
                             if (n1 == 0)
                                 n1 -= d02[crd2];
+
+                            if (n2 == 0)
+                                n2 = d10[crd1];
+                            if (n2 == 0)
+                                n2 -= d10[crd2];
                         } else {
-                            if (n2 == 0)
-                                n2 -= d10[crd2];
-                            if (n2 == 0)
-                                n2 = d10[crd1];
-
                             if (n0 == 0)
                                 n0 -= d21[crd2];
                             if (n0 == 0)
@@ -679,6 +674,11 @@ namespace vcg {
                                 n1 -= d02[crd2];
                             if (n1 == 0)
                                 n1 = d02[crd1];
+
+                            if (n2 == 0)
+                                n2 -= d10[crd2];
+                            if (n2 == 0)
+                                n2 = d10[crd1];
                         }
 
                         if (debugRaster)
@@ -793,7 +793,7 @@ namespace vcg {
                 _mesh = NULL;
             }
 
-            const float V(int i, int j, int k) const { return _volume->IsInExt(vcg::Point3i(i, j, k)); }
+            float V(int i, int j, int k) const { return _volume->IsInExt(vcg::Point3i(i, j, k)); }
 
             template <const int coord>
                     void GetIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) {
