@@ -350,6 +350,7 @@ namespace vs
 
                     uniform sampler2D outMask;
             uniform sampler2D inputEyeNormal;
+            uniform sampler2D inputDepth;
 
             varying vec2    sample_coords;
             varying vec3    sample_eye_normal;
@@ -360,30 +361,45 @@ namespace vs
                 float mask_val = texelFetch( outMask, frag_coords, 0 );
 
                 if( mask_val < 0.5f )
-                {   // this fragment falls on a valid sample of the current view
-                    vec3 current_eye_normal = normalize( texelFetch( inputEyeNormal, frag_coords, 0 ) );
-                    vec3 norm_sample_eye_normal = normalize( sample_eye_normal );
-                    vec3 perfect_view = vec3( 0.0f, 0.0f, -1.0f );
+                {   // possible conflict
 
-                    float look_at_me_1 = dot( -perfect_view, current_eye_normal );
-                    float look_at_me_2 = dot( -perfect_view, norm_sample_eye_normal );
+                    float arrivingDepth = gl_FragCoord.z;
+                    float povDepth = texelFetch( inputDepth, frag_coords, 0 ).x;
+                    float gap = abs( arrivingDepth - povDepth );
 
-                    if( look_at_me_1 > look_at_me_2 )
-                    {   // the current view is the best
-                        gl_FragData[0] = vec4( 0.0f, 1.0f, 1.0f, 1.0f );
-                        gl_FragData[1] = vec4( sample_coords, 1.0f, 1.0f );
+                    if( gap < 0.03f )
+                    {   // conflict
+                        vec3 current_eye_normal = normalize( texelFetch( inputEyeNormal, frag_coords, 0 ) );
+                        vec3 norm_sample_eye_normal = normalize( sample_eye_normal );
+                        vec3 perfect_view = vec3( 0.0f, 0.0f, -1.0f );
+
+                        float look_at_me_1 = dot( -perfect_view, current_eye_normal );
+                        float look_at_me_2 = dot( -perfect_view, norm_sample_eye_normal );
+
+                        if( look_at_me_1 > look_at_me_2 )
+                        {   // the current view is the best
+                            gl_FragData[0] = vec4( 0.0f, 1.0f, 1.0f, 1.0f );
+                            gl_FragData[1] = vec4( sample_coords, 1.0f, 1.0f );
+                        }
+                        else
+                        {   // the arriving sample is the best
+                            gl_FragData[0] = vec4( 1.0f, -1.0f, 1.0f, 1.0f );
+                            gl_FragData[1] = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+                        }
                     }
                     else
-                    {   // the arriving sample is the best
-                        gl_FragData[0] = vec4( 1.0f, -1.0f, 1.0f, 1.0f );
+                    {   // no conflict
+                        gl_FragData[0] = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
                         gl_FragData[1] = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
                     }
                 }
                 else
-                {   // no conflict -> no deads
+                {   // no conflict
                     gl_FragData[0] = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
                     gl_FragData[1] = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
                 }
+
+
             }
 
             );

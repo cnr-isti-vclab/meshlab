@@ -6,6 +6,8 @@
 #include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
+#include <QTime>
+
 namespace vs
 {
     class SamplerListener
@@ -35,6 +37,8 @@ namespace vs
                   MeshType*         featureSamplesMesh,
                   SamplerListener*  listener = 0 )
         {
+            QTime alltime;
+            alltime.start();
             if( listener ){ listener->startingSetup(); }
 
             // OpenGL initialization
@@ -74,8 +78,10 @@ namespace vs
             FinalCompactor                  finalCompactor  ( &resources );
             FeatureDetector                 detector        ( &resources );
 
-            if( listener ){ listener->setupComplete( resources.params->povs ); }
             GLint* samplesCount = &( resources.buffers[ "best_position" ]->elements );
+            int all_init_time = alltime.restart();
+            //qDebug( "init_time: %d msec", all_init_time );
+            if( listener ){ listener->setupComplete( resources.params->povs ); }
 
             // *** sampling ***
 
@@ -98,7 +104,16 @@ namespace vs
                 while( extractor.nextPov() )
                 {
                     extractor.go();
-                    if( i==0 ){ coneFilter.go(); }else{ detector.go(); }
+
+                    if( i==0 )
+                    {
+                        coneFilter.go();
+                    }
+                    else
+                    {
+                        detector.go();
+                    }
+
                     killer.go();
                     maskUpdater.go();
                     povCompactor.go();
@@ -107,11 +122,15 @@ namespace vs
                     aliveMasker.go();
                     aliveCompactor.go();
                     finalCompactor.go();
+
                     if( listener ){ listener->povProcessed( extractor.currentPov + 1, *samplesCount ); }
                 }
 
+
                 // download samples
                 downloadSamples( &resources, (i==0)? uniformSamplesMesh : featureSamplesMesh );
+                all_init_time = alltime.restart();
+                //qDebug( (i==0)? "uniforms time: %d msec" : "features time: %d msec", all_init_time );
             }
 
             // ****************

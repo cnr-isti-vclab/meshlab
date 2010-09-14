@@ -190,7 +190,6 @@ namespace vs
 
         GLfloat* download( GLint lod = 0 )
         {
-            assert( !depthData );           // we don't want to download depth buffers
             bool previouslyBound = bound;
             if( !bound ) bind();
 
@@ -203,7 +202,7 @@ namespace vs
 
             // downloads and returns the texture data
             void* texData = malloc( (int)textureBytes );
-            glGetTexImage( GL_TEXTURE_2D, lod, GL_RGB, GL_FLOAT, texData );
+            glGetTexImage( GL_TEXTURE_2D, lod, depthData? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, texData );
             if( !previouslyBound ) unbind();
             return (GLfloat*)texData;
         }
@@ -227,9 +226,17 @@ namespace vs
                 {
                     for( int j=0; j<tmpSide; j++ )
                     {
-                        sprintf( buf, "%d)\t(%f,\t%f,\t%f)\t(%d, %d)\n", c++, pix[0], pix[1], pix[2], j, i );
+                        if( depthData )
+                        {
+                            sprintf( buf, "%d)\t%f\t(%d, %d)\n", c++, pix[0], j, i );
+                            pix++;
+                        }
+                        else
+                        {
+                            sprintf( buf, "%d)\t(%f,\t%f,\t%f)\t(%d, %d)\n", c++, pix[0], pix[1], pix[2], j, i );
+                            pix++; pix++; pix++;
+                        }
                         stream << buf;
-                        pix++; pix++; pix++;
                     }
                 }
 

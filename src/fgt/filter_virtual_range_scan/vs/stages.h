@@ -205,8 +205,10 @@ namespace vs
             if( resources->params->useCustomPovs )
             {
                 Pov& newPov = resources->params->customPovs[ currentPov ];
-                ScalarType nearPlane, farPlane;
+                ScalarType nearPlane, farPlane, farP, nearP;
                 GlShot< ShotType >::GetNearFarPlanes( newPov.first, inputMesh->bbox, nearPlane, farPlane );
+                //farP = farPlane + ((farPlane - nearPlane) * 0.1);
+                //nearP = nearPlane - ((farPlane - nearPlane) * 0.1);
                 GlShot< ShotType >::SetView( newPov.first, nearPlane, farPlane );
 
                 glEnable( GL_SCISSOR_TEST );
@@ -243,7 +245,6 @@ namespace vs
 
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
             SimpleRenderer< MeshType >::render( inputMesh );
-            //resources->fbo->screenshots( "start" );
 
             startShader->unload();
             resources->fbo->unload();
@@ -257,14 +258,13 @@ namespace vs
             glGetFloatv( GL_MODELVIEW_MATRIX, resources->mvMatrix );
             glGetFloatv( GL_PROJECTION_MATRIX, resources->projMatrix );
 
-             if( resources->params->useCustomPovs )
+            if( resources->params->useCustomPovs )
                  GlShot< ShotType >::UnsetView();
 
             glMatrixMode( GL_PROJECTION );
             glLoadIdentity();
             glMatrixMode( GL_MODELVIEW );
             glLoadIdentity();
-
         }
 
         bool nextPov( void )
@@ -282,6 +282,7 @@ namespace vs
         std::vector< MyPoint >  upVectors;
         MyPoint                 meshCenter;
         ScalarType              orthoRadius;
+        int                     dummyPov;
 
         void generateUpVectors
                 ( std::vector< MyPoint >& povs,
@@ -631,8 +632,9 @@ namespace vs
             bindSampler( "best_normal", "bestNormal" );
             bindSampler( "out_mask", "outMask" );
             bindSampler( "input_eye_normal", "inputEyeNormal" );
+            bindSampler( "input_depth", "inputDepth" );
 
-            glClear( GL_COLOR_BUFFER_BIT );     // depth buffer is not cleared, otherwise
+            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );     // depth buffer is not cleared, otherwise
                                                 // we cannot do shadow mapping
             feedCoords( bestPosition->side, samplesSoFar );
 
