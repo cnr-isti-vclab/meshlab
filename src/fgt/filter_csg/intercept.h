@@ -19,7 +19,6 @@ namespace vcg {
         
         const bool debugRaster = false;
         ofstream debugRasterOut("/Users/ranma42/Desktop/out.raster.txt");
-        ofstream debugInOut("/Users/ranma42/Desktop/out.in.txt");
         
         template <typename _dist_type, typename _scalar>
                 class Intercept
@@ -292,7 +291,7 @@ namespace vcg {
                 return bbox.IsIn(p) ? GetInterceptRay(p).IsIn(s) : -1;
             }
             
-            inline InterceptBeam &operator &=(const InterceptBeam &other) {
+            inline InterceptBeam& operator &=(const InterceptBeam &other) {
                 vcg::Box2i newbbox(bbox);
                 newbbox.Intersect(other.bbox);
                 
@@ -308,7 +307,7 @@ namespace vcg {
                 return *this;
             }
             
-            inline InterceptBeam & operator |=(const InterceptBeam &other) {
+            inline InterceptBeam& operator |=(const InterceptBeam &other) {
                 vcg::Box2i newbbox(bbox);
                 newbbox.Add(other.bbox);
                 
@@ -325,7 +324,7 @@ namespace vcg {
                 return *this;
             }
             
-            inline InterceptBeam & operator -=(const InterceptBeam &other) {
+            inline InterceptBeam& operator -=(const InterceptBeam &other) {
                 vcg::Box2i damage(bbox);
                 damage.Intersect(other.bbox);
                 
@@ -371,7 +370,7 @@ namespace vcg {
             
             inline InterceptVolume(const Box3i &b, const Point3x &d, const ContainerType &beams) : delta(d), bbox(b), beam(beams) { assert (beams.size() == 3); };
             
-            inline InterceptVolume & operator &=(const InterceptVolume &other) {
+            inline InterceptVolume& operator &=(const InterceptVolume &other) {
                 assert (checkConsistency(other));
                 for (int i = 0; i < 3; ++i)
                     beam[i] &= other.beam[i];
@@ -379,7 +378,7 @@ namespace vcg {
                 return *this;
             }
             
-            inline InterceptVolume & operator |=(const InterceptVolume &other) {
+            inline InterceptVolume& operator |=(const InterceptVolume &other) {
                 assert (checkConsistency(other));
                 for (int i = 0; i < 3; ++i)
                     beam[i] |= other.beam[i];
@@ -387,7 +386,7 @@ namespace vcg {
                 return *this;
             }
             
-            inline InterceptVolume & operator -=(const InterceptVolume &other) {
+            inline InterceptVolume& operator -=(const InterceptVolume &other) {
                 assert (checkConsistency(other));
                 for (int i = 0; i < 3; ++i)
                     beam[i] -= other.beam[i];
@@ -668,9 +667,13 @@ namespace vcg {
                 fbox.Set(v0);
                 fbox.Add(v1);
                 fbox.Add(v2);
-                
-                vcg::Box3i ibox(vcg::Point3i(ceil(fbox.min.X()), ceil(fbox.min.Y()), ceil(fbox.min.Z())),
-                                vcg::Point3i(floor(fbox.max.X()), floor(fbox.max.Y()), floor(fbox.max.Z())));
+                for (int i=0; i<3; ++i) {
+                    assert (v0[i] >= bbox.min[i] && v0[i] <= bbox.max[i]);
+                    assert (v1[i] >= bbox.min[i] && v1[i] <= bbox.max[i]);
+                    assert (v2[i] >= bbox.min[i] && v2[i] <= bbox.max[i]);
+                }
+                vcg::Box3i ibox(vcg::Point3i(floor(fbox.min.X()), floor(fbox.min.Y()), floor(fbox.min.Z())),
+                                vcg::Point3i(ceil(fbox.max.X()), ceil(fbox.max.Y()), ceil(fbox.max.Z())));
                 
                 RasterFace<0>(v0, v1, v2, ibox, norm, quality);
                 RasterFace<1>(v0, v1, v2, ibox, norm, quality);
@@ -706,9 +709,21 @@ namespace vcg {
                     v0.Scale(invDelta);
                     v1.Scale(invDelta);
                     v2.Scale(invDelta);
-                    ScanFace (Point3dt(v0.X(), v0.Y(), v0.Z()),
-                              Point3dt(v1.X(), v1.Y(), v1.Z()),
-                              Point3dt(v2.X(), v2.Y(), v2.Z()),
+                    for (int j=0; j<3; ++j) {
+                        assert (v0[j] >= bbox.min[j] && v0[j] <= bbox.max[j]);
+                        assert (v1[j] >= bbox.min[j] && v1[j] <= bbox.max[j]);
+                        assert (v2[j] >= bbox.min[j] && v2[j] <= bbox.max[j]);
+                    }
+                    const int myDen = 32;
+                    ScanFace (Point3dt(DistType(v0.X()*myDen,myDen),
+                                       DistType(v0.Y()*myDen,myDen),
+                                       DistType(v0.Z()*myDen,myDen)),
+                              Point3dt(DistType(v1.X()*myDen,myDen),
+                                       DistType(v1.Y()*myDen,myDen),
+                                       DistType(v1.Z()*myDen,myDen)),
+                              Point3dt(DistType(v2.X()*myDen,myDen),
+                                       DistType(v2.Y()*myDen,myDen),
+                                       DistType(v2.Z()*myDen,myDen)),
                               i->cN().Normalize(),
                               0);
                 }
