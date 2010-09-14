@@ -23,10 +23,12 @@
 
 #include "decorate_base.h"
 #include <wrap/gl/addons.h>
+#include <vcg/complex/trimesh/stat.h>
 #include <meshlab/glarea.h>
 
 using namespace vcg;
 using namespace std;
+
 
 QString ExtraMeshDecoratePlugin::filterInfo(QAction *action) const
  {
@@ -42,6 +44,8 @@ QString ExtraMeshDecoratePlugin::filterInfo(QAction *action) const
     case DP_SHOW_FACE_NORMALS:					return tr("Draws object face normals");
     case DP_SHOW_QUOTED_BOX:						return tr("Draws quoted box");
     case DP_SHOW_VERT_LABEL:						return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
+    case DP_SHOW_VERT_QUALITY_HISTOGRAM:						return tr("Draws a (colored) Histogram of the per vertex quality");
+  case DP_SHOW_FACE_QUALITY_HISTOGRAM:						return tr("Draws a (colored) Histogram of the per face quality");
     case DP_SHOW_FACE_LABEL:						return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
     case DP_SHOW_CAMERA:								return tr("Draw the position of the camera, if present in the current mesh");
     case DP_SHOW_TEXPARAM: return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
@@ -67,6 +71,8 @@ QString ExtraMeshDecoratePlugin::filterName(FilterIDType filter) const
     case DP_SHOW_FACE_LABEL:			return tr("Show Face Label");
     case DP_SHOW_CAMERA:			return tr("Show Camera");
     case DP_SHOW_TEXPARAM:			return tr("Show UV Tex Param");
+    case DP_SHOW_VERT_QUALITY_HISTOGRAM:			return tr("Show Vert Quality Histogram");
+    case DP_SHOW_FACE_QUALITY_HISTOGRAM:			return tr("Show Face Quality Histogram");
 
     default: assert(0);
     }
@@ -147,7 +153,7 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
 			glColor(Color4b::Black);
 			glDepthRange (0.0, 0.9999);
 			glDepthFunc(GL_LEQUAL);
-            float baseSize = 4;
+      float baseSize = rm->getDynamicFloat(this->VertDotSizeParam());
 
 			glPointSize(baseSize+0.5);
 			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
@@ -170,6 +176,23 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
 			glPopAttrib();
         } break;
     case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,rm,qf); break;
+
+    case DP_SHOW_VERT_QUALITY_HISTOGRAM :
+      {
+        CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"VertQualityHist");
+        CHist &ch=qH();
+        this->DrawColorHistogram(ch,gla,rm,qf);
+      }
+      break;
+    case DP_SHOW_FACE_QUALITY_HISTOGRAM :
+      {
+        CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"FaceQualityHist");
+        CHist &ch=qH();
+        this->DrawColorHistogram(ch,gla,rm,qf);
+      }
+      break;
+
+
     } // end switch;
 	glPopMatrix();
 
@@ -333,39 +356,43 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,GLint *vp
 		}
 	}
 }
-
-void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickDist,QGLWidget *gla, QFont qf)
+/**
+ */
+void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickScalarDistance, QGLWidget *gla, QFont qf)
 {  
+
   float firstTick;
-  if(aVal > 0) firstTick = aVal - fmod(aVal,tickDist) + tickDist;
-          else firstTick = aVal - fmod(aVal,tickDist);
+  // fmod returns the floating-point remainder of numerator/denominator
+  if(aVal > 0) firstTick = aVal - fmod(aVal,tickScalarDistance) + tickScalarDistance;
+          else firstTick = aVal - fmod(aVal,tickScalarDistance);
 
   float firstTickTen,tickDistTen;
-  tickDistTen=tickDist /10.0f;
+  tickDistTen=tickScalarDistance /10.0f;
   if(aVal > 0) firstTickTen = aVal - fmod(aVal,tickDistTen) + tickDistTen;
           else firstTickTen = aVal - fmod(aVal,tickDistTen);          
 
   int neededZeros=0;
 					
-  Point3d Zero = a-((b-a)/(bVal-aVal))*aVal; 
+  Point3d Zero = a-((b-a)/(bVal-aVal))*aVal; // 3D Position of Zero.
 	Point3d v(b-a);
-  v.Normalize();
-  if(tickDist > 0)   // Draw lines only if the two endpoint are not coincident
+  //v.Normalize();
+  v = v*(1.0/(bVal-aVal));
+  if(tickScalarDistance > 0)   // Draw lines only if the two endpoint are not coincident
 	{
-					neededZeros = ceil(max(0.0,-log10(double(tickDist))));
+          neededZeros = ceil(max(0.0,-log10(double(tickScalarDistance))));
 					glPointSize(3);
 					float i;
 					glBegin(GL_POINTS);
-					for(i=firstTick;i<bVal;i+=tickDist)
+          for(i=firstTick;i<bVal;i+=tickScalarDistance)
 						glVertex(Zero+v*i);
 					glEnd();
 
-					for(i=firstTick+tickDist; i<bVal-tickDist;i+=tickDist)
+          for(i=firstTick+tickScalarDistance; i<bVal-tickScalarDistance;i+=tickScalarDistance)
 						gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,4+neededZeros,'f',neededZeros),qf);		
 
 				 glPointSize(1);
 				 glBegin(GL_POINTS);
-						for(i=firstTickTen;i<=bVal;i+=tickDistTen)
+            for(i=firstTickTen;i<bVal;i+=tickDistTen)
 							glVertex(Zero+v*i);
 				 glEnd();
 	}
@@ -462,6 +489,9 @@ bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const Mesh
             return false;
           }
         }
+  if(ID(action) == DP_SHOW_FACE_QUALITY_HISTOGRAM ) return m.hasDataMask(MeshModel::MM_FACEQUALITY);
+  if(ID(action) == DP_SHOW_VERT_QUALITY_HISTOGRAM ) return m.hasDataMask(MeshModel::MM_VERTQUALITY);
+
   if( ID(action) == DP_SHOW_VERT_PRINC_CURV_DIR )
   {
     if(!m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
@@ -473,8 +503,56 @@ bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const Mesh
   return true;
 }
 
-bool ExtraMeshDecoratePlugin::startDecorate(QAction * /*action*/, MeshDocument &/*m*/, RichParameterSet */*rm*/, GLArea *)
+
+bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, RichParameterSet *rm, GLArea *)
 {	
+  switch(ID(action))
+  {
+    case DP_SHOW_VERT_QUALITY_HISTOGRAM :
+      {
+        MeshModel *m=md.mm();
+
+        CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m->cm,"VertQualityHist");
+
+            if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,qH))
+              qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m->cm,std::string("VertQualityHist"));
+            CHist *H = &qH();
+            std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m->cm);
+            if(rm->getBool(UseFixedHistParam())) {
+              minmax.first=rm->getFloat(FixedHistMinParam());
+              minmax.second=rm->getFloat(FixedHistMaxParam());
+            }
+
+            H->SetRange( minmax.first, minmax.second, rm->getInt(HistBinNumParam()));
+            for(CMeshO::VertexIterator vi = m->cm.vert.begin(); vi!= m->cm.vert.end();++vi) if(!(*vi).IsD())
+            {
+              H->Add((*vi).Q(),(*vi).C());
+            }
+      } break;
+    case DP_SHOW_FACE_QUALITY_HISTOGRAM :
+      {
+        MeshModel *m=md.mm();
+
+        CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m->cm,"FaceQualityHist");
+
+            if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,qH))
+              qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m->cm,std::string("FaceQualityHist"));
+            CHist *H = &qH();
+            std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m->cm);
+
+            if(rm->getBool(UseFixedHistParam())) {
+              minmax.first=rm->getFloat(FixedHistMinParam());
+              minmax.second=rm->getFloat(FixedHistMaxParam());
+            }
+
+            H->SetRange( minmax.first,minmax.second, rm->getInt(HistBinNumParam()));
+            for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
+            {
+              H->Add((*fi).Q(),(*fi).C());
+            }
+      } break;
+
+  }
  return true;
 }
 
@@ -526,6 +604,59 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m,QGLWidget *gla, QFont qf)
 		glEnd();
 	glPopAttrib();			
 }
+void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch,QGLWidget *gla, RichParameterSet *, QFont qf)
+{
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+
+  float ratio = float(gla->width())/gla->height();
+  glOrtho(0,ratio,0,1,-1,1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  glPushAttrib(GL_ENABLE_BIT);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_BLEND);
+  
+  float len = ch.MaxV() - ch.MinV();
+  float maxWide = ch.MaxCount();
+  float bn = ch.BinNum();
+
+  float border = 0.1;
+  float histH = 1.0f - 2.f*border;
+  float histW = 0.3f;
+
+  glBegin(GL_QUAD_STRIP);
+  for(float i =0;i<bn;++i)
+  {
+    float val = ch.MinV() + (i/bn)*(ch.MaxV() - ch.MinV());
+    float wide = histW *float(ch.BinCount(val))/maxWide;
+    float ypos  = ( i   /bn)*histH;
+    float ypos2 = ((i+1)/bn)*histH;
+
+    glColor(ch.BinColorAvg(val));
+    glVertex3f(border,    border+ypos,0);
+    glVertex3f(border+wide, border+ypos,0);
+    glVertex3f(border,   border+ypos2,0);
+    glVertex3f(border+wide,border+ypos2,0);
+  }
+
+  glEnd();
+
+  glColor(Color4b::White);
+  drawQuotedLine(Point3d(border/2.0,border,0),Point3d(border/2.0,1.0-border,0),ch.MinV(),ch.MaxV(),len/20.0,gla,qf);
+
+  // Closing 2D
+  glPopAttrib();
+  glPopMatrix(); // restore modelview
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+}
 
 void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, QGLWidget *gla,  RichParameterSet *rm, QFont qf)
 {
@@ -575,8 +706,8 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, QGLWidget *gla,  RichPa
     glEnd();
     glDisable(GL_TEXTURE_2D);
 
-    drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.5,gla,qf);
-    drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.5,gla,qf);
+    drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.1,gla,qf);
+    drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.1,gla,qf);
 
     glPopAttrib();
     // Closing 2D
@@ -594,7 +725,22 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
     case DP_SHOW_TEXPARAM : {
             assert(!parset.hasParameter(TextureStyleParam()));
             parset.addParam(new RichBool(TextureStyleParam(), true,"Texture Param Wire","if true the parametrization is drawn in a textured wireframe style"));
+        } break;
+    case DP_SHOW_VERT : {
+            assert(!parset.hasParameter(VertDotSizeParam()));
+            parset.addParam(new RichDynamicFloat(VertDotSizeParam(), 4,2,8,"Dot Size","if true the parametrization is drawn in a textured wireframe style"));
+        } break;
+    case DP_SHOW_FACE_QUALITY_HISTOGRAM :
+    case DP_SHOW_VERT_QUALITY_HISTOGRAM :{
+        if(!parset.hasParameter(HistBinNumParam()))
+        {
+          parset.addParam(new RichInt(HistBinNumParam(), 256,"Histogram Bins","if true the parametrization is drawn in a textured wireframe style"));
+          parset.addParam(new RichBool(UseFixedHistParam(), false,"Fixed Histogram width","if true the parametrization is drawn in a textured wireframe style"));
+          parset.addParam(new RichFloat(FixedHistMinParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
+          parset.addParam(new RichFloat(FixedHistMaxParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
         }
+
+    } break;
     }
 }
 Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)

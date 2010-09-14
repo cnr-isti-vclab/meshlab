@@ -26,6 +26,9 @@
 
 #include <common/interfaces.h>
 #include <wrap/gui/coordinateframe.h>
+#include "colorhistogram.h"
+typedef vcg::ColorHistogram<float>  CHist;
+
 
 class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
@@ -45,9 +48,11 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_AXIS,
 		DP_SHOW_QUOTED_BOX,
 		DP_SHOW_VERT_LABEL, 
+    DP_SHOW_VERT_QUALITY_HISTOGRAM,
+    DP_SHOW_FACE_QUALITY_HISTOGRAM,
 		DP_SHOW_FACE_LABEL,
 		DP_SHOW_CAMERA,
-        DP_SHOW_TEXPARAM,
+    DP_SHOW_TEXPARAM,
   };
 
   QString filterName(FilterIDType filter) const;
@@ -61,7 +66,7 @@ private:
 	void	chooseX(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &x1,vcg::Point3d &x2);
 	void	chooseY(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
 	void	chooseZ(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
-
+  void drawHistogram(QGLWidget *gla, CHist &ch);
 public:
      
 	ExtraMeshDecoratePlugin()
@@ -71,7 +76,9 @@ public:
     DP_SHOW_NON_FAUX_EDGE <<
     DP_SHOW_FACE_NORMALS <<
     DP_SHOW_VERT_NORMALS <<
-		DP_SHOW_VERT_PRINC_CURV_DIR <<
+    DP_SHOW_VERT_QUALITY_HISTOGRAM <<
+    DP_SHOW_FACE_QUALITY_HISTOGRAM <<
+    DP_SHOW_VERT_PRINC_CURV_DIR <<
     DP_SHOW_BOX_CORNERS <<
     DP_SHOW_BOX_CORNERS_ABS <<
     DP_SHOW_AXIS <<
@@ -99,6 +106,7 @@ public:
 	void DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf);
 	void DrawCamera(MeshModel &m, QGLWidget *gla, QFont qf);
   void DrawTexParam(MeshModel &m,QGLWidget *gla, RichParameterSet *, QFont qf);
+  void DrawColorHistogram(CHist &ch, QGLWidget *gla, RichParameterSet *, QFont qf);
 
   virtual void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla);
   virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
@@ -106,6 +114,12 @@ public:
 
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
   inline QString TextureStyleParam() const { return  "MeshLab::Decoration::TextureStyle" ; }
+  inline QString VertDotSizeParam() const { return  "MeshLab::Decoration::VertDotSize" ; }
+  inline QString HistBinNumParam() const { return  "MeshLab::Decoration::HistBinNumParam" ; }
+  inline QString UseFixedHistParam() const { return  "MeshLab::Decoration::UseFixedHistParam" ; }
+  inline QString FixedHistMinParam() const { return  "MeshLab::Decoration::FixedHistMinParam" ; }
+  inline QString FixedHistMaxParam() const { return  "MeshLab::Decoration::FixedHistMaxParam" ; }
+
   bool textureWireParam;
 };
 
