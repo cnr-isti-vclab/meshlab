@@ -23,9 +23,14 @@
 
 #include <Qt>
 #include <QtGui>
+
 #include "filter_csg.h"
 
-#include "fixed.h"
+#include <vcg/complex/trimesh/create/extended_marching_cubes.h>
+#include <vcg/complex/trimesh/create/marching_cubes.h>
+
+#include <fstream>
+#include "gmpfrac.h"
 #include "intercept.h"
 
 using namespace std;
@@ -110,12 +115,26 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             firstMesh->updateDataMask(MeshModel::MM_FACENORMAL);
             secondMesh->updateDataMask(MeshModel::MM_FACENORMAL);
 
-            typedef CMeshO::ScalarType scalar;
-            typedef Intercept<vcg::math::fixed<8,vcg::math::base32>,scalar> intercept;
-            const float d = par.getFloat("Delta");
+            typedef float scalar;
+            //typedef Intercept<vcg::math::fixed<8,vcg::math::base32>,scalar> intercept;            
+            typedef Intercept<fraction,scalar> intercept;
+            const scalar d = par.getFloat("Delta");
             const Point3f delta(d, d, d);
-            InterceptVolume<intercept> v(InterceptSet3<intercept>(firstMesh->cm, delta)),
-            tmp(InterceptSet3<intercept>(secondMesh->cm, delta));
+            Log(0, "First volume");
+            InterceptVolume<intercept> v = InterceptSet3<intercept>(firstMesh->cm, delta);
+
+            ofstream out1("/Users/ranma42/Desktop/v1.intercepts.txt");
+            out1 << v;
+            out1.close();
+
+            Log(0, "Second volume");
+            InterceptVolume<intercept> tmp = InterceptSet3<intercept>(secondMesh->cm, delta);
+
+            ofstream out2("/Users/ranma42/Desktop/v2.intercepts.txt");
+            out2 << tmp;
+            out2.close();
+
+            Log(0, "Volumes rasterized");
 
             MeshModel *mesh;
             switch(par.getEnum("Operator")){
@@ -139,6 +158,17 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
                 return true;
             }
 
+            ofstream out3("/Users/ranma42/Desktop/out.intercepts.txt");
+            out3 << v;
+            out3.close();
+
+            Log("[MARCHING CUBES] Building mesh...");
+            typedef vcg::intercept::Walker<CMeshO, intercept> MyWalker;
+            typedef vcg::tri::ExtendedMarchingCubes<CMeshO, MyWalker> MyExtendedMarchingCubes;
+            typedef vcg::tri::MarchingCubes<CMeshO, MyWalker> MyMarchingCubes;
+            MyWalker walker;
+            MyMarchingCubes mc(mesh->cm, walker);
+            walker.BuildMesh<MyMarchingCubes>(mesh->cm, v, mc);
         }
         return true;
 

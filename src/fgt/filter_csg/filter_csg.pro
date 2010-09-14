@@ -1,13 +1,20 @@
 include (../../shared.pri)
+HEADERS += filter_csg.h \
+    bigint.h \
+    fixed.h \
+    intercept.h \
+    fraction.h \
+    gmpfrac.h
 
-HEADERS      += filter_csg.h \
-                bigint.h \
-                fixed.h \
-                intercept.h 
+SOURCES += filter_csg.cpp
+TARGET = filter_csg
+TEMPLATE = lib
+QT += opengl
+CONFIG += plugin
 
-SOURCES      += filter_csg.cpp 
+QMAKE_INCDIR += gmp-5.0.1/
 
-TARGET        = filter_csg
-TEMPLATE      = lib
-QT           += opengl
-CONFIG       += plugin
+#QMAKE_LIBS += -lgmpxx -lgmp
+#QMAKE_LIBDIR += gmp-5.0.1/.libs/
+
+OBJECTS += gmp-5.0.1/.libs/libgmpxx.a gmp-5.0.1/.libs/libgmp.a
