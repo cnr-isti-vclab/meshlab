@@ -35,16 +35,20 @@ namespace vs
 
         void render( void )
         {
-            /*
             for( int i=0; i<3; i++ )
             {
                 assert( glIsBuffer( buffer[i] ) == GL_TRUE );
             }
 
             glBindBuffer( GL_ARRAY_BUFFER, buffer[0] );         // coordinates
-            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, buffer[2] ); // indices
-            glEnableClientState( GL_NORMAL_ARRAY );
+            glVertexPointer( (GLint)3, GL_FLOAT, 0, 0 );
             glEnableClientState( GL_VERTEX_ARRAY );
+
+            glBindBuffer( GL_ARRAY_BUFFER, buffer[1] );         // normals
+            glNormalPointer( GL_FLOAT, 0, 0 );
+            glEnableClientState( GL_NORMAL_ARRAY );
+
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, buffer[2] ); // indices
 
             glDrawElements( GL_TRIANGLES, elementsToDraw, GL_UNSIGNED_INT,  0 );
 
@@ -52,9 +56,8 @@ namespace vs
             glDisableClientState( GL_VERTEX_ARRAY );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
             glBindBuffer( GL_ARRAY_BUFFER, 0 );
-            */
 
-
+            /*
             if( m->vert.size() == 0 ) return;
 
             typename MeshType::FaceIterator fi;
@@ -77,8 +80,7 @@ namespace vs
             }
 
             glEnd();
-
-
+            */
         }
 
     private:
@@ -127,21 +129,18 @@ namespace vs
                 vertexIndex++;
             }
 
-            bool floatTypes = ( scalarTypeSize == sizeof(float) );
-
             // fills coordinates buffer
             glBindBuffer( GL_ARRAY_BUFFER, buffer[0] );
-            glBufferData( GL_ARRAY_BUFFER, sizeof(vData), vData, GL_STATIC_DRAW );
-            glVertexPointer( (GLint)3, floatTypes? GL_FLOAT : GL_DOUBLE, 0, 0 );
+            glBufferData( GL_ARRAY_BUFFER, verticesSize, vData, GL_STATIC_DRAW );
+            glVertexPointer( (GLint)3, GL_FLOAT, 0, 0 );
             glBindBuffer( GL_ARRAY_BUFFER, 0 );
             free( vData );
 
             assert( glGetError() == GL_NO_ERROR );
 
             // fills normals buffer
-            glBindBuffer( GL_ARRAY_BUFFER, buffer[0] );
-            glBufferData( GL_ARRAY_BUFFER, sizeof(nData), nData, GL_STATIC_DRAW );
-            glNormalPointer( floatTypes? GL_FLOAT : GL_DOUBLE, 0, 0 );
+            glBindBuffer( GL_ARRAY_BUFFER, buffer[1] );
+            glBufferData( GL_ARRAY_BUFFER, verticesSize, nData, GL_STATIC_DRAW );
             glBindBuffer( GL_ARRAY_BUFFER, 0 );
             free( nData );
 
@@ -162,18 +161,9 @@ namespace vs
                 iP = &( iP[3] );
             }
 
-            /*
-            iP = (unsigned int*)iData;
-            for( int i=0; i<m->fn; i++ )
-            {
-                qDebug( "%d)\t(%d, %d, %d)", i, iP[0], iP[1], iP[2] );
-                iP = &( iP[3] );
-            }
-            */
-
             // fills indices buffer
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, buffer[2] );
-            glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(iData), iData, GL_STATIC_DRAW );
+            glBufferData( GL_ELEMENT_ARRAY_BUFFER, indicesSize, iData, GL_STATIC_DRAW );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
             free( iData );
             delete ptrToInt;
