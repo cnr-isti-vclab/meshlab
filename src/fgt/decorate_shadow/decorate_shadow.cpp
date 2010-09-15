@@ -76,7 +76,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
     }
 }		
 		
-bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& m, RichParameterSet* parset, GLArea* gla){
+bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, RichParameterSet* parset, GLArea* /*gla*/){
     bool result;
     switch(ID(action)){
         case DP_SHOW_SHADOW :
