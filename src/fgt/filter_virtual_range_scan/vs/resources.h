@@ -800,42 +800,6 @@ namespace vs
         }
         /* --------------------------------------------------------------------------- */
     };
-
-    /* -------------------- a simple mesh renderer ----------------------------------- */
-    template< class MeshType >
-    class SimpleRenderer
-    {
-
-    public:
-
-        static void render( MeshType* m )
-        {
-            if( m->vert.size() == 0 ) return;
-
-            typename MeshType::FaceIterator fi;
-            int i = 0;
-            vcg::Point3f* pp = 0;
-            vcg::Point3f* np = 0;
-
-            glBegin( GL_TRIANGLES );
-
-            for( fi = m->face.begin(); fi != m->face.end(); ++fi )
-            {
-                for( i = 0; i < 3; i++ )
-                {
-                    np = &( (*fi).V(i)->N() );
-                    glNormal3f( np->X(), np->Y(), np->Z() );
-
-                    pp = &( (*fi).V(i)->P() );
-                    glVertex3f( pp->X(), pp->Y(), pp->Z() );
-                }
-            }
-
-            glEnd();
-        }
-
-    };
-    /* ------------------------------------------------------------------------------- */
 }
 
 #endif // RESOURCES_H

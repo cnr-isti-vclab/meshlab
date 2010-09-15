@@ -10,5 +10,6 @@ HEADERS += filter_virtual_range_scan.h \
     vs/stages.h \
     vs/utils.h \
     vs/povs_generator.h \
-    my_gl_widget.h
+    my_gl_widget.h \
+    vs/simple_renderer.h
 SOURCES += filter_virtual_range_scan.cpp

@@ -3,6 +3,7 @@
 
 #include "resources.h"
 #include "povs_generator.h"
+#include "simple_renderer.h"
 
 namespace vs
 {
@@ -170,7 +171,7 @@ namespace vs
         typedef typename vcg::Shot< ScalarType >    ShotType;
 
         AttributesExtractor( MeshType* inputMesh, Resources* res )
-            :Stage( res )
+            :Stage( res ), renderer( inputMesh )
         {
             this->inputMesh = inputMesh;
             currentPov = 0;
@@ -205,10 +206,8 @@ namespace vs
             if( resources->params->useCustomPovs )
             {
                 Pov& newPov = resources->params->customPovs[ currentPov ];
-                ScalarType nearPlane, farPlane, farP, nearP;
+                ScalarType nearPlane, farPlane;
                 GlShot< ShotType >::GetNearFarPlanes( newPov.first, inputMesh->bbox, nearPlane, farPlane );
-                //farP = farPlane + ((farPlane - nearPlane) * 0.1);
-                //nearP = nearPlane - ((farPlane - nearPlane) * 0.1);
                 GlShot< ShotType >::SetView( newPov.first, nearPlane, farPlane );
 
                 glEnable( GL_SCISSOR_TEST );
@@ -244,7 +243,8 @@ namespace vs
             startShader->load();
 
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-            SimpleRenderer< MeshType >::render( inputMesh );
+            renderer.render( );
+            //resources->fbo->screenshots( "start" );
 
             startShader->unload();
             resources->fbo->unload();
@@ -274,15 +274,16 @@ namespace vs
             return ( currentPov < si );
         }
 
-        int                     currentPov;
+        int                         currentPov;
 
     private:
-        MeshType*               inputMesh;
-        std::vector< MyPoint >  povs;
-        std::vector< MyPoint >  upVectors;
-        MyPoint                 meshCenter;
-        ScalarType              orthoRadius;
-        int                     dummyPov;
+        MeshType*                   inputMesh;
+        SimpleRenderer< MeshType >  renderer;
+        std::vector< MyPoint >      povs;
+        std::vector< MyPoint >      upVectors;
+        MyPoint                     meshCenter;
+        ScalarType                  orthoRadius;
+        int                         dummyPov;
 
         void generateUpVectors
                 ( std::vector< MyPoint >& povs,

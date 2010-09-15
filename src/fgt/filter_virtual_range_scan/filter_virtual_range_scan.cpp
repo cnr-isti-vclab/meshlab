@@ -123,6 +123,14 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
     {
     case FP_VRS:
 
+        MeshModel* curMeshModel = md.mm();
+        CMeshO* startMesh = &( curMeshModel->cm );
+
+        if( !(startMesh->HasPerVertexNormal()) )
+        {
+            errorMessage = "Cannot apply the virtual scanning filter: the current mesh doesn't have per-vertex normals.";
+            return false;
+        }
 
         bool useLayerPovs = par.getBool( "useCustomPovs" );
         if( useLayerPovs )
@@ -158,8 +166,6 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
         vrsParams.useCustomPovs = useLayerPovs;
 
         bool oneMesh = par.getBool( "oneMesh" );
-        MeshModel* curMeshModel = md.mm();
-        CMeshO* startMesh = &( curMeshModel->cm );
         MeshModel* firstMeshModel = 0, *secondMeshModel = 0;
         CMeshO* firstMesh = 0, *secondMesh = 0;
 
