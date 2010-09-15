@@ -158,10 +158,6 @@ public:
     /// we are able to test for intersections with triangles which are slightly behind
     /// the surface. The default value is not really zero, it gets converted to -Delta.
     void trace_ray(PokingRay& pray, float off=0);
-
-    /// This function scans through the PokingRay array and reset the correspondence information
-    /// and the distance information (used to compute a new correspondence)
-    void clearCorrespondences();
 };
 
 } // Namespace VCG

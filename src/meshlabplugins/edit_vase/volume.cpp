@@ -9,14 +9,14 @@ const Point3i off[8] = { Point3i(0,0,0), Point3i(0,0,1), Point3i(0,1,0), Point3i
                                 Point3i(1,0,0), Point3i(1,0,1), Point3i(1,1,0), Point3i(1,1,1) };
 // the array is used to scan the 26-neighborhood
 const Point3i off26[26] = { Point3i(-1, -1, -1), Point3i(-1,  0, -1), Point3i(-1, +1, -1),
-                                   Point3i( 0, -1, -1), Point3i( 0,  0, -1), Point3i( 0, +1, -1),
-                                   Point3i( 1, -1, -1), Point3i( 1,  0, -1), Point3i( 1, +1, -1),
-                                   Point3i(-1, -1,  0), Point3i(-1,  0,  0), Point3i(-1, +1,  0),
-                                   Point3i( 0, -1,  0), /*   skip center */  Point3i( 0, +1,  0),
-                                   Point3i( 1, -1,  0), Point3i( 1,  0,  0), Point3i( 1, +1,  0),
-                                   Point3i(-1, -1,  1), Point3i(-1,  0,  1), Point3i(-1, +1,  1),
-                                   Point3i( 0, -1,  1), Point3i( 0,  0,  1), Point3i( 0, +1,  1),
-                                   Point3i( 1, -1,  1), Point3i( 1,  0,  1), Point3i( 1, +1,  1) };
+                            Point3i( 0, -1, -1), Point3i( 0,  0, -1), Point3i( 0, +1, -1),
+                            Point3i( 1, -1, -1), Point3i( 1,  0, -1), Point3i( 1, +1, -1),
+                            Point3i(-1, -1,  0), Point3i(-1,  0,  0), Point3i(-1, +1,  0),
+                            Point3i( 0, -1,  0), /*   skip center */  Point3i( 0, +1,  0),
+                            Point3i( 1, -1,  0), Point3i( 1,  0,  0), Point3i( 1, +1,  0),
+                            Point3i(-1, -1,  1), Point3i(-1,  0,  1), Point3i(-1, +1,  1),
+                            Point3i( 0, -1,  1), Point3i( 0,  0,  1), Point3i( 0, +1,  1),
+                            Point3i( 1, -1,  1), Point3i( 1,  0,  1), Point3i( 1, +1,  1) };
 
 void MyVolume::init( int gridsize, int padsize, vcg::Box3f bbox ){
     // Extract length of longest edge
@@ -212,24 +212,16 @@ void MyVolume::initField( CMeshO& surface, GridAccell& accell ){
     updateSurfaceCorrespondence( surface, accell, DELTA );
 }
 
-void MyVolume::isosurface( CMeshO& mesh, float offset ){
-    // Run marching cubes on regular lattice
+void MyVolume::isosurface( CMeshO& surf, float offset ){
+    // Run marching cubes on regular lattice getting isoband at "offset" distance
     typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<MyVoxel> >	MyWalker;
     typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
     MyWalker walker;
-    MyMarchingCubes	mc(mesh, walker);
-    // Extract isoband at "offset" distance
-    walker.BuildMesh<MyMarchingCubes>(mesh, this->grid, mc, offset);
-    // add an additional attribute for storing the original grid coordinate.
-    // so it is easy to detect for each vertex
-    CMeshO::PerVertexAttributeHandle<Point3f> MCIH;
-    if(!vcg::tri::HasPerVertexAttribute (mesh,std::string("OrigCoord")))
-          MCIH = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f>  (mesh,std::string("OrigCoord"));
-    else  MCIH = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>  (mesh,std::string("OrigCoord"));
+    MyMarchingCubes mc(surf, walker);
+    walker.BuildMesh<MyMarchingCubes>(surf, this->grid, mc, offset);
 
     // Rescale the marching cube mesh
-    for(CMeshO::VertexIterator vi=mesh.vert.begin();vi!=mesh.vert.end();vi++){
-        MCIH[vi]=(*vi).P(); // save the original coords
+    for(CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++){
         (*vi).P()[0] = ((*vi).P()[0]-padsize) * delta + bbox.min[0];
         (*vi).P()[1] = ((*vi).P()[1]-padsize) * delta + bbox.min[1];
         (*vi).P()[2] = ((*vi).P()[2]-padsize) * delta + bbox.min[2];
@@ -238,55 +230,48 @@ void MyVolume::isosurface( CMeshO& mesh, float offset ){
     //--- Remove slivers which might crash the whole system (reuses the one defined by plymc)
     // Paolo: il parametro perc va dato in funzione della grandezza del voxel se gli dai come
     // perc: perc=voxel.side/4 sei safe
-    mesh.vert.EnableMark();
-    mesh.vert.EnableVFAdjacency();
-    mesh.face.EnableVFAdjacency();
-    tri::UpdateTopology<CMeshO>::VertexFace( mesh );
-    tri::MCSimplify<CMeshO>( mesh, getDelta()/4 );
+    surf.vert.EnableMark();
+    surf.vert.EnableVFAdjacency();
+    surf.face.EnableVFAdjacency();
+    tri::UpdateTopology<CMeshO>::VertexFace( surf );
+    tri::MCSimplify<CMeshO>( surf, getDelta()/4 );
 
     //--- The simplify operation removed some vertices
-    tri::Allocator<CMeshO>::CompactVertexVector( mesh );
-    tri::Allocator<CMeshO>::CompactFaceVector( mesh );
+    tri::Allocator<CMeshO>::CompactVertexVector( surf );
+    tri::Allocator<CMeshO>::CompactFaceVector( surf );
 
     //--- Final Cleanup
-    mesh.face.EnableFFAdjacency();
-    tri::Clean<CMeshO>::RemoveTVertexByFlip(mesh,20,true);
-    tri::Clean<CMeshO>::RemoveFaceFoldByFlip(mesh);
+    surf.face.EnableFFAdjacency();
+    tri::Clean<CMeshO>::RemoveTVertexByFlip(surf,20,true);
+    tri::Clean<CMeshO>::RemoveFaceFoldByFlip(surf);
 
     #ifdef REMOVE_DEGENERATE_FACES
-        int total = tri::Clean<CMeshO>::MergeCloseVertex(mesh, getDelta()/8);
+        int total = tri::Clean<CMeshO>::MergeCloseVertex(surf, getDelta()/8);
         qDebug("Successfully merged %d vertices", total);
         // merging close might introduce non-manifolds
-        tri::Clean<CMeshO>::RemoveNonManifoldFace(mesh);
+        tri::Clean<CMeshO>::RemoveNonManifoldFace(surf);
         // Make sure this is not messing up the topology
-        tri::Allocator<CMeshO>::CompactVertexVector( mesh );
-        tri::Allocator<CMeshO>::CompactFaceVector( mesh );
-        mesh.face.EnableFFAdjacency();
-        mesh.vert.EnableMark();
-        mesh.vert.EnableVFAdjacency();
-        mesh.face.EnableVFAdjacency();
-        tri::UpdateTopology<CMeshO>::VertexFace( mesh );
+        tri::Allocator<CMeshO>::CompactVertexVector( surf );
+        tri::Allocator<CMeshO>::CompactFaceVector( surf );
+        surf.face.EnableFFAdjacency();
+        surf.vert.EnableMark();
+        surf.vert.EnableVFAdjacency();
+        surf.face.EnableVFAdjacency();
+        tri::UpdateTopology<CMeshO>::VertexFace( surf );
     #endif
 
     //--- Post-processing
     // tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cb);
 
-    // DEBUG!!! PAOLO ASKED TO CALL IT TWICE
-    #ifdef REPEAT_SIMPLIFY_PROCESS
-            tri::UpdateTopology<CMeshO>::VertexFace( mesh );
-            tri::MCSimplify<CMeshO>( mesh, getDelta()/4 );
-            tri::Allocator<CMeshO>::CompactVertexVector( mesh );
-            tri::Allocator<CMeshO>::CompactFaceVector( mesh );
-            mesh.face.EnableFFAdjacency();
-            tri::Clean<CMeshO>::RemoveTVertexByFlip(mesh,20,true);
-            tri::Clean<CMeshO>::RemoveFaceFoldByFlip(mesh);
-        }
-    #endif
-
     //--- Update surface normals
-    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized( mesh );
+    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized( surf );
+
     //--- Face orientation, needed to have more robust face distance tests
-    tri::UpdateFlags<CMeshO>::FaceProjection(mesh);
+    tri::UpdateFlags<CMeshO>::FaceProjection(surf);
+
+    //--- Attributes for curvature computation
+    surf.vert.EnableCurvature();
+    surf.vert.EnableCurvatureDir(); // quadric based needs it
 }
 
 /// gridaccell is needed only to retrieve the correct face=>voxel index
@@ -298,8 +283,6 @@ void MyVolume::updateSurfaceCorrespondence( CMeshO& surf, GridAccell& gridAccell
     Point3i o, newo;
     Point3f p, newp;
     float   dist;
-    CMeshO::PerVertexAttributeHandle<Point3f> MCIH = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>  (surf,std::string("OrigCoord"));
-    assert(vcg::tri::HasPerVertexAttribute(surf,std::string("OrigCoord")));
 
     for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
         // Compute hash index from face center

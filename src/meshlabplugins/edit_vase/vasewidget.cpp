@@ -106,9 +106,9 @@ void VaseWidget::on_iterationButton_released(){
     bool op_succeed = false;
     for(int i=0; i<ui.numItersSpin->value(); i++){
         qDebug("\n----- began iteration %d -----", balloon->numiterscompleted);
-        op_succeed = balloon->initializeField();    if( !op_succeed ) break;
-        balloon->interpolateField();                if( !op_succeed ) break;
-        balloon->computeCurvature();                if( !op_succeed ) break;
+        op_succeed = balloon->init_fields();    if( !op_succeed ) break;
+        balloon->interp_fields();               if( !op_succeed ) break;
+        balloon->compute_curvature();            if( !op_succeed ) break;
         balloon->evolve();
         qDebug("----- finished -----"); 
         // gla->log.Logf(GLLogStream::FILTER, "----- Finished iteration %d\n", balloon->numiterscompleted);
@@ -116,14 +116,16 @@ void VaseWidget::on_iterationButton_released(){
     }
 }
 void VaseWidget::on_refreshButton_released(){
-    bool op_succeeded = balloon->initializeField();
-    balloon->render(gla); // why is this here????
+    bool op_succeeded = balloon->init_fields();
     gla->log->Logf(GLLogStream::FILTER, "Refreshed view-based distance field %s", ((op_succeeded)?"completed":"**FAILED!**") );
+    balloon->selectedFacesQualityToColor();
+    balloon->render(gla); // TODO: necessary otherwise colors won't be shown, why is gla->update() not calling this?
     gla->update();
 }
 void VaseWidget::on_interpButton_released(){
-    balloon->interpolateField();
-    balloon->rm |= Balloon::SURF_VCOLOR;
+    balloon->interp_fields();
+    balloon->dfieldToVertexColor();
+    // balloon->render(gla); // TODO: this is un-necessary!! why? it's not consistent with above
     gla->log->Log(GLLogStream::FILTER, "Distance field interpolated");
     gla->update();
 }
@@ -133,9 +135,9 @@ void VaseWidget::on_evolveButton_released(){
     gla->update();
 }
 void VaseWidget::on_laplButton_released(){
-    balloon->computeCurvature();
-    balloon->rm |= Balloon::SURF_VCOLOR;
-    // gla->log.Logf(GLLogStream::FILTER, "Finished iteration %d", balloon->numiterscompleted);
+    balloon->compute_curvature();
+    balloon->KhToVertexColor();
+    balloon->render(gla); // TODO: necessary otherwise colors won't be shown, why is gla->update() not calling this?
     gla->update();
 }
 void VaseWidget::on_pushButton_released(){

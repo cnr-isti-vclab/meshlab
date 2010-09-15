@@ -115,12 +115,6 @@ void GridAccell::render(){
     //--- Post OpenGL stuff
      glEnable(GL_LIGHTING);
 }
-void GridAccell::clearCorrespondences(){
-    for( unsigned int i=0; i<rays.size(); i++ ){
-        rays[i].f = NULL;
-        rays[i].t = +FLT_MAX;
-    }
-}
 
 //-------------------------------------------------------------------------------------------//
 //

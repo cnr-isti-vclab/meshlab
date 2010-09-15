@@ -70,7 +70,9 @@ public:
     void SolveInQuality();
     /// Solves the interpolation problem by Cholesky returning the solution in passed vector
     /// The returned solution vector is valid up to the next time Init is called or the object is destroyed
-    void Solve( XBType* sols[3] ); 
+    void Solve( XBType* sols[3] );
+    /// Solves the interpolation problem by Cholesky returning the solution in the additional attribute
+    void SolveInAttribute( CMeshO::PerVertexAttributeHandle<float>& attrib );
 };
 
 } // vcg::

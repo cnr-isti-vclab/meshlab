@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
-    <height>788</height>
+    <width>411</width>
+    <height>836</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -224,28 +224,67 @@
            <item>
             <widget class="QPushButton" name="refreshButton">
              <property name="text">
-              <string>Refresh</string>
+              <string>init</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="interpButton">
              <property name="text">
-              <string>Interp.</string>
+              <string>interp</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="laplButton">
              <property name="text">
-              <string>Lapl</string>
+              <string>curv</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="evolveButton">
              <property name="text">
-              <string>Evolve</string>
+              <string>GO</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Which field to draw</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QPushButton" name="button_view_dfield_init">
+             <property name="text">
+              <string>init</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="button_view_dfield_interp">
+             <property name="text">
+              <string>inter</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="button_view_curvature">
+             <property name="text">
+              <string>curv</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="button_view_wfield">
+             <property name="text">
+              <string>wfield</string>
              </property>
             </widget>
            </item>

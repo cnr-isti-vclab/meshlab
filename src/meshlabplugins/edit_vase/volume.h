@@ -1,8 +1,8 @@
 #ifndef VOLUME_H
 #define VOLUME_H
 
-#include <vector> //STD vector
 #include <QDebug>
+#include <vector> //STD vector
 #include <QPainter> // Draw slice
 #include <common/interfaces.h> // Lots of meshlab stuff
 

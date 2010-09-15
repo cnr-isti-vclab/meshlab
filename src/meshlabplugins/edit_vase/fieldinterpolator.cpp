@@ -259,6 +259,12 @@ void FieldInterpolator::Solve( Matrix<FieldType, Dynamic, 1>* sols[3] ){
     llt.solveInPlace(*xb1); sols[1] = xb1;
     llt.solveInPlace(*xb2); sols[2] = xb2;
 }
+void FieldInterpolator::SolveInAttribute( CMeshO::PerVertexAttributeHandle<float>& attrib ){
+    SparseLLT<SparseMatrix<FieldType> ,Cholmod> llt(*A);
+    llt.solveInPlace(*xb0);
+    for(unsigned int vi=0; vi<mesh->vert.size(); vi++)
+        attrib[vi] = (*xb0)[vi];
+}
 
 /*
 

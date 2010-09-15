@@ -1,9 +1,11 @@
 #include "balloon.h"
 #include "float.h"
 #include "math.h"
+#include "vcg/complex/trimesh/allocate.h"           // AddPerVertexAttribute
+#include "vcg/complex/trimesh/update/selection.h"
+#include "vcg/complex/trimesh/update/color.h"
 #include "vcg/complex/trimesh/update/curvature.h"
-#include "vcg/complex/trimesh/update/curvature_fitting.h"
-
+#include "vcg/complex/trimesh/update/curvature_fitting.h" // Quadric based curvature computation
 using namespace vcg;
 
 //---------------------------------------------------------------------------------------//
@@ -14,6 +16,10 @@ using namespace vcg;
 void Balloon::init( int gridsize, int gridpad ){
     //--- Reset the iteration counter
     numiterscompleted = 0;
+    isCurvatureUpdated = false;
+    isDistanceFieldInit = false;
+    isDistanceFieldUpdated = false;
+    isWeightFieldUpdated = false;
 
     //--- Instantiate a properly sized wrapping volume
     vol.init( gridsize, gridpad, cloud.bbox );
@@ -48,159 +54,73 @@ void Balloon::init( int gridsize, int gridpad ){
         v.index = 0;
         v.field = NAN;
     }
-    vol.band.clear();
+
+    //--- Create extra space to store temporary variables
+    if( !vcg::tri::HasPerVertexAttribute (surf,std::string("Viewpoint distance field")) )
+        surf_df = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(surf, "Viewpoint distance field");
+    if( !vcg::tri::HasPerVertexAttribute (surf,std::string("Data support weight field")) )
+        surf_wf = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<float>(surf, "Data support weight field");
+
     //--- Update correspondences & band
+    vol.band.clear();
     vol.band.reserve(5*surf.fn);
     vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
 }
 
-bool Balloon::initializeField(){
-    //--- Setup the interpolation system
-    // if we fail, signal the failure to the caller
-    // Lower levels of omega might cause overshoothing problems
-    // float OMEGA = 1e3; // 1e8
-    float OMEGA = 1e8; // 1e8
-
-    LAPLACIAN type = COTANGENT; // COMBINATORIAL
-    bool op_succeed = finterp.Init( &surf, 1, type );
+bool Balloon::init_fields(){
+    //-----------------------------------------------------------------------------------------------------------//
+    //                                     SETUP THE INTERPOLATOR SYSTEM
+    //
+    //-----------------------------------------------------------------------------------------------------------//
+    surf.face.EnableQuality();
+    tri::UpdateQuality<CMeshO>::FaceConstant(surf, 0);
+    tri::UpdateSelection<CMeshO>::AllFace(surf);
+    bool op_succeed = true;
+    op_succeed &= dinterp.Init( &surf, 1, COTANGENT );
+    op_succeed &= winterp.Init( &surf, 1, COTANGENT );
     if( !op_succeed ){
-        finterp.ColorizeIllConditioned( type );
+        dinterp.ColorizeIllConditioned( COTANGENT );
         return false;
     }
 
-
-    float OMEGA_VERTEX = 1e-1;
-    float OMEGA_DATA   = 1e-1;
-    winterp.Init( &surf, 1, type );
-    if( !op_succeed ){
-        winterp.ColorizeIllConditioned( type );
-        return false;
+    //-----------------------------------------------------------------------------------------------------------//
+    //                                     INIT PSEUDO-HEAT WEIGHT SYSTEM
+    //
+    // Assign a value of 0 to all vertices of the mesh. A value of 1 will be associated to parts of the mesh
+    // which are considered "close" to data. Interpolating the field in a smooth way will end up generating
+    // an heat-like scalar field distribution on the surface.
+    //-----------------------------------------------------------------------------------------------------------//
+    {
+        for(CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++)
+            winterp.AddConstraint( tri::Index(surf,*vi), OMEGA_WEIGHT_FIELD, 0 );
     }
-
-    
-    // Shared data
-    enum INITMODE {BIFACEINTERSECTIONS, FACEINTERSECTIONS, BOXINTERSECTIONS} mode;
-    // mode = BIFACEINTERSECTIONS;
-    mode = BIFACEINTERSECTIONS;
-    const float ONETHIRD = 1.0f/3.0f;
-    float t,u,v; // Ray-Triangle intersection parameters
-    Point3f fcenter;
-    Point3i off;
-
-    // Uses the face centroid as a hash key in the accellGrid to determine which
-    // rays might intersect the current face.
-    if( mode == BOXINTERSECTIONS ){
-        for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
-            CFaceO& f = *(fi);
-            fcenter = f.P(0) + f.P(1) + f.P(2);
-            fcenter = myscale( fcenter, ONETHIRD );
-            gridAccell.pos2off( fcenter, off );
-            //--- examine intersections and determine real ones...
-            PointerVector& rays = gridAccell.Val(off[0], off[1], off[2]);
-            f.C() = ( rays.size()>0 ) ? Color4b(255,0,0,255) : Color4b(255,255,255,255);
+    //-----------------------------------------------------------------------------------------------------------//
+    //                                   ASSIGN A "MINIMAL" FACE TO EACH RAY
+    //
+    // In this first phase, we scan through faces and we update the information contained in the rays. We try to
+    // have a many-1 correspondence in between rays and faces: each face can have more than one ray, but one ray
+    // can only have one face associated with it. This face can either be behind or in front of the ray
+    // startpoint. In between all the choices available, we choose the face which is closest to the startpoint
+    //-----------------------------------------------------------------------------------------------------------//
+    {
+        // Ray-Triangle intersection parameters
+        float t,u,v;
+        // Clear the meta-data for correspondence
+        for( unsigned int i=0; i<gridAccell.rays.size(); i++ ){
+            gridAccell.rays[i].f = NULL;
+            gridAccell.rays[i].t = +FLT_MAX;
         }
-        qDebug() << "WARNING: test-mode only, per vertex field not updated!!";
-    }  
-    // Each intersecting ray gives a contribution on the face to each of the
-    // face vertices according to the barycentric weights
-    else if( mode == FACEINTERSECTIONS ){
-        this->rm ^= SURF_VCOLOR;
-        this->rm |= SURF_FCOLOR;
-        surf.face.EnableColor();
-        surf.face.EnableQuality();
-        tri::UpdateQuality<CMeshO>::FaceConstant(surf, 0);
-        std::vector<float> tot_w( surf.fn, 0 );
+        // Assign one face to every ray
         for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
             CFaceO& f = *(fi);
+            //--- Clear quality and selection flags
             f.ClearS();
-            f.C() = Color4b(255,255,255, 255);
-            f.Q() = 0; // initialize
-            Point3f fcenter = f.P(0) + f.P(1) + f.P(2);
-            fcenter = myscale( fcenter, ONETHIRD );
-            // NEW/OLD ITERATOR
-            // gridAccell.pos2off( fcenter, off );
-            // PointerVector& prays = gridAccell.Val(off[0], off[1], off[2]);
-            // for(unsigned int i=0; i<prays.size(); i++){ Ray3f& ray = prays[i]->ray;
-            for(gridAccell.iter.first(fcenter); !gridAccell.iter.isDone(); gridAccell.iter.next()){
-                Ray3f& ray = gridAccell.iter.currentItem().ray;
-                if( vcg::IntersectionRayTriangle<float>(ray, f.P(0), f.P(1), f.P(2), t, u, v) ){
-                    // Color the faces, if more than one, take average
-                    tot_w[ tri::Index(surf,f) ]++;
-                    f.Q() += t; // normalize with tot_w after
-                    f.SetS();
-                    //--- Add the constraints to the field
-                    finterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA*(1-u-v), t );
-                    finterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA*(u), t );
-                    finterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA*(v), t );
-                }
-            }
-        }
-
-        //--- Normalize in case there is more than 1 ray per-face
-        for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
-            if( tot_w[ tri::Index(surf,*fi) ] > 0 )
-                fi->Q() /= tot_w[ tri::Index(surf,*fi) ];
-        }
-        //--- Transfer the average distance stored in face quality to a color
-        //    and do it only for the selection (true)
-        tri::UpdateColor<CMeshO>::FaceQualityRamp(surf, true);
-    }
-    // This is the variation that adds to add constraints on both sides of the isosurface
-    // to cope with noise but especially to guarantee convergence of the surface. If we go
-    // through a sample, a negative force field will be generated that will push the
-    // isosurface back close to the sample.
-    else if( mode == BIFACEINTERSECTIONS ){
-        this->rm ^= SURF_VCOLOR;
-        this->rm |= SURF_FCOLOR;
-        surf.face.EnableColor();
-        surf.face.EnableQuality();
-        tri::UpdateQuality<CMeshO>::FaceConstant(surf, 0);
-        std::vector<float> tot_w( surf.fn, 0 );
-
-        // We clear the pokingRay-triangle correspondence information + distance information
-        // to get ready for the next step
-        gridAccell.clearCorrespondences();
-
-        // In this first phase, we scan through faces and we update the information
-        // contained in the rays. We try to have a many-1 correspondence in between
-        // rays and faces: each face can have more than one ray, but one ray can only
-        // have one face associated with it. This face can either be behind or in
-        // front of the ray startpoint.
-        for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
-            CFaceO& f = *(fi);
-            f.ClearS();
-            f.C() = Color4b(255,255,255, 255);
-            f.Q() = 0; // initialize
-            Point3f fcenter = f.P(0) + f.P(1) + f.P(2);
-            fcenter = myscale( fcenter, ONETHIRD );
-            gridAccell.pos2off( fcenter, off );
-            PointerVector& prays = gridAccell.Val(off[0], off[1], off[2]);
-
-            // We check each of the possibly intersecting rays and we associate this face
-            // with him if and only if this face is the closest to it. Note that we study
-            // the values of t,u,v directly as a t<0 is accepted as intersecting.
+            f.Q() = 0;
+            //--- Store closest face to ray
             for(gridAccell.iter.first(f); !gridAccell.iter.isDone(); gridAccell.iter.next()){
-            // for(gridAccell.iter.first(fcenter); !gridAccell.iter.isDone(); gridAccell.iter.next()){
                 PokingRay& pray = gridAccell.iter.currentItem();
                 Line3<float> line(pray.ray.Origin(), pray.ray.Direction());
-
-            // for(unsigned int i=0; i<prays.size(); i++){
-            //    Line3<float> line(prays[i]->ray.Origin(), prays[i]->ray.Direction());
-                
-                // If the ray falls within the domain of the face
                 if( IntersectionLineTriangle(line, f.P(0), f.P(1), f.P(2), t, u, v) ){
-                
-                    // DEBUG
-                    // f.C() = t>0 ? Color4b(0,0,255,255) : f.C() = Color4b(255,0,0,255);
-                    
-                    // DEBUG
-                    // if( prays[i]->f!=NULL && fabs(t)<fabs(prays[i]->t) ){
-                    //    prays[i]->f->C() = Color4b(255,0,0,255);
-                    //    qDebug() << "replaced: " << tri::Index(surf,prays[i]->f) << " from t: " << prays[i]->t << " to " << tri::Index(surf,f) << t;
-                    // }
-                    
-                    // If no face was associated with this ray or this face is closer
-                    // than the one that I stored previously
                     if( pray.f==NULL || fabs(t)<fabs(pray.t) ){
                         pray.f=&f;
                         pray.t=t;
@@ -208,157 +128,224 @@ bool Balloon::initializeField(){
                 }
             }
         }
-       
-        //--- Add constraints on vertexes of balloon
-        for(CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++)
-            winterp.AddConstraint( tri::Index(surf,*vi), OMEGA_VERTEX, 0 );
+    }
 
-        // Now we scan through the rays, we visit the "best" corresponding face and we
-        // set a constraint on this face. Also we modify the color of the face so that
-        // an approximation can be visualized
+    //-----------------------------------------------------------------------------------------------------------//
+    //                                  ASSIGN WEIGHT FROM EACH RAY TO FACES
+    //
+    // 1) visit the face and we set the field constraint imposed by the poking ray
+    // 2) every intersection which is very close to the data generates a confidence contribution.
+    //
+    // NOTE: The use of vcg::Simplify to remove degenerate triangles and any bug in the DDR iterator could cause a ray
+    // to fail to detect an intersection. If this takes place, a warning message is displayed and the insertion
+    // of the constraint gets skipped.
+    //-----------------------------------------------------------------------------------------------------------//
+    {
+        // Ray-Triangle intersection parameters
+        float t,u,v;
+        // Debug: total weight to take average of dist on face and display it
+#ifdef DEBUG
+        std::vector<float> tot_w( surf.fn, 0 );
+#endif
         for(unsigned int i=0; i<gridAccell.rays.size(); i++){
-            // Retrieve the corresponding face and signed distance
+            //--- Retrieve the corresponding face and signed distance
             Ray3f& ray = gridAccell.rays[i].ray;
-            // The use of vcg::Simplify to remove degenerate triangles could cause a ray to fail the intersection test!!
             if( gridAccell.rays[i].f == NULL){
                 qDebug() << "warning: ray #" << i << "has provided NULL intersection"; // << toString(ray.Origin()) << " " << toString(ray.Direction());
                 continue;
             }
             CFaceO& f = *(gridAccell.rays[i].f);
-            float t = gridAccell.rays[i].t;
+            t = gridAccell.rays[i].t;
+#ifdef DEBUG
             assert( !math::IsNAN(t) );
-
+#endif
             // Color the faces, if more than one, take average
+#ifdef DEBUG
             tot_w[ tri::Index(surf,f) ]++;
             f.Q() += t; // normalize with tot_w after
             f.SetS(); // enable the face for coloring
- 
-            // DEBUG
-            // f.C() = Color4b(0,255,0,255);
- 
+#endif
+
             // I was lazy and didn't store the u,v... we need to recompute them
             vcg::IntersectionRayTriangle<float>(ray, f.P(0), f.P(1), f.P(2), t, u, v);
+            assert( u>=0 && u<=1 && v>=0 && v<=1 );
 
             //--- Add the barycenter-weighted constraints to the vertices of the face
-            finterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA*(1-u-v), t );
-            finterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA*(u), t );
-            finterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA*(v), t );
+            dinterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA_VIEW_FIELD*(1-u-v), t );
+            dinterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA_VIEW_FIELD*(u), t );
+            dinterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA_VIEW_FIELD*(v), t );
 
             //--- And for the second interpolator
-            winterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA_DATA*(1-u-v), 1 );
-            winterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA_DATA*(u),     1 );
-            winterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA_DATA*(v),     1 );
-
-            assert( u>=0 && u<=1 && v>=0 && v<=1 );
+            winterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA_WEIGHT_FIELD*(1-u-v), 1 );
+            winterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA_WEIGHT_FIELD*(u),     1 );
+            winterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA_WEIGHT_FIELD*(v),     1 );
         }
-        
+#ifdef DEBUG
         //--- Normalize in case there is more than 1 ray per-face
         for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
             if( tot_w[ tri::Index(surf,*fi) ] > 0 )
                 fi->Q() /= tot_w[ tri::Index(surf,*fi) ];
         }
-        //--- Transfer the average distance stored in face quality to a color and do it only for the selection (true)
-        tri::UpdateColor<CMeshO>::FaceQualityRamp(surf, true);
+#endif
     }
-    
+
+    isDistanceFieldInit = true;
     return true;
 }
-void Balloon::interpolateField(){
-    //--- Mark property active
-    surf.vert.QualityEnabled = true;
 
-    //--- Interpolate the field
-    // finterp.SolveInQuality();
+bool Balloon::interp_fields(){
+    // Cannot interpolate if computation has failed
+    if( isDistanceFieldInit == false )
+        return false;
 
-    //--- Interpolate the field
-    winterp.SolveInQuality();
+    isDistanceFieldUpdated = true;
+    dinterp.SolveInAttribute( surf_df );
 
-    //--- Transfer vertex quality to surface
-    rm &= ~SURF_FCOLOR; // disable face colors
-    rm |=  SURF_VCOLOR; // enable vertex colors
-    Histogram<float> H;
-    tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
-    tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
+    isWeightFieldUpdated = true;
+    winterp.SolveInAttribute( surf_wf );
 }
-void Balloon::computeCurvature(){
-    #if FALSE
-        float OMEGA = 1; // interpolation coefficient
-        sinterp.Init( &surf, 3, COMBINATORIAL );  
-        for( CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++ )
-            sinterp.AddConstraint3( tri::Index(surf,*vi), OMEGA, (*vi).P()[0], (*vi).P()[1], (*vi).P()[2] );
-        FieldInterpolator::XBType* coords[3];
-        sinterp.Solve(coords);
-        for( CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++ ){
-            int vIdx = tri::Index(surf,*vi);
-            (*vi).P()[0] = (*coords[0])(vIdx);   
-            (*vi).P()[1] = (*coords[1])(vIdx);
-            (*vi).P()[2] = (*coords[2])(vIdx);
-        }
-    #endif
 
-    #if TRUE
-        surf.vert.EnableCurvature();
-        surf.vert.EnableCurvatureDir();
-        tri::UpdateCurvatureFitting<CMeshO>::computeCurvature( surf );
-        for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
-            (*vi).Kh() = ( (*vi).K1() + (*vi).K2() ) / 2;
-        }
-    #endif
-        
-    #if FALSE
-        // Enable curvature supports, How do I avoid a
-        // double computation of topology here?
-        surf.vert.EnableCurvature();
-        surf.vert.EnableVFAdjacency();
-        surf.face.EnableVFAdjacency();
-        surf.face.EnableFFAdjacency();
-        vcg::tri::UpdateTopology<CMeshO>::VertexFace( surf );
-        vcg::tri::UpdateTopology<CMeshO>::FaceFace( surf );
-                      
-        //--- Compute curvature and its bounds
-        tri::UpdateCurvature<CMeshO>::MeanAndGaussian( surf );
-    #endif
-        
-    if( surf.vert.CurvatureEnabled ){
-        //--- Enable color coding
-        rm &= ~SURF_FCOLOR;
-        rm |= SURF_VCOLOR;
-    
-        //--- DEBUG compute curvature bounds
-        float absmax = -FLT_MAX;
-        for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
-            float cabs = fabs((*vi).Kh());
-            absmax = (cabs>absmax) ? cabs : absmax;
-        }
-        
-        //--- Map curvature to two color ranges:
-        //    Blue => Yellow: negative values
-        //    Yellow => Red:  positive values
-        typedef unsigned char CT;
-        for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
-            if( (*vi).Kh() < 0 )
-                (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Blue, fabs((*vi).Kh())/absmax );
-            else
-                (*vi).C().lerp(Color4<CT>::Yellow, Color4<CT>::Red, (*vi).Kh()/absmax);
-        }
+bool Balloon::compute_curvature(){
+    isCurvatureUpdated = true;
+    tri::UpdateCurvatureFitting<CMeshO>::computeCurvature( surf );
+    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+        (*vi).Kh() = ( (*vi).K1() + (*vi).K2() ) / 2;
     }
+    return true;
 }
 
-// HP: a correspondence has already been executed once!
-void Balloon::evolve(){
-    // Update iteration counter
+bool Balloon::evolve(){
     numiterscompleted++;
+    std::vector<float> updates_view(vol.band.size(),0);
+    std::vector<float> updates_whgt(vol.band.size(),0);
+    std::vector<float> updates_curv(vol.band.size(),0);
+    float view_max_absdst = -FLT_MAX;
+    float view_max_dst    = -FLT_MAX;
+    float view_min_dst    = +FLT_MAX;
+    float curv_maxval     = -FLT_MAX;
 
-    //--- THIS IS A DEBUG TEST, ATTEMPTS TO DEBUG
-    if( false ){
-        //--- Test uniform band update
+    // Only meaningful if it has been computed..
+    qDebug("Delta: %f", vol.getDelta());
+
+    //-----------------------------------------------------------------------------------------------------------//
+    //                          1) TRANSFER PROPERTIES FROM VERTICES TO SURROUNDING GRID BAND
+    //
+    // We have a band of voxels around the current surface. In this first step we transfer the information stored
+    // on the surface to the surrounding voxels. First, we project the voxel center onto the explicit surface.
+    // Once there, we estimate where within the corresponding face we are located, and we interpolate the field
+    // values accordingly. We also keep track of the ranges so that we can determine which elements
+    //-----------------------------------------------------------------------------------------------------------//
+    {
+        Point3f c;      // barycentric coefficients
+        Point3f voxp;
         for(unsigned int i=0; i<vol.band.size(); i++){
             Point3i& voxi = vol.band[i];
             MyVoxel& v = vol.Voxel(voxi);
-            v.sfield += .05;
+            CFaceO& f = *v.face;
+
+            // extract projected points on surface and obtain barycentric coordinates
+            // TODO: double work, it was already computed during correspodence, write a new function?
+            Point3f proj;
+            vol.off2pos(voxi, voxp);
+            vcg::SignedFacePointDistance(f, voxp, proj);
+            Triangle3<float> triFace( f.P(0), f.P(1), f.P(2) );
+
+            // Paolo, is this really necessary?
+            int axis;
+            if     (f.Flags() & CFaceO::NORMX )   axis = 0;
+            else if(f.Flags() & CFaceO::NORMY )   axis = 1;
+            else                                  axis = 2;
+            vcg::InterpolationParameters(triFace, axis, proj, c);
+
+            if( isDistanceFieldUpdated ){
+                updates_view[i] = c[0]*surf_df[f.V(0)] + c[1]*surf_df[f.V(1)] + c[2]*surf_df[f.V(2)];
+                view_max_absdst = (fabs(updates_view[i])>view_max_absdst) ? fabs(updates_view[i]) : view_max_absdst;
+                view_max_dst = updates_view[i]>view_max_dst ? updates_view[i] : view_max_dst;
+                view_min_dst = updates_view[i]<view_min_dst ? updates_view[i] : view_min_dst;
+            }
+            if( isWeightFieldUpdated ){
+                updates_whgt[i] = c[0]*surf_wf[f.V(0)] + c[1]*surf_wf[f.V(1)] + c[2]*surf_wf[f.V(2)];
+            }
+            if( isCurvatureUpdated ){
+                updates_curv[i] = c[0]*f.V(0)->Kh() + c[1]*f.V(1)->Kh() + c[2]*f.V(2)->Kh();
+                curv_maxval = (fabs(updates_curv[i])>curv_maxval) ? fabs(updates_curv[i]) : curv_maxval;
+            }
         }
-        //--- Estrai isosurface
+
+        if( isDistanceFieldUpdated )
+            qDebug("view distance: min %.3f max %.3f", view_min_dst, view_max_dst);
+        if( isCurvatureUpdated )
+            qDebug("max curvature: %f", curv_maxval);
+    }
+
+
+    //-----------------------------------------------------------------------------------------------------------//
+    //                          2) COMBINE THE VARIOUS UPDATES MEANINGFULLY
+    // TODO
+    //
+    //-----------------------------------------------------------------------------------------------------------//
+    {
+        // Max evolution speed is proportional to grid size
+        float max_speed = vol.getDelta()/2;
+        // bound on energy balance: E = E_view + alpha*E_smooth
+        float alpha = .5;
+        // small (slows down) when worst case scenario is approaching grid size
+        float sigma2 = vol.getDelta()*vol.getDelta();
+        float k_notconverging = 1 - exp( -powf(view_max_absdst,2) / sigma2 );
+        // high  (speed up  ) when vertex is far away from surface
+        float k_highdist;
+        // high  (speed up  ) when vertex has high local curvature
+        float k_highcurv;
+
+        // For every element of the active band
+        for(unsigned int i=0; i<vol.band.size(); i++){
+            Point3i& voxi = vol.band[i];
+            MyVoxel& v = vol.Voxel(voxi);
+
+            //--- If I know current distance avoid over-shooting, as maximum speed is bound to dist from surface
+            if( isDistanceFieldUpdated  ){
+                max_speed = std::min( vol.getDelta()/2, std::abs(updates_view[i]) );
+                k_highdist = exp( -powf(fabs(updates_view[i])-view_max_absdst,2) / sigma2 );
+                v.sfield += vcg::sign( max_speed*k_highdist*k_notconverging, updates_view[i] );
+            }
+            //--- Curvature weight (faster if spiky)
+            if( isCurvatureUpdated ){
+                k_highcurv = sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
+                v.sfield += max_speed*alpha*k_highcurv;
+            }
+            //--- Apply the update on the implicit field
+
+
+            // When we are retro-compensating for over-shooting disable smoothing
+            if( surf.vert.CurvatureEnabled && updates_view[i] > 0){
+                // qDebug() << " " << k3 << " " << max_speed;
+            } else if( surf.vert.CurvatureEnabled && !surf.vert.QualityEnabled ) {
+                v.sfield += k_highcurv*alpha*max_speed; // prev .1
+            }
+        }
+
+        //--- show what's being updated
+        if( isDistanceFieldUpdated && isCurvatureUpdated && isWeightFieldUpdated )
+            qDebug() << "update: E_vd + alpha*E_kh";
+        else if( isDistanceFieldUpdated && isCurvatureUpdated )
+            qDebug() << "update: E_vd + kost*E_kh";
+        else if( isDistanceFieldUpdated )
+            qDebug() << "update: E_vd";
+        else if( isCurvatureUpdated )
+            qDebug() << "update: E_kh";
+    }
+
+
+
+    //-----------------------------------------------------------------------------------------------------------//
+    //                                     3) EXTRACT THE NEW EXPLICIT SURFACE
+    // TODO
+    //
+    //-----------------------------------------------------------------------------------------------------------//
+    {
+        //--- Extract isosurface
         vol.isosurface( surf, 0 );
+
         //--- Clear band for next isosurface, clearing the corresponding computation field
         for(unsigned int i=0; i<vol.band.size(); i++){
             Point3i& voxi = vol.band[i];
@@ -372,149 +359,14 @@ void Balloon::evolve(){
         //--- Update correspondences & band
         vol.band.reserve(5*surf.fn);
         vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
-        return;
+        //--- Nothing is updated anymore!!
+        isWeightFieldUpdated   = false;
+        isDistanceFieldUpdated = false;
+        isCurvatureUpdated     = false;
+        isDistanceFieldInit    = false;
     }
 
-    //--- Compute updates from amount stored in vertex quality
-    Point3f c; // barycentric coefficients
-    Point3f voxp;
-    std::vector<float> updates_view(vol.band.size(),0);
-    std::vector<float> updates_curv(vol.band.size(),0);
-    float view_max_absdst = -FLT_MAX;
-    float view_max_dst = -FLT_MAX, view_min_dst = +FLT_MAX;
-    float curv_maxval = -FLT_MAX;
-    for(unsigned int i=0; i<vol.band.size(); i++){
-        Point3i& voxi = vol.band[i];
-        MyVoxel& v = vol.Voxel(voxi);
-        CFaceO& f = *v.face;
-        // extract projected points on surface and obtain barycentric coordinates
-        // TODO: double work, it was already computed during correspodence, write a new function?
-        Point3f proj;
-        vol.off2pos(voxi, voxp);
-        vcg::SignedFacePointDistance(f, voxp, proj);
-        Triangle3<float> triFace( f.P(0), f.P(1), f.P(2) );
-
-        // Paolo, is this really necessary?
-        int axis;
-        if     (f.Flags() & CFaceO::NORMX )   axis = 0;
-        else if(f.Flags() & CFaceO::NORMY )   axis = 1;
-        else                                  axis = 2;
-        vcg::InterpolationParameters(triFace, axis, proj, c);
-
-        // Interpolate update amounts & keep track of the range
-        if( surf.vert.QualityEnabled ){
-            updates_view[i] = c[0]*f.V(0)->Q() + c[1]*f.V(1)->Q() + c[2]*f.V(2)->Q();
-            view_max_absdst = (fabs(updates_view[i])>view_max_absdst) ? fabs(updates_view[i]) : view_max_absdst;
-            view_max_dst = updates_view[i]>view_max_dst ? updates_view[i] : view_max_dst;
-            view_min_dst = updates_view[i]<view_min_dst ? updates_view[i] : view_min_dst;
-        }
-        // Interpolate curvature amount & keep track of the range
-        if( surf.vert.CurvatureEnabled ){
-            updates_curv[i] = c[0]*f.V(0)->Kh() + c[1]*f.V(1)->Kh() + c[2]*f.V(2)->Kh();
-            curv_maxval = (fabs(updates_curv[i])>curv_maxval) ? fabs(updates_curv[i]) : curv_maxval;
-        }
-    }
-    // Only meaningful if it has been computed..
-    qDebug("Delta: %f", vol.getDelta());
-        
-    if( surf.vert.QualityEnabled )
-        qDebug("view distance: min %.3f max %.3f", view_min_dst, view_max_dst);
-    if( surf.vert.CurvatureEnabled )
-        qDebug("max curvature: %f", curv_maxval);
-
-    //--- Apply exponential functions to modulate and regularize the updates
-    float sigma2 = vol.getDelta()*vol.getDelta();
-    float k1, k3;
-
-    //--- Maximum speed: avoid over-shoothing by limiting update speed
-    // E_view + alpha*E_smooth
-    float balance_coeff = .5;
-    //--- Max evolution speed proportional to grid size
-    float max_speed = vol.getDelta()/2;
-
-    // Slowdown weight, smaller if worst case scenario is very converging
-    float k2 = 1 - exp( -powf(view_max_absdst,2) / sigma2 );
-        
-    for(unsigned int i=0; i<vol.band.size(); i++){
-        Point3i& voxi = vol.band[i];
-        MyVoxel& v = vol.Voxel(voxi);
-
-        //--- If I know current distance avoid over-shooting, as maximum speed is bound to dist from surface
-        if( surf.vert.QualityEnabled )
-            max_speed = std::min( vol.getDelta()/2, std::abs(updates_view[i]) );
-
-        //--- Distance weights
-        if( surf.vert.QualityEnabled ){             
-            // Faster if I am located further
-            k1 = exp( -powf(fabs(updates_view[i])-view_max_absdst,2) / sigma2 );
-        }
-        //--- Curvature weight (faster if spiky)
-        if( surf.vert.CurvatureEnabled )
-            // k3 = updates_curv[i] / curv_maxval;
-            k3 = sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
-
-        //--- Apply the update on the implicit field
-        if( surf.vert.QualityEnabled ){
-            float prev = v.sfield;
-            if( updates_view[i] == view_min_dst && view_min_dst < 0 ){
-                qDebug("UPDATE VALUE %.3f (negative for expansion)", vcg::sign( k1*k2*max_speed, updates_view[i] ) );
-                qDebug("d_view: %.2f", updates_view[i]);
-                qDebug("k1: %.2f", k1);
-                qDebug("k2: %.2f", k2);
-                qDebug("max_speed: %.2f", max_speed);
-                qDebug("Prev   value %.3f", updates_view[i] );
-                qDebug("Curvature update: %.3f", k3*balance_coeff*max_speed );
-            }
-            v.sfield += vcg::sign( k1*k2*max_speed, updates_view[i] );
-            // v.sfield += vcg::sign( .15f*k1*k2*vol.getDelta(), updates_view[i]);
-            // v.sfield += .25f * k1 * vol.getDelta();
-        }
-        // if we don't have computed the distance field, we don't really know how to
-        // modulate the laplacian accordingly...
-// #if TRUE // ENABLE_CURVATURE_IN_EVOLUTION
-//        if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled ){
-        //          v.sfield += .1*k3*k2;
-        //        }
-
-
-
-        // When we are retro-compensating for over-shooting disable smoothing
-        if( surf.vert.CurvatureEnabled && updates_view[i] > 0){
-            // qDebug() << " " << k3 << " " << max_speed;
-            v.sfield += k3*balance_coeff*max_speed; // prev .1
-        } else if( surf.vert.CurvatureEnabled && !surf.vert.QualityEnabled ) {
-            v.sfield += k3*balance_coeff*max_speed; // prev .1
-        }
-// #endif
-    }
-
-    //--- DEBUG LINES: what's being updated (cannot put above cause it's in a loop)
-    if( surf.vert.QualityEnabled )
-      qDebug() << "updating implicit function using distance field";
-    if( surf.vert.CurvatureEnabled && surf.vert.QualityEnabled )
-      qDebug() << "updating implicit function using (modulated) curvature";  
-    else if( surf.vert.CurvatureEnabled )
-      qDebug() << "updating implicit function using (unmodulated) curvature";  
-       
-    //--- Estrai isosurface
-    vol.isosurface( surf, 0 );
-
-    //--- Clear band for next isosurface, clearing the corresponding computation field
-    for(unsigned int i=0; i<vol.band.size(); i++){
-        Point3i& voxi = vol.band[i];
-        MyVoxel& v = vol.Voxel(voxi);
-        v.status = 0;
-        v.face = 0;
-        v.index = 0;
-        v.field = NAN;
-    }
-    vol.band.clear();
-    //--- Update correspondences & band
-    vol.band.reserve(5*surf.fn);
-    vol.updateSurfaceCorrespondence( surf, gridAccell, 2*vol.getDelta() );
-    //--- Disable curvature and quality
-    surf.vert.CurvatureEnabled = false;
-    surf.vert.QualityEnabled = false;
+    return true;
 }
 
 //---------------------------------------------------------------------------------------//
@@ -522,6 +374,56 @@ void Balloon::evolve(){
 //                                   RENDERING
 //
 //---------------------------------------------------------------------------------------//
+/// Transfer the average distance stored in face quality to a color for triangles belonging to a certain selection
+void Balloon::selectedFacesQualityToColor(){
+    this->rm ^= SURF_VCOLOR; // disable vertex color
+    this->rm |= SURF_FCOLOR; // enable face color
+    surf.face.EnableColor();
+    tri::UpdateColor<CMeshO>::FaceConstant(surf, Color4b::White);
+    tri::UpdateColor<CMeshO>::FaceQualityRamp(surf, true);
+}
+
+
+void Balloon::dfieldToVertexColor(){
+    // Enable vertex coloring
+    rm &= ~SURF_FCOLOR;
+    rm |=  SURF_VCOLOR;
+
+    // Transfer from dfield to vertex quality
+    for( CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++ )
+        (*vi).Q() = surf_df[vi];
+
+    // Build histogram and map range to colors
+    Histogram<float> H;
+    tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
+    tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
+}
+
+void Balloon::KhToVertexColor(){
+    if( !surf.vert.CurvatureEnabled ) return;
+
+    // Disable face coloring and enable vertex
+    this->rm &= ~SURF_FCOLOR;
+    this->rm |=  SURF_VCOLOR;
+
+    // Compute curvature bounds
+    float absmax = -FLT_MAX;
+    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+        float cabs = fabs((*vi).Kh());
+        absmax = (cabs>absmax) ? cabs : absmax;
+    }
+
+    //--- Map curvature to two color ranges:
+    //    - Blue => Yellow: negative values
+    //    - Yellow => Red:  positive values
+    for(CMeshO::VertexIterator vi = surf.vert.begin(); vi != surf.vert.end(); ++vi){
+        if( (*vi).Kh() < 0 )
+            (*vi).C().lerp(Color4b::Yellow, Color4b::Blue, fabs((*vi).Kh())/absmax );
+        else
+            (*vi).C().lerp(Color4b::Yellow, Color4b::Red, (*vi).Kh()/absmax);
+    }
+}
+
 void Balloon::render_cloud(){
     // Draw the ray/rays from their origin up to some distance away
     glDisable(GL_LIGHTING);

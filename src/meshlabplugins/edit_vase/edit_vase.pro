@@ -35,6 +35,10 @@ SOURCES += $$VCGDIR/wrap/gui/trackmode.cpp
 DEFINES += USE_EIGEN_LOCAL
 DEFINES += REMOVE_DEGENERATE_FACES
 
+#--- DEBUG MODE
+# Toggles many allocations
+DEFINES += DEBUG
+
 INCLUDEPATH += /sw/include/eigen3
 INCLUDEPATH += /sw/include/suitesparse
 LIBS += -L/sw/lib -lamd -lcamd -lccolamd -lcholmod -lcolamd -lcxsparse -lblas
