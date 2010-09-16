@@ -83,16 +83,16 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   case FP_SELECT_DELETE_VERT :		       return QString("Delete Selected Vertices");
   case FP_SELECT_DELETE_FACE :          return QString("Delete Selected Faces");
   case FP_SELECT_DELETE_FACEVERT :      return QString("Delete Selected Faces and Vertices");
-  case FP_SELECT_FACE_FROM_VERT :		           return QString("Select Faces from Vertices");
-  case FP_SELECT_VERT_FROM_FACE :		           return QString("Select Vertices from Faces");
-  case FP_SELECT_ERODE :		           return QString("Erode Selection");
+  case FP_SELECT_FACE_FROM_VERT :       return QString("Select Faces from Vertices");
+  case FP_SELECT_VERT_FROM_FACE :       return QString("Select Vertices from Faces");
+  case FP_SELECT_ERODE :                 return QString("Erode Selection");
   case FP_SELECT_DILATE :		           return QString("Dilate Selection");
-  case FP_SELECT_BORDER:		     return QString("Select Border Faces");
-  case FP_SELECT_BY_VERT_QUALITY :		       return QString("Select by Vertex Quality");
-  case FP_SELECT_BY_FACE_QUALITY :		       return QString("Select by Face Quality");
-  case FP_SELECT_BY_RANGE:						 return QString("Select by Coord Range");
-  case FP_SELECT_BY_COLOR:						 return QString("Select Face by Vertex Color");
-  case CP_SELFINTERSECT_SELECT:      return QString("Self Intersecting Faces");
+  case FP_SELECT_BORDER:                 return QString("Select Border");
+  case FP_SELECT_BY_VERT_QUALITY :		       return QString("Select Faces by Vertex Quality");
+  case FP_SELECT_BY_FACE_QUALITY :		       return QString("Select Faces by Face Quality");
+  case FP_SELECT_BY_RANGE:						 return QString("Select Faces by Coord Range");
+  case FP_SELECT_BY_COLOR:						 return QString("Select Faces by Color");
+  case CP_SELFINTERSECT_SELECT:      return QString("Select Self Intersecting Faces");
   case CP_SELECT_TEXBORDER:            return QString("Select Vertex Texture Seams");
   case CP_SELECT_NON_MANIFOLD_FACE:    return QString("Select non Manifold Edges ");
   case CP_SELECT_NON_MANIFOLD_VERTEX:  return QString("Select non Manifold Vertices");
@@ -244,6 +244,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
                           tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
   break;
   case FP_SELECT_BORDER: tri::UpdateSelection<CMeshO>::FaceFromBorderFlag(m.cm);
+     tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
   break;
   case FP_SELECT_BY_VERT_QUALITY:
     {
@@ -377,23 +378,23 @@ int SelectionFilterPlugin::postCondition(QAction *action) const
 {
   switch(ID(action))
   {
-    case FP_SELECT_ALL:
-  case FP_SELECT_FACE_FROM_VERT:
-  case FP_SELECT_VERT_FROM_FACE:
-    case FP_SELECT_NONE:
-    case FP_SELECT_INVERT:
-    case FP_SELECT_ERODE:
-    case FP_SELECT_DILATE:
-    case FP_SELECT_BORDER:
-    case FP_SELECT_BY_VERT_QUALITY:
-  case FP_SELECT_BY_FACE_QUALITY:
-    case FP_SELECT_BY_RANGE:
-    case FP_SELECT_BY_COLOR:
-    case CP_SELFINTERSECT_SELECT:
-    case CP_SELECT_TEXBORDER:
-    case CP_SELECT_NON_MANIFOLD_FACE:
-    case CP_SELECT_NON_MANIFOLD_VERTEX:
-      return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
+      case FP_SELECT_ALL:
+      case FP_SELECT_FACE_FROM_VERT:
+      case FP_SELECT_VERT_FROM_FACE:
+      case FP_SELECT_NONE:
+      case FP_SELECT_INVERT:
+      case FP_SELECT_ERODE:
+      case FP_SELECT_DILATE:
+      case FP_SELECT_BORDER:
+      case FP_SELECT_BY_VERT_QUALITY:
+      case FP_SELECT_BY_FACE_QUALITY:
+      case FP_SELECT_BY_RANGE:
+      case FP_SELECT_BY_COLOR:
+      case CP_SELFINTERSECT_SELECT:
+      case CP_SELECT_TEXBORDER:
+      case CP_SELECT_NON_MANIFOLD_FACE:
+      case CP_SELECT_NON_MANIFOLD_VERTEX:
+    return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
   }
   return MeshModel::MM_UNKNOWN;
 }
