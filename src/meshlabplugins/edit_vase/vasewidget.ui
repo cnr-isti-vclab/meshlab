@@ -270,14 +270,7 @@
            <item>
             <widget class="QPushButton" name="button_view_dfield_interp">
              <property name="text">
-              <string>inter</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="button_view_curvature">
-             <property name="text">
-              <string>curv</string>
+              <string>dfield</string>
              </property>
             </widget>
            </item>
@@ -285,6 +278,13 @@
             <widget class="QPushButton" name="button_view_wfield">
              <property name="text">
               <string>wfield</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="button_view_curvature">
+             <property name="text">
+              <string>curv</string>
              </property>
             </widget>
            </item>

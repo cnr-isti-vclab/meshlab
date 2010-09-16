@@ -155,11 +155,13 @@ void VaseWidget::on_viewDirs_toggled(bool checked){
     else          balloon->rm &= ~Balloon::SHOW_CLOUD;
     gla->update();
 }
+
 void VaseWidget::on_surface_toggled(bool checked){
     if( checked ) balloon->rm |=  Balloon::SHOW_SURF;
     else          balloon->rm &= ~Balloon::SHOW_SURF;
     gla->update();
 }
+
 void VaseWidget::on_surf2vol_check_toggled(bool checked){
     if( checked ) balloon->rm |=  Balloon::SHOW_SURF_TO_VOL;
     else          balloon->rm &= ~Balloon::SHOW_SURF_TO_VOL;
@@ -172,8 +174,39 @@ void VaseWidget::on_surf2acc_check_toggled(bool checked){
     gla->update();
 }
 
+void VaseWidget::on_button_view_dfield_init_pressed(){
+    qDebug() << "undefined";
+}
 
+void VaseWidget::on_button_view_curvature_released(){
+    if( balloon->isCurvatureUpdated ){
+        balloon->KhToVertexColor();
+        balloon->render(gla); // TODO: necessary otherwise colors won't be shown, why is gla->update() not calling this?
+        gla->update();
+    } else {
+        qDebug() << "skipping, curvature was not updated";
+    }
+}
 
+void VaseWidget::on_button_view_wfield_released(){
+    if( balloon->isWeightFieldUpdated ){
+        balloon->wfieldToVertexColor();
+        balloon->render(gla); // TODO: necessary otherwise colors won't be shown, why is gla->update() not calling this?
+        gla->update();
+    } else {
+        qDebug() << "skipping, weight field was not updated";
+    }
+}
+
+void VaseWidget::on_button_view_dfield_interp_released(){
+    if( balloon->isDistanceFieldUpdated ){
+        balloon->dfieldToVertexColor();
+        balloon->render(gla); // TODO: necessary otherwise colors won't be shown, why is gla->update() not calling this?
+        gla->update();
+    } else {
+        qDebug() << "skipping, distance field was not updated";
+    }
+}
 
 /*
 // Draws the slicing planes

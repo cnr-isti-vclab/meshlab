@@ -31,6 +31,10 @@ private:
     // float slice_off; // which offset from 0 the slice is taken from
 
 private slots:
+    void on_button_view_dfield_interp_released();
+    void on_button_view_dfield_init_pressed();
+    void on_button_view_wfield_released();
+    void on_button_view_curvature_released();
     void on_pushButton_released();
     void on_laplButton_released();
     void on_surf2acc_check_toggled(bool checked);

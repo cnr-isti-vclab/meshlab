@@ -86,13 +86,13 @@ bool Balloon::init_fields(){
     //-----------------------------------------------------------------------------------------------------------//
     //                                     INIT PSEUDO-HEAT WEIGHT SYSTEM
     //
-    // Assign a value of 0 to all vertices of the mesh. A value of 1 will be associated to parts of the mesh
+    // Assign a value of 0 to all vertices of the mesh. A value of 0 will be associated to parts of the mesh
     // which are considered "close" to data. Interpolating the field in a smooth way will end up generating
     // an heat-like scalar field distribution on the surface.
     //-----------------------------------------------------------------------------------------------------------//
     {
         for(CMeshO::VertexIterator vi=surf.vert.begin();vi!=surf.vert.end();vi++)
-            winterp.AddConstraint( tri::Index(surf,*vi), OMEGA_WEIGHT_FIELD, 0 );
+            winterp.AddConstraint( tri::Index(surf,*vi), OMEGA_WEIGHT_FIELD, 1 );
     }
     //-----------------------------------------------------------------------------------------------------------//
     //                                   ASSIGN A "MINIMAL" FACE TO EACH RAY
@@ -144,9 +144,7 @@ bool Balloon::init_fields(){
         // Ray-Triangle intersection parameters
         float t,u,v;
         // Debug: total weight to take average of dist on face and display it
-#ifdef DEBUG
         std::vector<float> tot_w( surf.fn, 0 );
-#endif
         for(unsigned int i=0; i<gridAccell.rays.size(); i++){
             //--- Retrieve the corresponding face and signed distance
             Ray3f& ray = gridAccell.rays[i].ray;
@@ -156,15 +154,12 @@ bool Balloon::init_fields(){
             }
             CFaceO& f = *(gridAccell.rays[i].f);
             t = gridAccell.rays[i].t;
-#ifdef DEBUG
             assert( !math::IsNAN(t) );
-#endif
+
             // Color the faces, if more than one, take average
-#ifdef DEBUG
             tot_w[ tri::Index(surf,f) ]++;
             f.Q() += t; // normalize with tot_w after
             f.SetS(); // enable the face for coloring
-#endif
 
             // I was lazy and didn't store the u,v... we need to recompute them
             vcg::IntersectionRayTriangle<float>(ray, f.P(0), f.P(1), f.P(2), t, u, v);
@@ -175,18 +170,16 @@ bool Balloon::init_fields(){
             dinterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA_VIEW_FIELD*(u), t );
             dinterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA_VIEW_FIELD*(v), t );
 
-            //--- And for the second interpolator
-            winterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA_WEIGHT_FIELD*(1-u-v), 1 );
-            winterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA_WEIGHT_FIELD*(u),     1 );
-            winterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA_WEIGHT_FIELD*(v),     1 );
+            //--- Whenever we have an intersection, we have data
+            winterp.AddConstraint( tri::Index(surf,f.V(0)), OMEGA_WEIGHT_FIELD*(1-u-v), 0 );
+            winterp.AddConstraint( tri::Index(surf,f.V(1)), OMEGA_WEIGHT_FIELD*(u),     0 );
+            winterp.AddConstraint( tri::Index(surf,f.V(2)), OMEGA_WEIGHT_FIELD*(v),     0 );
         }
-#ifdef DEBUG
         //--- Normalize in case there is more than 1 ray per-face
         for(CMeshO::FaceIterator fi=surf.face.begin();fi!=surf.face.end();fi++){
             if( tot_w[ tri::Index(surf,*fi) ] > 0 )
                 fi->Q() /= tot_w[ tri::Index(surf,*fi) ];
         }
-#endif
     }
 
     isDistanceFieldInit = true;
@@ -222,6 +215,8 @@ bool Balloon::evolve(){
     float view_max_absdst = -FLT_MAX;
     float view_max_dst    = -FLT_MAX;
     float view_min_dst    = +FLT_MAX;
+    float view_min_weight = +FLT_MAX;
+    float view_max_weight = -FLT_MAX;
     float curv_maxval     = -FLT_MAX;
 
     // Only meaningful if it has been computed..
@@ -262,9 +257,12 @@ bool Balloon::evolve(){
                 view_max_absdst = (fabs(updates_view[i])>view_max_absdst) ? fabs(updates_view[i]) : view_max_absdst;
                 view_max_dst = updates_view[i]>view_max_dst ? updates_view[i] : view_max_dst;
                 view_min_dst = updates_view[i]<view_min_dst ? updates_view[i] : view_min_dst;
+
             }
             if( isWeightFieldUpdated ){
                 updates_whgt[i] = c[0]*surf_wf[f.V(0)] + c[1]*surf_wf[f.V(1)] + c[2]*surf_wf[f.V(2)];
+                view_min_weight = updates_whgt[i]<view_min_weight ? updates_whgt[i] : view_min_weight;
+                view_max_weight = updates_whgt[i]>view_max_weight ? updates_whgt[i] : view_max_weight;
             }
             if( isCurvatureUpdated ){
                 updates_curv[i] = c[0]*f.V(0)->Kh() + c[1]*f.V(1)->Kh() + c[2]*f.V(2)->Kh();
@@ -272,10 +270,12 @@ bool Balloon::evolve(){
             }
         }
 
+        if( isWeightFieldUpdated )
+            qDebug("weight   field: min %.3f max %.3f", view_min_dst, view_max_dst);
         if( isDistanceFieldUpdated )
-            qDebug("view distance: min %.3f max %.3f", view_min_dst, view_max_dst);
+            qDebug("distance field: min %.3f max %.3f", view_min_weight, view_max_weight);
         if( isCurvatureUpdated )
-            qDebug("max curvature: %f", curv_maxval);
+            qDebug("curvat   field:          max %.3f", curv_maxval);
     }
 
 
@@ -311,16 +311,13 @@ bool Balloon::evolve(){
             //--- Curvature weight (faster if spiky)
             if( isCurvatureUpdated ){
                 k_highcurv = sign(1.0f,updates_curv[i])*exp(-powf(fabs(updates_curv[i])-curv_maxval,2)/curv_maxval);
-                v.sfield += max_speed*alpha*k_highcurv;
-            }
-            //--- Apply the update on the implicit field
 
-
-            // When we are retro-compensating for over-shooting disable smoothing
-            if( surf.vert.CurvatureEnabled && updates_view[i] > 0){
-                // qDebug() << " " << k3 << " " << max_speed;
-            } else if( surf.vert.CurvatureEnabled && !surf.vert.QualityEnabled ) {
-                v.sfield += k_highcurv*alpha*max_speed; // prev .1
+                // If a "support" field is specified
+                if( isWeightFieldUpdated ){
+                    v.sfield += updates_whgt[i]*alpha*max_speed*k_highcurv;
+                } else {
+                    v.sfield += max_speed*k_highcurv;
+                }
             }
         }
 
@@ -384,6 +381,20 @@ void Balloon::selectedFacesQualityToColor(){
 }
 
 
+void Balloon::wfieldToVertexColor(){
+    // Enable vertex coloring
+    rm &= ~SURF_FCOLOR;
+    rm |=  SURF_VCOLOR;
+
+    // Transfer from wfield to vertex quality
+    for( CMeshO::VertexIterator vi=surf.vert.begin(); vi!=surf.vert.end(); vi++ )
+        (*vi).Q() = surf_wf[vi];
+
+    // Build histogram and map range to colors
+    Histogram<float> H;
+    tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(surf,H);
+    tri::UpdateColor<CMeshO>::VertexQualityRamp(surf,H.Percentile(0.0f),H.Percentile(1.0f));
+}
 void Balloon::dfieldToVertexColor(){
     // Enable vertex coloring
     rm &= ~SURF_FCOLOR;
