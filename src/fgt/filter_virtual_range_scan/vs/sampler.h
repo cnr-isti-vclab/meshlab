@@ -165,10 +165,14 @@ namespace vs
             // download samples from the gpu
             PixelData* position = resources->buffers[ "best_position" ];
             PixelData* normal   = resources->buffers[ "best_normal" ];
+            PixelData* color    = resources->buffers[ "best_color" ];
             GLfloat* pos = position->download();
             GLfloat* nrm = normal->download();
+            GLfloat* col = color->download();
+
             GLfloat* posPix = pos;
             GLfloat* nrmPix = nrm;
+            GLfloat* colPix = col;
 
             // append samples to output mesh
             int samples = position->elements;
@@ -182,12 +186,20 @@ namespace vs
                 (*vi).N() = CoordType( nrmPix[0], nrmPix[1], nrmPix[2] );
                 nrmPix = &(nrmPix[3]);
 
+                for( int i=0; i<3; i++ )
+                {
+                    (*vi).C()[i] = (unsigned char)( colPix[i] * 255 );
+                }
+                (*vi).C()[3] = (unsigned char)255;
+                colPix = &( colPix[3] );
+
                 vi++;
             }
 
             // free downloaded samples
             free( pos );
             free( nrm );
+            free( col );
 
             // re-compute bounding box
             vcg::tri::UpdateBounding< MeshType >::Box( *target );

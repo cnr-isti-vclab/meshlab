@@ -58,6 +58,7 @@ namespace vs
             attributes.push_back( "position" );
             attributes.push_back( "normal" );
             attributes.push_back( "eye_normal" );
+            attributes.push_back( "color" );
 
             simpleVertexProgram = "void main(){ gl_Position = ftransform(); }";
             offsets = "const ivec2 offset[4]={ivec2(0, 0), ivec2(1, 0), ivec2(0, 1), ivec2(1, 1)};";
@@ -212,12 +213,14 @@ namespace vs
                     varying vec4 pos;
             varying vec3 norm;
             varying vec3 eyeNorm;
+            varying vec4 col;
 
             void main()
             {
                 pos = gl_Vertex;
                 norm = gl_Normal;
                 eyeNorm = gl_NormalMatrix * gl_Normal;
+                col = gl_Color;
                 gl_Position = ftransform();
             }
             );
@@ -227,6 +230,7 @@ namespace vs
                     varying vec4 pos;
             varying vec3 norm;
             varying vec3 eyeNorm;
+            varying vec4 col;
 
             void main()
             {
@@ -238,7 +242,8 @@ namespace vs
                 gl_FragData[1] = vec4( pos.xyz, 0.0f );
                 gl_FragData[2] = vec4( the_norm, 0.0f );
                 gl_FragData[3] = vec4( the_eye_norm, 0.0f );
-                gl_FragData[4] = vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+                gl_FragData[4] = col;
+                gl_FragData[5] = vec4( 0.0f, 0.0f, 0.0f, 0.0f );
             }
             );
 

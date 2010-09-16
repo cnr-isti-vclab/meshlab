@@ -77,16 +77,16 @@ void FilterVirtualRangeScan::initParameterSet(QAction* filter,MeshDocument &md, 
         par.addParam( new RichDynamicFloat( "xConeAxis", 0.0f, -1.0f, 1.0f, "Cone axis (X):", "The X component of povs looking cone's axis.") );
         par.addParam( new RichDynamicFloat( "yConeAxis", 1.0f, -1.0f, 1.0f, "Cone axis (Y):", "The Y component of povs looking cone's axis.") );
         par.addParam( new RichDynamicFloat( "zConeAxis", 0.0f, -1.0f, 1.0f, "Cone axis (Z):", "The Z component of povs looking cone's axis.") );
+        par.addParam( new RichDynamicFloat( "coneGap", 360.0f, 0.0f, 360.0f, "Cone gap:", "The looking cone gap (in degrees).") );
 
         par.addParam( new RichBool( "useCustomPovs", false, "Use povs contained in the following layer, ignoring the above parameters", "" ) );
         par.addParam( new RichMesh( "povsLayer", md.mm(), &md, "Povs layer:", "" ) );
 
-        par.addParam( new RichDynamicFloat( "coneGap", 360.0f, 0.0f, 360.0f, "Cone gap:", "The looking cone gap (in degrees).") );
         par.addParam( new RichInt( "uniform_side", 64, "Uniform sampling resolution:",
                                    "The mesh will be sampled uniformly from a texture of v x v pixels, where v is the chosen value.") );
         par.addParam( new RichInt( "features_side", 512, "Feature sampling resolution:",
                                    "The filter performs feature detection from a texture of v x v pixels, where v is the chosen value.") );
-        par.addParam( new RichDynamicFloat( "frontFacingConeU", 40, 0.0f, 180.0f,
+        par.addParam( new RichDynamicFloat( "frontFacingConeU", 180.0f, 0.0f, 180.0f,
                                             "Front facing cone (uniform):",
                                             QString("Pixels whose normal is directed towards the viewer are considered front-facing.<br />") +
                                             "To be front-facing, these normals must reside within a given cone of directions, whose angle is set with this parameter.<br />" +

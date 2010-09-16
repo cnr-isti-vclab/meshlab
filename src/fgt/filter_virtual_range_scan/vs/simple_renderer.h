@@ -30,12 +30,12 @@ namespace vs
 
         ~SimpleRenderer( void )
         {
-            glDeleteBuffers( 3, buffer );
+            glDeleteBuffers( 4, buffer );
         }
 
         void render( void )
         {
-            for( int i=0; i<3; i++ )
+            for( int i=0; i<4; i++ )
             {
                 assert( glIsBuffer( buffer[i] ) == GL_TRUE );
             }
@@ -48,10 +48,15 @@ namespace vs
             glNormalPointer( GL_FLOAT, 0, 0 );
             glEnableClientState( GL_NORMAL_ARRAY );
 
-            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, buffer[2] ); // indices
+            glBindBuffer( GL_ARRAY_BUFFER, buffer[2] );         // colors
+            glColorPointer( (GLint)4, GL_UNSIGNED_BYTE, 0, 0 );
+            glEnableClientState( GL_COLOR_ARRAY );
+
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, buffer[3] ); // indices
 
             glDrawElements( GL_TRIANGLES, elementsToDraw, GL_UNSIGNED_INT,  0 );
 
+            glDisableClientState( GL_COLOR_ARRAY );
             glDisableClientState( GL_NORMAL_ARRAY );
             glDisableClientState( GL_VERTEX_ARRAY );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -92,14 +97,14 @@ namespace vs
         typedef typename MeshType::ScalarType       ScalarType;
 
         MeshType*   m;
-        GLuint      buffer[3];      // coords, normals, colors, indices
+        GLuint      buffer[4];      // coords, normals, colors, indices
         GLsizei     elementsToDraw; // 3 * face_number
         bool        buffersOk;      // true => use vbo's
 
         void createBuffers( void )
         {
             assert( glGetError() == GL_NO_ERROR );
-            glGenBuffers( 3, buffer );
+            glGenBuffers( 4, buffer );
 
             // prepare buffers
             size_t scalarTypeSize   = sizeof( ScalarType );     // size of scalar type            
@@ -110,8 +115,19 @@ namespace vs
             void* nData = malloc( verticesSize );               // normals buffer
             assert( vData && nData );
 
-            ScalarType* vP = (ScalarType*)vData;
-            ScalarType* nP = (ScalarType*)nData;
+
+            // assume that the color type is Color4b
+            size_t colorSize = 4 * m->vn;
+            void* cData = malloc( colorSize );
+            assert( cData );
+            bool perVertexColor = m->HasPerVertexColor();
+
+            // if per-vertex color is not available, we use per-mesh color
+            vcg::Color4b defaultColor = m->C();
+
+            ScalarType*     vP = (ScalarType*)vData;
+            ScalarType*     nP = (ScalarType*)nData;
+            unsigned char*  cP = (unsigned char*)cData;
             map< VertexPointer, unsigned int >* ptrToInt = new map< VertexPointer, unsigned int >();
             unsigned int vertexIndex = 0;
 
@@ -123,8 +139,14 @@ namespace vs
                     nP[i] = (*vi).N()[i];
                 }
 
+                for( int i=0; i<4; i++ )
+                {
+                    cP[i] = (perVertexColor? (*vi).C()[i] : defaultColor[i] );
+                }
+
                 vP = &( vP[3] );
                 nP = &( nP[3] );
+                cP = &( cP[4] );
                 (*ptrToInt)[ &(*vi) ] = vertexIndex;
                 vertexIndex++;
             }
@@ -146,6 +168,14 @@ namespace vs
 
             assert( glGetError() == GL_NO_ERROR );
 
+            // fills colors buffer
+            glBindBuffer( GL_ARRAY_BUFFER, buffer[2] );
+            glBufferData( GL_ARRAY_BUFFER, colorSize, cData, GL_STATIC_DRAW );
+            glBindBuffer( GL_ARRAY_BUFFER, 0 );
+            free( cData );
+
+            assert( glGetError() == GL_NO_ERROR );
+
             // prepare indices buffer
             elementsToDraw = (GLsizei)( m->fn * 3 );            // every face has three indices
             size_t indicesSize = ((size_t)elementsToDraw) * sizeof(unsigned int);
@@ -162,7 +192,7 @@ namespace vs
             }
 
             // fills indices buffer
-            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, buffer[2] );
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, buffer[3] );
             glBufferData( GL_ELEMENT_ARRAY_BUFFER, indicesSize, iData, GL_STATIC_DRAW );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
             free( iData );
