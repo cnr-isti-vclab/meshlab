@@ -719,17 +719,13 @@ void MainWindow::setCurrentFile(const QString &fileName)
     int congratsMeshCounter = settings.value("congratsMeshCounter",50).toInt();
     if(loadedMeshCounter > congratsMeshCounter * 2 )
 			{
-				QFile txtFile(":/images/100mesh.html");
-				txtFile.open(QIODevice::ReadOnly | QIODevice::Text);
-				QString tttt=txtFile.readAll();
-				// This preference values store when you did the last request for a mail
+        // This preference values store when you did the last request for a mail
 				settings.setValue("congratsMeshCounter",loadedMeshCounter);
 
 				QDialog *congratsDialog = new QDialog();
 				Ui::CongratsDialog temp;
 				temp.setupUi(congratsDialog);
         temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
-				temp.congratsTextEdit->setHtml(tttt);
 				congratsDialog->exec();
 				if(congratsDialog->result()==QDialog::Accepted)
           QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?cc=g.ranzuglia@isti.cnr.it&subject=[MeshLab] Reporting Info on MeshLab Usage"));
