@@ -29,7 +29,7 @@
 #include "dirt_utils.h"
 
 
-
+#include <vcg/space/color4.h>
 #include <vcg/math/random_generator.h>
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/space/index/spatial_hashing.h>
@@ -99,7 +99,7 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
 
 int FilterDirt::getRequirements(QAction */*action*/)
 {	
-    return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
+    return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR |MeshModel::MM_FACECOLOR;
 }
 
 bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
@@ -113,39 +113,93 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         Point3f dir;
         Point3f new_bar_coords;
         dir[0]=0;
-        dir[1]=-0.5;
-        dir[2]=-0.50;
+        dir[1]=0;
+        dir[2]=0.5;
         if(dmesh!=0){
                    CMeshO::VertexIterator vi;//= dmesh->cm.vert.begin();
                    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > pi = tri::Allocator<CMeshO>::GetPerVertexAttribute<DustParticle<CMeshO> >(dmesh->cm,"ParticleInfo");
                    CMeshO::CoordType new_pos;
+                   CMeshO::CoordType int_p;
+                   CMeshO::FacePointer new_f;
+                   bool stop_movement=false;
                    for(vi=dmesh->cm.vert.begin();vi!=dmesh->cm.vert.end();++vi){
-                        new_pos=StepForward((*vi).P(),*(pi[vi].face),dir);
-                        CMeshO::CoordType int_p;
-                        CMeshO::FacePointer new_f;
-                        if(ComputeIntersection((*vi).P(),new_pos,*(pi[vi].face),int_p,new_f)){
-                            //new_pos=int_p;
-                            //(*vi).P()=new_pos;
-                            //(*vi).P()=int_p;
-                            //pi[vi].face=new_f;
-                        }else{
+                       stop_movement=false;
+                       new_pos=StepForward((*vi).P(),pi[vi].face,dir);
+                       while(!stop_movement){
+
+                           if(!IsOnFace(new_pos,pi[vi].face)){
+
+
+                            //if(ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_f)){
+                            ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_f);
+
+                            pi[vi].face=new_f;
+                            Segment3f s1=Segment3f((*vi).P(),new_pos);
+                            Segment3f s2=Segment3f((*vi).P(),int_p);
+                            float t=s2.Length()/s1.Length();
+                            new_pos=int_p;
                             (*vi).P()=new_pos;
+                            (*pi[vi].face).C()=Color4b::Blue;//Debugging
+                            new_pos=StepForward((*vi).P(),pi[vi].face,dir,t);
+
+                            /*if(!IsOnFace(new_pos,pi[vi].face))
+                       {                                                                        {
+                           (*pi[vi].face).C()=Color4b::Green;//Debugging
+                           stop_movement=true;
+                           (*vi).P()=new_pos;
+                       }*/
+//     }
+                        }else{
+                         //The new position is on the same face
+                         (*pi[vi].face).C()=Color4b::Green;//Debugging
+                         stop_movement=true;
+                         (*vi).P()=new_pos;
                         }
+
+
 
                     }
               }
-
+               }
     }else{
+
         //First Application
         vector<Point3f> dustVertexVec;
         vector<DustParticle<CMeshO> > dustParticleVec;
 
         DustSampler<CMeshO> ts(dustVertexVec,dustParticleVec);
         MeshModel* currMM=md.mm();
-
+        if (currMM->cm.fn==0) {
+                errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet";
+                return false;
+        }
         std::string func_d = "ny";
+
+
+        currMM->updateDataMask(MeshModel::MM_FACEFACETOPO);
+        currMM->updateDataMask(MeshModel::MM_FACEMARK);
+        currMM->updateDataMask(MeshModel::MM_FACECOLOR);
         currMM->updateDataMask(MeshModel::MM_VERTQUALITY);
+        tri::UnMarkAll(currMM->cm);
+
+        //clean Mesh
+
+        tri::Allocator<CMeshO>::CompactFaceVector(currMM->cm);
+        tri::Clean<CMeshO>::RemoveUnreferencedVertex(currMM->cm);
+        tri::Clean<CMeshO>::RemoveDuplicateVertex(currMM->cm);
+        tri::Allocator<CMeshO>::CompactVertexVector(currMM->cm);
+
+        //clean flags
+        tri::UpdateFlags<CMeshO>::FaceClear(currMM->cm);
+
+        //update Mesh
+        tri::UpdateTopology<CMeshO>::FaceFace(currMM->cm);
+        tri::UpdateNormals<CMeshO>::PerFaceNormalized(currMM->cm);
+        tri::UpdateFlags<CMeshO>::FaceProjection(currMM->cm);
+
         Parser p;
+
+
         setPerVertexVariables(p);
         p.SetExpr(func_d);
 
@@ -162,7 +216,8 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             }
         }
 
-        tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::WeightedMontecarlo(currMM->cm,ts,par.getInt("nparticles"));
+        tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::Montecarlo(currMM->cm,ts,par.getInt("nparticles"));
+
         //dmm -> Dust Mesh Model
         MeshModel* dmm=md.addNewMesh("Dust Mesh");
 
