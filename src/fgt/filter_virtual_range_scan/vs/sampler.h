@@ -43,6 +43,7 @@ namespace vs
             QTime detectionTime;
             detectionTime.start();
             */
+
             if( listener ){ listener->startingSetup(); }
 
             // OpenGL initialization
@@ -117,9 +118,7 @@ namespace vs
                     }
                     else
                     {
-                        //detectionTime.restart();
                         detector.go();
-                        //qDebug( "detection: %d msec", detectionTime.restart() );
                     }
 
                     killer.go();
@@ -133,7 +132,6 @@ namespace vs
 
                     if( listener ){ listener->povProcessed( extractor.currentPov + 1, *samplesCount ); }
                 }
-
 
                 // download samples
                 downloadSamples( &resources, (i==0)? uniformSamplesMesh : featureSamplesMesh );

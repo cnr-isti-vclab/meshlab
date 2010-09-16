@@ -661,9 +661,9 @@ namespace vs
             string neighborOffsets =
                     string( "const ivec2 neighbours[4][2] = { \n" ) +
                     "{ ivec2( -1, 0 ), ivec2(  1,  0 ) },\n" +
-                    "{ ivec2(  0, 1 ), ivec2(  0, -1 ) }," +
                     "{ ivec2( -1, 1 ), ivec2(  1, -1 ) }," +
-                    "{ ivec2( -1, -1), ivec2(  1,  1 ) } };";
+                    "{ ivec2(  0, 1 ), ivec2(  0, -1 ) }," +
+                    "{ ivec2(  1, 1 ), ivec2( -1, -1 ) } };";
 
 
             const string shaderBody = STRINGFY(
@@ -677,24 +677,44 @@ namespace vs
             uniform float thresholdCosine;
             uniform float frontFacingCosine;
 
-            bool isValid( ivec2 pixel )
-            {
-                float maskVal = texelFetch( startMask, pixel, 0 ).x;
-                return ( maskVal < 0.5f );
-            }
+            float depths[8];
+            float myDepth;
+            ivec2 my_coords;
 
-            bool validTest( ivec2 first, ivec2 second )
+            bool neighboursTest( int pairIndex )
             {
-                return ( isValid( first ) && isValid( second ) );
-            }
+                // compute the neighbours texel coordinates
+                ivec2 n1 = my_coords + neighbours[ pairIndex ][ 0 ];
+                ivec2 n2 = my_coords + neighbours[ pairIndex ][ 1 ];
 
-            // the three pixels must lie on the same mesh patch, and the central
-            // one must be the nearest
-            bool smallDepthJumpTest( ivec2 first, ivec2 second, ivec2 center )
-            {
-                float centralDepth = texelFetch( inputDepth, center, 0 ).x;
-                float firstDepth = texelFetch( inputDepth, first, 0 ).x;
-                float secondDepth = texelFetch( inputDepth, second, 0 ).x;
+                // validity test
+                float maskVal = texelFetch( startMask, n1, 0 ).x;
+                if( maskVal > 0.5f ){ return false; }   // background pixel
+                maskVal = texelFetch( startMask, n2, 0 ).x;
+                if( maskVal > 0.5f ){ return false; }   // background pixel
+
+                // depth test
+
+                // retrieve depth values
+                float bufferedDepth = depths[ pairIndex ];
+                float firstDepth = bufferedDepth;
+                if( bufferedDepth < -0.5f  )
+                {
+                    firstDepth = texelFetch( inputDepth, n1, 0 ).x;
+                }
+
+                bufferedDepth = depths[ pairIndex + 4 ];
+                float secondDepth = bufferedDepth;
+                if( bufferedDepth < -0.5f  )
+                {
+                    secondDepth = texelFetch( inputDepth, n2, 0 ).x;
+                }
+
+                float centralDepth = myDepth;
+                if( myDepth < -0.5f )
+                {
+                    myDepth = texelFetch( inputDepth, my_coords, 0 ).x;
+                }
 
                 bool ok = false;
                 if( firstDepth < centralDepth )
@@ -712,28 +732,16 @@ namespace vs
                 }
 
                 float jump = max( abs( firstDepth - centralDepth ), abs( secondDepth - centralDepth ) );
-                return ( jump <= smallDepthJump );
-            }
+                if( !( jump <= smallDepthJump ) ){ return false; }  // depth test failed
 
-            bool attributeTest( ivec2 first, ivec2 second )
-            {
-                vec4 firstAtt = texelFetch( inputNormal, first, 0 );
-                vec4 secondAtt = texelFetch( inputNormal, second, 0 );
+                // normals test
+                vec4 firstAtt = texelFetch( inputNormal, n1, 0 );
+                vec4 secondAtt = texelFetch( inputNormal, n2, 0 );
                 float angleCosine = dot( firstAtt.xyz, secondAtt.xyz );
                 return ( angleCosine < thresholdCosine );
             }
 
-            bool neighboursTest( ivec2 my_coords, int pairIndex )
-            {
-                ivec2 n1 = my_coords + neighbours[ pairIndex ][ 0 ];
-                ivec2 n2 = my_coords + neighbours[ pairIndex ][ 1 ];
-
-                if( !validTest( n1, n2 ) ) return false;
-                if( !smallDepthJumpTest( n1, n2, my_coords ) ) return false;
-                return ( attributeTest( n1, n2 ) );
-            }
-
-            bool bigDepthJumpTest( ivec2 my_coords )
+            bool bigDepthJumpTest( void )
             {
                 vec4 eyeNormal = texelFetch( inputEyeNormal, my_coords, 0 );
                 vec3 myView = vec3( 0.0f, 0.0f, -1.0f );
@@ -744,58 +752,46 @@ namespace vs
                     return false;
                 }
 
-                float myDepth = texelFetch( inputDepth, my_coords, 0 ).x;
+                myDepth = texelFetch( inputDepth, my_coords, 0 ).x;
                 bool ok = false;
                 int i=0;
-                float neighborDepth;
 
                 while( !ok && i<8 )
                 {
-                    neighborDepth = texelFetch( inputDepth, my_coords + near[i], 0 ).x;
-                    ok = ( neighborDepth - myDepth > bigDepthJump );
+                    depths[i] = texelFetch( inputDepth, my_coords + near[i], 0 ).x;
+                    ok = ( depths[i] - myDepth > bigDepthJump );
                     i++;
                 }
 
                 return ok;
             }
 
-            bool isFeature( ivec2 my_coords )
+            void main()
             {
-                bool detected = bigDepthJumpTest( my_coords );
+                my_coords = ivec2( gl_FragCoord.xy );
+                float maskVal = texelFetch( startMask, my_coords, 0 ).x;
+                if( maskVal > 0.5f )
+                {   // this is a background pixel
+                    gl_FragColor = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+                    return;
+                }
 
+                // initialize depth values
+                for( int i=0; i<8; i++ ){ depths[i] = -1.0f; }
+                myDepth = -1.0f;
+
+                // perform feature-detection
+                bool detected = bigDepthJumpTest();
                 int i = 0;
-                while( !detected && i<4 )
+                while( !detected && i < 4 )
                 {
-                    detected = neighboursTest( my_coords, i );
+                    detected = neighboursTest( i );
                     i++;
                 }
 
-                return detected;
-            }
-
-            void main()
-            {
-                ivec2 coords = ivec2( gl_FragCoord.xy );
-                float maskVal = texelFetch( startMask, coords, 0 ).x;
-                if( maskVal > 0.5f ) // this is a background pixel
-                {
-                    gl_FragColor = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-                }
-                else
-                {
-                    float on;
-
-                    if( isFeature( coords ) )
-                    {
-                        on = 0.0f;
-                    }
-                    else
-                    {
-                        on = 1.0f;
-                    }
-
-                    gl_FragColor = vec4( on, on, on, 1.0f );
-                }
+                // save the mask value
+                float on = detected? 0.0f : 1.0f;
+                gl_FragColor = vec4( on, on, on, 1.0f );
             }
 
             );
