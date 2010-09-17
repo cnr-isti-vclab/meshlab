@@ -958,14 +958,17 @@ void MainWindow::applyDecorateMode()
     GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
   }
   else{
-    //RichParameterSet * decoratorParams = new RichParameterSet();
-		//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
-    bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
-		if(ret) {
-				GLA()->iDecoratorsList.push_back(action);
-        GLA()->log->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
-				}
-        else GLA()->log->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+    QString errorMessage;
+    if (iDecorateTemp->isDecorationApplicable(action,*(meshDoc()->mm()),errorMessage)) {
+				//RichParameterSet * decoratorParams = new RichParameterSet();
+				//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
+				bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
+				if(ret) {
+						GLA()->iDecoratorsList.push_back(action);
+						GLA()->log->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+						}
+						else GLA()->log->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+			}
 	}
 	layerDialog->updateDecoratorParsView();
 	layerDialog->updateLog(*GLA()->log);
