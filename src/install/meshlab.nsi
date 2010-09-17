@@ -162,7 +162,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\edit_select.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_texture.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_hole.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_topo.dll"
+  ;File "${DISTRIB_FOLDER}/plugins\edit_topo.dll"
 
   ; decorate plugins (2)
   File "${DISTRIB_FOLDER}/plugins\decorate_base.dll"
