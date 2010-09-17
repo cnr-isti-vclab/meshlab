@@ -45,6 +45,8 @@ public:
 	static QString getPluginDirPath();
   static QString getBaseDirPath();
 
+  QMap<QString,RichParameterSet> generateFilterParameterMap();
+
 	QDir pluginsDir;
   QMap<QString, QAction*> actionFilterMap;
   QMap<QString, MeshFilterInterface*> stringFilterMap;

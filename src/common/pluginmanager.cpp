@@ -80,13 +80,9 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 
 	if (eng != 0)
 	{
-		MeshDocument md;
-		MeshModel mm(&md);	
-		vcg::tri::Tetrahedron<CMeshO>(mm.cm);
-    mm.updateDataMask(MeshModel::MM_ALL);
 		QString code = "";
 		code += "Plugins = { };\n";
-
+    QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
     foreach(MeshFilterInterface* mi,this->meshFilterPlug)
 		{
 			QString pname = mi->pluginName();
@@ -100,10 +96,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 					if (filterFunction != "")
 					{
 						ScriptAdapterGenerator gen;
-						QAction act(filterName,NULL);
-						RichParameterSet rp;
-						mi->initParameterSet(&act,mm,rp);
-						QString gencode = gen.funCodeGenerator(filterName,rp);
+            QString gencode = gen.funCodeGenerator(filterName,FPM[filterName]);
 						code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
 					}
 				}
@@ -119,6 +112,28 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 		eng->evaluate(code);
     qDebug("Code:\n %s",qPrintable(code));
 	}
+}
+/*
+ This function create a map from filtername to dummy RichParameterSet.
+ containing for each filtername the set of parameter that it uses.
+ */
+QMap<QString, RichParameterSet> PluginManager::generateFilterParameterMap()
+{
+  QMap<QString,RichParameterSet> FPM;
+  MeshDocument md;
+  MeshModel mm(&md);
+  vcg::tri::Tetrahedron<CMeshO>(mm.cm);
+  mm.updateDataMask(MeshModel::MM_ALL);
+  QMap<QString, QAction*>::iterator ai;
+  for(ai=this->actionFilterMap.begin(); ai !=this->actionFilterMap.end();++ai)
+  {
+      QString filterName = ai.key();//  ->filterName();
+      QAction act(filterName,NULL);
+      RichParameterSet rp;
+      this->stringFilterMap[filterName]->initParameterSet(ai.value(),md,rp);
+      FPM[filterName]=rp;
+  }
+  return FPM;
 }
 
 QString PluginManager::getBaseDirPath()
