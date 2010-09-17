@@ -186,12 +186,28 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 {
 	switch (filterID)
 	{
-		case FP_LOOP_SS                          : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices.<br/><br/>"
-																												 "Alternatives weighting schemes are based on the paper <i>Barthe, L. & Kobbelt, L.</i> <b>Subdivision scheme tuning around extraordinary vertices</b> Computer Aided Geometric Design, 2004, 21, 561-583.<br/>"
-																												 "The current implementation of these schemes don't handle vertices of valence > 12.");
-		case FP_BUTTERFLY_SS                     : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");
+  case FP_REFINE_LS3_LOOP									 : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This subdivision method take normals into account. "
+                                                       "<br>See:"
+                                                       "<i>Boye', S. Guennebaud, G. & Schlick, C.</i> <br>"
+                                                       "<b>Least squares subdivision surfaces</b><br>"
+                                                       "Computer Graphics Forum, 2010.<br/><br/>"
+                                                       "Alternatives weighting schemes are based on the paper: "
+                                                       "<i>Barthe, L. & Kobbelt, L.</i><br>"
+                                                       "<b>Subdivision scheme tuning around extraordinary vertices</b><br>"
+                                                       "Computer Aided Geometric Design, 2004, 21, 561-583.<br/>"
+                                                       "The current implementation of these schemes don't handle vertices of valence > 12");
+  case FP_LOOP_SS                            : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximant subdivision method and it works for every triangle and has rules for extraordinary vertices.<br>");
+    case FP_BUTTERFLY_SS                     : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
 		case FP_MIDPOINT                         : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint");
-		case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
+    case FP_REFINE_CATMULL                   : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generates a quad mesh, otherwise it honores it the faux-edge bits");
+    case FP_REFINE_HALF_CATMULL              : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
+                                                         "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces"
+                                                         "(it adds only a single vertex for each triangle instead of four)."
+                                                       "<br> See: <br>"
+                                                       "<b>4-8 Subdivision</b>"
+                                                       "<br> <i>Luiz Velho, Denis Zorin </i>"
+                                                       "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
+    case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
 		case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
     case FP_SELECT_FACES_BY_AREA             : return tr("Removes null faces (the one with area equal to zero)");
     case FP_SELECT_FACES_BY_EDGE             : return tr("Select all triangles having an edge with lenght greater or equal than a given threshold");
@@ -204,7 +220,9 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_CENTER                           : return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
 		case FP_ROTATE                           : return tr("Generate a matrix transformation that rotates the mesh. The mesh can be rotated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
     case FP_ROTATE_FIT                       : return tr("Generate a matrix transformation that rotates the mesh so that the selected set of points fit well the XY plane.");
-    case FP_PRINCIPAL_AXIS                   : return tr("Generate a matrix transformation that rotates the mesh aligning it to its principal axis of inertia. if the mesh is watertight the Intertia tensor is computed assuming the interior of the mesh has a uniform density. In case of an open mesh or a point clouds the inerta tensor is computed assuming each vertex is a constant puntual mass.");
+    case FP_PRINCIPAL_AXIS                   : return tr("Generate a matrix transformation that rotates the mesh aligning it to its principal axis of inertia."
+                                                         "If the mesh is watertight the Itertia tensor is computed assuming the interior of the mesh has a uniform density."
+                                                         "In case of an open mesh or a point clouds the inerta tensor is computed assuming each vertex is a constant puntual mass.");
 		case FP_FLIP_AND_SWAP                    : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order.");
 		case FP_RESET_TRANSFORM                  : return tr("Set the current transformation matrix to the Identity. ");
 		case FP_FREEZE_TRANSFORM                 : return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
@@ -212,19 +230,11 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute the principal directions of curvature with several algorithms");
 		case FP_CLOSE_HOLES                      : return tr("Close holes smaller than a given threshold");
 		case FP_CYLINDER_UNWRAP                  : return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
-		case FP_REFINE_CATMULL                   : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note Position of the new vertces is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generate a quad mesh otherwise it honores it the faux-edge bits");
-		case FP_REFINE_HALF_CATMULL              : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme. It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces (it adds only a single vertex for each triangle instead of four)."
-		                                                     "<br> See <b>4–8 Subdivision</b>"
-		                                                     "<br> <i>Luiz Velho, Denis Zorin </i>"
-                                                             "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
 		case FP_QUAD_PAIRING                     : return tr("Convert a tri mesh into a quad mesh by pairing triangles.");
 		case FP_FAUX_CREASE                      : return tr("Mark the crease edges of a mesh as Non-Faux according to edge dihedral angle.");
 		case FP_VATTR_SEAM                       : return tr("Make all selected vertex attributes connectivity-independent:<br/>"
 		                                                     "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
 		                                                     "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
-		case FP_REFINE_LS3_LOOP									 : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This subdivision method take normals into account. See <i>Boyé, S. Guennebaud, G. & Schlick, C.</i> <b>Least squares subdivision surfaces</b> Computer Graphics Forum, 2010.<br/><br/>"
-																												 "Alternatives weighting schemes are based on the paper <i>Barthe, L. & Kobbelt, L.</i> <b>Subdivision scheme tuning around extraordinary vertices</b> Computer Aided Geometric Design, 2004, 21, 561-583.<br/>"
-																												 "The current implementation of these schemes don't handle vertices of valence > 12");
 
 		default                                  : assert(0);
 	}
