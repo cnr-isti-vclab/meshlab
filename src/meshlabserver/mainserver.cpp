@@ -38,13 +38,9 @@ public:
 class MeshLabServer
 {
 	public:
-	MeshLabServer()
-	{
-	}
+  MeshLabServer() {}
 
-	~MeshLabServer()
-	{
-	}
+  ~MeshLabServer() {}
 
 	static bool FilterCallBack(const int pos, const char * str)
 	{
@@ -62,20 +58,58 @@ class MeshLabServer
 	// Here we use that QSetting. If it is not set we remember to run meshlab first once.
 	// in this way it works safely on mac too and allows the user to put the small meshlabserver binary wherever they desire (/usr/local/bin).
 
-	void loadPlugins(FILE *fp=0)
+  void loadPlugins()
 	{
 		PM.loadPlugins(defaultGlobal);
-
-		if(fp)
-		{
-			foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
-				foreach(QAction *filterAction, iFilter->actions())
-					fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
-		}
 
 		printf("Total %i filtering actions\n", PM.actionFilterMap.size());
 		printf("Total %i io plugins\n", PM.meshIOPlug.size());
 	}
+
+  void dumpPluginInfoWiki(FILE *fp)
+  {
+    if(!fp) return;
+    foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+        foreach(QAction *filterAction, iFilter->actions())
+          fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
+  }
+
+  void dumpPluginInfoDoxygen(FILE *fp)
+  {
+    if(!fp) return;
+    int i=0;
+    QMap<QString, RichParameterSet> FPM = PM.generateFilterParameterMap();
+    fprintf(fp,"/*! \\mainpage MeshLab Filter Documentation\n");
+    //fprintf(fp,"\\AtBeginDocument{\\setcounter{tocdepth}{1}}");
+
+    foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
+      {
+        foreach(QAction *filterAction, iFilter->actions())
+         {
+            fprintf(fp,
+                         "\n\\section f%i %s \n\n"
+                         "%s\n"
+                         ,i++,qPrintable(filterAction->text()),qPrintable(iFilter->filterInfo(filterAction)));
+
+            fprintf(fp,  "<H2> Parameters </h2>\n");
+//            fprintf(fp,  "\\paragraph fp%i Parameters\n",i);
+
+            if(! FPM[filterAction->text()].paramList.empty())
+            {
+              fprintf(fp,"<TABLE>\n");
+              foreach(RichParameter* pp, FPM[filterAction->text()].paramList)
+              {
+                fprintf(fp,"<TR><TD> \\c %s  </TD> <TD> %s </TD> <TD><i> %s -- </i></TD> </TR>\n",
+                        qPrintable(pp->val->typeName()),qPrintable(pp->pd->fieldDesc),qPrintable(pp->pd->tooltip));
+              }
+              fprintf(fp,"</TABLE>\n");
+            }
+            else fprintf(fp,"No parameters.<br>");
+
+          }
+      }
+    fprintf(fp,"*/");
+  }
 
 	bool Open(MeshModel &mm, QString fileName)
 	{
@@ -158,8 +192,8 @@ class MeshLabServer
 	}
 
 
-	bool Script(MeshDocument &meshDocument, QString scriptfile){
-
+  bool Script(MeshDocument &meshDocument, QString scriptfile)
+  {
 		MeshModel &mm = *meshDocument.mm();
 
 		FilterScript scriptPtr;
@@ -331,129 +365,38 @@ int main(int argc, char *argv[])
 						{
 						case 'v' :
 						{
-							switch (argv[i+1][1])
-							{
-								case 'c' :
-								{
-									printf("vertex color, ");
-									mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-									i++;
-									break;
-								}
-								case 'f' :
-								{
-									printf("vertex flags, ");
-									mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;
-									i++;
-									break;
-								}
-								case 'n' :
-								{
-									printf("vertex normals, ");
-									mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
-									i++;
-									break;
-								}
-								case 'q' :
-								{
-									printf("vertex quality, ");
-									mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-									i++;
-									break;
-								}
-								case 't' :
-								{
-									printf("vertex tex coords, ");
-									mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;
-									i++;
-									break;
-								}
-								default :
-								{
-									i++;
-									break;
-								}
-							}
-							break;
-						}
+             switch (argv[i+1][1])
+              {
+                case 'c' : i++; printf("vertex color, "     ); mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;    break;
+                case 'f' : i++; printf("vertex flags, "     ); mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;    break;
+                case 'n' : i++; printf("vertex normals, "   ); mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;   break;
+                case 'q' : i++; printf("vertex quality, "   ); mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;  break;
+                case 't' : i++; printf("vertex tex coords, "); mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD; break;
+                default :  i++; printf("WARNING: unknowns per VERTEX attribute '%s'",argv[i+1]);break;
+              }
+            } break;
 						case 'f' :
 						{
 							switch (argv[i+1][1])
 							{
-								case 'c' :
-								{
-									printf("face color, ");
-									mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
-									i++;
-									break;
-								}
-								case 'f' :
-								{
-									printf("face flags, ");
-									mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;
-									i++;
-									break;
-								}
-								case 'n' :
-								{
-									printf("face normals, ");
-									mask |= vcg::tri::io::Mask::IOM_FACENORMAL;
-									i++;
-									break;
-								}
-								case 'q' :
-								{
-									printf("face quality, ");
-									mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
-									i++;
-									break;
-								}
-								default :
-								{
-									i++;
-									break;
-								}
+                case 'c' : i++; printf("face color, "  ); mask |= vcg::tri::io::Mask::IOM_FACECOLOR;   break;
+                case 'f' : i++; printf("face flags, "  ); mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;   break;
+                case 'n' : i++; printf("face normals, "); mask |= vcg::tri::io::Mask::IOM_FACENORMAL;  break;
+                case 'q' : i++; printf("face quality, "); mask |= vcg::tri::io::Mask::IOM_FACEQUALITY; break;
+               default :  i++; printf("WARNING: unknowns per FACE attribute '%s'",argv[i+1]);break;
 							}
-							break;
-						}
+            }	break;
 						case 'w' :
 						{
 							switch (argv[i+1][1])
 							{
-								case 'c' :
-								{
-									printf("wedge color, ");
-									mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;
-									i++;
-									break;
-								}
-								case 'n' :
-								{
-									printf("wedge normals, ");
-									mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
-									i++;
-									break;
-								}
-								case 't' :
-								{
-									printf("wedge tex coords, ");
-									mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
-									i++;
-									break;
-								}
-								default :
-								{
-									i++;
-									break;
-								}
-							}
-							break;
-						}
-						default:
-						{
-							i++;
-							break;
-						}
+                case 'c' : i++; printf("wedge color, "     ); mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;   break;
+                case 'n' : i++; printf("wedge normals, "   ); mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;  break;
+                case 't' : i++; printf("wedge tex coords, "); mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;break;
+               default :  i++; printf("WARNING: unknowns per WEDGE attribute '%s'",argv[i+1]);break;
+              }
+            } break;
+            default :  i++; printf("WARNING: unknowns attribute '%s'",argv[i+1]);break;
 						}
 						
 				}
@@ -471,20 +414,20 @@ int main(int argc, char *argv[])
 				printf("script %s\n", qPrintable(scriptName));
 				i += 2;
 				break; 
-			case 'd' :
+      case 'd' :
 				if( argc <= i+1 ) {
-					printf("Missing dump name\n");  
+          printf("Missing dump name\n");
 					exit(-1);
 				}
 				filterFP=fopen(argv[i+1],"w");
 			 i+=2;
 			 break;
-											 
 		}
 	}
 	
 	printf("Loading Plugins:\n");
-	server.loadPlugins(filterFP);
+  server.loadPlugins();
+  if(filterFP) server.dumpPluginInfoDoxygen(filterFP);
 	
 	
 	if(meshNamesIn.isEmpty()) {
