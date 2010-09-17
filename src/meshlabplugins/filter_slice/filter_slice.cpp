@@ -96,7 +96,7 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Ri
 	if (ID(filter)!=FP_RECURSIVE_SLICE)
 		axis<<"Custom Axis";*/
 	//parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));	
-  parlst.addParam(new RichEnum("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured"));
+  //parlst.addParam(new RichEnum("units",0,QStringList()<<"cm"<<"in","Units","units in which the objects is measured"));
   parlst.addParam(new RichFloat("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
 	
 	QStringList nn=QString(m.fullName()).split("/");
@@ -298,7 +298,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 			float planeDist=0;
 			float planeOffset = parlst.getFloat("planeOffset");
 			int	planeNum = parlst.getInt("planeNum");
-			int units=parlst.getEnum("units");
+//			int units=parlst.getEnum("units");
 	
 			//bool absOffset = parlst.getBool("absOffset");
       RefPlane reference=RefPlane(parlst.getEnum("relativeTo"));
@@ -453,7 +453,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 	return true;
 }
 
-void ExtraFilter_SlicePlugin::extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
+void ExtraFilter_SlicePlugin::extrude(MeshDocument* /*doc*/,MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
 {
   tri::ExtrudeBoundary<CMeshO>(orig->cm,dest->cm,eps,planeAxis);
 }
@@ -498,7 +498,7 @@ void ExtraFilter_SlicePlugin::capHole(MeshModel* currentMesh, MeshModel* destMes
   vcg::tri::UpdateFlags<CMeshO>::VertexClearV(currentMesh->cm);
   vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(currentMesh->cm);
   int nv=0;
-  for(int i=0;i<currentMesh->cm.face.size();i++)
+  for(size_t i=0;i<currentMesh->cm.face.size();i++)
   {
     for (int j=0;j<3;j++)
     if (!currentMesh->cm.face[i].IsV() && currentMesh->cm.face[i].IsB(j))
@@ -522,9 +522,9 @@ void ExtraFilter_SlicePlugin::capHole(MeshModel* currentMesh, MeshModel* destMes
   }
 	if (nv<2) return;
   CMeshO::VertexIterator vi=vcg::tri::Allocator<CMeshO>::AddVertices(destMesh->cm,nv);
-  for (int i=0;i<outlines.size();i++)
+  for (size_t i=0;i<outlines.size();i++)
   {
-    for(int j=0;j<outlines[i].size();++j,++vi)
+    for(size_t j=0;j<outlines[i].size();++j,++vi)
 			(&*vi)->P()=outlines[i][j];
   }
 

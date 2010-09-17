@@ -94,7 +94,7 @@ template <class MeshType>
   tri::Append<MeshType,MeshType>::Mesh(dest, orig);
   tri::UpdateTopology<MeshType>::FaceFace(dest);
   //create the clone, move it eps/2 on the left and invert its normals
-  for (int i=0;i<dest.vert.size();i++)
+  for (size_t i=0;i<dest.vert.size();i++)
     dest.vert[i].P()-=planeAxis*eps/2;
   tri::Clean<MeshType>::FlipMesh(dest);
   vcg::tri::UpdateTopology<MeshType>::FaceFace(dest);
@@ -105,7 +105,7 @@ template <class MeshType>
   vcg::tri::UpdateFlags<MeshType>::VertexClearV(dest);
   vcg::tri::UpdateFlags<MeshType>::FaceBorderFromFF(dest);
   int nv=0;
-  for(int i=0;i<dest.face.size();i++)
+  for(size_t i=0;i<dest.face.size();i++)
   {
     for (int j=0;j<3;j++)
     if (!dest.face[i].IsV() && dest.face[i].IsB(j))
@@ -128,7 +128,7 @@ template <class MeshType>
   //I have at least 3 vertexes
   MeshType tempMesh;
   tri::Append<MeshType,MeshType>::Mesh(tempMesh, orig);
-  for (int i=0;i<tempMesh.vert.size();i++)
+  for (size_t i=0;i<tempMesh.vert.size();i++)
     tempMesh.vert[i].P()+=planeAxis*eps/2;
   //create the clone and move it eps/2 on the right
   tri::Append<MeshType,MeshType>::Mesh(dest, tempMesh);
@@ -137,7 +137,7 @@ template <class MeshType>
   typename MeshType::VertexIterator vi=vcg::tri::Allocator<MeshType>::AddVertices(tempMesh,2*nv);
 
   //I have at least 6 vertexes
-  for (int i=0;i<outlines.size();i++)
+  for (size_t i=0;i<outlines.size();i++)
   {
     (&*vi)->P()=outlines[i][0];
     CVertexO* v0=(&*vi); ++vi;
@@ -146,7 +146,7 @@ template <class MeshType>
     CVertexO* vs0=v0;	//we need the start point
     CVertexO* vs1=v1; //to close the loop
 //		Log(0,"%d",outlines[i].size());
-    for(int j=1;j<outlines[i].size();++j)
+    for(size_t j=1;j<outlines[i].size();++j)
     {
       (&*vi)->P()=outlines[i][j];
       CVertexO* v2=(&*vi); ++vi;
