@@ -20,6 +20,7 @@ SUBDIRS       = common \
 				meshlabplugins/filter_clean \
 				meshlabplugins/filter_colorize \
 				meshlabplugins/filter_create \
+        meshlabplugins/filter_fractal \
 				meshlabplugins/filter_isoparametrization \
 				meshlabplugins/filter_measure \
 				meshlabplugins/filter_meshing \
@@ -46,7 +47,7 @@ SUBDIRS       = common \
 ##		        meshlabplugins/editslice \
 				meshlabplugins/editalign \
 				meshlabplugins/editmeasure \
-				meshlabplugins/editrgbtri \
+#				meshlabplugins/editrgbtri \
 				meshlabplugins/editsegment \
 ##				meshlabplugins/edit_straightener \
 				sampleplugins/sampleedit \
@@ -60,9 +61,8 @@ SUBDIRS       = common \
 			sampleplugins/filtercreateiso \
              fgt/filter_aging \
               fgt/filter_colorproc \
-#                fgt/filter_fractal \
                fgt/filter_func \
-#              fgt/filter_ssynth \
+              fgt/filter_ssynth \
               fgt/filter_qhull \
               fgt/filter_quality \
                fgt/filter_trioptimize \
@@ -71,5 +71,5 @@ SUBDIRS       = common \
                 fgt/editpaint\
                 fgt/edit_quality \
                 fgt/edit_texture\
-				fgt/edit_topo \
+##				fgt/edit_topo \
 				fgt/render_rfx 
