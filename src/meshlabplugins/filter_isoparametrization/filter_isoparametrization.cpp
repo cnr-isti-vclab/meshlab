@@ -77,28 +77,28 @@ QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
-  case ISOP_PARAM : return "<br>   The filter build the abstract Isoparameterization of a two-manifold triangular mesh   <br>"
+  case ISOP_PARAM : return "The filter build the abstract Isoparameterization of a two-manifold triangular mesh   <br>"
 											"An adaptively chosen abstract domain of the parameterization is built. For more details see: <br>"
 											"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
                       "IEEE Transaction of Visualization and Computer Graphics 2010";
-  case ISOP_REMESHING : return "<br>	 Remeshing based on an Abstract Isoparameterization, each triangle of the domain is recursively subdivided. <br>"
+  case ISOP_REMESHING : return "Remeshing based on an Abstract Isoparameterization, each triangle of the domain is recursively subdivided. <br>"
 													"For more details see: <br>"
 													"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
                           "IEEE Transaction of Visualization and Computer Graphics 2010";
-  case ISOP_DIAMPARAM : return "<br>	 The filter build a new mesh with a standard atlased per wedge texture. The atlas is simply done by "
+  case ISOP_DIAMPARAM : return "The filter build a new mesh with a standard atlased per wedge texture. The atlas is simply done by "
                          "splitting each triangle of the abstract domain<br>"
 													"For more details see: <br>"
 													"Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
                           "IEEE Transaction of Visualization and Computer Graphics 2010";
-  case ISOP_LOAD : return "<br>	 Load the Isoparameterization from a saved Abstract Mesh  <br>"
+  case ISOP_LOAD : return "Load the Isoparameterization from a saved Abstract Mesh  <br>"
 										 "For more details see: <br>"
 										 "Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
                      "IEEE Transaction of Visualization and Computer Graphics 2010";
-  case ISOP_SAVE : return "<br>	 Save the Isoparameterization on an Abstract Mesh  <br>"
+  case ISOP_SAVE : return "Save the Isoparameterization on an Abstract Mesh  <br>"
 										 "For more details see: <br>"
 										 "Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
                      "IEEE Transaction of Visualization and Computer Graphics 2010";
-  case ISOP_TRANSFER:return "<br>	 Transfer the Isoparametrization between two meshes, the two meshes must be reasonably similar and well aligned."
+  case ISOP_TRANSFER:return "Transfer the Isoparametrization between two meshes, the two meshes must be reasonably similar and well aligned."
                     " It is useful to transfer back an isoparam onto the original mesh after having computed it on a dummy, clean watertight model.<br>"
 											 "For more details see: <br>"
 											 "Pietroni, Tarini and Cignoni, 'Almost isometric mesh parameterization through abstract domains' <br>"
@@ -140,7 +140,7 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 			stopCriteriaList.push_back("L2");
 
       par.addParam(new RichEnum("stopCriteria", 1, stopCriteriaList, tr("Optimization Criteria"),
-				tr("<p style=\'white-space:pre\'>"
+        tr(//"<p style=\'white-space:pre\'>"
 				"Choose a metric to stop the parametrization within the interval<br>"
 				"1: Best Heuristic : stop considering both isometry and number of faces of base domain<br>"
 				"2: Area + Angle : stop at minimum area and angle distorsion<br>"

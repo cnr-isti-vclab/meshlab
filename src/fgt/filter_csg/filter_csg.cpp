@@ -63,8 +63,8 @@ QString FilterCSG::filterInfo(FilterIDType filterId) const
     case FP_CSG:
         return "Constructive Solid Geometry operation filter.<br>"
                 "For more details see: <br>"
-                "Rocchini, Cignoni, Ganovelli, Montani, Pingi and Scopigno, "
-                "'Marching Intersections: an Efficient Resampling Algorithm for Surface Management'<br>"
+                "<i>C. Rocchini, P. Cignoni, F. Ganovelli, C. Montani, P. Pingi and R.Scopigno, </i><br>"
+                "<b>'Marching Intersections: an Efficient Resampling Algorithm for Surface Management'</b><br>"
                 "In Proceedings of Shape Modeling International (SMI) 2001";
 
     default:
