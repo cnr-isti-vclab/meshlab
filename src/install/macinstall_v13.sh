@@ -162,7 +162,7 @@ plugins/libeditalign.dylib \
 plugins/libeditmeasure.dylib \
 plugins/libeditpaint.dylib \
 plugins/libeditsegment.dylib \
-plugins/libmeshdecorate.dylib \
+plugins/libdecorate_base.dylib \
 plugins/libdecorate_shadow.dylib \
 plugins/librender_gdp.dylib \
 plugins/librender_radiance_scaling.dylib \
