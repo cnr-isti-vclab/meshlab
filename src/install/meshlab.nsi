@@ -113,7 +113,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_create.dll"
 
-  File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
+  ;File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_func.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_isoparametrization.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_measure.dll"
@@ -127,8 +127,10 @@ Section "MainSection" SEC01
   
   File "${DISTRIB_FOLDER}/plugins\filter_sampling.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_select.dll"
-  ; File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_splitter.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_ssynth.dll"
+  
   
   
   File "${DISTRIB_FOLDER}/plugins\filter_texture.dll"
@@ -219,6 +221,7 @@ Section "MainSection" SEC01
   File "${QT_BASE}\bin\QtOpenGL4.dll"
   File "${QT_BASE}\bin\QtXml4.dll"
   File "${QT_BASE}\bin\QtNetwork4.dll"
+  File "${QT_BASE}\bin\QtScript4.dll"
   ;File "C:\MinGW\bin\mingwm10.dll"
   File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
   File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"
