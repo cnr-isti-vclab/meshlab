@@ -71,11 +71,11 @@ namespace vs
         static void randomPointsOnAUnitSphere( vector< MyPoint >& target, int count )
         {
             srand( 12345 );
-            float dtheta = (2 * PI) / 100.0;
+            float dtheta = (2 * PI) / 100.0f;
             int r = 0;
-            float theta = 0.0;
-            float du = 0.02, u = 0.0;
-            float px = 0.0, py = 0.0;
+            float theta = 0.0f;
+            float du = 0.02f, u = 0.0f;
+            float px = 0.0f, py = 0.0f;
 
             for( int i=0; i<count; i++ )
             {
@@ -83,10 +83,10 @@ namespace vs
                 theta = dtheta * r;
 
                 r = rand() % 100;
-                u = r * du - 1;
+                u = r * du - 1.0f;
 
-                px = cos( theta ) * sqrt( 1 - pow( u, 2 ) );
-                py = sin( theta ) * sqrt( 1 - pow( u, 2 ) );
+                px = cos( theta ) * sqrt( 1.0f - pow( u, 2 ) );
+                py = sin( theta ) * sqrt( 1.0f - pow( u, 2 ) );
 
                 target.push_back( MyPoint( px, py, u ) );
             }

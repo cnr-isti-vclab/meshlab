@@ -73,11 +73,25 @@ void FilterVirtualRangeScan::initParameterSet(QAction* filter,MeshDocument &md, 
     switch(ID(filter))
     {
     case FP_VRS:
-        par.addParam( new RichInt( "povs", 12, "Povs:", "The number of point of views from which the target mesh is observed.") );
-        par.addParam( new RichDynamicFloat( "xConeAxis", 0.0f, -1.0f, 1.0f, "Cone axis (X):", "The X component of povs looking cone's axis.") );
-        par.addParam( new RichDynamicFloat( "yConeAxis", 1.0f, -1.0f, 1.0f, "Cone axis (Y):", "The Y component of povs looking cone's axis.") );
-        par.addParam( new RichDynamicFloat( "zConeAxis", 0.0f, -1.0f, 1.0f, "Cone axis (Z):", "The Z component of povs looking cone's axis.") );
+        par.addParam( new RichInt( "povs", 20, "Povs:", "The number of point of views from which the target mesh is observed.") );
+        par.addParam( new RichPoint3f( "coneAxis", vcg::Point3f( 0.0f, 1.0f, 0.0f ), "Looking cone axis",
+           QString( "Povs are generated within a cone of directions, centered at the mesh bounding box center. This parameter specifies the cone axis." ) ) );
         par.addParam( new RichDynamicFloat( "coneGap", 360.0f, 0.0f, 360.0f, "Cone gap:", "The looking cone gap (in degrees).") );
+
+        QStringList drawModes;
+        drawModes << "Flat" << "Smooth";
+        par.addParam( new RichEnum( "drawMode", 0, drawModes, "Draw mode: ",
+                                    QString( "This parameter specifies the draw mode to be used by the vcg renderer to generate the color-map for each point of view." ) ) );
+
+        QStringList colorModes;
+        colorModes << "Per-vertex" << "Per-face" << "Per-mesh";
+        par.addParam( new RichEnum( "colorMode", 0, colorModes, "Color mode: ",
+                                    QString( "This parameter specifies the color mode to be used by the vcg renderer to generate the color-map for each point of view." ) ) );
+
+        QStringList textureModes;
+        textureModes << "None" << "Per-vertex" << "Per-wedge" << "Per-wedge multi";
+        par.addParam( new RichEnum( "textureMode", 0, textureModes, "Texture mode: ",
+                                    QString( "This parameter specifies the texture mode to be used by the vcg renderer to generate the color-map for each point of view." ) ) );
 
         par.addParam( new RichBool( "useCustomPovs", false, "Use povs contained in the following layer, ignoring the above parameters", "" ) );
         par.addParam( new RichMesh( "povsLayer", md.mm(), &md, "Povs layer:", "" ) );
@@ -91,10 +105,10 @@ void FilterVirtualRangeScan::initParameterSet(QAction* filter,MeshDocument &md, 
                                             QString("Pixels whose normal is directed towards the viewer are considered front-facing.<br />") +
                                             "To be front-facing, these normals must reside within a given cone of directions, whose angle is set with this parameter.<br />" +
                                             "Only the front-facing pixels form the uniform samples cloud" ) );
-        par.addParam( new RichDynamicFloat( "bigJump", 0.1, 0.0, 1.0, "Big depth jump threshold:",
+        par.addParam( new RichDynamicFloat( "bigJump", 0.1f, 0.0f, 1.0f, "Big depth jump threshold:",
                                             QString("The filter detects mesh borders and big offsets within the mesh by testing the depth of neighbours pixels.<br />") +
                                             "This parameter controls the (normalized) minimum depth offset for a depth jump to be recognized.") );
-        par.addParam( new RichDynamicFloat( "frontFacingConeF", 40, 0.0f, 180.0f,
+        par.addParam( new RichDynamicFloat( "frontFacingConeF", 40.0f, 0.0f, 180.0f,
                                             "Front facing cone (features):",
                                             QString("Look at the <i>Front facing cone (uniform)</i> parameter description to understand when a pixel is") +
                                             "said <i>front-facing</i>. In the feature sensitive sampling step, border pixels are recognized as features if " +
@@ -150,9 +164,10 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
         else
         {
             vrsParams.povs = par.getInt( "povs" );
-            vrsParams.coneAxis[ 0 ] = par.getDynamicFloat( "xConeAxis" );
-            vrsParams.coneAxis[ 1 ] = par.getDynamicFloat( "yConeAxis" );
-            vrsParams.coneAxis[ 2 ] = par.getDynamicFloat( "zConeAxis" );
+            vcg::Point3f coneAxis = par.getPoint3f( "coneAxis" );
+            vrsParams.coneAxis[ 0 ] = coneAxis.X();
+            vrsParams.coneAxis[ 1 ] = coneAxis.Y();
+            vrsParams.coneAxis[ 2 ] = coneAxis.Z();
             vrsParams.coneGap = par.getDynamicFloat( "coneGap" );
         }
 
@@ -163,6 +178,53 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
         vrsParams.bigDepthJump = par.getDynamicFloat( "bigJump" );
         vrsParams.smallDepthJump = par.getDynamicFloat( "smallJump" );
         vrsParams.angleThreshold = par.getDynamicFloat( "normalsAngle" );
+
+        int choice = par.getEnum( "drawMode" );
+        vrsParams.cmDrawMode = choice? vcg::GLW::DMSmooth : vcg::GLW::DMFlat;
+
+        choice = par.getEnum( "colorMode" );
+        vcg::GLW::ColorMode cMode;
+
+        switch( choice )
+        {
+        case 0:
+            cMode = vcg::GLW::CMPerVert;
+            break;
+        case 1:
+            cMode = vcg::GLW::CMPerFace;
+            break;
+        case 2:
+            cMode = vcg::GLW::CMPerMesh;
+            break;
+        default:
+            cMode = vcg::GLW::CMPerMesh;
+            break;
+        }
+        vrsParams.cmColorMode = cMode;
+
+        choice = par.getEnum( "textureMode" );
+        vcg::GLW::TextureMode tMode;
+
+        switch( choice )
+        {
+        case 0:
+            tMode = vcg::GLW::TMNone;
+            break;
+        case 1:
+            tMode = vcg::GLW::TMPerVert;
+            break;
+        case 2:
+            tMode = vcg::GLW::TMPerWedge;
+            break;
+        case 3:
+            tMode = vcg::GLW::TMPerWedgeMulti;
+            break;
+        default:
+            tMode = vcg::GLW::TMNone;
+            break;
+        }
+        vrsParams.cmTextureMode = tMode;
+
         vrsParams.useCustomPovs = useLayerPovs;
 
         bool oneMesh = par.getBool( "oneMesh" );
@@ -186,11 +248,11 @@ bool FilterVirtualRangeScan::applyFilter( QAction* filter,
             secondMesh = &( secondMeshModel->cm );
         }
 
-        MyGLWidget* tmpWidget = new MyGLWidget( &vrsParams, startMesh, firstMesh, secondMesh );
+        MyGLWidget* tmpWidget = new MyGLWidget( &vrsParams, curMeshModel, firstMesh, secondMesh );
         bool ok = tmpWidget->result;
         if( !ok )
         {
-            errorMessage = "cannot initialize a new OpenGL context.";
+            errorMessage = tmpWidget->errorString;
         }
         delete tmpWidget;
 

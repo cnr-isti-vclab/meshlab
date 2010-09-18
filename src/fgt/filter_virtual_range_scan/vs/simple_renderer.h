@@ -25,16 +25,17 @@ namespace vs
             assert(m && m->vert.size() > 0 && m->face.size() > 0 );
             this->m         = m;
             this->buffersOk = false;
-            createBuffers();
+            //createBuffers();
         }
 
         ~SimpleRenderer( void )
         {
-            glDeleteBuffers( 4, buffer );
+            //glDeleteBuffers( 4, buffer );
         }
 
         void render( void )
         {
+            /*
             for( int i=0; i<4; i++ )
             {
                 assert( glIsBuffer( buffer[i] ) == GL_TRUE );
@@ -61,8 +62,9 @@ namespace vs
             glDisableClientState( GL_VERTEX_ARRAY );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
             glBindBuffer( GL_ARRAY_BUFFER, 0 );
+            */
 
-            /*
+            // immediate-mode rendering
             if( m->vert.size() == 0 ) return;
 
             typename MeshType::FaceIterator fi;
@@ -85,7 +87,6 @@ namespace vs
             }
 
             glEnd();
-            */
         }
 
     private:
@@ -101,6 +102,7 @@ namespace vs
         GLsizei     elementsToDraw; // 3 * face_number
         bool        buffersOk;      // true => use vbo's
 
+        // create the buffer objects to hold mesh data
         void createBuffers( void )
         {
             assert( glGetError() == GL_NO_ERROR );

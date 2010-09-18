@@ -5,6 +5,7 @@
 #include <QString>
 
 #include <wrap/gl/shot.h>
+#include <wrap/gl/trimesh.h>
 #include <vcg/space/box2.h>
 #include <map>
 
@@ -34,6 +35,10 @@ namespace vs
         float bigDepthJump;                 // used to detect big depth offset
         float frontFacingConeU;             // the angle (in degrees) used to determine whether a pixel "is facing" the observer (uniform sampling)
         float frontFacingConeF;             // the facing cone gap used in the feature sensitive sampling step
+
+        vcg::GLW::DrawMode      cmDrawMode;     // the color-map draw mode
+        vcg::GLW::ColorMode     cmColorMode;    // the color-map color mode
+        vcg::GLW::TextureMode   cmTextureMode;  // the color-map texture mode
 
         vector< Pov > customPovs;           // custom point-of-views
         bool useCustomPovs;

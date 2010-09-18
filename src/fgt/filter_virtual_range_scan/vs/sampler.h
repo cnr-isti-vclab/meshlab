@@ -5,6 +5,7 @@
 
 #include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <common/meshmodel.h>
 
 #include <QTime>
 
@@ -32,7 +33,7 @@ namespace vs
 
         static void generateSamples
                 ( VSParameters*     params,
-                  MeshType*         inputMesh,
+                  MeshModel*        inputMeshModel,
                   MeshType*         uniformSamplesMesh,
                   MeshType*         featureSamplesMesh,
                   SamplerListener*  listener = 0 )
@@ -60,7 +61,7 @@ namespace vs
             glEnable( GL_TEXTURE_2D );
 
             // prepare input/output mesh
-            vcg::tri::UpdateBounding< MeshType >::Box( *inputMesh );
+            vcg::tri::UpdateBounding< CMeshO >::Box( inputMeshModel->cm );
             uniformSamplesMesh->Clear();
             featureSamplesMesh->Clear();
 
@@ -70,7 +71,7 @@ namespace vs
             resources.fbo->bind();
 
             // builds stages
-            AttributesExtractor< MeshType > extractor       ( inputMesh, &resources );
+            AttributesExtractor             extractor       ( inputMeshModel, &resources );
             ConeFilter                      coneFilter      ( &resources );
             Compactor                       inputCompactor  ( &resources, "out_mask", "input_", "best_" );
             Killer                          killer          ( &resources );

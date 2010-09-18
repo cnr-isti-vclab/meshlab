@@ -213,7 +213,7 @@ namespace vs
             if( f.open( QFile::WriteOnly ) )
             {
                 GLfloat* pix = download( lod );
-                int tmpSide = (int)side / pow( 2.0, lod );
+                int tmpSide = (int)side / (int)( pow( 2.0, lod ) );
                 QTextStream stream( &f );
 
                 char buf[300];

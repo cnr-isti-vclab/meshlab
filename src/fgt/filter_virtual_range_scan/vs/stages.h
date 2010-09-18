@@ -5,6 +5,10 @@
 #include "povs_generator.h"
 #include "simple_renderer.h"
 
+#include <common/meshmodel.h>
+
+#include <vcg/simplex/vertex/component_ocf.h>
+
 namespace vs
 {
     /* stages base class */
@@ -161,19 +165,19 @@ namespace vs
     };
 
     /* attribute extraction stage */
-    template< class MeshType >
     class AttributesExtractor: public Stage
     {
 
     public:
-        typedef typename MeshType::ScalarType       ScalarType;
-        typedef typename vcg::Point3< ScalarType >  MyPoint;
-        typedef typename vcg::Shot< ScalarType >    ShotType;
+        typedef CMeshO::ScalarType         ScalarType;
+        typedef vcg::Point3< ScalarType >  MyPoint;
+        typedef vcg::Shot< ScalarType >    ShotType;
 
-        AttributesExtractor( MeshType* inputMesh, Resources* res )
-            :Stage( res ), renderer( inputMesh )
+        AttributesExtractor( MeshModel* inputMeshModel, Resources* res )
+            :Stage( res ), renderer( &(inputMeshModel->cm) )
         {
-            this->inputMesh = inputMesh;
+            this->inputMeshModel = inputMeshModel;
+            this->inputMesh = &(inputMeshModel->cm);
             currentPov = 0;
             meshCenter = inputMesh->bbox.Center();
 
@@ -232,6 +236,7 @@ namespace vs
                            up.X(),          up.Y(),         up.Z() );
             }
 
+            // filling all attribute-maps except color
             tmpData.clear();
             collectAttributesData( "input_" );
             collectData( "start_mask" );
@@ -247,6 +252,24 @@ namespace vs
             //resources->fbo->screenshots( "start" );
 
             startShader->unload();
+            resources->fbo->unload();
+
+            // generate color-map with the vcg renderer
+            tmpData.clear();
+            collectData( "input_color" );
+            resources->fbo->load( tmpData );
+            resources->fbo->loadDepth( depthBuffer->textureId );
+
+            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+            inputMeshModel->Render
+                    ( resources->params->cmDrawMode,
+                      resources->params->cmColorMode,
+                      resources->params->cmTextureMode );
+            /*
+            static int k = 0;
+            resources->fbo->screenshots( QString::number(k++).toStdString() );
+            */
+
             resources->fbo->unload();
 
             if( resources->params->useCustomPovs )
@@ -277,8 +300,9 @@ namespace vs
         int                         currentPov;
 
     private:
-        MeshType*                   inputMesh;
-        SimpleRenderer< MeshType >  renderer;
+        MeshModel*                  inputMeshModel;
+        CMeshO*                     inputMesh;
+        SimpleRenderer< CMeshO >    renderer;
         std::vector< MyPoint >      povs;
         std::vector< MyPoint >      upVectors;
         MyPoint                     meshCenter;
