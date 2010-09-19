@@ -368,11 +368,13 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	// on the bottom of the glArea
 	if(infoAreaVisible)
 	{
+	glPushAttrib(GL_ENABLE_BIT);
     glEnable(GL_BLEND);
     glEnable(GL_MULTISAMPLE);
 
     displayInfo();
 		updateFps(time.elapsed());
+	glPopAttrib();
 	}
 
 	//Draw highlight if it is the current viewer
@@ -380,7 +382,14 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 		displayViewerHighlight();
 
 	// Finally display HELP if requested
-	if (isHelpVisible()) displayHelp();
+	if (isHelpVisible()) 
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glEnable(GL_BLEND);
+		glEnable(GL_MULTISAMPLE);
+		displayHelp();
+		glPopAttrib();
+	}
 
   QString error = checkGLError::makeString("There are gl errors:");
   if(!error.isEmpty()) {
@@ -523,56 +532,116 @@ void GLArea::displayViewerHighlight()
 
 void GLArea::displayHelp()
 {
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(-1,1,-1,1,-1,1);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
+	//glPushAttrib(GL_ALL_ATTRIB_BITS);
+	//glMatrixMode(GL_PROJECTION);
+	//glPushMatrix();
+	//glLoadIdentity();
+	//glOrtho(-1,1,-1,1,-1,1);
+	//glMatrixMode(GL_MODELVIEW);
+	//glPushMatrix();
+	//glLoadIdentity();
+	//glPushAttrib(GL_ENABLE_BIT);
+	//glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_LIGHTING);
+	//glDisable(GL_TEXTURE_2D);
+	//glEnable(GL_BLEND);
 
-	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT );
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT );
+	//glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_LIGHTING);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glBegin(GL_TRIANGLE_STRIP);
-		glColor4f(.5f,.8f,1.f,.6f); glVertex2f(-1, 1);
-		glColor4f(.0f,.0f,.0f,.0f); glVertex2f(-1,-1);
-		glColor4f(.5f,.8f,1.f,.6f); glVertex2f(-.5f,1);
-		glColor4f(.0f,.0f,.0f,.0f); glVertex2f(-.5f,-1);
-	glEnd();
+	//glBegin(GL_TRIANGLE_STRIP);
+	//	glColor4f(.5f,.8f,1.f,.6f); glVertex2f(-1, 1);
+	//	glColor4f(.0f,.0f,.0f,.0f); glVertex2f(-1,-1);
+	//	glColor4f(.5f,.8f,1.f,.6f); glVertex2f(-.5f,1);
+	//	glColor4f(.0f,.0f,.0f,.0f); glVertex2f(-.5f,-1);
+	//glEnd();
 
 
-  float fontSpacingV = (curSiz.height()*.01f)+3;
-	float hPosition = curSiz.width()*.1f;
-	glColor(Color4b::White);
-	//qFont.setBold(true);
-	renderText(2+hPosition-(qFont.pointSize()*9),1.5*fontSpacingV,QString("MeshLab Quick Help"),qFont);qFont.setBold(false);
-  renderText(2,3*fontSpacingV,QString("Drag:"),qFont);								renderText(hPosition,3*fontSpacingV,QString("Rotate"),qFont);
-	renderText(2,4.5*fontSpacingV,QString("Ctrl-Drag:"),qFont);					renderText(hPosition,4.5*fontSpacingV,QString("Pan"),qFont);
-	renderText(2,6*fontSpacingV,QString("Shift-Drag:"),qFont);					renderText(hPosition,6*fontSpacingV,QString("Zoom"),qFont);
-	renderText(2,7.5*fontSpacingV,QString("Alt-Drag:"),qFont);					renderText(hPosition,7.5*fontSpacingV,QString("Z-Panning"),qFont);
-	renderText(2,9*fontSpacingV,QString("Ctrl-Shift-Drag:"),qFont);			renderText(hPosition,9*fontSpacingV,QString("Rotate light"),qFont);
-	renderText(2,10.5*fontSpacingV,QString("Wheel:"),qFont);						renderText(hPosition,10.5*fontSpacingV,QString("Zoom"),qFont);
-	renderText(2,12*fontSpacingV,QString("Shift-Wheel:"),qFont);				renderText(hPosition,12*fontSpacingV,QString("Change perspective"),qFont);
-	renderText(2,13.5*fontSpacingV,QString("Ctrl-Wheel:"),qFont);				renderText(hPosition,13.5*fontSpacingV,QString("Move near clipping plane"),qFont);
-	renderText(2,15*fontSpacingV,QString("Ctrl-Shift-Wheel:"),qFont);		renderText(hPosition,15*fontSpacingV,QString("Move far clipping plane"),qFont);
-	renderText(2,16.5*fontSpacingV,QString("Double Click:"),qFont);			renderText(hPosition,16.5*fontSpacingV,QString("Center on mouse"),qFont);
-	renderText(2,18*fontSpacingV,QString("Alt+enter:"),qFont);						renderText(hPosition,18*fontSpacingV,QString("Enter/Exit fullscreen mode"),qFont);
+ // float fontSpacingV = (curSiz.height()*.01f)+3;
+	//float hPosition = curSiz.width()*.1f;
+	//glColor(Color4b::White);
+	////qFont.setBold(true);
+	//renderText(2+hPosition-(qFont.pointSize()*9),1.5*fontSpacingV,QString("MeshLab Quick Help"),qFont);qFont.setBold(false);
+ // renderText(2,3*fontSpacingV,QString("Drag:"),qFont);								renderText(hPosition,3*fontSpacingV,QString("Rotate"),qFont);
+	//renderText(2,4.5*fontSpacingV,QString("Ctrl-Drag:"),qFont);					renderText(hPosition,4.5*fontSpacingV,QString("Pan"),qFont);
+	//renderText(2,6*fontSpacingV,QString("Shift-Drag:"),qFont);					renderText(hPosition,6*fontSpacingV,QString("Zoom"),qFont);
+	//renderText(2,7.5*fontSpacingV,QString("Alt-Drag:"),qFont);					renderText(hPosition,7.5*fontSpacingV,QString("Z-Panning"),qFont);
+	//renderText(2,9*fontSpacingV,QString("Ctrl-Shift-Drag:"),qFont);			renderText(hPosition,9*fontSpacingV,QString("Rotate light"),qFont);
+	//renderText(2,10.5*fontSpacingV,QString("Wheel:"),qFont);						renderText(hPosition,10.5*fontSpacingV,QString("Zoom"),qFont);
+	//renderText(2,12*fontSpacingV,QString("Shift-Wheel:"),qFont);				renderText(hPosition,12*fontSpacingV,QString("Change perspective"),qFont);
+	//renderText(2,13.5*fontSpacingV,QString("Ctrl-Wheel:"),qFont);				renderText(hPosition,13.5*fontSpacingV,QString("Move near clipping plane"),qFont);
+	//renderText(2,15*fontSpacingV,QString("Ctrl-Shift-Wheel:"),qFont);		renderText(hPosition,15*fontSpacingV,QString("Move far clipping plane"),qFont);
+	//renderText(2,16.5*fontSpacingV,QString("Double Click:"),qFont);			renderText(hPosition,16.5*fontSpacingV,QString("Center on mouse"),qFont);
+	//renderText(2,18*fontSpacingV,QString("Alt+enter:"),qFont);						renderText(hPosition,18*fontSpacingV,QString("Enter/Exit fullscreen mode"),qFont);
+	//glPopAttrib();
+	//// Closing 2D
+	//glPopAttrib();
+	//glPopMatrix(); // restore modelview
+	//glMatrixMode(GL_PROJECTION);
+	//glPopMatrix();
+	//glMatrixMode(GL_MODELVIEW);
+	//glPopAttrib();
+
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	QPainter painter(this);
+	painter.save();
+	painter.setRenderHint(QPainter::TextAntialiasing);
+	painter.setPen(Qt::white);
+	qFont.setStyleStrategy(QFont::NoAntialias);
+	qFont.setFamily("Helvetica");
+	qFont.setPixelSize(12);
+	painter.setFont(qFont);
+	float bar0Width = qFont.pixelSize()* QString("Ctrl-Shift-Wheel:").size();
+	float bar1Width = qFont.pixelSize()* QString("Enter/Exit fullscreen mode").size();
+	QFontMetrics metrics = QFontMetrics(font());
+	int border = qMax(4, metrics.leading());
+
+	QRect Column_0(0,border, bar0Width, height()-border);
+	QRect Column_1( bar0Width,border,  bar0Width + bar1Width,  height()-border);
+
+	Color4b logAreaColor = glas.logAreaColor;
+	glas.logAreaColor[3]=128;
+	if(mvc->currentId!=id) logAreaColor /=2.0;
+
+	painter.fillRect(QRect(0, border, bar0Width + bar1Width, height()-border), ColorConverter::ToQColor(logAreaColor));
+
+	QString col1Text,col0Text;
+
+	if(meshDoc->size()>0)
+	{
+		if(meshDoc->size()==1)
+		{
+			col1Text += QString("Vertices: %1\n").arg(mm()->cm.vn);
+			col1Text += QString("Faces: %1\n").arg(mm()->cm.fn);
+		}
+		else
+		{
+			col1Text += QString("<%1>\n").arg(mm()->shortName());
+			col1Text += QString("Vertices: %1 (%2)\n").arg(mm()->cm.vn).arg(meshDoc->vn());
+			col1Text += QString("Faces: %1 (%2)\n").arg(mm()->cm.fn).arg(meshDoc->fn());
+		}
+
+		if(rm.selectedFace || rm.selectedVert || mm()->cm.sfn>0 || mm()->cm.svn>0 )
+			col1Text += QString("Selection: v:%1 f:%2\n").arg(mm()->cm.svn).arg(mm()->cm.sfn);
+
+		col1Text += GetMeshInfoString();
+
+		if(fov>5) col0Text += QString("FOV: %1\n").arg(fov);
+		else col0Text += QString("FOV: Ortho\n");
+		if ((cfps>0) && (cfps<999))
+			col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
+		if ((clipRatioNear!=1) || (clipRatioFar!=1))
+			col0Text += QString("Clipping: N:%1 F:%2\n").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1);
+		painter.drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
+		painter.drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
+		//if(mm()->cm.Tr != Matrix44f::Identity() ) displayMatrix(&painter, Column_2);
+	}
+	painter.restore();
+	painter.end();
 	glPopAttrib();
-	// Closing 2D
-	glPopAttrib();
-	glPopMatrix(); // restore modelview
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 
 }
 

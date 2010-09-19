@@ -227,7 +227,7 @@ void MainWindow::createActions()
 	showToolbarRenderAct->setChecked(true);
 	connect(showToolbarRenderAct, SIGNAL(triggered()), this, SLOT(showToolbarRender()));
 
-	showInfoPaneAct= new QAction (tr("Show Info &Pane"), this);
+	showInfoPaneAct= new QAction (tr("Show Info &Panel"), this);
 	showInfoPaneAct->setCheckable(true);
 	connect(showInfoPaneAct, SIGNAL(triggered()), this, SLOT(showInfoPane()));
 
