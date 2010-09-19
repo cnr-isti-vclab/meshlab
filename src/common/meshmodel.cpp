@@ -261,23 +261,20 @@ void MeshDocument::removeTag(int id){
 }
 
 MeshModel::MeshModel(MeshDocument *parent, const char *meshName) {
-  glw.m=&cm;
-  _id=parent->newMeshId();
-  if(parent)
-  {
-    parent->addNewMesh(meshName,this);
-  }
-  // These data are always active on the mesh
-  currentDataMask = MM_NONE;
-  currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
-  currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
+	glw.m=&cm;
+	_id=parent->newMeshId();
+	// These data are always active on the mesh
+	currentDataMask = MM_NONE;
+	currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
+	currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
 
-  visible=true;
-  cm.Tr.SetIdentity();
-  cm.sfn=0;
-  cm.svn=0;
-  if(meshName)
-		  fullPathFileName=meshName;
+	visible=true;
+	cm.Tr.SetIdentity();
+	cm.sfn=0;
+	cm.svn=0;
+	if(meshName) 
+		fullPathFileName=meshName;
+	//parent->addNewMesh(qPrintable(fullPathFileName),this);
 }
 
 
