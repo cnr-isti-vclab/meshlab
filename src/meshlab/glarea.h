@@ -233,10 +233,10 @@ protected:
 
 	void initializeGL();
 	void initTexture();
-	void displayInfo();
+  void displayInfo(QPainter *painter);
   void displayMatrix(QPainter *painter, QRect areaRect);
 	void displayViewerHighlight();
-	void displayHelp();
+  void displayHelp(QPainter *painter);
 
 	QString GetMeshInfoString();
   void paintEvent(QPaintEvent *event);

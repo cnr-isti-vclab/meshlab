@@ -1,0 +1,13 @@
+MeshLab Quick Help
+
+Drag:	Rotate
+Ctrl-Drag:	Pan
+Shift-Drag:	Zoom
+Alt-Drag:	Z-Panning
+Ctrl-Shift-Drag:	Rotate light
+Wheel:	Zoom	
+Shift-Wheel:	Change perspective
+Ctrl-Wheel:	Move near clipping plane
+Ctrl-Shift-Wheel:	Move far clipping plane
+Double Click:	Center on mouse
+Alt+enter:	Enter/Exit fullscreen mode
