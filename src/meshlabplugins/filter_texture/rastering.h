@@ -281,12 +281,9 @@ public:
 		
 		// Convert point to barycentric coords
 		vcg::Point3f interp;
-		int axis = 0;
-		float tmp = -1;
-		for (int i=0; i<3; ++i)
-			if (fabs(nearestF->cN()[i]) > tmp) {tmp = fabs(nearestF->cN()[i]); axis = i;}
-		bool ret = InterpolationParameters(*nearestF, axis, closestPt, interp);
-		assert(ret);
+    bool ret = InterpolationParameters(*nearestF, nearestF->cN(), closestPt, interp);
+    if(!ret) return;
+    assert(ret);
 		interp[2]=1.0-interp[1]-interp[0];
 		
 		if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - tp.Y())) < alpha)
