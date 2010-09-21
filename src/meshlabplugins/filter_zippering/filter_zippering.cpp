@@ -373,7 +373,9 @@ void FilterZippering::handleBorder( aux_info &info,                             
     for (size_t i = 0; i < info.border.size(); i ++) {
         //search for component intersecated by border and split it into two or more components
         bool conn = true; int c = searchComponent( info, info.border[i].edges.front().P0(), info.border[i].edges.back().P1(), conn ); polyline current;
-        if ( conn ) current = info.conn[c]; else current = info.trash[c];
+        if ( c == -1 ) //no intersection
+			continue;
+		if ( conn ) current = info.conn[c]; else current = info.trash[c];
         info.AddCComponent( cutComponent( current, info.border[i], rot_matrix ) );
 		polyline rev_border = info.border[i]; reverse( rev_border.edges.begin(), rev_border.edges.end() );
         for ( size_t k = 0; k < rev_border.edges.size(); k ++) rev_border.edges[k].Flip();
@@ -579,6 +581,7 @@ bool FilterZippering::findIntersection(  CMeshO::FacePointer currentF,				//face
 										 int last_split,							//previously splitted edge
 										 int &splitted_edge,						//currently splitted edge
 										 Point3f &hit ) {	//approximate intersection point
+	if ( currentF == NULL ) return false;
 	splitted_edge = -1;
     Plane3<CMeshO::ScalarType> plane; plane.Init( currentF->P(0), currentF->N() ); //projection plane
     Matrix44f rot_m; Point2f pt;	//matrix
@@ -965,7 +968,8 @@ int FilterZippering::refineBorder( MeshModel* m ) {
 				//add 1 new vertex
 				CMeshO::VertexIterator v = tri::Allocator<CMeshO>::AddVertices( m->cm, 1, vpu );
 				//update vertex pointer if necessary
-				if ( vpu.NeedUpdate() )  vpu.Update( pos.V() );
+				if ( vpu.NeedUpdate() )  
+					vpu.Update( pos.V() );
 				//search non-border edge;
 				int j; for (j=0; j<3 && face::IsBorder(*pos.F(), j); j++); assert( j < 3 );
 				//opposite face (vill be removed) and half-edge
@@ -999,13 +1003,16 @@ int FilterZippering::refineBorder( MeshModel* m ) {
 				CMeshO::FacePointer del_face_01 = pos.F()->FFp(j);
 				//troubleshooting
 				//if we split start face, we have to set a new start in order to avoid infinite loop
-				if ( pos.F() == start ) start = f1;
-				if ( (pos.F()->FFp(j)) == start && face::IsBorder(*f3,0) ) start = f3;
-				if ( (pos.F()->FFp(j)) == start && face::IsBorder(*f4,0) ) start = f4;
+				if ( pos.F() == start ) 
+					start = f1;
+				if ( (pos.F()->FFp(j)) == start && face::IsBorder(*f3,0) ) 
+					start = f3;
+				if ( (pos.F()->FFp(j)) == start && face::IsBorder(*f4,0) ) 
+					start = f4;
 				//it's a square, break the loop and go on
 				bool square = face::BorderCount(*(pos.F())) == 2 && face::BorderCount(*(pos.F()->FFp(j))) == 2;
 				//we deleted two faces, so we set a new pos using new faces
-				pos.Set( f1, 2, pos.V() );		
+				pos.Set( f1, 2, f1->V(0) );		
 				//finally remove faces
 				tri::Allocator<CMeshO>::DeleteFace( m->cm, *del_face_00 );
 				tri::Allocator<CMeshO>::DeleteFace( m->cm, *del_face_01 );
@@ -1500,7 +1507,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	if (ID(filter) == FP_ZIPPERING) {
 		//pre-processing step: visit the border of B and split faces with two border edges
 		refineBorder( b );
-
 		//clean flags
 		tri::UpdateFlags<CMeshO>::FaceClear(a->cm);
 		tri::UpdateFlags<CMeshO>::FaceClear(b->cm);
@@ -1517,6 +1523,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		//store face number
 		size_t fn_limit = a->cm.fn;
 		//append B to A and update flags
+		tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
+		tri::UpdateTopology<CMeshO>::FaceFace(b->cm);
 		tri::Append<CMeshO, CMeshO>::Mesh( a->cm, b->cm );
 		tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
 		tri::UpdateFlags<CMeshO>::FaceClear(a->cm);
@@ -1575,7 +1583,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		tbt_faces.resize(itr - tbt_faces.begin() );
 		//retriangulation of the faces and removal of the remaining part
 		vector< Point3f > coords; size_t patch_verts = verts.size();
-		for ( size_t i = 0; i < tbt_faces.size(); i ++ ) {
+		for ( size_t i = 0; i < tbt_faces.size(); i ++ )	 {
 			if ( !tbt_faces[i]->IsD() ) {
 				handleBorder( map_info[tbt_faces[i]], tbt_faces[i]->N(), coords, verts );
 				tri::Allocator<CMeshO>::DeleteFace(a->cm, *tbt_faces[i]);
@@ -1606,6 +1614,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 
 		//remove degenerate faces
 		tri::Clean<CMeshO>::RemoveDegenerateFace(a->cm);
+		tri::Clean<CMeshO>::RemoveDuplicateVertex(a->cm);
 		//compact vectors and update topology
 		tri::Allocator<CMeshO>::CompactFaceVector( a->cm );
 		tri::Allocator<CMeshO>::CompactVertexVector( a->cm );
