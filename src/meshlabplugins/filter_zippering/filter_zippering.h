@@ -50,7 +50,7 @@ struct aux_info {
     float eps;                      //epsilon
     //Add segment c to border
     virtual bool AddToBorder( vcg::Segment3<CMeshO::ScalarType> c, std::pair<int, int> v  ) {
-        /****Insert new segment****/
+		/****Insert new segment****/
         //Search for segment S having S.P0() == c.P1 or S.P1 == c.P0()
         if ( v.first == v.second ) return false;
         if ( c.Length() < eps ) { c.P1() = c.P0(); v.second = v.first; }

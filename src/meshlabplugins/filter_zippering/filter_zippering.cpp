@@ -1109,12 +1109,16 @@ void FilterZippering::projectFace( CMeshO::FacePointer f,							//pointer to the
 			 ( endF == 0 || isOnBorder( closestEnd, endF ) ) ) {
 			//if closest point is really closest to the border, split border face
 			if ( startF != 0 && Distance<CMeshO::ScalarType>(a->cm.vert[current_edge.first].P(), closestStart) <= eps ) {
+				map_info[startF].SetEps( eps ); 
+				map_info[startF].Init( *startF, tri::Index( a->cm, startF->V(0) ), tri::Index( a->cm, startF->V(1) ), tri::Index( a->cm, startF->V(2) )  );
 				map_info.insert( make_pair(startF, dummy) );
 				map_info[startF].addVertex( &(a->cm.vert[current_edge.first]), current_edge.first );
 				tbt_faces.push_back( startF );
 			}
 			//if closest point is really closest to the border, split border face
 			if ( endF != 0 && Distance<CMeshO::ScalarType>(a->cm.vert[current_edge.second].P(), closestEnd) <= eps ) {
+				map_info[endF].SetEps( eps );   
+				map_info[endF].Init( *endF, tri::Index( a->cm, endF->V(0) ), tri::Index( a->cm, endF->V(1) ), tri::Index( a->cm, endF->V(2) )  );
 				map_info.insert( make_pair(endF, dummy) );
 				map_info[endF].addVertex( &(a->cm.vert[current_edge.second]), current_edge.second );
 				tbt_faces.push_back( endF );
@@ -1139,7 +1143,7 @@ void FilterZippering::projectFace( CMeshO::FacePointer f,							//pointer to the
 		
 		//initialize info on faces (if info is already initialized, no operation is done)
 		map_info.insert( make_pair(startF, dummy) );	map_info[startF].SetEps( eps ); map_info[startF].Init( *startF, tri::Index( a->cm, startF->V(0) ), tri::Index( a->cm, startF->V(1) ), tri::Index( a->cm, startF->V(2) )  );
-		map_info.insert( make_pair(endF, dummy) );		map_info[endF].SetEps( eps );   map_info[startF].Init( *endF, tri::Index( a->cm, endF->V(0) ), tri::Index( a->cm, endF->V(1) ), tri::Index( a->cm, endF->V(2) )  );
+		map_info.insert( make_pair(endF, dummy) );		map_info[endF].SetEps( eps );   map_info[endF].Init( *endF, tri::Index( a->cm, endF->V(0) ), tri::Index( a->cm, endF->V(1) ), tri::Index( a->cm, endF->V(2) )  );
 
 		//project points on the surface of the mesh
 		a->cm.vert[current_edge.first].P() = closestStart;
