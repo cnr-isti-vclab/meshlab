@@ -269,7 +269,7 @@ inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
 	opac *= ((float)newcol[3]/255.0);
 	
 	for (int i = 0; i < 3; i ++) 
-		orig[i] = vcg::math::Min(255, ( (newcol[i]-orig[i]) * opac + orig[i] * 100 ) / 100);
+    orig[i] = std::min(255, ( (newcol[i]-orig[i]) * opac + orig[i] * 100 ) / 100);
 	
 	vertex->C() = orig;
 }
@@ -282,7 +282,7 @@ inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
 inline void mergeColors(double percent,const vcg::Color4b& c1,const vcg::Color4b& c2, vcg::Color4b* dest)
 {
 	for (int i = 0; i < 4; i ++)
-		(*dest)[i] = (char)vcg::math::Min(255.0,((c1[i]-c2[i])*percent+c2[i]));
+    (*dest)[i] = (char)std::min(255.0,((c1[i]-c2[i])*percent+c2[i]));
 }
 
 /** 

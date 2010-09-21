@@ -184,7 +184,7 @@ inline float brush(Brush b, float distance, float dx, float dy, float hardness)
 			if (dx >= 100 || dy >= 100 ) op = 1.0;
 			else if (dx > hardness || dy > hardness) 
 			{
-				op = (vcg::math::Max<float>(dx, dy) - hardness)/ (float) (100 - hardness);
+        op = (std::max<float>(dx, dy) - hardness)/ (float) (100 - hardness);
 			}
 			op = 1 - op;
 			break;
