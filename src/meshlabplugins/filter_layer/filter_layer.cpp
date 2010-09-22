@@ -27,15 +27,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "filter_splitter.h"
+#include "filter_layer.h"
 
 #include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include<vcg/complex/trimesh/allocate.h>
-
-#include <vcg/complex/trimesh/update/selection.h>
 #include<vcg/complex/trimesh/append.h>
 
 
@@ -44,9 +38,10 @@ using namespace std;
 using namespace vcg;
 
 // Constructor
-FilterSplitterPlugin::FilterSplitterPlugin()
+FilterLayerPlugin::FilterLayerPlugin()
 {
 	typeList <<
+  FP_FLATTEN <<
 	FP_SPLITSELECT <<
 	FP_DUPLICATE;
 
@@ -55,27 +50,29 @@ FilterSplitterPlugin::FilterSplitterPlugin()
 }
 
 // ST() return the very short string describing each filtering action
- QString FilterSplitterPlugin::filterName(FilterIDType filterId) const
+ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_SPLITSELECT :  return QString("Move selection on another layer");
 		case FP_DUPLICATE :  return QString("Duplicate current layer");
-		default : assert(0);
+    case FP_FLATTEN :  return QString("Flatten visible layers");
+    default : assert(0);
 	}
 }
 
 // Info() return the longer string describing each filtering action
- QString FilterSplitterPlugin::filterInfo(FilterIDType filterId) const
+ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_SPLITSELECT :  return QString("Selected faces are moved (or duplicated) in a new layer");
 		case FP_DUPLICATE :  return QString("Create a new layer containing the same model as the current one");
-		default : assert(0);
+    case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformations are preserved. Existing layers can be optionally deleted");
+    default : assert(0);
 	}
 }
 
 // This function define the needed parameters for each filter.
-void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst)
+void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst)
 {
 	 switch(ID(action))
 	 {
@@ -88,13 +85,35 @@ void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/
 												"if false, the selected faces are duplicated in the new layer"));
 			}
 			break;
+   case FP_FLATTEN :
+     parlst.addParam(new RichBool ("MergeVisible",
+                     true,
+                     "Merge Only Visible Layers",
+                     "Merge the vertices that are duplicated among different layers. <br>"
+                     "Very useful when the layers are spliced portions of a single big mesh."));
+     parlst.addParam(new RichBool ("DeleteLayer",
+                     true,
+                     "Delete Layers ",
+                     "Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
+                 parlst.addParam(new RichBool ("MergeVertices",
+                     true,
+                     "Merge duplicate vertices",
+                     "Merge the vertices that are duplicated among different layers. \n\n"
+                     "Very useful when the layers are spliced portions of a single big mesh."));
+                 parlst.addParam(new RichBool ("AlsoUnreferenced",
+                                                                                       false,
+                                                                                       "Keep unreferenced vertices",
+                                                                                       "Do not discard unreferenced vertices from source layers\n\n"
+                                                                                       "Necessary for point-only layers"));
+                 break;
+
 
    default: break; // do not add any parameter for the other filters
   }
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *)
+bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	CMeshO::FaceIterator fi;
 	int numFacesSel,numVertSel;
@@ -169,22 +188,75 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				face::ComputeNormalizedNormal(*fi);
 			tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
 			destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
-		}
+    }break;
+  case FP_FLATTEN :
+  {
+    // to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
+    bool deleteLayer = par.getBool("DeleteLayer");
+    bool mergeVisible = par.getBool("MergeVisible");
+    bool mergeVertices = par.getBool("MergeVertices");
+                      bool alsounreferenced = par.getBool("AlsoUnreferenced");
+
+    MeshModel *destMesh= md.addNewMesh("Merged Mesh");
+    md.meshList.front();
+    QList<MeshModel *> toBeDeletedList;
+
+    int cnt=0;
+    foreach(MeshModel *mmp, md.meshList)
+    { ++cnt;
+      if(mmp->visible || !mergeVisible)
+      {
+        if(mmp!=destMesh)
+        {
+            cb(cnt*100/md.meshList.size(), "Merging layers...");
+            tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
+            toBeDeletedList.push_back(mmp);
+            if(!alsounreferenced)
+                vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmp->cm);
+            tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
+            tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
+                                                      destMesh->updateDataMask(mmp);
+        }
+      }
+    }
+
+    if( deleteLayer )	{
+      Log( "Deleted %d merged layers", toBeDeletedList.size());
+      foreach(MeshModel *mmp,toBeDeletedList) {
+          md.delMesh(mmp);
+        }
+    }
+
+    if( mergeVertices )
+    {
+      int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
+      Log( "Removed %d duplicated vertices", delvert);
+    }
+
+    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(destMesh->cm);
+    tri::UpdateBounding<CMeshO>::Box(destMesh->cm);
+
+
+    // Log function dump textual info in the lower part of the MeshLab screen.
+    Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
+
+  } break;
 	}
 
 	return true;
 }
 
- FilterSplitterPlugin::FilterClass FilterSplitterPlugin::getClass(QAction *a)
+ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {
     case FP_SPLITSELECT :
     case FP_DUPLICATE :
+  case FP_FLATTEN :
       return MeshFilterInterface::Layer;
 		default :  assert(0);
 			return MeshFilterInterface::Generic;
   }
 }
 
-Q_EXPORT_PLUGIN(FilterSplitterPlugin)
+Q_EXPORT_PLUGIN(FilterLayerPlugin)

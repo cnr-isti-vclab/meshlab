@@ -28,15 +28,15 @@
 
 #include <common/interfaces.h>
 
-class FilterSplitterPlugin : public QObject, public MeshFilterInterface
+class FilterLayerPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_SPLITSELECT, FP_DUPLICATE };
+  enum { FP_FLATTEN, FP_SPLITSELECT, FP_DUPLICATE };
 
-	FilterSplitterPlugin();
+  FilterLayerPlugin();
 	
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
