@@ -42,9 +42,6 @@ namespace vs
 
         vector< Pov > customPovs;           // custom point-of-views
         bool useCustomPovs;
-
-        // only for my sandbox
-        vector< vcg::Point3f > computedPovs;
     };
 
     /*

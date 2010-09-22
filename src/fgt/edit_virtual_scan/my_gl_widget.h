@@ -1,9 +1,9 @@
 #ifndef MY_GL_WIDGET_H
 #define MY_GL_WIDGET_H
 
-#include "filter_virtual_range_scan.h"
+#include    "vs/sampler.h"
 
-#include <QGLWidget>
+#include    <QGLWidget>
 
 using namespace vs;
 
@@ -14,8 +14,9 @@ public:
     MyGLWidget( VSParameters*   params,
                 MeshModel*      inputMeshModel,
                 CMeshO*         uniformSamplesMesh,
-                CMeshO*         featureSamplesMesh )
-                    : QGLWidget( (QWidget*)0 )
+                CMeshO*         featureSamplesMesh,
+                QGLWidget*      shareWidget )
+                    : QGLWidget( (QWidget*)0, shareWidget )
     {
         this->params = params;
         this->inputMeshModel = inputMeshModel;

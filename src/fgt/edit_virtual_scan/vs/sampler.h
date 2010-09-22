@@ -38,13 +38,6 @@ namespace vs
                   MeshType*         featureSamplesMesh,
                   SamplerListener*  listener = 0 )
         {
-            /*
-            QTime alltime;
-            alltime.start();
-            QTime detectionTime;
-            detectionTime.start();
-            */
-
             if( listener ){ listener->startingSetup(); }
 
             // OpenGL initialization
@@ -85,10 +78,6 @@ namespace vs
             FeatureDetector                 detector        ( &resources );
 
             GLint* samplesCount = &( resources.buffers[ "best_position" ]->elements );
-            /*
-            int all_init_time = alltime.restart();
-            qDebug( "init_time: %d msec", all_init_time );
-            */
             if( listener ){ listener->setupComplete( resources.params->povs ); }
 
             // *** sampling ***
@@ -136,10 +125,6 @@ namespace vs
 
                 // download samples
                 downloadSamples( &resources, (i==0)? uniformSamplesMesh : featureSamplesMesh );
-                /*
-                all_init_time = alltime.restart();
-                qDebug( (i==0)? "uniforms time: %d msec" : "features time: %d msec", all_init_time );
-                */
             }
 
             // ****************

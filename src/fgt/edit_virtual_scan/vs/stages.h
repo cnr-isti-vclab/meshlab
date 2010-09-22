@@ -199,9 +199,6 @@ namespace vs
                 orthoRadius = ( inputMesh->bbox.Diag() / 2 ) * 1.2;
                 PovsGenerator< ScalarType >::generatePovs( res->params->povs, orthoRadius, meshCenter, coneAxis, coneGap, povs );
                 generateUpVectors( povs, meshCenter, upVectors );
-
-                // only for my sandbox
-                resources->params->computedPovs = this->povs;
             }
         }
 
