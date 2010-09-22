@@ -22,6 +22,7 @@ SUBDIRS       = common \
 				meshlabplugins/filter_create \
         meshlabplugins/filter_fractal \
 				meshlabplugins/filter_isoparametrization \
+				meshlabplugins/filter_layer \
 				meshlabplugins/filter_measure \
 				meshlabplugins/filter_meshing \
 				meshlabplugins/filter_mls \
@@ -29,7 +30,6 @@ SUBDIRS       = common \
 				meshlabplugins/filter_poisson \
 				meshlabplugins/filter_sampling \
 				meshlabplugins/filter_slice \
-				meshlabplugins/filter_splitter \
 				meshlabplugins/filter_select \
 				meshlabplugins/filter_texture \
         		meshlabplugins/filter_unsharp \
@@ -53,7 +53,6 @@ SUBDIRS       = common \
 				sampleplugins/sampleedit \
 				sampleplugins/samplefilter \
 				sampleplugins/samplefilterdyn \
-				sampleplugins/samplefilterdoc \
 				sampleplugins/sampledecoration \
 				sampleplugins/io_m\
 				sampleplugins/filterborder \

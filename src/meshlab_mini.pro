@@ -22,7 +22,7 @@ SUBDIRS       = common \                          # the common framework, used b
 #                meshlabplugins/filter_colorize\
 #                meshlabplugins/filter_measure\
 #                meshlabplugins/filter_sampling\
-#                meshlabplugins/filter_splitter\
+#                meshlabplugins/filter_layer\
 #                meshlabserver \
 
 #
