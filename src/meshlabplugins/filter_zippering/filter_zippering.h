@@ -52,8 +52,22 @@ struct aux_info {
     virtual bool AddToBorder( vcg::Segment3<CMeshO::ScalarType> c, std::pair<int, int> v  ) {
 		/****Insert new segment****/
         //Search for segment S having S.P0() == c.P1 or S.P1 == c.P0()
-        if ( v.first == v.second ) return false;
-        if ( c.Length() < eps ) { c.P1() = c.P0(); v.second = v.first; }
+		if ( v.first == 4013 && v.second == 4015 )
+			int stop = 3;
+		if ( v.first == v.second ) return false;
+        if ( c.Length() < eps ) {
+			c.P0() = c.P1();
+			v.first = v.second;
+			//if segment is too short (it's basically a point) check if it's one of the vertices
+			for ( size_t i = 0; i < trash.size(); i ++ ) {
+				for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) { //Only one trash component
+					if ( vcg::Distance<float>( trash[i].edges[j].P0(), c.P0() ) < eps ) return false;
+				}
+			}
+		}
+
+		if ( v.first == 4013 && v.second == 4013 )
+			int stop = 3;
         //check if c doesn't lie on existing edges
         //if it does, split edge
         for ( size_t i = 0; i < trash.size(); i ++ ) {

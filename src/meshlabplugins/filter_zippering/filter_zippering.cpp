@@ -1283,6 +1283,8 @@ void FilterZippering::handleBorderEdgeNF ( pair< int, int >& current_edge,						
 	Segment3<CMeshO::ScalarType> s( a->cm.vert[current_edge.first].P(), a->cm.vert[current_edge.second].P() );
 	//if they share a vertex and border edge pass trough the vertex, we split current face using the vertex
     if ( w != -1 && (cnt++ == MAX_LOOP || SquaredDistance<float>( s, startF->P(w) ) <= eps) ) {
+		//too short and it's a vertex, do nothing
+		if ( s.Length() < eps && vcg::Distance<float>( s.P0(), startF->P(w) ) < eps ) return;
 		tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
         CMeshO::VertexIterator v = tri::Allocator<CMeshO>::AddVertices( a->cm, 1, vpu ); (*v).P() = startF->P(w);
 		//add information to startF
