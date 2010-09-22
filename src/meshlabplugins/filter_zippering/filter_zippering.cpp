@@ -1053,7 +1053,6 @@ void FilterZippering::projectFace( CMeshO::FacePointer f,							//pointer to the
 	//store current border edge
 	stack.push_back( make_pair( tri::Index( a->cm, f->V(e) ),
                                 tri::Index( a->cm, f->V1(e) ) ) );    //indices of border vertices
-
 	//while there are border edges...
 	while ( !stack.empty() ) {
 
@@ -1076,6 +1075,14 @@ void FilterZippering::projectFace( CMeshO::FacePointer f,							//pointer to the
 		//search for nearest face of vertex e+1
         CMeshO::FacePointer endF = grid_a.GetClosest(PDistFunct, markerFunctor,  a->cm.vert[current_edge.second].P(), max_dist, dist, closestEnd);
 		if ( fabs(dist) >= fabs(max_dist) ) endF = 0;
+		
+		//DEBUG
+		if ( startF != 0 && endF != 0 ) {
+			if ( vcg::Distance<float> (a->cm.vert[current_edge.first].P(), closestStart) < eps &&
+				 vcg::Distance<float> (a->cm.vert[current_edge.second].P(), closestEnd) < eps )
+			dbg_cnt++;
+			continue;
+		}
 		
 		//case 00: startF and endF are null faces: no op
 		if ( startF == 0 && endF == 0 ) continue;
@@ -1554,7 +1561,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		vector< CMeshO::FacePointer > tbt_faces;   //To Be Triangulated
 		vector< CMeshO::FacePointer > tbr_faces;   //To Be Removed
 		vector< int > verts;					   //vector containing indices of vertices of the new faces
-
+		int ccc = 0;
+		dbg_cnt = 0;
 		//for each border of the mesh B, select a face and projected it on the surface of A
 		//add information to the faces of A when needed
 		for ( size_t c = 0; c < border.size(); c ++ ) {
@@ -1572,6 +1580,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 				int v_ind = tri::Index( a->cm, p.V() );
 				//project current face on the surface of A
 				projectFace( p.F(), a, grid, par.getFloat("distance"), map_info, tbt_faces, tbr_faces, verts );
+				ccc++;
 				//restore vertex pointer
 				p.V() = &a->cm.vert[v_ind];
 				p.NextB();

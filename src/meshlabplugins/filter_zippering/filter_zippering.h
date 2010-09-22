@@ -453,6 +453,8 @@ private:
 
 
         float eps;
+
+		int dbg_cnt;
 };
 
 #endif
