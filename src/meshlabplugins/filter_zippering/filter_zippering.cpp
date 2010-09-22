@@ -31,6 +31,7 @@
 
 #include <vcg/simplex/face/topology.h>
 #include <vcg/simplex/face/pos.h>
+#include <vcg/simplex/face/jumping_pos.h>
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/hole.h>
@@ -844,9 +845,9 @@ int FilterZippering::selectRedundant( std::vector< std::pair<CMeshO::FacePointer
 				//in order to guarantee that A and B will be tested alternatively
 				currentF->SetS(); sf++;
 				//insert adjacent faces at the beginning of the queue 
-				if ( !currentF->FFp(0)->IsS() ) queue.push_back( make_pair(currentF->FFp(0),'A') );
-				if ( !currentF->FFp(1)->IsS() ) queue.push_back( make_pair(currentF->FFp(1),'A') );
-				if ( !currentF->FFp(2)->IsS() ) queue.push_back( make_pair(currentF->FFp(2),'A') );
+				queue.push_back( make_pair(currentF->FFp(0),'A') );
+				queue.push_back( make_pair(currentF->FFp(1),'A') );
+				queue.push_back( make_pair(currentF->FFp(2),'A') );
 			}
 		}
 		//face is from mesh B, test redundancy with respect to A
@@ -856,9 +857,9 @@ int FilterZippering::selectRedundant( std::vector< std::pair<CMeshO::FacePointer
 				//in order to guarantee that A and B will be tested alternatively
 				currentF->SetS(); sf++;
 				//insert adjacent faces at the beginning of the queue 
-				if ( !currentF->FFp(0)->IsS() ) queue.push_back( make_pair(currentF->FFp(0),'B') );
-				if ( !currentF->FFp(0)->IsS() ) queue.push_back( make_pair(currentF->FFp(1),'B') );
-				if ( !currentF->FFp(0)->IsS() ) queue.push_back( make_pair(currentF->FFp(2),'B') );
+				queue.push_back( make_pair(currentF->FFp(0),'B') );
+				queue.push_back( make_pair(currentF->FFp(1),'B') );
+				queue.push_back( make_pair(currentF->FFp(2),'B') );
 			}
 		}
 	}
@@ -1076,12 +1077,31 @@ void FilterZippering::projectFace( CMeshO::FacePointer f,							//pointer to the
         CMeshO::FacePointer endF = grid_a.GetClosest(PDistFunct, markerFunctor,  a->cm.vert[current_edge.second].P(), max_dist, dist, closestEnd);
 		if ( fabs(dist) >= fabs(max_dist) ) endF = 0;
 		
-		//DEBUG
-		if ( startF != 0 && endF != 0 ) {
-			if ( vcg::Distance<float> (a->cm.vert[current_edge.first].P(), closestStart) < eps &&
-				 vcg::Distance<float> (a->cm.vert[current_edge.second].P(), closestEnd) < eps )
-			dbg_cnt++;
-			continue;
+		//check if current edge projection fits together with an edge of the face
+			if ( startF != 0 && endF != 0 ) {
+			bool fit = false;
+			int vert = -1;
+			for ( int i = 0; i < 3; i ++ ) {
+				if ( vcg::Distance<float>(closestStart, startF->P(i)) < eps )
+					 vert = i;				
+			}
+			if ( vert != -1 ) {
+				//search around vert
+				face::JumpingPos<CMeshO::FaceType> p;
+				p.Set( startF, vert, startF->V(vert) );
+
+				do {
+					if ( vcg::Distance<float>(closestStart, p.V()->P()) < eps &&
+						 vcg::Distance<float>(closestEnd, p.F()->P1(p.E())) < eps &&
+						 face::IsBorder( *(p.F()), p.E() ) )
+						 fit = true;
+					p.FlipF();
+					p.FlipE();
+				}while (p.F() != startF);
+				//we found the face!
+				if (fit) 
+					continue;
+			}
 		}
 		
 		//case 00: startF and endF are null faces: no op
@@ -1291,7 +1311,8 @@ void FilterZippering::handleBorderEdgeNF ( pair< int, int >& current_edge,						
 	//if they share a vertex and border edge pass trough the vertex, we split current face using the vertex
     if ( w != -1 && (cnt++ == MAX_LOOP || SquaredDistance<float>( s, startF->P(w) ) <= eps) ) {
 		//too short and it's a vertex, do nothing
-		if ( s.Length() < eps && vcg::Distance<float>( s.P0(), startF->P(w) ) < eps ) return;
+		if ( s.Length() < eps && vcg::Distance<float>( s.P0(), startF->P(w) ) < eps ) 
+			return;
 		tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
         CMeshO::VertexIterator v = tri::Allocator<CMeshO>::AddVertices( a->cm, 1, vpu ); (*v).P() = startF->P(w);
 		//add information to startF
@@ -1524,15 +1545,11 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		tri::UpdateFlags<CMeshO>::FaceClear(a->cm);
 		tri::UpdateFlags<CMeshO>::FaceClear(b->cm);
 		//before append, clean mesh A 
-		tri::Allocator<CMeshO>::CompactFaceVector( a->cm );
 		tri::Clean<CMeshO>::RemoveUnreferencedVertex( a->cm );
 		tri::Clean<CMeshO>::RemoveDuplicateVertex( a->cm );
-		tri::Allocator<CMeshO>::CompactVertexVector( a->cm );
 		//before append, clean mesh B
-		tri::Allocator<CMeshO>::CompactFaceVector( b->cm );
 		tri::Clean<CMeshO>::RemoveUnreferencedVertex( b->cm );
 		tri::Clean<CMeshO>::RemoveDuplicateVertex( b->cm );
-		tri::Allocator<CMeshO>::CompactVertexVector( b->cm );
 		//store face number
 		size_t fn_limit = a->cm.fn;
 		//append B to A and update flags
@@ -1561,8 +1578,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		vector< CMeshO::FacePointer > tbt_faces;   //To Be Triangulated
 		vector< CMeshO::FacePointer > tbr_faces;   //To Be Removed
 		vector< int > verts;					   //vector containing indices of vertices of the new faces
-		int ccc = 0;
-		dbg_cnt = 0;
 		//for each border of the mesh B, select a face and projected it on the surface of A
 		//add information to the faces of A when needed
 		for ( size_t c = 0; c < border.size(); c ++ ) {
@@ -1580,7 +1595,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 				int v_ind = tri::Index( a->cm, p.V() );
 				//project current face on the surface of A
 				projectFace( p.F(), a, grid, par.getFloat("distance"), map_info, tbt_faces, tbr_faces, verts );
-				ccc++;
 				//restore vertex pointer
 				p.V() = &a->cm.vert[v_ind];
 				p.NextB();
