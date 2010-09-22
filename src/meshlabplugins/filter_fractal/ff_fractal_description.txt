@@ -2,7 +2,7 @@ Generates a fractal terrain perturbation with five different algorithms.<br />
 Some good parameter values to start with are:<br />
 <table align="center">
     <tr style="border:1px solid black">
-        <td></td>
+        <td> - </td>
         <td align="center"> Seed </td>
         <td align="center"> Octaves </td>
         <td align="center"> Lacunarity </td>
@@ -57,9 +57,9 @@ Some good parameter values to start with are:<br />
     </tr>
 </table>
 <br /><br />
-Detailed algorithms descriptions can be found in:<br /><br />
-<span style="font-variant: small-caps;">Ebert, D.S., Musgrave, F.K., Peachey, D., Perlin, K., and Worley, S.</span><br />
-Texturing and Modeling: A Procedural Approach.<br />
-<i>Morgan Kaufmann Publishers Inc., San Francisco, CA, USA, 2002.</i>
+Detailed algorithms descriptions can be found in:<br />
+<i>Ebert, D.S., Musgrave, F.K., Peachey, D., Perlin, K., and Worley, S.</i><br />
+<b>Texturing and Modeling: A Procedural Approach</b><br />
+Morgan Kaufmann Publishers Inc., San Francisco, CA, USA, 2002.<br>
 
 
