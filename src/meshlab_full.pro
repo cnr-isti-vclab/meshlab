@@ -55,7 +55,6 @@ SUBDIRS       = common \
 				sampleplugins/samplefilterdyn \
 				sampleplugins/sampledecoration \
 				sampleplugins/io_m\
-				sampleplugins/filterborder \
 			sampleplugins/filtergeodesic \
 			sampleplugins/filtercreateiso \
              fgt/filter_aging \
