@@ -294,18 +294,23 @@ main (int argc,char **argv )
 		side_factor = 50;
 
 	std::string ocmename,tra_ma_file;
+	bool logging  = false;
 	bool compute_impostors  = false;
 	bool overwrite_database = false;
 	bool add_per_vertex_color = false;
 	bool transform = false;
         vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
 
+#ifdef _DEBUG
+        printf("ocme builder DEBUG MODE\n");
+#endif
+
 	std::string stat_file = std::string(""); 
   while (1)
     {
       int this_option_optind = optind ? optind : 1;
 
-			c = getopt (argc, argv, "ciosp:t:m:l:f:L:a:A:k:");
+			c = getopt (argc, argv, "ciospv:t:m:l:f:L:a:A:k:");
       if (c == EOF)
         break;
 
@@ -364,6 +369,10 @@ main (int argc,char **argv )
 		  berkeley_page_size = 	atoi(optarg);
 		  break;
 
+		case 'v':
+			logging = true;
+		  break;
+
 		default:
           printf("unknown parameter 0%o ??\n", c);
 		  UsageExit();
@@ -380,15 +389,16 @@ main (int argc,char **argv )
   lgn->Append("starting");
 
 
-  TIM::Begin(1);
-  STAT::Begin(N_STAT);
+   TIM::Begin(1);
+   STAT::Begin(N_STAT);
 
  	meshona = new OCME();
 	meshona->params.side_factor = side_factor;
  	meshona->oce.cache_policy->memory_limit  = cache_memory_limit * (1<<20);
- 
  	meshona->streaming_mode = true;	
- 
+
+	lgn->off = !logging;
+
  	int start = clock();
  	int totalstart = start;
 
@@ -409,7 +419,7 @@ main (int argc,char **argv )
 //	for(int i  = optind+min_meshes;  i < argc ; ++i)
 //			files.push_back(std::string(argv[i]));
 //	AddFromDisk(meshona,files);
-	
+        ++optind;
 	for(int i  = optind+min_meshes; (i < argc)&&  (i<optind+max_meshes)&& !Interrupt();++i){
 	
 		unsigned int wh = std::string(argv[i]).find(std::string(".aln"));
@@ -466,7 +476,7 @@ main (int argc,char **argv )
 
 			stat(argv[i],&buf);
 			meshona->stat.input_file_size+=buf.st_size;
-												if(buf.st_size < 500 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
+                        if(buf.st_size < 500 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
 
 				int mask = 0;
 
@@ -561,6 +571,10 @@ size_impostors\t \t \t %10lu \n \
 total size:\t \t \t %10lu \n \
 n get cells\t \t \t %15lu \n \
 input load time\t \t \t %f \n \
+add time\t \t \t \t %f \n \
+  upbox\t \t \t \t %f \n \
+  addface\t \t \t \t %f \n \
+  samples\t \t \t \t %f \n \
 fetch time\t \t \t %f \n \
 save time\t \t \t %f \n \
 total time\t \t \t %f \n \
@@ -583,6 +597,10 @@ meshona->stat.n_cells ,
 			meshona->stat.TotalSize(),
 			meshona->stat.n_getcell,
 			TIM::Total(0)/float(CLOCKS_PER_SEC),
+			TIM::Total(20)/float(CLOCKS_PER_SEC),
+			TIM::Total(21)/float(CLOCKS_PER_SEC),
+			TIM::Total(22)/float(CLOCKS_PER_SEC),
+			TIM::Total(23)/float(CLOCKS_PER_SEC),
 			TIM::Total(12)/float(CLOCKS_PER_SEC),
 			TIM::Total(13)/float(CLOCKS_PER_SEC),
 			TIM::Total(1)/float(CLOCKS_PER_SEC)

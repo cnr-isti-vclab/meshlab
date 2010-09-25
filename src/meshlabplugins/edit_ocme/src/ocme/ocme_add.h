@@ -107,7 +107,7 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 
 	/* Here the main cycle. for each face of the mesh put it in the hashed multigrid */
 	for(fi = m.face.begin(); fi != m.face.end(); ++fi) if(!(*fi).IsD()){
-
+		TIM::Begin(20);
 		if(added_cells.size() > (n_duplicate_removal+1)*1000){
 				::RemoveDuplicates(this->added_cells);
 				++n_duplicate_removal;
@@ -146,17 +146,27 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 
                          attr_map.ImportVertex(c,*(*fi).V(i),vIndex[i]);                                      // import all the attributes specified
                         }
+		TIM::Begin(22);
+        // add the face to the cell
+        unsigned int f_pos =  c->AddFace(OFace(vIndex[0],vIndex[1],vIndex[2]));		// assing the face to the cell
+        attr_map.ImportFace( c,  *fi  ,f_pos);                                      // import all the attributes specified
+		TIM::End(22);
 
-                // add the face to the cell
-                unsigned int f_pos =  c->AddFace(OFace(vIndex[0],vIndex[1],vIndex[2]));		// assing the face to the cell
-                attr_map.ImportFace( c,  *fi  ,f_pos);                                          // import all the attributes specified
-
+		TIM::Begin(23);
 		// rough roughroughourhg adding of samples
-		vcg::Point3f bary   = vcg::Barycenter(*fi);
-		vcg::Point3f pp[3];
-		for(int i  = 0; i < 3; ++i) pp[i]  = ((*fi).V(i))->P();
-		c->impostor->AddSample(bary,vcg::Normal(*fi).Normalize());	// collect a sample for the impostor
-		for(int i = 0; i < 3; ++i) c->impostor->AddSample(bary*0.5+pp[i]*0.5,vcg::Normal(*fi).Normalize());	// collect a sample for the impostor
+
+		 vcg::Point3f bary   = vcg::Barycenter(*fi);
+		//vcg::Point3f pp[3];
+		//for(int i  = 0; i < 3; ++i) pp[i]  = ((*fi).V(i))->P();
+		 c->impostor->AddSample(bary,vcg::Normal(*fi).Normalize());	// collect a sample for the impostor
+    //            for(int i = 0; i < 3; ++i) c->impostor->AddSample(bary*0.5+((*fi).V(i))->P()*0.5,vcg::Normal(*fi).Normalize());	// collect a sample for the impostor
+
+		//vcg::Point3f n = vcg::Normal(*fi).Normalize();
+		//for(int i  = 0; i < 3; ++i) 
+		//c->impostor->AddSample(((*fi).V(i))->P() ,n);	// collect a sample for the impostor
+
+
+		TIM::End(23);
 		/////////////////////////////////////////////////////
 
 		/* Handling the bounding boxes of the cell.
@@ -182,26 +192,28 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 		std::vector<CellKey>::iterator oi;
 
 		// count the number of times the bounding box is expended (just to know it)
-		if(!(old_box == c->bbox))	n_box_updates++;
+		if(!(old_box == c->bbox) )
+			n_box_updates++;
 
-		// get the cells at the same level "h" intersected by the bounding box of the face
-		OverlappingBBoxes( c->bbox.bbox3, h,overlapping);
+			TIM::Begin(21);
+			// get the cells at the same level "h" intersected by the bounding box of the face
+			OverlappingBBoxes( c->bbox.bbox3, h,overlapping);
 
-		Cell * ovl_cell = NULL;	// pointer to the overlapping cell
-		
-		for(oi = overlapping.begin(); oi != overlapping.end(); ++oi){
-			/* get the overlapping cell. If there is no such overlapping cell it must be created*/
-			ovl_cell = GetCellC((*oi),true);			
-			added_cells.push_back(*oi);
-			//ovl_cell->bbox.Add(facebox, sr);		// update its bounding box
-
-			if(c != ovl_cell)
-				CreateDependence(c,ovl_cell);		// connect the two cells
-		}
+			Cell * ovl_cell = NULL;	// pointer to the overlapping cell
+			
+			for(oi = overlapping.begin(); oi != overlapping.end(); ++oi){
+				/* get the overlapping cell. If there is no such overlapping cell it must be created*/
+				ovl_cell = GetCellC((*oi),true);			
+				if(c != ovl_cell)
+					CreateDependence(c,ovl_cell);		// connect the two cells
+			}
+			TIM::End(21);
+		TIM::End(20);
 	}
 
 	StopRecordCellsSetModification();
 	vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute (m,gPos);
+
 }
 
 

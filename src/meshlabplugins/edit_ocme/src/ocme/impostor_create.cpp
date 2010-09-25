@@ -2,7 +2,7 @@
 #include "impostor_definition.h"
 #include "ocme_definition.h"
 
-#include <GL/glew.h>
+//#include <GL/glew.h>
 #include <vcg/space/box3.h>
 #include <vcg/space/plane3.h>
 #include <vcg/space/fitting3.h>
@@ -54,7 +54,7 @@ vcg::Point3<char> Impostor::Acc(vcg::Point3<char> p,vcg::Point3<char> d, unsigne
 
 void  Impostor::AddSample( vcg::Point3f  p,   vcg::Point3f   n){
 	if(box.IsIn(p)){
-		const int ii = std::min<int>( int((p[0]-box.min[0])/cellsize),Gridsize()-1);
+                const int ii = std::min<int>( int((p[0]-box.min[0])/cellsize),Gridsize()-1);
 		const int jj = std::min<int>( int((p[1]-box.min[1])/cellsize),Gridsize()-1);
 		const int kk = std::min<int>( int((p[2]-box.min[2])/cellsize),Gridsize()-1);
 
@@ -63,12 +63,12 @@ void  Impostor::AddSample( vcg::Point3f  p,   vcg::Point3f   n){
 			centroids.At(ii,jj,kk) = Acc(centroids.At(ii,jj,kk),F2C(p,ii,jj,kk),n_samples.At(ii,jj,kk));
 			normals.At(ii,jj,kk)   = Acc(normals.At(ii,jj,kk),F2C_01(n),n_samples.At(ii,jj,kk));
 			++n_samples.At(ii,jj,kk);
-		}
+                }
 		else{
 			n_samples.At(ii,jj,kk) = 1;
 			centroids.At(ii,jj,kk)  =  F2C(p,ii,jj,kk);
 			normals.At(ii,jj,kk) =  F2C_01(n);
-		}
+                }
 
 	}
 }
@@ -173,9 +173,10 @@ char * Impostor::Serialize (char * ptr ){
 					*(unsigned char * ) ptr = i; ptr += sizeof(unsigned char);
 					*(unsigned char * ) ptr = j; ptr += sizeof(unsigned char);
 					*(unsigned char * ) ptr = k; ptr += sizeof(unsigned char);
-
+//printf("pos %d %d %d\n", centroids.At( i,j,k)[0],centroids.At( i,j,k)[1],centroids.At( i,j,k)[1]);
 					memcpy(ptr,&centroids.At( i,j,k)[0],3*sizeof(char)); ptr+= 3*sizeof(char);
-					memcpy(ptr,&normals.At( i,j,k)[0],3*sizeof(char)); ptr+= 3*sizeof(char);
+//printf("norm %d %d %d\n", normals.At( i,j,k)[0],normals.At( i,j,k)[1],normals.At( i,j,k)[1]);
+                                        memcpy(ptr,&normals.At( i,j,k)[0],3*sizeof(char)); ptr+= 3*sizeof(char);
 
 				}
 			

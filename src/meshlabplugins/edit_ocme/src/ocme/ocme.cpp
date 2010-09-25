@@ -338,6 +338,10 @@ Cell* OCME::GetCellC(const CellKey & key,bool ifnot_create){
 				newc->face				= AddElement<OFace>		("f",newc);
 				newc->vert				= AddElement<OVertex>	("v",newc);
 				newc->impostor->InitDataCumulate(key.BBox3f());
+				if(this->record_cells_set_modification) {
+						this->added_cells.push_back(key);
+						this->touched_cells.push_back(key);
+				}
 				return newc;
 		}
 

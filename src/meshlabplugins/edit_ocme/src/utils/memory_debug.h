@@ -21,19 +21,19 @@ struct MemDbgBase{
 struct MemDbg: public MemDbgBase{
 	static int & Level() {static int   level = 0; return level;}
 	static bool CheckHeap(int level){ 
-		#ifdef WIN32
+                #ifdef WIN32
 		return (level>Level())?(0!=_CrtCheckMemory()):true;
 		#else
 		return true;
 		#endif
 	}
 	static void SetBreakAlloc(int value ){
-		#ifdef WIN32
+                #ifdef WIN32
 		_CrtSetBreakAlloc(value );
 		#endif
 		value = 0;}
 	static void DumpMemoryLeaks(){
-		#ifdef WIN32
+                #ifdef WIN32
 		_CrtDumpMemoryLeaks();
 		#endif
 	}
@@ -45,12 +45,12 @@ struct MemDbg: public MemDbgBase{
 	static void SetPoint(unsigned int   n){
 		n=n;
 		if(!All())  NV().resize(128);
-		#ifdef WIN32
+                #ifdef WIN32
 		_CrtMemCheckpoint(& NV()[n]);
 		#endif
 	}
 	static unsigned int MemFromPoint(unsigned int p){
-		#ifdef WIN32
+                #ifdef WIN32
 		_CrtMemCheckpoint(&MemState());
 		#endif
 		return MemState().lTotalCount -  NV()[p].lTotalCount;

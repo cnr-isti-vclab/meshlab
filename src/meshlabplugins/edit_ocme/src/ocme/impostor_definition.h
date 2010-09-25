@@ -61,8 +61,8 @@ struct Impostor{
 
 	// converts from float to char (inside a subcell). a is is intended in the frame with origin at lower
 	// corner of the subcell, i.e. 0 -> -127, cellsize -> 127, cellsize/2 ->0
-	char F2C(float a) { return  (a / cellsize -0.5) * 255; };
-	char F2C_01(float a) { return  a *0.5 * 255; };
+        char F2C(float a) { return  (char) ((a / cellsize -0.5) * 255); };
+        char F2C_01(float a) { return (char) (a *0.5 * 255); };
 
 	vcg::Point3<char> F2C(vcg::Point3f  a, int ii, int jj, int kk) {
 			a = a- box.min;

@@ -1,3 +1,19 @@
+# this is the common include for all the plugins
+VCGDIR  = ../../../../../../vcglib
+GLEWDIR = ../../../../external/glew-1.5.1
+
+
+win32-msvc2005:DEFINES += GLEW_STATIC
+win32-msvc2008:DEFINES += GLEW_STATIC 
+
+INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
+DEPENDPATH += $$VCGDIR
+
+# the following line is to hide the hundred of warnings about the deprecated
+# old printf are all around the code
+win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
+win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
+
 
 # Base options
 TEMPLATE = app
@@ -75,10 +91,13 @@ INCLUDEPATH += ./berkeleydb \
     /usr/local/BerkeleyDB.4.7/include \
 		../../../../../../vcglib/ \
     /usr/include/qt4/Qt \
-		../ \
+		../  
 QMAKE_CXXFLAGS_RELEASE += -DNDEBUG
 #LIBS += -L/usr/lib \
 #    -L/usr/local/BerkeleyDB.4.7/lib \
-LIBS +=    -lGLEW
+LIBS +=    -lGLEW 
+
+LIBPATH += $$GLEWDIR/lib
+
 #    -ldb_cxx-4.7
-win32:LIBS +=
+ 
