@@ -86,13 +86,13 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
             CMeshO::ScalarType mindim = min(md.mm()->cm.bbox.Dim().V(md.mm()->cm.bbox.MinDim()),
                                             target->cm.bbox.Dim().V(target->cm.bbox.MinDim()));
 
-            //TODO: descriptions, tooltips
             parlst.addParam(new RichMesh("FirstMesh", md.mm(), &md, "First Mesh",
                                          "The first operand of the CSG operation"));
             parlst.addParam(new RichMesh("SecondMesh", target, &md, "Second Mesh",
                                          "The second operand of the CSG operation"));
             parlst.addParam(new RichAbsPerc("Delta", mindim / 10.0, 0, mindim,
                                             "Spacing between sampling points"));
+            parlst.addParam(new RichInt("SubDelta", 32, "Discretization points per sample interval"));
             parlst.addParam(new RichEnum("Operator",
                                          0,
                                          QStringList() << "Intersection" << "Union" << "Difference",
@@ -112,22 +112,18 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
         {
             MeshModel *firstMesh = par.getMesh("FirstMesh");
             MeshModel *secondMesh = par.getMesh("SecondMesh");
-            Log(0, "First BBox: %g %g %g %g %g %g",
-                firstMesh->cm.bbox.min.X(), firstMesh->cm.bbox.min.Y(), firstMesh->cm.bbox.min.Z(),
-                firstMesh->cm.bbox.max.X(), firstMesh->cm.bbox.max.Y(), firstMesh->cm.bbox.max.Z());
-            Log(0, "Operation: %d", par.getEnum("Operator") );
-            firstMesh->updateDataMask(MeshModel::MM_FACENORMAL);
-            secondMesh->updateDataMask(MeshModel::MM_FACENORMAL);
+            firstMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
+            secondMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
 
-            typedef float scalar;
-            //typedef Intercept<vcg::math::fixed<8,vcg::math::base32>,scalar> intercept;            
+            typedef CMeshO::ScalarType scalar;
             typedef Intercept<fraction,scalar> intercept;
             const scalar d = par.getFloat("Delta");
             const Point3f delta(d, d, d);
+            const int subFreq = par.getInt("SubDelta");
             Log(0, "Rasterizing first volume...");
-            InterceptVolume<intercept> v = InterceptSet3<intercept>(firstMesh->cm, delta);
+            InterceptVolume<intercept> v = InterceptSet3<intercept>(firstMesh->cm, delta, subFreq);
             Log(0, "Rasterizing second volume...");
-            InterceptVolume<intercept> tmp = InterceptSet3<intercept>(secondMesh->cm, delta);
+            InterceptVolume<intercept> tmp = InterceptSet3<intercept>(secondMesh->cm, delta, subFreq);
 
             MeshModel *mesh;
             switch(par.getEnum("Operator")){
@@ -164,7 +160,7 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             Log(0, "Done");
 
             vcg::tri::UpdateBounding<CMeshO>::Box(mesh->cm);
-            vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mesh->cm);
+            vcg::tri::UpdateNormals<CMeshO>::PerFaceFromCurrentVertexNormal(mesh->cm);
         }
         return true;
 
