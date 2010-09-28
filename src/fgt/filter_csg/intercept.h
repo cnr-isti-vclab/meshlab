@@ -15,14 +15,13 @@
 
 namespace std {
     namespace tr1 {
-        template <typename S, typename T>
-                struct hash<std::pair<S,T> > : public std::unary_function<std::pair<S,T>, std::size_t>
+        template <>
+                struct hash<vcg::Point3i> : public std::unary_function<vcg::Point3i, std::size_t>
         {
-            std::size_t operator()(const std::pair<S,T>& x) const
+            std::size_t operator()(const vcg::Point3i &x) const
             {
-                std::tr1::hash<S> s;
-                std::tr1::hash<T> t;
-                return s(x.first) + 131 * t(x.second);
+                std::tr1::hash<int> h;
+                return ((x[0]) * 131 + h(x[1])) * 131 + h(x[2]);
             }
         };
         
@@ -31,11 +30,6 @@ namespace std {
 
 namespace vcg {
     namespace intercept {
-        using namespace vcg::math;
-        
-        const bool debugRaster = false;
-        ofstream debugRasterOut("/Users/ranma42/Desktop/out.raster.txt");
-        
         template <typename _dist_type, typename _scalar>
                 class Intercept
         {
@@ -59,7 +53,7 @@ namespace vcg {
             inline Intercept operator -() const { return Intercept(_dist, -_norm, -_sort_norm, _quality); }
             
             inline bool operator <(const Intercept &other) const { return _dist < other._dist || (_dist == other.dist() && _sort_norm < other._sort_norm); }
-
+            
             inline bool operator <(const DistType &other) const { return _dist < other; }
             
             inline const DistType& dist() const { return _dist; }
@@ -70,7 +64,7 @@ namespace vcg {
             
             inline const Point3x& norm() const { return _norm; }
             
-            friend ostream& operator<<(ostream &out, const Intercept &x) {
+            friend std::ostream& operator<<(std::ostream &out, const Intercept &x) {
                 return out << "Intercept[" << x._dist << "[" << x._sort_norm << "], (" << p3print(x._norm) << "), " << x._quality << "]";
             }
         };
@@ -83,18 +77,18 @@ namespace vcg {
             
         private:
             typedef typename InterceptType::DistType DistType;
-
+            
             inline void cleanup() {
                 std::sort(v.begin(), v.end());
                 v.resize(v.size());
             }
-
+            
             inline bool isValid() const {
                 if (v.empty())
                     return true;
                 
                 if (v.size() % 2 != 0) {
-                    cerr << "Not a solid! (size: " << v.size() << ")" << endl;
+                    std::cerr << "Not a solid! (size: " << v.size() << ")" << std::endl;
                     return false;
                 }
                 
@@ -102,7 +96,7 @@ namespace vcg {
                 typename ContainerType::const_iterator next = curr+1;
                 while (next != v.end()) {
                     if (!(*curr < *next)) {
-                        cerr << "Not sorted! (" << *curr << " >= " << *next << ")" << endl;
+                        std::cerr << "Not sorted! (" << *curr << " >= " << *next << ")" << std::endl;
                         return false;
                     }
                     curr = next;
@@ -236,7 +230,7 @@ namespace vcg {
                 return InterceptRay(newv);
             }
             
-            friend ostream& operator<<(ostream &out, const InterceptRay &x) {
+            friend std::ostream& operator<<(std::ostream &out, const InterceptRay &x) {
                 typename ContainerType::const_iterator i, end = x.v.end();
                 out << "InterceptRay[";
                 for (i = x.v.begin(); i != end; ++i)
@@ -320,12 +314,12 @@ namespace vcg {
                 return *this;
             }
             
-            friend ostream& operator<<(ostream &out, const InterceptBeam &x) {
-                out << "InterceptBeam[" << p2print(x.bbox.min) << " - " << p2print(x.bbox.max) << "][" << endl;
+            friend std::ostream& operator<<(std::ostream &out, const InterceptBeam &x) {
+                out << "InterceptBeam[" << p2print(x.bbox.min) << " - " << p2print(x.bbox.max) << "][" << std::endl;
                 for(int i = x.bbox.min.X(); i <= x.bbox.max.X(); ++i) {
                     for(int j = x.bbox.min.Y(); j <= x.bbox.max.Y(); ++j) {
                         vcg::Point2i p(i,j);
-                        out << p2print(p) << ": " << x.GetInterceptRay(p) << endl;
+                        out << p2print(p) << ": " << x.GetInterceptRay(p) << std::endl;
                     }
                 }
                 return out << "]";
@@ -405,32 +399,31 @@ namespace vcg {
                 if (r[0]>0 && r[1]>0 && r[2]>0)
                     return 1;
                 else if ((r[0]<0 && r[1]<0 && r[2]<0) ||
-                         r[0]==0 && r[1]==0 && r[2] == 0)
+                         (r[0]==0 && r[1]==0 && r[2] == 0))
                     return -1;
                 
-                cerr << "Inconsistency: " << p3print(p) << p3print(delta) << endl;
+                std::cerr << "Inconsistency: " << p3print(p) << p3print(delta) << std::endl;
                 for (int i = 0; i < 3; ++i) {
-                    cerr << beam[i].IsIn(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3)), p.V(i));
-                    cerr << ": " << beam[i].GetInterceptRay(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3))) << endl;
+                    std::cerr << beam[i].IsIn(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3)), p.V(i));
+                    std::cerr << ": " << beam[i].GetInterceptRay(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3))) << std::endl;
                 }
-                
-                assert (false);
+
                 return 0;
             }
             
-            friend ostream& operator<<(ostream &out, const InterceptVolume &x) {
-                out << "InterceptVolume[" << p3print(x.delta) << "][" << endl;
+            friend std::ostream& operator<<(std::ostream &out, const InterceptVolume &x) {
+                out << "InterceptVolume[" << p3print(x.delta) << "][" << std::endl;
                 int coord = 0;
                 for(typename ContainerType::const_iterator iter = x.beam.begin(); iter != x.beam.end(); ++iter) {
-                    out << *iter << endl;
-                    out << "Beam " << coord << endl;
+                    out << *iter << std::endl;
+                    out << "Beam " << coord << std::endl;
                     
                     for (int i=x.bbox.min[coord]; i<=x.bbox.max[coord]; i+=1) {
-                        out << i << endl;
+                        out << i << std::endl;
                         
                         for (int k=x.bbox.min[(coord+2)%3]; k<=x.bbox.max[(coord+2)%3]+2; k+=1)
                             out << '+';
-                        out << endl;
+                        out << std::endl;
                         
                         for (int j=x.bbox.min[(coord+1)%3]; j<=x.bbox.max[(coord+1)%3]; j+=1) {
                             out << '+';
@@ -444,12 +437,12 @@ namespace vcg {
                                     c = '#';
                                 out << c;
                             }
-                            out << '+' << endl;
+                            out << '+' << std::endl;
                         }
                         
                         for (int k=x.bbox.min[(coord+2)%3]; k<x.bbox.max[(coord+2)%3]+2; k+=1)
                             out << '+';
-                        out << endl;
+                        out << std::endl;
                     }
                     coord++;
                 }
@@ -478,11 +471,11 @@ namespace vcg {
             
             inline void AddIntercept(const InterceptType &x) { v.push_back(x); }
             
-            friend ostream& operator<<(ostream &out, const InterceptSet &x) {
+            friend std::ostream& operator<<(std::ostream &out, const InterceptSet &x) {
                 typename ContainerType::const_iterator i, end = x.v.end();
                 out << "InterceptSet[";
                 for (i = x.v.begin(); i != end; ++i)
-                    out << *i << endl;
+                    out << *i << std::endl;
                 return out << "]";
             }
             
@@ -509,11 +502,11 @@ namespace vcg {
                 set[i].AddIntercept(x);
             }
             
-            friend ostream& operator<<(ostream &out, const InterceptSet1 &x) {
+            friend std::ostream& operator<<(std::ostream &out, const InterceptSet1 &x) {
                 typename ContainerType::const_iterator i, end = x.set.end();
                 out << "InterceptSet1[";
                 for (i = x.set.begin(); i != end; ++i)
-                    out << *i << endl;
+                    out << *i << std::endl;
                 return out << "]InterceptSet1";
             }
             
@@ -545,11 +538,11 @@ namespace vcg {
                 set[c.X()].AddIntercept(c.Y(), x);
             }
             
-            friend ostream& operator<<(ostream &out, const InterceptSet2 &x) {
+            friend std::ostream& operator<<(std::ostream &out, const InterceptSet2 &x) {
                 typename ContainerType::const_iterator i, end = x.set.end();
                 out << "InterceptSet2[";
                 for (i = x.set.begin(); i != end; ++i)
-                    out << *i << endl;
+                    out << *i << std::endl;
                 return out << "]InterceptSet2";
             }
             
@@ -584,23 +577,16 @@ namespace vcg {
                 const DistType det1 = d21[crd0] * d02[crd2] - d21[crd2] * d02[crd0];
                 const DistType det2 = d21[crd1] * d02[crd0] - d21[crd0] * d02[crd1];
                 
-                if (debugRaster) {
-                    debugRasterOut << "Face [" << crd0 << "] ";
-                    debugRasterOut << "(" << p3print(v0) << "), ";
-                    debugRasterOut << "(" << p3print(v1) << "), ";
-                    debugRasterOut << "(" << p3print(v2) << ")" << endl;
-                    
-                    debugRasterOut << p3print(d10) << endl;
-                }
+                DistType n0xy = (v1[crd1]-ibox.min[crd1])*d21[crd2] - (v1[crd2]-ibox.min[crd2])*d21[crd1];
+                DistType n1xy = (v2[crd1]-ibox.min[crd1])*d02[crd2] - (v2[crd2]-ibox.min[crd2])*d02[crd1];
+                DistType n2xy = (v0[crd1]-ibox.min[crd1])*d10[crd2] - (v0[crd2]-ibox.min[crd2])*d10[crd1];
+                const DistType n0dx = d21[crd2] + (ibox.Dim()[crd2] + 1) * d21[crd1];
+                const DistType n1dx = d02[crd2] + (ibox.Dim()[crd2] + 1) * d02[crd1];
+                const DistType n2dx = d10[crd2] + (ibox.Dim()[crd2] + 1) * d10[crd1];
                 for(int x = ibox.min[crd1]; x <= ibox.max[crd1]; ++x) {
                     for(int y = ibox.min[crd2]; y <= ibox.max[crd2]; ++y) {
-                        DistType n0 = (v1[crd1]-x)*d21[crd2] - (v1[crd2]-y)*d21[crd1];
-                        DistType n1 = (v2[crd1]-x)*d02[crd2] - (v2[crd2]-y)*d02[crd1];
-                        DistType n2 = (v0[crd1]-x)*d10[crd2] - (v0[crd2]-y)*d10[crd1];
-                        
-                        if (debugRaster)
-                            debugRasterOut << x << "," << y << ": " << p3print(Point3dt(n0,n1,n2)) << " -> ";
-                        
+                        DistType n0 = n0xy, n1 = n1xy, n2 = n2xy;
+
                         if (crd1 > crd2) {
                             if (n0 == 0)
                                 n0 = d21[crd1];
@@ -633,9 +619,6 @@ namespace vcg {
                                 n2 = d10[crd1];
                         }
                         
-                        if (debugRaster)
-                            debugRasterOut << p3print(Point3dt(n0,n1,n2)) << endl;
-                        
                         if((n0>0 && n1>0 && n2>0) || (n0<0 && n1<0 && n2<0)) {
                             DistType d = (v0[crd2] - y) * det2 + (v0[crd1] - x) * det1;
                             d /= det0;
@@ -643,14 +626,20 @@ namespace vcg {
                             assert (d >= ibox.min[crd0] && d <= ibox.max[crd0]);
                             set[crd0].AddIntercept(vcg::Point2i(x, y), InterceptType(d, norm, norm[crd0], quality));
                         }
+                        n0xy += d21[crd1];
+                        n1xy += d02[crd1];
+                        n2xy += d10[crd1];
                     }
+                    n0xy -= n0dx;
+                    n1xy -= n1dx;
+                    n2xy -= n2dx;
                 }
             }
             
             void ScanFace(const Point3dt &v0, const Point3dt &v1, const Point3dt &v2,
                           const Point3x &norm, const Scalar &quality) {
                 vcg::Box3<DistType> fbox;
-                fbox.Set(v0);
+                fbox.Add(v0);
                 fbox.Add(v1);
                 fbox.Add(v2);
                 for (int i=0; i<3; ++i) {
@@ -699,16 +688,16 @@ namespace vcg {
                         assert (v0[j] >= bbox.min[j] && v0[j] <= bbox.max[j]);
                         assert (v1[j] >= bbox.min[j] && v1[j] <= bbox.max[j]);
                         assert (v2[j] >= bbox.min[j] && v2[j] <= bbox.max[j]);
-                    }
-                    ScanFace (Point3dt(DistType(v0.X()*subCellPrecision, subCellPrecision),
-                                       DistType(v0.Y()*subCellPrecision, subCellPrecision),
-                                       DistType(v0.Z()*subCellPrecision, subCellPrecision)),
-                              Point3dt(DistType(v1.X()*subCellPrecision, subCellPrecision),
-                                       DistType(v1.Y()*subCellPrecision, subCellPrecision),
-                                       DistType(v1.Z()*subCellPrecision, subCellPrecision)),
-                              Point3dt(DistType(v2.X()*subCellPrecision, subCellPrecision),
-                                       DistType(v2.Y()*subCellPrecision, subCellPrecision),
-                                       DistType(v2.Z()*subCellPrecision, subCellPrecision)),
+                    }                    
+                    ScanFace (Point3dt(makeFraction(v0.X()*subCellPrecision, subCellPrecision),
+                                       makeFraction(v0.Y()*subCellPrecision, subCellPrecision),
+                                       makeFraction(v0.Z()*subCellPrecision, subCellPrecision)),
+                              Point3dt(makeFraction(v1.X()*subCellPrecision, subCellPrecision),
+                                       makeFraction(v1.Y()*subCellPrecision, subCellPrecision),
+                                       makeFraction(v1.Z()*subCellPrecision, subCellPrecision)),
+                              Point3dt(makeFraction(v2.X()*subCellPrecision, subCellPrecision),
+                                       makeFraction(v2.Y()*subCellPrecision, subCellPrecision),
+                                       makeFraction(v2.Z()*subCellPrecision, subCellPrecision)),
                               i->cN().Normalize(),
                               i->cQ());
                 }
@@ -716,11 +705,11 @@ namespace vcg {
             
             inline operator SortedType() const { return SortedType(bbox, delta, typename SortedType::ContainerType(set.begin(), set.end())); }
             
-            friend ostream& operator<<(ostream &out, const InterceptSet3<InterceptType> &x) {
+            friend std::ostream& operator<<(std::ostream &out, const InterceptSet3<InterceptType> &x) {
                 typename ContainerType::const_iterator i, end = x.set.end();
                 out << "InterceptSet3[";
                 for (i = x.set.begin(); i != end; ++i)
-                    out << *i << endl;
+                    out << *i << std::endl;
                 return out << "]InterceptSet3";
             }
             
@@ -736,14 +725,15 @@ namespace vcg {
             typedef typename MeshType::VertexPointer VertexPointer;
             typedef typename MeshType::CoordType CoordType;
             typedef typename std::tr1::unordered_map<const InterceptType*,size_t> VertexTable;
-            
+            typedef typename std::tr1::unordered_map<vcg::Point3i,float> SamplesTable;
+            typedef typename std::tr1::unordered_set<vcg::Point3i> CellsSet;
+
         public:
             template<typename EXTRACTOR_TYPE>
             void BuildMesh(MeshType &mesh, InterceptVolume<InterceptType> &volume, EXTRACTOR_TYPE &extractor)
             {
-                typedef std::tr1::unordered_set<pair<int,pair<int, int> > > phashset;
-                phashset cset;
-                int p[3];
+                CellsSet cset;
+                vcg::Point3i p;
                 
                 _volume = &volume;
                 _mesh = &mesh;
@@ -762,43 +752,64 @@ namespace vcg {
                                 p[c0]--;
                                 p[c1]--;
                                 p[c2]--;
-                                cset.insert(make_pair(p[0], make_pair(p[1], p[2])));
+                                cset.insert(p);
                                 p[c2]++;
-                                cset.insert(make_pair(p[0], make_pair(p[1], p[2])));
+                                cset.insert(p);
                                 p[c1]++;
                                 p[c2]--;
-                                cset.insert(make_pair(p[0], make_pair(p[1], p[2])));
+                                cset.insert(p);
                                 p[c2]++;
-                                cset.insert(make_pair(p[0], make_pair(p[1], p[2])));
+                                cset.insert(p);
                                 p[c0]++;
                             }
                             p[c1]--;
                             p[c2]--;
-                            cset.insert(make_pair(p[0], make_pair(p[1], p[2])));
+                            cset.insert(p);
                             p[c2]++;
-                            cset.insert(make_pair(p[0], make_pair(p[1], p[2])));
+                            cset.insert(p);
                             p[c1]++;
                             p[c2]--;
-                            cset.insert(make_pair(p[0], make_pair(p[1], p[2])));
+                            cset.insert(p);
                             p[c2]++;
-                            cset.insert(make_pair(p[0], make_pair(p[1], p[2])));
+                            cset.insert(p);
                         }
                     }
                 }
 
+                for (int i = 0; i < 2; ++i)
+                    for (int j = 0; j < 2; ++j)
+                        for (int k = 0; k < 2; ++k)
+                            for (CellsSet::const_iterator cell = cset.begin(); cell != cset.end(); ++cell) {
+                    vcg::Point3i p(*cell + vcg::Point3i(i, j, k));
+                    if (_samples.find(p) == _samples.end())
+                        _samples[p] = _volume->IsIn(p);
+                }
+
+                const vcg::Point3i diag(1, 1, 1);
                 extractor.Initialize();
-                for (phashset::const_iterator i = cset.begin(); i != cset.end(); ++i)
-                    extractor.ProcessCell(vcg::Point3i(i->first,  i->second.first,  i->second.second),
-                                          vcg::Point3i(i->first+1,i->second.first+1,i->second.second+1));
+                for (CellsSet::const_iterator cell = cset.begin(); cell != cset.end(); ++cell)
+                    extractor.ProcessCell(*cell, *cell + diag);
                 extractor.Finalize();
                 
                 _vertices.clear();
+                _samples.clear();
                 _volume = NULL;
                 _mesh = NULL;
             }
             
-            float V(int i, int j, int k) const { return _volume->IsIn(vcg::Point3i(i, j, k)); }
-            
+            inline float V(int i, int j, int k) const { return V(vcg::Point3i(i, j, k)); }
+
+            inline float V(const vcg::Point3i &p) const {
+                typename SamplesTable::const_iterator s = _samples.find(p);
+                //              if (s != _samples.end())
+                return s->second;
+
+                /*
+                _samples[p] = _volume->IsIn(p);
+                return _samples[p];
+  */
+            }
+
             template <const int coord>
                     void GetIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) {
                 assert (p2 == p1 + vcg::Point3i(coord == 0, coord == 1, coord == 2));
@@ -808,27 +819,25 @@ namespace vcg {
                 typename VertexTable::const_iterator v = _vertices.find(&i);
                 if (v == _vertices.end()) {
                     p = &*vcg::tri::Allocator<MeshType>::AddVertices(*_mesh, 1);
-                    p->P().V(coord) = i.dist().toFloat();
+                    p->P().V(coord) = toFloat(i.dist());
                     p->P().V((coord+1)%3) = p1[(coord+1)%3];
                     p->P().V((coord+2)%3) = p1[(coord+2)%3];
                     p->P().Scale(_volume->delta);
                     p->N() = i.norm();
                     p->Q() = i.quality();
-                    _vertices.insert(make_pair(&i, p - &_mesh->vert[0]));
+                    _vertices[&i] = p - &_mesh->vert[0];
                 } else
                     p = &_mesh->vert[v->second];
             }
             
-            void GetXIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<0>(p1, p2, p); }
+            inline void GetXIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<0>(p1, p2, p); }
             
-            void GetYIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<1>(p1, p2, p); }
+            inline void GetYIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<1>(p1, p2, p); }
             
-            void GetZIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<2>(p1, p2, p); }
+            inline void GetZIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<2>(p1, p2, p); }
             
             bool Exist(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) {
-                bool in1 = V(p1.X(), p1.Y(), p1.Z());
-                bool in2 = V(p2.X(), p2.Y(), p2.Z());
-                if (in1 == in2)
+                if (V(p1) == V(p2))
                     return false;
                 
                 vcg::Point3i d = p2 - p1;
@@ -844,6 +853,7 @@ namespace vcg {
             
         private:
             VertexTable _vertices;
+            SamplesTable _samples;
             InterceptVolume<InterceptType> *_volume;
             MeshType *_mesh;
         };

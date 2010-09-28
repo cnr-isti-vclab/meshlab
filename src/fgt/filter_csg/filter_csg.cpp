@@ -116,7 +116,7 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             secondMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
 
             typedef CMeshO::ScalarType scalar;
-            typedef Intercept<fraction,scalar> intercept;
+            typedef Intercept<mpq_class,scalar> intercept;
             const scalar d = par.getFloat("Delta");
             const Point3f delta(d, d, d);
             const int subFreq = par.getInt("SubDelta");
