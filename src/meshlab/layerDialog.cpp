@@ -77,8 +77,9 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 
 void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
 {
-	//Necessary because here the raster could be loaded and it needs an opengl context
-	mw->GLA()->makeCurrent();
+  // I do not believe so! makeCurrent is a gl related call..
+  //Necessary because here the raster could be loaded and it needs an opengl context
+  //	mw->GLA()->makeCurrent();
 
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
 	RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(item);
