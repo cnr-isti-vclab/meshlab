@@ -30,6 +30,7 @@
 #include <wrap/qt/col_qt_convert.h>
 #include <wrap/qt/shot_qt.h>
 #include <wrap/qt/checkGLError.h>
+#include <wrap/qt/gl_label.h>
 
 using namespace std;
 using namespace vcg;
@@ -263,130 +264,131 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
   painter.beginNativePainting();
 
   makeCurrent();
+
+
+  if(!isValid() )return;
   QTime time;
   time.start();
-	initTexture();
+
+  initTexture();
   glClearColor(1.0,1.0,1.0,0.0);
   glEnable(GL_DEPTH_TEST);
   glDepthMask(GL_TRUE);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	setView();  // Set Modelview and Projection matrix
+  setView();  // Set Modelview and Projection matrix
   if((!takeSnapTile) || (takeSnapTile && !ss.transparentBackground) )
     drawGradient();  // draws the background
 
   drawLight();
 
 //If it is a raster viewer draw the image as a texture
-	if(isRaster())
-		drawTarget();
+  if(isRaster())
+    drawTarget();
 
-	glPushMatrix();
+  glPushMatrix();
 
-	// Finally apply the Trackball for the model
-	trackball.GetView();
+  // Finally apply the Trackball for the model
+  trackball.GetView();
   trackball.Apply(false);
-	glPushMatrix();
+  glPushMatrix();
 
-	//glScale(d);
+  //glScale(d);
   //	glTranslate(-FullBBox.Center());
   setLightModel();
 
-	// Set proper colorMode
-	if(rm.colorMode != GLW::CMNone)
-	{
-		glEnable(GL_COLOR_MATERIAL);
-		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-	}
-	else glColor(Color4b::LightGray);
+  // Set proper colorMode
+  if(rm.colorMode != GLW::CMNone)
+  {
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+  }
+  else glColor(Color4b::LightGray);
 
-	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
-	else glDisable(GL_CULL_FACE);
+  if(rm.backFaceCull) glEnable(GL_CULL_FACE);
+  else glDisable(GL_CULL_FACE);
 
   if(!meshDoc->isBusy())
-	{
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
+  {
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-		if (iRenderer) iRenderer->Render(currentShader, *meshDoc, rm, this);
-		else
-		{
-
-			foreach(MeshModel * mp, meshDoc->meshList)
-				{
-					//Mesh visibility is read from the viewer visibility map, not from the mesh 
+    if (iRenderer) iRenderer->Render(currentShader, *meshDoc, rm, this);
+    else
+    {
+      foreach(MeshModel * mp, meshDoc->meshList)
+        {
+          //Mesh visibility is read from the viewer visibility map, not from the mesh
           if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-				}
-		}
-		if(iEdit) iEdit->Decorate(*mm(),this);
+        }
+    }
+    if(iEdit) iEdit->Decorate(*mm(),this,&painter);
 
-		// Draw the selection
+    // Draw the selection
     if(rm.selectedFace)  mm()->RenderSelectedFace();
     if(rm.selectedVert)  mm()->RenderSelectedVert();
-    QAction * p;
-		foreach(p , iDecoratorsList)
-				{
-					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-          decorInterface->decorate(p,*meshDoc,this->glas.currentGlobalParamSet, this);
-				}
+    foreach(QAction * p , iDecoratorsList)
+        {
+          MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+          decorInterface->decorate(p,*meshDoc,this->glas.currentGlobalParamSet, this,&painter);
+        }
+    glPopAttrib();
+  } ///end if busy
 
-		glPopAttrib();
-	} ///end if busy
+  glPopMatrix(); // We restore the state to immediately after the trackball (and before the bbox scaling/translating)
 
-	glPopMatrix(); // We restore the state to immediately after the trackball (and before the bbox scaling/translating)
+  if(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor))
+      trackball.DrawPostApply();
 
-	if(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor))
-			trackball.DrawPostApply();
-
-	// The picking of the surface position has to be done in object space,
-	// so after trackball transformation (and before the matrix associated to each mesh);
-	if(hasToPick && hasToGetPickPos)
-	{
-		Point3f pp;
-    hasToPick=false;
-    if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
-		{
-					emit transmitSurfacePos(nameToGetPickPos, pp);
-					hasToGetPickPos=false;
-		}
-	}
-	glPopMatrix(); // We restore the state to immediately before the trackball
-
-	// Double click move picked point to center
-	// It has to be done in the before trackball space (we MOVE the trackball itself...)
-	if(hasToPick && !hasToGetPickPos)
+  // The picking of the surface position has to be done in object space,
+  // so after trackball transformation (and before the matrix associated to each mesh);
+  if(hasToPick && hasToGetPickPos)
   {
-		Point3f pp;
+    Point3f pp;
     hasToPick=false;
     if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
-		{
-		      trackball.Translate(-pp);
+    {
+          emit transmitSurfacePos(nameToGetPickPos, pp);
+          hasToGetPickPos=false;
+    }
+  }
+  glPopMatrix(); // We restore the state to immediately before the trackball
+
+  // Double click move picked point to center
+  // It has to be done in the before trackball space (we MOVE the trackball itself...)
+  if(hasToPick && !hasToGetPickPos)
+  {
+    Point3f pp;
+    hasToPick=false;
+    if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
+    {
+          trackball.Translate(-pp);
           trackball.Scale(1.25f);
           QCursor::setPos(mapToGlobal(QPoint(width()/2+2,height()/2+2)));
-		}
+    }
   }
 
-	// ...and take a snapshot
-	if (takeSnapTile) pasteTile();
+  // ...and take a snapshot
+  if (takeSnapTile) pasteTile();
 
 
-	// Draw the log area background
-	// on the bottom of the glArea
-	if(infoAreaVisible)
-	{
+  // Draw the log area background
+  // on the bottom of the glArea
+  if(infoAreaVisible)
+  {
     glPushAttrib(GL_ENABLE_BIT);
     glDisable(GL_DEPTH_TEST);
     displayInfo(&painter);
-		updateFps(time.elapsed());
+    updateFps(time.elapsed());
     glPopAttrib();
-	}
+  }
 
-	//Draw highlight if it is the current viewer
-	if(mvc->currentId==id)
-		displayViewerHighlight();
+  //Draw highlight if it is the current viewer
+  if(mvc->currentId==id)
+    displayViewerHighlight();
 
-	// Finally display HELP if requested
-	if (isHelpVisible()) 
-	{
+  // Finally display HELP if requested
+  if (isHelpVisible())
+  {
     glPushAttrib(GL_ENABLE_BIT);
     glDisable(GL_DEPTH_TEST);
     displayHelp(&painter);
@@ -404,6 +406,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 			mvc->updateTrackballInViewers();
   painter.endNativePainting();
 }
+
 void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
 {
   painter->save();
@@ -432,6 +435,14 @@ void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
   TO.setTabs(TabList);
   painter->drawText(areaRect, tableText, TO);
   painter->restore();
+}
+void GLArea::renderText(double x, double y, double z, const QString & str, const QFont & fnt, int listBase)
+{
+  glPushAttrib(GL_ENABLE_BIT);
+  glDisable(GL_DEPTH_TEST);
+  QGLWidget::renderText(x,y,z,str,fnt,listBase);
+  //glGetError();
+  glPopAttrib();
 }
 
 void GLArea::displayInfo(QPainter *painter)

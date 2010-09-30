@@ -483,7 +483,7 @@ public:
   virtual ~MeshDecorateInterface() {}
 
   virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) =0;
-  virtual void decorate(QAction * /*mode*/,  MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/) = 0;
+  virtual void decorate(QAction * /*mode*/,  MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/) = 0;
   virtual void endDecorate(QAction * /*mode*/,   MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/){};
 
   /** \brief tests if a decoration is applicable to a mesh.
@@ -557,7 +557,9 @@ public:
 		StartEdit(md, parent);
 	}
 		
-	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/) = 0;
+  virtual void Decorate(MeshModel &m, GLArea *parent, QPainter * /*p*/) { Decorate(m,parent); };
+  virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/){};
+
 	virtual void mousePressEvent  (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	virtual void mouseMoveEvent   (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
