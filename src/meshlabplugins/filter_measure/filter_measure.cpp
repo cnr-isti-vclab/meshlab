@@ -257,37 +257,41 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());			
 			Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());			
 			Log("Mesh Volume  is %f", Volume);			
-			Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);		
+      Log("Mesh Surface is %f", Area);
+      Point3f bc=tri::Stat<CMeshO>::ComputeShellBarycenter(m);
+      Log("Thin shell barycenter  %9.6f  %9.6f  %9.6f",bc[0],bc[1],bc[2]);
 
+      if(Volume<=0) Log("Mesh is not 'solid', no information on barycenter and inertia tensor.");
+      else
+      {
+        Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
 
-			Matrix33f IT;
-			I.InertiaTensor(IT);
-			Log("Inertia Tensor is :");		
-			Log("    | %9.6f  %9.6f  %9.6f |",IT[0][0],IT[0][1],IT[0][2]);
-			Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
-			Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
+        Matrix33f IT;
+        I.InertiaTensor(IT);
+        Log("Inertia Tensor is :");
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[0][0],IT[0][1],IT[0][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
 
-			Log("Mesh Surface is %f", Area);
+        Matrix44f PCA;
+        Point4f pcav;
+        I.InertiaTensorEigen(PCA,pcav);
+        Log("Principal axes are :");
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
 
-			Matrix44f PCA;
-			Point4f pcav;
-			I.InertiaTensorEigen(PCA,pcav);
-			Log("Principal axes are :");
-			Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
-			Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
-			Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
+        // Point3f ax0(PCA[0][0],PCA[0][1],PCA[0][2]);
+        // Point3f ax1(PCA[1][0],PCA[1][1],PCA[1][2]);
+        // Point3f ax2(PCA[2][0],PCA[2][1],PCA[2][2]);
 
-			// Point3f ax0(PCA[0][0],PCA[0][1],PCA[0][2]);
-			// Point3f ax1(PCA[1][0],PCA[1][1],PCA[1][2]);
-			// Point3f ax2(PCA[2][0],PCA[2][1],PCA[2][2]);
+        // Log("ax0*ax1 %f (len ax0 %f) ",ax0*ax1, Norm(ax0));
+        // Log("ax1*ax2 %f (len ax1 %f) ",ax1*ax2, Norm(ax1));
+        // Log("ax0*ax2 %f (len ax2 %f) ",ax0*ax2, Norm(ax2));
 
-			// Log("ax0*ax1 %f (len ax0 %f) ",ax0*ax1, Norm(ax0));
-			// Log("ax1*ax2 %f (len ax1 %f) ",ax1*ax2, Norm(ax1));
-			// Log("ax0*ax2 %f (len ax2 %f) ",ax0*ax2, Norm(ax2));
-
-			Log("axis momenta are :");
-			Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
-
+        Log("axis momenta are :");
+        Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
+      }
 		}
 		break;
 		/************************************************************/
