@@ -53,7 +53,7 @@ void SampleEditPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, 
 	haveToPick=true;
 }
   
-void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla)
+void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
 	if(haveToPick)
 	{
@@ -78,38 +78,59 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla)
 	
 	glDisable(GL_LIGHTING);
 	glColor(Color4b::DarkRed);
-	drawFace(curFacePtr,m,gla);
-	
+  glBegin(GL_LINE_LOOP);
+    glVertex(curFacePtr->P(0));
+    glVertex(curFacePtr->P(1));
+    glVertex(curFacePtr->P(2));
+  glEnd();
+
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST); 
 	glDepthFunc(GL_LESS);
 	glColor(Color4b::Red);
-	drawFace(curFacePtr,m,gla);
-	glPopAttrib();
+  glBegin(GL_LINE_LOOP);
+    glVertex(curFacePtr->P(0));
+    glVertex(curFacePtr->P(1));
+    glVertex(curFacePtr->P(2));
+  glEnd();
+
+  drawFace(curFacePtr,m,gla,p);
+
+  glPopAttrib();
 	glPopMatrix();
  }
 }
 
-void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla)
+void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea *gla, QPainter *p)
 {
-	glBegin(GL_LINE_LOOP);
-		glVertex(fp->P(0));
-		glVertex(fp->P(1));
-		glVertex(fp->P(2));
-	glEnd();
-	
-	QString buf=QString("f%1\n (%3 %4 %5)").arg(tri::Index(m.cm,fp)).arg(tri::Index(m.cm,fp->V(0))).arg(tri::Index(m.cm,fp->V(1))).arg(tri::Index(m.cm,fp->V(2)));
-	Point3f c=Barycenter(*fp);
-	gla->renderText(c[0], c[1], c[2], buf, qFont);
-	for(int i=0;i<3;++i)
-		{
-			QString buf=QString("v%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
-			if( m.hasDataMask(MeshModel::MM_VERTQUALITY) )
-				buf+=QString(" - Q(%1)").arg(fp->V(i)->Q());
-			if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
-					buf+=QString("- uv(%1 %2) id:%3").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
-			gla->renderText(fp->P(i)[0], fp->P(i)[1], fp->P(i)[2], buf, qFont);
-		}
+
+  glDepthMask(GL_FALSE);
+  glDisable(GL_DEPTH_TEST);
+  p->endNativePainting();
+  p->save();
+  p->setRenderHint(QPainter::TextAntialiasing);
+  p->setPen(Qt::white);
+  QFont qFont;
+  qFont.setStyleStrategy(QFont::NoAntialias);
+  qFont.setFamily("Helvetica");
+  qFont.setPixelSize(12);
+  p->setFont(qFont);
+
+  QString buf;
+  buf+=QString("f%1\n (%3 %4 %5)").arg(tri::Index(m.cm,fp)).arg(tri::Index(m.cm,fp->V(0))).arg(tri::Index(m.cm,fp->V(1))).arg(tri::Index(m.cm,fp->V(2)));
+  Point3f c=Barycenter(*fp);
+  for(int i=0;i<3;++i)
+    {
+       buf+=QString("\nv%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
+      if( m.hasDataMask(MeshModel::MM_VERTQUALITY) )
+        buf+=QString(" - Q(%1)").arg(fp->V(i)->Q());
+      if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
+          buf+=QString("- uv(%1 %2) id:%3").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
+    }
+
+  p->drawText(QRect(0,0,gla->width(),gla->height()), Qt::AlignLeft | Qt::TextWordWrap, buf);
+  p->restore();
+  p->beginNativePainting();
 }
 
 bool SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *gla )

@@ -38,14 +38,15 @@ public:
 
     static const QString Info();
 
-    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
-    virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+    bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
+    void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *p);
+    void Decorate (MeshModel &/*m*/, GLArea * ){};
+    void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
+    void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
+    void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 		
-	void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea * gla);
+  void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea *gla, QPainter *p);
 
     QPoint cur;
 	QFont qFont;
