@@ -114,7 +114,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
      case FP_SELECT_INVERT : return tr("Invert the current set of selected faces");
      case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");
      case FP_SELECT_ALL    : return tr("Select all the faces of the current mesh");
-     case FP_SELECT_BORDER    : return tr("Select all the faces on the boundary");
+     case FP_SELECT_BORDER    : return tr("Select vertices and faces on the boundary");
      case FP_SELECT_BY_VERT_QUALITY    : return tr("Select all the faces with all the vertexes within the specified quality range");
    case FP_SELECT_BY_FACE_QUALITY    : return tr("Select all the faces with within the specified quality range");
      case FP_SELECT_BY_COLOR:  return tr("Select part of the mesh based on its color.");
@@ -132,6 +132,10 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 {
 		switch(ID(action))
 		{
+    case FP_SELECT_BORDER:
+      parlst.addParam(new RichInt("Iteration", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
+      break;
+
     case FP_SELECT_FACE_FROM_VERT:
       parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
       break;
@@ -244,7 +248,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
                           tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
   break;
   case FP_SELECT_BORDER: tri::UpdateSelection<CMeshO>::FaceFromBorderFlag(m.cm);
-     tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
+                         tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
   break;
   case FP_SELECT_BY_VERT_QUALITY:
     {
