@@ -660,12 +660,12 @@ namespace vcg {
         public:
             template <class MeshType>
                     inline InterceptSet3(const MeshType &m, const Point3x &d, int subCellPrecision=32, vcg::CallBackPos *cb=vcg::DummyCallBackPos) : delta(d),
-                    bbox(Point3i(floor(m.bbox.min.X() / d.X()) -1,
-                                 floor(m.bbox.min.Y() / d.Y()) -1,
-                                 floor(m.bbox.min.Z() / d.Z()) -1),
-                         Point3i(ceil(m.bbox.max.X() / d.X()),
-                                 ceil(m.bbox.max.Y() / d.Y()),
-                                 ceil(m.bbox.max.Z() / d.Z())))
+                    bbox(Point3i(floor(m.bbox.min.X() / d.X()) - 1,
+                                 floor(m.bbox.min.Y() / d.Y()) - 1,
+                                 floor(m.bbox.min.Z() / d.Z()) - 1),
+                         Point3i(ceil(m.bbox.max.X() / d.X()) + 1,
+                                 ceil(m.bbox.max.Y() / d.Y()) + 1,
+                                 ceil(m.bbox.max.Z() / d.Z()) + 1))
             {
                 const Point3x invDelta(Scalar(1) / delta.X(),
                                        Scalar(1) / delta.Y(),
