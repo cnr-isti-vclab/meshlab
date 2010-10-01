@@ -36,6 +36,8 @@
 
 #include <wrap/gl/picking.h>
 #include <wrap/gl/pick.h>
+#include <wrap/qt/gl_label.h>
+
 
 #include <math.h>
 
@@ -65,7 +67,7 @@ const QString EditPickPointsPlugin::Info()
 }
 
 //called
-void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla)
+void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painter)
 {
 	//qDebug() << "Decorate " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 	
@@ -127,7 +129,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla)
 		
 	}
 	
-	drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector(), mm.cm.bbox);
+  drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector(), mm.cm.bbox, painter);
 }
 
 bool EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
@@ -272,7 +274,7 @@ void EditPickPointsPlugin::mouseReleaseEvent(QMouseEvent *event, MeshModel &mm, 
 }
 
 void EditPickPointsPlugin::drawPickedPoints(
-		std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox)
+    std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox, QPainter *painter)
 {
 	assert(glArea);
 	
@@ -304,8 +306,8 @@ void EditPickPointsPlugin::drawPickedPoints(
 		if(item->isActive()){
 			Point3f point = item->getPoint();
 			glColor(Color4b::Blue);
-			glArea->renderText(point[0], point[1], point[2], QString(item->getName()) );
-			
+      glLabel::render(painter,point, QString(item->getName()));
+
 			//draw the dot if we arnt showing the normal or showing the normal as a line
 			if(!showNormal || !showPin)
 			{

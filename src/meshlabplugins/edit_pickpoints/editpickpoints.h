@@ -52,7 +52,7 @@ public:
 
 	virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
 	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+  virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *);
 	virtual void mousePressEvent(QMouseEvent *event, MeshModel &, GLArea * ) ;
 	virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &, GLArea * ) ;
 	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
@@ -60,7 +60,7 @@ public:
 	//basically copied from void AlignPairWidget::drawPickedPoints in editalign plugin
 	//Draws all the picked points on the screen
 	//boundingBox - gives some indication how to scale the normal flags
-	void drawPickedPoints(std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox);
+  void drawPickedPoints(std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox, QPainter *painter);
 	
 private:
 	//the current place the mouse clicked

@@ -451,7 +451,7 @@ void PickPointsDialog::clearPoints(bool clearOnlyXYZ){
 	}
 	
 	//draw without any points that may have been cleared
-	parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
+  //parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox,painter);
 	assert(_glArea);
 	_glArea->update();
 	
