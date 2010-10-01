@@ -91,8 +91,6 @@ public:
 	QSize curSiz;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
-  void renderText(double x, double y, double z, const QString & str,
-                   const QFont & fnt = QFont(), int listBase = 2000);
 
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}

@@ -436,14 +436,6 @@ void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
   painter->drawText(areaRect, tableText, TO);
   painter->restore();
 }
-void GLArea::renderText(double x, double y, double z, const QString & str, const QFont & fnt, int listBase)
-{
-  glPushAttrib(GL_ENABLE_BIT);
-  glDisable(GL_DEPTH_TEST);
-  QGLWidget::renderText(x,y,z,str,fnt,listBase);
-  //glGetError();
-  glPopAttrib();
-}
 
 void GLArea::displayInfo(QPainter *painter)
 {

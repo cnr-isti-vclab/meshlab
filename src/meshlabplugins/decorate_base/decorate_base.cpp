@@ -438,8 +438,6 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
   glLabel::render(painter,Point3f::Construct(a), tr("%1").arg(aVal,6+neededZeros,'f',neededZeros+2) ,qf,Color4b::White,angle,rightAlign);
   glLabel::render(painter,Point3f::Construct(b), tr("%1").arg(bVal,6+neededZeros,'f',neededZeros+2) ,qf,Color4b::White,angle,rightAlign);
 
-  //gla->renderText(a[0],a[1],a[2],tr("%1").arg(aVal,6+neededZeros,'f',neededZeros+2 ));
-  //gla->renderText(b[0],b[1],b[2],tr("%1").arg(bVal,6+neededZeros,'f',neededZeros+2 ) );
   glPopAttrib();
 }
 
