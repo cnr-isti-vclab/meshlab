@@ -170,7 +170,7 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             typedef vcg::intercept::Walker<CMeshO, intercept> MyWalker;
             MyWalker walker;
             if (par.getBool("Extended")) {
-                mesh->updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO);
+                mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
                 typedef vcg::tri::ExtendedMarchingCubes<CMeshO, MyWalker> MyExtendedMarchingCubes;
                 MyExtendedMarchingCubes mc(mesh->cm, walker);
                 walker.BuildMesh<MyExtendedMarchingCubes>(mesh->cm, v, mc, cb);
