@@ -535,15 +535,15 @@ DecoratorParamsTreeWidget::~DecoratorParamsTreeWidget()
 void DecoratorParamsTreeWidget::save()
 {
 	apply();
-	QDomDocument doc("MeshLabSettings");
-	RichParameterXMLVisitor v(doc);
 	for(int ii = 0;ii < tmpSet.paramList.size();++ii)
 	{
+		QDomDocument doc("MeshLabSettings");
+		RichParameterXMLVisitor v(doc);
 		RichParameter* p = tmpSet.paramList[ii];
 		p->accept(v);
 		doc.appendChild(v.parElem);
 		QString docstring =  doc.toString();
-		//qDebug("Writing into Settings param with name %s and content ****%s****",qPrintable(tmppar->name),qPrintable(docstring));
+		qDebug("Writing into Settings param with name %s and content ****%s****",qPrintable(p->name),qPrintable(docstring));
 		QSettings setting;
 		setting.setValue(p->name,QVariant(docstring));
 		p->pd->defVal->set(*p->val);
