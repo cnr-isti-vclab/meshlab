@@ -115,7 +115,7 @@ bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, R
     }
 }
 
-void DecorateShadowPlugin::decorate(QAction *action, MeshDocument &md, RichParameterSet *, GLArea *gla)
+void DecorateShadowPlugin::decorate(QAction *action, MeshDocument &md, RichParameterSet *, GLArea *gla,QPainter *)
 {
    switch(ID(action)){
             case DP_SHOW_SHADOW :

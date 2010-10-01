@@ -70,7 +70,7 @@ void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, RichParameterSe
 	parset.addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
 }		
 		
-bool SampleMeshDecoratePlugin::startDecorate( QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * /*parent*/ )
+bool SampleMeshDecoratePlugin::startDecorate( QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * /*parent*/)
 {
 	assert(parset->hasParameter(CubeMapPathParam()));
 	basename = parset->getString(CubeMapPathParam());
@@ -80,7 +80,7 @@ bool SampleMeshDecoratePlugin::startDecorate( QAction * /*mode*/, MeshDocument &
 	return true;
 }
 
-void SampleMeshDecoratePlugin::decorate(QAction *a, MeshDocument &/*m*/, RichParameterSet * parset,GLArea *gla)
+void SampleMeshDecoratePlugin::decorate(QAction *a, MeshDocument &/*m*/, RichParameterSet * parset,GLArea *gla, QPainter * )
 {
 	static QString lastname("unitialized");
 	switch(ID(a))

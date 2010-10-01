@@ -75,7 +75,7 @@ public:
 	QString basename;
 	
   bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*parent*/ par, GLArea * /*parent*/);
-  void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla);
+  void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *);
 	void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);	
 		
 };
