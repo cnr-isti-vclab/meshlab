@@ -61,7 +61,7 @@ private:
 	float niceRound2(float value,float base);
 	float niceRound(float value);
 
-	void	drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QGLWidget *gla, QFont qf);
+  void	drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QPainter *painter, QFont qf,float angle =0,bool rightAlign=false);
 
 	void	chooseX(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &x1,vcg::Point3d &x2);
 	void	chooseY(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
@@ -101,24 +101,27 @@ public:
 	QList<QAction *> actions () const {return actionList;}
 
 	void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
-	void DrawQuotedBox(MeshModel &m,GLArea *gla, QFont qf);
-	void DrawVertLabel(MeshModel &m, QGLWidget *gla, QFont qf);
-	void DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf);
-	void DrawCamera(MeshModel &m, QGLWidget *gla, QFont qf);
-  void DrawTexParam(MeshModel &m,QGLWidget *gla, RichParameterSet *, QFont qf);
-  void DrawColorHistogram(CHist &ch, QGLWidget *gla, RichParameterSet *, QFont qf);
+  void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);
+  void DrawVertLabel(MeshModel &m, QPainter *gla, QFont qf);
+  void DrawFaceLabel(MeshModel &m, QPainter *gla, QFont qf);
+  void DrawCamera(MeshModel &m, QPainter *painter, QFont qf);
+  void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
+  void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
 
-  virtual void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla);
+  virtual void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter);
   virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
 
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
-  inline QString TextureStyleParam() const { return  "MeshLab::Decoration::TextureStyle" ; }
-  inline QString VertDotSizeParam() const { return  "MeshLab::Decoration::VertDotSize" ; }
-  inline QString HistBinNumParam() const { return  "MeshLab::Decoration::HistBinNumParam" ; }
-  inline QString UseFixedHistParam() const { return  "MeshLab::Decoration::UseFixedHistParam" ; }
-  inline QString FixedHistMinParam() const { return  "MeshLab::Decoration::FixedHistMinParam" ; }
-  inline QString FixedHistMaxParam() const { return  "MeshLab::Decoration::FixedHistMaxParam" ; }
+  inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
+  inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }
+  inline QString HistBinNumParam() const     { return  "MeshLab::Decoration::HistBinNumParam" ; }
+  inline QString UseFixedHistParam() const   { return  "MeshLab::Decoration::UseFixedHistParam" ; }
+  inline QString FixedHistMinParam() const   { return  "MeshLab::Decoration::FixedHistMinParam" ; }
+  inline QString FixedHistMaxParam() const   { return  "MeshLab::Decoration::FixedHistMaxParam" ; }
+  inline QString FixedHistWidthParam() const { return  "MeshLab::Decoration::FixedHistWidthParam" ; }
+  inline QString AreaHistParam() const { return  "MeshLab::Decoration::AreaHistParam" ; }
+  inline QString NormalLength() const { return  "MeshLab::Decoration::NormalLength" ; }
 
   bool textureWireParam;
 };
