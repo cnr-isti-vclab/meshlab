@@ -103,6 +103,10 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
                                          "Intersection takes the volume shared between the two meshes; "
                                          "Union takes the volume included in at least one of the two meshes; "
                                          "Difference takes the volume included in the first mesh but not in the second one"));
+            parlst.addParam(new RichBool("Extended", false, "Extended Marching Cubes",
+                                         "Use extended marching cubes for surface reconstruction. "
+                                         "It tries to improve the quality of the mesh by reconstructing the sharp features "
+                                         "using the information in vertex normals"));
         }
         break;
 
@@ -111,13 +115,19 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
     }
 }
 
-bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *)
+bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
     switch(ID(filter)) {
     case FP_CSG:
         {
             MeshModel *firstMesh = par.getMesh("FirstMesh");
             MeshModel *secondMesh = par.getMesh("SecondMesh");
+
+            firstMesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
+            secondMesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
+            if (!isValid (firstMesh->cm, this->errorMessage) || !isValid (secondMesh->cm, this->errorMessage))
+                return false;
+
             firstMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
             secondMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
 
@@ -127,9 +137,9 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             const Point3f delta(d, d, d);
             const int subFreq = par.getInt("SubDelta");
             Log(0, "Rasterizing first volume...");
-            InterceptVolume<intercept> v = InterceptSet3<intercept>(firstMesh->cm, delta, subFreq);
+            InterceptVolume<intercept> v = InterceptSet3<intercept>(firstMesh->cm, delta, subFreq, cb);
             Log(0, "Rasterizing second volume...");
-            InterceptVolume<intercept> tmp = InterceptSet3<intercept>(secondMesh->cm, delta, subFreq);
+            InterceptVolume<intercept> tmp = InterceptSet3<intercept>(secondMesh->cm, delta, subFreq, cb);
 
             MeshModel *mesh;
             switch(par.getEnum("Operator")){
@@ -158,11 +168,18 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
 
             Log(0, "Building mesh...");
             typedef vcg::intercept::Walker<CMeshO, intercept> MyWalker;
-            typedef vcg::tri::ExtendedMarchingCubes<CMeshO, MyWalker> MyExtendedMarchingCubes;
-            typedef vcg::tri::MarchingCubes<CMeshO, MyWalker> MyMarchingCubes;
             MyWalker walker;
-            MyMarchingCubes mc(mesh->cm, walker);
-            walker.BuildMesh<MyMarchingCubes>(mesh->cm, v, mc);
+            if (par.getBool("Extended")) {
+                mesh->updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO);
+                typedef vcg::tri::ExtendedMarchingCubes<CMeshO, MyWalker> MyExtendedMarchingCubes;
+                MyExtendedMarchingCubes mc(mesh->cm, walker);
+                walker.BuildMesh<MyExtendedMarchingCubes>(mesh->cm, v, mc, cb);
+            } else {
+                typedef vcg::tri::MarchingCubes<CMeshO, MyWalker> MyMarchingCubes;
+                MyWalker walker;
+                MyMarchingCubes mc(mesh->cm, walker);
+                walker.BuildMesh<MyMarchingCubes>(mesh->cm, v, mc, cb);
+            }
             Log(0, "Done");
 
             vcg::tri::UpdateBounding<CMeshO>::Box(mesh->cm);

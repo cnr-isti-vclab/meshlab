@@ -6,7 +6,9 @@
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
 #include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/trimesh/clean.h>
 #include <vcg/space/box2.h>
+#include <wrap/callback.h>
 
 #include "fixed.h"
 
@@ -95,8 +97,8 @@ namespace vcg {
                 typename ContainerType::const_iterator curr = v.begin();
                 typename ContainerType::const_iterator next = curr+1;
                 while (next != v.end()) {
-                    if (!(*curr < *next)) {
-                        std::cerr << "Not sorted! (" << *curr << " >= " << *next << ")" << std::endl;
+                    if (*next < *curr) {
+                        std::cerr << "Not sorted! (" << *curr << " > " << *next << ")" << std::endl;
                         return false;
                     }
                     curr = next;
@@ -657,7 +659,7 @@ namespace vcg {
             
         public:
             template <class MeshType>
-                    inline InterceptSet3(const MeshType &m, const Point3x &d, int subCellPrecision=32) : delta(d),
+                    inline InterceptSet3(const MeshType &m, const Point3x &d, int subCellPrecision=32, vcg::CallBackPos *cb=vcg::DummyCallBackPos) : delta(d),
                     bbox(Point3i(floor(m.bbox.min.X() / d.X()) -1,
                                  floor(m.bbox.min.Y() / d.Y()) -1,
                                  floor(m.bbox.min.Z() / d.Z()) -1),
@@ -679,7 +681,16 @@ namespace vcg {
                 set.push_back(ISet2Type(xy));
                 
                 typename MeshType::ConstFaceIterator i, end = m.face.end();
-                for (i = m.face.begin(); i != end; ++i) {
+                const size_t nFaces = m.face.size();
+                size_t f = 0;
+                for (i = m.face.begin(); i != end; ++i, ++f) {
+                    if (!cb (100.0 * f / nFaces, "Rasterizing mesh...")) {
+                        set.clear();
+                        set.push_back(ISet2Type(yz));
+                        set.push_back(ISet2Type(zx));
+                        set.push_back(ISet2Type(xy));
+                        return;
+                    }
                     Point3x v0(i->V(0)->P()), v1(i->V(1)->P()), v2(i->V(2)->P());
                     v0.Scale(invDelta);
                     v1.Scale(invDelta);
@@ -728,9 +739,16 @@ namespace vcg {
             typedef typename std::tr1::unordered_map<vcg::Point3i,float> SamplesTable;
             typedef typename std::tr1::unordered_set<vcg::Point3i> CellsSet;
 
+            void clear() {
+                _vertices.clear();
+                _samples.clear();
+                _volume = NULL;
+                _mesh = NULL;
+            }
+
         public:
             template<typename EXTRACTOR_TYPE>
-            void BuildMesh(MeshType &mesh, InterceptVolume<InterceptType> &volume, EXTRACTOR_TYPE &extractor)
+            void BuildMesh(MeshType &mesh, InterceptVolume<InterceptType> &volume, EXTRACTOR_TYPE &extractor, vcg::CallBackPos *cb=vcg::DummyCallBackPos)
             {
                 CellsSet cset;
                 vcg::Point3i p;
@@ -776,38 +794,40 @@ namespace vcg {
                     }
                 }
 
-                for (int i = 0; i < 2; ++i)
-                    for (int j = 0; j < 2; ++j)
-                        for (int k = 0; k < 2; ++k)
-                            for (CellsSet::const_iterator cell = cset.begin(); cell != cset.end(); ++cell) {
-                    vcg::Point3i p(*cell + vcg::Point3i(i, j, k));
-                    if (_samples.find(p) == _samples.end())
-                        _samples[p] = _volume->IsIn(p);
+                const size_t n = cset.size();
+                size_t i = 0;
+                for (CellsSet::const_iterator cell = cset.begin(); cell != cset.end(); ++cell, ++i) {
+                    if (!cb(100.0 * i / n, "Precomputing in/out table...")) {
+                        clear();
+                        return;
+                    }
+                    for (int i = 0; i < 2; ++i)
+                        for (int j = 0; j < 2; ++j)
+                            for (int k = 0; k < 2; ++k) {
+                        vcg::Point3i p(*cell + vcg::Point3i(i, j, k));
+                        if (_samples.find(p) == _samples.end())
+                            _samples[p] = _volume->IsIn(p);
+                    }
                 }
 
                 const vcg::Point3i diag(1, 1, 1);
                 extractor.Initialize();
-                for (CellsSet::const_iterator cell = cset.begin(); cell != cset.end(); ++cell)
+                i = 0;
+                for (CellsSet::const_iterator cell = cset.begin(); cell != cset.end(); ++cell, ++i) {
+                    if (!cb(100.0 * i / n, "Reconstructing surface..."))
+                        break;
                     extractor.ProcessCell(*cell, *cell + diag);
+                }
                 extractor.Finalize();
-                
-                _vertices.clear();
-                _samples.clear();
-                _volume = NULL;
-                _mesh = NULL;
+
+                clear();
             }
             
             inline float V(int i, int j, int k) const { return V(vcg::Point3i(i, j, k)); }
 
             inline float V(const vcg::Point3i &p) const {
                 typename SamplesTable::const_iterator s = _samples.find(p);
-                //              if (s != _samples.end())
                 return s->second;
-
-                /*
-                _samples[p] = _volume->IsIn(p);
-                return _samples[p];
-  */
             }
 
             template <const int coord>
@@ -858,5 +878,24 @@ namespace vcg {
             MeshType *_mesh;
         };
     };
+
+    template <typename MeshType, typename StringType>
+            bool isValid(MeshType &mesh, StringType &errorMessage) {
+        if (vcg::tri::Clean<MeshType>::CountNonManifoldEdgeFF(mesh) > 0)
+            errorMessage = "non manifold edges";
+        else if (vcg::tri::Clean<MeshType>::CountNonManifoldVertexFF(mesh) > 0)
+            errorMessage = "non manifold vertices";
+        else if (!vcg::tri::Clean<MeshType>::IsSizeConsistent(mesh))
+            errorMessage = "non size-consistent mesh";
+        else {
+            int boundaryEdgeNum, internalEdgeNum;
+            vcg::tri::Clean<MeshType>::CountEdges(mesh, internalEdgeNum, boundaryEdgeNum);
+            if (boundaryEdgeNum > 0)
+                errorMessage = "non watertight mesh";
+            else
+                return true;
+        }
+        return false;
+    }
 };
 #endif // INTERCEPT_H
