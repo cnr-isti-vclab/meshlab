@@ -94,19 +94,19 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
     prev=cur;
     cur=event->pos();
     isDragging = true;
+    gla->update();
 
-    // to avoid too frequent rendering 
-    if(gla->lastRenderingTime() < 200 )
-    {
-      gla->update();
-    }
-    else{
-      gla->makeCurrent();
-      glDrawBuffer(GL_FRONT);
-      DrawXORRect(gla,true);
-      glDrawBuffer(GL_BACK);
-      glFlush();
-    }
+//    // to avoid too frequent rendering
+//    if(gla->lastRenderingTime() < 200 )
+//    {
+//    }
+//    else{
+//      gla->makeCurrent();
+//      glDrawBuffer(GL_FRONT);
+//      DrawXORRect(gla,true);
+//      glDrawBuffer(GL_BACK);
+//      glFlush();
+//    }
   }
   
   void EditSelectPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
@@ -206,8 +206,8 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
     if(selectFrontFlag)	GLPickTri<CMeshO>::PickFaceVisible(mid.x(), mid.y(), m.cm, NewSelFace, wid.x(), wid.y());
                    else GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, NewSelFace, wid.x(), wid.y());
 
-    qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
-    qDebug("Pickface: Got  %i on %i",int(NewSelFace.size()),int(m.cm.face.size()));
+//    qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
+//    qDebug("Pickface: Got  %i on %i",int(NewSelFace.size()),int(m.cm.face.size()));
 		glPopMatrix();
     tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
     switch(composingSelMode)
