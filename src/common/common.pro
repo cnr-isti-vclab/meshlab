@@ -23,16 +23,16 @@ linux-g++:QMAKE_CLEAN +=  ../distrib/plugins/*.so
 
 
 macx:QMAKE_POST_LINK = "\
-if [ -d  ../distrib/meshlab.app/Contents/MacOs/ ]; \
+if [ -d  ../distrib/meshlab.app/Contents/MacOS/ ]; \
 then  \
 echo "Copying";  \
 else  \
 mkdir ../distrib;  \
 mkdir ../distrib/meshlab.app ;  \
 mkdir ../distrib/meshlab.app/Contents;  \
-mkdir ../distrib/meshlab.app/Contents/MacOs;  \
+mkdir ../distrib/meshlab.app/Contents/MacOS;  \
 fi;   \
-cp libcommon.* ../distrib/meshlab.app/Contents/MacOs/"
+cp libcommon.* ../distrib/meshlab.app/Contents/MacOS/"
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
     $$GLEWDIR/include
