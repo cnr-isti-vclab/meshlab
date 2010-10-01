@@ -718,7 +718,7 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
     QString textureName("-- no texture --");
     if(!m.glw.TMId.empty())
       textureName = qPrintable(QString(m.cm.textures[0].c_str()))+QString("  ");
-    qDebug(qPrintable(textureName));
+    //, QPainter *qDebug(qPrintable(textureName));
     glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName);
     checkGLError::qDebug("DrawTexParam");
     drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.1,painter,qf,0,true);
@@ -751,8 +751,6 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
     }
     glEnd();
     glDisable(GL_TEXTURE_2D);
-    glPopAttrib();
-
 
     // Closing 2D
     glPopAttrib();
