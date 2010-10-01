@@ -90,13 +90,19 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
                                          "The first operand of the CSG operation"));
             parlst.addParam(new RichMesh("SecondMesh", target, &md, "Second Mesh",
                                          "The second operand of the CSG operation"));
-            parlst.addParam(new RichAbsPerc("Delta", mindim / 10.0, 0, mindim,
-                                            "Spacing between sampling points"));
-            parlst.addParam(new RichInt("SubDelta", 32, "Discretization points per sample interval"));
-            parlst.addParam(new RichEnum("Operator",
-                                         0,
-                                         QStringList() << "Intersection" << "Union" << "Difference",
-                                         "Operator"));
+            parlst.addParam(new RichAbsPerc("Delta", mindim / 100.0, 0, mindim,
+                                            "Spacing between sampling lines",
+                                            "This parameter controls the accuracy of the result and the speed of the computation."
+                                            "The time and memory needed to perform the operation usually scale as the reciprocal square of this value."
+                                            "For optimal results, this value should be at most half the the smallest feature (i.e. the highest frequency) you want to reproduce."));
+            parlst.addParam(new RichInt("SubDelta", 32, "Discretization points per sample interval",
+                                        "This is the number of points between the sampling lines to which the vertices can be rounded."
+                                        "Increasing this can marginally increase the precision and decrease the speed of the operation."));
+            parlst.addParam(new RichEnum("Operator", 0,
+                                         QStringList() << "Intersection" << "Union" << "Difference", "Operator",
+                                         "Intersection takes the volume shared between the two meshes; "
+                                         "Union takes the volume included in at least one of the two meshes; "
+                                         "Difference takes the volume included in the first mesh but not in the second one"));
         }
         break;
 
