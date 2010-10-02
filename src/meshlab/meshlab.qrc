@@ -36,5 +36,7 @@
         <file>images/selected_vert.png</file>
         <file>images/facebook.gif</file>
         <file>images/onscreenHelp.txt</file>
+        <file>images/splitV.png</file>
+        <file>images/splitH.png</file>
     </qresource>
 </RCC>

@@ -273,8 +273,8 @@ void MainWindow::createActions()
 
 	setSplitGroupAct = new QActionGroup(this);	setSplitGroupAct->setExclusive(true);
 
-	setSplitHAct	  = new QAction(tr("&Horizontally"),setSplitGroupAct);
-	setSplitVAct	  = new QAction(tr("&Vertically"),setSplitGroupAct);
+  setSplitHAct	  = new QAction(QIcon(":/images/splitH.png"),tr("&Horizontally"),setSplitGroupAct);
+  setSplitVAct	  = new QAction(QIcon(":/images/splitV.png"),tr("&Vertically"),setSplitGroupAct);
 
 	connect(setSplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(setSplit(QAction *)));
 
