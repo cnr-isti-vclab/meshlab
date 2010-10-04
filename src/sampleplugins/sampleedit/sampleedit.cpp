@@ -32,6 +32,7 @@ $Log: meshedit.cpp,v $
 #include "sampleedit.h"
 #include <wrap/gl/pick.h>
 #include<vcg/complex/trimesh/append.h>
+#include<wrap/qt/gl_label.h>
 
 using namespace std;
 using namespace vcg;
@@ -104,33 +105,33 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea *gla, QPainter *p)
 {
 
-  glDepthMask(GL_FALSE);
-  glDisable(GL_DEPTH_TEST);
-  p->endNativePainting();
-  p->save();
-  p->setRenderHint(QPainter::TextAntialiasing);
-  p->setPen(Qt::white);
-  QFont qFont;
-  qFont.setStyleStrategy(QFont::NoAntialias);
-  qFont.setFamily("Helvetica");
-  qFont.setPixelSize(12);
-  p->setFont(qFont);
-
-  QString buf;
-  buf+=QString("f%1\n (%3 %4 %5)").arg(tri::Index(m.cm,fp)).arg(tri::Index(m.cm,fp->V(0))).arg(tri::Index(m.cm,fp->V(1))).arg(tri::Index(m.cm,fp->V(2)));
+  //glDepthMask(GL_FALSE);
+  //glDisable(GL_DEPTH_TEST);
+  //p->endNativePainting();
+  //p->save();
+  //p->setRenderHint(QPainter::TextAntialiasing);
+  //p->setPen(Qt::white);
+  //QFont qFont;
+  //qFont.setStyleStrategy(QFont::NoAntialias);
+  //qFont.setFamily("Helvetica");
+  //qFont.setPixelSize(12);
+  //p->setFont(qFont);
+  QString buf = QString("f%1\n (%3 %4 %5)").arg(tri::Index(m.cm,fp)).arg(tri::Index(m.cm,fp->V(0))).arg(tri::Index(m.cm,fp->V(1))).arg(tri::Index(m.cm,fp->V(2)));
   Point3f c=Barycenter(*fp);
+  vcg::glLabel::render(p,c,buf);
   for(int i=0;i<3;++i)
     {
-       buf+=QString("\nv%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
+       buf =QString("\nv%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
       if( m.hasDataMask(MeshModel::MM_VERTQUALITY) )
-        buf+=QString(" - Q(%1)").arg(fp->V(i)->Q());
+        buf +=QString(" - Q(%1)").arg(fp->V(i)->Q());
       if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
-          buf+=QString("- uv(%1 %2) id:%3").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
+          buf +=QString("- uv(%1 %2) id:%3").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
+	  vcg::glLabel::render(p,fp->V(i)->P(),buf);
     }
 
-  p->drawText(QRect(0,0,gla->width(),gla->height()), Qt::AlignLeft | Qt::TextWordWrap, buf);
-  p->restore();
-  p->beginNativePainting();
+  //p->drawText(QRect(0,0,gla->width(),gla->height()), Qt::AlignLeft | Qt::TextWordWrap, buf);
+  //p->restore();
+  //p->beginNativePainting();
 }
 
 bool SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *gla )
