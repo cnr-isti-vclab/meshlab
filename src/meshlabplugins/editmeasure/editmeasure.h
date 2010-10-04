@@ -46,7 +46,7 @@ public:
   static const QString Info();
   virtual bool StartEdit(MeshModel &, GLArea *);
   virtual void EndEdit(MeshModel &, GLArea *);
-  virtual void Decorate(MeshModel &, GLArea *);
+  virtual void Decorate(MeshModel &, GLArea *,QPainter*);
   virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
   virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
   virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &, GLArea * );

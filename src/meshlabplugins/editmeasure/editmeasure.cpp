@@ -28,6 +28,7 @@ $Log: editmeasure.cpp,v $
 
 #include <meshlab/glarea.h>
 #include "editmeasure.h"
+#include <wrap/qt/gl_label.h>
 
 using namespace vcg;
 
@@ -61,13 +62,16 @@ void EditMeasurePlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &, GLAr
   gla->update();
 }
 
-void EditMeasurePlugin::Decorate(MeshModel &, GLArea * gla)
+void EditMeasurePlugin::Decorate(MeshModel &, GLArea * gla,QPainter* p)
 {
   rubberband.Render(gla);
-  if(rubberband.IsReady()){
+  if(rubberband.IsReady())
+  {
     Point3f a,b;
     rubberband.GetPoints(a,b);
-    rubberband.RenderLabel(QString("%1").arg(Distance(a,b)),gla);
+    //rubberband.RenderLabel(QString("%1").arg(Distance(a,b)),gla);
+	vcg::glLabel::render(p,b,QString("%1").arg(Distance(a,b)));
+
     if(!was_ready)
       suspendEditToggle();
     was_ready=true;
