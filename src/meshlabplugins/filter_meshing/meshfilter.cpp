@@ -964,11 +964,11 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 				return false; // can't continue, mesh can't be processed
 				}
 			  vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
-		  case 1: vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,false); break;
+		  case 1: vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,false,cb); break;
 		  case 2:
 			  vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
 			  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-        if ( ! tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
+        if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
 				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
 				return false; // can't continue, mesh can't be processed
 				}
