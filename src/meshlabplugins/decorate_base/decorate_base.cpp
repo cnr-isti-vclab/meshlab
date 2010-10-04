@@ -199,7 +199,7 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
     } // end switch;
 	glPopMatrix();
 
-  if(ID(a) == DP_SHOW_AXIS)	CoordinateFrame(m.cm.bbox.Diag()/2.0).Render(gla);
+  if(ID(a) == DP_SHOW_AXIS)	CoordinateFrame(m.cm.bbox.Diag()/2.0).Render(gla,painter);
   if(ID(a) == DP_SHOW_BOX_CORNERS_ABS)	DrawBBoxCorner(m,false);
 }
 
@@ -561,7 +561,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
             } else {
               for(CMeshO::VertexIterator vi = m->cm.vert.begin(); vi!= m->cm.vert.end();++vi) if(!(*vi).IsD())
                 {
-                  H->Add((*vi).Q(),(*vi).C());
+                  H->Add((*vi).Q(),(*vi).C(),1.0f);
                 }
             }
       } break;
@@ -587,7 +587,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
                   H->Add((*fi).Q(),(*fi).C(),DoubleArea(*fi)*0.5f);
             } else {
               for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
-                  H->Add((*fi).Q(),(*fi).C());
+                  H->Add((*fi).Q(),(*fi).C(),1.0f);
           }
       } break;
 
