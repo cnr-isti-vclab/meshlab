@@ -25,6 +25,12 @@
 #include <common/interfaces.h>
 #include <common/pluginmanager.h>
 #include <common/filterscript.h>
+
+#include <wrap/io_trimesh/io_mask.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/clean.h>
+
 class FilterData
 {
 public:
@@ -146,7 +152,34 @@ class MeshLabServer
 			printf("MeshLabServer: Failed loading of %s from dir %s\n",qPrintable(fileName),qPrintable(curdir.path()));
 			return false;
 		}
-		vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);
+
+		// In case of polygonal meshes the normal should be updated accordingly
+		if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) 
+		{
+			mm.updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
+			int degNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm.cm);
+			if(degNum) 
+				printf("Warning model contains %i degenerate faces. Removed them.",degNum);
+			mm.updateDataMask(MeshModel::MM_FACEFACETOPO);
+			vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm.cm);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm.cm);
+		} // standard case
+		else {
+			if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+				vcg::tri::UpdateNormals<CMeshO>::PerFace(mm.cm);
+			else
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm.cm);
+		}
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);					// updates bounding box
+
+		if(mm.cm.fn==0)
+		{
+			if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+				mm.updateDataMask(MeshModel::MM_VERTNORMAL);
+		}
+		else 
+			mm.updateDataMask(MeshModel::MM_VERTNORMAL);
+		//vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);
 		QDir::setCurrent(curdir.path());
 		return true;
 	}
@@ -272,7 +305,8 @@ class MeshLabServer
 			bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, FilterCallBack);
 			//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
 			//GLA()->log.Logf(GLLogStream::WARNING,"Re-Applied filter %s",qPrintable((*ii).first));
-
+			int vn = meshDocument.meshList[1]->cm.vert.size();
+			int fn = meshDocument.meshList[1]->cm.face.size();
 			if(!ret)
 			{
 				printf("Problem with filter: %s\n",qPrintable((*ii).first));
@@ -463,15 +497,16 @@ printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.v
 	//if there is not one name or an equal number of in and out names then exit 
 	if(meshNamesOut.isEmpty() )
 		printf("No output mesh names given."); 
-	else if(meshNamesOut.size() != 1 && meshNamesOut.size() != meshNamesIn.size() ) {
+	else //if(meshNamesOut.size() != 1 && meshNamesOut.size() != meshNamesIn.size() ) {
+		if(meshNamesOut.size() > meshDocument.meshList.size() ) {
 		printf("Wrong number of output mesh names given\n"); 
 		exit(-1);
 	} else 
 	{
 		for(int i = 0; i < meshNamesOut.size(); i++)
 		{
-			server.Save(meshDocument.getMesh(i), mask, meshNamesOut.at(i));
-			printf("Mesh %s saved with: %i vn %i fn\n", qPrintable(meshNamesOut.at(i)), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
+			server.Save(meshDocument.meshList[i], mask, meshNamesOut.at(i));
+			printf("Mesh %s saved with: %i vn %i fn\n", qPrintable(meshDocument.meshList[i]->fullName()), meshDocument.meshList[i]->cm.vn, meshDocument.meshList[i]->cm.fn);
 		}
 	}		
 }
