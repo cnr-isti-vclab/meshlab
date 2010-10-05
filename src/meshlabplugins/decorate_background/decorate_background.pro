@@ -2,10 +2,10 @@ include (../../shared.pri)
 
 QT           += opengl
 
-HEADERS       += sampledecorate.h cubemap.h
+HEADERS       += decorate_background.h cubemap.h
 
-SOURCES      += sampledecorate.cpp\ 
+SOURCES      += decorate_background.cpp\
                 cubemap.cpp
 
-TARGET        = sampledecoration
+TARGET        = decorate_background
 

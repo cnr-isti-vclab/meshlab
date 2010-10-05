@@ -35,6 +35,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
   virtual QString filterInfo(QAction *) const;
+  QString decorateInfo(QAction *) const;
   
   enum {
     DP_SHOW_FACE_NORMALS,
@@ -97,8 +98,6 @@ public:
         ap->setCheckable(true);
     }
   }
-
-	QList<QAction *> actions () const {return actionList;}
 
 	void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
   void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);

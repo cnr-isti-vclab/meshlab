@@ -20,20 +20,13 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-sampledecorate.cpp,v
-Revision 1.1  2007/12/13 00:33:55  cignoni
-New small samples
-
-****************************************************************************/
 
 #include <QtGui>
 
 #include <math.h>
 #include <limits>
 #include <stdlib.h>
-#include "sampledecorate.h"
+#include "decorate_background.h"
 #include <QGLWidget>
 #include <wrap/gl/addons.h>
 
