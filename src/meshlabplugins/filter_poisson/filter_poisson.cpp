@@ -178,12 +178,15 @@ bool PoissonPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	
 	int ret= Execute2(pp, Pts, Nor, mesh,center,scale,cb);
 	mesh.resetIterator();
-	Log("Successfully created a mesh of %i vert and %i faces",mesh.outOfCorePointCount()+mesh.inCorePoints.size(),mesh.triangleCount());
+	int vm = mesh.outOfCorePointCount()+mesh.inCorePoints.size();
+	int fm = mesh.triangleCount();
+
+	Log("Successfully created a mesh of %i vert and %i faces",vm,fm);
 	
 	//m.cm.Clear();
 	
-	tri::Allocator<CMeshO>::AddVertices(pm.cm,mesh.outOfCorePointCount()+mesh.inCorePoints.size());
-	tri::Allocator<CMeshO>::AddFaces(pm.cm,mesh.triangleCount());
+	tri::Allocator<CMeshO>::AddVertices(pm.cm,vm);
+	tri::Allocator<CMeshO>::AddFaces(pm.cm,fm);
 
   Point3D<float> p;
 	int i;

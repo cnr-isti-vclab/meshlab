@@ -13,6 +13,7 @@ public:
 		Offset = 1.0;
 		NoResetSamples = false;
 		NoClipTree = false;
+		Confidence = true;
 		
 	}
 	bool Verbose,NoResetSamples,NoClipTree,Confidence;
