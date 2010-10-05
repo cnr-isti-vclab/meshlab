@@ -305,8 +305,7 @@ class MeshLabServer
 			bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, FilterCallBack);
 			//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
 			//GLA()->log.Logf(GLLogStream::WARNING,"Re-Applied filter %s",qPrintable((*ii).first));
-			int vn = meshDocument.meshList[1]->cm.vert.size();
-			int fn = meshDocument.meshList[1]->cm.face.size();
+
 			if(!ret)
 			{
 				printf("Problem with filter: %s\n",qPrintable((*ii).first));
@@ -497,17 +496,19 @@ printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.v
 	//if there is not one name or an equal number of in and out names then exit 
 	if(meshNamesOut.isEmpty() )
 		printf("No output mesh names given."); 
-	else //if(meshNamesOut.size() != 1 && meshNamesOut.size() != meshNamesIn.size() ) {
-		if(meshNamesOut.size() > meshDocument.meshList.size() ) {
+	else 
+	if(meshNamesOut.size() != 1 && meshNamesOut.size() != meshNamesIn.size() ) 
+	{
+		//if(meshNamesOut.size() > meshDocument.meshList.size() ) {
 		printf("Wrong number of output mesh names given\n"); 
 		exit(-1);
 	} else 
 	{
-		for(int i = 0; i < meshNamesOut.size(); i++)
-		{
-			server.Save(meshDocument.meshList[i], mask, meshNamesOut.at(i));
-			printf("Mesh %s saved with: %i vn %i fn\n", qPrintable(meshDocument.meshList[i]->fullName()), meshDocument.meshList[i]->cm.vn, meshDocument.meshList[i]->cm.fn);
-		}
+		//for(int i = 0; i < meshNamesOut.size(); i++)
+		//{
+			server.Save(meshDocument.mm(), mask, meshNamesOut.at(0));
+			printf("Mesh %s saved with: %i vn %i fn\n", qPrintable(meshDocument.mm()->fullName()), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
+		//}
 	}		
 }
 
