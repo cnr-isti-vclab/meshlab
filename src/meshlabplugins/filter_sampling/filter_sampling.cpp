@@ -272,6 +272,7 @@ public:
 	bool colorFlag;
 	bool normalFlag;
 	bool qualityFlag;
+  bool selectionFlag;
 	bool storeDistanceAsQualityFlag;
 	float dist_upper_bound;
  	void init(CMeshO *_m, CallBackPos *_cb=0, int targetSz=0)
@@ -279,6 +280,7 @@ public:
 		coordFlag=false;
 		colorFlag=false;
 		qualityFlag=false;
+    selectionFlag=false;
 		storeDistanceAsQualityFlag=false;
 		m=_m;
 		if(m) 
@@ -319,6 +321,7 @@ void AddVert(CMeshO::VertexType &p)
 				if(colorFlag) p.C() = nearestV->C();
 				if(normalFlag) p.N() = nearestV->N();
 				if(qualityFlag) p.Q()= nearestV->Q();
+        if(selectionFlag) if(nearestV->IsS()) p.SetS();
 			}
 		else
 			{
@@ -337,6 +340,7 @@ void AddVert(CMeshO::VertexType &p)
 				if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
 				if(normalFlag) p.N() = nearestF->V(0)->N()*interp[0] + nearestF->V(1)->N()*interp[1] + nearestF->V(2)->N()*interp[2];
 				if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
+        if(selectionFlag) if(nearestF->IsS()) p.SetS();
 			}
 	}
 }; // end class RedetailSampler
@@ -579,9 +583,11 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 												"if enabled, the normal of each vertex of the target mesh will get the (interpolated) normal of the corresponding closest point on the source mesh"));										
 				parlst.addParam(new RichBool ("ColorTransfer", true, "Transfer Color",
 												"if enabled, the color of each vertex of the target mesh will become the color of the corresponding closest point on the source mesh"));										
-				parlst.addParam(new RichBool ("QualityTransfer", false, "Transfer quality",
-												"if enabled, the quality of each vertex of the target mesh will become the quality of the corresponding closest point on the source mesh"));										
-				parlst.addParam(new RichBool ("QualityDistance", false, "Store dist. as quality",
+        parlst.addParam(new RichBool ("QualityTransfer", false, "Transfer quality",
+                        "if enabled, the quality of each vertex of the target mesh will become the quality of the corresponding closest point on the source mesh"));
+        parlst.addParam(new RichBool ("SelectionTransfer", false, "Transfer Selection",
+                        "if enabled,  each vertex of the target mesh will be selected if the corresponding closest point on the source mesh falls in a selected face"));
+        parlst.addParam(new RichBool ("QualityDistance", false, "Store dist. as quality",
 												"if enabled, we store the distance of the transferred value as in the vertex quality"));										
 				parlst.addParam(new RichAbsPerc("UpperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
 												tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering attributes.")));
@@ -949,10 +955,11 @@ case FP_CLUSTERED_SAMPLING :
 			rs.coordFlag=par.getBool("GeomTransfer");
 			rs.normalFlag=par.getBool("NormalTransfer");
 			rs.qualityFlag=par.getBool("QualityTransfer");
+      rs.selectionFlag=par.getBool("SelectionTransfer");
 			
 			rs.storeDistanceAsQualityFlag=par.getBool("QualityDistance");
 
-			if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag  && !rs.normalFlag)
+      if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag  && !rs.normalFlag && !rs.selectionFlag)
 			{
 				errorMessage = QString("You have to choose at least one attribute to be sampled");
 				return false;
