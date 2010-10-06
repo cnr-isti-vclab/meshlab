@@ -1,8 +1,8 @@
 include (../../shared.pri)
 HEADERS = filter_dirt.h \
-          dirt_utils.h \
           dustparticle.h \
-          dustsampler.h \
+          dirt_utils.h \
+#         dustsampler.h \
           $$VCGDIR/vcg/complex/trimesh/point_sampling.h
 
 SOURCES = filter_dirt.cpp

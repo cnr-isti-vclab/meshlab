@@ -25,7 +25,7 @@
 #include <QtGui>
 #include "filter_dirt.h"
 #include "dustparticle.h"
-#include "dustsampler.h"
+//#include "dustsampler.h"
 #include "dirt_utils.h"
 
 
@@ -78,6 +78,7 @@ QString FilterDirt::filterName(FilterIDType filterId) const
         break;
     }
 }
+
 QString FilterDirt::filterInfo(FilterIDType filterId) const
 {
     switch (filterId) {
@@ -91,9 +92,18 @@ QString FilterDirt::filterInfo(FilterIDType filterId) const
 }
 
 void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par){
-    par.addParam(new RichInt("nparticles",1000,"Number of Dust Particles","Number of Dust Particles to Generate"));
-    //par.addParam(new RichDynamicFloat("step",0,0,10,"Steps","Steps of simulation"));
 
+
+
+    par.addParam(new RichFloat("dir_x",0.0,"x","x direction of dust source"));
+    par.addParam(new RichFloat("dir_y",0.0,"y","y direction of dust source"));
+    par.addParam(new RichFloat("dir_z",0.0,"z","z direction of dust source"));
+    par.addParam(new RichInt("nparticles",10,"particles","Max Number of Dust Particles to Generate Per Face"));
+    par.addParam(new RichFloat("slippiness",1,"s","The surface slippines"));
+    par.addParam(new RichFloat("adhesion",0.2,"k","Factor to model the general adhesion"));
+    par.addParam(new RichBool("mtc",false,"Map To Colors",""));
+    par.addParam(new RichBool("gt",false,"Generate Texture",""));
+    //par.addParam(new RichDynamicFloat("step",0,0,10,"Steps","Steps of simulation"));
     return;
 }
 
@@ -106,53 +116,48 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 {
 
 
-    if(md.size()>=2){//This is temporary just to try new steps of simulation
+    if(md.size()>=2){//This is temporary, just to try new steps of simulation
 
 
         MeshModel* dmesh=md.getMesh("Dust Mesh");
         Point3f dir;
         Point3f new_bar_coords;
         dir[0]=0;
-        dir[1]=0;
-        dir[2]=0.5;
+        dir[1]=-1;
+        dir[2]=0;
         if(dmesh!=0){
                    CMeshO::VertexIterator vi;//= dmesh->cm.vert.begin();
                    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > pi = tri::Allocator<CMeshO>::GetPerVertexAttribute<DustParticle<CMeshO> >(dmesh->cm,"ParticleInfo");
                    CMeshO::CoordType new_pos;
                    CMeshO::CoordType int_p;
+                   CMeshO::FacePointer pre_face;
                    CMeshO::FacePointer new_f;
                    bool stop_movement=false;
                    for(vi=dmesh->cm.vert.begin();vi!=dmesh->cm.vert.end();++vi){
                        stop_movement=false;
-                       new_pos=StepForward((*vi).P(),pi[vi].face,dir);
+                       pre_face=pi[vi].face;
+                       new_pos=StepForward((*vi).P(),pi[vi].speed,pi[vi].mass,pi[vi].face,dir);
                        while(!stop_movement){
 
                            if(!IsOnFace(new_pos,pi[vi].face)){
 
 
-                            //if(ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_f)){
+                            //if(ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_f))
                             ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_f);
-
                             pi[vi].face=new_f;
                             Segment3f s1=Segment3f((*vi).P(),new_pos);
                             Segment3f s2=Segment3f((*vi).P(),int_p);
-                            float t=s2.Length()/s1.Length();
                             new_pos=int_p;
                             (*vi).P()=new_pos;
-                            (*pi[vi].face).C()=Color4b::Blue;//Debugging
-                            new_pos=StepForward((*vi).P(),pi[vi].face,dir,t);
-
-                            /*if(!IsOnFace(new_pos,pi[vi].face))
-                       {                                                                        {
-                           (*pi[vi].face).C()=Color4b::Green;//Debugging
-                           stop_movement=true;
-                           (*vi).P()=new_pos;
-                       }*/
-//     }
+                            if(pre_face!=new_f)
+                            {
+                                float t=s2.Length()/s1.Length();
+                                pre_face=new_f;
+                                new_pos=StepForward((*vi).P(),pi[vi].speed,pi[vi].mass,pi[vi].face,dir,t);
+                            }
+                            else stop_movement=true;
                         }else{
-                         //The new position is on the same face
-                         (*pi[vi].face).C()=Color4b::Green;//Debugging
-                         stop_movement=true;
+                          stop_movement=true;
                          (*vi).P()=new_pos;
                         }
 
@@ -162,28 +167,31 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
               }
                }
     }else{
-
         //First Application
+        Point3f dir;
+        dir[0]=par.getFloat("dir_x");
+        dir[1]=par.getFloat("dir_y");
+        dir[2]=par.getFloat("dir_z");
+
         vector<Point3f> dustVertexVec;
         vector<DustParticle<CMeshO> > dustParticleVec;
-
-        DustSampler<CMeshO> ts(dustVertexVec,dustParticleVec);
         MeshModel* currMM=md.mm();
+
         if (currMM->cm.fn==0) {
                 errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet";
                 return false;
         }
         std::string func_d = "ny";
 
-
         currMM->updateDataMask(MeshModel::MM_FACEFACETOPO);
         currMM->updateDataMask(MeshModel::MM_FACEMARK);
         currMM->updateDataMask(MeshModel::MM_FACECOLOR);
         currMM->updateDataMask(MeshModel::MM_VERTQUALITY);
+        currMM->updateDataMask(MeshModel::MM_FACEQUALITY);
+        //currMM->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
         tri::UnMarkAll(currMM->cm);
 
         //clean Mesh
-
         tri::Allocator<CMeshO>::CompactFaceVector(currMM->cm);
         tri::Clean<CMeshO>::RemoveUnreferencedVertex(currMM->cm);
         tri::Clean<CMeshO>::RemoveDuplicateVertex(currMM->cm);
@@ -197,28 +205,15 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         tri::UpdateNormals<CMeshO>::PerFaceNormalized(currMM->cm);
         tri::UpdateFlags<CMeshO>::FaceProjection(currMM->cm);
 
-        Parser p;
-
-
-        setPerVertexVariables(p);
-        p.SetExpr(func_d);
-
-        CMeshO::VertexIterator vi;
-
-        for(vi=currMM->cm.vert.begin();vi!=currMM->cm.vert.end();++vi)
-        {
-            setAttributes(vi,currMM->cm);
-            try {
-                (*vi).Q() = p.Eval();
-            } catch(Parser::exception_type &e) {
-                errorMessage = e.GetMsg().c_str();
-                return false;
-            }
+        //Initialize quality for face
+        CMeshO::FaceIterator fIter;
+        for(fIter=currMM->cm.face.begin();fIter!=currMM->cm.face.end();++fIter){
+            fIter->Q()=0;
         }
 
-        tri::SurfaceSampling<CMeshO,DustSampler<CMeshO> >::Montecarlo(currMM->cm,ts,par.getInt("nparticles"));
-
-        //dmm -> Dust Mesh Model
+        ComputeNormalDustAmount(currMM,dir,par.getFloat("adhesion"),par.getFloat("slippiness"));
+        GenerateDustParticles(currMM,dustVertexVec,dustParticleVec,par.getInt("nparticles"),0.6);
+        //dmm-> Dust Mesh Model
         MeshModel* dmm=md.addNewMesh("Dust Mesh");
 
         dmm->cm.Clear();
@@ -226,20 +221,17 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 
         CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<DustParticle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
 
-
         CMeshO::VertexIterator vIter=dmm->cm.vert.begin();
         vector<Point3f>::iterator dvIter;
         std::vector< DustParticle<CMeshO> >::iterator dpIter=dustParticleVec.begin();
 
         for(dvIter=dustVertexVec.begin();dvIter!=dustVertexVec.end();++dvIter){
             (*vIter).P()=CMeshO::CoordType ((*dvIter)[0],(*dvIter)[1],(*dvIter)[2]);
-
             ph[vIter]=(*dpIter);
             ++dpIter;
             ++vIter;
         }
     }
-
     return true;
 }
 
@@ -248,52 +240,7 @@ MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *)
     return MeshFilterInterface::VertexColoring;
 }
 
-void FilterDirt::setPerVertexVariables(Parser &p)
-{
-    p.DefineVar("x", &x);
-    p.DefineVar("y", &y);
-    p.DefineVar("z", &z);
-    p.DefineVar("nx", &nx);
-    p.DefineVar("ny", &ny);
-    p.DefineVar("nz", &nz);
-    p.DefineVar("r", &r);
-    p.DefineVar("g", &g);
-    p.DefineVar("b", &b);
-    p.DefineVar("q", &q);
-    p.DefineVar("vi",&v);
-    p.DefineVar("rad",&rad);
 
-    // define var for user-defined attributes (if any exists)
-    // if vector is empty, code won't be executed
-    for(int i = 0; i < (int) v_attrNames.size(); i++)
-        p.DefineVar(v_attrNames[i],&v_attrValue[i]);
-}
 
-void FilterDirt::setAttributes(CMeshO::VertexIterator &vi, CMeshO &m)
-{
-    x = (*vi).P()[0]; // coord x
-    y = (*vi).P()[1]; // coord y
-    z = (*vi).P()[2]; // coord z
-
-    nx = (*vi).N()[0]; // normal coord x
-    ny = (*vi).N()[1]; // normal coord y
-    nz = (*vi).N()[2]; // normal coord z
-
-    r = (*vi).C()[0];  // color R
-    g = (*vi).C()[1];  // color G
-    b = (*vi).C()[2];  // color B
-
-    q = (*vi).Q();     // quality
-
-    if(tri::HasPerVertexRadius(m)) rad = (*vi).R();
-    else rad=0;
-
-    v = vi - m.vert.begin(); // zero based index of current vertex
-
-    // if user-defined attributes exist (vector is not empty)
-    //  set variables to explicit value obtained through attribute's handler
-    for(int i = 0; i < (int) v_attrValue.size(); i++)
-        v_attrValue[i] = vhandlers[i][vi];
-}
 
 Q_EXPORT_PLUGIN(FilterDirt)

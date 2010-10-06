@@ -50,7 +50,7 @@ class FilterDirt : public QObject, public MeshFilterInterface
         std::vector<std::string> v_attrNames;
         std::vector<double> v_attrValue;
         //std::vector<std::string> f_attrNames;
-        //std::vector<double> f_attrValue;
+        //std:: vector<double> f_attrValue;
         std::vector<CMeshO::PerVertexAttributeHandle<float> > vhandlers;
         //std::vector<CMeshO::PerFaceAttributeHandle<float> > fhandlers;
 

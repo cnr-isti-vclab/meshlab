@@ -28,7 +28,6 @@
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
 #include<vcg/complex/trimesh/base.h>
-#include "dirt_utils.h"
 
 template <class MeshType>
 
@@ -39,17 +38,24 @@ class DustParticle{
     typedef typename MeshType::FacePointer  FacePointer;
 public:
     DustParticle(){
-    mass=1;
+    mass=1.0f;
+    speed[0]=0.0f;
+    speed[1]=0.0f;
+    speed[2]=0.0f;
     };
 
+    DustParticle(float m,CoordType v){
+    mass=m;
+    speed=v;
+    };
     ~DustParticle(){};
 
 
 public:
         FacePointer face;
-        CoordType bar_coord;
+        CoordType bar_coord;/*To delete?*/
         float mass;
-        float speed;/*to delete?*/
+        CoordType speed;
 
         float ad_coeff;/*Adhesion Coefficient*/
 
