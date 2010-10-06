@@ -467,18 +467,22 @@ int main(int argc, char *argv[])
 		printf("No input mesh\n"); exit(-1);
 	} else
 	{
+		int firstind = -1;
 		for(int i = 0; i < meshNamesIn.size(); i++)
 		{
 
 			//now add it to the document
-            meshDocument.addNewMesh(meshNamesIn.at(i).toStdString().c_str());
-           // MeshModel *mm = new MeshModel( meshNamesIn.at(i).toStdString().c_str() );
+            MeshModel* mmod = meshDocument.addNewMesh(meshNamesIn.at(i).toStdString().c_str());
+			if (firstind == -1)
+				firstind = mmod->id();
+
+			// MeshModel *mm = new MeshModel( meshNamesIn.at(i).toStdString().c_str() );
             server.Open(*(meshDocument.mm()), meshNamesIn.at(i));
             MeshModel* mm = meshDocument.mm();
 printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.vn, mm->cm.fn);
 		}
 		//the first mesh is the one the script is applied to
-		meshDocument.setCurrentMesh(0);
+		meshDocument.setCurrentMesh(firstind);
 	}
 				
 	if(!scriptName.isEmpty())
