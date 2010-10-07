@@ -28,6 +28,8 @@
 #include <QtCore>
 #include <QApplication>
 #include <QAction>
+#include <QGLContext>
+#include <QGLFormat>
 #include <QMessageBox>
 #include <QTabletEvent>
 #include "filterparameter.h"
@@ -246,7 +248,9 @@ public:
     };
 	
 	
-	MeshFilterInterface() : MeshLabInterface() {}
+	MeshFilterInterface() : MeshLabInterface() 
+	{
+	}
 	virtual ~MeshFilterInterface() {}
 
   /** The long, formatted string describing each filtering action.
@@ -382,6 +386,7 @@ public:
     virtual QList<QAction *> actions() const { return actionList;}
 	  virtual QList<FilterIDType> types() const { return typeList;}
 	QString generatedScriptCode;
+	QGLContext* glContext;
 protected:
     // Each plugins exposes a set of filtering possibilities. 
 		// Each filtering procedure corresponds to a single QAction with a corresponding FilterIDType id. 
