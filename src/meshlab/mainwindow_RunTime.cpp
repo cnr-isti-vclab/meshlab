@@ -800,7 +800,14 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
   meshDoc()->setBusy(true);
   RichParameterSet MergedEnvironment(params);
   MergedEnvironment.join(currentGlobalParams);
+
+  //GLA() is only the parent
+  QGLWidget* filterWidget = new QGLWidget(GLA());
+  QGLFormat defForm = QGLFormat::defaultFormat();
+  iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
+  bool retres = iFilter->glContext->create(filterWidget->context());
   ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
+
   meshDoc()->setBusy(false);
 
   qApp->restoreOverrideCursor();
@@ -1276,10 +1283,13 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 					if(gla->mm()->cm.fn==0){
 						gla->setDrawMode(vcg::GLW::DMPoints);
-						if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)) gla->setLight(false);
-						else mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+						if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)) 
+							gla->setLight(false);
+						else 
+							mm->updateDataMask(MeshModel::MM_VERTNORMAL);
 					}
-					else mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+					else 
+						mm->updateDataMask(MeshModel::MM_VERTNORMAL);
 
 					updateMenus();
 					int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
