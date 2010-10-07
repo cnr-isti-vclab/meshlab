@@ -10,8 +10,8 @@ struct Logging{
 
 public:
 	bool off;
-	Logging(const char * filename){ 
-		Buf() = new char[65536];		 
+	Logging(const char * filename):off(false){ 
+		Buf() = new char[65536];Buf()[0]= '\0'; 		 
 		if(off) return;
 		LF() = false;
 		if((filename!=NULL)){

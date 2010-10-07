@@ -9,7 +9,7 @@
 
 
 SimpleDb::SimpleDb(const std::string & _name):	name(_name)
-	{max_file_size_bytes  = 1<<31;
+	{max_file_size_bytes  = 1<<30;
 	};
 
 void SimpleDb::Open(const std::string & _name){
@@ -32,8 +32,6 @@ void SimpleDb::Create(const std::string & _name, const unsigned int &  pagesize)
 
 		UpdateNextSegment(); // first segment of data
 }
-
-
 
 
 void SimpleDb::ReadIndex(const std::string & idname){

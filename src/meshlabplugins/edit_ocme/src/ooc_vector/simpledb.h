@@ -14,11 +14,11 @@ struct SimpleDb{
 		bool Void(){return value == std::numeric_limits<unsigned int>::max();}
 		void SetVoid(){  value = std::numeric_limits<unsigned int>::max();}
 
-		void SetIFile(const unsigned int & i){ value &= 0x000FFFFF; value |= i << 20; }
-		void SetISeg(const unsigned int & i) { value &= 0xFFF00000; value |= i; }
+		void SetIFile(const unsigned int & i){ value &= 0x00FFFFFF; value |= i << 24; }
+		void SetISeg(const unsigned int & i) { value &= 0xFF000000; value |= i; }
 
-		unsigned int  IFile() const { return value >> 20; }
-		unsigned int  ISeg() const {  return (value & 0x000FFFFF); }
+		unsigned int  IFile() const { return value >> 24; }
+		unsigned int  ISeg() const {  return (value & 0x00FFFFFF); }
 
 //		char * Serialize(char * buf){ *(unsigned int*)buf = value; return buf+sizeof(unsigned int);}
 		char * DeSerialize(char * buf){value =  *(unsigned int*)buf  ; return buf+sizeof(unsigned int);}
