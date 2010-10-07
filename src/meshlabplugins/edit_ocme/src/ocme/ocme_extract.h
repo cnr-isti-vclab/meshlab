@@ -102,7 +102,7 @@ void OCME::ExtractVerticesFromASingleCell( CellKey ck , MeshType & m){
 }
 
 template <class MeshType>
- void OCME::ExtractContainedFacesFromASingleCell( CellKey ck , MeshType & m, bool loadall, bool includeExternals){
+ void OCME::ExtractContainedFacesFromASingleCell( CellKey ck , MeshType & m){
 
     Cell * c = GetCell(ck,false);
     assert(c);
@@ -110,6 +110,13 @@ template <class MeshType>
     c->vert->LoadAll();
     c->face->LoadAll();
 
+	Chain<vcg::Color4b> * color_chain = 0;
+	std::map<std::string, ChainBase *  >::iterator ai = c->perVertex_attributes.find("Color4b");
+	bool hasColor = (ai!=c->perVertex_attributes.end());
+	if(hasColor){
+		m.vert.EnableColor();
+		color_chain = (Chain<vcg::Color4b>*) (*ai).second;
+	}
      if ( !c->IsEmpty()){
             Chain<OFace> *  	face_chain	= c->face;
             Chain<OVertex> * vertex_chain = c->vert;
@@ -122,6 +129,9 @@ template <class MeshType>
                     {
                         /* Here there should be the importer from OVertex to vcgVertex */
                         (*vi).P() = (*vertex_chain)[i].P();
+
+						if(hasColor)
+							(*vi).C() = (*color_chain)[i];
                     }
 
 
@@ -129,7 +139,10 @@ template <class MeshType>
             for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
                 for(unsigned int i = 0; i < 3; ++i){
                         assert((*face_chain)[ff][i] < m.vert.size());
-                       (*fi).V(i) = &m.vert[(*face_chain)[ff][i]];
+						if((*face_chain)[ff][i] >= m.vert.size())
+							(*fi).V(i) = &m.vert[0];
+						else
+	                       (*fi).V(i) = &m.vert[(*face_chain)[ff][i]];
                    }
             }
 

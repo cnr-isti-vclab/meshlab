@@ -101,7 +101,7 @@ void OCME::FillSamples(std::vector<CellKey> & cs){
 				// *** we should have an ad hoc function FillSamplesFromASingleCell
 				// *** TO DO.
 
-                                this->ExtractContainedFacesFromASingleCell(cs[i],tmp,true,true);
+                this->ExtractContainedFacesFromASingleCell(cs[i],tmp);
 
 				/* clear the data that will be recomputed */
 				c->impostor->ClearDataCumulate();
@@ -110,10 +110,10 @@ void OCME::FillSamples(std::vector<CellKey> & cs){
 				for(vcgMesh::FaceIterator fi = tmp.face.begin(); fi != tmp.face.end(); ++fi){
 						vcg::Point3f bary   = vcg::Barycenter(*fi);
 						vcg::Point3f pp[3];
-                                                vcg::Point3f n = vcg::Normal(*fi).Normalize();
-						for(int i  = 0; i < 3; ++i) pp[i]  = ((*fi).V(i))->P();
-                                                c->impostor->AddSample(bary,n);	// collect a sample for the impostor
-                                                for(int i = 0; i < 3; ++i) c->impostor->AddSample(bary*0.5+pp[i]*0.5,n);	// collect a sample for the impostor
+                        vcg::Point3f n = vcg::Normal(*fi).Normalize();
+                        //for(int i  = 0; i < 3; ++i) pp[i]  = ((*fi).V(i))->P();
+                        c->impostor->AddSample(bary,n,(*fi).V(0)->cC());	// collect a sample for the impostor
+                        //for(int i = 0; i < 3; ++i) c->impostor->AddSample(bary*0.5+pp[i]*0.5,n,vcg::Color4b::Gray);	// collect a sample for the impostor
 				}
 		}
 }

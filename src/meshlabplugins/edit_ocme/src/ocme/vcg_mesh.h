@@ -3,6 +3,7 @@
 
 #include<vcg/simplex/vertex/base.h>//
 #include<vcg/simplex/vertex/component.h>
+#include<vcg/simplex/vertex/component_ocf.h>
 #include<vcg/simplex/face/base.h>//
 #include<vcg/simplex/face/component.h>
 //#include<vcg/simplex/face/topology.h>//
@@ -33,9 +34,9 @@ class vcgVertex;
 
 struct vcgUsedType : public vcg::UsedTypes< vcg::Use<vcgVertex>::AsVertexType,vcg::Use<vcgFace>::AsFaceType>{};
 
-class vcgVertex  : public vcg::Vertex< vcgUsedType, vcg::vertex::Coord3f, vcg::vertex::Normal3f, vcg::vertex::Normal3f,vcg::vertex::BitFlags ,vcg::vertex::Color4b >{};
-class vcgFace    : public vcg::Face  < vcgUsedType, vcg::face::VertexRef,  vcg::face::Normal3f,  vcg::face::Color4b,vcg::face::BitFlags> {};
-class vcgMesh    : public vcg::tri::TriMesh< std::vector<vcgVertex>, std::vector<vcgFace> > {};
+class vcgVertex  : public vcg::Vertex< vcgUsedType, vcg::vertex::InfoOcf, vcg::vertex::Coord3f,  vcg::vertex::Color4bOcf, vcg::vertex::Normal3f,vcg::vertex::BitFlags >{};
+class vcgFace    : public vcg::Face  < vcgUsedType, vcg::face::VertexRef,  vcg::face::Normal3f, vcg::face::BitFlags> {};
+class vcgMesh    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<vcgVertex>, std::vector<vcgFace> > {};
 
 
 struct OFace{

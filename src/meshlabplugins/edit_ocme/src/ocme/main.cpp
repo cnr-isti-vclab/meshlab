@@ -144,9 +144,7 @@ void AddImpostors(char * ocmFile){
 
 void UsageExit(){
 	printf("Usage ocm_build.exe [options] [*.aln | *.ply]...\
-		   -i : compute impostor\n \
 		   -f : database name\n \
-		   -r : raster voxel \
 		   -c : add per vertex color if present \
 		   -o : owerwrite if already exists \
 		   -m : RAM cache \
@@ -196,60 +194,67 @@ bool Interrupt(){
 }
 
 
-
-void AddFromDisk(OCME * ocme, std::vector<std::string> files){
-
-		for(unsigned int i = 0; i < files.size(); ++i){
-
-				std::string name = files[i];
-				unsigned int wh = name.find(std::string(".aln"));
-
-				if(wh == name.length()-4)
-				// it is an aln file
-				{
-					std::vector<std::pair<std::string,vcg::Matrix44f> > aln;
-					LoadAln(name.c_str(),aln);
-
-					for(unsigned int idm = 0;  idm<   aln.size() ;++idm){
-						vcgMesh m;
-						vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,aln[idm].first.c_str());
-						vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,aln[idm].second);
-						if(!m.face.empty()){
-							ocme->AddMesh(m);
-						}
-					}
-				}
-				else
-					// It is a ply file
-				{
-					vcgMesh m;
-					struct stat buf;
-					stat(name.c_str(),&buf);
-                                        if(buf.st_size < 200 * (1<<20)){// if the file is less that 200MB load the mesh in memory and then add it
-
-						int mask = 0;
-
-						TIM::Begin(0);
-
-						vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(name.c_str(),mask);
-						vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,name.c_str(),cb);
-						if(!m.face.empty())
-							 ocme->AddMesh(m);
-					}
-					else
-					{
-						 vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
-						// if the file is more that 50 MB build directly from file
-						vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,name.c_str(),tra_ma,cb);
-
-					}
-
-				}
-
-			}
-			ocme->RemoveEmptyCells();
-}
-
+//
+//void AddFromDisk(OCME * ocme, std::vector<std::string> files){
+//
+//		for(unsigned int i = 0; i < files.size(); ++i){
+//
+//				std::string name = files[i];
+//				unsigned int wh = name.find(std::string(".aln"));
+//
+//				if(wh == name.length()-4)
+//				// it is an aln file
+//				{
+//					std::vector<std::pair<std::string,vcg::Matrix44f> > aln;
+//					LoadAln(name.c_str(),aln);
+//
+//					for(unsigned int idm = 0;  idm<   aln.size() ;++idm){
+//						vcgMesh m;
+//						vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,aln[idm].first.c_str());
+//						vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,aln[idm].second);
+//						if(!m.face.empty()){
+//							ocme->AddMesh(m);
+//						}
+//					}
+//				}
+//				else
+//					// It is a ply file
+//				{
+//					vcgMesh m;
+//					struct stat buf;
+//					stat(name.c_str(),&buf);
+//                                        if(buf.st_size < 200 * (1<<20)){// if the file is less that 200MB load the mesh in memory and then add it
+//
+//						int mask = 0;
+//
+//						TIM::Begin(0);
+//
+//                                                vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(name.c_str(),mask);
+//
+//                                                AttributeMapper am;
+//                                                if(mask & vcg::tri::io::Mask::IOM_VERTCOLOR){
+//                                                    m.vert.EnableColor();
+//                                                    am.vert_attrs.push_back("Color4b");
+//                                                }
+//
+//                                                vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,name.c_str(),cb);
+//						if(!m.face.empty())
+//                                                         ocme->AddMesh(m,am);
+//					}
+//					else
+//					{
+//						 vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
+//						// if the file is more that 50 MB build directly from file
+//						vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,name.c_str(),tra_ma,cb);
+//
+//					}
+//
+//				}
+//
+//			}
+//			ocme->RemoveEmptyCells();
+//}
+//
 
 
 
@@ -285,13 +290,13 @@ main (int argc,char **argv )
 	int c;
 	int digit_optind = 0;
 	unsigned int meshadded = 0,
-		max_meshes = 1000 /*std::numeric_limits<unsigned int>::max()*/,
-		min_meshes = 0,
-		min_meshes_aln = 0,
-		max_meshes_aln= 1000 /*std::numeric_limits<unsigned int>::max()*/,
-		cache_memory_limit = 200,
-		berkeley_page_size = 1024,
-		side_factor = 50;
+        max_meshes = 1000 /*std::numeric_limits<unsigned int>::max()*/,
+        min_meshes = 0,
+        min_meshes_aln = 0,
+        max_meshes_aln= 1000 /*std::numeric_limits<unsigned int>::max()*/,
+        cache_memory_limit = 200,
+        berkeley_page_size = 1024,
+        side_factor = 50;
 
 	std::string ocmename,tra_ma_file;
 	bool logging  = false;
@@ -299,6 +304,8 @@ main (int argc,char **argv )
 	bool overwrite_database = false;
 	bool add_per_vertex_color = false;
 	bool transform = false;
+	bool verify = false;
+
         vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
 
 #ifdef _DEBUG
@@ -310,12 +317,15 @@ main (int argc,char **argv )
     {
       int this_option_optind = optind ? optind : 1;
 
-			c = getopt (argc, argv, "ciospv:t:m:l:f:L:a:A:k:");
+                        c = getopt (argc, argv, "qciosvp:t:m:l:f:L:a:A:k:");
       if (c == EOF)
         break;
 
       switch (c)
         {
+        case 'q':
+          verify = true;
+          break;
         case 'i':
           compute_impostors = true;
           break;
@@ -387,7 +397,8 @@ main (int argc,char **argv )
   
   lgn = new Logging(stat_file.c_str());
   lgn->Append("starting");
-
+  lgn->Push();
+  
 
    TIM::Begin(1);
    STAT::Begin(N_STAT);
@@ -395,224 +406,231 @@ main (int argc,char **argv )
  	meshona = new OCME();
 	meshona->params.side_factor = side_factor;
  	meshona->oce.cache_policy->memory_limit  = cache_memory_limit * (1<<20);
- 	meshona->streaming_mode = true;	
 
 	lgn->off = !logging;
-
- 	int start = clock();
- 	int totalstart = start;
-
-  if(overwrite_database)
-	  remove(( ocmename+std::string(".ocm")).c_str());
- 
- #ifndef NO_BERKELEY
-    if(overwrite_database)
-		meshona->Create(( ocmename+std::string(".ocm")).c_str(),berkeley_page_size);
-	else
-		meshona->Open(( ocmename+std::string(".ocm")).c_str());
- #else
-	meshona->Create((std::string(ocmename)/*+std::string(".socm")*/).c_str(),berkeley_page_size);
- #endif
+	if(!verify){
+ 		meshona->streaming_mode = true;	
 
 
-//	std::vector<std::string> files;
-//	for(int i  = optind+min_meshes;  i < argc ; ++i)
-//			files.push_back(std::string(argv[i]));
-//	AddFromDisk(meshona,files);
-        ++optind;
-	for(int i  = optind+min_meshes; (i < argc)&&  (i<optind+max_meshes)&& !Interrupt();++i){
-	
-		unsigned int wh = std::string(argv[i]).find(std::string(".aln"));
+ 		int start = clock();
+ 		int totalstart = start;
 
-		if(wh == std::string(argv[i]).length()-4)
-		
-		// it is an aln file
-		{
-			std::vector<std::pair<std::string,vcg::Matrix44f> > aln;
-			LoadAln(argv[i],aln);
-
-			printf("aln.size()  = %d\n",aln.size());
-			for(unsigned int idm = min_meshes_aln; (idm<  std::min(max_meshes_aln,aln.size())) && !Interrupt();++idm){
-                 STAT::Reset();                
-				 start = clock();
-				vcgMesh m;
-                stat(aln[idm].first.c_str(),&buf);
-
-
-				++meshona->stat.n_files;
-                                meshona->stat.input_file_size+=buf.st_size;
-				TIM::Begin(0);
-				vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,aln[idm].first.c_str());
-				TIM::End(0);
-				meshona->stat.n_triangles += m.fn;
-				meshona->stat.n_vertices += m.fn;				
-
-                                printf("%d of %d in %f sec\n",idm,aln.size(),(clock()-start)/float(CLOCKS_PER_SEC));
-				vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,aln[idm].second);
-                                unsigned int newstart = clock();
-				if(!m.face.empty()){
- 		 			meshona->AddMesh(m);
-					++meshadded;
-				}
-				printf("Sizeof meshona->oce %d\n", meshona->oce.SizeOfMem());
-                                samples.push_back(Sample( m.fn,(clock()-newstart)/float(CLOCKS_PER_SEC),meshona->cells.size(),
-                                                          STAT::V(0),STAT::V(1),STAT::V(6),STAT::V(3),STAT::V(5)));
-				PrintFacesSec();
-				if(TIM::T().size()>12)
-                printf("accesses %d save time %f \n",STAT::V(N_ACCESSES),TIM::Total(13)/float(CLOCKS_PER_SEC));
-			}
-		}
+	  if(overwrite_database)
+		  remove(( ocmename+std::string(".socm")).c_str());
+	 
+	 #ifndef NO_BERKELEY
+		if(overwrite_database)
+			meshona->Create(( ocmename+std::string(".ocm")).c_str(),berkeley_page_size);
 		else
-			// It is a ply file
-		{
+			meshona->Open(( ocmename+std::string(".ocm")).c_str());
+	 #else
+	  if(overwrite_database)
+		meshona->Create((std::string(ocmename)/*+std::string(".socm")*/).c_str(),berkeley_page_size);
+	  else
+		meshona->Open((std::string(ocmename)+std::string(".socm")).c_str());
 
-                        STAT::Reset();
-                        start = clock();
- 			vcgMesh m;
-			unsigned long n_faces  =0;
- 
-			sprintf(lgn->Buf(),"Adding mesh %s (%d of %d)..Loading",argv[i],i-optind, argc-optind);
-			lgn->Push();
-
-			stat(argv[i],&buf);
-			meshona->stat.input_file_size+=buf.st_size;
-                        if(buf.st_size < 500 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
-
-				int mask = 0;
-
-				TIM::Begin(0);
-
-				vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(argv[i],mask);
-				vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,argv[i],cb);
-
-
-//				vcg::tri::io::InfoDAE  info;
-//				if (!vcg::tri::io::ImporterDAE<vcgMesh>::LoadMask(argv[i], info))
-//					continue;
-//				vcg::tri::io::ImporterDAE<vcgMesh>::Open(m,argv[i],info);
+	 #endif
 
 
 
-				meshona->stat.n_triangles += m.fn;
-				meshona->stat.n_vertices += m.vn;
-				if(transform){
-					sprintf(lgn->Buf(),"Apply transform" );
-					lgn->Push();
-					vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,tra_ma);
-//				vcg::tri::io::ExporterPLY<vcgMesh>::Save(m,std::string(argv[i]).append("T.ply").c_str());
+		for(int i  = optind+min_meshes; (i < argc)&&  (i<optind+max_meshes)&& !Interrupt();++i){
+		
+			unsigned int wh = std::string(argv[i]).find(std::string(".aln"));
+
+			if(wh == std::string(argv[i]).length()-4)
+			
+			// it is an aln file
+			{
+				std::vector<std::pair<std::string,vcg::Matrix44f> > aln;
+				LoadAln(argv[i],aln);
+
+				printf("aln.size()  = %d\n",aln.size());
+				for(unsigned int idm = min_meshes_aln; (idm<  std::min(max_meshes_aln,aln.size())) && !Interrupt();++idm){
+									STAT::Reset();
+									start = clock();
+					vcgMesh m;
+					stat(aln[idm].first.c_str(),&buf);
+
+
+					++meshona->stat.n_files;
+					meshona->stat.input_file_size+=buf.st_size;
+					TIM::Begin(0);
+					vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,aln[idm].first.c_str());
+					TIM::End(0);
+					meshona->stat.n_triangles += m.fn;
+					meshona->stat.n_vertices += m.fn;				
+
+					printf("%d of %d in %f sec\n",idm,aln.size(),(clock()-start)/float(CLOCKS_PER_SEC));
+					vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,aln[idm].second);
+					unsigned int newstart = clock();
+					if(!m.face.empty()){
+ 		 				meshona->AddMesh(m);
+						++meshadded;
+					}
+					printf("Sizeof meshona->oce %d\n", meshona->oce.SizeOfMem());
+					samples.push_back(Sample( m.fn,(clock()-newstart)/float(CLOCKS_PER_SEC),meshona->cells.size(),
+															  STAT::V(0),STAT::V(1),STAT::V(6),STAT::V(3),STAT::V(5)));
+					PrintFacesSec();
 				}
-				TIM::End(0);	
-
-				n_faces = m.fn;
-				sprintf(lgn->Buf(),"loaded in %f seconds\n",(clock()-start)/float(CLOCKS_PER_SEC));
-				lgn->Push();
-
-				assert( MemDbg::CheckHeap(0));
-
-				++meshona->stat.n_files;
-				
-				if(!m.face.empty()) {					 
-					 meshona->AddMesh(m);
-					++meshadded;
-				}
-				sprintf(lgn->Buf(),"#cells: %d \n", meshona->cells.size());
-				lgn->Push();
 			}
 			else
+				// It is a ply file
 			{
-				TIM::Begin(2);
-				// if the file is more that 50 MB build directly from file
-				n_faces = vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,argv[i],tra_ma,cb);
-				TIM::End(2);
+
+				STAT::Reset();
+				start = clock();
+ 				vcgMesh m;
+				unsigned long n_faces  =0;
+	 
+				sprintf(lgn->Buf(),"Adding mesh %s (%d of %d)..Loading",argv[i],i-optind, argc-optind);
+				lgn->Push();
+
+				stat(argv[i],&buf);
+				meshona->stat.input_file_size+=buf.st_size;
+							if(buf.st_size < 500 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
+
+					int mask = 0;
+
+					TIM::Begin(0);
+
+									AttributeMapper am;
+									vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(argv[i],mask);
+
+									if(mask & vcg::tri::io::Mask::IOM_VERTCOLOR){
+										m.vert.EnableColor();
+										am.vert_attrs.push_back("Color4b");
+									}
+
+					vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,argv[i],cb);
+
+					meshona->stat.n_triangles += m.fn;
+					meshona->stat.n_vertices += m.vn;
+
+					if(transform){
+						sprintf(lgn->Buf(),"Apply transform" );
+						lgn->Push();
+						vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,tra_ma);
+	
+					vcg::tri::io::ExporterPLY<vcgMesh>::Save(m,std::string(argv[i]).append("T.ply").c_str());
+					}
+					TIM::End(0);	
+
+					n_faces = m.fn;
+					sprintf(lgn->Buf(),"loaded in %f seconds\n",(clock()-start)/float(CLOCKS_PER_SEC));
+					lgn->Push();
+
+					assert( MemDbg::CheckHeap(0));
+
+					++meshona->stat.n_files;
+					
+					if(!m.face.empty()) {					 
+											 meshona->AddMesh(m,am);
+						++meshadded;
+					}
+					sprintf(lgn->Buf(),"#cells: %d \n", meshona->cells.size());
+					lgn->Push();
+				}
+				else
+				{
+					TIM::Begin(2);
+					// if the file is more that 50 MB build directly from file
+					n_faces = vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,argv[i],tra_ma,cb);
+					TIM::End(2);
+				}
+				
+				sprintf(lgn->Buf(),"added in %f seconds\n",(clock()-start)/float(CLOCKS_PER_SEC));
+							lgn->Push();
+							samples.push_back(Sample( n_faces,(clock()-start)/float(CLOCKS_PER_SEC),meshona->cells.size(),
+													  STAT::V(0),STAT::V(1),STAT::V(6),STAT::V(3),STAT::V(5)));
+				PrintFacesSec();
+							printf("accesses % d \n",STAT::V(N_ACCESSES));
+
 			}
-			
-			sprintf(lgn->Buf(),"added in %f seconds\n",(clock()-start)/float(CLOCKS_PER_SEC));
-                        lgn->Push();
-                        samples.push_back(Sample( n_faces,(clock()-start)/float(CLOCKS_PER_SEC),meshona->cells.size(),
-                                                  STAT::V(0),STAT::V(1),STAT::V(6),STAT::V(3),STAT::V(5)));
-			PrintFacesSec();
-                        printf("accesses % d \n",STAT::V(N_ACCESSES));
 
 		}
+			meshona->RemoveEmptyCells();
+ 			start = clock();
+			printf("number of cells: %d \n number of chains %d\n",
+				meshona->cells.size(),
+				meshona->oce.chains.size());
 
-	}
-        meshona->RemoveEmptyCells();
- 		start = clock();
-		printf("number of cells: %d \n number of chains %d\n",
-			meshona->cells.size(),
-			meshona->oce.chains.size());
+			if(compute_impostors)
+				meshona->ComputeImpostors();
 
-		if(compute_impostors)
-			meshona->ComputeImpostors();
+			meshona->Close(true);
+			
+			TIM::End(1);
 
-		meshona->Close(true);
-		
-		TIM::End(1);
+			PrintFacesSec();
 
-		PrintFacesSec();
+			printf("closed %ld seconds\n",(clock()-start)/CLOCKS_PER_SEC);
+			printf("total %ld seconds\n",(clock()-totalstart)/CLOCKS_PER_SEC);
+	//
+			sprintf(lgn->Buf()," \
+	n_triangles\t \t \t %12lu \n \
+	n_vertices\t \t \t %12lu \n \
+	size_inputMB\t \t \t %12lu \n \
+	n_cells\t \t \t %10lu \n \
+	n_chains\t \t \t %10lu \n \
+	n_chunks_faces\t \t \t %10lu (%f per cell)\n \
+	n_chunks_vertex\t \t \t %10lu (%f per cell)\n \
+	size_faces\t \t \t %10lu \n \
+	size_vertex\t \t \t %10lu \n \
+	size_dependences\t \t \t %10lu \n \
+	size_lcm_table\t \t \t %10lu \n \
+	size_ocme_table\t \t \t %10lu \n \
+	size_impostors\t \t \t %10lu \n \
+	total size:\t \t \t %10lu \n \
+	n get cells\t \t \t %15lu \n \
+	input load time\t \t \t %f \n \
+	add time\t \t \t \t %f \n \
+	  upbox\t \t \t \t %f \n \
+	  addface\t \t \t \t %f \n \
+	  samples\t \t \t \t %f \n \
+	total time\t \t \t %f \n \
+	",
+	meshona->stat.n_triangles,
+	meshona->stat.n_vertices,
+	meshona->stat.input_file_size,
+	meshona->stat.n_cells ,
+				meshona->stat.n_chains,
+				meshona->stat.n_chunks_faces,meshona->stat.n_chunks_faces_avg_per_cell,
+				meshona->stat.n_chunks_vertex,meshona->stat.n_chunks_vertex_avg_per_cell,
 
-		printf("closed %ld seconds\n",(clock()-start)/CLOCKS_PER_SEC);
-		printf("total %ld seconds\n",(clock()-totalstart)/CLOCKS_PER_SEC);
-//
-		sprintf(lgn->Buf()," \
-n_triangles\t \t \t %12lu \n \
-n_vertices\t \t \t %12lu \n \
-size_inputMB\t \t \t %12lu \n \
-n_cells\t \t \t %10lu \n \
-n_chains\t \t \t %10lu \n \
-n_chunks_faces\t \t \t %10lu (%f per cell)\n \
-n_chunks_vertex\t \t \t %10lu (%f per cell)\n \
-size_faces\t \t \t %10lu \n \
-size_vertex\t \t \t %10lu \n \
-size_dependences\t \t \t %10lu \n \
-size_lcm_table\t \t \t %10lu \n \
-size_ocme_table\t \t \t %10lu \n \
-size_impostors\t \t \t %10lu \n \
-total size:\t \t \t %10lu \n \
-n get cells\t \t \t %15lu \n \
-input load time\t \t \t %f \n \
-add time\t \t \t \t %f \n \
-  upbox\t \t \t \t %f \n \
-  addface\t \t \t \t %f \n \
-  samples\t \t \t \t %f \n \
-fetch time\t \t \t %f \n \
-save time\t \t \t %f \n \
-total time\t \t \t %f \n \
-",
-meshona->stat.n_triangles,
-meshona->stat.n_vertices,
-meshona->stat.input_file_size,
-meshona->stat.n_cells ,
-			meshona->stat.n_chains,
-			meshona->stat.n_chunks_faces,meshona->stat.n_chunks_faces_avg_per_cell,
-			meshona->stat.n_chunks_vertex,meshona->stat.n_chunks_vertex_avg_per_cell,
+				meshona->stat.size_faces,
+				meshona->stat.size_vertex,
 
-			meshona->stat.size_faces,
-			meshona->stat.size_vertex,
-
-			meshona->stat.size_dependences,
-			meshona->stat.size_lcm_allocation_table,
-			meshona->stat.size_ocme_table,
-			meshona->stat.size_impostors,
-			meshona->stat.TotalSize(),
-			meshona->stat.n_getcell,
-			TIM::Total(0)/float(CLOCKS_PER_SEC),
-			TIM::Total(20)/float(CLOCKS_PER_SEC),
-			TIM::Total(21)/float(CLOCKS_PER_SEC),
-			TIM::Total(22)/float(CLOCKS_PER_SEC),
-			TIM::Total(23)/float(CLOCKS_PER_SEC),
-			TIM::Total(12)/float(CLOCKS_PER_SEC),
-			TIM::Total(13)/float(CLOCKS_PER_SEC),
-			TIM::Total(1)/float(CLOCKS_PER_SEC)
-			);
-		lgn->Push();
-
+				meshona->stat.size_dependences,
+				meshona->stat.size_lcm_allocation_table,
+				meshona->stat.size_ocme_table,
+				meshona->stat.size_impostors,
+				meshona->stat.TotalSize(),
+				meshona->stat.n_getcell,
+				TIM::Total(0)/float(CLOCKS_PER_SEC),
+				TIM::Total(20)/float(CLOCKS_PER_SEC),
+				TIM::Total(21)/float(CLOCKS_PER_SEC),
+				TIM::Total(22)/float(CLOCKS_PER_SEC),
+				TIM::Total(23)/float(CLOCKS_PER_SEC),
+//				TIM::Total(12)/float(CLOCKS_PER_SEC),
+//				TIM::Total(13)/float(CLOCKS_PER_SEC),
+				TIM::Total(1)/float(CLOCKS_PER_SEC)
+				);
+			lgn->Push();
+}
+else
+{
+	meshona->Open(( ocmename+std::string(".socm")).c_str());
+	meshona->Verify();
+	meshona->Close(false);
+}
 
 		delete meshona;
 		delete lgn;
 }	
 		
 		samples.clear();
+
+
 		MemDbg::End();
 		MemDbg::DumpMemoryLeaks();
 }

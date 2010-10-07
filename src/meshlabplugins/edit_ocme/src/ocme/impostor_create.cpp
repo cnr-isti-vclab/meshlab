@@ -31,6 +31,7 @@ void Impostor::ClearDataCumulate(){
 	Delete(n_samples);
 	Delete(normals);
 	Delete(centroids);
+        Delete(colors);
 
 };
 
@@ -43,6 +44,12 @@ void Impostor::ClearAll(){
 		non_empty_children = 0;
 	}
 
+vcg::Point3<unsigned char> Impostor::Acc_0_255(vcg::Point3<unsigned char> p,vcg::Point3<unsigned char> d, unsigned int n){
+		vcg::Point3<unsigned char> res;
+		for(int i  = 0 ; i < 3; ++i)
+				res[i] = std::min<float>(255.0,std::max<float>(0.f, (((float) p[i]) * n + d[i])/(n+1)));
+		return res;
+}
 
 vcg::Point3<char> Impostor::Acc(vcg::Point3<char> p,vcg::Point3<char> d, unsigned int n){
 		vcg::Point3<char> res;
@@ -52,22 +59,25 @@ vcg::Point3<char> Impostor::Acc(vcg::Point3<char> p,vcg::Point3<char> d, unsigne
 }
 
 
-void  Impostor::AddSample( vcg::Point3f  p,   vcg::Point3f   n){
+void  Impostor::AddSample( vcg::Point3f  p,   vcg::Point3f   n, vcg::Color4b c){
 	if(box.IsIn(p)){
                 const int ii = std::min<int>( int((p[0]-box.min[0])/cellsize),Gridsize()-1);
 		const int jj = std::min<int>( int((p[1]-box.min[1])/cellsize),Gridsize()-1);
 		const int kk = std::min<int>( int((p[2]-box.min[2])/cellsize),Gridsize()-1);
 
 		if(n_samples.IsOn(ii,jj,kk)){
-				assert(n_samples.At(ii,jj,kk) != 0);
-			centroids.At(ii,jj,kk) = Acc(centroids.At(ii,jj,kk),F2C(p,ii,jj,kk),n_samples.At(ii,jj,kk));
-			normals.At(ii,jj,kk)   = Acc(normals.At(ii,jj,kk),F2C_01(n),n_samples.At(ii,jj,kk));
-			++n_samples.At(ii,jj,kk);
+						assert(n_samples.At(ii,jj,kk) != 0);
+						centroids.At(ii,jj,kk) = Acc(centroids.At(ii,jj,kk),F2C(p,ii,jj,kk),n_samples.At(ii,jj,kk));
+						normals.At(ii,jj,kk)   = Acc(normals.At(ii,jj,kk),F2C_01(n),n_samples.At(ii,jj,kk));
+                        colors.At(ii,jj,kk)   = Acc_0_255(colors.At(ii,jj,kk),F2C(c),n_samples.At(ii,jj,kk));
+                        ++n_samples.At(ii,jj,kk);
                 }
 		else{
-			n_samples.At(ii,jj,kk) = 1;
-			centroids.At(ii,jj,kk)  =  F2C(p,ii,jj,kk);
-			normals.At(ii,jj,kk) =  F2C_01(n);
+                        n_samples.At(ii,jj,kk)  = 1;
+						centroids.At(ii,jj,kk)  =  F2C(p,ii,jj,kk);
+                        normals.At(ii,jj,kk)    =  F2C_01(n);
+                        colors.At(ii,jj,kk)     =  F2C(c);
+
                 }
 
 	}
@@ -75,22 +85,26 @@ void  Impostor::AddSample( vcg::Point3f  p,   vcg::Point3f   n){
 
 void Impostor::AddSamplesFromImpostor(Impostor * ch){
 
-		vcg::Point3f p,n;
+                vcg::Point3f p,n;
+                vcg::Point3<unsigned char> c;
 		for(PointCellIterator pi  = ch->proxies.begin();pi != ch->proxies.end(); ++pi){
-				ch->GetPointNormal(*pi,p,n);
-			this->AddSample(p,n);
+                                ch->GetPointNormalColor(*pi,p,n,c);
+                                this->AddSample(p,n,vcg::Color4b(c[0],c[1],c[2],255));
 		}
 
 }
 
 
 void Impostor::Create(OCME*o,CellKey ck){
-		std::map<unsigned short,vcg::Point3<char> >::iterator pi,ni;
+        std::map<unsigned short,vcg::Point3<char> >::iterator pi,ni;
+        std::map<unsigned short,vcg::Point3<unsigned char> >::iterator ci;
+		ci;
 		pi = this->centroids.data.begin();
 		ni = this->normals.data.begin();
+        ci = this->colors.data.begin();
 
-		for(; pi != this->centroids.data.end(); ++pi,++ni )
-				proxies.push_back ( PointCell((*pi).first,PointNormal((*pi).second,(*ni).second)) );
+		for(; pi != this->centroids.data.end(); ++pi,++ni,++ci )
+                                proxies.push_back ( PointCell((*pi).first,PointNormal((*pi).second,(*ni).second,(*ci).second)) );
 }
 
 
@@ -155,7 +169,7 @@ int Impostor::SizeOf(){
 		for(unsigned int j = 0; j < Gridsize(); ++j)
 			for(unsigned int k = 0; k < Gridsize(); ++k) 
 				if( n_samples.IsOn(i,j,k) )
-					siz+= 6 *sizeof(char) + 3 * sizeof(unsigned char);
+                                        siz+= 9 *sizeof(char) + 3 * sizeof(unsigned char);
 	return siz;
 };
 
@@ -173,10 +187,9 @@ char * Impostor::Serialize (char * ptr ){
 					*(unsigned char * ) ptr = i; ptr += sizeof(unsigned char);
 					*(unsigned char * ) ptr = j; ptr += sizeof(unsigned char);
 					*(unsigned char * ) ptr = k; ptr += sizeof(unsigned char);
-//printf("pos %d %d %d\n", centroids.At( i,j,k)[0],centroids.At( i,j,k)[1],centroids.At( i,j,k)[1]);
 					memcpy(ptr,&centroids.At( i,j,k)[0],3*sizeof(char)); ptr+= 3*sizeof(char);
-//printf("norm %d %d %d\n", normals.At( i,j,k)[0],normals.At( i,j,k)[1],normals.At( i,j,k)[1]);
-                                        memcpy(ptr,&normals.At( i,j,k)[0],3*sizeof(char)); ptr+= 3*sizeof(char);
+                    memcpy(ptr,&normals.At( i,j,k)[0],3*sizeof(char)); ptr+= 3*sizeof(char);
+                    memcpy(ptr,&colors.At( i,j,k)[0],3*sizeof(char)); ptr+= 3*sizeof(char);
 
 				}
 			
@@ -199,7 +212,8 @@ char * Impostor::DeSerialize (char * ptr){
 
 					memcpy(&centroids.At( i,j,k)[0],ptr,3*sizeof(char)); ptr+= 3*sizeof(char);
 					memcpy(&normals.At( i,j,k)[0],ptr,3*sizeof(char)); ptr+= 3*sizeof(char);
-					n_samples.At(i,j,k) = 1;
+                    memcpy(&colors.At( i,j,k)[0],ptr,3*sizeof(char)); ptr+= 3*sizeof(char);
+                    n_samples.At(i,j,k) = 1;
 		}
 		cellsize = (box.max[0]-box.min[0])/Gridsize();
 //		ClearDataPlanes(); ////// DECOMMENT THIS!!!

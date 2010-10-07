@@ -57,15 +57,12 @@ void OCME::RemoveCell(const CellKey & key){
 	lgn->Push();
 
 	// remove all the chains from OOCEnv
-	lgn->Append("remove element");
 	for(ai = c->elements.begin(); ai != c->elements.end(); ++ai )  
 		 oce.RemoveChain(NameOfChain(key,(*ai).first));
 	 
-	lgn->Append("remove pva");
  	 for(ai = c->perVertex_attributes.begin(); ai != c->perVertex_attributes.end(); ++ai ) 
 		oce.RemoveChain(NameOfChain(key,(*ai).first));
 
- 	lgn->Append("remove pfa");
 	 for(ai = c->perFace_attributes.begin(); ai != c->perFace_attributes.end(); ++ai ) 
  		oce.RemoveChain(NameOfChain(key,(*ai).first));
 
@@ -77,7 +74,6 @@ void OCME::RemoveCell(const CellKey & key){
 		 dc->dependence_set.erase(key);
 	 }
 
- 	lgn->Append("erase");
 	cells.erase(key);		// remove from the multigrid map
 
 	MarkRemoved(key);

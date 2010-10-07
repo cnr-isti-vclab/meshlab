@@ -61,14 +61,15 @@ void DrawCellSel ( CellKey & ck, int mode = 0 )
 void OCME::InitRender()
 	{	
 		renderParams.one_level = false; 
-		renderParams.only_impostors = false; 
+		renderParams.only_impostors = true; 
 		renderParams.visitOn = true;
 		renderParams.render_subcells = false;
 		renderParams.level = 0;
-		renderParams.memory_limit_in_core = 100 * (1<<20);
-		renderParams.memory_limit_video = 15 * (1<<20);
+		renderParams.memory_limit_in_core = 500 * (1<<20);
+		renderParams.memory_limit_video = 150 * (1<<20);
 
-
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
 	}
 
 

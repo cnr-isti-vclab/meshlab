@@ -21,17 +21,22 @@ struct Impostor{
 	stdMatrix3Sparse<unsigned int,8> n_samples;
 	stdMatrix3Sparse<vcg::Point3<char>,8> normals;
 	stdMatrix3Sparse<vcg::Point3<char>,8> centroids;
+        stdMatrix3Sparse<vcg::Point3<unsigned char>,8> colors;
 
+	vcg::Point3<unsigned char> Acc_0_255(vcg::Point3<unsigned char> p,vcg::Point3<unsigned char> d, unsigned int n);
 	vcg::Point3<char> Acc(vcg::Point3<char> p,vcg::Point3<char> d, unsigned int n);
 
 	static unsigned int & Gridsize() {static unsigned int gridsize; return gridsize; }
 
-	struct  PointNormal : public std::pair< vcg::Point3<char> , vcg::Point3<char>  >{
-			PointNormal( vcg::Point3<char> p  , vcg::Point3<char> n){
-					this->first = p;
-					this->second = n;
+        struct  PointNormal {
+            PointNormal( vcg::Point3<char> _p  , vcg::Point3<char> _n, vcg::Point3<unsigned char> _c){
+                                        p = _p;
+                                        n = _n;
+                                        c = _c;
 			}
-			PointNormal(){}
+            PointNormal(){};
+            vcg::Point3<char> p,n;
+            vcg::Point3<unsigned char>  c;
 	};
 
 	struct  PointCell: public std::pair<stdMatrix3Sparse<unsigned short,8>::IndexType, PointNormal > {
@@ -64,13 +69,14 @@ struct Impostor{
         char F2C(float a) { return  (char) ((a / cellsize -0.5) * 255); };
         char F2C_01(float a) { return (char) (a *0.5 * 255); };
 
-	vcg::Point3<char> F2C(vcg::Point3f  a, int ii, int jj, int kk) {
-			a = a- box.min;
-			a[0] -= ii *cellsize;
-			a[1] -= jj *cellsize;
-			a[2] -= kk *cellsize;
-			return vcg::Point3<char>(F2C(a[0]),F2C(a[1]),F2C(a[2]));
-	};
+        vcg::Point3<unsigned char> F2C(vcg::Color4b  a) {return vcg::Point3<unsigned char>(a[0],a[1],a[2]);}
+        vcg::Point3<char> F2C(vcg::Point3f  a, int ii, int jj, int kk) {
+                        a = a- box.min;
+                        a[0] -= ii *cellsize;
+                        a[1] -= jj *cellsize;
+                        a[2] -= kk *cellsize;
+                        return vcg::Point3<char>(F2C(a[0]),F2C(a[1]),F2C(a[2]));
+        };
 
 	vcg::Point3<char> F2C_01(vcg::Point3f  a) { return vcg::Point3<char>(F2C_01(a[0]),F2C_01(a[1]),F2C_01(a[2])); };
 
@@ -88,18 +94,20 @@ struct Impostor{
 			return a/(255.f*0.5f);
 	}
 
-	void GetPointNormal( PointCell pn, vcg::Point3f & p, vcg::Point3f & n){
+        void GetPointNormalColor( PointCell pn, vcg::Point3f & p, vcg::Point3f & n,vcg::Point3<unsigned char> & c){
 			unsigned char i,j,k;
 			stdMatrix3Sparse<vcg::Point3<char>,8>::Index(pn.first,i,j,k);
-			vcg::Point3<char> & a = pn.second.first;
+                        vcg::Point3<char> & a = pn.second.p;
 			p = vcg::Point3f(C2F (a[0],i,0),C2F (a[1],j,1),C2F (a[2],k,2));
-			vcg::Point3<char> & b = pn.second.second;
+                        vcg::Point3<char> & b = pn.second.n;
 			n = vcg::Point3f(C2F_01(b[0]),C2F_01(b[1]),C2F_01(b[2])).Normalize();
-	}
+            c = pn.second.c;
+
+        }
 
 	void Render();
 
-	void AddSample( vcg::Point3f   p,  vcg::Point3f   n)	;
+        void AddSample( vcg::Point3f   p,  vcg::Point3f   n, vcg::Color4b )	;
 		
 	// add samples from the faces of a mesh
 	template <class MeshType>

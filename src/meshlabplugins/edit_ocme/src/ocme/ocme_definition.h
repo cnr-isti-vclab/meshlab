@@ -432,7 +432,7 @@ struct OCME{
 	// Build a mesh with all the faces of a single cell whose vertices are also
 	// in the same cell (only debug purpose)
 	template <class MeshType>
-	void ExtractContainedFacesFromASingleCell(CellKey ck , MeshType & m,bool loadall = false, bool includeExternals = true);
+	void ExtractContainedFacesFromASingleCell(CellKey ck , MeshType & m);
 
 	// Build a mesh with all the vertices in the cells passed as argument
 	template <class MeshType>
@@ -525,6 +525,9 @@ struct OCME{
 		see the comment in chain_mem.h
 	*/
 	void  * extMemHnd;
+
+	/* --------- DATA VERIFY AND REPAIR ----------- */
+	void Verify();
 
 	/* --------- DEBUG ------------ */
 	/* here a number of functions to check the consistency of the dataset */

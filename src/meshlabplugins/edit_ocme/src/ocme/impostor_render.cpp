@@ -34,12 +34,16 @@
 		glPopAttrib();
 
 		vcg::Point3f p,n;
+        vcg::Point3<unsigned char> c;
 
-                glPointSize(5);
+		glPointSize(5);
 		glBegin(GL_POINTS);
+		
 		for(	PointCellIterator pi   = this->proxies.begin(); pi != this->proxies .end(); ++pi  ){
-				this->GetPointNormal(*pi,p,n);
+                this->GetPointNormalColor(*pi,p,n,c);
 				glNormal(n);
+                glColor3ub(c[0],c[1],c[2]);
+				//glColor3f(.3f,.3f,.3f);
 				glVertex(p);
 		}
 		glEnd();

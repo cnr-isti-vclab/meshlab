@@ -74,13 +74,13 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	typename MeshType::VertexIterator vi;
 
 	static unsigned int n_duplicate_removal = 0;
-
+        int n_box_updates = 0;
 	int h;
 	Cell * c = NULL; // current cell. Cache the last used cell because very often this is coherent from face to face
 
 	// create an attibute that will store the address in ocme
-        typename MeshType::template PerVertexAttributeHandle<GISet> gPos =
-                vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GISet> (m,"gpos");
+    typename MeshType::template PerVertexAttributeHandle<GISet> gPos =
+            vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GISet> (m,"gpos");
 
         // initialize to unassigned
 	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
@@ -101,9 +101,10 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	lgn->Push();	
 
 
-	int n_box_updates = 0;
 
 	RecordCellsSetModification();
+
+        bool hasColor = vcg::tri::HasPerVertexColor(m);
 
 	/* Here the main cycle. for each face of the mesh put it in the hashed multigrid */
 	for(fi = m.face.begin(); fi != m.face.end(); ++fi) if(!(*fi).IsD()){
@@ -156,14 +157,9 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 		// rough roughroughourhg adding of samples
 
 		 vcg::Point3f bary   = vcg::Barycenter(*fi);
-		//vcg::Point3f pp[3];
-		//for(int i  = 0; i < 3; ++i) pp[i]  = ((*fi).V(i))->P();
-		 c->impostor->AddSample(bary,vcg::Normal(*fi).Normalize());	// collect a sample for the impostor
-    //            for(int i = 0; i < 3; ++i) c->impostor->AddSample(bary*0.5+((*fi).V(i))->P()*0.5,vcg::Normal(*fi).Normalize());	// collect a sample for the impostor
+                 vcg::Color4b color  =  (hasColor)? (*fi).V(0)->cC() : vcg::Color4b::Gray;
 
-		//vcg::Point3f n = vcg::Normal(*fi).Normalize();
-		//for(int i  = 0; i < 3; ++i) 
-		//c->impostor->AddSample(((*fi).V(i))->P() ,n);	// collect a sample for the impostor
+                 c->impostor->AddSample(bary,vcg::Normal(*fi).Normalize(),color);	// collect a sample for the impostor
 
 
 		TIM::End(23);
