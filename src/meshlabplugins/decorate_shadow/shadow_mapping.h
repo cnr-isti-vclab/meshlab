@@ -47,6 +47,10 @@ public:
       * @param gla GLArea reference.
       */
     void runShader(MeshDocument&, GLArea*);
+    virtual void setShadowIntensity(float f)
+    {
+      _intensity=f;
+    }
 
 protected:
     /** The darkness of the shadow.

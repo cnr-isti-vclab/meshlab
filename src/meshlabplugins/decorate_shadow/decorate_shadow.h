@@ -74,14 +74,21 @@ public:
         foreach(ap,actionList){
             ap->setCheckable(true);
         }
+        smShader= new ShadowMapping(0.1f);
+        vsmShader= new VarianceShadowMapping(0.1f);
+        vsmbShader= new VarianceShadowMappingBlur(0.1f);
+        _decoratorSSAO = new SSAO(0.1);
     }
+
 
 	QList<QAction *> actions () const {return actionList;}
     virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet  * /*parent*/ par, GLArea * /*parent*/);
     virtual void decorate(QAction *a, MeshDocument &m,  RichParameterSet  *, GLArea *gla, QPainter *p);
     virtual void initGlobalParameterSet(QAction *, RichParameterSet  & globalparam);
 private:
-    DecorateShader* _decoratorSH, *_decoratorSSAO;
+    DecorateShader* smShader, *vsmShader, *vsmbShader;
+    DecorateShader* _decoratorSH;
+    SSAO *_decoratorSSAO;
     inline const QString DecorateShadowSSAORadius() { return  "MeshLab::Decoration::SSAORadius" ; }
     inline const QString DecorateShadowMethod() { return  "MeshLab::Decoration::ShadowMethod" ; }
     inline const QString DecorateShadowIntensity() { return  "MeshLab::Decoration::ShadowIntensityVal" ; }

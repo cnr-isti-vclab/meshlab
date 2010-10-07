@@ -48,6 +48,14 @@ public:
       * @param gla GLArea reference.
       */
     void runShader(MeshDocument&, GLArea*);
+    virtual void setShadowIntensity(float f)
+    {
+      _intensity=f;
+    }
+    void setRadius(float rad)
+    {
+      this->_radius=rad;
+    }
 
 private:
 
@@ -70,6 +78,7 @@ private:
     void printNoiseTxt();
 
     float _radius;
+    float _intensity;
 
     int noiseWidth;
     int noiseHeight;

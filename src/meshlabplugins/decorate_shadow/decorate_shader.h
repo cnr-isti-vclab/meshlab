@@ -40,8 +40,9 @@ public:
         this->_initOk = false;
 
         //default texture size
-        this->_texSize = 1024;
-    }
+        this->_texW = 1024;
+        this->_texH = 1024;
+      }
 
     //virtual ~DecorateShader();
 
@@ -58,10 +59,11 @@ public:
       * @param gla GLArea reference.
       */
     virtual void runShader(MeshDocument&, GLArea*) = 0;
+    virtual void setShadowIntensity(float f) =0;
 
 protected:
     bool _initOk;
-    int _texSize;
+    int _texW,_texH;
 
     /** The FrameBufferObject handler */
     GLuint _fbo;
@@ -82,7 +84,7 @@ protected:
         glClearDepth(1.0);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
-        glViewport(0, 0, this->_texSize, this->_texSize);
+        glViewport(0, 0, this->_texW, this->_texH);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
 
@@ -143,15 +145,15 @@ protected:
         if (!this->_initOk)
                 return;
 
-        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+        QImage img(this->_texW, this->_texH, QImage::Format_RGB32);
 
-        float *tempFBuf = new float[this->_texSize * this->_texSize *1 ];
+        float *tempFBuf = new float[this->_texW * this->_texH *1 ];
         float *tempFBufPtr = tempFBuf;
         glBindTexture(GL_TEXTURE_2D, map);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, tempFBufPtr);
-        for (int i = 0; i < this->_texSize; ++i) {
+        for (int i = 0; i < this->_texH; ++i) {
                 QRgb *scanLine = (QRgb*)img.scanLine(i);
-                for (int j = 0; j < this->_texSize; ++j) {
+                for (int j = 0; j < this->_texW; ++j) {
                     const unsigned char val = (unsigned char) (tempFBufPtr[0] * 255.0f);
                         scanLine[j] = qRgb(val, val, val);
                         tempFBufPtr ++;
@@ -171,15 +173,15 @@ protected:
         if (!this->_initOk)
                 return;
 
-        QImage img(this->_texSize, this->_texSize, QImage::Format_RGB32);
+        QImage img(this->_texW, this->_texH, QImage::Format_RGB32);
 
-     unsigned char *tempBuf = new unsigned char[this->_texSize * this->_texSize * 3];
+     unsigned char *tempBuf = new unsigned char[this->_texW * this->_texH * 3];
         unsigned char *tempBufPtr = tempBuf;
         glBindTexture(GL_TEXTURE_2D, map);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
-        for (int i = 0; i < this->_texSize; ++i) {
+        for (int i = 0; i < this->_texH; ++i) {
                 QRgb *scanLine = (QRgb*)img.scanLine(i);
-                for (int j = 0; j < this->_texSize; ++j) {
+                for (int j = 0; j < this->_texW; ++j) {
                         scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
                         tempBufPtr += 3;
                 }
@@ -320,7 +322,7 @@ protected:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  this->_texSize, this->_texSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  this->_texW, this->_texH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachment, GL_TEXTURE_2D, tex, 0);
 
     }
@@ -333,7 +335,7 @@ protected:
     void genDepthRenderBufferEXT(GLuint& tex){
         glGenRenderbuffersEXT(1, &tex);
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, tex);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texSize, this->_texSize);
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texW, this->_texH);
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, tex);
     }
     
@@ -358,7 +360,7 @@ protected:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texW, this->_texH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex, 0);
         return;
     }
@@ -385,7 +387,7 @@ protected:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
         }
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16,  this->_texSize, this->_texSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16,  this->_texW, this->_texH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex, 0);
         return;
     }

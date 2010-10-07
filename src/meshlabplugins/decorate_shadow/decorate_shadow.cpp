@@ -78,36 +78,25 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 		
 bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, RichParameterSet* parset, GLArea* /*gla*/){
     bool result;
+
     switch(ID(action)){
         case DP_SHOW_SHADOW :
             if(!parset->hasParameter(DecorateShadowMethod())){
                 qDebug("Unable to find Shadow mapping method");
                 assert(0);
             }
-            switch (parset->getEnum(DecorateShadowMethod())){
-                case SH_MAP:
-                    this->_decoratorSH = new ShadowMapping(parset->getDynamicFloat(this->DecorateShadowIntensity()));
-                    break;
-
-                case SH_MAP_VSM:
-                    this->_decoratorSH = new VarianceShadowMapping(parset->getDynamicFloat(this->DecorateShadowIntensity()));
-                    break;
-
-                case SH_MAP_VSM_BLUR:
-                    this->_decoratorSH = new VarianceShadowMappingBlur(parset->getDynamicFloat(this->DecorateShadowIntensity()));
-                    break;
-
-                default: assert(0);
+            switch (parset->getEnum(DecorateShadowMethod()))
+            {
+            case SH_MAP: this->_decoratorSH = smShader; break;
+            case SH_MAP_VSM: this->_decoratorSH = vsmShader; break;
+            case SH_MAP_VSM_BLUR: this->_decoratorSH = vsmbShader; break;
             }
+            this->_decoratorSH->setShadowIntensity(parset->getDynamicFloat(this->DecorateShadowIntensity()));
             result = this->_decoratorSH->init();
             return result;
 
         case DP_SHOW_SSAO:
-            if(!parset->hasParameter(DecorateShadowMethod())){
-                qDebug("Unable to find uniform variable radius for SSAO shader");
-                assert(0);
-            }
-            this->_decoratorSSAO = new SSAO(parset->getFloat(DecorateShadowSSAORadius()));
+            this->_decoratorSSAO->setRadius(parset->getFloat(DecorateShadowSSAORadius()));
             result = this->_decoratorSSAO->init();
             return result;
 

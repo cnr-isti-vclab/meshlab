@@ -105,7 +105,7 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     /***********************************************************/
     glUseProgram(this->_blurShaderProgram);
 
-    GLfloat scale = 1/(this->_texSize * BLUR_COEF);
+    GLfloat scale = 1/(this->_texW * BLUR_COEF);
 
     GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");
     glUniform2f(scaleLoc, scale, 0.0);
