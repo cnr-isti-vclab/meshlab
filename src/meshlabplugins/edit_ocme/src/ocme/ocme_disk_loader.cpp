@@ -4,13 +4,13 @@
 #include <vcg/complex/trimesh/update/normal.h>
 
 
-int CellDisk::get(CellToken *token){
+int CellDisk::get(CellToken * /*token*/){
 	return 1;
 }
-int CellDisk::drop(CellToken *token){
+int CellDisk::drop(CellToken * /*token*/){
 	return 1;
 }
-int CellDisk::size(CellToken *token){
+int CellDisk::size(CellToken * /*token*/){
 	return 1;
 }
 
@@ -36,9 +36,9 @@ int CellRAM::size(CellToken *token){
 	return c->SizeInRAM();
 }
 
-int CellVideo::get(CellToken *token){return 1;}
-int CellVideo::drop(CellToken *token){return 1;}
-int CellVideo::size(CellToken *token){return 1;}
+int CellVideo::get(CellToken * /*token*/){return 1;}
+int CellVideo::drop(CellToken * /*token*/){return 1;}
+int CellVideo::size(CellToken * /*token*/){return 1;}
 
 
 

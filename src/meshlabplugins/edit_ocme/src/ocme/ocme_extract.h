@@ -19,14 +19,17 @@ struct Joiner{
 
 class RemoveDuplicateVert_Compare{
 public:
+		typename MeshType::template PerVertexAttributeHandle<unsigned int >    * biV;
         inline bool operator()(VertexPointer const &a, VertexPointer const &b)
         {
-                return (*a).cP() < (*b).cP();
+			return (*biV)[a] < (*biV)[b];
         }
 };
 
 
-static void JoinDuplicateVertex( MeshType & m, typename MeshType::template PerVertexAttributeHandle<GISet>  & gPosV )
+static void JoinBorderVertices( MeshType & m, 
+								typename MeshType::template PerVertexAttributeHandle<GISet>  & gPosV,
+								typename MeshType::template PerVertexAttributeHandle<unsigned int >  & biV)
 {
         if(m.vert.size()==0 || m.vn==0) return;
 
@@ -36,11 +39,15 @@ static void JoinDuplicateVertex( MeshType & m, typename MeshType::template PerVe
         int deleted=0;
         int k=0;
         size_t num_vert = m.vert.size();
-        std::vector<VertexPointer> perm(num_vert);
+        std::vector<VertexPointer> perm;
         for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi, ++k)
-                perm[k] = &(*vi);
+			if(biV[*vi] != 0)
+                perm.push_back(&(*vi));
+
+		if(perm.empty()) return;
 
         RemoveDuplicateVert_Compare c_obj;
+		c_obj.biV = & biV;
 
         std::sort(perm.begin(),perm.end(),c_obj);
 
@@ -48,18 +55,18 @@ static void JoinDuplicateVertex( MeshType & m, typename MeshType::template PerVe
         i = j;
         mp[perm[i]] = perm[j];
         ++i;
-        for(;i!=num_vert;)
+        for(;i!=perm.size();)
         {
                 if( (! (*perm[i]).IsD()) &&
                         (! (*perm[j]).IsD()) &&
-                        (*perm[i]).P() == (*perm[j]).cP() )
+                        (biV[*perm[i]] == biV[*perm[j]]) )
                 {
                         VertexPointer t = perm[i];
                         mp[perm[i]] = perm[j];
-
                         gPosV[*perm[j]].Add(gPosV[*t]);
-                        ++i;
+						gPosV[*perm[j]].BI() = biV[*perm[j]]; //store in gPosV the global border index
                         vcg::tri::Allocator<MeshType>::DeleteVertex(m,*t);
+                        ++i;
                         deleted++;
                 }
                 else
@@ -167,7 +174,13 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
         if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosV))
                 gPosV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GISet> (m,"ocme_gindex");
 
-	// create an attibute that will store if the  vertex is locked or not
+        // create an attibute that will store the address in ocme for the vertex
+        typename MeshType::template PerVertexAttributeHandle<unsigned int> biV =
+                vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned int> (m,"bi");
+        if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,biV))
+                biV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<unsigned int> (m,"bi");
+
+		// create an attibute that will store if the  vertex is locked or not
 	typename MeshType::template PerVertexAttributeHandle<unsigned char> lockedV =
 		vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned char> (m,"ocme_locked");
 
@@ -215,47 +228,53 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 		{
 			sr.Add((*ci)->key.h);
 			Chain<OVertex> * chain = (*ci)->vert;
+			Chain<BorderIndex>  * chain_bi = (*ci)->border;
 			RAssert(chain != NULL);
 
+			unsigned int first_added_v =  m.vert.size();
 	 		vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,chain->Size());
 
 			locked = (*ci)->ecd->locked() ;
 
-
-			// The vertex that was allocated to store a vertex that is not pointed by anything
-			// is deleted (refer to the header of ocme_definition.h for more explanation)
 			for(unsigned int i = 0; i < chain->Size(); ++i,++vi)
-                                {
-                                    gPosV[*vi].Clear();
-                                    int ind = gPosV[*vi].Index((*ci)->key);
-                                    assert(ind == -1);
+                {
+                    gPosV[*vi].Clear();
+                    int ind = gPosV[*vi].Index((*ci)->key);
+                    assert(ind == -1);
 
-                                    /* add this cells to the cells storing this vertices */
-                                    gPosV[*vi].Add(GIndex((*ci)->key,i));
+                    /* add this cells to the cells storing this vertices */
+                    gPosV[*vi].Add(GIndex((*ci)->key,i));
 
-                                    /* Here there should be the importer from OVertex to vcgVertex */
-                                    (*vi).P() = (*chain)[i].P();
+                    /* Here there should be the importer from OVertex to vcgVertex */
+                    (*vi).P() = (*chain)[i].P();
 
-                                    /*  export all the attributes specified */
-                                    attr_map.ExportVertex(*ci,*vi,i);
+                    /*  export all the attributes specified */
+                    attr_map.ExportVertex(*ci,*vi,i);
 
-                                    /* mark with the "editable" flag */
-                                    lockedV[*vi] = locked? 1 : 0 ; /* TODO: just to avoid the not-so-tested class for vector of bool in simple_temporary_data.h*/
-                                }
+                    /* mark with the "editable" flag */
+                    lockedV[*vi] = locked? 1 : 0 ; /* TODO: just to avoid the not-so-tested class for vector of bool in simple_temporary_data.h*/
+					
+					/* initialize the external counter to 0 [maybe unnecessary]*/ 
+					biV[*vi] = 0;
+			}
 
-                            Chain<OFace> * face_chain	= (*ci)->face;		// get the face chain
-                            RAssert(face_chain!=NULL);
+			/* assign the border index to the border vertices */
+			for(unsigned int i = 0; i < chain_bi->Size(); ++i)
+				biV[m.vert[first_added_v+ (*chain_bi)[i].vi] ] = (*chain_bi)[i].bi;
 
-                            typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
-                            for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
-                                gPosF[*fi] = GIndex((*ci)->key,ff);
-                                for(unsigned int i = 0; i < 3; ++i){
-                                        int iii = ((*face_chain)[ff][i]);
-                                        assert(iii+offset < m.vert.size());
-                                       (*fi).V(i) = &m.vert[iii+offset];
-                                   }
-                            }
-                            offset = m.vert.size();
+				Chain<OFace> * face_chain	= (*ci)->face;		// get the face chain
+				RAssert(face_chain!=NULL);
+
+				typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
+				for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
+					gPosF[*fi] = GIndex((*ci)->key,ff);
+					for(unsigned int i = 0; i < 3; ++i){
+							int iii = ((*face_chain)[ff][i]);
+							assert(iii+offset < m.vert.size());
+						   (*fi).V(i) = &m.vert[iii+offset];
+					   }
+				}
+				offset = m.vert.size();
               }
 
 	range() = sr;
@@ -265,15 +284,16 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			(*ci)->face->FreeAll();
 	}
 
-        ///CHECK
+ /// JUST CHECKING___________
                 for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
                     for( GISet::iterator gi = gPosV[*vi].begin(); gi != gPosV[*vi].end();++gi){
                         Cell *c = GetCell((*gi).first,false);
                         assert(c);
                         assert(c->vert->Size() > (*gi).second);
                     }
+///--------------------------
 
-        Joiner<MeshType>::JoinDuplicateVertex(m,gPosV);
+        Joiner<MeshType>::JoinBorderVertices(m,gPosV,biV);
 
         {
 
@@ -298,14 +318,16 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 
         }
 
-///CHECK
+ /// JUST CHECKING___________
         for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
             for( GISet::iterator gi = gPosV[*vi].begin(); gi != gPosV[*vi].end();++gi){
                 Cell *c = GetCell((*gi).first,false);
                 assert(c);
                 assert(c->vert->Size() > (*gi).second);
             }
+///--------------------------
 
+		vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute (m,biV);
 }
 
 

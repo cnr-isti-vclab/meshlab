@@ -279,12 +279,11 @@ main (int argc,char **argv )
 //	printf("SIZE OF vcgMesh: %d\n",sizeof(vcgMesh));
 //	printf("SIZE OF Impostor: %d\n",sizeof(Impostor));
 
-	SimpleDb::Index tp;
-	tp.SetIFile(0);
-	tp.SetISeg(10);
-	unsigned int j = tp.ISeg();
+//	_CrtSetBreakAlloc(1281429);
 
 	struct stat buf;
+	
+
 
 {
 	int c;

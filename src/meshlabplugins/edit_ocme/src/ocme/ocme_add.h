@@ -208,6 +208,18 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	}
 
 	StopRecordCellsSetModification();
+
+	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+		if(gPos[*vi].giset.size() > 1){
+			for(GISet::CopiesIterator ci = gPos[*vi].giset.begin(); ci != gPos[*vi].giset.end();++ci){
+				Cell * c = GetCell((*ci).first);
+				assert(c);
+				c->border->AddElem(BorderIndex((*ci).second, gbi ));
+			}
+			gbi++;
+		}
+
+
 	vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute (m,gPos);
 
 }

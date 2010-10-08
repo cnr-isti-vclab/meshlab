@@ -76,7 +76,6 @@ void OCME::ClearImpostors(std::vector<CellKey> & fromCells){
 		if(level == 32) return;																							// if the database is empty return
 
 		// phase 2., bottom up clearing of the impostors
-		bool to_insert = false;
 		for( ; level  < 31;++level ){
 			::RemoveDuplicates(cells_by_level[level]);
 			for(unsigned int i = 0; i <cells_by_level[level].size();++i){
@@ -106,14 +105,14 @@ void OCME::FillSamples(std::vector<CellKey> & cs){
 				/* clear the data that will be recomputed */
 				c->impostor->ClearDataCumulate();
 
+				bool hasColor = vcg::tri::HasPerVertexColor(tmp);
 
 				for(vcgMesh::FaceIterator fi = tmp.face.begin(); fi != tmp.face.end(); ++fi){
 						vcg::Point3f bary   = vcg::Barycenter(*fi);
 						vcg::Point3f pp[3];
                         vcg::Point3f n = vcg::Normal(*fi).Normalize();
-                        //for(int i  = 0; i < 3; ++i) pp[i]  = ((*fi).V(i))->P();
-                        c->impostor->AddSample(bary,n,(*fi).V(0)->cC());	// collect a sample for the impostor
-                        //for(int i = 0; i < 3; ++i) c->impostor->AddSample(bary*0.5+pp[i]*0.5,n,vcg::Color4b::Gray);	// collect a sample for the impostor
+						vcg::Color4b color  =  (hasColor)? (*fi).V(0)->cC() : vcg::Color4b::Gray;
+                        c->impostor->AddSample(bary,n,color);	// collect a sample for the impostor
 				}
 		}
 }

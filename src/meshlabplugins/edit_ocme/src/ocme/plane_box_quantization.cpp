@@ -8,7 +8,7 @@ void ToPolar(vcg::Point3f n, float & alpha, float & beta){
 	if( n[1]*n[1] > 0.99) 
 		alpha = 0.f; 
 	else
-		alpha = ((n[2]>0)?1.0:-1.0) * acos( n[0] / sqrt(1.f-( n[1]*n[1] ) ));
+		alpha = ((n[2]>0.f)?1.f:-1.f) * acos( n[0] / sqrt(1.f-( n[1]*n[1] ) ));
 }
 
 vcg::Point3f FromPolar(float   alpha, float   beta){

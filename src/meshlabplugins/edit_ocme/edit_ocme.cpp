@@ -429,7 +429,8 @@ void OcmeEditPlugin::loadOcm(){
 
 		UpdateBoundingBox();
 		setTrackBall();
-                mm = gla->meshDoc->addNewMesh("Ocm patch");
+        mm  = gla->meshDoc->addNewMesh("Ocm patch");
+	//	mm  ->cm.bbox = ocme_bbox;
 		ocme_loaded = true;
 		updateButtonsState();
 

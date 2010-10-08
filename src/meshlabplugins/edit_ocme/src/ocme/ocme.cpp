@@ -49,45 +49,6 @@ double CS(const int & h){ return cellsizes[15+h]; }
 int COff(const int & h){ return 15+h; }
 
 
-std::pair < OCME::CellsIterator ,bool >  CachedMap::insert( const  std::pair< CellKey,Cell*>  &  toinsert){
-			return allcells.insert(toinsert);
-	}
-
-Cell* CachedMap::find(const CellKey & ck){
-				 CellsIterator ci ;
-
-				 cache_access.lock();
-				 ci = cache.find(ck);// look in the cache
-				 if(ci!=cache.end()){
-						 cache_access.unlock();
-						 return (*ci).second;     // found! return it
-				 }
-
-				 ci = allcells.find(ck);           // look in allcells
-				 if(ci==allcells.end()){
-						 cache_access.unlock();
-						 return 0;     // if there is not, return
-				 }
-			//	 lgn->Append("in cells");lgn->Push();
-
-				assert(ci != allcells.end());
-
-				 if(cache.size()>100) cache.clear();
-
-				 cache.insert(std::pair<CellKey,Cell*>(ck,(*ci).second));
-				 cache_access.unlock();
-				 return (*ci).second;
-		}
-		 void  CachedMap::erase( const CellKey & ck){
-				 cache_access.lock();
-				 cache.erase(ck);
-				 allcells.erase(ck);
-				 cache_access.unlock();
-		 }
-
-		 OCME::CellsIterator  CachedMap::begin()		{ return allcells.begin();}
-		 OCME::CellsIterator  CachedMap::end()			{ return allcells.end();}
-		size_t	       CachedMap::size()    { return allcells.size();}
 
 
 
@@ -97,6 +58,7 @@ OCME::OCME(){
 					this->oce.AddNameTypeBound<GIndex>("GIndex");
 					this->oce.AddNameTypeBound<OFace>("OFace");
 					this->oce.AddNameTypeBound<OVertex>("OVertex");
+					this->oce.AddNameTypeBound<BorderIndex>("BIndex");
 
 					this->oce.AddNameTypeBound<vcg::Point3f>("Coord3f");
 					this->oce.AddNameTypeBound<vcg::Color4b>("Color4b");
@@ -107,6 +69,7 @@ OCME::OCME(){
 //				InitRender();
                     //this->oce.CreateFromString_UserTypes = &ocme_types_allocator;
 
+					gbi = 1;
 
                     params.side_factor = 50;
                     kernelSetMark = 1;
@@ -307,8 +270,9 @@ Cell* OCME::GetCell(const CellKey & key,bool ifnot_create){
 		if(!c){
 			if(ifnot_create) {
 				Cell * newc =  NewCell(key);;
-				newc->face				= AddElement<OFace>		("f",newc);
-				newc->vert				= AddElement<OVertex>	("v",newc);
+				newc->face				= AddElement<OFace>			("f",newc);
+				newc->vert				= AddElement<OVertex>		("v",newc);
+				newc->border			= AddElement<BorderIndex>	("b",newc);
 				if(this->record_cells_set_modification) {
 						this->added_cells.push_back(key);
 						this->touched_cells.push_back(key);
@@ -320,7 +284,7 @@ Cell* OCME::GetCell(const CellKey & key,bool ifnot_create){
 		} else { assert(key== c->key);return  c;}
 	}
 
-Impostor* GetImpostor(const CellKey & key, bool ifnot_create = true){
+Impostor* GetImpostor(const CellKey & , bool ifnot_create = true){
 		assert(0);
 		return 0;// not implemented yet
 		ifnot_create = false;
@@ -335,8 +299,9 @@ Cell* OCME::GetCellC(const CellKey & key,bool ifnot_create){
 
 		if(ifnot_create) {
 				Cell * newc =  NewCell(key);;
-				newc->face				= AddElement<OFace>		("f",newc);
-				newc->vert				= AddElement<OVertex>	("v",newc);
+				newc->face				= AddElement<OFace>			("f",newc);
+				newc->vert				= AddElement<OVertex>		("v",newc);
+				newc->border			= AddElement<BorderIndex>	("b",newc);
 				newc->impostor->InitDataCumulate(key.BBox3f());
 				if(this->record_cells_set_modification) {
 						this->added_cells.push_back(key);
@@ -482,14 +447,16 @@ int		OCME::SizeOf(){
 	for( i = this->cells.begin(); i != this->cells.end(); ++i){
 		size+=(*i).second->SizeOf();
 	}
-	return size + 2 * sizeof(int);// one integer to indicate the number of cells
+	return size + 3 * sizeof(int);// side factor, number of cells, gbi
 }
 
 char *	OCME::Serialize (  char * const buf){
 	char * ptr = buf;
 	CellsIterator  i;
-	*((int*)ptr) = (int) this->params.side_factor; ptr+=sizeof(int);
-	*((int*)ptr) = (int) this->cells.size(); ptr+=sizeof(int);
+	*((int*)ptr) = (int) this->params.side_factor;		ptr+=sizeof(int);
+	*((int*)ptr) = (int) this->cells.size();			ptr+=sizeof(int);
+	*((int*)ptr) = (int) gbi;							ptr+=sizeof(int);
+
 	for( i = this->cells.begin(); i != this->cells.end(); ++i)
 		ptr = (*i).second->Serialize(ptr);
 	return ptr;
@@ -499,6 +466,7 @@ char *	OCME::DeSerialize ( char * const buf ){
 	char *ptr = buf;
 	this->params.side_factor = * (int*) ptr; ptr+=sizeof(int);
 	int n_cells =  * (int*) ptr; ptr+=sizeof(int);
+	gbi =  * (int*) ptr; ptr+=sizeof(int);
 
 	MemDbg::SetPoint(0);
 	for(int i  = 0 ; i< n_cells;++i){
@@ -509,7 +477,7 @@ char *	OCME::DeSerialize ( char * const buf ){
 		  
 		 /* here the attribute names have been loaded and
 		 the chains in lmc have been loaded, but all the
-		 pair in c.elements have NULL as cell pointer.
+		 pair in c.elements have NULL as chain pointer.
 		 Here we reconnect them.
 		 */
 		 std::map<std::string, ChainBase *  >::iterator ai;
@@ -519,9 +487,11 @@ char *	OCME::DeSerialize ( char * const buf ){
 			assert(chain!=NULL);
 			(*ai).second = chain;
 
-			/* set face and vertex if needed */
+			/* set face, vertex and border if needed */
 			if((*ai).first == std::string("f"))				c.face				= (Chain<OFace>*)chain; else
-                        if((*ai).first == std::string("v"))				c.vert				= (Chain<OVertex>*)chain;
+            if((*ai).first == std::string("v"))				c.vert				= (Chain<OVertex>*)chain;else
+            if((*ai).first == std::string("b"))				c.border			= (Chain<BorderIndex>*)chain; 
+
 		 }
 
 
@@ -531,6 +501,14 @@ char *	OCME::DeSerialize ( char * const buf ){
 			assert(chain!=NULL);
 			(*ai).second = chain;
 		 }
+ 		 for( ai = c.perFace_attributes.begin(); ai != c.perFace_attributes.end(); ++ai){
+			std::string name_of_chain = NameOfChain(c.key,(*ai).first);
+			ChainBase * chain = oce.GetChain(name_of_chain);
+			assert(chain!=NULL);
+			(*ai).second = chain;
+		 }
+
+		
 
 	 }
 	 return ptr;

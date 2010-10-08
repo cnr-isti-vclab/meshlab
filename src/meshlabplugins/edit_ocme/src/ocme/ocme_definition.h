@@ -44,22 +44,6 @@ std::string ToString(CellKey key);
 extern Logging * lgn;
 
 
-struct CachedMap{
-		typedef std::map<CellKey,Cell*> CellsContainer;
-		typedef CellsContainer::iterator CellsIterator;
-		QMutex  cache_access;
-		CellsContainer allcells;
-		CellsContainer cache;
-
-		std::pair < CellsIterator ,bool > insert( const  std::pair< CellKey,Cell*> & toinsert);
-		Cell *  find ( const CellKey & ck);
-		void erase( const CellKey & ck);
-		CellsIterator begin();
-		CellsIterator end()	 ;
-		size_t	      size() ;
-
-};
-
 struct OCME{
 	
 	OCME();
@@ -122,7 +106,6 @@ struct OCME{
 		}
 	};
 	Statistics stat;
-
 	OOCEnv  oce;
 	
 	struct HashFunctor : public std::unary_function<CellKey, size_t>
@@ -162,6 +145,9 @@ struct OCME{
 
 	// true if modification to the set of cells are recorded
 	bool record_cells_set_modification;
+
+	// progressive mark to identify copies of the same vertex in different cells
+	unsigned int gbi;
 
 	// cell added since  record_cells_set_modification was set to true
 	std::vector<CellKey> touched_cells;
@@ -472,10 +458,8 @@ struct OCME{
 	Note: this is because currently faces are not pointed by anyone
 	*/
 	void RemoveDeletedFaces(  std::vector<Cell*> & cells);
-
-        /*
-	*/
-	void RemoveDeletedVertices(    std::vector<Cell*>   cells);
+	void RemoveDeletedBorder(std::vector<Cell*> & cells);
+ 	void RemoveDeletedVertices(    std::vector<Cell*>   cells);
 
 
 	/*

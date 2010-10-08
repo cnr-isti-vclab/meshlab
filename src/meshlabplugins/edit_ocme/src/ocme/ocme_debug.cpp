@@ -1,5 +1,7 @@
 #include "ocme_definition.h"
 
+void OCME::Verify(){ ;}
+
 bool OCME::CheckFaceVertDeletions(Cell *c){ return true;
 
 	c->ecd->deleted_face.SetAsVectorOfBool();
@@ -35,6 +37,6 @@ bool OCME::CheckFaceVertexAdj(Cell *c){
 	return true;
 }
 
-bool OCME:: CheckDependentSet(std::vector<Cell*> &  dep){return true;
+bool OCME:: CheckDependentSet(std::vector<Cell*> &  ){return true;
 
 }

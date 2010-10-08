@@ -18,7 +18,7 @@ void OCME::FindRemovedElements( MeshType & m,
 
                 typename MeshType::FaceIterator fi;
                 typename MeshType::VertexIterator vi;
-                unsigned int i;
+                 
 
                 std::vector<GIndex> committing_faces;
                 std::vector<GISet> committing_vertices;
@@ -26,17 +26,17 @@ void OCME::FindRemovedElements( MeshType & m,
                 /*
                         find the GIndex being committed
                 */
-                i = 0;
-                for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++i)
+                
+                for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
                 {
-                                GISet gposv = gPosV [i];
+                                GISet gposv = gPosV [*vi];
                                 if(!gposv.IsUnassigned() )
                                           committing_vertices.push_back(gposv);
                 }
 
-                i = 0;
-                for(fi = m.face.begin(); fi != m.face.end(); ++fi,++i){
-                                                GIndex gposf = gPosF [i];
+                
+                for(fi = m.face.begin(); fi != m.face.end(); ++fi ){
+                                                GIndex gposf = gPosF [*fi];
                                                 if(!gposf.IsUnassigned() )
                                                                 committing_faces.push_back(gposf);
                                 }
@@ -58,7 +58,7 @@ void OCME::FindRemovedElements( MeshType & m,
                 std::vector<GISet> deleted_vertices;
 
                 SetDifference(edited_vertices,committing_vertices,deleted_vertices);
-                for( i = 0; i < deleted_vertices.size(); ++i)
+                for(unsigned int  i = 0; i < deleted_vertices.size(); ++i)
                         for(GISet::iterator di = deleted_vertices[i].begin(); di != deleted_vertices[i].end();++di )
                             {
                                 Cell* c = GetCell((*di).first,false);
@@ -84,6 +84,11 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		If this operation fails it means you are trying to commit something you did not take
 		in edit with Edit(). In this case the function return, you should have called AddMesh.
 	*/
+		// create an attibute that will store the address in ocme
+    typename MeshType::template PerVertexAttributeHandle<GISet> gPosVNew =
+            vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GISet> (m,"gposNew");
+
+
         typename MeshType::template PerVertexAttributeHandle<GISet> gPosV =
                 vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<GISet> (m,"ocme_gindex");
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosV));
@@ -105,20 +110,10 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<unsigned char> (m,"ocme_locked");
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedF));
 
-	/* we will temporarily need a copy of the vertex position */
-  //      vcg::SimpleTempData<typename MeshType::VertContainer,GISet> gPosVNew(m.vert);	// create the temporary data
+	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+                gPosVNew[vi].Clear() ;	// set the vertex as unassigned	(i.e. to process)
 
-
-////////// check
-        for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-            for( GISet::iterator gi = gPosV[*vi].begin(); gi != gPosV[*vi].end();++gi){
-                Cell *c = GetCell((*gi).first,false);
-                assert(c);
-                assert(c->vert->Size() > (*gi).second);
-            }
-
-
-        FindRemovedElements(m,gPosV,gPosF);
+    FindRemovedElements(m,gPosV,gPosF);
 
 
 	RecordCellsSetModification();
@@ -221,15 +216,15 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		*/
                 int vIndex[3];
                 for(int i = 0; i < 3 ; ++i){
-                        vIndex[i] = gPosV[(*fi).V(i)].Index(ck);
+                        vIndex[i] = gPosVNew[(*fi).V(i)].Index(ck);
                         assert(c->key == ck);
                         assert(vIndex[i] < (int) c->vert->Size());
-                        // get the index of the vertx in this cell (or -1)
+                        // get the index of the vertex in this cell (or -1)
                         if(vIndex[i]==-1){ // this vertex was not in ck at edit time
-                             vIndex[i] = c-> AddVertex(OVertex(*(*fi).V(i)) );                            // no: add the vertex to it
-                             gPosV[(*fi).V(i)].Add(GIndex(ck,vIndex[i]));                                 // record to index
+                             vIndex[i] = c-> AddVertex(OVertex(*(*fi).V(i)) );     // no: add the vertex to it
+                             gPosVNew[(*fi).V(i)].Add(GIndex(ck,vIndex[i]));          // record to index
                          }
-                         attr_map.ImportVertex(c,*(*fi).V(i),vIndex[i]);                                      // import all the attributes specified
+                         attr_map.ImportVertex(c,*(*fi).V(i),vIndex[i]);           // import all the attributes specified
                          (*c->face)[gposf.i][i] = vIndex[i];
                          assert(vIndex[i] < (int) c->vert->Size());
                      }
@@ -238,27 +233,47 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
                 c->bbox.Add(facebox,sr);
                 }
 
-//      lgn->Append(" deleting   vertices moved from cell");
-//      {
-//         unsigned int ii = 0;
-//          for(vi = m.vert.begin(); vi != m.vert.end(); ++vi,++ii)
-//                 if(lockedV[*vi]==0)													//   skip if the vertex is not editable
-//         {
-//                  GISet   gposv = gPosV[*vi];
-//                  GISet   gposv_old = gPosVOld[*vi];
-//                  gposv_old.sub(gposv);
-//                  for(GISet::iterator dvi = gposv_old.begin(); dvi != gposv_old.end(); ++dvi){
-//                      Cell * dvc = GetCell((*dvi).first,false);
-//                      assert(dvc);
-//                      dvc->ecd->deleted_vertex.SetAsVectorOfMarked();
-//                      dvc->ecd->deleted_vertex.SetMarked((*dvi).second,true);
-//                      toCleanUpCells.push_back(dvc);
-//                  }
-//         }
-//      }
+		// compare gPosV e gPosVNew to update the borders
+		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi){
+			if(gPosVNew[*vi].giset.size() > 1)	{		// it is a border vertex
+				unsigned int bi;
+				GISet fresh_added  = gPosVNew[*vi];
+
+				if(gPosV[*vi].giset.size() > 1)	{		// it also was a border vertex
+					fresh_added.sub(gPosV[*vi]);		// copies added by this commit
+					bi  = gPosV[*vi].BI();				// take its global border index	
+ 				}
+				else
+					bi = gbi++;							// it is a new border vertex, create a new gbi
+
+				for(GISet::CopiesIterator ci = fresh_added.giset.begin(); ci != fresh_added.giset.end();++ci){
+					Cell * c = GetCell((*ci).first);
+					assert(c);
+					c->border->AddElem(BorderIndex((*ci).second, bi ));
+					assert((*ci).second < c->vert->Size());
+				}
+			}
+			if(gPosV[*vi].giset.size() > 1)	{		// it WAS a border vertex
+				GISet removed  = gPosV[*vi];
+				removed.sub(gPosVNew[*vi]);			// cells for which vi USED to be a border vertex
+				unsigned int bi = removed.BI();
+				for(GISet::CopiesIterator ci = removed.giset.begin(); ci != removed.giset.end();++ci){
+					Cell * c = GetCell((*ci).first);
+					toCleanUpCells.push_back(c);
+					assert(c);
+					for(unsigned int ii  = 0; ii < c->border->Size(); ++ii)// linear search! [to redo faster]
+						if((*(c->border))[ii].bi == bi){
+							c->ecd->deleted_border.SetAsVectorOfMarked();
+							c->ecd->deleted_border.SetMarked(ii,true);
+							break;
+						}
+				}
+			}
+		}
 
         if(!toCleanUpCells.empty()){
                 RemoveDuplicates(toCleanUpCells);
+                RemoveDeletedBorder(toCleanUpCells);
                 RemoveDeletedFaces(toCleanUpCells);
                 RemoveDeletedVertices(toCleanUpCells);
         }
@@ -285,6 +300,8 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 			lgn->Push();
 			RemoveCell((*ci)->key);
 		}
+
+	vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute (m,gPosVNew);
 
 	StopRecordCellsSetModification();
 

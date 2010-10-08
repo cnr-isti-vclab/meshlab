@@ -12,12 +12,21 @@ void OCME::RemoveDeletedFaces(  std::vector<Cell*> & cells){
 	}
 }
 
+void OCME::RemoveDeletedBorder(std::vector<Cell*> &  cells){
+	std::vector<Cell*>::iterator ci;
+	for(ci = cells.begin(); ci != cells.end(); ++ci){
+		(*ci) ->ecd->deleted_border.SetAsVectorOfMarked();	
+		(*ci)->border->Compact( (*ci)->ecd->deleted_border.marked_elements);
+		(*ci) ->ecd->deleted_border.Clear();	
+	}
+}
 
 void OCME::RemoveDeletedVertices(    std::vector<Cell*>  cs){
         std::vector<Cell*>::const_iterator ci;
         //
         for(ci = cs.begin(); ci != cs.end(); ++ci){
             std::vector<unsigned int>    remap;
+            Chain<BorderIndex> * bchain = (*ci)->border;
             Chain<OVertex> * vchain = (*ci)->vert;
             Chain<OFace> * fchain = (*ci)->face;
 
@@ -30,9 +39,10 @@ void OCME::RemoveDeletedVertices(    std::vector<Cell*>  cs){
                     int ind = (*fchain)[fi][i];
                     assert(remap[ind] < vchain->Size());
                     (*fchain)[fi][i] = remap[(*fchain)[fi][i]];
-                }
-        }
-
+				}
+            for(unsigned int ii = 0; ii < bchain->Size(); ++ii)
+                    (*bchain)[ii].vi = remap[(*bchain)[ii].vi];
+		}
 }
 
 

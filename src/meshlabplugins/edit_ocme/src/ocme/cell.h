@@ -59,6 +59,8 @@ struct GIndex{
 /* GISet is the set of GIndex corresponding to the same vertex*/
 struct GISet{
     std::map<CellKey,unsigned int > giset;
+	unsigned int bi;
+	typedef std::map<CellKey,unsigned int >::iterator CopiesIterator;
     typedef std::map<CellKey,unsigned int >::iterator iterator;
 
     void Add(GIndex gi){
@@ -71,7 +73,7 @@ struct GISet{
     iterator begin(){return giset.begin();}
     iterator end(){return giset.end();}
 
-    const  bool   & operator < (const GISet & o) const {
+    const  bool   operator < (const GISet & o) const {
         return giset<o.giset;
     }
 
@@ -81,6 +83,8 @@ struct GISet{
         for(iterator i = o.begin(); i!=o.end(); ++i)
             giset.erase((*i).first);
     }
+
+	unsigned int &  BI(){return bi;}
 
     int Index(CellKey ck){
         iterator gi = giset.find(ck);
@@ -130,10 +134,19 @@ struct Box4{
 	bool operator ==(const Box4 & b) const {return (bbox3==b.bbox3) && (sr==b.sr);}
 };
 
+struct BorderIndex{
+	BorderIndex(){}
+	BorderIndex(unsigned int _vi,unsigned int _bi):vi(_vi),bi(_bi){}
+	unsigned int 
+		vi,		// pointer to a border vertex in the cell
+		bi;		// its incremental mark
+};
+
 /* per cell auxiliary data structure for edit& commit */
 struct EditCommitAuxData{
 	BoolVector deleted_face;
 	BoolVector deleted_vertex;
+	BoolVector deleted_border;
 
 	FBool is_in_kernel;
 	FBool locked;
@@ -208,6 +221,9 @@ struct Cell{
 
 	/* all the vertices assigned to this cell. NOTE: this is a shortcut, "vert" is also in this->elements */
 	Chain<OVertex>  *vert;
+
+	/* border vertices */
+	Chain<BorderIndex> *border;
 
 	// auxiliary data needed for edit/Commit
 	EditCommitAuxData	*	ecd;

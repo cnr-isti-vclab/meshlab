@@ -222,7 +222,6 @@ SimpleDb::Index SimpleDb::Get(std::string key, void * buf, unsigned long siz){
 
 
 void SimpleDb::Del(std::string name){
-		FILE * f;
 		std::vector<Index> all_segs;
 		Index_ite ii = index.find(name);
 
