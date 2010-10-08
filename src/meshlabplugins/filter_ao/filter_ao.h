@@ -90,7 +90,7 @@ public:
 	void  initTextures          (void);
 	void  initGL                (vcg::CallBackPos *cb,
 	                             unsigned int numVertices);
-	bool  processGL             (AOGLWidget *glw,	MeshModel &m, std::vector<vcg::Point3f> &posVect);
+	bool  processGL             (MeshModel &m, std::vector<vcg::Point3f> &posVect);
 	bool  checkFramebuffer();
 
 	void  vertexCoordsToTexture (MeshModel &m);
@@ -113,6 +113,8 @@ public:
 	                             GLuint &pr);
 
 	void dumpFloatTexture(QString filename, float *texdata, int elems);
+private:
+	bool init;
 
 };
 

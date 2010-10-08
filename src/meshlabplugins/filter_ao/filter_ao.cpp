@@ -22,9 +22,8 @@
 ****************************************************************************/
 
 #include <GL/glew.h>
-#include "AOGLWidget.h"
 #include "filter_ao.h"
-
+#include <QGLFramebufferObject>
 #include <vcg/math/gen_normal.h>
 
 #include <wrap/qt/checkGLError.h>
@@ -51,6 +50,7 @@ AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 	foreach(FilterIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
 
+	init = false;
 	useGPU = AMBOCC_USEGPU_BY_DEFAULT;
 	numViews = AMBOCC_DEFAULT_NUM_VIEWS;
 	depthTexSize = AMBOCC_DEFAULT_TEXTURE_SIZE;
@@ -156,16 +156,28 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, Rich
 	
 	numViews = viewDirVec.size();
 
-	AOGLWidget *qWidget = new AOGLWidget(0,this);
-	qWidget->cb = cb;
-	qWidget->m = &m;
-	qWidget->viewDirVec = &viewDirVec;
-	qWidget->show();  //Ugly, but HAVE to be shown in order for it to work!
-	
+
+	this->glContext->makeCurrent();
+	this->initGL(cb,m.cm.vn);
+	unsigned int widgetSize = std::min(maxTexSize, depthTexSize);
+	QSize fbosize(widgetSize,widgetSize);
+	QGLFramebufferObjectFormat frmt;
+	frmt.setInternalTextureFormat(GL_RGBA);
+	frmt.setAttachment(QGLFramebufferObject::Depth);
+	QGLFramebufferObject fbo(fbosize,frmt);
+	qDebug("Start Painting window size %i %i", fbo.width(), fbo.height());
+	GLenum err = glGetError();
+	fbo.bind();
+	processGL(m,viewDirVec);
+	fbo.release();
+	err = glGetError();
+	const GLubyte* errname = gluErrorString(err);
+	qDebug("End Painting");
+	this->glContext->doneCurrent();
 	return !errInit;
 }
 	
-bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Point3f> &posVect)
+bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 {
 	if (errInit)
 		return false;
@@ -198,11 +210,9 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 	if(useGPU)
 	{	
 		vertexCoordsToTexture( m );
-		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
 	}
-
 	
 	tInitElapsed = tInit.elapsed();
 	vector<Point3f> faceCenterVec;
@@ -252,7 +262,7 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 			if(perFace) generateFaceOcclusionSW(m,faceCenterVec);
 			else generateOcclusionSW(m);
 		}
-
+		checkGLError::qDebug("Debug");
 	}
 
 	if (useGPU)
@@ -295,9 +305,10 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 		glDetachShader(shdrID, vs);
 		glDetachShader(shdrID, fs);
 		glDeleteShader(shdrID);   //executes but gives INVALID_OPERATION ( ?!?!? )
-
+		glGetError();            //patch for clean the gl error state from previous error
 		delete [] resultBufferTex;
 		delete [] resultBufferMRT;
+	
 	}
 
 	glDeleteTextures(1, &depthBufferTex);
