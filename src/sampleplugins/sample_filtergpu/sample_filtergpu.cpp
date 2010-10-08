@@ -21,8 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "samplefiltergpu.h"
-#include <QtScript>
+#include "sample_filtergpu.h"
 #include <QGLFramebufferObject>
 #include <QImage>
 
