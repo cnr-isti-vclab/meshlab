@@ -126,13 +126,14 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 	{
 	case ISOP_PARAM:
 		{
-			par.addParam(new RichInt("targetAbstractMinFaceNum",100,"Abstract Min Mesh Size",
+			par.addParam(new RichInt("targetAbstractMinFaceNum",140,"Abstract Min Mesh Size",
 				"This number and the following one indicate the range face number of the abstract mesh that is used for the parametrization process.<br>"
         "The algorithm will choose the best abstract mesh with the number of triangles within the specified interval.<br>"
 				"If the mesh has a very simple structure this range can be very low and strict;"
         "for a roughly spherical object if you can specify a range of [8,8] faces you get a octahedral abstract mesh, e.g. a geometry image.<br>"
 				"Large numbers (greater than 400) are usually not of practical use."));
-			par.addParam(new RichInt("targetAbstractMaxFaceNum",200,"Abstract Max Mesh Size", "See above."));
+			par.addParam(new RichInt("targetAbstractMaxFaceNum",180,"Abstract Max Mesh Size", "Please notice that a large interval requires huge amount of memory to be allocated, in order save the intermediate results. <br>"
+				"An interval of 40 should be fine."));
 			QStringList stopCriteriaList;
 			stopCriteriaList.push_back("Best Heuristic");
 			stopCriteriaList.push_back("Area + Angle");
@@ -147,8 +148,9 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
 				"3: Regularity : stop at minimum number of irregular vertices<br>"
 				"4: L2 : stop at minimum OneWay L2 Stretch Eff")));
 
-      par.addParam(new RichInt("convergenceSpeed",2, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results"));
-			par.addParam(new RichBool("DoubleStep",true,"Double Step","Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust, but it may increase the distorsion"));
+      par.addParam(new RichInt("convergenceSpeed",1, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results"));
+			par.addParam(new RichBool("DoubleStep",true,"Double Step","Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust."
+				"<br> Consider to disable this bool in case the object has topologycal noise or small handles."));
 			break;
 		}
 	case ISOP_REMESHING :
