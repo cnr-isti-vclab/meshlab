@@ -9,7 +9,7 @@
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\2010.02.1\qt"
+!define QT_BASE "C:\Qt\2010.05\qt"
 !define DISTRIB_FOLDER "../distrib"
 
 ; MUI 1.67 compatible ------
@@ -113,9 +113,10 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_create.dll"
 
-  ;File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_func.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_isoparametrization.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_layer.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_measure.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_meshing.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_mls.dll"
@@ -128,7 +129,6 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_sampling.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_select.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_splitter.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_ssynth.dll"
   
   
@@ -140,12 +140,12 @@ Section "MainSection" SEC01
   
 
   File "${DISTRIB_FOLDER}/plugins\samplefilter.dll"
-  File "${DISTRIB_FOLDER}/plugins\samplefilterdoc.dll"
+  ;File "${DISTRIB_FOLDER}/plugins\samplefilterdoc.dll"
   File "${DISTRIB_FOLDER}/plugins\samplefilterdyn.dll"
 
   File "${DISTRIB_FOLDER}/plugins\filtergeodesic.dll"
   File "${DISTRIB_FOLDER}/plugins\filtercreateiso.dll"
-  File "${DISTRIB_FOLDER}/plugins\filterborder.dll"
+  ;File "${DISTRIB_FOLDER}/plugins\filterborder.dll"
  
 
   ; edit plugins (14)
@@ -166,7 +166,8 @@ Section "MainSection" SEC01
 
   ; decorate plugins (2)
   File "${DISTRIB_FOLDER}/plugins\decorate_base.dll"
-  File "${DISTRIB_FOLDER}/plugins\sampledecoration.dll"
+  File "${DISTRIB_FOLDER}/plugins\decorate_background.dll"
+  ;File "${DISTRIB_FOLDER}/plugins\sampledecoration.dll"
   File "${DISTRIB_FOLDER}/plugins\decorate_shadow.dll"
   
   ; render plugins (1)
