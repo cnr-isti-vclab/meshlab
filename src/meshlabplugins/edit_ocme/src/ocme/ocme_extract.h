@@ -259,8 +259,11 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			}
 
 			/* assign the border index to the border vertices */
-			for(unsigned int i = 0; i < chain_bi->Size(); ++i)
+			for(unsigned int i = 0; i < chain_bi->Size(); ++i){
+				unsigned int _tmp = (*chain_bi)[i].vi;
+				assert(first_added_v+_tmp <  m.vert.size());
 				biV[m.vert[first_added_v+ (*chain_bi)[i].vi] ] = (*chain_bi)[i].bi;
+			}
 
 				Chain<OFace> * face_chain	= (*ci)->face;		// get the face chain
 				RAssert(face_chain!=NULL);

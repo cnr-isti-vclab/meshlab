@@ -239,7 +239,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 				unsigned int bi;
 				GISet fresh_added  = gPosVNew[*vi];
 
-				if(gPosV[*vi].giset.size() > 1)	{		// it also was a border vertex
+				if(gPosV[*vi].giset.size() > 1)	{		// it also WAS a border vertex
 					fresh_added.sub(gPosV[*vi]);		// copies added by this commit
 					bi  = gPosV[*vi].BI();				// take its global border index	
  				}
@@ -262,11 +262,12 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 					toCleanUpCells.push_back(c);
 					assert(c);
 					for(unsigned int ii  = 0; ii < c->border->Size(); ++ii)// linear search! [to redo faster]
-						if((*(c->border))[ii].bi == bi){
-							c->ecd->deleted_border.SetAsVectorOfMarked();
-							c->ecd->deleted_border.SetMarked(ii,true);
-							break;
-						}
+						if((*(c->border))[ii].bi == bi)
+							{
+								c->ecd->deleted_border.SetAsVectorOfMarked();
+								c->ecd->deleted_border.SetMarked(ii,true);
+								break;
+							}
 				}
 			}
 		}
