@@ -24,10 +24,10 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <vcg/space/colorspace.h>
 #include "meshselect.h"
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
-#include <vcg/space/colorspace.h>
 
 using namespace vcg;
 
