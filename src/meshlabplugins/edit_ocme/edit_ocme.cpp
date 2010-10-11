@@ -302,6 +302,7 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	QObject::connect(odw->toggleExtrPushButton ,SIGNAL(clicked() ),this,SLOT( toggleExtraction() ));
 	QObject::connect(odw->toggleShowTouchedPushButton ,SIGNAL(clicked() ),this,SLOT( toggleShowTouched() ));
 	QObject::connect(odw->addFromDiskPushButton ,SIGNAL(clicked() ),this,SLOT( addFromDisk() ));
+	QObject::connect(odw->editAllPushButton ,SIGNAL(clicked() ),this,SLOT( editAll() ));
 
 
 //	QTimer *timer = new QTimer(this);
@@ -420,7 +421,8 @@ void OcmeEditPlugin::loadOcm(){
 		ocme  = new OCME();
 		ocme->params.side_factor = 50; // READ IT FROM THE FILEEEEEEEEE
 		ocme->InitRender();
-		ocme->renderParams.memory_limit_in_core = 20;
+		ocme->renderParams.only_impostors = false;
+//		ocme->renderParams.memory_limit_in_core = 100;
 		ocme->Open ( ocm_name.toAscii() );
 
 #ifdef _RELEASED_
@@ -526,7 +528,15 @@ void OcmeEditPlugin::markEditable(){
 						if(ed) (*fi).SetS();
 						}
 }
+void OcmeEditPlugin::editAll(){
 
+	cells_to_edit.clear();
+	OCME::CellsIterator ci;
+	for( ci = ocme->cells.begin(); ci != ocme->cells.end(); ++ci)
+		cells_to_edit.push_back((*ci).second);
+	this->edit();
+
+}
 void OcmeEditPlugin::edit(){
 
 	ocme->renderCache.controller.pause();

@@ -115,13 +115,13 @@ public slots:
 	void toggleExtraction();
 	void toggleShowTouched();
 	void updateButtonsState();
+	void editAll();
 
 	/* ui only*/
 	void fillMeshAttribute();	// fill the list of trimesh attribute
 	void fillOcmAttribute();	// fill the list of ocm attributes
 	void tri2ocmAttribute();	// copy from meshattr to ocmattr
 	void ocm2triAttribute();	// copy from ocmattr to meshattr
-
 };
 
 #endif

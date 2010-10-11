@@ -29,7 +29,8 @@ public:
 
 static void JoinBorderVertices( MeshType & m, 
 								typename MeshType::template PerVertexAttributeHandle<GISet>  & gPosV,
-								typename MeshType::template PerVertexAttributeHandle<unsigned int >  & biV)
+								typename MeshType::template PerVertexAttributeHandle<unsigned int >  & biV,
+								typename MeshType::template PerVertexAttributeHandle<unsigned char >  & lockedV)
 {
         if(m.vert.size()==0 || m.vn==0) return;
 
@@ -64,6 +65,7 @@ static void JoinBorderVertices( MeshType & m,
                         VertexPointer t = perm[i];
                         mp[perm[i]] = perm[j];
                         gPosV[*perm[j]].Add(gPosV[*t]);
+						if (lockedV[*t]) lockedV[*perm[j]] = 1;
 						gPosV[*perm[j]].BI() = biV[*perm[j]]; //store in gPosV the global border index
                         vcg::tri::Allocator<MeshType>::DeleteVertex(m,*t);
                         ++i;
@@ -162,10 +164,10 @@ template <class MeshType>
 template <class MeshType>
 void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper attr_map){
 
-        m.Clear();
-	RemoveDuplicates(sel_cells);
-	sprintf(lgn->Buf(),"start adding vertices clock(): %d ", static_cast<int>(clock()));
-        lgn->Push();
+		m.Clear();
+		RemoveDuplicates(sel_cells);
+		sprintf(lgn->Buf(),"start adding vertices clock(): %d ", static_cast<int>(clock()));
+		lgn->Push();
 
         // create an attibute that will store the address in ocme for the vertex
         typename MeshType::template PerVertexAttributeHandle<GISet> gPosV =
@@ -181,32 +183,39 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
                 biV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<unsigned int> (m,"bi");
 
 		// create an attibute that will store if the  vertex is locked or not
-	typename MeshType::template PerVertexAttributeHandle<unsigned char> lockedV =
-		vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned char> (m,"ocme_locked");
+		typename MeshType::template PerVertexAttributeHandle<unsigned char> lockedV =
+			vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned char> (m,"ocme_locked");
 
-	if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedV))
-		lockedV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<unsigned char> (m,"ocme_locked");
+		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedV))
+			lockedV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<unsigned char> (m,"ocme_locked");
 
-	// create an attibute that will store the address in ocme for the face
-	typename MeshType::template PerFaceAttributeHandle<GIndex> gPosF =  
-		vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<GIndex> (m,"ocme_gindex");
+		// create an attibute that will store the address in ocme for the face
+		typename MeshType::template PerFaceAttributeHandle<GIndex> gPosF =  
+			vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<GIndex> (m,"ocme_gindex");
 
-	if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosF) )
-		gPosF = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<GIndex> (m,"ocme_gindex");
+		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosF) )
+			gPosF = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<GIndex> (m,"ocme_gindex");
 
-	// create an attibute that will store if the  face is locked or not
-	typename MeshType::template PerFaceAttributeHandle<unsigned char> lockedF =  
-		vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<unsigned char> (m,"ocme_locked");
+		// create an attibute that will store if the  face is locked or not
+		typename MeshType::template PerFaceAttributeHandle<unsigned char> lockedF =  
+			vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<unsigned char> (m,"ocme_locked");
 
-	if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedF) )
-		lockedF = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<unsigned char> (m,"ocme_locked");
+		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedF) )
+			lockedF = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<unsigned char> (m,"ocme_locked");
 
-	// create an attibute that will store the ScaleRange of the mesh
-	typename MeshType::template PerMeshAttributeHandle<ScaleRange> range =  
-		vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute<ScaleRange> (m,"ocme_range");
+		// create an attibute that will store the ScaleRange of the mesh
+		typename MeshType::template PerMeshAttributeHandle<ScaleRange> range =  
+			vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute<ScaleRange> (m,"ocme_range");
 
-	if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,range))
-		range = vcg::tri::Allocator<MeshType>::template AddPerMeshAttribute<ScaleRange> (m,"ocme_range");
+		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,range))
+			range = vcg::tri::Allocator<MeshType>::template AddPerMeshAttribute<ScaleRange> (m,"ocme_range");
+
+
+		typename MeshType::template PerMeshAttributeHandle<std::vector<CellKey> > sel_cells_attr =
+			vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute< std::vector<CellKey   > > (m,"sel_cells");
+		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,sel_cells_attr))
+			sel_cells_attr = vcg::tri::Allocator<MeshType>::template AddPerMeshAttribute<std::vector<CellKey> > (m,"sel_cells");
+
 
 
 	ScaleRange sr; 
@@ -216,11 +225,14 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 
 	bool locked;
 	typename MeshType::VertexIterator vi;
+	sel_cells_attr().clear();
+
 	for(ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci){
 			sprintf(lgn->Buf(),"loadall %d %d %d %d\n",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);
 			lgn->Push();
 			(*ci)->vert->LoadAll();
 			(*ci)->face->LoadAll();
+			sel_cells_attr().push_back((*ci)->key);
 	}
 
 	for(ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci)
@@ -287,16 +299,7 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			(*ci)->face->FreeAll();
 	}
 
- /// JUST CHECKING___________
-                for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-                    for( GISet::iterator gi = gPosV[*vi].begin(); gi != gPosV[*vi].end();++gi){
-                        Cell *c = GetCell((*gi).first,false);
-                        assert(c);
-                        assert(c->vert->Size() > (*gi).second);
-                    }
-///--------------------------
-
-        Joiner<MeshType>::JoinBorderVertices(m,gPosV,biV);
+        Joiner<MeshType>::JoinBorderVertices(m,gPosV,biV,lockedV);
 
         {
 
@@ -321,14 +324,6 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 
         }
 
- /// JUST CHECKING___________
-        for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-            for( GISet::iterator gi = gPosV[*vi].begin(); gi != gPosV[*vi].end();++gi){
-                Cell *c = GetCell((*gi).first,false);
-                assert(c);
-                assert(c->vert->Size() > (*gi).second);
-            }
-///--------------------------
 
 		vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute (m,biV);
 }

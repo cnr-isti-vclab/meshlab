@@ -47,7 +47,7 @@ inline int OCME::ComputeLevel( typename MeshType::FaceType & f){
 	typedef typename MeshType::ScalarType S;
 	S l = 0;
 	for(int i = 0; i < f.VN(); ++i)
-		l = std::max< S>((S)l,( f.V(i)->P() - f.V((i+1)%3)->P()).SquaredNorm());
+		l = std::max< S>((S)l,( f.V(i)->P() - f.V((i+1)%3)->P()).Norm());
 	// compute h so that 2^h = SIDE_FACTOR * sqrt(l)
 	return ComputeLevel(l);
 }

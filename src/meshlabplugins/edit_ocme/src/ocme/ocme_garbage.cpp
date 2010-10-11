@@ -15,7 +15,15 @@ void OCME::RemoveDeletedFaces(  std::vector<Cell*> & cells){
 void OCME::RemoveDeletedBorder(std::vector<Cell*> &  cells){
 	std::vector<Cell*>::iterator ci;
 	for(ci = cells.begin(); ci != cells.end(); ++ci){
+		/* here deleted_border contains the references to vertices that are no more border because 
+		they are not referred in other cells. Now we add also those that have been removed */
 		(*ci) ->ecd->deleted_border.SetAsVectorOfMarked();	
+		(*ci) ->ecd->deleted_vertex.SetAsVectorOfBool();
+
+		for(unsigned int i = 0; i < (*ci)->border->Size(); ++i)
+			if( (*ci) ->ecd->deleted_vertex.IsMarked( (*(*ci)->border)[i].vi ))
+				(*ci) ->ecd->deleted_border.SetMarked(i,true);
+
 		(*ci)->border->Compact( (*ci)->ecd->deleted_border.marked_elements);
 		(*ci) ->ecd->deleted_border.Clear();	
 	}
@@ -30,6 +38,7 @@ void OCME::RemoveDeletedVertices(    std::vector<Cell*>  cs){
             Chain<OVertex> * vchain = (*ci)->vert;
             Chain<OFace> * fchain = (*ci)->face;
 
+			(*ci)->ecd->deleted_vertex.SetAsVectorOfMarked();
             vchain->BuildRemap( (*ci)->ecd->deleted_vertex.marked_elements, remap);
             vchain->Compact((*ci)->ecd->deleted_vertex.marked_elements);
             (*ci)->ecd->deleted_vertex.Clear();

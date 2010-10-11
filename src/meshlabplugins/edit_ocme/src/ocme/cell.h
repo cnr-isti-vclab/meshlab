@@ -63,9 +63,8 @@ struct GISet{
 	typedef std::map<CellKey,unsigned int >::iterator CopiesIterator;
     typedef std::map<CellKey,unsigned int >::iterator iterator;
 
-    void Add(GIndex gi){
-        giset.insert(std::make_pair(gi.ck,gi.i));
-    }
+    void Add(GIndex gi){ giset.insert(std::make_pair(gi.ck,gi.i));}
+	void Add(std::pair <CellKey,unsigned int > p){giset.insert(p);}
     void Add(GISet &gis){ giset.insert(gis.giset.begin(),gis.giset.end());}
     void Clear(){giset.clear();}
     bool IsUnassigned(){return giset.empty();}
