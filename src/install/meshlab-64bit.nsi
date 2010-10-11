@@ -55,7 +55,7 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel64bit_v130BETA_${NOW}.exe"
+OutFile "MeshLabDevel_v130BETA_64bit_${NOW}.exe"
 ;InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 InstallDir "${MAINDIR}\VCG\MeshLab"
 ShowInstDetails show
