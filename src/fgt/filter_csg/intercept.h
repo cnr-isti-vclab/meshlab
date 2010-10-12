@@ -31,6 +31,12 @@ namespace std {
 }
 
 namespace vcg {
+    /** Class Intercept
+        Minimal data structure to collect the information about the intersection
+        between a line and a meshThis is class for definition of a mesh.
+        @param _dist_type (Template Parameter) Specifies the type of the distance value
+        @param _scalar (Template Parameter) Specifies the type of the scalar elements
+     */
     namespace intercept {
         template <typename _dist_type, typename _scalar>
                 class Intercept
@@ -41,10 +47,10 @@ namespace vcg {
             typedef vcg::Point3<Scalar> Point3x;
             
         private:
-            DistType _dist;
-            Point3x _norm;
-            Scalar _sort_norm;
-            Scalar _quality;
+            DistType _dist; /* distance of the intersection from the reference point */
+            Point3x _norm; /* normal of the mesh in the intersection point */
+            Scalar _sort_norm; /* component of the normal used for sorting (needed to discriminate intercepts having the same distance) */
+            Scalar _quality; /* quality of the mesh in the intersection point */
             
         public:
             inline Intercept() { }
@@ -71,6 +77,11 @@ namespace vcg {
             }
         };
         
+        /** Class InterceptRay
+            Class to collect all the intersections between a mesh and a line,
+            keeping them sorted to have efficient operations
+            @param InterceptType (Template Parameter) Specifies the type of the intercepts of the ray
+         */
         template <typename InterceptType>
                 class InterceptRay
         {
@@ -126,6 +137,8 @@ namespace vcg {
                 return *p;
             }
             
+            /* Returns -1 if the point at the given distance along the ray is outside,
+               0 if it is on the boundary, 1 if it is inside. */
             inline int IsIn(const DistType &s) const {
                 typename ContainerType::const_iterator p = std::lower_bound(v.begin(), v.end(), s);
                 if (p == v.end())
@@ -245,7 +258,12 @@ namespace vcg {
             ContainerType v;
         };
         
-        
+        /** Class InterceptBeam
+            Class to collect all the intersections between a mesh and a family of
+            parallel lines, with efficient intersection, union and difference
+            operations.
+            @param InterceptType (Template Parameter) Specifies the type of the intercepts of the ray
+         */
         template <typename InterceptType>
                 class InterceptBeam
         {
@@ -265,6 +283,8 @@ namespace vcg {
                 return ray[c.X()][c.Y()];
             }
             
+            /* Returns -1 if the point at the given point is outside,
+               0 if it is on the boundary, 1 if it is inside. */
             inline int IsIn(const vcg::Point2i &p, const DistType &s) const {
                 return bbox.IsIn(p) ? GetInterceptRay(p).IsIn(s) : -1;
             }
@@ -332,6 +352,10 @@ namespace vcg {
             ContainerType ray;
         };
         
+        /** Class InterceptBeam
+            Three orthogonal InterceptBeam instances, defining a volume
+            @param InterceptType (Template Parameter) Specifies the type of the intercepts of the ray
+         */
         template <typename InterceptType>
                 class InterceptVolume
         {
@@ -339,6 +363,8 @@ namespace vcg {
             typedef typename InterceptType::Scalar Scalar;
             typedef vcg::Point3<Scalar> Point3x;
             
+            /* To perform intersection/union/difference on different volumes, their
+               rays need to match exactly */
             inline bool checkConsistency(const InterceptVolume &other) const {
                 return delta == other.delta;
             }
@@ -386,11 +412,14 @@ namespace vcg {
                 return GetInterceptRay(coord, vcg::Point2i(p1.V(c1), p1.V(c2))).GetIntercept(p1.V(coord));
             }
             
+            /* Return 1 if the given point is in the volume, -1 if it is outside */
             inline int IsIn(const vcg::Point3i &p) const {
                 int r[3];
                 for (int i = 0; i < 3; ++i)
                     r[i] = beam[i].IsIn(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3)), p.V(i));
                 
+                /* If some beams are unable to tell whether a point is inside or outside
+                   (i.e. they return 0), try to make them consistent with other beams */
                 if (r[0] == 0)
                     r[0] += r[1] + r[2];
                 if (r[1] == 0)
@@ -398,12 +427,13 @@ namespace vcg {
                 if (r[2] == 0)
                     r[2] += r[2] + r[0];
                 
-                if (r[0]>0 && r[1]>0 && r[2]>0)
+                if (r[0]>0 && r[1]>0 && r[2]>0) /* consistent: inside -> inside */
                     return 1;
-                else if ((r[0]<0 && r[1]<0 && r[2]<0) ||
-                         (r[0]==0 && r[1]==0 && r[2] == 0))
+                else if ((r[0]<0 && r[1]<0 && r[2]<0) || /* consistent: outside -> outside */
+                         (r[0]==0 && r[1]==0 && r[2] == 0)) /* "consistent": unknown -> outside */
                     return -1;
                 
+                /* If the rasterization algorithm generates consistent volumes, this should never happen */
                 std::cerr << "Inconsistency: " << p3print(p) << p3print(delta) << std::endl;
                 for (int i = 0; i < 3; ++i) {
                     std::cerr << beam[i].IsIn(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3)), p.V(i));
@@ -459,7 +489,8 @@ namespace vcg {
             ContainerType beam;
         };
         
-        
+        /* Unsorted version of InterceptRay.
+           Used to temporarily accumulate the intersections along a line before sorting them */
         template <typename InterceptType>
                 class InterceptSet
         {
@@ -516,6 +547,9 @@ namespace vcg {
             ContainerType set;
         };
         
+        /* Unsorted version of InterceptBeam.
+           Used to temporarily accumulate the intersections along a family of
+           parallel lines before sorting them */
         template <typename InterceptType>
                 class InterceptSet2
         {
@@ -553,6 +587,10 @@ namespace vcg {
             ContainerType set;
         };
         
+        /* Unsorted version of InterceptVolume.
+           Used to temporarily accumulate the intersections in a volume before sorting them.
+           Rasterization is performed on faces after casting them to an integral type, so that no
+           numerical instability can cause the volume to be inconsistent */
         template <typename InterceptType>
                 class InterceptSet3
         {
@@ -589,6 +627,9 @@ namespace vcg {
                     for(int y = ibox.min[crd2]; y <= ibox.max[crd2]; ++y) {
                         DistType n0 = n0xy, n1 = n1xy, n2 = n2xy;
 
+                        /* Solve the inside/outside problem for on-edge points.
+                           The point (x,y,z) is actually considered to be
+                           (x+eps, y+eps^2, z+eps^2) with eps->0. */
                         if (crd1 > crd2) {
                             if (n0 == 0)
                                 n0 = d21[crd1];
@@ -750,13 +791,17 @@ namespace vcg {
             template<typename EXTRACTOR_TYPE>
             void BuildMesh(MeshType &mesh, InterceptVolume<InterceptType> &volume, EXTRACTOR_TYPE &extractor, vcg::CallBackPos *cb=vcg::DummyCallBackPos)
             {
-                CellsSet cset;
+                CellsSet cset; /* cells to be visited */
                 vcg::Point3i p;
                 
                 _volume = &volume;
                 _mesh = &mesh;
                 _mesh->Clear();
                 
+                /* To improve performance, instead of visiting the whole volume, mark the cells
+                   intersecting the surface so that they can be visited.
+                   This usually lowers the complexity from n^3 to about n^2 (where n is the
+                   number of samples along each direction */
                 for (int c0=0; c0 < 3; ++c0) {
                     const int c1 = (c0 + 1) % 3, c2 = (c0 + 2) % 3;
                     for (p[c1]=_volume->bbox.min.V(c1); p[c1]<=_volume->bbox.max.V(c1); ++p[c1])
@@ -794,6 +839,9 @@ namespace vcg {
                     }
                 }
 
+                /* Evaluating IsIn is "slow" (it requires binary search, so it's slower than an hashtable
+                   access) and vertices of the cells are often shared, so precomputing them in the
+                   _samples hashmap causes a performance improvement */
                 const size_t n = cset.size();
                 size_t i = 0;
                 for (CellsSet::const_iterator cell = cset.begin(); cell != cset.end(); ++cell, ++i) {
@@ -813,6 +861,7 @@ namespace vcg {
                 const vcg::Point3i diag(1, 1, 1);
                 extractor.Initialize();
                 i = 0;
+                /* Only visit marked cells */
                 for (CellsSet::const_iterator cell = cset.begin(); cell != cset.end(); ++cell, ++i) {
                     if (!cb(100.0 * i / n, "Reconstructing surface..."))
                         break;
@@ -826,6 +875,7 @@ namespace vcg {
             inline float V(int i, int j, int k) const { return V(vcg::Point3i(i, j, k)); }
 
             inline float V(const vcg::Point3i &p) const {
+                /* use precomputed in/out result */
                 typename SamplesTable::const_iterator s = _samples.find(p);
                 return s->second;
             }
@@ -846,7 +896,7 @@ namespace vcg {
                     p->N() = i.norm();
                     p->Q() = i.quality();
                     _vertices[&i] = p - &_mesh->vert[0];
-                } else
+                } else /* a vertex is already associated with the intercept. reuse it */
                     p = &_mesh->vert[v->second];
             }
             
@@ -872,8 +922,8 @@ namespace vcg {
             }
             
         private:
-            VertexTable _vertices;
-            SamplesTable _samples;
+            VertexTable _vertices; /* maps intercept -> vertex of the reconstructed mesh */
+            SamplesTable _samples; /* maps point -> in/out */
             InterceptVolume<InterceptType> *_volume;
             MeshType *_mesh;
         };
