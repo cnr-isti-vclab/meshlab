@@ -28,6 +28,33 @@ namespace std {
     }
 }
 
+/*
+  This header contains an implementation of "Marching Intersections"
+  For more details on this technique, see:
+    C. Rocchini, P. Cignoni, F. Ganovelli, C. Montani, P. Pingi and R.Scopigno,
+    'Marching Intersections: an Efficient Resampling Algorithm for Surface Management'
+    In Proceedings of Shape Modeling International (SMI) 2001
+
+  This technique is used to create a volume representation where CSG operations are simple.
+
+  Given a mesh, InterceptSet3 "rasterizes" it by computing all the intersections between
+  the mesh and 3 orthogonal families of lines (and storing them in the InterceptSet* containers).
+  After sorting them, they are organized in an InterceptVolume, which contains 3 InterceptBeam
+  objects, each containing the intersections with one family of lines.
+
+  This makes it vary easy to perform boolean operations, since along each line we have
+  a sequence of intervals that determine what is inside and what is outside of the volume.
+  To compute the intersection of two volumes, just get their "interval" representation and
+  for each line intersect the intervals (and similarly for union and difference).
+
+  Two notable problems are mesh consistency and performance:
+   - to guarantee that the interval representation is meaningful, the mesh needs to be watertight
+     and the rasterization step must not introduce any inaccuracies; this can be accomplished by
+     using arbitrary precision arithmetic (currently through libgmp)
+   - when reconstructing the result mesh, visiting the whole volume is not efficient; it is
+     possible (and usually much faster) to only visit the surface
+  */
+
 namespace vcg {
     /** Class Intercept
         Minimal data structure to collect the information about the intersection
