@@ -25,9 +25,7 @@
 #include <QtGui>
 #include "filter_dirt.h"
 #include "dustparticle.h"
-//#include "dustsampler.h"
 #include "dirt_utils.h"
-
 
 #include <vcg/space/color4.h>
 #include <vcg/math/random_generator.h>
@@ -130,35 +128,39 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
                    CMeshO::PerVertexAttributeHandle<DustParticle<CMeshO> > pi = tri::Allocator<CMeshO>::GetPerVertexAttribute<DustParticle<CMeshO> >(dmesh->cm,"ParticleInfo");
                    CMeshO::CoordType new_pos;
                    CMeshO::CoordType int_p;
-                   CMeshO::FacePointer pre_face;
-                   CMeshO::FacePointer new_f;
+                   CMeshO::FacePointer old_face;
+                   CMeshO::FacePointer new_face;
                    bool stop_movement=false;
                    for(vi=dmesh->cm.vert.begin();vi!=dmesh->cm.vert.end();++vi){
                        stop_movement=false;
-                       pre_face=pi[vi].face;
+                       //First Movement
+                       old_face=pi[vi].face;
                        new_pos=StepForward((*vi).P(),pi[vi].speed,pi[vi].mass,pi[vi].face,dir);
                        while(!stop_movement){
 
                            if(!IsOnFace(new_pos,pi[vi].face)){
-
-
-                            //if(ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_f))
-                            ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_f);
-                            pi[vi].face=new_f;
+                            ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_face);
+                            pi[vi].face=new_face;
                             Segment3f s1=Segment3f((*vi).P(),new_pos);
                             Segment3f s2=Segment3f((*vi).P(),int_p);
                             new_pos=int_p;
                             (*vi).P()=new_pos;
-                            if(pre_face!=new_f)
+                            if(old_face!=new_face)
                             {
                                 float t=s2.Length()/s1.Length();
-                                pre_face=new_f;
+                                //Updating quality for face
+                                old_face->Q()=old_face->Q()+1;
+                                //Updating veloctiy of particle
+                                //pi[vi].speed=UpdateVelocity(pi[vi].speed,pi[vi].mass,old_face,dir,(1-t));
+                                //New Movement
+                                old_face=new_face;
                                 new_pos=StepForward((*vi).P(),pi[vi].speed,pi[vi].mass,pi[vi].face,dir,t);
                             }
                             else stop_movement=true;
                         }else{
                           stop_movement=true;
-                         (*vi).P()=new_pos;
+                          pi[vi].face->Q()=pi[vi].face->Q()+1;
+                          (*vi).P()=new_pos;
                         }
 
 
@@ -166,6 +168,8 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
                     }
               }
                }
+
+    if(par.getBool("mtc"))DrawDirt(md.getMesh(0));
     }else{
         //First Application
         Point3f dir;
@@ -206,13 +210,16 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         tri::UpdateFlags<CMeshO>::FaceProjection(currMM->cm);
 
         //Initialize quality for face
-        CMeshO::FaceIterator fIter;
+        /*CMeshO::FaceIterator fIter;
         for(fIter=currMM->cm.face.begin();fIter!=currMM->cm.face.end();++fIter){
             fIter->Q()=0;
-        }
+        }*/
 
+        ResetFaceQuality(currMM);
         ComputeNormalDustAmount(currMM,dir,par.getFloat("adhesion"),par.getFloat("slippiness"));
+        ComputeSurfaceExposure(currMM,1,1);
         GenerateDustParticles(currMM,dustVertexVec,dustParticleVec,par.getInt("nparticles"),0.6);
+        ResetFaceQuality(currMM);
         //dmm-> Dust Mesh Model
         MeshModel* dmm=md.addNewMesh("Dust Mesh");
 

@@ -24,7 +24,7 @@
 #define DIRT_UTILS_H
 
 //Include Files
-#include <vcg/complex/trimesh/point_sampling.h>
+
 #include <math.h>
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
@@ -34,7 +34,41 @@
 #include<vcg/complex/trimesh/base.h>
 #include <vcg/space/point3.h>
 #include <vcg/space/intersection2.h>
+#include <vcg/complex/trimesh/allocate.h>
 #include "dustparticle.h"
+
+void ResetFaceQuality(MeshModel *m){
+
+    CMeshO::FaceIterator fi;
+
+    for(fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi)
+        (*fi).Q()=0;
+
+
+};
+
+CMeshO::CoordType UpdateVelocity(CMeshO::CoordType v,
+                              float m,
+                              CMeshO::FacePointer &face,
+                              CMeshO::CoordType dir,
+                              float t=1){
+    CMeshO::CoordType new_vel;
+    Point3<float> n= face->cN();
+    float a=n[0]*dir[0]+n[1]*dir[1]+n[2]*dir[2];
+
+
+    Point3<float> f;
+    //Calcolo le componenti della forza lungo il piano
+    f[0]=dir[0]-a*n[0];
+    f[1]=dir[1]-a*n[1];
+    f[2]=dir[2]-a*n[2];
+
+    new_vel[0]=v[0]+(f[0]/m)*t;
+    new_vel[1]=v[1]+(f[0]/m)*t;
+    new_vel[2]=v[2]+(f[0]/m)*t;
+
+    return new_vel;
+};
 
 
 /*
@@ -49,7 +83,6 @@
 
   @return new coordinates of the point
 */
-
 CMeshO::CoordType StepForward(CMeshO::CoordType p,
                               CMeshO::CoordType v,
                               float m,
@@ -77,31 +110,26 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,
     return new_pos;
 };
 
-void DrawDirt(MeshModel &m/*,std::vector<Point3f> &dp*/){
+void DrawDirt(MeshModel *m/*,std::vector<Point3f> &dp*/){
 
         float base_color=255;
         float s_color;
-        std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm);
+        std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m->cm);
         CMeshO::FaceIterator fi;
 
-        for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+        for(fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi)
         {
-            if(fi->Q()>0.5){
 
-            s_color=(1-(*fi).Q())*base_color;
+            s_color=base_color*(1-(((*fi).Q()-minmax.first)/(minmax.second-minmax.first)));
             (*fi).C()=Color4b(s_color, s_color, s_color, 0);
-        }else{
-            (*fi).C()=Color4b(255,255,255,255);
-            }
+
         }
 
-
-            //     (*fi).C().ColorRamp(minmax.first,minmax.second,(*fi).Q());
 
 };
 
 
-/*
+/**
 @description Compute the intersection of the segment from p1 to p2 and the face f
 
 @param CoordType p1 - position of the first point
@@ -110,10 +138,7 @@ void DrawDirt(MeshModel &m/*,std::vector<Point3f> &dp*/){
 @param CoordType int_point - intersection point this is a return parameter for the function.
 @param FacePointer face - pointer to the new face
 @return true if there is an intersection
-
 */
-
-
 bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::CoordType &int_point,CMeshO::FacePointer &new_f)
 {
 
@@ -259,8 +284,9 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
 
 };
 
-
-
+/**
+@description generate random baricentric coordinate
+*/
 CMeshO::CoordType RandomBaricentric(){
     CMeshO::CoordType interp;
 
@@ -289,10 +315,15 @@ CMeshO::CoordType RandomBaricentric(){
 bool ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s){
 
     //Verify if FaceQualty is enabled
+
+
+
+
     CMeshO::FaceIterator fi;
     float d;
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
         d=k/s+(1+k/s)*pow(fi->N().dot(u),s);
+
         fi->Q()=d;
     }
     return true;
@@ -300,11 +331,65 @@ bool ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s){
 
 /*
 @description This function compute the Surface Exposure per face of a Mesh m
-
+@param(MeshModel
 
 */
-float ComputeSurfaceExposure(MeshModel* m){
-    return 0.0f;
+void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
+    CMeshO::FaceIterator fi;
+    CMeshO::FaceIterator fi0;
+
+    CMeshO::CoordType b_c;
+    CMeshO::CoordType bp_i; //Barycentric coordinates
+    b_c[0]=0.3f;
+    b_c[1]=0.3f;
+    b_c[2]=1-(b_c[0]+b_c[1]);
+    CMeshO::CoordType p_c;
+    float dh=1.2;
+    CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<float>(m->cm,std::string("exposure"));
+
+    float exp=0;
+    float distance=0;
+    float u=0;
+    float v=0;
+    float t=0;
+
+
+
+    for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
+        if(fi->Q()!=0){
+
+        //For every face  get the central point
+        p_c[0]=fi->P(0)[0]*b_c[0]+fi->P(1)[0]*b_c[1]+fi->P(2)[0]*b_c[2];
+        p_c[1]=fi->P(0)[1]*b_c[0]+fi->P(1)[1]*b_c[1]+fi->P(2)[1]*b_c[2];
+        p_c[2]=fi->P(0)[2]*b_c[0]+fi->P(1)[2]*b_c[1]+fi->P(2)[2]*b_c[2];
+
+        //Create a ray with p_c as origin and direction dir
+        Ray3<float> ray=Ray3<float>(p_c,fi->N());
+
+        exp=0;
+        distance=0;
+
+
+
+        for(fi0=m->cm.face.begin();fi0!=m->cm.face.end();++fi0){
+            u=0;
+            v=0;
+            t=0;
+            if(fi!=fi0 && IntersectionRayTriangle(ray,fi0->P(0),fi0->P(1),fi0->P(2),t,u,v)){
+                if(distance==0 || t<distance ){
+                    distance=t;
+                    exp=dh/(dh+distance);
+                }
+            }
+
+          }
+        eh[fi]=1-(exp/n_ray);
+    }else{
+        eh[fi]=0;
+     }
+    }
+
+
 };
 
 void CreateDustTexture(MeshModel* m){
@@ -322,22 +407,44 @@ void CreateDustTexture(MeshModel* m){
 
 bool GenerateDustParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std::vector<DustParticle <CMeshO> > &dpv,int d,float threshold){
 
+    //Exposure Handler
+    CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m->cm,std::string("exposure"));
+
     CMeshO::FaceIterator fi;
     CMeshO::CoordType p;
     cpv.clear();
     dpv.clear();
-    //bool added=false; //debugging
+
+
+
+    /*float a1=1+1*eh[fi];
+    if(a1<0){
+    a=0;
+    }
+    if(a1>1){
+    a=1;
+    }
+    if(a1>=0 && a1<=1){
+       a=a1;
+    }
+*/
+
+
+
 
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
+        float a=0;
+        if(eh[fi]<1) a=0;
+        else a=1;
+        int n_dust=(int)d*fi->Q()*a;
+
         if(fi->Q()>threshold){
-            for(int i=0;i<(int)d*fi->Q()/* && !added*/;i++){
-               //added=true;
+            for(int i=0;i<n_dust;i++){
                p=RandomBaricentric();
                CMeshO::CoordType n_p;
                n_p[0]=fi->P(0)[0]*p[0]+fi->P(1)[0]*p[1]+fi->P(2)[0]*p[2];
                n_p[1]=fi->P(0)[1]*p[0]+fi->P(1)[1]*p[1]+fi->P(2)[1]*p[2];
                n_p[2]=fi->P(0)[2]*p[0]+fi->P(1)[2]*p[1]+fi->P(2)[2]*p[2];
-               //cpv.push_back(fi->P(0)*p[0]+fi->P(1)*p[1]+fi->P(2)*p[2]);
                cpv.push_back(n_p);
                DustParticle<CMeshO> part;
                part.face=&(*fi);
