@@ -1,9 +1,6 @@
 include (../../shared.pri)
 HEADERS += filter_csg.h \
-    bigint.h \
-    fixed.h \
     intercept.h \
-    fraction.h \
     gmpfrac.h
 
 SOURCES += filter_csg.cpp

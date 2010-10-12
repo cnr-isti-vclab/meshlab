@@ -1,5 +1,5 @@
-#ifndef BIGFRAC_H
-#define BIGFRAC_H
+#ifndef GMPFRAC_H
+#define GMPFRAC_H
 
 #include <iostream>
 #include <gmpxx.h>
@@ -26,4 +26,4 @@ inline mpq_class makeFraction(int num, int den) {
     return r;
 }
 
-#endif // BIGFRAC_H
+#endif // GMPFRAC_H

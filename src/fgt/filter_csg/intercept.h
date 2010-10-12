@@ -10,8 +10,6 @@
 #include <vcg/space/box2.h>
 #include <wrap/callback.h>
 
-#include "fixed.h"
-
 #define p2print(point) ((point).X()) << ", " << ((point).Y())
 #define p3print(point) p2print(point) << ", " << ((point).Z())
 
