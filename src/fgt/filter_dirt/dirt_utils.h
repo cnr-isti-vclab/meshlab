@@ -111,21 +111,15 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,
 };
 
 void DrawDirt(MeshModel *m/*,std::vector<Point3f> &dp*/){
-
         float base_color=255;
         float s_color;
         std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m->cm);
         CMeshO::FaceIterator fi;
-
         for(fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi)
         {
-
             s_color=base_color*(1-(((*fi).Q()-minmax.first)/(minmax.second-minmax.first)));
             (*fi).C()=Color4b(s_color, s_color, s_color, 0);
-
         }
-
-
 };
 
 
@@ -137,6 +131,7 @@ void DrawDirt(MeshModel *m/*,std::vector<Point3f> &dp*/){
 @param Facepointer f - pointer to the face
 @param CoordType int_point - intersection point this is a return parameter for the function.
 @param FacePointer face - pointer to the new face
+
 @return true if there is an intersection
 */
 bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::CoordType &int_point,CMeshO::FacePointer &new_f)
@@ -168,16 +163,12 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
     CMeshO::CoordType fv0 = (f->V(0))->P();
     CMeshO::CoordType fv1 = (f->V(1))->P();
     CMeshO::CoordType fv2 = (f->V(2))->P();
-
     Segment2f line0;
     Segment2f line1;
     Segment2f line2;
-
     Point2f p1_2d;
     Point2f p2_2d;
-
     switch(max_c){
-
     case 0:{
             line0=Segment2f(Point2f(fv0[1],fv0[2]),Point2f(fv1[1],fv1[2]));
             line1=Segment2f(Point2f(fv1[1],fv1[2]),Point2f(fv2[1],fv2[2]));
@@ -207,17 +198,14 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
             break;
         }
     }
-
     bool int_found=false;
     int edge=-1;
-
     Point2f tmp;
     if(SegmentSegmentIntersection(line0,seg,tmp)){
        int_found=true;
        int_p=tmp;
        edge=0;
     }
-
     if(SegmentSegmentIntersection(line1,seg,tmp)){
         if(int_found){
 
@@ -232,9 +220,6 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
             edge=1;
         }
     }
-
-
-
     if(SegmentSegmentIntersection(line2,seg,tmp)){
         if(int_found){
             if(Segment2f(tmp,p2_2d).Length()<Segment2f(int_p,p2_2d).Length()){
@@ -248,40 +233,30 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
             edge=2;
         }
     }
-
-
     if(int_found){
-        //f->C()=Color4b::Blue; //Debugging
         new_f=f->FFp(edge);
-        //new_f->C()=Color4b::Green;//Debugging
         switch(max_c){
-          case 0:{
+            case 0:{
                 int_point[0]=(n[0]*fv0[0]-n[1]*(int_p[0]-fv0[1])-n[2]*(int_p[1]-fv0[2]))/n[0];
                 int_point[1]=int_p[0];
                 int_point[2]=int_p[1];
                 break;
                 }
-         case 1:{
+            case 1:{
                 int_point[0]=int_p[0];
                 int_point[1]=(n[1]*fv0[1]-n[0]*(int_p[0]-fv0[0])-n[2]*(int_p[1]-fv0[2]))/n[1];
                 int_point[2]=int_p[1];
                 break;
-                 }
-         case 2:{
+                }
+            case 2:{
                 int_point[0]=int_p[0];
                 int_point[1]=int_p[1];
                 int_point[2]=(n[2]*fv0[2]-n[0]*(int_p[0]-fv0[0])-n[1]*(int_p[1]-fv0[1]))/n[2];
                 break;
-            }
-        }
-
-
-
+              }
+          }
     }
-
     return int_found;
-
-
 };
 
 /**
@@ -353,8 +328,10 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
     float v=0;
     float t=0;
 
-
-
+    for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
+        eh[fi]=1;
+    }
+/*
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
         if(fi->Q()!=0){
 
@@ -388,7 +365,7 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
         eh[fi]=0;
      }
     }
-
+*/
 
 };
 
@@ -428,10 +405,6 @@ bool GenerateDustParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std:
        a=a1;
     }
 */
-
-
-
-
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
         float a=0;
         if(eh[fi]<1) a=0;
