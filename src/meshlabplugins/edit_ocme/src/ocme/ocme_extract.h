@@ -124,7 +124,8 @@ template <class MeshType>
 	bool hasColor = (ai!=c->perVertex_attributes.end());
 	if(hasColor){
 		m.vert.EnableColor();
-		color_chain = (Chain<vcg::Color4b>*) (*ai).second;
+		color_chain = (Chain<vcg::Color4b>*) (*ai).second; 
+		RAssert(color_chain!=NULL);
 	}
      if ( !c->IsEmpty()){
             Chain<OFace> *  	face_chain	= c->face;
@@ -139,19 +140,17 @@ template <class MeshType>
                         /* Here there should be the importer from OVertex to vcgVertex */
                         (*vi).P() = (*vertex_chain)[i].P();
 
-						if(hasColor)
+						if(hasColor) 
 							(*vi).C() = (*color_chain)[i];
+						 
                     }
 
 
             typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
             for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
                 for(unsigned int i = 0; i < 3; ++i){
-                        assert((*face_chain)[ff][i] < m.vert.size());
-						if((*face_chain)[ff][i] >= m.vert.size())
-							(*fi).V(i) = &m.vert[0];
-						else
-	                       (*fi).V(i) = &m.vert[(*face_chain)[ff][i]];
+                        RAssert((*face_chain)[ff][i] < m.vert.size());
+	                    (*fi).V(i) = &m.vert[(*face_chain)[ff][i]];
                    }
             }
 
@@ -235,6 +234,9 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			sel_cells_attr().push_back((*ci)->key);
 	}
 
+	sprintf(lgn->Buf(),"All Loaded");
+	lgn->Push();
+
 	for(ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci)
 		if ( !(*ci)->IsEmpty())
 		{
@@ -259,10 +261,10 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 
                     /* Here there should be the importer from OVertex to vcgVertex */
                     (*vi).P() = (*chain)[i].P();
-
+ 
                     /*  export all the attributes specified */
                     attr_map.ExportVertex(*ci,*vi,i);
-
+(*vi).C() = (*vi).C().Scatter(32, (*ci)->key.h+16 ); //TMP DEBUG
                     /* mark with the "editable" flag */
                     lockedV[*vi] = locked? 1 : 0 ; /* TODO: just to avoid the not-so-tested class for vector of bool in simple_temporary_data.h*/
 					
@@ -283,6 +285,7 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 				typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
 				for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
 					gPosF[*fi] = GIndex((*ci)->key,ff);
+					lockedF[*fi] = locked? 1 : 0 ;
 					for(unsigned int i = 0; i < 3; ++i){
 							int iii = ((*face_chain)[ff][i]);
 							assert(iii+offset < m.vert.size());
@@ -299,7 +302,11 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			(*ci)->face->FreeAll();
 	}
 
+		sprintf(lgn->Buf(),"Start Join");
+		lgn->Push();
         Joiner<MeshType>::JoinBorderVertices(m,gPosV,biV,lockedV);
+		sprintf(lgn->Buf(),"End Join");
+		lgn->Push();
 
         {
 
@@ -331,23 +338,34 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 
 template <class MeshType>
 void OCME::Edit(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper attrMap){
-	std::vector<Cell*>     dep_cells,to_add;
+	std::vector<Cell*>     dep_cells,to_add,to_add_1;
 	std::vector<Cell*>::iterator ci; 
 
 	++generic_bool; // mark cells taken for editing
 
 	/*	extend the set of cells to edit with those in the same 3D space
-		ar different levels
+		at different levels
 	*/
 	std::set<CellKey>::iterator cki;
 	for(ci = sel_cells.begin(); ci != sel_cells.end(); ++ci)
 		for(cki = (*ci)->dependence_set.begin(); cki != (*ci)->dependence_set.end(); ++cki)
-			if((*cki).h != (*ci)->key.h){	// it is at a different level
+			if((*cki).h != (*ci)->key.h)// it is at a different level
+			{	
 				Cell *  c = GetCell((*cki),false);
 				if(c)
 					to_add.push_back(c);
 			}
+	for(ci = to_add.begin(); ci != to_add.end(); ++ci)
+		for(cki = (*ci)->dependence_set.begin(); cki != (*ci)->dependence_set.end(); ++cki)
+			if((*cki).h != (*ci)->key.h)// it is at a different level
+			{	
+				Cell *  c = GetCell((*cki),false);
+				if(c)
+					to_add_1.push_back(c);
+			}
+
 	sel_cells.insert(sel_cells.end(),to_add.begin(),to_add.end());
+	sel_cells.insert(sel_cells.end(),to_add_1.begin(),to_add_1.end());
 	RemoveDuplicates(sel_cells);
 
 	for(ci = sel_cells.begin(); ci != sel_cells.end(); ++ci)
@@ -367,9 +385,14 @@ void OCME::Edit(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper
 	for(std::vector<Cell*>::iterator ci = dep_cells.begin(); ci != dep_cells.end(); ++ci){
 		(*ci)->ecd->locked = FBool(&lockedMark);
 		(*ci)->ecd->locked = true;
+		sprintf(lgn->Buf(),"locked: %d %d %d %d",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);
+		lgn->Push();
 	}
-	for(std::vector<Cell*>::iterator ci = sel_cells.begin(); ci != sel_cells.end(); ++ci) 
+	for(std::vector<Cell*>::iterator ci = sel_cells.begin(); ci != sel_cells.end(); ++ci) {
 		(*ci)->ecd->locked = false;
+		sprintf(lgn->Buf(),"UnLocked: %d %d %d %d",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);
+		lgn->Push();
+	}
 	
 	 dep_cells.insert(dep_cells.end(), sel_cells.begin(),sel_cells.end());
 	 Extract(dep_cells,m,attrMap);

@@ -90,7 +90,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
               vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GISet> (m,"gposNew");
 
 
-        typename MeshType::template PerVertexAttributeHandle<GISet> gPosV =
+    typename MeshType::template PerVertexAttributeHandle<GISet> gPosV =
                 vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<GISet> (m,"ocme_gindex");
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosV));
 
@@ -117,14 +117,8 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 
 
 
-	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi){
-         gPosVNew[vi].Clear() ;	// set the vertex as unassigned	(i.e. to process)
-		 //if(lockedV[vi])
-			// for(GISet::CopiesIterator ci = gPosV[vi].giset.begin(); ci != gPosV[vi].giset.end(); ++ci)
-			//	 if(locked_cells.find( (*ci).first ) != locked_cells.end())
-			//		gPosVNew[vi].Add(*ci);
-	}
-
+	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi) 
+         gPosVNew[vi].Clear();
 
     FindRemovedElements(m,gPosV,gPosF);
 
@@ -208,7 +202,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 
                     ck = ComputeCellKey(facebox.min,h);
 
-//					ck = gposf.ck; // DEBUGGING: prevent the face from migrating
+//ck = gposf.ck; // DEBUGGING: prevent the face from migrating
 
                     if( (!c) || !(c->key == ck))				// check if the current cell is the right one
                             c = GetCell(ck);				// if not update it
@@ -234,8 +228,10 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
                         assert(c->key == ck);
                         assert(vIndex[i] < (int) c->vert->Size());
                         // get the index of the vertex in this cell (or -1)
-                        if(vIndex[i]==-1){ // this vertex was not in ck at edit time
-                             vIndex[i] = c-> AddVertex(OVertex(*(*fi).V(i)) );			// no: add the vertex to it
+						if(vIndex[i]==-1){ // this vertex was not in ck at edit time
+							 vIndex[i] = gPosVNew[(*fi).V(i)].Index(ck);
+							 if(vIndex[i]==-1)// not yet added during this commit
+	                             vIndex[i] = c-> AddVertex(OVertex(*(*fi).V(i)) );			// no: add the vertex to it
 							 gPosVNew[(*fi).V(i)].Add(GIndex(ck,vIndex[i]));	
                          }
                         
@@ -300,7 +296,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 				unsigned int bi;
 				GISet fresh_added  = gPosVNew[*vi];	
 
-				if( fresh_added.giset.size() + gPosV[*vi].giset.size()>1)	// it is a border vertex
+				if( fresh_added.giset.size() + gPosV[*vi].giset.size()>1){	// it is a border vertex
 					if(gPosV[*vi].giset.size() > 1)							// it already was a border vertex
 						bi  = gPosV[*vi].BI();								// take its global border index	
 					else {
@@ -317,12 +313,26 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 						}
 					}
 
-				/* add the reference to the border for fresh added cells */
-				for(GISet::CopiesIterator ci = fresh_added.giset.begin(); ci != fresh_added.giset.end();++ci){
-					Cell * c = GetCell((*ci).first);
-					assert(c);
-					c->border->AddElem(BorderIndex((*ci).second, bi ));
-					assert((*ci).second < c->vert->Size());
+					/* add the reference to the border for fresh added cells */
+					for(GISet::CopiesIterator ci = fresh_added.giset.begin(); ci != fresh_added.giset.end();++ci){
+						Cell * c = GetCell((*ci).first);
+						assert(c);
+						c->border->AddElem(BorderIndex((*ci).second, bi ));
+						assert((*ci).second < c->vert->Size());
+					}
+
+					// add new cell dependencies
+					GISet total = fresh_added; 
+					total.giset.insert(gPosV[*vi].giset.begin(),gPosV[*vi].giset.end());
+					for(GISet::CopiesIterator ci = total.giset.begin(); ci != total.giset.end();++ci) 
+						for(GISet::CopiesIterator ci1 = ci; ci1 != total.giset.end();++ci1){
+							Cell * c = GetCell((*ci).first,false);
+							Cell * c1 = GetCell((*ci1).first,false);
+							RAssert(c);
+							RAssert(c1);
+							this->CreateDependence(c,c1);
+						}
+	
 				}
 			}
 
@@ -358,7 +368,17 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		}
 
 
-		vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<GISet>(m,gPosVNew);
+	vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<GISet>(m,gPosVNew);
+	vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<GISet>(m,gPosV);
+	vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<unsigned char>(m,lockedV);
+
+	vcg::tri::Allocator<MeshType>::DeletePerFaceAttribute<GIndex>(m,gPosF);
+	vcg::tri::Allocator<MeshType>::DeletePerFaceAttribute<unsigned char>(m,lockedF);
+
+	vcg::tri::Allocator<MeshType>::DeletePerMeshAttribute<ScaleRange>(m,srE);
+	vcg::tri::Allocator<MeshType>::DeletePerMeshAttribute<std::vector<CellKey> >(m,sel_cells_attr);
+
+
 
 	StopRecordCellsSetModification();
 
@@ -367,6 +387,6 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 	//this->ClearImpostors(this->touched_cells);		// clear the part of the hierarchy containing the touched cells
 	//this->FillSamples(this->touched_cells);				// touched_cells also contains the new cells
 	//this->BuildImpostorsHierarchyPartial(this->touched_cells);
-
+	generic_bool++;
 }
 #endif

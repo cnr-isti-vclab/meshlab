@@ -264,17 +264,19 @@ void OCME::Render(){
          if(!cells_to_render[i]->generic_bool()) { // generic_bool() == the cell is taken in editing
           if(cells_to_render[i]->rd->renderCacheToken && cells_to_render[i]->rd->renderCacheToken->lock() )
 	 {
-			//c = c.Scatter ( 32,COff(cells_to_render[i]->key.h) );
-			 c = vcg::Color4b::Gray;
+			 c = c.Scatter ( 32,COff(cells_to_render[i]->key.h) );
+			 //c = vcg::Color4b::Gray;
 			// c.ColorRamp(0, maxp-minp,cells_to_render[i]->rd->priority+minp);
 			glColor ( c );
 
 			default_renderer.m = &cells_to_render[i]->rd->Mesh();
 
-                        if(vcg::tri::HasPerVertexColor(cells_to_render[i]->rd->Mesh()))
-                            default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMPerVert,vcg::GLW::TMNone>();
-			else
-                            default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMLast,vcg::GLW::TMNone>();
+
+            if(vcg::tri::HasPerVertexColor(cells_to_render[i]->rd->Mesh()))
+//					default_renderer.Draw<vcg::GLW::DMPoints , vcg::GLW::CMPerVert, vcg::GLW::TMNone>();
+				default_renderer.DrawPointsBase<vcg::GLW::NMPerVert,vcg::GLW::CMPerVert>();
+			else 
+                default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMLast,vcg::GLW::TMNone>();
 
 			cells_to_render[i]->rd->renderCacheToken->unlock();
 		}

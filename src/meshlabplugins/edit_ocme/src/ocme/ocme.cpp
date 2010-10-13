@@ -157,7 +157,7 @@ void OCME::MoveFace(GIndex & from, const CellKey &  to){
 	cellFrom->ecd->deleted_face.SetAsVectorOfMarked();
 	cellFrom->ecd->deleted_face.SetMarked(from.i,true);	//delete the copy in the old cell
 
-        from.i = cellTo->AddFace(  OFace(0,0,0));            //add a face, the real references will be set later on
+    from.i = cellTo->AddFace(  OFace(0,0,0));            //add a face, the real references will be set later on
 	from.ck = to;
 	
 	cellTo->bbox.sr.Add(to.h);				// extend the scale range of the to cell to include to.h
@@ -168,6 +168,8 @@ void OCME::MoveFace(GIndex & from, const CellKey &  to){
 	*/
  	cellTo->bbox.sr.Add(cellFrom->bbox.sr);
  	cellFrom->bbox.sr.Add(cellTo->bbox.sr);
+
+	this->CreateDependence(cellTo,cellFrom);
 }
 
 //void OCME::MoveFace(GIndex & gposf,  Cell *&  c,   Cell *& new_c){}	

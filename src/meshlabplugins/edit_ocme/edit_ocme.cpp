@@ -421,7 +421,7 @@ void OcmeEditPlugin::loadOcm(){
 		ocme  = new OCME();
 		ocme->params.side_factor = 50; // READ IT FROM THE FILEEEEEEEEE
 		ocme->InitRender();
-		ocme->renderParams.only_impostors = false;
+		ocme->renderParams.only_impostors = true;
 //		ocme->renderParams.memory_limit_in_core = 100;
 		ocme->Open ( ocm_name.toAscii() );
 
@@ -518,10 +518,11 @@ void OcmeEditPlugin::markEditable(){
 
 		for(CMeshO::VertexIterator vi = mm->cm.vert.begin(); vi != mm->cm.vert.end(); ++vi )
 				if(!(*vi).IsD())
-						if(!lockedV[*vi]) (*vi).SetS();
+						if(!lockedV[*vi]) (*vi).SetS(); else (*vi).ClearS();
 
 		for(CMeshO::FaceIterator fi = mm->cm.face.begin(); fi != mm->cm.face.end(); ++fi )
 				if(!(*fi).IsD()){
+					//	(*fi).ClearS();
 						bool ed = !lockedF[*fi];
 						for(unsigned int i = 0; i < (*fi).VN() ; ++i)
 								 ed = ed &&  !lockedV[(*fi).V(i)];
