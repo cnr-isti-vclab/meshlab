@@ -5,13 +5,10 @@ HEADERS += filter_csg.h \
 
 SOURCES += filter_csg.cpp
 TARGET = filter_csg
-TEMPLATE = lib
-QT += opengl
-CONFIG += plugin
 
-QMAKE_INCDIR += gmp-5.0.1/
+macx:INCLUDEPATH += ../../external/inc/macx/gmp-5.0.1
 
-#QMAKE_LIBS += -lgmpxx -lgmp
-#QMAKE_LIBDIR += gmp-5.0.1/.libs/
+macx:LIBS         += ../../external/lib/macx/libgmpxx.a ../../external/lib/macx/libgmp.a
+win32-g++:LIBS		 += ../../external/lib/win32-gcc/libgmpxx.a ../../external/lib/win32-gcc/libgmp.a
 
-OBJECTS += gmp-5.0.1/.libs/libgmpxx.a gmp-5.0.1/.libs/libgmp.a
+
