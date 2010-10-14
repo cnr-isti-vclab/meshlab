@@ -214,18 +214,20 @@ namespace vcg {
                     }
                     // i <= j < J
                     newv.push_back(*i);
-                    while (i != endi && j != endj) {
-                        while (j != endj && *(j+1) < *(i+1)) // j < J < I
+                    while (j != endj && !(*(i+1) < *j)) {
+                         // i <= j <= I & i <= j < J
+                        while (j != endj && *(j+1) < *(i+1)) // i <= j < J < I
                             j += 2;
                         // i < I <= J & i <= j < J
-                        if (j == endj || *(i+1) < *j) { // i < I < j < J
-                            newv.push_back(*(i+1));
-                            i += 2;
-                        } else { // i < j <= I < J
+                        if (j != endj && !(*(i+1) < *j)) { // i < j <= I < J
                             std::swap(i, j);
                             std::swap(endi, endj);
+                            // j < i <= J < I
                         }
                     }
+                    // i < I < j < J
+                    newv.push_back(*(i+1));
+                    i += 2;
                 }
                 newv.insert(newv.end(), i, endi);
                 newv.insert(newv.end(), j, endj);
@@ -253,7 +255,7 @@ namespace vcg {
                         } else  // j <= J <= i < I
                             continue;
                     }
-                    
+                     // i < j < J
                     while (j != endj && *(j+1) < *(i+1)) { // i < j < J < I
                         newv.push_back(-*j);
                         newv.push_back(-*(j+1));
