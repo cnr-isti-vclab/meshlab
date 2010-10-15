@@ -45,6 +45,24 @@ using namespace vcg;
 using namespace std;
 
 #define MAX_LOOP 150
+//function added to map call sto distance
+template <class ScalarType>
+ScalarType FilterZippering::SquaredDistance( vcg::Segment3<ScalarType> &s, vcg::Point3<ScalarType> &p)
+{
+	Point3<ScalarType> clos;
+	ScalarType dist;
+	vcg::SegmentPointDistance<CMeshO::ScalarType>(s, p, clos,dist );
+	return dist;
+}
+
+template <class ScalarType>
+vcg::Point3<ScalarType> FilterZippering::ClosestPoint( vcg::Segment3<ScalarType> &s, vcg::Point3<ScalarType> &p)
+{
+	Point3<ScalarType> clos;
+	ScalarType dist;
+	vcg::SegmentPointDistance<CMeshO::ScalarType>(s, p, clos,dist );
+	return clos;
+}
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -357,7 +375,13 @@ void FilterZippering::handleBorder( aux_info &info,                             
     for ( size_t j = 1; j < info.border[i].edges.size(); j++ ) {
 			//check if P0 lies on trash edge, then split border (skip first edge)
       for ( size_t k = 0; k < info.trash[0].edges.size(); k++ ) {
-        if ( SquaredDistance<float>( info.trash[0].edges[k], info.border[i].edges[j].P0() ) == 0.0f ) { //approxim
+				float EPSILON=info.trash[0].edges[k].Length()/100.f;
+				vcg::Point3<float> clos;
+				float dist;
+				vcg::SegmentPointDistance( info.trash[0].edges[k],info.border[i].edges[j].P0(),clos,dist);
+				if (dist<EPSILON)
+				{
+        //if ( SquaredDistance<float>( info.trash[0].edges[k], info.border[i].edges[j].P0() ) == 0.0f ) { //approxim
 					//Split is needed
 					polyline newborder; newborder.edges.insert( newborder.edges.begin(), info.border[i].edges.begin() + j, info.border[i].edges.end() );
 					newborder.verts.insert( newborder.verts.begin(), info.border[i].verts.begin() + j, info.border[i].verts.end() );
@@ -435,7 +459,12 @@ polyline FilterZippering::cutComponent( polyline comp,                          
     Point3f endpoint = border.edges.back().P1();
   Point2<CMeshO::ScalarType> startpoint2D ( (rot_mat * startpoint).X(), (rot_mat * startpoint).Y() );
     Point2<CMeshO::ScalarType> endpoint2D ( (rot_mat * endpoint).X(), (rot_mat * endpoint).Y() );
-    int startedge = 0, endedge = 0; float min_dist_s = SquaredDistance<CMeshO::ScalarType>( comp.edges[0], startpoint ), min_dist_e = SquaredDistance<CMeshO::ScalarType>( comp.edges[0], endpoint );
+    //int startedge = 0, endedge = 0; float min_dist_s = SquaredDistance<CMeshO::ScalarType>( comp.edges[0], startpoint ), min_dist_e = SquaredDistance<CMeshO::ScalarType>( comp.edges[0], endpoint );
+		int startedge = 0, endedge = 0; 
+		Point3f clos;
+		float dist;
+		float min_dist_s; vcg::SegmentPointDistance<CMeshO::ScalarType>( comp.edges[0], startpoint, clos,min_dist_s );
+		float min_dist_e; vcg::SegmentPointDistance<CMeshO::ScalarType>( comp.edges[0], endpoint, clos,min_dist_e );
     bool v_start = false, v_end = false;
     // search where startpoint and endpoint lie
     for ( size_t i = 0; i < comp.edges.size(); i ++ ) {
@@ -535,8 +564,17 @@ int FilterZippering::searchComponent(			aux_info &info,								//Auxiliar info
 		//for each ccon search for edges nearest to P0 and P1
 		float distP0 = 200000*eps; float distP1 = 200000*eps;
     for ( size_t j = 0; j < info.conn[i].edges.size(); j ++ ) {
-      if ( SquaredDistance<float>( info.conn[i].edges[j], P0 ) < distP0 ) distP0 = SquaredDistance<float>( info.conn[i].edges[j], P0 );
-      if ( SquaredDistance<float>( info.conn[i].edges[j], P1 ) < distP1 ) distP1 = SquaredDistance<float>( info.conn[i].edges[j], P1 );
+      //if ( SquaredDistance<float>( info.conn[i].edges[j], P0 ) < distP0 ) distP0 = SquaredDistance<float>( info.conn[i].edges[j], P0 );
+			float dist_test;
+			vcg::Point3f clos;
+			vcg::SegmentPointSquaredDistance(info.conn[i].edges[j],P0,clos,dist_test);
+			if (dist_test<distP0)
+				distP0=dist_test;
+			
+      //if ( SquaredDistance<float>( info.conn[i].edges[j], P1 ) < distP1 ) distP1 = SquaredDistance<float>( info.conn[i].edges[j], P1 );
+			vcg::SegmentPointSquaredDistance(info.conn[i].edges[j],P1,clos,dist_test);
+			if (dist_test<distP1)
+				distP1=dist_test;
 		}
 		if ( distP0 + distP1 < distanceC ) { distanceC = distP0 + distP1; nearestC = i; }
 	}
@@ -607,7 +645,7 @@ bool FilterZippering::findIntersection(  CMeshO::FacePointer currentF,				//face
         }
     }
     if ( min_dist >= b_edge.Length() ) return false; //point not found
-    hit = ClosestPoint(b_edge, closest); //projection on edge
+    hit = ClosestPoint<float>(b_edge, closest); //projection on edge
 	return true;
 }
 

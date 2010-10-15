@@ -30,7 +30,7 @@
 #include <QObject>
 
 #include <common/interfaces.h>
-
+#include <vcg/space/distance3.h>
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 
@@ -228,7 +228,11 @@ struct aux_info {
 		}
 
       for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
-				if ( vcg::SquaredDistance<float>( trash[i].edges[j], v->P() ) <= eps ) { 
+				//if ( vcg::SquaredDistance<float>( trash[i].edges[j], v->P() ) <= eps ) { 
+				float dist;
+				vcg::Point3f clos;
+				vcg::SegmentPointSquaredDistance<float>(trash[i].edges[j], v->P(),clos,dist);
+				if (dist <= eps ) { 
 					 cnt++; split = j;
 				}	
 			}
@@ -299,6 +303,12 @@ public:
 
 
 private:
+	template <class ScalarType>
+	ScalarType SquaredDistance( vcg::Segment3<ScalarType> &s, vcg::Point3<ScalarType> &p);
+	
+	template <class ScalarType>
+	vcg::Point3<ScalarType> ClosestPoint( vcg::Segment3<ScalarType> &s, vcg::Point3<ScalarType> &p);
+
         bool checkRedundancy(   CMeshO::FacePointer f,   //face
                                 MeshModel *a,            //mesh A
                                 MeshFaceGrid &grid,      //grid A
