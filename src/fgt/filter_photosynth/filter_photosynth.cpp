@@ -1,14 +1,4 @@
 /****************************************************************************
-* MeshLab                                                           o o     *
-* An extendible mesh processor                                    o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005, 2006                                          \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -21,82 +11,100 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <Qt>
-#include <QtGui>
-#include "filter_text.h"
+#include "filter_photosynth.h"
+#include <QtScript>
 
-#include <vcg/math/base.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/smooth.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/selection.h> 
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/point_sampling.h>
-#include <vcg/space/triangle3.h>
-
-
-using namespace std;
-using namespace vcg;
-
-FilterCreateText::FilterCreateText()
+// Constructor usually performs only two simple tasks of filling the two lists
+//  - typeList: with all the possible id of the filtering actions
+//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
+FilterPhotosynthPlugin::FilterPhotosynthPlugin()
 {
-	
-    typeList << 
-    FP_TEXT;
-    
-	FilterIDType tt;
-	foreach(tt , types())
-	actionList << new QAction(filterName(tt), this);
+  typeList << FP_IMPORT_PHOTOSYNTH;
+  foreach(FilterIDType tt , types())
+    actionList << new QAction(filterName(tt), this);
 }
 
- QString FilterCreateText::filterName(FilterIDType filterId) const
+// ST() must return the very short string describing each filtering action
+// (this string is used also to define the menu entry)
+QString FilterPhotosynthPlugin::filterName(FilterIDType filterId) const
 {
-	switch (filterId) {
-        case FP_TEXT:
-            return QString("String of Text");
-			break;
-		default:
-            assert(0); return QString("error");
-			break;
-	}
+  switch(filterId)
+  {
+    case FP_IMPORT_PHOTOSYNTH:  return QString("Import Photosynth data");
+    default:
+        assert(0);
+  }
+  return QString();
 }
- QString FilterCreateText::filterInfo(FilterIDType filterId) const
+
+// Info() must return the longer string describing each filtering action
+// (this string is used in the About plugin dialog)
+QString FilterPhotosynthPlugin::filterInfo(FilterIDType filterId) const
 {
-	switch (filterId) {
-        case FP_TEXT:
-            return QString("Create a 3D model of a text string");
-			break;
-		default:
-            assert(0); return QString("error");
-			break;
-	}
+  switch(filterId)
+  {
+    case FP_IMPORT_PHOTOSYNTH:
+      return QString("Downloads the synth data from the given URL and creates a document with multiple layers, each containing a set of points");
+    default:
+      assert(0);
+  }
+  return QString("Unknown Filter");
 }
 
- int FilterCreateText::getRequirements(QAction */*action*/)
-{	
-    return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR;
-}
-
-void FilterCreateText::initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & par)
+// The FilterClass describes in which generic class of filters it fits.
+// This choice affect the submenu in which each filter will be placed
+// More than a single class can be choosen.
+FilterPhotosynthPlugin::FilterClass FilterPhotosynthPlugin::getClass(QAction *a)
 {
-    par.addParam(new RichString("text3d","MeshLab","Text string","The string entered here will be transformed into a 3D model according to the choosen options"));
+  switch(ID(a))
+  {
+    case FP_IMPORT_PHOTOSYNTH:
+      return MeshFilterInterface::MeshCreation;
+    default:
+      assert(0);
+  }
+  return MeshFilterInterface::Generic;
 }
 
-bool FilterCreateText::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
+// This function define the needed parameters for each filter. Return true if the filter has some parameters
+// it is called every time, so you can set the default value of parameters according to the mesh
+// For each parameter you need to define,
+// - the name of the parameter,
+// - the default value
+// - the string shown in the dialog
+// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
+void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst)
 {
-    QString text3d = par.getString("text3d");
-    Log("Transforming text '%s'",qPrintable(text3d));
-	return true;
+  switch(ID(action))
+  {
+    case FP_IMPORT_PHOTOSYNTH:
+      parlst.addParam(new RichString("synthURL",
+                                     "http://photosynth.net",
+                                     "Synth URL",
+                                     "Paste the synth URL from your browser."));
+      break;
+    default:
+      assert(0);
+  }
 }
 
- MeshFilterInterface::FilterClass FilterCreateText::getClass(QAction *)
+// The Real Core Function doing the actual mesh processing.
+// Imports
+bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
-    return MeshFilterInterface::MeshCreation;
+  return true;
 }
 
+QString FilterPhotosynthPlugin::filterScriptFunctionName(FilterIDType filterID)
+{
+  switch(filterID)
+  {
+    case FP_IMPORT_PHOTOSYNTH:
+      return QString("importPhotosynth");
+    default:
+      assert(0);
+  }
+  return QString();
+}
 
-Q_EXPORT_PLUGIN(FilterCreateText)
+Q_EXPORT_PLUGIN(FilterPhotosynthPlugin)
