@@ -525,7 +525,7 @@ struct OCME{
 	// verify that dep is really the dependent set of kn
 	bool CheckDependentSet( std::vector<Cell*> &  dep);
 
-
+	bool BorderExists(Cell* c,unsigned int vi);
 
 };
 

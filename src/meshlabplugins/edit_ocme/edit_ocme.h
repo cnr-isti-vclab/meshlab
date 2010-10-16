@@ -116,7 +116,7 @@ public slots:
 	void toggleShowTouched();
 	void updateButtonsState();
 	void editAll();
-
+	void verify();
 	/* ui only*/
 	void fillMeshAttribute();	// fill the list of trimesh attribute
 	void fillOcmAttribute();	// fill the list of ocm attributes

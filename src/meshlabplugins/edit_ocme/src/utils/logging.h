@@ -16,7 +16,7 @@ public:
 		LF() = false;
 		if((filename!=NULL)){
 			LF() = true;	
-			F() = fopen(filename,"w");
+			F() = fopen(filename,"a+");
 			fclose(F());
 			FN() = std::string(filename);
 		}

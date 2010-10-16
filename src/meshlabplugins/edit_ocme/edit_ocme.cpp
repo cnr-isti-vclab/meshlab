@@ -303,6 +303,7 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	QObject::connect(odw->toggleShowTouchedPushButton ,SIGNAL(clicked() ),this,SLOT( toggleShowTouched() ));
 	QObject::connect(odw->addFromDiskPushButton ,SIGNAL(clicked() ),this,SLOT( addFromDisk() ));
 	QObject::connect(odw->editAllPushButton ,SIGNAL(clicked() ),this,SLOT( editAll() ));
+	QObject::connect(odw->verifyPushButton ,SIGNAL(clicked() ),this,SLOT( verify() ));
 
 
 //	QTimer *timer = new QTimer(this);
@@ -538,6 +539,10 @@ void OcmeEditPlugin::editAll(){
 	this->edit();
 
 }
+void OcmeEditPlugin::verify(){
+	ocme->Verify();
+}
+
 void OcmeEditPlugin::edit(){
 
 	ocme->renderCache.controller.pause();

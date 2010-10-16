@@ -284,7 +284,20 @@
      </rect>
     </property>
     <property name="text">
-     <string>edit all (small data)</string>
+     <string>edit all (globall)</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="verifyPushButton">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>352</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>verify (gloabl)</string>
     </property>
    </widget>
   </widget>

@@ -227,8 +227,6 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 	sel_cells_attr().clear();
 
 	for(ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci){
-			sprintf(lgn->Buf(),"loadall %d %d %d %d\n",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);
-			lgn->Push();
 			(*ci)->vert->LoadAll();
 			(*ci)->face->LoadAll();
 			sel_cells_attr().push_back((*ci)->key);
@@ -275,7 +273,7 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			/* assign the border index to the border vertices */
 			for(unsigned int i = 0; i < chain_bi->Size(); ++i){
 				unsigned int _tmp = (*chain_bi)[i].vi;
-				assert(first_added_v+_tmp <  m.vert.size());
+				RAssert(first_added_v+_tmp <  m.vert.size());
 				biV[m.vert[first_added_v+ (*chain_bi)[i].vi] ] = (*chain_bi)[i].bi;
 			}
 
@@ -352,16 +350,16 @@ void OCME::Edit(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper
 			if((*cki).h != (*ci)->key.h)// it is at a different level
 			{	
 				Cell *  c = GetCell((*cki),false);
-				if(c)
-					to_add.push_back(c);
+				RAssert(c);
+				to_add.push_back(c);
 			}
 	for(ci = to_add.begin(); ci != to_add.end(); ++ci)
 		for(cki = (*ci)->dependence_set.begin(); cki != (*ci)->dependence_set.end(); ++cki)
 			if((*cki).h != (*ci)->key.h)// it is at a different level
 			{	
 				Cell *  c = GetCell((*cki),false);
-				if(c)
-					to_add_1.push_back(c);
+				RAssert(c);
+				to_add_1.push_back(c);
 			}
 
 	sel_cells.insert(sel_cells.end(),to_add.begin(),to_add.end());
@@ -385,13 +383,9 @@ void OCME::Edit(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper
 	for(std::vector<Cell*>::iterator ci = dep_cells.begin(); ci != dep_cells.end(); ++ci){
 		(*ci)->ecd->locked = FBool(&lockedMark);
 		(*ci)->ecd->locked = true;
-		sprintf(lgn->Buf(),"locked: %d %d %d %d",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);
-		lgn->Push();
 	}
 	for(std::vector<Cell*>::iterator ci = sel_cells.begin(); ci != sel_cells.end(); ++ci) {
 		(*ci)->ecd->locked = false;
-		sprintf(lgn->Buf(),"UnLocked: %d %d %d %d",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);
-		lgn->Push();
 	}
 	
 	 dep_cells.insert(dep_cells.end(), sel_cells.begin(),sel_cells.end());

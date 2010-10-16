@@ -609,10 +609,10 @@ void Chain<TYPE>::Compact(std::vector<unsigned int> &deleted){
 	 
 	/* compact the vector */
 	unsigned int	siz = 0,	//	index of the last non deleted element being written , finally new size of the chain
-                        cnt = 0;	//	index of the non deleted element being copied (moved)
+                    cnt = 0;	//	index of the non deleted element being copied (moved)
 
-        //std::sort(deleted.begin(),deleted.end());
-        ::RemoveDuplicates(deleted);
+    ::RemoveDuplicates(deleted); 
+	RAssert(deleted.back() < size);
 	for(unsigned int di = 0; di < deleted.size(); ++di,++cnt)
             for(; cnt < deleted[di]; ++cnt){
                         tmp = (*this)[cnt];
@@ -629,21 +629,18 @@ void Chain<TYPE>::Compact(std::vector<unsigned int> &deleted){
 	RAssert(siz == size-deleted.size());
 	size = siz;
 
-	/* UGLY? maybe..** update the lenght of the last chunk */
-        int chi = (size/params.chunkSize);				// find in which chunk the element i is  kept
-	int cksize  = size%params.chunkSize;				// find its position inside the chunk
-
-	chunks [ chi ].size = cksize;
-
-	/* remove the chunks in excess.
-	NOTE: if the size is 0 we also have to remove the first chunk (0), otherwise 
-	we remove from the chunk chi+1
-	*/
-	RemoveChunks( (size==0)? 0:chi+1, chunks.size());
-
-	if(size==0) RAssert(chunks.empty());
-	
-	if(size>0) RAssert(size/params.chunkSize==chunks.size()-1);
+	if(size == 0)
+		RemoveChunks(0, chunks.size());
+	else{
+		/* UGLY? maybe..** update the lenght of the last chunk */
+		int chi = ( (size-1)/params.chunkSize);				// find in which chunk the element i is  kept
+		int cksize  = (size-1)%params.chunkSize;			// find its position inside the chunk
+		RAssert(chi < chunks.size());
+		chunks [ chi ].size = cksize + 1;
+		RemoveChunks( chi+1, chunks.size());
+		RAssert((size-1)/params.chunkSize==chunks.size()-1);
+	}
+	 
 }
 
 template <class TYPE> 

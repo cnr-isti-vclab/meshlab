@@ -169,17 +169,17 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
                 GIndex     gposf = gPosF[*fi]; // note: gPosF[] will not be updated because it is won't be used again
                                                // before it is destroyed
 
-		if( ((&(*fi) - &(*m.face.begin()))%1000) == 0){
-			sprintf(lgn->Buf(),"committed %d faces  \r",&(*fi) - &(*m.face.begin()));
-			lgn->Push();
-		}
+		//if( ((&(*fi) - &(*m.face.begin()))%1000) == 0){
+		//	sprintf(lgn->Buf(),"committed %d faces  \r",&(*fi) - &(*m.face.begin()));
+		//	lgn->Push();
+		//}
 
 
 				if((*fi).IsD()){                // face is deleted
                     if(!gposf.IsUnassigned()){  // it is in the database
                                                 // remove it from the db
                         Cell * c = GetCell(gposf.ck,false);
-                        assert(c);
+                        RAssert(c);
                         c->ecd->deleted_face.SetAsVectorOfMarked();
                         c->ecd->deleted_face.SetMarked(gposf.i,true);
                         toCleanUpCells.push_back(c);
@@ -225,8 +225,8 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
                 int vIndex[3];
                 for(int i = 0; i < 3 ; ++i){
                         vIndex[i] = gPosV[(*fi).V(i)].Index(ck);
-                        assert(c->key == ck);
-                        assert(vIndex[i] < (int) c->vert->Size());
+                        RAssert(c->key == ck);
+                        RAssert(vIndex[i] < (int) c->vert->Size());
                         // get the index of the vertex in this cell (or -1)
 						if(vIndex[i]==-1){ // this vertex was not in ck at edit time
 							 vIndex[i] = gPosVNew[(*fi).V(i)].Index(ck);
@@ -236,7 +236,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
                          }
                         
                          (*c->face)[gposf.i][i] = vIndex[i];
-                         assert(vIndex[i] < (int) c->vert->Size());
+                         RAssert(vIndex[i] < (int) c->vert->Size());
                      }
 
                 // update the bounding box of the cell c to contain the bbox of the face
@@ -247,7 +247,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 			for(GISet::CopiesIterator ci = gPosV[*vi].giset.begin();ci != gPosV[*vi].giset.end();++ci){
 				if(!(c->key == (*ci).first)) c = GetCell((*ci).first,false);
-				assert(c);
+				RAssert(c);
 				(*c->vert)[(*ci).second].P() = (*vi).cP();
 				attr_map.ImportVertex(c,*vi,(*ci).second);
 			}
@@ -258,7 +258,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 				std::vector<bool> todel;
 				for(unsigned int i = 0; i < sel_cells_attr().size(); ++i){
 					Cell * c = GetCell(sel_cells_attr()[i],false);
-					assert(c);
+					RAssert(c);
 					todel.resize(c->vert->Size(),true);
 					for(unsigned int fi = 0; fi < c->face->Size(); ++fi){
 						for(unsigned int vi  = 0; vi < 3; ++vi)
@@ -291,8 +291,9 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 			*/
 
 
-			// compare gPosV e gPosV to update the borders
-			for(vi = m.vert.begin(); vi != m.vert.end(); ++vi){
+			// compare gPosV e gPosVNew to update the borders
+			for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)if(!(*vi).IsD())
+			{
 				unsigned int bi;
 				GISet fresh_added  = gPosVNew[*vi];	
 
@@ -308,46 +309,71 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 						if(gPosV[*vi].giset.size() == 1){
 							GISet::CopiesIterator ci = gPosV[*vi].giset.begin();
 							Cell * c = GetCell((*ci).first);
-							assert(c);
-							c->border->AddElem(BorderIndex((*ci).second, bi ));
+							RAssert(c);
+							c->ecd->deleted_vertex.SetAsVectorOfBool();
+							RAssert(!c->ecd-> deleted_vertex.IsMarked((*ci).second));
+
+							if(!BorderExists(c,(*ci).second)){
+								c->border->AddElem(BorderIndex((*ci).second, bi ));
+								RAssert((*ci).second<c->vert->Size());
+							}
 						}
 					}
 
 					/* add the reference to the border for fresh added cells */
 					for(GISet::CopiesIterator ci = fresh_added.giset.begin(); ci != fresh_added.giset.end();++ci){
 						Cell * c = GetCell((*ci).first);
-						assert(c);
+						RAssert(c);
+						c->ecd->deleted_vertex.SetAsVectorOfBool();
+						RAssert(!c->ecd->deleted_vertex.IsMarked((*ci).second));
+						RAssert(!BorderExists(c,(*ci).second));
 						c->border->AddElem(BorderIndex((*ci).second, bi ));
-						assert((*ci).second < c->vert->Size());
+						RAssert((*ci).second < c->vert->Size());
 					}
 
 					// add new cell dependencies
 					GISet total = fresh_added; 
 					total.giset.insert(gPosV[*vi].giset.begin(),gPosV[*vi].giset.end());
-					for(GISet::CopiesIterator ci = total.giset.begin(); ci != total.giset.end();++ci) 
-						for(GISet::CopiesIterator ci1 = ci; ci1 != total.giset.end();++ci1){
-							Cell * c = GetCell((*ci).first,false);
-							Cell * c1 = GetCell((*ci1).first,false);
-							RAssert(c);
-							RAssert(c1);
-							this->CreateDependence(c,c1);
+					for(GISet::CopiesIterator ci = total.giset.begin(); ci != total.giset.end();++ci) {
+						GISet::CopiesIterator ci1 = ci;++ci1;
+						for(; ci1 != total.giset.end();++ci1){
+							Cell * c_in_commit = GetCell((*ci).first,false);
+							Cell * c1_in_commit = GetCell((*ci1).first,false);
+							RAssert(c_in_commit);
+							RAssert(c1_in_commit);
+							this->CreateDependence(c_in_commit,c1_in_commit);
 						}
+					}
 	
 				}
 			}
 
-
+		lgn->Append("cleaning up");
         if(!toCleanUpCells.empty()){
                 RemoveDuplicates		(toCleanUpCells);
+
+				std::vector<Cell*>::iterator ci;
+				for(ci = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci){
+					RAssert((*ci));
+					if(*ci){
+					if(!(*ci)->ecd){
+					sprintf(lgn->Buf(),"%d %d %d %d",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);lgn->Push();
+					sprintf(lgn->Buf(),"vert: %d face: %d ",(*ci)->vert->Size(),(*ci)->face->Size());lgn->Push();
+
+					}
+					RAssert((*ci)->rd);
+					}	
+				}
+
+
+				lgn->Append("RemoveDeletedFaces");
                 RemoveDeletedFaces		(toCleanUpCells);
+				lgn->Append("RemoveDeletedBorder");
                 RemoveDeletedBorder		(toCleanUpCells);
+				lgn->Append("RemoveDeletedVertices");
                 RemoveDeletedVertices	(toCleanUpCells);
        }
-
-        for(std::vector<Cell*>::iterator ci = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci)
-                if( !CheckFaceVertexAdj(*ci))
-                        CheckFaceVertexAdj(*ci);
-
+ 
 #ifdef _DEBUG
 	// DEBUG - check
 
@@ -366,7 +392,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 			lgn->Push();
 			RemoveCell((*ci)->key);
 		}
-
+	toCleanUpCells.clear();
 
 	vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<GISet>(m,gPosVNew);
 	vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<GISet>(m,gPosV);
@@ -382,11 +408,14 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 
 	StopRecordCellsSetModification();
 
+
 // TMP DEBUG> DO NOT UPDATE THE IMPOSTORS
 
 	//this->ClearImpostors(this->touched_cells);		// clear the part of the hierarchy containing the touched cells
 	//this->FillSamples(this->touched_cells);				// touched_cells also contains the new cells
 	//this->BuildImpostorsHierarchyPartial(this->touched_cells);
 	generic_bool++;
+
+	sprintf(lgn->Buf(),"EndCommit"); lgn->Push();
 }
 #endif

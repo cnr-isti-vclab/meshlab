@@ -90,7 +90,7 @@ OCME::~OCME(){
 		renderCache.controller.caches.clear();
 	for(CellsIterator mi = this->cells.begin(); mi != this->cells.end(); ++mi)
 		delete (*mi).second;
-
+	delete lgn;	
 	//disk_loader->Exit();
 	//while(!	disk_loader->isFinished());
 	//delete disk_loader;
@@ -150,9 +150,9 @@ int OCME::ComputeLevel(const float & l){
 
 void OCME::MoveFace(GIndex & from, const CellKey &  to){
 	Cell * cellFrom = GetCell(from.ck,false);
-	Cell * cellTo	= GetCell(to,false);
-	assert(cellFrom);
-	assert(cellTo);
+	Cell * cellTo	= GetCell(to,true);
+	RAssert(cellFrom);
+	RAssert(cellTo);
 	
 	cellFrom->ecd->deleted_face.SetAsVectorOfMarked();
 	cellFrom->ecd->deleted_face.SetMarked(from.i,true);	//delete the copy in the old cell
@@ -251,10 +251,13 @@ void OCME::OverlappingBBoxes( const vcg::Box3f & b, const int & h,std::vector<Ce
 				overlapping.push_back(CellKey(i,j,k,h));
 }
 
-void OCME::CreateDependence(Cell * & c1, Cell * & c2){
-	if( c1->dependence_set.find(c2->key) == c1->dependence_set.end()){
-		c1->dependence_set.insert(c2->key);
-		c2->dependence_set.insert(c1->key);
+void OCME::CreateDependence(Cell * & c1_CD, Cell * & c2_CD){
+	RAssert(c1_CD);
+	RAssert(c2_CD);
+	RAssert(c1_CD != c2_CD);
+	if( c1_CD->dependence_set.find(c2_CD->key) == c1_CD->dependence_set.end()){
+		c1_CD->dependence_set.insert(c2_CD->key);
+		c2_CD->dependence_set.insert(c1_CD->key);
 	}
 }
 

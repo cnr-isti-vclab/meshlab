@@ -2,19 +2,30 @@
 #include "multiple_std_iterator.h"
 
 
-void OCME::RemoveDeletedFaces(  std::vector<Cell*> & cells){
+void OCME::RemoveDeletedFaces(  std::vector<Cell*> & cucells){
 	std::vector<Cell*>::iterator ci;
-	for(ci = cells.begin(); ci != cells.end(); ++ci){
+	for(ci = cucells.begin(); ci != cucells.end(); ++ci){
+		RAssert((*ci));
+		if(*ci){
+			if(!(*ci)->ecd){
+				sprintf(lgn->Buf(),"%d %d %d %d",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);lgn->Push();
+				sprintf(lgn->Buf(),"vert: %d face: %d ",(*ci)->vert->Size(),(*ci)->face->Size());lgn->Push();
+				
+			}
+			RAssert((*ci)->rd);
+		}	
+	}
+	for(ci = cucells.begin(); ci != cucells.end(); ++ci){
 		MarkTouched((*ci)->key);
-		(*ci) ->ecd->deleted_face.SetAsVectorOfMarked();	
+		(*ci) ->ecd->deleted_face.SetAsVectorOfMarked();
 		(*ci)->face->Compact( (*ci)->ecd->deleted_face.marked_elements);
 		(*ci) ->ecd->deleted_face.Clear();	
 	}
 }
 
-void OCME::RemoveDeletedBorder(std::vector<Cell*> &  cells){
+void OCME::RemoveDeletedBorder(std::vector<Cell*> &  cucells){
 	std::vector<Cell*>::iterator ci;
-	for(ci = cells.begin(); ci != cells.end(); ++ci){
+	for(ci = cucells.begin(); ci != cucells.end(); ++ci){
 		/* here deleted_border contains the references to vertices that are no more border because 
 		they are not referred in other cells. Now we add also those that have been removed */
 		(*ci) ->ecd->deleted_border.SetAsVectorOfMarked();	
@@ -67,13 +78,13 @@ void OCME::RemoveEmptyCells(  ){
 
 void OCME::RemoveCell(const CellKey & key){
 	Cell * c = GetCell(key,false);
-	assert(c!=NULL);
-	assert(c->IsEmpty());
+	RAssert(c!=NULL);
+	RAssert(c->IsEmpty());
 
 	std::map<std::string, ChainBase *  >::iterator ai;
 
-	sprintf(lgn->Buf(),"cell %d %d %d %d",key.x,key.y,key.z,key.h);
-	lgn->Push();
+	//sprintf(lgn->Buf(),"removing cell %d %d %d %d",key.x,key.y,key.z,key.h);
+	//lgn->Push();
 
 	// remove all the chains from OOCEnv
 	for(ai = c->elements.begin(); ai != c->elements.end(); ++ai )  
@@ -88,9 +99,10 @@ void OCME::RemoveCell(const CellKey & key){
 	 std::set<CellKey>::iterator di;
 	 for(di = c ->dependence_set.begin(); di != c->dependence_set.end();++di){
 		 Cell * dc = GetCell(*di,false);
-		 RAssert(dc);
-		 RAssert(dc->dependence_set.find(key)!=dc->dependence_set.end());
-		 dc->dependence_set.erase(key);
+		 if(dc){
+			 RAssert(dc->dependence_set.find(key)!=dc->dependence_set.end());
+			 dc->dependence_set.erase(key);
+		 }
 	 }
 
 	cells.erase(key);		// remove from the multigrid map
