@@ -1,0 +1,13 @@
+
+This plugin makes use of qtsoap project from trolltech. In order to properly compile the plugin, follow the instructions below.
+
+
+Compiling instructions:
+
+In order to properly compile this plugin, you need to download and install the qtsoap package from:
+
+  http://qt.nokia.com/products/appdev/add-on-products/catalog/4/Utilities/qtsoap/
+
+then modify in filter_photosynth.pro file the line below according to your installation directory
+
+  include(C:\Qt\qtsoap-2.7_1-opensource\src\qtsoap.pri)

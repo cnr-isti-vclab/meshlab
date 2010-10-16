@@ -12,6 +12,7 @@
 ****************************************************************************/
 
 #include "filter_photosynth.h"
+#include "synthData.h"
 #include <QtScript>
 
 // Constructor usually performs only two simple tasks of filling the two lists
@@ -92,6 +93,13 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
 // Imports
 bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
+  QString url = par.getString("synthURL");
+  SynthData *synthData = SynthData::downloadSynthInfo(url);
+  if(!synthData->isValid())
+      return false;
+
+
+
   return true;
 }
 
