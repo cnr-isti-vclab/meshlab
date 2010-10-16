@@ -33,6 +33,11 @@ void SynthData::setCollectionRoot(QString collectionRoot)
   _collectionRoot = collectionRoot;
 }
 
+/*
+ * Returns true if this SynthData represents a Synth downloaded from photosynth.net.
+ * Upon a successful download this function returns true if called on the download operation result.
+ * Use this function to determine if the data were successfully downloaded.
+ */
 bool SynthData::isValid()
 {
   bool valid = false;
@@ -43,6 +48,10 @@ bool SynthData::isValid()
 
 QtSoapHttpTransport SynthData::transport;
 
+/*
+ * Contacts the photosynth web service to retrieve informations about
+ * the synth whose identifier is contained within the given url.
+ */
 SynthData *SynthData::downloadSynthInfo(QString url)
 {
   SynthData *synthData = new SynthData();
@@ -50,6 +59,7 @@ SynthData *SynthData::downloadSynthInfo(QString url)
   if(url.isNull() || url.isEmpty())
     return synthData;
 
+  //extracts the synth identifier
   int i = url.indexOf("cid=",0,Qt::CaseInsensitive);
   if(i < 0 || url.length() < i + 40)
     return synthData;
@@ -78,6 +88,9 @@ SynthData *SynthData::downloadSynthInfo(QString url)
   return synthData;
 }
 
+/*
+ * Handles the photosynth web service response.
+ */
 void SynthData::readWSresponse()
 {
   const QtSoapMessage &response = transport.getResponse();
@@ -95,10 +108,14 @@ void SynthData::readWSresponse()
 
   const QtSoapType &returnValue = response.returnValue();
   if (returnValue["Result"].isValid())
+    //the requested synth was found
     if(returnValue["Result"].toString() == "OK")
     {
+      //we can only extract point clouds from synths
       if(returnValue["CollectionType"].toString() == "Synth")
       {
+        //the url of the json string containing data about the synth coordinate systems (different clusters of points)
+        //their camera parameters and the number of binary files containing the point clouds data.
         QString jsonURL = returnValue["JsonUrl"].toString();
         QString jsonString = downloadJsonData(jsonURL);
         if(jsonString.isEmpty())
@@ -108,6 +125,7 @@ void SynthData::readWSresponse()
         }
         if(!this->parseJsonString(jsonString))
           return;
+        //the base url of the binary files containing point clouds data
         this->_collectionRoot = returnValue["CollectionRoot"].toString();
       }
       else
@@ -125,12 +143,22 @@ void SynthData::readWSresponse()
     qWarning("Cannot read the response\n");
 }
 
+/*
+ * Performs an HTTP request to download a json string containing data
+ * about the synth coordinate systems (different clusters of points)
+ * their camera parameters and the number of binary files containing
+ * the point clouds data.
+ */
 QString SynthData::downloadJsonData(QString jsonURL)
 {
   QString str;
   return str;
 }
 
+/*
+ * Extracts from the given string informations about the coordinate
+ * systems and their camera parameters.
+ */
 bool SynthData::parseJsonString(QString jsonString)
 {
   return false;
