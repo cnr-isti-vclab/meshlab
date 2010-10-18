@@ -1,0 +1,49 @@
+/*!
+	\page index.html
+	\title SOAP
+
+    	\section1 Description
+	
+            The Qt SOAP project provides basic web service support
+            with version 1.1 of the SOAP protocol.
+        
+
+	
+	    The SOAP (Simple Object Access Protocol) component recognizes
+	    the XML standard for describing how to exchange messages. Its
+	    primary usage is to invoke web services and get responses from
+            Qt-based applications.
+
+            These classes make it easy to construct, send, receive and
+            process SOAP messages on the client side.
+        
+
+    	
+        \section1 General
+	    \list
+	 \i  \link qtsoap-overview.html The SOAP component \endlink \endlist
+	
+        \section1 Classes
+	    \list
+	 \i  QtSoapMessage \i  QtSoapQName \i  QtSoapType \i  QtSoapArray \i  QtSoapArrayIterator \i  QtSoapStruct \i  QtSoapStructIterator \i  QtSoapSimpleType \i  QtSoapHttpTransport\endlist
+	
+        \section1 Examples
+	    \list
+	 \i  \link google-example.html Using the Google SOAP API \endlink \endlist
+	
+    
+
+    	
+
+    	
+    		\section1 Tested platforms
+		\list
+		\i Qt 4.4, 4.5 / Windows XP / MSVC.NET 2008
+		    \i Qt 4.4, 4.5 / Linux / gcc
+		    \i Qt 4.4, 4.5 / MacOS X 10.5 / gcc
+		    \endlist
+
+    	
+
+	
+	*/
