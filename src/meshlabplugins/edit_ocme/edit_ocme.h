@@ -119,7 +119,9 @@ public slots:
 	void verify();
 	/* ui only*/
 	void fillMeshAttribute();	// fill the list of trimesh attribute
+	void clearMeshAttribute();	// fill the list of trimesh attribute
 	void fillOcmAttribute();	// fill the list of ocm attributes
+	void clearOcmAttribute();	// fill the list of ocm attributes
 	void tri2ocmAttribute();	// copy from meshattr to ocmattr
 	void ocm2triAttribute();	// copy from ocmattr to meshattr
 };

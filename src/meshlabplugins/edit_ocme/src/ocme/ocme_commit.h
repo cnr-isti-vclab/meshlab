@@ -409,13 +409,10 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 	StopRecordCellsSetModification();
 
 
-// TMP DEBUG> DO NOT UPDATE THE IMPOSTORS
-
-	//this->ClearImpostors(this->touched_cells);		// clear the part of the hierarchy containing the touched cells
-	//this->FillSamples(this->touched_cells);				// touched_cells also contains the new cells
-	//this->BuildImpostorsHierarchyPartial(this->touched_cells);
+	this->ClearImpostors(this->touched_cells);		// clear the part of the hierarchy containing the touched cells
+	this->FillSamples(this->touched_cells);				// touched_cells also contains the new cells
+	this->BuildImpostorsHierarchyPartial(this->touched_cells);
 	generic_bool++;
-
 	sprintf(lgn->Buf(),"EndCommit"); lgn->Push();
 }
 #endif

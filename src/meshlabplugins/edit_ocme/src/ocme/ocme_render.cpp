@@ -27,7 +27,7 @@ void DrawCellSel ( CellKey & ck, int mode = 0 )
 
 	vcg::Color4b c;
 	if(mode=3)
-			c = vcg::Color4b(230,0,0,127);
+			c = vcg::Color4b(50,140,0,127);
 	else{
 					c = c.Scatter ( 32,lev+16 );
 			}

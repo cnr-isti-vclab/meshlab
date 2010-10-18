@@ -130,19 +130,6 @@
      <string>r</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="fillAttrOcmPushButton">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>30</y>
-      <width>31</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>r</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="tri2ocmPushButton">
     <property name="geometry">
      <rect>

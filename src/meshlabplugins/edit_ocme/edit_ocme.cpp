@@ -40,7 +40,7 @@ using namespace std;
 using namespace vcg;
 
 
-//#define _RELEASED_
+#define _RELEASED_
 
 OcmeEditPlugin::OcmeEditPlugin() {
 		showTouched = false;
@@ -202,6 +202,7 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 				ocme->Select(selected_cells);
 				cells_to_edit = selected_cells;
 				::RemoveDuplicates(cells_to_edit);
+				fillOcmAttribute();
 				updateButtonsState();
 		}
 
@@ -261,6 +262,9 @@ void OcmeEditPlugin::drawFace(CMeshO::FacePointer , MeshModel &, GLArea * )
 
 void OcmeEditPlugin::updateButtonsState(){
 
+		odw->commitPushButton->setEnabled( ocme_loaded && (!ocme->edited_faces.empty() || !ocme->edited_vertices.empty()));
+		odw->dropSelectionPushButton->setEnabled(ocme_loaded && (!ocme->edited_faces.empty() || !ocme->edited_vertices.empty()));
+		odw->markEditablePushButton->setEnabled(ocme_loaded && (!ocme->edited_faces.empty() || !ocme->edited_vertices.empty()));
 		odw->closeOcmPushButton->setEnabled(ocme_loaded);
 		odw->addPushButton->setEnabled(ocme_loaded);
 		odw->editPushButton->setEnabled(!this->cells_to_edit.empty());
@@ -295,7 +299,6 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	QObject::connect(odw->commitPushButton,SIGNAL(clicked()),this,SLOT(commit()));
 	QObject::connect(odw->addPushButton,SIGNAL(clicked()),this,SLOT(add()));
 	QObject::connect(odw->fillAttrMeshPushButton ,SIGNAL(clicked() ),this,SLOT( fillMeshAttribute()));
-	QObject::connect(odw->fillAttrOcmPushButton ,SIGNAL(clicked() ),this,SLOT( fillOcmAttribute()));
 	QObject::connect(odw->tri2ocmPushButton ,SIGNAL(clicked() ),this,SLOT( tri2ocmAttribute()));
 	QObject::connect(odw->ocm2triPushButton ,SIGNAL(clicked() ),this,SLOT( ocm2triAttribute()));
 	QObject::connect(odw->refreshImpostorsPushButton ,SIGNAL(clicked() ),this,SLOT( refreshImpostors()));
@@ -324,9 +327,10 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	odw->refreshImpostorsPushButton->hide();
 	odw->toggleExtrPushButton->hide();
 	odw->toggleShowTouchedPushButton->hide();
+	odw->editAllPushButton->hide();
+	odw->verifyPushButton->hide();
 
 	odw->fillAttrMeshPushButton->setEnabled(false);
-	odw->fillAttrOcmPushButton->setEnabled(false);
 	odw->ocm2triPushButton->setEnabled(false);
 	odw->tri2ocmPushButton->setEnabled(false);
 
@@ -390,14 +394,21 @@ void OcmeEditPlugin::fillMeshAttribute(){
 	}
 
 }
+void OcmeEditPlugin::clearMeshAttribute(){
+	 odw->meshAttrListWidget->clear();
+}
 void OcmeEditPlugin::fillOcmAttribute(){
 	AttributeMapper am;
 	ocme->GetCellsAttributes(cells_to_edit,am);
 
+	odw->ocmeAttrListWidget->clear();
 	for(unsigned int i  = 0; i < am.vert_attrs.size();++i)
 		odw->ocmeAttrListWidget->addItem( QString("vertex::").append(QString(am.vert_attrs[i].c_str())));
 	for(unsigned int i  = 0; i < am.face_attrs.size();++i)
 		odw->ocmeAttrListWidget->addItem( QString("face::").append(QString(am.face_attrs[i].c_str())));
+}
+void OcmeEditPlugin::clearOcmAttribute(){
+	 odw->ocmeAttrListWidget->clear();
 }
 void OcmeEditPlugin::tri2ocmAttribute(){
 	odw->ocmeAttrListWidget->addItem(odw->meshAttrListWidget->currentItem()->text());
@@ -406,8 +417,6 @@ void OcmeEditPlugin::tri2ocmAttribute(){
 void OcmeEditPlugin::ocm2triAttribute(){
 	odw->meshAttrListWidget->addItem(odw->ocmeAttrListWidget->currentItem()->text());
 }
-
-
 
 
 void OcmeEditPlugin::loadOcm(){
@@ -422,7 +431,7 @@ void OcmeEditPlugin::loadOcm(){
 		ocme  = new OCME();
 		ocme->params.side_factor = 50; // READ IT FROM THE FILEEEEEEEEE
 		ocme->InitRender();
-		ocme->renderParams.only_impostors = true;
+		ocme->renderParams.only_impostors = false;
 //		ocme->renderParams.memory_limit_in_core = 100;
 		ocme->Open ( ocm_name.toAscii() );
 
@@ -485,6 +494,7 @@ void OcmeEditPlugin::createOcm(){
 #endif
 	if(!ocm_name.isEmpty()){
 		ocme  = new OCME();
+		ocm_name.resize(ocm_name.size()-5);
 		ocme->Create(ocm_name.toAscii());
 		ocme->InitRender();
 
@@ -508,6 +518,9 @@ void OcmeEditPlugin::drop(){
 		cells_to_edit.clear();
 		ocme->DropEdited();
 		ocme->renderCache.controller.resume();
+		clearOcmAttribute();
+		clearMeshAttribute();
+		gla->update();
 }
 
 void OcmeEditPlugin::markEditable(){
@@ -529,6 +542,7 @@ void OcmeEditPlugin::markEditable(){
 								 ed = ed &&  !lockedV[(*fi).V(i)];
 						if(ed) (*fi).SetS();
 						}
+		
 }
 void OcmeEditPlugin::editAll(){
 
@@ -621,7 +635,7 @@ void OcmeEditPlugin::edit(){
 	vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 
 	ocme->renderCache.controller.resume();
-
+	updateButtonsState();
 }
 
 void OcmeEditPlugin::commit(){
@@ -632,6 +646,9 @@ void OcmeEditPlugin::commit(){
 	mm->cm.Clear();
 	ocme->renderCache.Start();
 	rendering.unlock();
+	this->clearMeshAttribute();
+	this->clearOcmAttribute();
+	gla -> update();
 }
 
 void OcmeEditPlugin::add(){
