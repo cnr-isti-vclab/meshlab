@@ -2,7 +2,7 @@
 #define GMPFRAC_H
 
 #include <iostream>
-#include <gmpxx.h>
+#include <mpirxx.h>
 
 inline long floor(const mpq_class &x) {
     mpz_class q;
