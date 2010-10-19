@@ -14,10 +14,8 @@
 #ifndef FILTER_PHOTOSYNTH_PLUGIN_H
 #define FILTER_PHOTOSYNTH_PLUGIN_H
 
-#include <QObject>
+//#include <QObject>
 #include <common/interfaces.h>
-
-class QScriptEngine;
 
 class FilterPhotosynthPlugin : public QObject, public MeshFilterInterface
 {
@@ -29,7 +27,7 @@ public:
 
   FilterPhotosynthPlugin();
 
-  virtual QString pluginName(void) const { return "ExtraSamplePlugin"; }
+  virtual QString pluginName(void) const { return "PhotosynthImporterPlugin"; }
 
   QString filterName(FilterIDType filter) const;
   QString filterInfo(FilterIDType filter) const;

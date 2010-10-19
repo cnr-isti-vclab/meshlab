@@ -2,7 +2,9 @@
 #define SYNTHDATA_H
 
 #define FILTER_PHOTOSYNTH_DEBUG_SOAP
+#define PRINT_JSON
 
+//#include <QObject>
 #include <QString>
 #include <QtSoapHttpTransport>
 
@@ -33,7 +35,7 @@ private:
 
 /*
  * Represents an independent cluster of points within the synth,
- * it is identified by ad ID, contains a point cloud and
+ * it is identified by an ID, contains a point cloud and
  * has its own camera parameters
  */
 class CoordinateSystem
@@ -56,6 +58,17 @@ class SynthData : public QObject
   static QtSoapHttpTransport transport;
 
 public:
+  enum Errors
+  {
+    NO_ERROR,
+    PENDING,
+    WRONG_URL,
+    WEBSERVICE_ERROR,
+    NEGATIVE_RESPONSE,
+    UNEXPECTED_RESPONSE,
+    WRONG_COLLECTION_TYPE
+  };
+
   SynthData(QObject *parent = 0);
   SynthData(const SynthData &other);
   ~SynthData();
@@ -66,12 +79,12 @@ public:
 
 private slots:
   void readWSresponse();
+  void parseJsonString(QNetworkReply *httpResponse);
 
 private:
   void setCollectionID(QString id);
   void setCollectionRoot(QString collectionRoot);
-  QString downloadJsonData(QString jsonURL);
-  bool parseJsonString(QString jsonString);
+  void downloadJsonData(QString jsonURL);
 
 private:
   //this is ths cid parameter taken from the url used to access the synth on photosynth.net
@@ -80,6 +93,8 @@ private:
   QString _collectionRoot;
   //Each coordinate system is a different cluster of point in the synth
   QList<CoordinateSystem> *_coordinateSystems;
+  //tells if this synth is valid, or if errors were encountered during the import process
+  Errors _state;
 };
 
 /*

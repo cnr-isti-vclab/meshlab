@@ -1,5 +1,12 @@
 #include "synthData.h"
 #include <QtSoapMessage>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QScriptEngine>
+#include <QScriptValue>
+#include <QScriptValueIterator>
+//#include <parser.h>
 
 /*************
  * SynthData *
@@ -16,6 +23,7 @@ SynthData::SynthData(const SynthData &other)
   _collectionID = other._collectionID;
   _collectionRoot = other._collectionRoot;
   _coordinateSystems = new QList<CoordinateSystem>(*other._coordinateSystems);
+  _state = PENDING;
 }
 
 SynthData::~SynthData()
@@ -41,7 +49,7 @@ void SynthData::setCollectionRoot(QString collectionRoot)
 bool SynthData::isValid()
 {
   bool valid = false;
-  if(!_collectionID.isNull() && !_collectionID.isEmpty() && !_collectionRoot.isNull() && !_collectionRoot.isEmpty())
+  if(_state == NO_ERROR)
       valid = true;
   return valid;
 }
@@ -57,12 +65,18 @@ SynthData *SynthData::downloadSynthInfo(QString url)
   SynthData *synthData = new SynthData();
 
   if(url.isNull() || url.isEmpty())
+  {
+    synthData->_state = WRONG_URL;
     return synthData;
+  }
 
   //extracts the synth identifier
   int i = url.indexOf("cid=",0,Qt::CaseInsensitive);
   if(i < 0 || url.length() < i + 40)
+  {
+    synthData->_state = WRONG_URL;
     return synthData;
+  }
 
   ImportSettings::ImportSource importSource = ImportSettings::WEB_SITE;
   QString cid = url.mid(i + 4, 36);
@@ -84,7 +98,7 @@ SynthData *SynthData::downloadSynthInfo(QString url)
 
     transport.submitRequest(message, "/photosynthws/PhotosynthService.asmx");
   }
-
+  synthData->_state = PENDING;
   return synthData;
 }
 
@@ -97,13 +111,12 @@ void SynthData::readWSresponse()
   if(response.isFault())
   {
     qWarning("ERROR: %s\n",response.faultString().toString().toLatin1().constData());
+    _state = WEBSERVICE_ERROR;
     return;
   }
 
 #ifdef FILTER_PHOTOSYNTH_DEBUG_SOAP
-  printf("-----------RESPONSE------------\n");
   qWarning("%s\n", response.toXmlString().toLatin1().constData());
-  printf("-----------------------\n");
 #endif
 
   const QtSoapType &returnValue = response.returnValue();
@@ -117,7 +130,9 @@ void SynthData::readWSresponse()
         //the url of the json string containing data about the synth coordinate systems (different clusters of points)
         //their camera parameters and the number of binary files containing the point clouds data.
         QString jsonURL = returnValue["JsonUrl"].toString();
-        QString jsonString = downloadJsonData(jsonURL);
+        //QString jsonString = downloadJsonData(jsonURL);
+        downloadJsonData(jsonURL);
+        /*
         if(jsonString.isEmpty())
         {
           qWarning("Could not download Json data.\n");
@@ -125,22 +140,28 @@ void SynthData::readWSresponse()
         }
         if(!this->parseJsonString(jsonString))
           return;
+        */
         //the base url of the binary files containing point clouds data
         this->_collectionRoot = returnValue["CollectionRoot"].toString();
       }
       else
       {
         qWarning("This filter is compatible with photosynths only, the provided url belongs to the category: %s\n",returnValue["CollectionType"].toString().toLatin1().constData());
+        _state = WRONG_COLLECTION_TYPE;
         return;
       }
     }
     else
     {
       qWarning("The web service returned: %s\n",returnValue["Result"].toString().toLatin1().constData());
+      _state = NEGATIVE_RESPONSE;
       return;
     }
   else
+    {
     qWarning("Cannot read the response\n");
+    _state = UNEXPECTED_RESPONSE;
+    }
 }
 
 /*
@@ -149,19 +170,75 @@ void SynthData::readWSresponse()
  * their camera parameters and the number of binary files containing
  * the point clouds data.
  */
-QString SynthData::downloadJsonData(QString jsonURL)
+void SynthData::downloadJsonData(QString jsonURL)
 {
-  QString str;
-  return str;
+  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+  connect(manager, SIGNAL(finished(QNetworkReply*)),
+          this, SLOT(parseJsonString(QNetworkReply*)));
+
+  manager->get(QNetworkRequest(QUrl(jsonURL)));
 }
 
 /*
  * Extracts from the given string informations about the coordinate
  * systems and their camera parameters.
  */
-bool SynthData::parseJsonString(QString jsonString)
+void SynthData::parseJsonString(QNetworkReply *httpResponse)
 {
-  return false;
+  QByteArray payload = httpResponse->readAll();
+  QString json(payload);
+  //QJson::Parser parser;
+#ifdef PRINT_JSON
+  qWarning("json string:\n%s",json.toLatin1().constData());
+#endif
+  /*
+  bool ok;
+  QVariant result = parser.parse("[1,2,3]", &ok);
+
+  if (!ok)
+      qDebug() << "something went wrong during the conversion";
+  else
+      qDebug() << "converted to" << result;
+  /*
+  QScriptEngine engine;
+  QScriptValue jsonData = engine.evaluate(json);
+  if(engine.hasUncaughtException())
+  {
+    qWarning("Uncaught exception\n");
+    if(jsonData.isError())
+    {
+      qWarning("%s %d\n",jsonData.toString().toLatin1().constData(),json.length());
+    }
+  }
+  QScriptValue collections = jsonData.property("l");
+  if(!collections.isValid())
+  {
+    qWarning("Invalid property\n");
+  }
+  if(collections.isArray())
+  {
+    qWarning("isArray\n");
+    QStringList items;
+    qScriptValueToSequence(collections, items);
+    if(!items.isEmpty())
+      qDebug("value %s",items.first().toStdString().c_str());
+    else
+      qWarning("La lista è vuota\n");
+  }
+  /*
+  QScriptValueIterator iterator(collections);
+  QScriptValue collection;
+  if(iterator.hasNext())
+  {
+    qWarning("Ramo if\n");
+    iterator.next();
+    collection = iterator.value();
+    //qDebug() << iterator.name() << ": " << iterator.value().toString();
+    qWarning() << iterator.name();
+  }
+  else
+    qWarning("Ramo else\n");
+  */
 }
 
 /******************

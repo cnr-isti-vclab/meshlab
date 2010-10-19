@@ -11,8 +11,9 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "filter_photosynth.h"
 #include "synthData.h"
+#include "filter_photosynth.h"
+//#include "synthData.h"
 #include <QtScript>
 
 // Constructor usually performs only two simple tasks of filling the two lists

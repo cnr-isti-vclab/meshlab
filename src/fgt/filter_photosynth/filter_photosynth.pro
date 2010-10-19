@@ -1,10 +1,11 @@
 include (../../shared.pri)
-# THIS IS TEMPORARY
-# WARNING:
-# in order to properly compile this plugin, you need to download and install the qtsoap package
-# http://qt.nokia.com/products/appdev/add-on-products/catalog/4/Utilities/qtsoap/
-# and modify the line below according to your installation directory
-include(C:\Qt\qtsoap-2.7_1-opensource\src\qtsoap.pri)
+include(../../external/qtsoap-2.7_1/src/qtsoap.pri)
+
+#INCLUDEPATH += C:\Emanuele\Uni\FGT\devel\qjson\qjson\src
+#LIBS += C:\Emanuele\Uni\FGT\devel\meshlab\src\external\lib
+#INCLUDEPATH += ../../external/qjson/src
+#win32-g++:LIBS += ../../external/lib/win32-gcc/libqjson.a
+#win32-g++:LIBS += -L../../external/lib/win32-gcc/ -lqjson
 
 HEADERS       += filter_photosynth.h \
     synthData.h
