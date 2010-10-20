@@ -13,8 +13,8 @@
 
 #include "synthData.h"
 #include "filter_photosynth.h"
-//#include "synthData.h"
 #include <QtScript>
+#include <unistd.h>
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -96,10 +96,43 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 {
   QString url = par.getString("synthURL");
   SynthData *synthData = SynthData::downloadSynthInfo(url);
+
+  //Hangs on active wait until data are available from the server
+  while(!synthData->dataReady())
+  {
+    int progress = 0;
+    switch(synthData->step())
+    {
+    case SynthData::WEB_SERVICE:
+      progress = 0;
+      break;
+    case SynthData::DOWNLOAD_JSON:
+      progress = 25;
+      break;
+    case SynthData::PARSE_JSON:
+      progress = 50;
+      break;
+    case SynthData::DOWNLOAD_BIN:
+      progress = 75;
+      break;
+    case SynthData::LOADING_BIN:
+      progress = 100;
+    }
+
+    cb(progress,synthData->progressInfo());
+    //allows qt main loop to process the events relative to the response from the server,
+    //triggering the signals that cause the invocation of the slots that process the response
+    //and set the control variable that stops this active wait.
+    //Note that a call to the function usleep() causes an infinite loop, because when the process awakes,
+    //the control remains inside this loop and doesn't reach qt main loop that this way can't process events.
+    QApplication::processEvents();
+  }
+
   if(!synthData->isValid())
-      return false;
-
-
+  {
+    this->errorMessage = SynthData::errors[synthData->state()];
+    return false;
+  }
 
   return true;
 }

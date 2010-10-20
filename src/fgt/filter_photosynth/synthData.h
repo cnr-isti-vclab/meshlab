@@ -1,8 +1,8 @@
 #ifndef SYNTHDATA_H
 #define SYNTHDATA_H
 
-#define FILTER_PHOTOSYNTH_DEBUG_SOAP
-#define PRINT_JSON
+//#define FILTER_PHOTOSYNTH_DEBUG_SOAP
+//#define PRINT_JSON
 
 //#include <QObject>
 #include <QString>
@@ -21,8 +21,13 @@ typedef struct Point
 /*
  * Represents a set of points
  */
-class PointCloud
+class PointCloud : public QObject
 {
+public:
+  PointCloud(int coordSysID, int binFileCount, QObject *parent = 0);
+  ~PointCloud();
+  int binFileCount() const;
+
 private:
   //the coordinate system id within the synth which this set belongs to
   int _coordinateSystem;
@@ -30,7 +35,7 @@ private:
   //and tells how many files this cloud is split into
   int _binFileCount;
   int _numberOfPoints;
-  QList<Point> _points;
+  QList<Point> *_points;
 };
 
 /*
@@ -38,14 +43,20 @@ private:
  * it is identified by an ID, contains a point cloud and
  * has its own camera parameters
  */
-class CoordinateSystem
+class CoordinateSystem : public QObject
 {
+public:
+  CoordinateSystem(int id, QObject *parent = 0);
+  void setPointCloud(PointCloud *pointCloud);
+  const PointCloud *pointCloud();
+  int id();
+
 private:
-    //this is the m parameter in the points_m_n.bin files containing the synth point clounds
-    int _id;
-    bool _shouldBeExported;
-    PointCloud _pointCloud;
-    //CameraParameterList _cameraParameterList;
+  //this is the m parameter in the points_m_n.bin files containing the synth point clounds
+  int _id;
+  bool _shouldBeExported;
+  PointCloud *_pointCloud;
+  //CameraParameterList _cameraParameterList;
 };
 
 /*
@@ -58,21 +69,40 @@ class SynthData : public QObject
   static QtSoapHttpTransport transport;
 
 public:
+  //contains errors descriptions
+  static const QString errors[];
+  //contains the strings used by cb() funcion
+  static const char *progress[];
+
   enum Errors
   {
-    NO_ERROR,
-    PENDING,
-    WRONG_URL,
+    WRONG_URL = 0,
     WEBSERVICE_ERROR,
     NEGATIVE_RESPONSE,
     UNEXPECTED_RESPONSE,
-    WRONG_COLLECTION_TYPE
+    WRONG_COLLECTION_TYPE,
+    JSON_PARSING,
+    NO_ERROR,
+    PENDING
+  };
+
+  enum Progress
+  {
+    WEB_SERVICE = 0,
+    DOWNLOAD_JSON,
+    PARSE_JSON,
+    DOWNLOAD_BIN,
+    LOADING_BIN
   };
 
   SynthData(QObject *parent = 0);
   SynthData(const SynthData &other);
   ~SynthData();
   bool isValid();
+  bool dataReady();
+  int state();
+  int step();
+  const char* progressInfo();
 
 public:
   static SynthData *downloadSynthInfo(QString url);
@@ -80,11 +110,13 @@ public:
 private slots:
   void readWSresponse();
   void parseJsonString(QNetworkReply *httpResponse);
+  void loadBinFile(QNetworkReply *httpResponse);
 
 private:
   void setCollectionID(QString id);
   void setCollectionRoot(QString collectionRoot);
   void downloadJsonData(QString jsonURL);
+  void downloadBinFiles();
 
 private:
   //this is ths cid parameter taken from the url used to access the synth on photosynth.net
@@ -92,9 +124,16 @@ private:
   //the base url of the binary files points_m_n.bin containing point clouds data
   QString _collectionRoot;
   //Each coordinate system is a different cluster of point in the synth
-  QList<CoordinateSystem> *_coordinateSystems;
+  QList<CoordinateSystem*> *_coordinateSystems;
   //tells if this synth is valid, or if errors were encountered during the import process
   Errors _state;
+  Progress _progress;
+  //when a SynthData is instantiated _dataReady == false
+  //until the data are downloaded from photosynth server
+  bool _dataReady;
+  //used to count how many responses to bin files requests have been processed
+  //when _semaphore reaches 0 _dataReady can be set to true
+  int _semaphore;
 };
 
 /*

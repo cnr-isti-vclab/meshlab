@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <QScriptEngine>
 #include <QScriptValue>
+#include <QScriptValueIterator>
 #include "handler.h"
 
-//#define PRINT_JSON
+#define PRINT_JSON
 
 QtSoapHttpTransport transport;
 
@@ -53,6 +54,21 @@ void Handler::readWSresponse()
             printf("Cannot read the response\n");
 }
 
+void printJsonObject(QString tabs, int indent, QScriptValue val, int limit)
+{
+  static int count = 0;
+  QScriptValueIterator it(val);
+  //while(it.hasNext() && count < 100)
+  while(it.hasNext())
+  {
+    it.next();
+    qDebug() << tabs << it.name() << ": " << it.value().toString();
+    if(it.value().isObject() && indent < limit)
+      printJsonObject(tabs + QString("\t"), indent + 1, it.value(), limit);
+    ++count;
+  }
+}
+
 //effettua una richiesta http all'indirizzo jsonURL per ottenere una stringa json
 void Handler::downloadJsonData(QString jsonURL)
 {
@@ -68,10 +84,12 @@ void Handler::parseJsonString(QNetworkReply *httpResponse)
     QByteArray payload = httpResponse->readAll();
     QString json(payload);
 #ifdef PRINT_JSON
-    qWarning("json string:\n%s\n",json.toLatin1().constData());
+    qWarning("First 1000 characters of json string:\n%s\n",json.toLatin1().left(1000).constData());
+    qWarning("Last 1000 characters of json string:\n%s\n",json.toLatin1().right(1000).constData());
 #endif
     QScriptEngine engine;
-    QScriptValue jsonData = engine.evaluate(json);
+    QScriptValue jsonData = engine.evaluate("(" + json + ")");
+    qWarning("ciao\n");
     if(engine.hasUncaughtException())
     {
       qWarning("Uncaught exception\n");
@@ -88,16 +106,45 @@ void Handler::parseJsonString(QNetworkReply *httpResponse)
     {
       qWarning("Invalid property\n");
     }
-    if(collections.isArray())
+    printJsonObject(QString(),0,collections,3);
+    /*
+    QScriptValueIterator iterator(collections);
+    while(iterator.hasNext())
     {
-      qWarning("isArray\n");
-      QStringList items;
-      qScriptValueToSequence(collections, items);
-      if(!items.isEmpty())
-        qDebug("value %s",items.first().toStdString().c_str());
-      else
-        qWarning("La lista è vuota\n");
-    }
+      iterator.next();
+      qDebug() << iterator.name() << ": " << iterator.value().toString();
+      if(iterator.value().isObject())
+      {
+        qDebug() << "WE";
+        QScriptValueIterator it(iterator.value());
+        while(it.hasNext())
+        {
+          it.next();
+          qDebug() << it.name() << ": " << it.value().toString();
+          if(it.name() == "x")
+          {
+            QScriptValueIterator it2(it.value());
+            while(it2.hasNext())
+            {
+              it2.next();
+              qDebug() << it2.name() << ": " << it2.value().toString();
+              if(it2.value().isObject())
+                printJsonObject(QString(),0,it2.value(),5);
+              /*
+              {
+                QScriptValueIterator it3(it2.value());
+                while(it3.hasNext())
+                {
+                  it3.next();
+                  qDebug() << it3.name() << ": " << it3.value().toString();
+                }
+              }
+
+            }
+          }
+        }
+      }
+    }*/
 }
 
 int main(int argc, char *argv[])
