@@ -921,8 +921,9 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 	minVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->min;
 	maxVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->max;
 	valueLE = new QLineEdit(p);
+  valueLE->setAlignment(Qt::AlignRight);
 	valueSlider = new QSlider(Qt::Horizontal,p);
-    valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+  valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 	fieldDesc = new QLabel(rp->pd->fieldDesc);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
@@ -954,7 +955,6 @@ DynamicFloatWidget::~DynamicFloatWidget()
 float DynamicFloatWidget::getValue()
 {
 	return float(valueLE->text().toDouble());
-
 }
 
 void DynamicFloatWidget::setValue(float  newVal)
@@ -1144,6 +1144,7 @@ void IntWidget::setWidgetValue( const Value& nv )
 FloatWidget::FloatWidget( QWidget* p,RichFloat* rpar )
 :LineEditWidget(p,rpar)
 {
+  this->lned->setAlignment(Qt::AlignRight);
 	lned->setText(QString::number(rp->val->getFloat(),'g',3));
 }
 
