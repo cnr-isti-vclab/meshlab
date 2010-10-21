@@ -1024,6 +1024,8 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 		Log("Computing %i loops from %f to %f",numLoop,startAngleDeg,endAngleDeg);
 
 		MeshModel *um=md.addNewMesh("Unrolled Mesh");
+    um->updateDataMask(&m);
+    um->cm.textures = m.cm.textures;
 		float avgZ=0;
 		CMeshO::VertexIterator vi;
 		// First loop duplicate accordingly the vertices.
@@ -1042,7 +1044,8 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 							{
 								CMeshO::VertexIterator nvi = tri::Allocator<CMeshO>::AddVertices(um->cm,1);
 								VertRefLoop[loopIndex][vi-m.cm.vert.begin()] = nvi - um->cm.vert.begin();
-								nvi->P().X()=math::ToRad(thetaDeg);
+                nvi->ImportData(*vi);
+                nvi->P().X()=-math::ToRad(thetaDeg);
 								nvi->P().Y()=vi->P().Y();
 								nvi->P().Z()=ro;
 								//nvi->N()=(*vi).N();
@@ -1085,6 +1088,7 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 											(Distance(um->cm.vert[i0].P(),um->cm.vert[i2].P()) < avgZ/10.0) )
 												{
 													CMeshO::FaceIterator nfi = tri::Allocator<CMeshO>::AddFaces(um->cm,1);
+                         (*nfi).ImportData(*fi);
 													nfi->V(0) = &um->cm.vert[i0];
 													nfi->V(1) = &um->cm.vert[i1];
 													nfi->V(2) = &um->cm.vert[i2];
