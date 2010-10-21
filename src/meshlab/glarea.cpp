@@ -1074,6 +1074,11 @@ void GLArea::sendCameraPos(QString name)
 	emit transmitViewDir(name, pos);
 }
 
+void GLArea::sendShot(QString name)
+{
+  Shotd curShot=shotFromTrackball().first;
+  emit transmitShot(name, curShot);
+}
 
 Point3f GLArea::getViewDir()
 {
@@ -1175,7 +1180,7 @@ void GLArea::loadRaster(int id)
 
 			//TODO temporaneo... poi bisogna creare un defaultShot
 			createOrthoView("Front");
-			Shot* tmpShot = &(shotFromTrackball().first);
+      Shotd* tmpShot = &(shotFromTrackball().first);
 			rm->setShot(*tmpShot);
 		}
 }
@@ -1257,7 +1262,7 @@ float GLArea::getCameraDistance()
 	return cameraDist;
 }
 
-void GLArea::initializeShot(Shot &shot) 
+void GLArea::initializeShot(Shotd &shot)
 {
 	//Da vedere
 	shot.Intrinsics.PixelSizeMm[0]=0.036916077;
@@ -1312,7 +1317,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 {
 	QDomElement root = doc.documentElement();
 	QDomNode node;
-  Shot shot;
+  Shotd shot;
 
 	node = root.firstChild();
 
@@ -1362,7 +1367,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 
 	trackball.track.sca =fabs(p2.Z()/p1.Z());
 
-	loadShot(QPair<Shot, float> (shot,trackball.track.sca));
+  loadShot(QPair<Shotd, float> (shot,trackball.track.sca));
 
 }
 
@@ -1371,14 +1376,14 @@ ViewState file is an xml file format created by Meshlab with the action "copyToC
 */
 void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 {
-  Shot shot;
+  Shotd shot;
 	QDomElement root = doc.documentElement();
 	QDomNode node = root.firstChild();
 
   while(!node.isNull())
   {
     if (QString::compare(node.nodeName(),"CamParam")==0)
-      ReadShotFromQDomNode<Shot>(shot,node);
+      ReadShotFromQDomNode<Shotd>(shot,node);
 		else if (QString::compare(node.nodeName(),"ViewSettings")==0)
 		{
 			QDomNamedNodeMap attr = node.attributes();
@@ -1405,13 +1410,13 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 		node = node.nextSibling();
 	}
 
-	loadShot(QPair<Shot, float> (shot,trackball.track.sca));
+  loadShot(QPair<Shotd, float> (shot,trackball.track.sca));
 }
 
 void GLArea::viewToClipboard()
 {
 	QClipboard *clipboard = QApplication::clipboard();
-	Shot shot = shotFromTrackball().first;
+  Shotd shot = shotFromTrackball().first;
 
 	QDomDocument doc("ViewState");
 	QDomElement root = doc.createElement("project");
@@ -1485,9 +1490,9 @@ void GLArea::viewFromClipboard()
   loadViewFromViewStateFile(doc);
 }
 
-QPair<vcg::Shot<double>,float> GLArea::shotFromTrackball()
+QPair<vcg::Shotd,float> GLArea::shotFromTrackball()
 {
-	Shot shot;
+  Shotd shot;
 	initializeShot(shot);
 
 	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
@@ -1498,11 +1503,11 @@ QPair<vcg::Shot<double>,float> GLArea::shotFromTrackball()
 	//add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have te same view---------------
 	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
 	//Add translation S^(-1) R^(-1)(gl)
-	//Shot doesn't introduce scaling
+  //Shotd doesn't introduce scaling
 	//---------------------------------------------------------------------
 	shot.Extrinsics.SetTra( shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
 	
-	Shot newShot = track2ShotCPU(shot, &trackball);
+  vcg::Shotd newShot = track2ShotCPU<double>(shot, &trackball);
 
 	////Expressing scaling as a translation along z
 	////k is the ratio between default scale and new scale
@@ -1520,12 +1525,12 @@ QPair<vcg::Shot<double>,float> GLArea::shotFromTrackball()
 
 	//newShot.Extrinsics.SetTra(t0);
 
-	return QPair<Shot, float> (newShot,trackball.track.sca);
+  return QPair<Shotd, float> (newShot,trackball.track.sca);
 }
 
-void GLArea::loadShot(const QPair<vcg::Shot<double>,float> &shotAndScale){
+void GLArea::loadShot(const QPair<vcg::Shotd,float> &shotAndScale){
 	
-	Shot shot = shotAndScale.first;
+  Shotd shot = shotAndScale.first;
 	
 	fov = shot.GetFovFromFocal();
 
@@ -1569,7 +1574,7 @@ void GLArea::loadShot(const QPair<vcg::Shot<double>,float> &shotAndScale){
 
 void GLArea::createOrthoView(QString dir)
 {
-	Shot view;
+  Shotd view;
 	initializeShot(view);
 
 	fov =5;
@@ -1603,13 +1608,13 @@ void GLArea::createOrthoView(QString dir)
 	//add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have te same view---------------
 	//T(gl)*S*R*T(t) => SR(gl+t) => S R (S^(-1)R^(-1)gl + t)
 	//Add translation S^(-1) R^(-1)(gl)
-	//Shot doesn't introduce scaling
+  //Shotd doesn't introduce scaling
 	//---------------------------------------------------------------------
 	view.Extrinsics.SetTra( view.Extrinsics.Tra() + (Inverse(view.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
 
-	Shot shot = track2ShotCPU(view, &trackball);
+  Shotd shot = track2ShotCPU(view, &trackball);
 	
-	QPair<Shot,float> shotAndScale = QPair<Shot,float> (shot, trackball.track.sca);
+  QPair<Shotd,float> shotAndScale = QPair<Shotd,float> (shot, trackball.track.sca);
 	loadShot(shotAndScale);
 }
 

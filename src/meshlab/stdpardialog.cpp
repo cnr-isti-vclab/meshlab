@@ -584,6 +584,72 @@ void Point3fWidget::setWidgetValue( const Value& nv )
 	for(unsigned int ii = 0; ii < 3;++ii)
 		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
 }
+/********************/
+// ShotdWidget Implementation
+
+ShotdWidget::ShotdWidget(QWidget *p, RichShotd* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
+{
+
+  paramName = rpf->name;
+  //int row = gridLay->rowCount() - 1;
+
+  descLab = new QLabel(rpf->pd->fieldDesc,p);
+  descLab->setToolTip(rpf->pd->fieldDesc);
+  gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+
+  QHBoxLayout* lay = new QHBoxLayout(p);
+
+
+  this->setValue(paramName,rp->val->getShotd());
+  if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
+    {
+      getShotButton = new QPushButton("Get shot",p);
+      lay->addWidget(getShotButton);
+
+      connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
+      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotd)),this,SLOT(setValue(QString,vcg::Shotd)));
+      connect(this,SIGNAL(askShot(QString)),gla_curr,SLOT(sendShot(QString)));
+    }
+  gridLay->addLayout(lay,row,1,Qt::AlignTop);
+}
+
+void ShotdWidget::getShot()
+{
+  emit askShot(paramName);
+}
+
+ShotdWidget::~ShotdWidget() {}
+
+void ShotdWidget::setValue(QString name,Shotd newVal)
+{
+  if(name==paramName)
+  {
+    curShot=newVal;
+  }
+}
+
+vcg::Shotd ShotdWidget::getValue()
+{
+  return curShot;
+}
+
+void ShotdWidget::collectWidgetValue()
+{
+  rp->val->set(ShotdValue(curShot));
+}
+
+void ShotdWidget::resetWidgetValue()
+{
+  curShot = rp->pd->defVal->getShotd();
+}
+
+void ShotdWidget::setWidgetValue( const Value& nv )
+{
+  curShot = nv.getShotd();
+}
+
+/********************/
+// ComboWidget End Implementation
 
 ComboWidget::ComboWidget(QWidget *p, RichParameter* rpar) :MeshLabWidget(p,rpar) {
 }
@@ -1355,6 +1421,12 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichPoint3f& pd )
 	vcg::Point3f pp = pd.val->getPoint3f(); 
 	QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")"; 
 	lastCreated = new QTableWidgetItem(pst/*,lst*/);
+}
+
+void RichParameterToQTableWidgetItemConstructor::visit( RichShotd& pd )
+{
+  assert(0); ///
+  lastCreated = new QTableWidgetItem(QString("TODO")/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit(RichOpenFile& pd)

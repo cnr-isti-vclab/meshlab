@@ -262,6 +262,34 @@ protected:
 };
 
 
+//public QHBoxLayout,
+class ShotdWidget : public MeshLabWidget
+{
+  Q_OBJECT
+
+public:
+  ShotdWidget(QWidget *p, RichShotd* rpf, QWidget *gla);
+  ~ShotdWidget();
+  QString paramName;
+  vcg::Shotd getValue();
+
+  void collectWidgetValue();
+  void resetWidgetValue();
+  void setWidgetValue(const Value& nv);
+
+  public slots:
+  void  getShot();
+  void  setValue(QString name, vcg::Shotd val);
+  signals:
+  void askShot(QString);
+
+protected:
+  vcg::Shotd curShot;
+  QLineEdit * shotLE;
+  QPushButton *getShotButton;
+  QLabel* descLab;
+};
+
 
 //public QGridLayout,
 class DynamicFloatWidget : public MeshLabWidget
@@ -617,6 +645,7 @@ public:
 	void visit(RichString& pd){lastCreated = new StringWidget(par,&pd);};
 	void visit(RichMatrix44f& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new Matrix44fWidget(par,&pd);*/};
 	void visit(RichPoint3f& pd){lastCreated = new Point3fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
+  void visit(RichShotd& pd){lastCreated = new ShotdWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
 	void visit(RichColor& pd){lastCreated = new ColorWidget(par,&pd);};
 	void visit(RichAbsPerc& pd){lastCreated = new AbsPercWidget(par,&pd);};
 	void visit(RichEnum& pd){lastCreated = new EnumWidget(par,&pd);};
@@ -646,6 +675,7 @@ public:
 	void visit(RichString& pd);
 	void visit(RichMatrix44f& /*pd*/){assert(0);};
 	void visit(RichPoint3f& pd);
+  void visit(RichShotd& pd);
 	void visit(RichColor& pd);
 	void visit(RichAbsPerc& pd);
 	void visit(RichEnum& pd);

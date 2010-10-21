@@ -70,7 +70,7 @@ class GLArea : public Viewer
 {
 	Q_OBJECT
 
-	typedef vcg::Shot<double> Shot;
+  //typedef vcg::Shot<double> Shot;
 
 public:
     GLArea(MultiViewer_Container *mvcont, RichParameterSet *current);
@@ -217,12 +217,14 @@ signals :
 		void transmitViewDir(QString name, vcg::Point3f dir);
 		void transmitViewPos(QString name, vcg::Point3f dir);
 		void transmitSurfacePos(QString name,vcg::Point3f dir);
-		void transmitCameraPos(QString name,vcg::Point3f dir);
+    void transmitCameraPos(QString name,vcg::Point3f dir);
+    void transmitShot(QString name, vcg::Shotd);
 public slots:
 		void sendViewPos(QString name);
 		void sendSurfacePos(QString name);
 		void sendViewDir(QString name);
 		void sendCameraPos(QString name);
+    void sendShot(QString name);
 
 
 public:
@@ -342,17 +344,17 @@ private:
 
 	//-----------Shot support----------------------------
 public:
-	QPair<Shot, float > shotFromTrackball();
+  QPair<vcg::Shotd, float > shotFromTrackball();
 	bool viewFromFile();
 	void createOrthoView(QString);
 	void viewToClipboard();
 	void viewFromClipboard();
-	void loadShot(const QPair<Shot, float> &) ;
+  void loadShot(const QPair<vcg::Shotd, float> &) ;
 
 private:
 
 	float getCameraDistance();
-	void initializeShot(Shot &shot);
+  void initializeShot(vcg::Shotd &shot);
   void loadShotFromTextAlignFile(const QDomDocument &doc);
   void loadViewFromViewStateFile(const QDomDocument &doc);
 	
