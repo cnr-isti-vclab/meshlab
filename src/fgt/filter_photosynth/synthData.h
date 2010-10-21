@@ -10,9 +10,9 @@
 
 typedef struct Point
 {
-  qreal _x;
-  qreal _y;
-  qreal _z;
+  float _x;
+  float _y;
+  float _z;
   uchar _r;
   uchar _g;
   uchar _b;
@@ -27,6 +27,8 @@ public:
   PointCloud(int coordSysID, int binFileCount, QObject *parent = 0);
   ~PointCloud();
   int binFileCount() const;
+  void addPoint(Point p);
+  const QList<Point> *points() const;
 
 private:
   //the coordinate system id within the synth which this set belongs to
@@ -82,6 +84,8 @@ public:
     UNEXPECTED_RESPONSE,
     WRONG_COLLECTION_TYPE,
     JSON_PARSING,
+    READING_BIN_DATA,
+    BIN_DATA_FORMAT,
     NO_ERROR,
     PENDING
   };
@@ -103,6 +107,7 @@ public:
   int state();
   int step();
   const char* progressInfo();
+  const QList<CoordinateSystem*> *coordinateSystems();
 
 public:
   static SynthData *downloadSynthInfo(QString url);
@@ -160,5 +165,14 @@ private:
   //specifies if the camera parameters have to be imported
   bool _importCameraParameters;
 };
+
+/*********************
+ * Utility functions *
+ *********************/
+
+int readCompressedInt(QIODevice *device, bool &error);
+float readBigEndianSingle(QIODevice *device, bool &error);
+unsigned short readBigEndianUInt16(QIODevice *device, bool &error);
+void printPoint(Point *p);
 
 #endif // SYNTHDATA_H

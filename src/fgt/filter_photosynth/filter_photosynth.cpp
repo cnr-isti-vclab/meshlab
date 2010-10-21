@@ -16,6 +16,8 @@
 #include <QtScript>
 #include <unistd.h>
 
+#define PRINT_POINTS
+
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
@@ -133,6 +135,21 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
     this->errorMessage = SynthData::errors[synthData->state()];
     return false;
   }
+
+#ifdef PRINT_POINTS
+  const QList<CoordinateSystem*> *coordinateSystems = synthData->coordinateSystems();
+  CoordinateSystem *sys;
+  const PointCloud *cloud;
+  const QList<Point> *points;
+  foreach(sys, *coordinateSystems)
+  {
+    cloud = sys->pointCloud();
+    points = cloud->points();
+    Point p;
+    foreach(p, *points)
+      printPoint(&p);
+  }
+#endif
 
   return true;
 }

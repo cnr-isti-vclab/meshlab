@@ -7,6 +7,8 @@
 #include <QScriptValue>
 #include <QScriptValueIterator>
 
+#define CHECK_ERRORS(errorCode) { if(error) { _state = (errorCode); _dataReady = true; return; } }
+
 /**************
  * PointCloud *
  **************/
@@ -27,6 +29,16 @@ PointCloud::~PointCloud()
 int PointCloud::binFileCount() const
 {
   return _binFileCount;
+}
+
+const QList<Point> *PointCloud::points() const
+{
+  return _points;
+}
+
+void PointCloud::addPoint(Point p)
+{
+  _points->append(p);
 }
 
 /********************
@@ -70,7 +82,9 @@ const QString SynthData::errors[] =
   "The requested Synth is unavailable",
   "Could not parse web service response: unexpected response",
   "This filter is compatible with photosynths belonging to \"Synth\" category only",
-  "Error parsing collection data"
+  "Error parsing collection data",
+  "Error reading binary data, file may be corrupted",
+  "The point cloud is stored in an incompatible format and cannot be loaded"
 };
 
 const char *SynthData::progress[] =
@@ -118,6 +132,11 @@ void SynthData::setCollectionRoot(QString collectionRoot)
   _collectionRoot = collectionRoot;
 }
 
+const QList<CoordinateSystem*> *SynthData::coordinateSystems()
+{
+  return _coordinateSystems;
+}
+
 /*
  * Returns true if this SynthData represents a Synth downloaded from photosynth.net.
  * Upon a successful download this function returns true if called on the download operation result.
@@ -131,6 +150,10 @@ bool SynthData::isValid()
   return valid;
 }
 
+/*
+ * Returns true if and only if the download process is finished.
+ * Use isValid() to know if errors occurred during the operation.
+ */
 bool SynthData::dataReady()
 {
     return _dataReady;
@@ -164,6 +187,7 @@ SynthData *SynthData::downloadSynthInfo(QString url)
   if(url.isNull() || url.isEmpty())
   {
     synthData->_state = WRONG_URL;
+    synthData->_dataReady = true;
     return synthData;
   }
 
@@ -172,6 +196,7 @@ SynthData *SynthData::downloadSynthInfo(QString url)
   if(i < 0 || url.length() < i + 40)
   {
     synthData->_state = WRONG_URL;
+    synthData->_dataReady = true;
     return synthData;
   }
 
@@ -311,13 +336,11 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
   {
     iterator.next();
     collection = iterator.value();
-    qWarning() << iterator.name(); //the synth cid
     coordSystemsCount = collection.property("_num_coord_systems").toInt32();
-    qWarning() << coordSystemsCount;
   }
   else
   {
-    qWarning("Errore\n");
+    qWarning("Error\n");
     _state = JSON_PARSING;
     return;
   }
@@ -345,7 +368,6 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
             //pointCloud[1]
             it.next();
             int binFileCount = it.value().toInt32();
-            qWarning() << it.name() << " " << it.value().toString();
             PointCloud *p = new PointCloud(i,binFileCount,coordSys);
             coordSys->setPointCloud(p);
           }
@@ -365,6 +387,10 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
   httpResponse->deleteLater();
 }
 
+/*
+ * Asks the server for bin files containing point clouds data
+ * sending an http request for each bin file composing the synth
+ */
 void SynthData::downloadBinFiles()
 {
   QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -375,25 +401,98 @@ void SynthData::downloadBinFiles()
   {
     if(sys->pointCloud() != 0)
     {
+      //As QNetworkAccessManager API is asynchronous, there is no mean, in the slot handling the response (loadBinFile),
+      //to understand if the response received is the last one, and thus to know if all data have been received.
+      //To let loadBinFile know when the processed response is the last one (allowing the _dataReady variable to be set to true)
+      //the counter _semaphore is used
       _semaphore += sys->pointCloud()->binFileCount();
       for(int i = 0; i < sys->pointCloud()->binFileCount(); ++i)
       {
         QString url = QString("%0points_%1_%2.bin").arg(_collectionRoot).arg(sys->id()).arg(i);
-        manager->get(QNetworkRequest(QUrl(url)));
-        qDebug() << "Request sent";
+        QNetworkRequest *request = new QNetworkRequest(QUrl(url));
+        PointCloud *p = (PointCloud *)sys->pointCloud();
+        //the slot handling the response (loadBinFile) is able to know which pointCloud the received data belong to
+        //retrieving the originating object of the request whose response is being processed
+        request->setOriginatingObject(p);
+        manager->get(*request);
+        delete request;
       }
     }
   }
 }
 
+/*
+ * Reads point data from httpResponse payload and fills
+ * the pointCloud of the coordinateSystem relative to the http request
+ * originating httpResponse
+ */
 void SynthData::loadBinFile(QNetworkReply *httpResponse)
 {
-  qDebug() << "Response received";
+  if(_state == READING_BIN_DATA || _state == BIN_DATA_FORMAT)
+    return;
+
   _progress = LOADING_BIN;
-  _state = NO_ERROR;
+
+  bool error = false;
+  unsigned short versionMajor = readBigEndianUInt16(httpResponse,error);
+  CHECK_ERRORS(READING_BIN_DATA)
+  unsigned short versionMinor = readBigEndianUInt16(httpResponse,error);
+  CHECK_ERRORS(READING_BIN_DATA)
+  if (versionMajor != 1 || versionMinor != 0)
+  {
+    _state = BIN_DATA_FORMAT;
+    _dataReady = true;
+    return;
+  }
+
+  int n = readCompressedInt(httpResponse,error);
+  CHECK_ERRORS(READING_BIN_DATA)
+  //skip the header section
+  for (int i = 0; i < n; i++)
+  {
+    int m = readCompressedInt(httpResponse,error);
+    CHECK_ERRORS(READING_BIN_DATA)
+    for (int j = 0; j < m; j++)
+    {
+      readCompressedInt(httpResponse,error);
+      CHECK_ERRORS(READING_BIN_DATA)
+      readCompressedInt(httpResponse,error);
+      CHECK_ERRORS(READING_BIN_DATA)
+    }
+  }
+
+  int nPoints = readCompressedInt(httpResponse,error);
+  CHECK_ERRORS(READING_BIN_DATA)
+  for (int i = 0; i < nPoints; i++)
+  {
+    Point point;
+
+    point._x = readBigEndianSingle(httpResponse,error);
+    CHECK_ERRORS(READING_BIN_DATA)
+    point._y = readBigEndianSingle(httpResponse,error);
+    CHECK_ERRORS(READING_BIN_DATA)
+    point._z = readBigEndianSingle(httpResponse,error);
+    CHECK_ERRORS(READING_BIN_DATA)
+
+    ushort color = readBigEndianUInt16(httpResponse,error);
+    CHECK_ERRORS(READING_BIN_DATA)
+
+    point._r = (uchar)(((color >> 11) * 255) / 31);
+    point._g = (uchar)((((color >> 5) & 63) * 255) / 63);
+    point._b = (uchar)(((color & 31) * 255) / 31);
+
+    //the cloud whose received points belong to
+    PointCloud *cloud = (PointCloud *)httpResponse->request().originatingObject();
+    cloud->addPoint(point);
+  }
+
   --_semaphore;
   if(_semaphore == 0)
+  {
+    //all data have been received
+    _state = NO_ERROR;
     _dataReady = true;
+  }
   httpResponse->deleteLater();
 }
 
@@ -427,4 +526,61 @@ bool ImportSettings::importPointClouds()
 bool ImportSettings::importCameraParameters()
 {
   return _importCameraParameters;
+}
+
+/*********************
+ * Utility functions *
+ *********************/
+
+int readCompressedInt(QIODevice *device, bool &error)
+{
+  error = false;
+  int i = 0;
+  char byte;
+
+  do
+  {
+    error = device->read(&byte, sizeof(char)) == -1 ? true : false;
+    if(error)
+      return i;
+    i = (i << 7) | (byte & 127);
+  } while (byte < (char)128);
+
+  return i;
+}
+
+float readBigEndianSingle(QIODevice *device, bool &error)
+{
+  error = false;
+  char bytes[4];
+  for(int i = 0; i < 4; ++i)
+  {
+    error = device->read(bytes + i * sizeof(char), sizeof(char)) == -1 ? true : false;
+    if(error)
+      return -1;
+  }
+  //qDebug() << (int) bytes[3] << (int) bytes[2] << (int) bytes[1] << (int) bytes[0];
+  char reversed[] = { bytes[3],bytes[2],bytes[1],bytes[0] };
+  //qDebug() << QByteArray(reversed).toFloat() << QByteArray(bytes).toFloat();
+  return QByteArray(reversed).toFloat();
+}
+
+unsigned short readBigEndianUInt16(QIODevice *device, bool &error)
+{
+  error = false;
+  char byte1;
+  error = device->read(&byte1,sizeof(char)) == -1 ? true : false;
+  if(error)
+    return 0;
+  char byte2;
+  error = device->read(&byte2,sizeof(char)) == -1 ? true : false;
+  if(error)
+    return 0;
+
+  return (unsigned short)(byte2 | (byte1 << 8));
+}
+
+void printPoint(Point *p)
+{
+  qDebug() << "x =" << p->_x << "; y =" << p->_y << "; z =" << p->_z << "R: " << p->_r << " G: " << p->_g << " B: " << p->_b;
 }
