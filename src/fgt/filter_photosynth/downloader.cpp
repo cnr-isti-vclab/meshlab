@@ -545,15 +545,11 @@ float readBigEndianSingle(QIODevice *device, bool &error)
     if(error)
       return -1;
   }
-  //qDebug() << (int) bytes[3] << (int) bytes[2] << (int) bytes[1] << (int) bytes[0];
- // qDebug("%3i %3i %3i %3i",(int)bytes[0], (int)bytes[1], (int)bytes[2], (int)bytes[3]);
+  // qDebug("%3i %3i %3i %3i",(int)bytes[0], (int)bytes[1], (int)bytes[2], (int)bytes[3]);
   char reversed[] = { bytes[3],bytes[2],bytes[1],bytes[0] };
-  //char reversed[] = { bytes[0],bytes[1],bytes[2],bytes[3] };
 
   float *f = (float *)(&  reversed[0]);
   return*f;
-  //qDebug() << QByteArray(reversed).toFloat() << QByteArray(bytes).toFloat();
-  //return QByteArray(reversed).toFloat();
 }
 
 unsigned short readBigEndianUInt16(QIODevice *device, bool &error)
