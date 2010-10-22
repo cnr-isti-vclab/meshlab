@@ -25,10 +25,8 @@ class PointCloud : public QObject
 {
 public:
   PointCloud(int coordSysID, int binFileCount, QObject *parent = 0);
-  ~PointCloud();
   int binFileCount() const;
-  void addPoint(Point p);
-  const QList<Point> *points() const;
+  QList<Point> points;
 
 private:
   //the coordinate system id within the synth which this set belongs to
@@ -37,7 +35,6 @@ private:
   //and tells how many files this cloud is split into
   int _binFileCount;
   int _numberOfPoints;
-  QList<Point> *_points;
 };
 
 /*

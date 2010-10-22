@@ -16,7 +16,7 @@
 #include <QtScript>
 #include <unistd.h>
 
-#define PRINT_POINTS
+using namespace vcg;
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -83,7 +83,8 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
   {
     case FP_IMPORT_PHOTOSYNTH:
       parlst.addParam(new RichString("synthURL",
-                                     "http://photosynth.net",
+//                                     "http://photosynth.net",
+                                     "http://photosynth.net/view.aspx?cid=1d814021-a4ab-4cdb-a533-570fc2b5758d",
                                      "Synth URL",
                                      "Paste the synth URL from your browser."));
       break;
@@ -136,20 +137,23 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
     return false;
   }
 
-#ifdef PRINT_POINTS
+
+
   const QList<CoordinateSystem*> *coordinateSystems = synthData->coordinateSystems();
   CoordinateSystem *sys;
-  const PointCloud *cloud;
-  const QList<Point> *points;
   foreach(sys, *coordinateSystems)
   {
-    cloud = sys->pointCloud();
-    points = cloud->points();
+    MeshModel *mm= md.addNewMesh("coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    qDebug("Adding a coordsys of %i points",sys->pointCloud()->points.size());
     Point p;
-    foreach(p, *points)
-      printPoint(&p);
+    foreach(p, sys->pointCloud()->points)
+    {
+      tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
+      mm->cm.vert.back().P() = Point3f(p._x,p._y,p._z);
+      mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
+    }
+    return true;
   }
-#endif
 
   return true;
 }

@@ -18,28 +18,14 @@ PointCloud::PointCloud(int coordSysID, int binFileCount, QObject *parent)
 {
   _coordinateSystem = coordSysID;
   _binFileCount = binFileCount;
-  _points = new QList<Point>();
 }
 
-PointCloud::~PointCloud()
-{
-  delete _points;
-}
 
 int PointCloud::binFileCount() const
 {
   return _binFileCount;
 }
 
-const QList<Point> *PointCloud::points() const
-{
-  return _points;
-}
-
-void PointCloud::addPoint(Point p)
-{
-  _points->append(p);
-}
 
 /********************
  * CoordinateSystem *
@@ -462,6 +448,7 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
   }
 
   int nPoints = readCompressedInt(httpResponse,error);
+  qDebug("Reading %i points",nPoints);
   CHECK_ERRORS(READING_BIN_DATA)
   for (int i = 0; i < nPoints; i++)
   {
@@ -480,10 +467,10 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
     point._r = (uchar)(((color >> 11) * 255) / 31);
     point._g = (uchar)((((color >> 5) & 63) * 255) / 63);
     point._b = (uchar)(((color & 31) * 255) / 31);
-
+    //qDebug("Read (%15f %15f %15f) - R:%3i G:%3i B:%3i",point._x,point._y,point._z,point._r,point._g,point._b);
     //the cloud whose received points belong to
     PointCloud *cloud = (PointCloud *)httpResponse->request().originatingObject();
-    cloud->addPoint(point);
+    cloud->points.append(point);
   }
 
   --_semaphore;
@@ -536,48 +523,51 @@ int readCompressedInt(QIODevice *device, bool &error)
 {
   error = false;
   int i = 0;
-  char byte;
+  unsigned char byte;
 
   do
   {
-    error = device->read(&byte, sizeof(char)) == -1 ? true : false;
+    error = device->read((char *)&byte, sizeof(char)) == -1 ? true : false;
     if(error)
       return i;
     i = (i << 7) | (byte & 127);
-  } while (byte < (char)128);
-
+  } while (byte < 128);
   return i;
 }
 
 float readBigEndianSingle(QIODevice *device, bool &error)
 {
   error = false;
-  char bytes[4];
+  unsigned char bytes[4];
   for(int i = 0; i < 4; ++i)
   {
-    error = device->read(bytes + i * sizeof(char), sizeof(char)) == -1 ? true : false;
+    error = device->read((char *)(bytes + i), sizeof(char)) == -1 ? true : false;
     if(error)
       return -1;
   }
   //qDebug() << (int) bytes[3] << (int) bytes[2] << (int) bytes[1] << (int) bytes[0];
+ // qDebug("%3i %3i %3i %3i",(int)bytes[0], (int)bytes[1], (int)bytes[2], (int)bytes[3]);
   char reversed[] = { bytes[3],bytes[2],bytes[1],bytes[0] };
+  //char reversed[] = { bytes[0],bytes[1],bytes[2],bytes[3] };
+
+  float *f = (float *)(&  reversed[0]);
+  return*f;
   //qDebug() << QByteArray(reversed).toFloat() << QByteArray(bytes).toFloat();
-  return QByteArray(reversed).toFloat();
+  //return QByteArray(reversed).toFloat();
 }
 
 unsigned short readBigEndianUInt16(QIODevice *device, bool &error)
 {
   error = false;
-  char byte1;
-  error = device->read(&byte1,sizeof(char)) == -1 ? true : false;
-  if(error)
-    return 0;
-  char byte2;
-  error = device->read(&byte2,sizeof(char)) == -1 ? true : false;
+  unsigned short byte1=0;
+  error = device->read((char *)&byte1,sizeof(char)) == -1 ? true : false;
+  if(error) return 0;
+  unsigned short byte2=0;
+  error = device->read((char *)&byte2,sizeof(char)) == -1 ? true : false;
   if(error)
     return 0;
 
-  return (unsigned short)(byte2 | (byte1 << 8));
+  return byte2 | (byte1 << 8);
 }
 
 void printPoint(Point *p)
