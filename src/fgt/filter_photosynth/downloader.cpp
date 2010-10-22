@@ -7,7 +7,11 @@
 #include <QScriptValue>
 #include <QScriptValueIterator>
 
-#define CHECK_ERRORS(errorCode) { if(error) { _state = (errorCode); _dataReady = true; return; } }
+#define SET_STATE(val1,val2) { _state = val1; _dataReady = val2; return; }
+#define CHECK(condition,val1,val2) { if(condition) { SET_STATE(val1,val2) } }
+#define SET_STATE_DELETE(val1,val2) { _state = val1; _dataReady = val2; httpResponse->deleteLater(); return; }
+#define CHECK_DELETE(condition,val1,val2) { if(condition) { SET_STATE_DELETE(val1,val2) } }
+#define CHECK_ERRORS(errorCode) { if(error) { _state = (errorCode); _dataReady = true; httpResponse->deleteLater(); return; } }
 
 /**************
  * PointCloud *
@@ -20,13 +24,6 @@ PointCloud::PointCloud(int coordSysID, int binFileCount, QObject *parent)
   _binFileCount = binFileCount;
 }
 
-
-int PointCloud::binFileCount() const
-{
-  return _binFileCount;
-}
-
-
 /********************
  * CoordinateSystem *
  ********************/
@@ -35,23 +32,8 @@ CoordinateSystem::CoordinateSystem(int id, QObject *parent)
   : QObject(parent)
 {
   _id = id;
-  _shouldBeExported = true;
+  _shouldBeImported = true;
   _pointCloud = 0;
-}
-
-int CoordinateSystem::id()
-{
-  return _id;
-}
-
-const PointCloud *CoordinateSystem::pointCloud()
-{
-  return _pointCloud;
-}
-
-void CoordinateSystem::setPointCloud(PointCloud *pointCloud)
-{
-  _pointCloud = pointCloud;
 }
 
 /*************
@@ -69,6 +51,7 @@ const QString SynthData::errors[] =
   "Could not parse web service response: unexpected response",
   "This filter is compatible with photosynths belonging to \"Synth\" category only",
   "Error parsing collection data",
+  "This synth is empty",
   "Error reading binary data, file may be corrupted",
   "The point cloud is stored in an incompatible format and cannot be loaded"
 };
@@ -92,35 +75,9 @@ SynthData::SynthData(QObject *parent)
   _semaphore = 0;
 }
 
-SynthData::SynthData(const SynthData &other)
-{
-  _collectionID = other._collectionID;
-  _collectionRoot = other._collectionRoot;
-  _coordinateSystems = new QList<CoordinateSystem*>(*other._coordinateSystems);
-  _state = other._state;
-  _progress = other._progress;
-  _dataReady = other._dataReady;
-  _semaphore = other._semaphore;
-}
-
 SynthData::~SynthData()
 {
   delete _coordinateSystems;
-}
-
-void SynthData::setCollectionID(QString id)
-{
-  _collectionID = id;
-}
-
-void SynthData::setCollectionRoot(QString collectionRoot)
-{
-  _collectionRoot = collectionRoot;
-}
-
-const QList<CoordinateSystem*> *SynthData::coordinateSystems()
-{
-  return _coordinateSystems;
 }
 
 /*
@@ -130,34 +87,7 @@ const QList<CoordinateSystem*> *SynthData::coordinateSystems()
  */
 bool SynthData::isValid()
 {
-  bool valid = false;
-  if(_state == NO_ERROR)
-      valid = true;
-  return valid;
-}
-
-/*
- * Returns true if and only if the download process is finished.
- * Use isValid() to know if errors occurred during the operation.
- */
-bool SynthData::dataReady()
-{
-    return _dataReady;
-}
-
-int SynthData::state()
-{
-  return _state;
-}
-
-int SynthData::step()
-{
-  return _progress;
-}
-
-const char *SynthData::progressInfo()
-{
-  return progress[_progress];
+  return (_state == NO_ERROR);
 }
 
 QtSoapHttpTransport SynthData::transport;
@@ -191,13 +121,13 @@ SynthData *SynthData::downloadSynthInfo(QString url)
   bool importPointClouds = true;
   bool importCameraParameters = false;
   ImportSettings settings(importSource,cid,importPointClouds,importCameraParameters);
-  synthData->setCollectionID(cid);
+  synthData->_collectionID = cid;
 
-  if(settings.source() == ImportSettings::WEB_SITE)
+  if(settings._source == ImportSettings::WEB_SITE)
   {
     QtSoapMessage message;
     message.setMethod("GetCollectionData", "http://labs.live.com/");
-    message.addMethodArgument("collectionId", "", settings.sourcePath());
+    message.addMethodArgument("collectionId", "", settings._sourcePath);
     message.addMethodArgument("incrementEmbedCount", "", false, 0);
 
     transport.setAction("http://labs.live.com/GetCollectionData");
@@ -216,18 +146,7 @@ SynthData *SynthData::downloadSynthInfo(QString url)
 void SynthData::readWSresponse()
 {
   const QtSoapMessage &response = transport.getResponse();
-  if(response.isFault())
-  {
-    qWarning("ERROR: %s\n",response.faultString().toString().toLatin1().constData());
-    _state = WEBSERVICE_ERROR;
-    _dataReady = true;
-    return;
-  }
-
-#ifdef FILTER_PHOTOSYNTH_DEBUG_SOAP
-  qWarning("%s\n", response.toXmlString().toLatin1().constData());
-#endif
-
+  CHECK(response.isFault(), WEBSERVICE_ERROR, true)
   const QtSoapType &returnValue = response.returnValue();
   if(returnValue["Result"].isValid())
     //the requested synth was found
@@ -243,26 +162,12 @@ void SynthData::readWSresponse()
         downloadJsonData(jsonURL);
       }
       else
-      {
-        qWarning("This filter is compatible with photosynths only, the provided url belongs to the category: %s\n",returnValue["CollectionType"].toString().toLatin1().constData());
-        _state = WRONG_COLLECTION_TYPE;
-        _dataReady = true;
-        return;
-      }
+        SET_STATE(WRONG_COLLECTION_TYPE, true)
     }
     else
-    {
-      qWarning("The web service returned: %s\n",returnValue["Result"].toString().toLatin1().constData());
-      _state = NEGATIVE_RESPONSE;
-      _dataReady = true;
-      return;
-    }
+      SET_STATE(NEGATIVE_RESPONSE, true)
   else
-  {
-    qWarning("Cannot read the response\n");
-    _state = UNEXPECTED_RESPONSE;
-    _dataReady = true;
-  }
+    SET_STATE(UNEXPECTED_RESPONSE, true)
 }
 
 /*
@@ -290,30 +195,13 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
   _progress = PARSE_JSON;
   QByteArray payload = httpResponse->readAll();
   QString json(payload);
-#ifdef PRINT_JSON
-  qWarning("json string:\n%s",json.toLatin1().constData());
-#endif
   QScriptEngine engine;
   QScriptValue jsonData = engine.evaluate("(" + json + ")");
-  if(engine.hasUncaughtException())
-  {
-    qWarning("Uncaught exception\n");
-    if(jsonData.isError())
-    {
-      qWarning("%s %d\n",jsonData.toString().toLatin1().constData(),json.length());
-    }
-    _state = JSON_PARSING;
-    return;
-  }
+  CHECK_DELETE(engine.hasUncaughtException(), JSON_PARSING, true)
   //the "l" property contains an object whose name is the synth cid
   //and whose value is an array containing the coordinate systems
   QScriptValue collections = jsonData.property("l");
-  if(!collections.isValid())
-  {
-    qWarning("Invalid property\n");
-    _state = JSON_PARSING;
-    return;
-  }
+  CHECK_DELETE(!collections.isValid(), JSON_PARSING, true)
   //use an iterator to retrieve the first collection
   QScriptValueIterator iterator(collections);
   QScriptValue collection;
@@ -325,11 +213,7 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
     coordSystemsCount = collection.property("_num_coord_systems").toInt32();
   }
   else
-  {
-    qWarning("Error\n");
-    _state = JSON_PARSING;
-    return;
-  }
+    SET_STATE_DELETE(JSON_PARSING, true)
   if(coordSystemsCount > 0)
   {
     CoordinateSystem *coordSys;
@@ -355,21 +239,15 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
             it.next();
             int binFileCount = it.value().toInt32();
             PointCloud *p = new PointCloud(i,binFileCount,coordSys);
-            coordSys->setPointCloud(p);
+            coordSys->_pointCloud = p;
           }
         }
-        else
-          qWarning("Niente point cloud\n");
       }
     }
     downloadBinFiles();
   }
   else
-  {
-    qWarning() << "Empty collection\n";
-    _dataReady = true;
-    return;
-  }
+    SET_STATE_DELETE(EMPTY, true)
   httpResponse->deleteLater();
 }
 
@@ -385,18 +263,18 @@ void SynthData::downloadBinFiles()
   _progress = DOWNLOAD_BIN;
   foreach(CoordinateSystem *sys, *_coordinateSystems)
   {
-    if(sys->pointCloud() != 0)
+    if(sys->_pointCloud)
     {
       //As QNetworkAccessManager API is asynchronous, there is no mean, in the slot handling the response (loadBinFile),
       //to understand if the response received is the last one, and thus to know if all data have been received.
       //To let loadBinFile know when the processed response is the last one (allowing the _dataReady variable to be set to true)
       //the counter _semaphore is used
-      _semaphore += sys->pointCloud()->binFileCount();
-      for(int i = 0; i < sys->pointCloud()->binFileCount(); ++i)
+      _semaphore += sys->_pointCloud->_binFileCount;
+      for(int i = 0; i < sys->_pointCloud->_binFileCount; ++i)
       {
-        QString url = QString("%0points_%1_%2.bin").arg(_collectionRoot).arg(sys->id()).arg(i);
+        QString url = QString("%0points_%1_%2.bin").arg(_collectionRoot).arg(sys->_id).arg(i);
         QNetworkRequest *request = new QNetworkRequest(QUrl(url));
-        PointCloud *p = (PointCloud *)sys->pointCloud();
+        PointCloud *p = (PointCloud *)sys->_pointCloud;
         //the slot handling the response (loadBinFile) is able to know which pointCloud the received data belong to
         //retrieving the originating object of the request whose response is being processed
         request->setOriginatingObject(p);
@@ -424,13 +302,7 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
   CHECK_ERRORS(READING_BIN_DATA)
   unsigned short versionMinor = readBigEndianUInt16(httpResponse,error);
   CHECK_ERRORS(READING_BIN_DATA)
-  if (versionMajor != 1 || versionMinor != 0)
-  {
-    _state = BIN_DATA_FORMAT;
-    _dataReady = true;
-    return;
-  }
-
+  CHECK_DELETE(versionMajor != 1 || versionMinor != 0, BIN_DATA_FORMAT, true)
   int n = readCompressedInt(httpResponse,error);
   CHECK_ERRORS(READING_BIN_DATA)
   //skip the header section
@@ -448,7 +320,6 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
   }
 
   int nPoints = readCompressedInt(httpResponse,error);
-  qDebug("Reading %i points",nPoints);
   CHECK_ERRORS(READING_BIN_DATA)
   for (int i = 0; i < nPoints; i++)
   {
@@ -467,19 +338,14 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
     point._r = (uchar)(((color >> 11) * 255) / 31);
     point._g = (uchar)((((color >> 5) & 63) * 255) / 63);
     point._b = (uchar)(((color & 31) * 255) / 31);
-    //qDebug("Read (%15f %15f %15f) - R:%3i G:%3i B:%3i",point._x,point._y,point._z,point._r,point._g,point._b);
     //the cloud whose received points belong to
     PointCloud *cloud = (PointCloud *)httpResponse->request().originatingObject();
-    cloud->points.append(point);
+    cloud->_points.append(point);
   }
 
   --_semaphore;
-  if(_semaphore == 0)
-  {
-    //all data have been received
-    _state = NO_ERROR;
-    _dataReady = true;
-  }
+  CHECK_DELETE(_semaphore == 0, NO_ERROR, true)
+
   httpResponse->deleteLater();
 }
 
@@ -493,26 +359,6 @@ ImportSettings::ImportSettings(ImportSource source, QString sourcePath, bool imp
   _sourcePath = sourcePath;
   _importPointClouds = importPointClouds;
   _importCameraParameters = importCameraParameters;
-}
-
-ImportSettings::ImportSource ImportSettings::source()
-{
-  return _source;
-}
-
-QString ImportSettings::sourcePath()
-{
-  return _sourcePath;
-}
-
-bool ImportSettings::importPointClouds()
-{
-  return _importPointClouds;
-}
-
-bool ImportSettings::importCameraParameters()
-{
-  return _importCameraParameters;
 }
 
 /*********************
@@ -545,7 +391,6 @@ float readBigEndianSingle(QIODevice *device, bool &error)
     if(error)
       return -1;
   }
-  // qDebug("%3i %3i %3i %3i",(int)bytes[0], (int)bytes[1], (int)bytes[2], (int)bytes[3]);
   char reversed[] = { bytes[3],bytes[2],bytes[1],bytes[0] };
 
   float *f = (float *)(&  reversed[0]);

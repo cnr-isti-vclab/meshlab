@@ -1,10 +1,6 @@
 #ifndef SYNTHDATA_H
 #define SYNTHDATA_H
 
-//#define FILTER_PHOTOSYNTH_DEBUG_SOAP
-//#define PRINT_JSON
-
-//#include <QObject>
 #include <QString>
 #include <QtSoapHttpTransport>
 
@@ -25,16 +21,15 @@ class PointCloud : public QObject
 {
 public:
   PointCloud(int coordSysID, int binFileCount, QObject *parent = 0);
-  int binFileCount() const;
-  QList<Point> points;
 
-private:
+public:
   //the coordinate system id within the synth which this set belongs to
   int _coordinateSystem;
   //this is the n parameter in the points_m_n.bin files containing the synth point clounds
   //and tells how many files this cloud is split into
   int _binFileCount;
   int _numberOfPoints;
+  QList<Point> _points;
 };
 
 /*
@@ -46,14 +41,11 @@ class CoordinateSystem : public QObject
 {
 public:
   CoordinateSystem(int id, QObject *parent = 0);
-  void setPointCloud(PointCloud *pointCloud);
-  const PointCloud *pointCloud();
-  int id();
 
-private:
+public:
   //this is the m parameter in the points_m_n.bin files containing the synth point clounds
   int _id;
-  bool _shouldBeExported;
+  bool _shouldBeImported;
   PointCloud *_pointCloud;
   //CameraParameterList _cameraParameterList;
 };
@@ -81,6 +73,7 @@ public:
     UNEXPECTED_RESPONSE,
     WRONG_COLLECTION_TYPE,
     JSON_PARSING,
+    EMPTY,
     READING_BIN_DATA,
     BIN_DATA_FORMAT,
     NO_ERROR,
@@ -97,14 +90,8 @@ public:
   };
 
   SynthData(QObject *parent = 0);
-  SynthData(const SynthData &other);
   ~SynthData();
   bool isValid();
-  bool dataReady();
-  int state();
-  int step();
-  const char* progressInfo();
-  const QList<CoordinateSystem*> *coordinateSystems();
 
 public:
   static SynthData *downloadSynthInfo(QString url);
@@ -115,13 +102,11 @@ private slots:
   void loadBinFile(QNetworkReply *httpResponse);
 
 private:
-  void setCollectionID(QString id);
-  void setCollectionRoot(QString collectionRoot);
   void downloadJsonData(QString jsonURL);
   void downloadBinFiles();
 
-private:
-  //this is ths cid parameter taken from the url used to access the synth on photosynth.net
+public:
+  //this is the cid parameter taken from the url used to access the synth on photosynth.net
   QString _collectionID;
   //the base url of the binary files points_m_n.bin containing point clouds data
   QString _collectionRoot;
@@ -133,6 +118,8 @@ private:
   //when a SynthData is instantiated _dataReady == false
   //until the data are downloaded from photosynth server
   bool _dataReady;
+
+private:
   //used to count how many responses to bin files requests have been processed
   //when _semaphore reaches 0 _dataReady can be set to true
   int _semaphore;
@@ -147,12 +134,8 @@ public:
   enum ImportSource { WEB_SITE, ZIP_FILE };
 
   ImportSettings(ImportSource source, QString sourcePath, bool importPointClouds, bool importCameraParameters);
-  ImportSettings::ImportSource source();
-  QString sourcePath();
-  bool importPointClouds();
-  bool importCameraParameters();
 
-private:
+public:
   //specifies if the synth has to be downloaded from a url or loaded from a zip file on the filesystem
   ImportSettings::ImportSource _source;
   //can be the cid parameter taken from the synth url or a path on a filesystem

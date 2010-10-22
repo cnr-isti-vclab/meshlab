@@ -83,8 +83,7 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
   {
     case FP_IMPORT_PHOTOSYNTH:
       parlst.addParam(new RichString("synthURL",
-//                                     "http://photosynth.net",
-                                     "http://photosynth.net/view.aspx?cid=1d814021-a4ab-4cdb-a533-570fc2b5758d",
+                                     "http://photosynth.net/view.aspx?cid=d09b3327-c5e9-4d98-b486-ff720352ce53",
                                      "Synth URL",
                                      "Paste the synth URL from your browser."));
       break;
@@ -101,10 +100,10 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
   SynthData *synthData = SynthData::downloadSynthInfo(url);
 
   //Hangs on active wait until data are available from the server
-  while(!synthData->dataReady())
+  while(!synthData->_dataReady)
   {
     int progress = 0;
-    switch(synthData->step())
+    switch(synthData->_progress)
     {
     case SynthData::WEB_SERVICE:
       progress = 0;
@@ -122,7 +121,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       progress = 100;
     }
 
-    cb(progress,synthData->progressInfo());
+    cb(progress,SynthData::progress[synthData->_progress]);
     //allows qt main loop to process the events relative to the response from the server,
     //triggering the signals that cause the invocation of the slots that process the response
     //and set the control variable that stops this active wait.
@@ -133,26 +132,26 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 
   if(!synthData->isValid())
   {
-    this->errorMessage = SynthData::errors[synthData->state()];
+    this->errorMessage = SynthData::errors[synthData->_state];
     return false;
   }
 
-
-
-  const QList<CoordinateSystem*> *coordinateSystems = synthData->coordinateSystems();
+  const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
   CoordinateSystem *sys;
   foreach(sys, *coordinateSystems)
   {
-    MeshModel *mm= md.addNewMesh("coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
-    qDebug("Adding a coordsys of %i points",sys->pointCloud()->points.size());
-    Point p;
-    foreach(p, sys->pointCloud()->points)
+    if(sys->_pointCloud)
     {
-      tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-      mm->cm.vert.back().P() = Point3f(p._x,p._y,p._z);
-      mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
+      MeshModel *mm = md.addNewMesh("coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+      Point p;
+      foreach(p, sys->_pointCloud->_points)
+      {
+        tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
+        mm->cm.vert.back().P() = Point3f(p._x,p._z,p._y);
+        mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
+      }
+
     }
-    return true;
   }
 
   return true;
