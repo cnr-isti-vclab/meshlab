@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QtSoapHttpTransport>
+#include <assert.h>
 
 typedef struct Point
 {
@@ -13,6 +14,54 @@ typedef struct Point
   uchar _g;
   uchar _b;
 } Point;
+
+/*
+typedef struct CameraParameters
+{
+  int _imageID;
+  qreal _posX;
+  qreal _posY;
+  qreal _posZ;
+  qreal _rotX;
+  qreal _rotY;
+  qreal _rotZ;
+  qreal _aspectRatio;
+  qreal _focalLength;
+  qreal _distortionRadius1;
+  qreal _distortionRadius2;
+} CameraParameters;
+*/
+
+class CameraParameters
+{
+public:
+  enum Field
+  {
+    FIRST = 0,
+    POS_X = FIRST,
+    POS_Y,
+    POS_Z,
+    ROT_X,
+    ROT_Y,
+    ROT_Z,
+    ASPECT_RATIO,
+    FOCAL_LENGTH,
+    LAST = FOCAL_LENGTH
+  };
+
+  void rotationFromNormalizedQuaternion();
+
+  inline qreal &operator [] (const int i)
+  {
+    assert(i >= 0 && i < 8);
+    return _fields[i];
+  }
+
+  int _imageID;
+  qreal _fields[8];
+  qreal _distortionRadius1;
+  qreal _distortionRadius2;
+};
 
 /*
  * Represents a set of points
@@ -47,7 +96,7 @@ public:
   int _id;
   bool _shouldBeImported;
   PointCloud *_pointCloud;
-  //CameraParameterList _cameraParameterList;
+  QList<CameraParameters> _cameraParametersList;
 };
 
 /*

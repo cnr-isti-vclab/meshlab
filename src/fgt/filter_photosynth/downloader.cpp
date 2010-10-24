@@ -1,4 +1,5 @@
 #include "synthData.h"
+#include <math.h>
 #include <QtSoapMessage>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -12,6 +13,26 @@
 #define SET_STATE_DELETE(val1,val2) { _state = val1; _dataReady = val2; httpResponse->deleteLater(); return; }
 #define CHECK_DELETE(condition,val1,val2) { if(condition) { SET_STATE_DELETE(val1,val2) } }
 #define CHECK_ERRORS(errorCode) { if(error) { _state = (errorCode); _dataReady = true; httpResponse->deleteLater(); return; } }
+
+/********************
+ * CameraParameters *
+ ********************/
+
+void CameraParameters::rotationFromNormalizedQuaternion()
+{
+  if (_fields[ROT_X] == 0 && _fields[ROT_Y] == 0 && _fields[ROT_Z] == 0)
+      return;
+
+  qreal a = _fields[ROT_X] * _fields[ROT_X] + _fields[ROT_Y] * _fields[ROT_Y] + _fields[ROT_Z] * _fields[ROT_Z];
+  qreal s = sqrt(a);
+  qreal x3 = sqrt(1 - a);
+  qreal l = atan2(s,x3);
+  qreal k = l * 2.0 / s;
+
+  _fields[ROT_X] = _fields[ROT_X] * k;
+  _fields[ROT_Y] = _fields[ROT_Y] * k;
+  _fields[ROT_Z] = _fields[ROT_Z] * k;
+}
 
 /**************
  * PointCloud *
@@ -241,6 +262,58 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
             PointCloud *p = new PointCloud(i,binFileCount,coordSys);
             coordSys->_pointCloud = p;
           }
+        }
+      }
+      //list of cameras
+      QScriptValue cameras = cs.property("r");
+      if(cameras.isValid() && !cameras.isNull())
+      {
+        QScriptValueIterator it(cameras);
+        while(it.hasNext())
+        {
+          it.next();
+          QScriptValue camera = it.value();
+          QScriptValue parameters = camera.property("j");
+          CameraParameters params;
+          QScriptValueIterator paramIt(parameters);
+          paramIt.next();
+          params._imageID = it.value().toInt32();
+          for(int i = CameraParameters::FIRST; i <= CameraParameters::LAST; ++i)
+          {
+            paramIt.next();
+            params[i] = paramIt.value().toNumber();
+          }
+          /*
+          paramIt.next();
+          params._posX = it.value().toNumber();
+          paramIt.next();
+          params._posY = it.value().toNumber();
+          paramIt.next();
+          params._posZ = it.value().toNumber();
+          paramIt.next();
+          params._rotX = it.value().toNumber();
+          paramIt.next();
+          params._rotY = it.value().toNumber();
+          paramIt.next();
+          params._rotZ = it.value().toNumber();
+          paramIt.next();
+          params._aspectRatio = it.value().toNumber();
+          paramIt.next();
+          params._focalLength = it.value().toNumber();
+          */
+          QScriptValue distortion = camera.property("f");
+          if(distortion.isValid() && !distortion.isNull())
+          {
+            QScriptValueIterator distortionIt(distortion);
+            distortionIt.next();
+            params._distortionRadius1 = distortionIt.value().toNumber();
+            distortionIt.next();
+            params._distortionRadius2 = distortionIt.value().toNumber();
+          }
+          else
+            params._distortionRadius1 = params._distortionRadius2 = 0;
+          params.rotationFromNormalizedQuaternion();
+          coordSys->_cameraParametersList.append(params);
         }
       }
     }

@@ -54,17 +54,18 @@ void Handler::readWSresponse()
             printf("Cannot read the response\n");
 }
 
-void printJsonObject(QString tabs, int indent, QScriptValue val, int limit)
+void printJsonObject(QTextStream &stream, QString tabs, int indent, QScriptValue val, int limit)
 {
   static int count = 0;
+
   QScriptValueIterator it(val);
   //while(it.hasNext() && count < 100)
   while(it.hasNext())
   {
     it.next();
-    qDebug() << tabs << it.name() << ": " << it.value().toString();
+    stream << tabs << it.name() << ": " << it.value().toString() << "\n";
     if(it.value().isObject() && indent < limit)
-      printJsonObject(tabs + QString("\t"), indent + 1, it.value(), limit);
+      printJsonObject(stream, tabs + QString("\t"), indent + 1, it.value(), limit);
     ++count;
   }
 }
@@ -106,7 +107,13 @@ void Handler::parseJsonString(QNetworkReply *httpResponse)
     {
       qWarning("Invalid property\n");
     }
-    printJsonObject(QString(),0,collections,3);
+    QFile file("json.txt");
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    QTextStream out(&file);
+    printJsonObject(out, QString(),0,collections,5);
+    file.close();
     /*
     QScriptValueIterator iterator(collections);
     while(iterator.hasNext())
