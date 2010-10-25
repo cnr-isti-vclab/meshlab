@@ -74,7 +74,6 @@ public slots:
 	void saveProject();
 	void delCurrentMesh();
 	void delCurrentRaster();
-  //void updateGL();
 	void endEdit();
 	void updateCustomSettings();
 
