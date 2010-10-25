@@ -1382,8 +1382,11 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 
   while(!node.isNull())
   {
-    if (QString::compare(node.nodeName(),"CamParam")==0)
+    if (QString::compare(node.nodeName(),"VCGCamera")==0)
       ReadShotFromQDomNode<Shotd>(shot,node);
+    else if (QString::compare(node.nodeName(),"CamParam")==0)
+      ReadShotFromOLDXML<Shotd>(shot,node);
+
 		else if (QString::compare(node.nodeName(),"ViewSettings")==0)
 		{
 			QDomNamedNodeMap attr = node.attributes();
@@ -1421,42 +1424,8 @@ void GLArea::viewToClipboard()
 	QDomDocument doc("ViewState");
 	QDomElement root = doc.createElement("project");
 	doc.appendChild( root );
-	QDomElement shotElem = doc.createElement( "CamParam" );
 
-	vcg::Point3d tra = -(shot.Extrinsics.Tra());
-	QString str = QString("%1 %2 %3 1").arg(tra[0]).arg(tra[1]).arg(tra[2]);
-	shotElem.setAttribute("SimTra", str);
-	vcg::Matrix44d rot = shot.Extrinsics.Rot();
-	str = QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16 ")
-		.arg(rot[0][0]).arg(rot[0][1])
-		.arg(rot[0][2]).arg(rot[0][3])
-		.arg(rot[1][0]).arg(rot[1][1])
-		.arg(rot[1][2]).arg(rot[1][3])
-		.arg(rot[2][0]).arg(rot[2][1])
-		.arg(rot[2][2]).arg(rot[2][3])
-		.arg(rot[3][0]).arg(rot[3][1])
-		.arg(rot[3][2]).arg(rot[3][3]);
-	shotElem.setAttribute( "SimRot", str);
-
-	vcg::Camera<double> &cam = shot.Intrinsics;
-
-	shotElem.setAttribute( "Focal", cam.FocalMm);
-
-	str = QString("%1 %2").arg(cam.k[0]).arg(cam.k[1]);
-	shotElem.setAttribute( "LensDist", str);
-
-	str = QString("%1 %2").arg(cam.PixelSizeMm[0]).arg(cam.PixelSizeMm[1]);
-	shotElem.setAttribute( "ScaleF", str);
-
-	str = QString("%1 %2").arg(cam.ViewportPx[0]).arg(cam.ViewportPx[1]);
-	shotElem.setAttribute( "Viewport", str);
-
-	str = QString("%1 %2").arg((int)(cam.DistorCenterPx[0])).arg((int)(cam.DistorCenterPx[1]));
-	shotElem.setAttribute( "Center", str);
-
-	str = QString("%1").arg((double) 1);
-	shotElem.setAttribute( "ScaleCorr", str);
-
+  QDomElement shotElem = WriteShotToQDomNode(shot,doc);
 	root.appendChild(shotElem);
 
 	QDomElement settingsElem = doc.createElement( "ViewSettings" );
@@ -1464,7 +1433,6 @@ void GLArea::viewToClipboard()
 	settingsElem.setAttribute( "NearPlane", nearPlane);
 	settingsElem.setAttribute( "FarPlane", farPlane);
 	root.appendChild(settingsElem);
-
 
 	QDomElement renderElem = doc.createElement( "Render");
 	renderElem.setAttribute("DrawMode",rm.drawMode);
