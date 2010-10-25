@@ -262,8 +262,8 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
  
                     /*  export all the attributes specified */
                     attr_map.ExportVertex(*ci,*vi,i);
-(*vi).C() = (*vi).C().Scatter(32, (*ci)->key.h+16 ); //TMP DEBUG
-                    /* mark with the "editable" flag */
+
+					/* mark with the "editable" flag */
                     lockedV[*vi] = locked? 1 : 0 ; /* TODO: just to avoid the not-so-tested class for vector of bool in simple_temporary_data.h*/
 					
 					/* initialize the external counter to 0 [maybe unnecessary]*/ 

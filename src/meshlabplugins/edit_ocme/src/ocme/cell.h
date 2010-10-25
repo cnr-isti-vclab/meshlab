@@ -76,8 +76,6 @@ struct GISet{
         return giset<o.giset;
     }
 
-
-
     void sub(GISet & o){
         for(iterator i = o.begin(); i!=o.end(); ++i)
             giset.erase((*i).first);
@@ -128,6 +126,7 @@ struct Box4{
 	Box4(){bbox3.SetNull();};
 	Box4(vcg::Box3f _bbox3, ScaleRange _sr):bbox3(_bbox3),sr(_sr){}
 	Box4 Add(vcg::Box3f b3, ScaleRange _sr ){ bbox3.Add(b3); sr.Add(_sr); return (*this);}
+	Box4 Add(vcg::Point3f p, int h ){ bbox3.Add(p); sr.Add(h); return (*this);}
 	vcg::Box3f bbox3;
 	ScaleRange sr;
 	bool operator ==(const Box4 & b) const {return (bbox3==b.bbox3) && (sr==b.sr);}

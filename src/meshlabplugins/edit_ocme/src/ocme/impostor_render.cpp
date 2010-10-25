@@ -36,7 +36,7 @@
 		vcg::Point3f p,n;
         vcg::Point3<unsigned char> c;
 
-		glPointSize(5);
+		glPointSize(8);
 		glBegin(GL_POINTS);
 		
 		for(	PointCellIterator pi   = this->proxies.begin(); pi != this->proxies .end(); ++pi  ){

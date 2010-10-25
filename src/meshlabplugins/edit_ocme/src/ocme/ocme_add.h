@@ -31,14 +31,30 @@ ScaleRange OCME::ScaleRangeOfTris( std::vector<vcg::Point3<vcg::Point3<S> > > & 
 template <class MeshType>
 ScaleRange OCME::ScaleRangeOfMesh( MeshType & m){
 	typename MeshType::ScalarType minScale,maxScale;
+
 	vcg::Histogramf mHist;
-	vcg::tri::Stat<MeshType>::ComputeEdgeHistogram(m,mHist);
-	minScale = mHist.Percentile(0.5f);
-	maxScale = mHist.Percentile(0.95f);
 	ScaleRange sr;
-       
-        sr.min = ComputeLevel(minScale);
-	sr.max = ComputeLevel(maxScale);
+	if(m.fn * 3>  m.vn){ // use the faces
+		vcg::tri::Stat<MeshType>::ComputeEdgeHistogram(m,mHist);
+		minScale = mHist.Percentile(0.5f);
+		maxScale = mHist.Percentile(0.95f);
+		
+		sr.min = ComputeLevel(minScale);
+		sr.max = ComputeLevel(maxScale);
+	}
+	else{// use the vertices
+        mHist.Clear();
+        mHist.SetRange( 0, m.bbox.Diag(), 10000);
+		MeshType::VertexIterator vi  = m.vert.begin();
+		MeshType::VertexIterator vi1 =  vi; vi++;
+		for( ; vi != m.vert.end(); ++vi,++vi1) 
+			mHist.Add(vcg::Distance((*vi).P(),(*vi1).P()));
+		 
+		minScale = mHist.Percentile(0.15f);
+		maxScale = mHist.Percentile(0.70f);
+		sr.min = ComputeLevel(minScale);
+		sr.max = ComputeLevel(maxScale);
+	}
 	return sr;
 }
 
@@ -64,7 +80,6 @@ inline int OCME::ComputeLevel( typename MeshType::FaceType & f, ScaleRange  & sr
 template <class MeshType>
 void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 
-
 	sprintf(lgn->Buf(),"Adding Mesh\n");
 	lgn->Push();	
 
@@ -74,7 +89,7 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	typename MeshType::VertexIterator vi;
 
 	static unsigned int n_duplicate_removal = 0;
-        int n_box_updates = 0;
+    int n_box_updates = 0,added_vert = 0;
 	int h;
 	Cell * c = NULL; // current cell. Cache the last used cell because very often this is coherent from face to face
 
@@ -93,7 +108,7 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	Since it is not really of much use to have multiple scales for a single mesh
 	here we put al the mesh at the same scale
 	*/
- 	sr.min = sr.max;
+ 	//sr.min = sr.max;
 
 	sprintf(lgn->Buf(),"MeshSize face %d  vert%d\n",m.fn,m.vn);
 	lgn->Push();	
@@ -104,9 +119,10 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 
 	RecordCellsSetModification();
 
-        bool hasColor = vcg::tri::HasPerVertexColor(m);
+    bool hasColor = vcg::tri::HasPerVertexColor(m);
 
 	/* Here the main cycle. for each face of the mesh put it in the hashed multigrid */
+	if(m.fn)
 	for(fi = m.face.begin(); fi != m.face.end(); ++fi) if(!(*fi).IsD()){
 		TIM::Begin(20);
 		if(added_cells.size() > (n_duplicate_removal+1)*1000){
@@ -141,6 +157,7 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 		for(int i = 0; i < 3 ; ++i){
                          vIndex[i] = gPos[(*fi).V(i)].Index(ck);                                          // get the index of the vertx in this cell (or -1)
                         if(vIndex[i]==-1){
+							 added_vert++;	
                              vIndex[i] = c-> AddVertex(OVertex(*(*fi).V(i)) );                               // no: add the vertex to it
                              gPos[(*fi).V(i)].Add(GIndex(ck,vIndex[i]));                                     // record to index
                          }
@@ -157,9 +174,9 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 		// rough roughroughourhg adding of samples
 
 		 vcg::Point3f bary   = vcg::Barycenter(*fi);
-                 vcg::Color4b color  =  (hasColor)? (*fi).V(0)->cC() : vcg::Color4b::Gray;
+         vcg::Color4b color  =  (hasColor)? (*fi).V(0)->cC() : vcg::Color4b::Gray;
 
-                 c->impostor->AddSample(bary,vcg::Normal(*fi).Normalize(),color);	// collect a sample for the impostor
+         c->impostor->AddSample(bary,vcg::Normal(*fi).Normalize(),color);	// collect a sample for the impostor
 
 
 		TIM::End(23);
@@ -206,7 +223,32 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 			TIM::End(21);
 		TIM::End(20);
 	}
+	{
+		// adding unreferenced vertices (the referenced vertices have already been added in the face cycle
+		if(added_vert<m.vn) // is there are no deleted and no unreferenced vertices, 
+							// this avoids to run over the vertices just to check
+			for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)if(!(*vi).IsD()){
+				if(gPos[*vi].giset.empty()){// if it was not assigned it means is unreferenced
+					 CellKey ck = ComputeCellKey((*vi).cP(),sr.max);
+					 if( (c==NULL) || !(c->key == ck)) {
+						 c = GetCellC(ck);
+							if(!c->generic_bool()) {                                            // if it is the first occurrence of the cell
+								UpdateCellsAttributes(c,attr_map);                              // make sure it contains all the attributes
+								c->generic_bool = FBool(&generic_bool);
+								c->generic_bool = true;
+							}
+					 }
+					 int pos = c-> AddVertex(OVertex(*vi) );   
+					 attr_map.ImportVertex(c,*vi,pos); 
+					 gPos[ *vi].Add(GIndex(ck,pos));        
 
+					 vcg::Color4b color  =  (hasColor)? (*vi).cC() : vcg::Color4b::Gray;
+					 c->impostor->AddSample((*vi).cP(),(*vi).cN(),color);	// collect a sample for the impostor
+					 c->bbox.Add((*vi).cP(),sr.max);
+				}
+		}
+	}
+	
 	StopRecordCellsSetModification();
 
 	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)

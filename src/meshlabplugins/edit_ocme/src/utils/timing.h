@@ -16,7 +16,7 @@ struct TIM{
 		 
 	}
 	static void End(unsigned int p){T()[p]+=(clock()-ST()[p]);}
-	static unsigned int Total(unsigned int p){return T()[p];}
+	static unsigned int Total(unsigned int p){return (p<T().size())?T()[p]:0;}
 
 }; 
 

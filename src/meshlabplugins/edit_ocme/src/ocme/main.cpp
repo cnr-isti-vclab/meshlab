@@ -1,15 +1,19 @@
 
 #include <sys/stat.h>
 
-#include "ocme.h"
-#include "impostor_definition.h" 
 #include "../utils/memory_debug.h"
 #include "../utils/timing.h"
 #include "../utils/logging.h"
 
 #include "../ooc_vector/ooc_chains.h"
 
-//#include "gindex_chunk.h"
+
+
+#include "ocme.h"
+#include "impostor_definition.h" 
+
+
+
 
 #include "import_ocm_ply.h"
 #include "../ooc_vector/berkeleydb/ooc_chains_berkeleydb.hpp"
@@ -143,12 +147,13 @@ void AddImpostors(char * ocmFile){
 }
 
 void UsageExit(){
-	printf("Usage ocm_build.exe [options] [*.aln | *.ply]...\
-		   -f : database name\n \
-		   -c : add per vertex color if present \
-		   -o : owerwrite if already exists \
-		   -m : RAM cache \
-		   -p : DB page size (bytes) \n");
+	printf("Usage ocm_build.exe [options] [*.aln | *.ply]...\n\
+		   -f : database name [default: out]\n\
+		   -v : verbose [default: no]\n\
+		   -s : skip faces (just insert vertices) [default: no]\n\
+		   -o : owerwrite if already exists [default: no]\n\
+		   -m : RAM cache (MB) [default: 200]\n\
+		   -p : database page size (B) [default: 1024]\n");
 
 	exit(0);
 }
@@ -262,23 +267,25 @@ bool Interrupt(){
 int
 main (int argc,char **argv )
 {
+#ifdef _DEBUG
+	printf("SIZE OF CELL: %d\n",sizeof(Cell));
+	printf("SIZE OF EdiTCOmmitData: %d\n",sizeof(EditCommitAuxData));
+	printf("SIZE OF RenderAuxData: %d\n",sizeof(RenderAuxData));
+	printf("SIZE OF FBOOL: %d\n",sizeof(FBool));
+	printf("SIZE OF BoolVector: %d\n",sizeof(BoolVector));
+	printf("SIZE OF Chain<GIndex>: %d\n",sizeof(Chain<GIndex>));
+	printf("SIZE OF std::map<unsigned int,unsigned int>: %d\n",sizeof(std::map<unsigned int,unsigned int>));
+	printf("waste: %d\n",sizeof(FBool)*5+sizeof(BoolVector)*3+sizeof(Chain<GIndex>)+sizeof(std::map<unsigned int,unsigned int>));
 
-//	printf("SIZE OF CELL: %d\n",sizeof(Cell));
-//	printf("SIZE OF FBOOL: %d\n",sizeof(FBool));
-//	printf("SIZE OF BoolVector: %d\n",sizeof(BoolVector));
-//	printf("SIZE OF Chain<GIndex>: %d\n",sizeof(Chain<GIndex>));
-//	printf("SIZE OF std::map<unsigned int,unsigned int>: %d\n",sizeof(std::map<unsigned int,unsigned int>));
-//	printf("waste: %d\n",sizeof(FBool)*5+sizeof(BoolVector)*3+sizeof(Chain<GIndex>)+sizeof(std::map<unsigned int,unsigned int>));
-//
-//	printf("SIZE OF Chain<GIndex>: %d\n",sizeof(Chain<GIndex>));
-//	printf("SIZE OF Chain<OFace>: %d\n",sizeof(Chain<OFace>));
-//	printf("SIZE OF Chain<OVertex>: %d\n",sizeof(Chain<OVertex>));
-//	printf("SIZE OF Chain<OVertex>::Chunk: %d\n",sizeof(Chain<OVertex>::Chunk));
-//	printf("SIZE OF CachePolicy: %d\n",sizeof(CachePolicy));
-//	printf("SIZE OF std::string: %d\n",sizeof(std::string));
-//	printf("SIZE OF vcgMesh: %d\n",sizeof(vcgMesh));
-//	printf("SIZE OF Impostor: %d\n",sizeof(Impostor));
-
+	printf("SIZE OF Chain<GIndex>: %d\n",sizeof(Chain<GIndex>));
+	printf("SIZE OF Chain<OFace>: %d\n",sizeof(Chain<OFace>));
+	printf("SIZE OF Chain<OVertex>: %d\n",sizeof(Chain<OVertex>));
+	printf("SIZE OF Chain<OVertex>::Chunk: %d\n",sizeof(Chain<OVertex>::Chunk));
+	printf("SIZE OF CachePolicy: %d\n",sizeof(CachePolicy));
+	printf("SIZE OF std::string: %d\n",sizeof(std::string));
+	printf("SIZE OF vcgMesh: %d\n",sizeof(vcgMesh));
+	printf("SIZE OF Impostor: %d\n",sizeof(Impostor));
+#endif
 //	_CrtSetBreakAlloc(1281429);
 
 	struct stat buf;
@@ -301,9 +308,9 @@ main (int argc,char **argv )
 	bool logging  = false;
 	bool compute_impostors  = false;
 	bool overwrite_database = false;
-	bool add_per_vertex_color = false;
 	bool transform = false;
 	bool verify = false;
+	bool only_vertices = false;
 
         vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
 
@@ -311,12 +318,14 @@ main (int argc,char **argv )
         printf("ocme builder DEBUG MODE\n");
 #endif
 
-	std::string stat_file = std::string(""); 
+  std::string stat_file = std::string(""); 
+  if(argc==1)
+	  UsageExit();
   while (1)
     {
       int this_option_optind = optind ? optind : 1;
 
-                        c = getopt (argc, argv, "qciosvp:t:m:l:f:L:a:A:k:");
+      c = getopt (argc, argv, "sqciosvp:t:m:l:f:L:a:A:k:");
       if (c == EOF)
         break;
 
@@ -329,23 +338,23 @@ main (int argc,char **argv )
           compute_impostors = true;
           break;
 
+        case 's':
+          only_vertices = true;
+          break;
+
         case 't':
           transform = true;
 		  printf("filename %s\n",optarg );tra_ma_file = std::string(optarg);
 		  LoadTraMa(tra_ma_file.c_str(),tra_ma);
           break;
 
-        case 's':
+        case 'S':
 		  printf("filename %s\n",optarg );stat_file = std::string(optarg);
           break;
 
 		case 'o':
           overwrite_database = true;
           break;
-		case 'c':
-		add_per_vertex_color = true;
-		break;
-
 		case 'f':
 		printf("filename %s\n",optarg );ocmename = std::string(optarg);
           break;
@@ -463,6 +472,7 @@ main (int argc,char **argv )
 					vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,aln[idm].second);
 					unsigned int newstart = clock();
 					if(!m.face.empty()){
+						if(only_vertices) m.fn = 0;
  		 				meshona->AddMesh(m);
 						++meshadded;
 					}
@@ -510,7 +520,7 @@ main (int argc,char **argv )
 						lgn->Push();
 						vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,tra_ma);
 	
-					vcg::tri::io::ExporterPLY<vcgMesh>::Save(m,std::string(argv[i]).append("T.ply").c_str());
+//					vcg::tri::io::ExporterPLY<vcgMesh>::Save(m,std::string(argv[i]).append("T.ply").c_str());
 					}
 					TIM::End(0);	
 
@@ -521,11 +531,11 @@ main (int argc,char **argv )
 					assert( MemDbg::CheckHeap(0));
 
 					++meshona->stat.n_files;
-					
-					if(!m.face.empty()) {					 
-											 meshona->AddMesh(m,am);
-						++meshadded;
-					}
+
+					if(only_vertices) m.fn = 0;
+					meshona->AddMesh(m,am);
+					++meshadded;
+
 					sprintf(lgn->Buf(),"#cells: %d \n", meshona->cells.size());
 					lgn->Push();
 				}
@@ -533,7 +543,7 @@ main (int argc,char **argv )
 				{
 					TIM::Begin(2);
 					// if the file is more that 50 MB build directly from file
-					n_faces = vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,argv[i],tra_ma,cb);
+	//				n_faces = vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,argv[i],tra_ma,cb);
 					TIM::End(2);
 				}
 				
@@ -624,7 +634,6 @@ else
 }
 
 		delete meshona;
-		delete lgn;
 }	
 		
 		samples.clear();

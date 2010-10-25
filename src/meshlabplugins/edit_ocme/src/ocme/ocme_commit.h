@@ -160,13 +160,14 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
                  }
         }
      }
-       vcg::Box3<ScalarType> facebox;
+      
 	/* Here the main cycle. for each face of the mesh put it in the hashed multigrid */
 	for(fi = m.face.begin(); fi != m.face.end(); ++fi) 
 		if( lockedF[*fi]==0)						// skip if not editable
 		{
-		CellKey ck;
-                GIndex     gposf = gPosF[*fi]; // note: gPosF[] will not be updated because it is won't be used again
+			vcg::Box3<ScalarType> facebox;
+			CellKey ck;
+            GIndex     gposf = gPosF[*fi]; // note: gPosF[] will not be updated because it is won't be used again
                                                // before it is destroyed
 
 		//if( ((&(*fi) - &(*m.face.begin()))%1000) == 0){
@@ -189,7 +190,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
                 }
 
                 // compute the cell where to put this face
-                {
+				{
                     // find in which level the face should be
                     h = ComputeLevel<MeshType>(*fi,srM);
 
@@ -206,7 +207,7 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 
                     if( (!c) || !(c->key == ck))				// check if the current cell is the right one
                             c = GetCell(ck);				// if not update it
-		}
+			}
 
 
 
@@ -244,31 +245,12 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		}
 
 		// import all the attributes specified
-		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)if( lockedV[*vi]==0)
 			for(GISet::CopiesIterator ci = gPosV[*vi].giset.begin();ci != gPosV[*vi].giset.end();++ci){
-				if(!(c->key == (*ci).first)) c = GetCell((*ci).first,false);
+				if( (c==NULL) || !(c->key == (*ci).first)) c = GetCell((*ci).first,false);
 				RAssert(c);
 				(*c->vert)[(*ci).second].P() = (*vi).cP();
 				attr_map.ImportVertex(c,*vi,(*ci).second);
-			}
-
-
-		/* mark unreferenced vertices for deletion	in cells included in the selection at edit time 	*/
-			{
-				std::vector<bool> todel;
-				for(unsigned int i = 0; i < sel_cells_attr().size(); ++i){
-					Cell * c = GetCell(sel_cells_attr()[i],false);
-					RAssert(c);
-					todel.resize(c->vert->Size(),true);
-					for(unsigned int fi = 0; fi < c->face->Size(); ++fi){
-						for(unsigned int vi  = 0; vi < 3; ++vi)
-							todel[(*c->face)[fi][vi]] = false;
-					}
-					c->ecd->deleted_vertex.SetAsVectorOfMarked();
-					for(unsigned int ii = 0; ii < c->vert->Size(); ++ii)
-						if(todel[ii])
-							c->ecd->deleted_vertex.SetMarked(ii,true);
-				}
 			}
 
 		/* update gPosV by removing deleted vertices */
@@ -347,33 +329,54 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 	
 				}
 			}
+		/* mark unreferenced vertices for deletion	in cells included in the selection at edit time 	*/
+			{
+				std::vector<bool> todel;
+				std::vector<bool> border;
+				for(unsigned int i = 0; i < sel_cells_attr().size(); ++i){
+					Cell * c = GetCell(sel_cells_attr()[i],false);
+					RAssert(c);
+					todel.resize(c->vert->Size(),true);
+					border.resize(c->vert->Size(),false);
+					for(unsigned int ii  = 0; ii < c->border->Size(); ++ii)
+						border[(*c->border)[ii].vi] = true;
+
+					for(unsigned int fi = 0; fi < c->face->Size(); ++fi){
+						for(unsigned int vi  = 0; vi < 3; ++vi)
+							todel[(*c->face)[fi][vi]] = false;
+					}
+					c->ecd->deleted_vertex.SetAsVectorOfMarked();
+					for(unsigned int ii = 0; ii < c->vert->Size(); ++ii)
+						if(todel[ii] && border[ii])
+							c->ecd->deleted_vertex.SetMarked(ii,true);
+				}
+			}
 
 		lgn->Append("cleaning up");
         if(!toCleanUpCells.empty()){
                 RemoveDuplicates		(toCleanUpCells);
-
-				std::vector<Cell*>::iterator ci;
-				for(ci = toCleanUpCells.begin(); ci != toCleanUpCells.end(); ++ci){
-					RAssert((*ci));
-					if(*ci){
-					if(!(*ci)->ecd){
-					sprintf(lgn->Buf(),"%d %d %d %d",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);lgn->Push();
-					sprintf(lgn->Buf(),"vert: %d face: %d ",(*ci)->vert->Size(),(*ci)->face->Size());lgn->Push();
-
-					}
-					RAssert((*ci)->rd);
-					}	
-				}
-
-
-				lgn->Append("RemoveDeletedFaces");
                 RemoveDeletedFaces		(toCleanUpCells);
-				lgn->Append("RemoveDeletedBorder");
                 RemoveDeletedBorder		(toCleanUpCells);
-				lgn->Append("RemoveDeletedVertices");
                 RemoveDeletedVertices	(toCleanUpCells);
        }
  
+		{
+			for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+				if(!(*vi).IsD() && gPosV[*vi].IsUnassigned() && gPosVNew[*vi].IsUnassigned() ){
+					 CellKey ck = ComputeCellKey((*vi).cP(),srM.max);
+					 if( (c==NULL) || !(c->key == ck)) {
+						 c = GetCellC(ck);
+							if(!c->generic_bool()) {                                            // if it is the first occurrence of the cell
+								UpdateCellsAttributes(c,attr_map);                              // make sure it contains all the attributes
+								c->generic_bool = FBool(&generic_bool);
+								c->generic_bool = true;
+							}
+					 }
+					 int pos = c-> AddVertex(OVertex(*vi) );   
+					 attr_map.ImportVertex(c,*vi,pos); 
+				}
+
+		}
 #ifdef _DEBUG
 	// DEBUG - check
 

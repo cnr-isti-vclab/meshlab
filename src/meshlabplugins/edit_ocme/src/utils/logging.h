@@ -22,7 +22,8 @@ public:
 		}
 	}
 	~Logging(){
-		delete [] Buf();
+		if( Buf())
+			{delete [] Buf(); Buf()=0;}
 		if(off) return;
 		J().clear();
 	}

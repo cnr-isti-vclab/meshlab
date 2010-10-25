@@ -97,9 +97,9 @@ struct Impostor{
         void GetPointNormalColor( PointCell pn, vcg::Point3f & p, vcg::Point3f & n,vcg::Point3<unsigned char> & c){
 			unsigned char i,j,k;
 			stdMatrix3Sparse<vcg::Point3<char>,8>::Index(pn.first,i,j,k);
-                        vcg::Point3<char> & a = pn.second.p;
+            vcg::Point3<char> & a = pn.second.p;
 			p = vcg::Point3f(C2F (a[0],i,0),C2F (a[1],j,1),C2F (a[2],k,2));
-                        vcg::Point3<char> & b = pn.second.n;
+            vcg::Point3<char> & b = pn.second.n;
 			n = vcg::Point3f(C2F_01(b[0]),C2F_01(b[1]),C2F_01(b[2])).Normalize();
             c = pn.second.c;
 

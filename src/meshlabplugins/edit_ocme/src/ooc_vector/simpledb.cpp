@@ -197,7 +197,7 @@ SimpleDb::Index  SimpleDb::Get(std::string key, void *&  buf){
 						ptr+= segment_size;
 				}
 				return res;
-		}else{
+			}else{
 						buf = new char[segment_size];
 					 return Get((*ii).second,buf,segment_size);
 					}

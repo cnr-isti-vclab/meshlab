@@ -38,7 +38,7 @@ struct SimpleDb{
 	Index			GetSingle(std::string  ,void *, unsigned long siz);
 	Index			Get(std::string key ,void *, unsigned long siz);
 	Index			Get(std::string key, void *&  buf);
-        Index			Get(const Index &  id, void * buf, const unsigned int &);
+    Index			Get(const Index &  id, void * buf, const unsigned int &);
 
 	void		Del(std::string);
 	void		Open(const std::string & _name);

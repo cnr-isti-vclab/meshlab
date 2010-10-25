@@ -5,20 +5,17 @@
 void OCME::RemoveDeletedFaces(  std::vector<Cell*> & cucells){
 	std::vector<Cell*>::iterator ci;
 	for(ci = cucells.begin(); ci != cucells.end(); ++ci){
-		RAssert((*ci));
-		if(*ci){
-			if(!(*ci)->ecd){
-				sprintf(lgn->Buf(),"%d %d %d %d",(*ci)->key.x,(*ci)->key.y,(*ci)->key.z,(*ci)->key.h);lgn->Push();
-				sprintf(lgn->Buf(),"vert: %d face: %d ",(*ci)->vert->Size(),(*ci)->face->Size());lgn->Push();
-				
-			}
-			RAssert((*ci)->rd);
-		}	
-	}
-	for(ci = cucells.begin(); ci != cucells.end(); ++ci){
 		MarkTouched((*ci)->key);
 		(*ci) ->ecd->deleted_face.SetAsVectorOfMarked();
+
+		/* remove the faces (indices) */
 		(*ci)->face->Compact( (*ci)->ecd->deleted_face.marked_elements);
+
+		/* remove corresponding per face attribute (color, normal, whatever... */
+		Cell::StringChainMap::iterator fai;
+		for(fai = (*ci)->perFace_attributes.begin(); fai != (*ci)->perFace_attributes.end(); ++fai)
+			(*fai).second->Compact((*ci)->ecd->deleted_face.marked_elements);
+
 		(*ci) ->ecd->deleted_face.Clear();	
 	}
 }
@@ -52,6 +49,12 @@ void OCME::RemoveDeletedVertices(    std::vector<Cell*>  cs){
 			(*ci)->ecd->deleted_vertex.SetAsVectorOfMarked();
             vchain->BuildRemap( (*ci)->ecd->deleted_vertex.marked_elements, remap);
             vchain->Compact((*ci)->ecd->deleted_vertex.marked_elements);
+
+			/* remove corresponding per vertex attribute (color, normal, whatever... */
+			Cell::StringChainMap::iterator vai;
+			for( vai = (*ci)->perVertex_attributes.begin(); vai != (*ci)->perVertex_attributes.end(); ++vai)
+				(*vai).second->Compact((*ci)->ecd->deleted_vertex.marked_elements);
+
             (*ci)->ecd->deleted_vertex.Clear();
 
             for(unsigned int fi = 0; fi < fchain->Size(); ++fi)

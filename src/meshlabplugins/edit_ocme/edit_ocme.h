@@ -105,13 +105,13 @@ public slots:
 	void loadOcm();				// load an ocm database
 	void closeOcm();			// close an ocm database
 	void createOcm();			// create an ocm database
-	void edit();					// edit current selection
-	void markEditable();  // mark as selected (flag S) the editable element on the editing mesh
-	void drop();					// drop current selection
+	void edit();				// edit current selection
+	void markEditable();		// mark as selected (flag S) the editable element on the editing mesh
+	void drop();				// drop current selection
 	void commit();				// commit
-	void add();						// add new mesh
-	void addFromDisk();		// add from disk
-	void refreshImpostors(); // refresh impostor (debug)
+	void add();					// add new mesh
+	void addFromDisk();			// add from disk
+	void refreshImpostors();	// refresh impostor (debug)
 	void toggleExtraction();
 	void toggleShowTouched();
 	void updateButtonsState();
