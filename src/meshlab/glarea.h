@@ -336,7 +336,7 @@ public:
 	void setIsRaster(bool viewMode);
 	void loadRaster(int id);
 
-	void setOpacity(int o) { opacity = o/100.0; updateGL(); } //between 0 and 100
+	void setOpacity(int o) { opacity = o/100.0; update(); } //between 0 and 100
 	void setTarget(QImage &image);
 
 private:
