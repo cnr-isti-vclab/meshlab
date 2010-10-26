@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+
+ <xs:element name='MESHLAB_FILTER_INTERFACE'>
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element ref='PLUGIN'/>
+   </xs:sequence>
+   <xs:attribute name='version' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='PLUGIN'>
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element ref='FILTER' maxOccurs='unbounded'/>
+   </xs:sequence>
+   <xs:attribute name='scriptName' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='FILTER'>
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element ref='FILTER_HELP'/>
+    <xs:element ref='PARAM' minOccurs='0' maxOccurs='unbounded'/>
+   </xs:sequence>
+   <xs:attribute name='enumName' type='xs:ID' use='required'/>
+   <xs:attribute name='name' type='xs:string' use='required'/>
+   <xs:attribute name='scriptFunctionName' type='xs:string' use='required'/>
+   <xs:attribute name='filterClass' type='xs:string' use='required'/>
+   <xs:attribute name='preCond' type='xs:string' use='optional' default='MM_NONE'/>
+   <xs:attribute name='postCond' type='xs:string' use='optional' default='MM_UNKNOWN'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='FILTER_HELP'>
+  <xs:complexType mixed='true'>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='PARAM'>
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element ref='PARAM_HELP'/>
+    <xs:choice>
+     <xs:element ref='CHECKBOX_GUI'/>
+     <xs:element ref='ABSPERC_GUI'/>
+    </xs:choice>
+   </xs:sequence>
+   <xs:attribute name='type' use='required'>
+    <xs:simpleType>
+     <xs:restriction base='xs:string'>
+      <xs:enumeration value='Boolean'/>
+      <xs:enumeration value='Real'/>
+     </xs:restriction>
+    </xs:simpleType>
+   </xs:attribute>
+   <xs:attribute name='name' type='xs:ID' use='required'/>
+   <xs:attribute name='defaultExpression' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='PARAM_HELP'>
+  <xs:complexType mixed='true'>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='CHECKBOX_GUI'>
+  <xs:complexType>
+   <xs:attribute name='label' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
+ <xs:element name='ABSPERC_GUI'>
+  <xs:complexType>
+   <xs:attribute name='label' type='xs:string' use='required'/>
+   <xs:attribute name='minExpr' type='xs:string' use='required'/>
+   <xs:attribute name='maxExpr' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+</xs:schema>
+
