@@ -8,7 +8,7 @@ DEPENDPATH += . \
               ssynth/StructureSynth/Parser \
               ssynth/SyntopiaCore/Exceptions \
               ssynth/SyntopiaCore/GLEngine \
-              ssynth/SyntopiaCore/GLEngine/RayTracer \
+              ssynth/SyntopiaCore/GLEngine/Raytracer \
               ssynth/SyntopiaCore/Logging \
               ssynth/SyntopiaCore/Math \
               ssynth/SyntopiaCore/Misc \
