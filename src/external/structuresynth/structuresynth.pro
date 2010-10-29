@@ -1,8 +1,5 @@
 TEMPLATE = lib
 TARGET = ssynth
-CONFIG+=opengl
-QT+=xml opengl script
-CONFIG += staticlib
 
 DEPENDPATH += . \
               ssynth \
@@ -113,6 +110,10 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.cpp \
            ssynth/StructureSynth/Model/Rendering/Renderer.cpp \
            ssynth/StructureSynth/Model/Rendering/TemplateRenderer.cpp \
+
+CONFIG += staticlib
+CONFIG+=opengl
+QT+=xml opengl script
 macx:DESTDIR       = ../lib/macx
 win32-g++:DESTDIR       = ../lib/win32-gcc
 win32-msvc2005:DESTDIR       = ../lib/win32-msvc2005
