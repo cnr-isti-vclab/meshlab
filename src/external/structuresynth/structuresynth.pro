@@ -64,7 +64,7 @@ HEADERS += ssynth/StructureSynth/Model/Action.h \
            ssynth/ThirdPartyCode/MersenneTwister/MersenneTwister.h \
            ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.h \
            ssynth/StructureSynth/Model/Rendering/Renderer.h \
-           ssynth/StructureSynth/Model/Rendering/TemplateRenderer.h
+           ssynth/StructureSynth/Model/Rendering/TemplateRenderer.h \
 SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/StructureSynth/Model/AmbiguousRule.cpp \
            ssynth/StructureSynth/Model/Builder.cpp \
