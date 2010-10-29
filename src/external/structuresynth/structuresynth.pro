@@ -44,10 +44,15 @@ HEADERS += ssynth/StructureSynth/Model/Action.h \
            ssynth/SyntopiaCore/GLEngine/Line.h \
            ssynth/SyntopiaCore/GLEngine/Mesh.h \
            ssynth/SyntopiaCore/GLEngine/Object3D.h \
-           ssynth/SyntopiaCore/GLEngine/RayTracer.h \
            ssynth/SyntopiaCore/GLEngine/RaytraceTriangle.h \
            ssynth/SyntopiaCore/GLEngine/Sphere.h \
            ssynth/SyntopiaCore/GLEngine/Triangle.h \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/RayTracer.h \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/AtomicCounter.h \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/ProgressiveOutput.h \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/RenderThread.h \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/Sampler.h \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/VoxelStepper.h \
            ssynth/SyntopiaCore/Logging/ListWidgetLogger.h \
            ssynth/SyntopiaCore/Logging/Logging.h \
            ssynth/SyntopiaCore/Math/Matrix4.h \
@@ -86,10 +91,14 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/SyntopiaCore/GLEngine/Line.cpp \
            ssynth/SyntopiaCore/GLEngine/Mesh.cpp \
            ssynth/SyntopiaCore/GLEngine/Object3D.cpp \
-           ssynth/SyntopiaCore/GLEngine/RayTracer.cpp \
            ssynth/SyntopiaCore/GLEngine/RaytraceTriangle.cpp \
            ssynth/SyntopiaCore/GLEngine/Sphere.cpp \
            ssynth/SyntopiaCore/GLEngine/Triangle.cpp \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/RayTracer.cpp \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/AtomicCounter.cpp \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/RenderThread.cpp \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/Sampler.cpp \
+		   ssynth/SyntopiaCore/GLEngine/RayTracer/VoxelStepper.cpp \
            ssynth/SyntopiaCore/Logging/ListWidgetLogger.cpp \
            ssynth/SyntopiaCore/Logging/Logging.cpp \
            ssynth/SyntopiaCore/Math/Matrix4.cpp \
@@ -101,7 +110,7 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/SyntopiaCore/Misc/Version.cpp \
            ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.cpp \
            ssynth/StructureSynth/Model/Rendering/Renderer.cpp \
-           ssynth/StructureSynth/Model/Rendering/TemplateRenderer.cpp
+           ssynth/StructureSynth/Model/Rendering/TemplateRenderer.cpp \
 CONFIG+=opengl
 QT+=xml opengl script
 macx:DESTDIR       = ../lib/macx
