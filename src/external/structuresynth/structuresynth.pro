@@ -45,11 +45,11 @@ HEADERS += ssynth/StructureSynth/Model/Action.h \
            ssynth/SyntopiaCore/GLEngine/Line.h \
            ssynth/SyntopiaCore/GLEngine/Mesh.h \
            ssynth/SyntopiaCore/GLEngine/Object3D.h \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/AtomicCounter.h \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/RayTracer.h \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/RenderThread.h \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/Sampler.h \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/VoxelStepper.h \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/AtomicCounter.h \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/RayTracer.h \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/RenderThread.h \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/Sampler.h \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/VoxelStepper.h \
            ssynth/SyntopiaCore/GLEngine/RaytraceTriangle.h \
            ssynth/SyntopiaCore/GLEngine/Sphere.h \
            ssynth/SyntopiaCore/GLEngine/Triangle.h \
@@ -91,11 +91,11 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/SyntopiaCore/GLEngine/Line.cpp \
            ssynth/SyntopiaCore/GLEngine/Mesh.cpp \
            ssynth/SyntopiaCore/GLEngine/Object3D.cpp \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/AtomicCounter.cpp \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/RayTracer.cpp \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/RenderThread.cpp \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/Sampler.cpp \
-           ssynth/SyntopiaCore/GLEngine/RayTracer/VoxelStepper.cpp \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/AtomicCounter.cpp \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/RayTracer.cpp \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/RenderThread.cpp \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/Sampler.cpp \
+           ssynth/SyntopiaCore/GLEngine/Raytracer/VoxelStepper.cpp \
            ssynth/SyntopiaCore/GLEngine/RaytraceTriangle.cpp \
            ssynth/SyntopiaCore/GLEngine/Sphere.cpp \
            ssynth/SyntopiaCore/GLEngine/Triangle.cpp \
