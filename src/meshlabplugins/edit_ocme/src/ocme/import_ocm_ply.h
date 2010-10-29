@@ -44,106 +44,12 @@ namespace io {
 	
 	
 
-
-template <class GIDX>
-void AddFace(OFace & fi, OCME * ocm, Chain<OVertex> * vert,GIDX & gPos,ScaleRange sr,std::vector<Cell*> & toCleanUp){
-//
-//		static Cell * c = NULL;
-//		// 1: find the proper level
-//		float l = -1.0;
-//		for(int i = 0; i < 3; ++i)
-//			l = std::max< float>((float)l,( (*vert)[fi[i]].P() - (*vert)[fi[(i+1)%3]].P()).SquaredNorm());
-//
-//		int h = std::max<float>(std::min<float>(l,sr.max),sr.min);
-//
-//		// 2. find the proper cell in the level h
-//		/* very first choice, pick the cell that contains the  min corner of the bounding box */
-//		vcg::Box3<float> facebox;
-//		vcg::Point3f verts[3],p,n;
-//		for(int i = 0; i < 3 ; ++i) {verts[i] = (*vert)[fi[i]].P(); facebox.Add(verts[i] );}
-//		p = (verts[0]+verts[1]+verts[2])/3.f;
-//		n = ((verts[1]-verts[0])^(verts[2]-verts[0])).Normalize();
-//
-//		CellKey ck = ComputeCellKey(facebox.min,h);
-//
-//		// 3. now we know that the cell where this face must to be put is "ck". Set che vertex pointers.
-//		if( (c==NULL) || !(c->key == ck))		// check if the current cell is the right one
-//			c = ocm->GetCellC(ck);					// if not update it
-//
-//
-//		/*  The vertices can be internal to the cell or external									*/
-//		/*  In the type OVertex there is bool to indicate this (OVertex::isExternal)				*/
-//		/*  If it is external its global index is put in the vector Cell::externalReferences		*/
-//		/*  and the position in Cell::externalReferences is stored as the first coordinate of vertex*/
-//		/*	position. Amen.																			*/
-//
-//		OVertex ov;
-//		int vIndex[3];
-//		for(int i = 0; i < 3 ; ++i){
-//			GIndex vp  = gPos[ fi[i] ];
-//			if(  vp.IsUnassigned()){												// check if it has already been assigned
-//				CellKey ckv = ComputeCellKey( (*vert)[fi[i]].P() ,h);					// no: find in which cell is should be stored
-//				Cell* ext_c = ( ckv == c->key)?c:	ocm->GetCellC(ckv);					// no: get this cell (caching: try if is the one already in c)
-//				int vpos =  ext_c-> AddVertex( (*vert)[fi[i]]  );				// no: add the vertex to it
-//				vp = gPos[fi[i]] = GIndex(ckv,vpos);							// no: get the GIndex
-//			}
-//
-//			// here the vertex has been assigned globally for sure
-//			if (vp.ck == ck)														// if it has been assigned to the the face cell
-//				vIndex[i] = vp.i;													// just copy its order
-//			else{
-//				int ext_pos = c->GetExternalReference(vp,false);					// check if  the reference to this vertex has already been created
-//				if(ext_pos!=-1)														// yes
-//					vIndex[i] =  c->GetVertexPointingToExternalReference(ext_pos);	//   yes: find out the corresponding vertex and assign it
-//				else{																// no
-//					ext_pos = c->AddExternalReference(vp);							//    no: add the external references
-//					vIndex[i] = c->AddExternalVertex(ext_pos);						//	  no: add the corresponding vertex
-//                    c->ecd->vert2externals.insert(std::pair<unsigned int,unsigned int>(ext_pos,vIndex[i]));
-//					toCleanUp.push_back(c);
-//				}
-//			}
-//
-//		//	assert(vIndex[i]<c->vert->Size());
-//
-//		}
-//        // add the face to the cell
-//		c->AddFace(OFace(vIndex[0],vIndex[1],vIndex[2]));
-//       // add the sample to the impostor
-//		c->impostor->AddSample(p,n);
-//
-//		/* Handling the bounding boxes of the cell.
-//		The bounding box 3 of a cell must include all the faces that cross that cell and that are
-//		assigned to the same level.
-//		The fourth dimension of the bounding box encodes the level and it will be used at editing time.
-//
-//		When a cell "c" must be enable for editing, we will have to load all the cells of the same level
-//		that intersect c. Furthermore we will have to load the upper and lower levels as written in sr (ScaleRange).
-//
-//		This wil guarantee the correct connectivity. For what concerns the geometry, we can decide to load all
-//		the cells from the set to the root and some more  lower levels. The key idea is that you are not enabled
-//		to change what you do not see.
-//		*/
-//
-//		// update the bounding box of the cell c to contain the bbox of the face
-//		const Box4 old_box = c->bbox;
-//		c->bbox.Add(facebox,sr);
-//
-//		// if the bounding box has enlarged then expand the bounding box of all the cells
-//		// touched by the bounding box to include the face
-//		std::vector<CellKey> overlapping;
-//		std::vector<CellKey>::iterator oi;
-//
-//		// get the cells at the same level "h" intersected by the bounding box of the face
-//		ocm->OverlappingBBoxes( facebox, h,overlapping);
-//
-//		Cell * ovl_cell = NULL;	// pointer to the overlapping cell
-//
-//		for(oi = overlapping.begin(); oi != overlapping.end(); ++oi){
-//			/* get the overlapping cell. If there is no such overlapping cell it must be created*/
-//			ovl_cell = ocm->GetCellC((*oi),true);
-//			ovl_cell->bbox.Add(facebox, sr);	// update its bounding box
-//		}
-}
+struct ChainedGISet{
+	ChainedGISet(GIndex g , unsigned int n):gi(g),next(n){}
+	ChainedGISet(){gi.i = -1; next = 0;}
+	GIndex gi;
+	unsigned int next;
+};
 
 /** 
 This class encapsulate a filter for opening ply meshes.
@@ -416,7 +322,127 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
   return r;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+static int FindIndexInCell( Chain<ChainedGISet> * gPos, unsigned int vi, CellKey ck){
 
+	do{
+		if( ((*gPos)[vi].gi.i!=-1) && ((*gPos)[vi].gi.ck==ck) )
+			return (*gPos)[vi].gi.i;//found it
+	}
+	while(  (*gPos)[vi].next != 0);
+	return -1; // not found
+}
+
+static void AddIndexInCell( Chain<ChainedGISet> * gPos, unsigned int vi, GIndex gi){
+
+	if((*gPos)[vi].gi.i == -1){
+				(*gPos)[vi].gi = gi;
+				(*gPos)[vi].next = 0;
+				return;
+		}
+	do{
+		vi = (*gPos)[vi].next;
+	}while( (*gPos)[vi].next != 0);
+	
+	(*gPos)[vi].next = gPos->AddElem(ChainedGISet(gi,0));
+}
+
+static void AddFace(OFace & fi, OCME * ocm, Chain<OVertex> * vert,Chain<ChainedGISet> * gPos,ScaleRange sr){
+
+		static Cell * c = NULL;
+		// 1: find the proper level
+		float l = -1.0;
+		for(int i = 0; i < 3; ++i)
+			l = std::max< float>((float)l,( (*vert)[fi[i]].P() - (*vert)[fi[(i+1)%3]].P()).SquaredNorm());
+
+		int h = std::max<float>(std::min<float>(l,sr.max),sr.min);
+
+		// 2. find the proper cell in the level h
+		/* very first choice, pick the cell that contains the  min corner of the bounding box */
+		vcg::Box3<float> facebox;
+		vcg::Point3f verts[3],p,n;
+		for(int i = 0; i < 3 ; ++i) {verts[i] = (*vert)[fi[i]].P(); facebox.Add(verts[i] );}
+		p = (verts[0]+verts[1]+verts[2])/3.f;
+		n = ((verts[1]-verts[0])^(verts[2]-verts[0])).Normalize();
+
+		CellKey ck = ComputeCellKey(facebox.min,h);
+
+		// 3. now we know that the cell where this face must to be put is "ck". Set che vertex pointers. 
+		if( (c==NULL) || !(c->key == ck)){		// check if the current cell is the right one
+			c = ocm->GetCellC(ck);					// if not update it
+                }
+
+                if(!c->generic_bool()) {                                            // if it is the first occurrence of the cell
+//                    UpdateCellsAttributes(c,attr_map);                              // make sure it contains all the attributes
+                    c->generic_bool = FBool(&generic_bool);
+                    c->generic_bool = true;
+                }
+
+
+		int vIndex[3];
+		for(int i = 0; i < 3 ; ++i){
+                         vIndex[i] = FindIndexInCell( gPos,fi[i], ck);                                          // get the index of the vertx in this cell (or -1)
+                        if(vIndex[i]==-1){
+//							 added_vert++;	
+                             vIndex[i] = c-> AddVertex( (*vert)[fi[i]]  );                               // no: add the vertex to it
+                             AddIndexInCell( gPos,fi[i],GIndex(ck,vIndex[i]));                                     // record to index
+                         }
+
+//                         attr_map.ImportVertex(c,*(*fi).V(i),vIndex[i]);                                      // import all the attributes specified
+                        }
+//		TIM::Begin(22);
+        // add the face to the cell
+        unsigned int f_pos =  c->AddFace(OFace(vIndex[0],vIndex[1],vIndex[2]));		// assing the face to the cell
+//        attr_map.ImportFace( c,  *fi  ,f_pos);                                      // import all the attributes specified
+//		TIM::End(22);
+
+//		TIM::Begin(23);
+		// rough roughroughourhg adding of samples
+
+		// vcg::Point3f bary   = vcg::Barycenter(*fi);
+		 vcg::Point3f bary   = (*vert)[fi[0]].P();
+         vcg::Color4b color  =   vcg::Color4b::Gray;
+
+		 c->impostor->AddSample(bary, n,color);	// collect a sample for the impostor
+
+		// update the bounding box of the cell c to contain the bbox of the face
+		const Box4 old_box = c->bbox;
+		c->bbox.Add(facebox,sr);
+
+		// if the bounding box has enlarged then expand the bounding box of all the cells
+		// touched by the bounding box to include the face
+		std::vector<CellKey> overlapping;
+		std::vector<CellKey>::iterator oi;
+
+		// get the cells at the same level "h" intersected by the bounding box of the face
+		ocm->OverlappingBBoxes( facebox, h,overlapping);
+
+		Cell * ovl_cell = NULL;	// pointer to the overlapping cell
+
+		for(oi = overlapping.begin(); oi != overlapping.end(); ++oi){
+			/* get the overlapping cell. If there is no such overlapping cell it must be created*/
+			ovl_cell = ocm->GetCellC((*oi),true);
+			ovl_cell->bbox.Add(facebox, sr);	// update its bounding box
+		}
+}
+
+static void AddCopies( OCME * ocm, Chain<OVertex> * vert, Chain<ChainedGISet> * gPos)
+{
+	unsigned int cpi;
+	for(unsigned int vi = 0; vi < vert->Size(); ++vi){
+		unsigned int ii = vi;
+		do{
+			cpi = (*gPos)[ii].gi.i;
+			assert(cpi != -1);
+			Cell * c = ocm->GetCell((*gPos)[ii].gi.ck,false); 
+			assert(c);
+			c->border->AddElem(BorderIndex((*gPos)[ii].gi.i, ocm->gbi ));
+			ocm->gbi++;
+			ii++;
+		}while((*gPos)[ii].next!=0);
+	}
+}
+/////////////////////////////////////////////////////////////////////////////////////////
 
 
 /// read a mesh with all the possible option specified in the PlyInfo obj.
@@ -436,7 +462,7 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 	/* OOCEnv stuff
 	*/
 	Chain<OVertex>  * vert;
-	Chain<GIndex>  * gPos;
+	Chain<ChainedGISet>  * gPos;
 	OOCEnv  oce;
 	unsigned long n_faces = 0; 
 
@@ -445,7 +471,7 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 
 	va.flags = 42;
 
-  pi.status = ::vcg::ply::E_NOERROR;
+	pi.status = ::vcg::ply::E_NOERROR;
 
 	/*
 	// TO BE REMOVED: tv not used AND "spurious" vertex declaration causes error if ocf
@@ -695,12 +721,14 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 			*/
 		
 			oce.cache_policy->memory_limit = 20*(1<<20);
-                        oce.params.blockSizeBytes = 2048;
+            oce.params.blockSizeBytes = 2048;
 			remove("buffer");
 			oce.Create("buffer");
 			vert = oce.GetChain<OVertex>(std::string("vert"),true);
+			lgn->Append("remapping vertices on disc");
 			vert->Resize(n);
-			gPos = oce.GetChain<GIndex>(std::string("GIndex"),true);
+			gPos = oce.GetChain<ChainedGISet>(std::string("ChainedGISet"),true);
+			lgn->Append("creating support data structure for borders (on disc)");
 			gPos->Resize(n);
 			
 			ocm->stat.n_vertices +=n;
@@ -771,7 +799,7 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 			std::vector<int> indices;
 
 			ScaleRange sr;
-			std::vector<Cell*> toCleanUp;
+			
 			typename OpenMeshType::FaceType   f;
 
 			pf.SetCurElement(i);
@@ -808,14 +836,14 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 
 			for(j=0;j<std::min(1000,n);++j) {
 				OFace oface(indices[j*3],indices[j*3+1],indices[j*3+2]);
-				AddFace(oface, ocm,vert,*gPos , sr, toCleanUp);
+				AddFace(oface, ocm,vert, gPos , sr);
 			}
 
 			for( j =  std::min(1000,n); j < n;++j){
 				
 				int k;
 
-				if(pi.cb && (j%1000)==0) pi.cb(50+j*50/n,"Face Loading");
+				if(pi.cb && (j%1000)==0) pi.cb( (j/float(n))*1000,"Face Loading (0_1000)");
 				if( pf.Read(&fa)==-1 )
 				{
 					pi.status = PlyInfo::E_SHORTFILE;
@@ -831,12 +859,11 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 					}
 				}
 				OFace oface(fa.v[0],fa.v[1],fa.v[2]);
-				AddFace(oface,ocm,vert, *gPos , sr, toCleanUp);
+				AddFace(oface,ocm,vert, gPos , sr);
 			}
 
-			RemoveDuplicates(toCleanUp);
+//			RemoveDuplicates(toCleanUp);
 
-			oce.TrashEverything( );
 }
 else if( !strcmp( pf.ElemName(i),"tristrips") )//////////////////// LETTURA TRISTRIP DI STANFORD
 		{ 
@@ -996,6 +1023,11 @@ else if( !strcmp( pf.ElemName(i),"tristrips") )//////////////////// LETTURA TRIS
 	for(fi=m.face.begin();fi!=m.face.end();++fi)
 		if( ! (*fi).IsD() )
 			++m.fn;
+
+	AddCopies(ocm,vert,gPos);
+	oce.TrashEverything( );
+
+
 
 	return n_faces;
 }

@@ -33,6 +33,77 @@
 
 #ifdef WIN32
 #include <conio.h>
+
+#include <string>
+#include <vector>
+#include <iostream>
+#include <windows.h>
+int SearchDirectory(std::vector<std::wstring> &refvecFiles,
+                     std::wstring        &refcstrRootDirectory,
+                     std::wstring        &refcstrExtension,
+                    bool                     bSearchSubdirectories = true)
+{
+  std::wstring     strFilePath;             // Filepath
+  std::wstring     strPattern;              // Pattern
+  std::wstring     strExtension;            // Extension
+  HANDLE          hFile;                   // Handle to file
+  WIN32_FIND_DATA FileInformation;         // File information
+
+
+  strPattern = refcstrRootDirectory + std::wstring( L"\\*.*");
+
+  hFile = ::FindFirstFile(strPattern.c_str(), &FileInformation);
+  if(hFile != INVALID_HANDLE_VALUE)
+  {
+    do
+    {
+      if(FileInformation.cFileName[0] != '.')
+      {
+        strFilePath.erase();
+//        strFilePath = refcstrRootDirectory + std::wstring( L"\\") + std::wstring( FileInformation.cFileName);
+        strFilePath =  std::wstring( FileInformation.cFileName);
+
+        if(FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+          if(bSearchSubdirectories)
+          {
+            // Search subdirectory
+            int iRC = SearchDirectory(refvecFiles,
+                                      strFilePath,
+                                      refcstrExtension,
+                                      bSearchSubdirectories);
+            if(iRC)
+              return iRC;
+          }
+        }
+        else
+        {
+          // Check extension
+		  strExtension = std::wstring(FileInformation.cFileName);
+		  strExtension = strExtension.substr(strExtension.rfind(L".") + 1);
+
+          if(strExtension == refcstrExtension)
+          {
+            // Save filename
+            refvecFiles.push_back(strFilePath);
+          }
+        }
+      }
+    } while(::FindNextFile(hFile, &FileInformation) );
+
+    // Close handle
+    ::FindClose(hFile);
+
+    DWORD dwError = ::GetLastError();
+    if(dwError != ERROR_NO_MORE_FILES)
+      return dwError;
+  }
+
+  return 0;
+}
+
+
+
 #else
 #include <termios.h>
 #include <unistd.h>
@@ -149,11 +220,16 @@ void AddImpostors(char * ocmFile){
 void UsageExit(){
 	printf("Usage ocm_build.exe [options] [*.aln | *.ply]...\n\
 		   -f : database name [default: out]\n\
+		   -k NUM : num triangles per edge size [default: 50]\n\
+		   -i : save a mesh made with impostors [default: no]\n\
 		   -v : verbose [default: no]\n\
 		   -s : skip faces (just insert vertices) [default: no]\n\
+		   -n : compute normals per vertex, only with -s [default: no]\n\
 		   -o : owerwrite if already exists [default: no]\n\
-		   -m : RAM cache (MB) [default: 200]\n\
-		   -p : database page size (B) [default: 1024]\n");
+		   -m NUM : RAM cache (MB) [default: 200]\n\
+		   -p NUM : database page size (B) [default: 1024]\n\
+		   -A : all ply files in the folder [windows only]\
+		   ");
 
 	exit(0);
 }
@@ -261,9 +337,6 @@ bool Interrupt(){
 //}
 //
 
-
-
-
 int
 main (int argc,char **argv )
 {
@@ -286,8 +359,15 @@ main (int argc,char **argv )
 	printf("SIZE OF vcgMesh: %d\n",sizeof(vcgMesh));
 	printf("SIZE OF Impostor: %d\n",sizeof(Impostor));
 #endif
-//	_CrtSetBreakAlloc(1281429);
 
+ 	
+	std::vector<std::wstring>  refvecFiles;
+	std::wstring        refcstrRootDirectory(L".");
+	std::wstring        refcstrExtension(L"ply");
+	bool                     bSearchSubdirectories = true;
+                    
+//	_CrtSetBreakAlloc(1281429);
+	std::vector<std::string> files_to_load;
 	struct stat buf;
 	
 
@@ -306,17 +386,19 @@ main (int argc,char **argv )
 
 	std::string ocmename,tra_ma_file;
 	bool logging  = false;
-	bool compute_impostors  = false;
+	bool save_impostors  = false;
 	bool overwrite_database = false;
 	bool transform = false;
 	bool verify = false;
 	bool only_vertices = false;
-
-        vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
+	bool compute_normals = false;
+	bool all_plys = false;
+    vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
 
 #ifdef _DEBUG
         printf("ocme builder DEBUG MODE\n");
 #endif
+	 
 
   std::string stat_file = std::string(""); 
   if(argc==1)
@@ -325,7 +407,7 @@ main (int argc,char **argv )
     {
       int this_option_optind = optind ? optind : 1;
 
-      c = getopt (argc, argv, "sqciosvp:t:m:l:f:L:a:A:k:");
+      c = getopt (argc, argv, "Fsqciosnvp:t:m:l:f:L:a:A:k:");
       if (c == EOF)
         break;
 
@@ -335,13 +417,20 @@ main (int argc,char **argv )
           verify = true;
           break;
         case 'i':
-          compute_impostors = true;
+          save_impostors = true;
           break;
-
+        case 'n':
+          compute_normals = true;
+          break;
         case 's':
           only_vertices = true;
           break;
-
+#ifdef _WIN32
+		case 'F':
+			all_plys = true;
+			SearchDirectory(refvecFiles,refcstrRootDirectory,refcstrExtension,false);
+			break;
+#endif
         case 't':
           transform = true;
 		  printf("filename %s\n",optarg );tra_ma_file = std::string(optarg);
@@ -439,18 +528,24 @@ main (int argc,char **argv )
 
 	 #endif
 
+	  if(all_plys)
+		  for(int i  = 0 ;  i < refvecFiles.size()  ;++i) 
+			  files_to_load.push_back( std::string( refvecFiles[i].begin(),refvecFiles[i].end()));
+	  else	
+		  for(int i  = optind ; (i < argc) ;++i) 
+			files_to_load.push_back(argv[i]);
 
 
-		for(int i  = optind+min_meshes; (i < argc)&&  (i<optind+max_meshes)&& !Interrupt();++i){
+		for(int i  = min_meshes; (i < files_to_load.size())&&  (i<max_meshes)&& !Interrupt();++i){
 		
-			unsigned int wh = std::string(argv[i]).find(std::string(".aln"));
+			unsigned int wh = std::string(files_to_load[i]).find(std::string(".aln"));
 
-			if(wh == std::string(argv[i]).length()-4)
+			if(wh == std::string(files_to_load[i]).length()-4)
 			
 			// it is an aln file
 			{
 				std::vector<std::pair<std::string,vcg::Matrix44f> > aln;
-				LoadAln(argv[i],aln);
+				LoadAln(files_to_load[i].c_str(),aln);
 
 				printf("aln.size()  = %d\n",aln.size());
 				for(unsigned int idm = min_meshes_aln; (idm<  std::min(max_meshes_aln,aln.size())) && !Interrupt();++idm){
@@ -472,7 +567,12 @@ main (int argc,char **argv )
 					vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,aln[idm].second);
 					unsigned int newstart = clock();
 					if(!m.face.empty()){
-						if(only_vertices) m.fn = 0;
+
+						if(only_vertices){
+							if(compute_normals)
+								vcg::tri::UpdateNormals<vcgMesh>::PerVertexPerFace(m);
+							m.fn = 0;
+						}	
  		 				meshona->AddMesh(m);
 						++meshadded;
 					}
@@ -491,26 +591,26 @@ main (int argc,char **argv )
  				vcgMesh m;
 				unsigned long n_faces  =0;
 	 
-				sprintf(lgn->Buf(),"Adding mesh %s (%d of %d)..Loading",argv[i],i-optind, argc-optind);
+				sprintf(lgn->Buf(),"Adding mesh %s (%d of %d)..Loading",files_to_load[i],i, files_to_load.size());
 				lgn->Push();
 
-				stat(argv[i],&buf);
+				stat(files_to_load[i].c_str(),&buf);
 				meshona->stat.input_file_size+=buf.st_size;
-							if(buf.st_size < 500 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
+							if(buf.st_size < 1000 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
 
 					int mask = 0;
 
 					TIM::Begin(0);
 
 									AttributeMapper am;
-									vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(argv[i],mask);
+									vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(files_to_load[i].c_str(),mask);
 
 									if(mask & vcg::tri::io::Mask::IOM_VERTCOLOR){
 										m.vert.EnableColor();
 										am.vert_attrs.push_back("Color4b");
 									}
 
-					vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,argv[i],cb);
+					vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,files_to_load[i].c_str(),cb);
 
 					meshona->stat.n_triangles += m.fn;
 					meshona->stat.n_vertices += m.vn;
@@ -532,7 +632,11 @@ main (int argc,char **argv )
 
 					++meshona->stat.n_files;
 
-					if(only_vertices) m.fn = 0;
+					if(only_vertices){
+							if(compute_normals) 
+								vcg::tri::UpdateNormals<vcgMesh>::PerVertexPerFace(m);
+							m.fn = 0;
+						}	
 					meshona->AddMesh(m,am);
 					++meshadded;
 
@@ -543,7 +647,7 @@ main (int argc,char **argv )
 				{
 					TIM::Begin(2);
 					// if the file is more that 50 MB build directly from file
-	//				n_faces = vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,argv[i],tra_ma,cb);
+					n_faces = vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,files_to_load[i].c_str(),tra_ma,cb);
 					TIM::End(2);
 				}
 				
@@ -563,8 +667,14 @@ main (int argc,char **argv )
 				meshona->cells.size(),
 				meshona->oce.chains.size());
 
-			if(compute_impostors)
-				meshona->ComputeImpostors();
+			if(save_impostors){
+				vcgMesh impostorMesh;
+				vcg::tri::io::PlyInfo pi;
+				pi.mask |=  vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTNORMAL;
+				impostorMesh.vert.EnableColor();
+				meshona->ImpostorsToMesh(impostorMesh);
+				vcg::tri::io::ExporterPLY<vcgMesh>::Save(impostorMesh,(std::string(ocmename)+std::string("_imp.ply")).c_str(),pi.mask);
+			}
 
 			meshona->Close(true);
 			

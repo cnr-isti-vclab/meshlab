@@ -79,7 +79,7 @@ inline int OCME::ComputeLevel( typename MeshType::FaceType & f, ScaleRange  & sr
 
 template <class MeshType>
 void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
-
+	if(m.vn==0) return;
 	sprintf(lgn->Buf(),"Adding Mesh\n");
 	lgn->Push();	
 
@@ -173,7 +173,8 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 		TIM::Begin(23);
 		// rough roughroughourhg adding of samples
 
-		 vcg::Point3f bary   = vcg::Barycenter(*fi);
+		// vcg::Point3f bary   = vcg::Barycenter(*fi);
+		 vcg::Point3f bary   = (*fi).V(0)->cP();
          vcg::Color4b color  =  (hasColor)? (*fi).V(0)->cC() : vcg::Color4b::Gray;
 
          c->impostor->AddSample(bary,vcg::Normal(*fi).Normalize(),color);	// collect a sample for the impostor

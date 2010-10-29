@@ -24,7 +24,7 @@ unsigned int to_render_fbool;
 unsigned int generic_bool;
 
 vcg::Point4f corners[8];
-double cellsizes[30];
+double cellsizes[256];
 
 Logging * olgn;
 Logging * lgn;
@@ -39,14 +39,14 @@ void InitCorners(){
 }
 
 void InitCellSizes(){
-	for(int i = 0; i < 15;++i)
-		cellsizes[15+i] = 1<<i;
-	for(int i = 1; i <= 15;++i)
-		cellsizes[15-i] = 1/ (double)(1<<i);
+	for(int i = 0; i < 127;++i)
+		cellsizes[127+i] = 1<<i;
+	for(int i = 1; i <= 127;++i)
+		cellsizes[127-i] = 1/ (double)(1<<i);
 }
 
-double CS(const int & h){ return cellsizes[15+h]; }
-int COff(const int & h){ return 15+h; }
+double CS(const int & h){ return cellsizes[127+h]; }
+int COff(const int & h){ return 127+h; }
 
 
 
@@ -81,8 +81,9 @@ OCME::OCME(){
 										record_cells_set_modification = false;
                     renderParams.one_level = false;
                     renderParams.level = 0;
-										renderCache.Init(this);
-										renderCache.Start();
+					renderCache.Init(this);
+					renderCache.Start();
+					splat_renderer.Clear();
 	}
 
 OCME::~OCME(){

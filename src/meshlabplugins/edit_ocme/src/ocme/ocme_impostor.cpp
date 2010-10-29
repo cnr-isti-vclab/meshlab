@@ -11,6 +11,60 @@ int COff(const int & h);
 
 void OCME::ComputeImpostors( ){
 }
+void OCME::ImpostorsToMesh(vcgMesh & m){
+
+	//{
+	//	vcg::Point3f p,n;
+	//	vcg::Point3<unsigned char> c;
+
+	//	m.Clear();
+	//	for(CellsIterator ci = cells.begin(); ci != cells.end();++ci){
+	//		Impostor * imp = (*ci).second->impostor;
+	//		vcgMesh::VertexIterator vi = vcg::tri::Allocator<vcgMesh>::AddVertices(m,imp->proxies.size());
+	//		for(	Impostor::PointCellIterator pi   = imp->proxies.begin(); pi != imp->proxies .end(); ++pi,++vi  ){
+	//				imp->GetPointNormalColor(*pi,p,n,c);
+	//				(*vi).N() =  n;
+	//				(*vi).C() = vcg::Color4b(c[0],c[1],c[2],255);
+	//				(*vi).P() = p;
+	//		}
+	//	}
+	//}
+
+	{
+		vcg::Point3f p,n;
+	 	vcg::Point3<unsigned char> c;
+
+		m.Clear();
+		for(CellsIterator cc = cells.begin(); cc != cells.end();++cc){
+			Impostor * imp = (*cc).second->impostor;
+
+			std::map<unsigned short,vcg::Point3<char> >::iterator pi,ni;
+			std::map<unsigned short,vcg::Point3<unsigned char> >::iterator ci;
+			
+			pi = imp->centroids.data.begin();
+			ni = imp->normals.data.begin();
+			ci = imp->colors.data.begin();
+
+			vcgMesh::VertexIterator vi = vcg::tri::Allocator<vcgMesh>::AddVertices(m,imp->centroids.data.size());
+
+			for(; pi != imp->centroids.data.end(); ++pi,++ni,++ci,++vi){
+					
+					unsigned char i,j,k;
+					stdMatrix3Sparse<vcg::Point3<char>,8>::Index((*pi).first,i,j,k);
+					vcg::Point3<char> & a =  (*pi).second;
+					p = vcg::Point3f(imp->C2F (a[0],i,0),imp->C2F (a[1],j,1),imp->C2F (a[2],k,2));
+					vcg::Point3<char> & b = (*ni).second;
+					n = vcg::Point3f(imp->C2F_01(b[0]),imp->C2F_01(b[1]),imp->C2F_01(b[2])).Normalize();
+
+					c = (*ci).second;
+
+					(*vi).N() =  n;
+					(*vi).C() = vcg::Color4b(c[0],c[1],c[2],255);
+					(*vi).P() = p;
+			}
+		}
+	}
+}
 
 bool OCME::ClearImpostor(const CellKey & ck){
 
@@ -56,7 +110,7 @@ void OCME::ClearImpostors(std::vector<CellKey> & fromCells){
 		++impostor_updated;
 		++generic_bool;					// used to mark the touched cells
 
-		std::vector<CellKey> cells_by_level [32];
+		std::vector<CellKey> cells_by_level [256];
 
 		// phase 1. fill the array of level with the cells and reset their occupancy
 		for(std::vector<CellKey>::iterator  ci  = fromCells.begin(); ci != fromCells.end(); ++ci){
@@ -72,11 +126,11 @@ void OCME::ClearImpostors(std::vector<CellKey> & fromCells){
 	}
 
 		unsigned int level = 0;
-		while( (level  < 32) &&  cells_by_level[level].empty() ) {++level;} // find the lowest non empty level
-		if(level == 32) return;																							// if the database is empty return
+		while( (level  < 256) &&  cells_by_level[level].empty() ) {++level;} // find the lowest non empty level
+		if(level == 256) return;																							// if the database is empty return
 
 		// phase 2., bottom up clearing of the impostors
-		for( ; level  < 31;++level ){
+		for( ; level  < 255;++level ){
 			::RemoveDuplicates(cells_by_level[level]);
 			for(unsigned int i = 0; i <cells_by_level[level].size();++i){
 				const CellKey &  k = cells_by_level[level][i];
@@ -183,7 +237,7 @@ void OCME::BuildImpostorsHierarchy(std::vector<Cell*> & fromCells){
 	/*
 	The impostors are built bottom up, starting from the smallest cells (lowest h)
 	*/
-	std::vector<CellKey> cells_by_level [32];
+	std::vector<CellKey> cells_by_level [256];
 
 	std::vector<Cell*>::iterator ci;
 
@@ -196,13 +250,13 @@ void OCME::BuildImpostorsHierarchy(std::vector<Cell*> & fromCells){
 	}
 
 	unsigned int level = 0;
-	while( (level  < 32) &&  cells_by_level[level].empty() ) {++level;} // find the lowest non empty level
-	if(level == 32) return;												// if the database is empty return
+	while( (level  < 256) &&  cells_by_level[level].empty() ) {++level;} // find the lowest non empty level
+	if(level == 256) return;												// if the database is empty return
 
 	// phase 2., bottom up updating of the impostors
 	std::vector<vcg::Point3f> smp;
 //	unsigned int tmpEnd = level+5;
-	for( ; level  < 31;++level ){
+	for( ; level  < 255;++level ){
 
 			::RemoveDuplicates(cells_by_level[level]);
 		// build of the impostors of this level
@@ -285,7 +339,7 @@ void OCME::BuildImpostorsHierarchyPartial(std::vector<Cell*> & fromCells){
 	/*
 	The impostors are built bottom up, starting from the smallest cells (lowest h)
 	*/
-	std::vector<CellKey> cells_by_level [32];
+	std::vector<CellKey> cells_by_level [256];
 	std::vector<Cell*>::iterator ci;
 
 	// phase 1. fill the array of level with the cells and compute centroid and data occupancy
@@ -297,13 +351,13 @@ void OCME::BuildImpostorsHierarchyPartial(std::vector<Cell*> & fromCells){
 	}
 
 	unsigned int level = 0;
-	while( (level  < 32) &&  cells_by_level[level].empty() ) {++level;}		// find the lowest non empty level
-	if(level == 32) return;																								// if  empty return
+	while( (level  < 256) &&  cells_by_level[level].empty() ) {++level;}		// find the lowest non empty level
+	if(level == 256) return;																								// if  empty return
 
 	// phase 2., bottom up updating of the impostors
 	//bool to_insert = false;
 
-	for( ; level  < 31;++level ){
+	for( ; level  < 255;++level ){
 		::RemoveDuplicates(cells_by_level[level]);
 		// build of the impostors of this level
 		for(unsigned int i = 0; i <cells_by_level[level].size();++i)

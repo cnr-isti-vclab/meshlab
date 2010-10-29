@@ -84,21 +84,43 @@ void  Impostor::AddSample( vcg::Point3f  p,   vcg::Point3f   n, vcg::Color4b c){
 }
 
 void Impostor::AddSamplesFromImpostor(Impostor * ch){
-
-                vcg::Point3f p,n;
-                vcg::Point3<unsigned char> c;
-		for(PointCellIterator pi  = ch->proxies.begin();pi != ch->proxies.end(); ++pi){
-                                ch->GetPointNormalColor(*pi,p,n,c);
-                                this->AddSample(p,n,vcg::Color4b(c[0],c[1],c[2],255));
+        vcg::Point3f p,n;
+        vcg::Point3<unsigned char> c;
+		for(PointCellIterator pi  = ch->proxies.begin();pi != ch->proxies.end(); ++pi)
+		{
+			ch->GetPointNormalColor(*pi,p,n,c);
+			this->AddSample(p,n,vcg::Color4b(c[0],c[1],c[2],255));
 		}
 
+}
+
+void Impostor::SparseToCompact(){
+		vcg::Point3f p,n;
+        vcg::Point3<unsigned char> c;
+		positionsV.clear();
+		normalsV.clear();
+		colorsV.clear();
+
+		for(PointCellIterator pi  = this->proxies.begin();pi != this->proxies.end(); ++pi)
+		{
+			this->GetPointNormalColor(*pi,p,n,c);
+			positionsV.push_back(p);
+			normalsV.push_back(n);
+			colorsV.push_back(c);
+		}
+
+}
+
+void Impostor::CompactToSparse(){
+	for(unsigned int i =0; i < positionsV.size();++i) 
+		this->AddSample(positionsV[i],normalsV[i],vcg::Color4b(colorsV[i][0],colorsV[i][1],colorsV[i][2],255));
 }
 
 
 void Impostor::Create(OCME*o,CellKey ck){
         std::map<unsigned short,vcg::Point3<char> >::iterator pi,ni;
         std::map<unsigned short,vcg::Point3<unsigned char> >::iterator ci;
-		ci;
+		
 		pi = this->centroids.data.begin();
 		ni = this->normals.data.begin();
         ci = this->colors.data.begin();
@@ -216,7 +238,7 @@ char * Impostor::DeSerialize (char * ptr){
                     n_samples.At(i,j,k) = 1;
 		}
 		cellsize = (box.max[0]-box.min[0])/Gridsize();
-//		ClearDataPlanes(); ////// DECOMMENT THIS!!!
+	
 
 
 		return ptr;

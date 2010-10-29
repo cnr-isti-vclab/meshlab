@@ -19,13 +19,14 @@
 #include <GL/glew.h>
 #include <wrap/gl/space.h>
 #include <wrap/gl/trimesh.h>
+#include <wrap/gl/splatting_apss/splatrenderer.h>
 
 
 extern unsigned int kernelSetMark;
 extern unsigned int lockedMark;
 extern unsigned int impostor_updated;
 extern unsigned int to_render_fbool;
-extern double cellsizes[30];
+extern double cellsizes[256];
 extern vcg::Point4f corners[8];
 
 void InitCellSizes();
@@ -270,6 +271,11 @@ struct OCME{
 	void ComputeImpostors();
 
 	/*
+	make a mesh with all the impostors
+	*/
+	void ImpostorsToMesh(vcgMesh & m);
+
+	/*
 	clear the impostor for the passed cells and reflect the change in the hierarchy
 	*/
 	void ClearImpostors(std::vector<CellKey> & cks);
@@ -395,6 +401,9 @@ struct OCME{
 	// render the dataset
 	std::vector<Cell*> cells_to_render;
 	void Render();
+
+	// splatting apss rendering for the impostors
+	SplatRenderer<vcgMesh> splat_renderer;
 
 	// roots of the octree forest
 	std::list<Cell*> octree_roots;
