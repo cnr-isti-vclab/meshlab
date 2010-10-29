@@ -138,7 +138,7 @@ struct Chain: public ChainBase{
 			void Init(const int & _capacity){
 				buffer = new TYPE[_capacity];size = 0; capacity = _capacity;}
 			int capacity;								// how many elements can be stored in this chunk
-			int size;									// how many elements are currently stored in this chunk
+			int size;									// [to remove] how many elements are currently stored in this chunk
 			TYPE * buffer;								// buffer where the data are kept (== NULL  ->not in memory, != NULL -> loaded
 			void Dump(void * buffer, int & size); //save the Chunk (NOT its data)
 			int fetch_time;								// the last time it was loaded
