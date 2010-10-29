@@ -1,17 +1,19 @@
 TEMPLATE = lib
 TARGET = ssynth
+CONFIG += staticlib
 
 DEPENDPATH += . \
               ssynth \
-              ssynth\StructureSynth\Model \
-              ssynth\StructureSynth\Parser \
-              ssynth\SyntopiaCore\Exceptions \
-              ssynth\SyntopiaCore\GLEngine \
-              ssynth\SyntopiaCore\Logging \
-              ssynth\SyntopiaCore\Math \
-              ssynth\SyntopiaCore\Misc \
-              ssynth\ThirdPartyCode\MersenneTwister \
-              ssynth\StructureSynth\Model\Rendering \
+              ssynth/StructureSynth/Model \
+              ssynth/StructureSynth/Parser \
+              ssynth/SyntopiaCore/Exceptions \
+              ssynth/SyntopiaCore/GLEngine \
+              ssynth/SyntopiaCore/GLEngine/RayTracer \
+              ssynth/SyntopiaCore/Logging \
+              ssynth/SyntopiaCore/Math \
+              ssynth/SyntopiaCore/Misc \
+              ssynth/ThirdPartyCode/MersenneTwister \
+              ssynth/StructureSynth/Model/Rendering
 
 
 INCLUDEPATH += ssynth
@@ -43,15 +45,14 @@ HEADERS += ssynth/StructureSynth/Model/Action.h \
            ssynth/SyntopiaCore/GLEngine/Line.h \
            ssynth/SyntopiaCore/GLEngine/Mesh.h \
            ssynth/SyntopiaCore/GLEngine/Object3D.h \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/AtomicCounter.h \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/RayTracer.h \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/RenderThread.h \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/Sampler.h \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/VoxelStepper.h \
            ssynth/SyntopiaCore/GLEngine/RaytraceTriangle.h \
            ssynth/SyntopiaCore/GLEngine/Sphere.h \
            ssynth/SyntopiaCore/GLEngine/Triangle.h \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/RayTracer.h \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/AtomicCounter.h \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/ProgressiveOutput.h \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/RenderThread.h \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/Sampler.h \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/VoxelStepper.h \
            ssynth/SyntopiaCore/Logging/ListWidgetLogger.h \
            ssynth/SyntopiaCore/Logging/Logging.h \
            ssynth/SyntopiaCore/Math/Matrix4.h \
@@ -64,7 +65,7 @@ HEADERS += ssynth/StructureSynth/Model/Action.h \
            ssynth/ThirdPartyCode/MersenneTwister/MersenneTwister.h \
            ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.h \
            ssynth/StructureSynth/Model/Rendering/Renderer.h \
-           ssynth/StructureSynth/Model/Rendering/TemplateRenderer.h \
+           ssynth/StructureSynth/Model/Rendering/TemplateRenderer.h
 SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/StructureSynth/Model/AmbiguousRule.cpp \
            ssynth/StructureSynth/Model/Builder.cpp \
@@ -90,14 +91,14 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/SyntopiaCore/GLEngine/Line.cpp \
            ssynth/SyntopiaCore/GLEngine/Mesh.cpp \
            ssynth/SyntopiaCore/GLEngine/Object3D.cpp \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/AtomicCounter.cpp \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/RayTracer.cpp \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/RenderThread.cpp \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/Sampler.cpp \
+           ssynth/SyntopiaCore/GLEngine/RayTracer/VoxelStepper.cpp \
            ssynth/SyntopiaCore/GLEngine/RaytraceTriangle.cpp \
            ssynth/SyntopiaCore/GLEngine/Sphere.cpp \
            ssynth/SyntopiaCore/GLEngine/Triangle.cpp \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/RayTracer.cpp \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/AtomicCounter.cpp \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/RenderThread.cpp \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/Sampler.cpp \
-		   ssynth/SyntopiaCore/GLEngine/Raytracer/VoxelStepper.cpp \
            ssynth/SyntopiaCore/Logging/ListWidgetLogger.cpp \
            ssynth/SyntopiaCore/Logging/Logging.cpp \
            ssynth/SyntopiaCore/Math/Matrix4.cpp \
@@ -109,9 +110,7 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/SyntopiaCore/Misc/Version.cpp \
            ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.cpp \
            ssynth/StructureSynth/Model/Rendering/Renderer.cpp \
-           ssynth/StructureSynth/Model/Rendering/TemplateRenderer.cpp \
-
-CONFIG += staticlib
+           ssynth/StructureSynth/Model/Rendering/TemplateRenderer.cpp
 CONFIG+=opengl
 QT+=xml opengl script
 macx:DESTDIR       = ../lib/macx
