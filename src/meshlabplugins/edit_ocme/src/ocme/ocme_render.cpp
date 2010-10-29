@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <wrap/gl/space.h>
 #include <wrap/gl/trimesh.h>
+#include <wrap/gl/splatting_apss/splatrenderer.h>
 #include "impostor_definition.h"
 #include "ocme_definition.h"
 #include "ocme_extract.h"
@@ -70,6 +71,7 @@ void OCME::InitRender()
 
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
+		
 	}
 
 
@@ -94,7 +96,7 @@ bool OCME::IsToRefineScreenErr(Cell * & c, float & prio ){
 	
 	prio = projerr;
 	if(projerr<0) return true;
-	return (projerr > 100.0);
+	return (projerr > 50.0);
 }
 
 
@@ -260,6 +262,12 @@ void OCME::Render(){
 
 	RAssert(MemDbg::CheckHeap(1));
  	::RemoveDuplicates(cells_to_render);
+	std::vector<Impostor*> impostor_to_render;
+	std::vector< std::vector<vcg::Point3f> *				>  positions;
+	std::vector< std::vector<vcg::Point3f> *				>  normals;
+	std::vector< std::vector<vcg::Point3<unsigned char> > *	>  colors;
+	std::vector<float>    radiuses;
+
 	for(unsigned int i = 0; i < cells_to_render.size(); ++i)
          if(!cells_to_render[i]->generic_bool()) { // generic_bool() == the cell is taken in editing
           if(cells_to_render[i]->rd->renderCacheToken && cells_to_render[i]->rd->renderCacheToken->lock() )
@@ -288,9 +296,24 @@ void OCME::Render(){
 //		glEnable(GL_COLOR_MATERIAL);
 //		 glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
 //		 glColor ( c );
-		 cells_to_render[i]->impostor->Render(this->renderParams.render_subcells);
+		 //cells_to_render[i]->impostor->Render(this->renderParams.render_subcells);
+		 
+		  // impostor_to_render.push_back(cells_to_render[i]->impostor);
+		  positions.push_back(&cells_to_render[i]->impostor->positionsV);
+		  normals.push_back(&cells_to_render[i]->impostor->normalsV);
+		  colors.push_back(&cells_to_render[i]->impostor->colorsV);
+		  radiuses.push_back( CS( cells_to_render[i]->key.h)/Impostor::Gridsize());
+		}
+	}
+		 
+	 //for(std::vector<Impostor *  > :: iterator  i =impostor_to_render.begin(); i != impostor_to_render.end();++i)
+		// (*i)->Render(this->renderParams.render_subcells);
+	 {
+
+		 splat_renderer.Render(positions,normals,colors,radiuses,vcg::GLW::ColorMode::CMPerMesh,
+			 vcg::GLW::TextureMode::TMNone);
 	 }
-}
+		
 	 renderCache.controller.updatePriorities();
 
 	 render_mutex.unlock();
@@ -309,4 +332,3 @@ void OCME::StopAndFlushRendering(){
 void OCME::StartRendering(){
 		render_mutex.unlock();
 }
-
