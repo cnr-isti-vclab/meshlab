@@ -11,7 +11,7 @@ DEPENDPATH += . \
               ssynth\SyntopiaCore\Math \
               ssynth\SyntopiaCore\Misc \
               ssynth\ThirdPartyCode\MersenneTwister \
-              ssynth\StructureSynth\Model\Rendering
+              ssynth\StructureSynth\Model\Rendering \
 
 
 INCLUDEPATH += ssynth
