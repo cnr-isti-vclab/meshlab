@@ -288,7 +288,7 @@ bool CICubeMap::LoadExt(const char *basename)
 
 			if(!tt.load(filename)) {
 					glPopAttrib();
-					QMessageBox::warning(0,"Cubemapped background decoration","Warning unable to load cube map images: " + filename );
+          //QMessageBox::warning(0,"Cubemapped background decoration","Warning unable to load cube map images: " + filename );
 					return false;
 				}
 

@@ -47,19 +47,25 @@ class SampleMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 
   enum {
     DP_SHOW_CUBEMAPPED_ENV,
+    DP_SHOW_GRID
 		};
 
 private:
 vcg::CICubeMap cm;
 
 inline QString CubeMapPathParam() const { return  "MeshLab::Decoration::CubeMapPath" ; }
+inline QString GridMajorParam() const { return  "MeshLab::Decoration::GridMajor" ; }
+inline QString GridMinorParam() const { return  "MeshLab::Decoration::GridMinor" ; }
+inline QString BoxRatioParam() const { return  "MeshLab::Decoration::BoxRatio" ; }
+inline QString ShowShadowParam() const { return  "MeshLab::Decoration::ShowShadow" ; }
 
 public:
      
 	SampleMeshDecoratePlugin()
 	{
-    typeList << 
-    DP_SHOW_CUBEMAPPED_ENV ;
+    typeList
+    << DP_SHOW_CUBEMAPPED_ENV
+    << DP_SHOW_GRID;
 
     FilterIDType tt;
     foreach(tt , types()){
@@ -72,12 +78,17 @@ public:
   }
 
 	QList<QAction *> actions () const {return actionList;}
-	QString basename;
+
+  QString cubemapFileName;
 	
   bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*parent*/ par, GLArea * /*parent*/);
   void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *);
 	void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);	
 		
+
+private:
+  void DrawGriddedCube(const vcg::Box3f &bb, float majorTick, float minorTick,GLArea *gla);
+
 };
 
 #endif
