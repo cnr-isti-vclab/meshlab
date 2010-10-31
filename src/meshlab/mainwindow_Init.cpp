@@ -92,6 +92,8 @@ void MainWindow::createActions()
 {
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
   newAct = new QAction(QIcon(":/images/open.png"),tr("New Empty Document..."), this);
+  newAct->setShortcutContext(Qt::ApplicationShortcut);
+  newAct->setShortcut(Qt::CTRL+Qt::Key_N);
   connect(newAct, SIGNAL(triggered()), this, SLOT(newDocument()));
 
   openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
@@ -641,13 +643,13 @@ void MainWindow::loadMeshLabSettings()
             bool ret = RichParameterFactory::create(docElem,&rpar);
             if (!ret)
             {
-                qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
+//                qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
                 continue;
             }
             if (!defaultGlobalParams.hasParameter(rpar->name))
             {
-                qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
-                       "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
+//                qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
+//                       "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
             }
             else currentGlobalParams.addParam(rpar);
 		}
@@ -656,10 +658,10 @@ void MainWindow::loadMeshLabSettings()
 	// 2) eventually fill missing values with the hardwired defaults 
 	for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
 	{
-		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
+//		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
 		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
 		{
-			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
+      qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
 			RichParameterCopyConstructor v;
 			defaultGlobalParams.paramList.at(ii)->accept(v);
 			currentGlobalParams.paramList.push_back(v.lastCreated);
