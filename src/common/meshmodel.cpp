@@ -394,11 +394,6 @@ RasterModel::RasterModel(MeshDocument *parent, const char *_rasterName) {
 	visible=false;
 }
 
-void RasterModel::setShot(Shot &shot)
-{
-	viewSpec = shot;
-}
-
 void RasterModel::addPlane(Plane *plane)
 {
 	planeList.append(plane);

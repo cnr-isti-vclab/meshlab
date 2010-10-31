@@ -286,10 +286,9 @@ and with all the images sharing the same shot.
 
 class RasterModel 
 {
-	typedef vcg::Shot<double> Shot;
 
 public:
-	Shot viewSpec;
+  vcg::Shotf shot;
 	QString rasterName;
 	bool visible; // used in rendering; Needed for switching from mesh view mode to raster view mode and vice versa.
 
@@ -306,8 +305,7 @@ public:
 	RasterModel(MeshDocument *parent, const char *_rasterName=0);
 
 	void setRasterName(QString newFileName) {rasterName = newFileName;};
-	void setShot(Shot &shot);
-	const QString getName() const {return rasterName;}
+  const QString getName() const {return rasterName;}
 	void addPlane(Plane * plane);
 
 
