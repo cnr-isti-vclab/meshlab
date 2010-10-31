@@ -402,8 +402,7 @@ MeshlabStdDialog::~MeshlabStdDialog()
 		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
 		QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
 
-		//int row = gridLay->rowCount() - 1;
-		gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
+    gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
 
 		QGridLayout* lay = new QGridLayout(p);
 		lay->addWidget(absLab,0,0,Qt::AlignHCenter);
@@ -585,9 +584,9 @@ void Point3fWidget::setWidgetValue( const Value& nv )
 		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
 }
 /********************/
-// ShotdWidget Implementation
+// ShotfWidget Implementation
 
-ShotdWidget::ShotdWidget(QWidget *p, RichShotd* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
+ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
 
   paramName = rpf->name;
@@ -600,27 +599,40 @@ ShotdWidget::ShotdWidget(QWidget *p, RichShotd* rpf, QWidget *gla_curr): MeshLab
   QHBoxLayout* lay = new QHBoxLayout(p);
 
 
-  this->setValue(paramName,rp->val->getShotd());
+  this->setValue(paramName,rp->val->getShotf());
   if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
     {
       getShotButton = new QPushButton("Get shot",p);
       lay->addWidget(getShotButton);
 
+      QStringList names;
+      names << "Current Trackball";
+      names << "Current Raster";
+
+      getShotCombo = new QComboBox(p);
+      getShotCombo->addItems(names);
+      lay->addWidget(getShotCombo);
+      connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
       connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
-      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotd)),this,SLOT(setValue(QString,vcg::Shotd)));
-      connect(this,SIGNAL(askShot(QString)),gla_curr,SLOT(sendShot(QString)));
+      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Shotf)));
+      connect(this,SIGNAL(askViewerShot(QString)),gla_curr,SLOT(sendViewerShot(QString)));
+      connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
     }
   gridLay->addLayout(lay,row,1,Qt::AlignTop);
 }
 
-void ShotdWidget::getShot()
+void ShotfWidget::getShot()
 {
-  emit askShot(paramName);
+  int index = getShotCombo->currentIndex();
+  if(index==0)
+      emit askViewerShot(paramName);
+  else
+      emit askRasterShot(paramName);
 }
 
-ShotdWidget::~ShotdWidget() {}
+ShotfWidget::~ShotfWidget() {}
 
-void ShotdWidget::setValue(QString name,Shotd newVal)
+void ShotfWidget::setValue(QString name,Shotf newVal)
 {
   if(name==paramName)
   {
@@ -628,24 +640,24 @@ void ShotdWidget::setValue(QString name,Shotd newVal)
   }
 }
 
-vcg::Shotd ShotdWidget::getValue()
+vcg::Shotf ShotfWidget::getValue()
 {
   return curShot;
 }
 
-void ShotdWidget::collectWidgetValue()
+void ShotfWidget::collectWidgetValue()
 {
-  rp->val->set(ShotdValue(curShot));
+  rp->val->set(ShotfValue(curShot));
 }
 
-void ShotdWidget::resetWidgetValue()
+void ShotfWidget::resetWidgetValue()
 {
-  curShot = rp->pd->defVal->getShotd();
+  curShot = rp->pd->defVal->getShotf();
 }
 
-void ShotdWidget::setWidgetValue( const Value& nv )
+void ShotfWidget::setWidgetValue( const Value& nv )
 {
-  curShot = nv.getShotd();
+  curShot = nv.getShotf();
 }
 
 /********************/
@@ -735,7 +747,7 @@ MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
 
 	for(int i=0;i<md->meshList.size();++i)
 	 {
-        QString shortName = md->meshList.at(i)->shortName();
+    QString shortName = md->meshList.at(i)->shortName();
 		meshNames.push_back(shortName);
 		if(md->meshList.at(i) == rp->pd->defVal->getMesh()) defaultMeshIndex = i;
 	 }
@@ -1423,7 +1435,7 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichPoint3f& pd )
 	lastCreated = new QTableWidgetItem(pst/*,lst*/);
 }
 
-void RichParameterToQTableWidgetItemConstructor::visit( RichShotd& pd )
+void RichParameterToQTableWidgetItemConstructor::visit( RichShotf& pd )
 {
   assert(0); ///
   lastCreated = new QTableWidgetItem(QString("TODO")/*,lst*/);

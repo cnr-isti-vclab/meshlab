@@ -262,16 +262,19 @@ protected:
 };
 
 
-//public QHBoxLayout,
-class ShotdWidget : public MeshLabWidget
+/// Widget to enter a Shot,
+/// if at the creation you provide a pointer to a GLArea (the mesh viewing window)
+/// the widget has a combo and a button to get shot from different places.
+
+class ShotfWidget : public MeshLabWidget
 {
   Q_OBJECT
 
 public:
-  ShotdWidget(QWidget *p, RichShotd* rpf, QWidget *gla);
-  ~ShotdWidget();
+  ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla);
+  ~ShotfWidget();
   QString paramName;
-  vcg::Shotd getValue();
+  vcg::Shotf getValue();
 
   void collectWidgetValue();
   void resetWidgetValue();
@@ -279,14 +282,16 @@ public:
 
   public slots:
   void  getShot();
-  void  setValue(QString name, vcg::Shotd val);
+  void  setValue(QString name, vcg::Shotf val);
   signals:
-  void askShot(QString);
+  void askRasterShot(QString);
+  void askViewerShot(QString);
 
 protected:
-  vcg::Shotd curShot;
+  vcg::Shotf curShot;
   QLineEdit * shotLE;
   QPushButton *getShotButton;
+  QComboBox *getShotCombo;
   QLabel* descLab;
 };
 
@@ -645,7 +650,7 @@ public:
 	void visit(RichString& pd){lastCreated = new StringWidget(par,&pd);};
 	void visit(RichMatrix44f& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new Matrix44fWidget(par,&pd);*/};
 	void visit(RichPoint3f& pd){lastCreated = new Point3fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
-  void visit(RichShotd& pd){lastCreated = new ShotdWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
+  void visit(RichShotf& pd){lastCreated = new ShotfWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
 	void visit(RichColor& pd){lastCreated = new ColorWidget(par,&pd);};
 	void visit(RichAbsPerc& pd){lastCreated = new AbsPercWidget(par,&pd);};
 	void visit(RichEnum& pd){lastCreated = new EnumWidget(par,&pd);};
@@ -675,7 +680,7 @@ public:
 	void visit(RichString& pd);
 	void visit(RichMatrix44f& /*pd*/){assert(0);};
 	void visit(RichPoint3f& pd);
-  void visit(RichShotd& pd);
+  void visit(RichShotf& pd);
 	void visit(RichColor& pd);
 	void visit(RichAbsPerc& pd);
 	void visit(RichEnum& pd);
