@@ -73,11 +73,7 @@ public:
   virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 	void showParserError(const QString &s, mu::Parser::exception_type &e);
-	void normalizeVertexQuality(MeshModel &m);
-	void normalizeFaceQuality(MeshModel &m);
-	void mapVertexQualityIntoColor(MeshModel &m);
-	void mapFaceQualityIntoColor(MeshModel &m);
-	void setAttributes(CMeshO::VertexIterator &vi,CMeshO &m);
+  void setAttributes(CMeshO::VertexIterator &vi,CMeshO &m);
 	void setAttributes(CMeshO::FaceIterator &fi,CMeshO &m);
   void setPerVertexVariables(mu::Parser &p, CMeshO &m);
   void setPerFaceVariables(mu::Parser &p, CMeshO &m);

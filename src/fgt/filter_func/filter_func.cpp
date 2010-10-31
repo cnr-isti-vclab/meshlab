@@ -522,10 +522,10 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				}
 
 				// normalize quality with values in [0..1] 
-				if(par.getBool("normalize")) normalizeVertexQuality(m);
+        if(par.getBool("normalize")) tri::UpdateQuality<CMeshO>::VertexNormalize(m.cm);
 				
 				// map quality into per-vertex color
-				if(par.getBool("map")) mapVertexQualityIntoColor(m);
+        if(par.getBool("map")) tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm);
 
 				// if succeded log stream contains number of vertices and time elapsed
 				Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
@@ -626,10 +626,10 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				}
 
 				// normalize quality with values in [0..1]
-				if(par.getBool("normalize")) normalizeFaceQuality(m);
+        if(par.getBool("normalize")) tri::UpdateQuality<CMeshO>::FaceNormalize(m.cm);
 
 				// map quality into per-vertex color
-				if(par.getBool("map")) mapFaceQualityIntoColor(m);
+        if(par.getBool("map")) tri::UpdateColor<CMeshO>::FaceQualityRamp(m.cm);
 
 				// if succeded log stream contains number of faces processed and time elapsed
 				Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
@@ -896,38 +896,6 @@ void FilterFunctionPlugin::showParserError(const QString &s, Parser::exception_t
 	errorMessage += s;
 	errorMessage += e.GetMsg().c_str();
 	errorMessage += "\n";
-}
-
-// normalize vertex quality in range [0..1]
-void FilterFunctionPlugin::normalizeVertexQuality(MeshModel &m)
-{
-	std::pair<double,double> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);	
-	CMeshO::VertexIterator vi;
-	for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) 
-		(*vi).Q() = ((*vi).Q() - minmax.first)/(minmax.second - minmax.first);
-}
-void FilterFunctionPlugin::normalizeFaceQuality(MeshModel &m)
-{
-	std::pair<double,double> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm);	
-	CMeshO::FaceIterator fi;
-	for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) 
-		(*fi).Q() = ((*fi).Q() - minmax.first)/(minmax.second - minmax.first);
-}
-
-// map current vertex quality in color for each vertex
-void FilterFunctionPlugin::mapVertexQualityIntoColor(MeshModel &m)
-{
-	std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);	
-	CMeshO::VertexIterator vi;
-	for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
-		(*vi).C().ColorRamp(minmax.first,minmax.second,(*vi).Q());
-}
-void FilterFunctionPlugin::mapFaceQualityIntoColor(MeshModel &m)
-{
-	std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm);	
-	CMeshO::FaceIterator fi;
-	for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) 
-		(*fi).C().ColorRamp(minmax.first,minmax.second,(*fi).Q());
 }
 
 // set per-vertex attributes associated to parser variables
