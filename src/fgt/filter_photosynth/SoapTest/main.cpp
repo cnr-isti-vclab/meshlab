@@ -64,7 +64,7 @@ void printJsonObject(QTextStream &stream, QString tabs, int indent, QScriptValue
   {
     it.next();
     stream << tabs << it.name() << ": " << it.value().toString() << "\n";
-    if(it.value().isObject() && indent < limit)
+    if(!it.value().isArray() && it.value().isObject() && indent < limit)
       printJsonObject(stream, tabs + QString("\t"), indent + 1, it.value(), limit);
     ++count;
   }

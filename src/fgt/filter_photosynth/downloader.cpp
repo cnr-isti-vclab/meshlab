@@ -1,3 +1,8 @@
+/*
+ * The following code is slightly based on the C# application
+ * SynthExport (http://synthexport.codeplex.com/) by Christoph Hausner
+ */
+
 #include "synthData.h"
 #include <math.h>
 #include <QtSoapMessage>
@@ -7,6 +12,8 @@
 #include <QScriptEngine>
 #include <QScriptValue>
 #include <QScriptValueIterator>
+#include <QImage>
+#include <QFile>
 
 #define SET_STATE(val1,val2) { _state = val1; _dataReady = val2; return; }
 #define CHECK(condition,val1,val2) { if(condition) { SET_STATE(val1,val2) } }
@@ -67,6 +74,7 @@ CoordinateSystem::CoordinateSystem(int id, QObject *parent)
 const QString SynthData::errors[] =
 {
   "The provided URL is invalid",
+  "Save path is missing: specify one",
   "The web service returned an error",
   "The requested Synth is unavailable",
   "Could not parse web service response: unexpected response",
@@ -74,7 +82,9 @@ const QString SynthData::errors[] =
   "Error parsing collection data",
   "This synth is empty",
   "Error reading binary data, file may be corrupted",
-  "The point cloud is stored in an incompatible format and cannot be loaded"
+  "The point cloud is stored in an incompatible format and cannot be loaded",
+  "Error creating output directory for images"
+  "Error saving images to the filesystem"
 };
 
 const char *SynthData::progress[] =
@@ -83,13 +93,15 @@ const char *SynthData::progress[] =
   "Downloading json data...",
   "Parsing json data...",
   "Downloading point cloud bin files...",
-  "Loading point cloud data..."
+  "Loading point cloud data...",
+  "Downloading images..."
 };
 
 SynthData::SynthData(QObject *parent)
   : QObject(parent)
 {
   _coordinateSystems = new QList<CoordinateSystem*>();
+  _imageMap = new QHash<int,Image>();
   _state = PENDING;
   _progress = WEB_SERVICE;
   _dataReady = false;
@@ -99,6 +111,7 @@ SynthData::SynthData(QObject *parent)
 SynthData::~SynthData()
 {
   delete _coordinateSystems;
+  delete _imageMap;
 }
 
 /*
@@ -117,7 +130,7 @@ QtSoapHttpTransport SynthData::transport;
  * Contacts the photosynth web service to retrieve informations about
  * the synth whose identifier is contained within the given url.
  */
-SynthData *SynthData::downloadSynthInfo(QString url)
+SynthData *SynthData::downloadSynthInfo(QString url, QString path)
 {
   SynthData *synthData = new SynthData();
 
@@ -127,6 +140,14 @@ SynthData *SynthData::downloadSynthInfo(QString url)
     synthData->_dataReady = true;
     return synthData;
   }
+
+  if(path.isNull() || path.isEmpty())
+  {
+    synthData->_state = WRONG_PATH;
+    synthData->_dataReady = true;
+    return synthData;
+  }
+  synthData->_savePath = path;
 
   //extracts the synth identifier
   int i = url.indexOf("cid=",0,Qt::CaseInsensitive);
@@ -232,11 +253,15 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
     iterator.next();
     collection = iterator.value();
     coordSystemsCount = collection.property("_num_coord_systems").toInt32();
+    _numImages = collection.property("_num_images").toInt32();
   }
   else
     SET_STATE_DELETE(JSON_PARSING, true)
   if(coordSystemsCount > 0)
   {
+    //the json object containing the images informations
+    QScriptValue map = collection.property("image_map");
+    parseImageMap(map);
     CoordinateSystem *coordSys;
     //the coordinate systems list
     QScriptValue coordSystems = collection.property("x");
@@ -325,6 +350,28 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
 }
 
 /*
+ * Parse the image list and, for each element of the list, creates an Image and puts it in the dictionary
+ */
+void SynthData::parseImageMap(QScriptValue &map)
+{
+  QScriptValueIterator imageIt(map);
+  while(imageIt.hasNext())
+  {
+    imageIt.next();
+    Image image;
+    image._ID = imageIt.name().toInt();
+    QScriptValue size = imageIt.value().property("d");
+    QScriptValueIterator sizeIt(size);
+    sizeIt.next();
+    image._width = sizeIt.value().toInt32();
+    sizeIt.next();
+    image._height = sizeIt.value().toInt32();
+    image._url = imageIt.value().property("u").toString();
+    _imageMap->insert(image._ID,image);
+  }
+}
+
+/*
  * Asks the server for bin files containing point clouds data
  * sending an http request for each bin file composing the synth
  */
@@ -366,7 +413,10 @@ void SynthData::downloadBinFiles()
 void SynthData::loadBinFile(QNetworkReply *httpResponse)
 {
   if(_state == READING_BIN_DATA || _state == BIN_DATA_FORMAT)
+  {
+    httpResponse->deleteLater();
     return;
+  }
 
   _progress = LOADING_BIN;
 
@@ -417,7 +467,64 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
   }
 
   --_semaphore;
-  CHECK_DELETE(_semaphore == 0, NO_ERROR, true)
+  if(_semaphore == 0)
+    downloadImages();
+  //CHECK_DELETE(_semaphore == 0, NO_ERROR, true)
+
+  httpResponse->deleteLater();
+}
+
+/*
+ * Asks the server for the images making up this synth.
+ * One http request is made for each image.
+ */
+void SynthData::downloadImages()
+{
+  _progress = DOWNLOAD_IMG;
+  QDir dir(_savePath);
+  bool success = dir.mkdir(_collectionID);
+  //if(!success)
+    //qWarning("fallimento creazione directory");
+  //CHECK(!success,CREATE_DIR,true)
+
+  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+  connect(manager, SIGNAL(finished(QNetworkReply*)),
+          this, SLOT(saveImages(QNetworkReply*)));
+  foreach(Image img, *_imageMap)
+  {
+    QNetworkRequest *request = new QNetworkRequest(QUrl(img._url));
+    request->setAttribute(QNetworkRequest::User,QVariant(img._ID));
+    manager->get(*request);
+    delete request;
+  }
+}
+
+/*
+ * Reads the http response and save the image to the filesystem
+ */
+void SynthData::saveImages(QNetworkReply *httpResponse)
+{
+  if(_state == SAVE_IMG)
+  {
+    httpResponse->deleteLater();
+    return;
+  }
+
+  if(httpResponse->error() != QNetworkReply::NoError)
+    qDebug() << httpResponse->errorString();
+
+  QByteArray payload = httpResponse->readAll();
+  QDir dir(_savePath);
+  dir.cd(_collectionID);
+  int id = httpResponse->request().attribute(QNetworkRequest::User).toInt();
+  QString filename("IMG_%1.jpg");
+  QFile file(dir.filePath(filename.arg(QString::number(id))));
+  CHECK_DELETE(!file.open(QIODevice::WriteOnly),SAVE_IMG,true)
+  CHECK_DELETE(file.write(payload) == -1,SAVE_IMG,true)
+  file.close();
+
+  ++_semaphore;
+  CHECK_DELETE(_semaphore == _numImages, NO_ERROR, true)
 
   httpResponse->deleteLater();
 }

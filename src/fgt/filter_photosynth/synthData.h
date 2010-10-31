@@ -1,7 +1,13 @@
+/*
+ * The following code is slightly based on the C# application
+ * SynthExport (http://synthexport.codeplex.com/) by Christoph Hausner
+ */
+
 #ifndef SYNTHDATA_H
 #define SYNTHDATA_H
 
 #include <QString>
+#include <QScriptValue>
 #include <QtSoapHttpTransport>
 #include <assert.h>
 
@@ -14,6 +20,14 @@ typedef struct Point
   uchar _g;
   uchar _b;
 } Point;
+
+typedef struct Image
+{
+  int _ID;
+  int _width;
+  int _height;
+  QString _url;
+} Image;
 
 /*
 typedef struct CameraParameters
@@ -117,6 +131,7 @@ public:
   enum Errors
   {
     WRONG_URL = 0,
+    WRONG_PATH,
     WEBSERVICE_ERROR,
     NEGATIVE_RESPONSE,
     UNEXPECTED_RESPONSE,
@@ -125,6 +140,8 @@ public:
     EMPTY,
     READING_BIN_DATA,
     BIN_DATA_FORMAT,
+    CREATE_DIR,
+    SAVE_IMG,
     NO_ERROR,
     PENDING
   };
@@ -135,7 +152,8 @@ public:
     DOWNLOAD_JSON,
     PARSE_JSON,
     DOWNLOAD_BIN,
-    LOADING_BIN
+    LOADING_BIN,
+    DOWNLOAD_IMG
   };
 
   SynthData(QObject *parent = 0);
@@ -143,16 +161,19 @@ public:
   bool isValid();
 
 public:
-  static SynthData *downloadSynthInfo(QString url);
+  static SynthData *downloadSynthInfo(QString url, QString path);
 
 private slots:
   void readWSresponse();
   void parseJsonString(QNetworkReply *httpResponse);
   void loadBinFile(QNetworkReply *httpResponse);
+  void saveImages(QNetworkReply *httpResponse);
 
 private:
+  void parseImageMap(QScriptValue &map);
   void downloadJsonData(QString jsonURL);
   void downloadBinFiles();
+  void downloadImages();
 
 public:
   //this is the cid parameter taken from the url used to access the synth on photosynth.net
@@ -161,17 +182,23 @@ public:
   QString _collectionRoot;
   //Each coordinate system is a different cluster of point in the synth
   QList<CoordinateSystem*> *_coordinateSystems;
+  //a dictionary mapping images id to image representation
+  QHash<int,Image> *_imageMap;
   //tells if this synth is valid, or if errors were encountered during the import process
   Errors _state;
   Progress _progress;
   //when a SynthData is instantiated _dataReady == false
   //until the data are downloaded from photosynth server
   bool _dataReady;
+  //Number of images of this synth
+  int _numImages;
 
 private:
   //used to count how many responses to bin files requests have been processed
   //when _semaphore reaches 0 _dataReady can be set to true
   int _semaphore;
+  //the images will be saved here
+  QString _savePath;
 };
 
 /*

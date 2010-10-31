@@ -86,6 +86,10 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
                                      "http://photosynth.net/view.aspx?cid=d09b3327-c5e9-4d98-b486-ff720352ce53",
                                      "Synth URL",
                                      "Paste the synth URL from your browser."));
+      parlst.addParam(new RichString("savePath",
+                                     "./",
+                                     "Save to",
+                                     "Enter the path where images will be saved to"));
       break;
     default:
       assert(0);
@@ -97,7 +101,8 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
 bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
   QString url = par.getString("synthURL");
-  SynthData *synthData = SynthData::downloadSynthInfo(url);
+  QString path = par.getString("savePath");
+  SynthData *synthData = SynthData::downloadSynthInfo(url,path);
 
   //Hangs on active wait until data are available from the server
   while(!synthData->_dataReady)
@@ -105,20 +110,23 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
     int progress = 0;
     switch(synthData->_progress)
     {
-    case SynthData::WEB_SERVICE:
-      progress = 0;
-      break;
-    case SynthData::DOWNLOAD_JSON:
-      progress = 25;
-      break;
-    case SynthData::PARSE_JSON:
-      progress = 50;
-      break;
-    case SynthData::DOWNLOAD_BIN:
-      progress = 75;
-      break;
-    case SynthData::LOADING_BIN:
-      progress = 100;
+      case SynthData::WEB_SERVICE:
+        progress = 0;
+        break;
+      case SynthData::DOWNLOAD_JSON:
+        progress = 20;
+        break;
+      case SynthData::PARSE_JSON:
+        progress = 40;
+        break;
+      case SynthData::DOWNLOAD_BIN:
+        progress = 60;
+        break;
+      case SynthData::LOADING_BIN:
+        progress = 80;
+        break;
+      case SynthData::DOWNLOAD_IMG:
+        progress = 100;
     }
 
     cb(progress,SynthData::progress[synthData->_progress]);
@@ -151,6 +159,18 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
       }
 
+    }
+    CameraParameters cam;
+    foreach(cam, sys->_cameraParametersList)
+    {
+      //qreal w = sqrt(cam[CameraParameters::ROT_X] * cam[CameraParameters::ROT_X] +
+      //               cam[CameraParameters::ROT_Y] * cam[CameraParameters::ROT_Y] +
+      //               cam[CameraParameters::ROT_Z] * cam[CameraParameters::ROT_Z]);
+      Matrix44d rot;
+      rot.FromEulerAngles(cam[CameraParameters::ROT_X], cam[CameraParameters::ROT_Y], cam[CameraParameters::ROT_Z]);
+      Shotd s;
+      s.Extrinsics.SetRot(rot);
+      s.Extrinsics.SetTra(Point3d(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]));
     }
   }
 
