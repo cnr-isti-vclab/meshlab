@@ -965,7 +965,7 @@ void GLArea::setView()
 	// This parameter is the one that controls:
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
 	float viewRatio = 1.75f;
-	float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
+  float cameraDist = viewRatio / tanf(math::ToRad(fov*.5f));
 
  if(fov==5)
    cameraDist = 1000; // small hack for orthographic projection where camera distance is rather meaningless...
@@ -1074,9 +1074,14 @@ void GLArea::sendCameraPos(QString name)
 	emit transmitViewDir(name, pos);
 }
 
-void GLArea::sendShot(QString name)
+void GLArea::sendViewerShot(QString name)
 {
-  Shotd curShot=shotFromTrackball().first;
+  Shotf curShot=shotFromTrackball().first;
+  emit transmitShot(name, curShot);
+}
+void GLArea::sendRasterShot(QString name)
+{
+  Shotf curShot= this->meshDoc->rm()->shot;
   emit transmitShot(name, curShot);
 }
 
@@ -1180,9 +1185,8 @@ void GLArea::loadRaster(int id)
 
 			//TODO temporaneo... poi bisogna creare un defaultShot
 			createOrthoView("Front");
-      Shotd* tmpShot = &(shotFromTrackball().first);
-			rm->setShot(*tmpShot);
-		}
+      rm->shot = shotFromTrackball().first;
+    }
 }
 
 void GLArea::drawTarget() {
@@ -1190,14 +1194,17 @@ void GLArea::drawTarget() {
 
   double ratio = 1.0f;
   //ratio = align.imageRatio;	quale ratio?
-
+  if(meshDoc->rm()==0) return;
+  QImage &curImg = meshDoc->rm()->currentPlane->image;
+  float imageRatio = float(curImg.width())/float(curImg.height());
+  float screenRatio = float(this->width())/float(this->height());
 //set orthogonal view
   glPushMatrix();
   glLoadIdentity();
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
-  gluOrtho2D(-1.0f*ratio, 1.0f*ratio, -1, 1);
+  gluOrtho2D(-1.0f*screenRatio, 1.0f*screenRatio, -1, 1);
 
   glColor4f(1, 1, 1, opacity);
   glDisable(GL_LIGHTING);
@@ -1208,13 +1215,13 @@ void GLArea::drawTarget() {
   glColor3f(1.0f, 1.0f, 1.0f);
   glBegin(GL_QUADS);
   glTexCoord2f(0.0f, 0.0f);	//first point
-  glVertex3f(-1.0f*ratio, -1.0f, 0.0f);
+  glVertex3f(-1.0f*imageRatio, -1.0f, 0.0f);
   glTexCoord2f(1.0f, 0.0f);	//second point
-  glVertex3f(1.0f*ratio, -1.0f, 0.0f);
+  glVertex3f(1.0f*imageRatio, -1.0f, 0.0f);
   glTexCoord2f(1.0f, 1.0f);	//third point
-  glVertex3f(1.0f*ratio, 1.0f, 0.0f);
+  glVertex3f(1.0f*imageRatio, 1.0f, 0.0f);
   glTexCoord2f(0.0f, 1.0f);	//fourth point
-  glVertex3f(-1.0f*ratio, 1.0f, 0.0f);
+  glVertex3f(-1.0f*imageRatio, 1.0f, 0.0f);
   glEnd();
 
   glEnable(GL_DEPTH_TEST);
@@ -1262,7 +1269,7 @@ float GLArea::getCameraDistance()
 	return cameraDist;
 }
 
-void GLArea::initializeShot(Shotd &shot)
+void GLArea::initializeShot(Shotf &shot)
 {
 	//Da vedere
 	shot.Intrinsics.PixelSizeMm[0]=0.036916077;
@@ -1317,7 +1324,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 {
 	QDomElement root = doc.documentElement();
 	QDomNode node;
-  Shotd shot;
+  Shotf shot;
 
 	node = root.firstChild();
 
@@ -1367,7 +1374,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 
 	trackball.track.sca =fabs(p2.Z()/p1.Z());
 
-  loadShot(QPair<Shotd, float> (shot,trackball.track.sca));
+  loadShot(QPair<Shotf, float> (shot,trackball.track.sca));
 
 }
 
@@ -1376,16 +1383,16 @@ ViewState file is an xml file format created by Meshlab with the action "copyToC
 */
 void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 {
-  Shotd shot;
+  Shotf shot;
 	QDomElement root = doc.documentElement();
 	QDomNode node = root.firstChild();
 
   while(!node.isNull())
   {
     if (QString::compare(node.nodeName(),"VCGCamera")==0)
-      ReadShotFromQDomNode<Shotd>(shot,node);
+      ReadShotFromQDomNode<Shotf>(shot,node);
     else if (QString::compare(node.nodeName(),"CamParam")==0)
-      ReadShotFromOLDXML<Shotd>(shot,node);
+      ReadShotFromOLDXML<Shotf>(shot,node);
 
 		else if (QString::compare(node.nodeName(),"ViewSettings")==0)
 		{
@@ -1413,13 +1420,13 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 		node = node.nextSibling();
 	}
 
-  loadShot(QPair<Shotd, float> (shot,trackball.track.sca));
+  loadShot(QPair<Shotf, float> (shot,trackball.track.sca));
 }
 
 void GLArea::viewToClipboard()
 {
 	QClipboard *clipboard = QApplication::clipboard();
-  Shotd shot = shotFromTrackball().first;
+  Shotf shot = shotFromTrackball().first;
 
 	QDomDocument doc("ViewState");
 	QDomElement root = doc.createElement("project");
@@ -1458,9 +1465,9 @@ void GLArea::viewFromClipboard()
   loadViewFromViewStateFile(doc);
 }
 
-QPair<vcg::Shotd,float> GLArea::shotFromTrackball()
+QPair<vcg::Shotf,float> GLArea::shotFromTrackball()
 {
-  Shotd shot;
+  Shotf shot;
 	initializeShot(shot);
 
 	double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
@@ -1473,9 +1480,9 @@ QPair<vcg::Shotd,float> GLArea::shotFromTrackball()
 	//Add translation S^(-1) R^(-1)(gl)
   //Shotd doesn't introduce scaling
 	//---------------------------------------------------------------------
-	shot.Extrinsics.SetTra( shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+  shot.Extrinsics.SetTra( shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3f(0, 0, cameraDist)));
 	
-  vcg::Shotd newShot = track2ShotCPU<double>(shot, &trackball);
+  vcg::Shotf newShot = track2ShotCPU<float>(shot, &trackball);
 
 	////Expressing scaling as a translation along z
 	////k is the ratio between default scale and new scale
@@ -1493,12 +1500,12 @@ QPair<vcg::Shotd,float> GLArea::shotFromTrackball()
 
 	//newShot.Extrinsics.SetTra(t0);
 
-  return QPair<Shotd, float> (newShot,trackball.track.sca);
+  return QPair<Shotf, float> (newShot,trackball.track.sca);
 }
 
-void GLArea::loadShot(const QPair<vcg::Shotd,float> &shotAndScale){
+void GLArea::loadShot(const QPair<vcg::Shotf,float> &shotAndScale){
 	
-  Shotd shot = shotAndScale.first;
+  Shotf shot = shotAndScale.first;
 	
 	fov = shot.GetFovFromFocal();
 
@@ -1542,7 +1549,7 @@ void GLArea::loadShot(const QPair<vcg::Shotd,float> &shotAndScale){
 
 void GLArea::createOrthoView(QString dir)
 {
-  Shotd view;
+  Shotf view;
 	initializeShot(view);
 
 	fov =5;
@@ -1554,20 +1561,20 @@ void GLArea::createOrthoView(QString dir)
 	trackball.track.sca = newScale;
 	trackball.track.tra =  -meshDoc->bbox().Center();
 
-	vcg::Matrix44d rot;
+  vcg::Matrix44f rot;
 
 	if(dir == tr("Top"))
-		rot.SetRotateDeg(90,Point3<double>(1,0,0));
+    rot.SetRotateDeg(90,Point3f(1,0,0));
 	else if(dir == tr("Bottom"))
-		rot.SetRotateDeg(90,Point3<double>(-1,0,0));
+    rot.SetRotateDeg(90,Point3f(-1,0,0));
 	else if(dir == tr("Left"))
-		rot.SetRotateDeg(90,Point3<double>(0,1,0));
+    rot.SetRotateDeg(90,Point3f(0,1,0));
 	else if(dir == tr("Right"))
-		rot.SetRotateDeg(90,Point3<double>(0,-1,0));
+    rot.SetRotateDeg(90,Point3f(0,-1,0));
 	else if(dir == tr("Front"))
-		rot.SetRotateDeg(0,Point3<double>(0,1,0));
+    rot.SetRotateDeg(0,Point3f(0,1,0));
 	else if(dir == tr("Back"))
-		rot.SetRotateDeg(180,Point3<double>(0,1,0));
+    rot.SetRotateDeg(180,Point3f(0,1,0));
 
 	view.Extrinsics.SetRot(rot);
 
@@ -1578,11 +1585,11 @@ void GLArea::createOrthoView(QString dir)
 	//Add translation S^(-1) R^(-1)(gl)
   //Shotd doesn't introduce scaling
 	//---------------------------------------------------------------------
-	view.Extrinsics.SetTra( view.Extrinsics.Tra() + (Inverse(view.Extrinsics.Rot())*Point3d(0, 0, cameraDist)));
+  view.Extrinsics.SetTra( view.Extrinsics.Tra() + (Inverse(view.Extrinsics.Rot())*Point3f(0, 0, cameraDist)));
 
-  Shotd shot = track2ShotCPU(view, &trackball);
+  Shotf shot = track2ShotCPU(view, &trackball);
 	
-  QPair<Shotd,float> shotAndScale = QPair<Shotd,float> (shot, trackball.track.sca);
+  QPair<Shotf,float> shotAndScale = QPair<Shotf,float> (shot, trackball.track.sca);
 	loadShot(shotAndScale);
 }
 

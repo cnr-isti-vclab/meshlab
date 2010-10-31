@@ -218,13 +218,14 @@ signals :
 		void transmitViewPos(QString name, vcg::Point3f dir);
 		void transmitSurfacePos(QString name,vcg::Point3f dir);
     void transmitCameraPos(QString name,vcg::Point3f dir);
-    void transmitShot(QString name, vcg::Shotd);
+    void transmitShot(QString name, vcg::Shotf);
 public slots:
 		void sendViewPos(QString name);
 		void sendSurfacePos(QString name);
 		void sendViewDir(QString name);
 		void sendCameraPos(QString name);
-    void sendShot(QString name);
+    void sendViewerShot(QString name);
+    void sendRasterShot(QString name);
 
 
 public:
@@ -344,17 +345,17 @@ private:
 
 	//-----------Shot support----------------------------
 public:
-  QPair<vcg::Shotd, float > shotFromTrackball();
+  QPair<vcg::Shotf, float > shotFromTrackball();
 	bool viewFromFile();
 	void createOrthoView(QString);
 	void viewToClipboard();
 	void viewFromClipboard();
-  void loadShot(const QPair<vcg::Shotd, float> &) ;
+  void loadShot(const QPair<vcg::Shotf, float> &) ;
 
 private:
 
 	float getCameraDistance();
-  void initializeShot(vcg::Shotd &shot);
+  void initializeShot(vcg::Shotf &shot);
   void loadShotFromTextAlignFile(const QDomDocument &doc);
   void loadViewFromViewStateFile(const QDomDocument &doc);
 	
@@ -419,16 +420,16 @@ private:
 		_far = 100;
 
 		//get shot extrinsics matrix 
-		vcg::Matrix44f shotExtr;
+    vcg::Matrix44<T> shotExtr;
 		refCamera.GetWorldToExtrinsicsMatrix().ToMatrix(shotExtr);
 
-		vcg::Matrix44f model2;
+    vcg::Matrix44<T> model2;
 		model2 = (shotExtr)* track->Matrix();
-		vcg::Matrix44d model;
+    vcg::Matrix44<T> model;
 		model2.ToMatrix(model);
 
 		//get translation out of modelview
-		vcg::Point3d tra;
+    vcg::Point3<T> tra;
 		tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
 		model[0][3] = model[1][3] = model[2][3] = 0;
 
@@ -440,7 +441,7 @@ private:
 		view.Extrinsics.SetRot(model);
 
 		//get pure translation out of modelview
-		vcg::Matrix44d imodel = model;
+    vcg::Matrix44<T> imodel = model;
 		vcg::Transpose(imodel);
 		tra = -(imodel*tra);
 		tra *= idet; 
@@ -460,7 +461,7 @@ private:
 	template <class T>
 	void shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
 
-		vcg::Quaterniond qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
+    vcg::Quaternion<T> qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
 
 		tb.track.rot = vcg::Quaternionf::Construct(qfrom);
 		tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()));
