@@ -87,7 +87,7 @@ void RichParameterSet::setValue(QString name,const Value& newval){ findParameter
      QString RichParameterSet::getString(QString name)   const { return findParameter(name)->val->getString();}
    Matrix44f RichParameterSet::getMatrix44(QString name) const { return findParameter(name)->val->getMatrix44f();}
      Point3f RichParameterSet::getPoint3f(QString name)  const { return findParameter(name)->val->getPoint3f();}  
-       Shotd RichParameterSet::getShotd(QString name)    const { return findParameter(name)->val->getShotd();}
+       Shotf RichParameterSet::getShotf(QString name)    const { return findParameter(name)->val->getShotf();}
        float RichParameterSet::getAbsPerc(QString name)  const { return findParameter(name)->val->getAbsPerc();}
 				 int RichParameterSet::getEnum(QString name)     const { return findParameter(name)->val->getEnum();}
 QList<float> RichParameterSet::getFloatList(QString name)    const { return findParameter(name)->val->getFloatList();}
@@ -210,9 +210,9 @@ void RichParameterCopyConstructor::visit( RichPoint3f& pd )
 	lastCreated = new RichPoint3f(pd.name,pd.val->getPoint3f(),pd.pd->defVal->getPoint3f(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
-void RichParameterCopyConstructor::visit( RichShotd& pd )
+void RichParameterCopyConstructor::visit( RichShotf& pd )
 {
-  lastCreated = new RichShotd(pd.name,pd.val->getShotd(),pd.pd->defVal->getShotd(),pd.pd->fieldDesc,pd.pd->tooltip);
+  lastCreated = new RichShotf(pd.name,pd.val->getShotf(),pd.pd->defVal->getShotf(),pd.pd->fieldDesc,pd.pd->tooltip);
 }
 
 void RichParameterCopyConstructor::visit( RichColor& pd )
@@ -322,9 +322,9 @@ void RichParameterXMLVisitor::visit( RichPoint3f& pd )
 	parElem.setAttribute("z",QString::number(p.Z()));
 }
 
-void RichParameterXMLVisitor::visit( RichShotd& pd )
+void RichParameterXMLVisitor::visit( RichShotf& pd )
 {
-  fillRichParameterAttribute("RichShotd",pd.name,pd.pd->fieldDesc,pd.pd->tooltip);
+  fillRichParameterAttribute("RichShotf",pd.name,pd.pd->fieldDesc,pd.pd->tooltip);
   assert(0); // TODO !!!!
 }
 
@@ -575,11 +575,11 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 		*par = new RichPoint3f(name, val,desc,tooltip);  
 		return true; 
 	}
-  if(type=="RichShotd")
+  if(type=="RichShotf")
   {
-    Shotd val;
+    Shotf val;
     assert(0); //TODO!!!!
-    *par = new RichShotd(name, val,desc,tooltip);
+    *par = new RichShotf(name, val,desc,tooltip);
     return true;
   }
 
@@ -630,7 +630,7 @@ Point3fDecoration::Point3fDecoration( Point3fValue* defvalue,const QString desc 
 {
 
 }
-ShotdDecoration::ShotdDecoration( ShotdValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+ShotfDecoration::ShotfDecoration( ShotfValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
@@ -857,22 +857,22 @@ RichPoint3f::~RichPoint3f()
 
 }
 //----
-RichShotd::RichShotd( const QString nm,const vcg::Shotd defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new ShotdValue(defval),new ShotdDecoration(new ShotdValue(defval),desc,tltip))
+RichShotf::RichShotf( const QString nm,const vcg::Shotf defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new ShotfValue(defval),new ShotfDecoration(new ShotfValue(defval),desc,tltip))
 {}
 
-RichShotd::RichShotd( const QString nm,const vcg::Shotd val,const vcg::Shotd defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new ShotdValue(val),new ShotdDecoration(new ShotdValue(defval),desc,tltip))
+RichShotf::RichShotf( const QString nm,const vcg::Shotf val,const vcg::Shotf defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new ShotfValue(val),new ShotfDecoration(new ShotfValue(defval),desc,tltip))
 {}
-void RichShotd::accept( Visitor& v )
+void RichShotf::accept( Visitor& v )
 {
   v.visit(*this);
 }
 
-bool RichShotd::operator==( const RichParameter& rb )
+bool RichShotf::operator==( const RichParameter& rb )
 {
-  return (rb.val->isShotd() &&(name == rb.name) ); // TODO REAL TEST OF EQUALITY // && (val->getShotd() == rb.val->getShotd()));
+  return (rb.val->isShotf() &&(name == rb.name) ); // TODO REAL TEST OF EQUALITY // && (val->getShotf() == rb.val->getShotf()));
 }
 
-RichShotd::~RichShotd()
+RichShotf::~RichShotf()
 { }
 //----
 RichColor::RichColor( const QString nm,const QColor defval,const QString desc,const QString tltip ) :RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,tltip))

@@ -82,7 +82,7 @@ public:
 	virtual QString			getString() const	{assert(0);return QString();}
 	virtual vcg::Matrix44f		getMatrix44f() const {assert(0);return vcg::Matrix44f();}
 	virtual vcg::Point3f getPoint3f() const {assert(0);return vcg::Point3f();}
-  virtual vcg::Shotd  getShotd() const {assert(0);return vcg::Shotd();}
+  virtual vcg::Shotf  getShotf() const {assert(0);return vcg::Shotf();}
 	virtual QColor		   getColor() const {assert(0);return QColor();}
 	virtual float		     getAbsPerc() const {assert(0);return float();}
 	virtual int					 getEnum() const {assert(0);return int();}
@@ -97,7 +97,7 @@ public:
 	virtual bool isString() const {return false;}
 	virtual bool isMatrix44f() const {return false;}
 	virtual bool isPoint3f() const {return false;}
-  virtual bool isShotd() const {return false;}
+  virtual bool isShotf() const {return false;}
 	virtual bool isColor() const {return false;}
 	virtual bool isAbsPerc() const {return false;}
 	virtual bool isEnum() const {return false;}
@@ -190,17 +190,17 @@ private:
   vcg::Point3f pval;
 };
 
-class ShotdValue : public Value
+class ShotfValue : public Value
 {
 public:
-  ShotdValue(const vcg::Shotd& val) : pval(val){};
-  inline vcg::Shotd getShotd() const {return pval;}
-  inline bool isShotd() const {return true;}
-  inline QString typeName() const {return QString("Shotd");}
-  inline void	 set(const Value& p) {pval = p.getShotd();}
-  ~ShotdValue(){}
+  ShotfValue(const vcg::Shotf& val) : pval(val){};
+  inline vcg::Shotf getShotf() const {return pval;}
+  inline bool isShotf() const {return true;}
+  inline QString typeName() const {return QString("Shotf");}
+  inline void	 set(const Value& p) {pval = p.getShotf();}
+  ~ShotfValue(){}
 private:
-  vcg::Shotd pval;
+  vcg::Shotf pval;
 };
 
 class ColorValue : public Value
@@ -375,11 +375,11 @@ public:
   ~Point3fDecoration(){}
 };
 
-class ShotdDecoration : public ParameterDecoration
+class ShotfDecoration : public ParameterDecoration
 {
 public:
-  ShotdDecoration(ShotdValue* defvalue,const QString desc = QString(),const QString tltip = QString());
-  ~ShotdDecoration(){}
+  ShotfDecoration(ShotfValue* defvalue,const QString desc = QString(),const QString tltip = QString());
+  ~ShotfDecoration(){}
 };
 
 class ColorDecoration : public ParameterDecoration
@@ -465,7 +465,7 @@ class RichFloat;
 class RichString;
 class RichMatrix44f;
 class RichPoint3f;
-class RichShotd;
+class RichShotf;
 class RichColor;
 class RichAbsPerc;
 class RichEnum;
@@ -486,7 +486,7 @@ public:
 	virtual void visit( RichString& pd) = 0;
 	virtual void visit( RichMatrix44f& pd) = 0;
 	virtual void visit( RichPoint3f& pd) = 0;
-  virtual void visit( RichShotd& pd) = 0;
+  virtual void visit( RichShotf& pd) = 0;
 	virtual void visit( RichColor& pd) = 0;
 	virtual void visit( RichAbsPerc& pd) = 0;
 	virtual void visit( RichEnum& pd) = 0;
@@ -579,14 +579,14 @@ public:
   bool operator==(const RichParameter& rb);
   ~RichPoint3f();
 };
-class RichShotd : public RichParameter
+class RichShotf : public RichParameter
 {
 public:
-  RichShotd(const QString nm,const vcg::Shotd defval,const QString desc=QString(),const QString tltip=QString());
-  RichShotd(const QString nm,const vcg::Shotd val,const vcg::Shotd defval,const QString desc=QString(),const QString tltip=QString());
+  RichShotf(const QString nm,const vcg::Shotf defval,const QString desc=QString(),const QString tltip=QString());
+  RichShotf(const QString nm,const vcg::Shotf val,const vcg::Shotf defval,const QString desc=QString(),const QString tltip=QString());
   void accept(Visitor& v);
   bool operator==(const RichParameter& rb);
-  ~RichShotd();
+  ~RichShotf();
 };
 
 class RichColor : public RichParameter
@@ -692,7 +692,7 @@ public:
 	void visit(RichString& pd);
 	void visit(RichMatrix44f& pd);
 	void visit(RichPoint3f& pd);
-  void visit(RichShotd& pd);
+  void visit(RichShotf& pd);
 	void visit(RichColor& pd);
 	void visit(RichAbsPerc& pd);
 
@@ -727,7 +727,7 @@ public:
 	void visit(RichString& pd);
 	void visit(RichMatrix44f& pd);
 	void visit(RichPoint3f& pd);
-  void visit(RichShotd& pd);
+  void visit(RichShotf& pd);
 	void visit(RichColor& pd);
 	void visit(RichAbsPerc& pd);
 
@@ -784,7 +784,7 @@ public:
 	QString			getString(QString name) const;
 	vcg::Matrix44f		getMatrix44(QString name) const;
 	vcg::Point3f getPoint3f(QString name) const;
-  vcg::Shotd getShotd(QString name) const;
+  vcg::Shotf getShotf(QString name) const;
 	QColor		   getColor(QString name) const;
 	vcg::Color4b getColor4b(QString name) const;
 	float		     getAbsPerc(QString name) const;
