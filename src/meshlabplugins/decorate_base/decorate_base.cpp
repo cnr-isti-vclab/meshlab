@@ -368,6 +368,9 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,GLint *vp
   for example if you want the a quoted line between 0.363 and 1.567 tickScalarDistance == 0.1 it means that
   you will have a line with labeled ticks at 0.4 0.5 etc.
  */
+
+
+
 void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickScalarDistance, QPainter *painter, QFont qf,float angle,bool rightAlign)
 {
   glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -405,6 +408,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 	Point3d v(b-a);
   //v.Normalize();
   v = v*(1.0/(bVal-aVal));
+  glLabel::Mode md(qf,Color4b::White,angle,rightAlign);
   if(tickScalarDistance > 0)   // Draw lines only if the two endpoint are not coincident
 	{
           neededZeros = ceil(max(0.0,-log10(double(tickScalarDistance))));
@@ -415,7 +419,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 						glVertex(Zero+v*i);
 					glEnd();
           for(i=firstTick; (i+labelMargin)<bVal;i+=tickScalarDistance)
-            glLabel::render(painter,Point3f::Construct(Zero+v*i),tr("%1 ").arg(i,4+neededZeros,'f',neededZeros),qf,Color4b::White,angle,rightAlign);
+            glLabel::render(painter,Point3f::Construct(Zero+v*i),tr("%1 ").arg(i,4+neededZeros,'f',neededZeros),md);
 				 glPointSize(1);
 				 glBegin(GL_POINTS);
             for(i=firstTickTen;i<bVal;i+=tickDistTen)
@@ -434,9 +438,9 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 
 
 	// bold font at beginning and at the end
-  qf.setBold(true);
-  glLabel::render(painter,Point3f::Construct(a), tr("%1").arg(aVal,6+neededZeros,'f',neededZeros+2) ,qf,Color4b::White,angle,rightAlign);
-  glLabel::render(painter,Point3f::Construct(b), tr("%1").arg(bVal,6+neededZeros,'f',neededZeros+2) ,qf,Color4b::White,angle,rightAlign);
+  md.qFont.setBold(true);
+  glLabel::render(painter,Point3f::Construct(a), tr("%1").arg(aVal,6+neededZeros,'f',neededZeros+2) ,md);
+  glLabel::render(painter,Point3f::Construct(b), tr("%1").arg(bVal,6+neededZeros,'f',neededZeros+2) ,md);
 
   glPopAttrib();
 }
@@ -626,22 +630,48 @@ void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter, QFon
 
 void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m,QPainter *painter, QFont qf)
 {
-  if(!m.cm.shot.IsValid()) return;
+  if(!m.cm.shot.IsValid())
+  {
+    glLabel::render2D(painter,glLabel::TOP_LEFT,"Current Mesh Has an invalid Camera");
+    return;
+  }
+
 
   glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
 	glColor3f(.8f,.8f,.8f);
 	
-	Point3f vp = m.cm.shot.GetViewPoint();
-		
+  Shotf &ls = m.cm.shot;
+  int ln=0;
+  if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Perspective");
+  if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Orthographic");
+
+  Point3f vp = ls.GetViewPoint();
+  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("ViewPoint %1 %2 %3").arg(vp[0]).arg(vp[1]).arg(vp[2]));
+  Point3f ax0 = ls.Axis(0);
+  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 0 - %1 %2 %3").arg(ax0[0]).arg(ax0[1]).arg(ax0[2]));
+  Point3f ax1 = ls.Axis(1);
+  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 1 - %1 %2 %3").arg(ax1[0]).arg(ax1[1]).arg(ax1[2]));
+  Point3f ax2 = ls.Axis(2);
+  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 2 - %1 %2 %3").arg(ax2[0]).arg(ax2[1]).arg(ax2[2]));
+  float fov = ls.GetFovFromFocal();
+  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Fov %1 ( %2 x %3) ").arg(fov).arg(ls.Intrinsics.ViewportPx[0]).arg(ls.Intrinsics.ViewportPx[1]));
+
 	float len = m.cm.bbox.Diag()/20.0;
 	 	glBegin(GL_LINES);
 			glVertex3f(vp[0]-len,vp[1],vp[2]); 	glVertex3f(vp[0]+len,vp[1],vp[2]); 
 			glVertex3f(vp[0],vp[1]-len,vp[2]); 	glVertex3f(vp[0],vp[1]+len,vp[2]); 
 			glVertex3f(vp[0],vp[1],vp[2]-len); 	glVertex3f(vp[0],vp[1],vp[2]+len); 
 		glEnd();
-	glPopAttrib();			
+
+    glBegin(GL_LINES);
+      glColor3f(1.0,0,0); glVertex(vp); 	glVertex(vp+ax0*len*2.0);
+      glColor3f(0,1.0,0); glVertex(vp); 	glVertex(vp+ax1*len*2.0);
+      glColor3f(0,0,1.0); glVertex(vp); 	glVertex(vp+ax2*len*2.0);
+    glEnd();
+
+    glPopAttrib();
 }
 void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *par, QFont qf)
 {
@@ -794,8 +824,11 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
                                                                               "Useful only if you have to compare multiple histograms.<br>"
                                                                               "Warning, with wrong values the histogram can become excessively flat or it can overflow"));
         }
+      } break;
 
-    } break;
+case DP_SHOW_CAMERA :{
+          parset.addParam(new RichBool(this->CameraInfoParam(), false,"Show View Camera","If true this filter shows the camera of current view"));
+        } break;
     }
 }
 Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)
