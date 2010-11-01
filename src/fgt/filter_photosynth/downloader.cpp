@@ -141,7 +141,7 @@ SynthData *SynthData::downloadSynthInfo(QString url, QString path)
     return synthData;
   }
 
-  if(path.isNull() || path.isEmpty())
+  if(path.isNull())
   {
     synthData->_state = WRONG_PATH;
     synthData->_dataReady = true;
@@ -302,7 +302,7 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
           CameraParameters params;
           QScriptValueIterator paramIt(parameters);
           paramIt.next();
-          params._imageID = it.value().toInt32();
+          params._imageID = paramIt.value().toInt32();
           for(int i = CameraParameters::FIRST; i <= CameraParameters::LAST; ++i)
           {
             paramIt.next();
@@ -468,7 +468,12 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
 
   --_semaphore;
   if(_semaphore == 0)
-    downloadImages();
+  {
+    if(!_savePath.isEmpty())
+      downloadImages();
+    else
+      SET_STATE_DELETE(NO_ERROR,true)
+  }
   //CHECK_DELETE(_semaphore == 0, NO_ERROR, true)
 
   httpResponse->deleteLater();
@@ -482,7 +487,7 @@ void SynthData::downloadImages()
 {
   _progress = DOWNLOAD_IMG;
   QDir dir(_savePath);
-  bool success = dir.mkdir(_collectionID);
+  /*bool success = */dir.mkdir(_collectionID);
   //if(!success)
     //qWarning("fallimento creazione directory");
   //CHECK(!success,CREATE_DIR,true)

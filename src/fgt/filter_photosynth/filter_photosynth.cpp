@@ -83,9 +83,11 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
   {
     case FP_IMPORT_PHOTOSYNTH:
       parlst.addParam(new RichString("synthURL",
-                                     "http://photosynth.net/view.aspx?cid=d09b3327-c5e9-4d98-b486-ff720352ce53",
+                                     "http://photosynth.net/view.aspx?cid=0799dbca-08a8-4bb2-bdce-b00db6069828",
                                      "Synth URL",
                                      "Paste the synth URL from your browser."));
+      parlst.addParam(new RichBool ("saveImages", false, "Download images", "Download images making up the specified synth."));
+      //parlst.addParam(new RichSaveFile("savePath","./",".jpg","Save to","Select the path where images will be saved to"));
       parlst.addParam(new RichString("savePath",
                                      "./",
                                      "Save to",
@@ -101,7 +103,10 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
 bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
   QString url = par.getString("synthURL");
-  QString path = par.getString("savePath");
+  QString path("");
+  if(par.getBool("saveImages"))
+    //path = par.getSaveFileName("savePath");
+    path = par.getString("savePath");
   SynthData *synthData = SynthData::downloadSynthInfo(url,path);
 
   //Hangs on active wait until data are available from the server
@@ -144,6 +149,12 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
     return false;
   }
 
+  QDir dir(QDir::currentPath());
+  QFile file(dir.filePath("Cam.txt"));
+  bool success = true;
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+      success = false;
+  QTextStream out(&file);
   const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
   CoordinateSystem *sys;
   foreach(sys, *coordinateSystems)
@@ -171,9 +182,39 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       Shotd s;
       s.Extrinsics.SetRot(rot);
       s.Extrinsics.SetTra(Point3d(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]));
+      qreal focal = cam[CameraParameters::FOCAL_LENGTH];
+      s.Intrinsics.FocalMm = focal * 10;
+      s.Intrinsics.PixelSizeMm = Point2d(0.1,0.1);
+      Image img = synthData->_imageMap->value(cam._imageID);
+      s.Intrinsics.ViewportPx = Point2i(img._width,img._height);
+      s.Intrinsics.CenterPx = Point2d(img._width/2,img._height/2);
+      if(success)
+      {
+        QString traVec = QString("TranslationVector=\"%1 %2 %3 1\"").arg(s.Extrinsics.Tra().X()).arg(s.Extrinsics.Tra().Y()).arg(s.Extrinsics.Tra().Z());
+        QString lensDist("LensDistortion=\"0 0\"");
+        QString viewPx = QString("ViewportPixel=\"%1 %2\"").arg(img._width).arg(img._height);
+        QString pxSize("PixelSizeMm=\"0.1 0.1\"");
+        QString centerPx = QString("CenterPx=\"%1 %2\"").arg(img._width/2).arg(img._height/2);
+        QString focalMm = QString("FocalMm=\"%1\"").arg(s.Intrinsics.FocalMm);
+        out << "Image: " << img._ID << "\n";
+        out << "<VCGCamera ";
+        out << traVec << " ";
+        out << lensDist << " ";
+        out << viewPx << " ";
+        out << pxSize << " ";
+        out << centerPx << " ";
+        out << focalMm << " ";
+        out << "RotationMatrix=\"";
+
+        unsigned int i, j;
+        for(i = 0; i < 4; i++)
+          for(j = 0; j < 4; j++)
+            out << rot.ElementAt(i,j) << " ";
+        out << "\"/>\n\n";
+      }
     }
   }
-
+  file.close();
   return true;
 }
 
