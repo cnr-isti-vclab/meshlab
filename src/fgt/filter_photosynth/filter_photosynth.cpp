@@ -215,6 +215,18 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
     }
   }
   file.close();
+  if(par.getBool("saveImages"))
+  {
+    QDir dir(path);
+    dir.cd(synthData->_collectionID);
+    QHashIterator<int, Image> it(*(synthData->_imageMap));
+    QString rasterBase("IMG_%1.jpg");
+    while (it.hasNext())
+    {
+      it.next();
+      md.addNewRaster(dir.filePath(rasterBase.arg(it.value()._ID)).toStdString().data());
+    }
+  }
   return true;
 }
 
