@@ -103,7 +103,7 @@ public:
   void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);
   void DrawVertLabel(MeshModel &m, QPainter *gla, QFont qf);
   void DrawFaceLabel(MeshModel &m, QPainter *gla, QFont qf);
-  void DrawCamera(MeshModel &m, QPainter *painter, QFont qf);
+  void DrawCamera(MeshModel &m, vcg::Shotf &ls, QPainter *painter, QFont qf);
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
 
@@ -124,6 +124,15 @@ public:
   inline QString NormalLength() const { return  "MeshLab::Decoration::NormalLength" ; }
 
   bool textureWireParam;
+
+signals:
+  void askViewerShot(QString);
+
+public slots:
+  void  setValue(QString name, vcg::Shotf val);
+
+private:
+  vcg::Shotf curShot;
 };
 
 #endif

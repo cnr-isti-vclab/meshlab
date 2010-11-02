@@ -143,7 +143,15 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
             glPopAttrib();
         } break;
     case DP_SHOW_BOX_CORNERS:	DrawBBoxCorner(m); break;
-    case DP_SHOW_CAMERA:	DrawCamera(m,painter,qf);break;
+    case DP_SHOW_CAMERA:
+      if(rm->getBool(this->CameraInfoParam()))
+            DrawCamera(m, m.cm.shot, painter,qf);
+      else
+      {
+        emit askViewerShot("decorate");
+        DrawCamera(m, curShot, painter,qf);
+      }
+      break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
     case DP_SHOW_VERT_LABEL:	DrawVertLabel(m,painter,qf);break;
     case DP_SHOW_FACE_LABEL:	DrawFaceLabel(m,painter,qf);break;
@@ -534,7 +542,7 @@ bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const Mesh
 }
 
 
-bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, RichParameterSet *rm, GLArea *)
+bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, RichParameterSet *rm, GLArea *gla)
 {	
   switch(ID(action))
   {
@@ -594,7 +602,11 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
                   H->Add((*fi).Q(),(*fi).C(),1.0f);
           }
       } break;
-
+  case DP_SHOW_CAMERA :
+    {
+      connect(gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Shotf)));
+      connect(this,SIGNAL(askViewerShot(QString)),gla,SLOT(sendViewerShot(QString)));
+    }
   }
  return true;
 }
@@ -628,21 +640,25 @@ void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter, QFon
 	glPopAttrib();			
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m,QPainter *painter, QFont qf)
+void ExtraMeshDecoratePlugin::setValue(QString name,Shotf newVal)
 {
-  if(!m.cm.shot.IsValid())
+    curShot=newVal;
+}
+
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, QPainter *painter, QFont qf)
+{
+  if(!ls.IsValid())
   {
     glLabel::render2D(painter,glLabel::TOP_LEFT,"Current Mesh Has an invalid Camera");
     return;
   }
-
 
   glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
 	glColor3f(.8f,.8f,.8f);
 	
-  Shotf &ls = m.cm.shot;
+  ;
   int ln=0;
   if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Perspective");
   if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Orthographic");
