@@ -18,6 +18,39 @@
 
 using namespace vcg;
 
+/*
+Matrix44f FilterPhotosynthPlugin::getRotation(CameraParameters cam)
+{
+  qreal a = cam[CameraParameters::ROT_X] * cam[CameraParameters::ROT_X] +
+            cam[CameraParameters::ROT_Y] * cam[CameraParameters::ROT_Y] +
+            cam[CameraParameters::ROT_Z] * cam[CameraParameters::ROT_Z];
+  qreal w2 = 1 - a;
+  qreal w = sqrt(w2);
+  Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_X],(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z]);
+  //Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z],(float)cam[CameraParameters::ROT_X]);
+  Matrix44f rot;
+  q.ToMatrix(rot);
+  //permutation matrix;
+  const float _p[] = {0,1,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,1};
+  Matrix44f p((float *)(&_p[0]));
+  Matrix44f permRot = p * rot;
+
+  Matrix44f flip;
+  flip.SetRotateDeg(180,Point3f(1,0,0));
+  Matrix44f flippedRot = rot * flip;
+
+  return rot;
+}
+*/
+/*
+Point3f FilterPhotosynthPlugin::getTranslation(CameraParameters cam)
+{
+  Point4f translation(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z], 1);
+  Point4f t = getRotation(cam) * translation;
+  return Point3f(-t[0],-t[1],-t[2]);
+}
+*/
+
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
@@ -83,7 +116,7 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
   {
     case FP_IMPORT_PHOTOSYNTH:
       parlst.addParam(new RichString("synthURL",
-                                     "http://photosynth.net/view.aspx?cid=0799dbca-08a8-4bb2-bdce-b00db6069828",
+                                     "http://photosynth.net/view.aspx?cid=e8f476c5-ed00-4626-a86c-31d654e94109",
                                      "Synth URL",
                                      "Paste the synth URL from your browser."));
       parlst.addParam(new RichBool ("saveImages", false, "Download images", "Download images making up the specified synth."));
@@ -166,28 +199,57 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       foreach(p, sys->_pointCloud->_points)
       {
         tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-        mm->cm.vert.back().P() = Point3f(p._x,p._z,p._y);
+        //mm->cm.vert.back().P() = Point3f(p._x,p._z,p._y);
+        //mm->cm.vert.back().P() = Point3f(p._x,p._z,-p._y);
+        //mm->cm.vert.back().P() = Point3f(p._y,p._z,p._x);// <---
+        mm->cm.vert.back().P() = Point3f(p._x,p._y,p._z);
         mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
       }
 
     }
+    MeshModel *mm = md.addNewMesh("cameras");
     CameraParameters cam;
     foreach(cam, sys->_cameraParametersList)
     {
-      //qreal w = sqrt(cam[CameraParameters::ROT_X] * cam[CameraParameters::ROT_X] +
-      //               cam[CameraParameters::ROT_Y] * cam[CameraParameters::ROT_Y] +
-      //               cam[CameraParameters::ROT_Z] * cam[CameraParameters::ROT_Z]);
-      Matrix44d rot;
-      rot.FromEulerAngles(cam[CameraParameters::ROT_X], cam[CameraParameters::ROT_Y], cam[CameraParameters::ROT_Z]);
-      Shotd s;
+
+      qreal a = cam[CameraParameters::ROT_X] * cam[CameraParameters::ROT_X] +
+                cam[CameraParameters::ROT_Y] * cam[CameraParameters::ROT_Y] +
+                cam[CameraParameters::ROT_Z] * cam[CameraParameters::ROT_Z];
+      qreal w2 = 1 - a;
+      qreal w = sqrt(w2);
+      Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_X],(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z]);
+      //Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z],(float)cam[CameraParameters::ROT_X]);
+      Matrix44f rot;
+      q.ToMatrix(rot);
+      //permutation matrix;
+      const float _p[] = {0,1,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,1};
+      Matrix44f p((float *)(&_p[0]));
+      Matrix44f permRot = p * rot;
+
+      Matrix44f flip;
+      flip.SetRotateDeg(180,Point3f(1,0,0));
+      Matrix44f flippedRot = rot * flip;
+
+      Shotf s;
       s.Extrinsics.SetRot(rot);
-      s.Extrinsics.SetTra(Point3d(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]));
+
+      s.Extrinsics.SetTra(Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]));
+      //s.Extrinsics.SetTra(getTranslation(cam));
+      //s.Extrinsics.SetTra(Point3f(cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z], cam[CameraParameters::POS_X]));
+
+
+      //MeshModel *mm = md.addNewMesh("camera");
+      tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
+      //mm->cm.vert.back().P() = getTranslation(cam);
+      mm->cm.vert.back().P() = Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]);
+
+
       qreal focal = cam[CameraParameters::FOCAL_LENGTH];
       s.Intrinsics.FocalMm = focal * 10;
-      s.Intrinsics.PixelSizeMm = Point2d(0.1,0.1);
+      s.Intrinsics.PixelSizeMm = Point2f(0.1,0.1);
       Image img = synthData->_imageMap->value(cam._imageID);
       s.Intrinsics.ViewportPx = Point2i(img._width,img._height);
-      s.Intrinsics.CenterPx = Point2d(img._width/2,img._height/2);
+      s.Intrinsics.CenterPx = Point2f(img._width/2,img._height/2);
       if(success)
       {
         QString traVec = QString("TranslationVector=\"%1 %2 %3 1\"").arg(s.Extrinsics.Tra().X()).arg(s.Extrinsics.Tra().Y()).arg(s.Extrinsics.Tra().Z());

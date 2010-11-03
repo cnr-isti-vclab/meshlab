@@ -40,7 +40,36 @@ void CameraParameters::rotationFromNormalizedQuaternion()
   _fields[ROT_Y] = _fields[ROT_Y] * k;
   _fields[ROT_Z] = _fields[ROT_Z] * k;
 }
+/*
+Point3f CameraParameters::getTranslation()
+{
+  return Point3f(_fields[CameraParameters::POS_X], _fields[CameraParameters::POS_Y], _fields[CameraParameters::POS_Z]);
+}
+*/
+/*
+Matrix44f CameraParameters::getRotation()
+{
+  qreal a = _fields[CameraParameters::ROT_X] * _fields[CameraParameters::ROT_X] +
+            _fields[CameraParameters::ROT_Y] * _fields[CameraParameters::ROT_Y] +
+            _fields[CameraParameters::ROT_Z] * _fields[CameraParameters::ROT_Z];
+  qreal w2 = 1 - a;
+  qreal w = sqrt(w2);
+  Quaternion<float> q((float)w,(float)_fields[CameraParameters::ROT_X],(float)_fields[CameraParameters::ROT_Y],(float)_fields[CameraParameters::ROT_Z]);
+  //Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z],(float)cam[CameraParameters::ROT_X]);
+  Matrix44f rot;
+  q.ToMatrix(rot);
+  //permutation matrix;
+  const float _p[] = {0,1,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,1};
+  Matrix44f p((float *)(&_p[0]));
+  Matrix44f permRot = p * rot;
 
+  Matrix44f flip;
+  flip.SetRotateDeg(180,Point3f(1,0,0));
+  Matrix44f flippedRot = rot * flip;
+
+  return rot;
+}
+*/
 /**************
  * PointCloud *
  **************/
@@ -337,7 +366,7 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
           }
           else
             params._distortionRadius1 = params._distortionRadius2 = 0;
-          params.rotationFromNormalizedQuaternion();
+          //params.rotationFromNormalizedQuaternion();
           coordSys->_cameraParametersList.append(params);
         }
       }

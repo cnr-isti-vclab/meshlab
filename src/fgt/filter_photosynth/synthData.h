@@ -64,6 +64,8 @@ public:
   };
 
   void rotationFromNormalizedQuaternion();
+  //Point3f getTranslation();
+  //Matrix44f getRotation();
 
   inline qreal &operator [] (const int i)
   {
