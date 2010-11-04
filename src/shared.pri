@@ -4,6 +4,7 @@ TEMPLATE      = lib
 CONFIG       += plugin
 QT += opengl
 QT += xml
+QT += xmlpatterns
 QT += script
 
 VCGDIR  = ../../../../vcglib
