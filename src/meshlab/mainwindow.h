@@ -174,7 +174,6 @@ private:
 	void setCurrentFile(const QString &fileName);
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
 
-
 	QHttp *httpReq;
 	QBuffer myLocalBuf;
 	int idHost;
@@ -186,12 +185,6 @@ private:
 	QMdiArea *mdiarea;
 	LayerDialog *layerDialog;
 	QSignalMapper *windowMapper;
-
-
-
-	/******************************************************************REMOVE IT!!!!************************************************/
-	QScriptEngine eng; 
-	/******************************************************************REMOVE IT!!!!************************************************/
 
 
     PluginManager PM;

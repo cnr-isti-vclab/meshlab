@@ -64,7 +64,7 @@ MainWindow::MainWindow()
         icon.addPixmap(QPixmap(":images/eye48.png"));
         setWindowIcon(icon);
 
-        PM.loadPlugins(defaultGlobalParams,&eng);
+        PM.loadPlugins(defaultGlobalParams);
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
 	createActions();
@@ -532,55 +532,103 @@ void MainWindow::createMenus()
 	unSplitMenu = handleMenu->addMenu("&Close");
 }
 
-void MainWindow::fillFilterMenu(){
-  // Connects the events of the actions within colorize to the method which shows their tooltip
+void MainWindow::fillFilterMenu()
+{
+	// Connects the events of the actions within colorize to the method which shows their tooltip
+	QMenu *filterMenuSelect = filterMenu->addMenu(tr("Selection"));
+	QMenu *filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));
+	 filterMenuCreate = filterMenu->addMenu(tr("Create New Mesh Layer"));
+	QMenu *filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing, simplification and reconstruction"));
+	QMenu *filterMenuPolygonal = filterMenu->addMenu(tr("Polygonal and Quad Mesh"));
+	QMenu *filterMenuColorize = filterMenu->addMenu(tr("Color Creation and Processing"));
+	QMenu *filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
+	QMenu *filterMenuQuality = filterMenu->addMenu(tr("Quality Measure and computations"));
+	QMenu *filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
+	 filterMenuLayer = filterMenu->addMenu(tr("Layer and Attribute Management"));
+	QMenu *filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
+	QMenu *filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
+	QMenu *filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
+	QMenu *filterMenuTexture = filterMenu->addMenu(tr("Texture"));
 
-  QMenu *filterMenuSelect = filterMenu->addMenu(tr("Selection"));
-  QMenu *filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));
-         filterMenuCreate = filterMenu->addMenu(tr("Create New Mesh Layer"));
-  QMenu *filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing, simplification and reconstruction"));
-  QMenu *filterMenuPolygonal = filterMenu->addMenu(tr("Polygonal and Quad Mesh"));
-  QMenu *filterMenuColorize = filterMenu->addMenu(tr("Color Creation and Processing"));
-  QMenu *filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
-  QMenu *filterMenuQuality = filterMenu->addMenu(tr("Quality Measure and computations"));
-  QMenu *filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
-         filterMenuLayer = filterMenu->addMenu(tr("Layer and Attribute Management"));
-  QMenu *filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
-  QMenu *filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
-  QMenu *filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
-  QMenu *filterMenuTexture = filterMenu->addMenu(tr("Texture"));
+	connect(filterMenu, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
 
-  connect(filterMenu, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-
-  QMap<QString,MeshFilterInterface *>::iterator msi;
-  for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
-    {
-      MeshFilterInterface * iFilter= msi.value();
-      QAction *filterAction = iFilter->AC((msi.key()));
+	QMap<QString,MeshFilterInterface *>::iterator msi;
+	for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
+	{
+		MeshFilterInterface * iFilter= msi.value();
+		QAction *filterAction = iFilter->AC((msi.key()));
 			filterAction->setToolTip(iFilter->filterInfo(filterAction));
-      connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
+		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
-      int filterClass = iFilter->getClass(filterAction);
-      if( filterClass & MeshFilterInterface::FaceColoring )   filterMenuColorize->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::VertexColoring ) filterMenuColorize->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Selection )      filterMenuSelect->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Cleaning )       filterMenuClean->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Remeshing )      filterMenuRemeshing->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Smoothing )      filterMenuSmoothing->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Normal )         filterMenuNormal->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Quality )        filterMenuQuality->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Measure  )	      filterMenuQuality->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Layer )          filterMenuLayer->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::MeshCreation )   filterMenuCreate->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::RangeMap )       filterMenuRangeMap->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::PointSet )       filterMenuPointSet->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Sampling )       filterMenuSampling->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Texture)         filterMenuTexture->addAction(filterAction);
-      if( filterClass & MeshFilterInterface::Polygonal)       filterMenuPolygonal->addAction(filterAction);
-      //  MeshFilterInterface::Generic :
-      if(filterClass == 0)                                    filterMenu->addAction(filterAction);
-      if(!filterAction->icon().isNull())                      filterToolBar->addAction(filterAction);
+		int filterClass = iFilter->getClass(filterAction);
+		if( filterClass & MeshFilterInterface::FaceColoring )   filterMenuColorize->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::VertexColoring ) filterMenuColorize->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Selection )      filterMenuSelect->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Cleaning )       filterMenuClean->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Remeshing )      filterMenuRemeshing->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Smoothing )      filterMenuSmoothing->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Normal )         filterMenuNormal->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Quality )        filterMenuQuality->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Measure  )	      filterMenuQuality->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Layer )          filterMenuLayer->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::MeshCreation )   filterMenuCreate->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::RangeMap )       filterMenuRangeMap->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::PointSet )       filterMenuPointSet->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Sampling )       filterMenuSampling->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Texture)         filterMenuTexture->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Polygonal)       filterMenuPolygonal->addAction(filterAction);
+		//  MeshFilterInterface::Generic :
+		if(filterClass == 0)                                    filterMenu->addAction(filterAction);
+		if(!filterAction->icon().isNull())                      filterToolBar->addAction(filterAction);
+	}
+
+	QMap<QString,MeshLabXMLFilterContainer>::iterator xmlit;
+	for(xmlit =  PM.stringXMLFilterMap.begin(); xmlit != PM.stringXMLFilterMap.end();++xmlit)
+	{
+		MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
+		QAction *filterAction = xmlit.value().act;
+		XMLFilterInfo* info = xmlit.value().xmlInfo;
+		bool isValid = false;
+		QString filterName = xmlit.key();
+		XMLMessageHandler errQuery;
+		QString help = info->filterHelp(filterName,isValid,errQuery);
+		if (isValid)
+			filterAction->setToolTip(help);
+		else
+			this->meshDoc()->Log.Logf(GLLogStream::SYSTEM,qPrintable(errQuery.statusMessage()));
+
+		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
+		isValid = true;
+		QString filterClasses = info->filterAttribute(filterName,QString("filterClass"),isValid,errQuery);
+		if (isValid)
+		{
+			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+			foreach(QString nameClass,filterClassesList)
+			{
+				if( nameClass == QString("FaceColoring")) filterMenuColorize->addAction(filterAction);
+				if( nameClass == QString("VertexColoring")) filterMenuColorize->addAction(filterAction);
+				if( nameClass == QString("Selection")) filterMenuSelect->addAction(filterAction);
+				if( nameClass == QString("Cleaning")) filterMenuClean->addAction(filterAction);
+				if( nameClass == QString("Remeshing")) filterMenuRemeshing->addAction(filterAction);
+				if( nameClass == QString("Smoothing")) filterMenuSmoothing->addAction(filterAction);
+				if( nameClass == QString("Normal")) filterMenuNormal->addAction(filterAction);
+				if( nameClass == QString("Quality")) filterMenuQuality->addAction(filterAction);
+				if( nameClass == QString("Measure")) filterMenuQuality->addAction(filterAction);
+				if( nameClass == QString("Layer")) filterMenuLayer->addAction(filterAction);
+				if( nameClass == QString("MeshCreation")) filterMenuCreate->addAction(filterAction);
+				if( nameClass == QString("RangeMap")) filterMenuRangeMap->addAction(filterAction);
+				if( nameClass == QString("PointSet")) filterMenuPointSet->addAction(filterAction);
+				if( nameClass == QString("Sampling")) filterMenuSampling->addAction(filterAction);
+				if( nameClass == QString("Texture")) filterMenuTexture->addAction(filterAction);
+				if( nameClass == QString("Polygonal")) filterMenuPolygonal->addAction(filterAction);
+			  //  //  MeshFilterInterface::Generic :
+				if(	nameClass == QString("Generic")) filterMenu->addAction(filterAction);
+				if(!filterAction->icon().isNull()) filterToolBar->addAction(filterAction);
+			}
 		}
+		else
+			this->meshDoc()->Log.Logf(GLLogStream::SYSTEM,qPrintable(errQuery.statusMessage()));
+	}
 }
 
 void MainWindow::fillDecorateMenu()

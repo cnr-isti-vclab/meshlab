@@ -79,6 +79,7 @@ ICON = images/meshlab.icns
 # ICON += images/meshlab_obj.icns
 QT += opengl
 QT += xml
+QT += xmlpatterns
 QT += network
 QT += script
 

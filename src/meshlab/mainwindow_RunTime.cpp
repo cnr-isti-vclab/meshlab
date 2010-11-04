@@ -604,12 +604,12 @@ void MainWindow::showScriptEditor()
 
 	if (dialog.exec()==QDialog::Accepted)
 	{
-		registerTypes(&eng);
+		registerTypes(&PM.eng);
 		//QScriptValue val = eng.newQObject(meshDoc());
-		QScriptValue val = eng.newQObject(meshDoc());
-		eng.globalObject().setProperty("md",val);
+		QScriptValue val = PM.eng.newQObject(meshDoc());
+		PM.eng.globalObject().setProperty("md",val);
 		QString code = dialog.scriptCode();
-		QScriptValue result = eng.evaluate(code);
+		QScriptValue result = PM.eng.evaluate(code);
 		if (result.isError())
 		{
 			meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",result.property("lineNumber").toInt32(),qPrintable(result.toString()));
@@ -706,60 +706,151 @@ void MainWindow::showTooltip(QAction* q){
 
 
 void MainWindow::startFilter()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+{	
+	if(currentViewContainer() == NULL) return;
+	if(GLA() == NULL) return;
 
-  if(currentViewContainer() == NULL) return;
-  if(GLA() == NULL) return;
-
-  // In order to avoid that a filter changes something assumed by the current editing tool,
+	// In order to avoid that a filter changes something assumed by the current editing tool,
 	// before actually starting the filter we close the current editing tool (if any).
 	if(GLA()) GLA()->endEdit();
+	updateMenus();
 
-  updateMenus();
-
-  QStringList missingPreconditions;
-	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
+	QStringList missingPreconditions;
+	QAction *action = qobject_cast<QAction *>(sender());
+	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+	//OLD FILTER PHILOSOPHY
+	if (iFilter != NULL)
 	{
-		qDebug("MeshCreation");
-//		MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
-//		connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
-//		GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
+		if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
+		{
+			qDebug("MeshCreation");
+			//		MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
+			//		connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+			//		GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
 
-    GLA()->meshDoc->addNewMesh("untitled.ply");
-//		gla->setFileName("untitled.ply");
-//    mdiarea->addSubWindow(mvcont);
-//    iFilter->setLog(mvcont->LogPtr());
-//    mvcont->LogPtr()->SetBookmark();
+			GLA()->meshDoc->addNewMesh("untitled.ply");
+			//		gla->setFileName("untitled.ply");
+			//    mdiarea->addSubWindow(mvcont);
+			//    iFilter->setLog(mvcont->LogPtr());
+			//    mvcont->LogPtr()->SetBookmark();
 
-    //if(mdiarea->isVisible()) mvcont->showMaximized();
-	}
-	else
-    if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))
+			//if(mdiarea->isVisible()) mvcont->showMaximized();
+		}
+		else
+			if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))
 			{
-        QString enstr = missingPreconditions.join(",");
+				QString enstr = missingPreconditions.join(",");
 				QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
-				"Current mesh does not have <i>" + enstr + "</i>."));
+						"Current mesh does not have <i>" + enstr + "</i>."));
 				return;
 			}
 
-  if(currentViewContainer())
-  {
-    iFilter->setLog(currentViewContainer()->LogPtr());
-    currentViewContainer()->LogPtr()->SetBookmark();
-  }
-    // just to be sure...
-    createStdPluginWnd();
+			if(currentViewContainer())
+			{
+				iFilter->setLog(currentViewContainer()->LogPtr());
+				currentViewContainer()->LogPtr()->SetBookmark();
+			}
+			// just to be sure...
+			createStdPluginWnd();
 
-    // (2) Ask for filter parameters and eventally directly invoke the filter
-    // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
-    // if no dialog is created the filter must be executed immediately
-    if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
-    {
-        RichParameterSet dummyParSet;
-        executeFilter(action, dummyParSet, false);
-    }
+			// (2) Ask for filter parameters and eventally directly invoke the filter
+			// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
+			// if no dialog is created the filter must be executed immediately
+			if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
+			{
+				RichParameterSet dummyParSet;
+				executeFilter(action, dummyParSet, false);
+			}
+	}
+	else // NEW XML PHILOSOPHY 
+	{
+		MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
+		QString fname = action->text();
+		const MeshLabXMLFilterContainer filt  = PM.stringXMLFilterMap.value(fname);
+		bool isvalid = false;
+		XMLMessageHandler errQuery;
+		QString filterClasses = filt.xmlInfo->filterAttribute(fname,QString("filterClass"),isvalid,errQuery);
+		if (isvalid)
+		{
+			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+			if(filterClassesList.contains("MeshCreation"))
+			{
+			  qDebug("MeshCreation");
+			  GLA()->meshDoc->addNewMesh("untitled.ply");
+			}
+			else
+			{
+			  /*if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))
+			  {
+				  QString enstr = missingPreconditions.join(",");
+				  QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
+					  "Current mesh does not have <i>" + enstr + "</i>."));
+				  return;
+			  }*/
+			}
+			  //INIT PARAMETERS WITH EXPRESSION : Both are defined inside the XML file
+			QStringList params = filt.xmlInfo->filterParameters(fname,isvalid,errQuery);
+			if (isvalid)
+			{
+				/*****IMPORTANT NOTE******/
+				//the popFrame will be called:
+				//- or in the executeFilter if the filter will be executed
+				//- or in the close Event of stdDialog window if the filter will NOT be executed
+				//- or in the catch exception if something went wrong during parsing/scanning
+				PM.env.pushFrame();
+				try
+				{
+					foreach(QString pp,params)
+					{
+						QStringList triple = pp.split(',');
+						if (triple.size() != 3)
+							throw ParsingException("Parameters List is not a correct triple (param_type,param_name,param_defaultExpression). Something REALLY wrong happened!");
+						else
+						{
+							//Initilize the parameters inside the environment
+							Expression* exp = ExpressionFactory::create(triple[0],triple[2]);
+							PM.env.insertLocalExpressionBinding(triple[1],exp);	
+							delete exp;
+						}
+					}
+				}
+				catch (ParsingException& e)
+				{
+					const char* err = e.what();
+					meshDoc()->Log.Logf(GLLogStream::SYSTEM,err);	
+					PM.env.popFrame();
+					return;
+				}
+				
+			}
+			else
+			{
+				meshDoc()->Log.Logf(GLLogStream::SYSTEM,qPrintable(errQuery.statusMessage()));
+				return;
+			}
+			if(currentViewContainer())
+			{
+			  iXMLFilter->setLog(currentViewContainer()->LogPtr());
+			  currentViewContainer()->LogPtr()->SetBookmark();
+			}
+			// just to be sure...
+			createStdPluginWnd();
+
+			// (2) Ask for filter parameters and eventally directly invoke the filter
+			// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
+			// if no dialog is created the filter must be executed immediately
+			/*if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
+			{
+			  RichParameterSet dummyParSet;
+			  executeFilter(action, dummyParSet, false);
+			}*/
+		}
+		else
+		{
+			meshDoc()->Log.Logf(GLLogStream::SYSTEM,qPrintable(errQuery.statusMessage()));
+			return;
+		}
+	}
 }
 
 /*
