@@ -272,7 +272,9 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         for(i = 0; i < 4; i++)
           for(j = 0; j < 4; j++)
             out << rot.ElementAt(i,j) << " ";
-        out << "\"/>\n\n";
+        out << "\" ";
+        out << "PhotosynthQuaternion=\"" << cam[CameraParameters::ROT_X] << " " << cam[CameraParameters::ROT_Y] << " " << cam[CameraParameters::ROT_Z] << "\" ";
+        out << "w=\"" << w << "\" />\n\n";
       }
     }
   }
