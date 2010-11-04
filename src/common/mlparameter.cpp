@@ -4,6 +4,9 @@
 Expression::Expression(const QString& ex) 
 : exp(ex) {}
 
+Expression::Expression()
+:exp(){}
+
 Expression::~Expression() {}
 
 QString& Expression::expression()
@@ -11,6 +14,17 @@ QString& Expression::expression()
 
 const QString& Expression::expression() const
 { return exp; }
+
+QScriptValue Expression::evaluate(Env* env ) const
+{
+	QScriptValue val = env->eng->evaluate(expression());
+	if(val.isError()) 
+		throw ParsingException(QString(val.toString()));
+	return val;
+}
+
+BoolExpression::BoolExpression() 
+: Expression() {}
 
 BoolExpression::BoolExpression(const QString& ex) 
 : Expression(ex) {}
@@ -20,22 +34,29 @@ BoolExpression::~BoolExpression()
 
 Value* BoolExpression::eval( Env* env ) const
 {
-	QScriptValue val = env->eng->evaluate(expression());
-	if(val.isError()) 
-		throw ParsingException(val.toString());
-	return new FloatValue(val.toBool());
+	return new BoolValue(evaluate(env).toBool());
 }
 
+Value* BoolExpression::eval(const QString& boolExp,Env* env ) 
+{
+	expression() = boolExp;
+	return new BoolValue(evaluate(env).toBool());
+}
+
+FloatExpression::FloatExpression() : Expression() {}
 FloatExpression::FloatExpression(const QString& ex) : Expression(ex) {}
 
 FloatExpression::~FloatExpression() {}
 
 Value* FloatExpression::eval( Env* env ) const
 {
-	QScriptValue val = env->eng->evaluate(expression());
-	if(val.isError()) 
-		throw ParsingException(val.toString());
-	return new FloatValue(val.toNumber());
+	return new FloatValue(evaluate(env).toNumber());
+}
+
+Value* FloatExpression::eval(const QString& floatExp,Env* env ) 
+{
+	expression() = floatExp;
+	return new FloatValue(evaluate(env).toNumber());
 }
 
 //FilterEnv::FilterEnv(const QMap<QString,Value*>& evalExpress)
@@ -58,6 +79,12 @@ Value* FloatExpression::eval( Env* env ) const
 Env::Env( QScriptEngine* scriptEng )
 {
 	eng = scriptEng;
+}
+
+Value* Env::insertLocalExpressionBinding( const QString& nm,Expression* exp )
+{
+	QString decl("var " + nm + " = " + exp->expression() + ";");
+	return exp->eval(decl,this);
 }
 //
 //Value* Env::insertLocalValueBinding( const QString& nm,Value* val )
@@ -89,3 +116,42 @@ Env::Env( QScriptEngine* scriptEng )
 //{
 //	eng->popContext();
 //}
+
+bool FilterEnv::getBool( const QString& nm ) const
+{
+	return findValue(nm).value()->getBool();
+}
+
+float FilterEnv::getFloat( const QString& nm ) const
+{
+	return findValue(nm).value()->getFloat();
+}
+
+QMap<QString,Value*>::const_iterator FilterEnv::findValue( const QString& nm ) const
+{
+	QMap<QString,Value*>::const_iterator it = evaluatedExpressions.find(nm);
+	if (it == evaluatedExpressions.end())
+		throw ValueNotFoundException(nm);
+	return it;
+}
+
+Expression* ExpressionFactory::create( const QString& type,const QString& defExpression)
+{
+	//in order to avoid 
+	Expression* exp = NULL;
+	QString cleanType = type.trimmed();
+	if (type == QString("Boolean"))
+	{
+		exp = new BoolExpression(defExpression);
+		return exp;
+	}
+
+	if (type == QString("Real"))
+	{
+		exp= new FloatExpression(defExpression);
+		return exp;
+	}
+	
+	throw ParsingException("Expression type has been not recognized. Should never happened because we validate XML file through XML Schema!");
+	//return NULL;
+}

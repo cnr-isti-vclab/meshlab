@@ -24,17 +24,25 @@
 #ifndef PLUGINMANAGER_H
 #define PLUGINMANAGER_H
 
+#include<QMap>
+#include<QObject>
+
 #include "interfaces.h"
+#include "mlparameter.h"
+#include "xmlfilterinfo.h"
+
 class QScriptEngine;
 /**
   \brief This class provides the basic tools for managing all the plugins. It is used by both meshlab and meshlab server.
   */
 class PluginManager
 {
+private:
+	static const QString xmlSchemaFile() {QString result = getPluginDirPath() + QObject::tr("/meshlabfilterXMLspecificationformat.xsd");return result;} 
 public:
   PluginManager();
   enum TypeIO{IMPORT,EXPORT};
-  void loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* eng = NULL);
+  void loadPlugins(RichParameterSet& defaultGlobal);
 
 	inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
 	inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
@@ -50,7 +58,12 @@ public:
 	QDir pluginsDir;
   QMap<QString, QAction*> actionFilterMap;
   QMap<QString, MeshFilterInterface*> stringFilterMap;
-	QVector<MeshIOInterface*> meshIOPlug;
+
+  //QMap<QString, QAction*> xmlActionFilterMap;
+  QMap<QString,	MeshLabXMLFilterContainer> stringXMLFilterMap;
+  //QMap<QString, XMLFilterInfo*> filterXMLFileMap;
+	
+  QVector<MeshIOInterface*> meshIOPlug;
 	QVector<MeshFilterInterface*> meshFilterPlug;
 	QVector<MeshRenderInterface*> meshRenderPlug;
 	QVector<MeshDecorateInterface*> meshDecoratePlug;
@@ -59,6 +72,9 @@ public:
 	QVector<QAction *> decoratorActionList;
 
   QStringList pluginsLoaded;
+
+  QScriptEngine eng; 
+  Env env;
 };
 
 #endif // PLUGINMANAGER_H

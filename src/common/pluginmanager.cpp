@@ -1,9 +1,13 @@
 #include "pluginmanager.h"
+#include <QObject>
 #include <QtScript/QtScript>
 #include <vcg/complex/trimesh/create/platonic.h>
+
 #include "scriptinterface.h"
 
+
 PluginManager::PluginManager()
+:eng(),env(&eng)
 {
     //pluginsDir=QDir(getPluginDirPath());
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -11,7 +15,7 @@ PluginManager::PluginManager()
     //qApp->addLibraryPath(getBaseDirPath());
 }
 
-void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* eng)
+void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 {
     pluginsDir=QDir(getPluginDirPath());
   // without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -47,6 +51,37 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 				}
 			}
 
+			MeshLabFilterInterface* iXMLfilter = qobject_cast<MeshLabFilterInterface *>(plugin);
+			if (iXMLfilter)
+			{
+				MeshLabXMLFilterContainer fc;
+				fc.filterInterface = iXMLfilter;
+				int res = fileName.lastIndexOf(QObject::tr("."));
+				QString withoutext = fileName.left(res); 
+				QString xmlFile = getPluginDirPath() + "/" + withoutext + QObject::tr(".xml");
+				qDebug("Loading XMLFile: %s",qPrintable(xmlFile));
+				XMLMessageHandler xmlErr;
+				fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,xmlSchemaFile(),xmlErr);
+				if (fc.xmlInfo != NULL)
+				{
+					XMLMessageHandler errQuery;
+					QStringList fn = fc.xmlInfo->filterNames(errQuery);
+					foreach(QString filtName,fn)
+					{
+						fc.act = new QAction(filtName,plugin);
+						stringXMLFilterMap.insert(filtName,fc);
+
+						//SHOULD INITIALIZE GLOBALS FOR FILTERS
+
+					}
+				}
+				else 
+				{
+					QString err = xmlErr.statusMessage();
+					qDebug("Error in XMLFile: %s - %s",qPrintable(xmlFile),qPrintable(err));
+				}
+			}
+
 			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
 			if (iIO) 
 				meshIOPlug.push_back(iIO);
@@ -75,43 +110,41 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal,QScriptEngine* e
 			}
 		}
 	}
-
+	
+	
 	/*******************************************/
 
-	if (eng != 0)
+	QString code = "";
+	code += "Plugins = { };\n";
+	QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
+	foreach(MeshFilterInterface* mi,this->meshFilterPlug)
 	{
-		QString code = "";
-		code += "Plugins = { };\n";
-    QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
-    foreach(MeshFilterInterface* mi,this->meshFilterPlug)
+		QString pname = mi->pluginName();
+		if (pname != "")
 		{
-			QString pname = mi->pluginName();
-			if (pname != "")
+			code += "Plugins." + pname + " = { };\n";
+			foreach(MeshFilterInterface::FilterIDType tt,mi->types())
 			{
-				code += "Plugins." + pname + " = { };\n";
-				foreach(MeshFilterInterface::FilterIDType tt,mi->types())
+				QString filterName = mi->filterName(tt);
+				QString filterFunction = mi->filterScriptFunctionName(tt);
+				if (filterFunction != "")
 				{
-					QString filterName = mi->filterName(tt);
-					QString filterFunction = mi->filterScriptFunctionName(tt);
-					if (filterFunction != "")
-					{
-						ScriptAdapterGenerator gen;
-            QString gencode = gen.funCodeGenerator(filterName,FPM[filterName]);
-						code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
-					}
+					ScriptAdapterGenerator gen;
+					QString gencode = gen.funCodeGenerator(filterName,FPM[filterName]);
+					code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
 				}
 			}
 		}
-
-		QScriptValue initFun  = eng->newFunction(PluginInterfaceInit,  this);
-		eng->globalObject().setProperty("_initParameterSet", initFun);
-
-		QScriptValue applyFun = eng->newFunction(PluginInterfaceApply, this);
-		eng->globalObject().setProperty("_applyFilter", applyFun);
-
-		eng->evaluate(code);
-    qDebug("Code:\n %s",qPrintable(code));
 	}
+
+	QScriptValue initFun  = eng.newFunction(PluginInterfaceInit,  this);
+	eng.globalObject().setProperty("_initParameterSet", initFun);
+
+	QScriptValue applyFun = eng.newFunction(PluginInterfaceApply, this);
+	eng.globalObject().setProperty("_applyFilter", applyFun);
+
+	eng.evaluate(code);
+	qDebug("Code:\n %s",qPrintable(code));
 }
 /*
  This function create a map from filtername to dummy RichParameterSet.
@@ -129,10 +162,10 @@ QMap<QString, RichParameterSet> PluginManager::generateFilterParameterMap()
   for(ai=this->actionFilterMap.begin(); ai !=this->actionFilterMap.end();++ai)
   {
       QString filterName = ai.key();//  ->filterName();
-      QAction act(filterName,NULL);
+      //QAction act(filterName,NULL);
       RichParameterSet rp;
-      this->stringFilterMap[filterName]->initParameterSet(ai.value(),md,rp);
-      FPM[filterName]=rp;
+	  stringFilterMap[filterName]->initParameterSet(ai.value(),md,rp);
+	  FPM[filterName]=rp;
   }
   return FPM;
 }

@@ -35,6 +35,7 @@
 #include "filterparameter.h"
 #include "GLLogStream.h"
 #include "meshmodel.h"
+#include "mlparameter.h"
 
 class QWidget;
 class QGLWidget;
@@ -75,9 +76,9 @@ public:
   /** the type used to identify plugin actions; there is a one-to-one relation betweeen an ID and an Action.
     \todo To be renamed as ActionIDType
     */
-  typedef int FilterIDType;
 
-	MeshLabInterface() :log(0) {}; 
+	MeshLabInterface() :log(0) {}
+	virtual ~MeshLabInterface() {}
 private:
 	GLLogStream *log;	
 public:
@@ -88,6 +89,14 @@ public:
 	// NEVER EVER use a msgbox to say something to the user.
   void Log(const char * f, ... );
   void Log(int Level, const char * f, ... ) ;
+};
+
+class MeshCommonInterface : public MeshLabInterface
+{
+public:
+	typedef int FilterIDType;
+	MeshCommonInterface() {}
+	virtual ~MeshCommonInterface() {}
 
   virtual QString pluginName(void) const { return ""; }
 
@@ -132,7 +141,7 @@ public:
 };
 /** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
   */
-class MeshIOInterface : public MeshLabInterface
+class MeshIOInterface : public MeshCommonInterface
 {
 public:
 	class Format
@@ -143,7 +152,7 @@ public:
 		QStringList extensions;
 	};
 
-	MeshIOInterface(): MeshLabInterface() {  }
+	MeshIOInterface(): MeshCommonInterface() {  }
   virtual ~MeshIOInterface() {}
 	
 	virtual QList<Format> importFormats() const = 0;
@@ -216,11 +225,13 @@ public:
 	QString errorMessage;
 
 };
+
+
 /**
   \brief The MeshFilterInterface class provide the interface of the filter plugins.
 
 */
-class MeshFilterInterface : public MeshLabInterface
+class MeshFilterInterface : public MeshCommonInterface
 {
 public:
   /** The FilterClass enum represents the set of keywords that must be used to categorize a filter.
@@ -248,7 +259,7 @@ public:
     };
 	
 	
-	MeshFilterInterface() : MeshLabInterface() 
+	MeshFilterInterface() : MeshCommonInterface() 
 	{
 	}
 	virtual ~MeshFilterInterface() {}
@@ -421,10 +432,10 @@ The typical rendering loop of a Render plugin is something like, :
 
 */
 
-class MeshRenderInterface : public MeshLabInterface
+class MeshRenderInterface : public MeshCommonInterface
 {
 public:
-	MeshRenderInterface() :MeshLabInterface() {}
+	MeshRenderInterface() :MeshCommonInterface() {}
     virtual ~MeshRenderInterface() {}
 		
   virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){};
@@ -467,10 +478,9 @@ public:
     - display of specific tagging
   */
 
-class MeshDecorateInterface : public MeshLabInterface
+class MeshDecorateInterface : public MeshCommonInterface
 {
 public:
-  typedef int FilterIDType;
 
   /** The DecorationClass enum represents the set of keywords that must be used to categorize a filter.
    Each filter can belong to one or more filtering class, or-ed togheter.
@@ -484,7 +494,7 @@ public:
         PostRendering    =0x00008, /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
   };
 
-  MeshDecorateInterface(): MeshLabInterface() {}
+  MeshDecorateInterface(): MeshCommonInterface() {}
   virtual ~MeshDecorateInterface() {}
 
   virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) =0;
@@ -522,10 +532,10 @@ Used to provide tools that needs some kind of interaction with the mesh.
 Editing tools are exclusive (only one at a time) and can grab the mouse events and customize the rendering process.
 */
 
-class MeshEditInterface : public MeshLabInterface
+class MeshEditInterface : public MeshCommonInterface
 {
 public:
-	MeshEditInterface() : MeshLabInterface() {}
+	MeshEditInterface() : MeshCommonInterface() {}
 	virtual ~MeshEditInterface() {}
 	
 	//should return a sentence describing what the editing tool does
@@ -597,9 +607,21 @@ public:
 
 };
 
+/**************************************************************************************************************************************************************/
+/*The new class of filter defined through XML file*/
+
+class MeshLabFilterInterface : public MeshLabInterface
+{
+public:
+	MeshLabFilterInterface():MeshLabInterface(){}
+	virtual ~MeshLabFilterInterface() {}
+
+	virtual bool applyFilter(const QString& filterName,const FilterEnv& env, vcg::CallBackPos *cb) =0;
+};
 
 Q_DECLARE_INTERFACE(MeshIOInterface,						"vcg.meshlab.MeshIOInterface/1.0")
 Q_DECLARE_INTERFACE(MeshFilterInterface,				"vcg.meshlab.MeshFilterInterface/1.0")
+Q_DECLARE_INTERFACE(MeshLabFilterInterface,				"vcg.meshlab.MeshLabFilterInterface/1.0")
 Q_DECLARE_INTERFACE(MeshRenderInterface,				"vcg.meshlab.MeshRenderInterface/1.0")
 Q_DECLARE_INTERFACE(MeshDecorateInterface,			"vcg.meshlab.MeshDecorateInterface/1.0")
 Q_DECLARE_INTERFACE(MeshEditInterface,					"vcg.meshlab.MeshEditInterface/1.0")

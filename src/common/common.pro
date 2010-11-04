@@ -49,6 +49,7 @@ win32-msvc2008:CONFIG += staticlib
 
 QT += opengl
 QT += xml
+QT += xmlpatterns
 QT += script
 
 
@@ -68,6 +69,9 @@ HEADERS += filterparameter.h \
     meshmodel.h \
     pluginmanager.h \
 	scriptinterface.h \
+	mlparameter.h \
+	xmlfilterinfo.h \
+	mlexception.h \
     ../../../vcglib/wrap/gl/trimesh.h
 SOURCES += filterparameter.cpp \
     interfaces.cpp \
@@ -76,4 +80,6 @@ SOURCES += filterparameter.cpp \
     meshmodel.cpp \
     pluginmanager.cpp \
 	scriptinterface.cpp \
+	mlparameter.cpp \
+	xmlfilterinfo.cpp \
     $$GLEWCODE
