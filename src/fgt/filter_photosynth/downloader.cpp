@@ -326,9 +326,11 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
         while(it.hasNext())
         {
           it.next();
+          int id = it.name().toInt();
           QScriptValue camera = it.value();
           QScriptValue parameters = camera.property("j");
           CameraParameters params;
+          params._camID = id;
           QScriptValueIterator paramIt(parameters);
           paramIt.next();
           params._imageID = paramIt.value().toInt32();

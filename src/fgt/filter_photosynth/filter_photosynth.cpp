@@ -228,12 +228,14 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 
       Matrix44f flip;
       flip.SetRotateDeg(180,Point3f(1,0,0));
-      Matrix44f flippedRot = rot * flip;
+      // (rot * flip)^T = flip^T * rot^T
+      Matrix44f transposedFlippedRot = flip.transpose() * rot.transpose();
 
       Shotf s;
-      s.Extrinsics.SetRot(rot);
+      //s.Extrinsics.SetRot(rot);
+      s.Extrinsics.SetRot(transposedFlippedRot);
 
-      s.Extrinsics.SetTra(Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]));
+      s.Extrinsics.SetTra(Point3f(-cam[CameraParameters::POS_X], -cam[CameraParameters::POS_Y], -cam[CameraParameters::POS_Z]));
       //s.Extrinsics.SetTra(getTranslation(cam));
       //s.Extrinsics.SetTra(Point3f(cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z], cam[CameraParameters::POS_X]));
 
@@ -258,8 +260,9 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         QString pxSize("PixelSizeMm=\"0.1 0.1\"");
         QString centerPx = QString("CenterPx=\"%1 %2\"").arg(img._width/2).arg(img._height/2);
         QString focalMm = QString("FocalMm=\"%1\"").arg(s.Intrinsics.FocalMm);
-        out << "Image: " << img._ID << "\n";
-        out << "<VCGCamera ";
+        out << QString("Camera %1 (Image %2: %3): ").arg(cam._camID).arg(img._ID).arg(img._url) << "\n\n";
+        out << "<!DOCTYPE ViewState>\n<project>\n";
+        out << " <VCGCamera ";
         out << traVec << " ";
         out << lensDist << " ";
         out << viewPx << " ";
@@ -267,14 +270,17 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         out << centerPx << " ";
         out << focalMm << " ";
         out << "RotationMatrix=\"";
-
         unsigned int i, j;
         for(i = 0; i < 4; i++)
           for(j = 0; j < 4; j++)
-            out << rot.ElementAt(i,j) << " ";
+            //out << rot.ElementAt(i,j) << " ";
+            out << transposedFlippedRot.ElementAt(i,j) << " ";
         out << "\" ";
         out << "PhotosynthQuaternion=\"" << cam[CameraParameters::ROT_X] << " " << cam[CameraParameters::ROT_Y] << " " << cam[CameraParameters::ROT_Z] << "\" ";
-        out << "w=\"" << w << "\" />\n\n";
+        out << "w=\"" << w << "\" />\n";
+        out << " <ViewSettings NearPlane=\"0\" TrackScale=\"0.299015\" FarPlane=\"13.0311\"/>\n";
+        out << " <Render Lighting=\"0\" DoubleSideLighting=\"0\" SelectedVert=\"0\" ColorMode=\"3\" SelectedFace=\"0\" BackFaceCull=\"0\" FancyLighting=\"0\" DrawMode=\"2\" TextureMode=\"0\"/>\n";
+        out << "</project>\n\n\n\n";
       }
     }
   }

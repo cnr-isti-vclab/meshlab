@@ -73,6 +73,7 @@ public:
     return _fields[i];
   }
 
+  int _camID;
   int _imageID;
   qreal _fields[8];
   qreal _distortionRadius1;
