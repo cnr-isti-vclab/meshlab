@@ -33,10 +33,10 @@
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
 #include<vcg/complex/trimesh/base.h>
-#include "muParser.h"
+//#include "muParser.h"
 
 using namespace vcg;
-using namespace mu;
+//using namespace mu;
 
 
 class FilterDirt : public QObject, public MeshFilterInterface
@@ -55,7 +55,7 @@ class FilterDirt : public QObject, public MeshFilterInterface
         //std::vector<CMeshO::PerFaceAttributeHandle<float> > fhandlers;
 
     public:
-        enum {FP_DIRT} ;
+        enum {FP_DIRT,FP_CLOUD_MOVEMENT} ;
 		
         FilterDirt();
         ~FilterDirt(){};
@@ -69,8 +69,7 @@ class FilterDirt : public QObject, public MeshFilterInterface
         virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
         virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
         virtual FilterClass getClass(QAction *);
-        void setPerVertexVariables(Parser &p);
-        void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
+
 
 };
 
