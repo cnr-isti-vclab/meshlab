@@ -604,12 +604,13 @@ void MainWindow::showScriptEditor()
 
 	if (dialog.exec()==QDialog::Accepted)
 	{
-		registerTypes(&PM.eng);
-		//QScriptValue val = eng.newQObject(meshDoc());
-		QScriptValue val = PM.eng.newQObject(meshDoc());
-		PM.eng.globalObject().setProperty("md",val);
+		registerTypes(&PM.env);
+		//QScriptValue val = PM.env.newQObject(meshDoc());
+		//PM.env.globalObject().setProperty("md",val);
+		PM.updateDocumentScriptBindings(*meshDoc());
+		//PM.env.globalObject().setProperty("md.current",QScriptValue(meshDoc()->mm()->id()));
 		QString code = dialog.scriptCode();
-		QScriptValue result = PM.eng.evaluate(code);
+		QScriptValue result = PM.env.evaluate(code);
 		if (result.isError())
 		{
 			meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",result.property("lineNumber").toInt32(),qPrintable(result.toString()));
@@ -793,11 +794,11 @@ void MainWindow::startFilter()
 			if (isvalid)
 			{
 				/*****IMPORTANT NOTE******/
-				//the popFrame will be called:
+				//the popContext will be called:
 				//- or in the executeFilter if the filter will be executed
 				//- or in the close Event of stdDialog window if the filter will NOT be executed
 				//- or in the catch exception if something went wrong during parsing/scanning
-				PM.env.pushFrame();
+				PM.env.pushContext();
 				try
 				{
 					foreach(QString pp,params)
@@ -818,7 +819,7 @@ void MainWindow::startFilter()
 				{
 					const char* err = e.what();
 					meshDoc()->Log.Logf(GLLogStream::SYSTEM,err);	
-					PM.env.popFrame();
+					PM.env.popContext();
 					return;
 				}
 				
