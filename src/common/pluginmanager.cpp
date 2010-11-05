@@ -7,7 +7,7 @@
 
 
 PluginManager::PluginManager()
-:eng(),env(&eng)
+:env()
 {
     //pluginsDir=QDir(getPluginDirPath());
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -137,13 +137,13 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 		}
 	}
 
-	QScriptValue initFun  = eng.newFunction(PluginInterfaceInit,  this);
-	eng.globalObject().setProperty("_initParameterSet", initFun);
+	QScriptValue initFun  = env.newFunction(PluginInterfaceInit,  this);
+	env.globalObject().setProperty("_initParameterSet", initFun);
 
-	QScriptValue applyFun = eng.newFunction(PluginInterfaceApply, this);
-	eng.globalObject().setProperty("_applyFilter", applyFun);
+	QScriptValue applyFun = env.newFunction(PluginInterfaceApply, this);
+	env.globalObject().setProperty("_applyFilter", applyFun);
 
-	eng.evaluate(code);
+	env.evaluate(code);
 	qDebug("Code:\n %s",qPrintable(code));
 }
 /*
@@ -249,4 +249,27 @@ void PluginManager::LoadFormats(QStringList &filters, QHash<QString, MeshIOInter
 	}
 	allKnownFormatsFilter.append(')');
 	filters.push_front(allKnownFormatsFilter);
+}
+
+void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
+{
+	QScriptValue val = env.newQObject(&doc);
+	env.globalObject().setProperty(meshDocVarName(),val);
+	if (doc.mm() != NULL)
+		updateMeshScriptBindings(doc,doc.mm()->id());
+
+}
+
+void PluginManager::updateMeshScriptBindings(MeshDocument& doc,const int id)
+{
+	IntExpression meshInd(QString::number(id));
+	env.insertNewFieldToVariable(meshDocVarName(),currentMeshVarName(),&meshInd);
+	FloatExpression bboxDiag(QString::number(0.0f));
+	MeshModel* model = doc.getMesh(id);
+	if (model != NULL)
+		bboxDiag.expression() = QString::number(model->cm.bbox.Diag());
+	
+	Value* val = env.insertNewFieldToVariable(meshDocVarName() + "." + currentMeshVarName(),QString("bboxDiag"),&bboxDiag);
+	QString st(meshDocVarName() + "." + currentMeshVarName() + ".bboxDiag");
+	env.evaluate("print(" + st + ");");
 }

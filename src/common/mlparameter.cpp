@@ -17,7 +17,7 @@ const QString& Expression::expression() const
 
 QScriptValue Expression::evaluate(Env* env ) const
 {
-	QScriptValue val = env->eng->evaluate(expression());
+	QScriptValue val = env->evaluate(expression());
 	if(val.isError()) 
 		throw ParsingException(QString(val.toString()));
 	return val;
@@ -59,6 +59,23 @@ Value* FloatExpression::eval(const QString& floatExp,Env* env )
 	return new FloatValue(evaluate(env).toNumber());
 }
 
+IntExpression::IntExpression() : Expression() {}
+IntExpression::IntExpression(const QString& ex) : Expression(ex) {}
+
+IntExpression::~IntExpression() {}
+
+Value* IntExpression::eval( Env* env ) const
+{
+	return new IntValue(evaluate(env).toInt32());
+}
+
+Value* IntExpression::eval(const QString& intExp,Env* env ) 
+{
+	expression() = intExp;
+	return new IntValue(evaluate(env).toInt32());
+}
+
+
 //FilterEnv::FilterEnv(const QMap<QString,Value*>& evalExpress)
 //:evaluatedExpressions(evalExpress)
 //{
@@ -76,9 +93,15 @@ Value* FloatExpression::eval(const QString& floatExp,Env* env )
 //	return evaluatedExpressions->find(nm)->getFloat();
 //}
 //
-Env::Env( QScriptEngine* scriptEng )
+Env::Env()
+:QScriptEngine()
 {
-	eng = scriptEng;
+}
+
+Value* Env::insertNewFieldToVariable(const QString& var,const QString& field,Expression* exp)
+{
+	QString decl(var + "." + field + " = " + exp->expression() + ";");
+	return exp->eval(decl,this);
 }
 
 Value* Env::insertLocalExpressionBinding( const QString& nm,Expression* exp )

@@ -44,6 +44,16 @@ public:
 	Value* eval(const QString& floatExp,Env* env);
 };
 
+class IntExpression : public Expression
+{
+public:
+	IntExpression();
+	IntExpression(const QString& ex);
+	~IntExpression();
+	Value* eval(Env* env) const;
+	Value* eval(const QString& intExp,Env* env);
+};
+
 class FilterEnv
 {
 private:
@@ -92,21 +102,18 @@ public:
 
 
 
-class Env
+class Env : public QScriptEngine
 {
 public:
-	Env(QScriptEngine* scriptEng);
+	Env();
 
 	//could throw a ParsingException: you should catch it in the calling code
 	Value* insertLocalExpressionBinding(const QString& nm,Expression* val);
+	Value* insertNewFieldToVariable(const QString& var,const QString& field,Expression* exp);
+	
 	//Value* removeLocalValueBinding(const QString& nm);
 	//Value* insertGlobalValueBinding(const QString& nm,Value* val);
 	//Value* removeGlobalValueBinding(const QString& nm);
-	inline void pushFrame() {eng->pushContext();};
-	inline void popFrame() {eng->popContext();};
-
-
-	QScriptEngine* eng;
 };
 
 #endif

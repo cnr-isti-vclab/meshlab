@@ -73,8 +73,13 @@ public:
 
   QStringList pluginsLoaded;
 
-  QScriptEngine eng; 
   Env env;
+
+  inline static const QString meshDocVarName() {return QString("meshDocument");}
+  inline static const QString currentMeshVarName() {return QString("current");}
+
+	void updateDocumentScriptBindings(MeshDocument& doc);
+	void updateMeshScriptBindings(MeshDocument& doc,const int id);
 };
 
 #endif // PLUGINMANAGER_H
