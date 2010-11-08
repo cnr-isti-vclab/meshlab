@@ -1,7 +1,7 @@
 include (../../shared.pri)
 
-HEADERS       = splatrenderer.h
-SOURCES       = splatrenderer.cpp
+HEADERS       = splatrenderer_plugin.h
+SOURCES       = splatrenderer_plugin.cpp
 TARGET        = render_splatting
 
 QT            += opengl
