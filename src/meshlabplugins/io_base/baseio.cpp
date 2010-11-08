@@ -53,7 +53,7 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
 		parlst.addParam(new RichFloat("angle",85.0,"Angle limit for face culling","short"));
 		parlst.addParam(new RichBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead"));
 		parlst.addParam(new RichBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]"));
-		parlst.addParam(new RichBool("pointsonly",false,"Keep only points","Just import points, without triangulation"));
+    parlst.addParam(new RichBool("pointsonly",false,"Keep only points","Import points a point cloud only, with radius and normals, no triangulation involved, isolated points and points with normals with steep angles are removed."));
 		parlst.addParam(new RichBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over"));
 		parlst.addParam(new RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles"));
 	}
@@ -131,18 +131,20 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		tri::io::ImporterPTX<CMeshO>::Info importparams;
 
-		importparams.meshnum = parlst.findParameter("meshindex")->val->getInt();
-		importparams.anglecull =parlst.findParameter("anglecull")->val->getBool(); 
-		importparams.angle = parlst.findParameter("angle")->val->getFloat();
-		importparams.savecolor = parlst.findParameter("usecolor")->val->getBool(); 
-		importparams.pointcull = parlst.findParameter("pointcull")->val->getBool();  
-		importparams.pointsonly = parlst.findParameter("pointsonly")->val->getBool();  
-		importparams.switchside = parlst.findParameter("switchside")->val->getBool();  
-		importparams.flipfaces = parlst.findParameter("flipfaces")->val->getBool();  
+    importparams.meshnum = parlst.getInt("meshindex");
+    importparams.anglecull =parlst.getBool("anglecull");
+    importparams.angle = parlst.getFloat("angle");
+    importparams.savecolor = parlst.getBool("usecolor");
+    importparams.pointcull = parlst.getBool("pointcull");
+    importparams.pointsonly = parlst.getBool("pointsonly");
+    importparams.switchside = parlst.getBool("switchside");
+    importparams.flipfaces = parlst.getBool("flipfaces");
 
 		// if color, add to mesh
 		if(importparams.savecolor)
 			importparams.mask |= tri::io::Mask::IOM_VERTCOLOR;
+    if(importparams.pointsonly)
+      importparams.mask |= tri::io::Mask::IOM_VERTRADIUS;
 
 		// reflectance is stored in quality
 		importparams.mask |= tri::io::Mask::IOM_VERTQUALITY;
