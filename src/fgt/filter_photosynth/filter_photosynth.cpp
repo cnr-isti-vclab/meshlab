@@ -15,6 +15,10 @@
 #include "filter_photosynth.h"
 #include <QtScript>
 #include <unistd.h>
+#include "qmeta/exif.h"
+#include "qmeta/jpeg.h"
+//#include "exif.h"
+//#include "jpeg.h"
 
 using namespace vcg;
 
@@ -250,15 +254,30 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       s.Intrinsics.FocalMm = focal * 10;
       s.Intrinsics.PixelSizeMm = Point2f(0.1,0.1);
       Image img = synthData->_imageMap->value(cam._imageID);
-      s.Intrinsics.ViewportPx = Point2i(img._width,img._height);
-      s.Intrinsics.CenterPx = Point2f(img._width/2,img._height/2);
+      QDir imageDir(path);
+      imageDir.cd(synthData->_collectionID);
+      qmeta::Jpeg jpeg(imageDir.filePath("IMG_%1.jpg").arg(img._ID));
+      int width = 0;
+      int height = 0;
+      if(jpeg.IsValid())
+      {
+        if(jpeg.exif())
+        {
+          width = jpeg.exif()->Value(qmeta::Exif::kPixelXDimension).ToUInt();
+          height = jpeg.exif()->Value(qmeta::Exif::kPixelYDimension).ToUInt();
+          //qDebug() << "Width:" << width;
+          ///qDebug() << "Width:" << height;
+        }
+      }
+      s.Intrinsics.ViewportPx = Point2i(width,height);
+      s.Intrinsics.CenterPx = Point2f(width/2,height/2);
       if(success)
       {
         QString traVec = QString("TranslationVector=\"%1 %2 %3 1\"").arg(s.Extrinsics.Tra().X()).arg(s.Extrinsics.Tra().Y()).arg(s.Extrinsics.Tra().Z());
         QString lensDist("LensDistortion=\"0 0\"");
-        QString viewPx = QString("ViewportPixel=\"%1 %2\"").arg(img._width).arg(img._height);
+        QString viewPx = QString("ViewportPixel=\"%1 %2\"").arg(width).arg(height);
         QString pxSize("PixelSizeMm=\"0.1 0.1\"");
-        QString centerPx = QString("CenterPx=\"%1 %2\"").arg(img._width/2).arg(img._height/2);
+        QString centerPx = QString("CenterPx=\"%1 %2\"").arg(width/2).arg(height/2);
         QString focalMm = QString("FocalMm=\"%1\"").arg(s.Intrinsics.FocalMm);
         out << QString("Camera %1 (Image %2: %3): ").arg(cam._camID).arg(img._ID).arg(img._url) << "\n\n";
         out << "<!DOCTYPE ViewState>\n<project>\n";
@@ -297,6 +316,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       md.addNewRaster(dir.filePath(rasterBase.arg(it.value()._ID)).toStdString().data());
     }
   }
+
   return true;
 }
 

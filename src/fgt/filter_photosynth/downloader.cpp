@@ -505,7 +505,6 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
     else
       SET_STATE_DELETE(NO_ERROR,true)
   }
-  //CHECK_DELETE(_semaphore == 0, NO_ERROR, true)
 
   httpResponse->deleteLater();
 }
@@ -521,7 +520,7 @@ void SynthData::downloadImages()
   /*bool success = */dir.mkdir(_collectionID);
   //if(!success)
     //qWarning("fallimento creazione directory");
-  //CHECK(!success,CREATE_DIR,true)
+  ///CHECK(!success,CREATE_DIR,true)
 
   QNetworkAccessManager *manager = new QNetworkAccessManager(this);
   connect(manager, SIGNAL(finished(QNetworkReply*)),

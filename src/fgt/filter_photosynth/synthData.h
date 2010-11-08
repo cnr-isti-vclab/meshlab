@@ -27,6 +27,7 @@ typedef struct Image
   int _width;
   int _height;
   QString _url;
+  QString _localPath;
 } Image;
 
 /*
@@ -193,7 +194,7 @@ public:
   //when a SynthData is instantiated _dataReady == false
   //until the data are downloaded from photosynth server
   bool _dataReady;
-  //Number of images of this synth
+  ///Number of images of this synth
   int _numImages;
 
 private:
