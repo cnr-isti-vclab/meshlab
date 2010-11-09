@@ -1,5 +1,6 @@
 #include "mlparameter.h"
 #include <QScriptValue>
+#include "scriptinterface.h"
 
 Expression::Expression(const QString& ex) 
 : exp(ex) {}
@@ -96,6 +97,7 @@ Value* IntExpression::eval(const QString& intExp,Env* env )
 Env::Env()
 :QScriptEngine()
 {
+	qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
 }
 
 Value* Env::insertNewFieldToVariable(const QString& var,const QString& field,Expression* exp)

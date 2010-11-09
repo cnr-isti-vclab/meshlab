@@ -7,7 +7,7 @@
 
 
 PluginManager::PluginManager()
-:env()
+:env(),currentDocInterface(NULL)
 {
     //pluginsDir=QDir(getPluginDirPath());
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -252,24 +252,9 @@ void PluginManager::LoadFormats(QStringList &filters, QHash<QString, MeshIOInter
 }
 
 void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
-{
-	QScriptValue val = env.newQObject(&doc);
-	env.globalObject().setProperty(meshDocVarName(),val);
-	if (doc.mm() != NULL)
-		updateMeshScriptBindings(doc,doc.mm()->id());
-
-}
-
-void PluginManager::updateMeshScriptBindings(MeshDocument& doc,const int id)
-{
-	IntExpression meshInd(QString::number(id));
-	env.insertNewFieldToVariable(meshDocVarName(),currentMeshVarName(),&meshInd);
-	FloatExpression bboxDiag(QString::number(0.0f));
-	MeshModel* model = doc.getMesh(id);
-	if (model != NULL)
-		bboxDiag.expression() = QString::number(model->cm.bbox.Diag());
-	
-	Value* val = env.insertNewFieldToVariable(meshDocVarName() + "." + currentMeshVarName(),QString("bboxDiag"),&bboxDiag);
-	QString st(meshDocVarName() + "." + currentMeshVarName() + ".bboxDiag");
-	env.evaluate("print(" + st + ");");
+{ 
+	delete currentDocInterface;
+	currentDocInterface = new MeshDocumentScriptInterface(&doc);
+	QScriptValue val = env.newQObject(currentDocInterface);
+	env.globalObject().setProperty(meshDocVarName(),val); 
 }

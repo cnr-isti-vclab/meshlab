@@ -149,3 +149,47 @@ void registerTypes(QScriptEngine* eng)
 	richset_ctor.property("prototype").setProperty("setFloat",floatfun);
 	eng->globalObject().setProperty("IRichParameterSet",richset_ctor);
 }
+
+MeshModelScriptInterface::MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* parent)
+:QObject(parent),mm(meshModel)
+{
+
+}
+
+Q_INVOKABLE float MeshModelScriptInterface::bboxDiag() const
+{
+	return mm.cm.bbox.Diag();
+}
+
+QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in)
+{
+	return eng->newQObject(in);
+}
+
+void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out)
+{
+	out = qobject_cast<MeshModelScriptInterface*>(val.toQObject());
+}
+
+MeshDocumentScriptInterface::MeshDocumentScriptInterface( MeshDocument* doc )
+:QObject(doc),md(doc)
+{
+}
+
+Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::getMesh( int meshId )
+{
+	MeshModel* model = md->getMesh(meshId);
+	if (model != NULL)
+		return new MeshModelScriptInterface(*model,this);
+	else
+		return NULL;
+}
+
+Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::current()
+{
+	MeshModel* model = md->mm();
+	if (model != NULL)
+		return new MeshModelScriptInterface(*model,this);
+	else
+		return NULL;
+}

@@ -23,8 +23,10 @@
 
 #ifndef SCRIPTINTERFACE_H
 #define SCRIPTINTERFACE_H
+
 #include <QtScript>
 #include "filterparameter.h"
+#include "meshmodel.h"
 
 class ScriptAdapterGenerator
 {
@@ -48,5 +50,47 @@ QScriptValue IRichParameterSet_ctor(QScriptContext* c,QScriptEngine* e);
 QScriptValue myprint (QScriptContext* sc, QScriptEngine* se);
 
 void registerTypes(QScriptEngine* eng);
+
+
+class MeshDocumentScriptInterface : public QObject
+{
+	Q_OBJECT
+
+public:
+	MeshDocumentScriptInterface(MeshDocument* doc);
+
+	Q_INVOKABLE MeshModelScriptInterface* getMesh(const int meshId);
+	Q_INVOKABLE MeshModelScriptInterface* current();
+
+private:
+	MeshDocument* md;
+};
+
+class MeshModelScriptInterface : public QObject
+{
+	Q_OBJECT
+
+public:
+	MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* mdsi);
+	
+	Q_INVOKABLE float bboxDiag() const;
+
+private:
+	MeshModel& mm;
+};
+
+Q_DECLARE_METATYPE(MeshModelScriptInterface*)
+
+QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in);
+
+void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out);
+
+
+//QScriptValue MeshModelScriptInterface_ctor(QScriptContext* c,QScriptEngine* e)
+//{
+//	QString x = c->argument(0).toInt32();
+//	return e->toScriptValue(MeshModelScriptInterface(x));
+//}
+
 
 #endif

@@ -27,6 +27,7 @@
 #include <QFileInfo>
 #include "meshmodel.h"
 #include <wrap/gl/math.h>
+#include "scriptinterface.h"
 
 using namespace vcg;
 
@@ -50,7 +51,7 @@ MeshModel *MeshDocument::getMesh(int i)
   {
     if(mmp->id() == i) return mmp;
   }
-  assert(0);
+  //assert(0);
   return 0;
 }
 
@@ -60,7 +61,7 @@ MeshModel *MeshDocument::getMesh(const char *name)
 			{
                 if(mmp->shortName() == name) return mmp;
 			}
-	assert(0);
+	//assert(0);
 	return 0;
 }
 

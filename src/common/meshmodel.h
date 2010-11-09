@@ -370,6 +370,9 @@ public:
 		
 }; // end class RenderMode
 
+
+class MeshModelScriptInterface;
+
 class MeshDocument : public QObject
 {
 	Q_OBJECT
@@ -392,6 +395,9 @@ public:
 	//returns the mesh ata given position in the list
   MeshModel *getMesh(int i);
 	MeshModel *getMesh(const char *name);
+
+
+
 
 	//set the current mesh to be the one at index i of the mesh list
   void setCurrentMesh( int i);

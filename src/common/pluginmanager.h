@@ -30,6 +30,7 @@
 #include "interfaces.h"
 #include "mlparameter.h"
 #include "xmlfilterinfo.h"
+#include "scriptinterface.h"
 
 class QScriptEngine;
 /**
@@ -39,6 +40,7 @@ class PluginManager
 {
 private:
 	static const QString xmlSchemaFile() {QString result = getPluginDirPath() + QObject::tr("/meshlabfilterXMLspecificationformat.xsd");return result;} 
+	MeshDocumentScriptInterface* currentDocInterface;
 public:
   PluginManager();
   enum TypeIO{IMPORT,EXPORT};
@@ -75,11 +77,9 @@ public:
 
   Env env;
 
-  inline static const QString meshDocVarName() {return QString("meshDocument");}
-  inline static const QString currentMeshVarName() {return QString("current");}
-
+  inline static const QString meshDocVarName() {return QString("meshDoc");}
+ 
 	void updateDocumentScriptBindings(MeshDocument& doc);
-	void updateMeshScriptBindings(MeshDocument& doc,const int id);
 };
 
 #endif // PLUGINMANAGER_H
