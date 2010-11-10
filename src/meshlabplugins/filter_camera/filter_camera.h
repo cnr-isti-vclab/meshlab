@@ -34,7 +34,7 @@ class FilterCameraPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-      enum { FP_SET_CAMERA, FP_QUALITY_FROM_CAMERA };
+      enum { FP_SET_MESH_CAMERA,FP_SET_RASTER_CAMERA, FP_QUALITY_FROM_CAMERA };
 
   FilterCameraPlugin();
 	

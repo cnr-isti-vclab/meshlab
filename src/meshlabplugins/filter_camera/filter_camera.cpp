@@ -40,7 +40,8 @@ using namespace vcg;
 FilterCameraPlugin::FilterCameraPlugin()
 {
 	typeList <<
-  FP_SET_CAMERA <<
+  FP_SET_MESH_CAMERA <<
+  FP_SET_RASTER_CAMERA <<
   FP_QUALITY_FROM_CAMERA;
 
   foreach(FilterIDType tt , types())
@@ -51,7 +52,8 @@ FilterCameraPlugin::FilterCameraPlugin()
 QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-    case FP_SET_CAMERA :  return QString("Set Camera");
+    case FP_SET_MESH_CAMERA :  return QString("Set Mesh Camera");
+  case FP_SET_RASTER_CAMERA :  return QString("Set Raster Camera");
     case FP_QUALITY_FROM_CAMERA :  return QString("Vertex Quality from Camera");
     default : assert(0);
   }
@@ -61,7 +63,8 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-    case FP_SET_CAMERA :  return QString("This filter allow to set a shot for the current mesh");
+    case FP_SET_MESH_CAMERA :  return QString("This filter allow to set a shot for the current mesh");
+  case FP_SET_RASTER_CAMERA :  return QString("This filter allow to set a shot for the current mesh");
     case FP_QUALITY_FROM_CAMERA :  return QString("Compute vertex quality using the camera definition, according to viewing angle or distance");
     default : assert(0);
   }
@@ -73,7 +76,10 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
   Shotf defShot;
 	 switch(ID(action))
 	 {
-   case FP_SET_CAMERA :
+   case FP_SET_RASTER_CAMERA :
+     parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current mesh."));
+     break;
+   case FP_SET_MESH_CAMERA :
      parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current mesh."));
                  break;
    case FP_QUALITY_FROM_CAMERA :
@@ -82,7 +88,6 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
                  parlst.addParam(new RichBool ("Clip", false,  "Clipping", "clip values outside the viewport to zero."));
                  parlst.addParam(new RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
                  parlst.addParam(new RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
-
                  break;
    default: break; // do not add any parameter for the other filters
   }
@@ -92,9 +97,13 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
 bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
   CMeshO &cm=md.mm()->cm;
+  RasterModel *rm = md.rm();
 	switch(ID(filter))
   {		
-    case FP_SET_CAMERA :
+  case FP_SET_RASTER_CAMERA :
+    rm->shot = par.getShotf("Shot");
+  break;
+    case FP_SET_MESH_CAMERA :
       cm.shot = par.getShotf("Shot");
     break;
     case FP_QUALITY_FROM_CAMERA :
@@ -152,7 +161,8 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
   switch(ID(a))
   {
   case FP_QUALITY_FROM_CAMERA :
-  case FP_SET_CAMERA :
+  case FP_SET_MESH_CAMERA :
+  case FP_SET_RASTER_CAMERA :
       return MeshFilterInterface::Generic;
   }
 }
