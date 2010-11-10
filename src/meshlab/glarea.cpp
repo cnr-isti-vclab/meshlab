@@ -1184,8 +1184,15 @@ void GLArea::loadRaster(int id)
 			//load his shot or a default shot
 
 			//TODO temporaneo... poi bisogna creare un defaultShot
+//			createOrthoView("Front");
+      //rm->shot = shotFromTrackball().first;
+
+		if (rm->shot.IsValid())
+			loadShot(QPair<Shotf, float> (rm->shot,trackball.track.sca));
+		else
 			createOrthoView("Front");
-      rm->shot = shotFromTrackball().first;
+			//rm->shot = shotFromTrackball().first;
+
     }
 }
 
