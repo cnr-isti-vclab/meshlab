@@ -1,4 +1,5 @@
 #include "ocme_definition.h"
+#include "impostor_definition.h"
 
 void OCME::Verify(){ 
 
@@ -86,6 +87,27 @@ void OCME::Verify(){
 	}
 
 
+}
+
+void OCME::ComputeStatistics(){
+
+	CellsIterator ci;
+	stat = Statistics();
+	unsigned int com =0;
+	{
+		stat.n_cells = cells.size();
+		
+		for(ci = cells.begin(); ci != cells.end(); ++ci){
+			stat.n_triangles += (*ci).second->face->Size();
+			stat.n_vertices  += (*ci).second->vert->Size();
+			stat.n_proxies   += (*ci).second->impostor->centroids.data.size();
+			com   += (*ci).second->impostor->positionsV.size();
+		}
+	}
+	sprintf(lgn->Buf(),"n_cells %d, n_tri %d, n_vert %d, n_pro(compact) %d,n_pro(sparse) %d",
+		stat.n_cells,stat.n_triangles,stat.n_vertices,com,stat.n_proxies 
+		);
+	lgn->Push();
 }
 
 bool OCME::CheckFaceVertDeletions(Cell *c){ return true;

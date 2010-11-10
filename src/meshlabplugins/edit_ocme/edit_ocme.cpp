@@ -43,7 +43,7 @@ using namespace vcg;
 //#define _RELEASED_
 
 OcmeEditPlugin::OcmeEditPlugin() {
-		showTouched = false;
+	showTouched = false;
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(12);    
 	mm = NULL;
@@ -52,6 +52,7 @@ OcmeEditPlugin::OcmeEditPlugin() {
 	ocme_loaded = false;
 	isDragging = false;
 	isToSelect = false;
+	useSplatting = true;
 	Impostor::Gridsize()= 8; // *** TO DO: include in the database
 }
 
@@ -130,7 +131,6 @@ void OcmeEditPlugin::DrawCellsToEdit( ){
 void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 {
 	rendering.lock();
-
 	vcg::Color4b c;
 	int lev;
 	float stepf=1.f;
@@ -168,7 +168,7 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 		glPopAttrib();
 	}else{
 
-		ocme->Render();
+		ocme->Render(useSplatting);
 
 		if(showTouched){
 				for(unsigned int i  = 0; i < ocme->touched_cells.size(); ++i){
@@ -311,11 +311,13 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	QObject::connect(odw->addFromDiskPushButton ,SIGNAL(clicked() ),this,SLOT( addFromDisk() ));
 	QObject::connect(odw->editAllPushButton ,SIGNAL(clicked() ),this,SLOT( editAll() ));
 	QObject::connect(odw->verifyPushButton ,SIGNAL(clicked() ),this,SLOT( verify() ));
+	QObject::connect(odw->splattingCheckBox ,SIGNAL(stateChanged(int) ),this,SLOT( toggleSplatting(int) ));
+	QObject::connect(odw->onlyImpostorsCheckBox ,SIGNAL(stateChanged(int) ),this,SLOT( toggleImpostors(int) ));
+ 
 
-
-//	QTimer *timer = new QTimer(this);
-//	connect(timer, SIGNAL(timeout()), gla, SLOT(updateGL()));
-//	timer->start(300);
+	QTimer *timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), gla, SLOT(update()));
+	timer->start(25);
 
 	// store current trackball
 	curr_track.track.sca = gla->trackball.track.sca;
@@ -342,6 +344,7 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 
 	updateButtonsState();
 
+	
 	return true;
 }
 
@@ -359,13 +362,15 @@ void OcmeEditPlugin::setTrackBall(){
 }
 void OcmeEditPlugin::	refreshImpostors(){
 		ocme->BuildImpostorsHierarchy();
+		for(OCME::CellsIterator ci = ocme->cells.begin();ci != ocme->cells.end();++ci)
+			(*ci).second->impostor->SparseToCompact();
 		 n_poly  =0;
 }
 void OcmeEditPlugin::toggleExtraction(){
 ocme->renderParams.visitOn = !ocme->renderParams.visitOn;
 }
 void OcmeEditPlugin::toggleShowTouched(){
-showTouched = !showTouched;
+	ocme->ComputeStatistics();
 }
 void OcmeEditPlugin::UpdateBoundingBox(){
 all_keys.clear();
@@ -437,6 +442,7 @@ void OcmeEditPlugin::loadOcm(){
 		ocme->params.side_factor = 50; // READ IT FROM THE FILEEEEEEEEE
 		ocme->InitRender();
 		ocme->renderParams.only_impostors = true;
+		ocme->splat_renderer.Init(this->gla);
 //		ocme->renderParams.memory_limit_in_core = 100;
 		ocme->Open ( ocm_name.toAscii() );
 
@@ -447,6 +453,8 @@ void OcmeEditPlugin::loadOcm(){
 		UpdateBoundingBox();
 		setTrackBall();
         mm  = gla->meshDoc->addNewMesh("Ocm patch");
+		mm->cm.vert.reserve(2000000);
+		mm->cm.face.reserve(4000000);
 	//	mm  ->cm.bbox = ocme_bbox;
 		ocme_loaded = true;
 		updateButtonsState();
@@ -502,9 +510,8 @@ void OcmeEditPlugin::createOcm(){
 		ocm_name.resize(ocm_name.size()-5);
 		ocme->Create(ocm_name.toAscii());
 		ocme->InitRender();
-
-
-                mm = gla->meshDoc->addNewMesh("Ocm patch");
+		ocme->splat_renderer.Init(this->gla);
+        mm = gla->meshDoc->addNewMesh("Ocm patch");
 
 		/* paramters to be exposed somehow later  on */
 		ocme->params.side_factor = 20;
@@ -564,6 +571,13 @@ void OcmeEditPlugin::editAll(){
 void OcmeEditPlugin::verify(){
 	ocme->Verify();
 }
+void OcmeEditPlugin::toggleSplatting(int s){
+	  useSplatting =  (Qt::Checked == s);
+}
+void OcmeEditPlugin::toggleImpostors(int s){
+	  ocme->renderParams.only_impostors =  (Qt::Checked == s);
+}
+ 
 
 void OcmeEditPlugin::edit(){
 
@@ -598,42 +612,45 @@ void OcmeEditPlugin::edit(){
 		if(attrMapper.face_attrs[i]==std::string("Qualityf") ) mm->cm.face.EnableQuality();
 	}
 
+	// try to take as mmuch as possible the cell  cells_to_edit for editing. maximum priority to those
+	//closer to the observer
+	while(!cells_to_edit.empty() && !ocme->Edit(cells_to_edit,mm->cm,4000000,attrMapper) )
+		cells_to_edit.pop_back();
+	if(!cells_to_edit.empty())
+//	if(ocme->Edit(cells_to_edit,mm->cm,4000000,attrMapper))
+	{
+		ocme->DeSelect(this->cells_to_edit);
+		cells_to_edit.clear();
+	 
 
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace ( mm->cm );
 
-	ocme->Edit(cells_to_edit,mm->cm,attrMapper);
-	ocme->DeSelect(this->cells_to_edit);
-	cells_to_edit.clear();
+		CMeshO::  PerFaceAttributeHandle<GIndex>  gposf =
+						vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
 
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace ( mm->cm );
+		if(!mm->cm.face.IsColorEnabled())
+			  mm->cm.face.EnableColor();
 
-        CMeshO::  PerFaceAttributeHandle<GIndex>  gposf =
-                        vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
-//
-//	CMeshO::  PerVertexAttributeHandle<unsigned char>  lockedV =
-//			vcg::tri::Allocator<CMeshO>::  GetPerVertexAttribute<unsigned char> (mm->cm,"ocme_locked");
-//
-//	CMeshO::  PerFaceAttributeHandle<unsigned char>  lockedF =
-//			vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<unsigned char> (mm->cm,"ocme_locked");
-//
-//
+		vcg::Color4b c;
+		for(unsigned int i = 0; i < mm->cm.face.size();++i)
 
-        if(!mm->cm.face.IsColorEnabled())
-            mm->cm.face.EnableColor();
+			if(!mm->cm.face[i].IsD()){
+						c = c.Scatter(32,gposf[i].ck.h+16);
+							mm->cm.face[i].C() = c;
+						}
 
-        vcg::Color4b c;
-        for(unsigned int i = 0; i < mm->cm.face.size();++i)
-
-            if(!mm->cm.face[i].IsD()){
-                        c = c.Scatter(32,gposf[i].ck.h+16);
-                            mm->cm.face[i].C() = c;
-                        }
-
-	vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+	}
 
 	ocme->renderCache.controller.resume();
 	clearOcmAttribute();
 	updateButtonsState();
 	gla->update();
+	sprintf(lgn->Buf(),"extract_pre: %d joiner12 %d joiner22 %d, fecth time %d, trace %d, cycle %d, freeing %d,\
+		  cycle face %d, addv %d, addf %d",
+		  TIM::Total(9),TIM::Total(31),TIM::Total(8),TIM::Total(12),TIM::Total(24),TIM::Total(25),TIM::Total(26),
+		TIM::Total(28),TIM::Total(29),TIM::Total(30));
+	lgn->Push();
 }
 
 void OcmeEditPlugin::commit(){

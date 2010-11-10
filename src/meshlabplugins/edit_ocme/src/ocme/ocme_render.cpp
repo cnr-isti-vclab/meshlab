@@ -100,11 +100,10 @@ bool OCME::IsToRefineScreenErr(Cell * & c, float & prio ){
 }
 
 
-bool OCME::IsInFrustum(Cell * c, vcg::Point3f * f){
-		const vcg::Point3f pos3 = c->key.BBox3f().Center();
-		const float radius =   c->key.BBox3f().Diag()*0.5;
+bool OCME::IsInFrustum(Cell * c, vcg::Point3f * f, float &dist, bool bsphere_or_bbox ){
+		const vcg::Point3f pos3 = (bsphere_or_bbox)?c->key.BBox3f().Center():c->bbox.bbox3.Center();
 
-		float dist;
+		const float radius =  ((bsphere_or_bbox)? c->key.BBox3f().Diag():c->bbox.bbox3.Diag())*0.5f;
 
 		vcg::Point3f n_l = ((f[6]-f[0])^(f[4]-f[0])).Normalize();
 		dist = (pos3-f[0])*n_l-radius;
@@ -141,6 +140,7 @@ bool OCME::IsInFrustum(Cell * c, vcg::Point3f * f){
 		if(dist > 0)
 			return false;
 
+		 
 		return true;
 }
 
@@ -152,7 +152,7 @@ void OCME::Visit(std::vector<Cell*> &  to_render){
 }
 void OCME::Visit(CellKey root, std::vector<Cell*> & to_render){
 
-
+	float _dist;
 	std::vector<Cell*> que;
 	que.push_back(GetCell(root,false));
 	std::vector<CellKey>   children;
@@ -160,7 +160,7 @@ void OCME::Visit(CellKey root, std::vector<Cell*> & to_render){
 		Cell * c = que.back();
 		que.pop_back();
 		
-		if(  IsToRefineScreenErr(c,c->rd->priority) && c->impostor->non_empty_children &&  IsInFrustum(c,this->frustum) ){
+		if(  IsToRefineScreenErr(c,c->rd->priority) && c->impostor->non_empty_children &&  IsInFrustum(c,this->frustum,_dist) ){
 			children.clear();
 			Children(c->key,children);
 			for(unsigned int ci = 0; ci < 8 ; ++ci)
@@ -216,14 +216,19 @@ void OCME::Select(std::vector<Cell*>  & selected){
 		glGetIntegerv(GL_VIEWPORT,&vp[0]);
 		ConvertFrustumView2World(this->sel_corners,this->sel_frustum);
 
-		for(unsigned int i = 0; i < cells_to_render.size(); ++i)
-				if(IsInFrustum(cells_to_render[i],sel_frustum))
-						selected.push_back(cells_to_render[i]);
+		std::vector<std::pair<float,Cell*> > selected_dist;
+		float dist;
+		for(unsigned int i = 0; i < cells_to_render.size(); ++i) 
+				if(IsInFrustum(cells_to_render[i],sel_frustum,dist,false))
+					selected_dist.push_back(make_pair<float,Cell*>(dist,cells_to_render[i]));
+		std::sort(selected_dist.begin(),selected_dist.end());
+		for(unsigned int i = 0; i < selected_dist.size();++i)
+			selected.push_back(selected_dist[i].second);
 }
 void OCME::DeSelect(std::vector<Cell*>  & selected){
 }
 
-void OCME::Render(){
+void OCME::Render(bool useSplatting){
 	render_mutex.lock();
 	RAssert(MemDbg::CheckHeap(1));
 
@@ -296,18 +301,21 @@ void OCME::Render(){
 //		glEnable(GL_COLOR_MATERIAL);
 //		 glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
 //		 glColor ( c );
-		 //cells_to_render[i]->impostor->Render(this->renderParams.render_subcells);
-		 
-		  // impostor_to_render.push_back(cells_to_render[i]->impostor);
-		  positions.push_back(&cells_to_render[i]->impostor->positionsV);
-		  normals.push_back(&cells_to_render[i]->impostor->normalsV);
-		  colors.push_back(&cells_to_render[i]->impostor->colorsV);
-		  radiuses.push_back( CS( cells_to_render[i]->key.h)/Impostor::Gridsize());
+		  if(!useSplatting)
+			cells_to_render[i]->impostor->Render(this->renderParams.render_subcells);
+		  else{ 
+			  // impostor_to_render.push_back(cells_to_render[i]->impostor);
+			  positions.push_back(&cells_to_render[i]->impostor->positionsV);
+			  normals.push_back(&cells_to_render[i]->impostor->normalsV);
+			  colors.push_back(&cells_to_render[i]->impostor->colorsV);
+			  radiuses.push_back( CS( cells_to_render[i]->key.h)/Impostor::Gridsize());
+		  }
 		}
 	}
 		 
 	 //for(std::vector<Impostor *  > :: iterator  i =impostor_to_render.begin(); i != impostor_to_render.end();++i)
 		// (*i)->Render(this->renderParams.render_subcells);
+	 if(useSplatting)
 	 {
 
 		 splat_renderer.Render(positions,normals,colors,radiuses,vcg::GLW::ColorMode::CMPerMesh,

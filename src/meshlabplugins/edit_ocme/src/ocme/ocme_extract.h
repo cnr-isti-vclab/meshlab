@@ -32,9 +32,17 @@ static void JoinBorderVertices( MeshType & m,
 								typename MeshType::template PerVertexAttributeHandle<unsigned int >  & biV,
 								typename MeshType::template PerVertexAttributeHandle<unsigned char >  & lockedV)
 {
+		
         if(m.vert.size()==0 || m.vn==0) return;
+		TIM::Begin(31);
 
-        std::map<VertexPointer, VertexPointer> mp;
+        VertexPointer base = &*m.vert.begin();
+		static std::vector< int> remap;
+		remap.reserve(2000000);
+		
+		remap.resize(m.vert.size(),-1);
+
+
         size_t i,j;
         VertexIterator vi;
         int deleted=0;
@@ -54,7 +62,7 @@ static void JoinBorderVertices( MeshType & m,
 
         j = 0;
         i = j;
-        mp[perm[i]] = perm[j];
+         
         ++i;
         for(;i!=perm.size();)
         {
@@ -63,7 +71,7 @@ static void JoinBorderVertices( MeshType & m,
                         (biV[*perm[i]] == biV[*perm[j]]) )
                 {
                         VertexPointer t = perm[i];
-                        mp[perm[i]] = perm[j];
+						remap[t-base ] = perm[j]-base;// remap
                         gPosV[*perm[j]].Add(gPosV[*t]);
 						if (lockedV[*t]) lockedV[*perm[j]] = 1;
 						gPosV[*perm[j]].BI() = biV[*perm[j]]; //store in gPosV the global border index
@@ -77,16 +85,21 @@ static void JoinBorderVertices( MeshType & m,
                         ++i;
                 }
         }
+		TIM::End(31);
+		TIM::Begin(8);
         FaceIterator fi;
         for(fi = m.face.begin(); fi!=m.face.end(); ++fi)
                 if( !(*fi).IsD() )
                         for(k = 0; k < 3; ++k)
-                                if( mp.find( (typename MeshType::VertexPointer)(*fi).V(k) ) != mp.end() )
-                                {
-                                        (*fi).V(k) = &*mp[ (*fi).V(k) ];
-                                }
+ 							{
+								int rm = remap[(*fi).V(k) - base];
+								if(rm!=-1)
+									(*fi).V(k)= &m.vert[rm];
+							}
 
         vcg::tri::Allocator<MeshType>::CompactVertexVector(m);
+		remap.clear();
+		TIM::End(8);
     }
 };
 
@@ -243,11 +256,14 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			Chain<BorderIndex>  * chain_bi = (*ci)->border;
 			RAssert(chain != NULL);
 
+			TIM::Begin(29);
 			unsigned int first_added_v =  m.vert.size();
 	 		vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,chain->Size());
+			TIM::End(29);
 
 			locked = (*ci)->ecd->locked() ;
 
+			TIM::Begin(25);
 			for(unsigned int i = 0; i < chain->Size(); ++i,++vi)
                 {
                     gPosV[*vi].Clear();
@@ -269,7 +285,9 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 					/* initialize the external counter to 0 [maybe unnecessary]*/ 
 					biV[*vi] = 0;
 			}
+			TIM::End(25);
 
+			
 			/* assign the border index to the border vertices */
 			for(unsigned int i = 0; i < chain_bi->Size(); ++i){
 				unsigned int _tmp = (*chain_bi)[i].vi;
@@ -280,7 +298,12 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 				Chain<OFace> * face_chain	= (*ci)->face;		// get the face chain
 				RAssert(face_chain!=NULL);
 
+
+				TIM::Begin(30);
 				typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
+				TIM::End(30);
+
+				TIM::Begin(28);
 				for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
 					gPosF[*fi] = GIndex((*ci)->key,ff);
 					lockedF[*fi] = locked? 1 : 0 ;
@@ -291,22 +314,24 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 					   }
 				}
 				offset = m.vert.size();
-              }
-
+				TIM::End(28);
+		}
+		
 	range() = sr;
 
-	for(ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci){
-			(*ci)->vert->FreeAll();
-			(*ci)->face->FreeAll();
-	}
+		TIM::Begin(26);
+		for(ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci){
+				(*ci)->vert->FreeAll();
+				(*ci)->face->FreeAll();
+		}
+		TIM::End(26);
 
-		sprintf(lgn->Buf(),"Start Join");
-		lgn->Push();
+		 
         Joiner<MeshType>::JoinBorderVertices(m,gPosV,biV,lockedV);
-		sprintf(lgn->Buf(),"End Join");
-		lgn->Push();
+		 
 
         {
+			TIM::Begin(24);	
 
             typename MeshType::FaceIterator fi;
             typename MeshType::VertexIterator vi;
@@ -326,19 +351,21 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
                             if(!(*fi).IsD()  && !lockedF[i])
                                             edited_faces.push_back(gPosF[i]);
             std::sort(edited_faces.begin(),edited_faces.end());
-
+			TIM::End(24);	
         }
 
-
+		 
 		vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute (m,biV);
+		 
 }
 
 
 template <class MeshType>
-void OCME::Edit(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper attrMap){
+bool OCME::Edit(   std::vector<Cell*> & sel_cells, MeshType & m, unsigned int max_size,AttributeMapper attrMap){
 	std::vector<Cell*>     dep_cells,to_add,to_add_1;
 	std::vector<Cell*>::iterator ci; 
 
+	
 	++generic_bool; // mark cells taken for editing
 
 	/*	extend the set of cells to edit with those in the same 3D space
@@ -389,7 +416,18 @@ void OCME::Edit(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper
 	}
 	
 	 dep_cells.insert(dep_cells.end(), sel_cells.begin(),sel_cells.end());
+	 {
+		unsigned int to_load = 0;
+		for(std::vector<Cell*>::iterator ci = dep_cells.begin(); ci != dep_cells.end(); ++ci) 
+			to_load+=(*ci)->face->Size()+(*ci)->vert->Size();
+		if( to_load > max_size) 
+			return false;
+		 
+	 }
+	
+
 	 Extract(dep_cells,m,attrMap);
+	 return true;
 }
 
 template <class MeshType>

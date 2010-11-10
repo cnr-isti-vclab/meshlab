@@ -228,7 +228,8 @@ void UsageExit(){
 		   -o : owerwrite if already exists [default: no]\n\
 		   -m NUM : RAM cache (MB) [default: 200]\n\
 		   -p NUM : database page size (B) [default: 1024]\n\
-		   -A : all ply files in the folder [windows only]\
+		   -F : all ply files in the folder [windows only]\
+		   -V : compute statistics [read only]\
 		   ");
 
 	exit(0);
@@ -337,6 +338,60 @@ bool Interrupt(){
 //}
 //
 
+
+void PrintStats(){
+							sprintf(lgn->Buf()," \
+					n_triangles\t \t \t %12lu \n \
+					n_vertices\t \t \t %12lu \n \
+					size_inputMB\t \t \t %12lu \n \
+					n_cells\t \t \t %10lu \n \
+					n_chains\t \t \t %10lu \n \
+					n_chunks_faces\t \t \t %10lu (%f per cell)\n \
+					n_chunks_vertex\t \t \t %10lu (%f per cell)\n \
+					size_faces\t \t \t %10lu \n \
+					size_vertex\t \t \t %10lu \n \
+					size_dependences\t \t \t %10lu \n \
+					size_lcm_table\t \t \t %10lu \n \
+					size_ocme_table\t \t \t %10lu \n \
+					size_impostors\t \t \t %10lu \n \
+					total size:\t \t \t %10lu \n \
+					n get cells\t \t \t %15lu \n \
+					input load time\t \t \t %f \n \
+					add time\t \t \t \t %f \n \
+					  upbox\t \t \t \t %f \n \
+					  addface\t \t \t \t %f \n \
+					  samples\t \t \t \t %f \n \
+					total time\t \t \t %f \n \
+					",
+					meshona->stat.n_triangles,
+					meshona->stat.n_vertices,
+					meshona->stat.input_file_size,
+					meshona->stat.n_cells ,
+								meshona->stat.n_chains,
+								meshona->stat.n_chunks_faces,meshona->stat.n_chunks_faces_avg_per_cell,
+								meshona->stat.n_chunks_vertex,meshona->stat.n_chunks_vertex_avg_per_cell,
+
+								meshona->stat.size_faces,
+								meshona->stat.size_vertex,
+
+								meshona->stat.size_dependences,
+								meshona->stat.size_lcm_allocation_table,
+								meshona->stat.size_ocme_table,
+								meshona->stat.size_impostors,
+								meshona->stat.TotalSize(),
+								meshona->stat.n_getcell,
+								TIM::Total(0)/float(CLOCKS_PER_SEC),
+								TIM::Total(20)/float(CLOCKS_PER_SEC),
+								TIM::Total(21)/float(CLOCKS_PER_SEC),
+								TIM::Total(22)/float(CLOCKS_PER_SEC),
+								TIM::Total(23)/float(CLOCKS_PER_SEC),
+				//				TIM::Total(12)/float(CLOCKS_PER_SEC),
+				//				TIM::Total(13)/float(CLOCKS_PER_SEC),
+								TIM::Total(1)/float(CLOCKS_PER_SEC)
+								);
+							lgn->Push();
+			}
+
 int
 main (int argc,char **argv )
 {
@@ -393,6 +448,7 @@ main (int argc,char **argv )
 	bool only_vertices = false;
 	bool compute_normals = false;
 	bool all_plys = false;
+	bool compute_stats = false;
     vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
 
 #ifdef _DEBUG
@@ -407,7 +463,7 @@ main (int argc,char **argv )
     {
       int this_option_optind = optind ? optind : 1;
 
-      c = getopt (argc, argv, "Fsqciosnvp:t:m:l:f:L:a:A:k:");
+      c = getopt (argc, argv, "VFsqciosnvp:t:m:l:f:L:a:A:k:");
       if (c == EOF)
         break;
 
@@ -424,6 +480,9 @@ main (int argc,char **argv )
           break;
         case 's':
           only_vertices = true;
+          break;
+        case 'V':
+          compute_stats = true;
           break;
 #ifdef _WIN32
 		case 'F':
@@ -505,7 +564,7 @@ main (int argc,char **argv )
  	meshona->oce.cache_policy->memory_limit  = cache_memory_limit * (1<<20);
 
 	lgn->off = !logging;
-	if(!verify){
+	if(!verify && !compute_stats){
  		meshona->streaming_mode = true;	
 
 
@@ -573,6 +632,11 @@ main (int argc,char **argv )
 								vcg::tri::UpdateNormals<vcgMesh>::PerVertexPerFace(m);
 							m.fn = 0;
 						}	
+						if(transform){
+							sprintf(lgn->Buf(),"Apply transform" );
+							lgn->Push();
+							vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,tra_ma);
+						}
  		 				meshona->AddMesh(m);
 						++meshadded;
 					}
@@ -591,7 +655,8 @@ main (int argc,char **argv )
  				vcgMesh m;
 				unsigned long n_faces  =0;
 	 
-				sprintf(lgn->Buf(),"Adding mesh %s (%d of %d)..Loading",files_to_load[i],i, files_to_load.size());
+		
+				sprintf(lgn->Buf(),"Adding mesh %s (%d of %d)..Loading",files_to_load[i].c_str(),i, files_to_load.size());
 				lgn->Push();
 
 				stat(files_to_load[i].c_str(),&buf);
@@ -602,13 +667,14 @@ main (int argc,char **argv )
 
 					TIM::Begin(0);
 
-									AttributeMapper am;
-									vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(files_to_load[i].c_str(),mask);
+									
+					AttributeMapper am;
+					vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(files_to_load[i].c_str(),mask);
 
-									if(mask & vcg::tri::io::Mask::IOM_VERTCOLOR){
-										m.vert.EnableColor();
-										am.vert_attrs.push_back("Color4b");
-									}
+					if(mask & vcg::tri::io::Mask::IOM_VERTCOLOR){
+						m.vert.EnableColor();
+						am.vert_attrs.push_back("Color4b");
+					}
 
 					vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,files_to_load[i].c_str(),cb);
 
@@ -685,61 +751,17 @@ main (int argc,char **argv )
 			printf("closed %ld seconds\n",(clock()-start)/CLOCKS_PER_SEC);
 			printf("total %ld seconds\n",(clock()-totalstart)/CLOCKS_PER_SEC);
 	//
-			sprintf(lgn->Buf()," \
-	n_triangles\t \t \t %12lu \n \
-	n_vertices\t \t \t %12lu \n \
-	size_inputMB\t \t \t %12lu \n \
-	n_cells\t \t \t %10lu \n \
-	n_chains\t \t \t %10lu \n \
-	n_chunks_faces\t \t \t %10lu (%f per cell)\n \
-	n_chunks_vertex\t \t \t %10lu (%f per cell)\n \
-	size_faces\t \t \t %10lu \n \
-	size_vertex\t \t \t %10lu \n \
-	size_dependences\t \t \t %10lu \n \
-	size_lcm_table\t \t \t %10lu \n \
-	size_ocme_table\t \t \t %10lu \n \
-	size_impostors\t \t \t %10lu \n \
-	total size:\t \t \t %10lu \n \
-	n get cells\t \t \t %15lu \n \
-	input load time\t \t \t %f \n \
-	add time\t \t \t \t %f \n \
-	  upbox\t \t \t \t %f \n \
-	  addface\t \t \t \t %f \n \
-	  samples\t \t \t \t %f \n \
-	total time\t \t \t %f \n \
-	",
-	meshona->stat.n_triangles,
-	meshona->stat.n_vertices,
-	meshona->stat.input_file_size,
-	meshona->stat.n_cells ,
-				meshona->stat.n_chains,
-				meshona->stat.n_chunks_faces,meshona->stat.n_chunks_faces_avg_per_cell,
-				meshona->stat.n_chunks_vertex,meshona->stat.n_chunks_vertex_avg_per_cell,
-
-				meshona->stat.size_faces,
-				meshona->stat.size_vertex,
-
-				meshona->stat.size_dependences,
-				meshona->stat.size_lcm_allocation_table,
-				meshona->stat.size_ocme_table,
-				meshona->stat.size_impostors,
-				meshona->stat.TotalSize(),
-				meshona->stat.n_getcell,
-				TIM::Total(0)/float(CLOCKS_PER_SEC),
-				TIM::Total(20)/float(CLOCKS_PER_SEC),
-				TIM::Total(21)/float(CLOCKS_PER_SEC),
-				TIM::Total(22)/float(CLOCKS_PER_SEC),
-				TIM::Total(23)/float(CLOCKS_PER_SEC),
-//				TIM::Total(12)/float(CLOCKS_PER_SEC),
-//				TIM::Total(13)/float(CLOCKS_PER_SEC),
-				TIM::Total(1)/float(CLOCKS_PER_SEC)
-				);
-			lgn->Push();
+			PrintStats();
 }
 else
 {
 	meshona->Open(( ocmename+std::string(".socm")).c_str());
-	meshona->Verify();
+	if(verify)
+		meshona->Verify();
+	if(compute_stats){
+		meshona->ComputeStatistics();
+		printf("tri: %d, ver %d]\n",meshona->stat.n_triangles,meshona->stat.n_vertices);
+	}
 	meshona->Close(false);
 }
 

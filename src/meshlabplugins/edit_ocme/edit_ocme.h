@@ -34,6 +34,7 @@
 /* OCME include */
 #include <ocme/ocme.h>
 #include <wrap/gui/trackball.h>
+#include <wrap/gl/splatting_apss/splatrenderer.h>
 
 class OcmeEditPlugin : public QObject, public MeshEditInterface
 {
@@ -60,7 +61,7 @@ public:
 	void UpdateBoundingBox();
 
 	QMutex rendering;
-
+	
 
 	QFont qFont;
 	bool haveToPick;
@@ -82,6 +83,8 @@ public:
 	void DrawXORRect(GLArea * gla);
 	std::vector<Cell*> selected_cells;
 
+	/* use splatting */
+	bool useSplatting;
 	/* OCME core */
 	OCME * ocme;						// [v0.1] only one ocm database at time cna be opened
 	bool ocme_loaded,initialized;
@@ -117,6 +120,8 @@ public slots:
 	void updateButtonsState();
 	void editAll();
 	void verify();
+	void toggleSplatting(int);
+	void toggleImpostors(int);
 	/* ui only*/
 	void fillMeshAttribute();	// fill the list of trimesh attribute
 	void clearMeshAttribute();	// fill the list of trimesh attribute

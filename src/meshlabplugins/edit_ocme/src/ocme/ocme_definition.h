@@ -60,13 +60,14 @@ struct OCME{
                                         size_faces(0),size_vertex(0),
 					size_dependences(0),size_lcm_allocation_table(0),size_ocme_table(0),size_impostors(0),n_getcell(0),
 					n_files(0),n_chunks_faces_avg_per_cell(0),n_chunks_vertex_avg_per_cell(0),
-                                        n_triangles(0),  n_vertices(0),
+                                        n_triangles(0),  n_vertices(0),n_proxies(0),
 					input_file_size(0),time_disk_write(0.0),
 					time_disk_read(0.0),time_total(0.0)
 	{}
 		unsigned long 
 			n_triangles,
 			n_vertices,
+			n_proxies,
 			input_file_size,
 			n_cells ,
 			n_chains,
@@ -379,7 +380,7 @@ struct OCME{
 	/* check if the cell c must be refined and with which priority */
 	bool  IsToRefineScreenErr(Cell * & c,float & pri);
 	/* check if the cells is in the view frustum */
-	bool IsInFrustum(Cell * c, vcg::Point3f * f);
+	bool IsInFrustum(Cell * c, vcg::Point3f * f, float &d, bool bsphere_or_bbox = true);
 	/* perform the hierarchical visit*/
 	void  Visit(CellKey root, std::vector<Cell*> & to_render);
 	void  Visit(std::vector<Cell*> & to_render);
@@ -400,7 +401,7 @@ struct OCME{
 
 	// render the dataset
 	std::vector<Cell*> cells_to_render;
-	void Render();
+	void Render(bool);
 
 	// splatting apss rendering for the impostors
 	SplatRenderer<vcgMesh> splat_renderer;
@@ -438,8 +439,9 @@ struct OCME{
 	void Extract(  std::vector<Cell*> & cells, MeshType & m,  AttributeMapper attr_map = AttributeMapper() );
 
 	// Build a mesh where the elements contained in cells may be edited
+	// If the element sum up to more than max_size do nothing and return false
 	template <class MeshType>
-	void Edit(  std::vector<Cell*> & cells, MeshType & m,  AttributeMapper attr_map = AttributeMapper());
+	bool Edit(  std::vector<Cell*> & cells, MeshType & m, unsigned int max_size,  AttributeMapper attr_map = AttributeMapper());
 
 	// Undo edit
 	void 	DropEdited();
@@ -521,6 +523,9 @@ struct OCME{
 
 	/* --------- DATA VERIFY AND REPAIR ----------- */
 	void Verify();
+
+	/* --------- DATA VERIFY AND REPAIR ----------- */
+	void ComputeStatistics();
 
 	/* --------- DEBUG ------------ */
 	/* here a number of functions to check the consistency of the dataset */

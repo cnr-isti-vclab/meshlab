@@ -108,7 +108,7 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	Since it is not really of much use to have multiple scales for a single mesh
 	here we put al the mesh at the same scale
 	*/
- 	//sr.min = sr.max;
+ 	sr.min = sr.max;
 
 	sprintf(lgn->Buf(),"MeshSize face %d  vert%d\n",m.fn,m.vn);
 	lgn->Push();	
