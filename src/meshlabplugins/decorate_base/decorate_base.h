@@ -112,7 +112,7 @@ public:
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
 
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
-  inline QString CameraInfoParam() const     { return  "MeshLab::Decoration::CameraInfo" ; }
+  inline QString CameraInfoParam() const     { return  "MeshLab::Decoration::CameraInfoType" ; }
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
   inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }
   inline QString HistBinNumParam() const     { return  "MeshLab::Decoration::HistBinNumParam" ; }
