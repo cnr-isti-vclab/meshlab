@@ -253,7 +253,8 @@ void PluginManager::LoadFormats(QStringList &filters, QHash<QString, MeshIOInter
 
 void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
 { 
-	delete currentDocInterface;
+	//delete currentDocInterface;
+	//all the currentDocInterface created will be destroyed by QT when the MeshDocument destructor has been called
 	currentDocInterface = new MeshDocumentScriptInterface(&doc);
 	QScriptValue val = env.newQObject(currentDocInterface);
 	env.globalObject().setProperty(meshDocVarName(),val); 
