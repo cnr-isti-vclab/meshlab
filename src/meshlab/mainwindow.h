@@ -76,7 +76,7 @@ public slots:
 	void delCurrentRaster();
 	void endEdit();
 	void updateCustomSettings();
-	void updateDocumentScriptBindings() {PM.updateDocumentScriptBindings(*meshDoc());};
+  void updateDocumentScriptBindings() {if(currentViewContainer()) PM.updateDocumentScriptBindings(*meshDoc());};
 
 private slots:
 
