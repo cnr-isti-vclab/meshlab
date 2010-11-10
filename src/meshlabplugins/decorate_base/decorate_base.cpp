@@ -144,14 +144,18 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
         } break;
     case DP_SHOW_BOX_CORNERS:	DrawBBoxCorner(m); break;
     case DP_SHOW_CAMERA:
-      if(rm->getBool(this->CameraInfoParam()))
-            DrawCamera(m, m.cm.shot, painter,qf);
-      else
       {
-        emit askViewerShot("decorate");
-        DrawCamera(m, curShot, painter,qf);
-      }
-      break;
+        switch(rm->getEnum(this->CameraInfoParam()))
+        {
+        case 0:
+        {
+          emit askViewerShot("decorate");
+          DrawCamera(m, curShot, painter,qf);
+        } break;
+        case 1 : DrawCamera(m, m.cm.shot, painter,qf); break;
+        case 2 : DrawCamera(m, md.rm()->shot, painter,qf); break;
+        }
+      }break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
     case DP_SHOW_VERT_LABEL:	DrawVertLabel(m,painter,qf);break;
     case DP_SHOW_FACE_LABEL:	DrawFaceLabel(m,painter,qf);break;
@@ -843,7 +847,8 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
       } break;
 
 case DP_SHOW_CAMERA :{
-          parset.addParam(new RichBool(this->CameraInfoParam(), false,"Show View Camera","If true this filter shows the camera of current view"));
+    QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
+          parset.addParam(new RichEnum(this->CameraInfoParam(), 0, methods,"Show View Camera","If true this filter shows the camera of current view"));
         } break;
     }
 }

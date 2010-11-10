@@ -88,6 +88,13 @@ public:
 
 private:
   void DrawGriddedCube(const vcg::Box3f &bb, float majorTick, float minorTick,GLArea *gla);
+  vcg::Shotf curShot;
+
+signals:
+  void askViewerShot(QString);
+
+public slots:
+  void  setValue(QString name, vcg::Shotf val);
 
 };
 
