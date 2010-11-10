@@ -1310,12 +1310,14 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 				int mask = 0;
 				MeshModel *mm= new MeshModel(gla->meshDoc);
+        QTime t;t.start();
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,prePar,QCallBack,this /*gla*/))
 				{
 					QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text
 					delete mm;
 				}
-				else{
+        else{
+          if(gla) gla->log->Logf(0,"Opened mesh %s in %i msec",qPrintable(fileName),t.elapsed());
 					// After opening the mesh lets ask to the io plugin if this format
 					// requires some optional, or userdriven post-opening processing.
 					// and in that case ask for the required parameters and then
