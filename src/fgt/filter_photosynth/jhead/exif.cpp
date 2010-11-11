@@ -755,11 +755,18 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
                 break;
 
             case TAG_PIXEL_Y_DIMENSION:
+                // Use largest of height and width to deal with images that have been
+                // rotated to portrait format.
+                a = (int)ConvertAnyFormat(ValuePtr, Format);
+                if (ExifImageWidth < a) ExifImageWidth = a;
+                ImageInfo.Height = a;
+                break;
             case TAG_PIXEL_X_DIMENSION:
                 // Use largest of height and width to deal with images that have been
                 // rotated to portrait format.
                 a = (int)ConvertAnyFormat(ValuePtr, Format);
                 if (ExifImageWidth < a) ExifImageWidth = a;
+                ImageInfo.Width = a;
                 break;
 
             case TAG_FOCAL_PLANE_XRES:

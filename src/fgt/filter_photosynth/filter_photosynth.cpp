@@ -19,7 +19,7 @@
 //#include "qmeta/jpeg.h"
 //#include "exif.h"
 //#include "jpeg.h"
-#include "jhead.h"
+#include "jhead/jhead.h"
 //#include "myexif.h"
 
 using namespace vcg;
@@ -190,11 +190,14 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
     return false;
   }
 
-  QDir dir(QDir::currentPath());
+  QDir dir(path);
   QFile file(dir.filePath("Cam.txt"));
   bool success = true;
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+  {
       success = false;
+      qWarning() << "Failed to create cam.txt";
+  }
   QTextStream out(&file);
   const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
   CoordinateSystem *sys;
@@ -240,12 +243,9 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       Matrix44f transposedFlippedRot = flip.transpose() * rot.transpose();
 
       Shotf s;
-      //s.Extrinsics.SetRot(rot);
       s.Extrinsics.SetRot(transposedFlippedRot);
-
-      s.Extrinsics.SetTra(Point3f(-cam[CameraParameters::POS_X], -cam[CameraParameters::POS_Y], -cam[CameraParameters::POS_Z]));
-      //s.Extrinsics.SetTra(getTranslation(cam));
-      //s.Extrinsics.SetTra(Point3f(cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z], cam[CameraParameters::POS_X]));
+      //s.Extrinsics.SetTra(Point3f(-cam[CameraParameters::POS_X], -cam[CameraParameters::POS_Y], -cam[CameraParameters::POS_Z]));
+      s.Extrinsics.SetTra(Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]));
 
 
       //MeshModel *mm = md.addNewMesh("camera");
@@ -289,12 +289,17 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
           //height = jpeg.exif()->Value(qmeta::Exif::kPixelYDimension).ToUInt();
         width = ImageInfo.Width;
         height = ImageInfo.Height;
-        focalLength = ImageInfo.FocalLength;
+        //focalLength = ImageInfo.FocalLength;
         ccdWidth = ImageInfo.CCDWidth;
+        focalLength = ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
         pixelSizeMm = ccdWidth / qMax(width,height);
-        qDebug() << "Width:" << width;
-        qDebug() << "Heigth:" << height;
-        qDebug() << "CCDwidth / focalLength = " << ccdWidth / focalLength << " Photosynth value = " << cam[CameraParameters::FOCAL_LENGTH];
+        //qDebug() << "Width:" << width;
+        //qDebug() << "Heigth:" << height;
+        //qDebug() << "CCDwidth / focalLength = " << ccdWidth / focalLength << " Photosynth value = " << cam[CameraParameters::FOCAL_LENGTH];
+        width = 1002;
+        height = 712;
+        focalLength = 22.7628;
+        pixelSizeMm = 0.0369161;
       }
       s.Intrinsics.FocalMm = focalLength;
       s.Intrinsics.PixelSizeMm = Point2f(pixelSizeMm,pixelSizeMm);
@@ -330,21 +335,24 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         out << " <Render Lighting=\"0\" DoubleSideLighting=\"0\" SelectedVert=\"0\" ColorMode=\"3\" SelectedFace=\"0\" BackFaceCull=\"0\" FancyLighting=\"0\" DrawMode=\"2\" TextureMode=\"0\"/>\n";
         out << "</project>\n\n\n\n";
       }
+
+      if(par.getBool("saveImages"))
+      {
+        QDir dir(path);
+        dir.cd(synthData->_collectionID);
+        //QHashIterator<int, Image> it(*(synthData->_imageMap));
+        QString rasterBase("IMG_%1.jpg");
+        //while (it.hasNext())
+        {
+          //it.next();
+          //RasterModel *rm = md.addNewRaster(dir.filePath(rasterBase.arg(it.value()._ID)).toStdString().data());
+          RasterModel *rm = md.addNewRaster(dir.filePath(rasterBase.arg(img._ID)).toStdString().data());
+          rm->shot = s;
+        }
+      }
     }
   }
   file.close();
-  if(par.getBool("saveImages"))
-  {
-    QDir dir(path);
-    dir.cd(synthData->_collectionID);
-    QHashIterator<int, Image> it(*(synthData->_imageMap));
-    QString rasterBase("IMG_%1.jpg");
-    while (it.hasNext())
-    {
-      it.next();
-      md.addNewRaster(dir.filePath(rasterBase.arg(it.value()._ID)).toStdString().data());
-    }
-  }
 
   return true;
 }
