@@ -127,7 +127,7 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
                                      "http://photosynth.net/view.aspx?cid=e8f476c5-ed00-4626-a86c-31d654e94109",
                                      "Synth URL",
                                      "Paste the synth URL from your browser."));
-      parlst.addParam(new RichBool ("saveImages", false, "Download images", "Download images making up the specified synth."));
+      parlst.addParam(new RichBool ("saveImages", true, "Download images", "Download images making up the specified synth."));
       //parlst.addParam(new RichSaveFile("savePath","./",".jpg","Save to","Select the path where images will be saved to"));
       parlst.addParam(new RichString("savePath",
                                      "./",
