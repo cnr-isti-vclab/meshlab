@@ -206,6 +206,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 
         float default_time=1;
 
+        //Get Parameters
         Point3f dir=par.getPoint3f("force_dir");;
         float l =par.getAbsPerc("s_length");
         float v=par.getFloat("velocity");
@@ -217,6 +218,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             associateParticles(base_mesh,cloud_mesh,m,v);
         }
 
+        //Move Cloud Mesh
         MoveCloudMeshForward(cloud_mesh,dir,l,1);
 
         break;
