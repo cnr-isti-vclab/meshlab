@@ -1345,7 +1345,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 				//Aligned Image
 				if(QString::compare(node.attributes().namedItem("aligned").nodeValue(),"1")==0){
 					QDomNode nodeb = node.firstChild();
-          ReadShotFromQDomNode(shot,nodeb);
+          ReadShotFromOLDXML(shot,nodeb);
         }
 			}
 		}
@@ -1407,7 +1407,8 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 			trackball.track.sca = attr.namedItem("TrackScale").nodeValue().section(' ',0,0).toFloat();
 			nearPlane = attr.namedItem("NearPlane").nodeValue().section(' ',0,0).toFloat();
 			farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();      
-      clipRatioNear = (getCameraDistance()-nearPlane)/2.0f ;
+			fov = shot.GetFovFromFocal();
+			clipRatioNear = (getCameraDistance()-nearPlane)/2.0f ;
       clipRatioFar = (farPlane-getCameraDistance())/10.0f ;
 
 		}
