@@ -15,12 +15,16 @@
 #include "filter_photosynth.h"
 #include <QtScript>
 #include <unistd.h>
-#include "qmeta/exif.h"
-#include "qmeta/jpeg.h"
+//#include "qmeta/exif.h"
+//#include "qmeta/jpeg.h"
 //#include "exif.h"
 //#include "jpeg.h"
+#include "jhead.h"
+//#include "myexif.h"
 
 using namespace vcg;
+
+extern ImageInfo_t ImageInfo;
 
 /*
 Matrix44f FilterPhotosynthPlugin::getRotation(CameraParameters cam)
@@ -250,25 +254,50 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       mm->cm.vert.back().P() = Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]);
 
 
-      qreal focal = cam[CameraParameters::FOCAL_LENGTH];
-      s.Intrinsics.FocalMm = focal * 10;
-      s.Intrinsics.PixelSizeMm = Point2f(0.1,0.1);
+      //qreal focal = cam[CameraParameters::FOCAL_LENGTH];
+      //s.Intrinsics.FocalMm = focal * 10;
+      //s.Intrinsics.PixelSizeMm = Point2f(0.1,0.1);
       Image img = synthData->_imageMap->value(cam._imageID);
       QDir imageDir(path);
       imageDir.cd(synthData->_collectionID);
-      qmeta::Jpeg jpeg(imageDir.filePath("IMG_%1.jpg").arg(img._ID));
+      //qmeta::Jpeg jpeg(imageDir.filePath("IMG_%1.jpg").arg(img._ID));
       int width = 0;
       int height = 0;
-      if(jpeg.IsValid())
-      {
-        if(jpeg.exif())
-        {
-          width = jpeg.exif()->Value(qmeta::Exif::kPixelXDimension).ToUInt();
-          height = jpeg.exif()->Value(qmeta::Exif::kPixelYDimension).ToUInt();
-          //qDebug() << "Width:" << width;
-          ///qDebug() << "Width:" << height;
-        }
+      float focalLength = 0;
+      float ccdWidth = 0;
+      float pixelSizeMm = 0;
+      const char *FileName = imageDir.filePath("IMG_%1.jpg").arg(img._ID).toStdString().data();
+      if (strlen(FileName) >= JHEAD_PATH_MAX-1){
+          // Protect against buffer overruns in strcpy / strcat's on filename
+          ErrFatal("filename too long");
+          qWarning() << "filename too long";
       }
+
+      ResetJpgfile();
+
+      // Start with an empty image information structure.
+      memset(&ImageInfo, 0, sizeof(ImageInfo));
+      ImageInfo.FlashUsed = -1;
+      ImageInfo.MeteringMode = -1;
+      ImageInfo.Whitebalance = -1;
+
+      strncpy(ImageInfo.FileName, FileName, PATH_MAX);
+      int res = ReadJpegFile(FileName,READ_METADATA);
+      if(res)
+      {
+          //width = jpeg.exif()->Value(qmeta::Exif::kPixelXDimension).ToUInt();
+          //height = jpeg.exif()->Value(qmeta::Exif::kPixelYDimension).ToUInt();
+        width = ImageInfo.Width;
+        height = ImageInfo.Height;
+        focalLength = ImageInfo.FocalLength;
+        ccdWidth = ImageInfo.CCDWidth;
+        pixelSizeMm = ccdWidth / qMax(width,height);
+        qDebug() << "Width:" << width;
+        qDebug() << "Heigth:" << height;
+        qDebug() << "CCDwidth / focalLength = " << ccdWidth / focalLength << " Photosynth value = " << cam[CameraParameters::FOCAL_LENGTH];
+      }
+      s.Intrinsics.FocalMm = focalLength;
+      s.Intrinsics.PixelSizeMm = Point2f(pixelSizeMm,pixelSizeMm);
       s.Intrinsics.ViewportPx = Point2i(width,height);
       s.Intrinsics.CenterPx = Point2f(width/2,height/2);
       if(success)
@@ -276,7 +305,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         QString traVec = QString("TranslationVector=\"%1 %2 %3 1\"").arg(s.Extrinsics.Tra().X()).arg(s.Extrinsics.Tra().Y()).arg(s.Extrinsics.Tra().Z());
         QString lensDist("LensDistortion=\"0 0\"");
         QString viewPx = QString("ViewportPixel=\"%1 %2\"").arg(width).arg(height);
-        QString pxSize("PixelSizeMm=\"0.1 0.1\"");
+        QString pxSize = QString("PixelSizeMm=\"%1 %2\"").arg(pixelSizeMm).arg(pixelSizeMm);
         QString centerPx = QString("CenterPx=\"%1 %2\"").arg(width/2).arg(height/2);
         QString focalMm = QString("FocalMm=\"%1\"").arg(s.Intrinsics.FocalMm);
         out << QString("Camera %1 (Image %2: %3): ").arg(cam._camID).arg(img._ID).arg(img._url) << "\n\n";
