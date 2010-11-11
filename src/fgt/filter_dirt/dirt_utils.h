@@ -43,6 +43,44 @@ using namespace vcg;
 using namespace tri;
 
 
+CMeshO::CoordType fromBarCoords(Point3f bc,CMeshO::FacePointer f){
+
+    CMeshO::CoordType p;
+    Point3f p0=f->P(0);
+    Point3f p1=f->P(1);
+    Point3f p2=f->P(2);
+    p[0]=p0[0]*bc[0]+p1[0]*bc[1]+p2[0]*bc[2];
+    p[1]=p0[1]*bc[0]+p1[1]*bc[1]+p2[1]*bc[2];
+    p[2]=p0[2]*bc[0]+p1[2]*bc[1]+p2[2]*bc[2];
+    return p;
+};
+
+
+CMeshO::CoordType CoordinateCorrection(CMeshO::CoordType p,CMeshO::FacePointer f){
+    Point3f bc;
+    CMeshO::CoordType c_p; //Correct Position
+    InterpolationParameters(*f,p,bc);
+
+    if(bc[0]==0){
+        bc[1]=1-bc[2];
+        c_p=fromBarCoords(bc,f);
+
+    }
+
+    if(bc[1]==0){
+        bc[0]=1-bc[2];
+        c_p=fromBarCoords(bc,f);
+
+    }
+
+    if(bc[2]==0){
+        bc[0]=1-bc[1];
+        c_p=fromBarCoords(bc,f);
+     }
+
+    return c_p;
+};
+
 bool SameSide(Point3f p1,Point3f p2,Point3f a,Point3f b){
         Point3f cp1;
         Point3f cp2;
@@ -63,21 +101,35 @@ bool SameSide(Point3f p1,Point3f p2,Point3f a,Point3f b){
 */
 bool IsOnFace(Point3f p, CMeshO::FacePointer f){
     //Verify if the point is on the same plane of the face
+
+
     CMeshO::CoordType n=f->N();
-    Point3<float> a=f->P(0);
+
+    Point3f a=f->P(0);
     if(math::Abs((p-a).dot(n))>0.0005) return false;
-    //Point3<float> a=f->P(0);
+
+
+
+    //Point3f bc;
+    //isOnFace=InterpolationParameters(*f,vcg::Normal(*f),p,bc);
+
+    //if(isOnFace && bc[0]>=0 && bc[1]>=0 && (bc[0]+bc[1]<=1)) return true;
+
+
+    //Point3f a=f->P(0);
     //float tmp2=n.dot(p);
     //float tmp=n.dot(a);
     //if(math::Abs(tmp2-tmp)>0.01) return false;
-    Point3<float> v0 = (f->V(0))->P();
-    Point3<float> v1 = (f->V(1))->P();
-    Point3<float> v2 = (f->V(2))->P();
+    //Point3f v0 = (f->V(0))->P();
+    //Point3f v1 = (f->V(1))->P();
+    //Point3f v2 = (f->V(2))->P();
 
-    if(SameSide(p,v0,v1,v2) && SameSide(p,v1,v0,v2) && SameSide(p,v2,v0,v1)) return true;
+
+ //  if(SameSide(p,v0,v1,v2) && SameSide(p,v1,v0,v2) && SameSide(p,v2,v0,v1)) return true;
+  //  return false;
 /*
     //Compute Barycentric coordinates
-    Point3<float> bc;
+    Point3f bc;
     bool isOnFace=false;
     isOnFace=InterpolationParameters(*f,vcg::Normal(*f),p,bc);
     if(!isOnFace) return false;
@@ -91,9 +143,9 @@ bool IsOnFace(Point3f p, CMeshO::FacePointer f){
     float tmp2=n.dot(p);
     float tmp=n.dot(a);
     if(math::Abs(tmp2-tmp)>0.001) return false;
+*/
 
-
-
+/*
     int max_c;
 
     if(math::Abs(n[0])>math::Abs(n[1])){
@@ -138,17 +190,18 @@ bool IsOnFace(Point3f p, CMeshO::FacePointer f){
         break;
         }
     }
-
-    Point2<float>v0 = C - A;
-    Point2<float>v1 = B - A;
-    Point2<float>v2 = P - A;
 */
+
+
 /*
-    Point3<float> v0 = (f->V(0))->P();
-    Point3<float> v1 = (f->V(1))->P();
-    Point3<float> v2 = (f->V(2))->P();
-    */
-/*
+    Point3f A=f->V(0)->P();
+    Point3f B=f->V(1)->P();
+    Point3f C=f->V(2)->P();
+
+    Point3fv0 = C - A;
+    Point3fv1 = B - A;
+    Point3fv2 = p - A;
+
     // Compute dot products
     double dot00 = v0.dot(v0);
     double dot01 = v0.dot(v1);
@@ -162,24 +215,81 @@ bool IsOnFace(Point3f p, CMeshO::FacePointer f){
     double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
     // Check if point is in triangle
-    return (u > 0) && (v > 0) && (u + v < 1);
+    //Compute Barycentric coordinates
+    Point3f bc;
 
+    InterpolationParameters(*f,vcg::Normal(*f),p,bc);
+
+    bool isOnFace=(u >= 0) && (v >= 0) && (u + v <= 1.00001);
+    return isOnFace;
 */
 
-    //if(SameSide(p,v0,v1,v2) && SameSide(p,v1,v0,v2) && SameSide(p,v2,v0,v1)) return true;
+
+
+
+
+    int max_c;
+
+    float n0=math::Abs(n[0]);
+    float n1=math::Abs(n[1]);
+    float n2=math::Abs(n[2]);
+
+    if(n0>n1){
+          if(n0>n2) max_c=0;
+          else max_c=2;
+    }else{
+        if(n1>n2) max_c=1;
+        else max_c=2;
+              }
+
+
+    Point2f p_2d;
+    Point2f p0_2d;
+    Point2f p1_2d;
+    Point2f p2_2d;
+
+    CMeshO::CoordType p0 = f->P(0);
+    CMeshO::CoordType p1 = f->P(1);
+    CMeshO::CoordType p2 = f->P(2);
+    switch(max_c){
+    case 0:{
+            p0_2d=Point2f(p0[1],p0[2]);
+            p1_2d=Point2f(p1[1],p1[2]);
+            p2_2d=Point2f(p2[1],p2[2]);
+            p_2d =Point2f(p[1],p[2]);
+            break;
+        }
+    case 1:{
+            p0_2d=Point2f(p0[0],p0[2]);
+            p1_2d=Point2f(p1[0],p1[2]);
+            p2_2d=Point2f(p2[0],p2[2]);
+            p_2d =Point2f(p[0],p[2]);
+
+            break;
+        }
+    case 2:{
+            p0_2d=Point2f(p0[0],p0[1]);
+            p1_2d=Point2f(p1[0],p1[1]);
+            p2_2d=Point2f(p2[0],p2[1]);
+            p_2d =Point2f(p[0],p[1]);
+
+            break;
+        }
+    }
+
+
+
+
+    Triangle2<float> f_2d=Triangle2<float>(p0_2d,p1_2d,p2_2d);
+
+
+
+    return IsInsideTrianglePoint(f_2d,p_2d);
 
 };
 
 
-bool MoveCloudMeshForward(){
 
-
-
-
-
-
-    return true;
-};
 
 
 float getElapsedTime(CMeshO::CoordType pi,CMeshO::CoordType pf,Point3f vi,Point3f a){
@@ -202,12 +312,12 @@ float getElapsedTime(CMeshO::CoordType vi,CMeshO::CoordType vf,CMeshO::FacePoint
     float t=0;
     float v_initial=sqrt(pow(vi[0],2)+pow(vi[1],2)+pow(vi[2],2));
     float v_final=sqrt(pow(vf[0],2)+pow(vf[1],2)+pow(vf[2],2));
-    Point3<float> n= face->N();
+    Point3f n= face->N();
     float a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
 
 
 
-    Point3<float> f;
+    Point3f f;
 
     f[0]=force[0]-a*n[0];
     f[1]=force[1]-a*n[1];
@@ -285,12 +395,12 @@ CMeshO::CoordType ComputeVelocity(CMeshO::CoordType vi,CMeshO::CoordType ac,floa
 CMeshO::CoordType UpdateVelocity(CMeshO::CoordType pf,CMeshO::CoordType pi,CMeshO::CoordType v,float m,CMeshO::FacePointer &face,CMeshO::CoordType force){
 
     CMeshO::CoordType new_vel;
-    Point3<float> n= face->cN();
+    Point3f n= face->cN();
     float a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
     //float b=n[0]*vel[0]+n[1]*vel[1]+n[2]*vel[2];
 
-    Point3<float> f;
-    //Point3<float> v;
+    Point3f f;
+    //Point3f v;
 
     f[0]=force[0]-a*n[0];
     f[1]=force[1]-a*n[1];
@@ -312,7 +422,7 @@ CMeshO::CoordType UpdateVelocity(CMeshO::CoordType pf,CMeshO::CoordType pi,CMesh
 CMeshO::CoordType ComputeAcceleration(float m,CMeshO::FacePointer face,CMeshO::CoordType dir){
     CMeshO::CoordType acc;
 
-    Point3<float> n= face->N();
+    Point3f n= face->N();
     float a=n[0]*dir[0]+n[1]*dir[1]+n[2]*dir[2];
 
     acc[0]=dir[0]-a*n[0];
@@ -348,16 +458,16 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,
 
 
     dir=dir*l;
-    Point3<float> new_pos;
-    Point3<float> n= face->N();
+    Point3f new_pos;
+    Point3f n= face->N();
     float a=n[0]*dir[0]+n[1]*dir[1]+n[2]*dir[2];
 
 //    float b=n[0]*vel[0]+n[1]*vel[1]+n[2]*vel[2];
 
 
 
-    Point3<float> f;
-    Point3<float> vel=GetVelocityComponents(v,l,face);
+    Point3f f;
+    Point3f vel=GetVelocityComponents(v,l,face);
     //Calcolo le componenti della forza lungo la faccia
     f[0]=dir[0]-a*n[0];
     f[1]=dir[1]-a*n[1];
@@ -385,7 +495,7 @@ void DrawDirt(MeshModel *m/*,std::vector<Point3f> &dp*/){
 
 
 /**
-@description Compute the intersection of the segment from p1 to p2 and the face f
+@def Compute the intersection of the segment from p1 to p2 and the face f
 
 @param CoordType p1 - position of the first point
 @param Coordtype p2 - position of the second poin
@@ -395,11 +505,11 @@ void DrawDirt(MeshModel *m/*,std::vector<Point3f> &dp*/){
 
 @return true if there is an intersection
 */
-bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::CoordType &int_point,CMeshO::FacePointer &new_f)
+bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::FacePointer &new_f,CMeshO::CoordType &int_point)
 {
 
-    CMeshO::CoordType n=f->N();
-
+    CMeshO::CoordType n=f->N().Normalize();
+    //n.Normalize();
     int max_c;
 
     float n0=math::Abs(n[0]);
@@ -415,11 +525,11 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
               }
     Point2f int_p;
 
-    Segment2f seg;
+    Line2f seg;
 
-    CMeshO::CoordType fv0 = (f->V(0))->P();
-    CMeshO::CoordType fv1 = (f->V(1))->P();
-    CMeshO::CoordType fv2 = (f->V(2))->P();
+    CMeshO::CoordType fv0 = f->P(0);//(f->V(0))->P();
+    CMeshO::CoordType fv1 = f->P(1);//(f->V(1))->P();
+    CMeshO::CoordType fv2 = f->P(2);//(f->V(2))->P();
     Segment2f line0;
     Segment2f line1;
     Segment2f line2;
@@ -432,7 +542,7 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
             line2=Segment2f(Point2f(fv2[1],fv2[2]),Point2f(fv0[1],fv0[2]));
             p1_2d=Point2f(p1[1],p1[2]);
             p2_2d=Point2f(p2[1],p2[2]);
-            seg=Segment2f(p1_2d,p2_2d);
+            seg=Line2f(p1_2d,p2_2d);
 
             break;
         }
@@ -442,7 +552,7 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
             line2=Segment2f(Point2f(fv2[0],fv2[2]),Point2f(fv0[0],fv0[2]));
             p1_2d=Point2f(p1[0],p1[2]);
             p2_2d=Point2f(p2[0],p2[2]);
-            seg=Segment2f(p1_2d,p2_2d);
+            seg=Line2f(p1_2d,p2_2d);
             break;
         }
     case 2:{
@@ -451,14 +561,69 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
             line2=Segment2f(Point2f(fv2[0],fv2[1]),Point2f(fv0[0],fv0[1]));
             p1_2d=Point2f(p1[0],p1[1]);
             p2_2d=Point2f(p2[0],p2[1]);
-            seg=Segment2f(p1_2d,p2_2d);
+            seg=Line2f(p1_2d,p2_2d);
             break;
         }
     }
 
-    Point2<float> tmp;
+
+    Point2f tmp_int;
     bool int_found=false;
-    float edge;
+    int edge;
+    float dist=0;
+    if(LineSegmentIntersection(seg,line0,tmp_int)){
+        dist=Distance(p2_2d,tmp_int);
+        edge=0;
+        int_p=tmp_int;
+        int_found=true;
+    }
+
+
+    if(LineSegmentIntersection(seg,line1,tmp_int)){
+        if(int_found){
+            if(Distance(p2_2d,tmp_int)<dist){
+            dist=Distance(p2_2d,tmp_int);
+            edge=1;
+            int_p=tmp_int;
+            }
+
+        }else{
+            int_found=true;
+            dist=Distance(p2_2d,tmp_int);
+            edge=1;
+            int_p=tmp_int;
+         }
+
+    }
+
+
+    if(LineSegmentIntersection(seg,line2,tmp_int)){
+        if(int_found){
+            if(Distance(p2_2d,tmp_int)<dist){
+            dist=Distance(p2_2d,tmp_int);
+            edge=2;
+            int_p=tmp_int;
+            }
+
+        }else{
+            int_found=true;
+            dist=Distance(p2_2d,tmp_int);
+            edge=2;
+            int_p=tmp_int;
+         }
+
+    }
+
+
+
+
+    if(!int_found){
+        Point3f bc;
+        InterpolationParameters(*f,f->N(),p1,bc);
+        int p=1;
+    }
+
+    /*
     if(SegmentSegmentIntersection(line0,seg,tmp)){
         if(tmp!=p1_2d){
             int_p=tmp;
@@ -466,9 +631,6 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
             int_found=true;
         }
      }
-
-
-
         if(SegmentSegmentIntersection(line1,seg,tmp)){
             if(tmp!=p1_2d){
                 int_p =tmp;
@@ -476,8 +638,6 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
                 int_found=true;
             }
         }
-
-
         if(SegmentSegmentIntersection(line2,seg,tmp)){
             if(tmp!=p1_2d){
                 int_p =tmp;
@@ -485,7 +645,7 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
                 int_found=true;
             }
         }
-
+    */
 
     /*
     bool int_found=false;
@@ -525,10 +685,9 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
     }
 
     */
+
     if(int_found){
         new_f=f->FFp(edge);
-
-
         switch(max_c){
             case 0:{
                 int_point[0]=(n[0]*fv0[0]-n[1]*(int_p[0]-fv0[1])-n[2]*(int_p[1]-fv0[2]))/n[0];
@@ -549,33 +708,60 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
                 break;
               }
           }
-
-
-
     }
 
+    /*      if(int_found){
+       Point3f bc;
+       InterpolationParameters(*new_f,new_f->N(),int_point,bc);
+       int min_c;
 
-    if(!IsOnFace(int_point,new_f)){
-        Point3f bc;
-        InterpolationParameters(*new_f,new_f->N(),int_point,bc);
+       if(bc[0]<bc[1]){
+           if(bc[0]<bc[2]){
+            min_c=0;
+           }else{
+            min_c=2;
+           }
+        }else{
+            if(bc[1]<bc[2]){
+            min_c=1;
+            }else{
+             min_c=2;
+            }
+                }
 
-        if(bc[0]==0){
-            bc[2]=1-bc[1];
+        switch(edge){
+
+        case 0:{
+            bc[0]=0;
+            bc[1]=bc[1];
+            bc[2]=1-bc[1]-0.0001;
+            break;
+            }
+        case 1:{
+                bc[0]=bc[0];
+                bc[1]=0;
+                bc[2]=1-bc[0]-0.0001;
+                break;
+            }
+        case 2:{
+                bc[0]=bc[0];
+                bc[1]=1-bc[0]-0.0001;
+                bc[2]=0;
+                break;
+            }
         }
 
-        if(bc[1]==0){
-            bc[2]=1-bc[0];
-        }
 
-        if(bc[2]==0){
-            bc[0]=1-bc[1];
-        }
-
-        int_point[0]=new_f->P(0)[0]*bc[0]+new_f->P(1)[0]*bc[1]+new_f->P(2)[0]*bc[2];
-        int_point[1]=new_f->P(0)[1]*bc[0]+new_f->P(1)[1]*bc[1]+new_f->P(2)[1]*bc[2];
-        int_point[2]=new_f->P(0)[2]*bc[0]+new_f->P(1)[2]*bc[1]+new_f->P(2)[2]*bc[2];
+        Point3f nf0=new_f->P(0);
+        Point3f nf1=new_f->P(1);
+        Point3f nf2=new_f->P(2);
+        int_point[0]=nf0[0]*bc[0]+nf1[0]*bc[1]+nf2[0]*bc[2];
+        int_point[1]=nf0[1]*bc[0]+nf1[1]*bc[1]+nf2[1]*bc[2];
+        int_point[2]=nf0[2]*bc[0]+nf1[2]*bc[1]+nf2[2]*bc[2];
 
     }
+*/
+
     return int_found;
 };
 
@@ -780,13 +966,15 @@ void associateParticles(MeshModel* b_m,MeshModel* c_m,float m,float v){
             fi->C()=Color4b::Blue;
             part.face=&*fi;
             part.mass=m;
-
             part.vel=v;
             ph[vi]=part;
             }
         }
     }
 };
+
+
+
 void prepareMesh(MeshModel* m){
     //clean flags
 
@@ -815,5 +1003,65 @@ void prepareMesh(MeshModel* m){
     tri::UpdateFlags<CMeshO>::FaceProjection(m->cm);
 
 }
+
+
+bool MoveCloudMeshForward(MeshModel *cloud,Point3f force,float l,float time){
+    CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(cloud->cm,"ParticleInfo");
+    CMeshO::VertexIterator vi;
+    CMeshO::FacePointer current_face;
+    CMeshO::FacePointer new_face;
+    float velocity;
+    float mass;
+    CMeshO::CoordType new_pos;
+    CMeshO::CoordType current_pos;
+    CMeshO::CoordType int_pos;
+
+    for(vi=cloud->cm.vert.begin();vi!=cloud->cm.vert.end();++vi){
+        float t=time;
+
+        current_face=ph[vi].face;
+        new_face=current_face   ;
+        current_pos=vi->P();
+
+        velocity=ph[vi].vel;
+        mass=ph[vi].mass;
+
+        new_pos=StepForward(vi->P(),velocity,mass,current_face,force,l,t);
+
+        while(!IsOnFace(new_pos,current_face)){
+            bool tmp=ComputeIntersection(current_pos,new_pos,current_face,new_face,int_pos);
+            new_face->C()=Color4b::Yellow;
+            if(!tmp){
+                break;
+            }
+            new_pos=int_pos;
+
+           //Debug
+            current_face->C()=Color4b::Black;
+            current_face=new_face;
+
+            t=t/2;
+            if(t>0.5){
+            new_pos=StepForward(vi->P(),velocity,mass,current_face,force,l,t);
+            }else{
+                current_face->C()=Color4b::Green;
+                if(!IsOnFace(new_pos,current_face)){
+                    CoordinateCorrection(new_pos,current_face);
+                    Point3f bc;
+                    InterpolationParameters(*new_face,new_pos,bc);
+                    current_face->C()=Color4b::Red;
+
+                }
+
+            }
+        }
+
+        vi->P()=new_pos;
+        ph[vi].face=current_face;
+
+    }
+
+    return true;
+};
 
 #endif // DIRT_UTILS_H

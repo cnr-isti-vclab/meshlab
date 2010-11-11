@@ -175,7 +175,6 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
         CMeshO::VertexIterator vi;
         vector<Point3f>::iterator dvi=dust_points.begin();
-        vector<Point3f>::iterator dvIter;
         std::vector< Particle<CMeshO> >::iterator dpi=dust_particles.begin();
 
         for(vi=dmm->cm.vert.begin();vi!=dmm->cm.vert.end();++vi){
@@ -205,16 +204,12 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             return false;
         }
 
+        float default_time=1;
 
-        Point3f dir=par.getPoint3f("force_dir");
+        Point3f dir=par.getPoint3f("force_dir");;
         float l =par.getAbsPerc("s_length");
-        Point3f force=dir;
         float v=par.getFloat("velocity");
-        //Point3f v=par.getPoint3f("velocity");
         float m=par.getFloat("mass");
-
-
-        float delta_t=1;
 
         if(!HasPerVertexAttribute(cloud_mesh->cm,"ParticleInfo")){
             prepareMesh(base_mesh);
@@ -222,224 +217,19 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             associateParticles(base_mesh,cloud_mesh,m,v);
         }
 
-        float default_time=1;
-        CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(cloud_mesh->cm,"ParticleInfo");
-        CMeshO::VertexIterator vi;
-        CMeshO::FacePointer current_face;
-        float velocity;
-        float mass;
-        CMeshO::FacePointer new_face;
-        CMeshO::CoordType   new_pos;
-        CMeshO::CoordType int_pos;
-        float t;
-        for(vi=cloud_mesh->cm.vert.begin();vi!=cloud_mesh->cm.vert.end();++vi){
-            t=default_time;
-            new_face=0;
-            current_face=ph[vi].face;
-            velocity=ph[vi].vel;
-            mass=ph[vi].mass;
-            new_pos=StepForward(vi->P(),velocity,mass,current_face,force,l,t);
-            Point3f acc=ComputeAcceleration(mass,current_face,force);
-            while(!IsOnFace(new_pos,current_face)){
-
-
-              bool int_found=ComputeIntersection(vi->P(),new_pos,current_face,int_pos,new_face);
-              //  t=t-getElapsedTime(vi->P(),int_pos,velocity,acc);
-
-                vi->P()=int_pos;
-                //new_pos=int_pos;
-                //Debugging
-                current_face->C()=Color4b::Green;
-                new_face->C()=Color4b::Red;
-                //vi->P()=int_pos;
-                //vi->P()=int_pos;
-                //ph[vi].face=new_face;
-                ph[vi].face=new_face;
-                current_face=new_face;
-                ph[vi].vel=ph[vi].vel/2;
-                velocity=ph[vi].vel;
-                t=t/2;
-                if(t<0.05 || velocity<0.05){
-                    new_pos=int_pos;
-                }else{
-                    new_pos=StepForward(vi->P(),velocity,mass,current_face,force,l,t);
-                }
-            }
-            //ph[vi].velocity=UpdateVelocity(new_pos,vi->P(),velocity,mass,current_face,force);
-            //ph[vi].velocity=ComputeVelocity(velocity,acc,t);
-            vi->P()=new_pos;
-
-
-            }
+        MoveCloudMeshForward(cloud_mesh,dir,l,1);
 
         break;
         }
     default:{
         break;
         }
-    }
+     }
 
 
   return true;
 }//End applyFilter
 
-/*
-        CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(cloud_mesh->cm,"ParticleInfo");
-
-
-        CMeshO::FacePointer new_face;
-        for(vi=cloud_mesh->cm.vert.begin();vi!=cloud_mesh->cm.vert.end();++vi){
-
-        float t=delta_t;
-        CMeshO::CoordType new_pos=StepForward(vi->P(),ph[vi].velocity,ph[vi].mass,ph[vi].face,force,t);
-
-
-        while(!IsOnFace(new_pos,ph[vi].face )){
-            CMeshO::CoordType int_point; //Intersection Point
-            ComputeIntersection(vi->P(),new_pos,ph[vi].face,int_point,new_face);
-            Point3f new_vel=UpdateVelocity(int_point,vi->P(),ph[vi].velocity,ph[vi].mass,ph[vi].face,force);
-            t=t-getElapsedTime(ph[vi].velocity,new_vel,ph[vi].face,ph[vi].mass,force);
-            if(t<0) t=0;
-            ph[vi].velocity=new_vel;
-            vi->P()=int_point;
-            ph[vi].face=new_face;
-
-            new_pos=StepForward(vi->P(),ph[vi].velocity,ph[vi].mass,ph[vi].face,force,t);
-        }
-        ph[vi].velocity=UpdateVelocity(new_pos,vi->P(),ph[vi].velocity,ph[vi].mass,ph[vi].face,force);
-        vi->P()=new_pos;
-        }
-         break;
-        }
-
-        /*
-        int counter = 0;
-        while(!IsOnFace(new_pos,ph[vi].face) && counter <5){
-            counter++;
-            ComputeIntersection(vi->P(),new_pos,ph[vi].face,int_point,new_face);
-
-           //Segment3f dist=Segment3f(vi->P(),new_pos);
-           //Segment3f dist_int=Segment3f(vi->P(),int_point);
-           //float res_t=1-getElapsedTime(int_point,vi->P(),pi[vi].mass,pi[vi].velocity,pi[vi].face,force);
-           //pi[vi].velocity=UpdateVelocity(pi[vi].velocity,pi[vi].mass,pi[vi].face,force,res_t);
-            vi->P()=int_point;
-            ph[vi].face=new_face;
-            new_pos=StepForward(vi->P(),ph[vi].velocity,ph[vi].mass,ph[vi].face,force,1);
-           }
-        vi->P()=new_pos;
-        //pi[vi].velocity=UpdateVelocity(pi[vi].velocity,pi[vi].mass,pi[vi].face,force,1);
-
-        }
-*/
-/*
-
-    if(md.size()>=2){//This is temporary, just to try new steps of simulation
-
-
-        MeshModel* dmesh=md.getMesh("Dust Mesh");
-        Point3f dir;
-        Point3f new_bar_coords;
-        dir[0]=0;
-        dir[1]=-1;
-        dir[2]=0;
-        if(dmesh!=0){
-                   CMeshO::VertexIterator vi;//= dmesh->cm.vert.begin();
-                   CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > pi = tri::Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(dmesh->cm,"ParticleInfo");
-                   CMeshO::CoordType new_pos;
-                   CMeshO::CoordType int_p;
-                   CMeshO::FacePointer old_face;
-                   CMeshO::FacePointer new_face;
-                   bool stop_movement=false;
-                   for(vi=dmesh->cm.vert.begin();vi!=dmesh->cm.vert.end();++vi){
-                       stop_movement=false;
-                       //First Movement
-                       old_face=pi[vi].face;
-                       new_pos=StepForward((*vi).P(),pi[vi].speed,pi[vi].mass,pi[vi].face,dir);
-                       while(!stop_movement){
-
-                           if(!IsOnFace(new_pos,pi[vi].face)){
-                            ComputeIntersection((*vi).P(),new_pos,pi[vi].face,int_p,new_face);
-                            pi[vi].face->Q()=pi[vi].face->Q()+1;
-                            pi[vi].face=new_face;
-                            Segment3f s1=Segment3f((*vi).P(),new_pos);
-                            Segment3f s2=Segment3f((*vi).P(),int_p);
-                            new_pos=int_p;
-                            (*vi).P()=new_pos;
-                            //if(old_face!=new_face)
-                            //{
-                                float t=s2.Length()/s1.Length();
-                                //Updating quality for face
-                                old_face->Q()=old_face->Q()+1;
-                                //Updating veloctiy of particle
-                                //pi[vi].speed=UpdateVelocity(pi[vi].speed,pi[vi].mass,old_face,dir,(1-t));
-                                //New Movement
-                                //old_face=new_face;
-                                if(t>0.05)new_pos=StepForward((*vi).P(),pi[vi].speed,pi[vi].mass,pi[vi].face,dir,t);
-                                else stop_movement=true;
-                            //}
-                            //else stop_movement=true;
-                        }else{
-                          stop_movement=true;
-                          pi[vi].face->Q()=pi[vi].face->Q()+1;
-                          (*vi).P()=new_pos;
-                        }
-
-
-
-                    }
-              }
-               }
-
-    if(par.getBool("mtc"))DrawDirt(md.getMesh(0));
-    }else{
-        //First Application
-        Point3f dir;
-        dir[0]=par.getFloat("dir_x");
-        dir[1]=par.getFloat("dir_y");
-        dir[2]=par.getFloat("dir_z");
-
-        vector<Point3f> dustVertexVec;
-        vector<Particle<CMeshO> > particleVec;
-        MeshModel* currMM=md.mm();
-
-        if (currMM->cm.fn==0) {
-                errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet";
-                return false;
-        }
-        std::string func_d = "ny";
-
-        //Initialize quality for face
-        CMeshO::FaceIterator fIter;
-        for(fIter=currMM->cm.face.begin();fIter!=currMM->cm.face.end();++fIter){
-            fIter->Q()=0;
-        }
-
-
-        ComputeNormalDustAmount(currMM,dir,par.getFloat("adhesion"),par.getFloat("slippiness"));
-        ComputeSurfaceExposure(currMM,1,1);
-        GenerateParticles(currMM,dustVertexVec,particleVec,par.getInt("nparticles"),0.6);
-
-        //dmm-> Dust Mesh Model
-        MeshModel* dmm=md.addNewMesh("Dust Mesh");
-
-        dmm->cm.Clear();
-        tri::Allocator<CMeshO>::AddVertices(dmm->cm,dustVertexVec.size());
-
-        CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
-
-        CMeshO::VertexIterator vIter=dmm->cm.vert.begin();
-        vector<Point3f>::iterator dvIter;
-        std::vector< Particle<CMeshO> >::iterator dpIter=particleVec.begin();
-
-        for(dvIter=dustVertexVec.begin();dvIter!=dustVertexVec.end();++dvIter){
-            (*vIter).P()=CMeshO::CoordType ((*dvIter)[0],(*dvIter)[1],(*dvIter)[2]);
-            ph[vIter]=(*dpIter);
-            ++dpIter;
-            ++vIter;
-        }
-    }
-    return true;
-*/
 
 
 MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *filter)
