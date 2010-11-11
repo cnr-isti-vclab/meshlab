@@ -293,13 +293,18 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         ccdWidth = ImageInfo.CCDWidth;
         focalLength = ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
         pixelSizeMm = ccdWidth / qMax(width,height);
-        //qDebug() << "Width:" << width;
-        //qDebug() << "Heigth:" << height;
+        qDebug() << "Width:" << width;
+        qDebug() << "Heigth:" << height;
+        qDebug() << "CCD Width:" << ccdWidth;
+        qDebug() << "Focal:" << focalLength;
+        qDebug() << "Pixel Size mm:" << pixelSizeMm;
         //qDebug() << "CCDwidth / focalLength = " << ccdWidth / focalLength << " Photosynth value = " << cam[CameraParameters::FOCAL_LENGTH];
+        /*
         width = 1002;
         height = 712;
         focalLength = 22.7628;
         pixelSizeMm = 0.0369161;
+        */
       }
       s.Intrinsics.FocalMm = focalLength;
       s.Intrinsics.PixelSizeMm = Point2f(pixelSizeMm,pixelSizeMm);
