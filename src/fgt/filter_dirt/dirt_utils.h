@@ -70,23 +70,42 @@ CMeshO::CoordType fixEdgePointCoordinates(CMeshO::CoordType p,CMeshO::FacePointe
     CMeshO::CoordType c_p; //Correct Position
     InterpolationParameters(*f,p,bc);
 
-    if(bc[0]==0){
-        bc[1]=1-bc[2];
-        c_p=fromBarCoords(bc,f);
+    int i;
+
+    if(bc[0]<bc[1])
+    {
+        if(bc[0]<bc[2]){
+            i=0;
+        }else{
+            i=2;
+        }
+
+    }else{
+        if(bc[1]<bc[2]){
+            i=1;
+        }else{
+            i=2;
+        }
 
     }
-
-    if(bc[1]==0){
-        bc[0]=1-bc[2];
-        c_p=fromBarCoords(bc,f);
-
-    }
-
-    if(bc[2]==0){
-        bc[0]=1-bc[1];
-        c_p=fromBarCoords(bc,f);
-     }
-
+    switch(i){
+    case 0:{
+            bc[0]=0.001f;
+            bc[1]=1-bc[2]-bc[0];
+            break;
+        }
+        case 1:{
+            bc[1]=0.001f;
+            bc[0]=1-bc[2]-bc[1];
+            break;
+            }
+        case 2:{
+            bc[2]=0.001f;
+            bc[0]=1-bc[1]-bc[2];
+            break;
+            }
+        }
+    c_p=fromBarCoords(bc,f);
     return c_p;
 };
 
@@ -100,6 +119,65 @@ CMeshO::CoordType fixEdgePointCoordinates(CMeshO::CoordType p,CMeshO::FacePointe
 @return true if point p is on face f, false elsewhere.
 */
 bool IsOnFace(Point3f p, CMeshO::FacePointer f){
+
+
+    Point3f p0=f->P(0);
+    Point3f p1=f->P(1);
+    Point3f  p2=f->P(2);
+
+    CMeshO::CoordType n=f->N();
+
+    float a = n.dot(p-p0);
+    if(math::Abs(a)>0.00001) return false;
+
+
+    int max_c;
+
+    float n0=math::Abs(n[0]);
+    float n1=math::Abs(n[1]);
+    float n2=math::Abs(n[2]);
+
+    if(n0>n1){
+          if(n0>n2) max_c=0;
+          else max_c=2;
+    }else{
+        if(n1>n2) max_c=1;
+        else max_c=2;
+              }
+
+
+    Point2f p_2d;
+    Point2f p0_2d;
+    Point2f p1_2d;
+    Point2f p2_2d;
+switch(max_c){
+    case 0:{
+            p0_2d=Point2f(p0[1],p0[2]);
+            p1_2d=Point2f(p1[1],p1[2]);
+            p2_2d=Point2f(p2[1],p2[2]);
+            p_2d=Point2f(p[1],p[2]);
+            break;
+        }
+    case 1:{
+            p0_2d=Point2f(p0[0],p0[2]);
+            p1_2d=Point2f(p1[0],p1[2]);
+            p2_2d=Point2f(p2[0],p2[2]);
+            p_2d=Point2f(p[0],p[2]);
+
+            break;
+        }
+    case 2:{
+            p0_2d=Point2f(p0[0],p0[1]);
+            p1_2d=Point2f(p1[0],p1[1]);
+            p2_2d=Point2f(p2[0],p2[1]);
+            p_2d=Point2f(p[0],p[1]);
+
+            break;
+        }
+    }
+
+
+
     Triangle2<float> f_2d=Triangle2<float>(p0_2d,p1_2d,p2_2d);
     return IsInsideTrianglePoint(f_2d,p_2d);
 
@@ -447,7 +525,7 @@ bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FaceP
               }
           }
 
-        if(!IsOnFace(int_point,new_face)){
+        if(!IsOnFace(int_point,new_f)){
             int_point=fixEdgePointCoordinates(int_point,new_f);
         }
 
@@ -494,7 +572,7 @@ void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s){
 
         fi->Q()=d;
     }
-    return true;
+
 };
 
 /**
@@ -592,7 +670,7 @@ void CreateDustTexture(MeshModel* m){
 bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std::vector< Particle<CMeshO> > &dpv,int d,float threshold){
 
     //Exposure Handler
-    CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m->cm,std::string("exposure"));
+   // CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m->cm,std::string("exposure"));
 
     CMeshO::FaceIterator fi;
     CMeshO::CoordType p;
@@ -613,9 +691,9 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std::vec
     }
 */
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
-        float a=0;
-        if(eh[fi]<1) a=0;
-        else a=1;
+        float a=1;
+        //if(eh[fi]<1) a=0;
+        //else a=1;
         int n_dust=(int)d*fi->Q()*a;
 
         if(fi->Q()>threshold){
@@ -720,13 +798,14 @@ void MoveCloudMeshForward(MeshModel *cloud,Point3f force,float l,float time){
     for(vi=cloud->cm.vert.begin();vi!=cloud->cm.vert.end();++vi){
         float t=time;
         current_face=ph[vi].face;
+        CMeshO::FacePointer new_face;
         new_face=current_face   ;
         current_pos=vi->P();
         velocity=ph[vi].vel;
         mass=ph[vi].mass;
         new_pos=StepForward(vi->P(),velocity,mass,current_face,force,l,t);
         while(!IsOnFace(new_pos,current_face)){
-            CMeshO::FacePointer new_face;
+
             ComputeIntersection(current_pos,new_pos,current_face,new_face,int_pos);
             new_pos=int_pos;
             current_face=new_face;
@@ -738,13 +817,14 @@ void MoveCloudMeshForward(MeshModel *cloud,Point3f force,float l,float time){
                 if(!IsOnFace(new_pos,current_face)){
                     Point3f bc;
                     InterpolationParameters(*current_face,new_pos,bc);
-                    }
+                    break;
+                }
             }
         }
         vi->P()=new_pos;
-        ph[vi].face=current_face;
+        ph[vi].face=new_face;
     }
-    return true;
+
 };
 
 #endif // DIRT_UTILS_H

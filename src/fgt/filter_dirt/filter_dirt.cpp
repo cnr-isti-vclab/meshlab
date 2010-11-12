@@ -163,7 +163,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         tri::UpdateFlags<CMeshO>::FaceClear(currMM->cm);
 
         ComputeNormalDustAmount(currMM,dir,k,s);
-        ComputeSurfaceExposure(currMM,1,1);
+        //ComputeSurfaceExposure(currMM,1,1);
         GenerateParticles(currMM,dust_points,dust_particles,n_p,0.6);
 
         tri::UpdateFlags<CMeshO>::FaceClear(currMM->cm);
@@ -238,7 +238,7 @@ MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *filter)
 {
     switch(ID(filter)){
     case FP_DIRT:return MeshFilterInterface::Sampling;
-    case FP_CLOUD_MOVEMENT:return MeshFilterInterface::VertexColoring;
+    case FP_CLOUD_MOVEMENT:return MeshFilterInterface::Remeshing;
     default:assert(0);
     }
 }
