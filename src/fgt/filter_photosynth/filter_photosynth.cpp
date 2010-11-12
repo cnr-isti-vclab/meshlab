@@ -195,8 +195,8 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
   bool success = true;
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
   {
-      success = false;
-      qWarning() << "Failed to create cam.txt";
+    success = false;
+    qWarning() << "Failed to create cam.txt";
   }
   QTextStream out(&file);
   const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
@@ -210,149 +210,147 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       foreach(p, sys->_pointCloud->_points)
       {
         tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-        //mm->cm.vert.back().P() = Point3f(p._x,p._z,p._y);
-        //mm->cm.vert.back().P() = Point3f(p._x,p._z,-p._y);
-        //mm->cm.vert.back().P() = Point3f(p._y,p._z,p._x);// <---
         mm->cm.vert.back().P() = Point3f(p._x,p._y,p._z);
         mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
       }
 
-    }
-    MeshModel *mm = md.addNewMesh("cameras");
-    CameraParameters cam;
-    foreach(cam, sys->_cameraParametersList)
-    {
-
-      qreal a = cam[CameraParameters::ROT_X] * cam[CameraParameters::ROT_X] +
-                cam[CameraParameters::ROT_Y] * cam[CameraParameters::ROT_Y] +
-                cam[CameraParameters::ROT_Z] * cam[CameraParameters::ROT_Z];
-      qreal w2 = 1 - a;
-      qreal w = sqrt(w2);
-      Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_X],(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z]);
-      //Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z],(float)cam[CameraParameters::ROT_X]);
-      Matrix44f rot;
-      q.ToMatrix(rot);
-      //permutation matrix;
-      const float _p[] = {0,1,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,1};
-      Matrix44f p((float *)(&_p[0]));
-      Matrix44f permRot = p * rot;
-
-      Matrix44f flip;
-      flip.SetRotateDeg(180,Point3f(1,0,0));
-      // (rot * flip)^T = flip^T * rot^T
-      Matrix44f transposedFlippedRot = flip.transpose() * rot.transpose();
-
-      Shotf s;
-      s.Extrinsics.SetRot(transposedFlippedRot);
-      //s.Extrinsics.SetTra(Point3f(-cam[CameraParameters::POS_X], -cam[CameraParameters::POS_Y], -cam[CameraParameters::POS_Z]));
-      s.Extrinsics.SetTra(Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]));
-
-
-      //MeshModel *mm = md.addNewMesh("camera");
-      tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-      //mm->cm.vert.back().P() = getTranslation(cam);
-      mm->cm.vert.back().P() = Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]);
-
-
-      //qreal focal = cam[CameraParameters::FOCAL_LENGTH];
-      //s.Intrinsics.FocalMm = focal * 10;
-      //s.Intrinsics.PixelSizeMm = Point2f(0.1,0.1);
-      Image img = synthData->_imageMap->value(cam._imageID);
-      QDir imageDir(path);
-      imageDir.cd(synthData->_collectionID);
-      //qmeta::Jpeg jpeg(imageDir.filePath("IMG_%1.jpg").arg(img._ID));
-      int width = 0;
-      int height = 0;
-      float focalLength = 0;
-      float ccdWidth = 0;
-      float pixelSizeMm = 0;
-      const char *FileName = imageDir.filePath("IMG_%1.jpg").arg(img._ID).toStdString().data();
-      if (strlen(FileName) >= JHEAD_PATH_MAX-1){
-          // Protect against buffer overruns in strcpy / strcat's on filename
-          ErrFatal("filename too long");
-          qWarning() << "filename too long";
-      }
-
-      ResetJpgfile();
-
-      // Start with an empty image information structure.
-      memset(&ImageInfo, 0, sizeof(ImageInfo));
-      ImageInfo.FlashUsed = -1;
-      ImageInfo.MeteringMode = -1;
-      ImageInfo.Whitebalance = -1;
-
-      strncpy(ImageInfo.FileName, FileName, PATH_MAX);
-      int res = ReadJpegFile(FileName,READ_METADATA);
-      if(res)
-      {
-          //width = jpeg.exif()->Value(qmeta::Exif::kPixelXDimension).ToUInt();
-          //height = jpeg.exif()->Value(qmeta::Exif::kPixelYDimension).ToUInt();
-        width = ImageInfo.Width;
-        height = ImageInfo.Height;
-        //focalLength = ImageInfo.FocalLength;
-        ccdWidth = ImageInfo.CCDWidth;
-        focalLength = ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
-        pixelSizeMm = ccdWidth / qMax(width,height);
-        qDebug() << "Width:" << width;
-        qDebug() << "Heigth:" << height;
-        qDebug() << "CCD Width:" << ccdWidth;
-        qDebug() << "Focal:" << focalLength;
-        qDebug() << "Pixel Size mm:" << pixelSizeMm;
-        //qDebug() << "CCDwidth / focalLength = " << ccdWidth / focalLength << " Photosynth value = " << cam[CameraParameters::FOCAL_LENGTH];
-        /*
-        width = 1002;
-        height = 712;
-        focalLength = 22.7628;
-        pixelSizeMm = 0.0369161;
-        */
-      }
-      s.Intrinsics.FocalMm = focalLength;
-      s.Intrinsics.PixelSizeMm = Point2f(pixelSizeMm,pixelSizeMm);
-      s.Intrinsics.ViewportPx = Point2i(width,height);
-      s.Intrinsics.CenterPx = Point2f(width/2,height/2);
-      if(success)
-      {
-        QString traVec = QString("TranslationVector=\"%1 %2 %3 1\"").arg(s.Extrinsics.Tra().X()).arg(s.Extrinsics.Tra().Y()).arg(s.Extrinsics.Tra().Z());
-        QString lensDist("LensDistortion=\"0 0\"");
-        QString viewPx = QString("ViewportPixel=\"%1 %2\"").arg(width).arg(height);
-        QString pxSize = QString("PixelSizeMm=\"%1 %2\"").arg(pixelSizeMm).arg(pixelSizeMm);
-        QString centerPx = QString("CenterPx=\"%1 %2\"").arg(width/2).arg(height/2);
-        QString focalMm = QString("FocalMm=\"%1\"").arg(s.Intrinsics.FocalMm);
-        out << QString("Camera %1 (Image %2: %3): ").arg(cam._camID).arg(img._ID).arg(img._url) << "\n\n";
-        out << "<!DOCTYPE ViewState>\n<project>\n";
-        out << " <VCGCamera ";
-        out << traVec << " ";
-        out << lensDist << " ";
-        out << viewPx << " ";
-        out << pxSize << " ";
-        out << centerPx << " ";
-        out << focalMm << " ";
-        out << "RotationMatrix=\"";
-        unsigned int i, j;
-        for(i = 0; i < 4; i++)
-          for(j = 0; j < 4; j++)
-            //out << rot.ElementAt(i,j) << " ";
-            out << transposedFlippedRot.ElementAt(i,j) << " ";
-        out << "\" ";
-        out << "PhotosynthQuaternion=\"" << cam[CameraParameters::ROT_X] << " " << cam[CameraParameters::ROT_Y] << " " << cam[CameraParameters::ROT_Z] << "\" ";
-        out << "w=\"" << w << "\" />\n";
-        out << " <ViewSettings NearPlane=\"0\" TrackScale=\"0.299015\" FarPlane=\"13.0311\"/>\n";
-        out << " <Render Lighting=\"0\" DoubleSideLighting=\"0\" SelectedVert=\"0\" ColorMode=\"3\" SelectedFace=\"0\" BackFaceCull=\"0\" FancyLighting=\"0\" DrawMode=\"2\" TextureMode=\"0\"/>\n";
-        out << "</project>\n\n\n\n";
-      }
-
       if(par.getBool("saveImages"))
       {
-        QDir dir(path);
-        dir.cd(synthData->_collectionID);
-        //QHashIterator<int, Image> it(*(synthData->_imageMap));
-        QString rasterBase("IMG_%1.jpg");
-        //while (it.hasNext())
+        MeshModel *mm = md.addNewMesh("cameras");
+        CameraParameters cam;
+        foreach(cam, sys->_cameraParametersList)
         {
-          //it.next();
-          //RasterModel *rm = md.addNewRaster(dir.filePath(rasterBase.arg(it.value()._ID)).toStdString().data());
-          RasterModel *rm = md.addNewRaster(dir.filePath(rasterBase.arg(img._ID)).toStdString().data());
-          rm->shot = s;
+
+          qreal a = cam[CameraParameters::ROT_X] * cam[CameraParameters::ROT_X] +
+                    cam[CameraParameters::ROT_Y] * cam[CameraParameters::ROT_Y] +
+                    cam[CameraParameters::ROT_Z] * cam[CameraParameters::ROT_Z];
+          qreal w2 = 1 - a;
+          qreal w = sqrt(w2);
+          Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_X],(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z]);
+          Matrix44f rot;
+          q.ToMatrix(rot);
+          Matrix44f flip;
+          flip.SetRotateDeg(180,Point3f(1,0,0));
+          // (rot * flip)^T = flip^T * rot^T
+          Matrix44f transposedFlippedRot = flip.transpose() * rot.transpose();
+
+          Shotf s;
+          s.Extrinsics.SetRot(transposedFlippedRot);
+          s.Extrinsics.SetTra(Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]));
+
+          tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
+          mm->cm.vert.back().P() = Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]);
+
+          Image img = synthData->_imageMap->value(cam._imageID);
+          QDir imageDir(path);
+          imageDir.cd(synthData->_collectionID);
+          //qmeta::Jpeg jpeg(imageDir.filePath("IMG_%1.jpg").arg(img._ID));
+          int width = 0;
+          int height = 0;
+          float focalLength = 0;
+          float ccdWidth = 0;
+          float pixelSizeMm = 0;
+          const char *FileName = imageDir.filePath("IMG_%1.jpg").arg(img._ID).toStdString().data();
+          if (strlen(FileName) >= JHEAD_PATH_MAX-1){
+              // Protect against buffer overruns in strcpy / strcat's on filename
+              ErrFatal("filename too long");
+              qWarning() << "filename too long";
+          }
+
+          ResetJpgfile();
+
+          // Start with an empty image information structure.
+          memset(&ImageInfo, 0, sizeof(ImageInfo));
+          ImageInfo.FlashUsed = -1;
+          ImageInfo.MeteringMode = -1;
+          ImageInfo.Whitebalance = -1;
+
+          strncpy(ImageInfo.FileName, FileName, PATH_MAX);
+          int res = ReadJpegFile(FileName,READ_METADATA);
+          if(res)
+          {
+              //width = jpeg.exif()->Value(qmeta::Exif::kPixelXDimension).ToUInt();
+              //height = jpeg.exif()->Value(qmeta::Exif::kPixelYDimension).ToUInt();
+            width = ImageInfo.Width;
+            height = ImageInfo.Height;
+            ccdWidth = ImageInfo.CCDWidth;
+            focalLength = ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
+            pixelSizeMm = ccdWidth / qMax(width,height);
+            qDebug() << "Width:" << width;
+            qDebug() << "Heigth:" << height;
+            qDebug() << "CCD Width:" << ccdWidth;
+            qDebug() << "Focal:" << focalLength;
+            qDebug() << "Pixel Size mm:" << pixelSizeMm;
+          }
+          if(ccdWidth == 0)
+          {
+            int resUnit = ImageInfo.ResolutionUnit;
+            float xResolution = ImageInfo.xResolution;
+            float yResolution = ImageInfo.yResolution;
+            qDebug() << "xResolution:" << xResolution;
+            qDebug() << "yResolution:" << yResolution;
+            pixelSizeMm = 1 / qMax(xResolution,yResolution);
+            switch(resUnit)
+            {
+            case 2: //inches
+              pixelSizeMm *= 25.4;
+              break;
+            case 3: //centimeters
+              pixelSizeMm *= 10;
+              break;
+            }
+            ccdWidth = pixelSizeMm * qMax(width,height);
+            focalLength = ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
+          }
+          s.Intrinsics.FocalMm = focalLength;
+          s.Intrinsics.PixelSizeMm = Point2f(pixelSizeMm,pixelSizeMm);
+          s.Intrinsics.ViewportPx = Point2i(width,height);
+          s.Intrinsics.CenterPx = Point2f(width/2,height/2);
+          if(success)
+          {
+            QString traVec = QString("TranslationVector=\"%1 %2 %3 1\"").arg(s.Extrinsics.Tra().X()).arg(s.Extrinsics.Tra().Y()).arg(s.Extrinsics.Tra().Z());
+            QString lensDist("LensDistortion=\"0 0\"");
+            QString viewPx = QString("ViewportPixel=\"%1 %2\"").arg(width).arg(height);
+            QString pxSize = QString("PixelSizeMm=\"%1 %2\"").arg(pixelSizeMm).arg(pixelSizeMm);
+            QString centerPx = QString("CenterPx=\"%1 %2\"").arg(width/2).arg(height/2);
+            QString focalMm = QString("FocalMm=\"%1\"").arg(s.Intrinsics.FocalMm);
+            out << QString("Camera %1 (Image %2: %3): ").arg(cam._camID).arg(img._ID).arg(img._url) << "\n\n";
+            out << "<!DOCTYPE ViewState>\n<project>\n";
+            out << " <VCGCamera ";
+            out << traVec << " ";
+            out << lensDist << " ";
+            out << viewPx << " ";
+            out << pxSize << " ";
+            out << centerPx << " ";
+            out << focalMm << " ";
+            out << "RotationMatrix=\"";
+            unsigned int i, j;
+            for(i = 0; i < 4; i++)
+              for(j = 0; j < 4; j++)
+                //out << rot.ElementAt(i,j) << " ";
+                out << transposedFlippedRot.ElementAt(i,j) << " ";
+            out << "\" ";
+            out << "PhotosynthQuaternion=\"" << cam[CameraParameters::ROT_X] << " " << cam[CameraParameters::ROT_Y] << " " << cam[CameraParameters::ROT_Z] << "\" ";
+            out << "w=\"" << w << "\" />\n";
+            out << " <ViewSettings NearPlane=\"0\" TrackScale=\"0.299015\" FarPlane=\"13.0311\"/>\n";
+            out << " <Render Lighting=\"0\" DoubleSideLighting=\"0\" SelectedVert=\"0\" ColorMode=\"3\" SelectedFace=\"0\" BackFaceCull=\"0\" FancyLighting=\"0\" DrawMode=\"2\" TextureMode=\"0\"/>\n";
+            out << "</project>\n\n\n\n";
+          }
+
+          if(par.getBool("saveImages"))
+          {
+            QDir dir(path);
+            dir.cd(synthData->_collectionID);
+            //QHashIterator<int, Image> it(*(synthData->_imageMap));
+            QString rasterBase("IMG_%1.jpg");
+            //while (it.hasNext())
+            {
+              //it.next();
+              //RasterModel *rm = md.addNewRaster(dir.filePath(rasterBase.arg(it.value()._ID)).toStdString().data());
+              RasterModel *rm = md.addNewRaster(dir.filePath(rasterBase.arg(img._ID)).toStdString().data());
+              rm->shot = s;
+            }
+          }
         }
       }
     }

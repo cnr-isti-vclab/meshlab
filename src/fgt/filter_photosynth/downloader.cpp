@@ -25,21 +25,6 @@
  * CameraParameters *
  ********************/
 
-void CameraParameters::rotationFromNormalizedQuaternion()
-{
-  if (_fields[ROT_X] == 0 && _fields[ROT_Y] == 0 && _fields[ROT_Z] == 0)
-      return;
-
-  qreal a = _fields[ROT_X] * _fields[ROT_X] + _fields[ROT_Y] * _fields[ROT_Y] + _fields[ROT_Z] * _fields[ROT_Z];
-  qreal s = sqrt(a);
-  qreal x3 = sqrt(1 - a);
-  qreal l = atan2(s,x3);
-  qreal k = l * 2.0 / s;
-
-  _fields[ROT_X] = _fields[ROT_X] * k;
-  _fields[ROT_Y] = _fields[ROT_Y] * k;
-  _fields[ROT_Z] = _fields[ROT_Z] * k;
-}
 /*
 Point3f CameraParameters::getTranslation()
 {
@@ -339,24 +324,6 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
             paramIt.next();
             params[i] = paramIt.value().toNumber();
           }
-          /*
-          paramIt.next();
-          params._posX = it.value().toNumber();
-          paramIt.next();
-          params._posY = it.value().toNumber();
-          paramIt.next();
-          params._posZ = it.value().toNumber();
-          paramIt.next();
-          params._rotX = it.value().toNumber();
-          paramIt.next();
-          params._rotY = it.value().toNumber();
-          paramIt.next();
-          params._rotZ = it.value().toNumber();
-          paramIt.next();
-          params._aspectRatio = it.value().toNumber();
-          paramIt.next();
-          params._focalLength = it.value().toNumber();
-          */
           QScriptValue distortion = camera.property("f");
           if(distortion.isValid() && !distortion.isNull())
           {
@@ -368,7 +335,6 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
           }
           else
             params._distortionRadius1 = params._distortionRadius2 = 0;
-          //params.rotationFromNormalizedQuaternion();
           coordSys->_cameraParametersList.append(params);
         }
       }

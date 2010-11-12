@@ -30,23 +30,6 @@ typedef struct Image
   QString _localPath;
 } Image;
 
-/*
-typedef struct CameraParameters
-{
-  int _imageID;
-  qreal _posX;
-  qreal _posY;
-  qreal _posZ;
-  qreal _rotX;
-  qreal _rotY;
-  qreal _rotZ;
-  qreal _aspectRatio;
-  qreal _focalLength;
-  qreal _distortionRadius1;
-  qreal _distortionRadius2;
-} CameraParameters;
-*/
-
 class CameraParameters
 {
 public:
@@ -64,7 +47,6 @@ public:
     LAST = FOCAL_LENGTH
   };
 
-  void rotationFromNormalizedQuaternion();
   //Point3f getTranslation();
   //Matrix44f getRotation();
 
