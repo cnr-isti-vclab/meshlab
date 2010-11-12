@@ -15,7 +15,8 @@
 #define FILTER_PHOTOSYNTH_PLUGIN_H
 
 //#include <QObject>
-#include <common/interfaces.h>
+#include "synthData.h"
+//#include <common/interfaces.h>
 
 class FilterPhotosynthPlugin : public QObject, public MeshFilterInterface
 {
@@ -36,6 +37,8 @@ public:
   int postCondition(QAction*) const { return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL; }
   FilterClass getClass(QAction *a);
   QString filterScriptFunctionName(FilterIDType filterID);
+  void readExifData(Image &img, CameraParameters &cam, QDir &root);
+  void outputToFile(QTextStream &out, Shotf &s, Image &img, CameraParameters &cam);
 };
 
 #endif /* FILTER_PHOTOSYNTH_PLUGIN_H */

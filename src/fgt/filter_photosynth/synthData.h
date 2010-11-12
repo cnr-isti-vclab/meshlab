@@ -10,6 +10,9 @@
 #include <QScriptValue>
 #include <QtSoapHttpTransport>
 #include <assert.h>
+#include <common/interfaces.h>
+
+using namespace vcg;
 
 typedef struct Point
 {
@@ -26,6 +29,8 @@ typedef struct Image
   int _ID;
   int _width;
   int _height;
+  int _exifWidth;
+  int _exifHeight;
   QString _url;
   QString _localPath;
 } Image;
@@ -47,8 +52,9 @@ public:
     LAST = FOCAL_LENGTH
   };
 
-  //Point3f getTranslation();
-  //Matrix44f getRotation();
+  CameraParameters() : _ccdWidth(0), _focalLength(0), _pixelSizeMm(0) {}
+  Point3f getTranslation();
+  Matrix44f getRotation();
 
   inline qreal &operator [] (const int i)
   {
@@ -61,6 +67,9 @@ public:
   qreal _fields[8];
   qreal _distortionRadius1;
   qreal _distortionRadius2;
+  float _ccdWidth;
+  float _focalLength;
+  float _pixelSizeMm;
 };
 
 /*
@@ -128,7 +137,7 @@ public:
     BIN_DATA_FORMAT,
     CREATE_DIR,
     SAVE_IMG,
-    NO_ERROR,
+    SYNTH_NO_ERROR,
     PENDING
   };
 
@@ -182,6 +191,8 @@ public:
 private:
   //used to count how many responses to bin files requests have been processed
   //when _semaphore reaches 0 _dataReady can be set to true
+  //used also to count how many responses to images requests have been processed
+  //when _semaphore reaches _numImages, all images have been downloaded
   int _semaphore;
   //the images will be saved here
   QString _savePath;

@@ -25,13 +25,11 @@
  * CameraParameters *
  ********************/
 
-/*
 Point3f CameraParameters::getTranslation()
 {
   return Point3f(_fields[CameraParameters::POS_X], _fields[CameraParameters::POS_Y], _fields[CameraParameters::POS_Z]);
 }
-*/
-/*
+
 Matrix44f CameraParameters::getRotation()
 {
   qreal a = _fields[CameraParameters::ROT_X] * _fields[CameraParameters::ROT_X] +
@@ -40,21 +38,16 @@ Matrix44f CameraParameters::getRotation()
   qreal w2 = 1 - a;
   qreal w = sqrt(w2);
   Quaternion<float> q((float)w,(float)_fields[CameraParameters::ROT_X],(float)_fields[CameraParameters::ROT_Y],(float)_fields[CameraParameters::ROT_Z]);
-  //Quaternion<float> q((float)w,(float)cam[CameraParameters::ROT_Y],(float)cam[CameraParameters::ROT_Z],(float)cam[CameraParameters::ROT_X]);
   Matrix44f rot;
   q.ToMatrix(rot);
-  //permutation matrix;
-  const float _p[] = {0,1,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,1};
-  Matrix44f p((float *)(&_p[0]));
-  Matrix44f permRot = p * rot;
-
   Matrix44f flip;
   flip.SetRotateDeg(180,Point3f(1,0,0));
-  Matrix44f flippedRot = rot * flip;
+  // (rot * flip)^T = flip^T * rot^T
+  Matrix44f transposedFlippedRot = flip.transpose() * rot.transpose();
 
-  return rot;
+  return transposedFlippedRot;
 }
-*/
+
 /**************
  * PointCloud *
  **************/
@@ -135,7 +128,7 @@ SynthData::~SynthData()
  */
 bool SynthData::isValid()
 {
-  return (_state == NO_ERROR);
+  return (_state == SYNTH_NO_ERROR);
 }
 
 QtSoapHttpTransport SynthData::transport;
@@ -469,7 +462,7 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
     if(!_savePath.isEmpty())
       downloadImages();
     else
-      SET_STATE_DELETE(NO_ERROR,true)
+      SET_STATE_DELETE(SYNTH_NO_ERROR,true)
   }
 
   httpResponse->deleteLater();
@@ -483,10 +476,7 @@ void SynthData::downloadImages()
 {
   _progress = DOWNLOAD_IMG;
   QDir dir(_savePath);
-  /*bool success = */dir.mkdir(_collectionID);
-  //if(!success)
-    //qWarning("fallimento creazione directory");
-  ///CHECK(!success,CREATE_DIR,true)
+  dir.mkdir(_collectionID);
 
   QNetworkAccessManager *manager = new QNetworkAccessManager(this);
   connect(manager, SIGNAL(finished(QNetworkReply*)),
@@ -525,7 +515,7 @@ void SynthData::saveImages(QNetworkReply *httpResponse)
   file.close();
 
   ++_semaphore;
-  CHECK_DELETE(_semaphore == _numImages, NO_ERROR, true)
+  CHECK_DELETE(_semaphore == _numImages, SYNTH_NO_ERROR, true)
 
   httpResponse->deleteLater();
 }
