@@ -150,7 +150,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       foreach(p, sys->_pointCloud->_points)
       {
         tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-        mm->cm.vert.back().P() = Point3f(p._x,p._y,p._z);
+        mm->cm.vert.back().P() = Point3f(p._x,p._z,-p._y);
         mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
       }
 
@@ -166,7 +166,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
           s.Extrinsics.SetTra(cam.getTranslation());
           //add a point to the cameras layer as a placeholder for the camera
           tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-          mm->cm.vert.back().P() = Point3f(cam[CameraParameters::POS_X], cam[CameraParameters::POS_Y], cam[CameraParameters::POS_Z]);
+          mm->cm.vert.back().P() = cam.getTranslation();
           //find intrinsics
           Image img = synthData->_imageMap->value(cam._imageID);
           QDir imageDir(path);

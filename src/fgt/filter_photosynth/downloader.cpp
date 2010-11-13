@@ -27,7 +27,7 @@
 
 Point3f CameraParameters::getTranslation()
 {
-  return Point3f(_fields[CameraParameters::POS_X], _fields[CameraParameters::POS_Y], _fields[CameraParameters::POS_Z]);
+  return Point3f(_fields[CameraParameters::POS_X], _fields[CameraParameters::POS_Z], -_fields[CameraParameters::POS_Y]);
 }
 
 Matrix44f CameraParameters::getRotation()
@@ -45,7 +45,11 @@ Matrix44f CameraParameters::getRotation()
   // (rot * flip)^T = flip^T * rot^T
   Matrix44f transposedFlippedRot = flip.transpose() * rot.transpose();
 
-  return transposedFlippedRot;
+  Matrix44f rotate90;
+  rotate90.SetRotateDeg(90,Point3f(1,0,0));
+  Matrix44f rotation = transposedFlippedRot * rotate90;
+
+  return rotation;
 }
 
 /**************
