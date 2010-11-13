@@ -110,48 +110,23 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
   if(par.getBool("saveImages"))
     //path = par.getSaveFileName("savePath");
     path = par.getString("savePath");
-  SynthData *synthData = SynthData::downloadSynthInfo(url,path);
+  SynthData *synthData = SynthData::downloadSynthInfo(url,path,cb);
 
   //Hangs on active wait until data are available from the server
   while(!synthData->_dataReady)
-  {
-    int progress = 0;
-    switch(synthData->_progress)
-    {
-      case SynthData::WEB_SERVICE:
-        progress = 0;
-        break;
-      case SynthData::DOWNLOAD_JSON:
-        progress = 20;
-        break;
-      case SynthData::PARSE_JSON:
-        progress = 40;
-        break;
-      case SynthData::DOWNLOAD_BIN:
-        progress = 60;
-        break;
-      case SynthData::LOADING_BIN:
-        progress = 80;
-        break;
-      case SynthData::DOWNLOAD_IMG:
-        progress = 100;
-    }
-
-    cb(progress,SynthData::progress[synthData->_progress]);
     //allows qt main loop to process the events relative to the response from the server,
     //triggering the signals that cause the invocation of the slots that process the response
     //and set the control variable that stops this active wait.
     //Note that a call to the function usleep() causes an infinite loop, because when the process awakes,
     //the control remains inside this loop and doesn't reach qt main loop that this way can't process events.
     QApplication::processEvents();
-  }
 
   if(!synthData->isValid())
   {
     this->errorMessage = SynthData::errors[synthData->_state];
     return false;
   }
-
+  cb(0,"Finishing import...");
   QDir dir(path);
   QFile file(dir.filePath("Cam.txt"));
   bool success = true;
@@ -164,8 +139,11 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 
   const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
   CoordinateSystem *sys;
+  int count = coordinateSystems->count();
+  int i = 0;
   foreach(sys, *coordinateSystems)
   {
+    cb((int)(i / count),"Finishing import...");
     if(sys->_pointCloud)
     {
       MeshModel *mm = md.addNewMesh("coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
@@ -210,6 +188,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         }
       }
     }
+    ++i;
   }
   file.close();
 

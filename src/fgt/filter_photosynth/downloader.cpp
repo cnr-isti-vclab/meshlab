@@ -94,7 +94,7 @@ const QString SynthData::errors[] =
   "Error saving images to the filesystem"
 };
 
-const char *SynthData::progress[] =
+const char *SynthData::steps[] =
 {
   "Contacting web service...",
   "Downloading json data...",
@@ -110,7 +110,8 @@ SynthData::SynthData(QObject *parent)
   _coordinateSystems = new QList<CoordinateSystem*>();
   _imageMap = new QHash<int,Image>();
   _state = PENDING;
-  _progress = WEB_SERVICE;
+  _step = WEB_SERVICE;
+  _progress = 0;
   _dataReady = false;
   _semaphore = 0;
 }
@@ -131,16 +132,29 @@ bool SynthData::isValid()
   return (_state == SYNTH_NO_ERROR);
 }
 
+/*
+ * Useful for cb().
+ * Returns the progress for the current step, and sets info according to the step being executed
+ */
+int SynthData::progressInfo()
+{
+  _info = steps[_step];
+  return _progress;
+}
+
 QtSoapHttpTransport SynthData::transport;
 
 /*
  * Contacts the photosynth web service to retrieve informations about
  * the synth whose identifier is contained within the given url.
  */
-SynthData *SynthData::downloadSynthInfo(QString url, QString path)
+SynthData *SynthData::downloadSynthInfo(QString url, QString path, vcg::CallBackPos *cb)
 {
   SynthData *synthData = new SynthData();
-
+  synthData->_cb = cb;
+  synthData->_step = WEB_SERVICE;
+  synthData->_progress = 0;
+  synthData->_cb(synthData->progressInfo(),synthData->_info.toStdString().data());
   if(url.isNull() || url.isEmpty())
   {
     synthData->_state = WRONG_URL;
@@ -186,6 +200,8 @@ SynthData *SynthData::downloadSynthInfo(QString url, QString path)
     transport.submitRequest(message, "/photosynthws/PhotosynthService.asmx");
   }
   synthData->_state = PENDING;
+  synthData->_progress = 50;
+  synthData->_cb(synthData->progressInfo(),synthData->_info.toStdString().data());
   return synthData;
 }
 
@@ -208,6 +224,8 @@ void SynthData::readWSresponse()
         //the url of the json string containing data about the synth coordinate systems (different clusters of points)
         //their camera parameters and the number of binary files containing the point clouds data.
         QString jsonURL = returnValue["JsonUrl"].toString();
+        _progress = 100;
+        _cb(progressInfo(),_info.toStdString().data());
         downloadJsonData(jsonURL);
       }
       else
@@ -227,12 +245,16 @@ void SynthData::readWSresponse()
  */
 void SynthData::downloadJsonData(QString jsonURL)
 {
+  _step = DOWNLOAD_JSON;
+  _progress = 0;
+  _cb(progressInfo(),_info.toStdString().data());
   QNetworkAccessManager *manager = new QNetworkAccessManager(this);
   connect(manager, SIGNAL(finished(QNetworkReply*)),
           this, SLOT(parseJsonString(QNetworkReply*)));
 
   manager->get(QNetworkRequest(QUrl(jsonURL)));
-  _progress = DOWNLOAD_JSON;
+  _progress = 50;
+  _cb(progressInfo(),_info.toStdString().data());
 }
 
 /*
@@ -241,7 +263,11 @@ void SynthData::downloadJsonData(QString jsonURL)
  */
 void SynthData::parseJsonString(QNetworkReply *httpResponse)
 {
-  _progress = PARSE_JSON;
+  _progress = 100;
+  _cb(progressInfo(),_info.toStdString().data());
+  _step = PARSE_JSON;
+  _progress = 0;
+  _cb(progressInfo(),_info.toStdString().data());
   QByteArray payload = httpResponse->readAll();
   QString json(payload);
   QScriptEngine engine;
@@ -274,6 +300,7 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
     QScriptValue coordSystems = collection.property("x");
     for(int i = 0; i <= coordSystemsCount; ++i)
     {
+      _progress = 50 + (int)(i / (2*coordSystemsCount));
       coordSys = new CoordinateSystem(i,this);
       _coordinateSystems->append(coordSys);
       QScriptValue cs = coordSystems.property(QString::number(i));
@@ -332,6 +359,8 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
         }
       }
     }
+    _progress = 100;
+    _cb(progressInfo(),_info.toStdString().data());
     downloadBinFiles();
   }
   else
@@ -345,8 +374,11 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
 void SynthData::parseImageMap(QScriptValue &map)
 {
   QScriptValueIterator imageIt(map);
+  int i = 0;
   while(imageIt.hasNext())
   {
+    _progress = (int)(i / (2*_numImages));
+    _cb(progressInfo(),_info.toStdString().data());
     imageIt.next();
     Image image;
     image._ID = imageIt.name().toInt();
@@ -358,6 +390,7 @@ void SynthData::parseImageMap(QScriptValue &map)
     image._height = sizeIt.value().toInt32();
     image._url = imageIt.value().property("u").toString();
     _imageMap->insert(image._ID,image);
+    ++i;
   }
 }
 
@@ -367,10 +400,12 @@ void SynthData::parseImageMap(QScriptValue &map)
  */
 void SynthData::downloadBinFiles()
 {
+  _step = DOWNLOAD_BIN;
+  _progress = 0;
+  _cb(progressInfo(),_info.toStdString().data());
   QNetworkAccessManager *manager = new QNetworkAccessManager(this);
   connect(manager, SIGNAL(finished(QNetworkReply*)),
           this, SLOT(loadBinFile(QNetworkReply*)));
-  _progress = DOWNLOAD_BIN;
   foreach(CoordinateSystem *sys, *_coordinateSystems)
   {
     if(sys->_pointCloud)
@@ -393,6 +428,7 @@ void SynthData::downloadBinFiles()
       }
     }
   }
+  _totalBinFilesCount = _semaphore;
 }
 
 /*
@@ -408,8 +444,9 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
     return;
   }
 
-  _progress = LOADING_BIN;
-
+  _step = LOADING_BIN;
+  _progress = 100 - (int)(_semaphore / _totalBinFilesCount);
+  _cb(progressInfo(),_info.toStdString().data());
   bool error = false;
   unsigned short versionMajor = readBigEndianUInt16(httpResponse,error);
   CHECK_ERRORS(READING_BIN_DATA)
@@ -460,7 +497,11 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
   if(_semaphore == 0)
   {
     if(!_savePath.isEmpty())
+    {
+      _progress = 100;
+      _cb(progressInfo(),_info.toStdString().data());
       downloadImages();
+    }
     else
       SET_STATE_DELETE(SYNTH_NO_ERROR,true)
   }
@@ -474,7 +515,9 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
  */
 void SynthData::downloadImages()
 {
-  _progress = DOWNLOAD_IMG;
+  _step = DOWNLOAD_IMG;
+  _progress = 0;
+  _cb(progressInfo(),_info.toStdString().data());
   QDir dir(_savePath);
   dir.mkdir(_collectionID);
 
@@ -504,6 +547,8 @@ void SynthData::saveImages(QNetworkReply *httpResponse)
   if(httpResponse->error() != QNetworkReply::NoError)
     qDebug() << httpResponse->errorString();
 
+  _progress = (int)(_semaphore / _numImages);
+  _cb(progressInfo(),_info.toStdString().data());
   QByteArray payload = httpResponse->readAll();
   QDir dir(_savePath);
   dir.cd(_collectionID);

@@ -121,9 +121,9 @@ public:
   //contains errors descriptions
   static const QString errors[];
   //contains the strings used by cb() funcion
-  static const char *progress[];
+  static const char *steps[];
 
-  enum Errors
+  enum Error
   {
     WRONG_URL = 0,
     WRONG_PATH,
@@ -141,7 +141,7 @@ public:
     PENDING
   };
 
-  enum Progress
+  enum Step
   {
     WEB_SERVICE = 0,
     DOWNLOAD_JSON,
@@ -156,7 +156,8 @@ public:
   bool isValid();
 
 public:
-  static SynthData *downloadSynthInfo(QString url, QString path);
+  static SynthData *downloadSynthInfo(QString url, QString path, vcg::CallBackPos *cb);
+  int progressInfo();
 
 private slots:
   void readWSresponse();
@@ -180,13 +181,20 @@ public:
   //a dictionary mapping images id to image representation
   QHash<int,Image> *_imageMap;
   //tells if this synth is valid, or if errors were encountered during the import process
-  Errors _state;
-  Progress _progress;
+  Error _state;
+  //tells the action the filter is performing during import process
+  Step _step;
+  //tells the progress (in percentage) of the step being executed
+  int _progress;
+  //during processing this string is set accordingly to the step is being executed
+  QString _info;
   //when a SynthData is instantiated _dataReady == false
   //until the data are downloaded from photosynth server
   bool _dataReady;
   ///Number of images of this synth
   int _numImages;
+  //the callback function to inform the user about the progress of the filter
+  vcg::CallBackPos *_cb;
 
 private:
   //used to count how many responses to bin files requests have been processed
@@ -194,6 +202,7 @@ private:
   //used also to count how many responses to images requests have been processed
   //when _semaphore reaches _numImages, all images have been downloaded
   int _semaphore;
+  int _totalBinFilesCount;
   //the images will be saved here
   QString _savePath;
 };
