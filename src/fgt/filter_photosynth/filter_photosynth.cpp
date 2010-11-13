@@ -140,10 +140,9 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
   const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
   CoordinateSystem *sys;
   int count = coordinateSystems->count();
-  int i = 0;
   foreach(sys, *coordinateSystems)
   {
-    cb((int)(i / count),"Finishing import...");
+    cb((int)(sys->_id / count),"Finishing import...");
     if(sys->_pointCloud)
     {
       MeshModel *mm = md.addNewMesh("coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
@@ -180,15 +179,12 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
           if(success)
             outputToFile(out, s, img, cam);
           //add a new raster
-          QString rasterBase("IMG_%1.jpg");
-          {
-            RasterModel *rm = md.addNewRaster(imageDir.filePath(rasterBase.arg(img._ID)).toStdString().data());
-            rm->shot = s;
-          }
+          RasterModel *rm = md.addNewRaster(imageDir.filePath(QString("IMG_%1.jpg").arg(img._ID)).toStdString().data());
+          rm->shot = s;
+          rm->setRasterName(QString("IMG_%1_%2.jpg").arg(img._ID).arg(sys->_id));
         }
       }
     }
-    ++i;
   }
   file.close();
 
