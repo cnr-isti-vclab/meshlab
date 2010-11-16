@@ -99,7 +99,8 @@ public:
 
 public slots:
     void updateTable();
-	void toggleStatus(QTreeWidgetItem * , int );
+  void rasterItemClicked(QTreeWidgetItem * , int );
+  void meshItemClicked(QTreeWidgetItem * , int );
     void showEvent ( QShowEvent * event );
     void showContextMenu(const QPoint& pos);
     void showLayerMenu();

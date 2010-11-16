@@ -54,13 +54,13 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	//TODO connect(updateTagAct, SIGNAL(triggered()), this, SLOT(?????????????));
 
 	// The following connection is used to associate the click with the change of the current mesh. 
-	connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(toggleStatus(QTreeWidgetItem * , int ) ) );
+  connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(meshItemClicked(QTreeWidgetItem * , int ) ) );
 	
 	connect(ui->meshTreeWidget, SIGNAL(itemExpanded(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
 	connect(ui->meshTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
 
 	// The following connection is used to associate the click with the switch between raster and mesh view. 
-	connect(ui->rasterTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(toggleStatus(QTreeWidgetItem * , int ) ) );
+  connect(ui->rasterTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(rasterItemClicked(QTreeWidgetItem * , int ) ) );
 
 	connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
 	connect(ui->deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );
@@ -75,54 +75,54 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	//connect(mw,SIGNAL(unSelectedDecoration(GLArea*,QAction*)),this,SLOT(removeParamsFromDecorationDialog(GLArea*,QAction*)));
 }
 
-void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
+void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 {
-  // I do not believe so! makeCurrent is a gl related call..
-  //Necessary because here the raster could be loaded and it needs an opengl context
-  //	mw->GLA()->makeCurrent();
-
-	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
-	RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(item);
-	if(mItem) 
-	{
+  MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
+  if(mItem)
+  {
     int clickedId= mItem->m->id();
-		switch(col)
-		{
-		case 0 :
-			{
-				//the user has clicked on one of the eyes
+    switch(col)
+    {
+    case 0 :
+      {
+        //the user has clicked on one of the eyes
         MeshDocument  *md= mw->GLA()->meshDoc;
-				// NICE TRICK.
-				// If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
-				// Very useful for comparing meshes
+        // NICE TRICK.
+        // If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
+        // Very useful for comparing meshes
 
-				if(QApplication::keyboardModifiers() == Qt::ControlModifier)
+        if(QApplication::keyboardModifiers() == Qt::ControlModifier)
           foreach(MeshModel *mp, md->meshList)
-				{
-					mp->visible=false;
+        {
+          mp->visible=false;
           mw->GLA()->addMeshSetVisibility(mp->id(), mp->visible);
-				}
+        }
 
         if(md->getMesh(clickedId)->visible)  md->getMesh(clickedId)->visible = false;
         else   md->getMesh(clickedId)->visible = true;
 
-				//Update current GLArea visibility 
+        //Update current GLArea visibility
         mw->GLA()->addMeshSetVisibility(md->getMesh(clickedId)->id(), md->getMesh(clickedId)->visible);
-			}
-		case 1 :
+      }
+    case 1 :
 
-		case 2 :
+    case 2 :
 
-		case 3 :
-			//the user has chosen to switch the layer
+    case 3 :
+      //the user has chosen to switch the layer
       mw->GLA()->meshDoc->setCurrentMesh(clickedId);
-			break;
-		}
-		//make sure the right row is colored or that they right eye is drawn (open or closed)
-		updateTable();
-		mw->GLA()->update();
-	}
-	else if(rItem)
+      break;
+    }
+    //make sure the right row is colored or that they right eye is drawn (open or closed)
+    updateTable();
+    mw->GLA()->update();
+  }
+}
+
+void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
+{
+	RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(item);
+  if(rItem)
 	{
 		int clickedId= rItem->r->id();
 
@@ -155,7 +155,6 @@ void LayerDialog::toggleStatus (QTreeWidgetItem * item , int col)
 		updateTable();
 		mw->GLA()->update();
 	}
-	else return; // user clicked on other info
 }
 
 void LayerDialog::showEvent ( QShowEvent * /* event*/ )
