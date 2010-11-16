@@ -77,7 +77,7 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
 	 switch(ID(action))
 	 {
    case FP_SET_RASTER_CAMERA :
-     parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current mesh."));
+     parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current raster."));
      break;
    case FP_SET_MESH_CAMERA :
      parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current mesh."));
