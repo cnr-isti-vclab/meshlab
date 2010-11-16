@@ -223,7 +223,7 @@ public slots:
 		void sendViewPos(QString name);
 		void sendSurfacePos(QString name);
 		void sendViewDir(QString name);
-		void sendCameraPos(QString name);
+    void sendMeshShot(QString name);
     void sendViewerShot(QString name);
     void sendRasterShot(QString name);
 
@@ -346,7 +346,8 @@ private:
 	//-----------Shot support----------------------------
 public:
   QPair<vcg::Shotf, float > shotFromTrackball();
-	bool viewFromFile();
+  void viewFromCurrentShot(QString kind);
+  bool viewFromFile();
 	void createOrthoView(QString);
 	void viewToClipboard();
 	void viewFromClipboard();

@@ -527,10 +527,10 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 			connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
 			connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
 			connect(gla_curr,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
-			connect(gla_curr,SIGNAL(transmitViewPos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Point3f)));
 			connect(gla_curr,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
 			connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
-			connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendViewPos(QString)));
+      connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendMeshShot(QString)));
 			connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
 			connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendCameraPos(QString)));
 		}
@@ -560,6 +560,12 @@ void Point3fWidget::setValue(QString name,Point3f newVal)
 		for(int i =0;i<3;++i)
 			coordSB[i]->setText(QString::number(newVal[i],'g',4));
 	}
+}
+
+void Point3fWidget::setValue(QString name,Shotf newValShot)
+{
+  Point3f p = newValShot.GetViewPoint();
+  setValue(name,p);
 }
 
 vcg::Point3f Point3fWidget::getValue()
@@ -607,6 +613,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
 
       QStringList names;
       names << "Current Trackball";
+      names << "Current Mesh";
       names << "Current Raster";
 
       getShotCombo = new QComboBox(p);
@@ -616,6 +623,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
       connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
       connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Shotf)));
       connect(this,SIGNAL(askViewerShot(QString)),gla_curr,SLOT(sendViewerShot(QString)));
+      connect(this,SIGNAL(askMeshShot(QString)),  gla_curr,SLOT(sendMeshShot(QString)));
       connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
     }
   gridLay->addLayout(lay,row,1,Qt::AlignTop);
@@ -624,10 +632,12 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
 void ShotfWidget::getShot()
 {
   int index = getShotCombo->currentIndex();
-  if(index==0)
-      emit askViewerShot(paramName);
-  else
-      emit askRasterShot(paramName);
+  switch(index)  {
+    case 0 : emit askViewerShot(paramName); break;
+    case 1 : emit askMeshShot(paramName); break;
+    case 2 : emit askRasterShot(paramName); break;
+    default : assert(0);
+  }
 }
 
 ShotfWidget::~ShotfWidget() {}

@@ -1068,10 +1068,10 @@ void GLArea::sendViewDir(QString name)
 	emit transmitViewDir(name,dir);
 }
 
-void GLArea::sendCameraPos(QString name)
+void GLArea::sendMeshShot(QString name)
 {
-		Point3f pos=meshDoc->mm()->cm.shot.GetViewPoint();
-	emit transmitViewDir(name, pos);
+  Shotf curShot=meshDoc->mm()->cm.shot;
+  emit transmitShot(name, curShot);
 }
 
 void GLArea::sendViewerShot(QString name)
@@ -1176,27 +1176,17 @@ void GLArea::setIsRaster(bool viewMode){
 }
 
 void GLArea::loadRaster(int id)
-{ 
-	foreach(RasterModel *rm, meshDoc->rasterList)
-		if(rm->id()==id){
-			meshDoc->setCurrentRaster(id);
-			setTarget(rm->currentPlane->image);
-			//load his shot or a default shot
-
-			//TODO temporaneo... poi bisogna creare un defaultShot
-//			createOrthoView("Front");
-      //rm->shot = shotFromTrackball().first;
-
-		if (rm->shot.IsValid())
-    {
-      //loadShot(QPair<Shotf, float> (rm->shot,trackball.track.sca));
+{
+  foreach(RasterModel *rm, meshDoc->rasterList)
+    if(rm->id()==id){
+    meshDoc->setCurrentRaster(id);
+    setTarget(rm->currentPlane->image);
+    //load his shot or a default shot
+    if (rm->shot.IsValid())
       loadShot(QPair<Shotf, float> (rm->shot,1));
-    }
-		else
-			createOrthoView("Front");
-			//rm->shot = shotFromTrackball().first;
-
-    }
+    else
+      createOrthoView("Front");
+  }
 }
 
 void GLArea::drawTarget() {
@@ -1281,22 +1271,21 @@ float GLArea::getCameraDistance()
 
 void GLArea::initializeShot(Shotf &shot)
 {
-	//Da vedere
-	shot.Intrinsics.PixelSizeMm[0]=0.036916077;
-    shot.Intrinsics.PixelSizeMm[1]=0.036916077;
+  shot.Intrinsics.PixelSizeMm[0]=0.036916077;
+  shot.Intrinsics.PixelSizeMm[1]=0.036916077;
 
-    shot.Intrinsics.DistorCenterPx[0]=width()/2;
-    shot.Intrinsics.DistorCenterPx[1]=height()/2;
-    shot.Intrinsics.CenterPx[0]=width()/2;
-    shot.Intrinsics.CenterPx[1]=height()/2;
-    shot.Intrinsics.ViewportPx[0]=width();
-    shot.Intrinsics.ViewportPx[1]=height();
+  shot.Intrinsics.DistorCenterPx[0]=width()/2;
+  shot.Intrinsics.DistorCenterPx[1]=height()/2;
+  shot.Intrinsics.CenterPx[0]=width()/2;
+  shot.Intrinsics.CenterPx[1]=height()/2;
+  shot.Intrinsics.ViewportPx[0]=width();
+  shot.Intrinsics.ViewportPx[1]=height();
 
-	double viewportYMm = shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
-	float defaultFov=60.0;
-	shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(defaultFov/2))); //27.846098mm
+  double viewportYMm = shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
+  float defaultFov=60.0;
+  shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(defaultFov/2))); //27.846098mm
 
-    shot.Extrinsics.SetIdentity();
+  shot.Extrinsics.SetIdentity();
 }
 
 bool GLArea::viewFromFile() 
@@ -1318,11 +1307,9 @@ bool GLArea::viewFromFile()
 	QString type = doc.doctype().name();
 
 	//TextAlign file project
-	if(type == "RegProjectML")
-    loadShotFromTextAlignFile(doc);
+  if(type == "RegProjectML")   loadShotFromTextAlignFile(doc);
 	//View State file
-	else if(type == "ViewState")
-    loadViewFromViewStateFile(doc);
+  else if(type == "ViewState") loadViewFromViewStateFile(doc);
 
 	qDebug("End file reading");
 	qf.close();
@@ -1495,24 +1482,22 @@ QPair<vcg::Shotf,float> GLArea::shotFromTrackball()
 	
   vcg::Shotf newShot = track2ShotCPU<float>(shot, &trackball);
 
-	////Expressing scaling as a translation along z
-	////k is the ratio between default scale and new scale
-	//double oldScale= 3.0f/meshDoc->bbox().Diag();
-	//double k= oldScale/trackball.track.sca;
-
-	////Apply this formula
-	//// R(t+p) = kR'(t'+p) forall p, R=R', k is a costant
-	//// R(t)= kR(t')
-	//// t = k*t'
-	//Point3d t1 = newShot.Extrinsics.Tra();
-	//
-	//Matrix44d rapM = Matrix44d().SetScale(k, k, k);
-	//Point3d t0 = rapM*t1;
-
-	//newShot.Extrinsics.SetTra(t0);
-
   return QPair<Shotf, float> (newShot,trackball.track.sca);
 }
+void GLArea::viewFromCurrentShot(QString kind)
+{
+  Shotf localShot;
+  if(kind=="Mesh" && meshDoc->mm())   localShot = meshDoc->mm()->cm.shot;
+  if(kind=="Raster" && meshDoc->rm()) localShot = meshDoc->rm()->shot;
+  if(!localShot.IsValid())
+  {
+    this->log->Logf(GLLogStream::SYSTEM, "Unable to set Shot from current %s",qPrintable(kind));
+    return;
+  }
+
+  loadShot(QPair<Shotf, float>(localShot,trackball.track.sca));
+}
+
 
 void GLArea::loadShot(const QPair<vcg::Shotf,float> &shotAndScale){
 	

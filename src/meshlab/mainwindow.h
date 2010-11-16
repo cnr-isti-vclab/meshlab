@@ -133,7 +133,9 @@ private slots:
 	void linkViewers();
 	void viewFrom(QAction *qa);
 	void readViewFromFile();
-	void copyViewToClipBoard();
+  void viewFromCurrentMeshShot();
+  void viewFromCurrentRasterShot();
+  void copyViewToClipBoard();
 	void pasteViewFromClipboard();
 
 	///////////Slot PopUp Menu Handles /////////////////////
@@ -363,6 +365,8 @@ private:
 	QAction *viewRightAct;
 	QAction *viewFrontAct;
 	QAction *viewBackAct;
+  QAction *viewFromMeshAct;
+  QAction *viewFromRasterAct;
 	QAction *viewFromFileAct;
 
 	///////////Actions Menu Windows -> Link/Copy/Paste View ////////////////////////

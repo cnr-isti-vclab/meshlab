@@ -37,11 +37,13 @@
 #include "savemaskexporter.h"
 #include "alnParser.h"
 
+
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/clean.h>
 #include "../common/scriptinterface.h"
+#include "../common/meshlabdocumentxml.h"
 
 using namespace std;
 using namespace vcg;
@@ -125,16 +127,13 @@ void MainWindow::updateWindowMenu()
 
 		// View From SUBmenu
 		viewFromMenu = windowsMenu->addMenu(tr("&View from"));
-
-		viewFromMenu->addAction(viewTopAct);
-		viewFromMenu->addAction(viewBottomAct);
-		viewFromMenu->addAction(viewLeftAct);
-		viewFromMenu->addAction(viewRightAct);
-		viewFromMenu->addAction(viewFrontAct);
-		viewFromMenu->addAction(viewBackAct);
+    foreach(QAction *ac, viewFromGroupAct->actions())
+      viewFromMenu->addAction(ac);
 
 		// View From File act
 		windowsMenu->addAction(viewFromFileAct);
+    windowsMenu->addAction(viewFromMeshAct);
+    windowsMenu->addAction(viewFromRasterAct);
 
 		// Copy and paste shot acts
 		windowsMenu->addAction(copyShotToClipboardAct);
@@ -181,10 +180,10 @@ void MainWindow::updateWindowMenu()
 
 void MainWindow::setColorMode(QAction *qa)
 {
-	if(qa->text() == tr("&None"))					GLA()->setColorMode(GLW::CMNone);
-        if(qa->text() == tr("Per &Mesh"))               GLA()->setColorMode(GLW::CMPerMesh);
-	if(qa->text() == tr("Per &Vertex"))		GLA()->setColorMode(GLW::CMPerVert);
-	if(qa->text() == tr("Per &Face"))			GLA()->setColorMode(GLW::CMPerFace);
+  if(qa->text() == tr("&None"))					GLA()->setColorMode(GLW::CMNone);
+  if(qa->text() == tr("Per &Mesh"))     GLA()->setColorMode(GLW::CMPerMesh);
+  if(qa->text() == tr("Per &Vertex"))		GLA()->setColorMode(GLW::CMPerVert);
+  if(qa->text() == tr("Per &Face"))			GLA()->setColorMode(GLW::CMPerFace);
 }
 
 void MainWindow::updateMenus()
@@ -507,35 +506,36 @@ void MainWindow::linkViewers()
 
 void MainWindow::viewFrom(QAction *qa)
 {
-  MultiViewer_Container *mvc = currentViewContainer();
-	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
-	if(glArea)
-		glArea->createOrthoView(qa->text());
+ if(GLA()) GLA()->createOrthoView(qa->text());
 }
 
 void MainWindow::readViewFromFile()
 {
-  MultiViewer_Container *mvc = currentViewContainer();
-	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
-	if(glArea)
-		glArea->viewFromFile();
+  if(GLA()) GLA()->viewFromFile();
 	updateMenus();
+}
+
+
+void MainWindow::viewFromCurrentMeshShot()
+{
+  if(GLA()) GLA()->viewFromCurrentShot("Mesh");
+  updateMenus();
+}
+
+void MainWindow::viewFromCurrentRasterShot()
+{
+  if(GLA()) GLA()->viewFromCurrentShot("Raster");
+  updateMenus();
 }
 
 void MainWindow::copyViewToClipBoard()
 {
-  MultiViewer_Container *mvc = currentViewContainer();
-	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
-	if(glArea)
-		glArea->viewToClipboard();
+  if(GLA()) GLA()->viewToClipboard();
 }
 
 void MainWindow::pasteViewFromClipboard()
 {
-  MultiViewer_Container *mvc = currentViewContainer();
-	GLArea* glArea = qobject_cast<GLArea*>(mvc->currentView());
-	if(glArea)
-		glArea->viewFromClipboard();
+  if(GLA()) GLA()->viewFromClipboard();
 	updateMenus();
 }
 
@@ -1123,8 +1123,8 @@ bool MainWindow::openIn(QString /* fileName */)
 void MainWindow::saveProject()
 {
 
-	QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),lastUsedDirectory.path().append("/untitled.aln"), tr("*.aln"));
-
+  QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),lastUsedDirectory.path().append("/test.mlp"), tr("*.aln,*.mlp"));
+bool ret;
 	qDebug("Saving aln file %s\n",qPrintable(fileName));
 	if (fileName.isEmpty()) return;
 	else
@@ -1134,7 +1134,9 @@ void MainWindow::saveProject()
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
 	}
-
+  QFileInfo fi(fileName);
+  if (QString(fi.suffix()).toLower() == "aln")
+  {
   vector<string> meshNameVector;
 	vector<Matrix44f> transfVector;
 
@@ -1143,8 +1145,12 @@ void MainWindow::saveProject()
         meshNameVector.push_back(qPrintable(mp->shortName()));
 		transfVector.push_back(mp->cm.Tr);
 	}
-	bool ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
-
+   ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
+}
+  else
+  {
+    ret = MeshDocumentToXMLFile(*meshDoc(),fileName);
+  }
 	if(!ret)
 	 QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
 

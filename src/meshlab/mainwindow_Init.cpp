@@ -290,17 +290,21 @@ void MainWindow::createActions()
 
 	viewFromGroupAct =  new QActionGroup(this);	viewFromGroupAct->setExclusive(true);
 
-	viewTopAct	  = new QAction(tr("Top"),viewFromGroupAct);
+  viewTopAct	    = new QAction(tr("Top"),viewFromGroupAct);
 	viewBottomAct	  = new QAction(tr("Bottom"),viewFromGroupAct);
-	viewLeftAct	  = new QAction(tr("Left"),viewFromGroupAct);
+  viewLeftAct	    = new QAction(tr("Left"),viewFromGroupAct);
 	viewRightAct	  = new QAction(tr("Right"),viewFromGroupAct);
 	viewFrontAct	  = new QAction(tr("Front"),viewFromGroupAct);
-	viewBackAct	  = new QAction(tr("Back"),viewFromGroupAct);
+  viewBackAct	    = new QAction(tr("Back"),viewFromGroupAct);
 
 	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
 
-	viewFromFileAct = new QAction (tr("View from file"), this);
-	connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
+  viewFromMeshAct = new QAction (tr("View from Mesh Camera"), this);
+  viewFromRasterAct = new QAction (tr("View from Raster Camera"), this);
+  viewFromFileAct = new QAction (tr("View from file"), this);
+  connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
+  connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
+  connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
 
 	copyShotToClipboardAct = new QAction (tr("Copy shot"), this);
 	copyShotToClipboardAct->setShortcut(QKeySequence::Copy);
