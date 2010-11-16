@@ -1188,7 +1188,10 @@ void GLArea::loadRaster(int id)
       //rm->shot = shotFromTrackball().first;
 
 		if (rm->shot.IsValid())
-			loadShot(QPair<Shotf, float> (rm->shot,trackball.track.sca));
+    {
+      //loadShot(QPair<Shotf, float> (rm->shot,trackball.track.sca));
+      loadShot(QPair<Shotf, float> (rm->shot,1));
+    }
 		else
 			createOrthoView("Front");
 			//rm->shot = shotFromTrackball().first;
