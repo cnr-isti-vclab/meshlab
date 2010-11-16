@@ -136,7 +136,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
     qWarning() << "Failed to create cam.txt";
   }
   QTextStream out(&file);
-
+  //scan coordinate systems list and add a new layer for each one, containing its points
   const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
   CoordinateSystem *sys;
   int count = coordinateSystems->count();
@@ -153,12 +153,14 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         mm->cm.vert.back().P() = Point3f(p._x,p._z,-p._y);
         mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
       }
-
+      //we consider cameras only if the user chooses to download images,
+      //otherwise there is no mean to retrieve camera intrinsics (can't read images exif, without images)
       if(par.getBool("saveImages"))
       {
         //create a new layer where add points representing cameras to
         MeshModel *mm = md.addNewMesh("cameras");
         CameraParameters cam;
+        //scan cameras list for this coordinate system and for each one add a raster with a shot matching the camera
         foreach(cam, sys->_cameraParametersList)
         {
           Shotf s;
@@ -179,6 +181,8 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
           if(success)
             outputToFile(out, s, img, cam);
           //add a new raster
+          //the same image can be added several times, one for each coordinate system it appears into
+          //this way the user can choose which point cloud the raster has to align with
           RasterModel *rm = md.addNewRaster(imageDir.filePath(QString("IMG_%1.jpg").arg(img._ID)).toStdString().data());
           rm->shot = s;
           rm->setRasterName(QString("IMG_%1_%2.jpg").arg(img._ID).arg(sys->_id));
@@ -229,19 +233,12 @@ void FilterPhotosynthPlugin::readExifData(Image &img, CameraParameters &cam, QDi
     cam._ccdWidth = ImageInfo.CCDWidth;
     cam._focalLength = cam._ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
     cam._pixelSizeMm = cam._ccdWidth / qMax(img._exifWidth,img._exifHeight);
-    qDebug() << "Width:" << img._exifWidth;
-    qDebug() << "Heigth:" << img._exifHeight;
-    qDebug() << "CCD Width:" << cam._ccdWidth;
-    qDebug() << "Focal:" << cam._focalLength;
-    qDebug() << "Pixel Size mm:" << cam._pixelSizeMm;
   }
-  if(cam._ccdWidth == 0)
+  if(cam._ccdWidth == 0) //could not find ccdWidth in exif
   {
     int resUnit = ImageInfo.ResolutionUnit;
-    float xResolution = ImageInfo.xResolution;
-    float yResolution = ImageInfo.yResolution;
-    qDebug() << "xResolution:" << xResolution;
-    qDebug() << "yResolution:" << yResolution;
+    float xResolution = ImageInfo.xResolution; //image dpi
+    float yResolution = ImageInfo.yResolution; //image dpi
     cam._pixelSizeMm = 1 / qMax(xResolution,yResolution);
     switch(resUnit)
     {

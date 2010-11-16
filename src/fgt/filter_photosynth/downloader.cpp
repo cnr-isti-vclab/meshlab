@@ -337,6 +337,7 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
           it.next();
           int id = it.name().toInt();
           QScriptValue camera = it.value();
+          //contains the camera extrinsics and some of intrinsics
           QScriptValue parameters = camera.property("j");
           CameraParameters params;
           params._camID = id;

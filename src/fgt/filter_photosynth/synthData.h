@@ -48,6 +48,7 @@ public:
     ROT_Y,
     ROT_Z,
     ASPECT_RATIO,
+    //apparently the value provided by photosynth is: ccd_dimension_in_mm / focal_length_in_mm
     FOCAL_LENGTH,
     LAST = FOCAL_LENGTH
   };
@@ -63,10 +64,11 @@ public:
   }
 
   int _camID;
-  int _imageID;
-  qreal _fields[8];
+  int _imageID; //the image whose this object represents the camera that took the shot
+  qreal _fields[8]; //contains position, rotation, aspect ratio, photosynth focal length, in the order of enum Field
   qreal _distortionRadius1;
   qreal _distortionRadius2;
+  //intrinsics
   float _ccdWidth;
   float _focalLength;
   float _pixelSizeMm;
