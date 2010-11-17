@@ -42,7 +42,8 @@ FilterCameraPlugin::FilterCameraPlugin()
 	typeList <<
   FP_SET_MESH_CAMERA <<
   FP_SET_RASTER_CAMERA <<
-  FP_QUALITY_FROM_CAMERA;
+  FP_QUALITY_FROM_CAMERA <<
+  FP_CAMERA_SCALE;
 
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -52,9 +53,10 @@ FilterCameraPlugin::FilterCameraPlugin()
 QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-    case FP_SET_MESH_CAMERA :  return QString("Set Mesh Camera");
-  case FP_SET_RASTER_CAMERA :  return QString("Set Raster Camera");
+    case FP_SET_MESH_CAMERA :      return QString("Set Mesh Camera");
+    case FP_SET_RASTER_CAMERA :    return QString("Set Raster Camera");
     case FP_QUALITY_FROM_CAMERA :  return QString("Vertex Quality from Camera");
+    case FP_CAMERA_SCALE :         return QString("Scale Camera");
     default : assert(0);
   }
 }
@@ -63,9 +65,10 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-    case FP_SET_MESH_CAMERA :  return QString("This filter allow to set a shot for the current mesh");
-  case FP_SET_RASTER_CAMERA :  return QString("This filter allow to set a shot for the current mesh");
-    case FP_QUALITY_FROM_CAMERA :  return QString("Compute vertex quality using the camera definition, according to viewing angle or distance");
+    case FP_SET_MESH_CAMERA :     return QString("This filter allow to set a shot for the current mesh");
+    case FP_SET_RASTER_CAMERA :   return QString("This filter allow to set a shot for the current mesh");
+    case FP_QUALITY_FROM_CAMERA : return QString("Compute vertex quality using the camera definition, according to viewing angle or distance");
+    case FP_CAMERA_SCALE :        return QString("Scale the camera, e.g. it changes focal lenght and pixel size so that their ratio does not change but the actual scale/size of the camera with respect to the scene.<br> Useful when your scene is in mt and your camera focal is in mm");
     default : assert(0);
   }
 }
@@ -76,6 +79,9 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
   Shotf defShot;
 	 switch(ID(action))
 	 {
+   case FP_CAMERA_SCALE :
+     parlst.addParam(new RichDynamicFloat("scale", 0, -3,3,"Scaling exp", "Exponent of the scaling factor. 0 means no scaling, 1 means 10 times larger, -1 means 1/10."));
+     break;
    case FP_SET_RASTER_CAMERA :
      parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current raster."));
      break;
@@ -100,6 +106,13 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
   RasterModel *rm = md.rm();
 	switch(ID(filter))
   {		
+  case FP_CAMERA_SCALE :
+    {
+      float scale = powf(10,par.getDynamicFloat("scale"));
+      cm.shot.Intrinsics.PixelSizeMm= cm.shot.Intrinsics.PixelSizeMm*scale;
+      cm.shot.Intrinsics.FocalMm = cm.shot.Intrinsics.FocalMm*scale;
+    }
+  break;
   case FP_SET_RASTER_CAMERA :
     rm->shot = par.getShotf("Shot");
   break;
@@ -151,7 +164,9 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
 {
   switch (ID(filter))
   {
-    case FP_QUALITY_FROM_CAMERA           : return MeshModel::MM_VERTQUALITY;
+    case FP_SET_MESH_CAMERA :
+  case FP_CAMERA_SCALE           : return MeshModel::MM_CAMERA;
+    case FP_QUALITY_FROM_CAMERA           : return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
     default                  : return MeshModel::MM_UNKNOWN;
   }
 }
@@ -160,10 +175,12 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
 {
   switch(ID(a))
   {
-  case FP_QUALITY_FROM_CAMERA :
+  case FP_CAMERA_SCALE :
   case FP_SET_MESH_CAMERA :
   case FP_SET_RASTER_CAMERA :
-      return MeshFilterInterface::Generic;
+      return MeshFilterInterface::Camera;
+  case FP_QUALITY_FROM_CAMERA :
+      return MeshFilterInterface::Camera;
   }
 }
 
