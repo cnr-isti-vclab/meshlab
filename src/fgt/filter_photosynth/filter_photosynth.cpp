@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include "jhead/jhead.h"
 
-#define CALIBRATED 1
+//#define CALIBRATED 1
 
 using namespace vcg;
 
@@ -191,9 +191,9 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
           //add a new raster
           //the same image can be added several times, one for each coordinate system it appears into
           //this way the user can choose which point cloud the raster has to align with
-          RasterModel *rm = md.addNewRaster(imageDir.filePath(QString("IMG_%1.jpg").arg(img._ID)).toStdString().data());
+          RasterModel *rm = md.addNewRaster(imageDir.filePath(QString("IMG_%1.jpg").arg(img._ID) ));
           rm->shot = s;
-          rm->setRasterName(QString("IMG_%1_%2.jpg").arg(img._ID).arg(sys->_id));
+          rm->setLabel(QString("IMG_%1_%2.jpg").arg(int(img._ID),3,10,QLatin1Char('0')).arg(sys->_id));
         }
       }
     }
