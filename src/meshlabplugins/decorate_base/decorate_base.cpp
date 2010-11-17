@@ -148,18 +148,17 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
         bool showFrustum=rm->getBool(this->CameraShowFrustum());
         switch(rm->getEnum(this->CameraInfoParam()))
         {
-        case 0:
-        {
+        case 0: // Trackball
           emit askViewerShot("decorate");
-          DrawCamera(m, curShot, showFrustum,painter,qf);
-        } break;
-        case 1 : DrawCamera(m, m.cm.shot, showFrustum, painter,qf); break;
-        case 2 : DrawCamera(m, md.rm()->shot, showFrustum, painter,qf); break;
+          DrawCamera(m, curShot, showFrustum,0,painter,qf);
+          break;
+        case 1 : DrawCamera(m, m.cm.shot, showFrustum, 0, painter,qf); break;
+        case 2 : DrawCamera(m, md.rm()->shot, showFrustum,0 , painter,qf); break;
         }
       }break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
-    case DP_SHOW_VERT_LABEL:	DrawVertLabel(m,painter,qf);break;
-    case DP_SHOW_FACE_LABEL:	DrawFaceLabel(m,painter,qf);break;
+    case DP_SHOW_VERT_LABEL:	DrawVertLabel(m,painter);break;
+    case DP_SHOW_FACE_LABEL:	DrawFaceLabel(m,painter);break;
     case DP_SHOW_VERT:	{
 			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_LIGHTING);
@@ -616,7 +615,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
  return true;
 }
 
-void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter, QFont qf)
+void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
 {
 	glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
 	glDepthFunc(GL_ALWAYS);
@@ -632,7 +631,7 @@ void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter, QFo
 }
 
 
-void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter, QFont qf)
+void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter)
 {
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
 	glDepthFunc(GL_ALWAYS);
@@ -650,7 +649,7 @@ void ExtraMeshDecoratePlugin::setValue(QString name,Shotf newVal)
     curShot=newVal;
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrustum, QPainter *painter, QFont qf)
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrustum, GLint textureId, QPainter *painter, QFont qf)
 {
   if(!ls.IsValid())
   {
@@ -679,7 +678,8 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrust
   glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Fov %1 ( %2 x %3) ").arg(fov).arg(ls.Intrinsics.ViewportPx[0]).arg(ls.Intrinsics.ViewportPx[1]));
   float focal = ls.Intrinsics.FocalMm;
   glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
-
+  if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE)
+  {
 	float len = m.cm.bbox.Diag()/20.0;
 	 	glBegin(GL_LINES);
 			glVertex3f(vp[0]-len,vp[1],vp[2]); 	glVertex3f(vp[0]+len,vp[1],vp[2]); 
@@ -731,6 +731,7 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrust
       glVertex(viewportCenter+viewportHorizontal+viewportVertical);
       glEnd();
     }
+  }
     glPopAttrib();
 }
 
