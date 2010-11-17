@@ -145,15 +145,16 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
     case DP_SHOW_BOX_CORNERS:	DrawBBoxCorner(m); break;
     case DP_SHOW_CAMERA:
       {
+        bool showFrustum=rm->getBool(this->CameraShowFrustum());
         switch(rm->getEnum(this->CameraInfoParam()))
         {
         case 0:
         {
           emit askViewerShot("decorate");
-          DrawCamera(m, curShot, painter,qf);
+          DrawCamera(m, curShot, showFrustum,painter,qf);
         } break;
-        case 1 : DrawCamera(m, m.cm.shot, painter,qf); break;
-        case 2 : DrawCamera(m, md.rm()->shot, painter,qf); break;
+        case 1 : DrawCamera(m, m.cm.shot, showFrustum, painter,qf); break;
+        case 2 : DrawCamera(m, md.rm()->shot, showFrustum, painter,qf); break;
         }
       }break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
@@ -649,7 +650,7 @@ void ExtraMeshDecoratePlugin::setValue(QString name,Shotf newVal)
     curShot=newVal;
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, QPainter *painter, QFont qf)
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrustum, QPainter *painter, QFont qf)
 {
   if(!ls.IsValid())
   {
@@ -662,7 +663,6 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, QPainter *pain
 	glDisable(GL_LIGHTING);
 	glColor3f(.8f,.8f,.8f);
 	
-  ;
   int ln=0;
   if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Perspective");
   if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Orthographic");
@@ -677,6 +677,8 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, QPainter *pain
   glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 2 - %1 %2 %3").arg(ax2[0]).arg(ax2[1]).arg(ax2[2]));
   float fov = ls.GetFovFromFocal();
   glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Fov %1 ( %2 x %3) ").arg(fov).arg(ls.Intrinsics.ViewportPx[0]).arg(ls.Intrinsics.ViewportPx[1]));
+  float focal = ls.Intrinsics.FocalMm;
+  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
 
 	float len = m.cm.bbox.Diag()/20.0;
 	 	glBegin(GL_LINES);
@@ -691,8 +693,47 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, QPainter *pain
       glColor3f(0,0,1.0); glVertex(vp); 	glVertex(vp+ax2*len*2.0);
     glEnd();
 
+// Now draw the frustum
+    Point3f viewportCenter = vp - ax2*ls.Intrinsics.FocalMm;
+    Point3f viewportHorizontal = ax0* float(ls.Intrinsics.ViewportPx[0]*ls.Intrinsics.PixelSizeMm[0]/2.0f);
+    Point3f viewportVertical   = ax1* float(ls.Intrinsics.ViewportPx[1]*ls.Intrinsics.PixelSizeMm[1]/2.0f);
+
+    glColor3f(0.0f,1.0f,1.0f);
+    glBegin(GL_LINES);
+    glColor(Color4b::White);
+    glVertex3f(vp[0],vp[1],vp[2]); glVertex(viewportCenter);
+    glColor(Color4b::Cyan);
+    glVertex(vp); glVertex(viewportCenter+viewportHorizontal+viewportVertical);
+    glVertex(vp); glVertex(viewportCenter+viewportHorizontal-viewportVertical);
+    glVertex(vp); glVertex(viewportCenter-viewportHorizontal+viewportVertical);
+    glVertex(vp); glVertex(viewportCenter-viewportHorizontal-viewportVertical);
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+    glVertex(viewportCenter+viewportHorizontal+viewportVertical);
+    glVertex(viewportCenter+viewportHorizontal-viewportVertical);
+    glVertex(viewportCenter-viewportHorizontal-viewportVertical);
+    glVertex(viewportCenter-viewportHorizontal+viewportVertical);
+    glEnd();
+
+
+    if(DrawFrustum)
+    {
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4f(.8f,.8f,.8f,.2f);
+      glBegin(GL_TRIANGLE_FAN);
+      glVertex(vp);
+      glVertex(viewportCenter+viewportHorizontal+viewportVertical);
+      glVertex(viewportCenter+viewportHorizontal-viewportVertical);
+      glVertex(viewportCenter-viewportHorizontal-viewportVertical);
+      glVertex(viewportCenter-viewportHorizontal+viewportVertical);
+      glVertex(viewportCenter+viewportHorizontal+viewportVertical);
+      glEnd();
+    }
     glPopAttrib();
 }
+
 void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *par, QFont qf)
 {
   glMatrixMode(GL_PROJECTION);
@@ -848,7 +889,8 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
 
 case DP_SHOW_CAMERA :{
     QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
-          parset.addParam(new RichEnum(this->CameraInfoParam(), 0, methods,"Show View Camera","If true this filter shows the camera of current view"));
+          parset.addParam(new RichEnum(this->CameraInfoParam(), 1, methods,"Show View Camera","If true this filter shows the camera of current view"));
+          parset.addParam(new RichBool(this->CameraShowFrustum(), false,"Show Frustum Sides","if true the frustum clipping planes are drawn"));
         } break;
     }
 }

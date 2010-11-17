@@ -103,7 +103,7 @@ public:
   void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);
   void DrawVertLabel(MeshModel &m, QPainter *gla, QFont qf);
   void DrawFaceLabel(MeshModel &m, QPainter *gla, QFont qf);
-  void DrawCamera(MeshModel &m, vcg::Shotf &ls, QPainter *painter, QFont qf);
+  void DrawCamera(MeshModel &m, vcg::Shotf &ls, bool drawFrustum, QPainter *painter, QFont qf);
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
 
@@ -112,6 +112,7 @@ public:
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
 
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
+  inline QString CameraShowFrustum() const   { return  "MeshLab::Decoration::CameraShowFrustum" ; }
   inline QString CameraInfoParam() const     { return  "MeshLab::Decoration::CameraInfoType" ; }
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
   inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }
