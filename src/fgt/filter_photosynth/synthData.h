@@ -48,8 +48,7 @@ public:
     ROT_Y,
     ROT_Z,
     ASPECT_RATIO,
-    //apparently the value provided by photosynth is: ccd_dimension_in_mm / focal_length_in_mm
-    FOCAL_LENGTH,
+    FOCAL_LENGTH, //apparently the value provided by photosynth is: ccd_dimension_in_mm / focal_length_in_mm
     LAST = FOCAL_LENGTH
   };
 
@@ -65,13 +64,13 @@ public:
 
   int _camID;
   int _imageID; //the image whose this object represents the camera that took the shot
-  qreal _fields[8]; //contains position, rotation, aspect ratio, photosynth focal length, in the order of enum Field
-  qreal _distortionRadius1;
-  qreal _distortionRadius2;
+  qreal _fields[8]; //contains position, rotation, aspect ratio, photosynth focal length, in the order of enum Field as taken from photosynth json
+  qreal _distortionRadius1; //from photosynth json
+  qreal _distortionRadius2; //from photosynth json
   //intrinsics
-  float _ccdWidth;
-  float _focalLength;
-  float _pixelSizeMm;
+  float _ccdWidth; //taken from image exif data, or (when missing in exif) computed using image resolution in pixel and in dpi
+  float _focalLength; //estimated using _fields[8] and _ccdWidth
+  float _pixelSizeMm; //estimated using _ccdWidth and image resolution in pixel or, when the first is missing, with image resolution in dpi
 };
 
 /*
