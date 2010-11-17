@@ -282,9 +282,6 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 
   drawLight();
 
-//If it is a raster viewer draw the image as a texture
-  if(isRaster())
-    drawTarget();
 
   glPushMatrix();
 
@@ -352,6 +349,9 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
     }
   }
   glPopMatrix(); // We restore the state to immediately before the trackball
+
+  //If it is a raster viewer draw the image as a texture
+  if(isRaster()) drawTarget();
 
   // Double click move picked point to center
   // It has to be done in the before trackball space (we MOVE the trackball itself...)
@@ -748,11 +748,9 @@ void GLArea::tabletEvent(QTabletEvent*e)
 void GLArea::wheelEvent(QWheelEvent*e)
 {
 	setFocus();
-	if(!isRaster())
-	{
-		const int WHEEL_STEP = 120;
-		float notch = e->delta()/ float(WHEEL_STEP);
-		switch(e->modifiers())
+  const int WHEEL_STEP = 120;
+  float notch = e->delta()/ float(WHEEL_STEP);
+  switch(e->modifiers())
 		{
 		case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50.0f); break;
 		case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
@@ -762,10 +760,12 @@ void GLArea::wheelEvent(QWheelEvent*e)
 			break;
 		case Qt::ShiftModifier												: fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
 		default:
-			trackball.MouseWheel( e->delta()/ float(WHEEL_STEP));
+      if(isRaster())
+        this->opacity = math::Clamp( opacity*powf(1.2f, notch),0.1f,1.0f);
+      else
+        trackball.MouseWheel( e->delta()/ float(WHEEL_STEP));
 			break;
 		}
-	}
 	update();
 }
 
@@ -1192,8 +1192,6 @@ void GLArea::loadRaster(int id)
 void GLArea::drawTarget() {
   if(!targetTex) return;
 
-  double ratio = 1.0f;
-  //ratio = align.imageRatio;	quale ratio?
   if(meshDoc->rm()==0) return;
   QImage &curImg = meshDoc->rm()->currentPlane->image;
   float imageRatio = float(curImg.width())/float(curImg.height());
@@ -1209,10 +1207,12 @@ void GLArea::drawTarget() {
   glColor4f(1, 1, 1, opacity);
   glDisable(GL_LIGHTING);
   glDisable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, targetTex);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-  glColor3f(1.0f, 1.0f, 1.0f);
   glBegin(GL_QUADS);
   glTexCoord2f(0.0f, 0.0f);	//first point
   glVertex3f(-1.0f*imageRatio, -1.0f, 0.0f);

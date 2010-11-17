@@ -329,7 +329,7 @@ private:
 
 	int zoomx, zoomy;
 	bool zoom;
-	double opacity;
+  float opacity;
 	GLuint targetTex;           // here we store the reference image. The raster image is rendered as a texture
 
 public:
@@ -337,8 +337,7 @@ public:
 	void setIsRaster(bool viewMode);
 	void loadRaster(int id);
 
-	void setOpacity(int o) { opacity = o/100.0; update(); } //between 0 and 100
-	void setTarget(QImage &image);
+  void setTarget(QImage &image);
 
 private:
 	void drawTarget();
