@@ -223,21 +223,39 @@ public:
 private:
   int currentDataMask;
   QString fullPathFileName;
+  QString _label;
   int _id;
 
 public:
 
   inline int id() const {return _id;}
+
   // Some notes about the files and naming.
+  // Each mesh when shown in the layer dialog has a label.
+  // By default the label is just the name of the file, but the
+
   // in a future the path should be moved outside the meshmodel into the meshdocument (and assume that all the meshes resides in a common subtree)
   // currently we just fix the interface and make the pathname private for avoiding future hassles.
 
-  const QString fullName() const {return fullPathFileName;};
-  const QString shortName() const;
-  const QString pathName() const {QFileInfo fi(fullName()); return fi.absolutePath();};
-  const QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();};
+  const QString label() const { if(_label.isEmpty()) return shortName(); else return _label;}
+
+  /// The whole full path name of the mesh
+  const QString fullName() const {return fullPathFileName;}
+
+  /// just the name of the file
+  const QString shortName() const { return QFileInfo(fullPathFileName).fileName(); }
+
+  /// just the name of the full path
+  const QString pathName() const {QFileInfo fi(fullName()); return fi.absolutePath();}
+
+  /// just the name of the extension.
+  const QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();}
+
+  /// the relative path with respect to the current project
+  const QString relativeName() const {QFileInfo fi(fullName()); return fi.suffix();}
 
   void setFileName(QString newFileName) {fullPathFileName = newFileName;}
+
 public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
 
@@ -435,6 +453,12 @@ public:
   GLLogStream Log;
   FilterScript filterHistory;
 
+  /**
+  All the files referred in a document are relative to the folder containing the project file.
+  */
+  QString fullPathFilename;
+  //
+
 	int size() const {return meshList.size();}
   bool isBusy() { return busy;}    // used in processing. To disable access to the mesh by the rendering thread
   void setBusy(bool _busy)
@@ -450,7 +474,7 @@ public:
   QList<TagBase *> getMeshTags(int meshId);
 	
 	///add a new mesh with the given name
-  MeshModel *addNewMesh(const char *meshName,MeshModel *newMesh=0, bool setAsCurrent=true);
+  MeshModel *addNewMesh(const char *meshLabel, MeshModel *newMesh=0, bool setAsCurrent=true);
 
   ///remove the mesh from the list and delete it from memory
   bool delMesh(MeshModel *mmToDel);
@@ -528,6 +552,7 @@ private:
 	std::vector<bool> faceSelection;
 	std::vector<bool> vertSelection;
 	vcg::Matrix44f Tr;
+  vcg::Shotf shot;
 public:
   // This function save the <mask> portion of a mesh into the private members of the MeshModelState class;
     void create(int _mask, MeshModel* _m);

@@ -115,9 +115,9 @@ void MeshDocument::setCurrentRaster( int i)
 }
 
 
-MeshModel * MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, bool setAsCurrent)
+MeshModel * MeshDocument::addNewMesh(const char *meshLabel, MeshModel *newMesh, bool setAsCurrent)
 {
-	QFileInfo info(meshName);
+  QFileInfo info(meshLabel);
 	QString newName=info.fileName();
   for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
 	{
@@ -144,11 +144,11 @@ MeshModel * MeshDocument::addNewMesh(const char *meshName, MeshModel *newMesh, b
 
 	meshList.push_back(newMesh);
 
-	emit meshSetChanged();
+  emit meshSetChanged();
 
   if(setAsCurrent)
     this->setCurrentMesh(newMesh->id());
-	return newMesh;
+  return newMesh;
 }
 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
@@ -459,8 +459,10 @@ void MeshModelState::create(int _mask, MeshModel* _m)
 			if(!(*vi).IsD()) (*ci) = (*vi).IsS();
 	}
 
-    if(changeMask & MeshModel::MM_TRANSFMATRIX)
-        Tr = m->cm.Tr;
+  if(changeMask & MeshModel::MM_TRANSFMATRIX)
+      Tr = m->cm.Tr;
+  if(changeMask & MeshModel::MM_CAMERA)
+      this->shot = m->cm.shot;
 }
 
 bool MeshModelState::apply(MeshModel *_m)
@@ -534,15 +536,11 @@ bool MeshModelState::apply(MeshModel *_m)
 
     if(changeMask & MeshModel::MM_TRANSFMATRIX)
         m->cm.Tr=Tr;
+    if(changeMask & MeshModel::MM_CAMERA)
+        m->cm.shot = this->shot;
 
     return true;
 }
-
-const QString MeshModel::shortName() const
-{
-    return QFileInfo(fullPathFileName).fileName();
-}
-
 
 /**** DATAMASK STUFF ****/
 
