@@ -103,7 +103,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 
         //Update current GLArea visibility
         mw->GLA()->addMeshSetVisibility(md->getMesh(clickedId)->id(), md->getMesh(clickedId)->visible);
-      }
+      } break;
     case 1 :
 
     case 2 :
@@ -151,6 +151,12 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				//Update current GLArea visibility 
 				mw->GLA()->updateRasterSetVisibilities( );
 			}
+    case 1 :
+    case 2 :
+    case 3 :
+      mw->GLA()->meshDoc->setCurrentRaster(clickedId);
+      break;
+
 		}
 		updateTable();
 		mw->GLA()->update();
