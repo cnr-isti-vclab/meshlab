@@ -255,7 +255,8 @@ public:
         RangeMap         =0x01000, /*!<  filters specific for range map processing*/
         PointSet         =0x02000,
         Measure          =0x04000,  /*!<  Filters that compute measures and information on meshes.*/
-        Polygonal        =0x08000  /*!<  Filters that works on polygonal and quad meshes.*/
+        Polygonal        =0x08000,  /*!<  Filters that works on polygonal and quad meshes.*/
+        Camera           =0x10000  /*!<  Filters that works on shot of mesh and raster.*/
     };
 	
 	
