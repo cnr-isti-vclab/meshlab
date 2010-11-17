@@ -768,11 +768,9 @@ void MainWindow::startFilter()
 		MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
 		QString fname = action->text();
 		const MeshLabXMLFilterContainer filt  = PM.stringXMLFilterMap.value(fname);
-		bool isvalid = false;
-		XMLMessageHandler errQuery;
-		QString filterClasses = filt.xmlInfo->filterAttribute(fname,QString("filterClass"),isvalid,errQuery);
-		if (isvalid)
+		try
 		{
+			QString filterClasses = filt.xmlInfo->filterAttribute(fname,QString("filterClass"));
 			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 			if(filterClassesList.contains("MeshCreation"))
 			{
@@ -789,67 +787,51 @@ void MainWindow::startFilter()
 				  return;
 			  }*/
 			}
-			  //INIT PARAMETERS WITH EXPRESSION : Both are defined inside the XML file
-			QStringList params = filt.xmlInfo->filterParameters(fname,isvalid,errQuery);
-			if (isvalid)
+			//INIT PARAMETERS WITH EXPRESSION : Both are defined inside the XML file
+			XMLFilterInfo::MapList params = filt.xmlInfo->filterParameters(fname);
+			/*****IMPORTANT NOTE******/
+			//the popContext will be called:
+			//- or in the executeFilter if the filter will be executed
+			//- or in the close Event of stdDialog window if the filter will NOT be executed
+			//- or in the catch exception if something went wrong during parsing/scanning
+			PM.env.pushContext();
+			try
 			{
-				/*****IMPORTANT NOTE******/
-				//the popContext will be called:
-				//- or in the executeFilter if the filter will be executed
-				//- or in the close Event of stdDialog window if the filter will NOT be executed
-				//- or in the catch exception if something went wrong during parsing/scanning
-				PM.env.pushContext();
-				try
-				{
-					foreach(QString pp,params)
-					{
-						QStringList triple = pp.split(',');
-						if (triple.size() != 3)
-							throw ParsingException("Parameters List is not a correct triple (param_type,param_name,param_defaultExpression). Something REALLY wrong happened!");
-						else
-						{
-							//Initilize the parameters inside the environment
-							Expression* exp = ExpressionFactory::create(triple[0],triple[2]);
-							PM.env.insertLocalExpressionBinding(triple[1],exp);	
-							delete exp;
-						}
-					}
+					//each map inside the list contains info (type,name,def_expr) on each parameter inside the filter
+				for(XMLFilterInfo::MapList::const_iterator it = params.constBegin();it != params.constEnd();++it)
+				{	
+					QMap<QString,QString> mp = *it;
+						//Initilize the parameters inside the environment
+					Expression* exp = ExpressionFactory::create(mp["type"],mp["defaultExpression"]);
+					PM.env.insertLocalExpressionBinding(mp["name"],exp);	
+					delete exp;	
 				}
-				catch (ParsingException& e)
+				if(currentViewContainer())
 				{
-					const char* err = e.what();
-					meshDoc()->Log.Logf(GLLogStream::SYSTEM,err);	
-					PM.env.popContext();
-					return;
+					iXMLFilter->setLog(currentViewContainer()->LogPtr());
+					currentViewContainer()->LogPtr()->SetBookmark();
 				}
-				
-			}
-			else
-			{
-				meshDoc()->Log.Logf(GLLogStream::SYSTEM,qPrintable(errQuery.statusMessage()));
-				return;
-			}
-			if(currentViewContainer())
-			{
-			  iXMLFilter->setLog(currentViewContainer()->LogPtr());
-			  currentViewContainer()->LogPtr()->SetBookmark();
-			}
-			// just to be sure...
-			createStdPluginWnd();
+				// just to be sure...
+				createStdPluginWnd();
 
-			// (2) Ask for filter parameters and eventally directly invoke the filter
-			// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
-			// if no dialog is created the filter must be executed immediately
-			/*if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
+				// (2) Ask for filter parameters and eventally directly invoke the filter
+				// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
+				// if no dialog is created the filter must be executed immediately
+				/*if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
+				{
+				  RichParameterSet dummyParSet;
+				  executeFilter(action, dummyParSet, false);
+				}*/
+			}
+			catch (ParsingException e)
 			{
-			  RichParameterSet dummyParSet;
-			  executeFilter(action, dummyParSet, false);
-			}*/
+				meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());	
+				PM.env.popContext();
+			}
 		}
-		else
+		catch(ParsingException e)
 		{
-			meshDoc()->Log.Logf(GLLogStream::SYSTEM,qPrintable(errQuery.statusMessage()));
-			return;
+			meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());	
 		}
 	}
 }

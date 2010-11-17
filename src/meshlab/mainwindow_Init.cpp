@@ -23,6 +23,7 @@
 
 
 #include "../common/interfaces.h"
+#include "../common/xmlfilterinfo.h"
 
 #include <QtGui>
 #include <QToolBar>
@@ -36,6 +37,7 @@
 #include "customDialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_congratsDialog.h"
+
 
 QProgressBar *MainWindow::qb;
 
@@ -595,20 +597,14 @@ void MainWindow::fillFilterMenu()
 		MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
 		QAction *filterAction = xmlit.value().act;
 		XMLFilterInfo* info = xmlit.value().xmlInfo;
-		bool isValid = false;
 		QString filterName = xmlit.key();
-		XMLMessageHandler errQuery;
-		QString help = info->filterHelp(filterName,isValid,errQuery);
-		if (isValid)
-			filterAction->setToolTip(help);
-		else
-			this->meshDoc()->Log.Logf(GLLogStream::SYSTEM,qPrintable(errQuery.statusMessage()));
-
-		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
-		isValid = true;
-		QString filterClasses = info->filterAttribute(filterName,QString("filterClass"),isValid,errQuery);
-		if (isValid)
+		try
 		{
+			QString help = info->filterHelp(filterName);
+			filterAction->setToolTip(help);
+
+			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
+			QString filterClasses = info->filterAttribute(filterName,QString("filterClass"));
 			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 			foreach(QString nameClass,filterClassesList)
 			{
@@ -634,8 +630,10 @@ void MainWindow::fillFilterMenu()
 				if(!filterAction->icon().isNull()) filterToolBar->addAction(filterAction);
 			}
 		}
-		else
-			this->meshDoc()->Log.Logf(GLLogStream::SYSTEM,qPrintable(errQuery.statusMessage()));
+		catch(ParsingException e)
+		{
+			meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());
+		}
 	}
 }
 
