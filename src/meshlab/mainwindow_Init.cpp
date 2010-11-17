@@ -554,6 +554,7 @@ void MainWindow::fillFilterMenu()
 	QMenu *filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
 	QMenu *filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
 	QMenu *filterMenuTexture = filterMenu->addMenu(tr("Texture"));
+  QMenu *filterMenuCamera = filterMenu->addMenu(tr("Camera"));
 
 	connect(filterMenu, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
 
@@ -582,6 +583,7 @@ void MainWindow::fillFilterMenu()
 		if( filterClass & MeshFilterInterface::Sampling )       filterMenuSampling->addAction(filterAction);
 		if( filterClass & MeshFilterInterface::Texture)         filterMenuTexture->addAction(filterAction);
 		if( filterClass & MeshFilterInterface::Polygonal)       filterMenuPolygonal->addAction(filterAction);
+    if( filterClass & MeshFilterInterface::Camera)          filterMenuCamera->addAction(filterAction);
 		//  MeshFilterInterface::Generic :
 		if(filterClass == 0)                                    filterMenu->addAction(filterAction);
 		if(!filterAction->icon().isNull())                      filterToolBar->addAction(filterAction);
@@ -626,6 +628,7 @@ void MainWindow::fillFilterMenu()
 				if( nameClass == QString("Sampling")) filterMenuSampling->addAction(filterAction);
 				if( nameClass == QString("Texture")) filterMenuTexture->addAction(filterAction);
 				if( nameClass == QString("Polygonal")) filterMenuPolygonal->addAction(filterAction);
+        if( nameClass == QString("Camera")) filterMenuCamera->addAction(filterAction);
 			  //  //  MeshFilterInterface::Generic :
 				if(	nameClass == QString("Generic")) filterMenu->addAction(filterAction);
 				if(!filterAction->icon().isNull()) filterToolBar->addAction(filterAction);
