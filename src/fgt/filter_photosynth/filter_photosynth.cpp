@@ -309,6 +309,11 @@ void FilterPhotosynthPlugin::readExifData(Image &img, CameraParameters &cam, QDi
     cam._ccdWidth = ImageInfo.CCDWidth;
     cam._focalLength = cam._ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
     cam._pixelSizeMm = cam._ccdWidth / qMax(img._exifWidth,img._exifHeight);
+    qDebug() << "Exif width:" << ImageInfo.Width;
+    qDebug() << "Exif height:" << ImageInfo.Height;
+    qDebug() << "CCD Width:" << ImageInfo.CCDWidth;
+    qDebug() << "Focal length:" << cam._focalLength;
+    qDebug() << "Pixel Size:" << cam._pixelSizeMm;
   }
   if(cam._ccdWidth == 0) //could not find ccdWidth in exif
   {
@@ -327,6 +332,11 @@ void FilterPhotosynthPlugin::readExifData(Image &img, CameraParameters &cam, QDi
     }
     cam._ccdWidth = cam._pixelSizeMm * qMax(img._exifWidth,img._exifHeight);
     cam._focalLength = cam._ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
+    qDebug() << "X resolution:" << xResolution;
+    qDebug() << "Y resolution:" << yResolution;
+    qDebug() << "CCD width:" << cam._ccdWidth;
+    qDebug() << "Focal length:" << cam._focalLength;
+    qDebug() << "Pixel size:" << cam._pixelSizeMm;
   }
 }
 
