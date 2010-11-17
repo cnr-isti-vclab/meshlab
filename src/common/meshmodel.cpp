@@ -55,7 +55,7 @@ MeshModel *MeshDocument::getMesh(int i)
   return 0;
 }
 
-MeshModel *MeshDocument::getMesh(const char *name)
+MeshModel *MeshDocument::getMesh(QString name)
 {
 	foreach(MeshModel *mmp, meshList)
 			{
@@ -114,29 +114,35 @@ void MeshDocument::setCurrentRaster( int i)
   return;
 }
 
-
-MeshModel * MeshDocument::addNewMesh(const char *meshLabel, MeshModel *newMesh, bool setAsCurrent)
+template <class LayerElement>
+QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
 {
   QFileInfo info(meshLabel);
-	QString newName=info.fileName();
-  for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
-	{
-    if((*mmi)->fullName() == newName)
-		{
-		  QFileInfo fi((*mmi)->fullName());
-		  QString baseName = fi.baseName();
-		  int lastNum = baseName.right(1).toInt();
-		  if( baseName.right(2).toInt() >= 10) 
-			  lastNum = baseName.right(1).toInt();
-		  if(lastNum) 
-			  newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
-		  else 
-			  newName = baseName+"_1";
-		  if (info.suffix() != QString(""))
-			newName = newName + "." + info.suffix();
-		}
-	}
+  QString newName=info.fileName();
+  typename QList<LayerElement*>::iterator mmi;
+  for(mmi=elemList.begin(); mmi!=elemList.end(); ++mmi)
+  {
+    if((*mmi)->label() == newName)
+    {
+      QFileInfo fi((*mmi)->label());
+      QString baseName = fi.baseName(); //  all characters in the file up to the first '.' Eg "/tmp/archive.tar.gz" -> "archive"
+      int lastNum = baseName.right(1).toInt();
+      if( baseName.right(2).toInt() >= 10)
+        lastNum = baseName.right(1).toInt();
+      if(lastNum)
+        newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
+      else
+        newName = baseName+"_1";
+      if (info.suffix() != QString(""))
+      newName = newName + "." + info.suffix();
+    }
+  }
+  return newName;
+}
 
+MeshModel * MeshDocument::addNewMesh(QString meshLabel, MeshModel *newMesh, bool setAsCurrent)
+{
+  QString newName = NameDisambiguator(this->meshList,meshLabel);
 	if(newMesh==0)
     newMesh=new MeshModel(this,qPrintable(newName));
 	else
@@ -154,72 +160,32 @@ MeshModel * MeshDocument::addNewMesh(const char *meshLabel, MeshModel *newMesh, 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
 	if(meshList.size()==1) return false;
+  if(!meshList.removeOne(mmToDel)) return false;
+  if(currentMesh == mmToDel)
+        setCurrentMesh(this->meshList.at(0)->id());
 
-	QMutableListIterator<MeshModel *> i(meshList);
+  delete mmToDel;
 
-	while (i.hasNext())
-	{
-		MeshModel *md = i.next();
-
-		if (md==mmToDel)
-		{
-			i.remove();
-			delete mmToDel;
-		}
-	}
-
-	if(currentMesh == mmToDel)
-	{
-		if (!meshList.isEmpty())
-			setCurrentMesh(this->meshList.at(0)->id());
-		else
-		{
-			this->Log.Logf(GLLogStream::SYSTEM,"Empty MeshDocument: should never happened!");
-		}
-	}
-
-	emit meshSetChanged();
-
+  emit meshSetChanged();
 	return true;
 }
 
-RasterModel * MeshDocument::addNewRaster(const char *rasterName, RasterModel *newRaster)
+RasterModel * MeshDocument::addNewRaster(QString fullPathFilename)
 {
-	QFileInfo info(rasterName);
-	QString newName=info.fileName();
-  for(QList<RasterModel*>::iterator ri=rasterList.begin();ri!=rasterList.end();++ri)
-	{
-    if((*ri)->getName() == newName)
-		{
-		  QFileInfo fi((*ri)->getName());
-		  QString baseName = fi.baseName();
-		  int lastNum = baseName.right(1).toInt();
-		  if( baseName.right(2).toInt() >= 10) 
-			  lastNum = baseName.right(1).toInt();
-		  if(lastNum) 
-			  newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
-		  else 
-			  newName = baseName+"_1";
-		  if (info.suffix() != QString(""))
-			newName = newName + "." + info.suffix();
-		}
-	}
+  QFileInfo info(fullPathFilename);
+  QString newLabel=info.fileName();
+  QString newName = NameDisambiguator(this->rasterList, newLabel);
 
-	if(newRaster==0)
-    newRaster=new RasterModel(this,qPrintable(newName));
-	else
-        newRaster->setRasterName(newName);
-
+  RasterModel *newRaster=new RasterModel(this, newLabel);
 	rasterList.push_back(newRaster);
 
-	emit rasterSetChanged();
-
 	//Add new plane
-	Plane *plane = new Plane(newRaster, rasterName, QString());
+  Plane *plane = new Plane(newRaster, fullPathFilename, QString());
 	newRaster->addPlane(plane);
 
 	this->setCurrentRaster(newRaster->id());
 
+  emit rasterSetChanged();
 	return newRaster;
 }
 
@@ -261,7 +227,7 @@ void MeshDocument::removeTag(int id){
 	}
 }
 
-MeshModel::MeshModel(MeshDocument *parent, const char *meshName) {
+MeshModel::MeshModel(MeshDocument *parent, QString meshName) {
 	glw.m=&cm;
 	_id=parent->newMeshId();
 	// These data are always active on the mesh
@@ -273,7 +239,7 @@ MeshModel::MeshModel(MeshDocument *parent, const char *meshName) {
 	cm.Tr.SetIdentity();
 	cm.sfn=0;
 	cm.svn=0;
-	if(meshName) 
+  if(!meshName.isEmpty())
 		fullPathFileName=meshName;
 	//parent->addNewMesh(qPrintable(fullPathFileName),this);
 }
@@ -389,9 +355,9 @@ Plane::Plane(RasterModel *_parent, const QString pathName, const QString _semant
 	image = QImage(pathName);
 }
 
-RasterModel::RasterModel(MeshDocument *parent, const char *_rasterName) {
+RasterModel::RasterModel(MeshDocument *parent, QString _rasterName) {
   _id=parent->newRasterId(); 
-	rasterName= _rasterName;
+  this->_label= _rasterName;
 	visible=false;
 }
 

@@ -252,14 +252,14 @@ public:
   const QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();}
 
   /// the relative path with respect to the current project
-  const QString relativeName() const {QFileInfo fi(fullName()); return fi.suffix();}
+  const QString relativeName() const {QFileInfo fi(fullName()); assert(0); return fi.suffix();}
 
   void setFileName(QString newFileName) {fullPathFileName = newFileName;}
 
 public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
 
-  MeshModel(MeshDocument *parent, const char *meshName=0);
+  MeshModel(MeshDocument *parent, QString meshName=QString());
   bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
   bool RenderSelectedFace();
   bool RenderSelectedVert();
@@ -292,6 +292,11 @@ public:
 	QString fullPathFileName;
 	QImage image;
 
+  /// The whole full path name of the mesh
+  const QString fullName() const {return fullPathFileName;}
+  /// just the name of the file
+  const QString shortName() const { return QFileInfo(fullPathFileName).fileName(); }
+
 	Plane(RasterModel *parent, const QString pathName, const QString _semantic);
 }; //end class Plane
 
@@ -307,8 +312,7 @@ class RasterModel
 
 public:
   vcg::Shotf shot;
-	QString rasterName;
-	bool visible; // used in rendering; Needed for switching from mesh view mode to raster view mode and vice versa.
+  bool visible; // used in rendering; Needed for switching from mesh view mode to raster view mode and vice versa.
 
 	///The list of the registered images
 	QList<Plane *> planeList;
@@ -316,16 +320,21 @@ public:
 
 private:
 	int _id;
+  QString _label;
 
 public:
 	inline int id() const {return _id;}
 	
-	RasterModel(MeshDocument *parent, const char *_rasterName=0);
+  RasterModel(MeshDocument *parent, QString _rasterName=QString());
 
-	void setRasterName(QString newFileName) {rasterName = newFileName;};
-  const QString getName() const {return rasterName;}
+  void setLabel(QString newLabel) {_label = newLabel;};
+
+  const QString label() const {
+    if(!_label.isEmpty())  return _label;
+    if(!planeList.empty()) return planeList.first()->shortName();
+    return "Error!";
+  }
 	void addPlane(Plane * plane);
-
 
 };// end class RasterModel
 
@@ -412,7 +421,7 @@ public:
 
 	//returns the mesh ata given position in the list
   MeshModel *getMesh(int i);
-	MeshModel *getMesh(const char *name);
+  MeshModel *getMesh(QString name);
 
 
 
@@ -474,13 +483,13 @@ public:
   QList<TagBase *> getMeshTags(int meshId);
 	
 	///add a new mesh with the given name
-  MeshModel *addNewMesh(const char *meshLabel, MeshModel *newMesh=0, bool setAsCurrent=true);
+  MeshModel *addNewMesh(QString meshLabel, MeshModel *newMesh=0, bool setAsCurrent=true);
 
   ///remove the mesh from the list and delete it from memory
   bool delMesh(MeshModel *mmToDel);
 
   ///add a new raster model 
-  RasterModel *addNewRaster(const char *rasterName,RasterModel *newRaster=0);
+  RasterModel *addNewRaster(QString rasterName);
 
 	///remove the raster from the list and delete it from memory
   bool delRaster(RasterModel *rasterToDel);

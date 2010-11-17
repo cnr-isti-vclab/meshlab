@@ -476,7 +476,7 @@ RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)
 
 	setText(1, QString::number(rasterModel->id()));
 
-	QString rasterName = rasterModel->getName();
+  QString rasterName = rasterModel->label();
 	setText(2, rasterName);	
 
 	r=rasterModel;

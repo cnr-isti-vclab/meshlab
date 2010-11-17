@@ -1242,10 +1242,8 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				if(!GLA())
 					newDocument();
 
-				RasterModel *rm= new RasterModel(GLA()->meshDoc);
-
         GLA()->meshDoc->setBusy(true);
-				GLA()->meshDoc->addNewRaster(qPrintable(fileName),rm);
+        RasterModel *rm= GLA()->meshDoc->addNewRaster(qPrintable(fileName));
         meshDoc()->setBusy(false);
 
 				if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
