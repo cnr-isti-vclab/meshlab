@@ -58,6 +58,7 @@ class MeshDocumentScriptInterface : public QObject
 
 public:
 	MeshDocumentScriptInterface(MeshDocument* doc);
+	~MeshDocumentScriptInterface(){}
 
 	Q_INVOKABLE MeshModelScriptInterface* getMesh(const int meshId);
 	Q_INVOKABLE MeshModelScriptInterface* current();

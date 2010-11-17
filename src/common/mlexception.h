@@ -1,32 +1,45 @@
 #ifndef ML_EXCEPTION
 #define ML_EXCEPTION
 
-class ParsingException : public std::exception
+class MeshLabException : public std::exception
+{
+public:
+	MeshLabException(const QString& text)
+		:std::exception(),excText(text){_ba = excText.toLocal8Bit();}
+
+	~MeshLabException() throw() {}
+	inline const char* what() const throw() {return _ba.constData();}
+
+protected:
+	QString excText;
+	QByteArray _ba;
+
+};
+
+class ParsingException : public MeshLabException
 {
 public:
         ParsingException(const QString& text)
-                :excText(text){excText = QString("Parsing Error: ") + excText;_ba = excText.toLocal8Bit();}
+                :MeshLabException(QString("Parsing Error: ") + text){}
 
         ~ParsingException() throw() {}
-     inline const char* what() const throw() {return _ba.constData();}
-
-private:
-	QString excText;
-	QByteArray _ba;
 };
 
-class ValueNotFoundException : public std::exception
+class ValueNotFoundException : public MeshLabException
 {
 public:
         ValueNotFoundException(const QString& valName)
-                :valNM(valName){valNM = QString("Value Name: ") + valNM +  QString(" has not been found in current environment.");_ba = valNM.toLocal8Bit();}
+                :MeshLabException(QString("Value Name: ") + valName +  QString(" has not been found in current environment.")){}
 
         ~ValueNotFoundException() throw() {}
-    inline const char* what() const throw() { return _ba.constData();}
-		
-private:
-	QString valNM;
-	QByteArray _ba;
 };
 
+class QueryException : public MeshLabException
+{
+public:
+	QueryException(const QString& syntaxError)
+		:MeshLabException(QString("Query Error: ") + syntaxError){}
+
+	~QueryException() throw() {}
+};
 #endif

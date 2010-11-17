@@ -64,8 +64,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,xmlSchemaFile(),xmlErr);
 				if (fc.xmlInfo != NULL)
 				{
-					XMLMessageHandler errQuery;
-					QStringList fn = fc.xmlInfo->filterNames(errQuery);
+					QStringList fn = fc.xmlInfo->filterNames();
 					foreach(QString filtName,fn)
 					{
 						fc.act = new QAction(filtName,plugin);
@@ -78,7 +77,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				else 
 				{
 					QString err = xmlErr.statusMessage();
-					qDebug("Error in XMLFile: %s - %s",qPrintable(xmlFile),qPrintable(err));
+					qDebug("Error in XMLFile: %s - line: %d, column: %d - %s",qPrintable(xmlFile),xmlErr.line(),xmlErr.column(),qPrintable(err));
 				}
 			}
 
@@ -253,7 +252,7 @@ void PluginManager::LoadFormats(QStringList &filters, QHash<QString, MeshIOInter
 
 void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
 { 
-	//delete currentDocInterface;
+	//WARNING!
 	//all the currentDocInterface created will be destroyed by QT when the MeshDocument destructor has been called
 	currentDocInterface = new MeshDocumentScriptInterface(&doc);
 	QScriptValue val = env.newQObject(currentDocInterface);

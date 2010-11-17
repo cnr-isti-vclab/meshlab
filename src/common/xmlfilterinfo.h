@@ -47,28 +47,36 @@ private:
 };
 
 
+//Query Exception should be managed by the XMLFilterInfo class (XMLFilterInfo is the class devoted to compose queries)
+//Parsing Exception instead should be managed by the code calling the XMLFilterInfo's functions. 
+//A Parsing Exception is raised every time an unexpected and/or missing tag or attribute in an XML has been encountered. 
+//So this kind of info it's sensible for the plugin's programmer.  
+
+
 class XMLFilterInfo
 {
 private:
 	XMLFilterInfo(const QString& file)
 		:fileName(file){}
 
-
+	static QString defaultGuiInfo(const QString& guiType,const QString& xmlvariable);
+	static QString floatGuiInfo(const QString& guiType,const QString& xmlvariable);
 	QString fileName;
 public:
+	typedef QList< QMap<QString,QString> > MapList;
+	static MapList mapListFromStringList(const QStringList& list);
 	static XMLFilterInfo* createXMLFileInfo(const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML);
 	inline static void deleteXMLFileInfo(XMLFilterInfo* xmlInfo) {delete xmlInfo;}
-	QStringList filterNames(XMLMessageHandler& errXML) const;
-	QString	filterHelp(const QString& filterName,bool& isValid,XMLMessageHandler& errXML) const;
+	QStringList filterNames() const;
+	QString	filterHelp(const QString& filterName) const;
 	
-	//The function returns a string list of all parameters for filterName. Each string in the list is a triple param_type,param_name,param_defaultExpression
-	//In order to parse each triple component is sufficient to call split(',')
-	QStringList filterParameters(const QString& filterName,bool& isValid,XMLMessageHandler& errXML) const;
-	QString filterAttribute(const QString& filterName,const QString& attribute,bool& isValid,XMLMessageHandler& errXML) const;
+	//The function returns a QList<QMap<QString,QString>>. Each map contains "type", "name" and "defaultExpression" of a single parameter.
+	MapList filterParameters(const QString& filterName) const;
 
-	/*QStringList filterParameters(const QString& filter);
-	QStringList filterParametersAndGui(const QString& filter);*/
-	QStringList query(const QString& qry,XMLMessageHandler& errQuery) const;
+	QMap<QString,QString> filterParameterGui(const QString& filter,const QString& parameter) const;
+	QString filterAttribute(const QString& filterName,const QString& attribute) const;
+
+	QStringList query(const QString& qry) const;
 };
 
 struct MeshLabXMLFilterContainer
