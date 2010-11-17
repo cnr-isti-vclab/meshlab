@@ -56,6 +56,7 @@ public:
   Point3f getTranslation();
   Matrix44f getRotation();
 
+  //use this to access camera parameters values taken from photosynth json, using enum Field values as argument
   inline qreal &operator [] (const int i)
   {
     assert(i >= 0 && i < 8);
