@@ -158,6 +158,7 @@ void OOCEnv::
 Close( bool andsave){
 	if(andsave){
 		SaveData();
+		((SimpleDb*)extMemHnd)->DisableSafeWriting();
 		SaveAT();
 	}
 	lgn->Append("deleting simpledb ");

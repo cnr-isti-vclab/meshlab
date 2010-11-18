@@ -302,22 +302,22 @@ static bool ErrorCritical(int err)
 	
 
 /// Standard call for reading a mesh
-static int Open( OpenMeshType &m, OCME * ocm,const char * filename, vcg::Matrix44f tra_ma, CallBackPos *cb=0)
+static int Open( OpenMeshType &m, OCME * ocm,const char * filename, vcg::Matrix44f tra_ma, bool only_vertices,CallBackPos *cb=0)
 {
 	PlyInfo pi;
   pi.cb=cb; 
-  return Open(m, ocm, filename,tra_ma, pi);
+  return Open(m, ocm, filename,tra_ma,only_vertices, pi);
 }
 
 /// Read a mesh and store in loadmask the loaded field
 /// Note that loadmask is not read! just modified. You cannot specify what fields
 /// have to be read. ALL the data for which your mesh HasSomething and are present 
 /// in the file are read in. 
-static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix44f tra_ma, int & loadmask, CallBackPos *cb =0)
+static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix44f tra_ma, int & loadmask, bool only_vertices,CallBackPos *cb =0)
 {
   PlyInfo pi;
   pi.cb=cb; 
-  int r =  Open(m,ocm, filename,tra_ma,pi);
+  int r =  Open(m,ocm, filename,tra_ma,  only_vertices,,pi);
   loadmask=pi.mask;
   return r;
 }
@@ -346,7 +346,13 @@ static void AddIndexInCell( Chain<ChainedGISet> * gPos, unsigned int vi, GIndex 
 	
 	(*gPos)[vi].next = gPos->AddElem(ChainedGISet(gi,0));
 }
-
+static void AddVertex(vcg::Point3f p,OCME * ocm,ScaleRange sr){
+	static Cell * c = NULL;
+	CellKey ck = ComputeCellKey(p,sr.max);
+	if( (c==NULL) || !(c->key == ck))
+		c = ocm->GetCellC(ck);
+	c->AddVertex(OVertex(p));
+}
 static void AddFace(OFace & fi, OCME * ocm, Chain<OVertex> * vert,Chain<ChainedGISet> * gPos,ScaleRange sr){
 
 		static Cell * c = NULL;
@@ -446,7 +452,7 @@ static void AddCopies( OCME * ocm, Chain<OVertex> * vert, Chain<ChainedGISet> * 
 
 
 /// read a mesh with all the possible option specified in the PlyInfo obj.
-static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix44f tra_ma, PlyInfo &pi )
+static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix44f tra_ma, bool only_vertices,PlyInfo &pi )
 {
   assert(filename!=0);
 	std::vector<VertexPointer> index;
@@ -719,30 +725,68 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 			/*
 			OOCEnv stuff
 			*/
-		
-			oce.cache_policy->memory_limit = 20*(1<<20);
-            oce.params.blockSizeBytes = 2048;
-			remove("buffer");
-			oce.Create("buffer");
-			vert = oce.GetChain<OVertex>(std::string("vert"),true);
-			lgn->Append("remapping vertices on disc");
-			vert->Resize(n);
-			gPos = oce.GetChain<ChainedGISet>(std::string("ChainedGISet"),true);
-			lgn->Append("creating support data structure for borders (on disc)");
-			gPos->Resize(n);
+			if(!only_vertices){
+				oce.cache_policy->memory_limit = 20*(1<<20);
+				oce.params.blockSizeBytes = 2048;
+				remove("buffer");
+				oce.Create("buffer");
+				vert = oce.GetChain<OVertex>(std::string("vert"),true);
+				lgn->Append("remapping vertices on disc");
+				vert->Resize(n);
+				gPos = oce.GetChain<ChainedGISet>(std::string("ChainedGISet"),true);
+				lgn->Append("creating support data structure for borders (on disc)");
+				gPos->Resize(n);
+			}
 			
 			ocm->stat.n_vertices +=n;
-      for(j=0;j<n;++j)
-			{
-				if(pi.cb && (j%1000)==0) pi.cb(j*50/n,"Vertex Loading");
+      
+	  {
+			  unsigned int ii=0;
+				vcg::Distribution<float> distr;
+				ScaleRange sr;
+				std::vector<vcg::Point3f> vert_to_add;
+				if( pf.Read( (void *)&(va) )==-1 )
+					{
+						pi.status = PlyInfo::E_SHORTFILE;
+						return pi.status;
+					}
+				vcg::Point3f prev = va.p;
+				vert_to_add.push_back(prev);
+
+				for(;ii<std::min(1000,n);++ii){
+				  if( pf.Read( (void *)&(va) )==-1 )
+					{
+						pi.status = PlyInfo::E_SHORTFILE;
+						return pi.status;
+					}
+				  distr.Add( (prev-va.p).Norm());
+				  prev = va.p;
+				  vert_to_add.push_back(va.p);
+				}
+
+				float minScale = distr.Percentile(0.15f);
+				float maxScale = distr.Percentile(0.70f);
+				sr.min = ocm->ComputeLevel(minScale);
+				sr.max = ocm->ComputeLevel(maxScale);
+if( (sr.max>10) || (sr.max<6))//davidone patch
+sr.max = 10;
+				for(unsigned int h = 0; h < vert_to_add.size(); ++h){
+					AddVertex( vert_to_add[i], ocm, sr);
+				}
+
+for(;ii< n ;++ii){
+				if(pi.cb && (ii%1000)==0) pi.cb(ii*50/n,"Vertex Loading");
 				//(*vi).UberFlags()=0; // No more necessary, since 9/2005 flags are set to zero in the constuctor.
 			  if( pf.Read( (void *)&(va) )==-1 )
 				{
 					pi.status = PlyInfo::E_SHORTFILE;
 					return pi.status;
 				}
+			  AddVertex( va.p, ocm, sr);
+		//	  (*vert)[j].P()  = tra_ma* vcg::Point3f(va.p[0],va.p[1],va.p[2]) ;
+
 			  
-			  (*vert)[j].P()  = tra_ma* vcg::Point3f(va.p[0],va.p[1],va.p[2]) ;
+
 	//			  (*vert)[j].P()[1] = tra_ma* va.p[1];
 	//			  (*vert)[j].P()[2] = tra_ma* va.p[2];
 /*				
@@ -780,6 +824,9 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 									VPV[k].memtypesize());
 			++vi;
 */
+}
+		if(only_vertices) 
+			return 0;
       }
 
 			//index.resize(n);

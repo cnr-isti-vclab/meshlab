@@ -34,7 +34,6 @@ static void JoinBorderVertices( MeshType & m,
 {
 		
         if(m.vert.size()==0 || m.vn==0) return;
-		TIM::Begin(31);
 
         VertexPointer base = &*m.vert.begin();
 		static std::vector< int> remap;
@@ -85,8 +84,7 @@ static void JoinBorderVertices( MeshType & m,
                         ++i;
                 }
         }
-		TIM::End(31);
-		TIM::Begin(8);
+
         FaceIterator fi;
         for(fi = m.face.begin(); fi!=m.face.end(); ++fi)
                 if( !(*fi).IsD() )
@@ -99,28 +97,20 @@ static void JoinBorderVertices( MeshType & m,
 
         vcg::tri::Allocator<MeshType>::CompactVertexVector(m);
 		remap.clear();
-		TIM::End(8);
     }
 };
 
 
 template <class MeshType>
 void OCME::ExtractVerticesFromASingleCell( CellKey ck , MeshType & m){
-
-//	//// phase 1. Copy all the vertices
-//	Cell* c = GetCell(ck,false);
-//
-//	typename MeshType::VertexIterator vi;
-//	Chain<OVertex> * chain = c->vert;
-//	RAssert(chain != NULL);
-//	vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,chain->Size());
-//
-//	chain->LoadAll();
-//	for(unsigned int i = 0; i < chain->Size(); ++i,++vi)
-//		if((*chain)[i].isExternal )  vcg::tri::Allocator<MeshType>::DeleteVertex(m,*vi);
-//		else
-//		(*vi).P() = (*chain)[i].P();
-// 	chain->FreeAll();
+	Cell* c = GetCell(ck,false);
+	typename MeshType::VertexIterator vi;
+	Chain<OVertex> * vert = c->vert;
+	RAssert(vert != NULL);
+	vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,vert->Size());
+	vert->LoadAll();
+	for(unsigned int i = 0; i < vert->Size(); ++i,++vi)(*vi).P() = (*vert)[i].P();
+	vert->FreeAll();
 }
 
 template <class MeshType>
@@ -175,7 +165,7 @@ template <class MeshType>
 
 template <class MeshType>
 void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMapper attr_map){
-
+m.face.EnableColor();
 		m.Clear();
 		RemoveDuplicates(sel_cells);
 		sprintf(lgn->Buf(),"start adding vertices clock(): %d ", static_cast<int>(clock()));
@@ -256,14 +246,14 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 			Chain<BorderIndex>  * chain_bi = (*ci)->border;
 			RAssert(chain != NULL);
 
-			TIM::Begin(29);
+
 			unsigned int first_added_v =  m.vert.size();
 	 		vi  = vcg::tri::Allocator<MeshType>::AddVertices(m,chain->Size());
-			TIM::End(29);
+	
 
 			locked = (*ci)->ecd->locked() ;
 
-			TIM::Begin(25);
+
 			for(unsigned int i = 0; i < chain->Size(); ++i,++vi)
                 {
                     gPosV[*vi].Clear();
@@ -285,7 +275,7 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 					/* initialize the external counter to 0 [maybe unnecessary]*/ 
 					biV[*vi] = 0;
 			}
-			TIM::End(25);
+
 
 			
 			/* assign the border index to the border vertices */
@@ -299,12 +289,16 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 				RAssert(face_chain!=NULL);
 
 
-				TIM::Begin(30);
-				typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
-				TIM::End(30);
 
-				TIM::Begin(28);
+				typename MeshType::FaceIterator fi  = vcg::tri::Allocator<MeshType>::AddFaces(m,face_chain->Size());
+	
+
+				
 				for(unsigned int ff = 0; ff < face_chain->Size();++ff,++fi){
+vcg::Color4b c; 
+c = c.Scatter(255,(*ci)->key.h+127);
+(*fi).C() = c;
+
 					gPosF[*fi] = GIndex((*ci)->key,ff);
 					lockedF[*fi] = locked? 1 : 0 ;
 					for(unsigned int i = 0; i < 3; ++i){
@@ -314,24 +308,24 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
 					   }
 				}
 				offset = m.vert.size();
-				TIM::End(28);
+				
 		}
 		
 	range() = sr;
 
-		TIM::Begin(26);
+	
 		for(ci  = sel_cells.begin(); ci != sel_cells.end(); ++ci){
 				(*ci)->vert->FreeAll();
 				(*ci)->face->FreeAll();
 		}
-		TIM::End(26);
+		
 
 		 
         Joiner<MeshType>::JoinBorderVertices(m,gPosV,biV,lockedV);
 		 
 
         {
-			TIM::Begin(24);	
+			
 
             typename MeshType::FaceIterator fi;
             typename MeshType::VertexIterator vi;
@@ -351,7 +345,7 @@ void OCME::Extract(   std::vector<Cell*> & sel_cells, MeshType & m, AttributeMap
                             if(!(*fi).IsD()  && !lockedF[i])
                                             edited_faces.push_back(gPosF[i]);
             std::sort(edited_faces.begin(),edited_faces.end());
-			TIM::End(24);	
+				
         }
 
 		 

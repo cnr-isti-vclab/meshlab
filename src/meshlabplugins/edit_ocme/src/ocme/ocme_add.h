@@ -110,6 +110,11 @@ void OCME::AddMesh( MeshType & m, AttributeMapper attr_map){
 	*/
  	sr.min = sr.max;
 
+/* begin davidone patch */
+//if( (sr.max>10) || (sr.max<6))//davidone patch
+//sr.max = 10;
+/* end davidone patch */
+
 	sprintf(lgn->Buf(),"MeshSize face %d  vert%d\n",m.fn,m.vn);
 	lgn->Push();	
 	sprintf(lgn->Buf(),"ScaleRange %d %d\n",sr.min,sr.max);

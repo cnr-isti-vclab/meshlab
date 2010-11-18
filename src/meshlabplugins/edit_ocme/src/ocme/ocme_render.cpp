@@ -16,7 +16,9 @@ int COff(const int & h);
 void DrawCellSel ( CellKey & ck, int mode = 0 )
 {
 
-
+	 glPushAttrib(GL_ALL_ATTRIB_BITS);
+	 glEnable(GL_COLOR_MATERIAL);
+	//glDisable(GL_LIGHTING);
 	vcg::Point3f p = ck.P3f();
 	int  lev = ck.h;
 	float stepf = ( lev>0 ) ? ( 1<<lev ) :  1.f/ ( float ) ( 1<< ( -lev ) ) ;
@@ -27,11 +29,9 @@ void DrawCellSel ( CellKey & ck, int mode = 0 )
 
 
 	vcg::Color4b c;
-	if(mode=3)
-			c = vcg::Color4b(50,140,0,127);
-	else{
-					c = c.Scatter ( 32,lev+16 );
-			}
+	c = c.Scatter ( 255,lev+127 );
+ 	c.ColorRamp(-10.f,  10.f, lev );
+	c[3] = 127;
 	glColor( c );
 
 	glPushMatrix();
@@ -56,7 +56,8 @@ void DrawCellSel ( CellKey & ck, int mode = 0 )
 	}
 
 	glPopMatrix();
-
+	 glDisable(GL_COLOR_MATERIAL);
+	 glPopAttrib();
 }
 
 void OCME::InitRender()
@@ -228,7 +229,10 @@ void OCME::Select(std::vector<Cell*>  & selected){
 void OCME::DeSelect(std::vector<Cell*>  & selected){
 }
 
-void OCME::Render(bool useSplatting){
+void OCME::Render(int impostorRenderMode){
+	bool useSplatting = (impostorRenderMode==0);
+	bool useBox = (impostorRenderMode==2);
+
 	render_mutex.lock();
 	RAssert(MemDbg::CheckHeap(1));
 
@@ -274,43 +278,41 @@ void OCME::Render(bool useSplatting){
 	std::vector<float>    radiuses;
 
 	for(unsigned int i = 0; i < cells_to_render.size(); ++i)
-         if(!cells_to_render[i]->generic_bool()) { // generic_bool() == the cell is taken in editing
+          if(!cells_to_render[i]->generic_bool()) 
+		  { // generic_bool() == the cell is taken in editing
           if(cells_to_render[i]->rd->renderCacheToken && cells_to_render[i]->rd->renderCacheToken->lock() )
-	 {
-			 c = c.Scatter ( 32,COff(cells_to_render[i]->key.h) );
-			 //c = vcg::Color4b::Gray;
-			// c.ColorRamp(0, maxp-minp,cells_to_render[i]->rd->priority+minp);
-			glColor ( c );
+		 {
+				// c = c.Scatter ( 32,COff(cells_to_render[i]->key.h) );
+				//glColor ( c );
 
-			default_renderer.m = &cells_to_render[i]->rd->Mesh();
+				default_renderer.m = &cells_to_render[i]->rd->Mesh();
 
+				if(vcg::tri::HasPerVertexColor(cells_to_render[i]->rd->Mesh()))
+	//					default_renderer.Draw<vcg::GLW::DMPoints , vcg::GLW::CMPerVert, vcg::GLW::TMNone>();
+					default_renderer.Draw<vcg::GLW::DMFlat , vcg::GLW::CMPerVert, vcg::GLW::TMNone>();
+	//				default_renderer.DrawPointsBase<vcg::GLW::NMPerVert,vcg::GLW::CMPerVert>();
+				else 
+//					default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMLast,vcg::GLW::TMNone>();
+					default_renderer.Draw<vcg::GLW::DMFlat,vcg::GLW::CMNone,vcg::GLW::TMNone>();
 
-            if(vcg::tri::HasPerVertexColor(cells_to_render[i]->rd->Mesh()))
-//					default_renderer.Draw<vcg::GLW::DMPoints , vcg::GLW::CMPerVert, vcg::GLW::TMNone>();
-				default_renderer.DrawPointsBase<vcg::GLW::NMPerVert,vcg::GLW::CMPerVert>();
-			else 
-                default_renderer.Draw<vcg::GLW::DMPoints,vcg::GLW::CMLast,vcg::GLW::TMNone>();
-
-			cells_to_render[i]->rd->renderCacheToken->unlock();
-		}
-	 else
-	  {
-//				c = c.Scatter ( 32,COff(cells_to_render[i]->key.h) );
-//		c = vcg::Color4b::Cyan;
-//			 c.ColorRamp(0, maxp-minp,cells_to_render[i]->rd->priority+minp)
-//		glEnable(GL_COLOR_MATERIAL);
-//		 glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
-//		 glColor ( c );
-		  if(!useSplatting)
-			cells_to_render[i]->impostor->Render(this->renderParams.render_subcells);
-		  else{ 
-			  // impostor_to_render.push_back(cells_to_render[i]->impostor);
-			  positions.push_back(&cells_to_render[i]->impostor->positionsV);
-			  normals.push_back(&cells_to_render[i]->impostor->normalsV);
-			  colors.push_back(&cells_to_render[i]->impostor->colorsV);
-			  radiuses.push_back( CS( cells_to_render[i]->key.h)/Impostor::Gridsize());
-		  }
-		}
+				cells_to_render[i]->rd->renderCacheToken->unlock();
+			}
+		 else
+		  {
+			  if(!useSplatting){
+				  if(useBox)
+					  DrawCellSel(cells_to_render[i]->key,3);
+				  else
+					cells_to_render[i]->impostor->Render( 0);
+			  }
+			  else{ 
+				  // impostor_to_render.push_back(cells_to_render[i]->impostor);
+				  positions.push_back(&cells_to_render[i]->impostor->positionsV);
+				  normals.push_back(&cells_to_render[i]->impostor->normalsV);
+				  colors.push_back(&cells_to_render[i]->impostor->colorsV);
+				  radiuses.push_back( CS( cells_to_render[i]->key.h)/Impostor::Gridsize());
+			  }
+			}
 	}
 		 
 	 //for(std::vector<Impostor *  > :: iterator  i =impostor_to_render.begin(); i != impostor_to_render.end();++i)

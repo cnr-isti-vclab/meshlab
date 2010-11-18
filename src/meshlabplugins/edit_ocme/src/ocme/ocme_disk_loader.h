@@ -53,7 +53,7 @@ public:
 	void Start(){controller.start();}
 	void Finish();
 	Controller<CellToken> controller;
-private:
+
 	CellDisk cellDisk;
 	CellRAM cellRAM;
 	CellVideo cellVideo;

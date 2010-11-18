@@ -44,7 +44,8 @@ int CellVideo::size(CellToken * /*token*/){return 1;}
 
 RenderCachesController::RenderCachesController() {
 
-	cellRAM.setCapacity((1<<20)*200);
+	cellRAM.setCapacity((1<<20)*25);
+	//cellRAM.setCapacity(cellRAM.ocme->renderParams.memory_limit_in_core);
 //	cellVideo.setCapacity(cellVideo.ocme->renderParams.memory_limit_video);
 //	cellDisk.setCapacity(100);
 	cellVideo.setInputCache(&cellRAM);

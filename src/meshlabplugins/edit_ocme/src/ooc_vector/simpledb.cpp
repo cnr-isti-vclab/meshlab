@@ -6,9 +6,9 @@
 #include "../utils/string_serialize.h"
 #include <stdio.h>
 
+extern Logging * lgn;
 
-
-SimpleDb::SimpleDb(const std::string & _name):	name(_name)
+SimpleDb::SimpleDb(const std::string & _name):	name(_name),safe_writing(false)
 	{max_file_size_bytes  = 1<<30;
 	};
 
@@ -33,6 +33,13 @@ void SimpleDb::Create(const std::string & _name, const unsigned int &  pagesize)
 		UpdateNextSegment(); // first segment of data
 }
 
+void SimpleDb::EnableSafeWriting(){
+		first_safe_segment = next_segment;
+		safe_writing = true;
+}
+void SimpleDb::DisableSafeWriting(){
+		safe_writing = false;
+}
 
 void SimpleDb::ReadIndex(const std::string & idname){
 		FILE * f = fopen(idname.c_str(),"r+b");
@@ -105,9 +112,17 @@ SimpleDb::~SimpleDb(){
 }
 
 
-SimpleDb::Index SimpleDb::Put(const Index &  pos, void * buf, unsigned int siz){
-                FILE * f = files[pos.IFile()];
-                f = files[pos.IFile()];
+SimpleDb::Index SimpleDb::PutSingle(    std::string  name, Index &  pos, void * buf, unsigned int siz){
+				if(safe_writing &&  (pos<first_safe_segment)){
+					pos = next_segment;	
+					UpdateNextSegment();
+
+					/* the following 3 lines update the value of the index in the volatile copy of the index. */
+					Index_ite ii = index.find(name);
+					RAssert(ii != index.end());
+					(*ii).second = pos;				
+				}
+                FILE *	f = files[pos.IFile()];
                 fseek(f,pos.ISeg()*segment_size,SEEK_SET);
                 fwrite(buf,siz,1,f);	// actually write the buffer to the file
                 return pos;
@@ -118,17 +133,19 @@ SimpleDb::Index SimpleDb::PutSingle(std::string name, void * buf, unsigned long 
 		Index pos;
 
 		Index_ite ii = index.find(name);
-		if(ii != index.end())
-				pos = (*ii).second;																			// if it is in the index take the value
-		else{
+		if( (ii == index.end()) || ((safe_writing &&  ((*ii).second<first_safe_segment))))
+		{
 				pos = next_segment;																			// otherwise take the next empty segment
-				index.insert(std::pair<std::string,Index>(name,pos));		// add to the index
+				if(safe_writing)
+					(*ii).second = pos;	
+				else
+					index.insert(std::pair<std::string,Index>(name,pos));		// add to the index
 				UpdateNextSegment();																		// update the next empty segment
 		}
+		else
+			pos = (*ii).second;																			// if it is in the index take the value
 
-		f = files[pos.IFile()];
-		fseek(f,pos.ISeg()*segment_size,SEEK_SET);
-		fwrite(buf,siz,1,f);	// actually write the buffer to the file
+		PutSingle(std::string(),pos,buf,siz);
 		return pos;
 }
 
@@ -231,13 +248,17 @@ void SimpleDb::Del(std::string name){
 				if(ii == index.end())
 						return;
 				while( ii != index.end()){
+					if(  ( safe_writing && ( (*ii).second < first_safe_segment))){
 						free_segments.push_back((*ii).second);
 						index.erase(ii);
-						ii = index.find(PartName(name,++i));
+					}
+					ii = index.find(PartName(name,++i));
 				}
 		}else{
-				free_segments.push_back((*ii).second);
-				index.erase(ii);
+					if(   ( safe_writing && ( (*ii).second < first_safe_segment))){
+						free_segments.push_back((*ii).second);
+						index.erase(ii);
+					}
 		}
 }
 

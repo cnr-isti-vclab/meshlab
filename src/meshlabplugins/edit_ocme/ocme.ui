@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>431</height>
+    <height>462</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -160,7 +160,7 @@
     <property name="geometry">
      <rect>
       <x>250</x>
-      <y>380</y>
+      <y>410</y>
       <width>131</width>
       <height>27</height>
      </rect>
@@ -173,7 +173,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>380</y>
+      <y>410</y>
       <width>93</width>
       <height>27</height>
      </rect>
@@ -186,7 +186,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>380</y>
+      <y>410</y>
       <width>151</width>
       <height>27</height>
      </rect>
@@ -265,7 +265,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>352</y>
+      <y>382</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -278,7 +278,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>352</y>
+      <y>382</y>
       <width>91</width>
       <height>31</height>
      </rect>
@@ -287,30 +287,11 @@
      <string>verify (gloabl)</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="splattingCheckBox">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>290</y>
-      <width>161</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Splatting with APSS</string>
-    </property>
-    <property name="checked">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QCheckBox" name="onlyImpostorsCheckBox">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>310</y>
+      <y>290</y>
       <width>111</width>
       <height>17</height>
      </rect>
@@ -320,6 +301,51 @@
     </property>
     <property name="checked">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="videoramSpinBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>350</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>10</number>
+    </property>
+    <property name="maximum">
+     <number>150</number>
+    </property>
+    <property name="singleStep">
+     <number>5</number>
+    </property>
+    <property name="value">
+     <number>10</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>350</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>video RAM (MB)</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="modeComboBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>310</y>
+      <width>69</width>
+      <height>22</height>
+     </rect>
     </property>
    </widget>
   </widget>

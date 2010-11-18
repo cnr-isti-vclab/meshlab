@@ -139,9 +139,9 @@ SaveChunk( typename Chain<TYPE>::Chunk & ck ){
 	unsigned int siz = ck.Write(local_buffer);
 
 	if(!ck.pos.Void() )
-		((SimpleDb*)extMemHnd)->Put(ck.pos, local_buffer, siz);
+		ck.pos = ((SimpleDb*)extMemHnd)->PutSingle(key,ck.pos, local_buffer, siz);
 	else
-		ck.pos = ((SimpleDb*)extMemHnd)->Put(key, local_buffer, siz);
+		ck.pos = ((SimpleDb*)extMemHnd)->PutSingle(key, local_buffer, siz);
 
 	ck.Written(local_buffer);
 

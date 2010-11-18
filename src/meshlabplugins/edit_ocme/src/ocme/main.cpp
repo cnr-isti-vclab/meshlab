@@ -222,6 +222,7 @@ void UsageExit(){
 		   -f : database name [default: out]\n\
 		   -k NUM : num triangles per edge size [default: 50]\n\
 		   -i : save a mesh made with impostors [default: no]\n\
+		   -I : recompute all the  impostors [default: no]\n\
 		   -v : verbose [default: no]\n\
 		   -s : skip faces (just insert vertices) [default: no]\n\
 		   -n : compute normals per vertex, only with -s [default: no]\n\
@@ -449,6 +450,7 @@ main (int argc,char **argv )
 	bool compute_normals = false;
 	bool all_plys = false;
 	bool compute_stats = false;
+	bool recompute_impostors = false;
     vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
 
 #ifdef _DEBUG
@@ -463,7 +465,7 @@ main (int argc,char **argv )
     {
       int this_option_optind = optind ? optind : 1;
 
-      c = getopt (argc, argv, "VFsqciosnvp:t:m:l:f:L:a:A:k:");
+	  c = getopt (argc, argv, "IVFsqciosnvp:t:m:l:f:L:a:A:k:S:");
       if (c == EOF)
         break;
 
@@ -474,6 +476,9 @@ main (int argc,char **argv )
           break;
         case 'i':
           save_impostors = true;
+          break;
+        case 'I':
+          recompute_impostors = true;
           break;
         case 'n':
           compute_normals = true;
@@ -564,7 +569,7 @@ main (int argc,char **argv )
  	meshona->oce.cache_policy->memory_limit  = cache_memory_limit * (1<<20);
 
 	lgn->off = !logging;
-	if(!verify && !compute_stats){
+	if(!verify && !compute_stats && !recompute_impostors){
  		meshona->streaming_mode = true;	
 
 
@@ -613,7 +618,6 @@ main (int argc,char **argv )
 					vcgMesh m;
 					stat(aln[idm].first.c_str(),&buf);
 
-
 					++meshona->stat.n_files;
 					meshona->stat.input_file_size+=buf.st_size;
 					TIM::Begin(0);
@@ -661,7 +665,9 @@ main (int argc,char **argv )
 
 				stat(files_to_load[i].c_str(),&buf);
 				meshona->stat.input_file_size+=buf.st_size;
-							if(buf.st_size < 1000 * (1<<20)){// if the file is less that 50MB load the mesh in memory and then add it
+			 	if(buf.st_size < 100 * (1<<20))
+				//	if(false)
+				{// if the file is less that 50MB load the mesh in memory and then add it
 
 					int mask = 0;
 
@@ -699,8 +705,10 @@ main (int argc,char **argv )
 					++meshona->stat.n_files;
 
 					if(only_vertices){
-							if(compute_normals) 
+						if(compute_normals) {
 								vcg::tri::UpdateNormals<vcgMesh>::PerVertexPerFace(m);
+								am.vert_attrs.push_back("Normal3f");
+						}
 							m.fn = 0;
 						}	
 					meshona->AddMesh(m,am);
@@ -713,7 +721,7 @@ main (int argc,char **argv )
 				{
 					TIM::Begin(2);
 					// if the file is more that 50 MB build directly from file
-					n_faces = vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,files_to_load[i].c_str(),tra_ma,cb);
+					n_faces = vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,files_to_load[i].c_str(),tra_ma,true,cb);
 					TIM::End(2);
 				}
 				
@@ -762,6 +770,8 @@ else
 		meshona->ComputeStatistics();
 		printf("tri: %d, ver %d]\n",meshona->stat.n_triangles,meshona->stat.n_vertices);
 	}
+	if(recompute_impostors)
+		meshona->ComputeImpostors();
 	meshona->Close(false);
 }
 

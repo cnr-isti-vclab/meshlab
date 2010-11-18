@@ -401,7 +401,7 @@ struct OCME{
 
 	// render the dataset
 	std::vector<Cell*> cells_to_render;
-	void Render(bool);
+	void Render(int);
 
 	// splatting apss rendering for the impostors
 	SplatRenderer<vcgMesh> splat_renderer;

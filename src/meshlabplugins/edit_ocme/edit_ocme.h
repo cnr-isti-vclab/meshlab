@@ -84,7 +84,7 @@ public:
 	std::vector<Cell*> selected_cells;
 
 	/* use splatting */
-	bool useSplatting;
+	int  impostorRenderMode;
 	/* OCME core */
 	OCME * ocme;						// [v0.1] only one ocm database at time cna be opened
 	bool ocme_loaded,initialized;
@@ -120,8 +120,9 @@ public slots:
 	void updateButtonsState();
 	void editAll();
 	void verify();
-	void toggleSplatting(int);
+	void renderModeChanged(int);
 	void toggleImpostors(int);
+	void setvideoram(int);
 	/* ui only*/
 	void fillMeshAttribute();	// fill the list of trimesh attribute
 	void clearMeshAttribute();	// fill the list of trimesh attribute

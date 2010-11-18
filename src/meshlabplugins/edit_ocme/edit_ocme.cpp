@@ -52,7 +52,7 @@ OcmeEditPlugin::OcmeEditPlugin() {
 	ocme_loaded = false;
 	isDragging = false;
 	isToSelect = false;
-	useSplatting = true;
+	impostorRenderMode = 0;
 	Impostor::Gridsize()= 8; // *** TO DO: include in the database
 }
 
@@ -109,6 +109,7 @@ vcg::Box3f GetViewVolumeBBox()
 void OcmeEditPlugin::DrawCellsToEdit( ){
 
 		// render all the cells only on the stencil buffer
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		glColorMask(false,false,false,false);
 		for(unsigned int i  = 0; i < cells_to_edit.size(); ++i)
 			DrawCellSel(cells_to_edit[i]->key,1);
@@ -125,6 +126,7 @@ void OcmeEditPlugin::DrawCellsToEdit( ){
 		glEnable(GL_LIGHTING);
 		glDisable(GL_BLEND);
 		glDepthFunc(GL_LESS);
+		glPopAttrib();
 
 }
 
@@ -168,7 +170,7 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 		glPopAttrib();
 	}else{
 
-		ocme->Render(useSplatting);
+		ocme->Render(impostorRenderMode);
 
 		if(showTouched){
 				for(unsigned int i  = 0; i < ocme->touched_cells.size(); ++i){
@@ -217,18 +219,14 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 		{
 			CellKey cellkey  = *results[0];
 			Cell *c = ocme->GetCell(cellkey,false);
-			cells_to_edit.push_back(c);
 		}
 	}
 
+ 
 	DrawCellsToEdit();
-//	// draw the cells selected as sphere
-//	for(unsigned int i  = 0; i < cells_to_edit.size(); ++i)
-//		DrawCellSel(cells_to_edit[i]->key,1);
-
 	if(isDragging)
 			DrawXORRect(gla);
-
+ 
 
 	rendering.unlock();
 
@@ -311,9 +309,15 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	QObject::connect(odw->addFromDiskPushButton ,SIGNAL(clicked() ),this,SLOT( addFromDisk() ));
 	QObject::connect(odw->editAllPushButton ,SIGNAL(clicked() ),this,SLOT( editAll() ));
 	QObject::connect(odw->verifyPushButton ,SIGNAL(clicked() ),this,SLOT( verify() ));
-	QObject::connect(odw->splattingCheckBox ,SIGNAL(stateChanged(int) ),this,SLOT( toggleSplatting(int) ));
+	//QObject::connect(odw->splattingCheckBox ,SIGNAL(stateChanged(int) ),this,SLOT( toggleSplatting(int) ));
 	QObject::connect(odw->onlyImpostorsCheckBox ,SIGNAL(stateChanged(int) ),this,SLOT( toggleImpostors(int) ));
+	QObject::connect(odw->videoramSpinBox ,SIGNAL(valueChanged(int) ),this,SLOT( setvideoram(int) ));
  
+
+	odw->modeComboBox->addItem(QString("splatting APSS"));
+	odw->modeComboBox->addItem(QString("points"));
+	odw->modeComboBox->addItem(QString("cells"));
+	QObject::connect(odw->modeComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(renderModeChanged(int)));
 
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), gla, SLOT(update()));
@@ -445,6 +449,7 @@ void OcmeEditPlugin::loadOcm(){
 		ocme->splat_renderer.Init(this->gla);
 //		ocme->renderParams.memory_limit_in_core = 100;
 		ocme->Open ( ocm_name.toAscii() );
+		((SimpleDb*)ocme->extMemHnd)->EnableSafeWriting();
 
 #ifdef _RELEASED_
 		refreshImpostors();
@@ -453,8 +458,8 @@ void OcmeEditPlugin::loadOcm(){
 		UpdateBoundingBox();
 		setTrackBall();
         mm  = gla->meshDoc->addNewMesh("Ocm patch");
-		mm->cm.vert.reserve(2000000);
-		mm->cm.face.reserve(4000000);
+//		mm->cm.vert.reserve(2000000);
+//		mm->cm.face.reserve(4000000);
 	//	mm  ->cm.bbox = ocme_bbox;
 		ocme_loaded = true;
 		updateButtonsState();
@@ -515,7 +520,7 @@ void OcmeEditPlugin::createOcm(){
 
 		/* paramters to be exposed somehow later  on */
 		ocme->params.side_factor = 20;
-		ocme->oce.cache_policy->memory_limit  = /*cache_memory_limit*/ 100 * (1<<20);
+		ocme->oce.cache_policy->memory_limit  = /*cache_memory_limit*/ 200* (1<<20);
 		ocme_bbox.SetNull();
 		/* */
 		ocme_loaded = true;
@@ -571,13 +576,18 @@ void OcmeEditPlugin::editAll(){
 void OcmeEditPlugin::verify(){
 	ocme->Verify();
 }
-void OcmeEditPlugin::toggleSplatting(int s){
-	  useSplatting =  (Qt::Checked == s);
+void OcmeEditPlugin::renderModeChanged(int i){
+	  impostorRenderMode =  i;
 }
 void OcmeEditPlugin::toggleImpostors(int s){
 	  ocme->renderParams.only_impostors =  (Qt::Checked == s);
 }
- 
+
+void OcmeEditPlugin::setvideoram(int v){
+	ocme->renderParams.memory_limit_in_core = v*(1<<20);
+	ocme->renderCache.cellRAM.setCapacity(ocme->renderParams.memory_limit_in_core);
+}
+
 
 void OcmeEditPlugin::edit(){
 
@@ -614,13 +624,14 @@ void OcmeEditPlugin::edit(){
 
 	// try to take as mmuch as possible the cell  cells_to_edit for editing. maximum priority to those
 	//closer to the observer
-	while(!cells_to_edit.empty() && !ocme->Edit(cells_to_edit,mm->cm,4000000,attrMapper) )
+	TIM::Begin(8);
+	while(!cells_to_edit.empty() && !ocme->Edit(cells_to_edit,mm->cm,2500000,attrMapper) )
 		cells_to_edit.pop_back();
 	if(!cells_to_edit.empty())
 //	if(ocme->Edit(cells_to_edit,mm->cm,4000000,attrMapper))
 	{
 		ocme->DeSelect(this->cells_to_edit);
-		cells_to_edit.clear();
+		
 	 
 
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace ( mm->cm );
@@ -641,22 +652,24 @@ void OcmeEditPlugin::edit(){
 
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 	}
+	TIM::End(8);
 
 	ocme->renderCache.controller.resume();
 	clearOcmAttribute();
 	updateButtonsState();
 	gla->update();
-	sprintf(lgn->Buf(),"extract_pre: %d joiner12 %d joiner22 %d, fecth time %d, trace %d, cycle %d, freeing %d,\
-		  cycle face %d, addv %d, addf %d",
-		  TIM::Total(9),TIM::Total(31),TIM::Total(8),TIM::Total(12),TIM::Total(24),TIM::Total(25),TIM::Total(26),
-		TIM::Total(28),TIM::Total(29),TIM::Total(30));
+	sprintf(lgn->Buf(),"time: %d cells %d, meshsize %d",TIM::Total(8),cells_to_edit.size(),mm->cm.fn);
 	lgn->Push();
+
+	cells_to_edit.clear();
 }
 
 void OcmeEditPlugin::commit(){
 	rendering.lock();
 	ocme->renderCache.Finish();
+	unsigned int start = clock();
 	ocme->Commit ( mm->cm );
+	sprintf(lgn->Buf(),"t: %d, nt %d ",clock()-start,mm->cm.fn);lgn->Push();
 	UpdateBoundingBox();
 	mm->cm.Clear();
 	ocme->renderCache.Start();
@@ -698,6 +711,7 @@ void OcmeEditPlugin::add(){
 /* selection */
 void OcmeEditPlugin::DrawXORRect(GLArea * gla)
 {
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -705,7 +719,7 @@ void OcmeEditPlugin::DrawXORRect(GLArea * gla)
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	glPushAttrib(GL_ENABLE_BIT);
+ 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
@@ -732,10 +746,11 @@ void OcmeEditPlugin::DrawXORRect(GLArea * gla)
 	glEnd();
 
 	// Closing 2D
-	glPopAttrib();
+	 
 	glPopMatrix(); // restore modelview
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 
+	glPopAttrib();
 }

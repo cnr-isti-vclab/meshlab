@@ -5,11 +5,20 @@
 /* UGLY: this dependency is because of the templates..it should be removed*/
 #include "../ooc_vector/berkeleydb/ooc_chains_berkeleydb.hpp"
 
+#include <vcg/space/normal_extrapolation.h>
 
 extern unsigned int  generic_bool;
 int COff(const int & h);
 
 void OCME::ComputeImpostors( ){
+	for(CellsIterator ci  = cells.begin(); ci != cells.end(); ++ci){
+		vcgMesh m;
+		this->ClearImpostor((*ci).second->key);
+		this->ExtractVerticesFromASingleCell((*ci).second->key,m);
+		vcg::NormalExtrapolation<vcgMesh::VertContainer>::ExtrapolateNormals(m.vert.begin(),m.vert.end(),10);
+		for(vcgMesh::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+			(*ci).second->impostor->AddSample((*vi).P(),(*vi).cN(),vcg::Color4b::Gray);
+	}
 }
 void OCME::ImpostorsToMesh(vcgMesh & m){
 

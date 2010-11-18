@@ -47,6 +47,8 @@ void OCME::FindRemovedElements( MeshType & m,
 
                 std::vector<GIndex> deleted_faces;
                 SetDifference(edited_faces,committing_faces,deleted_faces);
+sprintf(lgn->Buf(),"del faces %d",deleted_faces.size());
+lgn->Push();
                 for(unsigned int i = 0; i < deleted_faces.size(); ++i){
                                 Cell* c = GetCell(deleted_faces[i].ck,false);
                                 assert(c);

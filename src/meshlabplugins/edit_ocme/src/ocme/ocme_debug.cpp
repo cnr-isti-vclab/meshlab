@@ -90,7 +90,11 @@ void OCME::Verify(){
 }
 
 void OCME::ComputeStatistics(){
+lgn->off = false;
 
+	std::vector<unsigned int> distr,distrD;
+	unsigned int max_tri = 0;
+	unsigned int max_dep = 0;
 	CellsIterator ci;
 	stat = Statistics();
 	unsigned int com =0;
@@ -98,16 +102,45 @@ void OCME::ComputeStatistics(){
 		stat.n_cells = cells.size();
 		
 		for(ci = cells.begin(); ci != cells.end(); ++ci){
+			distr.push_back( ((*ci).second->face->Size()));
+			distrD.push_back( (*ci).second->dependence_set.size());
+			if (max_tri< 	(*ci).second->face->Size()) max_tri = (*ci).second->face->Size();
+			if (max_dep< 	(*ci).second->dependence_set.size()) max_dep = (*ci).second->dependence_set.size();
+
 			stat.n_triangles += (*ci).second->face->Size();
 			stat.n_vertices  += (*ci).second->vert->Size();
 			stat.n_proxies   += (*ci).second->impostor->centroids.data.size();
 			com   += (*ci).second->impostor->positionsV.size();
 		}
 	}
+	 
 	sprintf(lgn->Buf(),"n_cells %d, n_tri %d, n_vert %d, n_pro(compact) %d,n_pro(sparse) %d",
 		stat.n_cells,stat.n_triangles,stat.n_vertices,com,stat.n_proxies 
 		);
 	lgn->Push();
+	{
+		std::sort(distr.begin(),distr.end());
+	
+		unsigned int j =0;	
+		for(unsigned int i = 1; i < 100;++i){
+			unsigned int h = 0;
+			while(distr[j]< max_tri*i/100.f){++j;++h;}
+			sprintf(lgn->Buf(),"%f, %d",max_tri*i/100.f,h);
+			lgn->Push();
+		}
+	}
+	sprintf(lgn->Buf(),"-------------------------------------");lgn->Push();
+	{
+		std::sort(distrD.begin(),distrD.end());
+	
+		unsigned int j =0;	
+		for(unsigned int i = 1; i < 20;++i){
+			unsigned int h = 0;
+			while(distrD[j]< max_dep*i/20.f){++j;++h;}
+			sprintf(lgn->Buf(),"%f, %d",max_dep*i/20.f,h);
+			lgn->Push();
+		}
+	}
 }
 
 bool OCME::CheckFaceVertDeletions(Cell *c){ return true;

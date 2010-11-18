@@ -23,6 +23,9 @@ struct SimpleDb{
 //		char * Serialize(char * buf){ *(unsigned int*)buf = value; return buf+sizeof(unsigned int);}
 		char * DeSerialize(char * buf){value =  *(unsigned int*)buf  ; return buf+sizeof(unsigned int);}
 
+		const bool operator <(const Index& o)const{return value < o.value;}
+		const bool operator ==(const Index& o)const{return value == o.value;}
+		const bool operator >(const Index& o)const{return value > o.value;}
 //private:
 		unsigned int 	value;
 
@@ -31,28 +34,33 @@ struct SimpleDb{
 	SimpleDb(const std::string & _name);
 	~SimpleDb();
 
-	Index			Put(const Index &  pos, void * buf, unsigned int siz);
-	Index			PutSingle(std::string  ,void * ,unsigned long);
-	Index			Put(std::string  ,void * ,unsigned long);
+	Index		PutSingle(std::string, Index &  pos, void * buf, unsigned int siz);
+	Index		PutSingle(std::string  ,void * ,unsigned long);
+	Index		Put(std::string  ,void * ,unsigned long);
 
-	Index			GetSingle(std::string  ,void *, unsigned long siz);
-	Index			Get(std::string key ,void *, unsigned long siz);
-	Index			Get(std::string key, void *&  buf);
-    Index			Get(const Index &  id, void * buf, const unsigned int &);
+	Index		GetSingle(std::string  ,void *, unsigned long siz);
+	Index		Get(std::string key ,void *, unsigned long siz);
+	Index		Get(std::string key, void *&  buf);
+    Index		Get(const Index &  id, void * buf, const unsigned int &);
 
 	void		Del(std::string);
 	void		Open(const std::string & _name);
 	void		Create(const std::string & _name, const unsigned int &  pagesize);
+	void		EnableSafeWriting();
+	void		DisableSafeWriting();
 
 private:
-	unsigned int segment_size;						// length of a segment in bytes
-	unsigned int max_file_size_bytes;			// max admitted file size
+	unsigned int segment_size;				// length of a segment in bytes
+	unsigned int max_file_size_bytes;		// max admitted file size
 	unsigned int max_file_size_segments;	// max admitted file size
-	unsigned int used_segments;						// number of used segments
+	unsigned int used_segments;				// number of used segments
+
+	bool safe_writing;						// safe writing enabled (default false)
+	Index first_safe_segment;				// first segment beyond the safe database
 
 	Index next_segment;						// the index to the next segment to save to
 	Index next_creation;					// the next segment to be created
-	Index index_pos;							// where the index itself is written into the file
+	Index index_pos;						// where the index itself is written into the file
 
 	std::map<std::string,Index> index;		// index of the database
 	typedef std::map<std::string,Index>::iterator Index_ite;		// index of the database
