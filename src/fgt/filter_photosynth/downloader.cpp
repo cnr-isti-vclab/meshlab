@@ -450,7 +450,7 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
   }
 
   _step = LOADING_BIN;
-  _progress = 100 - (int)(_semaphore / _totalBinFilesCount);
+  _progress = (_totalBinFilesCount - _semaphore) / _totalBinFilesCount * 100;
   _cb(progressInfo(),_info.toStdString().data());
   bool error = false;
   unsigned short versionMajor = readBigEndianUInt16(httpResponse,error);
@@ -552,7 +552,7 @@ void SynthData::saveImages(QNetworkReply *httpResponse)
   if(httpResponse->error() != QNetworkReply::NoError)
     qDebug() << httpResponse->errorString();
 
-  _progress = (int)(_semaphore / _numImages);
+  _progress = (int)(_semaphore / _numImages) * 100;
   _cb(progressInfo(),_info.toStdString().data());
   QByteArray payload = httpResponse->readAll();
   QDir dir(_savePath);
