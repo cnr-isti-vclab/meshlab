@@ -304,7 +304,7 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
     QScriptValue coordSystems = collection.property("x");
     for(int i = 0; i <= coordSystemsCount; ++i)
     {
-      _progress = 50 + (int)(i / (2*coordSystemsCount));
+      _progress = 50 + (i / (2*coordSystemsCount) * 100);
       coordSys = new CoordinateSystem(i,this);
       _coordinateSystems->append(coordSys);
       QScriptValue cs = coordSystems.property(QString::number(i));
@@ -382,7 +382,7 @@ void SynthData::parseImageMap(QScriptValue &map)
   int i = 0;
   while(imageIt.hasNext())
   {
-    _progress = (int)(i / (2*_numImages));
+    _progress = i / (2*_numImages) * 100;
     _cb(progressInfo(),_info.toStdString().data());
     imageIt.next();
     Image image;
