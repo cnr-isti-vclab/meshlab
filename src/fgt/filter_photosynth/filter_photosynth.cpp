@@ -215,6 +215,9 @@ QString FilterPhotosynthPlugin::filterScriptFunctionName(FilterIDType filterID)
   return QString();
 }
 
+/*
+ * This function is taken from Astre's PhotoSynthToolkit
+ */
 void FilterPhotosynthPlugin::matrixScale(int m, int n, float *A, float s, float *R)
 {
   int i;
@@ -226,6 +229,9 @@ void FilterPhotosynthPlugin::matrixScale(int m, int n, float *A, float s, float 
   }
 }
 
+/*
+ * This function is taken from Astre's PhotoSynthToolkit
+ */
 void FilterPhotosynthPlugin::matrixProduct(int Am, int An, int Bm, int Bn, const float *A, const float *B, float *R)
 {
   int r = Am;
@@ -246,6 +252,9 @@ void FilterPhotosynthPlugin::matrixProduct(int Am, int An, int Bm, int Bn, const
   }
 }
 
+/*
+ * This function is taken and modified from Astre's PhotoSynthToolkit
+ */
 float *FilterPhotosynthPlugin::computeProjectionMatrix(int width, int height, CameraParameters &cam)
 {
   float focal = cam[CameraParameters::FOCAL_LENGTH] * qMax(width,height);
