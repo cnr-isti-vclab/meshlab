@@ -177,10 +177,10 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
           QDir imageDir(path);
           imageDir.cd(synthData->_collectionID);
           readExifData(img, cam, imageDir);
-          //s.Intrinsics.FocalMm = cam._focalLength;
-          s.Intrinsics.FocalMm = cam[CameraParameters::FOCAL_LENGTH] * qMax(img._exifWidth,img._exifHeight);
-          //s.Intrinsics.PixelSizeMm = Point2f(cam._pixelSizeMm,cam._pixelSizeMm);
-          s.Intrinsics.PixelSizeMm = Point2f(1,1);
+          s.Intrinsics.FocalMm = cam._focalLength;
+          //s.Intrinsics.FocalMm = cam[CameraParameters::FOCAL_LENGTH] * qMax(img._exifWidth,img._exifHeight);
+          s.Intrinsics.PixelSizeMm = Point2f(cam._pixelSizeMm,cam._pixelSizeMm);
+          //s.Intrinsics.PixelSizeMm = Point2f(1,1);
           s.Intrinsics.ViewportPx = Point2i(img._exifWidth,img._exifHeight);
           s.Intrinsics.CenterPx = Point2f(img._exifWidth/2,img._exifHeight/2);
           if(success)
@@ -236,7 +236,7 @@ void FilterPhotosynthPlugin::readExifData(Image &img, CameraParameters &cam, QDi
     img._exifWidth = ImageInfo.Width;
     img._exifHeight = ImageInfo.Height;
     cam._ccdWidth = ImageInfo.CCDWidth;
-    cam._focalLength = cam._ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
+    cam._focalLength = cam[CameraParameters::FOCAL_LENGTH] * cam._ccdWidth;
     cam._pixelSizeMm = cam._ccdWidth / qMax(img._exifWidth,img._exifHeight);
     qDebug() << "Exif width:" << ImageInfo.Width;
     qDebug() << "Exif height:" << ImageInfo.Height;
@@ -260,7 +260,7 @@ void FilterPhotosynthPlugin::readExifData(Image &img, CameraParameters &cam, QDi
       break;
     }
     cam._ccdWidth = cam._pixelSizeMm * qMax(img._exifWidth,img._exifHeight);
-    cam._focalLength = cam._ccdWidth / cam[CameraParameters::FOCAL_LENGTH];
+    cam._focalLength = cam[CameraParameters::FOCAL_LENGTH] * cam._ccdWidth;
     qDebug() << "X resolution:" << xResolution;
     qDebug() << "Y resolution:" << yResolution;
     qDebug() << "CCD width:" << cam._ccdWidth;

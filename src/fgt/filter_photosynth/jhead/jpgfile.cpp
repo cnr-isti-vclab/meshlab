@@ -76,8 +76,8 @@ static void process_SOFn (const uchar * Data, int marker)
     int data_precision, num_components;
 
     data_precision = Data[2];
-    //ImageInfo.Height = Get16m(Data+3);
-    //ImageInfo.Width = Get16m(Data+5);
+    ImageInfo.Height = Get16m(Data+3);
+    ImageInfo.Width = Get16m(Data+5);
     num_components = Data[7];
 
     if (num_components == 3){
