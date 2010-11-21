@@ -66,6 +66,7 @@ SUBDIRS       = common \
                 fgt/filter_qhull \
                 fgt/filter_quality \
                 fgt/filter_trioptimize \
+                fgt/filter_photosynth \
                 fgt/edit_hole \
                 fgt/editpaint\
                 fgt/edit_quality \
