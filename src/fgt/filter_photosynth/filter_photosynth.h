@@ -39,10 +39,6 @@ public:
   QString filterScriptFunctionName(FilterIDType filterID);
   void readExifData(Image &img, CameraParameters &cam, QDir &root);
   void outputToFile(QTextStream &out, Shotf &s, Image &img, CameraParameters &cam);
-  void matrixScale(int m, int n, float *A, float s, float *R);
-  void matrixProduct(int Am, int An, int Bm, int Bn, const float *A, const float *B, float *R);
-  float *computeProjectionMatrix(int width, int height, CameraParameters &cam);
-  void setShotCalibratedExtrinsics(Shotf &shot, float *projectionMatrix);
 };
 
 #endif /* FILTER_PHOTOSYNTH_PLUGIN_H */

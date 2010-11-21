@@ -2,7 +2,7 @@
  * The following code is slightly based on the C# application
  * SynthExport (http://synthexport.codeplex.com/) by Christoph Hausner
  * and on the C++ application
- * PhotoSynthToolkit (http://www.visual-experiments.com/) by Henry Astre
+ * PhotoSynthToolkit (http://www.visual-experiments.com/) by Henri Astre
  */
 
 #include "synthData.h"

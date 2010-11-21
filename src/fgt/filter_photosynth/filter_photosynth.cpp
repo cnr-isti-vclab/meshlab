@@ -17,8 +17,6 @@
 #include <unistd.h>
 #include "jhead/jhead.h"
 
-//#define CALIBRATED 1
-
 using namespace vcg;
 
 extern ImageInfo_t ImageInfo;
@@ -82,7 +80,7 @@ FilterPhotosynthPlugin::FilterClass FilterPhotosynthPlugin::getClass(QAction *a)
 // - the default value
 // - the string shown in the dialog
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst)
+void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParameterSet &parlst)
 {
   switch(ID(action))
   {
@@ -179,13 +177,12 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
           QDir imageDir(path);
           imageDir.cd(synthData->_collectionID);
           readExifData(img, cam, imageDir);
-          s.Intrinsics.FocalMm = cam._focalLength;
-          s.Intrinsics.PixelSizeMm = Point2f(cam._pixelSizeMm,cam._pixelSizeMm);
+          //s.Intrinsics.FocalMm = cam._focalLength;
+          s.Intrinsics.FocalMm = cam[CameraParameters::FOCAL_LENGTH] * qMax(img._exifWidth,img._exifHeight);
+          //s.Intrinsics.PixelSizeMm = Point2f(cam._pixelSizeMm,cam._pixelSizeMm);
+          s.Intrinsics.PixelSizeMm = Point2f(1,1);
           s.Intrinsics.ViewportPx = Point2i(img._exifWidth,img._exifHeight);
           s.Intrinsics.CenterPx = Point2f(img._exifWidth/2,img._exifHeight/2);
-#ifdef CALIBRATED
-          setShotCalibratedExtrinsics(s,computeProjectionMatrix(img._exifWidth,img._exifHeight,cam));
-#endif
           if(success)
             outputToFile(out, s, img, cam);
           //add a new raster
@@ -213,83 +210,6 @@ QString FilterPhotosynthPlugin::filterScriptFunctionName(FilterIDType filterID)
       assert(0);
   }
   return QString();
-}
-
-/*
- * This function is taken from Astre's PhotoSynthToolkit
- */
-void FilterPhotosynthPlugin::matrixScale(int m, int n, float *A, float s, float *R)
-{
-  int i;
-  int entries = m * n;
-
-  for (i = 0; i < entries; i++)
-  {
-    R[i] = A[i] * s;
-  }
-}
-
-/*
- * This function is taken from Astre's PhotoSynthToolkit
- */
-void FilterPhotosynthPlugin::matrixProduct(int Am, int An, int Bm, int Bn, const float *A, const float *B, float *R)
-{
-  int r = Am;
-  int c = Bn;
-  int m = An;
-
-  int i, j, k;
-  for (i = 0; i < r; i++)
-  {
-    for (j = 0; j < c; j++)
-    {
-      R[i * c + j] = 0.0;
-      for (k = 0; k < m; k++)
-      {
-        R[i * c + j] += A[i * An + k] * B[k * Bn + j];
-      }
-    }
-  }
-}
-
-/*
- * This function is taken and modified from Astre's PhotoSynthToolkit
- */
-float *FilterPhotosynthPlugin::computeProjectionMatrix(int width, int height, CameraParameters &cam)
-{
-  float focal = cam[CameraParameters::FOCAL_LENGTH] * qMax(width,height);
-  float R[9];
-  float t[3];
-  Matrix44f rot = cam.getRotation();
-  Point3f tra = cam.getTranslation();
-  for(int row = 0; row < 3; ++row)
-    for(int col = 0; col < 3; ++col)
-      R[row * 3 + col] = rot.ElementAt(row,col);
-  for(int i = 0; i < 3; ++i)
-    t[i] = tra[i];
-
-  float K[9] = { -focal,  0.0,    0.5 * width - 0.5,
-                 0.0,     focal,  0.5 * height - 0.5,
-                 0.0,     0.0,    1.0 };
-  float Ptmp[12] = { R[0], R[1], R[2], t[0],
-                     R[3], R[4], R[5], t[1],
-                     R[6], R[7], R[8], t[2] };
-  float *P = (float*)calloc(12,sizeof(float));
-  matrixProduct(3, 3, 3, 4, K, Ptmp, P);
-  matrixScale(3, 4, P, -1.0, P);
-  return P;
-}
-
-void FilterPhotosynthPlugin::setShotCalibratedExtrinsics(Shotf &shot, float *projectionMatrix)
-{
-  float r[] = {projectionMatrix[0], projectionMatrix[1], projectionMatrix[2],  0,
-               projectionMatrix[4], projectionMatrix[5], projectionMatrix[6],  0,
-               projectionMatrix[8], projectionMatrix[9], projectionMatrix[10], 0,
-               0,                   0,                   0,                    1};
-  Matrix44f rot(r);
-  shot.Extrinsics.SetRot(rot);
-  Point3f tra(projectionMatrix[3],projectionMatrix[7],projectionMatrix[11]);
-  shot.Extrinsics.SetTra(tra);
 }
 
 void FilterPhotosynthPlugin::readExifData(Image &img, CameraParameters &cam, QDir &root)
