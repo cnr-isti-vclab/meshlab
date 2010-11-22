@@ -779,16 +779,36 @@ void MainWindow::startFilter()
 			}
 			else
 			{
-			  /*if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))
-			  {
-				  QString enstr = missingPreconditions.join(",");
-				  QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
+				QString preCond = filt.xmlInfo->filterAttribute(fname,QString("preCond"));
+				QStringList preCondList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+				int preCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(preCondList);
+				if (!MeshLabFilterInterface::arePreCondsValid(preCondMask,(*meshDoc()->mm()),missingPreconditions))
+				{
+					QString enstr = missingPreconditions.join(",");
+					QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + filt.act->text() + "'</font> has not been applied.<br>"
 					  "Current mesh does not have <i>" + enstr + "</i>."));
-				  return;
-			  }*/
+					return;
+				}
 			}
 			//INIT PARAMETERS WITH EXPRESSION : Both are defined inside the XML file
-			XMLFilterInfo::MapList params = filt.xmlInfo->filterParameters(fname);
+			
+			
+			
+			//Inside the MapList there are QMap<QString,QString> containing info about parameters. In particular:
+			// "type" - "Boolean","Real" etc
+			// "name" - "parameter name"
+			// "defaultExpression" - "defExpression"
+			// "help" - "parameter help"
+			// "typeGui" - "ABSPERC_GUI" "CHECKBOX_GUI" etc
+			// "label" - "gui label"
+			// Depending to the typeGui could be inside the map other info:
+			// for example for ABSPERC_GUI there are also
+			// "minExpr" - "minExpr"
+			// "maxExpr" - "maxExpr" 
+
+			XMLFilterInfo::MapList params = filt.xmlInfo->filterParametersExtendedInfo(fname);
+			
+
 			/*****IMPORTANT NOTE******/
 			//the popContext will be called:
 			//- or in the executeFilter if the filter will be executed
@@ -800,11 +820,11 @@ void MainWindow::startFilter()
 					//each map inside the list contains info (type,name,def_expr) on each parameter inside the filter
 				for(XMLFilterInfo::MapList::const_iterator it = params.constBegin();it != params.constEnd();++it)
 				{	
-					QMap<QString,QString> mp = *it;
+					QMap<QString,QString> mp = *(it);
 						//Initilize the parameters inside the environment
 					Expression* exp = ExpressionFactory::create(mp["type"],mp["defaultExpression"]);
-					PM.env.insertLocalExpressionBinding(mp["name"],exp);	
-					delete exp;	
+					PM.env.insertLocalExpressionBinding(mp["name"],exp);
+					ExpressionFactory::destroy(exp);	
 				}
 				if(currentViewContainer())
 				{

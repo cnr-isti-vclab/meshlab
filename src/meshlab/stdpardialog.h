@@ -61,6 +61,7 @@ protected:
 	void InitRichParameter(RichParameter* rpar);
 };
 
+
 class BoolWidget : public MeshLabWidget 
 {
 	//QLabel* lab;
@@ -450,6 +451,97 @@ public:
 protected slots:
 	void selectFile();
 };
+
+//class XMLMeshLabWidgetFactory 
+//{
+//protected:
+//	static QMap<QString,XMLMeshLabWidgetFactory*> mpfact;
+//public:	
+//	XMLMeshLabWidgetFactory()
+//	virtual XMLMeshLabWidget* create(const QMap<QString,QString>& widgetTable) = 0;
+//};
+//
+//class XMLMeshLabWidget : public QObject
+//{
+//	Q_OBJECT
+//public:
+//	XMLMeshLabWidget(Expression* expr,QWidget* parent);
+//	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
+//	virtual void collectWidgetValue() = 0;
+//	virtual void setWidgetExpression(const QString& nwExpStr) = 0;
+//	virtual void updateWidget(const QStringList& xmlWidgetTag) = 0;
+//	virtual ~XMLMeshLabWidget();
+//
+//	// called when the user press the 'default' button to reset the parameter values to its default.
+//	// It just set the parameter value and then it calls the specialized resetWidgetValue() to update also the widget.
+//	//void resetValue();
+//	// update the parameter with the current widget values and return it.
+//	//Value& getWidgetValue();
+//
+//signals:
+//	void parameterChanged();
+//
+//protected:
+//	int row;
+//	QGridLayout* gridLay;
+//	QLabel* helpLab;
+//	QLineEdit* lExprEditor;
+//	QTextEdit* tExprEditor;
+//};
+//
+//class XMLBoolWidget : public XMLMeshLabWidget
+//{
+//	Q_OBJECT
+//public:
+//	XMLBoolWidget(QWidget* parent,const QStringList& xmlWidgetTag);
+//	~XMLBoolWidget();
+//	void resetWidgetValue();
+//	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
+//	void collectWidgetValue();
+//	void setWidgetValue(const Value& nv);
+//	void updateWidget(const QStringList& xmlWidgetTag);
+//
+//private:
+//	QCheckBox* box; 
+//};
+//
+//
+//struct AbsView
+//{
+//	QDoubleSpinBox *absSB;
+//	QDoubleSpinBox *percSB;
+//};
+//
+//struct DynamicView
+//{
+//	QSlider *valueSlider;
+//	int mask;
+//};
+//
+//class XMLFloatWidget : public XMLMeshLabWidget
+//{
+//	Q_OBJECT
+//public:
+//	XMLFloatWidget(QWidget* parent,const QStringList& xmlWidgetTag);
+//	~XMLFloatWidget();
+//	void resetWidgetValue();
+//	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
+//	void collectWidgetValue();
+//	void setWidgetValue(const Value& nv);
+//	void updateWidget(const QStringList& xmlWidgetTag);	
+//
+//private:
+//	AbsView* abs;
+//	DynamicView* dyn;
+//
+//	QLabel* fieldDesc; 
+//	float minVal;
+//	float maxVal;
+//
+//	float intToFloat(int val);  
+//	int floatToInt(float val);
+//}
+
 /*
 class QVariantListWidget : public MeshLabWidget
 {
@@ -603,7 +695,7 @@ public:
 	void createFrame();
 	void loadFrameContent(MeshDocument *mdPt=0);
 
-    bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi, QWidget *gla=0);
+	bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic();
 
 private slots:
@@ -635,8 +727,6 @@ public:
 	RichParameterSet prevParSet;
 	bool validcache;
 };
-
-
 
 //QWidget* parent parameter says to the class who will destroy the MeshLabWidget object that it had created
 //RichWidgetConstructor shouldn't destroy anything

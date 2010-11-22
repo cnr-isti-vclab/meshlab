@@ -1593,4 +1593,30 @@ void SaveFileWidget::selectFile()
 	emit dialogParamChanged();
 }
 
+//XMLBoolWidget::XMLBoolWidget( QWidget* parent,const QStringList& xmlWidgetTag )
+//{
+//
+//}
 
+//XMLMeshLabWidget::XMLMeshLabWidget( QWidget* p )
+//:QObject(parent)
+//{
+//	helpLab = new QLabel("<small>"+rpar->pd->tooltip +"</small>",p);
+//	helpLab->setTextFormat(Qt::RichText);
+//	helpLab->setWordWrap(true);
+//	helpLab->setVisible(false);
+//	helpLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+//	helpLab->setMinimumWidth(250);
+//	helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
+//	gridLay = qobject_cast<QGridLayout*>(p->layout());
+//	assert(gridLay != 0);
+//	row = gridLay->rowCount();
+//	gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
+//}
+
+
+//XMLMeshLabWidget::XMLMeshLabWidget( Expression* expr,QWidget* parent )
+//:exp(expr),QObject(parent)
+//{
+//
+//}
