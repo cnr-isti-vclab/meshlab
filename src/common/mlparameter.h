@@ -74,6 +74,7 @@ class ExpressionFactory
 public:
 	//all the eval implementations could throw a ParsingException: you should catch it in the calling code
 	static Expression* create( const QString& type,const QString& defExpression);
+	inline static void destroy(Expression* exp) {delete exp;}
 };
 
 

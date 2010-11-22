@@ -61,9 +61,12 @@ private:
 
 	static QString defaultGuiInfo(const QString& guiType,const QString& xmlvariable);
 	static QString floatGuiInfo(const QString& guiType,const QString& xmlvariable);
+	static QString guiErrorMsg() {return QString("Error: Unknown GUI widget requested");}
+	static QString guiTypeSwitchQueryText(const QString& var);
 	QString fileName;
 public:
 	typedef QList< QMap<QString,QString> > MapList;
+	static QMap<QString,QString> mapFromString(const QString& st);
 	static MapList mapListFromStringList(const QStringList& list);
 	static XMLFilterInfo* createXMLFileInfo(const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML);
 	inline static void deleteXMLFileInfo(XMLFilterInfo* xmlInfo) {delete xmlInfo;}
@@ -72,9 +75,13 @@ public:
 	
 	//The function returns a QList<QMap<QString,QString>>. Each map contains "type", "name" and "defaultExpression" of a single parameter.
 	MapList filterParameters(const QString& filterName) const;
-
-	QMap<QString,QString> filterParameterGui(const QString& filter,const QString& parameter) const;
+	XMLFilterInfo::MapList filterParametersExtendedInfo( const QString& filterName) const;
 	QString filterAttribute(const QString& filterName,const QString& attribute) const;
+
+	QString filterParameterHelp(const QString& filterName,const QString& paramName) const;
+	QMap<QString,QString> filterParameterGui(const QString& filter,const QString& parameter) const;
+	QMap<QString,QString> filterParameterExtendedInfo(const QString& filter,const QString& parameter) const;
+	QString filterParameterAttribute(const QString& filterName,const QString& paramName,const QString& attribute) const;
 
 	QStringList query(const QString& qry) const;
 };

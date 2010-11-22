@@ -613,9 +613,16 @@ public:
 
 class MeshLabFilterInterface : public MeshLabInterface
 {
+private:
+	static QMap<QString,MeshModel::MeshElement> convertingMap;
+	static void initConvertingMap();
+	static bool init;
 public:
-	MeshLabFilterInterface():MeshLabInterface(){}
+	MeshLabFilterInterface();
 	virtual ~MeshLabFilterInterface() {}
+
+	static bool arePreCondsValid(const int filterPreConds,const MeshModel& m, QStringList &MissingItems);
+	static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
 
 	virtual bool applyFilter(const QString& filterName,const FilterEnv& env, vcg::CallBackPos *cb) =0;
 };
