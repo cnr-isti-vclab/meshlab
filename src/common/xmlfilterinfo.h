@@ -46,12 +46,54 @@ private:
 	QSourceLocation m_sourceLocation;
 };
 
+namespace MLXMLElNames
+{
+	const QString mfiTag("MESHLAB_FILTER_INTERFACE");
+	const QString pluginTag("PLUGIN");
+	const QString filterTag("FILTER");
+	const QString filterHelpTag("FILTER_HELP");
+	const QString paramTag("PARAM");
+	const QString paramHelpTag("PARAM_HELP");
+	
+	const QString editTag("EDIT_GUI");
+	const QString checkBoxTag("CHECKBOX_GUI");
+	const QString absPercTag("ABSPERC_GUI");
+	
+
+
+	const QString mfiVersion("mfi_version");
+
+	const QString pluginScriptName("plugin_scriptName");
+
+	const QString filterName("f_name");
+	const QString filterScriptFunctName("f_scriptFunctionName");
+	const QString filterClass("f_class");
+	const QString filterPreCond("f_preCond");
+	const QString filterPostCond("f_postCond");
+	//filterHelp == name to access to the value of FILTER_HELP inside the Map produced by the XMLFilterInfo 
+	//const QString filterHelp("f_help");
+	
+	const QString paramType("p_type");
+	const QString paramName("p_name");
+	const QString paramDefExpr("p_defaultExpression");
+	//paramHelp == name to access to the value of PARAM_HELP inside the Map produced by the XMLFilterInfo 
+	//const QString paramHelp("p_help");
+
+	//guiType == name to access to the type of gui (ABSPERC_GUI, CHECKBOX_GUI etc.) inside the Map produced by the XMLFilterInfo 
+	const QString guiType("gui_type");
+	const QString guiLabel("gui_label");
+	const QString guiMinExpr("gui_minExpr");
+	const QString guiMaxExpr("gui_maxExpr");
+
+	//types' names inside the XML MeshLab file format
+	const QString boolType("Boolean");
+	const QString realType("Real");
+	const QString intType("Integer");
+}
 
 //Query Exception should be managed by the XMLFilterInfo class (XMLFilterInfo is the class devoted to compose queries)
 //Parsing Exception instead should be managed by the code calling the XMLFilterInfo's functions. 
 //A Parsing Exception is raised every time an unexpected and/or missing tag or attribute in an XML has been encountered. 
-//So this kind of info it's sensible for the plugin's programmer.  
-
 
 class XMLFilterInfo
 {
@@ -63,24 +105,37 @@ private:
 	static QString floatGuiInfo(const QString& guiType,const QString& xmlvariable);
 	static QString guiErrorMsg() {return QString("Error: Unknown GUI widget requested");}
 	static QString guiTypeSwitchQueryText(const QString& var);
+	inline static QString doc(const QString& file) {return QString("doc(\"" + file + "\")");}
+	inline static QString docMFI(const QString& file) {return doc(file) + "/" + MLXMLElNames::mfiTag;}
+	inline static QString docMFIPlugin(const QString& file) {return docMFI(file) + "/" + MLXMLElNames::pluginTag;}
+	inline static QString docMFIPluginFilter(const QString& file) {return docMFIPlugin(file) + "/" + MLXMLElNames::filterTag;}
+	inline static QString docMFIPluginFilterName(const QString& file,const QString& fname) {return docMFIPluginFilter(file) + "[@" + MLXMLElNames::filterName + " = \"" + fname + "\"]";}
+	inline static QString docMFIPluginFilterParam(const QString& file) {return docMFIPluginFilter(file) + "/" + MLXMLElNames::paramTag;}
+	inline static QString docMFIPluginFilterParamName(const QString& file,const QString& pname) {return docMFIPluginFilterParam(file) + "[@" + MLXMLElNames::paramName + " = \"" + pname + "\"]";}
+	inline static QString docMFIPluginFilterNameParam(const QString& file,const QString& fname) {return docMFIPluginFilterName(file,fname) + "/" + MLXMLElNames::paramTag;}
+	inline static QString docMFIPluginFilterNameParamName(const QString& file,const QString& fname,const QString& pname) {return docMFIPluginFilterNameParam(file,fname) + "[@" + MLXMLElNames::paramName + " = \"" + pname + "\"]";}
+	inline static QString attrVal(const QString& attr,const QString& var = QString("")) {return QString("{data(" + var + "@" + attr + ")}");}
+	inline static QString attrNameAttrVal(const QString& attr,const QString& var = QString("")) {return QString(attr + "=" + attrVal(attr,var));}
 	QString fileName;
 public:
-	typedef QList< QMap<QString,QString> > MapList;
-	static QMap<QString,QString> mapFromString(const QString& st);
-	static MapList mapListFromStringList(const QStringList& list);
+
+	typedef QMap<QString,QString> XMLMap;
+	typedef QList< XMLMap > XMLMapList;
+	static XMLMap mapFromString(const QString& st);
+	static XMLMapList mapListFromStringList(const QStringList& list);
 	static XMLFilterInfo* createXMLFileInfo(const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML);
 	inline static void deleteXMLFileInfo(XMLFilterInfo* xmlInfo) {delete xmlInfo;}
 	QStringList filterNames() const;
 	QString	filterHelp(const QString& filterName) const;
 	
 	//The function returns a QList<QMap<QString,QString>>. Each map contains "type", "name" and "defaultExpression" of a single parameter.
-	MapList filterParameters(const QString& filterName) const;
-	XMLFilterInfo::MapList filterParametersExtendedInfo( const QString& filterName) const;
+	XMLMapList filterParameters(const QString& filterName) const;
+	XMLMapList filterParametersExtendedInfo( const QString& filterName) const;
 	QString filterAttribute(const QString& filterName,const QString& attribute) const;
 
 	QString filterParameterHelp(const QString& filterName,const QString& paramName) const;
-	QMap<QString,QString> filterParameterGui(const QString& filter,const QString& parameter) const;
-	QMap<QString,QString> filterParameterExtendedInfo(const QString& filter,const QString& parameter) const;
+	XMLMap filterParameterGui(const QString& filter,const QString& parameter) const;
+	XMLMap filterParameterExtendedInfo(const QString& filter,const QString& parameter) const;
 	QString filterParameterAttribute(const QString& filterName,const QString& paramName,const QString& attribute) const;
 
 	QStringList query(const QString& qry) const;

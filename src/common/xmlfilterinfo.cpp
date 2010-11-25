@@ -41,26 +41,27 @@ XMLFilterInfo* XMLFilterInfo::createXMLFileInfo( const QString& XMLFileName,cons
 
 QString XMLFilterInfo::defaultGuiInfo(const QString& guiType,const QString& xmlvariable)
 {
-	return QString("typeGui=" + guiType + "|label={data(" + xmlvariable + "/@label)}");
+	return QString(MLXMLElNames::guiType+"=" + guiType + "|" + MLXMLElNames::guiLabel+"={data(" + xmlvariable + "/@" + MLXMLElNames::guiLabel+")}");
 }
 
 QString XMLFilterInfo::floatGuiInfo(const QString& guiType,const QString& xmlvariable)
 {
-	return defaultGuiInfo(guiType,xmlvariable) + "|minExpr={data(" + xmlvariable + "/@minExpr)}|maxExpr={data(" + xmlvariable + "/@maxExpr)}";
+	return defaultGuiInfo(guiType,xmlvariable) + "|" + MLXMLElNames::guiMinExpr + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiMinExpr + ")}|" + MLXMLElNames::guiMaxExpr + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiMaxExpr + ")}";
 }
 
 QString XMLFilterInfo::guiTypeSwitchQueryText(const QString& var)
 {
 	QString base("typeswitch(" + var + ")");
-	QString caseABS("case element (ABSPERC_GUI) return <p>" + floatGuiInfo("ABSPERC_GUI",var) + "</p>/string()");
-	QString caseFLOAT("case element (CHECKBOX_GUI) return <p>" + defaultGuiInfo("CHECKBOX_GUI",var) + "</p>/string()");
+	QString caseABS("case element (" + MLXMLElNames::absPercTag + ") return <p>" + floatGuiInfo(MLXMLElNames::absPercTag,var) + "</p>/string()");
+	QString caseFLOAT("case element (" + MLXMLElNames::checkBoxTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::checkBoxTag,var) + "</p>/string()");
 	QString errorMsg = "default return \"" + XMLFilterInfo::guiErrorMsg() + "\"";
 	return base + " " + caseABS + " " + caseFLOAT + " " + " " + errorMsg;
 }
 
 QStringList XMLFilterInfo::filterNames() const
 {
-	QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER/<p>{data(@name)}</p>/string()";
+	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER/<p>{data(@name)}</p>/string()";
+	QString namesQuery = docMFIPluginFilter(fileName) + "/<p>"+ attrVal(MLXMLElNames::filterName)+"</p>/string()";
 	try
 	{
 		return query(namesQuery);
@@ -74,7 +75,8 @@ QStringList XMLFilterInfo::filterNames() const
 
 QString XMLFilterInfo::filterHelp( const QString& filterName) const
 {
-	QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/FILTER_HELP/string()";
+	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/FILTER_HELP/string()";
+	QString namesQuery = docMFIPluginFilterName(fileName,filterName) + "/" + MLXMLElNames::filterHelpTag + "/string()";
 	try
 	{
 		QStringList res = query(namesQuery);
@@ -91,7 +93,8 @@ QString XMLFilterInfo::filterHelp( const QString& filterName) const
 
 QString XMLFilterInfo::filterAttribute( const QString& filterName,const QString& attribute) const
 {	
-	QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/@" + attribute + "/string()";
+	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/@" + attribute + "/string()";
+	QString namesQuery = docMFIPluginFilterName(fileName,filterName) + "/@" + attribute + "/string()";
 	try
 	{
 		QStringList res = query(namesQuery);
@@ -129,16 +132,17 @@ QStringList XMLFilterInfo::query( const QString& qry) const
 }
 
 
-XMLFilterInfo::MapList XMLFilterInfo::filterParametersExtendedInfo( const QString& filterName) const
+XMLFilterInfo::XMLMapList XMLFilterInfo::filterParametersExtendedInfo( const QString& filterName) const
 {
-	QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM/<p>{data(@name)}</p>/string()";
-	MapList mplist;
+	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM/<p>{data(@name)}</p>/string()";
+	QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>{data(@" + MLXMLElNames::paramName + ")}</p>/string()";
+	XMLMapList mplist;
 	try
 	{
 		QStringList nameList = query(namesQuery);
 		foreach(QString paramName,nameList)
 		{
-			QMap<QString,QString> ss = filterParameterExtendedInfo(filterName,paramName);
+			XMLFilterInfo::XMLMap ss = filterParameterExtendedInfo(filterName,paramName);
 			mplist.push_back(ss);
 		}
 		return mplist;
@@ -149,9 +153,10 @@ XMLFilterInfo::MapList XMLFilterInfo::filterParametersExtendedInfo( const QStrin
 	}
 }
 
-XMLFilterInfo::MapList XMLFilterInfo::filterParameters( const QString& filterName) const
+XMLFilterInfo::XMLMapList XMLFilterInfo::filterParameters( const QString& filterName) const
 {
-	QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM/<p>type={data(@type)}|name={data(@name)}|defaultExpression={data(@defaultExpression)}</p>/string()";
+	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM/<p>type={data(@type)}|name={data(@name)}|defaultExpression={data(@defaultExpression)}</p>/string()";
+	QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>" + attrNameAttrVal(MLXMLElNames::paramType) + "|" + attrNameAttrVal(MLXMLElNames::paramName) + "|" + attrNameAttrVal(MLXMLElNames::paramDefExpr) + "</p>/string()";
 	try
 	{
 		QStringList res = query(namesQuery);
@@ -163,22 +168,22 @@ XMLFilterInfo::MapList XMLFilterInfo::filterParameters( const QString& filterNam
 	}
 }
 
-XMLFilterInfo::MapList XMLFilterInfo::mapListFromStringList( const QStringList& list )
+XMLFilterInfo::XMLMapList XMLFilterInfo::mapListFromStringList( const QStringList& list )
 {
-	MapList result;
+	XMLMapList result;
 	//"attribute0=value0|attribute1=value1|...|attributeN=valueN" "attribute0=value0|attribute1=value1|...|attributeN=valueN" "attribute0=value0|attribute1=value1|...|attributeN=valueN"
 	foreach(QString st, list)
 	{
-		QMap<QString,QString> attrValue = mapFromString(st);
+		XMLFilterInfo::XMLMap attrValue = mapFromString(st);
 		result.push_back(attrValue);
 	}
 	return result;
 }
 
-QMap<QString,QString> XMLFilterInfo::mapFromString(const QString& st)
+XMLFilterInfo::XMLMap XMLFilterInfo::mapFromString(const QString& st)
 {
 	QStringList coupleList = st.split('|');
-	QMap<QString,QString> attrValue;
+	XMLFilterInfo::XMLMap attrValue;
 	foreach(QString couple,coupleList)
 	{
 		QStringList cl = couple.split('=');
@@ -188,15 +193,16 @@ QMap<QString,QString> XMLFilterInfo::mapFromString(const QString& st)
 	return attrValue;
 }
 
-QMap<QString,QString> XMLFilterInfo::filterParameterGui( const QString& filterName,const QString& parameterName) const
+XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterGui( const QString& filterName,const QString& parameterName) const
 { 
 	QString var("$gui");
-	QString totQuery("for " + var + " in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + parameterName + "\"]/(* except PARAM_HELP) return " + guiTypeSwitchQueryText(var));
-	QMap<QString,QString> mp;
+	//QString totQuery("for " + var + " in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + parameterName + "\"]/(* except PARAM_HELP) return " + guiTypeSwitchQueryText(var));
+	QString totQuery("for " + var + " in " + docMFIPluginFilterNameParamName(fileName,filterName,parameterName) + "/(* except PARAM_HELP) return " + guiTypeSwitchQueryText(var));
+	XMLFilterInfo::XMLMap mp;
 	try
 	{
 		QStringList res = query(totQuery);
-		XMLFilterInfo::MapList tmp = mapListFromStringList(res);
+		XMLFilterInfo::XMLMapList tmp = mapListFromStringList(res);
 		//MUST BE FOR EACH PARAMETER ONLY ONE GUI DECLARATION
 		if (tmp.size() != 1)
 			throw ParsingException("In filter " + filterName + " more than a single GUI declaration has been found for parameter " + parameterName);
@@ -213,7 +219,8 @@ QMap<QString,QString> XMLFilterInfo::filterParameterGui( const QString& filterNa
 
 QString XMLFilterInfo::filterParameterHelp( const QString& filterName,const QString& paramName ) const
 {
-	QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/PARAM_HELP/string()";
+	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/PARAM_HELP/string()";
+	QString namesQuery = docMFIPluginFilterNameParamName(filterName,fileName,paramName) + "/PARAM_HELP/string()";
 	try
 	{
 		QStringList res = query(namesQuery);
@@ -228,12 +235,13 @@ QString XMLFilterInfo::filterParameterHelp( const QString& filterName,const QStr
 }
 
 
-QMap<QString,QString> XMLFilterInfo::filterParameterExtendedInfo( const QString& filterName,const QString& paramName ) const
+XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterExtendedInfo( const QString& filterName,const QString& paramName ) const
 {
-	QString namesQuery = "for $x in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name=\"" + filterName + "\"]/PARAM[@name=\"" + paramName + "\"] return <p>type={data($x/@type)}|name={data($x/@name)}|defaultExpression={data($x/@defaultExpression)}|help={$x/PARAM_HELP}</p>/string()";
+	//QString namesQuery = "for $x in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name=\"" + filterName + "\"]/PARAM[@name=\"" + paramName + "\"] return <p>type={data($x/@type)}|name={data($x/@name)}|defaultExpression={data($x/@defaultExpression)}|help={$x/PARAM_HELP}</p>/string()";
+	QString namesQuery = "for $x in " + docMFIPluginFilterNameParamName(fileName,filterName,paramName) + " return <p>" + attrNameAttrVal(MLXMLElNames::paramType,"$x/") + "|" + attrNameAttrVal(MLXMLElNames::paramName,"$x/") + "|" + attrNameAttrVal(MLXMLElNames::paramDefExpr,"$x/") + "|" + attrNameAttrVal(MLXMLElNames::paramHelpTag,"$x/") + "</p>/string()";
 	try
 	{
-		QMap<QString,QString> res;
+		XMLFilterInfo::XMLMap res;
 		QStringList par = query(namesQuery);
 		if (par.size() == 0)
 			throw ParsingException("Parameter: " + paramName + " has not been defined in filter: " + filterName);
@@ -244,8 +252,8 @@ QMap<QString,QString> XMLFilterInfo::filterParameterExtendedInfo( const QString&
 			else
 			{
 				res = mapFromString(par[0]);
-				QMap<QString,QString> tmpres = filterParameterGui(filterName,paramName);
-				for(QMap<QString,QString>::const_iterator it = tmpres.constBegin();it != tmpres.constEnd();++it)
+				XMLFilterInfo::XMLMap tmpres = filterParameterGui(filterName,paramName);
+				for(XMLFilterInfo::XMLMap::const_iterator it = tmpres.constBegin();it != tmpres.constEnd();++it)
 					res[it.key()] = it.value();
 			}
 		}
@@ -289,7 +297,8 @@ QMap<QString,QString> XMLFilterInfo::filterParameterExtendedInfo( const QString&
 
 QString XMLFilterInfo::filterParameterAttribute( const QString& filterName,const QString& paramName,const QString& attribute ) const
 {
-	QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/@" + attribute + "/string()";
+	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/@" + attribute + "/string()";
+	QString namesQuery = docMFIPluginFilterNameParamName(fileName,filterName,paramName) + "/@" + attribute + "/string()";
 	try
 	{
 		QStringList res = query(namesQuery);
