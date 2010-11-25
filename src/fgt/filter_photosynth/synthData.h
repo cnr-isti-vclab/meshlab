@@ -214,6 +214,7 @@ public:
   bool _dataReady;
   ///Number of images of this synth
   int _numImages;
+  int _imagesToDownloadCount;
   //the callback function to inform the user about the progress of the filter
   vcg::CallBackPos *_cb;
   //contains import options

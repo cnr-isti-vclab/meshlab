@@ -121,6 +121,7 @@ SynthData::SynthData(ImportSettings &settings, QObject *parent)
   _progress = 0;
   _dataReady = false;
   _semaphore = 0;
+  _imagesToDownloadCount = 0;
 }
 
 SynthData::~SynthData()
@@ -191,7 +192,7 @@ SynthData *SynthData::downloadSynthInfo(ImportSettings &settings, vcg::CallBackP
 
   QtSoapMessage message;
   message.setMethod("GetCollectionData", "http://labs.live.com/");
-  message.addMethodArgument("collectionId", "", settings._url);
+  message.addMethodArgument("collectionId", "", cid);
   message.addMethodArgument("incrementEmbedCount", "", false, 0);
 
   transport.setAction("http://labs.live.com/GetCollectionData");
@@ -346,6 +347,7 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
             Image img = _imageMap->value(params._imageID);
             img._shouldBeDownloaded = true;
             _imageMap->insert(img._ID,img);
+            _imagesToDownloadCount++;
             for(int i = CameraParameters::FIRST; i <= CameraParameters::LAST; ++i)
             {
               paramIt.next();
@@ -584,7 +586,7 @@ void SynthData::saveImages(QNetworkReply *httpResponse)
   file.close();
 
   ++_semaphore;
-  CHECK_DELETE(_semaphore == _numImages, SYNTH_NO_ERROR, true)
+  CHECK_DELETE(_semaphore == _imagesToDownloadCount, SYNTH_NO_ERROR, true)
 
   httpResponse->deleteLater();
 }
