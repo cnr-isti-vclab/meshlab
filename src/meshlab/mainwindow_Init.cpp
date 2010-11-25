@@ -74,6 +74,7 @@ MainWindow::MainWindow()
 	createToolBars();
 	createMenus();
 	stddialog = 0;
+	xmldialog = 0;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(appName());

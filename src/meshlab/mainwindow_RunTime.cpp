@@ -80,6 +80,23 @@ void MainWindow::createStdPluginWnd()
 	connect(GLA(),SIGNAL(glareaClosed()),stddialog,SLOT(close()));
 }
 
+void MainWindow::createXMLStdPluginWnd()
+{
+	//checks if a MeshlabStdDialog is already open and closes it
+	if (xmldialog!=0){
+		xmldialog->close();
+		delete xmldialog;
+	}
+	xmldialog = new MeshLabXMLStdDialog(this);
+	xmldialog->setAllowedAreas (    Qt::RightDockWidgetArea);
+	addDockWidget(Qt::RightDockWidgetArea,xmldialog);
+	//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
+	xmldialog->setFloating(true);
+	xmldialog->hide();
+	connect(GLA(),SIGNAL(glareaClosed()),xmldialog,SLOT(close()));
+}
+
+
 // When we switch the current model (and we change the active window)
 // we have to close the stddialog.
 // this one is called when user switch current window.
@@ -767,10 +784,10 @@ void MainWindow::startFilter()
 	{
 		MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
 		QString fname = action->text();
-		const MeshLabXMLFilterContainer filt  = PM.stringXMLFilterMap.value(fname);
+		MeshLabXMLFilterContainer filt  = PM.stringXMLFilterMap.value(fname);
 		try
 		{
-			QString filterClasses = filt.xmlInfo->filterAttribute(fname,QString("filterClass"));
+			QString filterClasses = filt.xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
 			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 			if(filterClassesList.contains("MeshCreation"))
 			{
@@ -779,7 +796,7 @@ void MainWindow::startFilter()
 			}
 			else
 			{
-				QString preCond = filt.xmlInfo->filterAttribute(fname,QString("preCond"));
+				QString preCond = filt.xmlInfo->filterAttribute(fname,MLXMLElNames::filterPreCond);
 				QStringList preCondList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 				int preCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(preCondList);
 				if (!MeshLabFilterInterface::arePreCondsValid(preCondMask,(*meshDoc()->mm()),missingPreconditions))
@@ -832,12 +849,12 @@ void MainWindow::startFilter()
 					currentViewContainer()->LogPtr()->SetBookmark();
 				}
 				// just to be sure...
-				createStdPluginWnd();
+				createXMLStdPluginWnd();
 
 				// (2) Ask for filter parameters and eventally directly invoke the filter
 				// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
 				// if no dialog is created the filter must be executed immediately
-				if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
+				if(! xmldialog->showAutoDialog(&filt, meshDoc(),  this, GLA()) )
 				{
 					//RichParameterSet dummyParSet;
 					//executeFilter(action, dummyParSet, false);

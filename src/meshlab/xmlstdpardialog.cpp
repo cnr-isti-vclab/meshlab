@@ -22,7 +22,12 @@ void MeshLabXMLStdDialog::clearValues()
 
 void MeshLabXMLStdDialog::createFrame()
 {
+	if(qf) delete qf;
 
+	QFrame *newqf= new QFrame(this);
+	setWidget(newqf);
+	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+	qf = newqf;
 }
 
 void MeshLabXMLStdDialog::loadFrameContent( )
@@ -89,7 +94,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	this->adjustSize();
 }
 
-bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,const XMLFilterInfo::XMLMapList& mplist, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
+bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
 {
 	if (mfc == NULL) 
 		return false;
@@ -110,7 +115,9 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,const XM
 	curMeshDoc = md;
 	curgla=gla;
 
+	QString fname = mfc->act->text();
 	//mfi->initParameterSet(action, *mdp, curParSet);
+	XMLFilterInfo::XMLMapList& mplist = mfc->xmlInfo->filterParametersExtendedInfo(fname);
 	curParMap = mplist;
 	//curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
 	if(curParMap.isEmpty() && !isDynamic()) 
@@ -118,7 +125,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,const XM
 
 	createFrame();
 	loadFrameContent();
-	QString postCond = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
+	QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
 	QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 	curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
 	if(isDynamic())

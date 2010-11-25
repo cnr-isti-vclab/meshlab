@@ -148,7 +148,7 @@ public:
 	void createFrame();
 	void loadFrameContent();
 
-	bool showAutoDialog(MeshLabXMLFilterContainer* mfc,const XMLFilterInfo::XMLMapList& mplist, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
+	bool showAutoDialog(MeshLabXMLFilterContainer* mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic() const;
 private slots:
 	void applyClick();

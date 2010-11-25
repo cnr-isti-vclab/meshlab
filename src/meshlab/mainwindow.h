@@ -38,6 +38,7 @@
 #include "glarea.h"
 #include "layerDialog.h"
 #include "stdpardialog.h"
+#include "xmlstdpardialog.h"
 
 #define MAXRECENTFILES 4
 
@@ -162,6 +163,7 @@ private slots:
 	void wrapSetActiveSubWindow(QWidget* window);
 private:
     void createStdPluginWnd(); // this one is
+	void createXMLStdPluginWnd();
 	void initGlobalParameters();
     void createActions();
 	void createMenus();
@@ -184,6 +186,7 @@ private:
 	bool VerboseCheckingFlag;
 
 	MeshlabStdDialog *stddialog;
+	MeshLabXMLStdDialog* xmldialog;
 	static QProgressBar *qb;
 	QMdiArea *mdiarea;
 	LayerDialog *layerDialog;
@@ -247,7 +250,6 @@ public:
     return _qsb;
   }
 	QMenu* layerMenu() { return filterMenuLayer; }
-
 private:
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
