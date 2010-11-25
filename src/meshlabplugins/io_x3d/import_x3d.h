@@ -472,9 +472,9 @@ namespace io {
 		//Return true for the mode of TextureCoordinateGEnerator supported
 		inline static bool isTextCoorGenSupported(const QDomElement& elem)
 		{
-			if (elem.isNull()) return false;
+			if (elem.isNull()) return true;
 			QString mode = elem.attribute("mode", "SPHERE");
-			if (mode == "COORD")
+			if (mode == "COORD" || mode == "SPHERE")
 				return true;
 			return false;
 		}
@@ -763,8 +763,8 @@ namespace io {
 								}
 								j++;
 							}
-							if (!load)
-								textureFile.push_back(url);
+							/*if (!load)
+								textureFile.push_back(url);*/
 						}
 					}
 					QDomElement materialNode = appearance.firstChildElement("Material");
@@ -800,7 +800,7 @@ namespace io {
 							if (!coordIndex.isEmpty())
 							{
 								if (!color.isNull() && (!colorList.isEmpty() || color.attribute("USE", "") != "")) bHasPerVertexColor = true;
-								if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty() || textureCoor.attribute("USE", "") != "") && textureFile.size()>0) 
+								if ((!textureCoor.isNull() || textureGenSup || !textureList.isEmpty() || textureCoor.attribute("USE", "") != "") && textureFile.size()>0) 
 									bHasPerVertexText = true;
 								else 
 									copyTextureFile = false;
@@ -816,7 +816,7 @@ namespace io {
 						else if (tagName == "TriangleFanSet" || tagName == "TriangleSet" || tagName == "TriangleStripSet" || tagName == "QuadSet")
 						{
 							if (!color.isNull() && (!colorList.isEmpty() || color.attribute("USE", "") != "")) bHasPerWedgeColor = true;
-							if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty() || textureCoor.attribute("USE", "") != "") && textureFile.size()>0)
+							if ((textureGenSup || !textureCoor.isNull() || !textureList.isEmpty() || textureCoor.attribute("USE", "") != "") && textureFile.size()>0)
 								bHasPerWedgeTexCoord = true;
 							else
 								copyTextureFile = false;
@@ -837,11 +837,11 @@ namespace io {
 							findAndParseAttribute(coordIndex, geometry, "coordIndex", "");
 							if (!coordIndex.isEmpty())
 							{
-								if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty() || textureCoor.attribute("USE", "") != "") && textureFile.size()>0)
+								if ((textureGenSup || !textureCoor.isNull() || !textureList.isEmpty() || textureCoor.attribute("USE", "") != "") && textureFile.size()>0)
 								{
-									if (!texCoordIndex.isEmpty())
+									if (!texCoordIndex.isEmpty() || textureGenSup)
 										bHasPerWedgeTexCoord = true;
-									else
+									else 
 										bHasPerVertexText = true;
 								}
 								else
@@ -899,11 +899,11 @@ namespace io {
 						}
 						else
 							copyTextureFile = false;
-						if (copyTextureFile)
-						{
+						/*if (copyTextureFile)
+						{*/
 							for (size_t i = 0; i < textureFile.size(); i++)
 								info->textureFile.push_back(textureFile.at(i));
-						}
+						//}
 					}
 					geometry = geometry.nextSiblingElement();
 				}
@@ -1035,7 +1035,7 @@ namespace io {
 							getColor(colorList, colorComponent, (tt + ff*3)*colorComponent, m.face[faceIndex].WC(vertIndexPerFace), vcg::Color4b(Color4b::White));
 						//Load textureCoordinate per wedge
 						if (HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
-							getTextureCoord(texture, (tt + ff*3)*2, m.vert[vertexFaceIndex.at(tt + ff*3) + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix);
+							getTextureCoord(texture, (tt + ff*3)*2, m.vert[vertexFaceIndex.at(tt + ff*3) + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix, info);
 					}
 					//Load normal per face
 					if (HasPerFaceNormal(m) && normalPerVertex == "false" && (info->mask & vcg::tri::io::Mask::IOM_FACENORMAL))
@@ -1093,8 +1093,8 @@ namespace io {
 					getColor(colorList, colorComponent, index*colorComponent, firstColor, vcg::Color4b(Color4b::White));
 					getColor(colorList, colorComponent, index*colorComponent + colorComponent, secondColor, vcg::Color4b(Color4b::White));
 					vcg::TexCoord2<float> firstTextCoord, secondTextCoord;
-					getTextureCoord(texture, index*2, m.vert[vertexFaceIndex.at(index) + offset].cP(), firstTextCoord, tMatrix);
-					getTextureCoord(texture, index*2, m.vert[vertexFaceIndex.at(index + 1) + offset].cP(), secondTextCoord, tMatrix);
+					getTextureCoord(texture, index*2, m.vert[vertexFaceIndex.at(index) + offset].cP(), firstTextCoord, tMatrix, info);
+					getTextureCoord(texture, index*2, m.vert[vertexFaceIndex.at(index + 1) + offset].cP(), secondTextCoord, tMatrix, info);
 					for(int vi = 2; vi < numVertex; vi++)
 					{
 						int vertIndexPerFace = 0;
@@ -1128,7 +1128,7 @@ namespace io {
 						if ((info->mask & vcg::tri::io::Mask::IOM_WEDGCOLOR) && HasPerWedgeColor(m))
 							getColor(colorList, colorComponent, (index + vi)*colorComponent, m.face[faceIndex].WC(2 - vertIndexPerFace), vcg::Color4b(Color4b::White));
 						if (HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
-							getTextureCoord(texture, (index + vi)*2, m.vert[vertexFaceIndex.at(index + vi) + offset].cP(), m.face[faceIndex].WT(2 - vertIndexPerFace), tMatrix); 
+							getTextureCoord(texture, (index + vi)*2, m.vert[vertexFaceIndex.at(index + vi) + offset].cP(), m.face[faceIndex].WT(2 - vertIndexPerFace), tMatrix, info); 
 						
 						//Update first two vertex for the next face
 						if (geometry.tagName() == "TriangleStripSet")
@@ -1192,7 +1192,7 @@ namespace io {
 								getColor(colorList, colorComponent, indexVertex*colorComponent, m.face[faceIndex].WC(vertIndexPerFace), vcg::Color4b(Color4b::White));
 							//Load texture coordinate per wedge
 							if (HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
-								getTextureCoord(texture, indexVertex*2, m.vert[vertexFaceIndex.at(indexVertex) + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix); 
+								getTextureCoord(texture, indexVertex*2, m.vert[vertexFaceIndex.at(indexVertex) + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix, info); 
 							iv++;
 						}
 						//Load normal per face
@@ -1248,7 +1248,7 @@ namespace io {
 						getColor(colorList, colorComponent, vv*3, m.vert[offset + vv].C(), defValue);
 					//Load texture coordinate per vertex
 					if (m.HasPerVertexTexCoord() && (info->mask & vcg::tri::io::Mask::IOM_VERTCOORD))
-						getTextureCoord(texture, vv*2, m.vert[offset + vv].cP(), m.vert[offset + vv].T(), tMatrix);
+						getTextureCoord(texture, vv*2, m.vert[offset + vv].cP(), m.vert[offset + vv].T(), tMatrix, info);
 				}
 				//Load face in the mesh
 				int offsetFace = m.face.size();
@@ -1274,7 +1274,7 @@ namespace io {
 							m.face[faceIndex].V(vertIndexPerFace) = &(m.vert[vertIndex]);
 							//Load texture coordinate per wedge
 							if (!m.HasPerVertexTexCoord() && HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
-								getTextureCoord(texture, indexList.at(tt + ff*3).toInt()*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix);
+								getTextureCoord(texture, indexList.at(tt + ff*3).toInt()*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix, info);
 							if (HasPerWedgeColor(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGCOLOR))
 								m.face[faceIndex].WC(vertIndexPerFace) = vcg::Color4b(vcg::Color4b::White);
  						}
@@ -1343,8 +1343,8 @@ namespace io {
 						m.face[faceIndex].V(1) = &(m.vert[secondVertexIndex]);
 						if(!m.HasPerVertexTexCoord() && HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
 						{
-								getTextureCoord(texture, (firstVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix);
-								getTextureCoord(texture, (secondVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(1), tMatrix);
+								getTextureCoord(texture, (firstVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix, info);
+								getTextureCoord(texture, (secondVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(1), tMatrix, info);
 						}
 
  						vertIndex = indexList.at(ls).toInt() + offset;
@@ -1358,7 +1358,7 @@ namespace io {
 						if (HasPerFaceNormal(m) && (info->mask & vcg::tri::io::Mask::IOM_FACENORMAL) && normalPerVertex == "false")
 							getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
 						if(!m.HasPerVertexTexCoord() && HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
-							getTextureCoord(texture, (vertIndex - offset)*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(2 - vertIndexPerFace), tMatrix);
+							getTextureCoord(texture, (vertIndex - offset)*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(2 - vertIndexPerFace), tMatrix, info);
 						if (geometry.tagName() == "IndexedTriangleStripSet")
 							firstVertexIndex = secondVertexIndex;
 						secondVertexIndex = vertIndex;
@@ -1417,7 +1417,7 @@ namespace io {
 								m.face[faceIndex].V(vertIndexPerFace) = &(m.vert[indexList.at(indexVertex).toInt() + offset]);
 								//Load texture coordinate per wedge
 								if(!m.HasPerVertexTexCoord() && HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
-									getTextureCoord(texture, indexList.at(indexVertex).toInt()*2, m.vert[indexList.at(indexVertex).toInt() + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix);
+									getTextureCoord(texture, indexList.at(indexVertex).toInt()*2, m.vert[indexList.at(indexVertex).toInt() + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix, info);
 								if (HasPerWedgeColor(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGCOLOR))
 									m.face[faceIndex].WC(vertIndexPerFace) = vcg::Color4b(vcg::Color4b::White);
 								iv++;
@@ -1502,7 +1502,7 @@ namespace io {
 						getNormal(normalList, index * 3, m.vert[index + offsetVertex].N(), tMatrix);
 					//Load texture coordinate per vertex
 					if (m.HasPerVertexTexCoord() && (info->mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD))
-						getTextureCoord(texture, index * 2, m.vert[index + offsetVertex].cP(), m.vert[index + offsetVertex].T(), tMatrix);
+						getTextureCoord(texture, index * 2, m.vert[index + offsetVertex].cP(), m.vert[index + offsetVertex].T(), tMatrix, info);
 				}
 			}
 			//Load face in the mesh
@@ -1529,7 +1529,7 @@ namespace io {
 							m.face[index + offsetFace].V(vertIndexPerFace) = &(m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex]);
 							//Load texture coordinate per wedge
 							if (!m.HasPerVertexTexCoord() && HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
-								getTextureCoord(texture, (val[tt][0] * xDimension + val[tt][1])*2, m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex].cP(), m.face[index + offsetFace].WT(vertIndexPerFace), tMatrix);
+								getTextureCoord(texture, (val[tt][0] * xDimension + val[tt][1])*2, m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex].cP(), m.face[index + offsetFace].WT(vertIndexPerFace), tMatrix, info);
 							if (HasPerWedgeColor(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGCOLOR))
 								m.face[index + offsetFace].WC(vertIndexPerFace) = vcg::Color4b(vcg::Color4b::White);
 						}
@@ -1605,7 +1605,7 @@ namespace io {
 						getNormal(normalList, vv * 3, m.vert[offset + vv].N(), tMatrix);
 					//Load texture coordinate per vertex
 					if (m.HasPerVertexTexCoord() && (info->mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD))
-						getTextureCoord(texture, vv * 2, m.vert[offset + vv].cP(), m.vert[offset + vv].T(), tMatrix);
+						getTextureCoord(texture, vv * 2, m.vert[offset + vv].cP(), m.vert[offset + vv].T(), tMatrix, info);
 					if (cb !=NULL && (vv%1000 == 0)) (*cb)(10 + 80*info->numvert/info->numface + 81*vv/(2*nVertex*info->numface), "Loading X3D Object...");
 				}
 				
@@ -1686,9 +1686,9 @@ namespace io {
 							if(HasPerWedgeTexCoord(m) && (info->mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD))
 							{
 								if (texCoordIndex.isEmpty())// && !m.HasPerVertexTexCoord())
-									getTextureCoord(texture, index*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix);
+									getTextureCoord(texture, index*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix, info);
 								else if (!texCoordIndex.isEmpty() && (indexVect.at(tt + ff*3) + initPolygon) < texCoordIndex.size())
-									getTextureCoord(texture, texCoordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt()*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix); 
+									getTextureCoord(texture, texCoordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt()*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix, info); 
 								else
 								{
 									m.face[ff + offsetFace].WT(tt) = vcg::TexCoord2<float>(0, 0);
@@ -1874,7 +1874,7 @@ namespace io {
 				QDomElement multiTexture = appearance.firstChildElement("MultiTexture");
 				if (!multiTexture.isNull())
 				{
-					result= solveDefUse(multiTexture, defMap, multiTexture, info);
+					result = solveDefUse(multiTexture, defMap, multiTexture, info);
 					if (result != E_NOERROR) return result;
 					QDomElement child = multiTexture.firstChildElement();
 					while (!child.isNull())
@@ -1936,6 +1936,7 @@ namespace io {
 					if (!found){
 						TextureInfo tInfo = TextureInfo();
 						tInfo.isValid = false;
+						tInfo.textureIndex = -1;
 						textureInfo.push_back(tInfo);
 					}
 				}
@@ -1964,13 +1965,13 @@ namespace io {
 			vcg::Matrix33f matrix, tmp;
 			matrix.SetIdentity();
 			QStringList coordList, center;
-			findAndParseAttribute(center, elem, "center", "");
+			findAndParseAttribute(center, elem, "center", "0 0");
 			if (center.size() == 2)
 			{			
 				matrix[0][2] = -center.at(0).toFloat();
 				matrix[1][2] = -center.at(1).toFloat();
 			}
-			findAndParseAttribute(coordList, elem, "scale", "");
+			findAndParseAttribute(coordList, elem, "scale", "1 1");
 			if(coordList.size() == 2)
 			{
 				tmp.SetIdentity();
@@ -1978,10 +1979,16 @@ namespace io {
 				tmp[1][1] = coordList.at(1).toFloat();
 				matrix *= tmp;
 			}
-			findAndParseAttribute(coordList, elem, "rotation", "");
+			findAndParseAttribute(coordList, elem, "rotation", "0");
 			if(coordList.size() == 1)
 			{
-				tmp.SetRotateDeg(math::ToDeg(coordList.at(0).toFloat()), vcg::Point3f(0, 0, 1));
+				tmp.SetIdentity();
+				float angle = coordList.at(0).toFloat();
+				tmp[0][0] = cos(angle);
+				tmp[0][1] = -sin(angle);
+				tmp[1][0] = sin(angle);
+				tmp[1][1] = cos(angle);
+				//tmp.SetRotateDeg(math::ToDeg(coordList.at(0).toFloat()), vcg::Point3f(0, 0, 1));
 				matrix *= tmp;
 			}
 			if (center.size() == 2)
@@ -1991,7 +1998,7 @@ namespace io {
 				tmp[1][2] = center.at(1).toFloat();
 				matrix *= tmp;
 			}
-			findAndParseAttribute(coordList, elem, "traslation", "");
+			findAndParseAttribute(coordList, elem, "traslation", "0 0");
 			if(coordList.size() == 2)
 			{
 				tmp.SetIdentity();
@@ -2283,7 +2290,7 @@ namespace io {
 		
 
 		//If the index is valid, return the texture coordinate of index 'index'
-		inline static bool getTextureCoord(const TextureInfo& textInfo, int index, const vcg::Point3f& vertex, vcg::TexCoord2<float>& dest, const vcg::Matrix44f& tMatrix)
+		inline static bool getTextureCoord(const TextureInfo& textInfo, int index, const vcg::Point3f& vertex, vcg::TexCoord2<float>& dest, const vcg::Matrix44f& tMatrix, AdditionalInfoX3D* info)
 		{
 			vcg::Point3f point;
 			vcg::TexCoord2<float> textCoord;
@@ -2298,9 +2305,20 @@ namespace io {
 					point = vcg::Point3f(tmpVertex.X(), tmpVertex.Y(), 0.0);
 					textCoord.N() = textInfo.textureIndex;
 				}
+				else if (textInfo.mode == "SPHERE")
+				{
+					point = info->camera.Matrix() * vertex;
+					float u = point.X() / 2.0 + 0.5;
+					float v = point.Y() / 2.0 + 0.5;
+					u = (u - floorf(u));
+					v = (v - floorf(v));
+					point.X() = u;
+					point.Y() = v;
+					textCoord.N() = textInfo.textureIndex;
+				}
 				else
 				{
-					point = vcg::Point3f(0, 0, 0);
+					point = vcg::Point3f(0, 0, 1.0);
 					textCoord.N() = -1;
 				}
 			}
@@ -2311,7 +2329,7 @@ namespace io {
 			}
 			else
 			{
-				point = vcg::Point3f(0, 0, 0);
+				point = vcg::Point3f(0, 0, 1.0);
 				textCoord.N() = -1;
 			}
 			//Apply trasform
@@ -2322,15 +2340,15 @@ namespace io {
 				point.X() = point.X() < 0? 0: point.X();
 				point.X() = point.X() > 1? 1: point.X();
 			}
-			else
-				point.X() = (point.X() != floorf(point.X()))? (point.X() - floorf(point.X())): fmodf(point.X(), 2.0);
+			/*else
+				point.X() = (point.X() != floorf(point.X()))? (point.X() - floorf(point.X())): fmodf(point.X(), 2.0);*/
 			if (!textInfo.repeatT)
 			{
 				point.Y() = point.Y() < 0? 0: point.Y();
 				point.Y() = point.Y() > 1? 1: point.Y();
 			}
-			else
-				point.Y() = (point.Y() != floorf(point.Y()))? (point.Y() - floorf(point.Y())): fmodf(point.Y(), 2.0);
+			/*else
+				point.Y() = (point.Y() != floorf(point.Y()))? (point.Y() - floorf(point.Y())): fmodf(point.Y(), 2.0);*/
 			textCoord.U() = point.X();
 			textCoord.V() = point.Y();
 			dest = textCoord;
@@ -2351,6 +2369,36 @@ namespace io {
 			if (root.isNull()) return E_NOERROR;
 			int result = solveDefUse(root, defMap, root, info);
 			if (result != E_NOERROR) return result;
+			if (root.tagName() == "Viewpoint")
+			{
+				vcg::Point3f rot;
+				float angle = 0.0;
+				vcg::Point3f pos;
+				QString orientation = root.attribute("orientation");
+				QString position = root.attribute("position", "0 0 10");
+				QStringList list;
+				list = orientation.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+				if (list.size() == 4)
+				{
+					rot = vcg::Point3f(list.at(0).toFloat(), list.at(1).toFloat(), list.at(2).toFloat());
+					rot = rot.Normalize();
+					angle = list.at(3).toFloat();
+				}
+				else
+				{
+					rot = vcg::Point3f(0 ,0 ,1);
+					angle = 0.0;
+				}
+				list.clear();
+				list = position.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+				if (list.size() == 3)
+					pos = vcg::Point3f(list.at(0).toFloat(), list.at(1).toFloat(), list.at(2).toFloat()); 
+				else
+					pos = vcg::Point3f(0, 0, 10);
+				info->camera.SetIdentity();
+				info->camera.SetRotate(angle, rot);
+				info->camera.SetTranslate(pos);
+			}
 			if (root.tagName() == "Transform")
 			{
 				vcg::Matrix44f t = createTransformMatrix(root, tMatrix);
@@ -2451,7 +2499,7 @@ namespace io {
 										QString mode = solveChild.attribute("mode", "SPHERE");
 										textureInfo[j].mode = mode;
 										textureInfo[j].parameter = solveChild.attribute("parameter");
-										textureInfo[j].isValid = (mode == "COORD");
+										textureInfo[j].isValid = (mode == "COORD") || (mode == "SPHERE");
 										textureInfo[j].isCoordGenerator = true;
 									}
 									if ( i < textureTransformList.size())										
@@ -2480,11 +2528,18 @@ namespace io {
 								QString mode = textureCoord.attribute("mode", "SPHERE");
 								textureInfo[0].mode = mode;
 								textureInfo[0].parameter = textureCoord.attribute("parameter");
-								textureInfo[0].isValid = (mode == "COORD");
+								textureInfo[0].isValid = (mode == "COORD") || (mode == "SPHERE");
 								textureInfo[0].isCoordGenerator = true;
 								if (textureTransformList.size() > 0)
 									textureInfo[0].textureTransform = createTextureTrasformMatrix(textureTransformList.at(0).toElement());
 							}
+						}
+						else if (validTexture.size() == 1 && validTexture.at(0))
+						{
+							textureInfo[0].mode = "SPHERE";
+							textureInfo[0].parameter = "";
+							textureInfo[0].isValid = true;
+							textureInfo[0].isCoordGenerator = true;
 						}
 						
 						int colorComponent = (!color.isNull() && color.tagName() == "Color")? 3: 4;
@@ -2632,28 +2687,6 @@ public:
 		    QTextStream out(&file);
 			document->save(out, 1);*/
 			return LoadMaskByDom(document, info, info->filename);
-			/*wchar_t *file = coco_string_create(filename);
-			try 
-			{
-				VrmlTranslator::Scanner scanner(file);
-				VrmlTranslator::Parser parser(&scanner);
-				parser.doc = new QDomDocument();
-				parser.Parse();
-				if (parser.errors->count != 0) 
-				{
-					errorStr = coco_string_create_char(parser.errors->stringError);
-					return E_VRMLPARSERERROR;
-				}
-				info->doc = parser.doc;
-				return LoadMaskByDom(parser.doc, info, info->filename);
-			}
-			catch (char* str)
-			{
-				errorStr = str;
-				return E_VRMLPARSERERROR;
-			}
-			coco_string_delete(file);*/
-			return E_NOERROR;
 		}
 
 	};

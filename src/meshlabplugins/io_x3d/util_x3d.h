@@ -73,6 +73,8 @@ namespace io {
 
 		std::vector<bool> useTexture;
 
+		vcg::Similarityf camera;
+
 		int lineNumberError;
 		std::vector<QString> filenameStack;
 
