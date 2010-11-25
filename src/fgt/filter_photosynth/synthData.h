@@ -33,6 +33,7 @@ typedef struct Image
   int _exifHeight;
   QString _url;
   QString _localPath;
+  bool _shouldBeDownloaded;
 } Image;
 
 class CameraParameters
@@ -111,6 +112,24 @@ public:
 };
 
 /*
+ * Represents the options of the import process
+ */
+class ImportSettings
+{
+public:
+  ImportSettings() { };
+  ImportSettings(QString url, int clusterID, QString imageSavePath = QString(""));
+
+public:
+  //the synth url
+  QString _url;
+  //specifies which coordinate system (cluster of point) has to be imported, -1 means all
+  int _clusterID;
+  //specifies the path where the images have to be saved to; if it is equal to the empty string, images won't be downloaded
+  QString _imageSavePath;
+};
+
+/*
  * Represents a Synth
  */
 class SynthData : public QObject
@@ -153,12 +172,12 @@ public:
     DOWNLOAD_IMG
   };
 
-  SynthData(QObject *parent = 0);
+  SynthData(ImportSettings &settings, QObject *parent = 0);
   ~SynthData();
   bool isValid();
 
 public:
-  static SynthData *downloadSynthInfo(QString url, QString path, vcg::CallBackPos *cb);
+  static SynthData *downloadSynthInfo(ImportSettings &settings, vcg::CallBackPos *cb);
   int progressInfo();
 
 private slots:
@@ -197,6 +216,8 @@ public:
   int _numImages;
   //the callback function to inform the user about the progress of the filter
   vcg::CallBackPos *_cb;
+  //contains import options
+  ImportSettings _settings;
 
 private:
   //used to count how many responses to bin files requests have been processed
@@ -207,27 +228,6 @@ private:
   int _totalBinFilesCount;
   //the images will be saved here
   QString _savePath;
-};
-
-/*
- * Represents the options of the import process
- */
-class ImportSettings
-{
-public:
-  enum ImportSource { WEB_SITE, ZIP_FILE };
-
-  ImportSettings(ImportSource source, QString sourcePath, bool importPointClouds, bool importCameraParameters);
-
-public:
-  //specifies if the synth has to be downloaded from a url or loaded from a zip file on the filesystem
-  ImportSettings::ImportSource _source;
-  //can be the cid parameter taken from the synth url or a path on a filesystem
-  QString _sourcePath;
-  //specifies if the point clouds have to be imported
-  bool _importPointClouds;
-  //specifies if the camera parameters have to be imported
-  bool _importCameraParameters;
 };
 
 /*********************

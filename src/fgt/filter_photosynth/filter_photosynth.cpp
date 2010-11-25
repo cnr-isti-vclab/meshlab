@@ -12,14 +12,12 @@
 ****************************************************************************/
 
 #include "filter_photosynth.h"
-//#include "synthData.h"
 #include <QtScript>
 #include <unistd.h>
-#include "jhead/jhead.h"
+
+//#define FILTER_PHOTOSYNTH_DEBUG 1
 
 using namespace vcg;
-
-extern ImageInfo_t ImageInfo;
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -89,12 +87,13 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
                                      "http://photosynth.net/view.aspx?cid=e8f476c5-ed00-4626-a86c-31d654e94109",
                                      "Synth URL",
                                      "Paste the synth URL from your browser."));
+      parlst.addParam(new RichInt("clusterID", -1, "Cluster ID", "The ID of the cluster to download, type '-1' to download all"));
       parlst.addParam(new RichBool ("saveImages", true, "Download images", "Download images making up the specified synth."));
-      //parlst.addParam(new RichSaveFile("savePath","./",".jpg","Save to","Select the path where images will be saved to"));
       parlst.addParam(new RichString("savePath",
                                      "./",
                                      "Save to",
                                      "Enter the path where images will be saved to"));
+      parlst.addParam(new RichBool ("addCameraLayer", true, "Show cameras", "Add a layer with points as cameras placeholders"));
       break;
     default:
       assert(0);
@@ -102,15 +101,12 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
 }
 
 // The Real Core Function doing the actual mesh processing.
-// Imports
 bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
-  QString url = par.getString("synthURL");
-  QString path("");
+  ImportSettings settings(par.getString("synthURL"), par.getInt("clusterID"));
   if(par.getBool("saveImages"))
-    //path = par.getSaveFileName("savePath");
-    path = par.getString("savePath");
-  SynthData *synthData = SynthData::downloadSynthInfo(url,path,cb);
+    settings._imageSavePath = par.getString("savePath");
+  SynthData *synthData = SynthData::downloadSynthInfo(settings,cb);
 
   //Hangs on active wait until data are available from the server
   while(!synthData->_dataReady)
@@ -127,18 +123,22 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
   if(!synthData->isValid())
   {
     this->errorMessage = SynthData::errors[synthData->_state];
+    delete synthData;
     return false;
   }
   cb(0,"Finishing import...");
-  QDir dir(path);
-  QFile file(dir.filePath("Cam.txt"));
+  QDir imageDir(settings._imageSavePath);
+  imageDir.cd(synthData->_collectionID);
+#ifdef FILTER_PHOTOSYNTH_DEBUG
+  QFile cameraXMLfile(imageDir.filePath("Cam.txt"));
   bool success = true;
-  if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+  if (!cameraXMLfile.open(QIODevice::WriteOnly | QIODevice::Text))
   {
     success = false;
     qWarning() << "Failed to create cam.txt";
   }
-  QTextStream out(&file);
+  QTextStream out(&cameraXMLfile);
+#endif
   //scan coordinate systems list and add a new layer for each one, containing its points
   const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
   CoordinateSystem *sys;
@@ -156,12 +156,13 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         mm->cm.vert.back().P() = Point3f(p._x,p._z,-p._y);
         mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
       }
-      //we consider cameras only if the user chooses to download images,
-      //otherwise there is no mean to retrieve camera intrinsics (can't read images exif, without images)
+      //we consider cameras only if the user chooses to download images
       if(par.getBool("saveImages"))
       {
-        //create a new layer where add points representing cameras to
-        MeshModel *mm = md.addNewMesh("cameras");
+        MeshModel *mm;
+        if(par.getBool("addCameraLayer"))
+          //create a new layer where add points representing cameras to
+          mm = md.addNewMesh("cameras");
         CameraParameters cam;
         //scan cameras list for this coordinate system and for each one add a raster with a shot matching the camera
         foreach(cam, sys->_cameraParametersList)
@@ -169,22 +170,21 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
           Shotf s;
           s.Extrinsics.SetRot(cam.getRotation());
           s.Extrinsics.SetTra(cam.getTranslation());
-          //add a point to the cameras layer as a placeholder for the camera
-          tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-          mm->cm.vert.back().P() = cam.getTranslation();
-          //find intrinsics
           Image img = synthData->_imageMap->value(cam._imageID);
-          QDir imageDir(path);
-          imageDir.cd(synthData->_collectionID);
-          readExifData(img, cam, imageDir);
-          s.Intrinsics.FocalMm = cam._focalLength;
-          //s.Intrinsics.FocalMm = cam[CameraParameters::FOCAL_LENGTH] * qMax(img._exifWidth,img._exifHeight);
-          s.Intrinsics.PixelSizeMm = Point2f(cam._pixelSizeMm,cam._pixelSizeMm);
-          //s.Intrinsics.PixelSizeMm = Point2f(1,1);
-          s.Intrinsics.ViewportPx = Point2i(img._exifWidth,img._exifHeight);
-          s.Intrinsics.CenterPx = Point2f(img._exifWidth/2,img._exifHeight/2);
+          s.Intrinsics.FocalMm = cam[CameraParameters::FOCAL_LENGTH] * qMax(img._width,img._height);
+          s.Intrinsics.PixelSizeMm = Point2f(1,1);
+          s.Intrinsics.ViewportPx = Point2i(img._width,img._height);
+          s.Intrinsics.CenterPx = Point2f(img._width/2,img._height/2);
+#ifdef FILTER_PHOTOSYNTH_DEBUG
           if(success)
             outputToFile(out, s, img, cam);
+#endif
+          if(par.getBool("addCameraLayer"))
+          {
+            //add a point to the cameras layer as a placeholder for the camera
+            tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
+            mm->cm.vert.back().P() = cam.getTranslation();
+          }
           //add a new raster
           //the same image can be added several times, one for each coordinate system it appears into
           //this way the user can choose which point cloud the raster has to align with
@@ -195,8 +195,10 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
       }
     }
   }
-  file.close();
-
+#ifdef DEGUG
+  cameraXMLfile.close();
+#endif
+  delete synthData;
   return true;
 }
 
@@ -212,70 +214,16 @@ QString FilterPhotosynthPlugin::filterScriptFunctionName(FilterIDType filterID)
   return QString();
 }
 
-void FilterPhotosynthPlugin::readExifData(Image &img, CameraParameters &cam, QDir &root)
-{
-  const char *FileName = root.filePath("IMG_%1.jpg").arg(img._ID).toStdString().data();
-  if (strlen(FileName) >= JHEAD_PATH_MAX-1){
-      // Protect against buffer overruns in strcpy / strcat's on filename
-      ErrFatal("filename too long");
-      qWarning() << "filename too long";
-  }
-
-  ResetJpgfile();
-
-  // Start with an empty image information structure.
-  memset(&ImageInfo, 0, sizeof(ImageInfo));
-  ImageInfo.FlashUsed = -1;
-  ImageInfo.MeteringMode = -1;
-  ImageInfo.Whitebalance = -1;
-
-  strncpy(ImageInfo.FileName, FileName, PATH_MAX);
-  int res = ReadJpegFile(FileName,READ_METADATA);
-  if(res)
-  {
-    img._exifWidth = ImageInfo.Width;
-    img._exifHeight = ImageInfo.Height;
-    cam._ccdWidth = ImageInfo.CCDWidth;
-    cam._focalLength = cam[CameraParameters::FOCAL_LENGTH] * cam._ccdWidth;
-    cam._pixelSizeMm = cam._ccdWidth / qMax(img._exifWidth,img._exifHeight);
-    qDebug() << "Exif width:" << ImageInfo.Width;
-    qDebug() << "Exif height:" << ImageInfo.Height;
-    qDebug() << "CCD Width:" << ImageInfo.CCDWidth;
-    qDebug() << "Focal length:" << cam._focalLength;
-    qDebug() << "Pixel Size:" << cam._pixelSizeMm;
-  }
-  if(cam._ccdWidth == 0) //could not find ccdWidth in exif
-  {
-    int resUnit = ImageInfo.ResolutionUnit;
-    float xResolution = ImageInfo.xResolution; //image dpi
-    float yResolution = ImageInfo.yResolution; //image dpi
-    cam._pixelSizeMm = 1 / qMax(xResolution,yResolution);
-    switch(resUnit)
-    {
-    case 2: //inches
-      cam._pixelSizeMm *= 25.4;
-      break;
-    case 3: //centimeters
-      cam._pixelSizeMm *= 10;
-      break;
-    }
-    cam._ccdWidth = cam._pixelSizeMm * qMax(img._exifWidth,img._exifHeight);
-    cam._focalLength = cam[CameraParameters::FOCAL_LENGTH] * cam._ccdWidth;
-    qDebug() << "X resolution:" << xResolution;
-    qDebug() << "Y resolution:" << yResolution;
-    qDebug() << "CCD width:" << cam._ccdWidth;
-    qDebug() << "Focal length:" << cam._focalLength;
-    qDebug() << "Pixel size:" << cam._pixelSizeMm;
-  }
-}
-
+/*
+ * Writes on out the XML representing the camera described by s
+ */
 void FilterPhotosynthPlugin::outputToFile(QTextStream &out, Shotf &s, Image &img, CameraParameters &cam)
 {
   QString traVec = QString("TranslationVector=\"%1 %2 %3 1\"").arg(s.Extrinsics.Tra().X()).arg(s.Extrinsics.Tra().Y()).arg(s.Extrinsics.Tra().Z());
   QString lensDist("LensDistortion=\"0 0\"");
-  QString viewPx = QString("ViewportPixel=\"%1 %2\"").arg(img._exifWidth).arg(img._exifHeight);
+  QString viewPx = QString("ViewportPixel=\"%1 %2\"").arg(img._width).arg(img._height);
   QString pxSize = QString("PixelSizeMm=\"%1 %2\"").arg(cam._pixelSizeMm).arg(cam._pixelSizeMm);
-  QString centerPx = QString("CenterPx=\"%1 %2\"").arg(img._exifWidth/2).arg(img._exifHeight/2);
+  QString centerPx = QString("CenterPx=\"%1 %2\"").arg(img._width/2).arg(img._height/2);
   QString focalMm = QString("FocalMm=\"%1\"").arg(s.Intrinsics.FocalMm);
   out << QString("Camera %1 (Image %2: %3): ").arg(cam._camID).arg(img._ID).arg(img._url) << "\n\n";
   out << "<!DOCTYPE ViewState>\n<project>\n";

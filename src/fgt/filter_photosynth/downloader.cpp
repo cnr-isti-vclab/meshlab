@@ -73,7 +73,7 @@ CoordinateSystem::CoordinateSystem(int id, QObject *parent)
   : QObject(parent)
 {
   _id = id;
-  _shouldBeImported = true;
+  _shouldBeImported = false;
   _pointCloud = 0;
 }
 
@@ -110,11 +110,12 @@ const char *SynthData::steps[] =
   "Downloading images..."
 };
 
-SynthData::SynthData(QObject *parent)
+SynthData::SynthData(ImportSettings &settings, QObject *parent)
   : QObject(parent)
 {
   _coordinateSystems = new QList<CoordinateSystem*>();
   _imageMap = new QHash<int,Image>();
+  _settings = settings;
   _state = PENDING;
   _step = WEB_SERVICE;
   _progress = 0;
@@ -154,57 +155,50 @@ QtSoapHttpTransport SynthData::transport;
  * Contacts the photosynth web service to retrieve informations about
  * the synth whose identifier is contained within the given url.
  */
-SynthData *SynthData::downloadSynthInfo(QString url, QString path, vcg::CallBackPos *cb)
+SynthData *SynthData::downloadSynthInfo(ImportSettings &settings, vcg::CallBackPos *cb)
 {
-  SynthData *synthData = new SynthData();
+  SynthData *synthData = new SynthData(settings);
   synthData->_cb = cb;
   synthData->_step = WEB_SERVICE;
   synthData->_progress = 0;
   synthData->_cb(synthData->progressInfo(),synthData->_info.toStdString().data());
-  if(url.isNull() || url.isEmpty())
+  if(settings._url.isNull() || settings._url.isEmpty())
   {
     synthData->_state = WRONG_URL;
     synthData->_dataReady = true;
     return synthData;
   }
 
-  if(path.isNull())
+  if(settings._imageSavePath.isNull())
   {
     synthData->_state = WRONG_PATH;
     synthData->_dataReady = true;
     return synthData;
   }
-  synthData->_savePath = path;
+  synthData->_savePath = settings._imageSavePath;
 
   //extracts the synth identifier
-  int i = url.indexOf("cid=",0,Qt::CaseInsensitive);
-  if(i < 0 || url.length() < i + 40)
+  int i = settings._url.indexOf("cid=",0,Qt::CaseInsensitive);
+  if(i < 0 || settings._url.length() < i + 40)
   {
     synthData->_state = WRONG_URL;
     synthData->_dataReady = true;
     return synthData;
   }
 
-  ImportSettings::ImportSource importSource = ImportSettings::WEB_SITE;
-  QString cid = url.mid(i + 4, 36);
-  bool importPointClouds = true;
-  bool importCameraParameters = false;
-  ImportSettings settings(importSource,cid,importPointClouds,importCameraParameters);
+  QString cid = settings._url.mid(i + 4, 36);
   synthData->_collectionID = cid;
 
-  if(settings._source == ImportSettings::WEB_SITE)
-  {
-    QtSoapMessage message;
-    message.setMethod("GetCollectionData", "http://labs.live.com/");
-    message.addMethodArgument("collectionId", "", settings._sourcePath);
-    message.addMethodArgument("incrementEmbedCount", "", false, 0);
+  QtSoapMessage message;
+  message.setMethod("GetCollectionData", "http://labs.live.com/");
+  message.addMethodArgument("collectionId", "", settings._url);
+  message.addMethodArgument("incrementEmbedCount", "", false, 0);
 
-    transport.setAction("http://labs.live.com/GetCollectionData");
-    transport.setHost("photosynth.net");
-    QObject::connect(&transport, SIGNAL(responseReady()), synthData, SLOT(readWSresponse()));
+  transport.setAction("http://labs.live.com/GetCollectionData");
+  transport.setHost("photosynth.net");
+  QObject::connect(&transport, SIGNAL(responseReady()), synthData, SLOT(readWSresponse()));
 
-    transport.submitRequest(message, "/photosynthws/PhotosynthService.asmx");
-  }
+  transport.submitRequest(message, "/photosynthws/PhotosynthService.asmx");
   synthData->_state = PENDING;
   synthData->_progress = 50;
   synthData->_cb(synthData->progressInfo(),synthData->_info.toStdString().data());
@@ -306,63 +300,70 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
     QScriptValue coordSystems = collection.property("x");
     for(int i = 0; i <= coordSystemsCount; ++i)
     {
-      _progress = 50 + (i / (2*coordSystemsCount) * 100);
-      coordSys = new CoordinateSystem(i,this);
-      _coordinateSystems->append(coordSys);
-      QScriptValue cs = coordSystems.property(QString::number(i));
-      QScriptValue pointCloud = cs.property("k");
-      if(pointCloud.isValid())
+      if(_settings._clusterID == -1 || i == _settings._clusterID)
       {
-        QScriptValueIterator it(pointCloud);
-        if(it.hasNext())
+        _progress = 50 + (i / (2*coordSystemsCount) * 100);
+        coordSys = new CoordinateSystem(i,this);
+        coordSys->_shouldBeImported = true;
+        _coordinateSystems->append(coordSys);
+        QScriptValue cs = coordSystems.property(QString::number(i));
+        QScriptValue pointCloud = cs.property("k");
+        if(pointCloud.isValid())
         {
-          //pointCloud[0]
-          it.next();
-          QString str = it.value().toString();
-          if(!str.isNull() && !str.isEmpty())
+          QScriptValueIterator it(pointCloud);
+          if(it.hasNext())
           {
-            //pointCloud[1]
+            //pointCloud[0]
             it.next();
-            int binFileCount = it.value().toInt32();
-            PointCloud *p = new PointCloud(i,binFileCount,coordSys);
-            coordSys->_pointCloud = p;
+            QString str = it.value().toString();
+            if(!str.isNull() && !str.isEmpty())
+            {
+              //pointCloud[1]
+              it.next();
+              int binFileCount = it.value().toInt32();
+              PointCloud *p = new PointCloud(i,binFileCount,coordSys);
+              coordSys->_pointCloud = p;
+            }
           }
         }
-      }
-      //list of cameras
-      QScriptValue cameras = cs.property("r");
-      if(cameras.isValid() && !cameras.isNull())
-      {
-        QScriptValueIterator it(cameras);
-        while(it.hasNext())
+        //list of cameras
+        QScriptValue cameras = cs.property("r");
+        if(cameras.isValid() && !cameras.isNull())
         {
-          it.next();
-          int id = it.name().toInt();
-          QScriptValue camera = it.value();
-          //contains the camera extrinsics and some of intrinsics
-          QScriptValue parameters = camera.property("j");
-          CameraParameters params;
-          params._camID = id;
-          QScriptValueIterator paramIt(parameters);
-          paramIt.next();
-          params._imageID = paramIt.value().toInt32();
-          for(int i = CameraParameters::FIRST; i <= CameraParameters::LAST; ++i)
+          QScriptValueIterator it(cameras);
+          while(it.hasNext())
           {
+            it.next();
+            int id = it.name().toInt();
+            QScriptValue camera = it.value();
+            //contains the camera extrinsics and some of intrinsics
+            QScriptValue parameters = camera.property("j");
+            CameraParameters params;
+            params._camID = id;
+            QScriptValueIterator paramIt(parameters);
             paramIt.next();
-            params[i] = paramIt.value().toNumber();
+            params._imageID = paramIt.value().toInt32();
+            Image img = _imageMap->value(params._imageID);
+            img._shouldBeDownloaded = true;
+            _imageMap->insert(img._ID,img);
+            for(int i = CameraParameters::FIRST; i <= CameraParameters::LAST; ++i)
+            {
+              paramIt.next();
+              params[i] = paramIt.value().toNumber();
+            }
+            QScriptValue distortion = camera.property("f");
+            if(distortion.isValid() && !distortion.isNull())
+            {
+              QScriptValueIterator distortionIt(distortion);
+              distortionIt.next();
+              params._distortionRadius1 = distortionIt.value().toNumber();
+              distortionIt.next();
+              params._distortionRadius2 = distortionIt.value().toNumber();
+            }
+            else
+              params._distortionRadius1 = params._distortionRadius2 = 0;
+            coordSys->_cameraParametersList.append(params);
           }
-          QScriptValue distortion = camera.property("f");
-          if(distortion.isValid() && !distortion.isNull())
-          {
-            QScriptValueIterator distortionIt(distortion);
-            distortionIt.next();
-            params._distortionRadius1 = distortionIt.value().toNumber();
-            distortionIt.next();
-            params._distortionRadius2 = distortionIt.value().toNumber();
-          }
-          else
-            params._distortionRadius1 = params._distortionRadius2 = 0;
-          coordSys->_cameraParametersList.append(params);
         }
       }
     }
@@ -388,6 +389,7 @@ void SynthData::parseImageMap(QScriptValue &map)
     _cb(progressInfo(),_info.toStdString().data());
     imageIt.next();
     Image image;
+    image._shouldBeDownloaded = false;
     image._ID = imageIt.name().toInt();
     QScriptValue size = imageIt.value().property("d");
     QScriptValueIterator sizeIt(size);
@@ -415,7 +417,7 @@ void SynthData::downloadBinFiles()
           this, SLOT(loadBinFile(QNetworkReply*)));
   foreach(CoordinateSystem *sys, *_coordinateSystems)
   {
-    if(sys->_pointCloud)
+    if(sys->_shouldBeImported && sys->_pointCloud)
     {
       //As QNetworkAccessManager API is asynchronous, there is no mean, in the slot handling the response (loadBinFile),
       //to understand if the response received is the last one, and thus to know if all data have been received.
@@ -436,6 +438,11 @@ void SynthData::downloadBinFiles()
     }
   }
   _totalBinFilesCount = _semaphore;
+  if(_totalBinFilesCount == 0)
+  {
+    _state = SYNTH_NO_ERROR;
+    _dataReady = true;
+  }
 }
 
 /*
@@ -531,12 +538,22 @@ void SynthData::downloadImages()
   QNetworkAccessManager *manager = new QNetworkAccessManager(this);
   connect(manager, SIGNAL(finished(QNetworkReply*)),
           this, SLOT(saveImages(QNetworkReply*)));
+  int requestCount = 0;
   foreach(Image img, *_imageMap)
   {
-    QNetworkRequest *request = new QNetworkRequest(QUrl(img._url));
-    request->setAttribute(QNetworkRequest::User,QVariant(img._ID));
-    manager->get(*request);
-    delete request;
+    if(img._shouldBeDownloaded)
+    {
+      QNetworkRequest *request = new QNetworkRequest(QUrl(img._url));
+      request->setAttribute(QNetworkRequest::User,QVariant(img._ID));
+      manager->get(*request);
+      delete request;
+      ++requestCount;
+    }
+  }
+  if(requestCount == 0)
+  {
+    _state = SYNTH_NO_ERROR;
+    _dataReady = true;
   }
 }
 
@@ -576,18 +593,20 @@ void SynthData::saveImages(QNetworkReply *httpResponse)
  * ImportSettings *
  ******************/
 
-ImportSettings::ImportSettings(ImportSource source, QString sourcePath, bool importPointClouds, bool importCameraParameters)
+ImportSettings::ImportSettings(QString url, int clusterID, QString imageSavePath)
 {
-  _source = source;
-  _sourcePath = sourcePath;
-  _importPointClouds = importPointClouds;
-  _importCameraParameters = importCameraParameters;
+  _url = url;
+  _clusterID = clusterID;
+  _imageSavePath = imageSavePath;
 }
 
 /*********************
  * Utility functions *
  *********************/
 
+/*
+ * based on C# code from Christoph Hausner's SynthExport
+ */
 int readCompressedInt(QIODevice *device, bool &error)
 {
   error = false;
@@ -604,6 +623,9 @@ int readCompressedInt(QIODevice *device, bool &error)
   return i;
 }
 
+/*
+ * based on C# code from Christoph Hausner's SynthExport
+ */
 float readBigEndianSingle(QIODevice *device, bool &error)
 {
   error = false;
@@ -620,6 +642,9 @@ float readBigEndianSingle(QIODevice *device, bool &error)
   return*f;
 }
 
+/*
+ * based on C# code from Christoph Hausner's SynthExport
+ */
 unsigned short readBigEndianUInt16(QIODevice *device, bool &error)
 {
   error = false;
