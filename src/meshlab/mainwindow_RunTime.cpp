@@ -806,7 +806,7 @@ void MainWindow::startFilter()
 			// "minExpr" - "minExpr"
 			// "maxExpr" - "maxExpr" 
 
-			XMLFilterInfo::MapList params = filt.xmlInfo->filterParametersExtendedInfo(fname);
+			XMLFilterInfo::XMLMapList params = filt.xmlInfo->filterParametersExtendedInfo(fname);
 			
 
 			/*****IMPORTANT NOTE******/
@@ -818,12 +818,12 @@ void MainWindow::startFilter()
 			try
 			{
 					//each map inside the list contains info (type,name,def_expr) on each parameter inside the filter
-				for(XMLFilterInfo::MapList::const_iterator it = params.constBegin();it != params.constEnd();++it)
+				for(XMLFilterInfo::XMLMapList::const_iterator it = params.constBegin();it != params.constEnd();++it)
 				{	
-					QMap<QString,QString> mp = *(it);
+					XMLFilterInfo::XMLMap mp = *(it);
 						//Initilize the parameters inside the environment
-					Expression* exp = ExpressionFactory::create(mp["type"],mp["defaultExpression"]);
-					PM.env.insertLocalExpressionBinding(mp["name"],exp);
+					Expression* exp = ExpressionFactory::create(mp[MLXMLElNames::paramType],mp[MLXMLElNames::paramDefExpr]);
+					PM.env.insertLocalExpressionBinding(mp[MLXMLElNames::paramName],exp);
 					ExpressionFactory::destroy(exp);	
 				}
 				if(currentViewContainer())
@@ -837,11 +837,12 @@ void MainWindow::startFilter()
 				// (2) Ask for filter parameters and eventally directly invoke the filter
 				// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
 				// if no dialog is created the filter must be executed immediately
-				/*if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
+				if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
 				{
-				  RichParameterSet dummyParSet;
-				  executeFilter(action, dummyParSet, false);
-				}*/
+					//RichParameterSet dummyParSet;
+					//executeFilter(action, dummyParSet, false);
+					meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Problem with showAutoDialog.");
+				}
 			}
 			catch (ParsingException e)
 			{

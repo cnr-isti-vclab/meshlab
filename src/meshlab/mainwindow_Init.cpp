@@ -604,7 +604,7 @@ void MainWindow::fillFilterMenu()
 			filterAction->setToolTip(help);
 
 			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
-			QString filterClasses = info->filterAttribute(filterName,QString("filterClass"));
+			QString filterClasses = info->filterAttribute(filterName,MLXMLElNames::filterClass);
 			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 			foreach(QString nameClass,filterClassesList)
 			{
