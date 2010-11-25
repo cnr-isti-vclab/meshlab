@@ -43,8 +43,9 @@ public:
     velocity[0]=0.0f;
     velocity[1]=0.0f;
     velocity[2]=0.0f;
+    vel=0;
     face=0;
-    };
+    }
 
     Particle(float m,float v){
     mass=m;
@@ -54,8 +55,11 @@ public:
     Particle(float m,CoordType v){
     mass=m;
     velocity=v;
-    };
-    ~Particle(){};
+    }
+
+    ~Particle(){
+
+    }
 
 
 public:

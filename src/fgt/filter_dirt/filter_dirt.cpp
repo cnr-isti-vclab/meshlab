@@ -121,7 +121,7 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
             par.addParam(new RichPoint3f("force_dir",Point3f(0,-1,0),"force","Direction of the force acting on the points cloud"));
             par.addParam(new RichAbsPerc("s_length",max_value*perc,0,max_value,"Movement Length",""));
             //par.addParam(new RichPoint3f("velocity",Point3f(0,0,0),"v","Initial velocity of the particle"));
-            par.addParam(new RichFloat("velocity",5,"v","Initial velocity of the particle"));
+            par.addParam(new RichFloat("velocity",0,"v","Initial velocity of the particle"));
             par.addParam(new RichFloat("mass",1,"m","Mass of the particle"));
             break;
         }
@@ -160,13 +160,11 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 
         prepareMesh(currMM);
 
-        tri::UpdateFlags<CMeshO>::FaceClear(currMM->cm);
 
         ComputeNormalDustAmount(currMM,dir,k,s);
-        //ComputeSurfaceExposure(currMM,1,1);
+        ComputeSurfaceExposure(currMM,1,1);
         GenerateParticles(currMM,dust_points,dust_particles,n_p,0.6);
 
-        tri::UpdateFlags<CMeshO>::FaceClear(currMM->cm);
 
         MeshModel* dmm=md.addNewMesh("dust_mesh");
         dmm->cm.Clear();

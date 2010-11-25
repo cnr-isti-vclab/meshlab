@@ -23,25 +23,61 @@
 #ifndef DIRT_UTILS_H
 #define DIRT_UTILS_H
 
-#define PI 3.14159265 //To delete?
-
 //Include Files
 #include <math.h>
+#include <stdlib.h>
+#include <time.h>
+#include <limits>
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
 #include<vector>
 #include<vcg/simplex/vertex/base.h>
+#include<vcg/space/index/base.h>
 #include<vcg/simplex/face/base.h>
 #include<vcg/complex/trimesh/base.h>
 #include <vcg/space/point3.h>
 #include <vcg/space/intersection2.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/closest.h>
+#include <vcg/simplex/face/distance.h>
+#include <vcg/complex/trimesh/geodesic.h>
+#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/trimesh/create/resampler.h>
+#include <vcg/complex/trimesh/clustering.h>
+#include <vcg/simplex/face/distance.h>
+#include <vcg/space/index/grid_static_ptr.h>
+#include <vcg/space/intersection3.h>
 #include "particle.h"
-
 using namespace vcg;
 using namespace tri;
 
+typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
+typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MetroMeshVertexGrid;
+typedef FaceTmark<CMeshO> MarkerFace;
+
+/**
+@def Generate random barycentric coordinates
+@return a triple of barycentric coordinates
+*/
+CMeshO::CoordType RandomBaricentric(){
+    CMeshO::CoordType interp;
+    static math::MarsenneTwisterRNG rnd;
+    interp[1] = rnd.generate01();
+    interp[2] = rnd.generate01();
+        if(interp[1] + interp[2] > 1.0)
+        {
+                interp[1] = 1.0 - interp[1];
+                interp[2] = 1.0 - interp[2];
+                }
+
+        assert(interp[1] + interp[2] <= 1.0);
+        interp[0]=1.0-(interp[1] + interp[2]);
+        return interp;
+    };
 /**
 @def This funcion calculate the cartesian coordinates of a point given from its barycentric coordinates
 
@@ -56,57 +92,51 @@ CMeshO::CoordType fromBarCoords(Point3f bc,CMeshO::FacePointer f){
     Point3f p0=f->P(0);
     Point3f p1=f->P(1);
     Point3f p2=f->P(2);
-    p[0]=p0[0]*bc[0]+p1[0]*bc[1]+p2[0]*bc[2];
-    p[1]=p0[1]*bc[0]+p1[1]*bc[1]+p2[1]*bc[2];
-    p[2]=p0[2]*bc[0]+p1[2]*bc[1]+p2[2]*bc[2];
+    p=f->P(0)*bc[0]+f->P(1)*bc[1]+f->P(2)*bc[2];
     return p;
 };
 
+
+
+
 /**
-@def
-*/
-CMeshO::CoordType fixEdgePointCoordinates(CMeshO::CoordType p,CMeshO::FacePointer f){
+
+  */
+CMeshO::CoordType GetSafePosition(CMeshO::FacePointer f,int edge){
+
+    Point3f p0=f->P(0);
+    Point3f p1=f->P(1);
+    Point3f p2=f->P(2);
+
     Point3f bc;
-    CMeshO::CoordType c_p; //Correct Position
-    InterpolationParameters(*f,p,bc);
 
-    int i;
+    bc[0]=0.33f;
+    bc[1]=0.33f;
+    bc[2]=1-bc[0]-bc[1];
 
-    if(bc[0]<bc[1])
-    {
-        if(bc[0]<bc[2]){
-            i=0;
-        }else{
-            i=2;
+    CMeshO::CoordType pc=fromBarCoords(bc,f);
+    CMeshO::CoordType safe_p;
+
+    switch(edge){
+    case 0:{
+            bc=RandomBaricentric();
+            safe_p=p0*bc[0]+p1*bc[1]+pc*bc[2];
+            break;
         }
-
-    }else{
-        if(bc[1]<bc[2]){
-            i=1;
-        }else{
-            i=2;
+    case 1:{
+            bc=RandomBaricentric();
+            safe_p=p1*bc[0]+p2*bc[1]+pc*bc[2];
+            break;
+        }
+    case 2:{
+            bc=RandomBaricentric();
+            safe_p=p2*bc[0]+p0*bc[1]+pc*bc[2];
+            break;
         }
 
     }
-    switch(i){
-    case 0:{
-            bc[0]=0.001f;
-            bc[1]=1-bc[2]-bc[0];
-            break;
-        }
-        case 1:{
-            bc[1]=0.001f;
-            bc[0]=1-bc[2]-bc[1];
-            break;
-            }
-        case 2:{
-            bc[2]=0.001f;
-            bc[0]=1-bc[1]-bc[2];
-            break;
-            }
-        }
-    c_p=fromBarCoords(bc,f);
-    return c_p;
+    return safe_p;
+
 };
 
 
@@ -119,68 +149,33 @@ CMeshO::CoordType fixEdgePointCoordinates(CMeshO::CoordType p,CMeshO::FacePointe
 @return true if point p is on face f, false elsewhere.
 */
 bool IsOnFace(Point3f p, CMeshO::FacePointer f){
+    float EPSILON=0.00001;
+    //Compute vectors
+    Point3f a=f->V(0)->P();
+    Point3f b=f->V(2)->P();
+    Point3f c=f->V(1)->P();
 
 
-    Point3f p0=f->P(0);
-    Point3f p1=f->P(1);
-    Point3f  p2=f->P(2);
+    Point3f v0 = c-a;
+    Point3f v1 = b-a;
+    Point3f v2 = p-a;
 
-    CMeshO::CoordType n=f->N();
+    // Compute dot products
+    float dot00 = v0.dot(v0);
+    float dot01 = v0.dot(v1);
+    float dot02 = v0.dot(v2);
+    float dot11 = v1.dot(v1);
+    float dot12 = v1.dot(v2);
 
-    float a = n.dot(p-p0);
-    if(math::Abs(a)>0.00001) return false;
+    // Compute barycentric coordinates
+    float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
-
-    int max_c;
-
-    float n0=math::Abs(n[0]);
-    float n1=math::Abs(n[1]);
-    float n2=math::Abs(n[2]);
-
-    if(n0>n1){
-          if(n0>n2) max_c=0;
-          else max_c=2;
-    }else{
-        if(n1>n2) max_c=1;
-        else max_c=2;
-              }
-
-
-    Point2f p_2d;
-    Point2f p0_2d;
-    Point2f p1_2d;
-    Point2f p2_2d;
-switch(max_c){
-    case 0:{
-            p0_2d=Point2f(p0[1],p0[2]);
-            p1_2d=Point2f(p1[1],p1[2]);
-            p2_2d=Point2f(p2[1],p2[2]);
-            p_2d=Point2f(p[1],p[2]);
-            break;
-        }
-    case 1:{
-            p0_2d=Point2f(p0[0],p0[2]);
-            p1_2d=Point2f(p1[0],p1[2]);
-            p2_2d=Point2f(p2[0],p2[2]);
-            p_2d=Point2f(p[0],p[2]);
-
-            break;
-        }
-    case 2:{
-            p0_2d=Point2f(p0[0],p0[1]);
-            p1_2d=Point2f(p1[0],p1[1]);
-            p2_2d=Point2f(p2[0],p2[1]);
-            p_2d=Point2f(p[0],p[1]);
-
-            break;
-        }
-    }
-
-
-
-    Triangle2<float> f_2d=Triangle2<float>(p0_2d,p1_2d,p2_2d);
-    return IsInsideTrianglePoint(f_2d,p_2d);
-
+    // Check if point is in triangle
+    if(math::Abs(u)<EPSILON) u=0;
+    if(math::Abs(v)<EPSILON) v=0;
+    return (u >= 0) && (v >= 0) && (u + v <=1+EPSILON);
 };
 
 
@@ -261,9 +256,6 @@ CMeshO::CoordType UpdateVelocity(CMeshO::CoordType pf,CMeshO::CoordType pi,CMesh
     f[2]=force[2]-a*n[2];
 
 
-    //v[0]=vel[0]-b*n[0];
-    //v[1]=vel[1]-b*n[1];
-    //v[2]=vel[2]-b*n[2];
 
     new_vel[0]=sqrt(pow(v[0],2)+2*(f[0]/m)*(pf[0]-pi[0]) );
     new_vel[1]=sqrt(pow(v[1],2)+2*(f[1]/m)*(pf[1]-pi[1]) );
@@ -292,7 +284,7 @@ CMeshO::CoordType ComputeAcceleration(float m,CMeshO::FacePointer face,CMeshO::C
 CMeshO::CoordType GetVelocityComponents(float v,float l,CMeshO::FacePointer face){
 
     Point3f dir = Point3f(0,-1,0);
-    Point3f n=face->N();
+    Point3f n=face->cN();
     //n.Normalize();
     float a = dir.dot(n);
     Point3f vel;
@@ -309,9 +301,9 @@ CMeshO::CoordType GetVelocityComponents(float v,float l,CMeshO::FacePointer face
     Point3f nx=Point3f(n[0],0,0);
     Point3f ny=Point3f(0,n[1],0);
     Point3f nz=Point3f(0,0,n[2]);
-    float alpha=90-(acos(axis_x.dot(nx))*(180/PI));
-    float beta =90-(acos(axis_y.dot(ny))*(180/PI));
-    float gamma=90-(acos(axis_z.dot(nz))*(180/PI));
+    //float alpha=90-(acos(axis_x.dot(nx))*(180/PI));
+    //float beta =90-(acos(axis_y.dot(ny))*(180/PI));
+    //float gamma=90-(acos(axis_z.dot(nz))*(180/PI));
 
     //vel[0]=v*cos(alpha*PI/180)*l;
     //vel[1]=v*cos(beta*PI/180)*l;
@@ -351,7 +343,11 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,float v,float m,CMeshO::FacePo
 
 
     Point3f f;
-    Point3f vel=GetVelocityComponents(v,l,face);
+    //Point3f vel=GetVelocityComponents(v,l,face);
+    Point3f vel;
+    vel[0]=0.0f;
+    vel[1]=0.0f;
+    vel[2]=0.0f;
 
     //Compute force component along the face
     f[0]=dir[0]-a*n[0];
@@ -365,8 +361,25 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,float v,float m,CMeshO::FacePo
     return new_pos;
 };
 
-void DrawDirt(MeshModel *m/*,std::vector<Point3f> &dp*/){
-        float base_color=255;
+void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
+    if(base_mesh->cm.textures.size()>0){
+        base_mesh->updateDataMask(MeshModel::MM_VERTTEXCOORD);
+
+        CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (cloud_mesh->cm,std::string("ParticleInfo"));
+
+        CMeshO::VertexIterator vi;
+        for(vi=cloud_mesh->cm.vert.begin();vi!=cloud_mesh->cm.vert.end();++vi){
+            CMeshO::FacePointer f=ph[vi].face;
+            TexCoord2f p0=f->V(0)->T();
+            TexCoord2f p1=f->V(1)->T();
+            TexCoord2f p2=f->V(2)->T();
+
+
+        }
+    }
+
+
+    /* float base_color=255;
         float s_color;
         std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m->cm);
         CMeshO::FaceIterator fi;
@@ -375,6 +388,7 @@ void DrawDirt(MeshModel *m/*,std::vector<Point3f> &dp*/){
             s_color=base_color*(1-(((*fi).Q()-minmax.first)/(minmax.second-minmax.first)));
             (*fi).C()=Color4b(s_color, s_color, s_color, 0);
         }
+    */
 };
 
 
@@ -387,171 +401,126 @@ void DrawDirt(MeshModel *m/*,std::vector<Point3f> &dp*/){
 @param CoordType int_point - intersection point this is a return parameter for the function.
 @param FacePointer face - pointer to the new face
 
-@return true if there is an intersection, false elsewhere
+@return the intersection edge index if there is an intersection -1 elsewhere
 
 */
-bool ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::FacePointer &new_f,CMeshO::CoordType &int_point)
+int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::FacePointer &new_f,CMeshO::CoordType &int_point)
 {
 
-    CMeshO::CoordType n=f->N().Normalize();
-    //n.Normalize();
-    int max_c;
 
+
+
+    CMeshO::CoordType fv0 =f->V(0)->P();
+    CMeshO::CoordType fv1 =f->V(1)->P();
+    CMeshO::CoordType fv2 =f->V(2)->P();
+
+    int edge=-1;
+    float dist[3];
+    int axis=-1;
+    Point3f tmp;
+    Segment2f seg;
+    Line2f line;
+
+    dist[0]=PSDist(p2,fv0,fv1,tmp);
+    dist[1]=PSDist(p2,fv1,fv2,tmp);
+    dist[2]=PSDist(p2,fv2,fv0,tmp);
+
+    if(dist[0]<dist[1]){
+        if(dist[0]<dist[2]) edge=0;
+        else edge=2;
+    }else{
+        if(dist[1]<dist[2]) edge=1;
+        else edge=2;
+
+    }
+
+    new_f=f->FFp(edge);
+
+    Point3f n=f->cN();
     float n0=math::Abs(n[0]);
     float n1=math::Abs(n[1]);
     float n2=math::Abs(n[2]);
 
+
+
     if(n0>n1){
-          if(n0>n2) max_c=0;
-          else max_c=2;
+         if(n0>n2) axis=0;
+         else axis=2;
     }else{
-        if(n1>n2) max_c=1;
-        else max_c=2;
-              }
-    Point2f int_p;
+        if(n1>n2) axis=1;
+        else axis=2;
+        }
 
-    Line2f seg;
 
-    CMeshO::CoordType fv0 = f->P(0);//(f->V(0))->P();
-    CMeshO::CoordType fv1 = f->P(1);//(f->V(1))->P();
-    CMeshO::CoordType fv2 = f->P(2);//(f->V(2))->P();
-    Segment2f line0;
-    Segment2f line1;
-    Segment2f line2;
-    Point2f p1_2d;
-    Point2f p2_2d;
-    switch(max_c){
+
+    Point3f e1;
+    Point3f e2;
+
+    switch(edge){
     case 0:{
-            line0=Segment2f(Point2f(fv0[1],fv0[2]),Point2f(fv1[1],fv1[2]));
-            line1=Segment2f(Point2f(fv1[1],fv1[2]),Point2f(fv2[1],fv2[2]));
-            line2=Segment2f(Point2f(fv2[1],fv2[2]),Point2f(fv0[1],fv0[2]));
-            p1_2d=Point2f(p1[1],p1[2]);
-            p2_2d=Point2f(p2[1],p2[2]);
-            seg=Line2f(p1_2d,p2_2d);
-
-            break;
+        e1=fv0;
+        e2=fv1;
+        break;
         }
     case 1:{
-            line0=Segment2f(Point2f(fv0[0],fv0[2]),Point2f(fv1[0],fv1[2]));
-            line1=Segment2f(Point2f(fv1[0],fv1[2]),Point2f(fv2[0],fv2[2]));
-            line2=Segment2f(Point2f(fv2[0],fv2[2]),Point2f(fv0[0],fv0[2]));
-            p1_2d=Point2f(p1[0],p1[2]);
-            p2_2d=Point2f(p2[0],p2[2]);
-            seg=Line2f(p1_2d,p2_2d);
+            e1=fv1;
+            e2=fv2;
             break;
         }
     case 2:{
-            line0=Segment2f(Point2f(fv0[0],fv0[1]),Point2f(fv1[0],fv1[1]));
-            line1=Segment2f(Point2f(fv1[0],fv1[1]),Point2f(fv2[0],fv2[1]));
-            line2=Segment2f(Point2f(fv2[0],fv2[1]),Point2f(fv0[0],fv0[1]));
-            p1_2d=Point2f(p1[0],p1[1]);
-            p2_2d=Point2f(p2[0],p2[1]);
-            seg=Line2f(p1_2d,p2_2d);
+            e1=fv2;
+            e2=fv0;
             break;
         }
-    }
-
-
-    Point2f tmp_int;
-    bool int_found=false;
-    int edge=-1;
-    float dist=0;
-
-    if(LineSegmentIntersection(seg,line0,tmp_int)){
-        dist=Distance(p2_2d,tmp_int);
-        edge=0;
-        int_p=tmp_int;
-        int_found=true;
-    }
-
-
-    if(LineSegmentIntersection(seg,line1,tmp_int)){
-        if(int_found){
-            if(Distance(p2_2d,tmp_int)<dist){
-            dist=Distance(p2_2d,tmp_int);
-            edge=1;
-            int_p=tmp_int;
-            }
-
-        }else{
-            int_found=true;
-            dist=Distance(p2_2d,tmp_int);
-            edge=1;
-            int_p=tmp_int;
-         }
 
     }
 
+    switch(axis){
+    case 0:{
+        seg=Segment2f(Point2f(e1[1],e1[2]),Point2f(e2[1],e2[2]));
+        line=Line2f(Point2f(p1[1],p1[2]),Point2f(p2[1],p2[2]));
+        break;
+        }
+    case 1:{
+        seg=Segment2f(Point2f(e1[0],e1[2]),Point2f(e2[0],e2[2]));
+        line=Line2f(Point2f(p1[0],p1[2]),Point2f(p2[0],p2[2]));
 
-    if(LineSegmentIntersection(seg,line2,tmp_int)){
-        if(int_found){
-            if(Distance(p2_2d,tmp_int)<dist){
-            dist=Distance(p2_2d,tmp_int);
-            edge=2;
-            int_p=tmp_int;
-            }
+        break;
+        }
+    case 2:{
+        seg=Segment2f(Point2f(e1[0],e1[1]),Point2f(e2[0],e2[1]));
+        line=Line2f(Point2f(p1[0],p1[1]),Point2f(p2[0],p2[1]));
+        break;
+        }
 
-        }else{
-            int_found=true;
-            dist=Distance(p2_2d,tmp_int);
-            edge=2;
-            int_p=tmp_int;
-         }
 
     }
+    Point2f int_p;
+    LineSegmentIntersection(line,seg,int_p);
+    Point3f bc;
 
-
-
-    if(int_found){
-        new_f=f->FFp(edge);
-        switch(max_c){
-            case 0:{
-                int_point[0]=(n[0]*fv0[0]-n[1]*(int_p[0]-fv0[1])-n[2]*(int_p[1]-fv0[2]))/n[0];
-                int_point[1]=int_p[0];
-                int_point[2]=int_p[1];
-                break;
-                }
-            case 1:{
-                int_point[0]=int_p[0];
-                int_point[1]=(n[1]*fv0[1]-n[0]*(int_p[0]-fv0[0])-n[2]*(int_p[1]-fv0[2]))/n[1];
-                int_point[2]=int_p[1];
-                break;
-                }
-            case 2:{
-                int_point[0]=int_p[0];
-                int_point[1]=int_p[1];
-                int_point[2]=(n[2]*fv0[2]-n[0]*(int_p[0]-fv0[0])-n[1]*(int_p[1]-fv0[1]))/n[2];
-                break;
-              }
-          }
-
-        if(!IsOnFace(int_point,new_f)){
-            int_point=fixEdgePointCoordinates(int_point,new_f);
+    switch(axis){
+        case 0:{
+           InterpolationParameters2(Point2f(fv0[1],fv0[2]),Point2f(fv1[1],fv1[2]),Point2f(fv2[1],fv2[2]),int_p,bc);
+           break;
+               }
+        case 1:{
+            InterpolationParameters2(Point2f(fv0[0],fv0[2]),Point2f(fv1[0],fv1[2]),Point2f(fv2[0],fv2[2]),int_p,bc);
+            break;
+           }
+        case 2:{
+            InterpolationParameters2(Point2f(fv0[0],fv0[1]),Point2f(fv1[0],fv1[1]),Point2f(fv2[0],fv2[1]),int_p,bc);
+            break;
         }
 
     }
-    return int_found;
+
+   int_point= fromBarCoords(bc,f);
+
+   return edge;
+
+
 };
-
-/**
-@def Generate random barycentric coordinates
-@return a triple of barycentri coordinates
-*/
-CMeshO::CoordType RandomBaricentric(){
-    CMeshO::CoordType interp;
-    static math::MarsenneTwisterRNG rnd;
-    interp[1] = rnd.generate01();
-    interp[2] = rnd.generate01();
-        if(interp[1] + interp[2] > 1.0)
-        {
-                interp[1] = 1.0 - interp[1];
-                interp[2] = 1.0 - interp[2];
-                }
-
-        assert(interp[1] + interp[2] <= 1.0);
-        interp[0]=1.0-(interp[1] + interp[2]);
-        return interp;
-    };
 
 /**
 @def Compute the Normal Dust Amount Function per face of a Mesh m
@@ -563,6 +532,7 @@ CMeshO::CoordType RandomBaricentric(){
 
 @return nothing
 */
+
 void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s){
 
     CMeshO::FaceIterator fi;
@@ -584,79 +554,43 @@ void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s){
 
 @return nothing
 */
-void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
-    CMeshO::FaceIterator fi;
-    CMeshO::FaceIterator fi0;
 
-    CMeshO::CoordType b_c;
-    CMeshO::CoordType bp_i; //Barycentric coordinates
-    b_c[0]=0.3f;
-    b_c[1]=0.3f;
-    b_c[2]=1-(b_c[0]+b_c[1]);
-    CMeshO::CoordType p_c;
-    float dh=1.2;
+void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
+
     CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<float>(m->cm,std::string("exposure"));
 
+    float dh=1.2;
     float exp=0;
-    float distance=0;
-    float u=0;
-    float v=0;
-    float t=0;
-/*
+    float di=0;
+    float xi=0;
+    CMeshO::FacePointer face;
+    CMeshO::CoordType p_c;
+    MetroMeshFaceGrid f_grid;
+    f_grid.Set(m->cm.face.begin(),m->cm.face.end());
+    MarkerFace markerFunctor;
+    markerFunctor.SetMesh(&(m->cm));
+    RayTriangleIntersectionFunctor<false> RSectFunct;
+    CMeshO::FaceIterator fi;
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
-        eh[fi]=1;
-    }
-*/
-    for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
-        if(fi->Q()!=0){
-
-        //For every face  get the central point
-        p_c[0]=fi->P(0)[0]*b_c[0]+fi->P(1)[0]*b_c[1]+fi->P(2)[0]*b_c[2];
-        p_c[1]=fi->P(0)[1]*b_c[0]+fi->P(1)[1]*b_c[1]+fi->P(2)[1]*b_c[2];
-        p_c[2]=fi->P(0)[2]*b_c[0]+fi->P(1)[2]*b_c[1]+fi->P(2)[2]*b_c[2];
-
-        //Create a ray with p_c as origin and direction dir
+        //For every f_face  get the central point
+        p_c=Barycenter(*fi);
+        //Create a ray with p_c as origin and direction N
+        p_c=p_c+NormalizedNormal(*fi)*0.1;
         Ray3<float> ray=Ray3<float>(p_c,fi->N());
-
-        exp=0;
-        distance=0;
-
-
-
-        for(fi0=m->cm.face.begin();fi0!=m->cm.face.end();++fi0){
-            u=0;
-            v=0;
-            t=0;
-            if(fi!=fi0 && IntersectionRayTriangle(ray,fi0->P(0),fi0->P(1),fi0->P(2),t,u,v)){
-                if(distance==0 || t<distance ){
-                    distance=t;
-                    exp=dh/(dh+distance);
-                }
-            }
-
-          }
-        eh[fi]=1-(exp/n_ray);
-    }else{
+        xi=0;
+        di=0;
+        face=0;
         eh[fi]=0;
-     }
-    }
+        face=f_grid.DoRay<RayTriangleIntersectionFunctor<false>,MarkerFace>(RSectFunct,markerFunctor,ray,30,di);
+        if(di!=0){
+            fi->C()=Color4b::Blue;
+            xi=xi+(dh/(dh-di));
+        }
 
-};
-
-
-//To delete?
-void CreateDustTexture(MeshModel* m){
-    QString textName="dust_texture";
-    QString fileName(m->fullName());
-    fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'),fileName.lastIndexOf('/'))+1).append(textName);
-    QFile textFile(fileName);
-    QImage img(640, 640, QImage::Format_RGB32);
-    img.fill(qRgb(0,0,0)); // black
-    img.save(fileName,"jpg");
-    m->cm.textures.clear();
-    m->cm.textures.push_back(textName.toStdString());
-
-}
+        exp=1-xi;
+        eh[fi]=exp;
+        }
+    };
 
 /**
 @def This funcion
@@ -669,48 +603,47 @@ void CreateDustTexture(MeshModel* m){
 */
 bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std::vector< Particle<CMeshO> > &dpv,int d,float threshold){
 
-    //Exposure Handler
-   // CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m->cm,std::string("exposure"));
+    //Handler
+    CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m->cm,std::string("exposure"));
 
     CMeshO::FaceIterator fi;
     CMeshO::CoordType p;
     cpv.clear();
     dpv.clear();
+    float r=1;
+    float a0=0;
+    float a=0;
+    float a1=0;
 
 
-
-    /*float a1=1+1*eh[fi];
-    if(a1<0){
-    a=0;
-    }
-    if(a1>1){
-    a=1;
-    }
-    if(a1>=0 && a1<=1){
-       a=a1;
-    }
-*/
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
-        float a=1;
-        //if(eh[fi]<1) a=0;
-        //else a=1;
+        a1=a0+r*eh[fi];
+        if(a1<0)
+            a=0;
+        if(a1>1)
+            a=1;
+        if(a1>=0 && a1<=1)
+            a=a1;
+
+
+        if(eh[fi]==1) a=1;
+        else a=0;
+
         int n_dust=(int)d*fi->Q()*a;
 
-        if(fi->Q()>threshold){
             for(int i=0;i<n_dust;i++){
                p=RandomBaricentric();
                CMeshO::CoordType n_p;
-               n_p[0]=fi->P(0)[0]*p[0]+fi->P(1)[0]*p[1]+fi->P(2)[0]*p[2];
-               n_p[1]=fi->P(0)[1]*p[0]+fi->P(1)[1]*p[1]+fi->P(2)[1]*p[2];
-               n_p[2]=fi->P(0)[2]*p[0]+fi->P(1)[2]*p[1]+fi->P(2)[2]*p[2];
+               n_p=fi->P(0)*p[0]+fi->P(1)*p[1]+fi->P(2)*p[2];
                cpv.push_back(n_p);
                Particle<CMeshO> part;
                part.face=&(*fi);
                part.bar_coord=p;
                dpv.push_back(part);
                }
-            }
+
          fi->Q()=n_dust;
+
         }
 
 
@@ -722,20 +655,27 @@ return true;
 
 */
 void associateParticles(MeshModel* b_m,MeshModel* c_m,float m,float v){
+    MetroMeshFaceGrid   unifGridFace;
+
+    Point3f closestPt;
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (c_m->cm,std::string("ParticleInfo"));
-    CMeshO::FaceIterator fi;
+    unifGridFace.Set(b_m->cm.face.begin(),b_m->cm.face.end());
+    MarkerFace markerFunctor;
+    markerFunctor.SetMesh(&(b_m->cm));
+    float dist=1;
+    float dist_upper_bound=dist;
+
     CMeshO::VertexIterator vi;
-    for(fi=b_m->cm.face.begin();fi!=b_m->cm.face.end();++fi){
-        for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
-            if(IsOnFace( vi->P(),&*fi)){
-            Particle<CMeshO> part;
-            fi->C()=Color4b::Blue;
-            part.face=&*fi;
-            part.mass=m;
-            part.vel=v;
-            ph[vi]=part;
-            }
-        }
+
+    vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
+
+    for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
+        Particle<CMeshO> part;
+        part.face=unifGridFace.GetClosest(PDistFunct,markerFunctor,vi->P(),dist_upper_bound,dist,closestPt);
+        part.mass=m;
+        part.vel=v;
+        part.face->C()=Color4b::Blue;
+        ph[vi]=part;
     }
 };
 
@@ -774,56 +714,104 @@ void prepareMesh(MeshModel* m){
     tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
     tri::UpdateFlags<CMeshO>::FaceProjection(m->cm);
 
-}
+};
+
+
+
+void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,Point3f dir){
+
+    float time=t;
+    float velocity;
+    float mass;
+    Point3f new_pos;
+    Point3f current_pos;
+    Point3f int_pos;
+    CMeshO::FacePointer current_face=info.face;
+    CMeshO::FacePointer new_face;
+    new_face=current_face;
+    current_pos=p->P();
+    velocity=info.vel;
+    mass=info.mass;
+    new_pos=StepForward(p->P(),velocity,mass,current_face,dir,l,t);
+
+    while(!IsOnFace(new_pos,current_face)){
+        int edge=ComputeIntersection(current_pos,new_pos,current_face,new_face,int_pos);
+
+        time=time/2;
+        if(time>0.05){
+            current_face->C()=Color4b::Blue;
+            current_face=new_face;
+            current_face->C()=Color4b::Yellow;
+            new_pos=StepForward(int_pos,velocity,mass,current_face,dir,l,time);
+
+        }else{
+            new_pos=GetSafePosition(new_face,current_face->FFi(edge));
+            current_face=new_face;
+
+           }
+
+         }
+
+    p->P()=new_pos;
+    info.face=current_face;
+
+};
+
+
+
+
+/**
+@def This function compute the repulsion beetwen particles
+
+@param MeshModel* c_m - cloud of points
+@param int k          - max number of particle to repulse
+
+@return nothing
+*/
+void ComputeRepulsion(MeshModel *c_m,int k){
+    CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(c_m->cm,"ParticleInfo");
+    MetroMeshVertexGrid v_grid;
+    std::vector<Point3f> v_points;
+    std::vector<CMeshO::VertexPointer> vp;
+    std::vector<float> distances;
+
+    v_grid.Set(c_m->cm.vert.begin(),c_m->cm.vert.end());
+
+    Point3f bc ;
+
+    CMeshO::VertexIterator vi;
+
+    for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
+        vcg::tri::GetKClosestVertex(c_m->cm,v_grid,k,vi->P(),0.05f,vp,distances,v_points);
+        for(int i=0;i<v_points.size();i++){
+            Point3f dir = fromBarCoords(RandomBaricentric(),ph[vp[i]].face);
+            Ray3<float> ray=Ray3<float>(vi->P(),dir);
+            MoveParticle(ph[vp[i]],vp[i],0.01f,1,ray.Direction());
+            }
+        }
+    };
+
 
 /**
 @def This function simulate the movement of the cloud mesh, it requires that every point is associated with a Particle data structure
 
 @param MeshModel cloud  - Mesh of points
 @param Point3f   force  - Direction of the force
-@param float     l      - Lenght of the step
-@param float     time   - Time Step
+@param float     l      - Lenght of the  movementstep
+@param float     t   - Time Step
 
 @return nothing
 */
-void MoveCloudMeshForward(MeshModel *cloud,Point3f force,float l,float time){
+void MoveCloudMeshForward(MeshModel *cloud,Point3f force,float l,float t){
+
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(cloud->cm,"ParticleInfo");
     CMeshO::VertexIterator vi;
-    CMeshO::FacePointer current_face;
-    float velocity;
-    float mass;
-    CMeshO::CoordType new_pos;
-    CMeshO::CoordType current_pos;
-    CMeshO::CoordType int_pos;
-    for(vi=cloud->cm.vert.begin();vi!=cloud->cm.vert.end();++vi){
-        float t=time;
-        current_face=ph[vi].face;
-        CMeshO::FacePointer new_face;
-        new_face=current_face   ;
-        current_pos=vi->P();
-        velocity=ph[vi].vel;
-        mass=ph[vi].mass;
-        new_pos=StepForward(vi->P(),velocity,mass,current_face,force,l,t);
-        while(!IsOnFace(new_pos,current_face)){
 
-            ComputeIntersection(current_pos,new_pos,current_face,new_face,int_pos);
-            new_pos=int_pos;
-            current_face=new_face;
-            t=t/2;
-            if(t>0.5){
-            new_pos=StepForward(vi->P(),velocity,mass,current_face,force,l,t);
-            }else{
-                current_face->C()=Color4b::Green;
-                if(!IsOnFace(new_pos,current_face)){
-                    Point3f bc;
-                    InterpolationParameters(*current_face,new_pos,bc);
-                    break;
-                }
-            }
-        }
-        vi->P()=new_pos;
-        ph[vi].face=new_face;
-    }
+    for(vi=cloud->cm.vert.begin();vi!=cloud->cm.vert.end();++vi)
+        MoveParticle(ph[vi],&*vi,l,t,force);
+
+    for(int i=0;i<4;i++)
+       ComputeRepulsion(cloud,10);
 
 };
 
