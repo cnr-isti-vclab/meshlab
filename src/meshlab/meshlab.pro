@@ -2,6 +2,7 @@ VCGDIR = ../../../vcglib
 GLEWDIR = ../external/glew-1.5.1
 #CONFIG += debug_and_release
 DESTDIR = ../distrib
+
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN
 # CONFIG += warn_off
@@ -25,6 +26,7 @@ HEADERS = ../common/interfaces.h \
     changetexturename.h \
     layerDialog.h \
     stdpardialog.h \
+	xmlstdpardialog.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
     $$VCGDIR/wrap/gl/trimesh.h 
@@ -41,7 +43,8 @@ SOURCES = main.cpp \
     savemaskexporter.cpp \
     changetexturename.cpp \
     stdpardialog.cpp \
-    $$VCGDIR/wrap/gui/trackball.cpp \
+    xmlstdpardialog.cpp \
+	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
     glarea_setting.cpp
 
@@ -58,6 +61,7 @@ FORMS = ui/layerDialog.ui \
 	
 	win32-msvc2005: RCC_DIR = $(ConfigurationName)
 	win32-msvc2008: RCC_DIR = $(ConfigurationName)
+	win32-msvc2010: RCC_DIR = $(ConfigurationName)
 
 
 RESOURCES = meshlab.qrc
@@ -92,6 +96,8 @@ win32:DEFINES += NOMINMAX
 # old printf are all around the code
 win32-msvc2005:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_DEPRECATE
+win32-msvc2010:DEFINES += _CRT_SECURE_NO_DEPRECATE
+
 mac:QMAKE_CXX = g++-4.2
 
 # Uncomment these if you want to experiment with newer gcc compilers
@@ -114,6 +120,7 @@ macx:QMAKE_POST_LINK ="cp -P ../common/libcommon.1.dylib ../distrib/meshlab.app/
 
 win32-msvc2005:LIBS		+= -L../distrib -lcommon
 win32-msvc2008:LIBS		+= -L../distrib -lcommon
+win32-msvc2010:LIBS		+= -L../distrib -lcommon
 win32-g++:LIBS        	+= -L../distrib -lcommon
 
 #CONFIG(release,debug | release) {
