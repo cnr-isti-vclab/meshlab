@@ -51,7 +51,7 @@ public:
   void Log(int Level, const char * buf )
 	{
 		S.push_back(std::make_pair<int,QString>(Level,buf));
-        qDebug("LOG: %i %s",Level,buf);
+    qDebug("LOG: %i %s",Level,buf);
 	}
 
   void SetBookmark();

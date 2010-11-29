@@ -69,3 +69,11 @@ void GLLogStream::BackToBookmark()
   while(S.size() > bookmark )
     S.removeLast();
 }
+void GLLogStream::print(QStringList &out)
+{
+  out.clear();
+  QList<pair <int,QString> > ::iterator li;
+  for(li=S.begin();li!=S.end();++li)
+        out.push_back((*li).second);
+}
+
