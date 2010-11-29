@@ -117,7 +117,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,MeshDocu
 
 	QString fname = mfc->act->text();
 	//mfi->initParameterSet(action, *mdp, curParSet);
-	XMLFilterInfo::XMLMapList& mplist = mfc->xmlInfo->filterParametersExtendedInfo(fname);
+  XMLFilterInfo::XMLMapList mplist = mfc->xmlInfo->filterParametersExtendedInfo(fname);
 	curParMap = mplist;
 	//curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
 	if(curParMap.isEmpty() && !isDynamic()) 
