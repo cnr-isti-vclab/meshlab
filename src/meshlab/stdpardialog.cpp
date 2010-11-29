@@ -757,7 +757,7 @@ MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
 
 	for(int i=0;i<md->meshList.size();++i)
 	 {
-    QString shortName = md->meshList.at(i)->shortName();
+    QString shortName = md->meshList.at(i)->label();
 		meshNames.push_back(shortName);
 		if(md->meshList.at(i) == rp->pd->defVal->getMesh()) defaultMeshIndex = i;
 	 }
