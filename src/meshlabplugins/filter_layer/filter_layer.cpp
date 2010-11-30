@@ -43,6 +43,7 @@ FilterLayerPlugin::FilterLayerPlugin()
 	typeList <<
   FP_FLATTEN <<
 	FP_SPLITSELECT <<
+  FP_RENAME <<
 	FP_DUPLICATE;
 
   foreach(FilterIDType tt , types())
@@ -54,8 +55,9 @@ FilterLayerPlugin::FilterLayerPlugin()
 {
   switch(filterId) {
 		case FP_SPLITSELECT :  return QString("Move selection on another layer");
-		case FP_DUPLICATE :  return QString("Duplicate current layer");
-    case FP_FLATTEN :  return QString("Flatten visible layers");
+    case FP_DUPLICATE :  return QString("Duplicate Current layer");
+    case FP_FLATTEN :  return QString("Flatten Visible Layers");
+    case FP_RENAME :  return QString("Rename Current Layer");
     default : assert(0);
 	}
 }
@@ -67,13 +69,15 @@ FilterLayerPlugin::FilterLayerPlugin()
 		case FP_SPLITSELECT :  return QString("Selected faces are moved (or duplicated) in a new layer");
 		case FP_DUPLICATE :  return QString("Create a new layer containing the same model as the current one");
     case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformations are preserved. Existing layers can be optionally deleted");
+    case FP_RENAME :  return QString("Explicitly change the label shown for a given mesh");
     default : assert(0);
 	}
 }
 
 // This function define the needed parameters for each filter.
-void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst)
+void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
 {
+  MeshModel *mm=md.mm();
 	 switch(ID(action))
 	 {
 		case FP_SPLITSELECT :
@@ -86,28 +90,24 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, R
 			}
 			break;
    case FP_FLATTEN :
-     parlst.addParam(new RichBool ("MergeVisible",
-                     true,
-                     "Merge Only Visible Layers",
-                     "Merge the vertices that are duplicated among different layers. <br>"
-                     "Very useful when the layers are spliced portions of a single big mesh."));
-     parlst.addParam(new RichBool ("DeleteLayer",
-                     true,
-                     "Delete Layers ",
-                     "Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
-                 parlst.addParam(new RichBool ("MergeVertices",
-                     true,
-                     "Merge duplicate vertices",
-                     "Merge the vertices that are duplicated among different layers. \n\n"
-                     "Very useful when the layers are spliced portions of a single big mesh."));
-                 parlst.addParam(new RichBool ("AlsoUnreferenced",
-                                                                                       false,
-                                                                                       "Keep unreferenced vertices",
-                                                                                       "Do not discard unreferenced vertices from source layers\n\n"
-                                                                                       "Necessary for point-only layers"));
-                 break;
-
-
+       parlst.addParam(new RichBool ("MergeVisible", true, "Merge Only Visible Layers",
+                       "Merge the vertices that are duplicated among different layers. <br>"
+                       "Very useful when the layers are spliced portions of a single big mesh."));
+       parlst.addParam(new RichBool ("DeleteLayer", true, "Delete Layers ",
+                       "Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
+       parlst.addParam(new RichBool ("MergeVertices", true,  "Merge duplicate vertices",
+                       "Merge the vertices that are duplicated among different layers. \n\n"
+                       "Very useful when the layers are spliced portions of a single big mesh."));
+       parlst.addParam(new RichBool ("AlsoUnreferenced", false, "Keep unreferenced vertices",
+                       "Do not discard unreferenced vertices from source layers\n\n"
+                       "Necessary for point-only layers"));
+     break;
+   case FP_RENAME :
+       parlst.addParam(new RichString ("newName",
+                       mm->label(),
+                       "New Label",
+                       "New Label for the mesh"));
+       break;
    default: break; // do not add any parameter for the other filters
   }
 }
@@ -176,8 +176,9 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		{
 			// creating the new layer
 			// that is the back one
-            MeshModel *currentMesh  = md.mm();				// source = current
-            MeshModel *destMesh= md.addNewMesh("duplicated"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+      MeshModel *currentMesh  = md.mm();				// source = current
+      QString newName = currentMesh->label() + "_copy";
+      MeshModel *destMesh= md.addNewMesh(newName); // After Adding a mesh to a MeshDocument the new mesh is the current one
       tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm);
 
 			Log("Duplicated current model to layer %i", md.meshList.size());
@@ -235,28 +236,28 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 
     tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(destMesh->cm);
     tri::UpdateBounding<CMeshO>::Box(destMesh->cm);
-
-
-    // Log function dump textual info in the lower part of the MeshLab screen.
-    Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
-
+   Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
   } break;
+  case FP_RENAME:
+    md.mm()->setLabel(par.getString("newName"));
+    break;
 	}
 
 	return true;
 }
 
- FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
+FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {
+    case FP_RENAME :
     case FP_SPLITSELECT :
     case FP_DUPLICATE :
-  case FP_FLATTEN :
+    case FP_FLATTEN :
       return MeshFilterInterface::Layer;
-		default :  assert(0);
-			return MeshFilterInterface::Generic;
-  }
+    default :  assert(0);
+      return MeshFilterInterface::Generic;
+}
 }
 
 Q_EXPORT_PLUGIN(FilterLayerPlugin)
