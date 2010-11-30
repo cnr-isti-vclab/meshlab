@@ -16,12 +16,13 @@ class XMLMeshLabWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	XMLMeshLabWidget(QWidget* parent);
+	XMLMeshLabWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent);
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
 	virtual void collectWidgetValue() = 0;
 	virtual void setWidgetExpression(const QString& nwExpStr) = 0;
 	virtual void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
 	virtual ~XMLMeshLabWidget() {};
+	inline QLabel* helpLabel() {return helpLab;} 
 
 	// called when the user press the 'default' button to reset the parameter values to its default.
 	// It just set the parameter value and then it calls the specialized resetWidgetValue() to update also the widget.
@@ -31,6 +32,7 @@ public:
 
 signals:
 	void parameterChanged();
+	void widgetEvaluateExpression(const Expression& exp,Value** res);
 
 protected:
 	int row;
@@ -96,8 +98,8 @@ public:
 
 private:
 	QLabel* fieldDesc; 
-	float minVal;
-	float maxVal;
+	Value* minVal;
+	Value* maxVal;
 
 	QDoubleSpinBox *absSB;
 	QDoubleSpinBox *percSB;
@@ -123,15 +125,15 @@ public:
 	//void readValues(RichParameterSet &curParSet);
 	//void resetValues(RichParameterSet &curParSet);
 
-	//void toggleHelp();	
+	void toggleHelp();	
 
-	//QVector<MeshLabWidget *> stdfieldwidgets;
+	QVector<XMLMeshLabWidget*> xmlfieldwidgets;
 	QVector<QLabel *> helpList;
 
 	QWidget *curr_gla; // used for having a link to the glarea that spawned the parameter asking.
 	~XMLStdParFrame();
-//signals:
-
+signals:
+	void frameEvaluateExpression(const Expression& exp,Value** res);
 	/*void dynamicFloatChanged(int mask);
 	void parameterChanged();*/
 };
@@ -150,6 +152,9 @@ public:
 
 	bool showAutoDialog(MeshLabXMLFilterContainer* mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic() const;
+signals:
+	void dialogEvaluateExpression(const Expression& exp,Value** res);
+
 private slots:
 	void applyClick();
 	void closeClick();

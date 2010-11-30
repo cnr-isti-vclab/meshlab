@@ -78,6 +78,7 @@ public slots:
 	void endEdit();
 	void updateCustomSettings();
   void updateDocumentScriptBindings() {if(currentViewContainer()) PM.updateDocumentScriptBindings(*meshDoc());};
+  void evaluateExpression(const Expression& exp,Value** res);
 
 private slots:
 

@@ -17,7 +17,10 @@ MeshLabXMLStdDialog::~MeshLabXMLStdDialog()
 
 void MeshLabXMLStdDialog::clearValues()
 {
-
+	curAction = NULL;
+	curModel = NULL;
+	curmfc = NULL;
+	curmwi = NULL;
 }
 
 void MeshLabXMLStdDialog::createFrame()
@@ -46,7 +49,8 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
 
 	stdParFrame = new XMLStdParFrame(this,curgla);
-	XMLFilterInfo::XMLMapList mplist = curmfc->xmlInfo->filterParameters(fname);
+	connect(stdParFrame,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),this,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+	XMLFilterInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
 	stdParFrame->loadFrameContent(mplist);
 	gridLayout->addWidget(stdParFrame,1,0,1,2);
 
@@ -150,17 +154,34 @@ void MeshLabXMLStdDialog::closeClick()
 
 void MeshLabXMLStdDialog::resetValues()
 {
+	//curParSet.clear();
+	//curmfi->initParameterSet(curAction, *curMeshDoc, curParSet);
 
+	//assert(qf);
+	//assert(qf->isVisible());
+	//// assert(curParSet.paramList.count() == stdfieldwidgets.count());
+	//stdParFrame->resetValues(curParSet);
 }
 
 void MeshLabXMLStdDialog::toggleHelp()
 {
-
+	stdParFrame->toggleHelp();
+	qf->updateGeometry();	
+	qf->adjustSize();
+	this->updateGeometry();
+	this->adjustSize();
 }
 
 void MeshLabXMLStdDialog::togglePreview()
 {
+	if(previewCB->isChecked()) 
+	{
+		applyDynamic();
+	}
+	else
+		meshState.apply(curModel);
 
+	curgla->update();
 }
 
 void MeshLabXMLStdDialog::applyDynamic()
@@ -170,7 +191,13 @@ void MeshLabXMLStdDialog::applyDynamic()
 
 void MeshLabXMLStdDialog::changeCurrentMesh( int meshInd )
 {
-
+	if(isDynamic())
+	{
+		meshState.apply(curModel);
+		curModel=curMeshDoc->meshList.at(meshInd);
+		meshState.create(curmask, curModel);
+		applyDynamic();
+	}
 }
 
 //void MeshLabXMLStdDialog::closeEvent( QCloseEvent * event )
@@ -205,27 +232,57 @@ void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap)
 
 	QString descr;
 
-	//RichWidgetInterfaceConstructor rwc(this);
-	//for(int i = 0; i < curParSet.paramList.count(); i++)
-	//{
-	//	RichParameter* fpi=curParSet.paramList.at(i);
-	//	fpi->accept(rwc);
-	//	//vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
-	//	stdfieldwidgets.push_back(rwc.lastCreated);
-	//	helpList.push_back(rwc.lastCreated->helpLab);
-	//} // end for each parameter
-	//showNormal();
-	//adjustSize();
+	for(XMLFilterInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
+	{
+		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,this);
+		//connect(widg,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),this,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+		//bool conn = connect(widg,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),this,SLOT(frameEv(const Expression&,Value**)),Qt::DirectConnection);
+		xmlfieldwidgets.push_back(widg); 
+		helpList.push_back(widg->helpLabel());
+	}
+	showNormal();
+	adjustSize();
 }
 
-XMLMeshLabWidget::XMLMeshLabWidget( QWidget* parent )
+void XMLStdParFrame::toggleHelp()
+{
+	for(int i = 0; i < helpList.count(); i++)
+		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
+	updateGeometry();
+	adjustSize();
+}
+
+XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,QWidget* parent )
 :QWidget(parent)
 {
-	
+	helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",parent);
+	helpLab->setTextFormat(Qt::RichText);
+	helpLab->setWordWrap(true);
+	helpLab->setVisible(false);
+	helpLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+	helpLab->setMinimumWidth(250);
+	helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
+	gridLay = qobject_cast<QGridLayout*>(parent->layout());
+	assert(gridLay != 0);
+
+	row = gridLay->rowCount();
+	////WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
+	//if ((row == 1) && (rpar->val->isBool()))	
+	//{
+
+	//	QLabel* lb = new QLabel("",p);
+	//	gridLay->addWidget(lb);
+	//	gridLay->addWidget(helpLab,row+1,3,1,1,Qt::AlignTop);
+	//}
+	/////////////////////////////////////////////////////////////////////////
+	//else
+		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
+	updateGeometry();
+	adjustSize();
 }
 
 XMLBoolWidget::XMLBoolWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent )
-:XMLMeshLabWidget(parent)
+:XMLMeshLabWidget(xmlWidgetTag,parent)
 {
 }
 
@@ -265,10 +322,11 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 
 	if (guiType == MLXMLElNames::absPercTag)
 		return new XMLAbsWidget(widgetTable,parent);
+	return NULL;
 }
 
 XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent)
-:XMLMeshLabWidget(parent)
+:XMLMeshLabWidget(xmlWidgetTag,parent)
 {
 
 }
@@ -300,14 +358,71 @@ void XMLEditWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
 }
 
 XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* parent )
-:XMLMeshLabWidget(parent)
+:XMLMeshLabWidget(xmlWidgetTag,parent),minVal(NULL),maxVal(NULL)
 {
 
+	//WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//It's not nice at all doing the connection for an external object! The connect should be called in XMLStdParFrame::loadFrameContent but in this way 
+	//we must break the construction of the widget in two steps because otherwise in the constructor (called by XMLMeshLabWidgetFactory::create) the emit is invoked
+	//before the connection!
+	connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+	FloatExpression minExp(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
+	FloatExpression maxExp(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
+	emit widgetEvaluateExpression(minExp,&minVal);
+	emit widgetEvaluateExpression(maxExp,&maxVal);
+
+
+	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName] + " (abs and %)",parent);
+	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
+	absSB = new QDoubleSpinBox(parent);
+	percSB = new QDoubleSpinBox(parent);
+
+	//called with m_* only to maintain backward compatibility
+	float m_min = minVal->getFloat();
+	float m_max = maxVal->getFloat();
+
+	absSB->setMinimum(m_min-(m_max-m_min));
+	absSB->setMaximum(m_max*2);
+	absSB->setAlignment(Qt::AlignRight);
+
+	int decimals= 7-ceil(log10(fabs(m_max-m_min)) ) ;
+	//qDebug("range is (%f %f) %f ",m_max,m_min,fabs(m_max-m_min));
+	//qDebug("log range is %f ",log10(fabs(m_max-m_min)));
+	absSB->setDecimals(decimals);
+	absSB->setSingleStep((m_max-m_min)/100.0);
+	//float initVal = rp->val->getAbsPerc();
+	float initVal = 0.0f;
+	absSB->setValue(initVal);
+
+	percSB->setMinimum(-200);
+	percSB->setMaximum(200);
+	percSB->setAlignment(Qt::AlignRight);
+	percSB->setSingleStep(0.5);
+	percSB->setValue((100*(initVal - m_min))/(m_max - m_min));
+	percSB->setDecimals(3);
+	QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
+	QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
+
+	gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
+
+	QGridLayout* lay = new QGridLayout(parent);
+	lay->addWidget(absLab,0,0,Qt::AlignHCenter);
+	lay->addWidget(percLab,0,1,Qt::AlignHCenter);
+
+	lay->addWidget(absSB,1,0,Qt::AlignTop);
+	lay->addWidget(percSB,1,1,Qt::AlignTop);
+
+	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+
+        //connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+        //connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
+        //connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
 }
 
 XMLAbsWidget::~XMLAbsWidget()
 {
-
+	delete minVal;
+	delete maxVal;
 }
 
 void XMLAbsWidget::resetWidgetValue()

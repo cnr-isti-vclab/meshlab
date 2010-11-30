@@ -89,6 +89,7 @@ void MainWindow::createXMLStdPluginWnd()
 		delete xmldialog;
 	}
 	xmldialog = new MeshLabXMLStdDialog(this);
+	connect(xmldialog,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),this,SLOT(evaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 	xmldialog->setAllowedAreas (    Qt::RightDockWidgetArea);
 	addDockWidget(Qt::RightDockWidgetArea,xmldialog);
 	//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
@@ -1694,4 +1695,11 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	MainWindow::globalStatusBar()->update();
 	qApp->processEvents();
 	return true;
+}
+
+void MainWindow::evaluateExpression(const Expression& exp,Value** res )
+{
+	PM.env.pushContext();
+	*res = exp.eval(&PM.env);
+	PM.env.popContext();
 }
