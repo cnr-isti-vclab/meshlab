@@ -2,8 +2,10 @@
 #include <QtGlobal>
 #include <QFileInfo>
 #include <QtXml>
+
 #include "meshmodel.h"
 #include "meshlabdocumentxml.h"
+#include <wrap/qt/shot_qt.h>
 
 bool MeshDocumentToXMLFile(MeshDocument &md, QString filename)
 {
@@ -38,8 +40,17 @@ QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc)
 {
   QDomElement meshElem = doc.createElement("MLMesh");
   meshElem.setAttribute("name",mp->label());
+  meshElem.setAttribute("filename",mp->relativePathName());
   meshElem.appendChild(Matrix44fToXML(mp->cm.Tr,doc));
   return meshElem;
+}
+
+QDomElement RasterModelToXML(RasterModel *mp, QDomDocument &doc)
+{
+  QDomElement rasterElem = doc.createElement("MLRaster");
+  rasterElem.setAttribute("name",mp->label());
+  rasterElem.appendChild(WriteShotToQDomNode(mp->shot,doc));
+  return rasterElem;
 }
 
 QDomDocument MeshDocumentToXML(MeshDocument &md)
@@ -53,6 +64,16 @@ QDomDocument MeshDocumentToXML(MeshDocument &md)
     mgroot.appendChild(meshElem);
   }
   ddoc.appendChild(mgroot);
+
+  QDomElement rgroot = ddoc.createElement("RasterGroup");
+
+  foreach(RasterModel *rmp, md.rasterList)
+  {
+    QDomElement rasterElem = RasterModelToXML(rmp, ddoc);
+    rgroot.appendChild(rasterElem);
+  }
+
+  ddoc.appendChild(rgroot);
 
 //    tag.setAttribute(QString("name"),(*ii).first);
 //    RichParameterSet &par=(*ii).second;
