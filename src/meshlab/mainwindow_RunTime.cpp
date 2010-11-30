@@ -1180,6 +1180,7 @@ bool ret;
 
 bool MainWindow::openProject(QString fileName)
 {
+	//newDocument()->resetTrackBall();
     if (fileName.isEmpty())
 	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "*.aln");
 	if (fileName.isEmpty()) return false;

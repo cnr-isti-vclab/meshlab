@@ -224,19 +224,17 @@ XMLStdParFrame::~XMLStdParFrame()
 
 void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap)
 {
-	if(layout()) delete layout();
+	delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
 	vLayout->setAlignment(Qt::AlignTop);
-
 	setLayout(vLayout);
 
 	QString descr;
-
 	for(XMLFilterInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
 	{
 		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,this);
-		//connect(widg,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),this,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
-		//bool conn = connect(widg,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),this,SLOT(frameEv(const Expression&,Value**)),Qt::DirectConnection);
+		if (widg == NULL)
+			return;
 		xmlfieldwidgets.push_back(widg); 
 		helpList.push_back(widg->helpLabel());
 	}
@@ -255,7 +253,13 @@ void XMLStdParFrame::toggleHelp()
 XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,QWidget* parent )
 :QWidget(parent)
 {
-	helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",parent);
+	//WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//It's not nice at all doing the connection for an external object! The connect should be called in XMLStdParFrame::loadFrameContent but in this way 
+	//we must break the construction of the widget in two steps because otherwise in the constructor (called by XMLMeshLabWidgetFactory::create) the emit is invoked
+	//before the connection!
+	connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+
+	helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",this);
 	helpLab->setTextFormat(Qt::RichText);
 	helpLab->setWordWrap(true);
 	helpLab->setVisible(false);
@@ -267,46 +271,66 @@ XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,QWidget* pare
 
 	row = gridLay->rowCount();
 	////WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-	//if ((row == 1) && (rpar->val->isBool()))	
-	//{
+	if ((row == 1) && (mp[MLXMLElNames::paramType] == MLXMLElNames::boolType))	
+	{
 
-	//	QLabel* lb = new QLabel("",p);
-	//	gridLay->addWidget(lb);
-	//	gridLay->addWidget(helpLab,row+1,3,1,1,Qt::AlignTop);
-	//}
+		QLabel* lb = new QLabel("",this);
+		gridLay->addWidget(lb);
+		gridLay->addWidget(helpLab,row+1,3,1,1,Qt::AlignTop);
+	}
 	/////////////////////////////////////////////////////////////////////////
-	//else
+	else
 		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
 	updateGeometry();
 	adjustSize();
 }
 
-XMLBoolWidget::XMLBoolWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent )
+XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,parent)
 {
+	cb = new QCheckBox(xmlWidgetTag[MLXMLElNames::paramName],this);
+	cb->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
+	BoolExpression exp(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+	Value* boolVal = NULL;
+	emit widgetEvaluateExpression(exp,&boolVal);
+	cb->setChecked(boolVal->getBool());
+	delete boolVal;
+
+
+	//gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
+
+	//int row = gridLay->rowCount() -1 ;
+	//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
+	if (row == 1)
+		gridLay->addWidget(cb,row + 1,0,1,2,Qt::AlignTop);
+	/////////////////////////////////////////////////////////////////////////
+	else
+		gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
+
+	connect(cb,SIGNAL(stateChanged(int)),parent,SIGNAL(parameterChanged()));
 }
 
-XMLBoolWidget::~XMLBoolWidget()
+XMLCheckBoxWidget::~XMLCheckBoxWidget()
 {
 
 }
 
-void XMLBoolWidget::resetWidgetValue()
+void XMLCheckBoxWidget::resetWidgetValue()
 {
 
 }
 
-void XMLBoolWidget::collectWidgetValue()
+void XMLCheckBoxWidget::collectWidgetValue()
 {
 
 }
 
-void XMLBoolWidget::setWidgetExpression( const QString& nv )
+void XMLCheckBoxWidget::setWidgetExpression( const QString& nv )
 {
 
 }
 
-void XMLBoolWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+void XMLCheckBoxWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
 {
 
 }
@@ -318,7 +342,7 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 		return new XMLEditWidget(widgetTable,parent);
 
 	if (guiType == MLXMLElNames::checkBoxTag)
-		return new XMLBoolWidget(widgetTable,parent);
+		return new XMLCheckBoxWidget(widgetTable,parent);
 
 	if (guiType == MLXMLElNames::absPercTag)
 		return new XMLAbsWidget(widgetTable,parent);
@@ -360,22 +384,16 @@ void XMLEditWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
 XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,parent),minVal(NULL),maxVal(NULL)
 {
-
-	//WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//It's not nice at all doing the connection for an external object! The connect should be called in XMLStdParFrame::loadFrameContent but in this way 
-	//we must break the construction of the widget in two steps because otherwise in the constructor (called by XMLMeshLabWidgetFactory::create) the emit is invoked
-	//before the connection!
-	connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 	FloatExpression minExp(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
 	FloatExpression maxExp(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
 	emit widgetEvaluateExpression(minExp,&minVal);
 	emit widgetEvaluateExpression(maxExp,&maxVal);
 
 
-	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName] + " (abs and %)",parent);
+	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName] + " (abs and %)",this);
 	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
-	absSB = new QDoubleSpinBox(parent);
-	percSB = new QDoubleSpinBox(parent);
+	absSB = new QDoubleSpinBox(this);
+	percSB = new QDoubleSpinBox(this);
 
 	//called with m_* only to maintain backward compatibility
 	float m_min = minVal->getFloat();
@@ -405,15 +423,13 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* p
 
 	gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
 
-	QGridLayout* lay = new QGridLayout(parent);
+	QGridLayout* lay = new QGridLayout();
 	lay->addWidget(absLab,0,0,Qt::AlignHCenter);
 	lay->addWidget(percLab,0,1,Qt::AlignHCenter);
-
 	lay->addWidget(absSB,1,0,Qt::AlignTop);
 	lay->addWidget(percSB,1,1,Qt::AlignTop);
-
 	gridLay->addLayout(lay,row,1,Qt::AlignTop);
-
+	
         //connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
         //connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
         //connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));

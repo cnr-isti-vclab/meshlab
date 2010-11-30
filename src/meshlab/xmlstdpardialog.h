@@ -49,12 +49,12 @@ public:
 };
 
 //
-class XMLBoolWidget : public XMLMeshLabWidget
+class XMLCheckBoxWidget : public XMLMeshLabWidget
 {
 	Q_OBJECT
 public:
-	XMLBoolWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent);
-	~XMLBoolWidget();
+	XMLCheckBoxWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent);
+	~XMLCheckBoxWidget();
 	void resetWidgetValue();
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
 	void collectWidgetValue();
@@ -62,7 +62,7 @@ public:
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 
 private:
-	QCheckBox* box; 
+	QCheckBox* cb; 
 };
 //
 //
