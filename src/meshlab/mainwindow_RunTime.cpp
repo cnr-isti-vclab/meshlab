@@ -77,7 +77,8 @@ void MainWindow::createStdPluginWnd()
 	//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
 	stddialog->setFloating(true);
 	stddialog->hide();
-	connect(GLA(),SIGNAL(glareaClosed()),stddialog,SLOT(close()));
+  connect(GLA(),SIGNAL(glareaClosed()),this,SLOT(updateStdDialog()));
+  connect(GLA(),SIGNAL(glareaClosed()),stddialog,SLOT(close()));
 }
 
 void MainWindow::createXMLStdPluginWnd()
@@ -1333,12 +1334,14 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				}
 
 				int mask = 0;
-				MeshModel *mm= new MeshModel(gla->meshDoc);
+        //MeshModel *mm= new MeshModel(gla->meshDoc);
+        MeshModel *mm=gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
+
         QTime t;t.start();
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,prePar,QCallBack,this /*gla*/))
 				{
 					QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text
-					delete mm;
+          gla->meshDoc->delMesh(mm);
 				}
         else{
           if(gla) gla->log->Logf(0,"Opened mesh %s in %i msec",qPrintable(fileName),t.elapsed());
@@ -1355,7 +1358,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 					}
           gla->meshDoc->setBusy(true);
-					gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
+          //gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
 					gla->setFileName(mm->shortName());
