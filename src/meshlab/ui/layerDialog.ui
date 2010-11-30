@@ -7,16 +7,22 @@
     <x>0</x>
     <y>0</y>
     <width>263</width>
-    <height>543</height>
+    <height>781</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Layer Dialog</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTreeWidget" name="meshTreeWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
       <column>
        <property name="text">
         <string notr="true">1</string>
@@ -26,6 +32,12 @@
     </item>
     <item>
      <widget class="QTreeWidget" name="rasterTreeWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
       <column>
        <property name="text">
         <string notr="true">1</string>
@@ -77,9 +89,6 @@
     <item>
      <layout class="QVBoxLayout" name="subLayout">
       <item>
-       <widget class="QPlainTextEdit" name="logPlainTextEdit"/>
-      </item>
-      <item>
        <widget class="QTreeWidget" name="decParsTree">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
@@ -87,9 +96,6 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <attribute name="headerVisible">
-         <bool>false</bool>
-        </attribute>
         <attribute name="headerVisible">
          <bool>false</bool>
         </attribute>
@@ -101,6 +107,16 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="logPlainTextEdit">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
