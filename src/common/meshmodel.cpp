@@ -140,15 +140,12 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
   return newName;
 }
 
-MeshModel * MeshDocument::addNewMesh(QString meshLabel, MeshModel *newMesh, bool setAsCurrent)
+MeshModel * MeshDocument::addNewMesh(QString meshLabel, bool setAsCurrent)
 {
   QString newName = NameDisambiguator(this->meshList,meshLabel);
-	if(newMesh==0)
-    newMesh=new MeshModel(this,qPrintable(newName));
-	else
-        newMesh->setFileName(newName);
 
-	meshList.push_back(newMesh);
+  MeshModel *newMesh = new MeshModel(this,qPrintable(newName));
+  meshList.push_back(newMesh);
 
   emit meshSetChanged();
 
@@ -227,7 +224,8 @@ void MeshDocument::removeTag(int id){
 	}
 }
 
-MeshModel::MeshModel(MeshDocument *parent, QString meshName) {
+MeshModel::MeshModel(MeshDocument *_parent, QString meshName) {
+  parent=_parent;
 	glw.m=&cm;
 	_id=parent->newMeshId();
 	// These data are always active on the mesh
@@ -313,6 +311,22 @@ bool MeshModel::RenderSelectedVert()
   glPopMatrix();
   glPopAttrib();
   return true;
+}
+
+QString MeshModel::relativePathName() const
+{
+  QDir DocumentDir (documentPath());
+
+  QString relPath=DocumentDir.relativeFilePath(this->fullName() );
+
+  if(relPath.size()>1 && relPath[0]=='.' &&  relPath[1]=='.')
+      qDebug("Error %s ",qPrintable(relPath));
+  return relPath;
+}
+
+QString MeshModel::documentPath() const
+{
+  return parent->pathName();
 }
 
 int MeshModel::io2mm(int single_iobit)

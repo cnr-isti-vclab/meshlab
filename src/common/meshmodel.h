@@ -199,6 +199,7 @@ public:
 
 
   CMeshO cm;
+  MeshDocument *parent;
 
 
 public:
@@ -237,24 +238,28 @@ public:
   // in a future the path should be moved outside the meshmodel into the meshdocument (and assume that all the meshes resides in a common subtree)
   // currently we just fix the interface and make the pathname private for avoiding future hassles.
 
-  const QString label() const { if(_label.isEmpty()) return shortName(); else return _label;}
+  QString label() const { if(_label.isEmpty()) return shortName(); else return _label;}
 
   /// The whole full path name of the mesh
-  const QString fullName() const {return fullPathFileName;}
+  QString fullName() const {return fullPathFileName;}
 
   /// just the name of the file
-  const QString shortName() const { return QFileInfo(fullPathFileName).fileName(); }
+  QString shortName() const { return QFileInfo(fullPathFileName).fileName(); }
 
-  /// just the name of the full path
-  const QString pathName() const {QFileInfo fi(fullName()); return fi.absolutePath();}
+  /// the full path without the name of the file (e.g. the dir where the mesh and often its textures are)
+  QString pathName() const {QFileInfo fi(fullName()); return fi.absolutePath();}
 
-  /// just the name of the extension.
-  const QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();}
+  /// just the extension.
+  QString suffixName() const {QFileInfo fi(fullName()); return fi.suffix();}
 
   /// the relative path with respect to the current project
-  const QString relativeName() const {QFileInfo fi(fullName()); assert(0); return fi.suffix();}
+  QString relativePathName() const;
+
+  /// the relative path with respect to the current project
+  QString documentPath() const;
 
   void setFileName(QString newFileName) {fullPathFileName = newFileName;}
+  void setLabel(QString newName) {_label=newName;}
 
 public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
@@ -410,27 +415,50 @@ public:
 	{
     tagIdCounter=0;
     meshIdCounter=0;
-	rasterIdCounter=0;
-	currentMesh = NULL;
-	currentRaster = 0;
+    rasterIdCounter=0;
+    currentMesh = NULL;
+    currentRaster = 0;
     busy=true;
 	}
 
 	//deletes each meshModel
   ~MeshDocument();
 
-	//returns the mesh ata given position in the list
-  MeshModel *getMesh(int i);
+  /// returns the mesh with a given unique id
+  MeshModel *getMesh(int id);
   MeshModel *getMesh(QString name);
 
 
 
 
-	//set the current mesh to be the one at index i of the mesh list
-  void setCurrentMesh( int i);
+  //set the current mesh to be the one with the given ID
+  void setCurrentMesh( int new_curr_id );
 
-	//set the current raster to be the one at index i of the raster list
-  void setCurrentRaster( int i);
+  //set the current raster to be the one with the given ID
+  void setCurrentRaster( int new_curr_id );
+  void setCurrent(MeshModel *newCur){ setCurrentMesh(newCur->id());}
+  void setCurrent(RasterModel *newCur){ setCurrentRaster(newCur->id());}
+
+  /// methods to access the set of Meshes in a ordered fashion.
+  void advanceCurrentMesh(int pos) {advanceCurrentElement(meshList,currentMesh,pos);}
+  void advanceCurrentRaster(int pos) {advanceCurrentElement(rasterList,currentRaster,pos);}
+
+  template <class LayerElement>
+  void advanceCurrentElement(QList<LayerElement *>& elemList, LayerElement* curr, int pos)
+  {
+    typename QList<LayerElement *>::iterator mi;
+    for(mi=elemList.begin(); mi!=elemList.end();++mi)
+      if(*mi == curr) break;
+
+    assert(mi!=elemList.end());
+    while(pos>0)
+    {
+      pos--;
+      mi++;
+      if(mi==elemList.end()) mi=elemList.begin();
+      }
+    setCurrent((*mi));
+  }
 
 	MeshModel *mm() {
 		return currentMesh;
@@ -444,29 +472,29 @@ public:
 	/// The very important member:
 	/// The list of MeshModels.
 	QList<MeshModel *> meshList;
-
-  int tagIdCounter;
-  int meshIdCounter;
-  int rasterIdCounter;
-
-	///The list of the taggings of all the meshes/rasters of the project
-	QList<TagBase *> tagList;
-
-	//The list of the raster models of the project
-	QList<RasterModel *> rasterList;
+  //The list of the raster models of the project
+  QList<RasterModel *> rasterList;
+  ///The list of the taggings of all the meshes/rasters of the project
+  QList<TagBase *> tagList;
 
   int newTagId() {return tagIdCounter++;}
   int newMeshId() {return meshIdCounter++;}
   int newRasterId() {return rasterIdCounter++;}
 
-  GLLogStream Log;
-  FilterScript filterHistory;
-
+private:
+  int tagIdCounter;
+  int meshIdCounter;
+  int rasterIdCounter;
   /**
   All the files referred in a document are relative to the folder containing the project file.
+  this is the full path to the document.
   */
   QString fullPathFilename;
-  //
+
+public:
+ QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
+  GLLogStream Log;
+  FilterScript filterHistory;
 
 	int size() const {return meshList.size();}
   bool isBusy() { return busy;}    // used in processing. To disable access to the mesh by the rendering thread
@@ -478,12 +506,13 @@ public:
 
   private:
     bool  busy;
+
   public:
   ///Returns for mesh whose id is 'meshId' the list of the associated  tags
   QList<TagBase *> getMeshTags(int meshId);
 	
 	///add a new mesh with the given name
-  MeshModel *addNewMesh(QString meshLabel, MeshModel *newMesh=0, bool setAsCurrent=true);
+  MeshModel *addNewMesh(QString meshLabel, bool setAsCurrent=true);
 
   ///remove the mesh from the list and delete it from memory
   bool delMesh(MeshModel *mmToDel);
