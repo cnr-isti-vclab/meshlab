@@ -339,7 +339,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				// every parser variables is related to vertex coord and attributes.
 				CMeshO::VertexIterator vi;
-				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)if(!(*vi).IsD())
 				{
 					setAttributes(vi,m.cm);
 
@@ -390,7 +390,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				// every parser variables is related to face attributes.
 				CMeshO::FaceIterator fi;
-				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)if(!(*fi).IsD())
 				{
 					setAttributes(fi,m.cm);
 
@@ -446,7 +446,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				// every parser variables is related to vertex coord and attributes.
 				CMeshO::VertexIterator vi;
-				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)if(!(*vi).IsD())
 				{
 					setAttributes(vi,m.cm);
 
@@ -507,7 +507,8 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				// every parser variables is related to vertex coord and attributes.
 				time_t start = clock();
 				CMeshO::VertexIterator vi;
-				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+        for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+        if(!(*vi).IsD())
 				{
 					setAttributes(vi,m.cm);
 
@@ -560,7 +561,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				time_t start = clock();
 
 				// every parser variables is related to face attributes.
-				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)if(!(*fi).IsD())
 				{
 					setAttributes(fi,m.cm);
 
@@ -612,7 +613,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				// every parser variables is related to face attributes.
 				CMeshO::FaceIterator fi;
-				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)if(!(*fi).IsD())
 				{
 					setAttributes(fi,m.cm);
 
@@ -668,7 +669,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				// perform calculation of attribute's value with function specified by user
 				CMeshO::VertexIterator vi;
-				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)if(!(*vi).IsD())
 				{
 					setAttributes(vi,m.cm);
 
@@ -722,7 +723,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				// every parser variables is related to face attributes.
 				CMeshO::FaceIterator fi;
-				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)if(!(*fi).IsD())
 				{
 					setAttributes(fi,m.cm);
 
