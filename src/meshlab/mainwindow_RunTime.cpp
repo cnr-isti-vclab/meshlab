@@ -1335,7 +1335,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 				int mask = 0;
         //MeshModel *mm= new MeshModel(gla->meshDoc);
-        MeshModel *mm=gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
+        MeshModel *mm=gla->meshDoc->addNewMesh(qPrintable(fileName));
 
         QTime t;t.start();
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,prePar,QCallBack,this /*gla*/))
