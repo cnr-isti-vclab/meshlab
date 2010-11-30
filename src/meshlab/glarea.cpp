@@ -473,7 +473,7 @@ void GLArea::displayInfo(QPainter *painter)
   }
   else
   {
-    col1Text += QString("<%1>\n").arg(mm()->shortName());
+    col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
     col1Text += QString("Vertices: %1 (%2)\n").arg(mm()->cm.vn).arg(meshDoc->vn());
     col1Text += QString("Faces: %1 (%2)\n").arg(mm()->cm.fn).arg(meshDoc->fn());
   }
