@@ -195,15 +195,19 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
     case DP_SHOW_VERT_QUALITY_HISTOGRAM :
       {
         CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"VertQualityHist");
-        CHist &ch=qH();
-        this->DrawColorHistogram(ch,gla, painter,rm,qf);
+        if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, qH)) {
+          CHist &ch=qH();
+          this->DrawColorHistogram(ch,gla, painter,rm,qf);
+        }
       }
       break;
     case DP_SHOW_FACE_QUALITY_HISTOGRAM :
       {
         CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"FaceQualityHist");
-        CHist &ch=qH();
-        this->DrawColorHistogram(ch,gla, painter,rm,qf);
+        if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, qH)) {
+			CHist &ch=qH();
+	        this->DrawColorHistogram(ch,gla, painter,rm,qf);
+	        }
       }
       break;
 
