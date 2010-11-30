@@ -645,9 +645,7 @@ case FP_INVERT_FACES:
 
 case FP_FREEZE_TRANSFORM:
   {
-    tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-    tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
-    tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+    tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
     tri::UpdateBounding<CMeshO>::Box(m.cm);
     m.cm.Tr.SetIdentity();
   } break;
