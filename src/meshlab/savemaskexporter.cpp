@@ -48,11 +48,12 @@ void SaveMaskExporterDialog::InitDialog()
 	ui->renametextureButton->setDisabled(true);
 
   stdParFrame = new StdParFrame(this,glar);
-    stdParFrame->loadFrameContent(*parSet);
+  stdParFrame->loadFrameContent(*parSet);
   QVBoxLayout *vbox = new QVBoxLayout(this);
 	vbox->addWidget(stdParFrame);
 	ui->saveParBox->setLayout(vbox);
 
+ this->setWindowTitle("Choose Saving Options for: '"+m->label()+"'");
 	// Show the additional parameters only for formats that have some.
     if(parSet->isEmpty()) ui->saveParBox->hide();
 								else ui->saveParBox->show();
@@ -259,11 +260,6 @@ void SaveMaskExporterDialog::SlotSelectionNoneButton()
 	
 	//camera
 	ui->check_iom_camera->setChecked(false);
-}
-
-void SaveMaskExporterDialog::SetTitleDialog( const QString& filename )
-{
-	this->setWindowTitle("Exporting Parameters Options for " + filename);
 }
 
 void SaveMaskExporterDialog::on_check_help_stateChanged(int)
