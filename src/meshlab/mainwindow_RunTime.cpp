@@ -1182,7 +1182,7 @@ bool MainWindow::openProject(QString fileName)
 {
 	//newDocument()->resetTrackBall();
     if (fileName.isEmpty())
-	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "*.aln");
+	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "*.aln,*.mlp");
 	if (fileName.isEmpty()) return false;
 	else
 	{
@@ -1191,18 +1191,22 @@ bool MainWindow::openProject(QString fileName)
 		path.truncate(path.lastIndexOf("/"));
 		lastUsedDirectory.setPath(path);
 	}
+	QFileInfo fi(fileName);
+	 if (QString(fi.suffix()).toLower() == "aln")
+	{
 
-	vector<RangeMap> rmv;
+		vector<RangeMap> rmv;
 
-    int retVal=ALNParser::ParseALN(rmv,qPrintable(fileName));
-    if(retVal != ALNParser::NoError)
-    {
-        QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
-        return false;
-    }
+		int retVal=ALNParser::ParseALN(rmv,qPrintable(fileName));
+		if(retVal != ALNParser::NoError)
+		{
+			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
+			return false;
+		}
+	 
 
 	// this change of dir is needed for subsequent textures/materials loading
-	QFileInfo fi(fileName);
+	//QFileInfo fi(fileName);
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
 
     bool openRes=true;
@@ -1214,6 +1218,39 @@ bool MainWindow::openProject(QString fileName)
 
         if(openRes) meshDoc()->mm()->cm.Tr=(*ir).trasformation;
 	}
+	}
+	 else if (QString(fi.suffix()).toLower() == "mlp")
+	{
+		newDocument();
+		if (!MeshDocumentFromXML(*meshDoc(),fileName))
+			return false;
+		MeshDocument* md=meshDoc();
+		QDir::setCurrent(fi.absoluteDir().absolutePath());
+		for (int i=0; i<md->meshList.size(); i++)
+		{
+			if (i==0)
+				open(md->meshList[i]->relativePathName());
+			else
+				open(md->meshList[i]->relativePathName(),GLA());
+			meshDoc()->mm()->setLabel(md->mm()->label());
+
+		}
+		for (int i=0; i<md->rasterList.size(); i++)
+		{
+			vcg::Shotf sh=md->rasterList[i]->shot;
+			if (i==0)
+				open(md->rasterList[i]->planeList[0]->fullName());
+			else
+				open(md->rasterList[i]->planeList[0]->fullName());
+			meshDoc()->rasterList[i]->shot=sh;
+			meshDoc()->rm()->setLabel(md->rm()->label());
+
+		}
+
+
+		
+	 }
+	 else return false;
     if(this->GLA() == 0) return false;
 	this->GLA()->resetTrackBall();
 	return true;
