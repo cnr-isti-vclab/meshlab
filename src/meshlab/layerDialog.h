@@ -98,6 +98,7 @@ public:
 	void updateDecoratorParsView();
 
 public slots:
+  void keyPressEvent ( QKeyEvent * event );
     void updateTable();
   void rasterItemClicked(QTreeWidgetItem * , int );
   void meshItemClicked(QTreeWidgetItem * , int );
@@ -118,7 +119,6 @@ private:
 
 	//It stores if the treeWidgetItems are expanded or not
 	QMap< QPair<int ,int> ,  bool> expandedMap;
-	QMap<GLArea*,QList<QAction*> > dec;
 
 	void addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *meshModel);
 	void addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag,  MeshDocument &md, MeshModel *mm);

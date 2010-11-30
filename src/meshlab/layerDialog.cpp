@@ -75,6 +75,12 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	//connect(mw,SIGNAL(unSelectedDecoration(GLArea*,QAction*)),this,SLOT(removeParamsFromDecorationDialog(GLArea*,QAction*)));
 }
 
+void LayerDialog::keyPressEvent ( QKeyEvent * event )
+{
+  if(event->key() == Qt::Key_Space )
+    mw->GLA()->meshDoc->advanceCurrentRaster(1);
+}
+
 void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 {
   MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
@@ -463,7 +469,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 
 	setText(2, QString::number(meshModel->id()));
 
-	QString meshName = meshModel->shortName(); 
+  QString meshName = meshModel->label();
 	setText(3, meshName);	
 
 	m=meshModel;
