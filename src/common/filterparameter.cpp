@@ -268,10 +268,10 @@ void RichParameterCopyConstructor::visit( RichMesh& pd )
 void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name,const QString& desc,const QString& tooltip)
 {
 	parElem = docdom.createElement("Param");
+  parElem.setAttribute("name",name);
 	parElem.setAttribute("type",type);
-	parElem.setAttribute("name",name);
-	parElem.setAttribute("description",desc);
-	parElem.setAttribute("tooltip",tooltip);
+  //parElem.setAttribute("description",desc);
+  //parElem.setAttribute("tooltip",tooltip);
 }
 
 void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name,const QString& val,const QString& desc,const QString& tooltip)
