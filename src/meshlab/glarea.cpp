@@ -645,7 +645,7 @@ void GLArea::closeEvent(QCloseEvent *event)
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
-	if(!isRaster())
+	if(!isRaster() || isRaster())
 	{
 		e->ignore();
 		if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
@@ -659,7 +659,7 @@ void GLArea::keyReleaseEvent ( QKeyEvent * e )
 
 void GLArea::keyPressEvent ( QKeyEvent * e )
 {
-	if(!isRaster())
+	if(!isRaster() || isRaster())
 	{
 		e->ignore();
 		if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
@@ -676,7 +676,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 	e->accept();
 	setFocus();
 	
-	if(!isRaster())
+	if(!isRaster() || isRaster())
 	{
 		if( (iEdit && !suspendedEditor) )
 			iEdit->mousePressEvent(e,*mm(),this);
@@ -705,7 +705,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 {
-	if(!isRaster())
+	if(!isRaster() || isRaster())
 	{
 		if( (iEdit && !suspendedEditor) )
 			iEdit->mouseMoveEvent(e,*mm(),this);
@@ -772,7 +772,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
 
 void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
 {
-  	if(!isRaster())
+  	if(!isRaster() || isRaster())
 	{
 		hasToPick=true;
 		pointToPick=Point2i(e->x(),height()-e->y());
@@ -1182,8 +1182,9 @@ void GLArea::loadRaster(int id)
     meshDoc->setCurrentRaster(id);
     setTarget(rm->currentPlane->image);
     //load his shot or a default shot
+	
     if (rm->shot.IsValid())
-      loadShot(QPair<Shotf, float> (rm->shot,1));
+      loadShot(QPair<Shotf, float> (rm->shot,trackball.track.sca));
     else
       createOrthoView("Front");
   }
@@ -1539,6 +1540,7 @@ void GLArea::loadShot(const QPair<vcg::Shotf,float> &shotAndScale){
 
 	//trackball.track.sca =sca;
 	//trackball.track.tra =t1 /*+ tb.track.rot.Inverse().Rotate(glLookAt)*/ ;
+
 
 	update();
 }
