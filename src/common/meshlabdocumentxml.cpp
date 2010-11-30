@@ -30,16 +30,72 @@ QDomElement Matrix44fToXML(vcg::Matrix44f &m, QDomDocument &doc)
   return matrixElem;
 }
 
-bool MeshDocumentFromXML(MeshDocument &, QDomDocument &doc)
+bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 {
+	QFile qf(filename);
+		QFileInfo qfInfo(filename);
 
- return true;
+		if( !qf.open(QIODevice::ReadOnly ) )
+			return false;
+
+		QString project_path = qfInfo.absoluteFilePath();
+
+		QDomDocument doc("MeshLabDocument");    //It represents the XML document
+		if(!doc.setContent( &qf ))	
+			return false;
+
+		QDomElement root = doc.documentElement();
+
+		QDomNode node;
+
+		node = root.firstChild();
+
+		//Devices
+		while(!node.isNull()){
+			if(QString::compare(node.nodeName(),"MeshGroup")==0)
+			{
+				QDomNode mesh; QString filen, label;
+				mesh = node.firstChild();
+				while(!mesh.isNull()){
+				//return true;
+				filen=mesh.attributes().namedItem("filename").nodeValue();
+				md.addNewMesh(filen);
+				label=mesh.attributes().namedItem("label").nodeValue();
+				md.mm()->setLabel(label);
+				
+				mesh=mesh.nextSibling();
+				}
+			}
+			// READ IN POINT CORRESPONDECES INCOMPLETO!!
+			else if(QString::compare(node.nodeName(),"RasterGroup")==0)
+			{
+				QDomNode raster; QString filen, label;
+				raster = node.firstChild();
+				while(!raster.isNull()){
+				//return true;
+				filen=raster.attributes().namedItem("label").nodeValue();
+				md.addNewRaster(filen);
+				label=raster.attributes().namedItem("label").nodeValue();
+				md.rm()->setLabel(label);
+				QDomNode sh=raster.firstChild();
+				ReadShotFromQDomNode(md.rm()->shot,sh);
+				
+				raster=raster.nextSibling();
+				}
+			}
+			node = node.nextSibling();
+		}
+
+
+
+		qf.close();
+		return true;
 }
 
 QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc)
 {
   QDomElement meshElem = doc.createElement("MLMesh");
-  meshElem.setAttribute("name",mp->label());
+  meshElem.setAttribute("label",mp->label());
   meshElem.setAttribute("filename",mp->relativePathName());
   meshElem.appendChild(Matrix44fToXML(mp->cm.Tr,doc));
   return meshElem;
@@ -48,7 +104,7 @@ QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc)
 QDomElement RasterModelToXML(RasterModel *mp, QDomDocument &doc)
 {
   QDomElement rasterElem = doc.createElement("MLRaster");
-  rasterElem.setAttribute("name",mp->label());
+  rasterElem.setAttribute("label",mp->label());
   rasterElem.appendChild(WriteShotToQDomNode(mp->shot,doc));
   return rasterElem;
 }
@@ -56,6 +112,9 @@ QDomElement RasterModelToXML(RasterModel *mp, QDomDocument &doc)
 QDomDocument MeshDocumentToXML(MeshDocument &md)
 {
   QDomDocument ddoc("MeshLabDocument");
+
+  QDomElement root = ddoc.createElement("MeshLabProject");
+  ddoc.appendChild( root );
   QDomElement mgroot = ddoc.createElement("MeshGroup");
 
   foreach(MeshModel *mmp, md.meshList)
@@ -63,7 +122,7 @@ QDomDocument MeshDocumentToXML(MeshDocument &md)
     QDomElement meshElem = MeshModelToXML(mmp, ddoc);
     mgroot.appendChild(meshElem);
   }
-  ddoc.appendChild(mgroot);
+  root.appendChild(mgroot);
 
   QDomElement rgroot = ddoc.createElement("RasterGroup");
 
@@ -73,7 +132,7 @@ QDomDocument MeshDocumentToXML(MeshDocument &md)
     rgroot.appendChild(rasterElem);
   }
 
-  ddoc.appendChild(rgroot);
+  root.appendChild(rgroot);
 
 //    tag.setAttribute(QString("name"),(*ii).first);
 //    RichParameterSet &par=(*ii).second;
@@ -89,3 +148,4 @@ QDomDocument MeshDocumentToXML(MeshDocument &md)
 //
     return ddoc;
 }
+
