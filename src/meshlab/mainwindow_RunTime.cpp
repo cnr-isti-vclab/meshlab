@@ -1145,7 +1145,7 @@ bool MainWindow::openIn(QString /* fileName */)
 void MainWindow::saveProject()
 {
 
-  QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),lastUsedDirectory.path().append("/test.mlp"), tr("*.aln,*.mlp"));
+  QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("*.aln *.mlp"));
 bool ret;
 	qDebug("Saving aln file %s\n",qPrintable(fileName));
 	if (fileName.isEmpty()) return;
@@ -1182,7 +1182,7 @@ bool MainWindow::openProject(QString fileName)
 {
 	//newDocument()->resetTrackBall();
     if (fileName.isEmpty())
-	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "*.aln,*.mlp");
+	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "*.aln *.mlp");
 	if (fileName.isEmpty()) return false;
 	else
 	{
@@ -1223,7 +1223,10 @@ bool MainWindow::openProject(QString fileName)
 	{
 		newDocument();
 		if (!MeshDocumentFromXML(*meshDoc(),fileName))
+			{
+			QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MLP file");
 			return false;
+			}
 		MeshDocument* md=meshDoc();
 		QDir::setCurrent(fi.absoluteDir().absolutePath());
 		for (int i=0; i<md->meshList.size(); i++)
@@ -1279,6 +1282,9 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	filters.push_back("ALN project ( *.aln)");
 	filters.front().chop(1);
 	filters.front().append(" *.aln)");
+	filters.push_back("MeshLab Project ( *.mlp)");
+	filters.front().chop(1);
+	filters.front().append(" *.mlp)");
 	//Add filters for images
     filters.push_back("Images (*.png *.xpm *.jpg)");
 	QStringList fileNameList;
@@ -1298,7 +1304,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	foreach(fileName,fileNameList)
 	{
 			QFileInfo fi(fileName);
-			if(fi.suffix().toLower()=="aln") openProject(fileName);
+			if(fi.suffix().toLower()=="aln" || fi.suffix().toLower()=="mlp") openProject(fileName);
 			else if( fi.suffix().toLower()=="png" || fi.suffix().toLower()=="xpm" || fi.suffix().toLower()=="jpg")
 			{
 				qb->show();
