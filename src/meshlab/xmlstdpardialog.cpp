@@ -259,6 +259,7 @@ XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,QWidget* pare
 	//before the connection!
 	connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 
+
 	helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",this);
 	helpLab->setTextFormat(Qt::RichText);
 	helpLab->setWordWrap(true);
@@ -281,8 +282,6 @@ XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,QWidget* pare
 	/////////////////////////////////////////////////////////////////////////
 	else
 		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
-	updateGeometry();
-	adjustSize();
 }
 
 XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent )
@@ -418,17 +417,17 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* p
 	percSB->setSingleStep(0.5);
 	percSB->setValue((100*(initVal - m_min))/(m_max - m_min));
 	percSB->setDecimals(3);
-	QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
-	QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
+	QLabel *absLab=new QLabel("<i> <small> world unit</small></i>",this);
+	QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>",this);
 
-	gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
+	gridLay->addWidget(fieldDesc,row,0,Qt::AlignLeft);
 
 	QGridLayout* lay = new QGridLayout();
 	lay->addWidget(absLab,0,0,Qt::AlignHCenter);
 	lay->addWidget(percLab,0,1,Qt::AlignHCenter);
 	lay->addWidget(absSB,1,0,Qt::AlignTop);
 	lay->addWidget(percSB,1,1,Qt::AlignTop);
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	gridLay->addLayout(lay,row,1,1,2,Qt::AlignTop);
 	
         //connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
         //connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
