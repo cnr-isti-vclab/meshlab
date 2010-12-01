@@ -135,7 +135,11 @@ QStringList XMLFilterInfo::query( const QString& qry) const
 XMLFilterInfo::XMLMapList XMLFilterInfo::filterParametersExtendedInfo( const QString& filterName) const
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM/<p>{data(@name)}</p>/string()";
-	QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>{data(@" + MLXMLElNames::paramName + ")}</p>/string()";
+	//QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>{data(@" + MLXMLElNames::paramName + ")}</p>/string()";
+	
+	//in order to resolve the ordering problem
+	QString namesQuery = "for $a in " + docMFIPluginFilterNameParam(fileName,filterName) + " return <p>{data($a/@" + MLXMLElNames::paramName + ")}</p>/string()";
+	
 	XMLMapList mplist;
 	try
 	{
