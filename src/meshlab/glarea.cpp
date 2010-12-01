@@ -1184,7 +1184,20 @@ void GLArea::loadRaster(int id)
     //load his shot or a default shot
 	
     if (rm->shot.IsValid())
+	{
+		fov = rm->shot.GetFovFromFocal();
+
+		float cameraDist = getCameraDistance();
+		Matrix44f rotFrom;
+		rm->shot.Extrinsics.Rot().ToMatrix(rotFrom);
+
+		Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
+
+		Point3f p2 = (Point3f(0,0,cameraDist));
+
+		trackball.track.sca =fabs(p2.Z()/p1.Z());
       loadShot(QPair<Shotf, float> (rm->shot,trackball.track.sca));
+	}
     else
       createOrthoView("Front");
   }
