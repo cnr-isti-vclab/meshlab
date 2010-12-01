@@ -180,10 +180,23 @@ void GLArea::pasteTile()
 
 		if (tileRow >= totalRows)
 		{
-			QString outfile=QString("%1/%2%3.png")
-        .arg(ss.outdir)
-        .arg(ss.basename)
-        .arg(ss.counter++,2,10,QChar('0'));
+      QString outfile;
+
+      if(ss.snapAllLayers)
+      {
+			 outfile=QString("%1/%2%3_L%4.png")
+         .arg(ss.outdir)
+         .arg(ss.basename)
+         .arg(ss.counter,2,10,QChar('0'))
+         .arg(currSnapLayer,2,10,QChar('0'));
+      }
+      else
+      {
+			  outfile=QString("%1/%2%3.png")
+          .arg(ss.outdir)
+          .arg(ss.basename)
+          .arg(ss.counter++,2,10,QChar('0'));
+      }
 			bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
       if (ret) log->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
           else log->Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
@@ -574,11 +587,49 @@ void GLArea::displayHelp(QPainter *painter)
 
 void GLArea::saveSnapshot()
 {
+  // snap all layers
+  totalSnapLayer= meshDoc->meshList.size();
+  currSnapLayer=0;
+
+  // number of subparts
 	totalCols=totalRows=ss.resolution;
 	tileRow=tileCol=0;
 
-	takeSnapTile=true;
-	update();
+  if(ss.snapAllLayers)
+  {
+
+   while(currSnapLayer<totalSnapLayer)
+   {
+	   tileRow=tileCol=0;
+
+     meshDoc->setCurrentMesh(currSnapLayer);
+     for(int i=0; i<totalSnapLayer; i++)
+     {
+       if(i==currSnapLayer)
+         addMeshSetVisibility(i,true);
+       else
+         addMeshSetVisibility(i,false);
+     }
+
+     takeSnapTile=true;
+	   update();
+     repaint();
+     currSnapLayer++;
+   }
+
+   //cleanup
+   for(int i=0; i<totalSnapLayer; i++)
+   {
+     addMeshSetVisibility(i,true);
+   }
+
+   ss.counter++;
+  }
+  else
+  {
+	 takeSnapTile=true;
+	 update();
+  }
 }
 
 void GLArea::updateLayer()

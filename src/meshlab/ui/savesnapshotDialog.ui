@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
-    <height>174</height>
+    <width>552</width>
+    <height>192</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -136,7 +136,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>111</width>
+         <width>20</width>
          <height>20</height>
         </size>
        </property>
@@ -159,6 +159,26 @@
        </property>
        <property name="minimum">
         <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="alllayersCheckBox">
+       <property name="text">
+        <string>Snap All Layers</string>
        </property>
       </widget>
      </item>

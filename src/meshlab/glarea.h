@@ -54,6 +54,7 @@ public:
 	int counter;
 	int resolution;
   bool transparentBackground;
+  bool snapAllLayers;
 		
 	SnapshotSetting()
 	{
@@ -62,6 +63,7 @@ public:
 		counter=0;
 		resolution=1;
     transparentBackground=true;
+    snapAllLayers=false;
 	};
 };
 
@@ -95,14 +97,14 @@ public:
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-    QString getFileName()							{return QString(mm()->shortName());}
-	void		setFileName(QString name)	
-    {
+  QString getFileName() {return QString(mm()->shortName());}
+	void setFileName(QString name)	
+  {
     mm()->setFileName(name);
-		setWindowTitle(QFileInfo(name).fileName()+tr("[*]"));
+    setWindowTitle(QFileInfo(name).fileName()+tr("[*]"));
 	  
     ss.basename=QFileInfo(getFileName()).baseName().append("Snap");
-	}
+  }
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 
@@ -320,7 +322,8 @@ private:
   
 	enum AnimMode { AnimNone, AnimSpin, AnimInterp};
 	AnimMode animMode; 
-	int tileCol, tileRow, totalCols, totalRows;
+	int tileCol, tileRow, totalCols, totalRows;   // snapshot: total number of subparts and current subpart rendered
+  int totalSnapLayer, currSnapLayer;            // snapshot: total number of layers and current layer rendered
 	void setCursorTrack(vcg::TrackMode *tm);
 
 	//-----------Raster support----------------------------
