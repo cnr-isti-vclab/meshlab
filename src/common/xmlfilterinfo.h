@@ -61,29 +61,30 @@ namespace MLXMLElNames
 	
 
 
-	const QString mfiVersion("mfi_version");
+	const QString mfiVersion("mfiVersion");
 
-	const QString pluginScriptName("plugin_scriptName");
+	const QString pluginScriptName("pluginName");
 
-	const QString filterName("f_name");
-	const QString filterScriptFunctName("f_scriptFunctionName");
-	const QString filterClass("f_class");
-	const QString filterPreCond("f_preCond");
-	const QString filterPostCond("f_postCond");
+	const QString filterName("filterName");
+	const QString filterScriptFunctName("filterFunction");
+	const QString filterClass("filterClass");
+	const QString filterPreCond("filterPre");
+	const QString filterPostCond("filtePost");
 	//filterHelp == name to access to the value of FILTER_HELP inside the Map produced by the XMLFilterInfo 
 	//const QString filterHelp("f_help");
 	
-	const QString paramType("p_type");
-	const QString paramName("p_name");
-	const QString paramDefExpr("p_defaultExpression");
+	const QString paramType("parType");
+	const QString paramName("parName");
+	const QString paramDefExpr("parDefault");
+	const QString paramIsImportant("parIsImportant");
 	//paramHelp == name to access to the value of PARAM_HELP inside the Map produced by the XMLFilterInfo 
 	//const QString paramHelp("p_help");
 
 	//guiType == name to access to the type of gui (ABSPERC_GUI, CHECKBOX_GUI etc.) inside the Map produced by the XMLFilterInfo 
-	const QString guiType("gui_type");
-	const QString guiLabel("gui_label");
-	const QString guiMinExpr("gui_minExpr");
-	const QString guiMaxExpr("gui_maxExpr");
+	const QString guiType("guiType");
+	const QString guiLabel("guiLabel");
+	const QString guiMinExpr("guiMin");
+	const QString guiMaxExpr("guiMax");
 
 	//types' names inside the XML MeshLab file format
 	const QString boolType("Boolean");
