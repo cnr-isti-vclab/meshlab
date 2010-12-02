@@ -29,7 +29,6 @@ void MeshLabXMLStdDialog::createFrame()
 
 	QFrame *newqf= new QFrame(this);
 	setWidget(newqf);
-	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
 	qf = newqf;
 }
 
@@ -38,6 +37,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	assert(qf);
 	qf->hide();
 	QLabel *ql;
+
 
 	QGridLayout *gridLayout = new QGridLayout(qf);
 	qf->setLayout(gridLayout);
@@ -50,16 +50,23 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 
 	stdParFrame = new XMLStdParFrame(this,curgla);
 	connect(stdParFrame,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),this,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+
 	XMLFilterInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
 	stdParFrame->loadFrameContent(mplist);
 	gridLayout->addWidget(stdParFrame,1,0,1,2);
+	
+	//int buttonRow = 2;  // the row where the line of buttons start
 
-	int buttonRow = 2;  // the row where the line of buttons start
-
-	QPushButton *helpButton = new QPushButton("Help", qf);
-	QPushButton *closeButton = new QPushButton("Close", qf);
-	QPushButton *applyButton = new QPushButton("Apply", qf);
-	QPushButton *defaultButton = new QPushButton("Default", qf);
+	QPushButton *helpButton = new QPushButton("Help", this);
+	//helpButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
+	QPushButton *closeButton = new QPushButton("Close", this);
+	//closeButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
+	QPushButton *applyButton = new QPushButton("Apply", this);
+	//applyButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
+	QPushButton *defaultButton = new QPushButton("Default", this);
+	//defaultButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
+	ExpandButtonWidget* exp = new ExpandButtonWidget(this);
+	connect(exp,SIGNAL(expandView(bool)),this,SIGNAL(expandView(bool)));
 
 #ifdef Q_WS_MAC
 	// Hack needed on mac for correct sizes of button in the bottom of the dialog.
@@ -73,15 +80,18 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	{
 		previewCB = new QCheckBox("Preview", qf);
 		previewCB->setCheckState(Qt::Unchecked);
-		gridLayout->addWidget(previewCB,    buttonRow+0,0,Qt::AlignBottom);
+		gridLayout->addWidget(previewCB,    gridLayout->rowCount(),0,Qt::AlignBottom);
 		connect(previewCB,SIGNAL(toggled(bool)),this,SLOT( togglePreview() ));
-		buttonRow++;
+		//buttonRow++;
 	}
 
-	gridLayout->addWidget(helpButton,   buttonRow+0,1,Qt::AlignBottom);
-	gridLayout->addWidget(defaultButton,buttonRow+0,0,Qt::AlignBottom);
-	gridLayout->addWidget(closeButton,  buttonRow+1,0,Qt::AlignBottom);
-	gridLayout->addWidget(applyButton,  buttonRow+1,1,Qt::AlignBottom);
+	gridLayout->addWidget(exp,gridLayout->rowCount(),0,1,2,Qt::AlignJustify);
+	int firstButLine =  gridLayout->rowCount();
+	gridLayout->addWidget(helpButton,   firstButLine,1,Qt::AlignBottom);
+	gridLayout->addWidget(defaultButton,firstButLine,0,Qt::AlignBottom);
+	int secButLine = gridLayout->rowCount();
+	gridLayout->addWidget(closeButton,  secButLine,0,Qt::AlignBottom);
+	gridLayout->addWidget(applyButton,  secButLine,1,Qt::AlignBottom);
 
 
 	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
@@ -93,9 +103,10 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	qf->adjustSize();
 
 	//set the minimum size so it will shrink down to the right size	after the help is toggled
-	this->setMinimumSize(qf->sizeHint());
+	//this->setMinimumSize(qf->sizeHint());
 	this->showNormal();
 	this->adjustSize();
+	//setSizePolicy(QSizePolicy::Minimum,QSizePolicy::MinimumExpanding);
 }
 
 bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
@@ -210,11 +221,20 @@ bool MeshLabXMLStdDialog::isDynamic() const
 	 return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 }
 
-
 XMLStdParFrame::XMLStdParFrame( QWidget *p, QWidget *gla/*=0*/ )
-:QFrame(p)
+:QFrame(p),extended(false)
 {
 	curr_gla=gla;
+	vLayout = new QGridLayout(this);
+	vLayout->setAlignment(Qt::AlignTop);
+	setLayout(vLayout);
+	connect(p,SIGNAL(expandView(bool)),this,SLOT(expandView(bool)));
+	//updateFrameContent(parMap,false);
+	//this->setMinimumWidth(vLayout->sizeHint().width());
+	
+
+	//this->showNormal();
+	this->adjustSize();
 }
 
 XMLStdParFrame::~XMLStdParFrame()
@@ -224,12 +244,6 @@ XMLStdParFrame::~XMLStdParFrame()
 
 void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap)
 {
-	delete layout();
-	QGridLayout * vLayout = new QGridLayout(this);
-	vLayout->setAlignment(Qt::AlignTop);
-	setLayout(vLayout);
-
-	QString descr;
 	for(XMLFilterInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
 	{
 		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,this);
@@ -238,7 +252,8 @@ void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap)
 		xmlfieldwidgets.push_back(widg); 
 		helpList.push_back(widg->helpLabel());
 	}
-	showNormal();
+	//showNormal();
+	updateGeometry();
 	adjustSize();
 }
 
@@ -246,6 +261,14 @@ void XMLStdParFrame::toggleHelp()
 {
 	for(int i = 0; i < helpList.count(); i++)
 		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
+	updateGeometry();
+	adjustSize();
+}
+
+void XMLStdParFrame::expandView(bool exp)
+{
+	for(int i = 0; i < xmlfieldwidgets.count(); i++)
+		xmlfieldwidgets[i]->setVisibility(exp || xmlfieldwidgets[i]->isImportant); 
 	updateGeometry();
 	adjustSize();
 }
@@ -259,7 +282,13 @@ XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,QWidget* pare
 	//before the connection!
 	connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 
-
+	Value* isImp = NULL;
+	BoolExpression isImpExp(mp[MLXMLElNames::paramIsImportant]);
+	emit widgetEvaluateExpression(isImpExp,&isImp);
+	isImportant = isImp->getBool();
+	delete isImp;
+	setVisible(isImportant);
+		
 	helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",this);
 	helpLab->setTextFormat(Qt::RichText);
 	helpLab->setWordWrap(true);
@@ -284,6 +313,12 @@ XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,QWidget* pare
 		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
 }
 
+void XMLMeshLabWidget::setVisibility( const bool vis )
+{
+	helpLabel()->setVisible(helpLabel()->isVisible() && vis);
+	updateVisibility(vis);
+}
+
 XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,parent)
 {
@@ -293,8 +328,8 @@ XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,
 	Value* boolVal = NULL;
 	emit widgetEvaluateExpression(exp,&boolVal);
 	cb->setChecked(boolVal->getBool());
+	cb->setVisible(isImportant);
 	delete boolVal;
-
 
 	//gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
 
@@ -306,6 +341,8 @@ XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,
 	else
 		gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
 
+	cb->setVisible(isImportant);
+	//cb->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	connect(cb,SIGNAL(stateChanged(int)),parent,SIGNAL(parameterChanged()));
 }
 
@@ -334,6 +371,11 @@ void XMLCheckBoxWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag 
 
 }
 
+void XMLCheckBoxWidget::updateVisibility( const bool vis )
+{
+	cb->setVisible(vis);
+}
+
 XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,QWidget* parent)
 {
 	QString guiType = widgetTable[MLXMLElNames::guiType];
@@ -351,7 +393,6 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent)
 :XMLMeshLabWidget(xmlWidgetTag,parent)
 {
-
 }
 
 XMLEditWidget::~XMLEditWidget()
@@ -379,6 +420,13 @@ void XMLEditWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
 {
 
 }
+
+void XMLEditWidget::updateVisibility( const bool vis )
+{
+	fieldDesc->setVisible(vis);
+	this->lineEdit->setVisible(vis);
+}
+
 
 XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,parent),minVal(NULL),maxVal(NULL)
@@ -417,11 +465,10 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* p
 	percSB->setSingleStep(0.5);
 	percSB->setValue((100*(initVal - m_min))/(m_max - m_min));
 	percSB->setDecimals(3);
-	QLabel *absLab=new QLabel("<i> <small> world unit</small></i>",this);
-	QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>",this);
+	absLab=new QLabel("<i> <small> world unit</small></i>",this);
+	percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>",this);
 
 	gridLay->addWidget(fieldDesc,row,0,Qt::AlignLeft);
-
 	QGridLayout* lay = new QGridLayout();
 	lay->addWidget(absLab,0,0,Qt::AlignHCenter);
 	lay->addWidget(percLab,0,1,Qt::AlignHCenter);
@@ -429,9 +476,20 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* p
 	lay->addWidget(percSB,1,1,Qt::AlignTop);
 	gridLay->addLayout(lay,row,1,1,2,Qt::AlignTop);
 	
+
         //connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
         //connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
         //connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
+	this->absLab->setVisible(isImportant);
+	//this->absLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+	this->percLab->setVisible(isImportant);
+	//this->percLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+	this->fieldDesc->setVisible(isImportant);
+	//this->fieldDesc->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+	this->absSB->setVisible(isImportant);
+	//this->absSB->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+	this->percSB->setVisible(isImportant);
+	//this->percSB->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 }
 
 XMLAbsWidget::~XMLAbsWidget()
@@ -458,4 +516,47 @@ void XMLAbsWidget::setWidgetExpression( const QString& nv )
 void XMLAbsWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
 {
 
+}
+
+void XMLAbsWidget::updateVisibility( const bool vis )
+{
+	this->absLab->setVisible(vis);
+	this->percLab->setVisible(vis);
+	this->fieldDesc->setVisible(vis);
+	this->absSB->setVisible(vis);
+	this->percSB->setVisible(vis);
+}
+
+ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
+:QWidget(parent),up(0x0035),down(0x0036),isExpanded(false)
+{
+	arrow = down;
+	hlay = new QHBoxLayout(this);
+	//QChar ch(0x0036);
+	exp = new QPushButton(arrow,this);
+	exp->setFlat(true);
+	exp->setFont(QFont("Webdings",12));
+	//connect(exp,SIGNAL(clicked(bool)),this,SLOT(expandFrame(bool)));
+	QFontMetrics mt(exp->font(),exp);
+	QSize sz = mt.size(Qt::TextSingleLine,arrow);
+	sz.setWidth(sz.width() + 10);
+	exp->setMaximumSize(sz);
+	hlay->addWidget(exp,0,Qt::AlignHCenter);
+	connect(exp,SIGNAL(clicked(bool)),this,SLOT(changeIcon()));
+}
+
+ExpandButtonWidget::~ExpandButtonWidget()
+{
+
+}
+
+void ExpandButtonWidget::changeIcon()
+{
+	isExpanded = !isExpanded;
+	if (isExpanded)
+		arrow = up;
+	else
+		arrow = down;
+	exp->setText(arrow);
+	emit expandView(isExpanded);
 }

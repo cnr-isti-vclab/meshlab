@@ -3,10 +3,12 @@
 
 #include "../common/xmlfilterinfo.h"
 #include<QCheckBox>
+#include<QPushButton>
 #include<QRadioButton>
 #include<QSpinBox>
 #include<QTableWidget>
 #include<QComboBox>
+#include<QHBoxLayout>
 #include<QGridLayout>
 #include<QDockWidget>
 #include<QTextEdit>
@@ -21,9 +23,13 @@ public:
 	virtual void collectWidgetValue() = 0;
 	virtual void setWidgetExpression(const QString& nwExpStr) = 0;
 	virtual void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
+	void setVisibility(const bool vis);
+	virtual void updateVisibility(const bool vis) = 0;
+
 	virtual ~XMLMeshLabWidget() {};
 	inline QLabel* helpLabel() {return helpLab;} 
 
+	bool isImportant;
 	// called when the user press the 'default' button to reset the parameter values to its default.
 	// It just set the parameter value and then it calls the specialized resetWidgetValue() to update also the widget.
 	//void resetValue();
@@ -40,6 +46,7 @@ protected:
 	QLabel* helpLab;
 	QLineEdit* lExprEditor;
 	QTextEdit* tExprEditor;
+	
 };
 
 class XMLMeshLabWidgetFactory 
@@ -60,8 +67,10 @@ public:
 	void collectWidgetValue();
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+	void updateVisibility(const bool vis);
 
 private:
+
 	QCheckBox* cb; 
 };
 //
@@ -78,6 +87,7 @@ public:
 	void collectWidgetValue();
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+	void updateVisibility(const bool vis);
 
 private:
 	QLabel* fieldDesc; 
@@ -95,11 +105,14 @@ public:
 	void collectWidgetValue();
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+	void updateVisibility(const bool vis);
 
 private:
 	QLabel* fieldDesc; 
 	Value* minVal;
 	Value* maxVal;
+	QLabel *absLab;
+	QLabel *percLab;
 
 	QDoubleSpinBox *absSB;
 	QDoubleSpinBox *percSB;
@@ -134,8 +147,35 @@ public:
 	~XMLStdParFrame();
 signals:
 	void frameEvaluateExpression(const Expression& exp,Value** res);
+	
+private:
+	QGridLayout * vLayout;
+	bool extended;
+
 	/*void dynamicFloatChanged(int mask);
 	void parameterChanged();*/
+public slots:
+	void expandView(bool );
+};
+
+class ExpandButtonWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	ExpandButtonWidget(QWidget* parent);	
+	~ExpandButtonWidget();
+
+private slots:
+	void changeIcon();
+signals:
+	void expandView(bool exp);
+private:
+	QString arrow;
+	const QChar up;
+	const QChar down;
+	QPushButton* exp;
+	QHBoxLayout* hlay;
+	bool isExpanded;
 };
 
 class MeshLabXMLStdDialog : public QDockWidget
@@ -154,6 +194,7 @@ public:
 	bool isDynamic() const;
 signals:
 	void dialogEvaluateExpression(const Expression& exp,Value** res);
+	void expandView(bool exp);
 
 private slots:
 	void applyClick();
@@ -163,7 +204,6 @@ private slots:
 	void togglePreview();
 	void applyDynamic();
 	void changeCurrentMesh(int meshInd);
-
 private:
 	QFrame *qf;
 	XMLStdParFrame *stdParFrame;
@@ -171,7 +211,7 @@ private:
 	MeshModelState meshState;
 	MeshModelState meshCacheState;
 	QCheckBox *previewCB;
-
+	QGridLayout* gridLayout;
 
 	int curmask;
 	MeshModel *curModel;
