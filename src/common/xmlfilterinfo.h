@@ -69,7 +69,7 @@ namespace MLXMLElNames
 	const QString filterScriptFunctName("filterFunction");
 	const QString filterClass("filterClass");
 	const QString filterPreCond("filterPre");
-	const QString filterPostCond("filtePost");
+	const QString filterPostCond("filterPost");
 	//filterHelp == name to access to the value of FILTER_HELP inside the Map produced by the XMLFilterInfo 
 	//const QString filterHelp("f_help");
 	
