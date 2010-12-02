@@ -13,7 +13,6 @@
 
 #include "filter_photosynth.h"
 #include <QtScript>
-#include <unistd.h>
 
 //#define FILTER_PHOTOSYNTH_DEBUG 1
 
