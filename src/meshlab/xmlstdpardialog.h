@@ -131,6 +131,7 @@ class XMLStdParFrame : public QFrame
 public:
 	XMLStdParFrame(QWidget *p, QWidget *gla=0);
 	void loadFrameContent(const XMLFilterInfo::XMLMapList& parMap);
+	void extendedView(bool ext,bool help);
 	//void loadFrameContent(RichParameter* par,MeshDocument *mdPt = 0);
 
 	//// The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
@@ -138,7 +139,7 @@ public:
 	//void readValues(RichParameterSet &curParSet);
 	//void resetValues(RichParameterSet &curParSet);
 
-	void toggleHelp();	
+	void toggleHelp(bool help);	
 
 	QVector<XMLMeshLabWidget*> xmlfieldwidgets;
 	QVector<QLabel *> helpList;
@@ -154,8 +155,6 @@ private:
 
 	/*void dynamicFloatChanged(int mask);
 	void parameterChanged();*/
-public slots:
-	void expandView(bool );
 };
 
 class ExpandButtonWidget : public QWidget
@@ -194,7 +193,7 @@ public:
 	bool isDynamic() const;
 signals:
 	void dialogEvaluateExpression(const Expression& exp,Value** res);
-	void expandView(bool exp);
+	//void expandView(bool exp);
 
 private slots:
 	void applyClick();
@@ -204,6 +203,8 @@ private slots:
 	void togglePreview();
 	void applyDynamic();
 	void changeCurrentMesh(int meshInd);
+	void extendedView(bool ext);
+
 private:
 	QFrame *qf;
 	XMLStdParFrame *stdParFrame;
@@ -211,7 +212,6 @@ private:
 	MeshModelState meshState;
 	MeshModelState meshCacheState;
 	QCheckBox *previewCB;
-	QGridLayout* gridLayout;
 
 	int curmask;
 	MeshModel *curModel;
@@ -222,6 +222,7 @@ private:
 	XMLFilterInfo::XMLMapList prevParMap;
 	QWidget * curgla;
 	bool validcache;
+	bool showHelp;
 };
 
 #endif

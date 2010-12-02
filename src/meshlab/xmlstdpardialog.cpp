@@ -2,7 +2,7 @@
 #include <QtGui>
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog( QWidget *p )
-:QDockWidget(QString("Plugin"), p)
+:QDockWidget(QString("Plugin"), p),showHelp(false)
 {
 	curmask = 0;
 	qf = NULL;
@@ -57,16 +57,16 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	
 	//int buttonRow = 2;  // the row where the line of buttons start
 
-	QPushButton *helpButton = new QPushButton("Help", this);
+	QPushButton *helpButton = new QPushButton("Help", qf);
 	//helpButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
-	QPushButton *closeButton = new QPushButton("Close", this);
+	QPushButton *closeButton = new QPushButton("Close", qf);
 	//closeButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
-	QPushButton *applyButton = new QPushButton("Apply", this);
+	QPushButton *applyButton = new QPushButton("Apply", qf);
 	//applyButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
-	QPushButton *defaultButton = new QPushButton("Default", this);
+	QPushButton *defaultButton = new QPushButton("Default", qf);
 	//defaultButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
-	ExpandButtonWidget* exp = new ExpandButtonWidget(this);
-	connect(exp,SIGNAL(expandView(bool)),this,SIGNAL(expandView(bool)));
+	ExpandButtonWidget* exp = new ExpandButtonWidget(qf);
+	connect(exp,SIGNAL(expandView(bool)),this,SLOT(extendedView(bool)));
 
 #ifdef Q_WS_MAC
 	// Hack needed on mac for correct sizes of button in the bottom of the dialog.
@@ -176,7 +176,17 @@ void MeshLabXMLStdDialog::resetValues()
 
 void MeshLabXMLStdDialog::toggleHelp()
 {
-	stdParFrame->toggleHelp();
+	showHelp = !showHelp;
+	stdParFrame->toggleHelp(showHelp);
+	qf->updateGeometry();	
+	qf->adjustSize();
+	this->updateGeometry();
+	this->adjustSize();
+}
+
+void MeshLabXMLStdDialog::extendedView(bool ext)
+{
+	stdParFrame->extendedView(ext,showHelp);
 	qf->updateGeometry();	
 	qf->adjustSize();
 	this->updateGeometry();
@@ -228,7 +238,7 @@ XMLStdParFrame::XMLStdParFrame( QWidget *p, QWidget *gla/*=0*/ )
 	vLayout = new QGridLayout(this);
 	vLayout->setAlignment(Qt::AlignTop);
 	setLayout(vLayout);
-	connect(p,SIGNAL(expandView(bool)),this,SLOT(expandView(bool)));
+	//connect(p,SIGNAL(expandView(bool)),this,SLOT(expandView(bool)));
 	//updateFrameContent(parMap,false);
 	//this->setMinimumWidth(vLayout->sizeHint().width());
 	
@@ -257,18 +267,20 @@ void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap)
 	adjustSize();
 }
 
-void XMLStdParFrame::toggleHelp()
+void XMLStdParFrame::toggleHelp(bool help)
 {
 	for(int i = 0; i < helpList.count(); i++)
-		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
+		helpList.at(i)->setVisible(help && xmlfieldwidgets[i]->isVisible()) ;
 	updateGeometry();
 	adjustSize();
 }
 
-void XMLStdParFrame::expandView(bool exp)
+void XMLStdParFrame::extendedView(bool ext,bool help)
 {
 	for(int i = 0; i < xmlfieldwidgets.count(); i++)
-		xmlfieldwidgets[i]->setVisibility(exp || xmlfieldwidgets[i]->isImportant); 
+		xmlfieldwidgets[i]->setVisibility(ext || xmlfieldwidgets[i]->isImportant); 
+	if (help)
+		toggleHelp(help);
 	updateGeometry();
 	adjustSize();
 }
@@ -317,6 +329,7 @@ void XMLMeshLabWidget::setVisibility( const bool vis )
 {
 	helpLabel()->setVisible(helpLabel()->isVisible() && vis);
 	updateVisibility(vis);
+	setVisible(vis);
 }
 
 XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent )
