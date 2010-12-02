@@ -217,8 +217,10 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument */*m
 		stdfieldwidgets.push_back(rwc.lastCreated);
 		helpList.push_back(rwc.lastCreated->helpLab);
 	} // end for each parameter
-	showNormal();
-	adjustSize();
+
+	this->setMinimumSize(vLayout->sizeHint());
+	this->showNormal();
+	this->adjustSize();
 }
 
 void StdParFrame::loadFrameContent( RichParameter* par,MeshDocument */*mdPt*/ /*= 0*/ )
