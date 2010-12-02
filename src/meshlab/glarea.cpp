@@ -632,6 +632,7 @@ void GLArea::saveSnapshot()
   }
 }
 
+// Slot called when the current mesh has changed.
 void GLArea::updateLayer()
 {
     //if we have an edit tool open, notify it that the current layer has changed
@@ -644,6 +645,8 @@ void GLArea::updateLayer()
 		//TODO this is not the best design....   iEdit should maybe keep track of the model on its own
 		lastModelEdited = meshDoc->mm();
 	}
+  // if the layer has changed update also the decoration.
+  updateDecoration();
 }
 
 void GLArea::updateDecoration()
