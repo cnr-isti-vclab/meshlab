@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
+* This program is free software: you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -49,9 +49,11 @@
 #include <vcg/complex/trimesh/create/resampler.h>
 #include <vcg/complex/trimesh/clustering.h>
 #include <vcg/simplex/face/distance.h>
+#include <vcg/space/distance3.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/space/intersection3.h>
 #include "particle.h"
+
 using namespace vcg;
 using namespace tri;
 
@@ -59,25 +61,30 @@ typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
 typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MetroMeshVertexGrid;
 typedef FaceTmark<CMeshO> MarkerFace;
 
+#define PI 3.14159265
+
 /**
 @def Generate random barycentric coordinates
+
 @return a triple of barycentric coordinates
 */
-CMeshO::CoordType RandomBaricentric(){
-    CMeshO::CoordType interp;
-    static math::MarsenneTwisterRNG rnd;
-    interp[1] = rnd.generate01();
-    interp[2] = rnd.generate01();
-        if(interp[1] + interp[2] > 1.0)
-        {
-                interp[1] = 1.0 - interp[1];
-                interp[2] = 1.0 - interp[2];
-                }
 
-        assert(interp[1] + interp[2] <= 1.0);
-        interp[0]=1.0-(interp[1] + interp[2]);
-        return interp;
-    };
+CMeshO::CoordType RandomBaricentric(){
+	
+	CMeshO::CoordType interp;
+	static math::MarsenneTwisterRNG rnd;
+	interp[1] = rnd.generate01();
+	interp[2] = rnd.generate01();
+	
+	if(interp[1] + interp[2] > 1.0){
+		interp[1] = 1.0 - interp[1];
+		interp[2] = 1.0 - interp[2];
+	}
+	
+	assert(interp[1] + interp[2] <= 1.0);
+	interp[0]=1.0-(interp[1] + interp[2]);
+	return interp;
+};
 /**
 @def This funcion calculate the cartesian coordinates of a point given from its barycentric coordinates
 
@@ -86,6 +93,7 @@ CMeshO::CoordType RandomBaricentric(){
 
 @return cartesian coordinates of the point
 */
+
 CMeshO::CoordType fromBarCoords(Point3f bc,CMeshO::FacePointer f){
 
     CMeshO::CoordType p;
@@ -96,13 +104,16 @@ CMeshO::CoordType fromBarCoords(Point3f bc,CMeshO::FacePointer f){
     return p;
 };
 
-
-
-
 /**
+@def Given a Face and the index of an edge this function return a random point in the triangle
+     defined by the two points of the edge e and the center of the face.
+@param FacePointer f - a pointer to the face
+@param int         e - index of an edge
 
-  */
-CMeshO::CoordType GetSafePosition(CMeshO::FacePointer f,int edge){
+@return a point in the face f near the edge e
+*/
+
+CMeshO::CoordType GetSafePosition(CMeshO::FacePointer f,int e){
 
     Point3f p0=f->P(0);
     Point3f p1=f->P(1);
@@ -117,7 +128,8 @@ CMeshO::CoordType GetSafePosition(CMeshO::FacePointer f,int edge){
     CMeshO::CoordType pc=fromBarCoords(bc,f);
     CMeshO::CoordType safe_p;
 
-    switch(edge){
+    switch(e){
+
     case 0:{
             bc=RandomBaricentric();
             safe_p=p0*bc[0]+p1*bc[1]+pc*bc[2];
@@ -130,11 +142,12 @@ CMeshO::CoordType GetSafePosition(CMeshO::FacePointer f,int edge){
         }
     case 2:{
             bc=RandomBaricentric();
-            safe_p=p2*bc[0]+p0*bc[1]+pc*bc[2];
+            safe_p=p0*bc[0]+p2*bc[1]+pc*bc[2];
             break;
         }
 
     }
+
     return safe_p;
 
 };
@@ -148,6 +161,7 @@ CMeshO::CoordType GetSafePosition(CMeshO::FacePointer f,int edge){
 
 @return true if point p is on face f, false elsewhere.
 */
+
 bool IsOnFace(Point3f p, CMeshO::FacePointer f){
     float EPSILON=0.00001;
     //Compute vectors
@@ -179,45 +193,14 @@ bool IsOnFace(Point3f p, CMeshO::FacePointer f){
 };
 
 
+float GetElapsedTime(float t,Point3f pi,Point3f pm,Point3f pf){
+
+    float d1=Distance(pi,pf);
+    float d2=Distance(pi,pm);
+
+    return t-t*(d2/d1);
 
 
-
-float getElapsedTime(CMeshO::CoordType pi,CMeshO::CoordType pf,Point3f vi,Point3f a){
-
-    float t1=0;
-    float t2=0;
-    float s=pi[0]-pf[0];
-    float d=pow(vi[0],2)- 2*a[0]*s;
-    if(d<0) d=0;
-    t1=(-vi[0]+sqrt(d))/a[0];
-    t2=(-vi[0]-sqrt(d))/a[0];
-    if(t1>0) return t1;
-    if(t2>0) return t2;
-    return 0;
-
-};
-
-float getElapsedTime(CMeshO::CoordType vi,CMeshO::CoordType vf,CMeshO::FacePointer face,float m,CMeshO::CoordType force){
-
-    float t=0;
-    float v_initial=sqrt(pow(vi[0],2)+pow(vi[1],2)+pow(vi[2],2));
-    float v_final=sqrt(pow(vf[0],2)+pow(vf[1],2)+pow(vf[2],2));
-    Point3f n= face->N();
-    float a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
-
-
-
-    Point3f f;
-
-    f[0]=force[0]-a*n[0];
-    f[1]=force[1]-a*n[1];
-    f[2]=force[2]-a*n[2];
-
-    float acceleration=sqrt(pow(f[0]/m,2)+pow(f[1]/m,2)+pow(f[2]/m,2));
-    t=(v_final-v_initial)/acceleration;
-
-
-    return t;
 };
 
 
@@ -241,15 +224,14 @@ CMeshO::CoordType ComputeVelocity(CMeshO::CoordType vi,CMeshO::CoordType ac,floa
 
     return n_vel;
 };
-CMeshO::CoordType UpdateVelocity(CMeshO::CoordType pf,CMeshO::CoordType pi,CMeshO::CoordType v,float m,CMeshO::FacePointer &face,CMeshO::CoordType force){
+float UpdateVelocity(CMeshO::CoordType pi,CMeshO::CoordType pf,CMeshO::CoordType v,float m,CMeshO::FacePointer &face,CMeshO::CoordType force){
 
     CMeshO::CoordType new_vel;
+    float new_v;
     Point3f n= face->cN();
     float a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
-    //float b=n[0]*vel[0]+n[1]*vel[1]+n[2]*vel[2];
 
     Point3f f;
-    //Point3f v;
 
     f[0]=force[0]-a*n[0];
     f[1]=force[1]-a*n[1];
@@ -261,8 +243,9 @@ CMeshO::CoordType UpdateVelocity(CMeshO::CoordType pf,CMeshO::CoordType pi,CMesh
     new_vel[1]=sqrt(pow(v[1],2)+2*(f[1]/m)*(pf[1]-pi[1]) );
     new_vel[2]=sqrt(pow(v[2],2)+2*(f[2]/m)*(pf[2]-pi[2]) );
 
+    new_v=sqrt(pow(new_vel[0],2)+pow(new_vel[1],2)+pow(new_vel[2],2));
 
-    return new_vel;
+    return new_v;
 };
 CMeshO::CoordType ComputeAcceleration(float m,CMeshO::FacePointer face,CMeshO::CoordType dir){
     CMeshO::CoordType acc;
@@ -281,18 +264,11 @@ CMeshO::CoordType ComputeAcceleration(float m,CMeshO::FacePointer face,CMeshO::C
 /**
 @def
 */
-CMeshO::CoordType GetVelocityComponents(float v,float l,CMeshO::FacePointer face){
+CMeshO::CoordType GetVelocityComponents(float v,CMeshO::FacePointer face){
 
-    Point3f dir = Point3f(0,-1,0);
-    Point3f n=face->cN();
-    //n.Normalize();
-    float a = dir.dot(n);
     Point3f vel;
-
-    vel[0]=dir[0]-n[0]*a;
-    vel[1]=dir[1]-n[1]*a;
-    vel[2]=dir[2]-n[2]*a;
-
+    Point3f n=face->cN();
+    n.Normalize();
 
     Point3f axis_x=Point3f(1,0,0);
     Point3f axis_y=Point3f(0,1,0);
@@ -301,17 +277,13 @@ CMeshO::CoordType GetVelocityComponents(float v,float l,CMeshO::FacePointer face
     Point3f nx=Point3f(n[0],0,0);
     Point3f ny=Point3f(0,n[1],0);
     Point3f nz=Point3f(0,0,n[2]);
-    //float alpha=90-(acos(axis_x.dot(nx))*(180/PI));
-    //float beta =90-(acos(axis_y.dot(ny))*(180/PI));
-    //float gamma=90-(acos(axis_z.dot(nz))*(180/PI));
+    float alpha=90-(acos(axis_x.dot(nx))*(180/PI));
+    float beta =90-(acos(axis_y.dot(ny))*(180/PI));
+    float gamma=90-(acos(axis_z.dot(nz))*(180/PI));
 
-    //vel[0]=v*cos(alpha*PI/180)*l;
-    //vel[1]=v*cos(beta*PI/180)*l;
-    //vel[2]=v*cos(gamma*PI/180)*l;
-
-    vel[0]=vel[0]*l*v;
-    vel[1]=vel[1]*l*v;
-    vel[2]=vel[2]*l*v;
+    vel[0]=v*cos(alpha*PI/180);
+    vel[1]=v*cos(beta*PI/180);
+    vel[2]=v*cos(gamma*PI/180);
 
     return vel;
 
@@ -319,7 +291,6 @@ CMeshO::CoordType GetVelocityComponents(float v,float l,CMeshO::FacePointer face
 
 
 };
-
 
 /**
   @def Simulate the movement of a point, affected by a force "dir" on a face.
@@ -329,13 +300,14 @@ CMeshO::CoordType GetVelocityComponents(float v,float l,CMeshO::FacePointer face
   @param float     m   - mass of the particle
   @param FaceType face - pointer to the face
   @param CoordType dir - direction of the force
+  @param float 	   l   - length of the movement
   @param float     t   - time step
 
   @return new coordinates of the point
 */
 CMeshO::CoordType StepForward(CMeshO::CoordType p,float v,float m,CMeshO::FacePointer &face,CMeshO::CoordType dir,float l,float t=1){
 
-    dir=dir*l;
+    dir=dir;
     Point3f new_pos;
     Point3f n= face->N();
     float a=n[0]*dir[0]+n[1]*dir[1]+n[2]*dir[2];
@@ -343,7 +315,7 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,float v,float m,CMeshO::FacePo
 
 
     Point3f f;
-    //Point3f vel=GetVelocityComponents(v,l,face);
+    //Point3f vel=GetVelocityComponents(v,face);
     Point3f vel;
     vel[0]=0.0f;
     vel[1]=0.0f;
@@ -354,9 +326,9 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,float v,float m,CMeshO::FacePo
     f[1]=dir[1]-a*n[1];
     f[2]=dir[2]-a*n[2];
 
-    new_pos[0]=p[0]+vel[0]*t+0.5*(f[0]/m)*pow(t,2);
-    new_pos[1]=p[1]+vel[1]*t+0.5*(f[1]/m)*pow(t,2);
-    new_pos[2]=p[2]+vel[2]*t+0.5*(f[2]/m)*pow(t,2);
+    new_pos[0]=(p[0]+vel[0]*t+0.5*(f[0]/m)*pow(t,2))*l;
+    new_pos[1]=(p[1]+vel[1]*t+0.5*(f[1]/m)*pow(t,2))*l;
+    new_pos[2]=(p[2]+vel[2]*t+0.5*(f[2]/m)*pow(t,2))*l;
 
     return new_pos;
 };
@@ -373,6 +345,12 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
             TexCoord2f p0=f->V(0)->T();
             TexCoord2f p1=f->V(1)->T();
             TexCoord2f p2=f->V(2)->T();
+
+            QImage img;
+            img.load(base_mesh->cm.textures[0].c_str());
+
+            QPainter painter(&img);
+            painter.drawPoint(p0.U(),p0.V());
 
 
         }
@@ -563,6 +541,7 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
     float exp=0;
     float di=0;
     float xi=0;
+    
     CMeshO::FacePointer face;
     CMeshO::CoordType p_c;
     MetroMeshFaceGrid f_grid;
@@ -590,7 +569,7 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
         exp=1-xi;
         eh[fi]=exp;
         }
-    };
+};
 
 /**
 @def This funcion
@@ -732,27 +711,22 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,P
     current_pos=p->P();
     velocity=info.vel;
     mass=info.mass;
-    new_pos=StepForward(p->P(),velocity,mass,current_face,dir,l,t);
-
+    new_pos=StepForward(current_pos,velocity,mass,current_face,dir,l,time);
     while(!IsOnFace(new_pos,current_face)){
         int edge=ComputeIntersection(current_pos,new_pos,current_face,new_face,int_pos);
-
-        time=time/2;
-        if(time>0.05){
-            current_face->C()=Color4b::Blue;
+        time=GetElapsedTime(time,current_pos,int_pos,new_pos);
+        velocity=velocity/2;
+        if(time>0.001){
             current_face=new_face;
-            current_face->C()=Color4b::Yellow;
-            new_pos=StepForward(int_pos,velocity,mass,current_face,dir,l,time);
-
+            current_pos=int_pos;
+            new_pos=StepForward(current_pos,velocity,mass,current_face,dir,l,time);
         }else{
             new_pos=GetSafePosition(new_face,current_face->FFi(edge));
             current_face=new_face;
-
            }
-
-         }
-
+    }
     p->P()=new_pos;
+    info.vel=velocity;
     info.face=current_face;
 
 };
@@ -810,8 +784,8 @@ void MoveCloudMeshForward(MeshModel *cloud,Point3f force,float l,float t){
     for(vi=cloud->cm.vert.begin();vi!=cloud->cm.vert.end();++vi)
         MoveParticle(ph[vi],&*vi,l,t,force);
 
-    for(int i=0;i<4;i++)
-       ComputeRepulsion(cloud,10);
+//    for(int i=0;i<4;i++)
+//       ComputeRepulsion(cloud,10);
 
 };
 
