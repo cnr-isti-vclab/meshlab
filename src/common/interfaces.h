@@ -624,7 +624,7 @@ public:
 	static bool arePreCondsValid(const int filterPreConds,const MeshModel& m, QStringList &MissingItems);
 	static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
 
-	virtual bool applyFilter(const QString& filterName,const FilterEnv& env, vcg::CallBackPos *cb) =0;
+	virtual bool applyFilter(const QString& filterName,MeshDocument& md,const FilterEnv& env, vcg::CallBackPos *cb) =0;
 };
 
 Q_DECLARE_INTERFACE(MeshIOInterface,						"vcg.meshlab.MeshIOInterface/1.0")
