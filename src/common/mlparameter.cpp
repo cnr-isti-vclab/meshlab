@@ -160,6 +160,26 @@ QMap<QString,Value*>::const_iterator FilterEnv::findValue( const QString& nm ) c
 	return it;
 }
 
+FilterEnv::~FilterEnv()
+{
+	for(QMap<QString,Value*>::iterator it = evaluatedExpressions.begin();it != evaluatedExpressions.end();++it)
+		delete it.value();
+}
+
+bool FilterEnv::insertValueBinding( const QString& name,Value* val )
+{
+	bool isInside = evaluatedExpressions.contains(name);
+	evaluatedExpressions.insert(name,val);	
+	return isInside;
+}
+
+void FilterEnv::clear()
+{
+	for(QMap<QString,Value*>::iterator it = evaluatedExpressions.begin();it != evaluatedExpressions.end();++it)
+		delete it.value();
+	evaluatedExpressions.clear();
+}
+
 Expression* ExpressionFactory::create( const QString& type,const QString& defExpression)
 {
 	//in order to avoid 

@@ -57,12 +57,15 @@ public:
 class FilterEnv
 {
 private:
-	const QMap<QString,Value*> evaluatedExpressions;
+	QMap<QString,Value*> evaluatedExpressions;
 	QMap<QString,Value*>::const_iterator findValue(const QString& nm) const;
 //
 public:
 	//FilterEnv(const Env& env);
 	FilterEnv() {}
+	~FilterEnv();
+	bool insertValueBinding(const QString& name,Value* val);
+	void clear();
 
 	//All these functions could throw ValueNotFoundException: you should catch it in the calling code
 	bool getBool(const QString& nm) const;
