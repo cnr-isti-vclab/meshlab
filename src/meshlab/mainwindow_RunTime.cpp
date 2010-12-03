@@ -1236,6 +1236,7 @@ bool MainWindow::openProject(QString fileName)
 			else
 				open(md->meshList[i]->relativePathName(),GLA());
 			meshDoc()->mm()->setLabel(md->meshList[i]->label());
+			meshDoc()->mm()->cm.Tr=md->meshList[i]->cm.Tr;
 
 		}
 		for (int i=0; i<md->rasterList.size(); i++)
