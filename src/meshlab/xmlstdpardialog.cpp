@@ -406,7 +406,24 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent)
 :XMLMeshLabWidget(xmlWidgetTag,parent)
 {
+	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName],this);
+	lineEdit = new QLineEdit(this);
+	//int row = gridLay->rowCount() -1;
+
+	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
+	lineEdit->setText(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+	
+	gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
+	gridLay->addWidget(lineEdit,row,1,Qt::AlignTop);
+	//connect(lineEdit,SIGNAL(editingFinished()),p,SIGNAL(parameterChanged()));
+	connect(lineEdit,SIGNAL(selectionChanged()),this,SLOT(tooltipEvaluation()));
+	
+	fieldDesc->setVisible(isImportant);
+	this->lineEdit->setVisible(isImportant);
+
 }
+
+
 
 XMLEditWidget::~XMLEditWidget()
 {
@@ -440,6 +457,22 @@ void XMLEditWidget::updateVisibility( const bool vis )
 	this->lineEdit->setVisible(vis);
 }
 
+void XMLEditWidget::tooltipEvaluation()
+{
+	QString exp = lineEdit->selectedText();
+	FloatExpression flExp(exp);
+	Value* val = NULL;
+	try
+	{
+		emit widgetEvaluateExpression(flExp,&val);
+		if (val != NULL)
+			lineEdit->setToolTip(QString::number(val->getFloat()));
+		delete val;
+	}
+	catch(ParsingException& e)
+	{
+	}
+}
 
 XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,parent),minVal(NULL),maxVal(NULL)

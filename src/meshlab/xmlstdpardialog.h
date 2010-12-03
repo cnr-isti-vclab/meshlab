@@ -88,7 +88,8 @@ public:
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
-
+private slots:
+	void tooltipEvaluation();
 private:
 	QLabel* fieldDesc; 
 	QLineEdit* lineEdit;
