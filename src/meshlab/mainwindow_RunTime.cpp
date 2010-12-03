@@ -1743,7 +1743,14 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 
 void MainWindow::evaluateExpression(const Expression& exp,Value** res )
 {
-	PM.env.pushContext();
-	*res = exp.eval(&PM.env);
-	PM.env.popContext();
+	try
+	{
+		PM.env.pushContext();
+		*res = exp.eval(&PM.env);
+		PM.env.popContext();
+	}
+	catch (ParsingException& e)
+	{
+		GLA()->log->Logf(GLLogStream::WARNING,e.what());
+	}
 }

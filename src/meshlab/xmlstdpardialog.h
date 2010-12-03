@@ -22,6 +22,7 @@ public:
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
 	virtual void collectWidgetValue() = 0;
 	virtual void setWidgetExpression(const QString& nwExpStr) = 0;
+	virtual Expression* getWidgetExpression() = 0;
 	virtual void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
 	void setVisibility(const bool vis);
 	virtual void updateVisibility(const bool vis) = 0;
@@ -39,14 +40,14 @@ public:
 signals:
 	void parameterChanged();
 	void widgetEvaluateExpression(const Expression& exp,Value** res);
+	void insertParamInEnv(const QString& paramName,Expression* paramExp);
 
 protected:
 	int row;
 	QGridLayout* gridLay;
 	QLabel* helpLab;
-	QLineEdit* lExprEditor;
-	QTextEdit* tExprEditor;
-	
+	//QLineEdit* lExprEditor;
+	//QTextEdit* tExprEditor;
 };
 
 class XMLMeshLabWidgetFactory 
@@ -68,6 +69,7 @@ public:
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
+	Expression* getWidgetExpression();
 
 private:
 
@@ -88,6 +90,7 @@ public:
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
+	Expression* getWidgetExpression();
 private slots:
 	void tooltipEvaluation();
 private:
@@ -107,6 +110,7 @@ public:
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
+	Expression* getWidgetExpression();
 
 private:
 	QLabel* fieldDesc; 
@@ -221,6 +225,7 @@ private:
 	MainWindowInterface *curmwi;
 	XMLFilterInfo::XMLMapList curParMap;
 	XMLFilterInfo::XMLMapList prevParMap;
+	FilterEnv filtEnv;
 	QWidget * curgla;
 	bool validcache;
 	bool showHelp;

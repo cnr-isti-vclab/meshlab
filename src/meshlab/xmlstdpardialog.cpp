@@ -155,7 +155,35 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,MeshDocu
 
 void MeshLabXMLStdDialog::applyClick()
 {
+	QAction *q = curAction;
+	filtEnv.clear();
+	assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
+	for(int ii = 0;ii < curParMap.size();++ii)	
+	{
+		XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
+		Expression* exp = wid->getWidgetExpression();
+		//the result value will be destructed when the FilterEnv will be disposed
+		Value* res = NULL;
+		emit dialogEvaluateExpression(*exp,&res);
+		filtEnv.insertValueBinding(curParMap[ii][MLXMLElNames::paramName],res);
+		delete exp;
+	}
+	////int mask = 0;//curParSet.getDynamicFloatMask();
+	if(curmask)	
+		meshState.apply(curModel);
 
+	//PreView Caching: if the apply parameters are the same to those used in the preview mode
+	//we don't need to reapply the filter to the mesh
+	/*bool isEqual = (curParSet == prevParSet);
+	if ((isEqual) && (validcache))
+		meshCacheState.apply(curModel);
+	else
+		curmwi->executeFilter(q, curParSet, false);*/
+
+	if(curmask)	
+		meshState.create(curmask, curModel);
+	if(this->curgla) 
+		this->curgla->update();
 }
 
 void MeshLabXMLStdDialog::closeClick()
@@ -389,6 +417,16 @@ void XMLCheckBoxWidget::updateVisibility( const bool vis )
 	cb->setVisible(vis);
 }
 
+Expression* XMLCheckBoxWidget::getWidgetExpression()
+{
+	QString state;
+	if (cb->isChecked())
+		state = QString("true");
+	else
+		state = QString("false");
+	return new BoolExpression(state);
+}
+
 XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,QWidget* parent)
 {
 	QString guiType = widgetTable[MLXMLElNames::guiType];
@@ -420,7 +458,6 @@ XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* 
 	
 	fieldDesc->setVisible(isImportant);
 	this->lineEdit->setVisible(isImportant);
-
 }
 
 
@@ -462,16 +499,15 @@ void XMLEditWidget::tooltipEvaluation()
 	QString exp = lineEdit->selectedText();
 	FloatExpression flExp(exp);
 	Value* val = NULL;
-	try
-	{
-		emit widgetEvaluateExpression(flExp,&val);
-		if (val != NULL)
-			lineEdit->setToolTip(QString::number(val->getFloat()));
-		delete val;
-	}
-	catch(ParsingException& e)
-	{
-	}
+	emit widgetEvaluateExpression(flExp,&val);
+	if (val != NULL)
+		lineEdit->setToolTip(QString::number(val->getFloat()));
+	delete val;
+}
+
+Expression* XMLEditWidget::getWidgetExpression()
+{
+	return new FloatExpression(this->lineEdit->text());
 }
 
 XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* parent )
@@ -523,9 +559,9 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* p
 	gridLay->addLayout(lay,row,1,1,2,Qt::AlignTop);
 	
 
-        //connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
-        //connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-        //connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
+		//connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+		//connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
+		//connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
 	this->absLab->setVisible(isImportant);
 	//this->absLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 	this->percLab->setVisible(isImportant);
@@ -551,7 +587,7 @@ void XMLAbsWidget::resetWidgetValue()
 
 void XMLAbsWidget::collectWidgetValue()
 {
-
+	//rp->val->set(FloatValue(float(absSB->value())));
 }
 
 void XMLAbsWidget::setWidgetExpression( const QString& nv )
@@ -571,6 +607,11 @@ void XMLAbsWidget::updateVisibility( const bool vis )
 	this->fieldDesc->setVisible(vis);
 	this->absSB->setVisible(vis);
 	this->percSB->setVisible(vis);
+}
+
+Expression* XMLAbsWidget::getWidgetExpression()
+{
+	return new FloatExpression(QString::number(absSB->value()));
 }
 
 ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
