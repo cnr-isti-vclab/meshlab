@@ -1306,7 +1306,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
 	
-    // HashTable storing all supported formats together with
+  // HashTable storing all supported formats together with
 	// the (1-based) index  of first plugin which is able to open it
 	QHash<QString, MeshIOInterface*> allKnownFormats;
   PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
@@ -1317,7 +1317,9 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	filters.front().chop(1);
 	filters.front().append(" *.mlp)");
 	//Add filters for images
-    filters.push_back("Images (*.png *.xpm *.jpg)");
+  filters.front().chop(1);
+  filters.front().append(" *.png *.jpg)");
+  filters.push_back("Images (*.png *.jpg)");
 	QStringList fileNameList;
 	if (fileName.isEmpty())
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"), lastUsedDirectory.path(), filters.join(";;"));
