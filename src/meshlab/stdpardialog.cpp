@@ -617,6 +617,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
       names << "Current Trackball";
       names << "Current Mesh";
       names << "Current Raster";
+      names << "From File";
 
       getShotCombo = new QComboBox(p);
       getShotCombo->addItems(names);
@@ -638,6 +639,10 @@ void ShotfWidget::getShot()
     case 0 : emit askViewerShot(paramName); break;
     case 1 : emit askMeshShot(paramName); break;
     case 2 : emit askRasterShot(paramName); break;
+    case 3:
+      {
+       /// TODO use the code in the glarea to load a shot from a file.
+      }
     default : assert(0);
   }
 }
