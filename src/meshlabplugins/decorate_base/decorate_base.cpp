@@ -152,8 +152,8 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
           emit askViewerShot("decorate");
           DrawCamera(m, curShot, showFrustum,0,painter,qf);
           break;
-        case 1 : DrawCamera(m, m.cm.shot, showFrustum, 0, painter,qf); break;
-        case 2 : DrawCamera(m, md.rm()->shot, showFrustum,0 , painter,qf); break;
+        case 1 : DrawCamera(m, m.cm.shot, showFrustum, 1, painter,qf); break; // Mesh
+        case 2 : DrawCamera(m, md.rm()->shot, showFrustum,2 , painter,qf); break; // Raster
         }
       }break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
@@ -653,11 +653,13 @@ void ExtraMeshDecoratePlugin::setValue(QString name,Shotf newVal)
     curShot=newVal;
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrustum, GLint textureId, QPainter *painter, QFont qf)
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrustum, int cameraSourceId, QPainter *painter, QFont qf)
 {
   if(!ls.IsValid())
   {
-    glLabel::render2D(painter,glLabel::TOP_LEFT,"Current Mesh Has an invalid Camera");
+    if(cameraSourceId == 1 ) glLabel::render2D(painter,glLabel::TOP_LEFT,"Current Mesh Has an invalid Camera");
+    else if(cameraSourceId == 2 ) glLabel::render2D(painter,glLabel::TOP_LEFT,"Current Raster Has an invalid Camera");
+    else glLabel::render2D(painter,glLabel::TOP_LEFT,"Current TrackBall Has an invalid Camera");
     return;
   }
 

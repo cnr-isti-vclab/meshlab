@@ -103,7 +103,7 @@ public:
   void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);
   void DrawVertLabel(MeshModel &m, QPainter *gla);
   void DrawFaceLabel(MeshModel &m, QPainter *gla);
-  void DrawCamera(MeshModel &m, vcg::Shotf &ls, bool drawFrustum, GLint textureId, QPainter *painter, QFont qf);
+  void DrawCamera(MeshModel &m, vcg::Shotf &ls, bool drawFrustum, int cameraSourceId, QPainter *painter, QFont qf);
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
 
