@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>462</height>
+    <width>353</width>
+    <height>491</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -120,7 +120,7 @@
    <widget class="QPushButton" name="fillAttrMeshPushButton">
     <property name="geometry">
      <rect>
-      <x>330</x>
+      <x>300</x>
       <y>30</y>
       <width>31</width>
       <height>27</height>
@@ -159,8 +159,8 @@
    <widget class="QPushButton" name="refreshImpostorsPushButton">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>410</y>
+      <x>100</x>
+      <y>370</y>
       <width>131</width>
       <height>27</height>
      </rect>
@@ -172,8 +172,8 @@
    <widget class="QPushButton" name="toggleExtrPushButton">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>410</y>
+      <x>10</x>
+      <y>370</y>
       <width>93</width>
       <height>27</height>
      </rect>
@@ -185,9 +185,9 @@
    <widget class="QPushButton" name="toggleShowTouchedPushButton">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>410</y>
-      <width>151</width>
+      <x>90</x>
+      <y>440</y>
+      <width>111</width>
       <height>27</height>
      </rect>
     </property>
@@ -265,8 +265,8 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>382</y>
-      <width>151</width>
+      <y>440</y>
+      <width>91</width>
       <height>31</height>
      </rect>
     </property>
@@ -277,8 +277,8 @@
    <widget class="QPushButton" name="verifyPushButton">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>382</y>
+      <x>200</x>
+      <y>440</y>
       <width>91</width>
       <height>31</height>
      </rect>
@@ -307,7 +307,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>350</y>
+      <y>340</y>
       <width>61</width>
       <height>22</height>
      </rect>
@@ -329,7 +329,7 @@
     <property name="geometry">
      <rect>
       <x>70</x>
-      <y>350</y>
+      <y>340</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -343,7 +343,7 @@
      <rect>
       <x>10</x>
       <y>310</y>
-      <width>69</width>
+      <width>141</width>
       <height>22</height>
      </rect>
     </property>

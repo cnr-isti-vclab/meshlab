@@ -170,14 +170,14 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 		glPopAttrib();
 	}else{
 
-		ocme->Render(impostorRenderMode);
+			ocme->Render(impostorRenderMode);
 
-		if(showTouched){
-				for(unsigned int i  = 0; i < ocme->touched_cells.size(); ++i){
-		 DrawCellSel( ocme->touched_cells[i],1);
-		 ocme->GetCell(ocme->touched_cells[i],false)->impostor->Render(false);
-	}
-		}
+		//if(showTouched){
+		//		for(unsigned int i  = 0; i < ocme->touched_cells.size(); ++i){
+		//			 DrawCellSel( ocme->touched_cells[i],1);
+		//			 ocme->GetCell(ocme->touched_cells[i],false)->impostor->Render(false);
+		//	}
+		//}
 
 		if(isToSelect){
 				isToSelect = false;
@@ -213,6 +213,7 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 	// if mouse has been pressed do the picking
 	if ( pick )
 	{
+
 		pick = false;
 		std::vector<CellKey*> results;
 		if ( vcg::Pick ( pickx, gla->height()-picky, all_keys,results, DrawCell /*DrawImpostor*/) )
@@ -223,35 +224,36 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 	}
 
  
-	DrawCellsToEdit();
 	if(isDragging)
 			DrawXORRect(gla);
+	else
+			DrawCellsToEdit();
  
 
 	rendering.unlock();
 
-#ifndef _RELEASED_
-	if(ocme_loaded){
-			glPushAttrib ( GL_ALL_ATTRIB_BITS );
-			glMatrixMode(GL_PROJECTION); glPushMatrix();glLoadIdentity();
-			glMatrixMode(GL_MODELVIEW); glPushMatrix();glLoadIdentity();
-			glDisable ( GL_DEPTH_TEST );
-			glColor3f ( 1,1,1 );
-			QString msg ( "#poly " );
-			msg.append ( QString().setNum (  n_poly ) );
-			gla->renderText ( 20, 15,  msg );
-
-			msg= QString( "#cells " )+ QString().setNum(ocme->cells.size());
-			gla->renderText ( 20, 30,  msg );
-
-			msg= QString( "#roots " )+ QString().setNum(ocme->octree_roots.size());
-			gla->renderText ( 20, 45,  msg );
-
-			glMatrixMode(GL_PROJECTION); glPopMatrix();
-			glMatrixMode(GL_MODELVIEW); glPopMatrix();
-			glPopAttrib();
-	}
-#endif
+//#ifndef _RELEASED_
+//	if(ocme_loaded){
+//			glPushAttrib ( GL_ALL_ATTRIB_BITS );
+//			glMatrixMode(GL_PROJECTION); glPushMatrix();glLoadIdentity();
+//			glMatrixMode(GL_MODELVIEW); glPushMatrix();glLoadIdentity();
+//			glDisable ( GL_DEPTH_TEST );
+//			glColor3f ( 1,1,1 );
+//			QString msg ( "#poly " );
+//			msg.append ( QString().setNum (  n_poly ) );
+//			gla->renderText ( 20, 15,  msg );
+//
+//			msg= QString( "#cells " )+ QString().setNum(ocme->cells.size());
+//			gla->renderText ( 20, 30,  msg );
+//
+//			msg= QString( "#roots " )+ QString().setNum(ocme->octree_roots.size());
+//			gla->renderText ( 20, 45,  msg );
+//
+//			glMatrixMode(GL_PROJECTION); glPopMatrix();
+//			glMatrixMode(GL_MODELVIEW); glPopMatrix();
+//			glPopAttrib();
+//	}
+//#endif
 }
 
 void OcmeEditPlugin::drawFace(CMeshO::FacePointer , MeshModel &, GLArea * )

@@ -144,7 +144,7 @@ void OCME::DropEdited(  ){
 		++generic_bool; // mark cells taken for editing
 }
 int OCME::ComputeLevel(const float & l){
-	return   (int)( std::log(((float)this->params.side_factor) *  float(l)   ) / log(2.f)); 
+	return   (int) floor( std::log(((float)this->params.side_factor) *  float(l)   ) / log(2.f)); 
 }
 
 

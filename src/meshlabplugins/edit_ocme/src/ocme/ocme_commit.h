@@ -247,13 +247,22 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		}
 
 		// import all the attributes specified
-		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)if( lockedV[*vi]==0)
+		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)if( lockedV[*vi]==0){
+			// for the old copies
 			for(GISet::CopiesIterator ci = gPosV[*vi].giset.begin();ci != gPosV[*vi].giset.end();++ci){
 				if( (c==NULL) || !(c->key == (*ci).first)) c = GetCell((*ci).first,false);
 				RAssert(c);
 				(*c->vert)[(*ci).second].P() = (*vi).cP();
 				attr_map.ImportVertex(c,*vi,(*ci).second);
 			}
+			// for the new copies
+			for(GISet::CopiesIterator ci = gPosVNew[*vi].giset.begin();ci != gPosVNew[*vi].giset.end();++ci){
+				if( (c==NULL) || !(c->key == (*ci).first)) c = GetCell((*ci).first,false);
+				RAssert(c);
+				(*c->vert)[(*ci).second].P() = (*vi).cP();
+				attr_map.ImportVertex(c,*vi,(*ci).second);
+			}
+		}
 
 		/* update gPosV by removing deleted vertices */
 			{

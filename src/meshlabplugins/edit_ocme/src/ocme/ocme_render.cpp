@@ -15,10 +15,6 @@ int COff(const int & h);
 
 void DrawCellSel ( CellKey & ck, int mode = 0 )
 {
-
-	 glPushAttrib(GL_ALL_ATTRIB_BITS);
-	 glEnable(GL_COLOR_MATERIAL);
-	//glDisable(GL_LIGHTING);
 	vcg::Point3f p = ck.P3f();
 	int  lev = ck.h;
 	float stepf = ( lev>0 ) ? ( 1<<lev ) :  1.f/ ( float ) ( 1<< ( -lev ) ) ;
@@ -56,8 +52,7 @@ void DrawCellSel ( CellKey & ck, int mode = 0 )
 	}
 
 	glPopMatrix();
-	 glDisable(GL_COLOR_MATERIAL);
-	 glPopAttrib();
+
 }
 
 void OCME::InitRender()
@@ -319,9 +314,10 @@ void OCME::Render(int impostorRenderMode){
 		// (*i)->Render(this->renderParams.render_subcells);
 	 if(useSplatting)
 	 {
-
+		 glPushAttrib(GL_ALL_ATTRIB_BITS);
 		 splat_renderer.Render(positions,normals,colors,radiuses,vcg::GLW::ColorMode::CMPerMesh,
 			 vcg::GLW::TextureMode::TMNone);
+		 glPopAttrib();
 	 }
 		
 	 renderCache.controller.updatePriorities();
