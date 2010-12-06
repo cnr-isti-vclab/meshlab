@@ -76,13 +76,17 @@ void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParam
   }
 }		
 		
-bool SampleMeshDecoratePlugin::startDecorate( QAction * action, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * /*parent*/)
+bool SampleMeshDecoratePlugin::startDecorate( QAction * action, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * gla)
 {
   switch(ID(action)){
     case DP_SHOW_CUBEMAPPED_ENV :
     if(parset->findParameter(CubeMapPathParam())== NULL) qDebug("CubeMapPath was not setted!!!");
       cubemapFileName = parset->getString(CubeMapPathParam());
     break;
+  case DP_SHOW_GRID:
+    connect(gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Shotf)));
+    connect(this,SIGNAL(askViewerShot(QString)),gla,SLOT(sendViewerShot(QString)));
+  break;
   }
 	return true;
 }
@@ -100,7 +104,8 @@ void SampleMeshDecoratePlugin::decorate(QAction *a, MeshDocument &m, RichParamet
         glewInit();
         bool ret = cm.Load(qPrintable(cubemapFileName));
         lastname=cubemapFileName;
-        if(! ret ) QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + cubemapFileName );
+        if(! ret ) return;
+        //QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + cubemapFileName );
         cm.radius=10;
       }
 			if(!cm.IsValid()) return;
@@ -127,6 +132,7 @@ void SampleMeshDecoratePlugin::decorate(QAction *a, MeshDocument &m, RichParamet
     } break;
   case DP_SHOW_GRID :
     {
+      emit this->askViewerShot("me");
       Box3f bb=m.bbox();
       float scaleBB = parset->getFloat(BoxRatioParam());
       bb.Offset((bb.max-bb.min)*(scaleBB-1.0));
@@ -146,7 +152,7 @@ void DrawGridPlane(int axis, int side,
 
   Point3f p1,p2;
 
-  p1[zAxis]=p2[zAxis] = side ? minP[zAxis] : maxP[zAxis] ;
+  p1[zAxis]=p2[zAxis] = side ? maxP[zAxis] : minP[zAxis] ;
   glLineWidth(0.5f);
   glBegin(GL_LINES);
   // first draw the vertical lines
@@ -193,11 +199,33 @@ void DrawGridPlane(int axis, int side,
   glEnd();
 
 }
+/* return true if the side of a box is front facing with respet of the give viewpoint.
+   side 0, axis i == min on than i-th axis
+   side 1, axis i == min on than i-th axis
+  qyuesto capita se il prodotto scalare tra il vettore cnormale entro della faccia
+ */
 bool FrontFacing(Point3f viewPos,
                  int axis, int side,
                  Point3f minP, Point3f maxP)
 {
-  return true;
+  assert (side==0 || side ==1);
+  assert (axis>=0 && axis < 3);
+  Point3f N(0,0,0);
+  Point3f C = (minP+maxP)/2.0;
+
+  if(side == 1) {
+      C[axis] = maxP[axis];
+      N[axis]=-1;
+  }
+
+  if(side == 0) {
+    C[axis] = minP[axis];
+    N[axis]=1;
+  }
+  Point3f vpc = viewPos-C;
+//  qDebug("FaceCenter %f %f %f - %f %f %f",C[0],C[1],C[2],N[0],N[1],N[2]);
+//  qDebug("VPC        %f %f %f",vpc[0],vpc[1],vpc[2]);
+  return vpc*N > 0;
 }
 
 void SampleMeshDecoratePlugin::DrawGriddedCube(const Box3f &bb, float majorTick, float minorTick, GLArea *gla)
@@ -216,14 +244,16 @@ glDisable(GL_LIGHTING);
 glEnable(GL_LINE_SMOOTH);
 glEnable(GL_BLEND);
 glDepthMask(GL_FALSE);
-Point3f viewPos ;//= gla->getViewPos();
+Point3f viewPos = this->curShot.GetViewPoint();
 qDebug("Current camera pos %f %f %f",viewPos[0],viewPos[1],viewPos[2]);
 for (int ii=0;ii<3;++ii)
-  for(int jj=0;jj<1;++jj)
-    if(FrontFacing(viewPos,ii,jj,minP,maxP))
+  for(int jj=0;jj<2;++jj)
+    if(!FrontFacing(viewPos,ii,jj,minP,maxP))
         DrawGridPlane(ii,jj,minP,maxP,minG,maxG,10,1);
 
-glPopAttrib();
+  glPopAttrib();
 }
+
+void  SampleMeshDecoratePlugin::setValue(QString name, vcg::Shotf val) {curShot=val;}
 
 Q_EXPORT_PLUGIN(SampleMeshDecoratePlugin)
