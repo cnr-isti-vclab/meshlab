@@ -281,6 +281,7 @@ Section "MainSection" SEC01
   File "${QT_BASE}\bin\QtXml4.dll"
   File "${QT_BASE}\bin\QtNetwork4.dll"
   File "${QT_BASE}\bin\QtScript4.dll"
+  File "${QT_BASE}\bin\QtXmlPatterns4.dll"
   ;File "C:\MinGW\bin\mingwm10.dll"
   ;File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
   ;File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"
