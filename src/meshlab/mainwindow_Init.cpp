@@ -325,11 +325,11 @@ void MainWindow::createActions()
 	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
 
 	showFilterScriptAct = new QAction(tr("Show current filter script"),this);
-	showFilterScriptAct->setEnabled(true);
+	showFilterScriptAct->setEnabled(false);
 	connect(showFilterScriptAct, SIGNAL(triggered()), this, SLOT(showFilterScript()));
 
 	showScriptEditAct = new QAction(tr("Script Editor"),this);
-	showScriptEditAct->setEnabled(true);
+	showScriptEditAct->setEnabled(false);
 	connect(showScriptEditAct, SIGNAL(triggered()), this, SLOT(showScriptEditor()));
 
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
@@ -543,21 +543,21 @@ void MainWindow::createMenus()
 void MainWindow::fillFilterMenu()
 {
 	// Connects the events of the actions within colorize to the method which shows their tooltip
-	QMenu *filterMenuSelect = filterMenu->addMenu(tr("Selection"));
-	QMenu *filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));
-	 filterMenuCreate = filterMenu->addMenu(tr("Create New Mesh Layer"));
-	QMenu *filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing, simplification and reconstruction"));
-	QMenu *filterMenuPolygonal = filterMenu->addMenu(tr("Polygonal and Quad Mesh"));
-	QMenu *filterMenuColorize = filterMenu->addMenu(tr("Color Creation and Processing"));
-	QMenu *filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
-	QMenu *filterMenuQuality = filterMenu->addMenu(tr("Quality Measure and computations"));
-	QMenu *filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
-	 filterMenuLayer = filterMenu->addMenu(tr("Layer and Attribute Management"));
-	QMenu *filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
-	QMenu *filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
-	QMenu *filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
-	QMenu *filterMenuTexture = filterMenu->addMenu(tr("Texture"));
-  QMenu *filterMenuCamera = filterMenu->addMenu(tr("Camera"));
+	filterMenuSelect = filterMenu->addMenu(tr("Selection"));
+	filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));
+	filterMenuCreate = filterMenu->addMenu(tr("Create New Mesh Layer"));
+	filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing, simplification and reconstruction"));
+	filterMenuPolygonal = filterMenu->addMenu(tr("Polygonal and Quad Mesh"));
+	filterMenuColorize = filterMenu->addMenu(tr("Color Creation and Processing"));
+	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
+	filterMenuQuality = filterMenu->addMenu(tr("Quality Measure and computations"));
+	filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
+	filterMenuLayer = filterMenu->addMenu(tr("Layer and Attribute Management"));
+	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
+	filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
+	filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
+	filterMenuTexture = filterMenu->addMenu(tr("Texture"));
+	filterMenuCamera = filterMenu->addMenu(tr("Camera"));
 
 	connect(filterMenu, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
 

@@ -205,6 +205,31 @@ void MainWindow::setColorMode(QAction *qa)
   if(qa->text() == tr("Per &Face"))			GLA()->setColorMode(GLW::CMPerFace);
 }
 
+void MainWindow::activateSubFiltersMenu( const bool create,const bool act )
+{
+	showFilterScriptAct->setEnabled(act);
+	showScriptEditAct->setEnabled(act);
+	filterMenuSelect->setEnabled(act);
+	filterMenuClean->setEnabled(act);
+	//menu create is always activated
+	if (create)
+		filterMenuCreate->setEnabled(true);
+	else
+		filterMenuCreate->setEnabled(act);
+	filterMenuRemeshing->setEnabled(act);
+	filterMenuPolygonal->setEnabled(act);
+	filterMenuColorize->setEnabled(act);
+	filterMenuSmoothing->setEnabled(act);
+	filterMenuQuality->setEnabled(act); 
+	filterMenuNormal->setEnabled(act);
+	filterMenuLayer->setEnabled(act);
+	filterMenuRangeMap->setEnabled(act);
+	filterMenuPointSet->setEnabled(act);
+	filterMenuSampling->setEnabled(act);
+	filterMenuTexture->setEnabled(act); 
+	filterMenuCamera->setEnabled(act);
+}
+
 void MainWindow::updateMenus()
 {
 
@@ -221,6 +246,8 @@ void MainWindow::updateMenus()
 	saveAsAct->setEnabled(active);
 	saveSnapshotAct->setEnabled(active);
 	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
+	if (!filterMenu->actions().isEmpty())
+		activateSubFiltersMenu(false,active);
 	editMenu->setEnabled(active && !editMenu->actions().isEmpty());
 	renderMenu->setEnabled(active);
 	fullScreenAct->setEnabled(active);
@@ -1262,13 +1289,16 @@ bool MainWindow::openProject(QString fileName)
 
 GLArea* MainWindow::newDocument()
 {
-  MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
-  connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
-  GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
-  mvcont->addView(gla, Qt::Horizontal);
-  mdiarea->addSubWindow(gla->mvc);
-  if(mdiarea->isVisible()) gla->mvc->showMaximized();
-  return gla;
+	filterMenu->setEnabled(!filterMenu->actions().isEmpty());
+	if (!filterMenu->actions().isEmpty())
+		activateSubFiltersMenu(true,false);
+	MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
+	connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+	GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
+	mvcont->addView(gla, Qt::Horizontal);
+	mdiarea->addSubWindow(gla->mvc);
+	if(mdiarea->isVisible()) gla->mvc->showMaximized();
+	return gla;
 }
 
 bool MainWindow::open(QString fileName, GLArea *gla)

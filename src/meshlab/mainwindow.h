@@ -62,7 +62,7 @@ public:
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);
 	const QString appName() const {return tr("MeshLab v")+appVer(); }
-  const QString appVer() const {return tr("1.3.0b"); }
+  const QString appVer() const {return tr("1.3.0"); }
 
 signals:
 	void dispatchCustomSettings(RichParameterSet& rps);
@@ -129,6 +129,7 @@ private slots:
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
 	void updateMenus();
+	void activateSubFiltersMenu(const bool create,const bool act);
 	void updateStdDialog();
 	void setSplit(QAction *qa);
 	void setUnsplit();
@@ -261,8 +262,23 @@ private:
 	///////// Menus ///////////////
 	QMenu *fileMenu;
   QMenu *filterMenu;
-  QMenu *filterMenuLayer;
+
+  QMenu *filterMenuSelect;
+  QMenu *filterMenuClean;
   QMenu *filterMenuCreate;
+  QMenu *filterMenuRemeshing;
+  QMenu *filterMenuPolygonal;
+  QMenu *filterMenuColorize;
+  QMenu *filterMenuSmoothing;
+  QMenu *filterMenuQuality; 
+  QMenu *filterMenuLayer;
+  QMenu *filterMenuNormal;
+  QMenu *filterMenuRangeMap;
+  QMenu *filterMenuPointSet;
+  QMenu *filterMenuSampling;
+  QMenu *filterMenuTexture; 
+  QMenu *filterMenuCamera;
+
 	QMenu *editMenu;
 
   //Render Menu and SubMenu ////
