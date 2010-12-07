@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.3.0b"
+!define PRODUCT_VERSION "1.3.0"
 !define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -224,6 +224,7 @@ Section "MainSection" SEC01
   File "${QT_BASE}\bin\QtXml4.dll"
   File "${QT_BASE}\bin\QtNetwork4.dll"
   File "${QT_BASE}\bin\QtScript4.dll"
+  File "${QT_BASE}\bin\QtXmlPatterns4.dll"
   ;File "C:\MinGW\bin\mingwm10.dll"
   File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
   File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"
