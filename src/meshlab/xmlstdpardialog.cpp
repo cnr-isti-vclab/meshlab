@@ -402,12 +402,12 @@ void XMLCheckBoxWidget::collectWidgetValue()
 
 }
 
-void XMLCheckBoxWidget::setWidgetExpression( const QString& nv )
+void XMLCheckBoxWidget::setWidgetExpression( const QString& /*nv*/ )
 {
 
 }
 
-void XMLCheckBoxWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+void XMLCheckBoxWidget::updateWidget( const XMLFilterInfo::XMLMap& /*xmlWidgetTag*/ )
 {
 
 }
@@ -590,12 +590,12 @@ void XMLAbsWidget::collectWidgetValue()
 	//rp->val->set(FloatValue(float(absSB->value())));
 }
 
-void XMLAbsWidget::setWidgetExpression( const QString& nv )
+void XMLAbsWidget::setWidgetExpression( const QString& /*nv*/ )
 {
 
 }
 
-void XMLAbsWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+void XMLAbsWidget::updateWidget( const XMLFilterInfo::XMLMap& /*xmlWidgetTag*/ )
 {
 
 }

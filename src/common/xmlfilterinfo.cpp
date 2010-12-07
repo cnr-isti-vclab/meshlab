@@ -69,7 +69,7 @@ QStringList XMLFilterInfo::filterNames() const
 	}
 	catch(QueryException e)
 	{
-		qDebug(e.what());
+    qDebug("Caught a QueryException %s",e.what());
 	}
 	
 }
@@ -87,7 +87,7 @@ QString XMLFilterInfo::filterHelp( const QString& filterName) const
 	}
 	catch(QueryException q)
 	{
-		qDebug(q.what());
+    qDebug("Caught a QueryException %s",q.what());
 	}
 }
 
@@ -105,7 +105,7 @@ QString XMLFilterInfo::filterAttribute( const QString& filterName,const QString&
 	}	
 	catch (QueryException e)
 	{
-		qDebug(e.what());
+    qDebug("Caught a QueryException %s",e.what());
 	}
 }
 
@@ -154,7 +154,7 @@ XMLFilterInfo::XMLMapList XMLFilterInfo::filterParametersExtendedInfo( const QSt
 	}
 	catch (QueryException e)
 	{
-		qDebug(e.what());
+    qDebug("Caught a QueryException %s",e.what());
 	}
 }
 
@@ -218,7 +218,7 @@ XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterGui( const QString& filterNa
 	}
 	catch(QueryException e)
 	{
-		qDebug(e.what());
+    qDebug("Caught a QueryException %s",e.what());
 	}
 }
 
@@ -235,7 +235,7 @@ QString XMLFilterInfo::filterParameterHelp( const QString& filterName,const QStr
 	}
 	catch (QueryException e)
 	{
-		qDebug(e.what());
+    qDebug("Caught a QueryException %s",e.what());
 	}
 }
 
@@ -266,7 +266,7 @@ XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterExtendedInfo( const QString&
 	}
 	catch (QueryException e)
 	{
-		qDebug(e.what());
+    qDebug("Caught a QueryException %s",e.what());
 	}
 }
 
@@ -313,6 +313,6 @@ QString XMLFilterInfo::filterParameterAttribute( const QString& filterName,const
 	}	
 	catch (QueryException e)
 	{
-		qDebug(e.what());
+    qDebug("Caught a QueryException %s",e.what());
 	}
 }
