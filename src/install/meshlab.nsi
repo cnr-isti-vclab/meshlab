@@ -121,6 +121,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_meshing.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_mls.dll"
   
+  File "${DISTRIB_FOLDER}/plugins\filter_photosynth.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_plymc.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_poisson.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_qhull.dll"
