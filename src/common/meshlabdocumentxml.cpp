@@ -25,7 +25,7 @@ QDomElement Matrix44fToXML(vcg::Matrix44f &m, QDomDocument &doc)
   for(int i=0;i<4;++i)
     Row[i] =QString("%1 %2 %3 %4 ").arg(m[i][0]).arg(m[i][1]).arg(m[i][2]).arg(m[i][3]);
 
-  matrixElem.setAttribute("Tr",Row[0]+Row[1]+Row[2]+Row[3]);
+  matrixElem.setNodeValue(Row[0]+Row[1]+Row[2]+Row[3]);
 
   return matrixElem;
 }
