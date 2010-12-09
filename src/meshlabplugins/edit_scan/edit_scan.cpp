@@ -3,6 +3,51 @@
 #include "wrap/qt/trackball.h" //QT2VCG trackball function
 #include "wrap/qt/to_string.h" //QT2VCG trackball function
 
+#define EDITSCANHACK
+#ifdef EDITSCANHACK
+    #include <stdio.h>
+    struct Sample{
+        Point3f p,n,v;
+        Sample(Point3f p, Point3f n, Point3f v){
+            this->p = p;
+            this->n = n;
+            this->v = v;
+        }
+    };
+    
+    vector<Sample> samples;
+    
+    void write_to_ply(){
+        FILE* fid = fopen( "/temp/output.ply", "w" );
+        if( fid == NULL ){
+            qDebug("The output cannot be opened!");
+            return;
+        }
+        
+        fprintf(fid, "ply\n");
+        fprintf(fid, "format ascii 1.0\n");
+        fprintf(fid, "element vertex %d\n", samples.size() );
+        fprintf(fid, "property float x\n");
+        fprintf(fid, "property float y\n");
+        fprintf(fid, "property float z\n");
+        fprintf(fid, "property float nx\n");
+        fprintf(fid, "property float ny\n");
+        fprintf(fid, "property float nz\n");
+        fprintf(fid, "property float vx\n");
+        fprintf(fid, "property float vy\n");
+        fprintf(fid, "property float vz\n");
+        fprintf(fid, "end_header\n");
+        for(int i=0; i<samples.size(); i++){
+            Point3f& p = samples[i].p;
+            Point3f& n = samples[i].n;
+            Point3f& v = samples[i].v;
+            fprintf(fid, "%f %f %f %f %f %f %f %f %f\n", p[0],p[1],p[2],n[0],n[1],n[2],v[0],v[1],v[2]);            
+        }
+        fclose(fid);       
+    }
+#endif 
+
+
 Point2f myGluProject( Point3f p ){
     // retrieve matrixes from the pipeline
     GLdouble mvMatrix_f[16];  glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix_f);
@@ -48,8 +93,8 @@ bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
     timer = 0;
 
     //--- Create a new model to store the scan cloud
-    cloud = new MeshModel(&md, "Scan cloud");
-
+    cloud = md.addNewMesh("Scan cloud",false);
+   
     //--- Instantiate the UI, and connect events
     widget = new Widget(gla->window());
     connect(widget, SIGNAL(laser_parameter_updated()),
@@ -76,7 +121,7 @@ void VirtualScan::laser_parameter_updated(){
     Point2f sto( gla->width()/2, gla->height()/2 ); sto+=delta;
     // float width = *md->mm()->cm.bbox.MaxDim()/100.0;
     qDebug("period: %d, samples: %d", period, numsamp);
-    qDebug() << toString(str) << " " << toString(sto);
+    // qDebug() << toString(str) << " " << toString(sto);
 
     //--- Create the geometry of the scanline
     gla->update(); // since we use gluproject
@@ -93,15 +138,18 @@ void VirtualScan::laser_parameter_updated(){
     gla->update();
 }
 void VirtualScan::EndEdit(MeshModel&, GLArea* ){
-
     delete cloud;
     delete widget;
 }
 
 void VirtualScan::save_requested(){
-    md->addNewMesh("scan",cloud,false);
+#ifdef EDITSCANHACK
+    //--- Output model of "samples" to Ply file
+    write_to_ply();
+#else
     //--- Create a new model to store the scan cloud
-    cloud = new MeshModel(this->md, "Scan cloud");
+    cloud = md->addNewMesh("Scan cloud",false);
+#endif
 }
 
 // This is called only when mouse is pressed at first during a drag or a click is received
@@ -137,37 +185,36 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
         cloud->glw.SetHintParamf(GLW::HNPPointSize,SCANPOINTSIZE);
         cloud->Render(GLW::DMPoints, GLW::CMPerMesh, GLW::TMNone);
     glEnable(GL_LIGHTING);
-    if(widget->getDrawLineFlag())
-    {
-    //--- Shows the view directions of the scanned samples
-    // The "decorate plugin does nothing inside GLW, but does it directly
-    // put these before ->Render
-    //    cloud->updateDataMask(MeshModel::MM_VERTNORMAL);
-    //    cloud->glw.cnm = GLW::NMPerVert;
-    float LineLen = mm.cm.bbox.Diag()/20.0;
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_LIGHTING);
-    glBegin(GL_LINES);
-        glColor4f(.4f,.4f,1.f,.6f);
-        for(CMeshO::VertexIterator vi=cloud->cm.vert.begin(); vi!=cloud->cm.vert.end(); ++vi){
-            glVertex((*vi).P());
-            glVertex((*vi).P()+(*vi).N()*LineLen);
-        }
-    glEnd();
-  }
+    if(widget->getDrawLineFlag()){
+        //--- Shows the view directions of the scanned samples
+        // The "decorate plugin does nothing inside GLW, but does it directly
+        // put these before ->Render
+        //    cloud->updateDataMask(MeshModel::MM_VERTNORMAL);
+        //    cloud->glw.cnm = GLW::NMPerVert;
+        float LineLen = mm.cm.bbox.Diag()/20.0;
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_LIGHTING);
+        glBegin(GL_LINES);
+            glColor4f(.4f,.4f,1.f,.6f);
+            for(CMeshO::VertexIterator vi=cloud->cm.vert.begin(); vi!=cloud->cm.vert.end(); ++vi){
+                glVertex((*vi).P());
+                glVertex((*vi).P()+(*vi).N()*LineLen);
+            }
+        glEnd();
+    }
     //--- Draw the laser beam (just to help interfacing)
     sline.render(gla);
 }
 
 ScanLine::ScanLine(int N, Point2f& srt, Point2f& end ){
     float delta = 1.0 / (N-1);
-    qDebug() << "Scanpoint list: ";
+    // qDebug() << "Scanpoint list: ";
     float alpha=0;
     for( int i=0; i<N; i++, alpha+=delta ){
         Point2f curr = srt*(1-alpha) + end*alpha;
         soff.push_back(curr);
-        qDebug() << " - " << toString( curr );
+        // qDebug() << " - " << toString( curr );
         Point2i currI( curr[0], curr[1] );
         bbox.Add(currI);
     }
@@ -206,6 +253,12 @@ void VirtualScan::scanpoints(){
         tri::Allocator<CMeshO>::AddVertices(cloud->cm,1);
         cloud->cm.vert.back().P() = sample;
         cloud->cm.vert.back().N() = viewdir;
+        
+        #ifdef EDITSCANHACK
+            // TODO: How compute normal from depth buffer?
+            Point3f normal(0,0,0); 
+            samples.push_back(Sample(sample,normal,viewdir));        
+        #endif    
     }
     delete [] buffer;
 }
