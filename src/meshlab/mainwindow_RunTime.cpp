@@ -244,6 +244,7 @@ void MainWindow::updateMenus()
 	reloadAct->setEnabled(active);
 	saveAct->setEnabled(active);
 	saveAsAct->setEnabled(active);
+	saveProjectAct->setEnabled(active);
 	saveSnapshotAct->setEnabled(active);
 	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
 	if (!filterMenu->actions().isEmpty())
