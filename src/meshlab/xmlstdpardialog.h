@@ -2,6 +2,8 @@
 #define MESHLAB_XMLSTDPARDIALOG
 
 #include "../common/xmlfilterinfo.h"
+#include "../common/mlparameter.h"
+#include "../common/interfaces.h"
 #include<QCheckBox>
 #include<QPushButton>
 #include<QRadioButton>
@@ -12,6 +14,7 @@
 #include<QGridLayout>
 #include<QDockWidget>
 #include<QTextEdit>
+#include<QLabel>
 
 //
 class XMLMeshLabWidget : public QWidget

@@ -35,6 +35,7 @@
 #include <QStringList>
 #include <QColorDialog>
 #include "../common/pluginmanager.h"
+#include "../common/interfaces.h"
 #include "glarea.h"
 #include "layerDialog.h"
 #include "stdpardialog.h"
@@ -58,6 +59,7 @@ class MainWindow : public QMainWindow, MainWindowInterface
 public:
 	// callback function to execute a filter
 	void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview);
+	void executeFilter(MeshLabXMLFilterContainer* mfc, XMLFilterInfo::XMLMapList & mplist, bool  isPreview);
 
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);

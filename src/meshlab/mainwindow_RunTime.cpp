@@ -1007,6 +1007,105 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 }
 
+void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, XMLFilterInfo::XMLMapList& mplist, bool isPreview)
+{
+
+	//MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
+
+	//qb->show();
+	//iFilter->setLog(&meshDoc()->Log);
+
+	//// Ask for filter requirements (eg a filter can need topology, border flags etc)
+	//// and statisfy them
+	//qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+	//MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
+	//int req=iFilter->getRequirements(action);
+	//meshDoc()->mm()->updateDataMask(req);
+	//qApp->restoreOverrideCursor();
+
+	//// (3) save the current filter and its parameters in the history
+	//if(!isPreview)
+	//{
+	//	meshDoc()->filterHistory.actionList.append(qMakePair(action->text(),params));
+	//	meshDoc()->Log.ClearBookmark();
+	//}
+	//else
+	//	meshDoc()->Log.BackToBookmark();
+	//// (4) Apply the Filter
+	//bool ret;
+	//qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+	//QTime tt; tt.start();
+	//meshDoc()->setBusy(true);
+	//RichParameterSet MergedEnvironment(params);
+	//MergedEnvironment.join(currentGlobalParams);
+
+	////GLA() is only the parent
+	//QGLWidget* filterWidget = new QGLWidget(GLA());
+	//QGLFormat defForm = QGLFormat::defaultFormat();
+	//iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
+	//bool retres = iFilter->glContext->create(filterWidget->context());
+	//ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
+
+	//meshDoc()->setBusy(false);
+
+	//qApp->restoreOverrideCursor();
+
+	//// (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
+
+	//if(ret)
+	//{
+	//	meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
+	//	MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
+	//	if(GLA())
+	//	{
+	//		GLA()->setWindowModified(true);
+	//		GLA()->setLastAppliedFilter(action);
+	//	}
+	//	lastFilterAct->setText(QString("Apply filter ") + action->text());
+	//	lastFilterAct->setEnabled(true);
+	//}
+	//else // filter has failed. show the message error.
+	//{
+	//	QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(action->text())+iFilter->errorMsg()); // text
+	//	MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
+	//}
+	//// at the end for filters that change the color, or selection set the appropriate rendering mode
+	//if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
+	//	GLA()->setColorMode(vcg::GLW::CMPerFace);
+	//	meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+	//}
+	//if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
+	//	GLA()->setColorMode(vcg::GLW::CMPerVert);
+	//	meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+	//}
+	//if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
+	//{
+	//	GLA()->setColorMode(vcg::GLW::CMPerMesh);
+	//	meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
+	//}
+	//if(iFilter->getClass(action) & MeshFilterInterface::Selection )
+	//{
+	//	GLA()->setSelectVertRendering(true);
+	//	GLA()->setSelectFaceRendering(true);
+	//}
+	//if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
+	//	GLA()->resetTrackBall();
+
+	//if(iFilter->getClass(action) & MeshFilterInterface::Texture )
+	//	GLA()->updateTexture();
+
+	//qb->reset();
+
+	//updateMenus();
+	//GLA()->update(); //now there is the container
+	//MultiViewer_Container* mvc = currentViewContainer();
+	//if(mvc)
+	//	mvc->updateAllViewer();
+
+}
+
+
+
 // Edit Mode Managment
 // At any point there can be a single editing plugin active.
 // When a plugin is active it intercept the mouse actions.
