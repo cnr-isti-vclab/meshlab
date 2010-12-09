@@ -3,7 +3,7 @@
 
 #include<QStringList>
 #include<QtXmlPatterns/QAbstractMessageHandler>
-#include "interfaces.h"
+#include<QAction>
 
 class XMLMessageHandler : public QAbstractMessageHandler
 {
@@ -141,6 +141,8 @@ public:
 
 	QStringList query(const QString& qry) const;
 };
+
+class MeshLabFilterInterface;
 
 struct MeshLabXMLFilterContainer
 {

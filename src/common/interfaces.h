@@ -36,6 +36,7 @@
 #include "GLLogStream.h"
 #include "meshmodel.h"
 #include "mlparameter.h"
+#include "xmlfilterinfo.h"
 
 class QWidget;
 class QGLWidget;
@@ -48,6 +49,7 @@ class RenderMode;
 class GLArea;
 class QScriptEngine;
 
+
 /** The MainWindowInterface class defines just the executeFilter() callback function
     that is invoked by the standard parameter input dialog.
     It is used as base class of the MainWindow.
@@ -55,7 +57,8 @@ class QScriptEngine;
 class MainWindowInterface
 {
 public:
-  virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){};
+  virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){}
+  virtual void executeFilter(QAction *, XMLFilterInfo::XMLMapList &, bool /* isPreview */){}
 };
 
 /** \brief The MeshLabInterface class is the base of all the plugin interfaces.
