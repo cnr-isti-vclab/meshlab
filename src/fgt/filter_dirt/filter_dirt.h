@@ -68,6 +68,7 @@ class FilterDirt : public QObject, public MeshFilterInterface
         virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
         virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
         virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
+        virtual int postCondition(QAction*) const;
         virtual FilterClass getClass(QAction *);
 
 

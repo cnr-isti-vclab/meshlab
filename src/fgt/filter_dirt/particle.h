@@ -37,6 +37,7 @@ class Particle{
     typedef typename MeshType::VertexType   VertexType;
     typedef typename MeshType::FaceType     FaceType;
     typedef typename MeshType::FacePointer  FacePointer;
+
 public:
     Particle(){
     mass=1.0f;

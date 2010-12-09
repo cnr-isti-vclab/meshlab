@@ -106,23 +106,29 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
     switch(ID(filter)){
 
     case FP_DIRT:{
+            MeshModel* m=md.getMesh(0);
+            if(m!=0){
             par.addParam(new RichPoint3f("dust_dir",Point3f(0,1,0),"Direction","Direction of the dust source"));
-            par.addParam(new RichInt("nparticles",10,"particles","Max Number of Dust Particles to Generate Per Face"));
+            par.addParam(new RichInt("nparticles",3,"particles","Max Number of Dust Particles to Generate Per Face"));
             par.addParam(new RichFloat("slippiness",1,"s","The surface slippines"));
             par.addParam(new RichFloat("adhesion",0.2,"k","Factor to model the general adhesion"));
+            par.addParam(new RichBool("draw_texture",false,"Draw Dust",""));
+            par.addParam(new RichBool("colorize_mesh",false,"Map to Color",""));
+            }
             break;
 
         }
     case FP_CLOUD_MOVEMENT:{
             MeshModel* m=md.getMesh(0);
-            m->cm.bbox.DimX();
+            if(m!=0){
             float perc=0.01;
             float max_value=m->cm.bbox.Dim()[m->cm.bbox.MaxDim()];
             par.addParam(new RichPoint3f("force_dir",Point3f(0,-1,0),"force","Direction of the force acting on the points cloud"));
             par.addParam(new RichAbsPerc("s_length",max_value*perc,0,max_value,"Movement Length",""));
-            //par.addParam(new RichPoint3f("velocity",Point3f(0,0,0),"v","Initial velocity of the particle"));
             par.addParam(new RichFloat("velocity",0,"v","Initial velocity of the particle"));
             par.addParam(new RichFloat("mass",1,"m","Mass of the particle"));
+            par.addParam(new RichBool("colorize_mesh",false,"Map to Color",""));
+        }
             break;
         }
     default:{
@@ -146,6 +152,8 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         Point3f dir=par.getPoint3f("dust_dir");
         float s=par.getFloat("slippiness");
         float k=par.getFloat("adhesion");
+        bool draw=par.getBool("draw_texture");
+        bool colorize=par.getBool("colorize_mesh");
         int n_p=par.getInt("nparticles");
 
         MeshModel* currMM=md.mm();
@@ -155,10 +163,16 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
                 return false;
         }
 
+        if(draw && !currMM->cm.HasPerWedgeTexCoord()){
+            errorMessage = "Current Mesh does not have per Wedge Tex Coordinates";
+            return false;
+
+        }
         vector<Point3f> dust_points;
         vector<Particle<CMeshO> > dust_particles;
 
         prepareMesh(currMM);
+
 
 
         ComputeNormalDustAmount(currMM,dir,k,s);
@@ -182,6 +196,10 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             ++dpi;
         }
 
+        if(draw) DrawDust(currMM,dmm);
+        if(colorize) ColorizeMesh(currMM);
+
+
         break;
         }
     case FP_CLOUD_MOVEMENT:{
@@ -202,14 +220,12 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             return false;
         }
 
-        float default_time=1;
-
         //Get Parameters
         Point3f dir=par.getPoint3f("force_dir");;
         float l =par.getAbsPerc("s_length");
         float v=par.getFloat("velocity");
         float m=par.getFloat("mass");
-
+        bool colorize=par.getBool("colorize_mesh");
         if(!HasPerVertexAttribute(cloud_mesh->cm,"ParticleInfo")){
             prepareMesh(base_mesh);
             //Associate every point to a mesh and a Particle to every point
@@ -217,8 +233,9 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         }
 
         //Move Cloud Mesh
-        MoveCloudMeshForward(cloud_mesh,dir,l,1);
+        MoveCloudMeshForward(cloud_mesh,dir,l,1,2);
 
+        if(colorize) ColorizeMesh(base_mesh);
         break;
         }
     default:{
@@ -230,6 +247,19 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
   return true;
 }//End applyFilter
 
+
+
+
+int FilterDirt::postCondition( QAction *a) const
+{
+        switch (ID(a)){
+        case FP_DIRT : return MeshModel::MM_UNKNOWN;
+        case FP_CLOUD_MOVEMENT : return MeshModel::MM_UNKNOWN;
+        default: assert(0);
+        }
+
+        return MeshModel::MM_NONE;
+}
 
 
 MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *filter)
