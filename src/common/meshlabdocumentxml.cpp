@@ -25,7 +25,8 @@ QDomElement Matrix44fToXML(vcg::Matrix44f &m, QDomDocument &doc)
   for(int i=0;i<4;++i)
     Row[i] =QString("%1 %2 %3 %4 ").arg(m[i][0]).arg(m[i][1]).arg(m[i][2]).arg(m[i][3]);
 
-  matrixElem.setNodeValue(Row[0]+Row[1]+Row[2]+Row[3]);
+  QDomText nd = doc.createTextNode(Row[0]+Row[1]+Row[2]+Row[3]);
+  matrixElem.appendChild(nd);
 
   return matrixElem;
 }
@@ -62,15 +63,18 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 				md.addNewMesh(filen);
 				label=mesh.attributes().namedItem("label").nodeValue();
 				md.mm()->setLabel(label);
-				QDomNode tr;
-				tr=mesh.firstChild();
+				QDomNode tr=mesh.firstChild();
+		
 				if(!tr.isNull() && QString::compare(tr.nodeName(),"MLMatrix44")==0)
 				{
 				    vcg::Matrix44f trm;
-					QStringList values =  tr.attributes().namedItem("Tr").nodeValue().split(" ", QString::SkipEmptyParts);
-					for(int y = 0; y < 4; y++)
-					  for(int x = 0; x < 4; x++)
-						  md.mm()->cm.Tr[y][x] = values[x + 4*y].toFloat();
+					if (tr.childNodes().size() == 1)
+					{
+						QStringList values =  tr.firstChild().nodeValue().split(" ", QString::SkipEmptyParts);
+						for(int y = 0; y < 4; y++)
+							for(int x = 0; x < 4; x++)
+								md.mm()->cm.Tr[y][x] = values[x + 4*y].toFloat();
+					}
 
 				}
 				mesh=mesh.nextSibling();
