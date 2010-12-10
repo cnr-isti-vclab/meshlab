@@ -98,14 +98,6 @@ public:
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
   QString getFileName() {return QString(mm()->shortName());}
-	void setFileName(QString name)	
-  {
-    mm()->setFileName(name);
-    setWindowTitle(QFileInfo(name).fileName()+tr("[*]"));
-	  
-    ss.basename=QFileInfo(getFileName()).baseName().append("Snap");
-  }
-	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 
 	void updateFps(float deltaTime);

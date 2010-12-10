@@ -1544,8 +1544,6 @@ bool MainWindow::open(QString fileName, GLArea *gla)
           //gla->meshDoc->addNewMesh(qPrintable(fileName),mm);
 
 					//gla->mm()->ioMask |= mask;				// store mask into model structure
-					gla->setFileName(mm->shortName());
-
 					if(mdiarea->isVisible()) gla->mvc->showMaximized();
 					setCurrentFile(fileName);
 
@@ -1726,7 +1724,7 @@ bool MainWindow::saveAs(QString fileName)
 
 		qApp->restoreOverrideCursor();
         //meshDoc()->mm()->fileName = fileName.toStdString();
-		GLA()->setFileName(fileName);
+    this->meshDoc()->mm()->setFileName(fileName);
 		QSettings settings;
 		int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
 		settings.setValue("savedMeshCounter",savedMeshCounter+1);
