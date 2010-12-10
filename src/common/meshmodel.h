@@ -258,7 +258,11 @@ public:
   /// the relative path with respect to the current project
   QString documentPath() const;
 
-  void setFileName(QString newFileName) {fullPathFileName = newFileName;}
+  void setFileName(QString newFileName) {
+    QFileInfo fi(newFileName);
+    if(!fi.isAbsolute()) qWarning("Someone is trying to put a non relative filename");
+    fullPathFileName = fi.absoluteFilePath();
+  }
   void setLabel(QString newName) {_label=newName;}
 
 public:
