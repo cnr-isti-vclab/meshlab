@@ -814,7 +814,7 @@ void MainWindow::startFilter()
 	{
 		MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
 		QString fname = action->text();
-		MeshLabXMLFilterContainer filt  = PM.stringXMLFilterMap.value(fname);
+		MeshLabXMLFilterContainer& filt  = PM.stringXMLFilterMap[fname];
 		try
 		{
 			QString filterClasses = filt.xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
@@ -827,12 +827,12 @@ void MainWindow::startFilter()
 			else
 			{
 				QString preCond = filt.xmlInfo->filterAttribute(fname,MLXMLElNames::filterPreCond);
-				QStringList preCondList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+				QStringList preCondList = preCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 				int preCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(preCondList);
 				if (!MeshLabFilterInterface::arePreCondsValid(preCondMask,(*meshDoc()->mm()),missingPreconditions))
 				{
 					QString enstr = missingPreconditions.join(",");
-					QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + filt.act->text() + "'</font> has not been applied.<br>"
+					QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + fname + "'</font> has not been applied.<br>"
 					  "Current mesh does not have <i>" + enstr + "</i>."));
 					return;
 				}
@@ -884,7 +884,7 @@ void MainWindow::startFilter()
 				// (2) Ask for filter parameters and eventally directly invoke the filter
 				// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
 				// if no dialog is created the filter must be executed immediately
-				if(! xmldialog->showAutoDialog(&filt, meshDoc(),  this, GLA()) )
+				if(! xmldialog->showAutoDialog(filt, meshDoc(),  this, GLA()) )
 				{
 					//RichParameterSet dummyParSet;
 					//executeFilter(action, dummyParSet, false);
@@ -1008,21 +1008,24 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 }
 
-void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, XMLFilterInfo::XMLMapList& mplist, bool isPreview)
+void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, FilterEnv& env, bool isPreview)
 {
 
-	//MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
-
-	//qb->show();
-	//iFilter->setLog(&meshDoc()->Log);
+	MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
+	QString fname = mfc->act->text();
+	qb->show();
+	iFilter->setLog(&meshDoc()->Log);
 
 	//// Ask for filter requirements (eg a filter can need topology, border flags etc)
 	//// and statisfy them
-	//qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-	//MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
+	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
 	//int req=iFilter->getRequirements(action);
-	//meshDoc()->mm()->updateDataMask(req);
-	//qApp->restoreOverrideCursor();
+	QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
+	QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+	int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
+	meshDoc()->mm()->updateDataMask(postCondMask);
+	qApp->restoreOverrideCursor();
 
 	//// (3) save the current filter and its parameters in the history
 	//if(!isPreview)
@@ -1033,44 +1036,46 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, XMLFilterInfo::XM
 	//else
 	//	meshDoc()->Log.BackToBookmark();
 	//// (4) Apply the Filter
-	//bool ret;
-	//qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-	//QTime tt; tt.start();
-	//meshDoc()->setBusy(true);
+	bool ret;
+	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+	QTime tt; tt.start();
+	meshDoc()->setBusy(true);
 	//RichParameterSet MergedEnvironment(params);
 	//MergedEnvironment.join(currentGlobalParams);
 
 	////GLA() is only the parent
-	//QGLWidget* filterWidget = new QGLWidget(GLA());
-	//QGLFormat defForm = QGLFormat::defaultFormat();
-	//iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
-	//bool retres = iFilter->glContext->create(filterWidget->context());
-	//ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
+	QGLWidget* filterWidget = new QGLWidget(GLA());
+	QGLFormat defForm = QGLFormat::defaultFormat();
+	iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
+	bool retres = iFilter->glContext->create(filterWidget->context());
+	ret=iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
 
-	//meshDoc()->setBusy(false);
+	meshDoc()->setBusy(false);
 
-	//qApp->restoreOverrideCursor();
+	qApp->restoreOverrideCursor();
 
 	//// (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
-	//if(ret)
-	//{
-	//	meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
-	//	MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
-	//	if(GLA())
-	//	{
-	//		GLA()->setWindowModified(true);
-	//		GLA()->setLastAppliedFilter(action);
-	//	}
-	//	lastFilterAct->setText(QString("Apply filter ") + action->text());
-	//	lastFilterAct->setEnabled(true);
-	//}
-	//else // filter has failed. show the message error.
-	//{
-	//	QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(action->text())+iFilter->errorMsg()); // text
-	//	MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
-	//}
-	//// at the end for filters that change the color, or selection set the appropriate rendering mode
+	if(ret)
+	{
+		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(fname),tt.elapsed());
+		MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
+		if(GLA())
+		{
+			GLA()->setWindowModified(true);
+			GLA()->setLastAppliedFilter(mfc->act);
+		}
+		lastFilterAct->setText(QString("Apply filter ") + fname);
+		lastFilterAct->setEnabled(true);
+	}
+	else // filter has failed. show the message error.
+	{
+		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(fname)/*+iFilter->errorMsg()*/); // text
+		MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
+	}
+	// at the end for filters that change the color, or selection set the appropriate rendering mode
+	QString filterClasses = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
+	QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 	//if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
 	//	GLA()->setColorMode(vcg::GLW::CMPerFace);
 	//	meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
@@ -1095,13 +1100,13 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, XMLFilterInfo::XM
 	//if(iFilter->getClass(action) & MeshFilterInterface::Texture )
 	//	GLA()->updateTexture();
 
-	//qb->reset();
+	qb->reset();
 
-	//updateMenus();
-	//GLA()->update(); //now there is the container
-	//MultiViewer_Container* mvc = currentViewContainer();
-	//if(mvc)
-	//	mvc->updateAllViewer();
+	updateMenus();
+	GLA()->update(); //now there is the container
+	MultiViewer_Container* mvc = currentViewContainer();
+	if(mvc)
+		mvc->updateAllViewer();
 
 }
 

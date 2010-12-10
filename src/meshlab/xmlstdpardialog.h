@@ -197,8 +197,9 @@ public:
 	void createFrame();
 	void loadFrameContent();
 
-	bool showAutoDialog(MeshLabXMLFilterContainer* mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
+	bool showAutoDialog(MeshLabXMLFilterContainer& mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic() const;
+	FilterEnv filtEnv;
 signals:
 	void dialogEvaluateExpression(const Expression& exp,Value** res);
 	//void expandView(bool exp);
@@ -216,7 +217,7 @@ private slots:
 private:
 	QFrame *qf;
 	XMLStdParFrame *stdParFrame;
-	QAction *curAction;
+	//QAction *curAction;
 	MeshModelState meshState;
 	MeshModelState meshCacheState;
 	QCheckBox *previewCB;
@@ -228,7 +229,6 @@ private:
 	MainWindowInterface *curmwi;
 	XMLFilterInfo::XMLMapList curParMap;
 	XMLFilterInfo::XMLMapList prevParMap;
-	FilterEnv filtEnv;
 	QWidget * curgla;
 	bool validcache;
 	bool showHelp;

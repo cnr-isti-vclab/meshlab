@@ -17,7 +17,7 @@ MeshLabXMLStdDialog::~MeshLabXMLStdDialog()
 
 void MeshLabXMLStdDialog::clearValues()
 {
-	curAction = NULL;
+	//curAction = NULL;
 	curModel = NULL;
 	curmfc = NULL;
 	curmwi = NULL;
@@ -109,20 +109,18 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	//setSizePolicy(QSizePolicy::Minimum,QSizePolicy::MinimumExpanding);
 }
 
-bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
+bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
 {
-	if (mfc == NULL) 
+	if (mfc.filterInterface == NULL)
 		return false;
-	if (mfc->filterInterface == NULL)
+	if (mfc.xmlInfo == NULL)
 		return false;
-	if (mfc->xmlInfo == NULL)
-		return false;
-	if (mfc->act == NULL)
+	if (mfc.act == NULL)
 		return false;
 
 	validcache = false;
-	curAction=mfc->act;
-	curmfc=mfc;
+	//curAction=mfc.act;
+	curmfc=&mfc;
 	curmwi=mwi;
 	curParMap.clear();
 	prevParMap.clear();
@@ -130,9 +128,9 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,MeshDocu
 	curMeshDoc = md;
 	curgla=gla;
 
-	QString fname = mfc->act->text();
+	QString fname = mfc.act->text();
 	//mfi->initParameterSet(action, *mdp, curParSet);
-  XMLFilterInfo::XMLMapList mplist = mfc->xmlInfo->filterParametersExtendedInfo(fname);
+  XMLFilterInfo::XMLMapList mplist = mfc.xmlInfo->filterParametersExtendedInfo(fname);
 	curParMap = mplist;
 	//curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
 	if(curParMap.isEmpty() && !isDynamic()) 
@@ -140,7 +138,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,MeshDocu
 
 	createFrame();
 	loadFrameContent();
-	QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
+	QString postCond = mfc.xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
 	QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 	curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
 	if(isDynamic())
@@ -155,7 +153,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer *mfc,MeshDocu
 
 void MeshLabXMLStdDialog::applyClick()
 {
-	QAction *q = curAction;
+	QAction *q = curmfc->act;
 	filtEnv.clear();
 	assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
 	for(int ii = 0;ii < curParMap.size();++ii)	
@@ -178,7 +176,8 @@ void MeshLabXMLStdDialog::applyClick()
 	//if ((isEqual) && (validcache))
 	//	meshCacheState.apply(curModel);
 	//else
-	//curmwi->executeFilter(curmfc, curParSet, false);
+	QString nm = curmfc->act->text();
+	curmwi->executeFilter(curmfc,filtEnv,false);
 	
 
 	if(curmask)	
