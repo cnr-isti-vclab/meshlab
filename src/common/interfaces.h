@@ -58,7 +58,7 @@ class MainWindowInterface
 {
 public:
   virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){}
-  virtual void executeFilter(QAction *, XMLFilterInfo::XMLMapList &, bool /* isPreview */){}
+  virtual void executeFilter(MeshLabXMLFilterContainer*, FilterEnv& , bool /* isPreview */){}
 };
 
 /** \brief The MeshLabInterface class is the base of all the plugin interfaces.
@@ -624,6 +624,7 @@ public:
 	MeshLabFilterInterface();
 	virtual ~MeshLabFilterInterface() {}
 
+	QGLContext* glContext;
 	static bool arePreCondsValid(const int filterPreConds,const MeshModel& m, QStringList &MissingItems);
 	static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
 
