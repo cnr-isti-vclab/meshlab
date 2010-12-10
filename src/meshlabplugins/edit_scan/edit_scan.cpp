@@ -3,6 +3,8 @@
 #include "wrap/qt/trackball.h" //QT2VCG trackball function
 #include "wrap/qt/to_string.h" //QT2VCG trackball function
 
+#include <wrap/gl/pick.h>
+
 #define EDITSCANHACK
 #ifdef EDITSCANHACK
     #include <stdio.h>
@@ -18,7 +20,7 @@
     vector<Sample> samples;
     
     void write_to_ply(){
-        FILE* fid = fopen( "/temp/output.ply", "w" );
+        FILE* fid = fopen( "/tmp/output.ply", "w" );
         if( fid == NULL ){
             qDebug("The output cannot be opened!");
             return;
@@ -99,8 +101,8 @@ bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
     widget = new Widget(gla->window());
     connect(widget, SIGNAL(laser_parameter_updated()),
             this, SLOT(laser_parameter_updated()));
-    connect(widget, SIGNAL(scan_requested()),
-            this, SLOT(scan_requested()));
+    //connect(widget, SIGNAL(scan_requested()),
+    //        this, SLOT(scan_requested()));
     connect(widget, SIGNAL(save_requested()),
             this, SLOT(save_requested()));
 
@@ -145,6 +147,7 @@ void VirtualScan::EndEdit(MeshModel&, GLArea* ){
 void VirtualScan::save_requested(){
 #ifdef EDITSCANHACK
     //--- Output model of "samples" to Ply file
+    qDebug("Writing to ply...");
     write_to_ply();
 #else
     //--- Create a new model to store the scan cloud
@@ -242,6 +245,32 @@ void VirtualScan::scanpoints(){
         // http://www.opengl.org/sdk/docs/man/xhtml/glClearDepth.xml
         if( z == 1 )
             continue;
+        // Get selected face according to scanned point
+        vector<CMeshO::FacePointer> NewSelFace;
+        GLPickTri<CMeshO>::PickFaceVisible(curr[0], curr[1], this->md->mm()->cm, NewSelFace, 2, 2);
+        vector<CMeshO::FacePointer>::iterator fpi;
+        /* //For debug: select face where the scanner went through (so
+         * that we can see it on the screen)
+        for(fpi=NewSelFace.begin();fpi!=NewSelFace.end();++fpi)
+            (*fpi)->SetS();*/
+        // Get face normal
+        int normCaught = 0;
+        Point3f normal(0.0, 0.0, 0.0);
+        for(fpi=NewSelFace.begin();fpi!=NewSelFace.end();++fpi){
+            CMeshO::FaceType::NormalType n;
+            n = (*fpi)->N();
+            normal = Point3f(n[0], n[1], n[2]); 
+            normCaught = 1;
+            // Use first face and exit
+            break;
+            //cout << n[0] << " " << n[1] << " " << n[2] << endl;
+        }
+        // Print warning if no face was found for scanned point (means
+        // normal will be undefined)
+        if (!normCaught){
+            cout << "Could not find a face for scanned point!" << endl;
+        }
+
         //--- Retrieve x,y coordinates in object space and another sample
         // with a bit of offset toward the camera
         Point3f sample = myGluUnProject( curr, z );
@@ -256,7 +285,6 @@ void VirtualScan::scanpoints(){
         
         #ifdef EDITSCANHACK
             // TODO: How compute normal from depth buffer?
-            Point3f normal(0,0,0); 
             samples.push_back(Sample(sample,normal,viewdir));        
         #endif    
     }
