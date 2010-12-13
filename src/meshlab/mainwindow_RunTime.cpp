@@ -602,9 +602,12 @@ void MainWindow::dropEvent ( QDropEvent * event )
 		for (int i=0, size=url_list.size(); i<size; i++)
 		{
 			QString path = url_list.at(i).toLocalFile();
-			if( ( QApplication::keyboardModifiers () == Qt::ControlModifier ) && ( GLA() != NULL ) )
-				open(path,GLA());
-				else open(path);
+      if( (event->keyboardModifiers () == Qt::ControlModifier ) || ( QApplication::keyboardModifiers () == Qt::ControlModifier ))
+      {
+        if( GLA() != NULL ) open(path,GLA());
+         else open(path);
+      }
+      else open(path);
 		}
 	}
 }
