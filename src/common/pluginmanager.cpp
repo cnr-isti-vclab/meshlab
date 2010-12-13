@@ -7,7 +7,7 @@
 
 
 PluginManager::PluginManager()
-:env(),currentDocInterface(NULL)
+:currentDocInterface(NULL),env()
 {
     //pluginsDir=QDir(getPluginDirPath());
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
