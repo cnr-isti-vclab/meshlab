@@ -225,7 +225,7 @@ class MeshLabServer
 	}
 
 
-  bool Script(MeshDocument &meshDocument, QString scriptfile)
+  bool Script(MeshDocument &meshDocument, QString scriptfile, FILE *logfp)
   {
 		MeshModel &mm = *meshDocument.mm();
 
@@ -254,7 +254,8 @@ class MeshLabServer
 				return false;
 			}
 			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-			iFilter->setLog(NULL);
+      GLLogStream log;
+      iFilter->setLog(&log);
 			int req = iFilter->getRequirements(action);
 			mm.updateDataMask(req);
 					//make sure the PARMESH parameters are initialized
@@ -303,8 +304,11 @@ class MeshLabServer
 			}
 
 			bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, FilterCallBack);
-			//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
-			//GLA()->log.Logf(GLLogStream::WARNING,"Re-Applied filter %s",qPrintable((*ii).first));
+
+      QStringList logOutput;
+      log.print(logOutput);
+      foreach(QString logEntry, logOutput)
+        fprintf(logfp,"%s\n",qPrintable(logEntry));
 
 			if(!ret)
 			{
@@ -325,8 +329,9 @@ class MeshLabServer
 			" -o [filename...]  mesh(s) where to write the result(s)\n"
 			" -s filename		    script to be applied\n"
 			" -d filename       dump on a text file a list of all the filtering fucntion\n"
-			" -om options       data to save in the output files: vc -> vertex colors, vf -> vertex flags, vq -> vertex quality, vn-> vertex normals, vt -> vertex texture coords, "
-			" fc -> face colors, ff -> face flags, fq -> face quality, fn-> face normals, "
+      " -l filename       the log of the filters is ouput on a file\n"
+      " -om options       data to save in the output files: vc -> vertex colors, vf -> vertex flags, vq -> vertex quality, vn-> vertex normals, vt -> vertex texture coords, "
+      " fc -> face colors, ff -> face flags, fq -> face quality, fn-> face normals, "
 			" wc -> wedge colors, wn-> wedge normals, wt -> wedge texture coords \n"
 			"Example:\n"
 			"	'meshlabserver -i input.obj -o output.ply -s meshclean.mlx -om vc fq wn'\n"
@@ -339,7 +344,7 @@ class MeshLabServer
 			"Script is optional and must be in the format saved by MeshLab.\n"
 			);
 
-		exit(-1);
+    exit(-1);
 	}
 
 private:
@@ -350,6 +355,7 @@ private:
 
 int main(int argc, char *argv[])
 {
+  FILE *logfp=stdout;
 	QApplication app(argc, argv);  
 	MeshLabServer server;
 	MeshDocument meshDocument;
@@ -438,15 +444,24 @@ int main(int argc, char *argv[])
 				}
 
 			}
-			case 's' :  
-				if( argc <= i+1 ) {
-					printf("Missing script name\n");  
-					exit(-1);
-				}
-				scriptName = currentdir.absoluteFilePath(argv[i+1]);
-				printf("script %s\n", qPrintable(scriptName));
-				i += 2;
-				break; 
+      case 's' :
+        if( argc <= i+1 ) {
+          printf("Missing script name\n");
+          exit(-1);
+        }
+        scriptName = currentdir.absoluteFilePath(argv[i+1]);
+        printf("script %s\n", qPrintable(scriptName));
+        i += 2;
+        break;
+      case 'l' :
+        if( argc <= i+1 ) {
+          printf("Missing log filename\n");
+          exit(-1);
+        }
+        logfp = fopen(argv[i+1],"a");
+        printf("Log is saved in %s\n", argv[i+1]);
+        i += 2;
+        break;
       case 'd' :
 				if( argc <= i+1 ) {
           printf("Missing dump name\n");
@@ -488,14 +503,14 @@ printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.v
 	if(!scriptName.isEmpty())
 	{		
 		printf("Apply FilterScript: '%s'\n",qPrintable(scriptName));
-		bool returnValue = server.Script(meshDocument, scriptName);
+    bool returnValue = server.Script(meshDocument, scriptName,logfp);
 		if(!returnValue)
 		{
 			printf("Failed to apply FilterScript\n");
 			exit(-1);
 		}
 	} else 
-                printf("No Script to apply.\n");
+  printf("No Script to apply.\n");
 	
 	//if there is not one name or an equal number of in and out names then exit 
 	if(meshNamesOut.isEmpty() )
@@ -503,16 +518,12 @@ printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.v
 	else 
 	if(meshNamesOut.size() != 1 && meshNamesOut.size() != meshNamesIn.size() ) 
 	{
-		//if(meshNamesOut.size() > meshDocument.meshList.size() ) {
 		printf("Wrong number of output mesh names given\n"); 
 		exit(-1);
 	} else 
 	{
-		//for(int i = 0; i < meshNamesOut.size(); i++)
-		//{
 			server.Save(meshDocument.mm(), mask, meshNamesOut.at(0));
-			printf("Mesh %s saved with: %i vn %i fn\n", qPrintable(meshDocument.mm()->fullName()), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
-		//}
+      printf("Mesh %s saved as %s (%i vn %i fn)\n", qPrintable(meshDocument.mm()->fullName()), qPrintable(meshNamesOut.at(0)), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
 	}		
 }
 
