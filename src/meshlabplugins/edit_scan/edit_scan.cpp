@@ -231,6 +231,10 @@ void VirtualScan::scanpoints(){
                  sline.bbox.Dim()[0],sline.bbox.Dim()[1],
                  GL_DEPTH_COMPONENT, GL_FLOAT, buffer);
 
+    // Maximum normal/ray aperture
+    double alpha = 70; // degrees
+    double min_th_rad = cos( alpha  *  (3.14159/180.0) );
+
     for( unsigned int i=0; i<sline.soff.size(); i++ ){
         //--- Get curren scan point offset
         Point2f curr = sline.soff[i];
@@ -268,7 +272,8 @@ void VirtualScan::scanpoints(){
         // Print warning if no face was found for scanned point (means
         // normal will be undefined)
         if (!normCaught){
-            cout << "Could not find a face for scanned point!" << endl;
+            cout << "Could not find a face for scanned point.. skipping" << endl;
+            continue;
         }
 
         //--- Retrieve x,y coordinates in object space and another sample
@@ -277,6 +282,12 @@ void VirtualScan::scanpoints(){
         Point3f sample2 = myGluUnProject( curr, z+.01);
         Point3f viewdir = (sample-sample2).normalized();
         // qDebug() << "correspodning in object space to: " << toString(sample);
+
+        //--- Reject samples which view-dir is too far from camera
+        if( viewdir.dot(normal) < min_th_rad ){
+            qDebug() << "rejected!!!";
+            continue;
+        }
 
         //--- Add scanned sample to the cloud
         tri::Allocator<CMeshO>::AddVertices(cloud->cm,1);
