@@ -1,0 +1,43 @@
+<MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
+	<PLUGIN pluginName="ExtraSamplePlugin">
+		<FILTER filterName="Random vertex displacement" filterFunction="randomVerticesDisplacement" filterClass="Smoothing | Remeshing" filterPre="MM_NONE" filterPost="MM_NONE">
+			<FILTER_HELP>
+				Move the vertices of the mesh of a random quantity.
+			</FILTER_HELP>
+			<PARAM parType="Real" parName="Displacement" parDefault="meshDoc.current().bboxDiag() / 100.0" parIsImportant="true">
+				<PARAM_HELP>
+					The vertex are displaced of a vector whose norm is bounded by this value
+				</PARAM_HELP>
+				<ABSPERC_GUI guiLabel="Max displacement" guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+			</PARAM>
+			<PARAM parType="Boolean" parName="UpdateNormals" parDefault="true" parIsImportant="true">
+				<PARAM_HELP>
+					Toggle the recomputation of the normals after the random displacement.\n\n
+					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
+				</PARAM_HELP>
+				<CHECKBOX_GUI guiLabel="Recompute normals" />
+			</PARAM>
+			<PARAM parType="Boolean" parName="UpdateNormals2" parDefault="true" parIsImportant="false">
+				<PARAM_HELP>
+					Toggle the recomputation of the normals after the random displacement.\n\n
+					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
+				</PARAM_HELP>
+				<CHECKBOX_GUI guiLabel="Recompute normals" />
+			</PARAM>
+			<PARAM parType="Boolean" parName="CAZZO" parDefault="true" parIsImportant="false">
+				<PARAM_HELP>
+					Toggle the recomputation of the normals after the random displacement.\n\n
+					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
+				</PARAM_HELP>
+				<CHECKBOX_GUI guiLabel="Recompute normals" />
+			</PARAM>
+			<PARAM parType="Real" parName="UpdateNormals3" parDefault="meshDoc.current().bboxDiag() / 2.0" parIsImportant="false">
+				<PARAM_HELP>
+					Toggle the recomputation of the normals after the random displacement.\n\n
+					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
+				</PARAM_HELP>
+				<EDIT_GUI guiLabel="Recompute normals" />
+			</PARAM>
+		</FILTER>		
+	</PLUGIN>
+</MESHLAB_FILTER_INTERFACE>
