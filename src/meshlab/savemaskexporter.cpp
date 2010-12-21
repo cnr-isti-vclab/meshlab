@@ -123,6 +123,7 @@ bool SaveMaskExporterDialog::shouldBeEnabled(int iobit, int capabilityBits, int 
 void SaveMaskExporterDialog::checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits)
 {
  qcb->setEnabled(shouldBeEnabled (bit,capabilityBits, defaultBits) );
+ bool tt = shouldBeChecked (bit,capabilityBits, defaultBits); 
  qcb->setChecked(shouldBeChecked (bit,capabilityBits, defaultBits) );
 }
 

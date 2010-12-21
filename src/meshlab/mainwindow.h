@@ -85,11 +85,11 @@ public slots:
 private slots:
 
 	//////////// Slot Menu File //////////////////////
-  GLArea* newDocument();
+  GLArea* newDocument(const QString& projName = QString());
   void reload();
 	void openRecentFile();
-	bool saveAs(QString fileName = QString());
-	bool save();
+	bool saveAs(QString fileName = QString(),const bool saveAllPossibleAttributes = false);
+	bool save(const bool saveAllPossibleAttributes = false);
 	bool saveSnapshot();
 	///////////Slot Menu Edit ////////////////////////
 	void applyEditMode();
@@ -254,6 +254,10 @@ public:
     return _qsb;
   }
 	QMenu* layerMenu() { return filterMenuLayer; }
+	bool importMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
+	//void importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
+	bool importImage(const QString& fileImg);
+	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
 private:
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
@@ -307,12 +311,15 @@ private:
 	QMenu *unSplitMenu;
 
 	//////////// Actions Menu File ///////////////////////
-  QAction *newAct;
-  QAction *openAct;
-	QAction *openInAct,*openProjectAct;
+	QAction *newAct;
+	QAction *importAct;
+	QAction *exportAct;
+	QAction *exportAsAct;
+	QAction /**openInAct,*/ *openProjectAct;
 	QAction *closeAct;
+	QAction *closeProjectAct;
 	QAction *reloadAct;
-	QAction *saveAct,*saveAsAct,*saveProjectAct;
+	QAction *saveAsAct,*saveProjectAct,*saveProjectAsAct;
 	QAction *saveSnapshotAct;
 	QAction *lastFilterAct;
 	QAction *runFilterScriptAct;
@@ -406,7 +413,6 @@ private:
 	QAction *onlineHelpAct;
 	QAction *onscreenHelpAct;
 	QAction *checkUpdatesAct;
-
 	////////////////////////////////////////////////////
 };
 

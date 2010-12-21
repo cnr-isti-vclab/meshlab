@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 		);
 		window.open(argv[1]);
 	}
-	else 	if(filterObj->noEvent) window.open();
+	//else 	if(filterObj->noEvent) window.open();
  
 	return app.exec();
 }

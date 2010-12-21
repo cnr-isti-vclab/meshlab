@@ -86,54 +86,73 @@ MainWindow::MainWindow()
 	//qb->reset();
 	statusBar()->addPermanentWidget(qb,0);
 	updateMenus();
+	newDocument();
+	//QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());
+	//wid->showMaximized();
+	//ar->update();
 
 	//qb->setAutoClose(true);
 	//qb->setMinimumDuration(0);
 	//qb->reset();
+
 }
 
 void MainWindow::createActions()
 {
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
-  newAct = new QAction(QIcon(":/images/open.png"),tr("New Empty Document..."), this);
-  newAct->setShortcutContext(Qt::ApplicationShortcut);
-  newAct->setShortcut(Qt::CTRL+Qt::Key_N);
-  connect(newAct, SIGNAL(triggered()), this, SLOT(newDocument()));
+	newAct = new QAction(QIcon(":/images/open.png"),tr("New Empty Project..."), this);
+	newAct->setShortcutContext(Qt::ApplicationShortcut);
+	newAct->setShortcut(Qt::CTRL+Qt::Key_N);
+	connect(newAct, SIGNAL(triggered()), this, SLOT(newDocument()));
 
-  openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
-	openAct->setShortcutContext(Qt::ApplicationShortcut);
-	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
-	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-
-	openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open as new layer..."), this);
-	connect(openInAct, SIGNAL(triggered()), this, SLOT(openIn()));
-
-	openProjectAct = new QAction(QIcon(":/images/openPrj.png"),tr("&Open project..."), this);
+	openProjectAct = new QAction(QIcon(":/images/open.png"),tr("&Open project..."), this);
+	openProjectAct->setShortcutContext(Qt::ApplicationShortcut);
+	openProjectAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openProjectAct, SIGNAL(triggered()), this, SLOT(openProject()));
 
-	closeAct = new QAction(tr("&Close"), this);
-	closeAct->setShortcutContext(Qt::ApplicationShortcut);
+	saveProjectAct = new QAction(QIcon(":/images/save.png"),tr("&Save Project"), this);
+	saveProjectAct->setShortcutContext(Qt::ApplicationShortcut);
+	saveProjectAct->setShortcut(Qt::CTRL+Qt::Key_S);
+	connect(saveProjectAct, SIGNAL(triggered()), this, SLOT(saveProject()));
+
+	saveProjectAsAct = new QAction(QIcon(":/images/save.png"),tr("Save Project As..."), this);
+	connect(saveProjectAsAct, SIGNAL(triggered()), this, SLOT(saveProject()));
+
+	closeProjectAct = new QAction(tr("Close Project"), this);
+	//closeProjectAct->setShortcutContext(Qt::ApplicationShortcut);
 	//closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
-	connect(closeAct, SIGNAL(triggered()),mdiarea, SLOT(closeActiveSubWindow()));
+	connect(closeProjectAct, SIGNAL(triggered()),mdiarea, SLOT(closeActiveSubWindow()));
+
+	importAct = new QAction(QIcon(":/images/open.png"),tr("&Import Mesh..."), this);
+	importAct->setShortcutContext(Qt::ApplicationShortcut);
+	importAct->setShortcut(Qt::CTRL+Qt::Key_I);
+	connect(importAct, SIGNAL(triggered()), this, SLOT(open()));
+
+	exportAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh..."), this);
+	exportAct->setShortcutContext(Qt::ApplicationShortcut);
+	exportAct->setShortcut(Qt::CTRL+Qt::Key_E);
+	connect(exportAct, SIGNAL(triggered()), this, SLOT(save()));
+
+	exportAsAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh As..."), this);
+	connect(exportAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+
+	//openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open as new layer..."), this);
+	//connect(openInAct, SIGNAL(triggered()), this, SLOT(openIn()));
+
 
 	reloadAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
 	reloadAct->setShortcutContext(Qt::ApplicationShortcut);
 	reloadAct->setShortcut(Qt::CTRL+Qt::Key_R);
 	connect(reloadAct, SIGNAL(triggered()), this, SLOT(reload()));
 
-	saveAct = new QAction(QIcon(":/images/save.png"),tr("&Save"), this);
-	saveAct->setShortcutContext(Qt::ApplicationShortcut);
-	saveAct->setShortcut(Qt::CTRL+Qt::Key_S);
-	connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+	closeAct = new QAction(tr("&Close"), this);
+	//closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
+	connect(closeAct, SIGNAL(triggered()),this, SLOT(delCurrentMesh()));
 
 
 	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("Save As..."), this);
-	saveAsAct->setShortcutContext(Qt::ApplicationShortcut);
-	//saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-	saveProjectAct = new QAction(QIcon(":/images/savePrj.png"),tr("&Save Project..."), this);
-	connect(saveProjectAct, SIGNAL(triggered()), this, SLOT(saveProject()));
 
 	saveSnapshotAct = new QAction(QIcon(":/images/snapshot.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
@@ -206,15 +225,15 @@ void MainWindow::createActions()
 	backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
 
-  setSelectFaceRenderingAct 	  = new QAction(QIcon(":/images/selected_face.png"),tr("Selected Face Rendering"),this);
-  setSelectFaceRenderingAct->setCheckable(true);
-  setSelectFaceRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
-  connect(setSelectFaceRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectFaceRendering()));
+	setSelectFaceRenderingAct 	  = new QAction(QIcon(":/images/selected_face.png"),tr("Selected Face Rendering"),this);
+	setSelectFaceRenderingAct->setCheckable(true);
+	setSelectFaceRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
+	connect(setSelectFaceRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectFaceRendering()));
 
-  setSelectVertRenderingAct 	  = new QAction(QIcon(":/images/selected_vert.png"),tr("Selected Vertex Rendering"),this);
-  setSelectVertRenderingAct->setCheckable(true);
-  setSelectVertRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
-  connect(setSelectVertRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectVertRendering()));
+	setSelectVertRenderingAct 	  = new QAction(QIcon(":/images/selected_vert.png"),tr("Selected Vertex Rendering"),this);
+	setSelectVertRenderingAct->setCheckable(true);
+	setSelectVertRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
+	connect(setSelectVertRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectVertRendering()));
 
 	//////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
@@ -245,9 +264,9 @@ void MainWindow::createActions()
 	resetTrackBallAct = new QAction (tr("Reset &Trackball"), this);
 	resetTrackBallAct->setShortcutContext(Qt::ApplicationShortcut);
 #if defined(Q_OS_MAC)
-  resetTrackBallAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_H);
+	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_H);
 #else
-  resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
+	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 #endif
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
@@ -279,8 +298,8 @@ void MainWindow::createActions()
 
 	setSplitGroupAct = new QActionGroup(this);	setSplitGroupAct->setExclusive(true);
 
-  setSplitHAct	  = new QAction(QIcon(":/images/splitH.png"),tr("&Horizontally"),setSplitGroupAct);
-  setSplitVAct	  = new QAction(QIcon(":/images/splitV.png"),tr("&Vertically"),setSplitGroupAct);
+	setSplitHAct	  = new QAction(QIcon(":/images/splitH.png"),tr("&Horizontally"),setSplitGroupAct);
+	setSplitVAct	  = new QAction(QIcon(":/images/splitV.png"),tr("&Vertically"),setSplitGroupAct);
 
 	connect(setSplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(setSplit(QAction *)));
 
@@ -293,21 +312,21 @@ void MainWindow::createActions()
 
 	viewFromGroupAct =  new QActionGroup(this);	viewFromGroupAct->setExclusive(true);
 
-  viewTopAct	    = new QAction(tr("Top"),viewFromGroupAct);
+	viewTopAct	    = new QAction(tr("Top"),viewFromGroupAct);
 	viewBottomAct	  = new QAction(tr("Bottom"),viewFromGroupAct);
-  viewLeftAct	    = new QAction(tr("Left"),viewFromGroupAct);
+	viewLeftAct	    = new QAction(tr("Left"),viewFromGroupAct);
 	viewRightAct	  = new QAction(tr("Right"),viewFromGroupAct);
 	viewFrontAct	  = new QAction(tr("Front"),viewFromGroupAct);
-  viewBackAct	    = new QAction(tr("Back"),viewFromGroupAct);
+	viewBackAct	    = new QAction(tr("Back"),viewFromGroupAct);
 
 	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
 
-  viewFromMeshAct = new QAction (tr("View from Mesh Camera"), this);
-  viewFromRasterAct = new QAction (tr("View from Raster Camera"), this);
-  viewFromFileAct = new QAction (tr("View from file"), this);
-  connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
-  connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
-  connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
+	viewFromMeshAct = new QAction (tr("View from Mesh Camera"), this);
+	viewFromRasterAct = new QAction (tr("View from Raster Camera"), this);
+	viewFromFileAct = new QAction (tr("View from file"), this);
+	connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
+	connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
+	connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
 
 	copyShotToClipboardAct = new QAction (tr("Copy shot"), this);
 	copyShotToClipboardAct->setShortcut(QKeySequence::Copy);
@@ -378,9 +397,9 @@ void MainWindow::createToolBars()
 {
 	mainToolBar = addToolBar(tr("Standard"));
 	mainToolBar->setIconSize(QSize(32,32));
-	mainToolBar->addAction(openAct);
+	mainToolBar->addAction(importAct);
 	mainToolBar->addAction(reloadAct);
-	mainToolBar->addAction(saveAct);
+	mainToolBar->addAction(exportAct);
 	mainToolBar->addAction(saveSnapshotAct);
 	mainToolBar->addAction(showLayerDlgAct);
 
@@ -389,8 +408,8 @@ void MainWindow::createToolBars()
 	renderToolBar->addActions(renderModeGroupAct->actions());
 	renderToolBar->addAction(renderModeTextureAct);
 	renderToolBar->addAction(setLightAct);
-  renderToolBar->addAction(setSelectFaceRenderingAct);
-  renderToolBar->addAction(setSelectVertRenderingAct);
+	renderToolBar->addAction(setSelectFaceRenderingAct);
+	renderToolBar->addAction(setSelectVertRenderingAct);
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
@@ -415,15 +434,23 @@ void MainWindow::createMenus()
 {
 	//////////////////// Menu File ////////////////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
-  fileMenu->addAction(newAct);
-  fileMenu->addAction(openAct);
-	fileMenu->addAction(openInAct);
+	fileMenu->addAction(newAct);
 	fileMenu->addAction(openProjectAct);
-	fileMenu->addAction(closeAct);
-	fileMenu->addAction(reloadAct);
-	fileMenu->addAction(saveAct);
-	fileMenu->addAction(saveAsAct);
 	fileMenu->addAction(saveProjectAct);
+	//fileMenu->addAction(saveProjectAsAct);
+	fileMenu->addAction(closeProjectAct);
+	fileMenu->addSeparator();
+
+	fileMenu->addAction(importAct);
+	fileMenu->addAction(exportAct);
+	fileMenu->addAction(exportAsAct);
+	//fileMenu->addAction(openInAct);
+	//fileMenu->addAction(openProjectAct);
+	fileMenu->addAction(reloadAct);	
+	fileMenu->addAction(closeAct);
+
+	//fileMenu->addAction(saveAsAct);
+
 
 	//fileMenuNew = fileMenu->addMenu(tr("New"));
 
@@ -440,13 +467,13 @@ void MainWindow::createMenus()
 	editMenu = menuBar()->addMenu(tr("&Edit"));
 	editMenu->addAction(suspendEditModeAct);
 
-  //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
+	//////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addAction(showScriptEditAct);
 	filterMenu->addSeparator();
-	
+
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
@@ -455,8 +482,8 @@ void MainWindow::createMenus()
 	renderModeMenu->addAction(backFaceCullAct);
 	renderModeMenu->addActions(renderModeGroupAct->actions());
 	renderModeMenu->addAction(renderModeTextureAct);
-  renderModeMenu->addAction(setSelectFaceRenderingAct);
-  renderModeMenu->addAction(setSelectVertRenderingAct);
+	renderModeMenu->addAction(setSelectFaceRenderingAct);
+	renderModeMenu->addAction(setSelectVertRenderingAct);
 
 	lightingModeMenu=renderMenu->addMenu(tr("&Lighting"));
 	lightingModeMenu->addAction(setLightAct);
@@ -472,8 +499,8 @@ void MainWindow::createMenus()
 	colorModeNoneAct->setCheckable(true);
 	colorModeNoneAct->setChecked(true);
 
-        colorModePerMeshAct = new QAction(QString("Per &Mesh"),colorModeGroupAct);
-        colorModePerMeshAct->setCheckable(true);
+	colorModePerMeshAct = new QAction(QString("Per &Mesh"),colorModeGroupAct);
+	colorModePerMeshAct->setCheckable(true);
 
 	colorModePerVertexAct = new QAction(QString("Per &Vertex"),colorModeGroupAct);
 	colorModePerVertexAct->setCheckable(true);
@@ -483,7 +510,7 @@ void MainWindow::createMenus()
 
 
 	colorModeMenu->addAction(colorModeNoneAct);
-        colorModeMenu->addAction(colorModePerMeshAct);
+	colorModeMenu->addAction(colorModePerMeshAct);
 	colorModeMenu->addAction(colorModePerVertexAct);
 	colorModeMenu->addAction(colorModePerFaceAct);
 
