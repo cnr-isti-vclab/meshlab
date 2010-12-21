@@ -65,6 +65,16 @@ MeshModel *MeshDocument::getMesh(QString name)
 	return 0;
 }
 
+MeshModel *MeshDocument::getMeshByFullName(QString pathName)
+{
+	foreach(MeshModel *mmp, meshList)
+	{
+		if(mmp->fullName() == pathName) return mmp;
+	}
+	//assert(0);
+	return 0;
+}
+
 QList<TagBase *> MeshDocument::getMeshTags(int meshId)
 {
 	QList<TagBase *> meshTags;
@@ -140,11 +150,16 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
   return newName;
 }
 
-MeshModel * MeshDocument::addNewMesh(QString meshLabel, bool setAsCurrent)
-{
-  QString newName = NameDisambiguator(this->meshList,meshLabel);
+MeshModel * MeshDocument::addNewMesh(QString fullPath, bool setAsCurrent)
+{	
+  QString newName = NameDisambiguator(this->meshList,fullPath);
 
-  MeshModel *newMesh = new MeshModel(this,qPrintable(newName));
+  if (QDir::isRelativePath(fullPath))
+  {
+	  QFileInfo fi(fullPath);
+	  fullPath = fi.absoluteFilePath(); 
+  }
+  MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath));
   meshList.push_back(newMesh);
 
   emit meshSetChanged();
@@ -315,9 +330,9 @@ bool MeshModel::RenderSelectedVert()
 
 QString MeshModel::relativePathName() const
 {
+  QString dir = documentPath();
   QDir DocumentDir (documentPath());
-
-  QString relPath=DocumentDir.relativeFilePath(this->fullName() );
+  QString relPath=DocumentDir.relativeFilePath(this->fullPathFileName);
 
   if(relPath.size()>1 && relPath[0]=='.' &&  relPath[1]=='.')
       qDebug("Error %s ",qPrintable(relPath));

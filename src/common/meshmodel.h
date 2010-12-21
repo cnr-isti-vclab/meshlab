@@ -431,6 +431,7 @@ public:
   /// returns the mesh with a given unique id
   MeshModel *getMesh(int id);
   MeshModel *getMesh(QString name);
+  MeshModel *getMeshByFullName(QString pathName);
 
 
 
@@ -497,6 +498,7 @@ private:
 
 public:
  QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
+ void updatePathName(const QString& newFullPath) {fullPathFilename = newFullPath;}
   GLLogStream Log;
   FilterScript filterHistory;
 
@@ -516,7 +518,7 @@ public:
   QList<TagBase *> getMeshTags(int meshId);
 	
 	///add a new mesh with the given name
-  MeshModel *addNewMesh(QString meshLabel, bool setAsCurrent=true);
+  MeshModel *addNewMesh(QString fullPath, bool setAsCurrent=true);
 
   ///remove the mesh from the list and delete it from memory
   bool delMesh(MeshModel *mmToDel);
@@ -572,7 +574,6 @@ public:
 
 	///whenever the rasterList is changed
 		void rasterSetChanged();
-
 };// end class MeshDocument
 
 /*

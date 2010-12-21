@@ -9,13 +9,17 @@
 
 bool MeshDocumentToXMLFile(MeshDocument &md, QString filename)
 {
-  QFile file(filename);
-    file.open(QIODevice::WriteOnly);
-    QTextStream qstream(&file);
-    QDomDocument doc = MeshDocumentToXML(md);
-    doc.save(qstream,1);
-    file.close();
-    return true;
+	QFile file(filename);
+	file.open(QIODevice::WriteOnly);
+	QTextStream qstream(&file);
+	QFileInfo fi(filename); 
+	QDir tmpDir = QDir::current();
+	QDir::setCurrent(fi.absoluteDir().absolutePath());
+	QDomDocument doc = MeshDocumentToXML(md);
+	QDir::setCurrent(tmpDir.absolutePath());
+	doc.save(qstream,1);
+	file.close();
+	return true;
 }
 
 QDomElement Matrix44fToXML(vcg::Matrix44f &m, QDomDocument &doc)
@@ -35,7 +39,8 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 {
 	QFile qf(filename);
 		QFileInfo qfInfo(filename);
-
+		QDir tmpDir = QDir::current();		
+		QDir::setCurrent(qfInfo.absoluteDir().absolutePath());
 		if( !qf.open(QIODevice::ReadOnly ) )
 			return false;
 
@@ -60,9 +65,9 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 				while(!mesh.isNull()){
 				//return true;
 				filen=mesh.attributes().namedItem("filename").nodeValue();
-				md.addNewMesh(filen);
+				MeshModel* mm = md.addNewMesh(filen);
 				label=mesh.attributes().namedItem("label").nodeValue();
-				md.mm()->setLabel(label);
+				mm->setLabel(label);
 				QDomNode tr=mesh.firstChild();
 		
 				if(!tr.isNull() && QString::compare(tr.nodeName(),"MLMatrix44")==0)
@@ -100,8 +105,7 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 			node = node.nextSibling();
 		}
 
-
-
+		QDir::setCurrent(tmpDir.absolutePath());
 		qf.close();
 		return true;
 }
