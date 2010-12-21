@@ -153,8 +153,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
 
 void MeshLabXMLStdDialog::applyClick()
 {
-	QAction *q = curmfc->act;
-	filtEnv.clear();
+  filtEnv.clear();
 	assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
 	for(int ii = 0;ii < curParMap.size();++ii)	
 	{
@@ -478,12 +477,12 @@ void XMLEditWidget::collectWidgetValue()
 }
 
 
-void XMLEditWidget::setWidgetExpression( const QString& nv )
+void XMLEditWidget::setWidgetExpression( const QString& /*nv*/ )
 {
 
 }
 
-void XMLEditWidget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+void XMLEditWidget::updateWidget( const XMLFilterInfo::XMLMap& /*xmlWidgetTag*/ )
 {
 
 }

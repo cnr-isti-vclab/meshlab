@@ -1452,7 +1452,7 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichPoint3f& pd )
 	lastCreated = new QTableWidgetItem(pst/*,lst*/);
 }
 
-void RichParameterToQTableWidgetItemConstructor::visit( RichShotf& pd )
+void RichParameterToQTableWidgetItemConstructor::visit( RichShotf& /*pd*/ )
 {
   assert(0); ///
   lastCreated = new QTableWidgetItem(QString("TODO")/*,lst*/);
