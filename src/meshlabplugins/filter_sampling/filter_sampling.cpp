@@ -674,7 +674,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 		case FP_ELEMENT_SUBSAMPLING :  
 		{
 			MeshModel *curMM= md.mm();				
-			MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+      MeshModel *mm= md.addNewMesh("","Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 			mm->updateDataMask(curMM);
 			
 			BaseSampler mps(&(mm->cm));
@@ -693,7 +693,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 				{
 					MeshModel *curMM= md.mm();	
 					if(!tri::HasPerWedgeTexCoord(curMM->cm)) break;
-					MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+          MeshModel *mm= md.addNewMesh("","Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 					bool RecoverColor = par.getBool("RecoverColor");
 					BaseSampler mps(&(mm->cm));
 					mps.texSamplingWidth=par.getInt("TextureW");
@@ -720,7 +720,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 			}
 			
 			MeshModel *curMM= md.mm();				
-			MeshModel *mm= md.addNewMesh("Montecarlo Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+      MeshModel *mm= md.addNewMesh("","Montecarlo Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 			mm->updateDataMask(curMM);
 
 			BaseSampler mps(&(mm->cm));
@@ -741,7 +741,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 			}
 			
 			MeshModel *curMM= md.mm();				
-			MeshModel *mm= md.addNewMesh("Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+      MeshModel *mm= md.addNewMesh("","Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 			mm->updateDataMask(curMM);
 			int samplingMethod = par.getEnum("Sampling");
 			BaseSampler mps(&(mm->cm));
@@ -770,7 +770,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 case FP_CLUSTERED_SAMPLING :  
 		{			
 			MeshModel *curMM= md.mm();				
-			MeshModel *mm= md.addNewMesh("Cluster Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+      MeshModel *mm= md.addNewMesh("","Cluster Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 			int samplingMethod = par.getEnum("Sampling");
 			float threshold = par.getAbsPerc("Threshold");
 			bool selected = par.getBool("Selected");
@@ -818,7 +818,7 @@ case FP_CLUSTERED_SAMPLING :
 			}
 
 			MeshModel *curMM= md.mm();
-			MeshModel *mm= md.addNewMesh("Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+      MeshModel *mm= md.addNewMesh("","Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 			mm->updateDataMask(curMM);
 
 			float radius = par.getAbsPerc("Radius");
@@ -878,6 +878,7 @@ case FP_CLUSTERED_SAMPLING :
 			bool sampleEdge=par.getBool("SampleEdge");
 			bool sampleFauxEdge=par.getBool("SampleFauxEdge");
 			bool sampleFace=par.getBool("SampleFace");
+      float distUpperBound = par.getAbsPerc("MaxDist");
 
       if(sampleEdge && mm0->cm.fn==0) {
         Log("Disabled edge sampling. Meaningless when sampling point clouds");
@@ -899,9 +900,9 @@ case FP_CLUSTERED_SAMPLING :
 		  HausdorffSampler hs;
 			if(saveSampleFlag)
 				{
-					closestPtMesh=md.addNewMesh("Hausdorff Closest Points"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+          closestPtMesh=md.addNewMesh("","Hausdorff Closest Points"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 					closestPtMesh->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
-					samplePtMesh=md.addNewMesh("Hausdorff Sample Point");    
+          samplePtMesh=md.addNewMesh("","Hausdorff Sample Point");
 					samplePtMesh->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
 					hs.init(&(mm1->cm),&(samplePtMesh->cm),&(closestPtMesh->cm));
 				}
@@ -911,6 +912,7 @@ case FP_CLUSTERED_SAMPLING :
 			
 			qDebug("Sampled  mesh has %7i vert %7i face",mm0->cm.vn,mm0->cm.fn);
 			qDebug("Searched mesh has %7i vert %7i face",mm1->cm.vn,mm1->cm.fn);
+      qDebug("Max sampling distance %f on a bbox diag of %f",distUpperBound,mm1->cm.bbox.Diag());
 
 			if(sampleVert) 
 					tri::SurfaceSampling<CMeshO,HausdorffSampler>::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
@@ -920,13 +922,11 @@ case FP_CLUSTERED_SAMPLING :
 					tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 				
 			Log("Hausdorff Distance computed");						
-			Log("     Sample %i",hs.n_total_samples);						
-			Log("     min : %f   max %f",hs.getMinDist(),hs.getMaxDist());						
-			Log("     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
-			float d = mm0->cm.bbox.Diag();
-			Log("\nValues w.r.t. BBox Diag (%f)",d);						
-			Log("     min : %f   max %f",hs.getMinDist()/d,hs.getMaxDist()/d);						
-			Log("     mean : %f   RMS : %f",hs.getMeanDist()/d,hs.getRMSDist()/d);						
+      Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qPrintable(mm0->label()),qPrintable(mm1->label()));
+      Log("     min : %f   max %f   mean : %f   RMS : %f",hs.getMinDist(),hs.getMaxDist(),hs.getMeanDist(),hs.getRMSDist());
+      float d = mm0->cm.bbox.Diag();
+      Log("Values w.r.t. BBox Diag (%f)",d);
+      Log("     min : %f   max %f   mean : %f   RMS : %f\n",hs.getMinDist()/d,hs.getMaxDist()/d,hs.getMeanDist()/d,hs.getRMSDist()/d);
 			
 			
 			if(saveSampleFlag)
@@ -996,7 +996,7 @@ case FP_CLUSTERED_SAMPLING :
 			bool mergeCloseVert = par.getBool("mergeCloseVert");
 			
 			MeshModel *baseMesh= md.mm();				
-			MeshModel *offsetMesh =md.addNewMesh("Offset mesh");
+      MeshModel *offsetMesh =md.addNewMesh("","Offset mesh");
 			baseMesh->updateDataMask(MeshModel::MM_FACEMARK);	
 			
 			Point3i volumeDim;
@@ -1121,7 +1121,7 @@ case FP_CLUSTERED_SAMPLING :
 			float offset=par.getAbsPerc("Offset");
 
 			MeshModel *mmM= md.mm();				
-			MeshModel *mm= md.addNewMesh("Recur Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+      MeshModel *mm= md.addNewMesh("","Recur Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 
 			tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
 			tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
