@@ -100,10 +100,10 @@ MainWindow::MainWindow()
 void MainWindow::createActions()
 {
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
-	newAct = new QAction(QIcon(":/images/open.png"),tr("New Empty Project..."), this);
-	newAct->setShortcutContext(Qt::ApplicationShortcut);
-	newAct->setShortcut(Qt::CTRL+Qt::Key_N);
-	connect(newAct, SIGNAL(triggered()), this, SLOT(newDocument()));
+  newProjectAct = new QAction(QIcon(":/images/open.png"),tr("New Empty Project..."), this);
+  newProjectAct->setShortcutContext(Qt::ApplicationShortcut);
+  newProjectAct->setShortcut(Qt::CTRL+Qt::Key_N);
+  connect(newProjectAct, SIGNAL(triggered()), this, SLOT(newDocument()));
 
 	openProjectAct = new QAction(QIcon(":/images/open.png"),tr("&Open project..."), this);
 	openProjectAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -123,36 +123,26 @@ void MainWindow::createActions()
 	//closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
 	connect(closeProjectAct, SIGNAL(triggered()),mdiarea, SLOT(closeActiveSubWindow()));
 
-	importAct = new QAction(QIcon(":/images/open.png"),tr("&Import Mesh..."), this);
-	importAct->setShortcutContext(Qt::ApplicationShortcut);
-	importAct->setShortcut(Qt::CTRL+Qt::Key_I);
-	connect(importAct, SIGNAL(triggered()), this, SLOT(open()));
+  importMeshAct = new QAction(QIcon(":/images/open.png"),tr("&Import Mesh..."), this);
+  importMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+  importMeshAct->setShortcut(Qt::CTRL+Qt::Key_I);
+  connect(importMeshAct, SIGNAL(triggered()), this, SLOT(open()));
 
-	exportAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh..."), this);
-	exportAct->setShortcutContext(Qt::ApplicationShortcut);
-	exportAct->setShortcut(Qt::CTRL+Qt::Key_E);
-	connect(exportAct, SIGNAL(triggered()), this, SLOT(save()));
+  exportMeshAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh..."), this);
+  exportMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+  exportMeshAct->setShortcut(Qt::CTRL+Qt::Key_E);
+  connect(exportMeshAct, SIGNAL(triggered()), this, SLOT(save()));
 
-	exportAsAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh As..."), this);
-	connect(exportAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+  exportMeshAsAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh As..."), this);
+  connect(exportMeshAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-	//openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open as new layer..."), this);
-	//connect(openInAct, SIGNAL(triggered()), this, SLOT(openIn()));
+  reloadMeshAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
+  reloadMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+  reloadMeshAct->setShortcut(Qt::CTRL+Qt::Key_R);
+  connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
 
-
-	reloadAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
-	reloadAct->setShortcutContext(Qt::ApplicationShortcut);
-	reloadAct->setShortcut(Qt::CTRL+Qt::Key_R);
-	connect(reloadAct, SIGNAL(triggered()), this, SLOT(reload()));
-
-	closeAct = new QAction(tr("&Close"), this);
-	//closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
-	connect(closeAct, SIGNAL(triggered()),this, SLOT(delCurrentMesh()));
-
-
-	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("Save As..."), this);
-	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-
+  importRasterAct = new QAction(QIcon(":/images/open.png"),tr("Import Raster..."), this);
+  connect(importRasterAct, SIGNAL(triggered()), this, SLOT(importRaster()));
 
 	saveSnapshotAct = new QAction(QIcon(":/images/snapshot.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
@@ -397,9 +387,9 @@ void MainWindow::createToolBars()
 {
 	mainToolBar = addToolBar(tr("Standard"));
 	mainToolBar->setIconSize(QSize(32,32));
-	mainToolBar->addAction(importAct);
-	mainToolBar->addAction(reloadAct);
-	mainToolBar->addAction(exportAct);
+  mainToolBar->addAction(importMeshAct);
+  mainToolBar->addAction(reloadMeshAct);
+  mainToolBar->addAction(exportMeshAct);
 	mainToolBar->addAction(saveSnapshotAct);
 	mainToolBar->addAction(showLayerDlgAct);
 
@@ -434,27 +424,20 @@ void MainWindow::createMenus()
 {
 	//////////////////// Menu File ////////////////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
-	fileMenu->addAction(newAct);
+  fileMenu->addAction(newProjectAct);
 	fileMenu->addAction(openProjectAct);
 	fileMenu->addAction(saveProjectAct);
-	//fileMenu->addAction(saveProjectAsAct);
 	fileMenu->addAction(closeProjectAct);
 	fileMenu->addSeparator();
 
-	fileMenu->addAction(importAct);
-	fileMenu->addAction(exportAct);
-	fileMenu->addAction(exportAsAct);
-	//fileMenu->addAction(openInAct);
-	//fileMenu->addAction(openProjectAct);
-	fileMenu->addAction(reloadAct);	
-	fileMenu->addAction(closeAct);
-
-	//fileMenu->addAction(saveAsAct);
-
-
-	//fileMenuNew = fileMenu->addMenu(tr("New"));
-
+  fileMenu->addAction(importMeshAct);
+  fileMenu->addAction(exportMeshAct);
+  fileMenu->addAction(exportMeshAsAct);
+  fileMenu->addAction(reloadMeshAct);
 	fileMenu->addSeparator();
+  fileMenu->addAction(importRasterAct);
+  fileMenu->addSeparator();
+
 	fileMenu->addAction(saveSnapshotAct);
 	separatorAct = fileMenu->addSeparator();
 
@@ -622,7 +605,7 @@ void MainWindow::fillFilterMenu()
 	QMap<QString,MeshLabXMLFilterContainer>::iterator xmlit;
 	for(xmlit =  PM.stringXMLFilterMap.begin(); xmlit != PM.stringXMLFilterMap.end();++xmlit)
 	{
-		MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
+    //MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
 		QAction *filterAction = xmlit.value().act;
 		XMLFilterInfo* info = xmlit.value().xmlInfo;
 		QString filterName = xmlit.key();
@@ -688,14 +671,12 @@ void MainWindow::fillRenderMenu()
 
 void MainWindow::fillEditMenu()
 {
-	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
+  foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
 	{		
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
 			editMenu->addAction(editAction);
-
 			connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
-			//editActionList.push_back(editAction);
 		}
 	}
 }
@@ -703,62 +684,63 @@ void MainWindow::fillEditMenu()
 
 void MainWindow::loadMeshLabSettings()
 {
-  // I have already loaded the plugins so the default for the plugins are already in.
-	// we just miss the globals default of meshlab itself
-	GLArea::initGlobalParameterSet(& defaultGlobalParams);
-	
-	QSettings settings;
-	QStringList klist = settings.allKeys();
+  // I have already loaded the plugins so the default parameters for the settings
+  // of the plugins are already in the <defaultGlobalParams> .
+  // we just miss the globals default of meshlab itself
+  GLArea::initGlobalParameterSet(& defaultGlobalParams);
 
-  // 1) load saved values
-	for(int ii = 0;ii < klist.size();++ii)
-	{
-		QDomDocument doc;
-        doc.setContent(settings.value(klist.at(ii)).toString());
+  QSettings settings;
+  QStringList klist = settings.allKeys();
 
-		QString st = settings.value(klist.at(ii)).toString();
-        QDomElement docElem = doc.firstChild().toElement();
+  // 1) load saved values into the <currentGlobalParams>
+  for(int ii = 0;ii < klist.size();++ii)
+  {
+    QDomDocument doc;
+    doc.setContent(settings.value(klist.at(ii)).toString());
 
-		RichParameter* rpar = NULL;
-        if(!docElem.isNull())
-		{
-            bool ret = RichParameterFactory::create(docElem,&rpar);
-            if (!ret)
-            {
-//                qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
-                continue;
-            }
-            if (!defaultGlobalParams.hasParameter(rpar->name))
-            {
-//                qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
-//                       "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
-            }
-            else currentGlobalParams.addParam(rpar);
-		}
-	}
+    QString st = settings.value(klist.at(ii)).toString();
+    QDomElement docElem = doc.firstChild().toElement();
 
-	// 2) eventually fill missing values with the hardwired defaults 
-	for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
-	{
-//		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
-		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
-		{
+    RichParameter* rpar = NULL;
+    if(!docElem.isNull())
+    {
+      bool ret = RichParameterFactory::create(docElem,&rpar);
+      if (!ret)
+      {
+        //  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
+        continue;
+      }
+      if (!defaultGlobalParams.hasParameter(rpar->name))
+      {
+        //  qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
+        //         "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
+      }
+      else currentGlobalParams.addParam(rpar);
+    }
+  }
+
+  // 2) eventually fill missing values with the hardwired defaults
+  for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
+  {
+    //		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
+    if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
+    {
       qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
-			RichParameterCopyConstructor v;
-			defaultGlobalParams.paramList.at(ii)->accept(v);
-			currentGlobalParams.paramList.push_back(v.lastCreated);
-			
-			QDomDocument doc("MeshLabSettings");
-			RichParameterXMLVisitor vxml(doc);
-			v.lastCreated->accept(vxml);
-			doc.appendChild(vxml.parElem);
-			QString docstring =  doc.toString();
-			QSettings setting;
-			setting.setValue(v.lastCreated->name,QVariant(docstring));
-		}	
-	}
-	
-	emit dispatchCustomSettings(currentGlobalParams);
+      RichParameterCopyConstructor v;
+      defaultGlobalParams.paramList.at(ii)->accept(v);
+      currentGlobalParams.paramList.push_back(v.lastCreated);
+
+      QDomDocument doc("MeshLabSettings");
+      RichParameterXMLVisitor vxml(doc);
+      v.lastCreated->accept(vxml);
+      doc.appendChild(vxml.parElem);
+      QString docstring =  doc.toString();
+      QSettings setting;
+      setting.setValue(v.lastCreated->name,QVariant(docstring));
+    }
+  }
+
+  emit dispatchCustomSettings(currentGlobalParams);
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)

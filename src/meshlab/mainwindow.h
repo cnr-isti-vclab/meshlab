@@ -71,15 +71,15 @@ signals:
 
 public slots:
 
-  bool open(QString fileName=QString(), GLArea *gla=0);
-	bool openIn(QString fileName=QString());
+  bool open(QString fileName=QString());
+  bool openIn();
 	bool openProject(QString fileName=QString());
 	void saveProject();
 	void delCurrentMesh();
 	void delCurrentRaster();
 	void endEdit();
 	void updateCustomSettings();
-  void updateDocumentScriptBindings() {if(currentViewContainer()) PM.updateDocumentScriptBindings(*meshDoc());};
+  void updateDocumentScriptBindings() {if(currentViewContainer()) PM.updateDocumentScriptBindings(*meshDoc());}
   void evaluateExpression(const Expression& exp,Value** res);
 
 private slots:
@@ -256,7 +256,7 @@ public:
 	QMenu* layerMenu() { return filterMenuLayer; }
 	bool importMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
 	//void importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
-	bool importImage(const QString& fileImg);
+  bool importRaster(const QString& fileImg);
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
 private:
 	//////// ToolBars ///////////////
@@ -311,24 +311,22 @@ private:
 	QMenu *unSplitMenu;
 
 	//////////// Actions Menu File ///////////////////////
-	QAction *newAct;
-	QAction *importAct;
-	QAction *exportAct;
-	QAction *exportAsAct;
-	QAction /**openInAct,*/ *openProjectAct;
-	QAction *closeAct;
-	QAction *closeProjectAct;
-	QAction *reloadAct;
-	QAction *saveAsAct,*saveProjectAct,*saveProjectAsAct;
-	QAction *saveSnapshotAct;
-	QAction *lastFilterAct;
-	QAction *runFilterScriptAct;
-	QAction *showFilterScriptAct;
-	QAction* showScriptEditAct;
-	QAction *recentFileActs[MAXRECENTFILES];
+  QAction *newProjectAct;
+  QAction *openProjectAct,*saveProjectAct,*saveProjectAsAct;
+  QAction  *importMeshAct,   *exportMeshAct,  *exportMeshAsAct;
+  QAction  *importRasterAct;
+  QAction *closeProjectAct;
+  QAction *reloadMeshAct;
+  QAction *saveSnapshotAct;
+  QAction *recentFileActs[MAXRECENTFILES];
 	QAction *separatorAct;
 	QAction *exitAct;
-	/////////// Actions Menu Edit  /////////////////////
+  //////
+  QAction *lastFilterAct;
+  QAction *runFilterScriptAct;
+  QAction *showFilterScriptAct;
+  QAction* showScriptEditAct;
+  /////////// Actions Menu Edit  /////////////////////
   QAction *suspendEditModeAct;
 	/////////// Actions Menu Render /////////////////////
 	QActionGroup *renderModeGroupAct;
