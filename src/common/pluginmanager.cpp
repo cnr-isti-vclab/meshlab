@@ -153,8 +153,7 @@ QMap<QString, RichParameterSet> PluginManager::generateFilterParameterMap()
 {
   QMap<QString,RichParameterSet> FPM;
   MeshDocument md;
-  MeshModel* mm = new MeshModel(&md);
-  md.addNewMesh("",mm);
+  MeshModel* mm = md.addNewMesh("","dummy",true);
   vcg::tri::Tetrahedron<CMeshO>(mm->cm);
   mm->updateDataMask(MeshModel::MM_ALL);
   QMap<QString, QAction*>::iterator ai;
