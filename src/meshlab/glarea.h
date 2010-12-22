@@ -97,7 +97,7 @@ public:
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-  QString getFileName() {return QString(mm()->shortName());}
+  //QString getFileName() {return QString(mm()->shortName());}
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 
 	void updateFps(float deltaTime);

@@ -682,7 +682,7 @@ void GLArea::closeEvent(QCloseEvent *event)
 	if(isWindowModified())
 	{
 		 QMessageBox::StandardButton ret=QMessageBox::question(
-                this,  tr("MeshLab"), tr("File '%1' modified.\n\nClose without saving?").arg(getFileName()),
+                this,  tr("MeshLab"), tr("File '%1' modified.\n\nClose without saving?").arg(mm()->fullName()),
 								QMessageBox::Yes|QMessageBox::No,
 								QMessageBox::No);
 		if(ret==QMessageBox::No)
