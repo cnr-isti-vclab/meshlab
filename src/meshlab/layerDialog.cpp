@@ -258,9 +258,9 @@ void LayerDialog::updateTable()
 
 	ui->meshTreeWidget->clear();
 	ui->meshTreeWidget->setColumnCount(4);
-	ui->meshTreeWidget->setColumnWidth(0,40);
-	ui->meshTreeWidget->setColumnWidth(1,20);
-	ui->meshTreeWidget->setColumnWidth(2,20);
+  ui->meshTreeWidget->setColumnWidth(0,40);
+  ui->meshTreeWidget->setColumnWidth(1,40);
+  //ui->meshTreeWidget->setColumnWidth(2,40);
 	ui->meshTreeWidget->header()->hide();
 	foreach(MeshModel* mmd, md->meshList)
 	{
@@ -287,7 +287,7 @@ void LayerDialog::updateTable()
 			addTreeWidgetItem(item, tag, *md, mmd);
 	}
 
-	for(int i=3; i< ui->meshTreeWidget->columnCount(); i++)
+  for(int i=0; i< ui->meshTreeWidget->columnCount(); i++)
 		ui->meshTreeWidget->resizeColumnToContents(i);
 
 	//RasterTreewWidget
@@ -355,17 +355,24 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 //Add default annotations for each mesh about faces and vertices number
 void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *meshModel)
 {
-	QTreeWidgetItem *faces = new QTreeWidgetItem();
-	faces->setText(3, QString("Faces"));
-	faces->setText(4, QString::number(meshModel->cm.fn));	
-	parent->addChild(faces);
-	updateColumnNumber(faces);
+  QTreeWidgetItem *fileItem = new QTreeWidgetItem();
+  fileItem->setText(2, QString("File"));
+  if(!meshModel->fullName().isEmpty())
+        fileItem->setText(3, meshModel->shortName());
+  parent->addChild(fileItem);
+  updateColumnNumber(fileItem);
 
-	QTreeWidgetItem *vertices = new QTreeWidgetItem();
-	vertices->setText(3, QString("Vertices"));
-	vertices->setText(4, QString::number(meshModel->cm.vn));	
-	parent->addChild(vertices);
-	updateColumnNumber(vertices);
+  QTreeWidgetItem *faceItem = new QTreeWidgetItem();
+  faceItem->setText(2, QString("Faces"));
+  faceItem->setText(3, QString::number(meshModel->cm.fn));
+  parent->addChild(faceItem);
+  updateColumnNumber(faceItem);
+
+  QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+  vertItem->setText(2, QString("Vertices"));
+  vertItem->setText(3, QString::number(meshModel->cm.vn));
+  parent->addChild(vertItem);
+  updateColumnNumber(vertItem);
 }
 
 //Add a new item (not a MeshTreeWidgetItem but a tag item) to the treeWidget
@@ -463,14 +470,14 @@ void LayerDialog::updateDecoratorParsView()
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 {
 	if(meshModel->visible)  setIcon(0,QIcon(":/images/layer_eye_open.png"));
-	else setIcon(0,QIcon(":/images/layer_eye_close.png"));
+                     else setIcon(0,QIcon(":/images/layer_eye_close.png"));
 
-	setIcon(1,QIcon(":/images/layer_edit_unlocked.png"));
+//	setIcon(1,QIcon(":/images/layer_edit_unlocked.png"));
 
-	setText(2, QString::number(meshModel->id()));
+  setText(1, QString::number(meshModel->id()));
 
   QString meshName = meshModel->label();
-	setText(3, meshName);	
+  setText(2, meshName);
 
 	m=meshModel;
 }

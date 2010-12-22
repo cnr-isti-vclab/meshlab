@@ -99,12 +99,12 @@ public:
 
 public slots:
   void keyPressEvent ( QKeyEvent * event );
-    void updateTable();
+  void updateTable();
   void rasterItemClicked(QTreeWidgetItem * , int );
   void meshItemClicked(QTreeWidgetItem * , int );
-    void showEvent ( QShowEvent * event );
-    void showContextMenu(const QPoint& pos);
-    void showLayerMenu();
+  void showEvent ( QShowEvent * event );
+  void showContextMenu(const QPoint& pos);
+  void showLayerMenu();
 	void adaptLayout(QTreeWidgetItem * item);
 	void removeTag();
 
