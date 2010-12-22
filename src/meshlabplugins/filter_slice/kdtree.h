@@ -117,7 +117,7 @@ class KDTree
 			
 			QString layername;
 			layername=name+"L.ply";
-				MeshModel *slice1= m->addNewMesh(qPrintable(layername));
+        MeshModel *slice1= m->addNewMesh("",qPrintable(layername));
 				m->meshList.push_back(slice1);						// mesh name
 				slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(mm->cm,VERTEX_LEFT,VERTEX_LEFT);
@@ -131,7 +131,7 @@ class KDTree
 				slice1->cm.Tr = (mm->cm).Tr;								// copy transformation
 				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
 				layername=name+"_slice.ply";
-				MeshModel* cap= m->addNewMesh(qPrintable(layername));
+        MeshModel* cap= m->addNewMesh("",qPrintable(layername));
 				m->meshList.push_back(cap);
 				cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				ExtraFilter_SlicePlugin::capHole(slice1,cap);
@@ -139,7 +139,7 @@ class KDTree
 				if (eps!=0)
 				{
 					layername=name+"_extr.ply";
-					MeshModel* dup = m->addNewMesh(qPrintable(layername));		
+          MeshModel* dup = m->addNewMesh("",qPrintable(layername));
 					m->meshList.push_back(dup);
 					dup->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 					ExtraFilter_SlicePlugin::extrude(m,cap, dup, eps, planeAxis);
@@ -150,7 +150,7 @@ class KDTree
 				vcg::tri::UpdateTopology<CMeshO>::FaceFace(slice1->cm);
 				vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(slice1->cm);
 				layername=name+"R.ply";
-				MeshModel* slice2= m->addNewMesh(qPrintable(layername));
+        MeshModel* slice2= m->addNewMesh("",qPrintable(layername));
 				m->meshList.push_back(slice2);
 			
 				slice2->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);

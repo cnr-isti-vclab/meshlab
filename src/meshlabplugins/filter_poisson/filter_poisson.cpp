@@ -143,7 +143,7 @@ void PoissonPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameter
 bool PoissonPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	MeshModel &m=*md.mm();
-  MeshModel &pm =*md.addNewMesh("Poisson mesh");
+  MeshModel &pm =*md.addNewMesh("","Poisson mesh");
   vector<Point3D<float> > Pts(m.cm.vn);
 	vector<Point3D<float> > Nor(m.cm.vn); 	
 	CoredVectorMeshData mesh;

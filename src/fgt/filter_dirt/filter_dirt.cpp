@@ -119,16 +119,14 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
 
         }
     case FP_CLOUD_MOVEMENT:{
-            MeshModel* m=md.getMesh(0);
-            if(m!=0){
-            float perc=0.01;
-            float max_value=m->cm.bbox.Dim()[m->cm.bbox.MaxDim()];
+            float perc=0.01f;
+            float max_value=md.mm()->cm.bbox.Diag();
             par.addParam(new RichPoint3f("force_dir",Point3f(0,-1,0),"force","Direction of the force acting on the points cloud"));
             par.addParam(new RichAbsPerc("s_length",max_value*perc,0,max_value,"Movement Length",""));
             par.addParam(new RichFloat("velocity",0,"v","Initial velocity of the particle"));
             par.addParam(new RichFloat("mass",1,"m","Mass of the particle"));
             par.addParam(new RichBool("colorize_mesh",false,"Map to Color",""));
-        }
+
             break;
         }
     default:{
@@ -180,7 +178,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         GenerateParticles(currMM,dust_points,dust_particles,n_p,0.6);
 
 
-        MeshModel* dmm=md.addNewMesh("dust_mesh");
+        MeshModel* dmm=md.addNewMesh("","dust_mesh");
         dmm->cm.Clear();
 
         tri::Allocator<CMeshO>::AddVertices(dmm->cm,dust_points.size());

@@ -373,7 +373,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 				this->errorMessage="Sampling rate must be >1";
 				return false;
 			}
-			MeshModel* mm=md.addNewMesh("Re-meshed");
+      MeshModel* mm=md.addNewMesh("","Re-meshed");
 
 			CMeshO *rem=&mm->cm;
       DiamSampler DiamSampl;
@@ -408,7 +408,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			}
 
 			float border_size=par.getDynamicFloat("BorderSize");
-			MeshModel* mm=md.addNewMesh("Diam-Parameterized");
+      MeshModel* mm=md.addNewMesh("","Diam-Parameterized");
 			mm->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 			mm->updateDataMask(MeshModel::MM_VERTCOLOR);
 			CMeshO *rem=&mm->cm;

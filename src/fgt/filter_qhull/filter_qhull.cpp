@@ -205,7 +205,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 		case FP_QHULL_CONVEX_HULL :
 			{
 				MeshModel &m=*md.mm();
-				MeshModel &pm =*md.addNewMesh("Convex Hull");
+        MeshModel &pm =*md.addNewMesh("","Convex Hull");
 	
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
 					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
@@ -292,7 +292,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 		case FP_QHULL_DELAUNAY_TRIANGULATION:
 			{
 				MeshModel &m=*md.mm();
-			    MeshModel &pm =*md.addNewMesh("Delaunay Triangulation");
+          MeshModel &pm =*md.addNewMesh("","Delaunay Triangulation");
 				
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
 					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
@@ -369,7 +369,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 			case FP_QHULL_VORONOI_FILTERING:
 			{
 				MeshModel &m=*md.mm();
-			    MeshModel &pm =*md.addNewMesh("Voronoi Filtering");
+          MeshModel &pm =*md.addNewMesh("","Voronoi Filtering");
 				
 					m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
 					m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
@@ -422,7 +422,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						break;
 				}
 
-        MeshModel &pm =*md.addNewMesh(qPrintable(name));
+        MeshModel &pm =*md.addNewMesh("",qPrintable(name));
 
 				if (!alphashape && !pm.hasDataMask(MeshModel::MM_FACEQUALITY))
 				{
@@ -471,12 +471,12 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 					viewpoint = m.cm.shot.GetViewPoint();
 				}
 
-				MeshModel &pm =*md.addNewMesh("CH Flipped Points");
+        MeshModel &pm =*md.addNewMesh("","CH Flipped Points");
 				
 					pm.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
 					pm.clearDataMask(MeshModel::MM_VERTTEXCOORD);
 
-				MeshModel &pm2 =*md.addNewMesh("Visible Points Triangulation");
+        MeshModel &pm2 =*md.addNewMesh("","Visible Points Triangulation");
 				
 					pm2.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
 					pm2.clearDataMask(MeshModel::MM_VERTTEXCOORD);

@@ -146,19 +146,19 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             case CSG_OPERATION_INTERSECTION:
                 Log(0, "Intersection...");
                 v &= tmp;
-                mesh = md.addNewMesh("intersection");
+                mesh = md.addNewMesh("","intersection");
                 break;
 
             case CSG_OPERATION_UNION:
                 Log(0, "Union...");
                 v |= tmp;
-                mesh = md.addNewMesh("union");
+                mesh = md.addNewMesh("","union");
                 break;
 
             case CSG_OPERATION_DIFFERENCE:
                 Log(0, "Difference...");
                 v -= tmp;
-                mesh = md.addNewMesh("difference");
+                mesh = md.addNewMesh("","difference");
                 break;
 
             default:

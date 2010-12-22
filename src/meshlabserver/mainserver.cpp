@@ -126,7 +126,7 @@ class MeshLabServer
 		// the (1-based) index  of first plugin which is able to open it
 		QHash<QString, MeshIOInterface*> allKnownFormats;
 
-		PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
+    //PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 
 		QFileInfo fi(fileName);
 		QDir curdir= QDir::current();
@@ -136,7 +136,7 @@ class MeshLabServer
 		QString extension = fi.suffix();
 		qDebug("Opening a file with extention %s",qPrintable(extension));
 		// retrieving corresponding IO plugin
-		MeshIOInterface* pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+    MeshIOInterface* pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
 		if (pCurrentIOPlugin == 0)
 		{
 			printf("Error encountered while opening file: ");
@@ -186,23 +186,14 @@ class MeshLabServer
 
 	bool Save(MeshModel *mm, int mask, QString fileName)
 	{
-		// Opening files in a transparent form (IO plugins contribution is hidden to user)
-		QStringList filters;
-
-		// HashTable storing all supported formats togheter with
-		// the (1-based) index  of first plugin which is able to open it
-		QHash<QString, MeshIOInterface*> allKnownFormats;
-
-		PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
-
-		QFileInfo fi(fileName);
+    QFileInfo fi(fileName);
 		// this change of dir is needed for subsequent textures/materials loading
 		// QDir::setCurrent(fi.absoluteDir().absolutePath());
 
 		QString extension = fi.suffix();
 
 		// retrieving corresponding IO plugin
-		MeshIOInterface* pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+    MeshIOInterface* pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
 		if (pCurrentIOPlugin == 0)
 		{
 		printf("Error encountered while opening file: ");
@@ -487,7 +478,7 @@ int main(int argc, char *argv[])
 		{
 
 			//now add it to the document
-            MeshModel* mmod = meshDocument.addNewMesh(meshNamesIn.at(i).toStdString().c_str());
+            MeshModel* mmod = meshDocument.addNewMesh(meshNamesIn.at(i).toStdString().c_str(),"");
 			if (firstind == -1)
 				firstind = mmod->id();
 

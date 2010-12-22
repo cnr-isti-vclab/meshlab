@@ -248,7 +248,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(base->cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
 			
-			MeshModel *slice1= m.addNewMesh("slice");
+      MeshModel *slice1= m.addNewMesh("","slice");
 			//m.meshList.push_back(slice1);
 			QString layername;								
 			slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
@@ -257,7 +257,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
       createSlice(base,slice1);
 			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
 
-			MeshModel* cap= m.addNewMesh("plane");
+      MeshModel* cap= m.addNewMesh("","plane");
 			//m.meshList.push_back(cap);
 			cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			capHole(slice1,cap);
@@ -278,7 +278,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 			
 			if(parlst.getBool("capBase"))
 			{
-				MeshModel* cap= m.addNewMesh("slices");
+        MeshModel* cap= m.addNewMesh("","slices");
 				capHole(m.mm(),cap);
 				tri::Append<CMeshO,CMeshO>::Mesh(m.mm()->cm, cap->cm);
 				m.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
@@ -357,7 +357,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				
 				QString layername;
 				layername.sprintf("slice_%d-%d.ply",i,i+1);
-				MeshModel *slice1= m.addNewMesh(qPrintable(layername));
+        MeshModel *slice1= m.addNewMesh("",qPrintable(layername));
 				//m.meshList.push_back(slice1);
 				
 				slice1->setFileName(layername);								// mesh name
@@ -371,7 +371,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
 
 				layername.sprintf("plane_%d.ply",i+1);
-				MeshModel* cap= m.addNewMesh(qPrintable(layername));
+        MeshModel* cap= m.addNewMesh("",qPrintable(layername));
 				//m.meshList.push_back(cap);
 				
 				cap->setFileName(layername);								// mesh name
@@ -380,7 +380,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				if (eps!=0)
 				{
 					layername.sprintf("plane_%d_extruded.ply",i+1);
-					MeshModel* dup= m.addNewMesh(qPrintable(layername));
+          MeshModel* dup= m.addNewMesh("",qPrintable(layername));
 					//m.meshList.push_back(dup);
 					dup->setFileName(layername);								// mesh name
 					dup->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);					
@@ -396,7 +396,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				vcg::tri::UpdateBounding<CMeshO>::Box(slice1->cm);
 
 				layername.sprintf("slice_%d-%d.ply",i+1,i+2);
-				MeshModel* slice2= m.addNewMesh(qPrintable(layername));
+        MeshModel* slice2= m.addNewMesh("",qPrintable(layername));
 				//m.meshList.push_back(slice2);
 				slice2->setFileName(layername);								// mesh name
 				slice2->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);

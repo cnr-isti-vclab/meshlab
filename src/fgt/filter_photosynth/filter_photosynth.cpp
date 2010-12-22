@@ -147,7 +147,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
     cb((int)(sys->_id / count),"Finishing import...");
     if(sys->_pointCloud)
     {
-      MeshModel *mm = md.addNewMesh("coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+      MeshModel *mm = md.addNewMesh("","coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
       Point p;
       foreach(p, sys->_pointCloud->_points)
       {
@@ -161,7 +161,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
         MeshModel *mm;
         if(par.getBool("addCameraLayer"))
           //create a new layer where add points representing cameras to
-          mm = md.addNewMesh("cameras");
+          mm = md.addNewMesh("","cameras");
         CameraParameters cam;
         //scan cameras list for this coordinate system and for each one add a raster with a shot matching the camera
         foreach(cam, sys->_cameraParametersList)

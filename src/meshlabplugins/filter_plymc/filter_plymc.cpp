@@ -169,7 +169,7 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
             if(!p.SimplificationFlag) name = p.OutNameVec[i].c_str();
             else name = p.OutNameSimpVec[i].c_str();
 
-            MeshModel *mp=md.addNewMesh(name.c_str(),false);
+            MeshModel *mp=md.addNewMesh("",name.c_str(),false);
             tri::io::ImporterPLY<CMeshO>::Open(mp->cm,name.c_str());
             tri::UpdateBounding<CMeshO>::Box(mp->cm);
             tri::UpdateNormals<CMeshO>::PerVertexPerFace(mp->cm);

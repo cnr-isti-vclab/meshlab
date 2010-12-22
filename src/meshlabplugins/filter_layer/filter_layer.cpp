@@ -125,7 +125,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			// creating the new layer
 			// that is the back one
             MeshModel *currentMesh  = md.mm();				// source = current
-            MeshModel *destMesh= md.addNewMesh("SelectedSubset"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+            MeshModel *destMesh= md.addNewMesh("","SelectedSubset"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 
 			// select all points involved
 			tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
@@ -178,7 +178,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			// that is the back one
       MeshModel *currentMesh  = md.mm();				// source = current
       QString newName = currentMesh->label() + "_copy";
-      MeshModel *destMesh= md.addNewMesh(newName); // After Adding a mesh to a MeshDocument the new mesh is the current one
+      MeshModel *destMesh= md.addNewMesh("",newName); // After Adding a mesh to a MeshDocument the new mesh is the current one
       tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm);
 
 			Log("Duplicated current model to layer %i", md.meshList.size());
@@ -198,7 +198,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     bool mergeVertices = par.getBool("MergeVertices");
                       bool alsounreferenced = par.getBool("AlsoUnreferenced");
 
-    MeshModel *destMesh= md.addNewMesh("Merged Mesh");
+    MeshModel *destMesh= md.addNewMesh("","Merged Mesh");
     md.meshList.front();
     QList<MeshModel *> toBeDeletedList;
 
