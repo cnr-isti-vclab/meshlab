@@ -109,7 +109,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 			}
 		}
 	}
-	
+	knownIOFormats();
 	
 	/*******************************************/
 
@@ -203,9 +203,10 @@ QString PluginManager::getPluginDirPath()
 
 
 
-void PluginManager::LoadFormats(QStringList &filters, QHash<QString, MeshIOInterface*> &allKnownFormats, int type)
+void PluginManager::knownIOFormats()
 {
-	QList<MeshIOInterface::Format> currentFormats;
+	//currentFormats[IMPORT] currentFormats[EXPORT]
+	QVector< QList<MeshIOInterface::Format> > currentFormats(2);
 
 	QString allKnownFormatsFilter = QObject::tr("All known formats ("); 
 
@@ -213,41 +214,51 @@ void PluginManager::LoadFormats(QStringList &filters, QHash<QString, MeshIOInter
 	for (int i = 0; itIOPlugin != meshIOPlug.end(); ++itIOPlugin, ++i)  // cycle among loaded IO plugins
 	{
 		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
+		currentFormats[IMPORT].append(pMeshIOPlugin->importFormats()); 
+		currentFormats[EXPORT].append(pMeshIOPlugin->exportFormats());
 
-		switch(type){ 
-		  case IMPORT :	currentFormats = pMeshIOPlugin->importFormats(); break;
-		  case EXPORT : currentFormats = pMeshIOPlugin->exportFormats(); break;
-		  default :assert(0); // unknown filter type
-		}
-
-		QList<MeshIOInterface::Format>::iterator itFormat = currentFormats.begin();
-		while(itFormat != currentFormats.end())
+		for(int inpOut = 0;inpOut < 2;++inpOut)
 		{
-			MeshIOInterface::Format currentFormat = *itFormat;
-
-			QString currentFilterEntry = currentFormat.description + " (";
-
-			QStringListIterator itExtension(currentFormat.extensions);
-			while (itExtension.hasNext())
+			QMap<QString,MeshIOInterface*>* map = NULL;
+			QStringList* filt = NULL;
+			if (inpOut == int(IMPORT))
 			{
-				QString currentExtension = itExtension.next().toLower();
-				if (!allKnownFormats.contains(currentExtension))
-				{
-					allKnownFormats.insert(currentExtension, pMeshIOPlugin);
-					allKnownFormatsFilter.append(QObject::tr(" *."));
-					allKnownFormatsFilter.append(currentExtension);
-				}
-				currentFilterEntry.append(QObject::tr(" *."));
-				currentFilterEntry.append(currentExtension);
+				map = &allKnowInputFormats;
+				filt = &inpFilters;
 			}
-			currentFilterEntry.append(')');
-			filters.append(currentFilterEntry);
+			else
+			{
+				map = &allKnowOutputFormats;
+				filt = &outFilters;
+			}
+			QList<MeshIOInterface::Format>::iterator itFormat = currentFormats[inpOut].begin();
+			while(itFormat != currentFormats[inpOut].end())
+			{
+				MeshIOInterface::Format currentFormat = *itFormat;
 
-			++itFormat;
+				QString currentFilterEntry = currentFormat.description + " (";
+
+				QStringListIterator itExtension(currentFormat.extensions);
+				while (itExtension.hasNext())
+				{
+					QString currentExtension = itExtension.next().toLower();
+					if (!map->contains(currentExtension))
+					{
+						map->insert(currentExtension, pMeshIOPlugin);
+						allKnownFormatsFilter.append(QObject::tr(" *."));
+						allKnownFormatsFilter.append(currentExtension);
+					}
+					currentFilterEntry.append(QObject::tr(" *."));
+					currentFilterEntry.append(currentExtension);
+				}
+				currentFilterEntry.append(')');				
+				filt->append(currentFilterEntry);
+				++itFormat;	
+			}
+			allKnownFormatsFilter.append(')');
+			filt->push_front(allKnownFormatsFilter);
 		}
 	}
-	allKnownFormatsFilter.append(')');
-	filters.push_front(allKnownFormatsFilter);
 }
 
 void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )

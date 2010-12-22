@@ -51,7 +51,7 @@ public:
 	inline QVector<MeshRenderInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
 	inline QVector<MeshDecorateInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
 	inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
-	void LoadFormats(QStringList &filters, QHash<QString, MeshIOInterface*> &allKnownFormats, int type);
+	void knownIOFormats();
 	static QString getPluginDirPath();
   static QString getBaseDirPath();
 
@@ -63,7 +63,12 @@ public:
 
   //QMap<QString, QAction*> xmlActionFilterMap;
   QMap<QString,	MeshLabXMLFilterContainer> stringXMLFilterMap;
+  QMap<QString,MeshIOInterface*> allKnowInputFormats;
+  QMap<QString,MeshIOInterface*> allKnowOutputFormats;
+  QStringList inpFilters;
+  QStringList outFilters;
   //QMap<QString, XMLFilterInfo*> filterXMLFileMap;
+  
 	
   QVector<MeshIOInterface*> meshIOPlug;
 	QVector<MeshFilterInterface*> meshFilterPlug;
