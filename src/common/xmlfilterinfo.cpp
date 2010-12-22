@@ -1,12 +1,11 @@
-#include "xmlfilterinfo.h"
-#include<QFile>
+#include <QFile>
 #include <QtXmlPatterns/QXmlSchema>
 #include <QtXmlPatterns/QXmlSchemaValidator>
-#include <QUrl>
 #include <QtXmlPatterns/QXmlQuery>
-#include <QStringList>
+#include <QUrl>
+#include "xmlfilterinfo.h"
 #include "mlexception.h"
-
+#include <assert.h>
 XMLFilterInfo* XMLFilterInfo::createXMLFileInfo( const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML)
 {
 	QXmlSchema schema;
@@ -72,6 +71,8 @@ QStringList XMLFilterInfo::filterNames() const
     qDebug("Caught a QueryException %s",e.what());
 	}
 	
+  assert(0);
+  return QStringList();
 }
 
 QString XMLFilterInfo::filterHelp( const QString& filterName) const
@@ -89,6 +90,8 @@ QString XMLFilterInfo::filterHelp( const QString& filterName) const
 	{
     qDebug("Caught a QueryException %s",q.what());
 	}
+  assert(0);
+  return QString();
 }
 
 
@@ -107,6 +110,8 @@ QString XMLFilterInfo::filterAttribute( const QString& filterName,const QString&
 	{
     qDebug("Caught a QueryException %s",e.what());
 	}
+  assert(0);
+  return QString();
 }
 
 QStringList XMLFilterInfo::query( const QString& qry) const
@@ -156,21 +161,15 @@ XMLFilterInfo::XMLMapList XMLFilterInfo::filterParametersExtendedInfo( const QSt
 	{
     qDebug("Caught a QueryException %s",e.what());
 	}
+  assert(0);
+  return XMLFilterInfo::XMLMapList();
 }
 
 XMLFilterInfo::XMLMapList XMLFilterInfo::filterParameters( const QString& filterName) const
 {
-	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM/<p>type={data(@type)}|name={data(@name)}|defaultExpression={data(@defaultExpression)}</p>/string()";
-	QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>" + attrNameAttrVal(MLXMLElNames::paramType) + "|" + attrNameAttrVal(MLXMLElNames::paramName) + "|" + attrNameAttrVal(MLXMLElNames::paramDefExpr) + "</p>/string()";
-	try
-	{
-		QStringList res = query(namesQuery);
-		return mapListFromStringList(res);
-	}
-	catch (QueryException e)
-	{
-		throw e;
-	}
+  QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>" + attrNameAttrVal(MLXMLElNames::paramType) + "|" + attrNameAttrVal(MLXMLElNames::paramName) + "|" + attrNameAttrVal(MLXMLElNames::paramDefExpr) + "</p>/string()";
+  QStringList res = query(namesQuery);
+  return mapListFromStringList(res);
 }
 
 XMLFilterInfo::XMLMapList XMLFilterInfo::mapListFromStringList( const QStringList& list )
@@ -220,6 +219,8 @@ XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterGui( const QString& filterNa
 	{
     qDebug("Caught a QueryException %s",e.what());
 	}
+  assert(0);
+  return XMLFilterInfo::XMLMap();
 }
 
 QString XMLFilterInfo::filterParameterHelp( const QString& filterName,const QString& paramName ) const
@@ -237,6 +238,8 @@ QString XMLFilterInfo::filterParameterHelp( const QString& filterName,const QStr
 	{
     qDebug("Caught a QueryException %s",e.what());
 	}
+  assert(0);
+  return QString();
 }
 
 
@@ -268,6 +271,8 @@ XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterExtendedInfo( const QString&
 	{
     qDebug("Caught a QueryException %s",e.what());
 	}
+  assert(0);
+  return XMLFilterInfo::XMLMap();
 }
 
 //QMap<QString,QString> XMLFilterInfo::filterParameter( const QString& filterName,const QString& paramName ) const
@@ -315,4 +320,6 @@ QString XMLFilterInfo::filterParameterAttribute( const QString& filterName,const
 	{
     qDebug("Caught a QueryException %s",e.what());
 	}
+  assert(0);
+  return QString();
 }
