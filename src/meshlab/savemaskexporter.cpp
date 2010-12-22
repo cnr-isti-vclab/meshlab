@@ -30,7 +30,7 @@
 #include "changetexturename.h"
 
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterSet *_parSet,GLArea* glar):
-QDialog(parent),m(m),capability(capability),defaultBits(defaultBits),parSet(_parSet),glar(glar)
+QDialog(parent),m(m),capability(capability),defaultBits(defaultBits),parSet(_parSet),glar(glar),mask(0)
 {
 	ui = new Ui::MaskExporterDialog();
 	InitDialog();
@@ -123,7 +123,6 @@ bool SaveMaskExporterDialog::shouldBeEnabled(int iobit, int capabilityBits, int 
 void SaveMaskExporterDialog::checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits)
 {
  qcb->setEnabled(shouldBeEnabled (bit,capabilityBits, defaultBits) );
- bool tt = shouldBeChecked (bit,capabilityBits, defaultBits); 
  qcb->setChecked(shouldBeChecked (bit,capabilityBits, defaultBits) );
 }
 
@@ -162,8 +161,8 @@ void SaveMaskExporterDialog::SetMaskCapability()
 		ui->NoneButton->setChecked(true);
 }
 
-//slot
-void SaveMaskExporterDialog::SlotOkButton()
+
+void SaveMaskExporterDialog::updateMask()
 {
 	int newmask = 0;
 
@@ -189,6 +188,12 @@ void SaveMaskExporterDialog::SlotOkButton()
 	for(unsigned int i=0;i<m->cm.textures.size();i++)
 		m->cm.textures[i] = ui->listTextureName->item(i)->text().toStdString();
 	this->mask=newmask;
+}
+
+//slot
+void SaveMaskExporterDialog::SlotOkButton()
+{
+	updateMask();
     stdParFrame->readValues(*parSet);
 }
 

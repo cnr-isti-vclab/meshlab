@@ -55,16 +55,16 @@ public:
 	void SetTextureName();
 	int GetNewMask();
 	void SetMaskCapability();
+	void updateMask();
 
-private slots:
+public slots:
 	void on_check_help_stateChanged(int);
 	void SlotOkButton();
 	void SlotCancelButton();
 	void SlotRenameTexture();
 	void SlotSelectionTextureName();
-	void SlotSelectionAllButton();
 	void SlotSelectionNoneButton();
-
+	void SlotSelectionAllButton();
 private:
 	Ui::MaskExporterDialog* ui;
 	MeshModel *m;

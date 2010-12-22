@@ -1374,9 +1374,9 @@ bool MainWindow::openProject(QString fileName)
 			return false;
 		}
 		
-		QStringList filters;
+		/*QStringList filters;
 		QHash<QString, MeshIOInterface*> allKnownFormats;
-		PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
+		PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);*/
 		MeshDocument* md=meshDoc();
 		qb->show();
 		for (int i=0; i<md->meshList.size(); i++)
@@ -1384,7 +1384,7 @@ bool MainWindow::openProject(QString fileName)
 			QString fullPath = md->meshList[i]->fullName();
 			QFileInfo fi(fullPath);
 			QString extension = fi.suffix();
-			MeshIOInterface *pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+			MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
 			if(pCurrentIOPlugin != NULL)
 			{
 				RichParameterSet prePar;
@@ -1618,12 +1618,12 @@ bool MainWindow::importMesh(const QString& fileName,MeshIOInterface *pCurrentIOP
 bool MainWindow::open(QString fileName, GLArea *gla)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
-	QStringList filters;
-	
-  // HashTable storing all supported formats together withw
-	// the (1-based) index  of first plugin which is able to open it
-	QHash<QString, MeshIOInterface*> allKnownFormats;
-	PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
+	//QStringList filters;
+	//
+ // // HashTable storing all supported formats together withw
+	//// the (1-based) index  of first plugin which is able to open it
+	//QHash<QString, MeshIOInterface*> allKnownFormats;
+	//PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
 	//filters.push_back("ALN project ( *.aln)");
 	//filters.front().chop(1);
 	//filters.front().append(" *.aln)");
@@ -1632,7 +1632,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	//filters.front().append(" *.mlp)");
 	QStringList fileNameList;
 	if (fileName.isEmpty())
-		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"), lastUsedDirectory.path(), filters.join(";;"));
+		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"), lastUsedDirectory.path(), PM.inpFilters.join(";;"));
 	else 
 		fileNameList.push_back(fileName);
 
@@ -1653,7 +1653,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	{
 		QFileInfo fi(fileName);
 		QString extension = fi.suffix();
-		MeshIOInterface *pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+		MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
 		//pCurrentIOPlugin->setLog(gla->log);
 
 		RichParameterSet prePar;
@@ -1708,10 +1708,10 @@ void MainWindow::reload()
 	//open(file);
 	QFileInfo fi(fullPath);
 	QString extension = fi.suffix();
-	QStringList filters;
-	QHash<QString, MeshIOInterface*> allKnownFormats;
-	PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
-	MeshIOInterface *pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+	//QStringList filters;
+	//QHash<QString, MeshIOInterface*> allKnownFormats;
+	//PM.LoadFormats(filters, allKnownFormats,PluginManager::IMPORT);
+	MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
 	if(pCurrentIOPlugin != NULL)
 	{
 		RichParameterSet prePar;
@@ -1738,20 +1738,16 @@ void MainWindow::reload()
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
-	QStringList filters;
-
-	QHash<QString, MeshIOInterface*> allKnownFormats;
 	QFileInfo fi(fileName);
-	PM.LoadFormats( filters, allKnownFormats,PluginManager::EXPORT);
 	//QString defaultExt = "*." + mod->suffixName().toLower();
 	QString defaultExt = "*." + fi.suffix().toLower();
 	if(defaultExt == "*.") 
 		defaultExt = "*.ply";
 
 	QFileDialog saveDialog(this,tr("Save Current Layer"), mod->fullName());
-	saveDialog.setNameFilters(filters);
+	saveDialog.setNameFilters(PM.outFilters);
 	saveDialog.setAcceptMode(QFileDialog::AcceptSave);
-	QStringList matchingExtensions=filters.filter(defaultExt);
+	QStringList matchingExtensions=PM.outFilters.filter(defaultExt);
 	if(!matchingExtensions.isEmpty())
 		saveDialog.selectNameFilter(matchingExtensions.last());
 
@@ -1788,9 +1784,9 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		QString extension = fileName;
 		extension.remove(0, fileName.lastIndexOf('.')+1);
 
-		QStringListIterator itFilter(filters);
+		QStringListIterator itFilter(PM.outFilters);
 
-		MeshIOInterface *pCurrentIOPlugin = allKnownFormats[extension.toLower()];
+		MeshIOInterface *pCurrentIOPlugin = PM.allKnowOutputFormats[extension.toLower()];
 		if (pCurrentIOPlugin == 0)
 		{
 			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
@@ -1811,7 +1807,10 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		if (!saveAllPossibleAttributes)
 			maskDialog.exec();
 		else
-			maskDialog.SetMaskCapability();
+		{
+			maskDialog.SlotSelectionAllButton();
+			maskDialog.updateMask();
+		}
 		int mask = maskDialog.GetNewMask();
 		if (!saveAllPossibleAttributes)
 		{
