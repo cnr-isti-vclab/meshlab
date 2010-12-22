@@ -138,9 +138,9 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
       QString baseName = fi.baseName(); //  all characters in the file up to the first '.' Eg "/tmp/archive.tar.gz" -> "archive"
       int lastNum = baseName.right(1).toInt();
       if( baseName.right(2).toInt() >= 10)
-        lastNum = baseName.right(1).toInt();
+        lastNum = baseName.right(2).toInt();
       if(lastNum)
-        newName = baseName.left(baseName.length()-1)+QString::number(lastNum+1);
+        newName = baseName.left(baseName.length()-(lastNum<10?1:2))+QString::number(lastNum+1);
       else
         newName = baseName+"_1";
       if (info.suffix() != QString(""))
@@ -150,16 +150,23 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
   return newName;
 }
 
-MeshModel * MeshDocument::addNewMesh(QString fullPath, bool setAsCurrent)
-{	
-  QString newName = NameDisambiguator(this->meshList,fullPath);
+/*
+ When you create a new mesh it can be either a newly created one or an opened one.
+ If it is an opened one the fullpathname is meaningful and the label, by default is just the short name.
+ If it is a newly created one the fullpath is an empty string and the user has to provide a label.
+ */
 
-  if (QDir::isRelativePath(fullPath))
+MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent)
+{	
+  QString newlabel = NameDisambiguator(this->meshList,label);
+
+  if(!fullPath.isEmpty())
   {
 	  QFileInfo fi(fullPath);
 	  fullPath = fi.absoluteFilePath(); 
   }
-  MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath));
+
+  MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
   meshList.push_back(newMesh);
 
   emit meshSetChanged();
@@ -239,7 +246,7 @@ void MeshDocument::removeTag(int id){
 	}
 }
 
-MeshModel::MeshModel(MeshDocument *_parent, QString meshName) {
+MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName) {
   parent=_parent;
 	glw.m=&cm;
 	_id=parent->newMeshId();
@@ -252,9 +259,10 @@ MeshModel::MeshModel(MeshDocument *_parent, QString meshName) {
 	cm.Tr.SetIdentity();
 	cm.sfn=0;
 	cm.svn=0;
-  if(!meshName.isEmpty())
-		fullPathFileName=meshName;
-	//parent->addNewMesh(qPrintable(fullPathFileName),this);
+
+  if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
+
+  if(!labelName.isEmpty())     this->_label=labelName;
 }
 
 
@@ -330,16 +338,16 @@ bool MeshModel::RenderSelectedVert()
 
 QString MeshModel::relativePathName() const
 {
-  QString dir = documentPath();
-  QDir DocumentDir (documentPath());
-  QString relPath=DocumentDir.relativeFilePath(this->fullPathFileName);
+  QDir documentDir (documentPathName());
+  QString relPath=documentDir.relativeFilePath(this->fullPathFileName);
 
   if(relPath.size()>1 && relPath[0]=='.' &&  relPath[1]=='.')
-      qDebug("Error %s ",qPrintable(relPath));
+      qDebug("Error we have a mesh that is not in the same folder of the project: %s ",qPrintable(relPath));
+
   return relPath;
 }
 
-QString MeshModel::documentPath() const
+QString MeshModel::documentPathName() const
 {
   return parent->pathName();
 }

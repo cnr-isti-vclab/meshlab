@@ -255,8 +255,8 @@ public:
   /// the relative path with respect to the current project
   QString relativePathName() const;
 
-  /// the relative path with respect to the current project
-  QString documentPath() const;
+  /// the absolute path of the current project
+  QString documentPathName() const;
 
   void setFileName(QString newFileName) {
     QFileInfo fi(newFileName);
@@ -268,7 +268,7 @@ public:
 public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
 
-  MeshModel(MeshDocument *parent, QString meshName=QString());
+  MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
   bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
   bool RenderSelectedFace();
   bool RenderSelectedVert();
@@ -336,7 +336,7 @@ public:
 	
   RasterModel(MeshDocument *parent, QString _rasterName=QString());
 
-  void setLabel(QString newLabel) {_label = newLabel;};
+  void setLabel(QString newLabel) {_label = newLabel;}
 
   const QString label() const {
     if(!_label.isEmpty())  return _label;
@@ -420,7 +420,7 @@ public:
     tagIdCounter=0;
     meshIdCounter=0;
     rasterIdCounter=0;
-    currentMesh = NULL;
+    currentMesh = 0;
     currentRaster = 0;
     busy=true;
 	}
@@ -434,15 +434,13 @@ public:
   MeshModel *getMeshByFullName(QString pathName);
 
 
-
-
   //set the current mesh to be the one with the given ID
   void setCurrentMesh( int new_curr_id );
 
   //set the current raster to be the one with the given ID
   void setCurrentRaster( int new_curr_id );
-  void setCurrent(MeshModel *newCur){ setCurrentMesh(newCur->id());}
-  void setCurrent(RasterModel *newCur){ setCurrentRaster(newCur->id());}
+  void setCurrent(MeshModel   *newCur)  { setCurrentMesh(newCur->id());}
+  void setCurrent(RasterModel *newCur)  { setCurrentRaster(newCur->id());}
 
   /// methods to access the set of Meshes in a ordered fashion.
   void advanceCurrentMesh(int pos) {advanceCurrentElement(meshList,currentMesh,pos);}
@@ -498,7 +496,7 @@ private:
 
 public:
  QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
- void updatePathName(const QString& newFullPath) {fullPathFilename = newFullPath;}
+ void setFileName(const QString& newFileName) {fullPathFilename = newFileName;}
   GLLogStream Log;
   FilterScript filterHistory;
 
@@ -518,7 +516,7 @@ public:
   QList<TagBase *> getMeshTags(int meshId);
 	
 	///add a new mesh with the given name
-  MeshModel *addNewMesh(QString fullPath, bool setAsCurrent=true);
+  MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
 
   ///remove the mesh from the list and delete it from memory
   bool delMesh(MeshModel *mmToDel);
