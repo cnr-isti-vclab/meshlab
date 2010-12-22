@@ -106,7 +106,7 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
 {
   CMeshO &cm=md.mm()->cm;
   RasterModel *rm = md.rm();
@@ -182,12 +182,13 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
   switch(ID(a))
   {
   case FP_CAMERA_SCALE :
+  case FP_CAMERA_EDIT :
   case FP_SET_MESH_CAMERA :
   case FP_SET_RASTER_CAMERA :
-      return MeshFilterInterface::Camera;
   case FP_QUALITY_FROM_CAMERA :
       return MeshFilterInterface::Camera;
   }
+  assert(0);
 }
 
 Q_EXPORT_PLUGIN(FilterCameraPlugin)
