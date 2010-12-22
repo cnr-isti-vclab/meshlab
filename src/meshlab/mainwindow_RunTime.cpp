@@ -216,7 +216,7 @@ void MainWindow::activateSubFiltersMenu( const bool create,const bool act )
 	filterMenuClean->setEnabled(act);
 	//menu create is always activated
 	if (create)
-		filterMenuCreate->setEnabled(true);
+		filterMenuCreate->setEnabled(create);
 	else
 		filterMenuCreate->setEnabled(act);
 	filterMenuRemeshing->setEnabled(act);
@@ -236,17 +236,13 @@ void MainWindow::activateSubFiltersMenu( const bool create,const bool act )
 void MainWindow::updateMenus()
 {
   bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-  bool activeMesh=false;
-  if(activeDoc && !meshDoc()->meshList.empty()) activeMesh=true;
-
-  if(activeDoc && !activeMesh)
-		filterMenuCreate->setEnabled(true);
+  bool activeDocNotEmpty = activeDoc && !meshDoc()->meshList.empty();
 
   importMeshAct->setEnabled(activeDoc);
 
-  exportMeshAct->setEnabled(activeMesh);
-  exportMeshAsAct->setEnabled(activeMesh);
-  reloadMeshAct->setEnabled(activeMesh);
+  exportMeshAct->setEnabled(activeDocNotEmpty);
+  exportMeshAsAct->setEnabled(activeDocNotEmpty);
+  reloadMeshAct->setEnabled(activeDocNotEmpty);
   importRasterAct->setEnabled(activeDoc);
 
   saveProjectAsAct->setEnabled(activeDoc);
@@ -257,7 +253,7 @@ void MainWindow::updateMenus()
 
   filterMenu->setEnabled(activeDoc && !filterMenu->actions().isEmpty());
 	if (!filterMenu->actions().isEmpty())
-    activateSubFiltersMenu(false,activeDoc);
+    activateSubFiltersMenu(!activeDocNotEmpty,activeDocNotEmpty);
   editMenu->setEnabled(activeDoc && !editMenu->actions().isEmpty());
   renderMenu->setEnabled(activeDoc);
   fullScreenAct->setEnabled(activeDoc);
@@ -1359,9 +1355,6 @@ bool MainWindow::openProject(QString fileName)
   }
   else if (QString(fi.suffix()).toLower() == "mlp")
   {
-    /*if ((GLA()->meshDoc != NULL) && (GLA()->meshDoc->meshList.size() == 0))
-delete GLA()->meshDoc;*/
-
     newDocument(fileName);
     //QDir::setCurrent(fi.absoluteDir().absolutePath());
     if (!MeshDocumentFromXML(*meshDoc(),fileName))
@@ -1369,38 +1362,12 @@ delete GLA()->meshDoc;*/
       QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MLP file");
       return false;
     }
-
-    //QStringList filters;
-    //QHash<QString, MeshIOInterface*> allKnownFormats;
-    //PM.LoadFormats(filters, allKnownFormats, PluginManager::IMPORT);
     MeshDocument* md=meshDoc();
     qb->show();
     for (int i=0; i<md->meshList.size(); i++)
     {
       QString fullPath = md->meshList[i]->fullName();
-      QFileInfo fi(fullPath);
-      QString extension = fi.suffix();
-      MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
-      if(pCurrentIOPlugin != NULL)
-      {
-        RichParameterSet prePar;
-        pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
-        int mask = 0;
-        MeshModel *mm= GLA()->meshDoc->meshList[i];
-        QTime t;t.start();
-        bool open = importMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar);
-        if(open)
-        {
-          GLA()->log->Logf(0,"Opened mesh %s in %i msec",qPrintable(fileName),t.elapsed());
-          RichParameterSet par;
-          pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
-          pCurrentIOPlugin->applyOpenParameter(extension,*mm,par);
-        }
-        else
-          GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
-      }
-      else
-        GLA()->log->Logf(0,"Warning: Mesh %s cannot be opened. Your MeshLab version has not plugin to read %s file format",qPrintable(fullPath),qPrintable(extension));
+		importMeshWithStandardParams(fullPath,GLA()->meshDoc->meshList[i]);
     }
     for (int i=0; i<md->rasterList.size(); i++)
     {
@@ -1411,11 +1378,7 @@ delete GLA()->meshDoc;*/
         open(md->rasterList[i]->planeList[0]->fullName());
       meshDoc()->rasterList[i]->shot=sh;
       meshDoc()->rm()->setLabel(md->rm()->label());
-
     }
-
-
-
   }
   else
     return false;
@@ -1676,37 +1639,44 @@ void MainWindow::openRecentFile()
 	if (action)	open(action->data().toString());
 }
 
+bool MainWindow::importMeshWithStandardParams(QString& fullPath,MeshModel* mm)
+{
+	bool ret = false;
+	QFileInfo fi(fullPath);
+	QString extension = fi.suffix();
+	MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
+	if(pCurrentIOPlugin != NULL)
+	{
+		RichParameterSet prePar;
+		pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
+		int mask = 0;
+		//MeshModel* mm = meshDoc()->mm();
+		QTime t;t.start();
+		bool open = importMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar);
+		if(open) 
+		{
+			GLA()->log->Logf(0,"Opened mesh %s in %i msec",qPrintable(fullPath),t.elapsed());
+			RichParameterSet par;
+			pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
+			pCurrentIOPlugin->applyOpenParameter(extension,*mm,par);
+			ret = true;
+		}
+		else
+			GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fullPath));
+	}
+	else
+		GLA()->log->Logf(0,"Warning: Mesh %s cannot be opened. Your MeshLab version has not plugin to read %s file format",qPrintable(fullPath),qPrintable(extension));
+	return ret;
+}
+
+
 void MainWindow::reload()
 {
 	// Discards changes and reloads current file
 	// save current file name
-  QString fileName = meshDoc()->mm()->fullName();
-  QFileInfo fi(fileName);
-	QString extension = fi.suffix();
-  //QStringList suffixList;
-  //QHash<QString, MeshIOInterface*> allKnownFormats;
-  //PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
-  MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
-	if(pCurrentIOPlugin != NULL)
-	{
-		RichParameterSet prePar;
-    pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
-		int mask = 0;
-		MeshModel* mm = meshDoc()->mm();
-    bool open = importMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar);
-		if(open) 
-		{
-      GLA()->log->Logf(0,"Opened mesh %s",qPrintable(fileName));
-			RichParameterSet par;
-			pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
-      pCurrentIOPlugin->applyOpenParameter(extension,*mm, par);
-		}
-		else
-      GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
-	}
-	else
-    GLA()->log->Logf(0,"Warning: Mesh %s cannot be opened. Your MeshLab version has not plugin to read %s file format",qPrintable(fileName),qPrintable(extension));
-	
+	qb->show();
+	QString fileName = meshDoc()->mm()->fullName();
+	importMeshWithStandardParams(fileName,meshDoc()->mm());
 	qb->reset();
 }
 

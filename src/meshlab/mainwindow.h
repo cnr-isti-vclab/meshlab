@@ -258,6 +258,7 @@ public:
 	//void importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
   bool importRaster(const QString& fileImg);
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
+	bool importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
 private:
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
