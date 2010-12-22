@@ -9,17 +9,18 @@
 
 bool MeshDocumentToXMLFile(MeshDocument &md, QString filename)
 {
-	QFile file(filename);
-	file.open(QIODevice::WriteOnly);
-	QTextStream qstream(&file);
-	QFileInfo fi(filename); 
+  md.setFileName(filename);
+  QFileInfo fi(filename);
 	QDir tmpDir = QDir::current();
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
 	QDomDocument doc = MeshDocumentToXML(md);
-	QDir::setCurrent(tmpDir.absolutePath());
-	doc.save(qstream,1);
+  QFile file(filename);
+  file.open(QIODevice::WriteOnly);
+  QTextStream qstream(&file);
+  doc.save(qstream,1);
 	file.close();
-	return true;
+  QDir::setCurrent(tmpDir.absolutePath());
+  return true;
 }
 
 QDomElement Matrix44fToXML(vcg::Matrix44f &m, QDomDocument &doc)
@@ -27,9 +28,9 @@ QDomElement Matrix44fToXML(vcg::Matrix44f &m, QDomDocument &doc)
   QDomElement matrixElem = doc.createElement("MLMatrix44");
   QString Row[4];
   for(int i=0;i<4;++i)
-    Row[i] =QString("%1 %2 %3 %4 ").arg(m[i][0]).arg(m[i][1]).arg(m[i][2]).arg(m[i][3]);
+    Row[i] =QString("%1 %2 %3 %4 \n").arg(m[i][0]).arg(m[i][1]).arg(m[i][2]).arg(m[i][3]);
 
-  QDomText nd = doc.createTextNode(Row[0]+Row[1]+Row[2]+Row[3]);
+  QDomText nd = doc.createTextNode("\n"+Row[0]+Row[1]+Row[2]+Row[3]);
   matrixElem.appendChild(nd);
 
   return matrixElem;
@@ -65,9 +66,8 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 				while(!mesh.isNull()){
 				//return true;
 				filen=mesh.attributes().namedItem("filename").nodeValue();
-				MeshModel* mm = md.addNewMesh(filen);
-				label=mesh.attributes().namedItem("label").nodeValue();
-				mm->setLabel(label);
+        label=mesh.attributes().namedItem("label").nodeValue();
+        MeshModel* mm = md.addNewMesh(filen,label);
 				QDomNode tr=mesh.firstChild();
 		
 				if(!tr.isNull() && QString::compare(tr.nodeName(),"MLMatrix44")==0)
