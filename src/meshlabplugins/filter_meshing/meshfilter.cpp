@@ -1021,7 +1021,7 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 
 		Log("Computing %i loops from %f to %f",numLoop,startAngleDeg,endAngleDeg);
 
-		MeshModel *um=md.addNewMesh("Unrolled Mesh");
+    MeshModel *um=md.addNewMesh("","Unrolled Mesh");
     um->updateDataMask(&m);
     um->cm.textures = m.cm.textures;
 		float avgZ=0;
