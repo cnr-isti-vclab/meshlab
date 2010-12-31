@@ -204,39 +204,34 @@ QString PluginManager::getPluginDirPath()
 
 void PluginManager::knownIOFormats()
 {
-	//currentFormats[IMPORT] currentFormats[EXPORT]
-	QVector< QList<MeshIOInterface::Format> > currentFormats(2);
-
-	QString allKnownFormatsFilter = QObject::tr("All known formats ("); 
-
-	QVector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlug.begin();
-	for (int i = 0; itIOPlugin != meshIOPlug.end(); ++itIOPlugin, ++i)  // cycle among loaded IO plugins
+	for(int inpOut = 0;inpOut < 2;++inpOut)
 	{
-		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
-		currentFormats[IMPORT].append(pMeshIOPlugin->importFormats()); 
-		currentFormats[EXPORT].append(pMeshIOPlugin->exportFormats());
-
-		for(int inpOut = 0;inpOut < 2;++inpOut)
+		QStringList* formatFilters = NULL;
+		QString allKnownFormatsFilter = QObject::tr("All known formats (");
+		for(QVector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlug.begin();itIOPlugin != meshIOPlug.end();++itIOPlugin)
 		{
+			MeshIOInterface* pMeshIOPlugin = *itIOPlugin;	
+			QList<MeshIOInterface::Format> format;
 			QMap<QString,MeshIOInterface*>* map = NULL;
-			QStringList* filt = NULL;
-			if (inpOut == int(IMPORT))
+			if(inpOut== int(IMPORT))
 			{
 				map = &allKnowInputFormats;
-				filt = &inpFilters;
+				formatFilters = &inpFilters;
+				format = pMeshIOPlugin->importFormats();
 			}
 			else
 			{
 				map = &allKnowOutputFormats;
-				filt = &outFilters;
+				formatFilters = &outFilters;
+				format = pMeshIOPlugin->exportFormats();
 			}
-			QList<MeshIOInterface::Format>::iterator itFormat = currentFormats[inpOut].begin();
-			while(itFormat != currentFormats[inpOut].end())
+			for(QList<MeshIOInterface::Format>::iterator itf = format.begin();itf != format.end();++itf)
 			{
-				MeshIOInterface::Format currentFormat = *itFormat;
+				MeshIOInterface::Format currentFormat = *itf;
 
 				QString currentFilterEntry = currentFormat.description + " (";
 
+				//a particular file format could be associated with more than one file extension
 				QStringListIterator itExtension(currentFormat.extensions);
 				while (itExtension.hasNext())
 				{
@@ -251,12 +246,12 @@ void PluginManager::knownIOFormats()
 					currentFilterEntry.append(currentExtension);
 				}
 				currentFilterEntry.append(')');				
-				filt->append(currentFilterEntry);
-				++itFormat;	
+				formatFilters->append(currentFilterEntry);
 			}
-			allKnownFormatsFilter.append(')');
-			filt->push_front(allKnownFormatsFilter);
+
 		}
+		allKnownFormatsFilter.append(')');
+		formatFilters->push_front(allKnownFormatsFilter);
 	}
 }
 

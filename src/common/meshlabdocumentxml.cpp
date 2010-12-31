@@ -67,7 +67,7 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 				//return true;
 				filen=mesh.attributes().namedItem("filename").nodeValue();
         label=mesh.attributes().namedItem("label").nodeValue();
-        MeshModel* mm = md.addNewMesh(filen,label);
+        /*MeshModel* mm = */md.addNewMesh(filen,label);
 				QDomNode tr=mesh.firstChild();
 		
 				if(!tr.isNull() && QString::compare(tr.nodeName(),"MLMatrix44")==0)
