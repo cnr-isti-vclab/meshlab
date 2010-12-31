@@ -50,7 +50,7 @@ using namespace vcg;
 
 void MainWindow::updateRecentFileActions()
 {
-	bool active = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
+        /*bool active = */(bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
 	QSettings settings;
 	QStringList files = settings.value("recentFileList").toStringList();
 	int numRecentFiles = qMin(files.size(), (int)MAXRECENTFILES);
@@ -1445,7 +1445,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			}
 
 			GLA()->meshDoc->setBusy(true);
-			RasterModel *rm= GLA()->meshDoc->addNewRaster(qPrintable(fileName));
+                        /*RasterModel *rm=*/ GLA()->meshDoc->addNewRaster(qPrintable(fileName));
 			meshDoc()->setBusy(false);
 
 //			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
@@ -1570,14 +1570,14 @@ bool MainWindow::open(QString fileName)
 {
   if (!GLA())		return false;
 
-  QStringList suffixList;
+  //QStringList suffixList;
   // HashTable storing all supported formats together withw
 	// the (1-based) index  of first plugin which is able to open it
   //QHash<QString, MeshIOInterface*> allKnownFormats;
   //PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
   QStringList fileNameList;
 	if (fileName.isEmpty())
-    fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), suffixList.join(";;"));
+    fileNameList = QFileDialog::getOpenFileNames(this,tr("Import Mesh"), lastUsedDirectory.path(), PM.inpFilters.join(";;"));
 	else 
 		fileNameList.push_back(fileName);
 
@@ -1682,7 +1682,7 @@ void MainWindow::reload()
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
 {
-  QStringList suffixList;
+  QStringList& suffixList = PM.outFilters;
 
   //QHash<QString, MeshIOInterface*> allKnownFormats;
 	QFileInfo fi(fileName);
