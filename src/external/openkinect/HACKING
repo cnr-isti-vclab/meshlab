@@ -1,0 +1,84 @@
+	"Coding styles are like assholes, everyone has one and no one likes anyone else's."
+	--Eric Warmenhoven
+
+We're not terribly particular about coding style at this early stage. However,
+you should try to follow the following basic guidelines:
+
+=== INDENTATION ===
+
+libfreenect is coded using tabs for indentation. The nominal width is 4 spaces.
+However, you are encouraged to use spaces for alignment, as in the following
+example:
+
+	if (foo(this, that, there)
+	    && bar == baz) {
+		dostuff();
+	}
+
+Notice the spaces before the second line of the if() condition, after a single
+tab. This lets people use their preferred tab width setting while maintaining
+alignment.
+
+Do not, however, use spaces for indentation. Always use tabs.
+
+=== WIDTH ===
+
+We're not particular about code width, but 80 characters is a good mark where
+you should begin to consider breaking into multiple lines. A few 100 or 120-char
+lines are fine, but don't go longer than that. Documentation, if linewrapped,
+should be linewrapped to 80 character lines.
+
+=== IF / FOR / WHILE / etc. ===
+
+Put the opening brace on the same line, like this:
+
+	if (foo) {
+		...
+	} else if (bar) {
+		...
+	} else {
+		...
+	}
+
+Or don't use braces for single-line bodies, like this:
+
+	if (foo)
+		...
+	else if (bar)
+		...
+	else
+		...
+
+Exceptions are allowed when the if() condition spans multiple lines and putting
+the brace on its own line looks better by visually separating the condition from
+the body.
+
+=== FUNCTIONS ===
+
+Functions should have the opening brace on the next line, like this:
+
+void foo(int a_thing, int something_else)
+{
+	...
+}
+
+No-args functions should be (void), and function arguments should be separated
+with a space after the comma, like this:
+
+void baz(void)
+{
+	foo(bluh, blah);
+}
+
+Try to avoid having excessively long function names (abbreviating is fine) and
+don't make multiple functions that do essentially the same thing (and certainly
+don't copy and paste the code).
+
+In general, for data obtained with the Kinect, we'll provide a raw and a
+"cooked" variant, where it makes sense, but we don't need to support every
+"cooked" value convention under the sun.
+
+== WHITESPACE ===
+
+Avoid trailing whitespace. No lines should end in a tab or a space. Keep a
+newline (blank line) at the end of each file.

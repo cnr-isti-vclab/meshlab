@@ -1,0 +1,39 @@
+Fakenect
+(c) 2010 Brandyn White <bwhite@dappervision.com>
+
+See this blog post for more info
+http://brandynwhite.com/fakenect-openkinect-driver-simulator-experime
+
+Description
+This consists of a "record" program to save dumps from the kinect sensor and a library that can be linked to, providing an interface compatible with freenect.  This allows you to save data and repeat for experiments, debug problems, share datasets, and experiment with the kinect without having one.
+
+Record
+./record my_output       // NOTE: output directory is created for you
+
+The program takes one argument (the output directory) and saves the acceleration, depth, and rgb data as individual files with names in the form "TYPE-CURRENTIME-TIMESTAMP" where TYPE is either (a)ccel, (d)epth, or (r)gb, TIMESTAMP corresponds to the timestamp associated with the observation (or in the case of accel, the last timestamp seen), and CURRENTTIME corresponds to a floating point version of the time in seconds.  The purpose of storing the current time is so that delays can be recreated exactly as they occurred.  For RGB and DEPTH the dump is just the entirety of the data provided in PPM and PGM formats respectively (just a 1 line header above the raw dump).  For ACCEL, the dump is the 'freenect_raw_tilt_state'.  Only the front part of the file name is used, with the rest left undefined (extension, extra info, etc).
+ 
+A file called INDEX.txt is also output with all of the filenames local to that directory to simplify the format (e.g., no need to read the directory structure).
+
+Here is an example of using the program
+mkdir out
+sudo ./record out
+ 
+And it will keep running, when you want to stop it, hit Ctrl-C and the signal will be caught, runloop stopped, and everything will be stored cleanly.
+ 
+Library
+Use the resulting fakenect .so dynamically instead of libfreenect.
+
+We read 1 update from the index per call, so this needs to be called in a loop like usual.  If the index line is a Depth/RGB image the provided callback is called.  If the index line is accelerometer data, then it is used to update our internal state.  If you query for the accelerometer data you get the last sensor reading that we have.  The time delays are compensated as best as we can to match those from the original data and current run conditions (e.g., if it takes longer to run this code then we wait less).
+
+Build
+This is built with the main cmake script.
+
+This gives you a build/lib/fakenect/libfreenect.so (note that it has the same name, but it is not the same) that you dynamically link in instead of libfreenect.so.
+
+Evaluation
+There is a demo in wrappers/python, see the README there
+
+Here is an example of calling the cython demo
+sudo LD_LIBRARY_PATH="../../../fakenect/" FAKENECT_PATH="thanksgiving0" python demo_cv_depth_show.py
+
+Note the FAKENECT_PATH, you pass in the path to a directory made with "record"

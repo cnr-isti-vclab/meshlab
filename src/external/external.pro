@@ -7,3 +7,4 @@ SUBDIRS       = lib3ds-1.3.0/lib3ds \
                 muparser_v132/src \
                 levmar-2.3/levmar-2.3.pro \
                 structuresynth/structuresynth.pro \
+                openkinect/openkinect.pro
