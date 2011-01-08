@@ -55,6 +55,7 @@ public:
 	int resolution;
   bool transparentBackground;
   bool snapAllLayers;
+  bool tiledSave; // if true all the tiles are saved as separated files and not joined.
 		
 	SnapshotSetting()
 	{
@@ -64,6 +65,7 @@ public:
 		resolution=1;
     transparentBackground=true;
     snapAllLayers=false;
+    tiledSave=false;
 	};
 };
 
@@ -296,7 +298,7 @@ public:
    QMap<int, bool> rasterVisibilityMap;
 
  // Add an entry in the mesh visibility map
-	void addMeshSetVisibility(int meshId, bool visibility);
+  void meshSetVisibility(MeshModel *mp, bool visibility);
 
 // Add an entry in the raster visibility map
 	void addRasterSetVisibility(int rasterId, bool visibility);
@@ -315,7 +317,7 @@ private:
 	enum AnimMode { AnimNone, AnimSpin, AnimInterp};
 	AnimMode animMode; 
 	int tileCol, tileRow, totalCols, totalRows;   // snapshot: total number of subparts and current subpart rendered
-  int totalSnapLayer, currSnapLayer;            // snapshot: total number of layers and current layer rendered
+  int  currSnapLayer;            // snapshot: total number of layers and current layer rendered
 	void setCursorTrack(vcg::TrackMode *tm);
 
 	//-----------Raster support----------------------------

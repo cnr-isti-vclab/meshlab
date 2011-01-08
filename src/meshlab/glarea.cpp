@@ -155,23 +155,35 @@ void GLArea::initializeGL()
 
 void GLArea::pasteTile()
 {
+  QString outfile;
+
 	glPushAttrib(GL_ENABLE_BIT);
 	QImage tileBuffer=grabFrameBuffer(true).mirrored(false,true);
+  if(ss.tiledSave)
+  {
+    outfile=QString("%1/%2_%3-%4.png")
+            .arg(ss.outdir)
+            .arg(ss.basename)
+            .arg(tileCol,2,10,QChar('0'))
+            .arg(tileRow,2,10,QChar('0'));
+    tileBuffer.mirrored(false,true).save(outfile,"PNG");
+  }
+  else
+  {
+    if (snapBuffer.isNull())
+      snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
 
-	if (snapBuffer.isNull())
-		snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
+    uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.numBytes());
+    uchar *tilePtr = tileBuffer.bits();
 
-	uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.numBytes());
-	uchar *tilePtr = tileBuffer.bits();
-
-	for (int y=0; y < tileBuffer.height(); y++)
-	{
-		memcpy((void*) snapPtr, (void*) tilePtr, tileBuffer.bytesPerLine());
-		snapPtr+=tileBuffer.bytesPerLine() * totalCols;
-		tilePtr+=tileBuffer.bytesPerLine();
-	}
-
-	tileCol++;
+    for (int y=0; y < tileBuffer.height(); y++)
+    {
+      memcpy((void*) snapPtr, (void*) tilePtr, tileBuffer.bytesPerLine());
+      snapPtr+=tileBuffer.bytesPerLine() * totalCols;
+      tilePtr+=tileBuffer.bytesPerLine();
+    }
+  }
+  tileCol++;
 
 	if (tileCol >= totalCols)
 	{
@@ -180,31 +192,28 @@ void GLArea::pasteTile()
 
 		if (tileRow >= totalRows)
 		{
-      QString outfile;
-
       if(ss.snapAllLayers)
       {
-			 outfile=QString("%1/%2%3_L%4.png")
-         .arg(ss.outdir)
-         .arg(ss.basename)
-         .arg(ss.counter,2,10,QChar('0'))
-         .arg(currSnapLayer,2,10,QChar('0'));
-      }
-      else
-      {
+        outfile=QString("%1/%2%3_L%4.png")
+                .arg(ss.outdir).arg(ss.basename)
+                .arg(ss.counter,2,10,QChar('0'))
+                .arg(currSnapLayer,2,10,QChar('0'));
+      } else {
 			  outfile=QString("%1/%2%3.png")
-          .arg(ss.outdir)
-          .arg(ss.basename)
-          .arg(ss.counter++,2,10,QChar('0'));
+                .arg(ss.outdir).arg(ss.basename)
+                .arg(ss.counter++,2,10,QChar('0'));
       }
-			bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
-      if (ret) log->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
-          else log->Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
 
+      if(!ss.tiledSave)
+      {
+        bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
+        if (ret) log->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
+        else log->Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
+      }
 			takeSnapTile=false;
 			snapBuffer=QImage();
 		}
-	}
+  }
 	update();
 	glPopAttrib();
 }
@@ -588,7 +597,6 @@ void GLArea::displayHelp(QPainter *painter)
 void GLArea::saveSnapshot()
 {
   // snap all layers
-  totalSnapLayer= meshDoc->meshList.size();
   currSnapLayer=0;
 
   // number of subparts
@@ -597,32 +605,25 @@ void GLArea::saveSnapshot()
 
   if(ss.snapAllLayers)
   {
-
-   while(currSnapLayer<totalSnapLayer)
+   while(currSnapLayer<meshDoc->meshList.size())
    {
 	   tileRow=tileCol=0;
-
+     qDebug("Snapping layer %i",currSnapLayer);
      meshDoc->setCurrentMesh(currSnapLayer);
-     for(int i=0; i<totalSnapLayer; i++)
-     {
-       if(i==currSnapLayer)
-         addMeshSetVisibility(i,true);
-       else
-         addMeshSetVisibility(i,false);
+     foreach(MeshModel *mp,meshDoc->meshList) {
+       meshSetVisibility(mp,false);
      }
+     meshSetVisibility(mm(),true);
 
      takeSnapTile=true;
-	   update();
      repaint();
      currSnapLayer++;
    }
 
    //cleanup
-   for(int i=0; i<totalSnapLayer; i++)
-   {
-     addMeshSetVisibility(i,true);
+   foreach(MeshModel *mp,meshDoc->meshList) {
+     meshSetVisibility(mp,true);
    }
-
    ss.counter++;
   }
   else
@@ -1214,9 +1215,10 @@ void GLArea::updateRasterSetVisibilities()
 	}
 }
 
-void GLArea::addMeshSetVisibility(int meshId, bool visibility)
+void GLArea::meshSetVisibility(MeshModel *mp, bool visibility)
 {
-	meshVisibilityMap.insert(meshId,visibility);
+  mp->visible=visibility;
+  meshVisibilityMap[mp->id()]=visibility;
 }
 
 void GLArea::addRasterSetVisibility(int rasterId, bool visibility)

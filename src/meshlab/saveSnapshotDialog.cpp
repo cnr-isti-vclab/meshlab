@@ -51,6 +51,7 @@ SnapshotSetting SaveSnapshotDialog::getValues()
 	settings.resolution=ui->resolutionSpinBox->value();
   settings.transparentBackground=ui->backgroundCheckBox->isChecked();
   settings.snapAllLayers=ui->alllayersCheckBox->isChecked();
+  settings.tiledSave=ui->tiledSaveCheckBox->isChecked();
 	return settings;
 }
 

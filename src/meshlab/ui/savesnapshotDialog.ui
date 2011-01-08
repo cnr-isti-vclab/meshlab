@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>552</width>
-    <height>192</height>
+    <width>616</width>
+    <height>225</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -114,6 +114,16 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="tiledSaveCheckBox">
+       <property name="toolTip">
+        <string>If checked, save each image independently, allowing to later combine the saved images into a very very large image</string>
+       </property>
+       <property name="text">
+        <string>Tiled Save</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

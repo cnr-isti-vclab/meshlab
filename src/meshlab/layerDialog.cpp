@@ -98,17 +98,14 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
         // Very useful for comparing meshes
 
         if(QApplication::keyboardModifiers() == Qt::ControlModifier)
-          foreach(MeshModel *mp, md->meshList)
         {
-          mp->visible=false;
-          mw->GLA()->addMeshSetVisibility(mp->id(), mp->visible);
+          foreach(MeshModel *mp, md->meshList)
+            {
+              mw->GLA()->meshSetVisibility(mp, false);
+            }
         }
-
-        if(md->getMesh(clickedId)->visible)  md->getMesh(clickedId)->visible = false;
-        else   md->getMesh(clickedId)->visible = true;
-
-        //Update current GLArea visibility
-        mw->GLA()->addMeshSetVisibility(md->getMesh(clickedId)->id(), md->getMesh(clickedId)->visible);
+        //Toggle visibility of current mesh
+        mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
       } break;
     case 1 :
 
