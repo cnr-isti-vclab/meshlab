@@ -494,7 +494,12 @@ private:
   */
   QString fullPathFilename;
 
+  //it is the label of the document. it should only be something like Project_n (a temporary name for a new empty document) or the fullPathFilename.
+  QString documentLabel;
+
 public:
+	void setDocLabel(const QString& docLb) {documentLabel = docLb;}
+	QString docLabel() const {return documentLabel;}
  QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
  void setFileName(const QString& newFileName) {fullPathFilename = newFileName;}
   GLLogStream Log;
