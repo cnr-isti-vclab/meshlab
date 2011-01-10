@@ -88,6 +88,7 @@ private slots:
   GLArea* newDocument(const QString& projName = QString());
   void reload();
 	void openRecentFile();
+	void openRecentProj();
 	bool saveAs(QString fileName = QString(),const bool saveAllPossibleAttributes = false);
 	bool save(const bool saveAllPossibleAttributes = false);
 	bool saveSnapshot();
@@ -180,7 +181,9 @@ private:
   // void loadPlugins();
 	void keyPressEvent(QKeyEvent *);
 	void updateRecentFileActions();
+	void updateRecentProjActions();
 	void setCurrentFile(const QString &fileName);
+	void saveRecentProjectList(const QString &projName);
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
 
 	QHttp *httpReq;
@@ -259,6 +262,8 @@ public:
   bool importRaster(const QString& fileImg);
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
 	bool importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
+	
+
 private:
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
@@ -269,6 +274,8 @@ private:
 	///////// Menus ///////////////
 	QMenu *fileMenu;
   QMenu *filterMenu;
+  QMenu* recentProjMenu;
+  QMenu* recentFileMenu;
 
   QMenu *filterMenuSelect;
   QMenu *filterMenuClean;
@@ -320,6 +327,7 @@ private:
   QAction *reloadMeshAct;
   QAction *saveSnapshotAct;
   QAction *recentFileActs[MAXRECENTFILES];
+  QAction *recentProjActs[MAXRECENTFILES];
 	QAction *separatorAct;
 	QAction *exitAct;
   //////

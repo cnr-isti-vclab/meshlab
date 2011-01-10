@@ -147,10 +147,19 @@ void MainWindow::createActions()
 	saveSnapshotAct = new QAction(QIcon(":/images/snapshot.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
 
-	for (int i = 0; i < MAXRECENTFILES; ++i) {
+	for (int i = 0; i < MAXRECENTFILES; ++i) 
+	{
+		recentProjActs[i] = new QAction(this);
+		recentProjActs[i]->setVisible(true);
+		recentProjActs[i]->setEnabled(true);
+
 		recentFileActs[i] = new QAction(this);
-		recentFileActs[i]->setVisible(false);
+		recentFileActs[i]->setVisible(true);
+		recentFileActs[i]->setEnabled(false);
+		
+		connect(recentProjActs[i],SIGNAL(triggered()),this,SLOT(openRecentProj()));
 		connect(recentFileActs[i], SIGNAL(triggered()),this, SLOT(openRecentFile()));
+		
 	}
 
 	exitAct = new QAction(tr("E&xit"), this);
@@ -440,9 +449,16 @@ void MainWindow::createMenus()
 
 	fileMenu->addAction(saveSnapshotAct);
 	separatorAct = fileMenu->addSeparator();
+	recentProjMenu = fileMenu->addMenu(tr("Recent Projects"));
+	recentFileMenu = fileMenu->addMenu(tr("Recent Files"));
+	
 
-	for (int i = 0; i < MAXRECENTFILES; ++i) fileMenu->addAction(recentFileActs[i]);
-	updateRecentFileActions();
+	for (int i = 0; i < MAXRECENTFILES; ++i) 
+	{
+		recentProjMenu->addAction(recentProjActs[i]);
+		recentFileMenu->addAction(recentFileActs[i]);
+	}
+	//updateRecentFileActions();
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
 
@@ -763,6 +779,9 @@ void MainWindow::setCurrentFile(const QString &fileName)
 	while (files.size() > MAXRECENTFILES)
 		files.removeLast();
 
+	//avoid the slash/back-slash path ambiguity
+	for(int ii = 0;ii < files.size();++ii)
+		files[ii] = QDir::fromNativeSeparators(files[ii]);
 	settings.setValue("recentFileList", files);
 
 	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
@@ -796,6 +815,28 @@ void MainWindow::setCurrentFile(const QString &fileName)
 				if(congratsDialog->result()==QDialog::Accepted)
           QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?cc=g.ranzuglia@isti.cnr.it&subject=[MeshLab] Reporting Info on MeshLab Usage"));
 			}
+	}
+}
+
+void MainWindow::saveRecentProjectList(const QString &projName)
+{
+	QSettings settings;
+	QStringList files = settings.value("recentProjList").toStringList();
+	files.removeAll(projName);
+	files.prepend(projName);
+	while (files.size() > MAXRECENTFILES)
+		files.removeLast();
+
+	for(int ii = 0;ii < files.size();++ii)
+		files[ii] = QDir::fromNativeSeparators(files[ii]);
+
+	settings.setValue("recentProjList", files);
+
+	foreach (QWidget *widget, QApplication::topLevelWidgets()) 
+	{
+		MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
+		if (mainWin) 
+			mainWin->updateRecentProjActions();
 	}
 }
 

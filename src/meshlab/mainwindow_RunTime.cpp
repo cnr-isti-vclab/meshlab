@@ -50,20 +50,41 @@ using namespace vcg;
 
 void MainWindow::updateRecentFileActions()
 {
-        /*bool active = */(bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
+	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
+
 	QSettings settings;
 	QStringList files = settings.value("recentFileList").toStringList();
+
 	int numRecentFiles = qMin(files.size(), (int)MAXRECENTFILES);
+	
 	for (int i = 0; i < numRecentFiles; ++i) 
 	{
 		QString text = tr("&%1 %2").arg(i + 1).arg(QFileInfo(files[i]).fileName());
 		recentFileActs[i]->setText(text);
 		recentFileActs[i]->setData(files[i]);
-		//recentFileActs[i]->setEnabled(active);
+		recentFileActs[i]->setEnabled(activeDoc);
 	}
 	for (int j = numRecentFiles; j < MAXRECENTFILES; ++j)	
 		recentFileActs[j]->setVisible(false);
-	separatorAct->setVisible(numRecentFiles > 0);
+}
+
+void MainWindow::updateRecentProjActions()
+{
+	//bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
+
+	QSettings settings;
+	QStringList projs = settings.value("recentProjList").toStringList();
+
+	int numRecentProjs = qMin(projs.size(), (int)MAXRECENTFILES);
+	for (int i = 0; i < numRecentProjs; ++i) 
+	{
+		QString text = tr("&%1 %2").arg(i + 1).arg(QFileInfo(projs[i]).fileName());
+		recentProjActs[i]->setText(text);
+		recentProjActs[i]->setData(projs[i]);
+		recentProjActs[i]->setEnabled(true);
+	}
+	for (int j = numRecentProjs; j < MAXRECENTFILES; ++j)	
+		recentProjActs[j]->setVisible(false);
 }
 
 // creates the standard plugin window
@@ -251,6 +272,8 @@ void MainWindow::updateMenus()
 
   saveSnapshotAct->setEnabled(activeDoc);
 
+  updateRecentFileActions();
+  updateRecentProjActions();
   filterMenu->setEnabled(activeDoc && !filterMenu->actions().isEmpty());
 	if (!filterMenu->actions().isEmpty())
     activateSubFiltersMenu(!activeDocNotEmpty,activeDocNotEmpty);
@@ -1278,10 +1301,17 @@ bool MainWindow::openIn()
  */
 void MainWindow::saveProject()
 {
-  QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("*.aln *.mlp"));
+  QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;Align Project (*.aln)"));
   // this change of dir is needed for subsequent textures/materials loading
   QFileInfo fi(fileName);
   QDir::setCurrent(fi.absoluteDir().absolutePath());
+
+  /*********WARNING!!!!!! CHANGE IT!!! ALSO IN THE OPENPROJECT FUNCTION********/
+  meshDoc()->setDocLabel(fileName);
+  mdiarea->activeSubWindow()->setWindowTitle(meshDoc()->docLabel());
+  layerDialog->setWindowTitle(meshDoc()->docLabel());
+  /****************************************************************************/
+
 
   bool ret;
 	qDebug("Saving aln file %s\n",qPrintable(fileName));
@@ -1321,12 +1351,13 @@ void MainWindow::saveProject()
 bool MainWindow::openProject(QString fileName)
 {
   if (fileName.isEmpty())
-    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "*.aln *.mlp");
+    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln);;MeshLab Project (*.mlp);;Align Project (*.aln)");
   QFileInfo fi(fileName);
   if (fileName.isEmpty())
     return false;
   else
     lastUsedDirectory = fi.absoluteDir();
+  saveRecentProjectList(fileName);
   if (QString(fi.suffix()).toLower() == "aln")
   {
 
@@ -1355,7 +1386,16 @@ bool MainWindow::openProject(QString fileName)
   }
   else if (QString(fi.suffix()).toLower() == "mlp")
   {
-    newDocument(fileName);
+	  bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
+	  bool activeEmpty = activeDoc && meshDoc()->meshList.empty();
+    if (activeEmpty)
+	{
+		meshDoc()->setFileName(fileName);
+		mdiarea->currentSubWindow()->setWindowTitle(fileName);
+	}
+	else
+		newDocument(fileName);
+	meshDoc()->setDocLabel(fileName);
     //QDir::setCurrent(fi.absoluteDir().absolutePath());
     if (!MeshDocumentFromXML(*meshDoc(),fileName))
     {
@@ -1402,11 +1442,12 @@ GLArea* MainWindow::newDocument(const QString& projName)
 	if (projName.isEmpty())
 	{
 		static int docCounter = 1;
-		mvcont->setWindowTitle(QString("Project_") + QString::number(docCounter));
+		mvcont->meshDoc.setDocLabel(QString("Project_") + QString::number(docCounter));
 		++docCounter;
 	}
 	else
-		mvcont->setWindowTitle(projName);
+		mvcont->meshDoc.setDocLabel(projName);
+	mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
 	//if(mdiarea->isVisible()) 
 	gla->mvc->showMaximized();
 	return gla;
@@ -1637,6 +1678,12 @@ void MainWindow::openRecentFile()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	if (action)	open(action->data().toString());
+}
+
+void MainWindow::openRecentProj()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+	if (action)	openProject(action->data().toString());
 }
 
 bool MainWindow::importMeshWithStandardParams(QString& fullPath,MeshModel* mm)

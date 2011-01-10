@@ -252,6 +252,7 @@ void LayerDialog::updateTable()
 		return;
 	}
 	MeshDocument *md=mw->GLA()->meshDoc;
+	this->setWindowTitle(md->docLabel());
 
 	ui->meshTreeWidget->clear();
 	ui->meshTreeWidget->setColumnCount(4);
