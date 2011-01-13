@@ -402,7 +402,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
 			{
 				// clone the control mesh
 				MeshModel* ref = par.getMesh("ControlMesh");
-                                pPoints = md.addNewMesh("");
+				pPoints = md.addNewMesh("","TempMesh");
 				pPoints->updateDataMask(ref);
 				vcg::tri::Append<CMeshO,CMeshO>::Mesh(pPoints->cm, ref->cm);  // the last true means "copy all vertices"
 				vcg::tri::UpdateBounding<CMeshO>::Box(pPoints->cm);
@@ -570,7 +570,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
 		else if (id & _MCUBE_)
 		{
 			// create a new mesh
-			mesh = md.addNewMesh("mc_mesh");
+			mesh = md.addNewMesh("","mc_mesh");
 
 			typedef vcg::tri::MlsWalker<CMeshO,MlsSurface<CMeshO> > MlsWalker;
 			typedef vcg::tri::MarchingCubes<CMeshO, MlsWalker> MlsMarchingCubes;
