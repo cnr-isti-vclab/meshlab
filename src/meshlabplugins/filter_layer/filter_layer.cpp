@@ -44,7 +44,8 @@ FilterLayerPlugin::FilterLayerPlugin()
   FP_FLATTEN <<
 	FP_SPLITSELECT <<
   FP_RENAME <<
-	FP_DUPLICATE;
+	FP_DUPLICATE <<
+	FP_SELECTCURRENT;
 
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -58,6 +59,7 @@ FilterLayerPlugin::FilterLayerPlugin()
     case FP_DUPLICATE :  return QString("Duplicate Current layer");
     case FP_FLATTEN :  return QString("Flatten Visible Layers");
     case FP_RENAME :  return QString("Rename Current Layer");
+		case FP_SELECTCURRENT :  return QString("Change the current layer");
     default : assert(0);
 	}
 }
@@ -70,6 +72,7 @@ FilterLayerPlugin::FilterLayerPlugin()
 		case FP_DUPLICATE :  return QString("Create a new layer containing the same model as the current one");
     case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformations are preserved. Existing layers can be optionally deleted");
     case FP_RENAME :  return QString("Explicitly change the label shown for a given mesh");
+		case FP_SELECTCURRENT :  return QString("Change the current layer from its name");
     default : assert(0);
 	}
 }
@@ -108,7 +111,11 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
                        "New Label",
                        "New Label for the mesh"));
        break;
-   default: break; // do not add any parameter for the other filters
+   case FP_SELECTCURRENT :
+			parlst.addParam(new RichMesh ("mesh",md.mm(),&md, "Mesh",
+                                          "The name of the current mesh"));
+       break;
+	 default: break; // do not add any parameter for the other filters
   }
 }
 
@@ -179,6 +186,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
       MeshModel *currentMesh  = md.mm();				// source = current
       QString newName = currentMesh->label() + "_copy";
       MeshModel *destMesh= md.addNewMesh("",newName); // After Adding a mesh to a MeshDocument the new mesh is the current one
+			destMesh->updateDataMask(currentMesh);
       tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm);
 
 			Log("Duplicated current model to layer %i", md.meshList.size());
@@ -241,7 +249,13 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
   case FP_RENAME:
     md.mm()->setLabel(par.getString("newName"));
     break;
+	case FP_SELECTCURRENT:
+	{
+		md.setCurrent(par.getMesh("mesh"));
+		break;
 	}
+	}
+	
 
 	return true;
 }
@@ -254,6 +268,7 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
     case FP_SPLITSELECT :
     case FP_DUPLICATE :
     case FP_FLATTEN :
+		case FP_SELECTCURRENT :
       return MeshFilterInterface::Layer;
     default :  assert(0);
       return MeshFilterInterface::Generic;

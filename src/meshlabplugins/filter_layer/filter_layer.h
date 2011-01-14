@@ -34,7 +34,7 @@ class FilterLayerPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-  enum { FP_FLATTEN, FP_SPLITSELECT, FP_DUPLICATE, FP_RENAME };
+  enum { FP_FLATTEN, FP_SPLITSELECT, FP_DUPLICATE, FP_RENAME, FP_SELECTCURRENT };
 
   FilterLayerPlugin();
 	
