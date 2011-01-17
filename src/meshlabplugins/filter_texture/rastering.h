@@ -286,7 +286,17 @@ public:
             else if (nearestF->Flags() & CMeshO::FaceType::NORMY ) axis = 1;
             else axis = 2;
             bool ret = InterpolationParameters(*nearestF, axis, closestPt, interp);
-            assert(ret);
+						// if the point is outside the nearest face,
+						// then let's simply use the color of the nearest vertex:
+						if(!ret)
+						{
+							CMeshO::VertexType *nearestV=0;
+							float dist=dist_upper_bound;
+							nearestV =  vcg::tri::GetClosestVertex<CMeshO,VertexMeshGrid>(*srcMesh,unifGridVert,startPt,dist_upper_bound,dist);
+							if(dist == dist_upper_bound) return ;
+							trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(nearestV->C()[0], nearestV->C()[1], nearestV->C()[2], 255));
+							return;
+						}
             interp[2]=1.0-interp[1]-interp[0];
 
         if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - 1 - tp.Y())) < alpha)
