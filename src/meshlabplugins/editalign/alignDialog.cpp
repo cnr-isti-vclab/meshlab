@@ -57,7 +57,7 @@ void AlignDialog::closeEvent ( QCloseEvent * /*event*/ )
   emit closing();
 }
 
-AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)    
+AlignDialog::AlignDialog(QWidget *parent,EditAlignPlugin *_edit )    : QDockWidget(parent)
 { 
  // setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
 	//setVisible(false);
@@ -68,10 +68,11 @@ AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
 	this->setFloating(true);
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
-
+  this->edit = _edit;
 	// The following connection is used to associate the click with the change of the current mesh. 
 	connect(	ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(onClickItem(QTreeWidgetItem * , int ) ) );
-	
+  connect(	ui.alignTreeWidget, SIGNAL(updateMeshSetVisibilities()) , this,  SLOT(onClickItem(QTreeWidgetItem * , int ) ) );
+
 	globalLogTextEdit=ui.logTextEdit;
   currentArc=0;
 	meshTree=0;
@@ -156,7 +157,7 @@ void AlignDialog::updateButtons()
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
 {
-        QString meshName = meshNode->m->shortName();
+        QString meshName = meshNode->m->label();
 
 		QString labelText;
 		setText(0, QString::number(meshNode->id));		
@@ -253,22 +254,23 @@ void AlignDialog::onClickItem(QTreeWidgetItem * item, int column )
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
 	if(!mItem) return; // user clicked on a iteration info (neither a node nor an arc) 
 	
-	MeshNode * nn= mItem->n;
-	if(nn) {
-		if(column==1)
-					{
-						nn->m->visible = ! nn->m->visible;
-						if(nn->m->visible) mItem->setIcon(1,QIcon(":/layer_eye_open.png"));
-													else mItem->setIcon(1,QIcon(":/layer_eye_close.png"));
-					}
-		else {
-						gla->meshDoc->setCurrentMesh(nn->id);
-						updateCurrentNodeBackground();
-					}
-	} else {
-		assert(mItem->a);
-		setCurrentArc(mItem->a);
-	}
-	gla->update();
-	updateButtons();
+  MeshNode * nn= mItem->n;
+  if(nn) {
+    if(column==1)
+          {
+            nn->m->visible = ! nn->m->visible;
+            emit updateMeshSetVisibilities();
+            if(nn->m->visible) mItem->setIcon(1,QIcon(":/layer_eye_open.png"));
+                          else mItem->setIcon(1,QIcon(":/layer_eye_close.png"));
+          }
+    else {
+            gla->meshDoc->setCurrentMesh(nn->id);
+            updateCurrentNodeBackground();
+          }
+  } else {
+    assert(mItem->a);
+    setCurrentArc(mItem->a);
+  }
+  gla->update();
+  updateButtons();
 }

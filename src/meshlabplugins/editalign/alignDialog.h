@@ -51,7 +51,7 @@ class AlignDialog : public QDockWidget
 		Q_OBJECT
 
 	public:
-		AlignDialog(QWidget *parent = 0);
+    AlignDialog(QWidget *parent, EditAlignPlugin *_edit);
 		void rebuildTree();
 		void updateButtons();
 		void updateDialog();
@@ -61,7 +61,9 @@ class AlignDialog : public QDockWidget
 		
 		Ui::alignDialog ui;
 		GLArea *gla; 
-		EditAlignPlugin *edit;
+  private:
+    EditAlignPlugin *edit;
+public:
 
 		MeshTree *meshTree;
 		MeshNode *currentNode(); 
@@ -76,7 +78,7 @@ class AlignDialog : public QDockWidget
 virtual void closeEvent ( QCloseEvent * event )	;
 signals:
 	void closing();
-
+  void updateMeshSetVisibilities();
 
 	public slots:
 		void onClickItem(QTreeWidgetItem * item, int column );
