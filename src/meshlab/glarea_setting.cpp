@@ -19,6 +19,9 @@ void GLAreaSetting::initGlobalParameterSet( RichParameterSet * defaultGlobalPara
     QStringList textureMagFilterModes =  (QStringList() << "Nearest" << "Linear");
     defaultGlobalParamSet->addParam(new RichEnum(textureMinFilterParam()	, 1,textureMinFilterModes,"MeshLab Texture Minification Filtering","MeshLab GLarea's BackGround Color(top corner)"));
     defaultGlobalParamSet->addParam(new RichEnum(textureMagFilterParam()	, 1,textureMagFilterModes,"MeshLab Texture Magnification Filtering","MeshLab GLarea's BackGround Color(top corner)"));
+
+    defaultGlobalParamSet->addParam(new RichBool(pointDistanceAttenuationParam()	, true,"Perspective Varying Point Size","If true the size of the points is drawn with a size proprtional to the distance from the observer."));
+    defaultGlobalParamSet->addParam(new RichFloat(pointSizeParam()	, 2.0, "Point Size","The base size of points when drawn"));
 }
 
 
@@ -37,6 +40,9 @@ void GLAreaSetting::updateGlobalParameterSet( RichParameterSet& rps )
 
     textureMinFilter = rps.getEnum(this->textureMinFilterParam());
     textureMagFilter = rps.getEnum(this->textureMagFilterParam());
+
+    pointDistanceAttenuation = rps.getBool(this->pointDistanceAttenuationParam());
+    pointSize = rps.getFloat(this->pointSizeParam());
 
     currentGlobalParamSet=&rps;
 }

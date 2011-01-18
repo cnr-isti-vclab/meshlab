@@ -31,6 +31,12 @@ public:
     inline static QString textureMinFilterParam()           {return "MeshLab::Appearance::textureMinFilter";}
     inline static QString textureMagFilterParam()           {return "MeshLab::Appearance::textureMagFilter";}
 
+    bool pointDistanceAttenuation;
+    inline static QString pointDistanceAttenuationParam()           {return "MeshLab::Appearance::pointDistanceAttenuation";}
+    float pointSize;
+    inline static QString pointSizeParam()           {return "MeshLab::Appearance::pointSize";}
+
+
     void updateGlobalParameterSet( RichParameterSet& rps );
     static void initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet);
 
