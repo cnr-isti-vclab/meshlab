@@ -253,6 +253,7 @@ bool AlignPair::InitFixVert(AlignPair::A2Mesh *fm,
   if(PreferredGridSize==0) PreferredGridSize=fm->vert.size()*pp.UGExpansionFactor;
   u.Set(fm->vert.begin(), fm->vert.end());//, PreferredGridSize);
   printf("UG %i %i %i\n",u.siz[0],u.siz[1],u.siz[2]);
+  return true;
 }
 
 
