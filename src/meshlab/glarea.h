@@ -288,7 +288,6 @@ public:
 	float clipRatioNear;
 	float nearPlane;
 	float farPlane;
-  float pointSize;
   SnapshotSetting ss;
 
    // Store for each mesh if it is visible for the current viewer.

@@ -65,8 +65,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	clipRatioNear = 1;
 	nearPlane = .2f;
 	farPlane = 5.f;
-	pointSize = 2.0f;
-	
+
 	updateMeshSetVisibilities();
 	updateRasterSetVisibilities();
   setAutoFillBackground(false);
@@ -335,10 +334,13 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
     else
     {
       foreach(MeshModel * mp, meshDoc->meshList)
-        {
-          //Mesh visibility is read from the viewer visibility map, not from the mesh
-          if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-        }
+      {
+        //Mesh visibility is read from the viewer visibility map, not from the mesh
+        mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
+        mp->glw.SetHintParami(GLW::HNPPointDistanceAttenuation,glas.pointDistanceAttenuation?1:0);
+        mp->glw.SetHintParami(GLW::HNPPointSmooth,glas.pointSmooth?1:0);
+        if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+      }
     }
     if(iEdit) iEdit->Decorate(*mm(),this,&painter);
 
@@ -809,9 +811,9 @@ void GLArea::wheelEvent(QWheelEvent*e)
 		{
 		case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50.0f); break;
 		case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
-		case Qt::AltModifier													: pointSize = math::Clamp(pointSize*powf(1.2f, notch),0.01f,150.0f);
+    case Qt::AltModifier													: glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
 			foreach(MeshModel * mp, meshDoc->meshList)
-				mp->glw.SetHintParamf(GLW::HNPPointSize,pointSize);
+        mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
 			break;
 		case Qt::ShiftModifier												: fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
 		default:
