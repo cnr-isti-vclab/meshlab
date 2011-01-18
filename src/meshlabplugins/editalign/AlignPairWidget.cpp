@@ -52,6 +52,7 @@ AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 	QRect rr= QApplication::desktop()->screenGeometry ( this );
 	setMinimumSize(rr.width()*0.8,rr.width()*0.5);
 	hasToPick=false;
+  hasToDelete=false;
 	pointToPick=vcg::Point2i(-1,-1);
 }
 
@@ -101,7 +102,10 @@ void AlignPairWidget::paintGL ()
 				vcg::Box3f bb;
 				if(i==0) bb=freeMesh->bbox();
 				else	   bb=gluedTree->gluedBBox();
-				
+        vcg::GLW::DrawMode localDM=vcg::GLW::DMFlat;
+        vcg::GLW::ColorMode localCM = vcg::GLW::CMPerMesh;
+        if(freeMesh->m->hasDataMask(MeshModel::MM_VERTCOLOR)) localCM = vcg::GLW::CMPerVert;
+        if(freeMesh->m->cm.fn==0) localDM=vcg::GLW::DMPoints;
 				glPushMatrix();
 					bool allowScaling = qobject_cast<AlignPairDialog *>(parent())->allowScalingCB->isChecked();
 					if(allowScaling)  vcg::glScale(3.0f/bb.Diag());
@@ -109,29 +113,45 @@ void AlignPairWidget::paintGL ()
 					vcg::glTranslate(-bb.Center());
 					if(i==0)
 						{
-							freeMesh->m->Render(vcg::GLW::DMFlat,vcg::GLW::CMPerVert,vcg::GLW::TMNone);
+              freeMesh->m->Render(localDM,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
 							drawPickedPoints(freePickedPointVec,vcg::Color4b(vcg::Color4b::Red));	
 						} else				{
 							foreach(MeshNode *mn, gluedTree->nodeList) 
-								if(mn->glued && mn != freeMesh && mn->m->visible) mn->m->Render(vcg::GLW::DMFlat,vcg::GLW::CMPerVert,vcg::GLW::TMNone);
+                if(mn->glued && mn != freeMesh && mn->m->visible) mn->m->Render(localDM,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
 							drawPickedPoints(gluedPickedPointVec,vcg::Color4b(vcg::Color4b::Blue));	
 						}
 								
 						int pickSide= ( pointToPick[0] < (width()/2) )? 0 : 1;
 						if(hasToPick && pickSide==i)
-							{	
+            {
 							vcg::Point3f pp;
-								hasToPick=false;
-								if(vcg::Pick<vcg::Point3f>(pointToPick[0],pointToPick[1],pp)) 
-								{
-									qDebug("Picked point %i %i -> %f %f %f",pointToPick[0],pointToPick[1],pp[0],pp[1],pp[2]);
-									if(pickSide == 0) freePickedPointVec.push_back(pp);
-									else gluedPickedPointVec.push_back(pp);
-									hasToPick=false;
-									update();
-								}
-							}
-				glPopMatrix();
+              hasToPick=false;
+              if(vcg::Pick<vcg::Point3f>(pointToPick[0],pointToPick[1],pp))
+              {
+                std::vector<vcg::Point3f> &curVec = pickSide?gluedPickedPointVec:freePickedPointVec;
+
+                qDebug("Picked point %i %i -> %f %f %f",pointToPick[0],pointToPick[1],pp[0],pp[1],pp[2]);
+
+                if(hasToDelete)
+                {
+                  int bestInd = -1;
+                  double bestDist =10e100;
+                  for(int i=0;i<curVec.size();++i)
+                    if(Distance(pp,curVec[i])<bestDist)
+                    {
+                    bestDist = Distance(pp,curVec[i]);
+                    bestInd=i;
+                  }
+                  hasToDelete=false;
+                  if(bestInd>=0)
+                    curVec.erase(curVec.begin()+bestInd);
+                }
+                else curVec.push_back(pp);
+                hasToPick=false;
+                update();
+              }
+            }
+            glPopMatrix();
 				tt[i]->DrawPostApply();
 		} 
 }
@@ -177,7 +197,7 @@ void AlignPairWidget::keyPressEvent (QKeyEvent * e)
   e->ignore ();
   for(int i=0;i<2;++i)
 		{
-			if (e->key () == Qt::Key_Control)  tt[i]->ButtonDown (QT2VCG (Qt::NoButton, Qt::ControlModifier));
+      if (e->key () == Qt::Key_Control)  tt[i]->ButtonDown (QT2VCG (Qt::NoButton, Qt::ControlModifier));
 			if (e->key () == Qt::Key_Shift)    tt[i]->ButtonDown (QT2VCG (Qt::NoButton, Qt::ShiftModifier));
 			if (e->key () == Qt::Key_Alt)      tt[i]->ButtonDown (QT2VCG (Qt::NoButton, Qt::AltModifier));
 		}
@@ -187,6 +207,8 @@ void AlignPairWidget::mouseDoubleClickEvent(QMouseEvent * e)
 {
 	hasToPick=true;
 	pointToPick=vcg::Point2i(e->x(), height() -e->y());
+  if(e->modifiers()&Qt::ControlModifier)
+    hasToDelete=true;
 	updateGL ();
 
 }

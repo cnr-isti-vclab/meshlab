@@ -72,6 +72,7 @@ public:
 		
   /// mesh data structure initializer
 		bool hasToPick;
+    bool hasToDelete;
 		vcg::Point2i pointToPick;
 public:
 			void initMesh(MeshNode *left, MeshTree *right);

@@ -20,23 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-$Log: AlignPair.h,v $
-Revision 1.2  2006/09/28 08:17:46  spinelli
-*** empty log message ***
 
-Revision 1.1  2005/09/23 14:52:24  ganovell
-added to code from sand/box cignoni, added optionally definable
-namespace, added optional compilation as exectuable
-
-Revision 1.3  2005/08/26 01:34:17  cignoni
-First Working Release of align stuff
-
-Revision 1.2  2005/06/10 16:07:29  cignoni
-*** empty log message ***
-
-
-****************************************************************************/
 #ifndef __VCG_ALIGNPAIR
 #define __VCG_ALIGNPAIR
 
@@ -52,8 +36,6 @@ Revision 1.2  2005/06/10 16:07:29  cignoni
 #include<vcg/complex/trimesh/update/normal.h>
 #include<vcg/complex/trimesh/update/bounding.h>
 #include<vcg/complex/trimesh/update/edges.h>
-//#include <wrap/io_trimesh/import_ply.h>
-//#include <wrap/io_trimesh/export_ply.h>
 
 
 namespace vcg
@@ -89,12 +71,14 @@ class A2Mesh     : public vcg::tri::TriMesh< std::vector<A2Vertex>, std::vector<
 public:
   bool Import(const char *filename) { Matrix44d Tr; Tr.SetIdentity(); return Import(filename,Tr);} 
 	bool Import(const char *filename, Matrix44d &Tr, bool hasborderflag=false);
-	bool Init(const Matrix44d &Tr, bool hasborderflag);
+  bool InitVert(const Matrix44d &Tr, bool hasborderflag);
+  bool Init(const Matrix44d &Tr, bool hasborderflag);
 };
 
 typedef A2Mesh::FaceContainer FaceContainer;	  
 typedef A2Mesh::FaceType      FaceType;	  
 typedef GridStaticPtr<FaceType, double > A2Grid;
+typedef GridStaticPtr<A2Mesh::VertexType, double > A2GridVert;
 
 class Stat
 {
@@ -111,8 +95,7 @@ public:
 			int BorderDiscarded;
 			int SampleTested;  // quanti punti ho testato con la mindist
 			int SampleUsed;    // quanti punti ho scelto per la computematrix
-			double pcllo;
-			double pcl50;
+      double pcl50;
 			double pclhi;
 			double AVG;
 			double RMS;
@@ -164,10 +147,9 @@ public:
       MaxAngleRad  = math::ToRad(45.0);	
 			MaxShear     = 0.5;
 			MaxScale     = 0.5; // significa che lo scale deve essere compreso tra 1-MaxScale e 1+MaxScale
-			PassLoFilter = 0.05;
-			PassHiFilter = 0.75;
-			ReduceFactor = 0.90;
-			MinMinDistPerc = 0.01;
+      PassHiFilter = 0.75;
+      ReduceFactorPerc = 0.80;
+      MinMinDistPerc = 0.01;
 			EndStepNum   = 5;
 			MatchMode    = MMRigid;
 			SampleMode   = SMNormalEqualized;
@@ -175,8 +157,6 @@ public:
 			MinFixVertNum=20000;
 			MinFixVertNumPerc=.25;
 	}
-	//AlignPair::Param(AlignMode am);
-
 	
 	int SampleNum;			// numero di sample da prendere sulla mesh fix, utilizzando 
 											// il SampleMode scelto tra cui poi sceglierne al piu' <MaxPointNum> 
@@ -199,17 +179,20 @@ public:
 
 	int EndStepNum; // numero di iterazioni da considerare per decidere se icp ha converso.
 	
-	double PassLoFilter; // Filtraggio utilizzato per decidere quali punti scegliere tra quello trovati abbastanza
-	double PassHiFilter; // vicini. Espresso in percentili. Di solito si scarta il quelli sopra il 75 e quelli sotto il 5
-	double ReduceFactor; // At each step we reduce the range of search of the nearest points. We keep 5 times the <ReduceFactor> percentile.
+  //double PassLoFilter; // Filtraggio utilizzato per decidere quali punti scegliere tra quello trovati abbastanza
+  double PassHiFilter;   // vicini. Espresso in percentili. Di solito si scarta il quelli sopra il 75 e quelli sotto il 5
+  double ReduceFactorPerc; // At each step we discard the points farther than a given threshold. The threshold is iterativeley reduced;
+                            // StartMinDist= min(StartMinDist, 5.0*H.Percentile(ap.ReduceFactorPerc))
+
+
 	double MinMinDistPerc;	// Ratio between initial starting distance (MinDistAbs) and what can reach by the application of the ReduceFactor. 
 
 	int UGExpansionFactor; // Grandezza della UG per la mesh fix come rapporto del numero di facce della mesh fix 
 
 														// Nel caso si usi qualche struttura multiresolution
-	int   MinFixVertNum;				// Gli allineamenti si fanno mettendo nella ug come mesh fix una semplificata; 
+  int   MinFixVertNum;			// Gli allineamenti si fanno mettendo nella ug come mesh fix una semplificata;
 	float MinFixVertNumPerc;  // si usa il max tra MinFixVertNum e OrigMeshSize*MinFixVertNumPerc
-		
+  bool UseVertexOnly;       // if true all the Alignment pipeline ignores faces and works over point clouds.
 
 	double MaxShear;
 	double MaxScale;
@@ -367,7 +350,6 @@ bool ChoosePoints( 	std::vector<Point3d> &Ps,		// vertici corrispondenti su fix 
 																std::vector<Point3d> &Pt,		// vertici scelti su mov (verdi) 
 																std::vector<Point3d> &OPt,		// vertici scelti su mov (verdi) 
 																//vector<Point3d> &Nt, 		// normali scelti su mov (verdi)
-																double PassLo,
 																double PassHi,
 																Histogramf &H)
 ;
@@ -405,11 +387,11 @@ bool ChoosePoints( 	std::vector<Point3d> &Ps,		// vertici corrispondenti su fix 
 
 */
 
-bool Align(const Matrix44d &in, A2Grid &UG, Result &res)
+bool Align(const Matrix44d &in, A2Grid &UG, A2GridVert &UGV, Result &res)
 {
 	res.ap=ap;
 		
-	bool ret=Align(	UG,
+  bool ret=Align(	UG,UGV,
 									in,
 									res.Tr,
 									res.Pfix, res.Nfix,
@@ -433,16 +415,16 @@ in
 
 ************************************************************************************/
 
-bool Align(
-						A2Grid &u,
-  		const Matrix44d &in,					// trasformazione Iniziale che porta i punti di mov su fix 
-						Matrix44d &out,					// trasformazione calcolata
-            std::vector<Point3d> &Pfix,		// vertici corrispondenti su src (rossi)
-						std::vector<Point3d> &Nfix, 		// normali corrispondenti su src (rossi)
-						std::vector<Point3d> &OPmov,		// vertici scelti su trg (verdi) prima della trasformazione in ingresso (Original Point Target)
-						std::vector<Point3d> &ONmov, 		// normali scelti su trg (verdi)
-						Histogramf &H,
-						Stat &as);
+bool Align(A2Grid &u,
+           A2GridVert &uv,
+     const Matrix44d &in,					// trasformazione Iniziale che porta i punti di mov su fix
+           Matrix44d &out,					// trasformazione calcolata
+           std::vector<Point3d> &Pfix,		// vertici corrispondenti su src (rossi)
+           std::vector<Point3d> &Nfix, 		// normali corrispondenti su src (rossi)
+           std::vector<Point3d> &OPmov,		// vertici scelti su trg (verdi) prima della trasformazione in ingresso (Original Point Target)
+           std::vector<Point3d> &ONmov, 		// normali scelti su trg (verdi)
+           Histogramf &H,
+           Stat &as);
 
 
 bool InitMov(
@@ -451,10 +433,15 @@ bool InitMov(
 		Box3d &movbox,
 		const Matrix44d &in	);				
 
+static bool InitFixVert(A2Mesh *fm,
+                        AlignPair::Param &pp,
+                        A2GridVert &u,
+                        int PreferredGridSize=0);
+
 static bool InitFix(A2Mesh *fm,
-												AlignPair::Param &pp,
-												A2Grid &u,
-												int PreferredGridSize=0);
+                    AlignPair::Param &pp,
+                    A2Grid &u,
+                    int PreferredGridSize=0);
 
 }; // end class
 

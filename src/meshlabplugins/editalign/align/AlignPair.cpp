@@ -49,6 +49,15 @@ bool AlignPair::A2Mesh::Import(const char *filename, Matrix44d &Tr, bool hasbord
 return Init(Tr,hasborderflag);
 }
 
+bool AlignPair::A2Mesh::InitVert(const Matrix44d &Tr,bool hasborderflag)
+{
+  Matrix44d Idn; Idn.SetIdentity();
+  if(Tr!=Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this,Tr);
+  tri::UpdateNormals<A2Mesh>::NormalizeVertex(*this);
+  tri::UpdateBounding<A2Mesh>::Box(*this);
+  return true;
+}
+
 bool AlignPair::A2Mesh::Init(const Matrix44d &Tr,bool hasborderflag)
 {
 	Matrix44d Idn; Idn.SetIdentity();
@@ -113,9 +122,9 @@ void AlignPair::Stat::Dump(FILE *fp)
 	fprintf(fp,"Final Err %8.5f In %i iterations Total Time %ims\n",LastPcl50(),(int)I.size(),TotTime());
   fprintf(fp,"Mindist  Lo     Med   Hi    Avg  RMS   StdDev   Time Tested Used  Dist Bord Angl \n");
 	for(unsigned int qi=0;qi<I.size();++qi)
-			fprintf(fp,"%5.2f (%5.2f:%6.3f:%5.2f)(%5.3f:%5.2f:%6.3f)%4ims %5i %5i %4i+%4i+%4i\n",
+      fprintf(fp,"%5.2f (%6.3f:%5.2f)(%5.3f:%5.2f:%6.3f)%4ims %5i %5i %4i+%4i+%4i\n",
 				I[qi].MinDistAbs,
-				I[qi].pcllo, I[qi].pcl50, I[qi].pclhi,
+        I[qi].pcl50, I[qi].pclhi,
 				I[qi].AVG, I[qi].RMS, I[qi].StdDev ,
 				IterTime(qi),
 			  I[qi].SampleTested,I[qi].SampleUsed,I[qi].DistanceDiscarded,I[qi].BorderDiscarded,I[qi].AngleDiscarded);
@@ -126,11 +135,11 @@ void AlignPair::Stat::HTMLDump(FILE *fp)
 {
 	fprintf(fp,"Final Err %8.5f In %i iterations Total Time %ims\n",LastPcl50(),(int)I.size(),TotTime());
 	fprintf(fp,"<table border>\n");
-  fprintf(fp,"<tr> <th>Mindist</th><th>  Lo </th><th>    Med </th><th>  Hi </th><th>   Avg  </th><th> RMS </th><th>  StdDev  </th><th> Time </th><th> Tested </th><th> Used </th><th> Dist </th><th> Bord </th><th> Angl \n");
+  fprintf(fp,"<tr> <th>Mindist</th><th>    50ile </th><th>  Hi </th><th>   Avg  </th><th> RMS </th><th>  StdDev  </th><th> Time </th><th> Tested </th><th> Used </th><th> Dist </th><th> Bord </th><th> Angl \n");
 	for(unsigned int qi=0;qi<I.size();++qi)
-			fprintf(fp,"<tr> <td> %8.5f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %9.6f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %5.3f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %9.6f </td><td align=\"right\"> %4ims </td><td align=\"right\"> %5i </td><td align=\"right\"> %5i </td><td align=\"right\"> %4i </td><td align=\"right\"> %4i </td><td align=\"right\">%4i </td><td align=\"right\"></tr>\n",
+      fprintf(fp,"<tr> <td> %8.5f </td><td align=\"right\"> %9.6f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %5.3f </td><td align=\"right\"> %8.5f </td><td align=\"right\"> %9.6f </td><td align=\"right\"> %4ims </td><td align=\"right\"> %5i </td><td align=\"right\"> %5i </td><td align=\"right\"> %4i </td><td align=\"right\"> %4i </td><td align=\"right\">%4i </td><td align=\"right\"></tr>\n",
 					I[qi].MinDistAbs,
-				I[qi].pcllo, I[qi].pcl50, I[qi].pclhi,
+        I[qi].pcl50, I[qi].pclhi,
 				I[qi].AVG, I[qi].RMS, I[qi].StdDev ,
 				IterTime(qi),
 			  I[qi].SampleTested,I[qi].SampleUsed,I[qi].DistanceDiscarded,I[qi].BorderDiscarded,I[qi].AngleDiscarded);
@@ -150,14 +159,11 @@ bool AlignPair::ChoosePoints( 	vector<Point3d> &Ps,		// vertici corrispondenti s
 																vector<Point3d> &Ns, 		// normali corrispondenti su src (rossi)
 																vector<Point3d> &Pt,		// vertici scelti su trg (verdi) 
 																vector<Point3d> &OPt,		// vertici scelti su trg (verdi) 
-																double PassLo,
 																double PassHi,
 																Histogramf &H)
 {
 	const int N = ap.MaxPointNum;
-  
-	double newmind = H.Percentile(PassLo);
-	double newmaxd = H.Percentile(PassHi);
+  double newmaxd = H.Percentile(PassHi);
 	//printf("%5.1f of the pairs has a distance less than %g and greater than %g (0..%g) avg %g\n",	Perc*100,newmind,newmaxd,H.maxv,H.Percentile(.5));
 	int sz = Ps.size();
 	int fnd=0;
@@ -167,7 +173,7 @@ bool AlignPair::ChoosePoints( 	vector<Point3d> &Ps,		// vertici corrispondenti s
 	{
 		int index = fnd+myrnd.generate(lastgood-fnd);
 		double dd=Distance(Ps[index],Pt[index]);
-		if(dd<newmaxd && dd>=newmind)
+    if(dd<newmaxd)
 		{
 			swap(Ps[index],Ps[fnd]);
 			swap(Ns[index],Ns[fnd]);
@@ -202,7 +208,7 @@ bool AlignPair::ChoosePoints( 	vector<Point3d> &Ps,		// vertici corrispondenti s
 }
 
 /*
-Funzione chiamata dalla 
+Funzione chiamata dalla Align ad ogni ciclo
 Riempie i vettori <MovVert> e <MovNorm> con i coordinate e normali presi dal vettore di vertici mov 
 della mesh da muovere trasformata secondo la matrice <In>
 Calcola anche il nuovo bounding box di tali vertici trasformati.
@@ -229,6 +235,24 @@ bool AlignPair::InitMov(
 		trgbox.Add(pp);
 	}
 	return true;
+}
+
+bool AlignPair::InitFixVert(AlignPair::A2Mesh *fm,
+                            AlignPair::Param &pp,
+                            A2GridVert &u,
+                            int PreferredGridSize)
+{
+  Box3d bb2=fm->bbox;
+  double MinDist= pp.MinDistAbs*1.1;
+  //the bbox of the grid should be enflated of the mindist used in the ICP search
+  bb2.Offset(Point3d(MinDist,MinDist,MinDist));
+
+  u.SetBBox(bb2);
+
+  //Inserisco la src nella griglia
+  if(PreferredGridSize==0) PreferredGridSize=fm->vert.size()*pp.UGExpansionFactor;
+  u.Set(fm->vert.begin(), fm->vert.end());//, PreferredGridSize);
+  printf("UG %i %i %i\n",u.siz[0],u.siz[1],u.siz[2]);
 }
 
 
@@ -263,6 +287,7 @@ la uniform grid sia gia' inizializzata con la mesh fix
 
 bool AlignPair::Align(
 						A2Grid &u,
+            A2GridVert &uv,
   		const	Matrix44d &in,					// trasformazione Iniziale (che porta i punti di mov su fix)
 						Matrix44d &out,					// trasformazione calcolata
 						vector<Point3d> &Pfix,		// vertici corrispondenti su src (rossi)
@@ -272,10 +297,10 @@ bool AlignPair::Align(
 						Histogramf &H,
 						AlignPair::Stat &as)
 {	
-	vector<char> good;    // vettore per marcare i movvert che sicuramente non si devono usare 
+  vector<char> beyondCntVec;    // vettore per marcare i movvert che sicuramente non si devono usare
 	                      // ogni volta che un vertice si trova a distanza oltre max dist viene incrementato il suo contatore;
 												// i movvert che sono stati scartati piu' di MaxCntDist volte non si guardano piu';
-	const int MaxCntDist=3;
+  const int maxBeyondCnt=3;
 	vector< Point3d > movvert;
 	vector< Point3d > movnorm;
 	vector<Point3d> Pmov; // vertici scelti dopo la trasf iniziale
@@ -287,9 +312,7 @@ bool AlignPair::Align(
 	int i;
 
 	double CosAngleThr=cos(ap.MaxAngleRad);
-//	double StartMinDist=fix->bbox.Diag()*ap.MinDistPerc;;
 	double StartMinDist=ap.MinDistAbs;
-	//double TrgDistAbs=fix->bbox.Diag()*ap.TrgDistPerc;;
 	int tt1=clock();  
 	int ttsearch=0;
 	int ttleast=0;
@@ -297,15 +320,14 @@ bool AlignPair::Align(
 	as.clear();
 	as.StartTime=clock();
 			
-	good.resize(mov->size(),0);
+  beyondCntVec.resize(mov->size(),0);
 	/*############inizio ciclo################*/
 	do 
 	{	
 		Stat::IterInfo ii;
 		Box3d movbox;
 		InitMov(movvert,movnorm,movbox,out);
-
-		H.SetRange(0,StartMinDist,512,2.5);
+    H.SetRange(0,StartMinDist,512,2.5);
 		Pfix.clear();
 		Nfix.clear();
 		Pmov.clear();
@@ -314,46 +336,58 @@ bool AlignPair::Align(
 		int tts0=clock();
 		ii.MinDistAbs=StartMinDist;
     int LocSampleNum=min(ap.SampleNum,int(movvert.size()));
-		for(i=0;i<LocSampleNum;++i)
-				if( good[i] < MaxCntDist ) 			
-					if(! u.bbox.IsIn(movvert[i]) ) 
-						good[i]=MaxCntDist+1;
-					else{
-						A2Mesh::FacePointer f=0;
-						double error=StartMinDist;
-						Point3d n(0,0,0),q,ip;
-            double maxd= std::numeric_limits<double>::max();
-           // f=vcg::tri::GetClosestFace<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, q);
-					  f=vcg::tri::GetClosestFace<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, q,n,ip);
-            //tri::Closest(*fix, movvert[i], u, error, n, q, f, ip);
-						  //MinDistPoint(*fix, movvert[i], u, error, n, q ,f, ip);  
-						ii.SampleTested++;
-						if(error>=StartMinDist) {
-							ii.DistanceDiscarded++;
-							++good[i];
-						}
-						else
-							if(movnorm[i].dot(f->N()) < CosAngleThr)
-								ii.AngleDiscarded++;
-							else	if(	(ip[0]==0 && f->IsB(1)) || 
-												(ip[1]==0 && f->IsB(2)) || 
-												(ip[2]==0 && f->IsB(0))   )
-											ii.BorderDiscarded++;
-										else
-											{
-												Pmov.push_back(movvert[i]);
-												OPmov.push_back((*mov)[i].P());
-												ONmov.push_back((*mov)[i].N()); 
-												Nfix.push_back( n );
-												Pfix.push_back( q );
-												H.Add(float(error));
-												ii.SampleUsed++;
-											}
-			} // End of point pair search
-
+    Box3d fixbox;
+    if(u.Empty()) fixbox = uv.bbox;
+    else fixbox = u.bbox;
+    for(i=0;i<LocSampleNum;++i)
+    {
+      if( beyondCntVec[i] < maxBeyondCnt )
+        if(! fixbox.IsIn(movvert[i]) )
+          beyondCntVec[i]=maxBeyondCnt+1;
+      else
+      {
+        double error=StartMinDist;
+        Point3d closestNormal(0,0,0),closestPoint,ip;
+        double maxd= std::numeric_limits<double>::max();
+        ii.SampleTested++;
+        if(u.Empty()) // using the point cloud grid
+        {
+          A2Mesh::VertexPointer vp = tri::GetClosestVertex(*fix,uv,movvert[i], maxd, error);
+          if(error>=StartMinDist) {
+            ii.DistanceDiscarded++; ++beyondCntVec[i]; continue;
+          }
+          if(movnorm[i].dot(vp->N()) < CosAngleThr) {
+              ii.AngleDiscarded++; continue;
+          }
+          closestPoint=vp->P();
+          closestNormal=vp->N();
+        }
+        else // using the standard faces and grid
+        {
+          A2Mesh::FacePointer f=vcg::tri::GetClosestFace<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, closestPoint,closestNormal,ip);
+          if(error>=StartMinDist) {
+            ii.DistanceDiscarded++; ++beyondCntVec[i]; continue;
+          }
+          if(movnorm[i].dot(f->N()) < CosAngleThr) {
+              ii.AngleDiscarded++; continue;
+          }
+          if(	(ip[0]==0 && f->IsB(1)) ||  (ip[1]==0 && f->IsB(2)) || (ip[2]==0 && f->IsB(0))   ){
+            ii.BorderDiscarded++;  continue;
+          }
+        }
+        // The sample was accepted. Store it.
+        Pmov.push_back(movvert[i]);
+        OPmov.push_back((*mov)[i].P());
+        ONmov.push_back((*mov)[i].N());
+        Nfix.push_back( closestNormal );
+        Pfix.push_back( closestPoint );
+        H.Add(float(error));
+        ii.SampleUsed++;
+      }
+    } // End for each pmov
     int tts1=clock();
 		//printf("Found %d pairs\n",(int)Pfix.size());
-		//if(!ChoosePoints(Pfix,Nfix,Pmov,OPmov,ap.PassLoFilter,ap.PassHiFilter,H))		
+    if(!ChoosePoints(Pfix,Nfix,Pmov,OPmov,ap.PassHiFilter,H))
     if(int(Pfix.size())<ap.MinPointNum)
 		{
 			status = TOO_FEW_POINTS;
@@ -394,18 +428,11 @@ bool AlignPair::Align(
 		// Nei prossimi cicli si parte da questa matrice come iniziale.
 	  out=newout;
 
-		//printf("Found Transf\n");
-		//for(int kk=0; kk<4; ++kk) {
-		//	for(int jj=0; jj<4; ++jj) 	printf("%8.5lf ", out[kk][jj]); 
-		//	printf("\n");
-		//}
-	  
 		assert(Pfix.size()==Pmov.size());
 		int tts2=clock();
 		ttsearch+=tts1-tts0;	
 		ttleast +=tts2-tts1;
-		ii.pcllo=H.Percentile(ap.PassLoFilter);
-		ii.pcl50=H.Percentile(.5);
+    ii.pcl50=H.Percentile(.5);
 		ii.pclhi=H.Percentile(ap.PassHiFilter);
 		ii.AVG=H.Avg();
 		ii.RMS=H.RMS();
@@ -415,7 +442,7 @@ bool AlignPair::Align(
 		nc++;
 		// The distance of the next points to be considered is lowered according to the <ReduceFactor> parameter. 
 		// We use 5 times the <ReduceFactor> percentile of the found points. 
-		if(ap.ReduceFactor<1) StartMinDist=max(ap.MinDistAbs*ap.MinMinDistPerc, min(StartMinDist,5.0*H.Percentile(ap.ReduceFactor)));
+    if(ap.ReduceFactorPerc<1) StartMinDist=max(ap.MinDistAbs*ap.MinMinDistPerc, min(StartMinDist,5.0*H.Percentile(ap.ReduceFactorPerc)));
 	} 
 	while ( 
 		nc<=ap.MaxIterNum && 

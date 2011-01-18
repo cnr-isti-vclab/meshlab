@@ -20,10 +20,6 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-/****************************************************************************
-  History
-$Log: meshedit.cpp,v $
-****************************************************************************/
 
 #include <QObject>
 #include <QStringList>
@@ -67,39 +63,48 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::AlignPair::Result &result, 
     
 	ProcessArc(fixId,movId,MovToFix,result,ap);
 }
+/** This is the main alignment function.
+  It takes a pair of mesh and aling the second on the first one according to the parameters stored in <ap>
 
+  */
 void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap)
 {
-	vcg::Matrix44d Ident; Ident.SetIdentity();
-	vcg::AlignPair::A2Mesh Fix;
-	vcg::AlignPair::A2Mesh Mov;
-
+  vcg::AlignPair::A2Mesh Fix, Mov;
 	vcg::AlignPair aa;
 
-	aa.ConvertMesh<CMeshO>(MM(fixId)->cm,Fix);
-	Fix.Init(vcg::Matrix44d::Identity(),false);
-	aa.ConvertMesh<CMeshO>(MM(movId)->cm,Mov);
-  	QString buf;
-    //cb(0,qPrintable(buf.sprintf("Loaded Fix Mesh %32s vn:%8i fn:%8i\n",qPrintable(QFileInfo(MM(fixId)->fileName.c_str()).fileName()),Fix.vn,Fix.fn)));
-	  //cb(0,qPrintable(buf.sprintf("Loaded Mov Mesh %32s vn:%8i fn:%8i\n",qPrintable(QFileInfo(MM(movId)->fileName.c_str()).fileName()),Mov.vn,Mov.fn)));
+  // 1) Convert fixed mesh and put it into the grid.
+  aa.ConvertMesh<CMeshO>(MM(fixId)->cm,Fix);
 
-  	vcg::AlignPair::A2Grid UG;
-  	vcg::AlignPair::InitFix(&Fix, ap, UG);
-	  
+  vcg::AlignPair::A2Grid UG;
+  vcg::AlignPair::A2GridVert VG;
+
+  if(MM(fixId)->cm.fn==0 || ap.UseVertexOnly)
+  {
+    Fix.InitVert(vcg::Matrix44d::Identity(),false);
+    vcg::AlignPair::InitFixVert(&Fix,ap,VG);
+  }
+  else
+  {
+    Fix.Init(vcg::Matrix44d::Identity(),false);
+    vcg::AlignPair::InitFix(&Fix, ap, UG);
+  }
+  // 2) Convert the second mesh and sample a <ap.SampleNum> points on it.
+
+  aa.ConvertMesh<CMeshO>(MM(movId)->cm,Mov);
 	std::vector<vcg::AlignPair::A2Vertex> tmpmv;     
-
 	aa.ConvertVertex(Mov.vert,tmpmv);
 	aa.SampleMovVert(tmpmv, ap.SampleNum, ap.SampleMode);
-   
+
 	aa.mov=&tmpmv;
 	aa.fix=&Fix;
-    aa.ap = ap;
-    vcg::Matrix44d In;
-	In.SetIdentity();
-    In=MovM;
-    aa.Align(In,UG,result);
-    result.FixName=fixId;
-    result.MovName=movId;
+  aa.ap = ap;
+
+  vcg::Matrix44d In=MovM;
+  // Perform the ICP algorithm
+  aa.Align(In,UG,VG,result);
+
+  result.FixName=fixId;
+  result.MovName=movId;
 	result.as.Dump(stdout);
 }
 
@@ -140,8 +145,8 @@ void MeshTree::Process(vcg::AlignPair::Param &ap)
     if( ResVec[i].IsValid() )
 			ResVecPtr.push_back(&ResVec[i]);
     std::pair<double,double> dd=ResVec[i].ComputeAvgErr();
-    if( ResVec[i].IsValid() )  cb(0,qPrintable(buf.sprintf("(%2i/%i) %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",i+1,OG.SVA.size(),OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
-		                     else  cb(0,qPrintable(buf.sprintf("(%2i/%i) %2i -> %2i Failed Alignment of one arc \n"  ,i+1,OG.SVA.size(),OG.SVA[i].s,OG.SVA[i].t)));
+    if( ResVec[i].IsValid() )  cb(0,qPrintable(buf.sprintf("(%2i/%i) %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",int(i+1),int(OG.SVA.size()),OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
+                         else  cb(0,qPrintable(buf.sprintf("(%2i/%i) %2i -> %2i Failed Alignment of one arc \n"  ,int(i+1),int(OG.SVA.size()),OG.SVA[i].s,OG.SVA[i].t)));
  }
   // now cut the ResVec vector to the only computed result (the arcs with area > .1)
 	ResVec.resize(i);
@@ -186,7 +191,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 			GluedIdVec.push_back(mn->id);							
 			GluedTrVec.push_back(vcg::Matrix44d::Construct(mn->tr()));				
 			PaddedTrVec[mn->id]=GluedTrVec.back();
-            names[mn->id]=qPrintable(mn->m->shortName());
+            names[mn->id]=qPrintable(mn->m->label());
 		}
 	}		
 		
