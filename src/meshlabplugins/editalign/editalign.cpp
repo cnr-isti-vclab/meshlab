@@ -108,7 +108,7 @@ bool EditAlignPlugin::StartEdit(MeshModel &/*_mm*/, GLArea *_gla )
 	if(alignDialog==0)
 	{
 		//alignDialog=new AlignDialog(gla->parentWidget()->parentWidget());
-		alignDialog=new AlignDialog(gla->window());
+    alignDialog=new AlignDialog(gla->window(),this);
 		connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
 		connect(alignDialog->ui.icpParamCurrentButton,SIGNAL(clicked()),this,SLOT(alignParamCurrent()));
 		connect(alignDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
@@ -119,9 +119,9 @@ bool EditAlignPlugin::StartEdit(MeshModel &/*_mm*/, GLArea *_gla )
 		connect(alignDialog->ui.falseColorCB, SIGNAL(valueChanged(bool)) , _gla->window(),  SLOT(updateGL() ) );
 		connect(alignDialog->ui.recalcButton, SIGNAL(clicked()) , this,  SLOT(recalcCurrentArc() ) );
     connect(alignDialog->ui.hideRevealButton,  SIGNAL(clicked()) , this,  SLOT(hideRevealGluedMesh() ) );
-
+    connect(alignDialog, SIGNAL(updateMeshSetVisibilities() ), this->gla,SLOT(updateMeshSetVisibilities()));
 	}
-	alignDialog->edit=this;
+
 	//alignDialog->setCurrentNode(meshTree.find(gla->mm()) );
 	alignDialog->setTree(& meshTree);
 	alignDialog->show();
