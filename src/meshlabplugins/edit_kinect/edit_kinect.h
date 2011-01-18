@@ -82,6 +82,7 @@ public:
         void InitializeGL();
         void CleanupGL();
 public slots:
+        void loadCalibration();
         void startScan();
         void stopScan();
         void saveScan();

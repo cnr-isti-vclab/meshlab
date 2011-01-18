@@ -9,13 +9,15 @@ LIBS += /media/ACER_/devel/meshlab/src/external/lib/linux/libfreenect.a \
 
 HEADERS = 	edit_kinect_factory.h \
                 ui_kinect.h \
-                edit_kinect.h
+                edit_kinect.h \
+    calibration_data.h
 
 SOURCES =   edit_kinect_factory.cpp \
             edit_kinect.cpp \ # ../../../../meshlab/src/meshlab/glarea.cpp \
             freenect.cpp \
             ../../../../vcglib/wrap/gui/trackmode.cpp \
-            ../../../../vcglib/wrap/gui/trackball.cpp # ../../../../vcglib/wrap/gui/rubberband.cpp \
+            ../../../../vcglib/wrap/gui/trackball.cpp \ # ../../../../vcglib/wrap/gui/rubberband.cpp \
+    calibration_load.cpp
 
 TARGET = edit_kinect
 QT += opengl
@@ -24,5 +26,3 @@ FORMS += kinect.ui
 
 # OCME src/ocme FILES
 # Lib headers
-
-

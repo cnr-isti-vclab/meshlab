@@ -35,6 +35,7 @@ $Log: meshedit.cpp,v $
 #include<vcg/complex/trimesh/append.h>
 #include "freenect.h"
 #include "shader_basic.h"
+#include "calibration_data.h"
 
 #define GL_TEST_ERR\
         {\
@@ -174,16 +175,18 @@ void KinectEditPlugin::InitializeGL(){
     glBindBuffer(GL_ARRAY_BUFFER,  point_cloud );
     glBufferData(GL_ARRAY_BUFFER, 3*sizeof(float)*640*480,&points[0][0], GL_STATIC_DRAW);
 
-
-
     GLuint fs, vs;
 
     std::string str_vs =
     std::string("varying bool kill;")+
+    std::string("uniform float depth_distortion[5];")+
     std::string("uniform sampler2D col;")+
     std::string("uniform sampler2D dv;")+
     std::string("uniform float focal;")+
-    std::string("uniform float shiftx;")+
+
+    std::string("uniform mat3 R;")+
+    std::string("uniform mat3 rgb_intrinsics;")+
+    std::string("uniform vec3 T;")+
 
     std::string("vec4 point(float X, float Y){")+
     std::string(" vec4 pp;")+
@@ -195,14 +198,13 @@ void KinectEditPlugin::InitializeGL(){
     std::string(" return pp;}")+
 
     std::string("vec2 proj_color(vec4 p){")+
-    std::string(" vec2 pp;")+
-    std::string(" pp.x = ((p.x+shiftx)/p.z)*focal;")+
-    std::string(" pp.y = (p.y/p.z)*focal;")+
-    std::string(" pp.x = (pp.x+1.0)/2;")+
-    std::string(" pp.y = (pp.y+1.0)/2;")+
-    std::string(" pp.x = pp.x*640.0/1024.0;")+
-    std::string(" pp.y = pp.y*480.0/512.0;")+
-    std::string(" return pp;}")+
+    std::string(" vec3 pp;")+
+    std::string(" pp = R * vec3(p.x,p.y,p.z)+T ;")+
+    std::string(" pp.x =  pp.x * rgb_intrinsics[0][0] / pp.z + rgb_intrinsics[0][2];")+
+    std::string(" pp.y =  pp.y * rgb_intrinsics[1][1] / pp.z + rgb_intrinsics[1][2];")+
+    std::string(" pp.x =  pp.x / 1024.f;")+
+    std::string(" pp.y =  pp.y  / 512.f;")+
+    std::string(" return vec2(pp.x,pp.y);}")+
 
     std::string("void main() { ")+
     std::string(" vec4 pp  = point(gl_Vertex.x,gl_Vertex.y);")+
@@ -212,9 +214,14 @@ void KinectEditPlugin::InitializeGL(){
     std::string(" vec3 nn = normalize(cross( p_dx-pp,p_dy-pp));")+
     std::string(" nn = gl_NormalMatrix * nn;")+
     std::string(" nn = normalize(nn);")+
+    std::string(" vec2  col_coord = proj_color(pp);")+
+
     std::string(" vec3 lightVec = normalize(gl_LightSource[0].position.xyz);")+
     std::string(" float gray = abs(lightVec*nn);")+
-    std::string(" vec4 color  = texture2D(col,vec2(gl_Vertex.x,gl_Vertex.y));")+
+
+//    std::string(" vec4 color  = texture2D(col,vec2(gl_Vertex.x,gl_Vertex.y));")+
+    std::string(" vec4 color  = texture2D(col,col_coord);")+
+
  //   std::string(" vec4 color  = texture2D(col,proj_color(pp));")+
   //      std::string(" gl_FrontColor = vec4(gray,gray,gray,1.0);")+
     std::string(" gl_FrontColor = vec4(color.xyz,1.0);")+
@@ -234,10 +241,16 @@ void KinectEditPlugin::InitializeGL(){
     glUniform1i(depth_loc,0);
     GLuint col_loc = glGetUniformLocation(pr,"col");
     glUniform1i(col_loc,2);
-    foc_loc = glGetUniformLocation(pr,"focal");
-    glUniform1f(foc_loc,1.0);
-    shx_loc = glGetUniformLocation(pr,"shiftx");
-    glUniform1f(shx_loc,0.0);
+    GLuint depth_dis_loc = glGetUniformLocation(pr,"depth_distortion");
+    glUniform1fv(depth_dis_loc,5,&depth_distortion[0]);
+    GLuint R_loc = glGetUniformLocation(pr,"R");
+    glUniformMatrix3fv(R_loc,1,false,&R[0][0]);
+    GLuint T_loc = glGetUniformLocation(pr,"T");
+    glUniform3fv(T_loc,1,&T[0]);
+
+    GLuint rgb_intrinsics_loc = glGetUniformLocation(pr,"rgb_intrinsics");
+    glUniformMatrix3fv(rgb_intrinsics_loc,1,false,&rgb_intrinsics[0][0]);
+
     glUseProgram(0);
 
 }
@@ -308,6 +321,14 @@ void KinectEditPlugin::Decorate(MeshModel &, GLArea *  )
 }
 
 
+void KinectEditPlugin::loadCalibration(){
+    QString filename = QFileDialog::getOpenFileName((QWidget*)0,tr("Open YML"), QDir::currentPath(),
+                                             tr("Ocm file (*.yml )"));
+    if(!filename.isEmpty())
+        if(!::LoadCalibrationData(filename))
+            ::LoadCalibrationData("default_calibration.yml");
+
+}
 
 void KinectEditPlugin::startScan(){
     cumulate_frames = true;
@@ -369,6 +390,7 @@ bool KinectEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 {
         gla = _gla;
 
+        DefaultCalibrationData();
         odw = new Ui::KinectDockWidget ();
         kinect_panel  = new QDockWidget(gla);
         odw->setupUi(kinect_panel);
@@ -376,6 +398,7 @@ bool KinectEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
         kinect_panel->show();
 
         kinect_qt::start_kinect();
+        QObject::connect(odw->loadCalibrationPushButton,SIGNAL(clicked()),this,SLOT(loadCalibration()));
         QObject::connect(odw->startScanPushButton,SIGNAL(clicked()),this,SLOT(startScan()));
         QObject::connect(odw->saveScanPushButton,SIGNAL(clicked()),this,SLOT(saveScan()));
 

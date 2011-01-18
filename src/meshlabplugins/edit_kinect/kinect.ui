@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>205</width>
-    <height>175</height>
+    <height>218</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -39,7 +39,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>40</y>
+      <y>80</y>
       <width>91</width>
       <height>26</height>
      </rect>
@@ -52,7 +52,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>70</y>
+      <y>110</y>
       <width>158</width>
       <height>17</height>
      </rect>
@@ -68,7 +68,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>90</y>
+      <y>130</y>
       <width>158</width>
       <height>21</height>
      </rect>
@@ -84,7 +84,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>120</y>
+      <y>160</y>
       <width>91</width>
       <height>26</height>
      </rect>
@@ -97,7 +97,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>10</y>
+      <y>50</y>
       <width>62</width>
       <height>25</height>
      </rect>
@@ -116,13 +116,32 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>10</y>
+      <y>50</y>
       <width>56</width>
       <height>15</height>
      </rect>
     </property>
     <property name="text">
      <string>Tilt</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="loadCalibrationPushButton">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>10</y>
+      <width>121</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Load a YML calibration file as written by Nicholas Burrus kinect calibration software: http://nicolas.burrus.name/index.php/Research/KinectCalibration</string>
+    </property>
+    <property name="whatsThis">
+     <string>Load a YML calibration file as written by Nicholas Burrus kinect calibration software: http://nicolas.burrus.name/index.php/Research/KinectCalibration</string>
+    </property>
+    <property name="text">
+     <string>Load Calibration</string>
     </property>
    </widget>
   </widget>
