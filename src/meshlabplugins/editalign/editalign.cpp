@@ -120,7 +120,8 @@ bool EditAlignPlugin::StartEdit(MeshModel &/*_mm*/, GLArea *_gla )
 		connect(alignDialog->ui.recalcButton, SIGNAL(clicked()) , this,  SLOT(recalcCurrentArc() ) );
     connect(alignDialog->ui.hideRevealButton,  SIGNAL(clicked()) , this,  SLOT(hideRevealGluedMesh() ) );
     connect(alignDialog, SIGNAL(updateMeshSetVisibilities() ), this->gla,SLOT(updateMeshSetVisibilities()));
-	}
+    connect(alignDialog->ui.baseMeshButton, SIGNAL(clicked()) , this,  SLOT(setBaseMesh() ) );
+  }
 
 	//alignDialog->setCurrentNode(meshTree.find(gla->mm()) );
 	alignDialog->setTree(& meshTree);
@@ -153,6 +154,21 @@ void EditAlignPlugin::hideRevealGluedMesh()
   alignDialog->rebuildTree();
   gla->update();
 }
+
+void EditAlignPlugin::setBaseMesh()
+{
+  Matrix44f oldTr = md->mm()->cm.Tr;
+  Matrix44f inv = Inverse(oldTr);
+  md->mm()->cm.Tr.SetIdentity();
+
+  foreach(MeshNode *mn, meshTree.nodeList)
+        if(mn->glued && (mn->m != md->mm()) )
+              mn->m->cm.Tr *= inv;
+
+  alignDialog->rebuildTree();
+  gla->update();
+}
+
 
 void EditAlignPlugin::glueByPicking()
 {
@@ -344,7 +360,9 @@ switch(mode)
 			alignDialog->ui.recalcButton->setEnabled(false);
 			alignDialog->ui.icpButton->setEnabled(false);
 			alignDialog->ui.icpParamButton->setEnabled(false);
-			alignDialog->ui.alignTreeWidget->setEnabled(false);
+      alignDialog->ui.alignTreeWidget->setEnabled(false);
+      alignDialog->ui.baseMeshButton->setEnabled(false);
+
 			
 		break;
 	case	ALIGN_IDLE:
@@ -353,7 +371,8 @@ switch(mode)
 			alignDialog->ui.icpButton->setEnabled(true);
 			alignDialog->ui.icpParamButton->setEnabled(true);
 			alignDialog->ui.alignTreeWidget->setEnabled(true);
-			break;
+      alignDialog->ui.baseMeshButton->setEnabled(true);
+      break;
 	}
 }
 

@@ -184,6 +184,22 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="baseMeshButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>When pressed it make the current mesh as base mesh, e.g. the one with a Identity as transformation.</string>
+            </property>
+            <property name="text">
+             <string>Set as Base Mesh</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="hideRevealButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
