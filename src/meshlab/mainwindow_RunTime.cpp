@@ -800,12 +800,12 @@ void MainWindow::startFilter()
 	//OLD FILTER PHILOSOPHY
 	if (iFilter != NULL)
 	{
-		if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
-		{
-			qDebug("MeshCreation");
-      GLA()->meshDoc->addNewMesh("",iFilter->filterName(action) );
-		}
-		else
+		//if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
+		//{
+		//	qDebug("MeshCreation");
+		//	GLA()->meshDoc->addNewMesh("",iFilter->filterName(action) );
+		//}
+		//else
 			if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))
 			{
 				QString enstr = missingPreconditions.join(",");
@@ -945,7 +945,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
   int req=iFilter->getRequirements(action);
-  meshDoc()->mm()->updateDataMask(req);
+  if (!meshDoc()->meshList.isEmpty())
+	  meshDoc()->mm()->updateDataMask(req);
   qApp->restoreOverrideCursor();
 
 	// (3) save the current filter and its parameters in the history
