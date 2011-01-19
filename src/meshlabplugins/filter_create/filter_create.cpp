@@ -93,30 +93,35 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 // The Real Core Function doing the actual mesh processing.
 bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
-    MeshModel &m=(*md.mm());
+
+    MeshModel* m=md.addNewMesh("",this->filterName(ID(filter)));
   switch(ID(filter))	 {
     case CR_TETRAHEDRON :
-      vcg::tri::Tetrahedron<CMeshO>(m.cm);
+      vcg::tri::Tetrahedron<CMeshO>(m->cm);
       break;
     case CR_ICOSAHEDRON:
-      vcg::tri::Icosahedron<CMeshO>(m.cm);
+      vcg::tri::Icosahedron<CMeshO>(m->cm);
       break;
     case CR_DODECAHEDRON:
-      vcg::tri::Dodecahedron<CMeshO>(m.cm);
-			m.updateDataMask(MeshModel::MM_POLYGONAL);
+      vcg::tri::Dodecahedron<CMeshO>(m->cm);
+			m->updateDataMask(MeshModel::MM_POLYGONAL);
       break;
     case CR_OCTAHEDRON:
-      vcg::tri::Octahedron<CMeshO>(m.cm);
+      vcg::tri::Octahedron<CMeshO>(m->cm);
       break;
     case CR_SPHERE:
-      vcg::tri::Sphere<CMeshO>(m.cm);
-      break;
+	{
+		m->cm.face.EnableFFAdjacency();
+		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		vcg::tri::Sphere<CMeshO>(m->cm);
+		break;
+	}
     case CR_BOX:
     {
       float sz=par.getFloat("size");
       vcg::Box3f b(vcg::Point3f(1,1,1)*(sz/2),vcg::Point3f(1,1,1)*(-sz/2));
-      vcg::tri::Box<CMeshO>(m.cm,b);
-			m.updateDataMask(MeshModel::MM_POLYGONAL);
+      vcg::tri::Box<CMeshO>(m->cm,b);
+			m->updateDataMask(MeshModel::MM_POLYGONAL);
 
       break;
     }
@@ -125,11 +130,11 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       float r1=par.getFloat("r1");
       float h=par.getFloat("h");
       int subdiv=par.getInt("subdiv");
-      vcg::tri::Cone<CMeshO>(m.cm,r0,r1,h,subdiv);
+      vcg::tri::Cone<CMeshO>(m->cm,r0,r1,h,subdiv);
       break;
    }
- 	 vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-   vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
+ 	 vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);
+   vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
 	return true;
 }
 
