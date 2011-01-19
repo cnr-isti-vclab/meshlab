@@ -179,11 +179,11 @@ public:
 						}
 					}
 					it->ResetFlag();
-					it = holes.erase(it);
+					it = holes.erase(it++);
 					continue;
 				}
 			}
-			it++;
+			else it++;
 		}
 
 		for(fpit = bridgeF.begin(); fpit != bridgeF.end(); fpit++)
@@ -198,7 +198,7 @@ public:
 				{
 					(*bit)->ResetFlag();
 					delete *bit;
-					bit = bridges.erase(bit);
+					bit = bridges.erase(bit++);
 				}
 				else
 					 bit++;
@@ -454,7 +454,7 @@ private:
 						curPos.NextB();
 					}while( curPos != hit->p );
 				}
-				hit = holes.erase(hit);
+				hit = holes.erase(hit++);
 			}
 			else
 				hit++;

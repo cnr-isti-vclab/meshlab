@@ -665,13 +665,17 @@ private:
 		if(sideB.h->IsSelected())
 			sideA.h->SetSelect(true);
 		sideA.h->SetBridged(true);
-
-		typename HoleVector::iterator hit;
-		for(hit=holesManager->holes.begin(); hit!=holesManager->holes.end(); ++hit)
-			if(&*hit == sideB.h)
+			typename HoleVector::iterator hit = holesManager->holes.begin();
+			//for(hit=holesManager->holes.begin(); hit!=holesManager->holes.end(); ++hit)
+			while(hit!=holesManager->holes.end())	
 			{
-				holesManager->holes.erase(hit);
-				return;
+				if(&*hit == sideB.h)
+				{
+					holesManager->holes.erase(hit++);
+					return;
+				}
+				else 
+					hit++;
 			}
 	};
 

@@ -29,7 +29,8 @@ FillerDialog::FillerDialog(QWidget *parent)
 	someBridge = false;
 	ui.setupUi(this);
 	this->setWidget(ui.frame_main);
-	
+	ui.bridgeTab->setEnabled(false);
+
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+58,width(),height() );
 	this->setFloating(true);
