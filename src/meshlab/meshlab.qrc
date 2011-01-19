@@ -38,5 +38,8 @@
         <file>images/onscreenHelp.txt</file>
         <file>images/splitV.png</file>
         <file>images/splitH.png</file>
+        <file>images/open_project.png</file>
+        <file>images/import_mesh.png</file>
+        <file>images/new_project.png</file>
     </qresource>
 </RCC>

@@ -100,12 +100,12 @@ MainWindow::MainWindow()
 void MainWindow::createActions()
 {
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
-  newProjectAct = new QAction(QIcon(":/images/open.png"),tr("New Empty Project..."), this);
+  newProjectAct = new QAction(QIcon(":/images/new_project.png"),tr("New Empty Project..."), this);
   newProjectAct->setShortcutContext(Qt::ApplicationShortcut);
   newProjectAct->setShortcut(Qt::CTRL+Qt::Key_N);
   connect(newProjectAct, SIGNAL(triggered()), this, SLOT(newDocument()));
 
-	openProjectAct = new QAction(QIcon(":/images/open.png"),tr("&Open project..."), this);
+  openProjectAct = new QAction(QIcon(":/images/open_project.png"),tr("&Open project..."), this);
 	openProjectAct->setShortcutContext(Qt::ApplicationShortcut);
 	openProjectAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openProjectAct, SIGNAL(triggered()), this, SLOT(openProject()));
@@ -123,7 +123,7 @@ void MainWindow::createActions()
 	//closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
 	connect(closeProjectAct, SIGNAL(triggered()),mdiarea, SLOT(closeActiveSubWindow()));
 
-  importMeshAct = new QAction(QIcon(":/images/open.png"),tr("&Import Mesh..."), this);
+  importMeshAct = new QAction(QIcon(":/images/import_mesh.png"),tr("&Import Mesh..."), this);
   importMeshAct->setShortcutContext(Qt::ApplicationShortcut);
   importMeshAct->setShortcut(Qt::CTRL+Qt::Key_I);
   connect(importMeshAct, SIGNAL(triggered()), this, SLOT(open()));
@@ -156,7 +156,7 @@ void MainWindow::createActions()
 		recentFileActs[i] = new QAction(this);
 		recentFileActs[i]->setVisible(true);
 		recentFileActs[i]->setEnabled(false);
-		
+    recentFileActs[i]->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1+i));
 		connect(recentProjActs[i],SIGNAL(triggered()),this,SLOT(openRecentProj()));
 		connect(recentFileActs[i], SIGNAL(triggered()),this, SLOT(openRecentFile()));
 		
@@ -396,6 +396,8 @@ void MainWindow::createToolBars()
 {
 	mainToolBar = addToolBar(tr("Standard"));
 	mainToolBar->setIconSize(QSize(32,32));
+  mainToolBar->addAction(this->newProjectAct);
+  mainToolBar->addAction(this->openProjectAct);
   mainToolBar->addAction(importMeshAct);
   mainToolBar->addAction(reloadMeshAct);
   mainToolBar->addAction(exportMeshAct);
