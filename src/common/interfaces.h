@@ -560,8 +560,10 @@ public:
 	virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){return true;};
 	virtual bool StartEdit(MeshDocument &md, GLArea *parent)
 	{
-		assert(NULL != md.mm());
-		return (StartEdit(*(md.mm()), parent));	
+		//assert(NULL != md.mm());
+		if ( md.mm() != NULL)
+			return (StartEdit(*(md.mm()), parent));	
+		else return false;
 	}
 	// Called when the user press the second time the button 
 	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
