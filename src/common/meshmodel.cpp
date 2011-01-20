@@ -189,7 +189,7 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 	return true;
 }
 
-RasterModel * MeshDocument::addNewRaster(QString fullPathFilename)
+RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
 {
   QFileInfo info(fullPathFilename);
   QString newLabel=info.fileName();
@@ -199,8 +199,8 @@ RasterModel * MeshDocument::addNewRaster(QString fullPathFilename)
 	rasterList.push_back(newRaster);
 
 	//Add new plane
-  Plane *plane = new Plane(newRaster, fullPathFilename, QString());
-	newRaster->addPlane(plane);
+  //Plane *plane = new Plane(newRaster, fullPathFilename, QString());
+  //newRaster->addPlane(plane);
 
 	this->setCurrentRaster(newRaster->id());
 
@@ -394,6 +394,7 @@ Plane::Plane(RasterModel *_parent, const QString pathName, const QString _semant
 
 RasterModel::RasterModel(MeshDocument *parent, QString _rasterName) {
   _id=parent->newRasterId(); 
+  par = parent;
   this->_label= _rasterName;
 	visible=false;
 }

@@ -90,16 +90,26 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 			{
 				QDomNode raster; QString filen, label;
 				raster = node.firstChild();
-				while(!raster.isNull()){
+				while(!raster.isNull())
+				{
 				//return true;
-				filen=raster.attributes().namedItem("label").nodeValue();
-				md.addNewRaster(filen);
-				label=raster.attributes().namedItem("label").nodeValue();
-				md.rm()->setLabel(label);
-				QDomNode sh=raster.firstChild();
-				ReadShotFromQDomNode(md.rm()->shot,sh);
-				
-				raster=raster.nextSibling();
+					md.addNewRaster();
+					QString labelRaster=raster.attributes().namedItem("label").nodeValue();
+					md.rm()->setLabel(labelRaster);
+					QDomNode sh=raster.firstChild();
+					ReadShotFromQDomNode(md.rm()->shot,sh);
+
+					QDomElement el = raster.firstChildElement("Plane");
+					while(!el.isNull())
+					{
+						QString filen = el.attribute("fileName");
+						QFileInfo fi(filen);
+						QString sem = el.attribute("semantic");
+						QString nm = fi.absoluteFilePath();
+						md.rm()->addPlane(new Plane(md.rm(),fi.absoluteFilePath(),sem));
+						el = node.nextSiblingElement("Plane");
+					}	
+					raster=raster.nextSibling();
 				}
 			}
 			node = node.nextSibling();
@@ -119,12 +129,23 @@ QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc)
   return meshElem;
 }
 
-QDomElement RasterModelToXML(RasterModel *mp, QDomDocument &doc)
+QDomElement RasterModelToXML(RasterModel *mp,QDomDocument &doc)
 {
   QDomElement rasterElem = doc.createElement("MLRaster");
   rasterElem.setAttribute("label",mp->label());
   rasterElem.appendChild(WriteShotToQDomNode(mp->shot,doc));
+  for(int ii = 0;ii < mp->planeList.size();++ii)
+	rasterElem.appendChild(PlaneToXML(mp->planeList[ii],doc));
   return rasterElem;
+}
+
+QDomElement PlaneToXML(Plane* pl,QDomDocument& doc)
+{
+	QDomElement planeElem = doc.createElement("Plane");
+	QDir dir(pl->parent->par->pathName());
+	planeElem.setAttribute("fileName",dir.relativeFilePath(pl->fullPathFileName));
+	planeElem.setAttribute("semantic",pl->semantic);
+	return planeElem;
 }
 
 QDomDocument MeshDocumentToXML(MeshDocument &md)

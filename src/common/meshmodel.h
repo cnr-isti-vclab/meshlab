@@ -326,6 +326,7 @@ public:
 	///The list of the registered images
 	QList<Plane *> planeList;
 	Plane *currentPlane;
+	MeshDocument* par;
 
 private:
 	int _id;
@@ -527,7 +528,7 @@ public:
   bool delMesh(MeshModel *mmToDel);
 
   ///add a new raster model 
-  RasterModel *addNewRaster(QString rasterName);
+  RasterModel *addNewRaster(/*QString rasterName*/);
 
 	///remove the raster from the list and delete it from memory
   bool delRaster(RasterModel *rasterToDel);
