@@ -1410,16 +1410,16 @@ bool MainWindow::openProject(QString fileName)
       QString fullPath = md->meshList[i]->fullName();
 		importMeshWithStandardParams(fullPath,GLA()->meshDoc->meshList[i]);
     }
-    for (int i=0; i<md->rasterList.size(); i++)
-    {
-      vcg::Shotf sh=md->rasterList[i]->shot;
-      if (i==0)
-        open(md->rasterList[i]->planeList[0]->fullName());
-      else
-        open(md->rasterList[i]->planeList[0]->fullName());
-      meshDoc()->rasterList[i]->shot=sh;
-      meshDoc()->rm()->setLabel(md->rm()->label());
-    }
+    //for (int i=0; i<md->rasterList.size(); i++)
+    //{
+    //  vcg::Shotf sh=md->rasterList[i]->shot;
+    //  /*if (i==0)
+    //    open(md->rasterList[i]->planeList[0]->fullName());
+    //  else*/
+    //    importRaster(md->rasterList[i]->planeList[0]->fullName());
+    //  meshDoc()->rasterList[i]->shot=sh;
+    //  meshDoc()->rm()->setLabel(md->rm()->label());
+    //}
   }
   else
     return false;
@@ -1493,7 +1493,8 @@ bool MainWindow::importRaster(const QString& fileImg)
 			}
 
 			GLA()->meshDoc->setBusy(true);
-                        /*RasterModel *rm=*/ GLA()->meshDoc->addNewRaster(qPrintable(fileName));
+            RasterModel *rm= GLA()->meshDoc->addNewRaster();
+			rm->addPlane(new Plane(rm,fileName,QString("")));		
 			meshDoc()->setBusy(false);
 
 //			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
