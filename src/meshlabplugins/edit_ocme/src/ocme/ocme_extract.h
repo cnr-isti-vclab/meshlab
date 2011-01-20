@@ -4,7 +4,6 @@
 
 #include "impostor_definition.h"
 #include "ocme_definition.h"
-#include "../ooc_vector/berkeleydb/ooc_chains_berkeleydb.hpp"
 
 
 extern unsigned int generic_bool;

@@ -1,5 +1,5 @@
 
-#ifdef NO_BERKELEY
+
 
 #include "../utils/release_assert.h"
 #include "simpledb.h"
@@ -129,7 +129,6 @@ SimpleDb::Index SimpleDb::PutSingle(    std::string  name, Index &  pos, void * 
 }
 
 SimpleDb::Index SimpleDb::PutSingle(std::string name, void * buf, unsigned long siz){
-		FILE * f;
 		Index pos;
 
 		Index_ite ii = index.find(name);
@@ -311,4 +310,3 @@ SimpleDb::Index SimpleDb::AddSegment(){
 		return res;
 }
 
-#endif

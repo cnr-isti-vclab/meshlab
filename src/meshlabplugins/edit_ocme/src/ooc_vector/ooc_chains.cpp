@@ -1,5 +1,5 @@
 #include "ooc_chains.h"
-#include "./berkeleydb/ooc_chains_berkeleydb.hpp"
+#include "./io/ooc_chains.hpp"
 
 
 /* -------------------------------------------------------------------------- */

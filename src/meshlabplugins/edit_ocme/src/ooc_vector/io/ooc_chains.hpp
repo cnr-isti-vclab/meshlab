@@ -51,7 +51,6 @@ FetchChunk( typename  Chain<TYPE>::Chunk & ck ){
 	RAssert(MemDbg::CheckHeap(1));
 	TIM::Begin(12);
 
-
 	const unsigned int & chunk_order =  &ck-&(*chunks.begin());
 	std::string key = this->GetKey(chunk_order);
 

@@ -215,12 +215,12 @@ void OcmeEditPlugin::Decorate(MeshModel &, GLArea * gla)
 	{
 
 		pick = false;
-		std::vector<CellKey*> results;
-		if ( vcg::Pick ( pickx, gla->height()-picky, all_keys,results, DrawCell /*DrawImpostor*/) )
-		{
-			CellKey cellkey  = *results[0];
-			Cell *c = ocme->GetCell(cellkey,false);
-		}
+		//std::vector<CellKey*> results;
+		//if ( vcg::Pick ( pickx, gla->height()-picky, all_keys,results, DrawCell /*DrawImpostor*/) )
+		//{
+		//	CellKey cellkey  = *results[0];
+		//	Cell *c = ocme->GetCell(cellkey,false);
+		//}
 	}
 
  
@@ -354,7 +354,7 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	return true;
 }
 
-void OcmeEditPlugin::EndEdit(MeshModel &/*m*/, GLArea *gla )
+void OcmeEditPlugin::EndEdit(MeshModel & , GLArea *  )
 {
 	ocme_panel->hide();
 }
@@ -438,11 +438,7 @@ void OcmeEditPlugin::ocm2triAttribute(){
 void OcmeEditPlugin::loadOcm(){
 	ocm_name = QFileDialog::getOpenFileName((QWidget*)0,
 					   tr("Open Ocm"), QDir::currentPath(),
-#ifndef NO_BERKELEY
-					   tr("Ocm file (*.ocm )"));
-#else
 							tr("Ocm file (*.socm )"));
-#endif
 	if(!ocm_name.isEmpty()){
 		ocme  = new OCME();
 		ocme->params.side_factor = 50; // READ IT FROM THE FILEEEEEEEEE
@@ -459,7 +455,7 @@ void OcmeEditPlugin::loadOcm(){
 
 		UpdateBoundingBox();
 		setTrackBall();
-        mm  = gla->meshDoc->addNewMesh("Ocm patch");
+        mm  = gla->meshDoc->addNewMesh("Ocm patch","Ocm Patch");
 //		mm->cm.vert.reserve(2000000);
 //		mm->cm.face.reserve(4000000);
 	//	mm  ->cm.bbox = ocme_bbox;
@@ -507,18 +503,14 @@ void OcmeEditPlugin::closeOcm(){
 void OcmeEditPlugin::createOcm(){
 	ocm_name = QFileDialog::getSaveFileName((QWidget*)0,
 					   tr("Open Ocm"), QDir::currentPath(),
-#ifndef NO_BERKELEY
-						 tr("Ocm file (*.ocm )"));
-#else
 							tr("Ocm file (*.socm )"));
-#endif
 	if(!ocm_name.isEmpty()){
 		ocme  = new OCME();
 		ocm_name.resize(ocm_name.size()-5);
 		ocme->Create(ocm_name.toAscii());
 		ocme->InitRender();
 		ocme->splat_renderer.Init(this->gla);
-        mm = gla->meshDoc->addNewMesh("Ocm patch");
+        mm = gla->meshDoc->addNewMesh("Ocm patch","Ocm patch");
 
 		/* paramters to be exposed somehow later  on */
 		ocme->params.side_factor = 20;
@@ -560,7 +552,7 @@ void OcmeEditPlugin::markEditable(){
 				if(!(*fi).IsD()){
 					//	(*fi).ClearS();
 						bool ed = !lockedF[*fi];
-						for(unsigned int i = 0; i < (*fi).VN() ; ++i)
+						for( int i = 0; i < (*fi).VN() ; ++i)
 								 ed = ed &&  !lockedV[(*fi).V(i)];
 						if(ed) (*fi).SetS();
 						}

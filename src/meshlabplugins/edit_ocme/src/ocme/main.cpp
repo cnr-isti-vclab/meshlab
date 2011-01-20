@@ -16,7 +16,7 @@
 
 
 #include "import_ocm_ply.h"
-#include "../ooc_vector/berkeleydb/ooc_chains_berkeleydb.hpp"
+#include "../ooc_vector/io/ooc_chains.hpp"
 
 
 #include <wrap/io_trimesh/import_ply.h>
@@ -576,21 +576,12 @@ main (int argc,char **argv )
  		int start = clock();
  		int totalstart = start;
 
-	  if(overwrite_database)
-		  remove(( ocmename+std::string(".socm")).c_str());
-	 
-	 #ifndef NO_BERKELEY
-		if(overwrite_database)
-			meshona->Create(( ocmename+std::string(".ocm")).c_str(),berkeley_page_size);
-		else
-			meshona->Open(( ocmename+std::string(".ocm")).c_str());
-	 #else
+
 	  if(overwrite_database)
 		meshona->Create((std::string(ocmename)/*+std::string(".socm")*/).c_str(),berkeley_page_size);
 	  else
 		meshona->Open((std::string(ocmename)+std::string(".socm")).c_str());
 
-	 #endif
 
 	  if(all_plys)
 		  for(int i  = 0 ;  i < refvecFiles.size()  ;++i) 

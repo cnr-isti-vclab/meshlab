@@ -18,11 +18,9 @@
 #include "../utils/std_util.h"
 #include "../utils/memory_debug.h"
 #include "../utils/release_assert.h"
-
-#ifdef NO_BERKELEY
 #include <limits>
 #include "../ooc_vector/simpledb.h"
-#endif
+
 /* **********************************************************************
 the classes Chain and OOCEnv implement very large vector like containers (Chain)
 that do not fit in memory.
@@ -144,10 +142,7 @@ struct Chain: public ChainBase{
 			int fetch_time;								// the last time it was loaded
 			bool savedOnce;								// if the chunk has been saved at least once
 			unsigned int size_of_disk;					// size on disk
-
-#ifdef NO_BERKELEY
 			SimpleDb::Index pos;
-#endif						
 			/* query         */
 			bool IsLoaded(){return buffer!=NULL;}
 
