@@ -74,6 +74,7 @@ public slots:
   bool open(QString fileName=QString());
   bool openIn();
 	bool openProject(QString fileName=QString());
+	  bool importRaster(const QString& fileImg = QString());
 	void saveProject();
 	void delCurrentMesh();
 	void delCurrentRaster();
@@ -259,7 +260,7 @@ public:
 	QMenu* layerMenu() { return filterMenuLayer; }
 	bool importMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
 	//void importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
-  bool importRaster(const QString& fileImg);
+  //bool importRaster(const QString& fileImg);
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
 	bool importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
 	

@@ -1454,6 +1454,12 @@ GLArea* MainWindow::newDocument(const QString& projName)
 	return gla;
 }
 
+//WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//Temporary disgusting inequality between open (slot) - importMesh (function)
+//and importRaster (slot). It's not also difficult to remove the problem because
+//addNewRaster add a raster on a document and open the file, instead addNewMesh add a new mesh layer
+//without loading the model.
+
 bool MainWindow::importRaster(const QString& fileImg)
 {
 	QStringList filters;
