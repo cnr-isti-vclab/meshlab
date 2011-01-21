@@ -1662,6 +1662,12 @@ bool MainWindow::open(QString fileName)
 		QString extension = fi.suffix();
 		MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
 		//pCurrentIOPlugin->setLog(gla->log);
+                if (pCurrentIOPlugin == NULL)
+                {
+                    QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
+                    QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+                    return false;
+                }
 
 		RichParameterSet prePar;
 		pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
