@@ -62,8 +62,13 @@ public:
         isScanning = false;
     }
     virtual void keyPressEvent(QKeyEvent *e, MeshModel &/*m*/, GLArea *){
+        // S is used for interactive line-based scanning
         if( e->key() == Qt::Key_S )
             isScanning = true;
+
+        // D is used for range-like scans
+        if( e->key() == Qt::Key_D )
+            scan_requested();
     }
 
     //--- Dummy implementation of MeshEditInterfaceFactory, passes control to this MeshEditInterface
@@ -80,9 +85,6 @@ public:
     virtual MeshEditInterface* getMeshEditInterface(QAction* ){ return this; }
     virtual QString getEditToolDescription(QAction *){  return this->Info(); }
 
-private:
-    //--- Virtual scan functions
-    void scanPoints();
 public slots:
     // called repeatedly by the timer
     void readytoscan(){ sampleReady = true; }

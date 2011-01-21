@@ -101,8 +101,8 @@ bool VirtualScan::StartEdit(MeshDocument& md, GLArea* gla){
     widget = new Widget(gla->window());
     connect(widget, SIGNAL(laser_parameter_updated()),
             this, SLOT(laser_parameter_updated()));
-    //connect(widget, SIGNAL(scan_requested()),
-    //        this, SLOT(scan_requested()));
+    connect(widget, SIGNAL(scan_requested()),
+            this, SLOT(scan_requested()));
     connect(widget, SIGNAL(save_requested()),
             this, SLOT(save_requested()));
 
@@ -213,6 +213,9 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
 ScanLine::ScanLine(int N, Point2f& srt, Point2f& end ){
     float delta = 1.0 / (N-1);
     // qDebug() << "Scanpoint list: ";
+
+#define RANGE
+#ifdef LASER
     float alpha=0;
     for( int i=0; i<N; i++, alpha+=delta ){
         Point2f curr = srt*(1-alpha) + end*alpha;
@@ -221,10 +224,35 @@ ScanLine::ScanLine(int N, Point2f& srt, Point2f& end ){
         Point2i currI( curr[0], curr[1] );
         bbox.Add(currI);
     }
+#endif
+#ifdef RANGE
+    double halfedgel = ((srt-end).Norm()/2.0);
+    srt[1] = srt[1] - halfedgel;
+    end[1] = end[1] + halfedgel;
+
+    Point2f srt_x=srt, end_x=end;
+    Point2f srt_y=srt, end_y=end;
+    srt_x[1]=0; end_x[1]=0;
+    srt_y[0]=0; end_y[0]=0;
+    float alpha=0;
+    for( int i=0; i<N; i++, alpha+=delta ){
+        float beta = 0;
+        for( int j=1; j<N; j++, beta+=delta ){
+            Point2f curr = srt_x*(1-alpha) + end_x*alpha + srt_y*(1-beta)  + end_y*beta;
+            soff.push_back(curr);
+            // qDebug() << " - " << toString( curr );
+            Point2i currI( curr[0], curr[1] );
+            bbox.Add(currI);
+        }
+    }
+#endif
+
     // Retrieve a block 2 pixel larger from buffer
     bbox.Offset(2);
 }
 void VirtualScan::scanpoints(){
+    qDebug()<<"scanned!";
+
     // Read the portion of depth buffer we are interested in
     float* buffer = new float[ sline.bbox.Area() ];
     glReadPixels(sline.bbox.min[0],sline.bbox.min[1],
