@@ -1302,9 +1302,21 @@ bool MainWindow::openIn()
  */
 void MainWindow::saveProject()
 {
-  QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;Align Project (*.aln)"));
+	QFileDialog* saveDiag = new QFileDialog(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;Align Project (*.aln)"));
+	QCheckBox* saveAllFile = new QCheckBox(QString("Save All Files"),saveDiag);
+	saveAllFile->setCheckState(Qt::Checked);
+	QGridLayout* layout = (QGridLayout*) saveDiag->layout();
+	layout->addWidget(saveAllFile,4,2);
+	saveDiag->setAcceptMode(QFileDialog::AcceptSave);
+	saveDiag->exec();
+	QStringList files = saveDiag->selectedFiles();
+	if (files.size() != 1)
+		return;
+  QString fileName = files[0];
   // this change of dir is needed for subsequent textures/materials loading
   QFileInfo fi(fileName);
+  if (!fi.isFile())
+	  return;
   QDir::setCurrent(fi.absoluteDir().absolutePath());
 
   /*********WARNING!!!!!! CHANGE IT!!! ALSO IN THE OPENPROJECT FUNCTION********/
@@ -1339,11 +1351,14 @@ void MainWindow::saveProject()
   else
   {
     ret = MeshDocumentToXMLFile(*meshDoc(),fileName);
-    for(int ii = 0; ii < meshDoc()->meshList.size();++ii)
-    {
-      MeshModel* mp = meshDoc()->meshList[ii];
-      ret |= exportMesh(mp->fullName(),mp,true);
-    }
+    if (saveAllFile->isChecked())
+	{
+		for(int ii = 0; ii < meshDoc()->meshList.size();++ii)
+		{
+			MeshModel* mp = meshDoc()->meshList[ii];
+			ret |= exportMesh(mp->fullName(),mp,true);
+		}
+	}
   }
 	if(!ret)
     QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
