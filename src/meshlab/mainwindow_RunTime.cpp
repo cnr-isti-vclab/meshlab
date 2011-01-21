@@ -1303,6 +1303,9 @@ bool MainWindow::openIn()
 void MainWindow::saveProject()
 {
 	QFileDialog* saveDiag = new QFileDialog(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;Align Project (*.aln)"));
+#if defined(Q_OS_MAC)
+  saveDiag->setOption(QFileDialog::DontUseNativeDialog,true);
+#endif
 	QCheckBox* saveAllFile = new QCheckBox(QString("Save All Files"),saveDiag);
 	saveAllFile->setCheckState(Qt::Checked);
 	QGridLayout* layout = (QGridLayout*) saveDiag->layout();
