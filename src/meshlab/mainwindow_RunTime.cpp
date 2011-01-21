@@ -1350,7 +1350,6 @@ void MainWindow::saveProject()
   }
   else
   {
-    ret = MeshDocumentToXMLFile(*meshDoc(),fileName);
     if (saveAllFile->isChecked())
 	{
 		for(int ii = 0; ii < meshDoc()->meshList.size();++ii)
@@ -1359,6 +1358,7 @@ void MainWindow::saveProject()
 			ret |= exportMesh(mp->fullName(),mp,true);
 		}
 	}
+	ret = MeshDocumentToXMLFile(*meshDoc(),fileName);
   }
 	if(!ret)
     QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
