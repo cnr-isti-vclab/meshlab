@@ -1,6 +1,10 @@
 #include "ooc_chains.h"
-#include "./io/ooc_chains.hpp"
 
+#ifdef SIMPLE_DB
+#include "./io/ooc_chains.hpp"
+#else
+#include "./io/ooc_chains_kcdb.hpp"
+#endif
 
 /* -------------------------------------------------------------------------- */
 /* ------------------------- OOCEnv implementation ----------------------------- */

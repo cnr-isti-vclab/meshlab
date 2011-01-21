@@ -16,8 +16,12 @@
 
 
 #include "import_ocm_ply.h"
-#include "../ooc_vector/io/ooc_chains.hpp"
 
+#ifdef SIMPLE_DB
+#include "../ooc_vector/io/ooc_chains.hpp"
+#else 
+#include "../ooc_vector/io/ooc_chains_kcdb.hpp"
+#endif
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/import_dae.h>
@@ -38,6 +42,9 @@
 #include <vector>
 #include <iostream>
 #include <windows.h>
+
+#include <kcpolydb.h>
+
 int SearchDirectory(std::vector<std::wstring> &refvecFiles,
                      std::wstring        &refcstrRootDirectory,
                      std::wstring        &refcstrExtension,
@@ -277,67 +284,6 @@ bool Interrupt(){
 }
 
 
-//
-//void AddFromDisk(OCME * ocme, std::vector<std::string> files){
-//
-//		for(unsigned int i = 0; i < files.size(); ++i){
-//
-//				std::string name = files[i];
-//				unsigned int wh = name.find(std::string(".aln"));
-//
-//				if(wh == name.length()-4)
-//				// it is an aln file
-//				{
-//					std::vector<std::pair<std::string,vcg::Matrix44f> > aln;
-//					LoadAln(name.c_str(),aln);
-//
-//					for(unsigned int idm = 0;  idm<   aln.size() ;++idm){
-//						vcgMesh m;
-//						vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,aln[idm].first.c_str());
-//						vcg::tri::UpdatePosition<vcgMesh>::Matrix(m,aln[idm].second);
-//						if(!m.face.empty()){
-//							ocme->AddMesh(m);
-//						}
-//					}
-//				}
-//				else
-//					// It is a ply file
-//				{
-//					vcgMesh m;
-//					struct stat buf;
-//					stat(name.c_str(),&buf);
-//                                        if(buf.st_size < 200 * (1<<20)){// if the file is less that 200MB load the mesh in memory and then add it
-//
-//						int mask = 0;
-//
-//						TIM::Begin(0);
-//
-//                                                vcg::tri::io::ImporterPLY<vcgMesh>::LoadMask(name.c_str(),mask);
-//
-//                                                AttributeMapper am;
-//                                                if(mask & vcg::tri::io::Mask::IOM_VERTCOLOR){
-//                                                    m.vert.EnableColor();
-//                                                    am.vert_attrs.push_back("Color4b");
-//                                                }
-//
-//                                                vcg::tri::io::ImporterPLY<vcgMesh>::Open(m,name.c_str(),cb);
-//						if(!m.face.empty())
-//                                                         ocme->AddMesh(m,am);
-//					}
-//					else
-//					{
-//						 vcg::Matrix44f tra_ma;tra_ma.SetIdentity();
-//						// if the file is more that 50 MB build directly from file
-//						vcg::tri::io::ImporterOCMPLY<vcgMesh>::Open(m,meshona,name.c_str(),tra_ma,cb);
-//
-//					}
-//
-//				}
-//
-//			}
-//			ocme->RemoveEmptyCells();
-//}
-//
 
 
 void PrintStats(){
@@ -393,6 +339,8 @@ void PrintStats(){
 							lgn->Push();
 			}
 
+ 
+
 int
 main (int argc,char **argv )
 {
@@ -429,6 +377,8 @@ main (int argc,char **argv )
 
 
 {
+
+
 	int c;
 	int digit_optind = 0;
 	unsigned int meshadded = 0,
@@ -578,9 +528,9 @@ main (int argc,char **argv )
 
 
 	  if(overwrite_database)
-		meshona->Create((std::string(ocmename)/*+std::string(".socm")*/).c_str(),berkeley_page_size);
+		meshona->Create((std::string(ocmename) +std::string(".kch") ).c_str(),berkeley_page_size);
 	  else
-		meshona->Open((std::string(ocmename)+std::string(".socm")).c_str());
+		meshona->Open((std::string(ocmename)+std::string(".kch")).c_str());
 
 
 	  if(all_plys)

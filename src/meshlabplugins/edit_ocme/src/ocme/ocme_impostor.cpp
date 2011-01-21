@@ -3,7 +3,11 @@
 #include "ocme_extract.h"
 
 /* UGLY: this dependency is because of the templates..it should be removed*/
+#ifdef SIMPLE_DB
 #include "../ooc_vector/io/ooc_chains.hpp"
+#else
+#include "../ooc_vector/io/ooc_chains_kcdb.hpp"
+#endif
 
 #include <vcg/space/normal_extrapolation.h>
 

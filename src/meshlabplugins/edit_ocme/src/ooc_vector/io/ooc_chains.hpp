@@ -64,7 +64,9 @@ FetchChunk( typename  Chain<TYPE>::Chunk & ck ){
           res = ((SimpleDb*)extMemHnd)->Get(ck.pos, local_buffer,ck.SizeOfDisk());
 	else{
 	  res = ((SimpleDb*)extMemHnd)->Get(key, local_buffer, ck.SizeOfDisk());
+#ifdef SIMPLE_DB
 	  ck.pos = res;
+#endif
 	}
 	if(res.Void() )
 		printf("record not found");
@@ -88,7 +90,7 @@ LoadAll(){
 		{
 			RAssert(MemDbg::CheckHeap(1));
 
-			unsigned char * local_buffer = NULL;
+			char * local_buffer = NULL;
 			const unsigned int & chunk_order =  &ck-&(*chunks.begin());
 			std::string  key = this->GetKey(chunk_order);
 

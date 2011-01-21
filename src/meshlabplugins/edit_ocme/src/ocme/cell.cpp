@@ -1,7 +1,11 @@
 
 #include "../utils/memory_debug.h"
 // TODO include must be taken out of the way.....
+#ifdef SIMPLE_DB
 #include "../ooc_vector/io/ooc_chains.hpp"
+#else
+#include "../ooc_vector/io/ooc_chains_kcdb.hpp"
+#endif
 //...............................................
 
 #include "cell.h"
@@ -10,7 +14,7 @@
 Cell::~Cell(){ 
 		if(impostor) 
 			delete impostor;
-		 
+
 #ifndef _TEMP_BUILDER_MODE_
 		ClearEditCommitAuxData();
 		ClearRenderAuxData();

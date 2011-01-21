@@ -19,8 +19,9 @@
 #include "../utils/memory_debug.h"
 #include "../utils/release_assert.h"
 #include <limits>
+#ifdef SIMPLE_DB
 #include "../ooc_vector/simpledb.h"
-
+#endif
 /* **********************************************************************
 the classes Chain and OOCEnv implement very large vector like containers (Chain)
 that do not fit in memory.
@@ -129,7 +130,7 @@ struct Chain: public ChainBase{
 
 	struct Chunk{
 		Chunk():buffer(0),fetch_time(0),savedOnce(false){
-#ifdef NO_BERKELEY
+#ifdef SIMPLE_DB
 			pos.SetVoid();
 #endif
 		}
@@ -142,7 +143,9 @@ struct Chain: public ChainBase{
 			int fetch_time;								// the last time it was loaded
 			bool savedOnce;								// if the chunk has been saved at least once
 			unsigned int size_of_disk;					// size on disk
+#ifdef SIMPLE_DB	 
 			SimpleDb::Index pos;
+#endif
 			/* query         */
 			bool IsLoaded(){return buffer!=NULL;}
 
@@ -153,13 +156,13 @@ struct Chain: public ChainBase{
 			/* read/write */
 			unsigned int SizeOfDisk();
 			unsigned int SizeOfMem();
-			void Written(unsigned char * & buffer);
-			unsigned int Write(unsigned char * & buffer);
-			void Read(unsigned  char * buffer, unsigned char * here = NULL);
+			void Written( char * & buffer);
+			unsigned int Write( char * & buffer);
+			void Read(  char * buffer,  char * here = NULL);
 			static float CompressionRatio();
 
 			/* allocation */
-			void AllocMem(unsigned char *& buf,unsigned char * here = NULL);
+			void AllocMem( char *& buf, char * here = NULL);
 			void DeAllocMem();
 		};
 public:
@@ -815,18 +818,18 @@ SizeOfDisk(){ return sizeof(TYPE)*this->size;}
 
 
 template <class TYPE> void  Chain<TYPE>::Chunk::
-Written(unsigned  char * & buffer){buffer=buffer;}
+Written(  char * & buffer){buffer=buffer;}
 
 template <class TYPE> unsigned int  Chain<TYPE>::Chunk::
-Write(unsigned char * & buffer ){ 
-	buffer = (unsigned char*) this->buffer;
+Write(char * & buffer ){ 
+	buffer = ( char*) this->buffer;
 	this->size_of_disk = this->SizeOfMem();
 	return this->size_of_disk;
 }
 
  
 template <class TYPE> void  Chain<TYPE>::Chunk::
-Read(unsigned char *buf,unsigned char *here ){ 
+Read( char *buf, char *here ){ 
 	if(!here) 
 		this->buffer = (TYPE*)buf;
 }
@@ -835,10 +838,10 @@ template <class TYPE> float   Chain<TYPE>::Chunk::
 CompressionRatio(){return 1.0;};
 
 template <class TYPE> void  Chain<TYPE>::Chunk::
-AllocMem(unsigned char * & buf,unsigned char * here ){
+AllocMem( char * & buf, char * here ){
 	if(!here){
 		this->buffer = new TYPE[this->capacity];	// allocate the internal memory of the chunk
-		buf = (unsigned char*) this->buffer;		// return
+		buf = ( char*) this->buffer;		// return
 	}else
 		buf = here;									// simply copy the passed pointer
 };
