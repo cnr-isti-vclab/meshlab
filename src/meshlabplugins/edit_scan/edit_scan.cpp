@@ -264,6 +264,11 @@ void VirtualScan::scanpoints(){
     double min_th_rad = cos( alpha  *  (3.14159/180.0) );
 
     for( unsigned int i=0; i<sline.soff.size(); i++ ){
+        Point3f normal(0.0, 0.0, 0.0);
+
+        // feedback for slow scans
+        qDebug("Progress %d/%d\n",i,sline.soff.size());
+
         //--- Get curren scan point offset
         Point2f curr = sline.soff[i];
         // qDebug() << "scannign sample: " << toString(curr);
@@ -271,53 +276,61 @@ void VirtualScan::scanpoints(){
         Point2i currb;
         currb[0] = round( curr[0]-sline.bbox.min[0] );
         currb[1] = round( curr[1]-sline.bbox.min[1] );
+
         //--- Retrieve Z from depth buffer
         float z = buffer[ currb[0] + sline.bbox.DimX()*currb[1] ];
-        // Check against Z-Buffer limit set by glClearDepth
-        // http://www.opengl.org/sdk/docs/man/xhtml/glClearDepth.xml
-        if( z == 1 )
-            continue;
-        // Get selected face according to scanned point
-        vector<CMeshO::FacePointer> NewSelFace;
-        GLPickTri<CMeshO>::PickFaceVisible(curr[0], curr[1], this->md->mm()->cm, NewSelFace, 2, 2);
-        vector<CMeshO::FacePointer>::iterator fpi;
-        /* //For debug: select face where the scanner went through (so
-         * that we can see it on the screen)
-        for(fpi=NewSelFace.begin();fpi!=NewSelFace.end();++fpi)
-            (*fpi)->SetS();*/
-        // Get face normal
-        int normCaught = 0;
-        Point3f normal(0.0, 0.0, 0.0);
-        for(fpi=NewSelFace.begin();fpi!=NewSelFace.end();++fpi){
-            CMeshO::FaceType::NormalType n;
-            n = (*fpi)->N();
-            normal = Point3f(n[0], n[1], n[2]); 
-            normCaught = 1;
-            // Use first face and exit
-            break;
-            //cout << n[0] << " " << n[1] << " " << n[2] << endl;
-        }
-        // Print warning if no face was found for scanned point (means
-        // normal will be undefined)
-        if (!normCaught){
-            cout << "Could not find a face for scanned point.. skipping" << endl;
-            continue;
-        }
 
         //--- Retrieve x,y coordinates in object space and another sample
         // with a bit of offset toward the camera
         Point3f sample = myGluUnProject( curr, z );
         Point3f sample2 = myGluUnProject( curr, z+.01);
         Point3f viewdir = (sample-sample2).normalized();
+
+        // Check against Z-Buffer limit set by glClearDepth
+        // http://www.opengl.org/sdk/docs/man/xhtml/glClearDepth.xml
+        // Out of Z-buffer implies rays at infinity!!
+        if( z == 1 ){
+            // Zero-normal means sample at infinity!
+            // (should also be skipped by poisson...)
+            normal = Point3f(0,0,0);
+        }
+        // Something was found
+        else{
+            // Get selected face according to scanned point
+            vector<CMeshO::FacePointer> NewSelFace;
+            GLPickTri<CMeshO>::PickFaceVisible(curr[0], curr[1], this->md->mm()->cm, NewSelFace, 2, 2);
+            vector<CMeshO::FacePointer>::iterator fpi;
+            /* //For debug: select face where the scanner went through (so
+             * that we can see it on the screen)
+            for(fpi=NewSelFace.begin();fpi!=NewSelFace.end();++fpi)
+                (*fpi)->SetS();*/
+            // Get face normal
+            int normCaught = 0;
+            for(fpi=NewSelFace.begin();fpi!=NewSelFace.end();++fpi){
+                CMeshO::FaceType::NormalType n;
+                n = (*fpi)->N();
+                normal = Point3f(n[0], n[1], n[2]);
+                normCaught = 1;
+                // Use first face and exit
+                break;
+                //cout << n[0] << " " << n[1] << " " << n[2] << endl;
+            }
+
+            //--- Reject points for which a normal was not defined
+            if (!normCaught){
+                // cout << "Could not find a face for scanned point.. skipping" << endl;
+                continue;
+            }
+
+            //--- Reject samples which view-dir is too far from normal
+            if( viewdir.dot(normal) < min_th_rad ){
+                qDebug() << "rejected!!!";
+                continue;
+            }
+        }
         // qDebug() << "correspodning in object space to: " << toString(sample);
 
-        //--- Reject samples which view-dir is too far from camera
-        if( viewdir.dot(normal) < min_th_rad ){
-            qDebug() << "rejected!!!";
-            continue;
-        }
-
-        //--- Add scanned sample to the cloud
+        //--- Add scanned sample to the cloud (visualization purposes)
         tri::Allocator<CMeshO>::AddVertices(cloud->cm,1);
         cloud->cm.vert.back().P() = sample;
         cloud->cm.vert.back().N() = viewdir;
