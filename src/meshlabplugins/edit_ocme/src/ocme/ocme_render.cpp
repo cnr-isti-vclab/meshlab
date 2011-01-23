@@ -315,8 +315,8 @@ void OCME::Render(int impostorRenderMode){
 	 if(useSplatting)
 	 {
 		 glPushAttrib(GL_ALL_ATTRIB_BITS);
-		 splat_renderer.Render(positions,normals,colors,radiuses,vcg::GLW::ColorMode::CMPerMesh,
-			 vcg::GLW::TextureMode::TMNone);
+                 splat_renderer.Render(positions,normals,colors,radiuses,vcg::GLW::CMPerMesh,
+                         vcg::GLW::TMNone);
 		 glPopAttrib();
 	 }
 		

@@ -317,7 +317,7 @@ static int Open( OpenMeshType &m, OCME * ocm, const char * filename, vcg::Matrix
 {
   PlyInfo pi;
   pi.cb=cb; 
-  int r =  Open(m,ocm, filename,tra_ma,  only_vertices,,pi);
+  int r =  Open(m,ocm, filename,tra_ma,  only_vertices,pi);
   loadmask=pi.mask;
   return r;
 }

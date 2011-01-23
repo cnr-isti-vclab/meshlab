@@ -45,8 +45,8 @@ ScaleRange OCME::ScaleRangeOfMesh( MeshType & m){
 	else{// use the vertices
         mHist.Clear();
         mHist.SetRange( 0, m.bbox.Diag(), 10000);
-		MeshType::VertexIterator vi  = m.vert.begin();
-		MeshType::VertexIterator vi1 =  vi; vi++;
+                typename MeshType::VertexIterator vi  = m.vert.begin();
+                typename MeshType::VertexIterator vi1 =  vi; vi++;
 		for( ; vi != m.vert.end(); ++vi,++vi1) 
 			mHist.Add(vcg::Distance((*vi).P(),(*vi1).P()));
 		 

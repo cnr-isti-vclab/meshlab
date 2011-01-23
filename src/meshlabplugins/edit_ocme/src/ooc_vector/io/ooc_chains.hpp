@@ -8,7 +8,7 @@
 template <class TYPE> int Chain<TYPE>::
 SaveChunk( typename Chain<TYPE>::Chunk & ck ){
 	TIM::Begin(13);
-	unsigned   char * local_buffer = 0;
+        char * local_buffer = 0;
 
 	if(ck.savedOnce && this->saveOnce) return 0 ;
 
@@ -54,7 +54,7 @@ FetchChunk( typename  Chain<TYPE>::Chunk & ck ){
 	const unsigned int & chunk_order =  &ck-&(*chunks.begin());
 	std::string key = this->GetKey(chunk_order);
 
-	unsigned char * local_buffer;
+        char * local_buffer;
 
 	ck.AllocMem(local_buffer);
 
@@ -83,7 +83,7 @@ LoadAll(){
 	for(unsigned int ci = 0; ci < chunks.size(); ++ci)
 	{
 		typename Chain<TYPE>::Chunk & ck = chunks[ci];
-		unsigned char * ptr = (unsigned char*) &this->incore[ci*this->params.chunkSize];
+                char * ptr = ( char*) &this->incore[ci*this->params.chunkSize];
 		if(ck.buffer){
 			memcpy(ptr,ck.buffer,sizeof(TYPE)*ck.size);
 		}else

@@ -6,7 +6,7 @@ extern Logging * lgn;
 
 
 #include <kcpolydb.h>
-using namespace std;
+
 
 
 
@@ -52,7 +52,8 @@ Close( bool andsave){
 	//	((SimpleDb*)extMemHnd)->DisableSafeWriting();
 		SaveAT();
 	}
-	lgn->Append("deleting kcdb ");
+        lgn->Append("closing and deleting kcdb ");
+        ((kyotocabinet::PolyDB*)extMemHnd)->close();
 	delete (kyotocabinet::PolyDB*)extMemHnd;
 	lgn->Append("done");
 

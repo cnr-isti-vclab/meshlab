@@ -53,19 +53,22 @@ FetchChunk( typename  Chain<TYPE>::Chunk & ck ){
 	const unsigned int & chunk_order =  &ck-&(*chunks.begin());
 	std::string key = this->GetKey(chunk_order);
 
-	char * local_buffer;
+        char * chunk_buffer, *local_buffer;
 
-	ck.AllocMem(local_buffer);
+        ck.AllocMem(chunk_buffer);
 
 	size_t size_buffer;
 	local_buffer   = ((kyotocabinet::PolyDB*)extMemHnd)->get(key.c_str(),key.length(), &size_buffer);
-	
+
 	RAssert(ck.SizeOfDisk() == size_buffer);
  
-	if(local_buffer )
+        if(local_buffer==0 )
 		printf("record not found");
 
-	ck.Read(local_buffer);
+        memcpy(chunk_buffer,local_buffer,sizeof(char)*size_buffer);
+        ck.Read(chunk_buffer);
+
+        delete [] local_buffer;
 
 	TIM::End(12);
 	STAT::Inc(N_LOADEDCH);
@@ -84,17 +87,19 @@ LoadAll(){
 		{
 			RAssert(MemDbg::CheckHeap(1));
 
-			 char * local_buffer = NULL;
+                         char  * chunk_buffer,* local_buffer = NULL;
 			const unsigned int & chunk_order =  &ck-&(*chunks.begin());
 			std::string  key = this->GetKey(chunk_order);
 
-			ck.AllocMem(local_buffer,ptr);
+                        ck.AllocMem(chunk_buffer,ptr);
 
 			size_t size_buffer;
-			local_buffer =((kyotocabinet::PolyDB*)extMemHnd)->get(key.c_str(),key.length(),& size_buffer);
-            RAssert(local_buffer);
+                        local_buffer =((kyotocabinet::PolyDB*)extMemHnd)->get(key.c_str(),key.length(),& size_buffer);
+                        RAssert(local_buffer);
+                        memcpy(chunk_buffer,local_buffer,sizeof(char)*size_buffer);
+                        delete [] local_buffer;
 
-			ck.Read(local_buffer,ptr);
+                        ck.Read(local_buffer,ptr); // does nothing
 		}
 	}
 }

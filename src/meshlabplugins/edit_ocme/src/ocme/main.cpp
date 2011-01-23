@@ -526,12 +526,17 @@ main (int argc,char **argv )
  		int start = clock();
  		int totalstart = start;
 
-
-	  if(overwrite_database)
-		meshona->Create((std::string(ocmename) +std::string(".kch") ).c_str(),berkeley_page_size);
-	  else
-		meshona->Open((std::string(ocmename)+std::string(".kch")).c_str());
-
+#ifdef SIMPLE_DB
+    if(overwrite_database)
+          meshona->Create((std::string(ocmename)).c_str(),berkeley_page_size);
+    else
+          meshona->Open((std::string(ocmename)+std::string(".socm")).c_str());
+#else
+    if(overwrite_database)
+        meshona->Create((std::string(ocmename) +std::string(".kch") ).c_str(),berkeley_page_size);
+    else
+        meshona->Open((std::string(ocmename)+std::string(".kch")).c_str());
+#endif
 
 	  if(all_plys)
 		  for(int i  = 0 ;  i < refvecFiles.size()  ;++i) 
@@ -704,7 +709,11 @@ main (int argc,char **argv )
 }
 else
 {
+#ifdef SIMPLE_DB
 	meshona->Open(( ocmename+std::string(".socm")).c_str());
+#else
+        meshona->Open(( ocmename+std::string(".kch")).c_str());
+#endif
 	if(verify)
 		meshona->Verify();
 	if(compute_stats){

@@ -436,9 +436,15 @@ void OcmeEditPlugin::ocm2triAttribute(){
 
 
 void OcmeEditPlugin::loadOcm(){
+#ifdef SIMPLE_DB
 	ocm_name = QFileDialog::getOpenFileName((QWidget*)0,
-					   tr("Open Ocm"), QDir::currentPath(),
-							tr("Ocm file (*.socm )"));
+                                           tr("Open ocm"), QDir::currentPath(),
+                                                        tr("Ocm file (*.socm )"));
+#else
+        ocm_name = QFileDialog::getOpenFileName((QWidget*)0,
+                                           tr("Open kch"), QDir::currentPath(),
+                                                        tr("Kch file (*.kch )"));
+#endif
 	if(!ocm_name.isEmpty()){
 		ocme  = new OCME();
 		ocme->params.side_factor = 50; // READ IT FROM THE FILEEEEEEEEE
@@ -447,8 +453,11 @@ void OcmeEditPlugin::loadOcm(){
 		ocme->splat_renderer.Init(this->gla);
 //		ocme->renderParams.memory_limit_in_core = 100;
 		ocme->Open ( ocm_name.toAscii() );
+
+#ifdef SIMPLE_DB
 		((SimpleDb*)ocme->extMemHnd)->EnableSafeWriting();
 
+#endif
 #ifdef _RELEASED_
 		refreshImpostors();
 #endif

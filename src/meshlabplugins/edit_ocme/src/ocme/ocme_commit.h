@@ -408,15 +408,15 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 		}
 	toCleanUpCells.clear();
 
-	vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<GISet>(m,gPosVNew);
-	vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<GISet>(m,gPosV);
-	vcg::tri::Allocator<MeshType>::DeletePerVertexAttribute<unsigned char>(m,lockedV);
+        vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute<GISet>(m,gPosVNew);
+        vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute<GISet>(m,gPosV);
+        vcg::tri::Allocator<MeshType>::template DeletePerVertexAttribute<unsigned char>(m,lockedV);
 
-	vcg::tri::Allocator<MeshType>::DeletePerFaceAttribute<GIndex>(m,gPosF);
-	vcg::tri::Allocator<MeshType>::DeletePerFaceAttribute<unsigned char>(m,lockedF);
+        vcg::tri::Allocator<MeshType>::template DeletePerFaceAttribute<GIndex>(m,gPosF);
+        vcg::tri::Allocator<MeshType>::template DeletePerFaceAttribute<unsigned char>(m,lockedF);
 
-	vcg::tri::Allocator<MeshType>::DeletePerMeshAttribute<ScaleRange>(m,srE);
-	vcg::tri::Allocator<MeshType>::DeletePerMeshAttribute<std::vector<CellKey> >(m,sel_cells_attr);
+        vcg::tri::Allocator<MeshType>::template DeletePerMeshAttribute<ScaleRange>(m,srE);
+        vcg::tri::Allocator<MeshType>::template DeletePerMeshAttribute<std::vector<CellKey> >(m,sel_cells_attr);
 
 
 
