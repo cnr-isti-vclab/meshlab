@@ -1771,6 +1771,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 	if(defaultExt == "*.") 
 		defaultExt = "*.ply";
 
+	QString ff = mod->fullName();
 	QFileDialog saveDialog(this,tr("Save Current Layer"), mod->fullName());
   saveDialog.setNameFilters(suffixList);
 	saveDialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -1782,7 +1783,8 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		int dialogRet = saveDialog.exec();
 		if(dialogRet==QDialog::Rejected	) return false;
 		fileName=saveDialog.selectedFiles ().first();
-		if(fi.suffix().isEmpty())
+		QFileInfo fni(fileName);
+		if(fni.suffix().isEmpty())
 		{
 			QString ext = saveDialog.selectedNameFilter();
 			ext.chop(1); ext = ext.right(4);
