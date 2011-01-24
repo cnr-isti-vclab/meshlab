@@ -1,7 +1,8 @@
 <RCC>
-  <qresource prefix="/" >
-	  <file>images/icon_filler.png</file>
-    <file>images/bridgeCursor.png</file>
-    <file>images/bridgeCursor1.png</file>
-  </qresource>
+    <qresource prefix="/">
+        <file>images/icon_filler.png</file>
+        <file>images/bridgeCursor.png</file>
+        <file>images/bridgeCursor1.png</file>
+        <file>images/hole_filler.png</file>
+    </qresource>
 </RCC>

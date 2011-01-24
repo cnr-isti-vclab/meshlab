@@ -26,7 +26,7 @@
 
 EditHoleFactory::EditHoleFactory()
 {
-	editHole = new QAction(QIcon(":/images/icon_filler.png"),"Fill Hole", this);
+  editHole = new QAction(QIcon(":/images/hole_filler.png"),"Fill Hole", this);
 	
 	actionList << editHole;
 	
