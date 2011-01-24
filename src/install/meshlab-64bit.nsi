@@ -5,7 +5,7 @@
 
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
-!define PRODUCT_VERSION "1.3.0b"
+!define PRODUCT_VERSION "1.3.0"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -183,6 +183,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_meshing.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_mls.dll"
   
+  File "${DISTRIB_FOLDER}/plugins\filter_photosynth.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_plymc.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_poisson.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_qhull.dll"
