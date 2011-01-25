@@ -1318,7 +1318,7 @@ void MainWindow::saveProject()
   QString fileName = files[0];
   // this change of dir is needed for subsequent textures/materials loading
   QFileInfo fi(fileName);
-  if (!fi.isFile())
+  if (fi.isDir())
 	  return;
   QDir::setCurrent(fi.absoluteDir().absolutePath());
 
