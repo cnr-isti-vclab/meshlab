@@ -1512,6 +1512,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 
 			GLA()->meshDoc->setBusy(true);
             RasterModel *rm= GLA()->meshDoc->addNewRaster();
+			rm->setLabel(fileImg);
 			rm->addPlane(new Plane(rm,fileName,QString("")));		
 			meshDoc()->setBusy(false);
 
