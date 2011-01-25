@@ -1320,6 +1320,14 @@ void MainWindow::saveProject()
   QFileInfo fi(fileName);
   if (fi.isDir())
 	  return;
+  if (fi.suffix().isEmpty())
+  {
+	  QRegExp reg("\\.\\w+");
+	  saveDiag->selectedNameFilter().indexOf(reg);
+	  QString ext = reg.cap();
+	  fileName.append(ext);
+	  fi.setFile(fileName);
+  }
   QDir::setCurrent(fi.absoluteDir().absolutePath());
 
   /*********WARNING!!!!!! CHANGE IT!!! ALSO IN THE OPENPROJECT FUNCTION********/
@@ -1345,8 +1353,8 @@ void MainWindow::saveProject()
     vector<Matrix44f> transfVector;
 
     foreach(MeshModel * mp, meshDoc()->meshList)
-    {
-      meshNameVector.push_back(qPrintable(mp->shortName()));
+	{	
+      meshNameVector.push_back(qPrintable(mp->relativePathName()));
       transfVector.push_back(mp->cm.Tr);
     }
     ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
@@ -1397,8 +1405,9 @@ bool MainWindow::openProject(QString fileName)
     vector<RangeMap>::iterator ir;
     for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
     {
-      if(ir==rmv.begin()) openRes = open((*ir).filename.c_str());
-      else				openRes = open((*ir).filename.c_str());
+		QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();  
+      if(ir==rmv.begin()) openRes = open(relativeToProj);
+      else				openRes = open(relativeToProj);
 
       if(openRes) meshDoc()->mm()->cm.Tr=(*ir).trasformation;
     }
