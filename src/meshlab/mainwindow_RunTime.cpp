@@ -1568,6 +1568,9 @@ bool MainWindow::importMesh(const QString& fileName, MeshIOInterface *pCurrentIO
 		//pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 		//pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 
+                QString err = pCurrentIOPlugin->errorMsg();
+                if (!err.isEmpty())
+                    QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
 		meshDoc()->setBusy(true);
 		if(mdiarea->isVisible()) 
 			GLA()->mvc->showMaximized();
