@@ -4,6 +4,7 @@
 #include    "vs/sampler.h"
 
 #include    <QGLWidget>
+#include    <QString>
 
 using namespace vs;
 
@@ -93,8 +94,8 @@ private:
         bool everythingOk = true;
         while( everythingOk && mi != extToErr.end() )
         {
-            const char* required = (*mi).first.toStdString().c_str();
-            everythingOk = (bool)( glewIsSupported( required ) );
+            
+            everythingOk = (bool)( glewIsSupported( qPrintable((*mi).first) ) );
             ++mi;
         }
 
