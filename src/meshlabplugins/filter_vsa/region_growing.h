@@ -4,38 +4,100 @@
 #include <list>
 #include <vector>
 
-
-#include "planar_region.h"
 #include <vcg/complex/trimesh/allocate.h>
 
-template <class MeshType>
+template <class FaceType>
+struct FaceError{
+	FaceType * f;
+	float val;
+	FaceError(){};
+	FaceError(FaceType * _f,double _val):f(_f),val(_val){}
+	const bool operator <(const FaceError & o) const {return val < o.val;}
+};
+
+
+template<class MeshType>
+struct Region{
+	Region():isd(false){}
+	typedef Region RegionType;
+	typedef typename MeshType  MeshType;
+	typedef typename MeshType::FaceType FaceType;
+	typedef typename MeshType::FaceType::CoordType CoordType;
+    typedef typename MeshType::FaceType::ScalarType ScalarType;
+	typedef typename std::vector<typename MeshType::FaceType*>::iterator FaceIterator;
+	typedef typename std::list<Region*>::iterator AdjIterator;
+	typedef FaceError<FaceType> FaceError;
+
+	// adjacent regions
+	std::list<RegionType*> adj,nx_adj;
+
+
+	// some flag
+	bool isd;
+
+	// evaluate the gain if the triangle is added to the region
+    ScalarType Evaluate( FaceType & f);
+
+	// update the approximation error of the region
+	void UpdateError( );
+
+	// check if two regions are mergeable in one
+	// i.e. if they have the same planes and coincide i non extreme
+    ScalarType Mergeable(  RegionType & tr);
+
+	// set the region as adjacent to this one
+	void Connect( RegionType * tr);
+
+	// compute the faces which are on the border
+	void ComputeOnBorder( std::vector<FaceType*> & onBorder);
+
+	// clean the list of adjacencies
+	void Clean();
+
+	// refit the plane
+	void Refit();
+
+	// keep the best % percentile
+	void CutOff( FaceType*f);
+	
+	// restart from the best fitting face
+    void Restart();
+
+	void Decorate();
+
+};
+
+
+template < class RegionType>
 class RegionGrower{
 public:
 	RegionGrower():lastAdded(NULL),ave_error(-1),ave_var(-1),n_steps(0){}
-        typedef PlanarRegion<MeshType> RegionType;
-	typedef typename RegionType::FaceType FaceType;
-        typedef typename FaceType::ScalarType ScalarType;
+  	typedef typename RegionType RegionType;
+  	typedef typename RegionType::MeshType MeshType;
+  	typedef typename RegionType::FaceType FaceType;
+    typedef typename FaceType::ScalarType ScalarType;
 	typedef typename std::list<RegionType> ::iterator TriRegIterator;
-        typedef typename std::list<RegionType*>::iterator AdjIterator;
-        typedef typename PlanarRegion<MeshType>::Pov Pov;
+    typedef typename std::list<RegionType*>::iterator AdjIterator;
+    typedef typename RegionType::FaceError FaceError;
 
 	std::list<RegionType> regions;
 	std::vector<RegionType*> workingset;
         int n_faces,target_max_regions;
 	FaceType * lastAdded;
-        ScalarType	ave_error // average error (over single regions' error)
-                        ,ave_var,// average variance (over single regions' error)
-                        changed,	// faces that have changed from previous step ([0..1))
-                        err,
-                        target_error; // taget error
+    ScalarType	 ave_error // average error (over single regions' error)
+                ,ave_var// average variance (over single regions' error)
+                ,changed	// faces that have changed from previous step ([0..1))
+                ,err
+                ,target_error; // taget error
+
 	FaceType * worst;
-        ScalarType worst_err ;
-        MeshType * m;
+    ScalarType worst_err ;
+    MeshType * m;
 
-         typename MeshType:: template  PerFaceAttributeHandle<int*> attr_r;
-         typename MeshType:: template  PerFaceAttributeHandle<int*> attr_r_old;
+	typename MeshType:: template  PerFaceAttributeHandle<int*> attr_r;
+	typename MeshType:: template  PerFaceAttributeHandle<int*> attr_r_old;
 
-        unsigned int n_steps;//  number of steps done
+	unsigned int n_steps;//  number of steps done
 
 	struct CandiFace{
 		FaceType * f;
@@ -48,7 +110,7 @@ public:
 	};
 
 	std::vector<CandiFace> facesheap;
-	std::vector<FaceError<FaceType> > faceserr;
+	std::vector<FaceError  > faceserr;
 
         struct ErrorEval {
 
@@ -139,7 +201,7 @@ public:
 	void CreateRegion(FaceType * fi){
 		AddRegion(RegionType());
 		RegionType & tr =regions.back();
-                AddFaceToRegion(tr,fi);
+        AddFaceToRegion(tr,fi);
 		tr.Refit();
 		tr.color = vcg::Color4b::Scatter(2000,(int)regions.size());	
 	}
@@ -157,10 +219,13 @@ public:
             AdjIterator ai;
             for(fi = r1.face.begin();fi != r1.face.end(); ++fi)
                 AddFaceToRegion(r0,(*fi));
-            for(ai= r1.adj.begin(); ai != r1.adj.end();++ai) if( !(*ai)->isd && (*ai)!=&r0)
-                r0.nx_adj.push_back(*ai);
+            for(ai= r1.adj.begin(); ai != r1.adj.end();++ai) 
+				if( !(*ai)->isd && (*ai)!=&r0)
+				 r0.nx_adj.push_back(*ai);
+
             r1.face.clear();
             r1.isd = true;
+			r0.Refit();
         }
 
 
@@ -182,19 +247,19 @@ void PushHeap(std::vector<FaceType*> & candi, RegionType & r){
 
 // for each region take the candidates and fill in facesheap
 		void Refill( ){
-		facesheap.clear();
+			facesheap.clear();
 
-                typename std::list<RegionType>::iterator ri;
+			 typename std::list<RegionType>::iterator ri;
 
-		std::vector<FaceType*>  candi;
-		for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd)
-			{
-			candi.clear();
-                        Candidates((*ri),candi);
-			PushHeap(candi,*ri);
+			std::vector<FaceType*>  candi;
+			for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd)
+				{
+					candi.clear();
+					Candidates((*ri),candi);
+					PushHeap(candi,*ri);
+				}
+					std::make_heap(facesheap.begin(),facesheap.end());
 		}
-                std::make_heap(facesheap.begin(),facesheap.end());
-	}
 
 
         void   Candidates(RegionType & r, std::vector< typename RegionType::FaceType*> & c){
@@ -208,40 +273,39 @@ void PushHeap(std::vector<FaceType*> & candi, RegionType & r){
         }
 
         bool IsRelaxed(){
+                ScalarType _ave_error=0;
+                ScalarType _ave_var= 0;
+                ScalarType _changed = 0.0;
+                int nr=0;
 
-                                ScalarType _ave_error=0;
-                                ScalarType _ave_var= 0;
-                                ScalarType _changed = 0.0;
-                                int nr=0;
-
-                                typename std::list<RegionType>::iterator ri;
-                                worst=NULL;;
-                                worst_err = -1;
-                                qDebug("working set size: %d\n",workingset.size());
-                                for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd){
-                                        ++nr;
-                                        (*ri).UpdateError();
-                                        _ave_error+=(*ri).approx_err;
-                                        _ave_var+=(*ri).approx_var;
-                                        _changed+=(*ri).changed;
-                                        (*ri).changed=0;
-                                        if((*ri).worst.val*(*ri).size > worst_err){
-                                                                worst = (*ri).worst.f;
-                                                                worst_err = (*ri).worst.val*(*ri).size;
-                                        }
-                                }
-
-
-                                _ave_error/=nr;
-                                _ave_var/=nr;
-                                _changed/=n_faces;
-
-                                erroreval.Add(_ave_error);
-                                qDebug("Err:%f ov: %f-------",_ave_error,erroreval.BoxOverlap());
-
-
-                                return  (erroreval.BoxOverlap() > 0.5) || (erroreval.RelativeDecrease() < 0.1);
+                typename std::list<RegionType>::iterator ri;
+                worst=NULL;;
+                worst_err = -1;
+                qDebug("working set size: %d\n",workingset.size());
+                for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd){
+                        ++nr;
+                        (*ri).UpdateError();
+                        _ave_error+=(*ri).approx_err;
+                        _ave_var+=(*ri).approx_var;
+                        _changed+=(*ri).changed;
+                        (*ri).changed=0;
+                        if((*ri).worst.val*(*ri).size > worst_err){
+                                                worst = (*ri).worst.f;
+                                                worst_err = (*ri).worst.val*(*ri).size;
                         }
+                }
+
+
+                _ave_error/=nr;
+                _ave_var/=nr;
+                _changed/=n_faces;
+
+                erroreval.Add(_ave_error);
+                qDebug("Err:%f ov: %f-------",_ave_error,erroreval.BoxOverlap());
+
+
+                return  (erroreval.BoxOverlap() > 0.5) || (erroreval.RelativeDecrease() < 0.1);
+            }
 	
 void GrowStepOnce(){
 		CandiFace cf;	
@@ -277,133 +341,153 @@ void GrowStepOnce(){
 
 	void GrowStep(){
 		CandiFace cf;	
-                typename std::list<RegionType>::iterator ri;
+        typename std::list<RegionType>::iterator ri;
 
 		n_steps++;
 		for(ri = regions.begin(); ri != regions.end(); ++ri) if(!(*ri).isd)
 				(*ri).Clean();
 
 		while(!facesheap.empty() ){
-		
-			std::vector<FaceType*> toAdd;
-			std::pop_heap(facesheap.begin(),facesheap.end());
-			cf = facesheap.back();
-			//printf("err:%f\n",cf.val);		
-			facesheap.pop_back();
-                        if (attr_r[*cf.f]==NULL){
-                                        AddFaceToRegion( *cf.r,cf.f); // ads to region
+				std::vector<FaceType*> toAdd;
+				std::pop_heap(facesheap.begin(),facesheap.end());
+				cf = facesheap.back();
+				//printf("err:%f\n",cf.val);		
+				facesheap.pop_back();
+				if (attr_r[*cf.f]==NULL){
+					AddFaceToRegion( *cf.r,cf.f); // ads to region
 					lastAdded = &*cf.f;
 					for(int i=0; i < 3;++i) // put the adjacent in the set of faces to possibly add
-                                                if( attr_r[ *cf.f->FFp(i)] == NULL )
-							toAdd.push_back(cf.f->FFp(i));
-						else
-                                                        if(attr_r[*cf.f->FFp(i)] != attr_r[*cf.f])
-                                                        Connect((RegionType*)attr_r[*cf.f->FFp(i)],(RegionType*)cf.r);
+							if( attr_r[ *cf.f->FFp(i)] == NULL )
+								toAdd.push_back(cf.f->FFp(i));
+							else
+							if(attr_r[*cf.f->FFp(i)] != attr_r[*cf.f])
+								Connect((RegionType*)attr_r[*cf.f->FFp(i)],(RegionType*)cf.r);
+			
 					PushHeap(toAdd,*cf.r);
-			}
-			else
-			{
-                                if ( attr_r[*cf.f] != (int*)(cf.r) )
-                                Connect((RegionType*)attr_r[*cf.f],(RegionType*)cf.r);
-			}
+				}
+				else
+				{
+					if ( attr_r[*cf.f] != (int*)(cf.r) )
+					Connect((RegionType*)attr_r[*cf.f],(RegionType*)cf.r);
+				}
 		}
 		int h = (int) facesheap.size();
 		printf("----> %d\n",h);
 	}
 
-	void MergeStep(){
-			 TriRegIterator tri;
-                         typename RegionType::AdjIterator ai;
+	unsigned int MergeStep(){
+		 TriRegIterator tri;
+		 unsigned int merged = 0;
+         typename RegionType::AdjIterator ai;
 
-				 for(tri = regions.begin(); tri != regions.end(); ++tri)if(!(*tri).isd)
-						for(ai = (*tri).adj.begin(); ai != (*tri).adj.end(); ++ai) if(!(*ai)->isd)
-							if((*tri).Mergeable(*(*ai)))
-                                                                Merge((*tri),*(*ai));
-
-
-                                 for(tri = regions.begin(); tri != regions.end(); ++tri){
-					 for(ai = (*tri).nx_adj.begin(); ai != (*tri).nx_adj.end();++ai)
-						 (*tri).adj.push_back(*ai);
-                                         (*tri).adj.sort();
-                                         (*tri).adj.unique();
-                                     }
+		 for(tri = regions.begin(); tri != regions.end(); ++tri)if(!(*tri).isd)
+				for(ai = (*tri).adj.begin(); ai != (*tri).adj.end(); ++ai) if(!(*ai)->isd)
+					if((*tri).Mergeable(*(*ai))){
+						Merge((*tri),*(*ai));
+						merged++;
+					}
 
 
-
+         for(tri = regions.begin(); tri != regions.end(); ++tri){
+			 for(ai = (*tri).nx_adj.begin(); ai != (*tri).nx_adj.end();++ai)
+				 if(!(*ai)->isd) 
+					 (*tri).adj.push_back(*ai);
+			 (*tri).adj.sort();
+			 (*tri).adj.unique();
+             }
+		return merged;
 	}
 
-        bool Restart(){
-                std::vector<FaceType*>  candi;
-                TriRegIterator ri;
-                facesheap.clear();
+	//void TeleportStep(){
+	//	 TriRegIterator tri;
+ //        typename RegionType::AdjIterator ai;
 
-                if(IsRelaxed()){
-                    if( (worst_err <= target_error) || (regions.size() >= target_max_regions))
-                        return false;
-                    else
-                    {
-                        erroreval.Init(10);
-                        FaceError<FaceType>  wrs;
-                        wrs.f = worst;
-                        wrs.val = worst_err;
-                        printf("worst triangle error %f\n",worst_err);
+	//	 for(tri = regions.begin(); tri != regions.end(); ++tri)if(!(*tri).isd){
+	//			std::vector<FaceType*> & onBorder
+	//			ComputeOnBorder(onBorder);
+	//			if(onBorder.empty
+	//	 }
+	//	
+	//}
 
-                        CreateRegion(wrs.f);// CreateRegion changes wr->r
+    bool Restart(){
+            std::vector<FaceType*>  candi;
+            TriRegIterator ri;
+            facesheap.clear();
 
-                        // reset state variables
-                         ave_error=-1;
-                         ave_var=-1;
-                         err=0.0;
-                         changed=0;
-                    }
+            if(IsRelaxed()){
+                if( (worst_err <= target_error) || (regions.size() >= target_max_regions))
+                    return false;
+                else
+                {
+                    erroreval.Init(10);
+                    FaceError   wrs;
+                    wrs.f = worst;
+                    wrs.val = worst_err;
+                    printf("worst triangle error %f\n",worst_err);
+
+                    CreateRegion(wrs.f);// CreateRegion changes wr->r
+
+                    // reset state variables
+                     ave_error=-1;
+                     ave_var=-1;
+                     err=0.0;
+                     changed=0;
                 }
-                     for(ri = regions.begin(); ri != regions.end(); ++ri)
-                     {
-                             candi.clear();
-                             (*ri).Refit();            // fit a plane to the region
-                             Restart(*ri);             // clear stuff in the region, move the seed to the best fitting to the plabne
-                             Candidates(*ri,candi);    // take the (three) faces candidatees
-                             PushHeap(candi,(*ri));    // put the faces on to the heap
-                     }
-                return true;
+            }
+			
+	            for(ri = regions.begin(); ri != regions.end(); )
+					if((*ri).isd)
+						ri = regions.erase(ri);
+					else
+						++ri;
+
+                 for(ri = regions.begin(); ri != regions.end(); ++ri)
+                 {
+                         candi.clear();
+                         (*ri).Refit();            // fit a plane to the region
+                         Restart(*ri);             // clear stuff in the region, move the seed to the best fitting to the plabne
+                         Candidates(*ri,candi);    // take the (three) faces candidatees
+                         PushHeap(candi,(*ri));    // put the faces on to the heap
+                 }
+            return true;
+        }
+
+
+            void Restart(RegionType &r){
+                    if(!r.face.empty()){
+                            r.size=0;
+                            float b_err = r.Evaluate(*(*r.face.begin())),err;
+                            FaceType* b_face =(*r.face.begin());
+                            typename RegionType::FaceIterator fi;
+
+                            for( fi = r.face.begin(); fi != r.face.end(); ++fi)
+                            {
+                                    err = r.Evaluate(**fi);
+                                    if(err < b_err)
+                                    {
+                                            b_err = err;
+                                            b_face = *fi;
+                                    }
+                            }
+                            for( fi = r.face.begin(); fi != r.face.end(); ++fi) attr_r[(*fi)] = NULL;
+                            r.face.clear();
+                            r.adj.clear();
+                            AddFaceToRegion(r,b_face);
+                            r.Refit();
+                    }
             }
 
-			void CutOff(){}
+				void MakeCharts(){
+					this->Refill();
+					while(this->Restart()){
+						//do{ 
+							this->GrowStep();
+						//} while(Restart());
+					}
+					//while(this->MergeStep());
+				}
 
-
-
-                        void Restart(RegionType &r){
-                                if(!r.face.empty()){
-                                        r.size=0;
-                                        float b_err = r.Evaluate(*(*r.face.begin())),err;
-                                        FaceType* b_face =(*r.face.begin());
-                                        typename RegionType::FaceIterator fi;
-
-                                        for( fi = r.face.begin(); fi != r.face.end(); ++fi)
-                                        {
-                                                err = r.Evaluate(**fi);
-                                                if(err < b_err)
-                                                {
-                                                        b_err = err;
-                                                        b_face = *fi;
-                                                }
-                                        }
-                                        for( fi = r.face.begin(); fi != r.face.end(); ++fi) attr_r[(*fi)] = NULL;
-                                        r.face.clear();
-                                        r.adj.clear();
-                                        AddFaceToRegion(r,b_face);
-                                        r.Refit();
-                                }
-                        }
-
-                        void ComputeShots(int * vpsize, int pps){
-                            for(TriRegIterator tri = regions.begin(); tri != regions.end(); ++tri)
-                                (*tri).ComputeShot(vpsize,pps);
-                        }
-                        void GetAllShots( std::vector<Pov> & povs){
-                            for(TriRegIterator tri = regions.begin(); tri != regions.end(); ++tri)
-                                povs.insert(povs.end(),(*tri).povs.begin(),(*tri).povs.end());
-                        }
 };
 
 #endif

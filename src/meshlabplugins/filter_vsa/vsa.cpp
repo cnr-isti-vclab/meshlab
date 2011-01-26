@@ -33,6 +33,7 @@ $Log: samplefilter.cpp,v $
 
 #include "vsa.h"
 #include "region_growing.h"
+#include "planar_region.h"
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/allocate.h>
@@ -76,7 +77,7 @@ QString VsaPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
                 case FP_VSA :  return QString("Compute Variational Shape Approximation");
-		default : assert(0); 
+		default : assert(0);return QString(""); 
 	}
 }
 
@@ -94,10 +95,11 @@ void VsaPlugin::initParameterSet(QAction *action,MeshDocument &  m , RichParamet
                   parlst.addParam(new RichInt ("MinPatches", 10,"minimum number of patches to use"));
                   parlst.addParam(new RichInt ("MaxPatches", 10,"maximum number of patches to use"));
                   parlst.addParam(new RichFloat ("MaxError", 0.25,"target error"));
-                  parlst.addParam(new RichBool ("ComputeSamplingViews", false,"Also compute the view for sampling",""));
-                  parlst.addParam(new RichInt ("Width", 1024,"width of the viewport"));
-                  parlst.addParam(new RichInt ("Height", 512,"height of the viewport"));
-                  parlst.addParam(new RichInt ("Resolution", 10000,"Linear resolution: number of samples along the diagonal of the bbox"));
+                  parlst.addParam(new RichBool ("mergeonly", false,"merge only",""));
+                  //parlst.addParam(new RichBool ("ComputeSamplingViews", false,"Also compute the view for sampling",""));
+                  //parlst.addParam(new RichInt ("Width", 1024,"width of the viewport"));
+                  //parlst.addParam(new RichInt ("Height", 512,"height of the viewport"));
+                  //parlst.addParam(new RichInt ("Resolution", 10000,"Linear resolution: number of samples along the diagonal of the bbox"));
                   break;
 
    default: break; // do not add any parameter for the other filters
@@ -110,7 +112,6 @@ int VsaPlugin::getRequirements(QAction *){
 // The Real Core Function doing the actual mesh processing.
 bool VsaPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-    typedef RegionGrower<CMeshO>::Pov Pov;
 
 	switch(ID(filter)) {
                 case FP_VSA :
@@ -120,43 +121,50 @@ bool VsaPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
                         int maxpatches = par.getInt("MaxPatches");
                         float target_error = par.getFloat("MaxError");
 
-                        CMeshO::PerMeshAttributeHandle<RegionGrower<CMeshO>  > rg_handle;
-                        rg_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<RegionGrower<CMeshO> > (md.mm()->cm,"regiongrower");
-                        if (!vcg::tri::Allocator<CMeshO>::IsValidHandle(md.mm()->cm,rg_handle) )
-                            rg_handle = vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<RegionGrower<CMeshO> > (md.mm()->cm,"regiongrower");
+                        CMeshO::PerMeshAttributeHandle< RegionGrower<PlanarRegion<CMeshO> > > rg_handle;
+                        rg_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< RegionGrower< PlanarRegion<CMeshO> > > (md.mm()->cm,"regiongrower");
+                        if (!vcg::tri::Allocator< CMeshO >::IsValidHandle(md.mm()->cm,rg_handle) )
+                            rg_handle = vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<  RegionGrower<PlanarRegion<CMeshO> > > (md.mm()->cm,"regiongrower");
 
-                        rg_handle().Init(md.mm()->cm,minpatches,maxpatches,target_error);
-                        rg_handle().Refill();
-
-
-                        while(rg_handle().Restart())
-                            rg_handle().GrowStep();
+						if(par.getBool("mergeonly"))
+							rg_handle().MergeStep();
+						else{
+							rg_handle().Init(md.mm()->cm,minpatches,maxpatches,target_error);
+							rg_handle().MakeCharts();
+						}
 
                         unsigned int i=0, n_regions = rg_handle().regions.size();
-                        for(  RegionGrower<CMeshO>::TriRegIterator ti = rg_handle().regions.begin(); ti != rg_handle().regions.end(); ++ti,++i){
+                        for(  RegionGrower<PlanarRegion<CMeshO> >::TriRegIterator ti = rg_handle().regions.begin(); ti != rg_handle().regions.end(); ++ti,++i){
                             (*ti).color = (*ti).color.Scatter(n_regions,i);
-                            for( RegionGrower<CMeshO>::RegionType::FaceIterator fi = (*ti).face.begin(); fi != (*ti).face.end(); ++fi)
+							if((*ti).adj.size()==1)
+								(*ti).color = vcg::Color4b(vcg::Color4b::White);
+							else
+								if((*ti).adj.size()==2)
+									(*ti).color = vcg::Color4b(vcg::Color4b::Black);
+
+
+                            for(  RegionGrower<PlanarRegion<CMeshO> >::RegionType::FaceIterator fi = (*ti).face.begin(); fi != (*ti).face.end(); ++fi)
                                 (*fi)->C() = (*ti).color;
                         }
 
                         Log("Mesh Partitioned in %d Almost Planar regions",n_regions);
-                        bool alsoviews = par.getBool("ComputeSamplingViews");
+                        //bool alsoviews = par.getBool("ComputeSamplingViews");
 
-                        if(alsoviews){
-                            int vpsize[2]; int pps;
-                            vpsize[0] = par.getInt("Width");
-                            vpsize[1] = par.getInt("Height");
-                            pps = par.getInt("Resolution");
-                            Log("Computing Views");
-                            rg_handle().ComputeShots(vpsize,float(pps)/md.mm()->cm.bbox.Diag());
+                        //if(alsoviews){
+                        //    int vpsize[2]; int pps;
+                        //    vpsize[0] = par.getInt("Width");
+                        //    vpsize[1] = par.getInt("Height");
+                        //    pps = par.getInt("Resolution");
+                        //    Log("Computing Views");
+                        //    rg_handle().ComputeShots(vpsize,float(pps)/md.mm()->cm.bbox.Diag());
 
-                            CMeshO::PerMeshAttributeHandle<std::vector<Pov>  > povs_handle;
-                            povs_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<Pov> > (md.mm()->cm,"pointofviews");
-                            if (!vcg::tri::Allocator<CMeshO>::IsValidHandle(md.mm()->cm,povs_handle) )
-                                 povs_handle = vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<std::vector<Pov> > (md.mm()->cm,"pointofviews");
+                        //    CMeshO::PerMeshAttributeHandle<std::vector<Pov>  > povs_handle;
+                        //    povs_handle = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<Pov> > (md.mm()->cm,"pointofviews");
+                        //    if (!vcg::tri::Allocator<CMeshO>::IsValidHandle(md.mm()->cm,povs_handle) )
+                        //         povs_handle = vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<std::vector<Pov> > (md.mm()->cm,"pointofviews");
 
-                            rg_handle().GetAllShots(povs_handle());
-                        }
+                        //    rg_handle().GetAllShots(povs_handle());
+                        //}
 				
                 } break;
 		default: assert (0);
