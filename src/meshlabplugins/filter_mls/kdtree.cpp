@@ -68,6 +68,9 @@ void KdTree<Scalar>::setMaxNofNeighbors(unsigned int k)
 	* distances to the cells as a priority values allows to save about 10% of the leaves.
 	* But, again, priority queue insertions and deletions are quite involved, and therefore
 	* a simple stack is by far much faster.
+  *
+  * The result of the query, the k-nearest neighbors, are internally stored into a stack, where the
+  * topmost element
 	*/
 template<typename Scalar>
 void KdTree<Scalar>::doQueryK(const VectorType& queryPoint)
