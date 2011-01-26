@@ -9,7 +9,8 @@ SUBDIRS       = common \
                 meshlabplugins/io_3ds\
                 meshlabplugins/io_bre\
                 meshlabplugins/io_collada \
-                meshlabplugins/io_epoch\
+                meshlabplugins/io_epoch \
+				meshlabplugins/io_json \
                 meshlabplugins/io_u3d\
                 meshlabplugins/io_tri\
                 meshlabplugins/io_x3d \
@@ -61,6 +62,7 @@ SUBDIRS       = common \
 # projects
                 fgt/filter_aging \
                 fgt/filter_colorproc \
+				fgt/filter_csg \
                 fgt/filter_func \
                 fgt/filter_ssynth \
                 fgt/filter_qhull \
