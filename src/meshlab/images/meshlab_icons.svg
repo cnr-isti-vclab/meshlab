@@ -839,9 +839,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.5210566"
-     inkscape:cx="123.04369"
-     inkscape:cy="650.99249"
+     inkscape:zoom="10.062725"
+     inkscape:cx="354.98144"
+     inkscape:cy="595.7017"
      inkscape:document-units="px"
      inkscape:current-layer="layer4"
      showgrid="true"
@@ -1009,8 +1009,7 @@
      inkscape:label="Drawing"
      inkscape:groupmode="layer"
      id="layer1"
-     style="display:inline"
-     sodipodi:insensitive="true">
+     style="display:inline">
     <path
        sodipodi:nodetypes="ccccc"
        inkscape:connector-curvature="0"
@@ -2052,42 +2051,6 @@
        width="30.263901"
        y="-453.84262"
        x="-527.22369" />
-    <rect
-       style="fill:#ececec;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-       id="rect5163"
-       width="72"
-       height="48"
-       x="304"
-       y="316.36218"
-       rx="3.0263901"
-       ry="3.3490639" />
-    <path
-       sodipodi:type="arc"
-       style="fill:#ececec;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-       id="path5165"
-       sodipodi:cx="336"
-       sodipodi:cy="340.36218"
-       sodipodi:rx="16"
-       sodipodi:ry="16"
-       d="m 352,340.36218 a 16,16 0 1 1 -32,0 16,16 0 1 1 32,0 z" />
-    <path
-       sodipodi:type="arc"
-       style="fill:#ececec;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-       id="path5167"
-       sodipodi:cx="356"
-       sodipodi:cy="328.36218"
-       sodipodi:rx="4"
-       sodipodi:ry="4"
-       d="m 360,328.36218 a 4,4 0 1 1 -8,0 4,4 0 1 1 8,0 z" />
-    <path
-       sodipodi:type="arc"
-       style="fill:#ececec;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-       id="path5169"
-       sodipodi:cx="336"
-       sodipodi:cy="340.36218"
-       sodipodi:rx="8"
-       sodipodi:ry="8"
-       d="m 344,340.36218 a 8,8 0 1 1 -16,0 8,8 0 1 1 16,0 z" />
     <g
        id="g5331">
       <rect
@@ -2249,6 +2212,98 @@
          style="fill:url(#linearGradient5373);fill-opacity:1;stroke:#000000;stroke-width:3.83333349;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
          transform="matrix(0,1,-1,0,0,0)" />
     </g>
+    <path
+       sodipodi:nodetypes="ccccccccccccccccccc"
+       d="m 336,426.36218 15,10 -10,11 -9,-3 12,4 3,8 10,-2 11,3 3,13 6,5 -12,4 -9,-4 -7,4 -9,-8 -7,-11 -1,-16 4,-18 21,0 -6,10"
+       stroke-miterlimit="79.8403193612775"
+       id="path5336-9"
+       style="font-size:16px;fill:#c8c8c8;fill-opacity:1;stroke:#000000;stroke-width:1.5;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:none;display:inline;font-family:Times New Roman"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       style="font-size:16px;fill:#c8c8c8;fill-opacity:1;stroke:#000000;stroke-width:1.5;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:none;display:inline;font-family:Times New Roman"
+       id="path3303"
+       stroke-miterlimit="79.8403193612775"
+       d="m 354,445.36218 12,-1 3,-9 -3,-9 3,9 9,6 -3,10 3,12 -7,7 6,5 9,-3 1,-22 -2,-15 -8,-7 -11,-2 -9,0 -6,10 3,9"
+       sodipodi:nodetypes="cccccccccccccccccc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none"
+       d="m 343,438.36218 -7,-12 7,22 -10,12 11,-5 -4,16 8,-7 8,11 -16,-4"
+       id="path3627"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none"
+       d="m 354,445.36218 3,-19 9,18 0,-18"
+       id="path3629"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none"
+       d="m 370,435.36218 7,-7 1,13 7,-6"
+       id="path3631"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none"
+       d="m 378,441.36218 9,9 -12,1 0,0 0,0 0,0"
+       id="path3633"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none"
+       d="m 387,450.36218 -9,13 8,9"
+       id="path3635"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none"
+       d="m 378,463.36218 -2,12"
+       id="path3637"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:19.16806221;stroke-opacity:1;stroke-dasharray:none"
+       d="m 356,456.36218 15,14 -15,-6 0,11 15,-5 -6,9"
+       id="path3639"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:#5a5a5a;fill-opacity:1;stroke:#56ff42;stroke-width:1.50000000000000000;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:19.16806220999999866;stroke-opacity:1;stroke-dasharray:none"
+       d="m 343,448.36218 0,-10 8,-2 3,9 12,-1 3,-9 9,6 -3,10 3,12 -7,7 -3,-13 -12,-1 0,8 -8,0 -4,-9 z"
+       id="path4737"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccccccc"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -2436,5 +2491,15 @@
        inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/filter_select/images/snapshot.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
+    <rect
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/fgt/edit_hole/images/hole_filler.png"
+       style="fill:none;stroke:none;display:inline"
+       id="rect4739"
+       width="64"
+       height="64"
+       x="328"
+       y="420.36218" />
   </g>
 </svg>
