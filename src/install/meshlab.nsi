@@ -95,6 +95,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\io_epoch.dll"
   File "${DISTRIB_FOLDER}/plugins\io_collada.dll"
   File "${DISTRIB_FOLDER}/plugins\io_3ds.dll"
+  File "${DISTRIB_FOLDER}/plugins\io_json.dll"
   File "${DISTRIB_FOLDER}/plugins\io_u3d.dll"
   File "${DISTRIB_FOLDER}/plugins\io_x3d.dll"
   File "${DISTRIB_FOLDER}/plugins\io_tri.dll"
@@ -112,6 +113,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_colorproc.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_create.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_csg.dll"
 
   File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_func.dll"
