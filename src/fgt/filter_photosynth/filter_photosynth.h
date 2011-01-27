@@ -32,7 +32,7 @@ public:
   QString filterInfo(FilterIDType filter) const;
   void initParameterSet(QAction *action,MeshModel &/*m*/, RichParameterSet &/*parent*/);
   bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &/*parent*/, vcg::CallBackPos *cb);
-  int postCondition(QAction*) const { return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL; }
+  int postCondition(QAction*) const { return MeshModel::MM_UNKNOWN; }
   FilterClass getClass(QAction *a);
   QString filterScriptFunctionName(FilterIDType filterID);
   void outputToFile(QTextStream &out, Shotf &s, Image &img, CameraParameters &cam);
