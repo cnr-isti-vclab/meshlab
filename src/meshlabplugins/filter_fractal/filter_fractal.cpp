@@ -180,7 +180,9 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
 
 bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos* cb)
 {
-    switch(ID(filter))
+  if(this->getClass(filter) == MeshFilterInterface::MeshCreation)
+       md.addNewMesh("",this->filterName(ID(filter)));
+  switch(ID(filter))
     {
     case CR_FRACTAL_TERRAIN:
     case FP_FRACTAL_MESH:

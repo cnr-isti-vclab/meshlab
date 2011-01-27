@@ -320,7 +320,9 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 // The Real Core Function doing the actual mesh processing.
 bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-    MeshModel &m=*(md.mm());
+  if(this->getClass(filter) == MeshFilterInterface::MeshCreation)
+       md.addNewMesh("",this->filterName(ID(filter)));
+  MeshModel &m=*(md.mm());
 	Q_UNUSED(cb);
 	switch(ID(filter)) {
 		case FF_VERT_SELECTION :

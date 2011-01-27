@@ -71,6 +71,7 @@ void FilterSSynth::openX3D(const QString &fileName, MeshModel &m, int& mask, vcg
 }
 bool FilterSSynth::applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
+    md.addNewMesh("",this->filterName(ID(filter)));
     QWidget *  parent=(QWidget*)this->parent();
     RichParameter* grammar=par.findParameter(QString("grammar"));
     RichParameter* seed=par.findParameter(QString("seed"));
@@ -139,7 +140,7 @@ int FilterSSynth::getRequirements(QAction *)
 }
 int FilterSSynth::postCondition(QAction* filter) const
 {
-        return MeshModel::MM_VERTCOLOR;
+        return MeshModel::MM_UNKNOWN;
 }
  MeshFilterInterface::FilterClass FilterSSynth::getClass(QAction *filter)
 {
