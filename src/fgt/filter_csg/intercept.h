@@ -3,8 +3,14 @@
 
 #include <algorithm>
 #include <vector>
-#include <tr1/unordered_set>
-#include <tr1/unordered_map>
+#ifdef _MSC_VER
+    #include <unordered_map>
+    #include <unordered_set>
+#else
+    #include <tr1/unordered_map>
+    #include <tr1/unordered_set>
+#endif
+
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/space/box2.h>
