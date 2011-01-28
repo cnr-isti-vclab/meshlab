@@ -121,7 +121,8 @@ QString GLArea::GetMeshInfoString()
 	if(mm()->hasDataMask(MeshModel::MM_FACECOLOR) )   {info.append("FC ");}
 	if(mm()->hasDataMask(MeshModel::MM_FACEQUALITY) ) {info.append("FQ ");}
 	if(mm()->hasDataMask(MeshModel::MM_WEDGTEXCOORD)) {info.append("WT ");}
-	if(mm()->hasDataMask(MeshModel::MM_CAMERA) )      {info.append("MC ");}
+  if(mm()->hasDataMask(MeshModel::MM_CAMERA) )      {info.append("MC ");}
+  if(mm()->hasDataMask(MeshModel::MM_POLYGONAL) )   {info.append("MP ");}
 
 	return info;
 }
