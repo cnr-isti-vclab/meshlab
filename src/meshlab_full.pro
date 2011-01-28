@@ -20,6 +20,7 @@ SUBDIRS       = common \
 # Filters
                 meshlabplugins/filter_ao \
                 meshlabplugins/filter_autoalign \
+                meshlabplugins/filter_camera \
                 meshlabplugins/filter_clean \
                 meshlabplugins/filter_colorize \
                 meshlabplugins/filter_create \
