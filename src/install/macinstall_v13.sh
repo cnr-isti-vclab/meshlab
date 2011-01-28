@@ -115,16 +115,20 @@ PLUGINSNAMES="\
 plugins/libfilter_aging.dylib \
 plugins/libfilter_ao.dylib \
 plugins/libfilter_autoalign.dylib \
+plugins/libfilter_camera.dylib \
 plugins/libfilter_clean.dylib \
 plugins/libfilter_colorize.dylib \
 plugins/libfilter_colorproc.dylib \
 plugins/libfilter_create.dylib \
+plugins/libfilter_csg.dylib \
 plugins/libfilter_fractal.dylib \
 plugins/libfilter_func.dylib \
 plugins/libfilter_isoparametrization.dylib \
+plugins/libfilter_layer.dylib \
 plugins/libfilter_measure.dylib \
 plugins/libfilter_meshing.dylib \
 plugins/libfilter_mls.dylib \
+plugins/libfilter_photosynth.dylib \
 plugins/libfilter_plymc.dylib \
 plugins/libfilter_poisson.dylib \
 plugins/libfilter_qhull.dylib \
@@ -132,15 +136,13 @@ plugins/libfilter_quality.dylib \
 plugins/libfilter_sampling.dylib \
 plugins/libfilter_select.dylib \
 plugins/libfilter_slice.dylib \
-plugins/libfilter_splitter.dylib \
+plugins/libfilter_ssynth.dylib \
 plugins/libfilter_texture.dylib \
 plugins/libfilter_trioptimize.dylib \
 plugins/libfilter_unsharp.dylib \
 plugins/libfilter_zippering.dylib \
-plugins/libfilterborder.dylib \
 plugins/libfiltercreateiso.dylib \
 plugins/libfiltergeodesic.dylib \
-plugins/libfilter_ssynth.dylib \
 plugins/libio_3ds.dylib \
 plugins/libio_base.dylib \
 plugins/libio_bre.dylib \
@@ -148,6 +150,7 @@ plugins/libio_collada.dylib \
 plugins/libio_epoch.dylib \
 plugins/libio_expe.dylib \
 plugins/libio_gts.dylib \
+plugins/libio_json.dylib \
 plugins/libio_m.dylib \
 plugins/libio_pdb.dylib \
 plugins/libio_tri.dylib \
@@ -163,15 +166,14 @@ plugins/libeditmeasure.dylib \
 plugins/libeditpaint.dylib \
 plugins/libeditsegment.dylib \
 plugins/libdecorate_base.dylib \
+plugins/libdecorate_background.dylib \
 plugins/libdecorate_shadow.dylib \
 plugins/librender_gdp.dylib \
 plugins/librender_radiance_scaling.dylib \
 plugins/librender_rfx.dylib \
 plugins/librender_splatting.dylib \
-plugins/libsampledecoration.dylib \
 plugins/libsampleedit.dylib \
 plugins/libsamplefilter.dylib \
-plugins/libsamplefilterdoc.dylib \
 plugins/libsamplefilterdyn.dylib
 "
 pwd
