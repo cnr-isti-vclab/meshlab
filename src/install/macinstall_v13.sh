@@ -15,10 +15,11 @@ APPNAME="meshlab.app"
 
 BUNDLE="MeshLabBundle"
 
-QTCOMPONENTS="QtCore QtGui QtOpenGL QtNetwork QtXml QtScript"
+QTCOMPONENTS="QtCore QtGui QtOpenGL QtNetwork QtXml QtXmlPatterns QtScript"
 
 QTCORE=QtCore.framework/Versions/4.0/QtCore
 QTGUI=QtGui.framework/Versions/4.0/QtGui
+QTNETWORK=QtNetwork.framework/Versions/4.0/QtNetwork
 
 if [ -e $APPNAME -a -d $APPNAME ]
 then
@@ -104,10 +105,12 @@ echo "now trying to change the paths in the meshlab executable"
 
 install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtGui.framework/Versions/4.0/QtGui
 install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtXml.framework/Versions/4.0/QtXml
+install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtXmlPatterns.framework/Versions/4.0/QtXmlPatterns
 install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtNetwork.framework/Versions/4.0/QtNetwork
 install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtOpenGL.framework/Versions/4.0/QtOpenGL
 install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtScript.framework/Versions/4.0/QtScript
 install_name_tool -change QtGui.framework/Versions/4/QtGui   @executable_path/../Frameworks/$QTGUI  $BUNDLE/meshlab.app/Contents/Frameworks/QtOpenGL.framework/Versions/4.0/QtOpenGL
+install_name_tool -change QtNetwork.framework/Versions/4/QtNetwork @executable_path/../Frameworks/$QTNETWORK $BUNDLE/meshlab.app/Contents/Frameworks/QtXmlPatterns.framework/Versions/4.0/QtXmlPatterns
 
 echo "Copying the plugins in the meshlab package" #--------------------------
 
@@ -196,13 +199,14 @@ echo "Now Changing " #--------------------------
 EXECNAMES="MacOS/libcommon.1.dylib MacOS/meshlab $PLUGINSNAMES" 
 for x in $EXECNAMES
 do
-  install_name_tool -change QtCore.framework/Versions/4/QtCore       @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore       $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtGui.framework/Versions/4/QtGui         @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui         $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtNetwork.framework/Versions/4/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtOpenGL.framework/Versions/4/QtOpenGL   @executable_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL   $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtXml.framework/Versions/4/QtXml         @executable_path/../Frameworks/QtXml.framework/Versions/4/QtXml         $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtScript.framework/Versions/4/QtScript   @executable_path/../Frameworks/QtScript.framework/Versions/4/QtScript   $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change libcommon.1.dylib                        @executable_path/libcommon.1.dylib         $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change QtCore.framework/Versions/4/QtCore               @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore       $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change QtGui.framework/Versions/4/QtGui                 @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui         $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change QtNetwork.framework/Versions/4/QtNetwork         @executable_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change QtOpenGL.framework/Versions/4/QtOpenGL           @executable_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL   $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change QtXml.framework/Versions/4/QtXml                 @executable_path/../Frameworks/QtXml.framework/Versions/4/QtXml         $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change QtXmlPatterns.framework/Versions/4/QtXmlPatterns @executable_path/../Frameworks/QtXmlPatterns.framework/Versions/4/QtXmlPatterns $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change QtScript.framework/Versions/4/QtScript           @executable_path/../Frameworks/QtScript.framework/Versions/4/QtScript   $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change libcommon.1.dylib                                @executable_path/libcommon.1.dylib         $BUNDLE/meshlab.app/Contents/$x
 done
 
 cd ../install
