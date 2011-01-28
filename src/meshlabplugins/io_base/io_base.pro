@@ -6,7 +6,7 @@ HEADERS       += baseio.h \
     $$VCGDIR/wrap/io_trimesh/import_ptx.h \
 		$$VCGDIR/wrap/io_trimesh/export_off.h \
 		$$VCGDIR/wrap/ply/plylib.h \
-		$$VCGDIR/wrap/io_trimesh/io_material.h \
+    $$VCGDIR/wrap/io_trimesh/io_material.h
 				
 SOURCES       += baseio.cpp \
 		$$VCGDIR//wrap/ply/plylib.cpp\ 
