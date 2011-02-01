@@ -36,6 +36,7 @@
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
 #include "alnParser.h"
+#include <exception>
 
 
 #include <wrap/io_trimesh/io_mask.h>
@@ -695,7 +696,9 @@ void MainWindow::showScriptEditor()
 			layerDialog->updateLog(meshDoc()->Log);
 		}
 		else
-      GLA()->update();
+			GLA()->update();
+
+
 	}
 }
 
@@ -970,8 +973,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
   QGLFormat defForm = QGLFormat::defaultFormat();
   iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
   iFilter->glContext->create(filterWidget->context());
-  ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
-
+	ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
+ 
   meshDoc()->setBusy(false);
 
   qApp->restoreOverrideCursor();
@@ -1651,7 +1654,7 @@ bool MainWindow::open(QString fileName)
   if (!GLA())		return false;
 
   //QStringList suffixList;
-  // HashTable storing all supported formats together withw
+  // HashTable storing all supported formats together with
 	// the (1-based) index  of first plugin which is able to open it
   //QHash<QString, MeshIOInterface*> allKnownFormats;
   //PM.LoadFormats(suffixList, allKnownFormats,PluginManager::IMPORT);
