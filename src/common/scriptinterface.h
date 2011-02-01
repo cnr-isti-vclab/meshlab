@@ -63,7 +63,6 @@ public:
 	Q_INVOKABLE MeshModelScriptInterface* getMesh(const int meshId);
 	Q_INVOKABLE MeshModelScriptInterface* current();
 
-private:
 	MeshDocument* md;
 };
 
@@ -76,9 +75,13 @@ public:
 	
 	Q_INVOKABLE float bboxDiag() const;
 
-private:
 	MeshModel& mm;
 };
+
+Q_DECLARE_METATYPE(MeshDocumentScriptInterface*)
+QScriptValue MeshDocumentScriptInterfaceToScriptValue(QScriptEngine* eng,MeshDocumentScriptInterface* const& in);
+
+void MeshDocumentScriptInterfaceFromScriptValue(const QScriptValue& val,MeshDocumentScriptInterface*& out);
 
 Q_DECLARE_METATYPE(MeshModelScriptInterface*)
 

@@ -46,12 +46,12 @@ QScriptValue PluginInterfaceInit(QScriptContext *context, QScriptEngine *engine,
 		return false;
 	}
 
-	MeshDocument* md = qscriptvalue_cast<MeshDocument*>(engine->globalObject().property("md"));
+	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(PluginManager::meshDocVarName()));
 	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
 
 	MeshFilterInterface * mi = it.value();
 	QAction act(filterName, NULL);
-	mi->initParameterSet(&act, *(md->mm()), *rps);
+	mi->initParameterSet(&act, (md->current()->mm), *rps);
 
 	return true;
 }
@@ -66,12 +66,12 @@ QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine
 		return false;
 	}
 
-	MeshDocument* md = qscriptvalue_cast<MeshDocument*>(engine->globalObject().property("md"));
+	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(PluginManager::meshDocVarName()));
 	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
 
 	MeshFilterInterface * mi = it.value();
 	QAction act(filterName, NULL);
-	const bool res = mi->applyFilter(&act, *md, *rps, TestCallback);
+	const bool res = mi->applyFilter(&act, *(md->md), *rps, TestCallback);
 
 	return res;
 }
@@ -169,6 +169,16 @@ QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelS
 void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out)
 {
 	out = qobject_cast<MeshModelScriptInterface*>(val.toQObject());
+}
+
+QScriptValue MeshDocumentScriptInterfaceToScriptValue( QScriptEngine* eng,MeshDocumentScriptInterface* const& in )
+{
+	return eng->newQObject(in);
+}
+
+void MeshDocumentScriptInterfaceFromScriptValue( const QScriptValue& val,MeshDocumentScriptInterface*& out )
+{
+	out = qobject_cast<MeshDocumentScriptInterface*>(val.toQObject());
 }
 
 MeshDocumentScriptInterface::MeshDocumentScriptInterface( MeshDocument* doc )

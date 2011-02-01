@@ -1,6 +1,8 @@
 #ifndef ML_EXCEPTION
 #define ML_EXCEPTION
 
+#include <exception>
+
 class MeshLabException : public std::exception
 {
 public:
