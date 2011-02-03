@@ -13,11 +13,9 @@ using namespace std;
 
 class ScanLine{
 public:
-    // Screen offsets of scan points
-    vector<Point2f> soff;
+    vector<Point2f> soff; // Screen position of scan points    
     Box2i bbox;
     bool isScanning;
-
     ScanLine(){}
     ScanLine(int N, Point2f&, Point2f& );
     void render(GLArea* gla);

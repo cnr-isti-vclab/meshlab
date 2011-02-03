@@ -7,17 +7,17 @@
 
 #define EDITSCANHACK
 #ifdef EDITSCANHACK
-    #include <stdio.h>
-    struct Sample{
-        Point3f p,n,v;
-        Sample(Point3f p, Point3f n, Point3f v){
-            this->p = p;
-            this->n = n;
-            this->v = v;
-        }
-    };
+    #include <stdio.h>   
     
-    vector<Sample> samples;
+    class Sample{
+    public:
+        Point3f p;  // object space coordinate
+        Point3f n;  // normal
+        Point3f v;  // view direction
+        bool    bg; // volume carving ray? (part of background)
+    };
+
+    vector<Sample> temp_samples;
     
     void write_to_ply(){
         FILE* fid = fopen( "/tmp/output.ply", "w" );
@@ -28,7 +28,7 @@
         
         fprintf(fid, "ply\n");
         fprintf(fid, "format ascii 1.0\n");
-        fprintf(fid, "element vertex %d\n", samples.size() );
+        fprintf(fid, "element vertex %d\n", (int) temp_samples.size() );
         fprintf(fid, "property float x\n");
         fprintf(fid, "property float y\n");
         fprintf(fid, "property float z\n");
@@ -39,10 +39,10 @@
         fprintf(fid, "property float vy\n");
         fprintf(fid, "property float vz\n");
         fprintf(fid, "end_header\n");
-        for(int i=0; i<samples.size(); i++){
-            Point3f& p = samples[i].p;
-            Point3f& n = samples[i].n;
-            Point3f& v = samples[i].v;
+        for(unsigned int i=0; i<temp_samples.size(); i++){
+            Point3f& p = temp_samples[i].p;
+            Point3f& n = temp_samples[i].n;
+            Point3f& v = temp_samples[i].v;
             fprintf(fid, "%f %f %f %f %f %f %f %f %f\n", p[0],p[1],p[2],n[0],n[1],n[2],v[0],v[1],v[2]);            
         }
         fclose(fid);       
@@ -210,14 +210,16 @@ void VirtualScan::Decorate(MeshModel& mm, GLArea* gla){
     sline.render(gla);
 }
 
-ScanLine::ScanLine(int N, Point2f& srt, Point2f& end ){
-    float delta = 1.0 / (N-1);
+ScanLine::ScanLine(int N, Point2f& srt, Point2f& end){
+    
+    
     // qDebug() << "Scanpoint list: ";
 
 #define RANGE
 #ifdef LASER
     float alpha=0;
-    for( int i=0; i<N; i++, alpha+=delta ){
+    double delta_01 = 1.0 / (N-1);
+    for( int i=0; i<N; i++, alpha+=delta_01 ){
         Point2f curr = srt*(1-alpha) + end*alpha;
         soff.push_back(curr);
         // qDebug() << " - " << toString( curr );
@@ -226,6 +228,7 @@ ScanLine::ScanLine(int N, Point2f& srt, Point2f& end ){
     }
 #endif
 #ifdef RANGE
+    double delta_01 = 1.0 / (N-1.0); 
     double halfedgel = ((srt-end).Norm()/2.0);
     srt[1] = srt[1] - halfedgel;
     end[1] = end[1] + halfedgel;
@@ -235,12 +238,11 @@ ScanLine::ScanLine(int N, Point2f& srt, Point2f& end ){
     srt_x[1]=0; end_x[1]=0;
     srt_y[0]=0; end_y[0]=0;
     float alpha=0;
-    for( int i=0; i<N; i++, alpha+=delta ){
+    for( int i=0; i<N; i++, alpha+=delta_01 ){
         float beta = 0;
-        for( int j=1; j<N; j++, beta+=delta ){
+        for( int j=0; j<N; j++, beta+=delta_01 ){
             Point2f curr = srt_x*(1-alpha) + end_x*alpha + srt_y*(1-beta)  + end_y*beta;
             soff.push_back(curr);
-            // qDebug() << " - " << toString( curr );
             Point2i currI( curr[0], curr[1] );
             bbox.Add(currI);
         }
@@ -250,98 +252,83 @@ ScanLine::ScanLine(int N, Point2f& srt, Point2f& end ){
     // Retrieve a block 2 pixel larger from buffer
     bbox.Offset(2);
 }
+
 void VirtualScan::scanpoints(){
-    qDebug()<<"scanned!";
-
-    // Read the portion of depth buffer we are interested in
-    float* buffer = new float[ sline.bbox.Area() ];
-    glReadPixels(sline.bbox.min[0],sline.bbox.min[1],
-                 sline.bbox.Dim()[0],sline.bbox.Dim()[1],
-                 GL_DEPTH_COMPONENT, GL_FLOAT, buffer);
-
-    // Maximum normal/ray aperture
-    double alpha = 70; // degrees
-    double min_th_rad = cos( alpha  *  (3.14159/180.0) );
-
-    for( unsigned int i=0; i<sline.soff.size(); i++ ){
-        Point3f normal(0.0, 0.0, 0.0);
-
-        // feedback for slow scans
-        qDebug("Progress %d/%d\n",i,sline.soff.size());
-
-        //--- Get curren scan point offset
-        Point2f curr = sline.soff[i];
-        // qDebug() << "scannign sample: " << toString(curr);
-        //--- Convert point into the buffer offset
-        Point2i currb;
-        currb[0] = round( curr[0]-sline.bbox.min[0] );
-        currb[1] = round( curr[1]-sline.bbox.min[1] );
-
-        //--- Retrieve Z from depth buffer
-        float z = buffer[ currb[0] + sline.bbox.DimX()*currb[1] ];
-
-        //--- Retrieve x,y coordinates in object space and another sample
-        // with a bit of offset toward the camera
-        Point3f sample = myGluUnProject( curr, z );
-        Point3f sample2 = myGluUnProject( curr, z+.01);
-        Point3f viewdir = (sample-sample2).normalized();
-
-        // Check against Z-Buffer limit set by glClearDepth
-        // http://www.opengl.org/sdk/docs/man/xhtml/glClearDepth.xml
-        // Out of Z-buffer implies rays at infinity!!
-        if( z == 1 ){
-            // Zero-normal means sample at infinity!
-            // (should also be skipped by poisson...)
-            normal = Point3f(0,0,0);
-        }
-        // Something was found
-        else{
-            // Get selected face according to scanned point
-            vector<CMeshO::FacePointer> NewSelFace;
-            GLPickTri<CMeshO>::PickFaceVisible(curr[0], curr[1], this->md->mm()->cm, NewSelFace, 2, 2);
-            vector<CMeshO::FacePointer>::iterator fpi;
-            /* //For debug: select face where the scanner went through (so
-             * that we can see it on the screen)
-            for(fpi=NewSelFace.begin();fpi!=NewSelFace.end();++fpi)
-                (*fpi)->SetS();*/
-            // Get face normal
-            int normCaught = 0;
-            for(fpi=NewSelFace.begin();fpi!=NewSelFace.end();++fpi){
-                CMeshO::FaceType::NormalType n;
-                n = (*fpi)->N();
-                normal = Point3f(n[0], n[1], n[2]);
-                normCaught = 1;
-                // Use first face and exit
-                break;
-                //cout << n[0] << " " << n[1] << " " << n[2] << endl;
-            }
-
-            //--- Reject points for which a normal was not defined
-            if (!normCaught){
-                // cout << "Could not find a face for scanned point.. skipping" << endl;
-                continue;
-            }
-
-            //--- Reject samples which view-dir is too far from normal
-            if( viewdir.dot(normal) < min_th_rad ){
-                qDebug() << "rejected!!!";
-                continue;
-            }
-        }
-        // qDebug() << "correspodning in object space to: " << toString(sample);
-
-        //--- Add scanned sample to the cloud (visualization purposes)
-        tri::Allocator<CMeshO>::AddVertices(cloud->cm,1);
-        cloud->cm.vert.back().P() = sample;
-        cloud->cm.vert.back().N() = viewdir;
+    //--- Create samples
+    int X = sqrt( sline.soff.size() ); // TODO: move    
+    int Y = sqrt( sline.soff.size() ); // TODO: move    
+    vector<Sample> curr_samples( sline.soff.size() );
         
-        #ifdef EDITSCANHACK
-            // TODO: How compute normal from depth buffer?
-            samples.push_back(Sample(sample,normal,viewdir));        
-        #endif    
+    //--- Read the portion of depth buffer we are interested in
+    float* buffer = new float[ sline.bbox.Area() ];
+    glReadPixels(sline.bbox.min[0],sline.bbox.min[1],sline.bbox.Dim()[0],
+                 sline.bbox.Dim()[1],GL_DEPTH_COMPONENT, GL_FLOAT, buffer);
+    
+    //--- Extract samples
+    for( int x=0,I=0; x<X; x++ ){
+        for( int y=0; y<Y; y++,I=x+X*y ){
+            //--- Get current scan point offset
+            Point2f laser_xy = sline.soff[I];
+            
+            //--- Convert xy location into the buffer offset
+            Point2i buf_off;
+            buf_off[0] = round( laser_xy[0]-sline.bbox.min[0] );
+            buf_off[1] = round( laser_xy[1]-sline.bbox.min[1] );
+    
+            //--- Retrieve Z from depth buffer
+            double z = buffer[ buf_off[0] + sline.bbox.DimX()*buf_off[1] ];
+    
+            //--- Initialize sample
+            Point3f temp = myGluUnProject( laser_xy, z+0.01 );
+            curr_samples[I].p  = myGluUnProject( laser_xy, z );         // sample
+            curr_samples[I].v  = (curr_samples[I].p-temp).normalized(); // view direction
+            curr_samples[I].n  = Point3f(0,0,0);                        // normal
+            // Check against Z-Buffer limit set by glClearDepth
+            // http://www.opengl.org/sdk/docs/man/xhtml/glClearDepth.xml
+            // Out of Z-buffer implies rays at infinity!!
+            curr_samples[I].bg = (z==1);                                 // isbackground?                       
+        }
     }
+   
+    //--- Compute gradients and discard invalid
+    //    samples on outer layer are invalid by default
+    for( int x=1,I=0; x<X-1; x++ ){
+        for( int y=1; y<Y-1; y++,I=x+X*y){
+            Sample&  curr    = curr_samples[  x   + X* (y) ];
+            
+            //--- Extract samples for center differences
+            Point3f& px_next = curr_samples[(x+1) + X* (y) ].p;
+            Point3f& px_prev = curr_samples[(x-1) + X* (y) ].p;
+            Point3f& py_next = curr_samples[ (x)  + X*(y+1)].p;
+            Point3f& py_prev = curr_samples[ (x)  + X*(y-1)].p;
+            
+            //--- Extract tangent vectors & normal
+            Point3f px_tan = px_next-px_prev;
+            Point3f py_tan = py_next-py_prev;
+            curr.n = -( px_tan ^ py_tan );
+            curr.n.Normalize();
+            
+            //--- Regardless if BG or not
+            if( curr.n.dot(curr.v) < cos( 60/180.0*3.14159 ) )
+                continue;
+ 
+            //--- Restore NULL normal for BG samples
+            if( curr.bg )
+                curr.n = Point3f(0,0,0);
+            
+            //--- Add scanned sample to the "viz" cloud
+            tri::Allocator<CMeshO>::AddVertices(cloud->cm,1);
+            cloud->cm.vert.back().P() = curr.p;
+            cloud->cm.vert.back().N() = curr.v;
+            
+            //--- Add scanned sample to the "data" cloud
+            temp_samples.push_back( curr );
+        }
+    }
+    
     delete [] buffer;
 }
+
 void ScanLine::render(GLArea* gla){
 #if 0
     //--- DEBUG! why mv[4,3] = -1000?
@@ -364,7 +351,7 @@ void ScanLine::render(GLArea* gla){
             glLoadIdentity();
             glColor3f(1.0,0.0,0.0);
             glBegin(GL_POINTS);
-                for(int i=0; i<soff.size(); i++)
+                for(unsigned int i=0; i<soff.size(); i++)
                     glVertex(soff[i]);
                 // glVertex2f( gla->width()/2, gla->height()/2 );
             glEnd();

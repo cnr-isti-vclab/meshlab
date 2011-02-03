@@ -12,7 +12,7 @@ namespace Ui {
 // Defines the bounds (more than 1 object use them)
 enum {MIN_SAMPFREQ   = 1,   MAX_SAMPFREQ   = 30,    DEF_SAMPFREQ   = 5};
 enum {MIN_SCANWIDTH  = 1,   MAX_SCANWIDTH  = 100,   DEF_SCANWIDTH  = 30};
-enum {MIN_NUMSAMPLE  = 2,   MAX_NUMSAMPLE  = 100,   DEF_NUMSAMPLE  = 10};
+enum {MIN_NUMSAMPLE  = 2,   MAX_NUMSAMPLE  = 100,   DEF_NUMSAMPLE  = 50};
 
 class Widget : public QDockWidget {
     Q_OBJECT
