@@ -136,8 +136,6 @@ class SynthData : public QObject
 {
   Q_OBJECT
 
-  static QtSoapHttpTransport transport;
-
 public:
   //contains errors descriptions
   static const QString errors[];
@@ -177,7 +175,7 @@ public:
   bool isValid();
 
 public:
-  static SynthData *downloadSynthInfo(ImportSettings &settings, vcg::CallBackPos *cb);
+  void downloadSynthInfo(vcg::CallBackPos *cb);
   int progressInfo();
 
 private slots:
@@ -229,6 +227,7 @@ private:
   int _totalBinFilesCount;
   //the images will be saved here
   QString _savePath;
+  QtSoapHttpTransport transport;
 };
 
 /*********************

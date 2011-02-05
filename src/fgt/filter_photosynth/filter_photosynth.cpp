@@ -12,7 +12,7 @@
 ****************************************************************************/
 
 #include "filter_photosynth.h"
-#include <QtScript>
+//#include <QtScript>
 
 //#define FILTER_PHOTOSYNTH_DEBUG 1
 
@@ -102,104 +102,105 @@ void FilterPhotosynthPlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
 // The Real Core Function doing the actual mesh processing.
 bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
-  ImportSettings settings(par.getString("synthURL"), par.getInt("clusterID"));
-  if(par.getBool("saveImages"))
-    settings._imageSavePath = par.getString("savePath");
-  SynthData *synthData = SynthData::downloadSynthInfo(settings,cb);
-
-  //Hangs on active wait until data are available from the server
-  while(!synthData->_dataReady)
-  {
-    //allows qt main loop to process the events relative to the response from the server,
-    //triggering the signals that cause the invocation of the slots that process the response
-    //and set the control variable that stops this active wait.
-    //Note that a call to the function usleep() causes an infinite loop, because when the process awakes,
-    //the control remains inside this loop and doesn't reach qt main loop that this way can't process events.
-    QApplication::processEvents();
-    cb(synthData->progressInfo(),synthData->_info.toStdString().data());
-  }
-
-  if(!synthData->isValid())
-  {
-    this->errorMessage = SynthData::errors[synthData->_state];
-    delete synthData;
-    return false;
-  }
-  cb(0,"Finishing import...");
-  QDir imageDir(settings._imageSavePath);
-  imageDir.cd(synthData->_collectionID);
-#ifdef FILTER_PHOTOSYNTH_DEBUG
-  QFile cameraXMLfile(imageDir.filePath("Cam.txt"));
-  bool success = true;
-  if (!cameraXMLfile.open(QIODevice::WriteOnly | QIODevice::Text))
-  {
-    success = false;
-    qWarning() << "Failed to create cam.txt";
-  }
-  QTextStream out(&cameraXMLfile);
-#endif
-  //scan coordinate systems list and add a new layer for each one, containing its points
-  const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
-  CoordinateSystem *sys;
-  int count = coordinateSystems->count();
-  foreach(sys, *coordinateSystems)
-  {
-    cb((int)(sys->_id / count),"Finishing import...");
-    if(sys->_pointCloud)
-    {
-      MeshModel *mm = md.addNewMesh("","coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
-      Point p;
-      foreach(p, sys->_pointCloud->_points)
-      {
-        tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-        mm->cm.vert.back().P() = Point3f(p._x,p._z,-p._y);
-        mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
-      }
-      //we consider cameras only if the user chooses to download images
-      if(par.getBool("saveImages"))
-      {
-        MeshModel *mm;
-        if(par.getBool("addCameraLayer"))
-          //create a new layer where add points representing cameras to
-          mm = md.addNewMesh("","cameras");
-        CameraParameters cam;
-        //scan cameras list for this coordinate system and for each one add a raster with a shot matching the camera
-        foreach(cam, sys->_cameraParametersList)
-        {
-          Shotf s;
-          s.Extrinsics.SetRot(cam.getRotation());
-          s.Extrinsics.SetTra(cam.getTranslation());
-          Image img = synthData->_imageMap->value(cam._imageID);
-          s.Intrinsics.FocalMm = cam[CameraParameters::FOCAL_LENGTH] * qMax(img._width,img._height);
-          s.Intrinsics.PixelSizeMm = Point2f(1,1);
-          s.Intrinsics.ViewportPx = Point2i(img._width,img._height);
-          s.Intrinsics.CenterPx = Point2f(img._width/2,img._height/2);
-#ifdef FILTER_PHOTOSYNTH_DEBUG
-          if(success)
-            outputToFile(out, s, img, cam);
-#endif
-          if(par.getBool("addCameraLayer"))
-          {
-            //add a point to the cameras layer as a placeholder for the camera
-            tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-            mm->cm.vert.back().P() = cam.getTranslation();
-          }
-          //add a new raster
-          //the same image can be added several times, one for each coordinate system it appears into
-          //this way the user can choose which point cloud the raster has to align with
-          RasterModel *rm = md.addNewRaster();
-          QString imgName = imageDir.filePath(QString("IMG_%1.jpg").arg(img._ID) );
-          rm->addPlane(new Plane(rm,imgName,QString("")));
-          rm->shot = s;
-          rm->setLabel(QString("IMG_%1_%2.jpg").arg(int(img._ID),3,10,QLatin1Char('0')).arg(sys->_id));
-        }
-      }
-    }
-  }
-#ifdef DEGUG
-  cameraXMLfile.close();
-#endif
-  delete synthData;
+	  ImportSettings settings(par.getString("synthURL"), par.getInt("clusterID"));
+	  if(par.getBool("saveImages"))
+	    settings._imageSavePath = par.getString("savePath");
+	  //SynthData *synthData = SynthData::downloadSynthInfo(settings,cb);
+		SynthData *synthData = new SynthData(settings);
+		synthData->downloadSynthInfo(cb);
+	  //Hangs on active wait until data are available from the server
+	  while(!synthData->_dataReady)
+	  {
+	    //allows qt main loop to process the events relative to the response from the server,
+	    //triggering the signals that cause the invocation of the slots that process the response
+	    //and set the control variable that stops this active wait.
+	    //Note that a call to the function usleep() causes an infinite loop, because when the process awakes,
+	    //the control remains inside this loop and doesn't reach qt main loop that this way can't process events.
+	    QApplication::processEvents();
+	    cb(synthData->progressInfo(),synthData->_info.toStdString().data());
+	  }
+	
+	  if(!synthData->isValid())
+	  {
+	    this->errorMessage = SynthData::errors[synthData->_state];
+	    delete synthData;
+	    return false;
+	  }
+	  cb(0,"Finishing import...");
+	  QDir imageDir(settings._imageSavePath);
+	  imageDir.cd(synthData->_collectionID);
+	#ifdef FILTER_PHOTOSYNTH_DEBUG
+	  QFile cameraXMLfile(imageDir.filePath("Cam.txt"));
+	  bool success = true;
+	  if (!cameraXMLfile.open(QIODevice::WriteOnly | QIODevice::Text))
+	  {
+	    success = false;
+	    qWarning() << "Failed to create cam.txt";
+	  }
+	  QTextStream out(&cameraXMLfile);
+	#endif
+	  //scan coordinate systems list and add a new layer for each one, containing its points
+	  const QList<CoordinateSystem*> *coordinateSystems = synthData->_coordinateSystems;
+	  CoordinateSystem *sys;
+	  int count = coordinateSystems->count();
+	  foreach(sys, *coordinateSystems)
+	  {
+	    cb((int)(sys->_id / count),"Finishing import...");
+	    if(sys->_pointCloud)
+	    {
+	      MeshModel *mm = md.addNewMesh("","coordsys"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+	      Point p;
+	      foreach(p, sys->_pointCloud->_points)
+	      {
+	        tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
+	        mm->cm.vert.back().P() = Point3f(p._x,p._z,-p._y);
+	        mm->cm.vert.back().C() = Color4b(p._r,p._g,p._b,255);
+	      }
+	      //we consider cameras only if the user chooses to download images
+	      if(par.getBool("saveImages"))
+	      {
+	        MeshModel *mm;
+	        if(par.getBool("addCameraLayer"))
+	          //create a new layer where add points representing cameras to
+	          mm = md.addNewMesh("","cameras");
+	        CameraParameters cam;
+	        //scan cameras list for this coordinate system and for each one add a raster with a shot matching the camera
+	        foreach(cam, sys->_cameraParametersList)
+	        {
+	          Shotf s;
+	          s.Extrinsics.SetRot(cam.getRotation());
+	          s.Extrinsics.SetTra(cam.getTranslation());
+	          Image img = synthData->_imageMap->value(cam._imageID);
+	          s.Intrinsics.FocalMm = cam[CameraParameters::FOCAL_LENGTH] * qMax(img._width,img._height);
+	          s.Intrinsics.PixelSizeMm = Point2f(1,1);
+	          s.Intrinsics.ViewportPx = Point2i(img._width,img._height);
+	          s.Intrinsics.CenterPx = Point2f(img._width/2,img._height/2);
+	#ifdef FILTER_PHOTOSYNTH_DEBUG
+	          if(success)
+	            outputToFile(out, s, img, cam);
+	#endif
+	          if(par.getBool("addCameraLayer"))
+	          {
+	            //add a point to the cameras layer as a placeholder for the camera
+	            tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
+	            mm->cm.vert.back().P() = cam.getTranslation();
+	          }
+	          //add a new raster
+	          //the same image can be added several times, one for each coordinate system it appears into
+	          //this way the user can choose which point cloud the raster has to align with
+	          RasterModel *rm = md.addNewRaster();
+	          QString imgName = imageDir.filePath(QString("IMG_%1.jpg").arg(img._ID) );
+	          rm->addPlane(new Plane(rm,imgName,QString("")));
+	          rm->shot = s;
+	          rm->setLabel(QString("IMG_%1_%2.jpg").arg(int(img._ID),3,10,QLatin1Char('0')).arg(sys->_id));
+	        }
+	      }
+	    }
+	  }
+	#ifdef DEGUG
+	  cameraXMLfile.close();
+	#endif
+	  delete synthData;
   return true;
 }
 

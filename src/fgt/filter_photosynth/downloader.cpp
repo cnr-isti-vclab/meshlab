@@ -111,7 +111,7 @@ const char *SynthData::steps[] =
 };
 
 SynthData::SynthData(ImportSettings &settings, QObject *parent)
-  : QObject(parent)
+  : QObject(parent),transport()
 {
   _coordinateSystems = new QList<CoordinateSystem*>();
   _imageMap = new QHash<int,Image>();
@@ -122,6 +122,7 @@ SynthData::SynthData(ImportSettings &settings, QObject *parent)
   _dataReady = false;
   _semaphore = 0;
   _imagesToDownloadCount = 0;
+   connect(&transport, SIGNAL(responseReady()),this, SLOT(readWSresponse()));
 }
 
 SynthData::~SynthData()
@@ -150,45 +151,44 @@ int SynthData::progressInfo()
   return _progress;
 }
 
-QtSoapHttpTransport SynthData::transport;
+//QtSoapHttpTransport SynthData::transport;
 
 /*
  * Contacts the photosynth web service to retrieve informations about
  * the synth whose identifier is contained within the given url.
  */
-SynthData *SynthData::downloadSynthInfo(ImportSettings &settings, vcg::CallBackPos *cb)
+void SynthData::downloadSynthInfo(vcg::CallBackPos *cb)
 {
-  SynthData *synthData = new SynthData(settings);
-  synthData->_cb = cb;
-  synthData->_step = WEB_SERVICE;
-  synthData->_progress = 0;
-  synthData->_cb(synthData->progressInfo(),synthData->_info.toStdString().data());
-  if(settings._url.isNull() || settings._url.isEmpty())
+  _cb = cb;
+  _step = WEB_SERVICE;
+  _progress = 0;
+  _cb(progressInfo(),_info.toStdString().data());
+  if(_settings._url.isNull() || _settings._url.isEmpty())
   {
-    synthData->_state = WRONG_URL;
-    synthData->_dataReady = true;
-    return synthData;
+    _state = WRONG_URL;
+    _dataReady = true;
+    return;
   }
 
-  if(settings._imageSavePath.isNull())
+  if(_settings._imageSavePath.isNull())
   {
-    synthData->_state = WRONG_PATH;
-    synthData->_dataReady = true;
-    return synthData;
+    _state = WRONG_PATH;
+    _dataReady = true;
+    return ;
   }
-  synthData->_savePath = settings._imageSavePath;
+  _savePath = _settings._imageSavePath;
 
   //extracts the synth identifier
-  int i = settings._url.indexOf("cid=",0,Qt::CaseInsensitive);
-  if(i < 0 || settings._url.length() < i + 40)
+  int i = _settings._url.indexOf("cid=",0,Qt::CaseInsensitive);
+  if(i < 0 || _settings._url.length() < i + 40)
   {
-    synthData->_state = WRONG_URL;
-    synthData->_dataReady = true;
-    return synthData;
+    _state = WRONG_URL;
+    _dataReady = true;
+    return;
   }
 
-  QString cid = settings._url.mid(i + 4, 36);
-  synthData->_collectionID = cid;
+  QString cid = _settings._url.mid(i + 4, 36);
+  _collectionID = cid;
 
   QtSoapMessage message;
   message.setMethod("GetCollectionData", "http://labs.live.com/");
@@ -197,13 +197,11 @@ SynthData *SynthData::downloadSynthInfo(ImportSettings &settings, vcg::CallBackP
 
   transport.setAction("http://labs.live.com/GetCollectionData");
   transport.setHost("photosynth.net");
-  QObject::connect(&transport, SIGNAL(responseReady()), synthData, SLOT(readWSresponse()));
 
   transport.submitRequest(message, "/photosynthws/PhotosynthService.asmx");
-  synthData->_state = PENDING;
-  synthData->_progress = 50;
-  synthData->_cb(synthData->progressInfo(),synthData->_info.toStdString().data());
-  return synthData;
+  _state = PENDING;
+  _progress = 50;
+  _cb(progressInfo(),_info.toStdString().data());
 }
 
 /*

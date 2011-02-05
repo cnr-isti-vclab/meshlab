@@ -14,7 +14,9 @@
 #ifndef FILTER_PHOTOSYNTH_PLUGIN_H
 #define FILTER_PHOTOSYNTH_PLUGIN_H
 
+#include <common/interfaces.h>
 #include "synthData.h"
+
 
 class FilterPhotosynthPlugin : public QObject, public MeshFilterInterface
 {
