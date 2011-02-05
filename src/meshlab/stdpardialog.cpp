@@ -307,7 +307,8 @@ void MeshlabStdDialog::applyClick()
 
 void MeshlabStdDialog::applyDynamic()
 {
-	if(!previewCB->isChecked()) return;
+	if(!previewCB->isChecked()) 
+		return;
 	QAction *q = curAction;
 	stdParFrame->readValues(curParSet);
 	//for cache mechanism
@@ -346,7 +347,8 @@ void MeshlabStdDialog::closeClick()
 	if(curmask)	meshState.apply(curModel);
 	curmask = MeshModel::MM_UNKNOWN;
 	// Perform the update only if there is Valid GLarea. 
-	if(this->curgla) this->curgla->update();
+	//if(this->curgla) 
+	//	this->curgla->update();
 	close();
 }
 
