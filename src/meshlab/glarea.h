@@ -39,7 +39,7 @@
 
 #include "../common/interfaces.h"
 #include "glarea_setting.h"
-#include "viewer.h"
+#include "multiViewer_Container.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -70,7 +70,7 @@ public:
 };
 
 class MeshModel;
-class GLArea : public Viewer
+class GLArea : public QGLWidget
 {
 	Q_OBJECT
 
@@ -81,13 +81,21 @@ public:
 	~GLArea();
 	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 private:
-
+  int id;  //the very important unique id of each subwindow.
 
 public:
+  int getId() {return id;}
+
   // Layer Management stuff. 
-	
-	MeshModel *mm(){return meshDoc->mm();}
-	
+
+  MultiViewer_Container *mvc()
+  {
+    MultiViewer_Container *localMVC = qobject_cast<MultiViewer_Container *>(this->parent());
+    return localMVC;
+  }
+
+  MeshModel *mm(){ return mvc()->meshDoc.mm();}
+  inline MeshDocument *md() {return &(mvc()->meshDoc);}
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
 	GLLogStream *log;
@@ -104,7 +112,7 @@ public:
 
 	void updateFps(float deltaTime);
 	
-	bool isCurrent() { return mvc->currentId == id;}
+  bool isCurrent() { return mvc()->currentId == this->id;}
 	
   void showTrackBall(bool b)		{trackBallVisible = b; update();}
 	bool isHelpVisible()      {return helpVisible;}  

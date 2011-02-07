@@ -188,7 +188,7 @@ void MainWindow::updateWindowMenu()
 		if(mvc)
 		{
 			setUnsplitAct->setEnabled(mvc->viewerCounter()>1);
-			Viewer* current = mvc->currentView();
+      GLArea* current = mvc->currentView();
       if(current)
       {
         setSplitHAct->setEnabled(current->size().height()/2 > current->minimumSizeHint().height());
@@ -409,8 +409,8 @@ void MainWindow::setSplit(QAction *qa)
 		//The loading of the raster must be here
 		if(isRaster){
 			glwClone->setIsRaster(true);
-			if(GLA()->meshDoc->rm()->id()>=0)
-				glwClone->loadRaster(GLA()->meshDoc->rm()->id());
+      if(this->meshDoc()->rm()->id()>=0)
+        glwClone->loadRaster(this->meshDoc()->rm()->id());
 		}
 
 		updateMenus();
@@ -846,7 +846,7 @@ void MainWindow::startFilter()
 			if(filterClassesList.contains("MeshCreation"))
 			{
 			  qDebug("MeshCreation");
-        GLA()->meshDoc->addNewMesh("","untitled.ply");
+        meshDoc()->addNewMesh("","untitled.ply");
 			}
 			else
 			{
@@ -1438,7 +1438,7 @@ bool MainWindow::openProject(QString fileName)
     for (int i=0; i<md->meshList.size(); i++)
     {
       QString fullPath = md->meshList[i]->fullName();
-		importMeshWithStandardParams(fullPath,GLA()->meshDoc->meshList[i]);
+    importMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
     }
     //for (int i=0; i<md->rasterList.size(); i++)
     //{
@@ -1469,7 +1469,7 @@ GLArea* MainWindow::newDocument(const QString& projName)
 	connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
 	GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
 	mvcont->addView(gla, Qt::Horizontal);
-	mdiarea->addSubWindow(gla->mvc);
+  mdiarea->addSubWindow(gla->mvc());
 	if (projName.isEmpty())
 	{
 		static int docCounter = 1;
@@ -1480,7 +1480,7 @@ GLArea* MainWindow::newDocument(const QString& projName)
 		mvcont->meshDoc.setDocLabel(projName);
 	mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
 	//if(mdiarea->isVisible()) 
-	gla->mvc->showMaximized();
+  gla->mvc()->showMaximized();
 	return gla;
 }
 
@@ -1522,8 +1522,8 @@ bool MainWindow::importRaster(const QString& fileImg)
 				return false;
 			}
 
-			GLA()->meshDoc->setBusy(true);
-            RasterModel *rm= GLA()->meshDoc->addNewRaster();
+      this->meshDoc()->setBusy(true);
+            RasterModel *rm= meshDoc()->addNewRaster();
 			rm->setLabel(fileImg);
 			rm->addPlane(new Plane(rm,fileName,QString("")));		
 			meshDoc()->setBusy(false);
@@ -1586,7 +1586,7 @@ bool MainWindow::importMesh(const QString& fileName, MeshIOInterface *pCurrentIO
                     QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
 		meshDoc()->setBusy(true);
 		if(mdiarea->isVisible()) 
-			GLA()->mvc->showMaximized();
+      GLA()->mvc()->showMaximized();
 		setCurrentFile(fileName);
 
     if( mask & vcg::tri::io::Mask::IOM_FACECOLOR) GLA()->setColorMode(GLW::CMPerFace);
@@ -1697,7 +1697,7 @@ bool MainWindow::open(QString fileName)
 		}
 		int mask = 0;
 		//MeshModel *mm= new MeshModel(gla->meshDoc);
-    MeshModel *mm=GLA()->meshDoc->addNewMesh(qPrintable(fileName),"");
+    MeshModel *mm=meshDoc()->addNewMesh(qPrintable(fileName),"");
 		qb->show();
 		QTime t;t.start();
 		bool open = importMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar);

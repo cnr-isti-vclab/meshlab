@@ -78,7 +78,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 void LayerDialog::keyPressEvent ( QKeyEvent * event )
 {
   if(event->key() == Qt::Key_Space )
-    mw->GLA()->meshDoc->advanceCurrentRaster(1);
+    mw->meshDoc()->advanceCurrentRaster(1);
 }
 
 void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
@@ -92,7 +92,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
     case 0 :
       {
         //the user has clicked on one of the eyes
-        MeshDocument  *md= mw->GLA()->meshDoc;
+        MeshDocument  *md= mw->meshDoc();
         // NICE TRICK.
         // If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
         // Very useful for comparing meshes
@@ -113,7 +113,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 
     case 3 :
       //the user has chosen to switch the layer
-      mw->GLA()->meshDoc->setCurrentMesh(clickedId);
+      mw->meshDoc()->setCurrentMesh(clickedId);
       break;
     }
     //make sure the right row is colored or that they right eye is drawn (open or closed)
@@ -134,7 +134,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 		case 0 :
 			{
 				//the user has clicked on one of the eyes
-				MeshDocument  *md= mw->GLA()->meshDoc;
+        MeshDocument  *md= mw->meshDoc();
 
 				//Only one raster could be visible
 				foreach(RasterModel *rm, md->rasterList)
@@ -157,7 +157,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
     case 1 :
     case 2 :
     case 3 :
-      mw->GLA()->meshDoc->setCurrentRaster(clickedId);
+      mw->meshDoc()->setCurrentRaster(clickedId);
       break;
 
 		}
@@ -190,7 +190,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 	QTreeWidgetItem *tItem = dynamic_cast<QTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
 	if(mItem){ 
 		if (mItem->m)
-			mw->GLA()->meshDoc->setCurrentMesh(mItem->m->id());
+      mw->meshDoc()->setCurrentMesh(mItem->m->id());
 
 		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
 			MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
@@ -214,7 +214,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 
 void LayerDialog::removeTag()
 {
-	MeshDocument *md=mw->GLA()->meshDoc;
+  MeshDocument *md=mw->meshDoc();
 	md->removeTag(removeTagAct->data().toInt());
 	updateTable();
 }
@@ -251,7 +251,7 @@ void LayerDialog::updateTable()
 		//The layer dialog cannot be opened unless a new document is opened
 		return;
 	}
-	MeshDocument *md=mw->GLA()->meshDoc;
+  MeshDocument *md=mw->meshDoc();
 	this->setWindowTitle(md->docLabel());
 
 	ui->meshTreeWidget->clear();
@@ -304,7 +304,7 @@ void LayerDialog::updateTable()
 			rmd->visible =mw->GLA()->rasterVisibilityMap.value(rmd->id());
 
 		RasterTreeWidgetItem *item = new RasterTreeWidgetItem(rmd);
-		if(rmd== mw->GLA()->meshDoc->rm()) {
+    if(rmd== mw->meshDoc()->rm()) {
 			item->setBackground(2,QBrush(Qt::yellow));
 			item->setForeground(2,QBrush(Qt::blue));
 		}
@@ -514,7 +514,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			dialoglayout = new QGridLayout(parent);
 
 			frame = new StdParFrame(parent,mw->GLA());
-			frame->loadFrameContent(tmpSet,mw->GLA()->meshDoc);
+      frame->loadFrameContent(tmpSet,mw->meshDoc());
 			savebut = new QPushButton("Save",parent);
 			resetbut = new QPushButton("Reset",parent);
 			//applybut = new QPushButton("Apply",parent);

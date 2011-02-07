@@ -15,7 +15,6 @@ DEPENDPATH += $$VCGDIR \
 HEADERS = ../common/interfaces.h \
     mainwindow.h \
     glarea.h \
-	viewer.h \
     multiViewer_Container.h \
     glarea_setting.h \
     plugindialog.h \

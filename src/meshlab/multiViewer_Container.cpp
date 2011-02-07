@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 #include "multiViewer_Container.h"
-#include "viewer.h"
+#include "GLArea.h"
 #include <QMouseEvent>
 #include "mainwindow.h"
 
@@ -72,21 +72,21 @@ MultiViewer_Container::MultiViewer_Container(QWidget *parent)
 }
 
 MultiViewer_Container::~MultiViewer_Container(){
-	foreach(Viewer* viewer, viewerList)
+  foreach(GLArea* viewer, viewerList)
 		delete viewer;
 }
 
 int MultiViewer_Container::getNextViewerId(){
 	int newId=-1;
 
-	for(QVector<Viewer*>::iterator view=viewerList.begin();view!=viewerList.end();++view)
+  for(QVector<GLArea*>::iterator view=viewerList.begin();view!=viewerList.end();++view)
 		if(newId < (*view)->getId()) newId = (*view)->getId();
 
 	return ++newId;
 }
 
 
-void MultiViewer_Container::addView(Viewer* viewer,Qt::Orientation orient){
+void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient){
 	/* The Viewers are organized like a BSP tree.
 	Every new viewer is added within an Horizontal splitter. Its orientation could change according to next insertions.
 	HSplit
@@ -108,7 +108,7 @@ void MultiViewer_Container::addView(Viewer* viewer,Qt::Orientation orient){
 	}
 
 	else{
-		Viewer* current = currentView();
+    GLArea* current = currentView();
 		Splitter* parentSplitter = qobject_cast<Splitter *>(current->parent());
 		/*
 		CASE 2: Simple insertion inside the parent splitter (right branch). The insertion is on the parent's right branch.
@@ -201,7 +201,7 @@ void MultiViewer_Container::addView(Viewer* viewer,Qt::Orientation orient){
 
 void MultiViewer_Container::removeView(int viewerId){
 	for (int i=0; i< viewerList.count(); i++){
-		Viewer* viewer = viewerList.at(i);
+    GLArea* viewer = viewerList.at(i);
 		if (viewer->getId() == viewerId){
 			viewerList.remove(i);
 			Splitter* parentSplitter = qobject_cast<Splitter *>(viewer->parent());
@@ -255,16 +255,16 @@ void MultiViewer_Container::updateCurrent(int current){
 	emit updateMainWindowMenus(); 
 }
 
-Viewer * MultiViewer_Container::getViewer(int id)
+GLArea * MultiViewer_Container::getViewer(int id)
 {
-	foreach ( Viewer* viewer, viewerList)
+  foreach ( GLArea* viewer, viewerList)
 		if (viewer->getId() == id)
 			return viewer;
 	return 0;
 }
 
 int MultiViewer_Container::getViewerByPicking(QPoint p){
-	foreach ( Viewer* viewer, viewerList){
+  foreach ( GLArea* viewer, viewerList){
 		QPoint pViewer = viewer->mapFromGlobal(p);
 		if(viewer->visibleRegion().contains(pViewer))
 			return viewer->getId();
@@ -272,7 +272,7 @@ int MultiViewer_Container::getViewerByPicking(QPoint p){
 	return -1;
 }
 
-Viewer* MultiViewer_Container::currentView(){
+GLArea* MultiViewer_Container::currentView(){
 	return getViewer(currentId);
 }
 
@@ -281,7 +281,7 @@ int MultiViewer_Container::viewerCounter(){
 }
 
 void MultiViewer_Container::updateAllViewer(){
-	foreach ( Viewer* viewer, viewerList)
+  foreach ( GLArea* viewer, viewerList)
 		viewer->update();
 }
 
@@ -295,7 +295,7 @@ void MultiViewer_Container::updateTrackballInViewers()
 	if(glArea)
 	{
     QPair<Shotf,float> shotAndScale = glArea->shotFromTrackball();
-		foreach(Viewer* viewer, viewerList)
+    foreach(GLArea* viewer, viewerList)
 			if(viewer->getId() != currentId){
 				((GLArea*) viewer)->loadShot(shotAndScale);
 			}

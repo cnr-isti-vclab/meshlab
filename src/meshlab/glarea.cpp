@@ -36,7 +36,7 @@ using namespace std;
 using namespace vcg;
 
 GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
-: Viewer(mvcont)
+: QGLWidget(mvcont)
 {
     this->updateCustomSettingValues(*current);
   log=mvcont->LogPtr();
@@ -76,10 +76,10 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	zoom = false;
 	targetTex = 0;
 
-  connect(meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()),Qt::QueuedConnection);
-  connect(meshDoc, SIGNAL(meshModified()), this, SLOT(updateDecoration()),Qt::QueuedConnection);
-  connect(meshDoc, SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
-  connect(meshDoc, SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
+  connect(this->md(), SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()),Qt::QueuedConnection);
+  connect(this->md(), SIGNAL(meshModified()), this, SLOT(updateDecoration()),Qt::QueuedConnection);
+  connect(this->md(), SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
+  connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -99,7 +99,7 @@ GLArea::~GLArea()
 {
 	// warn any iRender plugin that we're deleting glarea
 	if (iRenderer)
-		iRenderer->Finalize(currentShader, *meshDoc, this);
+    iRenderer->Finalize(currentShader, *this->md(), this);
 	if(targetTex) glDeleteTextures(1, &targetTex);
 }
 
@@ -327,14 +327,14 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
   if(rm.backFaceCull) glEnable(GL_CULL_FACE);
   else glDisable(GL_CULL_FACE);
 
-  if(!meshDoc->isBusy())
+  if(!this->md()->isBusy())
   {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-    if (iRenderer) iRenderer->Render(currentShader, *meshDoc, rm, this);
+    if (iRenderer) iRenderer->Render(currentShader, *this->md(), rm, this);
     else
     {
-      foreach(MeshModel * mp, meshDoc->meshList)
+      foreach(MeshModel * mp, this->md()->meshList)
       {
         //Mesh visibility is read from the viewer visibility map, not from the mesh
         mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
@@ -351,7 +351,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
     foreach(QAction * p , iDecoratorsList)
         {
           MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-          decorInterface->decorate(p,*meshDoc,this->glas.currentGlobalParamSet, this,&painter);
+          decorInterface->decorate(p,*this->md(),this->glas.currentGlobalParamSet, this,&painter);
         }
     glPopAttrib();
   } ///end if busy
@@ -408,7 +408,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
   }
 
   //Draw highlight if it is the current viewer
-  if(mvc->currentId==id)
+  if(mvc()->currentId==id)
     displayViewerHighlight();
 
   // Finally display HELP if requested
@@ -427,8 +427,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 
 	//check if viewers are linked
   MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
-	if(window && window->linkViewersAct->isChecked() && mvc->currentId==id)
-			mvc->updateTrackballInViewers();
+  if(window && window->linkViewersAct->isChecked() && mvc()->currentId==id)
+      mvc()->updateTrackballInViewers();
   painter.endNativePainting();
 }
 
@@ -483,15 +483,15 @@ void GLArea::displayInfo(QPainter *painter)
 
   Color4b logAreaColor = glas.logAreaColor;
   glas.logAreaColor[3]=128;
-  if(mvc->currentId!=id) logAreaColor /=2.0;
+  if(mvc()->currentId!=id) logAreaColor /=2.0;
 
   painter->fillRect(QRect(0, this->height()-barHeight, width(), this->height()), ColorConverter::ToQColor(logAreaColor));
 
   QString col1Text,col0Text;
 
-   if(meshDoc->size()>0)
+   if(this->md()->size()>0)
   {
-  if(meshDoc->size()==1)
+  if(this->md()->size()==1)
   {
     col1Text += QString("Vertices: %1\n").arg(mm()->cm.vn);
     col1Text += QString("Faces: %1\n").arg(mm()->cm.fn);
@@ -499,8 +499,8 @@ void GLArea::displayInfo(QPainter *painter)
   else
   {
     col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
-    col1Text += QString("Vertices: %1 (%2)\n").arg(mm()->cm.vn).arg(meshDoc->vn());
-    col1Text += QString("Faces: %1 (%2)\n").arg(mm()->cm.fn).arg(meshDoc->fn());
+    col1Text += QString("Vertices: %1 (%2)\n").arg(mm()->cm.vn).arg(this->md()->vn());
+    col1Text += QString("Faces: %1 (%2)\n").arg(mm()->cm.fn).arg(this->md()->fn());
   }
 
   if(rm.selectedFace || rm.selectedVert || mm()->cm.sfn>0 || mm()->cm.svn>0 )
@@ -577,7 +577,7 @@ void GLArea::displayHelp(QPainter *painter)
 
 	Color4b logAreaColor = glas.logAreaColor;
 	glas.logAreaColor[3]=128;
-	if(mvc->currentId!=id) logAreaColor /=2.0;
+  if(mvc()->currentId!=id) logAreaColor /=2.0;
 
   static QString tableText;
   if(tableText.isEmpty())
@@ -608,12 +608,12 @@ void GLArea::saveSnapshot()
 
   if(ss.snapAllLayers)
   {
-   while(currSnapLayer<meshDoc->meshList.size())
+   while(currSnapLayer<this->md()->meshList.size())
    {
 	   tileRow=tileCol=0;
      qDebug("Snapping layer %i",currSnapLayer);
-     meshDoc->setCurrentMesh(currSnapLayer);
-     foreach(MeshModel *mp,meshDoc->meshList) {
+     this->md()->setCurrentMesh(currSnapLayer);
+     foreach(MeshModel *mp,this->md()->meshList) {
        meshSetVisibility(mp,false);
      }
      meshSetVisibility(mm(),true);
@@ -624,7 +624,7 @@ void GLArea::saveSnapshot()
    }
 
    //cleanup
-   foreach(MeshModel *mp,meshDoc->meshList) {
+   foreach(MeshModel *mp,this->md()->meshList) {
      meshSetVisibility(mp,true);
    }
    ss.counter++;
@@ -643,11 +643,11 @@ void GLArea::updateLayer()
 	if(iEdit)
 	{
 		assert(lastModelEdited);  //if there is an editor last model edited should always be set when start edit is called
-		iEdit->LayerChanged(*meshDoc, *lastModelEdited, this);
+    iEdit->LayerChanged(*this->md(), *lastModelEdited, this);
 
 		//now update the last model edited
 		//TODO this is not the best design....   iEdit should maybe keep track of the model on its own
-		lastModelEdited = meshDoc->mm();
+    lastModelEdited = this->md()->mm();
 	}
   // if the layer has changed update also the decoration.
   updateDecoration();
@@ -658,8 +658,8 @@ void GLArea::updateDecoration()
   foreach(QAction *p , iDecoratorsList)
       {
         MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-        decorInterface->endDecorate(p, *meshDoc,this->glas.currentGlobalParamSet,this);
-        decorInterface->startDecorate(p,*meshDoc, this->glas.currentGlobalParamSet,this);
+        decorInterface->endDecorate(p, *this->md(),this->glas.currentGlobalParamSet,this);
+        decorInterface->startDecorate(p,*this->md(), this->glas.currentGlobalParamSet,this);
       }
 }
 
@@ -671,9 +671,9 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 
 	iEdit = actionToMeshEditMap.value(currentEditor);
 	assert(iEdit);
-	lastModelEdited = meshDoc->mm();
-	if (!iEdit->StartEdit(*meshDoc, this))
-		//iEdit->EndEdit(*(meshDoc->mm()), this);
+  lastModelEdited = this->md()->mm();
+  if (!iEdit->StartEdit(*this->md(), this))
+    //iEdit->EndEdit(*(this->md()->mm()), this);
 		endEdit();
 	else
     log->Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
@@ -813,7 +813,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
 		case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50.0f); break;
 		case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
     case Qt::AltModifier													: glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
-			foreach(MeshModel * mp, meshDoc->meshList)
+      foreach(MeshModel * mp, this->md()->meshList)
         mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
 			break;
 		case Qt::ShiftModifier												: fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
@@ -887,14 +887,14 @@ void GLArea::initTexture()
 {
 	if(hasToUpdateTexture)
 	{
-        foreach (MeshModel *mp,meshDoc->meshList)
+        foreach (MeshModel *mp,this->md()->meshList)
             mp->glw.TMId.clear();
 
 		qDebug("Beware: deleting the texutres could lead to problems for shared textures.");
 		hasToUpdateTexture = false;
 	}
 
-    foreach (MeshModel *mp, meshDoc->meshList)
+    foreach (MeshModel *mp, this->md()->meshList)
     {
         if(!mp->cm.textures.empty() && mp->glw.TMId.empty()){
             glEnable(GL_TEXTURE_2D);
@@ -1093,9 +1093,9 @@ void GLArea::updateFps(float deltaTime)
 void GLArea::resetTrackBall()
 {
 	trackball.Reset();
-	float newScale= 3.0f/meshDoc->bbox().Diag();
+  float newScale= 3.0f/this->md()->bbox().Diag();
 	trackball.track.sca = newScale;
-	trackball.track.tra =  -meshDoc->bbox().Center();
+  trackball.track.tra =  -this->md()->bbox().Center();
   update();
 }
 
@@ -1128,7 +1128,7 @@ void GLArea::sendViewDir(QString name)
 
 void GLArea::sendMeshShot(QString name)
 {
-  Shotf curShot=meshDoc->mm()->cm.shot;
+  Shotf curShot=this->md()->mm()->cm.shot;
   emit transmitShot(name, curShot);
 }
 
@@ -1139,7 +1139,7 @@ void GLArea::sendViewerShot(QString name)
 }
 void GLArea::sendRasterShot(QString name)
 {
-  Shotf curShot= this->meshDoc->rm()->shot;
+  Shotf curShot= this->md()->rm()->shot;
   emit transmitShot(name, curShot);
 }
 
@@ -1171,7 +1171,7 @@ void GLArea::updateMeshSetVisibilities()
 	while (i.hasNext()) {
 		i.next();
 		bool found =false;
-		foreach(MeshModel * mp, meshDoc->meshList)
+    foreach(MeshModel * mp, this->md()->meshList)
 		{
       if(mp->id() == i.key())
 			{
@@ -1183,7 +1183,7 @@ void GLArea::updateMeshSetVisibilities()
 			meshVisibilityMap.remove(i.key());
 	}
 
-	foreach(MeshModel * mp, meshDoc->meshList)
+  foreach(MeshModel * mp, this->md()->meshList)
 	{
 		//Insert the new pair in the map; If the key is already in the map, its value will be overwritten
       meshVisibilityMap.insert(mp->id(),mp->visible);
@@ -1199,7 +1199,7 @@ void GLArea::updateRasterSetVisibilities()
 	while (i.hasNext()) {
 		i.next();
 		bool found =false;
-		foreach(RasterModel * rp, meshDoc->rasterList)
+    foreach(RasterModel * rp, this->md()->rasterList)
 		{
       if(rp->id() == i.key())
 			{
@@ -1211,7 +1211,7 @@ void GLArea::updateRasterSetVisibilities()
 			rasterVisibilityMap.remove(i.key());
 	}
 
-	foreach(RasterModel * rp, meshDoc->rasterList)
+  foreach(RasterModel * rp, this->md()->rasterList)
 	{
 		//Insert the new pair in the map;If the key is already in the map, its value will be overwritten
       rasterVisibilityMap.insert(rp->id(),rp->visible);
@@ -1236,9 +1236,9 @@ void GLArea::setIsRaster(bool viewMode){
 
 void GLArea::loadRaster(int id)
 {
-  foreach(RasterModel *rm, meshDoc->rasterList)
+  foreach(RasterModel *rm, this->md()->rasterList)
     if(rm->id()==id){
-    meshDoc->setCurrentRaster(id);
+    this->md()->setCurrentRaster(id);
     setTarget(rm->currentPlane->image);
     //load his shot or a default shot
 	
@@ -1265,8 +1265,8 @@ void GLArea::loadRaster(int id)
 void GLArea::drawTarget() {
   if(!targetTex) return;
 
-  if(meshDoc->rm()==0) return;
-  QImage &curImg = meshDoc->rm()->currentPlane->image;
+  if(this->md()->rm()==0) return;
+  QImage &curImg = this->md()->rm()->currentPlane->image;
   float imageRatio = float(curImg.width())/float(curImg.height());
   float screenRatio = float(this->width())/float(this->height());
 //set orthogonal view
@@ -1560,8 +1560,8 @@ QPair<vcg::Shotf,float> GLArea::shotFromTrackball()
 void GLArea::viewFromCurrentShot(QString kind)
 {
   Shotf localShot;
-  if(kind=="Mesh" && meshDoc->mm())   localShot = meshDoc->mm()->cm.shot;
-  if(kind=="Raster" && meshDoc->rm()) localShot = meshDoc->rm()->shot;
+  if(kind=="Mesh" && this->md()->mm())   localShot = this->md()->mm()->cm.shot;
+  if(kind=="Raster" && this->md()->rm()) localShot = this->md()->rm()->shot;
   if(!localShot.IsValid())
   {
     this->log->Logf(GLLogStream::SYSTEM, "Unable to set Shot from current %s",qPrintable(kind));
@@ -1584,7 +1584,7 @@ void GLArea::loadShot(const QPair<vcg::Shotf,float> &shotAndScale){
 	trackball.Reset();
 	trackball.track.sca = shotAndScale.second;
 	
-	/*Point3f point = meshDoc->bbox().Center();
+  /*Point3f point = this->md()->bbox().Center();
 	Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));*/
 	shot2Track(shot, cameraDist,trackball);
 
@@ -1627,9 +1627,9 @@ void GLArea::createOrthoView(QString dir)
 	view.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2))); //27.846098 equivalente a circa 60 gradi
 
 	trackball.Reset();
-	float newScale= 3.0f/meshDoc->bbox().Diag();
+  float newScale= 3.0f/this->md()->bbox().Diag();
 	trackball.track.sca = newScale;
-	trackball.track.tra =  -meshDoc->bbox().Center();
+  trackball.track.tra =  -this->md()->bbox().Center();
 
   vcg::Matrix44f rot;
 

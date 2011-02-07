@@ -30,9 +30,8 @@
 #include "../common/meshmodel.h"
 
 // Class list
-
+class GLArea;
 class RichParameterSet;
-class Viewer;
 class MultiViewer_Container;
 
 class Splitter : public QSplitter
@@ -70,17 +69,17 @@ public:
 	MultiViewer_Container(QWidget *parent);
     ~MultiViewer_Container();
 	
-	void addView(Viewer* viewer,  Qt::Orientation);
+  void addView(GLArea* viewer,  Qt::Orientation);
 	void removeView(int);
 	
-	Viewer* currentView();
-    int getNextViewerId();
+  GLArea* currentView();
+  int getNextViewerId();
 	int viewerCounter();
 
   void updateAllViewer();
 	void update(int id);
 
-	Viewer* getViewer(int id);
+  GLArea* getViewer(int id);
 	int getViewerByPicking(QPoint);
 
 	void updateTrackballInViewers();
@@ -99,7 +98,7 @@ public slots:
     void updateCurrent(int current);
 	
 private:
-	QVector<Viewer *> viewerList; /// widgets for the OpenGL contexts and images
+  QVector<GLArea *> viewerList; /// widgets for the OpenGL contexts and images
 };
 
 #endif // __MULTIVIEWER_CONTAINER_H__
