@@ -1310,7 +1310,7 @@ void MainWindow::saveProject()
   saveDiag->setOption(QFileDialog::DontUseNativeDialog,true);
 #endif
 	QCheckBox* saveAllFile = new QCheckBox(QString("Save All Files"),saveDiag);
-	saveAllFile->setCheckState(Qt::Checked);
+  saveAllFile->setCheckState(Qt::Unchecked);
 	QGridLayout* layout = (QGridLayout*) saveDiag->layout();
 	layout->addWidget(saveAllFile,4,2);
 	saveDiag->setAcceptMode(QFileDialog::AcceptSave);
