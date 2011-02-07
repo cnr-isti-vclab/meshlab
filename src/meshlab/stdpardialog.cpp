@@ -344,7 +344,8 @@ void MeshlabStdDialog::togglePreview()
 void MeshlabStdDialog::closeClick()
 {
 	//int mask = 0;//curParSet.getDynamicFloatMask();
-	if(curmask)	meshState.apply(curModel);
+  if(curmask != MeshModel::MM_UNKNOWN)
+    meshState.apply(curModel);
 	curmask = MeshModel::MM_UNKNOWN;
 	// Perform the update only if there is Valid GLarea. 
 	//if(this->curgla) 
@@ -643,7 +644,28 @@ void ShotfWidget::getShot()
     case 2 : emit askRasterShot(paramName); break;
     case 3:
       {
-       /// TODO use the code in the glarea to load a shot from a file.
+        QString filename = QFileDialog::getOpenFileName(this, tr("Load xml camera"), "./", tr("Xml Files (*.xml)"));
+        QFile qf(filename);
+        QFileInfo qfInfo(filename);
+
+        if( !qf.open(QIODevice::ReadOnly ) )
+          return ;
+
+        QDomDocument doc("XmlDocument");    //It represents the XML document
+        if(!doc.setContent( &qf ))     return;
+        qf.close();
+
+        QString type = doc.doctype().name();
+
+        //TextAlign file project
+        //if(type == "RegProjectML")   loadShotFromTextAlignFile(doc);
+        //View State file
+        //else if(type == "ViewState") loadViewFromViewStateFile(doc);
+
+        //qDebug("End file reading");
+
+
+       // return true;
       }
     default : assert(0);
   }
