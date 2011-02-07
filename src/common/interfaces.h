@@ -578,16 +578,16 @@ public:
 		StartEdit(md, parent);
 	}
 		
-  virtual void Decorate(MeshModel &m, GLArea *parent, QPainter * /*p*/) { Decorate(m,parent); };
-  virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/){};
+  virtual void Decorate(MeshModel &m, GLArea *parent, QPainter * /*p*/) { Decorate(m,parent); }
+  virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/){}
 
 	virtual void mousePressEvent  (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	virtual void mouseMoveEvent   (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	//virtual void wheelEvent     (QWheelEvent*e, MeshModel &/*m*/, GLArea * );
-	virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *){};
-	virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *){};
-	virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *){e->ignore();};
+  virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
+  virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
+  virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *){e->ignore();}
 };
 
 
