@@ -6,11 +6,11 @@ INCLUDEPATH += $$QTSOAPDIR
 
 HEADERS       += filter_photosynth.h \
                  synthData.h \
-                 $$QTSOAPDIR/qtsoap.h \
+                 $$QTSOAPDIR/qtsoap.h
 
 SOURCES       += filter_photosynth.cpp \
                  downloader.cpp \
-                 $$QTSOAPDIR/qtsoap.cpp \
+                 $$QTSOAPDIR/qtsoap.cpp
 
 TARGET         = filter_photosynth
 
