@@ -54,7 +54,7 @@ public:
 
     static const QString Info();
 
-    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
     virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
     virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
     virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
@@ -72,7 +72,7 @@ public:
 		
 		MeshDocument *md; 
 		MeshNode *currentNode() {return meshTree.find(md->mm());}
-		vcg::AlignPair::Result *currentArc() {return  alignDialog->currentArc;};
+    vcg::AlignPair::Result *currentArc() {return  alignDialog->currentArc;}
 		MeshTree meshTree;
 		GLArea * gla;
 

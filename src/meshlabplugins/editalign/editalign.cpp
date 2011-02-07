@@ -87,9 +87,9 @@ void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 	}
 }
 
-bool EditAlignPlugin::StartEdit(MeshModel &/*_mm*/, GLArea *_gla )
+bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 {
-	md=_gla->meshDoc;
+  this->md=&_md;
 	gla=_gla;
 
 	int id=0;

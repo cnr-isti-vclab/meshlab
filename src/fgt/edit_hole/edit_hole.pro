@@ -5,13 +5,13 @@ HEADERS       = edit_hole_factory.h \
 		    fillerDialog.h \
 		    holeListModel.h \
 		    fgtHole.h \
-		    fgtBridge.h \
+        fgtBridge.h \
 		    holeSetManager.h 
 
 SOURCES       = edit_hole_factory.cpp \
-		    edit_hole.cpp \
+        edit_hole.cpp \
 		    fillerDialog.cpp\
-		    holeListModel.cpp
+        holeListModel.cpp
 
 TARGET        = edit_hole
 

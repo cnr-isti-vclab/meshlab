@@ -59,7 +59,7 @@ public:
 	EditHolePlugin();
 	virtual ~EditHolePlugin();
 	static const QString Info();
-	virtual bool  StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+  virtual bool  StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
 	virtual void  EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
 	virtual void  Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
 	virtual void  mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
@@ -74,6 +74,7 @@ private:
 	HoleSorterFilter *holeSorter;
 	GLArea *gla;
 	MeshModel *mesh;
+  MeshDocument *md;
   FillerDialog *dialogFiller;
 
 	bool toDraw;

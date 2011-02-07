@@ -80,10 +80,12 @@ void EditHolePlugin::mouseMoveEvent(QMouseEvent * /*e*/, MeshModel &/*m*/, GLAre
 {
 }
 
-bool EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
+bool EditHolePlugin::StartEdit(MeshDocument &_md, GLArea *gla )
 {
-	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-  if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0)
+  this->md = &_md;
+
+  md->mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+  if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md->mm()->cm) >0)
 	{
 		QMessageBox::critical(0, tr("Manifoldness Failure"), QString("Hole's managing requires manifoldness."));
 		return false; // can't continue, mesh can't be processed
@@ -96,9 +98,9 @@ bool EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 		return false;
 
 	// if plugin restart with another mesh, recomputing of hole is forced
-	if(mesh != &m)
+  if(mesh != this->md->mm())
 	{
-		this->mesh = &m;
+    this->mesh = this->md->mm();
 		this->gla = gla;
 
 		mesh->clearDataMask(MeshModel::MM_FACEMARK);
@@ -130,7 +132,7 @@ bool EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 		delete holeSorter;
 		delete holesModel;
 	}
-	holesModel = new HoleListModel(&m);
+  holesModel = new HoleListModel(mesh);
 
 	
 	holesModel->holesManager.autoBridgeCB = new EditHoleAutoBridgingCB(dialogFiller->ui.infoLbl, 800);
@@ -150,8 +152,7 @@ bool EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 	}
 	else
 	{
-		Decorate(m, gla);
-    //Decorate(m, gla);
+    Decorate(*mesh, gla);
 		upGlA();
 	}
   return true;
@@ -190,9 +191,9 @@ void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
 				break;
 			case HoleListModel::ManualBridging:
 				oldAbutmentPresence = holesModel->PickedAbutment();
-				gla->meshDoc->setBusy(true);
+        md->setBusy(true);
 				holesModel->addBridgeFace(pickedFace, cur.x(), inverseY);
-				gla->meshDoc->setBusy(false);
+        md->setBusy(false);
 				if(holesModel->PickedAbutment() != oldAbutmentPresence)
 				{
 					if(oldAbutmentPresence == true)
@@ -265,7 +266,7 @@ void EditHolePlugin::updateDWeight(int val)
 
 void EditHolePlugin::fill()
 {
-  gla->meshDoc->setBusy(true);
+  md->setBusy(true);
 	if(holesModel->getState() == HoleListModel::Filled)
 		holesModel->acceptFilling(false);
 
@@ -275,7 +276,7 @@ void EditHolePlugin::fill()
 		holesModel->fill( FgtHole<CMeshO>::MinimumWeight);
 	else
 		holesModel->fill( FgtHole<CMeshO>::SelfIntersection);
-  gla->meshDoc->setBusy(false);
+  md->setBusy(false);
 	upGlA();
 }
 
@@ -283,19 +284,19 @@ void EditHolePlugin::acceptFill()
 {
 	if(holesModel->getState() == HoleListModel::Filled)
 	{
-    gla->meshDoc->setBusy(true);
+    md->setBusy(true);
 		holesModel->acceptFilling(true);
-    gla->meshDoc->setBusy(false);
+    md->setBusy(false);
 		gla->setWindowModified(true);
 	}
 }
 
 void EditHolePlugin::cancelFill()
 {
-  gla->meshDoc->setBusy(true);
+  md->setBusy(true);
 	if(holesModel->getState() == HoleListModel::Filled)
 		holesModel->acceptFilling(false);
-  gla->meshDoc->setBusy(false);
+  md->setBusy(false);
 }
 
 void EditHolePlugin::updateBridgeSldValue(int val)
@@ -322,18 +323,18 @@ void EditHolePlugin::manualBridge()
 
 void EditHolePlugin::autoBridge()
 {
-  gla->meshDoc->setBusy(true);
+  md->setBusy(true);
 	bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
 	holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
-  gla->meshDoc->setBusy(false);
+  md->setBusy(false);
 	upGlA();
 }
 
 void EditHolePlugin::closeNMHoles()
 {
-  gla->meshDoc->setBusy(true);
+  md->setBusy(true);
 	holesModel->closeNonManifolds();
-  gla->meshDoc->setBusy(false);
+  md->setBusy(false);
 	upGlA();
 }
 
@@ -351,9 +352,9 @@ void EditHolePlugin::acceptBridges()
 
 void EditHolePlugin::clearBridge()
 {
-  gla->meshDoc->setBusy(true);
+  md->setBusy(true);
 	holesModel->removeBridges();
-  gla->meshDoc->setBusy(false);
+  md->setBusy(false);
 	upGlA();
 }
 
