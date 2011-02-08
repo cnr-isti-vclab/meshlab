@@ -16,6 +16,7 @@ HEADERS       = edit_align_factory.h \
                  $$VCGDIR/wrap/gl/trimesh.h
 
 SOURCES       = edit_align_factory.cpp \
+			point_matching_scale.cpp \
                 editalign.cpp \
                 meshtree.cpp \
                 alignDialog.cpp \
@@ -29,6 +30,8 @@ SOURCES       = edit_align_factory.cpp \
                 $$VCGDIR/wrap/gui/trackball.cpp\
                 $$VCGDIR/wrap/gui/trackmode.cpp \
                 $$GLEWCODE
+                
+INCLUDEPATH += ../../external
 
 FORMS 	  += alignDialog.ui
 TARGET       = editalign

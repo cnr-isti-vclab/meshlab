@@ -31,6 +31,7 @@
 //#include<vcg/Convergence.h>
 #include "AlignPair.h"
 #include "AlignGlobal.h"
+#include "point_matching_scale.h"
 #include <vcg/math/point_matching.h>
 
 using namespace vcg;
@@ -349,7 +350,11 @@ double AlignGlobal::Node::AlignWithActiveAdj(bool Rigid)
 	bool ret;
 	//if(Rigid) ret=ComputeRigidMatchMatrix(out,FixP,MovP);
 	//else ret=ComputeMatchMatrix2(out,FixP,FixN,MovP);
-  ret=PointMatching<double>::ComputeRigidMatchMatrix(out,FixP,MovP);   
+  if(Rigid)
+	  ret=PointMatching<double>::ComputeRigidMatchMatrix(out,FixP,MovP);   
+  else
+	  ret= ComputeRotoTranslationScalingMatchMatrix(out,FixP,MovP);   
+
 	Matrix44d outIn=out; Invert(outIn);
 	//double maxdiff = MatrixNorm(out);
 	double maxdiff = MatrixBoxNorm(out,FixBox);

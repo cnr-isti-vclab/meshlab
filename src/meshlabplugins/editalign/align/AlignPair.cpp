@@ -22,6 +22,8 @@
 ****************************************************************************/
 
 #include "AlignPair.h"
+#include "point_matching_scale.h"
+
 #include <wrap/io_trimesh/import.h>
 #include <wrap/io_trimesh/export_ply.h>
 #include <vcg/complex/trimesh/clean.h>
@@ -399,8 +401,10 @@ bool AlignPair::Align(
 		bool res;
     Matrix44d newout;
 		switch(ap.MatchMode) {
-			case AlignPair::Param::MMClassic : res=PointMatching<double>::ComputeMatchMatrix(newout,Pfix,Nfix,OPmov);   break;
-      case AlignPair::Param::MMRigid   : res=PointMatching<double>::ComputeRigidMatchMatrix(newout,Pfix,OPmov);   break;
+		case AlignPair::Param::MMClassic : //res = ComputeScalingMatchMatrix(newout,Pfix,OPmov);break;
+										   //res=PointMatching<double>::ComputeMatchMatrix(newout,Pfix,Nfix,OPmov);   break;
+			res = ComputeRotoTranslationScalingMatchMatrix(newout,Pfix,OPmov); break;
+		case AlignPair::Param::MMRigid   : res=PointMatching<double>::ComputeRigidMatchMatrix(newout,Pfix,OPmov);   break;
   //    case AlignPair::Param::MMFast    : res=PointMatching::ComputeMatchMatrix2(out,Pfix,Nfix,OPmov);  break;
 			default :
 						status = UNKNOWN_MODE;
