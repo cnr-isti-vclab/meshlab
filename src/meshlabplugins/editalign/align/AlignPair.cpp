@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "AlignPair.h"
-#include "point_matching_scale.h"
+#include "../point_matching_scale.h"
 
 #include <wrap/io_trimesh/import.h>
 #include <wrap/io_trimesh/export_ply.h>
