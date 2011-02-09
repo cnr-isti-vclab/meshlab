@@ -246,7 +246,21 @@ void MeshDocument::removeTag(int id){
 	}
 }
 
-MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName) {
+bool MeshDocument::hasBeenModified()
+{
+	int ii = 0;
+	while(ii < meshList.size())
+	{
+		if (meshList[ii]->meshModified())
+			return true;
+		++ii;
+	}
+	return false;
+}
+
+MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName) 
+{
+	meshModified() = false;
   parent=_parent;
 	glw.m=&cm;
 	_id=parent->newMeshId();
@@ -622,4 +636,9 @@ void MeshModel::Enable(int openingFileMask)
   if( openingFileMask & tri::io::Mask::IOM_VERTQUALITY  ) updateDataMask(MM_VERTQUALITY);
   if( openingFileMask & tri::io::Mask::IOM_FACEQUALITY  ) updateDataMask(MM_FACEQUALITY);
   if( openingFileMask & tri::io::Mask::IOM_BITPOLYGONAL ) updateDataMask(MM_POLYGONAL);
+}
+
+bool& MeshModel::meshModified()
+{
+	return this->modified;
 }

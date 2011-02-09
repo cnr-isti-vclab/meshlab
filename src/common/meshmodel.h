@@ -226,6 +226,7 @@ private:
   QString fullPathFileName;
   QString _label;
   int _id;
+  bool modified;
 
 public:
 
@@ -265,6 +266,7 @@ public:
   }
   void setLabel(QString newName) {_label=newName;}
 
+
 public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
 
@@ -283,7 +285,10 @@ public:
   void updateDataMask(int neededDataMask);
   void clearDataMask(int unneededDataMask);
 
-	static int io2mm(int single_iobit);
+
+  bool& meshModified();
+  static int io2mm(int single_iobit);
+
 
 };// end class MeshModel
 
@@ -510,7 +515,10 @@ public:
   bool isBusy() { return busy;}    // used in processing. To disable access to the mesh by the rendering thread
   void setBusy(bool _busy)
   {
-    if(busy && _busy==false) emit meshModified();
+    if(busy && _busy==false) 
+	{
+		emit meshModified();
+	}
     busy=_busy;
   }
 
@@ -561,6 +569,7 @@ public:
 		return FullBBox;
  }
 
+ bool hasBeenModified();
 	private:
 		MeshModel *currentMesh;
 		//the current raster model 

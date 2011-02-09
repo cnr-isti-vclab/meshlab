@@ -62,6 +62,36 @@ bool MeshFilterInterface::isFilterApplicable(QAction *act, const MeshModel& m, Q
   return MissingItems.isEmpty();
 }
 
+int MeshFilterInterface::previewOnCreatedAttributes(QAction* act,const MeshModel& mm )
+{
+	int changedIfCalled = postCondition(act);
+	int createdIfCalled = MeshModel::MM_NONE;
+	if ((changedIfCalled & MeshModel::MM_VERTCOLOR) && !mm.hasDataMask(MeshModel::MM_VERTCOLOR))
+		createdIfCalled = createdIfCalled | MeshModel::MM_VERTCOLOR;
+
+	if ((changedIfCalled & MeshModel::MM_FACECOLOR) && !mm.hasDataMask(MeshModel::MM_FACECOLOR))
+		createdIfCalled = createdIfCalled | MeshModel::MM_FACECOLOR;
+
+	if ((changedIfCalled & MeshModel::MM_VERTQUALITY) && !mm.hasDataMask(MeshModel::MM_VERTQUALITY))
+		createdIfCalled = createdIfCalled | MeshModel::MM_VERTQUALITY;
+
+	if ((changedIfCalled & MeshModel::MM_FACEQUALITY) && !mm.hasDataMask(MeshModel::MM_FACEQUALITY))
+		createdIfCalled = createdIfCalled | MeshModel::MM_FACEQUALITY;
+
+	if ((changedIfCalled & MeshModel::MM_WEDGTEXCOORD) && !mm.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+		createdIfCalled = createdIfCalled | MeshModel::MM_WEDGTEXCOORD;
+
+	if ((changedIfCalled & MeshModel::MM_VERTTEXCOORD) && !mm.hasDataMask(MeshModel::MM_VERTTEXCOORD))
+		createdIfCalled = createdIfCalled | MeshModel::MM_VERTTEXCOORD;
+
+	if ((changedIfCalled & MeshModel::MM_VERTRADIUS) && !mm.hasDataMask(MeshModel::MM_VERTRADIUS))
+		createdIfCalled = createdIfCalled | MeshModel::MM_VERTRADIUS;
+
+	if ((getClass(act) == MeshFilterInterface::MeshCreation) && (mm.cm.vn == 0))
+		createdIfCalled = createdIfCalled | MeshModel::MM_VERTCOORD;
+	
+	return createdIfCalled;
+}
 
 bool MeshLabFilterInterface::arePreCondsValid( const int filterPreConds,const MeshModel& m, QStringList &MissingItems )
 {

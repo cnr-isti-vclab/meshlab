@@ -400,6 +400,10 @@ public:
 	 
     virtual QList<QAction *> actions() const { return actionList;}
 	  virtual QList<FilterIDType> types() const { return typeList;}
+
+	  /** Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
+	      BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! **/
+	  int previewOnCreatedAttributes(QAction* act,const MeshModel& mm);
 	QString generatedScriptCode;
 	QGLContext* glContext;
 protected:
