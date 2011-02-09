@@ -135,7 +135,12 @@ void EditPaintPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &, GLArea
 void EditPaintPlugin::tabletEvent(QTabletEvent * event, MeshModel & , GLArea * gla)
 {
 	event->accept();
-	pushInputEvent(event->type(), event->pos(), event->modifiers(), event->pressure(), latest_event.button, gla);
+
+  // if event is down, clean zbuff
+  if(event->type() == QEvent::TabletPress)
+  	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL; 
+
+  pushInputEvent(event->type(), event->pos(), event->modifiers(), event->pressure(), (event->pointerType() == QTabletEvent::Eraser)? Qt::RightButton : Qt::LeftButton, gla);
 	gla->update();
 } 
 
@@ -241,9 +246,12 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
 				case COLOR_PAINT:
 					{	
 						painted_vertices.clear();
-						QColor newcol = (latest_event.button == Qt::LeftButton) ? 
-							paintbox->getForegroundColor() : 
-							paintbox->getBackgroundColor();
+						QColor newcol;
+            
+            if(latest_event.button == Qt::LeftButton)
+              newcol = paintbox->getForegroundColor();  
+            else
+							newcol = paintbox->getBackgroundColor();
 						color[0] = newcol.red(); color[1] = newcol.green(); 
 						color[2] = newcol.blue(); color[3] = newcol.alpha();
 						paintbox->getUndoStack()->beginMacro("Color Paint");
