@@ -11,6 +11,8 @@ bool ComputeScalingMatchMatrix(vcg::Matrix44d &res,
 /**
 Compute a rototranslation + scaling transformation that bring PMov point as close as possible to Pfix
 */ 
+
+
 bool ComputeRotoTranslationScalingMatchMatrix(vcg::Matrix44d &res,
  						std::vector<vcg::Point3d> &Pfix,		
 						std::vector<vcg::Point3d> &Pmov);

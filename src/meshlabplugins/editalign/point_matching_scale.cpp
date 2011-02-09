@@ -75,7 +75,7 @@ double errorRotoTranslationScale(int n, double *x){
 	return dist;
 }
 
-bool ComputeRotoTranslationScalingMatchMatrix(Matrix44d &res,
+bool ComputeRotoTranslationScalingMatchMatrix(vcg::Matrix44d &res,
  						std::vector<Point3d> &Pfix,		
 						std::vector<Point3d> &Pmov){
 
