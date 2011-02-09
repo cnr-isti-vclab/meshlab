@@ -52,7 +52,7 @@ SUBDIRS       = common \
                 meshlabplugins/edit_pickpoints \
                 meshlabplugins/editalign \
                 meshlabplugins/editmeasure \
-                meshlabplugins/editsegment \
+#               meshlabplugins/editsegment \
 # Sample plugins
                 sampleplugins/sampleedit \
                 sampleplugins/samplefilter \
@@ -63,13 +63,13 @@ SUBDIRS       = common \
 # projects
                 fgt/filter_aging \
                 fgt/filter_colorproc \
-				fgt/filter_csg \
+#			fgt/filter_csg \
                 fgt/filter_func \
                 fgt/filter_ssynth \
                 fgt/filter_qhull \
                 fgt/filter_quality \
                 fgt/filter_trioptimize \
-                fgt/filter_photosynth \
+             fgt/filter_photosynth \
                 fgt/edit_hole \
                 fgt/editpaint\
                 fgt/edit_quality \
