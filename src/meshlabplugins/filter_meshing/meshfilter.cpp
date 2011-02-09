@@ -64,6 +64,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 		<< FP_CENTER
 		<< FP_INVERT_FACES
 		<< FP_NORMAL_EXTRAPOLATION
+    << FP_NORMAL_SMOOTH_POINTCLOUD
 		<< FP_COMPUTE_PRINC_CURV_DIR
 		<< FP_CLOSE_HOLES
 		<< FP_FREEZE_TRANSFORM
@@ -119,6 +120,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
     case FP_QUAD_PAIRING                     :return MeshFilterInterface::FilterClass(MeshFilterInterface::Remeshing+MeshFilterInterface::Polygonal);
 
     case FP_NORMAL_EXTRAPOLATION             : return MeshFilterInterface::FilterClass( MeshFilterInterface::Normal + MeshFilterInterface::PointSet );
+    case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshFilterInterface::FilterClass( MeshFilterInterface::Normal + MeshFilterInterface::PointSet );
 
 		case FP_INVERT_FACES                     :
 		case FP_REORIENT                         :
@@ -167,6 +169,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 		case FP_FREEZE_TRANSFORM                 : return tr("Freeze Current Matrix");
 		case FP_RESET_TRANSFORM                  : return tr("Reset Current Matrix");
 		case FP_NORMAL_EXTRAPOLATION             : return tr("Compute normals for point sets");
+		case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooths normals on a point sets");
 		case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
 		case FP_CLOSE_HOLES                      : return tr("Close Holes");
 		case FP_CYLINDER_UNWRAP                  : return tr("Geometric Cylindrical Unwrapping");
@@ -226,7 +229,8 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_FLIP_AND_SWAP                    : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order.");
 		case FP_RESET_TRANSFORM                  : return tr("Set the current transformation matrix to the Identity. ");
 		case FP_FREEZE_TRANSFORM                 : return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
-		case FP_NORMAL_EXTRAPOLATION             : return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces");
+		case FP_NORMAL_EXTRAPOLATION             : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
+		case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
 		case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute the principal directions of curvature with several algorithms");
 		case FP_CLOSE_HOLES                      : return tr("Close holes smaller than a given threshold");
 		case FP_CYLINDER_UNWRAP                  : return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
@@ -276,6 +280,8 @@ int ExtraMeshFilterPlugin::getRequirements(QAction * action)
 		case FP_INVERT_FACES                     :
 		case FP_CYLINDER_UNWRAP                  :
 		case FP_VATTR_SEAM                       : return 0;
+
+    case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
 
 		case FP_COMPUTE_PRINC_CURV_DIR           : return MeshModel::MM_VERTCURVDIR | MeshModel::MM_FACEMARK | MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO;
 
@@ -442,6 +448,11 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 
 		case FP_NORMAL_EXTRAPOLATION:
 			parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to estimate and propagate normals."));
+			break;
+
+    case FP_NORMAL_SMOOTH_POINTCLOUD:
+			parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to smooth normals."));
+			parlst.addParam(new RichBool("useDist",false,"Weight using neighbour distance","If selected, the neighbour normals are waighted according to their distance"));
 			break;
 
 		case FP_VATTR_SEAM:
@@ -945,6 +956,13 @@ case FP_NORMAL_EXTRAPOLATION :
     tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
     NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"),-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
   } break;
+
+case FP_NORMAL_SMOOTH_POINTCLOUD :
+  {
+    tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+    NormalExtrapolation<vector<CVertexO> >::SmoothNormalsUsingNeighbors(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"), par.getBool("useDist"), cb);
+  } break;
+
 
 case FP_COMPUTE_PRINC_CURV_DIR:
   {
