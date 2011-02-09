@@ -688,7 +688,7 @@ class MeshlabStdDialog : public QDockWidget
 	  Q_OBJECT
 
 public:
-  MeshlabStdDialog(QWidget *p);
+  MeshlabStdDialog(QWidget *p = NULL);
 	~MeshlabStdDialog();
 
 	void clearValues();
@@ -698,9 +698,10 @@ public:
 	bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic();
 
+	public slots:
+		void closeClick();
 private slots:
 	void applyClick();
-	void closeClick();
   void resetValues();
   void toggleHelp();
 	void togglePreview();

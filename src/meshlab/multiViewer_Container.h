@@ -83,6 +83,7 @@ public:
 	int getViewerByPicking(QPoint);
 
 	void updateTrackballInViewers();
+	void closeEvent(QCloseEvent *event);
 
 	MeshDocument meshDoc;
   int currentId;

@@ -673,32 +673,33 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 	assert(iEdit);
   lastModelEdited = this->md()->mm();
   if (!iEdit->StartEdit(*this->md(), this))
+  {
     //iEdit->EndEdit(*(this->md()->mm()), this);
 		endEdit();
-	else
+  }
+  else
+  {
     log->Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
+	mm()->meshModified() = true;
+  }
 }
 
 
-void GLArea::closeEvent(QCloseEvent *event)
+bool GLArea::readyToClose()
 {
-	bool close = true;
-	if(isWindowModified())
-	{
-		 QMessageBox::StandardButton ret=QMessageBox::question(
-                this,  tr("MeshLab"), tr("File '%1' modified.\n\nClose without saving?").arg(mm()->fullName()),
-								QMessageBox::Yes|QMessageBox::No,
-								QMessageBox::No);
-		if(ret==QMessageBox::No)
-		{
-			close = false;	// don't close please!
-			event->ignore();
-			return;
-		}
+	if (md()->hasBeenModified())
+	{		
+			QMessageBox::StandardButton ret=QMessageBox::question(
+				this,  tr("MeshLab"), tr("Project '%1' modified.\n\nClose without saving?").arg(md()->docLabel()),
+				QMessageBox::Yes|QMessageBox::No,
+				QMessageBox::No);
+			if(ret==QMessageBox::No)	// don't close please!
+				return false;
 	}
-	if(getCurrentEditAction()) endEdit();
-  emit glareaClosed();
-	event->accept();
+	if(getCurrentEditAction()) 
+		endEdit();
+	emit glareaClosed();
+	return true;
 }
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )

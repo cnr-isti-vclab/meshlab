@@ -475,6 +475,8 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
   setText(1, QString::number(meshModel->id()));
 
   QString meshName = meshModel->label();
+  if (meshModel->meshModified())
+	  meshName += " *";
   setText(2, meshName);
 
 	m=meshModel;

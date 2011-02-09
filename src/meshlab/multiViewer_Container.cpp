@@ -71,9 +71,12 @@ MultiViewer_Container::MultiViewer_Container(QWidget *parent)
 
 }
 
-MultiViewer_Container::~MultiViewer_Container(){
-  foreach(GLArea* viewer, viewerList)
-		delete viewer;
+MultiViewer_Container::~MultiViewer_Container()
+{
+  //foreach(GLArea* viewer, viewerList)
+  //{
+		//delete viewer;
+  //}
 }
 
 int MultiViewer_Container::getNextViewerId(){
@@ -300,4 +303,19 @@ void MultiViewer_Container::updateTrackballInViewers()
 				((GLArea*) viewer)->loadShot(shotAndScale);
 			}
 	}
+}
+
+void MultiViewer_Container::closeEvent( QCloseEvent *event )
+{
+	bool close = true;
+	int ii = 0;
+	while(close && (ii < viewerList.size()))
+	{
+		close = viewerList.at(ii)->readyToClose();
+		++ii;
+	}
+	if (close)
+		event->accept();
+	else
+		event->ignore();
 }

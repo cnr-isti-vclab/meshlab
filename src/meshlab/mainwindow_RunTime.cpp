@@ -103,7 +103,7 @@ void MainWindow::createStdPluginWnd()
 	stddialog->setFloating(true);
 	stddialog->hide();
   connect(GLA(),SIGNAL(glareaClosed()),this,SLOT(updateStdDialog()));
-  connect(GLA(),SIGNAL(glareaClosed()),stddialog,SLOT(close()));
+  connect(GLA(),SIGNAL(glareaClosed()),stddialog,SLOT(closeClick()));
 }
 
 void MainWindow::createXMLStdPluginWnd()
@@ -984,7 +984,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	if(ret)
 	{
     meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
-    MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
+    meshDoc()->mm()->meshModified() = true;
+	MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
     if(GLA())
     {
       GLA()->setWindowModified(true);
@@ -1075,6 +1076,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, FilterEnv& env, b
 	QGLFormat defForm = QGLFormat::defaultFormat();
 	iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
   iFilter->glContext->create(filterWidget->context());
+	
 	ret=iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
 
 	meshDoc()->setBusy(false);
@@ -1786,7 +1788,9 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 	QString defaultExt = "*." + fi.suffix().toLower();
 	if(defaultExt == "*.") 
 		defaultExt = "*.ply";
-
+	if (mod == NULL)
+		return false;
+	mod->meshModified() = false;
 	QString ff = mod->fullName();
 	QFileDialog saveDialog(this,tr("Save Current Layer"), mod->fullName());
   saveDialog.setNameFilters(suffixList);

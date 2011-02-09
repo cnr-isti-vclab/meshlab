@@ -205,8 +205,7 @@ public:
 	
 	//add a MeshEditInterface for the given action
 	void addMeshEditor(QAction *editAction, MeshEditInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
-	
-	void closeEvent(QCloseEvent *event);
+	bool readyToClose();
 	float lastRenderingTime() { return lastTime;}
 	void drawGradient();
 	void drawLight();
@@ -223,6 +222,7 @@ signals :
 		void transmitSurfacePos(QString name,vcg::Point3f dir);
     void transmitCameraPos(QString name,vcg::Point3f dir);
     void transmitShot(QString name, vcg::Shotf);
+	void updateLayerTable();
 public slots:
 		void sendViewPos(QString name);
 		void sendSurfacePos(QString name);
