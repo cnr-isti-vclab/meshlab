@@ -331,7 +331,11 @@ void MeshlabStdDialog::togglePreview()
 {
 	if(previewCB->isChecked()) 
 	{
-		applyDynamic();
+		stdParFrame->readValues(curParSet);
+		if (!prevParSet.isEmpty() && (validcache) && (curParSet == prevParSet))
+			meshCacheState.apply(curModel);
+		else
+			applyDynamic();
 	}
 	else
 		meshState.apply(curModel);
