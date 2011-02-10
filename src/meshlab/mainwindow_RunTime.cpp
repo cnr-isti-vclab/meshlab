@@ -1384,17 +1384,38 @@ bool MainWindow::openProject(QString fileName)
 {
   if (fileName.isEmpty())
     fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln);;MeshLab Project (*.mlp);;Align Project (*.aln)");
+
+  if (fileName.isEmpty()) return false;
+
   QFileInfo fi(fileName);
-  if (fileName.isEmpty())
+  lastUsedDirectory = fi.absoluteDir();
+
+  if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp") )
+  {
+    QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
     return false;
+  }
+
+  // Common Part: init a Doc if necessary, and
+  bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
+  bool activeEmpty = activeDoc && meshDoc()->meshList.empty();
+  if (activeEmpty)
+  {
+    meshDoc()->setFileName(fileName);
+    mdiarea->currentSubWindow()->setWindowTitle(fileName);
+  }
   else
-    lastUsedDirectory = fi.absoluteDir();
-  saveRecentProjectList(fileName);
+    newDocument(fileName);
+  meshDoc()->setDocLabel(fileName);
+  meshDoc()->setBusy(true);
+
+  // this change of dir is needed for subsequent textures/materials loading
+  QDir::setCurrent(fi.absoluteDir().absolutePath());
+  qb->show();
+
   if (QString(fi.suffix()).toLower() == "aln")
   {
-
     vector<RangeMap> rmv;
-
     int retVal=ALNParser::ParseALN(rmv,qPrintable(fileName));
     if(retVal != ALNParser::NoError)
     {
@@ -1402,63 +1423,36 @@ bool MainWindow::openProject(QString fileName)
       return false;
     }
 
-
-    // this change of dir is needed for subsequent textures/materials loading
-    QDir::setCurrent(fi.absoluteDir().absolutePath());
-
     bool openRes=true;
     vector<RangeMap>::iterator ir;
     for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
     {
-		QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();  
+      QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
       if(ir==rmv.begin()) openRes = open(relativeToProj);
       else				openRes = open(relativeToProj);
-
       if(openRes) meshDoc()->mm()->cm.Tr=(*ir).trasformation;
     }
   }
-  else if (QString(fi.suffix()).toLower() == "mlp")
+
+  if (QString(fi.suffix()).toLower() == "mlp")
   {
-	  bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-	  bool activeEmpty = activeDoc && meshDoc()->meshList.empty();
-    if (activeEmpty)
-	{
-		meshDoc()->setFileName(fileName);
-		mdiarea->currentSubWindow()->setWindowTitle(fileName);
-	}
-	else
-		newDocument(fileName);
-	meshDoc()->setDocLabel(fileName);
-    //QDir::setCurrent(fi.absoluteDir().absolutePath());
     if (!MeshDocumentFromXML(*meshDoc(),fileName))
     {
       QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MLP file");
       return false;
     }
-    MeshDocument* md=meshDoc();
-    qb->show();
-    for (int i=0; i<md->meshList.size(); i++)
+    for (int i=0; i<meshDoc()->meshList.size(); i++)
     {
-      QString fullPath = md->meshList[i]->fullName();
-    importMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
+      QString fullPath = meshDoc()->meshList[i]->fullName();
+      importMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
     }
-    //for (int i=0; i<md->rasterList.size(); i++)
-    //{
-    //  vcg::Shotf sh=md->rasterList[i]->shot;
-    //  /*if (i==0)
-    //    open(md->rasterList[i]->planeList[0]->fullName());
-    //  else*/
-    //    importRaster(md->rasterList[i]->planeList[0]->fullName());
-    //  meshDoc()->rasterList[i]->shot=sh;
-    //  meshDoc()->rm()->setLabel(md->rm()->label());
-    //}
   }
-  else
-    return false;
-  if(this->GLA() == 0)
-    return false;
+
+  meshDoc()->setBusy(false);
+  if(this->GLA() == 0)  return false;
   this->GLA()->resetTrackBall();
   qb->reset();
+  saveRecentProjectList(fileName);
   return true;
 }
 
