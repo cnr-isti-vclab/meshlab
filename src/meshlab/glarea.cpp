@@ -346,8 +346,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
     if(iEdit) iEdit->Decorate(*mm(),this,&painter);
 
     // Draw the selection
-    if(rm.selectedFace)  mm()->RenderSelectedFace();
-    if(rm.selectedVert)  mm()->RenderSelectedVert();
+    if(rm.selectedFace && (mm() != NULL))  mm()->RenderSelectedFace();
+    if(rm.selectedVert && (mm() != NULL))  mm()->RenderSelectedVert();
     foreach(QAction * p , iDecoratorsList)
         {
           MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());

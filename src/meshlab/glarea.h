@@ -150,7 +150,8 @@ public slots:
 	void endEdit(){	
 		if(iEdit && currentEditor) 
 		{
-			iEdit->EndEdit(*mm(),this);
+			if (mm() != NULL)
+				iEdit->EndEdit(*mm(),this);
 		}
 		iEdit= 0; 
 		currentEditor=0; 
