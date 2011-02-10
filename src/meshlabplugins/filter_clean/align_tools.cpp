@@ -233,10 +233,10 @@ bool AlignTools::align(MeshModel *stuckModel, PickedPoints *stuckPickedPoints,
 			vcg::GLW::ColorMode	oldColorMode;
 			//if the stuck model is not displayed next to the model to move,
 			//then temporarily display it
-			if(!modelToMoveGLArea->meshDoc->meshList.contains(stuckModel))
+			if(!modelToMoveGLArea->md()->meshList.contains(stuckModel))
 			{
 				removeMeshAddedForQuestion = true;
-				modelToMoveGLArea->meshDoc->meshList.push_back(stuckModel);
+				modelToMoveGLArea->md()->meshList.push_back(stuckModel);
 
 				//save the old colors
 				oldStuckColor = stuckModel->cm.C();
@@ -261,7 +261,7 @@ bool AlignTools::align(MeshModel *stuckModel, PickedPoints *stuckPickedPoints,
 			if(removeMeshAddedForQuestion)
 			{
 				//remove the mesh that was added
-				modelToMoveGLArea->meshDoc->meshList.pop_back();
+				modelToMoveGLArea->md()->meshList.pop_back();
 
 				//set back to how things were before
 				stuckModel->cm.C() = oldStuckColor;

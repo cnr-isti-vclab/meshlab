@@ -23,9 +23,12 @@ SOURCES      += align_tools.cpp \
                 ../../meshlabplugins/editalign/align/AlignPair.cpp \
                 ../../meshlabplugins/editalign/align/AlignGlobal.cpp \
                 ../../meshlabplugins/editalign/align/OccupancyGrid.cpp \
+				../../meshlabplugins/editalign/point_matching_scale.cpp \
 				$$VCGDIR/wrap/ply/plylib.cpp
 
-
+INCLUDEPATH += ../../external
+				
+				
 TARGET        = filter_clean
 
 QT           += opengl
