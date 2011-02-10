@@ -1,0 +1,102 @@
+<!DOCTYPE MeshLabDocument>
+<MeshLabProject>
+ <MeshGroup>
+  <MLMesh label="lato225.ply" filename="lato225.ply">
+   <MLMatrix44>
+-0.54984 -0.345201 -0.760599 -657.674 
+0.522595 0.568185 -0.635658 -511.656 
+0.651592 -0.746996 -0.132011 -906.996 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="lato180.ply" filename="lato180.ply">
+   <MLMatrix44>
+-0.770915 -0.57673 -0.270322 -261.406 
+-0.208502 0.629528 -0.74848 -613.188 
+0.601846 -0.520652 -0.605561 -1293.21 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="lato135.ply" filename="lato135.ply">
+   <MLMatrix44>
+-0.532981 -0.817083 0.219789 140.603 
+-0.823938 0.44209 -0.354518 -301.348 
+0.192504 -0.370044 -0.908852 -1545.22 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="lato000.ply" filename="lato000.ply">
+   <MLMatrix44>
+0.757015 -0.576201 -0.308093 -271.085 
+0.239366 -0.194185 0.951313 775.352 
+-0.607974 -0.793905 -0.00907874 -822.734 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="faccia315.ply" filename="faccia315.ply">
+   <MLMatrix44>
+0.695194 0.252515 -0.67301 -554.717 
+-0.253338 0.962262 0.0993556 80.3988 
+0.6727 0.101428 0.732931 -204.897 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="faccia270.ply" filename="faccia270.ply">
+   <MLMatrix44>
+-0.0145648 0.378278 -0.925578 -770.729 
+-0.398809 0.846662 0.352301 284.25 
+0.916919 0.37426 0.138529 -685.375 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="faccia225.ply" filename="faccia225.ply">
+   <MLMatrix44>
+-0.713668 0.259616 -0.650598 -557.003 
+-0.306007 0.719925 0.622951 505.865 
+0.630111 0.643668 -0.434342 -1156.13 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="faccia180.ply" filename="faccia180.ply">
+   <MLMatrix44>
+-0.999354 -0.0353971 -0.00621773 -36.3315 
+-0.0279035 0.655175 0.754961 617.469 
+-0.0226497 0.754648 -0.65574 -1345.87 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="faccia135.ply" filename="faccia135.ply">
+   <MLMatrix44>
+-0.697654 -0.337997 0.631694 487.645 
+0.272647 0.690118 0.670374 553.028 
+-0.662528 0.639918 -0.389309 -1138.18 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="faccia090.ply" filename="faccia090.ply">
+   <MLMatrix44>
+0.0175455 -0.465796 0.884718 703.974 
+0.418313 0.80711 0.41664 348.54 
+-0.908133 0.362779 0.20901 -654.388 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="faccia045.ply" filename="faccia045.ply">
+   <MLMatrix44>
+0.719369 -0.343695 0.603642 485.262 
+0.324563 0.934628 0.145363 126.2 
+-0.614141 0.0913494 0.783893 -182.017 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+  <MLMesh label="faccia000.ply" filename="faccia000.ply">
+   <MLMatrix44>
+0.997996 -0.047645 -0.0416191 -36.0515 
+0.0482462 0.998743 0.0135615 14.7443 
+0.0409207 -0.0155423 0.999041 2.48783 
+0 0 0 1 
+</MLMatrix44>
+  </MLMesh>
+ </MeshGroup>
+ <RasterGroup/>
+</MeshLabProject>
