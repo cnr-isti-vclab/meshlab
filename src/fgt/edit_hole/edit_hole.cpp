@@ -83,7 +83,8 @@ void EditHolePlugin::mouseMoveEvent(QMouseEvent * /*e*/, MeshModel &/*m*/, GLAre
 bool EditHolePlugin::StartEdit(MeshDocument &_md, GLArea *gla )
 {
   this->md = &_md;
-
+  if (md->mm() == NULL)
+	  return false;
   md->mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
   if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md->mm()->cm) >0)
 	{
