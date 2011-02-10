@@ -90,7 +90,7 @@ public:
 
   MultiViewer_Container *mvc()
   {
-    MultiViewer_Container *localMVC = qobject_cast<MultiViewer_Container *>(this->parent());
+    MultiViewer_Container *localMVC = reinterpret_cast<MultiViewer_Container *>(this->parent());
     return localMVC;
   }
 
