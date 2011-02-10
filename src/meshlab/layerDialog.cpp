@@ -93,10 +93,10 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
       {
         //the user has clicked on one of the eyes
         MeshDocument  *md= mw->meshDoc();
+
         // NICE TRICK.
         // If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
         // Very useful for comparing meshes
-
         if(QApplication::keyboardModifiers() == Qt::ControlModifier)
         {
           foreach(MeshModel *mp, md->meshList)
@@ -104,8 +104,21 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
               mw->GLA()->meshSetVisibility(mp, false);
             }
         }
+
         //Toggle visibility of current mesh
         mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
+
+        // EVEN NICER TRICK.
+        // If the user has pressed alt when clicking on the eye icon, all layers will get visible
+        // Very useful after you turned all layer invis using the previous option and want to avoid
+        // clicking on all of them...
+        if(QApplication::keyboardModifiers() == Qt::AltModifier)
+        {
+          foreach(MeshModel *mp, md->meshList)
+            {
+              mw->GLA()->meshSetVisibility(mp, true);
+            }
+        }
       } break;
     case 1 :
 
