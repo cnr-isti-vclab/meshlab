@@ -189,6 +189,8 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 
 bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
+	if (md.mm() == NULL)
+		return false;
   MeshModel &m=*(md.mm());
   CMeshO::FaceIterator fi;
 	CMeshO::VertexIterator vi;
