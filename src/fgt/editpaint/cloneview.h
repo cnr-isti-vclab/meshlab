@@ -46,7 +46,11 @@ public :
 	
 	virtual void mousePressEvent(QMouseEvent * event) {
 		start_pos = QPointF(event->pos());
-		last_pos.setX(event->pos().x()); last_pos.setY(event->pos().y());}
+		last_pos.setX(event->pos().x()); last_pos.setY(event->pos().y());
+
+    if (event->buttons() == Qt::RightButton)
+      emit positionReset();
+  }
 	
 	virtual void mouseMoveEvent ( QMouseEvent * event)
 	{
@@ -92,7 +96,8 @@ public :
 	
 signals:
 	void positionChanged(double x, double y);
-		
+	void positionReset();
+
 };
 
 #endif /*CLONEVIEW_H_*/

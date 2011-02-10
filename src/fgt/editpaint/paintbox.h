@@ -157,6 +157,7 @@ public slots:
 		
 	void setPixmapDelta(double x, double y);
 	void movePixmapDelta(double x, double y);
+	void resetPixmapDelta();
 };
 
 /******Brush Shapes******/ 

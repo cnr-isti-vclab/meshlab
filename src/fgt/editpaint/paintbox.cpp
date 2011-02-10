@@ -69,7 +69,8 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	//**********************************
 	
 	QObject::connect(clone_source_view, SIGNAL(positionChanged(double, double)), this, SLOT(movePixmapDelta(double, double)));
-	
+	QObject::connect(clone_source_view, SIGNAL(positionReset()), this, SLOT(resetPixmapDelta()));
+
 	refreshBrushPreview();
 }
 
@@ -120,6 +121,11 @@ void Paintbox::movePixmapDelta(double x, double y)
 {
 	item_delta.setX(item_delta.x() - x);
 	item_delta.setY(item_delta.y() - y);
+}
+
+void Paintbox::resetPixmapDelta()
+{ 
+  setPixmapDelta(item->pixmap().width()/2.0, item->pixmap().height()/2.0);
 }
 
 void Paintbox::setPixmapOffset(qreal x, qreal y)
