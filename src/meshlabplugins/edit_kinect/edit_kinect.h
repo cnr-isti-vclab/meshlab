@@ -39,7 +39,9 @@ class KinectEditPlugin : public QObject, public MeshEditInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
-		
+
+
+
 public:
         KinectEditPlugin();
         virtual ~KinectEditPlugin() {}
@@ -70,7 +72,9 @@ public:
                 foc_loc,
                 shx_loc,
                 point_cloud,    // VBO of 680*480 vertex
-                pr;             // program to displace vertices
+				pr,             // program to displace vertices
+				gl_undistort_rgb_tex,
+				gl_undistort_depth_tex;
 
         enum {VIEW_SCANNED_MODEL,VIEW_REAL_TIME} ViewMode;
         struct Frame{ unsigned short data[640*480];};
@@ -81,6 +85,7 @@ public:
         bool ScanningConverged();
         void InitializeGL();
         void CleanupGL();
+		void UndistortMaps();
 public slots:
         void loadCalibration();
         void startScan();

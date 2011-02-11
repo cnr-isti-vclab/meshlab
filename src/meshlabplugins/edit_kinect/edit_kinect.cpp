@@ -126,10 +126,37 @@ bool KinectEditPlugin::ScanningConverged(){
 void KinectEditPlugin::CleanupGL(){
     glDeleteTextures(1,  &gl_depth_tex);
     glDeleteTextures(1,  &gl_depth_tex_avg);
+	glDeleteTextures(1,  &gl_undistort_depth_tex);
+	glDeleteTextures(1,  &gl_undistort_rgb_tex);
     glDeleteTextures(1,  &gl_color_tex);
     glDeleteBuffers(1,   &point_cloud);
     glDeleteProgram(pr);
 }
+
+void KinectEditPlugin::UndistortMaps()
+{
+	/*RGB Undistort Texture, loading on the device*/
+	glActiveTexture(GL_TEXTURE3);
+	glGenTextures(1, &gl_undistort_rgb_tex);
+	glBindTexture(GL_TEXTURE_2D, gl_undistort_rgb_tex);
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_R32F, 1024, 512, 0, GL_RED, GL_UNSIGNED_SHORT,  0);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+
+	/*Depth Undistort Texture, loading on the device*/
+	glActiveTexture(GL_TEXTURE4);
+	glGenTextures(1, &gl_undistort_depth_tex);
+	glBindTexture(GL_TEXTURE_2D, gl_undistort_depth_tex);
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_R32F, 1024, 512, 0, GL_RED, GL_UNSIGNED_SHORT,  0);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+
+}
+
 void KinectEditPlugin::InitializeGL(){
 
 
@@ -179,7 +206,8 @@ void KinectEditPlugin::InitializeGL(){
 
     std::string str_vs =
     std::string("varying bool kill;")+
-    std::string("uniform float depth_distortion[5];")+
+	std::string("uniform sampler2D rgb_undistort;")+
+	std::string("uniform sampler2D depth_undistort;")+
     std::string("uniform sampler2D col;")+
     std::string("uniform sampler2D dv;")+
     std::string("uniform float focal;")+
@@ -241,8 +269,12 @@ void KinectEditPlugin::InitializeGL(){
     glUniform1i(depth_loc,0);
     GLuint col_loc = glGetUniformLocation(pr,"col");
     glUniform1i(col_loc,2);
-    GLuint depth_dis_loc = glGetUniformLocation(pr,"depth_distortion");
-    glUniform1fv(depth_dis_loc,5,&depth_distortion[0]);
+
+	GLuint rgb_dis_loc = glGetUniformLocation(pr,"rgb_undistort");
+	glUniform1i(rgb_dis_loc,3);
+	GLuint depth_dis_loc = glGetUniformLocation(pr,"depth_undistort");
+	glUniform1i(depth_dis_loc,4);
+
     GLuint R_loc = glGetUniformLocation(pr,"R");
     glUniformMatrix3fv(R_loc,1,false,&R[0][0]);
     GLuint T_loc = glGetUniformLocation(pr,"T");
@@ -257,6 +289,7 @@ void KinectEditPlugin::InitializeGL(){
 
 void KinectEditPlugin::Decorate(MeshModel &, GLArea *  )
 {
+
 
     if(toinitialize){
         InitializeGL();
@@ -327,6 +360,7 @@ void KinectEditPlugin::loadCalibration(){
     if(!filename.isEmpty())
         if(!::LoadCalibrationData(filename))
             ::LoadCalibrationData("default_calibration.yml");
+	UndistortMaps();
 
 }
 
@@ -365,7 +399,7 @@ vcg::Point3f Point(float v, float X, float Y){
 
 void KinectEditPlugin::saveScan(){
     mm = (MeshModel*)1;
-    mm = gla->meshDoc->addNewMesh("Kinect Mesh",false);
+	mm = gla->md()->addNewMesh("Kinect Mesh",false);
 
     CMeshO::VertexIterator vi =
             vcg::tri::Allocator<CMeshO>::AddVertices(mm->cm,640*480);
