@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 #include "multiViewer_Container.h"
-#include "GLArea.h"
+#include "glarea.h"
 #include <QMouseEvent>
 #include "mainwindow.h"
 
