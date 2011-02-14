@@ -156,7 +156,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\editmeasure.dll"
   File "${DISTRIB_FOLDER}/plugins\editpaint.dll"
   ;File "${DISTRIB_FOLDER}/plugins\editrgbtri.dll"
-  File "${DISTRIB_FOLDER}/plugins\editsegment.dll"
+  ;File "${DISTRIB_FOLDER}/plugins\editsegment.dll"
 
   File "${DISTRIB_FOLDER}/plugins\sampleedit.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_pickpoints.dll"
