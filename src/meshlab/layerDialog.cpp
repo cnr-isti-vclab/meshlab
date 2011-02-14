@@ -39,7 +39,8 @@ using namespace std;
 LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 {
 	ui = new Ui::layerDialog();
-	setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
+  setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow );
+  this-> QWidget::setAttribute( Qt::WA_MacAlwaysShowToolWindow);
 	setVisible(false);
 	LayerDialog::ui->setupUi(this);
 	mw=qobject_cast<MainWindow *>(parent);
@@ -62,7 +63,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	// The following connection is used to associate the click with the switch between raster and mesh view. 
   connect(ui->rasterTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(rasterItemClicked(QTreeWidgetItem * , int ) ) );
 
-	connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
+  connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(importMesh()) );
 	connect(ui->deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );
 
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
