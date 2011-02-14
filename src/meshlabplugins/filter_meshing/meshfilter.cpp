@@ -448,6 +448,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 
 		case FP_NORMAL_EXTRAPOLATION:
 			parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to estimate and propagate normals."));
+			parlst.addParam(new RichBool("Flip normals w.r.t. viewpoint",false,"Flip normals w.r.t. viewpoint","If the 'viewpoint' (i.e. scanner position) is known, it can be used to disambiguate normals orientation, so that all the normals will be oriented in the same direction."));
+			parlst.addParam(new RichPoint3f("Viewpoint Pos.",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
+
 			break;
 
     case FP_NORMAL_SMOOTH_POINTCLOUD:
@@ -955,6 +958,18 @@ case FP_NORMAL_EXTRAPOLATION :
   {
     tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
     NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"),-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
+	if (par.getBool("Flip normals using viewpoint")==true)
+	{
+		vcg::Point3f viewp=par.getPoint3f("Viewpoint Pos.");
+		CMeshO::VertexIterator vi;
+		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+		{
+			if ((*vi).N().dot(viewp-(*vi).P())<0.0f)
+			{
+				(*vi).N()=-(*vi).N();
+			}
+		}
+	}
   } break;
 
 case FP_NORMAL_SMOOTH_POINTCLOUD :
