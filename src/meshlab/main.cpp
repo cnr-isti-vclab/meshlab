@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 	
   MainWindow window;
   window.show();
-  // window.showMaximized();
+  window.showMaximized();
 
   // This event filter is installed to intercept the open events sent directly by the Operative System.
   FileOpenEater *filterObj=new FileOpenEater(&window);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 			"Look at http://meshlab.sourceforge.net/wiki\n"
 			"for a longer documentation\n"
 		);
-		window.open(argv[1]);
+    window.importMesh(argv[1]);
 	}
 	//else 	if(filterObj->noEvent) window.open();
  

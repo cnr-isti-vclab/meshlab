@@ -634,9 +634,9 @@ void MainWindow::dropEvent ( QDropEvent * event )
       QString path = url_list.at(i).toLocalFile();
       if( (event->keyboardModifiers () == Qt::ControlModifier ) || ( QApplication::keyboardModifiers () == Qt::ControlModifier ))
       {
-        this->newDocument();
+        this->newProject();
       }
-      open(path);
+      importMesh(path);
     }
   }
 }
@@ -1294,14 +1294,6 @@ void MainWindow::toggleSelectVertRendering()
   GLA()->setSelectVertRendering(!rm.selectedVert);
 }
 
-bool MainWindow::openIn()
-{
-	bool wasLayerVisible=layerDialog->isVisible();
-	layerDialog->setVisible(false);
-  bool ret= open(QString());
-	layerDialog->setVisible(wasLayerVisible);
-	return ret;
-}
 /*
  Save project. It saves the info of all the layers and the layer themselves. So
  */
@@ -1399,13 +1391,11 @@ bool MainWindow::openProject(QString fileName)
   // Common Part: init a Doc if necessary, and
   bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
   bool activeEmpty = activeDoc && meshDoc()->meshList.empty();
-  if (activeEmpty)
-  {
-    meshDoc()->setFileName(fileName);
-    mdiarea->currentSubWindow()->setWindowTitle(fileName);
-  }
-  else
-    newDocument(fileName);
+
+  if (!activeEmpty)  newProject(fileName);
+
+  meshDoc()->setFileName(fileName);
+  mdiarea->currentSubWindow()->setWindowTitle(fileName);
   meshDoc()->setDocLabel(fileName);
   meshDoc()->setBusy(true);
 
@@ -1428,8 +1418,8 @@ bool MainWindow::openProject(QString fileName)
     for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
     {
       QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
-      if(ir==rmv.begin()) openRes = open(relativeToProj);
-      else				openRes = open(relativeToProj);
+      meshDoc()->addNewMesh(relativeToProj,relativeToProj);
+      loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm());
       if(openRes) meshDoc()->mm()->cm.Tr=(*ir).trasformation;
     }
   }
@@ -1444,7 +1434,8 @@ bool MainWindow::openProject(QString fileName)
     for (int i=0; i<meshDoc()->meshList.size(); i++)
     {
       QString fullPath = meshDoc()->meshList[i]->fullName();
-      importMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
+      meshDoc()->setBusy(true);
+      loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
     }
   }
 
@@ -1456,7 +1447,7 @@ bool MainWindow::openProject(QString fileName)
   return true;
 }
 
-GLArea* MainWindow::newDocument(const QString& projName)
+GLArea* MainWindow::newProject(const QString& projName)
 {
 	filterMenu->setEnabled(!filterMenu->actions().isEmpty());
 	if (!filterMenu->actions().isEmpty())
@@ -1533,7 +1524,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 	return true;
 }
 
-bool MainWindow::importMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar)
+bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar)
 {
 	QFileInfo fi(fileName);
 	QString extension = fi.suffix();
@@ -1577,13 +1568,12 @@ bool MainWindow::importMesh(const QString& fileName, MeshIOInterface *pCurrentIO
 		//pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 		//pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 
-                QString err = pCurrentIOPlugin->errorMsg();
-                if (!err.isEmpty())
-                    QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
+    QString err = pCurrentIOPlugin->errorMsg();
+    if (!err.isEmpty())
+      QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
 		meshDoc()->setBusy(true);
-		if(mdiarea->isVisible()) 
-      GLA()->mvc()->showMaximized();
-		setCurrentFile(fileName);
+
+    setCurrentFile(fileName);
 
     if( mask & vcg::tri::io::Mask::IOM_FACECOLOR) GLA()->setColorMode(GLW::CMPerFace);
     if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR) GLA()->setColorMode(GLW::CMPerVert);
@@ -1645,7 +1635,7 @@ bool MainWindow::importMesh(const QString& fileName, MeshIOInterface *pCurrentIO
 }
 
 // Opening files in a transparent form (IO plugins contribution is hidden to user)
-bool MainWindow::open(QString fileName)
+bool MainWindow::importMesh(QString fileName)
 {
   if (!GLA())		return false;
 
@@ -1677,12 +1667,12 @@ bool MainWindow::open(QString fileName)
 		QString extension = fi.suffix();
 		MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
 		//pCurrentIOPlugin->setLog(gla->log);
-                if (pCurrentIOPlugin == NULL)
-                {
-                    QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
-                    QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-                    return false;
-                }
+    if (pCurrentIOPlugin == NULL)
+    {
+      QString errorMsgFormat("Unable to open file:\n\"%1\"\n\nError details: file format " + extension + " not supported.");
+      QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+      return false;
+    }
 
 		RichParameterSet prePar;
 		pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
@@ -1696,7 +1686,7 @@ bool MainWindow::open(QString fileName)
     MeshModel *mm=meshDoc()->addNewMesh(qPrintable(fileName),"");
 		qb->show();
 		QTime t;t.start();
-		bool open = importMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar);
+    bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar);
 		if(open) 
 		{
 			GLA()->log->Logf(0,"Opened mesh %s in %i msec",qPrintable(fileName),t.elapsed());
@@ -1712,16 +1702,16 @@ bool MainWindow::open(QString fileName)
 		else
 			GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
 	}// end foreach file of the input list
-	GLA()->log->Logf(0,"All files opened in %i msec",qPrintable(fileName),allFileTime.elapsed());
+  GLA()->log->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 	GLA()->update();
 	qb->reset();
 	return true;
 }
 
-void MainWindow::openRecentFile()
+void MainWindow::openRecentMesh()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
-	if (action)	open(action->data().toString());
+  if (action)	importMesh(action->data().toString());
 }
 
 void MainWindow::openRecentProj()
@@ -1730,7 +1720,7 @@ void MainWindow::openRecentProj()
 	if (action)	openProject(action->data().toString());
 }
 
-bool MainWindow::importMeshWithStandardParams(QString& fullPath,MeshModel* mm)
+bool MainWindow::loadMeshWithStandardParams(QString& fullPath,MeshModel* mm)
 {
 	bool ret = false;
 	QFileInfo fi(fullPath);
@@ -1741,9 +1731,8 @@ bool MainWindow::importMeshWithStandardParams(QString& fullPath,MeshModel* mm)
 		RichParameterSet prePar;
 		pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
 		int mask = 0;
-		//MeshModel* mm = meshDoc()->mm();
-		QTime t;t.start();
-		bool open = importMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar);
+    QTime t;t.start();
+    bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar);
 		if(open) 
 		{
 			GLA()->log->Logf(0,"Opened mesh %s in %i msec",qPrintable(fullPath),t.elapsed());
@@ -1767,7 +1756,7 @@ void MainWindow::reload()
 	// save current file name
 	qb->show();
 	QString fileName = meshDoc()->mm()->fullName();
-	importMeshWithStandardParams(fileName,meshDoc()->mm());
+  loadMeshWithStandardParams(fileName,meshDoc()->mm());
 	qb->reset();
 }
 

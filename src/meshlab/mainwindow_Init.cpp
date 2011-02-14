@@ -86,7 +86,7 @@ MainWindow::MainWindow()
 	//qb->reset();
 	statusBar()->addPermanentWidget(qb,0);
 	updateMenus();
-	newDocument();
+  newProject();
 	//QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());
 	//wid->showMaximized();
 	//ar->update();
@@ -103,7 +103,7 @@ void MainWindow::createActions()
   newProjectAct = new QAction(QIcon(":/images/new_project.png"),tr("New Empty Project..."), this);
   newProjectAct->setShortcutContext(Qt::ApplicationShortcut);
   newProjectAct->setShortcut(Qt::CTRL+Qt::Key_N);
-  connect(newProjectAct, SIGNAL(triggered()), this, SLOT(newDocument()));
+  connect(newProjectAct, SIGNAL(triggered()), this, SLOT(newProject()));
 
   openProjectAct = new QAction(QIcon(":/images/open_project.png"),tr("&Open project..."), this);
 	openProjectAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -126,7 +126,7 @@ void MainWindow::createActions()
   importMeshAct = new QAction(QIcon(":/images/import_mesh.png"),tr("&Import Mesh..."), this);
   importMeshAct->setShortcutContext(Qt::ApplicationShortcut);
   importMeshAct->setShortcut(Qt::CTRL+Qt::Key_I);
-  connect(importMeshAct, SIGNAL(triggered()), this, SLOT(open()));
+  connect(importMeshAct, SIGNAL(triggered()), this, SLOT(importMesh()));
 
   exportMeshAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh..."), this);
   exportMeshAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -158,7 +158,7 @@ void MainWindow::createActions()
 		recentFileActs[i]->setEnabled(false);
     recentFileActs[i]->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1+i));
 		connect(recentProjActs[i],SIGNAL(triggered()),this,SLOT(openRecentProj()));
-		connect(recentFileActs[i], SIGNAL(triggered()),this, SLOT(openRecentFile()));
+    connect(recentFileActs[i], SIGNAL(triggered()),this, SLOT(openRecentMesh()));
 		
 	}
 

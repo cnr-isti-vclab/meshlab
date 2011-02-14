@@ -69,26 +69,34 @@ public:
 signals:
 	void dispatchCustomSettings(RichParameterSet& rps);
 
-public slots:
+private slots:
+  GLArea* newProject(const QString& projName = QString());
+  bool openProject(QString fileName=QString());
+  void saveProject();
 
-  bool open(QString fileName=QString());
-  bool openIn();
-	bool openProject(QString fileName=QString());
-	  bool importRaster(const QString& fileImg = QString());
-	void saveProject();
-	void delCurrentMesh();
-	void delCurrentRaster();
-	void endEdit();
-	void updateCustomSettings();
+  bool importRaster(const QString& fileImg = QString());
+public slots:
+  bool importMesh(QString fileName=QString());
+  void updateCustomSettings();
+private slots:
+  void delCurrentMesh();
+  void delCurrentRaster();
+  void endEdit();
   void updateDocumentScriptBindings() {if(currentViewContainer()) PM.updateDocumentScriptBindings(*meshDoc());}
   void evaluateExpression(const Expression& exp,Value** res);
+
+
+public:
+  bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
+  bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
+  bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm);
+
 
 private slots:
 
 	//////////// Slot Menu File //////////////////////
-  GLArea* newDocument(const QString& projName = QString());
   void reload();
-	void openRecentFile();
+  void openRecentMesh();
 	void openRecentProj();
 	bool saveAs(QString fileName = QString(),const bool saveAllPossibleAttributes = false);
 	bool save(const bool saveAllPossibleAttributes = false);
@@ -258,11 +266,6 @@ public:
     return _qsb;
   }
 	QMenu* layerMenu() { return filterMenuLayer; }
-	bool importMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
-	//void importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
-  //bool importRaster(const QString& fileImg);
-	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-	bool importMeshWithStandardParams(QString& fullPath,MeshModel* mm);
 	
 
 private:
@@ -446,7 +449,7 @@ protected:
     if (event->type() == QEvent::FileOpen) {
       noEvent=false;
       QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
-      mainWindow->open(fileEvent->file());
+      mainWindow->importMesh(fileEvent->file());
       return true;
     } else {
       // standard event processing
