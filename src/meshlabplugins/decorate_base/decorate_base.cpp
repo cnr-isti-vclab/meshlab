@@ -832,11 +832,15 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
 
     if( rm->getBool(this->TextureStyleParam()) )
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                           else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    if(!m.glw.TMId.empty())
+    {
       glEnable(GL_TEXTURE_2D);
       glBindTexture( GL_TEXTURE_2D, m.glw.TMId.back() );
-      glBegin(GL_TRIANGLES);
+    }
+
+    glBegin(GL_TRIANGLES);
       for(size_t i=0;i<m.cm.face.size();++i)
         if(!m.cm.face[i].IsD())
         {
@@ -846,7 +850,7 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
         glVertex(m.cm.face[i].WT(1).P());
         glTexCoord(m.cm.face[i].WT(2).P());
         glVertex(m.cm.face[i].WT(2).P());
-    }
+        }
     glEnd();
     glDisable(GL_TEXTURE_2D);
 
