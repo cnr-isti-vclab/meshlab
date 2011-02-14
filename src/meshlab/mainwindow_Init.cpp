@@ -772,7 +772,7 @@ void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char 
 
 // this function update the app settings with the current recent file list
 // and update the loaded mesh counter
-void MainWindow::setCurrentFile(const QString &fileName)
+void MainWindow::saveRecentFileList(const QString &fileName)
 {
 	QSettings settings;
 	QStringList files = settings.value("recentFileList").toStringList();

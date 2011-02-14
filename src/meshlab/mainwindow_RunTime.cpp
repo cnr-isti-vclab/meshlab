@@ -1551,86 +1551,84 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 		QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
 		return false;
 	}
-
+  meshDoc()->setBusy(true);
 	pCurrentIOPlugin->setLog(GLA()->log);
 	if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,*prePar,QCallBack,this /*gla*/))
 	{
 		QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text
+    meshDoc()->setBusy(false);
 		return false;
 	}
-	else
-	{
-		// After opening the mesh lets ask to the io plugin if this format
-		// requires some optional, or userdriven post-opening processing.
-		// and in that case ask for the required parameters and then
-		// ask to the plugin to perform that processing
-		//RichParameterSet par;
-		//pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
-		//pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
+  // After opening the mesh lets ask to the io plugin if this format
+  // requires some optional, or userdriven post-opening processing.
+  // and in that case ask for the required parameters and then
+  // ask to the plugin to perform that processing
+  //RichParameterSet par;
+  //pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
+  //pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 
-    QString err = pCurrentIOPlugin->errorMsg();
-    if (!err.isEmpty())
-      QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
-		meshDoc()->setBusy(true);
+  QString err = pCurrentIOPlugin->errorMsg();
+  if (!err.isEmpty())
+    QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
 
-    setCurrentFile(fileName);
+  saveRecentFileList(fileName);
 
-    if( mask & vcg::tri::io::Mask::IOM_FACECOLOR) GLA()->setColorMode(GLW::CMPerFace);
-    if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR) GLA()->setColorMode(GLW::CMPerVert);
+  if( mask & vcg::tri::io::Mask::IOM_FACECOLOR) GLA()->setColorMode(GLW::CMPerFace);
+  if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR) GLA()->setColorMode(GLW::CMPerVert);
 
-		renderModeTextureAct->setChecked(false);
-		renderModeTextureAct->setEnabled(false);
-		if(!meshDoc()->mm()->cm.textures.empty())
-		{
-			renderModeTextureAct->setChecked(true);
-			renderModeTextureAct->setEnabled(true);
-			if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
-				GLA()->setTextureMode(GLW::TMPerVert);
-			if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
-				GLA()->setTextureMode(GLW::TMPerWedgeMulti);
-		}
+  renderModeTextureAct->setChecked(false);
+  renderModeTextureAct->setEnabled(false);
+  if(!meshDoc()->mm()->cm.textures.empty())
+  {
+    renderModeTextureAct->setChecked(true);
+    renderModeTextureAct->setEnabled(true);
+    if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
+      GLA()->setTextureMode(GLW::TMPerVert);
+    if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
+      GLA()->setTextureMode(GLW::TMPerWedgeMulti);
+  }
 
-		// In case of polygonal meshes the normal should be updated accordingly
-		if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL) 
-		{
-			mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
-			int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-			if(degNum) 
-				GLA()->log->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
-			mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
-			vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
-		} // standard case
-		else 
-		{
-			if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-				vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
-			else
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
-		}
-		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
+  // In case of polygonal meshes the normal should be updated accordingly
+  if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
+  {
+    mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
+    int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+    if(degNum)
+      GLA()->log->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
+    mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
+    vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
+    vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
+  } // standard case
+  else
+  {
+    if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+      vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
+    else
+      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
+  }
+  vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 
-		if(mm->cm.fn==0){
-			GLA()->setDrawMode(vcg::GLW::DMPoints);
-			if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)) 
-				GLA()->setLight(false);
-			else 
-				mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-		}
-		else 
-			mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+  if(mm->cm.fn==0){
+    GLA()->setDrawMode(vcg::GLW::DMPoints);
+    if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL))
+      GLA()->setLight(false);
+    else
+      mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+  }
+  else
+    mm->updateDataMask(MeshModel::MM_VERTNORMAL);
 
-		updateMenus();
-		int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
-		int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+  updateMenus();
+  int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
+  int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
 
-		if(delVertNum>0 || delFaceNum>0 )
-			QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-		meshDoc()->setBusy(false);
-		//if(newGla)
-		GLA()->resetTrackBall();
-		GLA()->update();
-	}
+  if(delVertNum>0 || delFaceNum>0 )
+    QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
+  meshDoc()->setBusy(false);
+  //if(newGla)
+  GLA()->resetTrackBall();
+  GLA()->update();
+
 	return true;
 }
 

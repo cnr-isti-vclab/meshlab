@@ -191,7 +191,7 @@ private:
 	void keyPressEvent(QKeyEvent *);
 	void updateRecentFileActions();
 	void updateRecentProjActions();
-	void setCurrentFile(const QString &fileName);
+  void saveRecentFileList(const QString &fileName);
 	void saveRecentProjectList(const QString &projName);
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
 
