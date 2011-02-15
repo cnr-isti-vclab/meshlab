@@ -5,11 +5,10 @@
    VCGLib  http://vcg.sf.net                                         o o
    Visual and Computer Graphics Library                            o     o
                                                                   _   O  _
-   Copyright(C) 2005-2007
    Paolo Cignoni                                                    \/)\/
    Visual Computing Lab  http://vcg.isti.cnr.it                    /\/|
    ISTI - Italian National Research Council                           |
-                                                                      \
+   Copyright(C) 2005-2011                                             \
 
 
 This program is free software; you can redistribute it and/or modify it
@@ -41,6 +40,7 @@ http://sourceforge.net/forum/forum.php?forum_id=499532
 
 or contact:
 Paolo Cignoni ( p.cignoni (at) isti.cnr.it )
+Guido Ranzuglia (g.ranzuglia (at) isti.cnr.it ) 
 
 For bugs, feature requests and such, please use the sourceforge service
 http://sourceforge.net/tracker/?group_id=149444
