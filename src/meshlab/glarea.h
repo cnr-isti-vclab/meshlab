@@ -88,11 +88,7 @@ public:
 
   // Layer Management stuff. 
 
-  MultiViewer_Container *mvc()
-  {
-    MultiViewer_Container *localMVC = reinterpret_cast<MultiViewer_Container *>(this->parent());
-    return localMVC;
-  }
+  MultiViewer_Container *mvc();
 
   MeshModel *mm(){ return mvc()->meshDoc.mm();}
   inline MeshDocument *md() {return &(mvc()->meshDoc);}

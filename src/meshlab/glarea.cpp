@@ -1664,4 +1664,15 @@ void GLArea::createOrthoView(QString dir)
 	loadShot(shotAndScale);
 }
 
+MultiViewer_Container * GLArea::mvc()
+{ 
+	Splitter * parentSplitter = qobject_cast<Splitter *>(parent());
+	MultiViewer_Container* mvc = qobject_cast<MultiViewer_Container *>(parentSplitter);
+	while(!mvc)
+	{
+		parentSplitter = qobject_cast<Splitter *>(parentSplitter->parent());
+		mvc= qobject_cast<MultiViewer_Container *>(parentSplitter);
+	}
+	return mvc;
+}
 
