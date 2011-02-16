@@ -99,7 +99,7 @@ public slots:
     void updateCurrent(int current);
 	
 private:
-  QVector<GLArea *> viewerList; /// widgets for the OpenGL contexts and images
+  QList<GLArea *> viewerList; /// widgets for the OpenGL contexts and images
 };
 
 #endif // __MULTIVIEWER_CONTAINER_H__

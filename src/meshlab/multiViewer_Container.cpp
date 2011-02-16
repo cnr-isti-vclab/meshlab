@@ -82,8 +82,10 @@ MultiViewer_Container::~MultiViewer_Container()
 int MultiViewer_Container::getNextViewerId(){
 	int newId=-1;
 
-  for(QVector<GLArea*>::iterator view=viewerList.begin();view!=viewerList.end();++view)
-		if(newId < (*view)->getId()) newId = (*view)->getId();
+  foreach(GLArea* view, viewerList)
+  {
+    if(newId < view->getId()) newId = view->getId();
+  }
 
 	return ++newId;
 }
@@ -172,59 +174,80 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient){
   return;
 }
 
-void MultiViewer_Container::removeView(int viewerId){
-	for (int i=0; i< viewerList.count(); i++){
-    GLArea* viewer = viewerList.at(i);
-		if (viewer->getId() == viewerId){
-			viewerList.remove(i);
-			Splitter* parentSplitter = qobject_cast<Splitter *>(viewer->parent());
-			viewer->deleteLater();
+void MultiViewer_Container::removeView(int viewerId)
+{
+  GLArea* viewer;
+  for (int i=0; i< viewerList.count(); i++)
+  {
+   if(viewerList.at(i)->getId() == viewerId)
+      viewer = viewerList.at(i);
+  }
+  assert(viewer);
 
-	//viewer has not yet been deleted
-/*
-    CASE 1: Simple deletion.
-    Example: Cancel View2:
+  Splitter* parentSplitter = qobject_cast<Splitter *>(viewer->parent());
+  int currentIndex = parentSplitter->indexOf(viewer);
 
-        HSplit            HSplit
-         /    \             |
-      View1   HSplit  =>   View1
-               |
-              View2
-*/
-			//Technically the viewer has not yet been cancelled, so parentSplitter has one branch
-			if(parentSplitter->count()==1)
-				parentSplitter->deleteLater();
+  viewer->deleteLater();
+  // Very basic case of just two son of the MultiviewContainer.
+  if(viewerList.count()==2)
+  {
+    viewerList.removeAll(viewer);
+    currentId = viewerList.first()->getId();
+    return;
+  }
 
-/*
-    CASE 2: Complex deletion, adjust the tree.
-     Example: Cancel View1:
+  // generic tree with more of two leaves (some splitter involved)
+  // two cases
+  // 1) the deleted object is a direct child of the root
+  // 2) otherwise; e.g. parent->parent exists.
 
-           HSplit                 HSplit
-          /      \                /    \
-       VSplit    HSplit   =>   HSplit   HSplit
-       /    \        |           | 	     |
-     View1  HSplit  View2      View3	   View2
-              |
-            View3
-*/
-			//Technically the viewer has not yet been cancelled, so parentSplitter has two branches
-			else if(parentSplitter->count()==2){
-				Splitter* parentParentSplitter = qobject_cast<Splitter *>(parentSplitter->parent());
-				if(parentParentSplitter){
-					int index = parentParentSplitter->indexOf(parentSplitter);
-					parentParentSplitter->insertWidget(index,parentSplitter->widget(1));
-					parentSplitter->deleteLater();
-				}
-			}
-		}
-	}
-	currentId = viewerList.at(0)->getId(); // default: current is the first viewer of the list
+
+  // First Case: deleting the direct son of the root (the mvc)
+  // the sibling content (that is a splitter) surely will be moved up
+  if(parentSplitter == this)
+  {
+    int insertIndex;
+    if(currentIndex == 0) insertIndex = 1;
+    else insertIndex = 0;
+
+    Splitter *siblingSplitter = qobject_cast<Splitter *>(this->widget(insertIndex));
+    assert(siblingSplitter);
+
+    QWidget *sonLeft = siblingSplitter->widget(0);
+    QWidget *sonRight = siblingSplitter->widget(1);
+    this->insertWidget(0,sonLeft);
+    this->insertWidget(1,sonRight);
+    siblingSplitter->deleteLater();
+    viewerList.removeAll(viewer);
+    currentId = viewerList.first()->getId();
+    return;
+  }
+
+// Final case. Very generic, not son of the root.
+
+Splitter* parentParentSplitter = qobject_cast<Splitter *>(parentSplitter->parent());
+assert(parentParentSplitter);
+int parentIndex= parentParentSplitter->indexOf(parentSplitter);
+
+int siblingIndex;
+if(currentIndex == 0) siblingIndex = 1;
+else siblingIndex = 0;
+
+QWidget  *siblingWidget = parentSplitter->widget(siblingIndex);
+assert(siblingWidget);
+parentParentSplitter->insertWidget(parentIndex,siblingWidget);
+
+parentSplitter->deleteLater();
+viewerList.removeAll(viewer);
+currentId = viewerList.first()->getId();
+
 }
 
 void MultiViewer_Container::updateCurrent(int current){
 	int previousCurrentId = currentId;
 	currentId=current;
-	update(previousCurrentId);
+  if(getViewer(previousCurrentId))
+        update(previousCurrentId);
 	emit updateMainWindowMenus(); 
 }
 
@@ -233,7 +256,6 @@ GLArea * MultiViewer_Container::getViewer(int id)
   foreach ( GLArea* viewer, viewerList)
 		if (viewer->getId() == id)
 			return viewer;
-  assert(0);
 	return 0;
 }
 
