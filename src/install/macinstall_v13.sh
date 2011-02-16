@@ -167,7 +167,6 @@ plugins/libedit_texture.dylib \
 plugins/libeditalign.dylib \
 plugins/libeditmeasure.dylib \
 plugins/libeditpaint.dylib \
-plugins/libeditsegment.dylib \
 plugins/libdecorate_base.dylib \
 plugins/libdecorate_background.dylib \
 plugins/libdecorate_shadow.dylib \
