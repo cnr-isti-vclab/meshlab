@@ -46,7 +46,7 @@ CleanFilter::CleanFilter()
 		<< FP_REMOVE_WRT_Q 
 		<< FP_REMOVE_ISOLATED_COMPLEXITY 
 		<< FP_REMOVE_ISOLATED_DIAMETER 
-		<< FP_ALIGN_WITH_PICKED_POINTS
+//		<< FP_ALIGN_WITH_PICKED_POINTS
     << FP_SELECTBYANGLE
     << FP_REMOVE_TVERTEX_FLIP
     << FP_REMOVE_TVERTEX_COLLAPSE
@@ -78,7 +78,7 @@ CleanFilter::~CleanFilter() {
 	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
-    case FP_ALIGN_WITH_PICKED_POINTS :	    return QString("Align Mesh using Picked Points");
+//    case FP_ALIGN_WITH_PICKED_POINTS :	    return QString("Align Mesh using Picked Points");
     case FP_SELECTBYANGLE :                 return QString("Select Faces by view angle");
     case FP_REMOVE_TVERTEX_FLIP :           return QString("Remove T-Vertices by edge flip");
     case FP_REMOVE_TVERTEX_COLLAPSE :       return QString("Remove T-Vertices by edge collapse");
@@ -101,7 +101,7 @@ CleanFilter::~CleanFilter() {
 		case FP_REMOVE_ISOLATED_COMPLEXITY:	 return tr("Remove isolated connected components composed by a limited number of triangles"); 
 		case FP_REMOVE_ISOLATED_DIAMETER:	 return tr("Remove isolated connected components whose diameter is smaller than the specified constant"); 
 		case FP_REMOVE_WRT_Q:	     return tr("Remove all the vertices with a quality lower smaller than the specified constant"); 
-		case FP_ALIGN_WITH_PICKED_POINTS: return tr("Align this mesh with another that has corresponding picked points.");
+//		case FP_ALIGN_WITH_PICKED_POINTS: return tr("Align this mesh with another that has corresponding picked points.");
 		case FP_SELECTBYANGLE :  return QString("Select faces according to the angle between their normal and the view direction. It is used in range map processing to select and delete steep faces parallel to viewdirection"); 
     case FP_REMOVE_TVERTEX_COLLAPSE :  return QString("Removes t-vertices from the mesh by collapsing the shortest of the incident edges");
     case FP_REMOVE_TVERTEX_FLIP : return QString("Removes t-vertices by flipping the opposite edge on the degenerate face if the triangulation quality improves");
@@ -129,7 +129,7 @@ CleanFilter::~CleanFilter() {
     case FP_REMOVE_DUPLICATE_FACE:
       return MeshFilterInterface::Cleaning;     
 		case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
-		case FP_ALIGN_WITH_PICKED_POINTS: return MeshFilterInterface::RangeMap;
+    //case FP_ALIGN_WITH_PICKED_POINTS: return MeshFilterInterface::RangeMap;
     default : assert(0);  
 	}
 }
@@ -147,7 +147,7 @@ CleanFilter::~CleanFilter() {
     case FP_REMOVE_TVERTEX_FLIP: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
   case FP_REMOVE_FOLD_FACE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
     case FP_SELECTBYANGLE:
-		case FP_ALIGN_WITH_PICKED_POINTS:
+//		case FP_ALIGN_WITH_PICKED_POINTS:
 		case FP_MERGE_CLOSE_VERTEX:
 		case FP_REMOVE_DUPLICATE_FACE:
     	return MeshModel::MM_NONE;
@@ -177,9 +177,9 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
 			qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
 		  parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
 		  break;
-    case FP_ALIGN_WITH_PICKED_POINTS :
-    	AlignTools::buildParameterSet(md,parlst);
-    	break;
+////    case FP_ALIGN_WITH_PICKED_POINTS :
+//    	AlignTools::buildParameterSet(md,parlst);
+//    	break;
 		case FP_SELECTBYANGLE :
 			{
 				parlst.addParam(new RichDynamicFloat("anglelimit",
@@ -272,15 +272,15 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 			Log("Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
 
 	  }break;
-    case FP_ALIGN_WITH_PICKED_POINTS:
-	{
-		bool result = AlignTools::setupThenAlign(m, par);
-		if(!result)
-		{
-			Log(GLLogStream::WARNING,"Align failed, make sure you have equal numbers of points.");	
-			return false;
-		}
-	}break;
+//    case FP_ALIGN_WITH_PICKED_POINTS:
+//	{
+//		bool result = AlignTools::setupThenAlign(m, par);
+//		if(!result)
+//		{
+//			Log(GLLogStream::WARNING,"Align failed, make sure you have equal numbers of points.");
+//			return false;
+//		}
+//	}break;
 
 		case FP_SELECTBYANGLE : 
 		{
