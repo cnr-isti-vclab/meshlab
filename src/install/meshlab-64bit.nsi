@@ -157,6 +157,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\io_epoch.dll"
   File "${DISTRIB_FOLDER}/plugins\io_collada.dll"
   ;File "${DISTRIB_FOLDER}/plugins\io_3ds.dll"
+  File "${DISTRIB_FOLDER}/plugins\io_json.dll"
   File "${DISTRIB_FOLDER}/plugins\io_u3d.dll"
   File "${DISTRIB_FOLDER}/plugins\io_x3d.dll"
   File "${DISTRIB_FOLDER}/plugins\io_tri.dll"
@@ -170,6 +171,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_aging.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_autoalign.dll"
 
+  File "${DISTRIB_FOLDER}/plugins\filter_camera.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_clean.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorproc.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"

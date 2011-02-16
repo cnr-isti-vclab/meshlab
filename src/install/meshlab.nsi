@@ -109,6 +109,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_aging.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_autoalign.dll"
 
+  File "${DISTRIB_FOLDER}/plugins\filter_camera.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_clean.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorproc.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"
