@@ -153,8 +153,8 @@ void SaveMaskExporterDialog::SetMaskCapability()
 	//camera THIS ONE HAS TO BE CORRECTED !!!! 
 	//bool camval = m->cm.shot.IsValid();
 	//int res = capability & vcg::tri::io::Mask::IOM_CAMERA;
-	ui->check_iom_camera->setDisabled( ((capability & vcg::tri::io::Mask::IOM_CAMERA)==0) | (m->cm.shot.IsValid() == false));
-	ui->check_iom_camera->setChecked ( ((capability & vcg::tri::io::Mask::IOM_CAMERA)!=0) & (m->cm.shot.IsValid()));
+  ui->check_iom_camera->setDisabled( ((capability & vcg::tri::io::Mask::IOM_CAMERA)==0) || (m->cm.shot.IsValid() == false));
+  ui->check_iom_camera->setChecked ( ((capability & vcg::tri::io::Mask::IOM_CAMERA)!=0) && (m->cm.shot.IsValid()));
 
 
 	if(capability == 0)
