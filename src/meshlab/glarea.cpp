@@ -342,9 +342,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
         mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
         mp->glw.SetHintParami(GLW::HNPPointDistanceAttenuation,glas.pointDistanceAttenuation?1:0);
         mp->glw.SetHintParami(GLW::HNPPointSmooth,glas.pointSmooth?1:0);
-        //if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-        mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-        qDebug("Meshlistsize %i id %i",this->md()->meshList.size(),this->id);
+        if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
       }
     }
     if(iEdit) iEdit->Decorate(*mm(),this,&painter);

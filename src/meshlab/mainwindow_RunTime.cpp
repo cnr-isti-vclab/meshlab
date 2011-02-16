@@ -1440,7 +1440,7 @@ bool MainWindow::openProject(QString fileName)
 
   meshDoc()->setBusy(false);
   if(this->GLA() == 0)  return false;
-  this->GLA()->resetTrackBall();
+  this->currentViewContainer()->resetAllTrackBall();
   qb->reset();
   saveRecentProjectList(fileName);
   return true;
