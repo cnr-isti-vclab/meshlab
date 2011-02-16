@@ -101,104 +101,75 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient){
 	View3
 	In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions).
 	*/
-	viewerList.append(viewer);
-  int count = viewerCounter();
 
-  //CASE 1: only when the first viewer is opened.
-  if (count==1){
-		addWidget(viewer);
+  //CASE 0: only when the first viewer is opened, just add it and return;
+  if (viewerCounter()==0)
+  {
+    viewerList.append(viewer);
+    addWidget(viewer);
+    currentId = viewer->getId();
+    //action for new viewer
+    connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
+    return;
 	}
 
-	else{
-    GLArea* current = currentView();
-		Splitter* parentSplitter = qobject_cast<Splitter *>(current->parent());
-		/*
-		CASE 2: Simple insertion inside the parent splitter (right branch). The insertion is on the parent's right branch.
-		Example: Add View2:
+  //CASE 1: happens only at the FIRST split;
+  if (viewerCounter()==1)
+  {
+    viewerList.append(viewer);
+    addWidget(viewer);
+    this->setOrientation(orient);
+    QList<int> sizes;
+    if(this->orientation()== Qt::Horizontal){
+      sizes.append(this->width()/2);
+      sizes.append(this->width()/2);
+    }
+    else{
+      sizes.append(this->height()/2);
+      sizes.append(this->height()/2);
+    }
 
-		HSplit           HSplit
-		/       =>      /    \
-		View1           View1   HSplit
-									|
-									View2
+    this->setSizes(sizes);
+    this->setHandleWidth(2);
+    this->setChildrenCollapsible(false);
 
-		*/
-		if(parentSplitter->count()==1){
+    currentId = viewer->getId();
+    //action for new viewer
+    connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
+    return;
+  }
 
-			parentSplitter->setOrientation(orient);
+  // Generic Case: Each splitter Has ALWAYS two children.
+  viewerList.append(viewer);
+  GLArea* currentGLA = this->currentView();
+  Splitter* currentSplitter = qobject_cast<Splitter *>(currentGLA->parent());
+  QList<int> parentSizes = currentSplitter->sizes();
 
-			Splitter* newSplitter = new Splitter(Qt::Horizontal);
+  int splittedIndex = currentSplitter->indexOf(currentGLA);
+  Splitter* newSplitter = new Splitter(orient);
+  currentSplitter->insertWidget(splittedIndex,newSplitter);
 
-			parentSplitter->addWidget(newSplitter);
-			newSplitter->addWidget(viewer);
+  newSplitter->addWidget(viewer);
+  newSplitter->addWidget(currentGLA);
 
-			//Setting the size of the widgets inside parent splitter.
-			QList<int> *sizes = new QList<int>();
+  QList<int> sizes;
+  if(orient== Qt::Horizontal){
+    sizes.append(currentSplitter->width()/2);
+    sizes.append(currentSplitter->width()/2);
+  }
+  else{
+    sizes.append(currentSplitter->height()/2);
+    sizes.append(currentSplitter->height()/2);
+  }
+  currentSplitter->setSizes(parentSizes);
+  newSplitter->setSizes(sizes);
+  newSplitter->setHandleWidth(2);
+  newSplitter->setChildrenCollapsible(false);
 
-			if(parentSplitter->orientation()== Qt::Horizontal){
-				sizes->append(parentSplitter->width()/2);
-				sizes->append(parentSplitter->width()/2);
-			}
-			else{
-				sizes->append(parentSplitter->height()/2);
-				sizes->append(parentSplitter->height()/2);
-			}
-
-			parentSplitter->setSizes(*sizes);
-
-			parentSplitter->setHandleWidth(2);
-
-			newSplitter->setChildrenCollapsible(false);
-
-		}
-		/*
-		CASE 3: The parent splitter has two children. The insertion is on the parent's left branch.
-		Example: Add View3:
-
-		HSplit                  HSplit
-		/     \                 /     \
-		View1 HSplit  =>     VSplit    HSplit
-		       |             /    \      |
-		      View2       View1  HSplit  View2
-									|
-									View3
-		*/
-		else{
-			Splitter* newSplitter = new Splitter(orient);
-
-			QList<int> sizes2 = parentSplitter->sizes();
-			parentSplitter->insertWidget(0, newSplitter);
-
-			Splitter* newSplitter2 = new Splitter(Qt::Horizontal);
-			newSplitter2->addWidget(viewer);
-			current->setParent(newSplitter);
-			newSplitter->addWidget(newSplitter2);
-
-			//Setting the size of the widgets inside parent splitter
-			QList<int> *sizes = new QList<int>();
-			if(newSplitter->orientation()== Qt::Horizontal){
-				sizes->append(parentSplitter->width()/2);
-				sizes->append(parentSplitter->width()/2);
-			}
-			else{
-				sizes->append(parentSplitter->height()/2);
-				sizes->append(parentSplitter->height()/2);
-			}
-
-			parentSplitter->setSizes(sizes2);
-			newSplitter->setSizes(*sizes);
-			newSplitter->setHandleWidth(2);
-
-			newSplitter->setChildrenCollapsible(false);
-			newSplitter2->setChildrenCollapsible(false);
-		}
-	}
-
-	currentId = viewer->getId();
-	//action for new viewer
-	connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
-
-
+  currentId = viewer->getId();
+  //action for new viewer
+  connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
+  return;
 }
 
 void MultiViewer_Container::removeView(int viewerId){
@@ -262,6 +233,7 @@ GLArea * MultiViewer_Container::getViewer(int id)
   foreach ( GLArea* viewer, viewerList)
 		if (viewer->getId() == id)
 			return viewer;
+  assert(0);
 	return 0;
 }
 

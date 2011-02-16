@@ -66,6 +66,8 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	nearPlane = .2f;
 	farPlane = 5.f;
 
+  id = mvcont->getNextViewerId();
+
 	updateMeshSetVisibilities();
 	updateRasterSetVisibilities();
   setAutoFillBackground(false);
