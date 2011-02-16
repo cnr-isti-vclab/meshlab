@@ -416,7 +416,6 @@ void MainWindow::setSplit(QAction *qa)
 		updateMenus();
 
 		glwClone->resetTrackBall();
-
 		glwClone->update();
 	}
 
@@ -1625,10 +1624,6 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
   if(delVertNum>0 || delFaceNum>0 )
     QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
   meshDoc()->setBusy(false);
-  //if(newGla)
-  GLA()->resetTrackBall();
-  GLA()->update();
-
 	return true;
 }
 
@@ -1701,7 +1696,9 @@ bool MainWindow::importMesh(QString fileName)
 			GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
 	}// end foreach file of the input list
   GLA()->log->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
-	GLA()->update();
+
+  this->currentViewContainer()->resetAllTrackBall();
+
 	qb->reset();
 	return true;
 }

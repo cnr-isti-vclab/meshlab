@@ -77,6 +77,7 @@ public:
   int viewerCounter();
 
   void updateAllViewer();
+  void resetAllTrackBall();
 	void update(int id);
 
   GLArea* getViewer(int id);

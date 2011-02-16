@@ -215,6 +215,7 @@ void MultiViewer_Container::removeView(int viewerId)
 
     QWidget *sonLeft = siblingSplitter->widget(0);
     QWidget *sonRight = siblingSplitter->widget(1);
+    this->setOrientation(siblingSplitter->orientation());
     this->insertWidget(0,sonLeft);
     this->insertWidget(1,sonRight);
     siblingSplitter->deleteLater();
@@ -236,11 +237,9 @@ else siblingIndex = 0;
 QWidget  *siblingWidget = parentSplitter->widget(siblingIndex);
 assert(siblingWidget);
 parentParentSplitter->insertWidget(parentIndex,siblingWidget);
-
 parentSplitter->deleteLater();
 viewerList.removeAll(viewer);
 currentId = viewerList.first()->getId();
-
 }
 
 void MultiViewer_Container::updateCurrent(int current){
@@ -279,6 +278,11 @@ int MultiViewer_Container::viewerCounter(){
 void MultiViewer_Container::updateAllViewer(){
   foreach ( GLArea* viewer, viewerList)
 		viewer->update();
+}
+
+void MultiViewer_Container::resetAllTrackBall(){
+  foreach ( GLArea* viewer, viewerList)
+    viewer->resetTrackBall();
 }
 
 void MultiViewer_Container::update(int id){

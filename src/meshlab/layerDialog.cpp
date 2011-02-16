@@ -279,7 +279,12 @@ void LayerDialog::updateTable()
 		//Restore mesh visibility according to the current visibility map
 		//very good to keep viewer state consistent
 		if( mw->GLA()->meshVisibilityMap.contains(mmd->id()))
-			mmd->visible =mw->GLA()->meshVisibilityMap.value(mmd->id());
+      mmd->visible = mw->GLA()->meshVisibilityMap.value(mmd->id());
+    else
+    {
+      mw->GLA()->meshVisibilityMap[mmd->id()]=true;
+      mmd->visible=true;
+    }
 
 		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd);
 		if(mmd== mw->GLA()->mm()) {

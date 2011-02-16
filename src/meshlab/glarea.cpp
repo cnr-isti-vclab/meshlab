@@ -342,7 +342,9 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
         mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
         mp->glw.SetHintParami(GLW::HNPPointDistanceAttenuation,glas.pointDistanceAttenuation?1:0);
         mp->glw.SetHintParami(GLW::HNPPointSmooth,glas.pointSmooth?1:0);
-        if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+        //if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+        mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+        qDebug("Meshlistsize %i id %i",this->md()->meshList.size(),this->id);
       }
     }
     if(iEdit) iEdit->Decorate(*mm(),this,&painter);
@@ -1168,24 +1170,7 @@ void GLArea::initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet)
 //Don't alter the state of the other elements in the visibility map
 void GLArea::updateMeshSetVisibilities()
 {
-	//Align meshVisibilityMap state with meshList state
-	//Deleting from the map the visibility of the deleted meshes 
-	QMapIterator<int, bool> i(meshVisibilityMap);
-	while (i.hasNext()) {
-		i.next();
-		bool found =false;
-    foreach(MeshModel * mp, this->md()->meshList)
-		{
-      if(mp->id() == i.key())
-			{
-				found = true;
-				break;
-			}
-		}
-		if(!found)
-			meshVisibilityMap.remove(i.key());
-	}
-
+  meshVisibilityMap.clear();
   foreach(MeshModel * mp, this->md()->meshList)
 	{
 		//Insert the new pair in the map; If the key is already in the map, its value will be overwritten
