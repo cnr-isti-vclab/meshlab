@@ -1453,11 +1453,11 @@ GLArea* MainWindow::newProject(const QString& projName)
 	if (!filterMenu->actions().isEmpty())
 		activateSubFiltersMenu(true,false);
 	MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
-	connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+  mdiarea->addSubWindow(mvcont);
+  connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
 	GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
 	mvcont->addView(gla, Qt::Horizontal);
-  mdiarea->addSubWindow(gla->mvc());
-	if (projName.isEmpty())
+  if (projName.isEmpty())
 	{
 		static int docCounter = 1;
 		mvcont->meshDoc.setDocLabel(QString("Project_") + QString::number(docCounter));

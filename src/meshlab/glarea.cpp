@@ -84,7 +84,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
 	*/
-	MainWindow* mainwindow = dynamic_cast<MainWindow*>(mvcont->parentWidget()->parentWidget());
+  MainWindow* mainwindow = this->mw();
 	//connecting the MainWindow Slots to GLArea signal (simple passthrough)
 	if(mainwindow != NULL){
 		connect(this,SIGNAL(updateMainWindowMenus()),mainwindow,SLOT(updateMenus()));
@@ -1666,13 +1666,21 @@ void GLArea::createOrthoView(QString dir)
 
 MultiViewer_Container * GLArea::mvc()
 { 
-	Splitter * parentSplitter = qobject_cast<Splitter *>(parent());
-	MultiViewer_Container* mvc = qobject_cast<MultiViewer_Container *>(parentSplitter);
-	while(!mvc)
-	{
-		parentSplitter = qobject_cast<Splitter *>(parentSplitter->parent());
-		mvc= qobject_cast<MultiViewer_Container *>(parentSplitter);
-	}
-	return mvc;
+  QObject * curParent = this->parent();
+  while(qobject_cast<MultiViewer_Container *>(curParent) == 0)
+  {
+    curParent = curParent->parent();
+  }
+  return qobject_cast<MultiViewer_Container *>(curParent);
 }
 
+
+MainWindow * GLArea::mw()
+{
+  QObject * curParent = this->parent();
+  while(qobject_cast<MainWindow *>(curParent) == 0)
+  {
+    curParent = curParent->parent();
+  }
+  return qobject_cast<MainWindow *>(curParent);
+}

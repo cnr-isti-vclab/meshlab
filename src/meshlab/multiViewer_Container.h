@@ -74,7 +74,7 @@ public:
 	
   GLArea* currentView();
   int getNextViewerId();
-	int viewerCounter();
+  int viewerCounter();
 
   void updateAllViewer();
 	void update(int id);

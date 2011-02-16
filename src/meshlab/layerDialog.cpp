@@ -259,7 +259,7 @@ void LayerDialog::updateTable()
 {
 	//TODO:Check if the current viewer is a GLArea
 	if(!isVisible()) return;
-	if(isVisible() & !mw->GLA())
+  if(isVisible() && !mw->GLA())
 	{
 		setVisible(false);
 		//The layer dialog cannot be opened unless a new document is opened
