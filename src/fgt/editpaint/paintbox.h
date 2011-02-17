@@ -94,14 +94,18 @@ public:
 	inline int getGradientForm() { return gradient_form->currentIndex(); }
 	inline int getPickMode() { return pick_mode->currentIndex(); }
 	inline float getNoiseSize() {return noise_slider->value();}
+	inline int getDisplacement() {return mesh_displacement_slider->value();}
+	inline int getDirection() {return mesh_displacement_direction->currentIndex();}
+
+  // pressure
+  inline bool getPressureFrameEnabled() {return pressure_frame->isEnabled();}
+  inline void enablePressureFrame() {pressure_frame->setEnabled(true);}
 	inline bool getPressureDisplacement() {return displacement_box->isChecked();}
 	inline bool getPressureHardness() {return hardness_box->isChecked();}
 	inline bool getPressureSize() {return size_box->isChecked(); }
 	inline bool getPressureOpacity() {return opacity_box->isChecked();}
-	inline int getDisplacement() {return mesh_displacement_slider->value();}
-	inline int getDirection() {return mesh_displacement_direction->currentIndex();}
-	inline QUndoStack * getUndoStack() {return stacks->activeStack();}
-	
+
+  inline QUndoStack * getUndoStack() {return stacks->activeStack();}
 	
 	void setUndoStack(QWidget * parent);
 	

@@ -99,6 +99,10 @@ bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 	connect(this, SIGNAL(setSelectionRendering(bool)),glarea,SLOT(setSelectFaceRendering(bool)) );
 	
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));
+
+  // initialize once and for all the radius (will remain the same all the time)
+  current_brush.radius = (paintbox->getRadius() * m.cm.bbox.Diag() * 0.5);
+
 	return true;
 }
 
@@ -115,7 +119,13 @@ void EditPaintPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 
 void EditPaintPlugin::mousePressEvent(QMouseEvent * event, MeshModel &, GLArea * gla) 
 {
+  // start a new stroke: init zbuffer and update brush
 	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
+
+  current_brush.size = paintbox->getSize();
+	current_brush.opacity = paintbox->getOpacity();
+	current_brush.hardness = paintbox->getHardness();
+
 	pushInputEvent(event->type(), event->pos(), event->modifiers(), 1, event->button(), gla);	
 	gla->update();
 }
@@ -134,11 +144,19 @@ void EditPaintPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &, GLArea
 
 void EditPaintPlugin::tabletEvent(QTabletEvent * event, MeshModel & , GLArea * gla)
 {
+  if(!(paintbox->getPressureFrameEnabled()))
+    paintbox->enablePressureFrame();
+
 	event->accept();
 
-  // if event is down, clean zbuff
+  // if event is down, start a new stroke: clean zbuff
   if(event->type() == QEvent::TabletPress)
+  {
   	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL; 
+    current_brush.size = paintbox->getSize();
+	  current_brush.opacity = paintbox->getOpacity();
+	  current_brush.hardness = paintbox->getHardness();
+  }
 
   pushInputEvent(event->type(), event->pos(), event->modifiers(), event->pressure(), (event->pointerType() == QTabletEvent::Eraser)? Qt::RightButton : Qt::LeftButton, gla);
 	gla->update();
@@ -211,11 +229,19 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
 	
 	if (current_options & EPP_DRAW_CURSOR)
 	{
-		//TODO Compute only when needed!!!!!!!!!!!!!!
-		current_brush.size = paintbox->getSize() * latest_event.pressure;
-		current_brush.radius = (paintbox->getRadius() * m.cm.bbox.Diag() * 0.5) * latest_event.pressure;
-		current_brush.opacity = paintbox->getOpacity() * latest_event.pressure;
-		current_brush.hardness = paintbox->getHardness() * latest_event.pressure;
+
+    current_brush.radius = (paintbox->getRadius() * m.cm.bbox.Diag() * 0.5);
+    if((paintbox->getPressureFrameEnabled()))
+    {
+      if(paintbox->getPressureSize())
+		    current_brush.size = paintbox->getSize() * latest_event.pressure;
+
+      if(paintbox->getPressureOpacity())
+		    current_brush.opacity = paintbox->getOpacity() * latest_event.pressure;
+
+      if(paintbox->getPressureHardness())
+		    current_brush.hardness = paintbox->getHardness() * latest_event.pressure;
+    }
 		
 		if (paintbox->getSizeUnit() == 0) 
 			drawSimplePolyLine(gla, latest_event.position, paintbox->getSize(), 
@@ -455,6 +481,9 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 	float p_x, p_y, p_z;
 	float newpos[3]; 
 
+  if(paintbox->getPressureDisplacement())
+    decrease_pos *= latest_event.pressure;
+
 	for (unsigned int k = 0; k < vertices->size(); k++) //forach selected vertices
 	{
 		pair<CVertexO *, PickingData> data = vertices->at(k);
@@ -554,6 +583,9 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 //	int opac = 1.0;
 	float decrease_pos = paintbox->getHardness() / 100.0;
 	float strength = m.cm.bbox.Diag() * paintbox->getDisplacement() / 1000.0;
+
+  if(paintbox->getPressureDisplacement())
+    strength *= latest_event.pressure;
 	
 	if (latest_event.button == Qt::RightButton) strength = - strength;
 	

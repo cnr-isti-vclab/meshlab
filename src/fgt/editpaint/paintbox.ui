@@ -1,94 +1,97 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>Paintbox</class>
- <widget class="QWidget" name="Paintbox" >
-  <property name="geometry" >
+ <widget class="QWidget" name="Paintbox">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>329</width>
-    <height>1107</height>
+    <height>1030</height>
    </rect>
   </property>
-  <property name="sizePolicy" >
-   <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Vertex Painting</string>
   </property>
-  <layout class="QGridLayout" >
-   <item row="0" column="0" colspan="2" >
-    <widget class="QFrame" name="frame_2" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+  <layout class="QGridLayout">
+   <item row="0" column="0" colspan="2">
+    <widget class="QFrame" name="frame_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="frameShape" >
+     <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
-     <property name="frameShadow" >
+     <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QHBoxLayout" >
-      <property name="spacing" >
+     <layout class="QHBoxLayout">
+      <property name="spacing">
        <number>6</number>
       </property>
-      <property name="leftMargin" >
+      <property name="leftMargin">
        <number>0</number>
       </property>
-      <property name="topMargin" >
+      <property name="topMargin">
        <number>3</number>
       </property>
-      <property name="rightMargin" >
+      <property name="rightMargin">
        <number>0</number>
       </property>
-      <property name="bottomMargin" >
+      <property name="bottomMargin">
        <number>3</number>
       </property>
       <item>
-       <widget class="QToolButton" name="undo_button" >
-        <property name="enabled" >
+       <widget class="QToolButton" name="undo_button">
+        <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>Undo</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/undo-24.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/undo-24.png</normaloff>:/images/undo-24.png</iconset>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="redo_button" >
-        <property name="enabled" >
+       <widget class="QToolButton" name="redo_button">
+        <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>Redo</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/redo-24.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/redo-24.png</normaloff>:/images/redo-24.png</iconset>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
        </widget>
@@ -96,218 +99,225 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2" >
-    <widget class="Line" name="line_2" >
-     <property name="orientation" >
+   <item row="1" column="0" colspan="2">
+    <widget class="Line" name="line_2">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="2" column="0" >
-    <widget class="QFrame" name="frame_3" >
-     <property name="enabled" >
+   <item row="2" column="0">
+    <widget class="QFrame" name="frame_3">
+     <property name="enabled">
       <bool>true</bool>
      </property>
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="frameShape" >
+     <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
-     <property name="frameShadow" >
+     <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" >
-      <property name="spacing" >
+     <layout class="QVBoxLayout">
+      <property name="spacing">
        <number>3</number>
       </property>
-      <property name="leftMargin" >
+      <property name="leftMargin">
        <number>0</number>
       </property>
-      <property name="topMargin" >
+      <property name="topMargin">
        <number>0</number>
       </property>
-      <property name="rightMargin" >
+      <property name="rightMargin">
        <number>0</number>
       </property>
       <item>
-       <widget class="QToolButton" name="pen_button" >
-        <property name="text" >
+       <widget class="QToolButton" name="pen_button">
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/paintbrush-22.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/paintbrush-22.png</normaloff>:/images/paintbrush-22.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="checked" >
+        <property name="checked">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="fill_button" >
-        <property name="text" >
+       <widget class="QToolButton" name="fill_button">
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/bucket-fill-22.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/bucket-fill-22.png</normaloff>:/images/bucket-fill-22.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="gradient_button" >
-        <property name="text" >
+       <widget class="QToolButton" name="gradient_button">
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/blend-22.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/blend-22.png</normaloff>:/images/blend-22.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="smooth_button" >
-        <property name="enabled" >
+       <widget class="QToolButton" name="smooth_button">
+        <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/blur-22.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="clone_button" >
-        <property name="enabled" >
+       <widget class="QToolButton" name="clone_button">
+        <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/clone-22.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/clone-22.png</normaloff>:/images/clone-22.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="pick_button" >
-        <property name="enabled" >
+       <widget class="QToolButton" name="pick_button">
+        <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/color-picker-22.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/color-picker-22.png</normaloff>:/images/color-picker-22.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="perlin_button" >
-        <property name="text" >
+       <widget class="QToolButton" name="perlin_button">
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/perlin.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/perlin.png</normaloff>:/images/perlin.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
        <spacer>
-        <property name="orientation" >
+        <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
-        <property name="sizeType" >
+        <property name="sizeType">
          <enum>QSizePolicy::Fixed</enum>
         </property>
-        <property name="sizeHint" >
+        <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
           <height>40</height>
@@ -316,92 +326,95 @@
        </spacer>
       </item>
       <item>
-       <widget class="QToolButton" name="mesh_pick_button" >
-        <property name="enabled" >
+       <widget class="QToolButton" name="mesh_pick_button">
+        <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/pickbrush-22.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/pickbrush-22.png</normaloff>:/images/pickbrush-22.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="checked" >
+        <property name="checked">
          <bool>false</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="mesh_smooth_button" >
-        <property name="enabled" >
+       <widget class="QToolButton" name="mesh_smooth_button">
+        <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/blur-22.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="mesh_add_button" >
-        <property name="enabled" >
+       <widget class="QToolButton" name="mesh_add_button">
+        <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>...</string>
         </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/add-24.png</iconset>
+        <property name="icon">
+         <iconset resource="meshlab.qrc">
+          <normaloff>:/images/add-24.png</normaloff>:/images/add-24.png</iconset>
         </property>
-        <property name="iconSize" >
+        <property name="iconSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
-        <property name="checkable" >
+        <property name="checkable">
          <bool>true</bool>
         </property>
-        <property name="autoExclusive" >
+        <property name="autoExclusive">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
        <spacer>
-        <property name="orientation" >
+        <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
-        <property name="sizeHint" >
+        <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>185</height>
+          <height>50</height>
          </size>
         </property>
        </spacer>
@@ -409,37 +422,28 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="1" >
-    <widget class="QWidget" native="1" name="widget" >
-     <layout class="QGridLayout" >
-      <property name="leftMargin" >
+   <item row="2" column="1">
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QGridLayout">
+      <property name="margin">
        <number>0</number>
       </property>
-      <property name="topMargin" >
-       <number>0</number>
-      </property>
-      <property name="rightMargin" >
-       <number>0</number>
-      </property>
-      <property name="bottomMargin" >
-       <number>0</number>
-      </property>
-      <item row="0" column="0" >
-       <widget class="QFrame" name="color_frame" >
-        <property name="minimumSize" >
+      <item row="0" column="0">
+       <widget class="QFrame" name="color_frame">
+        <property name="minimumSize">
          <size>
           <width>0</width>
           <height>90</height>
          </size>
         </property>
-        <property name="frameShape" >
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <widget class="QToolButton" name="default_colors" >
-         <property name="geometry" >
+        <widget class="QToolButton" name="default_colors">
+         <property name="geometry">
           <rect>
            <x>20</x>
            <y>60</y>
@@ -447,24 +451,25 @@
            <height>24</height>
           </rect>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>...</string>
          </property>
-         <property name="icon" >
-          <iconset resource="meshlab.qrc" >:/images/bw.png</iconset>
+         <property name="icon">
+          <iconset resource="meshlab.qrc">
+           <normaloff>:/images/bw.png</normaloff>:/images/bw.png</iconset>
          </property>
-         <property name="iconSize" >
+         <property name="iconSize">
           <size>
            <width>15</width>
            <height>15</height>
           </size>
          </property>
-         <property name="autoRaise" >
+         <property name="autoRaise">
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QToolButton" name="switch_colors" >
-         <property name="geometry" >
+        <widget class="QToolButton" name="switch_colors">
+         <property name="geometry">
           <rect>
            <x>110</x>
            <y>0</y>
@@ -472,30 +477,31 @@
            <height>24</height>
           </rect>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>...</string>
          </property>
-         <property name="icon" >
-          <iconset resource="meshlab.qrc" >:/images/swap-colors-12.png</iconset>
+         <property name="icon">
+          <iconset resource="meshlab.qrc">
+           <normaloff>:/images/swap-colors-12.png</normaloff>:/images/swap-colors-12.png</iconset>
          </property>
-         <property name="iconSize" >
+         <property name="iconSize">
           <size>
            <width>15</width>
            <height>15</height>
           </size>
          </property>
-         <property name="checkable" >
+         <property name="checkable">
           <bool>false</bool>
          </property>
-         <property name="autoRaise" >
+         <property name="autoRaise">
           <bool>true</bool>
          </property>
-         <property name="arrowType" >
+         <property name="arrowType">
           <enum>Qt::NoArrow</enum>
          </property>
         </widget>
-        <widget class="Colorframe" name="background_frame" >
-         <property name="geometry" >
+        <widget class="Colorframe" name="background_frame">
+         <property name="geometry">
           <rect>
            <x>60</x>
            <y>30</y>
@@ -503,21 +509,21 @@
            <height>41</height>
           </rect>
          </property>
-         <property name="palette" >
+         <property name="palette">
           <palette>
            <active>
-            <colorrole role="Base" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Base">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Window" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Window">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
@@ -526,18 +532,18 @@
             </colorrole>
            </active>
            <inactive>
-            <colorrole role="Base" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Base">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Window" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Window">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
@@ -546,18 +552,18 @@
             </colorrole>
            </inactive>
            <disabled>
-            <colorrole role="Base" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Base">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Window" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Window">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
@@ -567,21 +573,21 @@
            </disabled>
           </palette>
          </property>
-         <property name="autoFillBackground" >
+         <property name="autoFillBackground">
           <bool>true</bool>
          </property>
-         <property name="frameShape" >
+         <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
-         <property name="frameShadow" >
+         <property name="frameShadow">
           <enum>QFrame::Plain</enum>
          </property>
-         <property name="lineWidth" >
+         <property name="lineWidth">
           <number>2</number>
          </property>
         </widget>
-        <widget class="Colorframe" name="foreground_frame" >
-         <property name="geometry" >
+        <widget class="Colorframe" name="foreground_frame">
+         <property name="geometry">
           <rect>
            <x>40</x>
            <y>20</y>
@@ -589,21 +595,21 @@
            <height>41</height>
           </rect>
          </property>
-         <property name="palette" >
+         <property name="palette">
           <palette>
            <active>
-            <colorrole role="Base" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Base">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Window" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Window">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>0</red>
                <green>0</green>
                <blue>0</blue>
@@ -612,18 +618,18 @@
             </colorrole>
            </active>
            <inactive>
-            <colorrole role="Base" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Base">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>255</red>
                <green>255</green>
                <blue>255</blue>
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Window" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Window">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>0</red>
                <green>0</green>
                <blue>0</blue>
@@ -632,18 +638,18 @@
             </colorrole>
            </inactive>
            <disabled>
-            <colorrole role="Base" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Base">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>0</red>
                <green>0</green>
                <blue>0</blue>
               </color>
              </brush>
             </colorrole>
-            <colorrole role="Window" >
-             <brush brushstyle="SolidPattern" >
-              <color alpha="255" >
+            <colorrole role="Window">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
                <red>0</red>
                <green>0</green>
                <blue>0</blue>
@@ -653,31 +659,31 @@
            </disabled>
           </palette>
          </property>
-         <property name="autoFillBackground" >
+         <property name="autoFillBackground">
           <bool>true</bool>
          </property>
-         <property name="frameShape" >
+         <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
-         <property name="frameShadow" >
+         <property name="frameShadow">
           <enum>QFrame::Plain</enum>
          </property>
-         <property name="lineWidth" >
+         <property name="lineWidth">
           <number>2</number>
          </property>
         </widget>
        </widget>
       </item>
-      <item row="0" column="1" >
-       <widget class="QFrame" name="frame" >
-        <property name="frameShape" >
+      <item row="0" column="1">
+       <widget class="QFrame" name="frame">
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <widget class="QGraphicsView" name="brush_viewer" >
-         <property name="geometry" >
+        <widget class="QGraphicsView" name="brush_viewer">
+         <property name="geometry">
           <rect>
            <x>34</x>
            <y>4</y>
@@ -685,52 +691,52 @@
            <height>81</height>
           </rect>
          </property>
-         <property name="verticalScrollBarPolicy" >
+         <property name="verticalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
-         <property name="horizontalScrollBarPolicy" >
+         <property name="horizontalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
         </widget>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2" >
-       <widget class="QFrame" name="clone_source_frame" >
-        <property name="frameShape" >
+      <item row="1" column="0" colspan="2">
+       <widget class="QFrame" name="clone_source_frame">
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QVBoxLayout" >
+        <layout class="QVBoxLayout">
          <item>
-          <widget class="CloneView" name="clone_source_view" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="MinimumExpanding" hsizetype="Expanding" >
+          <widget class="CloneView" name="clone_source_view">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="verticalScrollBarPolicy" >
+           <property name="verticalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
-           <property name="horizontalScrollBarPolicy" >
+           <property name="horizontalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
-           <property name="interactive" >
+           <property name="interactive">
             <bool>true</bool>
            </property>
-           <property name="dragMode" >
+           <property name="dragMode">
             <enum>QGraphicsView::ScrollHandDrag</enum>
            </property>
-           <property name="optimizationFlags" >
-            <enum>QGraphicsView::DontAdjustForAntialiasing</enum>
+           <property name="optimizationFlags">
+            <set>QGraphicsView::DontAdjustForAntialiasing</set>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="clone_source_load_button" >
-           <property name="text" >
+          <widget class="QPushButton" name="clone_source_load_button">
+           <property name="text">
             <string>Load From File</string>
            </property>
           </widget>
@@ -738,99 +744,87 @@
         </layout>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2" >
-       <widget class="QFrame" name="pen_frame" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+      <item row="2" column="0" colspan="2">
+       <widget class="QFrame" name="pen_frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="frameShape" >
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QGridLayout" >
-         <property name="leftMargin" >
+        <layout class="QGridLayout">
+         <property name="margin">
           <number>9</number>
          </property>
-         <property name="topMargin" >
-          <number>9</number>
-         </property>
-         <property name="rightMargin" >
-          <number>9</number>
-         </property>
-         <property name="bottomMargin" >
-          <number>9</number>
-         </property>
-         <property name="horizontalSpacing" >
+         <property name="spacing">
           <number>6</number>
          </property>
-         <property name="verticalSpacing" >
-          <number>6</number>
-         </property>
-         <item row="0" column="2" >
-          <widget class="QSpinBox" name="deck_box" >
-           <property name="toolTip" >
+         <item row="0" column="2">
+          <widget class="QSpinBox" name="deck_box">
+           <property name="toolTip">
             <string>Change the opacity of the color (this is not the opengl alpha value)</string>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>100</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>100</number>
            </property>
           </widget>
          </item>
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label_deck" >
-           <property name="text" >
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_deck">
+           <property name="text">
             <string>Opacity</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" >
-          <widget class="QLabel" name="label_penmodus" >
-           <property name="enabled" >
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_penmodus">
+           <property name="enabled">
             <bool>false</bool>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Modus</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1" colspan="2" >
-          <widget class="QComboBox" name="pen_modus" >
-           <property name="enabled" >
+         <item row="1" column="1" colspan="2">
+          <widget class="QComboBox" name="pen_modus">
+           <property name="enabled">
             <bool>false</bool>
            </property>
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Normal</string>
             </property>
            </item>
           </widget>
          </item>
-         <item row="0" column="1" >
-          <widget class="QSlider" name="opacity_slider" >
-           <property name="toolTip" >
+         <item row="0" column="1">
+          <widget class="QSlider" name="opacity_slider">
+           <property name="toolTip">
             <string>Change the opacity of the color (this is not the opengl alpha value)</string>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>100</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>100</number>
            </property>
-           <property name="orientation" >
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
@@ -838,80 +832,68 @@
         </layout>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2" >
-       <widget class="QFrame" name="smooth_frame" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+      <item row="3" column="0" colspan="2">
+       <widget class="QFrame" name="smooth_frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="frameShape" >
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QGridLayout" >
-         <property name="leftMargin" >
+        <layout class="QGridLayout">
+         <property name="margin">
           <number>9</number>
          </property>
-         <property name="topMargin" >
-          <number>9</number>
-         </property>
-         <property name="rightMargin" >
-          <number>9</number>
-         </property>
-         <property name="bottomMargin" >
-          <number>9</number>
-         </property>
-         <property name="horizontalSpacing" >
+         <property name="spacing">
           <number>6</number>
          </property>
-         <property name="verticalSpacing" >
-          <number>6</number>
-         </property>
-         <item row="0" column="1" >
-          <widget class="QSlider" name="percentual_slider" >
-           <property name="toolTip" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+         <item row="0" column="1">
+          <widget class="QSlider" name="percentual_slider">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>100</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>25</number>
            </property>
-           <property name="sliderPosition" >
+           <property name="sliderPosition">
             <number>25</number>
            </property>
-           <property name="orientation" >
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label_percentual" >
-           <property name="text" >
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_percentual">
+           <property name="text">
             <string>Percentual</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="2" >
-          <widget class="QSpinBox" name="percentual_box" >
-           <property name="toolTip" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+         <item row="0" column="2">
+          <widget class="QSpinBox" name="percentual_box">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>100</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>24</number>
            </property>
           </widget>
@@ -919,61 +901,61 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </item>
-      <item row="4" column="0" colspan="2" >
-       <widget class="QFrame" name="mesh_displacement_frame" >
-        <property name="enabled" >
+      <item row="4" column="0" colspan="2">
+       <widget class="QFrame" name="mesh_displacement_frame">
+        <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="frameShape" >
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QGridLayout" >
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label_6" >
-           <property name="text" >
+        <layout class="QGridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
             <string>Displacement</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1" >
-          <widget class="QSlider" name="mesh_displacement_slider" >
-           <property name="sliderPosition" >
+         <item row="0" column="1">
+          <widget class="QSlider" name="mesh_displacement_slider">
+           <property name="sliderPosition">
             <number>4</number>
            </property>
-           <property name="orientation" >
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
-         <item row="0" column="2" >
-          <widget class="QDoubleSpinBox" name="displacement_spin_box" >
-           <property name="decimals" >
+         <item row="0" column="2">
+          <widget class="QDoubleSpinBox" name="displacement_spin_box">
+           <property name="decimals">
             <number>3</number>
            </property>
-           <property name="value" >
-            <double>4.000</double>
+           <property name="value">
+            <double>4.000000000000000</double>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" >
-          <widget class="QLabel" name="label_8" >
-           <property name="text" >
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
             <string>Direction</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1" colspan="2" >
-          <widget class="QComboBox" name="mesh_displacement_direction" >
+         <item row="1" column="1" colspan="2">
+          <widget class="QComboBox" name="mesh_displacement_direction">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Averaged Normals</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Per Vertex Normals</string>
             </property>
            </item>
@@ -982,196 +964,196 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2" >
-       <widget class="QFrame" name="pen_extra_frame" >
-        <property name="enabled" >
+      <item row="5" column="0" colspan="2">
+       <widget class="QFrame" name="pen_extra_frame">
+        <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="frameShape" >
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QGridLayout" >
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label_pen" >
-           <property name="text" >
+        <layout class="QGridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_pen">
+           <property name="text">
             <string>Brush</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="2" colspan="3" >
-          <widget class="QComboBox" name="brush_box" >
-           <property name="enabled" >
+         <item row="0" column="2" colspan="3">
+          <widget class="QComboBox" name="brush_box">
+           <property name="enabled">
             <bool>true</bool>
            </property>
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="editable" >
+           <property name="editable">
             <bool>false</bool>
            </property>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Circle</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Square</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Pixmap</string>
             </property>
            </item>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2" >
-          <widget class="QLabel" name="label_percentual_3" >
-           <property name="text" >
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="label_percentual_3">
+           <property name="text">
             <string>Hardness</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="2" colspan="2" >
-          <widget class="QSlider" name="hardness_slider" >
-           <property name="toolTip" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+         <item row="1" column="2" colspan="2">
+          <widget class="QSlider" name="hardness_slider">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>100</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>50</number>
            </property>
-           <property name="sliderPosition" >
+           <property name="sliderPosition">
             <number>50</number>
            </property>
-           <property name="orientation" >
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
-         <item row="1" column="4" >
-          <widget class="QSpinBox" name="decrease_box" >
-           <property name="toolTip" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+         <item row="1" column="4">
+          <widget class="QSpinBox" name="decrease_box">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>100</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>50</number>
            </property>
           </widget>
          </item>
-         <item row="2" column="0" colspan="2" >
-          <widget class="QLabel" name="label_percentual_4" >
-           <property name="text" >
+         <item row="2" column="0" colspan="2">
+          <widget class="QLabel" name="label_percentual_4">
+           <property name="text">
             <string>Size</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="2" colspan="2" >
-          <widget class="QSlider" name="size_slider" >
-           <property name="toolTip" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+         <item row="2" column="2" colspan="2">
+          <widget class="QSlider" name="size_slider">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>100</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>20</number>
            </property>
-           <property name="sliderPosition" >
+           <property name="sliderPosition">
             <number>20</number>
            </property>
-           <property name="orientation" >
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
-         <item row="2" column="4" >
-          <widget class="QSpinBox" name="decrease_box_3" >
-           <property name="toolTip" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+         <item row="2" column="4">
+          <widget class="QSpinBox" name="decrease_box_3">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>100</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>20</number>
            </property>
           </widget>
          </item>
-         <item row="3" column="0" colspan="2" >
-          <widget class="QLabel" name="label_percentual_5" >
-           <property name="text" >
+         <item row="3" column="0" colspan="2">
+          <widget class="QLabel" name="label_percentual_5">
+           <property name="text">
             <string>Units</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="2" colspan="3" >
-          <widget class="QComboBox" name="pen_unit" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+         <item row="3" column="2" colspan="3">
+          <widget class="QComboBox" name="pen_unit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>pixel</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>percentual of bounding box</string>
             </property>
            </item>
           </widget>
          </item>
-         <item row="4" column="0" >
-          <widget class="QLabel" name="label" >
-           <property name="text" >
+         <item row="4" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
             <string>Paint on:</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1" colspan="2" >
-          <widget class="QCheckBox" name="backface_culling" >
-           <property name="text" >
+         <item row="4" column="1" colspan="2">
+          <widget class="QCheckBox" name="backface_culling">
+           <property name="text">
             <string>backfaces</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="3" colspan="2" >
-          <widget class="QCheckBox" name="invisible_painting" >
-           <property name="text" >
+         <item row="4" column="3" colspan="2">
+          <widget class="QCheckBox" name="invisible_painting">
+           <property name="text">
             <string>hidden polygons</string>
            </property>
           </widget>
@@ -1179,95 +1161,83 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </item>
-      <item row="6" column="0" colspan="2" >
-       <widget class="QFrame" name="noise_frame" >
-        <property name="frameShape" >
+      <item row="6" column="0" colspan="2">
+       <widget class="QFrame" name="noise_frame">
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QHBoxLayout" >
+        <layout class="QHBoxLayout">
          <item>
-          <widget class="QLabel" name="label_5" >
-           <property name="text" >
+          <widget class="QLabel" name="label_5">
+           <property name="text">
             <string>Noise Scale</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSlider" name="noise_slider" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sliderPosition" >
+          <widget class="QSlider" name="noise_slider">
+           <property name="sliderPosition">
             <number>2</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="noise_box">
-           <property name="decimals" >
+           <property name="decimals">
             <number>3</number>
            </property>
-           <property name="value" >
-            <double>2.000</double>
+           <property name="value">
+            <double>2.000000000000000</double>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
       </item>
-      <item row="7" column="0" colspan="2" >
-       <widget class="QFrame" name="pick_frame" >
-        <property name="frameShape" >
+      <item row="7" column="0" colspan="2">
+       <widget class="QFrame" name="pick_frame">
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QGridLayout" >
-         <property name="leftMargin" >
+        <layout class="QGridLayout">
+         <property name="margin">
           <number>9</number>
          </property>
-         <property name="topMargin" >
-          <number>9</number>
-         </property>
-         <property name="rightMargin" >
-          <number>9</number>
-         </property>
-         <property name="bottomMargin" >
-          <number>9</number>
-         </property>
-         <property name="horizontalSpacing" >
+         <property name="spacing">
           <number>6</number>
          </property>
-         <property name="verticalSpacing" >
-          <number>6</number>
-         </property>
-         <item row="0" column="1" >
-          <widget class="QComboBox" name="pick_mode" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+         <item row="0" column="1">
+          <widget class="QComboBox" name="pick_mode">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Nearest vertex color</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Pixel color</string>
             </property>
            </item>
           </widget>
          </item>
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label_pick" >
-           <property name="text" >
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_pick">
+           <property name="text">
             <string>Picking mode</string>
            </property>
           </widget>
@@ -1275,82 +1245,70 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </item>
-      <item row="8" column="0" colspan="2" >
-       <widget class="QFrame" name="gradient_frame" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+      <item row="8" column="0" colspan="2">
+       <widget class="QFrame" name="gradient_frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="frameShape" >
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QGridLayout" >
-         <property name="leftMargin" >
+        <layout class="QGridLayout">
+         <property name="margin">
           <number>9</number>
          </property>
-         <property name="topMargin" >
-          <number>9</number>
-         </property>
-         <property name="rightMargin" >
-          <number>9</number>
-         </property>
-         <property name="bottomMargin" >
-          <number>9</number>
-         </property>
-         <property name="horizontalSpacing" >
+         <property name="spacing">
           <number>6</number>
          </property>
-         <property name="verticalSpacing" >
-          <number>6</number>
-         </property>
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label_4" >
-           <property name="text" >
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
             <string>Type</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1" colspan="2" >
-          <widget class="QComboBox" name="gradient_type" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+         <item row="0" column="1" colspan="2">
+          <widget class="QComboBox" name="gradient_type">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Foreground to background (RGB)</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Foreground to transparency</string>
             </property>
            </item>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2" >
-          <widget class="QLabel" name="label_3" >
-           <property name="text" >
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
             <string>Form</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="2" >
-          <widget class="QComboBox" name="gradient_form" >
+         <item row="1" column="2">
+          <widget class="QComboBox" name="gradient_form">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Linear</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Circular</string>
             </property>
            </item>
@@ -1359,37 +1317,37 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </item>
-      <item row="9" column="0" colspan="2" >
-       <widget class="QFrame" name="frame_4" >
-        <property name="frameShape" >
+      <item row="9" column="0" colspan="2">
+       <widget class="QFrame" name="frame_4">
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QHBoxLayout" >
+        <layout class="QHBoxLayout">
          <item>
-          <widget class="QLabel" name="label_2" >
-           <property name="text" >
+          <widget class="QLabel" name="label_2">
+           <property name="text">
             <string>Vertex search:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="search_mode" >
-           <property name="toolTip" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+          <widget class="QComboBox" name="search_mode">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">fast:&lt;/span> works better with big meshes, but can loose some vertexes when faces are not direct connected&lt;br />&lt;span style=" font-weight:600;">slow but accurate: &lt;/span>sholud be used with small meshes, because it finds every vertex during painting&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;fast:&lt;/span&gt; works better with big meshes, but can loose some vertexes when faces are not direct connected&lt;br /&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;slow but accurate: &lt;/span&gt;sholud be used with small meshes, because it finds every vertex during painting&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>fast</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>slow but accurate</string>
             </property>
            </item>
@@ -1398,50 +1356,50 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </item>
-      <item row="10" column="0" colspan="2" >
-       <widget class="QFrame" name="pressure_frame" >
-        <property name="enabled" >
-         <bool>false</bool>
+      <item row="10" column="0" colspan="2">
+       <widget class="QFrame" name="pressure_frame">
+        <property name="enabled">
+         <bool>true</bool>
         </property>
-        <property name="frameShape" >
+        <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="frameShadow" >
+        <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QGridLayout" >
-         <item row="0" column="0" colspan="3" >
-          <widget class="QLabel" name="label_7" >
-           <property name="text" >
+        <layout class="QGridLayout">
+         <item row="0" column="0" colspan="3">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
             <string>Pen pressure maps to:</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="0" >
-          <widget class="QCheckBox" name="opacity_box" >
-           <property name="text" >
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="opacity_box">
+           <property name="text">
             <string>Opacity</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="2" >
-          <widget class="QCheckBox" name="size_box" >
-           <property name="text" >
+         <item row="2" column="2">
+          <widget class="QCheckBox" name="size_box">
+           <property name="text">
             <string>Size</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="2" >
-          <widget class="QCheckBox" name="displacement_box" >
-           <property name="text" >
-            <string>Displacement</string>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="hardness_box">
+           <property name="text">
+            <string>Hardness</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" >
-          <widget class="QCheckBox" name="hardness_box" >
-           <property name="text" >
-            <string>Hardness</string>
+         <item row="1" column="2">
+          <widget class="QCheckBox" name="displacement_box">
+           <property name="text">
+            <string>Displacement / Smooth %</string>
            </property>
           </widget>
          </item>
@@ -1457,17 +1415,17 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>Colorframe</class>
    <extends>QFrame</extends>
-   <header location="global" >colorframe.h</header>
+   <header location="global">colorframe.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>CloneView</class>
    <extends>QGraphicsView</extends>
-   <header location="global" >cloneview.h</header>
+   <header location="global">cloneview.h</header>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="meshlab.qrc" />
+  <include location="meshlab.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -1476,11 +1434,11 @@ p, li { white-space: pre-wrap; }
    <receiver>deck_box</receiver>
    <slot>setValue(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>251</x>
      <y>399</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>308</x>
      <y>394</y>
     </hint>
@@ -1492,11 +1450,11 @@ p, li { white-space: pre-wrap; }
    <receiver>opacity_slider</receiver>
    <slot>setValue(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>308</x>
      <y>394</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>251</x>
      <y>399</y>
     </hint>
@@ -1508,11 +1466,11 @@ p, li { white-space: pre-wrap; }
    <receiver>percentual_box</receiver>
    <slot>setValue(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>251</x>
      <y>480</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>308</x>
      <y>477</y>
     </hint>
@@ -1524,11 +1482,11 @@ p, li { white-space: pre-wrap; }
    <receiver>percentual_slider</receiver>
    <slot>setValue(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>308</x>
      <y>477</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>251</x>
      <y>480</y>
     </hint>
@@ -1540,11 +1498,11 @@ p, li { white-space: pre-wrap; }
    <receiver>decrease_box</receiver>
    <slot>setValue(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>660</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>308</x>
      <y>666</y>
     </hint>
@@ -1556,11 +1514,11 @@ p, li { white-space: pre-wrap; }
    <receiver>hardness_slider</receiver>
    <slot>setValue(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>308</x>
      <y>666</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>248</x>
      <y>660</y>
     </hint>
@@ -1572,11 +1530,11 @@ p, li { white-space: pre-wrap; }
    <receiver>decrease_box_3</receiver>
    <slot>setValue(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>692</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>308</x>
      <y>698</y>
     </hint>
@@ -1588,11 +1546,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>69</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>135</x>
      <y>383</y>
     </hint>
@@ -1604,11 +1562,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pressure_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>69</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>139</x>
      <y>1097</y>
     </hint>
@@ -1620,11 +1578,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>69</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>137</x>
      <y>759</y>
     </hint>
@@ -1636,11 +1594,11 @@ p, li { white-space: pre-wrap; }
    <receiver>size_slider</receiver>
    <slot>setValue(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>308</x>
      <y>698</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>248</x>
      <y>692</y>
     </hint>
@@ -1652,11 +1610,11 @@ p, li { white-space: pre-wrap; }
    <receiver>gradient_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>135</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>209</x>
      <y>949</y>
     </hint>
@@ -1668,11 +1626,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>102</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>160</x>
      <y>383</y>
     </hint>
@@ -1684,11 +1642,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>135</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>216</x>
      <y>383</y>
     </hint>
@@ -1700,11 +1658,11 @@ p, li { white-space: pre-wrap; }
    <receiver>smooth_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>168</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>267</x>
      <y>466</y>
     </hint>
@@ -1716,11 +1674,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>168</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>250</x>
      <y>759</y>
     </hint>
@@ -1732,11 +1690,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pressure_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>168</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>272</x>
      <y>1097</y>
     </hint>
@@ -1748,11 +1706,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pick_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>234</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>319</x>
      <y>868</y>
     </hint>
@@ -1764,11 +1722,11 @@ p, li { white-space: pre-wrap; }
    <receiver>mesh_displacement_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>442</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>230</x>
      <y>587</y>
     </hint>
@@ -1780,11 +1738,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>25</x>
      <y>343</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>199</x>
      <y>759</y>
     </hint>
@@ -1796,27 +1754,43 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>28</x>
      <y>376</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>179</x>
      <y>759</y>
     </hint>
    </hints>
   </connection>
   <connection>
+   <sender>mesh_smooth_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pressure_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>24</x>
+     <y>373</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>981</y>
+    </hint>
+   </hints>
+  </connection>  
+  <connection>
    <sender>mesh_add_button</sender>
    <signal>toggled(bool)</signal>
    <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>442</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>122</x>
      <y>759</y>
     </hint>
@@ -1828,11 +1802,11 @@ p, li { white-space: pre-wrap; }
    <receiver>mesh_displacement_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>28</x>
      <y>442</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>122</x>
      <y>587</y>
     </hint>
@@ -1844,11 +1818,11 @@ p, li { white-space: pre-wrap; }
    <receiver>smooth_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>19</x>
      <y>371</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>153</x>
      <y>466</y>
     </hint>
@@ -1860,11 +1834,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pressure_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>31</x>
      <y>343</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>129</x>
      <y>1097</y>
     </hint>
@@ -1876,11 +1850,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pressure_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>442</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>129</x>
      <y>1097</y>
     </hint>
@@ -1892,11 +1866,11 @@ p, li { white-space: pre-wrap; }
    <receiver>clone_source_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>17</x>
      <y>201</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>319</x>
      <y>136</y>
     </hint>
@@ -1908,11 +1882,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>33</x>
      <y>201</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>319</x>
      <y>759</y>
     </hint>
@@ -1924,11 +1898,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>28</x>
      <y>201</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>277</x>
      <y>383</y>
     </hint>
@@ -1940,11 +1914,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pressure_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>27</x>
      <y>201</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>277</x>
      <y>1097</y>
     </hint>
@@ -1956,11 +1930,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>36</x>
      <y>267</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>254</x>
      <y>383</y>
     </hint>
@@ -1972,11 +1946,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>28</x>
      <y>267</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>259</x>
      <y>765</y>
     </hint>
@@ -1988,11 +1962,11 @@ p, li { white-space: pre-wrap; }
    <receiver>gradient_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>17</x>
      <y>267</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>188</x>
      <y>949</y>
     </hint>
@@ -2004,11 +1978,11 @@ p, li { white-space: pre-wrap; }
    <receiver>pressure_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>21</x>
      <y>267</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>166</x>
      <y>1097</y>
     </hint>
@@ -2020,11 +1994,11 @@ p, li { white-space: pre-wrap; }
    <receiver>gradient_form</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>17</x>
      <y>267</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>308</x>
      <y>938</y>
     </hint>
@@ -2036,11 +2010,11 @@ p, li { white-space: pre-wrap; }
    <receiver>gradient_form</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>29</x>
      <y>135</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>308</x>
      <y>938</y>
     </hint>
@@ -2052,11 +2026,11 @@ p, li { white-space: pre-wrap; }
    <receiver>noise_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>28</x>
      <y>267</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>197</x>
      <y>819</y>
     </hint>
