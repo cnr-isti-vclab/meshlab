@@ -17,11 +17,11 @@
 #include <QImage>
 #include <QFile>
 
-#define SET_STATE(val1,val2) { _state = val1; _dataReady = val2; return; }
+#define SET_STATE(val1,val2) { _state = val1; _mutex.lock(); _dataReady = val2; _mutex.unlock(); return; }
 #define CHECK(condition,val1,val2) { if(condition) { SET_STATE(val1,val2) } }
-#define SET_STATE_DELETE(val1,val2) { _state = val1; _dataReady = val2; httpResponse->deleteLater(); return; }
+#define SET_STATE_DELETE(val1,val2) { _state = val1; _mutex.lock(); _dataReady = val2; _mutex.unlock(); httpResponse->deleteLater(); return; }
 #define CHECK_DELETE(condition,val1,val2) { if(condition) { SET_STATE_DELETE(val1,val2) } }
-#define CHECK_ERRORS(errorCode) { if(error) { _state = (errorCode); _dataReady = true; httpResponse->deleteLater(); return; } }
+#define CHECK_ERRORS(errorCode) { if(error) { _state = (errorCode); _mutex.lock(); _dataReady = true; _mutex.unlock(); httpResponse->deleteLater(); return; } }
 
 /********************
  * CameraParameters *
@@ -111,7 +111,7 @@ const char *SynthData::steps[] =
 };
 
 SynthData::SynthData(ImportSettings &settings, QObject *parent)
-  : QObject(parent),transport()
+  : QObject(parent)//,transport()
 {
   _coordinateSystems = new QList<CoordinateSystem*>();
   _imageMap = new QHash<int,Image>();
@@ -119,10 +119,12 @@ SynthData::SynthData(ImportSettings &settings, QObject *parent)
   _state = PENDING;
   _step = WEB_SERVICE;
   _progress = 0;
+  _mutex.lock();
   _dataReady = false;
+  _mutex.unlock();
   _semaphore = 0;
   _imagesToDownloadCount = 0;
-   connect(&transport, SIGNAL(responseReady()),this, SLOT(readWSresponse()));
+  //connect(&transport, SIGNAL(responseReady()),this, SLOT(readWSresponse()));
 }
 
 SynthData::~SynthData()
@@ -166,14 +168,18 @@ void SynthData::downloadSynthInfo(vcg::CallBackPos *cb)
   if(_settings._url.isNull() || _settings._url.isEmpty())
   {
     _state = WRONG_URL;
+    _mutex.lock();
     _dataReady = true;
+    _mutex.unlock();
     return;
   }
 
   if(_settings._imageSavePath.isNull())
   {
     _state = WRONG_PATH;
+    _mutex.lock();
     _dataReady = true;
+    _mutex.unlock();
     return ;
   }
   _savePath = _settings._imageSavePath;
@@ -183,7 +189,9 @@ void SynthData::downloadSynthInfo(vcg::CallBackPos *cb)
   if(i < 0 || _settings._url.length() < i + 40)
   {
     _state = WRONG_URL;
+    _mutex.lock();
     _dataReady = true;
+    _mutex.unlock();
     return;
   }
 
@@ -195,10 +203,12 @@ void SynthData::downloadSynthInfo(vcg::CallBackPos *cb)
   message.addMethodArgument("collectionId", "", cid);
   message.addMethodArgument("incrementEmbedCount", "", false, 0);
 
-  transport.setAction("http://labs.live.com/GetCollectionData");
-  transport.setHost("photosynth.net");
+  QtSoapHttpTransport *transport = new QtSoapHttpTransport(this);
+  connect(transport, SIGNAL(responseReady(const QtSoapMessage &)),this, SLOT(readWSresponse(const QtSoapMessage &)));
+  transport->setAction("http://labs.live.com/GetCollectionData");
+  transport->setHost("photosynth.net");
 
-  transport.submitRequest(message, "/photosynthws/PhotosynthService.asmx");
+  transport->submitRequest(message, "/photosynthws/PhotosynthService.asmx");
   _state = PENDING;
   _progress = 50;
   _cb(progressInfo(),_info.toStdString().data());
@@ -207,9 +217,9 @@ void SynthData::downloadSynthInfo(vcg::CallBackPos *cb)
 /*
  * Handles the photosynth web service response.
  */
-void SynthData::readWSresponse()
+void SynthData::readWSresponse(const QtSoapMessage &response)
 {
-  const QtSoapMessage &response = transport.getResponse();
+  //const QtSoapMessage &response = transport.getResponse();
   CHECK(response.isFault(), WEBSERVICE_ERROR, true)
   const QtSoapType &returnValue = response.returnValue();
   if(returnValue["Result"].isValid())
@@ -433,7 +443,7 @@ void SynthData::downloadBinFiles()
         //retrieving the originating object of the request whose response is being processed
         request->setOriginatingObject(p);
         manager->get(*request);
-        delete request;
+        delete request; ///CHECK ON THIS!!!!!!!!! what happens if the slot asks for the originating object, but the request (who's supposed to store this info) has been deleted???? Does the QNetworkAccessManager keep a copy of the request passed as argument to get?
       }
     }
   }
@@ -441,7 +451,9 @@ void SynthData::downloadBinFiles()
   if(_totalBinFilesCount == 0)
   {
     _state = SYNTH_NO_ERROR;
+    _mutex.lock();
     _dataReady = true;
+    _mutex.unlock();
   }
 }
 
@@ -454,6 +466,7 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
 {
   if(_state == READING_BIN_DATA || _state == BIN_DATA_FORMAT)
   {
+    --_semaphore;
     httpResponse->deleteLater();
     return;
   }
@@ -546,14 +559,16 @@ void SynthData::downloadImages()
       QNetworkRequest *request = new QNetworkRequest(QUrl(img._url));
       request->setAttribute(QNetworkRequest::User,QVariant(img._ID));
       manager->get(*request);
-      delete request;
+      delete request; ///// CHECK ON THIS TOO!!!!!!!!!
       ++requestCount;
     }
   }
   if(requestCount == 0)
   {
     _state = SYNTH_NO_ERROR;
+    _mutex.lock();
     _dataReady = true;
+    _mutex.unlock();
   }
 }
 
@@ -564,6 +579,7 @@ void SynthData::saveImages(QNetworkReply *httpResponse)
 {
   if(_state == SAVE_IMG)
   {
+    ++_semaphore;
     httpResponse->deleteLater();
     return;
   }

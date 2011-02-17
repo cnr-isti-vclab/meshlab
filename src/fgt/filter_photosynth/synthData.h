@@ -11,6 +11,7 @@
 #include <QtSoapHttpTransport>
 #include <assert.h>
 #include <common/interfaces.h>
+#include <QMutex>
 
 using namespace vcg;
 
@@ -179,7 +180,7 @@ public:
   int progressInfo();
 
 private slots:
-  void readWSresponse();
+  void readWSresponse(const QtSoapMessage &response);
   void parseJsonString(QNetworkReply *httpResponse);
   void loadBinFile(QNetworkReply *httpResponse);
   void saveImages(QNetworkReply *httpResponse);
@@ -217,6 +218,7 @@ public:
   vcg::CallBackPos *_cb;
   //contains import options
   ImportSettings _settings;
+  QMutex _mutex;
 
 private:
   //used to count how many responses to bin files requests have been processed
@@ -227,7 +229,7 @@ private:
   int _totalBinFilesCount;
   //the images will be saved here
   QString _savePath;
-  QtSoapHttpTransport transport;
+  //QtSoapHttpTransport *_transport;
 };
 
 /*********************

@@ -105,19 +105,32 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	  ImportSettings settings(par.getString("synthURL"), par.getInt("clusterID"));
 	  if(par.getBool("saveImages"))
 	    settings._imageSavePath = par.getString("savePath");
-	  //SynthData *synthData = SynthData::downloadSynthInfo(settings,cb);
 		SynthData *synthData = new SynthData(settings);
 		synthData->downloadSynthInfo(cb);
 	  //Hangs on active wait until data are available from the server
-	  while(!synthData->_dataReady)
+    bool clearToProceed = false;
+    bool success = synthData->_mutex.tryLock();
+    if(success)
+    {
+      clearToProceed = synthData->_dataReady;
+      synthData->_mutex.unlock();
+    }
+    //while(!synthData->_dataReady)
+    while(!clearToProceed)
 	  {
 	    //allows qt main loop to process the events relative to the response from the server,
 	    //triggering the signals that cause the invocation of the slots that process the response
 	    //and set the control variable that stops this active wait.
 	    //Note that a call to the function usleep() causes an infinite loop, because when the process awakes,
 	    //the control remains inside this loop and doesn't reach qt main loop that this way can't process events.
-	    QApplication::processEvents();
+      QApplication::processEvents();
 	    cb(synthData->progressInfo(),synthData->_info.toStdString().data());
+      success = synthData->_mutex.tryLock();
+      if(success)
+      {
+        clearToProceed = synthData->_dataReady;
+        synthData->_mutex.unlock();
+      }
 	  }
 	
 	  if(!synthData->isValid())
@@ -159,10 +172,10 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	      //we consider cameras only if the user chooses to download images
 	      if(par.getBool("saveImages"))
 	      {
-	        MeshModel *mm;
+          MeshModel *mm1 = 0;
 	        if(par.getBool("addCameraLayer"))
 	          //create a new layer where add points representing cameras to
-	          mm = md.addNewMesh("","cameras");
+            mm1 = md.addNewMesh("","cameras");
 	        CameraParameters cam;
 	        //scan cameras list for this coordinate system and for each one add a raster with a shot matching the camera
 	        foreach(cam, sys->_cameraParametersList)
@@ -179,11 +192,12 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	          if(success)
 	            outputToFile(out, s, img, cam);
 	#endif
-	          if(par.getBool("addCameraLayer"))
+            //if(par.getBool("addCameraLayer"))
+            if(mm1)
 	          {
 	            //add a point to the cameras layer as a placeholder for the camera
-	            tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-	            mm->cm.vert.back().P() = cam.getTranslation();
+              tri::Allocator<CMeshO>::AddVertices(mm1->cm,1);
+              mm1->cm.vert.back().P() = cam.getTranslation();
 	          }
 	          //add a new raster
 	          //the same image can be added several times, one for each coordinate system it appears into
