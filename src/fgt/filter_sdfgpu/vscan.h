@@ -43,10 +43,4 @@ class Vscan
 
 };
 
-// utility functions;
-void useScreenAsDest();
-void useDefaultShader();
-void setDepthPeelingTolerance(float t);
-void setDepthPeelingSize(const Vscan & scan);
-
 #endif

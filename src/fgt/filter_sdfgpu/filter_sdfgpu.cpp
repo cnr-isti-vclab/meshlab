@@ -72,13 +72,20 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
   for( int i=0;  i < peel; i++ )
   {
       if( i==0 )
+      {
             useDefaultShader();
+             assert(checkAndLogGL() && "useDefaultShader");
+      }
       else
       {
             vsB->useAsSource();
+            assert(checkAndLogGL() && "useAsSource");
             useDepthPeelingShader();
+            assert(checkAndLogGL() && "useDepthPeelingShader");
             setDepthPeelingTolerance(tolerance);
+            assert(checkAndLogGL() && "setDepthPeelingTolerance");
             setDepthPeelingSize(*vsB);
+            assert(checkAndLogGL() && "setDepthPeelingSize");
       }
 
       vsA->useAsDest();
@@ -87,14 +94,14 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
 
       std::swap<Vscan*>(vsA,vsB);
 
-      checkAndLogGL();
+      assert(checkAndLogGL() && "useAsDest");
  }
 
   assert(checkAndLogGL() && "After deepth peeling");
 
   releaseGL();
 
- // assert(checkAndLogGL() && "After release"); ?? oerazione non valida ma funziona??
+ // assert(checkAndLogGL() && "After release"); ?? operazione non valida ma funziona??
 
 
 /* for(int i=0; i<md.mm()->cm.vert.size(); i++)
@@ -260,5 +267,31 @@ void SdfGpuPlugin::useDepthPeelingShader()
    float m[16];
    glUniformMatrix4fv(glGetUniformLocation(shaderProgram,"matr"), 1,1, m );
 }
+
+void SdfGpuPlugin::setDepthPeelingTolerance(float t)
+{
+    glUniform1f( glGetUniformLocation(shaderProgram,"tolerance"), t );
+}
+
+void SdfGpuPlugin::setDepthPeelingSize(const Vscan & scan)
+{
+    float f[2];
+    f[0] = 1.0f/scan.sizeX();
+    f[1] = 1.0f/scan.sizeY();
+    glUniform2f( glGetUniformLocation(shaderProgram,"oneOverBufSize"), f[0], f[1] );
+}
+
+
+void SdfGpuPlugin::useScreenAsDest()
+{
+  glBindFramebuffer(GL_FRAMEBUFFER, 0 );
+}
+
+void SdfGpuPlugin::useDefaultShader()
+{
+  glUseProgram(0);
+}
+
+
 
 Q_EXPORT_PLUGIN(SdfGpuPlugin)

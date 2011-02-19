@@ -15,8 +15,6 @@ Vscan::~Vscan()
     glDeleteFramebuffers(1, (GLuint *)&frameID);
 }
 
-static int shaderProgram = -1;
-
 void Vscan::fillDepthBuffer(float* buf) const{
   
   // readback Textures
@@ -28,28 +26,6 @@ void Vscan::fillDepthBuffer(float* buf) const{
   glBindFramebuffer(GL_FRAMEBUFFER, 0 );
 
 }
-
-void useScreenAsDest()
-{
-  glBindFramebuffer(GL_FRAMEBUFFER, 0 );
-}
-
-void useDefaultShader()
-{
-  glUseProgram(0);
-}
-
-void setDepthPeelingTolerance(float t){
-  glUniform1f( glGetUniformLocation(shaderProgram,"tolerance"), t );
-}
-
-void setDepthPeelingSize(const Vscan & scan){
-  float f[2];
-  f[0] = 1.0f/scan.sizeX();
-  f[1] = 1.0f/scan.sizeY();
-  glUniform2f( glGetUniformLocation(shaderProgram,"oneOverBufSize"), f[0], f[1] );
-}
-
 
 void Vscan::useAsSource(){
 //  glEnable(GL_TEXTURE_2D);

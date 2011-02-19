@@ -27,6 +27,14 @@ public:
 
     void useDepthPeelingShader();
 
+    void setDepthPeelingTolerance(float t);
+
+    void setDepthPeelingSize(const Vscan & scan);
+
+    void useScreenAsDest();
+
+    void useDefaultShader();
+
 private:
 
     Vscan* vsA;
