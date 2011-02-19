@@ -17,12 +17,6 @@
 #include <QImage>
 #include <QFile>
 
-#define SET_STATE(val1,val2) { _state = val1; _mutex.lock(); _dataReady = val2; _mutex.unlock(); return; }
-#define CHECK(condition,val1,val2) { if(condition) { SET_STATE(val1,val2) } }
-#define SET_STATE_DELETE(val1,val2) { _state = val1; _mutex.lock(); _dataReady = val2; _mutex.unlock(); httpResponse->deleteLater(); return; }
-#define CHECK_DELETE(condition,val1,val2) { if(condition) { SET_STATE_DELETE(val1,val2) } }
-#define CHECK_ERRORS(errorCode) { if(error) { _state = (errorCode); _mutex.lock(); _dataReady = true; _mutex.unlock(); httpResponse->deleteLater(); return; } }
-
 /********************
  * CameraParameters *
  ********************/
@@ -110,8 +104,25 @@ const char *SynthData::steps[] =
   "Downloading images..."
 };
 
+bool SynthData::checkAndSetState(bool condition, Error errorCode, QNetworkReply *httpResponse)
+{
+  if(condition)
+    setState(errorCode, httpResponse);
+  return condition;
+}
+
+void SynthData::setState(Error errorCode, QNetworkReply *httpResponse)
+{
+  _state = errorCode;
+  _mutex.lock();
+  _dataReady = true;
+  _mutex.unlock();
+  if(httpResponse)
+    httpResponse->deleteLater();
+}
+
 SynthData::SynthData(ImportSettings &settings, QObject *parent)
-  : QObject(parent)//,transport()
+  : QObject(parent)
 {
   _coordinateSystems = new QList<CoordinateSystem*>();
   _imageMap = new QHash<int,Image>();
@@ -124,7 +135,6 @@ SynthData::SynthData(ImportSettings &settings, QObject *parent)
   _mutex.unlock();
   _semaphore = 0;
   _imagesToDownloadCount = 0;
-  //connect(&transport, SIGNAL(responseReady()),this, SLOT(readWSresponse()));
 }
 
 SynthData::~SynthData()
@@ -152,8 +162,6 @@ int SynthData::progressInfo()
   _info = steps[_step];
   return _progress;
 }
-
-//QtSoapHttpTransport SynthData::transport;
 
 /*
  * Contacts the photosynth web service to retrieve informations about
@@ -219,10 +227,10 @@ void SynthData::downloadSynthInfo(vcg::CallBackPos *cb)
  */
 void SynthData::readWSresponse(const QtSoapMessage &response)
 {
-  //const QtSoapMessage &response = transport.getResponse();
-  CHECK(response.isFault(), WEBSERVICE_ERROR, true)
+  if(checkAndSetState(response.isFault(), WEBSERVICE_ERROR)) return;
   const QtSoapType &returnValue = response.returnValue();
   if(returnValue["Result"].isValid())
+  {
     //the requested synth was found
     if(returnValue["Result"].toString() == "OK")
     {
@@ -238,12 +246,13 @@ void SynthData::readWSresponse(const QtSoapMessage &response)
         downloadJsonData(jsonURL);
       }
       else
-        SET_STATE(WRONG_COLLECTION_TYPE, true)
+        setState(WRONG_COLLECTION_TYPE);
     }
     else
-      SET_STATE(NEGATIVE_RESPONSE, true)
+      setState(NEGATIVE_RESPONSE);
+  }
   else
-    SET_STATE(UNEXPECTED_RESPONSE, true)
+    setState(UNEXPECTED_RESPONSE);
 }
 
 /*
@@ -281,11 +290,11 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
   QString json(payload);
   QScriptEngine engine;
   QScriptValue jsonData = engine.evaluate("(" + json + ")");
-  CHECK_DELETE(engine.hasUncaughtException(), JSON_PARSING, true)
+  if(checkAndSetState(engine.hasUncaughtException(), JSON_PARSING, httpResponse)) return;
   //the "l" property contains an object whose name is the synth cid
   //and whose value is an array containing the coordinate systems
   QScriptValue collections = jsonData.property("l");
-  CHECK_DELETE(!collections.isValid(), JSON_PARSING, true)
+  if(checkAndSetState(!collections.isValid(), JSON_PARSING, httpResponse)) return;
   //use an iterator to retrieve the first collection
   QScriptValueIterator iterator(collections);
   QScriptValue collection;
@@ -298,7 +307,10 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
     _numImages = collection.property("_num_images").toInt32();
   }
   else
-    SET_STATE_DELETE(JSON_PARSING, true)
+  {
+    setState(JSON_PARSING, httpResponse);
+    return;
+  }
   if(coordSystemsCount > 0)
   {
     //the json object containing the images informations
@@ -312,13 +324,15 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
       if(_settings._clusterID == -1 || i == _settings._clusterID)
       {
         _progress = 50 + (i / (2*coordSystemsCount) * 100);
-        coordSys = new CoordinateSystem(i,this);
-        coordSys->_shouldBeImported = true;
-        _coordinateSystems->append(coordSys);
         QScriptValue cs = coordSystems.property(QString::number(i));
         QScriptValue pointCloud = cs.property("k");
-        if(pointCloud.isValid())
+        if(pointCloud.isValid() && !pointCloud.isNull())
         {
+          //NOTE: we are only interested in coordinate systems having a valid point cloud
+          //so we create one only under this condition, and discard all other ones
+          coordSys = new CoordinateSystem(i,this);
+          coordSys->_shouldBeImported = true;
+          _coordinateSystems->append(coordSys);
           QScriptValueIterator it(pointCloud);
           if(it.hasNext())
           {
@@ -334,45 +348,47 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
               coordSys->_pointCloud = p;
             }
           }
-        }
-        //list of cameras
-        QScriptValue cameras = cs.property("r");
-        if(cameras.isValid() && !cameras.isNull())
-        {
-          QScriptValueIterator it(cameras);
-          while(it.hasNext())
+          //list of cameras
+          //NOTE: we are only interested in camera lists belonging to a coordinate system having a valid point cloud
+          //this is the reason why the code below is inside the previous if branch
+          QScriptValue cameras = cs.property("r");
+          if(cameras.isValid() && !cameras.isNull())
           {
-            it.next();
-            int id = it.name().toInt();
-            QScriptValue camera = it.value();
-            //contains the camera extrinsics and some of intrinsics
-            QScriptValue parameters = camera.property("j");
-            CameraParameters params;
-            params._camID = id;
-            QScriptValueIterator paramIt(parameters);
-            paramIt.next();
-            params._imageID = paramIt.value().toInt32();
-            Image img = _imageMap->value(params._imageID);
-            img._shouldBeDownloaded = true;
-            _imageMap->insert(img._ID,img);
-            _imagesToDownloadCount++;
-            for(int i = CameraParameters::FIRST; i <= CameraParameters::LAST; ++i)
+            QScriptValueIterator it(cameras);
+            while(it.hasNext())
             {
+              it.next();
+              int id = it.name().toInt();
+              QScriptValue camera = it.value();
+              //contains the camera extrinsics and some of intrinsics
+              QScriptValue parameters = camera.property("j");
+              CameraParameters params;
+              params._camID = id;
+              QScriptValueIterator paramIt(parameters);
               paramIt.next();
-              params[i] = paramIt.value().toNumber();
+              params._imageID = paramIt.value().toInt32();
+              Image img = _imageMap->value(params._imageID);
+              img._shouldBeDownloaded = img._shouldBeDownloaded + 1;
+              _imageMap->insert(img._ID,img);
+              _imagesToDownloadCount++;
+              for(int i = CameraParameters::FIRST; i <= CameraParameters::LAST; ++i)
+              {
+                paramIt.next();
+                params[i] = paramIt.value().toNumber();
+              }
+              QScriptValue distortion = camera.property("f");
+              if(distortion.isValid() && !distortion.isNull())
+              {
+                QScriptValueIterator distortionIt(distortion);
+                distortionIt.next();
+                params._distortionRadius1 = distortionIt.value().toNumber();
+                distortionIt.next();
+                params._distortionRadius2 = distortionIt.value().toNumber();
+              }
+              else
+                params._distortionRadius1 = params._distortionRadius2 = 0;
+              coordSys->_cameraParametersList.append(params);
             }
-            QScriptValue distortion = camera.property("f");
-            if(distortion.isValid() && !distortion.isNull())
-            {
-              QScriptValueIterator distortionIt(distortion);
-              distortionIt.next();
-              params._distortionRadius1 = distortionIt.value().toNumber();
-              distortionIt.next();
-              params._distortionRadius2 = distortionIt.value().toNumber();
-            }
-            else
-              params._distortionRadius1 = params._distortionRadius2 = 0;
-            coordSys->_cameraParametersList.append(params);
           }
         }
       }
@@ -382,7 +398,7 @@ void SynthData::parseJsonString(QNetworkReply *httpResponse)
     downloadBinFiles();
   }
   else
-    SET_STATE_DELETE(EMPTY, true)
+    setState(EMPTY);
   httpResponse->deleteLater();
 }
 
@@ -399,7 +415,7 @@ void SynthData::parseImageMap(QScriptValue &map)
     _cb(progressInfo(),_info.toStdString().data());
     imageIt.next();
     Image image;
-    image._shouldBeDownloaded = false;
+    image._shouldBeDownloaded = 0;
     image._ID = imageIt.name().toInt();
     QScriptValue size = imageIt.value().property("d");
     QScriptValueIterator sizeIt(size);
@@ -433,7 +449,9 @@ void SynthData::downloadBinFiles()
       //to understand if the response received is the last one, and thus to know if all data have been received.
       //To let loadBinFile know when the processed response is the last one (allowing the _dataReady variable to be set to true)
       //the counter _semaphore is used
+      _mutex.lock();
       _semaphore += sys->_pointCloud->_binFileCount;
+      _mutex.unlock();
       for(int i = 0; i < sys->_pointCloud->_binFileCount; ++i)
       {
         QString url = QString("%0points_%1_%2.bin").arg(_collectionRoot).arg(sys->_id).arg(i);
@@ -443,7 +461,7 @@ void SynthData::downloadBinFiles()
         //retrieving the originating object of the request whose response is being processed
         request->setOriginatingObject(p);
         manager->get(*request);
-        delete request; ///CHECK ON THIS!!!!!!!!! what happens if the slot asks for the originating object, but the request (who's supposed to store this info) has been deleted???? Does the QNetworkAccessManager keep a copy of the request passed as argument to get?
+        delete request;
       }
     }
   }
@@ -464,9 +482,13 @@ void SynthData::downloadBinFiles()
  */
 void SynthData::loadBinFile(QNetworkReply *httpResponse)
 {
-  if(_state == READING_BIN_DATA || _state == BIN_DATA_FORMAT)
+  //if(_state == READING_BIN_DATA || _state == BIN_DATA_FORMAT)
+  bool ignore = false;
+  _mutex.lock();
+  ignore = _dataReady;
+  _mutex.unlock();
+  if(ignore)
   {
-    --_semaphore;
     httpResponse->deleteLater();
     return;
   }
@@ -476,41 +498,42 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
   _cb(progressInfo(),_info.toStdString().data());
   bool error = false;
   unsigned short versionMajor = readBigEndianUInt16(httpResponse,error);
-  CHECK_ERRORS(READING_BIN_DATA)
+  if(checkAndSetState(error,READING_BIN_DATA,httpResponse))
+    return;
   unsigned short versionMinor = readBigEndianUInt16(httpResponse,error);
-  CHECK_ERRORS(READING_BIN_DATA)
-  CHECK_DELETE(versionMajor != 1 || versionMinor != 0, BIN_DATA_FORMAT, true)
+  if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
+  if(checkAndSetState(versionMajor != 1 || versionMinor != 0, BIN_DATA_FORMAT, httpResponse)) return;
   int n = readCompressedInt(httpResponse,error);
-  CHECK_ERRORS(READING_BIN_DATA)
+  if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
   //skip the header section
   for (int i = 0; i < n; i++)
   {
     int m = readCompressedInt(httpResponse,error);
-    CHECK_ERRORS(READING_BIN_DATA)
+    if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
     for (int j = 0; j < m; j++)
     {
       readCompressedInt(httpResponse,error);
-      CHECK_ERRORS(READING_BIN_DATA)
+      if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
       readCompressedInt(httpResponse,error);
-      CHECK_ERRORS(READING_BIN_DATA)
+      if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
     }
   }
 
   int nPoints = readCompressedInt(httpResponse,error);
-  CHECK_ERRORS(READING_BIN_DATA)
+  if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
   for (int i = 0; i < nPoints; i++)
   {
     Point point;
 
     point._x = readBigEndianSingle(httpResponse,error);
-    CHECK_ERRORS(READING_BIN_DATA)
+    if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
     point._y = readBigEndianSingle(httpResponse,error);
-    CHECK_ERRORS(READING_BIN_DATA)
+    if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
     point._z = readBigEndianSingle(httpResponse,error);
-    CHECK_ERRORS(READING_BIN_DATA)
+    if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
 
     ushort color = readBigEndianUInt16(httpResponse,error);
-    CHECK_ERRORS(READING_BIN_DATA)
+    if(checkAndSetState(error,READING_BIN_DATA,httpResponse)) return;
 
     point._r = (uchar)(((color >> 11) * 255) / 31);
     point._g = (uchar)((((color >> 5) & 63) * 255) / 63);
@@ -520,7 +543,9 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
     cloud->_points.append(point);
   }
 
+  _mutex.lock();
   --_semaphore;
+  _mutex.unlock();
   if(_semaphore == 0)
   {
     if(!_savePath.isEmpty())
@@ -530,7 +555,7 @@ void SynthData::loadBinFile(QNetworkReply *httpResponse)
       downloadImages();
     }
     else
-      SET_STATE_DELETE(SYNTH_NO_ERROR,true)
+      setState(SYNTH_NO_ERROR);
   }
 
   httpResponse->deleteLater();
@@ -554,12 +579,12 @@ void SynthData::downloadImages()
   int requestCount = 0;
   foreach(Image img, *_imageMap)
   {
-    if(img._shouldBeDownloaded)
+    for(int i = 0; i < img._shouldBeDownloaded; ++i)
     {
       QNetworkRequest *request = new QNetworkRequest(QUrl(img._url));
       request->setAttribute(QNetworkRequest::User,QVariant(img._ID));
       manager->get(*request);
-      delete request; ///// CHECK ON THIS TOO!!!!!!!!!
+      delete request;
       ++requestCount;
     }
   }
@@ -577,9 +602,13 @@ void SynthData::downloadImages()
  */
 void SynthData::saveImages(QNetworkReply *httpResponse)
 {
-  if(_state == SAVE_IMG)
+  //if(_state == SAVE_IMG)
+  bool ignore = false;
+  _mutex.lock();
+  ignore = _dataReady;
+  _mutex.unlock();
+  if(ignore)
   {
-    ++_semaphore;
     httpResponse->deleteLater();
     return;
   }
@@ -595,12 +624,14 @@ void SynthData::saveImages(QNetworkReply *httpResponse)
   int id = httpResponse->request().attribute(QNetworkRequest::User).toInt();
   QString filename("IMG_%1.jpg");
   QFile file(dir.filePath(filename.arg(QString::number(id))));
-  CHECK_DELETE(!file.open(QIODevice::WriteOnly),SAVE_IMG,true)
-  CHECK_DELETE(file.write(payload) == -1,SAVE_IMG,true)
+  if(checkAndSetState(!file.open(QIODevice::WriteOnly), SAVE_IMG, httpResponse)) return;
+  if(checkAndSetState(file.write(payload) == -1, SAVE_IMG, httpResponse)) return;
   file.close();
 
+  _mutex.lock();
   ++_semaphore;
-  CHECK_DELETE(_semaphore == _imagesToDownloadCount, SYNTH_NO_ERROR, true)
+  _mutex.unlock();
+  if(checkAndSetState(_semaphore == _imagesToDownloadCount, SYNTH_NO_ERROR, httpResponse)) return;
 
   httpResponse->deleteLater();
 }

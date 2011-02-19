@@ -34,7 +34,7 @@ typedef struct Image
   int _exifHeight;
   QString _url;
   QString _localPath;
-  bool _shouldBeDownloaded;
+  int _shouldBeDownloaded; //tells how many times this image has to be downloaded, a value of zero means that this image won't be downloaded
 } Image;
 
 class CameraParameters
@@ -190,6 +190,8 @@ private:
   void downloadJsonData(QString jsonURL);
   void downloadBinFiles();
   void downloadImages();
+  bool checkAndSetState(bool condition, Error errorCode, QNetworkReply *httpResponse = 0);
+  void setState(Error errorCode, QNetworkReply *httpResponse = 0);
 
 public:
   //this is the cid parameter taken from the url used to access the synth on photosynth.net
@@ -229,7 +231,6 @@ private:
   int _totalBinFilesCount;
   //the images will be saved here
   QString _savePath;
-  //QtSoapHttpTransport *_transport;
 };
 
 /*********************

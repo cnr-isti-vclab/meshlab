@@ -12,7 +12,6 @@
 ****************************************************************************/
 
 #include "filter_photosynth.h"
-//#include <QtScript>
 
 //#define FILTER_PHOTOSYNTH_DEBUG 1
 
