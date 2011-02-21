@@ -1,12 +1,10 @@
 #include <GL/glew.h>
-//#include "log.h"
+#include <qdebug.h>
 
 #include "vscan.h"
 
-#include <qdebug.h>
-
-
-Vscan::Vscan(int _sx, int _sy):sx(_sx),sy(_sy){
+Vscan::Vscan(int _sx, int _sy):sx(_sx),sy(_sy)
+{
   initDone=false;
 }
 
@@ -15,7 +13,8 @@ Vscan::~Vscan()
     glDeleteFramebuffers(1, (GLuint *)&frameID);
 }
 
-void Vscan::fillDepthBuffer(float* buf) const{
+void Vscan::fillDepthBuffer(float* buf) const
+{
   
   // readback Textures
     
@@ -27,7 +26,8 @@ void Vscan::fillDepthBuffer(float* buf) const{
 
 }
 
-void Vscan::useAsSource(){
+void Vscan::useAsSource()
+{
 //  glEnable(GL_TEXTURE_2D);
 
   glActiveTexture(GL_TEXTURE0); 
@@ -85,8 +85,8 @@ void Vscan::splash(bool depth)
   glDisable(GL_TEXTURE_2D);
 }
 
-bool Vscan::init(){
-  
+bool Vscan::init()
+{
   if (initDone) return true;
 
      qDebug("Initializing FrameBufferObjects \n");
@@ -173,7 +173,6 @@ bool Vscan::init(){
   }
 
   return initDone;
-
 }
 
 bool Vscan::checkValid()

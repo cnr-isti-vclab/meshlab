@@ -1,6 +1,7 @@
 #ifndef FILTER_SDFGPU_H
 #define FILTER_SDFGPU_H
 
+
 #include <filterinterface.h>
 #include "Vscan.h"
 
@@ -23,8 +24,6 @@ public:
 
     void releaseGL();
 
-    bool checkAndLogGL();
-
     void useDepthPeelingShader();
 
     void setDepthPeelingTolerance(float t);
@@ -35,11 +34,14 @@ public:
 
     void useDefaultShader();
 
+    void setCamera(vcg::Point3f camDir, vcg::Box3f &meshBBox);
+
 private:
 
     Vscan* vsA;
     Vscan* vsB;
     int    shaderProgram;
+    int    fboSize;
 
 };
 

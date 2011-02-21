@@ -12,6 +12,8 @@
 #include <vcg/space/index/spatial_hashing.h>
 #include <vcg/math/matrix33.h>
 #include <wrap/qt/to_string.h>
+#include <vcg/math/gen_normal.h>
+#include <wrap/qt/checkGLError.h>
 #include <GL/glew.h>
 #include <stdio.h>
 using namespace std;
@@ -19,7 +21,7 @@ using namespace vcg;
 
 
 
-SdfGpuPlugin::SdfGpuPlugin() : SingleMeshFilterInterface("Compute SDF GPU"), shaderProgram(-1){}
+SdfGpuPlugin::SdfGpuPlugin() : SingleMeshFilterInterface("Compute SDF GPU"), shaderProgram(-1), fboSize(128){}
 
 void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par){
   qDebug() << "called here!";
@@ -64,83 +66,78 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
 
   setupMesh( md, onPrimitive );
 
-  assert(checkAndLogGL() && "after init");
+  checkGLError::qDebug("GL Init failed");
 
-  int   peel = 3;
+  std::vector<Point3f> unifDirVec;
+  unsigned int numViews = 30;
+  GenNormal<float>::Uniform(numViews,unifDirVec);
+
+  int   peel = 1;
   float tolerance = 0.0005f;
 
-  for( int i=0;  i < peel; i++ )
-  {
-      if( i==0 )
-      {
-            useDefaultShader();
-             assert(checkAndLogGL() && "useDefaultShader");
-      }
-      else
-      {
-            vsB->useAsSource();
-            assert(checkAndLogGL() && "useAsSource");
-            useDepthPeelingShader();
-            assert(checkAndLogGL() && "useDepthPeelingShader");
-            setDepthPeelingTolerance(tolerance);
-            assert(checkAndLogGL() && "setDepthPeelingTolerance");
-            setDepthPeelingSize(*vsB);
-            assert(checkAndLogGL() && "setDepthPeelingSize");
-      }
+  vector<vcg::Point3f>::iterator vi;
 
-      vsA->useAsDest();
+ /*for (*/vi = unifDirVec.begin();/*vi != unifDirVec.end(); vi++)*/
+ // {
 
-      fillFrameBuffer(i%2==0,md.mm());
 
-      std::swap<Vscan*>(vsA,vsB);
+          for( int i = 0;  i < peel; i++ )
+          {
 
-      assert(checkAndLogGL() && "useAsDest");
- }
+             /* if( i == 0 )
+              {
+                    useDefaultShader();
 
-  assert(checkAndLogGL() && "After deepth peeling");
+              }
+              else
+              {*/
+                    vsB->useAsSource();
+                    useDepthPeelingShader();
+                    setDepthPeelingTolerance(tolerance);
+                    setDepthPeelingSize(*vsB);
+              //}
+
+              vsA->useAsDest();
+              setCamera(*vi, md.mm()->cm.bbox);
+              fillFrameBuffer(i%2==0,md.mm());
+
+              std::swap<Vscan*>(vsA,vsB);
+
+         }
+//  }
+
+  checkGLError::qDebug("Depth peeling failed");
 
   releaseGL();
 
- // assert(checkAndLogGL() && "After release"); ?? operazione non valida ma funziona??
-
-
-/* for(int i=0; i<md.mm()->cm.vert.size(); i++)
- {
-     CVertexO& v = md.mm()->cm.vert[i];
-
-     //--- Save in mesh
-     v.Q() = 1;
- }*/
+  //checkGLError::qDebug("GL release failed");
 
   return true;
-}
-
-bool SdfGpuPlugin::checkAndLogGL()
-{
-   GLenum err = glGetError();
-
-   if(err != GL_NO_ERROR)
-   {
-        const GLubyte* errname = gluErrorString(err);
-        Log((const char*)errname);
-        return false;
-   }
-
-   return true;
 }
 
 void SdfGpuPlugin::initGL()
 {
     this->glContext->makeCurrent();
 
-    vsA = new Vscan(128, 128);
-    vsB = new Vscan(128, 128);
+    GLenum err = glewInit();
+
+    if (GLEW_OK != err)
+    {
+            Log(0,(const char*)glewGetErrorString(err));
+            return;
+    }
+
+    //******* SET DEFAULT OPENGL STUFF **********/
+    glEnable( GL_DEPTH_TEST );
+    glEnable( GL_TEXTURE_2D );
+    glEnable(GL_CULL_FACE);
+    glClearColor(0,1,0,1);
+
+    vsA = new Vscan(fboSize, fboSize);
+    vsB = new Vscan(fboSize, fboSize);
 
     vsA->init();
     vsB->init();
-
-    glClearColor(1,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void SdfGpuPlugin::releaseGL()
@@ -157,14 +154,13 @@ void SdfGpuPlugin::releaseGL()
 void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CULL_FACE);
     glCullFace((front)?GL_BACK:GL_FRONT);
 
-    glPushMatrix();
+  //  glPushMatrix();
 
     mm->glw.Draw<GLW::DMSmooth, GLW::CMNone, GLW::TMNone>();
 
-    glPopMatrix();
+    //glPopMatrix();
 }
 
 void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
@@ -203,8 +199,6 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
         tri::UpdateQuality<CMeshO>::FaceConstant(m,0);
         break;
     }
-
-
 }
 
 void SdfGpuPlugin::useDepthPeelingShader()
@@ -264,8 +258,8 @@ void SdfGpuPlugin::useDepthPeelingShader()
 
    glUniform1i( glGetUniformLocation(shaderProgram,"textureLastDepth"), 0 );
 
-   float m[16];
-   glUniformMatrix4fv(glGetUniformLocation(shaderProgram,"matr"), 1,1, m );
+ //  float m[16];
+  // glUniformMatrix4fv(glGetUniformLocation(shaderProgram,"matr"), 1,1, m );
 }
 
 void SdfGpuPlugin::setDepthPeelingTolerance(float t)
@@ -291,6 +285,27 @@ void SdfGpuPlugin::useDefaultShader()
 {
   glUseProgram(0);
 }
+
+void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
+{
+        //cameraDir = camDir;
+        GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
+                k = 0.1f;
+        Point3f eye = meshBBox.Center() + camDir * (d+k);
+
+        glViewport(0.0, 0.0, fboSize, fboSize);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-d, d, -d, d, k, k+(2.0*d) );
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        gluLookAt(eye.X(), eye.Y(), eye.Z(),
+                          meshBBox.Center().X(), meshBBox.Center().Y(), meshBBox.Center().Z(),
+                          0.0, 1.0, 0.0);
+}
+
 
 
 
