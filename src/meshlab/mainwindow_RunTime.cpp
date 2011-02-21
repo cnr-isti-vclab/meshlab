@@ -1035,7 +1035,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 
 
-void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, FilterEnv& env, bool isPreview)
+void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, FilterEnv& env, bool /*isPreview*/)
 {
 
 	MeshLabFilterInterface         *iFilter    = mfc->filterInterface;

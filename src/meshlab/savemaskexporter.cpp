@@ -30,7 +30,7 @@
 #include "changetexturename.h"
 
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, RichParameterSet *_parSet,GLArea* glar):
-QDialog(parent),m(m),capability(capability),defaultBits(defaultBits),parSet(_parSet),glar(glar),mask(0)
+QDialog(parent),m(m),mask(0),capability(capability),defaultBits(defaultBits),parSet(_parSet),glar(glar)
 {
 	ui = new Ui::MaskExporterDialog();
 	InitDialog();
