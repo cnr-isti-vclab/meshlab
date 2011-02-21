@@ -30,22 +30,25 @@ void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par){
                              "Choose whether to trace rays from faces or from vertices. "
                              "Recall that tracing from vertices will use vertex normal "
                              "estimation."));
-  par.addParam(new RichFloat("coneWidth", 0.001, "Cone width: ",
-                             "The standard deviation of the rays that will be casted around "
-                             "the anti-normals. Remember that most sampled directions are "
-                             "expected to fall within 3x this value."));
+
   par.addParam(  new RichInt("numberRays", 10, "Number of rays: ",
                              "The standard deviation of the rays that will be casted around "
                              "the anti-normals. Remember that most sampled directions are "
                              "expected to fall within 3x this value."));
-  par.addParam(new RichFloat("lowQuantile", .1, "Bottom quantile",
+ /* par.addParam(new RichFloat("lowQuantile", .1, "Bottom quantile",
                              "We will throw away the set of ray distances for each cone which distance "
                              "value falls under this quantile. Value in between [0,1]. 0 Implies all "
                              "values are kept"));
   par.addParam(new RichFloat("hiQuantile", .9, "Top quantile",
                              "We will throw away the set of ray distances for each cone which distance "
                              "value falls under this quantile. Value in between [0,1]. 1 Implies all "
-                             "values are kept"));
+                             "values are kept"));*/
+
+  par.addParam(new RichInt("peelingIteration", 4, "Peeling Iteration",
+                             "Number of depth peeling iteration"));
+
+  par.addParam(new RichFloat("peelingTolerance", 0.0005f, "Peeling Tolerance",
+                             "We will throw away the set of ray distances for each cone which distance " ));
 }
 
 
@@ -53,11 +56,12 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
 
 
   //--- Retrieve parameters
-  float widenessRad       = math::ToRad(pars.getFloat("coneWidth"));
-  int   raysPerCone       = pars.getInt("numberRays");
+
+
   ONPRIMITIVE onPrimitive = (ONPRIMITIVE) pars.getInt("onPrimitive");
-  float lo01pec           = pars.getFloat("lowQuantile");
-  float hi01pec           = pars.getFloat("hiQuantile");
+  unsigned int numViews = pars.getInt("numberRays");
+ // float lo01pec           = pars.getFloat("lowQuantile");
+  //float hi01pec           = pars.getFloat("hiQuantile");
 
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
@@ -69,33 +73,30 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
   checkGLError::qDebug("GL Init failed");
 
   std::vector<Point3f> unifDirVec;
-  unsigned int numViews = 30;
   GenNormal<float>::Uniform(numViews,unifDirVec);
 
-  int   peel = 1;
-  float tolerance = 0.0005f;
+  int   peel = pars.getInt("peelingIteration");
+  float tolerance = pars.getFloat("peelingTolerance");
 
   vector<vcg::Point3f>::iterator vi;
 
- /*for (*/vi = unifDirVec.begin();/*vi != unifDirVec.end(); vi++)*/
- // {
-
-
+ for(vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
+ {
           for( int i = 0;  i < peel; i++ )
           {
-
-             /* if( i == 0 )
+              if( i == 0 )
               {
                     useDefaultShader();
 
               }
               else
-              {*/
-                    vsB->useAsSource();
+              {
+
                     useDepthPeelingShader();
                     setDepthPeelingTolerance(tolerance);
                     setDepthPeelingSize(*vsB);
-              //}
+                    vsB->useAsSource();
+              }
 
               vsA->useAsDest();
               setCamera(*vi, md.mm()->cm.bbox);
@@ -104,7 +105,7 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
               std::swap<Vscan*>(vsA,vsB);
 
          }
-//  }
+}
 
   checkGLError::qDebug("Depth peeling failed");
 
@@ -153,6 +154,7 @@ void SdfGpuPlugin::releaseGL()
 
 void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 {
+    (front) ? glClearColor(0,1,0,1) : glClearColor(1,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glCullFace((front)?GL_BACK:GL_FRONT);
 
