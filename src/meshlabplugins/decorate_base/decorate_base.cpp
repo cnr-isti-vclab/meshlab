@@ -648,12 +648,12 @@ void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter)
 	glPopAttrib();			
 }
 
-void ExtraMeshDecoratePlugin::setValue(QString name,Shotf newVal)
+void ExtraMeshDecoratePlugin::setValue(QString /*name*/,Shotf newVal)
 {
     curShot=newVal;
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrustum, int cameraSourceId, QPainter *painter, QFont qf)
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel &m, Shotf &ls, bool DrawFrustum, int cameraSourceId, QPainter *painter, QFont /*qf*/)
 {
   if(!ls.IsValid())
   {
