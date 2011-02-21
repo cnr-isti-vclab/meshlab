@@ -46,8 +46,10 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBack
     // Mark not writable un-selected vertices
     CMeshO::VertexIterator  vi;
     for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
+    {
           if(!(*vi).IsS()) (*vi).ClearW();
                       else (*vi).SetW();
+    }
   }
 
   if(pp.PreserveBoundary && !Selected) 

@@ -48,8 +48,10 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallB
     // Mark not writable un-selected vertices
     CMeshO::VertexIterator  vi;
     for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
+    {
 			if(!(*vi).IsS()) (*vi).ClearW();
 			else (*vi).SetW();
+    }
   }
 	
 	vcg::LocalOptimization<CMeshO> DeciSession(m);
