@@ -103,6 +103,17 @@ void MeshDocument::setCurrentMesh( int i)
   return;
 }
 
+//returns the raster at a given position in the list
+RasterModel *MeshDocument::getRaster(int i)
+{
+  foreach(RasterModel *rmp, rasterList)
+  {
+    if(rmp->id() == i) return rmp;
+  }
+  //assert(0);
+  return 0;
+}
+
 //if i is <0 it means that no currentRaster is set
 void MeshDocument::setCurrentRaster( int i)
 {
