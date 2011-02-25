@@ -20,10 +20,22 @@ using namespace std;
 using namespace vcg;
 
 
+#define SDF_MAX_TEXTURE_SIZE 512
 
-SdfGpuPlugin::SdfGpuPlugin() : SingleMeshFilterInterface("Compute SDF GPU"), shaderProgram(-1), fboSize(128){}
 
-void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par){
+SdfGpuPlugin::SdfGpuPlugin()
+: SingleMeshFilterInterface("Compute SDF GPU"),
+  shaderProgram(-1),
+  fboSize(256),
+  colorFormat(GL_RGBA32F_ARB),
+  dataTypeFP(GL_FLOAT),
+  maxTexSize(16)
+{
+
+}
+
+void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par)
+{
   qDebug() << "called here!";
   QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
   par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
@@ -54,91 +66,154 @@ void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par){
 
 bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::CallBackPos* cb){
 
-
   //--- Retrieve parameters
-
-
-  ONPRIMITIVE onPrimitive = (ONPRIMITIVE) pars.getInt("onPrimitive");
+  ONPRIMITIVE  onPrimitive = (ONPRIMITIVE) pars.getInt("onPrimitive");
   unsigned int numViews = pars.getInt("numberRays");
- // float lo01pec           = pars.getFloat("lowQuantile");
-  //float hi01pec           = pars.getFloat("hiQuantile");
-
+  int          peel = pars.getInt("peelingIteration");
+  float        tolerance = pars.getFloat("peelingTolerance");
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
+  MeshModel* mm = md->mm();
+  CMeshO&    cm = mm->cm;
+
+
   //---GL init
-  initGL();
-
+  initGL(cm.vn);
   setupMesh( md, onPrimitive );
-
   checkGLError::qDebug("GL Init failed");
 
   std::vector<Point3f> unifDirVec;
   GenNormal<float>::Uniform(numViews,unifDirVec);
 
-  int   peel = pars.getInt("peelingIteration");
-  float tolerance = pars.getFloat("peelingTolerance");
-
   vector<vcg::Point3f>::iterator vi;
-
- for(vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
- {
-          for( int i = 0;  i < peel; i++ )
-          {
-              if( i == 0 )
-              {
-                    useDefaultShader();
-
-              }
-              else
-              {
-
-                    useDepthPeelingShader();
-                    setDepthPeelingTolerance(tolerance);
-                    setDepthPeelingSize(*vsB);
-                    vsB->useAsSource();
-              }
-
-              vsA->useAsDest();
-              setCamera(*vi, md.mm()->cm.bbox);
-              fillFrameBuffer(i%2==0,md.mm());
-
-              std::swap<Vscan*>(vsA,vsB);
-
-         }
-}
+  for(vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
+    TraceRays(peel, tolerance, *vi, md.mm());
 
   checkGLError::qDebug("Depth peeling failed");
 
+  //mesh clean up
+  //md.mm()->glw.ClearHint(vcg::GLW::HNUseVBO);
+  mm->clearDataMask(MeshModel::MM_VERTCOLOR);
+  mm->glw.Update();
   releaseGL();
 
-  //checkGLError::qDebug("GL release failed");
+  checkGLError::qDebug("GL release failed");
 
   return true;
 }
 
-void SdfGpuPlugin::initGL()
+bool SdfGpuPlugin::initGL(unsigned int numVertices)
 {
     this->glContext->makeCurrent();
+    //******* SET DEFAULT OPENGL STUFF **********/
+    glEnable( GL_DEPTH_TEST );
+    glEnable( GL_TEXTURE_2D );
+   // glEnable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_NORMALIZE);
+    glDisable(GL_COLOR_MATERIAL);
+    glClearColor(0,0,1,0);
+    glClearDepth(1.0);
 
     GLenum err = glewInit();
 
     if (GLEW_OK != err)
     {
             Log(0,(const char*)glewGetErrorString(err));
-            return;
+            return false;
     }
-
-    //******* SET DEFAULT OPENGL STUFF **********/
-    glEnable( GL_DEPTH_TEST );
-    glEnable( GL_TEXTURE_2D );
-    glEnable(GL_CULL_FACE);
-    glClearColor(0,1,0,1);
-
+    //**********INIT FBOs for depth peeling***********
     vsA = new Vscan(fboSize, fboSize);
     vsB = new Vscan(fboSize, fboSize);
 
     vsA->init();
     vsB->init();
+
+    //******* QUERY HARDWARE FOR: MAX TEX SIZE ********/
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
+    Log(0, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
+    maxTexSize = std::min(maxTexSize, (unsigned int)SDF_MAX_TEXTURE_SIZE);
+
+
+    unsigned int maxTexPages=1;
+    glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, reinterpret_cast<GLint*>(&maxTexPages) );
+
+
+    if ((maxTexSize*maxTexSize*maxTexPages) < numVertices)
+    {
+            Log(0, "That's a really huge model, I can't handle it in hardware, sorry..");
+            return false;
+    }
+
+
+    unsigned int smartTexSize;
+    for (smartTexSize=64; (smartTexSize*smartTexSize) < (numVertices/maxTexPages); smartTexSize*=2 );
+
+    if (smartTexSize > maxTexSize)
+    {
+            //should ever enter this point, just exit with error
+            Log(0,"There was an error while determining best texture size, unable to continue");
+            return false;
+    }
+
+
+
+    //cb(30, "Initializing: Shaders and Textures");
+  /*  if (maxTexPages == 4)
+            set_shaders("sdf4",vs,fs,shdrID);
+    else
+            set_shaders("sdf8",vs,fs,shdrID);  //geforce 8+
+*/
+
+    maxTexSize = smartTexSize;
+    numTexPages = std::min( (numVertices / (smartTexSize*smartTexSize))+1, maxTexPages);
+
+    Log(0,"Texture size chosen: %i",maxTexSize);
+    Log(0,"Number of texture pages: %i", numTexPages);
+
+    resultBufferTex = new GLuint[numTexPages];
+    resultBufferMRT = new GLenum[numTexPages];
+
+
+     glGenTextures (numTexPages, resultBufferTex);
+
+    for (unsigned int i=0; i<numTexPages; ++i)
+    {
+            glBindTexture(GL_TEXTURE_2D, resultBufferTex[i]);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, maxTexSize, maxTexSize, 0, GL_RGBA, dataTypeFP, 0);
+    }
+
+
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+
+    fboResult = 0;
+    glGenFramebuffersEXT(1, &fboResult);   // FBO for second pass (1 color attachment)
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
+    for (unsigned int i=0; i<numTexPages; ++i)
+    {
+            resultBufferMRT[i] = GL_COLOR_ATTACHMENT0_EXT+i;
+            glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT+i, GL_TEXTURE_2D, resultBufferTex[i], 0);
+    }
+
+    glDrawBuffers(numTexPages, resultBufferMRT);
+
+    if (!checkFramebuffer())
+    {
+             Log(0, "Init FBO for SDF result FAILED!..");
+            return false;
+    }
+
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
 }
 
 void SdfGpuPlugin::releaseGL()
@@ -160,8 +235,9 @@ void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 
   //  glPushMatrix();
 
-    mm->glw.Draw<GLW::DMSmooth, GLW::CMNone, GLW::TMNone>();
+   mm->glw.DrawFill<GLW::NMPerVert, GLW::CMPerVert, GLW::TMNone>();
 
+   // mm->glw.DrawPointsBase<GLW::NMPerVert, GLW::CMPerVert>();
     //glPopMatrix();
 }
 
@@ -169,11 +245,6 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
 {
     MeshModel* mm = md.mm();
     CMeshO& m     = mm->cm;
-
-
-    //--- Use VBO for faster drawing ?? si arrabbia
-   /* mm->glw.SetHint(vcg::GLW::HNUseVBO);
-    mm->glw.Update();*/
 
     //--- If on vertices, do some cleaning first
     if( onPrimitive == ON_VERTICES )
@@ -190,6 +261,24 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
     tri::UpdateNormals<CMeshO>::NormalizeVertex(m);
     tri::UpdateFlags<CMeshO>::FaceProjection(m);
 
+
+    mm->updateDataMask(MeshModel::MM_VERTCOLOR);
+
+    CMeshO::VertexIterator vi;
+    for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
+            (*vi).C()= vcg::Color4b::Yellow;
+
+ /*   for ( unsigned int i = 0; i  <m.vn; i++ )
+    {
+
+     //  m.vert[i].C() = vcg::Color4b( (i>>16) & 0x000000ff, (i>>8) & 0x000000ff, i & 0x000000ff,255);
+
+        m.vert[i].C() = vcg::Color4b::Yellow;
+    }*/
+
+
+  // tri::UpdateColor<CMeshO>::VertexConstant(m, vcg::Color4b::Yellow);
+
     //--- Enable & Reset the necessary attributes
     switch(onPrimitive){
       case ON_VERTICES:
@@ -201,6 +290,10 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
         tri::UpdateQuality<CMeshO>::FaceConstant(m,0);
         break;
     }
+
+    //--- Use VBO
+  //  mm->glw.SetHint(vcg::GLW::HNUseVBO);
+    mm->glw.Update();
 }
 
 void SdfGpuPlugin::useDepthPeelingShader()
@@ -257,7 +350,7 @@ void SdfGpuPlugin::useDepthPeelingShader()
    }
 
    glUseProgram(shaderProgram);
-
+   //bind texture sampler to texture unit 0
    glUniform1i( glGetUniformLocation(shaderProgram,"textureLastDepth"), 0 );
 
  //  float m[16];
@@ -280,35 +373,100 @@ void SdfGpuPlugin::setDepthPeelingSize(const Vscan & scan)
 
 void SdfGpuPlugin::useScreenAsDest()
 {
-  glBindFramebuffer(GL_FRAMEBUFFER, 0 );
+    glBindFramebuffer(GL_FRAMEBUFFER, 0 );
 }
 
 void SdfGpuPlugin::useDefaultShader()
 {
-  glUseProgram(0);
+    glUseProgram(0);
 }
 
 void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
 {
-        //cameraDir = camDir;
-        GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
-                k = 0.1f;
-        Point3f eye = meshBBox.Center() + camDir * (d+k);
+    GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
+            k = 0.1f;
+    Point3f eye = meshBBox.Center() + camDir * (d+k);
 
-        glViewport(0.0, 0.0, fboSize, fboSize);
+    glViewport(0.0, 0.0, fboSize, fboSize);
 
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-d, d, -d, d, k, k+(2.0*d) );
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-d, d, -d, d, k, k+(2.0*d) );
 
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        gluLookAt(eye.X(), eye.Y(), eye.Z(),
-                          meshBBox.Center().X(), meshBBox.Center().Y(), meshBBox.Center().Z(),
-                          0.0, 1.0, 0.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(eye.X(), eye.Y(), eye.Z(),
+                      meshBBox.Center().X(), meshBBox.Center().Y(), meshBBox.Center().Z(),
+                      0.0, 1.0, 0.0);
 }
 
 
+void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3f& dir, MeshModel* mm )
+{
+    for( int i = 0;  i < peelingIteration; i++ )
+    {
+       if( i == 0 )
+              useDefaultShader();
+        else
+       {
+              vsB->useAsSource();
+              useDepthPeelingShader();
+              setDepthPeelingTolerance(tolerance);
+              setDepthPeelingSize(*vsB);
+        }
+
+        vsA->useAsDest();
+        setCamera(dir, mm->cm.bbox);
+        fillFrameBuffer(i%2==0, mm);
+
+        drawVertexMarkers();
+
+        std::swap<Vscan*>(vsA,vsB);
+   }
+}
+
+void SdfGpuPlugin::drawVertexMarkers()
+{
+//TODO
+}
+
+
+bool SdfGpuPlugin::checkFramebuffer()
+{
+        GLenum fboStatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+
+        if ( fboStatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+        {
+                switch (fboStatus)
+                {
+                case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
+                        Log(0, "FBO Incomplete: Attachment");
+                        break;
+                case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
+                        Log(0, "FBO Incomplete: Missing Attachment");
+                        break;
+                case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+                        Log(0, "FBO Incomplete: Dimensions");
+                        break;
+                case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
+                        Log(0, "FBO Incomplete: Formats");
+                        break;
+                case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
+                        Log(0, "FBO Incomplete: Draw Buffer");
+                        break;
+                case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
+                        Log(0, "FBO Incomplete: Read Buffer");
+                        break;
+                default:
+                        Log(0, "Undefined FBO error");
+                        assert(0);
+                }
+
+                return false;
+        }
+
+        return true;
+}
 
 
 Q_EXPORT_PLUGIN(SdfGpuPlugin)
