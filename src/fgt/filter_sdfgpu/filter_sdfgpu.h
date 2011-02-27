@@ -4,6 +4,8 @@
 
 #include <filterinterface.h>
 #include "Vscan.h"
+#include "../../meshlabplugins/render_radiance_scaling/gpuProgram.h"
+#include "../../meshlabplugins/render_radiance_scaling/framebufferObject.h"
 
 enum ONPRIMITIVE{ON_VERTICES, ON_FACES};
 
@@ -43,13 +45,17 @@ public:
 
     bool checkFramebuffer();
 
+
 protected:
 
     unsigned int maxTexSize;
     unsigned int numTexPages;
     Vscan*       vsA;
     Vscan*       vsB;
-    int          shaderProgram;
+    //depth peeling shader IDs
+    GLuint       depthPeelingShaderProgram;
+    GLuint       depthPeelingFS;
+
     int          fboSize;
     GLuint*      resultBufferTex;
     GLenum*      resultBufferMRT;
@@ -57,6 +63,9 @@ protected:
     GLenum       colorFormat;
     GLenum       dataTypeFP;
 
+
+    GPUProgram*  mDeepthPeelingProgram;
+    GPUProgram*  mSDFProgram;
 };
 
 #endif // FILTER_SDFGPU_H
