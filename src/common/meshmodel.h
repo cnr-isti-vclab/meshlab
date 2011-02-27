@@ -444,7 +444,7 @@ public:
   void setCurrentMesh( int new_curr_id );
 
   /// returns the mesh with a given unique id
-  RasterModel *MeshDocument::getRaster(int i);
+  RasterModel *getRaster(int i);
 
   //set the current raster to be the one with the given ID
   void setCurrentRaster( int new_curr_id );
