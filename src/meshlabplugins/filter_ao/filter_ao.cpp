@@ -423,9 +423,9 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 		cb(30, "Initializing: Shaders and Textures");
 
 		if (maxTexPages == 4)
-			set_shaders("ambient_occlusion4",vs,fs,shdrID);
+      set_shaders(":/AmbientOcclusion/shaders/ambient_occlusion4",vs,fs,shdrID);
 		else
-			set_shaders("ambient_occlusion8",vs,fs,shdrID);  //geforce 8+
+      set_shaders(":/AmbientOcclusion/shaders/ambient_occlusion8",vs,fs,shdrID);  //geforce 8+
 
 
 		maxTexSize = smartTexSize;
@@ -808,30 +808,6 @@ void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 
 void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f, GLuint &pr)
 {	
-	QDir shadersDir = QDir(qApp->applicationDirPath());
-
-
-#if defined(Q_OS_WIN)
-	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins"  )
-		shadersDir.cdUp();
-#elif defined(Q_OS_MAC)
-	if (shadersDir.dirName() == "MacOS") {
-		for(int i=0;i<4;++i)
-		{
-			if(shadersDir.exists("shaders"))
-				break;
-			shadersDir.cdUp();
-		}
-	}
-#endif
-
-	bool ret=shadersDir.cd("shaders");
-	if(!ret) 
-	{
-		QMessageBox::information(0, "Ambient Occlusion Plugin","Unable to find the shaders directory.\nNo shaders will be loaded.");
-		return;
-	}
-
 	f = glCreateShader(GL_FRAGMENT_SHADER);
 	v = glCreateShader(GL_VERTEX_SHADER);
 
@@ -845,7 +821,7 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 	
 	fileName = fileName.left(fileName.size()-1);
 	fileName.append(".vert");
-	file.setFileName(shadersDir.absoluteFilePath(fileName));
+  file.setFileName(fileName);
 	if (file.open(QIODevice::ReadOnly))
 	{
 		QTextStream ts(&file);
@@ -862,7 +838,7 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 	fileName = fileName.left(fileName.size()-5);
 	fileName.append(nMRT);
 	fileName.append(".frag");
-	file.setFileName(shadersDir.absoluteFilePath(fileName));
+  file.setFileName(fileName);
 	if (file.open(QIODevice::ReadOnly))
 	{
 		QTextStream ts(&file);
