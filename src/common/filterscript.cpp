@@ -33,28 +33,35 @@
 #include "filterscript.h"
 
 using namespace vcg; 
+
+QDomDocument FilterScript::xmlDoc()
+{
+	QDomDocument doc("FilterScript");
+	QDomElement root = doc.createElement("FilterScript");
+	doc.appendChild(root);
+
+	FilterScript::iterator ii;
+	for(ii=actionList.begin();ii!= actionList.end();++ii)
+	{
+		QDomElement tag = doc.createElement("filter");
+		tag.setAttribute(QString("name"),(*ii).first);
+		RichParameterSet &par=(*ii).second;
+		QList<RichParameter*>::iterator jj;
+		RichParameterXMLVisitor v(doc);
+		for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
+		{
+			(*jj)->accept(v);
+			tag.appendChild(v.parElem);
+		}
+		root.appendChild(tag);
+	}
+	return doc;
+}
+
 bool FilterScript::save(QString filename)
 {
 
-  QDomDocument doc("FilterScript");
-  QDomElement root = doc.createElement("FilterScript");
-  doc.appendChild(root);
-
-  FilterScript::iterator ii;
-  for(ii=actionList.begin();ii!= actionList.end();++ii)
-  {
-		QDomElement tag = doc.createElement("filter");
-    tag.setAttribute(QString("name"),(*ii).first);
-    RichParameterSet &par=(*ii).second;
-    QList<RichParameter*>::iterator jj;
-		RichParameterXMLVisitor v(doc);
-    for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
-    {
-			(*jj)->accept(v);
-      tag.appendChild(v.parElem);
-    }
-    root.appendChild(tag);
-  }
+  QDomDocument doc = xmlDoc();
   QFile file(filename);
   file.open(QIODevice::WriteOnly);
   QTextStream qstream(&file);

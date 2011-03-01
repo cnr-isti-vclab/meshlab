@@ -40,7 +40,8 @@ class FilterScript
 public:
   bool open(QString filename);
   bool save(QString filename);
-  
+  QDomDocument xmlDoc();
+
   QList< QPair< QString , RichParameterSet> > actionList;
   typedef QList< QPair<QString, RichParameterSet> >::iterator iterator;
 };
