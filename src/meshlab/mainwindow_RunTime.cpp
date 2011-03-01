@@ -983,7 +983,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	if(ret)
 	{
     meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
-    meshDoc()->mm()->meshModified() = true;
+    if (meshDoc()->mm() != NULL)
+		meshDoc()->mm()->meshModified() = true;
 	MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
     if(GLA())
     {
