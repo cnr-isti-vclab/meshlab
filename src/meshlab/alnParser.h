@@ -113,7 +113,7 @@ public:
 
 			rangemaps.push_back(rm);
 		}
-
+    fclose(stream);
 		return NoError;
 	} // end of ParseALN
 
