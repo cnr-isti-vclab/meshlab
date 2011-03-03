@@ -1,4 +1,3 @@
-//#include <GL/glew.h>
 #include "filter_sdfgpu.h"
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/update/topology.h>
@@ -15,7 +14,6 @@
 #include <wrap/qt/to_string.h>
 #include <vcg/math/gen_normal.h>
 #include <wrap/qt/checkGLError.h>
-
 #include <stdio.h>
 using namespace std;
 using namespace vcg;
@@ -25,11 +23,7 @@ using namespace vcg;
 
 SdfGpuPlugin::SdfGpuPlugin()
 : SingleMeshFilterInterface("Compute SDF GPU"),
-  depthPeelingShaderProgram(-1),
-  fboSize(256),
-  colorFormat(GL_RGBA32F_ARB),
-  dataTypeFP(GL_FLOAT),
-  maxTexSize(16)
+  mPeelingTextureSize(256)
 {
 
 }
@@ -43,7 +37,7 @@ void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par)
                              "Recall that tracing from vertices will use vertex normal "
                              "estimation."));
 
-  par.addParam(  new RichInt("numberRays", 10, "Number of rays: ",
+  par.addParam(  new RichInt("numberRays", 3, "Number of rays: ",
                              "The standard deviation of the rays that will be casted around "
                              "the anti-normals. Remember that most sampled directions are "
                              "expected to fall within 3x this value."));
@@ -66,38 +60,29 @@ void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par)
 
 bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::CallBackPos* cb){
 
-  //--- Retrieve parameters
-  ONPRIMITIVE  onPrimitive = (ONPRIMITIVE) pars.getInt("onPrimitive");
-  unsigned int numViews = pars.getInt("numberRays");
-  int          peel = pars.getInt("peelingIteration");
-  float        tolerance = pars.getFloat("peelingTolerance");
-  assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
-
   MeshModel* mm = md.mm();
   CMeshO&    cm = mm->cm;
 
+  //******* RETRIEVE PARAMETERS **********/
+  ONPRIMITIVE  onPrimitive = (ONPRIMITIVE) pars.getInt("onPrimitive");
+  unsigned int numViews    = pars.getInt("numberRays");
+  int          peel        = pars.getInt("peelingIteration");
+  mTolerance   = pars.getFloat("peelingTolerance");
+  assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
-  //---GL init
+   //******* GL & MESH INIT **********/
   initGL(cm.vn);
   setupMesh( md, onPrimitive );
-  checkGLError::qDebug("GL Init failed");
 
+  //******** CALCULATE SDF *************/
   std::vector<Point3f> unifDirVec;
   GenNormal<float>::Uniform(numViews,unifDirVec);
 
-  vector<vcg::Point3f>::iterator vi;
-  for(vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
-    TraceRays(peel, tolerance, *vi, md.mm());
+  for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
+    TraceRays(peel, mTolerance, *vi, md.mm());
 
-  checkGLError::qDebug("Depth peeling failed");
-
-  //mesh clean up
-  //md.mm()->glw.ClearHint(vcg::GLW::HNUseVBO);
-
-  delete mDeepthPeelingProgram;
+  //******* CLEAN 'N' EXIT *************/
   releaseGL();
-
-  checkGLError::qDebug("GL release failed");
 
   return true;
 }
@@ -105,7 +90,6 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
 bool SdfGpuPlugin::initGL(unsigned int numVertices)
 {
     this->glContext->makeCurrent();
-
     //******* SET DEFAULT OPENGL STUFF **********/
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_TEXTURE_2D );
@@ -124,17 +108,13 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
             return false;
     }
     //**********INIT FBOs for depth peeling***********
-    vsA = new Vscan(fboSize, fboSize);
-    vsB = new Vscan(fboSize, fboSize);
+    mFboA      = new FramebufferObject();
+    mFboB      = new FramebufferObject();
+    mFboResult = new FramebufferObject();
 
-    vsA->init();
-    vsB->init();
-
-    //******* QUERY HARDWARE FOR: MAX TEX SIZE ********/
+    unsigned int maxTexSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
-
     Log(0, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
-    maxTexSize = std::min(maxTexSize, (unsigned int)SDF_MAX_TEXTURE_SIZE);
 
     if ((maxTexSize*maxTexSize) < numVertices)
     {
@@ -142,37 +122,61 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
             return false;
     }
 
+    for( mResTextureDim = 16; mResTextureDim*mResTextureDim < numVertices; mResTextureDim *= 2 ){}
+
+    mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
+
+    mColorTextureA = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mDepthTextureA = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mColorTextureB = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mDepthTextureB = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+
+    mFboA->attachTexture( mColorTextureA->format().target(), mColorTextureA->id(), GL_COLOR_ATTACHMENT0 );
+    mFboA->attachTexture( mDepthTextureA->format().target(), mDepthTextureA->id(), GL_DEPTH_ATTACHMENT  );
+    mFboB->attachTexture( mColorTextureB->format().target(), mColorTextureB->id(), GL_COLOR_ATTACHMENT0 );
+    mFboB->attachTexture( mDepthTextureB->format().target(), mDepthTextureB->id(), GL_DEPTH_ATTACHMENT  );
+
     mDeepthPeelingProgram = new GPUProgram("",":/SdfGpu/shaders/shaderDepthPeeling.fs","");
     mDeepthPeelingProgram->enable();
     mDeepthPeelingProgram->addUniform("textureLastDepth");
     mDeepthPeelingProgram->addUniform("tolerance");
     mDeepthPeelingProgram->addUniform("oneOverBufSize");
+
     mDeepthPeelingProgram->disable();
+
+    checkGLError::qDebug("GL Init failed");
 }
 
 void SdfGpuPlugin::releaseGL()
 {
-    useDefaultShader();
-    useScreenAsDest();
+    glUseProgram(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0 );
 
-    delete vsA;
-    delete vsB;
+    delete mDeepthPeelingProgram;
+    delete mFboResult;
+    delete mFboA;
+    delete mFboB;
+    delete mResultTexture;
+    delete mColorTextureA;
+    delete mDepthTextureA;
+    delete mColorTextureB;
+    delete mDepthTextureB;
+
+    checkGLError::qDebug("GL release failed");
 
     this->glContext->doneCurrent();
+
 }
 
 void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 {
-    (front) ? glClearColor(0,1,0,1) : glClearColor(1,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glCullFace((front)?GL_BACK:GL_FRONT);
-
-  //  glPushMatrix();
+   (front) ? glClearColor(0,1,0,1) : glClearColor(1,0,0,1);
+   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+   glCullFace((front)?GL_BACK:GL_FRONT);
 
    mm->glw.DrawFill<GLW::NMPerVert, GLW::CMPerVert, GLW::TMNone>();
 
-   // mm->glw.DrawPointsBase<GLW::NMPerVert, GLW::CMPerVert>();
-    //glPopMatrix();
 }
 
 void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
@@ -213,43 +217,13 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
     mm->glw.Update();
 }
 
-void SdfGpuPlugin::useDepthPeelingShader()
-{
-    mDeepthPeelingProgram->enable();
-    mDeepthPeelingProgram->setUniform1i( "textureLastDepth", 0 );
-}
-
-void SdfGpuPlugin::setDepthPeelingTolerance(float t)
-{
-    mDeepthPeelingProgram->setUniform1f( "tolerance", t );
-}
-
-void SdfGpuPlugin::setDepthPeelingSize(const Vscan & scan)
-{
-    float f[2];
-    f[0] = 1.0f/scan.sizeX();
-    f[1] = 1.0f/scan.sizeY();
-    mDeepthPeelingProgram->setUniform2f("oneOverBufSize", f[0], f[1]);
-}
-
-
-void SdfGpuPlugin::useScreenAsDest()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, 0 );
-}
-
-void SdfGpuPlugin::useDefaultShader()
-{
-    glUseProgram(0);
-}
-
 void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
 {
     GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
             k = 0.1f;
     Point3f eye = meshBBox.Center() + camDir * (d+k);
 
-    glViewport(0.0, 0.0, fboSize, fboSize);
+    glViewport(0.0, 0.0, mPeelingTextureSize, mPeelingTextureSize);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -263,72 +237,43 @@ void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
 }
 
 
+void SdfGpuPlugin::useDepthPeelingShader(FramebufferObject* fbo)
+{
+   glUseProgram(mDeepthPeelingProgram->id());
+   mDeepthPeelingProgram->setUniform1f("tolerance", mTolerance);
+   mDeepthPeelingProgram->setUniform2f("oneOverBufSize", 1.0f/mPeelingTextureSize, 1.0f/mPeelingTextureSize);
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_2D, fbo->getAttachedId(GL_DEPTH_ATTACHMENT));
+   mDeepthPeelingProgram->setUniform1i("textureLastDepth",0);
+}
+
 void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3f& dir, MeshModel* mm )
 {
     for( int i = 0;  i < peelingIteration; i++ )
     {
-       if( i == 0 )
-              useDefaultShader();
+        if( i == 0 )
+              glUseProgram(0);
         else
         {
-              vsB->useAsSource();
-              useDepthPeelingShader();
-              setDepthPeelingTolerance(tolerance);
-              setDepthPeelingSize(*vsB);
+               /*mDeepthPeelingProgram->enable();
+               mDeepthPeelingProgram->setUniform1f("tolerance", mTolerance);
+               mDeepthPeelingProgram->setUniform2f("oneOverBufSize", 1.0f/mPeelingTextureSize, 1.0f/mPeelingTextureSize);
+               mDeepthPeelingProgram->setUniformTexture("textureLastDepth",0, /*mFboB->getAttachedType(GL_DEPTH_ATTACHMENT)GL_TEXTURE_2D, mFboB->getAttachedId(GL_DEPTH_ATTACHMENT));
+               mDeepthPeelingProgram->disable();
+               mDeepthPeelingProgram->enable();*/
+               useDepthPeelingShader(mFboB);
         }
 
-        vsA->useAsDest();
+        mFboA->bind();
         setCamera(dir, mm->cm.bbox);
         fillFrameBuffer(i%2==0, mm);
 
-        drawVertexMarkers();
+      //  if( i != 0 ) mDeepthPeelingProgram->disable();
 
-        std::swap<Vscan*>(vsA,vsB);
+        std::swap<FramebufferObject*>(mFboA,mFboB);
    }
+
+    checkGLError::qDebug("Error during depth peeling");
 }
-
-void SdfGpuPlugin::drawVertexMarkers()
-{
-//TODO
-}
-
-
-bool SdfGpuPlugin::checkFramebuffer()
-{
-        GLenum fboStatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-
-        if ( fboStatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-        {
-                switch (fboStatus)
-                {
-                case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-                        Log(0, "FBO Incomplete: Attachment");
-                        break;
-                case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-                        Log(0, "FBO Incomplete: Missing Attachment");
-                        break;
-                case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-                        Log(0, "FBO Incomplete: Dimensions");
-                        break;
-                case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-                        Log(0, "FBO Incomplete: Formats");
-                        break;
-                case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-                        Log(0, "FBO Incomplete: Draw Buffer");
-                        break;
-                case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-                        Log(0, "FBO Incomplete: Read Buffer");
-                        break;
-                default:
-                        Log(0, "Undefined FBO error");
-                        assert(0);
-                }
-
-                return false;
-        }
-
-        return true;
-}
-
 
 Q_EXPORT_PLUGIN(SdfGpuPlugin)

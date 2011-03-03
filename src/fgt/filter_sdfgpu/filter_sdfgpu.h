@@ -1,11 +1,12 @@
 #ifndef FILTER_SDFGPU_H
 #define FILTER_SDFGPU_H
 
-
 #include <filterinterface.h>
-#include "Vscan.h"
-#include "../../meshlabplugins/render_radiance_scaling/gpuProgram.h"
-#include "../../meshlabplugins/render_radiance_scaling/framebufferObject.h"
+
+#include <gpuProgram.h>
+#include <framebufferObject.h>
+#include <texture2D.h>
+
 
 enum ONPRIMITIVE{ON_VERTICES, ON_FACES};
 
@@ -15,9 +16,10 @@ class SdfGpuPlugin : public SingleMeshFilterInterface{
 
 public:
     SdfGpuPlugin();
+    //main plugin function
     bool applyFilter(MeshDocument&, RichParameterSet&, vcg::CallBackPos*);
+    //parameters init for user interface
     virtual void initParameterSet(MeshDocument&, RichParameterSet &);
-
     //draw the mesh
     void fillFrameBuffer(bool front,  MeshModel* mm);
     //mesh setup
@@ -26,46 +28,28 @@ public:
     bool initGL(unsigned int numVertices);
     //openGL clean up
     void releaseGL();
-    //set the fragment shader for depth peeling
-    void useDepthPeelingShader();
-    //set tolerance uniform paramter
-    void setDepthPeelingTolerance(float t);
-    //set the FBO size uniform paramter
-    void setDepthPeelingSize(const Vscan & scan);
-    //
-    void useScreenAsDest();
-    //
-    void useDefaultShader();
-    //
+    //setup camera orientation
     void setCamera(vcg::Point3f camDir, vcg::Box3f &meshBBox);
-    //Do the actual calculation
+    //Do the actual sdf calculation
     void TraceRays(int peelingIteration, float tolerance, const vcg::Point3f& dir, MeshModel* mm );
-
-    void drawVertexMarkers();
-
-    bool checkFramebuffer();
-
+    //enable depth peeling shader
+    void useDepthPeelingShader(FramebufferObject* fbo);
 
 protected:
 
-    unsigned int maxTexSize;
-    unsigned int numTexPages;
-    Vscan*       vsA;
-    Vscan*       vsB;
-    //depth peeling shader IDs
-    GLuint       depthPeelingShaderProgram;
-    GLuint       depthPeelingFS;
-
-    int          fboSize;
-    GLuint*      resultBufferTex;
-    GLenum*      resultBufferMRT;
-    GLuint       fboResult;
-    GLenum       colorFormat;
-    GLenum       dataTypeFP;
-
-
-    GPUProgram*  mDeepthPeelingProgram;
-    GPUProgram*  mSDFProgram;
+    unsigned int       mResTextureDim;
+    FramebufferObject* mFboA;
+    FramebufferObject* mFboB;
+    FramebufferObject* mFboResult;
+    FloatTexture2D*    mResultTexture;
+    FloatTexture2D*    mColorTextureA;
+    FloatTexture2D*    mDepthTextureA;
+    FloatTexture2D*    mColorTextureB;
+    FloatTexture2D*    mDepthTextureB;
+    unsigned int       mPeelingTextureSize;
+    float              mTolerance;
+    GPUProgram*        mDeepthPeelingProgram;
+    GPUProgram*        mSDFProgram;
 };
 
 #endif // FILTER_SDFGPU_H
