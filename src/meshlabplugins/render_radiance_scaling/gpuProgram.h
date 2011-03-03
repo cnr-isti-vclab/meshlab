@@ -25,7 +25,7 @@
 
 #include <GL/glew.h>
 #include <iostream>
-#include <gpuShader.h>
+#include "gpuShader.h"
 #include <string>
 #include <vector>
 #include <map>
