@@ -1162,7 +1162,7 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 
 	float radius = scale; //TODO leftover
 	
-	QPointF * proj_points = new QPointF[points->size()]; //TODO hope it works on windows!
+  QVector<QPointF> proj_points(points->size());
 	
 	for (unsigned int i = 0; i < points->size(); i++)
 	{
@@ -1249,7 +1249,6 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 
-	delete proj_points;
 }
 
 //each side is divided in given segments
