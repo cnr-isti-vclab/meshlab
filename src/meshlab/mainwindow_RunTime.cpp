@@ -113,8 +113,8 @@ void MainWindow::createXMLStdPluginWnd()
 		xmldialog->close();
 		delete xmldialog;
 	}
-	xmldialog = new MeshLabXMLStdDialog(this);
-	connect(xmldialog,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),this,SLOT(evaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+	xmldialog = new MeshLabXMLStdDialog(PM.env,this);
+	//connect(xmldialog,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),this,SLOT(evaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 	xmldialog->setAllowedAreas (    Qt::RightDockWidgetArea);
 	addDockWidget(Qt::RightDockWidgetArea,xmldialog);
 	//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
@@ -892,9 +892,10 @@ void MainWindow::startFilter()
 				{	
 					XMLFilterInfo::XMLMap mp = *(it);
 						//Initilize the parameters inside the environment
-					Expression* exp = ExpressionFactory::create(mp[MLXMLElNames::paramType],mp[MLXMLElNames::paramDefExpr]);
-					PM.env.insertLocalExpressionBinding(mp[MLXMLElNames::paramName],exp);
-					ExpressionFactory::destroy(exp);	
+					//Expression* exp = ExpressionFactory::create(mp[MLXMLElNames::paramType],mp[MLXMLElNames::paramDefExpr]);
+
+					PM.env.insertExpressionBinding(mp[MLXMLElNames::paramName],mp[MLXMLElNames::paramDefExpr]);
+					//ExpressionFactory::destroy(exp);	
 				}
 				if(currentViewContainer())
 				{
@@ -914,10 +915,10 @@ void MainWindow::startFilter()
 					meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Problem with showAutoDialog.");
 				}
 			}
-			catch (ParsingException e)
+			catch (MeshLabException& e)
 			{
 				meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());	
-				PM.env.popContext();
+				PM.env.popContext();		
 			}
 		}
 		catch(ParsingException e)
@@ -1036,7 +1037,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 
 
-void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, FilterEnv& env, bool /*isPreview*/)
+void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool /*isPreview*/)
 {
 
 	MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
@@ -2020,16 +2021,16 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	return true;
 }
 
-void MainWindow::evaluateExpression(const Expression& exp,Value** res )
-{
-	try
-	{
-		PM.env.pushContext();
-		*res = exp.eval(&PM.env);
-		PM.env.popContext();
-	}
-	catch (ParsingException& e)
-	{
-		GLA()->log->Logf(GLLogStream::WARNING,e.what());
-	}
-}
+//void MainWindow::evaluateExpression(const Expression& exp,Value** res )
+//{
+//	try
+//	{
+//		PM.env.pushContext();
+//		*res = exp.eval(&PM.env);
+//		PM.env.popContext();
+//	}
+//	catch (ParsingException& e)
+//	{
+//		GLA()->log->Logf(GLLogStream::WARNING,e.what());
+//	}
+//}

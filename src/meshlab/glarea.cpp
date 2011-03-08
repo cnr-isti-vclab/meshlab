@@ -38,7 +38,9 @@ using namespace vcg;
 GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 : QGLWidget()
 {
+
     this->setParent(mvcont);
+
     this->updateCustomSettingValues(*current);
   log=mvcont->LogPtr();
 	animMode=AnimNone;

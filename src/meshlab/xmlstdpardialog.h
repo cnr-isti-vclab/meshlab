@@ -2,8 +2,9 @@
 #define MESHLAB_XMLSTDPARDIALOG
 
 #include "../common/xmlfilterinfo.h"
-#include "../common/mlparameter.h"
+#include "../common/environment.h"
 #include "../common/interfaces.h"
+#include "../common/mlexception.h"
 #include<QCheckBox>
 #include<QPushButton>
 #include<QRadioButton>
@@ -16,16 +17,27 @@
 #include<QTextEdit>
 #include<QLabel>
 
+
+class XMLWidgetException : public MeshLabException
+{
+public:
+	XMLWidgetException(const QString& text)
+		:MeshLabException(QString("XML Widget Error: ") + text){}
+
+	~XMLWidgetException() throw() {}
+};
+
 //
 class XMLMeshLabWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	XMLMeshLabWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent);
+	//WARNING! This constructor could rise up a set of MeshLabExceptions! this does it mean that the object COULD BE NOT correctly constructed!
+	XMLMeshLabWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
 	virtual void collectWidgetValue() = 0;
 	virtual void setWidgetExpression(const QString& nwExpStr) = 0;
-	virtual Expression* getWidgetExpression() = 0;
+	virtual QString getWidgetExpression() = 0;
 	virtual void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
 	void setVisibility(const bool vis);
 	virtual void updateVisibility(const bool vis) = 0;
@@ -42,13 +54,14 @@ public:
 
 signals:
 	void parameterChanged();
-	void widgetEvaluateExpression(const Expression& exp,Value** res);
-	void insertParamInEnv(const QString& paramName,Expression* paramExp);
+	//void widgetEvaluateExpression(const Expression& exp,Value** res);
+	//void insertParamInEnv(const QString& paramName,Expression* paramExp);
 
 protected:
 	int row;
 	QGridLayout* gridLay;
 	QLabel* helpLab;
+	EnvWrap env;
 	//QLineEdit* lExprEditor;
 	//QTextEdit* tExprEditor;
 };
@@ -56,7 +69,9 @@ protected:
 class XMLMeshLabWidgetFactory 
 {
 public:	
-	static XMLMeshLabWidget* create(const XMLFilterInfo::XMLMap& widgetTable,QWidget* parent);
+	//WARNING! this function call constructors that could rise up a set of MeshLabExceptions but it is not able to manage it, so let the exceptions floating up!
+	//IN ANY CASE the callee MUST check if the returned value is not NULL.
+	static XMLMeshLabWidget* create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,QWidget* parent);
 };
 
 //
@@ -64,7 +79,7 @@ class XMLCheckBoxWidget : public XMLMeshLabWidget
 {
 	Q_OBJECT
 public:
-	XMLCheckBoxWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent);
+	XMLCheckBoxWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLCheckBoxWidget();
 	void resetWidgetValue();
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
@@ -72,7 +87,7 @@ public:
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
-	Expression* getWidgetExpression();
+	QString getWidgetExpression();
 
 private:
 
@@ -85,7 +100,7 @@ class XMLEditWidget : public XMLMeshLabWidget
 {
 	Q_OBJECT
 public:
-	XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent);
+	XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLEditWidget();
 	void resetWidgetValue();
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
@@ -93,7 +108,7 @@ public:
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
-	Expression* getWidgetExpression();
+	QString getWidgetExpression();
 private slots:
 	void tooltipEvaluation();
 private:
@@ -104,7 +119,7 @@ private:
 class XMLAbsWidget : public XMLMeshLabWidget
 {	
 public:
-	XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent);
+	XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLAbsWidget();
 	
 	void resetWidgetValue();
@@ -113,7 +128,7 @@ public:
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
-	Expression* getWidgetExpression();
+	QString getWidgetExpression();
 
 private:
 	QLabel* fieldDesc; 
@@ -137,8 +152,8 @@ class XMLStdParFrame : public QFrame
 {
 	Q_OBJECT
 public:
-	XMLStdParFrame(QWidget *p, QWidget *gla=0);
-	void loadFrameContent(const XMLFilterInfo::XMLMapList& parMap);
+	XMLStdParFrame(QWidget *p,QWidget *gla=0);
+	void loadFrameContent(const XMLFilterInfo::XMLMapList& parMap,EnvWrap& envir);
 	void extendedView(bool ext,bool help);
 	//void loadFrameContent(RichParameter* par,MeshDocument *mdPt = 0);
 
@@ -154,8 +169,8 @@ public:
 
 	QWidget *curr_gla; // used for having a link to the glarea that spawned the parameter asking.
 	~XMLStdParFrame();
-signals:
-	void frameEvaluateExpression(const Expression& exp,Value** res);
+//signals:
+	//void frameEvaluateExpression(const Expression& exp,Value** res);
 	
 private:
 	QGridLayout * vLayout;
@@ -190,7 +205,7 @@ class MeshLabXMLStdDialog : public QDockWidget
 	Q_OBJECT
 
 public:
-	MeshLabXMLStdDialog(QWidget *p);
+	MeshLabXMLStdDialog(Env& envir,QWidget *p);
 	~MeshLabXMLStdDialog();
 
 	void clearValues();
@@ -199,9 +214,8 @@ public:
 
 	bool showAutoDialog(MeshLabXMLFilterContainer& mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic() const;
-	FilterEnv filtEnv;
-signals:
-	void dialogEvaluateExpression(const Expression& exp,Value** res);
+//signals:
+	//void dialogEvaluateExpression(const Expression& exp,Value** res);
 	//void expandView(bool exp);
 
 private slots:
@@ -215,6 +229,7 @@ private slots:
 	void extendedView(bool ext);
 
 private:
+	Env& env;
 	QFrame *qf;
 	XMLStdParFrame *stdParFrame;
 	//QAction *curAction;

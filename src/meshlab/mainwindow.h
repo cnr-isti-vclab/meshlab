@@ -35,7 +35,7 @@
 #include <QStringList>
 #include <QColorDialog>
 #include "../common/pluginmanager.h"
-#include "../common/mlparameter.h"
+#include "../common/environment.h"
 #include "glarea.h"
 #include "layerDialog.h"
 #include "stdpardialog.h"
@@ -59,7 +59,7 @@ class MainWindow : public QMainWindow, MainWindowInterface
 public:
 	// callback function to execute a filter
 	void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview);
-	void executeFilter(MeshLabXMLFilterContainer* mfc, FilterEnv& env, bool  isPreview);
+	void executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool  isPreview);
 
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);
@@ -83,7 +83,7 @@ private slots:
   void delCurrentRaster();
   void endEdit();
   void updateDocumentScriptBindings() {if(currentViewContainer()) PM.updateDocumentScriptBindings(*meshDoc());}
-  void evaluateExpression(const Expression& exp,Value** res);
+  //void evaluateExpression(const Expression& exp,Value** res);
 
 
 public:

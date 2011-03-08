@@ -1,8 +1,8 @@
 #include "xmlstdpardialog.h"
 #include <QtGui>
 
-MeshLabXMLStdDialog::MeshLabXMLStdDialog( QWidget *p )
-:QDockWidget(QString("Plugin"), p),showHelp(false)
+MeshLabXMLStdDialog::MeshLabXMLStdDialog( Env& environ,QWidget *p )
+:QDockWidget(QString("Plugin"), p),showHelp(false),env(environ)
 {
 	curmask = 0;
 	qf = NULL;
@@ -49,12 +49,13 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
 
 	stdParFrame = new XMLStdParFrame(this,curgla);
-	connect(stdParFrame,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),this,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+	//connect(stdParFrame,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),this,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 
 	XMLFilterInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
-	stdParFrame->loadFrameContent(mplist);
+	EnvWrap wrap(env);
+	stdParFrame->loadFrameContent(mplist,wrap);
 	gridLayout->addWidget(stdParFrame,1,0,1,2);
-	
+
 	//int buttonRow = 2;  // the row where the line of buttons start
 
 	QPushButton *helpButton = new QPushButton("Help", qf);
@@ -153,17 +154,14 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
 
 void MeshLabXMLStdDialog::applyClick()
 {
-  filtEnv.clear();
+	env.pushContext();
 	assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
 	for(int ii = 0;ii < curParMap.size();++ii)	
 	{
 		XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
-		Expression* exp = wid->getWidgetExpression();
-		//the result value will be destructed when the FilterEnv will be disposed
-		Value* res = NULL;
-		emit dialogEvaluateExpression(*exp,&res);
-		filtEnv.insertValueBinding(curParMap[ii][MLXMLElNames::paramName],res);
-		delete exp;
+		QString exp = wid->getWidgetExpression();
+		env.insertExpressionBinding(curParMap[ii][MLXMLElNames::paramName],exp);
+		//delete exp;
 	}
 	////int mask = 0;//curParSet.getDynamicFloatMask();
 	if(curmask)	
@@ -176,8 +174,9 @@ void MeshLabXMLStdDialog::applyClick()
 	//	meshCacheState.apply(curModel);
 	//else
 	QString nm = curmfc->act->text();
-	curmwi->executeFilter(curmfc,filtEnv,false);
-	
+	EnvWrap wrap(env);
+	curmwi->executeFilter(curmfc,wrap,false);
+	env.popContext();
 
 	if(curmask)	
 		meshState.create(curmask, curModel);
@@ -258,7 +257,7 @@ bool MeshLabXMLStdDialog::isDynamic() const
 	 return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 }
 
-XMLStdParFrame::XMLStdParFrame( QWidget *p, QWidget *gla/*=0*/ )
+XMLStdParFrame::XMLStdParFrame( QWidget *p,QWidget *gla/*=0*/ )
 :QFrame(p),extended(false)
 {
 	curr_gla=gla;
@@ -279,11 +278,11 @@ XMLStdParFrame::~XMLStdParFrame()
 
 }
 
-void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap)
+void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap,EnvWrap& envir)
 {
 	for(XMLFilterInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
 	{
-		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,this);
+		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,envir,this);
 		if (widg == NULL)
 			return;
 		xmlfieldwidgets.push_back(widg); 
@@ -312,20 +311,15 @@ void XMLStdParFrame::extendedView(bool ext,bool help)
 	adjustSize();
 }
 
-XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,QWidget* parent )
-:QWidget(parent)
+XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,EnvWrap& envir,QWidget* parent )
+:QWidget(parent),env(envir)
 {
 	//WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//It's not nice at all doing the connection for an external object! The connect should be called in XMLStdParFrame::loadFrameContent but in this way 
 	//we must break the construction of the widget in two steps because otherwise in the constructor (called by XMLMeshLabWidgetFactory::create) the emit is invoked
 	//before the connection!
-	connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
-
-	Value* isImp = NULL;
-	BoolExpression isImpExp(mp[MLXMLElNames::paramIsImportant]);
-	emit widgetEvaluateExpression(isImpExp,&isImp);
-	isImportant = isImp->getBool();
-	delete isImp;
+	//connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+	isImportant = env.getBool(mp[MLXMLElNames::paramIsImportant]);
 	setVisible(isImportant);
 		
 	helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",this);
@@ -359,17 +353,14 @@ void XMLMeshLabWidget::setVisibility( const bool vis )
 	setVisible(vis);
 }
 
-XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent )
-:XMLMeshLabWidget(xmlWidgetTag,parent)
+XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent )
+:XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
 	cb = new QCheckBox(xmlWidgetTag[MLXMLElNames::paramName],this);
 	cb->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
-	BoolExpression exp(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
-	Value* boolVal = NULL;
-	emit widgetEvaluateExpression(exp,&boolVal);
-	cb->setChecked(boolVal->getBool());
+	bool defVal = env.getBool(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+	cb->setChecked(defVal);
 	cb->setVisible(isImportant);
-	delete boolVal;
 
 	//gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
 
@@ -416,32 +407,32 @@ void XMLCheckBoxWidget::updateVisibility( const bool vis )
 	cb->setVisible(vis);
 }
 
-Expression* XMLCheckBoxWidget::getWidgetExpression()
+QString XMLCheckBoxWidget::getWidgetExpression()
 {
 	QString state;
 	if (cb->isChecked())
 		state = QString("true");
 	else
 		state = QString("false");
-	return new BoolExpression(state);
+	return state;
 }
 
-XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,QWidget* parent)
+XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,QWidget* parent)
 {
 	QString guiType = widgetTable[MLXMLElNames::guiType];
 	if (guiType == MLXMLElNames::editTag)
-		return new XMLEditWidget(widgetTable,parent);
+		return new XMLEditWidget(widgetTable,env,parent);
 
 	if (guiType == MLXMLElNames::checkBoxTag)
-		return new XMLCheckBoxWidget(widgetTable,parent);
+		return new XMLCheckBoxWidget(widgetTable,env,parent);
 
 	if (guiType == MLXMLElNames::absPercTag)
-		return new XMLAbsWidget(widgetTable,parent);
+		return new XMLAbsWidget(widgetTable,env,parent);
 	return NULL;
 }
 
-XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,QWidget* parent)
-:XMLMeshLabWidget(xmlWidgetTag,parent)
+XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent)
+:XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
 	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName],this);
 	lineEdit = new QLineEdit(this);
@@ -495,37 +486,34 @@ void XMLEditWidget::updateVisibility( const bool vis )
 
 void XMLEditWidget::tooltipEvaluation()
 {
-	QString exp = lineEdit->selectedText();
-	FloatExpression flExp(exp);
-	Value* val = NULL;
-	emit widgetEvaluateExpression(flExp,&val);
-	if (val != NULL)
-		lineEdit->setToolTip(QString::number(val->getFloat()));
-	delete val;
+	try
+	{
+		QString exp = lineEdit->selectedText();
+		float res = env.getFloat(exp);
+		lineEdit->setToolTip(QString::number(res));
+	}
+	catch (MeshLabException& /*e*/)
+	{
+		//WARNING!!! it's needed otherwise there is a stack overflow due to the Qt selection mechanism!
+		return;
+	}
 }
 
-Expression* XMLEditWidget::getWidgetExpression()
+QString XMLEditWidget::getWidgetExpression()
 {
-	return new FloatExpression(this->lineEdit->text());
+	return this->lineEdit->text();
 }
 
-XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, QWidget* parent )
-:XMLMeshLabWidget(xmlWidgetTag,parent),minVal(NULL),maxVal(NULL)
+XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
+:XMLMeshLabWidget(xmlWidgetTag,envir,parent),minVal(NULL),maxVal(NULL)
 {
-	FloatExpression minExp(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
-	FloatExpression maxExp(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
-	emit widgetEvaluateExpression(minExp,&minVal);
-	emit widgetEvaluateExpression(maxExp,&maxVal);
-
+	float m_min = env.getFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
+	float m_max = env.getFloat(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
 
 	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName] + " (abs and %)",this);
 	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
 	absSB = new QDoubleSpinBox(this);
 	percSB = new QDoubleSpinBox(this);
-
-	//called with m_* only to maintain backward compatibility
-	float m_min = minVal->getFloat();
-	float m_max = maxVal->getFloat();
 
 	absSB->setMinimum(m_min-(m_max-m_min));
 	absSB->setMaximum(m_max*2);
@@ -608,9 +596,9 @@ void XMLAbsWidget::updateVisibility( const bool vis )
 	this->percSB->setVisible(vis);
 }
 
-Expression* XMLAbsWidget::getWidgetExpression()
+QString XMLAbsWidget::getWidgetExpression()
 {
-	return new FloatExpression(QString::number(absSB->value()));
+	return QString::number(absSB->value());
 }
 
 ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
