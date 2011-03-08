@@ -35,13 +35,21 @@ public:
     //enable depth peeling shader
     void useDepthPeelingShader(FramebufferObject* fbo);
 
+    void vertexDataToTexture(MeshModel &m);
+
+    void calculateSdfHW(FramebufferObject& fboFront, FramebufferObject& fboBack, const vcg::Point3f& cameraDir);
+
+    void applySdfHW(MeshModel &m);
+
 protected:
 
     unsigned int       mResTextureDim;
+    FloatTexture2D*    mResultTexture;
+    FloatTexture2D*    mVertexCoordsTexture;
+    FloatTexture2D*    mVertexNormalsTexture;
     FramebufferObject* mFboA;
     FramebufferObject* mFboB;
     FramebufferObject* mFboResult;
-    FloatTexture2D*    mResultTexture;
     FloatTexture2D*    mColorTextureA;
     FloatTexture2D*    mDepthTextureA;
     FloatTexture2D*    mColorTextureB;

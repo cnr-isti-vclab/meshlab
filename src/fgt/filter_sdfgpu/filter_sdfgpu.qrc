@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/SdfGpu">
         <file>shaders/shaderDepthPeeling.fs</file>
+        <file>shaders/calculateSdf.frag</file>
     </qresource>
 </RCC>
