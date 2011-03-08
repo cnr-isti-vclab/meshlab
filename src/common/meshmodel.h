@@ -60,6 +60,7 @@
 #include <QObject>
 #include "GLLogStream.h"
 #include "filterscript.h"
+#include <QSemaphore>
 
 // Forward declarations needed for creating the used types
 class CVertexO;
@@ -204,6 +205,7 @@ public:
 
 public:
   vcg::GlTrimesh<CMeshO> glw;
+  QSemaphore meshSem;
 
 
 	/*

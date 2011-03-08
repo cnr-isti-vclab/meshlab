@@ -28,7 +28,7 @@
 #include<QObject>
 
 #include "interfaces.h"
-#include "mlparameter.h"
+#include "environment.h"
 #include "xmlfilterinfo.h"
 #include "scriptinterface.h"
 

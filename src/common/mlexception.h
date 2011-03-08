@@ -31,10 +31,20 @@ class ValueNotFoundException : public MeshLabException
 {
 public:
         ValueNotFoundException(const QString& valName)
-                :MeshLabException(QString("Value Name: ") + valName +  QString(" has not been found in current environment.")){}
+                :MeshLabException(QString("Value Name: ") + valName +  QString(" has not been defined in current environment.")){}
 
         ~ValueNotFoundException() throw() {}
 };
+
+class NotConstException : public MeshLabException
+{
+public:
+	NotConstException(const QString& exp)
+		:MeshLabException(QString("Expression: ") + exp +  QString(" is not a const expression. Expression contains an assignment operator \"=\".")){}
+
+	~NotConstException() throw() {}
+};
+
 
 class QueryException : public MeshLabException
 {
@@ -44,4 +54,23 @@ public:
 
 	~QueryException() throw() {}
 };
+
+class JavaScriptException : public MeshLabException
+{
+public:
+	JavaScriptException(const QString& syntaxError)
+		:MeshLabException(QString("JavaScript Error: ") + syntaxError){}
+
+	~JavaScriptException() throw() {}
+};
+
+class ExpressionHasNotThisTypeException :  public MeshLabException
+{
+public:
+	ExpressionHasNotThisTypeException(const QString& expectedType,const QString& exp)
+		:MeshLabException(QString("Expression: ") + exp + " cannot be evaluated to a " + expectedType + "'s value."){}
+
+	~ExpressionHasNotThisTypeException() throw() {}
+};
+
 #endif

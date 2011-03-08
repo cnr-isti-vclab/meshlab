@@ -35,7 +35,7 @@
 #include "filterparameter.h"
 #include "GLLogStream.h"
 #include "meshmodel.h"
-#include "mlparameter.h"
+#include "environment.h"
 #include "xmlfilterinfo.h"
 
 class QWidget;
@@ -58,7 +58,7 @@ class MainWindowInterface
 {
 public:
   virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){}
-  virtual void executeFilter(MeshLabXMLFilterContainer*, FilterEnv& , bool /* isPreview */){}
+  virtual void executeFilter(MeshLabXMLFilterContainer*, EnvWrap& , bool /* isPreview */){}
 };
 
 /** \brief The MeshLabInterface class is the base of all the plugin interfaces.
@@ -634,7 +634,7 @@ public:
 	static bool arePreCondsValid(const int filterPreConds,const MeshModel& m, QStringList &MissingItems);
 	static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
 
-	virtual bool applyFilter(const QString& filterName,MeshDocument& md,const FilterEnv& env, vcg::CallBackPos *cb) =0;
+	virtual bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos *cb) =0;
 };
 
 Q_DECLARE_INTERFACE(MeshIOInterface,						"vcg.meshlab.MeshIOInterface/1.0")
