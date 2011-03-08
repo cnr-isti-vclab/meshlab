@@ -32,7 +32,7 @@ SampleXMLFilterPlugin::SampleXMLFilterPlugin()
 { 
 }
 
-bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument& md,const FilterEnv& env, vcg::CallBackPos * cb )
+bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb )
 {
 	if (filterName == "Random vertex displacement")
 	{

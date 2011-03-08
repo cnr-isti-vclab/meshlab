@@ -48,7 +48,7 @@ public:
 
 	SampleXMLFilterPlugin();
 
-    bool applyFilter(const QString& filterName,MeshDocument& md,const FilterEnv& env, vcg::CallBackPos * cb) ;
+    bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb) ;
 };
 
 
