@@ -15,6 +15,7 @@
 #include <vcg/math/gen_normal.h>
 #include <wrap/qt/checkGLError.h>
 #include <stdio.h>
+#include <assert.h>
 using namespace std;
 using namespace vcg;
 
@@ -71,8 +72,11 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
    //******* GL & MESH INIT **********/
-  initGL(cm.vn);
-  setupMesh( md, onPrimitive );
+   setupMesh( md, onPrimitive );
+   initGL(cm.vn);
+   vertexDataToTexture(*mm);
+
+
 
   //******** CALCULATE SDF *************/
   std::vector<Point3f> unifDirVec;
@@ -136,7 +140,7 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     mFboResult->bind();
 
     glPushAttrib(GL_COLOR_BUFFER_BIT);
-    glClearColor(0,0,1,0);
+    glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT);
     glPopAttrib();
 
@@ -170,6 +174,10 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     mSDFProgram->addUniform("viewpSize");
     mSDFProgram->addUniform("texSize");
     mSDFProgram->disable();
+
+    assert(mFboResult->isValid());
+    assert(mFboA->isValid());
+    assert(mFboB->isValid());
 
     checkGLError::qDebug("GL Init failed");
 }
@@ -317,6 +325,8 @@ void SdfGpuPlugin::useDepthPeelingShader(FramebufferObject* fbo)
 
 void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject& fboBack, const Point3f& cameraDir)
 {
+    mFboResult->bind();
+    glViewport(0, 0, mResTextureDim, mResTextureDim);
     GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
 
     glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
@@ -343,23 +353,31 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
     glUseProgram(mSDFProgram->id());
 
     glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboFront.getAttachedId(GL_DEPTH_ATTACHMENT));
+    mSDFProgram->setUniform1i("depthTextureFront",0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fboBack.getAttachedId(GL_DEPTH_ATTACHMENT));
+    mSDFProgram->setUniform1i("depthTextureBack",1);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, mVertexCoordsTexture->id());
+    mSDFProgram->setUniform1i("vTexture",2);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, mVertexNormalsTexture->id());
+    mSDFProgram->setUniform1i("nTexture",3);
+
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mVertexCoordsTexture->id());
     mSDFProgram->setUniform1i("vTexture",0);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, mVertexNormalsTexture->id());
     mSDFProgram->setUniform1i("nTexture",1);
+   glEnable( GL_TEXTURE_2D );
 
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, fboFront.getAttachedId(GL_DEPTH_ATTACHMENT));
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_NONE);
-    mSDFProgram->setUniform1i("depthTextureFront",2);
-
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, fboBack.getAttachedId(GL_DEPTH_ATTACHMENT));
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_NONE);
-    mSDFProgram->setUniform1i("depthTextureBack",3);
-
+   // cameraDir.Normalize();
     // Set view direction
     mSDFProgram->setUniform3f("viewDirection", cameraDir.X(), cameraDir.Y(), cameraDir.Z());
 
@@ -372,8 +390,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
     // Set viewport Size
     mSDFProgram->setUniform1f("viewpSize", mResTextureDim );
 
-    mFboResult->bind();
-    glViewport(0, 0, mResTextureDim, mResTextureDim);
+
     // Screen-aligned Quad
     glBegin(GL_QUADS);
             glVertex3f(-1.0f, -1.0f, 0.0f); //L-L
@@ -382,6 +399,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
             glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
     glEnd();
 
+    mFboResult->unbind();
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
@@ -389,21 +407,23 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
 
 void SdfGpuPlugin::applySdfHW(MeshModel &m)
 {
-        const unsigned int texelNum = mResTextureDim*mResTextureDim;
+    const unsigned int texelNum = mResTextureDim*mResTextureDim;
 
-        GLfloat *result = new GLfloat[texelNum*4];
+    GLfloat *result = new GLfloat[texelNum*4];
 
-        mFboResult->bind();
+    mFboResult->bind();
 
-        glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-        glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
+    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
 
-        for (int i=0; i < m.cm.vn; ++i)
-        {
-               m.cm.vert[i].Q() = result[i*4];
-        }
+    for (int i=0; i < m.cm.vn; ++i)
+    {
+           m.cm.vert[i].Q() = result[i*4];
+    }
 
-        delete [] result;
+    mFboResult->unbind();
+
+    delete [] result;
 }
 
 
@@ -424,7 +444,7 @@ void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3
         glPolygonOffset(1.0f, 1.0f);
 
         fillFrameBuffer(i%2==0, mm);
-
+        mFboA->unbind();
         glDisable(GL_POLYGON_OFFSET_FILL);
 
         if(i%2) {
