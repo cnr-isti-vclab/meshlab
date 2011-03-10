@@ -39,8 +39,9 @@ QString ExtraMeshDecoratePlugin::filterInfo(QAction *action) const
     case DP_SHOW_AXIS :									return tr("Draws XYZ axes in world coordinates");
     case DP_SHOW_BOX_CORNERS:						return tr("Draws object's bounding box corners");
 		case DP_SHOW_VERT:									return tr("Draw the vertices of the mesh as round dots");
-    case DP_SHOW_NON_FAUX_EDGE:								return tr("Draws the edge of the mesh that are on the boundary.");
-		case DP_SHOW_BOX_CORNERS_ABS  :			return tr("Show Box Corners (Abs)");
+    case DP_SHOW_NON_FAUX_EDGE:				return tr("Draws the edge of the mesh that are tagged as 'real edges' (useful for quadmeshes).");
+    case DP_SHOW_BOUNDARY:								return tr("Draws the edge of the mesh that are on the boundary.");
+    case DP_SHOW_BOX_CORNERS_ABS  :			return tr("Show Box Corners (Abs)");
     case DP_SHOW_VERT_NORMALS:					return tr("Draws object vertex normals");
     case DP_SHOW_VERT_PRINC_CURV_DIR :	return tr("Show Vertex Principal Curvature Directions");
     case DP_SHOW_FACE_NORMALS:					return tr("Draws object face normals");
@@ -62,6 +63,7 @@ QString ExtraMeshDecoratePlugin::filterName(FilterIDType filter) const
     {
     case DP_SHOW_VERT      :	return QString("Show Vertex Dots");
     case DP_SHOW_NON_FAUX_EDGE :	return QString("Show Non-Faux Edges");
+    case DP_SHOW_BOUNDARY :	return QString("Show Boundary Edges");
     case DP_SHOW_VERT_NORMALS      :	return QString("Show Vertex Normals");
     case DP_SHOW_VERT_PRINC_CURV_DIR :	return QString("Show Vertex Principal Curvature Directions");
     case DP_SHOW_FACE_NORMALS      :	return QString("Show Face Normals");
@@ -210,8 +212,33 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
 	        }
       }
       break;
-
-
+    case DP_SHOW_BOUNDARY :
+    {
+      // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+      CMeshO::PerMeshAttributeHandle< vector<Point3f> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryVector");
+      if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, bvH))
+      {
+        vector<Point3f> *BVp = &bvH();
+        if (BVp->size() != 0)
+        {
+          glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+          glDisable(GL_LIGHTING);
+          glDepthFunc(GL_LEQUAL);
+          glEnable(GL_LINE_SMOOTH);
+          glEnable(GL_BLEND);
+          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+          glLineWidth(1.f);
+          glColor(Color4b::Green);
+          glDepthRange (0.0, 0.999);
+          glEnableClientState (GL_VERTEX_ARRAY);
+          glVertexPointer(3,GL_FLOAT,sizeof(Point3f),&(BVp->begin()[0]));
+          glDrawArrays(GL_LINES,0,BVp->size());
+          glDisableClientState (GL_VERTEX_ARRAY);
+          glPopAttrib();
+        }
+      }
+    }
+      break;
     } // end switch;
 	glPopMatrix();
 
@@ -554,37 +581,57 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
 {	
   switch(ID(action))
   {
-    case DP_SHOW_VERT_QUALITY_HISTOGRAM :
+    case DP_SHOW_BOUNDARY :
+    {
+      MeshModel *m=md.mm();
+      CMeshO::PerMeshAttributeHandle< vector<Point3f> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<Point3f> >(m->cm,"BoundaryVector");
+      if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,bvH))
+        bvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<Point3f> >(m->cm,std::string("BoundaryVector"));
+      vector<Point3f> *BVp = &bvH();
+      BVp->clear();
+      tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m->cm);
+      for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
       {
-        MeshModel *m=md.mm();
+        for(int i=0;i<3;++i)
+          if((*fi).IsB(i))
+          {
+            BVp->push_back((*fi).V0(i)->P());
+            BVp->push_back((*fi).V1(i)->P());
+          }
+      }
 
-        CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m->cm,"VertQualityHist");
+    } break;
+    case DP_SHOW_VERT_QUALITY_HISTOGRAM :
+    {
+      MeshModel *m=md.mm();
 
-            if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,qH))
-              qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m->cm,std::string("VertQualityHist"));
-            CHist *H = &qH();
-            std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m->cm);
-            if(rm->getBool(UseFixedHistParam())) {
-              minmax.first=rm->getFloat(FixedHistMinParam());
-              minmax.second=rm->getFloat(FixedHistMaxParam());
-            }
+      CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m->cm,"VertQualityHist");
 
-            H->SetRange( minmax.first, minmax.second, rm->getInt(HistBinNumParam()));
-            if(rm->getBool(AreaHistParam()))
-            {
-              for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
-                {
-                  float area6=DoubleArea(*fi)/6.0f;
-                  for(int i=0;i<3;++i)
-                      H->Add((*fi).V(i)->Q(),(*fi).V(i)->C(),area6);
-                }
-            } else {
-              for(CMeshO::VertexIterator vi = m->cm.vert.begin(); vi!= m->cm.vert.end();++vi) if(!(*vi).IsD())
-                {
-                  H->Add((*vi).Q(),(*vi).C(),1.0f);
-                }
-            }
-      } break;
+      if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,qH))
+        qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m->cm,std::string("VertQualityHist"));
+      CHist *H = &qH();
+      std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m->cm);
+      if(rm->getBool(UseFixedHistParam())) {
+        minmax.first=rm->getFloat(FixedHistMinParam());
+        minmax.second=rm->getFloat(FixedHistMaxParam());
+      }
+
+      H->SetRange( minmax.first, minmax.second, rm->getInt(HistBinNumParam()));
+      if(rm->getBool(AreaHistParam()))
+      {
+        for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
+        {
+          float area6=DoubleArea(*fi)/6.0f;
+          for(int i=0;i<3;++i)
+            H->Add((*fi).V(i)->Q(),(*fi).V(i)->C(),area6);
+        }
+      } else {
+        for(CMeshO::VertexIterator vi = m->cm.vert.begin(); vi!= m->cm.vert.end();++vi) if(!(*vi).IsD())
+        {
+          H->Add((*vi).Q(),(*vi).C(),1.0f);
+        }
+      }
+    } break;
     case DP_SHOW_FACE_QUALITY_HISTOGRAM :
       {
         MeshModel *m=md.mm();
