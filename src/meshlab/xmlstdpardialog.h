@@ -2,7 +2,7 @@
 #define MESHLAB_XMLSTDPARDIALOG
 
 #include "../common/xmlfilterinfo.h"
-#include "../common/environment.h"
+#include "../common/scriptinterface.h"
 #include "../common/interfaces.h"
 #include "../common/mlexception.h"
 #include<QCheckBox>

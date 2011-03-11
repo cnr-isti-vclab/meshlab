@@ -35,7 +35,7 @@
 #include <QStringList>
 #include <QColorDialog>
 #include "../common/pluginmanager.h"
-#include "../common/environment.h"
+#include "../common/scriptinterface.h"
 #include "glarea.h"
 #include "layerDialog.h"
 #include "stdpardialog.h"
