@@ -60,25 +60,32 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				QString withoutext = fileName.left(res); 
 				QString xmlFile = getPluginDirPath() + "/" + withoutext + QObject::tr(".xml");
 				qDebug("Loading XMLFile: %s",qPrintable(xmlFile));
-				XMLMessageHandler xmlErr;
-				fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,xmlSchemaFile(),xmlErr);
-				if (fc.xmlInfo != NULL)
-				{
-					QStringList fn = fc.xmlInfo->filterNames();
-					foreach(QString filtName,fn)
-					{
-						fc.act = new QAction(filtName,plugin);
-						stringXMLFilterMap.insert(filtName,fc);
+        if(!QFileInfo(xmlFile).exists())
+        {
+          qDebug("Error XMLFile: %s does not exist",qPrintable(xmlFile));
+        }
+        else
+        {
+          XMLMessageHandler xmlErr;
+          fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,xmlSchemaFile(),xmlErr);
+          if (fc.xmlInfo != NULL)
+          {
+            QStringList fn = fc.xmlInfo->filterNames();
+            foreach(QString filtName,fn)
+            {
+              fc.act = new QAction(filtName,plugin);
+              stringXMLFilterMap.insert(filtName,fc);
 
-						//SHOULD INITIALIZE GLOBALS FOR FILTERS
+              //SHOULD INITIALIZE GLOBALS FOR FILTERS
 
-					}
-				}
-				else 
-				{
-					QString err = xmlErr.statusMessage();
-					qDebug("Error in XMLFile: %s - line: %d, column: %d - %s",qPrintable(xmlFile),xmlErr.line(),xmlErr.column(),qPrintable(err));
-				}
+            }
+          }
+          else
+          {
+            QString err = xmlErr.statusMessage();
+            qDebug("Error in XMLFile: %s - line: %d, column: %d - %s",qPrintable(xmlFile),xmlErr.line(),xmlErr.column(),qPrintable(err));
+          }
+        }
 			}
 
 			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
