@@ -26,19 +26,23 @@
 
 #include <QtScript>
 #include "filterparameter.h"
+#include "xmlfilterinfo.h"
 #include "meshmodel.h"
 
 class ScriptAdapterGenerator
 {
 private:
 	QString parNames(const RichParameterSet& set) const;
+	QString parNames(const QString&  filterName,const XMLFilterInfo& xmlInfo) const;
 public:
-	QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set);
+	QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const;
+	QString funCodeGenerator(const QString&  filtername,const XMLFilterInfo& xmlInfo) const;
 };
 
 
 QScriptValue PluginInterfaceInit(QScriptContext *context, QScriptEngine *engine, void * param);
 QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine, void * param);
+QScriptValue PluginInterfaceApplyXML(QScriptContext *context, QScriptEngine *engine, void * param);
 
 QScriptValue IRichParameterSet_prototype_setBool(QScriptContext* c,QScriptEngine* e);
 QScriptValue IRichParameterSet_prototype_setInt(QScriptContext* c,QScriptEngine* e);
@@ -96,5 +100,51 @@ void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelSc
 //	return e->toScriptValue(MeshModelScriptInterface(x));
 //}
 
+class Env :public QScriptEngine
+{
+	Q_OBJECT
+
+public:
+	Env();
+	Q_INVOKABLE void insertExpressionBinding(const QString& nm,const QString& exp);
+};
+
+QScriptValue Env_ctor(QScriptContext *context,QScriptEngine *engine);
+
+Q_DECLARE_METATYPE(Env*)
+
+class EnvWrap
+{
+private:
+	bool constStatement(const QString& statement) const;
+	QScriptValue getExp( const QString& nm );
+	Env* env;
+public:
+	EnvWrap():env(NULL){};
+	EnvWrap(Env& envir);
+	bool getBool(const QString& nm);
+	float getFloat(const QString& nm);
+};
+
+QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);
+
+//class EnvWrap : protected virtual QScriptEngine
+//{
+//private:
+//	bool constStatement(const QString& statement) const;
+//	QScriptValue getExp( const QString& nm );
+//public:
+//	EnvWrap();
+//	bool getBool(const QString& nm);
+//	float getFloat(const QString& nm);
+//};
+//
+//
+//class Env : public EnvWrap, public virtual QScriptEngine
+//{
+//public:
+//	Env();
+//	void insertExpressionBinding(const QString& nm,const QString& exp);
+//};
 
 #endif

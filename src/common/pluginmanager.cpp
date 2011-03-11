@@ -113,7 +113,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	
 	/*******************************************/
 
-	QString code = "";
+	/*QString code = "";
 	code += "Plugins = { };\n";
 	QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
 	foreach(MeshFilterInterface* mi,this->meshFilterPlug)
@@ -143,7 +143,40 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	env.globalObject().setProperty("_applyFilter", applyFun);
 
 	env.evaluate(code);
+*/
+	QString code = "";
+	code += "Plugins = { };\n";
+	//QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
+	foreach(MeshLabXMLFilterContainer mi,stringXMLFilterMap)
+	{
+		QString pname = mi.xmlInfo->pluginName();
+		if (pname != "")
+		{
+			code += "Plugins." + pname + " = { };\n";
+			foreach(QString filterName,mi.xmlInfo->filterNames())
+			{
+				QString filterFunction = mi.xmlInfo->filterAttribute(filterName,MLXMLElNames::filterScriptFunctName);
+				if (filterFunction != "")
+				{
+					ScriptAdapterGenerator gen;
+					QString gencode = gen.funCodeGenerator(filterName,*mi.xmlInfo);
+					code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
+				}
+			}
+		}
+	}
+
+	//QScriptValue initFun  = env.newFunction(PluginInterfaceInit,  this);
+	//env.globalObject().setProperty("_initParameterSet", initFun);
+
+	QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
+	env.globalObject().setProperty("_applyFilter", applyFun);
+
+	QScriptValue res = env.evaluate(code);
 	qDebug("Code:\n %s",qPrintable(code));
+	if (env.hasUncaughtException())
+		qDebug() << "JavaScript Interpreter Error: " << res.toString() << "\n";
+	
 }
 /*
  This function create a map from filtername to dummy RichParameterSet.

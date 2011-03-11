@@ -69,7 +69,6 @@ HEADERS += filterparameter.h \
     meshmodel.h \
     pluginmanager.h \
 	scriptinterface.h \
-	environment.h \
 	xmlfilterinfo.h \
 	mlexception.h \
     ../../../vcglib/wrap/gl/trimesh.h \
@@ -81,7 +80,6 @@ SOURCES += filterparameter.cpp \
     meshmodel.cpp \
     pluginmanager.cpp \
 	scriptinterface.cpp \
-	environment.cpp \
 	xmlfilterinfo.cpp \
     $$GLEWCODE \
     meshlabdocumentxml.cpp

@@ -28,7 +28,6 @@
 #include<QObject>
 
 #include "interfaces.h"
-#include "environment.h"
 #include "xmlfilterinfo.h"
 #include "scriptinterface.h"
 

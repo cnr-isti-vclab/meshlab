@@ -3,6 +3,7 @@
 #include "interfaces.h"
 #include "filterparameter.h"
 #include "meshmodel.h"
+#include "mlexception.h"
 
 QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 {
@@ -15,7 +16,20 @@ QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 	return names;
 }
 
-QString ScriptAdapterGenerator::funCodeGenerator(const QString&  filtername,const RichParameterSet& set)
+QString ScriptAdapterGenerator::parNames( const QString& filterName,const XMLFilterInfo& xmlInfo ) const
+{
+	QString names;
+	XMLFilterInfo::XMLMapList params = xmlInfo.filterParameters(filterName);
+	int ii;
+	for(ii = 0;ii < (params.size() - 1);++ii)
+		names += params[ii][MLXMLElNames::paramName] + ", ";
+	if (params.size() != 0)
+		names += params[ii][MLXMLElNames::paramName];
+	return names;
+}
+
+
+QString ScriptAdapterGenerator::funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const
 {
 	QString code;
 	code += "function (" + parNames(set) + ")\n";
@@ -29,6 +43,20 @@ QString ScriptAdapterGenerator::funCodeGenerator(const QString&  filtername,cons
 	return code;
 }
 
+QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,const XMLFilterInfo& xmlInfo ) const
+{
+	QString code;
+	code += "function (" + parNames(filterName,xmlInfo) + ")\n";
+	code += "{\n";
+	code += "\tvar environ = new Env;\n";
+	XMLFilterInfo::XMLMapList mplist = xmlInfo.filterParameters(filterName);
+	for(int ii = 0; ii < mplist.size();++ii)
+		code += "\tenviron.insertExpressionBinding(\"" + mplist[ii][MLXMLElNames::paramName] + "\",arguments[" + QString::number(ii) + "]);\n";
+	code += "\tvar environWrap = new EnvWrap(environ);\n";
+	code += "\treturn _applyFilter(\"" + filterName + "\",environWrap);\n";
+	code += "};\n";
+	return code;
+}
 Q_DECLARE_METATYPE(MeshDocument*)
 
 static bool TestCallback(const int , const char* )
@@ -73,6 +101,22 @@ QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine
 	QAction act(filterName, NULL);
 	const bool res = mi->applyFilter(&act, *(md->md), *rps, TestCallback);
 
+	return res;
+}
+
+QScriptValue PluginInterfaceApplyXML(QScriptContext *context, QScriptEngine *engine, void * param)
+{
+	QString filterName = context->argument(0).toString();
+	PluginManager * pm = reinterpret_cast<PluginManager *>(param);
+	QMap<QString, MeshLabXMLFilterContainer>::iterator it = pm->stringXMLFilterMap.find(filterName);
+	if (it == pm->stringXMLFilterMap.end())
+		return false;
+
+	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(PluginManager::meshDocVarName()));
+	EnvWrap* envWrap = qscriptvalue_cast<EnvWrap*>(context->argument(1));
+
+	MeshLabFilterInterface * mi = it->filterInterface;
+	const bool res = mi->applyFilter(filterName, *(md->md), *envWrap, TestCallback);
 	return res;
 }
 
@@ -148,6 +192,14 @@ void registerTypes(QScriptEngine* eng)
 	QScriptValue floatfun = eng->newFunction(IRichParameterSet_prototype_setFloat,2);
 	richset_ctor.property("prototype").setProperty("setFloat",floatfun);
 	eng->globalObject().setProperty("IRichParameterSet",richset_ctor);
+
+	QScriptValue envwrap_ctor = eng->newFunction(EnvWrap_ctor);
+	//eng->setDefaultPrototype(qMetaTypeId<EnvWrap>(), envwrap_ctor.property("prototype"));
+	eng->globalObject().setProperty("EnvWrap",envwrap_ctor);
+
+	QScriptValue env_ctor = eng->newFunction(Env_ctor);
+	QScriptValue metaObject = eng->newQMetaObject(&Env::staticMetaObject, env_ctor);
+	eng->globalObject().setProperty("Env", metaObject);
 }
 
 MeshModelScriptInterface::MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* parent)
@@ -181,6 +233,13 @@ void MeshDocumentScriptInterfaceFromScriptValue( const QScriptValue& val,MeshDoc
 	out = qobject_cast<MeshDocumentScriptInterface*>(val.toQObject());
 }
 
+QScriptValue EnvWrap_ctor( QScriptContext* c,QScriptEngine* e )
+{
+	Env* env = qscriptvalue_cast<Env*>(c->argument(0));
+	EnvWrap* p = new EnvWrap(*env);
+	QScriptValue res = e->toScriptValue(*p);
+	return res;
+}
 MeshDocumentScriptInterface::MeshDocumentScriptInterface( MeshDocument* doc )
 :QObject(doc),md(doc)
 {
@@ -202,4 +261,68 @@ Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::current()
 		return new MeshModelScriptInterface(*model,this);
 	else
 		return NULL;
+}
+
+EnvWrap::EnvWrap(Env& envir)
+:env(&envir)
+{
+}
+
+QScriptValue EnvWrap::getExp( const QString& nm )
+{
+	if (!constStatement(nm))
+		throw NotConstException(nm);
+	QScriptValue result = env->evaluate(nm);
+	if (result.isError())
+		throw ValueNotFoundException(nm);
+	return result;
+}
+
+bool EnvWrap::getBool( const QString& nm )
+{
+	QScriptValue result = getExp(nm);
+	if (result.isBool())
+		return result.toBool();
+	else
+		throw ExpressionHasNotThisTypeException("Bool",nm);
+	return false;
+}
+
+float EnvWrap::getFloat( const QString& nm )
+{
+	QScriptValue result = getExp(nm);
+	if (result.isNumber())
+		return result.toNumber();
+	else
+		throw ExpressionHasNotThisTypeException("Float",nm);
+	return float();
+}
+
+bool EnvWrap::constStatement( const QString& statement ) const
+{
+	QRegExp exp("\\S+\\s*=\\s*S++;");
+	int ii = statement.indexOf(exp);
+	return (ii == -1);
+}
+
+Q_DECLARE_METATYPE(EnvWrap)
+Q_DECLARE_METATYPE(EnvWrap*)
+
+QScriptValue Env_ctor( QScriptContext *context,QScriptEngine *engine )
+{
+	Env * env = new Env();
+	return engine->newQObject(env, QScriptEngine::ScriptOwnership);
+}
+
+Env::Env()
+{
+	qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
+}
+
+void Env::insertExpressionBinding( const QString& nm,const QString& exp )
+{
+	QString decl("var " + nm + " = " + exp + ";");
+	QScriptValue res = evaluate(decl);
+	if	(res.isError())
+		throw JavaScriptException(res.toString());
 }

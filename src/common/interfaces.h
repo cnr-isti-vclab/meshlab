@@ -35,7 +35,7 @@
 #include "filterparameter.h"
 #include "GLLogStream.h"
 #include "meshmodel.h"
-#include "environment.h"
+#include "scriptinterface.h"
 #include "xmlfilterinfo.h"
 
 class QWidget;

@@ -126,6 +126,9 @@ public:
 	static XMLMapList mapListFromStringList(const QStringList& list);
 	static XMLFilterInfo* createXMLFileInfo(const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML);
 	inline static void deleteXMLFileInfo(XMLFilterInfo* xmlInfo) {delete xmlInfo;}
+	
+	QString pluginName() const;
+	
 	QStringList filterNames() const;
 	QString	filterHelp(const QString& filterName) const;
 	

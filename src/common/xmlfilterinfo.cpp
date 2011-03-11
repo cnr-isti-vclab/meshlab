@@ -323,3 +323,22 @@ QString XMLFilterInfo::filterParameterAttribute( const QString& filterName,const
   assert(0);
   return QString();
 }
+
+QString XMLFilterInfo::pluginName() const
+{
+	QString namesQuery = docMFIPlugin(fileName) + "/<p>" +attrVal(MLXMLElNames::pluginScriptName)+"</p>/string()";
+	try
+	{
+		QStringList res = query(namesQuery);
+		if (res.size() != 1)
+			throw ParsingException("Attribute " + MLXMLElNames::pluginScriptName + " has not been specified for plugin.");
+		return res[0]; 
+	}
+	catch(QueryException e)
+	{
+		qDebug("Caught a QueryException %s",e.what());
+	}
+
+	assert(0);
+	return QString();
+}
