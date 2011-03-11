@@ -22,9 +22,9 @@ QString ScriptAdapterGenerator::parNames( const QString& filterName,const XMLFil
 	XMLFilterInfo::XMLMapList params = xmlInfo.filterParameters(filterName);
 	int ii;
 	for(ii = 0;ii < (params.size() - 1);++ii)
-		names += params[ii][MLXMLElNames::paramName] + ", ";
+		names += params[ii][MLXMLElNames::paramType] + "_" + params[ii][MLXMLElNames::paramName] + ", ";
 	if (params.size() != 0)
-		names += params[ii][MLXMLElNames::paramName];
+		names += params[ii][MLXMLElNames::paramType] + "_" + params[ii][MLXMLElNames::paramName];
 	return names;
 }
 

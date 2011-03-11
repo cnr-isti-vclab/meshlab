@@ -28,6 +28,7 @@
 #include "filterparameter.h"
 #include "xmlfilterinfo.h"
 #include "meshmodel.h"
+#include "vcg/space/point3.h"
 
 class ScriptAdapterGenerator
 {
@@ -146,5 +147,6 @@ QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);
 //	Env();
 //	void insertExpressionBinding(const QString& nm,const QString& exp);
 //};
+
 
 #endif
