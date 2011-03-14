@@ -20,18 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-
- filtergeodesic.h,v
- Revision 1.1  2007/12/13 00:33:55  cignoni
- New small samples
-
- Revision 1.1  2007/12/02 07:57:48  cignoni
- Added the new sample filter plugin that removes border faces
-
-
- *****************************************************************************/
 #ifndef FILTERGEODESIC_PLUGIN_H
 #define FILTERGEODESIC_PLUGIN_H
 
@@ -59,16 +47,14 @@ class FilterGeodesic : public QObject, public MeshFilterInterface
 	FilterGeodesic();
 	~FilterGeodesic();
 
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
+  QString filterName(FilterIDType filter) const;
+  QString filterInfo(FilterIDType filter) const;
 
-  virtual FilterClass getClass(QAction *);
-  virtual int getRequirements(QAction *);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-
-	protected:
-	
+  FilterClass getClass(QAction *);
+  int getRequirements(QAction *);
+  bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+  int postCondition(QAction * filter) const;
 };
 
 

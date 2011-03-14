@@ -88,7 +88,7 @@ QString FilterGeodesic::filterName(FilterIDType filter) const
   {
     case FP_QUALITY_BORDER_GEODESIC :
     case FP_QUALITY_POINT_GEODESIC :
-		      return MeshFilterInterface::VertexColoring;     
+          return FilterGeodesic::FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Quality);
     default : assert(0);
 							return MeshFilterInterface::Generic;
   }
@@ -136,8 +136,8 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 				// Now actually compute the geodesic distnace from the closest point		
 				float dist;
 				tri::Geo<CMeshO> g;	
-
-				g.FarthestVertex(m.cm, startVertex, farthestVertex, dist);
+        float dist_thr = par.getAbsPerc("maxDistance");
+        g.FarthestVertex(m.cm, startVertex, farthestVertex, dist,dist_thr);
 
 				// Cleaning Quality value of the unrefernced vertices
 				// Unreached vertexes has a quality that is maxfloat
@@ -196,10 +196,19 @@ void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParamete
 		{
 			case FP_QUALITY_POINT_GEODESIC :
 					parlst.addParam(new RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
+          parlst.addParam(new RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
 					break;
     default: break; // do not add any parameter for the other filters
     }
 	return;
 }
 
+int FilterGeodesic::postCondition(QAction * filter) const
+{
+  switch (ID(filter))
+  {
+    case FP_QUALITY_POINT_GEODESIC:  return MeshModel::MM_VERTCOLOR + MeshModel::MM_VERTQUALITY;
+    default                  : return MeshModel::MM_UNKNOWN;
+  }
+}
 Q_EXPORT_PLUGIN(FilterGeodesic)
