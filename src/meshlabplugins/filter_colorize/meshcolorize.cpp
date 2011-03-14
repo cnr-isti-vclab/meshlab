@@ -48,7 +48,8 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 		CP_VERTEX_TO_FACE <<
 		CP_FACE_TO_VERTEX <<
 		CP_TEXTURE_TO_VERTEX <<
-    CP_RANDOM_FACE;
+    CP_RANDOM_FACE <<
+    CP_RANDOM_CONNECTED_COMPONENT;
     
   FilterIDType tt;
   foreach(tt , types())
@@ -70,6 +71,7 @@ QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
   case CP_FACE_TO_VERTEX:            return QString("Transfer Color: Face to Vertex");
   case CP_TEXTURE_TO_VERTEX:         return QString("Transfer Color: Texture to Vertex");
   case CP_RANDOM_FACE:               return QString("Random Face Color");
+  case CP_RANDOM_CONNECTED_COMPONENT:return QString("Random Component Color ");
   default: assert(0);
   }
   return QString("error!");
@@ -94,7 +96,8 @@ QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const {
   case CP_FACE_TO_VERTEX:           return QString("Face to Vertex color transfer");
   case CP_TEXTURE_TO_VERTEX:        return QString("Texture to Vertex color transfer");
   case CP_COLOR_NON_TOPO_COHERENT : return QString("Color edges topologically non coherent.");
-  case CP_RANDOM_FACE:              return QString("Colorize Faces randomly. If internal edges are present they are used");
+  case CP_RANDOM_FACE:              return QString("Colorize Faces randomly. If internal edges are present they are used. Useful for quads.");
+  case CP_RANDOM_CONNECTED_COMPONENT:  return QString("Colorize each connected component randomly.");
   default: assert(0); return QString("");
   }
 }
@@ -106,6 +109,7 @@ int ExtraMeshColorizePlugin::getRequirements(QAction *action){
   case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
   case CP_SATURATE_QUALITY:         return MeshModel::MM_VERTFACETOPO;
   case CP_RANDOM_FACE:              return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
+  case CP_RANDOM_CONNECTED_COMPONENT:return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
   case CP_CLAMP_QUALITY:            return 0; // TODO: split clamp on vertex & faces and add requirements
   case CP_MAP_VQUALITY_INTO_COLOR:  return MeshModel::MM_VERTCOLOR;
   case CP_MAP_FQUALITY_INTO_COLOR:  return MeshModel::MM_FACECOLOR;
@@ -300,7 +304,13 @@ break;
     }
 
 
-  case CP_RANDOM_FACE:
+  case CP_RANDOM_CONNECTED_COMPONENT:
+   m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+   m.updateDataMask(MeshModel::MM_FACEMARK);
+   vcg::tri::UpdateColor<CMeshO>::FaceRandomConnectedComponent(m.cm);
+   break;
+
+ case CP_RANDOM_FACE:
     vcg::tri::UpdateColor<CMeshO>::MultiFaceRandom(m.cm);
     break;
 
@@ -362,6 +372,7 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
     return FilterClass(Quality + FaceColoring);
 
   case   CP_RANDOM_FACE:
+  case   CP_RANDOM_CONNECTED_COMPONENT:
   case   CP_FACE_SMOOTH:
   case   CP_VERTEX_TO_FACE:
   case   CP_MAP_FQUALITY_INTO_COLOR:
@@ -377,6 +388,7 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const{
   switch(ID(a)){
   case CP_TRIANGLE_QUALITY:
   case CP_RANDOM_FACE:
+  case CP_RANDOM_CONNECTED_COMPONENT:
   case CP_DISCRETE_CURVATURE:
   case CP_COLOR_NON_TOPO_COHERENT:
     return MeshModel::MM_FACENUMBER;
@@ -404,6 +416,7 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const{
   case CP_TRIANGLE_QUALITY:
     return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
   case CP_RANDOM_FACE:
+  case CP_RANDOM_CONNECTED_COMPONENT:
   case CP_COLOR_NON_TOPO_COHERENT:
   case CP_FACE_SMOOTH:
   case CP_VERTEX_TO_FACE:
