@@ -75,7 +75,7 @@ void MeshlabStdDialog::changeCurrentMesh(int meshInd)
     if(isDynamic())
     {
         meshState.apply(curModel);
-        curModel=curMeshDoc->meshList.at(meshInd);
+        curModel=curMeshDoc->getMesh(meshInd);
         meshState.create(curmask, curModel);
         applyDynamic();
     }
