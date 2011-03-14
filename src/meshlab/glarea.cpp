@@ -859,9 +859,12 @@ void GLArea::setCursorTrack(vcg::TrackMode *tm)
   curMap["SphereMode"]=QCursor(QPixmap(":/images/cursors/plain_trackball.png"),1,1);
   curMap["PanMode"]=QCursor(QPixmap(":/images/cursors/plain_pan.png"),1,1);
   curMap["ScaleMode"]=QCursor(QPixmap(":/images/cursors/plain_zoom.png"),1,1);
+  curMap["PickMode"]=QCursor(QPixmap(":/images/cursors/plain_pick.png"),1,1);
  }
  if(tm) setCursor(curMap[tm->Name()]);
- else setCursor(curMap[""]);
+ else
+   if(hasToGetPickPos) setCursor(curMap["PickMode"]);
+     else setCursor(curMap[""]);
 
 }
 
@@ -1122,6 +1125,7 @@ void GLArea::sendViewPos(QString name)
 
 void GLArea::sendSurfacePos(QString name)
 {
+  qDebug("sendSurfacePos %s",qPrintable(name));
   nameToGetPickPos = name;
 	hasToGetPickPos=true;
 }
