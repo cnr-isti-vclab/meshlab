@@ -38,7 +38,7 @@ void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par)
                              "Recall that tracing from vertices will use vertex normal "
                              "estimation."));
 
-  par.addParam(  new RichInt("numberRays", 3, "Number of rays: ",
+  par.addParam(  new RichInt("numberRays", 128, "Number of rays: ",
                              "The standard deviation of the rays that will be casted around "
                              "the anti-normals. Remember that most sampled directions are "
                              "expected to fall within 3x this value."));
@@ -51,7 +51,10 @@ void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par)
                              "value falls under this quantile. Value in between [0,1]. 1 Implies all "
                              "values are kept"));*/
 
-  par.addParam(new RichInt("peelingIteration", 4, "Peeling Iteration",
+  par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
+                             "Size of the depth texture for depth peeling"));
+
+  par.addParam(new RichInt("peelingIteration", 2, "Peeling Iteration",
                              "Number of depth peeling iteration"));
 
   par.addParam(new RichFloat("peelingTolerance", 0.0005f, "Peeling Tolerance",
@@ -65,10 +68,11 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
   CMeshO&    cm = mm->cm;
 
   //******* RETRIEVE PARAMETERS **********/
-  ONPRIMITIVE  onPrimitive = (ONPRIMITIVE) pars.getInt("onPrimitive");
-  unsigned int numViews    = pars.getInt("numberRays");
-  int          peel        = pars.getInt("peelingIteration");
-  mTolerance   = pars.getFloat("peelingTolerance");
+  ONPRIMITIVE  onPrimitive  = (ONPRIMITIVE) pars.getInt("onPrimitive");
+  unsigned int numViews     = pars.getInt("numberRays");
+  int          peel         = pars.getInt("peelingIteration");
+  mTolerance                = pars.getFloat("peelingTolerance");
+  mPeelingTextureSize       = pars.getInt("DepthTextureSize");
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
    //******* GL & MESH INIT **********/
@@ -76,16 +80,17 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
    initGL(cm.vn);
    vertexDataToTexture(*mm);
 
-
-
   //******** CALCULATE SDF *************/
   std::vector<Point3f> unifDirVec;
   GenNormal<float>::Uniform(numViews,unifDirVec);
 
   for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
-    TraceRays(peel, mTolerance, *vi, md.mm());
+  {
+        (*vi).Normalize();
+        TraceRays(peel, mTolerance, *vi, md.mm());
+  }
 
-  applySdfHW(*mm);
+  applySdfHW(*mm,unifDirVec.size());
 
   //******* CLEAN AND EXIT *************/
   releaseGL();
@@ -368,16 +373,6 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
     glBindTexture(GL_TEXTURE_2D, mVertexNormalsTexture->id());
     mSDFProgram->setUniform1i("nTexture",3);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mVertexCoordsTexture->id());
-    mSDFProgram->setUniform1i("vTexture",0);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, mVertexNormalsTexture->id());
-    mSDFProgram->setUniform1i("nTexture",1);
-   glEnable( GL_TEXTURE_2D );
-
-   // cameraDir.Normalize();
     // Set view direction
     mSDFProgram->setUniform3f("viewDirection", cameraDir.X(), cameraDir.Y(), cameraDir.Z());
 
@@ -405,7 +400,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
 
 }
 
-void SdfGpuPlugin::applySdfHW(MeshModel &m)
+void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
 {
     const unsigned int texelNum = mResTextureDim*mResTextureDim;
 
@@ -418,7 +413,7 @@ void SdfGpuPlugin::applySdfHW(MeshModel &m)
 
     for (int i=0; i < m.cm.vn; ++i)
     {
-           m.cm.vert[i].Q() = result[i*4];
+        m.cm.vert[i].Q() = (result[i*4+1]>0.0) ? (result[i*4] / result[i*4+1]) : 0.0;
     }
 
     mFboResult->unbind();
@@ -447,9 +442,9 @@ void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3
         mFboA->unbind();
         glDisable(GL_POLYGON_OFFSET_FILL);
 
-        if(i%2) {
-            calculateSdfHW(*mFboA,*mFboB,dir);
-        }
+        if(i%2)
+            calculateSdfHW(*mFboB,*mFboA,dir);
+
 
 
         std::swap<FramebufferObject*>(mFboA,mFboB);

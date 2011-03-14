@@ -39,7 +39,7 @@ public:
 
     void calculateSdfHW(FramebufferObject& fboFront, FramebufferObject& fboBack, const vcg::Point3f& cameraDir);
 
-    void applySdfHW(MeshModel &m);
+    void applySdfHW(MeshModel &m, float numberOfRays);
 
 protected:
 

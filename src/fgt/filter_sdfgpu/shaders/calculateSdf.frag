@@ -25,8 +25,8 @@
 
 uniform sampler2D 	vTexture;
 uniform sampler2D 	nTexture;
-uniform sampler2D 	depthTextureFront;
-uniform sampler2D 	depthTextureBack;
+uniform sampler2D	depthTextureFront;
+uniform sampler2D	depthTextureBack;
 uniform vec3 		viewDirection;
 uniform mat4 		mvprMatrix;
 uniform float 		viewpSize;
@@ -49,18 +49,25 @@ void main(void)
     vec4 V = texture2D(vTexture, coords);
     vec4 N = texture2D(nTexture, coords);
     
-    vec4 P = project(V) * (viewpSize/texSize);
+    N = normalize(N);
+
+    vec4 P = project(V); //* (viewpSize/texSize);
      
-    P = P / P.w;
+    
+    float zFront   = texture2D(depthTextureFront, P.xy).r;
+    float zBack    = texture2D(depthTextureBack,  P.xy).r;    
+    float cosAngle = max(0.0,dot(N.xyz, viewDirection));
+      
 
-    float zFront = texture2D(depthTextureFront, P.xy).r;          
-
-    if ( zFront  >=  P.z  )
+    if ( zFront >=  P.z && cosAngle >= 0.6 && cosAngle <=  1.0)
     {
 
-	float zBack  = texture2D(depthTextureBack,  P.xy).r;
-	sdf =  (zBack-zFront)*max(dot(N.xyz, viewDirection), 0.0);
+	sdf =  max(0.0,(zBack-zFront) * cosAngle) ; 
+    
     }
+    else 
+	cosAngle = 0.0;
 
-    gl_FragColor = vec4(sdf, sdf, sdf,1.0);
+	
+    gl_FragColor = vec4( sdf, cosAngle, 0.0, 1.0);
 }
