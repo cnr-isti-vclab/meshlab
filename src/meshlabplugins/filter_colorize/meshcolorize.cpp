@@ -28,6 +28,7 @@
 #include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/curvature.h>
 #include <vcg/complex/trimesh/update/quality.h>
+#include <vcg/complex/trimesh/update/color.h>
 #include <limits>
 #include "meshcolorize.h"
 
