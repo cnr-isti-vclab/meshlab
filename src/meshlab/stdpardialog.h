@@ -249,7 +249,7 @@ public:
 	public slots:
 	void  getPoint();
 	void  setValue(QString name, vcg::Point3f val);	
-  void  setValue(QString name, vcg::Shotf val);
+  void  setShotValue(QString name, vcg::Shotf val);
 	signals:
 	void askViewDir(QString);
 	void askViewPos(QString);

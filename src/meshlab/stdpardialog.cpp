@@ -536,7 +536,7 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 			connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
 			connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
 			connect(gla_curr,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
-      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Point3f)));
+      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
 			connect(gla_curr,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
 			connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
       connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendMeshShot(QString)));
@@ -571,7 +571,7 @@ void Point3fWidget::setValue(QString name,Point3f newVal)
 	}
 }
 
-void Point3fWidget::setValue(QString name,Shotf newValShot)
+void Point3fWidget::setShotValue(QString name,Shotf newValShot)
 {
   Point3f p = newValShot.GetViewPoint();
   setValue(name,p);
@@ -631,7 +631,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
       lay->addWidget(getShotCombo);
       connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
       connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
-      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Shotf)));
+      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
       connect(this,SIGNAL(askViewerShot(QString)),gla_curr,SLOT(sendViewerShot(QString)));
       connect(this,SIGNAL(askMeshShot(QString)),  gla_curr,SLOT(sendMeshShot(QString)));
       connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
