@@ -91,7 +91,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 	lastq_Selected         = false;
 	lastq_PlanarQuadric    = false;
 	lastq_QualityWeight    = false;
-
+  lastq_BoundaryWeight   = 1.0;
 	lastqtex_QualityThr    = 0.3f;
 	lastqtex_extratw       = 0.0;
 }
@@ -320,7 +320,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 			parlst.addParam(new RichInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces", "The desired final number of faces."));
 			parlst.addParam(new RichFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial size."));
 			parlst.addParam(new RichFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
-			parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries"));
+      parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries to do not affect mesh boundaries during simplification"));
+      parlst.addParam(new RichFloat("BoundaryWeight",lastq_BoundaryWeight,"Boundary Preserving Weight","The importance of the boundary during simplification. Default (1.0) means that the boundary has the same importance of the rest. Values greater than 1.0 raise boundary importance and has the effect of removing less vertices on the border. Admitted range of values (0,+inf). "));
 			parlst.addParam(new RichBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface"));
       parlst.addParam(new RichBool ("PreserveTopology",lastq_PreserveTopology,"Preserve Topology","Avoid all the collapses that should cause a topology change in the mesh (like closing holes, squeezing handles, etc). If checked the genus of the mesh should stay unchanged."));
 			parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
@@ -674,6 +675,7 @@ case FP_QUADRIC_SIMPLIFICATION:
 		tri::TriEdgeCollapseQuadricParameter &pp = tri::MyTriEdgeCollapse::Params();
 		pp.QualityThr=lastq_QualityThr =par.getFloat("QualityThr");
 		pp.PreserveBoundary=lastq_PreserveBoundary = par.getBool("PreserveBoundary");
+    pp.BoundaryWeight = pp.BoundaryWeight * par.getFloat("BoundaryWeight");
     pp.PreserveTopology=lastq_PreserveTopology = par.getBool("PreserveTopology");
 		pp.QualityWeight=lastq_QualityWeight = par.getBool("QualityWeight");
 		pp.NormalCheck=lastq_PreserveNormal = par.getBool("PreserveNormal");
@@ -1015,6 +1017,11 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 
   case FP_CLOSE_HOLES:
   {
+    if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0){
+      errorMessage = "Mesh has some not 2 manifold faces, filter require manifoldness";
+      return false;
+    }
+
     size_t OriginalSize= m.cm.face.size();
     int MaxHoleSize = par.getInt("MaxHoleSize");
     bool SelectedFlag = par.getBool("Selected");
