@@ -38,6 +38,7 @@ SUBDIRS       = common \
                 meshlabplugins/filter_texture \
                 meshlabplugins/filter_unsharp \
                 meshlabplugins/filter_zippering \
+                meshlabplugins/filter_bnpts \
 # rendering stuff
                 meshlabplugins/render_splatting \
                 meshlabplugins/render_gdp \
