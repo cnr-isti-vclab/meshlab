@@ -167,7 +167,7 @@ XMLFilterInfo::XMLMapList XMLFilterInfo::filterParametersExtendedInfo( const QSt
 
 XMLFilterInfo::XMLMapList XMLFilterInfo::filterParameters( const QString& filterName) const
 {
-  QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>" + attrNameAttrVal(MLXMLElNames::paramType) + "|" + attrNameAttrVal(MLXMLElNames::paramName) + "|" + attrNameAttrVal(MLXMLElNames::paramDefExpr) + "</p>/string()";
+  QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>" + attrNameAttrVal(MLXMLElNames::paramType) + "|" + attrNameAttrVal(MLXMLElNames::paramName) + "|" + attrNameAttrVal(MLXMLElNames::paramDefExpr) + "|" + attrNameAttrVal(MLXMLElNames::paramIsImportant) + "</p>/string()";
   QStringList res = query(namesQuery);
   return mapListFromStringList(res);
 }

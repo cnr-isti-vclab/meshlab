@@ -35,6 +35,7 @@ class ScriptAdapterGenerator
 private:
 	QString parNames(const RichParameterSet& set) const;
 	QString parNames(const QString&  filterName,const XMLFilterInfo& xmlInfo) const;
+	static inline QString optName() {return QString("optional");}
 public:
 	QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const;
 	QString funCodeGenerator(const QString&  filtername,const XMLFilterInfo& xmlInfo) const;

@@ -19,12 +19,25 @@ QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 QString ScriptAdapterGenerator::parNames( const QString& filterName,const XMLFilterInfo& xmlInfo ) const
 {
 	QString names;
-	XMLFilterInfo::XMLMapList params = xmlInfo.filterParameters(filterName);
+	//it's important the order!!! 
+	XMLFilterInfo::XMLMapList params = xmlInfo.filterParametersExtendedInfo(filterName);
 	int ii;
-	for(ii = 0;ii < (params.size() - 1);++ii)
-		names += params[ii][MLXMLElNames::paramType] + "_" + params[ii][MLXMLElNames::paramName] + ", ";
-	if (params.size() != 0)
-		names += params[ii][MLXMLElNames::paramType] + "_" + params[ii][MLXMLElNames::paramName];
+	bool optional = false;
+	for(ii = 0;ii < params.size();++ii)
+	{
+		bool isImp = (params[ii][MLXMLElNames::paramIsImportant] == "true");
+		if (names.isEmpty() && isImp)
+			names += /*params[ii][MLXMLElNames::paramType] + "_" +*/ params[ii][MLXMLElNames::paramName];
+		else
+			if (isImp)
+				names += ", " + /*params[ii][MLXMLElNames::paramType] + "_" + */params[ii][MLXMLElNames::paramName];
+			else
+				optional = true;
+	}
+	if (optional && !(names.isEmpty()))
+		names += ", " + optName();
+	if (optional && names.isEmpty())
+		names += optName();
 	return names;
 }
 
@@ -46,12 +59,27 @@ QString ScriptAdapterGenerator::funCodeGenerator(const QString&  filtername,cons
 QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,const XMLFilterInfo& xmlInfo ) const
 {
 	QString code;
-	code += "function (" + parNames(filterName,xmlInfo) + ")\n";
+	QString names = parNames(filterName,xmlInfo);
+	code += "function (" + names + ")\n";
 	code += "{\n";
+	if (names.indexOf(optName()) != -1)
+		code += "\t" + optName() + " = " + optName() + " || {};\n";
+	XMLFilterInfo::XMLMapList mplist = xmlInfo.filterParametersExtendedInfo(filterName);
 	code += "\tvar environ = new Env;\n";
-	XMLFilterInfo::XMLMapList mplist = xmlInfo.filterParameters(filterName);
+	int arg = 0;
 	for(int ii = 0; ii < mplist.size();++ii)
-		code += "\tenviron.insertExpressionBinding(\"" + mplist[ii][MLXMLElNames::paramName] + "\",arguments[" + QString::number(ii) + "]);\n";
+	{
+		if (mplist[ii][MLXMLElNames::paramIsImportant] == "true")
+		{
+			code += "\tenviron.insertExpressionBinding(\"" + mplist[ii][MLXMLElNames::paramName] + "\",arguments[" + QString::number(arg) + "]);\n";
+			++arg;
+		}
+		else
+		{
+			code += "\tvar " + mplist[ii][MLXMLElNames::paramName] + " = " + optName() + "." + mplist[ii][MLXMLElNames::paramType] + "_" + mplist[ii][MLXMLElNames::paramName] + " || " + mplist[ii][MLXMLElNames::paramDefExpr] + ";\n";
+			code += "\tenviron.insertExpressionBinding(\"" + mplist[ii][MLXMLElNames::paramName] + "\", " + mplist[ii][MLXMLElNames::paramName] + ");\n";
+		}
+	}
 	code += "\tvar environWrap = new EnvWrap(environ);\n";
 	code += "\treturn _applyFilter(\"" + filterName + "\",environWrap);\n";
 	code += "};\n";
@@ -240,6 +268,7 @@ QScriptValue EnvWrap_ctor( QScriptContext* c,QScriptEngine* e )
 	QScriptValue res = e->toScriptValue(*p);
 	return res;
 }
+
 MeshDocumentScriptInterface::MeshDocumentScriptInterface( MeshDocument* doc )
 :QObject(doc),md(doc)
 {
