@@ -5,7 +5,7 @@ HEADERS       += filter_mutualinfo.h \
 			levmarmethods.h \
 			mutual.h \
 			parameters.h \
-			pointCorrispondence.h \
+			pointCorrespondence.h \
 			pointOnLayer.h \
 			shutils.h \
 			solver.h 

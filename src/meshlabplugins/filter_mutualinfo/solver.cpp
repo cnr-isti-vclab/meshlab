@@ -2,7 +2,7 @@
 #include <QTextStream>
 #include "filter_mutualinfo.h"
 #include <vcg/math/shot.h>
-#include "../../external/newuoa/newuoa.h"
+#include "../../external/newuoa/include/newuoa.h"
 
 
 #include "solver.h"
