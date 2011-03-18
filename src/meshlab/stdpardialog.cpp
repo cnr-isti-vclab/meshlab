@@ -614,7 +614,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
   QHBoxLayout* lay = new QHBoxLayout(p);
 
 
-  this->setValue(paramName,rp->val->getShotf());
+  this->setShotValue(paramName,rp->val->getShotf());
   if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
     {
       getShotButton = new QPushButton("Get shot",p);
@@ -677,7 +677,7 @@ void ShotfWidget::getShot()
 
 ShotfWidget::~ShotfWidget() {}
 
-void ShotfWidget::setValue(QString name,Shotf newVal)
+void ShotfWidget::setShotValue(QString name,Shotf newVal)
 {
   if(name==paramName)
   {

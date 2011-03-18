@@ -284,7 +284,7 @@ public:
 
   public slots:
   void  getShot();
-  void  setValue(QString name, vcg::Shotf val);
+  void  setShotValue(QString name, vcg::Shotf val);
   signals:
   void askRasterShot(QString);
   void askMeshShot(QString);
