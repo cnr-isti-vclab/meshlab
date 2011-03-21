@@ -31,6 +31,7 @@
    <xs:attribute name='filterClass' type='xs:string' use='required'/>
    <xs:attribute name='filterPre' type='xs:string' use='required'/>
    <xs:attribute name='filterPost' type='xs:string' use='required'/>
+   <xs:attribute name='filterAriety' type='ArietyType' use='required'/>
   </xs:complexType>
  </xs:element>
 
@@ -87,5 +88,13 @@
    <xs:attribute name='guiMax' type='xs:string' use='required'/>
   </xs:complexType>
  </xs:element>
+
+ <xs:simpleType name="ArietyType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="SingleMesh"/>
+    <xs:enumeration value="Fixed"/>
+    <xs:enumeration value="Variable"/>
+  </xs:restriction>
+</xs:simpleType>
 </xs:schema>
 
