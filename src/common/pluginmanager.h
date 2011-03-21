@@ -80,8 +80,6 @@ public:
   QStringList pluginsLoaded;
 
   Env env;
-
-  inline static const QString meshDocVarName() {return QString("meshDoc");}
  
 	void updateDocumentScriptBindings(MeshDocument& doc);
 };

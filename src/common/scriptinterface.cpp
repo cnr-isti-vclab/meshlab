@@ -19,7 +19,7 @@ QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 QString ScriptAdapterGenerator::parNames( const QString& filterName,const XMLFilterInfo& xmlInfo ) const
 {
 	QString names;
-	//it's important the order!!! 
+	//the order is important !!! 
 	XMLFilterInfo::XMLMapList params = xmlInfo.filterParametersExtendedInfo(filterName);
 	int ii;
 	bool optional = false;
@@ -60,13 +60,25 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 {
 	QString code;
 	QString names = parNames(filterName,xmlInfo);
+	QString ariet = xmlInfo.filterAttribute(filterName,MLXMLElNames::filterAriety);
+
+	bool isSingle = (ariet == MLXMLElNames::singleMeshAriety);
+	QString mid("meshID");
+	if ((names.isEmpty()) && isSingle)
+		names = mid;
+	else
+		if (isSingle)
+			names = mid + ", " + names;
+
 	code += "function (" + names + ")\n";
 	code += "{\n";
 	if (names.indexOf(optName()) != -1)
 		code += "\t" + optName() + " = " + optName() + " || {};\n";
 	XMLFilterInfo::XMLMapList mplist = xmlInfo.filterParametersExtendedInfo(filterName);
 	code += "\tvar environ = new Env;\n";
-	int arg = 0;
+	
+	//if is singleMeshAriety i have to jump the first argument because is the meshID
+	int arg = (int) isSingle;
 	for(int ii = 0; ii < mplist.size();++ii)
 	{
 		if (mplist[ii][MLXMLElNames::paramIsImportant] == "true")
@@ -81,7 +93,15 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 		}
 	}
 	code += "\tvar environWrap = new EnvWrap(environ);\n";
-	code += "\treturn _applyFilter(\"" + filterName + "\",environWrap);\n";
+	if (isSingle)
+	{
+		code += "\tvar oldInd=" + meshDocVarName() + ".setCurrent(" + mid + ");\n";
+		code += "\tif (oldInd == -1) return false;\n"; 
+	}
+	code += "\tvar result = _applyFilter(\"" + filterName + "\",environWrap);\n";
+	if (isSingle)
+		code += "\t" +meshDocVarName() + ".setCurrent(oldInd);\n";
+	code += "\treturn result;\n";
 	code += "};\n";
 	return code;
 }
@@ -102,7 +122,7 @@ QScriptValue PluginInterfaceInit(QScriptContext *context, QScriptEngine *engine,
 		return false;
 	}
 
-	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(PluginManager::meshDocVarName()));
+	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
 	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
 
 	MeshFilterInterface * mi = it.value();
@@ -122,7 +142,7 @@ QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine
 		return false;
 	}
 
-	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(PluginManager::meshDocVarName()));
+	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
 	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
 
 	MeshFilterInterface * mi = it.value();
@@ -140,7 +160,7 @@ QScriptValue PluginInterfaceApplyXML(QScriptContext *context, QScriptEngine *eng
 	if (it == pm->stringXMLFilterMap.end())
 		return false;
 
-	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(PluginManager::meshDocVarName()));
+	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
 	EnvWrap* envWrap = qscriptvalue_cast<EnvWrap*>(context->argument(1));
 
 	MeshLabFilterInterface * mi = it->filterInterface;
@@ -291,6 +311,19 @@ Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::current()
 	else
 		return NULL;
 }
+
+Q_INVOKABLE int MeshDocumentScriptInterface::setCurrent(const int meshId)
+{
+	int id = md->mm()->id();
+	if (md->getMesh(meshId) != NULL)
+	{
+		md->setCurrentMesh(meshId);
+		return id;
+	}
+	else
+		return -1;
+}
+
 
 EnvWrap::EnvWrap(Env& envir)
 :env(&envir)

@@ -37,6 +37,8 @@ private:
 	QString parNames(const QString&  filterName,const XMLFilterInfo& xmlInfo) const;
 	static inline QString optName() {return QString("optional");}
 public:
+	inline static const QString meshDocVarName() {return QString("meshDoc");}
+	
 	QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const;
 	QString funCodeGenerator(const QString&  filtername,const XMLFilterInfo& xmlInfo) const;
 };
@@ -68,7 +70,7 @@ public:
 
 	Q_INVOKABLE MeshModelScriptInterface* getMesh(const int meshId);
 	Q_INVOKABLE MeshModelScriptInterface* current();
-
+	Q_INVOKABLE int setCurrent(const int meshId);
 	MeshDocument* md;
 };
 

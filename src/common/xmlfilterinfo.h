@@ -70,6 +70,8 @@ namespace MLXMLElNames
 	const QString filterClass("filterClass");
 	const QString filterPreCond("filterPre");
 	const QString filterPostCond("filterPost");
+	const QString filterAriety("filterAriety");
+
 	//filterHelp == name to access to the value of FILTER_HELP inside the Map produced by the XMLFilterInfo 
 	//const QString filterHelp("f_help");
 	
@@ -90,6 +92,11 @@ namespace MLXMLElNames
 	const QString boolType("Boolean");
 	const QString realType("Real");
 	const QString intType("Integer");
+
+	//ariety values
+	const QString singleMeshAriety("SingleMesh");
+	const QString fixedAriety("Fixed");
+	const QString variableAriety("Variable");
 }
 
 //Query Exception should be managed by the XMLFilterInfo class (XMLFilterInfo is the class devoted to compose queries)
