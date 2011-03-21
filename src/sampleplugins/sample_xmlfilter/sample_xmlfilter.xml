@@ -1,6 +1,6 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
 	<PLUGIN pluginName="ExtraSamplePlugin">
-		<FILTER filterName="Random vertex displacement" filterFunction="randomVerticesDisplacement" filterClass="Smoothing | Remeshing" filterPre="MM_NONE" filterPost="MM_NONE">
+		<FILTER filterName="Random vertex displacement" filterFunction="randomVerticesDisplacement" filterClass="Smoothing | Remeshing" filterPre="MM_NONE" filterPost="MM_NONE" filterAriety="SingleMesh">
 			<FILTER_HELP>
 				Move the vertices of the mesh of a random quantity.
 			</FILTER_HELP>
@@ -16,27 +16,6 @@
 					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
 				</PARAM_HELP>
 				<CHECKBOX_GUI guiLabel="Recompute normals" />
-			</PARAM>
-			<PARAM parType="Boolean" parName="UpdateNormals2" parDefault="true" parIsImportant="false">
-				<PARAM_HELP>
-					Toggle the recomputation of the normals after the random displacement.\n\n
-					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
-				</PARAM_HELP>
-				<CHECKBOX_GUI guiLabel="Recompute normals" />
-			</PARAM>
-			<PARAM parType="Boolean" parName="CAZZO" parDefault="true" parIsImportant="false">
-				<PARAM_HELP>
-					Toggle the recomputation of the normals after the random displacement.\n\n
-					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
-				</PARAM_HELP>
-				<CHECKBOX_GUI guiLabel="Recompute normals" />
-			</PARAM>
-			<PARAM parType="Real" parName="UpdateNormals3" parDefault="meshDoc.current().bboxDiag() / 2.0" parIsImportant="false">
-				<PARAM_HELP>
-					Toggle the recomputation of the normals after the random displacement.\n\n
-					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
-				</PARAM_HELP>
-				<EDIT_GUI guiLabel="Recompute normals" />
 			</PARAM>
 		</FILTER>		
 	</PLUGIN>
