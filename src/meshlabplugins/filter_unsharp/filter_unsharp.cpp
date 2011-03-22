@@ -365,6 +365,12 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
     switch(ID(filter))
 	{
 		case FP_CREASE_CUT :{
+        if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm,false) > 0 || tri::Clean<CMeshO>::CountNonManifoldVertexFF(m.cm,false) > 0)
+        {
+          errorMessage = "Mesh has some not 2 manifold faces, this filter require manifoldness";
+          return false; // can't continue, mesh can't be processed
+        }
+
 				float angleDeg = par.getFloat("angleDeg");
 				tri::CreaseCut(m.cm, math::ToRad(angleDeg));
 				m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
