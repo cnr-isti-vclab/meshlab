@@ -44,6 +44,8 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_EDGE,
     DP_SHOW_NON_FAUX_EDGE,
     DP_SHOW_BOUNDARY,
+    DP_SHOW_NON_MANIF_EDGE,
+    DP_SHOW_NON_MANIF_VERT,
 		DP_SHOW_VERT_PRINC_CURV_DIR,
     DP_SHOW_BOX_CORNERS,
     DP_SHOW_BOX_CORNERS_ABS,
@@ -77,6 +79,8 @@ public:
     DP_SHOW_VERT <<
     DP_SHOW_NON_FAUX_EDGE <<
     DP_SHOW_BOUNDARY <<
+    DP_SHOW_NON_MANIF_EDGE <<
+    DP_SHOW_NON_MANIF_VERT <<
     DP_SHOW_FACE_NORMALS <<
     DP_SHOW_VERT_NORMALS <<
     DP_SHOW_VERT_QUALITY_HISTOGRAM <<
@@ -105,7 +109,7 @@ public:
   void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);
   void DrawVertLabel(MeshModel &m, QPainter *gla);
   void DrawFaceLabel(MeshModel &m, QPainter *gla);
-  void DrawCamera(MeshModel &m, vcg::Shotf &ls, bool drawFrustum, int cameraSourceId, QPainter *painter, QFont qf);
+  void DrawCamera(MeshDocument &m, bool drawFrustum, int cameraSourceId, QPainter *painter, QFont qf);
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
 
