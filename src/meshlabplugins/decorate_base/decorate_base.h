@@ -109,7 +109,8 @@ public:
   void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);
   void DrawVertLabel(MeshModel &m, QPainter *gla);
   void DrawFaceLabel(MeshModel &m, QPainter *gla);
-  void DrawCamera(MeshDocument &m, bool drawFrustum, int cameraSourceId, QPainter *painter, QFont qf);
+  void DisplayCamera(MeshModel *m, vcg::Shotf &ls, int cameraSourceId, QPainter *painter, QFont qf);
+  void DrawCamera(MeshModel *m, vcg::Shotf &ls, vcg::Color4b camcolor, vcg::Matrix44f &currtr, RichParameterSet *rm, QPainter *painter, QFont qf);
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
 
@@ -118,8 +119,15 @@ public:
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
 
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
-  inline QString CameraShowFrustum() const   { return  "MeshLab::Decoration::CameraShowFrustum" ; }
-  inline QString CameraInfoParam() const     { return  "MeshLab::Decoration::CameraInfoType" ; }
+  
+  inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }
+  inline QString FixedScaleParam() const     { return  "MeshLab::Decoration::CameraFixedScaleParam" ; }
+
+  inline QString ShowCameraDetails() const     { return  "MeshLab::Decoration::CameraShowCameraDetails" ; }
+
+  inline QString ShowMeshCameras() const     { return  "MeshLab::Decoration::ShowMeshCameras" ; }
+  inline QString ShowRasterCameras() const     { return  "MeshLab::Decoration::ShowRasterCameras" ; }
+
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
   inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }
   inline QString HistBinNumParam() const     { return  "MeshLab::Decoration::HistBinNumParam" ; }

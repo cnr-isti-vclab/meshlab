@@ -152,11 +152,46 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
     case DP_SHOW_BOX_CORNERS:	DrawBBoxCorner(m); break;
     case DP_SHOW_CAMERA:
       {
-        bool showFrustum=rm->getBool(this->CameraShowFrustum());
-        int cameraSourceId = rm->getEnum(this->CameraInfoParam());
+        // draw all mesh cameras
+        if(rm->getBool(ShowMeshCameras()))
+        {
+          for(int mi=0; mi<md.meshList.size(); mi++)
+          {
+            MeshModel *meshm = md.getMesh(mi);
 
-        DrawCamera(md, showFrustum,cameraSourceId,painter,qf);
-      } break;
+            if(meshm != md.mm())   // non-selected meshes
+             DrawCamera(meshm, meshm->cm.shot, Color4b::DarkRed, md.mm()->cm.Tr, rm, painter,qf);
+            else                          // selected mesh, draw & display data
+            {
+              DrawCamera(meshm, meshm->cm.shot, Color4b::Magenta, md.mm()->cm.Tr, rm, painter,qf);
+              if(rm->getBool(ShowCameraDetails()))
+                DisplayCamera(meshm, meshm->cm.shot, 1, painter, qf);
+            }
+          }
+        }
+
+        // draw all raster cameras
+        if(rm->getBool(ShowRasterCameras()))
+        {
+          for(int ri=0; ri<md.rasterList.size(); ri++)
+          {
+            RasterModel *raster = md.getRaster(ri);
+
+            if(raster != md.rm())   // non-selected raster
+            {
+              DrawCamera(NULL, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
+            }
+            else
+            {
+              DrawCamera(NULL, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter,qf);
+              if(rm->getBool(ShowCameraDetails()))
+                DisplayCamera(md.mm(), raster->shot, 2, painter, qf);
+            }
+          }
+        }
+
+
+      }break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
     case DP_SHOW_VERT_LABEL:	DrawVertLabel(m,painter);break;
     case DP_SHOW_FACE_LABEL:	DrawFaceLabel(m,painter);break;
@@ -856,26 +891,9 @@ void ExtraMeshDecoratePlugin::setValue(QString /*name*/,Shotf newVal)
     curShot=newVal;
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshDocument &md, bool DrawFrustum, int cameraSourceId, QPainter *painter, QFont /*qf*/)
+
+void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel *m, Shotf &ls, int cameraSourceId, QPainter *painter, QFont /*qf*/)
 {
-  Shotf ls;
-
-  switch(cameraSourceId)
-  {
-  case 0: // Trackball
-    emit askViewerShot("decorate");
-    ls=this->curShot;
-    break;
-  case 1 :
-    ls = md.mm()->cm.shot;
-    break;
-  case 2 :
-    if(md.rasterList.empty())  { glLabel::render2D(painter,glLabel::TOP_LEFT,"No Raster in this Document"); return; }
-    if(md.rm() == NULL) {  glLabel::render2D(painter,glLabel::TOP_LEFT,"No Current Raster"); return; }
-    ls = md.rm()->shot;
-    break; // Raster
-  }
-
   if(!ls.IsValid())
   {
     if(cameraSourceId == 1 ) glLabel::render2D(painter,glLabel::TOP_LEFT,"Current Mesh Has an invalid Camera");
@@ -884,11 +902,6 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshDocument &md, bool DrawFrustum, int
     return;
   }
 
-  glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
-	glDepthFunc(GL_ALWAYS);
-	glDisable(GL_LIGHTING);
-	glColor3f(.8f,.8f,.8f);
-	
   int ln=0;
   if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Perspective");
   if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Orthographic");
@@ -905,37 +918,84 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshDocument &md, bool DrawFrustum, int
   glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Fov %1 ( %2 x %3) ").arg(fov).arg(ls.Intrinsics.ViewportPx[0]).arg(ls.Intrinsics.ViewportPx[1]));
   float focal = ls.Intrinsics.FocalMm;
   glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
+}
+
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b camcolor, vcg::Matrix44f &currtr, RichParameterSet *rm, QPainter *painter, QFont qf)
+{
+  if(!ls.IsValid())  // no drawing if camera not valid
+    return;
+
+  if((m!=NULL) && (!m->visible))  // no drawing if mesh invisible
+    return;
+
+  Point3f vp = ls.GetViewPoint();
+  Point3f ax0 = ls.Axis(0);
+  Point3f ax1 = ls.Axis(1);
+  Point3f ax2 = ls.Axis(2);
+  float fov = ls.GetFovFromFocal();
+  float focal = ls.Intrinsics.FocalMm;
+
+  glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
+	glDepthFunc(GL_ALWAYS);
+	glDisable(GL_LIGHTING);
+
   if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE)
-  {
-  float len = md.mm()->cm.bbox.Diag()/20.0;
+  { 
+    // draw scale
+    float drawscale = 1.0;
+    if(rm->getEnum(CameraScaleParam()) == 1)  // fixed scale
+    {
+      drawscale = rm->getFloat(FixedScaleParam());
+    }
+    if(rm->getEnum(CameraScaleParam()) == 2)  // adaptive
+    {}  //[TODO]
+
+    // arbitrary size to draw axis
+    float len;
+    //if(m!=NULL)
+	  //  len = m->cm.bbox.Diag()/20.0;
+    //else
+      len = ls.Intrinsics.FocalMm;
+
+    glPushMatrix();
+    glMultMatrix(Inverse(currtr));  //remove current mesh transform
+
+    // grey axis, aligned with scene axis
+   	glColor3f(.7f,.7f,.7f);
 	 	glBegin(GL_LINES);
-			glVertex3f(vp[0]-len,vp[1],vp[2]); 	glVertex3f(vp[0]+len,vp[1],vp[2]); 
-			glVertex3f(vp[0],vp[1]-len,vp[2]); 	glVertex3f(vp[0],vp[1]+len,vp[2]); 
-			glVertex3f(vp[0],vp[1],vp[2]-len); 	glVertex3f(vp[0],vp[1],vp[2]+len); 
+			glVertex3f(vp[0]-(len/2.0),vp[1],vp[2]); 	glVertex3f(vp[0]+(len/2.0),vp[1],vp[2]); 
+			glVertex3f(vp[0],vp[1]-(len/2.0),vp[2]); 	glVertex3f(vp[0],vp[1]+(len/2.0),vp[2]); 
+			glVertex3f(vp[0],vp[1],vp[2]-(len/2.0)); 	glVertex3f(vp[0],vp[1],vp[2]+(len/2.0)); 
 		glEnd();
 
+
+    if(m!=NULL) //if mesh camera, apply mesh transform
+      glMultMatrix(m->cm.Tr);
+
+
+    // RGB axis, aligned with camera axis
     glBegin(GL_LINES);
-      glColor3f(1.0,0,0); glVertex(vp); 	glVertex(vp+ax0*len*2.0);
-      glColor3f(0,1.0,0); glVertex(vp); 	glVertex(vp+ax1*len*2.0);
-      glColor3f(0,0,1.0); glVertex(vp); 	glVertex(vp+ax2*len*2.0);
+      glColor3f(1.0,0,0); glVertex(vp); 	glVertex(vp+ax0*len);
+      glColor3f(0,1.0,0); glVertex(vp); 	glVertex(vp+ax1*len);
+      glColor3f(0,0,1.0); glVertex(vp); 	glVertex(vp+ax2*len);
     glEnd();
 
-// Now draw the frustum
-    Point3f viewportCenter = vp - ax2*ls.Intrinsics.FocalMm;
-    Point3f viewportHorizontal = ax0* float(ls.Intrinsics.ViewportPx[0]*ls.Intrinsics.PixelSizeMm[0]/2.0f);
-    Point3f viewportVertical   = ax1* float(ls.Intrinsics.ViewportPx[1]*ls.Intrinsics.PixelSizeMm[1]/2.0f);
 
-    glColor3f(0.0f,1.0f,1.0f);
+    // Now draw the frustum
+    Point3f viewportCenter = vp - (ax2*ls.Intrinsics.FocalMm * drawscale);
+    Point3f viewportHorizontal = ax0* float(ls.Intrinsics.ViewportPx[0]*ls.Intrinsics.PixelSizeMm[0]/2.0f * drawscale);
+    Point3f viewportVertical   = ax1* float(ls.Intrinsics.ViewportPx[1]*ls.Intrinsics.PixelSizeMm[1]/2.0f * drawscale);
+
+
     glBegin(GL_LINES);
-    glColor(Color4b::White);
+    glColor(camcolor);
     glVertex3f(vp[0],vp[1],vp[2]); glVertex(viewportCenter);
-    glColor(Color4b::Cyan);
+    glColor(camcolor);
     glVertex(vp); glVertex(viewportCenter+viewportHorizontal+viewportVertical);
     glVertex(vp); glVertex(viewportCenter+viewportHorizontal-viewportVertical);
     glVertex(vp); glVertex(viewportCenter-viewportHorizontal+viewportVertical);
     glVertex(vp); glVertex(viewportCenter-viewportHorizontal-viewportVertical);
     glEnd();
-
     glBegin(GL_LINE_LOOP);
     glVertex(viewportCenter+viewportHorizontal+viewportVertical);
     glVertex(viewportCenter+viewportHorizontal-viewportVertical);
@@ -943,23 +1003,25 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshDocument &md, bool DrawFrustum, int
     glVertex(viewportCenter-viewportHorizontal+viewportVertical);
     glEnd();
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(.8f,.8f,.8f,.2f);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex(vp);
+    glVertex(viewportCenter+viewportHorizontal+viewportVertical);
+    glVertex(viewportCenter+viewportHorizontal-viewportVertical);
+    glVertex(viewportCenter-viewportHorizontal-viewportVertical);
+    glVertex(viewportCenter-viewportHorizontal+viewportVertical);
+    glVertex(viewportCenter+viewportHorizontal+viewportVertical);
+    glEnd();
+    glDisable(GL_BLEND);
 
-    if(DrawFrustum)
-    {
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glColor4f(.8f,.8f,.8f,.2f);
-      glBegin(GL_TRIANGLE_FAN);
-      glVertex(vp);
-      glVertex(viewportCenter+viewportHorizontal+viewportVertical);
-      glVertex(viewportCenter+viewportHorizontal-viewportVertical);
-      glVertex(viewportCenter-viewportHorizontal-viewportVertical);
-      glVertex(viewportCenter-viewportHorizontal+viewportVertical);
-      glVertex(viewportCenter+viewportHorizontal+viewportVertical);
-      glEnd();
-    }
+
+    // remove mesh transform
+    glPopMatrix();
   }
-    glPopAttrib();
+
+  glPopAttrib();
 }
 
 void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *par, QFont qf)
@@ -1121,8 +1183,12 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
 
 case DP_SHOW_CAMERA :{
     QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
-          parset.addParam(new RichEnum(this->CameraInfoParam(), 1, methods,"Show View Camera","If true this filter shows the camera of current view"));
-          parset.addParam(new RichBool(this->CameraShowFrustum(), false,"Show Frustum Sides","if true the frustum clipping planes are drawn"));
+    QStringList scale; scale << "No Scale" << "Fixed Factor" << "Adaptive";
+          parset.addParam(new RichEnum(this->CameraScaleParam(), 1, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
+          parset.addParam(new RichFloat(this->FixedScaleParam(), 10.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
+          parset.addParam(new RichBool(this->ShowMeshCameras(), true, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
+          parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
+          parset.addParam(new RichBool(this->ShowCameraDetails, false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera" 
         } break;
     }
 }
