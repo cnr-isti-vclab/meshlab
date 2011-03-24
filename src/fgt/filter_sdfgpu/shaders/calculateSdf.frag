@@ -31,6 +31,9 @@ uniform vec3 		viewDirection;
 uniform mat4 		mvprMatrix;
 uniform float 		viewpSize;
 uniform float 		texSize;
+uniform	float		depthTolerance;
+uniform float		minCos;
+uniform float		maxCos;
 
 vec4 project(vec4 coords)
 {
@@ -59,7 +62,7 @@ void main(void)
     float cosAngle = max(0.0,dot(N.xyz, viewDirection));
       
 
-    if ( zFront >=  P.z && cosAngle >= 0.6 && cosAngle <=  1.0)
+    if ( (zFront-depthTolerance) <=  P.z && P.z <= (zFront+depthTolerance) && cosAngle >= 0.7 && cosAngle <= 1.0)
     {
 
 	sdf =  max(0.0,(zBack-zFront) * cosAngle) ; 

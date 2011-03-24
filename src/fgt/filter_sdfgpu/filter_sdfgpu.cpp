@@ -57,8 +57,17 @@ void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par)
   par.addParam(new RichInt("peelingIteration", 2, "Peeling Iteration",
                              "Number of depth peeling iteration"));
 
-  par.addParam(new RichFloat("peelingTolerance", 0.0005f, "Peeling Tolerance",
+  par.addParam(new RichFloat("peelingTolerance", 0.00005f, "Peeling Tolerance",
                              "We will throw away the set of ray distances for each cone which distance " ));
+
+  par.addParam(new RichFloat("depthTolerance", 0.0001f, "Depth tolerance",
+                             "A small delta that is the minimal distance in depth between two vertex" ));
+
+  par.addParam(new RichFloat("minCos", 0.7f, "Min cosine",
+                             "Min accepteded cosine of the angle between rays and vertex normals" ));
+
+  par.addParam(new RichFloat("maxCos", 1.0f, "Max cosine",
+                             "Max accepteded cosine of the angle between rays and vertex normals" ));
 }
 
 
@@ -73,6 +82,9 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
   int          peel         = pars.getInt("peelingIteration");
   mTolerance                = pars.getFloat("peelingTolerance");
   mPeelingTextureSize       = pars.getInt("DepthTextureSize");
+  mDepthTolerance           = pars.getFloat("depthTolerance");
+  mMinCos                   = pars.getFloat("minCos");
+  mMaxCos                   = pars.getFloat("maxCos");
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
    //******* GL & MESH INIT **********/
@@ -385,6 +397,12 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
     // Set viewport Size
     mSDFProgram->setUniform1f("viewpSize", mResTextureDim );
 
+    mSDFProgram->setUniform1f("depthTolerance", mDepthTolerance);
+
+//    mSDFProgram->setUniform1f("minCos", 0.7);
+
+//    mSDFProgram->setUniform1f("maxCos", 1.0);
+
 
     // Screen-aligned Quad
     glBegin(GL_QUADS);
@@ -435,12 +453,11 @@ void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3
         mFboA->bind();
         setCamera(dir, mm->cm.bbox);
 
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(1.0f, 1.0f);
-
+       /* glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(10.0,2.5);*/
         fillFrameBuffer(i%2==0, mm);
         mFboA->unbind();
-        glDisable(GL_POLYGON_OFFSET_FILL);
+        //glDisable(GL_POLYGON_OFFSET_FILL);
 
         if(i%2)
             calculateSdfHW(*mFboB,*mFboA,dir);

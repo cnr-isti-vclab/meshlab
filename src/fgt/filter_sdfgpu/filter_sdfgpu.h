@@ -56,6 +56,9 @@ protected:
     FloatTexture2D*    mDepthTextureB;
     unsigned int       mPeelingTextureSize;
     float              mTolerance;
+    float              mDepthTolerance;
+    float              mMinCos;
+    float              mMaxCos;
     GPUProgram*        mDeepthPeelingProgram;
     GPUProgram*        mSDFProgram;
 };
