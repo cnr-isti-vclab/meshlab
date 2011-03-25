@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
+		<file alias="script_system/meshlabfilterXMLspecificationformat.xsd">../common/script_system/meshlabfilterXMLspecificationformat.xsd</file>
+		<file alias="script_system/space_math.js">../common/script_system/space_math.js</file>
         <file>images/backlines.png</file>
         <file>images/bbox.png</file>
         <file>images/cursors/plain.png</file>
@@ -12,7 +14,7 @@
         <file>images/flatlines.png</file>
         <file>images/info.png</file>
         <file>images/lightoff.png</file>
-        <file>images/lighton.png</file>
+		<file>images/lighton.png</file>
         <file>images/logo.png</file>
         <file>images/logo_aimatshape.png</file>
         <file>images/logo_epoch.png</file>

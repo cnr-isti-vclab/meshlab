@@ -351,7 +351,6 @@ void MainWindow::updateMenus()
 				backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
         renderModeTextureAct->setEnabled(meshDoc()->mm() && !meshDoc()->mm()->cm.textures.empty());
 				renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
-
 				setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
 				setLightAct->setChecked(rm.lighting);
 
@@ -1077,9 +1076,15 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	QGLFormat defForm = QGLFormat::defaultFormat();
 	iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
   iFilter->glContext->create(filterWidget->context());
-	
-	ret=iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
-
+	try
+	{
+		ret=iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
+	}
+	catch(MeshLabException& e)
+	{
+		meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());
+		ret = false;
+	}
 	meshDoc()->setBusy(false);
 
 	qApp->restoreOverrideCursor();

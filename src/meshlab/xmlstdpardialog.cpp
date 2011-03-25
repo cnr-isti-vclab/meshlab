@@ -1,8 +1,8 @@
 #include "xmlstdpardialog.h"
 #include <QtGui>
 
-MeshLabXMLStdDialog::MeshLabXMLStdDialog( Env& environ,QWidget *p )
-:QDockWidget(QString("Plugin"), p),showHelp(false),env(environ)
+MeshLabXMLStdDialog::MeshLabXMLStdDialog( Env& envir,QWidget *p )
+:QDockWidget(QString("Plugin"), p),showHelp(false),env(envir)
 {
 	curmask = 0;
 	qf = NULL;

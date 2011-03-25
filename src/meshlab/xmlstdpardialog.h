@@ -42,7 +42,7 @@ public:
 	void setVisibility(const bool vis);
 	virtual void updateVisibility(const bool vis) = 0;
 
-	virtual ~XMLMeshLabWidget() {};
+        virtual ~XMLMeshLabWidget() {}
 	inline QLabel* helpLabel() {return helpLab;} 
 
 	bool isImportant;
