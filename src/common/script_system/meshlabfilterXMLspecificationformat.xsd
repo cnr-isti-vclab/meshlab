@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+
+ <xs:element name='MESHLAB_FILTER_INTERFACE'>
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element ref='PLUGIN'/>
+   </xs:sequence>
+   <xs:attribute name='mfiVersion' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='PLUGIN'>
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element ref='FILTER' maxOccurs='unbounded'/>
+   </xs:sequence>
+   <xs:attribute name='pluginName' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='FILTER'>
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element ref='FILTER_HELP'/>
+    <xs:element ref='PARAM' minOccurs='0' maxOccurs='unbounded'/>
+   </xs:sequence>
+   <xs:attribute name='filterName' type='xs:string' use='required'/>
+   <xs:attribute name='filterFunction' type='xs:string' use='required'/>
+   <xs:attribute name='filterClass' type='xs:string' use='required'/>
+   <xs:attribute name='filterPre' type='xs:string' use='required'/>
+   <xs:attribute name='filterPost' type='xs:string' use='required'/>
+   <xs:attribute name='filterAriety' type='ArietyType' use='required'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='FILTER_HELP'>
+  <xs:complexType mixed='true'>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='PARAM'>
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element ref='PARAM_HELP'/>
+    <xs:choice>
+     <xs:element ref='CHECKBOX_GUI'/>
+     <xs:element ref='ABSPERC_GUI'/>
+	 <xs:element ref='EDIT_GUI'/>
+    </xs:choice>
+   </xs:sequence>
+   <xs:attribute name='parType' use='required'>
+    <xs:simpleType>
+     <xs:restriction base='xs:string'>
+      <xs:enumeration value='Boolean'/>
+      <xs:enumeration value='Real'/>
+     </xs:restriction>
+    </xs:simpleType>
+   </xs:attribute>
+   <xs:attribute name='parName' type='xs:ID' use='required'/>
+   <xs:attribute name='parDefault' type='xs:string' use='required'/>
+   <xs:attribute name='parIsImportant' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='PARAM_HELP'>
+  <xs:complexType mixed='true'>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='CHECKBOX_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
+ <xs:element name='EDIT_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
+ <xs:element name='ABSPERC_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
+   <xs:attribute name='guiMin' type='xs:string' use='required'/>
+   <xs:attribute name='guiMax' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:simpleType name="ArietyType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="SingleMesh"/>
+    <xs:enumeration value="Fixed"/>
+    <xs:enumeration value="Variable"/>
+  </xs:restriction>
+</xs:simpleType>
+</xs:schema>
+
