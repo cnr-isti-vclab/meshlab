@@ -1,4 +1,5 @@
 #include <QFile>
+#include <QResource>
 #include <QtXmlPatterns/QXmlSchema>
 #include <QtXmlPatterns/QXmlSchemaValidator>
 #include <QtXmlPatterns/QXmlQuery>
@@ -6,12 +7,15 @@
 #include "xmlfilterinfo.h"
 #include "mlexception.h"
 #include <assert.h>
+
 XMLFilterInfo* XMLFilterInfo::createXMLFileInfo( const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML)
 {
 	QXmlSchema schema;
 	QAbstractMessageHandler * oldHandler = schema.messageHandler();
 	schema.setMessageHandler(&errXML);
-	if (!schema.load(QUrl::fromLocalFile(XMLSchemaFileName)))
+	QFile fi(XMLSchemaFileName);
+	bool opened = fi.open(QFile::ReadOnly);
+	if ((!opened) || (!schema.load(&fi)))
 	{	
 		schema.setMessageHandler(oldHandler);
 		return NULL;

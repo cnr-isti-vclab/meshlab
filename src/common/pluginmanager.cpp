@@ -67,7 +67,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
         else
         {
           XMLMessageHandler xmlErr;
-          fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,xmlSchemaFile(),xmlErr);
+		  fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,xmlSchemaFile(),xmlErr);
           if (fc.xmlInfo != NULL)
           {
             QStringList fn = fc.xmlInfo->filterNames();
