@@ -72,7 +72,7 @@ HEADERS += filterparameter.h \
 	xmlfilterinfo.h \
 	mlexception.h \
     ../../../vcglib/wrap/gl/trimesh.h \
-    meshlabdocumentxml.h
+    meshlabdocumentxml.h 
 SOURCES += filterparameter.cpp \
     interfaces.cpp \
     filterscript.cpp \
@@ -83,3 +83,9 @@ SOURCES += filterparameter.cpp \
 	xmlfilterinfo.cpp \
     $$GLEWCODE \
     meshlabdocumentxml.cpp
+
+#	win32-msvc2005: RCC_DIR = $(ConfigurationName)
+#	win32-msvc2008: RCC_DIR = $(ConfigurationName)
+#	win32-msvc2010: RCC_DIR = $(ConfigurationName)
+	
+#RESOURCES = common.qrc
