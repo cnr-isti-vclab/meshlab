@@ -1188,7 +1188,7 @@ case DP_SHOW_CAMERA :{
           parset.addParam(new RichFloat(this->FixedScaleParam(), 10.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
           parset.addParam(new RichBool(this->ShowMeshCameras(), true, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
           parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
-          parset.addParam(new RichBool(this->ShowCameraDetails, false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera" 
+          parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
         } break;
     }
 }
