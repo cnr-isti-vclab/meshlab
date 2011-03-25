@@ -38,6 +38,9 @@ private:
 	static inline QString optName() {return QString("optional");}
 public:
 	inline static const QString meshDocVarName() {return QString("meshDoc");}
+	static const QString xmlSchemaFile() {return QString(":/script_system/meshlabfilterXMLspecificationformat.xsd");}
+	static const QStringList javaScriptLibraryFiles();
+
 	
 	QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const;
 	QString funCodeGenerator(const QString&  filtername,const XMLFilterInfo& xmlInfo) const;

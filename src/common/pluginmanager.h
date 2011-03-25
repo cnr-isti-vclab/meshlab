@@ -38,7 +38,6 @@ class QScriptEngine;
 class PluginManager
 {
 private:
-	static const QString xmlSchemaFile() {QString result(":/script_system/meshlabfilterXMLspecificationformat.xsd")/* = getPluginDirPath() + QObject::tr("/meshlabfilterXMLspecificationformat.xsd")*/;return result;} 
 	MeshDocumentScriptInterface* currentDocInterface;
 public:
   PluginManager();

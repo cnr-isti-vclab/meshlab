@@ -67,7 +67,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
         else
         {
           XMLMessageHandler xmlErr;
-		  fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,xmlSchemaFile(),xmlErr);
+		  fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,ScriptAdapterGenerator::xmlSchemaFile(),xmlErr);
           if (fc.xmlInfo != NULL)
           {
             QStringList fn = fc.xmlInfo->filterNames();
@@ -152,6 +152,20 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	env.evaluate(code);
 */
 	QString code = "";
+	QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
+	int ii = 0;
+	while(ii < liblist.size())
+	{
+		QFile lib(liblist[ii]);
+		if (!lib.open(QFile::ReadOnly))
+			qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
+		QByteArray libcode = lib.readAll();
+		QScriptValue res = env.evaluate(QString(libcode));
+		if (res.isError())
+			qDebug("Warning: Library %s generated JavaScript Error: %s",qPrintable(liblist[ii]),qPrintable(res.toString()));
+		++ii;
+	} 
+
 	code += "Plugins = { };\n";
 	//QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
 	foreach(MeshLabXMLFilterContainer mi,stringXMLFilterMap)

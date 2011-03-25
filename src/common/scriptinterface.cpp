@@ -105,6 +105,14 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 	code += "};\n";
 	return code;
 }
+
+const QStringList ScriptAdapterGenerator::javaScriptLibraryFiles()
+{
+	QStringList res;
+	res.push_back(":/script_system/space_math.js");
+	return res;
+}
+
 Q_DECLARE_METATYPE(MeshDocument*)
 
 static bool TestCallback(const int , const char* )
