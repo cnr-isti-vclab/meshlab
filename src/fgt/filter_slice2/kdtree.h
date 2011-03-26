@@ -42,7 +42,7 @@ class KDTree
 		QString name;
   public:
 		bool delfather;
-		enum{X,Y,Z};
+                enum{X,Y,Z};
 		KDTree(MeshDocument *_m, MeshModel* _mm, float _eps, int _axisIndex=X)
 		{
 			name="";

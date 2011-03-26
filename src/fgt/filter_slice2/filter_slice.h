@@ -40,7 +40,9 @@
 
 #include <vcg/space/plane3.h>
 
+#include "filter_slice_functors.h"
 
+#include "mini_geom.h"
 
 class MyVertex;
 class MyEdge;
@@ -50,39 +52,44 @@ class MyUsedTypes: public vcg::UsedTypes < vcg::Use<MyVertex>::AsVertexType,vcg:
 
 class MyVertex: public vcg::Vertex < MyUsedTypes,vcg::vertex::Coord3f,vcg::vertex::BitFlags,vcg::vertex::VEAdj>{};
 class MyFace: public vcg::Face < MyUsedTypes, vcg::face::VertexRef>{};
-class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef> {};
+class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef, vcg::edge::EVAdj> {};
 
 class MyEdgeMesh: public vcg::edg::EdgeMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
+
 
 typedef vcg::edg::io::SVGProperties SVGProperties;
 
 class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshFilterInterface)
+        Q_OBJECT
+        Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_SINGLE_PLANE, FP_PARALLEL_PLANES, FP_RECURSIVE_SLICE };
-	enum { CAP_CW, CAP_CCW };
-	enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
-	ExtraFilter_SlicePlugin();
-	~ExtraFilter_SlicePlugin(){};
+//        enum{X,Y,Z};
+        enum { FP_SINGLE_PLANE, FP_PARALLEL_PLANES, FP_WAFFLE_SLICE, FP_RECURSIVE_SLICE };
+        enum { CAP_CW, CAP_CCW };
+        enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
+        ExtraFilter_SlicePlugin();
+        ~ExtraFilter_SlicePlugin(){};
 
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-	virtual bool autoDialog(QAction *);
-	virtual FilterClass getClass(QAction *);
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
+        virtual QString filterName(FilterIDType filter) const;
+        virtual QString filterInfo(FilterIDType filter) const;
+        virtual bool autoDialog(QAction *);
+        virtual FilterClass getClass(QAction *);
+        virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+        virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+        virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
 
-	static void capHole(MeshModel* orig, MeshModel* dest, int capDir=CAP_CW);
-	static void extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
-private:
-	SVGProperties pr;
-	void createSlice(MeshModel* orig,MeshModel* dest);
-	
-	
+        static void capHole(MeshModel* orig, MeshModel* dest, int capDir=CAP_CW);
+        static void extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
+
+    private:
+        SVGProperties pr;
+        void createSlice(MeshModel* orig,MeshModel* dest);
+
+        // nuove funzioni
+        void generateCap(MeshModel * mBase, /*const*/ Plane3f &slicingPlane, vcg::CallBackPos *cb, MeshModel * mCap, MeshModel * mSlice);
+
 };
 
 namespace vcg {
