@@ -57,6 +57,22 @@ public:
 class MyEdgeMesh2: public vcg::edg::EdgeMesh< std::vector<MyVertex2>, std::vector<MyEdge> > {};
 */
 
+typedef enum{X = 0, Y = 1, Z = 2} Axis;
+
+
+template <int A>
+struct Succ
+{
+    enum { value = A+1 };
+};
+
+template <>
+struct Succ<Z>
+{
+    enum { value = X };
+};
+
+
 template <typename EdgeMeshType>
 void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const Point2f &b1, const Point2f &b2, const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
 {
@@ -182,8 +198,8 @@ void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const P
            //?? prima muoviti poi cancella: puoi farlo all'inizio
 //           tri::Allocator<EdgeMeshType>::DeleteEdge(em,eCorr);
 //           tri::Allocator<EdgeMeshType>::DeleteVertex(em,v0);
-           tri::Allocator<MyEdgeMesh>::DeleteEdge(em,eCorr);
-           tri::Allocator<MyEdgeMesh>::DeleteVertex(em,v0);
+//           tri::Allocator<MyEdgeMesh>::DeleteEdge(em,eCorr);
+//           tri::Allocator<MyEdgeMesh>::DeleteVertex(em,v0);
                     ;
         }
 

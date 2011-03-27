@@ -42,8 +42,6 @@
 
 #include "filter_slice_functors.h"
 
-#include "mini_geom.h"
-
 class MyVertex;
 class MyEdge;
 class MyFace;
