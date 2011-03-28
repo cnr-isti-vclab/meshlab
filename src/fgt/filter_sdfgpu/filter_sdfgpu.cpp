@@ -19,59 +19,114 @@
 using namespace std;
 using namespace vcg;
 
-
 #define SDF_MAX_TEXTURE_SIZE 1024
 
 SdfGpuPlugin::SdfGpuPlugin()
-: SingleMeshFilterInterface("Compute SDF GPU"),
-  mPeelingTextureSize(256)
+: mPeelingTextureSize(256)
 {
+    typeList
+    << SDF_SDF
+    << SDF_CORRECTION_THIN_PARTS
+    << SDF_OBSCURANCE;
+
+    foreach(FilterIDType tt , types())
+            actionList << new QAction(filterName(tt), this);
 
 }
 
-void SdfGpuPlugin::initParameterSet(MeshDocument&, RichParameterSet& par)
+void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &par)
 {
-  qDebug() << "called here!";
-  QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
-  par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
-                             "Choose whether to trace rays from faces or from vertices. "
-                             "Recall that tracing from vertices will use vertex normal "
-                             "estimation."));
 
-  par.addParam(  new RichInt("numberRays", 128, "Number of rays: ",
-                             "The standard deviation of the rays that will be casted around "
-                             "the anti-normals. Remember that most sampled directions are "
-                             "expected to fall within 3x this value."));
- /* par.addParam(new RichFloat("lowQuantile", .1, "Bottom quantile",
-                             "We will throw away the set of ray distances for each cone which distance "
-                             "value falls under this quantile. Value in between [0,1]. 0 Implies all "
-                             "values are kept"));
-  par.addParam(new RichFloat("hiQuantile", .9, "Top quantile",
-                             "We will throw away the set of ray distances for each cone which distance "
-                             "value falls under this quantile. Value in between [0,1]. 1 Implies all "
-                             "values are kept"));*/
+    qDebug() << "called here!";
+    QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
+   par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
+                    "Choose whether to trace rays from faces or from vertices. "
+                    "Recall that tracing from vertices will use vertex normal "
+                    "estimation."));
+   par.addParam(  new RichInt("numberRays", 128, "Number of rays: ",
+                    "The standard deviation of the rays that will be casted around "
+                    "the anti-normals. Remember that most sampled directions are "
+                    "expected to fall within 3x this value."));
+   /* par.addParam(new RichFloat("lowQuantile", .1, "Bottom quantile",
+                    "We will throw away the set of ray distances for each cone which distance "
+                    "value falls under this quantile. Value in between [0,1]. 0 Implies all "
+                    "values are kept"));
+   par.addParam(new RichFloat("hiQuantile", .9, "Top quantile",
+                    "We will throw away the set of ray distances for each cone which distance "
+                    "value falls under this quantile. Value in between [0,1]. 1 Implies all "
+                    "values are kept"));*/
+   par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
+                    "Size of the depth texture for depth peeling"));
+   par.addParam(new RichInt("peelingIteration", 2, "Peeling Iteration",
+                                "Number of depth peeling iteration"));
+   par.addParam(new RichFloat("peelingTolerance", 0.00005f, "Peeling Tolerance",
+                            "We will throw away the set of ray distances for each cone which distance " ));
+   par.addParam(new RichFloat("depthTolerance", 0.0001f, "Depth tolerance",
+                            "A small delta that is the minimal distance in depth between two vertex" ));
+   par.addParam(new RichFloat("minCos", 0.7f, "Min cosine",
+                            "Min accepteded cosine of the angle between rays and vertex normals" ));
+   par.addParam(new RichFloat("maxCos", 1.0f, "Max cosine",
+                            "Max accepteded cosine of the angle between rays and vertex normals" ));
 
-  par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
-                             "Size of the depth texture for depth peeling"));
+    switch(mAction = ID(action))
+    {
+            case SDF_CORRECTION_THIN_PARTS:
+                 par.addParam(new RichFloat("minDist", 1.0f, "Min distance",
+                                 "Min distance to check too thin part of the mesh" ));
+                 break;
 
-  par.addParam(new RichInt("peelingIteration", 2, "Peeling Iteration",
-                             "Number of depth peeling iteration"));
+            case SDF_OBSCURANCE:
+                 par.addParam(new RichFloat("obscuranceExponent", 1.0f, "Obscurance Exponent",
+                                          "Parameter that increase or decrease the exponential rise in obscurance function" ));
+                 break;
 
-  par.addParam(new RichFloat("peelingTolerance", 0.00005f, "Peeling Tolerance",
-                             "We will throw away the set of ray distances for each cone which distance " ));
 
-  par.addParam(new RichFloat("depthTolerance", 0.0001f, "Depth tolerance",
-                             "A small delta that is the minimal distance in depth between two vertex" ));
+            default:
+                {
 
-  par.addParam(new RichFloat("minCos", 0.7f, "Min cosine",
-                             "Min accepteded cosine of the angle between rays and vertex normals" ));
 
-  par.addParam(new RichFloat("maxCos", 1.0f, "Max cosine",
-                             "Max accepteded cosine of the angle between rays and vertex normals" ));
+                    break;
+                }
+        }
+
 }
 
 
-bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::CallBackPos* cb)
+QString SdfGpuPlugin::filterName(FilterIDType filterId) const
+{
+        switch(filterId)
+        {
+                case SDF_SDF :  return QString("Shape diamter function");
+                case SDF_CORRECTION_THIN_PARTS :  return QString("Correction of thin parts");
+                case SDF_OBSCURANCE: return QString("Ambient obscurance");
+
+                default : assert(0);
+        }
+
+        return QString("");
+}
+
+
+QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
+{
+        switch(filterId)
+        {
+                case SDF_SDF :  return QString("Calculate the shape diameter function on the mesh, you can visualize the result colorizing the mesh");
+                case SDF_CORRECTION_THIN_PARTS :  return QString("Checks and corrects too thin parts of the model");
+                case SDF_OBSCURANCE :  return QString("Generates environment obscurances values for the loaded mesh");
+                default : assert(0);
+        }
+
+        return QString("");
+}
+
+int SdfGpuPlugin::getRequirements(QAction *action)
+{
+        //no requirements needed
+        return 0;
+}
+
+bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & pars, vcg::CallBackPos *cb)
 {
   MeshModel* mm = md.mm();
   CMeshO&    cm = mm->cm;
@@ -87,6 +142,12 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
   mMaxCos                   = pars.getFloat("maxCos");
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
+  if(mAction == SDF_OBSCURANCE)
+    mTau = pars.getFloat("obscuranceExponent");
+  else if(mAction == SDF_CORRECTION_THIN_PARTS)
+    mMinDist = pars.getFloat("minDist");
+
+
    //******* GL & MESH INIT **********/
    setupMesh( md, onPrimitive );
    initGL(cm.vn);
@@ -96,14 +157,20 @@ bool SdfGpuPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::Ca
   std::vector<Point3f> unifDirVec;
   GenNormal<float>::Uniform(numViews,unifDirVec);
 
+   Log(0, "Number of rays: %i ", unifDirVec.size() );
+
   for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
   {
         (*vi).Normalize();
         TraceRays(peel, mTolerance, *vi, md.mm());
   }
 
-  applySdfHW(*mm,unifDirVec.size());
+  if(mAction == SDF_SDF || mAction == SDF_CORRECTION_THIN_PARTS)
+    applySdfHW(*mm,unifDirVec.size());
+  else
+      applyObscurance(*mm,unifDirVec.size());
 
+  mm->glw.Update();
   //******* CLEAN AND EXIT *************/
   releaseGL();
 
@@ -190,7 +257,26 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     mSDFProgram->addUniform("mvprMatrix");
     mSDFProgram->addUniform("viewpSize");
     mSDFProgram->addUniform("texSize");
+    mSDFProgram->addUniform("minCos");
+    mSDFProgram->addUniform("maxCos");
     mSDFProgram->disable();
+
+    mObscuranceProgram = new GPUProgram("",":/SdfGpu/shaders/obscurances.frag","");
+    mObscuranceProgram->enable();
+    mObscuranceProgram->addUniform("vTexture");
+    mObscuranceProgram->addUniform("nTexture");
+    mObscuranceProgram->addUniform("depthTextureFront");
+    mObscuranceProgram->addUniform("depthTextureBack");
+    mObscuranceProgram->addUniform("viewDirection");
+    mObscuranceProgram->addUniform("mvprMatrix");
+    mObscuranceProgram->addUniform("viewpSize");
+    mObscuranceProgram->addUniform("texSize");
+    mObscuranceProgram->addUniform("minCos");
+    mObscuranceProgram->addUniform("maxCos");
+    mObscuranceProgram->addUniform("tau");
+    mObscuranceProgram->addUniform("firstRendering");
+    mObscuranceProgram->disable();
+
 
     assert(mFboResult->isValid());
     assert(mFboA->isValid());
@@ -305,6 +391,11 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
         break;
     }
 
+    if(mAction == SDF_OBSCURANCE)
+    { 
+        mm->updateDataMask(MeshModel::MM_VERTCOLOR);
+        tri::UpdateColor<CMeshO>::VertexConstant(m);
+    }
     //--- Use VBO
   //  mm->glw.SetHint(vcg::GLW::HNUseVBO);
     mm->glw.Update();
@@ -399,9 +490,9 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
 
     mSDFProgram->setUniform1f("depthTolerance", mDepthTolerance);
 
-//    mSDFProgram->setUniform1f("minCos", 0.7);
+    mSDFProgram->setUniform1f("minCos", mMinCos);
 
-//    mSDFProgram->setUniform1f("maxCos", 1.0);
+    mSDFProgram->setUniform1f("maxCos", mMaxCos);
 
 
     // Screen-aligned Quad
@@ -439,6 +530,107 @@ void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
     delete [] result;
 }
 
+void SdfGpuPlugin::calculateObscurance(FramebufferObject& fboFront, FramebufferObject& fboBack, const Point3f& cameraDir, int first)
+{
+    mFboResult->bind();
+    glViewport(0, 0, mResTextureDim, mResTextureDim);
+    GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
+
+    glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
+    glMatrixMode(GL_PROJECTION);
+    glMultMatrixf(mv_pr_Matrix_f);
+    glGetFloatv(GL_PROJECTION_MATRIX, mv_pr_Matrix_f);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // Need to clear the depthBuffer if we don't
+    // want a mesh-shaped hole in the middle of the S.A.Q. :)
+   // glClear(GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_ONE, GL_ONE);
+    glBlendEquation(GL_FUNC_ADD);
+
+    glUseProgram(mObscuranceProgram->id());
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboFront.getAttachedId(GL_DEPTH_ATTACHMENT));
+    mObscuranceProgram->setUniform1i("depthTextureFront",0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fboBack.getAttachedId(GL_DEPTH_ATTACHMENT));
+    mObscuranceProgram->setUniform1i("depthTextureBack",1);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, mVertexCoordsTexture->id());
+    mObscuranceProgram->setUniform1i("vTexture",2);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, mVertexNormalsTexture->id());
+    mObscuranceProgram->setUniform1i("nTexture",3);
+
+    // Set view direction
+    mObscuranceProgram->setUniform3f("viewDirection", cameraDir.X(), cameraDir.Y(), cameraDir.Z());
+
+    // Set ModelView-Projection Matrix
+    mObscuranceProgram->setUniformMatrix4fv( "mvprMatrix", mv_pr_Matrix_f, 1, GL_FALSE );
+
+    // Set texture Size
+    mObscuranceProgram->setUniform1f("texSize", mPeelingTextureSize);
+
+    // Set viewport Size
+    mObscuranceProgram->setUniform1f("viewpSize", mResTextureDim );
+
+    mObscuranceProgram->setUniform1f("depthTolerance", mDepthTolerance);
+
+    mObscuranceProgram->setUniform1f("minCos", 0.7);
+
+    mObscuranceProgram->setUniform1f("maxCos", 1.0);
+
+    mObscuranceProgram->setUniform1f("tau", mTau);
+
+    mObscuranceProgram->setUniform1i("firstRendering",first);
+
+    // Screen-aligned Quad
+    glBegin(GL_QUADS);
+            glVertex3f(-1.0f, -1.0f, 0.0f); //L-L
+            glVertex3f( 1.0f, -1.0f, 0.0f); //L-R
+            glVertex3f( 1.0f,  1.0f, 0.0f); //U-R
+            glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
+    glEnd();
+
+    mFboResult->unbind();
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+}
+
+void SdfGpuPlugin::applyObscurance(MeshModel &m, float numberOfRays)
+{
+    const unsigned int texelNum = mResTextureDim*mResTextureDim;
+
+    GLfloat *result = new GLfloat[texelNum*4];
+
+    mFboResult->bind();
+
+    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
+
+    for (int i=0; i < m.cm.vn; ++i)
+    {
+        m.cm.vert[i].Q() = result[i*4];
+        m.cm.vert[i].C().Import(Color4f(result[i*4],result[i*4],result[i*4],1.0f));
+    }
+
+    mFboResult->unbind();
+
+    delete [] result;
+}
 
 void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3f& dir, MeshModel* mm )
 {
@@ -459,10 +651,17 @@ void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3
         mFboA->unbind();
         //glDisable(GL_POLYGON_OFFSET_FILL);
 
-        if(i%2)
-            calculateSdfHW(*mFboB,*mFboA,dir);
 
-
+          switch(mAction)
+          {
+            case SDF_SDF:
+            case SDF_CORRECTION_THIN_PARTS:
+                 if(i%2) calculateSdfHW(*mFboB,*mFboA,dir);
+                break;
+            case SDF_OBSCURANCE:
+                 if(!i%2) calculateObscurance(*mFboA,*mFboB,dir, i) ;
+                break;
+          }
 
         std::swap<FramebufferObject*>(mFboA,mFboB);
    }

@@ -34,6 +34,8 @@ uniform float 		texSize;
 uniform	float		depthTolerance;
 uniform float		minCos;
 uniform float		maxCos;
+uniform float		tau;
+uniform int 		firstRendering;
 
 vec4 project(vec4 coords)
 {
@@ -45,13 +47,12 @@ vec4 project(vec4 coords)
 void main(void)
 {
 		
-    float sdf = 0.0;
-
-    vec2 coords = vec2(gl_FragCoord.xy/viewpSize);
-
-    vec4 V = texture2D(vTexture, coords);
-    vec4 N = texture2D(nTexture, coords);
-    
+    float obscurance = 0.0;
+   // float PI 	     = 3.14159265358979323846264;
+    vec2  coords     = vec2(gl_FragCoord.xy/viewpSize);
+    vec4 V 	     = texture2D(vTexture, coords);
+    vec4 N 	     = texture2D(nTexture, coords);
+ 
     N = normalize(N);
 
     vec4 P = project(V); //* (viewpSize/texSize);
@@ -62,15 +63,15 @@ void main(void)
     float cosAngle = max(0.0,dot(N.xyz, viewDirection));
       
 
-    if ( (zFront-depthTolerance) <=  P.z && P.z <= (zFront+depthTolerance) && cosAngle >= minCos && cosAngle <= maxCos)
+    if ( (zFront-depthTolerance) <=  P.z && P.z <= (zFront+depthTolerance) && cosAngle > 0.0)
     {
 
-	sdf =  max(0.0,(zBack-zFront) * cosAngle) ; 
+	if(firstRendering != 0)
+		obscurance =  (1.0 - exp(-tau*max(0.0,(zFront-zBack))))*cosAngle;
     
+        else obscurance = cosAngle;
     }
-    else 
-	cosAngle = 0.0;
-
+  
 	
-    gl_FragColor = vec4( sdf, cosAngle, 0.0, 1.0);
+    gl_FragColor = vec4( obscurance , obscurance , obscurance , 1.0);
 }

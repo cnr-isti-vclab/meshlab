@@ -1,7 +1,9 @@
 #ifndef FILTER_SDFGPU_H
 #define FILTER_SDFGPU_H
 
-#include <filterinterface.h>
+#include <QObject>
+
+#include <common/interfaces.h>
 
 #include <gpuProgram.h>
 #include <framebufferObject.h>
@@ -10,16 +12,33 @@
 
 enum ONPRIMITIVE{ON_VERTICES, ON_FACES};
 
-class SdfGpuPlugin : public SingleMeshFilterInterface{
+class SdfGpuPlugin : public QObject, public MeshFilterInterface
+{
     Q_OBJECT
     Q_INTERFACES(MeshFilterInterface)
 
+
 public:
+
+    enum{ SDF_SDF, SDF_CORRECTION_THIN_PARTS, SDF_OBSCURANCE };
+
     SdfGpuPlugin();
+
+    QString filterName(FilterIDType filterId) const;
+
+    QString filterInfo(FilterIDType filterId) const;
+
+    int     getRequirements(QAction *action);
+
+    virtual FilterClass getClass(){
+      return MeshFilterInterface::Generic;
+    }
+
+
     //main plugin function
-    bool applyFilter(MeshDocument&, RichParameterSet&, vcg::CallBackPos*);
+    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
     //parameters init for user interface
-    virtual void initParameterSet(MeshDocument&, RichParameterSet &);
+    virtual void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst);
     //draw the mesh
     void fillFrameBuffer(bool front,  MeshModel* mm);
     //mesh setup
@@ -41,8 +60,13 @@ public:
 
     void applySdfHW(MeshModel &m, float numberOfRays);
 
+    void calculateObscurance(FramebufferObject& fboFront, FramebufferObject& fboBack, const vcg::Point3f& cameraDir, int first);
+
+    void applyObscurance(MeshModel &m, float numberOfRays);
+
 protected:
 
+    FilterIDType       mAction;
     unsigned int       mResTextureDim;
     FloatTexture2D*    mResultTexture;
     FloatTexture2D*    mVertexCoordsTexture;
@@ -59,8 +83,13 @@ protected:
     float              mDepthTolerance;
     float              mMinCos;
     float              mMaxCos;
+    //obscurance exponent
+    float              mTau;
+    //min dist between vertices to check too thin parts
+    float              mMinDist;
     GPUProgram*        mDeepthPeelingProgram;
     GPUProgram*        mSDFProgram;
+    GPUProgram*        mObscuranceProgram;
 };
 
 #endif // FILTER_SDFGPU_H
