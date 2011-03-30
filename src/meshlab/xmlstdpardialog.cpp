@@ -334,7 +334,7 @@ XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,EnvWrap& envi
 
 	row = gridLay->rowCount();
 	////WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-	if ((row == 1) && (mp[MLXMLElNames::paramType] == MLXMLElNames::boolType))	
+	if ((row == 1) && (mp[MLXMLElNames::guiType] == MLXMLElNames::checkBoxTag))	
 	{
 
 		QLabel* lb = new QLabel("",this);
@@ -489,8 +489,8 @@ void XMLEditWidget::tooltipEvaluation()
 	try
 	{
 		QString exp = lineEdit->selectedText();
-		float res = env.getFloat(exp);
-		lineEdit->setToolTip(QString::number(res));
+		QString res = env.getString(exp);
+		lineEdit->setToolTip(res);
 	}
 	catch (MeshLabException& /*e*/)
 	{
