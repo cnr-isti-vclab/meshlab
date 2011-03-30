@@ -85,6 +85,8 @@ public:
 	MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* mdsi);
 	
 	Q_INVOKABLE float bboxDiag() const;
+	Q_INVOKABLE vcg::Point3f bboxMin() const;
+	Q_INVOKABLE vcg::Point3f bboxMax() const;
 
 	MeshModel& mm;
 };
@@ -99,6 +101,14 @@ Q_DECLARE_METATYPE(MeshModelScriptInterface*)
 QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in);
 
 void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out);
+
+Q_DECLARE_METATYPE(vcg::Point3f)
+
+QScriptValue Point3fToScriptValue(QScriptEngine* eng,const vcg::Point3f& in);
+
+void Point3fFromScriptValue(const QScriptValue& val,vcg::Point3f& out);
+
+
 
 
 //QScriptValue MeshModelScriptInterface_ctor(QScriptContext* c,QScriptEngine* e)

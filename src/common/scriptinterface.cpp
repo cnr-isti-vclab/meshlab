@@ -269,6 +269,16 @@ Q_INVOKABLE float MeshModelScriptInterface::bboxDiag() const
 	return mm.cm.bbox.Diag();
 }
 
+Q_INVOKABLE vcg::Point3f MeshModelScriptInterface::bboxMin() const
+{
+	return mm.cm.bbox.min;
+}
+
+Q_INVOKABLE vcg::Point3f MeshModelScriptInterface::bboxMax() const
+{
+	return mm.cm.bbox.max;
+}
+
 QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in)
 {
 	return eng->newQObject(in);
@@ -287,6 +297,20 @@ QScriptValue MeshDocumentScriptInterfaceToScriptValue( QScriptEngine* eng,MeshDo
 void MeshDocumentScriptInterfaceFromScriptValue( const QScriptValue& val,MeshDocumentScriptInterface*& out )
 {
 	out = qobject_cast<MeshDocumentScriptInterface*>(val.toQObject());
+}
+
+QScriptValue Point3fToScriptValue(QScriptEngine* eng,const vcg::Point3f& in)
+{
+	QScriptValue arrRes = eng->newArray(3);
+	for(unsigned int ii = 0;ii < 3;++ii)
+		arrRes.setProperty(ii,in[ii]);
+	return arrRes;
+}
+
+void Point3fFromScriptValue(const QScriptValue& val,vcg::Point3f& out)
+{
+	for(unsigned int ii = 0;ii < 3;++ii)
+		out[ii] = val.property(ii).toNumber();
 }
 
 QScriptValue EnvWrap_ctor( QScriptContext* c,QScriptEngine* e )
@@ -445,6 +469,7 @@ QScriptValue Env_ctor( QScriptContext *context,QScriptEngine *engine )
 Env::Env()
 {
 	qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
+	qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);
 }
 
 void Env::insertExpressionBinding( const QString& nm,const QString& exp )
