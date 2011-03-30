@@ -368,11 +368,69 @@ float EnvWrap::getFloat( const QString& nm )
 	return float();
 }
 
+vcg::Point3f EnvWrap::getVec3( const QString& nm )
+{
+	QScriptValue result = getExp(nm);
+	QVariant resVar = result.toVariant();
+	QVariantList resList = resVar.toList();
+	if (resList.size() == 3)
+		return vcg::Point3f(resList[0].toDouble(),resList[1].toDouble(),resList[2].toDouble());
+	else
+		throw ExpressionHasNotThisTypeException("Vec3",nm);
+	return vcg::Point3f();
+}
+
 bool EnvWrap::constStatement( const QString& statement ) const
 {
 	QRegExp exp("\\S+\\s*=\\s*S++;");
 	int ii = statement.indexOf(exp);
 	return (ii == -1);
+}
+//
+//QString EnvWrap::getExpType( const QString& exp )
+//{
+//	QScriptValue result = getExp(exp);
+//	QVariant resVariant = result.toVariant();
+//	switch (resVariant.type())
+//	{
+//		case(QVariant::Bool):
+//		{
+//			return MLXMLElNames::boolType;
+//			break;
+//		}
+//		
+//		case(QVariant::Int):
+//		{
+//				return MLXMLElNames::intType;
+//				break;
+//		}
+//
+//		case(QVariant::Double):
+//		{
+//			return MLXMLElNames::realType;
+//			break;
+//		}
+//
+//		case(QVariant::List)
+//		{
+//			QVariantList resList = resVariant.toList();
+//			switch(resList.size())
+//			{
+//				case(0):
+//				{
+//					break;
+//				}
+//
+//				case()
+//			}
+//		}
+//	}
+//}
+
+QString EnvWrap::getString( const QString& nm )
+{
+	QScriptValue result = getExp(nm);
+	return result.toString();
 }
 
 Q_DECLARE_METATYPE(EnvWrap)

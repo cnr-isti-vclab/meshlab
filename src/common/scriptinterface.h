@@ -131,6 +131,9 @@ public:
 	EnvWrap(Env& envir);
 	bool getBool(const QString& nm);
 	float getFloat(const QString& nm);
+	vcg::Point3f getVec3(const QString& nm);
+	/*QString getExpType(const QString& nm);*/
+	QString getString(const QString& nm);
 };
 
 QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);

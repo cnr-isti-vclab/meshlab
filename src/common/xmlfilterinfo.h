@@ -92,6 +92,7 @@ namespace MLXMLElNames
 	const QString boolType("Boolean");
 	const QString realType("Real");
 	const QString intType("Integer");
+	const QString vec3Type("Vec3");
 
 	//ariety values
 	const QString singleMeshAriety("SingleMesh");
