@@ -20,6 +20,7 @@ using namespace std;
 using namespace vcg;
 
 #define SDF_MAX_TEXTURE_SIZE 1024
+#define PI 3.14159265358979323846264;
 
 SdfGpuPlugin::SdfGpuPlugin()
 : mPeelingTextureSize(256)
@@ -57,9 +58,9 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                     "values are kept"));*/
    par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
                     "Size of the depth texture for depth peeling"));
-   par.addParam(new RichInt("peelingIteration", 2, "Peeling Iteration",
+   par.addParam(new RichInt("peelingIteration", 8, "Peeling Iteration",
                                 "Number of depth peeling iteration"));
-   par.addParam(new RichFloat("peelingTolerance", 0.00005f, "Peeling Tolerance",
+   par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
                             "We will throw away the set of ray distances for each cone which distance " ));
    par.addParam(new RichFloat("depthTolerance", 0.0001f, "Depth tolerance",
                             "A small delta that is the minimal distance in depth between two vertex" ));
@@ -76,7 +77,7 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                  break;
 
             case SDF_OBSCURANCE:
-                 par.addParam(new RichFloat("obscuranceExponent", 1.0f, "Obscurance Exponent",
+                 par.addParam(new RichFloat("obscuranceExponent", 10000.0f, "Obscurance Exponent",
                                           "Parameter that increase or decrease the exponential rise in obscurance function" ));
                  break;
 
@@ -159,6 +160,8 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
    Log(0, "Number of rays: %i ", unifDirVec.size() );
 
+
+  //Point3f p = Point3f(0,0,1);
   for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
   {
         (*vi).Normalize();
@@ -200,6 +203,7 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     //**********INIT FBOs for depth peeling***********
     mFboA      = new FramebufferObject();
     mFboB      = new FramebufferObject();
+    mFboC      = new FramebufferObject();
     mFboResult = new FramebufferObject();
 
     unsigned int maxTexSize;
@@ -214,6 +218,8 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
 
     for( mResTextureDim = 16; mResTextureDim*mResTextureDim < numVertices; mResTextureDim *= 2 ){}
 
+     Log(0, "Mesh has %i vertices\n", numVertices );
+     Log(0, "Result texture is %i X %i = %i", mResTextureDim, mResTextureDim, mResTextureDim*mResTextureDim);
 
     mVertexCoordsTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
     mVertexNormalsTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
@@ -230,15 +236,19 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
 
     mFboResult->unbind();
 
-    mColorTextureA = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
-    mDepthTextureA = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
-    mColorTextureB = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
-    mDepthTextureB = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mColorTextureA    = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mDepthTextureA    = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mColorTextureB    = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mDepthTextureB    = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mColorTextureC    = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mDepthTextureC    = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
 
     mFboA->attachTexture( mColorTextureA->format().target(), mColorTextureA->id(), GL_COLOR_ATTACHMENT0 );
     mFboA->attachTexture( mDepthTextureA->format().target(), mDepthTextureA->id(), GL_DEPTH_ATTACHMENT  );
     mFboB->attachTexture( mColorTextureB->format().target(), mColorTextureB->id(), GL_COLOR_ATTACHMENT0 );
     mFboB->attachTexture( mDepthTextureB->format().target(), mDepthTextureB->id(), GL_DEPTH_ATTACHMENT  );
+    mFboC->attachTexture( mColorTextureB->format().target(), mColorTextureB->id(), GL_COLOR_ATTACHMENT0 );
+    mFboC->attachTexture( mDepthTextureB->format().target(), mDepthTextureB->id(), GL_DEPTH_ATTACHMENT  );
 
     mDeepthPeelingProgram = new GPUProgram("",":/SdfGpu/shaders/shaderDepthPeeling.fs","");
     mDeepthPeelingProgram->enable();
@@ -253,6 +263,7 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     mSDFProgram->addUniform("nTexture");
     mSDFProgram->addUniform("depthTextureFront");
     mSDFProgram->addUniform("depthTextureBack");
+    mSDFProgram->addUniform("depthTolerance");
     mSDFProgram->addUniform("viewDirection");
     mSDFProgram->addUniform("mvprMatrix");
     mSDFProgram->addUniform("viewpSize");
@@ -267,6 +278,7 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     mObscuranceProgram->addUniform("nTexture");
     mObscuranceProgram->addUniform("depthTextureFront");
     mObscuranceProgram->addUniform("depthTextureBack");
+    mObscuranceProgram->addUniform("depthTolerance");
     mObscuranceProgram->addUniform("viewDirection");
     mObscuranceProgram->addUniform("mvprMatrix");
     mObscuranceProgram->addUniform("viewpSize");
@@ -330,9 +342,11 @@ void SdfGpuPlugin::releaseGL()
 
     delete mDeepthPeelingProgram;
     delete mSDFProgram;
+    delete mObscuranceProgram;
     delete mFboResult;
     delete mFboA;
     delete mFboB;
+    delete mFboC;
     delete mResultTexture;
     delete mVertexCoordsTexture;
     delete mVertexNormalsTexture;
@@ -340,6 +354,8 @@ void SdfGpuPlugin::releaseGL()
     delete mDepthTextureA;
     delete mColorTextureB;
     delete mDepthTextureB;
+    delete mColorTextureC;
+    delete mDepthTextureC;
 
     checkGLError::qDebug("GL release failed");
 
@@ -476,6 +492,8 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
     glBindTexture(GL_TEXTURE_2D, mVertexNormalsTexture->id());
     mSDFProgram->setUniform1i("nTexture",3);
 
+    //cameraDir.Normalize();
+
     // Set view direction
     mSDFProgram->setUniform3f("viewDirection", cameraDir.X(), cameraDir.Y(), cameraDir.Z());
 
@@ -574,7 +592,7 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject& fboFront, FramebufferO
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, mVertexNormalsTexture->id());
     mObscuranceProgram->setUniform1i("nTexture",3);
-
+  //  Log(0, "Camera dir: %f %f %f ", cameraDir.X(), cameraDir.Y(), cameraDir.Z() );
     // Set view direction
     mObscuranceProgram->setUniform3f("viewDirection", cameraDir.X(), cameraDir.Y(), cameraDir.Z());
 
@@ -623,12 +641,19 @@ void SdfGpuPlugin::applyObscurance(MeshModel &m, float numberOfRays)
 
     for (int i=0; i < m.cm.vn; ++i)
     {
-        m.cm.vert[i].Q() = result[i*4];
-        m.cm.vert[i].C().Import(Color4f(result[i*4],result[i*4],result[i*4],1.0f));
-    }
+         // Log(0, "V%i %f", i, result[i*4] );
+       m.cm.vert[i].Q() = result[i*4];
+   }
+
+    CMeshO::VertexIterator vi;
+    for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+        (*vi).Q()= (*vi).Q()/numberOfRays;
+
+    tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
+
+
 
     mFboResult->unbind();
-
     delete [] result;
 }
 

@@ -73,11 +73,14 @@ protected:
     FloatTexture2D*    mVertexNormalsTexture;
     FramebufferObject* mFboA;
     FramebufferObject* mFboB;
+    FramebufferObject* mFboC;
     FramebufferObject* mFboResult;
     FloatTexture2D*    mColorTextureA;
     FloatTexture2D*    mDepthTextureA;
     FloatTexture2D*    mColorTextureB;
     FloatTexture2D*    mDepthTextureB;
+    FloatTexture2D*    mColorTextureC;
+    FloatTexture2D*    mDepthTextureC;
     unsigned int       mPeelingTextureSize;
     float              mTolerance;
     float              mDepthTolerance;
