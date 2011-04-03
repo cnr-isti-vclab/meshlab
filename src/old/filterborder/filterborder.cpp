@@ -36,8 +36,8 @@
 #include <QtGui>
 #include "filterborder.h"
 
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/clean.h>
 
 using namespace std;
 using namespace vcg;

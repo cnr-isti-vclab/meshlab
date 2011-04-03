@@ -43,10 +43,10 @@ add samplefilter
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/stat.h>
 #include <vcg/math/histogram.h>
 
 #include "filter_curvature_from_sliding.h"

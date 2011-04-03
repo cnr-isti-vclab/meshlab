@@ -26,7 +26,7 @@
 
 #include <QThread>
 #include <vcg/math/matrix44.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/space/point2.h>
 #include <vcg/space/point3.h>
@@ -55,7 +55,7 @@ protected:
 	CMeshO												*selectionMesh;				//La sotto Mesh
 	std::vector<vcg::Point2i>			*gesture2D;						//Il gesto2D fatto dall'utente sulla primiva.
 	std::vector<vcg::Point3f>			*gesture3D;						//La corrispondente proezione del gesto2d sulla mesh.
-	std::vector<vcg::Point3f>			cloudNearPoints;			//Sono tutti i punti della Mesh più vicini a quelli del Sampling.
+	std::vector<vcg::Point3f>			cloudNearPoints;			//Sono tutti i punti della Mesh pi vicini a quelli del Sampling.
 	std::vector<vcg::Point3f>			cloudSampling;				//Il risultato del Sampling.
 	GridType											*grid;							  //La sotto mesh nella struttura di ricerca griglia statica.
 	double												totDistance;

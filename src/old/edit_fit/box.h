@@ -25,8 +25,8 @@
 #define BOX_H
 
 #include <vcg/space/obox3.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 #include <time.h>
 #include "primitive.h"
 
@@ -44,9 +44,9 @@ private:
 
 	double										DistanzaOrizzontale;		//Risultato della density serve per la RigidSampling
 	double										DistanzaVerticale;			//Risultato della density serve per la RigidSampling
-	std::vector<vcg::Point3f>	cloudSelection;					//serve per calcolare la densità
+	std::vector<vcg::Point3f>	cloudSelection;					//serve per calcolare la densit
 	vcg::Obox3f								BoxSelection;						//E' il box che racchiude il cilindro
-	void											Density();							//Calcola la densità e DistanzaOrizzontale e DistanzaVerticale
+	void											Density();							//Calcola la densit e DistanzaOrizzontale e DistanzaVerticale
 
 public:
 	Box(std::vector<vcg::Point2i> *_gesture2D,std::vector<vcg::Point3f> *_gesture3D,CMeshO *_TotMesh);
@@ -197,12 +197,12 @@ inline void Box::DrawNormal(){
 }
 inline void Box::InitSampling(double *par){
 	/*
-		|------2°------|
+		|------2------|
 		|							 |
-		3°						 4°
+		3						 4
 		|							 |
 		|							 |
-		|------1°------|
+		|------1------|
 	*/
 
 	double height=par[0];			//altezza
@@ -214,7 +214,7 @@ inline void Box::InitSampling(double *par){
 	oldDepth=depth;
 
 	for (double j=(-height/2);j<(+height/2);j+=DistanzaVerticale){
-		//1° and 2° side:
+		//1 and 2 side:
 		for (double i=-width/2;i<=width/2;i+=DistanzaOrizzontale){ 
 			cloudSampling.push_back(vcg::Point3f(i,j,-depth/2)); 
 			cloudSampling.push_back(vcg::Point3f(i,j,depth/2)); 
@@ -222,7 +222,7 @@ inline void Box::InitSampling(double *par){
 			cloudNearPoints.push_back(vcg::Point3f(0,0,0));
 			cloudNearPoints.push_back(vcg::Point3f(0,0,0));
 		}
-		//3° and 4° side:
+		//3 and 4 side:
 		for (double i=(-depth/2);i<=(depth/2);i+=DistanzaOrizzontale){ 
 			cloudSampling.push_back(vcg::Point3f(-width/2,j,i)); 
 			cloudSampling.push_back(vcg::Point3f(width/2,j,i)); 

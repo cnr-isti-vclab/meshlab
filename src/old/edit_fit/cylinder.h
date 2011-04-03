@@ -25,8 +25,8 @@
 #define CYLINDER_H
 
 #include <vcg/space/obox3.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 #include <time.h>
 #include "primitive.h"
 
@@ -37,9 +37,9 @@ private:
 	double										DistanzaVerticale;			//Risultato della density serve per la RigidSampling
 	int												numeroCerchi;						//Risultato della RigidSampling serve per il Sampling
 	int												numeroPuntiCerchio;			//Risultato della RigidSampling serve per il Sampling
-	std::vector<vcg::Point3f>	cloudSelection;					//serve per calcolare la densità
+	std::vector<vcg::Point3f>	cloudSelection;					//serve per calcolare la densit
 	vcg::Obox3f								BoxSelection;						//E' il box che racchiude il cilindro
-	void											Density();							//Calcola la densità e DistanzaOrizzontale e DistanzaVerticale
+	void											Density();							//Calcola la densit e DistanzaOrizzontale e DistanzaVerticale
 
 public:
 	Cylinder(std::vector<vcg::Point2i> *_gesture2D,std::vector<vcg::Point3f> *_gesture3D,CMeshO *_TotMesh);
@@ -126,7 +126,7 @@ inline void Cylinder::Sampling(const double *par){
 
 	for(int i=0;i<(int)cloudSampling.size();i++){
 		if(i==count){																			//Ogni "count" punti ho fatto un cerchio quindi azzero "alfa"
-			count+=numeroPuntiCerchio;											//e mi sposto di un'unità "DistVerticale" in su e genero il
+			count+=numeroPuntiCerchio;											//e mi sposto di un'unit "DistVerticale" in su e genero il
 			y+=DistVerticale;																//successivo cerchio.
 			alfa=0;
 			raggio-=incRaggio;

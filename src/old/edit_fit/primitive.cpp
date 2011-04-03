@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include <wrap/minpack/minpack.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 #include "primitive.h"
 #include <wrap/gl/math.h>
 
@@ -136,8 +136,8 @@ void Primitive::UpdateMesh_and_Grid_and_Near(const vcg::Matrix44f &m){
 inline void Primitive::NonLinearMinimization(){
 NLMin<Primitive> nlm;
 nlm.InitControl();
-nlm.control.maxcall  = 5;				//così è molto più veloce
-nlm.control.gtol = 0.0001;			//così è molto più veloce
+nlm.control.maxcall  = 5;				//cos  molto pi veloce
+nlm.control.gtol = 0.0001;			//cos  molto pi veloce
 nlm.Fit(cloudSampling.size()/*codominio/,numParameters/*dominio/,parameters,this,&Primitive::EvaluateError,0);
 }
 */
@@ -145,8 +145,8 @@ nlm.Fit(cloudSampling.size()/*codominio/,numParameters/*dominio/,parameters,this
 void Primitive::NonLinearMinimization(){
 	LMDiff nlm;
 	nlm.InitControl();
-	nlm.control.maxcall  = 5;				//così è molto più veloce
-	nlm.control.gtol = 0.0001;			//così è molto più veloce
+	nlm.control.maxcall  = 5;				//cos  molto pi veloce
+	nlm.control.gtol = 0.0001;			//cos  molto pi veloce
 	nlm.Run(cloudSampling.size()/*codominio*/,numParameters/*dominio*/,parameters,&callEvaluateError,this);
 }
 

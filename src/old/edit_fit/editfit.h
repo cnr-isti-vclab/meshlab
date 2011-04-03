@@ -52,7 +52,7 @@ $Log: editfit.h,v $
 #include <fstream> 
 #include <limits>
 #include <vcg/space/obox3.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 //#include <../code/lib/non_linear_minimization/non_linear_minimization.h>
 #include <vcg/math/point_matching.h>

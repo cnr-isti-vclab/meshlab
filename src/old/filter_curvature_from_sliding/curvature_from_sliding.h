@@ -21,14 +21,14 @@
 *                                                                           *
 ****************************************************************************/
 
-#include<vcg/complex/trimesh/update/position.h>
-#include<vcg/complex/trimesh/update/edges.h>
-#include <vcg/complex/trimesh/closest.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/subset.h>
+#include<vcg/complex/algorithms/update/position.h>
+#include<vcg/complex/algorithms/update/edges.h>
+#include <vcg/complex/algorithms/closest.h>
+#include <vcg/complex/append.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/complex.h>
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/algorithms/subset.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <lib/levmar/lm.h>
 

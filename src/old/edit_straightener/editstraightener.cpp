@@ -47,9 +47,9 @@ first version
 
 #include <meshlab/glarea.h>
 
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/algorithms/update/position.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/update/selection.h>
 #include <vcg/space/fitting3.h>
 
 #include <wrap/qt/trackball.h>
