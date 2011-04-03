@@ -78,8 +78,7 @@
 #define IMPORTERX3D
 
 #include<QtXml>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/complex/algorithms/create/platonic.h>
 #include <wrap/gl/glu_tesselator.h>
 
 #include "util_x3d.h"

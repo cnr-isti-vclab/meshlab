@@ -25,7 +25,7 @@
 #include <string>
 #include <fstream>
 
-#include <vcg/complex/trimesh/attribute_seam.h>
+#include <vcg/complex/algorithms/attribute_seam.h>
 
 #include <QString>
 #include <QFile>

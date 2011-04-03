@@ -29,8 +29,6 @@
 
 #include "io_u3d.h"
 #include <common/pluginmanager.h>
-//#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>

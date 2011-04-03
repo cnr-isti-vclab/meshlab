@@ -34,17 +34,11 @@
 
 #include "epoch_io.h"
 #include "epoch_reconstruction.h"
-#include <vcg/math/matrix33.h>
+#include <vcg/complex/append.h>
 #include <vcg/math/histogram.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/clustering.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/hole.h>
-#include <wrap/io_trimesh/io_mask.h>
+#include <vcg/complex/algorithms/create/platonic.h>
+#include <vcg/complex/algorithms/clustering.h>
+#include <vcg/complex/algorithms/hole.h>
 #include <wrap/io_trimesh/export_ply.h>
 #include <meshlab/alnParser.h>
 

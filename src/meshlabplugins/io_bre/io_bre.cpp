@@ -29,11 +29,6 @@
 #include <stdlib.h>
 #include <wrap/io_trimesh/export.h>
 
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/clean.h>
-
-#include <vcg/complex/trimesh/allocate.h>
 
 using namespace std;
 using namespace vcg;

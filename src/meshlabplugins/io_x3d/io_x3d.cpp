@@ -27,8 +27,6 @@
 
 
 #include "io_x3d.h"
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
 
 #include "import_x3d.h"
 #include "export_x3d.h"

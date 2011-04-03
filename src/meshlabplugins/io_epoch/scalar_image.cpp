@@ -23,27 +23,6 @@
 
 #include <Qt>
 #include <QPixmap>
-//#include <QtGui>
-//#include <QtXml/QDomDocument>
-//#include <QtXml/QDomElement>
-//#include <QtXml/QDomNode>
-//
-//
-//// temporaneamente prendo la versione corrente dalla cartella test
-//#include<vcg/complex/trimesh/update/bounding.h>
-//#include <wrap/io_trimesh/io_mask.h>
-//#include <vcg/complex/trimesh/create/platonic.h>
-//#include <vcg/complex/trimesh/update/bounding.h>
-//#include <vcg/complex/trimesh/update/normal.h>
-//#include <vcg/math/matrix33.h>
-//#include<vcg/complex/trimesh/append.h>
-//
-//#include <QMessageBox>
-//#include <QFileDialog>
-
-//#include "epoch.h"
-//#include "radial_distortion.h"
-//#include "epoch_camera.h"
 #include <bzlib.h>
 #include <vector>
 #include "scalar_image.h"

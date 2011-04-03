@@ -31,20 +31,11 @@
 #include <wrap/io_trimesh/export_ply.h>
 #include <wrap/io_trimesh/export.h>
 
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/selection.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/append.h>
 
-// debug, to be removed
-#include <wrap/io_trimesh/export_ply.h>
-
-#include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/create/marching_cubes.h>
-#include <vcg/complex/trimesh/create/mc_trivial_walker.h>
+#include <vcg/complex/append.h>
+#include <vcg/complex/algorithms/create/platonic.h>
+#include <vcg/complex/algorithms/create/marching_cubes.h>
+#include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
 #include <QMessageBox>
 #include <QFileDialog>

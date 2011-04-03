@@ -92,11 +92,8 @@
 
 #include "io_collada.h"
 
-//#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/texture.h>
+#include <vcg/complex/algorithms/update/texture.h>
 #include <wrap/io_trimesh/export.h>
-#include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/import_dae.h>
 #include <wrap/io_trimesh/export_dae.h>
 

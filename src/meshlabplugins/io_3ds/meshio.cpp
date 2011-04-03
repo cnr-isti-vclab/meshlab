@@ -40,8 +40,6 @@
 
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 
 #include <QMessageBox>
 
