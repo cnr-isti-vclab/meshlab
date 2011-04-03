@@ -35,12 +35,7 @@ $Log: samplefilter.cpp,v $
 #include "region_growing.h"
 #include "planar_region.h"
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include<vcg/complex/trimesh/append.h>
+#include<vcg/complex/append.h>
 
 
 using namespace vcg;

@@ -1,15 +1,6 @@
-#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/edges.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/quality.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/intersection.h>
+#include <vcg/complex/algorithms/intersection.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/space/index/spatial_hashing.h>
-#include <vcg/math/matrix33.h>
 
 #include <vcg/space/index/grid_static_ptr.h> // vcg::GridStaticPtr
 #include <vcg/space/index/spatial_hashing.h> // vcg::SpatialHashTable
@@ -107,7 +98,7 @@ bool SdfPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::CallB
   float maxDist=m.bbox.Diag();
   // This is a small number to avoid self-intersection during ray 
   // casting. It's a very common trick
-  float epsilon = maxDist / 10000.0; 
+  float epsilon = maxDist / 1000.0;
 
   //--- Ray casting
   vector<Ray3f> cone;
@@ -118,7 +109,7 @@ bool SdfPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::CallB
     for(int i=0; i<m.vert.size(); i++){
       CVertexO& v = m.vert[i];
       //--- Update progressbar
-      cb( i/m.vert.size(), "Casting rays into volume...");
+      cb( 100*i/m.vert.size(), "Casting rays into volume...");
       
       //--- Generate the set of cones
       ray.Set( v.P(), -v.N() );
@@ -148,7 +139,7 @@ bool SdfPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::CallB
       //--- Compute average of samples, throwing away outliers
       float totVal = 0, totCnt = 0;
       for(unsigned int i=0; i<coneSdf.size(); i++)
-        if( !math::IsNAN(coneSdf[i]) && coneSdf[i]>loperc && coneSdf[i]<hiperc ){
+        if( !math::IsNAN(coneSdf[i]) && coneSdf[i]>=loperc && coneSdf[i]<=hiperc ){
           totVal += coneSdf[i];
           totCnt += 1;
         } 

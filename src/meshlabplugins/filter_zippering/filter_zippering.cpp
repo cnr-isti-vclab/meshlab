@@ -32,9 +32,9 @@
 #include <vcg/simplex/face/topology.h>
 #include <vcg/simplex/face/pos.h>
 #include <vcg/simplex/face/jumping_pos.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/hole.h>
+#include <vcg/complex/append.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/hole.h>
 #include <vcg/space/intersection2.h>
 #include <wrap/gl/glu_tesselator.h>
 

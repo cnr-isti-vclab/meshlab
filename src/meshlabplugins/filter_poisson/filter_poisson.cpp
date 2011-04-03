@@ -41,7 +41,7 @@ add samplefilter
 #include <time.h>
 
 #include <common/interfaces.h>
-#include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/complex/algorithms/create/platonic.h>
 
 #include "filter_poisson.h"
 #include "src/Geometry.h"

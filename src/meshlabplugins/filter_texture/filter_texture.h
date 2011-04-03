@@ -27,8 +27,8 @@
 #include <QObject>
 #include <QTime>
 
-#include <vcg/complex/trimesh/attribute_seam.h>
-#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/algorithms/attribute_seam.h>
+#include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
 #include <common/interfaces.h>
 

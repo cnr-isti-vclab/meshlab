@@ -4,7 +4,7 @@
 #include <list>
 #include <vector>
 
-#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/allocate.h>
 
 template <class FaceType>
 struct FaceError{

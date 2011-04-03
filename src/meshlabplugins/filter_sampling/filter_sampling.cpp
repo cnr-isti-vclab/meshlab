@@ -34,12 +34,12 @@ $Log: samplefilter.cpp,v $
 
 #include "filter_sampling.h"
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/point_sampling.h>
-#include <vcg/complex/trimesh/create/resampler.h>
-#include <vcg/complex/trimesh/clustering.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/point_sampling.h>
+#include <vcg/complex/algorithms/create/resampler.h>
+#include <vcg/complex/algorithms/clustering.h>
 #include <vcg/simplex/face/distance.h>
-#include <vcg/complex/trimesh/geodesic.h>
+#include <vcg/complex/algorithms/geodesic.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include "voronoi_clustering.h"
 
@@ -54,7 +54,7 @@ using namespace std;
   For example, you can compute Hausdorff distance (that is a sampler) using various 
   sampling strategies (montecarlo, stratified etc).
 
-  For further details see vcg/complex/trimesh/point_sampling.h header file.
+  For further details see vcg/complex/algorithms/point_sampling.h header file.
 */ 
 
 

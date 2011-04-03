@@ -24,7 +24,7 @@
 #ifndef SLICE_KD_TREE
 #define SLICE_KD_TREE
 #include <vcg/space/point3.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 #include "filter_slice_functors.h"
 #include "filter_slice.h"
 

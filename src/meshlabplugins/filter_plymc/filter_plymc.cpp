@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "filter_plymc.h"
-#include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/append.h>
 #include <wrap/io_trimesh/export_vmi.h>
 
 #include "plymc.h"

@@ -24,12 +24,9 @@
 #include <QtGui>
 #include "filter_unsharp.h"
 
-#include <vcg/complex/trimesh/update/quality.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/selection.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/smooth.h>
-#include <vcg/complex/trimesh/crease_cut.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/smooth.h>
+#include <vcg/complex/algorithms/crease_cut.h>
 
 
 using namespace vcg;

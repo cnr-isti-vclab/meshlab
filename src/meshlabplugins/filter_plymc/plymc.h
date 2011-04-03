@@ -30,28 +30,28 @@
 #include <vcg/simplex/vertex/base.h>
 #include <vcg/simplex/face/base.h>
 #include <vcg/complex/used_types.h>
-#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/complex.h>
 
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/quality.h>
-#include <vcg/complex/trimesh/update/edges.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/algorithms/update/position.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/update/quality.h>
+#include <vcg/complex/algorithms/update/edges.h>
+#include <vcg/complex/algorithms/update/topology.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/math/histogram.h>
-#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/algorithms/clean.h>
 #include <wrap/io_trimesh/import.h>
 #include <wrap/io_trimesh/export_ply.h>
 #include <wrap/ply/plystuff.h>
 
-#include <vcg/complex/trimesh/create/marching_cubes.h>
-#include <vcg/complex/trimesh/create/extended_marching_cubes.h>
+#include <vcg/complex/algorithms/create/marching_cubes.h>
+#include <vcg/complex/algorithms/create/extended_marching_cubes.h>
 #include "trivial_walker.h"
 // local optimization
-#include <vcg/complex/local_optimization.h>
-#include <vcg/complex/local_optimization/tri_edge_collapse.h>
-#include <vcg/complex/local_optimization/tri_edge_collapse_quadric.h>
+#include <vcg/complex/algorithms/local_optimization.h>
+#include <vcg/complex/algorithms/local_optimization/tri_edge_collapse.h>
+#include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
 
 #include <vcg/simplex/edge/base.h>
 #include <stdarg.h>

@@ -31,7 +31,7 @@
 
 #include <common/interfaces.h>
 #include <vcg/space/distance3.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 
 #define SAMPLES_PER_EDGE 5 //modificare, length/epsilon

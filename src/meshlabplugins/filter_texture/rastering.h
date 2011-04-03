@@ -26,7 +26,7 @@
 
 #include <QtGui>
 #include <common/interfaces.h>
-#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
 
 class VertexSampler

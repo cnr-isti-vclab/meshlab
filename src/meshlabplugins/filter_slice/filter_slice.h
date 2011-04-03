@@ -30,12 +30,8 @@
 #include <vcg/complex/edgemesh/base.h>
 
 #include <vcg/complex/edgemesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/refine.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/algorithms/refine.h>
+#include <vcg/complex/append.h>
 #include <wrap/io_edgemesh/export_svg.h>
 
 #include <vcg/space/plane3.h>

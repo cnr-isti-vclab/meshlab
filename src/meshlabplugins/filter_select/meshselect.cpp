@@ -26,8 +26,8 @@
 #include <stdlib.h>
 #include <vcg/space/colorspace.h>
 #include "meshselect.h"
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/stat.h>
 
 using namespace vcg;
 

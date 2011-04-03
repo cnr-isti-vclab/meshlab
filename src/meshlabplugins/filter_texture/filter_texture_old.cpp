@@ -33,7 +33,7 @@ $Log: samplefilter.cpp,v $
 #include <stdlib.h>
 
 #include <meshlab/meshmodel.h>
-#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/algorithms/clean.h>
 
 #include "filter_texture.h"
 
