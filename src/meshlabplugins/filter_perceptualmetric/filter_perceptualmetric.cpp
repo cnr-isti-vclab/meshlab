@@ -34,17 +34,10 @@ $Log: filter_perceptualmetric.cpp,v $
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/quality.h>
-#include <vcg/complex/trimesh/point_sampling.h>
-#include <vcg/complex/trimesh/create/resampler.h>
+#include <vcg/complex/algorithms/point_sampling.h>
+#include <vcg/complex/algorithms/create/resampler.h>
 #include <vcg/simplex/face/distance.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/geodesic.h>
+#include <vcg/complex/algorithms/geodesic.h>
 #include <vcg/space/index/grid_static_ptr.h>
 
 // filter interface

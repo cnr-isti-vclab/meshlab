@@ -6,10 +6,10 @@
 #include <wrap/io_trimesh/import_ply.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/simplex/face/component_rt.h>
-#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/complex.h>
 #include "local_parametrization.h"
 #include "uv_grid.h"
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/stat.h>
 #include "param_mesh.h"
 
 ///ABSTRACT MESH THAT MAINTAINS THE WHOLE PARAMETERIZATION

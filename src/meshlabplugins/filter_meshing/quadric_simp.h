@@ -55,11 +55,11 @@ Added remove non manifold and quadric simplification filter.
 #include <limits>
 
 #include "meshfilter.h"
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/selection.h>
-#include <vcg/complex/local_optimization.h>
-#include <vcg/complex/local_optimization/tri_edge_collapse_quadric.h>
+#include <vcg/complex/algorithms/update/position.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/update/selection.h>
+#include <vcg/complex/algorithms/local_optimization.h>
+#include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/container/simple_temporary_data.h>
 namespace vcg {
 namespace tri {

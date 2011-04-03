@@ -30,12 +30,12 @@
 
 #include <common/interfaces.h>
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/refine.h>
-#include <vcg/complex/trimesh/refine_loop.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/create/advancing_front.h>
-#include <vcg/complex/trimesh/create/marching_cubes.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/refine.h>
+#include <vcg/complex/algorithms/refine_loop.h>
+#include <vcg/complex/append.h>
+#include <vcg/complex/algorithms/create/advancing_front.h>
+#include <vcg/complex/algorithms/create/marching_cubes.h>
 #include "mlsmarchingcube.h"
 
 #include "mlsplugin.h"

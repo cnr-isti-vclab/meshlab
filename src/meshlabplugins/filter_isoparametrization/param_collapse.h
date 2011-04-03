@@ -4,11 +4,11 @@
 #include <set>
 
 // local optimization
-#include <vcg/complex/local_optimization.h>
-#include <vcg/complex/local_optimization/tri_edge_collapse_quadric.h>
-#include <vcg/complex/local_optimization/tri_edge_flip.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/edge_collapse.h>
+#include <vcg/complex/algorithms/local_optimization.h>
+#include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
+#include <vcg/complex/algorithms/local_optimization/tri_edge_flip.h>
+#include <vcg/complex/append.h>
+#include <vcg/complex/algorithms/edge_collapse.h>
 #include <vcg/space/color4.h>
 #include <vcg/math/quadric.h>
 

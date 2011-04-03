@@ -1,8 +1,8 @@
 #ifndef _ISO_TANGENTSPACE
 #define _ISO_TANGENTSPACE
 #include "iso_parametrization.h"
-#include <vcg/complex/trimesh/update/curvature.h>
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/algorithms/update/curvature.h>
+#include <vcg/complex/algorithms/update/normal.h>
 
 class TangentSpace{
 	typedef IsoParametrization::CoordType CoordType;

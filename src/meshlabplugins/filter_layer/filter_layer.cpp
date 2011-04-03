@@ -29,8 +29,7 @@
 
 #include "filter_layer.h"
 
-#include <vcg/complex/trimesh/clean.h>
-#include<vcg/complex/trimesh/append.h>
+#include<vcg/complex/append.h>
 
 
 

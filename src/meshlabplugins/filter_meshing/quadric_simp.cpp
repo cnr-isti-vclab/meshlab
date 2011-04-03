@@ -20,9 +20,6 @@
  *                                                                           *
  ****************************************************************************/
 #include "meshfilter.h"
-#include <vcg/complex/local_optimization.h>
-#include <vcg/complex/local_optimization/tri_edge_collapse_quadric.h>
-#include <vcg/container/simple_temporary_data.h>
 #include "quadric_simp.h"
 
 using namespace vcg;

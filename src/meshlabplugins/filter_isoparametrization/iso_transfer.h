@@ -3,13 +3,13 @@
 #include<vcg/simplex/edge/base.h>
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
-#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/edges.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/complex.h>
+#include <vcg/complex/algorithms/update/topology.h>
+#include <vcg/complex/algorithms/update/edges.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 
 #ifndef _ISO_TRANSFER
 #define _ISO_TRANSFER

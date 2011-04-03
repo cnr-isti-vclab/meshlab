@@ -3,7 +3,7 @@
 
 // stuff to define the mesh
 #include <vcg/simplex/face/component_rt.h>
-#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/complex.h>
 #include "iso_parametrization.h"
 
 class BaseVertex;

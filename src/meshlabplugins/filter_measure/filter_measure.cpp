@@ -26,15 +26,15 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/inertia.h>
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/inertia.h>
+#include <vcg/complex/algorithms/stat.h>
 
-#include <vcg/complex/trimesh/update/selection.h>
-#include<vcg/complex/trimesh/append.h>
+#include <vcg/complex/algorithms/update/selection.h>
+#include<vcg/complex/append.h>
 #include<vcg/simplex/face/pos.h>
-#include<vcg/complex/trimesh/bitquad_support.h>
-#include<vcg/complex/trimesh/bitquad_optimization.h>
+#include<vcg/complex/algorithms/bitquad_support.h>
+#include<vcg/complex/algorithms/bitquad_optimization.h>
 #include "filter_measure.h"
 
 using namespace std;

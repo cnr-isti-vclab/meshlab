@@ -1,6 +1,6 @@
 include (../../shared.pri)
 
-HEADERS       += $$VCGDIR/vcg/complex/trimesh/clean.h\
+HEADERS       += $$VCGDIR/vcg/complex/algorithms/clean.h\
 		quadric_simp.h \ 
 		quadric_tex_simp.h \ 
 		meshfilter.h 

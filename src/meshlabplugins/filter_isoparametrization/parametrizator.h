@@ -13,20 +13,20 @@
 
 ///auxiliary structures
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/append.h>
+#include <vcg/complex/algorithms/update/topology.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 
 // update topology
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/edges.h>
-#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/update/edges.h>
+#include <vcg/complex/algorithms/update/flag.h>
 
 
 // local optimization
-#include <vcg/complex/local_optimization.h>
+#include <vcg/complex/algorithms/local_optimization.h>
 
 
 #include <local_parametrization.h>

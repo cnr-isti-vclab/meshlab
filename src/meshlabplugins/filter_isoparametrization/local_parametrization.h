@@ -11,7 +11,7 @@
 #ifndef LOCAL_PARAMETRIZATION
 #define LOCAL_PARAMETRIZATION
 
-//#include <vcg/complex/trimesh/point_sampling.h>
+//#include <vcg/complex/algorithms/point_sampling.h>
 
 //#define samples_area 80
 

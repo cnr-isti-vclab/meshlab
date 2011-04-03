@@ -1,7 +1,7 @@
 #ifndef PARAM_FLIP
 #define PARAM_FLIP
 
-#include <vcg/complex/local_optimization/tri_edge_flip.h>
+#include <vcg/complex/algorithms/local_optimization/tri_edge_flip.h>
 
 ///Flip function
 template <class BaseMesh>

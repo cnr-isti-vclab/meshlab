@@ -28,7 +28,6 @@
 #include "../../common/meshmodel.h"
 #include <filter_isoparametrization.h>
 #include <iso_transfer.h>
-#include <vcg/complex/trimesh/update/normal.h>
 
 
 #include <stdlib.h>

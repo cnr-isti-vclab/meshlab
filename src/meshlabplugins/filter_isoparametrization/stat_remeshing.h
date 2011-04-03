@@ -1,5 +1,5 @@
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/algorithms/update/topology.h>
+#include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/space/triangle3.h>
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/export_ply.h>

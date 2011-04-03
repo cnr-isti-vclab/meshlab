@@ -16,8 +16,8 @@
 #include <wrap/gl/shot.h>
 #include <wrap/gl/camera.h>
 //#include <vcg/math/shot.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 #include <wrap/io_trimesh/import_ply.h>
 
 #include "shutils.h"

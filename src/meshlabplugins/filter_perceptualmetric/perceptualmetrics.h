@@ -32,7 +32,7 @@ $Log: perceptualmetrics.h,v $
 #include <QObject>
 
 #include <common/interfaces.h>
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/stat.h>
 
 template <class MeshType>
 class PerceptualMetrics

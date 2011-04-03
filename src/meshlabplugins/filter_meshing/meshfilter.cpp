@@ -21,17 +21,17 @@
  ****************************************************************************/
 
 #include "meshfilter.h"
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/smooth.h>
-#include <vcg/complex/trimesh/hole.h>
-#include <vcg/complex/trimesh/refine_loop.h>
-#include <vcg/complex/trimesh/bitquad_support.h>
-#include <vcg/complex/trimesh/bitquad_creation.h>
-#include <vcg/complex/trimesh/clustering.h>
-#include <vcg/complex/trimesh/attribute_seam.h>
-#include <vcg/complex/trimesh/update/curvature.h>
-#include <vcg/complex/trimesh/update/curvature_fitting.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/smooth.h>
+#include <vcg/complex/algorithms/hole.h>
+#include <vcg/complex/algorithms/refine_loop.h>
+#include <vcg/complex/algorithms/bitquad_support.h>
+#include <vcg/complex/algorithms/bitquad_creation.h>
+#include <vcg/complex/algorithms/clustering.h>
+#include <vcg/complex/algorithms/attribute_seam.h>
+#include <vcg/complex/algorithms/update/curvature.h>
+#include <vcg/complex/algorithms/update/curvature_fitting.h>
 #include <vcg/space/normal_extrapolation.h>
 #include <vcg/space/fitting3.h>
 #include "quadric_tex_simp.h"
