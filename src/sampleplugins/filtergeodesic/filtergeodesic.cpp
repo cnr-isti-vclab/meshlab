@@ -37,10 +37,6 @@
 
 #include "filtergeodesic.h"
 
-#include <vcg/complex/trimesh/update/quality.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/clean.h>
-
 using namespace std;
 using namespace vcg;
 

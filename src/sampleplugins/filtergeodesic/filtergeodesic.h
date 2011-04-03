@@ -25,7 +25,7 @@
 
 #include <QObject>
 #include <common/interfaces.h>
-#include <vcg/complex/trimesh/geodesic.h>
+#include <vcg/complex/algorithms/geodesic.h>
 
 
 class FilterGeodesic : public QObject, public MeshFilterInterface

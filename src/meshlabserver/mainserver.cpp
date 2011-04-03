@@ -26,11 +26,6 @@
 #include <common/pluginmanager.h>
 #include <common/filterscript.h>
 
-#include <wrap/io_trimesh/io_mask.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/clean.h>
-
 class FilterData
 {
 public:

@@ -31,7 +31,6 @@ $Log: meshedit.cpp,v $
 #include <meshlab/glarea.h>
 #include "sampleedit.h"
 #include <wrap/gl/pick.h>
-#include<vcg/complex/trimesh/append.h>
 #include<wrap/qt/gl_label.h>
 
 using namespace std;

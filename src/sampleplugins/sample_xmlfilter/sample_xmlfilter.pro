@@ -6,4 +6,4 @@ SOURCES       += sample_xmlfilter.cpp \
 		
 TARGET        = sample_xmlfilter
 
-INSTALLS += sample_xmlfilter.xml
+#INSTALLS += sample_xmlfilter.xml

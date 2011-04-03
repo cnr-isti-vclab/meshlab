@@ -24,7 +24,6 @@
 #include <QtGui>
 #include <common/interfaces.h>
 #include <vcg/math/perlin_noise.h>
-#include <vcg/complex/trimesh/clean.h>
 #include <wrap/qt/col_qt_convert.h>
 
 
