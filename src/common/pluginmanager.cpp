@@ -1,7 +1,7 @@
 #include "pluginmanager.h"
 #include <QObject>
 #include <QtScript/QtScript>
-#include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/complex/algorithms/create/platonic.h>
 
 #include "scriptinterface.h"
 
