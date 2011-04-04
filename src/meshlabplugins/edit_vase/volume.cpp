@@ -1,7 +1,7 @@
 #include "volume.h"
 #include "myheap.h"                                 // maxheap for correspondence band
 #include "../filter_plymc/plymc.h"                  // remove bad triangles from marching cubes
-#include <vcg/complex/trimesh/smooth.h>             // mesh smoothing
+#include <vcg/complex/algorithms/smooth.h>             // mesh smoothing
 
 using namespace vcg;
 /// the array is used to scan a single voxel that contains the triangle in the initialization

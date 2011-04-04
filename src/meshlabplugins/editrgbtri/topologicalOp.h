@@ -25,10 +25,10 @@
 
 
 #include <vcg/simplex/face/topology.h>
-#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/complex.h>
 #include <vector>
 #include <list>
-#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/allocate.h>
 #include <iostream>
 
 #include <vcg/space/color4.h> 

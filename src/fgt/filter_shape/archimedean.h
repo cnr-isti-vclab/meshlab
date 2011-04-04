@@ -25,9 +25,9 @@
 #define __VCGLIB_ARCHIMEDEAN_H
 
 #include <vcg/math/base.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/refine.h>
-#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/algorithms/refine.h>
+#include <vcg/complex/algorithms/update/flag.h>
 
 namespace vcg {
 namespace tri {

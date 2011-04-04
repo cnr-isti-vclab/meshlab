@@ -61,7 +61,7 @@ Revision 1.2  2005/02/25 11:41:08  pietroni
 Fixed bug in Square
 
 Revision 1.1  2005/01/19 15:43:15  fiorin
-Moved from vcg/complex/trimesh to vcg/complex/trimesh/create
+Moved from vcg/complex/trimesh to vcg/complex/algorithms/create
 
 Revision 1.10  2004/10/28 00:54:34  cignoni
 Better Doxygen documentation
@@ -91,9 +91,9 @@ First working version (tetrahedron!)
 #define __VCGLIB_PLATONIC
 
 #include<vcg/math/base.h>
-#include<vcg/complex/trimesh/allocate.h>
-#include<vcg/complex/trimesh/refine.h>
-#include<vcg/complex/trimesh/update/flag.h>
+#include<vcg/complex/allocate.h>
+#include<vcg/complex/algorithms/refine.h>
+#include<vcg/complex/algorithms/update/flag.h>
 
 namespace vcg {
 namespace tri {

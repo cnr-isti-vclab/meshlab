@@ -32,7 +32,7 @@ $Log: meshedit.cpp,v $
 #include "edit_kinect.h"
 #include "ui_kinect.h"
 #include <wrap/gl/picking.h>
-#include<vcg/complex/trimesh/append.h>
+#include<vcg/complex/append.h>
 #include "freenect.h"
 #include "shader_basic.h"
 #include "calibration_data.h"

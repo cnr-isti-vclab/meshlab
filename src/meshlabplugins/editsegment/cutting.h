@@ -33,16 +33,16 @@
 #include <limits>
 #include <vcg/container/simple_temporary_data.h>
 #include <vcg/simplex/face/pos.h>
-#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/complex.h>
 #include <vcg/simplex/vertex/base.h>
 #include <vcg/simplex/face/base.h>
 #include <vcg/space/point3.h>
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/algorithms/update/normal.h>
 #include <curvaturetensor.h>
 
-#include <vcg/complex/trimesh/update/color.h>
+#include <vcg/complex/algorithms/update/color.h>
 #include <vcg/math/histogram.h>
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/stat.h>
 
 #include <time.h>
 

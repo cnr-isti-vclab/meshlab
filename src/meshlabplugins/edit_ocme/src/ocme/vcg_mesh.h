@@ -7,23 +7,23 @@
 #include<vcg/simplex/face/base.h>//
 #include<vcg/simplex/face/component.h>
 //#include<vcg/simplex/face/topology.h>//
-#include<vcg/complex/trimesh/base.h>//
+#include<vcg/complex/complex.h>//
 
 // input output
 #include<wrap/io_trimesh/import.h>
 #include<wrap/io_trimesh/export.h>//just in case
 
 // topology computation
-//#include<vcg/complex/trimesh/update/topology.h>//
-//#include<vcg/complex/trimesh/update/flag.h>//
+//#include<vcg/complex/algorithms/update/topology.h>//
+//#include<vcg/complex/algorithms/update/flag.h>//
 
 // half edge iterators
 //#include<vcg/simplex/face/pos.h>
 
 // normals and curvature
-#include<vcg/complex/trimesh/update/bounding.h> //class UpdateNormals 
-#include<vcg/complex/trimesh/update/normal.h> //class UpdateNormals 
-#include<vcg/complex/trimesh/update/curvature.h> //class curvature
+#include<vcg/complex/algorithms/update/bounding.h> //class UpdateNormals 
+#include<vcg/complex/algorithms/update/normal.h> //class UpdateNormals 
+#include<vcg/complex/algorithms/update/curvature.h> //class curvature
 
 #include "../utils/release_assert.h"
 

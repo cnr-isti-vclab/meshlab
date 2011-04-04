@@ -29,7 +29,7 @@
 #include <qstring.h>
 #include <wrap/gl/pick.h>
 
-#include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/complex/algorithms/create/platonic.h>
 #include <vcg/simplex/vertex/base.h>
 #include <vcg/simplex/vertex/component_ocf.h>
 #include <vcg/space/point3.h>
@@ -43,9 +43,9 @@
 #include <vcg/complex/edgemesh/update/bounding.h>
 #include <wrap/io_trimesh/import.h>
 
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/algorithms/update/position.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/update/normal.h>
 
 using namespace std;
 using namespace vcg;

@@ -21,16 +21,9 @@
  *                                                                           *
  ****************************************************************************/
 
-#include <QtGui>
-
-#include <math.h>
-#include <stdlib.h>
-#include <limits>
-#include <meshlab/glarea.h>
 #include "edit_select.h"
 #include <wrap/gl/pick.h>
-#include <vcg/complex/trimesh/update/selection.h>
-
+#include <meshlab/glarea.h>
 
 using namespace std;
 using namespace vcg;

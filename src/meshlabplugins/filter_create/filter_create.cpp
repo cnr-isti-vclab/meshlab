@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "filter_create.h"
-#include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/complex/algorithms/create/platonic.h>
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions

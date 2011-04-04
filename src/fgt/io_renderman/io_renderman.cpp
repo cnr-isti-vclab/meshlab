@@ -30,8 +30,8 @@
 
 #include <wrap/io_trimesh/export_smf.h>
 #include <wrap/io_trimesh/import_smf.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/polygon_support.h>
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/algorithms/polygon_support.h>
 #include <common/pluginmanager.h>
 
 using namespace vcg;

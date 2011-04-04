@@ -23,7 +23,7 @@
 
 #include "decorate_base.h"
 #include <wrap/gl/addons.h>
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/stat.h>
 #include <meshlab/glarea.h>
 #include <wrap/qt/checkGLError.h>
 #include <wrap/qt/gl_label.h>
@@ -153,19 +153,17 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
     case DP_SHOW_CAMERA:
       {
         // draw all mesh cameras
+       bool showCameraDetails = rm->getBool(ShowCameraDetails());
         if(rm->getBool(ShowMeshCameras()))
         {
-          for(int mi=0; mi<md.meshList.size(); mi++)
+          foreach(MeshModel *meshm,  md.meshList)
           {
-            MeshModel *meshm = md.getMesh(mi);
-
-            if(meshm != md.mm())   // non-selected meshes
+            if(meshm != md.mm() || (!showCameraDetails) )   // non-selected meshes
              DrawCamera(meshm, meshm->cm.shot, Color4b::DarkRed, md.mm()->cm.Tr, rm, painter,qf);
             else                          // selected mesh, draw & display data
             {
               DrawCamera(meshm, meshm->cm.shot, Color4b::Magenta, md.mm()->cm.Tr, rm, painter,qf);
-              if(rm->getBool(ShowCameraDetails()))
-                DisplayCamera(meshm, meshm->cm.shot, 1, painter, qf);
+              DisplayCamera(meshm, meshm->cm.shot, 1, painter, qf);
             }
           }
         }
@@ -173,19 +171,14 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
         // draw all raster cameras
         if(rm->getBool(ShowRasterCameras()))
         {
-          for(int ri=0; ri<md.rasterList.size(); ri++)
+          foreach(RasterModel *raster, md.rasterList)
           {
-            RasterModel *raster = md.getRaster(ri);
-
-            if(raster != md.rm())   // non-selected raster
-            {
+            if(raster != md.rm() || !showCameraDetails)   // non-selected raster
               DrawCamera(NULL, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
-            }
             else
             {
               DrawCamera(NULL, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter,qf);
-              if(rm->getBool(ShowCameraDetails()))
-                DisplayCamera(md.mm(), raster->shot, 2, painter, qf);
+              DisplayCamera(md.mm(), raster->shot, 2, painter, qf);
             }
           }
         }

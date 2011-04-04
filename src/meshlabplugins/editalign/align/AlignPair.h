@@ -32,10 +32,10 @@
 #include <vcg/simplex/face/component.h>
 #include <vcg/simplex/face/component_rt.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include<vcg/complex/trimesh/base.h>
-#include<vcg/complex/trimesh/update/normal.h>
-#include<vcg/complex/trimesh/update/bounding.h>
-#include<vcg/complex/trimesh/update/edges.h>
+#include<vcg/complex/complex.h>
+#include<vcg/complex/algorithms/update/normal.h>
+#include<vcg/complex/algorithms/update/bounding.h>
+#include<vcg/complex/algorithms/update/edges.h>
 
 
 namespace vcg

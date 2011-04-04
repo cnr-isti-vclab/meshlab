@@ -24,15 +24,15 @@
 #include "AlignPair.h"
 #include "../point_matching_scale.h"
 
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/update/position.h>
+#include <vcg/complex/algorithms/update/edges.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/closest.h>
 #include <wrap/io_trimesh/import.h>
 #include <wrap/io_trimesh/export_ply.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/edges.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/closest.h>
 
 #include <vcg/math/random_generator.h>
 #include <vcg/math/gen_normal.h>

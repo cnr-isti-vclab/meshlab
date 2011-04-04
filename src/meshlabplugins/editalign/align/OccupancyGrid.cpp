@@ -32,7 +32,7 @@
 #include "AlignPair.h"
 #include "OccupancyGrid.h"
 
-#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/algorithms/clean.h>
 #include <wrap/io_trimesh/import.h>
 #include <wrap/ply/plystuff.h>
 

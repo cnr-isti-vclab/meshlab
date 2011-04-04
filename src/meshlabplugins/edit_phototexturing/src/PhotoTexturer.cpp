@@ -39,7 +39,7 @@
 #include <src/TextureMerger.h>
 #include <src/Tsai/TsaiCameraCalibration.h>
 
-#include<vcg/complex/trimesh/allocate.h>
+#include<vcg/complex/allocate.h>
 #include <vcg/math/matrix44.h>
 #include <src/QuadTree/QuadTreeNode.h>
 
@@ -49,8 +49,8 @@
 #include <src/SmartBlendTextureMerger.h>
 
 
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/algorithms/update/position.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 
 
 

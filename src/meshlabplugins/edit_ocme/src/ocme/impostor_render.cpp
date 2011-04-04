@@ -5,7 +5,7 @@
 #include <wrap/gl/splatting_apss/splatrenderer.h>
 #include <wrap/gl/space.h>
 #include <vcg/space/box3.h>
-#include <vcg/complex/trimesh/clustering.h>
+#include <vcg/complex/algorithms/clustering.h>
 
 #include "stdmatrix3.h"
 #include "plane_box_intersection.h"

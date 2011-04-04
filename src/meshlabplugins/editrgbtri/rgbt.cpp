@@ -35,8 +35,8 @@
 #include "controlPoint.h"
 #include "subDialog.h"
 
-#include<vcg/complex/trimesh/update/topology.h>
-#include<vcg/complex/trimesh/update/bounding.h>
+#include<vcg/complex/algorithms/update/topology.h>
+#include<vcg/complex/algorithms/update/bounding.h>
 
 namespace rgbt
 {

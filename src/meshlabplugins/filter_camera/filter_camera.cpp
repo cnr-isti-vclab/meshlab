@@ -21,16 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-
 #include "filter_camera.h"
 
-#include <vcg/complex/trimesh/clean.h>
-#include<vcg/complex/trimesh/append.h>
+#include <vcg/complex/algorithms/clean.h>
 
 
 using namespace std;

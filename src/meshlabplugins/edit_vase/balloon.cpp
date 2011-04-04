@@ -1,11 +1,11 @@
 #include "balloon.h"
 #include "float.h"
 #include "math.h"
-#include "vcg/complex/trimesh/allocate.h"           // AddPerVertexAttribute
-#include "vcg/complex/trimesh/update/selection.h"
-#include "vcg/complex/trimesh/update/color.h"
-#include "vcg/complex/trimesh/update/curvature.h"
-#include "vcg/complex/trimesh/update/curvature_fitting.h" // Quadric based curvature computation
+#include "vcg/complex/allocate.h"           // AddPerVertexAttribute
+#include "vcg/complex/algorithms/update/selection.h"
+#include "vcg/complex/algorithms/update/color.h"
+#include "vcg/complex/algorithms/update/curvature.h"
+#include "vcg/complex/algorithms/update/curvature_fitting.h" // Quadric based curvature computation
 using namespace vcg;
 
 //---------------------------------------------------------------------------------------//

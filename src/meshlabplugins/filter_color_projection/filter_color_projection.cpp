@@ -115,7 +115,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
 
       // the mesh has to be correctly transformed before mapping
       tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
-
+      qDebug("Viewport %i %i",raster->shot.Intrinsics.ViewportPx[0],raster->shot.Intrinsics.ViewportPx[1]);
       for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
       {
         if(!(*vi).IsD())
@@ -128,7 +128,6 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
           if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
           {
             QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
-
             (*vi).C() = vcg::Color4b(qRed(pcolor), qGreen(pcolor), qBlue(pcolor), 255);          
           }
           else

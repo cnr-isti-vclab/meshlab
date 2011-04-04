@@ -28,8 +28,8 @@
 #include<wrap/ply/plylib.h>
 #include<wrap/io_trimesh/io_mask.h>
 #include<wrap/io_trimesh/io_ply.h>
-#include<vcg/complex/trimesh/allocate.h>
-#include<vcg/complex/trimesh/create/platonic.h>
+#include<vcg/complex/allocate.h>
+#include<vcg/complex/algorithms/create/platonic.h>
 #include<vcg/space/color4.h>
 #include <vector>
 

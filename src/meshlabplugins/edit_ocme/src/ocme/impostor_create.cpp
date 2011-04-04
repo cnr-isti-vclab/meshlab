@@ -6,7 +6,7 @@
 #include <vcg/space/box3.h>
 #include <vcg/space/plane3.h>
 #include <vcg/space/fitting3.h>
-#include <vcg/complex/trimesh/clustering.h>
+#include <vcg/complex/algorithms/clustering.h>
 #include <wrap/gl/trimesh.h>
 
 #include "cell.h"

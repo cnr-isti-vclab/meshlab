@@ -27,8 +27,8 @@
 #include <wrap/io_trimesh/import_dae.h>
 #include <wrap/io_trimesh/export_ply.h>
 #include <vcg/math/quaternion.h>
-#include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/update/position.h>
+#include <vcg/complex/algorithms/create/platonic.h>
+#include <vcg/complex/algorithms/update/position.h>
 
 #include <wrap/system/getopt.h>
 

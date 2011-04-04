@@ -26,7 +26,7 @@
 
 #include <cassert>
 #include <QString>
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/stat.h>
 #include <common/meshmodel.h>
 #include "rfx_uniform.h"
 

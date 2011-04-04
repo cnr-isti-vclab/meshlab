@@ -28,11 +28,11 @@
 #include <vcg/simplex/face/pos.h>
 #include <vcg/simplex/face/jumping_pos.h>
 
-#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/complex.h>
 #include <vcg/simplex/vertex/base.h>
 #include <vcg/simplex/face/base.h>
 #include <vcg/space/point3.h>
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/algorithms/update/normal.h>
 #include <vcg/math/matrix.h>
 #include <vcg/math/matrix33.h>
 

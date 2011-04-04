@@ -20,20 +20,8 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-
-#include <QtGui>
 #include <QFileDialog>
-
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-
 #include "filter_bnpts.h"
-
-#include <vcg/complex/trimesh/clean.h>
-#include<vcg/complex/trimesh/append.h>
-
-
 
 using namespace std;
 using namespace vcg;

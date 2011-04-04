@@ -38,7 +38,7 @@
 #include "pickpointsDialog.h"
 
 #include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 
 using namespace vcg;
 

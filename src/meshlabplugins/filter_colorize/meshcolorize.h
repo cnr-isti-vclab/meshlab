@@ -24,17 +24,8 @@
 #ifndef EXTRACOLORIZEPLUGIN_H
 #define EXTRACOLORIZEPLUGIN_H
 
-#include <QObject>
-#include <QAction>
-#include <QActionGroup>
-#include <QList>
 
 #include <common/interfaces.h>
-
-#include <vcg/math/base.h>
-#include <vcg/math/histogram.h>
-#include <vcg/space/triangle3.h>
-#include <vcg/complex/trimesh/update/color.h>
 
 class ExtraMeshColorizePlugin : public QObject, public MeshFilterInterface
 {

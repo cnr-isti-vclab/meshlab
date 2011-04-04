@@ -1,7 +1,7 @@
 #include "ocme_disk_loader.h"
 #include "ocme_definition.h"
 #include "ocme_extract.h"
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/algorithms/update/normal.h>
 
 
 int CellDisk::get(CellToken * /*token*/){

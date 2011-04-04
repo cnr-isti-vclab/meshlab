@@ -21,16 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/autoalign_4pcs.h>
 
 #include "filter_autoalign.h"
+#include <vcg/complex/algorithms/autoalign_4pcs.h>
 #include "../../meshlabplugins/editalign/align/Guess.h"
 
 using namespace vcg;

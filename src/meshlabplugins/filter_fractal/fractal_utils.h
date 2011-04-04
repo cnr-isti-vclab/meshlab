@@ -3,7 +3,7 @@
 
 #include <vcg/math/perlin_noise.h>
 #include <common/meshmodel.h>
-#include <vcg/complex/trimesh/smooth.h>
+#include <vcg/complex/algorithms/smooth.h>
 #include "filter_functors.h"
 #include <vector>
 

@@ -31,8 +31,8 @@
 
 #include "filter_slice_functors.h"
 #include <wrap/gl/glu_tesselator.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/append.h> //??
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/append.h> //??
 #include <math.h>
 
 #include "kdtree.h"
@@ -79,7 +79,7 @@ void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const P
 
     assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
 
-    typename EdgeMeshType::VertexIterator vi;   //alla prima passata è usato per inserire il vertice di intersezione
+    typename EdgeMeshType::VertexIterator vi;   //alla prima passata  usato per inserire il vertice di intersezione
 
     vector<latoRect> lJoints;
     Segment2f lato1, lato2, lato3, seg;
@@ -90,8 +90,8 @@ void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const P
     MyEdge * eStart = &(em.edges[0]);
     MyEdge * ei = eStart;
 
-    Point2f pJoint2D;       //sarà il punto di intersezione 2D inizializzato dal test di intersezione
-    Point3f pJoint;         //sarà il punto di intersezione 3D da inserire nell'edgeMesh
+    Point2f pJoint2D;       //sar il punto di intersezione 2D inizializzato dal test di intersezione
+    Point3f pJoint;         //sar il punto di intersezione 3D da inserire nell'edgeMesh
     pJoint[axis] = height;
 
     Point3f pAngle1, pAngle2;   //converto in 3D li angoli del rettangolo per quando dovranno essere inseriti
@@ -120,7 +120,7 @@ void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const P
         seg.Set(p2D0,p2D1);
 
 //        if(dentro)
-//            eCorr.SetV(); //segno che l'edge dovrà essere rimosso
+//            eCorr.SetV(); //segno che l'edge dovr essere rimosso
 
 
         latoRect lJoint;
@@ -151,12 +151,12 @@ void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const P
             lJoints.push_back(lJoint);             //memorizzo il lato intersecato
             (*vi).SetV();
 
-            //il 2° edge ha...
-            em.edges.back().V(0) = &(*vi);  //... come 1° vertice il nuovo vertice di intersezione e ...
-            em.edges.back().V(1) = eCorr.V(1);  //... come 2° setto il 2° vertice dell'edge corrente
+            //il 2 edge ha...
+            em.edges.back().V(0) = &(*vi);  //... come 1 vertice il nuovo vertice di intersezione e ...
+            em.edges.back().V(1) = eCorr.V(1);  //... come 2 setto il 2 vertice dell'edge corrente
 
-            //il 1° edge poiché fatto sull'edge corrente ha il 1° vertice inalterato, mentre...
-            eCorr.V(1) = &(*vi); //...il secondo vertice è il nuovo vertice di intersezione
+            //il 1 edge poich fatto sull'edge corrente ha il 1 vertice inalterato, mentre...
+            eCorr.V(1) = &(*vi); //...il secondo vertice  il nuovo vertice di intersezione
         }
         else
             (*vi).ClearV();
@@ -174,7 +174,7 @@ void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const P
     // Secondo giro sul poligono: faccio pulizia sostituendo pezzi di poligono con il rettangolo
     ei = eStart;    //riparto dall'inizio
     int i = 0;      //per scorrere i lati intersecati
-    //prima controllo se il punto di partenza è già dentro il rettangolo
+    //prima controllo se il punto di partenza  gi dentro il rettangolo
     MyEdge &es = (*eStart);
     bool dentro = ( (es.V(0)->P().X() < a1.X()) && (es.V(0)->P().X() > a2.X()) &&  (es.V(0)->P().Y() > a2.Y()) );
 
@@ -191,7 +191,7 @@ void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const P
             latoRect &lJoiny = lJoints[i];
             i++;
 
-            dentro = !dentro; //una volta passati attraverso un lato qualsiasi il 2° edge appena creato e su cui ci spostiamo si trova dalla parte opposta rispetto al 1°
+            dentro = !dentro; //una volta passati attraverso un lato qualsiasi il 2 edge appena creato e su cui ci spostiamo si trova dalla parte opposta rispetto al 1
         }
         else if(dentro)
         {
@@ -713,7 +713,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                             mCap->setFileName(layername);
 //                            CMeshO &cap = mCap->cm;
 
-                            //mesh temporanea, verrà poi scartata
+                            //mesh temporanea, verr poi scartata
                             mSlice = m.addNewMesh("",qPrintable(layernameTmp));
                             mSlice->setFileName(layernameTmp);		// mesh name
 //                            CMeshO &slice = mSlice ->cm;
@@ -724,10 +724,10 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                             Point3f centerCorr = planeCenter + planeAxis * i;
                             slicingPlane.Init(centerCorr,planeAxis);
 
-                            // applicazione del piano di taglio alla mesh. A seconda di ciò che deve essere messo nel layer di lavoro e/o usato ad un'iterazione successiva si possono generare: un piano (cap), 2 pezzi di mesh divisi dal piano (slice) e un'estrusione
+                            // applicazione del piano di taglio alla mesh. A seconda di ci che deve essere messo nel layer di lavoro e/o usato ad un'iterazione successiva si possono generare: un piano (cap), 2 pezzi di mesh divisi dal piano (slice) e un'estrusione
                             generateCap(mBase,slicingPlane,cb,mCap, mSlice);
 
-                            //rimuovo lo slice, non mi serve più; posso comunque riusare il puntatore nel ciclo
+                            //rimuovo lo slice, non mi serve pi; posso comunque riusare il puntatore nel ciclo
                             m.delMesh(mSlice);
 
                             //this is used to generate svd slices
@@ -889,7 +889,7 @@ void ExtraFilter_SlicePlugin::generateCap(MeshModel * mBase, /*const*/ Plane3f &
         vcg::tri::UpdateTopology<CMeshO>::FaceFace(base);
         vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base);
 
-        //CREA LA SLICE (parte A): crea la slice dalla mesh base (ma per ora è una slice aperta)
+        //CREA LA SLICE (parte A): crea la slice dalla mesh base (ma per ora  una slice aperta)
         mSlice->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
         vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base,VERTEX_LEFT,VERTEX_LEFT);
         vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base);

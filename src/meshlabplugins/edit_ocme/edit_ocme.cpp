@@ -34,7 +34,7 @@ $Log: meshedit.cpp,v $
 
 #include "ui_ocme.h"
 #include <wrap/gl/picking.h>
-#include<vcg/complex/trimesh/append.h>
+#include<vcg/complex/append.h>
 
 using namespace std;
 using namespace vcg;

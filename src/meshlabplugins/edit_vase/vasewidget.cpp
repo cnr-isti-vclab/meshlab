@@ -1,5 +1,5 @@
 #include "vasewidget.h"
-#include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/append.h>
 
 #include <QPainter>
 

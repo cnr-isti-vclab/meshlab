@@ -6,8 +6,8 @@
 #include <QPainter> // Draw slice
 #include <common/interfaces.h> // Lots of meshlab stuff
 
-#include <vcg/complex/trimesh/create/mc_trivial_walker.h> // SimpleVolume
-#include <vcg/complex/trimesh/create/marching_cubes.h> // Marching cube
+#include <vcg/complex/algorithms/create/mc_trivial_walker.h> // SimpleVolume
+#include <vcg/complex/algorithms/create/marching_cubes.h> // Marching cube
 #include "gridaccell.h" // Grid ray accellerator
 #include "vase_utils.h"
 

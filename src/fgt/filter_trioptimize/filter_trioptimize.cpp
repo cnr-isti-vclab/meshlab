@@ -30,11 +30,8 @@
 #include "filter_trioptimize.h"
 #include "curvedgeflip.h"
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/smooth.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/smooth.h>
 
 using namespace vcg;
 

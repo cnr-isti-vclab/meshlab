@@ -12,9 +12,9 @@
 #include "metadatafile_generator.h"
 #include <wrap/io_trimesh/export_ply.h>
 #include <wrap/io_trimesh/import_ply.h>
-#include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/algorithms/create/platonic.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/update/normal.h>
 
 CoformGUI::CoformGUI(MeshDocument* mdoc)
 :QDialog(),authorUuid(),defaultMeshPath(),md(mdoc)

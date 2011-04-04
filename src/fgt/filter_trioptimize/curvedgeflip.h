@@ -25,11 +25,11 @@
 #define __CURVEDGEFLIP
 
 #include <vcg/container/simple_temporary_data.h>
-#include <vcg/complex/local_optimization/tri_edge_flip.h>
+#include <vcg/complex/algorithms/local_optimization/tri_edge_flip.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/space/point3.h>
 
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/algorithms/update/normal.h>
 
 #include "curvdata.h"
 

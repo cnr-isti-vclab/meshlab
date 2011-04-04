@@ -1,5 +1,5 @@
 #include "filter_3dcoform.h"
-#include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/complex/algorithms/create/platonic.h>
 Filter3DCoformPlugin::Filter3DCoformPlugin() 
 :cofGui(NULL)
 { 

@@ -36,8 +36,8 @@
 #include <wrap/gl/pick.h>
 #include <limits>
 
-#include<vcg/complex/trimesh/update/topology.h>
-#include<vcg/complex/trimesh/update/bounding.h>
+#include<vcg/complex/algorithms/update/topology.h>
+#include<vcg/complex/algorithms/update/bounding.h>
 
 #include "rgbPrimitives.h"
 #include "topologicalOp.h"

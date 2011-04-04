@@ -27,7 +27,7 @@
 #include <vcg/space/point3.h>
 #include <vcg/math/matrix44.h>
 #include <vcg/space/index/grid_static_obj.h>
-#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/algorithms/point_sampling.h>
 namespace vcg
 {
 namespace tri

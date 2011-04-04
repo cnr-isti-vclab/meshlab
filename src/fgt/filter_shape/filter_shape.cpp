@@ -26,16 +26,16 @@
 #include "filter_shape.h"
 
 #include <vcg/math/base.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/smooth.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/selection.h> 
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/smooth.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/update/selection.h> 
+#include <vcg/complex/algorithms/update/color.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle3.h>
 
 //VCGLib

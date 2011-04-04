@@ -15,7 +15,7 @@
 #include "../utils/logging.h"
 
 /* vcglib includes */
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/algorithms/stat.h>
 #include <GL/glew.h>
 #include <wrap/gl/space.h>
 #include <wrap/gl/trimesh.h>

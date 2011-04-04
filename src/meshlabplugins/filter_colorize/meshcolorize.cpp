@@ -20,17 +20,13 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#include <QtGui>
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/smooth.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/curvature.h>
-#include <vcg/complex/trimesh/update/quality.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <limits>
 #include "meshcolorize.h"
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/smooth.h>
+#include <vcg/complex/algorithms/update/curvature.h>
+
 
 
 using namespace std;

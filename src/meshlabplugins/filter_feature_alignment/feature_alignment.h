@@ -25,25 +25,15 @@
 
 #include <meshlab/meshmodel.h>
 
-#include <vcg/simplex/vertex/base.h>
-#include <vcg/simplex/vertex/component.h>
-#include <vcg/simplex/face/base.h>
-#include <vcg/simplex/face/component.h>
-#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/allocate.h>
 #include <vcg/container/simple_temporary_data.h>
-#include <vcg/complex/trimesh/clustering.h>
+#include <vcg/complex/algorithms/clustering.h>
 
-#include <math.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 #include <ANN/ANN.h>
 #include <vcg/math/point_matching.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/complex/trimesh/closest.h>
-#include <vcg/complex/trimesh/point_sampling.h>
-#include <vcg/complex/trimesh/overlap_estimation.h>
+#include <vcg/complex/algorithms/closest.h>
+#include <vcg/complex/algorithms/point_sampling.h>
+#include <vcg/complex/algorithms/overlap_estimation.h>
 #include <meshlabplugins/edit_pickpoints/pickedPoints.h>
 
 #include <qdatetime.h>
@@ -136,7 +126,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             float consOffset;                           ///< Consensus percentage to overcome to win consensus test. Percentage is related to \c overlap , i.e \c consOffset=100 is  equal to \c overlap. Default is \c 90 .
             bool normalEqualization;                    ///< If \c true , normal equalization sampling is used during consensus test, otherways uniform sampling is used. \c true is the default.
             bool pickPoints;                            ///< Utility that stores a base and its match into picked points attribute. If \c true points are stored and they can be displayed later.
-            bool paint;                                 ///< Utility to paint \c mMov according to consensus. If \c true vertexes of \c mMov are painted accordingly to the best consensus found. To get a detailed description of how the mesh is colored see vcg/complex/trimesh/overlap_estimation.h.
+            bool paint;                                 ///< Utility to paint \c mMov according to consensus. If \c true vertexes of \c mMov are painted accordingly to the best consensus found. To get a detailed description of how the mesh is colored see vcg/complex/algorithms/overlap_estimation.h.
             int maxNumFullConsensus;                    ///< Indicates the max number of bases tested with full consensus procedure. Defailt is \c 15.
             int maxNumShortConsensus;                   ///< Indicates the max number of bases tested with short consensus procedure. Default is \c 50.
             float mMovBBoxDiag;                         ///< BBox diagonal of \c mMov. This is used to compute parameters such as \c consensusDist, \c sparseBaseDist etc.

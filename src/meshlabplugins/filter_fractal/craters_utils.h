@@ -1,7 +1,6 @@
 #ifndef CRATERS_UTILS_H
 #define CRATERS_UTILS_H
 
-#include <vcg/complex/trimesh/clean.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include "fractal_utils.h"
 
