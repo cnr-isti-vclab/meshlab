@@ -30,7 +30,7 @@
 #include "ui_textureeditor.h"
 #include "renderarea.h"
 #include <vcg/container/simple_temporary_data.h>	// da rimuovere una volta spostato smooth
-#include <vcg/complex/trimesh/textcoord_optimization.h>
+#include <vcg/complex/algorithms/textcoord_optimization.h>
 
 #define MARGIN 5
 #define MAXW 1400

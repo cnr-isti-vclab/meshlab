@@ -20,19 +20,11 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-Revision 1.0 2008/02/20 Alessandro Maione, Federico Bellucci
-FIRST RELEASE
-
-****************************************************************************/
 
 #include "qualitymapperdialog.h"
 #include <limits>
 #include <QPen>
 #include <QBrush>
-
-#include <vcg/complex/trimesh/update/color.h>
 
 using namespace vcg;
 

@@ -22,17 +22,7 @@
  ****************************************************************************/
 #include "editpaint.h"
 
-#include <QtGui>
-#include <GL/glew.h>
-
-#include <cmath>
-#include <cstdlib>
 #include <meshlab/glarea.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <wrap/io_trimesh/io_mask.h>
 #include <vcg/math/perlin_noise.h>
 
 using namespace std;

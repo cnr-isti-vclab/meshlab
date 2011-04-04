@@ -25,11 +25,8 @@
 #ifndef GEOMETRYAGINGPLUGIN_H
 #define GEOMETRYAGINGPLUGIN_H
 
-
-#include <QObject>
-
 #include <common/interfaces.h>
-#include <vcg/complex/trimesh/refine.h>
+#include <vcg/complex/algorithms/refine.h>
 #include <vcg/space/index/grid_static_ptr.h>
 
 #include "edgepred.h"

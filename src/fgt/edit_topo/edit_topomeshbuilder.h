@@ -28,18 +28,18 @@
 #include <common/interfaces.h>
 
 #include <vcg/complex/intersection.h>
-#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/algorithms/clean.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/space/index/aabb_binary_tree/aabb_binary_tree.h>
 #include <vcg/space/index/octree.h>
 #include <vcg/space/index/spatial_hashing.h>
 
-#include <vcg/complex/trimesh/refine.h>
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/smooth.h>
+#include <vcg/complex/algorithms/refine.h>
+#include <vcg/complex/append.h>
+#include <vcg/complex/algorithms/smooth.h>
 
 #include "edit_topodialog.h"
 

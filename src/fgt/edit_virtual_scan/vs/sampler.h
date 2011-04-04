@@ -3,8 +3,8 @@
 
 #include "stages.h"
 
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 #include <common/meshmodel.h>
 
 #include <QTime>

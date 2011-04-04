@@ -3,9 +3,9 @@
 
 #include <GL/glew.h>
 #include <vcg/space/point3.h>
-#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/color.h>
+#include <vcg/complex/complex.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/update/color.h>
 #include <wrap/gl/trimesh.h>
 
 #include "assert.h"

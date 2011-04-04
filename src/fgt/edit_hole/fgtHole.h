@@ -31,9 +31,8 @@
 #include <GL/glew.h>
 #include "vcg/simplex/face/pos.h"
 #include "vcg/space/point3.h"
-#include "vcg/complex/trimesh/hole.h"
-#include "vcg/complex/trimesh/allocate.h"
-#include <vcg/complex/trimesh/closest.h>
+#include "vcg/complex/algorithms/hole.h"
+#include <vcg/complex/algorithms/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include "vcg/space/color4.h"
 #include "holeSetManager.h"

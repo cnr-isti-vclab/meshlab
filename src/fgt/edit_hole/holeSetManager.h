@@ -26,7 +26,7 @@
 
 #include "fgtHole.h"
 #include "fgtBridge.h"
-#include "vcg/complex/trimesh/hole.h"
+#include "vcg/complex/algorithms/hole.h"
 #include <vcg/container/simple_temporary_data.h>
 
 

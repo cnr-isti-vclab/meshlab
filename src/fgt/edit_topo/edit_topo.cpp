@@ -26,15 +26,9 @@ $Log: edit_topo.cpp,v $
 ****************************************************************************/
 #include "edit_topo.h"
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/point_sampling.h>
-#include <vcg/complex/trimesh/create/resampler.h>
+#include <vcg/complex/algorithms/point_sampling.h>
+#include <vcg/complex/algorithms/create/resampler.h>
 #include <vcg/simplex/face/distance.h>
-#include <vcg/complex/trimesh/update/color.h>
 
 using namespace std;
 using namespace vcg;

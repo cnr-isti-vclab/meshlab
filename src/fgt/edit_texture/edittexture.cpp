@@ -28,7 +28,7 @@
 #include <wrap/gl/pick.h>
 #include <wrap/gl/picking.h>
 
-#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/algorithms/clean.h>
 
 using namespace vcg;
 

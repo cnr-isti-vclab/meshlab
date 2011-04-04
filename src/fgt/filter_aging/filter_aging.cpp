@@ -22,18 +22,12 @@
 ****************************************************************************/
 
 
-/* Standard includes */
-#include <map>
-#include <vector>
-
-/* Local includes */
 #include "filter_aging.h"
 using namespace vcg;
 /* VCG includes */
-#include <vcg/complex/trimesh/update/curvature.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/smooth.h>
+#include <vcg/complex/algorithms/update/curvature.h>
+#include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/smooth.h>
 #include <vcg/math/perlin_noise.h>
 
 

@@ -31,9 +31,9 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 
 #include "filter_topo.h"
 #include "../edit_topo/edit_topomeshbuilder.h"

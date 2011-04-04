@@ -34,7 +34,7 @@ FIRST RELEASE
 #include <QGraphicsItem>
 #include <common/meshmodel.h>
 #include <vcg/math/histogram.h>
-#include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax
+#include <vcg/complex/algorithms/stat.h> // for ComputePerVertexQualityMinMax
 #include <meshlab/glarea.h>
 #include "ui_qualitymapperdialog.h"
 #include "common/transferfunction.h"
