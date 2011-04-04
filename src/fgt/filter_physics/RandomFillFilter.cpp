@@ -1,8 +1,8 @@
 #include "RandomFillFilter.h"
 
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/inertia.h>
-#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/append.h>
+#include <vcg/complex/algorithms/inertia.h>
+#include <vcg/complex/algorithms/clean.h>
 
 #include <sstream>
 #include <cstdlib>

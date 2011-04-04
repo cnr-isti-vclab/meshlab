@@ -1,6 +1,6 @@
 #include "DynamicMeshSubFilter.h"
 
-#include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/append.h>
 
 DynamicMeshSubFilter::DynamicMeshSubFilter() : m_fps(-1), m_iterations(-1), m_contacts(-1), m_steps(-1), m_seconds(-1), m_bounciness(-1), m_gravity(-1) {
 }

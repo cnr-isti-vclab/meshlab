@@ -22,12 +22,8 @@
 ****************************************************************************/
 
 #include <vcg/space/colorspace.h>
-#include <Qt>
-#include <QtGui>
 #include "filter_colorproc.h"
 
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/color.h>
 #include <vcg/math/random_generator.h>
 
 #include <stdlib.h>

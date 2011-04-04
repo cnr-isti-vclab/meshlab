@@ -1,6 +1,6 @@
 #include "ODEFacade.h"
 
-#include <vcg/complex/trimesh/inertia.h>
+#include <vcg/complex/algorithms/inertia.h>
 
 #include <algorithm>
 #include <cmath>

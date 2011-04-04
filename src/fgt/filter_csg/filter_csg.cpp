@@ -21,13 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <Qt>
-#include <QtGui>
-
 #include "filter_csg.h"
-
-#include <vcg/complex/trimesh/create/extended_marching_cubes.h>
-#include <vcg/complex/trimesh/create/marching_cubes.h>
+#include <vcg/complex/algorithms/create/extended_marching_cubes.h>
+#include <vcg/complex/algorithms/create/marching_cubes.h>
 
 #include <fstream>
 #include "gmpfrac.h"

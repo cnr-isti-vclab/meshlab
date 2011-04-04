@@ -29,12 +29,6 @@
 ****************************************************************************/
 
 #include "qhull_tools.h"
-
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/color.h>
-
 #include <fstream>
 #include <iostream>
 

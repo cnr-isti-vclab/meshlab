@@ -28,7 +28,7 @@
 #include <common/interfaces.h>
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
-#include<vcg/complex/trimesh/base.h>
+#include<vcg/complex/complex.h>
 
 template <class MeshType>
 

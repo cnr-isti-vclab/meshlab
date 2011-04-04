@@ -24,10 +24,10 @@
 #define _DUSTSAMPLER_H_
 
 #include <vcg/math/random_generator.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 #include <vcg/space/index/spatial_hashing.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/update/topology.h>
+#include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/space/box2.h>
 #include "dustparticle.h"
 

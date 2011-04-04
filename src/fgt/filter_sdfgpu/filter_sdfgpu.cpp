@@ -1,16 +1,8 @@
 #include "filter_sdfgpu.h"
-#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/edges.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/quality.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/intersection.h>
+#include <vcg/complex/complex.h>
+#include <vcg/complex/algorithms/intersection.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/space/index/spatial_hashing.h>
-#include <vcg/math/matrix33.h>
 #include <wrap/qt/to_string.h>
 #include <vcg/math/gen_normal.h>
 #include <wrap/qt/checkGLError.h>
@@ -280,6 +272,7 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     mObscuranceProgram->addUniform("depthTextureBack");
     mObscuranceProgram->addUniform("depthTolerance");
     mObscuranceProgram->addUniform("viewDirection");
+    mObscuranceProgram->addUniform("depthTolerance");
     mObscuranceProgram->addUniform("mvprMatrix");
     mObscuranceProgram->addUniform("viewpSize");
     mObscuranceProgram->addUniform("texSize");
@@ -473,7 +466,6 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE, GL_ONE);
     glBlendEquation(GL_FUNC_ADD);
-
     glUseProgram(mSDFProgram->id());
 
     glActiveTexture(GL_TEXTURE0);
@@ -496,22 +488,25 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
 
     // Set view direction
     mSDFProgram->setUniform3f("viewDirection", cameraDir.X(), cameraDir.Y(), cameraDir.Z());
-
     // Set ModelView-Projection Matrix
     mSDFProgram->setUniformMatrix4fv( "mvprMatrix", mv_pr_Matrix_f, 1, GL_FALSE );
 
     // Set texture Size
     mSDFProgram->setUniform1f("texSize", mPeelingTextureSize);
+    checkGLError::qDebug("Error during depth peeling 00");
 
     // Set viewport Size
     mSDFProgram->setUniform1f("viewpSize", mResTextureDim );
+    checkGLError::qDebug("Error during depth peeling 01");
 
     mSDFProgram->setUniform1f("depthTolerance", mDepthTolerance);
+    checkGLError::qDebug("Error during depth peeling 1");
 
     mSDFProgram->setUniform1f("minCos", mMinCos);
 
     mSDFProgram->setUniform1f("maxCos", mMaxCos);
 
+    checkGLError::qDebug("Error during depth peeling 2");
 
     // Screen-aligned Quad
     glBegin(GL_QUADS);
@@ -520,7 +515,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject& fboFront, FramebufferObject
             glVertex3f( 1.0f,  1.0f, 0.0f); //U-R
             glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
     glEnd();
-
+    checkGLError::qDebug("Error during depth peeling 3");
     mFboResult->unbind();
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);

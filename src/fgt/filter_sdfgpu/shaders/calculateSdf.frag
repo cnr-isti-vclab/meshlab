@@ -23,17 +23,17 @@
 
 #version 110
 
-uniform sampler2D 	vTexture;
-uniform sampler2D 	nTexture;
-uniform sampler2D	depthTextureFront;
-uniform sampler2D	depthTextureBack;
-uniform vec3 		viewDirection;
-uniform mat4 		mvprMatrix;
-uniform float 		viewpSize;
-uniform float 		texSize;
-uniform	float		depthTolerance;
-uniform float		minCos;
-uniform float		maxCos;
+uniform sampler2D vTexture;
+uniform sampler2D nTexture;
+uniform sampler2D depthTextureFront;
+uniform sampler2D	 depthTextureBack;
+uniform vec3 	viewDirection;
+uniform mat4 	mvprMatrix;
+uniform float viewpSize;
+uniform float texSize;
+uniform	float depthTolerance;
+uniform float	 minCos;
+uniform float	 maxCos;
 
 vec4 project(vec4 coords)
 {

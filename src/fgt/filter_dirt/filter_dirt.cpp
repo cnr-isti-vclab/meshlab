@@ -29,24 +29,24 @@
 
 #include <vcg/space/color4.h>
 #include <vcg/math/random_generator.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/algorithms/closest.h>
 #include <vcg/space/index/spatial_hashing.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/update/topology.h>
+#include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/space/box2.h>
 #include <vcg/math/base.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/smooth.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/selection.h> 
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/smooth.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/update/selection.h> 
+#include <vcg/complex/algorithms/update/color.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle3.h>
-#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/allocate.h>
 #include <vector>
 
 using namespace std;

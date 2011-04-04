@@ -37,20 +37,20 @@
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/space/index/base.h>
 #include<vcg/simplex/face/base.h>
-#include<vcg/complex/trimesh/base.h>
+#include<vcg/complex/complex.h>
 #include <vcg/space/point3.h>
 #include <vcg/space/intersection2.h>
-#include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/closest.h>
+#include <vcg/complex/allocate.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/closest.h>
 #include <vcg/simplex/face/distance.h>
-#include <vcg/complex/trimesh/geodesic.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/point_sampling.h>
-#include <vcg/complex/trimesh/create/resampler.h>
-#include <vcg/complex/trimesh/clustering.h>
+#include <vcg/complex/algorithms/geodesic.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/point_sampling.h>
+#include <vcg/complex/algorithms/create/resampler.h>
+#include <vcg/complex/algorithms/clustering.h>
 #include <vcg/simplex/face/distance.h>
 #include <vcg/space/distance3.h>
 #include <vcg/space/index/grid_static_ptr.h>

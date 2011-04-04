@@ -21,17 +21,11 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string>
 #include "filter_func.h"
+#include <vcg/complex/algorithms/create/platonic.h>
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/create/platonic.h>
-
-#include <vcg/complex/trimesh/create/marching_cubes.h>
-#include <vcg/complex/trimesh/create/mc_trivial_walker.h>
+#include <vcg/complex/algorithms/create/marching_cubes.h>
+#include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
 #include "muParser.h"
 

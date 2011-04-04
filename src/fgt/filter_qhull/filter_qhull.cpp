@@ -26,14 +26,7 @@
 
 ****************************************************************************/
 
-#include <Qt>
-#include <QtGui>
 #include "filter_qhull.h"
-
-
-#include <math.h>
-#include <stdlib.h>
-#include <vcg/complex/trimesh/clean.h>
 
 #include "qhull_tools.h"
 

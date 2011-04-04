@@ -35,7 +35,7 @@ FIRST RELEASE
 #include <common/interfaces.h>
 
 #include "../edit_quality/common/transferfunction.h"
-#include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax
+#include <vcg/complex/algorithms/stat.h> // for ComputePerVertexQualityMinMax
 #include "../edit_quality/common/meshmethods.h"
 
 

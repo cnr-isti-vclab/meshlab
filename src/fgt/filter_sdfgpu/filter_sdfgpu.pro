@@ -22,5 +22,7 @@ TEMPLATE      = lib
 QT           += opengl
 CONFIG       += plugin
 
+DEPENDPATH += ./shaders
+
 RESOURCES += \
     filter_sdfgpu.qrc

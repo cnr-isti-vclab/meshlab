@@ -5,7 +5,7 @@
 
 #include<wrap/io_trimesh/io_mask.h>
 #include<wrap/callback.h>
-#include<vcg/complex/trimesh/clean.h>
+#include<vcg/complex/algorithms/clean.h>
 
 
 #include <stdio.h>

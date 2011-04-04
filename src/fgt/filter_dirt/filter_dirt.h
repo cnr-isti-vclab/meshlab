@@ -32,7 +32,7 @@
 #include<vector>
 #include<vcg/simplex/vertex/base.h>
 #include<vcg/simplex/face/base.h>
-#include<vcg/complex/trimesh/base.h>
+#include<vcg/complex/complex.h>
 //#include "muParser.h"
 
 using namespace vcg;

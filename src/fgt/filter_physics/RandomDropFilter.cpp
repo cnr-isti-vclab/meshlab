@@ -1,6 +1,6 @@
 #include "RandomDropFilter.h"
 
-#include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/append.h>
 
 #include <cstdlib>
 #include <ctime>

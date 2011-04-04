@@ -11,8 +11,8 @@
     #include <tr1/unordered_set>
 #endif
 
-#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/complex.h>
+#include <vcg/complex/algorithms/clean.h>
 #include <vcg/space/box2.h>
 #include <wrap/callback.h>
 
