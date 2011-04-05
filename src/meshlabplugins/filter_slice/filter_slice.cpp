@@ -226,7 +226,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
 			//this is used to generate svg slices
 			MyEdgeMesh *edgeMesh = new MyEdgeMesh();
-			vcg::Intersection<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
+      vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
 			vcg::edg::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
 			ev.push_back(edgeMesh);
 
@@ -235,7 +235,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
         fname="Slice.svg";
       if (!fname.endsWith(".svg"))
         fname+=".svg";
-			vcg::edg::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
+      vcg::tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
 
 
       SlicedEdge<CMeshO> slicededge(slicingPlane);
@@ -417,7 +417,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 				base=slice2;
 	      //this is used to generate svd slices
 				MyEdgeMesh *edgeMesh = new MyEdgeMesh();
-				vcg::Intersection<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
+        vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
 				vcg::edg::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
 				ev.push_back(edgeMesh);
 			}
@@ -427,7 +427,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
         fname="Slice.svg";
       if (!fname.endsWith(".svg"))
         fname+=".svg";
-			vcg::edg::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
+      vcg::tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
 		}
 		break;
 		case FP_RECURSIVE_SLICE:

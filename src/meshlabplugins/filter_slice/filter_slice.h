@@ -50,7 +50,7 @@ class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef> {};
 
 class MyEdgeMesh: public vcg::edg::EdgeMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 
-typedef vcg::edg::io::SVGProperties SVGProperties;
+typedef vcg::tri::io::SVGProperties SVGProperties;
 
 class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 {

@@ -292,11 +292,11 @@ bool FilterZippering::isOnBorder( Point3f point, CMeshO::FacePointer f )  {
 	if ( f == 0 ) return false;	//null face
     
 	//compute barycentric coords
-	float bc[3];
-	InterpolationParameters<CMeshO::FaceType, float>( *f, f->N(), point, bc[0], bc[1], bc[2] );
+  Point3f bc;
+  InterpolationParameters<CMeshO::FaceType, float>( *f, f->N(), point, bc );
 	//search for max and min
-	int min_el = min_element(bc, bc+3) - bc;
-	int max_el = max_element(bc, bc+3) - bc;
+  int min_el = min_element(&bc[0], &bc[0]+3) - &bc[0];
+  int max_el = max_element(&bc[0], &bc[0]+3) - &bc[0];
 	//coords of max el = 1.0f -> check vertex
 	if ( bc[max_el] >= 1.0f - eps ) return isBorderVert( f, max_el );
 	//coords of min_el = 0.0f -> check edge
