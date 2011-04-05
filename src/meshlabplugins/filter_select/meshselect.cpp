@@ -36,6 +36,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   typeList <<
     FP_SELECT_ALL <<
     FP_SELECT_NONE <<
+    FP_SELECTBYANGLE <<
     FP_SELECT_DELETE_VERT <<
     FP_SELECT_DELETE_FACE <<
     FP_SELECT_DELETE_FACEVERT <<
@@ -83,6 +84,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   case FP_SELECT_DELETE_VERT :		       return QString("Delete Selected Vertices");
   case FP_SELECT_DELETE_FACE :          return QString("Delete Selected Faces");
   case FP_SELECT_DELETE_FACEVERT :      return QString("Delete Selected Faces and Vertices");
+  case FP_SELECTBYANGLE :                 return QString("Select Faces by view angle");
   case FP_SELECT_FACE_FROM_VERT :       return QString("Select Faces from Vertices");
   case FP_SELECT_VERT_FROM_FACE :       return QString("Select Vertices from Faces");
   case FP_SELECT_ERODE :                 return QString("Erode Selection");
@@ -107,6 +109,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
      case FP_SELECT_DELETE_VERT : return tr("Delete the current set of selected vertices; faces that share one of the deleted vertexes are deleted too.");
      case FP_SELECT_DELETE_FACE : return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");
      case FP_SELECT_DELETE_FACEVERT : return tr("Delete the current set of selected faces and all the vertices surrounded by that faces.");
+   case FP_SELECTBYANGLE :             return QString("Select faces according to the angle between their normal and the view direction. It is used in range map processing to select and delete steep faces parallel to viewdirection");
    case CP_SELFINTERSECT_SELECT:    return tr("Select only self intersecting faces.");
    case FP_SELECT_FACE_FROM_VERT :		           return QString("Select faces from selected vertices");
    case FP_SELECT_VERT_FROM_FACE :		           return QString("Select vertices from selected faces");
@@ -135,7 +138,22 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
     case FP_SELECT_BORDER:
       parlst.addParam(new RichInt("Iteration", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
       break;
-
+    case FP_SELECTBYANGLE :
+      {
+        parlst.addParam(new RichDynamicFloat("anglelimit",
+                               75.0f, 0.0f, 180.0f,
+                        "angle threshold (deg)",
+                        "faces with normal at higher angle w.r.t. the view direction are selected"));
+        parlst.addParam(new RichBool ("usecamera",
+                        false,
+                        "Use ViewPoint from Mesh Camera",
+                        "Uses the ViewPoint from the camera associated to the current mesh\n if there is no camera, an error occurs"));
+        parlst.addParam(new RichPoint3f("viewpoint",
+                        Point3f(0.0f, 0.0f, 0.0f),
+                        "ViewPoint",
+                        "if UseCamera is true, this value is ignored"));
+      }
+      break;
     case FP_SELECT_FACE_FROM_VERT:
       parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
       break;
@@ -222,6 +240,40 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
                     tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
     break;
+
+  case FP_SELECTBYANGLE :
+  {
+    CMeshO::FaceIterator   fi;
+    bool usecam = par.getBool("usecamera");
+    Point3f viewpoint = par.getPoint3f("viewpoint");
+
+    // if usecamera but mesh does not have one
+    if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) )
+    {
+      errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
+      return false;
+    }
+    if(usecam)
+    {
+      viewpoint = m.cm.shot.GetViewPoint();
+    }
+
+    // angle threshold in radians
+    float limit = cos( math::ToRad(par.getDynamicFloat("anglelimit")) );
+    Point3f viewray;
+
+    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+      if(!(*fi).IsD())
+      {
+        viewray = viewpoint - Barycenter(*fi);
+        viewray.Normalize();
+
+        if((viewray.dot((*fi).N().Normalize())) < limit)
+          fi->SetS();
+      }
+
+  }
+  break;
   case FP_SELECT_ALL    :
       tri::UpdateSelection<CMeshO>::AllVertex(m.cm);
       tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
@@ -361,6 +413,9 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
       case FP_SELECT_BY_COLOR : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::FaceColoring);
       case FP_SELECT_BY_FACE_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
     case FP_SELECT_BY_VERT_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
+    case FP_SELECTBYANGLE :
+        return MeshFilterInterface::FilterClass(MeshFilterInterface::RangeMap + MeshFilterInterface::Selection);
+
     }
   return MeshFilterInterface::Selection;
 }
