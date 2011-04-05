@@ -27,9 +27,6 @@
 
 #include <QObject>
 #include <common/interfaces.h>
-#include <vcg/complex/edgemesh/base.h>
-
-#include <vcg/complex/edgemesh/update/bounding.h>
 #include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/complex/algorithms/refine.h>
@@ -52,10 +49,10 @@ class MyVertex: public vcg::Vertex < MyUsedTypes,vcg::vertex::Coord3f,vcg::verte
 class MyFace: public vcg::Face < MyUsedTypes, vcg::face::VertexRef>{};
 class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef, vcg::edge::EVAdj> {};
 
-class MyEdgeMesh: public vcg::edg::EdgeMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
+class MyEdgeMesh: public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 
 
-typedef vcg::edg::io::SVGProperties SVGProperties;
+typedef vcg::tri::io::SVGProperties SVGProperties;
 
 class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 {
