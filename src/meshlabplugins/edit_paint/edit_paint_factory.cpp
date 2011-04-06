@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "edit_paint_factory.h"
-#include "editpaint.h"
+#include "edit_paint.h"
 
 EditPaintFactory::EditPaintFactory()
 {

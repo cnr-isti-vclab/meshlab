@@ -20,7 +20,7 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-#include "editpaint.h"
+#include "edit_paint.h"
 
 #include <meshlab/glarea.h>
 #include <vcg/math/perlin_noise.h>
