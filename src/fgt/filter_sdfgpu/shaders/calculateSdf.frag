@@ -23,17 +23,20 @@
 
 #version 110
 
-uniform sampler2D vTexture;
-uniform sampler2D nTexture;
-uniform sampler2D depthTextureFront;
-uniform sampler2D	 depthTextureBack;
-uniform vec3 	viewDirection;
-uniform mat4 	mvprMatrix;
-uniform float viewpSize;
-uniform float texSize;
-uniform	float depthTolerance;
-uniform float	 minCos;
-uniform float	 maxCos;
+
+uniform sampler2D 	vTexture;
+uniform sampler2D 	nTexture;
+uniform sampler2D	depthTextureFront;
+uniform sampler2D	depthTextureBack;
+uniform sampler2D       depthTexturePrevBack;
+uniform vec3 		viewDirection;
+uniform mat4 		mvprMatrix;
+uniform float 		viewpSize;
+uniform float 		texSize;
+uniform	float		depthTolerance;
+uniform float		minCos;
+uniform float		maxCos;
+uniform int		firstRendering;
 
 vec4 project(vec4 coords)
 {
@@ -41,6 +44,11 @@ vec4 project(vec4 coords)
    return vec4(coords.xyz * 0.5+0.5, coords.w);
 }
 
+/*float calculateSdf(float2 P)
+{
+
+
+}*/
 
 void main(void)
 {
@@ -57,20 +65,27 @@ void main(void)
     vec4 P = project(V); //* (viewpSize/texSize);
      
     
-    float zFront   = texture2D(depthTextureFront, P.xy).r;
-    float zBack    = texture2D(depthTextureBack,  P.xy).r;    
-    float cosAngle = max(0.0,dot(N.xyz, viewDirection));
+    float zFront    = texture2D(depthTextureFront,    P.xy).r;
+    float zBack     = texture2D(depthTextureBack,     P.xy).r;
+    float zPrevBack = texture2D(depthTexturePrevBack, P.xy).r;   
+    float cosAngle  = max(0.0,dot(N.xyz, viewDirection));
       
 
-    if ( (zFront-depthTolerance) <=  P.z && P.z <= (zFront+depthTolerance) && cosAngle >= minCos && cosAngle <= maxCos)
+    if(firstRendering==1)
     {
-
-	sdf =  max(0.0,(zBack-zFront) * cosAngle) ; 
-    
+    	if (  P.z <= (zBack-depthTolerance) && cosAngle >= minCos && cosAngle <= maxCos)
+    		sdf =  max(0.0,(zBack-zFront) * cosAngle) ; 
+    	else 
+		cosAngle = 0.0;
     }
-    else 
-	cosAngle = 0.0;
-
+    else
+    {
+	
+	if (  (zPrevBack+depthTolerance) <= P.z && P.z <= (zBack-depthTolerance) && cosAngle >= minCos && cosAngle <= maxCos)
+    		sdf =  max(0.0,(zBack-zFront) * cosAngle) ; 
+    	else 
+		cosAngle = 0.0;
+    }
 	
     gl_FragColor = vec4( sdf, cosAngle, 0.0, 1.0);
 }

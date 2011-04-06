@@ -27,6 +27,7 @@ uniform sampler2D 	vTexture;
 uniform sampler2D 	nTexture;
 uniform sampler2D	depthTextureFront;
 uniform sampler2D	depthTextureBack;
+uniform sampler2D	depthTextureNextBack;
 uniform vec3 		viewDirection;
 uniform mat4 		mvprMatrix;
 uniform float 		viewpSize;
@@ -54,27 +55,34 @@ void main(void)
  
     N = normalize(N);
 
-    vec4 P = project(V); //* (viewpSize/texSize);
-     
-    
-    float zFront   = texture2D(depthTextureFront, P.xy).r;
-    float zBack    = texture2D(depthTextureBack,  P.xy).r;    
-    float cosAngle = max(0.0,dot(N.xyz, viewDirection));
-      
+    float cosAngle  = max(0.0,dot(N.xyz, viewDirection));
 
-    if ( (zFront-depthTolerance) <=  P.z && P.z <= (zFront+depthTolerance) )
+    if( cosAngle > 0.0 )
     {
 
-	if( firstRendering != 0 )
-	{
-	
-		float dist = max(0.0,(zFront-zBack));
-		obscurance = max(0.0, 1.0 - exp(-tau*dist))*cosAngle;
+    	vec4 P = project(V); //* (viewpSize/texSize);
+     
+    	float zBack = texture2D(depthTextureBack,  P.xy).r;
+    	
+    	if( firstRendering != 1 )
+    	{		 
+		float zFront    = texture2D(depthTextureFront,     P.xy).r;
+		float zNextBack = texture2D(depthTextureNextBack,  P.xy).r;   
+
+		if ( (zBack+depthTolerance) <=  P.z && P.z <= (zNextBack-depthTolerance) )
+		{
+ 			float dist = max(0.0,(zFront-zBack));
+			
+			obscurance = max(0.0, 1.0 - exp(-tau*dist))*cosAngle;
+			
     
-	}
-        else obscurance = cosAngle;
+		}
+    	}
+    	else if( P.z <= (zBack-depthTolerance) )  
+		obscurance = cosAngle;
+    
+    	
     }
-   
 	
     gl_FragColor = vec4(obscurance , obscurance , obscurance , 1.0);
 }

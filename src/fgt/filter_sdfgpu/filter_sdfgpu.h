@@ -17,7 +17,6 @@ class SdfGpuPlugin : public QObject, public MeshFilterInterface
     Q_OBJECT
     Q_INTERFACES(MeshFilterInterface)
 
-
 public:
 
     enum{ SDF_SDF, SDF_CORRECTION_THIN_PARTS, SDF_OBSCURANCE };
@@ -56,31 +55,28 @@ public:
 
     void vertexDataToTexture(MeshModel &m);
 
-    void calculateSdfHW(FramebufferObject& fboFront, FramebufferObject& fboBack, const vcg::Point3f& cameraDir);
+    void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir);
 
     void applySdfHW(MeshModel &m, float numberOfRays);
 
-    void calculateObscurance(FramebufferObject& fboFront, FramebufferObject& fboBack, const vcg::Point3f& cameraDir, int first);
+    void calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextFront, const vcg::Point3f& cameraDir);
 
     void applyObscurance(MeshModel &m, float numberOfRays);
 
-protected:
+  protected:
 
     FilterIDType       mAction;
     unsigned int       mResTextureDim;
-    FloatTexture2D*    mResultTexture;
     FloatTexture2D*    mVertexCoordsTexture;
     FloatTexture2D*    mVertexNormalsTexture;
-    FramebufferObject* mFboA;
-    FramebufferObject* mFboB;
-    FramebufferObject* mFboC;
+    //Fbo and texture for storing the result computation
     FramebufferObject* mFboResult;
-    FloatTexture2D*    mColorTextureA;
-    FloatTexture2D*    mDepthTextureA;
-    FloatTexture2D*    mColorTextureB;
-    FloatTexture2D*    mDepthTextureB;
-    FloatTexture2D*    mColorTextureC;
-    FloatTexture2D*    mDepthTextureC;
+    FloatTexture2D*    mResultTexture;
+    //Fbos and textures for depth peeling
+    FramebufferObject* mFboArray[4];
+    FloatTexture2D*    mColorTextureArray[4];
+    FloatTexture2D*    mDepthTextureArray[4];
+
     unsigned int       mPeelingTextureSize;
     float              mTolerance;
     float              mDepthTolerance;
