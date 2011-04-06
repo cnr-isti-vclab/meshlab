@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "edit_measure_factory.h"
-#include "editmeasure.h"
+#include "edit_measure.h"
 
 EditMeasureFactory::EditMeasureFactory()
 {

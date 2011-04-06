@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include <common/filterparameter.h>
-#include <meshlabplugins/editalign/align/AlignPair.h>
+#include <meshlabplugins/edit_align/align/AlignPair.h>
 #include <vcg/simplex/face/base.h>
 
 class AlignParameter {

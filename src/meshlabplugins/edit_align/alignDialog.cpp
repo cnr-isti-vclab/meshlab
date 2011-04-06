@@ -30,7 +30,7 @@ $Log: stdpardialog.cpp,v $
 #include <GL/glew.h>
 #include <QtGui>
 
-#include "editalign.h"
+#include "edit_align.h"
 
 #include "alignDialog.h"
 #include <meshlab/glarea.h>

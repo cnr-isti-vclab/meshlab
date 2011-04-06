@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "edit_align_factory.h"
-#include "editalign.h"
+#include "edit_align.h"
 
 EditAlignFactory::EditAlignFactory()
 {

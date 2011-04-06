@@ -30,7 +30,7 @@ $Log: meshedit.cpp,v $
 #include <stdlib.h>
 #include <meshlab/glarea.h>
 #include <vcg/math/point_matching.h>
-#include "editalign.h"
+#include "edit_align.h"
 #include <wrap/gl/pick.h>
 #include <wrap/qt/trackball.h>
 #include "AlignPairWidget.h"

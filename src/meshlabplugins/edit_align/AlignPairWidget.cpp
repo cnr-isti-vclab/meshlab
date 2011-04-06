@@ -27,9 +27,7 @@
 #include <wrap/gl/pick.h>
 
 
-//#include "alignDialog.h"
-//#include <meshlab/glarea.h>
-#include "editalign.h"
+#include "edit_align.h"
 #include "AlignPairWidget.h"
 #include "AlignPairDialog.h"
 

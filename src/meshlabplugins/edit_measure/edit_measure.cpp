@@ -27,7 +27,7 @@ $Log: editmeasure.cpp,v $
 #include <QtGui>
 
 #include <meshlab/glarea.h>
-#include "editmeasure.h"
+#include "edit_measure.h"
 #include <wrap/qt/gl_label.h>
 
 using namespace vcg;
