@@ -1,17 +1,9 @@
 
 #include "filter_sdfgpu.h"
-#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/update/topology.h>
-#include <vcg/complex/trimesh/update/edges.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/quality.h>
-#include <vcg/complex/trimesh/update/color.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/intersection.h>
+#include <vcg/complex/complex.h>
+#include <vcg/complex/algorithms/intersection.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/space/index/spatial_hashing.h>
-#include <vcg/math/matrix33.h>
 #include <wrap/qt/to_string.h>
 #include <vcg/math/gen_normal.h>
 #include <wrap/qt/checkGLError.h>
@@ -19,6 +11,7 @@
 #include <assert.h>
 using namespace std;
 using namespace vcg;
+
 
 #define SDF_MAX_TEXTURE_SIZE 1024
 #define PI 3.14159265358979323846264;
