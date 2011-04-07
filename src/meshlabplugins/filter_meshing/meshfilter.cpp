@@ -218,7 +218,10 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
 		case FP_REORIENT                         : return tr("Re-orient in a consistent way all the faces of the mesh");
-		case FP_INVERT_FACES                     : return tr("Invert faces orientation, flip the normal of the mesh");
+    case FP_INVERT_FACES                     : return tr("Invert faces orientation, flipping the normals of the mesh. <br>"
+                                                         "If requested, it tries to guess the right orientation; "
+                                                         "mainly it decide to flip all the faces if the minimum/maximum vertexes have not outward point normals for a few directions.<br>"
+                                                         "Works well for single component watertight objects.");
 		case FP_SCALE                            : return tr("Generate a matrix transformation that scale the mesh. The mesh can be also automatically scaled to a unit side box. ");
 		case FP_CENTER                           : return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
 		case FP_ROTATE                           : return tr("Generate a matrix transformation that rotates the mesh. The mesh can be rotated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
@@ -388,7 +391,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 			parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
       parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
       break;
-
+  case FP_INVERT_FACES:
+    parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected the normals will always be flipped otherwise the filter tries to set them outside"));
+   break;
   case FP_ROTATE:
     {
       QStringList rotMethod;
@@ -638,9 +643,12 @@ case FP_CLUSTERING:
     } break;
 
 case FP_INVERT_FACES:
-	{
-	  tri::Clean<CMeshO>::FlipMesh(m.cm);
-    if(m.hasDataMask(MeshModel::MM_POLYGONAL))
+  {
+    bool flipped=par.getBool("forceFlip");
+    if(flipped) tri::Clean<CMeshO>::FlipMesh(m.cm);
+    else flipped =  tri::Clean<CMeshO>::FlipNormalOutside(m.cm);
+
+    if(flipped && m.hasDataMask(MeshModel::MM_POLYGONAL))
     {
       for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) if(!(*fi).IsD())
       {
