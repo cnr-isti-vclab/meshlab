@@ -1,14 +1,14 @@
 include (../../shared.pri)
 
-HEADERS       += ../../meshlabplugins/editalign/align/AlignPair.h \
-		../../meshlabplugins/editalign/align/OccupancyGrid.h \
+HEADERS       += ../../meshlabplugins/edit_align/align/AlignPair.h \
+    ../../meshlabplugins/edit_align/align/OccupancyGrid.h \
 		../../common/filterparameter.h \
 		filter_autoalign.h
 
 SOURCES       += filter_autoalign.cpp \ 
-                ../../meshlabplugins/editalign/align/AlignPair.cpp \
-                ../../meshlabplugins/editalign/align/Guess.cpp \
-				../../meshlabplugins/editalign/point_matching_scale.cpp \
+                ../../meshlabplugins/edit_align/align/AlignPair.cpp \
+                ../../meshlabplugins/edit_align/align/Guess.cpp \
+        ../../meshlabplugins/edit_align/point_matching_scale.cpp \
 		../../../../vcglib/wrap/ply/plylib.cpp \
 		 
 INCLUDEPATH += ../../external
