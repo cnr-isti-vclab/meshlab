@@ -10,7 +10,7 @@ SUBDIRS       = common \
                 meshlabplugins/io_bre\
                 meshlabplugins/io_collada \
                 meshlabplugins/io_epoch \
-				meshlabplugins/io_json \
+                meshlabplugins/io_json \
                 meshlabplugins/io_u3d\
                 meshlabplugins/io_tri\
                 meshlabplugins/io_x3d \
@@ -18,32 +18,41 @@ SUBDIRS       = common \
                 meshlabplugins/io_expe \
                 meshlabplugins/io_pdb \
 # Filters
+                meshlabplugins/filter_aging \
                 meshlabplugins/filter_ao \
                 meshlabplugins/filter_autoalign \
                 meshlabplugins/filter_camera \
+                meshlabplugins/filter_bnpts \
                 meshlabplugins/filter_clean \
                 meshlabplugins/filter_colorize \
+                meshlabplugins/filter_colorproc \
                 meshlabplugins/filter_create \
+                meshlabplugins/filter_csg \
                 meshlabplugins/filter_fractal \
+                meshlabplugins/filter_func \
                 meshlabplugins/filter_isoparametrization \
                 meshlabplugins/filter_layer \
                 meshlabplugins/filter_measure \
                 meshlabplugins/filter_meshing \
                 meshlabplugins/filter_mls \
+                meshlabplugins/filter_photosynth \
                 meshlabplugins/filter_plymc \
                 meshlabplugins/filter_poisson \
+                meshlabplugins/filter_qhull \
+                meshlabplugins/filter_quality \
                 meshlabplugins/filter_sampling \
                 meshlabplugins/filter_slice \
                 meshlabplugins/filter_select \
+                meshlabplugins/filter_ssynth \
                 meshlabplugins/filter_texture \
+                meshlabplugins/filter_trioptimize \
                 meshlabplugins/filter_unsharp \
                 meshlabplugins/filter_zippering \
-                meshlabplugins/filter_bnpts \
 # rendering stuff
                 meshlabplugins/render_splatting \
                 meshlabplugins/render_gdp \
                 meshlabplugins/render_radiance_scaling \
-                fgt/render_rfx \
+                meshlabplugins/render_rfx \
 # decorations
                 meshlabplugins/decorate_base \
                 meshlabplugins/decorate_background \
@@ -51,9 +60,12 @@ SUBDIRS       = common \
 # editing tools
                 meshlabplugins/edit_select \
                 meshlabplugins/edit_pickpoints \
-                meshlabplugins/editalign \
-                meshlabplugins/editmeasure \
-#               meshlabplugins/editsegment \
+                meshlabplugins/edit_align \
+                meshlabplugins/edit_measure \
+                meshlabplugins/edit_hole \
+                meshlabplugins/edit_paint\
+                meshlabplugins/edit_quality \
+                meshlabplugins/edit_texture \
 # Sample plugins
                 sampleplugins/sampleedit \
                 sampleplugins/samplefilter \
@@ -61,18 +73,4 @@ SUBDIRS       = common \
                 sampleplugins/io_m\
                 sampleplugins/filtergeodesic \
                 sampleplugins/filtercreateiso \
-# projects
-                fgt/filter_aging \
-                fgt/filter_colorproc \
-#			fgt/filter_csg \
-                fgt/filter_func \
-                fgt/filter_ssynth \
-                fgt/filter_qhull \
-                fgt/filter_quality \
-                fgt/filter_trioptimize \
-             fgt/filter_photosynth \
-                fgt/edit_hole \
-                fgt/editpaint\
-                fgt/edit_quality \
-                fgt/edit_texture \
-                ##				fgt/edit_topo \
+
