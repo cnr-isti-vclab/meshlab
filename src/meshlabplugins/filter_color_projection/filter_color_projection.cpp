@@ -30,6 +30,7 @@
 
 #include "filter_color_projection.h"
 
+#include "render_helper.cpp"
 
 using namespace std;
 using namespace vcg;
@@ -37,8 +38,9 @@ using namespace vcg;
 // Constructor
 FilterColorProjectionPlugin::FilterColorProjectionPlugin()
 {
-	typeList <<
-	FP_SINGLEIMAGEPROJ;
+	typeList 
+    <<  FP_SINGLEIMAGEPROJ
+    <<  FP_MULTIIMAGETRIVIALPROJ;
 
 	foreach(FilterIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
@@ -49,6 +51,7 @@ QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FP_SINGLEIMAGEPROJ	:	return QString("Project current raster color to current mesh");
+		case FP_MULTIIMAGETRIVIALPROJ	:	return QString("Project active rasters color to current mesh");
 		default : assert(0);
 	}
 }
@@ -58,6 +61,7 @@ QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId) {
 		case FP_SINGLEIMAGEPROJ	:	return QString("Color information from the current raster is perspective-projected on the current mesh");
+		case FP_MULTIIMAGETRIVIALPROJ	:	return QString("Color information from all the active rasters is perspective-projected on the current mesh using basic weighting");
     default : assert(0);
 	}
 }
@@ -66,6 +70,7 @@ QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
 int FilterColorProjectionPlugin::getRequirements(QAction *action){
   switch(ID(action)){
     case FP_SINGLEIMAGEPROJ:  return MeshModel::MM_VERTCOLOR;
+    case FP_MULTIIMAGETRIVIALPROJ:  return MeshModel::MM_VERTCOLOR;
     default: assert(0); return 0;
   }
   return 0;
@@ -85,9 +90,42 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
 				true,
 				"Use depth for projection",
 				"If true, depth is used to restrict projection on visible faces"));
+			parlst.addParam(new RichFloat ("deptheta",
+				0.5,
+				"depth threshold",
+				"threshold value for depth buffer projection (shadow buffer)"));
+			parlst.addParam(new RichBool ("onselection",
+				false,
+				"Only on selecton",
+				"If true, projection is only done for selected vertices"));
 		}
 		break;
-      
+
+		case FP_MULTIIMAGETRIVIALPROJ :
+		{
+			parlst.addParam(new RichFloat ("deptheta",
+				0.5,
+				"depth threshold",
+				"threshold value for depth buffer projection (shadow buffer)"));
+			parlst.addParam(new RichBool ("onselection",
+				false,
+				"Only on selecton",
+				"If true, projection is only done for selected vertices"));
+			parlst.addParam(new RichBool ("useangle",
+				true,
+				"use angle weight",
+				"If true, color contribution is weighted by pixel view angle"));
+			parlst.addParam(new RichBool ("usedistance",
+				true,
+				"use distance weight",
+				"If true, color contribution is weighted by pixel view distance"));
+			parlst.addParam(new RichBool ("useborders",
+				true,
+				"use image borders weight",
+				"If true, color contribution is weighted by pixel distance from image boundaries"));
+		}
+		break;
+
 		default: break; // do not add any parameter for the other filters
 	}
 }
@@ -98,102 +136,296 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
 	CMeshO::FaceIterator fi;
   CMeshO::VertexIterator vi;
 
+  RenderHelper *rendermanager=NULL;
+
 	switch(ID(filter))
 	{
+
+    ////--------------------------- project single trivial ----------------------------------
 
 		case FP_SINGLEIMAGEPROJ :
 		{
       bool use_depth = par.getBool("usedepth");
+      bool onselection = par.getBool("onselection");
+      float eta = par.getFloat("deptheta");
 
-      // get current raster
+      Point2f  pp;       // projected point
+      float depth=0;     // depth of point (distance from camera)
+      float pdepth=0;    // depth value of projected point (from depth map)
+
+      // get current raster and model
       RasterModel *raster   = md.rm();
       MeshModel   *model    = md.mm();
 
-      // no drawing if camera not valid
+      // no projection if camera not valid
       if(!raster->shot.IsValid())  
         return false;
 
       // the mesh has to be correctly transformed before mapping
       tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
+      tri::UpdateBounding<CMeshO>::Box(model->cm);
+
+      if(use_depth)
+      {
+        // init rendermanager
+        rendermanager = new RenderHelper();
+        if( rendermanager->initializeGL(cb) != 0 )
+          return false;
+        Log("init GL");
+        if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
+          return false;
+        Log("init Buffers");
+
+        // render depth
+        rendermanager->renderScene(raster->shot, model, RenderHelper::FLAT);
+      }
+
       qDebug("Viewport %i %i",raster->shot.Intrinsics.ViewportPx[0],raster->shot.Intrinsics.ViewportPx[1]);
       for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
       {
-        if(!(*vi).IsD())
+        if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
         {
-          Point2f pp = raster->shot.Project((*vi).P());
+          pp = raster->shot.Project((*vi).P());
           
-          //float depth = raster->shot.Depth((*vi).P());
-
           //if inside image
           if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
           {
-            QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
-            (*vi).C() = vcg::Color4b(qRed(pcolor), qGreen(pcolor), qBlue(pcolor), 255);          
-          }
-          else
-          {
-            //(*vi).C() = vcg::Color4b(128, 100, 150, 255);
-          }
-          
 
+            if(use_depth)
+            {
+              depth  = raster->shot.Depth((*vi).P());
+              pdepth = rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];           
+            }
+
+            if(!use_depth || (depth <= (pdepth + eta)))
+            {
+              QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+              (*vi).C() = vcg::Color4b(qRed(pcolor), qGreen(pcolor), qBlue(pcolor), 255);          
+            }
+          }
         }
       }
 
       // the mesh has to return to its original position
       tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
+      tri::UpdateBounding<CMeshO>::Box(model->cm);
+
+      // delete rendermanager
+      if(rendermanager != NULL)
+        delete rendermanager;
+
+		} break;
 
 
+    ////--------------------------- project multi trivial ----------------------------------
 
-/*
-      bool appendexisting = par.getBool("append");
-      CMeshO::VertexIterator vi;
+    case FP_MULTIIMAGETRIVIALPROJ :
+    {
+      bool onselection = par.getBool("onselection");
+      float eta = par.getFloat("deptheta");
+      bool  useangle = par.getBool("useangle"); 
+      bool  usedistance = par.getBool("usedistance"); 
+      bool  useborders = par.getBool("useborders");
 
-      // destination file
-      QString filename = QFileDialog::getSaveFileName((QWidget*)NULL,tr("Export BNPTS File"), QDir::currentPath(), tr("BNPTS file (*.Bnpts )"));
-      FILE* outfile=NULL;
+      Point2f  pp;        // projected point
+      float  depth=0;     // depth of point (distance from camera)
+      float  pdepth=0;    // depth value of projected point (from depth map)
+      double pweight;     // pixel weight
+      MeshModel *model;
+      bool do_project;
+      int cam_ind;
 
-      if(appendexisting)
-        outfile  = fopen(qPrintable(filename), "wba");
-      else
-        outfile  = fopen(qPrintable(filename), "wb");
+      // min max depth for depth weight normalization
+      float allcammaxdepth;
+      float allcammindepth;
 
-      if(outfile==NULL)
-        return false;
+      // max image size for border weight normalization
+      float allcammaximagesize;
 
-      int cnt=0;
-      foreach(MeshModel *mmp, md.meshList)
-      { 
-        ++cnt;
+      // accumulation buffers for colors and weights
+      int buff_ind;
+      double *weights;
+      double *acc_red;
+      double *acc_grn;
+      double *acc_blu;
 
-        // visible ?
-        if(mmp->visible || !onlyvisiblelayers)
-        {
-          float buff[6];
-          
-          // the mesh has to be correctly transformed before exporting
-          tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
+      // get current model
+      model = md.mm();
 
-          for(vi=mmp->cm.vert.begin();vi!=mmp->cm.vert.end();++vi)
-					  if(!(*vi).IsD())
-            {
-              buff[0]=vi->P().X();
-              buff[1]=vi->P().Y();
-              buff[2]=vi->P().Z();
-              buff[3]=vi->N().X();
-              buff[4]=vi->N().Y();
-              buff[5]=vi->N().Z();
+      // the mesh has to be correctly transformed before mapping
+      tri::UpdatePosition<CMeshO>::Matrix(model->cm,model->cm.Tr,true);
+      tri::UpdateBounding<CMeshO>::Box(model->cm);
 
-              fwrite(buff,sizeof(float),6,outfile);
-            }
-
-          // the mesh has to return to its original position
-          tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
-        }     
+      // init accumulation buffers for colors and weights
+      Log("init color accumulation buffers");
+      weights = new double[model->cm.vn];
+      acc_red = new double[model->cm.vn];
+      acc_grn = new double[model->cm.vn];
+      acc_blu = new double[model->cm.vn];
+      for(int buff_ind=0; buff_ind<model->cm.vn; buff_ind++)
+      {
+        weights[buff_ind] = 0.0;
+        acc_red[buff_ind] = 0.0;
+        acc_grn[buff_ind] = 0.0;
+        acc_blu[buff_ind] = 0.0;
       }
 
-      fclose(outfile);
-*/
+      // calculate accuratenear/far for all cameras
+      std::vector<float> my_near;
+      std::vector<float> my_far;
+      calculateNearFarAccurate(md, &my_near, &my_far);
+
+      allcammaxdepth =  -1000000;
+      allcammindepth =   1000000;
+      allcammaximagesize = -1000000;
+      for(cam_ind = 0; cam_ind < md.rasterList.size(); cam_ind++)
+      {
+        if(my_far[cam_ind] > allcammaxdepth)
+          allcammaxdepth = my_far[cam_ind];
+        if(my_near[cam_ind] < allcammindepth)
+          allcammindepth = my_near[cam_ind];
+
+        float imgdiag = sqrt(double(md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[0] * md.rasterList[cam_ind]->shot.Intrinsics.ViewportPx[1]));
+        if (imgdiag > allcammaximagesize)
+          allcammaximagesize = imgdiag;
+      }
+
+
+
+      //-- cycle all cmaeras
+      cam_ind = 0;
+      foreach(RasterModel *raster, md.rasterList)
+      {
+        do_project = true;
+
+        // no drawing if camera not valid
+        if(!raster->shot.IsValid())  
+          do_project = false;
+
+        // no drawing if raster is not active
+        //if(!raster->shot.IsValid())  
+        //  do_project = false;
+
+        if(do_project)
+        {
+          // delete & reinit rendermanager
+          if(rendermanager != NULL)
+            delete rendermanager;
+          rendermanager = new RenderHelper();
+          if( rendermanager->initializeGL(cb) != 0 )
+            return false;
+          Log("init GL");
+          if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
+            return false;
+          Log("init Buffers");
+
+          // render normal & depth
+          rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, my_near[cam_ind]*0.99, my_far[cam_ind]*1.01);
+
+          buff_ind=0;
+
+          for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
+          {
+            if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
+            {
+              pp = raster->shot.Project((*vi).P());
+              
+              //if inside image
+              if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
+              {
+
+                depth  = raster->shot.Depth((*vi).P());
+                pdepth = rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];           
+
+                if(depth <= (pdepth + eta))
+                {
+                  // determine color
+                  QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+                  // determine weight
+                  pweight = 1.0;
+                  
+                  if(useangle)
+                  {
+                    Point3f pixnorm;
+                    Point3f viewaxis;
+
+                    pixnorm = (*vi).N();
+                    pixnorm.Normalize();
+
+                    viewaxis = raster->shot.GetViewPoint() - (*vi).P();
+                    viewaxis.Normalize();
+
+                    float ang = abs(pixnorm * viewaxis);
+                    ang = min(1.0f, ang);
+
+                    pweight *= ang;
+                  }
+                  
+                  if(usedistance)
+                  {
+                    float distw = depth;
+                    distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99)); 
+
+                    pweight *= distw;
+                    pweight *= distw;
+                  }
+
+                  if(useborders)
+                  {
+                    double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
+                    double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
+                    double borderw = min (xdist , ydist);
+
+                    pweight *= borderw;
+                  }                  
+
+                  weights[buff_ind] += pweight;
+                  acc_red[buff_ind] += (qRed(pcolor) * pweight / 255.0);
+                  acc_grn[buff_ind] += (qGreen(pcolor) * pweight / 255.0);
+                  acc_blu[buff_ind] += (qBlue(pcolor) * pweight / 255.0);
+                }
+              }
+            }
+            buff_ind++;
+          }
+          cam_ind ++;
+        } // end foreach camera
+      } // end foreach camera 
+
+      buff_ind = 0;
+      for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
+      {
+        if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
+        {
+          if (weights[buff_ind] != 0) // if 0, it has not found any valid projection on any camera
+          {
+            (*vi).C() = vcg::Color4b( (acc_red[buff_ind] / weights[buff_ind]) *255.0,
+                                      (acc_grn[buff_ind] / weights[buff_ind]) *255.0,
+                                      (acc_blu[buff_ind] / weights[buff_ind]) *255.0,
+                                      255);
+          }
+        }
+        buff_ind++;
+      }
+
+      // the mesh has to return to its original position
+      tri::UpdatePosition<CMeshO>::Matrix(model->cm,Inverse(model->cm.Tr),true);
+      tri::UpdateBounding<CMeshO>::Box(model->cm);
+
+      // delete rendermanager
+      if(rendermanager != NULL)
+        delete rendermanager;
+
+      // delete accumulation buffers
+      delete[]  weights;
+      delete[]  acc_red;
+      delete[]  acc_grn;
+      delete[]  acc_blu;
+
 		} break;
+
+
+
 	}
 	
 	return true;
@@ -202,8 +434,12 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
 FilterColorProjectionPlugin::FilterClass FilterColorProjectionPlugin::getClass(QAction *a)
 {
   switch(ID(a)) {
-    case FP_SINGLEIMAGEPROJ :
+    case FP_SINGLEIMAGEPROJ:
       return FilterClass(Camera + VertexColoring);
+      break;
+    case FP_MULTIIMAGETRIVIALPROJ:
+      return FilterClass(Camera + VertexColoring);
+      break;
     default :  assert(0);
       return MeshFilterInterface::Generic;
   }
@@ -213,9 +449,95 @@ int FilterColorProjectionPlugin::postCondition( QAction* a ) const{
   switch(ID(a)) {
     case FP_SINGLEIMAGEPROJ:
       return MeshModel::MM_VERTCOLOR;
+      break;
+    case FP_MULTIIMAGETRIVIALPROJ:
+      return MeshModel::MM_VERTCOLOR;
+      break;
     default: assert(0);
       return MeshModel::MM_NONE;
 	}
 }
+
+
+//--- this function calculates the near and far values 
+int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near_acc, std::vector<float> *far_acc)
+{
+  CMeshO::VertexIterator vi;
+  int rasterindex;
+  Point2f  pp;        // projected point
+  Point3f  viewaxis;
+
+  if(near_acc != NULL)
+  {
+    near_acc->clear();
+    near_acc->resize(md.rasterList.size());
+  }
+  else
+    return -1;
+
+  if(far_acc != NULL)
+  {
+    far_acc->clear();
+    far_acc->resize(md.rasterList.size());
+  }
+  else
+    return -1;
+  
+  // init near and far vectors
+  for(rasterindex = 0; rasterindex < md.rasterList.size(); rasterindex++)
+  {
+    (*near_acc)[rasterindex] =  1000000;
+    (*far_acc)[rasterindex]  = -1000000;
+  }
+
+  // current model
+  MeshModel *model = md.mm();
+
+  // scan all vertices
+  for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
+  {
+    if(!(*vi).IsD())
+    {
+      // check against all cameras
+      rasterindex = 0;
+      foreach(RasterModel *raster, md.rasterList)
+      {    
+        if(raster->shot.IsValid())  
+        {
+          pp = raster->shot.Project((*vi).P());
+ 
+          viewaxis = raster->shot.GetViewPoint() - (*vi).P();
+          viewaxis.Normalize();
+          
+          if(viewaxis * raster->shot.GetViewDir() > 0.0)     // if facing
+            if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1]) // if inside image
+            {
+              // then update near and far
+              if(raster->shot.Depth((*vi).P()) < (*near_acc)[rasterindex])
+                (*near_acc)[rasterindex] = raster->shot.Depth((*vi).P());
+              if(raster->shot.Depth((*vi).P()) > (*far_acc)[rasterindex])
+                (*far_acc)[rasterindex]  = raster->shot.Depth((*vi).P());
+            }
+
+        }
+        rasterindex++;
+      }
+    }
+  }
+
+  for(rasterindex = 0; rasterindex < md.rasterList.size(); rasterindex++) // set to 0 0 invalid and "strange" cameras
+  {
+    if ( ((*near_acc)[rasterindex] == 1000000)  ||  ((*far_acc)[rasterindex] == -1000000) )
+    {
+      (*near_acc)[rasterindex] = 0;
+      (*far_acc)[rasterindex]  = 0;
+    }
+  }
+
+  return 0;
+}
+
+
+
 
 Q_EXPORT_PLUGIN(FilterColorProjectionPlugin)

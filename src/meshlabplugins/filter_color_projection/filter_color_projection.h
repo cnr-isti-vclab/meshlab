@@ -34,7 +34,7 @@ class FilterColorProjectionPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_SINGLEIMAGEPROJ };
+	enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ };
 
 	FilterColorProjectionPlugin();
 	
@@ -45,7 +45,12 @@ public:
 	virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
   virtual int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
+
+private:
+
+  int calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near, std::vector<float> *far);
+
 };
 
 #endif
