@@ -23,7 +23,6 @@
 
 #version 110
 
-
 uniform sampler2D 	vTexture;
 uniform sampler2D 	nTexture;
 uniform sampler2D	depthTextureFront;
@@ -37,6 +36,7 @@ uniform	float		depthTolerance;
 uniform float		minCos;
 uniform float		maxCos;
 uniform int		firstRendering;
+float 			_vals[5];
 
 vec4 project(vec4 coords)
 {
@@ -44,11 +44,45 @@ vec4 project(vec4 coords)
    return vec4(coords.xyz * 0.5+0.5, coords.w);
 }
 
-/*float calculateSdf(float2 P)
+void InsertionSort(int n) 
 {
+   int i, j;
+
+   float app;
+ 
+   for (i = 1; i < n; i++)
+   {
+      app = _vals[i];
+ 
+      for (j = i - 1; (j >= 0) && (_vals[j] > app); j--)
+               _vals[j+1] = _vals[j];
+ 
+      _vals[j + 1] = app;
+   }
+}
 
 
-}*/
+float calculateSdf(vec3 P)
+{
+	
+    float sdf = 0.0;
+
+    float zFront    = texture2D(depthTextureFront,    P.xy).r;
+    float zBack     = texture2D(depthTextureBack,     P.xy).r;
+    float zPrevBack = texture2D(depthTexturePrevBack, P.xy).r; 
+    
+    if(firstRendering==1)
+    {
+    	if (  P.z <= (zBack-depthTolerance) )
+    		sdf =  max(0.0,(zBack-zFront) ) ; 
+    	
+    }
+    else if (  (zPrevBack+depthTolerance) <= P.z && P.z <= (zBack-depthTolerance) )
+    		sdf =  max(0.0,(zBack-zFront) ) ; 
+    
+
+    return sdf;
+}
 
 void main(void)
 {
@@ -64,28 +98,28 @@ void main(void)
 
     vec4 P = project(V); //* (viewpSize/texSize);
      
-    
-    float zFront    = texture2D(depthTextureFront,    P.xy).r;
-    float zBack     = texture2D(depthTextureBack,     P.xy).r;
-    float zPrevBack = texture2D(depthTexturePrevBack, P.xy).r;   
+   
     float cosAngle  = max(0.0,dot(N.xyz, viewDirection));
-      
 
-    if(firstRendering==1)
+    //supersampling
+
+    if( cosAngle  >= minCos && cosAngle <= maxCos )
     {
-    	if (  P.z <= (zBack-depthTolerance) && cosAngle >= minCos && cosAngle <= maxCos)
-    		sdf =  max(0.0,(zBack-zFront) * cosAngle) ; 
-    	else 
-		cosAngle = 0.0;
+
+	_vals[0] = calculateSdf( vec3( P.x		, P.y,       P.z  ) );
+	_vals[1] = calculateSdf( vec3( P.x - 1.0/texSize, P.y,       P.z  ) );
+	_vals[2] = calculateSdf( vec3( P.x + 1.0/texSize, P.y,       P.z  ) );
+	_vals[3] = calculateSdf( vec3( P.x , P.y - 1.0/texSize,      P.z  ) );
+	_vals[4] = calculateSdf( vec3( P.x , P.y + 1.0/texSize,      P.z  ) );
+
+	InsertionSort(5);
+
+	sdf = _vals[2];	
     }
     else
-    {
-	
-	if (  (zPrevBack+depthTolerance) <= P.z && P.z <= (zBack-depthTolerance) && cosAngle >= minCos && cosAngle <= maxCos)
-    		sdf =  max(0.0,(zBack-zFront) * cosAngle) ; 
-    	else 
-		cosAngle = 0.0;
-    }
+	cosAngle = 0.0;
+      
+
 	
     gl_FragColor = vec4( sdf, cosAngle, 0.0, 1.0);
 }

@@ -1,4 +1,3 @@
-
 #include "filter_sdfgpu.h"
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/intersection.h>
@@ -71,7 +70,7 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                  break;
 
             case SDF_OBSCURANCE:
-                 par.addParam(new RichFloat("obscuranceExponent", 10000.0f, "Obscurance Exponent",
+                 par.addParam(new RichFloat("obscuranceExponent", 10.0f, "Obscurance Exponent",
                                           "Parameter that increase or decrease the exponential rise in obscurance function" ));
                  break;
 
@@ -280,6 +279,7 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     mObscuranceProgram->addUniform("maxCos");
     mObscuranceProgram->addUniform("tau");
     mObscuranceProgram->addUniform("firstRendering");
+  //  mObscuranceProgram->addUniform("maxDist");      //mesh BB diagonal
     mObscuranceProgram->disable();
 
 
@@ -706,8 +706,7 @@ void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3
                   {
                       if(j==3)
                         calculateObscurance( mFboArray[2], mFboArray[1], mFboArray[3], dir);//front back nextBack
-                      else
-                          if(j==1)
+                      else if(j==1)
                         calculateObscurance( mFboArray[0], mFboArray[3], mFboArray[1], dir);//front back nextBack
                   }
               }
