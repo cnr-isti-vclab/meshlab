@@ -76,7 +76,7 @@ struct Succ<Z>
 template <typename EdgeMeshType>
 void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const Point2f &b1, const Point2f &b2, const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
 {
-
+    Log("Prova");
     assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
 
     typename EdgeMeshType::VertexIterator vi;   //alla prima passata  usato per inserire il vertice di intersezione
@@ -90,8 +90,8 @@ void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const P
     MyEdge * eStart = &(em.edge[0]);
     MyEdge * ei = eStart;
 
-    Point2f pJoint2D;       //sar il punto di intersezione 2D inizializzato dal test di intersezione
-    Point3f pJoint;         //sar il punto di intersezione 3D da inserire nell'edgeMesh
+    Point2f pJoint2D;       //punto di intersezione 2D inizializzato dal test di intersezione
+    Point3f pJoint;         //punto di intersezione 3D da inserire nell'edgeMesh
     pJoint[axis] = height;
 
     Point3f pAngle1, pAngle2;   //converto in 3D li angoli del rettangolo per quando dovranno essere inseriti
@@ -215,7 +215,7 @@ ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
                                          <<FP_RECURSIVE_SLICE
                                          <<FP_PARALLEL_PLANES
                                          <<FP_SINGLE_PLANE;
-;//??
+
   foreach(FilterIDType tt , types())
           actionList << new QAction(filterName(tt), this);
 }
@@ -273,6 +273,7 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Ri
     break;
   case FP_PARALLEL_PLANES :
   {
+    parlst.addParam(new RichFloat  ("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
     parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
     parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
     // BBox min=0, BBox center=1, Origin=2
@@ -291,6 +292,7 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Ri
     QStringList axis;
     axis<<"X Axis"<<"Y Axis"<<"Z Axis";
     parlst.addParam(new RichEnum("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
+    parlst.addParam(new RichFloat  ("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
     parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
     // BBox min=0, BBox center=1, Origin=2
     parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
@@ -325,7 +327,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 planeAxis[ind] = 1.0f;
         }
         else    planeAxis=parlst.getPoint3f("customAxis").Normalize();
-
+//
         float length=parlst.getFloat("length");
 
         // set common SVG Properties
@@ -593,6 +595,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                     //*singleFile	Single SVG				bool
                     //?capBase		Cap input mesh holes			bool
 
+
                         // VARIABILLI DI SUPPORTO
                         MeshModel * mBase = m.mm();
                         mBase->visible=false;
@@ -614,6 +617,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                         Axis axis = (Axis) parlst.getEnum("planeAxis");
                         Axis axisOrthog, axisJoint;
 //??togli i casting da dentro lo switch facendo meglio la templatazione
+
                         switch(axis)
                         {
                             case X:
@@ -670,6 +674,13 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                         Plane3f slicingPlane;
 
 
+                        pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
+                        pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
+
+                        pr.projDir = planeAxis;
+                        pr.projCenter =  m.mm()->cm.bbox.Center();
+
+
                         for(int i = 0; i < planeNum; ++i)
                         {
                             // creo un nuovo layer
@@ -707,18 +718,19 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                                 b1.X() = planeDist * j + eps;
                                 b2.X() = planeDist * j - eps;
 */
+
                                 subtraction<MyEdgeMesh>(*edgeMesh, a1, a2, b1, b2, axis, axisOrthog, axisJoint, centerCorr[axis]);
                             }
 
                             ev.push_back(edgeMesh);
                         }
 
-                        QString fname=parlst.getSaveFileName("filename");
+                        QString fname;//=parlst.getSaveFileName("filename");
                         if(fname=="")
                                 fname="Slice.svg";
                         else if (!fname.endsWith(".svg"))
                                 fname+=".svg";
-                        vcg::tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
+                        tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
 
 
                 }
