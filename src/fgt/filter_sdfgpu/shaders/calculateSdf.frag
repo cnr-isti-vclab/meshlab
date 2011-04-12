@@ -36,7 +36,7 @@ uniform	float		depthTolerance;
 uniform float		minCos;
 uniform float		maxCos;
 uniform int		firstRendering;
-float 			_vals[5];
+float 			_vals[9];
 
 vec4 project(vec4 coords)
 {
@@ -112,9 +112,14 @@ void main(void)
 	_vals[3] = calculateSdf( vec3( P.x , P.y - 1.0/texSize,      P.z  ) );
 	_vals[4] = calculateSdf( vec3( P.x , P.y + 1.0/texSize,      P.z  ) );
 
-	InsertionSort(5);
+	_vals[5] = calculateSdf( vec3( P.x - 1.0/texSize, P.y  - 1.0/texSize,       P.z  ) );
+	_vals[6] = calculateSdf( vec3( P.x + 1.0/texSize, P.y  + 1.0/texSize,       P.z  ) );
+	_vals[7] = calculateSdf( vec3( P.x + 1.0/texSize, P.y - 1.0/texSize,      P.z  ) );
+	_vals[8] = calculateSdf( vec3( P.x - 1.0/texSize, P.y + 1.0/texSize,      P.z  ) );
 
-	sdf = _vals[2];	
+	InsertionSort(9);
+
+	sdf = _vals[4] * cosAngle;	
     }
     else
 	cosAngle = 0.0;

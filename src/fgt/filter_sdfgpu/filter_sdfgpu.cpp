@@ -37,27 +37,19 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                     "Choose whether to trace rays from faces or from vertices. "
                     "Recall that tracing from vertices will use vertex normal "
                     "estimation."));
-   par.addParam(  new RichInt("numberRays", 128, "Number of rays: ",
+   par.addParam(  new RichInt("numberRays", 64, "Number of rays: ",
                     "The standard deviation of the rays that will be casted around "
                     "the anti-normals. Remember that most sampled directions are "
                     "expected to fall within 3x this value."));
-   /* par.addParam(new RichFloat("lowQuantile", .1, "Bottom quantile",
-                    "We will throw away the set of ray distances for each cone which distance "
-                    "value falls under this quantile. Value in between [0,1]. 0 Implies all "
-                    "values are kept"));
-   par.addParam(new RichFloat("hiQuantile", .9, "Top quantile",
-                    "We will throw away the set of ray distances for each cone which distance "
-                    "value falls under this quantile. Value in between [0,1]. 1 Implies all "
-                    "values are kept"));*/
    par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
                     "Size of the depth texture for depth peeling"));
    par.addParam(new RichInt("peelingIteration", 8, "Peeling Iteration",
                                 "Number of depth peeling iteration"));
    par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
                             "We will throw away the set of ray distances for each cone which distance " ));
-   par.addParam(new RichFloat("depthTolerance", 0.0001f, "Depth tolerance",
+   par.addParam(new RichFloat("depthTolerance", 0.0000001f, "Depth tolerance",
                             "A small delta that is the minimal distance in depth between two vertex" ));
-   par.addParam(new RichFloat("minCos", 0.7f, "Min cosine",
+   par.addParam(new RichFloat("minCos", 0.5f, "Min cosine",
                             "Min accepteded cosine of the angle between rays and vertex normals" ));
    par.addParam(new RichFloat("maxCos", 1.0f, "Max cosine",
                             "Max accepteded cosine of the angle between rays and vertex normals" ));
@@ -70,7 +62,7 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                  break;
 
             case SDF_OBSCURANCE:
-                 par.addParam(new RichFloat("obscuranceExponent", 10.0f, "Obscurance Exponent",
+                 par.addParam(new RichFloat("obscuranceExponent", 0.01f, "Obscurance Exponent",
                                           "Parameter that increase or decrease the exponential rise in obscurance function" ));
                  break;
 
@@ -279,7 +271,7 @@ bool SdfGpuPlugin::initGL(unsigned int numVertices)
     mObscuranceProgram->addUniform("maxCos");
     mObscuranceProgram->addUniform("tau");
     mObscuranceProgram->addUniform("firstRendering");
-  //  mObscuranceProgram->addUniform("maxDist");      //mesh BB diagonal
+    mObscuranceProgram->addUniform("maxDist");      //mesh BB diagonal
     mObscuranceProgram->disable();
 
 
@@ -544,7 +536,7 @@ void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
     delete [] result;
 }
 
-void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextBack, const vcg::Point3f& cameraDir)
+void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextBack, const vcg::Point3f& cameraDir, float bbDiag)
 {
     mFboResult->bind();
     glViewport(0, 0, mResTextureDim, mResTextureDim);
@@ -615,6 +607,8 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
     mObscuranceProgram->setUniform1f("maxCos", 1.0);
 
     mObscuranceProgram->setUniform1f("tau", mTau);
+
+    mObscuranceProgram->setUniform1f("maxDist", bbDiag);
 
     if(nextBack == NULL)
         mObscuranceProgram->setUniform1i("firstRendering",1);
@@ -705,13 +699,13 @@ void SdfGpuPlugin::TraceRays(int peelingIteration, float tolerance, const Point3
                   if(i%2)
                   {
                       if(j==3)
-                        calculateObscurance( mFboArray[2], mFboArray[1], mFboArray[3], dir);//front back nextBack
+                        calculateObscurance( mFboArray[2], mFboArray[1], mFboArray[3], dir, mm->cm.bbox.Diag());//front back nextBack
                       else if(j==1)
-                        calculateObscurance( mFboArray[0], mFboArray[3], mFboArray[1], dir);//front back nextBack
+                        calculateObscurance( mFboArray[0], mFboArray[3], mFboArray[1], dir, mm->cm.bbox.Diag());//front back nextBack
                   }
               }
               else if(i==1)
-                  calculateObscurance( mFboArray[0], mFboArray[1], NULL, dir);//front back nextBack
+                  calculateObscurance( mFboArray[0], mFboArray[1], NULL, dir, mm->cm.bbox.Diag());//front back nextBack
 
             break;
       }

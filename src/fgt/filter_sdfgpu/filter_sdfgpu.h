@@ -59,7 +59,7 @@ public:
 
     void applySdfHW(MeshModel &m, float numberOfRays);
 
-    void calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextFront, const vcg::Point3f& cameraDir);
+    void calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextFront, const vcg::Point3f& cameraDir, float bbDiag );
 
     void applyObscurance(MeshModel &m, float numberOfRays);
 

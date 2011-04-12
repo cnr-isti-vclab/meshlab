@@ -37,6 +37,7 @@ uniform float		minCos;
 uniform float		maxCos;
 uniform float		tau;
 uniform int 		firstRendering;
+uniform float		maxDist;
 
 vec4 project(vec4 coords)
 {
@@ -71,7 +72,7 @@ void main(void)
 
 		if ( (zBack+depthTolerance) <=  P.z && P.z <= (zNextBack-depthTolerance) )
 		{
- 			float dist = max(0.0,(zFront-zBack));
+ 			float dist = max(0.0,(zFront-zBack))*maxDist;
 			
 			obscurance = max(0.0, 1.0 - exp(-tau*dist))*cosAngle;
 			
