@@ -17,6 +17,19 @@
 				</PARAM_HELP>
 				<CHECKBOX_GUI guiLabel="Recompute normals" />
 			</PARAM>
+			<PARAM parType="Vec3" parName="VectDir" parDefault="[1.0,0.0,0.0]" parIsImportant="true">
+				<PARAM_HELP>
+					Toggle the recomputation of the normals after the random displacement.\n\n
+					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
+				</PARAM_HELP>
+				<EDIT_GUI guiLabel="VectDir" />
+			</PARAM>
+			<PARAM parType="Real" parName="Displ" parDefault="meshDoc.current().bboxDiag() / 100.0" parIsImportant="false">
+				<PARAM_HELP>
+					The vertex are displaced of a vector whose norm is bounded by this value
+				</PARAM_HELP>
+				<EDIT_GUI guiLabel="Max displacement"/>
+			</PARAM>
 		</FILTER>		
 	</PLUGIN>
 </MESHLAB_FILTER_INTERFACE>

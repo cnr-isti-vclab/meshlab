@@ -58,6 +58,7 @@ namespace MLXMLElNames
 	const QString editTag("EDIT_GUI");
 	const QString checkBoxTag("CHECKBOX_GUI");
 	const QString absPercTag("ABSPERC_GUI");
+	const QString vec3WidgetTag("VEC3_GUI");
 	
 
 

@@ -58,8 +58,9 @@ bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument&
 		//// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
 		if(env.getBool("UpdateNormals"))	
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-
-		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+		
+		vcg::Point3f res = env.getVec3("VectDir");
+ 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 
 		return true;
 	}

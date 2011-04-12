@@ -35,7 +35,8 @@ public:
 	//WARNING! This constructor could rise up a set of MeshLabExceptions! this does it mean that the object COULD BE NOT correctly constructed!
 	XMLMeshLabWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
-	virtual void collectWidgetValue() = 0;
+	//virtual void collectWidgetValue() = 0;
+	virtual void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
 	virtual void setWidgetExpression(const QString& nwExpStr) = 0;
 	virtual QString getWidgetExpression() = 0;
 	virtual void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
@@ -81,9 +82,9 @@ class XMLCheckBoxWidget : public XMLMeshLabWidget
 public:
 	XMLCheckBoxWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLCheckBoxWidget();
-	void resetWidgetValue();
+	
+	void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
-	void collectWidgetValue();
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
@@ -102,9 +103,7 @@ class XMLEditWidget : public XMLMeshLabWidget
 public:
 	XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLEditWidget();
-	void resetWidgetValue();
-	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
-	void collectWidgetValue();
+	void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
@@ -118,13 +117,12 @@ private:
 
 class XMLAbsWidget : public XMLMeshLabWidget
 {	
+	Q_OBJECT
 public:
 	XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLAbsWidget();
 	
-	void resetWidgetValue();
-	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
-	void collectWidgetValue();
+	void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void setWidgetExpression(const QString& nv);
 	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
@@ -139,6 +137,38 @@ private:
 
 	QDoubleSpinBox *absSB;
 	QDoubleSpinBox *percSB;
+};
+
+class XMLVec3Widget : public XMLMeshLabWidget
+{
+	Q_OBJECT
+public:
+	XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	~XMLVec3Widget();
+	QString paramName;
+
+	void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+	void setWidgetExpression(const QString& nv);
+	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+	void updateVisibility(const bool vis);
+	QString getWidgetExpression();
+
+	public slots:
+		void  getPoint();
+		void  setShotExpression(const QString& name,const QString& exp );	
+		void  setShot(const QString& name,const vcg::Shotf& val );
+signals:
+		void askViewDir(QString);
+		void askViewPos(QString);
+		void askSurfacePos(QString);
+		void askCameraPos(QString);
+		void setExp(const QString& name,const QString& exp );
+protected:
+	QLineEdit * coordSB[3];
+	QComboBox *getPoint3Combo;
+	QPushButton *getPoint3Button;
+	QLabel* descLab;
+	QWidget* curr_gla;
 };
 
 //class XMLSliderWidget : public XMLFloatWidget

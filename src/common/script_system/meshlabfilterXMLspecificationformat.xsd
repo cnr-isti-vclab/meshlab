@@ -48,6 +48,7 @@
      <xs:element ref='CHECKBOX_GUI'/>
      <xs:element ref='ABSPERC_GUI'/>
 	 <xs:element ref='EDIT_GUI'/>
+	 <xs:element ref='VEC3_GUI'/>
     </xs:choice>
    </xs:sequence>
    <xs:attribute name='parType' use='required'>
@@ -83,6 +84,12 @@
   </xs:complexType>
  </xs:element>
  
+  <xs:element name='VEC3_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
  <xs:element name='ABSPERC_GUI'>
   <xs:complexType>
    <xs:attribute name='guiLabel' type='xs:string' use='required'/>
@@ -90,7 +97,7 @@
    <xs:attribute name='guiMax' type='xs:string' use='required'/>
   </xs:complexType>
  </xs:element>
-
+ 
  <xs:simpleType name="ArietyType">
   <xs:restriction base="xs:string">
     <xs:enumeration value="SingleMesh"/>

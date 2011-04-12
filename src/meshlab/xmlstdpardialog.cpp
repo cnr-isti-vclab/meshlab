@@ -382,16 +382,6 @@ XMLCheckBoxWidget::~XMLCheckBoxWidget()
 
 }
 
-void XMLCheckBoxWidget::resetWidgetValue()
-{
-
-}
-
-void XMLCheckBoxWidget::collectWidgetValue()
-{
-
-}
-
 void XMLCheckBoxWidget::setWidgetExpression( const QString& /*nv*/ )
 {
 
@@ -417,6 +407,10 @@ QString XMLCheckBoxWidget::getWidgetExpression()
 	return state;
 }
 
+void XMLCheckBoxWidget::resetWidgetExpression( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+{
+
+}
 XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,QWidget* parent)
 {
 	QString guiType = widgetTable[MLXMLElNames::guiType];
@@ -428,6 +422,10 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 
 	if (guiType == MLXMLElNames::absPercTag)
 		return new XMLAbsWidget(widgetTable,env,parent);
+	
+	if (guiType == MLXMLElNames::vec3WidgetTag)
+		return new XMLVec3Widget(widgetTable,env,parent);
+
 	return NULL;
 }
 
@@ -457,15 +455,6 @@ XMLEditWidget::~XMLEditWidget()
 
 }
 
-void XMLEditWidget::resetWidgetValue()
-{
-
-}
-
-void XMLEditWidget::collectWidgetValue()
-{
-
-}
 
 
 void XMLEditWidget::setWidgetExpression( const QString& /*nv*/ )
@@ -502,6 +491,11 @@ void XMLEditWidget::tooltipEvaluation()
 QString XMLEditWidget::getWidgetExpression()
 {
 	return this->lineEdit->text();
+}
+
+void XMLEditWidget::resetWidgetExpression( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+{
+
 }
 
 XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
@@ -567,16 +561,6 @@ XMLAbsWidget::~XMLAbsWidget()
 	delete maxVal;
 }
 
-void XMLAbsWidget::resetWidgetValue()
-{
-
-}
-
-void XMLAbsWidget::collectWidgetValue()
-{
-	//rp->val->set(FloatValue(float(absSB->value())));
-}
-
 void XMLAbsWidget::setWidgetExpression( const QString& /*nv*/ )
 {
 
@@ -599,6 +583,11 @@ void XMLAbsWidget::updateVisibility( const bool vis )
 QString XMLAbsWidget::getWidgetExpression()
 {
 	return QString::number(absSB->value());
+}
+
+void XMLAbsWidget::resetWidgetExpression( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+{
+
 }
 
 ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
@@ -633,4 +622,134 @@ void ExpandButtonWidget::changeIcon()
 		arrow = down;
 	exp->setText(arrow);
 	emit expandView(isExpanded);
+}
+
+XMLVec3Widget::XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p)
+:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+{
+	XMLStdParFrame* par = qobject_cast<XMLStdParFrame*>(p);
+	if (par != NULL)
+	{
+		curr_gla = par->curr_gla;
+		paramName = xmlWidgetTag[MLXMLElNames::paramName];
+		//int row = gridLay->rowCount() - 1;
+
+		descLab = new QLabel( xmlWidgetTag[MLXMLElNames::paramName],p);
+		descLab->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
+		gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+
+		QHBoxLayout* lay = new QHBoxLayout(p);
+
+		for(int i =0;i<3;++i)
+		{
+			coordSB[i]= new QLineEdit(p);
+			QFont baseFont=coordSB[i]->font();
+			if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
+			else baseFont.setPointSize(baseFont.pointSize()*3/4);
+			coordSB[i]->setFont(baseFont);
+			//coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
+			coordSB[i]->setMinimumWidth(0);
+			coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
+			//coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
+			coordSB[i]->setValidator(new QDoubleValidator(p));
+			coordSB[i]->setAlignment(Qt::AlignRight);
+			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
+			lay->addWidget(coordSB[i]);
+		}
+		this->setShotExpression(paramName,xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+		if(curr_gla) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
+		{
+			getPoint3Button = new QPushButton("Get",p);
+			getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
+
+			getPoint3Button->setFlat(true);
+			//getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
+			//this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
+			lay->addWidget(getPoint3Button);
+			QStringList names;
+			names << "View Dir";
+			names << "View Pos";
+			names << "Surf. Pos";
+			names << "Camera Pos";
+
+			getPoint3Combo = new QComboBox(p);
+			getPoint3Combo->addItems(names);
+			//getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
+			//this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
+			lay->addWidget(getPoint3Combo);
+
+			connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
+			connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
+			connect(curr_gla,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+			connect(curr_gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
+			connect(curr_gla,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+			connect(this,SIGNAL(askViewDir(QString)),curr_gla,SLOT(sendViewDir(QString)));
+			connect(this,SIGNAL(askViewPos(QString)),curr_gla,SLOT(sendMeshShot(QString)));
+			connect(this,SIGNAL(askSurfacePos(QString)),curr_gla,SLOT(sendSurfacePos(QString)));
+			connect(this,SIGNAL(askCameraPos(QString)),curr_gla,SLOT(sendCameraPos(QString)));
+		}
+		gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	}
+}
+
+void XMLVec3Widget::resetWidgetExpression( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+{
+
+}
+
+void XMLVec3Widget::setWidgetExpression( const QString& exp )
+{
+	vcg::Point3f newVal = env.getVec3(exp);
+	for(int ii = 0;ii < 3;++ii)
+		coordSB[ii]->setText(QString::number(newVal[ii],'g',4));
+}
+
+void XMLVec3Widget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+{
+
+}
+
+void XMLVec3Widget::updateVisibility( const bool vis )
+{
+	for(int ii = 0;ii < 3;++ii)
+		coordSB[ii]->setVisible(vis);
+	getPoint3Button->setVisible(vis);
+	getPoint3Combo->setVisible(vis);
+	descLab->setVisible(vis);
+}
+
+QString XMLVec3Widget::getWidgetExpression()
+{
+	return QString("[" + coordSB[0]->text() + "," + coordSB[1]->text() + "," + coordSB[2]->text() + "]");
+}
+
+//void XMLVec3Widget::setExp(const QString& name,const QString& exp )
+//{
+//	QRegExp pointRegExp("\[\d+(\.\d)*,\d+(\.\d)*,\d+(\.\d)*\]");
+//	if ((name==paramName) && (pointRegExp.exactMatch(exp)))
+//	{
+//		for(int i =0;i<3;++i)
+//			coordSB[i]->setText(QString::number(val[i],'g',4));
+//	}
+//}	
+
+void XMLVec3Widget::getPoint()
+{
+
+}
+
+void XMLVec3Widget::setShot(const QString& name,const vcg::Shotf& val )
+{
+
+}
+
+void XMLVec3Widget::setShotExpression( const QString& name,const QString& exp )
+{
+	if (name == paramName)
+		setWidgetExpression(exp);
+}
+
+XMLVec3Widget::~XMLVec3Widget()
+{
+
 }
