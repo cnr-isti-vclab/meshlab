@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+	<xs:element name='MeshLabProject'>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref='MeshGroup'/>
+				<xs:element ref='RasterGroup'/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name='MeshGroup'>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref='MLMesh' maxOccurs='unbounded'/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name='MLMesh'>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref='MLMatrix44'/>
+			</xs:sequence>
+			<xs:attribute name='label' type='xs:string' use='required'/>
+			<xs:attribute name='filename' type='xs:string' use='required'/>	
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name='MLMatrix44' type='Vector16'/>
+
+	<xs:element name='RasterGroup'>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref='MLRaster' maxOccurs='unbounded'/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name='MLRaster'>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref='VCGCamera'/>
+				<xs:element ref='Plane'/>
+			</xs:sequence>	
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name='VCGCamera'>
+		<xs:complexType>
+			<xs:attribute name='TranslationVector' type='Vector3' use='required'/>
+			<xs:attribute name='LensDistortion' type='Vector2' use='required'/>
+			<xs:attribute name='ViewportPx' type='Vector2' use='required'/>
+			<xs:attribute name='PixelSizeMm' type='Vector2' use='required'/>
+			<xs:attribute name='CenterPx' type='Vector2' use='required'/>
+			<xs:attribute name='FocalMm' type='xs:decimal' use='required'/>
+			<xs:attribute name='RotationMatrix' type='Vector16' use='required'/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name='Plane'>
+		<xs:complexType>
+			<xs:attribute name='semantic' type='xs:string' use='required'/>
+			<xs:attribute name='fileName' type='xs:string' use='required'/>	
+		</xs:complexType>
+	</xs:element>
+
+	<xs:simpleType name='VectorList'>
+		<xs:list itemType='xs:decimal'/>
+	</xs:simpleType>
+
+	<xs:simpleType name='Vector2'>
+		<xs:restriction base='VectorList'>
+			<xs:length value='2'/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name='Vector3'>
+		<xs:restriction base='VectorList'>
+			<xs:length value='3'/>
+		</xs:restriction >
+	</xs:simpleType>
+
+	<xs:simpleType name='Vector16'>
+		<xs:restriction base='VectorList'>
+			<xs:length value='16'/>
+		</xs:restriction >
+	</xs:simpleType>
+</xs:schema>
