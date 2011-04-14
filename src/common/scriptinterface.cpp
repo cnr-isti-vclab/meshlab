@@ -362,7 +362,7 @@ EnvWrap::EnvWrap(Env& envir)
 {
 }
 
-QScriptValue EnvWrap::getExp( const QString& nm )
+QScriptValue EnvWrap::evalExp( const QString& nm )
 {
 	if (!constStatement(nm))
 		throw NotConstException(nm);
@@ -372,9 +372,9 @@ QScriptValue EnvWrap::getExp( const QString& nm )
 	return result;
 }
 
-bool EnvWrap::getBool( const QString& nm )
+bool EnvWrap::evalBool( const QString& nm )
 {
-	QScriptValue result = getExp(nm);
+	QScriptValue result = evalExp(nm);
 	if (result.isBool())
 		return result.toBool();
 	else
@@ -382,9 +382,9 @@ bool EnvWrap::getBool( const QString& nm )
 	return false;
 }
 
-float EnvWrap::getFloat( const QString& nm )
+float EnvWrap::evalFloat( const QString& nm )
 {
-	QScriptValue result = getExp(nm);
+	QScriptValue result = evalExp(nm);
 	if (result.isNumber())
 		return result.toNumber();
 	else
@@ -392,9 +392,9 @@ float EnvWrap::getFloat( const QString& nm )
 	return float();
 }
 
-vcg::Point3f EnvWrap::getVec3( const QString& nm )
+vcg::Point3f EnvWrap::evalVec3( const QString& nm )
 {
-	QScriptValue result = getExp(nm);
+	QScriptValue result = evalExp(nm);
 	QVariant resVar = result.toVariant();
 	QVariantList resList = resVar.toList();
 	if (resList.size() == 3)
@@ -451,9 +451,9 @@ bool EnvWrap::constStatement( const QString& statement ) const
 //	}
 //}
 
-QString EnvWrap::getString( const QString& nm )
+QString EnvWrap::evalString( const QString& nm )
 {
-	QScriptValue result = getExp(nm);
+	QScriptValue result = evalExp(nm);
 	return result.toString();
 }
 

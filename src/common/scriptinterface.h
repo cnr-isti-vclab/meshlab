@@ -134,16 +134,16 @@ class EnvWrap
 {
 private:
 	bool constStatement(const QString& statement) const;
-	QScriptValue getExp( const QString& nm );
+	QScriptValue evalExp( const QString& nm );
 	Env* env;
 public:
 	EnvWrap():env(NULL){};
 	EnvWrap(Env& envir);
-	bool getBool(const QString& nm);
-	float getFloat(const QString& nm);
-	vcg::Point3f getVec3(const QString& nm);
+	bool evalBool(const QString& nm);
+	float evalFloat(const QString& nm);
+	vcg::Point3f evalVec3(const QString& nm);
 	/*QString getExpType(const QString& nm);*/
-	QString getString(const QString& nm);
+	QString evalString(const QString& nm);
 };
 
 QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);
