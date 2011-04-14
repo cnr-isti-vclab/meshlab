@@ -226,6 +226,7 @@ public slots:
 		void sendViewPos(QString name);
 		void sendSurfacePos(QString name);
 		void sendViewDir(QString name);
+		void sendCameraPos(QString name);
     void sendMeshShot(QString name);
     void sendViewerShot(QString name);
     void sendRasterShot(QString name);

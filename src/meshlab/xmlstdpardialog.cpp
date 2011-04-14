@@ -98,7 +98,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
 	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
 	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
-	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetValues()));
+	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetExpressions()));
 
 	qf->showNormal();
 	qf->adjustSize();
@@ -189,17 +189,6 @@ void MeshLabXMLStdDialog::closeClick()
 
 }
 
-void MeshLabXMLStdDialog::resetValues()
-{
-	//curParSet.clear();
-	//curmfi->initParameterSet(curAction, *curMeshDoc, curParSet);
-
-	//assert(qf);
-	//assert(qf->isVisible());
-	//// assert(curParSet.paramList.count() == stdfieldwidgets.count());
-	//stdParFrame->resetValues(curParSet);
-}
-
 void MeshLabXMLStdDialog::toggleHelp()
 {
 	showHelp = !showHelp;
@@ -257,6 +246,14 @@ bool MeshLabXMLStdDialog::isDynamic() const
 	 return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 }
 
+void MeshLabXMLStdDialog::resetExpressions()
+{
+	QString fname(curmfc->act->text());
+	XMLFilterInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
+	EnvWrap envir(env);
+	stdParFrame->resetExpressions(mplist);
+}
+
 XMLStdParFrame::XMLStdParFrame( QWidget *p,QWidget *gla/*=0*/ )
 :QFrame(p),extended(false)
 {
@@ -311,6 +308,12 @@ void XMLStdParFrame::extendedView(bool ext,bool help)
 	adjustSize();
 }
 
+void XMLStdParFrame::resetExpressions(const XMLFilterInfo::XMLMapList& mplist)
+{
+	for(int i = 0; i < xmlfieldwidgets.count(); i++)
+		xmlfieldwidgets[i]->set(mplist[i][MLXMLElNames::paramDefExpr]);
+}
+
 XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,EnvWrap& envir,QWidget* parent )
 :QWidget(parent),env(envir)
 {
@@ -319,7 +322,7 @@ XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,EnvWrap& envi
 	//we must break the construction of the widget in two steps because otherwise in the constructor (called by XMLMeshLabWidgetFactory::create) the emit is invoked
 	//before the connection!
 	//connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
-	isImportant = env.getBool(mp[MLXMLElNames::paramIsImportant]);
+	isImportant = env.evalBool(mp[MLXMLElNames::paramIsImportant]);
 	setVisible(isImportant);
 		
 	helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",this);
@@ -353,12 +356,17 @@ void XMLMeshLabWidget::setVisibility( const bool vis )
 	setVisible(vis);
 }
 
+//void XMLMeshLabWidget::reset()
+//{	
+//	this->set(map[MLXMLElNames::paramDefExpr]);
+//}
+
 XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
 	cb = new QCheckBox(xmlWidgetTag[MLXMLElNames::paramName],this);
 	cb->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
-	bool defVal = env.getBool(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+	bool defVal = env.evalBool(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
 	cb->setChecked(defVal);
 	cb->setVisible(isImportant);
 
@@ -379,17 +387,12 @@ XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,
 
 XMLCheckBoxWidget::~XMLCheckBoxWidget()
 {
-
+	
 }
 
-void XMLCheckBoxWidget::setWidgetExpression( const QString& /*nv*/ )
+void XMLCheckBoxWidget::set( const QString& nwExpStr )
 {
-
-}
-
-void XMLCheckBoxWidget::updateWidget( const XMLFilterInfo::XMLMap& /*xmlWidgetTag*/ )
-{
-
+	cb->setChecked(env.evalBool(nwExpStr));
 }
 
 void XMLCheckBoxWidget::updateVisibility( const bool vis )
@@ -407,10 +410,6 @@ QString XMLCheckBoxWidget::getWidgetExpression()
 	return state;
 }
 
-void XMLCheckBoxWidget::resetWidgetExpression( const XMLFilterInfo::XMLMap& xmlWidgetTag )
-{
-
-}
 XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,QWidget* parent)
 {
 	QString guiType = widgetTable[MLXMLElNames::guiType];
@@ -457,14 +456,9 @@ XMLEditWidget::~XMLEditWidget()
 
 
 
-void XMLEditWidget::setWidgetExpression( const QString& /*nv*/ )
+void XMLEditWidget::set( const QString& nwExpStr )
 {
-
-}
-
-void XMLEditWidget::updateWidget( const XMLFilterInfo::XMLMap& /*xmlWidgetTag*/ )
-{
-
+	lineEdit->setText(nwExpStr);
 }
 
 void XMLEditWidget::updateVisibility( const bool vis )
@@ -478,7 +472,7 @@ void XMLEditWidget::tooltipEvaluation()
 	try
 	{
 		QString exp = lineEdit->selectedText();
-		QString res = env.getString(exp);
+		QString res = env.evalString(exp);
 		lineEdit->setToolTip(res);
 	}
 	catch (MeshLabException& /*e*/)
@@ -493,16 +487,12 @@ QString XMLEditWidget::getWidgetExpression()
 	return this->lineEdit->text();
 }
 
-void XMLEditWidget::resetWidgetExpression( const XMLFilterInfo::XMLMap& xmlWidgetTag )
-{
-
-}
 
 XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
-:XMLMeshLabWidget(xmlWidgetTag,envir,parent),minVal(NULL),maxVal(NULL)
+:XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
-	float m_min = env.getFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
-	float m_max = env.getFloat(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
+	m_min = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
+	m_max = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
 
 	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName] + " (abs and %)",this);
 	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
@@ -518,8 +508,7 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& e
 	//qDebug("log range is %f ",log10(fabs(m_max-m_min)));
 	absSB->setDecimals(decimals);
 	absSB->setSingleStep((m_max-m_min)/100.0);
-	//float initVal = rp->val->getAbsPerc();
-	float initVal = 0.0f;
+	float initVal = env.evalFloat(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
 	absSB->setValue(initVal);
 
 	percSB->setMinimum(-200);
@@ -540,9 +529,9 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& e
 	gridLay->addLayout(lay,row,1,1,2,Qt::AlignTop);
 	
 
-		//connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
-		//connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-		//connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
+	connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+	connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
+	//connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
 	this->absLab->setVisible(isImportant);
 	//this->absLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 	this->percLab->setVisible(isImportant);
@@ -557,18 +546,11 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& e
 
 XMLAbsWidget::~XMLAbsWidget()
 {
-	delete minVal;
-	delete maxVal;
 }
 
-void XMLAbsWidget::setWidgetExpression( const QString& /*nv*/ )
+void XMLAbsWidget::set( const QString& nwExpStr )
 {
-
-}
-
-void XMLAbsWidget::updateWidget( const XMLFilterInfo::XMLMap& /*xmlWidgetTag*/ )
-{
-
+	absSB->setValue(env.evalFloat(nwExpStr));
 }
 
 void XMLAbsWidget::updateVisibility( const bool vis )
@@ -585,9 +567,16 @@ QString XMLAbsWidget::getWidgetExpression()
 	return QString::number(absSB->value());
 }
 
-void XMLAbsWidget::resetWidgetExpression( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+void XMLAbsWidget::on_absSB_valueChanged(double newv)
 {
+	percSB->setValue((100*(newv - m_min))/(m_max - m_min));
+	emit dialogParamChanged();
+}
 
+void XMLAbsWidget::on_percSB_valueChanged(double newv)
+{
+	absSB->setValue((m_max - m_min)*0.01*newv + m_min);
+	emit dialogParamChanged();
 }
 
 ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
@@ -656,7 +645,8 @@ XMLVec3Widget::XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& 
 			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
 			lay->addWidget(coordSB[i]);
 		}
-		this->setShotExpression(paramName,xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+		vcg::Point3f def = envir.evalVec3(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+		this->setPoint(paramName,def);
 		if(curr_gla) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 		{
 			getPoint3Button = new QPushButton("Get",p);
@@ -680,9 +670,9 @@ XMLVec3Widget::XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& 
 
 			connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
 			connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
-			connect(curr_gla,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
-			connect(curr_gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
-			connect(curr_gla,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+			connect(curr_gla,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setPoint(QString,vcg::Point3f)));
+			connect(curr_gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShot(QString,vcg::Shotf)));
+			connect(curr_gla,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setPoint(QString,vcg::Point3f)));
 			connect(this,SIGNAL(askViewDir(QString)),curr_gla,SLOT(sendViewDir(QString)));
 			connect(this,SIGNAL(askViewPos(QString)),curr_gla,SLOT(sendMeshShot(QString)));
 			connect(this,SIGNAL(askSurfacePos(QString)),curr_gla,SLOT(sendSurfacePos(QString)));
@@ -692,21 +682,11 @@ XMLVec3Widget::XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& 
 	}
 }
 
-void XMLVec3Widget::resetWidgetExpression( const XMLFilterInfo::XMLMap& xmlWidgetTag )
+void XMLVec3Widget::set( const QString& exp )
 {
-
-}
-
-void XMLVec3Widget::setWidgetExpression( const QString& exp )
-{
-	vcg::Point3f newVal = env.getVec3(exp);
+	vcg::Point3f newVal = env.evalVec3(exp);
 	for(int ii = 0;ii < 3;++ii)
 		coordSB[ii]->setText(QString::number(newVal[ii],'g',4));
-}
-
-void XMLVec3Widget::updateWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag )
-{
-
 }
 
 void XMLVec3Widget::updateVisibility( const bool vis )
@@ -735,18 +715,31 @@ QString XMLVec3Widget::getWidgetExpression()
 
 void XMLVec3Widget::getPoint()
 {
-
+	int index = getPoint3Combo->currentIndex();
+	qDebug("Got signal %i",index);
+	switch(index)
+	{
+		case 0 : emit askViewDir(paramName);		 break;
+		case 1 : emit askViewPos(paramName);		 break;
+		case 2 : emit askSurfacePos(paramName); break;
+		case 3 : emit askCameraPos(paramName); break;
+		default : assert(0);
+	} 
 }
 
-void XMLVec3Widget::setShot(const QString& name,const vcg::Shotf& val )
+void XMLVec3Widget::setShot(const QString& name,const vcg::Shotf& shot )
 {
-
+	vcg::Point3f p = shot.GetViewPoint();
+	setPoint(name,p); 
 }
 
-void XMLVec3Widget::setShotExpression( const QString& name,const QString& exp )
+void XMLVec3Widget::setPoint( const QString& name,const vcg::Point3f& p )
 {
 	if (name == paramName)
-		setWidgetExpression(exp);
+	{
+		QString exp("[" + QString::number(p[0]) + "," + QString::number(p[1]) + "," + QString::number(p[2]) + "]"); 
+		set(exp);
+	}
 }
 
 XMLVec3Widget::~XMLVec3Widget()

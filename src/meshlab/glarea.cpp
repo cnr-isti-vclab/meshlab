@@ -1153,6 +1153,12 @@ void GLArea::sendRasterShot(QString name)
   emit transmitShot(name, curShot);
 }
 
+void GLArea::sendCameraPos( QString name )
+{
+	Point3f dir= trackball.camera.ViewPoint();
+	emit transmitCameraPos(name,dir);
+}
+
 Point3f GLArea::getViewDir()
 {
 	vcg::Matrix44f rotM;
@@ -1676,3 +1682,4 @@ MainWindow * GLArea::mw()
   }
   return qobject_cast<MainWindow *>(curParent);
 }
+

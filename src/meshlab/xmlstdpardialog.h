@@ -36,10 +36,10 @@ public:
 	XMLMeshLabWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
 	//virtual void collectWidgetValue() = 0;
-	virtual void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
-	virtual void setWidgetExpression(const QString& nwExpStr) = 0;
+	//void reset();
+	virtual void set(const QString& nwExpStr) = 0;
 	virtual QString getWidgetExpression() = 0;
-	virtual void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
+	//virtual void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
 	void setVisibility(const bool vis);
 	virtual void updateVisibility(const bool vis) = 0;
 
@@ -63,6 +63,7 @@ protected:
 	QGridLayout* gridLay;
 	QLabel* helpLab;
 	EnvWrap env;
+	/*const XMLFilterInfo::XMLMap& map;*/
 	//QLineEdit* lExprEditor;
 	//QTextEdit* tExprEditor;
 };
@@ -83,10 +84,9 @@ public:
 	XMLCheckBoxWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLCheckBoxWidget();
 	
-	void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
-	void setWidgetExpression(const QString& nv);
-	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+	void set(const QString& nwExpStr);
+	//void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
 
@@ -103,9 +103,9 @@ class XMLEditWidget : public XMLMeshLabWidget
 public:
 	XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLEditWidget();
-	void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag);
-	void setWidgetExpression(const QString& nv);
-	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+
+	void set(const QString& nwExpStr);
+	//void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
 private slots:
@@ -121,17 +121,23 @@ class XMLAbsWidget : public XMLMeshLabWidget
 public:
 	XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLAbsWidget();
-	
-	void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag);
-	void setWidgetExpression(const QString& nv);
-	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+
+	void set(const QString& nwExpStr);
+	//void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
 
+public slots:
+	void on_absSB_valueChanged(double newv);
+	void on_percSB_valueChanged(double newv);
+
+signals:
+	void dialogParamChanged();
+
 private:
 	QLabel* fieldDesc; 
-	Value* minVal;
-	Value* maxVal;
+	float m_min;
+	float m_max;
 	QLabel *absLab;
 	QLabel *percLab;
 
@@ -147,15 +153,14 @@ public:
 	~XMLVec3Widget();
 	QString paramName;
 
-	void resetWidgetExpression(const XMLFilterInfo::XMLMap& xmlWidgetTag);
-	void setWidgetExpression(const QString& nv);
-	void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+	void set(const QString& nwExpStr);
+	//void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
 
 	public slots:
 		void  getPoint();
-		void  setShotExpression(const QString& name,const QString& exp );	
+		void  setPoint( const QString& name,const vcg::Point3f& p );	
 		void  setShot(const QString& name,const vcg::Shotf& val );
 signals:
 		void askViewDir(QString);
@@ -190,7 +195,7 @@ public:
 	//// The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
 	//// This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
 	//void readValues(RichParameterSet &curParSet);
-	//void resetValues(RichParameterSet &curParSet);
+	void resetExpressions(const XMLFilterInfo::XMLMapList& mplist);
 
 	void toggleHelp(bool help);	
 
@@ -199,9 +204,10 @@ public:
 
 	QWidget *curr_gla; // used for having a link to the glarea that spawned the parameter asking.
 	~XMLStdParFrame();
-//signals:
+signals:
 	//void frameEvaluateExpression(const Expression& exp,Value** res);
-	
+	void parameterChanged();
+
 private:
 	QGridLayout * vLayout;
 	bool extended;
@@ -251,7 +257,7 @@ public:
 private slots:
 	void applyClick();
 	void closeClick();
-	void resetValues();
+	void resetExpressions();
 	void toggleHelp();
 	void togglePreview();
 	void applyDynamic();
