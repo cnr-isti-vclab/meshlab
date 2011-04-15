@@ -30,10 +30,10 @@
 #include "cleanfilter.h"
 #include "align_tools.h"
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/create/ball_pivoting.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/create/platonic.h>
+#include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/create/ball_pivoting.h>
 
 #include <vcg/space/normal_extrapolation.h>
 using namespace std;
