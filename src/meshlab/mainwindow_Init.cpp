@@ -94,7 +94,7 @@ MainWindow::MainWindow()
 	//qb->setAutoClose(true);
 	//qb->setMinimumDuration(0);
 	//qb->reset();
-
+	connect(GLA(), SIGNAL(updateLayerTable()), layerDialog, SLOT(updateTable()));
 }
 
 void MainWindow::createActions()
