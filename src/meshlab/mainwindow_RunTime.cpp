@@ -1359,16 +1359,15 @@ void MainWindow::saveProject()
     ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
   }
   else
-  {
-    if (saveAllFile->isChecked())
-	{
-		for(int ii = 0; ii < meshDoc()->meshList.size();++ii)
-		{
-			MeshModel* mp = meshDoc()->meshList[ii];
-			ret |= exportMesh(mp->fullName(),mp,true);
-		}
-	}
 	ret = MeshDocumentToXMLFile(*meshDoc(),fileName);
+ 
+  if (saveAllFile->isChecked())
+  {
+	  for(int ii = 0; ii < meshDoc()->meshList.size();++ii)
+	  {
+		  MeshModel* mp = meshDoc()->meshList[ii];
+		  ret |= exportMesh(mp->fullName(),mp,true);
+	  }
   }
 	if(!ret)
     QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
