@@ -40,174 +40,10 @@
 using namespace std;
 using namespace vcg;
 
-typedef enum{L1,l1,L2,NO_LATO} latoRect;
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
-
-/*
-class MyVertex2: public MyVertex
-{
-public:
-    latoRect lato;
-
-};
-
-class MyEdgeMesh2: public vcg::tri::EdgeMesh< std::vector<MyVertex2>, std::vector<MyEdge> > {};
-*/
-
-typedef enum{X = 0, Y = 1, Z = 2} Axis;
-
-
-template <int A>
-struct Succ
-{
-    enum { value = A+1 };
-};
-
-template <>
-struct Succ<Z>
-{
-    enum { value = X };
-};
-
-
-template <typename EdgeMeshType>
-void subtraction(EdgeMeshType &em, const Point2f &a1, const Point2f &a2, const Point2f &b1, const Point2f &b2, const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
-{
-    Log("Prova");
-    assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
-
-    typename EdgeMeshType::VertexIterator vi;   //alla prima passata  usato per inserire il vertice di intersezione
-
-    vector<latoRect> lJoints;
-    Segment2f lato1, lato2, lato3, seg;
-    lato1.Set(a1,b1);
-    lato2.Set(a1,a2);
-    lato3.Set(a2,b2);
-
-    MyEdge * eStart = &(em.edge[0]);
-    MyEdge * ei = eStart;
-
-    Point2f pJoint2D;       //punto di intersezione 2D inizializzato dal test di intersezione
-    Point3f pJoint;         //punto di intersezione 3D da inserire nell'edgeMesh
-    pJoint[axis] = height;
-
-    Point3f pAngle1, pAngle2;   //converto in 3D li angoli del rettangolo per quando dovranno essere inseriti
-    pAngle1[axis] = pAngle2[axis] = height;
-    pAngle1[axisOrthog] = a1.X();
-    pAngle2[axisOrthog] = a2.X();
-    pAngle1[axisJoint] = a1.Y();
-    pAngle2[axisJoint] = a2.Y();
-
-    do
-    {
-        MyEdge &eCorr = (*ei);
-        MyVertex &v0 = *(eCorr.V(0));
-        MyVertex &v1 = *(eCorr.V(1));
-        Point3f &p0 = v0.P();
-        Point3f &p1 = v1.P();
-
-        //converto i vertici in 2D
-        Point2f p2D0, p2D1;
-        p2D0.X() = p0[axisOrthog];
-        p2D0.Y() = p0[axisJoint];
-        p2D1.X() = p1[axisOrthog];
-        p2D1.Y() = p1[axisJoint];
-
-        //inizializzo il segmento
-        seg.Set(p2D0,p2D1);
-
-//        if(dentro)
-//            eCorr.SetV(); //segno che l'edge dovr essere rimosso
-
-
-        latoRect lJoint;
-        if(vcg::SegmentSegmentIntersection(lato1,seg,pJoint2D))
-            lJoint = L1;
-        else if(vcg::SegmentSegmentIntersection(lato2,seg,pJoint2D))
-            lJoint = l1;
-        else if(vcg::SegmentSegmentIntersection(lato3,seg,pJoint2D))
-            lJoint = L2;
-        else
-            lJoint = NO_LATO;
-        //bool isJoint = (vcg::SegmentSegmentIntersection(lato1,seg,pJoint2D)) || (vcg::SegmentSegmentIntersection(lato2,seg,pJoint2D)) || (vcg::SegmentSegmentIntersection(lato3,seg,pJoint2D));
-
-        if(lJoint != NO_LATO)
-        {
-            //converto il punto di intersezione in 3D
-            pJoint[axisOrthog] = pJoint2D.X();
-            pJoint[axisJoint] = pJoint2D.Y();
-
-            //spezzo l'edge corrente in due edge sul punto di intersezione
-
-            //aggiungo solo il secondo edge (per lil primo edge uso l'edge corrente)
-            vcg::tri::Allocator<EdgeMeshType>::AddEdges(em,1);
-            //aggiungo un solo vertice per il punto di intersezione (i 2 edge usano i vertici dell'edge corrente e solo il nuovo vertice d'intersezione)
-            vi = vcg::tri::Allocator<EdgeMeshType>::AddVertices(em,1);
-
-            (*vi).P() = pJoint;             //aggiungo il nuovo vertice di intersezione
-            lJoints.push_back(lJoint);             //memorizzo il lato intersecato
-            (*vi).SetV();
-
-            //il 2 edge ha...
-            em.edge.back().V(0) = &(*vi);  //... come 1 vertice il nuovo vertice di intersezione e ...
-            em.edge.back().V(1) = eCorr.V(1);  //... come 2 setto il 2 vertice dell'edge corrente
-
-            //il 1 edge poich fatto sull'edge corrente ha il 1 vertice inalterato, mentre...
-            eCorr.V(1) = &(*vi); //...il secondo vertice  il nuovo vertice di intersezione
-        }
-        else
-            (*vi).ClearV();
-
-        ei = v1.VEp();  // mi sposto sull'edge successivo
-
-    }while (ei != eStart);
-
-
-    //aggiungo l'edge del lato minore del rettangolo  e i suoi 2 vertici
-    vcg::tri::Allocator<EdgeMeshType>::AddEdges(em,1);
-    vi = vcg::tri::Allocator<EdgeMeshType>::AddVertices(em,2);
-
-
-    // Secondo giro sul poligono: faccio pulizia sostituendo pezzi di poligono con il rettangolo
-    ei = eStart;    //riparto dall'inizio
-    int i = 0;      //per scorrere i lati intersecati
-    //prima controllo se il punto di partenza  gi dentro il rettangolo
-    MyEdge &es = (*eStart);
-    bool dentro = ( (es.V(0)->P().X() < a1.X()) && (es.V(0)->P().X() > a2.X()) &&  (es.V(0)->P().Y() > a2.Y()) );
-
-
-    do
-    {
-        MyEdge &eCorr = (*ei);
-        MyVertex &v0 = *(eCorr.V(0));
-        MyVertex &v1 = *(eCorr.V(1));
-        ei = v1.VEp();  // mi sposto sull'edge successivo
-
-        if(v0.IsV())
-        {
-            latoRect &lJoiny = lJoints[i];
-            i++;
-
-            dentro = !dentro; //una volta passati attraverso un lato qualsiasi il 2 edge appena creato e su cui ci spostiamo si trova dalla parte opposta rispetto al 1
-        }
-        else if(dentro)
-        {
-           //?? prima muoviti poi cancella: puoi farlo all'inizio
-//           tri::Allocator<EdgeMeshType>::DeleteEdge(em,eCorr);
-//           tri::Allocator<EdgeMeshType>::DeleteVertex(em,v0);
-           tri::Allocator<MyEdgeMesh>::DeleteEdge(em,eCorr);
-//           tri::Allocator<MyEdgeMesh>::DeleteVertex(em,v0);
-                    ;
-        }
-
-    }while (ei != eStart);
-
-
-}
-
 
 ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
 {
@@ -388,7 +224,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
               ev.push_back(edgeMesh);
 
               QString fname;//=parlst.getSaveFileName("filename");
-              if(fname=="") fname="Slice.svg";
+              if(fname=="") fname="C:/Slice.svg";
               if (!fname.endsWith(".svg")) fname+=".svg";
 
               tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
@@ -602,9 +438,14 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                         CMeshO &base = mBase->cm;
                         Box3f &bbox = base.bbox;
 
+                        if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base,false) != 0))
+                        {
+                          Log("Mesh is not two manifold, cannot apply filter");
+                          return false;
+                        }
+
                         //this is used to generate svg slices
                         vector<MyEdgeMesh*> ev;
-                        CMeshO &orig = m.mm()->cm;
 
                         //per l'estrusione e per la larghezza degli incastri
                         float eps = parlst.getFloat("eps");
@@ -643,15 +484,23 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                         Point3f planeAxis(0,0,0);
                         planeAxis[axis] = 1.0f;
 
-                        Point3f planeCenter = bbox.min + planeAxis * planeOffset * (bbox.Diag()/2.0);  //parto dal basso (bbox min)
-                        int planeNum = (planeDist!=0) ? ( ((bbox.Dim()*planeAxis)/planeDist)+1 ) : 1 ;
+//                        assert(planeAxis.X() != 0 || planeAxis.Y() != 0 || planeAxis.Z()!= 0);
 
-                        Point3f planeOrthog(planeAxis); //
+                        //parto dal basso (bbox min)
+                        float lengthRect = bbox.Diag()/2.0;
+                        Point3f planeCenter = bbox.min + planeAxis*planeOffset*lengthRect;
+//                        Log("planeAxis %f,%f,%f", planeAxis.X(),planeAxis.Y(),planeAxis.Z());
+//                        Log("dim bbox %f",lengthRect);
+
+                        //evito la divisione per 0
+                        int planeNum = (planeDist == 0) ? 1 : ( ((bbox.Dim()*planeAxis)/planeDist)+1 );
+                        Log("Number of plane: %i",planeNum);
+
+                        Point3f planeOrthog(planeAxis);
 
                         planeAxis *= planeDist;		//usato per calcolare la posizione del nuovo piano
-                        float lengthRect = bbox.Diag()/2;
 
-                        //punti per il rettangoo 3D
+                        //punti per il rettangolo 3D
                         Point2f a1,b1,a2,b2,tmp;
                         a1.X() = eps;
                         a1.Y() = 0;
@@ -695,39 +544,49 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 //                            CMeshO &slice = mSlice ->cm;
 
                             // scelta e preparazione del piano di taglio
-                            s.sprintf("calculating slice %d",i+1);
-                            cb((i+1)*100.0f/planeNum,s.toStdString().c_str());
                             Point3f centerCorr = planeCenter + planeAxis * i;
+//                            Log("planeAxisIt %f,%f,%f", planeAxis.X(),planeAxis.Y(),planeAxis.Z());
+//                            Log("planeCenter  %f,%f,%f", planeCenter.X(),planeCenter.Y(),planeCenter.Z());
+//                            Log("centerCorr  %f,%f,%f", centerCorr.X(),centerCorr.Y(),centerCorr.Z());
                             slicingPlane.Init(centerCorr,planeAxis);
 
+                            //this is used to generate svd slices
+                            MyEdgeMesh *edgeMesh = new MyEdgeMesh(); //?? non mettere a puntatore se possibile
+                            //vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
+                            vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(base, slicingPlane , *edgeMesh);
+                            vcg::tri::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
+//                            if(edgeMesh->edge.size()!=0)
+                            {
+
+
+                                //for(int j = 1; j <= planeNum; ++j))
+                                {
+/*                                    a1.X() = planeDist * j + eps;
+                                    a2.X() = planeDist * j - eps;
+                                    b1.X() = planeDist * j + eps;
+                                    b2.X() = planeDist * j - eps;
+*/
+                                    Log("Plane %i have %i edge",i+1,edgeMesh->edge.size());
+                                    //tri::UpdateTopology<MyEdgeMesh>::FaceFace(*edgeMesh);
+                                    //subtraction(*edgeMesh, a1, a2, b1, b2, axis, axisOrthog, axisJoint, centerCorr[axis]);
+                                }
+                                ev.push_back(edgeMesh);
+                            }
+
                             // applicazione del piano di taglio alla mesh. A seconda di ci che deve essere messo nel layer di lavoro e/o usato ad un'iterazione successiva si possono generare: un piano (cap), 2 pezzi di mesh divisi dal piano (slice) e un'estrusione
+                            s.sprintf("calculating slice %d",i+1);
+                            cb((i+1)*100.0f/planeNum,s.toStdString().c_str());
                             generateCap(mBase,slicingPlane,cb,mCap, mSlice);
 
                             //rimuovo lo slice, non mi serve pi; posso comunque riusare il puntatore nel ciclo
                             m.delMesh(mSlice);
 
-                            //this is used to generate svd slices
-                            MyEdgeMesh *edgeMesh = new MyEdgeMesh(); //?? non mettere a puntatore se possibile
-                            vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(orig, slicingPlane , *edgeMesh);
-                            vcg::tri::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
 
-                            //for(int j = 1; j <= planeNum; ++j))
-                            {
-/*                                a1.X() = planeDist * j + eps;
-                                a2.X() = planeDist * j - eps;
-                                b1.X() = planeDist * j + eps;
-                                b2.X() = planeDist * j - eps;
-*/
-
-                                subtraction<MyEdgeMesh>(*edgeMesh, a1, a2, b1, b2, axis, axisOrthog, axisJoint, centerCorr[axis]);
-                            }
-
-                            ev.push_back(edgeMesh);
                         }
 
                         QString fname;//=parlst.getSaveFileName("filename");
                         if(fname=="")
-                                fname="Slice.svg";
+                                fname="C:/Slice.svg";
                         else if (!fname.endsWith(".svg"))
                                 fname+=".svg";
                         tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
@@ -885,6 +744,171 @@ void ExtraFilter_SlicePlugin::generateCap(MeshModel * mBase, /*const*/ Plane3f &
 //        vcg::tri::UpdateTopology<CMeshO>::FaceFace(cap);
 //        vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(cap);
 //        vcg::tri::UpdateBounding<CMeshO>::Box(cap);
+}
+
+
+void ExtraFilter_SlicePlugin::subtraction(MyEdgeMesh &em, const Point2f &a1, const Point2f &a2, const Point2f &b1, const Point2f &b2, const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
+{
+    assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
+    assert(em.edge.size()!=0);
+
+    Segment2f lato1, lato2, lato3, seg;
+    lato1.Set(a1,b1);
+    lato2.Set(a1,a2);
+    lato3.Set(a2,b2);
+
+    Point2f pJoint2D;       //punto di intersezione 2D inizializzato dal test di intersezione
+    Point3f pJoint;         //punto di intersezione 3D da inserire nell'edgeMesh
+    pJoint[axis] = height;
+
+    Point3f pAngle1, pAngle2;   //converto in 3D li angoli del rettangolo per quando dovranno essere inseriti
+    pAngle1[axis] = pAngle2[axis] = height;
+    pAngle1[axisOrthog] = a1.X();
+    pAngle2[axisOrthog] = a2.X();
+    pAngle1[axisJoint] = a1.Y();
+    pAngle2[axisJoint] = a2.Y();
+
+
+    vector<latoRect> lJoints;
+    MyEdgeMesh::VertexIterator vi;   //alla prima passata  usato per inserire il vertice di intersezione
+
+//    for(int i = 0; i < em.edge.size(); ++i)
+
+    MyEdge * eStart = &(em.edge[0]);
+//    MyVertex &vT = *(em.edge[0].V(1));
+//    MyEdge * eStart = vT.VEp();
+    MyEdge * ei = eStart;
+    MyEdge * ePrec;
+
+    int numE = 0;
+    do
+    {
+        numE++;
+        Log("edge visited: %i", numE);
+        MyEdge &eCorr = (*ei);
+
+        MyVertex &v0 = *(eCorr.V(0));
+        MyVertex &v1 = *(eCorr.V(1));
+
+        Point3f &p0 = v0.P();
+        Point3f &p1 = v1.P();
+
+        //converto i vertici in 2D
+        Point2f p2D0, p2D1;
+        p2D0.X() = p0[axisOrthog];
+        p2D0.Y() = p0[axisJoint];
+        p2D1.X() = p1[axisOrthog];
+        p2D1.Y() = p1[axisJoint];
+
+        //inizializzo il segmento
+        seg.Set(p2D0,p2D1);
+
+//        if(dentro)
+//            eCorr.SetV(); //segno che l'edge dovr essere rimosso
+
+        latoRect lJoint;
+        if(vcg::SegmentSegmentIntersection(lato1,seg,pJoint2D))
+        {
+            Log("intersection with L1");
+            lJoint = L1;
+        }
+        else if(vcg::SegmentSegmentIntersection(lato2,seg,pJoint2D))
+        {
+            Log("intersection with l1");
+            lJoint = l1;
+        }
+
+        else if(vcg::SegmentSegmentIntersection(lato3,seg,pJoint2D))
+        {
+            Log("intersection with L2");
+            lJoint = L2;
+        }
+        else
+        {
+            Log("intersection with NO_LATO");
+            lJoint = NO_LATO;
+        }
+        //bool isJoint = (vcg::SegmentSegmentIntersection(lato1,seg,pJoint2D)) || (vcg::SegmentSegmentIntersection(lato2,seg,pJoint2D)) || (vcg::SegmentSegmentIntersection(lato3,seg,pJoint2D));
+
+        if(lJoint != NO_LATO)
+        {
+
+            //converto il punto di intersezione in 3D
+            pJoint[axisOrthog] = pJoint2D.X();
+
+            pJoint[axisJoint] = pJoint2D.Y();
+
+            //spezzo l'edge corrente in due edge sul punto di intersezione
+
+            //aggiungo solo il secondo edge (per lil primo edge uso l'edge corrente)
+            vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
+            //aggiungo un solo vertice per il punto di intersezione (i 2 edge usano i vertici dell'edge corrente e solo il nuovo vertice d'intersezione)
+            vi = vcg::tri::Allocator<MyEdgeMesh>::AddVertices(em,1);
+
+            (*vi).P() = pJoint;             //aggiungo il nuovo vertice di intersezione
+            lJoints.push_back(lJoint);             //memorizzo il lato intersecato
+            (*vi).SetV();
+
+            //il 2 edge ha...
+            em.edge.back().V(0) = &(*vi);  //... come 1 vertice il nuovo vertice di intersezione e ...
+            em.edge.back().V(1) = eCorr.V(1);  //... come 2 setto il 2 vertice dell'edge corrente
+
+            //il 1 edge poich fatto sull'edge corrente ha il 1 vertice inalterato, mentre...
+            eCorr.V(1) = &(*vi); //...il secondo vertice  il nuovo vertice di intersezione
+
+        }
+
+        else
+        {
+            Log("sfasfasfasfa");
+//            (*vi).ClearV();
+
+        }
+
+        ePrec = ei;
+        ei = v1.VEp();  // mi sposto sull'edge successivo
+
+    }while (ei != eStart && ei != NULL && ei != ePrec);
+
+/*
+    //aggiungo l'edge del lato minore del rettangolo  e i suoi 2 vertici
+    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
+    vi = vcg::tri::Allocator<MyEdgeMesh>::AddVertices(em,2);
+
+
+    // Secondo giro sul poligono: faccio pulizia sostituendo pezzi di poligono con il rettangolo
+    ei = eStart;    //riparto dall'inizio
+    int i = 0;      //per scorrere i lati intersecati
+    //prima controllo se il punto di partenza  gi dentro il rettangolo
+    MyEdge &es = (*eStart);
+    bool dentro = ( (es.V(0)->P().X() < a1.X()) && (es.V(0)->P().X() > a2.X()) &&  (es.V(0)->P().Y() > a2.Y()) );
+
+
+    do
+    {
+        MyEdge &eCorr = (*ei);
+        MyVertex &v0 = *(eCorr.V(0));
+        MyVertex &v1 = *(eCorr.V(1));
+        ei = v1.VEp();  // mi sposto sull'edge successivo
+
+        if(v0.IsV())
+        {
+            latoRect &lJoiny = lJoints[i];
+            i++;
+
+            dentro = !dentro; //una volta passati attraverso un lato qualsiasi il 2 edge appena creato e su cui ci spostiamo si trova dalla parte opposta rispetto al 1
+        }
+        else if(dentro)
+        {
+           //?? prima muoviti poi cancella: puoi farlo all'inizio
+//           tri::Allocator<MyEdgeMesh>::DeleteEdge(em,eCorr);
+//           tri::Allocator<MyEdgeMesh>::DeleteVertex(em,v0);
+                    ;
+        }
+
+    }while (ei != eStart && ei != NULL);
+*/
+
 }
 
 

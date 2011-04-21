@@ -45,14 +45,31 @@ class MyFace;
 
 class MyUsedTypes: public vcg::UsedTypes < vcg::Use<MyVertex>::AsVertexType,vcg::Use<MyFace>::AsFaceType,vcg::Use<MyEdge>::AsEdgeType>{};
 
-class MyVertex: public vcg::Vertex < MyUsedTypes,vcg::vertex::Coord3f,vcg::vertex::BitFlags,vcg::vertex::VEAdj>{};
+class MyVertex: public vcg::Vertex < MyUsedTypes,vcg::vertex::Coord3f,vcg::vertex::BitFlags, vcg::vertex::VEAdj>{};
 class MyFace: public vcg::Face < MyUsedTypes, vcg::face::VertexRef>{};
-class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef, vcg::edge::EVAdj> {};
+class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef> {}; //, vcg::edge::EEAdj> {};
 
 class MyEdgeMesh: public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 
 
 typedef vcg::tri::io::SVGProperties SVGProperties;
+
+
+typedef enum{L1,l1,L2,NO_LATO} latoRect;
+typedef enum{X = 0, Y = 1, Z = 2} Axis;
+
+template <int A>
+struct Succ
+{
+    enum { value = A+1 };
+};
+
+template <>
+struct Succ<Z>
+{
+    enum { value = X };
+};
+
 
 class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 {
@@ -84,6 +101,7 @@ public:
 
         // nuove funzioni
         void generateCap(MeshModel * mBase, /*const*/ Plane3f &slicingPlane, vcg::CallBackPos *cb, MeshModel * mCap, MeshModel * mSlice);
+        void subtraction(MyEdgeMesh &em, const Point2f &a1, const Point2f &a2, const Point2f &b1, const Point2f &b2, const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height);
 
 };
 
