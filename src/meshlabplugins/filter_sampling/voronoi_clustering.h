@@ -94,11 +94,10 @@ static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, boo
 {
 		tri::Geo<CMeshO> g;
 		VertexPointer farthest;
-		float dist;
 		typename MeshType::template PerVertexAttributeHandle<VertexPointer> sources;
 		sources =  tri::Allocator<CMeshO>::AddPerVertexAttribute<VertexPointer> (m,"sources");
 		assert(tri::Allocator<CMeshO>::IsValidHandle(m,sources));
-    g.FarthestVertex(m,seedVec,farthest,dist,std::numeric_limits<ScalarType>::max(),&sources);
+    g.FarthestVertex(m,seedVec,farthest,std::numeric_limits<ScalarType>::max(),&sources);
 		
 		if(frontierFlag)
 		{
@@ -106,7 +105,7 @@ static void VoronoiColoring(MeshType &m, std::vector<VertexType *> &seedVec, boo
 				std::vector< std::pair<float,VertexPointer> > regionArea(m.vert.size(),zz);
 				std::vector<VertexPointer> borderVec;
 				GetAreaAndFrontier(m, sources,  regionArea, borderVec);
-				g.FarthestVertex(m,borderVec,farthest,dist);		
+        g.FarthestVertex(m,borderVec,farthest);
 		}
 		
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
@@ -154,13 +153,12 @@ static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int
 	{
 		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: First Partitioning");
 		tri::Geo<CMeshO> g;
-		float dist;
-		VertexPointer farthest;
+    VertexPointer farthest;
 		// first run: find for each point what is the closest to one of the seeds.
 		typename MeshType::template PerVertexAttributeHandle<VertexPointer> sources;
 		sources = tri::Allocator<CMeshO>::AddPerVertexAttribute<VertexPointer> (m,"sources");
 		
-    g.FarthestVertex(m,seedVec,farthest,dist,std::numeric_limits<ScalarType>::max(),&sources);
+    g.FarthestVertex(m,seedVec,farthest,std::numeric_limits<ScalarType>::max(),&sources);
 		
 		std::pair<float,VertexPointer> zz(0,0);
 		std::vector< std::pair<float,VertexPointer> > regionArea(m.vert.size(),zz);
@@ -180,7 +178,7 @@ static void VoronoiRelaxing(MeshType &m, std::vector<VertexType *> &seedVec, int
   
 		if(cb) cb(iter*100/relaxIter,"Voronoi Lloyd Relaxation: Searching New Seeds");
 			
-		g.FarthestVertex(m,borderVec,farthest,dist);		
+    g.FarthestVertex(m,borderVec,farthest);
 		tri::UpdateColor<CMeshO>::VertexQualityRamp(m);
 
 		// Search the local maxima for each region and use them as new seeds	

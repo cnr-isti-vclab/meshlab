@@ -117,7 +117,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 
 				Point3f startPoint = par.getPoint3f("startPoint");
 				// first search the closest point on the surface;
-				CMeshO::VertexPointer startVertex=0,farthestVertex;
+        CMeshO::VertexPointer startVertex=0;
 				float minDist= std::numeric_limits<float>::max();
 
 				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
@@ -130,10 +130,9 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 				Log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
 						
 				// Now actually compute the geodesic distnace from the closest point		
-				float dist;
-				tri::Geo<CMeshO> g;	
+        tri::Geo<CMeshO> g;
         float dist_thr = par.getAbsPerc("maxDistance");
-        g.FarthestVertex(m.cm, startVertex, farthestVertex, dist,dist_thr);
+        g.FarthestVertex(m.cm, startVertex,dist_thr);
 
 				// Cleaning Quality value of the unrefernced vertices
 				// Unreached vertexes has a quality that is maxfloat
@@ -159,9 +158,8 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 				m.updateDataMask(MeshModel::MM_VERTQUALITY);
 				m.updateDataMask(MeshModel::MM_VERTCOLOR);
 
-				float dist;
-				tri::Geo<CMeshO> g;	
-				bool ret = g.DistanceFromBorder(m.cm, dist);
+        tri::Geo<CMeshO> g;
+        bool ret = g.DistanceFromBorder(m.cm);
 
 				// Cleaning Quality value of the unrefernced vertices
 				// Unreached vertexes has a quality that is maxfloat
