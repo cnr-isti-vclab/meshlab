@@ -59,8 +59,7 @@ namespace MLXMLElNames
 	const QString checkBoxTag("CHECKBOX_GUI");
 	const QString absPercTag("ABSPERC_GUI");
 	const QString vec3WidgetTag("VEC3_GUI");
-	
-
+	const QString colorWidgetTag("COLOR_GUI");
 
 	const QString mfiVersion("mfiVersion");
 
@@ -94,6 +93,7 @@ namespace MLXMLElNames
 	const QString realType("Real");
 	const QString intType("Integer");
 	const QString vec3Type("Vec3");
+	const QString colorType("Color");
 
 	//ariety values
 	const QString singleMeshAriety("SingleMesh");

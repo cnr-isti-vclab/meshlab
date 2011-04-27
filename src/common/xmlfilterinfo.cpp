@@ -59,8 +59,9 @@ QString XMLFilterInfo::guiTypeSwitchQueryText(const QString& var)
 	QString caseBOOL("case element (" + MLXMLElNames::checkBoxTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::checkBoxTag,var) + "</p>/string()");
 	QString caseEDIT("case element (" + MLXMLElNames::editTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::editTag,var) + "</p>/string()");
 	QString caseVEC("case element (" + MLXMLElNames::vec3WidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::vec3WidgetTag,var) + "</p>/string()");
+	QString caseCOLOR("case element (" + MLXMLElNames::colorWidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::colorWidgetTag,var) + "</p>/string()");
 	QString errorMsg = "default return \"" + XMLFilterInfo::guiErrorMsg() + "\"";
-	return base + " " + caseABS + " " + caseBOOL + " " + caseEDIT + " " + caseVEC + " " + errorMsg;
+	return base + " " + caseABS + " " + caseBOOL + " " + caseEDIT + " " + caseVEC + " " + caseCOLOR + " " + errorMsg;
 }
 
 QStringList XMLFilterInfo::filterNames() const
