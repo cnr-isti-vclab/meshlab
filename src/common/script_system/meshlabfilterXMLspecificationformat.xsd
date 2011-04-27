@@ -49,6 +49,7 @@
      <xs:element ref='ABSPERC_GUI'/>
 	 <xs:element ref='EDIT_GUI'/>
 	 <xs:element ref='VEC3_GUI'/>
+	 <xs:element ref='COLOR_GUI'/>
     </xs:choice>
    </xs:sequence>
    <xs:attribute name='parType' use='required'>
@@ -58,6 +59,7 @@
       <xs:enumeration value='Real'/>
 	  <xs:enumeration value='Vec3'/>
 	  <xs:enumeration value='Integer'/>
+	  <xs:enumeration value='Color'/>
      </xs:restriction>
     </xs:simpleType>
    </xs:attribute>
@@ -95,6 +97,13 @@
    <xs:attribute name='guiLabel' type='xs:string' use='required'/>
    <xs:attribute name='guiMin' type='xs:string' use='required'/>
    <xs:attribute name='guiMax' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
+ 
+ <xs:element name='COLOR_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
   </xs:complexType>
  </xs:element>
  
