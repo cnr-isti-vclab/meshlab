@@ -102,11 +102,11 @@ QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelS
 
 void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out);
 
-Q_DECLARE_METATYPE(vcg::Point3f)
-
-QScriptValue Point3fToScriptValue(QScriptEngine* eng,const vcg::Point3f& in);
-
-void Point3fFromScriptValue(const QScriptValue& val,vcg::Point3f& out);
+//Q_DECLARE_METATYPE(vcg::Point3f)
+//
+//QScriptValue Point3fToScriptValue(QScriptEngine* eng,const vcg::Point3f& in);
+//
+//void Point3fFromScriptValue(const QScriptValue& val,vcg::Point3f& out);
 
 
 
@@ -140,8 +140,10 @@ public:
 	EnvWrap():env(NULL){};
 	EnvWrap(Env& envir);
 	bool evalBool(const QString& nm);
-	float evalFloat(const QString& nm);
+	double evalDouble(const QString& nm);
+	float evalFloat( const QString& nm );
 	vcg::Point3f evalVec3(const QString& nm);
+	QColor evalColor(const QString& nm);
 	/*QString getExpType(const QString& nm);*/
 	QString evalString(const QString& nm);
 };

@@ -299,19 +299,19 @@ void MeshDocumentScriptInterfaceFromScriptValue( const QScriptValue& val,MeshDoc
 	out = qobject_cast<MeshDocumentScriptInterface*>(val.toQObject());
 }
 
-QScriptValue Point3fToScriptValue(QScriptEngine* eng,const vcg::Point3f& in)
-{
-	QScriptValue arrRes = eng->newArray(3);
-	for(unsigned int ii = 0;ii < 3;++ii)
-		arrRes.setProperty(ii,in[ii]);
-	return arrRes;
-}
-
-void Point3fFromScriptValue(const QScriptValue& val,vcg::Point3f& out)
-{
-	for(unsigned int ii = 0;ii < 3;++ii)
-		out[ii] = val.property(ii).toNumber();
-}
+//QScriptValue Point3fToScriptValue(QScriptEngine* eng,const vcg::Point3f& in)
+//{
+//	QScriptValue arrRes = eng->newArray(3);
+//	for(unsigned int ii = 0;ii < 3;++ii)
+//		arrRes.setProperty(ii,in[ii]);
+//	return arrRes;
+//}
+//
+//void Point3fFromScriptValue(const QScriptValue& val,vcg::Point3f& out)
+//{
+//	for(unsigned int ii = 0;ii < 3;++ii)
+//		out[ii] = val.property(ii).toNumber();
+//}
 
 QScriptValue EnvWrap_ctor( QScriptContext* c,QScriptEngine* e )
 {
@@ -382,13 +382,27 @@ bool EnvWrap::evalBool( const QString& nm )
 	return false;
 }
 
-float EnvWrap::evalFloat( const QString& nm )
+double EnvWrap::evalDouble( const QString& nm )
 {
 	QScriptValue result = evalExp(nm);
 	if (result.isNumber())
 		return result.toNumber();
 	else
+		throw ExpressionHasNotThisTypeException("Double",nm);
+	return double();
+}
+
+float EnvWrap::evalFloat( const QString& nm )
+{
+	try
+	{	
+		double result = evalDouble(nm);
+		return (float) result;
+	}
+	catch(ExpressionHasNotThisTypeException& exc)
+	{
 		throw ExpressionHasNotThisTypeException("Float",nm);
+	}
 	return float();
 }
 
@@ -398,10 +412,57 @@ vcg::Point3f EnvWrap::evalVec3( const QString& nm )
 	QVariant resVar = result.toVariant();
 	QVariantList resList = resVar.toList();
 	if (resList.size() == 3)
-		return vcg::Point3f(resList[0].toDouble(),resList[1].toDouble(),resList[2].toDouble());
+		return vcg::Point3f(resList[0].toReal(),resList[1].toReal(),resList[2].toReal());
 	else
 		throw ExpressionHasNotThisTypeException("Vec3",nm);
 	return vcg::Point3f();
+}
+
+QColor EnvWrap::evalColor( const QString& nm )
+{
+	QScriptValue result = evalExp(nm);
+	QVariant resVar = result.toVariant();
+	QVariantList resList = resVar.toList();
+	QColor col;
+	int colorComp = resList.size();
+	if ((colorComp >= 3) && (colorComp <= 4)) 
+	{
+		bool isReal01 = false; 
+		bool isInt0255 = false;
+		for(int ii = 0;ii < colorComp;++ii)
+		{
+			bool isScalarReal = false;
+			bool isScalarInt = false;
+			float resFloat = (float) resList[ii].toReal(&isScalarReal);
+			int resInt = resList[ii].toInt(&isScalarInt);
+			if ((!isScalarReal) && (!isScalarInt))
+				throw ExpressionHasNotThisTypeException("Color",nm);
+			if ((resFloat >= 0.0f) && (resFloat <= 1.0f))
+				isReal01 = isReal01 || true;
+			if ((resInt >= 0) && (resInt <= 255))
+				isInt0255 =  isInt0255 || true;
+		} 
+		if (isReal01)
+		{
+			if (colorComp == 3)
+				return QColor::fromRgbF(resList[0].toReal(),resList[1].toReal(),resList[2].toReal());
+			if (colorComp == 4)
+				return QColor::fromRgbF(resList[0].toReal(),resList[1].toReal(),resList[2].toReal(),resList[3].toReal());
+		}
+		else if (isInt0255)
+		{
+			//if the
+			if (colorComp == 3)
+				return QColor(resList[0].toInt(),resList[1].toInt(),resList[2].toInt());
+			if (colorComp == 4)
+				return QColor(resList[0].toInt(),resList[1].toInt(),resList[2].toInt(),resList[3].toInt());
+		}
+		else
+			throw ExpressionHasNotThisTypeException("Color",nm);	
+	}
+	else
+		throw ExpressionHasNotThisTypeException("Color",nm);
+	return col;
 }
 
 bool EnvWrap::constStatement( const QString& statement ) const
@@ -469,7 +530,7 @@ QScriptValue Env_ctor( QScriptContext *context,QScriptEngine *engine )
 Env::Env()
 {
 	qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
-	qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);
+	/*qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);*/
 }
 
 void Env::insertExpressionBinding( const QString& nm,const QString& exp )
