@@ -506,6 +506,7 @@ int SnapVertexBorder(CMeshO &m, float threshold)
             }
           }
         }
+	  return total;
 
 }
 Q_EXPORT_PLUGIN(CleanFilter)
