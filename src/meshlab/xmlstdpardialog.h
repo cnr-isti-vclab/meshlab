@@ -176,6 +176,32 @@ protected:
 	QWidget* curr_gla;
 };
 
+class XMLColorWidget : public XMLMeshLabWidget
+{
+	Q_OBJECT
+
+	QPushButton* colorButton;
+	QLabel* colorLabel;
+	QLabel* descLabel;
+	QColor pickcol;
+
+public:
+	XMLColorWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	~XMLColorWidget();
+
+	void set(const QString& nwExpStr);
+	//void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
+	void updateVisibility(const bool vis);
+	QString getWidgetExpression();
+private:
+	void  updateColorInfo(const QColor& col);
+
+signals:
+	void dialogParamChanged();
+	private slots:
+		void pickColor(); 
+};
+
 //class XMLSliderWidget : public XMLFloatWidget
 //{
 //private:

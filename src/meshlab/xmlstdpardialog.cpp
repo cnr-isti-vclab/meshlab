@@ -425,6 +425,9 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 	if (guiType == MLXMLElNames::vec3WidgetTag)
 		return new XMLVec3Widget(widgetTable,env,parent);
 
+	if (guiType == MLXMLElNames::colorWidgetTag)
+		return new XMLColorWidget(widgetTable,env,parent);
+
 	return NULL;
 }
 
@@ -745,4 +748,68 @@ void XMLVec3Widget::setPoint( const QString& name,const vcg::Point3f& p )
 XMLVec3Widget::~XMLVec3Widget()
 {
 
+}
+
+XMLColorWidget::XMLColorWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+{
+	colorLabel = new QLabel(p);
+	QString paramName = xmlWidgetTag[MLXMLElNames::paramName];
+	descLabel = new QLabel(paramName,p);
+	colorButton = new QPushButton(p);
+	colorButton->setAutoFillBackground(true);
+	colorButton->setFlat(true);
+	//const QColor cl = rp->pd->defVal->getColor();
+	//resetWidgetValue();
+	QColor cl = envir.evalColor(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+	pickcol = cl;
+	updateColorInfo(cl);
+	//int row = gridLay->rowCount() - 1;
+	gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
+
+	QHBoxLayout* lay = new QHBoxLayout(p);
+	lay->addWidget(colorLabel);
+	lay->addWidget(colorButton);
+
+	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
+	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+}
+
+XMLColorWidget::~XMLColorWidget()
+{
+
+}
+
+void XMLColorWidget::updateVisibility( const bool vis )
+{
+	colorLabel->setVisible(vis);
+	descLabel->setVisible(vis);
+	colorButton->setVisible(vis);
+}
+
+void XMLColorWidget::set( const QString& nwExpStr )
+{
+	QColor col = env.evalColor(nwExpStr);
+	updateColorInfo(col);
+}
+
+QString XMLColorWidget::getWidgetExpression()
+{
+	return QString("[" + QString::number(pickcol.red()) + "," + QString::number(pickcol.green()) + "," + QString::number(pickcol.blue()) + "," + QString::number(pickcol.alpha()) + "]");
+}
+
+void XMLColorWidget::updateColorInfo( const QColor& col )
+{
+	colorLabel->setText("("+col.name()+")");
+	QPalette palette(col);
+	colorButton->setPalette(palette);
+}
+
+void XMLColorWidget::pickColor()
+{
+	pickcol =QColorDialog::getColor(pickcol);
+	if(pickcol.isValid()) 
+		updateColorInfo(pickcol);
+	emit dialogParamChanged();
 }
