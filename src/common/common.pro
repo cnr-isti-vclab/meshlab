@@ -5,12 +5,14 @@ GLEWCODE = $$GLEWDIR/src/glew.c
 
 win32-msvc2005:DESTDIR = ../distrib
 win32-msvc2008:DESTDIR = ../distrib
+win32-msvc2010:DESTDIR = ../distrib
 win32-g++:DLLDESTDIR = ../distrib
 
 
 # CONFIG(release,debug | release) {
 # win32-msvc2005:DESTDIR     = ./release
 # win32-msvc2008:DESTDIR     = ./release
+# win32-msvc2010:DESTDIR     = ./release
 # win32-g++:DLLDESTDIR     = ./release
 # }
 
@@ -46,6 +48,7 @@ linux-g++-64:DESTDIR = ../distrib
 
 win32-msvc2005:CONFIG += staticlib
 win32-msvc2008:CONFIG += staticlib
+win32-msvc2010:CONFIG += staticlib
 
 QT += opengl
 QT += xml
