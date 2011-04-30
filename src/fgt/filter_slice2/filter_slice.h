@@ -47,7 +47,7 @@ class MyUsedTypes: public vcg::UsedTypes < vcg::Use<MyVertex>::AsVertexType,vcg:
 
 class MyVertex: public vcg::Vertex < MyUsedTypes,vcg::vertex::Coord3f,vcg::vertex::BitFlags, vcg::vertex::VEAdj>{};
 class MyFace: public vcg::Face < MyUsedTypes, vcg::face::VertexRef>{};
-class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef> {}; //, vcg::edge::EEAdj> {};
+class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef, vcg::edge::EEAdj> {};
 
 class MyEdgeMesh: public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 

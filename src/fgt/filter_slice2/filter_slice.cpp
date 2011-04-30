@@ -33,6 +33,8 @@
 #include <wrap/gl/glu_tesselator.h>
 #include <vcg/complex/allocate.h>
 #include <vcg/complex/append.h>
+#include <vcg/complex/edgemesh/update/topology.h>
+
 #include <math.h>
 
 #include "kdtree.h"
@@ -132,7 +134,7 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Ri
     parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
     // BBox min=0, BBox center=1, Origin=2
     parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
-    parlst.addParam(new RichFloat("spacing",0.2,"Space between two planes", "Step value between each plane for automatically generating cross-sections."));
+    parlst.addParam(new RichFloat("spacing",0.02,"Space between two planes", "Step value between each plane for automatically generating cross-sections."));
     parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
     parlst.addParam(new RichBool("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter"));
   }
@@ -434,7 +436,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
                         // VARIABILLI DI SUPPORTO
                         MeshModel * mBase = m.mm();
-                        mBase->visible=false;
+                        mBase->visible = false;
                         CMeshO &base = mBase->cm;
                         Box3f &bbox = base.bbox;
 
@@ -443,9 +445,6 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                           Log("Mesh is not two manifold, cannot apply filter");
                           return false;
                         }
-
-                        //this is used to generate svg slices
-                        vector<MyEdgeMesh*> ev;
 
                         //per l'estrusione e per la larghezza degli incastri
                         float eps = parlst.getFloat("eps");
@@ -486,33 +485,38 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
 //                        assert(planeAxis.X() != 0 || planeAxis.Y() != 0 || planeAxis.Z()!= 0);
 
-                        //parto dal basso (bbox min)
                         float lengthRect = bbox.Diag()/2.0;
+                        if (lengthRect < planeDist)
+                        {
+                          Log("the distance between the planes should not be greater than the length of the mesh: %f", lengthRect);
+                          return false;
+                        }
+
+                        //parto dal basso (bbox min)
                         Point3f planeCenter = bbox.min + planeAxis*planeOffset*lengthRect;
-//                        Log("planeAxis %f,%f,%f", planeAxis.X(),planeAxis.Y(),planeAxis.Z());
-//                        Log("dim bbox %f",lengthRect);
 
                         //evito la divisione per 0
                         int planeNum = (planeDist == 0) ? 1 : ( ((bbox.Dim()*planeAxis)/planeDist)+1 );
                         Log("Number of plane: %i",planeNum);
 
-                        Point3f planeOrthog(planeAxis);
+//??                        Point3f planeOrthog(planeAxis);
 
                         planeAxis *= planeDist;		//usato per calcolare la posizione del nuovo piano
 
-                        //punti per il rettangolo 3D
-                        Point2f a1,b1,a2,b2,tmp;
-                        a1.X() = eps;
+                        float epsTmp = eps/2;
+                        //punti per il rettangolo
+                        Point2f a1,b1,a2,b2;
+                        a1.X() = epsTmp;
                         a1.Y() = 0;
 
-                        a2.X() = -eps;
+                        a2.X() = -epsTmp;
                         a2.Y() = 0;
 
-                        b1.X() = eps;
+                        b1.X() = epsTmp;
                         b1.Y() = lengthRect;
 
-                        b2.X() = -eps;
-                        b2.Y() = -lengthRect;
+                        b2.X() = -epsTmp;
+                        b2.Y() = lengthRect;
 
                         QString s;
 
@@ -529,32 +533,36 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                         pr.projDir = planeAxis;
                         pr.projCenter =  m.mm()->cm.bbox.Center();
 
+                        //this is used to generate svg slices
+                        vector<MyEdgeMesh*> ev;
 
                         for(int i = 0; i < planeNum; ++i)
                         {
                             // creo un nuovo layer
-                            layername.sprintf("cap_%d.ply",i+1);
+/*?                            layername.sprintf("cap_%d.ply",i+1);
                             mCap = m.addNewMesh("",qPrintable(layername));
                             mCap->setFileName(layername);
-//                            CMeshO &cap = mCap->cm;
 
-                            //mesh temporanea, verr poi scartata
+                            //mesh temporanea, poi da scartare
                             mSlice = m.addNewMesh("",qPrintable(layernameTmp));
                             mSlice->setFileName(layernameTmp);		// mesh name
-//                            CMeshO &slice = mSlice ->cm;
 
-                            // scelta e preparazione del piano di taglio
+                            s.sprintf("calculating slice %d",i+1);
+                            cb((i+1)*100.0f/planeNum,s.toStdString().c_str());
+
+ ?*/                          // scelta e preparazione del piano di taglio
                             Point3f centerCorr = planeCenter + planeAxis * i;
-//                            Log("planeAxisIt %f,%f,%f", planeAxis.X(),planeAxis.Y(),planeAxis.Z());
-//                            Log("planeCenter  %f,%f,%f", planeCenter.X(),planeCenter.Y(),planeCenter.Z());
-//                            Log("centerCorr  %f,%f,%f", centerCorr.X(),centerCorr.Y(),centerCorr.Z());
+                            Log("planeAxis: %f, %f, %f", planeAxis[0], planeAxis[1], planeAxis[2]);
+                            Log("planeCenter: %f, %f, %f", planeCenter[0], planeCenter[1], planeCenter[2]);
+                            Log("centerCorr: %f, %f, %f", centerCorr[0], centerCorr[1], centerCorr[2]);
                             slicingPlane.Init(centerCorr,planeAxis);
 
                             //this is used to generate svd slices
                             MyEdgeMesh *edgeMesh = new MyEdgeMesh(); //?? non mettere a puntatore se possibile
-                            //vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
                             vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(base, slicingPlane , *edgeMesh);
                             vcg::tri::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
+
+                            ev.push_back(edgeMesh);
 //                            if(edgeMesh->edge.size()!=0)
                             {
 
@@ -566,20 +574,18 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                                     b1.X() = planeDist * j + eps;
                                     b2.X() = planeDist * j - eps;
 */
-                                    Log("Plane %i have %i edge",i+1,edgeMesh->edge.size());
-                                    //tri::UpdateTopology<MyEdgeMesh>::FaceFace(*edgeMesh);
-                                    //subtraction(*edgeMesh, a1, a2, b1, b2, axis, axisOrthog, axisJoint, centerCorr[axis]);
+//                                    Log("Plane %i have %i edge",i+1,edgeMesh->edge.size());
+                                    edge::UpdateTopology<MyEdgeMesh>::EdgeEdge(*edgeMesh);
+                                    subtraction(*edgeMesh, a1, a2, b1, b2, axis, axisOrthog, axisJoint, centerCorr[axis]);
                                 }
-                                ev.push_back(edgeMesh);
                             }
+//                            ev.push_back(edgeMesh);
 
-                            // applicazione del piano di taglio alla mesh. A seconda di ci che deve essere messo nel layer di lavoro e/o usato ad un'iterazione successiva si possono generare: un piano (cap), 2 pezzi di mesh divisi dal piano (slice) e un'estrusione
-                            s.sprintf("calculating slice %d",i+1);
-                            cb((i+1)*100.0f/planeNum,s.toStdString().c_str());
-                            generateCap(mBase,slicingPlane,cb,mCap, mSlice);
+                            // genero il piano da raffigurare in 3D
+//?                            generateCap(mBase,slicingPlane,cb,mCap, mSlice);
 
                             //rimuovo lo slice, non mi serve pi; posso comunque riusare il puntatore nel ciclo
-                            m.delMesh(mSlice);
+//?                            m.delMesh(mSlice);
 
 
                         }
@@ -752,6 +758,7 @@ void ExtraFilter_SlicePlugin::subtraction(MyEdgeMesh &em, const Point2f &a1, con
     assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
     assert(em.edge.size()!=0);
 
+
     Segment2f lato1, lato2, lato3, seg;
     lato1.Set(a1,b1);
     lato2.Set(a1,a2);
@@ -769,17 +776,62 @@ void ExtraFilter_SlicePlugin::subtraction(MyEdgeMesh &em, const Point2f &a1, con
     pAngle2[axisJoint] = a2.Y();
 
 
-    vector<latoRect> lJoints;
+    vector<latoRect> lJoints;   //memorizza per ogni punto di intersezione quale lato è stato intersecato
     MyEdgeMesh::VertexIterator vi;   //alla prima passata  usato per inserire il vertice di intersezione
 
 //    for(int i = 0; i < em.edge.size(); ++i)
 
-    MyEdge * eStart = &(em.edge[0]);
+
+    MyEdge * eStart = &(em.edge[0]);        //memorizza l'edge di partenza
 //    MyVertex &vT = *(em.edge[0].V(1));
 //    MyEdge * eStart = vT.VEp();
-    MyEdge * ei = eStart;
+    MyEdge * ei = eStart;                   //itera sugli edge
     MyEdge * ePrec;
 
+
+//////PROVA DIS DA CANC
+    Point3f k1,k2,h1,h2;
+    k1[axis] = height;
+    k1[axisOrthog] = a1.X();
+    k1[axisJoint] = a1.Y();
+    k2[axis] = height;
+    k2[axisOrthog] = a2.X();
+    k2[axisJoint] = a2.Y();
+    h1[axis] = height;
+    h1[axisOrthog] = b1.X();
+    h1[axisJoint] = b1.Y();
+    h2[axis] = height;
+    h2[axisOrthog] = b2.X();
+    h2[axisJoint] = b2.Y();
+
+    MyEdgeMesh::VertexIterator v1 = vcg::tri::Allocator<MyEdgeMesh>::AddVertices(em,4);
+    MyEdgeMesh::VertexIterator v2 = v1+1;
+    MyEdgeMesh::VertexIterator v3 = v1+2;
+    MyEdgeMesh::VertexIterator v4 = v1+3;
+
+    (*v1).P() = k1;
+    (*v2).P() = k2;
+    (*v3).P() = h1;
+    (*v4).P() = h2;
+
+    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
+    em.edge.back().V(0) = &(*v1);
+    em.edge.back().V(1) = &(*v2);
+
+    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
+    em.edge.back().V(0) = &(*v2);
+    em.edge.back().V(1) = &(*v4);
+
+    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
+    em.edge.back().V(0) = &(*v4);
+    em.edge.back().V(1) = &(*v3);
+
+    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
+    em.edge.back().V(0) = &(*v3);
+    em.edge.back().V(1) = &(*v1);
+//////
+
+    /*
     int numE = 0;
     do
     {
@@ -857,7 +909,6 @@ void ExtraFilter_SlicePlugin::subtraction(MyEdgeMesh &em, const Point2f &a1, con
             eCorr.V(1) = &(*vi); //...il secondo vertice  il nuovo vertice di intersezione
 
         }
-
         else
         {
             Log("sfasfasfasfa");
@@ -869,7 +920,7 @@ void ExtraFilter_SlicePlugin::subtraction(MyEdgeMesh &em, const Point2f &a1, con
         ei = v1.VEp();  // mi sposto sull'edge successivo
 
     }while (ei != eStart && ei != NULL && ei != ePrec);
-
+*/
 /*
     //aggiungo l'edge del lato minore del rettangolo  e i suoi 2 vertici
     vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
