@@ -23,6 +23,8 @@
 
 #version 110
 
+
+
 uniform sampler2D 	vTexture;
 uniform sampler2D 	nTexture;
 uniform sampler2D	depthTextureFront;
@@ -75,6 +77,8 @@ void main(void)
  			float dist = max(0.0,(zFront-zBack))*maxDist;
 			
 			obscurance = max(0.0, 1.0 - exp(-tau*dist))*cosAngle;
+			
+			
 			
     
 		}

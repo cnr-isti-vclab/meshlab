@@ -29,38 +29,51 @@ public:
 
     int     getRequirements(QAction *action);
 
-    virtual FilterClass getClass(){
+    virtual FilterClass getClass()
+    {
       return MeshFilterInterface::Generic;
     }
 
-
-    //main plugin function
+    //Main plugin function
     bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-    //parameters init for user interface
+
+    //Parameters init for user interface
     virtual void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &parlst);
-    //draw the mesh
+
+    //Draw the mesh
     void fillFrameBuffer(bool front,  MeshModel* mm);
-    //mesh setup
+
+    //Mesh setup
     void setupMesh(MeshDocument& md, ONPRIMITIVE onprim );
-    //init openGL context
-    bool initGL(unsigned int numVertices);
-    //openGL clean up
-    void releaseGL();
-    //setup camera orientation
+
+    //Init OpenGL context
+    bool initGL(MeshModel& mm);
+
+    //OpenGL clean up
+    void releaseGL(MeshModel &m);
+
+    //Setup camera orientation
     void setCamera(vcg::Point3f camDir, vcg::Box3f &meshBBox);
-    //Do the actual sdf calculation
-    void TraceRays(int peelingIteration, float tolerance, const vcg::Point3f& dir, MeshModel* mm );
-    //enable depth peeling shader
+
+    //Calculate sdf or obscurance along a ray
+    void TraceRay(int peelingIteration, float tolerance, const vcg::Point3f& dir, MeshModel* mm );
+
+    //Enable depth peeling shader
     void useDepthPeelingShader(FramebufferObject* fbo);
 
+    //Position and normal of each vertex are copied to two separate texture, to be used in sdf and obscurance GPU calculation
     void vertexDataToTexture(MeshModel &m);
 
+    //Sdf calculation for each depth peeling iteration
     void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir);
 
+    //Copy sdf values from result texture to the mesh (vertex quality)
     void applySdfHW(MeshModel &m, float numberOfRays);
 
+    //Obscurance calculation for each depth peeling iteration
     void calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextFront, const vcg::Point3f& cameraDir, float bbDiag );
 
+    //Copy obscurance values from result texture to the mesh (vertex color)
     void applyObscurance(MeshModel &m, float numberOfRays);
 
   protected:
@@ -69,23 +82,20 @@ public:
     unsigned int       mResTextureDim;
     FloatTexture2D*    mVertexCoordsTexture;
     FloatTexture2D*    mVertexNormalsTexture;
-    //Fbo and texture for storing the result computation
-    FramebufferObject* mFboResult;
+    FramebufferObject* mFboResult;    //Fbo and texture storing the result computation
     FloatTexture2D*    mResultTexture;
-    //Fbos and textures for depth peeling
-    FramebufferObject* mFboArray[4];
+    FramebufferObject* mFboArray[4];  //Fbos and textures for depth peeling
     FloatTexture2D*    mColorTextureArray[4];
     FloatTexture2D*    mDepthTextureArray[4];
-
+    bool               mErrInit;
+    bool               mUseVBO;
     unsigned int       mPeelingTextureSize;
     float              mTolerance;
     float              mDepthTolerance;
     float              mMinCos;
     float              mMaxCos;
-    //obscurance exponent
-    float              mTau;
-    //min dist between vertices to check too thin parts
-    float              mMinDist;
+    float              mTau;      //obscurance exponent
+    float              mMinDist;  //min dist between vertices to check too thin parts
     GPUProgram*        mDeepthPeelingProgram;
     GPUProgram*        mSDFProgram;
     GPUProgram*        mObscuranceProgram;
