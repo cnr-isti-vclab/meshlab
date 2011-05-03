@@ -130,12 +130,16 @@ bool MeshLabFilterInterface::arePreCondsValid( const int filterPreConds,const Me
 int MeshLabFilterInterface::convertStringListToMeshElementEnum( const QStringList& stringListEnum )
 {
 	int res = 0;
+	QMap<QString,MeshModel::MeshElement> convertingMap;
+	initConvertingMap(convertingMap);
 	foreach(QString st,stringListEnum)
-		res = res | (int) convertingMap[st];
+	{
+		res = res | convertingMap[st];
+	}
 	return res;
 }
 
-void MeshLabFilterInterface::initConvertingMap()
+void MeshLabFilterInterface::initConvertingMap(QMap<QString,MeshModel::MeshElement>& convertingMap)
 {
 	convertingMap["MM_NONE"]       = MeshModel::MeshElement(MeshModel::MM_NONE);
 	convertingMap["MM_VERTCOORD"]  = MeshModel::MeshElement(MeshModel::MM_VERTCOORD);
@@ -176,13 +180,13 @@ void MeshLabFilterInterface::initConvertingMap()
 MeshLabFilterInterface::MeshLabFilterInterface()
 :MeshLabInterface()
 {
-	if (!init)
-	{
-		initConvertingMap();
-		init = true;
-	}
+	//if (!init)
+	//{
+	//	initConvertingMap();
+	//	init = true;
+	//}
 }
 
-QMap<QString,MeshModel::MeshElement> MeshLabFilterInterface::convertingMap;
-
-bool MeshLabFilterInterface::init = false;
+//QMap<QString,MeshModel::MeshElement> MeshLabFilterInterface::convertingMap;
+//
+//bool MeshLabFilterInterface::init = false;

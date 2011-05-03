@@ -623,9 +623,9 @@ public:
 class MeshLabFilterInterface : public MeshLabInterface
 {
 private:
-	static QMap<QString,MeshModel::MeshElement> convertingMap;
-	static void initConvertingMap();
-	static bool init;
+//	static QMap<QString,MeshModel::MeshElement> convertingMap;
+	static void initConvertingMap(QMap<QString,MeshModel::MeshElement>& convertingMap);
+//	static bool init;
 public:
 	MeshLabFilterInterface();
 	virtual ~MeshLabFilterInterface() {}

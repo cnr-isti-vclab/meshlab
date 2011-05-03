@@ -423,12 +423,11 @@ QColor EnvWrap::evalColor( const QString& nm )
 	QScriptValue result = evalExp(nm);
 	QVariant resVar = result.toVariant();
 	QVariantList resList = resVar.toList();
-	QColor col;
 	int colorComp = resList.size();
 	if ((colorComp >= 3) && (colorComp <= 4)) 
 	{
-		bool isReal01 = false; 
-		bool isInt0255 = false;
+		bool isReal01 = true; 
+		bool isInt0255 = true;
 		for(int ii = 0;ii < colorComp;++ii)
 		{
 			bool isScalarReal = false;
@@ -438,9 +437,16 @@ QColor EnvWrap::evalColor( const QString& nm )
 			if ((!isScalarReal) && (!isScalarInt))
 				throw ExpressionHasNotThisTypeException("Color",nm);
 			if ((resFloat >= 0.0f) && (resFloat <= 1.0f))
-				isReal01 = isReal01 || true;
-			if ((resInt >= 0) && (resInt <= 255))
-				isInt0255 =  isInt0255 || true;
+			{
+				isReal01 = isReal01 && true;
+				isInt0255 = false;
+			}
+			else
+				if ((resInt >= 0) && (resInt <= 255))
+				{
+					isInt0255 =  isInt0255 && true;
+					isReal01 = false;
+				}
 		} 
 		if (isReal01)
 		{
@@ -462,7 +468,7 @@ QColor EnvWrap::evalColor( const QString& nm )
 	}
 	else
 		throw ExpressionHasNotThisTypeException("Color",nm);
-	return col;
+	return QColor();
 }
 
 bool EnvWrap::constStatement( const QString& statement ) const
