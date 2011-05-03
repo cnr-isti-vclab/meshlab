@@ -76,7 +76,9 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	applyButton->setMinimumSize(100,25);
 	defaultButton->setMinimumSize(100, 25);
 #endif 	
-
+	QString postCond = curmfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
+	QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+	curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
 	if(isDynamic())
 	{
 		previewCB = new QCheckBox("Preview", qf);
@@ -124,7 +126,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
 	curmfc=&mfc;
 	curmwi=mwi;
 	curParMap.clear();
-	prevParMap.clear();
+	//prevParMap.clear();
 	curModel = md->mm();
 	curMeshDoc = md;
 	curgla=gla;
@@ -139,9 +141,9 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
 
 	createFrame();
 	loadFrameContent();
-	QString postCond = mfc.xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
-	QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-	curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
+	//QString postCond = mfc.xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
+	//QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+	//curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
 	if(isDynamic())
 	{
 		meshState.create(curmask, curModel);
@@ -167,15 +169,18 @@ void MeshLabXMLStdDialog::applyClick()
 	if(curmask)	
 		meshState.apply(curModel);
 
+	applyContext = env.currentContext()->toString();
 	//PreView Caching: if the apply parameters are the same to those used in the preview mode
 	//we don't need to reapply the filter to the mesh
-	//bool isEqual = (curParSet == prevParSet);
-	//if ((isEqual) && (validcache))
-	//	meshCacheState.apply(curModel);
-	//else
-	QString nm = curmfc->act->text();
-	EnvWrap wrap(env);
-	curmwi->executeFilter(curmfc,wrap,false);
+	bool isEqual = (applyContext == previewContext);
+	if ((isEqual) && (validcache))
+		meshCacheState.apply(curModel);
+	else
+	{
+		QString nm = curmfc->act->text();
+		EnvWrap wrap(env);
+		curmwi->executeFilter(curmfc,wrap,false);
+	}
 	env.popContext();
 
 	if(curmask)	
@@ -222,7 +227,30 @@ void MeshLabXMLStdDialog::togglePreview()
 
 void MeshLabXMLStdDialog::applyDynamic()
 {
+	if(!previewCB->isChecked()) 
+		return;
+	//QAction *q = curAction;
+	env.pushContext();
+	assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
+	for(int ii = 0;ii < curParMap.size();++ii)	
+	{
+		XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
+		QString exp = wid->getWidgetExpression();
+		env.insertExpressionBinding(curParMap[ii][MLXMLElNames::paramName],exp);
+		//delete exp;
+	}
+	//two different executions give the identical result if the two contexts (with the filter's parameters inside) are identical
+	previewContext = env.currentContext()->toString();
+	
+	meshState.apply(curModel);
+	EnvWrap envir(env);
+	curmwi->executeFilter(this->curmfc, envir, true);
+	env.pushContext();
+	meshCacheState.create(curmask,curModel);
+	validcache = true;
 
+	if(this->curgla) 
+		this->curgla->update();
 }
 
 void MeshLabXMLStdDialog::changeCurrentMesh( int meshInd )
@@ -380,7 +408,7 @@ XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,
 	else
 		gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
 
-	cb->setVisible(isImportant);
+	setVisibility(isImportant);
 	//cb->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	connect(cb,SIGNAL(stateChanged(int)),parent,SIGNAL(parameterChanged()));
 }
@@ -397,7 +425,7 @@ void XMLCheckBoxWidget::set( const QString& nwExpStr )
 
 void XMLCheckBoxWidget::updateVisibility( const bool vis )
 {
-	cb->setVisible(vis);
+	setVisibility(vis);
 }
 
 QString XMLCheckBoxWidget::getWidgetExpression()
@@ -408,6 +436,11 @@ QString XMLCheckBoxWidget::getWidgetExpression()
 	else
 		state = QString("false");
 	return state;
+}
+
+void XMLCheckBoxWidget::setVisibility( const bool vis )
+{
+	cb->setVisible(vis);
 }
 
 XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,QWidget* parent)
@@ -446,8 +479,7 @@ XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& 
 	//connect(lineEdit,SIGNAL(editingFinished()),p,SIGNAL(parameterChanged()));
 	connect(lineEdit,SIGNAL(selectionChanged()),this,SLOT(tooltipEvaluation()));
 	
-	fieldDesc->setVisible(isImportant);
-	this->lineEdit->setVisible(isImportant);
+	setVisibility(isImportant);
 }
 
 
@@ -466,8 +498,7 @@ void XMLEditWidget::set( const QString& nwExpStr )
 
 void XMLEditWidget::updateVisibility( const bool vis )
 {
-	fieldDesc->setVisible(vis);
-	this->lineEdit->setVisible(vis);
+	setVisibility(vis);
 }
 
 void XMLEditWidget::tooltipEvaluation()
@@ -490,6 +521,11 @@ QString XMLEditWidget::getWidgetExpression()
 	return this->lineEdit->text();
 }
 
+void XMLEditWidget::setVisibility( const bool vis )
+{
+	fieldDesc->setVisible(vis);
+	this->lineEdit->setVisible(vis);
+}
 
 XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
@@ -535,16 +571,7 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& e
 	connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
 	connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
 	//connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
-	this->absLab->setVisible(isImportant);
-	//this->absLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-	this->percLab->setVisible(isImportant);
-	//this->percLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-	this->fieldDesc->setVisible(isImportant);
-	//this->fieldDesc->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-	this->absSB->setVisible(isImportant);
-	//this->absSB->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-	this->percSB->setVisible(isImportant);
-	//this->percSB->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+	setVisibility(isImportant);
 }
 
 XMLAbsWidget::~XMLAbsWidget()
@@ -558,11 +585,7 @@ void XMLAbsWidget::set( const QString& nwExpStr )
 
 void XMLAbsWidget::updateVisibility( const bool vis )
 {
-	this->absLab->setVisible(vis);
-	this->percLab->setVisible(vis);
-	this->fieldDesc->setVisible(vis);
-	this->absSB->setVisible(vis);
-	this->percSB->setVisible(vis);
+	setVisibility(vis);
 }
 
 QString XMLAbsWidget::getWidgetExpression()
@@ -580,6 +603,15 @@ void XMLAbsWidget::on_percSB_valueChanged(double newv)
 {
 	absSB->setValue((m_max - m_min)*0.01*newv + m_min);
 	emit dialogParamChanged();
+}
+
+void XMLAbsWidget::setVisibility( const bool vis )
+{
+	this->absLab->setVisible(vis);
+	this->percLab->setVisible(vis);
+	this->fieldDesc->setVisible(vis);
+	this->absSB->setVisible(vis);
+	this->percSB->setVisible(vis);
 }
 
 ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
@@ -683,6 +715,7 @@ XMLVec3Widget::XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& 
 		}
 		gridLay->addLayout(lay,row,1,Qt::AlignTop);
 	}
+	setVisibility(isImportant);
 }
 
 void XMLVec3Widget::set( const QString& exp )
@@ -694,11 +727,7 @@ void XMLVec3Widget::set( const QString& exp )
 
 void XMLVec3Widget::updateVisibility( const bool vis )
 {
-	for(int ii = 0;ii < 3;++ii)
-		coordSB[ii]->setVisible(vis);
-	getPoint3Button->setVisible(vis);
-	getPoint3Combo->setVisible(vis);
-	descLab->setVisible(vis);
+	setVisibility(vis);
 }
 
 QString XMLVec3Widget::getWidgetExpression()
@@ -750,6 +779,15 @@ XMLVec3Widget::~XMLVec3Widget()
 
 }
 
+void XMLVec3Widget::setVisibility( const bool vis )
+{
+	for(int ii = 0;ii < 3;++ii)
+		coordSB[ii]->setVisible(vis);
+	getPoint3Button->setVisible(vis);
+	getPoint3Combo->setVisible(vis);
+	descLab->setVisible(vis);
+}
+
 XMLColorWidget::XMLColorWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
@@ -774,6 +812,7 @@ XMLColorWidget::XMLColorWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWra
 	gridLay->addLayout(lay,row,1,Qt::AlignTop);
 	connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+	setVisibility(isImportant);
 }
 
 XMLColorWidget::~XMLColorWidget()
@@ -783,9 +822,7 @@ XMLColorWidget::~XMLColorWidget()
 
 void XMLColorWidget::updateVisibility( const bool vis )
 {
-	colorLabel->setVisible(vis);
-	descLabel->setVisible(vis);
-	colorButton->setVisible(vis);
+	setVisibility(vis);
 }
 
 void XMLColorWidget::set( const QString& nwExpStr )
@@ -812,4 +849,11 @@ void XMLColorWidget::pickColor()
 	if(pickcol.isValid()) 
 		updateColorInfo(pickcol);
 	emit dialogParamChanged();
+}
+
+void XMLColorWidget::setVisibility( const bool vis )
+{
+	colorLabel->setVisible(vis);
+	descLabel->setVisible(vis);
+	colorButton->setVisible(vis);
 }

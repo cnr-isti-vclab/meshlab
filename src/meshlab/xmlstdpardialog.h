@@ -92,6 +92,14 @@ public:
 
 private:
 
+	//WHY WE NEED THIS FUNCTION?
+	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
+	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
+	//THIS THING HAS AS CONSEQUENCE THAT I HAVE TO PASTE AND COPY THE updateVisibility CODE INSIDE THE CONSTRUCTOR.
+	//TO AVOID THIS FOR EACH WIDGET WE ADD A setVisibility FUNCTION (OBVIOUSLY NOT VIRTUAL) WITH THE CODE THAT WE SHOULD PUT INSIDE THE
+	//updateVisibility. 
+	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
+	void setVisibility(const bool vis);
 	QCheckBox* cb; 
 };
 //
@@ -111,6 +119,14 @@ public:
 private slots:
 	void tooltipEvaluation();
 private:
+	//WHY WE NEED THIS FUNCTION?
+	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
+	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
+	//THIS THING HAS AS CONSEQUENCE THAT I HAVE TO PASTE AND COPY THE updateVisibility CODE INSIDE THE CONSTRUCTOR.
+	//TO AVOID THIS FOR EACH WIDGET WE ADD A setVisibility FUNCTION (OBVIOUSLY NOT VIRTUAL) WITH THE CODE THAT WE SHOULD PUT INSIDE THE
+	//updateVisibility. 
+	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
+	void setVisibility(const bool vis);
 	QLabel* fieldDesc; 
 	QLineEdit* lineEdit;
 };
@@ -135,6 +151,14 @@ signals:
 	void dialogParamChanged();
 
 private:
+	//WHY WE NEED THIS FUNCTION?
+	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
+	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
+	//THIS THING HAS AS CONSEQUENCE THAT I HAVE TO PASTE AND COPY THE updateVisibility CODE INSIDE THE CONSTRUCTOR.
+	//TO AVOID THIS FOR EACH WIDGET WE ADD A setVisibility FUNCTION (OBVIOUSLY NOT VIRTUAL) WITH THE CODE THAT WE SHOULD PUT INSIDE THE
+	//updateVisibility. 
+	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
+	void setVisibility(const bool vis);
 	QLabel* fieldDesc; 
 	float m_min;
 	float m_max;
@@ -174,6 +198,15 @@ protected:
 	QPushButton *getPoint3Button;
 	QLabel* descLab;
 	QWidget* curr_gla;
+private:
+	//WHY WE NEED THIS FUNCTION?
+	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
+	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
+	//THIS THING HAS AS CONSEQUENCE THAT I HAVE TO PASTE AND COPY THE updateVisibility CODE INSIDE THE CONSTRUCTOR.
+	//TO AVOID THIS FOR EACH WIDGET WE ADD A setVisibility FUNCTION (OBVIOUSLY NOT VIRTUAL) WITH THE CODE THAT WE SHOULD PUT INSIDE THE
+	//updateVisibility. 
+	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
+	void setVisibility(const bool vis);
 };
 
 class XMLColorWidget : public XMLMeshLabWidget
@@ -194,6 +227,14 @@ public:
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
 private:
+	//WHY WE NEED THIS FUNCTION?
+	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
+	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
+	//THIS THING HAS AS CONSEQUENCE THAT I HAVE TO PASTE AND COPY THE updateVisibility CODE INSIDE THE CONSTRUCTOR.
+	//TO AVOID THIS FOR EACH WIDGET WE ADD A setVisibility FUNCTION (OBVIOUSLY NOT VIRTUAL) WITH THE CODE THAT WE SHOULD PUT INSIDE THE
+	//updateVisibility. 
+	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
+	void setVisibility(const bool vis);
 	void  updateColorInfo(const QColor& col);
 
 signals:
@@ -305,7 +346,9 @@ private:
 	MeshLabXMLFilterContainer* curmfc;
 	MainWindowInterface *curmwi;
 	XMLFilterInfo::XMLMapList curParMap;
-	XMLFilterInfo::XMLMapList prevParMap;
+	//XMLFilterInfo::XMLMapList prevParMap;
+	QString applyContext;
+	QString previewContext;
 	QWidget * curgla;
 	bool validcache;
 	bool showHelp;
