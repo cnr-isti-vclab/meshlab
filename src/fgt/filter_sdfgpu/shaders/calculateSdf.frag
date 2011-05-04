@@ -34,7 +34,6 @@ uniform float 		viewpSize;
 uniform float 		texSize;
 uniform	float		depthTolerance;
 uniform float		minCos;
-uniform float		maxCos;
 uniform int		firstRendering;
 float 			_vals[9];
 
@@ -101,11 +100,12 @@ void main(void)
    
     float cosAngle  = max(0.0,dot(N.xyz, viewDirection));
 
-    //supersampling
+    
 
-    if( cosAngle  >= minCos && cosAngle <= maxCos )
+    if( cosAngle  >= minCos )
     {
 
+	//supersampling
 	_vals[0] = calculateSdf( vec3( P.x		, P.y,       P.z  ) );
 	_vals[1] = calculateSdf( vec3( P.x - 1.0/texSize, P.y,       P.z  ) );
 	_vals[2] = calculateSdf( vec3( P.x + 1.0/texSize, P.y,       P.z  ) );

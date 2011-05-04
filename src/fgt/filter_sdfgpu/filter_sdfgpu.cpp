@@ -46,10 +46,11 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                             "A small delta that is the minimal distance in depth between two vertex" ));
    par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
                             "Depth tolerance used during depth peeling" ));
-   par.addParam(new RichFloat("minCos", 0.5f, "Min cosine",
+  /* par.addParam(new RichFloat("minCos", 0.5f, "Min cosine",
                             "Min accepteded cosine of the angle between rays and vertex normals" ));
    par.addParam(new RichFloat("maxCos", 1.0f, "Max cosine",
-                            "Max accepteded cosine of the angle between rays and vertex normals" ));
+                            "Max accepteded cosine of the angle between rays and vertex normals" ));*/
+   par.addParam(new RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around vertex normal. Rays are traced within this cone."));
 
    switch(mAction = ID(action))
     {
@@ -119,8 +120,9 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   mTolerance                = pars.getFloat("peelingTolerance");
   mPeelingTextureSize       = pars.getInt("DepthTextureSize");
   mDepthTolerance           = pars.getFloat("depthTolerance");
-  mMinCos                   = pars.getFloat("minCos");
-  mMaxCos                   = pars.getFloat("maxCos");
+  float coneAngle           = pars.getFloat("coneAngle");
+  mMinCos                   = vcg::math::Sin(coneAngle/2.0);//pars.getFloat("minCos");
+  //mMaxCos                   = 1.0;
   mUseVBO                   = pars.getBool("useVBO");
 
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
@@ -178,6 +180,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     glEnable( GL_TEXTURE_2D );
     glDisable(GL_BLEND);
     glDisable(GL_LIGHTING);
+    glDisable(GL_ALPHA_TEST);
     glEnable(GL_NORMALIZE);
     glDisable(GL_COLOR_MATERIAL);
     glClearColor(0,0,1,0);
@@ -260,10 +263,17 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     //we use 4 FBOs to avoid z-fighting in sdf and obscurance calculation, see TraceRays function for details
     for(int i = 0; i < 4; i++)
     {
-        mColorTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+     //   mColorTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
         mDepthTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
-        mFboArray[i]->attachTexture( mColorTextureArray[i]->format().target(), mColorTextureArray[i]->id(), GL_COLOR_ATTACHMENT0 );
+        //mFboArray[i]->attachTexture( mColorTextureArray[i]->format().target(), mColorTextureArray[i]->id(), GL_COLOR_ATTACHMENT0 );
         mFboArray[i]->attachTexture( mDepthTextureArray[i]->format().target(), mDepthTextureArray[i]->id(), GL_DEPTH_ATTACHMENT  );
+
+        mFboArray[i]->bind();
+
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+
+        mFboArray[i]->unbind();
     }
 
     //Depth peeling shader used for both sdf and obscurance
@@ -287,7 +297,6 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mSDFProgram->addUniform("viewpSize");
     mSDFProgram->addUniform("texSize");
     mSDFProgram->addUniform("minCos");
-    mSDFProgram->addUniform("maxCos");
     mSDFProgram->addUniform("depthTexturePrevBack");
     mSDFProgram->addUniform("firstRendering");
     mSDFProgram->disable();
@@ -306,7 +315,6 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mObscuranceProgram->addUniform("viewpSize");
     mObscuranceProgram->addUniform("texSize");
     mObscuranceProgram->addUniform("minCos");
-    mObscuranceProgram->addUniform("maxCos");
     mObscuranceProgram->addUniform("tau");
     mObscuranceProgram->addUniform("firstRendering");
     mObscuranceProgram->addUniform("maxDist");      //mesh BB diagonal
@@ -383,7 +391,7 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
     for(int i = 0; i < 4; i++)
     {
         delete mFboArray[i];
-        delete mColorTextureArray[i];
+       // delete mColorTextureArray[i];
         delete mDepthTextureArray[i];
     }
 
@@ -398,12 +406,15 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
 
 void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 {
-   (front) ? glClearColor(0,1,0,1) : glClearColor(1,0,0,1);
-   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+   //(front) ? glClearColor(0,1,0,1) : glClearColor(1,0,0,1);
+   glClear(/*GL_COLOR_BUFFER_BIT|*/GL_DEPTH_BUFFER_BIT);
    glEnable(GL_CULL_FACE);
    glCullFace((front)?GL_BACK:GL_FRONT);
-
-   mm->glw.DrawFill<GLW::NMPerVert, GLW::CMPerVert, GLW::TMNone>();
+   //the most recent GPUs can do double speed Z-only rendering
+   //(also alpha test must be turned off, depth replace and texkill must not be used in fragment shader)
+   glColorMask(0, 0, 0, 0);
+   mm->glw.DrawFill<GLW::NMNone, GLW::CMNone, GLW::TMNone>();
+   glColorMask(1, 1, 1, 1);
 
    glDisable(GL_CULL_FACE);
 }
@@ -538,8 +549,6 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 
     mSDFProgram->setUniform1f("minCos", mMinCos);
 
-    mSDFProgram->setUniform1f("maxCos", mMaxCos);
-
     //just a flag to know how many layers to use for z-fighting removal
     if(fboPrevBack == NULL)
         mSDFProgram->setUniform1i("firstRendering",1);
@@ -647,8 +656,6 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
     mObscuranceProgram->setUniform1f("depthTolerance", mDepthTolerance);
 
     mObscuranceProgram->setUniform1f("minCos", 0.7);
-
-    mObscuranceProgram->setUniform1f("maxCos", 1.0);
 
     mObscuranceProgram->setUniform1f("tau", mTau);
 

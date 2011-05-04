@@ -36,7 +36,6 @@ uniform float 		viewpSize;
 uniform float 		texSize;
 uniform	float		depthTolerance;
 uniform float		minCos;
-uniform float		maxCos;
 uniform float		tau;
 uniform int 		firstRendering;
 uniform float		maxDist;

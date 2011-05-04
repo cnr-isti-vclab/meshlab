@@ -93,7 +93,7 @@ public:
     float              mTolerance;
     float              mDepthTolerance;
     float              mMinCos;
-    float              mMaxCos;
+   // float              mMaxCos;
     float              mTau;      //obscurance exponent
     float              mMinDist;  //min dist between vertices to check too thin parts
     GPUProgram*        mDeepthPeelingProgram;
