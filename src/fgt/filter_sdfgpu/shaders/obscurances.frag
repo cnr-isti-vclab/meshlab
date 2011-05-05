@@ -34,7 +34,6 @@ uniform vec3 		viewDirection;
 uniform mat4 		mvprMatrix;
 uniform float 		viewpSize;
 uniform float 		texSize;
-uniform	float		depthTolerance;
 uniform float		minCos;
 uniform float		tau;
 uniform int 		firstRendering;
@@ -59,30 +58,29 @@ void main(void)
 
     float cosAngle  = max(0.0,dot(N.xyz, viewDirection));
 
+    //Only front facing vertices
     if( cosAngle > 0.0 )
     {
-
     	vec4 P = project(V); //* (viewpSize/texSize);
      
     	float zBack = texture2D(depthTextureBack,  P.xy).r;
     	
+	//We are interested in vertices belonging to the "front" depth layer,
+	// we check vertex's depth against the previous layer and the next one
     	if( firstRendering != 1 )
     	{		 
 		float zFront    = texture2D(depthTextureFront,     P.xy).r;
 		float zNextBack = texture2D(depthTextureNextBack,  P.xy).r;   
 
-		if ( (zBack+depthTolerance) <=  P.z && P.z <= (zNextBack-depthTolerance) )
+		if ( zBack <=  P.z && P.z <= zNextBack )
 		{
  			float dist = max(0.0,(zFront-zBack))*maxDist;
 			
 			obscurance = max(0.0, 1.0 - exp(-tau*dist))*cosAngle;
-			
-			
-			
-    
 		}
-    	}
-    	else if( P.z <= (zBack-depthTolerance) )  
+    	}//first hit of the ray on the mesh. We compare vertex's depth to the next depth layer (back faces),
+	// this technique is called second-depth shadow mapping
+    	else if( P.z <= zBack )  
 		obscurance = cosAngle;
     
     	

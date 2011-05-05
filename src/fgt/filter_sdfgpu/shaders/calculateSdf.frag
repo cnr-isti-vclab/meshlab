@@ -32,7 +32,6 @@ uniform vec3 		viewDirection;
 uniform mat4 		mvprMatrix;
 uniform float 		viewpSize;
 uniform float 		texSize;
-uniform	float		depthTolerance;
 uniform float		minCos;
 uniform int		firstRendering;
 float 			_vals[9];
@@ -70,13 +69,16 @@ float calculateSdf(vec3 P)
     float zBack     = texture2D(depthTextureBack,     P.xy).r;
     float zPrevBack = texture2D(depthTexturePrevBack, P.xy).r; 
     
+    //first hit of the ray on the mesh. We compare vertex's depth to the next depth layer (back faces),
+    // this technique is called second-depth shadow mapping
     if(firstRendering==1)
     {
-    	if (  P.z <= (zBack-depthTolerance) )
+    	if (  P.z <= zBack )
     		sdf =  max(0.0,(zBack-zFront) ) ; 
     	
-    }
-    else if (  (zPrevBack+depthTolerance) <= P.z && P.z <= (zBack-depthTolerance) )
+    }//We have are interested in vertices belonging to the "front" depth layer
+     //, so we check vertex's depth against the previous layer and the next one
+    else if ( zPrevBack <= P.z && P.z <= zBack )
     		sdf =  max(0.0,(zBack-zFront) ) ; 
     
 
@@ -101,17 +103,15 @@ void main(void)
     float cosAngle  = max(0.0,dot(N.xyz, viewDirection));
 
     
-
     if( cosAngle  >= minCos )
     {
 
-	//supersampling
+	//supersampling, we take the median value only
 	_vals[0] = calculateSdf( vec3( P.x		, P.y,       P.z  ) );
 	_vals[1] = calculateSdf( vec3( P.x - 1.0/texSize, P.y,       P.z  ) );
 	_vals[2] = calculateSdf( vec3( P.x + 1.0/texSize, P.y,       P.z  ) );
 	_vals[3] = calculateSdf( vec3( P.x , P.y - 1.0/texSize,      P.z  ) );
 	_vals[4] = calculateSdf( vec3( P.x , P.y + 1.0/texSize,      P.z  ) );
-
 	_vals[5] = calculateSdf( vec3( P.x - 1.0/texSize, P.y  - 1.0/texSize,       P.z  ) );
 	_vals[6] = calculateSdf( vec3( P.x + 1.0/texSize, P.y  + 1.0/texSize,       P.z  ) );
 	_vals[7] = calculateSdf( vec3( P.x + 1.0/texSize, P.y - 1.0/texSize,      P.z  ) );

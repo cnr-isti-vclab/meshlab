@@ -56,7 +56,7 @@ public:
     void setCamera(vcg::Point3f camDir, vcg::Box3f &meshBBox);
 
     //Calculate sdf or obscurance along a ray
-    void TraceRay(int peelingIteration, float tolerance, const vcg::Point3f& dir, MeshModel* mm );
+    void TraceRay(int peelingIteration, const vcg::Point3f& dir, MeshModel* mm );
 
     //Enable depth peeling shader
     void useDepthPeelingShader(FramebufferObject* fbo);
@@ -85,15 +85,12 @@ public:
     FramebufferObject* mFboResult;    //Fbo and texture storing the result computation
     FloatTexture2D*    mResultTexture;
     FramebufferObject* mFboArray[4];  //Fbos and textures for depth peeling
-    FloatTexture2D*    mColorTextureArray[4];
     FloatTexture2D*    mDepthTextureArray[4];
     bool               mErrInit;
     bool               mUseVBO;
     unsigned int       mPeelingTextureSize;
     float              mTolerance;
-    float              mDepthTolerance;
     float              mMinCos;
-   // float              mMaxCos;
     float              mTau;      //obscurance exponent
     float              mMinDist;  //min dist between vertices to check too thin parts
     GPUProgram*        mDeepthPeelingProgram;

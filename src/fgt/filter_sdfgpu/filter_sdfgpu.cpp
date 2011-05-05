@@ -35,15 +35,15 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
     QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
    par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
                     "Choose whether to trace rays from faces or from vertices. " ));
-   par.addParam(  new RichInt("numberRays", 64, "Number of rays: ",
+   par.addParam(  new RichInt("numberRays",128, "Number of rays: ",
                     "The standard deviation of the rays that will be casted around "
                     "the anti-normals."));
    par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
                     "Size of the depth texture for depth peeling"));
    par.addParam(new RichInt("peelingIteration", 4, "Peeling Iteration",
                                 "Number of depth peeling iteration"));
-   par.addParam(new RichFloat("depthTolerance", 0.0000001f, "Depth tolerance",
-                            "A small delta that is the minimal distance in depth between two vertex" ));
+  /* par.addParam(new RichFloat("depthTolerance", 0.0000001f, "Depth tolerance",
+                            "A small delta that is the minimal distance in depth between two vertex" ));*/
    par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
                             "Depth tolerance used during depth peeling" ));
   /* par.addParam(new RichFloat("minCos", 0.5f, "Min cosine",
@@ -60,7 +60,7 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                  break;
 
             case SDF_OBSCURANCE:
-                 par.addParam(new RichFloat("obscuranceExponent", 0.01f, "Obscurance Exponent",
+                 par.addParam(new RichFloat("obscuranceExponent", 0.0f, "Obscurance Exponent",
                                           "Parameter that increase or decrease the exponential rise in obscurance function" ));
                  break;
 
@@ -119,10 +119,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   int          peel         = pars.getInt("peelingIteration");
   mTolerance                = pars.getFloat("peelingTolerance");
   mPeelingTextureSize       = pars.getInt("DepthTextureSize");
-  mDepthTolerance           = pars.getFloat("depthTolerance");
-  float coneAngle           = pars.getFloat("coneAngle");
-  mMinCos                   = vcg::math::Sin(coneAngle/2.0);//pars.getFloat("minCos");
-  //mMaxCos                   = 1.0;
+  mMinCos                   = vcg::math::Sin(pars.getFloat("coneAngle")/2.0);
   mUseVBO                   = pars.getBool("useVBO");
 
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
@@ -152,7 +149,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
   {
         (*vi).Normalize();
-        TraceRay(peel, mTolerance, *vi, md.mm());
+        TraceRay(peel, *vi, md.mm());
         cb(100*((float)tracedRays/(float)unifDirVec.size()), "Tracing rays...");
         ++tracedRays;
   }
@@ -163,7 +160,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   else
       applySdfHW(*mm,unifDirVec.size());
 
-  //CLEAN AND EXIT
+  //Clean & Exit
   releaseGL(*mm);
 
   return true;
@@ -263,9 +260,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     //we use 4 FBOs to avoid z-fighting in sdf and obscurance calculation, see TraceRays function for details
     for(int i = 0; i < 4; i++)
     {
-     //   mColorTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE ), TextureParams( GL_NEAREST, GL_NEAREST ) );
         mDepthTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
-        //mFboArray[i]->attachTexture( mColorTextureArray[i]->format().target(), mColorTextureArray[i]->id(), GL_COLOR_ATTACHMENT0 );
         mFboArray[i]->attachTexture( mDepthTextureArray[i]->format().target(), mDepthTextureArray[i]->id(), GL_DEPTH_ATTACHMENT  );
 
         mFboArray[i]->bind();
@@ -291,7 +286,6 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mSDFProgram->addUniform("nTexture");
     mSDFProgram->addUniform("depthTextureFront");
     mSDFProgram->addUniform("depthTextureBack");
-    mSDFProgram->addUniform("depthTolerance");
     mSDFProgram->addUniform("viewDirection");
     mSDFProgram->addUniform("mvprMatrix");
     mSDFProgram->addUniform("viewpSize");
@@ -309,7 +303,6 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mObscuranceProgram->addUniform("depthTextureFront");
     mObscuranceProgram->addUniform("depthTextureBack");
     mObscuranceProgram->addUniform("depthTextureNextBack");
-    mObscuranceProgram->addUniform("depthTolerance");
     mObscuranceProgram->addUniform("viewDirection");
     mObscuranceProgram->addUniform("mvprMatrix");
     mObscuranceProgram->addUniform("viewpSize");
@@ -391,7 +384,6 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
     for(int i = 0; i < 4; i++)
     {
         delete mFboArray[i];
-       // delete mColorTextureArray[i];
         delete mDepthTextureArray[i];
     }
 
@@ -406,8 +398,7 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
 
 void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 {
-   //(front) ? glClearColor(0,1,0,1) : glClearColor(1,0,0,1);
-   glClear(/*GL_COLOR_BUFFER_BIT|*/GL_DEPTH_BUFFER_BIT);
+   glClear(GL_DEPTH_BUFFER_BIT);
    glEnable(GL_CULL_FACE);
    glCullFace((front)?GL_BACK:GL_FRONT);
    //the most recent GPUs can do double speed Z-only rendering
@@ -545,8 +536,6 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
     // Set viewport Size
     mSDFProgram->setUniform1f("viewpSize", mResTextureDim );
 
-    mSDFProgram->setUniform1f("depthTolerance", mDepthTolerance);
-
     mSDFProgram->setUniform1f("minCos", mMinCos);
 
     //just a flag to know how many layers to use for z-fighting removal
@@ -653,8 +642,6 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
     // Set viewport Size
     mObscuranceProgram->setUniform1f("viewpSize", mResTextureDim );
 
-    mObscuranceProgram->setUniform1f("depthTolerance", mDepthTolerance);
-
     mObscuranceProgram->setUniform1f("minCos", 0.7);
 
     mObscuranceProgram->setUniform1f("tau", mTau);
@@ -693,7 +680,7 @@ void SdfGpuPlugin::applyObscurance(MeshModel &m, float numberOfRays)
 
     for( unsigned int i = 0; i < m.cm.vn; i++)
     {
-        m.cm.vert[i].Q() = 2.0f*result[i*4]/numberOfRays;
+        m.cm.vert[i].Q() = result[i*4]/numberOfRays;
     }
 
     tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
@@ -702,7 +689,7 @@ void SdfGpuPlugin::applyObscurance(MeshModel &m, float numberOfRays)
     delete [] result;
 }
 
-void SdfGpuPlugin::TraceRay(int peelingIteration, float tolerance, const Point3f& dir, MeshModel* mm )
+void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* mm )
 {
     unsigned int j = 0;
 
