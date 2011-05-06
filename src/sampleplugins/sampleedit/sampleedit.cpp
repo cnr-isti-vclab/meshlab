@@ -125,7 +125,9 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea *gl
         buf +=QString(" - Q(%1)").arg(fp->V(i)->Q());
       if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
           buf +=QString("- uv(%1 %2) id:%3").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
-	  vcg::glLabel::render(p,fp->V(i)->P(),buf);
+      if( m.hasDataMask(MeshModel::MM_VERTTEXCOORD) )
+          buf +=QString("- uv(%1 %2) id:%3").arg(fp->V(i)->T().U()).arg(fp->V(i)->T().V()).arg(fp->V(i)->T().N());
+    vcg::glLabel::render(p,fp->V(i)->P(),buf);
     }
 
   //p->drawText(QRect(0,0,gla->width(),gla->height()), Qt::AlignLeft | Qt::TextWordWrap, buf);
