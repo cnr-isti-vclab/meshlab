@@ -584,7 +584,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
             // Check textName and eventually add .png ext
             CheckError(std::max<int>(textName.lastIndexOf("\\"),textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
-            if (!textName.endsWith(".png", Qt::CaseInsensitive))
+            if (!textName.endsWith(".png", Qt::CaseInsensitive) && !textName.endsWith(".dds", Qt::CaseInsensitive) )
                 textName.append(".png");
 
             // Creates path to texture file
