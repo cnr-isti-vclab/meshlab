@@ -912,41 +912,46 @@ void GLArea::initTexture()
 
             for(unsigned int i =0; i< mp->cm.textures.size();++i){
                 QImage img, imgScaled, imgGL;
-
                 bool res = img.load(mp->cm.textures[i].c_str());
                 if(!res)
-				{
-                    // Note that sometimes (in collada) the texture names could have been encoded with a url-like style (e.g. replacing spaces with '%20') so making some other attempt could be harmless
-                    QString ConvertedName = QString(mp->cm.textures[i].c_str()).replace(QString("%20"), QString(" "));
-                    res = img.load(ConvertedName);
-                    if(!res) qDebug("Failure of loading texture %s",mp->cm.textures[i].c_str());
-                    else qDebug("Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
-				}
-                // image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
-                int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
-                int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
-                while(bestW>MaxTextureSize) bestW /=2;
-                while(bestH>MaxTextureSize) bestH /=2;
+                {
+                  // Note that sometimes (in collada) the texture names could have been encoded with a url-like style (e.g. replacing spaces with '%20') so making some other attempt could be harmless
+                  QString ConvertedName = QString(mp->cm.textures[i].c_str()).replace(QString("%20"), QString(" "));
+                  res = img.load(ConvertedName);
+                  if(!res) qDebug("Failure of loading texture %s",mp->cm.textures[i].c_str());
+                  else qDebug("Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
+                }
+                if(!res && QString(mp->cm.textures[i].c_str()).endsWith("dds",Qt::CaseInsensitive))
+                {
+                  qDebug("DDS binding!");
+                  int newTexId = bindTexture(QString(mp->cm.textures[i].c_str()));
+                  mp->glw.TMId.push_back(newTexId);
+                }
+                else
+                {
+                  // image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
+                  int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
+                  int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
+                  while(bestW>MaxTextureSize) bestW /=2;
+                  while(bestH>MaxTextureSize) bestH /=2;
 
-                log->Log(GLLogStream::SYSTEM,"Loading textures");
-                log->Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
-                imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-                imgGL=convertToGLFormat(imgScaled);
-                mp->glw.TMId.push_back(0);
-                glGenTextures( 1, (GLuint*)&(mp->glw.TMId.back()) );
-                glBindTexture( GL_TEXTURE_2D, mp->glw.TMId.back() );
-                glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
-
-                glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-                gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imgGL.width(), imgGL.height(), GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
-
+                  log->Log(GLLogStream::SYSTEM,"Loading textures");
+                  log->Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
+                  imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+                  imgGL=convertToGLFormat(imgScaled);
+                  mp->glw.TMId.push_back(0);
+                  qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",mp->glw.TMId.back() ,imgGL.width(), imgGL.height());
+                  glGenTextures( 1, (GLuint*)&(mp->glw.TMId.back()) );
+                  glBindTexture( GL_TEXTURE_2D, mp->glw.TMId.back() );
+                  glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
+                  gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imgGL.width(), imgGL.height(), GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
+                }
                 if(glas.textureMagFilter == 0 ) 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
                 else	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                 if(glas.textureMinFilter == 0 ) 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
                 else	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 
                 glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-                qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",mp->glw.TMId.back() ,imgGL.width(), imgGL.height());
             }
         }
         glDisable(GL_TEXTURE_2D);
