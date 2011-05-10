@@ -371,11 +371,11 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 						H.Add((*fi).Q());
 					}
 			}
-			Log("(         -inf..%15.7f) : %i",RangeMin,H.BinCountInd(0));
+      Log("(         -inf..%15.7f) : %4.0f",RangeMin,H.BinCountInd(0));
 			for(int i=1;i<=binNum;++i)
-				Log("[%15.7f..%15.7f) : %i",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
+        Log("[%15.7f..%15.7f) : %4.0f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
 
-			Log("[%15.7f..             +inf) : %i",RangeMax,H.BinCountInd(binNum+1));
+      Log("[%15.7f..             +inf) : %4.0f",RangeMax,H.BinCountInd(binNum+1));
 		} break;
 
 	default: assert(0);
