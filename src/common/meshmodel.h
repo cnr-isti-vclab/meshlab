@@ -64,12 +64,12 @@
 
 // Forward declarations needed for creating the used types
 class CVertexO;
-class CEdge;
+class CEdgeO;
 class CFaceO;
 
 // Declaration of the semantic of the used types
 class CUsedTypesO: public vcg::UsedTypes < vcg::Use<CVertexO>::AsVertexType,
-                                           vcg::Use<CEdge   >::AsEdgeType,
+                                           vcg::Use<CEdgeO   >::AsEdgeType,
                                            vcg::Use<CFaceO  >::AsFaceType >{};
 
 
@@ -96,14 +96,11 @@ class CVertexO  : public vcg::Vertex< CUsedTypesO,
 
 // The Main Edge Class
 // Currently it does not contains anything.
-class CEdge : public vcg::Edge<CUsedTypesO, vcg::edge::EVAdj> {
-public:
-	inline CEdge(){};
-  inline CEdge( CVertexO * v0, CVertexO * v1){ V(0)= v0 ; V(1)= v1;};
-  static inline CEdge OrderedEdge(CVertexO* v0,CVertexO* v1){
-   if(v0<v1) return CEdge(v0,v1);
-   else return CEdge(v1,v0);
-	}
+class CEdgeO : public vcg::Edge<CUsedTypesO,
+    vcg::edge::BitFlags,          /*  4b */
+    vcg::edge::EVAdj,
+    vcg::edge::EEAdj
+    >{
 };
 
 // Each face needs 32 byte, on 32bit arch. and 48 byte on 64bit arch.
