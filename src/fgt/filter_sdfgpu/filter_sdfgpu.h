@@ -4,11 +4,14 @@
 #include <QObject>
 
 #include <common/interfaces.h>
-
 #include <gpuProgram.h>
 #include <framebufferObject.h>
 #include <texture2D.h>
+#include <vcg/complex/algorithms/intersection.h>
 
+
+
+#define NUM_OF_DEPTH_TEX 3
 
 enum ONPRIMITIVE{ON_VERTICES, ON_FACES};
 
@@ -20,6 +23,20 @@ class SdfGpuPlugin : public QObject, public MeshFilterInterface
 public:
 
     enum{ SDF_SDF, SDF_CORRECTION_THIN_PARTS, SDF_OBSCURANCE };
+
+    struct SdfSample
+    {
+        SdfSample(float s, float w) : sample(s), weight(w){}
+        float sample;
+        float weight;
+    };
+
+    struct sampleCmp
+    {
+      bool operator() (SdfSample s1, SdfSample s2) { return s1.sample<s2.sample; }
+    } sampleCmp;
+
+
 
     SdfGpuPlugin();
 
@@ -61,14 +78,17 @@ public:
     //Enable depth peeling shader
     void useDepthPeelingShader(FramebufferObject* fbo);
 
-    //Position and normal of each vertex are copied to two separate texture, to be used in sdf and obscurance GPU calculation
+    //Position and normal of each vertex are copied to separate textures that are used in sdf and obscurance GPU calculation
     void vertexDataToTexture(MeshModel &m);
 
-    //Sdf calculation for each depth peeling iteration
-    void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir);
+    //Sdf calculation along a ray for each depth peeling iteration
+    void calculateSdf(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir);
 
-    //Copy sdf values from result texture to the mesh (vertex quality)
-    void applySdfHW(MeshModel &m, float numberOfRays);
+    //Copy sdf values from result texture to the mesh (vertex quality) if outliers removal is disabled,
+    //otherwise it stores vertices sdf in each vertex vector ( in the latter case it is exectued after each call to calculateSdf)
+    void applySdf(MeshModel &m);
+
+    void RemoveOutliersAndApplySdf(MeshModel &m, float lo01pec, float hi01pec, vcg::CallBackPos *cb);
 
     //Obscurance calculation for each depth peeling iteration
     void calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextFront, const vcg::Point3f& cameraDir, float bbDiag );
@@ -78,24 +98,37 @@ public:
 
   protected:
 
-    FilterIDType       mAction;
-    unsigned int       mResTextureDim;
-    FloatTexture2D*    mVertexCoordsTexture;
-    FloatTexture2D*    mVertexNormalsTexture;
+    FilterIDType mAction;
+
+    unsigned int mResTextureDim;
+
+    FloatTexture2D* mVertexCoordsTexture;
+    FloatTexture2D* mVertexNormalsTexture;
+
     FramebufferObject* mFboResult;    //Fbo and texture storing the result computation
     FloatTexture2D*    mResultTexture;
-    FramebufferObject* mFboArray[4];  //Fbos and textures for depth peeling
-    FloatTexture2D*    mDepthTextureArray[4];
-    bool               mErrInit;
-    bool               mUseVBO;
-    unsigned int       mPeelingTextureSize;
-    float              mTolerance;
-    float              mMinCos;
-    float              mTau;      //obscurance exponent
-    float              mMinDist;  //min dist between vertices to check too thin parts
-    GPUProgram*        mDeepthPeelingProgram;
-    GPUProgram*        mSDFProgram;
-    GPUProgram*        mObscuranceProgram;
+
+    FramebufferObject* mFboArray[NUM_OF_DEPTH_TEX];  //Fbos and textures for depth peeling
+    FloatTexture2D*    mDepthTextureArray[NUM_OF_DEPTH_TEX];
+
+    bool mUseVBO;
+    bool mRemoveOutliers; //activate outliers removal
+
+    unsigned int mPeelingTextureSize;
+
+    float mTolerance;
+    float mMinCos;
+
+    float mTau;      //obscurance exponent
+
+    float mMinDist;  //min dist between vertices to check too thin parts
+
+    GPUProgram* mDeepthPeelingProgram;
+    GPUProgram* mSDFProgram;
+    GPUProgram* mObscuranceProgram;
+
+    vcg::Histogram<float>   mHistogram;
+    std::vector<SdfSample>* mPerVertexSdfValues;
 };
 
 #endif // FILTER_SDFGPU_H

@@ -34,7 +34,6 @@ uniform vec3 		viewDirection;
 uniform mat4 		mvprMatrix;
 uniform float 		viewpSize;
 uniform float 		texSize;
-uniform float		minCos;
 uniform float		tau;
 uniform int 		firstRendering;
 uniform float		maxDist;

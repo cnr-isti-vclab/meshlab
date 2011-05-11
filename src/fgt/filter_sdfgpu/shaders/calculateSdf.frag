@@ -34,29 +34,13 @@ uniform float 		viewpSize;
 uniform float 		texSize;
 uniform float		minCos;
 uniform int		firstRendering;
-float 			_vals[9];
+uniform int 		removeOutliers;
+
 
 vec4 project(vec4 coords)
 {
    coords = mvprMatrix * coords; // clip space [-1 .. 1]   
    return vec4(coords.xyz * 0.5+0.5, coords.w);
-}
-
-void InsertionSort(int n) 
-{
-   int i, j;
-
-   float app;
- 
-   for (i = 1; i < n; i++)
-   {
-      app = _vals[i];
- 
-      for (j = i - 1; (j >= 0) && (_vals[j] > app); j--)
-               _vals[j+1] = _vals[j];
- 
-      _vals[j + 1] = app;
-   }
 }
 
 
@@ -101,30 +85,16 @@ void main(void)
      
    
     float cosAngle  = max(0.0,dot(N.xyz, viewDirection));
-
     
+
     if( cosAngle  >= minCos )
     {
+	sdf = calculateSdf( vec3( P.x, P.y, P.z  ) );
 
-	//supersampling, we take the median value only
-	_vals[0] = calculateSdf( vec3( P.x		, P.y,       P.z  ) );
-	_vals[1] = calculateSdf( vec3( P.x - 1.0/texSize, P.y,       P.z  ) );
-	_vals[2] = calculateSdf( vec3( P.x + 1.0/texSize, P.y,       P.z  ) );
-	_vals[3] = calculateSdf( vec3( P.x , P.y - 1.0/texSize,      P.z  ) );
-	_vals[4] = calculateSdf( vec3( P.x , P.y + 1.0/texSize,      P.z  ) );
-	_vals[5] = calculateSdf( vec3( P.x - 1.0/texSize, P.y  - 1.0/texSize,       P.z  ) );
-	_vals[6] = calculateSdf( vec3( P.x + 1.0/texSize, P.y  + 1.0/texSize,       P.z  ) );
-	_vals[7] = calculateSdf( vec3( P.x + 1.0/texSize, P.y - 1.0/texSize,      P.z  ) );
-	_vals[8] = calculateSdf( vec3( P.x - 1.0/texSize, P.y + 1.0/texSize,      P.z  ) );
-
-	InsertionSort(9);
-
-	sdf = _vals[4] * cosAngle;	
+	if(removeOutliers==0) sdf *= cosAngle; 
     }
-    else
-	cosAngle = 0.0;
-      
 
+    if(sdf==0.0) cosAngle = 0.0;
 	
     gl_FragColor = vec4( sdf, cosAngle, 0.0, 1.0);
 }
