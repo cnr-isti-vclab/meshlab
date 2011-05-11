@@ -37,29 +37,18 @@ class SlicedEdge
 public:
   SlicedEdge(const Plane3f &_p)
 	{
-	  p=_p;
+    pl=_p;
   }
 	bool operator()(face::Pos<typename MESH_TYPE::FaceType> ep)
 	{
-	  if (Distance(ep.V()->P(),p)<0) 
-			ep.V()->Q()=VERTEX_LEFT;
-		else if (Distance(ep.V()->P(),p)>0)
-			ep.V()->Q()=VERTEX_RIGHT;
-		else
-			ep.V()->Q()=VERTEX_SLICE;
-
-    if (Distance(ep.VFlip()->P(),p)<0)  
-			ep.VFlip()->Q()=VERTEX_LEFT;
-		else if (Distance(ep.VFlip()->P(),p)>0)  
-			ep.VFlip()->Q()=VERTEX_RIGHT;
-		else
-			ep.VFlip()->Q()=VERTEX_SLICE;
-
-    return (ep.V()->Q() != ep.VFlip()->Q()) && (ep.V()->Q()!=VERTEX_SLICE) && (ep.VFlip()->Q()!=VERTEX_SLICE);
+    float p1_proj = ep.V()->P()*pl.Direction()-pl.Offset();
+    float p0_proj = ep.VFlip()->P()*pl.Direction()-pl.Offset();
+    if ( (p1_proj * p0_proj) > 0) return false;
+    return true;
   }
 
 protected:
-  Plane3f p;
+  Plane3f pl;
 };
 
 

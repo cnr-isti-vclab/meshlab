@@ -27,28 +27,11 @@
 
 #include <QObject>
 #include <common/interfaces.h>
-#include <vcg/complex/edgemesh/base.h>
-
-#include <vcg/complex/edgemesh/update/bounding.h>
 #include <vcg/complex/algorithms/refine.h>
 #include <vcg/complex/append.h>
 #include <wrap/io_edgemesh/export_svg.h>
 
 #include <vcg/space/plane3.h>
-
-
-
-class MyVertex;
-class MyEdge;
-class MyFace;
-
-class MyUsedTypes: public vcg::UsedTypes < vcg::Use<MyVertex>::AsVertexType,vcg::Use<MyFace>::AsFaceType,vcg::Use<MyEdge>::AsEdgeType>{};
-
-class MyVertex: public vcg::Vertex < MyUsedTypes,vcg::vertex::Coord3f,vcg::vertex::BitFlags,vcg::vertex::VEAdj>{};
-class MyFace: public vcg::Face < MyUsedTypes, vcg::face::VertexRef>{};
-class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef> {};
-
-class MyEdgeMesh: public vcg::edg::EdgeMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
 
 typedef vcg::tri::io::SVGProperties SVGProperties;
 
@@ -58,27 +41,19 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_SINGLE_PLANE, FP_PARALLEL_PLANES, FP_RECURSIVE_SLICE };
-	enum { CAP_CW, CAP_CCW };
-	enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
+  enum { FP_SINGLE_PLANE, FP_PLANE_CUT};
+  enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
 
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
-	virtual bool autoDialog(QAction *);
-	virtual FilterClass getClass(QAction *);
+  virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
-
-	static void capHole(MeshModel* orig, MeshModel* dest, int capDir=CAP_CW);
-	static void extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
 private:
 	SVGProperties pr;
-	void createSlice(MeshModel* orig,MeshModel* dest);
-	
-	
 };
 
 namespace vcg {
