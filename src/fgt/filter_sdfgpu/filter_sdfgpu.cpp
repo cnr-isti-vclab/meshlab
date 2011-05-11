@@ -12,9 +12,8 @@ using namespace std;
 using namespace vcg;
 
 #define SDF_MAX_TEXTURE_SIZE 1024
-#define PI 3.14159265358979323846264f
+#define PI 3.14159265358979323846264;
 #define USEVBO_BY_DEFAULT false
-#define USEREMOVAL_DEFAULT false
 
 SdfGpuPlugin::SdfGpuPlugin()
 : mPeelingTextureSize(256)
@@ -32,10 +31,8 @@ SdfGpuPlugin::SdfGpuPlugin()
 void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet &par)
 {
 
-    qDebug() << "SDF plugin: called here!";
-    mAction = ID(action);
-
-   QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
+    qDebug() << "called here!";
+    QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
    par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
                     "Choose whether to trace rays from faces or from vertices. " ));
    par.addParam(  new RichInt("numberRays",128, "Number of rays: ",
@@ -45,13 +42,11 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                     "Size of the depth texture for depth peeling"));
    par.addParam(new RichInt("peelingIteration", 4, "Peeling Iteration",
                                 "Number of depth peeling iteration"));
-   par.addParam(new RichFloat("peelingTolerance", 0.00001f, "Peeling Tolerance",
+   par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
                             "Depth tolerance used during depth peeling" ));
+   par.addParam(new RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around vertex normal. Rays are traced within this cone."));
 
-   if(mAction != SDF_OBSCURANCE)
-        par.addParam(new RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around vertex normal. Rays are traced within this cone."));
-
-   switch(mAction)
+   switch(mAction = ID(action))
     {
             case SDF_CORRECTION_THIN_PARTS:
                  par.addParam(new RichFloat("minDist", 1.0f, "Min distance",
@@ -60,7 +55,7 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
 
             case SDF_OBSCURANCE:
                  par.addParam(new RichFloat("obscuranceExponent", 0.0f, "Obscurance Exponent",
-                                          "Parameter that increase or decrease the exponential rise in obscurance function. Zero is equivalent to canonical ambient occlusion" ));
+                                          "Parameter that increase or decrease the exponential rise in obscurance function" ));
                  break;
 
             default:
@@ -71,19 +66,6 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
 
    par.addParam(new RichBool("useVBO",USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
 
-   if(mAction != SDF_OBSCURANCE)
-   {
-       par.addParam(new RichBool("outliersRemoval",USEREMOVAL_DEFAULT,"Remove outliers", "Sdf calculation can be improved by removing values too small or too great compared to the median of rays length. This option needs additional memory and is a slower"));
-
-       par.addParam(new RichFloat("lowQuantile", .1, "Bottom quantile",
-                                  "We will throw away the set of ray distances for each cone which distance "
-                                  "value falls under this quantile. Value in between [0,1]. 0 Implies all "
-                                  "values are kept"));
-       par.addParam(new RichFloat("hiQuantile", .9, "Top quantile",
-                                  "We will throw away the set of ray distances for each cone which distance "
-                                  "value falls under this quantile. Value in between [0,1]. 1 Implies all "
-                                  "values are kept"));
-    }
 }
 
 QString SdfGpuPlugin::filterName(FilterIDType filterId) const
@@ -125,54 +107,36 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   MeshModel* mm = md.mm();
   CMeshO&    cm = mm->cm;
 
-  float lo01pec;
-  float hi01pec;
-
-  //Retrieve parameters
+  //RETRIEVE PARAMETERS
   ONPRIMITIVE  onPrimitive  = (ONPRIMITIVE) pars.getInt("onPrimitive");
   unsigned int numViews     = pars.getInt("numberRays");
   int          peel         = pars.getInt("peelingIteration");
   mTolerance                = pars.getFloat("peelingTolerance");
   mPeelingTextureSize       = pars.getInt("DepthTextureSize");
+  mMinCos                   = vcg::math::Cos(math::ToRad(pars.getFloat("coneAngle")/2.0));
   mUseVBO                   = pars.getBool("useVBO");
 
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
-  if(mAction != SDF_OBSCURANCE)
-  {
-     mMinCos         = math::Cos(math::ToRad(pars.getFloat("coneAngle")*0.5));//in radianti
-     mRemoveOutliers = pars.getBool("outliersRemoval");
-     lo01pec         = pars.getFloat("lowQuantile");
-     hi01pec         = pars.getFloat("hiQuantile");
-
-     if(mAction == SDF_CORRECTION_THIN_PARTS)
-        mMinDist = pars.getFloat("minDist");
- }
- else
+  if(mAction == SDF_OBSCURANCE)
     mTau = pars.getFloat("obscuranceExponent");
+  else if(mAction == SDF_CORRECTION_THIN_PARTS)
+    mMinDist = pars.getFloat("minDist");
 
-
-   //Mesh clean up
+   //MESH CLEAN UP
    setupMesh( md, onPrimitive );
 
-
-   //openGL init
+   //GL INIT
    if(!initGL(*mm)) return false;
 
-
+   //
    vertexDataToTexture(*mm);
-
-
-   //If we want to remove outliers we need a vector for each vertex in which we store all rays length
-   if(mRemoveOutliers)
-     mPerVertexSdfValues = new std::vector<SdfSample>[cm.vn];
-
 
   //Uniform sampling of directions over a sphere
   std::vector<Point3f> unifDirVec;
   GenNormal<float>::Uniform(numViews,unifDirVec);
-  Log(0, "Number of rays: %i ", unifDirVec.size() );
 
+  Log(0, "Number of rays: %i ", unifDirVec.size() );
 
   //Do the actual calculation of sdf or obscurance for each ray
   unsigned int tracedRays = 0;
@@ -184,63 +148,16 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
         ++tracedRays;
   }
 
-
-  //Read back the result texture and store result in the mesh
+  //read back the result texture and store result in the mesh
   if(mAction == SDF_OBSCURANCE)
       applyObscurance(*mm,unifDirVec.size());
   else
-  {
-      //If do not remove outliers the result is ready inside the result texture then we just copy values to vertex quality
-      if(!mRemoveOutliers)
-        applySdf(*mm);
-      else//otherwise we have all intermediate result
-        RemoveOutliersAndApplySdf(*mm,lo01pec,hi01pec,cb);
-  }
-
+      applySdfHW(*mm,unifDirVec.size());
 
   //Clean & Exit
   releaseGL(*mm);
 
   return true;
-}
-
-
-void SdfGpuPlugin::RemoveOutliersAndApplySdf(MeshModel &m, float lo01pec, float hi01pec, vcg::CallBackPos *cb )
-{
-    for ( unsigned int i = 0; i < m.cm.vn; i++ )
-    {
-        float totVal = 0, totCnt = 0;
-
-        if( !mPerVertexSdfValues[i].empty() )
-        {
-            mHistogram.Clear();
-            //Computer min and max sdf value for each vertex
-            float mind = (*(std::min_element(mPerVertexSdfValues[i].begin(),mPerVertexSdfValues[i].end(),sampleCmp))).sample;
-            float maxd = (*(std::max_element(mPerVertexSdfValues[i].begin(),mPerVertexSdfValues[i].end(),sampleCmp))).sample;
-
-            mHistogram.SetRange( mind,maxd, 100);
-
-            for( unsigned int j = 0; j < mPerVertexSdfValues[i].size(); j++ )
-              if(!math::IsNAN(mPerVertexSdfValues[i][j].sample))
-                  mHistogram.Add(mPerVertexSdfValues[i][j].sample);
-
-            float loperc = mHistogram.Percentile(lo01pec);
-            float hiperc = mHistogram.Percentile(hi01pec);
-
-            //Compute weighted average of samples, throwing away outliers
-            for( unsigned int k = 0; k < mPerVertexSdfValues[i].size(); k++)
-              if( mPerVertexSdfValues[i][k].sample >= loperc && mPerVertexSdfValues[i][k].sample <= hiperc )
-              {
-
-                totVal += mPerVertexSdfValues[i][k].sample * mPerVertexSdfValues[i][k].weight;
-                totCnt += mPerVertexSdfValues[i][k].weight;
-              }
-        }
-        //Save in mesh
-        m.cm.vert[i].Q() = totCnt>0 ? (m.cm.bbox.Diag()*totVal/totCnt) : 0;
-
-        cb(100*((float)i/(float)m.cm.vn), "Refining result...");
-    }
 }
 
 bool SdfGpuPlugin::initGL(MeshModel& mm)
@@ -249,7 +166,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     this->glContext->makeCurrent();
 
-    //Set default openGL staff
+    //SET DEFAULT OPENGL STUFF
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_TEXTURE_2D );
     glDisable(GL_BLEND);
@@ -257,9 +174,8 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     glDisable(GL_ALPHA_TEST);
     glEnable(GL_NORMALIZE);
     glDisable(GL_COLOR_MATERIAL);
-    glClearColor(0,0,0,0);
+    glClearColor(0,0,1,0);
     glClearDepth(1.0);
-
 
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -268,7 +184,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
             return false;
     }
 
-    //Check hardware capabilities
+    //CHECK HARDWARE CAPABILITIES
     if (!glewIsSupported("GL_ARB_vertex_shader GL_ARB_fragment_shader"))
     {
             if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
@@ -297,21 +213,19 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
             return false;
     }
 
-
-    //Init FBOs and TEXs
-    for(int i = 0; i < NUM_OF_DEPTH_TEX; i++)
+    //INIT FBOs AND TEXs
+    for(int i = 0; i < 4; i++)
     {
         mFboArray[i] = new FramebufferObject();
     }
 
     mFboResult = new FramebufferObject();
 
-
     unsigned int maxTexSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
     Log(0, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
 
-    //Check model size
+    //CHECK MODEL SIZE
     if ((maxTexSize*maxTexSize) < numVertices)
     {
             Log(0, "That's a really huge model, I can't handle it in hardware, sorry..");
@@ -329,26 +243,29 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
     mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
 
-    //Clear only the first time, this is important because during calculation we dont clear the framebuffer
-    //as we blend new values over the previous ones
+    //clear first time
     mFboResult->bind();
+    glPushAttrib(GL_COLOR_BUFFER_BIT);
+    glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT);
+    glPopAttrib();
     mFboResult->unbind();
 
     //we use 3 FBOs to avoid z-fighting in sdf and obscurance calculation, see TraceRays function for details
-    for(int i = 0; i < NUM_OF_DEPTH_TEX; i++)
+    for(int i = 0; i < 4; i++)
     {
-        mDepthTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+        mDepthTextureArray[i]  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+       // mNormalTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+       // mFboArray[i]->attachTexture( mNormalTextureArray[i]->format().target(), mNormalTextureArray[i]->id(), GL_COLOR_ATTACHMENT0_EXT );
         mFboArray[i]->attachTexture( mDepthTextureArray[i]->format().target(), mDepthTextureArray[i]->id(), GL_DEPTH_ATTACHMENT  );
 
-        mFboArray[i]->bind();
+       mFboArray[i]->bind();
 
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
 
         mFboArray[i]->unbind();
     }
-
 
     //Depth peeling shader used for both sdf and obscurance
     mDeepthPeelingProgram = new GPUProgram("",":/SdfGpu/shaders/shaderDepthPeeling.fs","");
@@ -372,7 +289,6 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mSDFProgram->addUniform("minCos");
     mSDFProgram->addUniform("depthTexturePrevBack");
     mSDFProgram->addUniform("firstRendering");
-    mSDFProgram->addUniform("removeOutliers");
     mSDFProgram->disable();
 
     //Obscurance shader
@@ -387,6 +303,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mObscuranceProgram->addUniform("mvprMatrix");
     mObscuranceProgram->addUniform("viewpSize");
     mObscuranceProgram->addUniform("texSize");
+    mObscuranceProgram->addUniform("minCos");
     mObscuranceProgram->addUniform("tau");
     mObscuranceProgram->addUniform("firstRendering");
     mObscuranceProgram->addUniform("maxDist");      //mesh BB diagonal
@@ -400,11 +317,12 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     //If required from the user, we use VBO to speed up mesh rendering
     if(mUseVBO)
+    {
         mm.glw.SetHint(vcg::GLW::HNUseVBO);
+        mm.glw.Update();
+    }
 
-    mm.glw.Update();
-
-    checkGLError::qDebug("openGL Init failed");
+    checkGLError::qDebug("GL Init failed");
 
     return true;
 }
@@ -418,7 +336,7 @@ void SdfGpuPlugin::vertexDataToTexture(MeshModel &m)
         vcg::Point3<CMeshO::ScalarType> vn;
 
         //Copies each vertex's position and normal in new vectors
-        for (unsigned int i=0; i < m.cm.vn; ++i)
+        for (int i=0; i < m.cm.vn; ++i)
         {
                 //Vertex position
                 vertexPosition[i*4+0] = m.cm.vert[i].P().X();
@@ -448,7 +366,6 @@ void SdfGpuPlugin::vertexDataToTexture(MeshModel &m)
 
 void SdfGpuPlugin::releaseGL(MeshModel &m)
 {
-    //Clear all
     glUseProgram(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -460,18 +377,10 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
     delete mVertexCoordsTexture;
     delete mVertexNormalsTexture;
 
-    for(int i = 0; i < NUM_OF_DEPTH_TEX; i++)
+    for(int i = 0; i < 4; i++)
     {
         delete mFboArray[i];
         delete mDepthTextureArray[i];
-    }
-
-    if(mRemoveOutliers)
-    {
-        for ( unsigned int i = 0; i < m.cm.vn; i++ )
-            mPerVertexSdfValues[i].clear();
-
-        delete[] mPerVertexSdfValues;
     }
 
     if (mUseVBO)
@@ -510,24 +419,25 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
       if (dup > 0 || unref > 0) Log("Removed %i duplicate and %i unreferenced vertices\n",dup,unref);
     }
 
-    //Enable & Reset the necessary attributes
-    if(onPrimitive==ON_VERTICES)
-    {
-
-        mm->updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
-        tri::UpdateQuality<CMeshO>::VertexConstant(m,0);
-    }
-    else
-    {
-        mm->updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
-        tri::UpdateQuality<CMeshO>::FaceConstant(m,0);
-    }
-
     //Updating mesh metadata
     tri::UpdateBounding<CMeshO>::Box(m);
-    tri::Allocator<CMeshO>::CompactVertexVector(m);
-    tri::Allocator<CMeshO>::CompactFaceVector(m);
-    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m);
+    tri::UpdateNormals<CMeshO>::PerFaceNormalized(m);
+    tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(m);
+    tri::UpdateNormals<CMeshO>::NormalizeVertex(m);
+    tri::UpdateFlags<CMeshO>::FaceProjection(m);
+
+    //Enable & Reset the necessary attributes
+    switch(onPrimitive)
+    {
+      case ON_VERTICES:
+        mm->updateDataMask(MeshModel::MM_VERTQUALITY);
+        tri::UpdateQuality<CMeshO>::VertexConstant(m,0);
+        break;
+      case ON_FACES:
+        mm->updateDataMask(MeshModel::MM_FACEQUALITY);
+        tri::UpdateQuality<CMeshO>::FaceConstant(m,0);
+        break;
+    }
 }
 
 void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
@@ -559,10 +469,9 @@ void SdfGpuPlugin::useDepthPeelingShader(FramebufferObject* fbo)
    mDeepthPeelingProgram->setUniform1i("textureLastDepth",0);
 }
 
-void SdfGpuPlugin::calculateSdf(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir)
+void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir)
 {
     mFboResult->bind();
-
     glViewport(0, 0, mResTextureDim, mResTextureDim);
     GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
 
@@ -580,14 +489,9 @@ void SdfGpuPlugin::calculateSdf(FramebufferObject* fboFront, FramebufferObject* 
 
     glDisable(GL_DEPTH_TEST);
 
-    //If we want do outliers removal, we need to keep all intermediate result
-    if(!mRemoveOutliers)
-    {
-        glEnable (GL_BLEND);
-        glBlendFunc (GL_ONE, GL_ONE);
-        glBlendEquation(GL_FUNC_ADD);
-    }
-    else glClear(GL_COLOR_BUFFER_BIT);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_ONE, GL_ONE);
+    glBlendEquation(GL_FUNC_ADD);
 
     glUseProgram(mSDFProgram->id());
 
@@ -636,12 +540,6 @@ void SdfGpuPlugin::calculateSdf(FramebufferObject* fboFront, FramebufferObject* 
     else
          mSDFProgram->setUniform1i("firstRendering",0);
 
-    if(mRemoveOutliers)
-        mSDFProgram->setUniform1i("removeOutliers",1);
-    else
-         mSDFProgram->setUniform1i("removeOutliers",0);
-
-
     // Screen-aligned Quad
     glBegin(GL_QUADS);
             glVertex3f(-1.0f, -1.0f, 0.0f); //L-L
@@ -656,7 +554,7 @@ void SdfGpuPlugin::calculateSdf(FramebufferObject* fboFront, FramebufferObject* 
 
 }
 
-void SdfGpuPlugin::applySdf(MeshModel &m)
+void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
 {
     const unsigned int texelNum = mResTextureDim*mResTextureDim;
 
@@ -667,18 +565,11 @@ void SdfGpuPlugin::applySdf(MeshModel &m)
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
 
-    for (unsigned int i=0; i < m.cm.vn; ++i)
-    {   
-       if(result[i*4] > 0.0)
-       {
-         if(mRemoveOutliers)
-            mPerVertexSdfValues[i].push_back(SdfSample(result[i*4],result[i*4+1]));
-         else
-            //weighted average: sdf sum is in the red channel and the weights sum in the green one
-            m.cm.vert[i].Q() = (result[i*4+1]>0.0) ? (m.cm.bbox.Diag() * result[i*4] / result[i*4+1]) : 0.0;
-
-       }
-     }
+    for (int i=0; i < m.cm.vn; ++i)
+    {
+        //weighted average: sdf sum is in the red channel and the weights sum in the green one
+        m.cm.vert[i].Q() = (result[i*4+1]>0.0) ? (result[i*4] / result[i*4+1]) : 0.0;
+    }
 
     mFboResult->unbind();
 
@@ -747,6 +638,8 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
     // Set viewport Size
     mObscuranceProgram->setUniform1f("viewpSize", mResTextureDim );
 
+    mObscuranceProgram->setUniform1f("minCos", 0.7);
+
     mObscuranceProgram->setUniform1f("tau", mTau);
 
     mObscuranceProgram->setUniform1f("maxDist", bbDiag);
@@ -805,7 +698,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               if(j > 0)
                   useDepthPeelingShader(mFboArray[j-1]);
                else
-                   useDepthPeelingShader(mFboArray[NUM_OF_DEPTH_TEX-1]);
+                   useDepthPeelingShader(mFboArray[3]);
         }
 
         mFboArray[j]->bind();
@@ -816,7 +709,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
         mFboArray[j]->unbind();
 
-         //we use 3 FBOs instead of two to avoid z-fighting (Inspired from Woo's shadow mapping method). See below.
+         //we use 4 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
          if(i%2)
          {
               //we use the same method as in sdf, see below
@@ -824,7 +717,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               {
                  if(i>1)
                  {
-                      int back = (j==1)? (NUM_OF_DEPTH_TEX-1) : 1;
+                      int back = (j==1)? 3 : 1;
                       calculateObscurance( mFboArray[j-1], mFboArray[back], mFboArray[j], dir, mm->cm.bbox.Diag());//front back nextBack
                  }
                  else
@@ -834,24 +727,18 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               {
                   if(i>1)
                   {
-                      //Since we are interested in vertices belonging to the front layer, in shader we check that
+                      //We are interested in vertices belonging to the front layer. So in shader we check that
                       //the vertex's depth is greater than the previous depth layer and smaller than the next one.
-                      //That's why we need an additional depth texture.
-                      int prevBack = (j==1) ? (NUM_OF_DEPTH_TEX-1) : 1;
-                      calculateSdf( mFboArray[j-1], mFboArray[j], mFboArray[prevBack], dir );// front back prevback
+                      int prevBack = (j==1) ? 3 : 1;
+                      calculateSdfHW( mFboArray[j-1], mFboArray[j], mFboArray[prevBack], dir );// front back prevback
                   }
                   else//we have first and second depth layers, so we can use "second-depth shadow mapping" to avoid z-fighting
-                      calculateSdf( mFboArray[j-1], mFboArray[j], NULL, dir );// front back prevback
-
-                  //if we want to remove outliers we need to save all intermediate results
-                  if(mRemoveOutliers)
-                    applySdf(*mm);
-
+                      calculateSdfHW( mFboArray[j-1], mFboArray[j], NULL, dir );// front back prevback
               }
           }
 
           //increment and wrap around
-          j = ( j==(NUM_OF_DEPTH_TEX-1) ) ? 0 : (j+1);
+          j = (j==3) ? 0 : (j+1);
    }
 
     checkGLError::qDebug("Error during depth peeling");

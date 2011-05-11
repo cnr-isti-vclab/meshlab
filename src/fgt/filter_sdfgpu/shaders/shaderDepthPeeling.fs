@@ -11,6 +11,6 @@ void main()
   float lastDepth = texture2D(textureLastDepth, tc ).x;
   if (gl_FragCoord.z<=lastDepth + tolerance) discard;
   
-  gl_FragColor = gl_Color; //
+  //gl_FragColor = gl_Color; //
     //
 }
