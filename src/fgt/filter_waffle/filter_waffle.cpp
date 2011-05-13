@@ -22,14 +22,13 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "filter_slice.h"
+#include "filter_waffle.h"
 //#include <stdlib.h>
 #include <vcg/complex/algorithms/intersection.h>
 #include <vcg/space/intersection2.h>
 
 #include <algorithm>
 
-#include "filter_slice_functors.h"
 #include <wrap/gl/glu_tesselator.h>
 #include <vcg/complex/allocate.h>
 #include <vcg/complex/append.h>

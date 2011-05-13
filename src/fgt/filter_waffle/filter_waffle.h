@@ -37,7 +37,7 @@
 
 #include <vcg/space/plane3.h>
 
-#include "filter_slice_functors.h"
+#include "filter_waffle_functors.h"
 
 class MyVertex;
 class MyEdge;

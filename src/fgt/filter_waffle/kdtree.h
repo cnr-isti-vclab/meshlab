@@ -25,8 +25,7 @@
 #define SLICE_KD_TREE
 #include <vcg/space/point3.h>
 #include <vcg/complex/algorithms/update/bounding.h>
-#include "filter_slice_functors.h"
-#include "filter_slice.h"
+#include "filter_waffle.h"
 
 template<typename MeshType>
 class KDTree

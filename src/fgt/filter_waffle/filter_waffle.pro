@@ -1,10 +1,10 @@
 include (../../shared.pri)
 
-HEADERS       += filter_slice.h \
-                filter_slice_functors.h \
+HEADERS       += filter_waffle.h \
+                filter_waffle_functors.h \
                 kdtree.h
 
-SOURCES       += filter_slice.cpp  
-TARGET        = filter_slice
+SOURCES       += filter_waffle.cpp
+TARGET        = filter_waffle
 
 QT           += opengl
