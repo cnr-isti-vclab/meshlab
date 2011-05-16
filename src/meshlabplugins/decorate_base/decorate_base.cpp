@@ -24,6 +24,7 @@
 #include "decorate_base.h"
 #include <wrap/gl/addons.h>
 #include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/bitquad_support.h>
 #include <meshlab/glarea.h>
 #include <wrap/qt/checkGLError.h>
 #include <wrap/qt/gl_label.h>
@@ -206,6 +207,7 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
 			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();			
 			glPopAttrib();
         } break;
+
     case DP_SHOW_NON_FAUX_EDGE :	{
 			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_LIGHTING);
@@ -214,11 +216,61 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glLineWidth(1.f);
-			glColor(Color4b::DarkGray);
+      Color4b cc=Color4b::DarkGray;
+      cc[3]=128;
+      glColor(cc);
 			glDepthRange (0.0, 0.999);
 			m.glw.DrawWirePolygonal<GLW::NMNone,GLW::CMNone>();
 			glPopAttrib();
-        } break;
+
+      CMeshO::PerMeshAttributeHandle< vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"ExtraordinaryVertexVector");
+      if(rm->getBool(this->ShowNonRegular()) && vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, vvH))
+      {
+        vector<PointPC> *vvP = &vvH();
+        glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_LIGHTING);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthRange (0.0, 0.999);
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glEnableClientState (GL_COLOR_ARRAY);
+
+        glEnable(GL_POINT_SMOOTH);
+        glPointSize(6.f);
+        glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
+        glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
+//        glDrawArrays(GL_POINTS,0,vvP->size());
+        glDrawArrays(GL_TRIANGLES,0,vvP->size());
+        glDisableClientState (GL_COLOR_ARRAY);
+        glDisableClientState (GL_VERTEX_ARRAY);
+        glPopAttrib();
+      }
+      CMeshO::PerMeshAttributeHandle< vector<PointPC> > sgH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"SeparatrixGraph");
+      if(rm->getBool(this->ShowSeparatrix()) && vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, sgH))
+      {
+        vector<PointPC> *vvP = &sgH();
+        glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_LIGHTING);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glLineWidth(2.f);
+        glDepthRange (0.0, 0.999);
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glEnableClientState (GL_COLOR_ARRAY);
+
+        glEnable(GL_POINT_SMOOTH);
+        glPointSize(6.f);
+        glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
+        glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
+        glDrawArrays(GL_LINES,0,vvP->size());
+        glDisableClientState (GL_COLOR_ARRAY);
+        glDisableClientState (GL_VERTEX_ARRAY);
+        glPopAttrib();
+      }
+    } break;
     case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,painter,rm,qf); break;
 
     case DP_SHOW_VERT_QUALITY_HISTOGRAM :
@@ -683,6 +735,124 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
 {	
   switch(ID(action))
   {
+  case DP_SHOW_NON_FAUX_EDGE :
+  {
+    MeshModel *m=md.mm();
+    CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m->cm,"ExtraordinaryVertexVector");
+    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,bvH))
+      bvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m->cm,std::string("ExtraordinaryVertexVector"));
+    vector<PointPC> *BVp = &bvH();
+    BVp->clear();
+
+    SimpleTempData<CMeshO::VertContainer, int > ValencyCounter(m->cm.vert,0);
+
+    for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
+    {
+      for(int i=0;i<3;++i)
+        if(!(*fi).IsF(i))
+        {
+          ++ ValencyCounter[(*fi).V0(i)];
+          ++ ValencyCounter[(*fi).V1(i)];
+        }
+    }
+    Color4b bCol2=Color4b(255,0,0,0);
+    Color4b vCol2=Color4b(255,0,0,192);
+    Color4b bCol3=Color4b(255,0,0,0);
+    Color4b vCol3=Color4b(255,0,0,128);
+    Color4b bCol5=Color4b(0,0,255,0);
+    Color4b vCol5=Color4b(0,0,255,128);
+    Color4b bCol6=Color4b(0,0,255,0);
+    Color4b vCol6=Color4b(0,0,255,192);
+
+    for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
+    {
+      for(int i=0;i<3;++i)
+      {
+        if(ValencyCounter[(*fi).V(i)]<6) {
+          BVp->push_back(make_pair(((*fi).V2(i)->P()+(*fi).V(i)->P())/2.0f,bCol2));
+          BVp->push_back(make_pair( (*fi).V(i)->P()                       ,vCol2));
+          BVp->push_back(make_pair(((*fi).V1(i)->P()+(*fi).V(i)->P())/2.0f,bCol2));
+        }
+        if(ValencyCounter[(*fi).V(i)]==6) {
+          BVp->push_back(make_pair(((*fi).V2(i)->P()+(*fi).V(i)->P())/2.0f,bCol3));
+          BVp->push_back(make_pair( (*fi).V(i)->P()                       ,vCol3));
+          BVp->push_back(make_pair(((*fi).V1(i)->P()+(*fi).V(i)->P())/2.0f,bCol3));
+        }
+        if(ValencyCounter[(*fi).V(i)]==10) {
+          BVp->push_back(make_pair(((*fi).V2(i)->P()+(*fi).V(i)->P())/2.0f,bCol5));
+          BVp->push_back(make_pair( (*fi).V(i)->P()                       ,vCol5));
+          BVp->push_back(make_pair(((*fi).V1(i)->P()+(*fi).V(i)->P())/2.0f,bCol5));
+        }
+        if(ValencyCounter[(*fi).V(i)]>10) {
+          BVp->push_back(make_pair(((*fi).V2(i)->P()+(*fi).V(i)->P())/2.0f,bCol6));
+          BVp->push_back(make_pair( (*fi).V(i)->P()                       ,vCol6));
+          BVp->push_back(make_pair(((*fi).V1(i)->P()+(*fi).V(i)->P())/2.0f,bCol6));
+        }
+      }
+    }
+    int val3cnt=0,val5cnt=0;
+    for(CMeshO::VertexIterator vi = m->cm.vert.begin(); vi!= m->cm.vert.end();++vi) if(!(*vi).IsD())
+    {
+      if(ValencyCounter[(*vi)]==6) ++val3cnt;
+      if(ValencyCounter[(*vi)]==10) ++val5cnt;
+    }
+    qDebug("Found %i vertices with valence 3",val3cnt);
+    qDebug("Found %i vertices with valence 5",val5cnt);
+
+#if 1
+    CMeshO::PerMeshAttributeHandle< vector<PointPC> > sgH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m->cm,"SeparatrixGraph");
+    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,sgH))
+      sgH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m->cm,std::string("SeparatrixGraph"));
+    vector<PointPC> *sgP = &sgH();
+    sgP->clear();
+
+    m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+
+    SimpleTempData<CMeshO::FaceContainer, Point3i > VisitedEdges(m->cm.face,Point3i(0,0,0));
+
+
+    for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
+    {
+      for(int i=0;i<3;++i)
+      {
+        if(ValencyCounter[(*fi).V(i)] != 8)
+        {
+          if(VisitedEdges[*fi][i]==0 && !(*fi).IsF(i))
+          {
+
+            CVertexO* startV=(*fi).V(i);
+            face::Pos <CFaceO> sp(&*fi,i,startV);
+            do
+            {
+              VisitedEdges[sp.F()][sp.E()]=1;
+              sgP->push_back(make_pair(sp.V()->P(),Color4b::Red));
+              sp.FlipV();
+              sgP->push_back(make_pair(sp.V()->P(),Color4b::Red));
+              sp.FlipE();
+              if(!sp.F()->IsF(sp.E())) sp.FlipF();
+              else
+              {
+                sp.FlipF();sp.FlipE();sp.FlipF();
+                assert(!sp.F()->IsF(sp.E()));
+              }
+              sp.FlipE();
+              if(!sp.F()->IsF(sp.E())) sp.FlipF();
+              else
+              {
+                sp.FlipF();sp.FlipE();sp.FlipF();
+                assert(!sp.F()->IsF(sp.E()));
+              }
+            }
+            while(ValencyCounter[sp.V()]==8 && VisitedEdges[sp.F()][sp.E()]==0);
+          }
+        }
+      } // end for i in 1..3
+    }  // end foreach face
+
+#endif
+  } break;
+
+
   case DP_SHOW_BOUNDARY :
   {
     MeshModel *m=md.mm();
@@ -1183,6 +1353,11 @@ case DP_SHOW_CAMERA :{
           parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
           parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
         } break;
-    }
+    case DP_SHOW_NON_FAUX_EDGE :{
+              parset.addParam(new RichBool(this->ShowSeparatrix(), true, "Show Quad mesh Separatrices","if true the lines connecting extraordinary vertices of a quad mesh are shown"));
+              parset.addParam(new RichBool(this->ShowNonRegular(), true, "Show Non Regular Vertices","if true, vertices with valence not equal to four are shown with red/blue fans"));
+            } break;
+        }
+
 }
 Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)

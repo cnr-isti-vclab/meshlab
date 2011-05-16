@@ -128,6 +128,9 @@ public:
   inline QString ShowMeshCameras() const     { return  "MeshLab::Decoration::ShowMeshCameras" ; }
   inline QString ShowRasterCameras() const     { return  "MeshLab::Decoration::ShowRasterCameras" ; }
 
+  inline QString ShowNonRegular() const     { return  "MeshLab::Decoration::ShowNonRegular" ; }
+  inline QString ShowSeparatrix() const     { return  "MeshLab::Decoration::ShowSeparatrix" ; }
+
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
   inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }
   inline QString HistBinNumParam() const     { return  "MeshLab::Decoration::HistBinNumParam" ; }
