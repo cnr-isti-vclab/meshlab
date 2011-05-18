@@ -231,7 +231,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         }
 
         //Move Cloud Mesh
-        MoveCloudMeshForward(cloud_mesh,dir,l,1,2);
+        MoveCloudMeshForward(cloud_mesh,dir,l,1,3);
 
         if(colorize) ColorizeMesh(base_mesh);
         break;
