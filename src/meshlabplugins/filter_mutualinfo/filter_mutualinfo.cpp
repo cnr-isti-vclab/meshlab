@@ -231,6 +231,14 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	//align.readRender(0);
 		
 	md.rm()->shot=align.shot;
+	float ratio=(float)md.rm()->currentPlane->image.height()/(float)align.shot.Intrinsics.ViewportPx[1];
+	md.rm()->shot.Intrinsics.ViewportPx[0]=md.rm()->currentPlane->image.width();
+	md.rm()->shot.Intrinsics.ViewportPx[1]=md.rm()->currentPlane->image.height();
+	md.rm()->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+	md.rm()->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+	md.rm()->shot.Intrinsics.CenterPx[0]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[0]/2.0);
+	md.rm()->shot.Intrinsics.CenterPx[1]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[1]/2.0);
+
 	this->glContext->doneCurrent();
 	//emit md.rasterSetChanged();
 	return true;

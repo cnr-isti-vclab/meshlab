@@ -113,7 +113,17 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
     }
   break;
   case FP_SET_RASTER_CAMERA :
-    rm->shot = par.getShotf("Shot");
+	  {
+			vcg::Shotf shotGot=par.getShotf("Shot");
+			rm->shot = shotGot;
+			float ratio=(float)rm->currentPlane->image.height()/(float)shotGot.Intrinsics.ViewportPx[1];
+			rm->shot.Intrinsics.ViewportPx[0]=rm->currentPlane->image.width();
+			rm->shot.Intrinsics.ViewportPx[1]=rm->currentPlane->image.height();
+			rm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+			rm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+			rm->shot.Intrinsics.CenterPx[0]=(int)((float)rm->shot.Intrinsics.ViewportPx[0]/2.0);
+			rm->shot.Intrinsics.CenterPx[1]=(int)((float)rm->shot.Intrinsics.ViewportPx[1]/2.0);
+	  }
   break;
     case FP_SET_MESH_CAMERA :
       cm.shot = par.getShotf("Shot");
