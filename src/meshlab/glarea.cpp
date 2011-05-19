@@ -822,7 +822,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
       foreach(MeshModel * mp, this->md()->meshList)
         mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
 			break;
-		case Qt::ShiftModifier												: fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
+		case Qt::ShiftModifier												: fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f); break;
 		default:
       if(isRaster())
         this->opacity = math::Clamp( opacity*powf(1.2f, notch),0.1f,1.0f);
