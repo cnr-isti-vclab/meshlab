@@ -9,6 +9,9 @@
 #include <framebufferObject.h>
 #include <texture2D.h>
 
+#define EXTRA_RAYS_REQUESTED 10
+#define EXTRA_RAYS_RESULTED 20 //must match value in sdf shader
+#define PEELING_FBO 3
 
 enum ONPRIMITIVE{ON_VERTICES, ON_FACES};
 
@@ -65,7 +68,7 @@ public:
     void vertexDataToTexture(MeshModel &m);
 
     //Sdf calculation for each depth peeling iteration
-    void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir);
+    void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir,  float bbDiag );
 
     //Copy sdf values from result texture to the mesh (vertex quality)
     void applySdfHW(MeshModel &m, float numberOfRays);
@@ -86,8 +89,6 @@ public:
     FloatTexture2D*    mResultTexture;
     FramebufferObject* mFboArray[4];  //Fbos and textures for depth peeling
     FloatTexture2D*    mDepthTextureArray[4];
-   // FloatTexture2D*    mNormalTextureArray[4];
-
     bool               mUseVBO;
     unsigned int       mPeelingTextureSize;
     float              mTolerance;
@@ -97,6 +98,9 @@ public:
     GPUProgram*        mDeepthPeelingProgram;
     GPUProgram*        mSDFProgram;
     GPUProgram*        mObscuranceProgram;
+    bool               mRemoveFalse;
+    bool               mRemoveOutliers;
+    float              mConeRays[EXTRA_RAYS_RESULTED*3];
 };
 
 #endif // FILTER_SDFGPU_H
