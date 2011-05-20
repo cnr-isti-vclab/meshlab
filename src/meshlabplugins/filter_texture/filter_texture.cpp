@@ -35,6 +35,7 @@ FilterTexturePlugin::FilterTexturePlugin()
 { 
     typeList << FP_UV_TO_COLOR
             << FP_UV_WEDGE_TO_VERTEX
+            << FP_UV_VERTEX_TO_WEDGE
             << FP_BASIC_TRIANGLE_MAPPING
             << FP_SET_TEXTURE
             << FP_PLANAR_MAPPING
@@ -52,6 +53,7 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
     {
     case FP_UV_TO_COLOR : return QString("UV to Color");
     case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
+    case FP_UV_VERTEX_TO_WEDGE : return QString("Convert PerVertex UV into PerWedge UV");
     case FP_BASIC_TRIANGLE_MAPPING : return QString("Trivial Per-Triangle Parametrization");
     case FP_PLANAR_MAPPING : return QString("Flat Plane Parametrization");
     case FP_SET_TEXTURE : return QString("Set Texture");
@@ -70,6 +72,7 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
     {
     case FP_UV_TO_COLOR :  return QString("Maps the UV Space into a color space, thus colorizing mesh vertices according to UV coords.");
     case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
+    case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluos vertices...");
     case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
     case FP_PLANAR_MAPPING : return QString("Builds a trivial flat plane parametrization.");
     case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>"
@@ -88,6 +91,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
     {
     case FP_UV_TO_COLOR : return MeshModel::MM_VERTTEXCOORD;
     case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_WEDGTEXCOORD;
+    case FP_UV_VERTEX_TO_WEDGE : return MeshModel::MM_VERTTEXCOORD;
     case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_FACENUMBER;
     case FP_PLANAR_MAPPING : return MeshModel::MM_FACENUMBER;
     case FP_SET_TEXTURE : return MeshModel::MM_WEDGTEXCOORD;
@@ -105,6 +109,7 @@ int FilterTexturePlugin::getRequirements(QAction *a)
     {
     case FP_UV_TO_COLOR :
     case FP_UV_WEDGE_TO_VERTEX :
+    case FP_UV_VERTEX_TO_WEDGE :
     case FP_BASIC_TRIANGLE_MAPPING :
     case FP_PLANAR_MAPPING :
     case FP_SET_TEXTURE : return MeshModel::MM_NONE;
@@ -122,6 +127,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
     {
     case FP_UV_TO_COLOR : return MeshModel::MM_VERTCOLOR;
     case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
+    case FP_UV_VERTEX_TO_WEDGE : return MeshModel::MM_WEDGTEXCOORD;
     case FP_PLANAR_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
     case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
     case FP_SET_TEXTURE : return MeshModel::MM_UNKNOWN;
@@ -142,6 +148,7 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
     {
     case FP_UV_TO_COLOR : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
     case FP_UV_WEDGE_TO_VERTEX :
+    case FP_UV_VERTEX_TO_WEDGE :
     case FP_BASIC_TRIANGLE_MAPPING :
     case FP_PLANAR_MAPPING :
     case FP_SET_TEXTURE :
@@ -369,6 +376,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
                 m.clearDataMask(MeshModel::MM_FACEFACETOPO);
                 m.clearDataMask(MeshModel::MM_VERTFACETOPO);
             }
+        }
+        break;
+
+    case FP_UV_VERTEX_TO_WEDGE : {
+            m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+            tri::UpdateTexture<CMeshO>::WedgeTexFromVertexTex(m.cm);
         }
         break;
 
