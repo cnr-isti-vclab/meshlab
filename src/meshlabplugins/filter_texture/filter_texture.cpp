@@ -28,7 +28,8 @@
 #include "filter_texture.h"
 #include "pushpull.h"
 #include "rastering.h"
-
+#include <vcg/complex/algorithms/update/texture.h>
+using namespace vcg;
 
 FilterTexturePlugin::FilterTexturePlugin() 
 { 
@@ -36,6 +37,7 @@ FilterTexturePlugin::FilterTexturePlugin()
             << FP_UV_WEDGE_TO_VERTEX
             << FP_BASIC_TRIANGLE_MAPPING
             << FP_SET_TEXTURE
+            << FP_PLANAR_MAPPING
             << FP_COLOR_TO_TEXTURE
             << FP_TRANSFER_TO_TEXTURE
             << FP_TEX_TO_VCOLOR_TRANSFER;
@@ -50,7 +52,8 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
     {
     case FP_UV_TO_COLOR : return QString("UV to Color");
     case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
-    case FP_BASIC_TRIANGLE_MAPPING : return QString("Trivial Per-Triangle Parametrization ");
+    case FP_BASIC_TRIANGLE_MAPPING : return QString("Trivial Per-Triangle Parametrization");
+    case FP_PLANAR_MAPPING : return QString("Flat Plane Parametrization");
     case FP_SET_TEXTURE : return QString("Set Texture");
     case FP_COLOR_TO_TEXTURE : return QString("Vertex Color to Texture");
     case FP_TRANSFER_TO_TEXTURE : return QString("Transfer Color to Texture (between 2 meshes)");
@@ -68,6 +71,7 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
     case FP_UV_TO_COLOR :  return QString("Maps the UV Space into a color space, thus colorizing mesh vertices according to UV coords.");
     case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
     case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
+    case FP_PLANAR_MAPPING : return QString("Builds a trivial flat plane parametrization.");
     case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>"
                                          "If the texture provided exists it will be simply associated to the current mesh else a dummy texture will be created and saved in the same directory.");
     case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture accordingly to per vertex color.");
@@ -85,6 +89,7 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
     case FP_UV_TO_COLOR : return MeshModel::MM_VERTTEXCOORD;
     case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_WEDGTEXCOORD;
     case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_FACENUMBER;
+    case FP_PLANAR_MAPPING : return MeshModel::MM_FACENUMBER;
     case FP_SET_TEXTURE : return MeshModel::MM_WEDGTEXCOORD;
     case FP_COLOR_TO_TEXTURE : return MeshModel::MM_VERTCOLOR | MeshModel::MM_WEDGTEXCOORD;
     case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
@@ -101,6 +106,7 @@ int FilterTexturePlugin::getRequirements(QAction *a)
     case FP_UV_TO_COLOR :
     case FP_UV_WEDGE_TO_VERTEX :
     case FP_BASIC_TRIANGLE_MAPPING :
+    case FP_PLANAR_MAPPING :
     case FP_SET_TEXTURE : return MeshModel::MM_NONE;
     case FP_COLOR_TO_TEXTURE : return MeshModel::MM_FACEFACETOPO;
     case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
@@ -116,6 +122,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
     {
     case FP_UV_TO_COLOR : return MeshModel::MM_VERTCOLOR;
     case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
+    case FP_PLANAR_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
     case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
     case FP_SET_TEXTURE : return MeshModel::MM_UNKNOWN;
     case FP_COLOR_TO_TEXTURE : return MeshModel::MM_UNKNOWN;
@@ -136,6 +143,7 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
     case FP_UV_TO_COLOR : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
     case FP_UV_WEDGE_TO_VERTEX :
     case FP_BASIC_TRIANGLE_MAPPING :
+    case FP_PLANAR_MAPPING :
     case FP_SET_TEXTURE :
     case FP_COLOR_TO_TEXTURE :
     case FP_TRANSFER_TO_TEXTURE : return MeshFilterInterface::Texture;
@@ -166,6 +174,10 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
         break;
     case FP_UV_WEDGE_TO_VERTEX :
         break;
+    case FP_PLANAR_MAPPING :
+      parlst.addParam(new RichEnum("projectionPlane", 0, QStringList("XY") << "XZ"<<"YZ","Projection plane","Choose the projection plane"));
+      parlst.addParam(new RichBool("aspectRatio", false, "Preserve Ratio", "If checked the resulting parametrization will preserve the original apsect ratio of the model otherwise it will fill up the whole 0..1 uv space"));
+      break;
     case FP_BASIC_TRIANGLE_MAPPING :
         parlst.addParam(new RichInt("sidedim", 0, "Quads per line", "Indicates how many triangles have to be put on each line (every quad contains two triangles)\nLeave 0 for automatic calculation"));
         parlst.addParam(new RichInt("textdim", 1024, "Texture Dimension (px)", "Gives an indication on how big the texture is"));
@@ -257,7 +269,7 @@ inline int getLongestEdge(const CMeshO::FaceType & f)
     return res;
 }
 
-typedef vcg::Triangle2<CMeshO::FaceType::TexCoordType::ScalarType> Tri2;
+typedef Triangle2<CMeshO::FaceType::TexCoordType::ScalarType> Tri2;
 
 inline void buildTrianglesCache(std::vector<Tri2> &arr, int maxLevels, float border, float quadSize, int idx=-1)
 {
@@ -309,7 +321,7 @@ T log_2(const T num)
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
+bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &par, CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
     switch(ID(filter))     {
@@ -332,10 +344,10 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
                     switch(colsp) {
                         // Red-Green color space
-                    case 0 : v.C() = vcg::Color4b((int)floor((normU*255)+0.5), (int)floor((normV*255)+0.5), 0, 255); break;
+                    case 0 : v.C() = Color4b((int)floor((normU*255)+0.5), (int)floor((normV*255)+0.5), 0, 255); break;
                         // Hue-Saturation color space
                     case 1 : {
-                            vcg::Color4f c;
+                            Color4f c;
                             c.SetHSVColor(normU, normV, 1.0);
                             v.C().Import(c);
                         }
@@ -351,7 +363,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
     case FP_UV_WEDGE_TO_VERTEX : {
             int vn = m.cm.vn;
             m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
-            vcg::tri::AttributeSeam::SplitVertex(m.cm, ExtractVertex, CompareVertex);
+            tri::AttributeSeam::SplitVertex(m.cm, ExtractVertex, CompareVertex);
             if (m.cm.vn != vn)
             {
                 m.clearDataMask(MeshModel::MM_FACEFACETOPO);
@@ -360,7 +372,22 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
         }
         break;
 
-    case FP_BASIC_TRIANGLE_MAPPING : {
+    case FP_PLANAR_MAPPING : {
+      m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+      // Get Parameters
+      Point3f planeVec[3][2] = {
+        {Point3f(1,0,0),Point3f(0,1,0)},  // XY
+        {Point3f(0,0,1),Point3f(1,0,0)},  // XZ
+        {Point3f(0,1,0),Point3f(0,0,1)}   // YZ
+      };
+
+      int sideDim = par.getEnum("projectionPlane");
+      bool aspectRatio = par.getBool("aspectRatio");
+      tri::UpdateTexture<CMeshO>::WedgeTexFromPlane(m.cm, planeVec[sideDim][0], planeVec[sideDim][1], aspectRatio);
+    }
+    break;
+    case FP_BASIC_TRIANGLE_MAPPING :
+    {
             m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 
             // Get Parameters
@@ -657,13 +684,13 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             img.fill(qRgba(0,0,0,0)); // transparent black
 
             // Compute (texture-space) border edges
-            vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
-            vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+            tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
+            tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 
             // Rasterizing triangles
             RasterSampler rs(img);
             rs.InitCallback(cb, m.cm.fn, 0, 80);
-            vcg::tri::SurfaceSampling<CMeshO,RasterSampler>::Texture(m.cm,rs,textW,textH,true);
+            tri::SurfaceSampling<CMeshO,RasterSampler>::Texture(m.cm,rs,textW,textH,true);
 
             // Revert alpha values for border edge pixels to 255
             cb(81, "Cleaning up texture ...");
@@ -679,12 +706,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             if (pp)
             {
                 cb(85, "Filling texture holes...");
-                vcg::PullPush(img, qRgba(0,0,0,0));
+                PullPush(img, qRgba(0,0,0,0));
             }
 
             // Undo topology changes
-            vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-            vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+            tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+            tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 
             // Save texture
             cb(90, "Saving texture ...");
@@ -764,22 +791,22 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
             // Compute (texture-space) border edges
             trgMesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
-            vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(trgMesh->cm);
-            vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
+            tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(trgMesh->cm);
+            tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
 
             // Rasterizing faces
             srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
-            vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
-            vcg::tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
+            tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
+            tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
             if (colorSampling)
             {
                 TransferColorSampler sampler(srcMesh->cm, img, upperbound); // color sampling
                 sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
-                vcg::tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
+                tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
             } else {
                 TransferColorSampler sampler(srcMesh->cm, img, &srcImg, upperbound); // texture sampling
                 sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
-                vcg::tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
+                tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
             }
 
             // Revert alpha values from border edge pixel to 255
@@ -796,12 +823,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             if (pp)
             {
                 cb(85, "Filling texture holes...");
-                vcg::PullPush(img, qRgba(0,0,0,0));
+                PullPush(img, qRgba(0,0,0,0));
             }
 
             // Undo topology changes
-            vcg::tri::UpdateTopology<CMeshO>::FaceFace(trgMesh->cm);
-            vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
+            tri::UpdateTopology<CMeshO>::FaceFace(trgMesh->cm);
+            tri::UpdateFlags<CMeshO>::FaceBorderFromFF(trgMesh->cm);
 
             // Save texture
             cb(90, "Saving texture ...");
@@ -841,13 +868,13 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
 
             srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
-            vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
-            vcg::tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
+            tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
+            tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
 
             // Colorizing vertices
             VertexSampler vs(srcMesh->cm, srcImg, upperbound);
             vs.InitCallback(cb, trgMesh->cm.vn);
-            vcg::tri::SurfaceSampling<CMeshO,VertexSampler>::VertexUniform(trgMesh->cm,vs,trgMesh->cm.vn);
+            tri::SurfaceSampling<CMeshO,VertexSampler>::VertexUniform(trgMesh->cm,vs,trgMesh->cm.vn);
         }
         break;
 
