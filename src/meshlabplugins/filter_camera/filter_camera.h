@@ -37,7 +37,8 @@ public:
       enum { FP_SET_MESH_CAMERA,
              FP_SET_RASTER_CAMERA,
              FP_QUALITY_FROM_CAMERA,
-             FP_CAMERA_SCALE,
+             FP_MESHCAMERA_SCALE,
+			 FP_RASTERCAMERA_SCALE,
              FP_CAMERA_EDIT};
 
   FilterCameraPlugin();

@@ -36,7 +36,8 @@ FilterCameraPlugin::FilterCameraPlugin()
   FP_SET_MESH_CAMERA <<
   FP_SET_RASTER_CAMERA <<
   FP_QUALITY_FROM_CAMERA <<
-  FP_CAMERA_SCALE<<
+  FP_MESHCAMERA_SCALE<<
+  FP_RASTERCAMERA_SCALE<<
   FP_CAMERA_EDIT;
 
   foreach(FilterIDType tt , types())
@@ -50,7 +51,8 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
     case FP_SET_MESH_CAMERA :      return QString("Set Mesh Camera");
     case FP_SET_RASTER_CAMERA :    return QString("Set Raster Camera");
     case FP_QUALITY_FROM_CAMERA :  return QString("Vertex Quality from Camera");
-    case FP_CAMERA_SCALE :         return QString("Scale Camera");
+    case FP_MESHCAMERA_SCALE :         return QString("Scale Mesh Camera");
+    case FP_RASTERCAMERA_SCALE :         return QString("Scale Raster Camera");
     case FP_CAMERA_EDIT :         return QString("Edit Raster Camera");
     default : assert(0);
   }
@@ -63,7 +65,8 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
     case FP_SET_MESH_CAMERA :     return QString("This filter allow to set a shot for the current mesh");
     case FP_SET_RASTER_CAMERA :   return QString("This filter allow to set a shot for the current mesh");
     case FP_QUALITY_FROM_CAMERA : return QString("Compute vertex quality using the camera definition, according to viewing angle or distance");
-    case FP_CAMERA_SCALE :        return QString("Scale the camera, e.g. it changes focal lenght and pixel size so that their ratio does not change but the actual scale/size of the camera with respect to the scene.<br> Useful when your scene is in mt and your camera focal is in mm");
+    case FP_MESHCAMERA_SCALE :        return QString("Scale the mesh camera");
+    case FP_RASTERCAMERA_SCALE :        return QString("Scale the raster camera, or all the raster cameras of the project");
     case FP_CAMERA_EDIT :        return QString("Allow to edit the current raster camera allowing to tweak intrinsics.");
     default : assert(0);
   }
@@ -78,8 +81,12 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
    case FP_CAMERA_EDIT :
      parlst.addParam(new RichDynamicFloat("fov_scale", 0, -3,3,"Scaling exp", "Exponent of the scaling factor. 0 means no scaling, 1 means 10 times larger, -1 means 1/10."));
      break;
-   case FP_CAMERA_SCALE :
-     parlst.addParam(new RichDynamicFloat("scale", 0, -3,3,"Scaling exp", "Exponent of the scaling factor. 0 means no scaling, 1 means 10 times larger, -1 means 1/10."));
+   case FP_MESHCAMERA_SCALE :
+     parlst.addParam(new RichFloat("scale", 1.0, "Scale factor", "The scale factor that has to be applied to the camera"));
+     break;
+   case FP_RASTERCAMERA_SCALE :
+     parlst.addParam(new RichFloat("scale", 1.0, "Scale factor", "The scale factor that has to be applied to the camera"));
+	 parlst.addParam(new RichBool ("toall", false, "Apply to all Raster layers", "Apply the same scaling to all the Raster layers"));
      break;
    case FP_SET_RASTER_CAMERA :
      parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current raster."));
@@ -105,11 +112,21 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
   RasterModel *rm = md.rm();
 	switch(ID(filter))
   {		
-  case FP_CAMERA_SCALE :
+  case FP_MESHCAMERA_SCALE :
     {
-      float scale = powf(10,par.getDynamicFloat("scale"));
-      cm.shot.Intrinsics.PixelSizeMm= cm.shot.Intrinsics.PixelSizeMm*scale;
-      cm.shot.Intrinsics.FocalMm = cm.shot.Intrinsics.FocalMm*scale;
+		float scale = par.getFloat("scale");
+		cm.shot.RescalingWorld(scale);
+    }
+  case FP_RASTERCAMERA_SCALE :
+    {
+		float scale = par.getFloat("scale");
+		if (!par.getBool("toall"))
+			rm->shot.RescalingWorld(scale);
+		else
+		{
+			for (int i=0; i<md.rasterList.size(); i++)
+				md.rasterList[i]->shot.RescalingWorld(scale);
+		}
     }
   break;
   case FP_SET_RASTER_CAMERA :
@@ -174,7 +191,8 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
   switch (ID(filter))
   {
     case FP_SET_MESH_CAMERA :
-    case FP_CAMERA_SCALE                  : return MeshModel::MM_CAMERA;
+    case FP_MESHCAMERA_SCALE                  : return MeshModel::MM_CAMERA;
+	case FP_RASTERCAMERA_SCALE                  : return MeshModel::MM_CAMERA;
     case FP_QUALITY_FROM_CAMERA           : return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
     default                  : return MeshModel::MM_UNKNOWN;
   }
@@ -184,7 +202,8 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
 {
   switch(ID(a))
   {
-  case FP_CAMERA_SCALE :
+  case FP_MESHCAMERA_SCALE :
+  case FP_RASTERCAMERA_SCALE :
   case FP_CAMERA_EDIT :
   case FP_SET_MESH_CAMERA :
   case FP_SET_RASTER_CAMERA :
