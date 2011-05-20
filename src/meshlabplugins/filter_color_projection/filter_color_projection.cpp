@@ -30,6 +30,8 @@
 
 #include "filter_color_projection.h"
 
+#include "floatbuffer.cpp"
+
 #include "render_helper.cpp"
 
 using namespace std;
@@ -123,6 +125,10 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
 				true,
 				"use image borders weight",
 				"If true, color contribution is weighted by pixel distance from image boundaries"));
+			parlst.addParam(new RichBool ("usesilhouettes",
+				true,
+				"use depth discontinuities weight",
+				"If true, color contribution is weighted by pixel distance from depth discontinuities (external and internal silhouettes)"));
 		}
 		break;
 
@@ -194,7 +200,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             if(use_depth)
             {
               depth  = raster->shot.Depth((*vi).P());
-              pdepth = rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];           
+              pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1]));//rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];           
             }
 
             if(!use_depth || (depth <= (pdepth + eta)))
@@ -226,6 +232,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
       bool  useangle = par.getBool("useangle"); 
       bool  usedistance = par.getBool("usedistance"); 
       bool  useborders = par.getBool("useborders");
+      bool  usesilhouettes = par.getBool("usesilhouettes");
 
       Point2f  pp;        // projected point
       float  depth=0;     // depth of point (distance from camera)
@@ -248,6 +255,9 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
       double *acc_red;
       double *acc_grn;
       double *acc_blu;
+
+      // filename for debug dump
+      char dumpFileName[1024];
 
       // get current model
       model = md.mm();
@@ -290,8 +300,6 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
           allcammaximagesize = imgdiag;
       }
 
-
-
       //-- cycle all cmaeras
       cam_ind = 0;
       foreach(RasterModel *raster, md.rasterList)
@@ -324,6 +332,29 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
 
           buff_ind=0;
 
+          // If should be used silhouette weighting, it is needed to compute depth discontinuities
+          // and per-pixel distance from detected borders on the entire image here
+          // the weight is then applied later, per-vertex, when needed
+          floatbuffer *silhouette_buff=NULL;
+          float maxsildist = rendermanager->depth->sx + rendermanager->depth->sy;
+          if(usesilhouettes)
+          {
+            silhouette_buff = new floatbuffer();
+            silhouette_buff->init(rendermanager->depth->sx, rendermanager->depth->sy);
+
+            silhouette_buff->applysobel(rendermanager->depth);
+		        //sprintf(dumpFileName,"Abord%i.bmp",cam_ind);
+		        //silhouette_buff->dumpbmp(dumpFileName);
+
+		        silhouette_buff->initborder(rendermanager->depth);
+		        //sprintf(dumpFileName,"Bbord%i.bmp",cam_ind);
+		        //silhouette_buff->dumpbmp(dumpFileName);
+
+		        maxsildist = silhouette_buff->distancefield();
+		        //sprintf(dumpFileName,"Cbord%i.bmp",cam_ind);
+		        //silhouette_buff->dumpbmp(dumpFileName);
+          }
+
           for(vi=model->cm.vert.begin();vi!=model->cm.vert.end();++vi)
           {
             if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
@@ -335,7 +366,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
               {
 
                 depth  = raster->shot.Depth((*vi).P());
-                pdepth = rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];           
+                pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])]; 
 
                 if(depth <= (pdepth + eta))
                 {
@@ -379,6 +410,14 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                     pweight *= borderw;
                   }                  
 
+                  if(usesilhouettes)
+                  {
+                    // here the silhouette weight is applied, but it is calculated before, on a per-image basis
+                    float silw = 1.0;
+                    silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
+                    pweight *= silw;
+                  }
+
                   weights[buff_ind] += pweight;
                   acc_red[buff_ind] += (qRed(pcolor) * pweight / 255.0);
                   acc_grn[buff_ind] += (qGreen(pcolor) * pweight / 255.0);
@@ -389,6 +428,12 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             buff_ind++;
           }
           cam_ind ++;
+
+          if(usesilhouettes)
+          {
+            delete silhouette_buff;
+          }
+
         } // end foreach camera
       } // end foreach camera 
 
@@ -458,6 +503,56 @@ int FilterColorProjectionPlugin::postCondition( QAction* a ) const{
 	}
 }
 
+
+
+
+// function to compute sobel on depth image, to find discontinuities
+/*
+int FilterColorProjectionPlugin::applysobel()
+{
+  int xx,yy;
+  float val;
+  float accum;
+
+  for(xx=0; xx<sx; xx++)
+	for(yy=0; yy<sy; yy++)
+		data[(yy * sx) + xx] = 0;
+
+  for(xx=1; xx<sx-1; xx++)
+	for(yy=1; yy<sy-1; yy++)
+		if (from->getval(xx, yy) != 0)
+			{
+				accum=0;
+				accum += -1.0 * from->getval(xx-1, yy-1);
+				accum += -2.0 * from->getval(xx-1, yy  );
+				accum += -1.0 * from->getval(xx-1, yy-1);
+				accum += +1.0 * from->getval(xx+1, yy-1);
+				accum += +2.0 * from->getval(xx+1, yy  );
+				accum += +1.0 * from->getval(xx+1, yy-1);
+
+				data[(yy * sx) + xx] += abs(accum);
+			}
+		
+
+  for(xx=1; xx<sx-1; xx++)
+	for(yy=1; yy<sy-1; yy++)
+		if (from->getval(xx, yy) != 0)
+			{
+				accum=0;
+				accum += -1.0 * from->getval(xx-1, yy-1);
+				accum += -2.0 * from->getval(xx  , yy-1);
+				accum += -1.0 * from->getval(xx-1, yy-1);
+				accum += +1.0 * from->getval(xx+1, yy+1);
+				accum += +2.0 * from->getval(xx  , yy+1);
+				accum += +1.0 * from->getval(xx+1, yy+1);
+
+				data[(yy * sx) + xx] += abs(accum);
+			}
+		
+
+  return 1;
+}
+*/
 
 //--- this function calculates the near and far values 
 int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near_acc, std::vector<float> *far_acc)

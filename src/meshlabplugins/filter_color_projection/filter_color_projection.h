@@ -21,11 +21,10 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef FILTER_BNPTS_H
-#define FILTER_BNPTS_H
+#ifndef FILTER_COLORPROJ_H
+#define FILTER_COLORPROJ_H
 
 #include <QObject>
-
 #include <common/interfaces.h>
 
 class FilterColorProjectionPlugin : public QObject, public MeshFilterInterface

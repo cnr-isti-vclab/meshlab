@@ -1,7 +1,31 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
 #include <GL/glew.h>
 
+#include <QObject>
 #include <QGLContext>
 #include <QGLFramebufferObject>
+#include <common/interfaces.h>
 
 #include "render_helper.h"
 
@@ -27,7 +51,7 @@ RenderHelper::RenderHelper()
 RenderHelper::~RenderHelper() 
 {
   if(color != NULL)  delete []color;
-  if(depth != NULL)  delete []depth;
+  if(depth != NULL)  delete depth;
 }
 
 
@@ -262,13 +286,14 @@ void RenderHelper::renderScene(vcg::Shotf &view, MeshModel *mesh, RenderingMode 
   if(depth != NULL)  delete []depth;
 
   color  = new unsigned char[wt * ht * 3];
-  depth  = new float [wt * ht];
+  depth  = new floatbuffer();
+  depth->init(wt,ht);
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
   glReadPixels( 0, 0, wt, ht, GL_RGB, GL_UNSIGNED_BYTE, color);
-  glReadPixels( 0, 0, wt, ht, GL_DEPTH_COMPONENT, GL_FLOAT, depth);
+  glReadPixels( 0, 0, wt, ht, GL_DEPTH_COMPONENT, GL_FLOAT, depth->data);
 
 
   //----- convert depth in world units
@@ -276,43 +301,19 @@ void RenderHelper::renderScene(vcg::Shotf &view, MeshModel *mesh, RenderingMode 
   maxdepth = -1000000;
 	for(int pixit = 0; pixit<wt*ht; pixit++)
 	{
-	 if (depth[pixit] == 1.0)
-		depth[pixit] = 0;
+	 if (depth->data[pixit] == 1.0)
+		depth->data[pixit] = 0;
 	 else
-		depth[pixit] = _near*_far / (_far - depth[pixit]*(_far-_near));
+		depth->data[pixit] = _near*_far / (_far - depth->data[pixit]*(_far-_near));
 
    // min and max for normalization purposes (e.g. weighting)
-   if(depth[pixit] > maxdepth)
-     maxdepth = depth[pixit];
-   if(depth[pixit] > maxdepth)
-     maxdepth = depth[pixit];
+   if(depth->data[pixit] > maxdepth)
+     maxdepth = depth->data[pixit];
+   if(depth->data[pixit] > maxdepth)
+     maxdepth = depth->data[pixit];
 	}
 
   //-----
-
-/*
-{                      // debug dump buffer to pfm (portable float map, open with hdrview o hdrshop) to check values
- FILE* miofile;
- int res;
- char buff[64];
-
- miofile = fopen("depth.pfm", "wb");
-
- fprintf(miofile,"PF\n");
- fprintf(miofile,"%i %i\n",wt,ht);
-
- fprintf(miofile,"-1.000000\n");
-
- for(int kk=0; kk< wt*ht; kk++)
- {
-  res = fwrite(&(depth[kk]), sizeof(float), 1, miofile);
-  res = fwrite(&(depth[kk]), sizeof(float), 1, miofile);
-  res = fwrite(&(depth[kk]), sizeof(float), 1, miofile);
- }
-
- fclose(miofile);
-}
-*/
 
   err = glGetError();
 
@@ -334,8 +335,9 @@ void RenderHelper::renderScene(vcg::Shotf &view, MeshModel *mesh, RenderingMode 
   GlShot< vcg::Shot<float> >::UnsetView();
 
   glFinish();
-  QImage l=fbo.toImage();
-  l.save("rendering.jpg");
+  
+  //QImage l=fbo.toImage();
+  //l.save("rendering.jpg");
 
   fbo.release();
 }
