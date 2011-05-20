@@ -34,15 +34,15 @@ namespace tri
 {
 
 
-class TriEdgeCollapseQuadricTexParameter
+class TriEdgeCollapseQuadricTexParameter : public BaseParameterClass
 {
 public:
-double	QualityThr; // all 
-	double	BoundaryWeight;
-	double	NormalThr;
-	double	CosineThr;
-	double	QuadricEpsilon;
-	double	ScaleFactor;
+  double	 QualityThr; // all
+  double 	BoundaryWeight;
+  double	 NormalThr;
+  double	 CosineThr;
+  double	 QuadricEpsilon;
+  double	 ScaleFactor;
 	float   ExtraTCoordWeight;
 	bool		UseArea;
 	bool		UseVertexWeight;
@@ -58,6 +58,30 @@ double	QualityThr; // all
 	bool		PreserveBoundary; 
 	bool		MarkComplex;
 	bool		SafeHeapUpdate;
+
+  TriEdgeCollapseQuadricTexParameter()
+  {
+    SetDefaultParams();
+  }
+
+  void SetDefaultParams()
+  {
+    UseArea=true;
+    UseVertexWeight=false;
+    NormalCheck=false;
+    NormalThr=M_PI/2;
+    QualityCheck=true;
+    QualityThr=.1;
+    BoundaryWeight=.5;
+    OptimalPlacement=true;
+    ScaleIndependent=true;
+    ComplexCheck=false;
+    QuadricEpsilon =1e-15;
+    ScaleFactor=1.0;
+    ExtraTCoordWeight=0.0;
+    QualityQuadric = false;
+    PreserveTopology = false;
+  }
 };
 
 
@@ -148,15 +172,14 @@ class QuadricTexHelper
 
 
  
-template<class TriMeshType,class MYTYPE, class HelperType = tri::QInfoStandard<typename TriMeshType::VertexType>  >
-class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, MYTYPE> 
+template<class TriMeshType, class VertexPair, class MYTYPE, class HelperType = tri::QInfoStandard<typename TriMeshType::VertexType>  >
+class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, VertexPair, MYTYPE>
 {
 	typedef HelperType QH;
-	typedef typename tri::TriEdgeCollapse<TriMeshType, MYTYPE>::HeapType HeapType;
-	typedef typename tri::TriEdgeCollapse<TriMeshType, MYTYPE>::HeapElem HeapElem;
+  typedef typename tri::TriEdgeCollapse<TriMeshType, VertexPair, MYTYPE>::HeapType HeapType;
+  typedef typename tri::TriEdgeCollapse<TriMeshType, VertexPair, MYTYPE>::HeapElem HeapElem;
 	typedef typename TriMeshType::FaceType FaceType;
-	typedef typename TriMeshType::FaceType::EdgeType EdgeType;
-	typedef typename TriMeshType::VertexType VertexType;
+  typedef typename TriMeshType::VertexType VertexType;
 	typedef typename TriMeshType::CoordType CoordType;
 	typedef typename TriMeshType::CoordType::ScalarType ScalarType;
 	typedef typename TriMeshType::VertexPointer VertexPointer;
@@ -164,12 +187,12 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 	public:
 
-	inline TriEdgeCollapseQuadricTex(const EdgeType &p, int mark)
-		//:TEC(p,i){}
-	{
+  inline TriEdgeCollapseQuadricTex(const VertexPair &p, int mark, BaseParameterClass *_pp)
+  {
+      TriEdgeCollapseQuadricTexParameter *pp = (TriEdgeCollapseQuadricTexParameter *)_pp;
 			this->localMark = mark;
 			this->pos=p;
-			this->_priority = ComputePriority();
+      this->_priority = ComputePriority(pp);
 	}
 
 // puntatori ai vertici che sono stati messi non-w per preservare il boundary
@@ -182,12 +205,13 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	static TriEdgeCollapseQuadricTexParameter & Params(){static TriEdgeCollapseQuadricTexParameter p; return p;}
 
 	    // Final Clean up after the end of the simplification process
-    static void Finalize(TriMeshType &m,HeapType & /*h_ret*/)
+    static void Finalize(TriMeshType &m,HeapType & /*h_ret*/, BaseParameterClass *_pp)
     {
-			vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromVF(m);
+      TriEdgeCollapseQuadricTexParameter *pp = (TriEdgeCollapseQuadricTexParameter *)_pp;
+      vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromVF(m);
 
       // If we had the boundary preservation we should clean up the writable flags
-     	if(Params().PreserveBoundary)
+      if(pp->PreserveBoundary)
       {
         typename 	std::vector<VertexPointer>::iterator wvi;
         for(wvi=WV().begin();wvi!=WV().end();++wvi)
@@ -195,24 +219,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
       }
     }
 
-	static void SetDefaultParams(){
-		Params().UseArea=true;
-		Params().UseVertexWeight=false;
-		Params().NormalCheck=false;
-		Params().NormalThr=M_PI/2;
-		Params().QualityCheck=true;
-		Params().QualityThr=.1;
-		Params().BoundaryWeight=.5;
-		Params().OptimalPlacement=true;
-		Params().ScaleIndependent=true;
-		Params().ComplexCheck=false;
-		Params().QuadricEpsilon =1e-15;
-		Params().ScaleFactor=1.0;
-		Params().ExtraTCoordWeight=0.0;
-		Params().QualityQuadric = false;
 
-		Params().PreserveTopology = false;
-	}
 
 
 	inline static int matchVertexID(FaceType *f,VertexType *v)
@@ -261,7 +268,9 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	}
 
 
-		ScalarType ComputePriority()  {
+    ScalarType ComputePriority(BaseParameterClass *_pp)
+    {
+      TriEdgeCollapseQuadricTexParameter *pp = (TriEdgeCollapseQuadricTexParameter *)_pp;
 			Quadric5<double> qsum1;
 			Quadric5<double> qsum2;
 			double min1[5];
@@ -274,7 +283,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 			ncoords = GetTexCoords(tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2);
 
-			return (ScalarType)ComputeMinimalsAndPriority(min1,min2,qsum1,qsum2,tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2,ncoords);			
+      return (ScalarType)ComputeMinimalsAndPriority(min1,min2,qsum1,qsum2,tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2,ncoords,pp);
 		}
 
 
@@ -285,8 +294,9 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 		- quality of the involved triangles
 		- normal checking
 		*/
-		ScalarType ComputePriority(double vv[5],Quadric5<double> &qsum)
-		{
+    ScalarType ComputeTexPriority(double vv[5],Quadric5<double> &qsum, BaseParameterClass *_pp)
+    {
+      TriEdgeCollapseQuadricTexParameter *pp = (TriEdgeCollapseQuadricTexParameter *)_pp;
 			VertexType * v[2];
 			v[0] = this->pos.V(0);
 			v[1] = this->pos.V(1);
@@ -316,7 +326,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 				{
 					qt= QualityFace(*x.F());
 					if(qt<MinQual) MinQual=qt;
-					if(Params().NormalCheck){
+          if(pp->NormalCheck){
 							Point3f nn=NormalizedNormal(*x.F());
 							ndiff=nn.dot(x.F()->N()) / x.F()->N().Norm();
 							if(ndiff<MinCos) MinCos=ndiff;
@@ -327,7 +337,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 				{
 					qt= QualityFace(*x.F());
 					if(qt<MinQual) MinQual=qt;
-					if(Params().NormalCheck){
+          if(pp->NormalCheck){
 							Point3f nn=NormalizedNormal(*x.F());
 							ndiff=nn.dot(x.F()->N() / x.F()->N().Norm());
 							if(ndiff<MinCos) MinCos=ndiff;
@@ -337,14 +347,14 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 
 			// All collapses involving triangles with quality larger than <QualityThr> have no penalty;
-			if(MinQual>Params().QualityThr) MinQual=Params().QualityThr;  
+      if(MinQual>pp->QualityThr) MinQual=pp->QualityThr;
 			if(QuadErr<1e-15) QuadErr=1e-15; // Do not use zero quality penalties
 			
 			this->_priority = (ScalarType)(QuadErr / MinQual);  // the priority of collapses that create low quality triangles has a penalty (it is increased)
 			
 			
-			if(Params().NormalCheck){
-					if(MinCos<Params().CosineThr) this->_priority *=1000;  // gross penalty to collapses that move too much the original normals.
+      if(pp->NormalCheck){
+          if(MinCos<pp->CosineThr) this->_priority *=1000;  // gross penalty to collapses that move too much the original normals.
 			}
 			
 																																																					
@@ -363,9 +373,10 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 									vcg::TexCoord2f &tcoord1_1,
 									vcg::TexCoord2f &tcoord0_2,
 									vcg::TexCoord2f &tcoord1_2,
-									int ncoords
-									)
-		{
+                   int ncoords,
+                   BaseParameterClass *_pp)
+    {
+      TriEdgeCollapseQuadricTexParameter *pp = (TriEdgeCollapseQuadricTexParameter *)_pp;
 			double tmp1[5];
 			double tmp2[5];
 			ScalarType priority1;
@@ -390,11 +401,11 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 			qsum_1 = QH::Qd(this->pos.V(0),tcoord0_1);
 			qsum_1 += QH::Qd(this->pos.V(1),tcoord1_1);
 
-			ComputeMinimal(dest_1,tmp1,tmp2,qsum_1);
-			priority1 = ComputePriority(dest_1,qsum_1);
+      ComputeMinimal(dest_1,tmp1,tmp2,qsum_1,pp);
+      priority1 = ComputeTexPriority(dest_1,qsum_1,pp);
 			
 			if(ncoords < 2)
-				return priority1*(1 + (Params().ExtraTCoordWeight)*(QH::Vd(this->pos.V(0)).size()+ QH::Vd(this->pos.V(1)).size() - 2));
+        return priority1*(1 + (pp->ExtraTCoordWeight)*(QH::Vd(this->pos.V(0)).size()+ QH::Vd(this->pos.V(1)).size() - 2));
 
 
 			tmp1[3] = tcoord0_2.u();
@@ -409,32 +420,33 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 			qsum_2 = QH::Qd(this->pos.V(0),tcoord0_2);
 			qsum_2 += QH::Qd(this->pos.V(1),tcoord1_2);
 
-			ComputeMinimal(dest_2,tmp1,tmp2,qsum_2);
-			priority2 = ComputePriority(dest_2,qsum_2);
+      ComputeMinimal(dest_2,tmp1,tmp2,qsum_2,pp);
+      priority2 = ComputeTexPriority(dest_2,qsum_2,pp);
 
 			if(priority1 > priority2)
 			{
-				ComputeMinimalWithGeoContraints(dest_2,tmp1,tmp2,qsum_2,dest_1);
-				priority2 = ComputePriority(dest_2,qsum_2);
+        ComputeMinimalWithGeoContraints(dest_2,tmp1,tmp2,qsum_2,dest_1,pp);
+        priority2 = ComputeTexPriority(dest_2,qsum_2,pp);
 			}
 			else
 			{
-				ComputeMinimalWithGeoContraints(dest_1,tmp1,tmp2,qsum_1,dest_2);
-				priority1 = ComputePriority(dest_1,qsum_1);
+        ComputeMinimalWithGeoContraints(dest_1,tmp1,tmp2,qsum_1,dest_2,pp);
+        priority1 = ComputeTexPriority(dest_1,qsum_1,pp);
 			}
 
 
-			this->_priority = max(priority1, priority2)*(1 + (Params().ExtraTCoordWeight)*(QH::Vd(this->pos.V(0)).size()+QH::Vd(this->pos.V(1)).size() - 2));
+      this->_priority = max(priority1, priority2)*(1 + (pp->ExtraTCoordWeight)*(QH::Vd(this->pos.V(0)).size()+QH::Vd(this->pos.V(1)).size() - 2));
 		
 			return this->_priority;
 		}
 
-		inline void ComputeMinimal(double vv[5],double v0[5],double v1[5], Quadric5<double> qsum)
-		{	
+    inline void ComputeMinimal(double vv[5],double v0[5],double v1[5], Quadric5<double> qsum,BaseParameterClass *_pp)
+    {
+      tri::TriEdgeCollapseQuadricParameter *pp =(tri::TriEdgeCollapseQuadricParameter *)_pp;
 			bool rt=qsum.Minimum(vv);
 			// if the computation of the minimum fails we choose between the two edge points and the middle one.
 			// Switch to this branch also in the case of not using the optimal placement.
-				if(!rt || !Params().OptimalPlacement ) { 
+        if(!rt || !pp->OptimalPlacement ) {
 			
 					vv[0] = (v0[0] + v1[0])/2;
 					vv[1] = (v0[1] + v1[1])/2;
@@ -444,7 +456,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 					// In the case of not using the optimal placement we have to be sure that the middle value is discarded.
 					double qvx= std::numeric_limits<float>::max();
-					if(Params().OptimalPlacement)
+          if(pp->OptimalPlacement)
 						qvx = qsum.Apply(vv);
 					
 
@@ -473,17 +485,18 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 				 
 		}
 
-		inline void ComputeMinimalWithGeoContraints(double vv[5],double v0[5],double v1[5], Quadric5<double> qsum, double geo[5])
-		{
+    inline void ComputeMinimalWithGeoContraints(double vv[5],double v0[5],double v1[5], Quadric5<double> qsum, double geo[5],BaseParameterClass *_pp)
+    {
+    tri::TriEdgeCollapseQuadricParameter *pp =(tri::TriEdgeCollapseQuadricParameter *)_pp;
  			bool rt=qsum.MinimumWithGeoContraints(vv,geo);
 			// if the computation of the minimum fails we choose between the two edge points and the middle one.
 			// Switch to this branch also in the case of not using the optimal placement.
-			if(!rt || !Params().OptimalPlacement) { 
+      if(!rt || !pp->OptimalPlacement) {
 					double qvx = std::numeric_limits<float>::max();
 					vv[0] = geo[0];
 					vv[1] = geo[1];
 					vv[2] = geo[2];
-					if(Params().OptimalPlacement) 
+          if(pp->OptimalPlacement)
 						{
 							vv[3] = (v0[3] + v1[3])/2;
 							vv[4] = (v0[4] + v1[4])/2;
@@ -517,8 +530,9 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 				
 		}
 
-	static void InitQuadric(TriMeshType &m)
-	{
+  static void InitQuadric(TriMeshType &m,BaseParameterClass *_pp)
+  {
+  tri::TriEdgeCollapseQuadricParameter *pp =(tri::TriEdgeCollapseQuadricParameter *)_pp;
 		typename TriMeshType::FaceIterator pf;
 		HelperType::Init(); 
 			
@@ -527,7 +541,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 				if((*pf).V(0)->IsR() &&(*pf).V(1)->IsR() &&(*pf).V(2)->IsR())
 						{
 							Quadric5<double> q;
-							q.byFace(*pf, QH::Qd3((*pf).V(0)), QH::Qd3((*pf).V(1)), QH::Qd3((*pf).V(2)),Params().QualityQuadric);
+              q.byFace(*pf, QH::Qd3((*pf).V(0)), QH::Qd3((*pf).V(1)), QH::Qd3((*pf).V(2)),pp->QualityQuadric);
 
 							for(int j=0;j<3;++j)
 							  if( (*pf).V(j)->IsW())
@@ -544,17 +558,16 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 	}
 
-		static void Init(TriMeshType &m,HeapType&h_ret){
-
+    static void Init(TriMeshType &m,HeapType&h_ret,BaseParameterClass *_pp)
+    {
+    tri::TriEdgeCollapseQuadricParameter *pp =(tri::TriEdgeCollapseQuadricParameter *)_pp;
 		typename 	TriMeshType::VertexIterator  vi;
 		typename 	TriMeshType::FaceIterator  pf;
-
-		EdgeType av0,av1,av01;
 
 			vcg::tri::UpdateTopology<TriMeshType>::VertexFace(m);
 			vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromVF(m);
 		
-		if(Params().PreserveBoundary )
+    if(pp->PreserveBoundary )
 		{
       WV().clear();
 			for(pf=m.face.begin();pf!=m.face.end();++pf)
@@ -567,7 +580,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 						}
 		}
 					
-			InitQuadric(m);
+      InitQuadric(m,pp);
 
 		// Initialize the heap with all the possible collapses 
 			  for(vi=m.vert.begin();vi!=m.vert.end();++vi) 
@@ -583,19 +596,20 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 										assert(x.F()->V(x.I())==&(*vi));
 										if((x.V0()<x.V1()) && x.V1()->IsRW() && !x.V1()->IsV()){
 													x.V1()->SetV();
-													h_ret.push_back(HeapElem(new MYTYPE(EdgeType(x.V0(),x.V1()),TriEdgeCollapse< TriMeshType,MYTYPE>::GlobalMark() )));
+                          h_ret.push_back(HeapElem(new MYTYPE(VertexPair(x.V0(),x.V1()),TriEdgeCollapse< TriMeshType,VertexPair,MYTYPE>::GlobalMark(),pp )));
 													}
 										if((x.V0()<x.V2()) && x.V2()->IsRW()&& !x.V2()->IsV()){
 													x.V2()->SetV();
-													h_ret.push_back(HeapElem(new MYTYPE(EdgeType(x.V0(),x.V2()),TriEdgeCollapse< TriMeshType,MYTYPE>::GlobalMark() )));
+                          h_ret.push_back(HeapElem(new MYTYPE(VertexPair(x.V0(),x.V2()),TriEdgeCollapse< TriMeshType,VertexPair,MYTYPE>::GlobalMark(),pp )));
 												}
 									}
 					}	
 		make_heap(h_ret.begin(),h_ret.end());
 	}
 
-  inline  void UpdateHeap(HeapType & h_ret)
+  inline  void UpdateHeap(HeapType & h_ret,BaseParameterClass *_pp)
   {
+    tri::TriEdgeCollapseQuadricParameter *pp =(tri::TriEdgeCollapseQuadricParameter *)_pp;
 		this->GlobalMark()++;
 		VertexType *v[2];
 		v[0]= this->pos.V(0);
@@ -623,7 +637,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 					{
 						vfi.V1()->SetV();
 						
-						h_ret.push_back(HeapElem(new MYTYPE(EdgeType(vfi.V0(),vfi.V1()), this->GlobalMark())));
+            h_ret.push_back(HeapElem(new MYTYPE(VertexPair(vfi.V0(),vfi.V1()), this->GlobalMark(),pp)));
 						std::push_heap(h_ret.begin(),h_ret.end());
 					}
 				
@@ -631,7 +645,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 					{
 						vfi.V2()->SetV();
 
-						h_ret.push_back(HeapElem(new MYTYPE(EdgeType(vfi.V0(),vfi.V2()),this->GlobalMark())));
+            h_ret.push_back(HeapElem(new MYTYPE(VertexPair(vfi.V0(),vfi.V2()),this->GlobalMark(),pp)));
 						std::push_heap(h_ret.begin(),h_ret.end());
 					}
 				}
@@ -639,8 +653,9 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 		} 
   }
 
-  void Execute(TriMeshType &m)
+  void Execute(TriMeshType &m, BaseParameterClass *_pp)
   {
+  tri::TriEdgeCollapseQuadricParameter *pp =(tri::TriEdgeCollapseQuadricParameter *)_pp;
 	Quadric5<double> qsum1;
 	Quadric5<double> qsum2;
 	double min1[5];
@@ -662,13 +677,14 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 	ncoords = GetTexCoords(tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2);
 
-	ComputeMinimalsAndPriority(min1,min2,qsum1,qsum2,tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2,ncoords);			
+  ComputeMinimalsAndPriority(min1,min2,qsum1,qsum2,tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2,ncoords,pp);
 
 	 CoordType newPos(min1[0],min1[1],min1[2]); /* it's the same as min2[0],min2[1],min2[2] since the geometrical
 												constraint has been imposed during the re-computation of the other minimal */
 
 		
-	 DoCollapse(m, this->pos, newPos ); // v0 is deleted and v1 take the new position	 
+  EdgeCollapser<TriMeshType,VertexPair>::Do(m, this->pos, newPos);
+  //DoCollapse(m, this->pos, newPos ); // v0 is deleted and v1 take the new position
 
 	vcg::TexCoord2f newtcoord;
 	Quadric5<double> newq;
@@ -747,11 +763,22 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 };
 
 
-class MyTriEdgeCollapseQTex: public TriEdgeCollapseQuadricTex< CMeshO, MyTriEdgeCollapseQTex, QuadricTexHelper > {
+class QTVertexPair {
+public:
+  inline QTVertexPair() {};
+  inline QTVertexPair( CVertexO * v0, CVertexO * v1){V(0) = v0; V(1) = v1; };
+  void Sort() {if(V(0)<V(0)) std::swap(V(0),V(0)); }
+  CVertexO *&V(int i) { return v[i]; }
+  CVertexO *cV(int i) const { return v[i]; }
+private:
+  CVertexO *v[2];
+
+};
+
+class MyTriEdgeCollapseQTex: public TriEdgeCollapseQuadricTex< CMeshO, QTVertexPair, MyTriEdgeCollapseQTex, QuadricTexHelper > {
 						public:
-						typedef  TriEdgeCollapseQuadricTex< CMeshO,  MyTriEdgeCollapseQTex, QuadricTexHelper> TECQ;
-            typedef  CMeshO::VertexType::EdgeType EdgeType;
-            inline MyTriEdgeCollapseQTex(  const EdgeType &p, int i) :TECQ(p,i){}
+            typedef  TriEdgeCollapseQuadricTex< CMeshO,  QTVertexPair, MyTriEdgeCollapseQTex, QuadricTexHelper> TECQ;
+            inline MyTriEdgeCollapseQTex(  const QTVertexPair &p, int i,BaseParameterClass *pp) :TECQ(p,i,pp){}
 };
 
 } // end namespace tri

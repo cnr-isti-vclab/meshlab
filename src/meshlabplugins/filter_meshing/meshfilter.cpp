@@ -40,7 +40,7 @@
 using namespace std;
 using namespace vcg;
 
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBackPos *cb);
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::TriEdgeCollapseQuadricTexParameter &pp, CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 {
@@ -679,8 +679,7 @@ case FP_QUADRIC_SIMPLIFICATION:
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
 
-		tri::MyTriEdgeCollapse::SetDefaultParams();
-		tri::TriEdgeCollapseQuadricParameter &pp = tri::MyTriEdgeCollapse::Params();
+    tri::TriEdgeCollapseQuadricParameter pp;
 		pp.QualityThr=lastq_QualityThr =par.getFloat("QualityThr");
 		pp.PreserveBoundary=lastq_PreserveBoundary = par.getBool("PreserveBoundary");
     pp.BoundaryWeight = pp.BoundaryWeight * par.getFloat("BoundaryWeight");
@@ -691,7 +690,7 @@ case FP_QUADRIC_SIMPLIFICATION:
 		pp.QualityQuadric=lastq_PlanarQuadric = par.getBool("PlanarQuadric");
 		lastq_Selected = par.getBool("Selected");
 
-		QuadricSimplification(m.cm,TargetFaceNum,lastq_Selected,  cb);
+    QuadricSimplification(m.cm,TargetFaceNum,lastq_Selected,pp,  cb);
 
 		if(par.getBool("AutoClean"))
 		{
@@ -725,8 +724,7 @@ case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
 
-		tri::MyTriEdgeCollapseQTex::SetDefaultParams();
-		tri::TriEdgeCollapseQuadricTexParameter & pp=tri::MyTriEdgeCollapseQTex::Params();
+    tri::TriEdgeCollapseQuadricTexParameter pp;
 
 		lastqtex_QualityThr = pp.QualityThr = par.getFloat("QualityThr");
 		lastqtex_extratw = pp.ExtraTCoordWeight = par.getFloat("Extratcoordw");
@@ -737,7 +735,7 @@ case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 
 		lastq_Selected = par.getBool("Selected");
 
-		QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, cb);
+    QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, pp, cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
   } break;

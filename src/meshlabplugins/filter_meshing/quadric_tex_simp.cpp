@@ -28,7 +28,7 @@ using namespace vcg;
 using namespace std;
 using namespace vcg::tri;
 
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBackPos *cb)
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::TriEdgeCollapseQuadricTexParameter &pp, CallBackPos *cb)
 {
 	math::Quadric<double> QZero;
 	QZero.SetZero();
@@ -54,7 +54,7 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallB
     }
   }
 	
-	vcg::LocalOptimization<CMeshO> DeciSession(m);
+  vcg::LocalOptimization<CMeshO> DeciSession(m,&pp);
 	cb(1,"Initializing simplification");
 	DeciSession.Init<MyTriEdgeCollapseQTex>();
 

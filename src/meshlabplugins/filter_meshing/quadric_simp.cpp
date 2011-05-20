@@ -25,7 +25,7 @@
 using namespace vcg;
 using namespace std;
 
-void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBackPos *cb)
+void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::TriEdgeCollapseQuadricParameter &pp, CallBackPos *cb)
 {
   math::Quadric<double> QZero;
   QZero.SetZero();
@@ -33,7 +33,7 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBack
   tri::QHelper::TDp()=&TD;
 
 	// we assume that the caller has already set up the tri::MyTriEdgeCollapse::Params() class
-	tri::TriEdgeCollapseQuadricParameter & pp = tri::MyTriEdgeCollapse::Params();
+  ;
   
   if(Selected) // simplify only inside selected faces
   {
@@ -58,7 +58,7 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, CallBack
   if(pp.NormalCheck) pp.NormalThrRad = M_PI/4.0;
 	
 	
-  vcg::LocalOptimization<CMeshO> DeciSession(m);
+  vcg::LocalOptimization<CMeshO> DeciSession(m,&pp);
 	cb(1,"Initializing simplification");
 	DeciSession.Init<tri::MyTriEdgeCollapse >();
 
