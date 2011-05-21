@@ -65,7 +65,6 @@ public:
 
 public:
         FacePointer face;
-		FacePointer p_face;
         CoordType bar_coord;/*To delete?*/
         float mass;
         CoordType velocity;

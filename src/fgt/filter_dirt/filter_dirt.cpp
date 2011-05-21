@@ -119,10 +119,11 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
 
         }
     case FP_CLOUD_MOVEMENT:{
-            float perc=0.01f;
-            float max_value=md.mm()->cm.bbox.Diag();
+            //float perc=0.01f;
+			//float max_value=md.getMesh(0)->cm.bbox.Diag(); //mm()->cm.bbox.Diag();
             par.addParam(new RichPoint3f("force_dir",Point3f(0,-1,0),"force","Direction of the force acting on the points cloud"));
-            par.addParam(new RichAbsPerc("s_length",max_value*perc,0,max_value,"Movement Length",""));
+			par.addParam(new RichInt("steps",1,"s","Simulation Steps"));
+			//par.addParam(new RichAbsPerc("s_length",max_value*perc,0,max_value,"Movement Length",""));
             par.addParam(new RichFloat("velocity",0,"v","Initial velocity of the particle"));
             par.addParam(new RichFloat("mass",1,"m","Mass of the particle"));
             par.addParam(new RichBool("colorize_mesh",false,"Map to Color",""));
@@ -217,29 +218,33 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             errorMessage="The filter requires that the second mesh is a Point Set";
             return false;
         }
-
-        //Get Parameters
+	    
+		//Get Parameters
         Point3f dir=par.getPoint3f("force_dir");;
-        float l =par.getAbsPerc("s_length");
-        float v=par.getFloat("velocity");
+        //float l =par.getAbsPerc("s_length");
+        float l=base_mesh->cm.bbox.Diag()*0.01; //mm()->cm.bbox.Diag();
+		float v=par.getFloat("velocity");
         float m=par.getFloat("mass");
-        bool colorize=par.getBool("colorize_mesh");
+		int s=par.getInt("steps");
+		bool colorize=par.getBool("colorize_mesh");
         if(!HasPerVertexAttribute(cloud_mesh->cm,"ParticleInfo")){
             prepareMesh(base_mesh);
             //Associate every point to a mesh and a Particle to every point
             associateParticles(base_mesh,cloud_mesh,m,v);
         }
-
-        //Move Cloud Mesh
-        MoveCloudMeshForward(cloud_mesh,dir,l,1,3);
-
-        if(colorize) ColorizeMesh(base_mesh);
+		//Move Cloud Mesh
+        for(int i=0;i<s;i++)
+			MoveCloudMeshForward(cloud_mesh,base_mesh,dir,l,1,3);
+		
+		if(colorize) ColorizeMesh(base_mesh);
         break;
         }
-    default:{
+    
+	default:{
         break;
         }
-     }
+    
+	}
 
 
   return true;
