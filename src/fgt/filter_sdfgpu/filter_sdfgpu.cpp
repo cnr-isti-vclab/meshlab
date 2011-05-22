@@ -48,7 +48,9 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                             "Depth tolerance used during depth peeling" ));
    par.addParam(new RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around vertex normal. Rays are traced within this cone."));
 
-   switch(mAction = ID(action))
+   mAction = ID(action);
+
+   switch(mAction)
     {
             case SDF_CORRECTION_THIN_PARTS:
                  par.addParam(new RichFloat("minDist", 1.0f, "Min distance",
@@ -67,9 +69,18 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
     }
 
    par.addParam(new RichBool("useVBO",USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
-   par.addParam(new RichBool("removeFalse",false,"Remove false intersections","By using VBO, Meshlt34g4gx structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
-   par.addParam(new RichBool("removeOutliers",false,"Remove outliers","By using VBO, Meshlt34g4gx structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
 
+   if(mAction != SDF_OBSCURANCE)
+   {
+        par.addParam(new RichBool("removeFalse",false,"Remove false intersections","For each"
+                                  "ray we check the normal at the point of intersection,"
+                                  "and ignore intersections where the normal at the intersection"
+                                  "points is in the same direction as the point-of-origin"
+                                  "(the same direction is defined as an angle difference less"
+                                  "than 90) "));
+
+        par.addParam(new RichBool("removeOutliers",false,"Remove outliers","Remove outliers"));
+   }
 }
 
 QString SdfGpuPlugin::filterName(FilterIDType filterId) const
@@ -119,16 +130,21 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   mPeelingTextureSize       = pars.getInt("DepthTextureSize");
   mMinCos                   = vcg::math::Cos(math::ToRad(pars.getFloat("coneAngle")/2.0));
   mUseVBO                   = pars.getBool("useVBO");
-  mRemoveFalse              = pars.getBool("removeFalse");
-  mRemoveOutliers           = pars.getBool("removeOutliers");
+
+
 
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
   if(mAction == SDF_OBSCURANCE)
     mTau = pars.getFloat("obscuranceExponent");
-  else if(mAction == SDF_CORRECTION_THIN_PARTS)
-    mMinDist = pars.getFloat("minDist");
+  else
+  {
+      if(mAction == SDF_CORRECTION_THIN_PARTS)
+            mMinDist = pars.getFloat("minDist");
 
+      mRemoveFalse     = pars.getBool("removeFalse");
+      mRemoveOutliers  = pars.getBool("removeOutliers");
+  }
    //MESH CLEAN UP
    setupMesh( md, onPrimitive );
 
@@ -151,17 +167,20 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   for(int i = 0; i < EXTRA_RAYS_RESULTED; i++)
   {
       coneDirVec[i].Normalize();
-      Log(0, "Ray%i %f %f %f", i,coneDirVec[i].X(), coneDirVec[i].Y(), coneDirVec[i].Z() );
-      Log(0,"angle: %f",math::ToDeg(vcg::Angle(coneDirVec[i],Point3f(0.0,0.0,1.0))));
       mConeRays[i]   = coneDirVec[i].X();
       mConeRays[i+1] = coneDirVec[i].Y();
-      mConeRays[i+2] = (coneDirVec[i].Z()>0) ? coneDirVec[i].Z() : (-1.0*coneDirVec[i].Z());
-  }
+      mConeRays[i+2] = coneDirVec[i].Z();
 
- // coneDirVec.clear();
+      Log(0, "Ray%i %f %f %f. Angle: %f", i,coneDirVec[i].X(),
+                                            coneDirVec[i].Y(),
+                                            coneDirVec[i].Z(),
+                                            math::ToDeg(vcg::Angle(coneDirVec[i],Point3f(0.0,0.0,1.0))));
+  }
 
   Log(0, "Number of rays: %i ", unifDirVec.size() );
   Log(0, "Number of rays for GPU outliers removal: %i ", coneDirVec.size() );
+
+  coneDirVec.clear();
 
   //Do the actual calculation of sdf or obscurance for each ray
   unsigned int tracedRays = 0;
@@ -172,8 +191,6 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
         cb(100*((float)tracedRays/(float)unifDirVec.size()), "Tracing rays...");
         ++tracedRays;
   }
-
-
 
   //read back the result texture and store result in the mesh
   if(mAction == SDF_OBSCURANCE)

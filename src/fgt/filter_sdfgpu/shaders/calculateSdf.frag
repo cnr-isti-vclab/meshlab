@@ -110,7 +110,7 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
     intersectionPointNormal = normalize(intersectionPointNormal);
     
     //if angles dont differ at least 90 degrees reject intersection
-    if(dot(-intersectionPointNormal, objSpaceNormal) > 0.0) return true;
+    if(dot(-intersectionPointNormal, objSpaceNormal) > 0.1) return true;
 
 }
 
