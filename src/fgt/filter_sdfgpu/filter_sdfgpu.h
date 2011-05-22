@@ -67,7 +67,7 @@ public:
     void vertexDataToTexture(MeshModel &m);
 
     //Sdf calculation for each depth peeling iteration
-    void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir,  float bbDiag );
+    void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir );
 
     //Copy sdf values from result texture to the mesh (vertex quality)
     void applySdfHW(MeshModel &m, float numberOfRays);
@@ -86,8 +86,8 @@ public:
     FloatTexture2D*    mVertexNormalsTexture;
     FramebufferObject* mFboResult;    //Fbo and texture storing the result computation
     FloatTexture2D*    mResultTexture;
-    FramebufferObject* mFboArray[4];  //Fbos and textures for depth peeling
-    FloatTexture2D*    mDepthTextureArray[4];
+    FramebufferObject* mFboArray[3];  //Fbos and textures for depth peeling
+    FloatTexture2D*    mDepthTextureArray[3];
     bool               mUseVBO;
     unsigned int       mPeelingTextureSize;
     float              mTolerance;

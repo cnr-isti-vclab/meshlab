@@ -38,7 +38,6 @@ uniform float 		viewpSize;
 uniform float 		texSize;
 uniform float		minCos;
 uniform int		firstRendering;
-uniform float		maxDist;
 uniform mat4		mvprMatrixINV;
 uniform int 		removeFalse;
 uniform int		removeOutliers;
@@ -94,8 +93,8 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
      
     vec3  x1 = vec3( coordX1.x, coordX1.y, sampleX1 );
     vec3  x2 = vec3( coordX2.x, coordX2.y, sampleX2 );
-    vec3  y1 = vec3( coordY1.x, coordY1.y, sampleY1);
-    vec3  y2 = vec3( coordY2.x, coordY2.y, sampleY2);
+    vec3  y1 = vec3( coordY1.x, coordY1.y, sampleY1 );
+    vec3  y2 = vec3( coordY2.x, coordY2.y, sampleY2 );
     
     //
     vec3 intersectionPointNormal = normalize(cross((x2-x1),(y2-y1)))  * 2.0 -0.5;
@@ -231,7 +230,7 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 
 
 	
-	//InsertionSort(EXTRA_RAYS);
+	InsertionSort(EXTRA_RAYS);
 
 
 	for( i = 0;  i < EXTRA_RAYS; i++ )

@@ -131,8 +131,6 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   mMinCos                   = vcg::math::Cos(math::ToRad(pars.getFloat("coneAngle")/2.0));
   mUseVBO                   = pars.getBool("useVBO");
 
-
-
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
   if(mAction == SDF_OBSCURANCE)
@@ -292,8 +290,8 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     glClear(GL_COLOR_BUFFER_BIT);
     mFboResult->unbind();
 
-    //we use 3 FBOs to avoid z-fighting in sdf and obscurance calculation, see TraceRays function for details
-    for(int i = 0; i < 4; i++)
+    //We use 3 FBOs to avoid z-fighting in sdf and obscurance calculation, see TraceRays function for details
+    for(int i = 0; i < 3; i++)
     {
         mDepthTextureArray[i]  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
                                                      TextureParams( GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE ) );
@@ -330,7 +328,6 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mSDFProgram->addUniform("minCos");
     mSDFProgram->addUniform("depthTexturePrevBack");
     mSDFProgram->addUniform("firstRendering");
-    mSDFProgram->addUniform("maxDist");
     mSDFProgram->addUniform("mvprMatrixINV");
     mSDFProgram->addUniform("removeFalse");
     mSDFProgram->addUniform("coneRays");
@@ -359,7 +356,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     assert(mFboArray[0]->isValid());
     assert(mFboArray[1]->isValid());
     assert(mFboArray[2]->isValid());
-    assert(mFboArray[3]->isValid());
+
 
     //If required from the user, we use VBO to speed up mesh rendering
     if(mUseVBO)
@@ -423,7 +420,7 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
     delete mVertexCoordsTexture;
     delete mVertexNormalsTexture;
 
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < 3; i++)
     {
         delete mFboArray[i];
         delete mDepthTextureArray[i];
@@ -433,6 +430,7 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
     {
         m.glw.ClearHint(vcg::GLW::HNUseVBO);
     }
+
     checkGLError::qDebug("GL release failed");
 
     this->glContext->doneCurrent();
@@ -514,7 +512,7 @@ void SdfGpuPlugin::useDepthPeelingShader(FramebufferObject* fbo)
    mDeepthPeelingProgram->setUniform1i("textureLastDepth",0);
 }
 
-void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir, float bbDiag)
+void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir)
 {
     mFboResult->bind();
     glViewport(0, 0, mResTextureDim, mResTextureDim);
@@ -584,8 +582,6 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 
     mSDFProgram->setUniform1f("minCos", mMinCos);
 
-    mSDFProgram->setUniform1f("maxDist", bbDiag);
-
     //just a flag to know how many layers to use for z-fighting removal
     if(fboPrevBack == NULL)
         mSDFProgram->setUniform1i("firstRendering",1);
@@ -598,11 +594,12 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
          mSDFProgram->setUniform1i("removeFalse",0);
 
     if(mRemoveOutliers)
+    {
         mSDFProgram->setUniform1i("removeOutliers",1);
+        mSDFProgram->setUniform3fv("coneRays", mConeRays, EXTRA_RAYS_RESULTED);
+    }
     else
-         mSDFProgram->setUniform1i("removeOutliers",0);
-
-    mSDFProgram->setUniform3fv("coneRays", mConeRays, EXTRA_RAYS_RESULTED);
+        mSDFProgram->setUniform1i("removeOutliers",0);
 
     // Screen-aligned Quad
     glBegin(GL_QUADS);
@@ -762,7 +759,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               if(j > 0)
                   useDepthPeelingShader(mFboArray[j-1]);
                else
-                   useDepthPeelingShader(mFboArray[3]);
+                   useDepthPeelingShader(mFboArray[2]);
         }
 
         mFboArray[j]->bind();
@@ -773,7 +770,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
         mFboArray[j]->unbind();
 
-         //we use 4 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
+         //we use 3 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
          if(i%2)
          {
               //we use the same method as in sdf, see below
@@ -781,7 +778,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               {
                  if(i>1)
                  {
-                      int back = (j==1)? 3 : 1;
+                      int back = (j==1)? 2 : 1;
                       calculateObscurance( mFboArray[j-1], mFboArray[back], mFboArray[j], dir, mm->cm.bbox.Diag());//front back nextBack
                  }
                  else
@@ -789,21 +786,20 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               }
               else //SDF_SDF, SDF_CORRECTION_THIN_PARTS
               {
-                  float d = mm->cm.bbox.Diag() * 1.1;
                   if(i>1)
                   {
-                      //We are interested in vertices belonging to the front layer. So in shader we check that
+                      //We are interested in vertices belonging to the front layer. Then in the shader we check that
                       //the vertex's depth is greater than the previous depth layer and smaller than the next one.
-                      int prevBack = (j==1) ? 3 : 1;
-                      calculateSdfHW( mFboArray[j-1], mFboArray[j], mFboArray[prevBack],dir, d );// front back prevback
+                      int prevBack = (j==1) ? 2 : 1;
+                      calculateSdfHW( mFboArray[j-1], mFboArray[j], mFboArray[prevBack],dir );// front back prevback
                   }
                   else//we have first and second depth layers, so we can use "second-depth shadow mapping" to avoid z-fighting
-                      calculateSdfHW( mFboArray[j-1], mFboArray[j], NULL, dir, d);// front back prevback
+                      calculateSdfHW( mFboArray[j-1], mFboArray[j], NULL, dir );// front back prevback
               }
           }
 
           //increment and wrap around
-          j = (j==3) ? 0 : (j+1);
+          j = (j==2) ? 0 : (j+1);
    }
 
     checkGLError::qDebug("Error during depth peeling");
