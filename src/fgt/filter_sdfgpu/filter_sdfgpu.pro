@@ -2,6 +2,7 @@ include (../../shared.pri)
 
 
 INCLUDEPATH += ../../meshlabplugins/render_radiance_scaling
+DEPENDPATH += shaders
 
 HEADERS       += filter_sdfgpu.h \
     filterinterface.h \

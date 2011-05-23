@@ -92,10 +92,10 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
     if(coordY1.y < 0.0 ) coordY1.y = 0.0;
     if(coordY2.y > 1.0 ) coordY2.y = 1.0;
 
-    float sampleX1 = texture2DLod(depthTextureBack, coordX1, 0).r;
-    float sampleX2 = texture2DLod(depthTextureBack, coordX2, 0).r;
-    float sampleY1 = texture2DLod(depthTextureBack, coordY1, 0).r;
-    float sampleY2 = texture2DLod(depthTextureBack, coordY2, 0).r;
+    float sampleX1 = texture2D(depthTextureBack, coordX1).r;
+    float sampleX2 = texture2D(depthTextureBack, coordX2).r;
+    float sampleY1 = texture2D(depthTextureBack, coordY1).r;
+    float sampleY2 = texture2D(depthTextureBack, coordY2).r;
      
     vec3  x1 = vec3( coordX1.x, coordX1.y, sampleX1 );
     vec3  x2 = vec3( coordX2.x, coordX2.y, sampleX2 );
@@ -136,7 +136,7 @@ float TraceRay(vec2 P, vec3 dir, float sourceHeight)
   	vec2   p2 	      = vec2(0.0);
 
 	// Compute max displacement:
-   	vec2 V = dir.xy*1.41422f;	
+    vec2 V = dir.xy*1.41422;
         
 	//
 	float cotan = sqrt(length(dir)*length(dir) - dir.z*dir.z) / (dir.z);
@@ -153,7 +153,7 @@ float TraceRay(vec2 P, vec3 dir, float sourceHeight)
 		
 		vec2 tc = P + coordOffset;
 		
-		CurrD = texture2DLod( depthTextureBack, tc, 0 ).r;
+    CurrD = texture2D( depthTextureBack, tc).r;
 
 		if(CurrD < Depth)
 		{
@@ -199,9 +199,9 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 	
     float sdf = 0.0;
 
-    float zFront    = texture2DLod(depthTextureFront,    P.xy, 0).r;
-    float zBack     = texture2DLod(depthTextureBack,     P.xy, 0).r;
-    float zPrevBack = texture2DLod(depthTexturePrevBack, P.xy, 0).r; 
+    float zFront    = texture2D(depthTextureFront,    P.xy).r;
+    float zBack     = texture2D(depthTextureBack,     P.xy).r;
+    float zPrevBack = texture2D(depthTexturePrevBack, P.xy).r;
 
     
     	
@@ -245,7 +245,7 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 
 	}
 
-	float valids   = EXTRA_RAYS - i;
+  float valids     = float(EXTRA_RAYS - i);
 	int median     = int(valids / 2.0);
 	int percentile = int(valids / 10.0);
 
