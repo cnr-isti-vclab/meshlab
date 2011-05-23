@@ -190,7 +190,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
   {
        (*vi).Normalize();
-        TraceRay(peel, *vi, md.mm());
+        TraceRay(peel, (*vi), md.mm());
         cb(100*((float)tracedRays/(float)unifDirVec.size()), "Tracing rays...");
         ++tracedRays;
   }
@@ -261,7 +261,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     }
 
     //INIT FBOs AND TEXs
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < 3; i++)
     {
         mFboArray[i] = new FramebufferObject();
     }
@@ -780,12 +780,16 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               {
                  if(i>1)
                  {
-                      int prevBack  = (j==0)? 1 : 0;
+                      int prevBack  = (j+1)%3;
                       int front     = (j==0)? 2 : (j-1);
                       calculateObscurance( mFboArray[front], mFboArray[prevBack], mFboArray[j], dir, mm->cm.bbox.Diag());//front prevBack Back
                  }
                  else
+                 {
+                     assert(j!=0);
                      calculateObscurance( mFboArray[j-1], mFboArray[j], NULL, dir, mm->cm.bbox.Diag());//front back nextBack
+
+                 }
               }
               else //SDF_SDF, SDF_CORRECTION_THIN_PARTS
               {
@@ -793,18 +797,26 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
                   {
                       //We are interested in vertices belonging to the front layer. Then in the shader we check that
                       //the vertex's depth is greater than the previous depth layer and smaller than the next one.
-                      int prevBack  = (j==0)? 1 : 0;
+                      int prevBack  = (j+1)%3;
                       int prevFront = (j==0)? 2 : (j-1);
                       calculateSdfHW( mFboArray[prevFront], mFboArray[j], mFboArray[prevBack],dir );// front back prevback
                   }
-                  else//we have first and second depth layers, so we can use "second-depth shadow mapping" to avoid z-fighting
+                  else
+                  {    //we have first and second depth layers, so we can use "second-depth shadow mapping" to avoid z-fighting
+                        assert(j!=0);
                       calculateSdfHW( mFboArray[j-1], mFboArray[j], NULL, dir );// front back prevback
+                  }
               }
           }
 
           //increment and wrap around
           j = (j+1) % 3;
    }
+
+    assert(mFboResult->isValid());
+    assert(mFboArray[0]->isValid());
+    assert(mFboArray[1]->isValid());
+    assert(mFboArray[2]->isValid());
 
     checkGLError::qDebug("Error during depth peeling");
 }
