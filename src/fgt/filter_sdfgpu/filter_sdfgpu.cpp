@@ -193,6 +193,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
         TraceRay(peel, (*vi), md.mm());
         cb(100*((float)tracedRays/(float)unifDirVec.size()), "Tracing rays...");
         ++tracedRays;
+         Log(0, "traced rays: %i ", tracedRays );
   }
 
   //read back the result texture and store result in the mesh
@@ -261,13 +262,6 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     }
 
     //INIT FBOs AND TEXs
-    for(int i = 0; i < 3; i++)
-    {
-        mFboArray[i] = new FramebufferObject();
-    }
-
-    mFboResult = new FramebufferObject();
-
     unsigned int maxTexSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
     Log(0, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
@@ -288,8 +282,10 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mVertexNormalsTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
 
     mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mFboResult = new FramebufferObject();
     mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
-
+    assert(mFboResult->isValid());
+    checkGLError::qDebug("Error during mFboResult ");
     //clear first time
     mFboResult->bind();
     glClear(GL_COLOR_BUFFER_BIT);
@@ -298,17 +294,32 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     //We use 3 FBOs to avoid z-fighting in sdf and obscurance calculation, see TraceRays function for details
     for(int i = 0; i < 3; i++)
     {
-        mDepthTextureArray[i]  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
-                                                     TextureParams( GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE ) );
 
-        mFboArray[i]->attachTexture( mDepthTextureArray[i]->format().target(), mDepthTextureArray[i]->id(), GL_DEPTH_ATTACHMENT  );
+        mFboArray[i] = new FramebufferObject();
 
         mFboArray[i]->bind();
+
+
+        mDepthTextureArray[i]  = new FloatTexture2D(TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
+                                                     TextureParams( GL_NEAREST, GL_NEAREST, GL_CLAMP, GL_CLAMP, GL_CLAMP) );
+
+
+        mDepthTextureArray[i]->bind();
+
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,
+                                    GL_TEXTURE_2D, mDepthTextureArray[i]->id(),0);
 
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
 
+
+        assert(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT && "mFboArray error");
+
         mFboArray[i]->unbind();
+        glDrawBuffer(GL_BACK);
+        glReadBuffer(GL_BACK);
+
+
     }
 
     //Depth peeling shader used for both sdf and obscurance
@@ -356,10 +367,10 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mObscuranceProgram->addUniform("maxDist");      //mesh BB diagonal
     mObscuranceProgram->disable();
 
-    assert(mFboResult->isValid());
-    assert(mFboArray[0]->isValid());
-    assert(mFboArray[1]->isValid());
-    assert(mFboArray[2]->isValid());
+    assert(mFboResult->isValid() && "Error during init");
+    assert(mFboArray[0]->isValid() && "Error during init");
+    assert(mFboArray[1]->isValid() && "Error during init");
+    assert(mFboArray[2]->isValid() && "Error during init");
 
 
     //If required from the user, we use VBO to speed up mesh rendering
@@ -443,15 +454,23 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
 void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 {
    glClear(GL_DEPTH_BUFFER_BIT);
+   checkGLError::qDebug("Error during fillFrameBuffer 1");
    glEnable(GL_CULL_FACE);
+   checkGLError::qDebug("Error during fillFrameBuffer 2");
    glCullFace((front)?GL_BACK:GL_FRONT);
+   checkGLError::qDebug("Error during fillFrameBuffer 3");
    //the most recent GPUs can do double speed Z-only rendering
    //(also alpha test must be turned off, depth replace and texkill must not be used in fragment shader)
    glColorMask(0, 0, 0, 0);
+   checkGLError::qDebug("Error during fillFrameBuffer 4");
    mm->glw.DrawFill<GLW::NMNone, GLW::CMNone, GLW::TMNone>();
+   checkGLError::qDebug("Error during fillFrameBuffer 5");
    glColorMask(1, 1, 1, 1);
-
+    checkGLError::qDebug("Error during fillFrameBuffer 6");
    glDisable(GL_CULL_FACE);
+   checkGLError::qDebug("Error during fillFrameBuffer 7");
+
+
 }
 
 void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
@@ -509,11 +528,17 @@ void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
 void SdfGpuPlugin::useDepthPeelingShader(FramebufferObject* fbo)
 {
    glUseProgram(mDeepthPeelingProgram->id());
+   checkGLError::qDebug("Error during useDepthPeelingShader 1 ");
    mDeepthPeelingProgram->setUniform1f("tolerance", mTolerance);
+   checkGLError::qDebug("Error during useDepthPeelingShader 2 ");
    mDeepthPeelingProgram->setUniform2f("oneOverBufSize", 1.0f/mPeelingTextureSize, 1.0f/mPeelingTextureSize);
+   checkGLError::qDebug("Error during useDepthPeelingShader 3 ");
    glActiveTexture(GL_TEXTURE0);
+   checkGLError::qDebug("Error during useDepthPeelingShader 4 ");
    glBindTexture(GL_TEXTURE_2D, fbo->getAttachedId(GL_DEPTH_ATTACHMENT));
+   checkGLError::qDebug("Error during useDepthPeelingShader 5 ");
    mDeepthPeelingProgram->setUniform1i("textureLastDepth",0);
+   checkGLError::qDebug("Error during useDepthPeelingShader 6 ");
 }
 
 void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir)
@@ -535,6 +560,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
     glLoadIdentity();
 
     glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE, GL_ONE);
@@ -614,6 +640,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
     glEnd();
 
     mFboResult->unbind();
+    glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
@@ -660,6 +687,7 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
     glLoadIdentity();
 
     glDisable(GL_DEPTH_TEST);
+     glDepthMask(GL_FALSE);
 
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE, GL_ONE);
@@ -722,6 +750,7 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
     glEnd();
 
     mFboResult->unbind();
+     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
@@ -800,11 +829,13 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
                       int prevBack  = (j+1)%3;
                       int prevFront = (j==0)? 2 : (j-1);
                       calculateSdfHW( mFboArray[prevFront], mFboArray[j], mFboArray[prevBack],dir );// front back prevback
+                         checkGLError::qDebug("Error during calculateSdfHW 1 ");
                   }
                   else
                   {    //we have first and second depth layers, so we can use "second-depth shadow mapping" to avoid z-fighting
                         assert(j!=0);
                       calculateSdfHW( mFboArray[j-1], mFboArray[j], NULL, dir );// front back prevback
+                      checkGLError::qDebug("Error during calculateSdfHW 2 ");
                   }
               }
           }
@@ -813,10 +844,10 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
           j = (j+1) % 3;
    }
 
-    assert(mFboResult->isValid());
-    assert(mFboArray[0]->isValid());
-    assert(mFboArray[1]->isValid());
-    assert(mFboArray[2]->isValid());
+    assert(mFboResult->isValid()&& "Error during depth peeling" );
+    assert(mFboArray[0]->isValid() && "Error during depth peeling");
+    assert(mFboArray[1]->isValid() && "Error during depth peeling");
+    assert(mFboArray[2]->isValid() && "Error during depth peeling");
 
     checkGLError::qDebug("Error during depth peeling");
 }
