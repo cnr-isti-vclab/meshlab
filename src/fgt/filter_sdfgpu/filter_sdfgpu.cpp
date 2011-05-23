@@ -780,8 +780,9 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               {
                  if(i>1)
                  {
-                      int back = (j==1)? 2 : 1;
-                      calculateObscurance( mFboArray[j-1], mFboArray[back], mFboArray[j], dir, mm->cm.bbox.Diag());//front back nextBack
+                      int prevBack  = (j==0)? 1 : 0;
+                      int front     = (j==0)? 2 : (j-1);
+                      calculateObscurance( mFboArray[front], mFboArray[prevBack], mFboArray[j], dir, mm->cm.bbox.Diag());//front prevBack Back
                  }
                  else
                      calculateObscurance( mFboArray[j-1], mFboArray[j], NULL, dir, mm->cm.bbox.Diag());//front back nextBack
@@ -792,8 +793,9 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
                   {
                       //We are interested in vertices belonging to the front layer. Then in the shader we check that
                       //the vertex's depth is greater than the previous depth layer and smaller than the next one.
-                      int prevBack = (j==1) ? 2 : 1;
-                      calculateSdfHW( mFboArray[j-1], mFboArray[j], mFboArray[prevBack],dir );// front back prevback
+                      int prevBack  = (j==0)? 1 : 0;
+                      int prevFront = (j==0)? 2 : (j-1);
+                      calculateSdfHW( mFboArray[prevFront], mFboArray[j], mFboArray[prevBack],dir );// front back prevback
                   }
                   else//we have first and second depth layers, so we can use "second-depth shadow mapping" to avoid z-fighting
                       calculateSdfHW( mFboArray[j-1], mFboArray[j], NULL, dir );// front back prevback
@@ -801,7 +803,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
           }
 
           //increment and wrap around
-          j = (j==2) ? 0 : (j+1);
+          j = (j+1) % 3;
    }
 
     checkGLError::qDebug("Error during depth peeling");
