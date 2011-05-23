@@ -133,6 +133,8 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
+  std::vector<Point3f> coneDirVec;
+
   if(mAction == SDF_OBSCURANCE)
     mTau = pars.getFloat("obscuranceExponent");
   else
@@ -142,7 +144,28 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
       mRemoveFalse     = pars.getBool("removeFalse");
       mRemoveOutliers  = pars.getBool("removeOutliers");
-  }
+
+      if(mRemoveOutliers)
+      {
+          //Uniform sampling of cone for GPU outliers removal
+
+          GenNormal<float>::UniformCone(EXTRA_RAYS_REQUESTED, coneDirVec, math::ToRad(45.0), Point3f(0.0,0.0,1.0));
+
+
+          for(int i = 0; i < EXTRA_RAYS_RESULTED; i++)
+          {
+              coneDirVec[i].Normalize();
+              mConeRays[i]   = coneDirVec[i].X();
+              mConeRays[i+1] = coneDirVec[i].Y();
+              mConeRays[i+2] = coneDirVec[i].Z();
+
+              Log(0, "Ray%i %f %f %f. Angle: %f", i,coneDirVec[i].X(),
+                                                    coneDirVec[i].Y(),
+                                                    coneDirVec[i].Z(),
+                                                    math::ToDeg(vcg::Angle(coneDirVec[i],Point3f(0.0,0.0,1.0))));
+          }
+      }
+   }
    //MESH CLEAN UP
    setupMesh( md, onPrimitive );
 
@@ -156,24 +179,6 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   std::vector<Point3f> unifDirVec;
   GenNormal<float>::Uniform(numViews,unifDirVec);
 
-
-  //Uniform sampling of cone for GPU outliers removal
-  std::vector<Point3f> coneDirVec;
-  GenNormal<float>::UniformCone(EXTRA_RAYS_REQUESTED, coneDirVec, math::ToRad(30.0), Point3f(0.0,0.0,1.0));
-
-
-  for(int i = 0; i < EXTRA_RAYS_RESULTED; i++)
-  {
-      coneDirVec[i].Normalize();
-      mConeRays[i]   = coneDirVec[i].X();
-      mConeRays[i+1] = coneDirVec[i].Y();
-      mConeRays[i+2] = coneDirVec[i].Z();
-
-      Log(0, "Ray%i %f %f %f. Angle: %f", i,coneDirVec[i].X(),
-                                            coneDirVec[i].Y(),
-                                            coneDirVec[i].Z(),
-                                            math::ToDeg(vcg::Angle(coneDirVec[i],Point3f(0.0,0.0,1.0))));
-  }
 
   Log(0, "Number of rays: %i ", unifDirVec.size() );
   Log(0, "Number of rays for GPU outliers removal: %i ", coneDirVec.size() );
@@ -346,7 +351,6 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mObscuranceProgram->addUniform("mvprMatrix");
     mObscuranceProgram->addUniform("viewpSize");
     mObscuranceProgram->addUniform("texSize");
-    mObscuranceProgram->addUniform("minCos");
     mObscuranceProgram->addUniform("tau");
     mObscuranceProgram->addUniform("firstRendering");
     mObscuranceProgram->addUniform("maxDist");      //mesh BB diagonal
@@ -698,8 +702,6 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
 
     // Set viewport Size
     mObscuranceProgram->setUniform1f("viewpSize", mResTextureDim );
-
-    mObscuranceProgram->setUniform1f("minCos", 0.7);
 
     mObscuranceProgram->setUniform1f("tau", mTau);
 

@@ -35,6 +35,7 @@ uniform mat4 		mvprMatrix;
 uniform float 		viewpSize;
 uniform float 		texSize;
 uniform float		tau;
+
 uniform int 		firstRendering;
 uniform float		maxDist;
 

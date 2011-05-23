@@ -25,7 +25,7 @@
 Author: Andrea Baldacci baldacci85@hotmail.it
 */
 
-#define EXTRA_RAYS 20
+#define EXTRA_RAYS 40
 
 uniform sampler2D 	vTexture;
 uniform sampler2D 	nTexture;
@@ -70,7 +70,13 @@ void InsertionSort(int n)
    }
 }
 
-//Recostruct normal at the point of intersection and check for false intersection (angle between points normals must differ at least 90 degrees)
+/*
+Recostruct normal at the point of intersection and check for false intersection.
+For each ray we check the normal at the point of intersection,
+and ignore intersections where the normal at the intersection
+points is in the same direction as the point-of-origin
+(the same direction is defined as an angle difference lessthan 90)
+*/
 bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
 {
 
@@ -97,7 +103,7 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
     vec3  y2 = vec3( coordY2.x, coordY2.y, sampleY2 );
     
     //
-    vec3 intersectionPointNormal = normalize(cross((x2-x1),(y2-y1)))  * 2.0 -0.5;
+    vec3 intersectionPointNormal = normalize(cross((x2-x1),(y2-y1)));//  * 2.0 -0.5;
   
     vec4 tmpNormal = vec4( intersectionPointNormal, 0.0 );
 
@@ -106,10 +112,10 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
 
     intersectionPointNormal = tmpNormal.xyz; 
     
-    intersectionPointNormal = normalize(intersectionPointNormal);
+   // intersectionPointNormal = normalize(intersectionPointNormal);
     
     //if angles dont differ at least 90 degrees reject intersection
-    if(dot(-intersectionPointNormal, objSpaceNormal) > 0.1) return true;
+    if(dot(-intersectionPointNormal, objSpaceNormal) > 0.0) return true;
 
 }
 
@@ -217,7 +223,7 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
    if(removeFalse==1)
 	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;
     
-   if( sdf != 0 && removeOutliers == 1)
+   if( sdf != 0.0 && removeOutliers == 1)
    {
 	
     
@@ -239,14 +245,14 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 
 	}
 
-	float valids     = EXTRA_RAYS - i;
+	float valids   = EXTRA_RAYS - i;
 	int median     = int(valids / 2.0);
 	int percentile = int(valids / 10.0);
 
 		
-	//if( sdf < _vals[i+median-4*percentile ] || sdf > _vals[i+median+4*percentile] ) return 0.0;	
+	if( sdf < _vals[i+median-4*percentile ] || sdf > _vals[i+median+4*percentile] ) return 0.0;	
 
-        sdf = _vals[i+median];
+      //  sdf = _vals[i+median];
 
    }    
 
@@ -283,5 +289,5 @@ void main(void)
       
 
 	
-    gl_FragColor = vec4( sdf, cosAngle , 0.0, 1.0);
+    gl_FragColor = vec4(sdf, cosAngle , 0.0, 1.0);
 }

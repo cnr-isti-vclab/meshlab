@@ -10,7 +10,7 @@
 #include <texture2D.h>
 
 #define EXTRA_RAYS_REQUESTED 10
-#define EXTRA_RAYS_RESULTED 20 //must match value in sdf shader
+#define EXTRA_RAYS_RESULTED 40 //must match value in sdf shader
 
 enum ONPRIMITIVE{ON_VERTICES, ON_FACES};
 
