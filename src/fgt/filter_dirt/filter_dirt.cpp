@@ -102,32 +102,24 @@ QString FilterDirt::filterInfo(FilterIDType filterId) const
 
 void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParameterSet &par){
 
-
-    switch(ID(filter)){
+	switch(ID(filter)){
 
     case FP_DIRT:{
-            MeshModel* m=md.getMesh(0);
-            if(m!=0){
             par.addParam(new RichPoint3f("dust_dir",Point3f(0,1,0),"Direction","Direction of the dust source"));
             par.addParam(new RichInt("nparticles",3,"particles","Max Number of Dust Particles to Generate Per Face"));
             par.addParam(new RichFloat("slippiness",1,"s","The surface slippines"));
             par.addParam(new RichFloat("adhesion",0.2,"k","Factor to model the general adhesion"));
             par.addParam(new RichBool("draw_texture",false,"Draw Dust",""));
             par.addParam(new RichBool("colorize_mesh",false,"Map to Color",""));
-            }
             break;
-
         }
     case FP_CLOUD_MOVEMENT:{
-            //float perc=0.01f;
-			//float max_value=md.getMesh(0)->cm.bbox.Diag(); //mm()->cm.bbox.Diag();
             par.addParam(new RichPoint3f("force_dir",Point3f(0,-1,0),"force","Direction of the force acting on the points cloud"));
 			par.addParam(new RichInt("steps",1,"s","Simulation Steps"));
 			//par.addParam(new RichAbsPerc("s_length",max_value*perc,0,max_value,"Movement Length",""));
             par.addParam(new RichFloat("velocity",0,"v","Initial velocity of the particle"));
             par.addParam(new RichFloat("mass",1,"m","Mass of the particle"));
             par.addParam(new RichBool("colorize_mesh",false,"Map to Color",""));
-
             break;
         }
     default:{
@@ -198,7 +190,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         if(draw) DrawDust(currMM,dmm);
         if(colorize) ColorizeMesh(currMM);
 
-
+		
         break;
         }
     case FP_CLOUD_MOVEMENT:{
@@ -273,8 +265,5 @@ MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *filter)
     default:assert(0);
     }
 }
-
-
-
 
 Q_EXPORT_PLUGIN(FilterDirt)
