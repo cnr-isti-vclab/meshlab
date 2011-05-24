@@ -286,10 +286,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
     assert(mFboResult->isValid());
     checkGLError::qDebug("Error during mFboResult ");
-    //clear first time
-    mFboResult->bind();
-    glClear(GL_COLOR_BUFFER_BIT);
-    mFboResult->unbind();
+
 
     //We use 3 FBOs to avoid z-fighting in sdf and obscurance calculation, see TraceRays function for details
     for(int i = 0; i < 3; i++)
@@ -545,6 +542,8 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 {
     mFboResult->bind();
     glViewport(0, 0, mResTextureDim, mResTextureDim);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
     GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
 
     glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
@@ -639,6 +638,9 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
             glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
     glEnd();
 
+
+    assert(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT && "mFboResult error while drawing");
+
     mFboResult->unbind();
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
@@ -672,6 +674,7 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
 {
     mFboResult->bind();
     glViewport(0, 0, mResTextureDim, mResTextureDim);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
     GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
 
     glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
@@ -748,6 +751,8 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
             glVertex3f( 1.0f,  1.0f, 0.0f); //U-R
             glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
     glEnd();
+
+     assert(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT && "mFboResult error while drawing");
 
     mFboResult->unbind();
      glDepthMask(GL_TRUE);
