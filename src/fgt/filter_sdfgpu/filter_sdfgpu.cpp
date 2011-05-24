@@ -278,10 +278,10 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     Log(0, "Mesh has %i vertices\n", numVertices );
     Log(0, "Result texture is %i X %i = %i", mResTextureDim, mResTextureDim, mResTextureDim*mResTextureDim);
 
-    mVertexCoordsTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
-    mVertexNormalsTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mVertexCoordsTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_LINEAR/*GL_NEAREST*/, /*GL_NEAREST*/GL_LINEAR ) );
+    mVertexNormalsTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( /*GL_NEAREST*/GL_LINEAR, /*GL_NEAREST*/GL_LINEAR ) );
 
-    mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, /*GL_RGBA32F_ARB*/GL_RGBA16F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, /*GL_RGBA32F_ARB*/GL_RGBA16F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_LINEAR/*GL_NEAREST*/, GL_LINEAR/*GL_NEAREST*/ ) );
     mFboResult = new FramebufferObject();
     mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
     assert(mFboResult->isValid());
@@ -298,7 +298,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
 
         mDepthTextureArray[i]  = new FloatTexture2D(TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
-                                                     TextureParams( GL_NEAREST, GL_NEAREST, GL_CLAMP, GL_CLAMP, GL_CLAMP) );
+                                                     TextureParams( /*GL_NEAREST*/GL_LINEAR, /*GL_NEAREST*/GL_LINEAR) );
 
 
         mDepthTextureArray[i]->bind();
