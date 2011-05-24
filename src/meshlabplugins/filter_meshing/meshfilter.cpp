@@ -229,7 +229,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
     case FP_PRINCIPAL_AXIS                   : return tr("Generate a matrix transformation that rotates the mesh aligning it to its principal axis of inertia."
                                                          "If the mesh is watertight the Itertia tensor is computed assuming the interior of the mesh has a uniform density."
                                                          "In case of an open mesh or a point clouds the inerta tensor is computed assuming each vertex is a constant puntual mass.");
-		case FP_FLIP_AND_SWAP                    : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order.");
+		case FP_FLIP_AND_SWAP                    : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order. This kind of transformation cannot be applied to set of Raster!");
 		case FP_RESET_TRANSFORM                  : return tr("Set the current transformation matrix to the Identity. ");
 		case FP_FREEZE_TRANSFORM                 : return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
 		case FP_NORMAL_EXTRAPOLATION             : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
@@ -394,6 +394,12 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
   case FP_INVERT_FACES:
     parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected the normals will always be flipped otherwise the filter tries to set them outside"));
    break;
+  case FP_ROTATE_FIT:
+	  {
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
+	  }
+     break;
   case FP_ROTATE:
     {
       QStringList rotMethod;
@@ -413,12 +419,16 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
       parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
       parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
       parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+	  parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
+
     }
     break;
     case FP_PRINCIPAL_AXIS:
       {
         parlst.addParam(new RichBool("pointsFlag",m.cm.fn==0,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
-      }
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
+	  }
      break;
     case FP_CENTER:
 			{
@@ -426,8 +436,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","Absolute translation amount along the X axis"));
         parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Absolute translation amount along the Y axis"));
         parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Absolute translation amount along the Z axis"));
-				parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
+		parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
         parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
       }
 			break;
 
@@ -441,10 +452,11 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 				scaleCenter.push_back("origin");
 				scaleCenter.push_back("barycenter");
 				scaleCenter.push_back("custom point");
-				parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of rotation:"), tr("Choose a method")));
-				parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+				parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
+				parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
 				parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
-        parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+				parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+				parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
       }
 			break;
 
@@ -747,6 +759,15 @@ case FP_RESET_TRANSFORM :
 
 case FP_ROTATE_FIT:
     {
+		if (par.getBool("ToAll"))
+	  {
+		  if (!par.getBool("Freeze"))
+		  {
+			  errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
+			return false;
+
+		  }
+	  }
       Box3f selBox; //il bbox delle facce selezionate
       std::vector< Point3f > selected_pts; //devo copiare i punti per il piano di fitting
 
@@ -775,10 +796,50 @@ case FP_ROTATE_FIT:
       float angleRad = Angle(Point3f(0,0,1),plane.Direction());
       Matrix44f rt; rt.SetRotateRad(angleRad,rotAxis);
       m.cm.Tr = rt*tr1;
-    } break;
+    } 
+	if(par.getBool("Freeze")&& !par.getBool("ToAll")){
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
+      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+      tri::UpdateBounding<CMeshO>::Box(m.cm);
+      m.cm.Tr.SetIdentity();
+		}
+	else if(par.getBool("ToAll")){
+          Matrix44f transf=m.cm.Tr;
+		  for (int i=0; i<md.meshList.size(); i++)
+			{
+				md.meshList[i]->cm.Tr=transf;
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+				md.meshList[i]->cm.Tr.SetIdentity();
+				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
+				
+
+			}
+			for (int i=0; i<md.rasterList.size(); i++)
+			{
+				md.rasterList[i]->shot.ApplyRigidTransformation(transf);
+				
+			}
+		}
+	
+	
+	
+	break;
 
 case FP_ROTATE :
   {
+	   if (par.getBool("ToAll"))
+	  {
+		  if (!par.getBool("Freeze"))
+		  {
+			  errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
+			return false;
+
+		  }
+	  }
 		Matrix44f trRot; trRot.SetIdentity();
     Point3f axis, tranVec;
 		Matrix44f trTran,trTranInv;
@@ -807,70 +868,140 @@ case FP_ROTATE :
 		trTranInv.SetTranslate(-tranVec);
 		m.cm.Tr=trTran*trRot*trTranInv;
 
-    if(par.getBool("Freeze")){
+    if(par.getBool("Freeze")&& !par.getBool("ToAll")){
       tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
       tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
       tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
       tri::UpdateBounding<CMeshO>::Box(m.cm);
       m.cm.Tr.SetIdentity();
 		}
+	else if(par.getBool("ToAll")){
+          Matrix44f transf=m.cm.Tr;
+		  for (int i=0; i<md.meshList.size(); i++)
+			{
+				md.meshList[i]->cm.Tr=transf;
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+				md.meshList[i]->cm.Tr.SetIdentity();
+				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
+				
+
+			}
+			for (int i=0; i<md.rasterList.size(); i++)
+			{
+				md.rasterList[i]->shot.ApplyRigidTransformation(transf);
+				
+			}
+		}
   } break;
 
 case FP_PRINCIPAL_AXIS:
   {
-    if(par.getBool("pointsFlag"))
-    {
-      Matrix33f cov;
-      Point3f bp(0,0,0);
-      vector<Point3f> PtVec;
-      for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end();++vi)
-        if(!(*vi).IsD()) {
-          PtVec.push_back((*vi).cP());
-          bp+=(*vi).cP();
-        }
+	  if (par.getBool("ToAll"))
+	  {
+		  if (!par.getBool("Freeze"))
+		  {
+			  errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
+			return false;
 
-      bp/=m.cm.vn;
+		  }
+	  }
+	  if(par.getBool("pointsFlag"))
+		{
+		  Matrix33f cov;
+		  Point3f bp(0,0,0);
+		  vector<Point3f> PtVec;
+		  for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end();++vi)
+			if(!(*vi).IsD()) {
+			  PtVec.push_back((*vi).cP());
+			  bp+=(*vi).cP();
+			}
 
-      cov.Covariance(PtVec,bp);
-      for(int i=0;i<3;i++)
-        qDebug("%8.3f %8.3f %8.3f ",cov[i][0],cov[i][1],cov[i][2]);
-      qDebug("\n");
-      Matrix33f eigenvecMatrix;
-      Point3f eigenvecVector;
-      int n;
-      Jacobi(cov,eigenvecVector,eigenvecMatrix,n);
-      for(int i=0;i<3;i++)
-        qDebug("%8.3f %8.3f %8.3f ",eigenvecMatrix[i][0],eigenvecMatrix[i][1],eigenvecMatrix[i][2]);
+		  bp/=m.cm.vn;
 
-      qDebug("\n%8.3f %8.3f %8.3f ",eigenvecVector[0],eigenvecVector[1],eigenvecVector[2]);
+		  cov.Covariance(PtVec,bp);
+		  for(int i=0;i<3;i++)
+			qDebug("%8.3f %8.3f %8.3f ",cov[i][0],cov[i][1],cov[i][2]);
+		  qDebug("\n");
+		  Matrix33f eigenvecMatrix;
+		  Point3f eigenvecVector;
+		  int n;
+		  Jacobi(cov,eigenvecVector,eigenvecMatrix,n);
+		  for(int i=0;i<3;i++)
+			qDebug("%8.3f %8.3f %8.3f ",eigenvecMatrix[i][0],eigenvecMatrix[i][1],eigenvecMatrix[i][2]);
 
-      Matrix44f trTran; trTran.SetIdentity();
-      for(int i=0;i<3;++i)
-        for(int j=0;j<3;++j)
-          trTran[i][j] = eigenvecMatrix[i][j];
-      trTran.transposeInPlace();
-      m.cm.Tr=trTran;
-    }
-    else
-    {
-      tri::Inertia<CMeshO> I;
-      I.Compute(m.cm);
+		  qDebug("\n%8.3f %8.3f %8.3f ",eigenvecVector[0],eigenvecVector[1],eigenvecVector[2]);
 
-      Matrix44f PCA;
-      Point4f pcav;
-      I.InertiaTensorEigen(PCA,pcav);
-      for(int i=0;i<4;i++)
-          qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
-      PCA.transposeInPlace();
+		  Matrix44f trTran; trTran.SetIdentity();
+		  for(int i=0;i<3;++i)
+			for(int j=0;j<3;++j)
+			  trTran[i][j] = eigenvecMatrix[i][j];
+		  trTran.transposeInPlace();
+		  m.cm.Tr=trTran;
+		}
+		else
+		{
+		  tri::Inertia<CMeshO> I;
+		  I.Compute(m.cm);
 
-      for(int i=0;i<4;i++)
-          qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
-      m.cm.Tr=PCA;
-    }
+		  Matrix44f PCA;
+		  Point4f pcav;
+		  I.InertiaTensorEigen(PCA,pcav);
+		  for(int i=0;i<4;i++)
+			  qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
+		  PCA.transposeInPlace();
+
+		  for(int i=0;i<4;i++)
+			  qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
+		  m.cm.Tr=PCA;
+	  }
+	  if (par.getBool("Freeze") && !par.getBool("ToAll"))
+	  {
+		  tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+		  tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
+		  tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+		  tri::UpdateBounding<CMeshO>::Box(m.cm);
+		  m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+		  m.cm.Tr.SetIdentity();
+	  }
+	  else if (par.getBool("ToAll"))
+	  {
+		  Matrix44f transf=m.cm.Tr;
+		  for (int i=0; i<md.meshList.size(); i++)
+			{
+				md.meshList[i]->cm.Tr=transf;
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+				md.meshList[i]->cm.Tr.SetIdentity();
+				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
+				
+
+			}
+			for (int i=0; i<md.rasterList.size(); i++)
+			{
+				md.rasterList[i]->shot.ApplyRigidTransformation(transf);
+				
+			}
+
+	  }
+
   } break;
 
 case FP_CENTER:
   {
+	  if (par.getBool("ToAll"))
+	  {
+		  if (!par.getBool("Freeze"))
+		  {
+			  errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
+			return false;
+
+		  }
+	  }
 		Matrix44f trTran; trTran.SetIdentity();
 
 		float xScale= par.getDynamicFloat("axisX");
@@ -882,52 +1013,129 @@ case FP_CENTER:
 			trTran.SetTranslate(-m.cm.bbox.Center());
 
 		m.cm.Tr=trTran;
-    if(par.getBool("Freeze")){
+    if(par.getBool("Freeze") && !par.getBool("ToAll")){
       tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
       tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
       tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
       tri::UpdateBounding<CMeshO>::Box(m.cm);
       m.cm.Tr.SetIdentity();
     }
+	else if (par.getBool("ToAll"))
+	  {
+		  Matrix44f transf=trTran;
+		  for (int i=0; i<md.meshList.size(); i++)
+			{
+				md.meshList[i]->cm.Tr=transf;
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+				md.meshList[i]->cm.Tr.SetIdentity();
+				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
+				
+
+			}
+			for (int i=0; i<md.rasterList.size(); i++)
+			{
+				md.rasterList[i]->shot.ApplyRigidTransformation(transf);
+				
+			}
+
+	  }
 
   } break;
 
 case FP_SCALE:
   {
-		Matrix44f trScale; trScale.SetIdentity();
-		Point3f tranVec;
-		Matrix44f trTran,trTranInv;
+	  if (par.getBool("ToAll"))
+	  {
+		  if (!par.getBool("uniformFlag") || !par.getBool("Freeze"))
+		  {
+			  errorMessage="Warning: the scaling is applied to all elements only when 'Uniform Scaling' and 'Freeze Matrix' checkboxes are selected. Nothing done.";
+			return false;
 
-		float xScale= par.getDynamicFloat("axisX");
-		float yScale= par.getDynamicFloat("axisY");
-		float zScale= par.getDynamicFloat("axisZ");
-		if(par.getBool("uniformFlag"))
-			trScale.SetScale(xScale,xScale,xScale);
-		else
-			trScale.SetScale(xScale,yScale,zScale);
-		if(par.getBool("unitFlag"))
-		{
-			float maxSide= max(m.cm.bbox.DimX(),max(m.cm.bbox.DimY(),m.cm.bbox.DimZ()));
-			trScale.SetScale(1.0/maxSide,1.0/maxSide,1.0/maxSide);
-		}
-		switch(par.getEnum("scaleCenter"))
-		{
-			case 0: tranVec=Point3f(0,0,0); break;
-			case 1: tranVec=m.cm.bbox.Center(); break;
-			case 2: tranVec=par.getPoint3f("customCenter");break;
-		}
+		  }
+		  else
+		  {
+			  Matrix44f trScale; trScale.SetIdentity();
+			Point3f tranVec;
+			Matrix44f trTran,trTranInv;
 
-		trTran.SetTranslate(tranVec);
-		trTranInv.SetTranslate(-tranVec);
+			float xScale= par.getDynamicFloat("axisX");
+				trScale.SetScale(xScale,xScale,xScale);
+			
+			if(par.getBool("unitFlag"))
+			{
+				float maxSide= max(m.cm.bbox.DimX(),max(m.cm.bbox.DimY(),m.cm.bbox.DimZ()));
+				trScale.SetScale(1.0/maxSide,1.0/maxSide,1.0/maxSide);
+			}
+			switch(par.getEnum("scaleCenter"))
+			{
+				case 0: tranVec=Point3f(0,0,0); break;
+				case 1: tranVec=m.cm.bbox.Center(); break;
+				case 2: tranVec=par.getPoint3f("customCenter");break;
+			}
 
-		m.cm.Tr=trTran*trScale*trTranInv;
-    if(par.getBool("Freeze")){
-      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
-      tri::UpdateBounding<CMeshO>::Box(m.cm);
-      m.cm.Tr.SetIdentity();
-    }
+			trTran.SetTranslate(tranVec);
+			trTranInv.SetTranslate(-tranVec);
+			for (int i=0; i<md.meshList.size(); i++)
+			{
+				md.meshList[i]->cm.Tr=trTran*trScale*trTranInv;
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+				md.meshList[i]->cm.Tr.SetIdentity();
+				md.meshList[i]->cm.shot.ApplyRigidTransformation(trTran);
+				md.meshList[i]->cm.shot.RescalingWorld(trScale[0][0]);
+				md.meshList[i]->cm.shot.ApplyRigidTransformation(trTranInv);
+
+			}
+			for (int i=0; i<md.rasterList.size(); i++)
+			{
+				md.rasterList[i]->shot.ApplyRigidTransformation(trTran);
+				md.rasterList[i]->shot.RescalingWorld(trScale[0][0]);
+				md.rasterList[i]->shot.ApplyRigidTransformation(trTranInv);
+			}
+		  }
+	  }
+	  else
+	  {
+			Matrix44f trScale; trScale.SetIdentity();
+			Point3f tranVec;
+			Matrix44f trTran,trTranInv;
+
+			float xScale= par.getDynamicFloat("axisX");
+			float yScale= par.getDynamicFloat("axisY");
+			float zScale= par.getDynamicFloat("axisZ");
+			if(par.getBool("uniformFlag"))
+				trScale.SetScale(xScale,xScale,xScale);
+			else
+				trScale.SetScale(xScale,yScale,zScale);
+			if(par.getBool("unitFlag"))
+			{
+				float maxSide= max(m.cm.bbox.DimX(),max(m.cm.bbox.DimY(),m.cm.bbox.DimZ()));
+				trScale.SetScale(1.0/maxSide,1.0/maxSide,1.0/maxSide);
+			}
+			switch(par.getEnum("scaleCenter"))
+			{
+				case 0: tranVec=Point3f(0,0,0); break;
+				case 1: tranVec=m.cm.bbox.Center(); break;
+				case 2: tranVec=par.getPoint3f("customCenter");break;
+			}
+
+			trTran.SetTranslate(tranVec);
+			trTranInv.SetTranslate(-tranVec);
+
+			m.cm.Tr=trTran*trScale*trTranInv;
+			if(par.getBool("Freeze")){
+			  tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+			  tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
+			  tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+			  tri::UpdateBounding<CMeshO>::Box(m.cm);
+			  m.cm.Tr.SetIdentity();
+			}
+	  }
 
   } break;
 
