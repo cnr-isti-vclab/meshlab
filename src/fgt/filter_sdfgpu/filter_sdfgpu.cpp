@@ -16,6 +16,7 @@ using namespace vcg;
 #define PI 3.14159265358979323846264;
 #define USEVBO_BY_DEFAULT false
 
+#define MACOS
 
 SdfGpuPlugin::SdfGpuPlugin()
 : mPeelingTextureSize(256)
@@ -281,12 +282,20 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mVertexCoordsTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_LINEAR/*GL_NEAREST*/, /*GL_NEAREST*/GL_LINEAR ) );
     mVertexNormalsTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( /*GL_NEAREST*/GL_LINEAR, /*GL_NEAREST*/GL_LINEAR ) );
 
-    mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, /*GL_RGBA32F_ARB*/GL_RGBA16F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_LINEAR/*GL_NEAREST*/, GL_LINEAR/*GL_NEAREST*/ ) );
+    mResultTexture      = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_LINEAR/*GL_NEAREST*/, GL_LINEAR/*GL_NEAREST*/ ) );
+
+#ifdef MACOS
+    mResultTextureDepth = new FloatTexture2D(TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
+                                            TextureParams( /*GL_NEAREST*/GL_LINEAR, /*GL_NEAREST*/GL_LINEAR) );
+#endif
     mFboResult = new FramebufferObject();
     mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
+#ifdef MACOS
+    mFboResult->attachTexture(mResultTextureDepth->format().target(),mResultTextureDepth->id(),GL_DEPTH_ATTACHMENT_EXT  );
+#endif
     assert(mFboResult->isValid());
-    checkGLError::qDebug("Error during mFboResult ");
 
+    checkGLError::qDebug("Error during mFboResult ");
 
     //We use 3 FBOs to avoid z-fighting in sdf and obscurance calculation, see TraceRays function for details
     for(int i = 0; i < 3; i++)
@@ -300,22 +309,35 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
         mDepthTextureArray[i]  = new FloatTexture2D(TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
                                                      TextureParams( /*GL_NEAREST*/GL_LINEAR, /*GL_NEAREST*/GL_LINEAR) );
 
+#ifdef MACOS
+        mColorTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_LINEAR/*GL_NEAREST*/, /*GL_NEAREST*/GL_LINEAR ) );
 
+        mColorTextureArray[i]->bind();
+
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,
+                                    GL_TEXTURE_2D, mColorTextureArray[i]->id(),0);
+
+#endif
         mDepthTextureArray[i]->bind();
 
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,
                                     GL_TEXTURE_2D, mDepthTextureArray[i]->id(),0);
 
+
+
+#ifndef MACOS
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
-
+#endif
 
         assert(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT && "mFboArray error");
 
         mFboArray[i]->unbind();
+
+ #ifndef MACOS
         glDrawBuffer(GL_BACK);
         glReadBuffer(GL_BACK);
-
+#endif
 
     }
 
@@ -450,19 +472,28 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
 
 void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 {
+#ifndef MACOS
    glClear(GL_DEPTH_BUFFER_BIT);
+#else
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif
    checkGLError::qDebug("Error during fillFrameBuffer 1");
    glEnable(GL_CULL_FACE);
    checkGLError::qDebug("Error during fillFrameBuffer 2");
    glCullFace((front)?GL_BACK:GL_FRONT);
    checkGLError::qDebug("Error during fillFrameBuffer 3");
+#ifndef MACOS
    //the most recent GPUs can do double speed Z-only rendering
    //(also alpha test must be turned off, depth replace and texkill must not be used in fragment shader)
    glColorMask(0, 0, 0, 0);
+
+#endif
    checkGLError::qDebug("Error during fillFrameBuffer 4");
    mm->glw.DrawFill<GLW::NMNone, GLW::CMNone, GLW::TMNone>();
    checkGLError::qDebug("Error during fillFrameBuffer 5");
+#ifndef MACOS
    glColorMask(1, 1, 1, 1);
+#endif
     checkGLError::qDebug("Error during fillFrameBuffer 6");
    glDisable(GL_CULL_FACE);
    checkGLError::qDebug("Error during fillFrameBuffer 7");
@@ -621,11 +652,14 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 
     mFboResult->bind();
     glViewport(0, 0, mResTextureDim, mResTextureDim);
-
+#ifndef MACOS
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
+#endif
+    checkGLError::qDebug("error after glDrawBuffer");
     glDisable(GL_DEPTH_TEST);
+#ifndef MACOS
     glDepthMask(GL_FALSE);
+#endif
 
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE, GL_ONE);
@@ -643,7 +677,9 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
     assert(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT && "mFboResult error while drawing");
 
     mFboResult->unbind();
-    glDepthMask(GL_TRUE);
+#ifndef MACOS
+ glDepthMask(GL_TRUE);
+#endif
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
@@ -737,11 +773,16 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
 
     mFboResult->bind();
     glViewport(0, 0, mResTextureDim, mResTextureDim);
+
+
+#ifndef MACOS
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
+#endif
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
 
+#ifndef MACOS
+    glDepthMask(GL_FALSE);
+#endif
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE, GL_ONE);
     glBlendEquation(GL_FUNC_ADD);
@@ -757,7 +798,9 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
      assert(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT && "mFboResult error while drawing");
 
     mFboResult->unbind();
+    #ifndef MACOS
      glDepthMask(GL_TRUE);
+    #endif
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
