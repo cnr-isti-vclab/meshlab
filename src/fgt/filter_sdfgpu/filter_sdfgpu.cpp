@@ -281,7 +281,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mVertexCoordsTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
     mVertexNormalsTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
 
-    mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+    mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, /*GL_RGBA32F_ARB*/GL_RGBA16F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
     mFboResult = new FramebufferObject();
     mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
     assert(mFboResult->isValid());
@@ -540,10 +540,6 @@ void SdfGpuPlugin::useDepthPeelingShader(FramebufferObject* fbo)
 
 void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir)
 {
-    mFboResult->bind();
-    glViewport(0, 0, mResTextureDim, mResTextureDim);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
     GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
 
     glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
@@ -557,13 +553,6 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-
-    glEnable (GL_BLEND);
-    glBlendFunc (GL_ONE, GL_ONE);
-    glBlendEquation(GL_FUNC_ADD);
 
     glUseProgram(mSDFProgram->id());
 
@@ -630,6 +619,18 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
     else
         mSDFProgram->setUniform1i("removeOutliers",0);
 
+    mFboResult->bind();
+    glViewport(0, 0, mResTextureDim, mResTextureDim);
+
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_ONE, GL_ONE);
+    glBlendEquation(GL_FUNC_ADD);
+
     // Screen-aligned Quad
     glBegin(GL_QUADS);
             glVertex3f(-1.0f, -1.0f, 0.0f); //L-L
@@ -672,9 +673,6 @@ void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
 
 void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextBack, const vcg::Point3f& cameraDir, float bbDiag)
 {
-    mFboResult->bind();
-    glViewport(0, 0, mResTextureDim, mResTextureDim);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
     GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
 
     glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
@@ -688,13 +686,6 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    glDisable(GL_DEPTH_TEST);
-     glDepthMask(GL_FALSE);
-
-    glEnable (GL_BLEND);
-    glBlendFunc (GL_ONE, GL_ONE);
-    glBlendEquation(GL_FUNC_ADD);
 
     glUseProgram(mObscuranceProgram->id());
 
@@ -743,6 +734,17 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
         mObscuranceProgram->setUniform1i("firstRendering",1);
     else
          mObscuranceProgram->setUniform1i("firstRendering",0);
+
+    mFboResult->bind();
+    glViewport(0, 0, mResTextureDim, mResTextureDim);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_ONE, GL_ONE);
+    glBlendEquation(GL_FUNC_ADD);
 
     // Screen-aligned Quad
     glBegin(GL_QUADS);
