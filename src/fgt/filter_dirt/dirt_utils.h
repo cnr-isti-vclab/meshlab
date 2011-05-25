@@ -81,7 +81,7 @@ bool CheckFallPosition(CMeshO::FacePointer f,Point3f g,float a){
 				return false;
 };
 
-float GetRemainingTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, float t,float l){
+float GetElapsedTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, float t,float l){
 	float d1= Distance(p1,p2);
 	float d2= Distance(p2,p3);
 	if(d1+d2==0) return 0;
@@ -548,7 +548,7 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::v
 /**
 
 */
-void associateParticles(MeshModel* b_m,MeshModel* c_m,float m,float v){
+void associateParticles(MeshModel* b_m,MeshModel* c_m,float &m,float &v){
 	MetroMeshFaceGrid   unifGridFace;
 	Point3f closestPt;
 	CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (c_m->cm,std::string("ParticleInfo"));
@@ -560,12 +560,12 @@ void associateParticles(MeshModel* b_m,MeshModel* c_m,float m,float v){
 	CMeshO::VertexIterator vi;
 	vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 	for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
-		Particle<CMeshO> part;
-		part.face=unifGridFace.GetClosest(PDistFunct,markerFunctor,vi->P(),dist_upper_bound,dist,closestPt);
-		part.face->Q()=part.face->Q();
-		part.mass=m;
-		part.velocity=v;
-		ph[vi]=part;
+		Particle<CMeshO>* part = new Particle<CMeshO>();
+		part->face=unifGridFace.GetClosest(PDistFunct,markerFunctor,vi->P(),dist_upper_bound,dist,closestPt);
+		part->face->Q()=part->face->Q()+1;
+		part->mass=m;
+		part->velocity=v;
+		ph[vi]=*part;
 	}
 
 };
@@ -619,7 +619,7 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,P
 		return;
 	}
 	float time=t;
-	float mass;
+	
 	Point3f new_pos;
 	Point3f current_pos;
 	Point3f int_pos;
@@ -633,11 +633,11 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,P
 		if(edge!=-1){
 			Point3f n = new_face->N();
 			if(CheckFallPosition(new_face,g,a))  p->SetS();
-			float new_velocity;
-			float elapsed_time;
-			ComputeParticlesVelocityAndTime(current_pos,int_pos,info.face,dir,l,info.mass,info.velocity,elapsed_time,new_velocity);
+			float new_velocity=0;
+			//ComputeParticlesVelocityAndTime(current_pos,int_pos,info.face,dir,l,info.mass,info.velocity,elapsed_time,new_velocity);
 			info.velocity=new_velocity;
-			time=time-GetRemainingTime(current_pos,int_pos,new_pos,time,l);
+			float elapsed_time=GetElapsedTime(current_pos,int_pos,new_pos,time,l);
+			time=time-elapsed_time;
 			current_pos=int_pos;
 			current_face->Q()+=elapsed_time*5;
 			current_face=new_face;	

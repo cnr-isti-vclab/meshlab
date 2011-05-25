@@ -224,6 +224,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             //Associate every point to a mesh and a Particle to every point
             associateParticles(base_mesh,cloud_mesh,m,v);
         }
+		
 		//Move Cloud Mesh
         float frac=100/s;
 		for(int i=0;i<s;i++){
