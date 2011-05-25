@@ -37,8 +37,8 @@ class FilterFunctionPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 protected:
-  double x,y,z,nx,ny,nz,r,g,b,q,fq,rad;
-	double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
+  double x,y,z,nx,ny,nz,r,g,b,q,fq,rad,vtu,vtv;
+  double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2,wtu0,wtv0,wtu1,wtv1,wtu2,wtv2;
 	double v,f,v0i,v1i,v2i;
 	std::vector<std::string> v_attrNames;
 	std::vector<double> v_attrValue;
