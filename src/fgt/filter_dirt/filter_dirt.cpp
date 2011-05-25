@@ -160,7 +160,8 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             return false;
 
         }
-        vector<Point3f> dust_points;
+        
+		vector<Point3f> dust_points;
         vector<Particle<CMeshO> > dust_particles;
 
         prepareMesh(currMM);
@@ -213,7 +214,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         Point3f dir=par.getPoint3f("force_dir");
         Point3f g=par.getPoint3f("gravity_dir");
 		float adhesion =par.getDynamicFloat("adhesion");
-		float l=base_mesh->cm.bbox.Diag()*0.001; //mm()->cm.bbox.Diag();
+		float l=base_mesh->cm.bbox.Diag()*0.01; //mm()->cm.bbox.Diag();
 		float v=par.getFloat("velocity");
         float m=par.getFloat("mass");
 		int s=par.getInt("steps");
@@ -224,9 +225,11 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             associateParticles(base_mesh,cloud_mesh,m,v);
         }
 		//Move Cloud Mesh
-        for(int i=0;i<s;i++)
+        float frac=100/s;
+		for(int i=0;i<s;i++){
 			MoveCloudMeshForward(cloud_mesh,base_mesh,g,dir,l,adhesion,1,1);
-		
+			if(cb) (*cb)(i*frac,"Moving...");
+		}
 		if(colorize) ColorizeMesh(base_mesh);
         break;
         }

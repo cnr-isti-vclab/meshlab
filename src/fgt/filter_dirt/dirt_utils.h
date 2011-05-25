@@ -81,6 +81,13 @@ bool CheckFallPosition(CMeshO::FacePointer f,Point3f g,float a){
 				return false;
 };
 
+float GetRemainingTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, float t,float l){
+	float d1= Distance(p1,p2);
+	float d2= Distance(p2,p3);
+	if(d1+d2==0) return 0;
+	float remainig_time=(d1/(d1+d2))*t;
+};
+
 void ComputeParticlesVelocityAndTime(CMeshO::CoordType o_p,CMeshO::CoordType n_p,CMeshO::FacePointer f,CMeshO::CoordType dir,float l,float m,float o_v,float &t,float &n_v){
 
 	Point3f n=f->N();
@@ -426,8 +433,7 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
 
 			if(di!=0){
 				xi=xi+(dh/(dh-di));
-				//face->C()=Color4b::Black;
-				//fi->C()=Color4b::Red;
+		
 			}
 		}
 		exp=1-(xi/n_ray);
@@ -631,10 +637,10 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,P
 			float elapsed_time;
 			ComputeParticlesVelocityAndTime(current_pos,int_pos,info.face,dir,l,info.mass,info.velocity,elapsed_time,new_velocity);
 			info.velocity=new_velocity;
+			time=time-GetRemainingTime(current_pos,int_pos,new_pos,time,l);
 			current_pos=int_pos;
 			current_face->Q()+=elapsed_time*5;
 			current_face=new_face;	
-			time=time-elapsed_time;
 			new_pos=int_pos;
 			if(time>0){
 				if(p->IsS()) break;
@@ -715,9 +721,11 @@ void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3f g,Point3f for
 	CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(cloud->cm,"ParticleInfo");
 	CMeshO::VertexIterator vi;
 		for(vi=cloud->cm.vert.begin();vi!=cloud->cm.vert.end();++vi)
-		if(!vi->IsD()) MoveParticle(ph[vi],&*vi,l,t,force,g,a);
-	//Handle falls Particle
-	ComputeParticlesFallsPosition(cloud,base,force);
+			if(!vi->IsD()) MoveParticle(ph[vi],&*vi,l,t,force,g,a);
+			
+		
+			//Handle falls Particle
+	ComputeParticlesFallsPosition(cloud,base,g);
 	//Compute Particles Repulsion
 	for(int i=0;i<r_step;i++)
 		ComputeRepulsion(base,cloud,50,l,g,a);
