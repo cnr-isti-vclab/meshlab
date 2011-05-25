@@ -85,7 +85,8 @@ float GetElapsedTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordTyp
 	float d1= Distance(p1,p2);
 	float d2= Distance(p2,p3);
 	if(d1+d2==0) return 0;
-	float remainig_time=(d1/(d1+d2))*t;
+	//float remainig_time=
+	return (d1/(d1+d2))*t;
 };
 
 void ComputeParticlesVelocityAndTime(CMeshO::CoordType o_p,CMeshO::CoordType n_p,CMeshO::FacePointer f,CMeshO::CoordType dir,float l,float m,float o_v,float &t,float &n_v){
