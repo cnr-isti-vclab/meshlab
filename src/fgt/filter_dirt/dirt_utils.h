@@ -74,24 +74,32 @@ typedef FaceTmark<CMeshO> MarkerFace;
 
 */
 
+bool CheckFallPosition(CMeshO::FacePointer f,Point3f g,float a){
+				Point3f n=f->N();
+				if(a>1) return false; 
+				if(acos(n.dot(g)/(n.Norm()*g.Norm()))<((PI/2)*(1-a))) return true;
+				return false;
+};
+
 void ComputeParticlesVelocityAndTime(CMeshO::CoordType o_p,CMeshO::CoordType n_p,CMeshO::FacePointer f,CMeshO::CoordType dir,float l,float m,float o_v,float &t,float &n_v){
 
-//	Point3f dir;
 	Point3f n=f->N();
 	float b=n[0]*dir[0]+n[1]*dir[1]+n[2]*dir[2];
-
-	Point3f  movement=(n_p-o_p)/l;
-
-	float distance=Distance(o_p,o_p+movement);
+	float distance=Distance(o_p,n_p);
 	Point3f force;
 	force[0]=dir[0]-b*n[0];
 	force[1]=dir[1]-b*n[1];
 	force[2]=dir[2]-b*n[2];
-
+	if(force.Norm()==0){
+		t=1;
+		n_v=0;
+		return;
+	}
 	float acceleration=(force/m).Norm();
-
 	float velocity=math::Sqrt(pow(o_v,2)+(2*acceleration*distance));
-	float time=(velocity-o_v)/acceleration;
+	float time;
+	time=(velocity-o_v)/acceleration;
+
 	t=time;
 	n_v=velocity;
 };
@@ -205,103 +213,6 @@ bool IsOnFace(Point3f p, CMeshO::FacePointer f){
 	if(math::Abs(v)<0) v=0;
 	return (u >= 0) && (v >= 0) && (u + v <=1);
 };
-
-
-float GetRemainingTime(float t,Point3f pi,Point3f pm,Point3f pf){
-	float time;
-
-	float d1=Distance(pi,pm);
-	float d2=Distance(pi,pf);
-	float d=d2-d1;
-
-	if(d>0) time=t-t*d/d2;
-
-	else return 0;
-};
-
-
-//To delete?
-CMeshO::CoordType ComputeVelocity(CMeshO::CoordType vi,CMeshO::CoordType ac,float t){
-
-	CMeshO::CoordType n_vel;
-
-	n_vel[0]=vi[0]+ac[0]*t;
-	n_vel[1]=vi[1]+ac[1]*t;
-	n_vel[2]=vi[2]+ac[2]*t;
-
-	return n_vel;
-};
-//To delete?
-float UpdateVelocity(CMeshO::CoordType pi,CMeshO::CoordType pf,CMeshO::CoordType v,float m,CMeshO::FacePointer &face,CMeshO::CoordType force){
-
-	CMeshO::CoordType new_vel;
-	float new_v;
-	Point3f n= face->cN();
-	float a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
-
-	Point3f f;
-
-	f[0]=force[0]-a*n[0];
-	f[1]=force[1]-a*n[1];
-	f[2]=force[2]-a*n[2];
-
-
-
-	new_vel[0]=sqrt(pow(v[0],2)+2*(f[0]/m)*(pf[0]-pi[0]) );
-	new_vel[1]=sqrt(pow(v[1],2)+2*(f[1]/m)*(pf[1]-pi[1]) );
-	new_vel[2]=sqrt(pow(v[2],2)+2*(f[2]/m)*(pf[2]-pi[2]) );
-
-	new_v=sqrt(pow(new_vel[0],2)+pow(new_vel[1],2)+pow(new_vel[2],2));
-
-	return new_v;
-};
-
-
-
-/**
-@def
-*/
-Point3f GetVelocityComponents(float v,CMeshO::FacePointer face){
-
-	//xy
-	//yz
-	//zx
-
-	Point3f n=face->cN();
-	n.Normalize();
-	Point3f acc;
-
-	float g=1;
-	//XY
-
-	Point3f vel;
-
-	Point3f axis_x=Point3f(1,0,0);
-	Point3f axis_y=Point3f(0,1,0);
-	Point3f axis_z=Point3f(0,0,1);
-
-	Point3f nx=Point3f(n[0],0,0);
-	Point3f ny=Point3f(0,n[1],0);
-	Point3f nz=Point3f(0,0,n[2]);
-	float alpha=90-(acos(axis_x.dot(nx))*(180/PI));
-	float beta =90-(acos(axis_y.dot(ny))*(180/PI));
-	float gamma=90-(acos(axis_z.dot(nz))*(180/PI));
-
-	vel[0]=v*cos(alpha*PI/180);
-	vel[1]=v*cos(beta*PI/180);
-	vel[2]=v*cos(gamma*PI/180);
-
-	acc[0]=g*sin(alpha*PI/180);
-	acc[1]=g*sin(beta*PI/180);
-	acc[2]=g*sin(gamma*PI/180);
-
-	return vel;
-
-
-
-
-};
-
 /**
 @def Simulate the movement of a point, affected by a force "dir" on a face.
 
@@ -319,55 +230,24 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,float v,float m,CMeshO::FacePo
 	Point3f new_pos;
 	Point3f n= face->N();
 	float a=n[0]*dir[0]+n[1]*dir[1]+n[2]*dir[2];
-
+	
 	Point3f f;
-	//GetVelocityComponents(v,face);
-	//Point3f vel=GetVelocityComponents(v,face);
 	Point3f vel;
-
-
 	//Compute force component along the face
 	f[0]=dir[0]-a*n[0];
 	f[1]=dir[1]-a*n[1];
 	f[2]=dir[2]-a*n[2];
-	//float acceleration=(f/m).Norm();
-	//float angle=0;
-	//Vx
-	//angle = asin((f[0]/m)/dir.Norm());
-	//vel[0]=v*cos(angle);
-	//Vy
-	//angle = asin((f[1]/m)/dir.Norm());
-	//vel[1]=v*cos(angle);
-	//Vz
-	//angle = asin((f[2]/m)/dir.Norm());
-	//vel[2]=v*cos(angle);
 	
-	vel=f/f.Norm();
-	vel[0]=vel[0]*v;
-	vel[1]=vel[1]*v;
-	vel[2]=vel[2]*v;
-	//Point3f vel2;
-	//vel2=f/m*t
-	
-		
-	//new_pos[0]=(vel[0]*t+0.5*(f[0]/m)*pow(t,2))*l;
-	//new_pos[1]=(vel[1]*t+0.5*(f[1]/m)*pow(t,2))*l;
-	//new_pos[2]=(vel[2]*t+0.5*(f[2]/m)*pow(t,2))*l;
-	//new_pos=p+vel*t+(f/m)*pow(t,2)*0.5;
-		
-	//Point3f tmp_vel=vel+(f/m)*t;
-	//float vel1=tmp_vel.Norm();
-	//float velocity=math::Sqrt(pow(v,2)+(2*acceleration*Distance(p,new_pos)));
-
-	//float time=(velocity-vel.Norm())/acceleration;
-	//float time2
-
-//	Point3f a1=p
-	//	Point3f a2
-
+	if(f.Norm()!=0){
+		vel=f/f.Norm();
+		vel=vel*v;
+	}else{
+		vel[0]=0;
+		vel[1]=0;
+		vel[2]=0;
+	}
 	new_pos=p+(vel*t+(f/m)*pow(t,2)*0.5)*l;
 	return new_pos;
-
 };
 
 void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
@@ -375,7 +255,6 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
 		QImage img;
 		QFileInfo text_file=QFileInfo(base_mesh->cm.textures[0].c_str());
 		img.load(base_mesh->cm.textures[0].c_str());
-
 		QPainter painter(&img);
 		float w=img.width();
 		float h=img.height();
@@ -383,27 +262,15 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
 		painter.setBrush(Qt::SolidPattern);
 		base_mesh->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 		CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> > (cloud_mesh->cm,std::string("ParticleInfo"));
-
 		CMeshO::VertexIterator vi;
 		for(vi=cloud_mesh->cm.vert.begin();vi!=cloud_mesh->cm.vert.end();++vi){
 			CMeshO::FacePointer f=ph[vi].face;
-
 			TexCoord2f t0=f->WT(0);
 			TexCoord2f t1=f->WT(1);
 			TexCoord2f t2=f->WT(2);
-
-
-
 			Point2f p0=Point2f(t0.U()*w,h-t0.V()*h);
 			Point2f p1=Point2f(t1.U()*w,h-t1.V()*h);
 			Point2f p2=Point2f(t2.U()*w,h-t2.V()*h);
-
-
-			//QPolygonF polygon;
-			//polygon.append(QPointF(p0[0],p0[1]));
-			//polygon.append(QPointF(p1[0],p1[1]));
-			//polygon.append(QPointF(p2[0],p2[1]));
-
 			Point3f bc;
 			Point2f dbc;
 			InterpolationParameters(*f,vi->P(),bc);
@@ -414,33 +281,25 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
 		img.save(path,"PNG");
 		base_mesh->cm.textures.clear();
 		base_mesh->cm.textures.push_back(path.toStdString());
-
 	}
-
-
 };
 
 
 void ColorizeMesh(MeshModel* m){
 	CMeshO::FaceIterator fi;
-	float base_color=255;
-	float s_color;
+	float color;
+	float dirtiness;
 	for(fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi){
-		s_color=(*fi).Q();
-		if(s_color>255) s_color=255;
-		(*fi).C()=Color4b(base_color-s_color,base_color-s_color, base_color-s_color, 0);
+		dirtiness=fi->Q();
+		if(dirtiness==0){
+			fi->C()=Color4b(255,255,255,0);
+		}else{
+		if(dirtiness>255) fi->C()=Color4b(0,0,0,0);
+		else fi->C()=Color4b(255-dirtiness,255-dirtiness,255-dirtiness,0);
+		}
 	}
 
-
-	/*float base_color=255;
-	float s_color;
-	std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m->cm);
-	CMeshO::FaceIterator fi;
-	for(fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi){
-	s_color=base_color*(1-(((*fi).Q()-minmax.first)/(minmax.second-minmax.first)));
-	(*fi).C()=Color4b(s_color, s_color, s_color, 0);
-	}
-	*/
+	tri::UpdateColor<CMeshO>::VertexFromFace(m->cm);
 };
 
 
@@ -456,19 +315,16 @@ void ColorizeMesh(MeshModel* m){
 @return the intersection edge index if there is an intersection -1 elsewhere
 Step
 */
-
 int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::FacePointer &new_f,CMeshO::CoordType &int_point){
 
 	CMeshO::CoordType v0=f->V(0)->P();
 	CMeshO::CoordType v1=f->V(1)->P();
 	CMeshO::CoordType v2=f->V(2)->P();
-
 	float dist[3];
 	Point3f int_points[3];
 	dist[0]=PSDist(p2,v0,v1,int_points[0]);
 	dist[1]=PSDist(p2,v1,v2,int_points[1]);
 	dist[2]=PSDist(p2,v2,v0,int_points[2]);
-
 	int edge=-1;
 	if(dist[0]<dist[1]){
 		if(dist[0]<dist[2]) edge=0;
@@ -498,7 +354,6 @@ int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePo
 		}
 		if(n_face!=0){
 			int r=(rand()%(n_face-1))+2;
-
 			for(int i=0;i<r;i++){
 				p.FlipE();
 				p.FlipF();
@@ -506,17 +361,9 @@ int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePo
 			new_f=p.F();
 		}
 	}	
-	
 	int_point=GetSafePosition(int_points[edge],new_f);
-	
 	return edge;
 };
-
-
-
-
-
-
 
 /**
 @def Compute the Normal Dust Amount Function per face of a Mesh m
@@ -529,14 +376,12 @@ int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePo
 @return nothing
 */
 void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s){
-
 	CMeshO::FaceIterator fi;
 	float d;
 	for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
 		d=k/s+(1+k/s)*pow(fi->N().dot(u),s);
 		fi->Q()=d;
 	}
-
 };
 
 /**
@@ -594,7 +439,6 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
 
 void ComputeParticlesFallsPosition(MeshModel* cloud_mesh,MeshModel* base_mesh,CMeshO::CoordType dir){
 	CMeshO::VertexIterator vi;
-
 	MetroMeshFaceGrid f_grid;
 	f_grid.Set(base_mesh->cm.face.begin(),base_mesh->cm.face.end());
 	MarkerFace markerFunctor;
@@ -644,7 +488,7 @@ void ComputeParticlesFallsPosition(MeshModel* cloud_mesh,MeshModel* base_mesh,CM
 
 @return ?
 */
-bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std::vector< Particle<CMeshO> > &dpv,int d,float threshold){
+bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::vector< Particle<CMeshO> > &dpv,*/int d,float threshold){
 
 	//Handler
 	CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m->cm,std::string("exposure"));
@@ -652,7 +496,7 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std::vec
 	CMeshO::FaceIterator fi;
 	CMeshO::CoordType p;
 	cpv.clear();
-	dpv.clear();
+	//dpv.clear();
 	float r=1;
 	float a0=0;
 	float a=0;
@@ -679,10 +523,11 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std::vec
 			CMeshO::CoordType n_p;
 			n_p=fi->P(0)*p[0]+fi->P(1)*p[1]+fi->P(2)*p[2];
 			cpv.push_back(n_p);
-			Particle<CMeshO> part;
+			/*Particle<CMeshO> part;
 			part.face=&(*fi);
 			part.bar_coord=p;
 			dpv.push_back(part);
+			*/
 		}
 
 		fi->Q()=n_dust;
@@ -698,7 +543,6 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,std::vec
 
 */
 void associateParticles(MeshModel* b_m,MeshModel* c_m,float m,float v){
-
 	MetroMeshFaceGrid   unifGridFace;
 	Point3f closestPt;
 	CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (c_m->cm,std::string("ParticleInfo"));
@@ -712,13 +556,11 @@ void associateParticles(MeshModel* b_m,MeshModel* c_m,float m,float v){
 	for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
 		Particle<CMeshO> part;
 		part.face=unifGridFace.GetClosest(PDistFunct,markerFunctor,vi->P(),dist_upper_bound,dist,closestPt);
-		part.face->Q()=part.face->Q()+1;
+		part.face->Q()=part.face->Q();
 		part.mass=m;
-		part.vel=v;
+		part.velocity=v;
 		ph[vi]=part;
 	}
-
-
 
 };
 
@@ -731,6 +573,7 @@ void associateParticles(MeshModel* b_m,MeshModel* c_m,float m,float v){
 @return nothing
 */
 void prepareMesh(MeshModel* m){
+	
 	m->updateDataMask(MeshModel::MM_FACEFACETOPO);
 	m->updateDataMask(MeshModel::MM_FACEMARK);
 	m->updateDataMask(MeshModel::MM_FACECOLOR);
@@ -747,7 +590,6 @@ void prepareMesh(MeshModel* m){
 	tri::Allocator<CMeshO>::CompactVertexVector(m->cm);
 
 	tri::UpdateFlags<CMeshO>::FaceClear(m->cm);
-
 	//update Mesh
 	m->cm.vert.EnableVFAdjacency();
 	m->cm.face.EnableVFAdjacency();
@@ -756,14 +598,21 @@ void prepareMesh(MeshModel* m){
 	tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
 	tri::UpdateFlags<CMeshO>::FaceProjection(m->cm);
 
+	CMeshO::FaceIterator fi;
+	for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
+		fi->Q()=0;
+	}
 };
 
 /**
 @def This function move a particle over the mesh
 */
-void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,Point3f dir,float m_angle){
+void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,Point3f dir,Point3f g,float a){
+	if(CheckFallPosition(info.face,g,a)){
+		p->SetS();
+		return;
+	}
 	float time=t;
-	float velocity;
 	float mass;
 	Point3f new_pos;
 	Point3f current_pos;
@@ -772,33 +621,43 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,P
 	CMeshO::FacePointer new_face;
 	new_face=current_face;
 	current_pos=p->P();
-	velocity=info.vel;
-	mass=info.mass;
-	new_pos=StepForward(current_pos,velocity,mass,current_face,dir,l,time);
-	if(!IsOnFace(new_pos,current_face)){
+	new_pos=StepForward(current_pos,info.velocity,info.mass,current_face,g+dir,l,time);
+	while(!IsOnFace(new_pos,current_face)){
 		int edge=ComputeIntersection(current_pos,new_pos,current_face,new_face,int_pos);
 		if(edge!=-1){
-			new_pos=int_pos;
+			Point3f n = new_face->N();
+			if(CheckFallPosition(new_face,g,a))  p->SetS();
+			float new_velocity;
+			float elapsed_time;
+			ComputeParticlesVelocityAndTime(current_pos,int_pos,info.face,dir,l,info.mass,info.velocity,elapsed_time,new_velocity);
+			info.velocity=new_velocity;
+			current_pos=int_pos;
+			current_face->Q()+=elapsed_time*5;
 			current_face=new_face;	
-			current_face->C()=Color4b::Green;
+			time=time-elapsed_time;
+			new_pos=int_pos;
+			if(time>0){
+				if(p->IsS()) break;
+				new_pos=StepForward(current_pos,info.velocity,info.mass,current_face,g+dir,l,time);
+			}
+			current_face->C()=Color4b::Green;//Just Debug!!!!
 		}else{
+			//We are on a border
 			new_pos=int_pos;
 			current_face=new_face;	
 			p->SetS();
+			break;
 		}
 	}
-	Point3f n = current_face->N();
+	//current_face->Q()+=1;
+	//Point3f n = ->N();
 	//if(acos(n.dot(dir)/(n.Norm()*dir.Norm()))<(m_angle)) p->SetS();
-	
-	float new_velocity;
-	float elapsed_time;
-	ComputeParticlesVelocityAndTime(p->P(),new_pos,info.face,dir,l,info.mass,info.vel,elapsed_time,new_velocity);
-
-
-	current_face->Q()=current_face->Q()+1;
-	
+	//float new_velocity;
+	//float elapsed_time;
+	//ComputeParticlesVelocityAndTime(current_pos,int_pos,info.face,dir,l,info.mass,info.velocity,elapsed_time,new_velocity);
+	//current_face->Q()=current_face->Q()+1;
 	p->P()=new_pos;
-	info.vel=new_velocity;
+	//info.velocity=new_velocity;
 	info.face=current_face;
 };
 
@@ -813,34 +672,28 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,P
 
 @return nothing
 */
-void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,float l){
+void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,float l,Point3f g,float a){
 	CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(c_m->cm,"ParticleInfo");
 	MetroMeshVertexGrid v_grid;
 	std::vector<Point3<float>> v_points;
 	std::vector<CMeshO::VertexPointer> vp;
 	std::vector<float> distances;
 
-	v_grid.Set(c_m->cm.vert.begin(),c_m->cm.vert.end());//,b_m->cm.bbox);
+	v_grid.Set(c_m->cm.vert.begin(),c_m->cm.vert.end(),b_m->cm.bbox);
 	
 	Point3f bc ;
 	CMeshO::VertexIterator vi;
 	
 	for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
 		vcg::tri::GetKClosestVertex(c_m->cm,v_grid,k,vi->P(),EPSILON,vp,distances,v_points);
-		for(int i=0;i<vp.size();i++){
-			//	Ray3<float> ray=Ray3<float>(vi->P(),fromBarCoords(RandomBaricentric(),ph[vp[i]].face));
-			CMeshO::VertexPointer v = vp[i];
-		if(v->P()!=vi->P()){
-			//Point3f p=fromBarCoords(RandomBaricentric(),ph[vp[i]].face);
-		
+		for(int i=0;i<vp.size();i++){CMeshO::VertexPointer v = vp[i];
+			if(v->P()!=vi->P() && !v->IsD() && !vi->IsD()){
 			Ray3<float> ray(vi->P(),fromBarCoords(RandomBaricentric(),ph[vp[i]].face));
 			ray.Normalize();
 			Point3f dir=ray.Direction(); 
 			dir.Normalize();
-			MoveParticle(ph[vp[i]],vp[i],0.01,1,dir,PI/2);
-			//Point3f n_p=p-v->P();
-			//v->P()=v->P()+n_p*0.1;
-				}
+			MoveParticle(ph[vp[i]],vp[i],0.01,1,dir,g,a);
+					}
 			}
 	}
 	
@@ -857,21 +710,17 @@ void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,float l){
 
 @return nothing
 */
-void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3f force,float l,float t,int r_step){
+void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3f g,Point3f force,float l,float a,float t,int r_step){
 
 	CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(cloud->cm,"ParticleInfo");
 	CMeshO::VertexIterator vi;
-
-	for(vi=cloud->cm.vert.begin();vi!=cloud->cm.vert.end();++vi)
-		if(!vi->IsD()) MoveParticle(ph[vi],&*vi,l,t,force,PI/2);
-
-
-
+		for(vi=cloud->cm.vert.begin();vi!=cloud->cm.vert.end();++vi)
+		if(!vi->IsD()) MoveParticle(ph[vi],&*vi,l,t,force,g,a);
+	//Handle falls Particle
 	ComputeParticlesFallsPosition(cloud,base,force);
-
 	//Compute Particles Repulsion
-	//for(int i=0;i<r_step;i++)
-	//	ComputeRepulsion(base,cloud,10,l);
+	for(int i=0;i<r_step;i++)
+		ComputeRepulsion(base,cloud,50,l,g,a);
 };
 
 

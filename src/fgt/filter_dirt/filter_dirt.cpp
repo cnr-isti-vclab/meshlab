@@ -109,15 +109,16 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
             par.addParam(new RichInt("nparticles",3,"particles","Max Number of Dust Particles to Generate Per Face"));
             par.addParam(new RichFloat("slippiness",1,"s","The surface slippines"));
             par.addParam(new RichFloat("adhesion",0.2,"k","Factor to model the general adhesion"));
-            par.addParam(new RichBool("draw_texture",false,"Draw Dust",""));
+			par.addParam(new RichBool("draw_texture",false,"Draw Dust",""));
             par.addParam(new RichBool("colorize_mesh",false,"Map to Color",""));
             break;
         }
     case FP_CLOUD_MOVEMENT:{
-            par.addParam(new RichPoint3f("force_dir",Point3f(0,-1,0),"force","Direction of the force acting on the points cloud"));
+            par.addParam(new RichPoint3f("gravity_dir",Point3f(0,-1,0),"g","Direction of gravity"));
+			par.addParam(new RichPoint3f("force_dir",Point3f(0,0,0),"Force","Direction of the force acting on the points cloud"));
 			par.addParam(new RichInt("steps",1,"s","Simulation Steps"));
-			//par.addParam(new RichAbsPerc("s_length",max_value*perc,0,max_value,"Movement Length",""));
-            par.addParam(new RichFloat("velocity",0,"v","Initial velocity of the particle"));
+			par.addParam(new RichDynamicFloat("adhesion", 1.0f, 0.0f, 1.0f,"Adhesion","Factor to model the general adhesion."));
+			par.addParam(new RichFloat("velocity",0,"v","Initial velocity of the particle"));
             par.addParam(new RichFloat("mass",1,"m","Mass of the particle"));
             par.addParam(new RichBool("colorize_mesh",false,"Map to Color",""));
             break;
@@ -163,28 +164,25 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         vector<Particle<CMeshO> > dust_particles;
 
         prepareMesh(currMM);
-
-
-
-        ComputeNormalDustAmount(currMM,dir,k,s);
+	    ComputeNormalDustAmount(currMM,dir,k,s);
         ComputeSurfaceExposure(currMM,1,1);
-        GenerateParticles(currMM,dust_points,dust_particles,n_p,0.6);
+        GenerateParticles(currMM,dust_points,/*dust_particles,*/n_p,0.6);
 
 
         MeshModel* dmm=md.addNewMesh("","dust_mesh");
         dmm->cm.Clear();
-
+		
         tri::Allocator<CMeshO>::AddVertices(dmm->cm,dust_points.size());
-        CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
+        //CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (dmm->cm,std::string("ParticleInfo"));
         CMeshO::VertexIterator vi;
         vector<Point3f>::iterator dvi=dust_points.begin();
-        std::vector< Particle<CMeshO> >::iterator dpi=dust_particles.begin();
+        //std::vector< Particle<CMeshO> >::iterator dpi=dust_particles.begin();
 
         for(vi=dmm->cm.vert.begin();vi!=dmm->cm.vert.end();++vi){
-            (*vi).P()=(*dvi);
-            ph[vi]=(*dpi);
+            vi->P()=(*dvi);
+          //  ph[vi]=(*dpi);
             ++dvi;
-            ++dpi;
+         //   ++dpi;
         }
 
         if(draw) DrawDust(currMM,dmm);
@@ -212,21 +210,22 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         }
 	    
 		//Get Parameters
-        Point3f dir=par.getPoint3f("force_dir");;
-        //float l =par.getAbsPerc("s_length");
-        float l=base_mesh->cm.bbox.Diag()*0.01; //mm()->cm.bbox.Diag();
+        Point3f dir=par.getPoint3f("force_dir");
+        Point3f g=par.getPoint3f("gravity_dir");
+		float adhesion =par.getDynamicFloat("adhesion");
+		float l=base_mesh->cm.bbox.Diag()*0.001; //mm()->cm.bbox.Diag();
 		float v=par.getFloat("velocity");
         float m=par.getFloat("mass");
 		int s=par.getInt("steps");
 		bool colorize=par.getBool("colorize_mesh");
         if(!HasPerVertexAttribute(cloud_mesh->cm,"ParticleInfo")){
-            prepareMesh(base_mesh);
+			prepareMesh(base_mesh);
             //Associate every point to a mesh and a Particle to every point
             associateParticles(base_mesh,cloud_mesh,m,v);
         }
 		//Move Cloud Mesh
         for(int i=0;i<s;i++)
-			MoveCloudMeshForward(cloud_mesh,base_mesh,dir,l,1,3);
+			MoveCloudMeshForward(cloud_mesh,base_mesh,g,dir,l,adhesion,1,1);
 		
 		if(colorize) ColorizeMesh(base_mesh);
         break;

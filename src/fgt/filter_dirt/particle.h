@@ -41,10 +41,7 @@ class Particle{
 public:
     Particle(){
     mass=1.0f;
-    velocity[0]=0.0f;
-    velocity[1]=0.0f;
-    velocity[2]=0.0f;
-    vel=0;
+	velocity=0;
     face=0;
     }
 
@@ -53,25 +50,18 @@ public:
     vel=v;
     }
 
-    Particle(float m,CoordType v){
-    mass=m;
-    velocity=v;
-    }
-
     ~Particle(){
 
     }
-
 
 public:
         FacePointer face;
         CoordType bar_coord;/*To delete?*/
         float mass;
-        CoordType velocity;
-        float vel;
+        //CoordType velocity;
+        float velocity;
         //float velocity;
         float ad_coeff;/*Adhesion Coefficient*/
-
         // Position History
         //std::vector<CMeshO::CoordType> pos_his;
 };
