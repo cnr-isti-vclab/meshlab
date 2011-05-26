@@ -114,9 +114,12 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	typedef typename MeshType::FaceType FaceType;
 	typedef typename MeshType::CoordType CoordType;
 	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename vcg::tri::AreaPreservingTexCoordOptimization<MeshType> OptType;
-	typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType1;
-	
+	#ifndef IMPLICIT
+		typedef typename vcg::tri::AreaPreservingTexCoordOptimization<MeshType> OptType;
+		typedef typename vcg::tri::MeanValueTexCoordOptimization<MeshType> OptType1;
+	#else
+		typedef typename PoissonSolver<MeshType> OptType;
+	#endif
 	
 	std::vector<VertexType*> starCenter;
 	starCenter.push_back(v);
@@ -152,24 +155,19 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 		}
 	}
 
-	///*for (int i=0;i<10;i++)*/
-	//if (En==EN_MeanVal)
-	//	for (int i=0;i<4;i++)
-	//		vcg::tri::SmoothTexCoords(hlev_mesh);
-	//else
+#ifndef IMPLICIT
 	vcg::tri::SmoothTexCoords(hlev_mesh);
-
+#endif
 	///get a copy of submesh
 	std::vector<typename MeshType::VertexType*> ordered_vertex;
 	CopyHlevMesh(ordered_faces,hlev_mesh,ordered_vertex);
 	assert(testParamCoords(hlev_mesh));
 	UpdateTopologies<MeshType>(&hlev_mesh);
-	//vcg::tri::SmoothTexCoords(hlev_mesh);
+
+#ifndef IMPLICIT
 	InitDampRestUV(hlev_mesh);
 	assert(testParamCoords(hlev_mesh));
-	//vcg::tri::SmoothTexCoords(hlev_mesh);
-	
-	
+#endif
 	
 
 	if (hlev_mesh.vn==0)
@@ -177,17 +175,18 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	if (hlev_mesh.fn==0)
 		return;
 
+#ifndef IMPLICIT
 	bool b=UnFold<MeshType>(hlev_mesh,star_domain.fn);
 	bool isOK=testParamCoords(hlev_mesh);
 
 	if ((!b)||(!isOK))
 		RestoreRestUV(hlev_mesh);
-	
+
 	bool b0=NonFolded<MeshType>(hlev_mesh);
 	
-
+#endif	
 	
-
+#ifndef IMPLICIT
 	///initialize optimization
 	if (En==EN_EXTMips)
 	{
@@ -224,9 +223,14 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 			opt.SetSpeed(speed0);
 			opt.IterateUntilConvergence(conv);
 		}
-	/*opt.IterateN(100);*/
-	/*int ite=*/
-
+#else
+	OptType opt(hlev_mesh);
+	opt.SetBorderAsFixed();
+	opt.SolvePoisson();
+#endif
+#ifdef IMPLICIT
+	assert(testParamCoords(hlev_mesh));
+#else
 	if (!testParamCoords(hlev_mesh))
 	{
 		RestoreRestUV(hlev_mesh);
@@ -236,13 +240,10 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	bool b1=NonFolded<MeshType>(hlev_mesh);
 	if ((b0)&&(!b1))
 	{
-#ifndef _MESHLAB
-		printf("@");
-#endif
 		//return;
 		RestoreRestUV(hlev_mesh);
 	}
-
+#endif
 	bool inside=true;
 
 	//test barycentric coords
@@ -286,6 +287,8 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 		//to_reassing->father=chosen;
 		//assert(!chosen->IsD());
 		//to_reassing->Bary=bary;
+		bool isOK=NormalizeBaryCoords(bary);
+		assert(isOK);
 		AssingFather(*to_reassing,chosen,bary,domain);
 	}
 

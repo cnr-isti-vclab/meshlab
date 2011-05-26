@@ -113,7 +113,12 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 				//system("pause");
 			}
 			//assert(found);
-			assert(testBaryCoords(bary));
+			//assert();
+			if(!testBaryCoords(bary))
+			{
+				printf("\n PAR ERROR 1: bary coords exceeds: %f,%f,%f \n",bary.X(),bary.Y(),bary.Z());
+				NormalizeBaryCoords(bary);
+			}
 			if (base_domain!=NULL)
 				AssingFather(*v,faces[index],bary,*base_domain);
 			else

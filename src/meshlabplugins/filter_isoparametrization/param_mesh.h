@@ -135,7 +135,8 @@ class BaseFace    : public vcg::Face  < BaseUsedTypes,
 	vcg::face::EdgePlane,
 	vcg::face::Mark,
 	vcg::face::Normal3f,
-	vcg::face::Color4b>
+	vcg::face::Color4b,
+	vcg::face::Quality3f>
 {
 public:
 	std::vector<std::pair<BaseVertex*,vcg::Point3f> > vertices_bary;
@@ -144,8 +145,8 @@ public:
 	ScalarType areadelta;
 	vcg::Color4b colorDivision;
 
-   template < class LeftV>
-	void ImportData(const LeftV  & left )
+  template < class LeftV>
+  void ImportData(const LeftV  & left )
   {
     vcg::Face  < BaseUsedTypes,
 	vcg::face::VFAdj, 
@@ -155,7 +156,8 @@ public:
 	vcg::face::EdgePlane,
 	vcg::face::Mark,
 	vcg::face::Normal3f,
-	vcg::face::Color4b>::ImportData(left);
+	vcg::face::Color4b,
+	vcg::face::Quality3f>::ImportData(left);
   }
 	
 	void ImportData(const BaseFace  & left )
@@ -168,7 +170,8 @@ public:
 	vcg::face::EdgePlane,
 	vcg::face::Mark,
 	vcg::face::Normal3f,
-	vcg::face::Color4b>::ImportData(left);
+	vcg::face::Color4b,
+	vcg::face::Quality3f>::ImportData(left);
     this->vertices_bary = std::vector<std::pair<BaseVertex*,vcg::Point3f> > (left.vertices_bary);
 	this->group=left.group;
 	this->areadelta=left.areadelta;

@@ -539,7 +539,7 @@ void RestoreRestUV(MeshType &m)
 		m.vert[i].T().P()=m.vert[i].RestUV;
 }
 
-
+#ifndef IMPLICIT
 ///parametrize a submesh from trinagles that are incident on vertices 
 template <class MeshType>
 void ParametrizeLocally(MeshType &parametrized,
@@ -575,7 +575,6 @@ void ParametrizeLocally(MeshType &parametrized,
 	//	parametrized.vert[i].RPos=parametrized.vert[i].P();
 
 	vcg::tri::MeanValueTexCoordOptimization<MeshType> opt(parametrized);
-	//vcg::tri::WachspressTexCoordOptimization<MeshType> opt(parametrized);
 	vcg::tri::AreaPreservingTexCoordOptimization<MeshType> opt1(parametrized);
 	opt.SetSpeed((ScalarType)0.0005);
 	InitDampRestUV(parametrized);
@@ -607,26 +606,82 @@ void ParametrizeLocally(MeshType &parametrized,
 		ScalarType area=(tex1-tex0)^(tex2-tex0);
 		assert(area>0);
 #endif
-//#ifndef _MESHLAB
-//		if (area<0){
-//			vcg::tri::io::ExporterPLY<BaseMesh>::Save(parametrized,"case0.ply");
-//
-//			for (int j=0;j<parametrized.vert.size();j++)
-//			{
-//				parametrized.vert[j].P().V(0)=parametrized.vert[j].T().U();
-//				parametrized.vert[j].P().V(1)=parametrized.vert[j].T().V();
-//				parametrized.vert[j].P().V(2)=0;
-//			}
-//			vcg::tri::io::ExporterPLY<BaseMesh>::Save(parametrized,"case1.ply");
-//			assert(0);
-//		}
-//#endif
 	}
 	///restore position
 	for (unsigned int i=0;i<parametrized.vert.size();i++)	
 		parametrized.vert[i].P()=positions[i];
 }
+#else
 
+///parametrize a submesh keeping fixed the borders
+template <class MeshType>
+void ParametrizeLocally(MeshType &parametrized,
+						bool fix_boundary=true,
+						bool init_border=true)
+{
+	typedef typename MeshType::FaceType FaceType;
+	typedef typename MeshType::ScalarType ScalarType;
+	typedef typename MeshType::CoordType CoordType;
+
+	///save old positions
+	std::vector<CoordType> positions;
+	positions.resize(parametrized.vert.size());
+	///set rest position
+	for (unsigned int i=0;i<parametrized.vert.size();i++)
+	{
+		positions[i]=parametrized.vert[i].P();
+		parametrized.vert[i].P()=parametrized.vert[i].RPos;
+	}
+
+	UpdateTopologies(&parametrized);
+	
+
+	if (init_border)
+		ParametrizeExternal(parametrized);
+
+	ParametrizeInternal(parametrized);
+	
+	//for (int i=0;i<parametrized.vert.size();i++)
+	//	parametrized.vert[i].RPos=parametrized.vert[i].P();
+
+	vcg::tri::MeanValueTexCoordOptimization<MeshType> opt(parametrized);
+	vcg::tri::AreaPreservingTexCoordOptimization<MeshType> opt1(parametrized);
+	opt.SetSpeed((ScalarType)0.0005);
+	InitDampRestUV(parametrized);
+	if (fix_boundary)
+	{
+		opt.TargetEquilateralGeometry();
+		//opt.TargetCurrentGeometry();
+		opt.SetBorderAsFixed();
+		opt.IterateUntilConvergence((ScalarType)0.000001,100);
+		/*opt.Iterate();
+		opt.Iterate();*/
+	}
+	else
+	{
+		opt1.TargetCurrentGeometry();
+		//opt1.SetBorderAsFixed();
+		opt1.IterateUntilConvergence((ScalarType)0.000001,200);
+	}
+
+	///assert parametrization
+	for (unsigned int i=0;i<parametrized.face.size();i++)
+	{
+		FaceType *f=&parametrized.face[i];
+		vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
+		vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
+		vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
+		vcg::Triangle2<typename MeshType::ScalarType> t2d=vcg::Triangle2<typename MeshType::ScalarType>(tex0,tex1,tex2);
+#ifndef NDEBUG
+		ScalarType area=(tex1-tex0)^(tex2-tex0);
+		assert(area>0);
+#endif
+	}
+	///restore position
+	for (unsigned int i=0;i<parametrized.vert.size();i++)	
+		parametrized.vert[i].P()=positions[i];
+}
+#endif
 template <class MeshType>
 void ForceInParam(vcg::Point2<typename MeshType::ScalarType> &UV,MeshType &domain)
 {
@@ -708,6 +763,7 @@ bool testBaryCoords(CoordType &bary)
 template <class CoordType>
 bool NormalizeBaryCoords(CoordType &bary)
 {
+	ScalarType EPS=(ScalarType)0.00000001;
 	bool isOK=testBaryCoords(bary);
 	if (!isOK)
 		return false;
@@ -716,26 +772,26 @@ bool NormalizeBaryCoords(CoordType &bary)
 
 	///test <0
 	if (bary.X()<0)
-		bary.X()=0;
+		bary.X()=EPS;
 	if (bary.Y()<0)
-		bary.Y()=0;
+		bary.Y()=EPS;
 	if (bary.Z()<0)
-		bary.Z()=0;
+		bary.Z()=EPS;
 
 	///test >1
 	if (bary.X()>1.0)
-		bary.X()=1.0;
+		bary.X()=EPS;
 	if (bary.Y()>1.0)
-		bary.Y()=1.0;
+		bary.Y()=EPS;
 	if (bary.Z()>1.0)
-		bary.Z()=1.0;
+		bary.Z()=EPS;
 	
 	///test sum
 	ScalarType diff=bary.X()+bary.Y()+bary.Z()-1.0;
-	bary.X()-=diff;
+	bary.X()-=(diff+EPS);
 
 	if (bary.X()<0)
-		bary.X()=0;
+		bary.X()=EPS;
 	return true;
 }
 
@@ -762,7 +818,8 @@ void AssingFather(typename MeshType::VertexType &v,
 
 template <class MeshType>
 bool testParametrization(MeshType &domain,
-						 MeshType &Hlev)
+						 MeshType &Hlev,
+						 bool correct=true)
 {
 	typedef typename MeshType::FaceType FaceType;
 	typedef typename MeshType::CoordType CoordType;
@@ -800,7 +857,9 @@ bool testParametrization(MeshType &domain,
 		((v->Bary.Y()>=0)&&(v->Bary.Y()<=1))&&
 		((v->Bary.Z()>=0)&&(v->Bary.Z()<=1)))))
 		{
-			printf("\n PAR ERROR : bary coords exceeds: %f,%f,%f \n",v->Bary.X(),v->Bary.Y(),v->Bary.Z());
+			printf("\n PAR ERROR 0: bary coords exceeds: %f,%f,%f \n",v->Bary.X(),v->Bary.Y(),v->Bary.Z());
+			/*system("pause");*/
+			NormalizeBaryCoords(v->Bary);
 			is_good=false;
 		}
 	}

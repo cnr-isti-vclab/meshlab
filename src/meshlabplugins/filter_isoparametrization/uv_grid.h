@@ -177,7 +177,7 @@ public:
 		{
 			UVTest= ClosestPoint2Box2(UV,bbox2);
 			///move toward to the center
-			UVTest=UVTest+(bbox2.Center()-UVTest)*0.0001;
+			UVTest=UVTest+(bbox2.Center()-UVTest)*(ScalarType)0.0001;
 			bbox2.IsIn(UVTest);
 		}
 

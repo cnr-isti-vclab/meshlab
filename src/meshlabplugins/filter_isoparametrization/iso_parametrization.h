@@ -43,7 +43,8 @@ class AbstractFace    : public vcg::Face  < AbstractUsedTypes,
 	vcg::face::FFAdj,
 	vcg::face::VertexRef,
 	vcg::face::Color4b,
-	vcg::face::BitFlags>
+	vcg::face::BitFlags,
+	vcg::face::Quality3f>
 //vcg::face::Normal3f>
 {};
 
@@ -98,10 +99,8 @@ class ParamFace: public vcg::Face <  ParamUsedTypes,
   vcg::face::Normal3f,
 	vcg::face::WedgeTexCoord2f,
 	vcg::face::Mark,
-	vcg::face::EdgePlane
-  //,
-  //vcg::face::Qualityf // not really needed
-  >
+	vcg::face::EdgePlane,
+	vcg::face::Quality3f>
 {
 public:
 	/*template < class LeftV>

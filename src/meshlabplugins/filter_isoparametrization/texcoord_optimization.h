@@ -792,7 +792,7 @@ public:
 		  PointType swap=v->T().P();
 		  PointType goal=sum[v]/div[v];
 		
-		  v->T().P() = goal*0.1+swap*0.9;
+		  v->T().P() = goal*(ScalarType)0.1+swap*(ScalarType)0.9;
 
 		  //v->T().P()=v->RestUV*(1-v->Damp)+(sum[v]/div[v])*(v->Damp);
 		  ScalarType temp=(swap-v->T().P()).SquaredNorm();
@@ -979,7 +979,7 @@ void SmoothTexCoords(MESH_TYPE &m){
   {
 		//if (v->div>0) {
 	    if (div[v]>0) {
-			v->T().P() = sum[v]/div[v];
+			v->T().P() = sum[v]/((ScalarType)div[v]);
 		}
 	}
 	
