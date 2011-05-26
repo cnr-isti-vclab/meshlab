@@ -115,7 +115,7 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
    // intersectionPointNormal = normalize(intersectionPointNormal);
     
     //if angles dont differ at least 90 degrees reject intersection
-    if(dot(-intersectionPointNormal, objSpaceNormal) > 0.0) return true;
+    if(dot(intersectionPointNormal, objSpaceNormal) > 0.0) return true;
 
 }
 
@@ -204,8 +204,6 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
     float zPrevBack = texture2D(depthTexturePrevBack, P.xy).r;
 
     
-    	
-
     //first hit of the ray on the mesh. We compare vertex's depth to the next depth layer (back faces),
     // this technique is called second-depth shadow mapping
     if(firstRendering==1)
@@ -220,10 +218,10 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
     else if ( zPrevBack <= P.z && P.z <= zBack )
     		sdf =  max(0.0,(zBack-zFront) ) ; 
 
-   if(removeFalse==1)
-	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;
+//  if(removeFalse==1)
+//	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;
     
-   if( sdf != 0.0 && removeOutliers == 1)
+/*   if( sdf != 0.0 && removeOutliers == 1)
    {
 	
     
@@ -245,7 +243,7 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 
 	}
 
-  float valids     = float(EXTRA_RAYS - i);
+ 	 float valids     = float(EXTRA_RAYS - i);
 	int median     = int(valids / 2.0);
 	int percentile = int(valids / 10.0);
 
@@ -253,8 +251,9 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 	if( sdf < _vals[i+median-4*percentile ] || sdf > _vals[i+median+4*percentile] ) return 0.0;	
 
       //  sdf = _vals[i+median];
-
-   }    
+	
+  
+    }*/    
 
 
     return sdf;
@@ -274,7 +273,7 @@ void main(void)
 
     vec4 P = project(V); //* (viewpSize/texSize);
      
-   
+  
     float cosAngle  = max(0.0,dot(N.xyz, viewDirection));
 
        
