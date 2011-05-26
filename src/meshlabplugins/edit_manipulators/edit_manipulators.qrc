@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/" >
+	<file>images/icon_manipulators.png</file>
+    <file>images/cur_manipulators.png</file>
+    </qresource>
+</RCC>
