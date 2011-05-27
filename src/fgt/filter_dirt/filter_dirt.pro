@@ -5,5 +5,5 @@ HEADERS = filter_dirt.h \
           dirt_utils.h \
           $$VCGDIR/vcg/complex/trimesh/point_sampling.h
 
-SOURCES = filter_dirt.cpp
+SOURCES = filter_dirt.cpp dirt_utils.cpp
 TARGET = filter_dirt

@@ -41,35 +41,35 @@ using namespace vcg;
 
 class FilterDirt : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshFilterInterface)
-    protected:
-        double x,y,z,nx,ny,nz,r,g,b,q,rad;
-        //double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
-        double v,f,v0i,v1i,v2i;
-        std::vector<std::string> v_attrNames;
-        std::vector<double> v_attrValue;
-        //std::vector<std::string> f_attrNames;
-        //std:: vector<double> f_attrValue;
-        std::vector<CMeshO::PerVertexAttributeHandle<float> > vhandlers;
-        //std::vector<CMeshO::PerFaceAttributeHandle<float> > fhandlers;
+    Q_OBJECT
+    Q_INTERFACES(MeshFilterInterface)
+protected:
+    double x,y,z,nx,ny,nz,r,g,b,q,rad;
+    //double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
+    double v,f,v0i,v1i,v2i;
+    std::vector<std::string> v_attrNames;
+    std::vector<double> v_attrValue;
+    //std::vector<std::string> f_attrNames;
+    //std:: vector<double> f_attrValue;
+    std::vector<CMeshO::PerVertexAttributeHandle<float> > vhandlers;
+    //std::vector<CMeshO::PerFaceAttributeHandle<float> > fhandlers;
 
-    public:
-        enum {FP_DIRT,FP_CLOUD_MOVEMENT} ;
-		
-        FilterDirt();
-        ~FilterDirt(){};
+public:
+    enum {FP_DIRT,FP_CLOUD_MOVEMENT} ;
 
-        virtual QString filterName(FilterIDType filter) const;
-        virtual QString filterInfo(FilterIDType filter) const;
-        virtual int getRequirements(QAction *);
-        virtual bool autoDialog(QAction *) {return true;}
-        virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};
-        virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-        virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-        virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
-        virtual int postCondition(QAction*) const;
-        virtual FilterClass getClass(QAction *);
+    FilterDirt();
+    ~FilterDirt(){};
+
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    virtual int getRequirements(QAction *);
+    virtual bool autoDialog(QAction *) {return true;}
+    //      virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};
+    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+    virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+    virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
+    virtual int postCondition(QAction*) const;
+    virtual FilterClass getClass(QAction *);
 
 
 };
