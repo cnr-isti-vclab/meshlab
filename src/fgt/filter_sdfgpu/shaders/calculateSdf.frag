@@ -210,7 +210,7 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
     {
     	if (  P.z <= zBack )
 	{
-    		sdf =  max(0.0,(zBack-zFront) ) ; 
+    		sdf = max(0.0,(zBack-zFront) ) ; 
     			
 	}
     }//We have are interested in vertices belonging to the "front" depth layer
@@ -218,10 +218,10 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
     else if ( zPrevBack <= P.z && P.z <= zBack )
     		sdf =  max(0.0,(zBack-zFront) ) ; 
 
-//  if(removeFalse==1)
-//	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;
+  if(removeFalse==1)
+	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;
     
-/*   if( sdf != 0.0 && removeOutliers == 1)
+   if( sdf != 0.0 && removeOutliers == 1)
    {
 	
     
@@ -248,12 +248,12 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 	int percentile = int(valids / 10.0);
 
 		
-	if( sdf < _vals[i+median-4*percentile ] || sdf > _vals[i+median+4*percentile] ) return 0.0;	
+	//if( sdf < _vals[i+median-4*percentile ] || sdf > _vals[i+median+4*percentile] ) return 0.0;	
 
-      //  sdf = _vals[i+median];
+	 sdf = _vals[i+median];
 	
   
-    }*/    
+    }   
 
 
     return sdf;

@@ -191,7 +191,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   {
        (*vi).Normalize();
         TraceRay(peel, (*vi), md.mm());
-        cb(100*((float)tracedRays/(float)unifDirVec.size()), "Tracing rays...");
+     //   cb(100*((float)tracedRays/(float)unifDirVec.size()), "Tracing rays...");
         ++tracedRays;
   }
 
@@ -221,7 +221,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     glDisable(GL_ALPHA_TEST);
     glEnable(GL_NORMALIZE);
     glDisable(GL_COLOR_MATERIAL);
-    glClearColor(1,0,0,0);
+    glClearColor(0,0,0,0);
     glClearDepth(1.0);
 
     GLenum err = glewInit();
@@ -289,13 +289,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
 
-  //  FloatTexture2D* df = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
-    //                                                    TextureParams( GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE ) );
-
-
     mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
-
-
 
     //clear first time
     mFboResult->bind();
@@ -542,7 +536,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
     glLoadIdentity();
 
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
+   // glDepthMask(GL_FALSE);
 
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE, GL_ONE);
@@ -625,7 +619,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 
     mFboResult->unbind();
     glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
+  //  glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 
 }
@@ -792,6 +786,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
         mFboArray[j]->unbind();
 
+       // Log(0,"i %i j %i",i,j);
          //we use 3 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
          if(i%2)
          {
@@ -802,11 +797,13 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
                  {
                       int prevBack  = (j+1)%3;
                       int front     = (j==0)? 2 : (j-1);
+                     // Log(0,"traccio con i %i j %i ------- front = %i, prevback = %i, back = %i",i,j,front,prevBack,j);
                       calculateObscurance( mFboArray[front], mFboArray[prevBack], mFboArray[j], dir, mm->cm.bbox.Diag());//front prevBack Back
                  }
                  else
                  {
                      assert(j!=0);
+                    //  Log(0,"traccio con i %i j %i ------- front = %i, back = %i",i,j,j-1,j);
                      calculateObscurance( mFboArray[j-1], mFboArray[j], NULL, dir, mm->cm.bbox.Diag());//front back nextBack
 
                  }
@@ -819,11 +816,13 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
                       //the vertex's depth is greater than the previous depth layer and smaller than the next one.
                       int prevBack  = (j+1)%3;
                       int prevFront = (j==0)? 2 : (j-1);
+                  //    Log(0,"traccio con i %i j %i ------- front = %i, back = %i, prevback = %i",i,j,prevFront,j,prevBack);
                       calculateSdfHW( mFboArray[prevFront], mFboArray[j], mFboArray[prevBack],dir );// front back prevback
                   }
                   else
                   {    //we have first and second depth layers, so we can use "second-depth shadow mapping" to avoid z-fighting
                         assert(j!=0);
+                     //    Log(0,"traccio con i %i j %i ------- front = %i, back = %i",i,j,j-1,j);
                       calculateSdfHW( mFboArray[j-1], mFboArray[j], NULL, dir );// front back prevback
                   }
               }
@@ -838,6 +837,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
     assert(mFboArray[1]->isValid());
     assert(mFboArray[2]->isValid());
 
+   // Log(0,"One ray traced");
     checkGLError::qDebug("Error during depth peeling");
 }
 
