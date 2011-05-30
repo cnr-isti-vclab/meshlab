@@ -96,6 +96,7 @@ public:
     float              mMinCos;
     float              mTau;      //obscurance exponent
     float              mMinDist;  //min dist between vertices to check too thin parts
+    float              mScale;  //Scaling factor used to setup camera
     GPUProgram*        mDeepthPeelingProgram;
     GPUProgram*        mSDFProgram;
     GPUProgram*        mObscuranceProgram;

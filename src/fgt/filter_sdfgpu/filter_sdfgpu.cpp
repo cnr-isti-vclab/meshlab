@@ -130,6 +130,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   mPeelingTextureSize       = pars.getInt("DepthTextureSize");
   mMinCos                   = vcg::math::Cos(math::ToRad(pars.getFloat("coneAngle")/2.0));
   mUseVBO                   = pars.getBool("useVBO");
+  mScale = (cm.bbox.Diag()/2)*1.1;
 
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
@@ -490,7 +491,7 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
 
 void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
 {
-    GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
+    GLfloat d = mScale,
             k = 0.1f;
     Point3f eye = meshBBox.Center() + camDir * (d+k);
 
@@ -638,7 +639,7 @@ void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
     for (int i=0; i < m.cm.vn; ++i)
     {
         //weighted average: sdf sum is in the red channel and the weights sum in the green one
-        m.cm.vert[i].Q() = (result[i*4+1]>0.0) ? (result[i*4] / result[i*4+1]) : 0.0;
+        m.cm.vert[i].Q() = mScale*((result[i*4+1]>0.0) ? (result[i*4] / result[i*4+1]) : 0.0);
     }
 
     mFboResult->unbind();
