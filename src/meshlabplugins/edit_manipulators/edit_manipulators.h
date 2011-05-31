@@ -63,12 +63,40 @@ private:
   ManipulatorMode current_manip_mode;
 
   bool isMoving;
-  float currOffset;
+  vcg::Point2i startdrag;
+  vcg::Point2i enddrag;
 
-  void UpdateMatrix(MeshModel &model);
+  float currScreenOffset_X;   // horizontal offset (screen space)
+  float currScreenOffset_Y;   // vertical offset (screen space)
+
+  // when the user is dragging, the mouse offset is stored here, 
+  // two sets of variables are used, since the offset will be accumulated in 
+  // the currOffset* variables when finished dragging
+  float displayOffset;        // mouse offset value (single axis)
+  float displayOffset_X;      // mouse X offset value
+  float displayOffset_Y;      // mouse Y offset value
+  float displayOffset_Z;      // mouse Z offset value
+
+  // offset is accumulated here... user can change the offset by dragging mouse until 
+  // satisfied, accumulating changes
+  // if the user confirms, this offset is applied to the matrix
+  float currOffset;     // combined offset value (single axis)
+  float currOffset_X;     // X offset value
+  float currOffset_Y;     // Y offset value
+  float currOffset_Z;     // Z offset value
+
+  vcg::Point3f screen_xaxis;
+  vcg::Point3f screen_yaxis;
+  vcg::Point3f screen_zaxis;
+
+  void resetOffsets();
+
+  void UpdateMatrix(MeshModel &model, GLArea * gla, bool applymouseoffset);
 
   void applyMotion(MeshModel &model, GLArea *gla);
   void cancelMotion(MeshModel &model, GLArea *gla);
+
+  bool MyPick(const int &x, const int &y, vcg::Point3f &pp, float mydepth);
 
 signals:
   void suspendEditToggle();
