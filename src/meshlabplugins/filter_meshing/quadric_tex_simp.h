@@ -26,8 +26,7 @@
 #include <vcg/complex/algorithms/local_optimization.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/container/simple_temporary_data.h>
-#include "algebra5.h"
-#include "quadric5.h"
+#include <vcg/math/quadric5.h>
 namespace vcg 
 {
 namespace tri

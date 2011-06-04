@@ -67,18 +67,6 @@ namespace tri {
 typedef	SimpleTempData<CMeshO::VertContainer, math::Quadric<double> > QuadricTemp;
 
 
-class VertexPair {
-public:
-  inline VertexPair() {};
-  inline VertexPair( CVertexO * v0, CVertexO * v1){V(0) = v0; V(1) = v1; };
-  void Sort() {if(V(0)<V(0)) std::swap(V(0),V(0)); }
-  CVertexO *&V(int i) { return v[i]; }
-  CVertexO *cV(int i) const { return v[i]; }
-private:
-  CVertexO *v[2];
-
-};
-
 class QHelper
 		{
 		public:
@@ -93,8 +81,9 @@ class QHelper
       static QuadricTemp &TD() {return *TDp();}
 		};
 
+typedef BasicVertexPair<CVertexO> VertexPair;
 
-class MyTriEdgeCollapse: public vcg::tri::TriEdgeCollapseQuadric< CMeshO, VertexPair, MyTriEdgeCollapse, QHelper > {
+class MyTriEdgeCollapse: public vcg::tri::TriEdgeCollapseQuadric< CMeshO, VertexPair , MyTriEdgeCollapse, QHelper > {
 						public:
             typedef  vcg::tri::TriEdgeCollapseQuadric< CMeshO, VertexPair,  MyTriEdgeCollapse, QHelper> TECQ;
             inline MyTriEdgeCollapse(  const VertexPair &p, int i, BaseParameterClass *pp) :TECQ(p,i,pp){}
