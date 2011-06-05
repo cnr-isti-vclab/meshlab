@@ -32,13 +32,13 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::
 {
 	math::Quadric<double> QZero;
 	QZero.SetZero();
-	QuadricTemp TD3(m.vert,QZero);
-	QuadricTexHelper::TDp3()=&TD3;
+  QuadricTexHelper<CMeshO>::QuadricTemp TD3(m.vert,QZero);
+  QuadricTexHelper<CMeshO>::TDp3()=&TD3;
 
-	QVector <QPair<vcg::TexCoord2<float>,Quadric5<double> > > qv;
+  std::vector<std::pair<vcg::TexCoord2<float>,Quadric5<double> > > qv;
 
-	Quadric5Temp TD(m.vert,qv);
-	QuadricTexHelper::TDp()=&TD;
+  QuadricTexHelper<CMeshO>::Quadric5Temp TD(m.vert,qv);
+  QuadricTexHelper<CMeshO>::TDp()=&TD;
 
 	if(Selected) // simplify only inside selected faces
   {
