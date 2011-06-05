@@ -70,13 +70,13 @@ typedef	SimpleTempData<CMeshO::VertContainer, math::Quadric<double> > QuadricTem
 class QHelper
 		{
 		public:
-			QHelper(){};
-      static void Init(){};
+      QHelper(){}
+      static void Init(){}
       static math::Quadric<double> &Qd(CVertexO &v) {return TD()[v];}
       static math::Quadric<double> &Qd(CVertexO *v) {return TD()[*v];}
-      static CVertexO::ScalarType W(CVertexO * /*v*/) {return 1.0;};
-      static CVertexO::ScalarType W(CVertexO & /*v*/) {return 1.0;};
-      static void Merge(CVertexO & /*v_dest*/, CVertexO const & /*v_del*/){};
+      static CVertexO::ScalarType W(CVertexO * /*v*/) {return 1.0;}
+      static CVertexO::ScalarType W(CVertexO & /*v*/) {return 1.0;}
+      static void Merge(CVertexO & /*v_dest*/, CVertexO const & /*v_del*/){}
       static QuadricTemp* &TDp() {static QuadricTemp *td; return td;}
       static QuadricTemp &TD() {return *TDp();}
 		};
