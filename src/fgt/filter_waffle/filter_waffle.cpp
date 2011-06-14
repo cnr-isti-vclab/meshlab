@@ -23,8 +23,13 @@
 ****************************************************************************/
 
 #include "filter_waffle.h"
-//#include <stdlib.h>
 #include <vcg/complex/algorithms/intersection.h>
+#include <vcg/complex/algorithms/update/topology.h>
+
+#include <wrap/gl/glu_tessellator_cap.h>
+
+
+
 #include <vcg/space/intersection2.h>
 
 #include <algorithm>
@@ -36,1098 +41,672 @@
 
 #include <math.h>
 
-#include "kdtree.h"
+//#include "kdtree.h"
 
 using namespace std;
 using namespace vcg;
 
 
-// Constructor usually performs only two simple tasks of filling the two lists
-//  - typeList: with all the possible id of the filtering actions
-//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
-
 ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
 {
-        typeList << FP_WAFFLE_SLICE
-                                         <<FP_RECURSIVE_SLICE
-                                         <<FP_PARALLEL_PLANES
-                                         <<FP_SINGLE_PLANE;
+    typeList << FP_WAFFLE_SLICE;
 
-  foreach(FilterIDType tt , types())
-          actionList << new QAction(filterName(tt), this);
+    foreach(FilterIDType tt , types())
+        actionList << new QAction(filterName(tt), this);
 }
 
-// ST() must return the very short string describing each filtering action
-// (this string is used also to define the menu entry)
- QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) const
+QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) const
 {
-  switch(filterId) {
-                case FP_SINGLE_PLANE    :  return QString("Cross section single plane");
-                case FP_PARALLEL_PLANES :  return QString("Cross section parallel planes");
-                case FP_WAFFLE_SLICE    :  return QString("Cross section waffle");
-                case FP_RECURSIVE_SLICE :  return QString("Cross section recursive");
-                default : assert(0);
-        }
-  return QString("error!");
+    switch(filterId) {
+        case FP_WAFFLE_SLICE    :  return QString("Cross section waffle");
+        default : assert(0);
+    }
+    return QString("error!");
 }
 
-// Info() must return the longer string describing each filtering action
-// (this string is used in the About plugin dialog)
-
- QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId) const
+QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId) const
 {
- switch(filterId) {
-                case FP_SINGLE_PLANE    :  return QString("Export once cross section of the current mesh relative to an axes in svg format.");
-                case FP_PARALLEL_PLANES :  return QString("Export one or more cross sections of the current mesh relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0).");
-                case FP_WAFFLE_SLICE    :  return QString("Export one or more cross sections of the current mesh relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0).");
-                case FP_RECURSIVE_SLICE :  return QString("Create a Sliceform model to cut out and assemble");
-                default : assert(0);
-        }
-  return QString("error!");
+    switch(filterId) {
+        case FP_WAFFLE_SLICE    :  return QString("Export one or more cross sections of the current mesh relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0).");
+        default : assert(0);
+    }
+    return QString("error!");
 }
 
-// This function define the needed parameters for each filter. Return true if the filter has some parameters
-// it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define,
-// - the name of the parameter,
-// - the string shown in the dialog
-// - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, RichParameterSet &parlst)
 {
-  switch(ID(filter))
-  {
-  case FP_SINGLE_PLANE:
-  {
-    QStringList axis = QStringList()<<"X Axis"<<"Y Axis"<<"Z Axis"<<"Custom Axis";;
-    parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
-    parlst.addParam(new RichFloat  ("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
-    parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
-    parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
-    // BBox min=0, BBox center=1, Origin=2
-    parlst.addParam(new RichEnum   ("relativeTo",0,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
-  }
-    break;
-  case FP_PARALLEL_PLANES :
-  {
-    parlst.addParam(new RichFloat  ("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
-    parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
-    parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
-    // BBox min=0, BBox center=1, Origin=2
-    parlst.addParam(new RichEnum ("relativeTo",0,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
-    parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
-    parlst.addParam(new RichInt("planeNum",10,"Number of Planes", "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above."));
-    parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
-    parlst.addParam(new RichBool("hideBase",true,"Hide Original Mesh","Hide the Original Mesh"));
-    parlst.addParam(new RichBool("hideSlices",true,"Hide Slices","Hide the Generated Slices"));
-    parlst.addParam(new RichBool("hidePlanes",false,"Hide Planes","Hide the Generated Slicing Planes"));
-    parlst.addParam(new RichBool("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter"));
-  }
-    break;
-  case FP_WAFFLE_SLICE :
-  {
-    QStringList axis;
-    axis<<"X Axis"<<"Y Axis"<<"Z Axis";
-    parlst.addParam(new RichEnum("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
-    parlst.addParam(new RichFloat  ("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
-    parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
-    // BBox min=0, BBox center=1, Origin=2
-    parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
-    parlst.addParam(new RichFloat("spacing",0.2,"Space between two planes", "Step value between each plane for automatically generating cross-sections."));
-    parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
-    parlst.addParam(new RichBool("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter"));
-  }
-    break;
-  case FP_RECURSIVE_SLICE:
-  {
-    QStringList axis;
-    axis<<"X Axis"<<"Y Axis"<<"Z Axis";
-    parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
-    parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
-    parlst.addParam(new RichBool	 ("delfather",true,"delete father", "Delete the father's mesh after slicing it"));
-    parlst.addParam(new RichInt		 ("iter",2,"iterations","iterations"));
-  }
-    break;
-  default : assert(0);
-  }
-}
-
-// The Real Core Function doing the actual mesh processing.
-// Move Vertex of a random quantity
-bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, RichParameterSet &parlst, vcg::CallBackPos *cb)
-{
-  // Get common params
-        Point3f planeAxis(0,0,0);
-        if (ID(filter) == FP_RECURSIVE_SLICE || FP_WAFFLE_SLICE)
-        {
-                int ind = parlst.getEnum("planeAxis");
-                planeAxis[ind] = 1.0f;
-        }
-        else    planeAxis=parlst.getPoint3f("customAxis").Normalize();
-//
-        float length=parlst.getFloat("length");
-
-        // set common SVG Properties
-        float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
-        Point3f sizeCm=m.mm()->cm.bbox.Dim()*(length/maxdim);
-        // to check for dimensions with custom axis
-        if (planeAxis[0]==1)
-                pr.sizeCm=Point2f(sizeCm[1],sizeCm[2]);
-        else if (planeAxis[1]==1)
-                pr.sizeCm=Point2f(sizeCm[0],sizeCm[2]);
-        else
-                pr.sizeCm=Point2f(sizeCm[0],sizeCm[1]);
-        Log("sizecm %fx%f",pr.sizeCm[0],pr.sizeCm[1]);
-
-        pr.lineWidthPt=200;
-        pr.scale=2/maxdim;
-        // get filter specific params and execute filter
-        switch(ID(filter))
-        {
-          case FP_SINGLE_PLANE:
-            {
-              float planeOffset = parlst.getFloat("planeOffset");
-              Point3f planeCenter;
-
-              pr.numCol=1;
-              pr.numRow=1;
-              pr.projDir = planeAxis;
-              pr.projCenter =  m.mm()->cm.bbox.Center();
-              Log("Single Plane Slicing: x = %f , y = %f, z = %f", planeAxis[0], planeAxis[1], planeAxis[2]);
-
-              vector<MyEdgeMesh*> ev;
-              Box3f bbox=m.mm()->cm.bbox;
-              MeshModel* base=m.mm();
-              MeshModel* orig=m.mm();
-
-
-              //actual cut of the mesh
-
-              if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base->cm)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
-              {
-                Log("Mesh is not two manifold, cannot apply filter");
-                return false;
-              }
-
-              switch(RefPlane(parlst.getEnum("relativeTo")))
-              {
-               case REF_CENTER:  planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0); break;
-               case REF_MIN:     planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0); break;
-               case REF_ORIG:    planeCenter = planeAxis*planeOffset;  break;
-              }
-
-              Plane3f slicingPlane(planeCenter.dot(planeAxis),planeAxis);
-
-              //this is used to generate svg slices
-              MyEdgeMesh *edgeMesh = new MyEdgeMesh();
-              IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
-              tri::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
-              ev.push_back(edgeMesh);
-
-              QString fname;//=parlst.getSaveFileName("filename");
-              if(fname=="") fname="C:/Slice.svg";
-              if (!fname.endsWith(".svg")) fname+=".svg";
-
-              tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
-
-              SlicedEdge<CMeshO> slicededge(slicingPlane);
-              SlicingFunction<CMeshO> slicingfunc(slicingPlane);
-              //after the RefineE call, the mesh will have vertices with quality
-              //relative to the slicing plane
-              vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
-                  (base->cm, slicingfunc, slicededge, false, cb);
-              tri::UpdateTopology<CMeshO>::FaceFace(base->cm);
-              tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
-
-              MeshModel *slice1= m.addNewMesh("","slice");
-              //m.meshList.push_back(slice1);
-              QString layername;
-              slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-              tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_LEFT,VERTEX_LEFT);
-              tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base->cm);
-              createSlice(base,slice1);
-              tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
-
-              MeshModel* cap= m.addNewMesh("","plane");
-              //m.meshList.push_back(cap);
-              cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-              capHole(slice1,cap);
-              //delete slice1;
-              m.delMesh(slice1);
-              vcg::tri::UpdateTopology<CMeshO>::FaceFace(cap->cm);
-              vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(cap->cm);
-              vcg::tri::UpdateBounding<CMeshO>::Box(cap->cm);
-            }
-                break;
-                case FP_PARALLEL_PLANES :
-                {
-                        bool hideBase=parlst.getBool("hideBase");
-                        bool hideSlices=parlst.getBool("hideSlices");
-                        bool hidePlanes=parlst.getBool("hidePlanes");
-
-                        if(parlst.getBool("capBase"))
-                        {
-        MeshModel* cap= m.addNewMesh("","slices");
-                                capHole(m.mm(),cap);
-                                tri::Append<CMeshO,CMeshO>::Mesh(m.mm()->cm, cap->cm);
-                                m.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-                                tri::UpdateTopology<CMeshO>::FaceFace(m.mm()->cm);
-                                //delete cap;
-                                m.delMesh(cap);
-                        }
-
-                        float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
-                        // eps to use in extrusion, is relative to maxdim
-                        // eps : length = eps_xtr : maxdim  -> eps_xtr = (eps*maxdim)/length
-                        // NOTE: change eps with eps_xtr everywhere below
-                        float eps=parlst.getFloat("eps");
-                        eps=maxdim*(eps/length);
-
-                        //float planeDist = parlst.getAbsPerc("planeDist");
-                        float planeDist=0;
-                        float planeOffset = parlst.getFloat("planeOffset");
-                        int	planeNum = parlst.getInt("planeNum");
-//			int units=parlst.getEnum("units");
-
-                        //bool absOffset = parlst.getBool("absOffset");
-      RefPlane reference=RefPlane(parlst.getEnum("relativeTo"));
-                        Point3f planeCenter;
-                        Plane3f slicingPlane;
-                        pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
-                        pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
-
-                        pr.projDir = planeAxis;
-                        pr.projCenter =  m.mm()->cm.bbox.Center();
-
-                        vector<MyEdgeMesh*> ev;
-                        if (hideBase)
-                                m.mm()->visible=false;
-                        Box3f bbox=m.mm()->cm.bbox;
-                        MeshModel* base=m.mm();
-                        MeshModel* orig=m.mm();
-                        for(int i=0;i<planeNum;++i)
-                        {
-        if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base->cm)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
-                                {
-                                        Log("Mesh is not two manifold, cannot apply filter");
-                                        return false;
-                                }
-
-                                QString s;
-                                s.sprintf("calculating slice %d",i+1);
-                                cb((i+1)*100.0f/planeNum,s.toStdString().c_str());
-                                switch(reference)
-                                {
-                                  case REF_CENTER:
-                                          planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox center
-                                          if (planeNum!=1)
-                                                  planeDist=(bbox.Dim()*planeAxis)/(2*(planeNum-1));
-                                          break;
-                                  case REF_MIN:
-                                                planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0);  //bbox min
-                                                if (planeNum!=1)
-                                                        planeDist=(bbox.Dim()*planeAxis)/(planeNum-1);
-                                                break;
-                                  case REF_ORIG:
-                                          planeCenter = planeAxis*planeOffset;  //origin
-                                          break;
-                                }
-
-                                planeCenter+=planeAxis*planeDist*i;
-                                slicingPlane.Init(planeCenter,planeAxis);
-        SlicedEdge<CMeshO> slicededge(slicingPlane);
-        SlicingFunction<CMeshO> slicingfunc(slicingPlane);
-        //after the RefineE call, the mesh will have vertices with quality
-                                //relative to the slicing plane
-        vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
-             (base->cm, slicingfunc, slicededge, false, cb);
-                                vcg::tri::UpdateTopology<CMeshO>::FaceFace(base->cm);
-                                vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base->cm);
-
-                                QString layername;
-                                layername.sprintf("slice_%d-%d.ply",i,i+1);
-        MeshModel *slice1= m.addNewMesh("",qPrintable(layername));
-                                //m.meshList.push_back(slice1);
-
-                                slice1->setFileName(layername);								// mesh name
-                                slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-                                vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_LEFT,VERTEX_LEFT);
-        vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base->cm);
-                                if (hideSlices)
-                                        slice1->visible=false;
-
-        createSlice(base,slice1);
-                                vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice1->cm);
-
-                                layername.sprintf("plane_%d.ply",i+1);
-        MeshModel* cap= m.addNewMesh("",qPrintable(layername));
-                                //m.meshList.push_back(cap);
-
-                                cap->setFileName(layername);								// mesh name
-                                cap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-                                capHole(slice1,cap);
-                                if (eps!=0)
-                                {
-                                        layername.sprintf("plane_%d_extruded.ply",i+1);
-          MeshModel* dup= m.addNewMesh("",qPrintable(layername));
-                                        //m.meshList.push_back(dup);
-                                        dup->setFileName(layername);								// mesh name
-                                        dup->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-                                        extrude(&m,cap, dup, eps, planeAxis);
-                                }
-                                if (hidePlanes)
-                                        cap->visible=false;
-                                tri::Append<CMeshO,CMeshO>::Mesh(slice1->cm, cap->cm);
-                                tri::Clean<CMeshO>::RemoveDuplicateVertex(slice1->cm);
-                                slice1->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-                                vcg::tri::UpdateTopology<CMeshO>::FaceFace(slice1->cm);
-                                vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(slice1->cm);
-                                vcg::tri::UpdateBounding<CMeshO>::Box(slice1->cm);
-
-                                layername.sprintf("slice_%d-%d.ply",i+1,i+2);
-        MeshModel* slice2= m.addNewMesh("",qPrintable(layername));
-                                //m.meshList.push_back(slice2);
-                                slice2->setFileName(layername);								// mesh name
-                                slice2->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-                                vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base->cm,VERTEX_RIGHT,VERTEX_RIGHT);
-                                vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base->cm);
-                                createSlice(base,slice2);
-                                tri::Clean<CMeshO>::FlipMesh(cap->cm);
-                                tri::Append<CMeshO,CMeshO>::Mesh(slice2->cm, cap->cm);
-                                tri::Clean<CMeshO>::RemoveDuplicateVertex(slice2->cm);
-                                slice2->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-                                vcg::tri::UpdateTopology<CMeshO>::FaceFace(slice2->cm);
-                                vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(slice2->cm);
-                                vcg::tri::UpdateBounding<CMeshO>::Box(slice2->cm);
-
-                                if (hideSlices)
-                                        slice2->visible=false;
-                                if (i!=0)
-                                        m.delMesh(base);
-                                base=slice2;
-              //this is used to generate svd slices
-                                MyEdgeMesh *edgeMesh = new MyEdgeMesh();
-                                vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(orig->cm, slicingPlane , *edgeMesh);
-                                vcg::tri::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
-                                ev.push_back(edgeMesh);
-                        }
-
-                        QString fname=parlst.getSaveFileName("filename");
-                        if(fname=="")
-        fname="Slice.svg";
-      if (!fname.endsWith(".svg"))
-        fname+=".svg";
-                        vcg::tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
-                }
-                break;
+    switch(ID(filter))
+    {
         case FP_WAFFLE_SLICE :
         {
-                    //PARAMETRI
-                    //*length		Dimension on the longer axis (cm)	int
-                    //*filename		Output File				QString
-                    //customAxis	Custom axis				Point3f
-                    //planeOffset	Cross plane offset			float
-                    //*eps		Medium thickness			float
-                    //planeNum		Number of Planes			int
-                    //*singleFile	Single SVG				bool
-                    //?capBase		Cap input mesh holes			bool
+            QStringList axis;
+            axis<<"X Axis"<<"Y Axis"<<"Z Axis";
+            parlst.addParam(new RichEnum("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
+            parlst.addParam(new RichFloat  ("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
+            parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
+            // BBox min=0, BBox center=1, Origin=2
+            parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
+            parlst.addParam(new RichFloat("spacing",0.05,"Space between two planes", "Step value between each plane for automatically generating cross-sections."));
+            parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
+            parlst.addParam(new RichBool("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter"));
+        }
+        break;
+    default : assert(0);
+    }
+}
 
+bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, RichParameterSet &parlst, vcg::CallBackPos *cb)
+{
+    vcg::tri::UpdateBounding<CMeshO>::Box(m.mm()->cm);
 
-                    Axis axis = (Axis) parlst.getEnum("planeAxis");
-                    Axis axisOrthog, axisJoint;
-//??togli i casting da dentro lo switch facendo meglio la templatazione
+    switch(ID(filter))
+    {
+        case FP_WAFFLE_SLICE :
+        {
+            Point3f planeAxis(0,0,0);
+            Axis axis = (Axis) parlst.getEnum("planeAxis");
+            planeAxis[axis] = 1.0f;
 
-                    switch(axis)
-                    {
-                        case X:
-                        {
-                            axisOrthog = (Axis) Succ<X>::value;
-                            axisJoint = (Axis) Succ<Succ<X>::value>::value;
-                        }
-                        break;
-                        case Y:
-                        {
-                            axisOrthog = (Axis) Succ<Y>::value;
-                            axisJoint = (Axis) Succ<Succ<Y>::value>::value;
-                        }
-                        break;
-                        case Z:
-                        {
-                            axisOrthog = (Axis) Succ<Z>::value;
-                            axisJoint = (Axis) Succ<Succ<Z>::value>::value;
-                        }
-                        break;
-                    }
+            float length = parlst.getFloat("length");
 
-                    Point3f planeAxis(0,0,0);
-                    planeAxis[axis] = 1.0f;
+            // set common SVG Properties
+            float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
+            // eps to use in extrusion, is relative to maxdim
+            // eps : length = eps_xtr : maxdim  -> eps_xtr = (eps*maxdim)/length
+            // NOTE: change eps with eps_xtr everywhere below
+            float eps=parlst.getFloat("eps");
+            eps=maxdim*(eps/length);
 
-
-                        // VARIABILLI DI SUPPORTO
-                        MeshModel * mBase = m.mm();
-                        mBase->visible = false;
-                        CMeshO &base = mBase->cm;
-                        Box3f &bbox = base.bbox;
-
-                        if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base,false) != 0))
-                        {
-                          Log("Mesh is not two manifold, cannot apply filter");
-                          return false;
-                        }
-
-                        //per l'estrusione e per la larghezza degli incastri
-                        float maxdim = bbox.Dim()[bbox.MaxDim()];
-                        // eps to use in extrusion, is relative to maxdim
-                        // eps : length = eps_xtr : maxdim  -> eps_xtr = (eps*maxdim)/length
-                        // NOTE: change eps with eps_xtr everywhere below
-                        float eps=parlst.getFloat("eps");
-                        eps=maxdim*(eps/length);
-//                        float eps = parlst.getFloat("eps");
-
-                        //PIANI BASE
-                        float planeDist = parlst.getFloat("spacing");
-                        float planeOffset = parlst.getFloat("planeOffset");                        
-                        int planeNum = (planeDist == 0) ? 1 : ( ((bbox.Dim()*planeAxis)/planeDist)+1 ); //evito la divisione per 0
-                        Log("Number of plane: %i",planeNum);
-
-                        float lengthRect = bbox.Diag()/2.0;
-                        Point3f planeCenter = bbox.min + planeAxis*planeOffset*lengthRect;      //parto dal basso (bbox min)
-                        Plane3f slicingPlane;
-
-
-                        pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
-                        pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
-
-                        pr.projDir = planeAxis;
-                        pr.projCenter =  m.mm()->cm.bbox.Center();
-
-                        //this is used to generate svg slices
-                        vector<MyEdgeMesh*> ev;
-
-
-//                        Point3f planeIncrement = planeAxis * planeDist;		//usato per calcolare la posizione del nuovo piano
-
-/*
-                        float epsTmp = eps/2;
-                        //punti per il rettangolo
-                        Point2f a1,b1,a2,b2;
-                        a1.X() = epsTmp;
-                        a1.Y() = 0;
-
-                        a2.X() = -epsTmp;
-                        a2.Y() = 0;
-
-                        b1.X() = epsTmp;
-                        b1.Y() = lengthRect;
-
-                        b2.X() = -epsTmp;
-                        b2.Y() = lengthRect;
-
-                        QString s;
-
-*/
-                        // Variabili temporanee
-                        QString layername;
-                        const QString layernameTmp = "temp.ply";
-                        MeshModel * mCap;
-                        //MeshModel * mSlice;
-
-
-//                        for(int i = 0; i < planeNum; ++i)
-                        int i = 4;
-//                        for(int i = 1; i < 4; ++i)
-                        {
-/*?
-                            // creo un nuovo layer
-                            layername.sprintf("cap_%d.ply",i+1);
-                            mCap = m.addNewMesh("",qPrintable(layername));
-                            mCap->setFileName(layername);
-
-                            //mesh temporanea, poi da scartare
-                            mSlice = m.addNewMesh("",qPrintable(layernameTmp));
-                            mSlice->setFileName(layernameTmp);		// mesh name
-
-                            s.sprintf("calculating slice %d",i+1);
-                            cb((i+1)*100.0f/planeNum,s.toStdString().c_str());
-
- ?*/
-                            // creo un nuovo layer
-                            layername.sprintf("cap_%d.ply",i+1);
-                            mCap = m.addNewMesh("",qPrintable(layername));
-                            mCap->setFileName(layername);
-                            CMeshO &cm = mCap->cm;
-
-                            MyEdgeMesh *edgeMesh = new MyEdgeMesh();    //this is used to generate svd slices
-                            //MyEdgeMesh &em = *edgeMesh;
-
-                            cm.Clear();
-                            edgeMesh->Clear();
-                            Point3f centerCorr = planeCenter + planeAxis * planeDist * i;
-                            Log("center corr %f %f %f\n",centerCorr[0],centerCorr[1],centerCorr[2]);
-
-                            slicingPlane.Init(centerCorr,planeAxis);
-
-                            vcg::IntersectionPlaneMesh<CMeshO, MyEdgeMesh, float>(base, slicingPlane , *edgeMesh);
-                            tri::Clean<MyEdgeMesh>::RemoveDuplicateVertex(*edgeMesh);
-//                            vcg::tri::UpdateBounding<MyEdgeMesh>::Box(em);
-//                            vcg::tri::CapEdgeMesh(em,cm);
-
-                            tri::UpdateBounding<MyEdgeMesh>::Box(*edgeMesh);
-                            ev.push_back(edgeMesh);
-
-                            //Log("  edge mesh vn %5i en %5i fn %5i\n",em.vn,em.en,em.fn);
-                            Log("sliced mesh vn %5i en %5i fn %5i\n",cm.vn,cm.en,cm.fn);
-
-//                            vcg::tri::UpdateBounding<MyEdgeMesh>::Box(cm);
-//                            if(edgeMesh->edge.size()!=0)
-                            {
-
-
-                                //for(int j = 1; j <= planeNum; ++j))
-                                {
-/*                                    a1.X() = planeDist * j + eps;
-                                    a2.X() = planeDist * j - eps;
-                                    b1.X() = planeDist * j + eps;
-                                    b2.X() = planeDist * j - eps;
-*/
-//                                    Log("Plane %i have %i edge",i+1,edgeMesh->edge.size());
-//                                    tri::UpdateTopology<MyEdgeMesh>::EdgeEdge(*edgeMesh);
-//                                    subtraction(*edgeMesh, a1, a2, b1, b2, axis, axisOrthog, axisJoint, centerCorr[axis]);
-                                }
-                            }
-
-                            // genero il piano da raffigurare in 3D
-//?                            generateCap(mBase,slicingPlane,cb,mCap, mSlice);
-
-                            //rimuovo lo slice, non mi serve pi; posso comunque riusare il puntatore nel ciclo
-//?                            m.delMesh(mSlice);
-
-
-                        }
-
-                        QString fname;//=parlst.getSaveFileName("filename");
-                        if(fname=="")
-                                fname="C:/Slice.svg";
-                        else if (!fname.endsWith(".svg"))
-                                fname+=".svg";
-                        tri::io::ExporterSVG<MyEdgeMesh>::Save(ev, fname.toStdString().c_str(), pr);
-
-
+            Point3f sizeCm=m.mm()->cm.bbox.Dim()*(length/maxdim);
+            // to check for dimensions with custom axis
+            Axis axisOrthog, axisJoint;
+            switch(axis)
+            {
+            case X:
+                {
+                    axisOrthog = (Axis) Succ<X>::value;
+                    axisJoint = (Axis) Succ<Succ<X>::value>::value;
+                    pr.sizeCm = Point2f(sizeCm[1],sizeCm[2]);
                 }
                 break;
-                case FP_RECURSIVE_SLICE:
+            case Y:
                 {
-                        float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
-                        // eps to use in extrusion, is relative to maxdim
-                        // eps : length = eps_xtr : maxdim  -> eps_xtr = (eps*maxdim)/length
-                        // NOTE: change eps with eps_xtr everywhere below
-                        float eps=parlst.getFloat("eps");
-                        eps=maxdim*(eps/length);
-                        KDTree<CMeshO> *kdt=new KDTree<CMeshO>(&m,m.mm(), eps, parlst.getEnum("planeAxis"));
-                        kdt->delfather=parlst.getBool("delfather");
-                        int iter=parlst.getInt("iter");
-                        for(int i=0;i<iter;i++)
-                        {
-                                kdt->Slice(cb);
-                        }
-                        vcg::tri::UpdateBounding<CMeshO>::Box(m.mm()->cm);
+                    axisOrthog = (Axis) Succ<Y>::value;
+                    axisJoint = (Axis) Succ<Succ<Y>::value>::value;
+                    pr.sizeCm = Point2f(sizeCm[0],sizeCm[2]);
+                }
+                break;
+            case Z:
+                {
+                    axisOrthog = (Axis) Succ<Z>::value;
+                    axisJoint = (Axis) Succ<Succ<Z>::value>::value;
+                    pr.sizeCm = Point2f(sizeCm[0],sizeCm[1]);
+                }
+                break;
+            }
+
+            Log("sizecm %fx%f",pr.sizeCm[0],pr.sizeCm[1]);
+
+            pr.lineWidthPt=200;
+            pr.scale=2/maxdim;
+            float planeOffset = parlst.getFloat("planeOffset");
+            Point3f planeCenter;
+            Plane3f slicingPlane;
+
+            float planeDist = parlst.getFloat("spacing");
+            Box3f &bbox = m.mm()->cm.bbox;
+/*            if(planeDist > bbox.Diag());
+            {
+                Log("The space between two planes must be less than the length of the mesh");
+                return false;
+            }
+*/
+            int planeNum = (planeDist == 0) ? 1 : ( ((bbox.Dim()*planeAxis)/planeDist)+1 ); //evito la divisione per 0
+
+            pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
+            pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
+            pr.projDir = planeAxis;
+            pr.projCenter =  m.mm()->cm.bbox.Center();
+
+            vector<MeshModel*> ev;
+            MeshModel* base = m.mm();
+            CMeshO &cmBase = base->cm;
+//            MeshModel* orig = m.mm();
+//            CMeshO &cmOrig = orig->cm;
+
+
+            //actual cut of the mesh
+
+            if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(cmBase)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(cmBase,false) != 0))
+            {
+                Log("Mesh is not two manifold, cannot apply filter");
+                return false;
+            }
+
+            float lengthDiag = bbox.Diag()/2.0;
+            planeCenter = bbox.min + planeAxis*planeOffset*lengthDiag;      //parto dal basso (bbox min)
+
+            float epsTmp = eps/2.0;
+
+
+
+//            for(int j = 0; j < planeNum; ++j)
+//                float dist = 0.0+=planeDist;
+
+//            float dist = 0.0;
+//            Lati3 lati; //il quarto lato lo ignoro, tanto non lo uso mai
+            Segment2f  lati[planeNum][3];
+
+            //generateRectSeg(j, epsTmp, lengthDiag, lati);
+            generateRectSeg(epsTmp, lengthDiag, lati[0]);
+
+            MeshModel* cap;
+            MeshModel* cap2;
+            for(int i = 0; i < planeNum; ++i)
+            {
+//                Log("######## LAYER %i", i);
+                planeCenter += planeAxis*planeDist;
+                slicingPlane.Init(planeCenter,planeAxis);
+
+                //this is used to generate svg slices
+                cap= m.addNewMesh("","EdgeMesh");
+                vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(base->cm, slicingPlane, cap->cm );
+
+                tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
+                ev.push_back(cap);
+
+                if(cap->cm.edge.size()> 0)
+                {
+                    subtraction(cap->cm, lati[0], axis, axisOrthog, axisJoint, planeCenter[axis]);
+                }
+
+                cap2= m.addNewMesh("","CappedSlice");
+                tri::CapEdgeMesh(cap->cm, cap2->cm);
+
+            }
+
+            QString fname;//=parlst.getSaveFileName("filename");
+            if(fname=="") fname="C:/Slice.svg";
+            if (!fname.endsWith(".svg")) fname+=".svg";
+
+//            tri::io::ExporterSVG<MeshModel>::Save(ev, fname.toStdString().c_str(), pr);
+
+        }
+        break;
     }
-    break;
-        }
-        return true;
+    return true;
 }
 
-void ExtraFilter_SlicePlugin::extrude(MeshDocument* /*doc*/,MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
+
+
+//void ExtraFilter_SlicePlugin::extrude(MeshDocument* /*doc*/,MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
+//{
+//    tri::ExtrudeBoundary<CMeshO>(orig->cm,dest->cm,eps,planeAxis);
+//}
+
+MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
 {
-  tri::ExtrudeBoundary<CMeshO>(orig->cm,dest->cm,eps,planeAxis);
-}
- MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
-{
-        switch(ID(filter))
-        {
-                case FP_SINGLE_PLANE:
-                case FP_PARALLEL_PLANES :
-                case FP_WAFFLE_SLICE :
-                case FP_RECURSIVE_SLICE :
-                return MeshFilterInterface::Measure;
-                default: assert(0);
-        }
-        return MeshFilterInterface::Generic;
+    switch(ID(filter))
+    {
+        case FP_WAFFLE_SLICE :
+        return MeshFilterInterface::Measure;
+        default: assert(0);
+    }
+    return MeshFilterInterface::Generic;
 }
 
+/*
 bool ExtraFilter_SlicePlugin::autoDialog(QAction *action)
 {
-  switch(ID(action))
-  {
-        case FP_SINGLE_PLANE:
-  case  FP_RECURSIVE_SLICE:
-  case FP_WAFFLE_SLICE :
-  case FP_PARALLEL_PLANES: return true;
-        default: return false;
-  }
-}
-
-void ExtraFilter_SlicePlugin::createSlice(MeshModel* currentMesh, MeshModel* destMesh)
-{
-  tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
-  tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, true);
-  tri::UpdateTopology<CMeshO>::FaceFace(destMesh->cm);
-  tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
-  destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
-}
-
-void ExtraFilter_SlicePlugin::capHole(MeshModel* currentMesh, MeshModel* destMesh, int capDir)
-{
-
-  std::vector< std::vector<Point3f> > outlines;
-  std::vector<Point3f> outline;
-  vcg::tri::UpdateFlags<CMeshO>::VertexClearV(currentMesh->cm);
-  vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(currentMesh->cm);
-  int nv=0;
-  for(size_t i=0;i<currentMesh->cm.face.size();i++)
-  {
-    for (int j=0;j<3;j++)
-    if (!currentMesh->cm.face[i].IsV() && currentMesh->cm.face[i].IsB(j))
+    switch(ID(action))
     {
-      CFaceO* startB=&(currentMesh->cm.face[i]);
-      vcg::face::Pos<CFaceO> p(startB,j);
-            do
-      {
-                                p.V()->SetV();
-        outline.push_back(p.V()->P());
-        p.NextB();
-                                nv++;
-      }
-      while(!p.V()->IsV());
-                        if (capDir==CAP_CCW)
-                                std::reverse(outline.begin(),outline.end());
-
-      outlines.push_back(outline);
-      outline.clear();
+        case FP_WAFFLE_SLICE :
+        default: return false;
     }
-  }
-        if (nv<2) return;
-  CMeshO::VertexIterator vi=vcg::tri::Allocator<CMeshO>::AddVertices(destMesh->cm,nv);
-  for (size_t i=0;i<outlines.size();i++)
-  {
-    for(size_t j=0;j<outlines[i].size();++j,++vi)
-                        (&*vi)->P()=outlines[i][j];
-  }
-
-  std::vector<int> indices;
-  glu_tesselator::tesselate(outlines, indices);
-//  Log(0,"%d new faces",indices.size());
-  std::vector<Point3f> points;
-  glu_tesselator::unroll(outlines, points);
-  CMeshO::FaceIterator fi=tri::Allocator<CMeshO>::AddFaces(destMesh->cm,nv-2);
-  for (size_t i=0; i<indices.size(); i+=3,++fi)
-  {
-    (*&fi)->V(0)=&destMesh->cm.vert[ indices[i+0] ];
-    (*&fi)->V(1)=&destMesh->cm.vert[ indices[i+1] ];
-    (*&fi)->V(2)=&destMesh->cm.vert[ indices[i+2] ];
-  }
-        tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
-  //vcg::tri::UpdateTopology<CMeshO>::FaceFace(destMesh->cm);
-  vcg::tri::UpdateBounding<CMeshO>::Box(destMesh->cm);
 }
+*/
 
-///////// NUOVE FUNZIONI
-void ExtraFilter_SlicePlugin::generateCap(MeshModel * mBase, /*const*/ Plane3f &slicingPlane, vcg::CallBackPos *cb, MeshModel * mCap, MeshModel * mSlice)
+void ExtraFilter_SlicePlugin::generateRectSeg(const float &epsTmp, const float &lengthDiag, Segment2f lati[])
 {
-        CMeshO &base = mBase->cm;
-//        CMeshO &cap = mCap->cm;
-        CMeshO &slice = mSlice->cm;
+    //variabili di supporto
+    float yMag = +epsTmp;
+    float yMin = -epsTmp;
 
-        //Prepara la mesh base su cui fare slicing
-        SlicedEdge<CMeshO> slicededge(slicingPlane);
-        SlicingFunction<CMeshO> slicingfunc(slicingPlane);
-        vcg::RefineE<CMeshO, SlicingFunction<CMeshO>, SlicedEdge<CMeshO> >
-                (base, slicingfunc, slicededge, false, cb);
-        vcg::tri::UpdateTopology<CMeshO>::FaceFace(base);
-        vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(base);
+    //punti per il rettangolo
+    Point2f a1,b1,a2,b2;    //a1 e a2 sono i punti + interni
+    a1.X() = 0;
+    a1.Y() = yMag;
 
-        //CREA LA SLICE (parte A): crea la slice dalla mesh base (ma per ora  una slice aperta)
-        mSlice->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-        vcg::tri::UpdateSelection<CMeshO>::VertexFromQualityRange(base,VERTEX_LEFT,VERTEX_LEFT);
-        vcg::tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(base);
+    a2.X() = 0;
+    a2.Y() = yMin;
 
-        createSlice(mBase,mSlice);
+    b1.X() = lengthDiag;
+    b1.Y() = yMag;
 
-        vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(slice);
+    b2.X() = lengthDiag;
+    b2.Y() = yMin;
 
-        mCap->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-
-        // CREA IL CAP (il piano) dalla slice appena creata
-        capHole(mSlice,mCap);
-
-//??    per il singolo, ma non per i cap del ciclo (casomai per gli slice del ciclo)
-//??    il ciclo fa altre cose su cap (lo fonde con slice1, lo usa per generare slice2 e lo fonde con slice2)
-//        vcg::tri::UpdateTopology<CMeshO>::FaceFace(cap);
-//        vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(cap);
-//        vcg::tri::UpdateBounding<CMeshO>::Box(cap);
+    //inizializzo i segmenti
+    lati[L1].Set(a1,b1);    //lato + a destra
+    lati[L2].Set(a2,b2);    //lato + a sinistra
+    lati[l1].Set(a1,a2);    //lato minore che passa per il centro
+    //il lato minore più lontano non sereve
 }
 
+bool compareX(JointPoint v0, JointPoint v1)
+{
+    return v0.p.X() < v1.p.X();
+}
 
-void ExtraFilter_SlicePlugin::subtraction(MyEdgeMesh &em, const Point2f &a1, const Point2f &a2, const Point2f &b1, const Point2f &b2, const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
+bool compareY(JointPoint v0, JointPoint v1)
+{
+    return v0.p.Y() < v1.p.Y();
+}
+
+void ExtraFilter_SlicePlugin::addAndBreak(CMeshO &em, Point3f & pJoint, const Axis &axisOrthog, const Axis &axisJoint, const JointPoint & jp, const CMeshO::VertexIterator vi, const CMeshO::EdgeIterator ei)
+{
+//Log("Edge spezzato %i", jp.e);
+//Log("Edge nuovo %i", &(*ei) - &(em.edge[0]));
+//Log("Indirizzo V1 spostato su nuovo edge %i", em.edge[jp.e].V(1) - &(em.vert[0]));
+//Log("Indirizzo V Joint %i", &(*vi) - &(em.vert[0]));
+
+    //SPEZZO IN DUE UN EDGE
+    //converto il punto di intersezione in 3D (la terza coordinata pJoint[axis] è sempre la stessa per tutti i punti)
+    pJoint[axisJoint] = jp.p.X();
+    pJoint[axisOrthog] = jp.p.Y();
+
+    //aggiungo un solo vertice per il punto di intersezione (i 2 edge usano i vertici dell'edge corrente e in + solo il nuovo vertice d'intersezione)
+    (*vi).P() = pJoint;     //aggiungo il nuovo vertice di intersezione
+    (*vi).SetV();           //indico che è un punto di Joint per la successiva fase di cancellazione
+    //spezzo l'edge corrente in due edge sul punto di intersezione: aggiungo solo il secondo edge e per il primo edge uso l'edge corrente
+
+    //il nuovo edge ha...
+    ei->V(0) = &(*vi);              //... come vertice 0 il nuovo vertice di intersezione e ...
+    ei->V(1) =em.edge[jp.e].V(1);   //... come vertice 1 setto il vertice dal lato giusto (indV1) dell'edge corrente
+
+    //l'edge 1, fatto sull'edge corrente, ha il vertice 0 inalterato, mentre...
+    em.edge[jp.e].V(1) = &(*vi);       //...il vertice 1 diventa il nuovo vertice di intersezione
+}
+
+void ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
 {
     assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
-    assert(em.edge.size()!=0);
 
+    //dalla mesh testata venivano mesh con troppi vertici rispetto al numero di edge (che dovrebbero essere uguali)
+    tri::Allocator<CMeshO>::CompactEdgeVector(em);
+    tri::Allocator<CMeshO>::CompactVertexVector(em);
 
-    Segment2f lato1, lato2, lato3, seg;
-    lato1.Set(a1,b1);
-    lato2.Set(a1,a2);
-    lato3.Set(a2,b2);
+    // 1- RICERCA DEI PUNTI DI INTERSEZIONE TRA MESH E RETTANGOLO
+    tri::UpdateTopology<CMeshO>::EdgeEdge(em);
+    vcg::tri::UpdateFlags<CMeshO>::EdgeClearV(em);  // setto i flag per sapere se sono stati visitati dal sottociclo (che visita una sagoma alla volta)
+
+    //variabili usate per convertire l'edge esaminato in 2D cosi da poter usare la funzione di intersezione
+    Segment2f seg;
+    Point2f p0_2D, p1_2D;
 
     Point2f pJoint2D;       //punto di intersezione 2D inizializzato dal test di intersezione
-    Point3f pJoint;         //punto di intersezione 3D da inserire nell'edgeMesh
-    pJoint[axis] = height;  //è uguale per tutti i punti
 
-    Point3f pAngle1, pAngle2;   //converto in 3D li angoli del rettangolo per quando dovranno essere inseriti
-    pAngle1[axis] = pAngle2[axis] = height;
-    pAngle1[axisOrthog] = a1.X();
-    pAngle2[axisOrthog] = a2.X();
-    pAngle1[axisJoint] = a1.Y();
-    pAngle2[axisJoint] = a2.Y();
+    //vettori che memorizzano i punti di intersezione trovati, uno per ogni lato del rettangolo
+    vector<JointPoint> jointPointsL1;
+    vector<JointPoint> jointPointsL2;
+    vector<JointPoint> jointPointsl1;
 
-
-    vector<latoRect> lJoints;   //memorizza per ogni punto di intersezione quale lato è stato intersecato
-    MyEdgeMesh::VertexIterator vi;   //alla prima passata  usato per inserire il vertice di intersezione
-
-////// DISEGNO DEL RETTANGOLOLO DI SOTTRAZIONE (PARTE DA RIMUOVERE)
-    Point3f k1,k2,h1,h2;
-    k1[axis] = height;
-    k1[axisOrthog] = a1.X();
-    k1[axisJoint] = a1.Y();
-    k2[axis] = height;
-    k2[axisOrthog] = a2.X();
-    k2[axisJoint] = a2.Y();
-    h1[axis] = height;
-    h1[axisOrthog] = b1.X();
-    h1[axisJoint] = b1.Y();
-    h2[axis] = height;
-    h2[axisOrthog] = b2.X();
-    h2[axisJoint] = b2.Y();
-
-    MyEdgeMesh::VertexIterator v1 = vcg::tri::Allocator<MyEdgeMesh>::AddVertices(em,4);
-    MyEdgeMesh::VertexIterator v2 = v1+1;
-    MyEdgeMesh::VertexIterator v3 = v1+2;
-    MyEdgeMesh::VertexIterator v4 = v1+3;
-
-    (*v1).P() = k1;
-    (*v2).P() = k2;
-    (*v3).P() = h1;
-    (*v4).P() = h2;
-
-    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
-    em.edge.back().V(0) = &(*v1);
-    em.edge.back().V(1) = &(*v2);
-
-    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
-    em.edge.back().V(0) = &(*v2);
-    em.edge.back().V(1) = &(*v4);
-
-    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
-    em.edge.back().V(0) = &(*v4);
-    em.edge.back().V(1) = &(*v3);
-
-    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
-    em.edge.back().V(0) = &(*v3);
-    em.edge.back().V(1) = &(*v1);
-
-    // setto i flag per sapere se sono stati visitati dal ciclo principali (che visita una sagoma alla volta)
-//    vcg::tri::UpdateFlags<CMeshO>::EdgeClearV(em);
-    for(int i = 0; i < em.edge.size(); ++i)
+    for(size_t i = 0; i < em.edge.size(); i++)      // ciclo sulle diverse sagome
     {
-        em.edge[i].ClearV();
-    }
-
-    // ciclo sulle diverse dagome
-    for(int i = 0; i < em.edge.size(); ++i)
-    {
-
-        Log("Sagoma %i", i+1);
-        MyEdge * eStart = &(em.edge[i]);    //memorizza l'edge di partenza
-
-        if(eStart->IsV())
+        if (!em.edge[i].IsV())
         {
-            MyEdge * ei = eStart;           //itera sugli edge
-            MyEdge * ePrec = NULL;          //usato per vedere se torno indietro sullo stesso edge (in tal caso la sagoma è aperta)
+            edge::Pos<CEdgeO> eStart(&em.edge[i],0);    //memorizza l'edge di partenza
+            edge::Pos<CEdgeO> eCorr = eStart;           //itera sugli edge
 
             int numE = 0;
             do
             {
-                Log("edge visited: %i", numE);
                 numE++;
 
-                MyEdge &eCorr = (*ei);
-                eCorr.SetV();
+                eCorr.E()->SetV();
 
-                Point3f &p0 = (eCorr.V(0))->P();
-                Point3f &p1 = (eCorr.V(1))->P();
+                Point3f &p0 = eCorr.E()->V(0)->P();
+                Point3f &p1 = eCorr.E()->V(1)->P();
 
-                //converto i vertici in 2D
-                Point2f p2D0, p2D1;
-                p2D0.X() = p0[axisOrthog];
-                p2D0.Y() = p0[axisJoint];
-                p2D1.X() = p1[axisOrthog];
-                p2D1.Y() = p1[axisJoint];
+                //converto i vertici in 2D: per come ho definito i retangli di ritaglio la X è lungo axisJoint e la Y è lungo axisOrthog
+                p0_2D.X() = p0[axisJoint];
+                p0_2D.Y() = p0[axisOrthog];
+                p1_2D.X() = p1[axisJoint];
+                p1_2D.Y() = p1[axisOrthog];
 
-                //inizializzo il segmento 2D
-                seg.Set(p2D0,p2D1);
+                //inizializzo il segmento 2D da usare per il test di intersezione
+                seg.Set(p0_2D,p1_2D);
 
-                latoRect lJoint;
-                if(vcg::SegmentSegmentIntersection(lato1,seg,pJoint2D))
-                    lJoint = L1;
-                else if(vcg::SegmentSegmentIntersection(lato2,seg,pJoint2D))
-                    lJoint = l1;
-                else if(vcg::SegmentSegmentIntersection(lato3,seg,pJoint2D))
-                    lJoint = L2;
-                else
-                    lJoint = NO_LATO;
-                //bool isJoint = (vcg::SegmentSegmentIntersection(lato1,seg,pJoint2D)) || (vcg::SegmentSegmentIntersection(lato2,seg,pJoint2D)) || (vcg::SegmentSegmentIntersection(lato3,seg,pJoint2D));
-
-                if(lJoint != NO_LATO)
+                int ei = eCorr.E() - &(em.edge[0]); //indice dell'edge corrente
+bool cc = false;
+                //un segmento puo' intersecare contemporaneamente 2 lati (ma non 3) quindi non posso mettere else
+                if(vcg::SegmentSegmentIntersection(lati[L1],seg,pJoint2D))
                 {
-
-                    //converto il punto di intersezione in 3D
-                    pJoint[axisOrthog] = pJoint2D.X();
-                    pJoint[axisJoint] = pJoint2D.Y();
-
-                    //spezzo l'edge corrente in due edge sul punto di intersezione
-
-                    //aggiungo solo il secondo edge (per il primo edge uso l'edge corrente)
-                    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
-                    //aggiungo un solo vertice per il punto di intersezione (i 2 edge usano i vertici dell'edge corrente e solo il nuovo vertice d'intersezione)
-                    vi = vcg::tri::Allocator<MyEdgeMesh>::AddVertices(em,1);
-
-                    (*vi).P() = pJoint;         //aggiungo il nuovo vertice di intersezione
-                    lJoints.push_back(lJoint);  //memorizzo il lato intersecato
-                    (*vi).SetV();               //indico che è un punto di intersezione
-
-                    //l'edge 1, fatto sull'edge corrente, ha il vertice 0 inalterato, mentre...
-                    eCorr.V(1) = &(*vi); //...il vertice 1 diventa il nuovo vertice di intersezione
-
-                    //l'edge 2 ha...
-                    em.edge.back().V(0) = &(*vi);  //... come vertice 0 il nuovo vertice di intersezione e ...
-                    em.edge.back().V(1) = eCorr.V(1);  //... come vertice 1 setto il vertice 2 dell'edge corrente
+                    JointPoint newJoint(pJoint2D, ei, L1);
+                    jointPointsL1.push_back(newJoint);
+if(cc){Log("PROBLEMAAAAAAAAAA");
+cc = true;
+Log("ei L1: %i", ei);}
                 }
-                else
-                    (*vi).ClearV();
+                if(vcg::SegmentSegmentIntersection(lati[L2],seg,pJoint2D))
+                {
+                    JointPoint newJoint(pJoint2D, ei, L2);
+                    jointPointsL2.push_back(newJoint);
+if(cc){Log("PROBLEMAAAAAAAAAA");
+cc = true;
+Log("ei L2: %i", ei);}
+                }
+                if(vcg::SegmentSegmentIntersection(lati[l1],seg,pJoint2D))
+                {
+                    JointPoint newJoint(pJoint2D, ei, l1);
+                    jointPointsl1.push_back(newJoint);
+if(cc){Log("PROBLEMAAAAAAAAAA");
+cc = true;
+Log("ei l1: %i", ei);}
+                }
+cc = false;
+                eCorr.NextE();
 
-                ePrec = ei;
-                ei = eCorr.EEp(1);  // mi sposto sull'edge successivo
+            }while(eCorr != eStart); //&& eCorr != NULL && eCorr != ePrec
 
-            }while (ei != eStart && ei != NULL && ei != ePrec);
+//            Log("edge visited: %i", numE);
         }
     }
 
+    int nJP = jointPointsL1.size() + jointPointsl1.size() + jointPointsL2.size();
+    if(nJP == 0) return; // se non ho trovato punti di intersezione nn devo fare nulla: esco
 
-    // setto i flag per sapere se sono stati visitati dal ciclo principali (che visita una sagoma alla volta)
-//    vcg::tri::UpdateFlags<CMeshO>::EdgeClearV(em);
-    for(int i = 0; i < em.edge.size(); ++i)
+    // 2- AGGIUNTA DEI PUNTI DI INTERSEZIONE SPEZZANDO GLI EDGE DELLA MESH
+
+    //percorrendo un lato lungo del rettangolo (L1 o L2) tutte le volte che entro nella sagoma attraverso un punto di joint devo passare da un'altro punto di joint per uscire dalla sagoma.
+    //Dunque se ho un numero pari di punti di joint lungo un lato, dopo averlo percorso sono fuori dalla sagoma.
+    //Se invece i joint sono dispari alla fine sono ancora dentro la sagoma e devo aggiungere lo spigolo del rettangolo.
+    //Nota 1: quindi ho di nuovo un numero pari di vertici su L1 e L2.
+    //Nota 2: se l1 sia pari o dispari dipende direttamente da L1 e L2.
+    //Nota 3: nJP è sicuramente pari perchè seguendo il percorso L1-l1-L2 parto da fuori, passo sempre da un punto di joint e alla fine sono di nuovo fuori (e ovviamente resta pari anche se aggiungo i due spigoli)
+
+    Point3f pJoint;         //punto di intersezione 3D, usato per convertire i pJoint2D in 3D ed inserirli nell'edgeMesh
+    pJoint[axis] = height;  //la terza coordinata è uguale per tutti i punti dato che lavoriamo in 2D
+//????TOGLI SOTTRAZIONE SOPRA
+    //ordino i vertici di intersezione lungo i lati del rettangolo
+    std::sort(jointPointsL1.begin(), jointPointsL1.end(), compareY);
+    std::sort(jointPointsL2.begin(), jointPointsL2.end(), compareY);
+    std::sort(jointPointsl1.begin(), jointPointsl1.end(), compareX);    //lo ordino per X
+
+//??un singolo segmento puo' aver intersecato 2 lati del rettangolo ed in tal caso viene riferito da + di 1 punto di Joint, quindi nello spezzare devo mettere nel nuovo edge quello dalla parte giusta
+//??L1 sta + a destra quindi dato l'edge da spezzare il suo vertice più a destra andrà nel nuovo edge e sarà sostituito dal punto di joint
+//??int indV1 = (em.edge[jointPointsL1[iL1].e].V(0)->P().Y() > em.edge[jointPointsL1[iL1].e].V(1)->P().Y()) ? 0 : 1;
+
+//?? PROBLEMA non ho considerato nessuno spigolo è dentro la mesh che viene intersecata solo da l1
+
+
+    //per gli edge di chiusura che aggiungo in seguito (dopo aver rimosso gli edge interni) quello che faccio è tenere un indice ivS che indica da dove ho iniziato a inserire i nuovi vertici e poi inserisco i vertici a coppie in ordine, cosi successivamente li ripesco a coppie e creo gli edge (tratto a parte gli edge incidenti su spigoli)
+
+    size_t iL1, iL2, il1, endl1, ivS;   //indici per scorrere
+    ivS = em.vert.size();               //indice del primo dei nuovi vertici (usato successivamente per creare gli edge di chiusura)
+
+    endl1 = jointPointsl1.size();       //indice di coda dei punti di joint sul lato l1
+
+//???? ciclo for principale di rimozione vertici puoi farlo anche solo fino a qui
+    //iteratori a verice ed edge nuovi da creare
+    CMeshO::EdgeIterator ei = vcg::tri::Allocator<CMeshO>::AddEdges(em,nJP);    //di edge aggiungo quelli per quando spezzo un edge nel punto di intersezione: sono nJP dato che nello spezzare riuso l'edge spezzato
+
+    int dispL1 = jointPointsL1.size()%2;
+    int dispL2 = jointPointsL2.size()%2;
+    int addEC = dispL1 + dispL2;
+    int nEC = nJP + addEC; //se serve devo contare anche gli spigoli
+
+    CMeshO::VertexIterator vi = vcg::tri::Allocator<CMeshO>::AddVertices(em,nEC);
+
+//    assert( (jointPointsl1.size()!=1) || (!dispL1 && dispL2 && jointPointsl1.size() == 1) || (dispL1 && !dispL2 && jointPointsl1.size() == 1) );  // se L1 e L2 sono entrambi dispari l1 non può avere un solo vertice : o ne ha o almeno 2
+    if(jointPointsL1.size()!=0 && jointPointsL2.size()!=0)
+        if(jointPointsL1[0].e == jointPointsL2[0].e) Log("PROBLEMAAAAAAAAAA!!!");
+
+
+    //prima controllo se ci sono spigoli e in caso inserisco in ordine di percorrenza di lati del rettangolo (L1-l1-L2) le parti che vanno congiunte
+    if(dispL1)  //se per L1 ho un numero dispari di punti il primo punto va trattato a parte assieme allo spigolo.
     {
-        em.edge[i].ClearV();
+        //VERTICE IN L1
+        addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsL1[0], vi, ei);
+        vi++; ei++;
+        //VERTICE SPIGOLO: aggiungo subito lo spigolo direttamente alla mesh
+        pJoint[axisJoint] = lati[L1].P0().X();
+        pJoint[axisOrthog] = lati[L1].P0().Y();
+        (*vi).P() = pJoint;             //aggiungo il vertice spigolo
+        vi++;       // aggiungendo lo spigolo non devo avanzare di edge (i suoi edge verranno aggiunti nella quarta fase)
+        iL1 = 1;
+
+        //VERTICE IN l1
+        if(endl1 > 0)   //se l1 non è vuoto devo prendere un vertice dal fondo
+        {
+            endl1--;
+            addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[endl1], vi, ei);
+            vi++;
+            ei++;
+            nEC = 4;    //(riuso nEC)
+        }else nEC = 2;
+    }else {iL1 = 0; nEC = 0;}
+
+    if(dispL2)  //se per L2 ho un numero dispari di punti il primo punto va trattato a parte assieme allo spigolo.
+    {
+        //VERTICE IN l1
+        if(endl1 > 0)   //se l1 non è vuoto devo prendere un vertice
+        {
+            addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[il1], vi, ei);
+            il1 = 1;
+            vi++;
+            ei++;
+        } else {il1 = 0; nEC++;}
+        //VERTICE SPIGOLO: aggiungo subito lo spigolo direttamente alla mesh
+        pJoint[axisJoint] = lati[L2].P0().X();
+        pJoint[axisOrthog] = lati[L2].P0().Y();
+        (*vi).P() = pJoint;             //aggiungo il vertice spigolo
+        vi++;   // aggiungendo lo spigolo non devo avanzare di edge (i suoi edge verranno aggiunti nella quarta fase)
+        iL2 = 1;
+        //VERTICE IN L2
+        addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsL2[0], vi, ei);
+        vi++; ei++;
+    }else{iL2 = 0; il1 = 0;}
+
+    assert( iL2<2 && iL1<2 && il1<2 && il1<=endl1);
+
+    // Tutti gli altri punti sono presi a coppie: posso avanzare di 2 nei 3 cicli successivi perché ho sistemato gli indici in modo che rimanga un numero pari di vertici
+    for(; iL1  < jointPointsL1.size(); vi++, iL1++, ei++)
+    {
+        addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsL1[iL1], vi, ei);
+        vi++; iL1++; ei++;
+        addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsL1[iL1], vi, ei);
+    }
+    for(; iL2  < jointPointsL2.size(); vi++, iL2++, ei++)
+    {
+        addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsL2[iL2], vi, ei);
+        vi++; iL2++; ei++;
+        addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsL2[iL2], vi, ei);
+    }
+    for(; il1  < endl1; vi++, il1++, ei++)
+    {
+        addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[il1], vi, ei);
+        vi++; il1++; ei++;
+        addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[il1], vi, ei);
     }
 
 
-    // Secondo giro sul poligono: faccio pulizia sostituendo pezzi di poligono con pezzi di rettangolo
-    int i = 0;      //per scorrere i lati intersecati
+    // 3- RIMOZIONE DEGLI EDGE INTERNI AL RETTANGOLO
+    tri::UpdateTopology<CMeshO>::EdgeEdge(em);
+    vcg::tri::UpdateFlags<CMeshO>::EdgeClearV(em);  // setto i flag per sapere se sono stati visitati dal sottociclo (che visita una sagoma alla volta)
 
-    // ciclo sulle diverse dagome
-    for(int i = 0; i < em.edge.size(); ++i)
+    CVertexO *firstJV = &(em.vert[0]) + ivS; // indirizzo del primo punto di joint
+
+    //le y dei due lati lunghi del rettangolo, per verificare se un vertice è dentro
+    float & y1 = lati[0].P0().Y();
+    float & y2 = lati[1].P1().Y();
+
+    unsigned int nDel, nVDel;
+    nDel = nVDel = 0;
+
+//    for(size_t i = 0; i < old em.edge.size(); i++)//non c'è bisogno che arrivo in fondo perché gli edge nuovi fanno parte sicuramente di qualche sagoma
+    for(size_t i = 0; i < em.edge.size(); i++)
     {
-
-        Log("Sagoma %i", i+1);
-        MyEdge * eStart = &(em.edge[i]);    //memorizza l'edge di partenza
-
-        if(eStart->IsV())
+        if (!em.edge[i].IsV())
         {
-            MyEdge * ei = eStart;           //itera sugli edge
-            MyEdge * ePrec = NULL;          //usato per vedere se torno indietro sullo stesso edge (in tal caso la sagoma è aperta)
 
-            //prima controllo se il punto di partenza sta dentro il rettangolo
-            MyEdge &es = (*eStart);
-            bool dentro = ( (es.V(0)->P().X() < a1.X()) && (es.V(0)->P().X() > a2.X()) &&  (es.V(0)->P().Y() > a2.Y()) );
+            edge::Pos<CEdgeO> eStart(&em.edge[i],0);    //memorizza l'edge di partenza
+//??WHILE INUTILE SE LIMITO IL FOR ALL'INDICE VECCHIO
+if(eStart.V() >= firstJV)Log("jjjj");
+            while(eStart.V() >= firstJV)                //cerco un punto non di Joint
+                eStart.NextE();
 
+            edge::Pos<CEdgeO> eCorr = eStart;           //itera sugli edge
+
+            bool dentro = ( (eStart.V()->P().X() > 0) && (eStart.V()->P().Y() < y1) && (eStart.V()->P().Y() > y2) );//&& !(eStart.V()->IsV() ) );
+//Log("dentro %i", dentro);
+int numE = 0;
             do
             {
+numE++;
+                eCorr.E()->SetV();
 
-                MyEdge &eCorr = (*ei);
-                eCorr.SetV();
+//                if(eStart.V()->IsV())
+                if(eCorr.V() >= firstJV)   //se attraverso un punto di Joint
+                    dentro = !dentro;
+                else if(dentro)
+{
+                    tri::Allocator<CMeshO>::DeleteVertex(em,*(eCorr.V()));
+nVDel++;
+//Log("DEL!!!");
+}
 
-/*** metti rimozione arco e se serve inserimento nuovi punti
-                if(lJoint != NO_LATO)
-                {
+                if(dentro)  //se sono dentro non faccio altro che ...
+{
+                    tri::Allocator<CMeshO>::DeleteEdge(em,*(eCorr.E())); // ...segnare che l'edge corrente va eliminato
+nDel++;
+}
 
-                    //converto il punto di intersezione in 3D
-                    pJoint[axisOrthog] = pJoint2D.X();
-                    pJoint[axisJoint] = pJoint2D.Y();
-
-                    //spezzo l'edge corrente in due edge sul punto di intersezione
-
-                    //aggiungo solo il secondo edge (per il primo edge uso l'edge corrente)
-                    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
-                    //aggiungo un solo vertice per il punto di intersezione (i 2 edge usano i vertici dell'edge corrente e solo il nuovo vertice d'intersezione)
-                    vi = vcg::tri::Allocator<MyEdgeMesh>::AddVertices(em,1);
-
-                    (*vi).P() = pJoint;         //aggiungo il nuovo vertice di intersezione
-                    lJoints.push_back(lJoint);  //memorizzo il lato intersecato
-                    (*vi).SetV();               //indico che è un punto di intersezione
-
-                    //l'edge 1, fatto sull'edge corrente, ha il vertice 0 inalterato, mentre...
-                    eCorr.V(1) = &(*vi); //...il vertice 1 diventa il nuovo vertice di intersezione
-
-                    //l'edge 2 ha...
-                    em.edge.back().V(0) = &(*vi);  //... come vertice 0 il nuovo vertice di intersezione e ...
-                    em.edge.back().V(1) = eCorr.V(1);  //... come vertice 1 setto il vertice 2 dell'edge corrente
-                }
-                else
-                    (*vi).ClearV();
-*/
-                ePrec = ei;
-                ei = eCorr.EEp(1);  // mi sposto sull'edge successivo
-
-            }while (ei != eStart && ei != NULL && ei != ePrec);
+                eCorr.NextE();
+            }while(eCorr != eStart); //&& ei != NULL && ei != ePrec
+//Log("Nuova sagoma trovata numE: %i", numE);
         }
     }
 
+    // 4- AGGIUNTA DEGLI EDGE DI CHIUSURA
+    nJP = (nJP/2)+addEC;      //gli edge di chiusura sono pari al numero di vertici di Joint inseriti diviso 2 + gli edge per gli spigoli
+    ei = vcg::tri::Allocator<CMeshO>::AddEdges(em,nJP);
+    CMeshO::EdgeIterator eEnd = ei+nJP;
 
 
-
-
-
-
-//////
-
-    /*
-    int numE = 0;
-    do
+    if(nEC==3)  //ci sono i due spigoli e sono direttamente congiunti
     {
-        numE++;
-        Log("edge visited: %i", numE);
-        MyEdge &eCorr = (*ei);
+        //e0
+        ei->V(0)=firstJV;   //v0
+        firstJV++;
+        ei->V(1)=firstJV;   //v1
+        ei++;   //e1 (non mi sposto sul vertice successivo)
+        ei->V(0)=firstJV;   //v1
+        firstJV++;
+        ei->V(1)=firstJV;   //v2
+        ei++;   //e2
+        ei->V(0)=firstJV;   //v2
+        firstJV++;
+        ei->V(1)=firstJV;   //v3
 
-        MyVertex &v0 = *(eCorr.V(0));
-        MyVertex &v1 = *(eCorr.V(1));
+        ei++;
+        firstJV++;
 
-        Point3f &p0 = v0.P();
-        Point3f &p1 = v1.P();
+    }else if(nEC==4)    //ci sono i due spigoli ma non sono direttamente congiunti
+    {
+        //e0
+        ei->V(0)=firstJV;   //v0
+        firstJV++;
+        ei->V(1)=firstJV;   //v1
+        ei++;   //e1
+        ei->V(0)=firstJV;   //v1
+        firstJV++;
+        ei->V(1)=firstJV;   //v2
+        firstJV++;// stavolta sposto
+        ei++;   //e2
+        ei->V(0)=firstJV;   //v3
+        firstJV++;
+        ei->V(1)=firstJV;   //v4
+        ei++;   //e1
+        ei->V(0)=firstJV;   //v4
+        firstJV++;
+        ei->V(1)=firstJV;   //v5
+        firstJV++;
+        ei++;
+    }
 
-        //converto i vertici in 2D
-        Point2f p2D0, p2D1;
-        p2D0.X() = p0[axisOrthog];
-        p2D0.Y() = p0[axisJoint];
-        p2D1.X() = p1[axisOrthog];
-        p2D1.Y() = p1[axisJoint];
 
-        //inizializzo il segmento
-        seg.Set(p2D0,p2D1);
-
-//        if(dentro)
-//            eCorr.SetV(); //segno che l'edge dovr essere rimosso
-
-        latoRect lJoint;
-        if(vcg::SegmentSegmentIntersection(lato1,seg,pJoint2D))
-        {
-            Log("intersection with L1");
-            lJoint = L1;
-        }
-        else if(vcg::SegmentSegmentIntersection(lato2,seg,pJoint2D))
-        {
-            Log("intersection with l1");
-            lJoint = l1;
-        }
-
-        else if(vcg::SegmentSegmentIntersection(lato3,seg,pJoint2D))
-        {
-            Log("intersection with L2");
-            lJoint = L2;
-        }
-        else
-        {
-            Log("intersection with NO_LATO");
-            lJoint = NO_LATO;
-        }
-        //bool isJoint = (vcg::SegmentSegmentIntersection(lato1,seg,pJoint2D)) || (vcg::SegmentSegmentIntersection(lato2,seg,pJoint2D)) || (vcg::SegmentSegmentIntersection(lato3,seg,pJoint2D));
-
-        if(lJoint != NO_LATO)
-        {
-
-            //converto il punto di intersezione in 3D
-            pJoint[axisOrthog] = pJoint2D.X();
-
-            pJoint[axisJoint] = pJoint2D.Y();
-
-            //spezzo l'edge corrente in due edge sul punto di intersezione
-
-            //aggiungo solo il secondo edge (per lil primo edge uso l'edge corrente)
-            vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
-            //aggiungo un solo vertice per il punto di intersezione (i 2 edge usano i vertici dell'edge corrente e solo il nuovo vertice d'intersezione)
-            vi = vcg::tri::Allocator<MyEdgeMesh>::AddVertices(em,1);
-
-            (*vi).P() = pJoint;             //aggiungo il nuovo vertice di intersezione
-            lJoints.push_back(lJoint);             //memorizzo il lato intersecato
-            (*vi).SetV();
-
-            //il 2 edge ha...
-            em.edge.back().V(0) = &(*vi);  //... come 1 vertice il nuovo vertice di intersezione e ...
-            em.edge.back().V(1) = eCorr.V(1);  //... come 2 setto il 2 vertice dell'edge corrente
-
-            //il 1 edge poich fatto sull'edge corrente ha il 1 vertice inalterato, mentre...
-            eCorr.V(1) = &(*vi); //...il secondo vertice  il nuovo vertice di intersezione
-
-        }
-        else
-        {
-            Log("sfasfasfasfa");
-//            (*vi).ClearV();
-
-        }
-
-        ePrec = ei;
-        ei = v1.VEp();  // mi sposto sull'edge successivo
-
-    }while (ei != eStart && ei != NULL && ei != ePrec);
-*/
 /*
-    //aggiungo l'edge del lato minore del rettangolo  e i suoi 2 vertici
-    vcg::tri::Allocator<MyEdgeMesh>::AddEdges(em,1);
-    vi = vcg::tri::Allocator<MyEdgeMesh>::AddVertices(em,2);
+//iterations of StaticUnroller
+template<int N>
+struct StaticUnroller
+{
+        static void step()
+        {
+                ei->V(0)=firstJV;
+                firstJV++;
+                ei->V(1)=firstJV;	//per l'iterazione successiva non avanzo con il secondo vertice
+                ei++;
+                StaticUnroller<int N-1>::step();
+        }
+}
+
+//stop of StaticUnroller
+template<int 0>
+struct StaticUnroller
+{
+        static void step() { }
+}
 
 
-    // Secondo giro sul poligono: faccio pulizia sostituendo pezzi di poligono con il rettangolo
-    ei = eStart;    //riparto dall'inizio
-    int i = 0;      //per scorrere i lati intersecati
-    //prima controllo se il punto di partenza  gi dentro il rettangolo
-    MyEdge &es = (*eStart);
-    bool dentro = ( (es.V(0)->P().X() < a1.X()) && (es.V(0)->P().X() > a2.X()) &&  (es.V(0)->P().Y() > a2.Y()) );
-
-
-    do
+    if(incSpig==3)
     {
-        MyEdge &eCorr = (*ei);
-        MyVertex &v0 = *(eCorr.V(0));
-        MyVertex &v1 = *(eCorr.V(1));
-        ei = v1.VEp();  // mi sposto sull'edge successivo
+        StaticUnroller<3>::step();
+    }else if(incSpig==4)
+    {
+        StaticUnroller<2>::step();
+        firstJV++;  // stavolta sposto il vertice
+        StaticUnroller<2>::step();
+    }
 
-        if(v0.IsV())
-        {
-            latoRect &lJoiny = lJoints[i];
-            i++;
-
-            dentro = !dentro; //una volta passati attraverso un lato qualsiasi il 2 edge appena creato e su cui ci spostiamo si trova dalla parte opposta rispetto al 1
-        }
-        else if(dentro)
-        {
-           //?? prima muoviti poi cancella: puoi farlo all'inizio
-//           tri::Allocator<MyEdgeMesh>::DeleteEdge(em,eCorr);
-//           tri::Allocator<MyEdgeMesh>::DeleteVertex(em,v0);
-                    ;
-        }
-
-    }while (ei != eStart && ei != NULL);
 */
+
+    for(; ei < eEnd; firstJV++, ei++)
+    {
+        Log("QUI NON CI DEVI ENTRARE PER ORA");
+        ei->V(0)=firstJV;
+        firstJV++;
+        ei->V(1)=firstJV;
+    }
+
+
+    tri::Allocator<CMeshO>::CompactEdgeVector(em);
+    tri::Allocator<CMeshO>::CompactVertexVector(em);
+
+    tri::UpdateTopology<CMeshO>::EdgeEdge(em);
+
+
+/*
+Log per testare
+
+Log("N vert Orig %i", em.vert.size());
+Log("N edge Orig %i", em.edge.size());
+
+
+Log("stampa vertici e edge");
+for(size_t i = 0; i < em.vert.size(); i++)
+{
+    Log("Vertex %i (%f,%f,%f)", i, em.vert[i].P().X(), em.vert[i].P().Y(), em.vert[i].P().Z());
+}
+for(size_t i = 0; i < em.edge.size(); i++)
+{
+    CVertexO* start = &(em.vert[0]);
+    Log("Edge %i (%i,%i)", i, &(*em.edge[i].V(0))-start,&(*em.edge[i].V(1))-start);
+}
+*/
+
+
+//?????????metti controllo errore se torna indietro: la sagoma e' aperta
 
 }
 

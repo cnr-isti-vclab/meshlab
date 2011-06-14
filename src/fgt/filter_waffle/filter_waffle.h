@@ -55,7 +55,6 @@ class MyEdgeMesh: public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<M
 typedef vcg::tri::io::SVGProperties SVGProperties;
 
 
-typedef enum{L1,l1,L2,NO_LATO} latoRect;
 typedef enum{X = 0, Y = 1, Z = 2} Axis;
 
 template <int A>
@@ -70,6 +69,22 @@ struct Succ<Z>
     enum { value = X };
 };
 
+//L1: lato + a destra, L2: lato + a sinistra, l1: lato minore che passa per il centro
+typedef enum{L1=0,L2=1,l1=2,NO_LATO=3} latoRect;
+
+class JointPoint{
+public:
+    Point2f p;
+    int e;
+    latoRect l;
+
+    JointPoint(Point2f p1, int e1, latoRect l1)
+    {
+        p = p1; e = e1; l = l1;
+    }
+};
+
+
 
 class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 {
@@ -78,31 +93,30 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 
 public:
 //        enum{X,Y,Z};
-        enum { FP_SINGLE_PLANE, FP_PARALLEL_PLANES, FP_WAFFLE_SLICE, FP_RECURSIVE_SLICE };
-        enum { CAP_CW, CAP_CCW };
+        enum { FP_WAFFLE_SLICE };
+//        enum { CAP_CW, CAP_CCW };
         enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
         ExtraFilter_SlicePlugin();
         ~ExtraFilter_SlicePlugin(){};
 
         virtual QString filterName(FilterIDType filter) const;
         virtual QString filterInfo(FilterIDType filter) const;
-        virtual bool autoDialog(QAction *);
+//        virtual bool autoDialog(QAction *);
         virtual FilterClass getClass(QAction *);
         virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
         virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
         virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
 
-        static void capHole(MeshModel* orig, MeshModel* dest, int capDir=CAP_CW);
-        static void extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
+//        static void extrude(MeshDocument* doc,MeshModel* orig, MeshModel* dest, float eps, vcg::Point3f planeAxis);
 
     private:
         SVGProperties pr;
-        void createSlice(MeshModel* orig,MeshModel* dest);
+//        void createSlice(MeshModel* orig,MeshModel* dest);
 
         // nuove funzioni
-        void generateCap(MeshModel * mBase, /*const*/ Plane3f &slicingPlane, vcg::CallBackPos *cb, MeshModel * mCap, MeshModel * mSlice);
-        void subtraction(MyEdgeMesh &em, const Point2f &a1, const Point2f &a2, const Point2f &b1, const Point2f &b2, const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height);
-
+        void generateRectSeg(const float &epsTmp, const float &lengthDiag, Segment2f lati[]);
+        void subtraction(CMeshO &em, Segment2f lati[], const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height);
+        void addAndBreak(CMeshO &em, Point3f & pJoint, const Axis &axisOrthog, const Axis &axisJoint, const JointPoint & jp, const CMeshO::VertexIterator vi, const CMeshO::EdgeIterator ei);
 };
 
 namespace vcg {
