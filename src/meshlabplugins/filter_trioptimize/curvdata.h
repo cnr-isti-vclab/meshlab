@@ -35,7 +35,7 @@ public:
 		K = 0; // gaussian curvature
 	}
 	
-	virtual ~CurvData() {};
+  virtual ~CurvData() {}
 	
 	friend const CurvData operator+(const CurvData &lhs, const CurvData &rhs)
 	{

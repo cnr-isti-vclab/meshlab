@@ -43,22 +43,22 @@ class AbsCEFlip;
 class NSMCEFlip : public vcg::tri::CurvEdgeFlip<CMeshO, NSMCEFlip, NSMCEval >
 {
 public:
-	NSMCEFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, NSMCEFlip, NSMCEval >(pos, mark) {}
+  NSMCEFlip(PosType pos, int mark,BaseParameterClass *_pp) :
+    vcg::tri::CurvEdgeFlip<CMeshO, NSMCEFlip, NSMCEval >(pos, mark,_pp) {}
 };
 
 class MeanCEFlip : public vcg::tri::CurvEdgeFlip<CMeshO, MeanCEFlip, MeanCEval >
 {
 public:
-	MeanCEFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, MeanCEFlip, MeanCEval >(pos, mark) {}
+  MeanCEFlip(PosType pos, int mark,BaseParameterClass *_pp) :
+    vcg::tri::CurvEdgeFlip<CMeshO, MeanCEFlip, MeanCEval >(pos, mark,_pp) {}
 };
 
 class AbsCEFlip : public vcg::tri::CurvEdgeFlip<CMeshO, AbsCEFlip, AbsCEval >
 {
 public:
-	AbsCEFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, AbsCEFlip, AbsCEval >(pos, mark) {}
+  AbsCEFlip(PosType pos, int mark,BaseParameterClass *_pp) :
+    vcg::tri::CurvEdgeFlip<CMeshO, AbsCEFlip, AbsCEval >(pos, mark, _pp) {}
 };
 
 // forward declarations
@@ -71,38 +71,38 @@ class QMeanRatioEFlip;
 class MyTriEFlip : public vcg::tri::TriEdgeFlip<CMeshO, MyTriEFlip>
 {
 public:
-	MyTriEFlip(PosType pos, int mark) :
-		vcg::tri::TriEdgeFlip<CMeshO, MyTriEFlip>(pos, mark) {}
+  MyTriEFlip(PosType pos, int mark,BaseParameterClass *pp) :
+    vcg::tri::TriEdgeFlip<CMeshO, MyTriEFlip>(pos, mark,pp) {}
 };
 
 class MyTopoEFlip : public vcg::tri::TopoEdgeFlip<CMeshO, MyTopoEFlip>
 {
 public:
-	MyTopoEFlip(PosType pos, int mark) :
-		vcg::tri::TopoEdgeFlip<CMeshO, MyTopoEFlip>(pos, mark) {}
+  MyTopoEFlip(PosType pos, int mark, BaseParameterClass *pp) :
+    vcg::tri::TopoEdgeFlip<CMeshO, MyTopoEFlip>(pos, mark,pp) {}
 };
 
 class QEFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, QEFlip>
 {
 public:
-	QEFlip(PosType pos, int mark) :
-		vcg::tri::PlanarEdgeFlip<CMeshO, QEFlip>(pos, mark) {}
+  QEFlip(PosType pos, int mark,BaseParameterClass *pp) :
+    vcg::tri::PlanarEdgeFlip<CMeshO, QEFlip>(pos, mark,pp) {}
 };
 
 class QRadiiEFlip :
 public vcg::tri::PlanarEdgeFlip<CMeshO, QRadiiEFlip, QualityRadii>
 {
 public:
-	QRadiiEFlip(PosType pos, int mark) :
-		vcg::tri::PlanarEdgeFlip<CMeshO, QRadiiEFlip, QualityRadii>(pos, mark) {}
+  QRadiiEFlip(PosType pos, int mark,BaseParameterClass *pp) :
+    vcg::tri::PlanarEdgeFlip<CMeshO, QRadiiEFlip, QualityRadii>(pos, mark,pp) {}
 };
 
 class QMeanRatioEFlip :
 public vcg::tri::PlanarEdgeFlip<CMeshO, QMeanRatioEFlip, QualityMeanRatio>
 {
 public:
-	QMeanRatioEFlip(PosType pos, int mark) :
-		vcg::tri::PlanarEdgeFlip<CMeshO, QMeanRatioEFlip, QualityMeanRatio>(pos, mark) {}
+  QMeanRatioEFlip(PosType pos, int mark,BaseParameterClass *pp) :
+    vcg::tri::PlanarEdgeFlip<CMeshO, QMeanRatioEFlip, QualityMeanRatio>(pos, mark,pp) {}
 };
 
 
@@ -282,7 +282,9 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
 			return false; // can't continue, mesh can't be processed
 		}
-		vcg::LocalOptimization<CMeshO> optimiz(m.cm);
+    vcg::tri::PlanarEdgeFlipParameter pp;
+
+    vcg::LocalOptimization<CMeshO> optimiz(m.cm,&pp);
 		float pthr = par.getFloat("pthreshold");
 		time_t start = clock();
 
@@ -308,10 +310,11 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
 
 			int metric = par.getEnum("curvtype");
+      pp.CoplanarAngleThresholdDeg = pthr;
 			switch (metric) {
-				case 0: MeanCEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<MeanCEFlip>(); break;
-				case 1:  NSMCEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<NSMCEFlip>(); 	break;
-				case 2:  AbsCEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<AbsCEFlip>();  break;
+        case 0: optimiz.Init<MeanCEFlip>(); break;
+        case 1: optimiz.Init<NSMCEFlip>();  break;
+        case 2: optimiz.Init<AbsCEFlip>();  break;
 			}
 			
 			// stop when flips become harmful
@@ -334,19 +337,20 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		
-		vcg::LocalOptimization<CMeshO> optimiz(m.cm);
+    vcg::tri::PlanarEdgeFlipParameter pp;
+    vcg::LocalOptimization<CMeshO> optimiz(m.cm,&pp);
 		float pthr = par.getFloat("pthreshold");
-	  time_t	start = clock();
+    pp.CoplanarAngleThresholdDeg=pthr;
+    time_t	start = clock();
 		
 		
 			int metric = par.getEnum("planartype");
 			switch (metric) {
-				case 0:          QEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<QEFlip>(); break;
-				case 1:     QRadiiEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<QRadiiEFlip>(); break;
-				case 2: QMeanRatioEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<QMeanRatioEFlip>(); break;
-				case 3:      MyTriEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<MyTriEFlip>(); break;
-				case 4:     MyTopoEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<MyTopoEFlip>(); 	break;
+        case 0: optimiz.Init<QEFlip>(); break;
+        case 1: optimiz.Init<QRadiiEFlip>(); break;
+        case 2: optimiz.Init<QMeanRatioEFlip>(); break;
+        case 3: optimiz.Init<MyTriEFlip>(); break;
+        case 4: optimiz.Init<MyTopoEFlip>(); 	break;
 			}
 			// stop when flips become harmful
 			optimiz.SetTargetMetric(limit);

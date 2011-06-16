@@ -131,11 +131,11 @@ protected:
 public:
 	CurvEdgeFlip() {}
 	
-	CurvEdgeFlip(PosType pos, int mark)
+  CurvEdgeFlip(PosType pos, int mark,BaseParameterClass *pp)
 	{
 		this->_pos = pos;
 		this->_localMark = mark;
-		this->_priority = ComputePriority();
+    this->_priority = ComputePriority(pp);
 	}
 	
 	
@@ -198,14 +198,15 @@ public:
 	}
 	
 	
-	virtual bool IsFeasible()
+  virtual bool IsFeasible(BaseParameterClass *_pp)
 	{
-		// First the flip must be topologically correct.
+    PlanarEdgeFlipParameter *pp=(PlanarEdgeFlipParameter *)_pp;
+    // First the flip must be topologically correct.
 		if(!vcg::face::CheckFlipEdge(*this->_pos.F(), this->_pos.E()))
 			return false;
 		
 		// then the angle between the involved normals must be greater???
-		if (math::ToDeg(Angle(this->_pos.FFlip()->cN(), this->_pos.F()->cN()) ) <= this->CoplanarAngleThresholdDeg() )
+    if (math::ToDeg(Angle(this->_pos.FFlip()->cN(), this->_pos.F()->cN()) ) <= pp->CoplanarAngleThresholdDeg )
 			return false;
 		
 		CoordType v0, v1, v2, v3;
@@ -231,7 +232,7 @@ public:
 	}
 
 	
-	ScalarType ComputePriority()
+  ScalarType ComputePriority(BaseParameterClass *pp)
 	{
 		/*
 		     1  
@@ -243,7 +244,7 @@ public:
 		     0
 		*/
 		
-		if(!this->IsFeasible())
+    if(!this->IsFeasible(pp))
 			return std::numeric_limits<ScalarType>::infinity();
 		
 		VertexPointer v0, v1, v2, v3;
@@ -307,7 +308,7 @@ public:
 	}
 	
 	
-	static void Init(TRIMESH_TYPE &m, HeapType &heap)
+  static void Init(TRIMESH_TYPE &m, HeapType &heap, BaseParameterClass *pp)
 	{
 		CURVEVAL curveval;
 		heap.clear();
@@ -326,7 +327,7 @@ public:
 				for (unsigned int i = 0; i < 3; i++)
 					if ((*fi).V1(i) - (*fi).V0(i) > 0) {
 						PosType newpos(&*fi, i);
-            Insert(heap, newpos, tri::IMark(m));
+            Insert(heap, newpos, tri::IMark(m),pp);
 					}
 	}
 }; // end CurvEdgeFlip class
