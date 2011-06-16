@@ -1118,7 +1118,7 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b c
     //if(m!=NULL)
 	  //  len = m->cm.bbox.Diag()/20.0;
     //else
-      len = ls.Intrinsics.FocalMm;
+      len = ls.Intrinsics.FocalMm * drawscale;
 
     glPushMatrix();
     glMultMatrix(Inverse(currtr));  //remove current mesh transform
