@@ -168,7 +168,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
             pr.projDir = planeAxis;
             pr.projCenter =  m.mm()->cm.bbox.Center();
 
-            vector<MeshModel*> ev;
+            vector<CMeshO*> ev;
             MeshModel* base = m.mm();
             CMeshO &cmBase = base->cm;
 //            MeshModel* orig = m.mm();
@@ -213,7 +213,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(base->cm, slicingPlane, cap->cm );
 
                 tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
-                ev.push_back(cap);
+                ev.push_back(&(cap->cm));
 
                 if(cap->cm.edge.size()> 0)
                 {
@@ -229,7 +229,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
             if(fname=="") fname="C:/Slice.svg";
             if (!fname.endsWith(".svg")) fname+=".svg";
 
-//            tri::io::ExporterSVG<MeshModel>::Save(ev, fname.toStdString().c_str(), pr);
+            tri::io::ExporterSVG<CMeshO>::Save(ev, fname.toStdString().c_str(), pr);
 
         }
         break;
