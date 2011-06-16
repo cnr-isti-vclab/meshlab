@@ -2,7 +2,7 @@
 #include <QtGui>
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog( Env& envir,QWidget *p )
-:QDockWidget(QString("Plugin"), p),showHelp(false),env(envir)
+:QDockWidget(QString("Plugin"), p),env(envir),showHelp(false)
 {
 	curmask = 0;
 	qf = NULL;
