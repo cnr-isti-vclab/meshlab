@@ -39,7 +39,7 @@
 using namespace std;
 using namespace vcg;
 
-int SnapVertexBorder(CMeshO &m, float threshold);
+int SnapVertexBorder(CMeshO &m, float threshold,vcg::CallBackPos * cb);
 
 CleanFilter::CleanFilter() 
 {
@@ -319,7 +319,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
   case FP_SNAP_MISMATCHED_BORDER :
     {
       float threshold = par.getFloat("EdgeDistRatio");
-      int total = SnapVertexBorder(m.cm, threshold);
+      int total = SnapVertexBorder(m.cm, threshold,cb);
       Log("Successfully Splitted %d faces to snap", total);
     } break;
 
@@ -329,7 +329,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 }
 
 
-int SnapVertexBorder(CMeshO &m, float threshold)
+int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
 {
   tri::Allocator<CMeshO>::CompactVertexVector(m);
   tri::Allocator<CMeshO>::CompactFaceVector(m);
@@ -358,6 +358,8 @@ int SnapVertexBorder(CMeshO &m, float threshold)
   for(CMeshO::VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi)
     if(!(*vi).IsD() && (*vi).IsB())
       {
+        int percPos = (tri::Index(m,*vi) *100) / m.vn;
+        cb(percPos,"Snapping vertices");
         vector<CMeshO::FacePointer> faceVec;
         vector<float> distVec;
         vector<Point3f> pointVec;
@@ -424,7 +426,7 @@ int SnapVertexBorder(CMeshO &m, float threshold)
 //  V0 ------------------V2     V0 -------fv---------V2
 //       i
 
-  for(int i=0;i<splitVertVec.size();++i)
+  for(size_t i=0;i<splitVertVec.size();++i)
     {
       firstVert->P() = splitVertVec[i];
       int eInd = splitEdgeVec[i];
