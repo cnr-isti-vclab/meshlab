@@ -763,7 +763,9 @@ bool testBaryCoords(CoordType &bary)
 template <class CoordType>
 bool NormalizeBaryCoords(CoordType &bary)
 {
-	ScalarType EPS=(ScalarType)0.00000001;
+  typedef typename CoordType::ScalarType ScalarType;
+
+  ScalarType EPS=(ScalarType)0.00000001;
 	bool isOK=testBaryCoords(bary);
 	if (!isOK)
 		return false;
@@ -771,20 +773,14 @@ bool NormalizeBaryCoords(CoordType &bary)
 	typedef typename CoordType::ScalarType ScalarType;
 
 	///test <0
-	if (bary.X()<0)
-		bary.X()=EPS;
-	if (bary.Y()<0)
-		bary.Y()=EPS;
-	if (bary.Z()<0)
-		bary.Z()=EPS;
+  if (bary.X()<0) bary.X()=EPS;
+  if (bary.Y()<0) bary.Y()=EPS;
+  if (bary.Z()<0) bary.Z()=EPS;
 
 	///test >1
-	if (bary.X()>1.0)
-		bary.X()=EPS;
-	if (bary.Y()>1.0)
-		bary.Y()=EPS;
-	if (bary.Z()>1.0)
-		bary.Z()=EPS;
+  if (bary.X()>1.0) bary.X()=1.0-EPS;
+  if (bary.Y()>1.0) bary.Y()=1.0-EPS;
+  if (bary.Z()>1.0) bary.Z()=1.0-EPS;
 	
 	///test sum
 	ScalarType diff=bary.X()+bary.Y()+bary.Z()-1.0;
@@ -799,7 +795,7 @@ template <class MeshType>
 void AssingFather(typename MeshType::VertexType &v,
 									typename MeshType::FaceType *father,
 									typename MeshType::CoordType &bary,
-                  MeshType & domain)
+                  MeshType & /*domain*/)
 {
 #ifdef _DEBUG
 	const typename MeshType::ScalarType eps=(typename MeshType::ScalarType)0.00001;
@@ -818,8 +814,7 @@ void AssingFather(typename MeshType::VertexType &v,
 
 template <class MeshType>
 bool testParametrization(MeshType &domain,
-						 MeshType &Hlev,
-						 bool correct=true)
+             MeshType &Hlev)
 {
 	typedef typename MeshType::FaceType FaceType;
 	typedef typename MeshType::CoordType CoordType;
@@ -1164,7 +1159,7 @@ void ParametrizeLocally(MeshType &parametrized,
 
 
 template <class MeshType>
-void GetUV(const typename MeshType::FaceType* f,
+void InterpolateUV(const typename MeshType::FaceType* f,
 		   const typename MeshType::CoordType &bary,
 		   typename MeshType::ScalarType &U,
 		   typename MeshType::ScalarType &V)
@@ -1430,7 +1425,7 @@ void ParametrizeStarEquilateral(typename MeshType::VertexType *center,
 	{
 		FaceType *father=HresVert[i]->father;
 		CoordType Bary=HresVert[i]->Bary;
-		GetUV<MeshType>(father,Bary,HresVert[i]->T().U(),HresVert[i]->T().V());
+    InterpolateUV<MeshType>(father,Bary,HresVert[i]->T().U(),HresVert[i]->T().V());
 	}
 }
 

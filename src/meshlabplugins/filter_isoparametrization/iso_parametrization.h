@@ -844,14 +844,10 @@ private:
 	void Clamp(vcg::Point2f &UV)
 	{
 		float eps=0.00001f;
-		if ((UV.X()<eps)&&(UV.X()>-eps))
-			UV.X()=0;
-		if ((UV.X()<1+eps)&&(UV.X()>1-eps))
-			UV.X()=1;
-		if ((UV.Y()<eps)&&(UV.Y()>-eps))
-			UV.Y()=0;
-		if ((UV.Y()<1+eps)&&(UV.Y()>1-eps))
-			UV.Y()=1;
+    if (UV.X() < eps) UV.X()=0;
+    if (UV.X()>1-eps) UV.X()=1;
+    if (UV.Y() < eps) UV.Y()=0;
+    if (UV.Y()>1-eps) UV.Y()=1;
 	}
 	
 	
@@ -1218,7 +1214,7 @@ public:
 			vcg::Point2<ScalarType> UV_interp=bary3D.X()*UVd0+bary3D.Y()*UVd1+bary3D.Z()*UVd2;
 			inv_GE1(EdgeIndex,UV_interp,I,UV);
 			Clamp(UV);
-			assert((UV.X()>=0)&&(UV.Y()>=0)&&(UV.X()<=1)&&(UV.Y()<=1)&&(UV.X()+UV.Y()<=1+eps));
+      //assert((UV.X()>=0)&&(UV.Y()>=0)&&(UV.X()<=1)&&(UV.Y()<=1)&&(UV.X()+UV.Y()<=1+eps));
 			assert((I==I0)||(I==I1)||(I==I2));
 			return;
 		}
@@ -1351,7 +1347,7 @@ public:
 		if (LocalIndex==-1)
 			return false;
 
-		GetUV<AbstractMesh>(&star_domain->face[LocalIndex],bary,UVHstar.X(),UVHstar.Y());
+    InterpolateUV<AbstractMesh>(&star_domain->face[LocalIndex],bary,UVHstar.X(),UVHstar.Y());
 		return true;
 	}
 
@@ -1407,7 +1403,7 @@ public:
 		int LocalIndex=diamond_meshes[DiamIndex].Global2Local(I);
 		if(LocalIndex!=-1)
 		{
-			GetUV<AbstractMesh>(&diam_domain->face[LocalIndex],bary,UVDiam.X(),UVDiam.Y());
+      InterpolateUV<AbstractMesh>(&diam_domain->face[LocalIndex],bary,UVDiam.X(),UVDiam.Y());
 			return;
 		}
 		///if ! found seach in the star space

@@ -3,6 +3,9 @@
 
 #include <vcg/complex/algorithms/local_optimization/tri_edge_flip.h>
 
+namespace vcg{
+namespace tri{
+
 ///Flip function
 template <class BaseMesh>
 class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<BaseMesh> >
@@ -19,7 +22,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 
 	public:
 	
-	static EnergyType &EType(){static EnergyType E;return E;};
+  static EnergyType &EType(){static EnergyType E;return E;}
 
 	bool savedomain;
 	
@@ -36,11 +39,11 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 	/*!
 	 *	Constructor with <I>pos</I> type
 	 */
-  inline ParamEdgeFlip(const typename Super::PosType pos, int mark)
+  inline ParamEdgeFlip(const typename Super::PosType pos, int mark,BaseParameterClass *pp)
 	{
 		this->_pos = pos;
 		this->_localMark = mark;
-		this->_priority = this->ComputePriority();
+    this->_priority = this->ComputePriority(pp);
 		savedomain=false;
 	}
 
@@ -71,7 +74,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 			//system("pause");
 		}
 
-			GetUV<BaseMesh>(father,bary,v->T().U(),v->T().V());
+      InterpolateUV<BaseMesh>(father,bary,v->T().U(),v->T().V());
 		}
 
 		///update VF topology
@@ -296,7 +299,7 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 		time_opt+=(t1-t0);*/
 	}
 
-	ScalarType ComputePriority()
+  ScalarType ComputePriority(BaseParameterClass *)
 	{
     this->_priority=EdgeDiff();
 		return this->_priority;
@@ -316,5 +319,8 @@ class ParamEdgeFlip : public vcg::tri::PlanarEdgeFlip<BaseMesh, ParamEdgeFlip<Ba
 	}
 
 };
+
+}//end namespace tri
+}//end namespace vcg
 
 #endif

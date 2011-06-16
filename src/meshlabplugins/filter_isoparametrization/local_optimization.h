@@ -86,7 +86,7 @@ typename MeshType::ScalarType StarDistorsion(typename MeshType::VertexType *v)
 			///interpolate U V per vertex
 			CoordType bary=test_face->vertices_bary[i].second;
 			ScalarType u,v;
-			GetUV<MeshType>(parametric_face,bary,u,v);
+      InterpolateUV<MeshType>(parametric_face,bary,u,v);
 			
 			VertexType* to_parametrize=test_face->vertices_bary[i].first;
 			to_parametrize->T().U()=u;
@@ -145,7 +145,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 			///interpolate U V per vertex
 			CoordType bary=test_face->vertices_bary[i].second;
 			ScalarType u,v;
-			GetUV<MeshType>(parametric_face,bary,u,v);
+      InterpolateUV<MeshType>(parametric_face,bary,u,v);
 			
 			VertexType* to_parametrize=test_face->vertices_bary[i].first;
 			to_parametrize->T().U()=u;

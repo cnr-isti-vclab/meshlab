@@ -267,7 +267,7 @@ public:
 					{
 						inDomain.push_back(test);
 						///parametrize it
-						GetUV<MeshType>(father,bary,test->T().U(),test->T().V());
+            InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
 					}
 				}
 				///create Hres mesh already parametrized
@@ -333,7 +333,7 @@ public:
 						{
 							inDomain.push_back(test);
 							///parametrize it
-							GetUV<MeshType>(father,bary,test->T().U(),test->T().V());
+              InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
 						}
 					}
 					///create Hres mesh already parametrized
@@ -388,7 +388,7 @@ public:
 				FaceType * father=test->father;
 				assert(father==f0);
 				CoordType bary=test->Bary;
-				GetUV<MeshType>(father,bary,test->T().U(),test->T().V());
+        InterpolateUV<MeshType>(father,bary,test->T().U(),test->T().V());
 			}
 			///create Hres mesh already parametrized
 			std::vector<FaceType*> OrderedFaces;

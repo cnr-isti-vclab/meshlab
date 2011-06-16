@@ -50,8 +50,8 @@
 //int time_opt;
 
 ///Flip function
-class MyTriEdgeFlip : public ParamEdgeFlip<BaseMesh>{};
-class MyTriEdgeCollapse: public ParamEdgeCollapse<BaseMesh>{};
+class MyTriEdgeFlip : public vcg::tri::ParamEdgeFlip<BaseMesh>{};
+class MyTriEdgeCollapse: public vcg::tri::ParamEdgeCollapse<BaseMesh>{};
 
 ///THIS CLASS MAINTAINS STRUCTURES WICH ARE USED FOR PARAMETRIZATION
 ///TOGHETHER WITH METHOD FOR COLORIZATION FOR VISUALIZATION PURPOSES
@@ -167,11 +167,9 @@ private:
 		////initialization for decimation
 		//base_mesh.en=0;
 		InitIMark();
-		for (unsigned int i=0;i<base_mesh.vert.size();i++)
-			base_mesh.vert[i].ClearFlags();
-		for (unsigned int i=0;i<base_mesh.face.size();i++)
-			base_mesh.face[i].ClearFlags();
-		InitVoronoiArea();
+    vcg::tri::UpdateFlags<BaseMesh>::VertexClear(base_mesh);
+    vcg::tri::UpdateFlags<BaseMesh>::FaceClear(base_mesh);
+    InitVoronoiArea();
 	}
 
 	void InitIMark()
@@ -182,14 +180,14 @@ private:
 	}
 	
 
-	void ParaDecimate(const int &targetFaces,
-					  const int &interval,
-					  bool execute_flip=false)
+  void ParaDecimate(vcg::tri::ParamEdgeCollapseParameter &pecp,
+                    const int &targetFaces,
+                    const int &interval,
+                    bool execute_flip=false)
 	{
-		vcg::LocalOptimization<BaseMesh> DeciSession(base_mesh);
+    vcg::LocalOptimization<BaseMesh> DeciSession(base_mesh,&pecp);
 		DeciSession.Init<MyTriEdgeCollapse >();
-		MyTriEdgeCollapse::Accuracy()=accuracy;
-		MyTriEdgeCollapse::HresMesh()=&final_mesh;
+
 		PatchesOptimizer<BaseMesh>::HresMesh()=&final_mesh;
 		PatchesOptimizer<BaseMesh>::BaseMesh()=&base_mesh;
 
@@ -269,7 +267,7 @@ private:
 
 			if (do_flip)
 			{
-				FlipStep();
+        FlipStep(pecp);
 				vcg::tri::UpdateTopology<BaseMesh>::FaceFace(base_mesh);
 				vcg::tri::UpdateTopology<BaseMesh>::VertexFace(base_mesh);
 				InitIMark();
@@ -347,13 +345,11 @@ private:
 			{return (dist>other.dist);}
 		};
 
-	void FinalOptimization()
+  void FinalOptimization(vcg::tri::ParamEdgeCollapseParameter *pecp)
 	{
 		char ret[200];
 		sprintf(ret," PERFORM GLOBAL OPTIMIZATION initializing... ");
 		(*cb)(0,ret);
-
-		
 
 		std::vector<vert_para> ord_vertex;
 		ord_vertex.resize(base_mesh.vn);
@@ -371,7 +367,7 @@ private:
 		for (unsigned int i=0;i<ord_vertex.size();i++)
 		{
 				printf("%3.3f\n",ord_vertex[i].dist);
-				SmartOptimizeStar<BaseMesh>(ord_vertex[i].v,base_mesh,MyTriEdgeCollapse::Accuracy(),EType);
+        SmartOptimizeStar<BaseMesh>(ord_vertex[i].v,base_mesh,pecp->Accuracy(),EType);
 		}	
 	}
 
@@ -394,8 +390,12 @@ private:
 		///INITIALIZATION
 		InitializeStructures<MeshType>(mesh);
 		
-		///DECIMATION & PARAMETRIZATION
-		ParaDecimate(targetFaces,interval,execute_flip);
+    vcg::tri::ParamEdgeCollapseParameter pecp;
+    pecp.Accuracy()=accuracy;
+    pecp.HresMesh()=&final_mesh;
+
+    ///DECIMATION & PARAMETRIZATION
+    ParaDecimate(pecp, targetFaces,interval,execute_flip);
 
 		///SET BEST FIND STOP POINT
 		bool isOK=SetBestStatus(test_interpolation);
@@ -407,7 +407,7 @@ private:
 
 		///LAST FLIP STEP
 		if (execute_flip)
-			FlipStep();
+      FlipStep(pecp);
 
 		vcg::tri::UpdateTopology<BaseMesh>::FaceFace(base_mesh);
 		vcg::tri::UpdateTopology<BaseMesh>::VertexFace(base_mesh);
@@ -427,7 +427,7 @@ private:
 		
 		///LAST OPTIMIZATION STEP ON STARS
 		if (execute_flip)
-			FinalOptimization();
+      FinalOptimization(&pecp);
 
 		#ifndef _MESHLAB	
 		if (execute_flip)
@@ -777,12 +777,12 @@ public:
 	///PARAMETRIZATION FUNCTIONS 
 	///initialize the mesh 
 	template <class MeshType>
-	ReturnCode Parametrize(MeshType *mesh,bool Two_steps=true,EnergyType _EType=EN_EXTMips)
+  ReturnCode Parametrize(MeshType *mesh,vcg::tri::ParamEdgeCollapseParameter &pecp,bool Two_steps=true,EnergyType _EType=EN_EXTMips)
 	{		
 		EType=_EType;
-		MyTriEdgeCollapse::EType()=EType;
-		MyTriEdgeFlip::EType()=EType;
-
+//		MyTriEdgeCollapse::EType()=EType;
+//		MyTriEdgeFlip::EType()=EType;
+    pecp.EType()=_EType;
 		///clean unreferenced vertices
 		vcg::tri::Clean<MeshType>::RemoveUnreferencedVertex(*mesh);
 		/*bool done;*/
@@ -829,7 +829,6 @@ public:
 			ExportMeshes(para_mesh1,abs_mesh1);
 
 			
-
 			///constrauct an ISOPARAM
 			printf("\n STEP 2.5 \n");
 			IsoParametrization IsoParam1;
@@ -893,7 +892,7 @@ public:
 				base_f->vertices_bary.push_back(std::pair<BaseVertex *,CoordType>(&final_mesh.vert[i],bary));
 			}
 		 InitVoronoiArea();
-		 FinalOptimization();
+     FinalOptimization(&pecp);
 		 printf("STEP 3 \n");
 		}
 		///finally perform the final optimization step
@@ -909,13 +908,13 @@ public:
 	}
 
 	///perform one or more flip steps
-	void FlipStep()
+  void FlipStep(vcg::tri::ParamEdgeCollapseParameter &pecp)
 	{
 #ifndef _MESHLAB
 		printf("\n STARTING FLIP SESSION \n");
 #endif
 		InitIMark();
-		FlipSession=new vcg::LocalOptimization<BaseMesh>(base_mesh);
+    FlipSession=new vcg::LocalOptimization<BaseMesh>(base_mesh,&pecp);
 		FlipSession->Init<MyTriEdgeFlip>();	
 		/*bool b=*/FlipSession->DoOptimization();
 #ifndef _MESHLAB

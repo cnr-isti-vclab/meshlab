@@ -295,7 +295,8 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			case 3:Parametrizator.SetParameters(cb,targetAbstractMinFaceNum,tolerance,IsoParametrizator::SM_L2,convergenceSpeed);break;
 			default:Parametrizator.SetParameters(cb,targetAbstractMinFaceNum,tolerance,IsoParametrizator::SM_Euristic,convergenceSpeed);break;
 			}
-			IsoParametrizator::ReturnCode ret=Parametrizator.Parametrize<CMeshO>(mesh,doublestep);
+      tri::ParamEdgeCollapseParameter pecp;
+      IsoParametrizator::ReturnCode ret=Parametrizator.Parametrize<CMeshO>(mesh,pecp,doublestep);
 
 			if (ret==IsoParametrizator::Done)
 			{

@@ -20,10 +20,28 @@
 #include "opt_patch.h"
 #include "local_optimization.h"
 
-template <class BaseMesh>
-class ParamEdgeCollapse: public vcg::tri::TriEdgeCollapse<BaseMesh,ParamEdgeCollapse<BaseMesh> > {
+namespace vcg{
+namespace tri{
+
+typedef vcg::tri::BasicVertexPair<BaseMesh::VertexType> VertexPair;
+
+class ParamEdgeCollapseParameter : public vcg::BaseParameterClass
+{
+private:
+  EnergyType E;
+  int _acc;
+  BaseMesh* mesh;
+
 public:
-        typedef vcg::tri::TriEdgeCollapse<BaseMesh,ParamEdgeCollapse<BaseMesh> > Super;
+  int &Accuracy()       { return _acc;}
+  BaseMesh* &HresMesh() { return mesh; }
+  EnergyType &EType()   { return E; }
+};
+
+template <class BaseMesh>
+class ParamEdgeCollapse: public vcg::tri::TriEdgeCollapse<BaseMesh, VertexPair , ParamEdgeCollapse<BaseMesh> > {
+public:
+        typedef vcg::tri::TriEdgeCollapse<BaseMesh, VertexPair, ParamEdgeCollapse<BaseMesh> > Super;
 	typedef typename BaseMesh::VertexType::EdgeType EdgeType;
         typedef typename BaseMesh::VertexType VertexType;
 	typedef typename BaseMesh::VertexType BaseVertex;
@@ -33,13 +51,12 @@ public:
         typedef typename BaseMesh::CoordType   CoordType;
         typedef BaseMesh TriMeshType;
 
-	static EnergyType &EType(){static EnergyType E;return E;};
-	
-	inline ParamEdgeCollapse(const EdgeType &p, int mark)
+
+  inline ParamEdgeCollapse(const VertexPair &p, int mark, BaseParameterClass *pp)
 	{    
         Super::localMark = mark;
         Super::pos=p;
-        Super::_priority = ComputePriority();
+        Super::_priority = ComputePriority(pp);
 	}
 
 	inline ScalarType Cost()
@@ -59,8 +76,9 @@ public:
 	return (pow(lenght,2)+costArea);
   }
 
-	inline bool IsFeasible(){
-    return LinkConditions(Super::pos);
+  inline bool IsFeasible(const BaseParameterClass *){
+//    return LinkConditions(Super::pos);
+    return EdgeCollapser<TriMeshType,VertexPair>::LinkConditions(Super::pos);
 	}
 
   inline void SetHlevMeshUV(const std::vector<BaseFace*> &LowFace,
@@ -77,7 +95,7 @@ public:
 		{
 			VertexType *brother=test_face->vertices_bary[i].first;
 			CoordType bary=test_face->vertices_bary[i].second;
-                        GetUV<BaseMesh>(test_face,bary,brother->T().U(),brother->T().V());
+                        InterpolateUV<BaseMesh>(test_face,bary,brother->T().U(),brother->T().V());
 			//printf("%f , %f \n",brother->T().U(),brother->T().V());
 			assert(brother!=NULL);
 			HiVertex.push_back(brother);
@@ -210,7 +228,7 @@ public:
 	///DISTORSION
 	
 	///create pos
-	EdgeType posEdge;
+  VertexPair posEdge;
 	std::vector<typename FaceType::VertexType*> vertEdge;
 	FindNotBorderVertices<BaseMesh>(created,vertEdge);
 
@@ -225,8 +243,8 @@ public:
 	for (unsigned int i=0;i<created.face.size();i++)
 		domain.face[i].areadelta=created.face[i].areadelta;
 
-	DoCollapse(created,posEdge, newPos); // v0 is deleted and v1 take the new position
-	
+//	DoCollapse(created,posEdge, newPos); // v0 is deleted and v1 take the new position
+  EdgeCollapser<BaseMesh,VertexPair>::Do(created, posEdge, newPos);
 	UpdateTopologies<BaseMesh>(&created);
 
 	/////parametrize domain
@@ -279,7 +297,7 @@ public:
 	return (bestPos);
   }
 
-  inline ScalarType ComputePriority()
+  inline ScalarType ComputePriority(BaseParameterClass *)
   { 
 	return (Cost());
 	//return( Distance(pos.V(0)->cP(),pos.V(1)->cP()));
@@ -291,7 +309,7 @@ public:
 	return bestPos;
   }
 
-  void UpdateFF(EdgeType &posEdge)
+  void UpdateFF(VertexPair &posEdge)
 	{
 		std::vector<typename TriMeshType::FaceType*> shared;
 		std::vector<typename TriMeshType::FaceType*> in_v0;
@@ -362,7 +380,7 @@ public:
 
 
 ///create a copy the submesh for a collapse and parameterize it
-void CreatePreCollapseSubmesh(EdgeType &pos,
+void CreatePreCollapseSubmesh(VertexPair &pos,
 							  BaseMesh &param,
 							  std::vector<VertexType*> &orderedVertex,
 							  std::vector<FaceType*> &orderedFaces)
@@ -386,7 +404,7 @@ void CreatePreCollapseSubmesh(EdgeType &pos,
 
 ///create a copy the submesh after the collapse that is already parameterized
 /// only the central vertex has to be set to (0,0)
-void CreatePostCollapseSubmesh(EdgeType &pos,
+void CreatePostCollapseSubmesh(VertexPair &pos,
 							   BaseMesh &param_post,
 							  std::vector<VertexType*> &orderedVertex,
 							  std::vector<FaceType*> &orderedFaces)
@@ -413,7 +431,7 @@ void CreatePostCollapseSubmesh(EdgeType &pos,
 		
 }
 
-void AphaBetaToUV(EdgeType &pos,
+void AphaBetaToUV(VertexPair &pos,
 				  std::vector<FaceType*> &orderedFaces,
 				  BaseMesh &param,
 			      std::vector<VertexType*> &HresVert)
@@ -438,7 +456,7 @@ void AphaBetaToUV(EdgeType &pos,
 
 			///transform to UV
 			ScalarType u,v;
-			GetUV<BaseMesh>(parametric_face,bary,u,v);
+      InterpolateUV<BaseMesh>(parametric_face,bary,u,v);
 			///and assing
 			brother->T().U()=u;
 			brother->T().V()=v;
@@ -534,7 +552,7 @@ void UVToAlphaBeta(std::vector<VertexType*> &HresVert,
 		brother->Bary=bary1;*/
 
 		///set new parametrization value
-		GetUV<BaseMesh>(&param.face[index],bary1,u,v);
+    InterpolateUV<BaseMesh>(&param.face[index],bary1,u,v);
 		HresVert[i]->T().U()=u;
 		HresVert[i]->T().V()=v;
 	}
@@ -573,13 +591,15 @@ void AssignRPos(VertexType* &to_assign,
 	to_assign->RPos=val;
 }
 
-void Execute(BaseMesh &m)
+void Execute(BaseMesh &m, vcg::BaseParameterClass *_pp)
 	{	
     typedef typename BaseMesh::FaceType FaceType;
     typedef typename BaseMesh::VertexType VertexType;
     typedef typename BaseMesh::ScalarType ScalarType;
     typedef typename BaseMesh::CoordType CoordType;
-		
+
+    ParamEdgeCollapseParameter *pp=(ParamEdgeCollapseParameter *)_pp;
+
 		assert(this->pos.V(0)!=this->pos.V(1));
 		assert(!this->pos.V(0)->IsD());
 		assert(!this->pos.V(1)->IsD());
@@ -617,7 +637,9 @@ void Execute(BaseMesh &m)
 		ScalarType area0=Area<BaseFace>(orderedFaces0);
 
 		///do the collapse
-		DoCollapse(m, this->pos, newPos); // v0 is deleted and v1 take the new position
+//		DoCollapse(m, this->pos, newPos); // v0 is deleted and v1 take the new position
+    EdgeCollapser<TriMeshType,VertexPair>::Do(m, this->pos, newPos);
+
 		//vcg::tri::UpdateTopology<BaseMesh>::TestVertexFace(m); ///TEST
 		//---------------------------///
 		///create a parametrized submesh post-collapse #1
@@ -673,24 +695,13 @@ void Execute(BaseMesh &m)
 		
 		this->pos.V(1)->RPos=oldRPos;
 		
-    /*bool b=*/SmartOptimizeStar<BaseMesh>(this->pos.V(1),m,Accuracy(),EType());
+    /*bool b=*/SmartOptimizeStar<BaseMesh>(this->pos.V(1),m,pp->Accuracy(),pp->EType());
 		
 		/*int t1=clock();
 		time_opt+=(t1-t0);*/
 	}
 
 public:
-	static int &Accuracy()
-	{
-		static int _acc;
-		return _acc;
-	}
-	
-	static BaseMesh* &HresMesh()
-	{
-		static BaseMesh* mesh;
-		return mesh;
-	}
 
 	BaseVertex *getV(int num)
 	{
@@ -698,5 +709,7 @@ public:
 		return this->pos.V(num);
 	}	
 };
+}//end namespace tri
+}//end namespace vcg
 
 #endif

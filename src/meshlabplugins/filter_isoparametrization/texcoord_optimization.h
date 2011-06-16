@@ -956,7 +956,8 @@ void SmoothTexCoords(MESH_TYPE &m){
   assert(m.HasPerVertexTexCoord());
   
   typedef typename MESH_TYPE::VertexType::TexCoordType::PointType PointType;
-  
+  typedef typename MESH_TYPE::VertexType::TexCoordType::ScalarType ScalarType;
+
   SimpleTempData<typename MESH_TYPE::VertContainer, int> div(m.vert);
   SimpleTempData<typename MESH_TYPE::VertContainer, PointType > sum(m.vert);
   
