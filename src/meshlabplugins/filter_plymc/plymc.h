@@ -527,12 +527,11 @@ void Process(vcg::CallBackPos *cb=0)
 }; //end PlyMC class
 
 
-template < class MeshType>
-         class PlyMCTriEdgeCollapse: public MCTriEdgeCollapse< MeshType, PlyMCTriEdgeCollapse<MeshType> > {
+template < class MeshType, class VertexPair>
+         class PlyMCTriEdgeCollapse: public MCTriEdgeCollapse< MeshType, VertexPair, PlyMCTriEdgeCollapse<MeshType,VertexPair> > {
                         public:
-                        typedef  MCTriEdgeCollapse< MeshType,  PlyMCTriEdgeCollapse  > MCTEC;
-            typedef  typename  MeshType::VertexType::EdgeType EdgeType;
-            inline PlyMCTriEdgeCollapse(  const EdgeType &p, int i) :MCTEC(p,i){}
+                        typedef  MCTriEdgeCollapse< MeshType, VertexPair, PlyMCTriEdgeCollapse  > MCTEC;
+            inline PlyMCTriEdgeCollapse(  const VertexPair &p, int i, BaseParameterClass *pp) :MCTEC(p,i,pp){}
  };
 
 
@@ -540,13 +539,15 @@ template < class MeshType>
 template<   class MeshType>
 void MCSimplify( MeshType &m, float absoluteError, bool preserveBB, vcg::CallBackPos *cb)
 {
-    typedef PlyMCTriEdgeCollapse<MeshType> MyColl;
+
+    typedef PlyMCTriEdgeCollapse<MeshType,BasicVertexPair<typename MeshType::VertexType> > MyColl;
 
     tri::UpdateBounding<MeshType>::Box(m);
     tri::UpdateTopology<MeshType>::VertexFace(m);
-    vcg::LocalOptimization<MeshType> DeciSession(m);
-    MyColl::bb()=m.bbox;
-    MyColl::preserveBBox()=preserveBB;
+    TriEdgeCollapseMCParameter pp;
+    pp.bb=m.bbox;
+    pp.preserveBBox=preserveBB;
+    vcg::LocalOptimization<MeshType> DeciSession(m,&pp);
     if(absoluteError==0)
     {
       // guess the mc side.
@@ -584,7 +585,7 @@ void MCSimplify( MeshType &m, float absoluteError, bool preserveBB, vcg::CallBac
     char buf[1024];
     DeciSession.template Init< MyColl > ();
 
-    MyColl::areaThr()=TargetError*TargetError;
+    pp.areaThr=TargetError*TargetError;
     DeciSession.SetTimeBudget(1.0f);
     if(TargetError < std::numeric_limits<float>::max() ) DeciSession.SetTargetMetric(TargetError);
     while(DeciSession.DoOptimization() && DeciSession.currMetric < TargetError)
