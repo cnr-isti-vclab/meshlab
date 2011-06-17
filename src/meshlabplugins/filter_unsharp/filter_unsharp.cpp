@@ -542,7 +542,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 						tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm);
 				
 				for(int i=0;i<m.cm.fn;++i)
-					m.cm.face[i].N() = normalOrig[i] + (normalOrig[i] - m.cm.face[i].N())*alpha;
+          m.cm.face[i].N() = normalOrig[i]*alphaorig + (normalOrig[i] - m.cm.face[i].N())*alpha;
 				
 			}	break;
 	case FP_UNSHARP_GEOMETRY:			
