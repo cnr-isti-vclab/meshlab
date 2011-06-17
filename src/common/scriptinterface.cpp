@@ -527,7 +527,7 @@ QString EnvWrap::evalString( const QString& nm )
 Q_DECLARE_METATYPE(EnvWrap)
 Q_DECLARE_METATYPE(EnvWrap*)
 
-QScriptValue Env_ctor( QScriptContext *context,QScriptEngine *engine )
+QScriptValue Env_ctor( QScriptContext */*context*/,QScriptEngine *engine )
 {
 	Env * env = new Env();
 	return engine->newQObject(env, QScriptEngine::ScriptOwnership);
