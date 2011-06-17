@@ -1055,7 +1055,7 @@ void ExtraMeshDecoratePlugin::setValue(QString /*name*/,Shotf newVal)
 }
 
 
-void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel *m, Shotf &ls, int cameraSourceId, QPainter *painter, QFont /*qf*/)
+void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel *, Shotf &ls, int cameraSourceId, QPainter *painter, QFont /*qf*/)
 {
   if(!ls.IsValid())
   {
@@ -1083,7 +1083,7 @@ void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel *m, Shotf &ls, int cameraS
   glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b camcolor, vcg::Matrix44f &currtr, RichParameterSet *rm, QPainter *painter, QFont qf)
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b camcolor, vcg::Matrix44f &currtr, RichParameterSet *rm, QPainter */*painter*/, QFont /*qf*/)
 {
   if(!ls.IsValid())  // no drawing if camera not valid
     return;
@@ -1095,8 +1095,8 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b c
   Point3f ax0 = ls.Axis(0);
   Point3f ax1 = ls.Axis(1);
   Point3f ax2 = ls.Axis(2);
-  float fov = ls.GetFovFromFocal();
-  float focal = ls.Intrinsics.FocalMm;
+//  float fov = ls.GetFovFromFocal();
+//  float focal = ls.Intrinsics.FocalMm;
 
   glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
 	glDepthFunc(GL_ALWAYS);
