@@ -77,10 +77,11 @@ public:
     Point2f p;
     int e;
     latoRect l;
+    char indV;
 
-    JointPoint(Point2f p1, int e1, latoRect l1)
+    JointPoint(const Point2f &p1, const int &e1, const latoRect &l1, const char &indV1)
     {
-        p = p1; e = e1; l = l1;
+        p = p1; e = e1; l = l1; indV = indV1;
     }
 };
 
@@ -114,7 +115,7 @@ public:
 //        void createSlice(MeshModel* orig,MeshModel* dest);
 
         // nuove funzioni
-        void generateRectSeg(const float &epsTmp, const float &lengthDiag, Segment2f lati[]);
+        void generateRectSeg(const float &dist, const float &epsTmp, const float &lengthDiag, Segment2f lati[]);
         void subtraction(CMeshO &em, Segment2f lati[], const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height);
         void addAndBreak(CMeshO &em, Point3f & pJoint, const Axis &axisOrthog, const Axis &axisJoint, const JointPoint & jp, const CMeshO::VertexIterator vi, const CMeshO::EdgeIterator ei);
 };

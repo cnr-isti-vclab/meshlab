@@ -86,7 +86,7 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Ri
             parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
             // BBox min=0, BBox center=1, Origin=2
             parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
-            parlst.addParam(new RichFloat("spacing",0.05,"Space between two planes", "Step value between each plane for automatically generating cross-sections."));
+            parlst.addParam(new RichFloat("spacing",0.02,"Space between two planes", "Step value between each plane for automatically generating cross-sections."));
             parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
             parlst.addParam(new RichBool("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter"));
         }
@@ -161,7 +161,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 return false;
             }
 */
-            int planeNum = (planeDist == 0) ? 1 : ( ((bbox.Dim()*planeAxis)/planeDist)+1 ); //evito la divisione per 0
+            const int planeNum = (planeDist == 0) ? 1 : ( ((bbox.Dim()*planeAxis)/planeDist)+1 ); //evito la divisione per 0
 
             pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
             pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
@@ -188,24 +188,18 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
             float epsTmp = eps/2.0;
 
-
-
-//            for(int j = 0; j < planeNum; ++j)
-//                float dist = 0.0+=planeDist;
-
-//            float dist = 0.0;
-//            Lati3 lati; //il quarto lato lo ignoro, tanto non lo uso mai
-            Segment2f  lati[planeNum][3];
-
-            //generateRectSeg(j, epsTmp, lengthDiag, lati);
-            generateRectSeg(epsTmp, lengthDiag, lati[0]);
+            Segment2f  lati[3]; //il quarto lato lo ignoro, tanto non lo uso mai
+            generateRectSeg(0, epsTmp, bbox.Diag()*2, lati);
 
             MeshModel* cap;
             MeshModel* cap2;
+            float start = planeCenter[axis];
+            //planeNum
             for(int i = 0; i < planeNum; ++i)
             {
-//                Log("######## LAYER %i", i);
-                planeCenter += planeAxis*planeDist;
+                Log("######## LAYER %i", i);
+
+                planeCenter[axis] += planeDist;
                 slicingPlane.Init(planeCenter,planeAxis);
 
                 //this is used to generate svg slices
@@ -217,15 +211,114 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
                 if(cap->cm.edge.size()> 0)
                 {
-                    subtraction(cap->cm, lati[0], axis, axisOrthog, axisJoint, planeCenter[axis]);
-                }
+                    for(int j = 0; j < planeNum; ++j)
+                    {
+//                        Log("#### RECTANGLE %i", j);
+                        float newDist = start + planeDist*j;
+                        float yMag = epsTmp + newDist;
+                        float yMin = -epsTmp + newDist;
+                        // shifta rect (solo su Y ovviamente)
+                        lati[L1].P0().Y() = yMag;
+                        lati[L1].P1().Y() = yMag;
+                        lati[L2].P0().Y() = yMin;
+                        lati[L2].P1().Y() = yMin;
+                        lati[l1].P0().Y() = yMag;
+                        lati[l1].P1().Y() = yMin;
 
+                        subtraction(cap->cm, lati, axis, axisOrthog, axisJoint, planeCenter[axis]);
+                    }
+                }
                 cap2= m.addNewMesh("","CappedSlice");
                 tri::CapEdgeMesh(cap->cm, cap2->cm);
-
             }
 
-            QString fname;//=parlst.getSaveFileName("filename");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+            planeAxis[axis] = 0.0f;
+            planeAxis[axisOrthog] = 1.0f;
+
+            //??pr.sizeCm = Point2f(sizeCm[1],sizeCm[2]);
+            //??pr.sizeCm = Point2f(sizeCm[0],sizeCm[2]);
+            //??pr.sizeCm = Point2f(sizeCm[0],sizeCm[1]);
+
+//            pr.lineWidthPt=200;
+//            pr.scale=2/maxdim;
+
+
+//            pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
+//            pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
+//            pr.projDir = planeAxis;
+//            pr.projCenter =  m.mm()->cm.bbox.Center();
+
+            planeCenter = bbox.min + planeAxis*planeOffset*lengthDiag;      //parto dal basso (bbox min)
+
+            generateRectSeg(0, epsTmp, bbox.Diag()*2, lati);
+            start = planeCenter[axisOrthog];
+            //planeNum
+            for(int i = 0; i < planeNum; ++i)
+            {
+
+                Log("######## LAYER INV %i", i);
+
+                planeCenter[axisOrthog] += planeDist;
+                slicingPlane.Init(planeCenter,planeAxis);
+
+                //this is used to generate svg slices
+                cap= m.addNewMesh("","EdgeMesh");
+                vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(base->cm, slicingPlane, cap->cm );
+
+                tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
+                ev.push_back(&(cap->cm));
+
+                if(cap->cm.edge.size()> 0)
+                {
+                    for(int j = 0; j < planeNum; ++j)
+                    {
+//                        Log("#### RECTANGLE %i", j);
+                        float newDist = start + planeDist*j;
+                        float yMag = epsTmp + newDist;
+                        float yMin = -epsTmp + newDist;
+                        // shifta rect (solo su Y ovviamente)
+                        lati[L1].P0().Y() = yMag;
+                        lati[L1].P1().Y() = yMag;
+                        lati[L2].P0().Y() = yMin;
+                        lati[L2].P1().Y() = yMin;
+                        lati[l1].P0().Y() = yMag;
+                        lati[l1].P1().Y() = yMin;
+
+                        subtraction(cap->cm, lati, axisOrthog, axis, axisJoint, planeCenter[axisOrthog]);
+                    }
+                }
+                cap2= m.addNewMesh("","CappedSlice");
+                tri::CapEdgeMesh(cap->cm, cap2->cm);
+            }
+
+
+*/
+
+
+
+
+
+
+
+
+            QString fname;//= parlst.getSaveFileName("filename");
             if(fname=="") fname="C:/Slice.svg";
             if (!fname.endsWith(".svg")) fname+=".svg";
 
@@ -266,11 +359,12 @@ bool ExtraFilter_SlicePlugin::autoDialog(QAction *action)
 }
 */
 
-void ExtraFilter_SlicePlugin::generateRectSeg(const float &epsTmp, const float &lengthDiag, Segment2f lati[])
+void ExtraFilter_SlicePlugin::generateRectSeg(const float &dist, const float &epsTmp, const float &lengthDiag, Segment2f lati[])
 {
+    //?? rimuovi dist yMag e yMin
     //variabili di supporto
-    float yMag = +epsTmp;
-    float yMin = -epsTmp;
+    float yMag = dist+epsTmp;
+    float yMin = dist-epsTmp;
 
     //punti per il rettangolo
     Point2f a1,b1,a2,b2;    //a1 e a2 sono i punti + interni
@@ -287,9 +381,9 @@ void ExtraFilter_SlicePlugin::generateRectSeg(const float &epsTmp, const float &
     b2.Y() = yMin;
 
     //inizializzo i segmenti
-    lati[L1].Set(a1,b1);    //lato + a destra
-    lati[L2].Set(a2,b2);    //lato + a sinistra
-    lati[l1].Set(a1,a2);    //lato minore che passa per il centro
+    lati[L1].Set(a1,b1);    //lato con Y maggiore
+    lati[L2].Set(a2,b2);    //lato con Y minore
+    lati[l1].Set(a1,a2);    //lato minore che passa per il centro (0,0)
     //il lato minore più lontano non sereve
 }
 
@@ -322,14 +416,15 @@ void ExtraFilter_SlicePlugin::addAndBreak(CMeshO &em, Point3f & pJoint, const Ax
 
     //il nuovo edge ha...
     ei->V(0) = &(*vi);              //... come vertice 0 il nuovo vertice di intersezione e ...
-    ei->V(1) =em.edge[jp.e].V(1);   //... come vertice 1 setto il vertice dal lato giusto (indV1) dell'edge corrente
+    ei->V(1) =em.edge[jp.e].V(jp.indV);   //... come vertice 1 setto il vertice dal lato giusto (indV1) dell'edge corrente
 
     //l'edge 1, fatto sull'edge corrente, ha il vertice 0 inalterato, mentre...
-    em.edge[jp.e].V(1) = &(*vi);       //...il vertice 1 diventa il nuovo vertice di intersezione
+    em.edge[jp.e].V(jp.indV) = &(*vi);       //...il vertice 1 diventa il nuovo vertice di intersezione
 }
 
 void ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
 {
+
     assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
 
     //dalla mesh testata venivano mesh con troppi vertici rispetto al numero di edge (che dovrebbero essere uguali)
@@ -337,6 +432,7 @@ void ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Ax
     tri::Allocator<CMeshO>::CompactVertexVector(em);
 
     // 1- RICERCA DEI PUNTI DI INTERSEZIONE TRA MESH E RETTANGOLO
+    Log("FASE 1");
     tri::UpdateTopology<CMeshO>::EdgeEdge(em);
     vcg::tri::UpdateFlags<CMeshO>::EdgeClearV(em);  // setto i flag per sapere se sono stati visitati dal sottociclo (che visita una sagoma alla volta)
 
@@ -358,15 +454,13 @@ void ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Ax
             edge::Pos<CEdgeO> eStart(&em.edge[i],0);    //memorizza l'edge di partenza
             edge::Pos<CEdgeO> eCorr = eStart;           //itera sugli edge
 
-            int numE = 0;
             do
             {
-                numE++;
-
                 eCorr.E()->SetV();
 
                 Point3f &p0 = eCorr.E()->V(0)->P();
                 Point3f &p1 = eCorr.E()->V(1)->P();
+
 
                 //converto i vertici in 2D: per come ho definito i retangli di ritaglio la X è lungo axisJoint e la Y è lungo axisOrthog
                 p0_2D.X() = p0[axisJoint];
@@ -378,38 +472,44 @@ void ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Ax
                 seg.Set(p0_2D,p1_2D);
 
                 int ei = eCorr.E() - &(em.edge[0]); //indice dell'edge corrente
-bool cc = false;
+bool c1,c2,c3;
+c1=c2=c3= false;
+
                 //un segmento puo' intersecare contemporaneamente 2 lati (ma non 3) quindi non posso mettere else
-                if(vcg::SegmentSegmentIntersection(lati[L1],seg,pJoint2D))
+                if(vcg::SegmentSegmentIntersection(lati[L1],seg,pJoint2D) && (seg.P0().Y() != seg.P1().Y()) )
                 {
-                    JointPoint newJoint(pJoint2D, ei, L1);
+                    char indV = (seg.P0().Y() > seg.P1().Y()) ? 0 : 1;  //indice del vertice esterno al rettangolo; in questo edge verrà sostituito con il punto di joint per formare il primo edge dello spezzamento
+                    JointPoint newJoint(pJoint2D, ei, L1, indV);
                     jointPointsL1.push_back(newJoint);
-if(cc){Log("PROBLEMAAAAAAAAAA");
-cc = true;
-Log("ei L1: %i", ei);}
+//                    Log("Inters L1 (%f %f) (%f %f),(%f %f) (%f %f),(%f %f)",lati[L1].P0().X(),lati[L1].P0().Y(),lati[L1].P1().X(),lati[L1].P1().Y(),seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
+c1 = true;
                 }
-                if(vcg::SegmentSegmentIntersection(lati[L2],seg,pJoint2D))
+                if(vcg::SegmentSegmentIntersection(lati[L2],seg,pJoint2D) && (seg.P0().Y() != seg.P1().Y()) )
                 {
-                    JointPoint newJoint(pJoint2D, ei, L2);
+                    char indV = (seg.P0().Y() < seg.P1().Y()) ? 0 : 1;
+                    JointPoint newJoint(pJoint2D, ei, L2, indV);
                     jointPointsL2.push_back(newJoint);
-if(cc){Log("PROBLEMAAAAAAAAAA");
-cc = true;
-Log("ei L2: %i", ei);}
+//                    Log("Inters L2 (%f %f) (%f %f),(%f %f) (%f %f),(%f %f)",lati[L2].P0().X(),lati[L2].P0().Y(),lati[L2].P1().X(),lati[L2].P1().Y(),seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
+c2 = true;
                 }
-                if(vcg::SegmentSegmentIntersection(lati[l1],seg,pJoint2D))
+                if(vcg::SegmentSegmentIntersection(lati[l1],seg,pJoint2D)  && (seg.P0().X() != seg.P1().X()) )
                 {
-                    JointPoint newJoint(pJoint2D, ei, l1);
+                    char indV = (seg.P0().X() < 0) ? 0 : 1;
+                    JointPoint newJoint(pJoint2D, ei, l1, indV);
                     jointPointsl1.push_back(newJoint);
-if(cc){Log("PROBLEMAAAAAAAAAA");
-cc = true;
-Log("ei l1: %i", ei);}
+//                    Log("Inters l1 (%f %f) (%f %f),(%f %f) (%f %f),(%f %f)",lati[l1].P0().X(),lati[l1].P0().Y(),lati[l1].P1().X(),lati[l1].P1().Y(),seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
+c3 = true;
                 }
-cc = false;
-                eCorr.NextE();
+//test da rimovere
+if(c1){
+    if(c2)Log("ei L1 L2: %i", ei);
+    else if(c3)Log("ei L1 l1: %i", ei);
+}else if(c2&&c3)Log("ei L2 l1: %i", ei);
+
+            eCorr.NextE();
 
             }while(eCorr != eStart); //&& eCorr != NULL && eCorr != ePrec
 
-//            Log("edge visited: %i", numE);
         }
     }
 
@@ -417,7 +517,7 @@ cc = false;
     if(nJP == 0) return; // se non ho trovato punti di intersezione nn devo fare nulla: esco
 
     // 2- AGGIUNTA DEI PUNTI DI INTERSEZIONE SPEZZANDO GLI EDGE DELLA MESH
-
+    Log("FASE 2");
     //percorrendo un lato lungo del rettangolo (L1 o L2) tutte le volte che entro nella sagoma attraverso un punto di joint devo passare da un'altro punto di joint per uscire dalla sagoma.
     //Dunque se ho un numero pari di punti di joint lungo un lato, dopo averlo percorso sono fuori dalla sagoma.
     //Se invece i joint sono dispari alla fine sono ancora dentro la sagoma e devo aggiungere lo spigolo del rettangolo.
@@ -427,27 +527,23 @@ cc = false;
 
     Point3f pJoint;         //punto di intersezione 3D, usato per convertire i pJoint2D in 3D ed inserirli nell'edgeMesh
     pJoint[axis] = height;  //la terza coordinata è uguale per tutti i punti dato che lavoriamo in 2D
-//????TOGLI SOTTRAZIONE SOPRA
+
     //ordino i vertici di intersezione lungo i lati del rettangolo
     std::sort(jointPointsL1.begin(), jointPointsL1.end(), compareY);
     std::sort(jointPointsL2.begin(), jointPointsL2.end(), compareY);
     std::sort(jointPointsl1.begin(), jointPointsl1.end(), compareX);    //lo ordino per X
-
-//??un singolo segmento puo' aver intersecato 2 lati del rettangolo ed in tal caso viene riferito da + di 1 punto di Joint, quindi nello spezzare devo mettere nel nuovo edge quello dalla parte giusta
-//??L1 sta + a destra quindi dato l'edge da spezzare il suo vertice più a destra andrà nel nuovo edge e sarà sostituito dal punto di joint
-//??int indV1 = (em.edge[jointPointsL1[iL1].e].V(0)->P().Y() > em.edge[jointPointsL1[iL1].e].V(1)->P().Y()) ? 0 : 1;
-
-//?? PROBLEMA non ho considerato nessuno spigolo è dentro la mesh che viene intersecata solo da l1
+    Log("TIPO L1 %i, l1 %i, L2 %i",jointPointsL1.size(),jointPointsl1.size(),jointPointsL2.size());
 
 
     //per gli edge di chiusura che aggiungo in seguito (dopo aver rimosso gli edge interni) quello che faccio è tenere un indice ivS che indica da dove ho iniziato a inserire i nuovi vertici e poi inserisco i vertici a coppie in ordine, cosi successivamente li ripesco a coppie e creo gli edge (tratto a parte gli edge incidenti su spigoli)
 
-    size_t iL1, iL2, il1, endl1, ivS;   //indici per scorrere
-    ivS = em.vert.size();               //indice del primo dei nuovi vertici (usato successivamente per creare gli edge di chiusura)
+    size_t iL1, iL2, il1, endl1, ivS, ieS;  //indici per scorrere
+    ivS = em.vert.size();                   //indice del primo dei nuovi vertici (usato successivamente per creare gli edge di chiusura)
+    ieS = em.edge.size();
+    //il ciclo for principale che cerca vertici ed edge da rimuovere puo' anche fermarsi a prima dei nuovi edge aggiunti
 
     endl1 = jointPointsl1.size();       //indice di coda dei punti di joint sul lato l1
 
-//???? ciclo for principale di rimozione vertici puoi farlo anche solo fino a qui
     //iteratori a verice ed edge nuovi da creare
     CMeshO::EdgeIterator ei = vcg::tri::Allocator<CMeshO>::AddEdges(em,nJP);    //di edge aggiungo quelli per quando spezzo un edge nel punto di intersezione: sono nJP dato che nello spezzare riuso l'edge spezzato
 
@@ -459,14 +555,12 @@ cc = false;
     CMeshO::VertexIterator vi = vcg::tri::Allocator<CMeshO>::AddVertices(em,nEC);
 
 //    assert( (jointPointsl1.size()!=1) || (!dispL1 && dispL2 && jointPointsl1.size() == 1) || (dispL1 && !dispL2 && jointPointsl1.size() == 1) );  // se L1 e L2 sono entrambi dispari l1 non può avere un solo vertice : o ne ha o almeno 2
-    if(jointPointsL1.size()!=0 && jointPointsL2.size()!=0)
-        if(jointPointsL1[0].e == jointPointsL2[0].e) Log("PROBLEMAAAAAAAAAA!!!");
-
 
     //prima controllo se ci sono spigoli e in caso inserisco in ordine di percorrenza di lati del rettangolo (L1-l1-L2) le parti che vanno congiunte
     if(dispL1)  //se per L1 ho un numero dispari di punti il primo punto va trattato a parte assieme allo spigolo.
     {
         //VERTICE IN L1
+        //L1 ha Y maggiore (rispetto a L2) quindi dato l'edge da spezzare il suo vertice con Y maggiore va nel nuovo edge e viene sostituito dal punto di joint
         addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsL1[0], vi, ei);
         vi++; ei++;
         //VERTICE SPIGOLO: aggiungo subito lo spigolo direttamente alla mesh
@@ -483,8 +577,8 @@ cc = false;
             addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[endl1], vi, ei);
             vi++;
             ei++;
-            nEC = 4;    //(riuso nEC)
-        }else nEC = 2;
+            nEC = 2;    //(riuso nEC) sono etrato da L1 ed esco da l1
+        }else nEC = 3;  //sono etrato da L1 ed esco da L2
     }else {iL1 = 0; nEC = 0;}
 
     if(dispL2)  //se per L2 ho un numero dispari di punti il primo punto va trattato a parte assieme allo spigolo.
@@ -496,7 +590,9 @@ cc = false;
             il1 = 1;
             vi++;
             ei++;
-        } else {il1 = 0; nEC++;}
+            assert(nEC==0 || nEC ==2);
+            nEC+=2; //sono entrato da l1 ed esco da L2
+        } else {il1 = 0; assert(nEC==3);} //nEC ha il valore giusto dal caso precedentesono entrato da L1 ed esco da L2
         //VERTICE SPIGOLO: aggiungo subito lo spigolo direttamente alla mesh
         pJoint[axisJoint] = lati[L2].P0().X();
         pJoint[axisOrthog] = lati[L2].P0().Y();
@@ -530,71 +626,69 @@ cc = false;
         addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[il1], vi, ei);
     }
 
-
     // 3- RIMOZIONE DEGLI EDGE INTERNI AL RETTANGOLO
+    Log("FASE 3");
     tri::UpdateTopology<CMeshO>::EdgeEdge(em);
     vcg::tri::UpdateFlags<CMeshO>::EdgeClearV(em);  // setto i flag per sapere se sono stati visitati dal sottociclo (che visita una sagoma alla volta)
 
     CVertexO *firstJV = &(em.vert[0]) + ivS; // indirizzo del primo punto di joint
+    CEdgeO *firstE = &(em.edge[0]) + ieS;
+    CEdgeO *endE = &(em.edge[0]) + em.edge.size();
 
-    //le y dei due lati lunghi del rettangolo, per verificare se un vertice è dentro
-    float & y1 = lati[0].P0().Y();
-    float & y2 = lati[1].P1().Y();
-
-    unsigned int nDel, nVDel;
-    nDel = nVDel = 0;
-
-//    for(size_t i = 0; i < old em.edge.size(); i++)//non c'è bisogno che arrivo in fondo perché gli edge nuovi fanno parte sicuramente di qualche sagoma
-    for(size_t i = 0; i < em.edge.size(); i++)
+    //da firstE compreso in poi abbiamo edge tutti esterni al rettangolo (ma non TUTTI gli esterni) che hanno un vertice sul rettangolo
+    for(CEdgeO *corrE = firstE; corrE < endE; corrE++)   //partendo dai nuovi edge appena inseriti prendo sicuramente tutti i ritagli effettuati e parto sicuramente da edge esterni al retangolo (per costruzione) di cui almeno un vertice è di joint
     {
-        if (!em.edge[i].IsV())
+        if (!corrE->IsV())
         {
+            corrE->SetV();   //teoricamente non servirebbe (non puo' esistere un unico edge esterno se la forma è chiusa e non ci posso passare per altri percorsi per questo edge)
 
-            edge::Pos<CEdgeO> eStart(&em.edge[i],0);    //memorizza l'edge di partenza
-//??WHILE INUTILE SE LIMITO IL FOR ALL'INDICE VECCHIO
-if(eStart.V() >= firstJV)Log("jjjj");
-            while(eStart.V() >= firstJV)                //cerco un punto non di Joint
-                eStart.NextE();
+            char ind = (corrE->V(0) >= firstJV) ? 0 : 1;  //guardo quale dei 2 vertici sia il vertice di Joint
+if(corrE->V(ind) < firstJV) Log("ERRORE!");//cambia con assert
 
-            edge::Pos<CEdgeO> eCorr = eStart;           //itera sugli edge
+            edge::Pos<CEdgeO> posCorr(&(*corrE),ind);
+            posCorr.FlipE(); //flippando l'edge e avendo un vertice di joint entro nel rettangolo
+            tri::Allocator<CMeshO>::DeleteEdge(em,*(posCorr.E())); // segno che l'edge corrente va eliminato
 
-            bool dentro = ( (eStart.V()->P().X() > 0) && (eStart.V()->P().Y() < y1) && (eStart.V()->P().Y() > y2) );//&& !(eStart.V()->IsV() ) );
-//Log("dentro %i", dentro);
-int numE = 0;
             do
             {
-numE++;
-                eCorr.E()->SetV();
+                posCorr.FlipV();
+                posCorr.FlipE();
 
-//                if(eStart.V()->IsV())
-                if(eCorr.V() >= firstJV)   //se attraverso un punto di Joint
-                    dentro = !dentro;
-                else if(dentro)
-{
-                    tri::Allocator<CMeshO>::DeleteVertex(em,*(eCorr.V()));
-nVDel++;
-//Log("DEL!!!");
-}
-
-                if(dentro)  //se sono dentro non faccio altro che ...
-{
-                    tri::Allocator<CMeshO>::DeleteEdge(em,*(eCorr.E())); // ...segnare che l'edge corrente va eliminato
-nDel++;
-}
-
-                eCorr.NextE();
-            }while(eCorr != eStart); //&& ei != NULL && ei != ePrec
-//Log("Nuova sagoma trovata numE: %i", numE);
+                //se non riattraverso un Joint posCorr riferisce ad edge e vertice interni
+                if(posCorr.V() < firstJV)
+                {
+                    tri::Allocator<CMeshO>::DeleteVertex(em,*(posCorr.V()));
+                    tri::Allocator<CMeshO>::DeleteEdge(em,*(posCorr.E())); // segno che l'edge corrente va eliminato
+                }
+                else {posCorr.E()->SetV(); //in questo caso siamo usciti dal rettangolo: il vertice e' di joint e l'edge e' divenuto esterno e sicuramente e' uno dei nuovi edge; lo setto come visitato (potrei mettere un break)
+if(posCorr.E() < firstE) Log("ERRORE 2!");//cambia con assert
+                }
+            }while(posCorr.V() < firstJV);
         }
     }
 
     // 4- AGGIUNTA DEGLI EDGE DI CHIUSURA
+    Log("FASE 4");
     nJP = (nJP/2)+addEC;      //gli edge di chiusura sono pari al numero di vertici di Joint inseriti diviso 2 + gli edge per gli spigoli
+//?? nJP = em.vert.size() - em.edge.size();
     ei = vcg::tri::Allocator<CMeshO>::AddEdges(em,nJP);
     CMeshO::EdgeIterator eEnd = ei+nJP;
 
+    if(nEC==2)  //ci sta un solo spigolo (2 edge contigui da inizializzare)
+    {
+        //e0
+        ei->V(0)=firstJV;   //v0
+        firstJV++;
+        ei->V(1)=firstJV;   //v1
+        ei++;   //e1 (non mi sposto sul vertice successivo)
+        ei->V(0)=firstJV;   //v1
+        firstJV++;
+        ei->V(1)=firstJV;   //v2
 
-    if(nEC==3)  //ci sono i due spigoli e sono direttamente congiunti
+        ei++;
+        firstJV++;
+
+    }else if(nEC==3)  //ci sono i due spigoli e sono direttamente congiunti
     {
         //e0
         ei->V(0)=firstJV;   //v0
@@ -631,10 +725,10 @@ nDel++;
         ei->V(0)=firstJV;   //v4
         firstJV++;
         ei->V(1)=firstJV;   //v5
-        firstJV++;
-        ei++;
-    }
 
+        ei++;
+        firstJV++;
+    }
 
 /*
 //iterations of StaticUnroller
@@ -659,10 +753,10 @@ struct StaticUnroller
 }
 
 
-    if(incSpig==3)
+    if(incSpig==??)
     {
         StaticUnroller<3>::step();
-    }else if(incSpig==4)
+    }else if(incSpig==??)
     {
         StaticUnroller<2>::step();
         firstJV++;  // stavolta sposto il vertice
@@ -670,40 +764,41 @@ struct StaticUnroller
     }
 
 */
-
     for(; ei < eEnd; firstJV++, ei++)
     {
-        Log("QUI NON CI DEVI ENTRARE PER ORA");
         ei->V(0)=firstJV;
         firstJV++;
         ei->V(1)=firstJV;
     }
 
-
     tri::Allocator<CMeshO>::CompactEdgeVector(em);
     tri::Allocator<CMeshO>::CompactVertexVector(em);
+
+    assert(em.vert.size() == em.edge.size());   //è una condizione che alla fine, dopo aver rimosso gli edge ed i veritici di troppo deve sempre valere anche se si sconnettono delle sagome visto che ogni vertice connette esattamente 2 vertici (e viceversa) e sono tutte sagome chiuse
 
     tri::UpdateTopology<CMeshO>::EdgeEdge(em);
 
 
-/*
-Log per testare
-
-Log("N vert Orig %i", em.vert.size());
-Log("N edge Orig %i", em.edge.size());
-
+/**************
+//Log per testare
+Log("N vert %i", em.vert.size());
+Log("N edge %i", em.edge.size());
 
 Log("stampa vertici e edge");
 for(size_t i = 0; i < em.vert.size(); i++)
 {
+    if(em.vert[i].IsD()) Log("{{{");
     Log("Vertex %i (%f,%f,%f)", i, em.vert[i].P().X(), em.vert[i].P().Y(), em.vert[i].P().Z());
+    if(em.vert[i].IsD()) Log("}}}");
 }
 for(size_t i = 0; i < em.edge.size(); i++)
 {
+    if(em.edge[i].IsD()) Log("{{{");
     CVertexO* start = &(em.vert[0]);
     Log("Edge %i (%i,%i)", i, &(*em.edge[i].V(0))-start,&(*em.edge[i].V(1))-start);
+    if(em.edge[i].IsD()) Log("}}}");
 }
-*/
+**********/
 
 
 //?????????metti controllo errore se torna indietro: la sagoma e' aperta
