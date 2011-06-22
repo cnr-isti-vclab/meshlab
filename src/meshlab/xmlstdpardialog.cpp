@@ -191,7 +191,13 @@ void MeshLabXMLStdDialog::applyClick()
 
 void MeshLabXMLStdDialog::closeClick()
 {
-
+	if(curmask != MeshModel::MM_UNKNOWN)
+		meshState.apply(curModel);
+	curmask = MeshModel::MM_UNKNOWN;
+	// Perform the update only if there is Valid GLarea. 
+	if(this->curgla) 
+		this->curgla->update();
+	close();
 }
 
 void MeshLabXMLStdDialog::toggleHelp()
@@ -282,6 +288,10 @@ void MeshLabXMLStdDialog::resetExpressions()
 	stdParFrame->resetExpressions(mplist);
 }
 
+void MeshLabXMLStdDialog::closeEvent( QCloseEvent * /*event*/ )
+{
+	closeClick();
+}
 XMLStdParFrame::XMLStdParFrame( QWidget *p,QWidget *gla/*=0*/ )
 :QFrame(p),extended(false)
 {
@@ -300,7 +310,7 @@ XMLStdParFrame::XMLStdParFrame( QWidget *p,QWidget *gla/*=0*/ )
 
 XMLStdParFrame::~XMLStdParFrame()
 {
-
+	
 }
 
 void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap,EnvWrap& envir)
@@ -392,7 +402,7 @@ void XMLMeshLabWidget::setVisibility( const bool vis )
 XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
-	cb = new QCheckBox(xmlWidgetTag[MLXMLElNames::paramName],this);
+	cb = new QCheckBox(xmlWidgetTag[MLXMLElNames::guiLabel],this);
 	cb->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
 	bool defVal = env.evalBool(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
 	cb->setChecked(defVal);
@@ -460,6 +470,9 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 
 	if (guiType == MLXMLElNames::colorWidgetTag)
 		return new XMLColorWidget(widgetTable,env,parent);
+	
+	if (guiType == MLXMLElNames::sliderWidgetTag)
+		return new XMLSliderWidget(widgetTable,env,parent);
 
 	return NULL;
 }
@@ -467,7 +480,7 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent)
 :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
-	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName],this);
+	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
 	lineEdit = new QLineEdit(this);
 	//int row = gridLay->rowCount() -1;
 
@@ -476,7 +489,7 @@ XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& 
 	
 	gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
 	gridLay->addWidget(lineEdit,row,1,Qt::AlignTop);
-	//connect(lineEdit,SIGNAL(editingFinished()),p,SIGNAL(parameterChanged()));
+	connect(lineEdit,SIGNAL(editingFinished()),parent,SIGNAL(parameterChanged()));
 	connect(lineEdit,SIGNAL(selectionChanged()),this,SLOT(tooltipEvaluation()));
 	
 	setVisibility(isImportant);
@@ -533,7 +546,7 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& e
 	m_min = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
 	m_max = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
 
-	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::paramName] + " (abs and %)",this);
+	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel] + " (abs and %)",this);
 	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
 	absSB = new QDoubleSpinBox(this);
 	percSB = new QDoubleSpinBox(this);
@@ -570,7 +583,7 @@ XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& e
 
 	connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
 	connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-	//connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
+	connect(this,SIGNAL(dialogParamChanged()),parent,SIGNAL(parameterChanged()));
 	setVisibility(isImportant);
 }
 
@@ -658,7 +671,7 @@ XMLVec3Widget::XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& 
 		paramName = xmlWidgetTag[MLXMLElNames::paramName];
 		//int row = gridLay->rowCount() - 1;
 
-		descLab = new QLabel( xmlWidgetTag[MLXMLElNames::paramName],p);
+		descLab = new QLabel( xmlWidgetTag[MLXMLElNames::guiLabel],p);
 		descLab->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
 		gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 
@@ -793,7 +806,7 @@ XMLColorWidget::XMLColorWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWra
 {
 	colorLabel = new QLabel(p);
 	QString paramName = xmlWidgetTag[MLXMLElNames::paramName];
-	descLabel = new QLabel(paramName,p);
+	descLabel = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],p);
 	colorButton = new QPushButton(p);
 	colorButton->setAutoFillBackground(true);
 	colorButton->setFlat(true);
@@ -856,4 +869,94 @@ void XMLColorWidget::setVisibility( const bool vis )
 	colorLabel->setVisible(vis);
 	descLabel->setVisible(vis);
 	colorButton->setVisible(vis);
+}
+
+XMLSliderWidget::XMLSliderWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+{
+	minVal = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
+	maxVal = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
+	valueLE = new QLineEdit(p);
+	valueLE->setAlignment(Qt::AlignRight);
+	valueSlider = new QSlider(Qt::Horizontal,p);
+	valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel]);
+	valueSlider->setMinimum(0);
+	valueSlider->setMaximum(100);
+	float fval = env.evalFloat(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+	valueSlider->setValue(floatToInt( fval));
+	valueLE->setValidator(new QDoubleValidator (minVal,maxVal, 5, valueLE));
+	valueLE->setText(QString::number(fval));
+
+
+	//int row = gridLay->rowCount() - 1;
+	gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
+
+	QHBoxLayout* lay = new QHBoxLayout(p);
+	lay->addWidget(valueLE,0,Qt::AlignHCenter);
+	//lay->addWidget(valueSlider,0,Qt::AlignJustify);
+	lay->addWidget(valueSlider,0,0);
+	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+
+	connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
+	connect(valueSlider,SIGNAL(valueChanged(int)),this,SLOT(setValue(int)));
+	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+	setVisibility(isImportant);
+}
+
+XMLSliderWidget::~XMLSliderWidget()
+{
+
+}
+
+void XMLSliderWidget::set( const QString& nwExpStr )
+{
+	 float fval = env.evalFloat(nwExpStr);
+	 valueSlider->setValue(floatToInt(fval));
+}
+
+void XMLSliderWidget::updateVisibility( const bool vis )
+{
+	setVisibility(isImportant);
+}
+
+QString XMLSliderWidget::getWidgetExpression()
+{
+	return valueLE->text();
+}
+
+void XMLSliderWidget::setValue( int newv )
+{
+	if( QString::number(intToFloat(newv)) != valueLE->text())
+		valueLE->setText(QString::number(intToFloat(newv)));
+}
+
+void XMLSliderWidget::setValue( float newValue )
+{
+	if(floatToInt(float(valueLE->text().toDouble())) != newValue)
+		valueLE->setText(QString::number(intToFloat(newValue)));
+}
+
+void XMLSliderWidget::setValue()
+{
+	float newValLE=float(valueLE->text().toDouble());
+	valueSlider->setValue(floatToInt(newValLE));
+	emit dialogParamChanged();
+}
+
+float XMLSliderWidget::intToFloat( int val )
+{
+	return minVal+float(val)/100.0f*(maxVal-minVal);
+}
+
+int XMLSliderWidget::floatToInt( float val )
+{
+	return int (100.0f*(val-minVal)/(maxVal-minVal));
+}
+
+void XMLSliderWidget::setVisibility( const bool vis )
+{
+	valueLE->setVisible(vis);
+	valueSlider->setVisible(vis);
+	fieldDesc->setVisible(vis); 
 }

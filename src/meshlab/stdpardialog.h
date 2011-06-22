@@ -330,7 +330,6 @@ protected:
 	QLabel* fieldDesc; 
   float minVal;
   float maxVal;
-	int mask;
 private :
 	float intToFloat(int val);  
 	int floatToInt(float val);

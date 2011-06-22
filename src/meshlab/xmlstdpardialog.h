@@ -243,12 +243,40 @@ signals:
 		void pickColor(); 
 };
 
-//class XMLSliderWidget : public XMLFloatWidget
-//{
-//private:
-//	QSlider *valueSlider;
-//	int mask;
-//};
+class XMLSliderWidget : public XMLMeshLabWidget
+{
+	Q_OBJECT
+signals:
+	void dialogParamChanged();
+public:
+	XMLSliderWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	~XMLSliderWidget();
+	void set(const QString& nwExpStr);
+	void updateVisibility(const bool vis);
+	QString getWidgetExpression();
+
+public slots:
+	void setValue(int newv);
+	void setValue();
+	void setValue(float newValue);
+
+private:
+	//WHY WE NEED THIS FUNCTION?
+	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
+	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
+	//THIS THING HAS AS CONSEQUENCE THAT I HAVE TO PASTE AND COPY THE updateVisibility CODE INSIDE THE CONSTRUCTOR.
+	//TO AVOID THIS FOR EACH WIDGET WE ADD A setVisibility FUNCTION (OBVIOUSLY NOT VIRTUAL) WITH THE CODE THAT WE SHOULD PUT INSIDE THE
+	//updateVisibility. 
+	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
+	void setVisibility(const bool vis);
+	float intToFloat(int val);  
+	int floatToInt(float val);
+	QLineEdit *valueLE;
+	QSlider   *valueSlider;
+	QLabel* fieldDesc; 
+	float minVal;
+	float maxVal;
+};
 
 class XMLStdParFrame : public QFrame
 {
@@ -317,6 +345,7 @@ public:
 
 	bool showAutoDialog(MeshLabXMLFilterContainer& mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic() const;
+	void closeEvent ( QCloseEvent * event ); 
 //signals:
 	//void dialogEvaluateExpression(const Expression& exp,Value** res);
 	//void expandView(bool exp);
