@@ -60,6 +60,7 @@ namespace MLXMLElNames
 	const QString absPercTag("ABSPERC_GUI");
 	const QString vec3WidgetTag("VEC3_GUI");
 	const QString colorWidgetTag("COLOR_GUI");
+	const QString sliderWidgetTag("SLIDER_GUI");
 
 	const QString mfiVersion("mfiVersion");
 
