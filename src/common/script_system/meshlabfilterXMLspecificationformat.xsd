@@ -50,6 +50,7 @@
 	 <xs:element ref='EDIT_GUI'/>
 	 <xs:element ref='VEC3_GUI'/>
 	 <xs:element ref='COLOR_GUI'/>
+	 <xs:element ref='SLIDER_GUI'/>
     </xs:choice>
    </xs:sequence>
    <xs:attribute name='parType' use='required'>
@@ -104,6 +105,14 @@
  <xs:element name='COLOR_GUI'>
   <xs:complexType>
    <xs:attribute name='guiLabel' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
+  <xs:element name='SLIDER_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
+   <xs:attribute name='guiMin' type='xs:string' use='required'/>
+   <xs:attribute name='guiMax' type='xs:string' use='required'/>
   </xs:complexType>
  </xs:element>
  
