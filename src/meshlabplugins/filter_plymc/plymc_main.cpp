@@ -221,10 +221,7 @@ int main(int argc, char *argv[])
 
   if(pmc.MP.size()==0) usage();
   printf("End Parsing\n\n");
-  int t1=clock();
   pmc.Process();
-  int t2=clock();
-
 
   return 0;
 }

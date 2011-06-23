@@ -96,7 +96,7 @@ template<class TriMeshType>
     int size() {return meshnames.size();}
 
     int getCacheSize() {return MC.MaxSize;}
-    int setCacheSize(int newsize)
+    int setCacheSize(size_t newsize)
     {
       if(newsize == MC.MaxSize)
 	return MC.MaxSize;
@@ -112,7 +112,7 @@ template<class TriMeshType>
       vector<RangeMap> rmaps;
       ALNParser::ParseALN(rmaps, alnName);
 
-      for(int i=0; i<rmaps.size(); i++)
+      for(size_t i=0; i<rmaps.size(); i++)
           AddSingleMesh(rmaps[i].filename.c_str(), rmaps[i].trasformation, rmaps[i].quality);
 
       return true;

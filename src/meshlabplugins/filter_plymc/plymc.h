@@ -575,11 +575,11 @@ void MCSimplify( MeshType &m, float absoluteError, bool preserveBB, vcg::CallBac
       for(size_t i = 0; i< ZSet.size()-1;++i)
       {
         Delta = std::max(ZSet[i+1]-ZSet[i],Delta);
-        qDebug("%f",Delta);
+//        qDebug("%f",Delta);
       }
       absoluteError= Delta/4.0f;
     }
-    qDebug("Simplifying at absoluteError=%f",absoluteError);
+//    qDebug("Simplifying at absoluteError=%f",absoluteError);
 
     float TargetError = absoluteError;
     char buf[1024];

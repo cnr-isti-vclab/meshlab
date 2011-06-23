@@ -1,5 +1,4 @@
 TARGET = plymc
-LIBPATH += 
 DEPENDPATH += .
 INCLUDEPATH += ../../../../vcglib \
     ../../code/lib/glew/include
