@@ -33,7 +33,7 @@ class FilterColorProjectionPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ };
+	enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
 
 	FilterColorProjectionPlugin();
 	
