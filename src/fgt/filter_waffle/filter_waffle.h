@@ -39,19 +39,6 @@
 
 #include "filter_waffle_functors.h"
 
-class MyVertex;
-class MyEdge;
-class MyFace;
-
-class MyUsedTypes: public vcg::UsedTypes < vcg::Use<MyVertex>::AsVertexType,vcg::Use<MyFace>::AsFaceType,vcg::Use<MyEdge>::AsEdgeType>{};
-
-class MyVertex: public vcg::Vertex < MyUsedTypes,vcg::vertex::Coord3f,vcg::vertex::BitFlags, vcg::vertex::VEAdj>{};
-class MyFace: public vcg::Face < MyUsedTypes, vcg::face::VertexRef>{};
-class MyEdge    : public vcg::Edge <MyUsedTypes,vcg::edge::VertexRef, vcg::edge::BitFlags, vcg::edge::EEAdj> {};
-
-class MyEdgeMesh: public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyEdge> > {};
-
-
 typedef vcg::tri::io::SVGProperties SVGProperties;
 
 
@@ -72,16 +59,24 @@ struct Succ<Z>
 //L1: lato + a destra, L2: lato + a sinistra, l1: lato minore che passa per il centro
 typedef enum{L1=0,L2=1,l1=2,NO_LATO=3} latoRect;
 
+//come vengono incastrati 2 piani
+typedef enum{NILL=0, ZERO_INCASTRO=1, BROKEN=2, ONE_CONTACT=3, TWO_CONTACT=4, THREE_CONTACT=5} Incastri;
+//ZERO_INCASTRO indica che le 2 sagome non si intersecano pernulla
+//BROKEN indica che si intersecano ma non hanno in contatto la base del rettangolo
+//NO_CONTACT indica che si toccano solo sulla base
+
 class JointPoint{
 public:
     Point2f p;
     int e;
-    latoRect l;
-    char indV;
+    int indV;  //indice del vertice da spostare nel nuovo edge oppure del vertice collineare
+    bool collinear; //indica se è collineare un vertice
 
-    JointPoint(const Point2f &p1, const int &e1, const latoRect &l1, const char &indV1)
+    JointPoint(){}
+
+    JointPoint(const Point2f &p1, const int &e1, const int &indV1, const bool &collinear1)
     {
-        p = p1; e = e1; l = l1; indV = indV1;
+        p = p1; e = e1; indV = indV1; collinear = collinear1;
     }
 };
 
@@ -112,11 +107,12 @@ public:
 
     private:
         SVGProperties pr;
+        SVGProperties prOrth;
 //        void createSlice(MeshModel* orig,MeshModel* dest);
 
         // nuove funzioni
         void generateRectSeg(const float &dist, const float &epsTmp, const float &lengthDiag, Segment2f lati[]);
-        void subtraction(CMeshO &em, Segment2f lati[], const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height);
+        Incastri subtraction(CMeshO &em, Segment2f lati[], const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height);
         void addAndBreak(CMeshO &em, Point3f & pJoint, const Axis &axisOrthog, const Axis &axisJoint, const JointPoint & jp, const CMeshO::VertexIterator vi, const CMeshO::EdgeIterator ei);
 };
 

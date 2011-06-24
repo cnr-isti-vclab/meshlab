@@ -85,7 +85,7 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Ri
             parlst.addParam(new RichFloat  ("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
             parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
             // BBox min=0, BBox center=1, Origin=2
-            parlst.addParam(new RichFloat("eps",0.3,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
+            parlst.addParam(new RichFloat("eps",1.0,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
             parlst.addParam(new RichFloat("spacing",0.02,"Space between two planes", "Step value between each plane for automatically generating cross-sections."));
             parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
             parlst.addParam(new RichBool("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter"));
@@ -127,6 +127,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                     axisOrthog = (Axis) Succ<X>::value;
                     axisJoint = (Axis) Succ<Succ<X>::value>::value;
                     pr.sizeCm = Point2f(sizeCm[1],sizeCm[2]);
+                    prOrth.sizeCm = Point2f(sizeCm[2],sizeCm[0]);
                 }
                 break;
             case Y:
@@ -134,6 +135,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                     axisOrthog = (Axis) Succ<Y>::value;
                     axisJoint = (Axis) Succ<Succ<Y>::value>::value;
                     pr.sizeCm = Point2f(sizeCm[0],sizeCm[2]);
+                    prOrth.sizeCm = Point2f(sizeCm[1],sizeCm[0]);
                 }
                 break;
             case Z:
@@ -141,6 +143,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                     axisOrthog = (Axis) Succ<Z>::value;
                     axisJoint = (Axis) Succ<Succ<Z>::value>::value;
                     pr.sizeCm = Point2f(sizeCm[0],sizeCm[1]);
+                    prOrth.sizeCm = Point2f(sizeCm[1],sizeCm[2]);
                 }
                 break;
             }
@@ -161,6 +164,16 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 return false;
             }
 */
+            bool ok = planeDist < eps;
+            Log("ok %i", ok);
+            Log("The space between two planes must be less than the length of the eps: planedist %f, eps %f",planeDist, eps);
+            if(planeDist < eps) //??non so perché ma dentro da sempre vero qualunque confronto metto
+            {
+                Log("The space between two planes must be less than the length of the eps: planedist %f, eps %f",planeDist, eps);
+                return false;
+            }
+
+
             const int planeNum = (planeDist == 0) ? 1 : ( ((bbox.Dim()*planeAxis)/planeDist)+1 ); //evito la divisione per 0
 
             pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
@@ -183,23 +196,31 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 return false;
             }
 
-            float lengthDiag = bbox.Diag()/2.0;
-            planeCenter = bbox.min + planeAxis*planeOffset*lengthDiag;      //parto dal basso (bbox min)
+            const float lengthDiag = bbox.Diag()/2.0;
+
+            planeCenter = bbox.Center() + planeAxis*planeOffset*lengthDiag;
+            planeCenter[axis] -= (planeNum/2) * planeDist;  //partendo dal centro devo andare indietro della metà
 
             float epsTmp = eps/2.0;
 
-            Segment2f  lati[3]; //il quarto lato lo ignoro, tanto non lo uso mai
+            Segment2f lati[3]; //il quarto lato lo ignoro, tanto non lo uso mai
             generateRectSeg(0, epsTmp, bbox.Diag()*2, lati);
 
             MeshModel* cap;
             MeshModel* cap2;
+            MeshModel* extr;
+
             float start = planeCenter[axis];
+//*
+            Incastri inc[planeNum][planeNum];
             //planeNum
             for(int i = 0; i < planeNum; ++i)
             {
-                Log("######## LAYER %i", i);
+//                Log("######## LAYER %i", i);
+                planeCenter[axis] = start + planeDist*i;;
 
-                planeCenter[axis] += planeDist;
+
+                //planeCenter[axis] += planeDist;
                 slicingPlane.Init(planeCenter,planeAxis);
 
                 //this is used to generate svg slices
@@ -207,10 +228,9 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(base->cm, slicingPlane, cap->cm );
 
                 tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
-                ev.push_back(&(cap->cm));
-
                 if(cap->cm.edge.size()> 0)
                 {
+
                     for(int j = 0; j < planeNum; ++j)
                     {
 //                        Log("#### RECTANGLE %i", j);
@@ -225,98 +245,24 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                         lati[l1].P0().Y() = yMag;
                         lati[l1].P1().Y() = yMin;
 
-                        subtraction(cap->cm, lati, axis, axisOrthog, axisJoint, planeCenter[axis]);
+                        inc[i][j] = subtraction(cap->cm, lati, axis, axisOrthog, axisJoint, planeCenter[axis]);
+
+                        if(inc[i][j]==BROKEN) Log("ATTENTION! The first plane %i is broken fron the plane %i",i,j);
                     }
+                    ev.push_back(&(cap->cm));
                 }
+
                 cap2= m.addNewMesh("","CappedSlice");
                 tri::CapEdgeMesh(cap->cm, cap2->cm);
+
+                extr= m.addNewMesh("","Extruded");
+                cap2->updateDataMask(MeshModel::MM_FACEFACETOPO);
+                extr->updateDataMask(MeshModel::MM_FACEFACETOPO);
+                tri::UpdateTopology<CMeshO>::FaceFace(cap2->cm);
+                tri::ExtrudeBoundary<CMeshO>(cap2->cm,extr->cm,eps,planeAxis);
+                extr->visible = cap2->visible =false;
+
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-            planeAxis[axis] = 0.0f;
-            planeAxis[axisOrthog] = 1.0f;
-
-            //??pr.sizeCm = Point2f(sizeCm[1],sizeCm[2]);
-            //??pr.sizeCm = Point2f(sizeCm[0],sizeCm[2]);
-            //??pr.sizeCm = Point2f(sizeCm[0],sizeCm[1]);
-
-//            pr.lineWidthPt=200;
-//            pr.scale=2/maxdim;
-
-
-//            pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
-//            pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
-//            pr.projDir = planeAxis;
-//            pr.projCenter =  m.mm()->cm.bbox.Center();
-
-            planeCenter = bbox.min + planeAxis*planeOffset*lengthDiag;      //parto dal basso (bbox min)
-
-            generateRectSeg(0, epsTmp, bbox.Diag()*2, lati);
-            start = planeCenter[axisOrthog];
-            //planeNum
-            for(int i = 0; i < planeNum; ++i)
-            {
-
-                Log("######## LAYER INV %i", i);
-
-                planeCenter[axisOrthog] += planeDist;
-                slicingPlane.Init(planeCenter,planeAxis);
-
-                //this is used to generate svg slices
-                cap= m.addNewMesh("","EdgeMesh");
-                vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(base->cm, slicingPlane, cap->cm );
-
-                tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
-                ev.push_back(&(cap->cm));
-
-                if(cap->cm.edge.size()> 0)
-                {
-                    for(int j = 0; j < planeNum; ++j)
-                    {
-//                        Log("#### RECTANGLE %i", j);
-                        float newDist = start + planeDist*j;
-                        float yMag = epsTmp + newDist;
-                        float yMin = -epsTmp + newDist;
-                        // shifta rect (solo su Y ovviamente)
-                        lati[L1].P0().Y() = yMag;
-                        lati[L1].P1().Y() = yMag;
-                        lati[L2].P0().Y() = yMin;
-                        lati[L2].P1().Y() = yMin;
-                        lati[l1].P0().Y() = yMag;
-                        lati[l1].P1().Y() = yMin;
-
-                        subtraction(cap->cm, lati, axisOrthog, axis, axisJoint, planeCenter[axisOrthog]);
-                    }
-                }
-                cap2= m.addNewMesh("","CappedSlice");
-                tri::CapEdgeMesh(cap->cm, cap2->cm);
-            }
-
-
-*/
-
-
-
-
-
-
-
 
             QString fname;//= parlst.getSaveFileName("filename");
             if(fname=="") fname="C:/Slice.svg";
@@ -324,18 +270,114 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
             tri::io::ExporterSVG<CMeshO>::Save(ev, fname.toStdString().c_str(), pr);
 
+//*/
+
+//*
+            vector<CMeshO*> evOrth;
+
+            planeAxis[axis] = 0.0f;
+            planeAxis[axisOrthog] = 1.0f;
+
+            planeCenter = bbox.Center() + planeAxis*planeOffset*lengthDiag;
+            planeCenter[axisOrthog] -= (planeNum/2) * planeDist;  //partendo dal centro devo andare indietro della metà
+
+            generateRectSeg(0, epsTmp, -bbox.Diag()*2, lati);
+
+            prOrth.lineWidthPt=200;
+            prOrth.scale=2/maxdim;
+            prOrth.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
+            prOrth.numRow=(int)(planeNum*1.0f/prOrth.numCol)+1;
+            prOrth.projDir = planeAxis;
+            prOrth.projCenter =  m.mm()->cm.bbox.Center();
+
+            Incastri situationForPlaneI[planeNum];
+            Incastri situationForPlaneJ[planeNum];
+
+            for(int k = 0; k < planeNum; ++k)
+            {
+                situationForPlaneI[k] = NILL;
+                situationForPlaneJ[k] = NILL;
+            }
+
+            //planeNum
+            for(int j = 0; j < planeNum; ++j)
+            {
+//                Log("######## LAYER INV %i", j);
+                planeCenter[axisOrthog] = start + planeDist*j;
+//                planeCenter[axisOrthog] += planeDist;
+
+                slicingPlane.Init(planeCenter,planeAxis);
+
+                //this is used to generate svg slices
+                cap= m.addNewMesh("","EdgeMesh");
+                vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(base->cm, slicingPlane, cap->cm );
+
+                tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
+
+                if(cap->cm.edge.size()> 0)
+                {
+                    for(int i = 0; i < planeNum; ++i)
+                    {
+//                      Log("#### RECTANGLE %i", i);
+
+                        if(inc[i][j]!=ZERO_INCASTRO)   //se le due sagome non si incastravano al ciclo prima non lo fanno neanche ora
+                        {
+                            float newDist = start + planeDist*i;
+                            float yMag = epsTmp + newDist;
+                            float yMin = -epsTmp + newDist;
+                            // shifta rect (solo su Y ovviamente)
+                            lati[L1].P0().Y() = yMag;
+                            lati[L1].P1().Y() = yMag;
+                            lati[L2].P0().Y() = yMin;
+                            lati[L2].P1().Y() = yMin;
+                            lati[l1].P0().Y() = yMag;
+                            lati[l1].P1().Y() = yMin;
+
+                            Incastri temp = subtraction(cap->cm, lati, axisOrthog, axis, axisJoint, planeCenter[axisOrthog]);
+
+                            if(temp==BROKEN) Log("ATTENTION! The second plane %i is broken from the plane %i",j,i);
+                            if(temp < inc[i][j]) temp = inc[i][j];  //mi interessa che almeno uno dei 2 piani regga
+                            if(situationForPlaneI[i] < temp) situationForPlaneI[i] = temp;
+                            if(situationForPlaneJ[j] < temp) situationForPlaneJ[j] = temp;
+                        }
+                    }
+                    evOrth.push_back(&(cap->cm));
+                }
+
+                cap2= m.addNewMesh("","CappedSlice");
+                tri::CapEdgeMesh(cap->cm, cap2->cm);
+
+                extr= m.addNewMesh("","Extruded");
+                cap2->updateDataMask(MeshModel::MM_FACEFACETOPO);
+                extr->updateDataMask(MeshModel::MM_FACEFACETOPO);
+                tri::UpdateTopology<CMeshO>::FaceFace(cap2->cm);
+                tri::ExtrudeBoundary<CMeshO>(cap2->cm,extr->cm,eps,planeAxis);
+                extr->visible = cap2->visible =false;
+            }
+/*
+            for(int k = 0; k < planeNum; ++k)
+            {
+                if(situationForPlaneI[k] < TWO_CONTACT) Log("ATTENTION! The first plane %i has no joints",k);
+                else if(situationForPlaneI[k] == TWO_CONTACT) Log("ATTENTION! The first plane %i may not be stable",k);
+
+                if(situationForPlaneJ[k] < TWO_CONTACT) Log("ATTENTION! The second plane %i has no joints",k);
+                else if(situationForPlaneJ[k] == TWO_CONTACT) Log("ATTENTION! The second plane %i may not be stable",k);
+            }
+//*/
+
+//*/
+            QString fnameOrth;//= parlst.getSaveFileName("filename");
+            if(fnameOrth=="") fnameOrth="C:/SliceOrth.svg";
+            if (!fnameOrth.endsWith(".svg")) fnameOrth+=".svg";
+
+            tri::io::ExporterSVG<CMeshO>::Save(evOrth, fnameOrth.toStdString().c_str(), prOrth);
+
+            base->visible =false;
         }
         break;
     }
     return true;
 }
-
-
-
-//void ExtraFilter_SlicePlugin::extrude(MeshDocument* /*doc*/,MeshModel* orig, MeshModel* dest, float eps, Point3f planeAxis)
-//{
-//    tri::ExtrudeBoundary<CMeshO>(orig->cm,dest->cm,eps,planeAxis);
-//}
 
 MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
 {
@@ -385,16 +427,25 @@ void ExtraFilter_SlicePlugin::generateRectSeg(const float &dist, const float &ep
     lati[L2].Set(a2,b2);    //lato con Y minore
     lati[l1].Set(a1,a2);    //lato minore che passa per il centro (0,0)
     //il lato minore più lontano non sereve
+
+    //per recuperare
+    //yMag == lati[L1].P0.Y();
+    //yMin == lati[L2].P0.Y();
 }
 
 bool compareX(JointPoint v0, JointPoint v1)
 {
     return v0.p.X() < v1.p.X();
 }
-
+//??? forse serve fare un compare esclusivo (non considera )
 bool compareY(JointPoint v0, JointPoint v1)
 {
     return v0.p.Y() < v1.p.Y();
+}
+
+bool compareInvY(JointPoint v0, JointPoint v1)
+{
+    return v0.p.Y() > v1.p.Y();
 }
 
 void ExtraFilter_SlicePlugin::addAndBreak(CMeshO &em, Point3f & pJoint, const Axis &axisOrthog, const Axis &axisJoint, const JointPoint & jp, const CMeshO::VertexIterator vi, const CMeshO::EdgeIterator ei)
@@ -402,37 +453,79 @@ void ExtraFilter_SlicePlugin::addAndBreak(CMeshO &em, Point3f & pJoint, const Ax
 //Log("Edge spezzato %i", jp.e);
 //Log("Edge nuovo %i", &(*ei) - &(em.edge[0]));
 //Log("Indirizzo V1 spostato su nuovo edge %i", em.edge[jp.e].V(1) - &(em.vert[0]));
-//Log("Indirizzo V Joint %i", &(*vi) - &(em.vert[0]));
+//og("Indirizzo V Joint %i", &(*vi) - &(em.vert[0]));
+//Log("IndV %i", jp.indV);    //indice del vertice esterno o collineare
+//Log("Collineare %i", jp.collinear);
 
-    //SPEZZO IN DUE UN EDGE
-    //converto il punto di intersezione in 3D (la terza coordinata pJoint[axis] è sempre la stessa per tutti i punti)
-    pJoint[axisJoint] = jp.p.X();
-    pJoint[axisOrthog] = jp.p.Y();
+    if(jp.collinear) //e' come se spostassi (li copio e cancello i vecchi) il vertice collineare ed uno dei 2 vertici che vi incidono tra edge e vertici di joint
+    {
+        (*vi).P() = em.edge[jp.e].V(jp.indV)->P();  //duplico il vertice collineare di joint (deve stare tra i punti di joint, in fondo al vettore dei vertici)
+//        (*vi).SetV();
 
-    //aggiungo un solo vertice per il punto di intersezione (i 2 edge usano i vertici dell'edge corrente e in + solo il nuovo vertice d'intersezione)
-    (*vi).P() = pJoint;     //aggiungo il nuovo vertice di intersezione
-    (*vi).SetV();           //indico che è un punto di Joint per la successiva fase di cancellazione
-    //spezzo l'edge corrente in due edge sul punto di intersezione: aggiungo solo il secondo edge e per il primo edge uso l'edge corrente
+        CEdgeO *e2 = em.edge[jp.e].EEp(jp.indV);    //passo all'altro edge incidente sul vertice collineare
+        int indV2 = em.edge[jp.e].EEi(jp.indV);     //indice del vertice collineare sul nuovo edge
+        e2->V(indV2) = &(*vi);      //sostituisco il punto (sono identici ma il nuovo è messo tra i punti di joint)
+//Log("altro edge %i",&(*e2) - &(em.edge[0]));
+//Log("indV2 %i",indV2);
 
-    //il nuovo edge ha...
-    ei->V(0) = &(*vi);              //... come vertice 0 il nuovo vertice di intersezione e ...
-    ei->V(1) =em.edge[jp.e].V(jp.indV);   //... come vertice 1 setto il vertice dal lato giusto (indV1) dell'edge corrente
+        int otherV =(jp.indV+1)%2;
+        Log("bubu %i",otherV);
+        ei->V(otherV) = em.edge[jp.e].V(otherV);    //copio l'altro vertice (non collineare) nel nuovo edge
+        ei->V(jp.indV) = &(*vi);                    //metto il punto di Joint collineare come altro vertice
 
-    //l'edge 1, fatto sull'edge corrente, ha il vertice 0 inalterato, mentre...
-    em.edge[jp.e].V(jp.indV) = &(*vi);       //...il vertice 1 diventa il nuovo vertice di intersezione
+        em.edge[jp.e].V(otherV) = em.edge[jp.e].V(jp.indV);     //sconnetto completametne il vecchio edge (riferisce solo al vertice che verrà eliminato: lo rendendolo degenere); cosi quando ricostruisco la topologia non da noie (non lo elimino subito ma solo dopo aver rimosso gli archi interni)
+        tri::Allocator<CMeshO>::DeleteVertex(em,*( em.edge[jp.e].V(jp.indV) )); //segno che il vecchio punto va rimosso
+        tri::Allocator<CMeshO>::DeleteEdge(em, em.edge[jp.e]);                  //segno che l'edge precedente va eliminato perche' sostituito
+        //dopo non li rimuovo subito tanto devo trovare anche gli edge interni da rimuovere
+
+    }else
+    {
+        //SPEZZO IN DUE UN EDGE
+        //converto il punto di intersezione in 3D (la terza coordinata pJoint[axis] è sempre la stessa per tutti i punti)
+        pJoint[axisJoint] = jp.p.X();
+        pJoint[axisOrthog] = jp.p.Y();
+
+        //aggiungo un solo vertice per il punto di intersezione (i 2 edge usano i vertici dell'edge corrente e in + solo il nuovo vertice d'intersezione)
+        (*vi).P() = pJoint;     //aggiungo il nuovo vertice di intersezione
+//        (*vi).SetV();           //indico che è un punto di Joint per la successiva fase di cancellazione (non serve: sono tutti in fondo al vector)
+        //spezzo l'edge corrente in due edge sul punto di intersezione: aggiungo solo il secondo edge e per il primo edge uso l'edge corrente
+
+        //il nuovo edge ha...
+        ei->V(0) = &(*vi);              //... come vertice 0 il nuovo vertice di intersezione e ...
+
+        ei->V(1) =em.edge[jp.e].V(jp.indV);   //... come vertice 1 setto il vertice dal lato giusto (indV1) dell'edge corrente
+
+        //l'edge 1, fatto sull'edge corrente, ha il vertice 0 inalterato, mentre...
+        em.edge[jp.e].V(jp.indV) = &(*vi);       //...il vertice 1 diventa il nuovo vertice di intersezione
+    }
+
 }
 
-void ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
+bool inOrthogonalEdge(const float &rangeMin, const float &rangeMax, const float &equal, const float &coordInRange, const float &coordEq)
 {
+    if(rangeMin<= coordInRange && coordInRange <= rangeMax && equal == coordEq) return true;
+    return false;
+}
 
-    assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
-
+Incastri ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Axis &axis, const Axis &axisOrthog, const Axis &axisJoint, const float height)
+{
     //dalla mesh testata venivano mesh con troppi vertici rispetto al numero di edge (che dovrebbero essere uguali)
+    Incastri inc;
+
     tri::Allocator<CMeshO>::CompactEdgeVector(em);
     tri::Allocator<CMeshO>::CompactVertexVector(em);
 
+
+    tri::UpdateTopology<CMeshO>::EdgeEdge(em);
+
+    tri::Allocator<CMeshO>::CompactEdgeVector(em);
+    tri::Allocator<CMeshO>::CompactVertexVector(em);
+
+//    assert(em.vert.size() == em.edge.size());   //se ogni sagoma è chiusa deve valere
+    assert(axis != axisOrthog && axisOrthog != axisJoint && axisJoint != axis);
+
     // 1- RICERCA DEI PUNTI DI INTERSEZIONE TRA MESH E RETTANGOLO
-    Log("FASE 1");
+//    Log("FASE 1");
     tri::UpdateTopology<CMeshO>::EdgeEdge(em);
     vcg::tri::UpdateFlags<CMeshO>::EdgeClearV(em);  // setto i flag per sapere se sono stati visitati dal sottociclo (che visita una sagoma alla volta)
 
@@ -447,12 +540,41 @@ void ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Ax
     vector<JointPoint> jointPointsL2;
     vector<JointPoint> jointPointsl1;
 
+    bool cas0, cas1;    //per l'intersezione con il lato minore devo vedere se il rettangolo è sopra o sotto l'origine per scegliere indV
+    float xMax, xMin;
+    bool rectPos = lati[L1].P1().X() > 0;   //controlla se il rettangolo è positivo o meno
+    if(rectPos)
+    {
+        cas0=false;
+        cas1=true;
+        xMax = lati[L1].P1().X();
+        xMin = 0;
+    }
+    else{
+        cas0=true;
+        cas1=false;
+        xMax = 0;
+        xMin = lati[L1].P1().X();
+    }
+
+    float & yMax = lati[l1].P0().Y();
+    float & yMin = lati[l1].P1().Y();
+
+//Log("--- L1:(%f %f) (%f %f)",lati[L1].P0().X(),lati[L1].P0().Y(),lati[L1].P1().X(),lati[L1].P1().Y());
+//Log("--- L2:(%f %f) (%f %f)",lati[L2].P0().X(),lati[L2].P0().Y(),lati[L2].P1().X(),lati[L2].P1().Y());
+//Log("--- l1:(%f %f) (%f %f)",lati[l1].P0().X(),lati[l1].P0().Y(),lati[l1].P1().X(),lati[l1].P1().Y());
+
     for(size_t i = 0; i < em.edge.size(); i++)      // ciclo sulle diverse sagome
     {
         if (!em.edge[i].IsV())
         {
             edge::Pos<CEdgeO> eStart(&em.edge[i],0);    //memorizza l'edge di partenza
             edge::Pos<CEdgeO> eCorr = eStart;           //itera sugli edge
+//Log("Nuova Forma");
+            bool enableL1,enableL2,enablel1;    //flag che gestiscono abilitano i test di intersezione con i 3 laii del rettangolo; gestiscono l'aggiunta o meno di punti collineari
+            enableL1=enableL2=enablel1=true;    //la prima volta che incontro un colineare lo ignoro, la seconda se proseguo sulla stessa direzione lo aggiungo (altrimenti e' di rimbalzo)
+            bool lastDir;                       //indica se ero dentro o fuori l'ultima volta che ho incontrato un colineare: puo' essere positiva o negativa
+            JointPoint firstCollinearP;         //per i vertici collineari guardo i due edge adiacenti per vedere se si attraversa effettivamente il lato e in tal caso lo riaggiungo
 
             do
             {
@@ -472,52 +594,263 @@ void ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], const Ax
                 seg.Set(p0_2D,p1_2D);
 
                 int ei = eCorr.E() - &(em.edge[0]); //indice dell'edge corrente
-bool c1,c2,c3;
-c1=c2=c3= false;
+//bool c1,c2,c3;
+//c1=c2=c3= false;
 
-                //un segmento puo' intersecare contemporaneamente 2 lati (ma non 3) quindi non posso mettere else
-                if(vcg::SegmentSegmentIntersection(lati[L1],seg,pJoint2D) && (seg.P0().Y() != seg.P1().Y()) )
+                if( ((!enableL1)||(!enableL2)||(!enablel1)) && (seg.P0().Y()==seg.P1().Y()||seg.P0().X() == seg.P1().X()) ) break;  //non considero neanche i casi in cui l'edge è collineare ad uno dei lati
+                //???????ma non entra mai nel caso seguente? se ho beccato un punto collineare su un lato posso saltare il controllo di segmenti collineari per quel lato ma non per gli altri due lati perché potrei uscire da loro
+
+                //un segmento puo' intersecare contemporaneamente 2 lati (ma non 3) quindi non posso mettere else sui 3 casi dei lati
+
+                if(seg.P0().Y() != seg.P1().Y())
                 {
-                    char indV = (seg.P0().Y() > seg.P1().Y()) ? 0 : 1;  //indice del vertice esterno al rettangolo; in questo edge verrà sostituito con il punto di joint per formare il primo edge dello spezzamento
-                    JointPoint newJoint(pJoint2D, ei, L1, indV);
-                    jointPointsL1.push_back(newJoint);
-//                    Log("Inters L1 (%f %f) (%f %f),(%f %f) (%f %f),(%f %f)",lati[L1].P0().X(),lati[L1].P0().Y(),lati[L1].P1().X(),lati[L1].P1().Y(),seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
-c1 = true;
+                    int indV = (seg.P0().Y() > seg.P1().Y()) ? 0 : 1;  //indice del vertice esterno al rettangolo; in questo edge verrà sostituito con il punto di joint per formare il primo edge dello spezzamento
+
+                    // L1
+                    //uno dei vertici di seg potrebbe coincidere con il punto di intersezione. In tal caso significa che giace sul lato (lo testo a parte perche' SegmentSegmentIntersection non lo gestisce bene)
+                    if(inOrthogonalEdge(xMin,xMax,yMax,seg.P0().X(), seg.P0().Y()))
+                    {
+                        if(enableL1)    //la prima volta che incontro un colineare non lo considero ma segno che l'ho incontrato: il prossimo punto di joint che incontrer0' sara' sicuramente un colineare
+                        {
+                            enableL1=false;
+                            lastDir = (seg.P1().Y() > yMax) ? true : false; //per vedere la direzione devo guardare l'altro punto che non e' colineare
+                            JointPoint newJoint(seg.P0(), ei, 0, true);
+
+                            firstCollinearP = newJoint;     //tengo da parte il punto collineare trovato fino a quando non vedo se sono uscito realmente o meno
+//Log("L1 p0 non aggiunto: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                        }else   //la seconda volta che incontro un colineare
+                        {
+//Log("L1 p0 dir: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            enableL1=true;
+                            bool dir = (seg.P1().Y() > yMax) ? true : false;
+                            if(lastDir!=dir)    //aggiungo solo se non e' un punto di rimbalzo, ovvero se attraverso realmente l'asse
+                            {
+                                jointPointsL1.push_back(firstCollinearP);
+//Log("L1 p0 coll: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            }
+                        }
+                    }else if(inOrthogonalEdge(xMin,xMax,yMax,seg.P1().X(), seg.P1().Y()))
+                    {
+                        if(enableL1)    //la prima volta che incontro un colineare non lo considero ma segno che l'ho incontrato: il prossimo punto di joint che incontrer0' sara' sicuramente un colineare
+                        {
+                            enableL1=false;
+                            lastDir = (seg.P1().Y() > yMax) ? true : false; //per vedere la direzione devo guardare l'altro punto che non e' colineare
+                            JointPoint newJoint(seg.P1(), ei, 1, true);
+
+                            firstCollinearP = newJoint;
+//Log("L1 p1 non aggiunto: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                        }else   //la seconda volta che incontro un colineare
+                        {
+//Log("L1 p1 dir: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            enableL1=true;
+                            bool dir = (seg.P0().Y() > yMax) ? true : false;
+                            if(lastDir!=dir)    //aggiungo solo se non e' un punto di rimbalzo, ovvero se attraverso realmente l'asse
+                            {
+                                jointPointsL1.push_back(firstCollinearP);
+//Log("L1 p1 coll: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            }
+                        }
+                    }else if(vcg::SegmentSegmentIntersection(lati[L1],seg,pJoint2D))    //grazie ai test precedenti questo caso fa intersezione solo quando nn sono collineari
+                    {
+                        if(!enablel1)
+                        {
+                            if(rectPos == lastDir>0)
+                            {
+                                jointPointsl1.push_back(firstCollinearP);
+                                enablel1 = true;
+                            }
+//Log("aggiunto vecchio");
+                        }else
+                        {
+                            JointPoint newJoint(pJoint2D, ei, indV, false);
+                            jointPointsL1.push_back(newJoint);
+//Log("Inters L1: %i,(%f %f) (%f %f),(%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
+//c1 = true;
+                        }
+                    }
+//??????????RIMUOVI IL CAMPO l di tipo latorect in JointPoint (non è + utilizzato)
+                    // L2
+                    indV = (seg.P0().Y() < seg.P1().Y()) ? false : true;
+                    if(inOrthogonalEdge(xMin,xMax,yMin,seg.P0().X(), seg.P0().Y()))
+                    {
+                        if(enableL2)    //la prima volta che incontro un colineare non lo considero ma segno che l'ho incontrato: il prossimo punto di joint che incontrer0' sara' sicuramente un colineare
+                        {
+                            enableL2=false;
+                            lastDir = (seg.P1().Y() < yMin) ? true : false;
+                            JointPoint newJoint(seg.P0(), ei, 0, true);
+
+                            firstCollinearP = newJoint;
+//Log("L2 p0 non aggiunto: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                        }else   //la seconda volta che incontro un colineare
+                        {
+//Log("L2 p0 dir: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            enableL2=true;
+                            bool dir = (seg.P1().Y() < yMin) ? true : false;
+                            if(lastDir!=dir)    //aggiungo solo se non e' un punto di rimbalzo, ovvero se attraverso realmente l'asse
+                            {
+                                jointPointsL2.push_back(firstCollinearP);
+//Log("L2 p0 coll: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            }
+                        }
+                    }else if(inOrthogonalEdge(xMin,xMax,yMin,seg.P1().X(), seg.P1().Y()))
+                    {
+                        if(enableL2)    //la prima volta che incontro un colineare non lo considero ma segno che l'ho incontrato: il prossimo punto di joint che incontrer0' sara' sicuramente un colineare
+                        {
+                            enableL2=false;
+                            lastDir = (seg.P0().Y() < yMin) ? true : false;
+                            JointPoint newJoint(seg.P1(), ei, 1, true);
+
+                            firstCollinearP = newJoint;
+//Log("L2 p1 non aggiunto: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                        }else   //la seconda volta che incontro un colineare
+                        {
+//Log("L2 p1 dir: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            enableL2=true;
+                            bool dir = (seg.P0().Y() < yMin) ? true : false;
+                            if(lastDir!=dir)    //aggiungo solo se non e' un punto di rimbalzo, ovvero se attraverso realmente l'asse
+                            {
+                                jointPointsL2.push_back(firstCollinearP);
+//Log("L2 p1 coll: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            }
+                        }
+                    }else if(vcg::SegmentSegmentIntersection(lati[L2],seg,pJoint2D))
+                    {
+                        if(!enablel1)
+                        {
+                            if(rectPos == lastDir>0)
+                            {
+                                jointPointsl1.push_back(firstCollinearP);
+                                enablel1 = true;
+                            }
+//Log("aggiunto vecchio");
+                        }else
+                        {
+//Log("Inters L2: %i,(%f %f) (%f %f),(%f %f) (%f %f),(%f %f)",ei,lati[L2].P0().X(),lati[L2].P0().Y(),lati[L2].P1().X(),lati[L2].P1().Y(),seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
+//c2 = true;
+                            JointPoint newJoint(pJoint2D, ei, indV, false);
+                            jointPointsL2.push_back(newJoint);
+                        }
+                    }
                 }
-                if(vcg::SegmentSegmentIntersection(lati[L2],seg,pJoint2D) && (seg.P0().Y() != seg.P1().Y()) )
+
+                if(seg.P0().X() != seg.P1().X())
                 {
-                    char indV = (seg.P0().Y() < seg.P1().Y()) ? 0 : 1;
-                    JointPoint newJoint(pJoint2D, ei, L2, indV);
-                    jointPointsL2.push_back(newJoint);
-//                    Log("Inters L2 (%f %f) (%f %f),(%f %f) (%f %f),(%f %f)",lati[L2].P0().X(),lati[L2].P0().Y(),lati[L2].P1().X(),lati[L2].P1().Y(),seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
-c2 = true;
+                    int indV = (seg.P0().X() < seg.P1().X()) ? cas0 : cas1;
+
+                    // l1
+                    if(inOrthogonalEdge(yMin,yMax,0,seg.P0().Y(), seg.P0().X()))
+                    {
+                        if(enablel1)    //la prima volta che incontro un colineare non lo considero ma segno che l'ho incontrato: il prossimo punto di joint che incontrer0' sara' sicuramente un colineare
+                        {
+                            enablel1=false;
+                            lastDir = (seg.P1().X() < 0) ? false : true;
+                            JointPoint newJoint(seg.P0(), ei, 0, true);
+
+                            firstCollinearP = newJoint;
+//Log("l1 p0 non aggiunto: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                        }else   //la seconda volta che incontro un colineare
+                        {
+                            enablel1=true;
+                            bool dir = (seg.P1().X() < 0) ? false : true;
+//Log("l1 p0 dir [%i %i]: %i, (%f %f) (%f %f)",lastDir,dir,ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            if(lastDir!=dir)    //aggiungo solo se non e' un punto di rimbalzo, ovvero se attraverso realmente l'asse
+                            {
+                                jointPointsl1.push_back(firstCollinearP);
+//Log("l1 p0 coll: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            }
+                        }
+                    }
+                    else if(inOrthogonalEdge(yMin,yMax,0,seg.P1().Y(), seg.P1().X()))
+                    {
+                        if(enablel1)    //la prima volta che incontro un colineare non lo considero ma segno che l'ho incontrato: il prossimo punto di joint che incontrer0' sara' sicuramente un colineare
+                        {
+                            enablel1=false;
+                            lastDir = (seg.P0().X() < 0) ? false : true;
+                            JointPoint newJoint(seg.P1(), ei, 1, true);
+
+                            firstCollinearP = newJoint;
+//Log("l1 p1 non aggiunto: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                        }else   //la seconda volta che incontro un colineare
+                        {
+                            enablel1=true;
+                            bool dir = (seg.P0().X() < 0) ? false : true;
+//Log("l1 p1 dir [%i %i]: %i, (%f %f) (%f %f)",lastDir,dir,ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            if(lastDir!=dir)    //aggiungo solo se non e' un punto di rimbalzo, ovvero se attraverso realmente l'asse
+                            {
+                                jointPointsl1.push_back(firstCollinearP);
+//Log("l1 p1 coll: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
+                            }
+                        }
+                    }else if(vcg::SegmentSegmentIntersection(lati[l1],seg,pJoint2D))
+                    {
+                        if(!enableL1)
+                        {
+//Log("aggiunto vecchio");
+                            if(lastDir<xMax)    //aggiungo il vecchio punto collineare trovato in precedenza solo se ero dentro
+                            {
+                                jointPointsL1.push_back(firstCollinearP);
+                                enableL1 = true;    //sono uscito dall'altro lato
+                            }
+                        }else if(!enableL2)
+                        {
+//Log("aggiunto vecchio");
+                            if(lastDir>xMin)
+                            {
+                                jointPointsL2.push_back(firstCollinearP);
+                                enableL2 = true;
+                            }
+                        }else
+                        {
+                            JointPoint newJoint(pJoint2D, ei, indV, false);
+                            jointPointsl1.push_back(newJoint);
+//Log("Inters l1: %i, (%f %f) (%f %f),(%f %f) (%f %f),(%f %f)",ei,lati[l1].P0().X(),lati[l1].P0().Y(),lati[l1].P1().X(),lati[l1].P1().Y(),seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
+//c3 = true;
+                        }
+                    }
                 }
-                if(vcg::SegmentSegmentIntersection(lati[l1],seg,pJoint2D)  && (seg.P0().X() != seg.P1().X()) )
-                {
-                    char indV = (seg.P0().X() < 0) ? 0 : 1;
-                    JointPoint newJoint(pJoint2D, ei, l1, indV);
-                    jointPointsl1.push_back(newJoint);
-//                    Log("Inters l1 (%f %f) (%f %f),(%f %f) (%f %f),(%f %f)",lati[l1].P0().X(),lati[l1].P0().Y(),lati[l1].P1().X(),lati[l1].P1().Y(),seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X(),pJoint2D.Y());
-c3 = true;
-                }
+
+
+
+//Log("ALL: %i, (%f %f) (%f %f)",ei,seg.P0().X(),seg.P0().Y(),seg.P1().X(),seg.P1().Y(),pJoint2D.X());
 //test da rimovere
-if(c1){
-    if(c2)Log("ei L1 L2: %i", ei);
-    else if(c3)Log("ei L1 l1: %i", ei);
-}else if(c2&&c3)Log("ei L2 l1: %i", ei);
+//if(c1){
+//    if(c2)Log("ei L1 L2: %i", ei);
+//    else if(c3)Log("ei L1 l1: %i", ei);
+//}else if(c2&&c3)Log("ei L2 l1: %i", ei);
 
-            eCorr.NextE();
+                eCorr.NextE();
 
-            }while(eCorr != eStart); //&& eCorr != NULL && eCorr != ePrec
+            }while(eCorr != eStart);//(!eCorr.E()->IsV());//(eCorr != eStart); //&& eCorr != NULL && eCorr != ePrec
 
         }
     }
 
     int nJP = jointPointsL1.size() + jointPointsl1.size() + jointPointsL2.size();
-    if(nJP == 0) return; // se non ho trovato punti di intersezione nn devo fare nulla: esco
+    if(nJP == 0) return ZERO_INCASTRO; // se non ho trovato punti di intersezione nn devo fare nulla: esco
 
-    // 2- AGGIUNTA DEI PUNTI DI INTERSEZIONE SPEZZANDO GLI EDGE DELLA MESH
-    Log("FASE 2");
+//if(nJP%2 != 0)Log("ERRORE: ho trovato almeno un punto di joint di troppo"); //cambia con assert
+        /**************
+        Log("Log per testare");
+        Log("N vert %i", em.vert.size());
+        Log("N edge %i", em.edge.size());
+
+        Log("stampa vertici e edge");
+        for(size_t i = 0; i < em.vert.size(); i++)
+        {
+            if(em.vert[i].IsD()) Log("{{{");
+            Log("Vertex %i (%f,%f,%f)", i, em.vert[i].P().X(), em.vert[i].P().Y(), em.vert[i].P().Z());
+            if(em.vert[i].IsD()) Log("}}}");
+        }
+        for(size_t i = 0; i < em.edge.size(); i++)
+        {
+            if(em.edge[i].IsD()) Log("{{{");
+            CVertexO* start = &(em.vert[0]);
+            Log("Edge %i (%i,%i)", i, &(*em.edge[i].V(0))-start,&(*em.edge[i].V(1))-start);
+            if(em.edge[i].IsD()) Log("}}}");
+        }
+    //    **********/
+// 2- AGGIUNTA DEI PUNTI DI INTERSEZIONE SPEZZANDO GLI EDGE DELLA MESH
+//    Log("FASE 2");
     //percorrendo un lato lungo del rettangolo (L1 o L2) tutte le volte che entro nella sagoma attraverso un punto di joint devo passare da un'altro punto di joint per uscire dalla sagoma.
     //Dunque se ho un numero pari di punti di joint lungo un lato, dopo averlo percorso sono fuori dalla sagoma.
     //Se invece i joint sono dispari alla fine sono ancora dentro la sagoma e devo aggiungere lo spigolo del rettangolo.
@@ -528,11 +861,24 @@ if(c1){
     Point3f pJoint;         //punto di intersezione 3D, usato per convertire i pJoint2D in 3D ed inserirli nell'edgeMesh
     pJoint[axis] = height;  //la terza coordinata è uguale per tutti i punti dato che lavoriamo in 2D
 
+// stampa dei punti di intersezione trovati
+//for(int k=0;k<jointPointsl1.size();k++)
+//    Log("(%f %f) %i, %i, %i",jointPointsl1[k].p.X(),jointPointsl1[k].p.Y(),jointPointsl1[k].e, jointPointsl1[k].l, jointPointsl1[k].indV);
+
     //ordino i vertici di intersezione lungo i lati del rettangolo
-    std::sort(jointPointsL1.begin(), jointPointsL1.end(), compareY);
-    std::sort(jointPointsL2.begin(), jointPointsL2.end(), compareY);
     std::sort(jointPointsl1.begin(), jointPointsl1.end(), compareX);    //lo ordino per X
-    Log("TIPO L1 %i, l1 %i, L2 %i",jointPointsL1.size(),jointPointsl1.size(),jointPointsL2.size());
+
+    //i lati lunghi li ordino a seconda se il rettangolo ha lunghezza positiva o negativa
+    if(cas0)    //se ha lunghezza positiva
+    {
+        std::sort(jointPointsL1.begin(), jointPointsL1.end(), compareY);
+        std::sort(jointPointsL2.begin(), jointPointsL2.end(), compareY);
+    }else
+    {
+        std::sort(jointPointsL1.begin(), jointPointsL1.end(), compareInvY);
+        std::sort(jointPointsL2.begin(), jointPointsL2.end(), compareInvY);
+    }
+//    Log("TIPO L1 %i, l1 %i, L2 %i",jointPointsL1.size(),jointPointsl1.size(),jointPointsL2.size());
 
 
     //per gli edge di chiusura che aggiungo in seguito (dopo aver rimosso gli edge interni) quello che faccio è tenere un indice ivS che indica da dove ho iniziato a inserire i nuovi vertici e poi inserisco i vertici a coppie in ordine, cosi successivamente li ripesco a coppie e creo gli edge (tratto a parte gli edge incidenti su spigoli)
@@ -570,6 +916,9 @@ if(c1){
         vi++;       // aggiungendo lo spigolo non devo avanzare di edge (i suoi edge verranno aggiunti nella quarta fase)
         iL1 = 1;
 
+        if(jointPointsl1.size()!=0)inc = ONE_CONTACT;
+        else inc = BROKEN;
+
         //VERTICE IN l1
         if(endl1 > 0)   //se l1 non è vuoto devo prendere un vertice dal fondo
         {
@@ -577,8 +926,9 @@ if(c1){
             addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[endl1], vi, ei);
             vi++;
             ei++;
-            nEC = 2;    //(riuso nEC) sono etrato da L1 ed esco da l1
-        }else nEC = 3;  //sono etrato da L1 ed esco da L2
+            nEC = 2;                        //(riuso nEC) sono etrato da L1 ed esco da l1
+            inc = THREE_CONTACT;
+        }else {nEC = 3; inc = TWO_CONTACT;} //sono etrato da L1 ed esco da L2
     }else {iL1 = 0; nEC = 0;}
 
     if(dispL2)  //se per L2 ho un numero dispari di punti il primo punto va trattato a parte assieme allo spigolo.
@@ -586,13 +936,13 @@ if(c1){
         //VERTICE IN l1
         if(endl1 > 0)   //se l1 non è vuoto devo prendere un vertice
         {
-            addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[il1], vi, ei);
+            addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[0], vi, ei);
             il1 = 1;
             vi++;
             ei++;
             assert(nEC==0 || nEC ==2);
             nEC+=2; //sono entrato da l1 ed esco da L2
-        } else {il1 = 0; assert(nEC==3);} //nEC ha il valore giusto dal caso precedentesono entrato da L1 ed esco da L2
+        } else {il1 = 0; assert(nEC==3); inc = TWO_CONTACT;} //nEC ha il valore giusto dal caso precedentesono entrato da L1 ed esco da L2
         //VERTICE SPIGOLO: aggiungo subito lo spigolo direttamente alla mesh
         pJoint[axisJoint] = lati[L2].P0().X();
         pJoint[axisOrthog] = lati[L2].P0().Y();
@@ -626,9 +976,32 @@ if(c1){
         addAndBreak(em, pJoint, axisOrthog, axisJoint, jointPointsl1[il1], vi, ei);
     }
 
-    // 3- RIMOZIONE DEGLI EDGE INTERNI AL RETTANGOLO
-    Log("FASE 3");
     tri::UpdateTopology<CMeshO>::EdgeEdge(em);
+
+    /**************
+    Log("Log per testare");
+    Log("N vert %i", em.vert.size());
+    Log("N edge %i", em.edge.size());
+
+    Log("stampa vertici e edge");
+    for(size_t i = 0; i < em.vert.size(); i++)
+    {
+        if(em.vert[i].IsD()) Log("{{{");
+        Log("Vertex %i (%f,%f,%f)", i, em.vert[i].P().X(), em.vert[i].P().Y(), em.vert[i].P().Z());
+        if(em.vert[i].IsD()) Log("}}}");
+    }
+    for(size_t i = 0; i < em.edge.size(); i++)
+    {
+        if(em.edge[i].IsD()) Log("{{{");
+        CVertexO* start = &(em.vert[0]);
+        Log("Edge %i (%i,%i)", i, &(*em.edge[i].V(0))-start,&(*em.edge[i].V(1))-start);
+        if(em.edge[i].IsD()) Log("}}}");
+    }
+//    **********/
+
+
+    // 3- RIMOZIONE DEGLI EDGE INTERNI AL RETTANGOLO
+//    Log("FASE 3");
     vcg::tri::UpdateFlags<CMeshO>::EdgeClearV(em);  // setto i flag per sapere se sono stati visitati dal sottociclo (che visita una sagoma alla volta)
 
     CVertexO *firstJV = &(em.vert[0]) + ivS; // indirizzo del primo punto di joint
@@ -640,15 +1013,17 @@ if(c1){
     {
         if (!corrE->IsV())
         {
+            //sembra che corrE->SetV() non funzioni
             corrE->SetV();   //teoricamente non servirebbe (non puo' esistere un unico edge esterno se la forma è chiusa e non ci posso passare per altri percorsi per questo edge)
 
             char ind = (corrE->V(0) >= firstJV) ? 0 : 1;  //guardo quale dei 2 vertici sia il vertice di Joint
-if(corrE->V(ind) < firstJV) Log("ERRORE!");//cambia con assert
+//if(corrE->V(ind) < firstJV) Log("ERRORE!");//cambia con assert
 
             edge::Pos<CEdgeO> posCorr(&(*corrE),ind);
             posCorr.FlipE(); //flippando l'edge e avendo un vertice di joint entro nel rettangolo
             tri::Allocator<CMeshO>::DeleteEdge(em,*(posCorr.E())); // segno che l'edge corrente va eliminato
 
+//Log("START e %i i %i", &(*posCorr.E())-&(em.edge[0]), &(*posCorr.E()->V(0))-&(em.vert[0]),&(*posCorr.E()->V(1))-&(em.vert[0]));
             do
             {
                 posCorr.FlipV();
@@ -659,16 +1034,20 @@ if(corrE->V(ind) < firstJV) Log("ERRORE!");//cambia con assert
                 {
                     tri::Allocator<CMeshO>::DeleteVertex(em,*(posCorr.V()));
                     tri::Allocator<CMeshO>::DeleteEdge(em,*(posCorr.E())); // segno che l'edge corrente va eliminato
+if(posCorr.E() < firstE)
+                    assert(posCorr.E() < firstE);  //fin quando sono all'interno non posso trovare alcuno di nuovi edge
                 }
-                else {posCorr.E()->SetV(); //in questo caso siamo usciti dal rettangolo: il vertice e' di joint e l'edge e' divenuto esterno e sicuramente e' uno dei nuovi edge; lo setto come visitato (potrei mettere un break)
-if(posCorr.E() < firstE) Log("ERRORE 2!");//cambia con assert
+                else    //in questo caso siamo usciti dal rettangolo poiche' il vertice e' di joint
+                {
+//Log("e %i i %i", &(*posCorr.E())-&(em.edge[0]), &(*posCorr.E()->V(0))-&(em.vert[0]),&(*posCorr.E()->V(1))-&(em.vert[0]));
+                    posCorr.E()->SetV();    //l'edge e' divenuto esterno, quindi lo setto come visitato (potrei mettere un break), ma non so se sia tra i vecchi edge (modificati) o tra i nuovi
                 }
             }while(posCorr.V() < firstJV);
         }
     }
 
     // 4- AGGIUNTA DEGLI EDGE DI CHIUSURA
-    Log("FASE 4");
+//    Log("FASE 4");
     nJP = (nJP/2)+addEC;      //gli edge di chiusura sono pari al numero di vertici di Joint inseriti diviso 2 + gli edge per gli spigoli
 //?? nJP = em.vert.size() - em.edge.size();
     ei = vcg::tri::Allocator<CMeshO>::AddEdges(em,nJP);
@@ -731,7 +1110,7 @@ if(posCorr.E() < firstE) Log("ERRORE 2!");//cambia con assert
     }
 
 /*
-//iterations of StaticUnroller
+//per il pezz precedente posso sostituirlo con uno srotolamento di un for
 template<int N>
 struct StaticUnroller
 {
@@ -771,16 +1150,17 @@ struct StaticUnroller
         ei->V(1)=firstJV;
     }
 
+    //solo alla fine butto tutto ciò che non mi serve (cosi non ho problemi con gli indici)
     tri::Allocator<CMeshO>::CompactEdgeVector(em);
     tri::Allocator<CMeshO>::CompactVertexVector(em);
 
-    assert(em.vert.size() == em.edge.size());   //è una condizione che alla fine, dopo aver rimosso gli edge ed i veritici di troppo deve sempre valere anche se si sconnettono delle sagome visto che ogni vertice connette esattamente 2 vertici (e viceversa) e sono tutte sagome chiuse
+//    assert(em.vert.size() == em.edge.size());   //è una condizione che alla fine, dopo aver rimosso gli edge ed i veritici di troppo deve sempre valere anche se si sconnettono delle sagome visto che ogni vertice connette esattamente 2 vertici (e viceversa) e sono tutte sagome chiuse
 
     tri::UpdateTopology<CMeshO>::EdgeEdge(em);
 
-
+    return inc;
 /**************
-//Log per testare
+Log("Log per testare");
 Log("N vert %i", em.vert.size());
 Log("N edge %i", em.edge.size());
 
@@ -800,8 +1180,6 @@ for(size_t i = 0; i < em.edge.size(); i++)
 }
 **********/
 
-
-//?????????metti controllo errore se torna indietro: la sagoma e' aperta
 
 }
 
