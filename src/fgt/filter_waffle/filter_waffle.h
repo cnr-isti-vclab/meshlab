@@ -33,11 +33,12 @@
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/append.h>
 #include <vcg/complex/algorithms/update/selection.h>
-#include <wrap/io_edgemesh/export_svg.h>
+//#include <wrap/io_edgemesh/export_svg.h>
 
 #include <vcg/space/plane3.h>
 
 #include "filter_waffle_functors.h"
+#include "export_svg.h"
 
 typedef vcg::tri::io::SVGProperties SVGProperties;
 

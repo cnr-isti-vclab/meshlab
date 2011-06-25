@@ -180,6 +180,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
             pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
             pr.projDir = planeAxis;
             pr.projCenter =  m.mm()->cm.bbox.Center();
+            pr.enumeration = true;
 
             vector<CMeshO*> ev;
             MeshModel* base = m.mm();
@@ -289,6 +290,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
             prOrth.numRow=(int)(planeNum*1.0f/prOrth.numCol)+1;
             prOrth.projDir = planeAxis;
             prOrth.projCenter =  m.mm()->cm.bbox.Center();
+            prOrth.enumeration = true;
 
             Incastri situationForPlaneI[planeNum];
             Incastri situationForPlaneJ[planeNum];
