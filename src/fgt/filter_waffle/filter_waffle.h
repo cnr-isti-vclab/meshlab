@@ -61,10 +61,10 @@ struct Succ<Z>
 typedef enum{L1=0,L2=1,l1=2,NO_LATO=3} latoRect;
 
 //come vengono incastrati 2 piani
-typedef enum{NILL=0, ZERO_INCASTRO=1, BROKEN=2, ONE_CONTACT=3, TWO_CONTACT=4, THREE_CONTACT=5} Incastri;
+typedef enum{NOT_PLANE,NOT_SAGOME, NILL, ZERO_INCASTRO, BROKEN, ONE_CONTACT, TWO_CONTACT, THREE_CONTACT} Incastri;
 //ZERO_INCASTRO indica che le 2 sagome non si intersecano pernulla
 //BROKEN indica che si intersecano ma non hanno in contatto la base del rettangolo
-//NO_CONTACT indica che si toccano solo sulla base
+//ONE_CONTACT indica che si toccano solo sulla base
 
 class JointPoint{
 public:

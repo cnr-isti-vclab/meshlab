@@ -85,14 +85,15 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Ri
             parlst.addParam(new RichFloat  ("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
             parlst.addParam(new RichFloat("planeOffset",0.0,"Cross plane offset","Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
             // BBox min=0, BBox center=1, Origin=2
-            parlst.addParam(new RichFloat("eps",1.0,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
-            parlst.addParam(new RichFloat("spacing",0.02,"Space between two planes", "Step value between each plane for automatically generating cross-sections."));
+            parlst.addParam(new RichFloat("eps",0.08,"Thickness of a planes","Thickness of the plans generated. Must be between 0 and 1. If > 1 the extrusion of the plans overlap."));
+//            parlst.addParam(new RichFloat("eps",1.0,"Medium thickness","Thickness of the medium where the pieces will be cut away"));
+            parlst.addParam(new RichFloat("spacing",0.1,"Space between two planes", "Distance between planes. Must be between 0 and 1 and indicates how many parts to cut the figure."));
+//            parlst.addParam(new RichFloat("planeNum",1,"Number of planes", "Number of plans that are automatically generated."));
             parlst.addParam(new RichBool("hideBase",true,"Hide Original Mesh","Hide the Original Mesh"));
             parlst.addParam(new RichBool("hideEdge",true,"Hide Edge Mesh","Hide the Generated Edge Mesh"));
-            parlst.addParam(new RichBool("hidePlanes",true,"Hide Planes","Hide the Generated Slicing Planes"));
-            parlst.addParam(new RichBool("hideExtrudes",false,"Hide Extrusions","Hide the Generated Estrusions"));
-            parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
-            parlst.addParam(new RichBool("capBase",true,"Cap input mesh holes","Eventually cap the holes of the input mesh before applying the filter"));
+            parlst.addParam(new RichBool("hidePlanes",false,"Hide Planes","Hide the Generated Slicing Planes"));
+            parlst.addParam(new RichBool("hideExtrudes",true,"Hide Extrusions","Hide the Generated Estrusions"));
+//            parlst.addParam(new RichBool("singleFile", true, "Single SVG","Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below"));
         }
         break;
     default : assert(0);
@@ -107,6 +108,16 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
     {
         case FP_WAFFLE_SLICE :
         {
+            MeshModel* base = m.mm();
+            CMeshO &cmBase = base->cm;
+            Box3f &bbox = m.mm()->cm.bbox;
+
+            if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(cmBase)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(cmBase,false) != 0))
+            {
+                Log("Mesh is not two manifold, cannot apply filter");
+                return false;
+            }
+
             Point3f planeAxis(0,0,0);
             Axis axis = (Axis) parlst.getEnum("planeAxis");
             planeAxis[axis] = 1.0f;
@@ -119,12 +130,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
             bool hideExtrudes = parlst.getBool("hideExtrudes");
 
             // set common SVG Properties
-            float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
-            // eps to use in extrusion, is relative to maxdim
-            // eps : length = eps_xtr : maxdim  -> eps_xtr = (eps*maxdim)/length
-            // NOTE: change eps with eps_xtr everywhere below
-            float eps=parlst.getFloat("eps");
-            eps=maxdim*(eps/length);
+            const float maxdim=m.mm()->cm.bbox.Dim()[m.mm()->cm.bbox.MaxDim()];
 
             Point3f sizeCm=m.mm()->cm.bbox.Dim()*(length/maxdim);
             // to check for dimensions with custom axis
@@ -159,31 +165,33 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
 
             Log("sizecm %fx%f",pr.sizeCm[0],pr.sizeCm[1]);
 
+            vector<CMeshO*> ev;
+
             pr.lineWidthPt=200;
             pr.scale=2/maxdim;
             float planeOffset = parlst.getFloat("planeOffset");
             Point3f planeCenter;
             Plane3f slicingPlane;
 
-            float planeDist = parlst.getFloat("spacing");
-            Box3f &bbox = m.mm()->cm.bbox;
-/*            if(planeDist > bbox.Diag());
+            if(parlst.getFloat("spacing") >= 1)
             {
-                Log("The space between two planes must be less than the length of the mesh");
+                Log("the selected distance between the planes is greater than 1. The filter had no effect");
                 return false;
             }
-*/
-            bool ok = planeDist < eps;
-            Log("ok %i", ok);
-            Log("The space between two planes must be less than the length of the eps: planedist %f, eps %f",planeDist, eps);
-            if(planeDist < eps) //??non so perché ma dentro da sempre vero qualunque confronto metto
-            {
-                Log("The space between two planes must be less than the length of the eps: planedist %f, eps %f",planeDist, eps);
-                return false;
-            }
+            const float planeDist = maxdim * parlst.getFloat("spacing");
+//            const int planeNum = parlst.getFloat("planeNum");
 
-
+  //          const float planeDist = (planeNum == 1) ? 1 : ( (bbox.Dim()*planeAxis)/ planeNum-1 );
             const int planeNum = (planeDist == 0) ? 1 : ( ((bbox.Dim()*planeAxis)/planeDist)+1 ); //evito la divisione per 0
+
+            float eps =planeDist*2* parlst.getFloat("eps");
+//            const float eps= planeDist / parlst.getFloat("eps");
+//            eps=maxdim*(eps/length);
+
+            Log("dddddddddd %f %f %f %f %f",eps, planeDist, planeNum, maxdim, parlst.getFloat("spacing"));
+
+//            if(planeNum <= 0) return true;
+
 
             pr.numCol=(int)(max((int)sqrt(planeNum*1.0f),2)+1);
             pr.numRow=(int)(planeNum*1.0f/pr.numCol)+1;
@@ -191,30 +199,22 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
             pr.projCenter =  m.mm()->cm.bbox.Center();
             pr.enumeration = true;
 
-            vector<CMeshO*> ev;
-            MeshModel* base = m.mm();
-            CMeshO &cmBase = base->cm;
-//            MeshModel* orig = m.mm();
-//            CMeshO &cmOrig = orig->cm;
-
-
-            //actual cut of the mesh
-
-            if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(cmBase)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(cmBase,false) != 0))
-            {
-                Log("Mesh is not two manifold, cannot apply filter");
-                return false;
-            }
-
             const float lengthDiag = bbox.Diag()/2.0;
 
             planeCenter = bbox.Center() + planeAxis*planeOffset*lengthDiag;
             planeCenter[axis] -= (planeNum/2) * planeDist;  //partendo dal centro devo andare indietro della metà
 
-            float epsTmp = eps/2.0;
 
-            Segment2f lati[3]; //il quarto lato lo ignoro, tanto non lo uso mai
-            generateRectSeg(0, epsTmp, bbox.Diag()*2, lati);
+            Segment2f lati[3]; //il rettangolo: è formato da 3 segmenti, il quarto lato lo ignoro, tanto non lo uso mai
+
+            const float epsTmp = eps/2.0;
+            if(eps < 1)
+                generateRectSeg(0, epsTmp, bbox.Diag()*2, lati);
+            else
+            {
+                generateRectSeg(0, maxdim, bbox.Diag()*2, lati);
+                Log("thickness is greater than 1: the extrusions will overlap");
+            }
 
             MeshModel* cap;
             MeshModel* cap2;
@@ -235,49 +235,61 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 slicingPlane.Init(planeCenter,planeAxis);
 
                 //this is used to generate svg slices
-                layername.sprintf("EdgeMesh_%d",numAdd++);
+                layername.sprintf("EdgeMesh_%d",numAdd);
                 cap= m.addNewMesh("",qPrintable(layername));
                 vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(base->cm, slicingPlane, cap->cm );
 
                 tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
-                if(cap->cm.edge.size()> 0)  //se la mesh ha intersezione  con il piano
+                if(cap->cm.edge.size()>= 3)     //se la mesh ha intersezione con il piano e genera almeno una faccia
                 {
-                    for(int j = 0; j < planeNum; ++j)   //ritaglio  le intersezioni
+                    Incastri temp;
+                    if(eps >= 1)
                     {
-//                        Log("#### RECTANGLE %i", j);
-                        float newDist = start + planeDist*j;
-                        float yMag = epsTmp + newDist;
-                        float yMin = -epsTmp + newDist;
-                        // shifta rect (solo su Y ovviamente)
-                        lati[L1].P0().Y() = yMag;
-                        lati[L1].P1().Y() = yMag;
-                        lati[L2].P0().Y() = yMin;
-                        lati[L2].P1().Y() = yMin;
-                        lati[l1].P0().Y() = yMag;
-                        lati[l1].P1().Y() = yMin;
-
-                        inc[i][j] = subtraction(cap->cm, lati, axis, axisOrthog, axisJoint, planeCenter[axis]);
-
-                        if(inc[i][j]==BROKEN) Log("ATTENTION! The first plane %i is broken fron the plane %i",i,j);
+                        temp = subtraction(cap->cm, lati, axis, axisOrthog, axisJoint, planeCenter[axis]);
+                        if(temp == NOT_PLANE) {Log("ATTENTION! The IntersectionPlaneMesh did not return a plane silhouette in the current plane!"); m.delMesh(cap); break;}
+                        if(temp== NOT_SAGOME) {Log("ATTENTION! The IntersectionPlaneMesh did not return a simple closed silhouette for the plane %i.",i); break;;}
                     }
+                    else
+                        for(int j = 0; j < planeNum; ++j)   //ritaglio  le intersezioni
+                        {
+//                            Log("#### RECTANGLE %i", j);
+                            float newDist = start + planeDist*j;
+                            float yMag = epsTmp + newDist;
+                            float yMin = -epsTmp + newDist;
+                            // shifta rect (solo su Y ovviamente)
+                            lati[L1].P0().Y() = yMag;
+                            lati[L1].P1().Y() = yMag;
+                            lati[L2].P0().Y() = yMin;
+                            lati[L2].P1().Y() = yMin;
+                            lati[l1].P0().Y() = yMag;
+                            lati[l1].P1().Y() = yMin;
 
-                    ev.push_back(&(cap->cm));                       //aggiungo alle sagome da esportare in SVG
+                            temp = subtraction(cap->cm, lati, axis, axisOrthog, axisJoint, planeCenter[axis]);
 
-                    layername.sprintf("CappedSlice_%d",numAdd++);   //aggiungo la sagoma riempita
-                    cap2= m.addNewMesh("",qPrintable(layername));
-                    tri::CapEdgeMesh(cap->cm, cap2->cm);
+                            inc[i][j] = temp;
+                            if(temp == NOT_PLANE) {Log("ATTENTION! The IntersectionPlaneMesh did not return a plane silhouette in the current plane!"); m.delMesh(cap); break;}
+                            if(temp== NOT_SAGOME) {Log("ATTENTION! The IntersectionPlaneMesh did not return a simple closed silhouette for the plane %i.",i); m.delMesh(cap); break;}
+//                            if(temp==BROKEN) Log("ATTENTION! The first plane %i is broken fron the plane %i",i,j);
+                        }
+                    if(temp > NOT_SAGOME)
+                    {
+                        ev.push_back(&(cap->cm));                       //aggiungo alle sagome da esportare in SVG
 
-                    layername.sprintf("Extruded_%d",numAdd++);      //aggiungo la sagoma estrusa
-                    extr= m.addNewMesh("",qPrintable(layername));
-                    cap2->updateDataMask(MeshModel::MM_FACEFACETOPO);
-                    extr->updateDataMask(MeshModel::MM_FACEFACETOPO);
-                    tri::UpdateTopology<CMeshO>::FaceFace(cap2->cm);
-                    tri::ExtrudeBoundary<CMeshO>(cap2->cm,extr->cm,eps,planeAxis);
+                        layername.sprintf("CappedSlice_%d",numAdd);   //aggiungo la sagoma riempita
+                        cap2= m.addNewMesh("",qPrintable(layername));
+                        tri::CapEdgeMesh(cap->cm, cap2->cm);
 
-                    if(hideEdge) cap->visible =false;
-                    if(hidePlanes) cap2->visible =false;
-                    if(hideExtrudes) extr->visible =false;
+                        layername.sprintf("Extruded_%d",numAdd++);      //aggiungo la sagoma estrusa
+                        extr= m.addNewMesh("",qPrintable(layername));
+                        cap2->updateDataMask(MeshModel::MM_FACEFACETOPO);
+                        extr->updateDataMask(MeshModel::MM_FACEFACETOPO);
+                        tri::UpdateTopology<CMeshO>::FaceFace(cap2->cm);
+                        tri::ExtrudeBoundary<CMeshO>(cap2->cm,extr->cm,eps,planeAxis);
 
+                        if(hideEdge) cap->visible =false;
+                        if(hidePlanes) cap2->visible =false;
+                        if(hideExtrudes) extr->visible =false;
+                    }
                 }else m.delMesh(cap);   //se non esiste intersezione non consider neanche il risultato
             }
 
@@ -298,7 +310,13 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
             planeCenter = bbox.Center() + planeAxis*planeOffset*lengthDiag;
             planeCenter[axisOrthog] -= (planeNum/2) * planeDist;  //partendo dal centro devo andare indietro della metà
 
-            generateRectSeg(0, epsTmp, -bbox.Diag()*2, lati);
+            if(eps < 1)
+                 generateRectSeg(0, epsTmp, -bbox.Diag()*2, lati);
+            else
+            {
+                generateRectSeg(0, maxdim, -bbox.Diag()*2, lati);
+                Log("thickness is greater than 1: the extrusions will overlap");
+            }
 
             prOrth.lineWidthPt=200;
             prOrth.scale=2/maxdim;
@@ -328,14 +346,21 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 slicingPlane.Init(planeCenter,planeAxis);
 
                 //this is used to generate svg slices
-                layername.sprintf("EdgeMesh_O_%d",numAdd++);
+                layername.sprintf("EdgeMesh_O_%d",numAdd);
                 cap= m.addNewMesh("",qPrintable(layername));
                 vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(base->cm, slicingPlane, cap->cm );
 
                 tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
 
-                if(cap->cm.edge.size()> 0)
+                if(cap->cm.edge.size()>= 3)     //se la mesh ha intersezione con il piano e genera almeno una faccia
                 {
+                    Incastri temp;
+                    if(eps >= 1)
+                    {
+                        temp = subtraction(cap->cm, lati, axisOrthog, axis, axisJoint, planeCenter[axisOrthog]);
+                        if(temp == NOT_PLANE) {Log("ATTENTION! The IntersectionPlaneMesh did not return a plane silhouette in the current plane!"); m.delMesh(cap); break;}
+                        if(temp== NOT_SAGOME) {Log("ATTENTION! The IntersectionPlaneMesh did not return a simple closed silhouette for the plane %i.",j); break;;}
+                    } else
                     for(int i = 0; i < planeNum; ++i)
                     {
 //                      Log("#### RECTANGLE %i", i);
@@ -353,34 +378,44 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                             lati[l1].P0().Y() = yMag;
                             lati[l1].P1().Y() = yMin;
 
-                            Incastri temp = subtraction(cap->cm, lati, axisOrthog, axis, axisJoint, planeCenter[axisOrthog]);
+                            temp = subtraction(cap->cm, lati, axisOrthog, axis, axisJoint, planeCenter[axisOrthog]);
 
-                            if(temp==BROKEN) Log("ATTENTION! The second plane %i is broken from the plane %i",j,i);
-                            if(temp < inc[i][j]) temp = inc[i][j];  //mi interessa che almeno uno dei 2 piani regga
-                            if(situationForPlaneI[i] < temp) situationForPlaneI[i] = temp;
-                            if(situationForPlaneJ[j] < temp) situationForPlaneJ[j] = temp;
+                            if(temp == NOT_PLANE) {Log("ATTENTION! The IntersectionPlaneMesh did not return a plane silhouette in the current plane!"); m.delMesh(cap); break;}
+                            if(temp== NOT_SAGOME) {Log("ATTENTION! The IntersectionPlaneMesh did not return a simple closed silhouette for the plane %i.",j); m.delMesh(cap); break;;}
+//                            if(temp==BROKEN) Log("ATTENTION! The second plane %i is broken from the plane %i",j,i);
+//                            if(temp < inc[i][j]) temp = inc[i][j];  //mi interessa che almeno uno dei 2 piani regga
+//                            if(situationForPlaneI[i] < temp) situationForPlaneI[i] = temp;
+//                            if(situationForPlaneJ[j] < temp) situationForPlaneJ[j] = temp;
                         }
                     }
+                   if(temp > NOT_SAGOME)
+                    {
+                        evOrth.push_back(&(cap->cm));
 
-                    evOrth.push_back(&(cap->cm));
+                        layername.sprintf("CappedSlice_O_%d",numAdd);
+                        cap2= m.addNewMesh("",qPrintable(layername));
+                        tri::CapEdgeMesh(cap->cm, cap2->cm);
 
-                    layername.sprintf("CappedSlice_O_%d",numAdd++);
-                    cap2= m.addNewMesh("",qPrintable(layername));
-                    tri::CapEdgeMesh(cap->cm, cap2->cm);
+                        layername.sprintf("Extruded_O_%d",numAdd++);
+                        extr= m.addNewMesh("",qPrintable(layername));
+                        cap2->updateDataMask(MeshModel::MM_FACEFACETOPO);
+                        extr->updateDataMask(MeshModel::MM_FACEFACETOPO);
+                        tri::UpdateTopology<CMeshO>::FaceFace(cap2->cm);
+                        tri::ExtrudeBoundary<CMeshO>(cap2->cm,extr->cm,eps,planeAxis);
 
-                    layername.sprintf("Extruded_O_%d",numAdd++);
-                    extr= m.addNewMesh("",qPrintable(layername));
-                    cap2->updateDataMask(MeshModel::MM_FACEFACETOPO);
-                    extr->updateDataMask(MeshModel::MM_FACEFACETOPO);
-                    tri::UpdateTopology<CMeshO>::FaceFace(cap2->cm);
-                    tri::ExtrudeBoundary<CMeshO>(cap2->cm,extr->cm,eps,planeAxis);
-
-                    if(hideEdge) cap->visible =false;
-                    if(hidePlanes) cap2->visible =false;
-                    if(hideExtrudes) extr->visible =false;
-
-                }else m.delMesh(cap);
+                        if(hideEdge) cap->visible =false;
+                        if(hidePlanes) cap2->visible =false;
+                        if(hideExtrudes) extr->visible =false;
+                    }
+                }else m.delMesh(cap);   //se non esiste intersezione non consider neanche il risultato
             }
+
+            QString fnameOrth;//= parlst.getSaveFileName("filename");
+            if(fnameOrth=="") fnameOrth="C:/SliceOrth.svg";
+            if (!fnameOrth.endsWith("Orth.svg")) fnameOrth+="Orth.svg";
+
+            tri::io::ExporterSVG<CMeshO>::Save(evOrth, fnameOrth.toStdString().c_str(), prOrth);
+
 /*
             for(int k = 0; k < planeNum; ++k)
             {
@@ -391,12 +426,9 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshDocument &m, Rich
                 else if(situationForPlaneJ[k] == TWO_CONTACT) Log("ATTENTION! The second plane %i may not be stable",k);
             }
 //*/
-
-            QString fnameOrth;//= parlst.getSaveFileName("filename");
-            if(fnameOrth=="") fnameOrth="C:/SliceOrth.svg";
-            if (!fnameOrth.endsWith(".svg")) fnameOrth+=".svg";
-
-            tri::io::ExporterSVG<CMeshO>::Save(evOrth, fnameOrth.toStdString().c_str(), prOrth);
+            if(hideEdge) cap->visible =false;
+            if(hidePlanes) cap2->visible =false;
+            if(hideExtrudes) extr->visible =false;
 
             if(hideBase) base->visible =false;
         }
@@ -463,7 +495,7 @@ bool compareX(JointPoint v0, JointPoint v1)
 {
     return v0.p.X() < v1.p.X();
 }
-//??? forse serve fare un compare esclusivo (non considera )
+
 bool compareY(JointPoint v0, JointPoint v1)
 {
     return v0.p.Y() < v1.p.Y();
@@ -605,16 +637,26 @@ Incastri ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], cons
             do
             {
                 eCorr.E()->SetV();
+                Point3f &p = eCorr.V()->P();
+
+                if(! ((height - numeric_limits<float>::epsilon() < p[axis]) && (p[axis] < height + numeric_limits<float>::epsilon())) ) return NOT_PLANE;
+//Log("p axis %f, height %f",p[axis],height);
 
                 Point3f &p0 = eCorr.E()->V(0)->P();
                 Point3f &p1 = eCorr.E()->V(1)->P();
 
+                if(p0==p1){eCorr.NextE();Log("ci sono archi degeneri");continue;} //salto gli archi degeneri
+//Log("p0 axis %f, p1 axis %f",test1,test2);
+
+                float test1, test2;
+                test1=p0[axis]*1; test2=p1[axis]*1;
 
                 //converto i vertici in 2D: per come ho definito i retangli di ritaglio la X è lungo axisJoint e la Y è lungo axisOrthog
                 p0_2D.X() = p0[axisJoint];
                 p0_2D.Y() = p0[axisOrthog];
                 p1_2D.X() = p1[axisJoint];
                 p1_2D.Y() = p1[axisOrthog];
+
 
                 //inizializzo il segmento 2D da usare per il test di intersezione
                 seg.Set(p0_2D,p1_2D);
@@ -694,7 +736,7 @@ Incastri ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], cons
 //c1 = true;
                         }
                     }
-//??????????RIMUOVI IL CAMPO l di tipo latorect in JointPoint (non è + utilizzato)
+
                     // L2
                     indV = (seg.P0().Y() < seg.P1().Y()) ? false : true;
                     if(inOrthogonalEdge(xMin,xMax,yMin,seg.P0().X(), seg.P0().Y()))
@@ -844,7 +886,9 @@ Incastri ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], cons
 //    else if(c3)Log("ei L1 l1: %i", ei);
 //}else if(c2&&c3)Log("ei L2 l1: %i", ei);
 
+                edge::Pos<CEdgeO> prec = eCorr;
                 eCorr.NextE();
+                if(prec==eCorr) return NOT_SAGOME;
 
             }while(eCorr != eStart);//(!eCorr.E()->IsV());//(eCorr != eStart); //&& eCorr != NULL && eCorr != ePrec
 
@@ -854,7 +898,7 @@ Incastri ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], cons
     int nJP = jointPointsL1.size() + jointPointsl1.size() + jointPointsL2.size();
     if(nJP == 0) return ZERO_INCASTRO; // se non ho trovato punti di intersezione nn devo fare nulla: esco
 
-//if(nJP%2 != 0)Log("ERRORE: ho trovato almeno un punto di joint di troppo"); //cambia con assert
+if(nJP%2 != 0)Log("ERRORE: ho trovato almeno un punto di joint di troppo"); //cambia con assert
         /**************
         Log("Log per testare");
         Log("N vert %i", em.vert.size());
@@ -904,7 +948,7 @@ Incastri ExtraFilter_SlicePlugin::subtraction(CMeshO &em, Segment2f lati[], cons
         std::sort(jointPointsL1.begin(), jointPointsL1.end(), compareInvY);
         std::sort(jointPointsL2.begin(), jointPointsL2.end(), compareInvY);
     }
-//    Log("TIPO L1 %i, l1 %i, L2 %i",jointPointsL1.size(),jointPointsl1.size(),jointPointsL2.size());
+//Log("TIPO L1 %i, l1 %i, L2 %i",jointPointsL1.size(),jointPointsl1.size(),jointPointsL2.size());
 
 
     //per gli edge di chiusura che aggiungo in seguito (dopo aver rimosso gli edge interni) quello che faccio è tenere un indice ivS che indica da dove ho iniziato a inserire i nuovi vertici e poi inserisco i vertici a coppie in ordine, cosi successivamente li ripesco a coppie e creo gli edge (tratto a parte gli edge incidenti su spigoli)
