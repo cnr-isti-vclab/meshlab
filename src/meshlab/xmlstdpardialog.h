@@ -278,6 +278,45 @@ private:
 	float maxVal;
 };
 
+class XMLComboWidget : public XMLMeshLabWidget
+{
+	Q_OBJECT
+protected:	
+	QComboBox *enumCombo;
+	QLabel *enumLabel;
+public:
+	XMLComboWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	~XMLComboWidget();
+	void updateVisibility(const bool vis);
+	void Init(QWidget *p,QString lab,int newEnum, QStringList values);
+	virtual void set(const QString& nwExpStr) = 0;
+	QString getWidgetExpression();
+
+private:
+	//WHY WE NEED THIS FUNCTION?
+	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
+	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
+	//THIS THING HAS AS CONSEQUENCE THAT I HAVE TO PASTE AND COPY THE updateVisibility CODE INSIDE THE CONSTRUCTOR.
+	//TO AVOID THIS FOR EACH WIDGET WE ADD A setVisibility FUNCTION (OBVIOUSLY NOT VIRTUAL) WITH THE CODE THAT WE SHOULD PUT INSIDE THE
+	//updateVisibility. 
+	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
+	void setVisibility(const bool vis);
+
+signals:
+	void dialogParamChanged();
+};
+
+class XMLEnumWidget : public XMLComboWidget
+{
+	Q_OBJECT
+
+public:	
+	XMLEnumWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	~XMLEnumWidget(){};
+
+	void set(const QString& nwExpStr);
+};
+
 class XMLStdParFrame : public QFrame
 {
 	Q_OBJECT

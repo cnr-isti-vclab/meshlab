@@ -960,3 +960,70 @@ void XMLSliderWidget::setVisibility( const bool vis )
 	valueSlider->setVisible(vis);
 	fieldDesc->setVisible(vis); 
 }
+
+XMLComboWidget::XMLComboWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+{
+	enumLabel = new QLabel(p);
+	enumLabel->setText(xmlWidgetTag[MLXMLElNames::guiLabel]);
+	enumCombo = new QComboBox(p);
+	//enumCombo->setCurrentIndex(newEnum);
+	//int row = gridLay->rowCount() - 1;
+	gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
+	gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
+	connect(enumCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
+	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+	setVisibility(isImportant);
+}
+
+void XMLComboWidget::setVisibility( const bool vis )
+{
+	enumLabel->setVisible(vis);
+	enumCombo->setVisible(vis);
+}
+
+void XMLComboWidget::updateVisibility( const bool vis )
+{
+	setVisibility(vis);
+}
+
+QString XMLComboWidget::getWidgetExpression()
+{
+	return enumCombo->currentText();
+}
+
+XMLComboWidget::~XMLComboWidget()
+{
+
+}
+
+XMLEnumWidget::XMLEnumWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+:XMLComboWidget(xmlWidgetTag,envir,p)
+{
+	QStringList res = xmlWidgetTag[MLXMLElNames::guiValuesList].split('|');
+	QTableWidget* tw = new QTableWidget(res.size(),2,this);
+	tw->setSelectionBehavior(QAbstractItemView::SelectRows);
+	enumCombo->setModel(tw->model());
+	enumCombo->setView(tw);
+	enumCombo->setModelColumn(0);
+	for(int ii = 0;ii < res.size();++ii)
+	{
+		QRegExp exp("\\S+\\s*=\\s*\\d+");
+		res[ii].indexOf(exp);
+		QStringList capt = exp.cap().trimmed().split('=');
+		if (capt.size() == 2)
+		{
+			QLabel* enumString= new QLabel(capt[0],tw);
+			QLabel* enumValue = new QLabel (capt[1],tw);
+			tw->setCellWidget(ii,0,enumString);
+			tw->setCellWidget(ii,1,enumString);
+			/*it's orrible but in this moment i have no better solution*/
+			if (capt[0] == xmlWidgetTag[MLXMLElNames::paramDefExpr])
+				enumCombo->setCurrentIndex(ii);
+		}
+	}
+}
+
+void XMLEnumWidget::set( const QString& nwExpStr )
+{
+}
