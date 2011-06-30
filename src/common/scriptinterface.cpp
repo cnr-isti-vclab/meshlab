@@ -72,24 +72,69 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 
 	code += "function (" + names + ")\n";
 	code += "{\n";
-	if (names.indexOf(optName()) != -1)
-		code += "\t" + optName() + " = " + optName() + " || {};\n";
 	XMLFilterInfo::XMLMapList mplist = xmlInfo.filterParametersExtendedInfo(filterName);
+	if (names.indexOf(optName()) != -1)
+	{
+		QString defValues;
+		for(int ii = 0;ii < mplist.size();++ii)
+		{
+			XMLFilterInfo::XMLMap mp = mplist[ii];
+			if (mp[MLXMLElNames::paramIsImportant] == "false")
+				defValues += mp[MLXMLElNames::paramName] + " : " + mp[MLXMLElNames::paramDefExpr] + ", ";
+		}
+		code += "\t" + optName() + " = __mergeOptions(" + optName() + ",{" + defValues + "});\n";
+	}
+	
 	code += "\tvar environ = new Env;\n";
 	
 	//if is singleMeshAriety i have to jump the first argument because is the meshID
 	int arg = (int) isSingle;
 	for(int ii = 0; ii < mplist.size();++ii)
 	{
-		if (mplist[ii][MLXMLElNames::paramIsImportant] == "true")
+		XMLFilterInfo::XMLMap mp = mplist[ii];
+		bool isenum = false;
+		QString num = QString::number(ii);
+		QString values = mp[MLXMLElNames::paramType];
+		if (values.contains(MLXMLElNames::enumType))
 		{
-			code += "\tenviron.insertExpressionBinding(\"" + mplist[ii][MLXMLElNames::paramName] + "\",arguments[" + QString::number(arg) + "]);\n";
+			QRegExp rem(MLXMLElNames::enumType + " \\{");
+			values.remove(rem);
+			rem.setPattern("\\}");
+			values.remove(rem);
+			XMLFilterInfo::XMLMap valuesMap = XMLFilterInfo::mapFromString(values,QRegExp("\\|"),QRegExp("\\:"));
+			code += "\tfunction enumfun_" + num + "()\n\t{\t\n";
+			for(XMLFilterInfo::XMLMap::iterator it = valuesMap.begin();it != valuesMap.end();++it)
+				code += "\t\tthis[\"" + it.key() + "\"] = " + it.value() + ";\n";
+			code += "\t}\n";
+
+			code += "\tvar enumtype_" + num + " = new enumfun_" + num + "();\n";
+			isenum = true;
+		}
+		if (mp[MLXMLElNames::paramIsImportant] == "true")
+		{
+			QString argument =  "arguments[" + QString::number(arg) + "]";
+			if (isenum)
+			{
+				code += "\tvar argm = enumtype_" + num + "[" + argument + "];\n";
+				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\",argm);\n";
+			}
+			else
+				//code += "\tprint(" + argument + ");\n";
+				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\"," + argument + ");\n";
 			++arg;
 		}
 		else
 		{
-			code += "\tvar " + mplist[ii][MLXMLElNames::paramName] + " = " + optName() + "." + mplist[ii][MLXMLElNames::paramType] + "_" + mplist[ii][MLXMLElNames::paramName] + " || " + mplist[ii][MLXMLElNames::paramDefExpr] + ";\n";
-			code += "\tenviron.insertExpressionBinding(\"" + mplist[ii][MLXMLElNames::paramName] + "\", " + mplist[ii][MLXMLElNames::paramName] + ");\n";
+			if (isenum)
+			{
+				code += "\tvar " + mp[MLXMLElNames::paramName] + " = " + optName() + "." + /*mp[MLXMLElNames::paramType] + "_" +*/ mp[MLXMLElNames::paramName] + ";\n";
+				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\", " + mp[MLXMLElNames::paramName] + ");\n";
+			}
+			else
+			{
+				code += "\tvar " + mp[MLXMLElNames::paramName] + " = " + optName() + "." + /*mp[MLXMLElNames::paramType] + "_" +*/ mp[MLXMLElNames::paramName] + ";\n";
+				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\", " + mp[MLXMLElNames::paramName] + ");\n";
+			}
 		}
 	}
 	code += "\tvar environWrap = new EnvWrap(environ);\n";
@@ -111,6 +156,18 @@ const QStringList ScriptAdapterGenerator::javaScriptLibraryFiles()
 	QStringList res;
 	res.push_back(":/script_system/space_math.js");
 	return res;
+}
+
+QString ScriptAdapterGenerator::mergeOptParamsCodeGenerator() const
+{
+	QString code;
+	code += "function __mergeOptions(argOptions, defaultOptions)\n{";
+	code += "\tvar ret = { };\n";
+	code += "\targOptions = argOptions || { };\n";
+	code += "\tfor (var p in defaultOptions)\n";
+	code += "\t\tret[p] = argOptions.hasOwnProperty(p) ? argOptions[p] : defaultOptions[p];\n";
+	code += "\treturn ret;\n}";
+	return code;
 }
 
 Q_DECLARE_METATYPE(MeshDocument*)
@@ -406,6 +463,20 @@ float EnvWrap::evalFloat( const QString& nm )
 	return float();
 }
 
+int EnvWrap::evalInt( const QString& nm )
+{
+	try
+	{	
+		double result = evalDouble(nm);
+		return (int) result;
+	}
+	catch(ExpressionHasNotThisTypeException& exc)
+	{
+		throw ExpressionHasNotThisTypeException("Int",nm);
+	}
+	return int();
+}
+
 vcg::Point3f EnvWrap::evalVec3( const QString& nm )
 {
 	QScriptValue result = evalExp(nm);
@@ -416,6 +487,11 @@ vcg::Point3f EnvWrap::evalVec3( const QString& nm )
 	else
 		throw ExpressionHasNotThisTypeException("Vec3",nm);
 	return vcg::Point3f();
+}
+
+int EnvWrap::evalEnum( const QString& nm )
+{
+	return evalInt(nm);
 }
 
 QColor EnvWrap::evalColor( const QString& nm )
@@ -473,7 +549,8 @@ QColor EnvWrap::evalColor( const QString& nm )
 
 bool EnvWrap::constStatement( const QString& statement ) const
 {
-	QRegExp exp("\\S+\\s*=\\s*S++;");
+	/*QRegExp exp("\\S+\\s*=\\s*S++;");*/
+	QRegExp exp("\\S+\\s*=\\s*\\S+;");
 	int ii = statement.indexOf(exp);
 	return (ii == -1);
 }

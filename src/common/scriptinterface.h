@@ -41,7 +41,7 @@ public:
 	static const QString xmlSchemaFile() {return QString(":/script_system/meshlabfilterXMLspecificationformat.xsd");}
 	static const QStringList javaScriptLibraryFiles();
 
-	
+	QString mergeOptParamsCodeGenerator() const;
 	QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const;
 	QString funCodeGenerator(const QString&  filtername,const XMLFilterInfo& xmlInfo) const;
 };
@@ -142,10 +142,12 @@ public:
 	bool evalBool(const QString& nm);
 	double evalDouble(const QString& nm);
 	float evalFloat( const QString& nm );
+	int evalInt( const QString& nm );
 	vcg::Point3f evalVec3(const QString& nm);
 	QColor evalColor(const QString& nm);
 	/*QString getExpType(const QString& nm);*/
 	QString evalString(const QString& nm);
+	int evalEnum( const QString& nm );
 };
 
 QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);

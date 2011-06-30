@@ -208,7 +208,7 @@ public:
       const RichParameterSet & par,	/// The parameters that have been set up in the initPreOpenParameter()
       vcg::CallBackPos *cb=0,					/// standard callback for reporting progress in the loading
       QWidget *parent=0)=0;						/// you should not use this...
-    
+
   virtual bool save(
       const QString &format, // the extension of the format e.g. "PLY"
 			const QString &fileName,

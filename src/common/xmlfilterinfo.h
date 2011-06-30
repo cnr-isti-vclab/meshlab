@@ -61,6 +61,7 @@ namespace MLXMLElNames
 	const QString vec3WidgetTag("VEC3_GUI");
 	const QString colorWidgetTag("COLOR_GUI");
 	const QString sliderWidgetTag("SLIDER_GUI");
+	const QString enumWidgetTag("ENUM_GUI");
 
 	const QString mfiVersion("mfiVersion");
 
@@ -88,6 +89,7 @@ namespace MLXMLElNames
 	const QString guiLabel("guiLabel");
 	const QString guiMinExpr("guiMin");
 	const QString guiMaxExpr("guiMax");
+	const QString guiValuesList("guiValuesList");
 
 	//types' names inside the XML MeshLab file format
 	const QString boolType("Boolean");
@@ -95,6 +97,7 @@ namespace MLXMLElNames
 	const QString intType("Integer");
 	const QString vec3Type("Vec3");
 	const QString colorType("Color");
+	const QString enumType("Enum");
 
 	//ariety values
 	const QString singleMeshAriety("SingleMesh");
@@ -114,8 +117,12 @@ private:
 
 	static QString defaultGuiInfo(const QString& guiType,const QString& xmlvariable);
 	static QString floatGuiInfo(const QString& guiType,const QString& xmlvariable);
+	static QString enumGuiInfo(const QString& guiType,const QString& xmlvariable);
 	static QString guiErrorMsg() {return QString("Error: Unknown GUI widget requested");}
 	static QString guiTypeSwitchQueryText(const QString& var);
+	inline static const QString externalSep() {return QString("^");}
+	inline static const QRegExp extSep() {return QRegExp("\\" + externalSep());}
+	inline static const QRegExp intSep() {return QRegExp("\\s*=\\s*");}
 	inline static QString doc(const QString& file) {return QString("doc(\"" + file + "\")");}
 	inline static QString docMFI(const QString& file) {return doc(file) + "/" + MLXMLElNames::mfiTag;}
 	inline static QString docMFIPlugin(const QString& file) {return docMFI(file) + "/" + MLXMLElNames::pluginTag;}
@@ -132,7 +139,7 @@ public:
 
 	typedef QMap<QString,QString> XMLMap;
 	typedef QList< XMLMap > XMLMapList;
-	static XMLMap mapFromString(const QString& st);
+	static XMLMap mapFromString(const QString& st,const QRegExp& extsep = extSep(),const QRegExp& intsep = intSep());
 	static XMLMapList mapListFromStringList(const QStringList& list);
 	static XMLFilterInfo* createXMLFileInfo(const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML);
 	inline static void deleteXMLFileInfo(XMLFilterInfo* xmlInfo) {delete xmlInfo;}

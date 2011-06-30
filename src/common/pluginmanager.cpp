@@ -165,7 +165,8 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 			qDebug("Warning: Library %s generated JavaScript Error: %s",qPrintable(liblist[ii]),qPrintable(res.toString()));
 		++ii;
 	} 
-
+	ScriptAdapterGenerator gen;
+	code += gen.mergeOptParamsCodeGenerator() + "\n";
 	code += "Plugins = { };\n";
 	//QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
 	foreach(MeshLabXMLFilterContainer mi,stringXMLFilterMap)
@@ -179,7 +180,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				QString filterFunction = mi.xmlInfo->filterAttribute(filterName,MLXMLElNames::filterScriptFunctName);
 				if (filterFunction != "")
 				{
-					ScriptAdapterGenerator gen;
+					
 					QString gencode = gen.funCodeGenerator(filterName,*mi.xmlInfo);
 					code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
 				}

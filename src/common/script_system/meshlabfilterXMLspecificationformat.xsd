@@ -51,16 +51,19 @@
 	 <xs:element ref='VEC3_GUI'/>
 	 <xs:element ref='COLOR_GUI'/>
 	 <xs:element ref='SLIDER_GUI'/>
+	 <xs:element ref='ENUM_GUI'/>
     </xs:choice>
    </xs:sequence>
    <xs:attribute name='parType' use='required'>
     <xs:simpleType>
      <xs:restriction base='xs:string'>
-      <xs:enumeration value='Boolean'/>
-      <xs:enumeration value='Real'/>
-	  <xs:enumeration value='Vec3'/>
-	  <xs:enumeration value='Integer'/>
-	  <xs:enumeration value='Color'/>
+      <xs:pattern value='Boolean'/>
+	  <xs:pattern value='Int'/>
+      <xs:pattern value='Real'/>
+	  <xs:pattern value='Vec3'/>
+	  <xs:pattern value='Integer'/>
+	  <xs:pattern value='Color'/>
+	  <xs:pattern value='Enum \{(\s*\S+\s*\:\s*\S+\s*\|?)+\}'/>
      </xs:restriction>
     </xs:simpleType>
    </xs:attribute>
@@ -101,7 +104,6 @@
   </xs:complexType>
  </xs:element>
  
- 
  <xs:element name='COLOR_GUI'>
   <xs:complexType>
    <xs:attribute name='guiLabel' type='xs:string' use='required'/>
@@ -113,6 +115,12 @@
    <xs:attribute name='guiLabel' type='xs:string' use='required'/>
    <xs:attribute name='guiMin' type='xs:string' use='required'/>
    <xs:attribute name='guiMax' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
+ <xs:element name='ENUM_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
   </xs:complexType>
  </xs:element>
  
