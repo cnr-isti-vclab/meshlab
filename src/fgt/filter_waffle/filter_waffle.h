@@ -57,14 +57,18 @@ struct Succ<Z>
     enum { value = X };
 };
 
+template <int A>
+struct Min
+{
+    enum { value = A+1 };
+};
+
+
 //L1: lato + a destra, L2: lato + a sinistra, l1: lato minore che passa per il centro
 typedef enum{L1=0,L2=1,l1=2,NO_LATO=3} latoRect;
 
 //come vengono incastrati 2 piani
-typedef enum{NOT_PLANE,NOT_SAGOME, NILL, ZERO_INCASTRO, BROKEN, ONE_CONTACT, TWO_CONTACT, THREE_CONTACT} Incastri;
-//ZERO_INCASTRO indica che le 2 sagome non si intersecano pernulla
-//BROKEN indica che si intersecano ma non hanno in contatto la base del rettangolo
-//ONE_CONTACT indica che si toccano solo sulla base
+typedef enum{NOT_PLANE,NOT_SAGOME, NILL} Incastri;
 
 class JointPoint{
 public:
@@ -108,7 +112,6 @@ public:
 
     private:
         SVGProperties pr;
-        SVGProperties prOrth;
 //        void createSlice(MeshModel* orig,MeshModel* dest);
 
         // nuove funzioni
