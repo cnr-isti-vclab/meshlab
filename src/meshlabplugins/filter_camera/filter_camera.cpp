@@ -276,14 +276,14 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
 				md.meshList[i]->cm.shot.ApplyRigidTransformation(trTran);
-				md.meshList[i]->cm.shot.RescalingWorld(trScale[0][0]);
+				md.meshList[i]->cm.shot.RescalingWorld(trScale[0][0], false);
 				md.meshList[i]->cm.shot.ApplyRigidTransformation(trTranInv);
 
 			}
 			for (int i=0; i<md.rasterList.size(); i++)
 			{
 				md.rasterList[i]->shot.ApplyRigidTransformation(trTran);
-				md.rasterList[i]->shot.RescalingWorld(trScale[0][0]);
+				md.rasterList[i]->shot.RescalingWorld(trScale[0][0], false);
 				md.rasterList[i]->shot.ApplyRigidTransformation(trTranInv);
 			}
 		}
@@ -292,7 +292,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
 			for (int i=0; i<md.rasterList.size(); i++)
 			{
 				md.rasterList[i]->shot.ApplyRigidTransformation(trTran);
-				md.rasterList[i]->shot.RescalingWorld(trScale[0][0]);
+				md.rasterList[i]->shot.RescalingWorld(trScale[0][0], false);
 				md.rasterList[i]->shot.ApplyRigidTransformation(trTranInv);
 			}
 		}
@@ -301,13 +301,13 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
 			case 0: 
 				{
 				rm->shot.ApplyRigidTransformation(trTran);
-				rm->shot.RescalingWorld(Scale);
+				rm->shot.RescalingWorld(Scale, false);
 				rm->shot.ApplyRigidTransformation(trTranInv);
 				}
 		   case 1: 
 				{		
 				cm.shot.ApplyRigidTransformation(trTran);
-				cm.shot.RescalingWorld(Scale);
+				cm.shot.RescalingWorld(Scale, false);
 				cm.shot.ApplyRigidTransformation(trTranInv);
 				}
 		}
