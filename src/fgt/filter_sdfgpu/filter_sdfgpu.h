@@ -86,7 +86,6 @@ public:
     FloatTexture2D*    mVertexNormalsTexture;
     FramebufferObject* mFboResult;    //Fbo and texture storing the result computation
     FloatTexture2D*    mResultTexture;
-    FloatTexture2D*    mResultTextureDepth;
     FramebufferObject* mFboArray[3];  //Fbos and textures for depth peeling
     FloatTexture2D*    mDepthTextureArray[3];
     FloatTexture2D*    mColorTextureArray[3];

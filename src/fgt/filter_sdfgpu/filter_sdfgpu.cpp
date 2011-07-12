@@ -130,7 +130,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   mPeelingTextureSize       = pars.getInt("DepthTextureSize");
   mMinCos                   = vcg::math::Cos(math::ToRad(pars.getFloat("coneAngle")/2.0));
   mUseVBO                   = pars.getBool("useVBO");
-  mScale = (cm.bbox.Diag()/2)*1.1;
+
 
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
 
@@ -303,7 +303,10 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
         mDepthTextureArray[i]  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
                                                      TextureParams( GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE ) );
 
+        //mColorTextureArray[i] = mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+
         mFboArray[i]->attachTexture( mDepthTextureArray[i]->format().target(), mDepthTextureArray[i]->id(), GL_DEPTH_ATTACHMENT  );
+
 
         mFboArray[i]->bind();
 
@@ -491,15 +494,17 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
 
 void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
 {
-    GLfloat d = mScale,
+    GLfloat d = (meshBBox.Diag()/2.0),
             k = 0.1f;
     Point3f eye = meshBBox.Center() + camDir * (d+k);
+
+    mScale = 2*k+(2.0*d);
 
     glViewport(0.0, 0.0, mPeelingTextureSize, mPeelingTextureSize);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-d, d, -d, d, k, k+(2.0*d) );
+    glOrtho(-d, d, -d, d, /*k*/0, mScale );
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -813,7 +818,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
               {
                   if(i>1)
                   {
-                      //We are interested in vertices belonging to the front layer. Then in the shader we check that
+                      //We are interested in vertices belonging to the front layer. Then in the shader, we check that
                       //the vertex's depth is greater than the previous depth layer and smaller than the next one.
                       int prevBack  = (j+1)%3;
                       int prevFront = (j==0)? 2 : (j-1);
