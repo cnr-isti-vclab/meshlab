@@ -114,6 +114,7 @@ void Parameters::initScale(CMeshO &mesh)
 			scale[i] = 1/diff;
 		p[i] = 0.0;
 	}
+	//scale[6]=3*scale[6];
 }
 
 
