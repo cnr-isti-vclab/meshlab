@@ -31,6 +31,7 @@ uniform sampler2D 	vTexture;
 uniform sampler2D 	nTexture;
 uniform sampler2D	depthTextureFront;
 uniform sampler2D	depthTextureBack;
+uniform sampler2D	normalTextureBack;
 uniform sampler2D       depthTexturePrevBack;
 uniform vec3 		viewDirection;
 uniform mat4 		mvprMatrix;
@@ -75,47 +76,16 @@ Recostruct normal at the point of intersection and check for false intersection.
 For each ray we check the normal at the point of intersection,
 and ignore intersections where the normal at the intersection
 points is in the same direction as the point-of-origin
-(the same direction is defined as an angle difference lessthan 90)
+(the same direction is defined as an angle difference less than 90 degrees)
 */
 bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
 {
 
-    //Recostructing the normal at intersection point
+    //normal at intersection point
+    vec3 intersectionNormal = texture2D(normalTextureBack, P.xy).rgb;
 
-    vec2 coordX1 = vec2( P.x - 1.0/texSize, P.y );
-    vec2 coordX2 = vec2( P.x + 1.0/texSize, P.y );
-    vec2 coordY1 = vec2( P.x , P.y - 1.0/texSize);
-    vec2 coordY2 = vec2( P.x , P.y + 1.0/texSize);
-
-    if(coordX1.x < 0.0 ) coordX1.x = 0.0;
-    if(coordX2.x > 1.0 ) coordX2.x = 1.0;
-    if(coordY1.y < 0.0 ) coordY1.y = 0.0;
-    if(coordY2.y > 1.0 ) coordY2.y = 1.0;
-
-    float sampleX1 = texture2D(depthTextureBack, coordX1).r;
-    float sampleX2 = texture2D(depthTextureBack, coordX2).r;
-    float sampleY1 = texture2D(depthTextureBack, coordY1).r;
-    float sampleY2 = texture2D(depthTextureBack, coordY2).r;
-     
-    vec3  x1 = vec3( coordX1.x, coordX1.y, sampleX1 );
-    vec3  x2 = vec3( coordX2.x, coordX2.y, sampleX2 );
-    vec3  y1 = vec3( coordY1.x, coordY1.y, sampleY1 );
-    vec3  y2 = vec3( coordY2.x, coordY2.y, sampleY2 );
-    
-    //
-    vec3 intersectionPointNormal = normalize(cross((x2-x1),(y2-y1)));//  * 2.0 -0.5;
-  
-    vec4 tmpNormal = vec4( intersectionPointNormal, 0.0 );
-
-    //from texture space to object space
-    tmpNormal = mvprMatrixINV * tmpNormal ;
-
-    intersectionPointNormal = tmpNormal.xyz; 
-    
-   // intersectionPointNormal = normalize(intersectionPointNormal);
-    
     //if angles dont differ at least 90 degrees reject intersection
-    if(dot(intersectionPointNormal, objSpaceNormal) > 0.0) return true;
+    if(dot(intersectionNormal, objSpaceNormal) > 0.0) return true;
 
 }
 

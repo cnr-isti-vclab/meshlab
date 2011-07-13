@@ -3,5 +3,6 @@
         <file>shaders/shaderDepthPeeling.fs</file>
         <file>shaders/calculateSdf.frag</file>
         <file>shaders/obscurances.frag</file>
+        <file>shaders/vertexShaderDepthPeeling.vs</file>
     </qresource>
 </RCC>

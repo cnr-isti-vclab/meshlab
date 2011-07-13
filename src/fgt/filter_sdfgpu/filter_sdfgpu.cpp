@@ -303,21 +303,15 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
         mDepthTextureArray[i]  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT ),
                                                      TextureParams( GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE ) );
 
-        //mColorTextureArray[i] = mResultTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+        mColorTextureArray[i] = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mPeelingTextureSize, mPeelingTextureSize, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
 
+        mFboArray[i]->attachTexture( mColorTextureArray[i]->format().target(), mColorTextureArray[i]->id(), GL_COLOR_ATTACHMENT0_EXT );
         mFboArray[i]->attachTexture( mDepthTextureArray[i]->format().target(), mDepthTextureArray[i]->id(), GL_DEPTH_ATTACHMENT  );
 
-
-        mFboArray[i]->bind();
-
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        mFboArray[i]->unbind();
     }
 
     //Depth peeling shader used for both sdf and obscurance
-    mDeepthPeelingProgram = new GPUProgram("",":/SdfGpu/shaders/shaderDepthPeeling.fs","");
+    mDeepthPeelingProgram = new GPUProgram(":/SdfGpu/shaders/vertexShaderDepthPeeling.vs",":/SdfGpu/shaders/shaderDepthPeeling.fs","");
     mDeepthPeelingProgram->enable();
     mDeepthPeelingProgram->addUniform("textureLastDepth");
     mDeepthPeelingProgram->addUniform("tolerance");
@@ -342,6 +336,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     mSDFProgram->addUniform("removeFalse");
     mSDFProgram->addUniform("coneRays");
     mSDFProgram->addUniform("removeOutliers");
+    mSDFProgram->addUniform("normalTextureBack");
     mSDFProgram->disable();
 
     //Obscurance shader
@@ -433,6 +428,7 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
     {
         delete mFboArray[i];
         delete mDepthTextureArray[i];
+        delete mColorTextureArray[i];
     }
 
     if (mUseVBO)
@@ -447,14 +443,14 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
 
 void SdfGpuPlugin::fillFrameBuffer(bool front,  MeshModel* mm)
 {
-   glClear(GL_DEPTH_BUFFER_BIT);
+   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
    glEnable(GL_CULL_FACE);
    glCullFace((front)?GL_BACK:GL_FRONT);
    //the most recent GPUs can do double speed Z-only rendering
    //(also alpha test must be turned off, depth replace and texkill must not be used in fragment shader)
-   glColorMask(0, 0, 0, 0);
-   mm->glw.DrawFill<GLW::NMNone, GLW::CMNone, GLW::TMNone>();
-   glColorMask(1, 1, 1, 1);
+   //glColorMask(0, 0, 0, 0);
+   mm->glw.DrawFill<GLW::NMPerVert, GLW::CMNone, GLW::TMNone>();
+   //glColorMask(1, 1, 1, 1);
 
    glDisable(GL_CULL_FACE);
 }
@@ -560,21 +556,27 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
     mSDFProgram->setUniform1i("depthTextureBack",1);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, mVertexCoordsTexture->id());
-    mSDFProgram->setUniform1i("vTexture",2);
+    glBindTexture(GL_TEXTURE_2D, fboBack->getAttachedId(GL_COLOR_ATTACHMENT0));
+    mSDFProgram->setUniform1i("normalTextureBack",2);
 
     glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, mVertexCoordsTexture->id());
+    mSDFProgram->setUniform1i("vTexture",3);
+
+    glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, mVertexNormalsTexture->id());
-    mSDFProgram->setUniform1i("nTexture",3);
+    mSDFProgram->setUniform1i("nTexture",4);
 
     //previous depth layer, see TraceRays function for an explanation
     if(fboPrevBack)
     {
-        glActiveTexture(GL_TEXTURE4);
+        glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_2D, fboPrevBack->getAttachedId(GL_DEPTH_ATTACHMENT));
-        mSDFProgram->setUniform1i("depthTexturePrevBack",4);
+        mSDFProgram->setUniform1i("depthTexturePrevBack",5);
 
     }
+
+
 
     // Set view direction
     mSDFProgram->setUniform3f("viewDirection", cameraDir.X(), cameraDir.Y(), cameraDir.Z());
