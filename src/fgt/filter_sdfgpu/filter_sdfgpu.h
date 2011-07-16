@@ -21,7 +21,7 @@ class SdfGpuPlugin : public QObject, public MeshFilterInterface
 
 public:
 
-    enum{ SDF_SDF, SDF_CORRECTION_THIN_PARTS, SDF_OBSCURANCE };
+    enum{ SDF_SDF, SDF_DEPTH_COMPLEXITY, SDF_OBSCURANCE };
 
     SdfGpuPlugin();
 
@@ -78,14 +78,22 @@ public:
     //Copy obscurance values from result texture to the mesh (vertex color)
     void applyObscurance(MeshModel &m, float numberOfRays);
 
+    void preRender(unsigned int peelingIteration);
+
+    bool postRender(unsigned int peelingIteration);
+
+    bool postCalculate(unsigned int peelingIteration);
+
   protected:
 
     FilterIDType       mAction;
     unsigned int       mResTextureDim;
+    unsigned int       mNumberOfTexRows; //the number of rows of a texture actually used for the result texture
     FloatTexture2D*    mVertexCoordsTexture;
     FloatTexture2D*    mVertexNormalsTexture;
     FramebufferObject* mFboResult;    //Fbo and texture storing the result computation
     FloatTexture2D*    mResultTexture;
+    FloatTexture2D*    mDirsResultTexture;
     FramebufferObject* mFboArray[3];  //Fbos and textures for depth peeling
     FloatTexture2D*    mDepthTextureArray[3];
     FloatTexture2D*    mColorTextureArray[3];
@@ -102,6 +110,12 @@ public:
     bool               mRemoveFalse;
     bool               mRemoveOutliers;
     float              mConeRays[EXTRA_RAYS_RESULTED*3];
+    GLuint             mOcclusionQuery;
+    GLuint             mPixelCount;
+    unsigned int       mTempDepthComplexity;
+    unsigned int       mDepthComplexity;
+    CMeshO::PerVertexAttributeHandle<vcg::Point3f> mMaxQualityDir;
+
 };
 
 #endif // FILTER_SDFGPU_H
