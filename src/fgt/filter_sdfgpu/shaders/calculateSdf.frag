@@ -87,6 +87,7 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
     //if angles dont differ at least 90 degrees reject intersection
     if(dot(intersectionNormal, objSpaceNormal) > 0.0) return true;
 
+    return false;
 }
 
 //Based on the paper "Dynamic Parallax Occlusion Mapping with Approximate Soft Shadows" Natalya Tatarchuk ATI Research, Inc.
@@ -191,7 +192,7 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
   if(removeFalse==1)
 	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;
     
-   if( sdf != 0.0 && removeOutliers == 1)
+   /*if( sdf != 0.0 && removeOutliers == 1)
    {
 	
     
@@ -223,7 +224,7 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 	 sdf = _vals[i+median];
 	
   
-    }   
+    }   */
 
 
     return sdf;
