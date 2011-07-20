@@ -17,8 +17,6 @@ using namespace vcg;
 #define USEVBO_BY_DEFAULT false
 #define PIXEL_COUNT_THRESHOLD 100
 
-
-
 SdfGpuPlugin::SdfGpuPlugin()
 : mPeelingTextureSize(256),
   mTempDepthComplexity(0),
@@ -125,7 +123,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   CMeshO&    cm = mm->cm;
 
   //RETRIEVE PARAMETERS
-  ONPRIMITIVE  onPrimitive  = (ONPRIMITIVE) pars.getInt("onPrimitive");
+  ONPRIMITIVE  mOnPrimitive  = (ONPRIMITIVE) pars.getInt("onPrimitive");
   assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
   unsigned int numViews     = pars.getInt("numberRays");
   int          peel         = pars.getInt("peelingIteration");
@@ -167,13 +165,16 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       }
    }
    //MESH CLEAN UP
-   setupMesh( md, onPrimitive );
+   setupMesh( md, mOnPrimitive );
 
    //GL INIT
    if(!initGL(*mm)) return false;
 
    //
-   vertexDataToTexture(*mm);
+   if(mOnPrimitive==ON_VERTICES)
+        vertexDataToTexture(*mm);
+   else
+       faceDataToTexture(*mm);
 
   //Uniform sampling of directions over a sphere
   std::vector<Point3f> unifDirVec;
@@ -228,6 +229,13 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 bool SdfGpuPlugin::initGL(MeshModel& mm)
 {
     const unsigned int numVertices = mm.cm.vn;
+    const unsigned int numFaces    = mm.cm.fn;
+
+    unsigned int numElems;
+    if(mOnPrimitive==ON_VERTICES)
+        numElems = numVertices;
+    else
+        numElems = numFaces;
 
     this->glContext->makeCurrent();
 
@@ -291,17 +299,19 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     Log(0, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
 
     //CHECK MODEL SIZE
-    if ((maxTexSize*maxTexSize) < numVertices)
+    if ((maxTexSize*maxTexSize) < numElems)
     {
             Log(0, "That's a really huge model, I can't handle it in hardware, sorry..");
             return false;
     }
 
-//    mNumberOfTexRows = ceil( ((float)numVertices) / ((float)mResTextureDim));
+    for( mResTextureDim = 16; mResTextureDim*mResTextureDim < numElems; mResTextureDim *= 2 ){}
 
-    for( mResTextureDim = 16; mResTextureDim*mResTextureDim < numVertices; mResTextureDim *= 2 ){}
+     mNumberOfTexRows = ceil( ((float)numElems) / ((float)mResTextureDim));
 
     Log(0, "Mesh has %i vertices\n", numVertices );
+    Log(0, "Mesh has %i faces\n", numFaces);
+    Log(0, "Number of tex rows used %i",mNumberOfTexRows);
     Log(0, "Result texture is %i X %i = %i", mResTextureDim, mResTextureDim, mResTextureDim*mResTextureDim);
 
     mVertexCoordsTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
@@ -398,6 +408,45 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     return true;
 }
+
+void SdfGpuPlugin::faceDataToTexture(MeshModel &m)
+ {
+    unsigned int texSize = mResTextureDim*mResTextureDim*4;
+
+    GLfloat *facePosition= new GLfloat[texSize];
+    GLfloat *faceNormals = new GLfloat[texSize];
+    vcg::Point3<CMeshO::ScalarType> fn;
+
+    //Copies each face's position and normal in new vectors
+    for (int i=0; i < m.cm.fn; ++i)
+    {
+            //face position
+            facePosition[i*4+0] = (m.cm.face[i].P(0).X() + m.cm.face[i].P(1).X() + m.cm.face[i].P(2).X())*(1/3);
+            facePosition[i*4+1] = (m.cm.face[i].P(0).Y() + m.cm.face[i].P(1).Y() + m.cm.face[i].P(2).Y())*(1/3);
+            facePosition[i*4+2] = (m.cm.face[i].P(0).Z() + m.cm.face[i].P(1).Z() + m.cm.face[i].P(2).Z())*(1/3);
+            facePosition[i*4+3] = 1.0;
+
+            //Normal vector for each face
+            fn = m.cm.face[i].N();
+            faceNormals[i*4+0] = fn.X();
+            faceNormals[i*4+1] = fn.Y();
+            faceNormals[i*4+2] = fn.Z();
+            faceNormals[i*4+3] = 0.0;
+    }
+
+     //Write vertex coordinates
+    mVertexCoordsTexture->bind();
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, mResTextureDim, mResTextureDim, 0, GL_RGBA, GL_FLOAT, facePosition);
+
+    //Write normal directions
+    mVertexNormalsTexture->bind();
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, mResTextureDim, mResTextureDim, 0, GL_RGBA, GL_FLOAT, faceNormals);
+
+    delete [] faceNormals;
+    delete [] facePosition;
+
+
+ }
 
 void SdfGpuPlugin::vertexDataToTexture(MeshModel &m)
 {
@@ -514,8 +563,11 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
         break;
     }
 
-  if(!vcg::tri::HasPerVertexAttribute(m,"maxQualityDir"))
-    mMaxQualityDir = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f>(m,std::string("maxQualityDir"));
+  if(!vcg::tri::HasPerVertexAttribute(m,"maxQualityDir") && onPrimitive == ON_VERTICES)
+        mMaxQualityDirPerVertex = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f>(m,std::string("maxQualityDir"));
+  else if(!vcg::tri::HasPerFaceAttribute(m,"maxQualityDir") && onPrimitive == ON_FACES)
+        mMaxQualityDirPerFace = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Point3f>(m,std::string("maxQualityDir"));
+
 
 }
 
@@ -692,7 +744,7 @@ void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
         //weighted average: sdf sum is in the red channel and the weights sum in the green one
         Point3f dir = Point3f(result[i*4], result[i*4+1], result[i*4+2]);
         vcg::Normalize(dir);
-        mMaxQualityDir[i] = dir;
+        mMaxQualityDirPerVertex[i] = dir;
       //  Log(0,"vertice %i: %f %f %f",i,dir.X(),dir.Y(),dir.Z());
     }
 
@@ -826,7 +878,7 @@ void SdfGpuPlugin::applyObscurance(MeshModel &m, float numberOfRays)
 
         Point3f dir = Point3f(result[i*4], result[i*4+1], result[i*4+2]);
         vcg::Normalize(dir);
-        mMaxQualityDir[i] = dir;
+        mMaxQualityDirPerVertex[i] = dir;
 
     }
 

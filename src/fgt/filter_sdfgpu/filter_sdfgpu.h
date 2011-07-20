@@ -66,6 +66,8 @@ public:
     //Position and normal of each vertex are copied to two separate texture, to be used in sdf and obscurance GPU calculation
     void vertexDataToTexture(MeshModel &m);
 
+    void faceDataToTexture(MeshModel &m);
+
     //Sdf calculation for each depth peeling iteration
     void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir );
 
@@ -87,6 +89,7 @@ public:
   protected:
 
     FilterIDType       mAction;
+    ONPRIMITIVE        mOnPrimitive;
     unsigned int       mResTextureDim;
     unsigned int       mNumberOfTexRows; //the number of rows of a texture actually used for the result texture
     FloatTexture2D*    mVertexCoordsTexture;
@@ -114,7 +117,9 @@ public:
     GLuint             mPixelCount;
     unsigned int       mTempDepthComplexity;
     unsigned int       mDepthComplexity;
-    CMeshO::PerVertexAttributeHandle<vcg::Point3f> mMaxQualityDir;
+
+    CMeshO::PerFaceAttributeHandle<vcg::Point3f>   mMaxQualityDirPerFace;
+    CMeshO::PerVertexAttributeHandle<vcg::Point3f> mMaxQualityDirPerVertex;
 
 
 };
