@@ -116,6 +116,7 @@ public:
     unsigned int       mDepthComplexity;
     CMeshO::PerVertexAttributeHandle<vcg::Point3f> mMaxQualityDir;
 
+
 };
 
 #endif // FILTER_SDFGPU_H

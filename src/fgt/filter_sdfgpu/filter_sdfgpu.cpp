@@ -185,6 +185,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
   coneDirVec.clear();
 
+  vector<int>  mDepthDistrib(peel,0);
   //Do the actual calculation of sdf or obscurance for each ray
   unsigned int tracedRays = 0;
   for(vector<vcg::Point3f>::iterator vi = unifDirVec.begin(); vi != unifDirVec.end(); vi++)
@@ -197,7 +198,9 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
         ++tracedRays;
         mDepthComplexity = std::max(mDepthComplexity, mTempDepthComplexity);
-     //   Log(0, "Mesh temp depth complexity %i \n", mTempDepthComplexity );
+        Log(0, "Mesh temp depth complexity %i \n", mTempDepthComplexity );
+        assert(mTempDepthComplexity<peel);
+        mDepthDistrib[mTempDepthComplexity]++;
         mTempDepthComplexity = 0;
   }
 
@@ -208,6 +211,13 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       applySdfHW(*mm,unifDirVec.size());
 
   Log(0, "Mesh depth complexity %i \n", mDepthComplexity );
+
+  //Depth complexity distribution log. Useful to know which is the probability to find a number of layers looking at the mesh or scene.
+  Log(0, "Depth complexity             NumberOfViews\n", mDepthComplexity );
+  for(int j = 0; j < peel; j++)
+  {
+     Log(0, "   %i                             %i\n", j, mDepthDistrib[j] );
+  }
 
   //Clean & Exit
   releaseGL(*mm);
@@ -827,7 +837,7 @@ void SdfGpuPlugin::applyObscurance(MeshModel &m, float numberOfRays)
 
 void SdfGpuPlugin::preRender(unsigned int peelingIteration)
 {
-    if( /*mAction == SDF_DEPTH_COMPLEXITY &&*/ peelingIteration != 0)
+    if( peelingIteration != 0)
       glBeginQueryARB( GL_SAMPLES_PASSED_ARB, mOcclusionQuery );
 
 }
@@ -835,7 +845,7 @@ void SdfGpuPlugin::preRender(unsigned int peelingIteration)
 bool SdfGpuPlugin::postRender(unsigned int peelingIteration)
 {
 
-    if( /*mAction == SDF_DEPTH_COMPLEXITY &&*/ peelingIteration != 0)
+    if( peelingIteration != 0)
     {
         glEndQueryARB( GL_SAMPLES_PASSED_ARB );
 
@@ -844,11 +854,13 @@ bool SdfGpuPlugin::postRender(unsigned int peelingIteration)
         if(mPixelCount > PIXEL_COUNT_THRESHOLD )
         {
             mTempDepthComplexity++;
+
             return true;
         }
         else return false;
 
    }
+
 
     return true;
 }
@@ -892,7 +904,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
         setCamera(dir, mm->cm.bbox);
 
-        preRender(peelingIteration);
+        preRender(i);
 
         fillFrameBuffer(i%2==0, mm);
 
@@ -900,7 +912,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
 
         //cut off useless passes
-        if(!postRender(peelingIteration))
+        if(!postRender(i))
             return;
 
        // Log(0,"i %i j %i",i,j);
