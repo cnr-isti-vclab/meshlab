@@ -198,8 +198,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
         ++tracedRays;
         mDepthComplexity = std::max(mDepthComplexity, mTempDepthComplexity);
-        Log(0, "Mesh temp depth complexity %i \n", mTempDepthComplexity );
-        assert(mTempDepthComplexity<peel);
+
         mDepthDistrib[mTempDepthComplexity]++;
         mTempDepthComplexity = 0;
   }
@@ -210,7 +209,8 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   else if(mAction == SDF_SDF)
       applySdfHW(*mm,unifDirVec.size());
 
-  Log(0, "Mesh depth complexity %i \n", mDepthComplexity );
+  Log(0, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
+                                    " the peeling iteration parameter)\n", mDepthComplexity );
 
   //Depth complexity distribution log. Useful to know which is the probability to find a number of layers looking at the mesh or scene.
   Log(0, "Depth complexity             NumberOfViews\n", mDepthComplexity );
@@ -887,6 +887,7 @@ bool SdfGpuPlugin::postCalculate(unsigned int peelingIteration)
 void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* mm )
 {
     unsigned int j = 0;
+    static bool underestimation = false;
 
     for( int i = 0;  i < peelingIteration; i++ )
     {
@@ -911,11 +912,16 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
         mFboArray[j]->unbind();
 
 
-        //cut off useless passes
+        //Cut off useless passes
         if(!postRender(i))
             return;
-
-       // Log(0,"i %i j %i",i,j);
+        else
+            if(i==(peelingIteration-1) && !underestimation)
+            {
+                Log(0,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
+                underestimation = true;
+            }
+             // Log(0,"i %i j %i",i,j);
          //we use 3 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
          if(i%2)
          {
