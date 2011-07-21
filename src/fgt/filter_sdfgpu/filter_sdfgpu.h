@@ -12,7 +12,7 @@
 #define EXTRA_RAYS_REQUESTED 10
 #define EXTRA_RAYS_RESULTED 40 //must match value in sdf shader
 
-enum ONPRIMITIVE{ON_VERTICES, ON_FACES};
+enum ONPRIMITIVE{ON_VERTICES=0, ON_FACES=1};
 
 class SdfGpuPlugin : public QObject, public MeshFilterInterface
 {
@@ -124,6 +124,7 @@ public:
     GLuint             mPixelCount;
     unsigned int       mTempDepthComplexity;
     unsigned int       mDepthComplexity;
+    bool               mDepthComplexityWarning;
 
     CMeshO::PerFaceAttributeHandle<vcg::Point3f>   mMaxQualityDirPerFace;
     CMeshO::PerVertexAttributeHandle<vcg::Point3f> mMaxQualityDirPerVertex;

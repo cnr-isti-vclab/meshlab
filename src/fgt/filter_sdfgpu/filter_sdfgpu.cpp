@@ -20,7 +20,8 @@ using namespace vcg;
 SdfGpuPlugin::SdfGpuPlugin()
 : mPeelingTextureSize(256),
   mTempDepthComplexity(0),
-  mDepthComplexity(0)
+  mDepthComplexity(0),
+  mDepthComplexityWarning(false)
 {
     typeList
     << SDF_SDF
@@ -123,7 +124,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
   CMeshO&    cm = mm->cm;
 
   //RETRIEVE PARAMETERS
-  ONPRIMITIVE  mOnPrimitive  = (ONPRIMITIVE) pars.getInt("onPrimitive");
+  mOnPrimitive  = (ONPRIMITIVE) pars.getEnum("onPrimitive");
  // assert( mOnPrimitive==ON_VERTICES && "Face mode not supported yet" );
   unsigned int numViews     = pars.getInt("numberRays");
   int          peel         = pars.getInt("peelingIteration");
@@ -220,6 +221,10 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
           applySdfPerFace(*mm,unifDirVec.size());
 
   }
+
+  if(mDepthComplexityWarning)
+      Log(0,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
+
   Log(0, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
                                     " the peeling iteration parameter)\n", mDepthComplexity );
 
@@ -621,6 +626,9 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 {
     mFboResult->bind();
 
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0,0,mResTextureDim,mNumberOfTexRows);
+
     GLenum buffers[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT };
     glDrawBuffers(2, buffers);
 
@@ -731,6 +739,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
     glEnable(GL_DEPTH_TEST);
   //  glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
+      glDisable(GL_SCISSOR_TEST);
 
 }
 
@@ -807,6 +816,9 @@ void SdfGpuPlugin::applySdfPerFace(MeshModel &m, float numberOfRays)
 void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextBack, const vcg::Point3f& cameraDir, float bbDiag)
 {
     mFboResult->bind();
+
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0,0,mResTextureDim,mNumberOfTexRows);
 
     GLenum buffers[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT };
     glDrawBuffers(2, buffers);
@@ -900,6 +912,7 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
+    glDisable(GL_SCISSOR_TEST);
 }
 
 void SdfGpuPlugin::applyObscurancePerVertex(MeshModel &m, float numberOfRays)
@@ -998,6 +1011,7 @@ bool SdfGpuPlugin::postRender(unsigned int peelingIteration)
    }
 
 
+
     return true;
 }
 
@@ -1023,7 +1037,6 @@ bool SdfGpuPlugin::postCalculate(unsigned int peelingIteration)
 void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* mm )
 {
     unsigned int j = 0;
-    static bool underestimation = false;
 
     for( int i = 0;  i < peelingIteration; i++ )
     {
@@ -1052,15 +1065,14 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
         if(!postRender(i))
             return;
         else
-            if(i==(peelingIteration-1) && !underestimation)
-            {
-                Log(0,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
-                underestimation = true;
-            }
+            if(i==(peelingIteration-1))
+                mDepthComplexityWarning = true;
+
              // Log(0,"i %i j %i",i,j);
          //we use 3 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
          if(i%2)
          {
+
               //we use the same method as in sdf, see below
               if(mAction==SDF_OBSCURANCE )
               {
@@ -1097,6 +1109,8 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
                       calculateSdfHW( mFboArray[j-1], mFboArray[j], NULL, dir );// front back prevback
                   }
               }
+
+
           }
 
           //increment and wrap around
