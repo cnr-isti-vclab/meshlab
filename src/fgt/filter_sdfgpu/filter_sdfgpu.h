@@ -72,13 +72,20 @@ public:
     void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir );
 
     //Copy sdf values from result texture to the mesh (vertex quality)
-    void applySdfHW(MeshModel &m, float numberOfRays);
+    void applySdfPerVertex(MeshModel &m, float numberOfRays);
+
+    //Copy sdf values from result texture to the mesh (face quality)
+    void applySdfPerFace(MeshModel &m, float numberOfRays);
+
 
     //Obscurance calculation for each depth peeling iteration
     void calculateObscurance(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* nextFront, const vcg::Point3f& cameraDir, float bbDiag );
 
     //Copy obscurance values from result texture to the mesh (vertex color)
-    void applyObscurance(MeshModel &m, float numberOfRays);
+    void applyObscurancePerVertex(MeshModel &m, float numberOfRays);
+
+    //Copy obscurance values from result texture to the mesh (face color)
+    void applyObscurancePerFace(MeshModel &m, float numberOfRays);
 
     void preRender(unsigned int peelingIteration);
 

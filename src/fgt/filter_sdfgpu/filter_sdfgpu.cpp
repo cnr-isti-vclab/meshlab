@@ -124,7 +124,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
   //RETRIEVE PARAMETERS
   ONPRIMITIVE  mOnPrimitive  = (ONPRIMITIVE) pars.getInt("onPrimitive");
-  assert( onPrimitive==ON_VERTICES && "Face mode not supported yet" );
+ // assert( mOnPrimitive==ON_VERTICES && "Face mode not supported yet" );
   unsigned int numViews     = pars.getInt("numberRays");
   int          peel         = pars.getInt("peelingIteration");
   mTolerance                = pars.getFloat("peelingTolerance");
@@ -206,10 +206,20 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
   //read back the result texture and store result in the mesh
   if(mAction == SDF_OBSCURANCE)
-      applyObscurance(*mm,unifDirVec.size());
+  {
+      if(mOnPrimitive == ON_VERTICES)
+        applyObscurancePerVertex(*mm,unifDirVec.size());
+    else
+        applyObscurancePerFace(*mm,unifDirVec.size());
+  }
   else if(mAction == SDF_SDF)
-      applySdfHW(*mm,unifDirVec.size());
+  {
+      if(mOnPrimitive == ON_VERTICES)
+            applySdfPerVertex(*mm,unifDirVec.size());
+      else
+          applySdfPerFace(*mm,unifDirVec.size());
 
+  }
   Log(0, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
                                     " the peeling iteration parameter)\n", mDepthComplexity );
 
@@ -415,22 +425,23 @@ void SdfGpuPlugin::faceDataToTexture(MeshModel &m)
 
     GLfloat *facePosition= new GLfloat[texSize];
     GLfloat *faceNormals = new GLfloat[texSize];
-    vcg::Point3<CMeshO::ScalarType> fn;
+    vcg::Point3<CMeshO::ScalarType> n;
 
     //Copies each face's position and normal in new vectors
     for (int i=0; i < m.cm.fn; ++i)
     {
             //face position
-            facePosition[i*4+0] = (m.cm.face[i].P(0).X() + m.cm.face[i].P(1).X() + m.cm.face[i].P(2).X())*(1/3);
-            facePosition[i*4+1] = (m.cm.face[i].P(0).Y() + m.cm.face[i].P(1).Y() + m.cm.face[i].P(2).Y())*(1/3);
-            facePosition[i*4+2] = (m.cm.face[i].P(0).Z() + m.cm.face[i].P(1).Z() + m.cm.face[i].P(2).Z())*(1/3);
+            facePosition[i*4+0] = (m.cm.face[i].P(0).X() + m.cm.face[i].P(1).X() + m.cm.face[i].P(2).X())*(1.0/3.0);
+            facePosition[i*4+1] = (m.cm.face[i].P(0).Y() + m.cm.face[i].P(1).Y() + m.cm.face[i].P(2).Y())*(1.0/3.0);
+            facePosition[i*4+2] = (m.cm.face[i].P(0).Z() + m.cm.face[i].P(1).Z() + m.cm.face[i].P(2).Z())*(1.0/3.0);
             facePosition[i*4+3] = 1.0;
 
             //Normal vector for each face
-            fn = m.cm.face[i].N();
-            faceNormals[i*4+0] = fn.X();
-            faceNormals[i*4+1] = fn.Y();
-            faceNormals[i*4+2] = fn.Z();
+            n = m.cm.face[i].N();
+
+            faceNormals[i*4+0] = n.X();
+            faceNormals[i*4+1] = n.Y();
+            faceNormals[i*4+2] = n.Z();
             faceNormals[i*4+3] = 0.0;
     }
 
@@ -548,7 +559,7 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
     tri::UpdateBounding<CMeshO>::Box(m);
     vcg::tri::Allocator<CMeshO>::CompactVertexVector(m);
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(m);
-   // vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m);
+
 
     //Enable & Reset the necessary attributes
     switch(onPrimitive)
@@ -559,7 +570,11 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
         break;
       case ON_FACES:
         mm->updateDataMask(MeshModel::MM_FACEQUALITY);
+        mm->updateDataMask(MeshModel::MM_FACENORMAL);
+        mm->updateDataMask(MeshModel::MM_FACECOLOR);
         tri::UpdateQuality<CMeshO>::FaceConstant(m,0);
+
+
         break;
     }
 
@@ -719,7 +734,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 
 }
 
-void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
+void SdfGpuPlugin::applySdfPerVertex(MeshModel &m, float numberOfRays)
 {
     const unsigned int texelNum = mResTextureDim*mResTextureDim;
 
@@ -745,6 +760,41 @@ void SdfGpuPlugin::applySdfHW(MeshModel &m, float numberOfRays)
         Point3f dir = Point3f(result[i*4], result[i*4+1], result[i*4+2]);
         vcg::Normalize(dir);
         mMaxQualityDirPerVertex[i] = dir;
+      //  Log(0,"vertice %i: %f %f %f",i,dir.X(),dir.Y(),dir.Z());
+    }
+
+
+    mFboResult->unbind();
+
+    delete [] result;
+}
+
+void SdfGpuPlugin::applySdfPerFace(MeshModel &m, float numberOfRays)
+{
+    const unsigned int texelNum = mResTextureDim*mResTextureDim;
+
+    GLfloat *result = new GLfloat[texelNum*4];
+
+    mFboResult->bind();
+
+    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
+
+    for (int i=0; i < m.cm.fn; ++i)
+    {
+        //weighted average: sdf sum is in the red channel and the weights sum in the green one
+        m.cm.face[i].Q() = mScale*((result[i*4+1]>0.0) ? (result[i*4] / result[i*4+1]) : 0.0);
+    }
+
+    glReadBuffer(GL_COLOR_ATTACHMENT1_EXT);
+    glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
+
+    for (int i=0; i < m.cm.fn; ++i)
+    {
+        //weighted average: sdf sum is in the red channel and the weights sum in the green one
+        Point3f dir = Point3f(result[i*4], result[i*4+1], result[i*4+2]);
+        vcg::Normalize(dir);
+        mMaxQualityDirPerFace[i] = dir;
       //  Log(0,"vertice %i: %f %f %f",i,dir.X(),dir.Y(),dir.Z());
     }
 
@@ -852,7 +902,7 @@ void SdfGpuPlugin::calculateObscurance(FramebufferObject* fboFront, FramebufferO
     glDisable(GL_BLEND);
 }
 
-void SdfGpuPlugin::applyObscurance(MeshModel &m, float numberOfRays)
+void SdfGpuPlugin::applyObscurancePerVertex(MeshModel &m, float numberOfRays)
 {
     const unsigned int texelNum = mResTextureDim*mResTextureDim;
 
@@ -879,6 +929,40 @@ void SdfGpuPlugin::applyObscurance(MeshModel &m, float numberOfRays)
         Point3f dir = Point3f(result[i*4], result[i*4+1], result[i*4+2]);
         vcg::Normalize(dir);
         mMaxQualityDirPerVertex[i] = dir;
+
+    }
+
+    mFboResult->unbind();
+    delete [] result;
+}
+
+void SdfGpuPlugin::applyObscurancePerFace(MeshModel &m, float numberOfRays)
+{
+    const unsigned int texelNum = mResTextureDim*mResTextureDim;
+
+    GLfloat *result = new GLfloat[texelNum*4];
+
+    mFboResult->bind();
+
+    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
+
+    for( unsigned int i = 0; i < m.cm.fn; i++)
+    {
+        m.cm.face[i].Q() = result[i*4]/numberOfRays;
+    }
+
+    tri::UpdateColor<CMeshO>::FaceQualityGray(m.cm);
+
+    glReadBuffer(GL_COLOR_ATTACHMENT1_EXT);
+    glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
+
+    for (unsigned int i=0; i < m.cm.fn; ++i)
+    {
+
+        Point3f dir = Point3f(result[i*4], result[i*4+1], result[i*4+2]);
+        vcg::Normalize(dir);
+        mMaxQualityDirPerFace[i] = dir;
 
     }
 
