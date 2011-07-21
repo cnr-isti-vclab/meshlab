@@ -40,6 +40,7 @@ public:
              FP_CAMERA_ROTATE,
              FP_CAMERA_SCALE,
 			 FP_CAMERA_TRANSLATE,
+			 FP_CAMERA_TRANSFORM,
              FP_CAMERA_EDIT};
 
   FilterCameraPlugin();

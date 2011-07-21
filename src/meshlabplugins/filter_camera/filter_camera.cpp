@@ -39,6 +39,7 @@ FilterCameraPlugin::FilterCameraPlugin()
   FP_CAMERA_ROTATE<<
   FP_CAMERA_SCALE<<
   FP_CAMERA_TRANSLATE<<
+  FP_CAMERA_TRANSFORM <<
   FP_CAMERA_EDIT;
 
   foreach(FilterIDType tt , types())
@@ -55,6 +56,7 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 	case FP_CAMERA_ROTATE :         return QString("Transform: Rotate Camera or set of cameras");
 	case FP_CAMERA_SCALE :         return QString("Transform: Scale Camera or set of cameras");
 	case FP_CAMERA_TRANSLATE :         return QString("Transform: Translate Camera or set of cameras");
+ 	case FP_CAMERA_TRANSFORM :        return QString("Transform the camera extrinsics, or all the cameras of the project.");
     case FP_CAMERA_EDIT :         return QString("Edit Raster Camera");
     default : assert(0);
   }
@@ -70,6 +72,7 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
     case FP_CAMERA_ROTATE :       return QString("Rotate the camera, or all the cameras of the project. The selected raster is the reference if viewpoint rotation is selected.");
 	case FP_CAMERA_SCALE :        return QString("Scale the camera, or all the cameras of the project. The selected raster is the reference if viewpoint scaling is selected.");
 	case FP_CAMERA_TRANSLATE :        return QString("Translate the camera, or all the cameras of the project.");
+	case FP_CAMERA_TRANSFORM :        return QString("Transform the camera extrinsics, or all the cameras of the project.");
     case FP_CAMERA_EDIT :        return QString("Allow to edit the current raster camera allowing to tweak intrinsics.");
     default : assert(0);
   }
@@ -139,9 +142,23 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
 	    parlst.addParam(new RichBool ("toall", false, "Apply to all Raster and Mesh layers", "Apply the same scaling to all the layers, including any 3D layer"));
 	   }
      break;
-   case FP_SET_RASTER_CAMERA :
+	
+   case FP_CAMERA_TRANSFORM :
+	  {
+		QStringList shotType;
+        shotType.push_back("Raster Camera");
+        shotType.push_back("Mesh Camera");
+		vcg::Matrix44f mat; mat.SetIdentity();
+	    parlst.addParam(new RichMatrix44f("TransformMatrix",mat,"Matrix to apply to camera extrinsics"));
+	    parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+		parlst.addParam(new RichBool ("toallRaster", false, "Apply to all Raster layers", "Apply the same scaling to all the Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+	    parlst.addParam(new RichBool ("toall", false, "Apply to all Raster and Mesh layers", "Apply the same scaling to all the layers, including any 3D layer"));
+	
+	   }
+     break;  case FP_SET_RASTER_CAMERA :
      parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current raster."));
      break;
+
    case FP_SET_MESH_CAMERA :
      parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current mesh."));
                  break;
@@ -370,6 +387,51 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
 		}
     }
   break;
+  case FP_CAMERA_TRANSFORM :
+	  {vcg::Matrix44f mat = par.getMatrix44("TransformMatrix");
+	   		
+	  if (par.getBool("toall"))
+		{
+			for (int i=0; i<md.meshList.size(); i++)
+			{
+				md.meshList[i]->cm.Tr = mat;
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+				md.meshList[i]->cm.Tr.SetIdentity();
+				md.meshList[i]->cm.shot.ApplyRigidTransformation(mat);
+				
+			}
+			for (int i=0; i<md.rasterList.size(); i++)
+			{
+				md.rasterList[i]->shot.ApplyRigidTransformation(mat);
+				
+			}
+		}
+		else if (par.getBool("toallRaster") && (par.getEnum("camera")==0))
+		{
+			for (int i=0; i<md.rasterList.size(); i++)
+			{
+				md.rasterList[i]->shot.ApplyRigidTransformation(mat);
+
+			}
+		}
+		else switch(par.getEnum("camera"))
+		{	
+			case 0: 
+				{
+				rm->shot.ApplyRigidTransformation(mat);
+				}
+		   case 1: 
+				{		
+				cm.shot.ApplyRigidTransformation(mat);
+				}
+		}
+	  }
+
+  break;
+
   case FP_SET_RASTER_CAMERA :
 	  {
 			vcg::Shotf shotGot=par.getShotf("Shot");
@@ -434,7 +496,8 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
     case FP_SET_MESH_CAMERA :
 	case FP_CAMERA_ROTATE   : 	
 	case FP_CAMERA_TRANSLATE   :               
-    case FP_CAMERA_SCALE                  : return MeshModel::MM_CAMERA;
+	case FP_CAMERA_TRANSFORM:
+	case FP_CAMERA_SCALE                  : return MeshModel::MM_CAMERA;
     case FP_QUALITY_FROM_CAMERA           : return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
     default                  : return MeshModel::MM_UNKNOWN;
   }
@@ -448,6 +511,7 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
   case FP_CAMERA_SCALE :
   case FP_CAMERA_TRANSLATE :
   case FP_CAMERA_EDIT :
+  case FP_CAMERA_TRANSFORM:
   case FP_SET_MESH_CAMERA :
   case FP_SET_RASTER_CAMERA :
   case FP_QUALITY_FROM_CAMERA :

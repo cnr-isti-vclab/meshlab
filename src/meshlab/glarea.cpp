@@ -1147,6 +1147,12 @@ void GLArea::sendMeshShot(QString name)
   emit transmitShot(name, curShot);
 }
 
+void GLArea::sendMeshMatrix(QString name)
+{
+  Matrix44f mat=this->md()->mm()->cm.Tr;
+  emit transmitMatrix(name, mat);
+}
+
 void GLArea::sendViewerShot(QString name)
 {
   Shotf curShot=shotFromTrackball().first;

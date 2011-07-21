@@ -33,7 +33,7 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 		clearValues();
 }
 
-StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla)
+StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
 //:QDialog(p)
 :QFrame(p)
 {
@@ -195,8 +195,9 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 }
 
 //void StdParFrame::loadFrameContent(ParameterDeclarationSet &curParSet,MeshDocument *mdPt)
-void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument */*mdPt*/)
+void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * _mdPt )
 {
+
  if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
     vLayout->setAlignment(Qt::AlignTop);
@@ -598,6 +599,99 @@ void Point3fWidget::setWidgetValue( const Value& nv )
 	for(unsigned int ii = 0; ii < 3;++ii)
 		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
 }
+
+/******************************************/
+// Matrix44fWidget Implementation
+/******************************************/
+
+
+//QHBoxLayout(NULL)
+Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_curr): MeshLabWidget(p,rpf)
+{
+
+	paramName = rpf->name;
+	//int row = gridLay->rowCount() - 1;
+
+	descLab = new QLabel(rpf->pd->fieldDesc,p);
+	descLab->setToolTip(rpf->pd->fieldDesc);
+	gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+
+	QVBoxLayout* lay = new QVBoxLayout(p);
+	QGridLayout* lay44 = new QGridLayout(p);
+
+	
+
+	for(int i =0;i<16;++i)
+		{
+			coordSB[i]= new QLineEdit(p);
+			QFont baseFont=coordSB[i]->font();
+			if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
+															  else baseFont.setPointSize(baseFont.pointSize()*3/4);
+			coordSB[i]->setFont(baseFont);
+			//coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
+			coordSB[i]->setMinimumWidth(0);
+			coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
+			//coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
+			coordSB[i]->setValidator(new QDoubleValidator(p));
+			coordSB[i]->setAlignment(Qt::AlignRight);
+			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
+			 lay44->addWidget(coordSB[i],i/4,i%4);
+
+		}
+	this->setValue(paramName,rp->val->getMatrix44f());
+
+	lay->addLayout(lay44);
+
+	QPushButton     * getShotButton = new QPushButton("Read from current layer");
+    lay->addWidget(getShotButton);
+
+	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+
+	connect(this,SIGNAL(askMeshMatrix(QString)),  gla_curr,SLOT(sendMeshMatrix(QString)));
+
+}
+
+
+Matrix44fWidget::~Matrix44fWidget() {}
+
+void Matrix44fWidget::setValue(QString name,Matrix44f newVal)
+{
+	if(name==paramName)
+	{
+		for(int i =0;i<16;++i)
+			coordSB[i]->setText(QString::number(newVal[i/4][i%4],'g',4));
+	}
+}
+
+
+vcg::Matrix44f Matrix44fWidget::getValue()
+{
+	float val[16];
+	for(unsigned int i  = 0; i < 16; ++i)
+		val[i] = coordSB[i]->text().toFloat();
+	return Matrix44f(val); 
+}
+
+void Matrix44fWidget::collectWidgetValue()
+{
+	float val[16]; for(unsigned int i  = 0; i < 16; ++i) val[i] = coordSB[i]->text().toFloat();
+	vcg::Matrix44f  m;
+	rp->val->set(Matrix44fValue(m));
+}
+
+void Matrix44fWidget::resetWidgetValue()
+{
+	vcg::Matrix44f  m; m.SetIdentity();
+	for(unsigned int ii = 0; ii < 16;++ii)
+		coordSB[ii]->setText(QString::number(rp->pd->defVal->getMatrix44f()[ii/4][ii%4],'g',3));
+}
+
+void Matrix44fWidget::setWidgetValue( const Value& nv )
+{
+	for(unsigned int ii = 0; ii < 16;++ii)
+		coordSB[ii]->setText(QString::number(nv.getMatrix44f()[ii/4][ii%4],'g',3));
+}
+
 /********************/
 // ShotfWidget Implementation
 

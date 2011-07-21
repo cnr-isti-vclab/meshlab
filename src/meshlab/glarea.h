@@ -221,6 +221,7 @@ signals :
 		void transmitSurfacePos(QString name,vcg::Point3f dir);
     void transmitCameraPos(QString name,vcg::Point3f dir);
     void transmitShot(QString name, vcg::Shotf);
+	void transmitMatrix(QString name, vcg::Matrix44f);
 	void updateLayerTable();
 public slots:
 		void sendViewPos(QString name);
@@ -228,6 +229,7 @@ public slots:
 		void sendViewDir(QString name);
 		void sendCameraPos(QString name);
     void sendMeshShot(QString name);
+	void sendMeshMatrix(QString name);
     void sendViewerShot(QString name);
     void sendRasterShot(QString name);
 

@@ -263,6 +263,31 @@ protected:
 	QLabel* descLab;
 };
 
+class Matrix44fWidget : public MeshLabWidget
+{
+	Q_OBJECT
+	
+public:
+  Matrix44fWidget(QWidget *p,  RichMatrix44f* rpf, QWidget *gla_curr);
+  ~Matrix44fWidget();
+	QString paramName;
+	vcg::Matrix44f getValue();
+
+	void collectWidgetValue();
+	void resetWidgetValue();
+	void setWidgetValue(const Value& nv);
+	
+	public slots:
+	void  setValue(QString name, vcg::Matrix44f val);	
+	signals:
+	void askMeshMatrix(QString);
+
+
+protected:
+	QLineEdit * coordSB[16];
+	QPushButton *getPoint3Button;
+	QLabel* descLab;
+};
 
 /// Widget to enter a Shot,
 /// if at the creation you provide a pointer to a GLArea (the mesh viewing window)
@@ -740,7 +765,7 @@ public:
 	void visit(RichInt& pd) {lastCreated = new IntWidget(par,&pd);};
 	void visit(RichFloat& pd){lastCreated = new FloatWidget(par,&pd);};
 	void visit(RichString& pd){lastCreated = new StringWidget(par,&pd);};
-	void visit(RichMatrix44f& /*pd*/){assert(0);/*TO BE IMPLEMENTED*/ /*lastCreated = new Matrix44fWidget(par,&pd);*/};
+	void visit(RichMatrix44f&  pd ){  lastCreated = new Matrix44fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla); }
 	void visit(RichPoint3f& pd){lastCreated = new Point3fWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
   void visit(RichShotf& pd){lastCreated = new ShotfWidget(par,&pd,reinterpret_cast<StdParFrame*>(par)->gla);};
 	void visit(RichColor& pd){lastCreated = new ColorWidget(par,&pd);};
