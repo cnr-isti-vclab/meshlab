@@ -46,7 +46,7 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                     "the anti-normals."));
    par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
                     "Size of the depth texture for depth peeling"));
-   par.addParam(new RichInt("peelingIteration", 4, "Peeling Iteration",
+   par.addParam(new RichInt("peelingIteration", 10, "Peeling Iteration",
                                 "Number of depth peeling iteration"));
    par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
                             "Depth tolerance used during depth peeling" ));
@@ -59,8 +59,12 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
    switch(mAction)
     {
             case SDF_OBSCURANCE:
-                 par.addParam(new RichFloat("obscuranceExponent", 0.0f, "Obscurance Exponent",
-                                          "Parameter that increase or decrease the exponential rise in obscurance function" ));
+                 par.addParam(new RichFloat("obscuranceExponent", 0.1f, "Obscurance Exponent",
+                                          "This parameter controls the spatial decay term in the obscurance formula. "
+                                          "The greater the exponent, the greater the influence of distance; that is: "
+                                          "even if a ray is blocked by an occluder its contribution to the obscurance term is non zero, but proportional to this parameter. "
+                                          "It turs out that if you choose a value of zero, you get the standard ambient occlusion term. "
+                                          "(In this case, only a value of two, in the peeling iteration parameter, has a sense)"));
                  break;
 
             default:
@@ -104,7 +108,16 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
         {
                 case SDF_SDF                   :  return QString("Calculate the shape diameter function on the mesh, you can visualize the result colorizing the mesh");
                 case SDF_DEPTH_COMPLEXITY :  return QString("Calculate depth complexity of the mesh");
-                case SDF_OBSCURANCE            :  return QString("Generates environment obscurances values for the loaded mesh");
+                case SDF_OBSCURANCE            :  return QString("Calculates obscurance coefficents for the mesh. Obscurance is introduced to avoid the "
+                                                                 "disadvantages of both classical ambient term and ambient occlusion. "
+                                                                 "In ambient occlusion, totally occluded parts of the mesh are black. "
+                                                                 "Instead obscurance, despite still based on a perfectly diffuse light coming "
+                                                                 "from everywhere, accounts for multiple bounces of indirect illumination by means "
+                                                                 "of a function of both the openness of a point and the distance to his occluder (if any). "
+                                                                 "Obscurance is inversely proportional to the number of ray casted from the point "
+                                                                 "that hit an occluder and proportional to the distance a ray travels before hitting the occluder. "
+                                                                 "You can control how much the distance factor influences the final result with the obscurance exponenent (see help below). "
+                                                                 "Obscurance is a value in the range [0,1]. \nFor further details see the reference paper: Iones Krupkin Sbert Zhukov - Fast, Realistic Lighting for Video Games - IEEECG&A 2003 ");
 
                 default : assert(0);
         }
@@ -222,8 +235,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
   }
 
-  if(mDepthComplexityWarning)
-      Log(0,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
+//  if(mDepthComplexityWarning)
 
   Log(0, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
                                     " the peeling iteration parameter)\n", mDepthComplexity );
@@ -552,6 +564,7 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
     MeshModel* mm = md.mm();
     CMeshO& m     = mm->cm;
 
+
     //If on vertices, do some cleaning first
     if( onPrimitive == ON_VERTICES )
     {
@@ -578,13 +591,11 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
         mm->updateDataMask(MeshModel::MM_FACENORMAL);
         mm->updateDataMask(MeshModel::MM_FACECOLOR);
         tri::UpdateQuality<CMeshO>::FaceConstant(m,0);
-
-
         break;
     }
 
-  if(!vcg::tri::HasPerVertexAttribute(m,"maxQualityDir") && onPrimitive == ON_VERTICES)
-        mMaxQualityDirPerVertex = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f>(m,std::string("maxQualityDir"));
+ if(!vcg::tri::HasPerVertexAttribute(m,"maxQualityDir") && onPrimitive == ON_VERTICES)
+       mMaxQualityDirPerVertex = vcg::tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f>(m,std::string("maxQualityDir"));
   else if(!vcg::tri::HasPerFaceAttribute(m,"maxQualityDir") && onPrimitive == ON_FACES)
         mMaxQualityDirPerFace = vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Point3f>(m,std::string("maxQualityDir"));
 
@@ -975,7 +986,7 @@ void SdfGpuPlugin::applyObscurancePerFace(MeshModel &m, float numberOfRays)
 
         Point3f dir = Point3f(result[i*4], result[i*4+1], result[i*4+2]);
         vcg::Normalize(dir);
-        mMaxQualityDirPerFace[i] = dir;
+       mMaxQualityDirPerFace[i] = dir;
 
     }
 
@@ -986,7 +997,7 @@ void SdfGpuPlugin::applyObscurancePerFace(MeshModel &m, float numberOfRays)
 
 void SdfGpuPlugin::preRender(unsigned int peelingIteration)
 {
-    if( peelingIteration != 0)
+    if( peelingIteration != 0 )
       glBeginQueryARB( GL_SAMPLES_PASSED_ARB, mOcclusionQuery );
 
 }
@@ -1066,7 +1077,8 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
             return;
         else
             if(i==(peelingIteration-1))
-                mDepthComplexityWarning = true;
+                Log(0,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
+
 
              // Log(0,"i %i j %i",i,j);
          //we use 3 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
