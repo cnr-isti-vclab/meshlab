@@ -235,7 +235,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
   }
 
-//  if(mDepthComplexityWarning)
+
 
   Log(0, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
                                     " the peeling iteration parameter)\n", mDepthComplexity );
@@ -249,6 +249,8 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
   //Clean & Exit
   releaseGL(*mm);
+
+  mDepthComplexity = 0;
 
   return true;
 }
@@ -577,6 +579,7 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
     tri::UpdateBounding<CMeshO>::Box(m);
     vcg::tri::Allocator<CMeshO>::CompactVertexVector(m);
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(m);
+    vcg::tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(m);
 
 
     //Enable & Reset the necessary attributes

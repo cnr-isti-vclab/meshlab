@@ -53,23 +53,6 @@ vec4 project(vec4 coords)
    return vec4(coords.xyz * 0.5+0.5, coords.w);
 }
 
-//Sort values
-void InsertionSort(int n) 
-{
-   int i, j;
-
-   float app;
- 
-   for (i = 1; i < n; i++)
-   {
-      app = _vals[i];
- 
-      for (j = i - 1; (j >= 0) && (_vals[j] > app); j--)
-               _vals[j+1] = _vals[j];
- 
-      _vals[j + 1] = app;
-   }
-}
 
 /*
 Recostruct normal at the point of intersection and check for false intersection.
@@ -107,7 +90,7 @@ float TraceRay(vec2 P, vec3 dir, float sourceHeight)
   	vec2   p2 	      = vec2(0.0);
 
 	// Compute max displacement:
-    vec2 V = dir.xy*1.41422;
+        vec2 V = dir.xy*1.41422;
         
 	//
 	float cotan = sqrt(length(dir)*length(dir) - dir.z*dir.z) / (dir.z);
@@ -124,7 +107,7 @@ float TraceRay(vec2 P, vec3 dir, float sourceHeight)
 		
 		vec2 tc = P + coordOffset;
 		
-    CurrD = texture2D( depthTextureBack, tc).r;
+    		CurrD = texture2D( depthTextureBack, tc).r;
 
 		if(CurrD < Depth)
 		{
@@ -192,39 +175,58 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
   if(removeFalse==1)
 	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;
     
-   /*if( sdf != 0.0 && removeOutliers == 1)
+   if( sdf != 0.0 && removeOutliers == 1)
    {
 	
     
 	int i = 0;
+	
+	float mean = 0.0;
+	float min_val = 100000.0;
+	float max_val = 0.0;
 
 	for( ; i < EXTRA_RAYS ; i++ )
 	{
 		_vals[i] = TraceRay( P.xy, coneRays[i] , zFront );	
+	
+		mean += _vals[i];
+		min_val = min(_vals[i],min_val);
+		max_val = max(_vals[i], max_val);
 	}
 
-
 	
-	InsertionSort(EXTRA_RAYS);
-
-
-	for( i = 0;  i < EXTRA_RAYS; i++ )
+	float trialMedian = mean/40.0;
+	
+	int counter = 0;
+	
+	
+	for(int n = 0; n < 10; n++)
 	{
-		if(_vals[i] != 0.0 ) break;
+		for(int j = 0; j < EXTRA_RAYS ; j++ )
+			if(_vals[j]>trialMedian ) counter++; 	
+	
 
+		if(counter>20)
+		{		
+			trialMedian += (max_val - trialMedian)/2.0;
+			min_val = trialMedian;
+		}
+		else if(counter < 20)
+		{
+			trialMedian -= (trialMedian - min_val)/2.0;
+			max_val = trialMedian;
+		}
+		else
+		    break;
+		
+
+		counter = 0;
 	}
 
- 	 float valids     = float(EXTRA_RAYS - i);
-	int median     = int(valids / 2.0);
-	int percentile = int(valids / 10.0);
-
-		
-	//if( sdf < _vals[i+median-4*percentile ] || sdf > _vals[i+median+4*percentile] ) return 0.0;	
-
-	 sdf = _vals[i+median];
 	
+	sdf = trialMedian;
   
-    }   */
+    }   
 
 
     return sdf;
