@@ -674,8 +674,8 @@ vcg::Matrix44f Matrix44fWidget::getValue()
 
 void Matrix44fWidget::collectWidgetValue()
 {
-	float val[16]; for(unsigned int i  = 0; i < 16; ++i) val[i] = coordSB[i]->text().toFloat();
 	vcg::Matrix44f  m;
+	for(unsigned int i  = 0; i < 16; ++i) m[i/4][i%4] = coordSB[i]->text().toFloat();
 	rp->val->set(Matrix44fValue(m));
 }
 
