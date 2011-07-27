@@ -42,17 +42,20 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
    par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
                     "Choose whether to trace rays from faces or from vertices. " ));
    par.addParam(  new RichInt("numberRays",128, "Number of rays: ",
-                    "The standard deviation of the rays that will be casted around "
-                    "the anti-normals."));
+                    "The number of rays that will be casted around "
+                    "the normals."));
    par.addParam(new RichInt("DepthTextureSize", 512, "Depth texture size",
-                    "Size of the depth texture for depth peeling"));
+                    "Size of the depth texture for depth peeling. Higher resolutions provide better sampling of the mesh, with a small performance penalty."));
    par.addParam(new RichInt("peelingIteration", 10, "Peeling Iteration",
-                                "Number of depth peeling iteration"));
+                                "Number of depth peeling iteration. Actually is the maximum number of layers that a ray can hit while traversing the mesh. "
+                                "For example, in the case of a sphere, you should specify 2 in this parameter. For a torus, specify 4. "
+                                "<b>For more complex geometry you should run the depth complexity filter to know the exact value</b>."));
    par.addParam(new RichFloat("peelingTolerance", 0.0000001f, "Peeling Tolerance",
-                            "Depth tolerance used during depth peeling" ));
+                            "Depth tolerance used during depth peeling. This is the threshold used to differentiate layers between each others."
+                            "Two elements whose distance is below this value will be considered as belonging to the same layer."));
 
    if(mAction != SDF_DEPTH_COMPLEXITY)
-        par.addParam(new RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around vertex normal. Rays are traced within this cone."));
+        par.addParam(new RichFloat("coneAngle",120,"Cone amplitude", "Cone amplitude around normals in degrees. Rays are traced within this cone."));
 
 
 
@@ -64,7 +67,7 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
                                           "The greater the exponent, the greater the influence of distance; that is: "
                                           "even if a ray is blocked by an occluder its contribution to the obscurance term is non zero, but proportional to this parameter. "
                                           "It turs out that if you choose a value of zero, you get the standard ambient occlusion term. "
-                                          "(In this case, only a value of two, in the peeling iteration parameter, has a sense)"));
+                                          "<b>(In this case, only a value of two, in the peeling iteration parameter, has a sense)</b>"));
                  break;
 
             default:
@@ -106,8 +109,14 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
 {
         switch(filterId)
         {
-                case SDF_SDF                   :  return QString("Calculate the shape diameter function on the mesh, you can visualize the result colorizing the mesh");
-                case SDF_DEPTH_COMPLEXITY :  return QString("Calculate depth complexity of the mesh");
+                case SDF_SDF                   :  return QString("Calculate the SDF (<b>shape diameter function</b>) on the mesh, you can visualize the result colorizing the mesh. "
+                                                                 "The SDF is a scalar function on the mesh surface and represents the neighborhood diameter of the object at each point. "
+                                                                 "Given a point on the mesh surface,"
+                                                                 "several rays are sent inside a cone, centered around the point's inward-normal, to the other side of the mesh. The result is a weighted sum of all rays lenghts. "
+                                                                 "For further details, see the reference paper: <b>Shapira Shamir Cohen-Or, Consistent Mesh Partitioning and Skeletonisation using the shaper diamter function, Visual Comput (2008)</b> ");
+                case SDF_DEPTH_COMPLEXITY      :  return QString("Calculate the depth complexity of the mesh, that is: the maximum number of layers that a ray can hit while traversing the mesh. To have a correct value, you should specify and high value in the peeling iteration paramater. "
+                                                                 "You can read the result in the MeshLab log window. <b>If warnings are not present, you have the exact value, otherwise try increasing the peeling iteration paramater. After having calulated the correct value,"
+                                                                 "you can ignore further warnings that you may get using that value.</b>. ");
                 case SDF_OBSCURANCE            :  return QString("Calculates obscurance coefficents for the mesh. Obscurance is introduced to avoid the "
                                                                  "disadvantages of both classical ambient term and ambient occlusion. "
                                                                  "In ambient occlusion, totally occluded parts of the mesh are black. "
@@ -117,7 +126,7 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
                                                                  "Obscurance is inversely proportional to the number of ray casted from the point "
                                                                  "that hit an occluder and proportional to the distance a ray travels before hitting the occluder. "
                                                                  "You can control how much the distance factor influences the final result with the obscurance exponenent (see help below). "
-                                                                 "Obscurance is a value in the range [0,1]. \nFor further details see the reference paper: Iones Krupkin Sbert Zhukov - Fast, Realistic Lighting for Video Games - IEEECG&A 2003 ");
+                                                                 "Obscurance is a value in the range [0,1]. \nFor further details see the reference paper: <b>Iones Krupkin Sbert Zhukov - Fast, Realistic Lighting for Video Games - IEEECG&A 2003</b> ");
 
                 default : assert(0);
         }
