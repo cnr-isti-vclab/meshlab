@@ -25,7 +25,9 @@
 Author: Andrea Baldacci baldacci85@hotmail.it
 */
 
-#define EXTRA_RAYS 40
+
+#define MEDIAN_SEARCH_ITERATIONS 64
+#define EXTRA_VALS 81
 
 uniform sampler2D 	vTexture;
 uniform sampler2D 	nTexture;
@@ -42,8 +44,7 @@ uniform int		firstRendering;
 uniform mat4		mvprMatrixINV;
 uniform int 		removeFalse;
 uniform int		removeOutliers;
-uniform vec3		coneRays[EXTRA_RAYS];
-float			_vals[EXTRA_RAYS];
+float			extraVals[EXTRA_VALS];
 
 
 
@@ -73,84 +74,13 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
     return false;
 }
 
-//Based on the paper "Dynamic Parallax Occlusion Mapping with Approximate Soft Shadows" Natalya Tatarchuk ATI Research, Inc.
-float TraceRay(vec2 P, vec3 dir, float sourceHeight)
-{
-	
-	int LinearSearchSteps = 256; 
-	
-	float  StepSize       = 1.0/256.0;
-	float  Depth 	      = sourceHeight; //Initial depth is that of front vertex
-        int    StepIndex      = 0;
-	
-	float  CurrD          = 0.0;
-	float  PrevD          = sourceHeight;
-	
-	vec2   p1 	      = vec2(0.0);
-  	vec2   p2 	      = vec2(0.0);
 
-	// Compute max displacement:
-        vec2 V = dir.xy*1.41422;
-        
-	//
-	float cotan = sqrt(length(dir)*length(dir) - dir.z*dir.z) / (dir.z);
-	
-	float coordStepSize = StepSize * cotan;
-	
-	vec2  coordOffset = vec2(0.0,0.0);
-	
-	
-	while(StepIndex < LinearSearchSteps)
-	{
-		Depth 		+= StepSize;
-		coordOffset 	+= V.xy * coordStepSize;
-		
-		vec2 tc = P + coordOffset;
-		
-    		CurrD = texture2D( depthTextureBack, tc).r;
-
-		if(CurrD < Depth)
-		{
-			p1 = vec2(Depth, CurrD);
-			p2 = vec2(Depth - StepSize, PrevD);
-			StepIndex =  LinearSearchSteps;
-		}
-		else
-		{
-
-			//no intersections found, the height map values along the edges is below one. 
-			//In this case the parallax vector near the edges crosses the texture boundary without hitting any features
-			if(tc.x < 0.0 || tc.x > 1.0 || tc.y < 0.0 || tc.y > 1.0) return 0.0;
-		
-			StepIndex++;
-			PrevD = CurrD;
-		}
-	}
-
-
-	//Linear approximation using current and last step
-	float d2 = p2.x - p2.y;
-	float d1 = p1.x - p1.y;
-      
-      	float fDenominator = d2 - d1;
-	
-	if(fDenominator == 0.0)
-	{
-
-		return 0.0;
-	}
-	//y=m0*x+b0 and y=m1*x+b1 intersection
-	float destHeight =  (p1.x * d2 - p2.x * d1) / fDenominator;
-      
-	float sdf = sqrt((destHeight - sourceHeight)* (destHeight - sourceHeight) + length(coordOffset)*length(coordOffset));
-
-      return sdf;
-
-}
 
 float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 {
-	
+
+    
+
     float sdf = 0.0;
 
     float zFront    = texture2D(depthTextureFront,    P.xy).r;
@@ -172,46 +102,62 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
     else if ( zPrevBack <= P.z && P.z <= zBack )
     		sdf =  max(0.0,(zBack-zFront) ) ; 
 
-  if(removeFalse==1)
-	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;
+
+     if(removeFalse==1)
+	if( isFalseIntersection(P,objSpaceNormal) ) return 0.0;	
     
+
    if( sdf != 0.0 && removeOutliers == 1)
    {
-	
-    
-	int i = 0;
-	
+
 	float mean = 0.0;
 	float min_val = 100000.0;
 	float max_val = 0.0;
 
-	for( ; i < EXTRA_RAYS ; i++ )
+	int index = 0;
+
+	for( float j = -4.0; j <= 4.0; j += 1.0 )
 	{
-		_vals[i] = TraceRay( P.xy, coneRays[i] , zFront );	
+		for( float i = -4.0; i <= 4.0 ; i += 1.0 )
+		{
+			if(index >= EXTRA_VALS) return 0.0;
+
+
+			float s =  texture2D(depthTextureBack, P.xy + vec2(j/texSize,i/texSize)).r;
+			
+			if(s == 1.0) break;
+			
+			extraVals[index] = s; 	
 	
-		mean += _vals[i];
-		min_val = min(_vals[i],min_val);
-		max_val = max(_vals[i], max_val);
+			mean   += extraVals[index];
+			min_val = min(extraVals[index],min_val);
+			max_val = max(extraVals[index], max_val);
+
+			index++;
+					
+		}
+
 	}
 
-	
-	float trialMedian = mean/40.0;
+	index += 1;	
+
+	float trialMedian = mean/float(index);
 	
 	int counter = 0;
 	
 	
-	for(int n = 0; n < 10; n++)
+	for(int n = 0; n < MEDIAN_SEARCH_ITERATIONS; n++)
 	{
-		for(int j = 0; j < EXTRA_RAYS ; j++ )
-			if(_vals[j]>trialMedian ) counter++; 	
+		for(int j = 0; j < index; j++ )
+			if( extraVals[j] > trialMedian ) counter++; 	
 	
 
-		if(counter>20)
+		if( counter > (index/2) )
 		{		
 			trialMedian += (max_val - trialMedian)/2.0;
 			min_val = trialMedian;
 		}
-		else if(counter < 20)
+		else if( counter < (index/2) )
 		{
 			trialMedian -= (trialMedian - min_val)/2.0;
 			max_val = trialMedian;
@@ -224,7 +170,7 @@ float calculateSdf(vec3 P, vec3 objSpacePos, vec3 objSpaceNormal)
 	}
 
 	
-	sdf = trialMedian;
+	sdf = max(0.0, trialMedian - zFront);
   
     }   
 

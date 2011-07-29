@@ -9,9 +9,6 @@
 #include <framebufferObject.h>
 #include <texture2D.h>
 
-#define EXTRA_RAYS_REQUESTED 10
-#define EXTRA_RAYS_RESULTED 40 //must match value in sdf shader
-
 enum ONPRIMITIVE{ON_VERTICES=0, ON_FACES=1};
 
 class SdfGpuPlugin : public QObject, public MeshFilterInterface
@@ -119,7 +116,6 @@ public:
     GPUProgram*        mObscuranceProgram;
     bool               mRemoveFalse;
     bool               mRemoveOutliers;
-    float              mConeRays[EXTRA_RAYS_RESULTED*3];
     GLuint             mOcclusionQuery;
     GLuint             mPixelCount;
     unsigned int       mTempDepthComplexity;

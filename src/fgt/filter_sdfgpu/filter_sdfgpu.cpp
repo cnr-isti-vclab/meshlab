@@ -14,7 +14,7 @@ using namespace vcg;
 
 #define SDF_MAX_TEXTURE_SIZE 1024
 #define PI 3.14159265358979323846264;
-#define USEVBO_BY_DEFAULT false
+#define USEVBO_BY_DEFAULT true
 #define PIXEL_COUNT_THRESHOLD 100
 
 SdfGpuPlugin::SdfGpuPlugin()
@@ -80,14 +80,16 @@ void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &m, RichParameter
 
    if(mAction == SDF_SDF)
    {
-        par.addParam(new RichBool("removeFalse",false,"Remove false intersections","For each"
+        par.addParam(new RichBool("removeFalse",true,"Remove false intersections","For each"
                                   "ray we check the normal at the point of intersection,"
                                   "and ignore intersections where the normal at the intersection"
                                   "points is in the same direction as the point-of-origin"
                                   "(the same direction is defined as an angle difference less"
                                   "than 90) "));
 
-        par.addParam(new RichBool("removeOutliers",false,"Remove outliers","Remove outliers"));
+        par.addParam(new RichBool("removeOutliers",false,"Remove outliers","The outliers removal is made on the fly with a supersampling of the depth buffer. "
+                                  "For each ray that we trace, we take multiple depth values near the point of intersection and we output only the median of these values. "
+                                  "Some mesh can benefit from this additional calculation. "));
    }
 }
 
@@ -95,9 +97,9 @@ QString SdfGpuPlugin::filterName(FilterIDType filterId) const
 {
         switch(filterId)
         {
-                case SDF_SDF                   :  return QString("Shape diameter function");
+                case SDF_SDF                   :  return QString("Shape Diameter Function");
                 case SDF_DEPTH_COMPLEXITY      :  return QString("Depth complexity");
-                case SDF_OBSCURANCE            :  return QString("Ambient obscurance");
+                case SDF_OBSCURANCE            :  return QString("Volumetric obscurance");
 
                 default : assert(0);
         }
@@ -166,26 +168,7 @@ bool SdfGpuPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       mRemoveFalse     = pars.getBool("removeFalse");
       mRemoveOutliers  = pars.getBool("removeOutliers");
 
-      if(mRemoveOutliers)
-      {
-          //Uniform sampling of cone for GPU outliers removal
 
-          GenNormal<float>::UniformCone(EXTRA_RAYS_REQUESTED, coneDirVec, math::ToRad(45.0), Point3f(0.0,0.0,1.0));
-
-
-          for(int i = 0; i < EXTRA_RAYS_RESULTED; i++)
-          {
-              coneDirVec[i].Normalize();
-              mConeRays[i]   = coneDirVec[i].X();
-              mConeRays[i+1] = coneDirVec[i].Y();
-              mConeRays[i+2] = coneDirVec[i].Z();
-
-              Log(0, "Ray%i %f %f %f. Angle: %f", i,coneDirVec[i].X(),
-                                                    coneDirVec[i].Y(),
-                                                    coneDirVec[i].Z(),
-                                                    math::ToDeg(vcg::Angle(coneDirVec[i],Point3f(0.0,0.0,1.0))));
-          }
-      }
    }
    //MESH CLEAN UP
    setupMesh( md, mOnPrimitive );
@@ -324,6 +307,11 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
             return false;
     }
 
+    GLint maxColorAttachments;
+    glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &maxColorAttachments);
+
+
+
     //INIT FBOs AND TEXs
     for(int i = 0; i < 3; i++)
     {
@@ -357,6 +345,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     mResultTexture      = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
     mDirsResultTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
+
 
     mFboResult->attachTexture( mResultTexture->format().target(), mResultTexture->id(), GL_COLOR_ATTACHMENT0_EXT );
     mFboResult->attachTexture( mDirsResultTexture->format().target(), mDirsResultTexture->id(), GL_COLOR_ATTACHMENT1_EXT );
@@ -743,10 +732,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
          mSDFProgram->setUniform1i("removeFalse",0);
 
     if(mRemoveOutliers)
-    {
         mSDFProgram->setUniform1i("removeOutliers",1);
-        mSDFProgram->setUniform3fv("coneRays", mConeRays, EXTRA_RAYS_RESULTED);
-    }
     else
         mSDFProgram->setUniform1i("removeOutliers",0);
 
