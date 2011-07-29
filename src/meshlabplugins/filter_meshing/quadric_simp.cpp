@@ -32,9 +32,6 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::Tri
   tri::QuadricTemp TD(m.vert,QZero);
   tri::QHelper::TDp()=&TD;
 
-	// we assume that the caller has already set up the tri::MyTriEdgeCollapse::Params() class
-  ;
-  
   if(Selected) // simplify only inside selected faces
   {
     // select only the vertices having ALL incident faces selected
