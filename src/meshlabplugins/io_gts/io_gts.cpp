@@ -29,8 +29,8 @@
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 
-#include "wrap/io_trimesh/import_gts.h"
-#include "wrap/io_trimesh/export_gts.h"
+#include <wrap/io_trimesh/import_gts.h>
+#include <wrap/io_trimesh/export_gts.h>
 
 #include <QMessageBox>
 
