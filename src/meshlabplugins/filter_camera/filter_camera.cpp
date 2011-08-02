@@ -388,7 +388,8 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
     }
   break;
   case FP_CAMERA_TRANSFORM :
-	  {vcg::Matrix44f mat = par.getMatrix44("TransformMatrix");
+	  {
+		vcg::Matrix44f mat = par.getMatrix44("TransformMatrix");
 	   		
 	  if (par.getBool("toall"))
 		{
@@ -413,7 +414,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
 		{
 			for (int i=0; i<md.rasterList.size(); i++)
 			{
-				md.rasterList[i]->shot.ApplyRigidTransformation(mat);
+				md.rasterList[i]->shot.ApplySimilarity(mat);
 
 			}
 		}
