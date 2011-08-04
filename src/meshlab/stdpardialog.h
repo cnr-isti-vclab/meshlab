@@ -279,6 +279,8 @@ public:
 	
 	public slots:
 	void  setValue(QString name, vcg::Matrix44f val);	
+	void getMatrix();
+	void pasteMatrix();
 	signals:
 	void askMeshMatrix(QString);
 

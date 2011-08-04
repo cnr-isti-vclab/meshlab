@@ -642,11 +642,17 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
 
 	lay->addLayout(lay44);
 
-	QPushButton     * getShotButton = new QPushButton("Read from current layer");
-    lay->addWidget(getShotButton);
+	QPushButton     * getMatrixButton = new QPushButton("Read from current layer");
+    lay->addWidget(getMatrixButton);
+
+	QPushButton     * pasteMatrixButton = new QPushButton("Paste from clipboard");
+	lay->addWidget(pasteMatrixButton);
 
 	gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
+	connect(gla_curr,SIGNAL(transmitMatrix(QString,vcg::Matrix44f)),this,SLOT(setValue(QString,vcg::Matrix44f)));
+	connect(getMatrixButton,SIGNAL(clicked()),this,SLOT(getMatrix()));
+	connect(pasteMatrixButton,SIGNAL(clicked()),this,SLOT(pasteMatrix()));
 	connect(this,SIGNAL(askMeshMatrix(QString)),  gla_curr,SLOT(sendMeshMatrix(QString)));
 
 }
@@ -670,6 +676,27 @@ vcg::Matrix44f Matrix44fWidget::getValue()
 	for(unsigned int i  = 0; i < 16; ++i)
 		val[i] = coordSB[i]->text().toFloat();
 	return Matrix44f(val); 
+}
+
+void Matrix44fWidget::getMatrix(){
+
+	emit askMeshMatrix(QString("TransformMatrix"));
+}
+
+void Matrix44fWidget::pasteMatrix(){
+	QClipboard *clipboard = QApplication::clipboard();
+	QString shotString = clipboard->text();
+	QStringList list1 = shotString.split(" ");
+	if(list1.size() < 16) return;
+	int id = 0;
+	for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id){
+		bool ok = true;
+		(*i).toFloat(&ok);
+		if(!ok) return;
+	}
+	id = 0;
+	for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id) 
+		coordSB[id]->setText(*i) ;
 }
 
 void Matrix44fWidget::collectWidgetValue()
