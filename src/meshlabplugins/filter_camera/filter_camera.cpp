@@ -401,12 +401,12 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
 				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
-				md.meshList[i]->cm.shot.ApplyRigidTransformation(mat);
+				md.meshList[i]->cm.shot.ApplySimilarity(mat);
 				
 			}
 			for (int i=0; i<md.rasterList.size(); i++)
 			{
-				md.rasterList[i]->shot.ApplyRigidTransformation(mat);
+				md.rasterList[i]->shot.ApplySimilarity(mat);
 				
 			}
 		}
