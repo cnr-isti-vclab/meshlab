@@ -338,10 +338,10 @@ break;
 			{
 				for (int i=0; i<3; i++)
 				{
-					vcg::Point2f newcoord((*fi).WT(i).P().X()-(int)(*fi).WT(i).P().X(),(*fi).WT(i).P().Y()-(int)(*fi).WT(i).P().Y());
-					QRgb val = tex.pixel(newcoord[0]*tex.width(),(1-newcoord[1])*tex.height()-1);
+          // note the trick for getting only the fractional part of the uv with the correct wrapping (e.g. 1.5 -> 0.5 and -0.3 -> 0.7)
+          vcg::Point2f newcoord((*fi).WT(i).P().X()-floor((*fi).WT(i).P().X()),(*fi).WT(i).P().Y()-floor((*fi).WT(i).P().Y()));
+          QRgb val = tex.pixel(newcoord[0]*tex.width(),(1-newcoord[1])*tex.height()-1);
 					(*fi).V(i)->C().SetRGB(qRed(val),qGreen(val),qBlue(val));
-					
 				}
 			}
 	    }
