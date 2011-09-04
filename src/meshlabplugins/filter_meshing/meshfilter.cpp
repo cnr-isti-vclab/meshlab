@@ -93,7 +93,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 	lastq_QualityWeight    = false;
   lastq_BoundaryWeight   = 1.0;
 	lastqtex_QualityThr    = 0.3f;
-	lastqtex_extratw       = 0.0;
+  lastqtex_extratw       = 1.0;
 }
 
 ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
@@ -340,7 +340,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 			parlst.addParam(new RichFloat("QualityThr",lastqtex_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
 			parlst.addParam(new RichFloat("Extratcoordw",lastqtex_extratw,"Texture Weight","Additional weight for each extra Texture Coordinates for every (selected) vertex"));
 			parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries"));
-			parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
+      parlst.addParam(new RichFloat("BoundaryWeight",lastq_BoundaryWeight,"Boundary Preserving Weight","The importance of the boundary during simplification. Default (1.0) means that the boundary has the same importance of the rest. Values greater than 1.0 raise boundary importance and has the effect of removing less vertices on the border. Admitted range of values (0,+inf). "));
+      parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
 			parlst.addParam(new RichBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface"));
 			parlst.addParam(new RichBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh."));
 			parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!"));
@@ -742,7 +743,8 @@ case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		lastqtex_extratw = pp.ExtraTCoordWeight = par.getFloat("Extratcoordw");
 		lastq_OptimalPlacement = pp.OptimalPlacement = par.getBool("OptimalPlacement");
 		lastq_PreserveBoundary = pp.PreserveBoundary = par.getBool("PreserveBoundary");
-		lastq_PlanarQuadric  = pp.QualityQuadric = par.getBool("PlanarQuadric");
+    pp.BoundaryWeight = pp.BoundaryWeight * par.getFloat("BoundaryWeight");
+    lastq_PlanarQuadric  = pp.QualityQuadric = par.getBool("PlanarQuadric");
 		lastq_PreserveNormal = pp.NormalCheck = par.getBool("PreserveNormal");
 
 		lastq_Selected = par.getBool("Selected");
