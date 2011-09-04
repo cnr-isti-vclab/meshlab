@@ -40,9 +40,10 @@ QString ExtraMeshDecoratePlugin::filterInfo(QAction *action) const
   {
     case DP_SHOW_AXIS :									return tr("Draws XYZ axes in world coordinates");
     case DP_SHOW_BOX_CORNERS:						return tr("Draws object's bounding box corners");
-		case DP_SHOW_VERT:									return tr("Draw the vertices of the mesh as round dots");
+    case DP_SHOW_VERT:									return tr("Draw the vertices of the mesh as round dots");
     case DP_SHOW_NON_FAUX_EDGE:				return tr("Draws the edge of the mesh that are tagged as 'real edges' (useful for quadmeshes).");
     case DP_SHOW_BOUNDARY:								return tr("Draws the edge of the mesh that are on the boundary.");
+    case DP_SHOW_BOUNDARY_TEX:					return tr("Draws the edge where there is a texture seam.");
     case DP_SHOW_NON_MANIF_EDGE:					return tr("Draws the non manifold edges of the current mesh");
     case DP_SHOW_NON_MANIF_VERT:					return tr("Draws the non manifold vertices of the current mesh");
     case DP_SHOW_BOX_CORNERS_ABS  :			return tr("Show Box Corners (Abs)");
@@ -68,6 +69,7 @@ QString ExtraMeshDecoratePlugin::filterName(FilterIDType filter) const
     case DP_SHOW_VERT      :	return QString("Show Vertex Dots");
     case DP_SHOW_NON_FAUX_EDGE :	return QString("Show Non-Faux Edges");
     case DP_SHOW_BOUNDARY :	return QString("Show Boundary Edges");
+    case DP_SHOW_BOUNDARY_TEX :	return QString("Show Texture Seams");
     case DP_SHOW_NON_MANIF_EDGE :	return QString("Show Non Manif Edges");
     case DP_SHOW_NON_MANIF_VERT:	return QString("Show Non Manif Vertices");
     case DP_SHOW_VERT_NORMALS      :	return QString("Show Vertex Normals");
@@ -387,8 +389,34 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
           glPopAttrib();
         }
       }
-    }
-      break;
+    } break;
+    case DP_SHOW_BOUNDARY_TEX :
+    {
+      // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+      CMeshO::PerMeshAttributeHandle< vector<Point3f> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryTexVector");
+      if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, btvH))
+      {
+        vector<Point3f> *BTVp = &btvH();
+        if (BTVp->size() != 0)
+        {
+          glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+          glDisable(GL_LIGHTING);
+          glDisable(GL_TEXTURE_2D);
+          glDepthFunc(GL_LEQUAL);
+          glEnable(GL_LINE_SMOOTH);
+          glEnable(GL_BLEND);
+          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+          glLineWidth(1.f);
+          glColor(Color4b::Green);
+          glDepthRange (0.0, 0.999);
+          glEnableClientState (GL_VERTEX_ARRAY);
+          glVertexPointer(3,GL_FLOAT,sizeof(Point3f),&(BTVp->begin()[0]));
+          glDrawArrays(GL_LINES,0,BTVp->size());
+          glDisableClientState (GL_VERTEX_ARRAY);
+          glPopAttrib();
+        }
+      }
+    } break;
     } // end switch;
 	glPopMatrix();
 
@@ -400,7 +428,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+  glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
@@ -819,7 +847,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
         {
           if(VisitedEdges[*fi][i]==0 && !(*fi).IsF(i))
           {
-
             CVertexO* startV=(*fi).V(i);
             face::Pos <CFaceO> sp(&*fi,i,startV);
             do
@@ -869,6 +896,43 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
         {
           BVp->push_back((*fi).V0(i)->P());
           BVp->push_back((*fi).V1(i)->P());
+        }
+    }
+
+  } break;
+  case DP_SHOW_BOUNDARY_TEX :
+  {
+    MeshModel *m=md.mm();
+    m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+    CMeshO::PerMeshAttributeHandle< vector<Point3f> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<Point3f> >(m->cm,"BoundaryTexVector");
+    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,btvH))
+      btvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<Point3f> >(m->cm,std::string("BoundaryTexVector"));
+    vector<Point3f> *BTVp = &btvH();
+    BTVp->clear();
+    vector<std::pair<CMeshO::FacePointer,int> > SaveTopoVec;
+    CMeshO::FaceIterator fi;
+    for(fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
+    {
+        for(int i=0;i<3;++i)
+            SaveTopoVec.push_back(std::make_pair((*fi).FFp(i),(*fi).FFi(i)));
+    }
+    tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m->cm);
+    for(fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
+    {
+      for(int i=0;i<3;++i)
+        if(face::IsBorder(*fi,i))
+        {
+          BTVp->push_back((*fi).V0(i)->P());
+          BTVp->push_back((*fi).V1(i)->P());
+        }
+    }
+    vector<std::pair<CMeshO::FacePointer,int> >::iterator iii;
+    for(fi = m->cm.face.begin(), iii=SaveTopoVec.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
+    {
+        for(int i=0;i<3;++i)
+        {
+            (*fi).FFp(i)= iii->first;
+            (*fi).FFi(i)= iii->second;
         }
     }
 
@@ -1244,6 +1308,15 @@ void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainte
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
 }
+
+// This function performs the Scale/Translation transform
+// that is needed to correctly draw a single texture.
+// When more than a single texture is used they are stacked vertically
+void ExtraMeshDecoratePlugin::PlaceTexParam(int TexInd, int TexNum)
+{
+
+}
+
 
 void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter,  RichParameterSet *rm, QFont qf)
 {

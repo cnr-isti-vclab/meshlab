@@ -38,25 +38,26 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   QString decorateInfo(QAction *) const;
   
   enum {
-    DP_SHOW_FACE_NORMALS,
-    DP_SHOW_VERT_NORMALS,
-    DP_SHOW_VERT,
-    DP_SHOW_EDGE,
-    DP_SHOW_NON_FAUX_EDGE,
-    DP_SHOW_BOUNDARY,
-    DP_SHOW_NON_MANIF_EDGE,
-    DP_SHOW_NON_MANIF_VERT,
-		DP_SHOW_VERT_PRINC_CURV_DIR,
-    DP_SHOW_BOX_CORNERS,
-    DP_SHOW_BOX_CORNERS_ABS,
-    DP_SHOW_AXIS,
-		DP_SHOW_QUOTED_BOX,
-		DP_SHOW_VERT_LABEL, 
-    DP_SHOW_VERT_QUALITY_HISTOGRAM,
-    DP_SHOW_FACE_QUALITY_HISTOGRAM,
-		DP_SHOW_FACE_LABEL,
-		DP_SHOW_CAMERA,
-    DP_SHOW_TEXPARAM,
+      DP_SHOW_FACE_NORMALS,
+      DP_SHOW_VERT_NORMALS,
+      DP_SHOW_VERT,
+      DP_SHOW_EDGE,
+      DP_SHOW_NON_FAUX_EDGE,
+      DP_SHOW_BOUNDARY,
+      DP_SHOW_NON_MANIF_EDGE,
+      DP_SHOW_NON_MANIF_VERT,
+      DP_SHOW_VERT_PRINC_CURV_DIR,
+      DP_SHOW_BOX_CORNERS,
+      DP_SHOW_BOX_CORNERS_ABS,
+      DP_SHOW_AXIS,
+      DP_SHOW_QUOTED_BOX,
+      DP_SHOW_VERT_LABEL,
+      DP_SHOW_VERT_QUALITY_HISTOGRAM,
+      DP_SHOW_FACE_QUALITY_HISTOGRAM,
+      DP_SHOW_FACE_LABEL,
+      DP_SHOW_CAMERA,
+      DP_SHOW_TEXPARAM,
+      DP_SHOW_BOUNDARY_TEX
   };
 
   QString filterName(FilterIDType filter) const;
@@ -73,44 +74,46 @@ private:
   void drawHistogram(QGLWidget *gla, CHist &ch);
 public:
      
-	ExtraMeshDecoratePlugin()
-	{
-    typeList << 
-    DP_SHOW_VERT <<
-    DP_SHOW_NON_FAUX_EDGE <<
-    DP_SHOW_BOUNDARY <<
-    DP_SHOW_NON_MANIF_EDGE <<
-    DP_SHOW_NON_MANIF_VERT <<
-    DP_SHOW_FACE_NORMALS <<
-    DP_SHOW_VERT_NORMALS <<
-    DP_SHOW_VERT_QUALITY_HISTOGRAM <<
-    DP_SHOW_FACE_QUALITY_HISTOGRAM <<
-    DP_SHOW_VERT_PRINC_CURV_DIR <<
-    DP_SHOW_BOX_CORNERS <<
-    DP_SHOW_BOX_CORNERS_ABS <<
-    DP_SHOW_AXIS <<
-    DP_SHOW_QUOTED_BOX <<
-		DP_SHOW_VERT_LABEL << 
-		DP_SHOW_FACE_LABEL << 
-        DP_SHOW_CAMERA <<
-        DP_SHOW_TEXPARAM;
+  ExtraMeshDecoratePlugin()
+  {
+      typeList <<
+                  DP_SHOW_VERT <<
+                  DP_SHOW_NON_FAUX_EDGE <<
+                  DP_SHOW_BOUNDARY <<
+                  DP_SHOW_NON_MANIF_EDGE <<
+                  DP_SHOW_NON_MANIF_VERT <<
+                  DP_SHOW_FACE_NORMALS <<
+                  DP_SHOW_VERT_NORMALS <<
+                  DP_SHOW_VERT_QUALITY_HISTOGRAM <<
+                  DP_SHOW_FACE_QUALITY_HISTOGRAM <<
+                  DP_SHOW_VERT_PRINC_CURV_DIR <<
+                  DP_SHOW_BOX_CORNERS <<
+                  DP_SHOW_BOX_CORNERS_ABS <<
+                  DP_SHOW_AXIS <<
+                  DP_SHOW_QUOTED_BOX <<
+                  DP_SHOW_VERT_LABEL <<
+                  DP_SHOW_FACE_LABEL <<
+                  DP_SHOW_CAMERA <<
+                  DP_SHOW_TEXPARAM <<
+                  DP_SHOW_BOUNDARY_TEX;
 
-    FilterIDType tt;
-    foreach(tt , types()){
+      FilterIDType tt;
+      foreach(tt , types()){
           actionList << new QAction(filterName(tt), this);
-    }
-    QAction *ap;
+      }
+      QAction *ap;
     foreach(ap,actionList){
         ap->setCheckable(true);
     }
   }
 
-	void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
+  void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
   void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);
   void DrawVertLabel(MeshModel &m, QPainter *gla);
   void DrawFaceLabel(MeshModel &m, QPainter *gla);
   void DisplayCamera(MeshModel *m, vcg::Shotf &ls, int cameraSourceId, QPainter *painter, QFont qf);
   void DrawCamera(MeshModel *m, vcg::Shotf &ls, vcg::Color4b camcolor, vcg::Matrix44f &currtr, RichParameterSet *rm, QPainter *painter, QFont qf);
+  void PlaceTexParam(int TexInd, int TexNum);
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
 
