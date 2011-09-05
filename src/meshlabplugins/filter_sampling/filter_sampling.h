@@ -62,12 +62,13 @@ public:
 
 	FilterDocSampling();
 	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-  virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual int getRequirements(QAction *action);
-    virtual FilterClass getClass(QAction *);
+  QString filterName(FilterIDType filter) const;
+  QString filterInfo(FilterIDType filter) const;
+  void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+  bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  int getRequirements(QAction *action);
+  int postCondition( QAction* ) const;
+  FilterClass getClass(QAction *);
 };
 
 #endif

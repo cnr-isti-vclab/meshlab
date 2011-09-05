@@ -420,7 +420,7 @@ FilterDocSampling::FilterDocSampling()
 																									"collapse each voronoi cell to a single vertex, and construct the triangulation according to the clusters adjacency relations.<br>"
 																									"Very similar to the technique described in <b>'Approximated Centroidal Voronoi Diagrams for Uniform Polygonal Mesh Coarsening'</b> - Valette Chassery - Eurographics 2004");
 		case FP_VORONOI_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis."); 
-		case FP_DISK_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis."); 
+    case FP_DISK_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the Euclidean distance from these projected points. Projection and coloring are done on a per vertex basis.");
 		case FP_REGULAR_RECURSIVE_SAMPLING   :  return QString("The bbox is recrusively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building ofsetted samples."); 
 		default : assert(0); return QString("unknown filter!!!!");
 
@@ -517,10 +517,12 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 			parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be chosen. Being a subsampling of the original elements if this number should not be larger than the number of elements of the original mesh."));
 			break;
 		case FP_POISSONDISK_SAMPLING :
+
 			parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
 			parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
       parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is <i>K</i> means that<i>K</i> x <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
-			parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud."));
+      parlst.addParam(new RichBool("ApproximateGeodesicDistance", false, "Approximate Geodesic Distance", "If true Poisson Disc distances are computed using an approximate geodesic distance, e.g. an euclidean distance weighted by a function of the difference between the normals of the two points."));
+      parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud."));
       parlst.addParam(new RichBool("RefineFlag", false, "Refine Existing Samples", "If true the vertices of the below mesh are used as starting vertices, and they will utterly refined by adding more and more points until possible. "));
       parlst.addParam(new RichMesh("RefineMesh", md.mm(),&md, "Samples to be refined", "Used only if the above option is checked. "));
       break;
@@ -647,6 +649,8 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 					parlst.addParam(new RichDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f,  tr("Radius"), 
 																"the radius of the spheres centered in the VertexMesh seeds "));
 					parlst.addParam(new RichBool("SampleRadius", false, "Use sample radius", "Use the radius that is stored in each sample of the vertex mesh. Useful for displaing the variable disk sampling results"));
+          parlst.addParam(new RichBool("ApproximateGeodetic", false, "Use Approximate Geodetic", "Use the Approximate Geodetic Metric instead of the Euclidean distance. Approximate geodetic metric uses the normals between the two points to weight the euclidean distance."));
+
 			} else {
 					parlst.addParam(new RichBool ("backward", false, "BackDistance",
 													"If true the mesh is colored according the distance from the frontier of the voonoi diagram induced by the VertexMesh seeds."));
@@ -809,8 +813,8 @@ case FP_CLUSTERED_SAMPLING :
     break;
 		case FP_POISSONDISK_SAMPLING :
 		case FP_VARIABLEDISK_SAMPLING :
-		{
-			bool subsampleFlag = par.getBool("Subsample");
+    {
+      bool subsampleFlag = par.getBool("Subsample");
       if (md.mm()->cm.fn==0 && subsampleFlag==false)
 			{
 				errorMessage = "This filter requires a mesh. It does not work on PointSet.";
@@ -833,39 +837,40 @@ case FP_CLUSTERED_SAMPLING :
 			
 			CMeshO MontecarloMesh; // this mesh is used only if we need real poisson sampling (and therefore we need to choose points different from the starting mesh vertices)
 			
-			if(!subsampleFlag)
-			{
-        QTime tt;tt.start();
-				BaseSampler sampler(&MontecarloMesh);
-				sampler.qualitySampling =true;
-				tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
-				MontecarloMesh.bbox = curMM->cm.bbox; // we want the same bounding box
-				presampledMesh=&MontecarloMesh;
-				Log("Generated %i Montecarlo Samples (%i msec)",MontecarloMesh.vn,tt.elapsed());
-				}
-			
-			BaseSampler mps(&(mm->cm));
-				
-			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
-			if(ID(action)==FP_VARIABLEDISK_SAMPLING) 
-			{
-						pp.adaptiveRadiusFlag=true;
-						pp.radiusVariance = par.getFloat("RadiusVariance");
-						Log("Variable Density variance is %f, radius can vary from %f to %f",pp.radiusVariance,radius/pp.radiusVariance,radius*pp.radiusVariance);
+      if(!subsampleFlag)
+      {
+          QTime tt;tt.start();
+          BaseSampler sampler(&MontecarloMesh);
+          sampler.qualitySampling =true;
+          tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
+          MontecarloMesh.bbox = curMM->cm.bbox; // we want the same bounding box
+          presampledMesh=&MontecarloMesh;
+          Log("Generated %i Montecarlo Samples (%i msec)",MontecarloMesh.vn,tt.elapsed());
+      }
+
+      BaseSampler mps(&(mm->cm));
+
+      tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
+      if(ID(action)==FP_VARIABLEDISK_SAMPLING)
+      {
+          pp.adaptiveRadiusFlag=true;
+          pp.radiusVariance = par.getFloat("RadiusVariance");
+          Log("Variable Density variance is %f, radius can vary from %f to %f",pp.radiusVariance,radius/pp.radiusVariance,radius*pp.radiusVariance);
       }
       else
       {
-        if(par.getBool("RefineFlag"))
-        {
-        pp.preGenFlag=true;
-        pp.preGenMesh=&(par.getMesh("RefineMesh")->cm);
-        }
+          if(par.getBool("RefineFlag"))
+          {
+              pp.preGenFlag=true;
+              pp.preGenMesh=&(par.getMesh("RefineMesh")->cm);
+          }
+          pp.geodesicDistanceFlag=par.getBool("ApproximateGeodesicDistance");
       }
-            tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(curMM->cm, mps, *presampledMesh, radius,pp);
-            //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
+      tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(curMM->cm, mps, *presampledMesh, radius,pp);
+      //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
 
-			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-			Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
+      vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+      Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
 		}
 			break;
 			
@@ -1069,6 +1074,7 @@ case FP_CLUSTERED_SAMPLING :
 			for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
 		  VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV,backwardFlag);
 		} break;
+
 	case FP_DISK_COLORING :
 		{
 			MeshModel* mmM = par.getMesh("ColoredMesh");  
@@ -1077,39 +1083,36 @@ case FP_CLUSTERED_SAMPLING :
 			SampleSHT sht;
       tri::VertTmark<CMeshO> markerFunctor;
 			typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
-			VDistFunct distFunctor;
-			Point3f closestPt;
 			tri::UpdateColor<CMeshO>::VertexConstant(mmM->cm, Color4b::LightGray);
-			if(par.getBool("SampleRadius"))
-			{
-					sht.Set(mmM->cm.vert.begin(),mmM->cm.vert.end(),mmM->cm.bbox);
-					std::vector<CMeshO::VertexType*> closests;
-					for(CMeshO::VertexIterator viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
-					{
-						Point3f p = viv->cP();
-						float radius = viv->Q();
-						Box3f bb(p-Point3f(radius,radius,radius),p+Point3f(radius,radius,radius));
-						GridGetInBox(sht, markerFunctor, bb, closests);
-						
-            for(size_t i=0; i<closests.size(); ++i)
-						{
-							float dist = Distance(p,closests[i]->cP());
-							if(dist < radius)
-												closests[i]->C().lerp(Color4b::White,Color4b::Red,dist/radius);
-						}
-					}
-			}
-			else // use fixed radius
-			{
-					sht.Set(mmV->cm.vert.begin(),mmV->cm.vert.end(),mmV->cm.bbox);
-					float dist, dist_upper_bound= par.getDynamicFloat("Radius");
+      tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
+      bool approximateGeodeticFlag = par.getBool("ApproximateGeodetic");
+      bool sampleRadiusFlag = par.getBool("SampleRadius");
+      sht.Set(mmM->cm.vert.begin(),mmM->cm.vert.end());
+          std::vector<CMeshO::VertexType*> closests;
+          float radius = par.getDynamicFloat("Radius");
 
-					for(CMeshO::VertexIterator vim = mmM->cm.vert.begin(); vim!= mmM->cm.vert.end(); ++vim) if(!(*vim).IsD())
-					{
-						CMeshO::VertexPointer nearestV =  sht.GetClosest(distFunctor,markerFunctor,(*vim).cP(),dist_upper_bound,dist,closestPt);
-						if(nearestV) vim->C()=Color4b::Red;
-					}
-			}
+          for(CMeshO::VertexIterator viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
+          {
+            Point3f p = viv->cP();
+            if(sampleRadiusFlag) radius = viv->Q();
+            Box3f bb(p-Point3f(radius,radius,radius),p+Point3f(radius,radius,radius));
+            GridGetInBox(sht, markerFunctor, bb, closests);
+
+            for(size_t i=0; i<closests.size(); ++i)
+            {
+                float dist;
+                if(approximateGeodeticFlag)
+                    dist = ApproximateGeodesicDistance(viv->cP(),viv->cN(),closests[i]->cP(),closests[i]->cN());
+                else
+                    dist = Distance(p,closests[i]->cP());
+
+                if(dist < radius && closests[i]->Q() > dist)
+                {
+                    closests[i]->Q() = dist;
+                    closests[i]->C().lerp(Color4b::White,Color4b::Red,dist/radius);
+                }
+            }
+      }
 		} break;
 	case FP_REGULAR_RECURSIVE_SAMPLING :
 		{
@@ -1168,6 +1171,14 @@ case FP_CLUSTERED_SAMPLING :
 	}
 	return FilterClass(0);
 }
-
+int FilterDocSampling::postCondition( QAction* a ) const
+{
+   switch(ID(a)){
+   case FP_VORONOI_COLORING:
+   case FP_DISK_COLORING:
+     return MeshModel::MM_VERTCOLOR;
+   }
+   return MeshModel::MM_UNKNOWN;
+}
 
 Q_EXPORT_PLUGIN(FilterDocSampling)
