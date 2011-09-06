@@ -21,13 +21,13 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QApplication>
+#include <common/mlapplication.h>
 #include <QMessageBox>
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
-  QApplication app(argc, argv);
+  MeshLabApplication app(argc, argv);
   QLocale::setDefault(QLocale::C);
   QCoreApplication::setOrganizationName("VCG");
   QCoreApplication::setApplicationName("MeshLab");

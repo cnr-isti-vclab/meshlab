@@ -474,6 +474,9 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 	if (guiType == MLXMLElNames::sliderWidgetTag)
 		return new XMLSliderWidget(widgetTable,env,parent);
 
+	if (guiType == MLXMLElNames::enumWidgetTag)
+		return new XMLEnumWidget(widgetTable,env,parent);
+
 	return NULL;
 }
 
@@ -1000,27 +1003,14 @@ XMLComboWidget::~XMLComboWidget()
 XMLEnumWidget::XMLEnumWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLComboWidget(xmlWidgetTag,envir,p)
 {
-	QStringList res = xmlWidgetTag[MLXMLElNames::guiValuesList].split('|');
-	QTableWidget* tw = new QTableWidget(res.size(),2,this);
-	tw->setSelectionBehavior(QAbstractItemView::SelectRows);
-	enumCombo->setModel(tw->model());
-	enumCombo->setView(tw);
-	enumCombo->setModelColumn(0);
-	for(int ii = 0;ii < res.size();++ii)
+	QString typ = xmlWidgetTag[MLXMLElNames::paramType];
+	QMap<int,QString> mp;
+	bool rr = MLXMLUtilityFunctions::getEnumNamesValuesFromString(typ,mp);
+	if (rr)
 	{
-		QRegExp exp("\\S+\\s*=\\s*\\d+");
-		res[ii].indexOf(exp);
-		QStringList capt = exp.cap().trimmed().split('=');
-		if (capt.size() == 2)
-		{
-			QLabel* enumString= new QLabel(capt[0],tw);
-			QLabel* enumValue = new QLabel (capt[1],tw);
-			tw->setCellWidget(ii,0,enumString);
-			tw->setCellWidget(ii,1,enumString);
-			/*it's orrible but in this moment i have no better solution*/
-			if (capt[0] == xmlWidgetTag[MLXMLElNames::paramDefExpr])
-				enumCombo->setCurrentIndex(ii);
-		}
+		for(QMap<int,QString>::iterator it = mp.begin();it != mp.end();++it)
+			enumCombo->addItem(it.value(),QVariant(it.key()));
+		enumCombo->setCurrentIndex(env.evalInt(xmlWidgetTag[MLXMLElNames::paramDefExpr]));
 	}
 }
 

@@ -1603,7 +1603,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
   else
   {
     if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-      vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
+      vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm->cm);
     else
       vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
   }
