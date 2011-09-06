@@ -638,10 +638,14 @@ void MeshModel::clearDataMask(int unneededDataMask)
 
 void MeshModel::Enable(int openingFileMask)
 {
-  if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD ) updateDataMask(MM_VERTTEXCOORD);
-  if( openingFileMask & tri::io::Mask::IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
-  if( openingFileMask & tri::io::Mask::IOM_VERTCOLOR    ) updateDataMask(MM_VERTCOLOR);
-  if( openingFileMask & tri::io::Mask::IOM_FACECOLOR    ) updateDataMask(MM_FACECOLOR);
+  if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD ) 
+	  updateDataMask(MM_VERTTEXCOORD);
+  if( openingFileMask & tri::io::Mask::IOM_WEDGTEXCOORD ) 
+	  updateDataMask(MM_WEDGTEXCOORD);
+  if( openingFileMask & tri::io::Mask::IOM_VERTCOLOR    ) 
+	  updateDataMask(MM_VERTCOLOR);
+  if( openingFileMask & tri::io::Mask::IOM_FACECOLOR    ) 
+	  updateDataMask(MM_FACECOLOR);
   if( openingFileMask & tri::io::Mask::IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
   if( openingFileMask & tri::io::Mask::IOM_CAMERA       ) updateDataMask(MM_CAMERA);
   if( openingFileMask & tri::io::Mask::IOM_VERTQUALITY  ) updateDataMask(MM_VERTQUALITY);

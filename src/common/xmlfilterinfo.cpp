@@ -49,7 +49,7 @@ QString XMLFilterInfo::defaultGuiInfo(const QString& guiType,const QString& xmlv
 
 QString XMLFilterInfo::floatGuiInfo(const QString& guiType,const QString& xmlvariable)
 {
-	return defaultGuiInfo(guiType,xmlvariable) + externalSep() + MLXMLElNames::guiMinExpr + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiMinExpr + ")}externalSep()" + MLXMLElNames::guiMaxExpr + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiMaxExpr + ")}";
+	return defaultGuiInfo(guiType,xmlvariable) + externalSep() + MLXMLElNames::guiMinExpr + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiMinExpr + ")}" + externalSep() + MLXMLElNames::guiMaxExpr + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiMaxExpr + ")}";
 }
 
 QString XMLFilterInfo::enumGuiInfo( const QString& guiType,const QString& xmlvariable )
@@ -357,3 +357,24 @@ QString XMLFilterInfo::pluginName() const
 	return QString();
 }
 
+
+bool MLXMLUtilityFunctions::getEnumNamesValuesFromString( const QString& st,QMap<int,QString>& mp )
+{
+	QString cp(st);
+	cp = cp.trimmed();
+	QRegExp valid("Enum\\s*\\{(\\s*\\S+\\s*\\:\\s*\\d+\\s*\\|?)+\\}");
+	bool res = valid.exactMatch(cp);
+	QRegExp enumexp("Enum\\s*\\{");
+	QRegExp spaces("\\s*");
+	cp = cp.remove(enumexp).remove('}').remove(spaces);
+	QRegExp extsp("\\|");
+	QRegExp intsp("\\:");
+	XMLFilterInfo::XMLMap xmlmp = XMLFilterInfo::mapFromString(cp,extsp,intsp);
+	bool conv = true;
+	for(XMLFilterInfo::XMLMap::iterator it = xmlmp.begin();it != xmlmp.end();++it)
+	{
+		mp.insert(it.value().toInt(&conv),it.key());
+		res = conv && res;
+	}
+	return res;
+}

@@ -1,5 +1,5 @@
-#ifndef ML_EXCEPTION
-#define ML_EXCEPTION
+#ifndef ML_EXCEPTION_H
+#define ML_EXCEPTION_H
 
 #include <exception>
 

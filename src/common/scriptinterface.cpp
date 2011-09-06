@@ -115,8 +115,8 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 			QString argument =  "arguments[" + QString::number(arg) + "]";
 			if (isenum)
 			{
-				code += "\tvar argm = enumtype_" + num + "[" + argument + "];\n";
-				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\",argm);\n";
+				code += "\tvar argenum_" + num + " = enumtype_" + num + "[" + argument + "];\n";
+				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\",argenum_" + num + ");\n";
 			}
 			else
 				//code += "\tprint(" + argument + ");\n";
@@ -127,6 +127,7 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 		{
 			if (isenum)
 			{
+				//code += "\tvar argenum_" + num + " = enumtype_" + num + "[" + argument + "];\n";
 				code += "\tvar " + mp[MLXMLElNames::paramName] + " = " + optName() + "." + /*mp[MLXMLElNames::paramType] + "_" +*/ mp[MLXMLElNames::paramName] + ";\n";
 				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\", " + mp[MLXMLElNames::paramName] + ");\n";
 			}

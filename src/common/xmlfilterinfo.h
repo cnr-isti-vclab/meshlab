@@ -162,6 +162,12 @@ public:
 	QStringList query(const QString& qry) const;
 };
 
+class MLXMLUtilityFunctions
+{
+public:
+	static bool getEnumNamesValuesFromString(const QString& st,QMap<int,QString>& mp);
+};
+
 class MeshLabFilterInterface;
 
 struct MeshLabXMLFilterContainer
