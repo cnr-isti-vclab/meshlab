@@ -104,7 +104,15 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 			XMLFilterInfo::XMLMap valuesMap = XMLFilterInfo::mapFromString(values,QRegExp("\\|"),QRegExp("\\:"));
 			code += "\tfunction enumfun_" + num + "()\n\t{\t\n";
 			for(XMLFilterInfo::XMLMap::iterator it = valuesMap.begin();it != valuesMap.end();++it)
+			{
 				code += "\t\tthis[\"" + it.key() + "\"] = " + it.value() + ";\n";
+				code += "\t\tthis[parseInt(" + it.value() + ")] = \"" + it.key() + "\";\n";
+			}
+			code += "\t}\n";
+			code += "\tfunction get_" + num + "(ff,ii)\n\t{\t\n";
+			code += "\t\tif (typeof(ii) == \"number\") return ff[ff[ii]];\n";
+			code += "\t\telse if (typeof(ii) == \"string\") return ff[ii];\n";
+			code += "\t\t\telse return undefined;\n";
 			code += "\t}\n";
 
 			code += "\tvar enumtype_" + num + " = new enumfun_" + num + "();\n";
@@ -115,7 +123,7 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 			QString argument =  "arguments[" + QString::number(arg) + "]";
 			if (isenum)
 			{
-				code += "\tvar argenum_" + num + " = enumtype_" + num + "[" + argument + "];\n";
+				code += "\tvar argenum_" + num + " = get_" + num + "(enumtype_" + num + "," + argument + ");\n";
 				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\",argenum_" + num + ");\n";
 			}
 			else
@@ -128,7 +136,7 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 			if (isenum)
 			{
 				//code += "\tvar argenum_" + num + " = enumtype_" + num + "[" + argument + "];\n";
-				code += "\tvar " + mp[MLXMLElNames::paramName] + " = " + optName() + "." + /*mp[MLXMLElNames::paramType] + "_" +*/ mp[MLXMLElNames::paramName] + ";\n";
+				code += "\tvar " + mp[MLXMLElNames::paramName] + " = get_" + num + "(enumtype_" + num + "," + optName() + "." + /*mp[MLXMLElNames::paramType] + "_" +*/ mp[MLXMLElNames::paramName] + ");\n";
 				code += "\tenviron.insertExpressionBinding(\"" + mp[MLXMLElNames::paramName] + "\", " + mp[MLXMLElNames::paramName] + ");\n";
 			}
 			else
