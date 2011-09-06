@@ -63,7 +63,7 @@
 	  <xs:pattern value='Vec3'/>
 	  <xs:pattern value='Integer'/>
 	  <xs:pattern value='Color'/>
-	  <xs:pattern value='Enum \{(\s*\S+\s*\:\s*\S+\s*\|?)+\}'/>
+	  <xs:pattern value='Enum \{(\s*\S+\s*\:\s*\d+\s*(\|)?)+\}'/>
      </xs:restriction>
     </xs:simpleType>
    </xs:attribute>
