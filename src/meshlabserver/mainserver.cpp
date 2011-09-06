@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QApplication>
+#include <common/mlapplication.h>
 #include <common/interfaces.h>
 #include <common/pluginmanager.h>
 #include <common/filterscript.h>
@@ -342,7 +342,7 @@ private:
 int main(int argc, char *argv[])
 {
   FILE *logfp=stdout;
-	QApplication app(argc, argv);  
+	MeshLabApplication app(argc, argv);  
 	MeshLabServer server;
 	MeshDocument meshDocument;
 	QStringList meshNamesIn, meshNamesOut;
