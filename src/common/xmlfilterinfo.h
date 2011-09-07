@@ -62,7 +62,8 @@ namespace MLXMLElNames
 	const QString colorWidgetTag("COLOR_GUI");
 	const QString sliderWidgetTag("SLIDER_GUI");
 	const QString enumWidgetTag("ENUM_GUI");
-
+	const QString meshWidgetTag("MESH_GUI");	
+	
 	const QString mfiVersion("mfiVersion");
 
 	const QString pluginScriptName("pluginName");
@@ -98,6 +99,7 @@ namespace MLXMLElNames
 	const QString vec3Type("Vec3");
 	const QString colorType("Color");
 	const QString enumType("Enum");
+	const QString meshType("Mesh");
 
 	//ariety values
 	const QString singleMeshAriety("SingleMesh");
@@ -117,7 +119,6 @@ private:
 
 	static QString defaultGuiInfo(const QString& guiType,const QString& xmlvariable);
 	static QString floatGuiInfo(const QString& guiType,const QString& xmlvariable);
-	static QString enumGuiInfo(const QString& guiType,const QString& xmlvariable);
 	static QString guiErrorMsg() {return QString("Error: Unknown GUI widget requested");}
 	static QString guiTypeSwitchQueryText(const QString& var);
 	inline static const QString externalSep() {return QString("^");}

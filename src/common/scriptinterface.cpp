@@ -410,6 +410,15 @@ Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::current()
 		return NULL;
 }
 
+Q_INVOKABLE int MeshDocumentScriptInterface::currentId()
+{
+	MeshModel* model = md->mm();
+	if (model != NULL)
+		return model->id();
+	else
+		return -1;
+}
+
 Q_INVOKABLE int MeshDocumentScriptInterface::setCurrent(const int meshId)
 {
 	int id = md->mm()->id();
@@ -499,6 +508,11 @@ vcg::Point3f EnvWrap::evalVec3( const QString& nm )
 }
 
 int EnvWrap::evalEnum( const QString& nm )
+{
+	return evalInt(nm);
+}
+
+int EnvWrap::evalMesh(const QString& nm)
 {
 	return evalInt(nm);
 }

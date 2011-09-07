@@ -52,12 +52,6 @@ QString XMLFilterInfo::floatGuiInfo(const QString& guiType,const QString& xmlvar
 	return defaultGuiInfo(guiType,xmlvariable) + externalSep() + MLXMLElNames::guiMinExpr + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiMinExpr + ")}" + externalSep() + MLXMLElNames::guiMaxExpr + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiMaxExpr + ")}";
 }
 
-QString XMLFilterInfo::enumGuiInfo( const QString& guiType,const QString& xmlvariable )
-{
-	return defaultGuiInfo(guiType,xmlvariable) + externalSep() + MLXMLElNames::guiValuesList + "={data(" + xmlvariable + "/@" + MLXMLElNames::guiValuesList + ")}";
-
-}
-
 QString XMLFilterInfo::guiTypeSwitchQueryText(const QString& var)
 {
 	QString base("typeswitch(" + var + ")");
@@ -68,8 +62,9 @@ QString XMLFilterInfo::guiTypeSwitchQueryText(const QString& var)
 	QString caseCOLOR("case element (" + MLXMLElNames::colorWidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::colorWidgetTag,var) + "</p>/string()");
 	QString caseSLIDER("case element (" + MLXMLElNames::sliderWidgetTag + ") return <p>" + floatGuiInfo(MLXMLElNames::sliderWidgetTag,var) + "</p>/string()");
 	QString caseENUM("case element (" + MLXMLElNames::enumWidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::enumWidgetTag,var) + "</p>/string()");
+	QString caseMESH("case element (" + MLXMLElNames::meshWidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::meshWidgetTag,var) + "</p>/string()");
 	QString errorMsg = "default return \"" + XMLFilterInfo::guiErrorMsg() + "\"";
-	return base + " " + caseABS + " " + caseBOOL + " " + caseEDIT + " " + caseVEC + " " + caseCOLOR + " " + caseSLIDER + " " + caseENUM + " " + errorMsg;
+	return base + " " + caseABS + " " + caseBOOL + " " + caseEDIT + " " + caseVEC + " " + caseCOLOR + " " + caseSLIDER + " " + caseENUM + " " + caseMESH + " " + errorMsg;
 }
 
 QStringList XMLFilterInfo::filterNames() const

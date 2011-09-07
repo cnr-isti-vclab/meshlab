@@ -73,6 +73,7 @@ public:
 
 	Q_INVOKABLE MeshModelScriptInterface* getMesh(const int meshId);
 	Q_INVOKABLE MeshModelScriptInterface* current();
+	Q_INVOKABLE int currentId();
 	Q_INVOKABLE int setCurrent(const int meshId);
 	MeshDocument* md;
 };
@@ -148,6 +149,7 @@ public:
 	/*QString getExpType(const QString& nm);*/
 	QString evalString(const QString& nm);
 	int evalEnum( const QString& nm );
+	int evalMesh(const QString& nm);
 };
 
 QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);
