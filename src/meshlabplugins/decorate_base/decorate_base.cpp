@@ -747,7 +747,7 @@ bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const Mesh
   {
     if(!m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
   }
-    if( ID(action) == DP_SHOW_TEXPARAM )
+    if( ID(action) == DP_SHOW_TEXPARAM || ID(action) == DP_SHOW_BOUNDARY_TEX)
     {
         if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return false;
     }
