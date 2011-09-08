@@ -82,7 +82,7 @@ FilterMeasurePlugin::FilterMeasurePlugin()
 {
   switch(filterId) {
     case FP_MEASURE_TOPO :  return QString("Compute Topological Measures");
-    case FP_MEASURE_TOPO_QUAD :  return QString("Compute Topological Measures for Quad Meshes");
+    case FP_MEASURE_TOPO_QUAD :  return QString("Compute Measures for Quad Meshes");
     case FP_MEASURE_GEOM :  return QString("Compute Geometric Measures");
     case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature");
     case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION :  return QString("Per Vertex Quality Stat");
@@ -240,7 +240,51 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			int nTris = tri::Clean<CMeshO>::CountBitTris(m);
 			int nPolys = tri::Clean<CMeshO>::CountBitPolygons(m);
 
-			Log("Mesh has %i tri %i quad and %i polig",nTris,nQuads,nPolys);
+      Log("Mesh has %i tri %i quad and %i polig",nTris,nQuads,nPolys);
+
+      //
+      //   i
+      //
+      //
+      //   i+1     i+2
+      tri::UpdateFlags<CMeshO>::FaceClearV(m);
+      Distribution<float> ad; // angle distributio
+      Distribution<float> rd; // ratio distribution
+
+      for(CMeshO::FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
+      {
+
+        // Collect the vertices
+        Point3f qv[4];
+        for(int i=0;i<3;++i)
+        {
+         if(!(*fi).IsF(i) && !(*fi).IsF((i+1)%3))
+         {
+          qv[0]= (*fi).cP0(i);
+          qv[1]= (*fi).cP1(i);
+          qv[2]= (*fi).cP2(i);
+          face::Pos<CFaceO> pp(&*fi,(i+2)%3,fi->V(i));
+          assert(pp.F()->IsF(pp.E()));
+          pp.FlipF();pp.FlipE();pp.FlipV();
+          qv[3]= pp.V()->cP();
+          break;
+         }
+
+         for(int i=0;i<4;++i)
+             ad.Add(fabs(90-math::ToDeg(Angle(qv[(i+0)%4] - qv[(i+1)%4], qv[(i+2)%4] - qv[(i+1)%4]))));
+         float edgeLen[4];
+
+         for(int i=0;i<4;++i)
+             edgeLen[i]=Distance(qv[(i+0)%4],qv[(i+1)%4]);
+         std::sort(edgeLen,edgeLen+4);
+         rd.Add(edgeLen[0]/edgeLen[3]);
+        }
+      }
+
+      Log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
+                          ad.Avg(), ad.Min(), ad.Max(),ad.StandardDeviation(),ad.Percentile(0.05),ad.Percentile(0.95));
+
+      Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", rd.Avg(), rd.Min(), rd.Max());
 
 		}
 		break;
