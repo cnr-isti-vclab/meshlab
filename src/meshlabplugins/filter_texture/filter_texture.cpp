@@ -58,7 +58,7 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
     case FP_PLANAR_MAPPING : return QString("Flat Plane Parametrization");
     case FP_SET_TEXTURE : return QString("Set Texture");
     case FP_COLOR_TO_TEXTURE : return QString("Vertex Color to Texture");
-    case FP_TRANSFER_TO_TEXTURE : return QString("Transfer Color to Texture (between 2 meshes)");
+    case FP_TRANSFER_TO_TEXTURE : return QString("Transfer Vertex Attributes to Texture (between 2 meshes)");
     case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Texture to Vertex Color (between 2 meshes)"); // TODO Choose a name
     default : assert(0);
     }
@@ -78,7 +78,7 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
     case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>"
                                          "If the texture provided exists it will be simply associated to the current mesh else a dummy texture will be created and saved in the same directory.");
     case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture accordingly to per vertex color.");
-    case FP_TRANSFER_TO_TEXTURE : return QString("Transfer texture/vertex color from one mesh to another's texture.");
+    case FP_TRANSFER_TO_TEXTURE : return QString("Transfer texture color, vertex color or normal from one mesh to another's texture. This is generally used to restore detail lost in simplification");
     case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Generates Vertex Color values picking color from another mesh texture.");
     default : assert(0);
     }
@@ -215,9 +215,9 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
             parlst.addParam(new RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
                                           "The mesh that contains the source data that we want to transfer"));
             parlst.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
-                                          "The mesh whose texture will be filled according to source mesh texture or vertex color"));
-            parlst.addParam(new RichEnum("data", 0, QStringList("Vertex Color") << "Texture Color", "Color Data Source",
-                                         "Choose to transfer color information from source mesh texture or vertex color"));
+                                          "The mesh whose texture will be filled according to source mesh data"));
+            parlst.addParam(new RichEnum("data", 0, QStringList("Vertex Color") << "Texture Color" << "Vertex Normal", "Color Data Source",
+                                         "Choose to transfer color information from source mesh texture, vertex color or vertex normal"));
             parlst.addParam(new RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                             tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering data")));
             parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
@@ -744,12 +744,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
     case FP_TRANSFER_TO_TEXTURE : {
             MeshModel *srcMesh = par.getMesh("sourceMesh");
             MeshModel *trgMesh = par.getMesh("targetMesh");
-            bool colorSampling;
-            switch (par.getEnum("data")) {
-            case 0: colorSampling = true; break;
-            case 1: colorSampling = false; break;
-            default: assert(0);
-            }
+            int datasource = par.getEnum("data");
             float upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
             QString textName = par.getString("textName");
             int textW = par.getInt("textW");
@@ -767,9 +762,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             // Source image (for texture to texture transfer)
             QImage srcImg;
 
-            if (colorSampling) {
-                CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per Vertex Color");
-            } else {
+            if (datasource == 0) 
+            {
+              CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per Vertex Color");
+            } 
+            else if (datasource == 1) 
+            {
                 // Check whether is possible to access source mesh texture
                 CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh doesn't have Per Wedge Texture Coordinates");
                 CheckError(srcMesh->cm.textures.empty(), "Source mesh doesn't have any associated texture");
@@ -777,6 +775,10 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
                 path = path.left(std::max<int>(path.lastIndexOf('\\'),path.lastIndexOf('/'))+1).append(srcMesh->cm.textures[0].c_str());
                 CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
                 CheckError(!srcImg.load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
+            }
+            else if (datasource == 2) 
+            {
+              CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTNORMAL), "Source mesh doesn't have Per Vertex Normals");
             }
 
             QString filePath(trgMesh->fullName());
@@ -811,13 +813,21 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
             tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
             tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
-            if (colorSampling)
+            if (datasource == 0)
             {
-                TransferColorSampler sampler(srcMesh->cm, img, upperbound); // color sampling
+                TransferColorSampler sampler(srcMesh->cm, img, upperbound, false); // color sampling
                 sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
                 tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
-            } else {
+            } 
+            else if (datasource == 1) 
+            {
                 TransferColorSampler sampler(srcMesh->cm, img, &srcImg, upperbound); // texture sampling
+                sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
+                tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
+            }
+            else if (datasource == 2) 
+            {
+                TransferColorSampler sampler(srcMesh->cm, img, upperbound, true); // normal sampling
                 sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
                 tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
             }
