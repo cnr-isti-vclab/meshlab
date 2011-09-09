@@ -81,7 +81,8 @@ public:
 	VCGVertexScriptInterface(CMeshO::VertexType& v);
 
 	//Q_INVOKABLE vcg::Point3f* p();
-	Q_INVOKABLE QVector<float> p();
+	Q_INVOKABLE QVector<float> getP();
+	Q_INVOKABLE void setP(const float x,const float y,const float z);
 
 	CMeshO::VertexType& vv;
 };

@@ -398,12 +398,17 @@ Q_INVOKABLE VCGVertexScriptInterface* MeshModelScriptInterface::v( const int ind
 		return NULL;
 }
 
-Q_INVOKABLE QVector<float> VCGVertexScriptInterface::p() 
+Q_INVOKABLE QVector<float> VCGVertexScriptInterface::getP() 
 {
 	QVector<float> vfl(3);
 	for (int ii = 0;ii < 3;++ii)
 		vfl[ii] = vv.P()[ii];
 	return vfl;
+}
+
+Q_INVOKABLE void VCGVertexScriptInterface::setP( const float x,const float y,const float z )
+{
+	vv.P() = vcg::Point3f(x,y,z);
 }
 
 QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in)
