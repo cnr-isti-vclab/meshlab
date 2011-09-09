@@ -299,94 +299,6 @@ QScriptValue myprint (QScriptContext* sc, QScriptEngine* se)
 	return QScriptValue(se, 0);
 }
 
-void registerTypes(QScriptEngine* eng)
-{
-	eng->globalObject().setProperty("print", eng->newFunction(myprint, 1));
-
-	QScriptValue richset_ctor = eng->newFunction(IRichParameterSet_ctor);
-	eng->setDefaultPrototype(qMetaTypeId<RichParameterSet>(), richset_ctor.property("prototype"));
-	QScriptValue boolfun = eng->newFunction(IRichParameterSet_prototype_setBool,2);
-	richset_ctor.property("prototype").setProperty("setBool",boolfun);
-	QScriptValue intfun = eng->newFunction(IRichParameterSet_prototype_setInt,2);
-	richset_ctor.property("prototype").setProperty("setInt",intfun);
-	QScriptValue abspercfun = eng->newFunction(IRichParameterSet_prototype_setAbsPerc,2);
-	richset_ctor.property("prototype").setProperty("setAbsPerc",abspercfun);
-	QScriptValue floatfun = eng->newFunction(IRichParameterSet_prototype_setFloat,2);
-	richset_ctor.property("prototype").setProperty("setFloat",floatfun);
-	eng->globalObject().setProperty("IRichParameterSet",richset_ctor);
-
-	QScriptValue envwrap_ctor = eng->newFunction(EnvWrap_ctor);
-	//eng->setDefaultPrototype(qMetaTypeId<EnvWrap>(), envwrap_ctor.property("prototype"));
-	eng->globalObject().setProperty("EnvWrap",envwrap_ctor);
-
-	QScriptValue env_ctor = eng->newFunction(Env_ctor);
-	QScriptValue metaObject = eng->newQMetaObject(&Env::staticMetaObject, env_ctor);
-	eng->globalObject().setProperty("Env", metaObject);
-}
-
-MeshModelScriptInterface::MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* parent)
-:QObject(parent),mm(meshModel)
-{
-
-}
-
-Q_INVOKABLE float MeshModelScriptInterface::bboxDiag() const
-{
-	return mm.cm.bbox.Diag();
-}
-
-Q_INVOKABLE vcg::Point3f MeshModelScriptInterface::bboxMin() const
-{
-	return mm.cm.bbox.min;
-}
-
-Q_INVOKABLE vcg::Point3f MeshModelScriptInterface::bboxMax() const
-{
-	return mm.cm.bbox.max;
-}
-
-QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in)
-{
-	return eng->newQObject(in);
-}
-
-void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out)
-{
-	out = qobject_cast<MeshModelScriptInterface*>(val.toQObject());
-}
-
-QScriptValue MeshDocumentScriptInterfaceToScriptValue( QScriptEngine* eng,MeshDocumentScriptInterface* const& in )
-{
-	return eng->newQObject(in);
-}
-
-void MeshDocumentScriptInterfaceFromScriptValue( const QScriptValue& val,MeshDocumentScriptInterface*& out )
-{
-	out = qobject_cast<MeshDocumentScriptInterface*>(val.toQObject());
-}
-
-//QScriptValue Point3fToScriptValue(QScriptEngine* eng,const vcg::Point3f& in)
-//{
-//	QScriptValue arrRes = eng->newArray(3);
-//	for(unsigned int ii = 0;ii < 3;++ii)
-//		arrRes.setProperty(ii,in[ii]);
-//	return arrRes;
-//}
-//
-//void Point3fFromScriptValue(const QScriptValue& val,vcg::Point3f& out)
-//{
-//	for(unsigned int ii = 0;ii < 3;++ii)
-//		out[ii] = val.property(ii).toNumber();
-//}
-
-QScriptValue EnvWrap_ctor( QScriptContext* c,QScriptEngine* e )
-{
-	Env* env = qscriptvalue_cast<Env*>(c->argument(0));
-	EnvWrap* p = new EnvWrap(*env);
-	QScriptValue res = e->toScriptValue(*p);
-	return res;
-}
-
 MeshDocumentScriptInterface::MeshDocumentScriptInterface( MeshDocument* doc )
 :QObject(doc),md(doc)
 {
@@ -431,6 +343,107 @@ Q_INVOKABLE int MeshDocumentScriptInterface::setCurrent(const int meshId)
 		return -1;
 }
 
+Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::operator[]( const QString& name )
+{
+	MeshModel* mym = md->getMesh(name);
+	if (mym != NULL)
+		return new MeshModelScriptInterface(*mym,this);
+	else
+		return NULL;
+}
+
+Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::getMeshByName( const QString& name )
+{
+	return (*this)[name];
+}
+
+
+MeshModelScriptInterface::MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* parent)
+:QObject(parent),mm(meshModel)
+{
+
+}
+
+Q_INVOKABLE float MeshModelScriptInterface::bboxDiag() const
+{
+	return mm.cm.bbox.Diag();
+}
+
+Q_INVOKABLE vcg::Point3f MeshModelScriptInterface::bboxMin() const
+{
+	return mm.cm.bbox.min;
+}
+
+Q_INVOKABLE vcg::Point3f MeshModelScriptInterface::bboxMax() const
+{
+	return mm.cm.bbox.max;
+}
+
+Q_INVOKABLE int MeshModelScriptInterface::id() const
+{
+	return mm.id();
+}
+
+VCGVertexScriptInterface::VCGVertexScriptInterface( CMeshO::VertexType& v )
+:QObject(),vv(v)
+{
+}
+
+Q_INVOKABLE VCGVertexScriptInterface* MeshModelScriptInterface::v( const int ind )
+{
+	unsigned int ii(ind);
+	if (ii < mm.cm.vert.size())
+		return new VCGVertexScriptInterface(mm.cm.vert[ii]);
+	else
+		return NULL;
+}
+
+Q_INVOKABLE QVector<float> VCGVertexScriptInterface::p() 
+{
+	QVector<float> vfl(3);
+	for (int ii = 0;ii < 3;++ii)
+		vfl[ii] = vv.P()[ii];
+	return vfl;
+}
+
+QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in)
+{
+	return eng->newQObject(in);
+}
+
+void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out)
+{
+	out = qobject_cast<MeshModelScriptInterface*>(val.toQObject());
+}
+
+QScriptValue MeshDocumentScriptInterfaceToScriptValue( QScriptEngine* eng,MeshDocumentScriptInterface* const& in )
+{
+	return eng->newQObject(in);
+}
+
+void MeshDocumentScriptInterfaceFromScriptValue( const QScriptValue& val,MeshDocumentScriptInterface*& out )
+{
+	out = qobject_cast<MeshDocumentScriptInterface*>(val.toQObject());
+}
+
+
+QScriptValue VCGVertexScriptInterfaceToScriptValue( QScriptEngine* eng,VCGVertexScriptInterface* const& in )
+{
+	return eng->newQObject(in);
+}
+
+void VCGVertexScriptInterfaceFromScriptValue( const QScriptValue& val,VCGVertexScriptInterface*& out )
+{
+	out = qobject_cast<VCGVertexScriptInterface*>(val.toQObject());
+}
+
+QScriptValue EnvWrap_ctor( QScriptContext* c,QScriptEngine* e )
+{
+	Env* env = qscriptvalue_cast<Env*>(c->argument(0));
+	EnvWrap* p = new EnvWrap(*env);
+	QScriptValue res = e->toScriptValue(*p);
+	return res;
+}
 
 EnvWrap::EnvWrap(Env& envir)
 :env(&envir)
@@ -577,46 +590,7 @@ bool EnvWrap::constStatement( const QString& statement ) const
 	int ii = statement.indexOf(exp);
 	return (ii == -1);
 }
-//
-//QString EnvWrap::getExpType( const QString& exp )
-//{
-//	QScriptValue result = getExp(exp);
-//	QVariant resVariant = result.toVariant();
-//	switch (resVariant.type())
-//	{
-//		case(QVariant::Bool):
-//		{
-//			return MLXMLElNames::boolType;
-//			break;
-//		}
-//		
-//		case(QVariant::Int):
-//		{
-//				return MLXMLElNames::intType;
-//				break;
-//		}
-//
-//		case(QVariant::Double):
-//		{
-//			return MLXMLElNames::realType;
-//			break;
-//		}
-//
-//		case(QVariant::List)
-//		{
-//			QVariantList resList = resVariant.toList();
-//			switch(resList.size())
-//			{
-//				case(0):
-//				{
-//					break;
-//				}
-//
-//				case()
-//			}
-//		}
-//	}
-//}
+
 
 QString EnvWrap::evalString( const QString& nm )
 {
@@ -635,7 +609,19 @@ QScriptValue Env_ctor( QScriptContext */*context*/,QScriptEngine *engine )
 
 Env::Env()
 {
+	qScriptRegisterSequenceMetaType<QVector<float> >(this);
 	qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
+	qScriptRegisterMetaType(this,VCGVertexScriptInterfaceToScriptValue,VCGVertexScriptInterfaceFromScriptValue);
+	//qScriptRegisterMetaType(this,VCGPoint3fScriptInterfaceToScriptValue,VCGPoint3fScriptInterfaceFromScriptValue);
+	globalObject().setProperty("print", newFunction(myprint, 1));
+
+	QScriptValue envwrap_ctor = newFunction(EnvWrap_ctor);
+	//eng->setDefaultPrototype(qMetaTypeId<EnvWrap>(), envwrap_ctor.property("prototype"));
+	globalObject().setProperty("EnvWrap",envwrap_ctor);
+
+	QScriptValue env_ctor = newFunction(Env_ctor);
+	QScriptValue metaObject = newQMetaObject(&Env::staticMetaObject, env_ctor);
+	globalObject().setProperty("Env", metaObject);
 	/*qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);*/
 }
 
@@ -646,3 +632,4 @@ void Env::insertExpressionBinding( const QString& nm,const QString& exp )
 	if	(res.isError())
 		throw JavaScriptException(res.toString());
 }
+

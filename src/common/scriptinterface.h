@@ -60,8 +60,31 @@ QScriptValue IRichParameterSet_ctor(QScriptContext* c,QScriptEngine* e);
 
 QScriptValue myprint (QScriptContext* sc, QScriptEngine* se);
 
-void registerTypes(QScriptEngine* eng);
 
+//class VCGPoint3fScriptInterface : public QObject
+//{
+//	Q_OBJECT
+//public:
+//	static QString getterSetterCode();
+//	VCGPoint3fScriptInterface(vcg::Point3f& p);
+//
+//	float operator[](const int ii);
+//	vcg::Point3f& pp;
+//};
+//
+//QScriptValue VCGPoint3fScriptInterface_ctor(QScriptContext *context, QScriptEngine *engine);
+
+class VCGVertexScriptInterface : public QObject
+{
+	Q_OBJECT 
+public:
+	VCGVertexScriptInterface(CMeshO::VertexType& v);
+
+	//Q_INVOKABLE vcg::Point3f* p();
+	Q_INVOKABLE QVector<float> p();
+
+	CMeshO::VertexType& vv;
+};
 
 class MeshDocumentScriptInterface : public QObject
 {
@@ -72,6 +95,8 @@ public:
 	~MeshDocumentScriptInterface(){}
 
 	Q_INVOKABLE MeshModelScriptInterface* getMesh(const int meshId);
+	Q_INVOKABLE MeshModelScriptInterface* operator[](const QString& name);
+	Q_INVOKABLE MeshModelScriptInterface* getMeshByName(const QString& name);
 	Q_INVOKABLE MeshModelScriptInterface* current();
 	Q_INVOKABLE int currentId();
 	Q_INVOKABLE int setCurrent(const int meshId);
@@ -85,12 +110,14 @@ class MeshModelScriptInterface : public QObject
 public:
 	MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* mdsi);
 	
+	Q_INVOKABLE int id() const;
 	Q_INVOKABLE float bboxDiag() const;
 	Q_INVOKABLE vcg::Point3f bboxMin() const;
 	Q_INVOKABLE vcg::Point3f bboxMax() const;
+	Q_INVOKABLE VCGVertexScriptInterface* v(const int ind);
 
 	MeshModel& mm;
-};
+}; 
 
 Q_DECLARE_METATYPE(MeshDocumentScriptInterface*)
 QScriptValue MeshDocumentScriptInterfaceToScriptValue(QScriptEngine* eng,MeshDocumentScriptInterface* const& in);
@@ -103,20 +130,13 @@ QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelS
 
 void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out);
 
-//Q_DECLARE_METATYPE(vcg::Point3f)
-//
-//QScriptValue Point3fToScriptValue(QScriptEngine* eng,const vcg::Point3f& in);
-//
-//void Point3fFromScriptValue(const QScriptValue& val,vcg::Point3f& out);
+Q_DECLARE_METATYPE(VCGVertexScriptInterface*)
 
+QScriptValue VCGVertexScriptInterfaceToScriptValue(QScriptEngine* eng,VCGVertexScriptInterface* const& in);
 
+void VCGVertexScriptInterfaceFromScriptValue(const QScriptValue& val,VCGVertexScriptInterface*& out);
 
-
-//QScriptValue MeshModelScriptInterface_ctor(QScriptContext* c,QScriptEngine* e)
-//{
-//	QString x = c->argument(0).toInt32();
-//	return e->toScriptValue(MeshModelScriptInterface(x));
-//}
+Q_DECLARE_METATYPE(QVector<float>)
 
 class Env :public QScriptEngine
 {
