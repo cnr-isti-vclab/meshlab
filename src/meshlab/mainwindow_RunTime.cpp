@@ -677,7 +677,6 @@ void MainWindow::showScriptEditor()
 
 	if (dialog.exec()==QDialog::Accepted)
 	{
-		registerTypes(&PM.env);
 		//QScriptValue val = PM.env.newQObject(meshDoc());
 		//PM.env.globalObject().setProperty("md",val);
 		PM.updateDocumentScriptBindings(*meshDoc());
@@ -691,7 +690,6 @@ void MainWindow::showScriptEditor()
 		}
 		else
 			GLA()->update();
-
 
 	}
 }
