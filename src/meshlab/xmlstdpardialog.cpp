@@ -1017,3 +1017,8 @@ XMLEnumWidget::XMLEnumWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap&
 void XMLEnumWidget::set( const QString& nwExpStr )
 {
 }
+
+QString XMLEnumWidget::getWidgetExpression()
+{
+	return enumCombo->itemData(enumCombo->currentIndex()).toString();
+}

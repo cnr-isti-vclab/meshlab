@@ -290,7 +290,7 @@ public:
 	void updateVisibility(const bool vis);
 	void Init(QWidget *p,QString lab,int newEnum, QStringList values);
 	virtual void set(const QString& nwExpStr) = 0;
-	QString getWidgetExpression();
+	virtual QString getWidgetExpression();
 
 private:
 	//WHY WE NEED THIS FUNCTION?
@@ -314,6 +314,7 @@ public:
 	XMLEnumWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLEnumWidget(){};
 
+	QString getWidgetExpression();
 	void set(const QString& nwExpStr);
 };
 
