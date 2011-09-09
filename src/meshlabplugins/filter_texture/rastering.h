@@ -157,17 +157,17 @@ class TransferColorSampler
     QImage *srcImg;
     float dist_upper_bound;
     bool fromTexture;
-    bool normalsampling;
     MetroMeshGrid unifGridFace;
     VertexMeshGrid   unifGridVert;
-    bool useVertexSampling;
+    bool usePointCloudSampling;
 
     // Callback stuff
     vcg::CallBackPos *cb;
     const CMeshO::FaceType *currFace;
     CMeshO *srcMesh;
     int faceNo, faceCnt, start, offset;
-
+    int vertexMode;
+    float minQ,maxQ;
     typedef vcg::tri::FaceTmark<CMeshO> MarkerFace;
     MarkerFace markerFunctor;
 
@@ -202,16 +202,22 @@ class TransferColorSampler
     }*/
 
 public:
-    TransferColorSampler(CMeshO &_srcMesh, QImage &_trgImg, float upperBound, bool usenormal)
+    TransferColorSampler(CMeshO &_srcMesh, QImage &_trgImg, float upperBound, int _vertexMode)
     : trgImg(_trgImg), dist_upper_bound(upperBound)
     {
         srcMesh=&_srcMesh;
-        useVertexSampling = _srcMesh.face.empty();
-        if(useVertexSampling) unifGridVert.Set(_srcMesh.vert.begin(),_srcMesh.vert.end());
+        usePointCloudSampling = _srcMesh.face.empty();
+        if(usePointCloudSampling) unifGridVert.Set(_srcMesh.vert.begin(),_srcMesh.vert.end());
                         else  unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
         markerFunctor.SetMesh(&_srcMesh);
         fromTexture = false;
-        normalsampling = usenormal;
+        vertexMode=_vertexMode;
+        if(vertexMode==2)
+        {
+            std::pair<float,float> minmax = vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(_srcMesh);
+            minQ=minmax.first;
+            maxQ=minmax.second;
+        }
     }
 
     TransferColorSampler(CMeshO &_srcMesh, QImage &_trgImg, QImage *_srcImg, float upperBound)
@@ -222,9 +228,9 @@ public:
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
         markerFunctor.SetMesh(&_srcMesh);
         fromTexture = true;
-        useVertexSampling=false;
+        usePointCloudSampling=false;
+        vertexMode=-1;
     }
-
     void InitCallback(vcg::CallBackPos *_cb, int _faceNo, int _start=0, int _offset=100)
     {
         assert(_faceNo > 0);
@@ -247,7 +253,6 @@ public:
             if (p[0] <.0) {alpha = 254+p[0]*128; bary[0] = 0.;} else
                 if (p[1] <.0) {alpha = 254+p[1]*128; bary[1] = 0.;} else
                     if (p[2] <.0) {alpha = 254+p[2]*128; bary[2] = 0.;}*/
-
         int rr,gg,bb;
         CMeshO::CoordType bary = p;
         int alpha = 255;
@@ -262,7 +267,7 @@ public:
 
         // Retrieve closest point on source mesh
 
-        if(useVertexSampling)
+        if(usePointCloudSampling)
         {
             CMeshO::VertexType   *nearestV=0;
             float dist=dist_upper_bound;
@@ -271,19 +276,26 @@ public:
             //if(storeDistanceAsQualityFlag)  p.Q() = dist;
             if(dist == dist_upper_bound) return ;
 
-            if(normalsampling)
+            switch(vertexMode)
             {
-              rr = ((nearestV->N()[0]) * 128.0) + 128;  
-              gg = ((nearestV->N()[1]) * 128.0) + 128;  
-              bb = ((nearestV->N()[2]) * 128.0) + 128;
+                case 0 : // Color
+                {
+                    rr = nearestV->C()[0];
+                    gg = nearestV->C()[1];
+                    bb = nearestV->C()[2];
+                } break;
+                case 1: // normal
+                {
+                    rr = ((nearestV->N()[0]) * 128.0) + 128;
+                    gg = ((nearestV->N()[1]) * 128.0) + 128;
+                    bb = ((nearestV->N()[2]) * 128.0) + 128;
+                } break;
+                case 2: // quality
+                {
+                    float q= ((nearestV->Q()-minQ)/(maxQ-minQ))*255.0f;
+                    rr = gg = bb = q;
+                } break;
             }
-            else
-            {
-              rr = nearestV->C()[0];  
-              gg = nearestV->C()[1];  
-              bb = nearestV->C()[1];
-            }
-
             trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(rr, gg, bb, 255));
         }
         else // sampling from a mesh
@@ -333,19 +345,28 @@ public:
             {
                 // Calculate and set color
                 CMeshO::VertexType::ColorType c;
-
-                if(normalsampling)
+                switch(vertexMode)
                 {
-                  CMeshO::VertexType::ColorType c0,c1,c2;
-
-                  c0[0] = ((nearestF->V(0)->cN()[0]) * 128.0) + 128;  c0[1] = ((nearestF->V(0)->cN()[1]) * 128.0) + 128;  c0[2] = ((nearestF->V(0)->cN()[2]) * 128.0) + 128;
-                  c1[0] = ((nearestF->V(1)->cN()[0]) * 128.0) + 128;  c1[1] = ((nearestF->V(1)->cN()[1]) * 128.0) + 128;  c1[2] = ((nearestF->V(1)->cN()[2]) * 128.0) + 128;
-                  c2[0] = ((nearestF->V(2)->cN()[0]) * 128.0) + 128;  c2[1] = ((nearestF->V(2)->cN()[1]) * 128.0) + 128;  c2[2] = ((nearestF->V(2)->cN()[2]) * 128.0) + 128;
-
-                  c.lerp(c0, c1, c2, interp);
+                case 0 : // Color
+                    c.lerp(nearestF->V(0)->cC(), nearestF->V(1)->cC(), nearestF->V(2)->cC(), interp);
+                    break;
+                case 1 : { // Normal
+                    vcg::Point3f nn = nearestF->V(0)->cN()*interp[0]+
+                                           nearestF->V(1)->cN()*interp[1]+
+                                           nearestF->V(2)->cN()*interp[2];
+                    nn.Normalize();
+                    nn= ((nn+vcg::Point3f(1.0,1.0,1.0))/2.0f)*255.0f;
+                    c=vcg::Color4b(nn[0],nn[1],nn[2],255);
                 }
-                else
-                  c.lerp(nearestF->V(0)->cC(), nearestF->V(1)->cC(), nearestF->V(2)->cC(), interp);
+                    break;
+                case 2 : { // Quality
+                    float q = nearestF->V(0)->cQ()*interp[0]+
+                            nearestF->V(1)->cQ()*interp[1]+
+                            nearestF->V(2)->cQ()*interp[2];
+                    c=vcg::Color4b::GrayShade(255.0*(q-minQ)/(maxQ-minQ));
+                } break;
+                default: assert(0);
+                }
 
                 trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
             }

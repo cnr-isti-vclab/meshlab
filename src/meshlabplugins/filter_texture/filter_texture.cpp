@@ -216,8 +216,8 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
                                           "The mesh that contains the source data that we want to transfer"));
             parlst.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
                                           "The mesh whose texture will be filled according to source mesh data"));
-            parlst.addParam(new RichEnum("data", 0, QStringList("Vertex Color") << "Texture Color" << "Vertex Normal", "Color Data Source",
-                                         "Choose to transfer color information from source mesh texture, vertex color or vertex normal"));
+            parlst.addParam(new RichEnum("AttributeEnum", 0, QStringList("Vertex Color")  << "Vertex Normal" << "Vertex Quality"<< "Texture Color", "Color Data Source",
+                                         "Choose what attribute has to be transferred onto the target texture. You can choos bettween Per vertex attributes (clor,normal,quality) or to transfer color information from source mesh texture"));
             parlst.addParam(new RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                             tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering data")));
             parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
@@ -744,7 +744,16 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
     case FP_TRANSFER_TO_TEXTURE : {
             MeshModel *srcMesh = par.getMesh("sourceMesh");
             MeshModel *trgMesh = par.getMesh("targetMesh");
-            int datasource = par.getEnum("data");
+            bool vertexSampling=false;
+            bool textureSampling=false;
+            int  vertexMode= -1;
+            switch (par.getEnum("AttributeEnum")) {
+            case 0: vertexSampling= true; vertexMode=0; break;  // Color
+            case 1: vertexSampling= true; vertexMode=1; break;  // Normal
+            case 2: vertexSampling= true; vertexMode=2; break;  // Quality
+            case 3: textureSampling = true; break;
+            default: assert(0);
+            }
             float upperbound = par.getAbsPerc("upperBound"); // maximum distance to stop search
             QString textName = par.getString("textName");
             int textW = par.getInt("textW");
@@ -762,12 +771,11 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             // Source image (for texture to texture transfer)
             QImage srcImg;
 
-            if (datasource == 0) 
-            {
-              CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per Vertex Color");
-            } 
-            else if (datasource == 1) 
-            {
+            if (vertexSampling) {
+                if(vertexMode==0) {CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per Vertex Color");}
+                if(vertexMode==1) {CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTNORMAL), "Source mesh doesn't have Per Vertex Normal");}
+                if(vertexMode==2) {CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTQUALITY), "Source mesh doesn't have Per Vertex Quality");}
+            } else { assert(textureSampling);
                 // Check whether is possible to access source mesh texture
                 CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh doesn't have Per Wedge Texture Coordinates");
                 CheckError(srcMesh->cm.textures.empty(), "Source mesh doesn't have any associated texture");
@@ -775,10 +783,6 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
                 path = path.left(std::max<int>(path.lastIndexOf('\\'),path.lastIndexOf('/'))+1).append(srcMesh->cm.textures[0].c_str());
                 CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
                 CheckError(!srcImg.load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
-            }
-            else if (datasource == 2) 
-            {
-              CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTNORMAL), "Source mesh doesn't have Per Vertex Normals");
             }
 
             QString filePath(trgMesh->fullName());
@@ -813,21 +817,13 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
             tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
             tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
-            if (datasource == 0)
+            if (vertexSampling)
             {
-                TransferColorSampler sampler(srcMesh->cm, img, upperbound, false); // color sampling
+                TransferColorSampler sampler(srcMesh->cm, img, upperbound,vertexMode); // color sampling
                 sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
                 tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
-            } 
-            else if (datasource == 1) 
-            {
+            } else { assert(textureSampling);
                 TransferColorSampler sampler(srcMesh->cm, img, &srcImg, upperbound); // texture sampling
-                sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
-                tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
-            }
-            else if (datasource == 2) 
-            {
-                TransferColorSampler sampler(srcMesh->cm, img, upperbound, true); // normal sampling
                 sampler.InitCallback(cb, trgMesh->cm.fn, 0, 80);
                 tri::SurfaceSampling<CMeshO,TransferColorSampler>::Texture(trgMesh->cm,sampler,img.width(),img.height(),false);
             }
