@@ -795,7 +795,7 @@ template <class MeshType>
 void AssingFather(typename MeshType::VertexType &v,
 									typename MeshType::FaceType *father,
 									typename MeshType::CoordType &bary,
-                  MeshType & /*domain*/)
+                  MeshType & domain)
 {
 #ifdef _DEBUG
 	const typename MeshType::ScalarType eps=(typename MeshType::ScalarType)0.00001;
