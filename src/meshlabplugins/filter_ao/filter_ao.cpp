@@ -194,6 +194,14 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 
+  CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+  if(!tri::Allocator<CMeshO>::IsValidHandle<Point3f>(m.cm,BN))
+  {
+        BN = tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f> (m.cm,"BentNormal");
+        std::vector<std::string> AllVertexAttribName;
+        tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3f >(m.cm,AllVertexAttribName);
+        qDebug("Now mesh has %i attrib",AllVertexAttribName.size());
+  }
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -731,6 +739,8 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m)
 	glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
 	cameraDir.Normalize();
+  CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+
 	for (int i=0; i<m.cm.vn; ++i)
 	{
 		Point3<CMeshO::ScalarType> &vp = m.cm.vert[i].P();
@@ -744,6 +754,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m)
 		if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
 		{
 			 m.cm.vert[i].Q() += max(m.cm.vert[i].cN().dot(cameraDir), 0.0f);
+       BN[ m.cm.vert[i] ] += cameraDir;
 		}
 	}
 
