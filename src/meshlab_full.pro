@@ -9,6 +9,7 @@ SUBDIRS       = common \
                 meshlabplugins/io_3ds\
                 meshlabplugins/io_bre\
                 meshlabplugins/io_collada \
+				meshlabplugins/io_ctm \
                 meshlabplugins/io_epoch \
                 meshlabplugins/io_json \
                 meshlabplugins/io_u3d\
@@ -26,8 +27,10 @@ SUBDIRS       = common \
                 meshlabplugins/filter_clean \
                 meshlabplugins/filter_colorize \
                 meshlabplugins/filter_colorproc \
+				meshlabplugins/filter_color_projection \
                 meshlabplugins/filter_create \
                 meshlabplugins/filter_csg \
+				meshlabplugins/filter_dirt \
                 meshlabplugins/filter_fractal \
                 meshlabplugins/filter_func \
                 meshlabplugins/filter_isoparametrization \
@@ -41,6 +44,7 @@ SUBDIRS       = common \
                 meshlabplugins/filter_qhull \
                 meshlabplugins/filter_quality \
                 meshlabplugins/filter_sampling \
+				meshlabplugins/filter_sdfgpu \
                 meshlabplugins/filter_slice \
                 meshlabplugins/filter_select \
                 meshlabplugins/filter_ssynth \
