@@ -9,7 +9,8 @@
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\2010.05\qt"
+!define QT_BASE "C:\Qt\2011.03"
+!define MINGW_BASE "C:\Qt\qtcreator-2.1.0\mingw"
 !define DISTRIB_FOLDER "../distrib"
 
 ; MUI 1.67 compatible ------
@@ -233,9 +234,9 @@ Section "MainSection" SEC01
   File "${QT_BASE}\bin\QtScript4.dll"
   File "${QT_BASE}\bin\QtXmlPatterns4.dll"
   ;File "C:\MinGW\bin\mingwm10.dll"
-  File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
-  File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"
-  File "${QT_BASE}\..\mingw\bin\libgomp-1.dll"
+  File "${MINGW_BASE}\bin\mingwm10.dll"
+  File "${MINGW_BASE}\bin\libgcc_s_dw2-1.dll"
+  File "${MINGW_BASE}\bin\libgomp-1.dll"
   
   File "..\..\docs\readme.txt"
   ;File "..\..\docs\history.txt"
