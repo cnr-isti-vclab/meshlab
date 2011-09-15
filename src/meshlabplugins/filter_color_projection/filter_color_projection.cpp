@@ -24,9 +24,9 @@
 #include <QtGui>
 #include <QFileDialog>
 
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
 
 #include "filter_color_projection.h"
 
