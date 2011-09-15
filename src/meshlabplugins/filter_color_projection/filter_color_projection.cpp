@@ -163,6 +163,10 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
 				1024,
 				"pixel size of texture image",
 				"pixel size of texture image, the image will be a square tsize X tsize, most applications do require that tsize is a power of 2"));
+			parlst.addParam(new RichBool ("dorefill",
+				true,
+				"fill atlas gaps",
+				"If true, unfilled areas of the mesh are interpolated, to avoid visible seams while mipmapping"));
 			parlst.addParam(new RichFloat ("deptheta",
 				0.5,
 				"depth threshold",
@@ -532,12 +536,14 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
 		{
       bool onselection = par.getBool("onselection");
       int texsize = par.getInt("texsize");
+      bool  dorefill = par.getBool("dorefill"); 
       float eta = par.getFloat("deptheta");
       bool  useangle = par.getBool("useangle"); 
       bool  usedistance = par.getBool("usedistance"); 
       bool  useborders = par.getBool("useborders");
       bool  usesilhouettes = par.getBool("usesilhouettes");
       QString textName = par.getString("textName");
+      
       
       int textW = texsize;   
       int textH = texsize;
@@ -582,10 +588,12 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
       img.fill(qRgba(0,0,0,0)); // transparent black
 
       // Compute (texture-space) border edges
-      model->updateDataMask(MeshModel::MM_FACEFACETOPO);
-      //tri::UpdateTopology<CMeshO>::FaceFace(model->cm);
-      tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
-      tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
+      if(dorefill)
+      {
+        model->updateDataMask(MeshModel::MM_FACEFACETOPO);
+        tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+        tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
+      }
 
       // create a list of to-be-filled texels and accumulators
       // storing texel 2d coords, texel mesh-space point, texel mesh normal
@@ -771,28 +779,38 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
       // for each texel.... divide accumulated values by weight and write to texture
       for(texcount=0; texcount < texels.size(); texcount++)
       {
-        float texel_red   = 1.0;
-        float texel_green = 1.0;
-        float texel_blue  = 1.0;
-
         if(accums[texcount].weights > 0.0)
         {
-          texel_red   =  accums[texcount].acc_red / accums[texcount].weights;
-          texel_green =  accums[texcount].acc_grn / accums[texcount].weights;
-          texel_blue  =  accums[texcount].acc_blu / accums[texcount].weights;        
-        }
+          float texel_red   =  accums[texcount].acc_red / accums[texcount].weights;
+          float texel_green =  accums[texcount].acc_grn / accums[texcount].weights;
+          float texel_blue  =  accums[texcount].acc_blu / accums[texcount].weights;        
 
-        img.setPixel(texels[texcount].texcoord.X(), img.height() - 1 - texels[texcount].texcoord.Y(), qRgba(texel_red*255.0, texel_green*255.0, texel_blue*255.0, 255));
+          img.setPixel(texels[texcount].texcoord.X(), img.height() - 1 - texels[texcount].texcoord.Y(), qRgba(texel_red*255.0, texel_green*255.0, texel_blue*255.0, 255));
+        }
+        else         // if no projected data available, black (to be refilled later on
+        {
+          img.setPixel(texels[texcount].texcoord.X(), img.height() - 1 - texels[texcount].texcoord.Y(), qRgba(0, 0, 0, 0));
+        }        
       }
 
-      // PullPush
-      cb(85, "Filling texture holes...");
-      PullPush(img, qRgba(0,0,0,0));
+      // cleaning 
+      texels.clear();
+      accums.clear();
 
+      // PullPush
+      if(dorefill)
+      {
+        cb(85, "Filling texture holes...");
+        
+        PullPush(img, qRgba(0,0,0,0));      // atlas gaps
+      }
 
       // Undo topology changes
-      tri::UpdateTopology<CMeshO>::FaceFace(model->cm);
-      tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
+      if(dorefill)
+      {
+        tri::UpdateTopology<CMeshO>::FaceFace(model->cm);
+        tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
+      }
 
       // Save texture
       cb(90, "Saving texture ...");

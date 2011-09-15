@@ -33,47 +33,6 @@
 using namespace std;
 using namespace vcg;
 
-//----------------------------------  BMP headers for cross platform compilation
- 
-/* Note: the magic number has been removed from the bmpfile_header structure
-   since it causes alignment problems
-     struct bmpfile_magic should be written/read first
-   followed by the
-     struct bmpfile_header
-   [this avoids compiler-specific alignment pragmas etc.]
-*/
- 
-typedef unsigned int uint16_t; 
-typedef signed long int int32_t; 
-typedef unsigned long int uint32_t;
-
-typedef struct {
-  unsigned char magic[2];
-} BITMAPMAGICHEADER_X;
- 
-typedef struct {
-  uint32_t filesz;
-  uint16_t creator1;
-  uint16_t creator2;
-  uint32_t bmp_offset;
-} BITMAPFILEHEADER_X;
-
-typedef struct {
-  uint32_t header_sz;
-  int32_t width;
-  int32_t height;
-  uint16_t nplanes;
-  uint16_t bitspp;
-  uint32_t compress_type;
-  uint32_t bmp_bytesz;
-  int32_t hres;
-  int32_t vres;
-  uint32_t ncolors;
-  uint32_t nimpcolors;
-} BITMAPINFOHEADER_X;
-
-//------------------------------------------------------------------------------
-
 class colorp
 {
  public:
@@ -116,9 +75,6 @@ class floatbuffer
 	int initborder(floatbuffer* zerofrom);
 	int distancefield();
 
-	int dump(QString filename);
-	int dumpbmp(QString filename, bool asitis = false);
-	int dumpbmp2(QString filename);
 	int dumppfm(QString filename);
 };
 
