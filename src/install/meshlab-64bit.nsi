@@ -5,14 +5,14 @@
 
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
-!define PRODUCT_VERSION "1.3.0"
+!define PRODUCT_VERSION "1.3.1"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Users\isti\Desktop\qt-everywhere-opensource-src-4.7.0"
+!define QT_BASE "D:\qt-everywhere-opensource-src-4.7.2"
 !define DISTRIB_FOLDER "../distrib"
 !define MICROSOFT_VS2008_REDIST_KEYDIR "Software\Microsoft\Windows\CurrentVersion\Uninstall\"
 !define MICROSOFT_VS2008_X64 "{8220EEFE-38CD-377E-8595-13398D740ACE}"
@@ -165,6 +165,8 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\io_gts.dll"
   File "${DISTRIB_FOLDER}/plugins\io_pdb.dll"
   File "${DISTRIB_FOLDER}/plugins\io_m.dll"
+  File "${DISTRIB_FOLDER}/plugins\io_ctm.dll"
+  
 
   ; filter plugins (23)
   File "${DISTRIB_FOLDER}/plugins\filter_ao.dll"
@@ -174,9 +176,11 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_camera.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_clean.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorproc.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_color_projection.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_create.dll"
 
+  File "${DISTRIB_FOLDER}/plugins\filter_dirt.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_func.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_isoparametrization.dll"
@@ -193,6 +197,7 @@ Section "MainSection" SEC01
   
   File "${DISTRIB_FOLDER}/plugins\filter_sampling.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_select.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_sdfgpu.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
   
   
@@ -211,9 +216,9 @@ Section "MainSection" SEC01
  
 
   ; edit plugins (14)
-  File "${DISTRIB_FOLDER}/plugins\editalign.dll"
-  File "${DISTRIB_FOLDER}/plugins\editmeasure.dll"
-  File "${DISTRIB_FOLDER}/plugins\editpaint.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_align.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_measure.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_paint.dll"
   ;File "${DISTRIB_FOLDER}/plugins\editrgbtri.dll"
   ;File "${DISTRIB_FOLDER}/plugins\editsegment.dll"
 
