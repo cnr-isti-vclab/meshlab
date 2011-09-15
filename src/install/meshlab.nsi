@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.3.0"
+!define PRODUCT_VERSION "1.3.1"
 !define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -93,6 +93,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\io_base.dll"
   File "${DISTRIB_FOLDER}/plugins\io_bre.dll"
   File "${DISTRIB_FOLDER}/plugins\io_epoch.dll"
+  File "${DISTRIB_FOLDER}/plugins\io_ctm.dll"
   File "${DISTRIB_FOLDER}/plugins\io_collada.dll"
   File "${DISTRIB_FOLDER}/plugins\io_3ds.dll"
   File "${DISTRIB_FOLDER}/plugins\io_json.dll"
@@ -112,10 +113,12 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_camera.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_clean.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorproc.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_color_projection.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_create.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_csg.dll"
 
+  File "${DISTRIB_FOLDER}/plugins\filter_dirt.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_func.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_isoparametrization.dll"
@@ -131,6 +134,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_quality.dll"
   
   File "${DISTRIB_FOLDER}/plugins\filter_sampling.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_sdfgpu.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_select.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_ssynth.dll"
