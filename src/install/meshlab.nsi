@@ -157,9 +157,9 @@ Section "MainSection" SEC01
  
 
   ; edit plugins (14)
-  File "${DISTRIB_FOLDER}/plugins\editalign.dll"
-  File "${DISTRIB_FOLDER}/plugins\editmeasure.dll"
-  File "${DISTRIB_FOLDER}/plugins\editpaint.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_align.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_measure.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_paint.dll"
   ;File "${DISTRIB_FOLDER}/plugins\editrgbtri.dll"
   ;File "${DISTRIB_FOLDER}/plugins\editsegment.dll"
 
