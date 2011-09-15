@@ -6,7 +6,10 @@ SOURCES += io_ctm.cpp
 INCLUDEPATH += ../../external/OpenCTM-1.0.3/lib
 TARGET = io_ctm
 
-QMAKE_CXXFLAGS += /DOPENCTM_STATIC
+win32-msvc.net:QMAKE_CXXFLAGS += /DOPENCTM_STATIC
+win32-msvc2005:QMAKE_CXXFLAGS += /DOPENCTM_STATIC
+win32-msvc2008:QMAKE_CXXFLAGS += /DOPENCTM_STATIC
+win32-g++:DEFINES += OPENCTM_STATIC
 
 win32-msvc.net:LIBS	+= ../../external/lib/win32-msvc.net/openctm.lib
 win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/openctm.lib
