@@ -23,8 +23,8 @@
 #ifndef FLOATBUFFER_H
 #define FLOATBUFFER_H
 
-#include<vcg\math\shot.h>
-#include<vcg\math\histogram.h>
+#include<vcg/math/shot.h>
+#include<vcg/math/histogram.h>
 
 #include<QString>
 #include<QImage>
