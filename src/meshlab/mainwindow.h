@@ -238,7 +238,7 @@ public:
   const RichParameterSet& defaultGlobalPars() const { return defaultGlobalParams; }
 
 	GLArea *GLA() const {
-	  if(mdiarea->currentSubWindow()==0) return 0;
+//	  if(mdiarea->currentSubWindow()==0) return 0;
     MultiViewer_Container *mvc = currentViewContainer();
     if(!mvc) return 0;
     GLArea *glw =  qobject_cast<GLArea*>(mvc->currentView());
@@ -246,13 +246,24 @@ public:
 	}
 
   MultiViewer_Container* currentViewContainer() const {
-    if(mdiarea->currentSubWindow()==0) return 0;
     MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
-		if(!mvc){ 
+    if(mvc) return mvc;
+    if(mvc==0 && mdiarea->currentSubWindow()!=0 ){
 			mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
-			return mvc;
+      if(mvc) return mvc;
 		}
-		else return 0;
+    QList<QMdiSubWindow *> subwinList=mdiarea->subWindowList();
+    foreach(QMdiSubWindow *subwinPtr,subwinList)
+    {
+        MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(subwinPtr);
+        if(mvc) return mvc;
+        if(mvc==0 && subwinPtr!=0){
+          mvc = qobject_cast<MultiViewer_Container *>(subwinPtr->widget());
+          if(mvc) return mvc;
+        }
+    }
+
+    return 0;
 	}
 
 
