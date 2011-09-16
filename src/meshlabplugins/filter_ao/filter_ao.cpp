@@ -81,8 +81,8 @@ QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
-		case FP_VERT_AMBIENT_OCCLUSION :  return QString("Generates environment occlusions values for the loaded mesh"); 
-		case FP_FACE_AMBIENT_OCCLUSION :  return QString("Generates environment occlusions values for the loaded mesh"); 
+    case FP_VERT_AMBIENT_OCCLUSION :
+    case FP_FACE_AMBIENT_OCCLUSION :  return QString("Compute ambient occlusions values; it takes a number or well distributed view direction and for point of the surface it computes how many time it is visible from these directions. This number is saved into quality and automatically mapped into a gray shade. The average direction is saved into an attribute named 'BentNormal'");
 		default : assert(0); 
 	}
 
