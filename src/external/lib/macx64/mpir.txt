@@ -1,0 +1,3 @@
+This version of mpir (2.4.0) for mac64 has been compiled with the following configure command line:
+
+ ./configure CFLAGS="-mmacosx-version-min=10.5" LDFLAGS="-mmacosx-version-min=10.5" --enable-cxx --enable-static --with-pic
