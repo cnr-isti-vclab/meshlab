@@ -370,7 +370,7 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 }
 
 //Add default annotations for each mesh about faces and vertices number
-void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *meshModel)
+void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel)
 {
   QTreeWidgetItem *fileItem = new QTreeWidgetItem();
   fileItem->setText(2, QString("File"));
@@ -390,6 +390,47 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *mes
   vertItem->setText(3, QString::number(meshModel->cm.vn));
   parent->addChild(vertItem);
   updateColumnNumber(vertItem);
+
+  std::vector<std::string> AttribNameVector;
+  vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(meshModel->cm,AttribNameVector);
+  for(int i = 0; i < (int) AttribNameVector.size(); i++)
+  {
+      QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+      vertItem->setText(2, QString("Vert Attr."));
+      vertItem->setText(3, "float "+QString(AttribNameVector[i].c_str()));
+      parent->addChild(vertItem);
+      updateColumnNumber(vertItem);
+  }
+  AttribNameVector.clear();
+  vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< vcg::Point3f >(meshModel->cm,AttribNameVector);
+  for(int i = 0; i < (int) AttribNameVector.size(); i++)
+  {
+      QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+      vertItem->setText(2, QString("Vert Attr."));
+      vertItem->setText(3, "Point3f "+QString(AttribNameVector[i].c_str()));
+      parent->addChild(vertItem);
+      updateColumnNumber(vertItem);
+  }
+  vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(meshModel->cm,AttribNameVector);
+  for(int i = 0; i < (int) AttribNameVector.size(); i++)
+  {
+      QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+      vertItem->setText(2, QString("Face Attr."));
+      vertItem->setText(3, "float "+QString(AttribNameVector[i].c_str()));
+      parent->addChild(vertItem);
+      updateColumnNumber(vertItem);
+  }
+  AttribNameVector.clear();
+  vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< vcg::Point3f >(meshModel->cm,AttribNameVector);
+  for(int i = 0; i < (int) AttribNameVector.size(); i++)
+  {
+      QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+      vertItem->setText(2, QString("Face Attr."));
+      vertItem->setText(3, "Point3f "+QString(AttribNameVector[i].c_str()));
+      parent->addChild(vertItem);
+      updateColumnNumber(vertItem);
+  }
+
 }
 
 //Add a new item (not a MeshTreeWidgetItem but a tag item) to the treeWidget

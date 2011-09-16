@@ -120,7 +120,7 @@ private:
 	//It stores if the treeWidgetItems are expanded or not
 	QMap< QPair<int ,int> ,  bool> expandedMap;
 
-	void addDefaultNotes(QTreeWidgetItem * parent, const MeshModel *meshModel);
+  void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
 	void addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag,  MeshDocument &md, MeshModel *mm);
 	void updateColumnNumber(const QTreeWidgetItem * item);
 
