@@ -364,7 +364,7 @@ public:
 		delete(p);
 	}
 
-	typedef struct Elem
+  struct Elem
 	{
 	public:
 		VertexType *center;
@@ -372,7 +372,7 @@ public:
 		int t_mark;
 
 		//bool operator <(Elem* e){return (priority<e.priority);}
-		inline const bool operator <(const Elem& e) const 
+    inline bool operator <(const Elem& e) const
 		{ 
 			return (priority<e.priority);
 			//return (locModPtr->Priority() < h.locModPtr->Priority());
@@ -385,6 +385,7 @@ public:
 			t_mark=_t_mark;
 		}
 	};
+
 	std::vector<Elem> Operations;
 
 

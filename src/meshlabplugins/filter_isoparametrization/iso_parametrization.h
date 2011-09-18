@@ -90,7 +90,7 @@ public:
     }
 
 	CoordType RPos;
-	static const bool Has_Auxiliary(){return false;}
+  static bool Has_Auxiliary(){return false;}
 };
 
 class ParamFace: public vcg::Face <  ParamUsedTypes,

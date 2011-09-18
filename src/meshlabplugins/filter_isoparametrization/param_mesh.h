@@ -41,7 +41,7 @@ public:
 		//num_collapse=1;
 	}
 	
-	static const bool Has_Auxiliary(){return true;}
+  static bool Has_Auxiliary(){return true;}
 
 	vcg::Point2<ScalarType> RestUV;
 	
