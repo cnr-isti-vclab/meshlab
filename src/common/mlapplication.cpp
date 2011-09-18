@@ -20,6 +20,7 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 	}
 	catch (MeshLabException& e)
 	{
-		qCritical(e.what());
+    qCritical("%s",e.what());
 	}
+  return false;
 }
