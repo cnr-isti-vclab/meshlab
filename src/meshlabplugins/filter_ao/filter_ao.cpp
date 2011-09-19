@@ -35,7 +35,7 @@
 #define AMBOCC_DEFAULT_TEXTURE_SIZE 512
 #define AMBOCC_DEFAULT_NUM_VIEWS 128
 #define AMBOCC_USEGPU_BY_DEFAULT false
-#define AMBOCC_USEVBO_BY_DEFAULT false
+#define AMBOCC_USEVBO_BY_DEFAULT true
 
 using namespace std;
 using namespace vcg;
@@ -89,7 +89,7 @@ QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
 	return QString("");
 }
 
-int AmbientOcclusionPlugin::getRequirements(QAction *action)
+int AmbientOcclusionPlugin::getRequirements(QAction */*action*/)
 {
 	//no requirements needed
 	return 0;
