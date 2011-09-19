@@ -170,7 +170,7 @@ public:
 	/*QString getExpType(const QString& nm);*/
 	QString evalString(const QString& nm);
 	int evalEnum( const QString& nm );
-	int evalMesh(const QString& nm);
+	MeshModel* evalMesh(const QString& nm);
 };
 
 QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);

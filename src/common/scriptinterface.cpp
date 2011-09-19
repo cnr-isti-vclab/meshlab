@@ -530,9 +530,14 @@ int EnvWrap::evalEnum( const QString& nm )
 	return evalInt(nm);
 }
 
-int EnvWrap::evalMesh(const QString& nm)
+MeshModel* EnvWrap::evalMesh(const QString& nm)
 {
-	return evalInt(nm);
+	int ii = evalInt(nm);
+	QScriptValue mdsv = env->globalObject().property(ScriptAdapterGenerator::meshDocVarName());
+	MeshDocumentScriptInterface* mdsi = dynamic_cast<MeshDocumentScriptInterface*>(mdsv.toQObject());
+	if (mdsi != NULL) 
+		return mdsi->md->getMesh(ii);
+	return NULL;
 }
 
 QColor EnvWrap::evalColor( const QString& nm )
