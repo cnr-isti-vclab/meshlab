@@ -54,6 +54,8 @@ private:
 vcg::CICubeMap cm;
 
 inline QString CubeMapPathParam() const { return  "MeshLab::Decoration::CubeMapPath" ; }
+inline QString GridSnapParam() const { return  "MeshLab::Decoration::GridSnap" ; }
+inline QString GridBackParam() const { return  "MeshLab::Decoration::GridBack" ; }
 inline QString GridMajorParam() const { return  "MeshLab::Decoration::GridMajor" ; }
 inline QString GridMinorParam() const { return  "MeshLab::Decoration::GridMinor" ; }
 inline QString BoxRatioParam() const { return  "MeshLab::Decoration::BoxRatio" ; }
@@ -87,7 +89,7 @@ public:
 		
 
 private:
-  void DrawGriddedCube(const vcg::Box3f &bb, float majorTick, float minorTick,GLArea *gla);
+  void DrawGriddedCube(MeshModel &m, const vcg::Box3f &bb, float majorTick, float minorTick, bool snapFlag, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor, GLArea *gla);
   vcg::Shotf curShot;
 
 signals:
