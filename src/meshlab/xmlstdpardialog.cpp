@@ -918,7 +918,7 @@ void XMLSliderWidget::set( const QString& nwExpStr )
 	 valueSlider->setValue(floatToInt(fval));
 }
 
-void XMLSliderWidget::updateVisibility( const bool vis )
+void XMLSliderWidget::updateVisibility( const bool /*vis*/ )
 {
 	setVisibility(isImportant);
 }

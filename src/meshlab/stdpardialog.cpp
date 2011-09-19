@@ -194,22 +194,15 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	this->adjustSize();
 }
 
-//void StdParFrame::loadFrameContent(ParameterDeclarationSet &curParSet,MeshDocument *mdPt)
-void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * _mdPt )
+void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*_mdPt*/ )
 {
 
  if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
     vLayout->setAlignment(Qt::AlignTop);
-	//QLabel* lb = new QLabel("",this);
-	//vLayout->addWidget(lb);
-	
 	setLayout(vLayout);
-	
-	//QLabel *ql;
 
-	QString descr;
-	RichWidgetInterfaceConstructor rwc(this);
+  RichWidgetInterfaceConstructor rwc(this);
 	for(int i = 0; i < curParSet.paramList.count(); i++)
 	{
 		RichParameter* fpi=curParSet.paramList.at(i);
