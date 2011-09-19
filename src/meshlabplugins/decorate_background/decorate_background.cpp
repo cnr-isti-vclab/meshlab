@@ -37,9 +37,9 @@
 
 using namespace vcg;
 
-QString SampleMeshDecoratePlugin::filterInfo(QAction *action) const
+QString SampleMeshDecoratePlugin::decorationInfo(FilterIDType id) const
 {
-	switch(ID(action))
+  switch(id)
 	{
 	case DP_SHOW_CUBEMAPPED_ENV :      return tr("Draws a customizable cube mapped background that is sync with trackball rotation");
   case DP_SHOW_GRID :      return tr("Draws a gridded background that can be used as a reference.");
@@ -47,7 +47,7 @@ QString SampleMeshDecoratePlugin::filterInfo(QAction *action) const
 	assert(0);
 	return QString();
 }
-QString SampleMeshDecoratePlugin::filterName(FilterIDType id) const
+QString SampleMeshDecoratePlugin::decorationName(FilterIDType id) const
 {
 	switch(id)
 	{
@@ -202,7 +202,7 @@ void DrawGridPlane(int axis, int side,
 /* return true if the side of a box is front facing with respet of the give viewpoint.
    side 0, axis i == min on than i-th axis
    side 1, axis i == min on than i-th axis
-  qyuesto capita se il prodotto scalare tra il vettore cnormale entro della faccia
+   questo capita se il prodotto scalare tra il vettore normale entro della faccia
  */
 bool FrontFacing(Point3f viewPos,
                  int axis, int side,
@@ -230,28 +230,30 @@ bool FrontFacing(Point3f viewPos,
 
 void SampleMeshDecoratePlugin::DrawGriddedCube(const Box3f &bb, float majorTick, float minorTick, GLArea *gla)
 {
-glPushAttrib(GL_ALL_ATTRIB_BITS);
-Point3f minP,maxP, minG,maxG;
-minP=bb.min;maxP=bb.max;
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    Point3f minP,maxP, minG,maxG;
+    minP=bb.min;maxP=bb.max;
 
-for(int i=0;i<3;++i)
-{
-  if(minP[i] > 0 ) minG[i] = minP[i] - fmod(minP[i],majorTick) + majorTick;
-  if(minP[i] ==0 ) minG[i] = majorTick;
-  if(minP[i] < 0 ) minG[i] = minP[i] + fmod(fabs(minP[i]),majorTick);
-}
-glDisable(GL_LIGHTING);
-glEnable(GL_LINE_SMOOTH);
-glEnable(GL_BLEND);
-glDepthMask(GL_FALSE);
-Point3f viewPos = this->curShot.GetViewPoint();
-qDebug("Current camera pos %f %f %f",viewPos[0],viewPos[1],viewPos[2]);
-for (int ii=0;ii<3;++ii)
-  for(int jj=0;jj<2;++jj)
-    if(!FrontFacing(viewPos,ii,jj,minP,maxP))
-        DrawGridPlane(ii,jj,minP,maxP,minG,maxG,10,1);
+    // Make the box well rounded wrt to major tick
+    for(int i=0;i<3;++i) // foreach axis
+    {
+        if(minP[i] > 0 ) minG[i] = minP[i] - fmod(minP[i],majorTick) + majorTick;
+        if(minP[i] ==0 ) minG[i] = majorTick;
+        if(minP[i] < 0 ) minG[i] = minP[i] + fmod(fabs(minP[i]),majorTick);
+    }
 
-  glPopAttrib();
+    glDisable(GL_LIGHTING);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    Point3f viewPos = this->curShot.GetViewPoint();
+    qDebug("Current camera pos %f %f %f",viewPos[0],viewPos[1],viewPos[2]);
+    for (int ii=0;ii<3;++ii)
+        for(int jj=0;jj<2;++jj)
+            if(!FrontFacing(viewPos,ii,jj,minP,maxP))
+                DrawGridPlane(ii,jj,minP,maxP,minG,maxG,10,1);
+
+    glPopAttrib();
 }
 
 void  SampleMeshDecoratePlugin::setValue(QString name, vcg::Shotf val) {curShot=val;}

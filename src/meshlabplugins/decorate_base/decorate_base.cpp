@@ -34,9 +34,9 @@ using namespace std;
 
 typedef pair<Point3f,Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
 
-QString ExtraMeshDecoratePlugin::filterInfo(QAction *action) const
+QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
  {
-  switch(ID(action))
+  switch(filter)
   {
     case DP_SHOW_AXIS :									return tr("Draws XYZ axes in world coordinates");
     case DP_SHOW_BOX_CORNERS:						return tr("Draws object's bounding box corners");
@@ -62,7 +62,7 @@ QString ExtraMeshDecoratePlugin::filterInfo(QAction *action) const
   return QString();
  }
 
-QString ExtraMeshDecoratePlugin::filterName(FilterIDType filter) const
+QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
 {
     switch(filter)
     {
@@ -1312,7 +1312,7 @@ void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainte
 // This function performs the Scale/Translation transform
 // that is needed to correctly draw a single texture.
 // When more than a single texture is used they are stacked vertically
-void ExtraMeshDecoratePlugin::PlaceTexParam(int TexInd, int TexNum)
+void ExtraMeshDecoratePlugin::PlaceTexParam(int /*TexInd*/, int /*TexNum*/)
 {
 
 }

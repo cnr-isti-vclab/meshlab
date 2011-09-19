@@ -25,16 +25,16 @@
 
 using namespace vcg;
 
-QString DecorateShadowPlugin::filterInfo(QAction *action) const
+QString DecorateShadowPlugin::decorationInfo(FilterIDType id) const
 {
-    switch(ID(action)){
+    switch(id){
         case DP_SHOW_SHADOW :           return tr("Enable shadow mapping");
         case DP_SHOW_SSAO:              return tr("Enable Screen Space Ambient Occlusion");
     default:     assert(0); return QString();
     }  
 }
 
-QString DecorateShadowPlugin::filterName(FilterIDType id) const
+QString DecorateShadowPlugin::decorationName(FilterIDType id) const
 {
     switch(id){
         case DP_SHOW_SHADOW :           return tr("Enable shadow mapping");

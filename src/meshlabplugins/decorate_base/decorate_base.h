@@ -34,9 +34,9 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
-  virtual QString filterInfo(QAction *) const;
-  QString decorateInfo(QAction *) const;
-  
+  QString decorationName(FilterIDType filter) const;
+  QString decorationInfo(FilterIDType filter) const;
+
   enum {
       DP_SHOW_FACE_NORMALS,
       DP_SHOW_VERT_NORMALS,
@@ -60,7 +60,6 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
       DP_SHOW_BOUNDARY_TEX
   };
 
-  QString filterName(FilterIDType filter) const;
 
 private:
 	float niceRound2(float value,float base);
@@ -99,7 +98,7 @@ public:
 
       FilterIDType tt;
       foreach(tt , types()){
-          actionList << new QAction(filterName(tt), this);
+          actionList << new QAction(decorationName(tt), this);
       }
       QAction *ap;
     foreach(ap,actionList){

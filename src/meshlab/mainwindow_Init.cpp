@@ -673,7 +673,7 @@ void MainWindow::fillDecorateMenu()
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{
 			connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
-			decorateAction->setToolTip(iDecorate->filterInfo(decorateAction));
+      decorateAction->setToolTip(iDecorate->decorationInfo(decorateAction));
 			renderMenu->addAction(decorateAction);
 		}
 	}

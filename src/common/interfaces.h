@@ -129,18 +129,6 @@ public:
    If a filter wants to save some permanent stuff should set the permanent default values.
 */
 	virtual void initGlobalParameterSet(QAction * /*format*/, RichParameterSet & /*globalparam*/) {}
-
-	// The longer string describing each filtering action. 
-	// This string is printed in the top of the parameter window 
-	// so it should be at least one or two paragraphs long.
-	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
-	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
-	virtual QString filterInfo(QAction* action) const =0;
-
-	// The very short string (a few words) describing each filtering action 
-	// This string is used also to define the menu entry
-  virtual QString filterName(FilterIDType ) const =0;
-
 };
 /** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
   */
@@ -161,20 +149,7 @@ public:
 	virtual QList<Format> importFormats() const = 0;
 	virtual QList<Format> exportFormats() const = 0;
 
-	
-	// The longer string describing each filtering action. 
-	// This string is printed in the top of the parameter window 
-	// so it should be at least one or two paragraphs long.
-	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
-	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
-	QString filterInfo(QAction* /*action*/) const {return QString();};
-
-	// The very short string (a few words) describing each filtering action 
-	// This string is used also to define the menu entry
-  QString filterName(FilterIDType) const {return QString();};
-
-	
-	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
+  // This function is called to initialize the list of additional parameters that a OPENING filter could require
 	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
 	// The instanced parameters are then passed to the open at the loading time.
 	// Typical example of use to decide what subportion of a mesh you have to load.
@@ -268,6 +243,12 @@ public:
 	}
 	virtual ~MeshFilterInterface() {}
 
+
+  /** The very short string (a few words) describing each filtering action
+  // This string is used also to define the menu entry
+  */
+  virtual QString filterName(FilterIDType ) const =0;
+
   /** The long, formatted string describing each filtering action.
 	// This string is printed in the top of the parameter window 
   // so it should be at least one or two paragraphs long. The more the better.
@@ -316,7 +297,7 @@ public:
 	// It is widely used by the meshlab's preview system.
 	//TO BE REPLACED WITH = 0
   */
-	virtual int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
+  virtual int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;}
 
   /** \brief applies the selected filter with the already stabilished parameters
   * This function is called by the framework after getting values for the parameters specified in the \ref InitParameterSet
@@ -350,9 +331,8 @@ public:
     * Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
     */
 	const QString &errorMsg() {return this->errorMessage;}
-	virtual QString filterInfo(QAction *a) const {return this->filterInfo(ID(a));};
-	virtual QString filterName(QAction *a) const {return this->filterName(ID(a));};
-  virtual QString filterName(FilterIDType /*filterID*/) const =0;// const {return MeshLabInterface::filterName(filterID);};
+  virtual QString filterInfo(QAction *a) const {return this->filterInfo(ID(a));}
+  virtual QString filterName(QAction *a) const {return this->filterName(ID(a));}
   virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) {return "";}
 
 
@@ -446,24 +426,11 @@ public:
 	MeshRenderInterface() :MeshCommonInterface() {}
     virtual ~MeshRenderInterface() {}
 		
-  virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){};
+  virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){}
 	virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
-	virtual void Finalize(QAction * /*mode*/, MeshDocument &/*m*/, GLArea * /*parent*/){};
+  virtual void Finalize(QAction * /*mode*/, MeshDocument &/*m*/, GLArea * /*parent*/){}
 	virtual bool isSupported() = 0;
 	virtual QList<QAction *> actions() = 0;
-
-	// The longer string describing each filtering action. 
-	// This string is printed in the top of the parameter window 
-	// so it should be at least one or two paragraphs long.
-	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
-	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
-	QString filterInfo(QAction* /*action*/) const {return QString();};
-
-	// The very short string (a few words) describing each filtering action 
-	// This string is used also to define the menu entry
-	QString filterName(FilterIDType /*action*/) const {return QString();};
-
-
 };
 /**
   MeshDecorateInterface is the base class of all <b> decorators </b>
@@ -504,17 +471,24 @@ public:
 
   MeshDecorateInterface(): MeshCommonInterface() {}
   virtual ~MeshDecorateInterface() {}
+  /** The very short string (a few words) describing each filtering action
+  // This string is used also to define the menu entry
+  */
+  virtual QString decorationName(FilterIDType ) const =0;
+  virtual QString decorationInfo(FilterIDType ) const =0;
+  virtual QString decorationInfo(QAction *a) const {return decorationInfo(ID(a));}
+
 
   virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) =0;
   virtual void decorate(QAction * /*mode*/,  MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/) = 0;
-  virtual void endDecorate(QAction * /*mode*/,   MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/){};
+  virtual void endDecorate(QAction * /*mode*/,   MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/){}
 
   /** \brief tests if a decoration is applicable to a mesh.
   For istance curvature cannot be shown on a mesh without curvature.
   On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
   It is invoked only for decoration of \i PerMesh class;
   */
-  virtual bool isDecorationApplicable(QAction */*action*/, const MeshModel& /*m*/, QString&/*MissingItems*/) const {return true;};
+  virtual bool isDecorationApplicable(QAction */*action*/, const MeshModel& /*m*/, QString&/*MissingItems*/) const {return true;}
 
   virtual int getDecorationClass(QAction */*action*/) const {return Generic;}
 
@@ -526,7 +500,7 @@ protected:
 	virtual FilterIDType ID(QAction *a) const
 	{
 		foreach( FilterIDType tt, types())
-			if( a->text() == this->filterName(tt) ) return tt;
+      if( a->text() == this->decorationName(tt) ) return tt;
 		qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
 		assert(0);
 		return -1;
@@ -549,18 +523,7 @@ public:
 	//should return a sentence describing what the editing tool does
 	static const QString Info();
 
-	// The longer string describing each filtering action. 
-	// This string is printed in the top of the parameter window 
-	// so it should be at least one or two paragraphs long.
-	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
-	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
-	QString filterInfo(QAction* /*action*/) const {return QString();};
-
-	// The very short string (a few words) describing each filtering action 
-	// This string is used also to define the menu entry
-	QString filterName(FilterIDType ) const {return QString();};
-
-	// Called when the user press the first time the button 
+  // Called when the user press the first time the button
 	virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){return true;};
 	virtual bool StartEdit(MeshDocument &md, GLArea *parent)
 	{

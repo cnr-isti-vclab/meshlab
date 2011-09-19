@@ -42,8 +42,8 @@ class SampleMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
-  QString filterName(FilterIDType filter) const;
-  QString filterInfo(QAction *) const;
+  QString decorationName(FilterIDType id) const;
+  QString decorationInfo(FilterIDType id) const;
 
   enum {
     DP_SHOW_CUBEMAPPED_ENV,
@@ -69,7 +69,7 @@ public:
 
     FilterIDType tt;
     foreach(tt , types()){
-	      actionList << new QAction(filterName(tt), this);
+        actionList << new QAction(decorationName(tt), this);
     }
     QAction *ap;
     foreach(ap,actionList){
