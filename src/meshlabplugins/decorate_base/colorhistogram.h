@@ -25,9 +25,9 @@ public:
    * The statistics related to the histogram data (average, RMS, etc.) are
    * also updated.
    */
-  void Add(ScalarType v,Color4b c,float increment);
+  void Add(ScalarType v,Color4b c,float increment=1.0);
 
-  Color4b BinColorAvg(ScalarType v) { return BinColorAvgInd(BinIndex(v)); }
+  Color4b BinColorAvg(ScalarType v) { return BinColorAvgInd(this->BinIndex(v)); }
 
   Color4b BinColorAvgInd(int index) {
     return Color4b( (unsigned char)((CV[index][0] / float(this->H[index]))),
@@ -80,9 +80,9 @@ asking for 4    lower bound will return an iterator pointing to R[3]==4; and wil
 
 */
 template <class ScalarType>
-void ColorHistogram<ScalarType>::Add(ScalarType v,Color4b c,float increment=1.0f)
+void ColorHistogram<ScalarType>::Add(ScalarType v,Color4b c,float increment/*=1.0f*/)
 {
-  int pos=BinIndex(v);
+  int pos=this->BinIndex(v);
   if(v<this->minElem) this->minElem=v;
   if(v>this->maxElem) this->maxElem=v;
   if(pos>=0 && pos<=this->n)
