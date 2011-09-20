@@ -52,6 +52,8 @@ namespace MLXMLElNames
 	const QString pluginTag("PLUGIN");
 	const QString filterTag("FILTER");
 	const QString filterHelpTag("FILTER_HELP");
+	const QString filterJSCodeTag("FILTER_JSCODE");
+
 	const QString paramTag("PARAM");
 	const QString paramHelpTag("PARAM_HELP");
 	
@@ -67,6 +69,8 @@ namespace MLXMLElNames
 	const QString mfiVersion("mfiVersion");
 
 	const QString pluginScriptName("pluginName");
+	const QString pluginAuthor("pluginAuthor");
+	const QString pluginEmail("pluginEmail");
 
 	const QString filterName("filterName");
 	const QString filterScriptFunctName("filterFunction");
@@ -146,9 +150,11 @@ public:
 	inline static void deleteXMLFileInfo(XMLFilterInfo* xmlInfo) {delete xmlInfo;}
 	
 	QString pluginName() const;
+	QString pluginAttribute(const QString& attribute ) const;
 	
 	QStringList filterNames() const;
 	QString	filterHelp(const QString& filterName) const;
+	QString filterElement(const QString& filterName,const QString& filterElement) const;
 	
 	//The function returns a QList<QMap<QString,QString>>. Each map contains "type", "name" and "defaultExpression" of a single parameter.
 	XMLMapList filterParameters(const QString& filterName) const;

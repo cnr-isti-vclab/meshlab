@@ -17,6 +17,8 @@
     <xs:element ref='FILTER' maxOccurs='unbounded'/>
    </xs:sequence>
    <xs:attribute name='pluginName' type='xs:string' use='required'/>
+   <xs:attribute name='pluginAuthor' type='xs:string' use='required'/>
+   <xs:attribute name='pluginEmail' type='xs:string' use='required'/>
   </xs:complexType>
  </xs:element>
 
@@ -25,6 +27,7 @@
    <xs:sequence>
     <xs:element ref='FILTER_HELP'/>
     <xs:element ref='PARAM' minOccurs='0' maxOccurs='unbounded'/>
+	<xs:element ref='FILTER_JSCODE' minOccurs='0' maxOccurs='1'/>
    </xs:sequence>
    <xs:attribute name='filterName' type='xs:string' use='required'/>
    <xs:attribute name='filterFunction' type='xs:string' use='required'/>
@@ -39,7 +42,12 @@
   <xs:complexType mixed='true'>
   </xs:complexType>
  </xs:element>
-
+ 
+  <xs:element name='FILTER_JSCODE'>
+  <xs:complexType mixed='true'>
+  </xs:complexType>
+ </xs:element>
+ 
  <xs:element name='PARAM'>
   <xs:complexType>
    <xs:sequence>
@@ -78,7 +86,7 @@
   <xs:complexType mixed='true'>
   </xs:complexType>
  </xs:element>
-
+ 
  <xs:element name='CHECKBOX_GUI'>
   <xs:complexType>
    <xs:attribute name='guiLabel' type='xs:string' use='required'/>

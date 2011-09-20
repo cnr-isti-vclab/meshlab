@@ -103,6 +103,25 @@ QString XMLFilterInfo::filterHelp( const QString& filterName) const
   return QString();
 }
 
+QString XMLFilterInfo::filterElement( const QString& filterName,const QString& filterElement) const
+{
+	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/FILTER_HELP/string()";
+	QString namesQuery = docMFIPluginFilterName(fileName,filterName) + "/" + filterElement + "/string()";
+	try
+	{
+		QStringList res = query(namesQuery);
+		if (res.size() != 1)
+			throw ParsingException("There is not help tag for filter " + filterName);
+		return res[0];
+	}
+	catch(QueryException q)
+	{
+		qDebug("Caught a QueryException %s",q.what());
+	}
+	assert(0);
+	return QString();
+}
+
 
 QString XMLFilterInfo::filterAttribute( const QString& filterName,const QString& attribute) const
 {	
@@ -255,7 +274,7 @@ QString XMLFilterInfo::filterParameterHelp( const QString& filterName,const QStr
 XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterExtendedInfo( const QString& filterName,const QString& paramName ) const
 {
 	//QString namesQuery = "for $x in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name=\"" + filterName + "\"]/PARAM[@name=\"" + paramName + "\"] return <p>type={data($x/@type)}|name={data($x/@name)}|defaultExpression={data($x/@defaultExpression)}|help={$x/PARAM_HELP}</p>/string()";
-	QString namesQuery = "for $x in " + docMFIPluginFilterNameParamName(fileName,filterName,paramName) + " return <p>" + attrNameAttrVal(MLXMLElNames::paramType,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramName,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramDefExpr,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramIsImportant,"$x/") + externalSep() + MLXMLElNames::paramHelpTag + "={$x/" + MLXMLElNames::paramHelpTag + "}</p>/string()";
+	QString namesQuery = "for $x in " + docMFIPluginFilterNameParamName(fileName,filterName,paramName) + " return <p>" + attrNameAttrVal(MLXMLElNames::paramType,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramName,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramDefExpr,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramIsImportant,"$x/") + externalSep() + MLXMLElNames::paramHelpTag + "={$x/" + MLXMLElNames::paramHelpTag + "}";
 	try
 	{
 		XMLFilterInfo::XMLMap res;
@@ -332,6 +351,26 @@ QString XMLFilterInfo::filterParameterAttribute( const QString& filterName,const
   assert(0);
   return QString();
 }
+
+QString XMLFilterInfo::pluginAttribute(const QString& attribute ) const
+{
+	QString namesQuery = docMFIPlugin(fileName) + "/<p>" +attrVal(attribute)+"</p>/string()";
+	try
+	{
+		QStringList res = query(namesQuery);
+		if (res.size() != 1)
+			throw ParsingException("Attribute " + attribute + " has not been specified for plugin.");
+		return res[0]; 
+	}
+	catch(QueryException e)
+	{
+		qDebug("Caught a QueryException %s",e.what());
+	}
+
+	assert(0);
+	return QString();
+}
+
 
 QString XMLFilterInfo::pluginName() const
 {
