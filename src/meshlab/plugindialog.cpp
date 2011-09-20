@@ -183,7 +183,8 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 		if (iDecorate)
 		{
 			foreach(QAction *a,iDecorate->actions())
-				if (actionName==a->text()) labelInfo->setText(iDecorate->filterInfo(a));
+				if (actionName==a->text()) 
+					labelInfo->setText(iDecorate->decorationInfo(a));
 		}
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 		if (iFilter)
