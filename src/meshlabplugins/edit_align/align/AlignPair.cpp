@@ -151,10 +151,11 @@ void AlignPair::Stat::HTMLDump(FILE *fp)
 
 
 /*
-
-Chiamata dopo ogni iterazione dell ICP per scartare le coppie di punti
-secondo i due valori di filtraggio in percentile PassHi e PassLo
-E' l'unica funzione ad usare PointNum e MinPointNum;
+This function is used to choose remove outliers after each ICP iteration.
+All the points with a distance over the given Percentile are discarded.
+It uses two parameters
+MaxPointNum an (unused) hard limit on the number of points that are choosen
+MinPointNum the minimum number of points that have to be chosen to be usable
 
 */
 bool AlignPair::ChoosePoints( 	vector<Point3d> &Ps,		// vertici corrispondenti su src (rossi)
@@ -175,7 +176,7 @@ bool AlignPair::ChoosePoints( 	vector<Point3d> &Ps,		// vertici corrispondenti s
 	{
 		int index = fnd+myrnd.generate(lastgood-fnd);
 		double dd=Distance(Ps[index],Pt[index]);
-    if(dd<newmaxd)
+    if(dd<=newmaxd)
 		{
 			swap(Ps[index],Ps[fnd]);
 			swap(Ns[index],Ns[fnd]);

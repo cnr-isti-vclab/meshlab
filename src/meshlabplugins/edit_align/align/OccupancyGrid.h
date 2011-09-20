@@ -218,7 +218,7 @@ public:
 	int coverage;  // quanto e' ricoperta da altre mesh eccetto se stessa (eg: se ho due mesh di 1000 con overlap al 30% la covrg e' 300)
 	int area;      // numero di voxel toccati da questa mesh
 	bool operator < (OGMeshInfo &o) const { return area<o.area;}	
-	static const int MaxStat() { return 64;}
+  static int MaxStat() { return 64;}
 	bool used;
 };
 /* Classe con informazioni su un arco plausibile
