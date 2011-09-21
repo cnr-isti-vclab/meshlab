@@ -47,12 +47,12 @@ public:
 
 	FilterMeasurePlugin();
 	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-	virtual FilterClass getClass(QAction *);
-	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel *mm=0);
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
+	FilterClass getClass(QAction *);
+	void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+	bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel *mm=0);
 };
 
 class MeasureTopoTag: public TagBase

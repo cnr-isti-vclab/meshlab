@@ -143,6 +143,46 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 	return MeshFilterInterface::Generic;
 }
 
+int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
+{
+	switch (ID(filter))
+	{
+	case FP_LOOP_SS                          :
+	case FP_BUTTERFLY_SS                     :
+	case FP_MIDPOINT                         :
+	case FP_REFINE_CATMULL                   :
+	case FP_REMOVE_UNREFERENCED_VERTEX       :
+	case FP_REMOVE_DUPLICATED_VERTEX         :
+	case FP_SELECT_FACES_BY_AREA             :
+	case FP_SELECT_FACES_BY_EDGE             :
+	case FP_QUADRIC_SIMPLIFICATION           :
+	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  :
+	case FP_REORIENT                         :
+	case FP_INVERT_FACES                     :
+	case FP_COMPUTE_PRINC_CURV_DIR           :
+	case FP_CLOSE_HOLES                      :
+	case FP_CYLINDER_UNWRAP                  :
+	case FP_REFINE_HALF_CATMULL              :
+	case FP_QUAD_PAIRING                     :
+	case FP_FAUX_CREASE                      :
+	case FP_VATTR_SEAM                       :
+	case FP_REFINE_LS3_LOOP									 : return MeshModel::MM_FACENUMBER;
+
+	case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
+	case FP_CLUSTERING                       :
+	case FP_SCALE                            :
+	case FP_CENTER                           :
+	case FP_ROTATE                           :
+	case FP_ROTATE_FIT                       :
+	case FP_PRINCIPAL_AXIS                   :
+	case FP_FLIP_AND_SWAP                    :
+	case FP_FREEZE_TRANSFORM                 :
+	case FP_RESET_TRANSFORM                  :
+	case FP_NORMAL_EXTRAPOLATION             : return MeshModel::MM_NONE;
+	}
+	return MeshModel::MM_NONE;
+}
+
 QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 {
 	switch (filter)
@@ -247,54 +287,6 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 	}
 
 	return QString();
-}
-
-int ExtraMeshFilterPlugin::getRequirements(QAction * action)
-{
-	switch(ID(action))
-	{
-		case FP_FAUX_CREASE                      : return MeshModel::MM_FACEFACETOPO;
-		case FP_QUAD_PAIRING                     : return MeshModel::MM_FACEFACETOPO;
-		case FP_REFINE_CATMULL                   : return MeshModel::MM_FACEFACETOPO;
-		case FP_REFINE_HALF_CATMULL              : return MeshModel::MM_FACEFACETOPO;
-
-		case FP_LOOP_SS                          :
-		case FP_BUTTERFLY_SS                     :
-		case FP_MIDPOINT                         :
-		case FP_CLOSE_HOLES                      :
-		case FP_REFINE_LS3_LOOP									 : return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
-
-		case FP_REORIENT                         : return MeshModel::MM_FACEFACETOPO;
-
-		case FP_REMOVE_UNREFERENCED_VERTEX       :
-		case FP_REMOVE_DUPLICATED_VERTEX         :
-    case FP_SELECT_FACES_BY_AREA             :
-    case FP_SELECT_FACES_BY_EDGE             :
-		case FP_CLUSTERING                       :
-		case FP_ROTATE                           :
-    case FP_ROTATE_FIT                       :
-    case FP_PRINCIPAL_AXIS                   :
-		case FP_CENTER                           :
-		case FP_SCALE                            :
-		case FP_RESET_TRANSFORM                  :
-		case FP_FLIP_AND_SWAP                    :
-		case FP_FREEZE_TRANSFORM                 :
-		case FP_NORMAL_EXTRAPOLATION             :
-		case FP_INVERT_FACES                     :
-		case FP_CYLINDER_UNWRAP                  :
-		case FP_VATTR_SEAM                       : return 0;
-
-    case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
-
-		case FP_COMPUTE_PRINC_CURV_DIR           : return MeshModel::MM_VERTCURVDIR | MeshModel::MM_FACEMARK | MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO;
-
-		case FP_QUADRIC_SIMPLIFICATION           :
-		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK;
-
-		default                                  : assert(0);
-	}
-
-	return 0;
 }
 
 // this function builds and intializes with the default values (that can depend on the current mesh or selection)
@@ -531,6 +523,7 @@ case  FP_BUTTERFLY_SS:
 case  FP_MIDPOINT:
 case  FP_REFINE_LS3_LOOP:
       {
+        m.updateDataMask( MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER );
         if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
         {
           errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
@@ -632,16 +625,16 @@ case FP_REMOVE_DUPLICATED_VERTEX:
 
 case FP_REORIENT:
 	  {
+			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
       bool oriented, orientable;
       if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm)>0 ) {
         errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness"; // text
         return false; // can't continue, mesh can't be processed
       }
-
       tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
-      vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-      vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
-      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+      tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+      tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
+      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
   } break;
 
 case FP_CLUSTERING:
@@ -689,6 +682,7 @@ case FP_FREEZE_TRANSFORM:
 
 case FP_QUADRIC_SIMPLIFICATION:
   {
+    m.updateDataMask( MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK);
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
 
@@ -724,6 +718,7 @@ case FP_QUADRIC_SIMPLIFICATION:
 
 case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
   {
+    m.updateDataMask( MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK);
 		if(!tri::HasPerWedgeTexCoord(m.cm))
 		{
 			errorMessage="Warning: nothing have been done. Mesh has no Texture.";
@@ -766,8 +761,7 @@ case FP_ROTATE_FIT:
 		  if (!par.getBool("Freeze"))
 		  {
 			  errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
-			return false;
-
+				return false;
 		  }
 	  }
       Box3f selBox; //il bbox delle facce selezionate
@@ -817,14 +811,9 @@ case FP_ROTATE_FIT:
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
 				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
-				
-
 			}
 			for (int i=0; i<md.rasterList.size(); i++)
-			{
 				md.rasterList[i]->shot.ApplyRigidTransformation(transf);
-				
-			}
 		}
 	
 	
@@ -833,7 +822,7 @@ case FP_ROTATE_FIT:
 
 case FP_ROTATE :
   {
-	   if (par.getBool("ToAll"))
+     if (par.getBool("ToAll"))
 	  {
 		  if (!par.getBool("Freeze"))
 		  {
@@ -888,14 +877,9 @@ case FP_ROTATE :
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
 				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
-				
-
 			}
 			for (int i=0; i<md.rasterList.size(); i++)
-			{
 				md.rasterList[i]->shot.ApplyRigidTransformation(transf);
-				
-			}
 		}
   } break;
 
@@ -907,7 +891,6 @@ case FP_PRINCIPAL_AXIS:
 		  {
 			  errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
 			return false;
-
 		  }
 	  }
 	  if(par.getBool("pointsFlag"))
@@ -1169,7 +1152,6 @@ case FP_FLIP_AND_SWAP:
       tri::UpdateBounding<CMeshO>::Box(m.cm);
       m.cm.Tr.SetIdentity();
     }
-
   } break;
 
 case FP_NORMAL_EXTRAPOLATION :
@@ -1199,14 +1181,15 @@ case FP_NORMAL_SMOOTH_POINTCLOUD :
 
 case FP_COMPUTE_PRINC_CURV_DIR:
   {
-
-	  if(par.getBool("Autoclean")){
+   m.updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO);
+   m.updateDataMask(MeshModel::MM_VERTCURV | MeshModel::MM_VERTCURVDIR);
+   tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
+    if(par.getBool("Autoclean")){
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			Log( "Removed %d unreferenced vertices",delvert);
 	  }
 
 	  switch(par.getEnum("Method")){
-
 		  case 0:
         if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0 ) {
 				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
@@ -1221,9 +1204,9 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
 				return false; // can't continue, mesh can't be processed
 				}
-			  vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycles(m.cm); break;
+				vcg::tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycles(m.cm); break;
 		  case 3:
-			  vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+				vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
         tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm);
 				break;
 		  default:assert(0);break;
@@ -1233,6 +1216,7 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 
   case FP_CLOSE_HOLES:
   {
+    m.updateDataMask(MeshModel::MM_FACEFACETOPO);
     if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0){
       errorMessage = "Mesh has some not 2 manifold faces, filter require manifoldness";
       return false;
@@ -1364,20 +1348,20 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 	  tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
 	  assert(tri::BitQuadCreation<CMeshO>::IsBitTriQuadConventional(m.cm));
-	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
-	  m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-	  m.updateDataMask(MeshModel::MM_POLYGONAL);
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+
   } break;
 
   case FP_REFINE_CATMULL :
   { // in practice it is just a simple double application of the FP_REFINE_HALF_CATMULL.
-	  m.updateDataMask(MeshModel::MM_FACEQUALITY);
+    m.updateDataMask(MeshModel::MM_FACEQUALITY);
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 	  assert(tri::BitQuadCreation<CMeshO>::IsBitTriQuadConventional(m.cm));
 	  tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 	  tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
 	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		m.updateDataMask(MeshModel::MM_POLYGONAL);
   } break;
 
   case FP_QUAD_PAIRING :
@@ -1398,8 +1382,8 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 
   case FP_FAUX_CREASE :
   {
+  m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 	float AngleDeg = par.getFloat("AngleDeg");
-	tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	tri::UpdateFlags<CMeshO>::FaceFauxCrease(m.cm,math::ToRad(AngleDeg));
   } break;
 

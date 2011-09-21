@@ -67,14 +67,14 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 	FilterUnsharp();
 	~FilterUnsharp();
 
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-  virtual FilterClass getClass(QAction *);
-  virtual int getRequirements(QAction *);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-  virtual void initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst);
-	virtual int postCondition( QAction* ) const;
-	virtual int getPreConditions(QAction *) const;
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
+	FilterClass getClass(QAction *);
+	int getRequirements(QAction *);
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	void initParameterSet(QAction *action, MeshDocument &/*m*/, RichParameterSet & parlst);
+	int postCondition( QAction* ) const;
+	int getPreConditions(QAction *) const;
 
 	protected:
 	

@@ -116,8 +116,8 @@ public:
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
 
-  virtual void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter);
-  virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
+  void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter);
+  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
 
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);

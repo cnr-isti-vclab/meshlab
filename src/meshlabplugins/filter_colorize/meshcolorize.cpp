@@ -99,27 +99,6 @@ QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const {
   }
 }
 
-// What "new" properties the plugin requires
-int ExtraMeshColorizePlugin::getRequirements(QAction *action){
-  switch(ID(action)){
-  case CP_DISCRETE_CURVATURE:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV;
-  case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
-  case CP_SATURATE_QUALITY:         return MeshModel::MM_VERTFACETOPO;
-  case CP_RANDOM_FACE:              return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
-  case CP_RANDOM_CONNECTED_COMPONENT:return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
-  case CP_CLAMP_QUALITY:            return 0; // TODO: split clamp on vertex & faces and add requirements
-  case CP_MAP_VQUALITY_INTO_COLOR:  return MeshModel::MM_VERTCOLOR;
-  case CP_MAP_FQUALITY_INTO_COLOR:  return MeshModel::MM_FACECOLOR;
-  case CP_VERTEX_SMOOTH:            return 0; // TODO: should it be MM_NONE?
-  case CP_FACE_SMOOTH:              return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR ;
-  case CP_VERTEX_TO_FACE:           return MeshModel::MM_FACECOLOR;
-  case CP_FACE_TO_VERTEX:           return MeshModel::MM_VERTCOLOR;
-  case CP_TEXTURE_TO_VERTEX:        return MeshModel::MM_FACECOLOR;
-  default: assert(0); return 0;
-  }
-  return 0;
-}
-
 void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichParameterSet & par){
   // variables cannot be defined within switch statement
   QStringList metrics;
@@ -175,18 +154,22 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
  MeshModel &m=*(md.mm());
  switch(ID(filter)) {
   case CP_SATURATE_QUALITY:{
+     m.updateDataMask(MeshModel::MM_VERTFACETOPO);
      tri::UpdateQuality<CMeshO>::VertexSaturate(m.cm, par.getFloat("gradientThr"));
      if(par.getBool("updateColor"))
      {
        Histogramf H;
        tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+       m.updateDataMask(MeshModel::MM_VERTCOLOR);
        tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
      }
      Log("Saturated ");
    }
 break;
+  case CP_MAP_VQUALITY_INTO_COLOR:
+     m.updateDataMask(MeshModel::MM_VERTCOLOR);
   case CP_CLAMP_QUALITY:
-  case CP_MAP_VQUALITY_INTO_COLOR:{
+      {
       float RangeMin = par.getFloat("minVal");	
       float RangeMax = par.getFloat("maxVal");		
 			bool usePerc = par.getDynamicFloat("perc")>0;
@@ -218,6 +201,7 @@ break;
       break;
     }
    case CP_MAP_FQUALITY_INTO_COLOR: {
+       m.updateDataMask(MeshModel::MM_FACECOLOR);
        float RangeMin = par.getFloat("minVal");
        float RangeMax = par.getFloat("maxVal");
        float perc = par.getDynamicFloat("perc");
@@ -244,6 +228,9 @@ break;
 
   case CP_DISCRETE_CURVATURE:
     {
+      m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV);
+      m.updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+
       if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0) {
 				errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
 				return false; // can't continue, mesh can't be processed
@@ -267,12 +254,11 @@ break;
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
       tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
       Log( "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
-			m.updateDataMask(MeshModel::MM_VERTQUALITY);
-			m.updateDataMask(MeshModel::MM_VERTCOLOR);
     break;
     }  
   case CP_TRIANGLE_QUALITY:
     {
+     m.updateDataMask(MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY);
 			CMeshO::FaceIterator fi;
 			float min = 0;
 			float max = 1.0;
@@ -303,11 +289,13 @@ break;
 
   case CP_RANDOM_CONNECTED_COMPONENT:
    m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-   m.updateDataMask(MeshModel::MM_FACEMARK);
+   m.updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
    vcg::tri::UpdateColor<CMeshO>::FaceRandomConnectedComponent(m.cm);
    break;
 
  case CP_RANDOM_FACE:
+     m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+     m.updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
     vcg::tri::UpdateColor<CMeshO>::MultiFaceRandom(m.cm);
     break;
 
@@ -319,19 +307,23 @@ break;
 		break;
   case CP_FACE_SMOOTH:
 		{
+    m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		int iteration = par.getInt("iteration");
 		tri::Smooth<CMeshO>::FaceColorLaplacian(m.cm,iteration,false,cb);
 		}
 		break;
   case CP_FACE_TO_VERTEX:
-		 tri::UpdateColor<CMeshO>::VertexFromFace(m.cm);
+     m.updateDataMask(MeshModel::MM_VERTCOLOR);
+     tri::UpdateColor<CMeshO>::VertexFromFace(m.cm);
 		break;
 	 case CP_VERTEX_TO_FACE:
-		 tri::UpdateColor<CMeshO>::FaceFromVertex(m.cm);
+     m.updateDataMask(MeshModel::MM_FACECOLOR);
+     tri::UpdateColor<CMeshO>::FaceFromVertex(m.cm);
 		 break;
   case CP_TEXTURE_TO_VERTEX:
 		{
-			if(!HasPerWedgeTexCoord(m.cm)) break;
+      m.updateDataMask(MeshModel::MM_VERTCOLOR);
+      if(!HasPerWedgeTexCoord(m.cm)) break;
 			CMeshO::FaceIterator fi; 
 			QImage tex(m.cm.textures[0].c_str());
 			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD()) 

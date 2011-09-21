@@ -42,10 +42,10 @@ public:
 
   bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
   bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent= 0);
-  virtual void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
-  virtual void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
+  void initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
+  void applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par);
   void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst);
-  virtual void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
+  void initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet & par);
 };
 
 #endif

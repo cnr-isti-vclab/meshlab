@@ -156,15 +156,6 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
               return MeshFilterInterface::Generic;
   }
 }
- int FilterCreate::getRequirements(QAction *action)
-{
-  switch(ID(action))
-  {
-    case CR_SPHERE:
-      return MeshModel::MM_FACEFACETOPO;
-  }
-  return MeshModel::MM_NONE;
-}
 
 QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
  {

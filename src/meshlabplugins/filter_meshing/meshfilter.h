@@ -74,15 +74,15 @@ public:
 
 
  ExtraMeshFilterPlugin();
- ~ExtraMeshFilterPlugin(){};
- virtual QString filterName(FilterIDType filter) const;
- virtual QString filterInfo(FilterIDType filter) const;
+ ~ExtraMeshFilterPlugin(){}
+  QString filterName(FilterIDType filter) const;
+  QString filterInfo(FilterIDType filter) const;
 
- virtual FilterClass getClass(QAction *);
- virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
- virtual int getRequirements(QAction *);
- virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
- virtual int postCondition(QAction *filter) const;
+  FilterClass getClass(QAction *);
+  void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+  bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  int postCondition(QAction *filter) const;
+  int getPreCondition(QAction *filter) const;
 
 protected:
 

@@ -54,18 +54,15 @@ public:
     
 
     ExtraMeshColorizePlugin();
-    ~ExtraMeshColorizePlugin(){};
+    ~ExtraMeshColorizePlugin(){}
   
-  virtual QString filterName(FilterIDType filter) const;
-  virtual QString filterInfo(FilterIDType filterId) const;
+ QString filterName(FilterIDType filter) const;
+ QString filterInfo(FilterIDType filterId) const;
 	int getPreConditions(QAction *) const;
 	int postCondition( QAction* ) const;
-
-  virtual FilterClass getClass(QAction *);
-  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-  virtual int getRequirements(QAction *);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-
+	FilterClass getClass(QAction *);
+	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 };
 
 #endif

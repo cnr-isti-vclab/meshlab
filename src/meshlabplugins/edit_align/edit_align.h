@@ -54,12 +54,12 @@ public:
 
     static const QString Info();
 
-    virtual bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
-    virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+    bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
+    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+    void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+    void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
+    void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
+    void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
 		QFont qFont;
   	int mode;			

@@ -35,14 +35,13 @@ public:
 
 	FilterCreate();
 
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-  virtual FilterClass getClass(QAction *);
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual int getRequirements(QAction *action);
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
+	FilterClass getClass(QAction *);
+	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	QString filterScriptFunctionName(FilterIDType filterID);
-	virtual QString pluginName(void) const { return "FilterCreate"; }
+	QString pluginName(void) const { return "FilterCreate"; }
 };
 
 #endif
