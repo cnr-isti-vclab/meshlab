@@ -73,7 +73,7 @@ class XMLMeshLabWidgetFactory
 public:	
 	//WARNING! this function call constructors that could rise up a set of MeshLabExceptions but it is not able to manage it, so let the exceptions floating up!
 	//IN ANY CASE the callee MUST check if the returned value is not NULL.
-	static XMLMeshLabWidget* create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,QWidget* parent);
+	static XMLMeshLabWidget* create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,MeshDocument* md,QWidget* parent);
 };
 
 //
@@ -289,7 +289,7 @@ public:
 	~XMLComboWidget();
 	void updateVisibility(const bool vis);
 	void Init(QWidget *p,QString lab,int newEnum, QStringList values);
-	virtual void set(const QString& nwExpStr) = 0;
+	void set(const QString& nwExpStr) {};
 	virtual QString getWidgetExpression();
 
 private:
@@ -315,8 +315,49 @@ public:
 	~XMLEnumWidget(){};
 
 	QString getWidgetExpression();
-	void set(const QString& nwExpStr);
 };
+
+class XMLMeshWidget : public XMLEnumWidget
+{
+	Q_OBJECT
+
+public:
+	XMLMeshWidget(MeshDocument* mdoc,const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	~XMLMeshWidget(){};
+
+private:
+	MeshDocument* md;
+};
+
+//class XMLShotfWidget : public MeshLabWidget
+//{
+//	Q_OBJECT
+//
+//public:
+//	ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla);
+//	~ShotfWidget();
+//	QString paramName;
+//	vcg::Shotf getValue();
+//
+//	void collectWidgetValue();
+//	void resetWidgetValue();
+//	void setWidgetValue(const Value& nv);
+//
+//	public slots:
+//		void  getShot();
+//		void  setShotValue(QString name, vcg::Shotf val);
+//signals:
+//		void askRasterShot(QString);
+//		void askMeshShot(QString);
+//		void askViewerShot(QString);
+//
+//protected:
+//	vcg::Shotf curShot;
+//	QLineEdit * shotLE;
+//	QPushButton *getShotButton;
+//	QComboBox *getShotCombo;
+//	QLabel* descLab;
+//};
 
 class XMLStdParFrame : public QFrame
 {
@@ -390,6 +431,7 @@ public:
 	//void dialogEvaluateExpression(const Expression& exp,Value** res);
 	//void expandView(bool exp);
 
+	MeshDocument * curMeshDoc;
 private slots:
 	void applyClick();
 	void closeClick();
@@ -411,7 +453,6 @@ private:
 
 	int curmask;
 	MeshModel *curModel;
-	MeshDocument * curMeshDoc;
 	MeshLabXMLFilterContainer* curmfc;
 	MainWindowInterface *curmwi;
 	XMLFilterInfo::XMLMapList curParMap;

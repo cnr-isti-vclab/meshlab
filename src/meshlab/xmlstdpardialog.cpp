@@ -315,9 +315,12 @@ XMLStdParFrame::~XMLStdParFrame()
 
 void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap,EnvWrap& envir)
 {
+	MeshLabXMLStdDialog* dialog = qobject_cast<MeshLabXMLStdDialog*>(parent());
+	if (dialog == NULL)
+		throw MeshLabException("An XMLStdParFrame has not a MeshLabXMLStdDialog's parent");
 	for(XMLFilterInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
 	{
-		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,envir,this);
+		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,envir,dialog->curMeshDoc,this);
 		if (widg == NULL)
 			return;
 		xmlfieldwidgets.push_back(widg); 
@@ -453,7 +456,7 @@ void XMLCheckBoxWidget::setVisibility( const bool vis )
 	cb->setVisible(vis);
 }
 
-XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,QWidget* parent)
+XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,MeshDocument* md,QWidget* parent)
 {
 	QString guiType = widgetTable[MLXMLElNames::guiType];
 	if (guiType == MLXMLElNames::editTag)
@@ -477,6 +480,8 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 	if (guiType == MLXMLElNames::enumWidgetTag)
 		return new XMLEnumWidget(widgetTable,env,parent);
 
+	if (guiType == MLXMLElNames::meshWidgetTag)
+		return new XMLMeshWidget(md,widgetTable,env,parent);
 	return NULL;
 }
 
@@ -1014,11 +1019,17 @@ XMLEnumWidget::XMLEnumWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap&
 	}
 }
 
-void XMLEnumWidget::set( const QString& nwExpStr )
-{
-}
-
 QString XMLEnumWidget::getWidgetExpression()
 {
 	return enumCombo->itemData(enumCombo->currentIndex()).toString();
+}
+
+XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+:XMLEnumWidget(xmlWidgetTag,envir,p)
+{
+	foreach(MeshModel* mm,mdoc->meshList)
+		enumCombo->addItem(mm->shortName(),mm->id());
+	int def = env.evalInt(xmlWidgetTag[MLXMLElNames::paramDefExpr]); 
+	if (mdoc->getMesh(def))
+		enumCombo->setCurrentIndex(def);
 }
