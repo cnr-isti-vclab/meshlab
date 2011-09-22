@@ -274,7 +274,7 @@ QString XMLFilterInfo::filterParameterHelp( const QString& filterName,const QStr
 XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterExtendedInfo( const QString& filterName,const QString& paramName ) const
 {
 	//QString namesQuery = "for $x in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name=\"" + filterName + "\"]/PARAM[@name=\"" + paramName + "\"] return <p>type={data($x/@type)}|name={data($x/@name)}|defaultExpression={data($x/@defaultExpression)}|help={$x/PARAM_HELP}</p>/string()";
-	QString namesQuery = "for $x in " + docMFIPluginFilterNameParamName(fileName,filterName,paramName) + " return <p>" + attrNameAttrVal(MLXMLElNames::paramType,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramName,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramDefExpr,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramIsImportant,"$x/") + externalSep() + MLXMLElNames::paramHelpTag + "={$x/" + MLXMLElNames::paramHelpTag + "}";
+	QString namesQuery = "for $x in " + docMFIPluginFilterNameParamName(fileName,filterName,paramName) + " return <p>" + attrNameAttrVal(MLXMLElNames::paramType,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramName,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramDefExpr,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramIsImportant,"$x/") + externalSep() + MLXMLElNames::paramHelpTag + "={$x/" + MLXMLElNames::paramHelpTag + "}</p>/string()";
 	try
 	{
 		XMLFilterInfo::XMLMap res;
@@ -297,9 +297,8 @@ XMLFilterInfo::XMLMap XMLFilterInfo::filterParameterExtendedInfo( const QString&
 	}
 	catch (QueryException e)
 	{
-    qDebug("Caught a QueryException %s",e.what());
+		qDebug("Caught a QueryException %s",e.what());
 	}
-  assert(0);
   return XMLFilterInfo::XMLMap();
 }
 
