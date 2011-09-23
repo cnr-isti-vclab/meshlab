@@ -126,6 +126,21 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 									foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
 									addItems(pluginItem,Templist);
 								}
+								MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
+								if (iXMLFilter)
+								{
+									QFileInfo f(dir.absoluteFilePath(fileName));
+									QString tmp = f.baseName() + ".xml";
+									QString xmlFile = dir.absoluteFilePath(tmp);
+									XMLMessageHandler xmlErr;
+									MeshLabXMLFilterContainer fc;
+									fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,ScriptAdapterGenerator::xmlSchemaFile(),xmlErr);
+									if (fc.xmlInfo != NULL)
+									{
+										QStringList fn = fc.xmlInfo->filterNames();
+										addItems(pluginItem,fn);	
+									}
+								}
 								MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 								if (iRender){
 									QStringList Templist;
@@ -162,6 +177,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 	if (item->parent()!=NULL)	{parent=item->parent()->text(0);actionName=item->text(0);}
 	else parent=item->text(0);
 	QString fileName=pathDirectory+"/"+parent;
+	QDir dir(pathDirectory);
 	QPluginLoader loader(fileName);
     qDebug("Trying to load the plugin '%s'",qPrintable(fileName));
 	QObject *plugin = loader.instance();
@@ -191,6 +207,22 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 		{
 			foreach(QAction *a,iFilter->actions())
 							if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
+		}
+		MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
+		if (iXMLFilter)
+		{
+			QFileInfo f(dir.absoluteFilePath(parent));
+			QString tmp = f.baseName() + ".xml";
+			QString xmlFile = dir.absoluteFilePath(tmp);
+			XMLMessageHandler xmlErr;
+			MeshLabXMLFilterContainer fc;
+			fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,ScriptAdapterGenerator::xmlSchemaFile(),xmlErr);
+			if (fc.xmlInfo != NULL)
+			{
+				QStringList ls = fc.xmlInfo->filterNames();
+				foreach(QString fn,ls)
+					labelInfo->setText(fc.xmlInfo->filterHelp(fn));	
+			}
 		}
 		MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 		if (iRender){
