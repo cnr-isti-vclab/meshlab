@@ -1104,29 +1104,30 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	// at the end for filters that change the color, or selection set the appropriate rendering mode
 	QString filterClasses = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
 	QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-	//if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
-	//	GLA()->setColorMode(vcg::GLW::CMPerFace);
-	//	meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
-	//}
-	//if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
-	//	GLA()->setColorMode(vcg::GLW::CMPerVert);
-	//	meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-	//}
-	//if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
-	//{
-	//	GLA()->setColorMode(vcg::GLW::CMPerMesh);
-	//	meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
-	//}
-	//if(iFilter->getClass(action) & MeshFilterInterface::Selection )
-	//{
-	//	GLA()->setSelectVertRendering(true);
-	//	GLA()->setSelectFaceRendering(true);
-	//}
-	//if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
-	//	GLA()->resetTrackBall();
+	int mask =	MeshLabFilterInterface::convertStringListToCategoryEnum(filterClassesList);
+	if(mask & MeshFilterInterface::FaceColoring ) {
+		GLA()->setColorMode(vcg::GLW::CMPerFace);
+		meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+	}
+	if(mask & MeshFilterInterface::VertexColoring ){
+		GLA()->setColorMode(vcg::GLW::CMPerVert);
+		meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+	}
+	if(mask & MeshModel::MM_COLOR)
+	{
+		GLA()->setColorMode(vcg::GLW::CMPerMesh);
+		meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
+	}
+	if(mask & MeshFilterInterface::Selection )
+	{
+		GLA()->setSelectVertRendering(true);
+		GLA()->setSelectFaceRendering(true);
+	}
+	if(mask & MeshFilterInterface::MeshCreation )
+		GLA()->resetTrackBall();
 
-	//if(iFilter->getClass(action) & MeshFilterInterface::Texture )
-	//	GLA()->updateTexture();
+	if(mask & MeshFilterInterface::Texture )
+		GLA()->updateTexture();
 
 	qb->reset();
 
