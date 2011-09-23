@@ -187,6 +187,38 @@ MeshLabFilterInterface::MeshLabFilterInterface()
 	//}
 }
 
+void MeshLabFilterInterface::initConvertingCategoryMap( QMap<QString,MeshFilterInterface::FilterClass>& convertingMap )
+{
+	convertingMap["Generic"] = MeshFilterInterface::Generic;
+	convertingMap["Selection"] = MeshFilterInterface::Selection;
+	convertingMap["Remeshing"] = MeshFilterInterface::Remeshing;
+	convertingMap["FaceColoring"] = MeshFilterInterface::FaceColoring;
+	convertingMap["VertexColoring"] = MeshFilterInterface::VertexColoring;
+	convertingMap["MeshCreation"] = MeshFilterInterface::MeshCreation;
+	convertingMap["Smoothing"] = MeshFilterInterface::Smoothing;
+	convertingMap["Quality"] = MeshFilterInterface::Quality;
+	convertingMap["Layer"] = MeshFilterInterface::Layer;
+	convertingMap["Normal"] = MeshFilterInterface::Normal;
+	convertingMap["Sampling"] = MeshFilterInterface::Sampling;
+	convertingMap["Texture"] = MeshFilterInterface::Texture;
+	convertingMap["RangeMap"] = MeshFilterInterface::RangeMap;
+	convertingMap["PointSet"] = MeshFilterInterface::PointSet;
+	convertingMap["Measure"] = MeshFilterInterface::Measure;
+	convertingMap["Polygonal"] = MeshFilterInterface::Polygonal;
+	convertingMap["Camera"] = MeshFilterInterface::Camera;
+}
+
+int MeshLabFilterInterface::convertStringListToCategoryEnum( const QStringList& stringListEnum )
+{
+	int res = 0;
+	QMap<QString,MeshFilterInterface::FilterClass> convertingMap;
+	initConvertingCategoryMap(convertingMap);
+	foreach(QString st,stringListEnum)
+	{
+		res = res | convertingMap[st];
+	}
+	return res;
+}
 //QMap<QString,MeshModel::MeshElement> MeshLabFilterInterface::convertingMap;
 //
 //bool MeshLabFilterInterface::init = false;
