@@ -369,14 +369,14 @@ Q_INVOKABLE float MeshModelScriptInterface::bboxDiag() const
 	return mm.cm.bbox.Diag();
 }
 
-Q_INVOKABLE vcg::Point3f MeshModelScriptInterface::bboxMin() const
+Q_INVOKABLE QVector<float> MeshModelScriptInterface::bboxMin() const
 {
-	return mm.cm.bbox.min;
+	return ScriptInterfaceUtilities::vcgPointToVector(mm.cm.bbox.min);
 }
 
-Q_INVOKABLE vcg::Point3f MeshModelScriptInterface::bboxMax() const
+Q_INVOKABLE QVector<float> MeshModelScriptInterface::bboxMax() const
 {
-	return mm.cm.bbox.max;
+	return ScriptInterfaceUtilities::vcgPointToVector(mm.cm.bbox.max);
 }
 
 Q_INVOKABLE int MeshModelScriptInterface::id() const
@@ -398,12 +398,14 @@ Q_INVOKABLE VCGVertexScriptInterface* MeshModelScriptInterface::v( const int ind
 		return NULL;
 }
 
+Q_INVOKABLE ShotScriptInterface* MeshModelScriptInterface::shot()
+{
+	return new ShotScriptInterface(mm.cm.shot);
+}
+
 Q_INVOKABLE QVector<float> VCGVertexScriptInterface::getP() 
 {
-	QVector<float> vfl(3);
-	for (int ii = 0;ii < 3;++ii)
-		vfl[ii] = vv.P()[ii];
-	return vfl;
+	return ScriptInterfaceUtilities::vcgPointToVector(vv.P());
 }
 
 Q_INVOKABLE void VCGVertexScriptInterface::setP( const float x,const float y,const float z )
@@ -440,6 +442,16 @@ QScriptValue VCGVertexScriptInterfaceToScriptValue( QScriptEngine* eng,VCGVertex
 void VCGVertexScriptInterfaceFromScriptValue( const QScriptValue& val,VCGVertexScriptInterface*& out )
 {
 	out = qobject_cast<VCGVertexScriptInterface*>(val.toQObject());
+}
+
+QScriptValue ShotScriptInterfaceToScriptValue( QScriptEngine* eng,ShotScriptInterface* const& in )
+{
+	return eng->newQObject(in);
+}
+
+void ShotScriptInterfaceFromScriptValue( const QScriptValue& val,ShotScriptInterface*& out )
+{
+	out = qobject_cast<ShotScriptInterface*>(val.toQObject());
 }
 
 QScriptValue EnvWrap_ctor( QScriptContext* c,QScriptEngine* e )
@@ -617,6 +629,7 @@ QScriptValue Env_ctor( QScriptContext */*context*/,QScriptEngine *engine )
 	return engine->newQObject(env, QScriptEngine::ScriptOwnership);
 }
 
+
 Env::Env()
 {
 	qScriptRegisterSequenceMetaType<QVector<float> >(this);
@@ -643,3 +656,17 @@ void Env::insertExpressionBinding( const QString& nm,const QString& exp )
 		throw JavaScriptException(res.toString());
 }
 
+
+ShotScriptInterface::ShotScriptInterface( vcg::Shotf& st )
+:shot(st)
+{
+
+}
+
+QVector<float> ScriptInterfaceUtilities::vcgPointToVector( const vcg::Point3f& p )
+{
+	QVector<float> vfl(3);
+	for (int ii = 0;ii < 3;++ii)
+		vfl[ii] = p[ii];
+	return vfl;
+}

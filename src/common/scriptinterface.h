@@ -60,6 +60,11 @@ QScriptValue IRichParameterSet_ctor(QScriptContext* c,QScriptEngine* e);
 
 QScriptValue myprint (QScriptContext* sc, QScriptEngine* se);
 
+class ScriptInterfaceUtilities
+{
+public:
+	static QVector<float> vcgPointToVector(const vcg::Point3f& p);
+};
 
 //class VCGPoint3fScriptInterface : public QObject
 //{
@@ -104,6 +109,8 @@ public:
 	MeshDocument* md;
 };
 
+class ShotScriptInterface;
+
 class MeshModelScriptInterface : public QObject
 {
 	Q_OBJECT
@@ -113,9 +120,10 @@ public:
 	
 	Q_INVOKABLE int id() const;
 	Q_INVOKABLE float bboxDiag() const;
-	Q_INVOKABLE vcg::Point3f bboxMin() const;
-	Q_INVOKABLE vcg::Point3f bboxMax() const;
+	Q_INVOKABLE QVector<float> bboxMin() const;
+	Q_INVOKABLE QVector<float> bboxMax() const;
 	Q_INVOKABLE VCGVertexScriptInterface* v(const int ind);
+	Q_INVOKABLE ShotScriptInterface* shot();
 
 	MeshModel& mm;
 }; 
@@ -175,6 +183,21 @@ public:
 
 QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);
 
+class ShotScriptInterface : public QObject
+{
+	Q_OBJECT
+public:
+	ShotScriptInterface(vcg::Shotf& st);
+	~ShotScriptInterface() {};
+
+private:
+	vcg::Shotf& shot; 
+};
+
+Q_DECLARE_METATYPE(ShotScriptInterface*)
+QScriptValue ShotScriptInterfaceToScriptValue(QScriptEngine* eng,ShotScriptInterface* const& in);
+
+void ShotScriptInterfaceFromScriptValue(const QScriptValue& val,ShotScriptInterface*& out);
 //class EnvWrap : protected virtual QScriptEngine
 //{
 //private:
