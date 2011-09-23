@@ -93,7 +93,7 @@ QString XMLFilterInfo::filterHelp( const QString& filterName) const
 		QStringList res = query(namesQuery);
 		if (res.size() != 1)
 			throw ParsingException("There is not help tag for filter " + filterName);
-		return res[0];
+		return res[0].trimmed();
 	}
 	catch(QueryException q)
 	{
@@ -112,7 +112,7 @@ QString XMLFilterInfo::filterElement( const QString& filterName,const QString& f
 		QStringList res = query(namesQuery);
 		if (res.size() != 1)
 			throw ParsingException("There is not help tag for filter " + filterName);
-		return res[0];
+		return res[0].trimmed();
 	}
 	catch(QueryException q)
 	{
@@ -132,7 +132,7 @@ QString XMLFilterInfo::filterAttribute( const QString& filterName,const QString&
 		QStringList res = query(namesQuery);
 		if (res.size() != 1)
 			throw ParsingException("Attribute " + attribute + " has not been specified for filter " + filterName);
-		return res[0]; 
+		return res[0].trimmed(); 
 	}	
 	catch (QueryException e)
 	{
@@ -206,7 +206,7 @@ XMLFilterInfo::XMLMapList XMLFilterInfo::mapListFromStringList( const QStringLis
 	//"attribute0=value0|attribute1=value1|...|attributeN=valueN" "attribute0=value0|attribute1=value1|...|attributeN=valueN" "attribute0=value0|attribute1=value1|...|attributeN=valueN"
 	foreach(QString st, list)
 	{
-		XMLFilterInfo::XMLMap attrValue = mapFromString(st);
+		XMLFilterInfo::XMLMap attrValue = mapFromString(st.trimmed());
 		result.push_back(attrValue);
 	}
 	return result;
