@@ -1,5 +1,5 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
-	<PLUGIN pluginName="ExtraSamplePlugin">
+	<PLUGIN pluginName="ExtraSamplePlugin" pluginAuthor="Guido Ranzuglia" pluginEmail="guido.ranzuglia@isti.cnr.it">
 		<FILTER filterName="Random vertex displacement" filterFunction="randomVerticesDisplacement" filterClass="Smoothing | Remeshing" filterPre="MM_NONE" filterPost="MM_NONE" filterAriety="SingleMesh">
 			<FILTER_HELP>
 				Move the vertices of the mesh of a random quantity.
@@ -16,19 +16,6 @@
 					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
 				</PARAM_HELP>
 				<CHECKBOX_GUI guiLabel="Recompute normals" />
-			</PARAM>
-			<PARAM parType="Vec3" parName="VectDir" parDefault="[1.0,0.0,0.0]" parIsImportant="true">
-				<PARAM_HELP>
-					Toggle the recomputation of the normals after the random displacement.\n\n
-					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.
-				</PARAM_HELP>
-				<EDIT_GUI guiLabel="VectDir" />
-			</PARAM>
-			<PARAM parType="Real" parName="Displ" parDefault="meshDoc.current().bboxDiag() / 100.0" parIsImportant="false">
-				<PARAM_HELP>
-					The vertex are displaced of a vector whose norm is bounded by this value
-				</PARAM_HELP>
-				<EDIT_GUI guiLabel="Max displacement"/>
 			</PARAM>
 		</FILTER>		
 	</PLUGIN>
