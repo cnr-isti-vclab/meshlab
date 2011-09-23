@@ -903,9 +903,8 @@ void MainWindow::startFilter()
 				// if no dialog is created the filter must be executed immediately
 				if(! xmldialog->showAutoDialog(filt, meshDoc(),  this, GLA()) )
 				{
-					//RichParameterSet dummyParSet;
-					//executeFilter(action, dummyParSet, false);
-					meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Problem with showAutoDialog.");
+					EnvWrap envwrap(PM.env);
+					executeFilter(&filt, envwrap, false);
 				}
 			}
 			catch (MeshLabException& e)
