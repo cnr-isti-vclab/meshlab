@@ -79,7 +79,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	QString postCond = curmfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
 	QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 	curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
-	if(isDynamic())
+	if(isPreviewable())
 	{
 		previewCB = new QCheckBox("Preview", qf);
 		previewCB->setCheckState(Qt::Unchecked);
@@ -136,7 +136,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
   XMLFilterInfo::XMLMapList mplist = mfc.xmlInfo->filterParametersExtendedInfo(fname);
 	curParMap = mplist;
 	//curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
-	if(curParMap.isEmpty() && !isDynamic()) 
+	if(curParMap.isEmpty() && !isPreviewable())
 		return false;
 
 	createFrame();
@@ -144,7 +144,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
 	//QString postCond = mfc.xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
 	//QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 	//curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
-	if(isDynamic())
+	if(isPreviewable())
 	{
 		meshState.create(curmask, curModel);
 		connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
@@ -261,7 +261,7 @@ void MeshLabXMLStdDialog::applyDynamic()
 
 void MeshLabXMLStdDialog::changeCurrentMesh( int meshInd )
 {
-	if(isDynamic())
+	if(isPreviewable())
 	{
 		meshState.apply(curModel);
 		curModel=curMeshDoc->meshList.at(meshInd);
@@ -275,7 +275,7 @@ void MeshLabXMLStdDialog::changeCurrentMesh( int meshInd )
 //
 //}
 
-bool MeshLabXMLStdDialog::isDynamic() const
+bool MeshLabXMLStdDialog::isPreviewable() const
 {
 	 return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 }

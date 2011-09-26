@@ -425,7 +425,7 @@ public:
 	void loadFrameContent();
 
 	bool showAutoDialog(MeshLabXMLFilterContainer& mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
-	bool isDynamic() const;
+	bool isPreviewable() const;
 	void closeEvent ( QCloseEvent * event ); 
 //signals:
 	//void dialogEvaluateExpression(const Expression& exp,Value** res);

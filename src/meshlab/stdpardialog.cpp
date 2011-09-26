@@ -56,11 +56,11 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 
 		mfi->initParameterSet(action, *mdp, curParSet);
         curmask = mfi->postCondition(action);
-        if(curParSet.isEmpty() && !isDynamic()) return false;
+        if(curParSet.isEmpty() && !isPreviewable()) return false;
 
         createFrame();
 		loadFrameContent(mdp);
-		if(isDynamic())
+		if(isPreviewable())
 		{
 			meshState.create(curmask, curModel);
 			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
@@ -72,7 +72,7 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 
 void MeshlabStdDialog::changeCurrentMesh(int meshInd)
 {
-    if(isDynamic())
+    if(isPreviewable())
     {
         meshState.apply(curModel);
         curModel=curMeshDoc->getMesh(meshInd);
@@ -81,7 +81,7 @@ void MeshlabStdDialog::changeCurrentMesh(int meshInd)
     }
 }
 
-bool MeshlabStdDialog::isDynamic()
+bool MeshlabStdDialog::isPreviewable()
 {
     return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 }
@@ -165,7 +165,7 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	defaultButton->setMinimumSize(100, 25);
 #endif 	
 
-	if(isDynamic())
+	if(isPreviewable())
 		{
 			previewCB = new QCheckBox("Preview", qf);
                         previewCB->setCheckState(Qt::Unchecked);
@@ -361,7 +361,7 @@ void MeshlabStdDialog::closeEvent(QCloseEvent * /*event*/)
 MeshlabStdDialog::~MeshlabStdDialog()
 {
 	delete stdParFrame;
-	if(isDynamic()) 
+	if(isPreviewable())
 		delete previewCB;
 }
 

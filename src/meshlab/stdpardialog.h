@@ -722,7 +722,7 @@ public:
 	void loadFrameContent(MeshDocument *mdPt=0);
 
 	bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi, QWidget *gla=0);
-	bool isDynamic();
+	bool isPreviewable();
 
 	public slots:
 		void closeClick();
