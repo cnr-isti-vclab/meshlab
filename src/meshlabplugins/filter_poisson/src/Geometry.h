@@ -180,7 +180,7 @@ public:
 	std::vector<Point3D<float> > oocPoints;
 	std::vector<TriangleIndex> triangles;
 	int oocPointIndex,triangleIndex;
-	CoredVectorMeshData::CoredVectorMeshData(void);
+	CoredVectorMeshData(void);
 
 	void resetIterator(void);
 
