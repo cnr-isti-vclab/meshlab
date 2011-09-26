@@ -34,5 +34,5 @@ linux-g++-64:LIBS += ../../external/lib/linux-g++-64/lib3ds.a
 # mac:LIBS -= -l3ds 
 # mac:LIBS += ../../../../code/lib/lib3ds-1.3.0/lib/mac/lib3ds.a
 
-macx:LIBS += ../../external/lib/macx/lib3ds.a
+macx:LIBS += $$MACLIBDIR/lib3ds.a
 

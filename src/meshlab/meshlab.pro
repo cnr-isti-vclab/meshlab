@@ -1,11 +1,7 @@
-VCGDIR = ../../../vcglib
-GLEWDIR = ../external/glew-1.5.1
+include (../general.pri)
 #CONFIG += debug_and_release
 DESTDIR = ../distrib
 
-# uncomment to try Eigen
-# DEFINES += VCG_USE_EIGEN
-# CONFIG += warn_off
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
     $$GLEWDIR/include
@@ -96,8 +92,6 @@ win32:DEFINES += NOMINMAX
 win32-msvc2005:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2010:DEFINES += _CRT_SECURE_NO_DEPRECATE
-
-mac:QMAKE_CXX = g++-4.2
 
 # Uncomment these if you want to experiment with newer gcc compilers
 # (here using the one provided with macports)

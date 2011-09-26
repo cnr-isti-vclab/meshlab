@@ -34,9 +34,15 @@ win32-g++:QMAKE_LFLAGS += -fopenmp
 #linux-g++-32:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
 linux-g++-64:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
 
+
+#macx:QMAKE_CXX = g++
+macx: {
+  contains(QMAKE_CXX,clang++) {
+  } else {
 macx:QMAKE_CXXFLAGS += -fopenmp -D_USE_OMP
 macx:QMAKE_LFLAGS += -fopenmp
-
+  }
+}
 win32-msvc.net:LIBS	+= ../../external/lib/win32-msvc.net/levmar.lib
 win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/levmar.lib
 win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/levmar.lib
@@ -44,7 +50,7 @@ win32-g++:LIBS		+= -L../../external/lib/win32-gcc -llevmar
 linux-g++:LIBS		+= -L../../external/lib/linux-g++ -llevmar
 linux-g++-32:LIBS		+= -L../../external/lib/linux-g++-32 -llevmar
 linux-g++-64:LIBS		+= -L../../external/lib/linux-g++-64 -llevmar
-macx:LIBS += ../../../src/external/lib/macx/liblevmar.a
+macx:LIBS += $$MACLIBDIR/liblevmar.a
 
 # Please never ever uncomment this...
 #QMAKE_CXXFLAGS += -fpermissive

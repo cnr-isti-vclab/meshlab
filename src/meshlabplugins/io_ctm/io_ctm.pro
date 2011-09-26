@@ -19,4 +19,4 @@ linux-g++:LIBS		+= ../../external/lib/linux-g++/libopenctm.a
 linux-g++-32:LIBS	+= ../../external/lib/linux-g++-32/libopenctm.a
 linux-g++-64:LIBS	+= ../../external/lib/linux-g++-64/libopenctm.a
 #macx:LIBS += ../../external/lib/macx/libopenctm.a
-macx:LIBS += ../../external/lib/macx64/libopenctm.a
+macx:LIBS += $$MACLIBDIR/libopenctm.a

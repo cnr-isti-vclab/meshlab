@@ -1,7 +1,5 @@
-VCGDIR = ../../../vcglib
-GLEWDIR = ../external/glew-1.5.1
+include (../general.pri)
 GLEWCODE = $$GLEWDIR/src/glew.c
-
 
 win32-msvc2005:DESTDIR = ../distrib
 win32-msvc2008:DESTDIR = ../distrib
@@ -34,7 +32,22 @@ mkdir ../distrib/meshlab.app ;  \
 mkdir ../distrib/meshlab.app/Contents;  \
 mkdir ../distrib/meshlab.app/Contents/MacOS;  \
 fi;   \
-cp libcommon.* ../distrib/meshlab.app/Contents/MacOS/"
+cp libcommon.* ../distrib/meshlab.app/Contents/MacOS/ ;\
+if [ -d ../external/ ];\
+then \
+echo "ok shader dir exists"; \
+else \
+ln -s ../../meshlab/src/external ../external;\
+echo "linked external dir"; \
+fi;\
+if [ -d ../distrib/shaders/ ];\
+then \
+echo "ok shader dir exists"; \
+else \
+ln -s ../../../meshlab/src/distrib/shaders ../distrib/shaders ;\
+echo "linked shader dir"; \
+fi;\
+"
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
     $$GLEWDIR/include

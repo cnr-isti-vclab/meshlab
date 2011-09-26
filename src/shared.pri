@@ -1,3 +1,5 @@
+include (../../general.pri)
+VCGDIR = ../$$VCGDIR
 # this is the common include for all the plugins
 
 TEMPLATE      = lib
@@ -6,9 +8,6 @@ QT += opengl
 QT += xml
 QT += xmlpatterns
 QT += script
-
-VCGDIR  = ../../../../vcglib
-GLEWDIR = ../../external/glew-1.5.1
 
 mac:LIBS += ../../common/libcommon.dylib
 
@@ -36,8 +35,8 @@ win32-msvc2010:DEFINES += GLEW_STATIC
 # DEFINES += VCG_USE_EIGEN
 # CONFIG += warn_off
 
-INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
-DEPENDPATH += $$VCGDIR
+INCLUDEPATH  *= ../.. $$VCGDIR ../$$GLEWDIR/include
+DEPENDPATH += ../.. $$VCGDIR
 
 # Uncomment these if you want to experiment with newer gcc compilers
 # (here using the one provided with macports)
@@ -45,12 +44,7 @@ DEPENDPATH += $$VCGDIR
 # macx-g++:QMAKE_CXXFLAGS_RELEASE -= -Os
 # macx-g++:QMAKE_CXXFLAGS_RELEASE += -O3
 
-macx:QMAKE_CXX=g++-4.2
 ##macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../../meshlab/plugins/lib$${TARGET}.dylib"
-
-# the following line is needed to avoid mismatch between
-# the awful min/max macros of windows and the limits max
-win32:DEFINES += NOMINMAX
 
 # the following line is to hide the hundred of warnings about the deprecated
 # old printf are all around the code
