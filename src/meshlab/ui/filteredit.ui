@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Frame</class>
+ <widget class="QFrame" name="Frame">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>567</width>
+    <height>281</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Filter Editor</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Raised</enum>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Filter Name</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLineEdit" name="nameLine">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2" rowspan="7">
+    <widget class="QTreeWidget" name="paramviewer"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Filter JS Function </string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="functionLine"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Category</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="CheckBoxList" name="category">
+     <item>
+      <property name="text">
+       <string/>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Generic</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Selection</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Cleaning</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Remeshing</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>FaceColoring</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>VertexColoring</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>MeshCreation</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Smoothing</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Quality</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Layer</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Normal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Sampling</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Texture</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>RangeMap</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>PointSet</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Measure</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Polygonal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Camera</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Ariety</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QComboBox" name="ariety"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Pre-Conditions</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="CheckBoxList" name="precond"/>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Post-Conditions</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="CheckBoxList" name="postcond"/>
+   </item>
+   <item row="6" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Filter Help</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QPlainTextEdit" name="helpedit"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CheckBoxList</class>
+   <extends>QComboBox</extends>
+   <header>additionalgui.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
