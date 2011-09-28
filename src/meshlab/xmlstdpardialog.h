@@ -404,9 +404,9 @@ private slots:
 signals:
 	void expandView(bool exp);
 private:
-	QString arrow;
-	const QChar up;
-	const QChar down;
+	QIcon arrow;
+	const QIcon up;
+	const QIcon down;
 	QPushButton* exp;
 	bool isExpanded;
 };

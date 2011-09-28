@@ -1,4 +1,5 @@
 #include "xmlstdpardialog.h"
+#include <climits>
 #include <QtGui>
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog( Env& envir,QWidget *p )
@@ -636,18 +637,23 @@ void XMLAbsWidget::setVisibility( const bool vis )
 }
 
 ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
-:QWidget(parent),up(0x0035),down(0x0036),isExpanded(false)
+:QWidget(parent),up(QCommonStyle().standardPixmap(QStyle::SP_ArrowUp)),down(QCommonStyle().standardPixmap(QStyle::SP_ArrowDown)),isExpanded(false)
 {
 	arrow = down;
 	QHBoxLayout *hlay = new QHBoxLayout(this);
 	//QChar ch(0x0036);
-	exp = new QPushButton(arrow,this);
+	exp = new QPushButton(arrow,"",this);
 	exp->setFlat(true);
-	exp->setFont(QFont("Webdings",12));
 	//connect(exp,SIGNAL(clicked(bool)),this,SLOT(expandFrame(bool)));
-	QFontMetrics mt(exp->font(),exp);
-	QSize sz = mt.size(Qt::TextSingleLine,arrow);
-	sz.setWidth(sz.width() + 10);
+	/*QFontMetrics mt(exp->font(),exp);
+	QSize sz = mt.size(Qt::TextSingleLine,arrow);*/
+	QList<QSize> sizes = arrow.availableSizes();
+	int min = INT_MAX;
+	for(int ii = 0;ii < sizes.size();++ii)
+		if (sizes[ii].width() < min)
+			min = sizes[ii].width();
+	QSize sz;
+	sz.setWidth(min + 10);
 	//exp->setMaximumSize(sz);
 	hlay->addWidget(exp,0,Qt::AlignHCenter);
 	connect(exp,SIGNAL(clicked(bool)),this,SLOT(changeIcon()));
@@ -665,7 +671,7 @@ void ExpandButtonWidget::changeIcon()
 		arrow = up;
 	else
 		arrow = down;
-	exp->setText(arrow);
+	exp->setIcon(arrow);
 	emit expandView(isExpanded);
 }
 
