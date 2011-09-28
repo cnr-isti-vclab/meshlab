@@ -122,6 +122,12 @@ public:
 	Q_INVOKABLE float bboxDiag() const;
 	Q_INVOKABLE QVector<float> bboxMin() const;
 	Q_INVOKABLE QVector<float> bboxMax() const;
+Q_INVOKABLE inline float computeMinVQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mm.cm).first;  }
+Q_INVOKABLE inline float computeMaxVQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mm.cm).second; }
+Q_INVOKABLE inline float computeMinFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).first;  }
+Q_INVOKABLE inline float computeMaxFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).second; }
+
+
 	Q_INVOKABLE VCGVertexScriptInterface* v(const int ind);
 	Q_INVOKABLE ShotScriptInterface* shot();
 
