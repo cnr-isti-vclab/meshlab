@@ -22,8 +22,14 @@
   </xs:complexType>
  </xs:element>
 
- <xs:element name='FILTER'>
-  <xs:complexType>
+ <xs:element name='FILTER' type='filterType'>
+	<xs:unique name="paramNameKey">
+      <xs:selector xpath="*/PARAM"/>
+      <xs:field xpath="parName"/>
+    </xs:unique>
+  </xs:element>
+  
+  <xs:complexType name='filterType'>
    <xs:sequence>
     <xs:element ref='FILTER_HELP'/>
     <xs:element ref='PARAM' minOccurs='0' maxOccurs='unbounded'/>
@@ -36,7 +42,6 @@
    <xs:attribute name='filterPost' type='xs:string' use='required'/>
    <xs:attribute name='filterAriety' type='ArietyType' use='required'/>
   </xs:complexType>
- </xs:element>
 
  <xs:element name='FILTER_HELP'>
   <xs:complexType mixed='true'>
@@ -76,7 +81,7 @@
      </xs:restriction>
     </xs:simpleType>
    </xs:attribute>
-   <xs:attribute name='parName' type='xs:ID' use='required'/>
+   <xs:attribute name='parName' type='xs:string' use='required'/>
    <xs:attribute name='parDefault' type='xs:string' use='required'/>
    <xs:attribute name='parIsImportant' type='xs:string' use='required'/>
   </xs:complexType>
