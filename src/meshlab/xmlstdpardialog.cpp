@@ -639,7 +639,7 @@ ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
 :QWidget(parent),up(0x0035),down(0x0036),isExpanded(false)
 {
 	arrow = down;
-	hlay = new QHBoxLayout(this);
+	QHBoxLayout *hlay = new QHBoxLayout(this);
 	//QChar ch(0x0036);
 	exp = new QPushButton(arrow,this);
 	exp->setFlat(true);
@@ -648,7 +648,7 @@ ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
 	QFontMetrics mt(exp->font(),exp);
 	QSize sz = mt.size(Qt::TextSingleLine,arrow);
 	sz.setWidth(sz.width() + 10);
-	exp->setMaximumSize(sz);
+	//exp->setMaximumSize(sz);
 	hlay->addWidget(exp,0,Qt::AlignHCenter);
 	connect(exp,SIGNAL(clicked(bool)),this,SLOT(changeIcon()));
 }

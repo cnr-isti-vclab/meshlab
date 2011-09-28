@@ -408,7 +408,6 @@ private:
 	const QChar up;
 	const QChar down;
 	QPushButton* exp;
-	QHBoxLayout* hlay;
 	bool isExpanded;
 };
 
