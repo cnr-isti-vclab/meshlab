@@ -498,6 +498,7 @@ void GLArea::displayInfo(QPainter *painter)
   {
   if(this->md()->size()==1)
   {
+    col1Text += QString("Mesh: %1\n").arg(mm()->label());
     col1Text += QString("Vertices: %1\n").arg(mm()->cm.vn);
     col1Text += QString("Faces: %1\n").arg(mm()->cm.fn);
   }
