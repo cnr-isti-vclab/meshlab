@@ -75,6 +75,9 @@ void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParam
       parset.addParam(new RichBool(GridSnapParam(),false,"Grid Snapping",""));
       parset.addParam(new RichBool(GridBackParam(),false,"Front grid culling",""));
       parset.addParam(new RichBool(ShowShadowParam(),false,"Show silhouette",""));
+      parset.addParam(new RichColor(GridColorBackParam(),QColor(Color4b::Gray),"Back Grid Color",""));
+      parset.addParam(new RichColor(GridColorFrontParam(),QColor(Color4b::Gray),"Front grid Color",""));
+
     break;
   }
 }		
@@ -143,8 +146,10 @@ void SampleMeshDecoratePlugin::decorate(QAction *a, MeshDocument &m, RichParamet
       bool gridSnap = parset->getBool(GridSnapParam());
       bool backFlag = parset->getBool(GridBackParam());
       bool shadowFlag = parset->getBool(ShowShadowParam());
+      Color4b backColor = parset->getColor4b(GridColorBackParam());
+      Color4b frontColor = parset->getColor4b(GridColorFrontParam());
       bb.Offset((bb.max-bb.min)*(scaleBB-1.0));
-      DrawGriddedCube(*m.mm(),bb,majorTick,minorTick,gridSnap,backFlag,shadowFlag,Color4b::Gray,Color4b::Gray,gla);
+      DrawGriddedCube(*m.mm(),bb,majorTick,minorTick,gridSnap,backFlag,shadowFlag,backColor,frontColor,gla);
     } break;
   }
 }
@@ -318,16 +323,19 @@ void SampleMeshDecoratePlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, fl
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     Point3f viewPos = this->curShot.GetViewPoint();
-    qDebug("BG Grid MajorTick %4.2f MinorTick %4.2f  ## camera pos %7.3f %7.3f %7.3f", majorTick, minorTick, viewPos[0],viewPos[1],viewPos[2]);
-    qDebug("BG Grid boxF %7.3f %7.3f %7.3f # %7.3f %7.3f %7.3f",minP[0],minP[1],minP[2],maxP[0],maxP[1],maxP[2]);
-    qDebug("BG Grid boxG %7.3f %7.3f %7.3f # %7.3f %7.3f %7.3f",minG[0],minG[1],minG[2],maxG[0],maxG[1],maxG[2]);
+//    qDebug("BG Grid MajorTick %4.2f MinorTick %4.2f  ## camera pos %7.3f %7.3f %7.3f", majorTick, minorTick, viewPos[0],viewPos[1],viewPos[2]);
+//    qDebug("BG Grid boxF %7.3f %7.3f %7.3f # %7.3f %7.3f %7.3f",minP[0],minP[1],minP[2],maxP[0],maxP[1],maxP[2]);
+//    qDebug("BG Grid boxG %7.3f %7.3f %7.3f # %7.3f %7.3f %7.3f",minG[0],minG[1],minG[2],maxG[0],maxG[1],maxG[2]);
     for (int ii=0;ii<3;++ii)
         for(int jj=0;jj<2;++jj)
-            if(FrontFacing(viewPos,ii,jj,minP,maxP) || !backCullFlag)
+        {
+            bool front = FrontFacing(viewPos,ii,jj,minP,maxP);
+            if( front || !backCullFlag)
             {
-                DrawGridPlane(ii,jj,minP,maxP,minG,maxG,majorTick,minorTick,snapFlag,frontColor);
+                DrawGridPlane(ii,jj,minP,maxP,minG,maxG,majorTick,minorTick,snapFlag,front?frontColor:backColor);
                 if(shadowFlag) DrawFlatMesh(m, ii,jj,minG,maxG);
             }
+        }
 
     glPopAttrib();
 }
