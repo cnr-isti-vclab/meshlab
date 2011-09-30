@@ -397,7 +397,6 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
 			{
 				md.meshList[i]->cm.Tr = mat;
 				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
