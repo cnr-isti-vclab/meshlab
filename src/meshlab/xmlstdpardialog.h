@@ -16,6 +16,7 @@
 #include<QDockWidget>
 #include<QTextEdit>
 #include<QLabel>
+#include "qstyleoption.h"
 
 
 class XMLWidgetException : public MeshLabException
@@ -392,6 +393,19 @@ private:
 	void parameterChanged();*/
 };
 
+class PrimitiveButton : public QPushButton
+{
+	Q_OBJECT
+public:	
+	PrimitiveButton(const QStyle::PrimitiveElement el,QWidget* parent);	
+	~PrimitiveButton();
+	void setPrimitiveElement(const QStyle::PrimitiveElement el);
+protected:
+	void paintEvent(QPaintEvent * event);
+private:
+	QStyle::PrimitiveElement elem;
+};
+
 class ExpandButtonWidget : public QWidget
 {
 	Q_OBJECT
@@ -404,10 +418,7 @@ private slots:
 signals:
 	void expandView(bool exp);
 private:
-	QIcon arrow;
-	const QIcon up;
-	const QIcon down;
-	QPushButton* exp;
+	PrimitiveButton* exp;
 	bool isExpanded;
 };
 

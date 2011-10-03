@@ -637,24 +637,24 @@ void XMLAbsWidget::setVisibility( const bool vis )
 }
 
 ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
-:QWidget(parent),up(QCommonStyle().standardPixmap(QStyle::SP_ArrowUp)),down(QCommonStyle().standardPixmap(QStyle::SP_ArrowDown)),isExpanded(false)
+:QWidget(parent),isExpanded(false)
 {
-	arrow = down;
+	QIcon arrow = QCommonStyle().standardIcon(QStyle::SP_ArrowDown);
 	QHBoxLayout *hlay = new QHBoxLayout(this);
 	//QChar ch(0x0036);
-	exp = new QPushButton(arrow,"",this);
-	exp->setFlat(true);
+	exp = new PrimitiveButton(QStyle::PE_IndicatorArrowDown,this);
+	//exp->setFlat(true);
 	//connect(exp,SIGNAL(clicked(bool)),this,SLOT(expandFrame(bool)));
 	/*QFontMetrics mt(exp->font(),exp);
 	QSize sz = mt.size(Qt::TextSingleLine,arrow);*/
-	QList<QSize> sizes = arrow.availableSizes();
+	/*QList<QSize> sizes = arrow.availableSizes();
 	int min = INT_MAX;
 	for(int ii = 0;ii < sizes.size();++ii)
 		if (sizes[ii].width() < min)
 			min = sizes[ii].width();
 	QSize sz;
-	sz.setWidth(min + 10);
-	//exp->setMaximumSize(sz);
+	sz.setWidth(min + 10);*/
+	
 	hlay->addWidget(exp,0,Qt::AlignHCenter);
 	connect(exp,SIGNAL(clicked(bool)),this,SLOT(changeIcon()));
 }
@@ -668,11 +668,35 @@ void ExpandButtonWidget::changeIcon()
 {
 	isExpanded = !isExpanded;
 	if (isExpanded)
-		arrow = up;
+		exp->setPrimitiveElement(QStyle::PE_IndicatorArrowUp);
 	else
-		arrow = down;
-	exp->setIcon(arrow);
+		exp->setPrimitiveElement(QStyle::PE_IndicatorArrowDown);
+	exp->repaint();
 	emit expandView(isExpanded);
+}
+
+PrimitiveButton::PrimitiveButton(const QStyle::PrimitiveElement el,QWidget* parent )
+:QPushButton(parent),elem(el)
+{
+}
+
+PrimitiveButton::~PrimitiveButton()
+{
+
+}
+
+void PrimitiveButton::paintEvent( QPaintEvent * event )
+{
+	QStylePainter painter(this);
+	QStyleOptionButton option;
+	option.initFrom(this);
+	//painter.drawControl(QStyle::CE_PushButton,option);
+	painter.drawPrimitive (elem,option);
+}
+
+void PrimitiveButton::setPrimitiveElement( const QStyle::PrimitiveElement el)
+{
+	elem = el;
 }
 
 XMLVec3Widget::XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p)
@@ -1039,3 +1063,7 @@ XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const XMLFilterInfo::XMLMap& xm
 	if (mdoc->getMesh(def))
 		enumCombo->setCurrentIndex(def);
 }
+
+
+
+
