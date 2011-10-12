@@ -166,8 +166,10 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 
 		std::vector<SubGraph> Graphs;
 		Graphs=buildGraph(md);
+		Log(0, "BuildGraph completed");
 		
 		AlignGlobal(md, Graphs);
+		Log(0, "AlignGlobal completed");
 	}
 	
 	//for(int i = 0; i < Graphs.size(); i++)
@@ -178,6 +180,7 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	//Graphs.clear();
 	 
 	this->glContext->doneCurrent();
+	Log(0, "Done!");
 
 	return true;
 
@@ -489,6 +492,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::buildGraph(MeshDocument &md)
 	std::vector<AlignPair> allArcs;
 		
 	allArcs=CalcPairs(md);
+	Log(0, "Calcpairs completed");
 	return CreateGraphs(md, allArcs);
 		 
 }
@@ -631,6 +635,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 	int numNodes=md.rasterList.size();
 	bool* assigned=new bool();
 	int* grNum=new int();
+	Log(0, "Tuttok1");
 	for (int s=0; s<numNodes; s++)
 	{
 		assigned[s]=false;
@@ -639,6 +644,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 	int totGr=1;
 	bool done=false;
 	int totNodes=0;
+	Log(0, "Tuttok2");
 	while (!done)
 	{
 		for (int i=0; i<arcs.size(); i++)
@@ -667,17 +673,18 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 			done=true;
 		else totGr++;
 	}
-
+	Log(0, "Tuttok3");
 	for (int i=1; i<totGr+1; i++)
 	{
 		SubGraph graph;
 		graph.id=i;
 		for (int j=0; j<numNodes; j++)
 		{
+			Log(0, "Node %d of %d",j,numNodes);
 			if (grNum[j]==i)
 			{
 				Node n;
-				double mut=0.0;
+				double mut=0.0; double are=0.00001;
 				n.active=false;
 				n.id=j;
 				for (int k=0; k<arcs.size(); k++)
@@ -685,17 +692,20 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 					if(arcs[k].imageId==j)
 					{
 						mut+=arcs[k].mutual*arcs[k].area;
+						are+=arcs[k].area;
 						n.arcs.push_back(arcs[k]);
+
 					}
 				}
-				n.avMut=mut/n.arcs.size();
+				n.avMut=mut/are;
 				std::sort(n.arcs.begin(), n.arcs.end(), ordering());
 				graph.nodes.push_back(n);
+				Log(0, "Node %d of %d: avMut %3.2f, arch %d",j,numNodes, n.avMut, n.arcs.size());
 			}
 		}
 		Gr.push_back(graph);
 	}
-
+	Log(0, "Tuttok5");
 	Log(0, "Tot nodes %d, SubGraphs %d",numNodes,totGr);
 
 	return Gr;
@@ -707,13 +717,18 @@ bool FilterMutualInfoPlugin::AlignGlobal(MeshDocument &md, std::vector<SubGraph>
 	{
 	for (int i=0; i<graphs.size(); i++)
 	{
+		int n=0;
 		while (!allActive(graphs[i]))
 		{
+			Log(0, "Round %d of %d: get the right node",n+1,graphs[i].nodes.size());
 			int curr= getTheRightNode(graphs[i]);
 			graphs[i].nodes[curr].active=true;
+			Log(0, "Round %d of %d: align the node",n+1,graphs[i].nodes.size());
 			AlignNode(md, graphs[i].nodes[curr]);
+			Log(0, "Round %d of %d: update the graph",n+1,graphs[i].nodes.size());
 			UpdateGraph(md, graphs[i], curr);
 			Log(0, "Image %d completed",curr);
+			n++;
 
 		}
 		for (int l=0; l<graphs[i].nodes.size(); l++)
@@ -883,6 +898,43 @@ bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n
 	MutualInfo mutual;
 	
 	align.mesh=&md.mm()->cm;
+
+	vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
+	vcg::Point3f *normals = new vcg::Point3f[align.mesh->vn];
+	vcg::Color4b *colors = new vcg::Color4b[align.mesh->vn];
+	unsigned int *indices = new unsigned int[align.mesh->fn*3];
+
+	for(int i = 0; i < align.mesh->vn; i++) {
+	vertices[i] = align.mesh->vert[i].P();
+	normals[i] = align.mesh->vert[i].N();
+	colors[i] = align.mesh->vert[i].C();
+	}
+
+	for(int i = 0; i < align.mesh->fn; i++) 
+	for(int k = 0; k < 3; k++) 
+	indices[k+i*3] = align.mesh->face[i].V(k) - &*align.mesh->vert.begin();
+
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.vbo);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), 
+	  vertices, GL_STATIC_DRAW_ARB);
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.nbo);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), 
+	  normals, GL_STATIC_DRAW_ARB);
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.cbo);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Color4b), 
+	  colors, GL_STATIC_DRAW_ARB);
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.ibo);
+	glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.mesh->fn*3*sizeof(unsigned int), 
+	  indices, GL_STATIC_DRAW_ARB);
+	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+
+
+	// it is safe to delete after copying data to VBO
+	delete []vertices;
+	delete []normals;
+	delete []colors;
 	
 	for (int h=0; h<graph.nodes.size(); h++)
 		for (int l=0; l<graph.nodes[h].arcs.size(); l++)
@@ -901,42 +953,7 @@ bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n
 				//this->initGL();
 				align.resize(800);
 
-				vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
-				vcg::Point3f *normals = new vcg::Point3f[align.mesh->vn];
-				vcg::Color4b *colors = new vcg::Color4b[align.mesh->vn];
-				unsigned int *indices = new unsigned int[align.mesh->fn*3];
-
-				for(int i = 0; i < align.mesh->vn; i++) {
-				vertices[i] = align.mesh->vert[i].P();
-				normals[i] = align.mesh->vert[i].N();
-				colors[i] = align.mesh->vert[i].C();
-				}
-
-				for(int i = 0; i < align.mesh->fn; i++) 
-				for(int k = 0; k < 3; k++) 
-				indices[k+i*3] = align.mesh->face[i].V(k) - &*align.mesh->vert.begin();
-
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.vbo);
-				glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), 
-				  vertices, GL_STATIC_DRAW_ARB);
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.nbo);
-				glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), 
-				  normals, GL_STATIC_DRAW_ARB);
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.cbo);
-				glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Color4b), 
-				  colors, GL_STATIC_DRAW_ARB);
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-
-				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.ibo);
-				glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.mesh->fn*3*sizeof(unsigned int), 
-				  indices, GL_STATIC_DRAW_ARB);
-				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-
-
-				// it is safe to delete after copying data to VBO
-				delete []vertices;
-				delete []normals;
-				delete []colors;
+				
 
 				//align.shot=par.getShotf("Shot");
 
