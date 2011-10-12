@@ -713,6 +713,7 @@ bool FilterMutualInfoPlugin::AlignGlobal(MeshDocument &md, std::vector<SubGraph>
 			graphs[i].nodes[curr].active=true;
 			AlignNode(md, graphs[i].nodes[curr]);
 			UpdateGraph(md, graphs[i], curr);
+			Log(0, "Image %d completed",curr);
 
 		}
 		for (int l=0; l<graphs[i].nodes.size(); l++)
