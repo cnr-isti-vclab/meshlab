@@ -100,7 +100,9 @@ double Solver::operator()(int ndim, double *x) {
          double m = 2 - mutual->info(w, h, align->target, align->render, i, iend, j, jend);
          info += m;
        }
-     }
+     } 
+	 break;
+	
    case AlignSet::COLOR:
    case AlignSet::SILHOUETTE: {
     align->renderScene(shot,0);
@@ -114,6 +116,7 @@ double Solver::operator()(int ndim, double *x) {
          info += m;
        }
      }
+	break;
    }
    case AlignSet::NODE: {
 		assert(glGetError() == 0);

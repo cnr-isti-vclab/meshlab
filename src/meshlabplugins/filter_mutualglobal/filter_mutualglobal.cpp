@@ -117,6 +117,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 			
 			//parlst.addParam(new RichShotf  ("Shot", vcg::Shotf(),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 			
+			parlst.addParam(new RichBool("Pre-alignment",false,"Pre-alignment step","Pre-alignment step"));
 			parlst.addParam(new RichBool("Estimate Focal",false,"Estimate focal length","Estimate focal length"));
 			parlst.addParam(new RichBool("Fine",true,"Fine Alignment","Fine alignment"));
 
@@ -156,19 +157,25 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 
 	this->initGL();
 
-	//preAlignment(md, par, cb);
-
-	std::vector<SubGraph> Graphs;
-	Graphs=buildGraph(md);
-	
-	AlignGlobal(md, Graphs);
-	
-	for(int i = 0; i < Graphs.size(); i++)
+	if (par.getBool("Pre-alignment"))
 	{
-	  //delete Graphs[i];
+		preAlignment(md, par, cb);
 	}
+	else
+	{
 
-	Graphs.clear();
+		std::vector<SubGraph> Graphs;
+		Graphs=buildGraph(md);
+		
+		AlignGlobal(md, Graphs);
+	}
+	
+	//for(int i = 0; i < Graphs.size(); i++)
+	//{
+	//  //delete Graphs[i];
+	//}
+
+	//Graphs.clear();
 	 
 	this->glContext->doneCurrent();
 
@@ -670,13 +677,18 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 			if (grNum[j]==i)
 			{
 				Node n;
+				double mut=0.0;
 				n.active=false;
 				n.id=j;
 				for (int k=0; k<arcs.size(); k++)
 				{
 					if(arcs[k].imageId==j)
+					{
+						mut+=arcs[k].mutual*arcs[k].area;
 						n.arcs.push_back(arcs[k]);
+					}
 				}
+				n.avMut=mut/n.arcs.size();
 				std::sort(n.arcs.begin(), n.arcs.end(), ordering());
 				graph.nodes.push_back(n);
 			}
@@ -729,6 +741,12 @@ int FilterMutualInfoPlugin::getTheRightNode(SubGraph graph)
 					act++;
 			}
 			if (act>bestActive)
+			{
+				bestActive=act;			
+				bestLinks=graph.nodes[k].arcs.size();
+				cand=k;
+			}
+			else if (act==bestActive && graph.nodes[k].avMut<graph.nodes[cand].avMut)
 			{
 				bestActive=act;			
 				bestLinks=graph.nodes[k].arcs.size();

@@ -76,6 +76,7 @@ public:
 
 	bool active;
 	int id;
+	double avMut;
 	std::vector<AlignPair> arcs;
 
 };
