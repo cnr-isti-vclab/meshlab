@@ -50,7 +50,7 @@ public:
   virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &, GLArea * );
   virtual void keyReleaseEvent(QKeyEvent *, MeshModel &, GLArea * );
 
-  void DrawManipulators(MeshModel &model, bool onlyActive);
+  void DrawManipulators(MeshModel &model, GLArea *gla, bool onlyActive);
   void DrawMeshBox(MeshModel &model);
 
 private:
@@ -88,6 +88,13 @@ private:
   vcg::Point3f screen_xaxis;
   vcg::Point3f screen_yaxis;
   vcg::Point3f screen_zaxis;
+
+  void DrawCircle(float r, float g, float b);
+  void DrawArrows(float r, float g, float b);
+  void DrawCubes(float r, float g, float b);
+  void DrawRotateManipulators(MeshModel &model, GLArea *gla);
+  void DrawScaleManipulators(MeshModel &model, GLArea *gla);
+  void DrawTranslateManipulators(MeshModel &model, GLArea *gla); 
 
   void resetOffsets();
 
