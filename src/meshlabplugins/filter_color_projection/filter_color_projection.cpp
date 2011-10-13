@@ -468,8 +468,8 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                     double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
                     double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
                     double borderw = min (xdist , ydist);
-                    borderw = min(1.0,borderw);
-                    borderw = max(0.0,borderw);
+                    //borderw = min(1.0,borderw); //debug debug
+                    //borderw = max(0.0,borderw); //debug debug
 
                     pweight *= borderw;
                   }                  
@@ -479,8 +479,8 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                     // here the silhouette weight is applied, but it is calculated before, on a per-image basis
                     float silw = 1.0;
                     silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
-                    silw = min(1.0f,silw);
-                    silw = max(0.0f,silw);
+                    //silw = min(1.0f,silw); //debug debug
+                    //silw = max(0.0f,silw); //debug debug 
 
                     pweight *= silw;
                   }
