@@ -38,7 +38,7 @@
 
 using namespace vcg;
 
-bool IOMPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & par,  CallBackPos *cb, QWidget *parent)
+bool IOMPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & /*par*/,  CallBackPos *cb, QWidget */*parent*/)
 {
     QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
     int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qPrintable(fileName), mask, cb);
@@ -50,10 +50,11 @@ bool IOMPlugin::open(const QString &formatName, const QString &fileName, MeshMod
     return true;
 }
 
-bool IOMPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos *cb, QWidget *parent)
+bool IOMPlugin::save(const QString &/*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos *cb, QWidget *parent)
 {
     bool lossLessFlag = par.findParameter("LossLess")->val->getBool();
-    int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qPrintable(fileName),mask,lossLessFlag);
+    float relativePrecisionParam = par.findParameter("relativePrecisionParam")->val->getFloat();
+    int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qPrintable(fileName),mask,lossLessFlag,relativePrecisionParam);
     if(result!=0)
     {
         QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
@@ -87,14 +88,17 @@ QList<MeshIOInterface::Format> IOMPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void IOMPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
+void IOMPlugin::GetExportMaskCapability(QString &/*format*/, int &capability, int &defaultBits) const
 {
   capability=defaultBits=vcg::tri::io::ExporterCTM<CMeshO>::GetExportMaskCapability();
 	return;
 }
 void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & par)
 {
-    par.addParam(new RichBool("LossLess",false, "LossLess compression",
-                                "If true it does not apply any lossy compression technique."));
+  par.addParam(new RichBool("LossLess",false, "LossLess compression",
+                              "If true it does not apply any lossy compression technique."));
+  par.addParam(new RichFloat("relativePrecisionParam",0.0001, "Relative Coord Precision",
+                             "When using a lossy compression this number control the introduced error and hence the compression factor."
+                             "It is a number relative to the average edge lenght. (e.g. the default means that the error should be roughly 1/10000 of the average edge lenght)"));
 }
 Q_EXPORT_PLUGIN(IOMPlugin)
