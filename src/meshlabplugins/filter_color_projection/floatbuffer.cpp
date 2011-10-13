@@ -257,7 +257,7 @@ int floatbuffer::distancefield()
 		cx = xx-1;
 		cy = yy;
 
-		if(cx >0)									// inside image
+		if(cx >=0)									// inside image
 			if(data[cx + (sx*cy)] != -1)			// not background
 				if(data[cx + (sx*cy)] > currval)	// need update
 				{
@@ -285,7 +285,7 @@ int floatbuffer::distancefield()
 		cx = xx;
 		cy = yy-1;
 
-		if(cy >0)									// inside image
+		if(cy >=0)									// inside image
 			if(data[cx + (sx*cy)] != -1)			// not background
 				if(data[cx + (sx*cy)] > currval)	// need update
 				{
