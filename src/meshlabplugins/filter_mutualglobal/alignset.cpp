@@ -1220,7 +1220,7 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component, bool save) {
 
   GlShot< vcg::Shot<float> >::UnsetView();
 
-  //save=false;
+  save=false;
   //glFinish();
   if (save)
   {

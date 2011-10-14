@@ -49,6 +49,7 @@ public:
 
 	float mutual;
 	float area;
+	float weight;
 
 	bool valid;
 
@@ -62,6 +63,12 @@ public:
 struct ordering {
     bool operator ()(AlignPair a, AlignPair b) {
 		return a.area > b.area;
+    }
+};
+
+struct orderingW {
+    bool operator ()(AlignPair a, AlignPair b) {
+		return (a.area*a.mutual) > (b.area*b.mutual);
     }
 };
 
