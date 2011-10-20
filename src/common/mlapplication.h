@@ -6,7 +6,7 @@
 class MeshLabApplication : public QApplication
 {
 public:
-	MeshLabApplication(int argc, char *argv[]);
+	MeshLabApplication(int &argc, char *argv[]);
 	~MeshLabApplication();
 	bool notify(QObject * rec, QEvent * ev);
 };

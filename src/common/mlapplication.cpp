@@ -1,7 +1,7 @@
 #include "mlapplication.h"
 #include "mlexception.h"
 
-MeshLabApplication::MeshLabApplication( int argc, char *argv[] )
+MeshLabApplication::MeshLabApplication( int &argc, char *argv[] )
 :QApplication(argc,argv)
 {
 
