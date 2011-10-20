@@ -41,7 +41,7 @@ $Log: samplefilter.cpp,v $
 #include <vcg/simplex/face/distance.h>
 #include <vcg/complex/algorithms/geodesic.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include "voronoi_clustering.h"
+#include <vcg/complex/algorithms/voronoi_clustering.h>
 
 using namespace vcg;
 using namespace std;
@@ -1042,10 +1042,10 @@ case FP_CLUSTERED_SAMPLING :
 			md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);	
 			md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);	
 
-			ClusteringSampler<CMeshO> vc(&seedVec);
-			if(randSeed!=0) tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
-			tri::SurfaceSampling<CMeshO, ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
-			VoronoiProcessing<CMeshO>::VoronoiRelaxing(*cm, seedVec, relaxIter,90,cb);
+			tri::ClusteringSampler<CMeshO> vc(&seedVec);
+			if(randSeed!=0) tri::SurfaceSampling<CMeshO, tri::ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
+			tri::SurfaceSampling<CMeshO, tri::ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
+			tri::VoronoiProcessing<CMeshO>::VoronoiRelaxing(*cm, seedVec, relaxIter,90,cb);
 			
 			//VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
 
@@ -1069,10 +1069,10 @@ case FP_CLUSTERED_SAMPLING :
 				vecP.push_back((*vi).cP());
 			
 			vector<CMeshO::VertexPointer> vecV; // points to vertexes of ColoredMesh; 
-			VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
+			tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
 			Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
 			for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
-		  VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV,backwardFlag);
+		  tri::VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV,backwardFlag);
 		} break;
 
 	case FP_DISK_COLORING :
@@ -1081,7 +1081,7 @@ case FP_CLUSTERED_SAMPLING :
 			MeshModel* mmV = par.getMesh("VertexMesh");   
 			typedef vcg::SpatialHashTable<CMeshO::VertexType, float> SampleSHT;
 			SampleSHT sht;
-      tri::VertTmark<CMeshO> markerFunctor;
+	  tri::VertTmark<CMeshO> markerFunctor;
 			typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
 			tri::UpdateColor<CMeshO>::VertexConstant(mmM->cm, Color4b::LightGray);
       tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
