@@ -290,7 +290,7 @@ public:
 	~XMLComboWidget();
 	void updateVisibility(const bool vis);
 	void Init(QWidget *p,QString lab,int newEnum, QStringList values);
-	void set(const QString& nwExpStr) {};
+	void set(const QString& /*nwExpStr*/) {}
 	virtual QString getWidgetExpression();
 
 private:
