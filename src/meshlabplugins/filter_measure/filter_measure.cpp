@@ -60,85 +60,11 @@ MeasureTopoTag::MeasureTopoTag(MeshDocument &parent, MeshModel *mm, QString name
 	faceVertManif=-1;
 };
 
-// Constructor 
-FilterMeasurePlugin::FilterMeasurePlugin() 
-{ 
-	typeList << 
-    FP_MEASURE_TOPO <<
-    FP_MEASURE_TOPO_QUAD <<
-    FP_MEASURE_GAUSSCURV <<
-    FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION <<
-    FP_MEASURE_FACE_QUALITY_DISTRIBUTION <<
-    FP_MEASURE_VERTEX_QUALITY_HISTOGRAM <<
-    FP_MEASURE_FACE_QUALITY_HISTOGRAM <<
-    FP_MEASURE_GEOM;
-  
-  foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
-}
-
-// ST() return the very short string describing each filtering action 
- QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
-{
-  switch(filterId) {
-    case FP_MEASURE_TOPO :  return QString("Compute Topological Measures");
-    case FP_MEASURE_TOPO_QUAD :  return QString("Compute Measures for Quad Meshes");
-    case FP_MEASURE_GEOM :  return QString("Compute Geometric Measures");
-    case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature");
-    case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION :  return QString("Per Vertex Quality Stat");
-    case FP_MEASURE_FACE_QUALITY_DISTRIBUTION :  return QString("Per Face Quality Stat");
-    case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM :  return QString("Per Vertex Quality Histogram");
-    case FP_MEASURE_FACE_QUALITY_HISTOGRAM :  return QString("Per Face Quality Histogram");
-  default : assert(0);
-	}
-}
-
-// Info() return the longer string describing each filtering action 
- QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
-{
-  switch(filterId) {
-		case FP_MEASURE_TOPO :  return QString("Selected faces are moved (or duplicated) in a new layer"); 
-		case FP_MEASURE_TOPO_QUAD :  return QString("Selected faces are moved (or duplicated) in a new layer"); 
-		case FP_MEASURE_GEOM :  return QString("Create a new layer containing the same model as the current one");
-		case FP_MEASURE_GAUSSCURV :  return QString("Compute Integral of Gaussian Curvature");
-    case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION : return QString("Compute some statistical measures (min, max, med, stdev, variance, about the distribution of per vertex quality values");
-    case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM : return QString("Compute a histogram with a given number of bin of the per vertex quality");
-    case FP_MEASURE_FACE_QUALITY_DISTRIBUTION : return QString("Compute some statistical measures (min, max, med, stdev, variance, about the distribution of per face quality values");
-    case FP_MEASURE_FACE_QUALITY_HISTOGRAM : return QString("Compute a histogram with a given number of bin of the per face quality");
-    default : assert(0);
-	}
-}
-
-// This function define the needed parameters for each filter. 
-void FilterMeasurePlugin::initParameterSet(QAction *action, MeshDocument &m, RichParameterSet & par)
-{
-	 switch(ID(action))	 
-	 {
-   case FP_MEASURE_FACE_QUALITY_HISTOGRAM :
-         {
-         pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.mm()->cm);
-         par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that is used as a lower bound for the set of bins (all the value smaller this one will be put in the first bin)"));
-         par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that is used as a upper bound for the set of bins (all the value over this one will be put in the last bin)"));
-         par.addParam(new RichInt("binNum",20,"Number of bins","Number of bins in which the range of values is subdivided"));
-        } break;
-   case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
-         {
-         pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.mm()->cm);
-         par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that is used as a lower bound for the set of bins (all the value smaller this one will be put in the first bin)"));
-         par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that is used as a upper bound for the set of bins (all the value over this one will be put in the last bin)"));
-         par.addParam(new RichInt("binNum",20,"Number of bins","Number of bins in which the range of values is subdivided"));
-        } break;
-	}
-}
 
 // Core Function doing the actual mesh processing.
-bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
+bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb )
 {
-	CMeshO::FaceIterator fi;
-
-	switch(ID(filter))
-	{
-	case FP_MEASURE_TOPO : 
+	if (filterName == "Compute Topological Measures")
 		{
 			CMeshO &m=md.mm()->cm;	
 			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);				
@@ -148,7 +74,7 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			tri::UpdateTopology<CMeshO>::FaceFace(m);
 			tri::UpdateTopology<CMeshO>::VertexFace(m);
 
-			MeasureTopoTag *tag = new MeasureTopoTag(md, md.mm(), filterName(ID(filter)));
+			MeasureTopoTag *tag = new MeasureTopoTag(md, md.mm(), filterName );
 
 			int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
 			int faceEdgeManif = tri::UpdateSelection<CMeshO>::CountFace(m);
@@ -191,7 +117,7 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 				Log("Mesh has %i holes",holeNum);
 				tag->holes=holeNum;
 
-				int genus = tri::Clean<CMeshO>::MeshGenus(m, holeNum, connectedComponentsNum, edgeNum);
+				int genus = tri::Clean<CMeshO>::MeshGenus(m.vn, edgeNum, m.fn, holeNum, connectedComponentsNum);
 				Log("Genus is %i",genus);
 				tag->genus=genus;
 			}
@@ -202,10 +128,11 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			}
 
 			md.addNewTag(tag);
+			return true;
 		}
-		break;
-		/************************************************************/ 
-	case FP_MEASURE_TOPO_QUAD : 
+
+	/************************************************************/
+	if (filterName == "Compute Topological Measures for Quad Meshes")
 		{
 			CMeshO &m=md.mm()->cm;	
 			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);				
@@ -285,11 +212,10 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
                           ad.Avg(), ad.Min(), ad.Max(),ad.StandardDeviation(),ad.Percentile(0.05),ad.Percentile(0.95));
 
       Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", rd.Avg(), rd.Min(), rd.Max());
-
+      return true;
 		}
-		break;
 		/************************************************************/ 
-	case FP_MEASURE_GEOM : 
+	if(filterName == "Compute Geometric Measures")
 		{
 			CMeshO &m=md.mm()->cm;
 			tri::Inertia<CMeshO> I;
@@ -325,26 +251,17 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
         Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
         Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
 
-        // Point3f ax0(PCA[0][0],PCA[0][1],PCA[0][2]);
-        // Point3f ax1(PCA[1][0],PCA[1][1],PCA[1][2]);
-        // Point3f ax2(PCA[2][0],PCA[2][1],PCA[2][2]);
-
-        // Log("ax0*ax1 %f (len ax0 %f) ",ax0*ax1, Norm(ax0));
-        // Log("ax1*ax2 %f (len ax1 %f) ",ax1*ax2, Norm(ax1));
-        // Log("ax0*ax2 %f (len ax2 %f) ",ax0*ax2, Norm(ax2));
-
         Log("axis momenta are :");
         Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
       }
+      return true;
 		}
-		break;
 		/************************************************************/
-	case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION :
-	case FP_MEASURE_FACE_QUALITY_DISTRIBUTION :
+	if((filterName == "Per Vertex Quality Stat") || (filterName == "Per Face Quality Stat") )
 		{
 			CMeshO &m=md.mm()->cm;
 			Distribution<float> DD;
-			if(ID(filter)==FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION)
+			if(filterName == "Per Vertex Quality Stat")
 				tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
 			else
 				tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
@@ -352,54 +269,21 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			Log("   Min %f Max %f",DD.Min(),DD.Max());		
 			Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));		
 			Log("   StdDev		%f",DD.StandardDeviation());		
-			Log("   Variance  %f",DD.Variance());						
+			Log("   Variance  %f",DD.Variance());
+			return true;
 		}
-		break;
 
-	case FP_MEASURE_GAUSSCURV : 
+	if((filterName == "Per Vertex Quality Histogram") || (filterName == "Per Face Quality Histogram") )
 		{
 			CMeshO &m=md.mm()->cm;
-			SimpleTempData<CMeshO::VertContainer, float> TDArea(m.vert,0.0f);
-			SimpleTempData<CMeshO::VertContainer, float> TDAngleSum(m.vert,0);
-
-			tri::UpdateQuality<CMeshO>::VertexConstant(m,0);
-			float angle[3];
-			CMeshO::FaceIterator fi;
-			for(fi=m.face.begin(); fi!= m.face.end(); ++fi)
-			{
-				angle[0] = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
-				angle[1] = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
-				angle[2] = M_PI-(angle[0]+angle[1]);
-
-				float area= DoubleArea(*fi)/6.0f;
-				for(int i=0;i<3;++i)
-				{
-					TDArea[(*fi).V(i)]+=area;
-					TDAngleSum[(*fi).V(i)]+=angle[i];
-				}
-			}
-			CMeshO::VertexIterator vi;
-			float totalSum=0;
-			for(vi=m.vert.begin(); vi!= m.vert.end(); ++vi)
-			{
-				(*vi).Q() = (2.0*M_PI-TDAngleSum[vi]);//*TDArea[vi];
-				//if((*vi).IsS()) 
-				totalSum += (*vi).Q(); 
-			}
-			Log("integrated is %f (%f*pi)", totalSum,totalSum/M_PI);												
-		} break;
-	case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
-	case FP_MEASURE_FACE_QUALITY_HISTOGRAM:
-		{
-			CMeshO &m=md.mm()->cm;
-			float RangeMin = par.getFloat("minVal");
-			float RangeMax = par.getFloat("maxVal");
-			int binNum = par.getInt("binNum");
-
+			("minVal");
+			float RangeMin = env.evalFloat("HistMin");
+			float RangeMax = env.evalFloat("HistMax");
+			int binNum     = env.evalInt("binNum");
 
 			Histogramf H;
 			H.SetRange(RangeMin,RangeMax,binNum);
-      if(ID(filter)==FP_MEASURE_VERTEX_QUALITY_HISTOGRAM)
+			if(filterName == "Per Vertex Quality Histogram")
 			{
 				for(CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 					if(!(*vi).IsD())
@@ -420,29 +304,9 @@ bool FilterMeasurePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
         Log("[%15.7f..%15.7f) : %4.0f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
 
       Log("[%15.7f..             +inf) : %4.0f",RangeMax,H.BinCountInd(binNum+1));
-		} break;
-
-	default: assert(0);
-	}
-	return true;
-}
-
-FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *a)
-{
-	switch(ID(a))
-	{
-	case FP_MEASURE_GAUSSCURV :
-	case FP_MEASURE_GEOM :
-	case FP_MEASURE_TOPO :
-	case FP_MEASURE_TOPO_QUAD :
-	case FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION:
-	case FP_MEASURE_VERTEX_QUALITY_HISTOGRAM:
-	case FP_MEASURE_FACE_QUALITY_DISTRIBUTION:
-	case FP_MEASURE_FACE_QUALITY_HISTOGRAM:
-		return MeshFilterInterface::Measure;
-	default :  assert(0);
-		return MeshFilterInterface::Generic;
-	}
+      return true;
+        }
+    return false;
 }
 
 QTreeWidgetItem * FilterMeasurePlugin::tagDump(TagBase * _tag, MeshDocument &/*md*/, MeshModel */*mm*/)
@@ -496,3 +360,36 @@ QTreeWidgetItem * FilterMeasurePlugin::tagDump(TagBase * _tag, MeshDocument &/*m
 }
 
 Q_EXPORT_PLUGIN(FilterMeasurePlugin)
+
+//case FP_MEASURE_GAUSSCURV :
+//	{
+//		CMeshO &m=md.mm()->cm;
+//		SimpleTempData<CMeshO::VertContainer, float> TDArea(m.vert,0.0f);
+//		SimpleTempData<CMeshO::VertContainer, float> TDAngleSum(m.vert,0);
+
+//		tri::UpdateQuality<CMeshO>::VertexConstant(m,0);
+//		float angle[3];
+//		CMeshO::FaceIterator fi;
+//		for(fi=m.face.begin(); fi!= m.face.end(); ++fi)
+//		{
+//			angle[0] = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
+//			angle[1] = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
+//			angle[2] = M_PI-(angle[0]+angle[1]);
+
+//			float area= DoubleArea(*fi)/6.0f;
+//			for(int i=0;i<3;++i)
+//			{
+//				TDArea[(*fi).V(i)]+=area;
+//				TDAngleSum[(*fi).V(i)]+=angle[i];
+//			}
+//		}
+//		CMeshO::VertexIterator vi;
+//		float totalSum=0;
+//		for(vi=m.vert.begin(); vi!= m.vert.end(); ++vi)
+//		{
+//			(*vi).Q() = (2.0*M_PI-TDAngleSum[vi]);//*TDArea[vi];
+//			//if((*vi).IsS())
+//			totalSum += (*vi).Q();
+//		}
+//		Log("integrated is %f (%f*pi)", totalSum,totalSum/M_PI);
+//	} break;

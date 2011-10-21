@@ -28,36 +28,20 @@
 
 #include <common/interfaces.h>
 
-class FilterMeasurePlugin : public QObject, public MeshFilterInterface
+class FilterMeasurePlugin : public QObject, public MeshLabFilterInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshFilterInterface)
+	Q_INTERFACES(MeshLabFilterInterface)
 
 public:
-	enum { 
-	FP_MEASURE_GEOM, 
-	FP_MEASURE_TOPO,
-	FP_MEASURE_TOPO_QUAD,
-	FP_MEASURE_GAUSSCURV,
-  FP_MEASURE_VERTEX_QUALITY_DISTRIBUTION,
-  FP_MEASURE_VERTEX_QUALITY_HISTOGRAM,
-  FP_MEASURE_FACE_QUALITY_DISTRIBUTION,
-  FP_MEASURE_FACE_QUALITY_HISTOGRAM
-  };
 
-	FilterMeasurePlugin();
-	
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *);
-	void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	FilterMeasurePlugin(){}
+	bool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );
 	QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel *mm=0);
 };
 
 class MeasureTopoTag: public TagBase
 {
-
 public:
 	int edges;
 	int boundaryEdges;
