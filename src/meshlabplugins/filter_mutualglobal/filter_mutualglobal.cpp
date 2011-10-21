@@ -117,8 +117,13 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 			
 			//parlst.addParam(new RichShotf  ("Shot", vcg::Shotf(),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 			
+			parlst.addParam(new RichInt ("Number of refinement steps",
+				1,
+				"Number of minimaziations step on the global graph",
+				"Number of minimaziations step on the global graph"));
+
 			parlst.addParam(new RichBool("Pre-alignment",false,"Pre-alignment step","Pre-alignment step"));
-			parlst.addParam(new RichBool("Estimate Focal",false,"Estimate focal length","Estimate focal length"));
+			parlst.addParam(new RichBool("Estimate Focal",true,"Estimate focal length","Estimate focal length"));
 			parlst.addParam(new RichBool("Fine",true,"Fine Alignment","Fine alignment"));
 
  		  /*parlst.addParam(new RichBool ("UpdateNormals",
@@ -161,7 +166,13 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	{
 		preAlignment(md, par, cb);
 	}
-	else
+
+	this->glContext->doneCurrent();
+
+	this->glContext->makeCurrent();
+
+	this->initGL();
+	for (int i=0; i<par.getInt("Number of refinement steps"); i++)
 	{
 
 		std::vector<SubGraph> Graphs;
@@ -405,15 +416,6 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 					break;
 			}
 
-	
-	for (int r=0; r<md.rasterList.size();r++)
-	{
-		//this->glContext->makeCurrent();
-		align.image=&md.rasterList[r]->currentPlane->image;
-		align.shot=md.rasterList[r]->shot;
-	//this->initGL();
-		align.resize(800);
-
 	vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
   vcg::Point3f *normals = new vcg::Point3f[align.mesh->vn];
   vcg::Color4b *colors = new vcg::Color4b[align.mesh->vn];
@@ -450,6 +452,17 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
   delete []vertices;
   delete []normals;
   delete []colors;
+  delete []indices;
+
+	for (int r=0; r<md.rasterList.size();r++)
+	{
+		//this->glContext->makeCurrent();
+		align.image=&md.rasterList[r]->currentPlane->image;
+		align.shot=md.rasterList[r]->shot;
+	//this->initGL();
+		align.resize(800);
+
+	
 
   
 	
@@ -680,14 +693,17 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md)
 std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs)
 {
 	std::vector<SubGraph> Gr;
+	SubGraph allNodes;
 	int numNodes=md.rasterList.size();
-	bool* assigned=new bool();
-	int* grNum=new int();
 	Log(0, "Tuttok1");
 	for (int s=0; s<numNodes; s++)
 	{
-		assigned[s]=false;
-		grNum[s]=0;
+		Node n;
+		n.active=false;
+		n.assigned=false;
+		n.grNum=0;
+		n.avMut=0.0;
+		allNodes.nodes.push_back(n);
 	}
 	int totGr=1;
 	bool done=false;
@@ -698,19 +714,19 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 		for (int i=0; i<arcs.size(); i++)
 		{
 			int candidate=arcs[i].imageId;
-			if(assigned[candidate]==false)
+			if(allNodes.nodes[candidate].assigned==false)
 			{
-				assigned[candidate]=true;
-				grNum[candidate]=totGr;
+				allNodes.nodes[candidate].assigned=true;
+				allNodes.nodes[candidate].grNum=totGr;
 				totNodes++;
 				for (int j=0; j<arcs.size(); j++)
 				{
 					if (arcs[j].imageId==candidate)
 					{
-						if (assigned[arcs[j].projId]==false)
+						if (allNodes.nodes[arcs[j].projId].assigned==false)
 						{
-							assigned[arcs[j].projId]=true;
-							grNum[arcs[j].projId]=totGr;
+							allNodes.nodes[arcs[j].projId].assigned=true;
+							allNodes.nodes[arcs[j].projId].grNum=totGr;
 							totNodes++;
 						}
 					}
@@ -722,6 +738,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 		else totGr++;
 	}
 	Log(0, "Tuttok3");
+	
 	for (int i=1; i<totGr+1; i++)
 	{
 		SubGraph graph;
@@ -729,7 +746,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 		for (int j=0; j<numNodes; j++)
 		{
 			Log(0, "Node %d of %d",j,numNodes);
-			if (grNum[j]==i)
+			if (allNodes.nodes[j].grNum==i)
 			{
 				Node n;
 				double mut=0.0; double are=0.00001;
@@ -754,7 +771,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 	}
 	Log(0, "Tuttok5");
 	Log(0, "Tot nodes %d, SubGraphs %d",numNodes,totGr);
-
+	
 	return Gr;
 }
 
@@ -899,6 +916,7 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 	delete []vertices;
 	delete []normals;
 	delete []colors;
+	delete []indices;
 	
     //align.shot=par.getShotf("Shot");
 		
@@ -982,6 +1000,7 @@ bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n
 	delete []vertices;
 	delete []normals;
 	delete []colors;
+	delete []indices;
 	
 	for (int h=0; h<graph.nodes.size(); h++)
 		for (int l=0; l<graph.nodes[h].arcs.size(); l++)

@@ -82,7 +82,9 @@ public:
 
 
 	bool active;
+	bool assigned;
 	int id;
+	int grNum;
 	double avMut;
 	std::vector<AlignPair> arcs;
 

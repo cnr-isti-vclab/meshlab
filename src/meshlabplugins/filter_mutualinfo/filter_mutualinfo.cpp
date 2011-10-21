@@ -217,6 +217,7 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
   delete []vertices;
   delete []normals;
   delete []colors;
+  delete []indices;
 	
     align.shot=par.getShotf("Shot");
 		

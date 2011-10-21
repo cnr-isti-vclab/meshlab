@@ -107,7 +107,7 @@ void AlignSet::resize(int max_side) {
   if(w != image->width() || h != image->height())
     im = image->scaled(w, h, Qt::IgnoreAspectRatio); //Qt::KeepAspectRatio);
   else im = *image;
-  im.save("image.jpg");
+  //im.save("image.jpg");
   assert(w == im.width());
   assert(h == im.height());
   QColor color;
