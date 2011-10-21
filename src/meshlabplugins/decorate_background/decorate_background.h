@@ -60,6 +60,8 @@ inline QString GridMajorParam() const { return  "MeshLab::Decoration::GridMajor"
 inline QString GridMinorParam() const { return  "MeshLab::Decoration::GridMinor" ; }
 inline QString BoxRatioParam() const { return  "MeshLab::Decoration::BoxRatio" ; }
 inline QString ShowShadowParam() const { return  "MeshLab::Decoration::ShowShadow" ; }
+inline QString GridColorBackParam() const { return  "MeshLab::Decoration::GridColorBack" ; }
+inline QString GridColorFrontParam() const { return  "MeshLab::Decoration::GridColorFront" ; }
 
 public:
      
