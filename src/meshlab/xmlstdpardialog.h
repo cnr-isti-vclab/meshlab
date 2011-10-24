@@ -17,7 +17,7 @@
 #include<QTextEdit>
 #include<QLabel>
 #include "qstyleoption.h"
-
+#include "additionalgui.h"
 
 class XMLWidgetException : public MeshLabException
 {
@@ -34,7 +34,7 @@ class XMLMeshLabWidget : public QWidget
 	Q_OBJECT
 public:
 	//WARNING! This constructor could rise up a set of MeshLabExceptions! this does it mean that the object COULD BE NOT correctly constructed!
-	XMLMeshLabWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
+	XMLMeshLabWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
 	//virtual void collectWidgetValue() = 0;
 	//void reset();
@@ -74,7 +74,7 @@ class XMLMeshLabWidgetFactory
 public:	
 	//WARNING! this function call constructors that could rise up a set of MeshLabExceptions but it is not able to manage it, so let the exceptions floating up!
 	//IN ANY CASE the callee MUST check if the returned value is not NULL.
-	static XMLMeshLabWidget* create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,MeshDocument* md,QWidget* parent);
+	static XMLMeshLabWidget* create(const MLXMLPluginInfo::XMLMap& widgetTable,EnvWrap& env,MeshDocument* md,QWidget* parent);
 };
 
 //
@@ -82,7 +82,7 @@ class XMLCheckBoxWidget : public XMLMeshLabWidget
 {
 	Q_OBJECT
 public:
-	XMLCheckBoxWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
+	XMLCheckBoxWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLCheckBoxWidget();
 	
 	// bring the values from the Qt widgets to the parameter (e.g. from the checkBox to the parameter).
@@ -110,7 +110,7 @@ class XMLEditWidget : public XMLMeshLabWidget
 {
 	Q_OBJECT
 public:
-	XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
+	XMLEditWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLEditWidget();
 
 	void set(const QString& nwExpStr);
@@ -136,7 +136,7 @@ class XMLAbsWidget : public XMLMeshLabWidget
 {	
 	Q_OBJECT
 public:
-	XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
+	XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent);
 	~XMLAbsWidget();
 
 	void set(const QString& nwExpStr);
@@ -174,7 +174,7 @@ class XMLVec3Widget : public XMLMeshLabWidget
 {
 	Q_OBJECT
 public:
-	XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLVec3Widget();
 	QString paramName;
 
@@ -220,7 +220,7 @@ class XMLColorWidget : public XMLMeshLabWidget
 	QColor pickcol;
 
 public:
-	XMLColorWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	XMLColorWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLColorWidget();
 
 	void set(const QString& nwExpStr);
@@ -250,7 +250,7 @@ class XMLSliderWidget : public XMLMeshLabWidget
 signals:
 	void dialogParamChanged();
 public:
-	XMLSliderWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	XMLSliderWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLSliderWidget();
 	void set(const QString& nwExpStr);
 	void updateVisibility(const bool vis);
@@ -286,7 +286,7 @@ protected:
 	QComboBox *enumCombo;
 	QLabel *enumLabel;
 public:
-	XMLComboWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	XMLComboWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLComboWidget();
 	void updateVisibility(const bool vis);
 	void Init(QWidget *p,QString lab,int newEnum, QStringList values);
@@ -312,7 +312,7 @@ class XMLEnumWidget : public XMLComboWidget
 	Q_OBJECT
 
 public:	
-	XMLEnumWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	XMLEnumWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLEnumWidget(){};
 
 	QString getWidgetExpression();
@@ -323,7 +323,7 @@ class XMLMeshWidget : public XMLEnumWidget
 	Q_OBJECT
 
 public:
-	XMLMeshWidget(MeshDocument* mdoc,const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	XMLMeshWidget(MeshDocument* mdoc,const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLMeshWidget(){};
 
 private:
@@ -365,14 +365,14 @@ class XMLStdParFrame : public QFrame
 	Q_OBJECT
 public:
 	XMLStdParFrame(QWidget *p,QWidget *gla=0);
-	void loadFrameContent(const XMLFilterInfo::XMLMapList& parMap,EnvWrap& envir);
+	void loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir);
 	void extendedView(bool ext,bool help);
 	//void loadFrameContent(RichParameter* par,MeshDocument *mdPt = 0);
 
 	//// The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
 	//// This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
 	//void readValues(RichParameterSet &curParSet);
-	void resetExpressions(const XMLFilterInfo::XMLMapList& mplist);
+	void resetExpressions(const MLXMLPluginInfo::XMLMapList& mplist);
 
 	void toggleHelp(bool help);	
 
@@ -391,35 +391,6 @@ private:
 
 	/*void dynamicFloatChanged(int mask);
 	void parameterChanged();*/
-};
-
-class PrimitiveButton : public QPushButton
-{
-	Q_OBJECT
-public:	
-	PrimitiveButton(const QStyle::PrimitiveElement el,QWidget* parent);	
-	~PrimitiveButton();
-	void setPrimitiveElement(const QStyle::PrimitiveElement el);
-protected:
-	void paintEvent(QPaintEvent * event);
-private:
-	QStyle::PrimitiveElement elem;
-};
-
-class ExpandButtonWidget : public QWidget
-{
-	Q_OBJECT
-public:
-	ExpandButtonWidget(QWidget* parent);	
-	~ExpandButtonWidget();
-
-private slots:
-	void changeIcon();
-signals:
-	void expandView(bool exp);
-private:
-	PrimitiveButton* exp;
-	bool isExpanded;
 };
 
 class MeshLabXMLStdDialog : public QDockWidget
@@ -465,7 +436,7 @@ private:
 	MeshModel *curModel;
 	MeshLabXMLFilterContainer* curmfc;
 	MainWindowInterface *curmwi;
-	XMLFilterInfo::XMLMapList curParMap;
+	MLXMLPluginInfo::XMLMapList curParMap;
 	//XMLFilterInfo::XMLMapList prevParMap;
 	QString applyContext;
 	QString previewContext;

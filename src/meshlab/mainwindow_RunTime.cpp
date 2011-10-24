@@ -37,6 +37,7 @@
 #include "savemaskexporter.h"
 #include "alnParser.h"
 #include <exception>
+#include "xmlgeneratorgui.h"
 
 
 #include "../common/scriptinterface.h"
@@ -869,7 +870,7 @@ void MainWindow::startFilter()
 			// "minExpr" - "minExpr"
 			// "maxExpr" - "maxExpr" 
 
-			XMLFilterInfo::XMLMapList params = filt.xmlInfo->filterParametersExtendedInfo(fname);
+			MLXMLPluginInfo::XMLMapList params = filt.xmlInfo->filterParametersExtendedInfo(fname);
 			
 
 			/*****IMPORTANT NOTE******/
@@ -881,9 +882,9 @@ void MainWindow::startFilter()
 			try
 			{
 					//each map inside the list contains info (type,name,def_expr) on each parameter inside the filter
-				for(XMLFilterInfo::XMLMapList::const_iterator it = params.constBegin();it != params.constEnd();++it)
+				for(MLXMLPluginInfo::XMLMapList::const_iterator it = params.constBegin();it != params.constEnd();++it)
 				{	
-					XMLFilterInfo::XMLMap mp = *(it);
+					MLXMLPluginInfo::XMLMap mp = *(it);
 						//Initilize the parameters inside the environment
 					//Expression* exp = ExpressionFactory::create(mp[MLXMLElNames::paramType],mp[MLXMLElNames::paramDefExpr]);
 
@@ -1933,6 +1934,8 @@ void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()-
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
 void MainWindow::showLayerDlg() {if(GLA() != 0) 	layerDialog->setVisible( !layerDialog->isVisible() );}
+void MainWindow::showXMLPluginEditorGui(){if(GLA() != 0) 	plugingui->setVisible( !plugingui->isVisible() );}
+
 
 void MainWindow::setCustomize()
 {

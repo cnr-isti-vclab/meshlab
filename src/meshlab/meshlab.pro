@@ -22,6 +22,8 @@ HEADERS = ../common/interfaces.h \
     layerDialog.h \
     stdpardialog.h \
 	xmlstdpardialog.h \
+	additionalgui.h \
+	xmlgeneratorgui.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
     $$VCGDIR/wrap/gl/trimesh.h 
@@ -39,6 +41,8 @@ SOURCES = main.cpp \
     changetexturename.cpp \
     stdpardialog.cpp \
     xmlstdpardialog.cpp \
+	additionalgui.cpp \
+	xmlgeneratorgui.cpp \
 	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
     glarea_setting.cpp
@@ -51,7 +55,11 @@ FORMS = ui/layerDialog.ui \
     ui/renametexture.ui \
     ui/savemaskexporter.ui \
     ui/congratsDialog.ui \
-	ui/scriptEditor.ui
+	ui/scriptEditor.ui \
+	ui/filtergui.ui \
+	ui/paramgui.ui \
+	ui/filtercreatortab.ui
+	
 
 	
 	win32-msvc2005: RCC_DIR = $(ConfigurationName)

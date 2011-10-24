@@ -52,7 +52,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	stdParFrame = new XMLStdParFrame(this,curgla);
 	//connect(stdParFrame,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),this,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 
-	XMLFilterInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
+	MLXMLPluginInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
 	EnvWrap wrap(env);
 	stdParFrame->loadFrameContent(mplist,wrap);
 	gridLayout->addWidget(stdParFrame,1,0,1,2);
@@ -134,7 +134,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
 
 	QString fname = mfc.act->text();
 	//mfi->initParameterSet(action, *mdp, curParSet);
-  XMLFilterInfo::XMLMapList mplist = mfc.xmlInfo->filterParametersExtendedInfo(fname);
+  MLXMLPluginInfo::XMLMapList mplist = mfc.xmlInfo->filterParametersExtendedInfo(fname);
 	curParMap = mplist;
 	//curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
 	if(curParMap.isEmpty() && !isPreviewable())
@@ -284,7 +284,7 @@ bool MeshLabXMLStdDialog::isPreviewable() const
 void MeshLabXMLStdDialog::resetExpressions()
 {
 	QString fname(curmfc->act->text());
-	XMLFilterInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
+	MLXMLPluginInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
 	EnvWrap envir(env);
 	stdParFrame->resetExpressions(mplist);
 }
@@ -314,12 +314,12 @@ XMLStdParFrame::~XMLStdParFrame()
 	
 }
 
-void XMLStdParFrame::loadFrameContent(const XMLFilterInfo::XMLMapList& parMap,EnvWrap& envir)
+void XMLStdParFrame::loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir)
 {
 	MeshLabXMLStdDialog* dialog = qobject_cast<MeshLabXMLStdDialog*>(parent());
 	if (dialog == NULL)
 		throw MeshLabException("An XMLStdParFrame has not a MeshLabXMLStdDialog's parent");
-	for(XMLFilterInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
+	for(MLXMLPluginInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
 	{
 		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,envir,dialog->curMeshDoc,this);
 		if (widg == NULL)
@@ -350,13 +350,13 @@ void XMLStdParFrame::extendedView(bool ext,bool help)
 	adjustSize();
 }
 
-void XMLStdParFrame::resetExpressions(const XMLFilterInfo::XMLMapList& mplist)
+void XMLStdParFrame::resetExpressions(const MLXMLPluginInfo::XMLMapList& mplist)
 {
 	for(int i = 0; i < xmlfieldwidgets.count(); i++)
 		xmlfieldwidgets[i]->set(mplist[i][MLXMLElNames::paramDefExpr]);
 }
 
-XMLMeshLabWidget::XMLMeshLabWidget(const XMLFilterInfo::XMLMap& mp,EnvWrap& envir,QWidget* parent )
+XMLMeshLabWidget::XMLMeshLabWidget(const MLXMLPluginInfo::XMLMap& mp,EnvWrap& envir,QWidget* parent )
 :QWidget(parent),env(envir)
 {
 	//WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -403,7 +403,7 @@ void XMLMeshLabWidget::setVisibility( const bool vis )
 //	this->set(map[MLXMLElNames::paramDefExpr]);
 //}
 
-XMLCheckBoxWidget::XMLCheckBoxWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent )
+XMLCheckBoxWidget::XMLCheckBoxWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
 	cb = new QCheckBox(xmlWidgetTag[MLXMLElNames::guiLabel],this);
@@ -457,7 +457,7 @@ void XMLCheckBoxWidget::setVisibility( const bool vis )
 	cb->setVisible(vis);
 }
 
-XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& widgetTable,EnvWrap& env,MeshDocument* md,QWidget* parent)
+XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const MLXMLPluginInfo::XMLMap& widgetTable,EnvWrap& env,MeshDocument* md,QWidget* parent)
 {
 	QString guiType = widgetTable[MLXMLElNames::guiType];
 	if (guiType == MLXMLElNames::editTag)
@@ -486,7 +486,7 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const XMLFilterInfo::XMLMap& w
 	return NULL;
 }
 
-XMLEditWidget::XMLEditWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent)
+XMLEditWidget::XMLEditWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent)
 :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
 	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
@@ -549,7 +549,7 @@ void XMLEditWidget::setVisibility( const bool vis )
 	this->lineEdit->setVisible(vis);
 }
 
-XMLAbsWidget::XMLAbsWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
+XMLAbsWidget::XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
 	m_min = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
@@ -636,70 +636,8 @@ void XMLAbsWidget::setVisibility( const bool vis )
 	this->percSB->setVisible(vis);
 }
 
-ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
-:QWidget(parent),isExpanded(false)
-{
-	QIcon arrow = QCommonStyle().standardIcon(QStyle::SP_ArrowDown);
-	QHBoxLayout *hlay = new QHBoxLayout(this);
-	//QChar ch(0x0036);
-	exp = new PrimitiveButton(QStyle::PE_IndicatorArrowDown,this);
-	//exp->setFlat(true);
-	//connect(exp,SIGNAL(clicked(bool)),this,SLOT(expandFrame(bool)));
-	/*QFontMetrics mt(exp->font(),exp);
-	QSize sz = mt.size(Qt::TextSingleLine,arrow);*/
-	/*QList<QSize> sizes = arrow.availableSizes();
-	int min = INT_MAX;
-	for(int ii = 0;ii < sizes.size();++ii)
-		if (sizes[ii].width() < min)
-			min = sizes[ii].width();
-	QSize sz;
-	sz.setWidth(min + 10);*/
-	
-	hlay->addWidget(exp,0,Qt::AlignHCenter);
-	connect(exp,SIGNAL(clicked(bool)),this,SLOT(changeIcon()));
-}
 
-ExpandButtonWidget::~ExpandButtonWidget()
-{
-
-}
-
-void ExpandButtonWidget::changeIcon()
-{
-	isExpanded = !isExpanded;
-	if (isExpanded)
-		exp->setPrimitiveElement(QStyle::PE_IndicatorArrowUp);
-	else
-		exp->setPrimitiveElement(QStyle::PE_IndicatorArrowDown);
-	exp->repaint();
-	emit expandView(isExpanded);
-}
-
-PrimitiveButton::PrimitiveButton(const QStyle::PrimitiveElement el,QWidget* parent )
-:QPushButton(parent),elem(el)
-{
-}
-
-PrimitiveButton::~PrimitiveButton()
-{
-
-}
-
-void PrimitiveButton::paintEvent( QPaintEvent * event )
-{
-	QStylePainter painter(this);
-	QStyleOptionButton option;
-	option.initFrom(this);
-	//painter.drawControl(QStyle::CE_PushButton,option);
-	painter.drawPrimitive (elem,option);
-}
-
-void PrimitiveButton::setPrimitiveElement( const QStyle::PrimitiveElement el)
-{
-	elem = el;
-}
-
-XMLVec3Widget::XMLVec3Widget(const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p)
+XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p)
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
 	XMLStdParFrame* par = qobject_cast<XMLStdParFrame*>(p);
@@ -839,7 +777,7 @@ void XMLVec3Widget::setVisibility( const bool vis )
 	descLab->setVisible(vis);
 }
 
-XMLColorWidget::XMLColorWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+XMLColorWidget::XMLColorWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
 	colorLabel = new QLabel(p);
@@ -909,7 +847,7 @@ void XMLColorWidget::setVisibility( const bool vis )
 	colorButton->setVisible(vis);
 }
 
-XMLSliderWidget::XMLSliderWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+XMLSliderWidget::XMLSliderWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
 	minVal = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
@@ -999,7 +937,7 @@ void XMLSliderWidget::setVisibility( const bool vis )
 	fieldDesc->setVisible(vis); 
 }
 
-XMLComboWidget::XMLComboWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+XMLComboWidget::XMLComboWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
 	enumLabel = new QLabel(p);
@@ -1035,7 +973,7 @@ XMLComboWidget::~XMLComboWidget()
 
 }
 
-XMLEnumWidget::XMLEnumWidget( const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+XMLEnumWidget::XMLEnumWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLComboWidget(xmlWidgetTag,envir,p)
 {
 	QString typ = xmlWidgetTag[MLXMLElNames::paramType];
@@ -1054,7 +992,7 @@ QString XMLEnumWidget::getWidgetExpression()
 	return enumCombo->itemData(enumCombo->currentIndex()).toString();
 }
 
-XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const XMLFilterInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLEnumWidget(xmlWidgetTag,envir,p)
 {
 	foreach(MeshModel* mm,mdoc->meshList)

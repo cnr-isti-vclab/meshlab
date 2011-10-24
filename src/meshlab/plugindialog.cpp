@@ -134,7 +134,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 									QString xmlFile = dir.absoluteFilePath(tmp);
 									XMLMessageHandler xmlErr;
 									MeshLabXMLFilterContainer fc;
-									fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,ScriptAdapterGenerator::xmlSchemaFile(),xmlErr);
+									fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
 									if (fc.xmlInfo != NULL)
 									{
 										QStringList fn = fc.xmlInfo->filterNames();
@@ -216,7 +216,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 			QString xmlFile = dir.absoluteFilePath(tmp);
 			XMLMessageHandler xmlErr;
 			MeshLabXMLFilterContainer fc;
-			fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,ScriptAdapterGenerator::xmlSchemaFile(),xmlErr);
+			fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
 			if (fc.xmlInfo != NULL)
 			{
 				QStringList ls = fc.xmlInfo->filterNames();

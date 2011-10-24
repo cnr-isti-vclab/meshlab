@@ -48,6 +48,10 @@ MainWindow::MainWindow()
 	layerDialog = new LayerDialog(this);
 	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	addDockWidget(Qt::RightDockWidgetArea,layerDialog);
+
+	plugingui = new PluginGeneratorGUI(this);
+	plugingui->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
+	addDockWidget(Qt::LeftDockWidgetArea,plugingui);
 	//setCentralWidget(workspace);
 	setCentralWidget(mdiarea);
 	windowMapper = new QSignalMapper(this);
@@ -350,6 +354,10 @@ void MainWindow::createActions()
 	showScriptEditAct->setEnabled(false);
 	connect(showScriptEditAct, SIGNAL(triggered()), this, SLOT(showScriptEditor()));
 
+
+	showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
+	showFilterEditAct->setEnabled(false);
+	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
@@ -473,6 +481,7 @@ void MainWindow::createMenus()
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addAction(showScriptEditAct);
+	filterMenu->addAction(showFilterEditAct);
 	filterMenu->addSeparator();
 
 
@@ -625,7 +634,7 @@ void MainWindow::fillFilterMenu()
 	{
     //MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
 		QAction *filterAction = xmlit.value().act;
-		XMLFilterInfo* info = xmlit.value().xmlInfo;
+		MLXMLPluginInfo* info = xmlit.value().xmlInfo;
 		QString filterName = xmlit.key();
 		try
 		{

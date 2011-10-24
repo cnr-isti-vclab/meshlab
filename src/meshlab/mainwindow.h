@@ -40,6 +40,7 @@
 #include "layerDialog.h"
 #include "stdpardialog.h"
 #include "xmlstdpardialog.h"
+#include "xmlgeneratorgui.h"
 
 #define MAXRECENTFILES 4
 
@@ -110,6 +111,7 @@ private slots:
 	void runFilterScript();
 	void showFilterScript();
 	void showScriptEditor();
+	void showXMLPluginEditorGui();
   void showTooltip(QAction*);
   /////////// Slot Menu Render /////////////////////
 	void renderBbox();
@@ -206,6 +208,7 @@ private:
 	static QProgressBar *qb;
 	QMdiArea *mdiarea;
 	LayerDialog *layerDialog;
+	PluginGeneratorGUI* plugingui;
 	QSignalMapper *windowMapper;
 
 
@@ -350,6 +353,7 @@ private:
   QAction *runFilterScriptAct;
   QAction *showFilterScriptAct;
   QAction* showScriptEditAct;
+  QAction* showFilterEditAct;
   /////////// Actions Menu Edit  /////////////////////
   QAction *suspendEditModeAct;
 	/////////// Actions Menu Render /////////////////////
@@ -437,6 +441,7 @@ private:
 	QAction *checkUpdatesAct;
 	////////////////////////////////////////////////////
 };
+
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System
 class FileOpenEater : public QObject
