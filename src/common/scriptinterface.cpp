@@ -16,11 +16,11 @@ QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 	return names;
 }
 
-QString ScriptAdapterGenerator::parNames( const QString& filterName,const XMLFilterInfo& xmlInfo ) const
+QString ScriptAdapterGenerator::parNames( const QString& filterName,const MLXMLPluginInfo& xmlInfo ) const
 {
 	QString names;
 	//the order is important !!! 
-	XMLFilterInfo::XMLMapList params = xmlInfo.filterParametersExtendedInfo(filterName);
+	MLXMLPluginInfo::XMLMapList params = xmlInfo.filterParametersExtendedInfo(filterName);
 	int ii;
 	bool optional = false;
 	for(ii = 0;ii < params.size();++ii)
@@ -56,13 +56,13 @@ QString ScriptAdapterGenerator::funCodeGenerator(const QString&  filtername,cons
 	return code;
 }
 
-QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,const XMLFilterInfo& xmlInfo ) const
+QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,const MLXMLPluginInfo& xmlInfo ) const
 {
 	QString code;
 	QString names = parNames(filterName,xmlInfo);
-	QString ariet = xmlInfo.filterAttribute(filterName,MLXMLElNames::filterAriety);
+	QString ariet = xmlInfo.filterAttribute(filterName,MLXMLElNames::filterArity);
 
-	bool isSingle = (ariet == MLXMLElNames::singleMeshAriety);
+	bool isSingle = (ariet == MLXMLElNames::singleMeshArity);
 	QString mid("meshID");
 	if ((names.isEmpty()) && isSingle)
 		names = mid;
@@ -72,13 +72,13 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 
 	code += "function (" + names + ")\n";
 	code += "{\n";
-	XMLFilterInfo::XMLMapList mplist = xmlInfo.filterParametersExtendedInfo(filterName);
+	MLXMLPluginInfo::XMLMapList mplist = xmlInfo.filterParametersExtendedInfo(filterName);
 	if (names.indexOf(optName()) != -1)
 	{
 		QString defValues;
 		for(int ii = 0;ii < mplist.size();++ii)
 		{
-			XMLFilterInfo::XMLMap mp = mplist[ii];
+			MLXMLPluginInfo::XMLMap mp = mplist[ii];
 			if (mp[MLXMLElNames::paramIsImportant] == "false")
 				defValues += mp[MLXMLElNames::paramName] + " : " + mp[MLXMLElNames::paramDefExpr] + ", ";
 		}
@@ -91,7 +91,7 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 	int arg = (int) isSingle;
 	for(int ii = 0; ii < mplist.size();++ii)
 	{
-		XMLFilterInfo::XMLMap mp = mplist[ii];
+		MLXMLPluginInfo::XMLMap mp = mplist[ii];
 		bool isenum = false;
 		QString num = QString::number(ii);
 		QString values = mp[MLXMLElNames::paramType];
@@ -101,9 +101,9 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,cons
 			values.remove(rem);
 			rem.setPattern("\\}");
 			values.remove(rem);
-			XMLFilterInfo::XMLMap valuesMap = XMLFilterInfo::mapFromString(values,QRegExp("\\|"),QRegExp("\\:"));
+			MLXMLPluginInfo::XMLMap valuesMap = MLXMLPluginInfo::mapFromString(values,QRegExp("\\|"),QRegExp("\\:"));
 			code += "\tfunction enumfun_" + num + "()\n\t{\t\n";
-			for(XMLFilterInfo::XMLMap::iterator it = valuesMap.begin();it != valuesMap.end();++it)
+			for(MLXMLPluginInfo::XMLMap::iterator it = valuesMap.begin();it != valuesMap.end();++it)
 			{
 				code += "\t\tthis[\"" + it.key() + "\"] = " + it.value() + ";\n";
 				code += "\t\tthis[parseInt(" + it.value() + ")] = \"" + it.key() + "\";\n";

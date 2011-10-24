@@ -67,7 +67,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				else
 				{
 					XMLMessageHandler xmlErr;
-					fc.xmlInfo = XMLFilterInfo::createXMLFileInfo(xmlFile,ScriptAdapterGenerator::xmlSchemaFile(),xmlErr);
+					fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
 					if (fc.xmlInfo != NULL)
 					{
 						QStringList fn = fc.xmlInfo->filterNames();
@@ -195,7 +195,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	env.globalObject().setProperty("_applyFilter", applyFun);
 
 	QScriptValue res = env.evaluate(code);
-	qDebug("Code:\n %s",qPrintable(code));
+	//qDebug("Code:\n %s",qPrintable(code));
 	if (env.hasUncaughtException())
 		qDebug() << "JavaScript Interpreter Error: " << res.toString() << "\n";
 

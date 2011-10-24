@@ -48,6 +48,8 @@ private:
 
 namespace MLXMLElNames
 {
+	const QString mfiCurrentVersion("2.0");
+
 	const QString mfiTag("MESHLAB_FILTER_INTERFACE");
 	const QString pluginTag("PLUGIN");
 	const QString filterTag("FILTER");
@@ -77,7 +79,7 @@ namespace MLXMLElNames
 	const QString filterClass("filterClass");
 	const QString filterPreCond("filterPre");
 	const QString filterPostCond("filterPost");
-	const QString filterAriety("filterAriety");
+	const QString filterArity("filterArity");
 
 	//filterHelp == name to access to the value of FILTER_HELP inside the Map produced by the XMLFilterInfo 
 	//const QString filterHelp("f_help");
@@ -94,31 +96,50 @@ namespace MLXMLElNames
 	const QString guiLabel("guiLabel");
 	const QString guiMinExpr("guiMin");
 	const QString guiMaxExpr("guiMax");
-	const QString guiValuesList("guiValuesList");
 
 	//types' names inside the XML MeshLab file format
 	const QString boolType("Boolean");
 	const QString realType("Real");
-	const QString intType("Integer");
+	const QString intType("Int");
 	const QString vec3Type("Vec3");
 	const QString colorType("Color");
 	const QString enumType("Enum");
 	const QString meshType("Mesh");
 
 	//ariety values
-	const QString singleMeshAriety("SingleMesh");
-	const QString fixedAriety("Fixed");
-	const QString variableAriety("Variable");
+	const QString singleMeshArity("SingleMesh");
+	const QString fixedArity("Fixed");
+	const QString variableArity("Variable");
+
+	void initMLXMLTypeList(QStringList& ls);
+	void initMLXMLGUITypeList(QStringList& ls);
+	void initMLXMLArityValuesList(QStringList& ls);
+	void initMLXMLGUIListForType( const QString& mlxmltype,QStringList& ls );
+	//
+	void initMLXMLTreeTag(QStringList& ls);
+
+	void initMLXMLPluginAttributesTag(QStringList& ls);
+
+	void initMLXMLFilterAttributesTag(QStringList& ls);
+	void initMLXMLFilterElemsTag(QStringList& ls);
+
+	void initMLXMLParamAttributesTag(QStringList& ls);
+	void initMLXMLParamElemsTag(QStringList& ls);
+		
+	void initMLXMLGUIAttributesTag(const QString& guiType,QStringList& ls);
 }
+
+
+
 
 //Query Exception should be managed by the XMLFilterInfo class (XMLFilterInfo is the class devoted to compose queries)
 //Parsing Exception instead should be managed by the code calling the XMLFilterInfo's functions. 
 //A Parsing Exception is raised every time an unexpected and/or missing tag or attribute in an XML has been encountered. 
 
-class XMLFilterInfo
+class MLXMLPluginInfo
 {
 private:
-	XMLFilterInfo(const QString& file)
+	MLXMLPluginInfo(const QString& file)
 		:fileName(file){}
 
 	static QString defaultGuiInfo(const QString& guiType,const QString& xmlvariable);
@@ -144,11 +165,13 @@ public:
 
 	typedef QMap<QString,QString> XMLMap;
 	typedef QList< XMLMap > XMLMapList;
+	static MLXMLPluginInfo* createXMLPluginInfo( const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML);
 	static XMLMap mapFromString(const QString& st,const QRegExp& extsep = extSep(),const QRegExp& intsep = intSep());
 	static XMLMapList mapListFromStringList(const QStringList& list);
-	static XMLFilterInfo* createXMLFileInfo(const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML);
-	inline static void deleteXMLFileInfo(XMLFilterInfo* xmlInfo) {delete xmlInfo;}
+	inline static void deleteXMLFileInfo(MLXMLPluginInfo* xmlInfo) {delete xmlInfo;}
 	
+	QString interfaceAttribute(const QString& attribute) const;
+
 	QString pluginName() const;
 	QString pluginAttribute(const QString& attribute ) const;
 	
@@ -165,22 +188,73 @@ public:
 	XMLMap filterParameterGui(const QString& filter,const QString& parameter) const;
 	XMLMap filterParameterExtendedInfo(const QString& filter,const QString& parameter) const;
 	QString filterParameterAttribute(const QString& filterName,const QString& paramName,const QString& attribute) const;
+	QString filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName ) const;
 
 	QStringList query(const QString& qry) const;
 };
 
+struct MLXMLGUISubTree
+{
+	MLXMLPluginInfo::XMLMap guiinfo;
+};
+
+struct MLXMLParamSubTree
+{
+	MLXMLPluginInfo::XMLMap paraminfo;
+	MLXMLGUISubTree gui;
+};
+
+struct MLXMLFilterSubTree
+{
+	MLXMLPluginInfo::XMLMap filterinfo;
+	QList<MLXMLParamSubTree> params;
+};
+
+struct MLXMLPluginSubTree
+{
+	MLXMLPluginInfo::XMLMap pluginfo;
+	QList<MLXMLFilterSubTree> filters;
+};
+
+struct MLXMLTree
+{
+	MLXMLPluginInfo::XMLMap interfaceinfo;
+	MLXMLPluginSubTree plugin;
+};
+
 class MLXMLUtilityFunctions
 {
+	static QString xmlAttrNameValue(const MLXMLPluginInfo::XMLMap& map,const QString& attname);
+	static QString generateMeshLabCodeFilePreamble();
+	static QString generateNameClassPlugin(const MLXMLPluginSubTree& plugtree);
+	static QString generateEvalParam( const MLXMLParamSubTree& param,const QString& envname );
 public:
+	static const QString xmlSchemaFile() {return QString(":/script_system/meshlabfilterXMLspecificationformat.xsd");}
+
 	static bool getEnumNamesValuesFromString(const QString& st,QMap<int,QString>& mp);
+	static QString generateMeshLabXML(const MLXMLTree& tree);
+	static QString generateXMLPlugin(const MLXMLPluginSubTree& plugin);	
+	static QString generateXMLFilter(const MLXMLFilterSubTree& filter);
+	static QString generateXMLParam(const MLXMLParamSubTree& param);
+	static QString generateXMLGUI(const MLXMLGUISubTree& gui);
+
+	static void loadMeshLabXML(MLXMLTree& tree,const MLXMLPluginInfo& pinfo);
+	static void loadXMLPlugin(MLXMLPluginSubTree& plugin,const MLXMLPluginInfo& pinfo);
+	static void loadXMLFilter(const QString& name,MLXMLFilterSubTree& filter,const MLXMLPluginInfo& pinfo);
+	static void loadXMLParam(const QString& filtername,const QString& paramname,MLXMLParamSubTree& param,const MLXMLPluginInfo& pinfo );
+	static void loadXMLGUI(const QString& filtername,const QString& paramname,MLXMLGUISubTree& gui,const MLXMLPluginInfo& pinfo);
+
+	static QString generateH(const QString& basefilename,const MLXMLTree& tree );
+	static QString generateCPP(const QString& basefilename,const MLXMLTree& tree );
 };
+
 
 class MeshLabFilterInterface;
 
 struct MeshLabXMLFilterContainer
 {
 	QAction* act;
-	XMLFilterInfo* xmlInfo;
+	MLXMLPluginInfo* xmlInfo;
 	MeshLabFilterInterface* filterInterface;
 };
 
