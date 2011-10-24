@@ -401,8 +401,8 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	ui->guiframe->setVisible(false);
 	ui->guiframe->setFilterName(filtername);
 	ui->jsframe->setVisible(true);
-	QGridLayout* lay = new QGridLayout(this);
-	setLayout(lay);
+	//QGridLayout* lay = new QGridLayout();
+	//setLayout(lay);
 	connect(ui->guibut,SIGNAL(released()),this,SLOT(guiButtonClicked()));
 	connect(ui->jsbut,SIGNAL(released()),this,SLOT(jsButtonClicked()));
 	connect(ui->guiframe,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SIGNAL(filterNameUpdated(const QString&,QWidget*)));
@@ -477,7 +477,7 @@ PluginGeneratorGUI::PluginGeneratorGUI(QWidget* parent )
 	QFileInfo fi(QApplication::applicationFilePath());
 	directory.setCurrent(fi.absolutePath());
 	QSplitter* f = new QSplitter(this);
-	QGridLayout* lay = new QGridLayout(this);
+	QGridLayout* lay = new QGridLayout();
 	tabs = new QTabWidget(this);
 	tabs->setUsesScrollButtons(true);
 	//setWidget(tabs);
