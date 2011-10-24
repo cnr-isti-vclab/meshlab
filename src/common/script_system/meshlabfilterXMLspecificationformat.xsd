@@ -40,7 +40,7 @@
    <xs:attribute name='filterClass' type='xs:string' use='required'/>
    <xs:attribute name='filterPre' type='xs:string' use='required'/>
    <xs:attribute name='filterPost' type='xs:string' use='required'/>
-   <xs:attribute name='filterAriety' type='ArietyType' use='required'/>
+   <xs:attribute name='filterArity' type='ArityType' use='required'/>
   </xs:complexType>
 
  <xs:element name='FILTER_HELP'>
@@ -144,7 +144,7 @@
   </xs:complexType>
  </xs:element>
  
- <xs:simpleType name="ArietyType">
+ <xs:simpleType name="ArityType">
   <xs:restriction base="xs:string">
     <xs:enumeration value="SingleMesh"/>
     <xs:enumeration value="Fixed"/>
