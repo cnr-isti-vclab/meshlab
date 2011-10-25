@@ -519,8 +519,8 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md)
 
 	align.mesh=&md.mm()->cm;
 	
-	solver.optimize_focal=true;
-	solver.fine_alignment=true;
+	/*solver.optimize_focal=true;
+	solver.fine_alignment=true;*/
 
 	{
 		vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
@@ -873,8 +873,8 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 
 	align.ProjectedMultiImageChanged();
 	
-	solver.optimize_focal=true;
-	solver.fine_alignment=true;
+	/*solver.optimize_focal=true;
+	solver.fine_alignment=true;*/
 
 	//this->glContext->makeCurrent();
 	/*this->initGL();*/
