@@ -35,6 +35,7 @@ CheckBoxList::CheckBoxList( QWidget *widget /*= 0*/ )
 :QComboBox(widget),highli(0),defaultval(),popupopen(false)
 {
 	view()->viewport()->installEventFilter(this);
+        view()->setItemDelegate(new CheckBoxListItemDelegate(this));
 	connect(this,SIGNAL(highlighted(int)),this,SLOT(currentHighlighted(int)));
 }
 
