@@ -67,8 +67,12 @@ void ParamGeneratorGUI::initUI()
 	pdefault = new QLineEdit(this);
 	pisimp = new QCheckBox("isImportant",this);
 	pisimp->setCheckState(Qt::Checked);
-	QLabel* hlab = new QLabel("Help",this);
+	//QLabel* hlab = new QLabel("Help",this);
+	QGroupBox* gpbox = new QGroupBox("Parameter Help",this);
+	QGridLayout* laybox = new QGridLayout();
 	phel = new QPlainTextEdit(this);
+	laybox->addWidget(phel);
+	gpbox->setLayout(laybox);
 	/*QLabel* glab = new QLabel("GUI",this);*/
 	pguitree = new QTreeWidget(this);
 	pguitree->header()->hide();
@@ -80,9 +84,9 @@ void ParamGeneratorGUI::initUI()
 	layout->addWidget(dlab,2,0);
 	layout->addWidget(pdefault,2,1);
 	layout->addWidget(pisimp,3,0);
-	layout->addWidget(hlab,4,0);
-	layout->addWidget(phel,4,1);
-	layout->addWidget(pguitree,5,1);
+	//layout->addWidget(hlab,4,0);
+	layout->addWidget(gpbox,4,0,1,2);
+	layout->addWidget(pguitree,5,0,1,2);
 	QTreeWidgetItem* item = new QTreeWidgetItem();
 	item->setText(0,"GUI");
 	pguitree->setColumnCount(2);

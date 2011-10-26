@@ -57,7 +57,6 @@ FORMS = ui/layerDialog.ui \
     ui/congratsDialog.ui \
 	ui/scriptEditor.ui \
 	ui/filtergui.ui \
-	ui/paramgui.ui \
 	ui/filtercreatortab.ui
 	
 
