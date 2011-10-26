@@ -1,18 +1,40 @@
 #include "additionalgui.h"
 
+CheckBoxListItemDelegate::CheckBoxListItemDelegate(QObject *parent)
+: QStyledItemDelegate(parent)
+{
+}
+
+void CheckBoxListItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,const QModelIndex &index) const
+{
+	bool value = index.data(Qt::CheckStateRole).toBool();
+	QString text = index.data(Qt::DisplayRole).toString();
+
+	// fill style options with item data
+	const QStyle *style = QApplication::style();
+	QStyleOptionButton opt;
+	opt.state |= value ? QStyle::State_On : QStyle::State_Off;
+	opt.state |= QStyle::State_Enabled;
+	opt.text = text;
+	opt.rect = QRect(option.rect.x(),option.rect.y(),16,16);
+
+	QRect textrect(option.rect.x() + 16,option.rect.y(),option.rect.width() - 16,option.rect.height());
+	style->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,painter);
+	style->drawItemText(painter,textrect,Qt::AlignLeft,opt.palette,true,text);
+}
+
 CheckBoxList::CheckBoxList(const QString& defaultValue,QWidget *widget )
-:QComboBox(widget),highli(0),defaultval(defaultValue)
+:QComboBox(widget),highli(0),defaultval(defaultValue),popupopen(false)
 {
 	view()->viewport()->installEventFilter(this);
-	view()->setAlternatingRowColors(true);
+	view()->setItemDelegate(new CheckBoxListItemDelegate(this));
 	connect(this,SIGNAL(highlighted(int)),this,SLOT(currentHighlighted(int)));
 }
 
 CheckBoxList::CheckBoxList( QWidget *widget /*= 0*/ )
-:QComboBox(widget),highli(0),defaultval()
+:QComboBox(widget),highli(0),defaultval(),popupopen(false)
 {
 	view()->viewport()->installEventFilter(this);
-	view()->setAlternatingRowColors(true);
 	connect(this,SIGNAL(highlighted(int)),this,SLOT(currentHighlighted(int)));
 }
 
@@ -24,14 +46,14 @@ void CheckBoxList::paintEvent(QPaintEvent *)
 {
 	QStylePainter painter(this);
 	painter.setPen(palette().color(QPalette::Text));
-
 	QStyleOptionComboBox opt;
 	initStyleOption(&opt);
+	opt.currentText = "";
 	if (selectedItemsNames().empty())
-                opt.currentText = defaultval;
+		opt.currentText = defaultval;
 	else
 		opt.currentText = selectedItemsString(QString(" | "));
-	for (int ii=0;ii<count();++ii) 
+	for (int ii=0;ii<count();++ii)
 	{
 		Qt::CheckState v;
 		if (sel.contains(itemText(ii)))
@@ -42,18 +64,30 @@ void CheckBoxList::paintEvent(QPaintEvent *)
 	}
 	painter.drawComplexControl(QStyle::CC_ComboBox, opt);
 	painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
-
 }
 
-bool CheckBoxList::eventFilter(QObject *object, QEvent *event)
+bool CheckBoxList::eventFilter(QObject *object, QEvent * event)
 {
-	if(event->type() == QEvent::MouseButtonRelease && object==view()->viewport())
+	if ((event->type() == QEvent::MouseButtonPress) && (!popupopen))
+	{
+		popupopen = true;
+		return true;
+	}
+	if((event->type() == QEvent::MouseButtonRelease) &&
+		(object==view()->viewport()) && popupopen)
 	{
 		updateSelected(highli);
 		repaint();
+		popupopen = true;
 		return true;
 	}
 	return QComboBox::eventFilter(object,event);
+}
+
+void CheckBoxList::focusOutEvent ( QFocusEvent * /*e*/ )
+{
+	if (popupopen)
+		popupopen = false;
 }
 
 QStringList CheckBoxList::getSelected() const
@@ -65,21 +99,22 @@ void CheckBoxList::updateSelected(const int ind)
 {
 	bool checked = itemData(ind,Qt::CheckStateRole).toBool();
 	QString text = itemText(highli);
-	QItemSelectionModel::SelectionFlag flag;
 	if (checked)
 		sel.removeAll(text);
 	else
 		sel.push_back(text);
 }
 
-void CheckBoxList::insertCheckableItem( const int pos,const QString& lab,const bool checked )
+void CheckBoxList::insertCheckableItem( const int pos,const QString&
+									   lab,const bool checked )
 {
 	insertItem(pos,lab);
 	if (checked)
 		sel.push_back(lab);
 }
 
-void CheckBoxList::insertCheckableItem(const QString& lab,const bool checked )
+void CheckBoxList::insertCheckableItem(const QString& lab,const bool
+									   checked )
 {
 	addItem(lab);
 	if (checked)
@@ -100,13 +135,13 @@ QString CheckBoxList::selectedItemsString(const QString& sep) const
 {
 	QStringList ll = selectedItemsNames();
 	if (ll.isEmpty())
-                return defaultval;
+		return defaultval;
 	return ll.join(sep);
 }
 
 void CheckBoxList::setDefaultValue( const QString& defaultValue )
 {
-    defaultval = defaultValue;
+	defaultval = defaultValue;
 }
 
 void CheckBoxList::setCurrentValue( const QStringList& st )

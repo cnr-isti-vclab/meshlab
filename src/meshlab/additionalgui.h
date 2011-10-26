@@ -4,24 +4,34 @@
 #include <QtGui>
 #include <QString>
 
+class CheckBoxListItemDelegate : public QStyledItemDelegate
+{
+	Q_OBJECT
+public:
+	CheckBoxListItemDelegate(QObject *parent);
+	void paint(QPainter *painter, const QStyleOptionViewItem&option,const QModelIndex &index) const;
+};
+
 //WARNING!!!!DON'T USE QComboBox currentText() to get selected elements! Instead use selectedItemsString.
 class CheckBoxList: public QComboBox
 {
-    Q_OBJECT;
+	Q_OBJECT;
 
 public:
 	CheckBoxList(QWidget *widget = 0);
-    CheckBoxList(const QString& defaultValue,QWidget *widget = 0);
-    ~CheckBoxList();
-    void paintEvent(QPaintEvent *);
+	CheckBoxList(const QString& defaultValue,QWidget *widget = 0);
+	~CheckBoxList();
+	void paintEvent(QPaintEvent *);
 	bool eventFilter(QObject *object, QEvent *event);
-    QStringList getSelected() const;
+	QStringList getSelected() const;
 	void insertCheckableItem(const int pos,const QString& lab,const bool checked);
 	void insertCheckableItem(const QString& lab,const bool checked );
 	void updateSelected(int ind);
 	QString selectedItemsString(const QString& sep = QString(" | ")) const;
 	QStringList selectedItemsNames() const;
 	void setDefaultValue(const QString& defaultValue);
+protected:
+	void	focusOutEvent ( QFocusEvent * e );
 private slots:
 	void currentHighlighted(int high);
 public slots:
@@ -29,7 +39,8 @@ public slots:
 private:
 	QStringList sel;
 	int highli;
-        QString defaultval;
+	QString defaultval;
+	bool popupopen;
 };
 
 class PrimitiveButton : public QPushButton

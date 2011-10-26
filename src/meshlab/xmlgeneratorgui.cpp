@@ -180,8 +180,7 @@ FilterGeneratorGUI::FilterGeneratorGUI( QWidget* parent /*= NULL*/ )
 {
 	ui = new Ui::FilterCreatorGUI();
 	ui->setupUi(this);
-	//(49,149,255)
-	this->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; } QPlainTextEdit{ background-color: white;} QTreeWidget  { background-color: white;}");
+	this->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; } QPlainTextEdit{ background-color: white;} QTreeWidget  { background-color: white;} QComboBox QAbstractItemView{qproperty-alternatingRowColors:true;alternate-background-color: white;}");
 	fillComboBoxes();
 	createContextMenu();
 	ui->paramviewer->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
@@ -401,6 +400,7 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	ui->guiframe->setVisible(false);
 	ui->guiframe->setFilterName(filtername);
 	ui->jsframe->setVisible(true);
+	ui->jsframe->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; } QTextEdit {background-color: white;}");
 	//QGridLayout* lay = new QGridLayout();
 	//setLayout(lay);
 	connect(ui->guibut,SIGNAL(released()),this,SLOT(guiButtonClicked()));
@@ -470,7 +470,7 @@ void FilterGeneratorTab::importInfo( const MLXMLFilterSubTree& tree )
 	ui->jscode->setText(tree.filterinfo[MLXMLElNames::filterJSCodeTag]);
 	ui->guiframe->importInfo(tree);
 }
-
+/*" + gaycolor.red() + "," + gaycolor.green() + "," + gaycolor.blue() + "*/
 PluginGeneratorGUI::PluginGeneratorGUI(QWidget* parent )
 :QDockWidget(parent),init(false),plugname(),author(),mail()
 {
