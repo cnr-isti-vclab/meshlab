@@ -265,7 +265,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_SCALE                            : return tr("Generate a matrix transformation that scale the mesh. The mesh can be also automatically scaled to a unit side box. ");
 		case FP_CENTER                           : return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
 		case FP_ROTATE                           : return tr("Generate a matrix transformation that rotates the mesh. The mesh can be rotated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
-    case FP_ROTATE_FIT                       : return tr("Generate a matrix transformation that rotates the mesh so that the selected set of points fit well the XY plane.");
+	case FP_ROTATE_FIT                       : return tr("Generate a matrix transformation that roto traslate the mesh so that the selected set of points fit well the XY plane and passes through the origin. If some faces are selected all the vertices incidenet on the faces are sued. It reports on the log the average error of the fitting (in mesh units).");
     case FP_PRINCIPAL_AXIS                   : return tr("Generate a matrix transformation that rotates the mesh aligning it to its principal axis of inertia."
                                                          "If the mesh is watertight the Itertia tensor is computed assuming the interior of the mesh has a uniform density."
                                                          "In case of an open mesh or a point clouds the inerta tensor is computed assuming each vertex is a constant puntual mass.");
@@ -767,7 +767,7 @@ case FP_ROTATE_FIT:
       Box3f selBox; //il bbox delle facce selezionate
       std::vector< Point3f > selected_pts; //devo copiare i punti per il piano di fitting
 
-      if(m.cm.svn==0)
+      if(m.cm.svn==0 || m.cm.sfn!=0 )
       {
         tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
         tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
@@ -782,15 +782,19 @@ case FP_ROTATE_FIT:
       Log("Using %i vertexes to build a fitting  plane",int(selected_pts.size()));
       Plane3f plane;
       PlaneFittingPoints(selected_pts,plane);
+      float errorSum=0;
+      for(size_t i=0;i<selected_pts.size();++i)
+        errorSum+=fabs(Distance(plane,selected_pts[i]));
+
+      Log("Fitting Plane avg error is %f",errorSum/float(selected_pts.size()));
 
       Log("New Z axis is %f %f %f",plane.Direction()[0],plane.Direction()[1],plane.Direction()[2]);
 
       Matrix44f tr1; tr1.SetTranslate(-selBox.Center());
-      Matrix44f tr2; tr2.SetTranslate(selBox.Center());
       Point3f rotAxis=Point3f(0,0,1) ^ plane.Direction();
       rotAxis.Normalize();
       float angleRad = Angle(Point3f(0,0,1),plane.Direction());
-      Matrix44f rt; rt.SetRotateRad(angleRad,rotAxis);
+      Matrix44f rt; rt.SetRotateRad(-angleRad,rotAxis);
       m.cm.Tr = rt*tr1;
     } 
 	if(par.getBool("Freeze")&& !par.getBool("ToAll")){
