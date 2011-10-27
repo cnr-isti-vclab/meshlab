@@ -197,7 +197,7 @@ FilterGeneratorGUI::FilterGeneratorGUI( QWidget* parent /*= NULL*/ )
 
 FilterGeneratorGUI::~FilterGeneratorGUI()
 {
-
+	delete ui;
 }
 
 void FilterGeneratorGUI::collectInfo( MLXMLFilterSubTree& filter )
@@ -416,7 +416,7 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 
 FilterGeneratorTab::~FilterGeneratorTab()
 {
-
+	delete ui;
 }
 
 //void FilterGeneratorTab::addRemoveVerticalSpacer()
