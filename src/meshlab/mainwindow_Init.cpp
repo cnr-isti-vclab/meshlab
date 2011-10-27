@@ -49,7 +49,7 @@ MainWindow::MainWindow()
 	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	addDockWidget(Qt::RightDockWidgetArea,layerDialog);
 
-	plugingui = new PluginGeneratorGUI(this);
+	plugingui = new PluginGeneratorGUI(PM,this);
 	plugingui->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
 	addDockWidget(Qt::LeftDockWidgetArea,plugingui);
 	//setCentralWidget(workspace);
@@ -62,6 +62,7 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateWindowMenu()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
+	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&)),this,SLOT(scriptCodeExecuted(const QScriptValue&)));
 
 	httpReq=new QHttp(this);
 	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
@@ -356,7 +357,7 @@ void MainWindow::createActions()
 
 
 	showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
-	showFilterEditAct->setEnabled(false);
+	showFilterEditAct->setEnabled(true);
 	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);

@@ -405,8 +405,8 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	ui->guiframe->setFilterName(filtername);
 	ui->jsframe->setVisible(true);
 	ui->jsframe->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; } QTextEdit {background-color: white;}");
-	//QGridLayout* lay = new QGridLayout();
-	//setLayout(lay);
+	layout()->setAlignment(Qt::AlignTop);
+
 	connect(ui->guibut,SIGNAL(released()),this,SLOT(guiButtonClicked()));
 	connect(ui->jsbut,SIGNAL(released()),this,SLOT(jsButtonClicked()));
 	connect(ui->guiframe,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SIGNAL(filterNameUpdated(const QString&,QWidget*)));
@@ -427,14 +427,14 @@ FilterGeneratorTab::~FilterGeneratorTab()
 
 void FilterGeneratorTab::jsButtonClicked()
 {
-	//expandCollapse(jsexp,ui->jsbut,ui->jsframe);
 	jsexp = !jsexp;
+	update();
 }
 
 void FilterGeneratorTab::guiButtonClicked()
 {
 	guiexp = !guiexp;
-	//expandCollapse(guiexp,ui->guibut,ui->guiframe);
+	update();
 }
 
 void FilterGeneratorTab::expandCollapse(const bool exp,PrimitiveButton* pb,QFrame* fr )
@@ -448,19 +448,8 @@ void FilterGeneratorTab::expandCollapse(const bool exp,PrimitiveButton* pb,QFram
 
 void FilterGeneratorTab::paintEvent( QPaintEvent* p )
 {
-	ui->jsbut->show();
-	ui->label->show();
 	expandCollapse(jsexp,ui->jsbut,ui->jsframe);
-
-	ui->guibut->show();
-	ui->label_2->show();
-	expandCollapse(guiexp,ui->guibut,ui->guiframe);
-
-	if (!jsexp && !guiexp)
-		ui->mainlayout->addItem(ui->verticalSpacer, 4, 0, 1, 1);
-	else
-		ui->mainlayout->removeItem(ui->verticalSpacer);
-		
+	expandCollapse(guiexp,ui->guibut,ui->guiframe);	
 }
 
 void FilterGeneratorTab::collectInfo( MLXMLFilterSubTree& filter )
@@ -474,13 +463,24 @@ void FilterGeneratorTab::importInfo( const MLXMLFilterSubTree& tree )
 	ui->jscode->setText(tree.filterinfo[MLXMLElNames::filterJSCodeTag]);
 	ui->guiframe->importInfo(tree);
 }
+
+QString FilterGeneratorTab::getCode() const
+{
+	return ui->jscode->toPlainText();
+}
+
+void FilterGeneratorTab::setCode( const QString& code )
+{
+	ui->jscode->setPlainText(code);
+}
+
 /*" + gaycolor.red() + "," + gaycolor.green() + "," + gaycolor.blue() + "*/
-PluginGeneratorGUI::PluginGeneratorGUI(QWidget* parent )
-:QDockWidget(parent),init(false),plugname(),author(),mail()
+PluginGeneratorGUI::PluginGeneratorGUI(PluginManager& pman,QWidget* parent )
+:QDockWidget(parent),init(false),plugname(),author(),mail(),doc(NULL),PM(pman)
 {
 	QFileInfo fi(QApplication::applicationFilePath());
 	directory.setCurrent(fi.absolutePath());
-	QSplitter* f = new QSplitter(this);
+	QFrame* f = new QFrame(this);
 	QGridLayout* lay = new QGridLayout();
 	tabs = new QTabWidget(this);
 	tabs->setUsesScrollButtons(true);
@@ -501,7 +501,7 @@ PluginGeneratorGUI::PluginGeneratorGUI(QWidget* parent )
 	setWidget(f);
 	createContextMenu();
 	this->setVisible(false);
-	//this->setScroll	
+	//this->setScroll
 }
 
 
@@ -521,8 +521,8 @@ void PluginGeneratorGUI::paintEvent( QPaintEvent *event )
 	{
 		setMinimumSize(this->parentWidget()->size().width() * 0.5,0);
 		init = true;
+		//tabs->show();
 	}
-	tabs->show();
 }
 
 void PluginGeneratorGUI::contextMenuEvent( QContextMenuEvent * event )
@@ -540,6 +540,16 @@ void PluginGeneratorGUI::menuSelection( QAction* act)
 			case MN_EXECUTECODE:
 			{
 				executeCurrentCode();
+				break;
+			}
+			case MN_LOADCODE:
+			{
+				loadScriptCode();
+				break;
+			}
+			case MN_SAVECODE:
+			{
+				saveScriptCode();
 				break;
 			}
 			case MN_ADDFILTER:
@@ -591,6 +601,10 @@ void PluginGeneratorGUI::createContextMenu()
 	menu = new QMenu(this);
 	QAction* runfilt = menu->addAction("Run Current Code");
 	runfilt->setData(QVariant(MN_EXECUTECODE));
+	QAction* ldscfilt = menu->addAction("Load Script Code");
+	ldscfilt->setData(QVariant(MN_LOADCODE));
+	QAction* svscfilt = menu->addAction("Save Script Code");
+	svscfilt->setData(QVariant(MN_SAVECODE));
 	menu->addSeparator();
 	QAction* actnewfilt = menu->addAction("New Filter");
 	actnewfilt->setData(QVariant(MN_ADDFILTER));
@@ -616,7 +630,42 @@ void PluginGeneratorGUI::createContextMenu()
 
 void PluginGeneratorGUI::executeCurrentCode()
 {
-        //throw std::exception("The method or operation is not implemented.");
+	Env env;
+	if (doc != NULL)
+	{
+		MeshDocumentScriptInterface* currentDocInterface = new MeshDocumentScriptInterface(doc);
+		QScriptValue val = env.newQObject(currentDocInterface);
+		env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
+		QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
+		int ii = 0;
+		while(ii < liblist.size())
+		{
+			QFile lib(liblist[ii]);
+			if (!lib.open(QFile::ReadOnly))
+				qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
+			QByteArray libcode = lib.readAll();
+			QScriptValue res = env.evaluate(QString(libcode));
+			if (res.isError())
+				throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");
+			++ii;
+		} 
+		QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
+		env.globalObject().setProperty("_applyFilter", applyFun);
+
+		QScriptValue res = env.evaluate(QString(PM.pluginsCode()));
+		if (res.isError())
+			throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + res.toString() + "\n");
+		FilterGeneratorTab* ftab = tab(tabs->currentIndex());
+		if (ftab != NULL)
+		{
+			QScriptValue result = env.evaluate(ftab->getCode());
+			emit scriptCodeExecuted(result);
+		}
+		else
+			throw MeshLabException("System Error: A FilterGeneratorTab object has been expected.");
+	}
+	else
+		throw MeshLabException("System Error: A valid MeshLabDocument has not correctly been associated with PluginGeneratorGUI. Code cannot be executed.");
 }
 
 void PluginGeneratorGUI::addNewFilter()
@@ -649,6 +698,31 @@ void PluginGeneratorGUI::newXMLPlugin()
 void PluginGeneratorGUI::saveXMLPlugin()
 {
         //throw std::exception("The method or operation is not implemented.");
+}
+
+void PluginGeneratorGUI::loadScriptCode()
+{
+	QFileDialog* lddiag = new QFileDialog(this,tr("Load Script File"),directory.absolutePath(), tr("Script File (*.js)"));
+	lddiag->setAcceptMode(QFileDialog::AcceptOpen);
+	lddiag->exec();
+	QStringList files = lddiag->selectedFiles();
+	if (files.size() != 1)
+		return;
+	QString fileName = files[0];
+	QFileInfo finfo(files[0]);
+	QFile file(fileName);
+	if (!file.open(QFile::ReadOnly))
+		qDebug("Warning: Library %s has not been loaded.",qPrintable(fileName));
+	QByteArray code = file.readAll();
+	FilterGeneratorTab* tb = tab(tabs->currentIndex());
+	if (tb != NULL)
+		tb->setCode(QString(code));
+
+}
+
+void PluginGeneratorGUI::saveScriptCode()
+{
+
 }
 
 void PluginGeneratorGUI::saveAsXMLPlugin()
@@ -761,7 +835,7 @@ void PluginGeneratorGUI::collectInfo(MLXMLTree& tree )
 	for(int ii = 0;ii < tabs->count();++ii)
 	{
 		MLXMLFilterSubTree filtertree;
-		FilterGeneratorTab* ftab = qobject_cast<FilterGeneratorTab*>(tabs->widget(ii));
+		FilterGeneratorTab* ftab = tab(ii);
 		if (ftab != NULL)
 		{
 			ftab->collectInfo(filtertree);
@@ -818,8 +892,19 @@ void PluginGeneratorGUI::importInfo( const MLXMLTree& tree )
 	for(int ii = 0;ii < tree.plugin.filters.size();++ii)
 	{
 		tabs->setTabText(ii,tree.plugin.filters[ii].filterinfo[MLXMLElNames::filterName]);
-		FilterGeneratorTab* gentab = qobject_cast<FilterGeneratorTab*>(tabs->widget(ii));
+		FilterGeneratorTab* gentab = tab(ii);
 		gentab->importInfo(tree.plugin.filters[ii]);
 	}
 }
+
+void PluginGeneratorGUI::setDocument( MeshDocument* mdoc )
+{
+	doc = mdoc;
+}
+
+FilterGeneratorTab* PluginGeneratorGUI::tab(int ii)
+{
+	return qobject_cast<FilterGeneratorTab*>(tabs->widget(ii));
+}
+
 

@@ -1,7 +1,9 @@
 #ifndef XMLGENERATORGUI_H
 #define XMLGENERATORGUI_H
 
+#include "../common/meshmodel.h"
 #include "../common/xmlfilterinfo.h"
+#include "../common/pluginmanager.h"
 #include "additionalgui.h"
 #include <QTabWidget>
 #include <QFrame>
@@ -116,6 +118,10 @@ public:
 
 	void collectInfo(MLXMLFilterSubTree& filter);
 	void importInfo(const MLXMLFilterSubTree& tree);
+
+	QString getCode() const;
+	void setCode(const QString& code);
+
 protected:
 	void paintEvent(QPaintEvent* p);
 private slots:
@@ -140,8 +146,9 @@ class PluginGeneratorGUI : public QDockWidget
 {
 	Q_OBJECT
 public:
-	PluginGeneratorGUI(QWidget* parent = NULL);
+	PluginGeneratorGUI(PluginManager& pman,QWidget* parent = NULL);
 	~PluginGeneratorGUI();
+	void setDocument(MeshDocument* mdoc);
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -152,9 +159,11 @@ private slots:
 	void updateTabTitle(const QString& name,QWidget* wid);
 	void validateFilterName(const QString& name,FilterGeneratorGUI* wid);
 private:
-	enum MenuOption {MN_ADDFILTER,MN_REMOVEFILTER,MN_EXPORTFILTERINPLUGIN,MN_EXECUTECODE,MN_NEWXMLPLUGIN,MN_SAVEXMLPLUGIN,MN_SAVEASXMLPLUGIN,MN_LOADXMLPLUGIN,MN_INSERTPLUGINMESHLAB};
+	enum MenuOption {MN_ADDFILTER,MN_REMOVEFILTER,MN_EXPORTFILTERINPLUGIN,MN_EXECUTECODE,MN_LOADCODE,MN_SAVECODE,MN_NEWXMLPLUGIN,MN_SAVEXMLPLUGIN,MN_SAVEASXMLPLUGIN,MN_LOADXMLPLUGIN,MN_INSERTPLUGINMESHLAB};
 	void createContextMenu();
 	void executeCurrentCode();
+	void loadScriptCode();
+	void saveScriptCode();
 	void addNewFilter();
 	void removeFilter();
 	void exportFilterInPlugin();
@@ -167,6 +176,7 @@ private:
 	QString generateXML(const MLXMLTree& tree);
 	void collectInfo(MLXMLTree& tree);
 	void importInfo(const MLXMLTree& tree);
+	FilterGeneratorTab* tab(int ii);
 
 	QString plugname;
 	QString author;
@@ -176,6 +186,9 @@ private:
 	QTabWidget* tabs;
 	bool init;
 	QDir directory;
-
+	MeshDocument* doc;
+	PluginManager& PM;
+signals:
+	void scriptCodeExecuted(const QScriptValue& val);
 };
 #endif

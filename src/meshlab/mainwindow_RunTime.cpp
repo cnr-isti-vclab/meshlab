@@ -1140,7 +1140,16 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 
 }
 
-
+void MainWindow::scriptCodeExecuted( const QScriptValue& val )
+{
+	if (val.isError())
+	{
+		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",val.property("lineNumber").toInt32(),qPrintable(val.toString()));
+		layerDialog->updateLog(meshDoc()->Log);
+	}
+	else
+		GLA()->update();
+}
 
 // Edit Mode Managment
 // At any point there can be a single editing plugin active.

@@ -83,7 +83,7 @@ private slots:
   void delCurrentMesh();
   void delCurrentRaster();
   void endEdit();
-  void updateDocumentScriptBindings() {if(currentViewContainer()) PM.updateDocumentScriptBindings(*meshDoc());}
+  void updateDocumentScriptBindings() {if(currentViewContainer()) plugingui->setDocument(meshDoc());}
   //void evaluateExpression(const Expression& exp,Value** res);
 
 
@@ -177,6 +177,7 @@ private slots:
 
 	///////////Solt Wrapper for QMdiArea //////////////////
 	void wrapSetActiveSubWindow(QWidget* window);
+	void scriptCodeExecuted(const QScriptValue& val);
 private:
     void createStdPluginWnd(); // this one is
 	void createXMLStdPluginWnd();
