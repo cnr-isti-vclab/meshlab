@@ -7,7 +7,7 @@
 
 
 PluginManager::PluginManager()
-:currentDocInterface(NULL),env()
+:currentDocInterface(NULL),env(),scriptplugcode()
 {
 	//pluginsDir=QDir(getPluginDirPath());
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -117,64 +117,23 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 		}
 	}
 	knownIOFormats();
+	loadPluginsCode();
+}
 
-	/*******************************************/
 
-	/*QString code = "";
-	code += "Plugins = { };\n";
-	QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
-	foreach(MeshFilterInterface* mi,this->meshFilterPlug)
-	{
-	QString pname = mi->pluginName();
-	if (pname != "")
-	{
-	code += "Plugins." + pname + " = { };\n";
-	foreach(MeshFilterInterface::FilterIDType tt,mi->types())
-	{
-	QString filterName = mi->filterName(tt);
-	QString filterFunction = mi->filterScriptFunctionName(tt);
-	if (filterFunction != "")
-	{
+void PluginManager::loadPluginsCode()
+{
+	scriptplugcode = "";
 	ScriptAdapterGenerator gen;
-	QString gencode = gen.funCodeGenerator(filterName,FPM[filterName]);
-	code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
-	}
-	}
-	}
-	}
-
-	QScriptValue initFun  = env.newFunction(PluginInterfaceInit,  this);
-	env.globalObject().setProperty("_initParameterSet", initFun);
-
-	QScriptValue applyFun = env.newFunction(PluginInterfaceApply, this);
-	env.globalObject().setProperty("_applyFilter", applyFun);
-
-	env.evaluate(code);
-	*/
-	QString code = "";
-	QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
-	int ii = 0;
-	while(ii < liblist.size())
-	{
-		QFile lib(liblist[ii]);
-		if (!lib.open(QFile::ReadOnly))
-			qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
-		QByteArray libcode = lib.readAll();
-		QScriptValue res = env.evaluate(QString(libcode));
-		if (res.isError())
-			qDebug("Warning: Library %s generated JavaScript Error: %s",qPrintable(liblist[ii]),qPrintable(res.toString()));
-		++ii;
-	} 
-	ScriptAdapterGenerator gen;
-	code += gen.mergeOptParamsCodeGenerator() + "\n";
-	code += "Plugins = { };\n";
+	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
+	scriptplugcode += "Plugins = { };\n";
 	//QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
 	foreach(MeshLabXMLFilterContainer mi,stringXMLFilterMap)
 	{
 		QString pname = mi.xmlInfo->pluginName();
 		if (pname != "")
 		{
-			code += "Plugins." + pname + " = { };\n";
+			scriptplugcode += "Plugins." + pname + " = { };\n";
 			foreach(QString filterName,mi.xmlInfo->filterNames())
 			{
 				QString filterFunction = mi.xmlInfo->filterAttribute(filterName,MLXMLElNames::filterScriptFunctName);
@@ -182,24 +141,13 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				{
 
 					QString gencode = gen.funCodeGenerator(filterName,*mi.xmlInfo);
-					code += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
+					scriptplugcode += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
 				}
 			}
 		}
 	}
-
-	//QScriptValue initFun  = env.newFunction(PluginInterfaceInit,  this);
-	//env.globalObject().setProperty("_initParameterSet", initFun);
-
-	QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
-	env.globalObject().setProperty("_applyFilter", applyFun);
-
-	QScriptValue res = env.evaluate(code);
-	//qDebug("Code:\n %s",qPrintable(code));
-	if (env.hasUncaughtException())
-		qDebug() << "JavaScript Interpreter Error: " << res.toString() << "\n";
-
 }
+
 /*
 This function create a map from filtername to dummy RichParameterSet.
 containing for each filtername the set of parameter that it uses.
@@ -318,3 +266,9 @@ void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
 	QScriptValue val = env.newQObject(currentDocInterface);
 	env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
 }
+
+QString PluginManager::pluginsCode() const
+{
+	return scriptplugcode;
+}
+

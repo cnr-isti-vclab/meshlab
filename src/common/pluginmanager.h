@@ -43,6 +43,7 @@ public:
   PluginManager();
   enum TypeIO{IMPORT,EXPORT};
   void loadPlugins(RichParameterSet& defaultGlobal);
+  QString pluginsCode() const;
 
 	inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
 	inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
@@ -77,10 +78,13 @@ public:
 	QVector<QAction *> decoratorActionList;
 
   QStringList pluginsLoaded;
-
   Env env;
  
 	void updateDocumentScriptBindings(MeshDocument& doc);
+private:
+	void loadPluginsCode();
+	QString scriptplugcode;
+
 };
 
 #endif // PLUGINMANAGER_H
