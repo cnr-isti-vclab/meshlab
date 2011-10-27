@@ -1,5 +1,5 @@
 #include "ui_filtergui.h"
-#include "ui_paramgui.h"
+//#include "ui_paramgui.h"
 #include "ui_filtercreatortab.h"
 //#include "ui_filtereditorframe.h"
 #include "xmlgeneratorgui.h"
