@@ -83,7 +83,7 @@ private slots:
   void delCurrentMesh();
   void delCurrentRaster();
   void endEdit();
-  void updateDocumentScriptBindings() {if(currentViewContainer()) plugingui->setDocument(meshDoc());}
+  void updateDocumentScriptBindings();
   //void evaluateExpression(const Expression& exp,Value** res);
 
 

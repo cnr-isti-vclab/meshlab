@@ -2044,3 +2044,11 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 //		GLA()->log->Logf(GLLogStream::WARNING,e.what());
 //	}
 //}
+void MainWindow::updateDocumentScriptBindings()
+{
+	if(currentViewContainer()) 
+	{
+		plugingui->setDocument(meshDoc());
+		PM.updateDocumentScriptBindings(*meshDoc());
+	}
+}
