@@ -77,6 +77,11 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 {
 	 switch(ID(action))	 {
 
+     case CR_SPHERE :
+       parlst.addParam(new RichFloat("radius",1,"Radius","Radius of the sphere"));
+       parlst.addParam(new RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
+                                   "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
+       break;
     case CR_BOX :
       parlst.addParam(new RichFloat("size",1,"Scale factor","Scales the new mesh"));
       break;
@@ -104,16 +109,22 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       break;
     case CR_DODECAHEDRON:
       vcg::tri::Dodecahedron<CMeshO>(m->cm);
-			m->updateDataMask(MeshModel::MM_POLYGONAL);
+      m->updateDataMask(MeshModel::MM_POLYGONAL);
       break;
     case CR_OCTAHEDRON:
       vcg::tri::Octahedron<CMeshO>(m->cm);
       break;
     case CR_SPHERE:
 	{
+		int rec = par.getInt("subdiv");
+		float radius = par.getFloat("radius");
 		m->cm.face.EnableFFAdjacency();
 		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-		vcg::tri::Sphere<CMeshO>(m->cm);
+		vcg::tri::Sphere<CMeshO>(m->cm,rec);
+
+		for(CMeshO::VertexIterator vi = m->cm.vert.begin();vi!= m->cm.vert.end();++vi)
+		  vi->P()=vi->P()*radius;
+
 		break;
 	}
     case CR_BOX:
