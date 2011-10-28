@@ -117,7 +117,28 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 		}
 	}
 	knownIOFormats();
+	QString code = "";
+	QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
+	int ii = 0;
+	while(ii < liblist.size())
+	{
+		QFile lib(liblist[ii]);
+		if (!lib.open(QFile::ReadOnly))
+			qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
+		QByteArray libcode = lib.readAll();
+		QScriptValue res = env.evaluate(QString(libcode));
+		if (res.isError())
+			qDebug("Warning: Library %s generated JavaScript Error: %s",qPrintable(liblist[ii]),qPrintable(res.toString()));
+		++ii;
+	} 
 	loadPluginsCode();
+	QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
+	env.globalObject().setProperty("_applyFilter", applyFun);
+
+	QScriptValue res = env.evaluate(code);
+	//qDebug("Code:\n %s",qPrintable(code));
+	if (env.hasUncaughtException())
+		qDebug() << "JavaScript Interpreter Error: " << res.toString() << "\n";
 }
 
 
