@@ -118,9 +118,10 @@ public:
 
 	void collectInfo(MLXMLFilterSubTree& filter);
 	void importInfo(const MLXMLFilterSubTree& tree);
-
+	void initLibInEnv(PluginManager& pm);
 	QString getCode() const;
 	void setCode(const QString& code);
+	QScriptValue executeCode(MeshDocument* md);
 
 protected:
 	void paintEvent(QPaintEvent* p);
@@ -137,6 +138,7 @@ private:
 	//void expandCollapse(bool& exp,PrimitiveButton* pb,QFrame* fr );
 	void expandCollapse(const bool exp,PrimitiveButton* pb,QFrame* fr );
 
+	Env env;
 	bool jsexp;
 	bool guiexp;
 	Ui::FilterCreatorTab* ui;

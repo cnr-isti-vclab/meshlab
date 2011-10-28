@@ -474,6 +474,48 @@ void FilterGeneratorTab::setCode( const QString& code )
 	ui->jscode->setPlainText(code);
 }
 
+QScriptValue FilterGeneratorTab::executeCode(MeshDocument* doc)
+{
+	if (doc != NULL)
+	{
+		env.pushContext();
+		MeshDocumentScriptInterface* currentDocInterface = new MeshDocumentScriptInterface(doc);
+		QScriptValue val = env.newQObject(currentDocInterface);
+		env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
+		QScriptValue result = env.evaluate(getCode());
+		env.popContext();
+		return result;
+	}
+	else
+		throw MeshLabException("System Error: A valid MeshLabDocument has not correctly been associated with PluginGeneratorGUI. Code cannot be executed.");
+
+	return QScriptValue();
+}
+
+void FilterGeneratorTab::initLibInEnv(PluginManager& pm )
+{
+	QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
+	int ii = 0;
+	while(ii < liblist.size())
+	{
+		QFile lib(liblist[ii]);
+		if (!lib.open(QFile::ReadOnly))
+			qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
+		QByteArray libcode = lib.readAll();
+		QScriptValue res = env.evaluate(QString(libcode));
+		if (res.isError())
+			throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");
+		++ii;
+	} 
+	QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, &pm);
+	env.globalObject().setProperty("_applyFilter", applyFun);
+
+	QString st = pm.pluginsCode();
+	QScriptValue res = env.evaluate(QString(pm.pluginsCode()));
+	if (res.isError())
+		throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + res.toString() + "\n");
+}
+
 /*" + gaycolor.red() + "," + gaycolor.green() + "," + gaycolor.blue() + "*/
 PluginGeneratorGUI::PluginGeneratorGUI(PluginManager& pman,QWidget* parent )
 :QDockWidget(parent),init(false),plugname(),author(),mail(),doc(NULL),PM(pman)
@@ -539,6 +581,14 @@ void PluginGeneratorGUI::menuSelection( QAction* act)
 		{
 			case MN_EXECUTECODE:
 			{
+				/*FilterGeneratorTab* tb = tab(tabs->currentIndex());
+				if (tb != NULL)
+				{
+					QScriptValue result = tb->executeCode(doc);
+					emit scriptCodeExecuted(result);
+				}
+				else
+					throw MeshLabException("System Error: A FilterGeneratorTab object has been expected.");*/
 				executeCurrentCode();
 				break;
 			}
@@ -633,6 +683,7 @@ void PluginGeneratorGUI::executeCurrentCode()
 	Env env;
 	if (doc != NULL)
 	{
+		QString code;
 		MeshDocumentScriptInterface* currentDocInterface = new MeshDocumentScriptInterface(doc);
 		QScriptValue val = env.newQObject(currentDocInterface);
 		env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
@@ -644,21 +695,23 @@ void PluginGeneratorGUI::executeCurrentCode()
 			if (!lib.open(QFile::ReadOnly))
 				qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
 			QByteArray libcode = lib.readAll();
-			QScriptValue res = env.evaluate(QString(libcode));
+			/*QScriptValue res = env.evaluate(QString(libcode));
 			if (res.isError())
-				throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");
+				throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");*/
+			code += QString(libcode);
 			++ii;
 		} 
-		QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
+		QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, &PM);
 		env.globalObject().setProperty("_applyFilter", applyFun);
 
-		QScriptValue res = env.evaluate(QString(PM.pluginsCode()));
-		if (res.isError())
-			throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + res.toString() + "\n");
+		//QScriptValue res = env.evaluate(QString(PM.pluginsCode()));
+		code += PM.pluginsCode();
+		/*if (res.isError())
+			throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + res.toString() + "\n");*/
 		FilterGeneratorTab* ftab = tab(tabs->currentIndex());
 		if (ftab != NULL)
 		{
-			QScriptValue result = env.evaluate(ftab->getCode());
+			QScriptValue result = env.evaluate(code + ftab->getCode());
 			emit scriptCodeExecuted(result);
 		}
 		else
@@ -675,6 +728,7 @@ void PluginGeneratorGUI::addNewFilter()
 		namelist.push_back(tabs->tabText(ii));
 	QString tmpname = UsefulGUIFunctions::generateUniqueDefaultName("Filter",namelist);
 	FilterGeneratorTab* tb = new FilterGeneratorTab(tmpname,this);
+	tb->initLibInEnv(PM);
 	tabs->addTab(tb,tmpname);
 	connect(tb,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SLOT(updateTabTitle(const QString&,QWidget*)));
 	connect(tb,SIGNAL(validateFilterName(const QString&,FilterGeneratorGUI*)),this,SLOT(validateFilterName(const QString&,FilterGeneratorGUI*)));
@@ -706,14 +760,16 @@ void PluginGeneratorGUI::loadScriptCode()
 	lddiag->setAcceptMode(QFileDialog::AcceptOpen);
 	lddiag->exec();
 	QStringList files = lddiag->selectedFiles();
+	delete lddiag;
 	if (files.size() != 1)
 		return;
 	QString fileName = files[0];
 	QFileInfo finfo(files[0]);
 	QFile file(fileName);
-	if (!file.open(QFile::ReadOnly))
-		qDebug("Warning: Library %s has not been loaded.",qPrintable(fileName));
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		qDebug("Warning: File %s has not been loaded.",qPrintable(fileName));
 	QByteArray code = file.readAll();
+	file.close();
 	FilterGeneratorTab* tb = tab(tabs->currentIndex());
 	if (tb != NULL)
 		tb->setCode(QString(code));
@@ -722,7 +778,17 @@ void PluginGeneratorGUI::loadScriptCode()
 
 void PluginGeneratorGUI::saveScriptCode()
 {
-
+	QString filename = QFileDialog::getSaveFileName(this,tr("Save Script File"),directory.absolutePath(),tr("Script File (*.js)"));
+	QFile file(filename);
+	if (!file.open(QFile::WriteOnly | QIODevice::Text))
+		qDebug("Warning: File %s has not been saved.",qPrintable(filename));
+	FilterGeneratorTab* tb = tab(tabs->currentIndex());
+	if (tb != NULL)
+	{
+		QTextStream out(&file);
+		out << tb->getCode();
+	}
+	file.close();
 }
 
 void PluginGeneratorGUI::saveAsXMLPlugin()
@@ -803,6 +869,7 @@ void PluginGeneratorGUI::saveAsXMLPlugin()
 	QTextStream out(&file);
 	out << xml;
 	file.close();
+	delete saveDiag;
 }
 
 void PluginGeneratorGUI::loadXMLPlugin()
