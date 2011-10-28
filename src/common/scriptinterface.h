@@ -87,6 +87,8 @@ public:
 	//Q_INVOKABLE vcg::Point3f* p();
 	Q_INVOKABLE QVector<float> getP();
 	Q_INVOKABLE void setP(const float x,const float y,const float z);
+	Q_INVOKABLE QVector<float> getN();
+	Q_INVOKABLE void setN(const float x,const float y,const float z);
 
 	CMeshO::VertexType& vv;
 };
@@ -126,7 +128,8 @@ Q_INVOKABLE inline float computeMaxVQ() const {  return vcg::tri::Stat<CMeshO>::
 Q_INVOKABLE inline float computeMinFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).first;  }
 Q_INVOKABLE inline float computeMaxFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).second; }
 
-
+	Q_INVOKABLE int vn() const;
+	Q_INVOKABLE int fn() const;
 	Q_INVOKABLE VCGVertexScriptInterface* v(const int ind);
 	Q_INVOKABLE ShotScriptInterface* shot();
 

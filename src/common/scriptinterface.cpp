@@ -403,6 +403,17 @@ Q_INVOKABLE ShotScriptInterface* MeshModelScriptInterface::shot()
 	return new ShotScriptInterface(mm.cm.shot);
 }
 
+Q_INVOKABLE int MeshModelScriptInterface::vn() const
+{
+	return mm.cm.vn;
+}
+
+Q_INVOKABLE int MeshModelScriptInterface::fn() const
+{
+	return mm.cm.fn;
+}
+
+
 Q_INVOKABLE QVector<float> VCGVertexScriptInterface::getP() 
 {
 	return ScriptInterfaceUtilities::vcgPointToVector(vv.P());
@@ -411,6 +422,16 @@ Q_INVOKABLE QVector<float> VCGVertexScriptInterface::getP()
 Q_INVOKABLE void VCGVertexScriptInterface::setP( const float x,const float y,const float z )
 {
 	vv.P() = vcg::Point3f(x,y,z);
+}
+
+Q_INVOKABLE QVector<float> VCGVertexScriptInterface::getN()
+{
+	return ScriptInterfaceUtilities::vcgPointToVector(vv.N());
+}
+
+Q_INVOKABLE void VCGVertexScriptInterface::setN( const float x,const float y,const float z )
+{
+	vv.N() = vcg::Point3f(x,y,z);
 }
 
 QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in)
