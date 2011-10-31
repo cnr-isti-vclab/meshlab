@@ -1,6 +1,6 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
 	<PLUGIN pluginName="ExtraSamplePlugin" pluginAuthor="Guido Ranzuglia" pluginEmail="guido.ranzuglia@isti.cnr.it">
-		<FILTER filterName="Random vertex displacement" filterFunction="randomVerticesDisplacement" filterClass="Smoothing | Remeshing" filterPre="MM_NONE" filterPost="MM_NONE" filterAriety="SingleMesh">
+		<FILTER filterName="Random vertex displacement" filterFunction="randomVerticesDisplacement" filterClass="Smoothing | Remeshing" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh">
 			<FILTER_HELP>
 				Move the vertices of the mesh of a random quantity.
 			</FILTER_HELP>
