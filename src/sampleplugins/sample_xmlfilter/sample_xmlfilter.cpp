@@ -38,7 +38,7 @@ bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument&
 	{
 		MeshModel &m=*md.mm();
 		srand(time(NULL)); 
-		const float max_displacement =env.getFloat("Displacement");
+		const float max_displacement =env.evalFloat("Displacement");
 
 		for(unsigned int i = 0; i< m.cm.vert.size(); i++)
 		{
@@ -56,10 +56,9 @@ bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument&
 		Log("Successfully displaced %i vertices",m.cm.vn);
 
 		//// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
-		if(env.getBool("UpdateNormals"))	
+		if(env.evalBool("UpdateNormals"))	
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		
-		vcg::Point3f res = env.getVec3("VectDir");
  		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 
 		return true;
