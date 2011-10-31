@@ -145,6 +145,7 @@ private slots:
 	void updateMenus();
 	void activateSubFiltersMenu(const bool create,const bool act);
 	void updateStdDialog();
+	void updateXMLStdDialog();
 	void setSplit(QAction *qa);
 	void setUnsplit();
 	void linkViewers();

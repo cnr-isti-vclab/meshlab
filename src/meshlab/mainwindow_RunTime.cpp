@@ -117,7 +117,9 @@ void MainWindow::createXMLStdPluginWnd()
 	//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
 	xmldialog->setFloating(true);
 	xmldialog->hide();
-	connect(GLA(),SIGNAL(glareaClosed()),xmldialog,SLOT(close()));
+	connect(GLA(),SIGNAL(glareaClosed()),this,SLOT(updateStdDialog()));
+	connect(GLA(),SIGNAL(glareaClosed()),xmldialog,SLOT(closeClick()));
+	//connect(GLA(),SIGNAL(glareaClosed()),xmldialog,SLOT(close()));
 }
 
 
@@ -131,6 +133,21 @@ void MainWindow::updateStdDialog()
       if(stddialog->curModel != meshDoc()->mm()){
 				stddialog->curgla=0; // invalidate the curgla member that is no more valid.
 				stddialog->close();
+			}
+		}
+	}
+}
+
+// When we switch the current model (and we change the active window)
+// we have to close the stddialog.
+// this one is called when user switch current window.
+void MainWindow::updateXMLStdDialog()
+{
+	if(xmldialog!=0){
+		if(GLA()!=0){
+			if(xmldialog->curModel != meshDoc()->mm()){
+				xmldialog->resetPointers(); // invalidate the curgla member that is no more valid.
+				xmldialog->close();
 			}
 		}
 	}

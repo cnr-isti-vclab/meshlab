@@ -408,6 +408,8 @@ public:
 	bool showAutoDialog(MeshLabXMLFilterContainer& mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isPreviewable() const;
 	void closeEvent ( QCloseEvent * event ); 
+	void resetPointers();
+	MeshModel *curModel;
 //signals:
 	//void dialogEvaluateExpression(const Expression& exp,Value** res);
 	//void expandView(bool exp);
@@ -431,16 +433,14 @@ private:
 	MeshModelState meshState;
 	MeshModelState meshCacheState;
 	QCheckBox *previewCB;
-
+	QWidget * curgla;
 	int curmask;
-	MeshModel *curModel;
 	MeshLabXMLFilterContainer* curmfc;
 	MainWindowInterface *curmwi;
 	MLXMLPluginInfo::XMLMapList curParMap;
 	//XMLFilterInfo::XMLMapList prevParMap;
 	QString applyContext;
 	QString previewContext;
-	QWidget * curgla;
 	bool validcache;
 	bool showHelp;
 };

@@ -293,6 +293,14 @@ void MeshLabXMLStdDialog::closeEvent( QCloseEvent * /*event*/ )
 {
 	closeClick();
 }
+
+void MeshLabXMLStdDialog::resetPointers()
+{
+	curMeshDoc = NULL;
+	curgla = NULL;
+	curModel = NULL;
+}
+
 XMLStdParFrame::XMLStdParFrame( QWidget *p,QWidget *gla/*=0*/ )
 :QFrame(p),extended(false)
 {
