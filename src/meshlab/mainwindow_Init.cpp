@@ -357,9 +357,9 @@ void MainWindow::createActions()
 	connect(showScriptEditAct, SIGNAL(triggered()), this, SLOT(showScriptEditor()));
 
 
-	//showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
-	//showFilterEditAct->setEnabled(true);
-	//connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
+	/*showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
+	showFilterEditAct->setEnabled(true);
+	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));*/
 
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
@@ -484,7 +484,7 @@ void MainWindow::createMenus()
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addAction(showScriptEditAct);
-	filterMenu->addAction(showFilterEditAct);
+	//filterMenu->addAction(showFilterEditAct);
 	filterMenu->addSeparator();
 
 
