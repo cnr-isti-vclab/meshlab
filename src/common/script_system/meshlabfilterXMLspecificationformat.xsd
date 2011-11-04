@@ -41,6 +41,7 @@
    <xs:attribute name='filterPre' type='xs:string' use='required'/>
    <xs:attribute name='filterPost' type='xs:string' use='required'/>
    <xs:attribute name='filterArity' type='ArityType' use='required'/>
+   <xs:attribute name='filterIsInterruptible' type='xs:string' use='required'/>
   </xs:complexType>
 
  <xs:element name='FILTER_HELP'>

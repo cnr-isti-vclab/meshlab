@@ -38,6 +38,7 @@
 #include "scriptinterface.h"
 #include "xmlfilterinfo.h"
 
+
 class QWidget;
 class QGLWidget;
 class QString;
@@ -47,6 +48,7 @@ class QTreeWidgetItem;
 class MeshModel;
 class RenderMode;
 class GLArea;
+class GLAreaReg;
 class QScriptEngine;
 
 
@@ -581,11 +583,16 @@ public:
 
 };
 
+
+
 /**************************************************************************************************************************************************************/
 /*The new class of filter defined through XML file*/
 
-class MeshLabFilterInterface : public MeshLabInterface
+typedef bool SignalCallBack();
+
+class MeshLabFilterInterface : public QObject, public MeshLabInterface
 {
+	Q_OBJECT
 public:
 	MeshLabFilterInterface();
 	virtual ~MeshLabFilterInterface() {}
@@ -597,7 +604,12 @@ public:
 	static bool arePreCondsValid(const int filterPreConds,const MeshModel& m, QStringList &MissingItems);
 	static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
 	static int convertStringListToCategoryEnum(const QStringList& stringListEnum);
-	virtual bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos *cb) =0;
+	virtual bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) =0;
+protected:
+	bool hasInterruptRequested(const bool& redraw);
+
+signals:
+	void filterUpdateRequest(const bool& redraw,bool* interrupt);
 };
 
 Q_DECLARE_INTERFACE(MeshIOInterface,						"vcg.meshlab.MeshIOInterface/1.0")

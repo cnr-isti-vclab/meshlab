@@ -80,6 +80,7 @@ namespace MLXMLElNames
 	const QString filterPreCond("filterPre");
 	const QString filterPostCond("filterPost");
 	const QString filterArity("filterArity");
+	const QString filterIsInterruptible("filterIsInterruptible");
 
 	//filterHelp == name to access to the value of FILTER_HELP inside the Map produced by the XMLFilterInfo 
 	//const QString filterHelp("f_help");

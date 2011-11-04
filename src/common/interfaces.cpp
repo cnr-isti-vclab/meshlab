@@ -219,6 +219,14 @@ int MeshLabFilterInterface::convertStringListToCategoryEnum( const QStringList& 
 	}
 	return res;
 }
+
+bool MeshLabFilterInterface::hasInterruptRequested( const bool& redraw )
+{
+	bool interrupt = false;
+	emit filterUpdateRequest(redraw,&interrupt);
+	return interrupt;
+}
+
 //QMap<QString,MeshModel::MeshElement> MeshLabFilterInterface::convertingMap;
 //
 //bool MeshLabFilterInterface::init = false;
